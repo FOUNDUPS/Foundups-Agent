@@ -1,5 +1,206 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-11: OpenClaw bootstrap constructor extraction
+
+**Author**: 0102  
+**WSP**: 22, 62, 73, 97
+
+### Changes
+- Added `src/openclaw_bootstrap_config.py`
+  - centralized identity/runtime/model/context bootstrap state
+  - initializes telemetry baselines and turn-cancel state
+- Updated `src/openclaw_dae.py`
+  - constructor now delegates control-plane bootstrap to the helper
+  - removed large inline bootstrap block from `__init__`
+
+### Why
+- The facade constructor still contained a large control-plane setup block that did not belong inline.
+- WSP 97 requires clear separation between control-plane setup and execution behavior.
+- WSP 62 requires continued large-file reduction in stable seams.
+
+### Result
+- `openclaw_dae.py` reduced further to `2638` lines.
+- Bootstrap state is now centralized and reusable for future supervisor/runtime boot work.
+
+---
+
+## 2026-03-11: OpenClaw provider/runtime chain extraction
+
+**Author**: 0102  
+**WSP**: 22, 62, 73, 97
+
+### Changes
+- Added `src/openclaw_provider_chain.py`
+  - IronClaw conversation provider call
+  - preferred external provider conversation call
+- Extended `src/openclaw_runtime_support.py`
+  - moved IronClaw autostart/recovery logic out of the facade
+- Updated `src/openclaw_dae.py`
+  - provider/runtime methods now delegate to extracted helpers
+  - removed dead subprocess/shlex/shutil imports
+
+### Why
+- Provider/runtime mechanics are a separate control-plane seam from intent routing and identity handling.
+- WSP 97 requires explicit execution-plane boundaries.
+- WSP 62 requires continued large-file reduction by stable seam extraction.
+
+### Result
+- `openclaw_dae.py` reduced further to `2814` lines.
+- Conversation provider chain is now isolated from the main facade.
+- IronClaw autostart/recovery logic is centralized in runtime support.
+
+---
+
+## 2026-03-11: OpenClaw identity/context and model-policy extraction
+
+**Author**: 0102  
+**WSP**: 22, 62, 73, 97
+
+### Changes
+- Added `src/openclaw_identity_context.py`
+  - identity query detection
+  - identity card/compact builders
+  - WSP_00 boot prompt loading
+  - platform context-pack resolution/loading
+  - conversation system prompt assembly
+- Added `src/openclaw_model_policy.py`
+  - model-switch parsing/gating
+  - local/external target resolution
+  - provider-key checks
+  - agentic local model-role selection
+  - local runtime target application
+- Updated `src/openclaw_dae.py`
+  - reduced to facade wrappers for identity/context/model-policy concerns
+  - preserved existing public methods for tests/callers
+  - dropped file size below 3000 lines
+
+### Why
+- `openclaw_dae.py` was still carrying control-plane seams that belong in focused modules.
+- WSP 62 requires incremental large-file reduction, not a single rewrite.
+- WSP 97 requires explicit execution-plane boundaries: identity/context and model policy are OpenClaw-local control-plane concerns.
+
+### Result
+- `openclaw_dae.py` reduced to `2988` lines.
+- Identity/context and model-routing logic now live in dedicated modules.
+- Existing OpenClaw behavior is preserved through thin facade wrappers.
+
+---
+
+## 2026-03-11: WSP 97 CoT/CoR gates wired into OpenClaw execution pipeline
+
+**Author**: 0102
+**WSP**: 22, 50, 97
+
+### Changes
+- Added `src/cot_cor_integration.py`
+  - `apply_cot_gate()`: Pre-fetches HoloIndex context for internal LLMs
+  - `apply_cor_gate()`: Verifies actions against WSP compliance + alternatives
+  - `should_block_action()`, `format_cor_warning()`: Helper utilities
+- Updated `src/openclaw_dae.py`
+  - Imported CoT/CoR integration module
+  - `_wsp_preflight()`: Added CoT gate for QUERY/RESEARCH intents (line ~1256)
+  - `_plan_execution()`: Added CoR gate for mutating intents (line ~1615)
+  - CoR BLOCK → downgrades to advisory conversation
+  - CoR RECONSIDER → attaches warning to metadata
+
+### Why
+- WSP 97 v1.1 specifies CoT/CoR verification gates
+- Internal LLMs (Qwen 2K, Gemma 512) cannot self-retrieve
+- OpenClaw actions spend user UPs → need pre-execution verification
+- Prevents confabulation (CoT) and vibecoding (CoR)
+
+### Result
+- CoT gate fires on QUERY/RESEARCH → prefetches context via HoloIndex.search()
+- CoR gate fires on COMMAND/SYSTEM/SOCIAL/AUTOMATION → checks WSP compliance
+- Actions blocked by CoR gate return advisory with explanation
+- Context stored in `intent.metadata["cot_context"]` for downstream use
+
+### Related Skills
+- `holo_index/skills/cot_prefetch/` (CoT gate skill)
+- `holo_index/skills/cor_verify/` (CoR gate skill)
+
+---
+
+## 2026-03-11: OpenClaw social/conversation seams kept in control plane
+
+**Author**: 0102  
+**WSP**: 22, 62, 73, 97
+
+### Changes
+- Added `src/openclaw_social_controller.py`
+  - Extracted:
+    - `SOCIAL` route adapter sequencing
+    - natural-language conversation-to-social control bridge
+- Added `src/openclaw_conversation_engine.py`
+  - Extracted the primary conversation execution chain:
+    - deterministic identity/model/token controls
+    - IronClaw/local/external fallback ordering
+    - token telemetry + cancellation handling
+- Updated `src/openclaw_dae.py`
+  - Converted `_execute_social()`, `_try_conversation_social_control()`, and `_execute_conversation()` into facade delegates.
+
+### Why
+- WSP 73/97 boundary check showed these seams belong to OpenClaw's frontal-lobe control plane, not `social_media_dae`.
+- Social Media DAE remains a child execution/consciousness domain.
+- WRE remains selectively wired at execution-plane resolution time instead of owning direct conversational control.
+
+### Result
+- OpenClaw keeps mission control, dialogue, and execution-plane routing in `moltbot_bridge`.
+- `openclaw_dae.py` is smaller and the next extraction seam is clearer.
+
+---
+
+## 2026-03-10: OpenClaw runtime/ledger helpers extracted from oversized DAE
+
+**Author**: 0102  
+**WSP**: 22, 62, 73, 84
+
+### Changes
+- Added `src/openclaw_action_ledger.py`
+  - Extracted social response capture and DAEmon action emission helpers.
+- Added `src/openclaw_runtime_support.py`
+  - Extracted:
+    - local model snapshot resolution
+    - IronClaw runtime probing
+    - provider endpoint probing
+    - model availability snapshot
+    - identity snapshot composition
+- Updated `src/openclaw_dae.py`
+  - Converted the extracted sections into thin facade wrappers.
+
+### Why
+- `openclaw_dae.py` had grown to 4493 lines and was carrying too many responsibilities.
+- This extraction reduces control-plane coupling while preserving the current public `OpenClawDAE` interface.
+
+### Result
+- `openclaw_dae.py` reduced to 4194 lines after the first extraction pass.
+- Runtime/identity behavior remains covered by existing tests.
+
+---
+
+## 2026-03-10: OpenClaw action ledger wired to central DAEmon
+
+**Author**: 0102  
+**WSP**: 22, 73, 91
+
+### Changes
+- Updated `src/openclaw_dae.py`
+  - Added structured DAEmon `ACTION_PERFORMED` emission for the core autonomy loop:
+    - `intent_classified`
+    - `skill_safety_gate`
+    - `wsp_preflight`
+    - `permission_gate`
+    - `plan_built`
+    - `plan_executed`
+    - `result_validated`
+  - Preserved existing `message_in` / `message_out` reporting.
+
+### Why
+- OpenClaw previously emitted only ingress/egress heartbeats to DAEmon.
+- The central bus now captures the control-plane actions needed for real-time 012/0102 observability.
+
+---
+
 ## 2026-03-07: CTO WRE prompt added to OpenClaw default context pack
 
 **Author**: 0102  
@@ -956,3 +1157,120 @@ openclaw onboard
   - Read-safe by default
   - No external model drift
   - Mutating intents auto-contained before execution planning
+
+## 2026-03-10: LinkedIn mission-control routing + WSP 97 context pack
+
+**Author**: 0102  
+**WSP**: 15, 50, 77, 84, 97
+
+### Changes
+- Added `src/linkedin_loop_adapter.py` as a conversational control surface for the durable LinkedIn orchestration loop.
+- Updated `src/openclaw_dae.py` to:
+  - route mission phrases such as `let's work on LN` through the loop adapter before low-level LinkedIn actions
+  - load `WSP_97_System_Execution_Prompting_Protocol.md` into the default OpenClaw platform context pack
+  - prioritize code-change language over health vocabulary during agentic model selection so edit work routes to the coder model
+
+### Outcome
+- OpenClaw can now steer LinkedIn loop phases conversationally while preserving deterministic action commands.
+- WSP 97 is part of default OpenClaw context, so `follow wsp` resolves through the execution-prompting protocol by default.
+- Mixed prompts like `fix the failing test in main.py` now route to `local/qwen-coder-7b` instead of `local/gemma-270m`.
+
+## 2026-03-10: Deterministic "follow wsp" command route
+
+**Author**: 0102  
+**WSP**: 50, 77, 84, 97
+
+### Changes
+- Added explicit `follow wsp` interception in `src/openclaw_dae.py` command routing.
+- The canonical WSP 97 operator now routes through `modules/infrastructure/wsp_orchestrator/src/wsp_orchestrator.py` instead of falling through generic WRE command handling.
+
+### Outcome
+- `follow wsp ...` now has a real execution plane in OpenClaw:
+  - detect operator
+  - call WSP orchestrator
+  - return deterministic execution summary
+
+## 2026-03-11: OpenClaw control-plane refactor - intent planner + result memory
+
+**Author**: 0102  
+**WSP**: 22, 50, 73, 84, 97
+
+### Changes
+- Added `src/openclaw_intent_planner.py` for intent classification, WSP preflight, and execution-plan construction.
+- Added `src/openclaw_result_memory.py` for output validation and WRE pattern-memory storage.
+- Reduced `src/openclaw_dae.py` by replacing inline classify/preflight/plan/finalize blocks with facade wrappers.
+
+### Outcome
+- OpenClaw intent resolution and result finalization are now isolated control-plane seams instead of monolith internals.
+- `openclaw_dae.py` dropped from `2638` lines to `2262` lines in this slice.
+
+## 2026-03-11: OpenClaw control-plane refactor - permission and safety policy
+
+**Author**: 0102  
+**WSP**: 22, 50, 71, 73, 84, 95, 97
+
+### Changes
+- Added `src/openclaw_permission_policy.py` for autonomy-tier resolution, source-write gating, AI Overseer emission, containment checks, and cached skill-safety scanning.
+- Replaced the inline permission/security block in `src/openclaw_dae.py` with facade wrappers.
+
+### Outcome
+- Permission, containment, and skill-safety policy are now centralized and auditable as one control-plane module.
+- `openclaw_dae.py` dropped from `2262` lines to `2086` lines in this slice.
+
+## 2026-03-11: OpenClaw control-plane refactor - execution routes
+
+**Author**: 0102  
+**WSP**: 22, 50, 73, 84, 97
+
+### Changes
+- Added `src/openclaw_execution_routes.py` for post-plan route execution:
+  - query
+  - command + follow-wsp
+  - monitor
+  - schedule
+  - system
+  - automation
+  - foundup
+  - research
+- Replaced the inline route layer in `src/openclaw_dae.py` with facade wrappers.
+
+### Outcome
+- Execution-plane routing now lives in a dedicated module after plan resolution, aligned to WSP 97 plane separation.
+- `openclaw_dae.py` dropped from `2086` lines to `1678` lines in this slice.
+
+## 2026-03-11: OpenClaw control-plane refactor - telemetry and turn state
+
+**Author**: 0102  
+**WSP**: 22, 73, 84, 91, 97
+
+### Changes
+- Added `src/openclaw_turn_state.py` for:
+  - conversation-engine markers
+  - preferred-external status markers
+  - token telemetry
+  - cooperative turn cancellation
+- Replaced the inline runtime bookkeeping block in `src/openclaw_dae.py` with facade wrappers.
+
+### Outcome
+- Runtime bookkeeping is now isolated from the OpenClaw control-plane facade.
+- `openclaw_dae.py` dropped from `1678` lines to `1603` lines in this slice.
+
+## 2026-03-11: OpenClaw control-plane refactor - status surface + process loop
+
+**Author**: 0102  
+**WSP**: 22, 50, 73, 84, 91, 97
+
+### Changes
+- Added `src/openclaw_status_surface.py` for:
+  - `connect_wre` readiness/status synthesis
+  - Discord/AI Overseer status push dispatch
+- Added `src/openclaw_process_loop.py` for the full autonomy loop:
+  - honeypot intercept
+  - containment gate
+  - intent -> preflight -> permission -> plan -> execute -> validate pipeline
+  - DAEmon in/out and action reporting
+- Replaced the inline status/process bodies in `src/openclaw_dae.py` with facade delegation.
+
+### Outcome
+- `OpenClawDAE` now behaves as a true orchestration facade instead of carrying the full autonomy implementation.
+- `openclaw_dae.py` dropped from `1603` lines to `1342` lines in this final extraction slice.
