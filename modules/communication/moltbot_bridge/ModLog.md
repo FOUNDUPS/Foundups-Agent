@@ -1274,3 +1274,16 @@ openclaw onboard
 ### Outcome
 - `OpenClawDAE` now behaves as a true orchestration facade instead of carrying the full autonomy implementation.
 - `openclaw_dae.py` dropped from `1603` lines to `1342` lines in this final extraction slice.
+
+## 2026-03-15: OpenClaw docs updated for WSP 97 module split
+
+**Author**: 0102  
+**WSP**: 22, 73, 84, 97
+
+### Changes
+- Appended canonical control-plane module map to `README.md`.
+- Appended internal module-boundary map to `INTERFACE.md`.
+
+### Outcome
+- Repo-local documentation now matches the post-refactor OpenClaw runtime layout.
+- The next 0102 session can re-enter OpenClaw using the actual module graph instead of the old monolith assumption.

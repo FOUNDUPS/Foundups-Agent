@@ -261,3 +261,29 @@ When WRE is unavailable, COMMAND intents return deterministic advisory fallback:
 - **WSP 77**: Agent coordination (4-phase execution)
 - **WSP 91**: Observability (structured logging)
 - **WSP 96**: Skill execution (micro chain-of-thought)
+
+## WSP 97 Internal Module Boundaries
+
+OpenClaw runtime responsibilities are now split into dedicated modules under `src/`.
+This is the canonical internal layout for future work:
+
+- `openclaw_dae.py`: facade only
+- `openclaw_intent_planner.py`: classify -> preflight -> plan
+- `openclaw_permission_policy.py`: autonomy tier + containment + skill safety
+- `openclaw_execution_routes.py`: non-social route execution
+- `openclaw_social_controller.py`: social-routing bridge
+- `openclaw_conversation_engine.py`: dialogue execution
+- `openclaw_model_policy.py`: model selection and switching
+- `openclaw_identity_context.py`: identity + context-pack builders
+- `openclaw_runtime_support.py`: runtime/model probes and autostart
+- `openclaw_status_surface.py`: operator-facing status helpers
+- `openclaw_process_loop.py`: full autonomy loop orchestration
+- `openclaw_result_memory.py`: validate + remember
+- `openclaw_turn_state.py`: token telemetry and turn cancellation
+- `openclaw_action_ledger.py`: DAEmon action reporting
+- `openclaw_provider_chain.py`: external/IronClaw provider chain
+- `openclaw_bootstrap_config.py`: constructor-time control-plane state
+
+Refactor status:
+- `openclaw_dae.py` now stays below the large-file threshold at `1342` lines
+- execution-plane resolution now matches `WSP_97`: resolve intent -> gate -> plan -> route -> validate -> remember
