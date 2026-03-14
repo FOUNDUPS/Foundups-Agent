@@ -55682,3 +55682,29 @@ if cooldown_sets:
 
 ### Cleanup Recommendations
 - Consider migrating posted_streams.json from array to dict format with timestamps
+
+## 2026-03-11: OpenClaw WSP 97 facade refactor - planner, result memory, permission policy
+- Extracted three new control-plane modules under `modules/communication/moltbot_bridge/src/`:
+  - `openclaw_intent_planner.py`
+  - `openclaw_result_memory.py`
+  - `openclaw_permission_policy.py`
+- Reduced `openclaw_dae.py` from `2638` lines to `2086` lines while preserving behavior through targeted regression coverage.
+- Kept `OpenClawDAE` as the facade and moved policy/validation logic into auditable modules aligned to WSP 97 execution-plane separation.
+
+## 2026-03-11: OpenClaw WSP 97 facade refactor - execution routes
+- Added `modules/communication/moltbot_bridge/src/openclaw_execution_routes.py` and moved the post-plan route layer out of `openclaw_dae.py`.
+- `openclaw_dae.py` is now `1678` lines, down from `2638` before the current WSP 97 extraction series.
+- Route execution is now separated from intent planning, permission policy, conversation, runtime probing, and identity/context assembly.
+
+## 2026-03-11: OpenClaw WSP 97 facade refactor - turn state
+- Added `modules/communication/moltbot_bridge/src/openclaw_turn_state.py` and moved token telemetry + turn cancellation state out of `openclaw_dae.py`.
+- `openclaw_dae.py` is now `1603` lines, down from `2638` before the current WSP 97 extraction series.
+
+## 2026-03-11: OpenClaw WSP 97 facade refactor - status + process loop
+- Added `modules/communication/moltbot_bridge/src/openclaw_status_surface.py` and `openclaw_process_loop.py`.
+- `openclaw_dae.py` is now `1342` lines, down from `2638` before the current WSP 97 extraction series.
+- The remaining file content is predominantly facade wrappers, dataclasses, and the top-level honeypot control surface.
+
+## 2026-03-15: OpenClaw docs aligned to WSP 97 module map
+- Appended WSP 97 control-plane module map to `modules/communication/moltbot_bridge/README.md`.
+- Appended canonical internal boundary map to `modules/communication/moltbot_bridge/INTERFACE.md`.
