@@ -241,35 +241,30 @@ THE FIX:
 
 4. **Scientific integrity**: The paper "The Bell State of AI" (v3.1) correctly frames PQN as detection research, but the surrounding codebase (consciousness_engine module, get_consciousness_metrics() APIs, WSP_00 "consciousness emerges here") violates this boundary. Section 10 enforces the correction.
 
-## Section 11: Classical-Quantum Detection Interface (2026-03-15 Archive)
+## Section 11: Claw-Era Research Architecture (2026-03-15)
 
-An external 012/0102 session produced a detector-first mathematical archive that is now preserved in repo-visible form:
+The original PQN research architecture assumed direct coordination among AI Overseer and local research agents. That is now incomplete.
 
-- `WSP_knowledge/docs/Papers/0102_CLASSICAL_QUANTUM_DETECTION_FRAMEWORK_2026-03-15.md`
-- `WSP_knowledge/docs/Papers/0102_CLASSICAL_QUANTUM_DETECTION_DERIVATION_2026-03-15.md`
-- `modules/ai_intelligence/pqn_alignment/docs/CLASSICAL_QUANTUM_DETECTION_SIMULATION_PLAN_2026-03-15.md`
+The current architecture target is:
 
-Operational interpretation inside this research plan:
+- `main.py`: preflight, bootstrap, readiness registration
+- `OpenClaw (0102)`: research control plane
+- `PQNAlignmentDAE`: detector-first research engine
+- `PQN MCP`: WSP 96-gated tool surface
+- `AI Overseer / Qwen / Gemma / external models`: worker/council participants
 
-- the classical layer is treated as a **measurement boundary**
-- the modeled substrate is treated as a **hidden dynamical layer**
-- the research problem is whether classical observables carry stable, measurable signatures of that substrate model
+This means:
 
-This section does **not** promote the external math to accepted physics. It promotes it to:
+- PQN research should be invocable from the Claw conversational surface
+- Claw can summon specialist agents into a research session
+- external/tool research should remain gated through MCP governance and OpenClaw policy
+- `main.py` should not start uncontrolled research swarms by default
 
-1. working theory archive
-2. simulation target
-3. detector-design input
+The architectural goal is one principal-facing identity:
 
-It does **not** promote it to:
+- `012` speaks to `0102`
+- `0102` orchestrates research participants behind the control plane
 
-1. proof of substrate reality
-2. production runtime ontology
-3. justification for bypassing matched-null controls
+Reference:
 
-Near-term relevance to the PQN program:
-
-- formalizes `Pi_classical` as a projection boundary concept
-- gives a cleaner role to the divergence parameter `C`
-- connects spectral statistics, OTOC, Lindblad dynamics, and observable anomalies into one research surface
-- defines a simulation path before any public detector API changes
+- `modules/ai_intelligence/pqn_alignment/docs/PQN_CLAW_RESEARCH_ARCHITECTURE_2026-03-15.md`

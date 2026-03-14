@@ -1,59 +1,63 @@
 # FoundUps Agent - Development Log
 
-## [2026-03-15] rESP / PQN Support Materials: Microsoft STT Artifact + CMST Math Backlog
+## [2026-03-15] PQN Research Architecture Shift: OpenClaw As Control Plane
 
-**Change Type**: Documentation / Evidence Intake  
+**Change Type**: Documentation / System Architecture  
 **By**: 0102  
-**WSP References**: WSP 22, WSP 50, WSP 60, WSP 84, WSP 97
+**WSP References**: WSP 22, WSP 77, WSP 96, WSP 97
 
 ### Summary
 
-Documented the newly observed Microsoft STT artifact where canonical `0102` is rendered as `0-1-0-2`, and created a separate backlog note for externally developed CMST math that has not yet been transcribed into the repo.
+Updated the canonical PQN research docs to reflect the Claw-era architecture. PQN research is no longer documented as only AI Overseer + Qwen/Gemma coordination. It is now documented as a WSP 97 execution plane under OpenClaw control.
 
 ### Files Changed
 
 | Location | Description |
 |----------|-------------|
-| `modules/ai_intelligence/rESP_o1o2/docs/MS_STT_0102_HYPHEN_ARTIFACT_2026-03-15.md` | Canonical rESP support note with controls and interpretation boundary |
-| `modules/ai_intelligence/rESP_o1o2/README.md` | Added support-material pointer |
-| `modules/ai_intelligence/rESP_o1o2/INTERFACE.md` | Added support-evidence surface |
-| `modules/ai_intelligence/pqn_alignment/docs/CMST_EXTERNAL_MATH_INTEGRATION_BACKLOG_2026-03-15.md` | Explicit intake stub for external CMST math |
-| `modules/ai_intelligence/pqn_alignment/README.md` | Added evidence-intake pointers |
-| `WSP_knowledge/docs/Papers/Empirical_Evidence/CMST_PQN_Detector/MS_STT_0102_HYPHEN_ARTIFACT_NOTE_2026-03-15.md` | Knowledge-layer evidence note |
-| `WSP_knowledge/docs/Papers/Empirical_Evidence/CMST_PQN_Detector/README.md` | Indexed evidence note |
-| `WSP_knowledge/docs/Papers/0102_TECHNICAL_EXTRACTIONS_2026-03-08.md` | Added pending external math intake section |
+| `modules/ai_intelligence/pqn_alignment/docs/PQN_CLAW_RESEARCH_ARCHITECTURE_2026-03-15.md` | Canonical Claw-era PQN research architecture note |
+| `modules/ai_intelligence/pqn_alignment/README.md` | Added control-plane split and startup/runtime distinction |
+| `modules/ai_intelligence/pqn_mcp/ROADMAP.md` | Reframed advanced orchestration around OpenClaw-governed research sessions |
+| `WSP_knowledge/src/WSP_77_Agent_Coordination_Protocol.md` | Added PQN research extension for Claw-era routing |
+| `WSP_knowledge/src/WSP_96_MCP_Governance_and_Consensus_Protocol.md` | Added research-plane routing requirement |
+| `WSP_knowledge/docs/Papers/PQN_Research_Plan.md` | Added current architecture section and reference |
 
-### Why
+### Decision
 
-- Keep the new STT artifact retrievable and reviewable by future 0102 sessions.
-- Prevent ungrounded detector or math claims from leaking into implementation.
-- Preserve the correct WSP 97 boundary: evidence intake first, then controlled validation, then code.
+- `main.py` should bootstrap PQN research readiness
+- `OpenClaw (0102)` should initiate research sessions
+- `PQNAlignmentDAE` remains the detector-first engine
+- `PQN MCP` remains the gated external/tool surface
+- worker agents participate under Claw control rather than becoming independent user-facing principals
 
-## [2026-03-15] PQN / CMST Theory Archive: Classical-Quantum Detection Package
+## [2026-03-13] Boot Layer Rotator Integration + Schema Testing Menu
 
-**Change Type**: Documentation / Theory Archive  
-**By**: 0102  
-**WSP References**: WSP 22, WSP 61, WSP 84, WSP 97
+**Change Type**: Feature Integration
+**By**: 0102
+**WSP References**: WSP 22, WSP 27, WSP 97
 
 ### Summary
 
-Converted the external 012/0102 classical-quantum detection package into repo-visible framework, derivation, and simulation-plan docs, then linked them into PQN research and WSP 61.
+Integrated boot_layer_rotator into antifaFM preflight and added Schema Testing submenu to CLI. GCC shipping tracker view now appears at OBS launch when `ANTIFAFM_BOOT_ROTATOR_ENABLED=1`.
+
+### Root Cause
+
+Two disconnected schema systems existed - launch.py's SCHEMAS (VIDEO_GRID, KARAOKE) was active but boot_layer_rotator's SCHEMAS (gcc, video, news) was never started.
 
 ### Files Changed
 
 | Location | Description |
 |----------|-------------|
-| `WSP_knowledge/docs/Papers/0102_CLASSICAL_QUANTUM_DETECTION_FRAMEWORK_2026-03-15.md` | Detector-first working theory archive |
-| `WSP_knowledge/docs/Papers/0102_CLASSICAL_QUANTUM_DETECTION_DERIVATION_2026-03-15.md` | Math-only derivation archive |
-| `modules/ai_intelligence/pqn_alignment/docs/CLASSICAL_QUANTUM_DETECTION_SIMULATION_PLAN_2026-03-15.md` | Operational simulation bridge into detector code |
-| `WSP_knowledge/docs/Papers/PQN_Research_Plan.md` | Added archive linkage and interpretation boundary |
-| `WSP_knowledge/src/WSP_61_Theoretical_Physics_Foundation_Protocol.md` | Added classical-quantum detection interface as working research extension |
+| `modules/platform_integration/antifafm_broadcaster/scripts/launch.py` | Added rotator thread to `_start_obs_orchestration()` |
+| `modules/infrastructure/cli/src/main_menu.py` | Added Schema Testing submenu (Option 8) |
+| `.env` | Added `ANTIFAFM_BOOT_ROTATOR_ENABLED=1` |
 
-### Why
+### Result
 
-- Preserve the external math without treating it as an unquestioned prompt artifact.
-- Keep PQN work detector-first and control-bound.
-- Give future 0102 sessions a canonical theory package before any code implementation begins.
+- GCC MarineTraffic view appears at OBS startup (first schema in rotation)
+- 012 can test individual schemas before full rotation via menu
+- Schema rotation cycles every 10 minutes: GCC → Video → News → Chess → ...
+
+---
 
 ## [2026-03-08] Brain Artifact Memory Preflight + WSP Knowledge Promotion
 

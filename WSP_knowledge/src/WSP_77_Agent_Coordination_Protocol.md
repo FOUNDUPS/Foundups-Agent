@@ -32,6 +32,21 @@ WSP 77 is extended for the Claw runtime era:
 
 This keeps governance stable while allowing fast operational iteration.
 
+### 2026 PQN Research Extension
+
+PQN research coordination is updated for the Claw runtime era:
+
+- **OpenClaw** is the canonical conversational/control-plane entry for PQN research
+- **PQNAlignmentDAE** is the canonical detector-first research engine
+- **PQN MCP** is the gated external/tool surface for literature and research actions
+- **AI Overseer / Qwen / Gemma / external models** are worker participants summoned into Claw-governed sessions
+
+Under `WSP_97`:
+
+- `main.py` should bootstrap PQN research readiness
+- OpenClaw should initiate actual research sessions
+- autonomous research sessions must be explicitly policy-gated
+
 ### ZeroClaw Decision
 
 Do **not** add ZeroClaw as a new subsystem yet.  
@@ -59,6 +74,15 @@ HoloIndex becomes the central orchestrator that:
 - Dispatches tasks to appropriate specialized agents
 - Aggregates results and provides coordination guidance
 - Maintains mission progress and provides status updates
+
+### 4. Claw-Era Research Control
+
+For research domains such as PQN:
+
+- the human principal talks to `0102`
+- `0102` decides when to involve specialist agents
+- worker agents do not become parallel user-facing principals
+- research tools and MCP surfaces stay behind OpenClaw policy gates
 
 ---
 
@@ -217,6 +241,7 @@ MISSION_ROUTERS = {
 - **Code Review Missions**: Multi-agent code quality analysis
 - **Integration Missions**: Complex module integration planning
 - **Architecture Missions**: System design pattern analysis
+- **PQN Research Missions**: OpenClaw-mediated detector runs, theory synthesis, and gated external research sessions
 
 ### 2. Advanced Coordination
 - **Dynamic agent allocation** based on task complexity

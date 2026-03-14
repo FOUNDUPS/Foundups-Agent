@@ -108,6 +108,17 @@ Governance checks are injected at distinct layers:
 
 This split prevents control-plane duplication and keeps policy authority centralized.
 
+### Research-Plane Routing Requirement (2026-03-15 Claw Alignment)
+
+For research domains that use MCP surfaces, including PQN:
+
+- `main.py` handles readiness preflight and service bootstrap
+- OpenClaw handles mission intake and execution-plane routing
+- MCP servers remain gated tool surfaces, not independent user-facing principals
+- worker agents may participate in research sessions, but only under the active Claw-governed session context
+
+This prevents MCP-enabled research swarms from bypassing the OpenClaw control plane.
+
 ### Skill Supply-Chain Security Gate
 
 MCP-connected agents that execute skills must satisfy a supply-chain gate before activation.

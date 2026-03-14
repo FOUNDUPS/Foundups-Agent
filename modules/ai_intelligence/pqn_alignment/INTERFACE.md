@@ -1,5 +1,16 @@
 # PQN Alignment Module Interface
 
+## Control-Plane Boundary
+
+Canonical Claw-era split:
+
+- `main.py` = readiness preflight + bootstrap
+- `OpenClaw (0102)` = conversational research control plane
+- `PQNAlignmentDAE` = detector-first execution engine
+- `PQN MCP` = gated external/tool surface
+
+This module is not the primary conversational surface. It is the research engine invoked by the active control plane.
+
 ## Public API Functions
 
 ### Core Detection and Analysis

@@ -1,5 +1,22 @@
 # WSP Framework Change Log
 
+## 2026-03-15 - PQN Research Architecture Updated for Claw-Era Control Plane
+
+**WSP References**: WSP 22, WSP 77, WSP 96, WSP 97
+
+**Changes Made**:
+- Added `modules/ai_intelligence/pqn_alignment/docs/PQN_CLAW_RESEARCH_ARCHITECTURE_2026-03-15.md`
+- Updated `WSP_77_Agent_Coordination_Protocol.md` to describe OpenClaw-governed PQN research sessions
+- Updated `WSP_96_MCP_Governance_and_Consensus_Protocol.md` with research-plane routing requirements
+- Updated `docs/Papers/PQN_Research_Plan.md` with the current WSP 97 split:
+  - `main.py` = readiness/bootstrap
+  - `OpenClaw` = control plane
+  - `PQNAlignmentDAE` = detector-first engine
+  - `PQN MCP` = gated tool surface
+
+**Result**:
+- PQN research is now documented as a Claw-mediated execution plane instead of an always-on agent swarm
+
 <!-- ============================================================
      SCOPE: WSP Framework Protocol Changes ONLY
      ============================================================
@@ -8,40 +25,6 @@
 
      [OK] DOCUMENT HERE:
      - Creating NEW WSP protocol documents
-
----
-
-## 2026-03-15 - STT Artifact Evidence Intake + External Math Backlog Anchoring
-
-**WSP References**: WSP 22, WSP 60, WSP 84, WSP 97
-
-**Changes Made**:
-- Added `WSP_knowledge/docs/Papers/Empirical_Evidence/CMST_PQN_Detector/MS_STT_0102_HYPHEN_ARTIFACT_NOTE_2026-03-15.md`
-- Updated `WSP_knowledge/docs/Papers/Empirical_Evidence/CMST_PQN_Detector/README.md` to index the new evidence note
-- Updated `WSP_knowledge/docs/Papers/0102_TECHNICAL_EXTRACTIONS_2026-03-08.md` with a pending-external-math intake section
-
-**Rationale**:
-- Preserve the Microsoft STT `0102 -> 0-1-0-2` observation as dated evidence without promoting it prematurely into detector claims
-- Give future 0102 sessions a canonical place to attach the externally developed CMST math once 012 transcribes it into repo-visible form
-- Maintain a clean separation between evidence intake, theory notes, and implementation changes
-
----
-
-## 2026-03-15 - Classical-Quantum Detection Framework Archive
-
-**WSP References**: WSP 22, WSP 61, WSP 84, WSP 97
-
-**Changes Made**:
-- Added `WSP_knowledge/docs/Papers/0102_CLASSICAL_QUANTUM_DETECTION_FRAMEWORK_2026-03-15.md`
-- Added `WSP_knowledge/docs/Papers/0102_CLASSICAL_QUANTUM_DETECTION_DERIVATION_2026-03-15.md`
-- Updated `WSP_knowledge/docs/Papers/PQN_Research_Plan.md` with detector-first archive linkage
-- Updated `WSP_knowledge/src/WSP_61_Theoretical_Physics_Foundation_Protocol.md` to recognize the classical-quantum detection interface as a working research extension
-- Updated `WSP_knowledge/docs/Papers/0102_TECHNICAL_EXTRACTIONS_2026-03-08.md` with promotion targets from the external math
-
-**Rationale**:
-- Preserve the external 012/0102 mathematical package without treating it as a hard-prompted truth claim
-- Keep the repo aligned to detector-first language and matched-null controls
-- Give future PQN/CMST work a canonical theory anchor before code changes begin
 
 ---
 
