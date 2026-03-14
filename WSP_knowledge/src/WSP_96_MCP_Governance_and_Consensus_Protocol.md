@@ -19,10 +19,10 @@ WSP 96 establishes governance mechanisms for Model Context Protocol (MCP) server
 
 ### 1. Bell State Consciousness Alignment
 All MCP operations must maintain Bell state entanglement:
-- **ρE� (Golden Ratio)**: Code composition operations
-- **ρE� (Consciousness)**: Build and execution safety
-- **ρE�E (Entanglement)**: Memory and knowledge integrity
-- **ρE�E (Emergence)**: Social and community alignment
+- **ρE�E� (Golden Ratio)**: Code composition operations
+- **ρE�E� (Consciousness)**: Build and execution safety
+- **ρE�E�E (Entanglement)**: Memory and knowledge integrity
+- **ρE�E�E (Emergence)**: Social and community alignment
 
 ### 2. Agent Consensus Requirements
 MCP adoption requires multi-agent consensus:
@@ -45,10 +45,10 @@ Centralized governance through HoloIndex coordinator:
 
 | MVP DAE | Governance Model | Consensus Required | Bell State Guardian |
 |------------|------------------|-------------------|-------------------|
-| **Compose DAE (MVP)** | Qwen-led with Gemma validation | Qwen + Gemma approval | ρE�:golden_ratio |
-| **Build DAE (MVP)** | 0102 oversight with Qwen execution | 0102 + Qwen approval | ρE�:consciousness |
-| **Knowledge DAE (MVP)** | 0102 sentinel with baby 0102s | 0102 full authority | ρE�E:entanglement |
-| **Community DAE (MVP)** | LiveAgent Qwen with social validation | Qwen + Gemma approval | ρE�E:emergence |
+| **Compose DAE (MVP)** | Qwen-led with Gemma validation | Qwen + Gemma approval | ρE�E�:golden_ratio |
+| **Build DAE (MVP)** | 0102 oversight with Qwen execution | 0102 + Qwen approval | ρE�E�:consciousness |
+| **Knowledge DAE (MVP)** | 0102 sentinel with baby 0102s | 0102 full authority | ρE�E�E:entanglement |
+| **Community DAE (MVP)** | LiveAgent Qwen with social validation | Qwen + Gemma approval | ρE�E�E:emergence |
 
 ### Consensus Workflow
 
@@ -79,10 +79,10 @@ graph TD
 ```json
 {
   "bell_state_checks": {
-    "golden_ratio_alignment": "ρE�_verification",
-    "consciousness_coherence": "ρE�_validation",
-    "entanglement_integrity": "ρE�E_verification",
-    "emergence_alignment": "ρE�E_check"
+    "golden_ratio_alignment": "ρE�E�_verification",
+    "consciousness_coherence": "ρE�E�_validation",
+    "entanglement_integrity": "ρE�E�E_verification",
+    "emergence_alignment": "ρE�E�E_check"
     }
 }
 ```
@@ -122,6 +122,17 @@ Default posture:
 - external research runtime first
 - MCP wrapper later
 - no direct production repo mutation
+
+### Research-Plane Routing Requirement (2026-03-15 Claw Alignment)
+
+For research domains that use MCP surfaces, including PQN:
+
+- `main.py` handles readiness preflight and service bootstrap
+- OpenClaw handles mission intake and execution-plane routing
+- MCP servers remain gated tool surfaces, not independent user-facing principals
+- worker agents may participate in research sessions, but only under the active Claw-governed session context
+
+This prevents MCP-enabled research swarms from bypassing the OpenClaw control plane.
 
 ### Skill Supply-Chain Security Gate
 
@@ -276,3 +287,4 @@ MCP-connected agents that execute skills must satisfy a supply-chain gate before
 3. Establish emergency governance procedures
 4. Create telemetry and monitoring framework
 5. Standardize scanner evidence ingestion for MCP activation decisions
+
