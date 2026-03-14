@@ -2,6 +2,23 @@
 
 <!-- Per WSP 22: Journal format - NEWEST entries at TOP, oldest at bottom -->
 
+## [2026-03-15] - Theory Archive Manifest Tests
+**Tests Added/Updated**:
+- `test_theory_archive.py`
+  - verifies canonical classical-quantum theory archive files exist
+  - verifies PQN agent API exposes the theory archive manifest
+- `test_interface_symbols.py`
+  - now asserts `get_theory_archive_context` is exported
+
+**Validation Scope**:
+- archive document presence
+- implementation-target surface presence
+- PQNAlignmentDAE API wiring
+
+**WSP Compliance**: WSP 22, WSP 84, WSP 97
+
+---
+
 ## [2025-09-20] - WSP 88 Surgical Cleanup - Test Impact Assessment
 **Current Active Tests** (10 total):
 - test_claude_key.py — API key validation for Claude integration

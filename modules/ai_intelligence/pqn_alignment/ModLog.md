@@ -37,6 +37,20 @@
   - WSP 84 (reuse existing detector surfaces)
   - WSP 97 (theory -> simulation plan -> implementation boundary)
 
+### **Theory Archive Agent Context Surface**
+- **Date**: 2026-03-15
+- **Operating As**: 0102 CTO / Architect
+- **Change**: Added a lightweight theory-archive manifest to the PQN module and exposed it through `PQNAlignmentDAE.get_0102_api()`.
+- **Details**:
+  - Added `src/theory_archive.py`
+  - Exported `get_theory_archive_context` from module public API
+  - Wired `theory_archive` into the 0102 API surface for PQN research agents
+  - Added focused tests for manifest presence and DAE API exposure
+- **WSP Compliance**:
+  - WSP 22 (traceability)
+  - WSP 84 (no new detector implementation)
+  - WSP 97 (context surface without ontology promotion)
+
 ### **S11 Local LLM Integration - PQN DAE Workers**
 - **Date**: 2026-02-05
 - **Operating As**: 0102 Agent (PQN Research DAE)
