@@ -163,3 +163,31 @@ When WRE is unavailable, COMMAND intents return deterministic advisory fallback 
 - Advisory Mode header
 - Command recognition
 - Three actionable options (CLI, retry, query mode)
+
+## WSP 97 Control-Plane Module Map
+
+OpenClaw now follows a facade + delegated-module design.
+`OpenClawDAE` remains the public contract surface, while the runtime is split into focused control-plane modules.
+
+| Module | Responsibility |
+|------|------|
+| `src/openclaw_dae.py` | Facade, public contract, dependency wiring |
+| `src/openclaw_intent_planner.py` | Intent classification, WSP preflight, plan construction |
+| `src/openclaw_permission_policy.py` | Autonomy tiers, SOURCE gating, containment, skill safety |
+| `src/openclaw_execution_routes.py` | Post-plan route dispatch |
+| `src/openclaw_conversation_engine.py` | Conversation execution and response shaping |
+| `src/openclaw_model_policy.py` | Agentic model routing and live model switching |
+| `src/openclaw_identity_context.py` | Identity card, platform context pack, WSP_00 prompt assembly |
+| `src/openclaw_runtime_support.py` | Runtime probing, IronClaw autostart, model availability |
+| `src/openclaw_status_surface.py` | `connect wre` readiness/status and outward status push |
+| `src/openclaw_process_loop.py` | Full autonomy loop orchestration |
+| `src/openclaw_result_memory.py` | Validate + remember (WRE pattern memory writeback) |
+| `src/openclaw_turn_state.py` | Token telemetry and cooperative turn cancellation |
+| `src/openclaw_action_ledger.py` | Structured DAEmon action emission |
+| `src/openclaw_social_controller.py` | Social-routing bridge and LinkedIn mission control |
+| `src/openclaw_provider_chain.py` | Preferred external / IronClaw provider call chain |
+| `src/openclaw_bootstrap_config.py` | Constructor-time state/bootstrap wiring |
+
+Current refactor result:
+- `openclaw_dae.py` reduced from `2638` lines to `1342`
+- remaining file content is predominantly facade wrappers, dataclasses, and the honeypot surface
