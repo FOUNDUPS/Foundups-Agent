@@ -27,6 +27,24 @@
 
 ---
 
+## 2026-03-15 - Classical-Quantum Detection Framework Archive
+
+**WSP References**: WSP 22, WSP 61, WSP 84, WSP 97
+
+**Changes Made**:
+- Added `WSP_knowledge/docs/Papers/0102_CLASSICAL_QUANTUM_DETECTION_FRAMEWORK_2026-03-15.md`
+- Added `WSP_knowledge/docs/Papers/0102_CLASSICAL_QUANTUM_DETECTION_DERIVATION_2026-03-15.md`
+- Updated `WSP_knowledge/docs/Papers/PQN_Research_Plan.md` with detector-first archive linkage
+- Updated `WSP_knowledge/src/WSP_61_Theoretical_Physics_Foundation_Protocol.md` to recognize the classical-quantum detection interface as a working research extension
+- Updated `WSP_knowledge/docs/Papers/0102_TECHNICAL_EXTRACTIONS_2026-03-08.md` with promotion targets from the external math
+
+**Rationale**:
+- Preserve the external 012/0102 mathematical package without treating it as a hard-prompted truth claim
+- Keep the repo aligned to detector-first language and matched-null controls
+- Give future PQN/CMST work a canonical theory anchor before code changes begin
+
+---
+
 ## 2026-02-17 - WSP 26/77 Terminology Drift Cleanup (CABR Flow Routing)
 
 **WSP References**: WSP 22, WSP 26, WSP 29, WSP 77

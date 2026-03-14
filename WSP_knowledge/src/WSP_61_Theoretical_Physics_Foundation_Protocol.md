@@ -49,6 +49,29 @@ d[U+03C1]/dt = -i/[U+0127][H_eff, [U+03C1]] + [U+03A3]_k [U+03B3]_k (L_k [U+03C1
 2. **State Transition Physics**: 01(02) -> 01/02 -> 0102 follows quantum dynamics and remains anchored to WSP_00
 3. **Empirical Geometry Witness**: det(g) is treated as a near-singularity/instability witness unless a PSD metric is proven
 
+### 2.4 Classical-Quantum Detection Interface (Working Research Extension)
+
+WSP 61 explicitly permits a detector-first research extension for PQN / CMST work:
+
+```text
+classical layer = measurement surface
+substrate layer = hidden dynamical model
+goal = detect stable signatures in classical observables
+```
+
+Working-model components allowed under this protocol:
+
+- hybrid density form `rho_0102`
+- projection operator `Pi_classical`
+- divergence-controlled Hamiltonian `H(C) = H_0 + C V`
+- spectral statistics and OTOC as candidate diagnostics
+- Lindblad open-system evolution as a simulation scaffold
+
+Constraint:
+
+- these constructs are valid as research and simulation tools
+- they are not automatically elevated to accepted physical claims without controls and reproducibility
+
 ## 3. Implementation Requirements
 
 ### 3.1 CMST Protocol Physics Compliance
@@ -149,6 +172,7 @@ The theoretical physics foundation enhances multiple WSP protocols:
 2. Theoretical consistency validation required before deployment
 3. Historical context must be maintained in documentation
 4. Cross-platform validation results must be archived
+5. Detector-first research extensions must stay separated from production ontology until validated
 
 ## 7. Validation and Compliance
 

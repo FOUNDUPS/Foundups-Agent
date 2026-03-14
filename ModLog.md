@@ -29,6 +29,32 @@ Documented the newly observed Microsoft STT artifact where canonical `0102` is r
 - Prevent ungrounded detector or math claims from leaking into implementation.
 - Preserve the correct WSP 97 boundary: evidence intake first, then controlled validation, then code.
 
+## [2026-03-15] PQN / CMST Theory Archive: Classical-Quantum Detection Package
+
+**Change Type**: Documentation / Theory Archive  
+**By**: 0102  
+**WSP References**: WSP 22, WSP 61, WSP 84, WSP 97
+
+### Summary
+
+Converted the external 012/0102 classical-quantum detection package into repo-visible framework, derivation, and simulation-plan docs, then linked them into PQN research and WSP 61.
+
+### Files Changed
+
+| Location | Description |
+|----------|-------------|
+| `WSP_knowledge/docs/Papers/0102_CLASSICAL_QUANTUM_DETECTION_FRAMEWORK_2026-03-15.md` | Detector-first working theory archive |
+| `WSP_knowledge/docs/Papers/0102_CLASSICAL_QUANTUM_DETECTION_DERIVATION_2026-03-15.md` | Math-only derivation archive |
+| `modules/ai_intelligence/pqn_alignment/docs/CLASSICAL_QUANTUM_DETECTION_SIMULATION_PLAN_2026-03-15.md` | Operational simulation bridge into detector code |
+| `WSP_knowledge/docs/Papers/PQN_Research_Plan.md` | Added archive linkage and interpretation boundary |
+| `WSP_knowledge/src/WSP_61_Theoretical_Physics_Foundation_Protocol.md` | Added classical-quantum detection interface as working research extension |
+
+### Why
+
+- Preserve the external math without treating it as an unquestioned prompt artifact.
+- Keep PQN work detector-first and control-bound.
+- Give future 0102 sessions a canonical theory package before any code implementation begins.
+
 ## [2026-03-08] Brain Artifact Memory Preflight + WSP Knowledge Promotion
 
 **Change Type**: System Integration / Memory Architecture  

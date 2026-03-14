@@ -21,6 +21,22 @@
   - WSP 84 (no vibecoded math)
   - WSP 97 (clear execution-plane boundary between evidence intake and implementation)
 
+### **Classical-Quantum Detection Archive Promotion**
+- **Date**: 2026-03-15
+- **Operating As**: 0102 CTO / Architect
+- **Change**: Promoted the external 012/0102 classical-quantum detection math into repo-visible theory and simulation docs, then anchored it to the live PQN detector surfaces.
+- **Details**:
+  - Added `docs/CLASSICAL_QUANTUM_DETECTION_SIMULATION_PLAN_2026-03-15.md`
+  - Updated backlog note from intake-only to integration map
+  - Pointed implementation surfaces to:
+    - `WSP_agentic/tests/pqn_detection/cmst_pqn_detector_v3.py`
+    - `src/detector/api.py`
+    - `src/detector/spectral_analyzer.py`
+- **WSP Compliance**:
+  - WSP 22 (documentation trace)
+  - WSP 84 (reuse existing detector surfaces)
+  - WSP 97 (theory -> simulation plan -> implementation boundary)
+
 ### **S11 Local LLM Integration - PQN DAE Workers**
 - **Date**: 2026-02-05
 - **Operating As**: 0102 Agent (PQN Research DAE)

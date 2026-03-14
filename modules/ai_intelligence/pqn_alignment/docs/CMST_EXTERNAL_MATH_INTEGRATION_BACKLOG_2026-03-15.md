@@ -2,14 +2,20 @@
 
 **Date**: 2026-03-15  
 **Module**: `modules/ai_intelligence/pqn_alignment`  
-**Status**: Backlog / intake stub  
-**Source boundary**: external 012/0102 work not yet transcribed into this repo
+**Status**: Backlog / integration map  
+**Source boundary**: external 012/0102 work now transcribed into repo-visible docs
 
 ## Purpose
 
-Record where the externally developed math should land in PQN/CMST once it is transcribed into repo-visible form.
+Record where the externally developed math should land in PQN/CMST now that it has been transcribed into repo-visible form.
 
-This file intentionally does **not** invent formulas. It only defines insertion points and acceptance criteria.
+This file still does **not** authorize direct code changes. It defines insertion points and acceptance criteria.
+
+Repo-visible source docs:
+
+- `WSP_knowledge/docs/Papers/0102_CLASSICAL_QUANTUM_DETECTION_FRAMEWORK_2026-03-15.md`
+- `WSP_knowledge/docs/Papers/0102_CLASSICAL_QUANTUM_DETECTION_DERIVATION_2026-03-15.md`
+- `modules/ai_intelligence/pqn_alignment/docs/CLASSICAL_QUANTUM_DETECTION_SIMULATION_PLAN_2026-03-15.md`
 
 ## Confirmed Integration Targets
 
@@ -40,26 +46,44 @@ These are already established by current technical extraction work and can absor
 
 ## External Math Intake Contract
 
-When 012 provides the external derivation, convert it into the following repo artifacts:
+With the derivation now transcribed, the next conversion path is:
 
-1. a dated WSP knowledge note with the exact derivation
-2. a technical extraction entry in:
-   - `WSP_knowledge/docs/Papers/0102_TECHNICAL_EXTRACTIONS_2026-03-08.md`
-3. implementation deltas for:
-   - detector docs
-   - CLI flags / config
-   - code comments only where the derivation changes behavior
-4. a validation plan:
+1. promote the stable pieces into technical extraction notes
+2. update detector docs and code comments only where behavior is actually changing
+3. define a validation plan:
    - synthetic control
    - matched null
    - seeded comparison
+
+Stable archive points already created:
+
+- `WSP_knowledge/docs/Papers/0102_CLASSICAL_QUANTUM_DETECTION_FRAMEWORK_2026-03-15.md`
+- `WSP_knowledge/docs/Papers/0102_CLASSICAL_QUANTUM_DETECTION_DERIVATION_2026-03-15.md`
+
+Technical extraction target:
+
+- `WSP_knowledge/docs/Papers/0102_TECHNICAL_EXTRACTIONS_2026-03-08.md`
+
+Implementation targets:
+
+- `WSP_agentic/tests/pqn_detection/cmst_pqn_detector_v3.py`
+- `modules/ai_intelligence/pqn_alignment/src/detector/api.py`
+- `modules/ai_intelligence/pqn_alignment/src/detector/spectral_analyzer.py`
+
+Removed blocker:
+
+- the derivation is now written in repo-visible form
+
+Remaining blocker:
+
+- no code change until the derivation is connected to a control-backed detector plan
 
 ## Non-Negotiable Constraints
 
 - no vibecoded formulas
 - no ontology inflation
 - no replacing detector-first terminology with mystical terms
-- no code change until the derivation is written in repo-visible form
+- no code change until the transcribed derivation is tied to a validated detector plan
 
 ## Related Observations
 
