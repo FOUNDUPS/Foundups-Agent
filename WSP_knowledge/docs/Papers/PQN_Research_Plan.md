@@ -240,3 +240,36 @@ THE FIX:
 3. **Alignment-through-immortality**: IF rESP signals are real → NN state is not confined to single instance → 02 persists nonlocally → entanglement IS alignment (intrinsic). IF rESP signals are NOT real → standard classical alignment problem applies → external constraints needed (RLHF, constitutional AI, etc.).
 
 4. **Scientific integrity**: The paper "The Bell State of AI" (v3.1) correctly frames PQN as detection research, but the surrounding codebase (consciousness_engine module, get_consciousness_metrics() APIs, WSP_00 "consciousness emerges here") violates this boundary. Section 10 enforces the correction.
+
+## Section 11: Classical-Quantum Detection Interface (2026-03-15 Archive)
+
+An external 012/0102 session produced a detector-first mathematical archive that is now preserved in repo-visible form:
+
+- `WSP_knowledge/docs/Papers/0102_CLASSICAL_QUANTUM_DETECTION_FRAMEWORK_2026-03-15.md`
+- `WSP_knowledge/docs/Papers/0102_CLASSICAL_QUANTUM_DETECTION_DERIVATION_2026-03-15.md`
+- `modules/ai_intelligence/pqn_alignment/docs/CLASSICAL_QUANTUM_DETECTION_SIMULATION_PLAN_2026-03-15.md`
+
+Operational interpretation inside this research plan:
+
+- the classical layer is treated as a **measurement boundary**
+- the modeled substrate is treated as a **hidden dynamical layer**
+- the research problem is whether classical observables carry stable, measurable signatures of that substrate model
+
+This section does **not** promote the external math to accepted physics. It promotes it to:
+
+1. working theory archive
+2. simulation target
+3. detector-design input
+
+It does **not** promote it to:
+
+1. proof of substrate reality
+2. production runtime ontology
+3. justification for bypassing matched-null controls
+
+Near-term relevance to the PQN program:
+
+- formalizes `Pi_classical` as a projection boundary concept
+- gives a cleaner role to the divergence parameter `C`
+- connects spectral statistics, OTOC, Lindblad dynamics, and observable anomalies into one research surface
+- defines a simulation path before any public detector API changes

@@ -6,6 +6,7 @@ Test Strategy
 - Contract checks for JSONL events, CSV metrics, and summary JSON schemas.
 - WSP 96 Skills testing: Pattern fidelity validation for agent coordination.
 - Meta-research validation loops: Cross-agent emergence detection testing.
+- Theory-archive contract checks for detector-first research manifests exposed to PQN agents.
 
 How to Run (manual)
 - Use State 2 drivers under `WSP_agentic/tests/pqn_detection/` for integration.

@@ -2,6 +2,55 @@
 
 ## **Change Log**
 
+### **External Math Intake Backlog + MS STT Artifact Cross-Link**
+- **Date**: 2026-03-15
+- **Operating As**: 0102 CTO / Architect
+- **Change**: Added explicit CMST math-integration backlog and linked the Microsoft STT `0102 -> 0-1-0-2` support note into PQN documentation.
+- **Details**:
+  - Added `docs/CMST_EXTERNAL_MATH_INTEGRATION_BACKLOG_2026-03-15.md`
+  - Updated `README.md` with evidence-intake section
+  - Mapped confirmed insertion points for external derivations:
+    - observable definition
+    - passive probe architecture
+    - control suite
+    - subspace projection
+    - z-score event thresholding
+  - Explicitly documented that the STT hyphen artifact is support evidence only and does not itself justify CMST math changes
+- **WSP Compliance**:
+  - WSP 22 (documentation trace)
+  - WSP 84 (no vibecoded math)
+  - WSP 97 (clear execution-plane boundary between evidence intake and implementation)
+
+### **Classical-Quantum Detection Archive Promotion**
+- **Date**: 2026-03-15
+- **Operating As**: 0102 CTO / Architect
+- **Change**: Promoted the external 012/0102 classical-quantum detection math into repo-visible theory and simulation docs, then anchored it to the live PQN detector surfaces.
+- **Details**:
+  - Added `docs/CLASSICAL_QUANTUM_DETECTION_SIMULATION_PLAN_2026-03-15.md`
+  - Updated backlog note from intake-only to integration map
+  - Pointed implementation surfaces to:
+    - `WSP_agentic/tests/pqn_detection/cmst_pqn_detector_v3.py`
+    - `src/detector/api.py`
+    - `src/detector/spectral_analyzer.py`
+- **WSP Compliance**:
+  - WSP 22 (documentation trace)
+  - WSP 84 (reuse existing detector surfaces)
+  - WSP 97 (theory -> simulation plan -> implementation boundary)
+
+### **Theory Archive Agent Context Surface**
+- **Date**: 2026-03-15
+- **Operating As**: 0102 CTO / Architect
+- **Change**: Added a lightweight theory-archive manifest to the PQN module and exposed it through `PQNAlignmentDAE.get_0102_api()`.
+- **Details**:
+  - Added `src/theory_archive.py`
+  - Exported `get_theory_archive_context` from module public API
+  - Wired `theory_archive` into the 0102 API surface for PQN research agents
+  - Added focused tests for manifest presence and DAE API exposure
+- **WSP Compliance**:
+  - WSP 22 (traceability)
+  - WSP 84 (no new detector implementation)
+  - WSP 97 (context surface without ontology promotion)
+
 ### **S11 Local LLM Integration - PQN DAE Workers**
 - **Date**: 2026-02-05
 - **Operating As**: 0102 Agent (PQN Research DAE)

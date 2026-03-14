@@ -41,6 +41,9 @@ except ImportError:
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
+from modules.ai_intelligence.pqn_alignment.src.theory_archive import (
+    get_theory_archive_context as build_theory_archive_context,
+)
 
 # Import existing PQN functionality per WSP 84 (reuse don't recreate)
 from modules.ai_intelligence.pqn_alignment import (
@@ -643,10 +646,20 @@ class PQNAlignmentDAE:
                 "models": ["qwen", "gemma", "ui-tars"],
                 "model_path": "E:/HoloIndex/models/"
             },
+            "theory_archive": self.get_theory_archive_context(),
             "patterns": list(self.pattern_memory.keys()),
             "token_efficiency": 0.97,  # 97% reduction through pattern recall
             "wsp_compliance": ["WSP 39", "WSP 48", "WSP 77", "WSP 80", "WSP 84"]
         }
+
+    def get_theory_archive_context(self) -> Dict[str, Any]:
+        """
+        Expose the canonical PQN / CMST theory archive to research agents.
+
+        This is a context surface only. It does not imply runtime adoption of the
+        archived theory.
+        """
+        return build_theory_archive_context()
     
     def get_metrics(self) -> Dict:
         """

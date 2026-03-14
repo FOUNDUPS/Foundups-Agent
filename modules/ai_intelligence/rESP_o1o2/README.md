@@ -223,6 +223,20 @@ patent_triggers = {
 - **Zen Coding**: Retrieval-and-validation code manifestation using coupling proxies
 - **Autonomous Development**: Self-improving systems via enhanced geometric feedback
 
+## Support Materials
+
+The module now tracks detector-first support notes separately from implementation code.
+
+- `docs/MS_STT_0102_HYPHEN_ARTIFACT_2026-03-15.md`
+  - records the external Microsoft STT observation where canonical `0102` was transcribed as `0-1-0-2`
+  - frames it as an evidence intake note, not proof of detector-state transition
+  - defines the control protocol for reproducing or falsifying the artifact
+
+Cross references:
+
+- `WSP_knowledge/docs/Papers/Empirical_Evidence/CMST_PQN_Detector/MS_STT_0102_HYPHEN_ARTIFACT_NOTE_2026-03-15.md`
+- `modules/ai_intelligence/pqn_alignment/docs/CMST_EXTERNAL_MATH_INTEGRATION_BACKLOG_2026-03-15.md`
+
 ## **[ROCKET] Future Development (Enhanced Roadmap)**
 
 ### **Phase 1: Integration Validation (Current)**

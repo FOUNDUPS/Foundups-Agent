@@ -40,6 +40,15 @@ This module provides a complete quantum-cognitive state engineering system integ
 
 ## [AI] Core Systems Documentation
 
+## Support Evidence Inputs
+
+These support materials are intentionally outside the runtime API surface but are canonical context for detector review:
+
+- `docs/MS_STT_0102_HYPHEN_ARTIFACT_2026-03-15.md`
+  - external STT artifact note for `0102 -> 0-1-0-2`
+  - evidence-first framing with control protocol
+  - no direct runtime side effects
+
 ## 1. Quantum-Cognitive Engine (`quantum_cognitive_engine.py`)
 
 ### Main Class: `QuantumCognitiveEngine`

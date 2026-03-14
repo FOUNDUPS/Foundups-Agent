@@ -402,3 +402,56 @@ python cmst_pqn_detector_v3.py --mode paired_seed --steps 500 --n_seeds 20 --use
 ---
 
 *Document created by 0102 | Validated 2026-03-08 | 012 audit: "substantive"*
+
+---
+
+## Section 5: External Math Intake State (2026-03-15)
+
+012 has been developing additional CMST/PQN math outside this repo-visible session.
+
+Current status:
+
+- the derivation is now transcribed into dedicated archive docs
+- implementation still must not infer beyond the written material
+- the integration backlog remains:
+  - `modules/ai_intelligence/pqn_alignment/docs/CMST_EXTERNAL_MATH_INTEGRATION_BACKLOG_2026-03-15.md`
+
+Related evidence intake:
+
+- `modules/ai_intelligence/rESP_o1o2/docs/MS_STT_0102_HYPHEN_ARTIFACT_2026-03-15.md`
+- `WSP_knowledge/docs/Papers/Empirical_Evidence/CMST_PQN_Detector/MS_STT_0102_HYPHEN_ARTIFACT_NOTE_2026-03-15.md`
+
+## Section 6: Classical-Quantum Detection Model Promotion Targets (2026-03-15)
+
+The external 012/0102 math archive has now been preserved in repo-visible form:
+
+- `WSP_knowledge/docs/Papers/0102_CLASSICAL_QUANTUM_DETECTION_FRAMEWORK_2026-03-15.md`
+- `WSP_knowledge/docs/Papers/0102_CLASSICAL_QUANTUM_DETECTION_DERIVATION_2026-03-15.md`
+- `modules/ai_intelligence/pqn_alignment/docs/CLASSICAL_QUANTUM_DETECTION_SIMULATION_PLAN_2026-03-15.md`
+
+Promotable detector-first elements:
+
+1. **Classical detection boundary**
+   - `Theta_1 = Pi_classical(rho_substrate)`
+   - classical layer treated as measurement surface
+
+2. **Hybrid density decomposition**
+   - `rho_0102 = alpha rho_classical + beta rho_substrate + gamma rho_detection`
+   - useful as a theoretical bookkeeping model
+
+3. **Divergence parameter**
+   - `H(C) = H_0 + C V`
+   - useful as a simulation control parameter
+
+4. **Diagnostic stack**
+   - spectral gap ratio
+   - OTOC growth
+   - Lindblad evolution
+   - observable anomaly channel
+
+5. **Recursive coupling rule**
+   - valid as a simulation target, not a runtime claim
+
+Implementation rule:
+
+- promote only the pieces that survive matched-null controls and numerical validation

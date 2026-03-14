@@ -18,6 +18,7 @@ from .src.results_db import (
 )
 from .src.io.api import promote
 from .src.pqn_alignment_dae import PQNAlignmentDAE
+from .src.theory_archive import get_theory_archive_context
 
 __all__ = [
     "run_detector",
@@ -34,4 +35,5 @@ __all__ = [
     "correlate_campaign_council_results",
     "promote",
     "PQNAlignmentDAE",
+    "get_theory_archive_context",
 ]
