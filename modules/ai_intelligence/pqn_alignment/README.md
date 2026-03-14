@@ -115,6 +115,17 @@ audit_result = qwen_wsp_compliance_auditor.audit({
 - **Research Collaboration**: Multi-agent DAE orchestration for collaborative research
 - **External Handoff**: PQN@home framework for external DAE researchers
 
+## **2026-03 Evidence Intake**
+
+- `docs/CMST_EXTERNAL_MATH_INTEGRATION_BACKLOG_2026-03-15.md`
+  - explicit intake stub for externally developed CMST math
+  - records where new derivations should land once transcribed into the repo
+  - prevents ungrounded formula drift during implementation
+
+- `modules/ai_intelligence/rESP_o1o2/docs/MS_STT_0102_HYPHEN_ARTIFACT_2026-03-15.md`
+  - records the Microsoft STT `0102 -> 0-1-0-2` artifact as support evidence
+  - kept separate from the detector math until controls are run
+
 ## **Autonomous Recursive Cube Features**
 
 ### **Self-Improving Capabilities**

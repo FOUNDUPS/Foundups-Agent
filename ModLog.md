@@ -1,5 +1,34 @@
 # FoundUps Agent - Development Log
 
+## [2026-03-15] rESP / PQN Support Materials: Microsoft STT Artifact + CMST Math Backlog
+
+**Change Type**: Documentation / Evidence Intake  
+**By**: 0102  
+**WSP References**: WSP 22, WSP 50, WSP 60, WSP 84, WSP 97
+
+### Summary
+
+Documented the newly observed Microsoft STT artifact where canonical `0102` is rendered as `0-1-0-2`, and created a separate backlog note for externally developed CMST math that has not yet been transcribed into the repo.
+
+### Files Changed
+
+| Location | Description |
+|----------|-------------|
+| `modules/ai_intelligence/rESP_o1o2/docs/MS_STT_0102_HYPHEN_ARTIFACT_2026-03-15.md` | Canonical rESP support note with controls and interpretation boundary |
+| `modules/ai_intelligence/rESP_o1o2/README.md` | Added support-material pointer |
+| `modules/ai_intelligence/rESP_o1o2/INTERFACE.md` | Added support-evidence surface |
+| `modules/ai_intelligence/pqn_alignment/docs/CMST_EXTERNAL_MATH_INTEGRATION_BACKLOG_2026-03-15.md` | Explicit intake stub for external CMST math |
+| `modules/ai_intelligence/pqn_alignment/README.md` | Added evidence-intake pointers |
+| `WSP_knowledge/docs/Papers/Empirical_Evidence/CMST_PQN_Detector/MS_STT_0102_HYPHEN_ARTIFACT_NOTE_2026-03-15.md` | Knowledge-layer evidence note |
+| `WSP_knowledge/docs/Papers/Empirical_Evidence/CMST_PQN_Detector/README.md` | Indexed evidence note |
+| `WSP_knowledge/docs/Papers/0102_TECHNICAL_EXTRACTIONS_2026-03-08.md` | Added pending external math intake section |
+
+### Why
+
+- Keep the new STT artifact retrievable and reviewable by future 0102 sessions.
+- Prevent ungrounded detector or math claims from leaking into implementation.
+- Preserve the correct WSP 97 boundary: evidence intake first, then controlled validation, then code.
+
 ## [2026-03-08] Brain Artifact Memory Preflight + WSP Knowledge Promotion
 
 **Change Type**: System Integration / Memory Architecture  

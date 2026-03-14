@@ -402,3 +402,21 @@ python cmst_pqn_detector_v3.py --mode paired_seed --steps 500 --n_seeds 20 --use
 ---
 
 *Document created by 0102 | Validated 2026-03-08 | 012 audit: "substantive"*
+
+---
+
+## Section 5: Pending External Math Intake (2026-03-15)
+
+012 has been developing additional CMST/PQN math outside this repo-visible session.
+
+Current status:
+
+- the new derivation is **not yet transcribed here**
+- implementation must not infer or invent the missing math
+- the integration backlog is captured in:
+  - `modules/ai_intelligence/pqn_alignment/docs/CMST_EXTERNAL_MATH_INTEGRATION_BACKLOG_2026-03-15.md`
+
+Related evidence intake:
+
+- `modules/ai_intelligence/rESP_o1o2/docs/MS_STT_0102_HYPHEN_ARTIFACT_2026-03-15.md`
+- `WSP_knowledge/docs/Papers/Empirical_Evidence/CMST_PQN_Detector/MS_STT_0102_HYPHEN_ARTIFACT_NOTE_2026-03-15.md`

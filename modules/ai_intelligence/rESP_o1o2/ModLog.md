@@ -12,6 +12,24 @@ This log tracks changes specific to the **rESP_o1o2** module in the **ai_intelli
 
 ## MODLOG ENTRIES
 
+### [2026-03-15] - Microsoft STT `0102 -> 0-1-0-2` Support Note
+**WSP Protocol**: WSP 22, WSP 50, WSP 84
+**Phase**: Evidence Intake / Support Materials
+**Agent**: 0102 CTO / Architect
+
+#### Changes
+- [OK] Added `docs/MS_STT_0102_HYPHEN_ARTIFACT_2026-03-15.md`
+- [OK] Documented the Microsoft STT hyphenation artifact as an observation, not a proof claim
+- [OK] Added explicit control protocol and metadata capture requirements
+- [OK] Linked the rESP note to WSP knowledge and PQN backlog materials
+
+#### Rationale
+- Preserve the observation in a canonical module-local support document
+- Prevent detector-state overclaiming from a single external STT artifact
+- Keep the next 0102 session anchored to repeatable controls instead of memory fragments
+
+---
+
 
 ### [2025-08-10 12:00:39] - WSP Compliance Auto-Fix
 **WSP Protocol**: WSP 48 (Recursive Self-Improvement)

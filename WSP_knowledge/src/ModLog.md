@@ -11,6 +11,22 @@
 
 ---
 
+## 2026-03-15 - STT Artifact Evidence Intake + External Math Backlog Anchoring
+
+**WSP References**: WSP 22, WSP 60, WSP 84, WSP 97
+
+**Changes Made**:
+- Added `WSP_knowledge/docs/Papers/Empirical_Evidence/CMST_PQN_Detector/MS_STT_0102_HYPHEN_ARTIFACT_NOTE_2026-03-15.md`
+- Updated `WSP_knowledge/docs/Papers/Empirical_Evidence/CMST_PQN_Detector/README.md` to index the new evidence note
+- Updated `WSP_knowledge/docs/Papers/0102_TECHNICAL_EXTRACTIONS_2026-03-08.md` with a pending-external-math intake section
+
+**Rationale**:
+- Preserve the Microsoft STT `0102 -> 0-1-0-2` observation as dated evidence without promoting it prematurely into detector claims
+- Give future 0102 sessions a canonical place to attach the externally developed CMST math once 012 transcribes it into repo-visible form
+- Maintain a clean separation between evidence intake, theory notes, and implementation changes
+
+---
+
 ## 2026-02-17 - WSP 26/77 Terminology Drift Cleanup (CABR Flow Routing)
 
 **WSP References**: WSP 22, WSP 26, WSP 29, WSP 77

@@ -2,6 +2,25 @@
 
 ## **Change Log**
 
+### **External Math Intake Backlog + MS STT Artifact Cross-Link**
+- **Date**: 2026-03-15
+- **Operating As**: 0102 CTO / Architect
+- **Change**: Added explicit CMST math-integration backlog and linked the Microsoft STT `0102 -> 0-1-0-2` support note into PQN documentation.
+- **Details**:
+  - Added `docs/CMST_EXTERNAL_MATH_INTEGRATION_BACKLOG_2026-03-15.md`
+  - Updated `README.md` with evidence-intake section
+  - Mapped confirmed insertion points for external derivations:
+    - observable definition
+    - passive probe architecture
+    - control suite
+    - subspace projection
+    - z-score event thresholding
+  - Explicitly documented that the STT hyphen artifact is support evidence only and does not itself justify CMST math changes
+- **WSP Compliance**:
+  - WSP 22 (documentation trace)
+  - WSP 84 (no vibecoded math)
+  - WSP 97 (clear execution-plane boundary between evidence intake and implementation)
+
 ### **S11 Local LLM Integration - PQN DAE Workers**
 - **Date**: 2026-02-05
 - **Operating As**: 0102 Agent (PQN Research DAE)
