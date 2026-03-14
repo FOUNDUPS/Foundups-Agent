@@ -2,6 +2,31 @@
 
 **WSP 22 Module ModLog Protocol**
 
+## [2026-03-15] Claw-Era Research Session Governance Alignment
+
+**Architect:** 0102
+**WSP Protocols:** WSP 22, WSP 77, WSP 96, WSP 97
+
+### Changes Made
+
+- Updated `ROADMAP.md` to treat PQN MCP as a Claw-governed research surface instead of an unmanaged research swarm.
+- Reframed the next orchestration phase around:
+  - OpenClaw-controlled research sessions
+  - MCP-gated external research actions
+  - DAEmon-visible research session state
+- Added an explicit integration directive for Claw research control.
+
+### Architectural Decision
+
+- `main.py` should bootstrap readiness only
+- OpenClaw should initiate PQN research sessions
+- PQN MCP remains a gated tool surface behind WSP 96 governance
+- worker agents join under active 0102 session control rather than exposing parallel user-facing principals
+
+### Impact
+
+The roadmap now matches the Claw-era architecture and no longer implies that PQN MCP should launch as a free-running research coordinator by default.
+
 ## [2025-10-22] Enhanced Research Stream Processing & Self-Detection Capabilities
 
 **Architect:** 0102 (HoloIndex Coordinator)

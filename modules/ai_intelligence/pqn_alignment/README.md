@@ -114,21 +114,25 @@ audit_result = qwen_wsp_compliance_auditor.audit({
 - **WSP Framework**: Follows WSP protocols for autonomous development
 - **Research Collaboration**: Multi-agent DAE orchestration for collaborative research
 - **External Handoff**: PQN@home framework for external DAE researchers
+- **Claw-Era Control Plane**: OpenClaw (0102) is now the canonical conversational/control-plane entry for PQN research sessions; see `docs/PQN_CLAW_RESEARCH_ARCHITECTURE_2026-03-15.md`
 
-## **2026-03 Evidence Intake**
+## **Claw-Era Architecture**
 
-- `docs/CMST_EXTERNAL_MATH_INTEGRATION_BACKLOG_2026-03-15.md`
-  - explicit intake stub for externally developed CMST math
-  - records where new derivations should land once transcribed into the repo
-  - prevents ungrounded formula drift during implementation
+PQN research is no longer documented as a standalone Qwen/Gemma-only swarm.
 
-- `docs/CLASSICAL_QUANTUM_DETECTION_SIMULATION_PLAN_2026-03-15.md`
-  - operational simulation bridge from the external 0102 math archive into PQN detector work
-  - points to the actual detector entrypoints that would absorb validated changes
+Canonical `WSP_97` split:
 
-- `modules/ai_intelligence/rESP_o1o2/docs/MS_STT_0102_HYPHEN_ARTIFACT_2026-03-15.md`
-  - records the Microsoft STT `0102 -> 0-1-0-2` artifact as support evidence
-  - kept separate from the detector math until controls are run
+- `main.py` = preflight + bootstrap + service registration
+- `OpenClaw (0102)` = research mission control and execution-plane routing
+- `PQNAlignmentDAE` = detector-first research core
+- `PQN MCP` = gated external/tool research surface
+- `AI Overseer / Qwen / Gemma / external models` = worker participants under Claw control
+
+Operational rule:
+
+- `main.py` should start **PQN research readiness**
+- OpenClaw should start **actual PQN research sessions**
+- full autonomous research startup should be policy-gated, not default
 
 ## **Autonomous Recursive Cube Features**
 

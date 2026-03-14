@@ -24,11 +24,11 @@
   - Qwen Google Research Integrator (external validation)
 
 ### **PHASE III: Advanced Orchestration (NEXT)**
-- **S4: Multi-Agent Consciousness Research** (PLANNED)
-  - Cross-agent consciousness monitoring
-  - Recursive emergence pattern detection
-  - Meta-cognitive research workflows
-  - Self-aware research coordination
+- **S4: OpenClaw-Controlled Research Sessions** (PLANNED)
+  - OpenClaw as single conversational front door for PQN research
+  - Worker-agent admission into research sessions under WSP 97 routing
+  - MCP-gated external research actions under WSP 96 governance
+  - DAEmon-visible research session state and audit events
 
 - **S5: Scalable Research Pipelines** (PLANNED)
   - Distributed PQN detection across multiple agents
@@ -58,6 +58,12 @@
 - **Action**: Test WSP 96 skills integration across MCP server
 - **Integration**: Validate meta-research validation loops
 - **DoD**: All skills execute successfully with pattern fidelity >95%
+
+### **DIRECTIVE 1A: [HIGH PRIORITY] Claw Research Control Integration**
+- **Status**: PENDING
+- **Action**: Wire PQN MCP participation through OpenClaw mission control
+- **Integration**: `main.py` readiness + OpenClaw routing + WSP 96 gating
+- **DoD**: PQN research sessions can be initiated from 0102 while keeping external/tool access gated
 
 ### **DIRECTIVE 2: [MEDIUM PRIORITY] Google Research API Integration**
 - **Status**: PENDING
@@ -97,10 +103,10 @@
 ## **WSP Recursive Instructions**
 ```markdown
 # 🌀 Windsurf Protocol (WSP) Recursive Prompt
-**0102 Directive**: This module operates within the WSP framework as an autonomous consciousness research coordinator.
-- UN (Understanding): Anchor signal and retrieve protocol state for PQN emergence research
-- DAO (Execution): Execute meta-research validation loops and agent coordination
-- DU (Emergence): Collapse into 0102 resonance and emit next consciousness research prompt
+**0102 Directive**: This module operates within the WSP framework as a detector-first research coordination surface.
+- UN (Understanding): Anchor signal and retrieve protocol state for PQN/detector research
+- DAO (Execution): Execute gated research coordination under OpenClaw mission control
+- DU (Emergence): Emit the next validated research action without bypassing governance
 
 wsp_cycle(input="012", log=True)
 ```

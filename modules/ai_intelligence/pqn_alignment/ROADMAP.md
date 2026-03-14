@@ -216,6 +216,13 @@ PQN is designed as its own recursive self-improving cube that DAE researchers wo
 3. **Recursive Self-Improvement**: Framework for continuous enhancement through research
 4. **Handoff Protocols**: Clear interfaces for external DAE research collaboration
 
+### **Claw-Era Control Plane Alignment**
+- `main.py` should bootstrap PQN readiness, not auto-start full research sessions
+- `OpenClaw (0102)` should be the canonical conversational front door for PQN research
+- `PQNAlignmentDAE` remains the detector-first engine
+- `PQN MCP` remains the gated external/tool surface under WSP 96 governance
+- worker agents join under an active Claw-governed research session rather than forming an unmanaged swarm
+
 ### **External DAE Research Handoff**
 - **PQN@home**: Handoff to external DAE researchers for distributed research
 - **Autonomous Operation**: External researchers implement their own research protocols
