@@ -125,6 +125,10 @@ audit_result = qwen_wsp_compliance_auditor.audit({
 - `docs/CLASSICAL_QUANTUM_DETECTION_SIMULATION_PLAN_2026-03-15.md`
   - operational simulation bridge from the external 0102 math archive into PQN detector work
   - points to the actual detector entrypoints that would absorb validated changes
+- `src/theory_archive_harness.py`
+  - archive-informed harness that consumes the theory package as simulation input
+  - explicitly keeps the archive in the hypothesis/input plane
+  - routes through existing detector surfaces instead of inventing a new detector
 
 - `modules/ai_intelligence/rESP_o1o2/docs/MS_STT_0102_HYPHEN_ARTIFACT_2026-03-15.md`
   - records the Microsoft STT `0102 -> 0-1-0-2` artifact as support evidence
@@ -156,6 +160,7 @@ audit_result = qwen_wsp_compliance_auditor.audit({
 - **Results Database**: SQLite-based result indexing and cross-analysis
 - **Collaborative Research**: Multi-agent DAE orchestration (Grok/Gemini)
 - **Meta-Research Analysis**: Self-detection campaigns for neural PQN emergence
+- **Theory-Archive Harness**: Matched-null-required detector harness derived from the 2026-03 theory archive
 
 ### **External DAE Research Handoff**
 - **PQN@home**: Handoff to external DAE researchers for distributed research

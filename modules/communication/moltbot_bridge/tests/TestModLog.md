@@ -1,3 +1,14 @@
+## 2026-03-15: Generic DAE runtime command routing
+
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py modules/communication/moltbot_bridge/tests/test_openclaw_dae_runtime_commands.py modules/communication/moltbot_bridge/tests/test_pqn_research_adapter.py modules/infrastructure/dae_daemon/tests/test_dae_launch_broker.py -q`
+- Status: PASS
+- Result: `14 passed, 2 warnings`
+- Notes:
+  - Validates generic broker-managed DAE runtime commands through OpenClaw.
+  - Confirms PQN runtime commands remain stable on top of the generic broker layer.
+
+---
+
 # TestModLog - tests
 
 ## 2026-03-05: Post-escalation shared security regression sweep

@@ -44,6 +44,10 @@ from pathlib import Path
 from modules.ai_intelligence.pqn_alignment.src.theory_archive import (
     get_theory_archive_context as build_theory_archive_context,
 )
+from modules.ai_intelligence.pqn_alignment.src.theory_archive_harness import (
+    build_theory_archive_harness_spec,
+    run_theory_archive_detector_harness,
+)
 
 # Import existing PQN functionality per WSP 84 (reuse don't recreate)
 from modules.ai_intelligence.pqn_alignment import (
@@ -647,6 +651,7 @@ class PQNAlignmentDAE:
                 "model_path": "E:/HoloIndex/models/"
             },
             "theory_archive": self.get_theory_archive_context(),
+            "theory_archive_harness": self.get_theory_archive_harness_spec(),
             "patterns": list(self.pattern_memory.keys()),
             "token_efficiency": 0.97,  # 97% reduction through pattern recall
             "wsp_compliance": ["WSP 39", "WSP 48", "WSP 77", "WSP 80", "WSP 84"]
@@ -660,6 +665,14 @@ class PQNAlignmentDAE:
         archived theory.
         """
         return build_theory_archive_context()
+
+    def get_theory_archive_harness_spec(self) -> Dict[str, Any]:
+        """Expose the archive-informed harness contract to research agents."""
+        return build_theory_archive_harness_spec()
+
+    def run_theory_archive_harness(self, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Run one archive-informed detector harness pass."""
+        return run_theory_archive_detector_harness(config=config or {})
     
     def get_metrics(self) -> Dict:
         """

@@ -4,9 +4,12 @@
 
 ### Core Detection and Analysis
 - `run_detector(config: Dict) -> Tuple[str, str]`: Run PQN detection on a script
+- `run_detector_with_spectral_analysis(config: Dict) -> Dict[str, Any]`: Run detector plus spectral analysis
 - `run_sweep(config: Dict) -> str`: Execute parameter sweep analysis
 - `phase_sweep(config: Dict) -> str`: CLI wrapper for parameter sweep
 - `council_run(config: Dict) -> Tuple[str, str]`: Run council optimization cycle
+- `build_theory_archive_harness_spec(repo_root: str = "") -> Dict[str, Any]`: Build non-dogmatic harness spec from the theory archive
+- `run_theory_archive_detector_harness(config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]`: Execute one archive-informed detector pass
 
 ### Results Database Management
 - `init_db(db_path: Optional[str] = None) -> None`: Initialize results database
@@ -89,6 +92,15 @@ Broker-facing entrypoints:
 
 This keeps `main.py` responsible for readiness/bootstrap while `0102` launches
 research cycles through the broker at runtime.
+
+### Theory Archive Harness Contract
+
+- Archive mode: `archive_informed_non_dogmatic`
+- Required invariant: `matched_null_required=True`
+- Detector surface: `run_detector_with_spectral_analysis(...)`
+- Agent exposure:
+  - `PQNAlignmentDAE.get_0102_api()["theory_archive_harness"]`
+  - `PQNAlignmentDAE.run_theory_archive_harness(...)`
 
 ### Basic Detection
 ```python

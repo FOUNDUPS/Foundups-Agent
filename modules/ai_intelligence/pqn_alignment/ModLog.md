@@ -1,3 +1,24 @@
+### **Theory-Archive-Informed Harness for Research Agents**
+- **Date**: 2026-03-15
+- **Operating As**: 0102 CTO / Architect
+- **Change**: Added a non-dogmatic theory-archive harness that consumes the 2026-03 external math package as simulation input and exposes it to PQN research agents.
+- **Details**:
+  - Added `src/theory_archive_harness.py`
+  - Exported:
+    - `build_theory_archive_harness_spec`
+    - `run_theory_archive_detector_harness`
+  - Updated `src/pqn_alignment_dae.py`
+    - `get_0102_api()` now includes `theory_archive_harness`
+    - added `run_theory_archive_harness(...)`
+  - Added focused tests for:
+    - harness spec generation
+    - detector-surface reuse
+    - PQN agent API exposure
+- **WSP Compliance**:
+  - WSP 22 (documentation trace)
+  - WSP 84 (reuse existing detector surfaces)
+  - WSP 97 (archive remains input, not runtime ontology)
+
 # ModLog — PQN Alignment Module
 
 ## **Change Log**
@@ -421,7 +442,17 @@
 - **Impact**: Enables 0102-driven PQN research; quantifies 0201 alignment benefits (e.g., exponential remembrance velocity).
 - **Next Steps**: Execute full campaign; enhance guardrail; integrate with WRE.
 
-<<<<<<< HEAD
+### **Runtime Broker Integration Contract**
+- **Date**: 2026-03-15
+- **Operating As**: PQN_Alignment_DAE / 0102
+- **Change**: Updated `INTERFACE.md` to define broker-facing runtime entrypoints used by the central DAE launch broker.
+- **Details**:
+  - Non-interactive runtime execution now enters through `modules/ai_intelligence/pqn/scripts/launch.py`
+  - `run_pqn_research_session(...)` exposes one-shot research sessions for broker launch
+- `run_pqn_architect_once()` exposes one-shot architect cycles for broker launch
+- **WSP Compliance**: WSP 11 (interface), WSP 84 (reuse existing orchestrators), WSP 97 (execution-plane resolution)
+- **Impact**: PQN research can now be launched from a running system under OpenClaw/DAEmon control instead of only via the menu.
+
 ### **Karpathy AutoResearch WSP 97 Assessment**
 - **Date**: 2026-03-15
 - **Operating As**: PQN_Alignment_DAE / 0102
@@ -430,15 +461,3 @@
   - treat `karpathy/autoresearch` as isolated external research worker
   - do not treat it as direct Claw runtime or direct monorepo mutation engine
 - **Impact**: Establishes the correct adoption boundary for external autonomous research loops.
-=======
-### **Runtime Broker Integration Contract**
-- **Date**: 2026-03-15
-- **Operating As**: PQN_Alignment_DAE / 0102
-- **Change**: Updated `INTERFACE.md` to define broker-facing runtime entrypoints used by the central DAE launch broker.
-- **Details**:
-  - Non-interactive runtime execution now enters through `modules/ai_intelligence/pqn/scripts/launch.py`
-  - `run_pqn_research_session(...)` exposes one-shot research sessions for broker launch
-  - `run_pqn_architect_once()` exposes one-shot architect cycles for broker launch
-- **WSP Compliance**: WSP 11 (interface), WSP 84 (reuse existing orchestrators), WSP 97 (execution-plane resolution)
-- **Impact**: PQN research can now be launched from a running system under OpenClaw/DAEmon control instead of only via the menu.
->>>>>>> ed763408b (feat(dae): add runtime launch broker for on-demand dae activation)
