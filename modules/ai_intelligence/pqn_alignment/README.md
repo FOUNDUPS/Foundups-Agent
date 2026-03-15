@@ -127,6 +127,10 @@ PQN research is no longer documented as a standalone Qwen/Gemma-only swarm.
   - archive-informed harness that consumes the theory package as simulation input
   - explicitly keeps the archive in the hypothesis/input plane
   - routes through existing detector surfaces instead of inventing a new detector
+- `src/theory_archive_simulation_runner.py`
+  - runs the theory-archive experiment matrix as matched-null vs probe comparisons
+  - produces comparative summaries for research agents without promoting the archive to truth
+  - writes simulation summaries under `artifact_results/theory_archive_simulation`
 
 Canonical `WSP_97` split:
 
@@ -141,6 +145,19 @@ Operational rule:
 - `main.py` should start **PQN research readiness**
 - OpenClaw should start **actual PQN research sessions**
 - full autonomous research startup should be policy-gated, not default
+
+### Archive-Informed Simulation Example
+```python
+from modules.ai_intelligence.pqn_alignment import run_theory_archive_simulation
+
+result = run_theory_archive_simulation({
+    "seeds": [0, 1, 2],
+    "steps": 240,
+})
+
+print(result["interpretation"]["outcome"])
+print(result["comparison"]["delta_entrainment_score"])
+```
 
 ## **Autonomous Recursive Cube Features**
 

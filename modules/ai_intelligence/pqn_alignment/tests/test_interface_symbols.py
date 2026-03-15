@@ -9,3 +9,5 @@ def test_interface_symbols():
     assert hasattr(mod, 'council_run')
     assert hasattr(mod, 'promote')
     assert hasattr(mod, 'get_theory_archive_context')
+    assert hasattr(mod, 'build_theory_archive_simulation_plan')
+    assert hasattr(mod, 'run_theory_archive_simulation')

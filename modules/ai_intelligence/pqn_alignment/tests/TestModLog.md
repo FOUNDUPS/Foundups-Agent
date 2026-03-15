@@ -1,3 +1,22 @@
+## [2026-03-15] - Theory Archive Simulation Runner Tests
+**Tests Added/Updated**:
+- `test_theory_archive_simulation_runner.py`
+  - verifies non-dogmatic simulation plan generation
+  - verifies probe vs matched-null comparison semantics
+  - verifies PQNAlignmentDAE exposes the simulation plan to research agents
+- `test_interface_symbols.py`
+  - now asserts simulation runner symbols are exported
+
+**Validation Scope**:
+- matched-null-required simulation planning
+- comparative detector interpretation
+- PQN agent API wiring
+- package export integrity
+
+**WSP Compliance**: WSP 22, WSP 84, WSP 97
+
+---
+
 ## [2026-03-15] - Theory Archive Harness Tests
 **Tests Added/Updated**:
 - `test_theory_archive.py`

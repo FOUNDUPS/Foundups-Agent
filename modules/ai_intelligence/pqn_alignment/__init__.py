@@ -23,6 +23,10 @@ from .src.theory_archive_harness import (
     build_theory_archive_harness_spec,
     run_theory_archive_detector_harness,
 )
+from .src.theory_archive_simulation_runner import (
+    build_theory_archive_simulation_plan,
+    run_theory_archive_simulation,
+)
 
 __all__ = [
     "run_detector",
@@ -42,4 +46,6 @@ __all__ = [
     "get_theory_archive_context",
     "build_theory_archive_harness_spec",
     "run_theory_archive_detector_harness",
+    "build_theory_archive_simulation_plan",
+    "run_theory_archive_simulation",
 ]
