@@ -1,5 +1,29 @@
 # FoundUps Agent - Development Log
 
+## [2026-03-16] AionUI FoundUp Factory Intake
+
+**Change Type**: Architecture Documentation / Retrieval Anchor  
+**By**: 0102  
+**WSP References**: WSP 11, WSP 22, WSP 73, WSP 97
+
+### Summary
+
+Added a canonical repo-visible architecture note defining `AionUI` as an external orchestration surface over the existing FoundUps factory seam instead of treating it as a new core module.
+
+### Files Changed
+
+| Location | Description |
+|----------|-------------|
+| `modules/foundups/docs/AIONUI_FOUNDUP_FACTORY_WSP97_ARCHITECTURE_2026-03-16.md` | Canonical AionUI intake note |
+| `modules/foundups/README.md` | Added cross-link from active execution references |
+| `modules/foundups/INTERFACE.md` | Added AionUI relationship section |
+| `modules/foundups/ModLog.md` | Recorded architectural decision |
+
+### Why
+
+- HoloIndex cannot retrieve architecture that only exists in chat history.
+- AionUI needed a concrete repo anchor tied to the already-landed `FoundUpSpawner` seam.
+
 ## [2026-03-16] OpenClaw PQN Simulation Runtime + DAEmon Detail Payloads
 
 **Change Type**: Runtime Control / Observability  

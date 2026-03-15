@@ -6,6 +6,7 @@ For active execution, use these first:
 - `modules/foundups/ROADMAP.md` (domain-level layered roadmap)
 - `modules/foundups/docs/OCCAM_LAYERED_EXECUTION_PLAN.md` (architecture intent)
 - `modules/foundups/docs/CONTINUATION_RUNBOOK.md` (resume/handoff workflow)
+- `modules/foundups/docs/AIONUI_FOUNDUP_FACTORY_WSP97_ARCHITECTURE_2026-03-16.md` (external orchestration surface over FoundUp factory)
 - `modules/foundups/agent_market/ROADMAP.md` (execution ledger roadmap)
 - `modules/foundups/simulator/ROADMAP.md` (simulation and DEX roadmap)
 
