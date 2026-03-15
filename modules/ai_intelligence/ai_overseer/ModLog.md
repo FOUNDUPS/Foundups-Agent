@@ -2071,3 +2071,19 @@ from modules.platform_integration.youtube_auth.src.mcp_quota_server import MCPQu
 ### Outcome
 - FoundUps now has a reusable architect-grade audit skill instead of a one-off prompt ritual.
 - Audit output is persisted as JSON + Markdown handoff artifacts under AI Overseer memory.
+
+## 2026-03-15: External open source tool diligence Skillz
+
+**Author**: 0102  
+**WSP**: 15, 50, 77, 84, 95, 97
+
+### Changes
+- Added `skillz/open_source_tool_diligence/SKILLz.md`.
+- Encoded the correct posture for external runtimes:
+  - isolate first
+  - control through FoundUps planes
+  - optional MCP later
+  - no direct production mutation
+
+### Outcome
+- 0102 now has a reusable diligence skill for evaluating external open-source tools such as `karpathy/autoresearch`.

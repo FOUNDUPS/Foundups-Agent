@@ -108,6 +108,21 @@ Governance checks are injected at distinct layers:
 
 This split prevents control-plane duplication and keeps policy authority centralized.
 
+### External Non-MCP Runtime Intake Rule (2026-03-15)
+
+Tools that do not natively speak MCP, but perform autonomous research or coding loops, must not be treated as MCP-native just because they are useful.
+
+Required sequence:
+1. evaluate under WSP 97 and WSP 15
+2. pilot in isolation
+3. wrap behind FoundUps launch/control surfaces
+4. expose MCP status/report surfaces only after wrapper stability
+
+Default posture:
+- external research runtime first
+- MCP wrapper later
+- no direct production repo mutation
+
 ### Skill Supply-Chain Security Gate
 
 MCP-connected agents that execute skills must satisfy a supply-chain gate before activation.

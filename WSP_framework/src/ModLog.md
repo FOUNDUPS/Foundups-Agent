@@ -757,3 +757,14 @@ L:<lane> S:<scope> M:<mode> T:<task> R:[wsps] I:{inv} O:[out] F:[fail]
 **Verification**:
 - Confirmed no missing numbered framework WSP rows (excluding WSP 00 entry format) after remediation.
 - Confirmed WSP 94 and WSP 98 rows are present in `WSP_MASTER_INDEX.md`.
+
+## 2026-03-15 - External research runtime governance clarification
+
+**WSP References**: WSP 77, WSP 96, WSP 97, WSP 22
+
+**Changes Made**:
+- Updated `WSP_77_Agent_Coordination_Protocol.md` with explicit rule that autonomous external research systems remain subordinate worker runtimes under 0102 control.
+- Updated `WSP_96_MCP_Governance_and_Consensus_Protocol.md` to clarify that non-MCP external runtimes must be isolated and wrapped before any MCP exposure.
+
+**Rationale**:
+- Tools such as `karpathy/autoresearch` are useful candidates, but their operating model does not map directly to FoundUps control-plane or production-repo governance.

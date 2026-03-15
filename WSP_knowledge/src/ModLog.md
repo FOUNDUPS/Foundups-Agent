@@ -739,3 +739,14 @@ L:<lane> S:<scope> M:<mode> T:<task> R:[wsps] I:{inv} O:[out] F:[fail]
 **Verification**:
 - Confirmed no missing numbered framework WSP rows (excluding WSP 00 entry format) after remediation.
 - Confirmed WSP 94 and WSP 98 rows are present in `WSP_MASTER_INDEX.md`.
+
+## 2026-03-15 - External research runtime governance clarification
+
+**WSP References**: WSP 77, WSP 96, WSP 97, WSP 22
+
+**Changes Made**:
+- Mirrored the WSP 77 update for external research worker runtimes.
+- Mirrored the WSP 96 update for non-MCP external runtime intake posture.
+
+**Rationale**:
+- Keeps framework and knowledge mirrors aligned while FoundUps evaluates external tools such as `karpathy/autoresearch`.
