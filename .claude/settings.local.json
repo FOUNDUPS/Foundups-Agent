@@ -126,10 +126,18 @@
       "Bash(done)",
       "Bash(git config:*)",
       "Bash(git sync-both:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(cmd /c type:*)",
+      "Bash(nslookup:*)",
+      "Bash(ping:*)",
+      "WebFetch(domain:www.antifafm.com)",
+      "Bash(git stash:*)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "additionalDirectories": [
+      "o:\\Foundups-Agent\\modules\\infrastructure\\container_isolation"
+    ]
   },
   "model": "claude-opus-4-5-20251101"
 }

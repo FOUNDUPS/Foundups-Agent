@@ -173,16 +173,99 @@ SCHEMAS: Dict[str, Dict[str, Any]] = {
 ROTATION_ORDER = ["gcc", "video", "news", "chess", "checkers", "cams", "karaoke"]
 
 
+# OBS source names that need visibility control
+# Video grid sources to hide during non-video schemas
+VIDEO_SOURCES = ["video1", "video2", "video3", "video4", "video5", "video6", "video7", "video8", "video9"]
+BROWSER_SOURCE = os.getenv("OBS_BROWSER_SOURCE", "antifaFM Website")
+
+
+def _get_obs_client():
+    """Get OBS WebSocket client."""
+    import obsws_python as obs
+
+    host = os.getenv("OBS_WEBSOCKET_HOST", "localhost")
+    port = int(os.getenv("OBS_WEBSOCKET_PORT", 4455))
+    password = os.getenv("OBS_WEBSOCKET_PASSWORD", "")
+
+    return obs.ReqClient(host=host, port=port, password=password)
+
+
+async def set_source_visibility(source_name: str, visible: bool, scene_name: str = None) -> Dict[str, Any]:
+    """
+    Set OBS scene item visibility.
+
+    Args:
+        source_name: Name of the source in OBS
+        visible: True to show, False to hide
+        scene_name: Scene containing the source (default: current scene)
+    """
+    try:
+        client = _get_obs_client()
+
+        # Get current scene if not specified
+        if not scene_name:
+            current = client.get_current_program_scene()
+            scene_name = current.scene_name
+
+        # Get scene item ID
+        items = client.get_scene_item_list(scene_name)
+        item_id = None
+        for item in items.scene_items:
+            if item.get("sourceName") == source_name:
+                item_id = item.get("sceneItemId")
+                break
+
+        if item_id is None:
+            return {"success": False, "error": f"Source '{source_name}' not found in scene"}
+
+        # Set visibility
+        client.set_scene_item_enabled(
+            scene_name=scene_name,
+            item_id=item_id,
+            enabled=visible
+        )
+
+        logger.debug(f"[ROTATOR] Set {source_name} visibility={visible}")
+        return {"success": True, "source": source_name, "visible": visible}
+
+    except Exception as e:
+        logger.warning(f"[ROTATOR] Visibility control failed for {source_name}: {e}")
+        return {"success": False, "error": str(e)}
+
+
+async def configure_schema_visibility(schema_id: str) -> Dict[str, Any]:
+    """
+    Configure OBS source visibility for a schema.
+
+    - GCC/news/chess schemas: Hide video grid, show browser
+    - Video schema: Show video grid, hide browser
+    """
+    results = {"schema": schema_id, "visibility_changes": []}
+
+    if schema_id == "video":
+        # VIDEO schema: Show video grid, hide browser
+        for src in VIDEO_SOURCES:
+            r = await set_source_visibility(src, True)
+            results["visibility_changes"].append(r)
+        r = await set_source_visibility(BROWSER_SOURCE, False)
+        results["visibility_changes"].append(r)
+        logger.info(f"[ROTATOR] Video schema: showing video grid, hiding browser")
+    else:
+        # Non-video schemas (GCC, news, chess, etc): Hide video grid, show browser
+        for src in VIDEO_SOURCES:
+            r = await set_source_visibility(src, False)
+            results["visibility_changes"].append(r)
+        r = await set_source_visibility(BROWSER_SOURCE, True)
+        results["visibility_changes"].append(r)
+        logger.info(f"[ROTATOR] {schema_id} schema: hiding video grid, showing browser")
+
+    return results
+
+
 async def update_obs_source(url: str) -> Dict[str, Any]:
     """Update OBS browser source."""
     try:
-        import obsws_python as obs
-
-        host = os.getenv("OBS_WEBSOCKET_HOST", "localhost")
-        port = int(os.getenv("OBS_WEBSOCKET_PORT", 4455))
-        password = os.getenv("OBS_WEBSOCKET_PASSWORD", "")
-
-        client = obs.ReqClient(host=host, port=port, password=password)
+        client = _get_obs_client()
         # Browser source name (env var or default to existing)
         source_name = os.getenv("OBS_BROWSER_SOURCE", "antifaFM Website")
         client.set_input_settings(
@@ -210,6 +293,11 @@ async def run_schema(schema_id: str) -> Dict[str, Any]:
     start_time = datetime.now(timezone.utc)
     logger.info(f"[ROTATOR] Starting schema: {schema['name']}")
     emit_event("schema_started", schema_id=schema_id, name=schema["name"])
+
+    # Configure OBS source visibility for this schema
+    visibility_result = await configure_schema_visibility(schema_id)
+    if visibility_result.get("visibility_changes"):
+        logger.info(f"[ROTATOR] Visibility configured for {schema_id}")
 
     if schema["implemented"] and schema["executor"]:
         # Import and run the schema's executor
@@ -247,6 +335,49 @@ async def run_schema(schema_id: str) -> Dict[str, Any]:
     }
 
 
+async def ensure_audio_playing() -> Dict[str, Any]:
+    """
+    Ensure antifaFM audio source is playing.
+
+    Uses antifafm_dj skill for audio health check and restart.
+    Audio URL: https://a12.asurahosting.com/listen/antifafm/radio.mp3
+    """
+    try:
+        # Try to use antifafm_dj skill
+        from modules.ai_intelligence.ai_overseer.skillz.antifafm_dj import (
+            check_audio_health,
+            restart_audio_source,
+        )
+
+        # Check current health
+        health = check_audio_health()
+        if health["healthy"]:
+            logger.info(f"[ROTATOR] Audio healthy: {health['state']}")
+            return {"success": True, "source": health["source"], "action": "verified"}
+
+        # Not healthy - restart
+        logger.info(f"[ROTATOR] Audio issues: {health['issues']} - restarting...")
+        result = restart_audio_source()
+        return result
+
+    except ImportError:
+        # Fallback: direct OBS control
+        logger.debug("[ROTATOR] antifafm_dj skill not available, using direct OBS")
+        audio_source = os.getenv("OBS_AUDIO_SOURCE", "antifaFM Radio")
+        try:
+            client = _get_obs_client()
+            client.trigger_media_input_action(
+                name=audio_source,
+                action="OBS_WEBSOCKET_MEDIA_INPUT_ACTION_RESTART"
+            )
+            client.set_input_mute(name=audio_source, muted=False)
+            logger.info(f"[ROTATOR] Audio source '{audio_source}' restarted")
+            return {"success": True, "source": audio_source}
+        except Exception as e:
+            logger.warning(f"[ROTATOR] Audio restart failed: {e}")
+            return {"success": False, "error": str(e)}
+
+
 def check_override() -> bool:
     """Check if rotation should pause."""
     return OVERRIDE_SIGNAL_FILE.exists()
@@ -276,6 +407,13 @@ async def rotation_daemon():
     logger.info(f"[ROTATOR] Schemas: {' → '.join(ROTATION_ORDER)}")
     logger.info(f"[ROTATOR] Schema duration: {SCHEMA_DURATION_SEC}s each")
     emit_event("rotation_started", schemas=ROTATION_ORDER, duration_sec=SCHEMA_DURATION_SEC)
+
+    # Ensure audio is playing at startup
+    audio_result = await ensure_audio_playing()
+    if audio_result.get("success"):
+        logger.info("[ROTATOR] Audio source verified and restarted")
+    else:
+        logger.warning(f"[ROTATOR] Audio check failed: {audio_result.get('error')}")
 
     schema_index = 0
     running = True

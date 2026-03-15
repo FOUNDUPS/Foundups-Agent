@@ -1,19 +1,19 @@
 # Brain Artifact Index
 
-**Scan Time**: 2026-03-08T12:08:08.252866
-**Conversations Scanned**: 29
-**Conversations with Artifacts**: 25
-**Total Artifacts**: 99
-**Total Revision History**: 502 revisions
-**DPO Pairs**: 23
-**SFT Examples**: 16
+**Scan Time**: 2026-03-12T06:16:45.665415
+**Conversations Scanned**: 30
+**Conversations with Artifacts**: 26
+**Total Artifacts**: 107
+**Total Revision History**: 517 revisions
+**DPO Pairs**: 24
+**SFT Examples**: 17
 
 ## Artifacts by Type
 
-- **analysis**: 34
-- **task**: 25
-- **plan**: 24
-- **walkthrough**: 16
+- **analysis**: 38
+- **plan**: 26
+- **task**: 26
+- **walkthrough**: 17
 
 ---
 
@@ -86,10 +86,12 @@
 ### `603032e1-f055-48cd-a844-18b5d39a5f59`
 
 - **analysis**: `brain_artifacts_as_memory.md` (6575 bytes) (1 revisions)
-- **task**: `task.md` (1814 bytes) (3 revisions)
-- **walkthrough**: `walkthrough.md` (5370 bytes) (1 revisions)
+- **plan**: `implementation_plan.md` (6792 bytes) (1 revisions)
+- **task**: `task.md` (2004 bytes) (7 revisions)
+- **walkthrough**: `walkthrough.md` (1869 bytes) (2 revisions)
 - **analysis**: `wre_architecture_audit.md` (17285 bytes) (1 revisions)
-- **training**: 0 DPO / 1 SFT
+- **analysis**: `wsp97_audit.md` (4964 bytes) (1 revisions)
+- **training**: 1 DPO / 1 SFT
 
 ### `6077794e-e49d-47c8-a354-8e930934356a`
 
@@ -132,6 +134,16 @@
 - **task**: `task.md` (1353 bytes) (9 revisions)
 - **walkthrough**: `walkthrough.md` (1495 bytes) (4 revisions)
 - **training**: 1 DPO / 1 SFT
+
+### `9ff4ef18-9ce5-4d03-b705-0efd1f209fd7`
+
+- **analysis**: `claw_ecosystem_blockchain_creative_audit.md` (11015 bytes) (1 revisions)
+- **plan**: `implementation_plan.md` (6020 bytes) (1 revisions)
+- **analysis**: `openclaw_ecosystem_wsp15_evaluation.md` (10155 bytes) (1 revisions)
+- **task**: `task.md` (1316 bytes) (3 revisions)
+- **walkthrough**: `walkthrough.md` (4135 bytes) (1 revisions)
+- **analysis**: `wsp97_forward_docs_audit.md` (4420 bytes) (1 revisions)
+- **training**: 0 DPO / 1 SFT
 
 ### `af2540fb-6e46-4399-bef1-a7b4c061370e`
 

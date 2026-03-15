@@ -13,14 +13,18 @@
 - Add WSP validation layer
 - Create comprehensive tests
 - Establish IronClaw worker route for simulation and digital-twin execution
+- **Connect orphaned capabilities to WRE** (98.5% orphan rate discovered)
 
 ### Tasks
 - [ ] Convert social_media_orchestrator -> plugin
-- [ ] Convert mlestar_orchestrator -> plugin  
+- [ ] Convert mlestar_orchestrator -> plugin
 - [ ] Convert 0102_orchestrator -> plugin
 - [ ] Build pattern library from existing code
 - [ ] Add test coverage (>90% per WSP 5)
 - [x] Scaffold `ironclaw_worker` plugin + optional registration toggle
+- [x] Create orphan_capability_scanner skill (WSP 88)
+- [ ] Connect top 10 orphans via generated SKILLz.md templates
+- [ ] Wire antifaFM broadcaster to WRE as proof-of-concept
 
 ## Phase 2: MVP (2.2.2) - Following Sprint
 ### Goals

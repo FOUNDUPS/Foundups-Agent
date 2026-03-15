@@ -2,30 +2,46 @@
 
 ## Chronological Change Log
 
-### 2026-03-16 - AionUI FoundUp Factory Intake
+### 2026-03-13 - Social Twin FoundUp Architecture Lock
 
 **By:** 0102
-**WSP References:** WSP 11, WSP 22, WSP 73, WSP 97
+**WSP References:** WSP 11, WSP 15, WSP 22, WSP 42, WSP 73, WSP 77, WSP 84
 
 **What changed**
-- Added canonical architecture note:
-  - `modules/foundups/docs/AIONUI_FOUNDUP_FACTORY_WSP97_ARCHITECTURE_2026-03-16.md`
-- Updated FoundUps docs to point at the note:
+- Added new FoundUp module:
+  - `modules/foundups/social_twin/`
+- Added domain roadmap/reference links for the new FoundUp:
+  - `modules/foundups/ROADMAP.md`
   - `modules/foundups/README.md`
-  - `modules/foundups/INTERFACE.md`
 
 **Why**
-- `AionUI` is an external orchestration surface, not a core repo module.
-- It needed a repo-visible definition so HoloIndex can retrieve the relationship between:
-  - `FoundUp Seed`
-  - `FoundUpSpawner`
-  - `OpenClaw`
-  - external AionUI supervision
+- 012 identified the internal social-engagement prototype as a real FoundUp candidate.
+- The architecture needed an explicit product boundary and a stable answer to the
+  question of one vs two 0102 roles.
 
 **Decision**
-- FoundUps core repo remains the factory.
-- Spawned FoundUp sandboxes remain the product.
-- AionUI sits above the existing factory seam; it does not replace it.
+- Build one FoundUp with two core roles:
+  - `orchestrator_0102`
+  - `engager_0102`
+- Keep amplification as an optional later associate, not a core first-step role.
+
+### 2026-03-12 - FoundUps Trailer and Short Film Vision Brief
+
+**By:** 0102
+**WSP References:** WSP 22, WSP 26, WSP 27, WSP 29, WSP 77, WSP 97
+
+**What changed**
+- Added a canonical creative-brief document for FoundUps trailer and short-film
+  development:
+  - `modules/foundups/docs/FOUNDUPS_TRAILER_SHORT_FILM_BRIEF.md`
+
+**Why**
+- 012 requested a WSP-grounded deep-dive into the core FoundUps vision, public
+  litepaper framing, and doctrine stack to support future trailers and short
+  films.
+- The brief locks source-backed narrative pillars, non-claims, visual language,
+  and treatment directions so later sessions can continue without re-mining the
+  full codebase and document graph.
 
 ---
 

@@ -24,6 +24,7 @@ src/content/
 +-- content_templates.py         <- Professional post templates
 +-- hashtag_manager.py           <- Hashtag optimization and analysis
 +-- media_handler.py             <- Media attachment management
++-- publishing_router.py         <- Historical article search + target routing
 ```
 
 ## [TOOL] Components Overview
@@ -68,6 +69,16 @@ src/content/
   - File format support and conversion
   - Media metadata management
 
+### **5. Publishing Router (publishing_router.py)**
+- **Purpose**: Search article history and recommend the best LinkedIn publishing entity
+- **Status**: [OK] COMPLETED
+- **Features**:
+  - Canonical publishing-map loading from `data/linkedin_publishing_map.json`
+  - Entity discovery across personal and company publishing surfaces
+  - Historical article title search across all mapped entities
+  - Heuristic target resolution for new article drafts
+  - Explicit limitation reporting for personal-profile and unverified routes
+
 ## [U+1F9EA] Testing Framework
 
 ```
@@ -76,6 +87,7 @@ tests/test_content/
 +-- test_content_templates.py    <- Template tests
 +-- test_hashtag_manager.py      <- Hashtag manager tests
 +-- test_media_handler.py        <- Media handler tests
++-- test_publishing_router.py    <- Publishing discovery + routing tests
 +-- test_content_integration.py  <- Integration testing
 ```
 
@@ -88,6 +100,7 @@ tests/test_content/
 - **AI Intelligence**: Uses BanterEngine for content generation
 - **Engagement Module**: Provides content for interactions
 - **Main Agent**: Orchestrates content creation workflows
+- **Skill Layer**: `linkedin_article_targeting` exposes article-map discovery to 0102
 
 ### **External Dependencies**
 - **LinkedIn API**: Content posting and media upload
@@ -101,6 +114,7 @@ tests/test_content/
 - [x] Content templates with professional formatting
 - [x] Hashtag manager with optimization features
 - [x] Media handler with file management
+- [x] Publishing map and target-routing helper for multi-entity article discovery
 - [x] All components under 300 lines (WSP 40 compliance)
 - [x] Comprehensive test suites for all components
 
@@ -127,7 +141,9 @@ from modules.platform_integration.linkedin_agent.src.content import (
     LinkedInPostGenerator,
     ContentTemplates,
     HashtagManager,
-    MediaHandler
+    MediaHandler,
+    search_published_articles,
+    resolve_article_target
 )
 
 # Initialize components
@@ -151,6 +167,15 @@ post.hashtags = hashtags
 if media_file:
     media_attachment = media_handler.create_attachment(media_file)
     post.media = media_attachment
+
+# Search existing article history before drafting
+matches = search_published_articles("solo founders coding with AI")
+
+# Recommend a target for a new article
+target = resolve_article_target(
+    title="Building a multi-agent IDE for solo founders",
+    brief="Foundups architecture, software like LEGO, and post-startup tooling"
+)
 ```
 
 ### **Template-Based Content**

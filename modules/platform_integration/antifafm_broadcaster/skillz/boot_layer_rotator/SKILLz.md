@@ -68,13 +68,18 @@ When a schema is not implemented or fails to load:
 
 Uses `OBS_BROWSER_SOURCE` env var (default: `antifaFM Website`).
 
-## WRE Connection
+## WRE Connection (INTEGRATED 2026-03-13)
 
 ```yaml
 trigger:
   type: startup
-  source: main.py (antifaFM section)
-  gate: ANTIFAFM_BOOT_ROTATOR_ENABLED=1
+  source: scripts/launch.py → _start_obs_orchestration()
+  gate: ANTIFAFM_BOOT_ROTATOR_ENABLED=1  # ✓ CONNECTED
+  status: INTEGRATED  # Was SPEC ONLY, now LIVE
+
+integration_points:
+  - launch.py: Starts rotator_thread after OBS connection
+  - main_menu.py: Schema Testing submenu (Option 8)
 
 events_emitted:
   - schema_started: {schema_id, timestamp}
@@ -91,7 +96,22 @@ telemetry:
   path: modules/platform_integration/antifafm_broadcaster/telemetry/rotator_events.jsonl
 ```
 
+## CLI Menu Integration
+
+Option 8 in antifaFM menu provides Schema Testing:
+```
+1. Test GCC Shipping Tracker     [OK] READY
+2. Test Video Rotation           [OK] READY
+3. Test News Ticker              [OK] READY
+4-6. (Coming Soon schemas)
+7. Start Full Rotation (10-min cycle)
+8. Stop/Pause Rotation
+9. Show Rotation Status
+0. Back
+```
+
 ## WSP Compliance
 - WSP 27: Universal DAE Architecture
+- WSP 97: Applied for integration investigation
 - WSP 103: CLI Interface Standard
 - WSP 60: Module Memory Architecture (event telemetry)

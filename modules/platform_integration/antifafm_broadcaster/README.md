@@ -69,6 +69,26 @@ asyncio.run(broadcaster.start())
 | `ANTIFAFM_DEFAULT_VISUAL` | `assets/default_visual.png` | Static image overlay |
 | `ANTIFAFM_HEARTBEAT_INTERVAL` | `30` | Health check interval (seconds) |
 
+### OBS Mode Audio (ANTIFAFM_USE_OBS=1)
+
+When using OBS mode, OBS handles streaming directly. You **must** configure an audio source in OBS:
+
+**Audio Stream URL**: `https://a12.asurahosting.com/listen/antifafm/radio.mp3`
+
+**OBS Setup**:
+1. Sources → **+** → **Media Source**
+2. Name: `antifaFM Radio`
+3. Uncheck "Local File"
+4. Input: `https://a12.asurahosting.com/listen/antifafm/radio.mp3`
+5. Check "Restart playback when source becomes active"
+
+**Audio Monitoring**: Right-click source → Advanced Audio Properties → Monitor: "Monitor and Output"
+
+**If no audio**: The media source may need a restart. Via OBS WebSocket:
+```python
+client.trigger_media_input_action(name='antifaFM Radio', action='OBS_WEBSOCKET_MEDIA_INPUT_ACTION_RESTART')
+```
+
 ### Layer 2.5: Visual Effects
 
 | Variable | Default | Description |

@@ -1,5 +1,49 @@
 # HoloIndex Package ModLog
 
+## [2026-03-08] Orphan Capability Scanner - WRE Connection Tool
+
+**Agent**: 0102
+**WSP References**: WSP 22 (ModLog), WSP 77 (Agent Coordination), WSP 88 (Orphan Analysis), WSP 103 (CLI Standard)
+**Status**: [OK] COMPLETE
+
+### Context
+012's insight: "Tons of code sitting waiting for 012 to use... 012 will never use it."
+
+Codebase has CLI capabilities (`if __name__ == "__main__"`) without WRE connection (no SKILLz.md), making them invisible to autonomous execution.
+
+### Actions
+- Created `holo_index/skillz/orphan_capability_scanner/`:
+  - `executor.py` (400 lines): Unified scanner combining GemmaOrphanDetector, OpenClawCapabilityAudit, WSP88OrphanAnalyzer
+  - `SKILLz.md`: WRE registration with cadence:daily trigger
+  - `__init__.py`: Package initialization
+- Scanner finds all `__main__` blocks, cross-references against SKILLz.md registry
+- Generates SKILLz.md templates for top orphans
+
+### Critical Finding (tests excluded)
+- **711 CLI entrypoints** found in codebase
+- **85 registered SKILLz.md** files
+- **689 orphans (96.9%)** - unconnected code
+- **22 WRE-connected (3.1%)** - autonomous code
+
+Top orphans by size:
+1. ai_overseer.py (3584 lines)
+2. auto_moderator_dae.py (2560 lines)
+3. antifafm_broadcaster/launch.py (2285 lines)
+
+### Result
+- Scanner is WRE-connected (not an orphan itself)
+- Supports `--json` for OpenClaw consumption
+- Generates actionable SKILLz.md templates
+- Templates output to `reports/orphan_skillz_templates/`
+
+### Usage
+```bash
+python holo_index/skillz/orphan_capability_scanner/executor.py --scan --json
+python holo_index/skillz/orphan_capability_scanner/executor.py --generate 10
+```
+
+---
+
 ## [2026-03-08] MCP Client Dependency Guard
 
 **Agent**: 0102  

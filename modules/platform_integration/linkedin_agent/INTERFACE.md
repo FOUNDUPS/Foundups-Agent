@@ -19,6 +19,10 @@
   - Post updates: `--post "content"`
   - Write articles: `--article "title" --body "body"`
   - Article URL: `https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A1263645`
+- **LinkedIn Article Targeting** (`modules/platform_integration/linkedin_agent/skillz/linkedin_article_targeting/`)
+  - Discovery/routing helper for multi-entity LinkedIn article placement
+  - Actions: `list_entities`, `search_articles`, `resolve_target`
+  - Uses canonical map: `modules/platform_integration/linkedin_agent/data/linkedin_publishing_map.json`
 
 ---
 
@@ -122,6 +126,31 @@ Behavior contract:
 CLI/adapter mapping (current):
 - `linkedin_action_cli.py --action digital_twin ...`
 - `linkedin_social_adapter.py` action `digital_twin`
+
+#### `Publishing Router`
+**Purpose:** Historical LinkedIn publishing discovery and heuristic article targeting.
+
+```python
+def load_publishing_map() -> Dict[str, Any]
+def list_publishing_entities(
+    include_zero_article: bool = True,
+    include_not_checked: bool = True,
+    query: str = "",
+) -> List[Dict[str, Any]]
+def search_published_articles(query: str, limit: int = 10) -> List[Dict[str, Any]]
+def resolve_article_target(
+    title: str,
+    brief: str = "",
+    body: str = "",
+    preferred_entity: str = "",
+) -> Dict[str, Any]
+```
+
+Behavior contract:
+- Loads a canonical entity/article map from `data/linkedin_publishing_map.json`.
+- Searches historical titles across all mapped entities.
+- Returns heuristic recommendations only; it does not guarantee live posting support.
+- Marks personal-profile and not-yet-verified routes with explicit limitations.
 
 #### `LinkedInPost`
 **Purpose:** LinkedIn content data structure  
