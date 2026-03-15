@@ -1,3 +1,14 @@
+## 2026-03-16: PQN simulation runtime command routing
+
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_pqn_research_adapter.py modules/communication/moltbot_bridge/tests/test_openclaw_dae_runtime_commands.py modules/infrastructure/dae_daemon/tests/test_dae_adapter.py -q`
+- Status: PASS
+- Notes:
+  - Validates `run/status pqn simulation` routing through the PQN research adapter.
+  - Confirms OpenClaw RESEARCH route passes the DAEmon action reporter into the adapter.
+  - Confirms structured `details` payloads are preserved in DAEmon action events.
+
+---
+
 ## 2026-03-15: Generic DAE runtime command routing
 
 - Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py modules/communication/moltbot_bridge/tests/test_openclaw_dae_runtime_commands.py modules/communication/moltbot_bridge/tests/test_pqn_research_adapter.py modules/infrastructure/dae_daemon/tests/test_dae_launch_broker.py -q`

@@ -64,3 +64,62 @@ class TestPQNResearchAdapterRuntimeControl:
             result = handle_pqn_research_intent("launch pqn research", "012")
 
         assert "runtime broker is not available" in result.lower()
+
+    def test_status_pqn_simulation_returns_plan(self):
+        reporter = MagicMock()
+        fake_plan = {
+            "run_count": 6,
+            "matched_null_required": True,
+            "out_root": "modules/ai_intelligence/pqn_alignment/artifact_results/theory_archive_simulation",
+            "spec": {
+                "target_resonance_hz": 7.05,
+                "observables": ["spectral_gap_ratio", "detection_signal_eta"],
+            },
+        }
+
+        with patch(
+            "modules.ai_intelligence.pqn_alignment.PQNAlignmentDAE",
+        ) as dae_cls:
+            dae_cls.return_value.get_theory_archive_simulation_plan.return_value = fake_plan
+            result = handle_pqn_research_intent(
+                "status pqn simulation",
+                "012",
+                report_action=reporter,
+            )
+
+        assert "PQN Theory-Archive Simulation Plan" in result
+        assert "run_count=6" in result
+        reporter.assert_called_once()
+        assert reporter.call_args.args[0] == "pqn_simulation_plan"
+
+    def test_run_pqn_simulation_reports_completion(self):
+        reporter = MagicMock()
+        fake_result = {
+            "runs": [{}, {}, {}],
+            "summary_path": "modules/ai_intelligence/pqn_alignment/artifact_results/theory_archive_simulation/summary.json",
+            "comparison": {
+                "delta_entrainment_score": 0.21,
+                "delta_resonance_event_count": 2.0,
+                "probe_closer_to_target": True,
+            },
+            "interpretation": {
+                "outcome": "probe_advantage_requires_followup",
+            },
+        }
+
+        with patch(
+            "modules.ai_intelligence.pqn_alignment.PQNAlignmentDAE",
+        ) as dae_cls:
+            dae_cls.return_value.run_theory_archive_simulation.return_value = fake_result
+            result = handle_pqn_research_intent(
+                "run pqn simulation",
+                "012",
+                report_action=reporter,
+            )
+
+        assert "PQN Theory-Archive Simulation Complete" in result
+        assert "probe_advantage_requires_followup" in result
+        assert reporter.call_count == 2
+        assert reporter.call_args_list[0].args[0] == "pqn_simulation"
+        assert reporter.call_args_list[0].args[2] == "started"
+        assert reporter.call_args_list[1].args[2] == "completed"

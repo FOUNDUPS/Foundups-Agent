@@ -170,14 +170,27 @@ class CentralDAEAdapter:
             {"dest": dest, "summary": summary[:200]},
         )
 
-    def report_action(self, action_type: str, target: str = "", result: str = "") -> None:
+    def report_action(
+        self,
+        action_type: str,
+        target: str = "",
+        result: str = "",
+        details: Optional[Dict[str, Any]] = None,
+    ) -> None:
         """Report an action performed by this DAE."""
         if not self._daemon:
             return
+        payload = {
+            "action_type": action_type,
+            "target": target,
+            "result": result[:200],
+        }
+        if details:
+            payload["details"] = details
         self._daemon.registry.report_event(
             self._dae_id,
             DAEEventType.ACTION_PERFORMED,
-            {"action_type": action_type, "target": target, "result": result[:200]},
+            payload,
         )
 
     def report_security_event(self, reason: str, severity: str = "warning") -> None:

@@ -1,5 +1,20 @@
 # dae_daemon ModLog
 
+## V1.2.1 - Structured Action Details for Live Research Events (2026-03-16)
+
+**What**: Extended the non-invasive `CentralDAEAdapter` so action events can carry structured details payloads.
+
+**Why**: OpenClaw was already trying to emit structured research/runtime details through the action ledger, but the adapter signature still dropped them. That broke the intended real-time observability contract for PQN simulation runs.
+
+**Changes**:
+- Updated `src/dae_adapter.py`
+  - `report_action(...)` now accepts optional `details`
+  - preserves `details` inside the emitted `ACTION_PERFORMED` payload
+
+**Impact**:
+- OpenClaw research/runtime events can now carry machine-readable context into DAEmon.
+- PQN simulation start/completion signals are visible as structured events rather than only flat text summaries.
+
 ## V1.0.0 - Centralized DAEmon (Cardiovascular System) (2026-02-17)
 
 **What**: Created 8-layer centralized DAEmon module for monitoring and controlling all DAEs.

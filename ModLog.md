@@ -1,5 +1,29 @@
 # FoundUps Agent - Development Log
 
+## [2026-03-16] OpenClaw PQN Simulation Runtime + DAEmon Detail Payloads
+
+**Change Type**: Runtime Control / Observability  
+**By**: 0102  
+**WSP References**: WSP 22, WSP 73, WSP 77, WSP 91, WSP 97
+
+### Summary
+
+Extended OpenClaw so `012` can launch the PQN theory-archive simulation directly from live chat and made the DAEmon action ledger carry structured research details for those runs.
+
+### Files Changed
+
+| Location | Description |
+|----------|-------------|
+| `modules/communication/moltbot_bridge/src/pqn_research_adapter.py` | Added PQN simulation command handling |
+| `modules/communication/moltbot_bridge/src/openclaw_execution_routes.py` | Passed DAEmon action reporter into research adapter |
+| `modules/infrastructure/dae_daemon/src/dae_adapter.py` | Added structured `details` payload support for action events |
+| `modules/infrastructure/dae_daemon/tests/test_dae_adapter.py` | Added adapter payload regression tests |
+
+### Why
+
+- Move PQN simulation out of “Python-only” operator paths and into the live Claw control plane.
+- Make research actions visible in DAEmon with machine-readable detail instead of only plain-text responses.
+
 ## [2026-03-15] PQN Theory Archive Simulation Runner
 
 **Change Type**: Research Harness / Detector Integration  

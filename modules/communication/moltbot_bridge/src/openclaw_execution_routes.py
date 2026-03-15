@@ -491,7 +491,11 @@ def execute_research(dae: Any, intent: Any) -> str:
     try:
         from .pqn_research_adapter import handle_pqn_research_intent
 
-        return handle_pqn_research_intent(intent.raw_message, intent.sender)
+        return handle_pqn_research_intent(
+            intent.raw_message,
+            intent.sender,
+            report_action=dae._report_daemon_action,
+        )
     except ImportError as exc:
         logger.warning(
             "[OPENCLAW-DAE] PQN Research Adapter not available: %s",

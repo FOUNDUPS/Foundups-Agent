@@ -120,7 +120,11 @@ def classify_intent(
     if classify_dae_runtime_category is not None:
         runtime_category = classify_dae_runtime_category(message)
         if runtime_category is not None:
-            category = runtime_category
+            category = (
+                dae.IntentCategory(runtime_category)
+                if isinstance(runtime_category, str)
+                else runtime_category
+            )
             confidence = 0.95
             extracted_task = message
             method = "deterministic_dae_runtime"
