@@ -48,6 +48,10 @@ from modules.ai_intelligence.pqn_alignment.src.theory_archive_harness import (
     build_theory_archive_harness_spec,
     run_theory_archive_detector_harness,
 )
+from modules.ai_intelligence.pqn_alignment.src.theory_archive_simulation_runner import (
+    build_theory_archive_simulation_plan,
+    run_theory_archive_simulation,
+)
 
 # Import existing PQN functionality per WSP 84 (reuse don't recreate)
 from modules.ai_intelligence.pqn_alignment import (
@@ -652,6 +656,7 @@ class PQNAlignmentDAE:
             },
             "theory_archive": self.get_theory_archive_context(),
             "theory_archive_harness": self.get_theory_archive_harness_spec(),
+            "theory_archive_simulation": self.get_theory_archive_simulation_plan(),
             "patterns": list(self.pattern_memory.keys()),
             "token_efficiency": 0.97,  # 97% reduction through pattern recall
             "wsp_compliance": ["WSP 39", "WSP 48", "WSP 77", "WSP 80", "WSP 84"]
@@ -673,6 +678,14 @@ class PQNAlignmentDAE:
     def run_theory_archive_harness(self, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Run one archive-informed detector harness pass."""
         return run_theory_archive_detector_harness(config=config or {})
+
+    def get_theory_archive_simulation_plan(self) -> Dict[str, Any]:
+        """Expose the archive-informed simulation plan to research agents."""
+        return build_theory_archive_simulation_plan()
+
+    def run_theory_archive_simulation(self, config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Run the archive-informed simulation suite against the existing detector surface."""
+        return run_theory_archive_simulation(config=config or {})
     
     def get_metrics(self) -> Dict:
         """

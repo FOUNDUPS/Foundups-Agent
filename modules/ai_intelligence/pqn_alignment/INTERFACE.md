@@ -21,6 +21,8 @@ This module is not the primary conversational surface. It is the research engine
 - `council_run(config: Dict) -> Tuple[str, str]`: Run council optimization cycle
 - `build_theory_archive_harness_spec(repo_root: str = "") -> Dict[str, Any]`: Build non-dogmatic harness spec from the theory archive
 - `run_theory_archive_detector_harness(config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]`: Execute one archive-informed detector pass
+- `build_theory_archive_simulation_plan(config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]`: Build a matched-null-required simulation plan from the theory archive
+- `run_theory_archive_simulation(config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]`: Execute the archive-informed simulation matrix through the existing detector surface
 
 ### Results Database Management
 - `init_db(db_path: Optional[str] = None) -> None`: Initialize results database
@@ -112,6 +114,20 @@ research cycles through the broker at runtime.
 - Agent exposure:
   - `PQNAlignmentDAE.get_0102_api()["theory_archive_harness"]`
   - `PQNAlignmentDAE.run_theory_archive_harness(...)`
+
+### Theory Archive Simulation Contract
+
+- Plan mode: `archive_informed_simulation_plan`
+- Run mode: `archive_informed_simulation_runner`
+- Required invariant: `matched_null_required=True`
+- Comparison model: `probe` vs `control`
+- Output surface:
+  - `PQNAlignmentDAE.get_0102_api()["theory_archive_simulation"]`
+  - `PQNAlignmentDAE.run_theory_archive_simulation(...)`
+- Interpretation guard:
+  - `archive_informed=True`
+  - `validated_truth=False`
+  - simulation results are comparative detector evidence only
 
 ### Basic Detection
 ```python

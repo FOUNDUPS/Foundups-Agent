@@ -1,5 +1,29 @@
 # FoundUps Agent - Development Log
 
+## [2026-03-15] PQN Theory Archive Simulation Runner
+
+**Change Type**: Research Harness / Detector Integration  
+**By**: 0102  
+**WSP References**: WSP 22, WSP 77, WSP 84, WSP 97
+
+### Summary
+
+Extended the PQN theory-archive intake from a single-pass harness into a comparative simulation runner that executes matched-null and probe paths through the existing detector surface. The external math archive remains hypothesis input only.
+
+### Files Changed
+
+| Location | Description |
+|----------|-------------|
+| `modules/ai_intelligence/pqn_alignment/src/theory_archive_simulation_runner.py` | Comparative simulation plan/run surface |
+| `modules/ai_intelligence/pqn_alignment/src/pqn_alignment_dae.py` | Exposes simulation plan/run to research agents |
+| `modules/ai_intelligence/pqn_alignment/__init__.py` | Public package exports |
+| `modules/ai_intelligence/pqn_alignment/tests/test_theory_archive_simulation_runner.py` | Simulation runner contract tests |
+
+### Why
+
+- Move the external PQN math archive from documentation intake toward controlled experiment execution.
+- Give Claw-launched research agents a reproducible simulation surface without promoting theory text to system truth.
+
 ## [2026-03-15] Claw Runtime Broker Generalization + PQN Theory Harness
 
 **Change Type**: Runtime Control / Research Harness  

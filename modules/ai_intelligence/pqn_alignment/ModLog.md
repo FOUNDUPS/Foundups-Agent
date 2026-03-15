@@ -1,3 +1,26 @@
+### **Theory-Archive Simulation Runner for Research Agents**
+- **Date**: 2026-03-15
+- **Operating As**: 0102 CTO / Architect
+- **Change**: Promoted the theory archive from single-pass harness input to a first-class matched-null simulation runner for PQN research agents.
+- **Details**:
+  - Added `src/theory_archive_simulation_runner.py`
+  - Exported:
+    - `build_theory_archive_simulation_plan`
+    - `run_theory_archive_simulation`
+  - Updated `src/pqn_alignment_dae.py`
+    - `get_0102_api()` now includes `theory_archive_simulation`
+    - added `get_theory_archive_simulation_plan(...)`
+    - added `run_theory_archive_simulation(...)`
+  - Updated package exports in `__init__.py`
+  - Added focused tests for:
+    - simulation plan generation
+    - control vs probe comparison semantics
+    - PQN agent API exposure
+- **WSP Compliance**:
+  - WSP 22 (documentation trace)
+  - WSP 84 (reuse existing detector surfaces)
+  - WSP 97 (archive remains research input, not runtime ontology)
+
 ### **Theory-Archive-Informed Harness for Research Agents**
 - **Date**: 2026-03-15
 - **Operating As**: 0102 CTO / Architect
@@ -433,4 +456,3 @@
   - treat `karpathy/autoresearch` as isolated external research worker
   - do not treat it as direct Claw runtime or direct monorepo mutation engine
 - **Impact**: Establishes the correct adoption boundary for external autonomous research loops.
-
