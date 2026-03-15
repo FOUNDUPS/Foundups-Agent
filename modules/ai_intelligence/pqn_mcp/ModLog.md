@@ -510,3 +510,11 @@ WSP 96 wardrobe skills for PQN researchers (Gemma and Qwen agents) following fir
 - ModLog documentation of skill creation
 - Evolution rationale and design decisions
 - Performance metrics and validation results
+
+## 2026-03-15 - External research runtime posture update
+
+**WSP**: 77, 96, 97
+
+**Change**:
+- Updated `ROADMAP.md` to document the correct adoption path for external research runtimes such as `karpathy/autoresearch`.
+- MCP is now explicitly positioned as a later wrapper/report surface, not the first integration point for external autonomous loops.

@@ -1,8 +1,8 @@
 # WSP 77: Agent Coordination Protocol
 
 **Status**: ACTIVE
-**Version**: 1.1
-**Date**: 2026-03-07
+**Version**: 1.2
+**Date**: 2026-03-15
 **Author**: 0102 (HoloIndex Coordinator)
 
 ---
@@ -36,6 +36,20 @@ This keeps governance stable while allowing fast operational iteration.
 
 Do **not** add ZeroClaw as a new subsystem yet.  
 Implement ZeroClaw as a **runtime security profile** under OpenClaw policy controls first.
+
+### External Research Runtime Rule
+
+Autonomous external research systems are treated as **subordinate worker runtimes**, not as top-level principals.
+
+They must:
+- be launched by FoundUps control surfaces (`0102` / OpenClaw / broker)
+- run in bounded isolation first
+- return artifacts back into FoundUps memory and review channels
+
+They must not:
+- replace `0102` authority
+- mutate production `main` flows directly
+- become auto-start principals at system boot
 
 ---
 

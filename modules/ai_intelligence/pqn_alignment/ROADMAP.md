@@ -73,6 +73,13 @@
 - **S10: PQN Corroborating Evidence** (PLANNED)
   - Resonance Fingerprinting (harmonic detection)
 
+- **S10B: External Autonomous Research Runtime Pilot** (PLANNED)
+  - Candidate: `karpathy/autoresearch`
+  - Use only as isolated worker for bounded PQN experiment loops
+  - Launch posture: broker-managed or sandbox-only, never `main.py` auto-start
+  - Artifact return only: metrics, summaries, experiment patches, no direct production mutation
+  - Governance gate: explicit license check + WSP 97 execution-plane review before pilot
+
 - **S11: Local LLM Integration (System Agent)** (COMPLETED 2026-02-05)
   - **Objective**: Empower Local Qwen/UI Tars to act as PQN DAE Workers.
   - **Task 11.1**: ✅ Architect DAE update to support Local LLM directives.

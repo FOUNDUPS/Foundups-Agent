@@ -55553,6 +55553,22 @@ if cooldown_sets:
 ### Cleanup Recommendations
 - Consider migrating posted_streams.json from array to dict format with timestamps
 
+## 2026-03-15 - AutoResearch WSP 97 assessment
+
+**Scope**
+- `modules/ai_intelligence/pqn_alignment/docs/KARPATHY_AUTORESEARCH_WSP97_ASSESSMENT_2026-03-15.md`
+- `modules/ai_intelligence/ai_overseer/skillz/open_source_tool_diligence/SKILLz.md`
+- `modules/ai_intelligence/pqn_alignment/ROADMAP.md`
+- `modules/ai_intelligence/pqn_mcp/ROADMAP.md`
+- `WSP_framework/src/WSP_77_Agent_Coordination_Protocol.md`
+- `WSP_framework/src/WSP_96_MCP_Governance_and_Consensus_Protocol.md`
+- mirrored knowledge copies
+
+**Summary**
+- Assessed `karpathy/autoresearch` as an external isolated research worker candidate.
+- Explicitly rejected direct startup integration and direct production monorepo mutation.
+- Added reusable diligence skill and updated WSP/roadmap posture to match.
+
 ## LinkedIn Scheduling Queue Audit - 2025-10-19
 
 **WSP Compliance**: WSP 50 (Pre-Action), WSP 77 (Agent Coordination), WSP 60 (Memory)

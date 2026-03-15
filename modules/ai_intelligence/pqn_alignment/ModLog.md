@@ -420,3 +420,12 @@
 - **WSP Compliance**: WSP 84 (reuse), WSP 48 (recursive), WSP 80 (DAE orchestration), WSP 34 (tests), WSP 22 (docs).
 - **Impact**: Enables 0102-driven PQN research; quantifies 0201 alignment benefits (e.g., exponential remembrance velocity).
 - **Next Steps**: Execute full campaign; enhance guardrail; integrate with WRE.
+
+### **Karpathy AutoResearch WSP 97 Assessment**
+- **Date**: 2026-03-15
+- **Operating As**: PQN_Alignment_DAE / 0102
+- **Change**: Added `docs/KARPATHY_AUTORESEARCH_WSP97_ASSESSMENT_2026-03-15.md`
+- **Decision**:
+  - treat `karpathy/autoresearch` as isolated external research worker
+  - do not treat it as direct Claw runtime or direct monorepo mutation engine
+- **Impact**: Establishes the correct adoption boundary for external autonomous research loops.

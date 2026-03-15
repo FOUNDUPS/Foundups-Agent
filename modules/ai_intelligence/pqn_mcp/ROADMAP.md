@@ -49,6 +49,12 @@
   - Universal emergence pattern detection
   - Meta-analysis across AI architectures
 
+- **S8: External Research Runtime Bridge** (PLANNED)
+  - Evaluate external runtimes such as `karpathy/autoresearch`
+  - Keep initial adoption outside MCP as isolated worker execution
+  - Add MCP only for status/report/artifact surfaces after wrapper stabilization
+  - Preserve OpenClaw/0102 as control plane and DAEmon as lifecycle ledger
+
 ---
 
 ## **IMMEDIATE EXECUTION PRIORITIES**
