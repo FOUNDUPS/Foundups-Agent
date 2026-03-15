@@ -1064,6 +1064,44 @@ class OpenClawDAE:
             )
             return intent
 
+        # Deterministic runtime DAE routing for broker-managed launch/status commands.
+        try:
+            from .dae_runtime_adapter import classify_dae_runtime_category
+
+            runtime_category = classify_dae_runtime_category(message)
+        except Exception:
+            runtime_category = None
+
+        if runtime_category:
+            category = (
+                IntentCategory.MONITOR
+                if runtime_category == "monitor"
+                else IntentCategory.SYSTEM
+            )
+            confidence = 0.95
+            extracted_task = message
+            intent = OpenClawIntent(
+                raw_message=message,
+                category=category,
+                confidence=confidence,
+                sender=sender,
+                channel=channel,
+                session_key=session_key,
+                is_authorized_commander=is_commander,
+                extracted_task=extracted_task,
+                target_domain=self.DOMAIN_ROUTES.get(category),
+                metadata={**metadata, "classification_method": "deterministic_dae_runtime"},
+            )
+            logger.info(
+                "[OPENCLAW-DAE] Intent classified (dae runtime): category=%s confidence=%.2f "
+                "commander=%s domain=%s",
+                category.value,
+                confidence,
+                is_commander,
+                intent.target_domain,
+            )
+            return intent
+
         # Phase 1: Keyword pre-filter (fast, <1ms)
         keyword_scores: Dict[IntentCategory, float] = {}
         for cat, keywords in self.INTENT_KEYWORDS.items():
@@ -1218,8 +1256,22 @@ class OpenClawDAE:
         # when WRE is unavailable, let execution proceed to the route
         # handler which provides actionable advisory fallback. Only
         # SCHEDULE and SYSTEM hard-block (they have no advisory fallback).
+        is_runtime_dae_system = False
+        if intent.category == IntentCategory.SYSTEM:
+            try:
+                from .dae_runtime_adapter import is_dae_runtime_request
+
+                is_runtime_dae_system = is_dae_runtime_request(intent.raw_message)
+            except Exception:
+                is_runtime_dae_system = False
+
         if intent.category in (IntentCategory.SCHEDULE, IntentCategory.SYSTEM):
             if self.wre is None:
+                if intent.category == IntentCategory.SYSTEM and is_runtime_dae_system:
+                    logger.info(
+                        "[OPENCLAW-DAE] [WSP-50] DAE runtime SYSTEM request bypasses WRE dependency"
+                    )
+                    return True
                 logger.warning(
                     "[OPENCLAW-DAE] [WSP-50] BLOCKED: WRE unavailable for %s",
                     intent.category.value,
@@ -1878,6 +1930,20 @@ class OpenClawDAE:
 
     def _execute_monitor(self, intent: OpenClawIntent) -> str:
         """Route MONITOR to AI Overseer status."""
+        try:
+            from .dae_runtime_adapter import is_dae_runtime_request, handle_dae_runtime_intent
+
+            if is_dae_runtime_request(intent.raw_message):
+                response = handle_dae_runtime_intent(
+                    intent.raw_message,
+                    intent.sender,
+                    allow_mutation=False,
+                )
+                if response:
+                    return response
+        except Exception as exc:
+            logger.warning("[OPENCLAW-DAE] DAE runtime monitor adapter unavailable: %s", exc)
+
         parts = ["**System Status:**"]
 
         # WRE status
@@ -2117,6 +2183,19 @@ class OpenClawDAE:
                 "System commands require @012 authorization. "
                 "Your request has been logged."
             )
+        try:
+            from .dae_runtime_adapter import is_dae_runtime_request, handle_dae_runtime_intent
+
+            if is_dae_runtime_request(intent.raw_message):
+                response = handle_dae_runtime_intent(
+                    intent.raw_message,
+                    intent.sender,
+                    allow_mutation=True,
+                )
+                if response:
+                    return response
+        except Exception as exc:
+            logger.warning("[OPENCLAW-DAE] DAE runtime system adapter unavailable: %s", exc)
         return (
             f"System command received: {intent.extracted_task}\n"
             "Infrastructure routing in progress..."

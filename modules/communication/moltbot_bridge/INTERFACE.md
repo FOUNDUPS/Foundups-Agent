@@ -143,6 +143,24 @@ response = await dae.process(
 | FOUNDUP | fam_adapter | METRICS | FoundUp launch and FAM workflows |
 | CONVERSATION | digital_twin | ADVISORY | Casual dialogue |
 
+### Generic DAE Runtime Control
+
+Broker-managed runtime commands are now available through OpenClaw:
+- `list launchable daes`
+- `status holodae`
+- `launch social media dae`
+- `stop training system`
+- `status liberty alert`
+
+Routing contract:
+- OpenClaw deterministic runtime classification
+- `dae_runtime_adapter.py`
+- central `DAELaunchBroker`
+
+Authorization:
+- `list` and `status` are read-only
+- `launch` and `stop` require `012` authority
+
 ### PQN Runtime Control
 
 PQN research runtime can now be controlled through research intent phrases:
@@ -199,6 +217,7 @@ Routing contract:
   `modules/communication/moltbot_bridge/docs/SKILL_BOUNDARY_POLICY.md`
 - MONITOR responses include OpenClaw skill safety gate state:
   - status, required/enforced, last check timestamp, and gate message.
+- MONITOR/SYSTEM routes now expose broker-managed DAE runtime inspection and control.
 
 ### Skill Safety Environment
 

@@ -1,6 +1,7 @@
 from modules.ai_intelligence.pqn_alignment import (
     PQNAlignmentDAE,
     get_theory_archive_context,
+    build_theory_archive_harness_spec,
 )
 
 
@@ -29,3 +30,11 @@ def test_theory_archive_targets_reference_live_detector_surfaces(monkeypatch):
     target_paths = {item["relative_path"] for item in context["implementation_targets"]}
     assert "WSP_agentic/tests/pqn_detection/cmst_pqn_detector_v3.py" in target_paths
     assert "modules/ai_intelligence/pqn_alignment/src/detector/api.py" in target_paths
+
+
+def test_theory_archive_harness_manifest_exists():
+    spec = build_theory_archive_harness_spec()
+
+    assert spec["mode"] == "archive_informed_non_dogmatic"
+    assert spec["matched_null_required"] is True
+    assert spec["target_resonance_hz"] == 7.05

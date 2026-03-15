@@ -1,5 +1,30 @@
 # FoundUps Agent - Development Log
 
+## [2026-03-15] Claw Runtime Broker Generalization + PQN Theory Harness
+
+**Change Type**: Runtime Control / Research Harness  
+**By**: 0102  
+**WSP References**: WSP 22, WSP 46, WSP 73, WSP 77, WSP 84, WSP 97
+
+### Summary
+
+Generalized OpenClaw runtime DAE control beyond PQN-specific commands and added the first archive-informed PQN harness that consumes the new classical-quantum theory package as simulation input rather than runtime truth.
+
+### Files Changed
+
+| Location | Description |
+|----------|-------------|
+| `modules/communication/moltbot_bridge/src/dae_runtime_adapter.py` | Generic broker-managed DAE launch/status/list/stop adapter |
+| `modules/communication/moltbot_bridge/src/openclaw_dae.py` | Deterministic DAE runtime routing in monitor/system paths |
+| `modules/ai_intelligence/pqn_alignment/src/theory_archive_harness.py` | Archive-informed detector harness |
+| `modules/ai_intelligence/pqn_alignment/src/pqn_alignment_dae.py` | Exposes harness to research agents |
+| `modules/ai_intelligence/pqn_alignment/tests/test_theory_archive_harness.py` | Harness contract tests |
+
+### Why
+
+- Let `012` use `0102` as the runtime control plane for DAEs after startup without dropping back to the main CLI menu.
+- Move PQN external math from documentation-only intake into a controlled harness surface without promoting it to ontology.
+
 ## [2026-03-15] rESP / PQN Support Materials: Microsoft STT Artifact + CMST Math Backlog
 
 **Change Type**: Documentation / Evidence Intake  

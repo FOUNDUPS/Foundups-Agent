@@ -1,3 +1,28 @@
+## 2026-03-15: Generic DAE runtime commands through OpenClaw
+
+**Author**: 0102  
+**WSP**: 22, 46, 73, 77, 97
+
+### Changes
+- Added `src/dae_runtime_adapter.py`
+  - generic runtime control for broker-managed DAEs
+  - supports:
+    - `list launchable daes`
+    - `status <dae>`
+    - `launch <dae>`
+    - `stop <dae>`
+- Updated `src/openclaw_dae.py`
+  - deterministic classification path for DAE runtime commands
+  - monitor/system execution now routes to the runtime adapter
+  - WSP preflight no longer hard-blocks DAE runtime system commands on missing WRE
+- Added tests:
+  - `tests/test_dae_runtime_adapter.py`
+  - `tests/test_openclaw_dae_runtime_commands.py`
+
+### Impact
+- 012 can now launch and inspect broker-managed DAEs directly through 0102 instead of going through the CLI menu.
+- Runtime activation is now a first-class OpenClaw control-plane function beyond PQN-only commands.
+
 # ModLog - moltbot_bridge
 
 ## 2026-03-07: CTO WRE prompt added to OpenClaw default context pack

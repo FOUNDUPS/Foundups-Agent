@@ -19,6 +19,10 @@ from .src.results_db import (
 from .src.io.api import promote
 from .src.pqn_alignment_dae import PQNAlignmentDAE
 from .src.theory_archive import get_theory_archive_context
+from .src.theory_archive_harness import (
+    build_theory_archive_harness_spec,
+    run_theory_archive_detector_harness,
+)
 
 __all__ = [
     "run_detector",
@@ -36,4 +40,6 @@ __all__ = [
     "promote",
     "PQNAlignmentDAE",
     "get_theory_archive_context",
+    "build_theory_archive_harness_spec",
+    "run_theory_archive_detector_harness",
 ]

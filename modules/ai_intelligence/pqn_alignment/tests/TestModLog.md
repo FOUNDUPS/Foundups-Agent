@@ -1,3 +1,22 @@
+## [2026-03-15] - Theory Archive Harness Tests
+**Tests Added/Updated**:
+- `test_theory_archive.py`
+  - now verifies the harness manifest exists alongside the theory archive manifest
+- `test_theory_archive_harness.py`
+  - verifies archive-informed spec generation
+  - verifies the harness routes through the existing detector surface
+  - verifies PQNAlignmentDAE exposes the harness to research agents
+
+**Validation Scope**:
+- non-dogmatic theory archive consumption
+- matched-null-required invariant
+- detector surface reuse
+- PQN agent API wiring
+
+**WSP Compliance**: WSP 22, WSP 84, WSP 97
+
+---
+
 # TestModLog — PQN Alignment Module
 
 <!-- Per WSP 22: Journal format - NEWEST entries at TOP, oldest at bottom -->
