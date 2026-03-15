@@ -143,6 +143,20 @@ response = await dae.process(
 | FOUNDUP | fam_adapter | METRICS | FoundUp launch and FAM workflows |
 | CONVERSATION | digital_twin | ADVISORY | Casual dialogue |
 
+### PQN Runtime Control
+
+PQN research runtime can now be controlled through research intent phrases:
+- `launch pqn research`
+- `status pqn research`
+- `stop pqn research`
+- `launch pqn architect`
+- `status pqn architect`
+
+Routing contract:
+- OpenClaw -> `pqn_research_adapter.py`
+- `pqn_research_adapter.py` -> central `DAELaunchBroker`
+- `DAELaunchBroker` -> broker-managed PQN runtime entrypoints in `modules/ai_intelligence/pqn/scripts/launch.py`
+
 ### FOUNDUP Route Contract (FAM Adapter)
 
 - Launch command examples:

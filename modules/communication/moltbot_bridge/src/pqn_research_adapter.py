@@ -51,10 +51,25 @@ _GALLERY_KEYWORDS = [
     "show detection", "show evidence",
 ]
 
+_RUNTIME_CONTROL_KEYWORDS = [
+    "launch pqn research",
+    "start pqn research",
+    "status pqn research",
+    "stop pqn research",
+    "launch pqn architect",
+    "start pqn architect",
+    "status pqn architect",
+    "stop pqn architect",
+]
+
 
 def _classify_sub_intent(message: str) -> str:
     """Classify RESEARCH message into sub-intent."""
     msg_lower = message.lower()
+
+    for kw in _RUNTIME_CONTROL_KEYWORDS:
+        if kw in msg_lower:
+            return "runtime_control"
 
     for kw in _DEMO_KEYWORDS:
         if kw in msg_lower:
@@ -74,6 +89,67 @@ def _classify_sub_intent(message: str) -> str:
 
     # Default: knowledge query via HoloIndex
     return "knowledge"
+
+
+def _get_launch_broker():
+    """Load the runtime DAE broker if available."""
+    try:
+        from modules.infrastructure.dae_daemon.src.dae_launch_broker import (
+            get_dae_launch_broker,
+        )
+
+        return get_dae_launch_broker()
+    except Exception as exc:
+        logger.debug("[PQN-RESEARCH] Launch broker unavailable: %s", exc)
+        return None
+
+
+def _handle_runtime_control(message: str, sender: str) -> str:
+    """Launch/status/stop runtime PQN DAEs through the central broker."""
+    broker = _get_launch_broker()
+    if broker is None:
+        return (
+            "PQN runtime broker is not available. Start the system through `python main.py` "
+            "so 0102 can bootstrap broker-managed DAE launches."
+        )
+
+    msg_lower = message.lower()
+    dae_id = "pqn_architect" if "architect" in msg_lower else "pqn_research"
+
+    if "launch " in msg_lower or "start " in msg_lower:
+        result = broker.start_dae(dae_id, actor_id=sender)
+        if result.get("error") == "not_registered":
+            return (
+                f"PQN runtime `{dae_id}` is not registered yet. "
+                "Launch through `python main.py` so 0102 can bootstrap launchable DAEs."
+            )
+        status = result.get("status", result.get("error", "unknown"))
+        return (
+            f"PQN runtime launch `{dae_id}` -> {status}.\n"
+            f"started_at={result.get('started_at', 0)}"
+        )
+
+    if "stop " in msg_lower:
+        result = broker.stop_dae(dae_id, actor_id=sender)
+        if result.get("error") == "not_running":
+            return f"PQN runtime `{dae_id}` is not running."
+        status = result.get("status", result.get("error", "unknown"))
+        return f"PQN runtime stop `{dae_id}` -> {status}."
+
+    result = broker.get_runtime_status(dae_id)
+    if not result.get("registered"):
+        return (
+            f"PQN runtime `{dae_id}` is not registered yet. "
+            "Launch through `python main.py` so 0102 can bootstrap launchable DAEs."
+        )
+    return (
+        f"PQN runtime status `{dae_id}`\n"
+        f"state={result.get('state')}\n"
+        f"running={result.get('running')}\n"
+        f"enabled={result.get('enabled')}\n"
+        f"run_count={result.get('run_count')}\n"
+        f"last_error={result.get('last_error') or 'none'}"
+    )
 
 
 # --- HoloIndex Retrieval (WSP_00 canonical search) ---
@@ -289,7 +365,9 @@ def handle_pqn_research_intent(message: str, sender: str) -> str:
         sub_intent, sender, message,
     )
 
-    if sub_intent == "teach":
+    if sub_intent == "runtime_control":
+        return _handle_runtime_control(message, sender)
+    elif sub_intent == "teach":
         return _handle_teach(message)
     elif sub_intent == "demo":
         return _handle_demo(message, sender)

@@ -52,3 +52,27 @@
 | AI Gateway | Yes (V1.1.0) | model selection actions |
 
 **WSP References**: WSP 72 (no cross-module dependency changes), WSP 91 (observability)
+
+## V1.2.0 - Runtime DAE Launch Broker (2026-03-15)
+
+**What**: Added a broker-managed runtime activation layer so a running system can start and inspect DAEs without re-entering the interactive menu.
+
+**Changes**:
+- Added `src/dae_launch_broker.py` with:
+  - `DAELaunchSpec`
+  - `DAERuntimeHandle`
+  - `DAELaunchBroker`
+  - singleton helpers for runtime consumers/tests
+- Broker now supports:
+  - `register_launch_spec(...)`
+  - `start_dae(...)`
+  - `stop_dae(...)`
+  - `get_status(...)`
+  - `list_launchable(...)`
+- Broker writes lifecycle transitions back through the central registry/event store so DAEmon remains the canonical runtime ledger.
+- Updated `README.md` to document the broker architecture and runtime usage.
+
+**Impact**:
+- `main.py` can register launchable DAEs during bootstrap.
+- OpenClaw and other control surfaces can activate DAEs after startup.
+- Runtime DAE launch no longer depends on fake menu input or restarting `main.py`.

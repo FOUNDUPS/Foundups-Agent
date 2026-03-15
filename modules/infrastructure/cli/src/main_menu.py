@@ -460,7 +460,8 @@ def _run_interactive_menu(
         from modules.infrastructure.dae_daemon.src.dae_daemon import get_central_daemon
         from modules.infrastructure.dae_daemon.src.schemas import DAERegistration
         _central_daemon = get_central_daemon()
-        _central_daemon.start()
+        if _central_daemon.state != "running":
+            _central_daemon.start()
 
         # Pre-register known DAEs
         _default_daes = [

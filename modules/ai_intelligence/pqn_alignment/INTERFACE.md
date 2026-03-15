@@ -78,6 +78,18 @@
 
 ## Usage Examples
 
+## Runtime Launch Integration
+
+Non-interactive runtime entrypoints used by the central DAE launch broker live in:
+- `modules/ai_intelligence/pqn/scripts/launch.py`
+
+Broker-facing entrypoints:
+- `run_pqn_research_session(selected_agents=None, session_name="PQN_Research", save_results=True)`
+- `run_pqn_architect_once()`
+
+This keeps `main.py` responsible for readiness/bootstrap while `0102` launches
+research cycles through the broker at runtime.
+
 ### Basic Detection
 ```python
 from modules.ai_intelligence.pqn_alignment import run_detector
