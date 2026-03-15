@@ -1,5 +1,65 @@
 # HoloIndex Package ModLog
 
+## [2026-03-15] WSP 97 Refactoring - QwenAdvisor
+
+**Agent**: 0102
+**WSP References**: WSP 97 (System Execution), WSP 93 (CodeIndex), Occam's Layer Discipline
+**Status**: [OK] COMPLETE
+
+### Context
+
+CodeIndex flagged high-complexity functions in advisor.py:
+- `generate_guidance`: 164 lines
+- `_synthesize_guidance`: 158 lines
+
+### Actions
+
+Refactored `holo_index/qwen_advisor/advisor.py`:
+
+| Function | Before | After |
+|----------|--------|-------|
+| `generate_guidance` | 164 lines | ~25 lines + 4 helpers |
+| `_synthesize_guidance` | 158 lines | ~30 lines + 7 helpers |
+
+### WSP 97 Compliance
+
+- **CoT Gate**: Read existing code structure before refactoring
+- **CoR Gate**: Asked "Is there a better way?" - identified clear phase separation
+
+---
+
+## [2026-03-15] WSP 97 Refactoring - QwenOrchestrator
+
+**Agent**: 0102
+**WSP References**: WSP 97 (System Execution), WSP 93 (CodeIndex), Occam's Layer Discipline
+**Status**: [OK] COMPLETE
+
+### Context
+
+CodeIndex flagged `orchestrate_holoindex_request` as CRITICAL at 235 lines.
+
+### Actions
+
+Refactored to ~50 lines + 6 helper methods:
+- `_prepare_orchestration_context()`
+- `_handle_mission_coordination()`
+- `_classify_and_route_intent()`
+- `_execute_orchestrated_analysis_phase()`
+- `_compose_orchestration_output()`
+- `_generate_throttled_general_output()`
+
+---
+
+## [2026-03-11] CodeIndex Surgical Skill - WRE Connected
+
+**Agent**: 0102
+**WSP References**: WSP 93 (CodeIndex), WSP 97 (System Execution), WSP 77 (Agent Coordination)
+**Status**: [OK] COMPLETE
+
+Created `holo_index/skillz/codeindex_surgical/` with SKILLz.md, executor.py for function-level indexing.
+
+---
+
 ## [2026-03-08] Orphan Capability Scanner - WRE Connection Tool
 
 **Agent**: 0102
