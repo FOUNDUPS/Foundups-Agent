@@ -175,6 +175,24 @@ Routing contract:
 - `pqn_research_adapter.py` -> central `DAELaunchBroker`
 - `DAELaunchBroker` -> broker-managed PQN runtime entrypoints in `modules/ai_intelligence/pqn/scripts/launch.py`
 
+### PQN Theory-Archive Simulation Control
+
+PQN simulation can now be triggered directly through research intent phrases:
+- `run pqn simulation`
+- `launch pqn simulation`
+- `status pqn simulation`
+- `show pqn simulation plan`
+
+Routing contract:
+- OpenClaw -> `pqn_research_adapter.py`
+- `pqn_research_adapter.py` -> `PQNAlignmentDAE.run_theory_archive_simulation(...)`
+- PQN simulation lifecycle -> OpenClaw DAEmon action ledger
+
+Operational rule:
+- simulation is a research action, not a broker-managed DAE
+- archive remains hypothesis input only
+- returned interpretation remains comparative, not ontological
+
 ### FOUNDUP Route Contract (FAM Adapter)
 
 - Launch command examples:

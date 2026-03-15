@@ -1,5 +1,17 @@
 # dae_daemon TestModLog
 
+## V1.2.1 - Structured Action Details Test (2026-03-16)
+
+**Created**: `test_dae_adapter.py`
+- validates `CentralDAEAdapter.report_action(...)` preserves structured `details`
+- validates the adapter still no-ops cleanly when DAEmon is absent
+
+**Run**:
+- `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest modules/infrastructure/dae_daemon/tests/test_dae_adapter.py -q`
+
+**Result**:
+- `2 passed`
+
 ## V1.0.0 - Initial Test Suite (2026-02-17)
 
 **Created**: `test_schemas.py` — Layer 0 formal pytest tests (50+ assertions)

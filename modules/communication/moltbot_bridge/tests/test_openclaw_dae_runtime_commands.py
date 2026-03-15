@@ -74,3 +74,23 @@ def test_execute_monitor_routes_to_dae_runtime_adapter():
 
     mocked.assert_called_once()
     assert "Launchable DAEs" in response
+
+
+def test_execute_research_passes_daemon_reporter():
+    dae = OpenClawDAE(repo_root=PROJECT_ROOT)
+    intent = dae.classify_intent(
+        message="run pqn simulation",
+        sender="012",
+        channel="discord",
+        session_key="runtime-5",
+    )
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.pqn_research_adapter.handle_pqn_research_intent",
+        return_value="**PQN Theory-Archive Simulation Complete**",
+    ) as mocked:
+        response = dae._execute_research(intent)
+
+    mocked.assert_called_once()
+    assert mocked.call_args.kwargs["report_action"] == dae._report_daemon_action
+    assert "Simulation Complete" in response

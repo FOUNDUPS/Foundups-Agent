@@ -1,3 +1,26 @@
+## 2026-03-16: PQN simulation runtime control + DAEmon research ledger
+
+**Author**: 0102  
+**WSP**: 22, 73, 77, 91, 97
+
+### Changes
+- Updated `src/pqn_research_adapter.py`
+  - added theory-archive simulation commands:
+    - `run pqn simulation`
+    - `launch pqn simulation`
+    - `status pqn simulation`
+    - `show pqn simulation plan`
+  - simulation commands now call `PQNAlignmentDAE` directly
+  - broker-managed PQN runtime commands now emit action-ledger events
+- Updated `src/openclaw_execution_routes.py`
+  - RESEARCH route now passes OpenClaw's DAEmon action reporter into the PQN adapter
+- Updated `INTERFACE.md`
+  - documented the simulation control path and its non-broker nature
+
+### Impact
+- 012 can run the theory-archive simulation from a live OpenClaw session without dropping to Python or the CLI menu.
+- PQN research actions now surface in the DAEmon ledger with structured start/completion details instead of disappearing into plain text replies.
+
 ## 2026-03-15: Generic DAE runtime commands through OpenClaw
 
 **Author**: 0102  

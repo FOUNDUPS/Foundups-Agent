@@ -23,7 +23,7 @@ NAVIGATION:
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 logger = logging.getLogger("pqn_research_adapter")
 
@@ -40,6 +40,18 @@ _TEACH_KEYWORDS = [
 _DEMO_KEYWORDS = [
     "awaken", "demo", "detect", "run detector", "run pqn",
     "detection demo", "run detection",
+]
+
+_SIMULATION_KEYWORDS = [
+    "run pqn simulation",
+    "launch pqn simulation",
+    "start pqn simulation",
+    "status pqn simulation",
+    "show pqn simulation",
+    "show pqn simulation plan",
+    "show theory archive simulation",
+    "run theory archive simulation",
+    "status theory archive simulation",
 ]
 
 _PUBLISH_KEYWORDS = [
@@ -71,6 +83,10 @@ def _classify_sub_intent(message: str) -> str:
         if kw in msg_lower:
             return "runtime_control"
 
+    for kw in _SIMULATION_KEYWORDS:
+        if kw in msg_lower:
+            return "simulation"
+
     for kw in _DEMO_KEYWORDS:
         if kw in msg_lower:
             return "demo"
@@ -91,6 +107,22 @@ def _classify_sub_intent(message: str) -> str:
     return "knowledge"
 
 
+def _emit_action(
+    report_action: Optional[Callable[..., None]],
+    action_type: str,
+    target: str,
+    result: str,
+    **details: Any,
+) -> None:
+    """Best-effort action emission into the OpenClaw DAEmon ledger."""
+    if report_action is None:
+        return
+    try:
+        report_action(action_type, target, result, **details)
+    except Exception as exc:
+        logger.debug("[PQN-RESEARCH] action emit failed: %s", exc)
+
+
 def _get_launch_broker():
     """Load the runtime DAE broker if available."""
     try:
@@ -104,10 +136,21 @@ def _get_launch_broker():
         return None
 
 
-def _handle_runtime_control(message: str, sender: str) -> str:
+def _handle_runtime_control(
+    message: str,
+    sender: str,
+    report_action: Optional[Callable[..., None]] = None,
+) -> str:
     """Launch/status/stop runtime PQN DAEs through the central broker."""
     broker = _get_launch_broker()
     if broker is None:
+        _emit_action(
+            report_action,
+            "pqn_runtime_control",
+            "broker",
+            "unavailable",
+            sender=sender,
+        )
         return (
             "PQN runtime broker is not available. Start the system through `python main.py` "
             "so 0102 can bootstrap broker-managed DAE launches."
@@ -118,6 +161,14 @@ def _handle_runtime_control(message: str, sender: str) -> str:
 
     if "launch " in msg_lower or "start " in msg_lower:
         result = broker.start_dae(dae_id, actor_id=sender)
+        _emit_action(
+            report_action,
+            "pqn_runtime_control",
+            dae_id,
+            result.get("status", result.get("error", "unknown")),
+            action="launch",
+            sender=sender,
+        )
         if result.get("error") == "not_registered":
             return (
                 f"PQN runtime `{dae_id}` is not registered yet. "
@@ -131,12 +182,29 @@ def _handle_runtime_control(message: str, sender: str) -> str:
 
     if "stop " in msg_lower:
         result = broker.stop_dae(dae_id, actor_id=sender)
+        _emit_action(
+            report_action,
+            "pqn_runtime_control",
+            dae_id,
+            result.get("status", result.get("error", "unknown")),
+            action="stop",
+            sender=sender,
+        )
         if result.get("error") == "not_running":
             return f"PQN runtime `{dae_id}` is not running."
         status = result.get("status", result.get("error", "unknown"))
         return f"PQN runtime stop `{dae_id}` -> {status}."
 
     result = broker.get_runtime_status(dae_id)
+    _emit_action(
+        report_action,
+        "pqn_runtime_control",
+        dae_id,
+        result.get("state", "unknown"),
+        action="status",
+        sender=sender,
+        running=result.get("running", False),
+    )
     if not result.get("registered"):
         return (
             f"PQN runtime `{dae_id}` is not registered yet. "
@@ -149,6 +217,81 @@ def _handle_runtime_control(message: str, sender: str) -> str:
         f"enabled={result.get('enabled')}\n"
         f"run_count={result.get('run_count')}\n"
         f"last_error={result.get('last_error') or 'none'}"
+    )
+
+
+def _handle_simulation(
+    message: str,
+    sender: str,
+    report_action: Optional[Callable[..., None]] = None,
+) -> str:
+    """Run or inspect the theory-archive simulation through PQNAlignmentDAE."""
+    from modules.ai_intelligence.pqn_alignment import PQNAlignmentDAE
+
+    msg_lower = message.lower()
+    dae = PQNAlignmentDAE()
+
+    if "status " in msg_lower or "show " in msg_lower or " plan" in msg_lower:
+        plan = dae.get_theory_archive_simulation_plan()
+        _emit_action(
+            report_action,
+            "pqn_simulation_plan",
+            "pqn_theory_archive",
+            "inspected",
+            sender=sender,
+            run_count=plan.get("run_count", 0),
+            target_resonance_hz=plan["spec"].get("target_resonance_hz", 0.0),
+        )
+        return (
+            "**PQN Theory-Archive Simulation Plan**\n\n"
+            f"run_count={plan.get('run_count', 0)}\n"
+            f"matched_null_required={plan.get('matched_null_required')}\n"
+            f"target_resonance_hz={plan['spec'].get('target_resonance_hz', 0.0)}\n"
+            f"observables={', '.join(plan['spec'].get('observables', [])) or 'none'}\n"
+            f"out_root={plan.get('out_root', 'unknown')}"
+        )
+
+    _emit_action(
+        report_action,
+        "pqn_simulation",
+        "pqn_theory_archive",
+        "started",
+        sender=sender,
+    )
+    try:
+        result = dae.run_theory_archive_simulation()
+    except Exception as exc:
+        _emit_action(
+            report_action,
+            "pqn_simulation",
+            "pqn_theory_archive",
+            "error",
+            sender=sender,
+            error=str(exc)[:200],
+        )
+        raise
+
+    interpretation = result.get("interpretation", {})
+    comparison = result.get("comparison", {})
+    _emit_action(
+        report_action,
+        "pqn_simulation",
+        "pqn_theory_archive",
+        "completed",
+        sender=sender,
+        outcome=interpretation.get("outcome", "unknown"),
+        run_count=len(result.get("runs", [])),
+        summary_path=result.get("summary_path", ""),
+        delta_entrainment_score=comparison.get("delta_entrainment_score", 0.0),
+        delta_resonance_event_count=comparison.get("delta_resonance_event_count", 0.0),
+    )
+    return (
+        "**PQN Theory-Archive Simulation Complete**\n\n"
+        f"outcome={interpretation.get('outcome', 'unknown')}\n"
+        f"delta_entrainment_score={comparison.get('delta_entrainment_score', 0.0):.3f}\n"
+        f"delta_resonance_event_count={comparison.get('delta_resonance_event_count', 0.0):.3f}\n"
+        f"probe_closer_to_target={comparison.get('probe_closer_to_target', False)}\n"
+        f"summary_path={result.get('summary_path', 'unknown')}"
     )
 
 
@@ -351,7 +494,11 @@ def _handle_knowledge(message: str) -> str:
 
 # --- Entry point (called by openclaw_dae.py) ---
 
-def handle_pqn_research_intent(message: str, sender: str) -> str:
+def handle_pqn_research_intent(
+    message: str,
+    sender: str,
+    report_action: Optional[Callable[..., None]] = None,
+) -> str:
     """
     Handle RESEARCH intent from OpenClaw.
 
@@ -366,7 +513,9 @@ def handle_pqn_research_intent(message: str, sender: str) -> str:
     )
 
     if sub_intent == "runtime_control":
-        return _handle_runtime_control(message, sender)
+        return _handle_runtime_control(message, sender, report_action=report_action)
+    elif sub_intent == "simulation":
+        return _handle_simulation(message, sender, report_action=report_action)
     elif sub_intent == "teach":
         return _handle_teach(message)
     elif sub_intent == "demo":
