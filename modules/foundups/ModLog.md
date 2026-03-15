@@ -2,6 +2,33 @@
 
 ## Chronological Change Log
 
+### 2026-03-16 - AionUI FoundUp Factory Intake
+
+**By:** 0102
+**WSP References:** WSP 11, WSP 22, WSP 73, WSP 97
+
+**What changed**
+- Added canonical architecture note:
+  - `modules/foundups/docs/AIONUI_FOUNDUP_FACTORY_WSP97_ARCHITECTURE_2026-03-16.md`
+- Updated FoundUps docs to point at the note:
+  - `modules/foundups/README.md`
+  - `modules/foundups/INTERFACE.md`
+
+**Why**
+- `AionUI` is an external orchestration surface, not a core repo module.
+- It needed a repo-visible definition so HoloIndex can retrieve the relationship between:
+  - `FoundUp Seed`
+  - `FoundUpSpawner`
+  - `OpenClaw`
+  - external AionUI supervision
+
+**Decision**
+- FoundUps core repo remains the factory.
+- Spawned FoundUp sandboxes remain the product.
+- AionUI sits above the existing factory seam; it does not replace it.
+
+---
+
 ### 2026-02-22 - pAVS IronClaw Agent Builder + Digital Twin Roadmap
 
 **By:** 0102

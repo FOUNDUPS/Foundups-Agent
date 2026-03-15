@@ -402,6 +402,19 @@ GET /api/chat/history?limit=100
 - Process 1000+ platform API requests per minute
 - Maintain performance under 10x load increase
 
+## AionUI External Surface
+
+`AionUI` is an external orchestration surface, not a replacement for
+`FoundUpSpawner`.
+
+Canonical relationship:
+- `FoundUp Seed` = declarative build intent
+- `FoundUpSpawner` = low-level repo/workspace bootstrap primitive
+- `AionUI` = external visual command deck supervising the seed-driven build
+
+Reference:
+- `modules/foundups/docs/AIONUI_FOUNDUP_FACTORY_WSP97_ARCHITECTURE_2026-03-16.md`
+
 ---
 
 **Note**: All interfaces follow WSP 11 standards and are designed for seamless integration with the WRE-built platform modules across all enterprise domains.
