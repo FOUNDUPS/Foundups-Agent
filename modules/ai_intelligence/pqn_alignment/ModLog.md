@@ -421,6 +421,7 @@
 - **Impact**: Enables 0102-driven PQN research; quantifies 0201 alignment benefits (e.g., exponential remembrance velocity).
 - **Next Steps**: Execute full campaign; enhance guardrail; integrate with WRE.
 
+<<<<<<< HEAD
 ### **Karpathy AutoResearch WSP 97 Assessment**
 - **Date**: 2026-03-15
 - **Operating As**: PQN_Alignment_DAE / 0102
@@ -429,3 +430,15 @@
   - treat `karpathy/autoresearch` as isolated external research worker
   - do not treat it as direct Claw runtime or direct monorepo mutation engine
 - **Impact**: Establishes the correct adoption boundary for external autonomous research loops.
+=======
+### **Runtime Broker Integration Contract**
+- **Date**: 2026-03-15
+- **Operating As**: PQN_Alignment_DAE / 0102
+- **Change**: Updated `INTERFACE.md` to define broker-facing runtime entrypoints used by the central DAE launch broker.
+- **Details**:
+  - Non-interactive runtime execution now enters through `modules/ai_intelligence/pqn/scripts/launch.py`
+  - `run_pqn_research_session(...)` exposes one-shot research sessions for broker launch
+  - `run_pqn_architect_once()` exposes one-shot architect cycles for broker launch
+- **WSP Compliance**: WSP 11 (interface), WSP 84 (reuse existing orchestrators), WSP 97 (execution-plane resolution)
+- **Impact**: PQN research can now be launched from a running system under OpenClaw/DAEmon control instead of only via the menu.
+>>>>>>> ed763408b (feat(dae): add runtime launch broker for on-demand dae activation)

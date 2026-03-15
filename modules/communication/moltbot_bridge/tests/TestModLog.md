@@ -126,3 +126,20 @@
 - Result: `89 passed, 2 warnings`
 - Notes:
   - Full-file regression confirms new runtime-profile gates do not break existing OpenClaw DAE behavior.
+
+## 2026-03-15: PQN runtime broker adapter tests
+
+**Files**
+- `test_pqn_research_adapter.py`
+
+**Coverage**
+- `launch pqn research` -> broker `start_dae("pqn_research")`
+- `status pqn architect` -> broker status rendering
+- `stop pqn research` -> broker `stop_dae("pqn_research")`
+- missing broker fallback text
+
+**Run**
+- `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest modules/communication/moltbot_bridge/tests/test_pqn_research_adapter.py -q`
+
+**Result**
+- `4 passed`

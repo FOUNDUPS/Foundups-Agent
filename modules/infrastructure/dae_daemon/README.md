@@ -9,6 +9,7 @@ CentralDAEmon (Layer 4 - singleton)
   |-- EventStore (Layer 1 - JSONL + SQLite dual-write)
   |-- DAERegistry (Layer 2 - registration, heartbeat, state)
   |-- Killswitch (Layer 3 - security detach + PID termination)
+  |-- DAELaunchBroker (runtime activation for launchable DAEs)
 
 CentralDAEAdapter (Layer 5 - non-invasive integration)
   |-- Any existing DAE uses this to register, no class hierarchy changes
@@ -40,6 +41,30 @@ Menu option 17 in `python main.py` shows the DAE Dashboard with:
 - Enable/disable individual DAEs
 - Killswitch reports
 
+### For runtime activation:
+```python
+from modules.infrastructure.dae_daemon.src.dae_launch_broker import (
+    DAELaunchSpec,
+    get_dae_launch_broker,
+)
+
+broker = get_dae_launch_broker()
+broker.register_launch_spec(
+    DAELaunchSpec(
+        dae_id="pqn_research",
+        dae_name="PQN Research Session",
+        domain="ai_intelligence",
+        start_callable=run_pqn_research_session,
+    )
+)
+broker.start_dae("pqn_research", actor_id="012")
+```
+
+Runtime intent:
+- `main.py` bootstraps launchable specs
+- OpenClaw or another controller asks broker to `start/status/stop`
+- Central DAEmon remains the canonical lifecycle ledger
+
 ## Security Killswitch
 
 - 1 CRITICAL event = immediate detach
@@ -57,6 +82,7 @@ Menu option 17 in `python main.py` shows the DAE Dashboard with:
 | `src/killswitch.py` | 3 | Security detach + PID kill |
 | `src/dae_daemon.py` | 4 | Singleton daemon (composes 1-3) |
 | `src/dae_adapter.py` | 5 | Non-invasive adapter for DAEs |
+| `src/dae_launch_broker.py` | 5 | Runtime launch broker for on-demand DAE activation |
 
 ## WSP Compliance
 

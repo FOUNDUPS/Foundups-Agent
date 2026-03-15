@@ -175,7 +175,11 @@ from modules.ai_intelligence.training_system.scripts.launch import run_training_
 from modules.ai_intelligence.training_system.scripts.training_commands import execute_training_command
 
 # Extracted to modules/ai_intelligence/pqn/scripts/launch.py per WSP 62
-from modules.ai_intelligence.pqn.scripts.launch import run_pqn_dae
+from modules.ai_intelligence.pqn.scripts.launch import (
+    run_pqn_dae,
+    run_pqn_research_session,
+    run_pqn_architect_once,
+)
 
 # Extracted to modules/platform_integration/youtube_shorts_scheduler/scripts/launch.py per WSP 62
 from modules.platform_integration.youtube_shorts_scheduler.scripts.launch import (
@@ -190,6 +194,12 @@ from modules.platform_integration.antifafm_broadcaster.scripts.launch import (
     stop_antifafm_background,
     get_antifafm_status,
     run_suno_sync_cli,
+)
+
+from modules.infrastructure.dae_daemon.src.dae_daemon import get_central_daemon
+from modules.infrastructure.dae_daemon.src.dae_launch_broker import (
+    DAELaunchSpec,
+    get_dae_launch_broker,
 )
 
 # Re-enable normal logging after all imports are complete
@@ -720,6 +730,87 @@ def run_wsp_framework_preflight(repo_root: Path, overseer: Any | None = None) ->
     return True
 
 
+def bootstrap_runtime_dae_launches() -> None:
+    """Register broker-managed DAE entrypoints for an already running system."""
+    daemon = get_central_daemon()
+    if daemon.state != "running":
+        daemon.start()
+
+    broker = get_dae_launch_broker(daemon=daemon)
+    specs = [
+        DAELaunchSpec(
+            dae_id="holodae",
+            dae_name="HoloDAE",
+            domain="ai_intelligence",
+            module_path="modules.ai_intelligence.holo_dae.scripts.launch",
+            start_callable=run_holodae,
+            description="Code intelligence and search runtime.",
+        ),
+        DAELaunchSpec(
+            dae_id="git_push_dae",
+            dae_name="GitPush DAE",
+            domain="infrastructure",
+            module_path="modules.infrastructure.git_push_dae.scripts.launch",
+            start_callable=lambda: launch_git_push_dae(run_once=False),
+            description="Autonomous git push daemon.",
+        ),
+        DAELaunchSpec(
+            dae_id="social_media",
+            dae_name="Social Media DAE",
+            domain="platform_integration",
+            module_path="modules.platform_integration.social_media_orchestrator.scripts.launch",
+            start_callable=run_social_media_dae,
+            description="Unified social media orchestration runtime.",
+        ),
+        DAELaunchSpec(
+            dae_id="vision_dae",
+            dae_name="FoundUps Vision DAE",
+            domain="infrastructure",
+            module_path="modules.infrastructure.dae_infrastructure.foundups_vision_dae.scripts.launch",
+            start_callable=run_vision_dae,
+            description="Pattern sensorium runtime.",
+        ),
+        DAELaunchSpec(
+            dae_id="liberty_alert",
+            dae_name="Liberty Alert DAE",
+            domain="communication",
+            module_path="modules.communication.liberty_alert.scripts.launch",
+            start_callable=run_liberty_alert_dae,
+            description="Community protection alert runtime.",
+        ),
+        DAELaunchSpec(
+            dae_id="training_system",
+            dae_name="Training System",
+            domain="ai_intelligence",
+            module_path="modules.ai_intelligence.training_system.scripts.launch",
+            start_callable=run_training_system,
+            description="Pattern learning and training runtime.",
+        ),
+        DAELaunchSpec(
+            dae_id="pqn_research",
+            dae_name="PQN Research Session",
+            domain="ai_intelligence",
+            module_path="modules.ai_intelligence.pqn.scripts.launch",
+            start_callable=run_pqn_research_session,
+            heartbeat_interval_sec=15.0,
+            description="Non-interactive PQN research session.",
+        ),
+        DAELaunchSpec(
+            dae_id="pqn_architect",
+            dae_name="PQN Architect",
+            domain="ai_intelligence",
+            module_path="modules.ai_intelligence.pqn.scripts.launch",
+            start_callable=run_pqn_architect_once,
+            heartbeat_interval_sec=15.0,
+            description="Non-interactive PQN architect cycle.",
+        ),
+    ]
+    for spec in specs:
+        broker.register_launch_spec(spec)
+
+    print(f"[DAE-BROKER] ready launchable={len(broker.list_launchable_daes())}")
+
+
 def main():
     """Main entry point - thin router to CLI module."""
     repo_root = Path(__file__).resolve().parent
@@ -749,6 +840,8 @@ def main():
         return
     if not run_wsp_framework_preflight(repo_root, overseer=overseer):
         return
+
+    bootstrap_runtime_dae_launches()
 
     # Auto-start antifaFM broadcaster (default ON, disable with ANTIFAFM_AUTO_START=0)
     # NOTE: Uses OBS mode by default - OBS handles streaming, script handles chat/schemas

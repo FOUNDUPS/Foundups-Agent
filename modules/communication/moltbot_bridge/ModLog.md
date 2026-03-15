@@ -956,3 +956,22 @@ openclaw onboard
   - Read-safe by default
   - No external model drift
   - Mutating intents auto-contained before execution planning
+
+## 2026-03-15: PQN runtime broker control from OpenClaw
+
+**Author**: 0102  
+**WSP**: 11, 72, 73, 84, 97
+
+### Changes
+- Updated `src/pqn_research_adapter.py` to recognize broker-managed runtime commands:
+  - `launch pqn research`
+  - `status pqn research`
+  - `stop pqn research`
+  - `launch pqn architect`
+  - `status pqn architect`
+- Runtime control now routes through the central `DAELaunchBroker` instead of trying to re-enter the menu layer.
+- Updated `INTERFACE.md` to document the new runtime control contract.
+
+### Outcome
+- 012 can ask 0102 to launch PQN research inside an already running system.
+- OpenClaw stays the conversational/control-plane front door while DAEmon remains the lifecycle ledger.

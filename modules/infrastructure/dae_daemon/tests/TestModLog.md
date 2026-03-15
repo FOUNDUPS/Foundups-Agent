@@ -17,3 +17,16 @@ register -> start -> heartbeat -> cardiovascular observation -> security detach 
 
 **Updated**: Killswitch tests verify popup alert triggers on HIGH events.
 MessageBoxW mocked to no-op in test environment.
+
+## V1.2.0 - Runtime Launch Broker Tests (2026-03-15)
+
+**Created**: `test_dae_launch_broker.py`
+- Validates one-shot broker launches transition to `stopped`
+- Validates launch failures transition to `crashed`
+- Validates stop-capable DAEs can be started, reported, and stopped through the broker
+
+**Run**:
+- `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest modules/infrastructure/dae_daemon/tests/test_dae_launch_broker.py -q`
+
+**Result**:
+- `3 passed`

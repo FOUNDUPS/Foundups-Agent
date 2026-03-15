@@ -12,10 +12,13 @@ Extracted from main.py per WSP 62 Large File Refactoring Protocol
 
 import sys
 import os
+import json
+import time
 import asyncio
 import traceback
 import importlib
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # Add project root to path
 project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
@@ -245,6 +248,74 @@ def run_pqn_dae():
             print(f"[ERROR] PQN Launch failed: {e}")
             traceback.print_exc()
             input("\nPress Enter to return to PQN Menu...")
+
+
+def run_pqn_architect_once() -> Dict[str, Any]:
+    """Run a single non-interactive PQN architect cycle for broker launch."""
+    from modules.ai_intelligence.pqn_alignment.src.pqn_architect_dae import (
+        PQNArchitectDAE,
+    )
+
+    architect = PQNArchitectDAE()
+    report = architect.generate_strategic_report()
+    next_action = architect.get_next_action()
+    result: Dict[str, Any] = {"status": "no_action"}
+
+    if next_action is not None:
+        result = asyncio.run(architect.execute_directive(next_action))
+
+    output_dir = project_root / "strategic_reports"
+    output_dir.mkdir(exist_ok=True)
+    output_path = output_dir / f"pqn_architect_report_{int(time.time())}.json"
+    with open(output_path, "w", encoding="utf-8") as handle:
+        json.dump(
+            {
+                "report": report,
+                "next_action_result": result,
+            },
+            handle,
+            indent=2,
+        )
+
+    return {
+        "status": result.get("status", "ok"),
+        "report_path": str(output_path),
+        "next_action": report.get("next_action", {}),
+    }
+
+
+def run_pqn_research_session(
+    selected_agents: Optional[List[str]] = None,
+    session_name: str = "PQN_Research",
+    save_results: bool = True,
+) -> Dict[str, Any]:
+    """Run a single non-interactive PQN research session for broker launch."""
+    from modules.ai_intelligence.pqn_alignment.src.pqn_research_dae_orchestrator import (
+        PQNResearchDAEOrchestrator,
+    )
+
+    orchestrator = PQNResearchDAEOrchestrator()
+    session = orchestrator.create_research_session(
+        session_name=session_name,
+        selected_agents=selected_agents,
+    )
+    results = asyncio.run(orchestrator.execute_research_session(session.session_id))
+
+    output_path = None
+    if save_results:
+        output_dir = project_root / "research_results"
+        output_dir.mkdir(exist_ok=True)
+        output_path = output_dir / f"{session.session_id}_results.json"
+        with open(output_path, "w", encoding="utf-8") as handle:
+            json.dump(results, handle, indent=2)
+
+    return {
+        "status": "completed",
+        "session_id": session.session_id,
+        "agents_used": list(session.agents.keys()),
+        "tasks_completed": len(results.get("completed_tasks", {})),
+        "results_path": str(output_path) if output_path else "",
+    }
 
 if __name__ == "__main__":
     run_pqn_dae()
