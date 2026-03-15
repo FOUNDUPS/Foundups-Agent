@@ -38,6 +38,7 @@ import logging
 import os
 import threading
 import time
+import uuid
 from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
@@ -54,6 +55,11 @@ except ImportError:
 from modules.infrastructure.database.src.agent_db import AgentDB
 
 logger = logging.getLogger(__name__)
+
+
+def _new_runtime_id(prefix: str) -> str:
+    """Create a collision-resistant runtime identifier for adaptive-learning records."""
+    return f"{prefix}_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}_{uuid.uuid4().hex[:8]}"
 
 
 def _breadcrumb_enabled() -> bool:
@@ -456,7 +462,7 @@ class BreadcrumbTracer:
                                estimated_minutes: int, priority: str = "medium",
                                dependencies: List[str] = None, deliverables: List[str] = None) -> str:
         """Create a handoff contract for multi-agent task assignment."""
-        contract_id = f"contract_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hash(task_description) % 1000}"
+        contract_id = _new_runtime_id("contract")
 
         # Add deadline if high priority
         deadline = None
@@ -652,7 +658,7 @@ class BreadcrumbTracer:
 
     def discover_autonomous_task(self, task_description: str, context: Dict[str, Any] = None) -> str:
         """Autonomously discover and register a task that needs to be done."""
-        task_id = f"auto_task_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hash(task_description) % 1000}"
+        task_id = _new_runtime_id("auto_task")
 
         # Analyze task to determine requirements
         required_skills = self._analyze_task_requirements(task_description)
@@ -946,7 +952,7 @@ class BreadcrumbTracer:
     def _create_coordination_event(self, event_type: str, initiator: str,
                                  targets: List[str], payload: Dict[str, Any]) -> None:
         """Create a coordination event for inter-agent communication."""
-        event_id = f"coord_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{hash(str(payload)) % 1000}"
+        event_id = _new_runtime_id("coord")
 
         # Create coordination event in database (WSP 78)
         success = self.db.create_coordination_event(

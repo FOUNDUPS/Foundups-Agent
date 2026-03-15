@@ -55838,3 +55838,9 @@ if cooldown_sets:
 ## 2026-03-15: OpenClaw docs aligned to WSP 97 module map
 - Appended WSP 97 control-plane module map to `modules/communication/moltbot_bridge/README.md`.
 - Appended canonical internal boundary map to `modules/communication/moltbot_bridge/INTERFACE.md`.
+
+## 2026-03-16: HoloIndex adaptive-learning DB drift and event-collision fix
+- Fixed `modules/infrastructure/database/src/agent_db.py` so legacy `agents_autonomous_tasks` tables self-heal missing `status` and `completed_at` columns.
+- Added regression coverage in `modules/infrastructure/database/tests/test_agent_db_schema_compatibility.py`.
+- Fixed `holo_index/adaptive_learning/breadcrumb_tracer.py` runtime ID generation to use collision-resistant IDs for contracts, autonomous tasks, and coordination events.
+- Verified repeated `python holo_index.py --search "AionUI" --limit 5 --no-advisor` runs complete without adaptive-learning database errors.

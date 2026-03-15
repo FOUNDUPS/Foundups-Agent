@@ -126,3 +126,15 @@ python -m pytest --cov=modules.infrastructure.database.src --cov-report=html mod
 **Rationale**:
 - Protects against regressions where SQLite pragmas are only set at file-init time.
 - Ensures audit tooling remains deterministic and CI-friendly.
+
+## Entry: 2026-03-16 - AgentDB schema compatibility regression coverage
+**Added Tests**:
+- `test_agent_db_schema_compatibility.py`
+  - verifies legacy `agents_autonomous_tasks` tables are migrated with `status` and `completed_at`
+  - verifies legacy rows are backfilled to `pending`
+  - verifies autonomous task assignment/completion works after migration
+  - verifies recent breadcrumb agent discovery works against live DB timestamps
+
+**Validation**:
+- `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest modules/infrastructure/database/tests/test_agent_db_schema_compatibility.py -q`
+- Result: `2 passed`

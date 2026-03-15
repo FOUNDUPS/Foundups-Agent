@@ -22,7 +22,7 @@ Shared agent memory and state management.
 
 import json
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Any
 from .db_manager import DatabaseManager
 
@@ -284,6 +284,55 @@ class AgentDB:
             conn.execute('CREATE INDEX IF NOT EXISTS idx_transactions_status ON agents_transactions(status)')
             conn.execute('CREATE INDEX IF NOT EXISTS idx_transactions_currency ON agents_transactions(currency)')
 
+        self._migrate_legacy_tables()
+
+    def _get_table_columns(self, table_name: str) -> set[str]:
+        """Return normalized column names for a table across supported backends."""
+        columns = set()
+        for row in self.db.get_table_info(table_name):
+            column_name = row.get("name") or row.get("column_name")
+            if column_name:
+                columns.add(str(column_name))
+        return columns
+
+    def _ensure_table_columns(self, table_name: str, column_definitions: Dict[str, str]) -> None:
+        """Add missing columns to legacy tables in a backward-compatible way."""
+        existing_columns = self._get_table_columns(table_name)
+        missing_columns = {
+            column_name: definition
+            for column_name, definition in column_definitions.items()
+            if column_name not in existing_columns
+        }
+        if not missing_columns:
+            return
+
+        with self.db.get_connection() as conn:
+            for column_name, definition in missing_columns.items():
+                conn.execute(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {definition}")
+
+    def _migrate_legacy_tables(self) -> None:
+        """Backfill columns expected by current AgentDB methods."""
+        self._ensure_table_columns(
+            "agents_autonomous_tasks",
+            {
+                "status": "TEXT DEFAULT 'pending'",
+                "completed_at": "DATETIME",
+            },
+        )
+
+        with self.db.get_connection() as conn:
+            conn.execute("""
+                UPDATE agents_autonomous_tasks
+                SET status = 'pending'
+                WHERE status IS NULL OR status = ''
+            """)
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_autonomous_tasks_status ON agents_autonomous_tasks(status)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_autonomous_tasks_assigned_to ON agents_autonomous_tasks(assigned_to)"
+            )
+
     def record_awakening(self, agent_id: str, consciousness_level: str, koan: str = None) -> None:
         """Record agent awakening state."""
         with self.db.get_connection() as conn:
@@ -412,18 +461,35 @@ class AgentDB:
 
     def get_recent_breadcrumb_agents(self, minutes: int = 120, limit: int = 5) -> List[str]:
         """Get distinct breadcrumb agent IDs within the time window."""
-        cutoff = datetime.now() - timedelta(minutes=minutes)
-        rows = self.execute_query(
+        cutoff = (datetime.now(timezone.utc) - timedelta(minutes=minutes)).replace(tzinfo=None)
+        rows = self.db.execute_query(
             """
-            SELECT DISTINCT agent_id
+            SELECT agent_id, MAX(timestamp) AS last_seen
             FROM agents_breadcrumbs
-            WHERE agent_id IS NOT NULL AND agent_id != '' AND timestamp >= ?
-            ORDER BY timestamp DESC
+            WHERE agent_id IS NOT NULL AND agent_id != ''
+            GROUP BY agent_id
+            ORDER BY last_seen DESC
             LIMIT ?
             """,
-            (cutoff.isoformat(), limit)
+            (max(limit * 5, limit),)
         )
-        return [row['agent_id'] for row in rows]
+
+        recent_agents: List[str] = []
+        for row in rows:
+            last_seen = row.get("last_seen")
+            if not last_seen:
+                continue
+            if isinstance(last_seen, str):
+                parsed_last_seen = datetime.fromisoformat(last_seen.replace("Z", "+00:00"))
+            else:
+                parsed_last_seen = last_seen
+            if getattr(parsed_last_seen, "tzinfo", None) is not None:
+                parsed_last_seen = parsed_last_seen.astimezone(timezone.utc).replace(tzinfo=None)
+            if parsed_last_seen >= cutoff:
+                recent_agents.append(row["agent_id"])
+            if len(recent_agents) >= limit:
+                break
+        return recent_agents
 
     # ============================================================================
     # HANDOFF CONTRACTS (Multi-Agent Task Assignment)

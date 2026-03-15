@@ -92,3 +92,18 @@
 - Stronger integrity guarantees for relational writes.
 - More resilient concurrent event-store writes.
 - Shared architecture language for SIM + CABR + blockchain settlement boundary.
+
+## Entry: 2026-03-16 - AgentDB legacy autonomous-task schema self-heal
+**What Changed**:
+- Added backward-compatible migration logic in `src/agent_db.py` for legacy `agents_autonomous_tasks` tables.
+- Self-heals missing `status` and `completed_at` columns on startup instead of assuming a fresh schema.
+- Backfills null task statuses to `pending` and adds indexes on `status` and `assigned_to`.
+- Corrected `get_recent_breadcrumb_agents()` to query through `DatabaseManager` and normalize breadcrumb timestamps in UTC.
+
+**Why**:
+- HoloIndex adaptive-learning search paths were failing against older databases with `no such column: status`.
+- Recent-agent discovery also had a latent bug from mixed timestamp formats and a wrong method call.
+
+**Impact**:
+- Existing `foundups.db` instances can run adaptive-learning task discovery without manual DB surgery.
+- Breadcrumb-based recent-agent lookups now work reliably across SQLite timestamp formats.
