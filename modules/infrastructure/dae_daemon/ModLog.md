@@ -91,3 +91,19 @@
 - `main.py` can register launchable DAEs during bootstrap.
 - OpenClaw and other control surfaces can activate DAEs after startup.
 - Runtime DAE launch no longer depends on fake menu input or restarting `main.py`.
+
+## V1.3.0 - DAEmon Observer Read Surface (2026-03-17)
+
+**What**: Added a read-side supervision layer over the central event store so OpenClaw and other controllers can tail recent events and request live runtime snapshots.
+
+**Changes**:
+- Added `src/dae_observer.py` with:
+  - `tail_events(...)`
+  - `get_live_status(...)`
+  - `get_system_live_status(...)`
+- Extended `src/event_store.py` with `query_recent(...)` for recent-window event reads.
+- Updated `README.md` to document the observer as the canonical live supervision seam.
+
+**Impact**:
+- DAEmon is now both the write ledger and the read-side runtime surface.
+- OpenClaw can expose real-time Claw/PQN supervision without scraping logs or bypassing the daemon.

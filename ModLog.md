@@ -55844,3 +55844,11 @@ if cooldown_sets:
 - Added regression coverage in `modules/infrastructure/database/tests/test_agent_db_schema_compatibility.py`.
 - Fixed `holo_index/adaptive_learning/breadcrumb_tracer.py` runtime ID generation to use collision-resistant IDs for contracts, autonomous tasks, and coordination events.
 - Verified repeated `python holo_index.py --search "AionUI" --limit 5 --no-advisor` runs complete without adaptive-learning database errors.
+
+## 2026-03-17: DAEmon live-tail/status surface for Claw and PQN
+- Added `modules/infrastructure/dae_daemon/src/dae_observer.py` as the read-side observer over the central event ledger.
+- Extended `modules/infrastructure/dae_daemon/src/event_store.py` with recent-window querying.
+- Extended `modules/communication/moltbot_bridge/src/dae_runtime_adapter.py` with read-only supervision commands:
+  - `tail <dae>`
+  - `status <dae> live`
+- Added `openclaw` / `claw` / `0102` daemon aliases so 012 can supervise Claw directly through OpenClaw.

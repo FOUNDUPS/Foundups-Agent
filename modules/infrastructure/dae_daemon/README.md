@@ -65,6 +65,20 @@ Runtime intent:
 - OpenClaw or another controller asks broker to `start/status/stop`
 - Central DAEmon remains the canonical lifecycle ledger
 
+### For live supervision:
+```python
+from modules.infrastructure.dae_daemon.src.dae_observer import get_dae_observer
+
+observer = get_dae_observer()
+tail = observer.tail_events(dae_id="openclaw", limit=8)
+snapshot = observer.get_live_status("pqn_research", limit=8)
+```
+
+Runtime supervision intent:
+- `tail <dae>` -> recent DAEmon event stream for that DAE
+- `status <dae> live` -> registry state + runtime status + recent event tail
+- The event store remains the source of truth; the observer is read-only
+
 ## Security Killswitch
 
 - 1 CRITICAL event = immediate detach
@@ -83,6 +97,7 @@ Runtime intent:
 | `src/dae_daemon.py` | 4 | Singleton daemon (composes 1-3) |
 | `src/dae_adapter.py` | 5 | Non-invasive adapter for DAEs |
 | `src/dae_launch_broker.py` | 5 | Runtime launch broker for on-demand DAE activation |
+| `src/dae_observer.py` | 5 | Read-side observer for live status and event tails |
 
 ## WSP Compliance
 

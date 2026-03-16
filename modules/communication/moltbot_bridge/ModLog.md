@@ -982,3 +982,170 @@ openclaw onboard
   - Read-safe by default
   - No external model drift
   - Mutating intents auto-contained before execution planning
+
+## 2026-03-15: PQN runtime broker control from OpenClaw
+
+**Author**: 0102  
+**WSP**: 11, 72, 73, 84, 97
+
+### Changes
+- Updated `src/pqn_research_adapter.py` to recognize broker-managed runtime commands:
+  - `launch pqn research`
+  - `status pqn research`
+  - `stop pqn research`
+  - `launch pqn architect`
+  - `status pqn architect`
+- Runtime control now routes through the central `DAELaunchBroker` instead of trying to re-enter the menu layer.
+- Updated `INTERFACE.md` to document the new runtime control contract.
+
+### Outcome
+- 012 can ask 0102 to launch PQN research inside an already running system.
+- OpenClaw stays the conversational/control-plane front door while DAEmon remains the lifecycle ledger.
+## 2026-03-10: LinkedIn mission-control routing + WSP 97 context pack
+
+**Author**: 0102  
+**WSP**: 15, 50, 77, 84, 97
+
+### Changes
+- Added `src/linkedin_loop_adapter.py` as a conversational control surface for the durable LinkedIn orchestration loop.
+- Updated `src/openclaw_dae.py` to:
+  - route mission phrases such as `let's work on LN` through the loop adapter before low-level LinkedIn actions
+  - load `WSP_97_System_Execution_Prompting_Protocol.md` into the default OpenClaw platform context pack
+  - prioritize code-change language over health vocabulary during agentic model selection so edit work routes to the coder model
+
+### Outcome
+- OpenClaw can now steer LinkedIn loop phases conversationally while preserving deterministic action commands.
+- WSP 97 is part of default OpenClaw context, so `follow wsp` resolves through the execution-prompting protocol by default.
+- Mixed prompts like `fix the failing test in main.py` now route to `local/qwen-coder-7b` instead of `local/gemma-270m`.
+
+## 2026-03-10: Deterministic "follow wsp" command route
+
+**Author**: 0102  
+**WSP**: 50, 77, 84, 97
+
+### Changes
+- Added explicit `follow wsp` interception in `src/openclaw_dae.py` command routing.
+- The canonical WSP 97 operator now routes through `modules/infrastructure/wsp_orchestrator/src/wsp_orchestrator.py` instead of falling through generic WRE command handling.
+
+### Outcome
+- `follow wsp ...` now has a real execution plane in OpenClaw:
+  - detect operator
+  - call WSP orchestrator
+  - return deterministic execution summary
+
+## 2026-03-11: OpenClaw control-plane refactor - intent planner + result memory
+
+**Author**: 0102  
+**WSP**: 22, 50, 73, 84, 97
+
+### Changes
+- Added `src/openclaw_intent_planner.py` for intent classification, WSP preflight, and execution-plan construction.
+- Added `src/openclaw_result_memory.py` for output validation and WRE pattern-memory storage.
+- Reduced `src/openclaw_dae.py` by replacing inline classify/preflight/plan/finalize blocks with facade wrappers.
+
+### Outcome
+- OpenClaw intent resolution and result finalization are now isolated control-plane seams instead of monolith internals.
+- `openclaw_dae.py` dropped from `2638` lines to `2262` lines in this slice.
+
+## 2026-03-11: OpenClaw control-plane refactor - permission and safety policy
+
+**Author**: 0102  
+**WSP**: 22, 50, 71, 73, 84, 95, 97
+
+### Changes
+- Added `src/openclaw_permission_policy.py` for autonomy-tier resolution, source-write gating, AI Overseer emission, containment checks, and cached skill-safety scanning.
+- Replaced the inline permission/security block in `src/openclaw_dae.py` with facade wrappers.
+
+### Outcome
+- Permission, containment, and skill-safety policy are now centralized and auditable as one control-plane module.
+- `openclaw_dae.py` dropped from `2262` lines to `2086` lines in this slice.
+
+## 2026-03-11: OpenClaw control-plane refactor - execution routes
+
+**Author**: 0102  
+**WSP**: 22, 50, 73, 84, 97
+
+### Changes
+- Added `src/openclaw_execution_routes.py` for post-plan route execution:
+  - query
+  - command + follow-wsp
+  - monitor
+  - schedule
+  - system
+  - automation
+  - foundup
+  - research
+- Replaced the inline route layer in `src/openclaw_dae.py` with facade wrappers.
+
+### Outcome
+- Execution-plane routing now lives in a dedicated module after plan resolution, aligned to WSP 97 plane separation.
+- `openclaw_dae.py` dropped from `2086` lines to `1678` lines in this slice.
+
+## 2026-03-11: OpenClaw control-plane refactor - telemetry and turn state
+
+**Author**: 0102  
+**WSP**: 22, 73, 84, 91, 97
+
+### Changes
+- Added `src/openclaw_turn_state.py` for:
+  - conversation-engine markers
+  - preferred-external status markers
+  - token telemetry
+  - cooperative turn cancellation
+- Replaced the inline runtime bookkeeping block in `src/openclaw_dae.py` with facade wrappers.
+
+### Outcome
+- Runtime bookkeeping is now isolated from the OpenClaw control-plane facade.
+- `openclaw_dae.py` dropped from `1678` lines to `1603` lines in this slice.
+
+## 2026-03-11: OpenClaw control-plane refactor - status surface + process loop
+
+**Author**: 0102  
+**WSP**: 22, 50, 73, 84, 91, 97
+
+### Changes
+- Added `src/openclaw_status_surface.py` for:
+  - `connect_wre` readiness/status synthesis
+  - Discord/AI Overseer status push dispatch
+- Added `src/openclaw_process_loop.py` for the full autonomy loop:
+  - honeypot intercept
+  - containment gate
+  - intent -> preflight -> permission -> plan -> execute -> validate pipeline
+  - DAEmon in/out and action reporting
+- Replaced the inline status/process bodies in `src/openclaw_dae.py` with facade delegation.
+
+### Outcome
+- `OpenClawDAE` now behaves as a true orchestration facade instead of carrying the full autonomy implementation.
+- `openclaw_dae.py` dropped from `1603` lines to `1342` lines in this final extraction slice.
+
+## 2026-03-15: OpenClaw docs updated for WSP 97 module split
+
+**Author**: 0102  
+**WSP**: 22, 73, 84, 97
+
+### Changes
+- Appended canonical control-plane module map to `README.md`.
+- Appended internal module-boundary map to `INTERFACE.md`.
+
+### Outcome
+- Repo-local documentation now matches the post-refactor OpenClaw runtime layout.
+- The next 0102 session can re-enter OpenClaw using the actual module graph instead of the old monolith assumption.
+
+## 2026-03-17: OpenClaw runtime supervision surface
+
+**Author**: 0102  
+**WSP**: 22, 73, 91, 97
+
+### Changes
+- Extended `src/dae_runtime_adapter.py` with read-only supervision commands:
+  - `tail <dae>`
+  - `status <dae> live`
+- Added OpenClaw aliases for its own daemon identity:
+  - `openclaw`
+  - `claw`
+  - `0102`
+- Updated `INTERFACE.md` to document the new live-tail command surface.
+
+### Outcome
+- 012 can inspect the DAEmon ledger through OpenClaw instead of reading raw logs.
+- Claw and PQN runtime activity now has a real supervision surface, not just event persistence.
