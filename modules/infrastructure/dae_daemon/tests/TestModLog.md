@@ -42,3 +42,15 @@ MessageBoxW mocked to no-op in test environment.
 
 **Result**:
 - `3 passed`
+
+## V1.3.0 - DAEmon Observer Tests (2026-03-17)
+
+**Created**: `test_dae_observer.py`
+- validates recent event tail retrieval for a registered DAE
+- validates live status snapshots combine registry state and recent event history
+
+**Run**:
+- `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest modules/infrastructure/dae_daemon/tests/test_dae_observer.py -q`
+
+**Result**:
+- `2 passed`

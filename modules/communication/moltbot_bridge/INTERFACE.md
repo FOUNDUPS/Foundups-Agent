@@ -338,3 +338,15 @@ This is the canonical internal layout for future work:
 Refactor status:
 - `openclaw_dae.py` now stays below the large-file threshold at `1342` lines
 - execution-plane resolution now matches `WSP_97`: resolve intent -> gate -> plan -> route -> validate -> remember
+
+## Runtime Supervision Commands
+
+OpenClaw can now read the DAEmon live ledger for itself and broker-managed DAEs:
+
+- `tail openclaw`
+- `status openclaw live`
+- `tail pqn research`
+- `status pqn research live`
+- `tail holodae`
+
+These commands are read-only. They use the central DAEmon observer surface and do not mutate runtime state.

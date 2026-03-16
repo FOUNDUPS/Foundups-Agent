@@ -230,6 +230,54 @@ class DAEEventStore:
             )
         return events
 
+    def query_recent(
+        self,
+        event_type: Optional[str] = None,
+        dae_id: Optional[str] = None,
+        limit: int = 50,
+    ) -> List[DAEEvent]:
+        """Return the most recent events, ordered oldest->newest within the window."""
+        conditions = ["1=1"]
+        params: List[Any] = []
+
+        if event_type:
+            conditions.append("event_type = ?")
+            params.append(event_type)
+        if dae_id:
+            conditions.append("dae_id = ?")
+            params.append(dae_id)
+
+        where_clause = " AND ".join(conditions)
+        params.append(limit)
+
+        with self._connect() as conn:
+            cursor = conn.execute(
+                f"""
+                SELECT * FROM dae_events
+                WHERE {where_clause}
+                ORDER BY sequence_id DESC
+                LIMIT ?
+                """,
+                tuple(params),
+            )
+            rows = list(reversed(cursor.fetchall()))
+
+        events = []
+        for row in rows:
+            events.append(
+                DAEEvent(
+                    event_id=row["event_id"],
+                    sequence_id=row["sequence_id"],
+                    dedupe_key=row["dedupe_key"],
+                    event_type=DAEEventType(row["event_type"]),
+                    dae_id=row["dae_id"],
+                    actor_id=row["actor_id"] or "system",
+                    payload=json.loads(row["payload_json"] or "{}"),
+                    timestamp=row["timestamp"],
+                )
+            )
+        return events
+
     # ------------------------------------------------------------------
     # Stats / Parity
     # ------------------------------------------------------------------

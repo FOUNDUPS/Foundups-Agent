@@ -306,3 +306,11 @@
 - Result: `4 passed, 92 deselected, 2 warnings`
 - Notes:
   - Confirms extracted status/telemetry surfaces still drive token usage, cancellation, monitor, and follow-wsp behavior correctly.
+
+## 2026-03-17: Runtime supervision adapter coverage
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py modules/communication/moltbot_bridge/tests/test_openclaw_dae_runtime_commands.py -q`
+- Status: PASS
+- Result: `11 passed`
+- Notes:
+  - Confirms `tail <dae>` and `status <dae> live` classify as monitor intents.
+  - Confirms OpenClaw runtime supervision for `openclaw` routes through the new DAEmon observer path.

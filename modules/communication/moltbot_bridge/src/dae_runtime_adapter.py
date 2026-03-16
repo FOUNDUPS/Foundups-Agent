@@ -11,12 +11,16 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger("dae_runtime_adapter")
 
 
 _DAE_ALIASES: Dict[str, str] = {
+    "openclaw dae": "openclaw",
+    "openclaw": "openclaw",
+    "claw": "openclaw",
+    "0102": "openclaw",
     "holodae": "holodae",
     "holo dae": "holodae",
     "git push dae": "git_push_dae",
@@ -37,6 +41,7 @@ _DAE_ALIASES: Dict[str, str] = {
 
 _MUTATING_VERBS = ("launch", "start", "stop")
 _STATUS_VERBS = ("status", "show")
+_TAIL_VERBS = ("tail", "watch")
 _LIST_PATTERNS = (
     "list daes",
     "list launchable daes",
@@ -66,6 +71,16 @@ def _get_launch_broker():
         return None
 
 
+def _get_dae_observer():
+    try:
+        from modules.infrastructure.dae_daemon.src.dae_observer import get_dae_observer
+
+        return get_dae_observer()
+    except Exception as exc:
+        logger.debug("[DAE-RUNTIME] DAE observer unavailable: %s", exc)
+        return None
+
+
 def parse_dae_runtime_request(message: str) -> Optional[Dict[str, str]]:
     """Return normalized runtime request or None."""
     msg = _normalize(message)
@@ -82,8 +97,10 @@ def parse_dae_runtime_request(message: str) -> Optional[Dict[str, str]]:
             if msg.startswith(f"{verb} ") or f" {verb} " in msg:
                 action = verb
                 break
+    elif any(msg.startswith(f"{verb} ") or f" {verb} " in msg for verb in _TAIL_VERBS):
+        action = "tail"
     elif any(msg.startswith(f"{verb} ") or f" {verb} " in msg for verb in _STATUS_VERBS):
-        action = "status"
+        action = "live_status" if " live" in msg or msg.startswith("live ") else "status"
 
     if not action:
         return None
@@ -105,9 +122,65 @@ def classify_dae_runtime_category(message: str) -> Optional[str]:
     request = parse_dae_runtime_request(message)
     if not request:
         return None
-    if request["action"] in {"status", "list"}:
+    if request["action"] in {"status", "live_status", "tail", "list"}:
         return "monitor"
     return "system"
+
+
+def _format_event_line(event: Dict[str, Any]) -> str:
+    payload = event.get("payload", {}) or {}
+    base = f"#{event.get('sequence_id')} {event.get('event_type')}"
+    if event.get("event_type") == "action_performed":
+        action = payload.get("action_type", "action")
+        target = payload.get("target") or payload.get("details", {}).get("target") or payload.get("action_target")
+        result = payload.get("result", "")
+        parts = [base, f"action={action}"]
+        if target:
+            parts.append(f"target={target}")
+        if result:
+            parts.append(f"result={str(result)[:80]}")
+        return " | ".join(parts)
+    if event.get("event_type") == "dae_state_changed":
+        return (
+            f"{base} | {payload.get('old_state', 'unknown')} -> "
+            f"{payload.get('new_state', 'unknown')} | reason={payload.get('reason', 'none')}"
+        )
+    if event.get("event_type") == "message_in":
+        return f"{base} | from={payload.get('source', 'unknown')} | {payload.get('summary', '')[:80]}"
+    if event.get("event_type") == "message_out":
+        return f"{base} | to={payload.get('dest', 'unknown')} | {payload.get('summary', '')[:80]}"
+    return base
+
+
+def _format_live_status(snapshot: Dict[str, Any]) -> str:
+    runtime = snapshot.get("runtime", {}) or {}
+    lines = [
+        f"DAE live status `{snapshot.get('dae_id')}`",
+        f"state={snapshot.get('state')}",
+        f"enabled={snapshot.get('enabled')}",
+        f"registered={snapshot.get('registered')}",
+    ]
+    if snapshot.get("domain"):
+        lines.append(f"domain={snapshot.get('domain')}")
+    if snapshot.get("pid"):
+        lines.append(f"pid={snapshot.get('pid')}")
+    if snapshot.get("last_heartbeat_age_sec") is not None:
+        lines.append(f"last_heartbeat_age_sec={snapshot.get('last_heartbeat_age_sec')}")
+    if runtime:
+        if "running" in runtime:
+            lines.append(f"running={runtime.get('running')}")
+        if "run_count" in runtime:
+            lines.append(f"run_count={runtime.get('run_count')}")
+        if runtime.get("last_error"):
+            lines.append(f"last_error={runtime.get('last_error')}")
+        elif runtime.get("last_result_summary"):
+            lines.append(f"last_result={runtime.get('last_result_summary')}")
+
+    recent_events = snapshot.get("recent_events", [])
+    if recent_events:
+        lines.append("recent_events:")
+        lines.extend(f"- {_format_event_line(event)}" for event in recent_events)
+    return "\n".join(lines)
 
 
 def handle_dae_runtime_intent(
@@ -121,17 +194,18 @@ def handle_dae_runtime_intent(
     if not request:
         return ""
 
-    broker = _get_launch_broker()
-    if broker is None:
-        return (
-            "DAE runtime broker is not available. Start the system through `python main.py` "
-            "so 0102 can bootstrap runtime launches."
-        )
-
     action = request["action"]
     dae_id = request["dae_id"]
 
+    observer = _get_dae_observer()
+    broker = _get_launch_broker()
+
     if action == "list":
+        if broker is None:
+            return (
+                "DAE runtime broker is not available. Start the system through `python main.py` "
+                "so 0102 can bootstrap runtime launches."
+            )
         launchable = broker.list_launchable_daes()
         if not launchable:
             return "No launchable DAEs are currently registered."
@@ -150,7 +224,30 @@ def handle_dae_runtime_intent(
             "launch/status/stop by the known runtime name."
         )
 
+    if action == "tail":
+        if observer is None:
+            return "DAE observer is not available yet."
+        events = observer.tail_events(dae_id=dae_id, limit=8)
+        if not events:
+            return f"No recent daemon events for `{dae_id}`."
+        lines = [f"DAE event tail `{dae_id}`"]
+        lines.extend(f"- {_format_event_line(event)}" for event in events)
+        return "\n".join(lines)
+
+    if action == "live_status":
+        if observer is None:
+            return "DAE observer is not available yet."
+        snapshot = observer.get_live_status(dae_id, limit=8)
+        if not snapshot.get("registered"):
+            return f"DAE runtime `{dae_id}` is not registered."
+        return _format_live_status(snapshot)
+
     if action == "status":
+        if broker is None:
+            return (
+                "DAE runtime broker is not available. Start the system through `python main.py` "
+                "so 0102 can bootstrap runtime launches."
+            )
         result = broker.get_runtime_status(dae_id)
         if not result.get("registered"):
             return f"DAE runtime `{dae_id}` is not registered."
@@ -167,6 +264,12 @@ def handle_dae_runtime_intent(
         return (
             "Runtime launch and stop commands require 012 authorization. "
             "Use `status <dae>` or `list launchable daes` for read-only inspection."
+        )
+
+    if broker is None:
+        return (
+            "DAE runtime broker is not available. Start the system through `python main.py` "
+            "so 0102 can bootstrap runtime launches."
         )
 
     if action in {"launch", "start"}:
