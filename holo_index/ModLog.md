@@ -5753,3 +5753,8 @@ The complete DAE Memory System has been implemented:
   - Downloaded `Qwen3.5-4B-Q4_K_M.gguf`
   - Hardlinked to `E:/LM_studio/models/local/qwen3.5-4b`
   - LM Studio reported loaded model id `qwen3.5-4b`
+
+## [2026-03-16] - Adaptive-learning search path stabilized
+- Fixed the `AgentDB` schema/runtime mismatch that was breaking adaptive-learning startup on older databases (`agents_autonomous_tasks` missing `status`).
+- Fixed coordination-event ID collisions in `holo_index/adaptive_learning/breadcrumb_tracer.py` by replacing second-resolution IDs with UUID-backed runtime IDs.
+- Verified live HoloIndex searches no longer emit database errors on repeated generic queries such as `AionUI`.
