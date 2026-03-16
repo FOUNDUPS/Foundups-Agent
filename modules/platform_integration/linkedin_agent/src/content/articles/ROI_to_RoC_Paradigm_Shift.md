@@ -1,6 +1,6 @@
 # ROI Is Dead. Return on Compute™ Is Coming.
 
-**By UnDaoDu 012 🖐️ with 0102 🦞**
+UnDaoDu 012 🖐️ and 0102 🦞
 
 ---
 

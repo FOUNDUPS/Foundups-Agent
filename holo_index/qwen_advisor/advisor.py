@@ -357,8 +357,11 @@ class QwenAdvisor:
             return None
 
     def generate_guidance(self, context: AdvisorContext, enable_dae_cube_mapping: bool = False, enable_function_indexing: bool = False) -> AdvisorResult:
-        """Generate intelligent guidance using WSP Master, LLM, and Pattern Coach."""
+        """Generate intelligent guidance using WSP Master, LLM, and Pattern Coach.
 
+        WSP 97 Refactored: Extracted into 4 phases per Occam's Layer Discipline.
+        """
+        # PHASE 1: Check cache
         cache_key = self.cache.make_key(context.query, {"code": len(context.code_hits), "wsp": len(context.wsp_hits)})
         cube_tags = sorted({hit.get('cube') for hit in context.code_hits + context.wsp_hits if hit and hit.get('cube')})
         cached = self.cache.get(cache_key)
@@ -366,15 +369,33 @@ class QwenAdvisor:
             logger.debug("Advisor cache hit for query: %s", context.query)
             return AdvisorResult(**cached)
 
-        # NEW: Step 0.5 - File Movement Detection & WSP Compliance
-        file_movement_analysis = self.detect_file_movements_and_compliance(context)
-        if file_movement_analysis['file_movements_detected']:
+        # PHASE 2: Pre-analysis (file movement, integration gaps, troubleshooting)
+        pre_analysis = self._run_pre_analysis(context)
+
+        # PHASE 3: Core analysis (WSP, LLM, rules engine)
+        core_analysis = self._run_core_analysis(context)
+        prompt = core_analysis['prompt']
+
+        # PHASE 4: Synthesize and build result
+        return self._build_guidance_result(
+            context, pre_analysis, core_analysis, cube_tags, cache_key, prompt,
+            enable_dae_cube_mapping, enable_function_indexing
+        )
+
+    def _run_pre_analysis(self, context: AdvisorContext) -> Dict[str, Any]:
+        """Run pre-analysis phase: file movement, integration gaps, troubleshooting."""
+        result = {
+            'file_movement_analysis': {},
+            'integration_gaps': None,
+            'troubleshooting_guidance': ""
+        }
+
+        # File Movement Detection & WSP Compliance
+        result['file_movement_analysis'] = self.detect_file_movements_and_compliance(context)
+        if result['file_movement_analysis']['file_movements_detected']:
             logger.info("[CYCLE] File movement detected - initiating WSP compliance verification")
 
-        # Initialize guidance as dict to store analysis results
-        guidance = {}
-
-        # NEW: Step 0.6 - Integration Gap Detection
+        # Integration Gap Detection
         logger.info("[INTEGRATION-GAP] Starting integration gap detection analysis")
         integration_gap_analysis = self.detect_integration_gaps(context)
         logger.info(f"[INTEGRATION-GAP] Analysis complete - Found {len(integration_gap_analysis.get('detected_gaps', []))} gaps")
@@ -382,36 +403,44 @@ class QwenAdvisor:
             logger.info("[LINK] Integration gaps detected - Module A monitors but Module B can't act")
             for gap in integration_gap_analysis['detected_gaps']:
                 logger.info(f"[GAP] {gap['type']}: {gap['monitoring_module']} -> {gap['action_module']}")
-            guidance['integration_gaps'] = integration_gap_analysis
+            result['integration_gaps'] = integration_gap_analysis
 
-        # Step 0: Troubleshooting Pattern Recognition
+        # Troubleshooting Pattern Recognition
         troubleshooting_patterns = self._detect_troubleshooting_patterns(context.query)
-        troubleshooting_guidance = ""
         if troubleshooting_patterns:
             logger.info("[TOOL] Troubleshooting patterns detected: %s", list(troubleshooting_patterns.keys()))
-            troubleshooting_guidance = self._generate_troubleshooting_guidance(troubleshooting_patterns)
+            result['troubleshooting_guidance'] = self._generate_troubleshooting_guidance(troubleshooting_patterns)
 
-        # Step 1: WSP Master Analysis - Comprehensive protocol guidance
-        wsp_analysis = self.wsp_master.analyze_query(context.query, context.code_hits)
+        return result
 
-        # Check for Unicode/emojis preventive warnings (WSP 20)
-        unicode_check = None
-        if "code" in context.query.lower() or "implement" in context.query.lower() or "python" in context.query.lower():
-            unicode_check = self.wsp_master.check_unicode_violation(context.query, "query")
-            if unicode_check["preventive_warning"]:
-                # Add WSP 20 reference for Unicode guidance (not a violation, just prevention)
-                if "WSP_20" not in wsp_analysis.suggested_wsps:
-                    wsp_analysis.suggested_wsps.append("WSP_20")
-                    wsp_analysis.wsp_relevance["WSP_20"] = 0.7  # Lower priority since it's preventive
+    def _run_core_analysis(self, context: AdvisorContext) -> Dict[str, Any]:
+        """Run core analysis phase: WSP, LLM, rules engine."""
+        result = {
+            'wsp_analysis': None,
+            'llm_analysis': None,
+            'rules_guidance': {},
+            'unicode_check': None,
+            'prompt': ""
+        }
+
+        # WSP Master Analysis
+        result['wsp_analysis'] = self.wsp_master.analyze_query(context.query, context.code_hits)
+
+        # Unicode/emojis preventive warnings (WSP 20)
+        if any(kw in context.query.lower() for kw in ["code", "implement", "python"]):
+            result['unicode_check'] = self.wsp_master.check_unicode_violation(context.query, "query")
+            if result['unicode_check']["preventive_warning"]:
+                if "WSP_20" not in result['wsp_analysis'].suggested_wsps:
+                    result['wsp_analysis'].suggested_wsps.append("WSP_20")
+                    result['wsp_analysis'].wsp_relevance["WSP_20"] = 0.7
 
         logger.debug("WSP Master analysis completed: intent=%s, risk=%s",
-                    wsp_analysis.intent_category, wsp_analysis.risk_level)
+                    result['wsp_analysis'].intent_category, result['wsp_analysis'].risk_level)
 
-        # Step 2: LLM Analysis - Intelligent code understanding
-        prompt = build_compliance_prompt(context.query, context.code_hits, context.wsp_hits)
-        llm_analysis = None
+        # LLM Analysis
+        result['prompt'] = build_compliance_prompt(context.query, context.code_hits, context.wsp_hits)
         try:
-            llm_analysis = self.llm_engine.analyze_code_context(
+            result['llm_analysis'] = self.llm_engine.analyze_code_context(
                 query=context.query,
                 code_snippets=[hit.get('content', '')[:500] for hit in context.code_hits[:5]],
                 wsp_guidance=[hit.get('content', '')[:300] for hit in context.wsp_hits[:3]]
@@ -420,70 +449,52 @@ class QwenAdvisor:
         except Exception as e:
             logger.warning(f"LLM analysis failed, falling back to rules engine: {e}")
 
-        # Step 3: Rules Engine Fallback - Compliance checking
-        rules_guidance = self.rules_engine.generate_contextual_guidance(
+        # Rules Engine Fallback
+        result['rules_guidance'] = self.rules_engine.generate_contextual_guidance(
             context.query,
             context.code_hits,
             {"wsp_hits": context.wsp_hits}
         )
 
-        # Step 4: Pattern Coach - Behavioral coaching
-        # Note: Pattern coach is handled at CLI level for now, but could be integrated here
+        return result
 
+    def _build_guidance_result(
+        self, context: AdvisorContext, pre_analysis: Dict[str, Any],
+        core_analysis: Dict[str, Any], cube_tags: List[str], cache_key: str, prompt: str,
+        enable_dae_cube_mapping: bool, enable_function_indexing: bool
+    ) -> AdvisorResult:
+        """Build final guidance result from all analyses."""
+        wsp_analysis = core_analysis['wsp_analysis']
+        llm_analysis = core_analysis['llm_analysis']
+        rules_guidance = core_analysis['rules_guidance']
+        unicode_check = core_analysis['unicode_check']
+        file_movement_analysis = pre_analysis['file_movement_analysis']
 
-        # Combine all guidance sources
-        integration_gaps = guidance.get('integration_gaps')
-        guidance = self._synthesize_guidance(llm_analysis, wsp_analysis, rules_guidance, troubleshooting_guidance, integration_gaps, context, enable_dae_cube_mapping, enable_function_indexing)
+        # Synthesize guidance
+        guidance = self._synthesize_guidance(
+            llm_analysis, wsp_analysis, rules_guidance,
+            pre_analysis['troubleshooting_guidance'],
+            pre_analysis['integration_gaps'],
+            context, enable_dae_cube_mapping, enable_function_indexing
+        )
         todos = self._synthesize_todos(llm_analysis, wsp_analysis, rules_guidance)
-        # Add Unicode preventive warning if detected
-        if unicode_check and unicode_check["preventive_warning"]:
-            unicode_todo = ("WSP 20 PREVENTION: Avoid Unicode/emojis in future code - use ASCII alternatives like [OK], [ERROR], [TARGET]")
-            if unicode_todo not in todos:
-                todos.insert(0, unicode_todo)
         reminders = self._synthesize_reminders(wsp_analysis, rules_guidance)
 
-        # Add Unicode preventive warning to guidance if detected
-        if unicode_check and unicode_check["preventive_warning"]:
-            preventive_warning = f"\\n\\n{unicode_check['recommendation']}"
-            if guidance:
-                guidance += preventive_warning
-            else:
-                guidance = unicode_check['recommendation']
+        # Apply Unicode warnings
+        guidance, todos = self._apply_unicode_warnings(guidance, todos, unicode_check)
 
         # Add test-specific guidance
-        query_lower = context.query.lower()
-        if ('test' in query_lower) and "Review FMAS plan: WSP_framework/docs/testing/HOLOINDEX_QWEN_ADVISOR_FMAS_PLAN.md" not in todos:
-            todos.append("Review FMAS plan: WSP_framework/docs/testing/HOLOINDEX_QWEN_ADVISOR_FMAS_PLAN.md")
+        if 'test' in context.query.lower():
+            fmas_todo = "Review FMAS plan: WSP_framework/docs/testing/HOLOINDEX_QWEN_ADVISOR_FMAS_PLAN.md"
+            if fmas_todo not in todos:
+                todos.append(fmas_todo)
 
-        # Calculate confidence based on guidance sources
+        # Apply file movement guidance
+        guidance, todos = self._apply_file_movement_guidance(guidance, todos, file_movement_analysis)
+
+        # Build metadata
         confidence = self._calculate_confidence(llm_analysis, wsp_analysis)
-
-        # Include violation information
-        violations = []
-        for violation in rules_guidance.get("violations", []):
-            violations.append(f"[{violation['wsp_reference']}] {violation['guidance']}")
-
-        # NEW: Integrate file movement guidance into main guidance
-        if file_movement_analysis['file_movements_detected']:
-            guidance += f"\n\n[CYCLE] FILE MOVEMENT DETECTED - WSP COMPLIANCE REQUIRED:\n"
-            guidance += f"0102 Discoverability Score: {file_movement_analysis['0102_discoverability_score']:.1f}/1.0\n\n"
-
-            if file_movement_analysis['wsp_violations']:
-                guidance += "[ERROR] WSP VIOLATIONS:\n"
-                for violation in file_movement_analysis['wsp_violations']:
-                    guidance += f"   - {violation}\n"
-
-            if file_movement_analysis['documentation_updates_needed']:
-                guidance += "\n[DOCS] REQUIRED DOCUMENTATION UPDATES:\n"
-                for update in file_movement_analysis['documentation_updates_needed']:
-                    guidance += f"   - {update}\n"
-                    todos.append(update)
-
-            if file_movement_analysis['navigation_updates_needed']:
-                guidance += "\n[NAV] REQUIRED NAVIGATION UPDATES:\n"
-                for update in file_movement_analysis['navigation_updates_needed']:
-                    guidance += f"   - {update}\n"
-                    todos.append(update)
+        violations = [f"[{v['wsp_reference']}] {v['guidance']}" for v in rules_guidance.get("violations", [])]
 
         result = AdvisorResult(
             guidance=guidance,
@@ -504,10 +515,11 @@ class QwenAdvisor:
                     "suggested_wsps": wsp_analysis.suggested_wsps,
                     "relevance_scores": wsp_analysis.wsp_relevance
                 },
-                "file_movement_analysis": file_movement_analysis,  # NEW: File movement compliance data
+                "file_movement_analysis": file_movement_analysis,
             },
         )
 
+        # Cache and record telemetry
         self.cache.set(cache_key, result.__dict__)
         record_advisor_event(self.config.telemetry_path, {
             "query": context.query,
@@ -521,164 +533,224 @@ class QwenAdvisor:
 
         return result
 
-    def _synthesize_guidance(self, llm_analysis, wsp_analysis, rules_guidance, troubleshooting_guidance="", integration_gaps=None, context=None, enable_dae_cube_mapping=False, enable_function_indexing=False) -> str:
-        # DEBUG: Check if code index flags are received
-        logger.info(f"[CODE-INDEX-DEBUG] enable_dae_cube_mapping={enable_dae_cube_mapping}, enable_function_indexing={enable_function_indexing}")
-        """Synthesize guidance from all sources using first principles: limit output to prevent truncation."""
+    def _apply_unicode_warnings(self, guidance: str, todos: List[str], unicode_check: Optional[Dict]) -> tuple:
+        """Apply Unicode preventive warnings to guidance and todos."""
+        if unicode_check and unicode_check.get("preventive_warning"):
+            unicode_todo = "WSP 20 PREVENTION: Avoid Unicode/emojis in future code - use ASCII alternatives like [OK], [ERROR], [TARGET]"
+            if unicode_todo not in todos:
+                todos.insert(0, unicode_todo)
+            preventive_warning = f"\\n\\n{unicode_check['recommendation']}"
+            guidance = (guidance + preventive_warning) if guidance else unicode_check['recommendation']
+        return guidance, todos
 
-        # FIRST PRINCIPLES: Check if we need to limit output to prevent console truncation
+    def _apply_file_movement_guidance(self, guidance: str, todos: List[str], file_movement_analysis: Dict) -> tuple:
+        """Apply file movement compliance guidance."""
+        if not file_movement_analysis.get('file_movements_detected'):
+            return guidance, todos
+
+        guidance += f"\n\n[CYCLE] FILE MOVEMENT DETECTED - WSP COMPLIANCE REQUIRED:\n"
+        guidance += f"0102 Discoverability Score: {file_movement_analysis['0102_discoverability_score']:.1f}/1.0\n\n"
+
+        if file_movement_analysis.get('wsp_violations'):
+            guidance += "[ERROR] WSP VIOLATIONS:\n"
+            for violation in file_movement_analysis['wsp_violations']:
+                guidance += f"   - {violation}\n"
+
+        if file_movement_analysis.get('documentation_updates_needed'):
+            guidance += "\n[DOCS] REQUIRED DOCUMENTATION UPDATES:\n"
+            for update in file_movement_analysis['documentation_updates_needed']:
+                guidance += f"   - {update}\n"
+                todos.append(update)
+
+        if file_movement_analysis.get('navigation_updates_needed'):
+            guidance += "\n[NAV] REQUIRED NAVIGATION UPDATES:\n"
+            for update in file_movement_analysis['navigation_updates_needed']:
+                guidance += f"   - {update}\n"
+                todos.append(update)
+
+        return guidance, todos
+
+    def _synthesize_guidance(self, llm_analysis, wsp_analysis, rules_guidance, troubleshooting_guidance="", integration_gaps=None, context=None, enable_dae_cube_mapping=False, enable_function_indexing=False) -> str:
+        """Synthesize guidance from all sources. WSP 97 refactored into modular sections."""
+        logger.info(f"[CODE-INDEX-DEBUG] enable_dae_cube_mapping={enable_dae_cube_mapping}, enable_function_indexing={enable_function_indexing}")
+
+        # PHASE 1: Determine output mode
+        strict_mode = self._check_strict_mode(context)
+        guidance_parts = []
+
+        # PHASE 2: Add optional sections based on flags and mode
+        self._add_cube_mapping_section(guidance_parts, context, wsp_analysis, enable_dae_cube_mapping, strict_mode)
+        self._add_codeindex_section(guidance_parts, context, wsp_analysis, enable_function_indexing, strict_mode)
+
+        # PHASE 3: Add troubleshooting if detected
+        if troubleshooting_guidance and not strict_mode:
+            guidance_parts.append(troubleshooting_guidance)
+            guidance_parts.append("")
+
+        # PHASE 4: Add integration gaps and work context
+        self._add_integration_gap_section(guidance_parts, integration_gaps, strict_mode)
+        self._add_work_context_section(guidance_parts, context, strict_mode)
+
+        # PHASE 5: Add primary guidance (LLM/WSP/rules fallback)
+        self._add_primary_guidance_section(guidance_parts, llm_analysis, wsp_analysis, rules_guidance)
+
+        return " ".join(guidance_parts)
+
+    def _check_strict_mode(self, context: Optional[AdvisorContext]) -> bool:
+        """Determine if strict output limiting is needed to prevent truncation."""
         total_findings = 0
         if context:
             total_findings = len(context.code_hits) + len(context.wsp_hits)
 
-        # If many findings (>20), apply strict output limiting (first principles: prevent information overload)
         strict_mode = total_findings > 20
         if strict_mode:
             logger.info(f"[FIRST-PRINCIPLES] High volume results ({total_findings}) - applying strict output limiting")
 
-        guidance_parts = []
-
-        # RECURSIVE LEARNING: Check for output truncation patterns and adapt
-        if hasattr(self, '_detect_output_truncation_patterns'):
+        # Check for output truncation patterns
+        if hasattr(self, '_detect_output_truncation_patterns') and context:
             truncation_detected = self._detect_output_truncation_patterns(context, total_findings)
             if truncation_detected:
                 logger.info("[RECURSIVE] Output truncation pattern detected - enabling emergency limiting")
-                strict_mode = True  # Force strict mode for truncation prevention
+                strict_mode = True
 
-        # REVOLUTIONARY DAE CUBE MAPPING: Generate system flow awareness (only when enabled)
-        cube_mapping = None
-        if enable_dae_cube_mapping:
-            cube_mapping = self._generate_dae_cube_mapping(context, wsp_analysis)
+        return strict_mode
 
-        if cube_mapping and not strict_mode:  # FIRST PRINCIPLES: Skip cube mapping in strict mode to prevent truncation
-            guidance_parts.append("[CUBE-MAP] DAE CUBE MAPPING (WSP 80):")
-            guidance_parts.append(f"  [BOUNDARY] Active Cube: {cube_mapping.get('active_cube', 'Unknown')}")
-            guidance_parts.append(f"  [MODULES] Cube contains: {len(cube_mapping.get('modules', []))} modules")
+    def _add_cube_mapping_section(self, guidance_parts: List[str], context, wsp_analysis, enabled: bool, strict_mode: bool) -> None:
+        """Add DAE cube mapping section to guidance."""
+        if not enabled or strict_mode:
+            return
 
-            # Show mermaid flow if available
-            mermaid_flow = cube_mapping.get('mermaid_flow')
-            if mermaid_flow and len(mermaid_flow) < 500:  # Limit mermaid size to prevent truncation
-                guidance_parts.append("  [FLOW] Mermaid System Flow:")
-                guidance_parts.append("    ```mermaid")
-                guidance_parts.append(f"    {mermaid_flow}")
-                guidance_parts.append("    ```")
+        cube_mapping = self._generate_dae_cube_mapping(context, wsp_analysis)
+        if not cube_mapping:
+            return
+
+        guidance_parts.append("[CUBE-MAP] DAE CUBE MAPPING (WSP 80):")
+        guidance_parts.append(f"  [BOUNDARY] Active Cube: {cube_mapping.get('active_cube', 'Unknown')}")
+        guidance_parts.append(f"  [MODULES] Cube contains: {len(cube_mapping.get('modules', []))} modules")
+
+        mermaid_flow = cube_mapping.get('mermaid_flow')
+        if mermaid_flow and len(mermaid_flow) < 500:
+            guidance_parts.append("  [FLOW] Mermaid System Flow:")
+            guidance_parts.append("    ```mermaid")
+            guidance_parts.append(f"    {mermaid_flow}")
+            guidance_parts.append("    ```")
+        guidance_parts.append("")
+
+    def _add_codeindex_section(self, guidance_parts: List[str], context, wsp_analysis, enabled: bool, strict_mode: bool) -> None:
+        """Add CodeIndex surgical analysis section to guidance."""
+        if not enabled:
+            return
+
+        verbose_mode = os.getenv('HOLO_VERBOSE', '').lower() in {'1', 'true', 'yes'}
+        if verbose_mode:
+            print("[DEBUG] CODEINDEX: Starting comprehensive surgical analysis...")
+
+        if not strict_mode:
+            self._add_full_codeindex_analysis(guidance_parts, context)
+        else:
+            self._add_basic_codeindex_analysis(guidance_parts, context, wsp_analysis)
+
+    def _add_full_codeindex_analysis(self, guidance_parts: List[str], context) -> None:
+        """Add full CodeIndex surgical analysis (non-strict mode)."""
+        # 1. SURGICAL CODE INDEX
+        surgical_results = self.surgical_code_index(context)
+        if surgical_results['exact_fixes']:
+            guidance_parts.append("[SURGERY] SURGICAL CODE INDEX - EXACT FIX LOCATIONS:")
+            for fix in surgical_results['exact_fixes'][:3]:
+                guidance_parts.append(f"  [TARGET] {fix['function']} ({fix['line_range']}) - {fix['estimated_effort']}min effort")
+                guidance_parts.append(f"     -> Lines {fix['start_line']}-{fix['end_line']} ({fix['end_line'] - fix['start_line'] + 1} lines)")
             guidance_parts.append("")
 
-        # CODEINDEX: SURGICAL PRECISION METHODS - Enhanced Function Analysis
-        if enable_function_indexing:
-            print("[DEBUG] CODEINDEX: Starting comprehensive surgical analysis...")  # DEBUG
+        # 2. LEGO VISUALIZATION
+        lego_viz = self.lego_visualization(context)
+        if "[BLOCK-" in lego_viz:
+            guidance_parts.append(lego_viz)
+            guidance_parts.append("")
 
-            if not strict_mode:  # Only run full CodeIndex in non-strict mode
-                # 1. SURGICAL CODE INDEX - Exact fix locations
-                surgical_results = self.surgical_code_index(context)
-                if surgical_results['exact_fixes']:
-                    guidance_parts.append("[SURGERY] SURGICAL CODE INDEX - EXACT FIX LOCATIONS:")
-                    for fix in surgical_results['exact_fixes'][:3]:  # Limit to top 3
-                        guidance_parts.append(f"  [TARGET] {fix['function']} ({fix['line_range']}) - {fix['estimated_effort']}min effort")
-                        guidance_parts.append(f"     -> Lines {fix['start_line']}-{fix['end_line']} ({fix['end_line'] - fix['start_line'] + 1} lines)")
-                    guidance_parts.append("")
+        # 3. CONTINUOUS CIRCULATION
+        guidance_parts.append(self.continuous_circulation(context))
+        guidance_parts.append("")
 
-                # 2. LEGO VISUALIZATION - Function snap points
-                lego_viz = self.lego_visualization(context)
-                if "[BLOCK-" in lego_viz:
-                    guidance_parts.append(lego_viz)
-                    guidance_parts.append("")
+        # 4. PRESENT CHOICE
+        guidance_parts.append(self.present_choice(context))
+        guidance_parts.append("")
 
-                # 3. CONTINUOUS CIRCULATION - Health monitoring
-                circulation_status = self.continuous_circulation(context)
-                guidance_parts.append(circulation_status)
-                guidance_parts.append("")
+        # 5. CHALLENGE ASSUMPTIONS
+        assumption_analysis = self.challenge_assumptions(context)
+        if len(assumption_analysis.split('\n')) > 2:
+            guidance_parts.append(assumption_analysis)
+            guidance_parts.append("")
 
-                # 4. PRESENT CHOICE - A/B/C decision framework
-                choice_framework = self.present_choice(context)
-                guidance_parts.append(choice_framework)
-                guidance_parts.append("")
+    def _add_basic_codeindex_analysis(self, guidance_parts: List[str], context, wsp_analysis) -> None:
+        """Add basic CodeIndex analysis (strict mode fallback)."""
+        function_indexing = self._generate_function_level_indexing(context, wsp_analysis)
+        if not function_indexing:
+            return
 
-                # 5. CHALLENGE ASSUMPTIONS - Hidden assumptions analysis
-                assumption_analysis = self.challenge_assumptions(context)
-                if len(assumption_analysis.split('\n')) > 2:  # Only if findings exist
-                    guidance_parts.append(assumption_analysis)
-                    guidance_parts.append("")
+        guidance_parts.append("[CODE-INDEX] FUNCTION-LEVEL CODE INDEXING (WSP 92):")
+        primary_module = function_indexing.get('primary_module')
+        if primary_module:
+            functions = primary_module.get('functions', [])
+            guidance_parts.append(f"  [FUNCTIONS] {len(functions)} functions indexed")
+            complex_funcs = sorted(functions, key=lambda f: f.get('complexity', 1), reverse=True)[:3]
+            for func in complex_funcs:
+                complexity_str = self._complexity_to_string(func.get('complexity', 1))
+                guidance_parts.append(f"    [BULLET] {func.get('name', 'unknown')} - {complexity_str}")
+        guidance_parts.append("")
 
-            else:
-                # Fallback to basic function indexing in strict mode
-                function_indexing = self._generate_function_level_indexing(context, wsp_analysis)
-                if function_indexing:
-                    guidance_parts.append("[CODE-INDEX] FUNCTION-LEVEL CODE INDEXING (WSP 92):")
-                    primary_module = function_indexing.get('primary_module')
-                    if primary_module:
-                        functions = primary_module.get('functions', [])
-                        guidance_parts.append(f"  [FUNCTIONS] {len(functions)} functions indexed")
-                        # Show top complexity functions
-                        complex_funcs = sorted(functions, key=lambda f: f.get('complexity', 1), reverse=True)[:3]
-                        for func in complex_funcs:
-                            complexity_str = self._complexity_to_string(func.get('complexity', 1))
-                            guidance_parts.append(f"    • {func.get('name', 'unknown')} - {complexity_str}")
-                    guidance_parts.append("")
+    def _add_integration_gap_section(self, guidance_parts: List[str], integration_gaps: Optional[Dict], strict_mode: bool) -> None:
+        """Add integration gap detection section to guidance."""
+        if not integration_gaps or not integration_gaps.get('detected_gaps'):
+            return
 
-        # Priority: Troubleshooting guidance (if detected)
-        if troubleshooting_guidance and not strict_mode:  # FIRST PRINCIPLES: Skip troubleshooting in strict mode
-            guidance_parts.append(troubleshooting_guidance)
-            guidance_parts.append("")  # Add spacing
+        guidance_parts.append("[LINK] INTEGRATION GAPS DETECTED:")
+        gap_limit = 1 if strict_mode else 3
+        for gap in integration_gaps['detected_gaps'][:gap_limit]:
+            guidance_parts.append(f"  - {gap['type']}: {gap['monitoring_module']} -> {gap['action_module']}")
 
-        # DEBUG: Check if code index content is in guidance_parts
-        verbose_mode = os.getenv('HOLO_VERBOSE', '').lower() in {'1', 'true', 'yes'}
-        code_index_found = any("[CODE-INDEX]" in part for part in guidance_parts)
-        if verbose_mode:
-            print(f"[DEBUG] CODE INDEX: Content in guidance_parts: {code_index_found}")  # DEBUG
+        if integration_gaps.get('recommended_integrations') and not strict_mode:
+            guidance_parts.append("  [IDEA] RECOMMENDED INTEGRATIONS:")
+            for rec in integration_gaps['recommended_integrations'][:1]:
+                guidance_parts.append(f"     {rec}")
+        guidance_parts.append("")
 
-        final_guidance = " ".join(guidance_parts)
-        code_index_in_final = "[CODE-INDEX]" in final_guidance
-        if verbose_mode:
-            print(f"[DEBUG] CODE INDEX: Content in final guidance: {code_index_in_final}")  # DEBUG
-            print(f"[DEBUG] CODE INDEX: Final guidance length: {len(final_guidance)}")  # DEBUG
-
-        # NEW: HIGH PRIORITY - Integration Gap Detection
-        if integration_gaps and integration_gaps.get('detected_gaps'):
-            guidance_parts.append("[LINK] INTEGRATION GAPS DETECTED:")
-            # FIRST PRINCIPLES: In strict mode, limit to 1 gap to prevent truncation
-            gap_limit = 1 if strict_mode else 3
-            for gap in integration_gaps['detected_gaps'][:gap_limit]:
-                guidance_parts.append(f"  - {gap['type']}: {gap['monitoring_module']} -> {gap['action_module']}")
-            if integration_gaps.get('recommended_integrations') and not strict_mode:
-                guidance_parts.append("  [IDEA] RECOMMENDED INTEGRATIONS:")
-                for rec in integration_gaps['recommended_integrations'][:1]:  # Strict: only top 1
-                    guidance_parts.append(f"     {rec}")
-            guidance_parts.append("")  # Add spacing
-
-        # NEW: REAL-TIME 0102 WORK CONTEXT MAP
+    def _add_work_context_section(self, guidance_parts: List[str], context, strict_mode: bool) -> None:
+        """Add 0102 work context map section to guidance."""
         logger.info("[WORK-CONTEXT] Generating 0102 work context map")
         work_context_map = self._generate_work_context_map(context)
-        logger.info(f"[WORK-CONTEXT] Map generated - Confidence: {work_context_map.get('confidence', 0.0) if work_context_map else 0.0:.2f}")
-        if work_context_map and not strict_mode:  # FIRST PRINCIPLES: Skip work context in strict mode to prevent truncation
-            logger.info(f"[WORK-CONTEXT] Current task: {work_context_map.get('current_task', 'Unknown')}")
-            logger.info(f"[WORK-CONTEXT] Active module: {work_context_map.get('active_module', 'Unknown')}")
-            guidance_parts.append("[MAP] 0102 WORK CONTEXT MAP:")
-            guidance_parts.append(f"  [TARGET] Current Focus: {work_context_map.get('current_task', 'Unknown')}")
-            guidance_parts.append(f"  [FOLDER] Active Module: {work_context_map.get('active_module', 'Unknown')}")
-            guidance_parts.append(f"  [LOCATION] Exact Location: {work_context_map.get('exact_location', 'Unknown')}")
-            if work_context_map.get('related_modules'):
-                guidance_parts.append("  [LINK] Related Modules:")
-                related_limit = 1 if strict_mode else 3  # Strict: only 1 related module
-                for mod in work_context_map['related_modules'][:related_limit]:
-                    guidance_parts.append(f"     - {mod}")
-            guidance_parts.append("")  # Add spacing
+        confidence = work_context_map.get('confidence', 0.0) if work_context_map else 0.0
+        logger.info(f"[WORK-CONTEXT] Map generated - Confidence: {confidence:.2f}")
 
-        # Primary: LLM analysis (if available)
+        if not work_context_map or strict_mode:
+            return
+
+        logger.info(f"[WORK-CONTEXT] Current task: {work_context_map.get('current_task', 'Unknown')}")
+        logger.info(f"[WORK-CONTEXT] Active module: {work_context_map.get('active_module', 'Unknown')}")
+
+        guidance_parts.append("[MAP] 0102 WORK CONTEXT MAP:")
+        guidance_parts.append(f"  [TARGET] Current Focus: {work_context_map.get('current_task', 'Unknown')}")
+        guidance_parts.append(f"  [FOLDER] Active Module: {work_context_map.get('active_module', 'Unknown')}")
+        guidance_parts.append(f"  [LOCATION] Exact Location: {work_context_map.get('exact_location', 'Unknown')}")
+
+        if work_context_map.get('related_modules'):
+            guidance_parts.append("  [LINK] Related Modules:")
+            related_limit = 1 if strict_mode else 3
+            for mod in work_context_map['related_modules'][:related_limit]:
+                guidance_parts.append(f"     - {mod}")
+        guidance_parts.append("")
+
+    def _add_primary_guidance_section(self, guidance_parts: List[str], llm_analysis, wsp_analysis, rules_guidance: Dict) -> None:
+        """Add primary guidance from LLM, WSP, or rules engine."""
         if llm_analysis and llm_analysis.get("guidance"):
             guidance_parts.append(llm_analysis["guidance"])
         else:
-            # Secondary: WSP Master guidance
             wsp_guidance_items = self.wsp_master.generate_comprehensive_guidance(wsp_analysis)
             if wsp_guidance_items:
                 top_guidance = wsp_guidance_items[0]
                 guidance_parts.append(f"{top_guidance.wsp_reference}: {top_guidance.guidance}")
 
-        # Tertiary: Rules engine fallback
         if not guidance_parts:
             guidance_parts.append(rules_guidance.get("primary_guidance", "Query processed. Follow WSP protocols."))
-
-        return " ".join(guidance_parts)
 
     def _synthesize_todos(self, llm_analysis, wsp_analysis, rules_guidance) -> List[str]:
         """Synthesize TODOs from all sources."""

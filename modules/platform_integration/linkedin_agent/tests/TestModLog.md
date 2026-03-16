@@ -13,6 +13,21 @@ wsp_cycle(input="linkedin_test_evolution", log=True)
 
 ## [CLIPBOARD] **Test Framework Evolution Timeline**
 
+### **Latest: LinkedIn Publishing Router + Article Targeting Skill**
+
+**WSP Compliance**: WSP 34 (Test Documentation), WSP 5 (Testing Standards), WSP 22 (Module Memory)
+
+#### **[OK] NEW TEST COVERAGE**
+- Added `test_content/test_publishing_router.py`
+  - entity listing
+  - historical article search
+  - heuristic route resolution
+  - personal-profile limitation reporting
+- Added `skillz/linkedin_article_targeting/tests/test_linkedin_article_targeting.py`
+  - `list_entities`
+  - `search_articles`
+  - `resolve_target`
+
 ### **Latest: Session Pickle Binary I/O Regression**
 
 **WSP Compliance**: WSP 34 (Test Documentation), WSP 5 (Testing Standards), WSP 22 (Module Memory)

@@ -465,6 +465,34 @@ def _start_obs_orchestration():
         _obs_threads.extend([grid_thread, news_thread])
         print('[OBS] Video orchestration started (grid + news)')
 
+        # Boot Layer Rotator - GCC shipping, chess, etc. schema rotation
+        if os.getenv("ANTIFAFM_BOOT_ROTATOR_ENABLED", "0") == "1":
+            try:
+                from modules.platform_integration.antifafm_broadcaster.skillz.boot_layer_rotator.executor import (
+                    rotation_daemon as boot_rotator_daemon
+                )
+
+                def run_boot_rotator():
+                    """Run boot layer schema rotation (GCC -> Video -> News -> ...)"""
+                    try:
+                        import asyncio
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        print('[OBS-ROTATOR] Starting boot layer rotation (10-min schemas)')
+                        loop.run_until_complete(boot_rotator_daemon())
+                    except Exception as e:
+                        print(f'[OBS-ROTATOR] Fatal error: {e}')
+
+                rotator_thread = threading.Thread(target=run_boot_rotator, daemon=True, name="obs-rotator")
+                rotator_thread.start()
+                _obs_threads.append(rotator_thread)
+                print('[OBS] Boot layer rotator started (ANTIFAFM_BOOT_ROTATOR_ENABLED=1)')
+
+            except ImportError as e:
+                print(f'[OBS] Boot layer rotator import failed: {e}')
+        else:
+            print('[OBS] Boot layer rotator disabled (set ANTIFAFM_BOOT_ROTATOR_ENABLED=1 to enable)')
+
     except ImportError:
         print('[OBS] obsws_python not installed - skipping video orchestration')
     except Exception as e:

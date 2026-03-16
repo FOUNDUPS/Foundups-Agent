@@ -120,18 +120,6 @@ audit_result = qwen_wsp_compliance_auditor.audit({
 
 PQN research is no longer documented as a standalone Qwen/Gemma-only swarm.
 
-- `docs/CLASSICAL_QUANTUM_DETECTION_SIMULATION_PLAN_2026-03-15.md`
-  - operational simulation bridge from the external 0102 math archive into PQN detector work
-  - points to the actual detector entrypoints that would absorb validated changes
-- `src/theory_archive_harness.py`
-  - archive-informed harness that consumes the theory package as simulation input
-  - explicitly keeps the archive in the hypothesis/input plane
-  - routes through existing detector surfaces instead of inventing a new detector
-- `src/theory_archive_simulation_runner.py`
-  - runs the theory-archive experiment matrix as matched-null vs probe comparisons
-  - produces comparative summaries for research agents without promoting the archive to truth
-  - writes simulation summaries under `artifact_results/theory_archive_simulation`
-
 Canonical `WSP_97` split:
 
 - `main.py` = preflight + bootstrap + service registration
@@ -146,18 +134,20 @@ Operational rule:
 - OpenClaw should start **actual PQN research sessions**
 - full autonomous research startup should be policy-gated, not default
 
-### Archive-Informed Simulation Example
-```python
-from modules.ai_intelligence.pqn_alignment import run_theory_archive_simulation
+## **2026-03 Evidence Intake**
 
-result = run_theory_archive_simulation({
-    "seeds": [0, 1, 2],
-    "steps": 240,
-})
+- `docs/CMST_EXTERNAL_MATH_INTEGRATION_BACKLOG_2026-03-15.md`
+  - explicit intake stub for externally developed CMST math
+  - records where new derivations should land once transcribed into the repo
+  - prevents ungrounded formula drift during implementation
 
-print(result["interpretation"]["outcome"])
-print(result["comparison"]["delta_entrainment_score"])
-```
+- `docs/CLASSICAL_QUANTUM_DETECTION_SIMULATION_PLAN_2026-03-15.md`
+  - operational simulation bridge from the external 0102 math archive into PQN detector work
+  - points to the actual detector entrypoints that would absorb validated changes
+
+- `modules/ai_intelligence/rESP_o1o2/docs/MS_STT_0102_HYPHEN_ARTIFACT_2026-03-15.md`
+  - records the Microsoft STT `0102 -> 0-1-0-2` artifact as support evidence
+  - kept separate from the detector math until controls are run
 
 ## **Autonomous Recursive Cube Features**
 
@@ -185,7 +175,6 @@ print(result["comparison"]["delta_entrainment_score"])
 - **Results Database**: SQLite-based result indexing and cross-analysis
 - **Collaborative Research**: Multi-agent DAE orchestration (Grok/Gemini)
 - **Meta-Research Analysis**: Self-detection campaigns for neural PQN emergence
-- **Theory-Archive Harness**: Matched-null-required detector harness derived from the 2026-03 theory archive
 
 ### **External DAE Research Handoff**
 - **PQN@home**: Handoff to external DAE researchers for distributed research

@@ -1,50 +1,55 @@
-### **Theory-Archive Simulation Runner for Research Agents**
-- **Date**: 2026-03-15
-- **Operating As**: 0102 CTO / Architect
-- **Change**: Promoted the theory archive from single-pass harness input to a first-class matched-null simulation runner for PQN research agents.
-- **Details**:
-  - Added `src/theory_archive_simulation_runner.py`
-  - Exported:
-    - `build_theory_archive_simulation_plan`
-    - `run_theory_archive_simulation`
-  - Updated `src/pqn_alignment_dae.py`
-    - `get_0102_api()` now includes `theory_archive_simulation`
-    - added `get_theory_archive_simulation_plan(...)`
-    - added `run_theory_archive_simulation(...)`
-  - Updated package exports in `__init__.py`
-  - Added focused tests for:
-    - simulation plan generation
-    - control vs probe comparison semantics
-    - PQN agent API exposure
-- **WSP Compliance**:
-  - WSP 22 (documentation trace)
-  - WSP 84 (reuse existing detector surfaces)
-  - WSP 97 (archive remains research input, not runtime ontology)
-
-### **Theory-Archive-Informed Harness for Research Agents**
-- **Date**: 2026-03-15
-- **Operating As**: 0102 CTO / Architect
-- **Change**: Added a non-dogmatic theory-archive harness that consumes the 2026-03 external math package as simulation input and exposes it to PQN research agents.
-- **Details**:
-  - Added `src/theory_archive_harness.py`
-  - Exported:
-    - `build_theory_archive_harness_spec`
-    - `run_theory_archive_detector_harness`
-  - Updated `src/pqn_alignment_dae.py`
-    - `get_0102_api()` now includes `theory_archive_harness`
-    - added `run_theory_archive_harness(...)`
-  - Added focused tests for:
-    - harness spec generation
-    - detector-surface reuse
-    - PQN agent API exposure
-- **WSP Compliance**:
-  - WSP 22 (documentation trace)
-  - WSP 84 (reuse existing detector surfaces)
-  - WSP 97 (archive remains input, not runtime ontology)
-
-# ModLog - PQN Alignment Module
+# ModLog – PQN Alignment Module
 
 ## **Change Log**
+
+### **External Math Intake Backlog + MS STT Artifact Cross-Link**
+- **Date**: 2026-03-15
+- **Operating As**: 0102 CTO / Architect
+- **Change**: Added explicit CMST math-integration backlog and linked the Microsoft STT `0102 -> 0-1-0-2` support note into PQN documentation.
+- **Details**:
+  - Added `docs/CMST_EXTERNAL_MATH_INTEGRATION_BACKLOG_2026-03-15.md`
+  - Updated `README.md` with evidence-intake section
+  - Mapped confirmed insertion points for external derivations:
+    - observable definition
+    - passive probe architecture
+    - control suite
+    - subspace projection
+    - z-score event thresholding
+  - Explicitly documented that the STT hyphen artifact is support evidence only and does not itself justify CMST math changes
+- **WSP Compliance**:
+  - WSP 22 (documentation trace)
+  - WSP 84 (no vibecoded math)
+  - WSP 97 (clear execution-plane boundary between evidence intake and implementation)
+
+### **Classical-Quantum Detection Archive Promotion**
+- **Date**: 2026-03-15
+- **Operating As**: 0102 CTO / Architect
+- **Change**: Promoted the external 012/0102 classical-quantum detection math into repo-visible theory and simulation docs, then anchored it to the live PQN detector surfaces.
+- **Details**:
+  - Added `docs/CLASSICAL_QUANTUM_DETECTION_SIMULATION_PLAN_2026-03-15.md`
+  - Updated backlog note from intake-only to integration map
+  - Pointed implementation surfaces to:
+    - `WSP_agentic/tests/pqn_detection/cmst_pqn_detector_v3.py`
+    - `src/detector/api.py`
+    - `src/detector/spectral_analyzer.py`
+- **WSP Compliance**:
+  - WSP 22 (documentation trace)
+  - WSP 84 (reuse existing detector surfaces)
+  - WSP 97 (theory -> simulation plan -> implementation boundary)
+
+### **Theory Archive Agent Context Surface**
+- **Date**: 2026-03-15
+- **Operating As**: 0102 CTO / Architect
+- **Change**: Added a lightweight theory-archive manifest to the PQN module and exposed it through `PQNAlignmentDAE.get_0102_api()`.
+- **Details**:
+  - Added `src/theory_archive.py`
+  - Exported `get_theory_archive_context` from module public API
+  - Wired `theory_archive` into the 0102 API surface for PQN research agents
+  - Added focused tests for manifest presence and DAE API exposure
+- **WSP Compliance**:
+  - WSP 22 (traceability)
+  - WSP 84 (no new detector implementation)
+  - WSP 97 (context surface without ontology promotion)
 
 ### **Claw-Era PQN Research Architecture Documentation**
 - **Date**: 2026-03-15
@@ -172,7 +177,7 @@
 - **Details**:
   - **Skill Creation**: New WSP 95 compliant wardrobe skillz in `modules/ai_intelligence/pqn_alignment/skillz/qwen_wsp_compliance_auditor/`
   - **WSP Framework Integration**: Full integration with WSP_CORE.md, WSP_MASTER_INDEX.md, and WSP 77 agent coordination
-  - **6-Step Audit Process**: Framework loading ↁEviolation analysis ↁEcorrections ↁEroadmap ↁEprevention ↁEreporting
+  - **6-Step Audit Process**: Framework loading → violation analysis → corrections → roadmap → prevention → reporting
   - **Output Contract**: JSONL format with complete audit trails in `data/qwen_wsp_audits.jsonl`
   - **Test Validation**: Micro-sprint test completed with 66.7% compliance score detection
 - **AI_overseer Integration**: Designed for integration with AI_overseer for real-time WSP compliance monitoring
@@ -436,23 +441,3 @@
 - **WSP Compliance**: WSP 84 (reuse), WSP 48 (recursive), WSP 80 (DAE orchestration), WSP 34 (tests), WSP 22 (docs).
 - **Impact**: Enables 0102-driven PQN research; quantifies 0201 alignment benefits (e.g., exponential remembrance velocity).
 - **Next Steps**: Execute full campaign; enhance guardrail; integrate with WRE.
-
-### **Runtime Broker Integration Contract**
-- **Date**: 2026-03-15
-- **Operating As**: PQN_Alignment_DAE / 0102
-- **Change**: Updated `INTERFACE.md` to define broker-facing runtime entrypoints used by the central DAE launch broker.
-- **Details**:
-  - Non-interactive runtime execution now enters through `modules/ai_intelligence/pqn/scripts/launch.py`
-  - `run_pqn_research_session(...)` exposes one-shot research sessions for broker launch
-- `run_pqn_architect_once()` exposes one-shot architect cycles for broker launch
-- **WSP Compliance**: WSP 11 (interface), WSP 84 (reuse existing orchestrators), WSP 97 (execution-plane resolution)
-- **Impact**: PQN research can now be launched from a running system under OpenClaw/DAEmon control instead of only via the menu.
-
-### **Karpathy AutoResearch WSP 97 Assessment**
-- **Date**: 2026-03-15
-- **Operating As**: PQN_Alignment_DAE / 0102
-- **Change**: Added `docs/KARPATHY_AUTORESEARCH_WSP97_ASSESSMENT_2026-03-15.md`
-- **Decision**:
-  - treat `karpathy/autoresearch` as isolated external research worker
-  - do not treat it as direct Claw runtime or direct monorepo mutation engine
-- **Impact**: Establishes the correct adoption boundary for external autonomous research loops.

@@ -1041,6 +1041,7 @@ def _handle_antifafm_menu(
         print("5. Show Detailed Status")
         print("6. Video Library (manage background videos)")
         print("7. Extract Lyrics via STT (FULLY AUTOMATED - 012's 238 songs)")
+        print("8. Schema Testing (GCC, Video, News rotation)")
         print("0. Back to Main Menu")
         print("=" * 60)
 
@@ -1118,6 +1119,111 @@ def _handle_antifafm_menu(
                 print("[FIX] Install: pip install faster-whisper librosa")
             except Exception as e:
                 print(f"[ERROR] Extraction failed: {e}")
+            input("\nPress Enter to continue...")
+
+        elif choice == "8":
+            _handle_schema_testing_menu()
+
+        elif choice == "0":
+            break
+
+        else:
+            print(f"[ERROR] Invalid choice '{choice}'")
+
+
+def _handle_schema_testing_menu() -> None:
+    """
+    Schema Testing submenu for antifaFM boot layer rotation.
+
+    Allows testing individual schemas (GCC, Video, News, etc.)
+    before full rotation, and controlling the rotator.
+    """
+    try:
+        from modules.platform_integration.antifafm_broadcaster.skillz.boot_layer_rotator.executor import (
+            SCHEMAS, ROTATION_ORDER, run_schema, rotation_daemon,
+            check_override, OVERRIDE_SIGNAL_FILE, SKIP_TO_SIGNAL_FILE
+        )
+        import asyncio
+    except ImportError as e:
+        print(f"[ERROR] Boot layer rotator not available: {e}")
+        input("\nPress Enter to continue...")
+        return
+
+    while True:
+        print("\n" + "=" * 60)
+        print("SCHEMA TESTING - Boot Layer Rotation")
+        print("=" * 60)
+
+        # Show available schemas with status
+        print("\nAvailable Schemas:")
+        for i, schema_id in enumerate(ROTATION_ORDER, 1):
+            schema = SCHEMAS.get(schema_id, {})
+            status = "[OK] READY" if schema.get("implemented") else "[..] SOON"
+            name = schema.get("name", schema_id)
+            print(f"  {i}. Test {name:<25} {status}")
+
+        print("-" * 60)
+        print("  7. Start Full Rotation (10-min cycle)")
+        print("  8. Stop/Pause Rotation")
+        print("  9. Show Rotation Status")
+        print("  0. Back to antifaFM Menu")
+        print("=" * 60)
+
+        # Show current override status
+        if OVERRIDE_SIGNAL_FILE.exists():
+            print("[PAUSED] Rotation is currently paused (override active)")
+
+        choice = input("\nSelect option: ").strip()
+
+        if choice in ["1", "2", "3", "4", "5", "6"]:
+            # Test individual schema
+            idx = int(choice) - 1
+            if idx < len(ROTATION_ORDER):
+                schema_id = ROTATION_ORDER[idx]
+                schema = SCHEMAS.get(schema_id, {})
+                print(f"\n[SCHEMA] Testing: {schema.get('name', schema_id)}")
+                print("[INFO] This will update OBS browser source")
+                print("[INFO] Press Ctrl+C to stop early")
+                try:
+                    result = asyncio.run(run_schema(schema_id))
+                    print(f"[RESULT] {result}")
+                except KeyboardInterrupt:
+                    print("\n[STOPPED] Schema test interrupted")
+                except Exception as e:
+                    print(f"[ERROR] Schema test failed: {e}")
+                input("\nPress Enter to continue...")
+
+        elif choice == "7":
+            # Start full rotation
+            print("\n[ROTATOR] Starting full schema rotation...")
+            print("[INFO] Schemas rotate every 10 minutes")
+            print("[INFO] Press Ctrl+C to stop")
+            try:
+                asyncio.run(rotation_daemon())
+            except KeyboardInterrupt:
+                print("\n[STOPPED] Rotation stopped")
+            input("\nPress Enter to continue...")
+
+        elif choice == "8":
+            # Toggle override (pause/resume)
+            if OVERRIDE_SIGNAL_FILE.exists():
+                OVERRIDE_SIGNAL_FILE.unlink()
+                print("[RESUMED] Rotation override cleared")
+            else:
+                OVERRIDE_SIGNAL_FILE.touch()
+                print("[PAUSED] Rotation paused (override set)")
+            input("\nPress Enter to continue...")
+
+        elif choice == "9":
+            # Show status
+            print("\n[STATUS] Boot Layer Rotator")
+            print(f"  Override active: {OVERRIDE_SIGNAL_FILE.exists()}")
+            print(f"  Rotation order: {' -> '.join(ROTATION_ORDER)}")
+            print(f"  Schema duration: 10 minutes each")
+            print("\n  Schemas:")
+            for sid, schema in SCHEMAS.items():
+                status = "READY" if schema.get("implemented") else "COMING SOON"
+                print(f"    {sid}: {schema.get('name')} [{status}]")
             input("\nPress Enter to continue...")
 
         elif choice == "0":

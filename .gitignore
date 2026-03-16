@@ -349,6 +349,9 @@ WSP_agentic/agentic_journals/awakening/awareness_log.md
 
 # Data directories (runtime scraped/generated data)
 data/
+!modules/platform_integration/linkedin_agent/data/
+modules/platform_integration/linkedin_agent/data/*
+!modules/platform_integration/linkedin_agent/data/linkedin_publishing_map.json
 # Website static datasets must be versioned for deterministic deploys
 !public/data/
 !public/data/**

@@ -152,6 +152,7 @@ Failure behavior:
   - Tables: `modules_git_linkedin_posts`, `modules_git_x_posts`
   - Tracks commit_hash, message, content, timestamp, success
 - [OK] **X/Twitter Cross-posting**: Simultaneous posting to both LinkedIn and X with duplicate tracking
+- [OK] **Article Targeting Discovery**: Canonical map of LinkedIn publishing entities, article history search, and heuristic target resolution for new article drafts
 
 ### **Technical Architecture (IMPLEMENTED)**
 ```python
@@ -289,6 +290,8 @@ The LinkedIn Agent properly coordinates with other enterprise domains:
 - **[0102 Handoff](./docs/0102_handoff.md)** - Layered tests status and continuation notes
 - **[Identity Switcher Map](./data/linkedin_identity_switcher.json)** - Reusable identity list for like loop
 - **[Skill Templates](./data/linkedin_skill_templates.json)** - Digital Twin comment and repost templates
+- **[Publishing Map](./data/linkedin_publishing_map.json)** - Canonical account/article corpus for article discovery and target routing
+- **[Article Targeting Skill](./skillz/linkedin_article_targeting/SKILLz.md)** - Skill surface for entity listing, article search, and route resolution
 
 ## [TARGET] Usage Example
 

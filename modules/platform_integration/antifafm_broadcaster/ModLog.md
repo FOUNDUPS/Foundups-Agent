@@ -1,5 +1,125 @@
 # antifaFM Broadcaster - ModLog
 
+## V3.2.2 - antifaFM DJ Audio Health Skill (2026-03-13)
+
+**Context**: No audio when OBS launched. Audio source (`antifaFM Radio`) needs monitoring and auto-restart.
+
+**Root Cause**: OBS mode (`ANTIFAFM_USE_OBS=1`) requires manual audio source configuration. No ai_overseer skill existed to monitor audio health.
+
+**Solution**: Created `antifafm_dj` OpenClaw skill for audio health monitoring:
+
+**Audio Stream**: `https://a12.asurahosting.com/listen/antifafm/radio.mp3`
+
+**Skill Location**: `modules/ai_intelligence/ai_overseer/skillz/antifafm_dj/`
+
+**Capabilities**:
+1. `check_audio_health()` - Verify `antifaFM Radio` media source state
+2. `restart_audio_source()` - Restart media source if stopped
+3. `check_stream_reachable()` - Verify stream URL responds
+4. `health_daemon()` - Continuous monitoring (30s interval)
+
+**Integration**:
+- `boot_layer_rotator` now uses `antifafm_dj` skill at startup
+- Fallback to direct OBS control if skill unavailable
+
+**Files Created**:
+- `ai_overseer/skillz/antifafm_dj/SKILLz.md`
+- `ai_overseer/skillz/antifafm_dj/executor.py`
+- `ai_overseer/skillz/antifafm_dj/__init__.py`
+
+**Files Modified**:
+- `antifafm_broadcaster/README.md` - Documented audio source requirement
+- `boot_layer_rotator/executor.py` - Uses antifafm_dj skill
+
+**WSP Compliance**: WSP 27 (DAE Architecture), WSP 91 (Observability)
+
+---
+
+## V3.2.1 - OBS Visibility Control (2026-03-13)
+
+**Context**: GCC map was loading in browser source but video grid sources remained visible on top, obscuring the map.
+
+**Root Cause**: `grid_orchestrator` and `boot_layer_rotator` control DIFFERENT OBS sources:
+- `grid_orchestrator` → video1-video9 scene items (video grid)
+- `boot_layer_rotator` → browser source URL (MarineTraffic map)
+
+No visibility coordination existed between them.
+
+**Solution**: Added OBS scene item visibility control to boot_layer_rotator:
+1. `set_source_visibility()` - Control individual source visibility
+2. `configure_schema_visibility()` - Schema-based visibility presets
+
+**Visibility Logic**:
+```
+GCC/news/chess schemas:
+  - Hide video1-video9 (video grid)
+  - Show browser source (MarineTraffic/Coming Soon)
+
+Video schema:
+  - Show video1-video9 (video grid)
+  - Hide browser source
+```
+
+**Files Modified**:
+- `skillz/boot_layer_rotator/executor.py` - Added visibility control functions
+
+**WSP Compliance**: WSP 97 applied (Hard Think → First Principles → Build)
+
+---
+
+## V3.2.0 - Boot Layer Rotator Integration (2026-03-13)
+
+**Context**: GCC shipping tracker view not appearing when OBS launches. WSP 97 investigation revealed boot_layer_rotator was implemented but never integrated into launch.py preflight.
+
+**Root Cause**: Two disconnected schema systems existed:
+1. `launch.py SCHEMAS` (VIDEO_GRID, KARAOKE, etc.) - ACTIVE
+2. `boot_layer_rotator SCHEMAS` (gcc, video, news, chess) - NOT CONNECTED
+
+**Solution**:
+1. Added boot_layer_rotator integration to `_start_obs_orchestration()` in launch.py
+2. Added Schema Testing submenu (Option 8) to antifaFM CLI menu
+3. Gated by `ANTIFAFM_BOOT_ROTATOR_ENABLED=1` env var
+
+**Changes**:
+1. `scripts/launch.py` - Added rotator thread start after OBS connection
+2. `modules/infrastructure/cli/src/main_menu.py` - Added Schema Testing submenu
+3. `.env` - Added `ANTIFAFM_BOOT_ROTATOR_ENABLED=1`
+
+**Schema Testing Menu** (Option 8):
+```
+1. Test GCC Shipping Tracker     [OK] READY
+2. Test Video Rotation           [OK] READY
+3. Test News Ticker              [OK] READY
+4. Test Chess                    [..] SOON
+5. Test Checkers                 [..] SOON
+6. Test Cams                     [..] SOON
+7. Start Full Rotation (10-min cycle)
+8. Stop/Pause Rotation
+9. Show Rotation Status
+0. Back
+```
+
+**Startup Flow**:
+```
+launch.py → _start_obs_orchestration()
+    → OBS connected ✓
+    → grid_thread started ✓
+    → news_thread started ✓
+    → IF ANTIFAFM_BOOT_ROTATOR_ENABLED=1:
+        → rotator_thread started (GCC → Video → News → ...)
+```
+
+**WSP Compliance**:
+- WSP 97: Applied HoloIndex → Research → Hard Think → Build methodology
+- WSP 27: Boot layer rotator follows DAE architecture
+- WSP 22: ModLog updated
+
+**Files Modified**:
+- `scripts/launch.py` - Boot layer rotator thread integration
+- `modules/infrastructure/cli/src/main_menu.py` - Schema Testing submenu
+
+---
+
 ## V3.1.0 - WRE Integration (2026-03-07)
 
 **Context**: CTO assessment revealed antifaFM at 19% WRE integration - isolated island unable to execute skills autonomously or participate in ecosystem coordination.

@@ -9,6 +9,7 @@ For active execution, use these first:
 - `modules/foundups/docs/AIONUI_FOUNDUP_FACTORY_WSP97_ARCHITECTURE_2026-03-16.md` (external orchestration surface over FoundUp factory)
 - `modules/foundups/agent_market/ROADMAP.md` (execution ledger roadmap)
 - `modules/foundups/simulator/ROADMAP.md` (simulation and DEX roadmap)
+- `modules/foundups/social_twin/ROADMAP.md` (human-in-the-loop social engagement FoundUp)
 
 The rest of this README contains historical context.
 

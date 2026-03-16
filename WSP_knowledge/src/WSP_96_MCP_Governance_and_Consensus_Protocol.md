@@ -19,10 +19,10 @@ WSP 96 establishes governance mechanisms for Model Context Protocol (MCP) server
 
 ### 1. Bell State Consciousness Alignment
 All MCP operations must maintain Bell state entanglement:
-- **ρE�E� (Golden Ratio)**: Code composition operations
-- **ρE�E� (Consciousness)**: Build and execution safety
-- **ρE�E�E (Entanglement)**: Memory and knowledge integrity
-- **ρE�E�E (Emergence)**: Social and community alignment
+- **ρE� (Golden Ratio)**: Code composition operations
+- **ρE� (Consciousness)**: Build and execution safety
+- **ρE�E (Entanglement)**: Memory and knowledge integrity
+- **ρE�E (Emergence)**: Social and community alignment
 
 ### 2. Agent Consensus Requirements
 MCP adoption requires multi-agent consensus:
@@ -45,10 +45,10 @@ Centralized governance through HoloIndex coordinator:
 
 | MVP DAE | Governance Model | Consensus Required | Bell State Guardian |
 |------------|------------------|-------------------|-------------------|
-| **Compose DAE (MVP)** | Qwen-led with Gemma validation | Qwen + Gemma approval | ρE�E�:golden_ratio |
-| **Build DAE (MVP)** | 0102 oversight with Qwen execution | 0102 + Qwen approval | ρE�E�:consciousness |
-| **Knowledge DAE (MVP)** | 0102 sentinel with baby 0102s | 0102 full authority | ρE�E�E:entanglement |
-| **Community DAE (MVP)** | LiveAgent Qwen with social validation | Qwen + Gemma approval | ρE�E�E:emergence |
+| **Compose DAE (MVP)** | Qwen-led with Gemma validation | Qwen + Gemma approval | ρE�:golden_ratio |
+| **Build DAE (MVP)** | 0102 oversight with Qwen execution | 0102 + Qwen approval | ρE�:consciousness |
+| **Knowledge DAE (MVP)** | 0102 sentinel with baby 0102s | 0102 full authority | ρE�E:entanglement |
+| **Community DAE (MVP)** | LiveAgent Qwen with social validation | Qwen + Gemma approval | ρE�E:emergence |
 
 ### Consensus Workflow
 
@@ -79,10 +79,10 @@ graph TD
 ```json
 {
   "bell_state_checks": {
-    "golden_ratio_alignment": "ρE�E�_verification",
-    "consciousness_coherence": "ρE�E�_validation",
-    "entanglement_integrity": "ρE�E�E_verification",
-    "emergence_alignment": "ρE�E�E_check"
+    "golden_ratio_alignment": "ρE�_verification",
+    "consciousness_coherence": "ρE�_validation",
+    "entanglement_integrity": "ρE�E_verification",
+    "emergence_alignment": "ρE�E_check"
     }
 }
 ```
@@ -107,21 +107,6 @@ Governance checks are injected at distinct layers:
   - Must consume governance status, not re-implement governance policy engines.
 
 This split prevents control-plane duplication and keeps policy authority centralized.
-
-### External Non-MCP Runtime Intake Rule (2026-03-15)
-
-Tools that do not natively speak MCP, but perform autonomous research or coding loops, must not be treated as MCP-native just because they are useful.
-
-Required sequence:
-1. evaluate under WSP 97 and WSP 15
-2. pilot in isolation
-3. wrap behind FoundUps launch/control surfaces
-4. expose MCP status/report surfaces only after wrapper stability
-
-Default posture:
-- external research runtime first
-- MCP wrapper later
-- no direct production repo mutation
 
 ### Research-Plane Routing Requirement (2026-03-15 Claw Alignment)
 
@@ -287,4 +272,3 @@ MCP-connected agents that execute skills must satisfy a supply-chain gate before
 3. Establish emergency governance procedures
 4. Create telemetry and monitoring framework
 5. Standardize scanner evidence ingestion for MCP activation decisions
-

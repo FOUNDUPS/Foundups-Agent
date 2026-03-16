@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
 
 def env_truthy(name: str, default: str = "0") -> bool:
@@ -205,3 +205,78 @@ class IronClawGatewayClient:
             return None
         except Exception:
             return None
+
+    def startup_probe(self) -> Dict[str, Any]:
+        """
+        Higher-level startup probe with actionable remediation.
+
+        Checks IronClaw health, and if down, probes LM Studio as fallback.
+        Returns detailed status with remediation steps.
+
+        Returns:
+            Dict with keys: ok, detail, remediation (if not ok)
+        """
+        # First try IronClaw
+        ironclaw_ok, ironclaw_detail = self.health()
+
+        if ironclaw_ok:
+            return {
+                "ok": True,
+                "detail": f"ironclaw_healthy: {ironclaw_detail}",
+                "backend": "ironclaw",
+            }
+
+        # IronClaw down - check LM Studio fallback
+        lm_studio_url = os.getenv("SIM_QWEN_BACKEND_URL", "http://127.0.0.1:1234")
+        use_local = os.getenv("SIM_QWEN_BACKEND", "").lower() == "local"
+
+        lm_studio_ok = False
+        lm_studio_detail = ""
+
+        if use_local:
+            try:
+                import requests
+
+                # LM Studio exposes /v1/models
+                resp = requests.get(
+                    f"{lm_studio_url}/v1/models",
+                    timeout=5.0,
+                )
+                if resp.ok:
+                    lm_studio_ok = True
+                    lm_studio_detail = f"lm_studio responding at {lm_studio_url}"
+            except Exception as e:
+                lm_studio_detail = f"lm_studio probe failed: {e}"
+
+        if lm_studio_ok:
+            return {
+                "ok": True,
+                "detail": f"ironclaw_down but lm_studio_fallback_ok at {lm_studio_url}",
+                "backend": "lm_studio",
+            }
+
+        # Both down - provide remediation
+        remediation = []
+
+        # IronClaw remediation
+        start_cmd = os.getenv("IRONCLAW_START_CMD", "").strip()
+        if start_cmd:
+            remediation.append(f"Run: {start_cmd}")
+        else:
+            remediation.append(
+                "Set IRONCLAW_START_CMD in .env (e.g., 'ironclaw start' or "
+                "'cargo run --release --manifest-path temp/_vendor/ironclaw/Cargo.toml')"
+            )
+
+        # LM Studio remediation
+        if use_local:
+            remediation.append(f"Or start LM Studio and load a model (expecting {lm_studio_url})")
+        else:
+            remediation.append("Or set SIM_QWEN_BACKEND=local and start LM Studio")
+
+        return {
+            "ok": False,
+            "detail": f"ironclaw_down ({ironclaw_detail}), lm_studio_unavailable",
+            "remediation": remediation,
+            "backend": None,
+        }

@@ -10,6 +10,7 @@ implementation sources of truth:
 - `modules/foundups/simulator/ROADMAP.md`
 - `modules/foundups/agent/ROADMAP.md`
 - `modules/foundups/docs/FOUNDUPS_PAVS_IRONCLAW_AGENT_BUILDER_DIGITAL_TWIN_ROADMAP.md`
+- `modules/foundups/social_twin/ROADMAP.md`
 
 ## First-Principles Constraints
 1. No market claims without an auditable event/state trail.
@@ -91,6 +92,8 @@ implementation sources of truth:
 1. Read models for control panel (portfolio, CABR, traction, active agents).
 2. Member control panel widgets and live tape.
 3. Simulator stress packs for DEX/liquidity and PoB yield.
+4. Social Twin FoundUp vertical slice:
+   Discord/OpenClaw review plane -> approved social execution -> follow-up queue.
 
 ### P2 (After)
 1. Dynamic pricing and queue optimization.
