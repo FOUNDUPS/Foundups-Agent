@@ -1,5 +1,30 @@
 # FoundUps Agent - Development Log
 
+## [2026-03-18] OpenClaw Resident Bootstrap Through Broker
+
+**Change Type**: Runtime Control Plane / Bootstrap  
+**By**: 0102  
+**WSP References**: WSP 22, WSP 73, WSP 77, WSP 91, WSP 97
+
+### Summary
+
+Promoted OpenClaw from a menu-only surface to a broker-managed resident runtime by reusing the existing webhook receiver as the canonical always-on service.
+
+### Files Changed
+
+| Location | Description |
+|----------|-------------|
+| `modules/communication/moltbot_bridge/scripts/launch.py` | Resident OpenClaw service launcher/stop hooks |
+| `main.py` | Registers `openclaw` as launchable and autostarts after preflight |
+| `modules/infrastructure/cli/src/openclaw_menu.py` | Reuses broker-managed runtime before falling back to subprocess launch |
+| `.env.example` | Documents resident OpenClaw env controls |
+
+### Why
+
+- `WSP_97` requires a real execution plane, not only a manual submenu.
+- The webhook receiver already existed as the correct non-interactive OpenClaw surface.
+- Reusing that surface keeps the control plane thin and DAEmon-observable.
+
 ## [2026-03-16] AionUI FoundUp Factory Intake
 
 **Change Type**: Architecture Documentation / Retrieval Anchor  

@@ -17,6 +17,18 @@ logger = logging.getLogger(__name__)
 REPO_ROOT = Path(__file__).resolve().parents[4]
 
 
+def _get_openclaw_runtime_broker():
+    """Return broker when the runtime control plane is available."""
+    try:
+        from modules.infrastructure.dae_daemon.src.dae_launch_broker import (
+            get_dae_launch_broker,
+        )
+
+        return get_dae_launch_broker()
+    except Exception:
+        return None
+
+
 def handle_openclaw_menu() -> bool:
     """OpenClaw engagement menu. Returns True to exit to main menu."""
     print("\n  OpenClaw / IronClaw (Talk to 0102)")
@@ -111,6 +123,22 @@ def _voice_repl(backend: str | None = None, no_api_keys: bool | None = None) -> 
 
 def _webhook_server() -> None:
     """Start OpenClaw webhook receiver (FastAPI on :18800)."""
+    broker = _get_openclaw_runtime_broker()
+    if broker is not None:
+        status = broker.get_runtime_status("openclaw")
+        if status.get("registered"):
+            if status.get("running"):
+                print("\n  OpenClaw resident service is already running.")
+                print(f"  state={status.get('state')} run_count={status.get('run_count')}")
+            else:
+                result = broker.start_dae("openclaw", actor_id="012")
+                launch_status = result.get("status", result.get("error", "unknown"))
+                print(f"\n  OpenClaw resident service -> {launch_status}")
+            print("  POST http://127.0.0.1:18800/webhook/openclaw")
+            print("  GET  http://127.0.0.1:18800/health")
+            input("\n  Enter to continue...")
+            return
+
     webhook_script = (
         REPO_ROOT / "modules" / "communication"
         / "moltbot_bridge" / "src" / "webhook_receiver.py"
