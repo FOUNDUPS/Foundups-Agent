@@ -9,8 +9,9 @@ domain: communication
 intent_type: DISTRIBUTION
 promotion_state: prototype
 pattern_fidelity_threshold: 0.85
+category: workflow
+evals: []
 ---
-
 # Oracle PQN Distributor Skillz
 
 **Skill Type**: Persona + Distribution (WSP 96 micro chain-of-thought)

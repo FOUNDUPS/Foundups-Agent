@@ -8,8 +8,9 @@ agents: [qwen, gemma]
 primary_agent: gemma
 intent_type: CLASSIFICATION
 promotion_state: prototype
+category: workflow
+evals: []
 ---
-
 # Digital Twin Intent Labels Skill
 
 **Purpose**: Classify each video segment's communicative intent for training 0102's response generation.

@@ -1,3 +1,19 @@
+---
+name: manage_metadata_editor
+description: Manage stream metadata editing interface
+version: 1.0_prototype
+author: 0102
+created: 2026-03-18
+agents: [qwen]
+primary_agent: qwen
+intent_type: MANAGEMENT
+promotion_state: prototype
+pattern_fidelity_threshold: 0.85
+category: workflow
+evals: []
+trigger:
+  manual
+---
 # YouTube Manage Metadata Editor Skillz
 
 ## Purpose

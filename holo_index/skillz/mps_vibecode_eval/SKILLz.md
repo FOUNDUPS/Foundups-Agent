@@ -34,8 +34,9 @@ metrics:
     min_outcome_quality: 0.85
     min_execution_count: 50
     required_test_pass_rate: 0.95
+category: workflow
+evals: []
 ---
-
 # MPS VIBECODE Evaluation Skill
 
 **Purpose**: Evaluate VIBECODE issues (created new code without searching existing) using WSP 15 Module Prioritization Scoring.

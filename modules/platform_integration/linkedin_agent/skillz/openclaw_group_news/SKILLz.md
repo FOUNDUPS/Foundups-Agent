@@ -10,8 +10,9 @@ intent_type: CONTENT_GENERATION
 promotion_state: prototype
 rate_limit: 3_per_day
 linkedin_group: https://www.linkedin.com/groups/6729915/
+category: workflow
+evals: []
 ---
-
 # OpenClaw Group News Poster
 
 **Purpose**: Autonomous search, rate, and post OpenClaw news to LinkedIn group (1-3 times/day).

@@ -9,8 +9,9 @@ domain: communication
 intent_type: CLASSIFICATION
 promotion_state: prototype
 pattern_fidelity_threshold: 0.85
+category: workflow
+evals: []
 ---
-
 # OpenClaw Intent Router Skill
 
 **Skill Type**: Micro Chain-of-Thought (WSP 96)

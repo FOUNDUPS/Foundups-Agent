@@ -10,8 +10,9 @@ intent_type: GENERATION
 promotion_state: prototype
 pattern_fidelity_threshold: 0.90
 target_linkedin_page: 104834798 (GeoZai)
+category: workflow
+evals: []
 ---
-
 # antifaFM LinkedIn Post Generator
 
 **Purpose**: Generate engaging LinkedIn posts for antifaFM live streams that align with the FFCPLN anti-fascist music brand.

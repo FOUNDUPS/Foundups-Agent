@@ -14,8 +14,9 @@ required_assets:
   - modules/communication/moltbot_bridge/src/linkedin_social_adapter.py
   - modules/infrastructure/browser_actions/src/linkedin_actions.py
 executor: executor.py
+category: workflow
+evals: []
 ---
-
 # LinkedIn Engagement Skill (WRE Bridge)
 
 Execute LinkedIn engagement actions through WRE's ReAct reasoning loop, enabling

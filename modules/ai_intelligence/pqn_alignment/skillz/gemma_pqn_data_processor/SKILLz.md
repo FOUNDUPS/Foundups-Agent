@@ -6,8 +6,9 @@ author: 0102_wre_team
 agents: [gemma]
 dependencies: [pattern_memory, libido_monitor]
 domain: autonomous_operations
+category: workflow
+evals: []
 ---
-
 # Gemma PQN Data Processor
 
 ---

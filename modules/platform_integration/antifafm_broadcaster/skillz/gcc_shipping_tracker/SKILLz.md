@@ -1,3 +1,19 @@
+---
+name: gcc_shipping_tracker
+description: Strait of Hormuz shipping tracker for stream visuals
+version: 1.0_prototype
+author: 0102
+created: 2026-03-18
+agents: [qwen]
+primary_agent: qwen
+intent_type: VISUALIZATION
+promotion_state: prototype
+pattern_fidelity_threshold: 0.85
+category: workflow
+evals: []
+trigger:
+  cadence: 5min
+---
 # GCC Shipping Tracker Skill
 
 ## Purpose

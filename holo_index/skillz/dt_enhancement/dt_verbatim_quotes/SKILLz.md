@@ -8,8 +8,10 @@ agents: [qwen]
 primary_agent: qwen
 intent_type: EXTRACTION
 promotion_state: prototype
+category: capability-uplift
+evals: []
+retirement_date: null
 ---
-
 # Digital Twin Verbatim Quotes Skill
 
 **Purpose**: Extract EXACT spoken words (not summaries) for voice training.

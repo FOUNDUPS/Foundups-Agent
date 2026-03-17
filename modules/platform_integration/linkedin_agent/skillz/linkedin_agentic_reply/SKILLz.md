@@ -9,8 +9,9 @@ domain: social
 intent_type: DECISION
 promotion_state: prototype
 pattern_fidelity_threshold: 0.9
+category: workflow
+evals: []
 ---
-
 # LinkedIn Agentic Reply Skill
 
 Execute agentic LinkedIn reply flows with OpenClaw/WSP controls.

@@ -1,3 +1,19 @@
+---
+name: external_stream_chat
+description: Process and respond to external stream chat messages
+version: 1.0_prototype
+author: 0102
+created: 2026-03-18
+agents: [qwen]
+primary_agent: qwen
+intent_type: GENERATION
+promotion_state: prototype
+pattern_fidelity_threshold: 0.85
+category: workflow
+evals: []
+trigger:
+  event: chat_message
+---
 # External Stream Chat Skill
 
 ## Overview

@@ -8,8 +8,9 @@ dependencies: [browser_actions, foundups_vision, pattern_memory]
 domain: autonomous_engagement
 intent_type: ENGAGEMENT
 promotion_state: prototype
+category: workflow
+evals: []
 ---
-
 # Qwen YouTube Studio Engagement Skill
 
 **Skill Type**: Micro Chain-of-Thought (WSP 96)

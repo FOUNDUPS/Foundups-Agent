@@ -1,3 +1,19 @@
+---
+name: skill_1_regular_engagement
+description: Regular viewer engagement response generation
+version: 1.0_prototype
+author: 0102
+created: 2026-03-18
+agents: [qwen]
+primary_agent: qwen
+intent_type: GENERATION
+promotion_state: prototype
+pattern_fidelity_threshold: 0.85
+category: workflow
+evals: []
+trigger:
+  event: comment_received
+---
 # Skill 1: Regular Engagement
 
 **Phase:** 3O-3R Sprint 4

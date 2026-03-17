@@ -8,8 +8,9 @@ agents: [qwen]
 primary_agent: qwen
 intent_type: EXTRACTION
 promotion_state: prototype
+category: workflow
+evals: []
 ---
-
 # Digital Twin Quotable Moments Skill
 
 **Purpose**: Extract memorable, shareable quotes for VoiceMemory RAG index.

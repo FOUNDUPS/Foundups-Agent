@@ -8,8 +8,9 @@ agents: [qwen]
 primary_agent: qwen
 intent_type: EXTRACTION
 promotion_state: prototype
+category: workflow
+evals: []
 ---
-
 # Digital Twin Q&A Moments Skill
 
 **Purpose**: Extract question-answer pairs from video content for SFT training data.

@@ -9,8 +9,9 @@ domain: ai_intelligence
 intent_type: DECISION
 promotion_state: prototype
 pattern_fidelity_threshold: 0.95
+category: workflow
+evals: []
 ---
-
 # M2M Compile Gate Skill
 
 ## Purpose

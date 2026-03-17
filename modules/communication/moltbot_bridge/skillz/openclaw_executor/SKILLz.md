@@ -9,8 +9,9 @@ domain: communication
 intent_type: DECISION
 promotion_state: prototype
 pattern_fidelity_threshold: 0.90
+category: workflow
+evals: []
 ---
-
 # OpenClaw Executor Skill
 
 **Skill Type**: Micro Chain-of-Thought (WSP 96)

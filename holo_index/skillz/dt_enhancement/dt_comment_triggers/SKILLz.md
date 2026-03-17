@@ -8,8 +8,9 @@ agents: [qwen]
 primary_agent: qwen
 intent_type: PREDICTION
 promotion_state: prototype
+category: workflow
+evals: []
 ---
-
 # Digital Twin Comment Triggers Skill
 
 **Purpose**: Predict which video segments will generate viewer comments/engagement.

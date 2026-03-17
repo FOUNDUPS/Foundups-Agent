@@ -1,3 +1,19 @@
+---
+name: stream_metadata_editor
+description: Stream metadata update automation
+version: 1.0_prototype
+author: 0102
+created: 2026-03-18
+agents: [qwen]
+primary_agent: qwen
+intent_type: EXECUTION
+promotion_state: prototype
+pattern_fidelity_threshold: 0.85
+category: workflow
+evals: []
+trigger:
+  event: metadata_change
+---
 # YouTube Stream Metadata Editor Skillz
 
 ## Purpose
