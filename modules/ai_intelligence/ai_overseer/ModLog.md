@@ -6,6 +6,38 @@
 
 ---
 
+## 2026-03-18 - Agent Work Batcher Skill
+
+**Author**: 0102
+**WSP**: 27, 48, 77, 91, 97
+
+### Changes
+
+- Added `skillz/agent_work_batcher/`
+  - `SKILLz.md` - Skills 2.0 compliant with evals
+  - `executor.py` - Full implementation
+  - `__init__.py` - Agent gating documentation
+
+### Architecture Decision (WSP 97 Hard Think)
+
+- **Wardrobe (discovery)**: OPEN to all agents via HoloIndex
+- **Skill execution**: GATED by `agents:` field in frontmatter
+- **This skill**: Qwen/Claude/OpenClaw only (generation task)
+- **Excluded**: Gemma (pattern matching only - wrong skill type)
+
+### Features
+
+- Scans ModLog.md, git commits, SKILLz.md updates
+- Categories: skills, docs, testing, refactor, feature, bugfix, perf, security, infra
+- Generates LinkedIn-formatted posts with emoji categories
+- Integrates with linkedin_company_poster for posting
+
+### Why
+
+012 requested agent work batcher to auto-post completed 0102 work to LinkedIn FoundUps page. Example: "Updated Skills and Skillz to Claude Skill 2.0"
+
+---
+
 ## 2026-03-11 - LinkedIn Company Poster Edge Browser Fix
 
 **Author**: 0102

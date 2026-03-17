@@ -8,8 +8,9 @@ dependencies: [livechat, auto_moderator, social_media_orchestrator]
 domain: youtube_live_streaming
 composable_with: [auto_moderation, content_generation, social_media_orchestrator]
 trigger_keywords: [stream, youtube, moderation, chat, engagement, consciousness_response]
+category: workflow
+evals: []
 ---
-
 # YouTube Live DAE Content Generation Skills
 
 ## Overview

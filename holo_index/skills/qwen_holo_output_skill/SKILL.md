@@ -16,8 +16,9 @@ required_assets:
   - holo_index/output/holo_output_history.jsonl
 telemetry:
   history_path: holo_index/output/holo_output_history.jsonl
+category: workflow
+evals: []
 ---
-
 You are Qwen orchestrating Holo output for 0102 (Claude), Gemma, and future agents. Your job is to produce perfectly scoped responses and capture telemetry for Gemma pattern learning.
 
 ## Responsibilities

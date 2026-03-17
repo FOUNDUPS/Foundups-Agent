@@ -5,8 +5,9 @@ user-invocable: true
 command-dispatch: tool
 command-tool: bash
 command-arg-mode: raw
+category: workflow
+evals: []
 ---
-
 # OpenClaw Automation Skill
 
 Control and query the YouTube automation system (AutoModeratorDAE).

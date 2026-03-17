@@ -8,8 +8,9 @@ domain: documentation_optimization
 intent_type: COMPRESSION
 promotion_state: production
 user_invocable: true
+category: workflow
+evals: []
 ---
-
 # /m2m - M2M Compression Skill
 
 Self-service M2M (machine-to-machine) documentation compression for 0102.

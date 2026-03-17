@@ -5,8 +5,9 @@ user-invocable: true
 command-dispatch: tool
 command-tool: bash
 command-arg-mode: raw
+category: workflow
+evals: []
 ---
-
 # OpenClaw Schedule Skill
 
 Schedule YouTube Shorts through the Content Page Scheduler via WRE routing.

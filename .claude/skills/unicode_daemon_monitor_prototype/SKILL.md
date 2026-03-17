@@ -6,8 +6,9 @@ author: 0102_wre_team
 agents: [qwen, gemma]
 dependencies: [pattern_memory, libido_monitor]
 domain: autonomous_operations
+category: workflow
+evals: []
 ---
-
 # Unicode Daemon Monitor Skill
 
 ## Purpose

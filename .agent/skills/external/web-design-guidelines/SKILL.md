@@ -6,8 +6,9 @@ version: 1.0.0
 stage: prototype
 wsp_95_status: VETTED_PARTIAL
 security_note: "Fetches external URL at runtime (github raw content)"
+category: workflow
+evals: []
 ---
-
 # Web Interface Guidelines
 
 **Source:** [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)

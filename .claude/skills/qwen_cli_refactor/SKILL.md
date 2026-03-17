@@ -9,8 +9,9 @@ domain: code_refactoring
 intent_type: REFACTORING
 promotion_state: prototype
 pattern_fidelity_threshold: 0.90
+category: workflow
+evals: []
 ---
-
 # Qwen CLI Refactoring Skill
 
 **Agent**: Qwen 1.5B (strategic analysis + code extraction)
