@@ -65,6 +65,11 @@ Runtime intent:
 - OpenClaw or another controller asks broker to `start/status/stop`
 - Central DAEmon remains the canonical lifecycle ledger
 
+Resident OpenClaw path:
+- `main.py` now registers `openclaw` as a launchable broker-managed DAE
+- the resident service uses the existing OpenClaw webhook receiver surface
+- default bootstrap can autostart it after startup preflights
+
 ### For live supervision:
 ```python
 from modules.infrastructure.dae_daemon.src.dae_observer import get_dae_observer

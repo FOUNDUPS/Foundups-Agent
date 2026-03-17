@@ -157,6 +157,10 @@ from modules.infrastructure.evade_net.scripts.launch import run_evade_net
 
 # Extracted to modules/communication/liberty_alert/scripts/launch.py per WSP 62
 from modules.communication.liberty_alert.scripts.launch import run_liberty_alert_dae
+from modules.communication.moltbot_bridge.scripts.launch import (
+    run_openclaw_resident_service,
+    stop_openclaw_resident_service,
+)
 
 # Extracted to modules/infrastructure/git_push_dae/scripts/launch.py per WSP 62
 from modules.infrastructure.git_push_dae.scripts.launch import (
@@ -737,7 +741,23 @@ def bootstrap_runtime_dae_launches() -> None:
         daemon.start()
 
     broker = get_dae_launch_broker(daemon=daemon)
-    specs = [
+    resident_enabled = os.getenv("OPENCLAW_RESIDENT_ENABLED", "1") != "0"
+    specs = []
+    if resident_enabled:
+        specs.append(
+            DAELaunchSpec(
+                dae_id="openclaw",
+                dae_name="OpenClaw Resident Service",
+                domain="communication",
+                module_path="modules.communication.moltbot_bridge.scripts.launch",
+                start_callable=run_openclaw_resident_service,
+                stop_callable=stop_openclaw_resident_service,
+                heartbeat_interval_sec=15.0,
+                description="Resident OpenClaw webhook/control-plane service.",
+            )
+        )
+
+    specs.extend([
         DAELaunchSpec(
             dae_id="holodae",
             dae_name="HoloDAE",
@@ -804,11 +824,19 @@ def bootstrap_runtime_dae_launches() -> None:
             heartbeat_interval_sec=15.0,
             description="Non-interactive PQN architect cycle.",
         ),
-    ]
+    ])
     for spec in specs:
         broker.register_launch_spec(spec)
 
     print(f"[DAE-BROKER] ready launchable={len(broker.list_launchable_daes())}")
+
+    resident_autostart = os.getenv("OPENCLAW_RESIDENT_AUTOSTART", "1") != "0"
+    if resident_enabled and resident_autostart:
+        status = broker.get_runtime_status("openclaw")
+        if not status.get("running"):
+            result = broker.start_dae("openclaw", actor_id="0102")
+            launch_status = result.get("status", result.get("error", "unknown"))
+            print(f"[OPENCLAW-RESIDENT] bootstrap={launch_status}")
 
 
 def main():

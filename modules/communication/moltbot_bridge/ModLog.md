@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-18: Resident OpenClaw broker runtime
+
+**Author**: 0102  
+**WSP**: 22, 73, 77, 97
+
+### Changes
+- Added `scripts/launch.py`
+  - `run_openclaw_resident_service(...)`
+  - `stop_openclaw_resident_service()`
+  - broker-safe Uvicorn startup without thread signal-handler conflicts
+- Updated `README.md` and `INTERFACE.md`
+  - documented resident OpenClaw service contract and env flags
+
+### Impact
+- OpenClaw now has a canonical resident service surface for broker-managed runtime activation.
+- The resident runtime reuses the existing webhook receiver instead of introducing a second daemon shape.
+
 ## 2026-03-15: IronClaw startup_probe with LM Studio fallback
 
 **Author**: 0102 (Opus 4.5)

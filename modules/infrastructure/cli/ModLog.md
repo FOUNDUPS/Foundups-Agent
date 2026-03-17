@@ -2,6 +2,26 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## V0.3.14 - OpenClaw menu aligned to resident broker runtime (2026-03-18)
+
+### Changed
+- `src/openclaw_menu.py`
+  - Added broker-aware webhook launch path
+  - Option `3` now:
+    - checks broker runtime for `openclaw`
+    - starts the resident service through the broker when registered
+    - avoids spawning a competing webhook subprocess when the resident runtime already exists
+
+### Purpose
+- Keep manual CLI fallback aligned with the broker-managed control plane.
+- Prevent the menu surface from fighting the new resident OpenClaw runtime.
+
+### WSP Compliance
+- **WSP 22**: ModLog documentation
+- **WSP 97**: execution-plane alignment before new behavior
+
+---
+
 ## V0.3.13 - antifaFM Preflight Check + Schema Testing (2026-03-06)
 
 ### Added

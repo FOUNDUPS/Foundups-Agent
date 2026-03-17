@@ -1,5 +1,22 @@
 # dae_daemon ModLog
 
+## V1.2.3 - Resident OpenClaw registered as broker-managed runtime (2026-03-18)
+
+**What**: Extended the runtime broker contract so OpenClaw itself can be treated as a launchable resident DAE instead of only a menu surface.
+
+**Why**: `WSP_97` requires the control plane to exist as a real runtime lane. Without that, `openclaw` could be tailed and queried, but not bootstrapped as a first-class resident service.
+
+**Changes**:
+- `main.py`
+  - registers `openclaw` launch spec during bootstrap
+  - optional autostart after preflights
+- `README.md`
+  - documents the resident OpenClaw path through the broker
+
+**Impact**:
+- `openclaw` is now part of the broker-managed runtime inventory.
+- The DAEmon lifecycle ledger can track the resident OpenClaw service as a real runtime instead of only its downstream events.
+
 ## V1.2.1 - Structured Action Details for Live Research Events (2026-03-16)
 
 **What**: Extended the non-invasive `CentralDAEAdapter` so action events can carry structured details payloads.

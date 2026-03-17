@@ -94,6 +94,28 @@ Security:
 - Standalone adapter mode runs the same Cisco skill-safety gate before execution.
 - DAE mode (`--via-dae`) also enforces skill safety through OpenClawDAE.
 
+## Resident OpenClaw Service
+
+OpenClaw now has a broker-managed resident service path built on the existing
+webhook receiver instead of a separate daemon shape.
+
+- `main.py` registers `openclaw` as a launchable DAE
+- default bootstrap path autostarts it unless disabled
+- runtime control works through Claw or the generic DAE broker surface
+
+Environment:
+- `OPENCLAW_RESIDENT_ENABLED=1`
+- `OPENCLAW_RESIDENT_AUTOSTART=1`
+- `OPENCLAW_RESIDENT_HOST=127.0.0.1`
+- `OPENCLAW_RESIDENT_PORT=18800`
+- `OPENCLAW_RESIDENT_LOG_LEVEL=info`
+
+Runtime examples:
+- `status openclaw`
+- `status openclaw live`
+- `tail openclaw`
+- `stop openclaw`
+
 ### Memory Writeback (WSP 60 / WSP 48)
 
 Standalone action runs are now persisted into WRE PatternMemory as `skill_outcomes`
@@ -107,6 +129,7 @@ records (`action_cli_<route>_<action>`), enabling recall of:
 
 | Path | Purpose |
 |------|---------|
+| `scripts/launch.py` | Broker-managed resident OpenClaw service hooks |
 | `workspace/AGENTS.md` | WSP framework training |
 | `workspace/SOUL.md` | 0102 identity/voice |
 | `workspace/TOOLS.md` | Foundups CLI commands |

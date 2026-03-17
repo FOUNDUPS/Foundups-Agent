@@ -1,3 +1,13 @@
+## 2026-03-18: Resident OpenClaw launch contract
+
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_resident_launch.py modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py -q`
+- Status: PASS
+- Notes:
+  - Validates broker-safe resident OpenClaw launch/stop hooks.
+  - Confirms generic DAE runtime control remains stable with `openclaw` as a launchable runtime alias.
+
+---
+
 ## 2026-03-16: PQN simulation runtime command routing
 
 - Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_pqn_research_adapter.py modules/communication/moltbot_bridge/tests/test_openclaw_dae_runtime_commands.py modules/infrastructure/dae_daemon/tests/test_dae_adapter.py -q`

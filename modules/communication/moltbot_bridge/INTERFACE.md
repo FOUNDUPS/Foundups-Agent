@@ -95,6 +95,11 @@ Structured result contract:
 | `FOUNDUPS_WEBHOOK_TOKEN` | Yes | Shared secret with OpenClaw |
 | `OPENCLAW_GATEWAY_URL` | No | OpenClaw gateway (default: ws://127.0.0.1:18789) |
 | `MOLTBOT_GATEWAY_URL` | No | Legacy name (fallback) |
+| `OPENCLAW_RESIDENT_ENABLED` | No | Register resident OpenClaw webhook runtime at startup (default on) |
+| `OPENCLAW_RESIDENT_AUTOSTART` | No | Auto-start broker-managed resident OpenClaw service after preflights (default on) |
+| `OPENCLAW_RESIDENT_HOST` | No | Host for resident OpenClaw webhook service (default `127.0.0.1`) |
+| `OPENCLAW_RESIDENT_PORT` | No | Port for resident OpenClaw webhook service (default `18800`) |
+| `OPENCLAW_RESIDENT_LOG_LEVEL` | No | Uvicorn log level for resident service (default `info`) |
 | `OPENCLAW_CONVERSATION_BACKEND` | No | `openclaw` (default) or `ironclaw` for sidecar conversational runtime |
 | `OPENCLAW_NO_API_KEYS` | No | `1` disables external/cloud LLM calls in OpenClaw/FAM paths |
 | `OPENCLAW_ALLOW_EXTERNAL_LLM` | No | `1` allows AI Gateway cloud fallback (auto-disabled when `*_NO_API_KEYS=1`) |
@@ -147,6 +152,9 @@ response = await dae.process(
 
 Broker-managed runtime commands are now available through OpenClaw:
 - `list launchable daes`
+- `status openclaw`
+- `status openclaw live`
+- `tail openclaw`
 - `status holodae`
 - `launch social media dae`
 - `stop training system`
@@ -160,6 +168,11 @@ Routing contract:
 Authorization:
 - `list` and `status` are read-only
 - `launch` and `stop` require `012` authority
+
+Resident OpenClaw contract:
+- `main.py` registers `openclaw` as a launchable DAE using `scripts/launch.py`
+- bootstrap can autostart the resident webhook service after preflight
+- CLI menu option `3` now reuses the broker-managed runtime when available instead of spawning a competing subprocess
 
 ### PQN Runtime Control
 
