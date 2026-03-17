@@ -721,15 +721,27 @@ def run_multi_channel_scheduler(
         return {"error": str(e)}
 
     # FIX: Close extra tabs if session restore opened multiple (2026-01-18)
+    # HARDENED 2026-03-18: Handle Chrome 146 timeout issues gracefully
     handles = driver.window_handles
     if len(handles) > 1:
         print(f"[FIX] Closing {len(handles) - 1} extra tab(s) from session restore...")
         main_handle = handles[0]
         for handle in handles[1:]:
-            driver.switch_to.window(handle)
-            driver.close()
-        driver.switch_to.window(main_handle)
-        print(f"[OK] Now operating on single tab")
+            try:
+                driver.switch_to.window(handle)
+                # Use JavaScript to close tab (more reliable than driver.close())
+                driver.execute_script("window.close();")
+            except Exception as close_err:
+                print(f"[WARN] Tab close failed (non-fatal): {close_err}")
+                # Tab may already be closed or unresponsive - continue
+        try:
+            driver.switch_to.window(main_handle)
+            print(f"[OK] Now operating on single tab")
+        except Exception as switch_err:
+            print(f"[WARN] Switch to main tab failed: {switch_err}")
+            # Try to get any available handle
+            if driver.window_handles:
+                driver.switch_to.window(driver.window_handles[0])
 
     # Import scheduler components
     from modules.platform_integration.youtube_shorts_scheduler.src.scheduler import YouTubeShortsScheduler

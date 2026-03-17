@@ -2,6 +2,29 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## V0.19.3 - LIVE Video Prioritization + Daemon Mode (2026-03-18)
+
+### Added
+- **LIVE prioritization**: LIVE/Streamed/Premiered videos indexed FIRST
+- **Shorts filtering**: Shorts skipped (low content value for indexing)
+- **Daemon mode**: Continuous 24/7 indexing via CLI menu option 2
+- **Dual-browser daemon**: Alternates Chrome (9222) and Edge (9223) channels
+
+### Changed Files
+- `src/studio_ask_indexer.py`: Added LIVE detection, Shorts filter, priority ordering
+- `modules/infrastructure/cli/src/indexing_menu.py`: Added daemon mode handler
+
+### Research (WSP 97)
+- **Chrome 146**: Native MCP support discovered (`chrome://inspect/#remote-debugging`)
+- **Chrome DevTools MCP**: 26-tool server for AI browser automation
+- Task spec created: `wre_core/docs/CHROME_DEVTOOLS_MCP_INTEGRATION_TASK.md`
+
+### WSP Compliance
+- **WSP 22**: ModLog documentation
+- **WSP 97**: CoT/CoR research gates applied
+
+---
+
 ## V0.19.2 - Browser Channel Isolation (2026-03-11)
 
 ### Fixed

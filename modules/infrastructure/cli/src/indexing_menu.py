@@ -23,11 +23,12 @@ def handle_indexing_menu() -> None:
     print("Each video saved as JSON with transcripts, topics, timestamps")
     print("=" * 60)
     print("1. [GEMINI] Gemini AI Indexing (fast, no download)")
-    print("2. [LOCAL] Whisper Indexing (yt-dlp + faster-whisper)")
-    print("3. [TEST] Test Video Indexing (single video)")
-    print("4. [BATCH] Batch Index Channel (bulk process)")
-    print("5. [ENHANCE] Batch Enhance Videos (AI Training Data)")
-    print("6. [TRAIN] Extract Training Data (Gemma quality filter)")
+    print("2. [DAEMON] Continuous Indexing (24/7 daemon mode)")
+    print("3. [LOCAL] Whisper Indexing (yt-dlp + faster-whisper)")
+    print("4. [TEST] Test Video Indexing (single video)")
+    print("5. [BATCH] Batch Index Channel (bulk process)")
+    print("6. [ENHANCE] Batch Enhance Videos (AI Training Data)")
+    print("7. [TRAIN] Extract Training Data (Gemma quality filter)")
     print("0. Back")
     print("=" * 60)
 
@@ -36,14 +37,16 @@ def handle_indexing_menu() -> None:
     if idx_choice == "1":
         _handle_gemini_indexing()
     elif idx_choice == "2":
-        _handle_whisper_indexing()
+        _handle_daemon_indexing()
     elif idx_choice == "3":
-        _handle_test_video_indexing()
+        _handle_whisper_indexing()
     elif idx_choice == "4":
-        _handle_batch_indexing()
+        _handle_test_video_indexing()
     elif idx_choice == "5":
-        _handle_batch_enhancement()
+        _handle_batch_indexing()
     elif idx_choice == "6":
+        _handle_batch_enhancement()
+    elif idx_choice == "7":
         _handle_training_data_extraction()
     elif idx_choice == "0":
         pass  # Back to YT menu
@@ -96,6 +99,113 @@ def _handle_gemini_indexing() -> None:
         print(f"[ERROR] studio_ask_indexer not available: {e}")
     except Exception as e:
         print(f"[ERROR] Indexing failed: {e}")
+        import traceback
+        traceback.print_exc()
+
+
+def _handle_daemon_indexing() -> None:
+    """Handle continuous 24/7 daemon indexing mode."""
+    print("\n[DAEMON] Continuous Video Indexing")
+    print("=" * 60)
+    print("Runs indexing in a continuous loop with configurable intervals.")
+    print("Creates STOP file to stop: memory/STOP_VIDEO_INDEXER")
+    print("=" * 60)
+
+    groups = group_channels_by_browser(role="indexing")
+    chrome_names = [ch.get("name", ch.get("key")) for ch in groups.get("chrome", [])]
+    edge_names = [ch.get("name", ch.get("key")) for ch in groups.get("edge", [])]
+    print(f"  Chrome (9222): {' + '.join(chrome_names) if chrome_names else '(none)'}")
+    print(f"  Edge (9223): {' + '.join(edge_names) if edge_names else '(none)'}")
+    print("")
+
+    # Get configuration
+    videos_per_cycle = input("Videos per channel per cycle [10]: ").strip() or "10"
+    interval = input("Interval between cycles (minutes) [15]: ").strip() or "15"
+    max_cycles = input("Max cycles (0=infinite) [0]: ").strip() or "0"
+
+    try:
+        videos_per_cycle = int(videos_per_cycle)
+        interval = int(interval)
+        max_cycles = int(max_cycles) if max_cycles != "0" else None
+    except ValueError:
+        print("[ERROR] Invalid input - using defaults")
+        videos_per_cycle, interval, max_cycles = 10, 15, None
+
+    print(f"\n[CONFIG] Videos/channel/cycle: {videos_per_cycle}")
+    print(f"[CONFIG] Interval: {interval} minutes")
+    print(f"[CONFIG] Max cycles: {max_cycles if max_cycles else 'unlimited'}")
+    print("\n[INFO] Press Ctrl+C to stop or create: memory/STOP_VIDEO_INDEXER")
+    print("[STARTING] Daemon mode...\n")
+
+    try:
+        from modules.ai_intelligence.video_indexer.src.studio_ask_indexer import run_video_indexing_cycle
+
+        groups = group_channels_by_browser(role="indexing")
+        chrome_channels = [ch.get("id") for ch in groups.get("chrome", []) if ch.get("id")]
+        edge_channels = [ch.get("id") for ch in groups.get("edge", []) if ch.get("id")]
+
+        # Custom dual-browser daemon loop
+        async def dual_browser_daemon():
+            cycles = 0
+            total_indexed = 0
+            stop_file = Path("memory") / "STOP_VIDEO_INDEXER"
+
+            while True:
+                if stop_file.exists():
+                    print("[DAEMON] STOP file detected")
+                    break
+                if max_cycles and cycles >= max_cycles:
+                    print(f"[DAEMON] Reached max cycles ({max_cycles})")
+                    break
+
+                cycles += 1
+                print(f"\n[DAEMON] === Cycle {cycles} ===")
+
+                # Phase 1: Chrome channels
+                if chrome_channels:
+                    print(f"[DAEMON] Chrome channels: {len(chrome_channels)}")
+                    result = await run_video_indexing_cycle(
+                        channels=chrome_channels,
+                        max_videos_per_channel=videos_per_cycle,
+                        browser="chrome"
+                    )
+                    indexed = result.get('total_indexed', 0)
+                    total_indexed += indexed
+                    print(f"[DAEMON] Chrome indexed: {indexed}")
+
+                # Phase 2: Edge channels
+                if edge_channels:
+                    print(f"[DAEMON] Edge channels: {len(edge_channels)}")
+                    result = await run_video_indexing_cycle(
+                        channels=edge_channels,
+                        max_videos_per_channel=videos_per_cycle,
+                        browser="edge"
+                    )
+                    indexed = result.get('total_indexed', 0)
+                    total_indexed += indexed
+                    print(f"[DAEMON] Edge indexed: {indexed}")
+
+                print(f"[DAEMON] Cycle {cycles} complete. Total indexed: {total_indexed}")
+                print(f"[DAEMON] Sleeping {interval} minutes...")
+
+                # Interruptible sleep
+                for _ in range(interval * 6):  # Check every 10 seconds
+                    if stop_file.exists():
+                        break
+                    await asyncio.sleep(10)
+
+            return {"cycles": cycles, "total_indexed": total_indexed}
+
+        result = asyncio.run(dual_browser_daemon())
+        print(f"\n[DAEMON] Stopped after {result.get('cycles', 0)} cycles")
+        print(f"[DAEMON] Total videos indexed: {result.get('total_indexed', 0)}")
+
+    except KeyboardInterrupt:
+        print("\n[DAEMON] Stopped by user (Ctrl+C)")
+    except ImportError as e:
+        print(f"[ERROR] studio_ask_indexer not available: {e}")
+    except Exception as e:
+        print(f"[ERROR] Daemon failed: {e}")
         import traceback
         traceback.print_exc()
 

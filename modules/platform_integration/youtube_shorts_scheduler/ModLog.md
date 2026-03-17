@@ -1,5 +1,33 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-03-18 - Hardened Tab Close for Chrome 146
+
+**WSP References**: WSP 97 (CoT/CoR), WSP 91 (Observability)
+
+### Problem
+Chrome 146 throws "failed to close window in 20 seconds" during session restore tab cleanup:
+```
+selenium.common.exceptions.WebDriverException: Message: unknown error: failed to close window in 20 seconds
+```
+
+### Root Cause
+`driver.close()` can timeout when tabs are unresponsive or Chrome is under load.
+
+### Fix
+Changed `launch.py:730` from `driver.close()` to `driver.execute_script("window.close()")` with try-except:
+```python
+try:
+    driver.switch_to.window(handle)
+    driver.execute_script("window.close();")  # More reliable than driver.close()
+except Exception as close_err:
+    print(f"[WARN] Tab close failed (non-fatal): {close_err}")
+```
+
+### Files Changed
+- `scripts/launch.py`: Lines 723-737 - hardened tab cleanup
+
+---
+
 ## 2026-02-27 - Browser Rotation Fix: Add close() Method
 
 **WSP References**: WSP 84 (Code Reuse), WSP 27 (DAE Lifecycle)
