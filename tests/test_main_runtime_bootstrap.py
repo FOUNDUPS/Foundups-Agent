@@ -1,6 +1,12 @@
+import importlib.util
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import main
+_MAIN_PATH = Path(__file__).resolve().parents[1] / "main.py"
+_MAIN_SPEC = importlib.util.spec_from_file_location("foundups_test_main", _MAIN_PATH)
+assert _MAIN_SPEC and _MAIN_SPEC.loader
+main = importlib.util.module_from_spec(_MAIN_SPEC)
+_MAIN_SPEC.loader.exec_module(main)
 
 
 def test_bootstrap_runtime_dae_launches_registers_openclaw(monkeypatch):
@@ -66,6 +72,32 @@ def test_bootstrap_runtime_dae_launches_registers_holodae_stop_hook(monkeypatch)
     holodae_specs = [spec for spec in specs if spec.dae_id == "holodae"]
     assert len(holodae_specs) == 1
     assert holodae_specs[0].stop_callable is main.stop_holodae
+
+
+def test_bootstrap_runtime_dae_launches_registers_git_push_and_social_stop_hooks(monkeypatch):
+    daemon = MagicMock()
+    daemon.running = True
+    broker = MagicMock()
+    broker.list_launchable_daes.return_value = {"git_push_dae": {}, "social_media": {}}
+    broker.get_runtime_status.return_value = {"running": True}
+
+    monkeypatch.setenv("OPENCLAW_RESIDENT_ENABLED", "0")
+    monkeypatch.setenv("OPENCLAW_SUPERVISOR_ENABLED", "0")
+
+    with patch.object(main, "get_central_daemon", return_value=daemon), patch.object(
+        main, "get_dae_launch_broker", return_value=broker
+    ):
+        main.bootstrap_runtime_dae_launches()
+
+    specs = [call.args[0] for call in broker.register_launch_spec.call_args_list]
+    git_specs = [spec for spec in specs if spec.dae_id == "git_push_dae"]
+    social_specs = [spec for spec in specs if spec.dae_id == "social_media"]
+    assert len(git_specs) == 1
+    assert len(social_specs) == 1
+    assert git_specs[0].stop_callable is not None
+    assert social_specs[0].stop_callable is not None
+    assert git_specs[0].stop_callable.__name__ == "stop_git_push_dae"
+    assert social_specs[0].stop_callable.__name__ == "stop_social_media_dae"
 
 
 def test_bootstrap_runtime_dae_launches_registers_and_autostarts_openclaw_supervisor(monkeypatch):

@@ -150,7 +150,10 @@ from modules.ai_intelligence.holo_dae.scripts.launch import run_holodae, stop_ho
 
 
 # Extracted to modules/platform_integration/social_media_orchestrator/scripts/launch.py per WSP 62
-from modules.platform_integration.social_media_orchestrator.scripts.launch import run_social_media_dae
+from modules.platform_integration.social_media_orchestrator.scripts.launch import (
+    run_social_media_dae,
+    stop_social_media_dae,
+)
 
 from modules.communication.auto_meeting_orchestrator.scripts.launch import run_amo_dae
 from modules.infrastructure.evade_net.scripts.launch import run_evade_net
@@ -167,6 +170,7 @@ from modules.communication.moltbot_bridge.scripts.launch import (
 # Extracted to modules/infrastructure/git_push_dae/scripts/launch.py per WSP 62
 from modules.infrastructure.git_push_dae.scripts.launch import (
     launch_git_push_dae,
+    stop_git_push_dae,
     view_git_post_history,
     check_instance_status,
 )
@@ -911,6 +915,7 @@ def bootstrap_runtime_dae_launches() -> None:
             domain="infrastructure",
             module_path="modules.infrastructure.git_push_dae.scripts.launch",
             start_callable=lambda: launch_git_push_dae(run_once=False),
+            stop_callable=stop_git_push_dae,
             description="Autonomous git push daemon.",
         ),
         DAELaunchSpec(
@@ -919,6 +924,7 @@ def bootstrap_runtime_dae_launches() -> None:
             domain="platform_integration",
             module_path="modules.platform_integration.social_media_orchestrator.scripts.launch",
             start_callable=run_social_media_dae,
+            stop_callable=stop_social_media_dae,
             description="Unified social media orchestration runtime.",
         ),
         DAELaunchSpec(

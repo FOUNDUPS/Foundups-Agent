@@ -55958,3 +55958,8 @@ if cooldown_sets:
 - Added a real `stop_holodae()` hook to `modules/ai_intelligence/holo_dae/scripts/launch.py`.
 - Registered `holodae` with a `stop_callable` in `main.py` so runtime control surfaces can stop HoloDAE honestly instead of returning `stop_unsupported`.
 
+## 2026-03-18: GitPush and Social Media broker stop support
+- Added `stop_git_push_dae()` to `modules/infrastructure/git_push_dae/scripts/launch.py`.
+- Added `stop_social_media_dae()` to `modules/platform_integration/social_media_orchestrator/scripts/launch.py`.
+- Registered both runtimes with real `stop_callable` hooks in `main.py`.
+

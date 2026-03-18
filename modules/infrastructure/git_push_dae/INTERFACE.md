@@ -65,6 +65,22 @@ class HealthStatus:
     recommendations: List[str]
 ```
 
+### Broker-Managed Runtime Hooks
+
+```python
+from modules.infrastructure.git_push_dae.scripts.launch import (
+    launch_git_push_dae,
+    stop_git_push_dae,
+)
+
+launch_git_push_dae(run_once=False)
+stop_git_push_dae()  # -> {"status": "stopping"} | {"status": "not_running"}
+```
+
+Runtime contract:
+- `main.py` registers `git_push_dae` with `stop_callable=stop_git_push_dae`
+- generic DAE runtime commands can now stop the broker-managed GitPushDAE honestly
+
 ## Agentic Parameters
 
 ### Push Decision Criteria (Autonomous)
