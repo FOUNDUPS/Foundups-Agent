@@ -1,7 +1,8 @@
 ---
 description: Template for building layered orchestration systems using the LEGO test pattern
+category: workflow
+evals: []
 ---
-
 # Orchestration SKILLz Template
 
 Build automation systems using layered, composable test modules that snap together like LEGO blocks.

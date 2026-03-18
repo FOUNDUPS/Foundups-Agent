@@ -1,3 +1,19 @@
+---
+name: boot_layer_rotator
+description: Master schema rotation for antifaFM stream visuals
+version: 1.0_prototype
+author: 0102
+created: 2026-03-18
+agents: [qwen]
+primary_agent: qwen
+intent_type: ORCHESTRATION
+promotion_state: prototype
+pattern_fidelity_threshold: 0.85
+category: workflow
+evals: []
+trigger:
+  startup
+---
 # Boot Layer Rotator Skill
 
 ## Purpose

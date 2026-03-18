@@ -9,8 +9,9 @@ domain: autonomous_operations
 intent_type: CLASSIFICATION
 promotion_state: prototype
 pattern_fidelity_threshold: 0.95
+category: workflow
+evals: []
 ---
-
 # Gemma Nested Module Detector
 
 **Purpose**: Fast binary classification of nested module anti-patterns using Gemma's pattern matching capabilities.

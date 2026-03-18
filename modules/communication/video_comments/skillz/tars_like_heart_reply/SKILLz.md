@@ -1,3 +1,19 @@
+---
+name: tars_like_heart_reply
+description: TARS-style heart emoji reply generation
+version: 1.0_prototype
+author: 0102
+created: 2026-03-18
+agents: [qwen]
+primary_agent: qwen
+intent_type: GENERATION
+promotion_state: prototype
+pattern_fidelity_threshold: 0.85
+category: workflow
+evals: []
+trigger:
+  event: comment_received
+---
 # TARS Like + Heart + Reply Skill
 
 **WSP Reference:** WSP 96 (WRE Skills Protocol)

@@ -5,8 +5,9 @@ user-invocable: true
 command-dispatch: tool
 command-tool: bash
 command-arg-mode: raw
+category: workflow
+evals: []
 ---
-
 # OpenClaw Monitor Skill
 
 Real-time monitoring of the Foundups Agent system through WRE and AI Overseer.

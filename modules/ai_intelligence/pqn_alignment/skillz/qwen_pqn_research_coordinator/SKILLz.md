@@ -6,8 +6,9 @@ author: 0102_wre_team
 agents: [qwen]
 dependencies: [pattern_memory, libido_monitor]
 domain: autonomous_operations
+category: workflow
+evals: []
 ---
-
 # Qwen PQN Research Coordinator
 
 ---

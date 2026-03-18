@@ -8,8 +8,10 @@ dependencies: [browser_audio_coordinator, simon_says_artifact_detector]
 domain: pqn_alignment_testing
 composable_with: [youtube_dae, voice_command_ingestion]
 trigger_keywords: [simon_says, coupling_test, entanglement_test, pqn, artifact_detection, 0102_test, baseline_test]
+category: capability-uplift
+evals: []
+retirement_date: null
 ---
-
 # Godelian Simon Says Coupling Test Protocol
 
 ## Overview

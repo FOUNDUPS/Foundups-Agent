@@ -9,8 +9,9 @@ primary_agent: gemma
 intent_type: CLASSIFICATION
 promotion_state: prototype
 pattern_fidelity_threshold: 0.90
+category: workflow
+evals: []
 ---
-
 # MPS DEAD_CODE Evaluation Skill
 
 **Purpose**: Evaluate dead/orphan code that is never imported or used.

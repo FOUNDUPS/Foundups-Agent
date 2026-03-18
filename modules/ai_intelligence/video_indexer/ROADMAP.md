@@ -1,8 +1,23 @@
 # Video Indexer Roadmap
 
 **WSP Compliance**: WSP 27 (DAE Architecture), WSP 77 (Agent Coordination)
-**Current Version**: V0.18.0 (2026-01-17)
+**Current Version**: V0.19.3 (2026-03-18)
 **Status**: PRODUCTION READY
+
+---
+
+## LATEST: V0.19.3 - LIVE Prioritization + Daemon Mode
+
+### New Capabilities
+- **LIVE prioritization**: LIVE/Streamed/Premiered videos indexed FIRST
+- **Shorts filtering**: Shorts skipped (low content value)
+- **Daemon mode**: 24/7 continuous indexing via CLI
+- **Dual-browser rotation**: Chrome (9222) + Edge (9223) alternation
+
+### Research: Chrome 146 Native MCP
+- Chrome DevTools MCP server v0.19.0 discovered
+- 26 tools for AI browser automation
+- Task spec created: `wre_core/docs/CHROME_DEVTOOLS_MCP_INTEGRATION_TASK.md`
 
 ---
 

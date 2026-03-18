@@ -459,6 +459,226 @@ class WRESkillsDiscovery:
             # Sleep
             time.sleep(interval_seconds)
 
+    # =========================================================================
+    # COMMAND ROLODEX INTEGRATION (Step 2: WRE reads orphan CLIs)
+    # =========================================================================
+
+    def load_command_rolodex(self, source: str = "sqlite") -> Dict[str, Any]:
+        """
+        Load command rolodex for CLI discovery.
+
+        Args:
+            source: "sqlite" (indexed) or "json" (portable)
+
+        Returns:
+            Dict with commands list and metadata
+        """
+        rolodex_base = self.repo_root / "holo_index" / "docs"
+
+        if source == "sqlite":
+            db_path = rolodex_base / "command_rolodex.db"
+            if db_path.exists():
+                return self._load_rolodex_sqlite(db_path)
+            logger.warning("[WRE-DISCOVERY] SQLite rolodex not found, falling back to JSON")
+
+        # Fallback to JSON
+        json_path = rolodex_base / "command_rolodex.json"
+        if json_path.exists():
+            return self._load_rolodex_json(json_path)
+
+        logger.error("[WRE-DISCOVERY] No command rolodex found. Run: python holo_index.py --index-cli")
+        return {"commands": [], "total_cli_entrypoints": 0}
+
+    def _load_rolodex_sqlite(self, db_path: Path) -> Dict[str, Any]:
+        """Load rolodex from SQLite database."""
+        import sqlite3
+
+        conn = sqlite3.connect(str(db_path))
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        # Get metadata
+        metadata = {}
+        cursor.execute("SELECT key, value FROM rolodex_metadata")
+        for row in cursor.fetchall():
+            metadata[row["key"]] = row["value"]
+
+        # Get commands
+        commands = []
+        cursor.execute("SELECT * FROM cli_commands ORDER BY line_count DESC")
+        for row in cursor.fetchall():
+            commands.append(dict(row))
+
+        conn.close()
+
+        return {
+            "commands": commands,
+            "total_cli_entrypoints": int(metadata.get("total_commands", 0)),
+            "wre_connected_count": int(metadata.get("wre_connected_count", 0)),
+            "orphan_count": int(metadata.get("orphan_count", 0)),
+            "indexed_at": metadata.get("indexed_at"),
+        }
+
+    def _load_rolodex_json(self, json_path: Path) -> Dict[str, Any]:
+        """Load rolodex from JSON file."""
+        import json
+        with open(json_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    def discover_orphan_clis(
+        self,
+        min_line_count: int = 100,
+        has_json_flag: Optional[bool] = None,
+        category: Optional[str] = None,
+        limit: int = 50
+    ) -> List[Dict[str, Any]]:
+        """
+        Discover orphan CLIs that need SKILLz.md wrappers.
+
+        Args:
+            min_line_count: Minimum lines to be considered substantial
+            has_json_flag: Filter by JSON support (True/False/None for all)
+            category: Filter by category (e.g., "cadence:continuous")
+            limit: Max results to return
+
+        Returns:
+            List of orphan CLI dicts sorted by line_count (most substantial first)
+        """
+        rolodex = self.load_command_rolodex()
+        orphans = []
+
+        for cmd in rolodex.get("commands", []):
+            # Skip WRE-connected
+            if cmd.get("wre_connected"):
+                continue
+
+            # Apply filters
+            if cmd.get("line_count", 0) < min_line_count:
+                continue
+            if has_json_flag is not None and cmd.get("has_json_flag") != has_json_flag:
+                continue
+            if category and cmd.get("category") != category:
+                continue
+
+            orphans.append(cmd)
+
+        # Sort by line_count descending
+        orphans.sort(key=lambda x: x.get("line_count", 0), reverse=True)
+
+        logger.info(f"[WRE-DISCOVERY] Found {len(orphans)} orphan CLIs (limit={limit})")
+        return orphans[:limit]
+
+    def suggest_skillz_md_for_orphan(self, orphan_cli: Dict[str, Any]) -> str:
+        """
+        Generate SKILLz.md template for an orphan CLI.
+
+        This enables Gemma pattern-matching to suggest WRE connection.
+
+        Args:
+            orphan_cli: Dict from discover_orphan_clis()
+
+        Returns:
+            SKILLz.md template content
+        """
+        from datetime import datetime
+
+        module_name = orphan_cli.get("module_name", "unknown")
+        path = orphan_cli.get("path", "")
+        trigger = orphan_cli.get("suggested_trigger", "manual")
+        has_json = orphan_cli.get("has_json_flag", False)
+        line_count = orphan_cli.get("line_count", 0)
+
+        # Extract skill name from module path
+        parts = module_name.split(".")
+        skill_name = parts[-1] if parts else "unknown_skill"
+
+        # Determine primary agent based on trigger type
+        if "cadence:continuous" in trigger:
+            primary_agent = "qwen"
+            intent_type = "TELEMETRY"
+        elif "event:" in trigger:
+            primary_agent = "qwen"
+            intent_type = "DECISION"
+        else:
+            primary_agent = "gemma"
+            intent_type = "CLASSIFICATION"
+
+        template = f'''---
+name: {skill_name}
+description: Auto-generated wrapper for {module_name}
+version: 1.0_prototype
+author: orphan_capability_scanner
+created: {datetime.now().strftime("%Y-%m-%d")}
+agents: [{primary_agent}]
+primary_agent: {primary_agent}
+intent_type: {intent_type}
+promotion_state: prototype
+pattern_fidelity_threshold: 0.85
+category: auto_generated
+evals: []
+trigger:
+  {trigger}
+---
+# {skill_name.replace("_", " ").title()}
+
+## Purpose
+WRE wrapper for `{path}` ({line_count} lines)
+
+## CLI Interface
+```bash
+python {path.replace(chr(92), "/")} --help
+{"python " + path.replace(chr(92), "/") + " --json" if has_json else "# TODO: Add --json support per WSP 103"}
+```
+
+## Instructions (For AI Agent)
+
+### 1. VALIDATE_PRECONDITIONS
+**Rule**: Before execution, verify required state
+**Expected Pattern**: preconditions_validated=True
+
+### 2. EXECUTE_CLI
+**Rule**: Run the CLI command with appropriate flags
+**Expected Pattern**: cli_executed=True
+
+### 3. VALIDATE_OUTPUT
+**Rule**: Check output for success/failure indicators
+**Expected Pattern**: output_validated=True
+
+## Benchmark Test Cases
+
+### Test Set 1: Basic Execution
+1. Input: `--help` → Expected: Usage information displayed
+2. Input: `--status` → Expected: Status JSON (if supported)
+
+## Success Criteria
+
+- ✅ Pattern fidelity ≥ 85%
+- ✅ CLI executes without error
+- ✅ Output matches expected format
+'''
+        return template
+
+    def get_orphan_reduction_progress(self) -> Dict[str, Any]:
+        """
+        Get metrics on orphan CLI reduction progress.
+
+        Returns:
+            Dict with progress metrics for observability
+        """
+        rolodex = self.load_command_rolodex()
+
+        total = rolodex.get("total_cli_entrypoints", 0)
+        connected = rolodex.get("wre_connected_count", 0)
+        orphans = rolodex.get("orphan_count", 0)
+
+        return {
+            "total_clis": total,
+            "wre_connected": connected,
+            "orphans": orphans,
+            "connection_rate": round(connected / total * 100, 2) if total > 0 else 0,
+            "indexed_at": rolodex.get("indexed_at"),
+        }
+
 
 # Example usage
 if __name__ == "__main__":

@@ -170,7 +170,9 @@ SCHEMAS: Dict[str, Dict[str, Any]] = {
 }
 
 # Default rotation order (10 min each schema)
-ROTATION_ORDER = ["gcc", "video", "news", "chess", "checkers", "cams", "karaoke"]
+# NOTE: Only include IMPLEMENTED schemas. Coming Soon schemas removed 2026-03-18.
+# Add schema back when executor is wired (see run_schema() imports)
+ROTATION_ORDER = ["gcc", "video", "news"]
 
 
 # OBS source names that need visibility control

@@ -8,8 +8,9 @@ dependencies: [git_push_dae, pattern_memory]
 domain: autonomous_operations
 intent_type: DECISION
 promotion_state: prototype
+category: workflow
+evals: []
 ---
-
 # Qwen GitPush Analyzer Skill
 
 **Skill Type**: Micro Chain-of-Thought (WSP 96)

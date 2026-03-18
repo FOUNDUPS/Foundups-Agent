@@ -1,3 +1,19 @@
+---
+name: unified_metadata_updater
+description: Unified metadata updater for all stream platforms
+version: 1.0_prototype
+author: 0102
+created: 2026-03-18
+agents: [qwen]
+primary_agent: qwen
+intent_type: ORCHESTRATION
+promotion_state: prototype
+pattern_fidelity_threshold: 0.85
+category: workflow
+evals: []
+trigger:
+  event: schema_change
+---
 # Unified Metadata Updater Skillz
 
 ## Purpose

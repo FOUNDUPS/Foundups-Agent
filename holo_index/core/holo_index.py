@@ -51,6 +51,45 @@ except ImportError as exc:
 # Lazy load sentence_transformers to prevent crash on import
 SentenceTransformer = None
 
+# Timeout configuration for blocking operations (WSP 97 pre-flight compliance)
+HOLO_MODEL_IMPORT_TIMEOUT = float(os.getenv("HOLO_MODEL_IMPORT_TIMEOUT", "5"))  # 5s default
+HOLO_MODEL_LOAD_TIMEOUT = float(os.getenv("HOLO_MODEL_LOAD_TIMEOUT", "10"))     # 10s default
+HOLO_ENCODE_TIMEOUT = float(os.getenv("HOLO_ENCODE_TIMEOUT", "3"))              # 3s default
+HOLO_SEARCH_TIMEOUT = float(os.getenv("HOLO_SEARCH_TIMEOUT", "15"))             # 15s default
+
+
+def _run_with_timeout(func, timeout_sec: float, default=None, error_msg: str = "Operation timed out"):
+    """
+    Execute a function with a hard timeout using ThreadPoolExecutor.
+    Returns default value on timeout or exception instead of hanging.
+
+    WSP 97: Prevents indefinite hangs in HoloIndex operations.
+    """
+    from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        future = executor.submit(func)
+        try:
+            return future.result(timeout=timeout_sec)
+        except FuturesTimeoutError:
+            logging.getLogger(__name__).warning(f"{error_msg} (>{timeout_sec}s)")
+            return default
+        except Exception as e:
+            logging.getLogger(__name__).warning(f"{error_msg}: {e}")
+            return default
+
+
+def _import_sentence_transformers():
+    """Import SentenceTransformer with timeout protection."""
+    from sentence_transformers import SentenceTransformer as ST
+    return ST
+
+
+def _load_model(model_class, model_name: str):
+    """Load the model with timeout protection."""
+    return model_class(model_name)
+
+
 # Search cache for fast repeated queries (WSP 91 observability)
 try:
     from .search_cache import SearchCache, get_search_cache
@@ -158,24 +197,28 @@ class HoloIndex:
         else:
             global SentenceTransformer
             if SentenceTransformer is None:
-                try:
-                    from sentence_transformers import SentenceTransformer
-                except KeyboardInterrupt:
-                    self._log_agent_action("SentenceTransformer import interrupted; continuing without model", "WARN")
-                    SentenceTransformer = None
-                except Exception as e:
-                    self._log_agent_action(f"Failed to import SentenceTransformer: {e}", "ERROR")
-                    SentenceTransformer = None
+                # WSP 97: Import with hard timeout to prevent indefinite hangs
+                self._log_agent_action(f"Importing SentenceTransformer (timeout={HOLO_MODEL_IMPORT_TIMEOUT}s)...", "MODEL")
+                SentenceTransformer = _run_with_timeout(
+                    _import_sentence_transformers,
+                    timeout_sec=HOLO_MODEL_IMPORT_TIMEOUT,
+                    default=None,
+                    error_msg="SentenceTransformer import timed out"
+                )
+                if SentenceTransformer is None:
+                    self._log_agent_action("SentenceTransformer unavailable; falling back to lexical search", "WARN")
 
             if SentenceTransformer:
-                try:
-                    self.model = SentenceTransformer(model_name)
-                except KeyboardInterrupt:
-                    self._log_agent_action("SentenceTransformer load interrupted; continuing without model", "WARN")
-                    self.model = None
-                except Exception as e:
-                    self._log_agent_action(f"Failed to load model: {e}", "ERROR")
-                    self.model = None
+                # WSP 97: Load model with hard timeout
+                self._log_agent_action(f"Loading model '{model_name}' (timeout={HOLO_MODEL_LOAD_TIMEOUT}s)...", "MODEL")
+                self.model = _run_with_timeout(
+                    lambda: _load_model(SentenceTransformer, model_name),
+                    timeout_sec=HOLO_MODEL_LOAD_TIMEOUT,
+                    default=None,
+                    error_msg=f"Model '{model_name}' load timed out"
+                )
+                if self.model is None:
+                    self._log_agent_action("Model load failed; falling back to lexical search", "WARN")
             else:
                 self.model = None
 
@@ -1320,7 +1363,16 @@ class HoloIndex:
             self._log_agent_action("Embedding model not available - using offline lexical scan", "WARN")
             return self._lexical_search_collection(collection, query, limit, kind, doc_type_filter)
         else:
-            embedding = model.encode(query, show_progress_bar=False).tolist()
+            # WSP 97: Encode with timeout to prevent indefinite hangs
+            embedding = _run_with_timeout(
+                lambda: model.encode(query, show_progress_bar=False).tolist(),
+                timeout_sec=HOLO_ENCODE_TIMEOUT,
+                default=None,
+                error_msg=f"model.encode() timed out for query '{query[:50]}'"
+            )
+            if embedding is None:
+                self._log_agent_action("Encoding timed out - falling back to lexical search", "WARN")
+                return self._lexical_search_collection(collection, query, limit, kind, doc_type_filter)
             results = collection.query(query_embeddings=[embedding], n_results=limit)
 
         formatted: List[Dict[str, Any]] = []

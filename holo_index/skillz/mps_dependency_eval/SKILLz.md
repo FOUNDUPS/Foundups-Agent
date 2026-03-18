@@ -9,8 +9,9 @@ primary_agent: qwen
 intent_type: DECISION
 promotion_state: prototype
 pattern_fidelity_threshold: 0.90
+category: workflow
+evals: []
 ---
-
 # MPS DEPENDENCY Evaluation Skill
 
 **Purpose**: Evaluate dependency issues (circular imports, version conflicts, missing deps).

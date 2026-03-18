@@ -5,8 +5,9 @@ user-invocable: true
 command-dispatch: tool
 command-tool: bash
 command-arg-mode: raw
+category: workflow
+evals: []
 ---
-
 # HoloIndex Search Skill
 
 Use this skill to search the Foundups codebase semantically BEFORE making any changes.

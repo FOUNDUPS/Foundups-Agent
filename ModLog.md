@@ -1,9 +1,36 @@
 # FoundUps Agent - Development Log
 
+## [2026-03-18] Git Main-Merge Sentinel
+
+**Change Type**: Feature
+**By**: 0102
+**WSP References**: WSP 72 (Module Independence), WSP 91 (Observability), WSP 22 (ModLog)
+
+### Summary
+
+Auto-merge feature branches to main at startup. Solves the problem where agents commit to feature branches but don't merge to main, causing branch drift.
+
+### Files Changed
+
+| Location | Description |
+|----------|-------------|
+| `wre_core/src/git_main_merge_sentinel.py` | NEW - Merge logic |
+| `main.py` | Preflight wrapper + chain call |
+| `.env.example` | Sentinel env vars |
+| `wre_core/ModLog.md` | Documentation |
+
+### Env Vars
+
+- `GIT_MAIN_MERGE_SENTINEL=1` - Enable (default ON)
+- `GIT_MAIN_MERGE_SENTINEL_ENFORCED=0` - Block startup on failure
+- `GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH=1` - Delete merged branch
+
+---
+
 ## [2026-03-18] DAEmon Cursor-Follow Supervision
 
-**Change Type**: Observability / Runtime Supervision  
-**By**: 0102  
+**Change Type**: Observability / Runtime Supervision
+**By**: 0102
 **WSP References**: WSP 22, WSP 73, WSP 91, WSP 97
 
 ### Summary

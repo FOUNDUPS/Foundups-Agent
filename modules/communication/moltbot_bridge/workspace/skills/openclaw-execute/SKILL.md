@@ -5,8 +5,9 @@ user-invocable: true
 command-dispatch: tool
 command-tool: bash
 command-arg-mode: raw
+category: workflow
+evals: []
 ---
-
 # OpenClaw Execute Skill
 
 Execute tasks through the Foundups WRE (Work Routing Engine) with full WSP governance,

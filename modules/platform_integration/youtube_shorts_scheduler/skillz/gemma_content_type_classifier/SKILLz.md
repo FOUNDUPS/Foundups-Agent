@@ -42,8 +42,10 @@ metrics:
     min_outcome_quality: 0.85
     min_execution_count: 100
     required_test_pass_rate: 0.95
+category: capability-uplift
+evals: []
+retirement_date: null
 ---
-
 # Gemma Content Type Classifier
 
 **Purpose**: Classify video content type and dynamically select the appropriate description template for YouTube Shorts scheduling. Replaces static `description_template` config with AI-driven classification.

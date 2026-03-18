@@ -6,8 +6,9 @@ version: 2.0
 stage: prototype
 wsp_95_status: VETTED_FULL
 security_review: 2026-02-08
+category: workflow
+evals: []
 ---
-
 # UI/UX Pro Max - Design Intelligence
 
 **Source:** [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)

@@ -9,8 +9,9 @@ primary_agent: qwen
 intent_type: GENERATION
 promotion_state: prototype
 pattern_fidelity_threshold: 0.90
+category: workflow
+evals: []
 ---
-
 # FFCPLN Title & Description Enhancement Skill
 
 **Purpose**: Generate high-engagement titles and descriptions for YouTube Shorts that are **MUSIC CLIPS** from the FFCPLN playlist.

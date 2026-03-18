@@ -10,8 +10,9 @@ intent_type: DECISION
 promotion_state: prototype
 pattern_fidelity_threshold: 0.90
 test_status: needs_validation
+category: workflow
+evals: []
 ---
-
 # MPS WSP_VIOLATION Evaluation Skill
 
 **Purpose**: Evaluate WSP protocol violations using WSP 15 MPS methodology.

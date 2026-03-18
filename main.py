@@ -737,6 +737,64 @@ def run_wsp_framework_preflight(repo_root: Path, overseer: Any | None = None) ->
     return True
 
 
+def run_git_main_merge_sentinel_preflight(repo_root: Path) -> bool:
+    """
+    Run git main-merge sentinel at startup.
+
+    Auto-merges feature branches to main to prevent drift.
+
+    Env:
+        GIT_MAIN_MERGE_SENTINEL=1           Enable sentinel (default ON)
+        GIT_MAIN_MERGE_SENTINEL_ENFORCED=0  If 1, block startup on failure
+        GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH=1  Delete merged branch (default ON)
+    """
+    if os.getenv("GIT_MAIN_MERGE_SENTINEL", "1") == "0":
+        logger.info("[GIT-MERGE-SENTINEL] Startup preflight disabled")
+        return True
+
+    try:
+        from modules.infrastructure.wre_core.src.git_main_merge_sentinel import (
+            run_main_merge_sentinel,
+        )
+
+        result = run_main_merge_sentinel(repo_root)
+
+        # Build status line
+        status = "PASS" if result["passed"] else "FAIL"
+        merged = result.get("merged", False)
+        branch = result.get("branch") or "main"
+        actions_count = len(result.get("actions", []))
+
+        if result["error"]:
+            print(
+                f"[GIT-MERGE-SENTINEL] preflight={status} branch={branch} "
+                f"merged={merged} error={result['error']}"
+            )
+        else:
+            print(
+                f"[GIT-MERGE-SENTINEL] preflight={status} branch={branch} "
+                f"merged={merged} actions={actions_count}"
+            )
+
+        # Log actions for debugging
+        for action in result.get("actions", []):
+            logger.debug(f"[GIT-MERGE-SENTINEL] {action}")
+
+        return result["passed"]
+
+    except ImportError as exc:
+        logger.error(f"[GIT-MERGE-SENTINEL] Import failed: {exc}")
+        print(f"[GIT-MERGE-SENTINEL] preflight=WARN import_error")
+        return True  # Non-blocking import failure
+    except Exception as exc:
+        logger.error(f"[GIT-MERGE-SENTINEL] Startup preflight failed: {exc}")
+        if os.getenv("GIT_MAIN_MERGE_SENTINEL_ENFORCED", "0") == "1":
+            print(f"[GIT-MERGE-SENTINEL] preflight=FAIL error={exc}")
+            return False
+        print(f"[GIT-MERGE-SENTINEL] preflight=WARN error={exc}")
+        return True
+
+
 def bootstrap_runtime_dae_launches() -> None:
     """Register broker-managed DAE entrypoints for an already running system."""
     daemon = get_central_daemon()
@@ -901,6 +959,8 @@ def main():
     if not run_wre_dashboard_preflight(repo_root):
         return
     if not run_wsp_framework_preflight(repo_root, overseer=overseer):
+        return
+    if not run_git_main_merge_sentinel_preflight(repo_root):
         return
 
     bootstrap_runtime_dae_launches()

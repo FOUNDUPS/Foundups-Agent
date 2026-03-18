@@ -9,8 +9,9 @@ primary_agent: qwen
 intent_type: ANALYSIS
 promotion_state: prototype
 pattern_fidelity_threshold: 0.85
+category: workflow
+evals: []
 ---
-
 # Digital Twin Style Fingerprint Skill
 
 **Purpose**: Extract formality, energy, humor, and other style metrics from video content for Digital Twin voice training.

@@ -605,19 +605,45 @@ CONTENT CATEGORY (pick ONE):
                 logger.warning(f"[STUDIO-ASK] Sort failed (using default order): {e}")
                 # Continue with default order - better than failing
 
-            # Get list of video IDs
+            # Get list of video IDs (PRIORITIZE: LIVE > Regular, skip Shorts)
+            # 2026-03-18: Added LIVE prioritization and Shorts filtering
             video_ids = []
+            live_videos = []
+            regular_videos = []
             try:
                 video_rows = self.driver.find_elements("css selector", "ytcp-video-row, tr.style-scope")
-                for row in video_rows[:max_videos]:
+                for row in video_rows:
                     try:
                         link = row.find_element("css selector", "a[href*='/video/']")
                         href = link.get_attribute("href")
                         vid_id = self._extract_video_id_from_url(href)
-                        if vid_id:
-                            video_ids.append(vid_id)
+                        if not vid_id:
+                            continue
+
+                        # Get row text to detect LIVE/Shorts
+                        row_text = row.text.lower()
+
+                        # Skip Shorts (they have limited content value for indexing)
+                        if "short" in row_text or "#short" in row_text:
+                            continue
+
+                        # Detect LIVE/Premiered videos (higher priority)
+                        is_live = any(kw in row_text for kw in ["live", "streamed", "premiered", "stream"])
+
+                        if is_live:
+                            live_videos.append(vid_id)
+                        else:
+                            regular_videos.append(vid_id)
                     except Exception:
                         continue
+
+                # PRIORITY ORDER: LIVE first, then regular videos
+                video_ids = live_videos + regular_videos
+                video_ids = video_ids[:max_videos]  # Apply limit after prioritization
+
+                if live_videos:
+                    logger.info(f"[STUDIO-ASK] Found {len(live_videos)} LIVE videos (prioritized)")
+
             except Exception as e:
                 logger.warning(f"[STUDIO-ASK] Failed to get video list: {e}")
             

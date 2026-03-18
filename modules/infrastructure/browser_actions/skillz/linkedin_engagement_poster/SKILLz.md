@@ -1,3 +1,19 @@
+---
+name: linkedin_engagement_poster
+description: LinkedIn engagement and comment posting automation
+version: 1.0_prototype
+author: 0102
+created: 2026-03-18
+agents: [qwen]
+primary_agent: qwen
+intent_type: EXECUTION
+promotion_state: prototype
+pattern_fidelity_threshold: 0.85
+category: workflow
+evals: []
+trigger:
+  event: engagement_scheduled
+---
 # LinkedIn Engagement Poster Skill
 
 **WSP Reference:** WSP 96 (WRE Skills Protocol)

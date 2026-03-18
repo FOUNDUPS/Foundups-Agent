@@ -1,3 +1,19 @@
+---
+name: qwen_bulk_import_migration
+description: Bulk import migration assistant for Python modules
+version: 1.0_prototype
+author: 0102
+created: 2026-03-18
+agents: [qwen]
+primary_agent: qwen
+intent_type: REFACTORING
+promotion_state: prototype
+pattern_fidelity_threshold: 0.85
+category: workflow
+evals: []
+trigger:
+  manual
+---
 # Qwen Bulk Import Migration Skill
 
 **Version**: 1.0.0

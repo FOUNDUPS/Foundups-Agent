@@ -2,8 +2,9 @@
 name: foundups-wsp
 description: WSP Framework knowledge and compliance for Foundups Agent development
 user-invocable: true
+category: workflow
+evals: []
 ---
-
 # Foundups WSP Framework Skill
 
 You have access to the Work Structure Protocol (WSP) Framework that governs all Foundups development.

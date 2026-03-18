@@ -6,8 +6,9 @@ version: 1.0.0
 stage: prototype
 wsp_95_status: VETTED_FULL
 security_review: 2026-02-08
+category: workflow
+evals: []
 ---
-
 # Vercel React Best Practices
 
 **Source:** [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills)

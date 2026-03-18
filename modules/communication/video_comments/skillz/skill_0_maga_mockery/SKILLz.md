@@ -1,3 +1,19 @@
+---
+name: skill_0_maga_mockery
+description: MAGA troll mockery response generation
+version: 1.0_prototype
+author: 0102
+created: 2026-03-18
+agents: [gemma]
+primary_agent: gemma
+intent_type: GENERATION
+promotion_state: prototype
+pattern_fidelity_threshold: 0.85
+category: workflow
+evals: []
+trigger:
+  event: classification_maga
+---
 # Skill 0: MAGA Mockery
 
 **Phase:** 3O-3R Sprint 2

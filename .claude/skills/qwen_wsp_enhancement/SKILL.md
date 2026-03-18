@@ -7,8 +7,9 @@ agents: [qwen, gemma]
 dependencies: [holo_index, pattern_memory, wsp_framework]
 domain: wsp_protocol_enhancement
 composable_with: [code_intelligence, module_analysis]
+category: workflow
+evals: []
 ---
-
 # Qwen WSP Enhancement Skills
 
 ## Overview

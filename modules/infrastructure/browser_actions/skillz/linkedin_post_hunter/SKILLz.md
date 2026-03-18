@@ -1,3 +1,19 @@
+---
+name: linkedin_post_hunter
+description: LinkedIn post discovery and engagement targeting
+version: 1.0_prototype
+author: 0102
+created: 2026-03-18
+agents: [qwen]
+primary_agent: qwen
+intent_type: DISCOVERY
+promotion_state: prototype
+pattern_fidelity_threshold: 0.85
+category: workflow
+evals: []
+trigger:
+  cadence: 4h
+---
 # LinkedIn Post Hunter Skill
 
 **WSP Reference:** WSP 96 (WRE Skills Protocol)

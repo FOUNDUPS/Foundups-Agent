@@ -5,8 +5,9 @@ user-invocable: true
 command-dispatch: tool
 command-tool: bash
 command-arg-mode: raw
+category: workflow
+evals: []
 ---
-
 # PQN Research Skill
 
 Use this skill to interact with the PQN@home distributed detection network,

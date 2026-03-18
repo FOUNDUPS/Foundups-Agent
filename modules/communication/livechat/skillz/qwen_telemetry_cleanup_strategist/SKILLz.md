@@ -11,8 +11,9 @@ promotion_state: prototype
 estimated_tokens: 200-500
 execution_time_ms: 150-300
 wsp_chain: [WSP_77, WSP_91, WSP_96, WSP_15]
+category: workflow
+evals: []
 ---
-
 # Qwen Telemetry Cleanup Strategist
 
 **Purpose**: Strategic analysis and safe execution planning for YouTube DAE telemetry lifecycle management

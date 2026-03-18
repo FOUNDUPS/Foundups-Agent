@@ -9,8 +9,9 @@ domain: ai_intelligence
 intent_type: TELEMETRY
 promotion_state: prototype
 pattern_fidelity_threshold: 0.95
+category: workflow
+evals: []
 ---
-
 # M2M Holo Retrieval Benchmark Skill
 
 ## Purpose

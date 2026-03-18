@@ -9,8 +9,9 @@ primary_agent: gemma
 trigger_keywords: [moderate, spam, toxic, chat, filter, block]
 pattern_fidelity_threshold: 0.90
 test_status: prototype
+category: workflow
+evals: []
 ---
-
 # YouTube Chat Moderation Skill (PROTOTYPE)
 
 **Purpose**: Validate this skill pattern with 0102 (Claude Code) before deploying to native Qwen/Gemma environment.

@@ -8,8 +8,10 @@ dependencies: [browser_actions, studio_ask_indexer]
 domain: video_indexing
 intent_type: EXTRACTION
 promotion_state: prototype
+category: capability-uplift
+evals: []
+retirement_date: null
 ---
-
 # Transcript Ask SKILLz
 
 **Skill Type**: Browser Automation + AI Extraction (WSP 96)

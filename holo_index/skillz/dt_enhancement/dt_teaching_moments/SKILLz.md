@@ -8,8 +8,9 @@ agents: [qwen]
 primary_agent: qwen
 intent_type: EXTRACTION
 promotion_state: prototype
+category: workflow
+evals: []
 ---
-
 # Digital Twin Teaching Moments Skill
 
 **Purpose**: Identify segments where 012 teaches or explains concepts.

@@ -8,8 +8,9 @@ agents: [qwen]
 primary_agent: qwen
 intent_type: EXTRACTION
 promotion_state: prototype
+category: workflow
+evals: []
 ---
-
 # Digital Twin Voice Patterns Skill
 
 **Purpose**: Extract 012's signature phrases, filler words, and vocabulary patterns for voice cloning.

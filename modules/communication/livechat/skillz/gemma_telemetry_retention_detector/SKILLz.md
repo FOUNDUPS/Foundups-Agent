@@ -11,8 +11,9 @@ promotion_state: prototype
 estimated_tokens: 50-100
 execution_time_ms: 10-50
 wsp_chain: [WSP_77, WSP_91, WSP_96]
+category: workflow
+evals: []
 ---
-
 # Gemma Telemetry Retention Detector
 
 **Purpose**: Fast pattern matching to classify YouTube DAE heartbeat records for retention strategy

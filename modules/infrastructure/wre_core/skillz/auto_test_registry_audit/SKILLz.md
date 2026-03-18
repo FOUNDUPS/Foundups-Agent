@@ -18,8 +18,9 @@ dependencies:
 metrics:
   pattern_fidelity_scoring:
     enabled: true
+category: workflow
+evals: []
 ---
-
 # Auto Test Registry Audit
 
 **Purpose**: Maintains the Single Source of Truth for verification capabilities by scanning the codebase and updating `WSP_knowledge/WSP_Test_Registry.json`.
