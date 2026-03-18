@@ -334,3 +334,12 @@
 - Notes:
   - Confirms `tail <dae>` and `status <dae> live` classify as monitor intents.
   - Confirms OpenClaw runtime supervision for `openclaw` routes through the new DAEmon observer path.
+
+## 2026-03-18: PQN simulation runtime alignment coverage
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_pqn_research_adapter.py modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py modules/communication/moltbot_bridge/tests/test_openclaw_dae_runtime_commands.py -q`
+- Status: PASS
+- Result: `25 passed`
+- Notes:
+  - Confirms `run pqn simulation` is now classified as broker/runtime control instead of inline research execution.
+  - Confirms `show pqn simulation plan` stays on the RESEARCH read path.
+  - Confirms `pqn_simulation` is visible to generic DAE runtime supervision commands.

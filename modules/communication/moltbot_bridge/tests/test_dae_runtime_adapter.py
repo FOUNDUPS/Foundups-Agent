@@ -15,6 +15,20 @@ def test_parse_launch_social_media_dae():
     assert request["dae_id"] == "social_media"
 
 
+def test_parse_launch_pqn_simulation_runtime():
+    request = parse_dae_runtime_request("run pqn simulation")
+
+    assert request is not None
+    assert request["action"] == "launch"
+    assert request["dae_id"] == "pqn_simulation"
+
+
+def test_parse_show_pqn_simulation_plan_stays_out_of_runtime_adapter():
+    request = parse_dae_runtime_request("show pqn simulation plan")
+
+    assert request is None
+
+
 def test_classify_status_as_monitor():
     assert classify_dae_runtime_category("status holodae") == "monitor"
     assert classify_dae_runtime_category("list launchable daes") == "monitor"

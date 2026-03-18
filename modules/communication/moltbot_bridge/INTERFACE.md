@@ -198,15 +198,27 @@ PQN simulation can now be triggered directly through research intent phrases:
 - `run pqn simulation`
 - `launch pqn simulation`
 - `status pqn simulation`
+- `stop pqn simulation`
+- `tail pqn simulation`
+- `watch pqn simulation since 42`
 - `show pqn simulation plan`
 
 Routing contract:
-- OpenClaw -> `pqn_research_adapter.py`
-- `pqn_research_adapter.py` -> `PQNAlignmentDAE.run_theory_archive_simulation(...)`
-- PQN simulation lifecycle -> OpenClaw DAEmon action ledger
+- `run|launch|status|stop pqn simulation`:
+  - OpenClaw deterministic runtime classification or `pqn_research_adapter.py`
+  - `DAELaunchBroker`
+  - `modules/ai_intelligence/pqn/scripts/launch.py:run_pqn_simulation_once()`
+- `show pqn simulation plan`:
+  - OpenClaw RESEARCH route
+  - `pqn_research_adapter.py`
+  - `PQNAlignmentDAE.get_theory_archive_simulation_plan(...)`
+- supervision:
+  - generic DAE runtime observer surface
+  - `tail|watch pqn simulation ...`
 
 Operational rule:
-- simulation is a research action, not a broker-managed DAE
+- simulation execution is a broker-managed runtime lane
+- simulation planning remains a read-only research query
 - archive remains hypothesis input only
 - returned interpretation remains comparative, not ontological
 

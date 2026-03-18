@@ -441,3 +441,14 @@
 - **WSP Compliance**: WSP 84 (reuse), WSP 48 (recursive), WSP 80 (DAE orchestration), WSP 34 (tests), WSP 22 (docs).
 - **Impact**: Enables 0102-driven PQN research; quantifies 0201 alignment benefits (e.g., exponential remembrance velocity).
 - **Next Steps**: Execute full campaign; enhance guardrail; integrate with WRE.
+
+### **PQN Simulation Runtime Broker Alignment**
+- **Date**: 2026-03-18
+- **Operating As**: 0102 / PQN runtime control-plane integration
+- **Change**: Moved theory-archive simulation execution into the broker-managed DAE runtime lane.
+- **Details**:
+  - Added `run_pqn_simulation_once()` as a one-shot launch hook in `modules/ai_intelligence/pqn/scripts/launch.py`
+  - Registered `pqn_simulation` during `main.py` runtime bootstrap
+  - Preserved `show pqn simulation plan` as a read-only archive/planning query
+- **WSP Compliance**: WSP 22 (documentation), WSP 84 (reuse existing detector/simulation surface), WSP 97 (separate planning from execution)
+- **Impact**: PQN simulation now participates in the same launch/status/supervision model as the other resident runtime lanes.
