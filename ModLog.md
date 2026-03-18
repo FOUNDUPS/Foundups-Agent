@@ -1,5 +1,37 @@
 # FoundUps Agent - Development Log
 
+## [2026-03-18] LIVE Video Prioritization + Chrome 146 MCP
+
+**Change Type**: Feature / Research
+**By**: 0102
+**WSP References**: WSP 22 (ModLog), WSP 97 (CoT/CoR), WSP 91 (Observability)
+
+### Summary
+
+Video indexer now prioritizes LIVE videos and has 24/7 daemon mode. Research discovered Chrome 146 native MCP support - integrated Chrome DevTools MCP server.
+
+### Files Changed
+
+| Location | Description |
+|----------|-------------|
+| `video_indexer/src/studio_ask_indexer.py` | LIVE prioritization, Shorts filter |
+| `cli/src/indexing_menu.py` | Daemon mode (24/7 continuous) |
+| `youtube_shorts_scheduler/scripts/launch.py` | Chrome 146 driver.close() fix |
+| `wre_core/docs/CHROME_DEVTOOLS_MCP_INTEGRATION_TASK.md` | Qwen Code task spec |
+| `.mcp.json` | Added chrome-devtools MCP server |
+
+### Research (WSP 97)
+
+- Chrome 146 native MCP: `chrome://inspect/#remote-debugging`
+- Chrome DevTools MCP v0.19.0: 26 tools for AI browser automation
+- WebDriver BiDi: Real-time bidirectional communication
+
+### PR
+
+[#215](https://github.com/FOUNDUPS/Foundups-Agent/pull/215)
+
+---
+
 ## [2026-03-15] GitHub Orchestrator - 0102 Management Layer
 
 **Change Type**: New Module / Infrastructure

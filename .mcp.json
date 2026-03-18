@@ -1,0 +1,27 @@
+{
+  "$schema": "https://raw.githubusercontent.com/anthropics/claude-code/main/schemas/mcp.schema.json",
+  "mcpServers": {
+    "holo_index": {
+      "command": "python",
+      "args": ["-m", "holo_index.mcp_server"],
+      "cwd": "."
+    },
+    "wsp_governance": {
+      "command": "python",
+      "args": ["-m", "WSP_framework.mcp_server"],
+      "cwd": "."
+    },
+    "web_search": {
+      "command": "python",
+      "args": ["-m", "mcp_servers.web_search.server"],
+      "cwd": "."
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"],
+      "env": {
+        "CHROME_DEVTOOLS_MCP_NO_USAGE_STATISTICS": "1"
+      }
+    }
+  }
+}

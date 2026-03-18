@@ -2,6 +2,29 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## V0.3.14 - Video Indexing Daemon Mode (2026-03-18)
+
+### Added
+- `src/indexing_menu.py`
+  - **Option 2: [DAEMON] Continuous Indexing** - 24/7 daemon mode
+  - Dual-browser rotation: Chrome (9222) + Edge (9223) channels
+  - Configurable: videos per cycle, interval, max cycles
+  - Stop via `Ctrl+C` or `memory/STOP_VIDEO_INDEXER` file
+
+### Menu Change
+```
+1. [GEMINI] Gemini AI Indexing
+2. [DAEMON] Continuous Indexing  ← NEW
+3. [LOCAL] Whisper Indexing
+4-7. (renumbered)
+```
+
+### WSP Compliance
+- **WSP 22**: ModLog documentation
+- **WSP 27**: DAE Architecture (daemon loop)
+
+---
+
 ## V0.3.13 - antifaFM Preflight Check + Schema Testing (2026-03-06)
 
 ### Added
