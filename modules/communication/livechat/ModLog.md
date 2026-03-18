@@ -10,6 +10,31 @@ This log tracks changes specific to the **livechat** module in the **communicati
 
 ---
 
+## 2026-03-18 - Session Recovery for Account Rotation
+
+**By:** 0102
+**WSP References:** WSP 22 (ModLog), WSP 91 (Observability)
+
+### Problem
+
+Chrome/Edge browser sessions can die (timeout, crash, disconnect) causing "invalid session id" errors. The account rotation code would log the error but not attempt recovery, blocking video indexing (Chrome-only) and comment engagement rotation.
+
+### Fix
+
+Added session recovery logic to `auto_moderator_dae.py` (lines 799-818):
+1. Detect session errors using `_is_session_error()`
+2. Reset switcher driver to None (force reconnect)
+3. Call `_connect_to_chrome()` to establish new session
+4. Retry the account switch operation
+
+### Impact
+
+- Video indexing can resume after browser session dies
+- Account rotation recovers automatically without restart
+- Follows same pattern as `multi_channel_coordinator.py` session recovery
+
+---
+
 ## 2026-03-11 - DAEmon Orchestration Switches + LinkedIn Phase 4
 
 **By:** 0102
