@@ -55914,3 +55914,11 @@ if cooldown_sets:
 - Registered `openclaw_supervisor` in `main.bootstrap_runtime_dae_launches()` and added autostart controls in `.env.example`.
 - Moved ownership of the daemon self-audit loop into the supervisor; `main.py` now starts direct self-audit only as a fallback when the supervisor is disabled.
 - Exposed `openclaw_supervisor` through the generic runtime control surface (`status/tail openclaw supervisor`).
+
+## 2026-03-18: IronClaw runtime readiness moved into startup preflight
+- Added `run_ironclaw_runtime_preflight()` to `main.py`.
+- Startup now validates IronClaw readiness before security/dependency/runtime bootstrap when `OPENCLAW_CONVERSATION_BACKEND=ironclaw`.
+- Enforcement defaults are policy-driven:
+  - strict when IronClaw is the active backend and no local fallback is allowed
+  - warn-only when local fallback policy is enabled
+- Added focused tests in `tests/test_main_ironclaw_preflight.py`.

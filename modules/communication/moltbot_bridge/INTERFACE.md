@@ -105,6 +105,9 @@ Structured result contract:
 | `OPENCLAW_RESIDENT_PORT` | No | Port for resident OpenClaw webhook service (default `18800`) |
 | `OPENCLAW_RESIDENT_LOG_LEVEL` | No | Uvicorn log level for resident service (default `info`) |
 | `OPENCLAW_CONVERSATION_BACKEND` | No | `openclaw` (default) or `ironclaw` for sidecar conversational runtime |
+| `OPENCLAW_IRONCLAW_PREFLIGHT` | No | Enable IronClaw startup readiness preflight (default on) |
+| `OPENCLAW_IRONCLAW_PREFLIGHT_ALWAYS` | No | Run IronClaw readiness preflight even when backend is not `ironclaw` (default off) |
+| `OPENCLAW_IRONCLAW_PREFLIGHT_ENFORCED` | No | Explicitly block startup when IronClaw readiness fails |
 | `OPENCLAW_NO_API_KEYS` | No | `1` disables external/cloud LLM calls in OpenClaw/FAM paths |
 | `OPENCLAW_ALLOW_EXTERNAL_LLM` | No | `1` allows AI Gateway cloud fallback (auto-disabled when `*_NO_API_KEYS=1`) |
 | `OPENCLAW_OLLAMA_MODEL` | No | Ollama model ID for local fallback (default `qwen2.5-coder:7b`) |
@@ -179,6 +182,7 @@ Authorization:
 Resident OpenClaw contract:
 - `main.py` registers `openclaw` as a launchable DAE using `scripts/launch.py`
 - `main.py` registers `openclaw_supervisor` as a separate broker-managed runtime
+- `main.py` runs IronClaw readiness preflight before runtime bootstrap when IronClaw is the active backend
 - bootstrap can autostart the resident webhook service after preflight
 - bootstrap can autostart the supervisor state machine after resident/runtime registration
 - CLI menu option `3` now reuses the broker-managed runtime when available instead of spawning a competing subprocess
@@ -209,6 +213,7 @@ Current operational rule:
 - the supervisor owns the daemon self-audit loop when enabled
 - `main.py` only starts direct self-audit as a fallback when supervisor is disabled
 - resident OpenClaw restarts are policy-gated through the broker/runtime surface
+- IronClaw runtime readiness is validated at startup before resident/runtime bootstrap when IronClaw is the selected backend
 
 ### PQN Runtime Control
 

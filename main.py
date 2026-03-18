@@ -410,6 +410,69 @@ def run_openclaw_security_preflight(repo_root: Path, overseer: Any | None = None
     return True
 
 
+def run_ironclaw_runtime_preflight(repo_root: Path) -> bool:
+    """
+    Validate IronClaw runtime readiness before startup when IronClaw is the active backend.
+
+    Env controls:
+      OPENCLAW_IRONCLAW_PREFLIGHT=1           Enable runtime readiness check (default on)
+      OPENCLAW_IRONCLAW_PREFLIGHT_ALWAYS=0    Check even when backend is not `ironclaw`
+      OPENCLAW_IRONCLAW_PREFLIGHT_ENFORCED    Explicitly block startup on failed readiness
+
+    Default enforcement:
+      - enabled automatically when `OPENCLAW_CONVERSATION_BACKEND=ironclaw`
+      - and `OPENCLAW_IRONCLAW_ALLOW_LOCAL_FALLBACK=0`
+    """
+    _ = repo_root  # kept for signature parity with other startup preflights
+
+    enabled = os.getenv("OPENCLAW_IRONCLAW_PREFLIGHT", "1") != "0"
+    if not enabled:
+        logger.info("[IRONCLAW] Startup preflight disabled")
+        return True
+
+    backend = (os.getenv("OPENCLAW_CONVERSATION_BACKEND", "openclaw").strip().lower() or "openclaw")
+    always = os.getenv("OPENCLAW_IRONCLAW_PREFLIGHT_ALWAYS", "0") != "0"
+    if backend != "ironclaw" and not always:
+        print(f"[IRONCLAW] preflight=SKIP backend={backend}")
+        return True
+
+    allow_local_fallback = os.getenv("OPENCLAW_IRONCLAW_ALLOW_LOCAL_FALLBACK", "0") != "0"
+    enforced_default = "1" if backend == "ironclaw" and not allow_local_fallback else "0"
+    enforced = os.getenv("OPENCLAW_IRONCLAW_PREFLIGHT_ENFORCED", enforced_default) != "0"
+
+    try:
+        from modules.communication.moltbot_bridge.src.ironclaw_gateway_client import (
+            IronClawGatewayClient,
+        )
+
+        status = IronClawGatewayClient().startup_probe()
+    except Exception as exc:
+        logger.error(f"[IRONCLAW] Startup preflight execution failed: {exc}")
+        if enforced:
+            print(f"[IRONCLAW] preflight=FAIL backend={backend} error={type(exc).__name__}")
+            print("[IRONCLAW] Startup blocked by OPENCLAW_IRONCLAW_PREFLIGHT_ENFORCED=1")
+            return False
+        print(f"[IRONCLAW] preflight=WARN backend={backend} error={type(exc).__name__}")
+        return True
+
+    passed = bool(status.get("ok", False))
+    runtime_backend = str(status.get("backend") or "none")
+    detail = str(status.get("detail") or "no-detail")
+    print(
+        f"[IRONCLAW] preflight={'PASS' if passed else 'FAIL'} "
+        f"backend={backend} resolved={runtime_backend} detail={detail}"
+    )
+
+    remediation = status.get("remediation") or []
+    if remediation and not passed:
+        print(f"[IRONCLAW] next={str(remediation[0])[:200]}")
+
+    if not passed and enforced:
+        print("[IRONCLAW] Startup blocked by OPENCLAW_IRONCLAW_PREFLIGHT_ENFORCED=1")
+        return False
+    return True
+
+
 def run_dependency_security_preflight(repo_root: Path) -> bool:
     """
     Run dependency/CVE preflight at startup.
@@ -893,6 +956,8 @@ def main():
     if not run_env_hygiene_preflight(repo_root):
         return
     if not run_brain_artifact_preflight(repo_root):
+        return
+    if not run_ironclaw_runtime_preflight(repo_root):
         return
     if not run_openclaw_security_preflight(repo_root, overseer=overseer):
         return

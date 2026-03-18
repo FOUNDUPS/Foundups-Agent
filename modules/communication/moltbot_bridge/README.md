@@ -54,6 +54,13 @@ CLI integration:
 - Main menu -> `16. OpenClaw / IronClaw` -> options `5/6/7/8`
 - Direct flags: `--ironclaw-chat`, `--ironclaw-voice`
 
+Startup readiness:
+- `main.py` now runs an IronClaw runtime preflight before broker bootstrap when IronClaw is the active conversation backend.
+- default behavior:
+  - `OPENCLAW_CONVERSATION_BACKEND=openclaw` -> preflight prints `SKIP`
+  - `OPENCLAW_CONVERSATION_BACKEND=ironclaw` with no fallback -> failed readiness blocks startup
+  - `OPENCLAW_CONVERSATION_BACKEND=ironclaw` with `OPENCLAW_IRONCLAW_ALLOW_LOCAL_FALLBACK=1` -> failed readiness warns but does not block
+
 ## Standalone Action CLI (Agent API Surface)
 
 For autonomous execution outside menu navigation, use:

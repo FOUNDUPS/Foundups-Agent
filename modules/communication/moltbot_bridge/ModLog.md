@@ -1224,3 +1224,20 @@ openclaw onboard
 ### Outcome
 - 0102 now has a canonical runtime supervisor surface instead of relying only on the self-audit loop.
 - Resident OpenClaw and self-audit are now coordinated through one broker-visible lifecycle.
+
+## 2026-03-18: IronClaw startup readiness preflight
+
+**Author**: 0102  
+**WSP**: 22, 73, 97
+
+### Changes
+- Added startup IronClaw readiness gate in `main.py` using `IronClawGatewayClient.startup_probe()`.
+- Added env controls for:
+  - `OPENCLAW_IRONCLAW_PREFLIGHT`
+  - `OPENCLAW_IRONCLAW_PREFLIGHT_ALWAYS`
+  - `OPENCLAW_IRONCLAW_PREFLIGHT_ENFORCED`
+- Updated README/INTERFACE startup contract to make IronClaw readiness explicit instead of a late conversational surprise.
+
+### Outcome
+- IronClaw health is now checked at the correct layer when IronClaw is the selected conversation backend.
+- Startup blocking only occurs when the active backend truly depends on IronClaw without fallback.
