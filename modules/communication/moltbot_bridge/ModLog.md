@@ -1241,3 +1241,9 @@ openclaw onboard
 ### Outcome
 - IronClaw health is now checked at the correct layer when IronClaw is the selected conversation backend.
 - Startup blocking only occurs when the active backend truly depends on IronClaw without fallback.
+
+## 2026-03-18: OpenClaw supervisor bounded repair loop
+- Added OPENCLAW_SUPERVISOR_MAX_RESTARTS and OPENCLAW_SUPERVISOR_RESTART_WINDOW_SEC.
+- Supervisor now observes incremental DAEmon follow events, tracks restart attempts inside a rolling window, and escalates when the resident OpenClaw repair budget is exhausted.
+- Failed verify cycles now record memory and advance the event cursor before escalation.
+
