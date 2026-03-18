@@ -42,6 +42,7 @@ dae.start()
 
 ## Integration Points
 - **Main.py Option 0**: Runs one GitPushDAE cycle and returns to menu
+- **Runtime broker**: `stop git push dae` now routes to `stop_git_push_dae()` through the generic DAE runtime surface
 - **HoloIndex**: Quality assessment for push decisions
 - **Social Media**: LinkedIn/X posting when conditions met
 

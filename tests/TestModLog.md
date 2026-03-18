@@ -41,6 +41,14 @@
 - Notes:
   - Confirms `main.bootstrap_runtime_dae_launches()` registers `holodae` with a real `stop_callable`.
 
+## 2026-03-18: Main bootstrap GitPush and Social Media stop-hook registration
+
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest tests/test_main_runtime_bootstrap.py -q`
+- Status: PASS
+- Notes:
+  - Confirms `main.bootstrap_runtime_dae_launches()` registers `git_push_dae` with a real `stop_callable`.
+  - Confirms `main.bootstrap_runtime_dae_launches()` registers `social_media` with a real `stop_callable`.
+
 ---
 
 ## 2026-03-08: Markdown sanitizer coverage

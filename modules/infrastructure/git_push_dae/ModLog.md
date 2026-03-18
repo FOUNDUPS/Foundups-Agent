@@ -414,3 +414,7 @@ docs/session_backups/
 - [OK] Error handling with context
 - [OK] Health monitoring (vital signs, anomalies)
 - [OK] Semantic conventions (OpenTelemetry alignment)
+## 2026-03-18: Broker-managed stop hook
+- Added broker-visible runtime state to `scripts/launch.py`.
+- Added `stop_git_push_dae()` so the runtime broker can stop GitPushDAE instead of returning `stop_unsupported`.
+- `main.py` now registers `git_push_dae` with a real `stop_callable`.

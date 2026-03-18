@@ -1074,3 +1074,7 @@ schedule_id = await orchestrator.schedule_content(
 
 ---
 
+## 2026-03-18: Broker-managed stop hook
+- Replaced the launch wrapper with an ASCII-clean version that exposes broker-visible runtime state.
+- Added `stop_social_media_dae()` so the runtime broker can stop the social cadence loop instead of returning `stop_unsupported`.
+- SocialMediaDAE now uses an interruptible wait so stop requests do not sit behind the full cadence sleep.

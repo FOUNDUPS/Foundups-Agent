@@ -65,3 +65,11 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirna
 ---
 
 *Test log maintained per WSP 34 protocol*
+## 2026-03-18: Social Media DAE launch stop-hook coverage
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/platform_integration/social_media_orchestrator/tests/test_launch_runtime.py tests/test_main_runtime_bootstrap.py -q`
+- Status: PASS
+- Coverage:
+  - Confirms `stop_social_media_dae()` returns `not_running` when no broker-managed instance exists.
+  - Confirms `SocialMediaDAE.stop()` interrupts the cadence wait instead of waiting out the full sleep.
+  - Confirms the launch wrapper exposes a live Social Media DAE instance that can be stopped through the broker hook.
+  - Confirms `main.bootstrap_runtime_dae_launches()` registers `social_media` with a real `stop_callable`.

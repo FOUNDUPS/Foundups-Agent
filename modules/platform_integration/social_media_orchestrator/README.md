@@ -175,3 +175,8 @@ For detailed technical architecture documentation:
 - **WSP 50**: Pre-action verification in all operations
 - **WSP 72**: Block independence achieved through modularization
 - **WSP 87**: HoloIndex navigation entries for all components
+## Runtime Control (2026-03-18)
+- main.py now registers social_media as a broker-managed runtime with a real stop hook.
+- stop social media dae maps to stop_social_media_dae() instead of returning stop_unsupported.
+- The cadence wait is interruptible, so stop requests do not sit behind the full sleep interval.
+

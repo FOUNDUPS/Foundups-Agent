@@ -26,6 +26,12 @@ Module: git_push_dae
 import sys
 import time
 import traceback
+import threading
+from typing import Any, Dict
+
+_git_push_lock = threading.RLock()
+_git_push_instance: Any = None
+_git_push_status: Dict[str, Any] = {}
 
 # WRE CoT preflight - recursive enforcement after watch period
 try:
@@ -46,6 +52,7 @@ def launch_git_push_dae(run_once: bool = False):
     Args:
         run_once: Run a single monitoring cycle and return to caller (menu-safe).
     """
+    global _git_push_instance
     print("\n" + "="*60)
     print("[MENU] GIT PUSH DAE - AUTONOMOUS DEVELOPMENT")
     print("="*60)
@@ -63,14 +70,22 @@ def launch_git_push_dae(run_once: bool = False):
         print("[DEBUG-MAIN] Creating GitPushDAE instance...")
         dae = GitPushDAE(domain="foundups_development", check_interval=300)  # 5-minute checks
         print("[DEBUG-MAIN] GitPushDAE instance created")
+        with _git_push_lock:
+            _git_push_instance = dae
+            _git_push_status.clear()
+            _git_push_status.update({"status": "starting", "run_once": run_once})
 
         if run_once:
             print("[INFO] Running one GitPushDAE monitoring cycle (run-once mode)...")
             health = dae.run_once()
+            with _git_push_lock:
+                _git_push_status["status"] = health.status
             print(f"[INFO] GitPushDAE run-once complete (health: {health.status})")
         else:
             print("[DEBUG-MAIN] Starting GitPushDAE daemon...")
             dae.start()
+            with _git_push_lock:
+                _git_push_status["status"] = "running"
             print("[DEBUG-MAIN] GitPushDAE daemon started")
 
             print("\n[INFO]GitPushDAE launched successfully!")
@@ -84,18 +99,28 @@ def launch_git_push_dae(run_once: bool = False):
             except KeyboardInterrupt:
                 print("\n[INFO] Stopping GitPushDAE...")
                 dae.stop()
+                with _git_push_lock:
+                    _git_push_status["status"] = "stopped"
 
     except ImportError as e:
+        with _git_push_lock:
+            _git_push_status["status"] = "failed"
         print(f"[ERROR]Failed to import GitPushDAE: {e}")
         print("GitPushDAE module not available")
         traceback.print_exc()
 
     except Exception as e:
+        with _git_push_lock:
+            _git_push_status["status"] = "failed"
         print(f"[ERROR]GitPushDAE failed: {e}")
         traceback.print_exc()
         input("\nPress Enter to continue...")
 
     finally:
+        with _git_push_lock:
+            _git_push_instance = None
+            if "status" not in _git_push_status or _git_push_status["status"] == "running":
+                _git_push_status["status"] = "stopped"
         # Flush stdout/stderr to prevent "lost sys.stderr" errors
         # when returning to menu (WSP 90 UTF-8 enforcement cleanup)
         try:
@@ -140,6 +165,18 @@ def check_instance_status():
             print("[STOPPED] GitPushDAE not running")
     except Exception as e:
         print(f"[UNKNOWN] Could not check status: {e}")
+
+
+def stop_git_push_dae() -> Dict[str, Any]:
+    """Request shutdown for the broker-managed GitPushDAE runtime."""
+    with _git_push_lock:
+        dae = _git_push_instance
+        if dae is None:
+            return {"status": "not_running"}
+
+        dae.stop()
+        _git_push_status["status"] = "stopping"
+        return {"status": "stopping"}
 
 
 if __name__ == "__main__":

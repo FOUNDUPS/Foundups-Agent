@@ -29,6 +29,22 @@ async def authenticate_platform(platform: str, credentials: Dict[str, Any]) -> b
 def get_status() -> Dict[str, Any]
 ```
 
+### Broker-Managed Runtime Hooks
+
+```python
+from modules.platform_integration.social_media_orchestrator.scripts.launch import (
+    run_social_media_dae,
+    stop_social_media_dae,
+)
+
+run_social_media_dae()
+stop_social_media_dae()  # -> {"status": "stopping"} | {"status": "not_running"}
+```
+
+Runtime contract:
+- `main.py` registers `social_media` with `stop_callable=stop_social_media_dae`
+- the cadence wait is interruptible, so stop requests do not wait for the full interval
+
 #### Content Operations
 ```python
 async def post_content(content: str, platforms: List[str], options: Optional[Dict] = None) -> Dict[str, Any]
