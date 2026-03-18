@@ -1,0 +1,31 @@
+{
+  "name": "chrome-devtools",
+  "description": "Chrome DevTools MCP for AI browser automation",
+  "version": "0.19.0",
+  "source": "https://github.com/ChromeDevTools/chrome-devtools-mcp",
+  "command": "npx",
+  "args": ["-y", "chrome-devtools-mcp@latest"],
+  "slim_mode": {
+    "args": ["-y", "chrome-devtools-mcp@latest", "--slim", "--headless"],
+    "description": "Token-optimized with only 3 core tools"
+  },
+  "connect_to_existing": {
+    "args": ["-y", "chrome-devtools-mcp@latest", "-u", "http://localhost:9222"],
+    "description": "Connect to Chrome running with --remote-debugging-port=9222"
+  },
+  "tools": {
+    "input": ["click", "drag", "fill", "fill_form", "handle_dialog", "hover", "press_key", "type_text", "upload_file"],
+    "navigation": ["close_page", "list_pages", "navigate_page", "new_page", "select_page", "wait_for"],
+    "emulation": ["emulate", "resize_page"],
+    "performance": ["performance_analyze_insight", "performance_start_trace", "performance_stop_trace", "take_memory_snapshot"],
+    "network": ["get_network_request", "list_network_requests"],
+    "debugging": ["evaluate_script", "get_console_message", "lighthouse_audit", "list_console_messages", "take_screenshot", "take_snapshot"]
+  },
+  "wsp_compliance": {
+    "wsp_77": "Agent Coordination - Qwen/Gemma can invoke via MCP",
+    "wsp_91": "Observability - Performance traces captured",
+    "wsp_97": "CoT/CoR - Research-based implementation"
+  },
+  "created": "2026-03-18",
+  "created_by": "0102"
+}

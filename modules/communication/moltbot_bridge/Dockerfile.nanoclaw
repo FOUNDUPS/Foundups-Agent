@@ -1,0 +1,32 @@
+# modules/communication/moltbot_bridge/Dockerfile.nanoclaw
+# NanoClaw Container-per-Skill Template (WSP 95 Security Rules)
+
+# Base image: Minimal alpine python for reduced surface area
+FROM python:3.11-alpine
+
+# Security: Create non-root user
+RUN addgroup -S nanoclaw && adduser -S nanoclaw -G nanoclaw
+
+# Set working directory
+WORKDIR /app
+
+# Install isolated dependencies (assumes requirements.txt is provided in build context)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy minimal secure context
+COPY src/ ./src/
+
+# Change ownership to prevent privilege escalation
+RUN chown -R nanoclaw:nanoclaw /app
+
+# Switch to non-root user
+USER nanoclaw
+
+# Environment configuration for strict socket/HTTP bridge access
+ENV OPENCLAW_SUPERVISOR_HOST="openclaw-supervisor"
+ENV OPENCLAW_SUPERVISOR_PORT="8080"
+
+# Note to orchestrator: Run this container with:
+# --network=supervisor_net --cap-drop=ALL --read-only -d
+ENTRYPOINT ["python", "-m", "src.main"]

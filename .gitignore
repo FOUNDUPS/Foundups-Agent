@@ -60,6 +60,12 @@ venv/
 ENV/
 env/
 
+# M2M compression staging (local working files)
+.m2m/
+
+# Git worktrees (local working directories)
+.worktrees/
+
 # IDE
 .idea/
 .vscode/

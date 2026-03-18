@@ -1,0 +1,4 @@
+# Container isolation dependencies
+# Docker must be installed on host system
+pytest>=7.0.0
+pytest-asyncio>=0.21.0

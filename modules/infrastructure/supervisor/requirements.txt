@@ -1,0 +1,4 @@
+# Supervisor module dependencies
+# Core dependencies are inherited from repo root
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
