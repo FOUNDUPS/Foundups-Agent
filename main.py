@@ -183,6 +183,7 @@ from modules.ai_intelligence.pqn.scripts.launch import (
     run_pqn_dae,
     run_pqn_research_session,
     run_pqn_architect_once,
+    run_pqn_simulation_once,
 )
 
 # Extracted to modules/platform_integration/youtube_shorts_scheduler/scripts/launch.py per WSP 62
@@ -823,6 +824,15 @@ def bootstrap_runtime_dae_launches() -> None:
             start_callable=run_pqn_architect_once,
             heartbeat_interval_sec=15.0,
             description="Non-interactive PQN architect cycle.",
+        ),
+        DAELaunchSpec(
+            dae_id="pqn_simulation",
+            dae_name="PQN Theory-Archive Simulation",
+            domain="ai_intelligence",
+            module_path="modules.ai_intelligence.pqn.scripts.launch",
+            start_callable=run_pqn_simulation_once,
+            heartbeat_interval_sec=15.0,
+            description="Broker-managed PQN simulation against the theory archive.",
         ),
     ])
     for spec in specs:

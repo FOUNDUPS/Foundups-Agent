@@ -65,7 +65,7 @@ class TestPQNResearchAdapterRuntimeControl:
 
         assert "runtime broker is not available" in result.lower()
 
-    def test_status_pqn_simulation_returns_plan(self):
+    def test_show_pqn_simulation_plan_returns_plan(self):
         reporter = MagicMock()
         fake_plan = {
             "run_count": 6,
@@ -82,7 +82,7 @@ class TestPQNResearchAdapterRuntimeControl:
         ) as dae_cls:
             dae_cls.return_value.get_theory_archive_simulation_plan.return_value = fake_plan
             result = handle_pqn_research_intent(
-                "status pqn simulation",
+                "show pqn simulation plan",
                 "012",
                 report_action=reporter,
             )
@@ -92,34 +92,26 @@ class TestPQNResearchAdapterRuntimeControl:
         reporter.assert_called_once()
         assert reporter.call_args.args[0] == "pqn_simulation_plan"
 
-    def test_run_pqn_simulation_reports_completion(self):
+    def test_run_pqn_simulation_uses_broker_runtime(self):
         reporter = MagicMock()
-        fake_result = {
-            "runs": [{}, {}, {}],
-            "summary_path": "modules/ai_intelligence/pqn_alignment/artifact_results/theory_archive_simulation/summary.json",
-            "comparison": {
-                "delta_entrainment_score": 0.21,
-                "delta_resonance_event_count": 2.0,
-                "probe_closer_to_target": True,
-            },
-            "interpretation": {
-                "outcome": "probe_advantage_requires_followup",
-            },
+        broker = MagicMock()
+        broker.start_dae.return_value = {
+            "status": "starting",
+            "started_at": 456.0,
         }
 
         with patch(
-            "modules.ai_intelligence.pqn_alignment.PQNAlignmentDAE",
-        ) as dae_cls:
-            dae_cls.return_value.run_theory_archive_simulation.return_value = fake_result
+            "modules.communication.moltbot_bridge.src.pqn_research_adapter._get_launch_broker",
+            return_value=broker,
+        ):
             result = handle_pqn_research_intent(
                 "run pqn simulation",
                 "012",
                 report_action=reporter,
             )
 
-        assert "PQN Theory-Archive Simulation Complete" in result
-        assert "probe_advantage_requires_followup" in result
-        assert reporter.call_count == 2
-        assert reporter.call_args_list[0].args[0] == "pqn_simulation"
-        assert reporter.call_args_list[0].args[2] == "started"
-        assert reporter.call_args_list[1].args[2] == "completed"
+        broker.start_dae.assert_called_once_with("pqn_simulation", actor_id="012")
+        assert "PQN simulation launch `pqn_simulation` -> starting." in result
+        reporter.assert_called_once()
+        assert reporter.call_args.args[0] == "pqn_simulation_runtime"
+        assert reporter.call_args.args[2] == "starting"

@@ -117,6 +117,32 @@ def classify_intent(
         )
         return intent
 
+    if "pqn simulation plan" in msg_lower or "theory archive simulation plan" in msg_lower:
+        category = dae.IntentCategory.RESEARCH
+        confidence = 0.95
+        extracted_task = message
+        intent = dae.OpenClawIntent(
+            raw_message=message,
+            category=category,
+            confidence=confidence,
+            sender=sender,
+            channel=channel,
+            session_key=session_key,
+            is_authorized_commander=is_commander,
+            extracted_task=extracted_task,
+            target_domain=dae.DOMAIN_ROUTES.get(category),
+            metadata={**metadata, "classification_method": "deterministic_pqn_simulation_plan"},
+        )
+        logger.info(
+            "[OPENCLAW-DAE] Intent classified (pqn_simulation_plan): category=%s confidence=%.2f "
+            "commander=%s domain=%s",
+            category.value,
+            confidence,
+            is_commander,
+            intent.target_domain,
+        )
+        return intent
+
     if classify_dae_runtime_category is not None:
         runtime_category = classify_dae_runtime_category(message)
         if runtime_category is not None:

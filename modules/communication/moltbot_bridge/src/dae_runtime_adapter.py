@@ -37,9 +37,11 @@ _DAE_ALIASES: Dict[str, str] = {
     "training dae": "training_system",
     "pqn research": "pqn_research",
     "pqn architect": "pqn_architect",
+    "pqn simulation": "pqn_simulation",
+    "theory archive simulation": "pqn_simulation",
 }
 
-_MUTATING_VERBS = ("launch", "start", "stop")
+_MUTATING_VERBS = ("launch", "start", "run", "stop")
 _STATUS_VERBS = ("status", "show")
 _TAIL_VERBS = ("tail",)
 _FOLLOW_VERBS = ("watch", "follow")
@@ -88,6 +90,9 @@ def parse_dae_runtime_request(message: str) -> Optional[Dict[str, str]]:
     if not msg:
         return None
 
+    if "simulation plan" in msg:
+        return None
+
     cursor_match = re.search(r"\b(?:since|after|cursor)\s+(\d+)\b", msg)
     since_sequence = int(cursor_match.group(1)) if cursor_match else 0
 
@@ -104,7 +109,7 @@ def parse_dae_runtime_request(message: str) -> Optional[Dict[str, str]]:
     if any(msg.startswith(f"{verb} ") or f" {verb} " in msg for verb in _MUTATING_VERBS):
         for verb in _MUTATING_VERBS:
             if msg.startswith(f"{verb} ") or f" {verb} " in msg:
-                action = verb
+                action = "launch" if verb == "run" else verb
                 break
     elif any(msg.startswith(f"{verb} ") or f" {verb} " in msg for verb in _TAIL_VERBS):
         action = "tail"

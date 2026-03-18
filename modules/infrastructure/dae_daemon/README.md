@@ -60,6 +60,11 @@ broker.register_launch_spec(
 broker.start_dae("pqn_research", actor_id="012")
 ```
 
+Broker-managed one-shot runtimes can also expose analysis lanes such as:
+- `pqn_research`
+- `pqn_architect`
+- `pqn_simulation`
+
 Runtime intent:
 - `main.py` bootstraps launchable specs
 - OpenClaw or another controller asks broker to `start/status/stop`

@@ -1183,3 +1183,19 @@ openclaw onboard
 ### Outcome
 - 012 can inspect the DAEmon ledger through OpenClaw instead of reading raw logs.
 - Claw and PQN runtime activity now has a real supervision surface, not just event persistence.
+
+## 2026-03-18: PQN simulation broker/runtime alignment
+
+**Author**: 0102  
+**WSP**: 22, 73, 84, 97
+
+### Changes
+- Extended `src/dae_runtime_adapter.py` aliases and parsing so `pqn_simulation` is a first-class runtime target.
+- Added deterministic separation:
+  - `show pqn simulation plan` stays on the RESEARCH/read path
+  - `run|launch|status|stop pqn simulation` routes to runtime control
+- Updated `src/pqn_research_adapter.py` to delegate simulation execution/status/stop to the central broker instead of instantiating `PQNAlignmentDAE` inline.
+
+### Outcome
+- PQN simulation now behaves like the rest of the launchable runtime system instead of bypassing it.
+- Claw, DAEmon, and the broker now share one execution ledger for PQN simulation lifecycle events.

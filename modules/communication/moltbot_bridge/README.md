@@ -116,6 +116,12 @@ Runtime examples:
 - `tail openclaw`
 - `stop openclaw`
 
+PQN runtime examples:
+- `run pqn simulation`
+- `status pqn simulation`
+- `tail pqn simulation`
+- `show pqn simulation plan`
+
 ### Memory Writeback (WSP 60 / WSP 48)
 
 Standalone action runs are now persisted into WRE PatternMemory as `skill_outcomes`

@@ -55900,3 +55900,11 @@ if cooldown_sets:
   - `tail <dae>`
   - `status <dae> live`
 - Added `openclaw` / `claw` / `0102` daemon aliases so 012 can supervise Claw directly through OpenClaw.
+
+## 2026-03-18: PQN simulation moved into broker-managed runtime lane
+- Added `run_pqn_simulation_once()` in `modules/ai_intelligence/pqn/scripts/launch.py` as the broker-facing one-shot launch hook.
+- Registered `pqn_simulation` in `main.bootstrap_runtime_dae_launches()` so the runtime becomes visible to Claw and DAEmon like the other launchable DAEs.
+- Updated `modules/communication/moltbot_bridge/src/pqn_research_adapter.py` so:
+  - `show pqn simulation plan` stays a read-only research query
+  - `run|launch|status|stop pqn simulation` routes through the broker-managed runtime lane
+- Extended `dae_runtime_adapter.py` aliases so generic runtime commands can supervise `pqn_simulation`.

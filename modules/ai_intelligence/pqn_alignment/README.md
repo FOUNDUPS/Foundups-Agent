@@ -133,6 +133,8 @@ Operational rule:
 - `main.py` should start **PQN research readiness**
 - OpenClaw should start **actual PQN research sessions**
 - full autonomous research startup should be policy-gated, not default
+- `pqn_simulation` is now a broker-managed one-shot runtime lane
+- `show pqn simulation plan` remains a read-only research/planning query
 
 ## **2026-03 Evidence Intake**
 
