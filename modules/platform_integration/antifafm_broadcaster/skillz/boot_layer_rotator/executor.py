@@ -426,8 +426,13 @@ async def rotation_daemon():
         logger.info("[ROTATOR] Shutdown signal received")
         running = False
 
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
+    # Only register signal handlers if running in main thread
+    # (avoids "signal only works in main thread" error when launched from menu)
+    try:
+        signal.signal(signal.SIGINT, signal_handler)
+        signal.signal(signal.SIGTERM, signal_handler)
+    except ValueError as e:
+        logger.debug(f"[ROTATOR] Signal handlers not registered (non-main thread): {e}")
 
     while running:
         # Check for override
