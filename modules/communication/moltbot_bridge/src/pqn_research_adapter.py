@@ -46,11 +46,15 @@ _SIMULATION_KEYWORDS = [
     "run pqn simulation",
     "launch pqn simulation",
     "start pqn simulation",
+    "stop pqn simulation",
     "status pqn simulation",
     "show pqn simulation",
     "show pqn simulation plan",
     "show theory archive simulation",
     "run theory archive simulation",
+    "launch theory archive simulation",
+    "start theory archive simulation",
+    "stop theory archive simulation",
     "status theory archive simulation",
 ]
 
@@ -225,13 +229,13 @@ def _handle_simulation(
     sender: str,
     report_action: Optional[Callable[..., None]] = None,
 ) -> str:
-    """Run or inspect the theory-archive simulation through PQNAlignmentDAE."""
-    from modules.ai_intelligence.pqn_alignment import PQNAlignmentDAE
-
+    """Run or inspect the theory-archive simulation through the runtime broker."""
     msg_lower = message.lower()
-    dae = PQNAlignmentDAE()
 
-    if "status " in msg_lower or "show " in msg_lower or " plan" in msg_lower:
+    if " plan" in msg_lower:
+        from modules.ai_intelligence.pqn_alignment import PQNAlignmentDAE
+
+        dae = PQNAlignmentDAE()
         plan = dae.get_theory_archive_simulation_plan()
         _emit_action(
             report_action,
@@ -251,47 +255,80 @@ def _handle_simulation(
             f"out_root={plan.get('out_root', 'unknown')}"
         )
 
-    _emit_action(
-        report_action,
-        "pqn_simulation",
-        "pqn_theory_archive",
-        "started",
-        sender=sender,
-    )
-    try:
-        result = dae.run_theory_archive_simulation()
-    except Exception as exc:
+    broker = _get_launch_broker()
+    if broker is None:
         _emit_action(
             report_action,
             "pqn_simulation",
             "pqn_theory_archive",
-            "error",
+            "broker_unavailable",
             sender=sender,
-            error=str(exc)[:200],
         )
-        raise
+        return (
+            "PQN runtime broker is not available. Start the system through `python main.py` "
+            "so 0102 can bootstrap broker-managed simulation runs."
+        )
 
-    interpretation = result.get("interpretation", {})
-    comparison = result.get("comparison", {})
+    dae_id = "pqn_simulation"
+
+    if "launch " in msg_lower or "start " in msg_lower or "run " in msg_lower:
+        result = broker.start_dae(dae_id, actor_id=sender)
+        _emit_action(
+            report_action,
+            "pqn_simulation_runtime",
+            dae_id,
+            result.get("status", result.get("error", "unknown")),
+            action="launch",
+            sender=sender,
+        )
+        if result.get("error") == "not_registered":
+            return (
+                "PQN simulation runtime is not registered yet. "
+                "Launch through `python main.py` so 0102 can bootstrap launchable DAEs."
+            )
+        status = result.get("status", result.get("error", "unknown"))
+        return (
+            f"PQN simulation launch `{dae_id}` -> {status}.\n"
+            f"started_at={result.get('started_at', 0)}"
+        )
+
+    if "stop " in msg_lower:
+        result = broker.stop_dae(dae_id, actor_id=sender)
+        _emit_action(
+            report_action,
+            "pqn_simulation_runtime",
+            dae_id,
+            result.get("status", result.get("error", "unknown")),
+            action="stop",
+            sender=sender,
+        )
+        status = result.get("status", result.get("error", "unknown"))
+        if result.get("error") == "not_running":
+            return f"PQN simulation runtime `{dae_id}` is not running."
+        return f"PQN simulation stop `{dae_id}` -> {status}."
+
+    result = broker.get_runtime_status(dae_id)
     _emit_action(
         report_action,
-        "pqn_simulation",
-        "pqn_theory_archive",
-        "completed",
+        "pqn_simulation_runtime",
+        dae_id,
+        result.get("state", "unknown"),
+        action="status",
         sender=sender,
-        outcome=interpretation.get("outcome", "unknown"),
-        run_count=len(result.get("runs", [])),
-        summary_path=result.get("summary_path", ""),
-        delta_entrainment_score=comparison.get("delta_entrainment_score", 0.0),
-        delta_resonance_event_count=comparison.get("delta_resonance_event_count", 0.0),
+        running=result.get("running", False),
     )
+    if not result.get("registered"):
+        return (
+            "PQN simulation runtime is not registered yet. "
+            "Launch through `python main.py` so 0102 can bootstrap launchable DAEs."
+        )
     return (
-        "**PQN Theory-Archive Simulation Complete**\n\n"
-        f"outcome={interpretation.get('outcome', 'unknown')}\n"
-        f"delta_entrainment_score={comparison.get('delta_entrainment_score', 0.0):.3f}\n"
-        f"delta_resonance_event_count={comparison.get('delta_resonance_event_count', 0.0):.3f}\n"
-        f"probe_closer_to_target={comparison.get('probe_closer_to_target', False)}\n"
-        f"summary_path={result.get('summary_path', 'unknown')}"
+        f"PQN simulation status `{dae_id}`\n"
+        f"state={result.get('state')}\n"
+        f"running={result.get('running')}\n"
+        f"enabled={result.get('enabled')}\n"
+        f"run_count={result.get('run_count')}\n"
+        f"last_error={result.get('last_error') or 'none'}"
     )
 
 

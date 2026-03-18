@@ -1,5 +1,31 @@
 # TestModLog - shared tests
 
+## 2026-03-18: Main bootstrap resident OpenClaw registration
+
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest tests/test_main_runtime_bootstrap.py -q`
+- Status: PASS
+- Notes:
+  - Confirms `main.bootstrap_runtime_dae_launches()` registers `openclaw` as a broker-managed launch spec.
+  - Confirms resident OpenClaw autostart requests the broker path instead of remaining menu-only.
+
+## 2026-03-18: Main bootstrap PQN simulation registration
+
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest tests/test_main_runtime_bootstrap.py -q`
+- Status: PASS
+- Notes:
+  - Confirms `main.bootstrap_runtime_dae_launches()` registers `pqn_simulation` as a launchable broker spec.
+  - Confirms the simulation lane is bootstrapped alongside the other PQN runtime entrypoints.
+
+## 2026-03-18: Main bootstrap OpenClaw supervisor registration
+
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest tests/test_main_runtime_bootstrap.py -q`
+- Status: PASS
+- Notes:
+  - Confirms `main.bootstrap_runtime_dae_launches()` registers `openclaw_supervisor`.
+  - Confirms supervisor autostart is routed through the broker-managed runtime surface.
+
+---
+
 ## 2026-03-08: Markdown sanitizer coverage
 
 - Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; pytest -q tests/test_markdown_sanitizer.py`

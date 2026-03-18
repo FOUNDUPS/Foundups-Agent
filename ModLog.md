@@ -1,104 +1,52 @@
 # FoundUps Agent - Development Log
 
-## [2026-03-18] LIVE Video Prioritization + Chrome 146 MCP
+## [2026-03-18] DAEmon Cursor-Follow Supervision
 
-**Change Type**: Feature / Research
-**By**: 0102
-**WSP References**: WSP 22 (ModLog), WSP 97 (CoT/CoR), WSP 91 (Observability)
+**Change Type**: Observability / Runtime Supervision  
+**By**: 0102  
+**WSP References**: WSP 22, WSP 73, WSP 91, WSP 97
 
 ### Summary
 
-Video indexer now prioritizes LIVE videos and has 24/7 daemon mode. Research discovered Chrome 146 native MCP support - integrated Chrome DevTools MCP server.
+Upgraded DAEmon supervision from recent-window snapshots to explicit cursor-based follow semantics so `012` and `0102` can incrementally watch runtime activity without relying on a fake streaming loop.
 
 ### Files Changed
 
 | Location | Description |
 |----------|-------------|
-| `video_indexer/src/studio_ask_indexer.py` | LIVE prioritization, Shorts filter |
-| `cli/src/indexing_menu.py` | Daemon mode (24/7 continuous) |
-| `youtube_shorts_scheduler/scripts/launch.py` | Chrome 146 driver.close() fix |
-| `wre_core/docs/CHROME_DEVTOOLS_MCP_INTEGRATION_TASK.md` | Qwen Code task spec |
-| `.mcp.json` | Added chrome-devtools MCP server |
-
-### Research (WSP 97)
-
-- Chrome 146 native MCP: `chrome://inspect/#remote-debugging`
-- Chrome DevTools MCP v0.19.0: 26 tools for AI browser automation
-- WebDriver BiDi: Real-time bidirectional communication
-
-### PR
-
-[#215](https://github.com/FOUNDUPS/Foundups-Agent/pull/215)
-
----
-
-## [2026-03-15] GitHub Orchestrator - 0102 Management Layer
-
-**Change Type**: New Module / Infrastructure
-**By**: 0102
-**WSP References**: WSP 103 (FoundUp Federation), WSP 77 (Agent Coordination), WSP 97 (Execution Mantra)
-
-### Summary
-
-Created GitHub Orchestrator module enabling 0102 to MANAGE (not participate in) GitHub org resources autonomously. Verified with FOUNDUPS/autopost test repo. Applied WSP 97 retrospective learning for continuous improvement.
-
-### Files Changed
-
-| Location | Description |
-|----------|-------------|
-| `modules/infrastructure/github_orchestrator/` | New module (README, INTERFACE, ROADMAP, ModLog) |
-| `modules/infrastructure/github_orchestrator/src/orchestrator.py` | Core orchestrator + FAM listener |
-| `WSP_knowledge/src/WSP_103_FoundUp_Federation_Protocol.md` | Updated with Access Gating section |
-| `modules/foundups/docs/FOUNDUP_FEDERATION_MIGRATION_PLAN.md` | AutoPost + spin-out queue |
-
-### Capabilities
-
-- Issue create/close (TESTED: Issue #2 on FOUNDUPS/autopost)
-- Collaborator add/remove (code ready)
-- Federated repo creation (dual-remote pattern)
-- FAM DAEmon listener wired
-
-### WSP 97 Learning
-
-Sprint 1 violated HoloIndex step (created without searching). Sprint 2 followed full mantra. Documented in module ModLog for future reference.
-
----
-
-## [2026-03-18] Skills 2.0 Compliance - System-Wide Update
-
-**Change Type**: Infrastructure / Standards Compliance
-**By**: 0102
-**WSP References**: WSP 96, WSP 97, Agent Skills Open Standard
-
-### Summary
-
-Applied Claude Code Skills 2.0 standard across all 87 skill files in the codebase. Created batch update tooling and fixed 17 files that were missing YAML frontmatter.
-
-### Files Changed
-
-| Location | Description |
-|----------|-------------|
-| `holo_index/skillz/skills2_batch_updater/` | New batch update tool for Skills 2.0 fields |
-| 69 SKILL.md/SKILLz.md files | Added `category`, `evals`, `retirement_date` fields |
-| 17 SKILLz.md files | Added complete YAML frontmatter (were missing) |
-| `holo_index/ModLog.md` | Detailed entry for HoloIndex module |
-| `MEMORY.md` | Updated Skills 2.0 compliance status |
-
-### Skills 2.0 Fields Added
-
-```yaml
-category: workflow | capability-uplift
-evals: []  # Test cases for skill promotion
-retirement_date: null  # For capability-uplift only
-```
+| `modules/infrastructure/dae_daemon/src/event_store.py` | Added latest-sequence helper for observer cursors |
+| `modules/infrastructure/dae_daemon/src/dae_observer.py` | Added `follow_events(...)` and cursor fields in live status |
+| `modules/communication/moltbot_bridge/src/dae_runtime_adapter.py` | Added `watch|follow <dae> since <sequence>` runtime contract |
 
 ### Why
 
-- Anthropic Skills 2.0 standard now used across Claude Code, Cursor, Gemini CLI, Codex CLI
-- System-wide compliance enables interoperability with Agent Skills Open Standard
-- Fixed frontmatter enables proper HoloIndex discovery of all skills
+- `WSP_97` required a real execution-plane cursor, not only “show me the last few events”.
+- This makes DAEmon supervision incremental and machine-usable for future 24/7 control loops.
 
----
+## [2026-03-18] OpenClaw Resident Bootstrap Through Broker
+
+**Change Type**: Runtime Control Plane / Bootstrap  
+**By**: 0102  
+**WSP References**: WSP 22, WSP 73, WSP 77, WSP 91, WSP 97
+
+### Summary
+
+Promoted OpenClaw from a menu-only surface to a broker-managed resident runtime by reusing the existing webhook receiver as the canonical always-on service.
+
+### Files Changed
+
+| Location | Description |
+|----------|-------------|
+| `modules/communication/moltbot_bridge/scripts/launch.py` | Resident OpenClaw service launcher/stop hooks |
+| `main.py` | Registers `openclaw` as launchable and autostarts after preflight |
+| `modules/infrastructure/cli/src/openclaw_menu.py` | Reuses broker-managed runtime before falling back to subprocess launch |
+| `.env.example` | Documents resident OpenClaw env controls |
+
+### Why
+
+- `WSP_97` requires a real execution plane, not only a manual submenu.
+- The webhook receiver already existed as the correct non-interactive OpenClaw surface.
+- Reusing that surface keeps the control plane thin and DAEmon-observable.
 
 ## [2026-03-16] AionUI FoundUp Factory Intake
 
@@ -55952,3 +55900,17 @@ if cooldown_sets:
   - `tail <dae>`
   - `status <dae> live`
 - Added `openclaw` / `claw` / `0102` daemon aliases so 012 can supervise Claw directly through OpenClaw.
+
+## 2026-03-18: PQN simulation moved into broker-managed runtime lane
+- Added `run_pqn_simulation_once()` in `modules/ai_intelligence/pqn/scripts/launch.py` as the broker-facing one-shot launch hook.
+- Registered `pqn_simulation` in `main.bootstrap_runtime_dae_launches()` so the runtime becomes visible to Claw and DAEmon like the other launchable DAEs.
+- Updated `modules/communication/moltbot_bridge/src/pqn_research_adapter.py` so:
+  - `show pqn simulation plan` stays a read-only research query
+  - `run|launch|status|stop pqn simulation` routes through the broker-managed runtime lane
+- Extended `dae_runtime_adapter.py` aliases so generic runtime commands can supervise `pqn_simulation`.
+
+## 2026-03-18: OpenClaw supervisor state machine becomes resident runtime
+- Added `modules/communication/moltbot_bridge/src/openclaw_supervisor.py` as the explicit 0102 state machine.
+- Registered `openclaw_supervisor` in `main.bootstrap_runtime_dae_launches()` and added autostart controls in `.env.example`.
+- Moved ownership of the daemon self-audit loop into the supervisor; `main.py` now starts direct self-audit only as a fallback when the supervisor is disabled.
+- Exposed `openclaw_supervisor` through the generic runtime control surface (`status/tail openclaw supervisor`).

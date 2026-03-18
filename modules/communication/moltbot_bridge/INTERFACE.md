@@ -95,6 +95,15 @@ Structured result contract:
 | `FOUNDUPS_WEBHOOK_TOKEN` | Yes | Shared secret with OpenClaw |
 | `OPENCLAW_GATEWAY_URL` | No | OpenClaw gateway (default: ws://127.0.0.1:18789) |
 | `MOLTBOT_GATEWAY_URL` | No | Legacy name (fallback) |
+| `OPENCLAW_RESIDENT_ENABLED` | No | Register resident OpenClaw webhook runtime at startup (default on) |
+| `OPENCLAW_RESIDENT_AUTOSTART` | No | Auto-start broker-managed resident OpenClaw service after preflights (default on) |
+| `OPENCLAW_SUPERVISOR_ENABLED` | No | Register broker-managed OpenClaw supervisor runtime at startup (default on) |
+| `OPENCLAW_SUPERVISOR_AUTOSTART` | No | Auto-start the OpenClaw supervisor after bootstrap (default on) |
+| `OPENCLAW_SUPERVISOR_POLL_SEC` | No | Poll interval for the OpenClaw supervisor state machine (default `10`) |
+| `OPENCLAW_SUPERVISOR_ALLOW_RESTART` | No | Allow the supervisor to restart resident OpenClaw when it is down (default on) |
+| `OPENCLAW_RESIDENT_HOST` | No | Host for resident OpenClaw webhook service (default `127.0.0.1`) |
+| `OPENCLAW_RESIDENT_PORT` | No | Port for resident OpenClaw webhook service (default `18800`) |
+| `OPENCLAW_RESIDENT_LOG_LEVEL` | No | Uvicorn log level for resident service (default `info`) |
 | `OPENCLAW_CONVERSATION_BACKEND` | No | `openclaw` (default) or `ironclaw` for sidecar conversational runtime |
 | `OPENCLAW_NO_API_KEYS` | No | `1` disables external/cloud LLM calls in OpenClaw/FAM paths |
 | `OPENCLAW_ALLOW_EXTERNAL_LLM` | No | `1` allows AI Gateway cloud fallback (auto-disabled when `*_NO_API_KEYS=1`) |
@@ -147,6 +156,12 @@ response = await dae.process(
 
 Broker-managed runtime commands are now available through OpenClaw:
 - `list launchable daes`
+- `status openclaw`
+- `status openclaw live`
+- `tail openclaw`
+- `tail openclaw supervisor`
+- `watch openclaw since 42`
+- `status openclaw supervisor live`
 - `status holodae`
 - `launch social media dae`
 - `stop training system`
@@ -160,6 +175,40 @@ Routing contract:
 Authorization:
 - `list` and `status` are read-only
 - `launch` and `stop` require `012` authority
+
+Resident OpenClaw contract:
+- `main.py` registers `openclaw` as a launchable DAE using `scripts/launch.py`
+- `main.py` registers `openclaw_supervisor` as a separate broker-managed runtime
+- bootstrap can autostart the resident webhook service after preflight
+- bootstrap can autostart the supervisor state machine after resident/runtime registration
+- CLI menu option `3` now reuses the broker-managed runtime when available instead of spawning a competing subprocess
+- live supervision now exposes a cursor contract:
+  - `tail <dae>` = recent window
+  - `watch|follow <dae> since <sequence>` = incremental follow with returned `next_cursor`
+
+### OpenClaw Supervisor Contract
+
+Canonical 0102 lifecycle owner:
+- runtime id: `openclaw_supervisor`
+- implementation: `src/openclaw_supervisor.py`
+- broker launch wrapper: `scripts/launch.py`
+
+Current explicit states:
+- `BOOT`
+- `PREFLIGHT`
+- `OBSERVE`
+- `TRIAGE`
+- `PLAN`
+- `EXECUTE`
+- `VERIFY`
+- `REMEMBER`
+- `ESCALATE`
+- `IDLE_WATCH`
+
+Current operational rule:
+- the supervisor owns the daemon self-audit loop when enabled
+- `main.py` only starts direct self-audit as a fallback when supervisor is disabled
+- resident OpenClaw restarts are policy-gated through the broker/runtime surface
 
 ### PQN Runtime Control
 
@@ -181,15 +230,27 @@ PQN simulation can now be triggered directly through research intent phrases:
 - `run pqn simulation`
 - `launch pqn simulation`
 - `status pqn simulation`
+- `stop pqn simulation`
+- `tail pqn simulation`
+- `watch pqn simulation since 42`
 - `show pqn simulation plan`
 
 Routing contract:
-- OpenClaw -> `pqn_research_adapter.py`
-- `pqn_research_adapter.py` -> `PQNAlignmentDAE.run_theory_archive_simulation(...)`
-- PQN simulation lifecycle -> OpenClaw DAEmon action ledger
+- `run|launch|status|stop pqn simulation`:
+  - OpenClaw deterministic runtime classification or `pqn_research_adapter.py`
+  - `DAELaunchBroker`
+  - `modules/ai_intelligence/pqn/scripts/launch.py:run_pqn_simulation_once()`
+- `show pqn simulation plan`:
+  - OpenClaw RESEARCH route
+  - `pqn_research_adapter.py`
+  - `PQNAlignmentDAE.get_theory_archive_simulation_plan(...)`
+- supervision:
+  - generic DAE runtime observer surface
+  - `tail|watch pqn simulation ...`
 
 Operational rule:
-- simulation is a research action, not a broker-managed DAE
+- simulation execution is a broker-managed runtime lane
+- simulation planning remains a read-only research query
 - archive remains hypothesis input only
 - returned interpretation remains comparative, not ontological
 

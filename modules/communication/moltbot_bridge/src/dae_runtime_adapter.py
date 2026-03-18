@@ -19,6 +19,8 @@ logger = logging.getLogger("dae_runtime_adapter")
 _DAE_ALIASES: Dict[str, str] = {
     "openclaw dae": "openclaw",
     "openclaw": "openclaw",
+    "openclaw supervisor": "openclaw_supervisor",
+    "0102 supervisor": "openclaw_supervisor",
     "claw": "openclaw",
     "0102": "openclaw",
     "holodae": "holodae",
@@ -37,11 +39,14 @@ _DAE_ALIASES: Dict[str, str] = {
     "training dae": "training_system",
     "pqn research": "pqn_research",
     "pqn architect": "pqn_architect",
+    "pqn simulation": "pqn_simulation",
+    "theory archive simulation": "pqn_simulation",
 }
 
-_MUTATING_VERBS = ("launch", "start", "stop")
+_MUTATING_VERBS = ("launch", "start", "run", "stop")
 _STATUS_VERBS = ("status", "show")
-_TAIL_VERBS = ("tail", "watch")
+_TAIL_VERBS = ("tail",)
+_FOLLOW_VERBS = ("watch", "follow")
 _LIST_PATTERNS = (
     "list daes",
     "list launchable daes",
@@ -87,18 +92,31 @@ def parse_dae_runtime_request(message: str) -> Optional[Dict[str, str]]:
     if not msg:
         return None
 
+    if "simulation plan" in msg:
+        return None
+
+    cursor_match = re.search(r"\b(?:since|after|cursor)\s+(\d+)\b", msg)
+    since_sequence = int(cursor_match.group(1)) if cursor_match else 0
+
     for pattern in _LIST_PATTERNS:
         if pattern in msg:
-            return {"action": "list", "dae_id": "", "normalized_message": msg}
+            return {
+                "action": "list",
+                "dae_id": "",
+                "normalized_message": msg,
+                "since_sequence": since_sequence,
+            }
 
     action = ""
     if any(msg.startswith(f"{verb} ") or f" {verb} " in msg for verb in _MUTATING_VERBS):
         for verb in _MUTATING_VERBS:
             if msg.startswith(f"{verb} ") or f" {verb} " in msg:
-                action = verb
+                action = "launch" if verb == "run" else verb
                 break
     elif any(msg.startswith(f"{verb} ") or f" {verb} " in msg for verb in _TAIL_VERBS):
         action = "tail"
+    elif any(msg.startswith(f"{verb} ") or f" {verb} " in msg for verb in _FOLLOW_VERBS):
+        action = "follow"
     elif any(msg.startswith(f"{verb} ") or f" {verb} " in msg for verb in _STATUS_VERBS):
         action = "live_status" if " live" in msg or msg.startswith("live ") else "status"
 
@@ -107,10 +125,22 @@ def parse_dae_runtime_request(message: str) -> Optional[Dict[str, str]]:
 
     for alias, dae_id in sorted(_DAE_ALIASES.items(), key=lambda item: len(item[0]), reverse=True):
         if alias in msg:
-            return {"action": action, "dae_id": dae_id, "normalized_message": msg}
+            resolved_action = "follow" if action == "tail" and since_sequence > 0 else action
+            return {
+                "action": resolved_action,
+                "dae_id": dae_id,
+                "normalized_message": msg,
+                "since_sequence": since_sequence,
+            }
 
     if " dae" in msg or msg.endswith("dae"):
-        return {"action": action, "dae_id": "", "normalized_message": msg}
+        resolved_action = "follow" if action == "tail" and since_sequence > 0 else action
+        return {
+            "action": resolved_action,
+            "dae_id": "",
+            "normalized_message": msg,
+            "since_sequence": since_sequence,
+        }
     return None
 
 
@@ -122,7 +152,7 @@ def classify_dae_runtime_category(message: str) -> Optional[str]:
     request = parse_dae_runtime_request(message)
     if not request:
         return None
-    if request["action"] in {"status", "live_status", "tail", "list"}:
+    if request["action"] in {"status", "live_status", "tail", "follow", "list"}:
         return "monitor"
     return "system"
 
@@ -166,6 +196,8 @@ def _format_live_status(snapshot: Dict[str, Any]) -> str:
         lines.append(f"pid={snapshot.get('pid')}")
     if snapshot.get("last_heartbeat_age_sec") is not None:
         lines.append(f"last_heartbeat_age_sec={snapshot.get('last_heartbeat_age_sec')}")
+    if snapshot.get("next_cursor") is not None:
+        lines.append(f"next_cursor={snapshot.get('next_cursor')}")
     if runtime:
         if "running" in runtime:
             lines.append(f"running={runtime.get('running')}")
@@ -183,6 +215,23 @@ def _format_live_status(snapshot: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def _format_follow_response(follow: Dict[str, Any]) -> str:
+    dae_id = follow.get("dae_id") or "system"
+    since_sequence = follow.get("since_sequence", 0)
+    next_cursor = follow.get("next_cursor", since_sequence)
+    events = follow.get("events", [])
+    lines = [
+        f"DAE follow `{dae_id}`",
+        f"since_sequence={since_sequence}",
+        f"next_cursor={next_cursor}",
+        f"new_events={len(events)}",
+    ]
+    if events:
+        lines.append("events:")
+        lines.extend(f"- {_format_event_line(event)}" for event in events)
+    return "\n".join(lines)
+
+
 def handle_dae_runtime_intent(
     message: str,
     sender: str,
@@ -196,6 +245,7 @@ def handle_dae_runtime_intent(
 
     action = request["action"]
     dae_id = request["dae_id"]
+    since_sequence = int(request.get("since_sequence", 0))
 
     observer = _get_dae_observer()
     broker = _get_launch_broker()
@@ -233,6 +283,16 @@ def handle_dae_runtime_intent(
         lines = [f"DAE event tail `{dae_id}`"]
         lines.extend(f"- {_format_event_line(event)}" for event in events)
         return "\n".join(lines)
+
+    if action == "follow":
+        if observer is None:
+            return "DAE observer is not available yet."
+        follow = observer.follow_events(
+            dae_id=dae_id,
+            since_sequence=since_sequence,
+            limit=8,
+        )
+        return _format_follow_response(follow)
 
     if action == "live_status":
         if observer is None:

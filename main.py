@@ -157,6 +157,12 @@ from modules.infrastructure.evade_net.scripts.launch import run_evade_net
 
 # Extracted to modules/communication/liberty_alert/scripts/launch.py per WSP 62
 from modules.communication.liberty_alert.scripts.launch import run_liberty_alert_dae
+from modules.communication.moltbot_bridge.scripts.launch import (
+    run_openclaw_resident_service,
+    stop_openclaw_resident_service,
+    run_openclaw_supervisor_service,
+    stop_openclaw_supervisor_service,
+)
 
 # Extracted to modules/infrastructure/git_push_dae/scripts/launch.py per WSP 62
 from modules.infrastructure.git_push_dae.scripts.launch import (
@@ -179,6 +185,7 @@ from modules.ai_intelligence.pqn.scripts.launch import (
     run_pqn_dae,
     run_pqn_research_session,
     run_pqn_architect_once,
+    run_pqn_simulation_once,
 )
 
 # Extracted to modules/platform_integration/youtube_shorts_scheduler/scripts/launch.py per WSP 62
@@ -737,7 +744,37 @@ def bootstrap_runtime_dae_launches() -> None:
         daemon.start()
 
     broker = get_dae_launch_broker(daemon=daemon)
-    specs = [
+    resident_enabled = os.getenv("OPENCLAW_RESIDENT_ENABLED", "1") != "0"
+    supervisor_enabled = os.getenv("OPENCLAW_SUPERVISOR_ENABLED", "1") != "0"
+    specs = []
+    if resident_enabled:
+        specs.append(
+            DAELaunchSpec(
+                dae_id="openclaw",
+                dae_name="OpenClaw Resident Service",
+                domain="communication",
+                module_path="modules.communication.moltbot_bridge.scripts.launch",
+                start_callable=run_openclaw_resident_service,
+                stop_callable=stop_openclaw_resident_service,
+                heartbeat_interval_sec=15.0,
+                description="Resident OpenClaw webhook/control-plane service.",
+            )
+        )
+    if supervisor_enabled:
+        specs.append(
+            DAELaunchSpec(
+                dae_id="openclaw_supervisor",
+                dae_name="OpenClaw Supervisor",
+                domain="communication",
+                module_path="modules.communication.moltbot_bridge.scripts.launch",
+                start_callable=run_openclaw_supervisor_service,
+                stop_callable=stop_openclaw_supervisor_service,
+                heartbeat_interval_sec=15.0,
+                description="Canonical 0102 supervisor state machine.",
+            )
+        )
+
+    specs.extend([
         DAELaunchSpec(
             dae_id="holodae",
             dae_name="HoloDAE",
@@ -804,11 +841,36 @@ def bootstrap_runtime_dae_launches() -> None:
             heartbeat_interval_sec=15.0,
             description="Non-interactive PQN architect cycle.",
         ),
-    ]
+        DAELaunchSpec(
+            dae_id="pqn_simulation",
+            dae_name="PQN Theory-Archive Simulation",
+            domain="ai_intelligence",
+            module_path="modules.ai_intelligence.pqn.scripts.launch",
+            start_callable=run_pqn_simulation_once,
+            heartbeat_interval_sec=15.0,
+            description="Broker-managed PQN simulation against the theory archive.",
+        ),
+    ])
     for spec in specs:
         broker.register_launch_spec(spec)
 
     print(f"[DAE-BROKER] ready launchable={len(broker.list_launchable_daes())}")
+
+    resident_autostart = os.getenv("OPENCLAW_RESIDENT_AUTOSTART", "1") != "0"
+    if resident_enabled and resident_autostart:
+        status = broker.get_runtime_status("openclaw")
+        if not status.get("running"):
+            result = broker.start_dae("openclaw", actor_id="0102")
+            launch_status = result.get("status", result.get("error", "unknown"))
+            print(f"[OPENCLAW-RESIDENT] bootstrap={launch_status}")
+
+    supervisor_autostart = os.getenv("OPENCLAW_SUPERVISOR_AUTOSTART", "1") != "0"
+    if supervisor_enabled and supervisor_autostart:
+        status = broker.get_runtime_status("openclaw_supervisor")
+        if not status.get("running"):
+            result = broker.start_dae("openclaw_supervisor", actor_id="0102")
+            launch_status = result.get("status", result.get("error", "unknown"))
+            print(f"[OPENCLAW-SUPERVISOR] bootstrap={launch_status}")
 
 
 def main():
@@ -1073,7 +1135,8 @@ def main():
     from modules.infrastructure.cli.src.main_menu import run_main_menu
 
     self_audit_loop = None
-    if os.getenv("OPENCLAW_SELF_AUDIT_ENABLED", "1") != "0":
+    supervisor_enabled = os.getenv("OPENCLAW_SUPERVISOR_ENABLED", "1") != "0"
+    if not supervisor_enabled and os.getenv("OPENCLAW_SELF_AUDIT_ENABLED", "1") != "0":
         try:
             from modules.infrastructure.wre_core.src.daemon_self_audit_loop import (
                 DaemonSelfAuditLoop,

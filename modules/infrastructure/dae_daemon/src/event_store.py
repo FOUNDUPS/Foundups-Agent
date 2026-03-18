@@ -275,8 +275,15 @@ class DAEEventStore:
                     payload=json.loads(row["payload_json"] or "{}"),
                     timestamp=row["timestamp"],
                 )
-            )
+        )
         return events
+
+    def get_latest_sequence_id(self) -> int:
+        """Return the latest persisted sequence id, or 0 when store is empty."""
+        with self._connect() as conn:
+            cursor = conn.execute("SELECT MAX(sequence_id) FROM dae_events")
+            row = cursor.fetchone()
+        return int(row[0] or 0)
 
     # ------------------------------------------------------------------
     # Stats / Parity

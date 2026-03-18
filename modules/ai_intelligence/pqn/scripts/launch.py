@@ -317,5 +317,26 @@ def run_pqn_research_session(
         "results_path": str(output_path) if output_path else "",
     }
 
+
+def run_pqn_simulation_once(config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Run one broker-managed PQN theory-archive simulation cycle."""
+    from modules.ai_intelligence.pqn_alignment.src.pqn_alignment_dae import (
+        PQNAlignmentDAE,
+    )
+
+    dae = PQNAlignmentDAE()
+    result = dae.run_theory_archive_simulation(config=config or {})
+    comparison = result.get("comparison", {})
+    interpretation = result.get("interpretation", {})
+
+    return {
+        "status": interpretation.get("outcome", "completed"),
+        "summary_path": result.get("summary_path", ""),
+        "run_count": len(result.get("runs", [])),
+        "probe_closer_to_target": comparison.get("probe_closer_to_target", False),
+        "validated_truth": interpretation.get("validated_truth", False),
+        "archive_informed": interpretation.get("archive_informed", True),
+    }
+
 if __name__ == "__main__":
     run_pqn_dae()

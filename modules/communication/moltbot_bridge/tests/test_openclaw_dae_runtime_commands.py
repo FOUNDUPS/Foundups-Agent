@@ -76,21 +76,56 @@ def test_execute_monitor_routes_to_dae_runtime_adapter():
     assert "Launchable DAEs" in response
 
 
-def test_execute_research_passes_daemon_reporter():
+def test_classify_run_pqn_simulation_as_system_runtime():
+    dae = OpenClawDAE(repo_root=PROJECT_ROOT)
+
+    intent = dae.classify_intent(
+        message="run pqn simulation",
+        sender="012",
+        channel="discord",
+        session_key="runtime-5a",
+    )
+
+    assert intent.category == IntentCategory.SYSTEM
+    assert intent.metadata["classification_method"] == "deterministic_dae_runtime"
+
+
+def test_execute_system_routes_pqn_simulation_to_dae_runtime_adapter():
     dae = OpenClawDAE(repo_root=PROJECT_ROOT)
     intent = dae.classify_intent(
         message="run pqn simulation",
         sender="012",
         channel="discord",
-        session_key="runtime-5",
+        session_key="runtime-5b",
     )
 
     with patch(
+        "modules.communication.moltbot_bridge.src.dae_runtime_adapter.handle_dae_runtime_intent",
+        return_value="PQN simulation launch `pqn_simulation` -> starting.",
+    ) as mocked:
+        response = dae._execute_system(intent)
+
+    mocked.assert_called_once()
+    assert "pqn_simulation" in response
+
+
+def test_show_pqn_simulation_plan_stays_on_research_route():
+    dae = OpenClawDAE(repo_root=PROJECT_ROOT)
+    intent = dae.classify_intent(
+        message="show pqn simulation plan",
+        sender="012",
+        channel="discord",
+        session_key="runtime-5c",
+    )
+
+    assert intent.category == IntentCategory.RESEARCH
+
+    with patch(
         "modules.communication.moltbot_bridge.src.pqn_research_adapter.handle_pqn_research_intent",
-        return_value="**PQN Theory-Archive Simulation Complete**",
+        return_value="**PQN Theory-Archive Simulation Plan**",
     ) as mocked:
         response = dae._execute_research(intent)
 
     mocked.assert_called_once()
     assert mocked.call_args.kwargs["report_action"] == dae._report_daemon_action
-    assert "Simulation Complete" in response
+    assert "Simulation Plan" in response

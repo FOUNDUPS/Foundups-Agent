@@ -1,3 +1,23 @@
+## 2026-03-18: Cursor-based DAE follow runtime
+
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py modules/communication/moltbot_bridge/tests/test_openclaw_dae_runtime_commands.py -q`
+- Status: PASS
+- Notes:
+  - Validates `watch openclaw since <sequence>` parses to the follow path.
+  - Confirms OpenClaw runtime supervision now returns `next_cursor` for incremental polling.
+
+---
+
+## 2026-03-18: Resident OpenClaw launch contract
+
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_resident_launch.py modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py -q`
+- Status: PASS
+- Notes:
+  - Validates broker-safe resident OpenClaw launch/stop hooks.
+  - Confirms generic DAE runtime control remains stable with `openclaw` as a launchable runtime alias.
+
+---
+
 ## 2026-03-16: PQN simulation runtime command routing
 
 - Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_pqn_research_adapter.py modules/communication/moltbot_bridge/tests/test_openclaw_dae_runtime_commands.py modules/infrastructure/dae_daemon/tests/test_dae_adapter.py -q`
@@ -314,3 +334,21 @@
 - Notes:
   - Confirms `tail <dae>` and `status <dae> live` classify as monitor intents.
   - Confirms OpenClaw runtime supervision for `openclaw` routes through the new DAEmon observer path.
+
+## 2026-03-18: PQN simulation runtime alignment coverage
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_pqn_research_adapter.py modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py modules/communication/moltbot_bridge/tests/test_openclaw_dae_runtime_commands.py -q`
+- Status: PASS
+- Result: `25 passed`
+- Notes:
+  - Confirms `run pqn simulation` is now classified as broker/runtime control instead of inline research execution.
+  - Confirms `show pqn simulation plan` stays on the RESEARCH read path.
+  - Confirms `pqn_simulation` is visible to generic DAE runtime supervision commands.
+
+## 2026-03-18: OpenClaw supervisor runtime coverage
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_supervisor.py modules/communication/moltbot_bridge/tests/test_openclaw_resident_launch.py modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py -q`
+- Status: PASS
+- Result: `20 passed`
+- Notes:
+  - Confirms the explicit supervisor state machine restarts resident OpenClaw when runtime status is down.
+  - Confirms `openclaw_supervisor` is exposed through the runtime adapter aliases.
+  - Confirms the broker launch wrapper starts and stops the supervisor service cleanly.

@@ -15,6 +15,28 @@ def test_parse_launch_social_media_dae():
     assert request["dae_id"] == "social_media"
 
 
+def test_parse_launch_pqn_simulation_runtime():
+    request = parse_dae_runtime_request("run pqn simulation")
+
+    assert request is not None
+    assert request["action"] == "launch"
+    assert request["dae_id"] == "pqn_simulation"
+
+
+def test_parse_show_pqn_simulation_plan_stays_out_of_runtime_adapter():
+    request = parse_dae_runtime_request("show pqn simulation plan")
+
+    assert request is None
+
+
+def test_parse_status_openclaw_supervisor_runtime():
+    request = parse_dae_runtime_request("status openclaw supervisor live")
+
+    assert request is not None
+    assert request["action"] == "live_status"
+    assert request["dae_id"] == "openclaw_supervisor"
+
+
 def test_classify_status_as_monitor():
     assert classify_dae_runtime_category("status holodae") == "monitor"
     assert classify_dae_runtime_category("list launchable daes") == "monitor"
@@ -97,6 +119,15 @@ def test_parse_tail_openclaw_request():
     assert request["dae_id"] == "openclaw"
 
 
+def test_parse_watch_openclaw_since_request():
+    request = parse_dae_runtime_request("watch openclaw since 41")
+
+    assert request is not None
+    assert request["action"] == "follow"
+    assert request["dae_id"] == "openclaw"
+    assert request["since_sequence"] == 41
+
+
 def test_live_status_openclaw_uses_observer():
     observer = MagicMock()
     observer.get_live_status.return_value = {
@@ -168,3 +199,41 @@ def test_tail_openclaw_uses_observer():
     observer.tail_events.assert_called_once_with(dae_id="openclaw", limit=8)
     assert "DAE event tail `openclaw`" in result
     assert "pqn_simulation" in result
+
+
+def test_follow_openclaw_uses_cursor_observer():
+    observer = MagicMock()
+    observer.follow_events.return_value = {
+        "dae_id": "openclaw",
+        "since_sequence": 41,
+        "next_cursor": 43,
+        "events": [
+            {
+                "sequence_id": 42,
+                "event_type": "action_performed",
+                "payload": {
+                    "action_type": "launch_requested",
+                    "target": "openclaw",
+                    "result": "ok",
+                },
+            }
+        ],
+    }
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.dae_runtime_adapter._get_dae_observer",
+        return_value=observer,
+    ):
+        result = handle_dae_runtime_intent(
+            "watch openclaw since 41",
+            "012",
+            allow_mutation=False,
+        )
+
+    observer.follow_events.assert_called_once_with(
+        dae_id="openclaw",
+        since_sequence=41,
+        limit=8,
+    )
+    assert "DAE follow `openclaw`" in result
+    assert "next_cursor=43" in result

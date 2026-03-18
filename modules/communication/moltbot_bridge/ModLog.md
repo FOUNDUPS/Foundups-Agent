@@ -1,5 +1,39 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-18: Cursor-based DAE follow commands
+
+**Author**: 0102  
+**WSP**: 22, 73, 91, 97
+
+### Changes
+- Updated `src/dae_runtime_adapter.py`
+  - added `watch|follow <dae> since <sequence>` parsing
+  - preserved `tail <dae>` as the recent-window command
+  - surfaced `next_cursor` in live status formatting
+- Updated `INTERFACE.md`
+  - documented the cursor/follow runtime contract
+
+### Impact
+- OpenClaw runtime supervision is now incremental instead of snapshot-only.
+- `012` and future 0102 loops can continue from a known event cursor without rereading the same tail window.
+
+## 2026-03-18: Resident OpenClaw broker runtime
+
+**Author**: 0102  
+**WSP**: 22, 73, 77, 97
+
+### Changes
+- Added `scripts/launch.py`
+  - `run_openclaw_resident_service(...)`
+  - `stop_openclaw_resident_service()`
+  - broker-safe Uvicorn startup without thread signal-handler conflicts
+- Updated `README.md` and `INTERFACE.md`
+  - documented resident OpenClaw service contract and env flags
+
+### Impact
+- OpenClaw now has a canonical resident service surface for broker-managed runtime activation.
+- The resident runtime reuses the existing webhook receiver instead of introducing a second daemon shape.
+
 ## 2026-03-15: IronClaw startup_probe with LM Studio fallback
 
 **Author**: 0102 (Opus 4.5)
@@ -1149,3 +1183,44 @@ openclaw onboard
 ### Outcome
 - 012 can inspect the DAEmon ledger through OpenClaw instead of reading raw logs.
 - Claw and PQN runtime activity now has a real supervision surface, not just event persistence.
+
+## 2026-03-18: PQN simulation broker/runtime alignment
+
+**Author**: 0102  
+**WSP**: 22, 73, 84, 97
+
+### Changes
+- Extended `src/dae_runtime_adapter.py` aliases and parsing so `pqn_simulation` is a first-class runtime target.
+- Added deterministic separation:
+  - `show pqn simulation plan` stays on the RESEARCH/read path
+  - `run|launch|status|stop pqn simulation` routes to runtime control
+- Updated `src/pqn_research_adapter.py` to delegate simulation execution/status/stop to the central broker instead of instantiating `PQNAlignmentDAE` inline.
+
+### Outcome
+- PQN simulation now behaves like the rest of the launchable runtime system instead of bypassing it.
+- Claw, DAEmon, and the broker now share one execution ledger for PQN simulation lifecycle events.
+
+## 2026-03-18: OpenClaw supervisor promoted to broker-managed runtime
+
+**Author**: 0102  
+**WSP**: 22, 73, 84, 97
+
+### Changes
+- Added `src/openclaw_supervisor.py` with the explicit state machine:
+  - `BOOT`
+  - `PREFLIGHT`
+  - `OBSERVE`
+  - `TRIAGE`
+  - `PLAN`
+  - `EXECUTE`
+  - `VERIFY`
+  - `REMEMBER`
+  - `ESCALATE`
+  - `IDLE_WATCH`
+- Added supervisor launch/stop wrappers to `scripts/launch.py`.
+- Updated `main.py` bootstrap so the supervisor is registered and can autostart as `openclaw_supervisor`.
+- Shifted daemon self-audit ownership to the supervisor path, leaving `main.py` fallback-only when supervisor is disabled.
+
+### Outcome
+- 0102 now has a canonical runtime supervisor surface instead of relying only on the self-audit loop.
+- Resident OpenClaw and self-audit are now coordinated through one broker-visible lifecycle.

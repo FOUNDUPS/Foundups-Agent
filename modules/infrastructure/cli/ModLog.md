@@ -2,26 +2,23 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
-## V0.3.14 - Video Indexing Daemon Mode (2026-03-18)
+## V0.3.14 - OpenClaw menu aligned to resident broker runtime (2026-03-18)
 
-### Added
-- `src/indexing_menu.py`
-  - **Option 2: [DAEMON] Continuous Indexing** - 24/7 daemon mode
-  - Dual-browser rotation: Chrome (9222) + Edge (9223) channels
-  - Configurable: videos per cycle, interval, max cycles
-  - Stop via `Ctrl+C` or `memory/STOP_VIDEO_INDEXER` file
+### Changed
+- `src/openclaw_menu.py`
+  - Added broker-aware webhook launch path
+  - Option `3` now:
+    - checks broker runtime for `openclaw`
+    - starts the resident service through the broker when registered
+    - avoids spawning a competing webhook subprocess when the resident runtime already exists
 
-### Menu Change
-```
-1. [GEMINI] Gemini AI Indexing
-2. [DAEMON] Continuous Indexing  ← NEW
-3. [LOCAL] Whisper Indexing
-4-7. (renumbered)
-```
+### Purpose
+- Keep manual CLI fallback aligned with the broker-managed control plane.
+- Prevent the menu surface from fighting the new resident OpenClaw runtime.
 
 ### WSP Compliance
 - **WSP 22**: ModLog documentation
-- **WSP 27**: DAE Architecture (daemon loop)
+- **WSP 97**: execution-plane alignment before new behavior
 
 ---
 

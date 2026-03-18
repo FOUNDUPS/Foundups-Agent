@@ -102,6 +102,7 @@ Non-interactive runtime entrypoints used by the central DAE launch broker live i
 Broker-facing entrypoints:
 - `run_pqn_research_session(selected_agents=None, session_name="PQN_Research", save_results=True)`
 - `run_pqn_architect_once()`
+- `run_pqn_simulation_once(config: Optional[Dict[str, Any]] = None)`
 
 This keeps `main.py` responsible for readiness/bootstrap while `0102` launches
 research cycles through the broker at runtime.
