@@ -3,31 +3,31 @@
   "files": [
     {
       "path": "foundups-wsp/SKILL.md",
-      "sha256": "4a06c21c2c6cb8df34cf83785fdccbf67b4ffc5110e69988eda1ce46d0e126f4"
+      "sha256": "dafb28446b8c5d950264d393cca15c508585d69ce664db09a97307a77506ab58"
     },
     {
       "path": "holo-search/SKILL.md",
-      "sha256": "35b90314ed931a5376758dd61314d3ed9978595b28d790a368817e2140e416c8"
+      "sha256": "7e7dbc9f56ac9bf89a3adc904b3818184e4df29fc3ac59605443ea33f0cb757b"
     },
     {
       "path": "openclaw-automation/SKILL.md",
-      "sha256": "b545701483eed4d4a6790c15d4eb1680269c02af82a796e4d87040e480152fa5"
+      "sha256": "cefc209bd736d8876c98fc94500f5c264132eab6442fcc0121f1e836e2b8bf13"
     },
     {
       "path": "openclaw-execute/SKILL.md",
-      "sha256": "15a90ab14412076e73015b953a985c6a688258deab52fde70001f35e733164a9"
+      "sha256": "cfb27fe2a0cdb101cdf5f2281758d148771f114dc2b5b9b9ad9d4e2ba58d3b2b"
     },
     {
       "path": "openclaw-monitor/SKILL.md",
-      "sha256": "1746f1cb995c37a4bb965de0eb8beec8fdf6c6a7952f871e50ae869c70b1594b"
+      "sha256": "cbe4f1ed247e13d8d986e5defdd84db22c0406e492635e55a2f426b0e638f565"
     },
     {
       "path": "openclaw-schedule/SKILL.md",
-      "sha256": "2b73fba621bb4633cccaea51c1f853451b7970ad4c052d4b042158971524c857"
+      "sha256": "bac625d8493417105693111af19ca3a2f3550bd8c250d53121daedf08a0d99f1"
     },
     {
       "path": "pqn-research/SKILL.md",
-      "sha256": "12573309bf4220342515b218d4e44e7a9b60c6f6f15ea534ec725e50a3fc996e"
+      "sha256": "9b6987f1474840524e6935cee735c87c42360a8b04c2edf436ad06211645f10c"
     }
   ]
 }
