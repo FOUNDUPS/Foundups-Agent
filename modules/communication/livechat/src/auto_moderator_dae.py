@@ -793,8 +793,31 @@ class AutoModeratorDAE:
                             logger.warning(f"[ROTATE] ⚠️ Account switch failed: {switch_result.get('error')}")
 
                 except Exception as e:
-                    logger.error(f"[ROTATE] ❌ Account rotation error: {e}")
-        
+                    error_str = str(e)
+                    logger.error(f"[ROTATE] ❌ Account rotation error: {error_str}")
+
+                    # Session recovery: if session died, reset driver and retry once
+                    if _is_session_error(error_str):
+                        logger.warning("[ROTATE] Session error detected - attempting recovery...")
+                        try:
+                            from modules.infrastructure.foundups_vision.src.studio_account_switcher import get_account_switcher
+                            # Reset the switcher's driver to force reconnect
+                            switcher = get_account_switcher()
+                            switcher.driver = None
+
+                            # Attempt reconnect
+                            if switcher._connect_to_chrome():
+                                logger.info("[ROTATE] Chrome reconnected - retrying account switch")
+                                switch_result = await switcher.switch_to_account(target_account)
+                                if switch_result.get("success"):
+                                    logger.info(f"[ROTATE] ✅ Recovery successful - switched to {target_account}")
+                                else:
+                                    logger.warning(f"[ROTATE] Recovery switch failed: {switch_result.get('error')}")
+                            else:
+                                logger.error("[ROTATE] Chrome reconnect failed - session unrecoverable")
+                        except Exception as recovery_err:
+                            logger.error(f"[ROTATE] Recovery attempt failed: {recovery_err}")
+
         # Normalize result into dict (resolve_stream can return a tuple in some branches)
         if isinstance(result, tuple):
             # Tuple format: (video_id, chat_id)
