@@ -34,10 +34,38 @@ class DAEObserver:
         )
         return [self._event_to_dict(event) for event in events]
 
+    def follow_events(
+        self,
+        *,
+        dae_id: Optional[str] = None,
+        event_type: Optional[str] = None,
+        since_sequence: int = 0,
+        limit: int = 12,
+    ) -> Dict[str, Any]:
+        """Return events after a known cursor and the next cursor to continue from."""
+        events = self._daemon.event_store.query(
+            dae_id=dae_id,
+            event_type=event_type,
+            since_sequence=since_sequence,
+            limit=limit,
+        )
+        event_dicts = [self._event_to_dict(event) for event in events]
+        latest_sequence = self._daemon.event_store.get_latest_sequence_id()
+        next_cursor = event_dicts[-1]["sequence_id"] if event_dicts else latest_sequence
+        return {
+            "dae_id": dae_id or "",
+            "event_type": event_type or "",
+            "since_sequence": since_sequence,
+            "next_cursor": next_cursor,
+            "latest_sequence_id": latest_sequence,
+            "events": event_dicts,
+        }
+
     def get_live_status(self, dae_id: str, *, limit: int = 8) -> Dict[str, Any]:
         reg = self._daemon.registry.get(dae_id)
         recent_events = self.tail_events(dae_id=dae_id, limit=limit)
         runtime = self._get_runtime_status(dae_id)
+        latest_sequence = self._daemon.event_store.get_latest_sequence_id()
         last_event = recent_events[-1] if recent_events else None
         last_action = None
         for event in reversed(recent_events):
@@ -60,6 +88,8 @@ class DAEObserver:
             "heartbeat_interval_sec": reg.heartbeat_interval_sec if reg else None,
             "last_heartbeat_age_sec": heartbeat_age_sec,
             "runtime": runtime,
+            "latest_sequence_id": latest_sequence,
+            "next_cursor": last_event["sequence_id"] if last_event else latest_sequence,
             "recent_events": recent_events,
             "last_event": last_event,
             "last_action": last_action,
@@ -68,6 +98,7 @@ class DAEObserver:
     def get_system_live_status(self, *, limit: int = 12) -> Dict[str, Any]:
         return {
             "dashboard": self._daemon.get_dashboard(),
+            "latest_sequence_id": self._daemon.event_store.get_latest_sequence_id(),
             "recent_events": self.tail_events(limit=limit),
         }
 

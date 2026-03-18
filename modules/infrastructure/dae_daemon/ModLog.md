@@ -1,5 +1,24 @@
 # dae_daemon ModLog
 
+## V1.2.4 - Cursor-based observer follow mode (2026-03-18)
+
+**What**: Added cursor-based follow semantics on top of the DAEmon event store.
+
+**Why**: Recent-window snapshots were useful for inspection but not strong enough for incremental supervision. `WSP_97` needs a deterministic cursor contract that future control loops can resume from.
+
+**Changes**:
+- `src/event_store.py`
+  - added `get_latest_sequence_id()`
+- `src/dae_observer.py`
+  - added `follow_events(...)`
+  - added `latest_sequence_id` and `next_cursor` to live/system snapshots
+- `README.md`
+  - documented `watch <dae> since <sequence>` follow contract
+
+**Impact**:
+- DAEmon read surfaces can now return an explicit next cursor for incremental polling.
+- This is the first clean step from ad hoc tails toward true 24/7 supervision.
+
 ## V1.2.3 - Resident OpenClaw registered as broker-managed runtime (2026-03-18)
 
 **What**: Extended the runtime broker contract so OpenClaw itself can be treated as a launchable resident DAE instead of only a menu surface.

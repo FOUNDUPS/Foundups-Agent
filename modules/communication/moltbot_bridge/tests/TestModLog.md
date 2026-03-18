@@ -1,3 +1,13 @@
+## 2026-03-18: Cursor-based DAE follow runtime
+
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py modules/communication/moltbot_bridge/tests/test_openclaw_dae_runtime_commands.py -q`
+- Status: PASS
+- Notes:
+  - Validates `watch openclaw since <sequence>` parses to the follow path.
+  - Confirms OpenClaw runtime supervision now returns `next_cursor` for incremental polling.
+
+---
+
 ## 2026-03-18: Resident OpenClaw launch contract
 
 - Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_resident_launch.py modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py -q`

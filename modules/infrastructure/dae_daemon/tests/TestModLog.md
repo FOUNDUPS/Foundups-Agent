@@ -1,5 +1,17 @@
 # dae_daemon TestModLog
 
+## V1.2.4 - Cursor-based observer follow tests (2026-03-18)
+
+**Updated**: `test_dae_observer.py`
+- validates `follow_events(...)` returns only events beyond a known cursor
+- validates the observer emits a usable `next_cursor` for incremental polling
+
+**Run**:
+- `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest modules/infrastructure/dae_daemon/tests/test_dae_observer.py -q`
+
+**Result**:
+- `3 passed`
+
 ## V1.2.1 - Structured Action Details Test (2026-03-16)
 
 **Created**: `test_dae_adapter.py`
