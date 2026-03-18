@@ -29,6 +29,14 @@ def test_parse_show_pqn_simulation_plan_stays_out_of_runtime_adapter():
     assert request is None
 
 
+def test_parse_status_openclaw_supervisor_runtime():
+    request = parse_dae_runtime_request("status openclaw supervisor live")
+
+    assert request is not None
+    assert request["action"] == "live_status"
+    assert request["dae_id"] == "openclaw_supervisor"
+
+
 def test_classify_status_as_monitor():
     assert classify_dae_runtime_category("status holodae") == "monitor"
     assert classify_dae_runtime_category("list launchable daes") == "monitor"

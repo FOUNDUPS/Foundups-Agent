@@ -55908,3 +55908,9 @@ if cooldown_sets:
   - `show pqn simulation plan` stays a read-only research query
   - `run|launch|status|stop pqn simulation` routes through the broker-managed runtime lane
 - Extended `dae_runtime_adapter.py` aliases so generic runtime commands can supervise `pqn_simulation`.
+
+## 2026-03-18: OpenClaw supervisor state machine becomes resident runtime
+- Added `modules/communication/moltbot_bridge/src/openclaw_supervisor.py` as the explicit 0102 state machine.
+- Registered `openclaw_supervisor` in `main.bootstrap_runtime_dae_launches()` and added autostart controls in `.env.example`.
+- Moved ownership of the daemon self-audit loop into the supervisor; `main.py` now starts direct self-audit only as a fallback when the supervisor is disabled.
+- Exposed `openclaw_supervisor` through the generic runtime control surface (`status/tail openclaw supervisor`).

@@ -64,6 +64,7 @@ Broker-managed one-shot runtimes can also expose analysis lanes such as:
 - `pqn_research`
 - `pqn_architect`
 - `pqn_simulation`
+- `openclaw_supervisor`
 
 Runtime intent:
 - `main.py` bootstraps launchable specs
@@ -89,6 +90,10 @@ Runtime supervision intent:
 - `status <dae> live` -> registry state + runtime status + recent event tail
 - `watch <dae> since <sequence>` -> cursor-based incremental follow from a known event id
 - The event store remains the source of truth; the observer is read-only
+- Example supervisory surfaces:
+  - `status openclaw live`
+  - `status openclaw supervisor live`
+  - `tail pqn simulation`
 
 ## Security Killswitch
 
