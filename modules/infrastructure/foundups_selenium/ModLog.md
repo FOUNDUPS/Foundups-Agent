@@ -1,5 +1,64 @@
 # ModLog — FoundUps Selenium
 
+## V1.1.0 — Chrome DevTools MCP Adapter
+
+**Date**: 2026-03-18
+**WSP Compliance**: WSP 72 (Module Independence), WSP 91 (Observability), WSP 11 (Interface)
+
+### Summary
+
+Added BrowserAdapter class that provides unified interface for Selenium AND Chrome DevTools MCP. Enables gradual migration from Selenium to MCP while maintaining backwards compatibility.
+
+### New Files
+
+- `src/devtools_mcp_adapter.py`:
+  - `MCPClient`: Connects to Chrome DevTools MCP server via stdio
+  - `BrowserAdapter`: Unified interface with auto-detection
+  - `BrowserResult`: Standardized result dataclass
+  - `get_browser_adapter()`: Factory function
+
+### API
+
+```python
+from modules.infrastructure.foundups_selenium import BrowserAdapter, get_browser_adapter
+
+# Auto-detect best backend
+adapter = get_browser_adapter(backend="auto")
+await adapter.initialize()
+
+# Unified operations work on both backends
+await adapter.navigate("https://youtube.com")
+await adapter.click("button#submit")
+await adapter.type_text("input#search", "hello")
+result = await adapter.take_screenshot()
+
+# Check which backend is active
+print(adapter.backend)  # "mcp" or "selenium"
+```
+
+### Methods
+
+| Method | MCP Tool | Selenium Equivalent |
+|--------|----------|---------------------|
+| `navigate(url)` | `navigate_page` | `driver.get()` |
+| `click(selector)` | `click` | `find_element().click()` |
+| `type_text(selector, text)` | `type_text` | `send_keys()` |
+| `fill(selector, value)` | `fill` | `clear()` + `send_keys()` |
+| `hover(selector)` | `hover` | `ActionChains.move_to_element()` |
+| `press_key(key)` | `press_key` | `send_keys(Keys.X)` |
+| `take_screenshot()` | `take_screenshot` | `get_screenshot_as_png()` |
+| `evaluate_script(js)` | `evaluate_script` | `execute_script()` |
+| `wait_for(selector)` | `wait_for` | `WebDriverWait` |
+| `new_page()` | `new_page` | `window.open()` |
+| `close_page()` | `close_page` | `window.close()` |
+| `list_pages()` | `list_pages` | `window_handles` |
+
+### Phase 1 of Chrome DevTools MCP Integration
+
+See: `wre_core/docs/CHROME_DEVTOOLS_MCP_INTEGRATION_TASK.md`
+
+---
+
 ## V0.8.1 — LinkedIn Registry Migration
 
 **Date**: 2026-03-07
