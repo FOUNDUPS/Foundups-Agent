@@ -34,6 +34,13 @@
   - Confirms startup blocks when IronClaw is the active backend and readiness fails without fallback.
   - Confirms startup warns but allows boot when local fallback policy is enabled.
 
+## 2026-03-18: Main bootstrap HoloDAE stop-hook registration
+
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest tests/test_main_runtime_bootstrap.py -q`
+- Status: PASS
+- Notes:
+  - Confirms `main.bootstrap_runtime_dae_launches()` registers `holodae` with a real `stop_callable`.
+
 ---
 
 ## 2026-03-08: Markdown sanitizer coverage
