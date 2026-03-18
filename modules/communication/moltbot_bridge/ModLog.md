@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-18: Cursor-based DAE follow commands
+
+**Author**: 0102  
+**WSP**: 22, 73, 91, 97
+
+### Changes
+- Updated `src/dae_runtime_adapter.py`
+  - added `watch|follow <dae> since <sequence>` parsing
+  - preserved `tail <dae>` as the recent-window command
+  - surfaced `next_cursor` in live status formatting
+- Updated `INTERFACE.md`
+  - documented the cursor/follow runtime contract
+
+### Impact
+- OpenClaw runtime supervision is now incremental instead of snapshot-only.
+- `012` and future 0102 loops can continue from a known event cursor without rereading the same tail window.
+
 ## 2026-03-18: Resident OpenClaw broker runtime
 
 **Author**: 0102  

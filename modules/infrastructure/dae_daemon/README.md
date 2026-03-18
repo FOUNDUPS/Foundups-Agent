@@ -82,6 +82,7 @@ snapshot = observer.get_live_status("pqn_research", limit=8)
 Runtime supervision intent:
 - `tail <dae>` -> recent DAEmon event stream for that DAE
 - `status <dae> live` -> registry state + runtime status + recent event tail
+- `watch <dae> since <sequence>` -> cursor-based incremental follow from a known event id
 - The event store remains the source of truth; the observer is read-only
 
 ## Security Killswitch

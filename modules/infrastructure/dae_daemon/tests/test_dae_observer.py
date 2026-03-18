@@ -74,3 +74,33 @@ class TestDAEObserver:
         assert snapshot["state"] in {"registered", "running"}
         assert snapshot["recent_events"]
         assert snapshot["last_event"]["event_type"] == "message_in"
+
+    def test_follow_events_respects_cursor_and_returns_next_cursor(self, tmp_path):
+        daemon = get_central_daemon(data_dir=tmp_path / "dae_daemon")
+        daemon.start()
+        daemon.register_dae(
+            DAERegistration(
+                dae_id="openclaw",
+                dae_name="OpenClaw DAE",
+                domain="communication",
+            )
+        )
+        daemon.registry.report_event(
+            "openclaw",
+            DAEEventType.MESSAGE_IN,
+            {"source": "012", "summary": "first"},
+        )
+        daemon.registry.report_event(
+            "openclaw",
+            DAEEventType.ACTION_PERFORMED,
+            {"action_type": "launch_requested", "target": "openclaw", "result": "ok"},
+        )
+
+        observer = get_dae_observer(daemon=daemon)
+        follow = observer.follow_events(dae_id="openclaw", since_sequence=1, limit=5)
+
+        assert follow["since_sequence"] == 1
+        assert follow["next_cursor"] >= 2
+        assert follow["events"]
+        assert all(event["sequence_id"] > 1 for event in follow["events"])
+        assert follow["events"][-1]["event_type"] == "action_performed"

@@ -155,6 +155,7 @@ Broker-managed runtime commands are now available through OpenClaw:
 - `status openclaw`
 - `status openclaw live`
 - `tail openclaw`
+- `watch openclaw since 42`
 - `status holodae`
 - `launch social media dae`
 - `stop training system`
@@ -173,6 +174,9 @@ Resident OpenClaw contract:
 - `main.py` registers `openclaw` as a launchable DAE using `scripts/launch.py`
 - bootstrap can autostart the resident webhook service after preflight
 - CLI menu option `3` now reuses the broker-managed runtime when available instead of spawning a competing subprocess
+- live supervision now exposes a cursor contract:
+  - `tail <dae>` = recent window
+  - `watch|follow <dae> since <sequence>` = incremental follow with returned `next_cursor`
 
 ### PQN Runtime Control
 

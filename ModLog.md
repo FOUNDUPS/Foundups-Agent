@@ -1,5 +1,28 @@
 # FoundUps Agent - Development Log
 
+## [2026-03-18] DAEmon Cursor-Follow Supervision
+
+**Change Type**: Observability / Runtime Supervision  
+**By**: 0102  
+**WSP References**: WSP 22, WSP 73, WSP 91, WSP 97
+
+### Summary
+
+Upgraded DAEmon supervision from recent-window snapshots to explicit cursor-based follow semantics so `012` and `0102` can incrementally watch runtime activity without relying on a fake streaming loop.
+
+### Files Changed
+
+| Location | Description |
+|----------|-------------|
+| `modules/infrastructure/dae_daemon/src/event_store.py` | Added latest-sequence helper for observer cursors |
+| `modules/infrastructure/dae_daemon/src/dae_observer.py` | Added `follow_events(...)` and cursor fields in live status |
+| `modules/communication/moltbot_bridge/src/dae_runtime_adapter.py` | Added `watch|follow <dae> since <sequence>` runtime contract |
+
+### Why
+
+- `WSP_97` required a real execution-plane cursor, not only “show me the last few events”.
+- This makes DAEmon supervision incremental and machine-usable for future 24/7 control loops.
+
 ## [2026-03-18] OpenClaw Resident Bootstrap Through Broker
 
 **Change Type**: Runtime Control Plane / Bootstrap  
