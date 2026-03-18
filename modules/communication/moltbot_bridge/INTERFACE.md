@@ -168,6 +168,7 @@ Broker-managed runtime commands are now available through OpenClaw:
 - `watch openclaw since 42`
 - `status openclaw supervisor live`
 - `status holodae`
+- `stop holodae`
 - `launch social media dae`
 - `stop training system`
 - `status liberty alert`

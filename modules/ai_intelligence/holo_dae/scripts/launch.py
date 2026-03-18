@@ -11,8 +11,14 @@ Module: holo_dae
 import sys
 import time
 import logging
+import threading
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
+
+_holodae_lock = threading.RLock()
+_holodae_instance: Any = None
+_holodae_status: Dict[str, Any] = {}
 
 # WRE CoT preflight - recursive enforcement after watch period
 try:
@@ -27,6 +33,7 @@ except ImportError:
 @preflight_guard("holo_dae")
 def run_holodae():
     """Run HoloDAE (Code Intelligence & Monitoring)."""
+    global _holodae_instance
     print("[HOLODAE] Starting HoloDAE - Code Intelligence & Monitoring System...")
 
     # HOLO-DAE INSTANCE LOCKING (First Principles: Resource Protection & Consistency)
@@ -57,6 +64,10 @@ def run_holodae():
     try:
         from holo_index.qwen_advisor.autonomous_holodae import AutonomousHoloDAE
         holodae = AutonomousHoloDAE()
+        with _holodae_lock:
+            _holodae_instance = holodae
+            _holodae_status.clear()
+            _holodae_status.update({"status": "starting"})
 
         # Log successful instance acquisition
         instance_summary = lock.get_instance_summary()
@@ -78,6 +89,8 @@ def run_holodae():
             logger.debug(f"[WRE-TRIGGER] Skill triggers unavailable: {trigger_exc}")
 
         holodae.start_autonomous_monitoring()
+        with _holodae_lock:
+            _holodae_status.update({"status": "running"})
 
         print("[HOLODAE] Autonomous monitoring active. Press Ctrl+C to stop.")
 
@@ -97,14 +110,33 @@ def run_holodae():
             print("[HOLODAE] HoloDAE stopped successfully")
 
     except Exception as e:
+        with _holodae_lock:
+            _holodae_status["status"] = "failed"
         print(f"[HOLODAE-ERROR] Failed to start: {e}")
         import traceback
         traceback.print_exc()
 
     finally:
+        with _holodae_lock:
+            if _holodae_instance is not None:
+                _holodae_instance = None
+            if "status" not in _holodae_status or _holodae_status["status"] == "running":
+                _holodae_status["status"] = "stopped"
         # Release the instance lock when done
         lock.release()
         logger.info("[LOCK] HoloDAE monitor instance lock released")
+
+
+def stop_holodae() -> Dict[str, Any]:
+    """Request shutdown for the broker-managed HoloDAE runtime."""
+    with _holodae_lock:
+        holodae = _holodae_instance
+        if holodae is None:
+            return {"status": "not_running"}
+
+        holodae.stop_autonomous_monitoring()
+        _holodae_status["status"] = "stopping"
+        return {"status": "stopping"}
 
 
 if __name__ == "__main__":

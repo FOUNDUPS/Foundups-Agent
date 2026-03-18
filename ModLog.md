@@ -55954,3 +55954,7 @@ if cooldown_sets:
 - Added restart-budget enforcement to modules/communication/moltbot_bridge/src/openclaw_supervisor.py.
 - Supervisor now advances a DAEmon follow cursor each cycle and escalates when restart attempts exceed policy instead of retrying indefinitely.
 
+## 2026-03-18: HoloDAE broker stop support
+- Added a real `stop_holodae()` hook to `modules/ai_intelligence/holo_dae/scripts/launch.py`.
+- Registered `holodae` with a `stop_callable` in `main.py` so runtime control surfaces can stop HoloDAE honestly instead of returning `stop_unsupported`.
+

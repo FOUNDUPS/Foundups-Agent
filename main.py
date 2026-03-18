@@ -146,7 +146,7 @@ logger = logging.getLogger(__name__)
 import time
 
 # Extracted to modules/ai_intelligence/holo_dae/scripts/launch.py per WSP 62
-from modules.ai_intelligence.holo_dae.scripts.launch import run_holodae
+from modules.ai_intelligence.holo_dae.scripts.launch import run_holodae, stop_holodae
 
 
 # Extracted to modules/platform_integration/social_media_orchestrator/scripts/launch.py per WSP 62
@@ -902,6 +902,7 @@ def bootstrap_runtime_dae_launches() -> None:
             domain="ai_intelligence",
             module_path="modules.ai_intelligence.holo_dae.scripts.launch",
             start_callable=run_holodae,
+            stop_callable=stop_holodae,
             description="Code intelligence and search runtime.",
         ),
         DAELaunchSpec(
