@@ -2,6 +2,44 @@
 
 ## Chronological Change Log
 
+### [2026-03-18] - Git Main-Merge Sentinel
+
+**WSP Protocol References**: WSP 72 (Module Independence), WSP 91 (Observability), WSP 22 (ModLog)
+**Impact Analysis**: Auto-merges feature branches to main at startup, preventing branch drift when agents commit to feature branches but forget to merge.
+
+#### Changes Made
+
+- `src/git_main_merge_sentinel.py` (NEW):
+  - One-shot sentinel runs at startup (not a daemon)
+  - Fast-forward merge first (safest, no merge commits)
+  - Falls back to PR creation + merge via `gh` CLI if diverged
+  - Handles stash/checkout for uncommitted changes
+  - Deletes merged branch (local + both remotes) when configured
+  - Fail-open by default (merge failures warn, don't block)
+- `main.py`:
+  - Added `run_git_main_merge_sentinel_preflight()` wrapper
+  - Integrated into preflight chain after WSP framework check
+- `.env.example`:
+  - Added `GIT_MAIN_MERGE_SENTINEL=1` (default ON)
+  - Added `GIT_MAIN_MERGE_SENTINEL_ENFORCED=0`
+  - Added `GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH=1` (default ON)
+
+#### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GIT_MAIN_MERGE_SENTINEL` | 1 | Enable sentinel at startup |
+| `GIT_MAIN_MERGE_SENTINEL_ENFORCED` | 0 | If 1, block startup on failure |
+| `GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH` | 1 | Delete merged branch after merge |
+
+#### Sample Output
+
+```
+[GIT-MERGE-SENTINEL] preflight=PASS branch=main merged=False actions=1
+```
+
+---
+
 ### [2026-03-08] - Brain Artifact Promotion to WSP_knowledge + Incremental Startup Refresh
 
 **WSP Protocol References**: WSP 60 (Module Memory), WSP 84 (Enhance Existing), WSP 87 (Code Navigation), WSP 22 (ModLog)

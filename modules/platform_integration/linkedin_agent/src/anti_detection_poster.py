@@ -231,8 +231,8 @@ class AntiDetectionLinkedIn:
             chrome_options.add_argument('--disable-prompt-on-repost')
             chrome_options.add_argument('--disable-translate')
 
-            # User agent to appear as regular Chrome
-            chrome_options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+            # User agent to appear as regular Chrome (Updated 2026-03 to Chrome 146)
+            chrome_options.add_argument('user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36')
 
             # Use profile to maintain session
             if use_existing_session:

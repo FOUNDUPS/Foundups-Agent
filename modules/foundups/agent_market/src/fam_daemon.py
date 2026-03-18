@@ -92,6 +92,12 @@ class FAMEventType(str, Enum):
     TIDE_SUPPORT_RECEIVED = "tide_support_received"  # Alias: support received from network
     SUSTAINABILITY_REACHED = "sustainability_reached"  # Fee revenue > operational costs
 
+    # Access/Subscription (WSP 103: FoundUp Federation + Access Gating)
+    ANGEL_SUBSCRIBED = "angel_subscribed"              # Angel pays $195/mo → pre-OPO repo access
+    SUBSCRIPTION_CANCELLED = "subscription_cancelled"  # User cancels → revoke repo access
+    DU_STAKED = "du_staked"                            # User stakes in FoundUp → specific repo access
+    DU_UNSTAKED = "du_unstaked"                        # User unstakes → revoke specific repo access
+
     # System
     HEARTBEAT = "heartbeat"
     DAEMON_STARTED = "daemon_started"

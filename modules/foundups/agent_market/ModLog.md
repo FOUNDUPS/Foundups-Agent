@@ -1,5 +1,42 @@
 # ModLog - FoundUps Agent Market
 
+## 2026-03-15 - Access/Subscription FAMEventTypes (WSP 103)
+
+### WSP References
+- WSP 103 (FoundUp Federation), WSP 97 (Execution Mantra)
+
+### Changes
+
+Added 4 new event types for autonomous access gating:
+
+| Event | Purpose |
+|-------|---------|
+| `ANGEL_SUBSCRIBED` | Angel pays $195/mo → grants pre-OPO repo access |
+| `SUBSCRIPTION_CANCELLED` | User cancels → revokes repo access |
+| `DU_STAKED` | User stakes in FoundUp → grants specific repo access |
+| `DU_UNSTAKED` | User unstakes → revokes specific repo access |
+
+### Integration
+
+GitHub Orchestrator listens for these events via `wire_github_to_fam()`:
+- `angel_subscribed` → `add_collaborator()` to all pre-OPO repos
+- `subscription_cancelled` → `remove_collaborator()` from repos
+
+### Usage
+
+```python
+from modules.foundups.agent_market.src.fam_daemon import get_fam_daemon, FAMEventType
+
+daemon = get_fam_daemon()
+daemon.emit(
+    FAMEventType.ANGEL_SUBSCRIBED,
+    payload={"github_username": "new_angel", "tier": "angel"},
+    actor_id="stripe_webhook"
+)
+```
+
+---
+
 ## 2026-02-20 - FIX: FAM publish() alias for emit()
 
 ### WSP References
