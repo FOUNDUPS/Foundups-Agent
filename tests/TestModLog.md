@@ -24,6 +24,16 @@
   - Confirms `main.bootstrap_runtime_dae_launches()` registers `openclaw_supervisor`.
   - Confirms supervisor autostart is routed through the broker-managed runtime surface.
 
+## 2026-03-18: IronClaw startup readiness preflight
+
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest tests/test_main_ironclaw_preflight.py tests/test_main_runtime_bootstrap.py -q`
+- Status: PASS
+- Result: `7 passed`
+- Notes:
+  - Confirms startup skips IronClaw readiness when backend is `openclaw`.
+  - Confirms startup blocks when IronClaw is the active backend and readiness fails without fallback.
+  - Confirms startup warns but allows boot when local fallback policy is enabled.
+
 ---
 
 ## 2026-03-08: Markdown sanitizer coverage
