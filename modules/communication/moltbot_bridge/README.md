@@ -100,12 +100,16 @@ OpenClaw now has a broker-managed resident service path built on the existing
 webhook receiver instead of a separate daemon shape.
 
 - `main.py` registers `openclaw` as a launchable DAE
+- `main.py` registers `openclaw_supervisor` as the canonical 0102 state machine
 - default bootstrap path autostarts it unless disabled
 - runtime control works through Claw or the generic DAE broker surface
 
 Environment:
 - `OPENCLAW_RESIDENT_ENABLED=1`
 - `OPENCLAW_RESIDENT_AUTOSTART=1`
+- `OPENCLAW_SUPERVISOR_ENABLED=1`
+- `OPENCLAW_SUPERVISOR_AUTOSTART=1`
+- `OPENCLAW_SUPERVISOR_POLL_SEC=10`
 - `OPENCLAW_RESIDENT_HOST=127.0.0.1`
 - `OPENCLAW_RESIDENT_PORT=18800`
 - `OPENCLAW_RESIDENT_LOG_LEVEL=info`
@@ -115,6 +119,8 @@ Runtime examples:
 - `status openclaw live`
 - `tail openclaw`
 - `stop openclaw`
+- `status openclaw supervisor live`
+- `tail openclaw supervisor`
 
 PQN runtime examples:
 - `run pqn simulation`

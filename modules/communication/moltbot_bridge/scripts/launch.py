@@ -6,6 +6,7 @@ from __future__ import annotations
 import logging
 import os
 import threading
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
@@ -13,6 +14,9 @@ logger = logging.getLogger(__name__)
 _runtime_lock = threading.RLock()
 _runtime_server: Any = None
 _runtime_status: Dict[str, Any] = {}
+_supervisor_lock = threading.RLock()
+_supervisor_runtime: Any = None
+_supervisor_status: Dict[str, Any] = {}
 
 
 def _resolve_host(host: Optional[str]) -> str:
@@ -131,3 +135,51 @@ def get_openclaw_resident_status() -> Dict[str, Any]:
         status = dict(_runtime_status)
         status["running"] = bool(server and not getattr(server, "should_exit", False))
         return status
+
+
+def run_openclaw_supervisor_service(repo_root: Optional[str] = None) -> Dict[str, Any]:
+    """Run the explicit OpenClaw supervisor state machine as a broker-managed runtime."""
+    from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
+        OpenClawSupervisor,
+    )
+
+    resolved_root = Path(repo_root) if repo_root else Path(__file__).resolve().parents[4]
+    supervisor = OpenClawSupervisor(repo_root=resolved_root)
+
+    with _supervisor_lock:
+        global _supervisor_runtime
+        _supervisor_runtime = supervisor
+        _supervisor_status.clear()
+        _supervisor_status.update(
+            {
+                "repo_root": str(resolved_root),
+                "status": "running",
+            }
+        )
+
+    try:
+        result = supervisor.run_forever()
+        with _supervisor_lock:
+            if _supervisor_runtime is supervisor:
+                _supervisor_runtime = None
+                _supervisor_status.update({"status": result.get("status", "stopped")})
+        return result
+    finally:
+        with _supervisor_lock:
+            if _supervisor_runtime is supervisor:
+                _supervisor_runtime = None
+
+
+def stop_openclaw_supervisor_service() -> Dict[str, Any]:
+    """Request shutdown for the broker-managed OpenClaw supervisor service."""
+    with _supervisor_lock:
+        supervisor = _supervisor_runtime
+        if supervisor is None:
+            return {"status": "not_running"}
+
+        supervisor.stop()
+        _supervisor_status["status"] = "stopping"
+        return {
+            "status": "stopping",
+            "repo_root": _supervisor_status.get("repo_root", ""),
+        }

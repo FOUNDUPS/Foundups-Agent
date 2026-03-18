@@ -1,4 +1,5 @@
 from types import SimpleNamespace
+from unittest.mock import MagicMock
 
 from modules.communication.moltbot_bridge.scripts import launch as openclaw_launch
 
@@ -62,3 +63,39 @@ def test_stop_openclaw_resident_service_sets_should_exit():
 
     openclaw_launch._runtime_server = None
     openclaw_launch._runtime_status.clear()
+
+
+def test_run_openclaw_supervisor_service_uses_supervisor_runtime(monkeypatch, tmp_path):
+    created = {}
+
+    class FakeSupervisor:
+        def __init__(self, repo_root):
+            created["repo_root"] = repo_root
+
+        def run_forever(self):
+            return {"status": "stopped"}
+
+    monkeypatch.setitem(
+        __import__("sys").modules,
+        "modules.communication.moltbot_bridge.src.openclaw_supervisor",
+        SimpleNamespace(OpenClawSupervisor=FakeSupervisor),
+    )
+
+    result = openclaw_launch.run_openclaw_supervisor_service(repo_root=str(tmp_path))
+
+    assert created["repo_root"] == tmp_path
+    assert result["status"] == "stopped"
+
+
+def test_stop_openclaw_supervisor_service_calls_stop():
+    runtime = MagicMock()
+    openclaw_launch._supervisor_runtime = runtime
+    openclaw_launch._supervisor_status.clear()
+    openclaw_launch._supervisor_status.update({"repo_root": "O:/Foundups-Agent"})
+
+    result = openclaw_launch.stop_openclaw_supervisor_service()
+
+    assert result["status"] == "stopping"
+    runtime.stop.assert_called_once()
+    openclaw_launch._supervisor_runtime = None
+    openclaw_launch._supervisor_status.clear()

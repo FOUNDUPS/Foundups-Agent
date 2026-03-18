@@ -19,6 +19,8 @@ logger = logging.getLogger("dae_runtime_adapter")
 _DAE_ALIASES: Dict[str, str] = {
     "openclaw dae": "openclaw",
     "openclaw": "openclaw",
+    "openclaw supervisor": "openclaw_supervisor",
+    "0102 supervisor": "openclaw_supervisor",
     "claw": "openclaw",
     "0102": "openclaw",
     "holodae": "holodae",

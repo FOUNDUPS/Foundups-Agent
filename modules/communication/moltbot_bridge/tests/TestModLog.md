@@ -343,3 +343,12 @@
   - Confirms `run pqn simulation` is now classified as broker/runtime control instead of inline research execution.
   - Confirms `show pqn simulation plan` stays on the RESEARCH read path.
   - Confirms `pqn_simulation` is visible to generic DAE runtime supervision commands.
+
+## 2026-03-18: OpenClaw supervisor runtime coverage
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_supervisor.py modules/communication/moltbot_bridge/tests/test_openclaw_resident_launch.py modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py -q`
+- Status: PASS
+- Result: `20 passed`
+- Notes:
+  - Confirms the explicit supervisor state machine restarts resident OpenClaw when runtime status is down.
+  - Confirms `openclaw_supervisor` is exposed through the runtime adapter aliases.
+  - Confirms the broker launch wrapper starts and stops the supervisor service cleanly.
