@@ -8,6 +8,8 @@ Public API:
     - BrowserManager: Singleton browser session manager
     - get_browser_manager: Factory function for BrowserManager
     - TelemetryStore: Browser action telemetry storage
+    - BrowserAdapter: Unified Selenium/MCP interface
+    - get_browser_adapter: Factory function for BrowserAdapter
 
 WSP Compliance:
     - WSP 3: Infrastructure domain placement
@@ -20,6 +22,7 @@ from .browser_manager import BrowserManager, get_browser_manager
 from .telemetry_store import TelemetryStore
 from .foundup_typer import FoundupsTyper, get_typer
 from .human_behavior import HumanBehavior, get_human_behavior
+from .devtools_mcp_adapter import BrowserAdapter, get_browser_adapter, BrowserResult
 
 __all__ = [
     "FoundUpsDriver",
@@ -30,6 +33,9 @@ __all__ = [
     "get_typer",
     "HumanBehavior",
     "get_human_behavior",
+    "BrowserAdapter",
+    "get_browser_adapter",
+    "BrowserResult",
 ]
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
