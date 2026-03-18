@@ -101,6 +101,8 @@ Structured result contract:
 | `OPENCLAW_SUPERVISOR_AUTOSTART` | No | Auto-start the OpenClaw supervisor after bootstrap (default on) |
 | `OPENCLAW_SUPERVISOR_POLL_SEC` | No | Poll interval for the OpenClaw supervisor state machine (default `10`) |
 | `OPENCLAW_SUPERVISOR_ALLOW_RESTART` | No | Allow the supervisor to restart resident OpenClaw when it is down (default on) |
+| `OPENCLAW_SUPERVISOR_MAX_RESTARTS` | No | Maximum resident OpenClaw restart attempts allowed inside the supervisor repair window (default `3`) |
+| `OPENCLAW_SUPERVISOR_RESTART_WINDOW_SEC` | No | Rolling window used for restart-budget enforcement before escalation (default `900`) |
 | `OPENCLAW_RESIDENT_HOST` | No | Host for resident OpenClaw webhook service (default `127.0.0.1`) |
 | `OPENCLAW_RESIDENT_PORT` | No | Port for resident OpenClaw webhook service (default `18800`) |
 | `OPENCLAW_RESIDENT_LOG_LEVEL` | No | Uvicorn log level for resident service (default `info`) |
@@ -213,6 +215,9 @@ Current operational rule:
 - the supervisor owns the daemon self-audit loop when enabled
 - `main.py` only starts direct self-audit as a fallback when supervisor is disabled
 - resident OpenClaw restarts are policy-gated through the broker/runtime surface
+- restart attempts are bounded by `OPENCLAW_SUPERVISOR_MAX_RESTARTS` within `OPENCLAW_SUPERVISOR_RESTART_WINDOW_SEC`
+- when the repair budget is exhausted, the supervisor escalates instead of retrying indefinitely
+- the supervisor advances a DAEmon follow cursor every cycle so repair decisions are tied to observed runtime history
 - IronClaw runtime readiness is validated at startup before resident/runtime bootstrap when IronClaw is the selected backend
 
 ### PQN Runtime Control

@@ -352,3 +352,13 @@
   - Confirms the explicit supervisor state machine restarts resident OpenClaw when runtime status is down.
   - Confirms `openclaw_supervisor` is exposed through the runtime adapter aliases.
   - Confirms the broker launch wrapper starts and stops the supervisor service cleanly.
+
+## 2026-03-18: OpenClaw supervisor repair-budget coverage
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_supervisor.py -q`
+- Status: PASS
+- Result: `4 passed`
+- Coverage:
+  - Confirms the supervisor advances the DAEmon follow cursor during idle and repair cycles.
+  - Confirms restart attempts are bounded by policy and escalate when the repair budget is exhausted.
+  - Confirms failed verify cycles are still remembered before escalation.
+

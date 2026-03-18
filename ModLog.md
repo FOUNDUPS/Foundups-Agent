@@ -55949,3 +55949,8 @@ if cooldown_sets:
   - strict when IronClaw is the active backend and no local fallback is allowed
   - warn-only when local fallback policy is enabled
 - Added focused tests in `tests/test_main_ironclaw_preflight.py`.
+
+## 2026-03-18: OpenClaw supervisor bounded repair budget
+- Added restart-budget enforcement to modules/communication/moltbot_bridge/src/openclaw_supervisor.py.
+- Supervisor now advances a DAEmon follow cursor each cycle and escalates when restart attempts exceed policy instead of retrying indefinitely.
+

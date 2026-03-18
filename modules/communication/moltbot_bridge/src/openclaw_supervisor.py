@@ -8,9 +8,10 @@ import os
 import subprocess
 import threading
 import time
+from collections import deque
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Deque, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,8 @@ class OpenClawSupervisor:
         self.repo_root = Path(repo_root).resolve()
         self.poll_sec = float(os.getenv("OPENCLAW_SUPERVISOR_POLL_SEC", "10"))
         self.restart_enabled = os.getenv("OPENCLAW_SUPERVISOR_ALLOW_RESTART", "1") != "0"
+        self.max_restart_attempts = max(int(os.getenv("OPENCLAW_SUPERVISOR_MAX_RESTARTS", "3")), 1)
+        self.restart_window_sec = max(float(os.getenv("OPENCLAW_SUPERVISOR_RESTART_WINDOW_SEC", "900")), 60.0)
         self.self_audit_enabled = os.getenv("OPENCLAW_SELF_AUDIT_ENABLED", "1") != "0"
         self.current_state = SupervisorState.BOOT
         self.last_reason = "init"
@@ -54,6 +57,8 @@ class OpenClawSupervisor:
         self._action_reporter = action_reporter or self._build_daemon_reporter()
         self._self_audit_factory = self_audit_factory
         self._self_audit_loop: Any | None = None
+        self._event_cursor = 0
+        self._restart_attempts: Deque[float] = deque()
 
     def stop(self) -> None:
         self._stop_event.set()
@@ -115,6 +120,7 @@ class OpenClawSupervisor:
 
         if not verify["ok"]:
             self._transition(SupervisorState.ESCALATE, verify.get("error", "verify_failed"))
+            self._remember(observation, plan, action_result, verify)
         else:
             self._transition(SupervisorState.REMEMBER, plan["action"])
             self._remember(observation, plan, action_result, verify)
@@ -213,8 +219,22 @@ class OpenClawSupervisor:
             "openclaw_runtime": broker.get_runtime_status("openclaw") if broker else {"registered": False},
             "supervisor_runtime": broker.get_runtime_status("openclaw_supervisor") if broker else {"registered": False},
             "openclaw_live": observer.get_live_status("openclaw", limit=4) if observer else {"registered": False},
+            "openclaw_follow": (
+                observer.follow_events(
+                    dae_id="openclaw",
+                    since_sequence=self._event_cursor,
+                    limit=8,
+                )
+                if observer
+                else {"events": [], "next_cursor": self._event_cursor, "latest_sequence_id": self._event_cursor}
+            ),
             "git": self._git_summary(),
             "self_audit_enabled": self.self_audit_enabled,
+            "restart_budget": {
+                "max_attempts": self.max_restart_attempts,
+                "window_sec": self.restart_window_sec,
+                "attempts_in_window": self._attempts_in_window(),
+            },
         }
 
     def _triage(self, observation: Dict[str, Any]) -> Dict[str, Any]:
@@ -227,8 +247,21 @@ class OpenClawSupervisor:
         if not runtime.get("registered"):
             return {"kind": "escalate", "reason": "openclaw_runtime_not_registered"}
 
-        if not runtime.get("running") and self.restart_enabled:
-            return {"kind": "action", "reason": "resident_openclaw_not_running", "action": "start_openclaw"}
+        if not runtime.get("running"):
+            if not self.restart_enabled:
+                return {"kind": "escalate", "reason": "resident_openclaw_down_restart_disabled"}
+            if not self._can_attempt_restart():
+                return {
+                    "kind": "escalate",
+                    "reason": "resident_openclaw_restart_budget_exhausted",
+                    "restart_budget": observation.get("restart_budget", {}),
+                }
+            return {
+                "kind": "action",
+                "reason": "resident_openclaw_not_running",
+                "action": "start_openclaw",
+                "restart_budget": observation.get("restart_budget", {}),
+            }
 
         return {"kind": "idle", "reason": "resident_openclaw_healthy"}
 
@@ -238,6 +271,8 @@ class OpenClawSupervisor:
             "target": "openclaw",
             "reason": triage["reason"],
             "git_dirty_files": observation["git"]["dirty_files"],
+            "restart_budget": observation.get("restart_budget", {}),
+            "next_restart_attempt": self._attempts_in_window() + 1,
         }
 
     def _execute(self, plan: Dict[str, Any]) -> Dict[str, Any]:
@@ -245,6 +280,7 @@ class OpenClawSupervisor:
         if broker is None:
             return {"ok": False, "error": "broker_unavailable"}
         if plan["action"] == "start_openclaw":
+            self._record_restart_attempt()
             result = broker.start_dae("openclaw", actor_id="0102")
             self._action_reporter(
                 "supervisor_execute",
@@ -259,7 +295,15 @@ class OpenClawSupervisor:
         if broker is None:
             return {"ok": False, "error": "broker_unavailable"}
         status = broker.get_runtime_status(plan["target"])
-        ok = action_result.get("status") in {"starting", "already_running"} and status.get("registered")
+        running_states = {"starting", "running", "degraded"}
+        ok = (
+            action_result.get("status") in {"starting", "already_running"}
+            and status.get("registered")
+            and (
+                status.get("running")
+                or str(status.get("state", "")).lower() in running_states
+            )
+        )
         return {"ok": ok, "status": status, "error": status.get("last_error", "")}
 
     def _remember(
@@ -279,8 +323,12 @@ class OpenClawSupervisor:
                 "action_result": action_result,
                 "verify": verify,
                 "git": observation.get("git", {}),
+                "restart_budget": observation.get("restart_budget", {}),
+                "openclaw_follow": observation.get("openclaw_follow", {}),
             },
         )
+        follow = observation.get("openclaw_follow", {})
+        self._event_cursor = int(follow.get("next_cursor", self._event_cursor) or self._event_cursor)
 
     def _git_summary(self) -> Dict[str, Any]:
         try:
@@ -297,3 +345,21 @@ class OpenClawSupervisor:
             return {"branch": branch, "dirty_files": dirty_files}
         except Exception as exc:
             return {"branch": "unknown", "dirty_files": -1, "error": str(exc)[:200]}
+
+    def _attempts_in_window(self) -> int:
+        now = time.time()
+        self._prune_restart_attempts(now)
+        return len(self._restart_attempts)
+
+    def _can_attempt_restart(self) -> bool:
+        return self._attempts_in_window() < self.max_restart_attempts
+
+    def _record_restart_attempt(self) -> None:
+        now = time.time()
+        self._prune_restart_attempts(now)
+        self._restart_attempts.append(now)
+
+    def _prune_restart_attempts(self, now: float) -> None:
+        cutoff = now - self.restart_window_sec
+        while self._restart_attempts and self._restart_attempts[0] < cutoff:
+            self._restart_attempts.popleft()

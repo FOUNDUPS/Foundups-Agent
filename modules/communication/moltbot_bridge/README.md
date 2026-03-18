@@ -117,6 +117,8 @@ Environment:
 - `OPENCLAW_SUPERVISOR_ENABLED=1`
 - `OPENCLAW_SUPERVISOR_AUTOSTART=1`
 - `OPENCLAW_SUPERVISOR_POLL_SEC=10`
+- `OPENCLAW_SUPERVISOR_MAX_RESTARTS=3`
+- `OPENCLAW_SUPERVISOR_RESTART_WINDOW_SEC=900`
 - `OPENCLAW_RESIDENT_HOST=127.0.0.1`
 - `OPENCLAW_RESIDENT_PORT=18800`
 - `OPENCLAW_RESIDENT_LOG_LEVEL=info`
@@ -128,6 +130,11 @@ Runtime examples:
 - `stop openclaw`
 - `status openclaw supervisor live`
 - `tail openclaw supervisor`
+
+Supervisor repair policy:
+- resident OpenClaw restart attempts are bounded inside a rolling window
+- exhausted restart budget escalates instead of looping forever
+- every cycle advances a DAEmon follow cursor so repair decisions stay tied to observed runtime history
 
 PQN runtime examples:
 - `run pqn simulation`
