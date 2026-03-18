@@ -1,0 +1,32 @@
+{
+  "name": "social_twin",
+  "type": "foundup",
+  "domain": "foundups",
+  "version": "0.1.0",
+  "status": "poc",
+  "description": "Human-in-the-loop social engagement FoundUp with ranked opportunity queues, approval-first reply drafting, and execution/amplification lanes.",
+  "surfaces": {
+    "review": "discord_or_telegram",
+    "execution": "local_browser_automation",
+    "future_operator_ui": "browser_sidecar"
+  },
+  "wsp_compliance": [
+    "WSP 3",
+    "WSP 11",
+    "WSP 15",
+    "WSP 22",
+    "WSP 42",
+    "WSP 50",
+    "WSP 73",
+    "WSP 77",
+    "WSP 84",
+    "WSP 91"
+  ],
+  "integration_points": {
+    "control_plane": "modules/communication/moltbot_bridge/src/openclaw_dae.py",
+    "feed_scan": "modules/infrastructure/browser_actions/src/linkedin_actions.py",
+    "drafting": "modules/ai_intelligence/digital_twin/src/comment_drafter.py",
+    "execution": "modules/platform_integration/linkedin_agent/docs/LINKEDIN_DIGITAL_TWIN_FLOW.md",
+    "target_memory": "modules/platform_integration/linkedin_agent/src/content/publishing_router.py"
+  }
+}
