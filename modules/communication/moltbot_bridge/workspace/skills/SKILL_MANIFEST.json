@@ -26,6 +26,10 @@
       "sha256": "bac625d8493417105693111af19ca3a2f3550bd8c250d53121daedf08a0d99f1"
     },
     {
+      "path": "openclaw-grants/SKILL.md",
+      "sha256": "c43c2e87370b8bf95b84fb0a42780e274188c0f0f1c0df5974fe6a29b167b7f1"
+    },
+    {
       "path": "pqn-research/SKILL.md",
       "sha256": "9b6987f1474840524e6935cee735c87c42360a8b04c2edf436ad06211645f10c"
     }

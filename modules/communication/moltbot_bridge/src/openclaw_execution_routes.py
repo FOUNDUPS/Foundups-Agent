@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger("openclaw_dae")
 
@@ -138,18 +138,26 @@ async def execute_command(dae: Any, intent: Any) -> str:
         )
         return command_advisory_fallback(dae, intent)
 
+    command_context = _build_wre_command_context(dae, intent)
     try:
-        result = dae.wre.execute(
-            {
-                "type": "orchestration",
-                "task": intent.extracted_task,
-                "source": "openclaw_dae",
-                "sender": intent.sender,
-                "channel": intent.channel,
-                "target_files": dae._extract_file_paths(intent.raw_message),
-            }
-        )
-        return f"Command executed via WRE:\n{result}"
+        execute_skill = getattr(dae.wre, "execute_skill", None)
+        if callable(execute_skill):
+            skill_name, skill_agent, selection_metadata = _resolve_wre_skill_execution(
+                dae, intent, command_context
+            )
+            if skill_name:
+                skill_context = dict(command_context)
+                if selection_metadata:
+                    skill_context["skill_selection"] = selection_metadata
+                result = execute_skill(
+                    skill_name=skill_name,
+                    agent=skill_agent,
+                    input_context=skill_context,
+                )
+                return _format_wre_command_result(result, skill_name=skill_name)
+
+        result = dae.wre.execute(command_context)
+        return _format_wre_command_result(result)
     except Exception as exc:
         logger.error("[OPENCLAW-DAE] Command execution error: %s", exc)
         logger.warning(
@@ -163,6 +171,152 @@ async def execute_command(dae: Any, intent: Any) -> str:
             details={"reason": "wre_error", "error": str(exc)[:200]},
         )
         return command_advisory_fallback(dae, intent, error=str(exc))
+
+
+def _build_wre_command_context(dae: Any, intent: Any) -> Dict[str, Any]:
+    """Normalize OpenClaw COMMAND context for WRE entry points."""
+    return {
+        "type": "orchestration",
+        "task": intent.extracted_task or intent.raw_message,
+        "command": intent.raw_message,
+        "source": "openclaw_dae",
+        "sender": intent.sender,
+        "channel": intent.channel,
+        "target_files": dae._extract_file_paths(intent.raw_message),
+    }
+
+
+def _resolve_wre_skill_execution(
+    dae: Any,
+    intent: Any,
+    command_context: Dict[str, Any],
+) -> tuple[Optional[str], str, Dict[str, Any]]:
+    """
+    Pick the best existing WRE skill for an OpenClaw COMMAND.
+
+    Prefer natural-language candidate discovery, bias git requests toward the
+    existing `qwen_gitpush` skill, and fall back to `openclaw_executor` as the
+    generic command bridge when no domain-specific match exists.
+    """
+    wre = dae.wre
+    loader = getattr(wre, "skills_loader", None)
+    task_text = command_context.get("task", "") or ""
+
+    candidates = []
+    find_candidates = getattr(wre, "find_skill_candidates", None)
+    if callable(find_candidates):
+        try:
+            candidates = list(find_candidates(task_text) or [])
+        except Exception as exc:
+            logger.warning("[OPENCLAW-DAE] Skill discovery failed for '%s': %s", task_text, exc)
+
+    if _looks_like_git_command(task_text) and _loader_has_skill(loader, "qwen_gitpush"):
+        candidates.insert(0, "qwen_gitpush")
+
+    if not candidates and _loader_has_skill(loader, "openclaw_executor"):
+        candidates.append("openclaw_executor")
+
+    candidates = _dedupe_skills(candidates)
+    if not candidates:
+        return None, "qwen", {}
+
+    selected_skill = candidates[0]
+    selection_metadata: Dict[str, Any] = {}
+    select_skill_tot = getattr(wre, "select_skill_tot", None)
+    if callable(select_skill_tot) and len(candidates) > 1:
+        try:
+            selected_skill, selection_metadata = select_skill_tot(candidates, command_context)
+        except Exception as exc:
+            logger.warning("[OPENCLAW-DAE] ToT skill selection failed: %s", exc)
+
+    return selected_skill, _resolve_skill_agent(loader, selected_skill), selection_metadata
+
+
+def _loader_has_skill(loader: Any, skill_name: str) -> bool:
+    """Duck-typed skill existence check for real loaders and test doubles."""
+    if loader is None:
+        return False
+
+    has_skill = getattr(loader, "has_skill", None)
+    if callable(has_skill):
+        try:
+            result = has_skill(skill_name)
+            if isinstance(result, bool):
+                return result
+        except Exception:
+            pass
+
+    registry = getattr(loader, "registry", {}) or {}
+    skills = registry.get("skills", {}) if isinstance(registry, dict) else {}
+    return isinstance(skills, dict) and skill_name in skills
+
+
+def _resolve_skill_agent(loader: Any, skill_name: str) -> str:
+    """Choose the preferred execution agent for a registered skill."""
+    if loader is None:
+        return "qwen"
+
+    registry = getattr(loader, "registry", {}) or {}
+    skills = registry.get("skills", {}) if isinstance(registry, dict) else {}
+    skill_info = skills.get(skill_name, {}) if isinstance(skills, dict) else {}
+
+    agents = skill_info.get("agents") or []
+    primary_agent = skill_info.get("primary_agent")
+    fallback_agent = skill_info.get("fallback_agent")
+
+    for candidate in ("qwen", "gemma", "grok", "ui-tars"):
+        if candidate == primary_agent or candidate in agents:
+            return candidate
+
+    if primary_agent:
+        return str(primary_agent)
+    if fallback_agent:
+        return str(fallback_agent)
+    if agents:
+        return str(agents[0])
+    return "qwen"
+
+
+def _looks_like_git_command(task_text: str) -> bool:
+    """Detect git-oriented autonomous development requests."""
+    lowered = (task_text or "").lower()
+    return bool(
+        re.search(
+            r"\b(git|commit|push|branch|merge|rebase|stash|diff|pull request)\b",
+            lowered,
+        )
+    )
+
+
+def _dedupe_skills(skill_names: list[str]) -> list[str]:
+    """Preserve candidate order while removing duplicates and blanks."""
+    seen = set()
+    ordered = []
+    for skill_name in skill_names:
+        if not skill_name or skill_name in seen:
+            continue
+        seen.add(skill_name)
+        ordered.append(skill_name)
+    return ordered
+
+
+def _format_wre_command_result(result: Any, skill_name: Optional[str] = None) -> str:
+    """Render WRE execution results for OpenClaw channel responses."""
+    prefix = "Command executed via WRE"
+    if skill_name:
+        prefix = f"Command executed via WRE skill `{skill_name}`"
+
+    if isinstance(result, dict):
+        output = result.get("output")
+        if output in (None, ""):
+            output = result.get("reason") or result.get("error")
+        if output in (None, ""):
+            output = json.dumps(result, indent=2, ensure_ascii=False, default=str)
+        elif not isinstance(output, str):
+            output = json.dumps(output, indent=2, ensure_ascii=False, default=str)
+        return f"{prefix}:\n{output}"
+
+    return f"{prefix}:\n{result}"
 
 
 async def try_execute_follow_wsp(dae: Any, intent: Any) -> Optional[str]:
