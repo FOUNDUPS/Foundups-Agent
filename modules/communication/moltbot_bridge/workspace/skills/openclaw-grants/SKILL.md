@@ -33,6 +33,8 @@ For grant work that means:
 - `docs/external_research/WEB3_GRANTS_0102_SHORTLIST_2026-03-21.md`
 - `docs/external_research/0102_GRANT_PACKET_MASTER_2026-03-22.md`
 - `modules/communication/moltbot_bridge/workspace/reports/web3_grants_0102_target_sheet_20260321.json`
+- `modules/communication/moltbot_bridge/workspace/reports/web3_grants_0102_wsp97_rescored_20260322.json`
+- `modules/communication/moltbot_bridge/workspace/reports/web3_grants_0102_watchlist.json`
 
 ## Use Cases
 
@@ -42,12 +44,19 @@ For grant work that means:
 cd O:/Foundups-Agent && python -c "
 import json
 from pathlib import Path
-path = Path('modules/communication/moltbot_bridge/workspace/reports/web3_grants_0102_target_sheet_20260321.json')
+path = Path('modules/communication/moltbot_bridge/workspace/reports/web3_grants_0102_wsp97_rescored_20260322.json')
 data = json.loads(path.read_text(encoding='utf-8'))
-items = sorted(data['items'], key=lambda x: x['priority_rank'])
-for item in items[:10]:
-    print(f\"{item['priority_rank']:>2}  {item['name']}  [{item['status']}]  {item['wsp15_mps']['priority']}:{item['wsp15_mps']['total']}\")
+for group_name, items in data['priority_groups'].items():
+    print(f'\\n[{group_name}]')
+    for item in items:
+        print(f\"- {item['name']} :: {item['repo_blockchain_fit']}\")
 "
+```
+
+### Refresh the official-source watchlist
+
+```bash
+cd O:/Foundups-Agent && python scripts/refresh_grant_watchlist.py
 ```
 
 ### Run OpenClaw on a grant task
@@ -85,10 +94,12 @@ print(result)
 ## Execution Rules
 
 - Use existing modules before inventing new ones
-- Read the target sheet before picking a grant
+- Read the WSP 97 rescored sheet before picking a grant
 - Start with `apply_now` items
+- Prefer grants that match implemented or near-term repo capability
 - Tailor to the target ecosystem instead of reusing a generic answer
 - Prefer repo evidence and architecture references over slogans
+- Refresh the watchlist before making a new application push
 - Record new findings in workspace memory or HoloIndex PatternMemory
 
 ## Human-Only Gates
