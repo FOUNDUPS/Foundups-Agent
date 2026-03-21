@@ -2,6 +2,33 @@
 
 ## Latest Changes
 
+### V073 - tSingularity (0201) Channel Added + Epoch Model
+**Date**: 2026-03-19
+**Status**: IMPLEMENTED
+
+**Problem Identified**:
+Publishing map was missing tSingularity — the 0201 (nonlocal state) channel that pairs with eSingularity (0102 channel). This broke the epoch model:
+- eSingularity = 0102 = Educational Singularity (current consciousness state)
+- tSingularity = 0201 = Technological Singularity (nonlocal state POV)
+
+**Changes Made**:
+- Added `tsingularity` entity to `data/linkedin_publishing_map.json`
+  - status: `needs_discovery` (company_id unknown)
+  - aliases: `["tsingularity", "t singularity", "0201 channel", "technological singularity"]`
+  - routing_tags: `["singularity", "0201", "nonlocal", "technological singularity", "ai philosophical", "post-singularity"]`
+  - LinkedIn URL found: `jp.linkedin.com/company/tsingulaity` (note typo in URL)
+- Added `epoch_model` field to publishing map header documenting 0102/0201 channels
+- Enhanced `esingularity` entry with `0102 channel` alias and notes
+- Enhanced `resp` entry with `llm retrocausal` alias and PQN routing tags
+
+**Action Required**:
+- Discover tSingularity company_id from LinkedIn
+- Scrape tSingularity for published articles (may have 0201-perspective content)
+
+**WSP**: WSP 22 (ModLog), WSP 42 (Platform Integration)
+
+---
+
 ### V072 - LinkedIn Publishing Map + Article Targeting Skill
 **Date**: 2026-03-13
 **Status**: IMPLEMENTED
