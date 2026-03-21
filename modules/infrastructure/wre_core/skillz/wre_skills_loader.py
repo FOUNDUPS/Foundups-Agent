@@ -72,6 +72,53 @@ class WRESkillsLoader:
         with open(self.registry_path, 'r', encoding='utf-8') as f:
             return json.load(f)
 
+    def list_skills(
+        self,
+        agent_type: Optional[str] = None,
+        promotion_state: Optional[str] = None,
+        domain: Optional[str] = None,
+    ) -> List[str]:
+        """
+        Return registered skill names with optional lightweight filtering.
+
+        This is a metadata-only operation intended for routing and candidate
+        selection. It should not force-load any SKILLz.md content.
+        """
+        skills = self.registry.get("skills", {})
+        if not isinstance(skills, dict):
+            return []
+
+        names: List[str] = []
+        for skill_name, skill_info in skills.items():
+            if not isinstance(skill_info, dict):
+                continue
+
+            if agent_type:
+                agents = skill_info.get("agents") or []
+                primary_agent = skill_info.get("primary_agent")
+                fallback_agent = skill_info.get("fallback_agent")
+                if (
+                    agent_type not in agents
+                    and agent_type != primary_agent
+                    and agent_type != fallback_agent
+                ):
+                    continue
+
+            if promotion_state and skill_info.get("promotion_state") != promotion_state:
+                continue
+
+            if domain and skill_info.get("domain") != domain:
+                continue
+
+            names.append(skill_name)
+
+        return sorted(names)
+
+    def has_skill(self, skill_name: str) -> bool:
+        """Return True when the registry contains the named skill."""
+        skills = self.registry.get("skills", {})
+        return isinstance(skills, dict) and skill_name in skills
+
     def discover_skills(
         self,
         agent_type: Optional[str] = None,
@@ -103,15 +150,9 @@ class WRESkillsLoader:
             if promotion_state and skill_info.get("promotion_state") != promotion_state:
                 continue
 
-            # Load SKILLz.md (preferred) or SKILL.md (legacy fallback)
-            skill_path = self.repo_root / skill_info["location"] / "SKILLz.md"
-            if not skill_path.exists():
-                skill_path = self.repo_root / skill_info["location"] / "SKILL.md"
-            if not skill_path.exists():
-                logger.warning(f"[WRE-LOADER] Skill file not found: {skill_path}")
-                continue
-
+            skill_path: Optional[Path] = None
             try:
+                skill_path = self.resolve_skill_file(skill_name)
                 metadata = self._extract_metadata(skill_path)
                 discovered_skills.append(SkillMetadata(
                     name=skill_name,
@@ -123,7 +164,11 @@ class WRESkillsLoader:
                     pattern_fidelity_threshold=metadata.get("pattern_fidelity_threshold", 0.90)
                 ))
             except Exception as e:
-                logger.error(f"[WRE-LOADER] Failed to extract metadata from {skill_path}: {e}")
+                logger.error(
+                    "[WRE-LOADER] Failed to extract metadata from %s: %s",
+                    skill_path or skill_name,
+                    e,
+                )
 
         logger.info(f"[WRE-LOADER] Discovered {len(discovered_skills)} skills (agent={agent_type}, intent={intent_type}, state={promotion_state})")
         return discovered_skills
@@ -188,16 +233,68 @@ class WRESkillsLoader:
         if not skill_info:
             raise ValueError(f"Skill not found in registry: {skill_name}")
 
-        base_dir = self.repo_root / skill_info["location"]
-        preferred = base_dir / "SKILLz.md"
-        legacy = base_dir / "SKILL.md"
-        if preferred.exists():
-            return preferred
-        if legacy.exists():
-            return legacy
+        candidates = self._candidate_skill_files(skill_name, skill_info)
+        for candidate in candidates:
+            if candidate.exists():
+                return candidate
+
         raise FileNotFoundError(
-            f"Skill file not found for {skill_name}: {preferred} or {legacy}"
+            f"Skill file not found for {skill_name}: "
+            + ", ".join(str(candidate) for candidate in candidates[:6])
         )
+
+    def _candidate_skill_files(
+        self,
+        skill_name: str,
+        skill_info: Optional[Dict[str, Any]] = None,
+    ) -> List[Path]:
+        """
+        Build candidate SKILL file paths for a registry entry.
+
+        Some registry locations still point at legacy `skills/` directories while
+        the real implementation now lives in `skillz/`. Prefer the configured
+        location first, then scan common in-repo skill locations as a wiring
+        fallback instead of silently degrading to synthetic prompt content.
+        """
+        candidates: List[Path] = []
+        seen: set[str] = set()
+
+        def _append(path: Path) -> None:
+            path_str = str(path)
+            if path_str not in seen:
+                seen.add(path_str)
+                candidates.append(path)
+
+        if skill_info:
+            configured = Path(str(skill_info["location"]))
+            if not configured.is_absolute():
+                configured = self.repo_root / configured
+            _append(configured / "SKILLz.md")
+            _append(configured / "SKILL.md")
+
+            configured_str = str(configured)
+            if "\\skills\\" in configured_str or "/skills/" in configured_str:
+                alt_dir = Path(
+                    configured_str.replace("\\skills\\", "\\skillz\\").replace("/skills/", "/skillz/")
+                )
+                _append(alt_dir / "SKILLz.md")
+                _append(alt_dir / "SKILL.md")
+
+        search_patterns = [
+            f"modules/*/*/skillz/{skill_name}/SKILLz.md",
+            f"modules/*/*/skillz/{skill_name}/SKILL.md",
+            f"modules/*/*/skills/{skill_name}/SKILLz.md",
+            f"modules/*/*/skills/{skill_name}/SKILL.md",
+            f".claude/skills/{skill_name}/SKILLz.md",
+            f".claude/skills/{skill_name}/SKILL.md",
+            f"holo_index/skills/{skill_name}/SKILLz.md",
+            f"holo_index/skills/{skill_name}/SKILL.md",
+        ]
+        for pattern in search_patterns:
+            for match in self.repo_root.glob(pattern):
+                _append(match)
+
+        return candidates
 
     def inject_skill_into_prompt(
         self,

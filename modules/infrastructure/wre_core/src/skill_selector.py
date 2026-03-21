@@ -15,6 +15,7 @@ WSP References: WSP 46, WSP 48, WSP 77
 """
 
 import logging
+import re
 from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
 from dataclasses import dataclass, field
 
@@ -176,9 +177,22 @@ class SkillSelector:
             if isinstance(kw_val, list):
                 keywords.extend(kw_val)
             elif isinstance(kw_val, str):
-                keywords.extend(kw_val.split())
+                keywords.extend(self._tokenize_text(kw_val))
 
-        return [k.lower() for k in keywords if len(k) > 2]
+        normalized = []
+        for keyword in keywords:
+            normalized.extend(self._tokenize_text(str(keyword)))
+
+        return normalized
+
+    @staticmethod
+    def _tokenize_text(text: str) -> List[str]:
+        """Tokenize natural language and snake/kebab case into search terms."""
+        return [
+            token
+            for token in re.findall(r"[a-z0-9]+", text.lower().replace("_", " ").replace("-", " "))
+            if len(token) > 2
+        ]
 
     def _calculate_confidence(
         self,
@@ -267,18 +281,41 @@ class SkillSelector:
         if not all_skills:
             return []
 
-        # Match skills by intent keywords
-        intent_lower = intent.lower()
-        intent_parts = intent_lower.replace('-', '_').split('_')
+        registry = getattr(self.skills_loader, "registry", {}) or {}
+        registry_skills = registry.get("skills", {}) if isinstance(registry, dict) else {}
+        intent_tokens = self._tokenize_text(intent)
+        if not intent_tokens:
+            return []
 
-        candidates = []
+        ranked_candidates = []
         for skill in all_skills:
-            skill_lower = skill.lower()
-            # Check if any intent keyword appears in skill name
-            if any(part in skill_lower for part in intent_parts if len(part) > 2):
-                candidates.append(skill)
+            skill_info = registry_skills.get(skill, {}) if isinstance(registry_skills, dict) else {}
+            searchable_parts = [
+                skill,
+                str(skill_info.get("description", "")),
+                str(skill_info.get("domain", "")),
+                str(skill_info.get("intent_type", "")),
+                str(skill_info.get("location", "")),
+            ]
+            searchable_text = " ".join(part for part in searchable_parts if part).lower()
+            searchable_tokens = set(self._tokenize_text(searchable_text))
+            if not searchable_tokens:
+                continue
 
-        return candidates[:10]  # Limit to top 10 matches
+            score = 0.0
+            for token in intent_tokens:
+                if token in searchable_tokens:
+                    score += 1.0
+                elif token in skill.lower():
+                    score += 0.75
+                elif token in searchable_text:
+                    score += 0.5
+
+            if score > 0:
+                ranked_candidates.append((score, skill))
+
+        ranked_candidates.sort(key=lambda item: (-item[0], item[1]))
+        return [skill for _, skill in ranked_candidates[:10]]
 
 
 # Convenience function for quick selection

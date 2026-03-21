@@ -17,6 +17,7 @@ sys.path.insert(0, str(repo_root))
 
 from modules.infrastructure.wre_core.src.libido_monitor import GemmaLibidoMonitor
 from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
+from modules.infrastructure.wre_core.src.skill_selector import SkillSelector
 from modules.infrastructure.wre_core.skillz.wre_skills_loader import WRESkillsLoader
 
 
@@ -126,6 +127,28 @@ def test_execute_skill_with_qwen_mock():
     print("  - llama-cpp-python installed")
     print("  - LOCAL_MODEL_CODE_DIR or LOCAL_MODEL_CODE_PATH set (qwen-coder-7b default)")
     print("  - Graceful fallback implemented if unavailable")
+
+
+def test_resolve_skill_file_falls_back_to_skillz_directory():
+    """Registry path drift: resolve_skill_file() still finds the real skill file."""
+    skills_loader = WRESkillsLoader()
+
+    skill_path = skills_loader.resolve_skill_file("qwen_gitpush")
+
+    assert skill_path.exists()
+    assert skill_path.name == "SKILLz.md"
+    assert "git_push_dae" in str(skill_path)
+    assert "skillz" in str(skill_path).lower()
+
+
+def test_skill_selector_matches_natural_language_git_intent():
+    """Natural-language commands should discover qwen_gitpush candidates."""
+    skills_loader = WRESkillsLoader()
+    selector = SkillSelector(skills_loader=skills_loader)
+
+    candidates = selector.find_candidates_for_intent("git commit and push changes")
+
+    assert "qwen_gitpush" in candidates
 
 
 if __name__ == "__main__":
