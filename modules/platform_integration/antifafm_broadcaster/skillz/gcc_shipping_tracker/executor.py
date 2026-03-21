@@ -96,10 +96,19 @@ body {
 import base64
 COMING_SOON_DATA_URI = "data:text/html;base64," + base64.b64encode(COMING_SOON_HTML.encode()).decode()
 
-# MarineTraffic URLs for GCC region
+# Shipping tracker URLs for GCC region
+# NOTE: VesselFinder preferred - no cookie consent popup, cleaner embed
+# MarineTraffic has cookie consent dialog that blocks the view
+
+# VesselFinder URLs (PREFERRED - no cookie popup)
+# type=8 = Tankers only (critical for oil transit monitoring)
+VESSELFINDER_HORMUZ = "https://www.vesselfinder.com/map#11/26.4/56.3/type=8"
+VESSELFINDER_GULF = "https://www.vesselfinder.com/map#7/26.0/51.5/type=8"
+VESSELFINDER_TANKERS = "https://www.vesselfinder.com/map#8/26.5/55.0/type=8"
+
+# MarineTraffic URLs (BACKUP - has cookie popup issues)
 MARINETRAFFIC_HORMUZ = "https://www.marinetraffic.com/en/ais/home/centerx/56.3/centery/26.5/zoom/8"
 MARINETRAFFIC_GULF = "https://www.marinetraffic.com/en/ais/home/centerx/51.5/centery/26.0/zoom/6"
-VESSELFINDER_HORMUZ = "https://www.vesselfinder.com/?imo=0&mmsi=0&type=0&area=strait-of-hormuz"
 
 
 # Hormuz region bounding box (approximate)
@@ -146,22 +155,24 @@ async def fetch_ais_summary() -> Dict[str, Any]:
         "bounds": HORMUZ_BOUNDS,
         "status": "live_map_available",
         "map_urls": {
-            "marinetraffic": MARINETRAFFIC_HORMUZ,
-            "vesselfinder": VESSELFINDER_HORMUZ,
+            "vesselfinder_hormuz": VESSELFINDER_HORMUZ,
+            "vesselfinder_gulf": VESSELFINDER_GULF,
+            "vesselfinder_tankers": VESSELFINDER_TANKERS,
         },
-        "note": "For real-time vessel counts, open map URL or configure API key"
+        "note": "VesselFinder type=8 filters for tankers only (oil transit)"
     }
 
 
-def open_live_map(source: str = "marinetraffic") -> Dict[str, Any]:
+def open_live_map(source: str = "vesselfinder") -> Dict[str, Any]:
     """Open live shipping map in default browser."""
     urls = {
-        "marinetraffic": MARINETRAFFIC_HORMUZ,
         "vesselfinder": VESSELFINDER_HORMUZ,
-        "gulf": MARINETRAFFIC_GULF,
+        "gulf": VESSELFINDER_GULF,
+        "tankers": VESSELFINDER_TANKERS,
+        "marinetraffic": MARINETRAFFIC_HORMUZ,  # backup
     }
 
-    url = urls.get(source, MARINETRAFFIC_HORMUZ)
+    url = urls.get(source, VESSELFINDER_HORMUZ)
     webbrowser.open(url)
 
     return {
@@ -174,8 +185,8 @@ def open_live_map(source: str = "marinetraffic") -> Dict[str, Any]:
 
 def get_tanker_focus_url() -> str:
     """Get URL filtered for tankers only."""
-    # MarineTraffic ship type filter: 80-89 = Tankers
-    return f"{MARINETRAFFIC_HORMUZ}/shiptype:80,81,82,83,84,85,86,87,88,89"
+    # VesselFinder type=8 = Tankers (cleaner, no cookie popup)
+    return VESSELFINDER_TANKERS
 
 
 async def check_alerts() -> List[Dict[str, Any]]:
@@ -375,11 +386,11 @@ async def rotation_daemon(standalone: bool = True):
     logger.info("[GCC-DAEMON] Starting GCC schema (2-min view rotation)")
     logger.info(f"[GCC-DAEMON] Schema duration: {SCHEMA_DURATION_SEC}s, View interval: {VIEW_INTERVAL_SEC}s")
 
-    # Rotation views
+    # Rotation views - VesselFinder preferred (no cookie popup, ships not planes)
     views = [
-        ("hormuz", MARINETRAFFIC_HORMUZ),
-        ("gulf", MARINETRAFFIC_GULF),
-        ("tankers", get_tanker_focus_url()),
+        ("hormuz_tankers", VESSELFINDER_HORMUZ),
+        ("gulf_tankers", VESSELFINDER_GULF),
+        ("all_tankers", VESSELFINDER_TANKERS),
     ]
     view_index = 0
     cycle_count = 0

@@ -6,3 +6,245 @@
 {"timestamp": "2026-03-14T22:38:02.192360+00:00", "event": "rotation_started", "schemas": ["gcc", "video", "news", "chess", "checkers", "cams", "karaoke"], "duration_sec": 600}
 {"timestamp": "2026-03-15T23:04:26.942836+00:00", "event": "rotation_started", "schemas": ["gcc", "video", "news", "chess", "checkers", "cams", "karaoke"], "duration_sec": 600}
 {"timestamp": "2026-03-16T22:32:01.822885+00:00", "event": "rotation_started", "schemas": ["gcc", "video", "news", "chess", "checkers", "cams", "karaoke"], "duration_sec": 600}
+{"timestamp": "2026-03-18T08:36:27.882796+00:00", "event": "rotation_started", "schemas": ["gcc", "video", "news"], "duration_sec": 600}
+{"timestamp": "2026-03-18T23:06:04.743133+00:00", "event": "rotation_started", "schemas": ["gcc", "video", "news"], "duration_sec": 600}
+{"timestamp": "2026-03-18T23:06:04.858670+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-18T23:16:06.497034+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 601.639893, "success": true}
+{"timestamp": "2026-03-18T23:16:06.503686+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-18T23:16:06.818098+00:00", "event": "fallback_shown", "schema_id": "video", "reason": "not_implemented"}
+{"timestamp": "2026-03-18T23:26:06.828700+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.326537, "success": true, "fallback": true}
+{"timestamp": "2026-03-18T23:26:06.835313+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-18T23:26:07.007869+00:00", "event": "fallback_shown", "schema_id": "news", "reason": "not_implemented"}
+{"timestamp": "2026-03-18T23:36:07.031947+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.198682, "success": true, "fallback": true}
+{"timestamp": "2026-03-18T23:36:07.033106+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-18T23:46:07.750299+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.717193, "success": true}
+{"timestamp": "2026-03-18T23:46:07.751813+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-18T23:46:07.873416+00:00", "event": "fallback_shown", "schema_id": "video", "reason": "not_implemented"}
+{"timestamp": "2026-03-18T23:56:07.882897+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.130075, "success": true, "fallback": true}
+{"timestamp": "2026-03-18T23:56:07.909040+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-18T23:56:08.154762+00:00", "event": "fallback_shown", "schema_id": "news", "reason": "not_implemented"}
+{"timestamp": "2026-03-19T00:06:08.175963+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.278618, "success": true, "fallback": true}
+{"timestamp": "2026-03-19T00:06:08.178214+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-19T00:16:08.703944+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.526738, "success": true}
+{"timestamp": "2026-03-19T00:16:08.704466+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-19T00:16:08.923697+00:00", "event": "fallback_shown", "schema_id": "video", "reason": "not_implemented"}
+{"timestamp": "2026-03-19T00:26:08.930759+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.226293, "success": true, "fallback": true}
+{"timestamp": "2026-03-19T00:26:08.933426+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-19T00:26:09.042115+00:00", "event": "fallback_shown", "schema_id": "news", "reason": "not_implemented"}
+{"timestamp": "2026-03-19T00:36:09.048683+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.115777, "success": true, "fallback": true}
+{"timestamp": "2026-03-19T00:36:09.051728+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-19T00:46:09.523403+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.471673, "success": true}
+{"timestamp": "2026-03-19T00:46:09.524926+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-19T00:46:09.648349+00:00", "event": "fallback_shown", "schema_id": "video", "reason": "not_implemented"}
+{"timestamp": "2026-03-19T00:56:09.667885+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.143472, "success": true, "fallback": true}
+{"timestamp": "2026-03-19T00:56:09.669509+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-19T00:56:09.772505+00:00", "event": "fallback_shown", "schema_id": "news", "reason": "not_implemented"}
+{"timestamp": "2026-03-19T01:06:09.788097+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.11793, "success": true, "fallback": true}
+{"timestamp": "2026-03-19T01:06:09.790135+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-19T01:16:10.260156+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.470012, "success": true}
+{"timestamp": "2026-03-19T01:16:10.261163+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-19T01:16:10.401357+00:00", "event": "fallback_shown", "schema_id": "video", "reason": "not_implemented"}
+{"timestamp": "2026-03-19T01:26:10.415774+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.153953, "success": true, "fallback": true}
+{"timestamp": "2026-03-19T01:26:10.418030+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-19T01:26:10.575330+00:00", "event": "fallback_shown", "schema_id": "news", "reason": "not_implemented"}
+{"timestamp": "2026-03-19T01:36:10.588338+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.171357, "success": true, "fallback": true}
+{"timestamp": "2026-03-19T01:36:10.590592+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-19T01:46:12.397904+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 601.808322, "success": true}
+{"timestamp": "2026-03-19T01:46:12.400432+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-19T01:46:53.241883+00:00", "event": "fallback_shown", "schema_id": "video", "reason": "not_implemented"}
+{"timestamp": "2026-03-20T06:41:15.650875+00:00", "event": "rotation_started", "schemas": ["gcc", "video", "news"], "duration_sec": 600}
+{"timestamp": "2026-03-20T06:41:15.659820+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T06:51:15.988384+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.327552, "success": true}
+{"timestamp": "2026-03-20T06:51:15.988893+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T07:01:16.033542+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.044649, "success": true}
+{"timestamp": "2026-03-20T07:01:16.035175+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T07:11:16.126072+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.091415, "success": true}
+{"timestamp": "2026-03-20T07:11:16.127673+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T07:21:16.480947+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.354875, "success": true}
+{"timestamp": "2026-03-20T07:21:16.482474+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T07:31:16.522851+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.041388, "success": true}
+{"timestamp": "2026-03-20T07:31:16.524218+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T07:41:16.565167+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.040949, "success": true}
+{"timestamp": "2026-03-20T07:41:16.566821+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T07:51:16.938861+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.373694, "success": true}
+{"timestamp": "2026-03-20T07:51:16.939876+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T08:01:16.978078+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.038202, "success": true}
+{"timestamp": "2026-03-20T08:01:16.979205+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T08:11:17.024017+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.044128, "success": true}
+{"timestamp": "2026-03-20T08:11:17.025585+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T08:21:17.407279+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.382211, "success": true}
+{"timestamp": "2026-03-20T08:21:17.408289+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T08:31:17.450347+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.042424, "success": true}
+{"timestamp": "2026-03-20T08:31:17.450866+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T08:41:17.485955+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.035089, "success": true}
+{"timestamp": "2026-03-20T08:41:17.487469+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T08:51:17.896656+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.409185, "success": true}
+{"timestamp": "2026-03-20T08:51:17.897162+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T09:01:17.940826+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.043664, "success": true}
+{"timestamp": "2026-03-20T09:01:17.940826+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T09:11:18.001602+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.060265, "success": true}
+{"timestamp": "2026-03-20T09:11:18.002636+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T09:21:18.349628+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.346994, "success": true}
+{"timestamp": "2026-03-20T09:21:18.350662+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T09:31:18.383020+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.032879, "success": true}
+{"timestamp": "2026-03-20T09:31:18.384670+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T09:41:18.417192+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.034172, "success": true}
+{"timestamp": "2026-03-20T09:41:18.418703+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T09:51:18.782484+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.363766, "success": true}
+{"timestamp": "2026-03-20T09:51:18.782484+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T10:01:18.824189+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.041705, "success": true}
+{"timestamp": "2026-03-20T10:01:18.825836+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T10:11:18.862963+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.038774, "success": true}
+{"timestamp": "2026-03-20T10:11:18.864570+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T10:21:19.179093+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.314523, "success": true}
+{"timestamp": "2026-03-20T10:21:19.180683+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T10:31:19.214437+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.033754, "success": true}
+{"timestamp": "2026-03-20T10:31:19.216076+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T10:41:19.259689+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.04465, "success": true}
+{"timestamp": "2026-03-20T10:41:19.261214+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T10:51:19.644994+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.384789, "success": true}
+{"timestamp": "2026-03-20T10:51:19.647621+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T11:01:19.706308+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.059206, "success": true}
+{"timestamp": "2026-03-20T11:01:19.706308+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T11:11:19.749616+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.042802, "success": true}
+{"timestamp": "2026-03-20T11:11:19.751134+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T11:21:20.170774+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.421158, "success": true}
+{"timestamp": "2026-03-20T11:21:20.172379+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T11:31:20.221828+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.049449, "success": true}
+{"timestamp": "2026-03-20T11:31:20.222966+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T11:41:20.258166+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.0352, "success": true}
+{"timestamp": "2026-03-20T11:41:20.258672+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T11:51:20.605367+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.346695, "success": true}
+{"timestamp": "2026-03-20T11:51:20.606424+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T12:01:20.651702+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.045791, "success": true}
+{"timestamp": "2026-03-20T12:01:20.653285+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T12:11:20.703891+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.052189, "success": true}
+{"timestamp": "2026-03-20T12:11:20.705019+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T12:21:21.029321+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.324302, "success": true}
+{"timestamp": "2026-03-20T12:21:21.030936+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T12:31:21.071093+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.040157, "success": true}
+{"timestamp": "2026-03-20T12:31:21.072469+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T12:41:21.112396+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.040442, "success": true}
+{"timestamp": "2026-03-20T12:41:21.112396+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T12:51:21.464481+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.352085, "success": true}
+{"timestamp": "2026-03-20T12:51:21.464997+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T13:01:21.500095+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.034593, "success": true}
+{"timestamp": "2026-03-20T13:01:21.501101+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T13:11:21.540877+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.040782, "success": true}
+{"timestamp": "2026-03-20T13:11:21.542509+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T13:21:21.918160+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.375651, "success": true}
+{"timestamp": "2026-03-20T13:21:21.919679+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T13:31:21.966070+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.04791, "success": true}
+{"timestamp": "2026-03-20T13:31:21.967230+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T13:41:22.002698+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.035468, "success": true}
+{"timestamp": "2026-03-20T13:41:22.002698+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T13:51:22.385880+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.383182, "success": true}
+{"timestamp": "2026-03-20T13:51:22.387522+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T14:01:22.420233+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.032711, "success": true}
+{"timestamp": "2026-03-20T14:01:22.421836+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T14:11:22.484746+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.06291, "success": true}
+{"timestamp": "2026-03-20T14:11:22.486261+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T14:21:22.829298+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.343037, "success": true}
+{"timestamp": "2026-03-20T14:21:22.829810+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T14:31:22.861963+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.031562, "success": true}
+{"timestamp": "2026-03-20T14:31:22.862480+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T14:41:22.894697+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.032217, "success": true}
+{"timestamp": "2026-03-20T14:41:22.896730+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T14:51:23.305533+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.40932, "success": true}
+{"timestamp": "2026-03-20T14:51:23.308578+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T15:01:23.561400+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.25333, "success": true}
+{"timestamp": "2026-03-20T15:01:23.562617+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T15:11:23.604995+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.041774, "success": true}
+{"timestamp": "2026-03-20T15:11:23.606548+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T15:21:23.922505+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.316478, "success": true}
+{"timestamp": "2026-03-20T15:21:23.923019+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T15:31:23.954250+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.031231, "success": true}
+{"timestamp": "2026-03-20T15:31:23.955836+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T15:41:23.998392+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.044142, "success": true}
+{"timestamp": "2026-03-20T15:41:23.999502+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T15:51:24.362864+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.363362, "success": true}
+{"timestamp": "2026-03-20T15:51:24.364435+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T16:01:24.392412+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.027977, "success": true}
+{"timestamp": "2026-03-20T16:01:24.393717+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T16:11:24.432357+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.03864, "success": true}
+{"timestamp": "2026-03-20T16:11:24.433888+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T16:21:24.765234+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.331851, "success": true}
+{"timestamp": "2026-03-20T16:21:24.766812+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T16:31:24.814506+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.049272, "success": true}
+{"timestamp": "2026-03-20T16:31:24.815823+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T16:41:24.863289+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.048783, "success": true}
+{"timestamp": "2026-03-20T16:41:24.864860+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T16:51:25.263077+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.399788, "success": true}
+{"timestamp": "2026-03-20T16:51:25.263595+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T17:01:25.305918+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.042323, "success": true}
+{"timestamp": "2026-03-20T17:01:25.307028+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T17:11:25.351715+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.044687, "success": true}
+{"timestamp": "2026-03-20T17:11:25.352841+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T17:21:25.730142+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.377301, "success": true}
+{"timestamp": "2026-03-20T17:21:25.730657+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T17:31:25.766700+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.036043, "success": true}
+{"timestamp": "2026-03-20T17:31:25.768328+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T17:41:25.810190+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.042873, "success": true}
+{"timestamp": "2026-03-20T17:41:25.811328+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T17:51:26.161332+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.348993, "success": true}
+{"timestamp": "2026-03-20T17:51:26.161837+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T18:01:26.199181+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.037344, "success": true}
+{"timestamp": "2026-03-20T18:01:26.200791+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T18:11:26.236241+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.03706, "success": true}
+{"timestamp": "2026-03-20T18:11:26.237870+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T18:21:26.655473+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.417603, "success": true}
+{"timestamp": "2026-03-20T18:21:26.656699+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T18:31:26.693887+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.037188, "success": true}
+{"timestamp": "2026-03-20T18:31:26.695472+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T18:41:26.743670+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.049783, "success": true}
+{"timestamp": "2026-03-20T18:41:26.745261+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T18:51:27.069873+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.326203, "success": true}
+{"timestamp": "2026-03-20T18:51:27.070387+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T19:01:27.113333+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.042946, "success": true}
+{"timestamp": "2026-03-20T19:01:27.114346+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T19:11:27.156671+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.041819, "success": true}
+{"timestamp": "2026-03-20T19:11:27.158716+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T19:21:27.604208+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.444886, "success": true}
+{"timestamp": "2026-03-20T19:21:27.605731+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T19:31:27.678411+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.073504, "success": true}
+{"timestamp": "2026-03-20T19:31:27.678922+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T19:41:27.720070+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.041148, "success": true}
+{"timestamp": "2026-03-20T19:41:27.720070+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T19:51:28.091959+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.371375, "success": true}
+{"timestamp": "2026-03-20T19:51:28.091959+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T20:01:28.122031+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.029433, "success": true}
+{"timestamp": "2026-03-20T20:01:28.122547+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T20:11:28.163538+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.040991, "success": true}
+{"timestamp": "2026-03-20T20:11:28.164708+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T20:21:28.538412+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.373704, "success": true}
+{"timestamp": "2026-03-20T20:21:28.540042+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T20:31:28.596043+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.056001, "success": true}
+{"timestamp": "2026-03-20T20:31:28.597200+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T20:41:28.641990+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.04479, "success": true}
+{"timestamp": "2026-03-20T20:41:28.643106+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T20:51:29.027267+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.384681, "success": true}
+{"timestamp": "2026-03-20T20:51:29.028813+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T21:01:29.075416+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.046603, "success": true}
+{"timestamp": "2026-03-20T21:01:29.076535+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T21:11:29.126338+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.049803, "success": true}
+{"timestamp": "2026-03-20T21:11:29.127529+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T21:21:29.448449+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.320413, "success": true}
+{"timestamp": "2026-03-20T21:21:29.448449+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T21:31:29.496631+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.047587, "success": true}
+{"timestamp": "2026-03-20T21:31:29.497150+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T21:41:29.537672+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.040522, "success": true}
+{"timestamp": "2026-03-20T21:41:29.538876+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T21:51:29.909567+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.370691, "success": true}
+{"timestamp": "2026-03-20T21:51:29.910084+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T22:01:29.943295+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.033211, "success": true}
+{"timestamp": "2026-03-20T22:01:29.943295+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T22:11:29.981816+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.038521, "success": true}
+{"timestamp": "2026-03-20T22:11:29.983109+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T22:21:30.324419+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.34131, "success": true}
+{"timestamp": "2026-03-20T22:21:30.325457+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}
+{"timestamp": "2026-03-20T22:31:30.365976+00:00", "event": "schema_completed", "schema_id": "video", "duration_sec": 600.041033, "success": true}
+{"timestamp": "2026-03-20T22:31:30.367104+00:00", "event": "schema_started", "schema_id": "news", "name": "News Ticker"}
+{"timestamp": "2026-03-20T22:41:30.404664+00:00", "event": "schema_completed", "schema_id": "news", "duration_sec": 600.03756, "success": true}
+{"timestamp": "2026-03-20T22:41:30.404664+00:00", "event": "schema_started", "schema_id": "gcc", "name": "GCC Shipping Tracker"}
+{"timestamp": "2026-03-20T22:51:30.755111+00:00", "event": "schema_completed", "schema_id": "gcc", "duration_sec": 600.350447, "success": true}
+{"timestamp": "2026-03-20T22:51:30.756169+00:00", "event": "schema_started", "schema_id": "video", "name": "Video Rotation"}

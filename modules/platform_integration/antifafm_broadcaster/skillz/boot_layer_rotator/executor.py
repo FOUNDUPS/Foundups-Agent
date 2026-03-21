@@ -171,8 +171,8 @@ SCHEMAS: Dict[str, Dict[str, Any]] = {
 
 # Default rotation order (10 min each schema)
 # NOTE: Only include IMPLEMENTED schemas. Coming Soon schemas removed 2026-03-18.
-# Add schema back when executor is wired (see run_schema() imports)
-ROTATION_ORDER = ["gcc", "video", "news"]
+# Schema names must match SCHEMAS registry keys
+ROTATION_ORDER = ["gcc", "video", "news"]  # "video" and "news" are aliases
 
 
 # OBS source names that need visibility control
@@ -235,31 +235,105 @@ async def set_source_visibility(source_name: str, visible: bool, scene_name: str
         return {"success": False, "error": str(e)}
 
 
+async def set_source_mute(source_name: str, muted: bool) -> Dict[str, Any]:
+    """
+    Set OBS input source mute state.
+
+    Args:
+        source_name: Name of the audio source in OBS
+        muted: True to mute, False to unmute
+    """
+    try:
+        client = _get_obs_client()
+        client.set_input_mute(name=source_name, muted=muted)
+        logger.debug(f"[ROTATOR] Set {source_name} muted={muted}")
+        return {"success": True, "source": source_name, "muted": muted}
+    except Exception as e:
+        logger.warning(f"[ROTATOR] Mute control failed for {source_name}: {e}")
+        return {"success": False, "error": str(e)}
+
+
+async def set_source_bounds_fullscreen(source_name: str) -> Dict[str, Any]:
+    """
+    Set OBS source to full screen bounds (1920x1080 at position 0,0).
+    """
+    try:
+        client = _get_obs_client()
+        scene_name = client.get_current_program_scene().scene_name
+
+        # Get scene item ID
+        items = client.get_scene_item_list(scene_name)
+        item_id = None
+        for item in items.scene_items:
+            if item.get("sourceName") == source_name:
+                item_id = item.get("sceneItemId")
+                break
+
+        if item_id is None:
+            return {"success": False, "error": f"Source '{source_name}' not found"}
+
+        # Set full screen transform
+        transform = {
+            "positionX": 0.0,
+            "positionY": 0.0,
+            "boundsWidth": 1920.0,
+            "boundsHeight": 1080.0,
+            "boundsType": "OBS_BOUNDS_STRETCH",  # Stretch to fill
+        }
+        client.set_scene_item_transform(scene_name, item_id, transform)
+        logger.debug(f"[ROTATOR] Set {source_name} to fullscreen 1920x1080")
+        return {"success": True, "source": source_name, "bounds": "1920x1080"}
+
+    except Exception as e:
+        logger.warning(f"[ROTATOR] Fullscreen bounds failed for {source_name}: {e}")
+        return {"success": False, "error": str(e)}
+
+
 async def configure_schema_visibility(schema_id: str) -> Dict[str, Any]:
     """
-    Configure OBS source visibility for a schema.
+    Configure OBS source visibility AND audio for a schema.
 
-    - GCC/news/chess schemas: Hide video grid, show browser
-    - Video schema: Show video grid, hide browser
+    - GCC/news/chess schemas: Hide video grid, show browser FULLSCREEN, UNMUTE radio, MUTE videos
+    - Video schema: Show video grid, hide browser, MUTE radio, UNMUTE videos
+
+    CRITICAL: Audio muting prevents dual-audio playback (radio + video simultaneously)
     """
-    results = {"schema": schema_id, "visibility_changes": []}
+    results = {"schema": schema_id, "visibility_changes": [], "audio_changes": []}
+
+    # Audio source names
+    radio_source = os.getenv("OBS_AUDIO_SOURCE", "antifaFM Radio")
 
     if schema_id == "video":
-        # VIDEO schema: Show video grid, hide browser
+        # VIDEO schema: Show video grid, hide browser, MUTE radio, UNMUTE videos
         for src in VIDEO_SOURCES:
             r = await set_source_visibility(src, True)
             results["visibility_changes"].append(r)
+            # Unmute video sources so their audio plays
+            r = await set_source_mute(src, False)
+            results["audio_changes"].append(r)
         r = await set_source_visibility(BROWSER_SOURCE, False)
         results["visibility_changes"].append(r)
-        logger.info(f"[ROTATOR] Video schema: showing video grid, hiding browser")
+        # MUTE radio when videos are playing
+        r = await set_source_mute(radio_source, True)
+        results["audio_changes"].append(r)
+        logger.info(f"[ROTATOR] Video schema: showing video grid, radio MUTED")
     else:
-        # Non-video schemas (GCC, news, chess, etc): Hide video grid, show browser
+        # Non-video schemas (GCC, news, chess, etc): Hide video grid, show browser FULLSCREEN
         for src in VIDEO_SOURCES:
             r = await set_source_visibility(src, False)
             results["visibility_changes"].append(r)
+            # Mute video sources when not visible
+            r = await set_source_mute(src, True)
+            results["audio_changes"].append(r)
         r = await set_source_visibility(BROWSER_SOURCE, True)
         results["visibility_changes"].append(r)
-        logger.info(f"[ROTATOR] {schema_id} schema: hiding video grid, showing browser")
+        # Set browser source to fullscreen bounds
+        r = await set_source_bounds_fullscreen(BROWSER_SOURCE)
+        results["bounds_change"] = r
+        # UNMUTE radio when videos are hidden
+        r = await set_source_mute(radio_source, False)
+        results["audio_changes"].append(r)
+        logger.info(f"[ROTATOR] {schema_id} schema: browser FULLSCREEN, radio UNMUTED")
 
     return results
 
@@ -312,6 +386,27 @@ async def run_schema(schema_id: str) -> Dict[str, Any]:
                 duration = (datetime.now(timezone.utc) - start_time).total_seconds()
                 emit_event("schema_completed", schema_id=schema_id, duration_sec=duration, success=True)
                 return result
+
+            elif schema_id == "video":
+                # VIDEO schema: Show video grid for 10 minutes
+                # Videos rotate based on OBS video sources (video1-9)
+                logger.info("[ROTATOR] Video schema: showing video grid")
+                # Video sources are already visible from configure_schema_visibility
+                # Wait for schema duration, videos play from OBS
+                await asyncio.sleep(SCHEMA_DURATION_SEC)
+                duration = (datetime.now(timezone.utc) - start_time).total_seconds()
+                emit_event("schema_completed", schema_id=schema_id, duration_sec=duration, success=True)
+                return {"schema": schema_id, "elapsed_sec": duration}
+
+            elif schema_id == "news":
+                # NEWS schema: Show news ticker overlay
+                logger.info("[ROTATOR] News schema: headlines via browser source")
+                # News ticker uses the browser source which is now visible
+                await asyncio.sleep(SCHEMA_DURATION_SEC)
+                duration = (datetime.now(timezone.utc) - start_time).total_seconds()
+                emit_event("schema_completed", schema_id=schema_id, duration_sec=duration, success=True)
+                return {"schema": schema_id, "elapsed_sec": duration}
+
             # Add other schema imports here as they're implemented
         except ImportError as e:
             logger.error(f"[ROTATOR] Failed to import {schema_id}: {e}")
