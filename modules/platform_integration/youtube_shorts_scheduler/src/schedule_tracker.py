@@ -269,6 +269,38 @@ class ScheduleTracker:
             except ValueError:
                 return datetime.min
 
+    def has_sufficient_coverage(self, min_days_ahead: int = 14) -> Tuple[bool, int]:
+        """
+        Check if channel has sufficient scheduling coverage into the future.
+
+        Used to skip channels that already have enough scheduled videos,
+        avoiding wasted page navigation and DOM automation.
+
+        Args:
+            min_days_ahead: Minimum number of days with 3/3 videos scheduled
+
+        Returns:
+            Tuple of (has_coverage: bool, days_ahead: int)
+        """
+        today = datetime.now().date()
+        future_full_days = 0
+
+        for date_str, count in self.schedule.items():
+            try:
+                parsed_date = self._parse_date(date_str).date()
+                if parsed_date > today and count >= 3:
+                    future_full_days += 1
+            except Exception:
+                continue
+
+        has_coverage = future_full_days >= min_days_ahead
+        if has_coverage:
+            logger.info(
+                f"[TRACKER] {self.channel_id}: {future_full_days} full days ahead "
+                f"(>= {min_days_ahead}) — sufficient coverage, can skip"
+            )
+        return has_coverage, future_full_days
+
     def log_schedule_report(self):
         """Log a human-readable schedule report."""
         summary = self.get_summary()
