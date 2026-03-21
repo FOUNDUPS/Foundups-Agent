@@ -682,6 +682,81 @@ def run_brain_artifact_preflight(repo_root: Path) -> bool:
     return True
 
 
+def run_connect_wre(repo_root: Path) -> dict:
+    """
+    WSP 97 Section 4.6: --connect-wre CLI hook.
+
+    Verify WRE preflight connection and enforcement mode.
+
+    Returns structured status:
+        coded: YES (command is wired in CLI)
+        connection: CONNECTED | PARTIAL | DISCONNECTED
+        readiness: READY | INSUFFICIENT_DATA | DEGRADED | BLOCKED | DISABLED
+        manual_enforced: bool
+        auto_enforced_now: bool
+        sample_coverage: int (executions vs min_samples)
+        alert_counts: {critical: int, warning: int}
+    """
+    result = {
+        "coded": "YES",
+        "connection": "DISCONNECTED",
+        "readiness": "DISABLED",
+        "manual_enforced": False,
+        "auto_enforced_now": False,
+        "sample_coverage": 0,
+        "alert_counts": {"critical": 0, "warning": 0},
+    }
+
+    # Check WRE dashboard health
+    try:
+        from modules.infrastructure.wre_core.src.dashboard_alerts import (
+            DashboardAlertMonitor,
+            check_dashboard_health,
+        )
+
+        monitor = DashboardAlertMonitor()
+        health = check_dashboard_health() or {}
+
+        insufficient_data = bool(health.get("insufficient_data", False))
+        total_executions = int(health.get("total_executions", 0))
+        min_samples = int(health.get("min_samples", 25))
+        in_watch = monitor.is_in_watch_period()
+
+        manual_enforced = os.getenv("WRE_DASHBOARD_PREFLIGHT_ENFORCED", "0") != "0"
+        auto_enforce = os.getenv("WRE_DASHBOARD_AUTO_ENFORCE", "1") != "0"
+        auto_enforced_now = bool(auto_enforce and not in_watch and not insufficient_data)
+
+        alerts = health.get("alerts", []) if isinstance(health.get("alerts"), list) else []
+        critical_count = sum(1 for a in alerts if a.get("severity") == "critical")
+        warning_count = sum(1 for a in alerts if a.get("severity") == "warning")
+        healthy = bool(health.get("healthy", True))
+
+        result["connection"] = "CONNECTED"
+        result["manual_enforced"] = manual_enforced
+        result["auto_enforced_now"] = auto_enforced_now
+        result["sample_coverage"] = total_executions
+        result["alert_counts"] = {"critical": critical_count, "warning": warning_count}
+
+        if insufficient_data:
+            result["readiness"] = "INSUFFICIENT_DATA"
+        elif critical_count > 0:
+            result["readiness"] = "BLOCKED" if (manual_enforced or auto_enforced_now) else "DEGRADED"
+        elif not healthy:
+            result["readiness"] = "DEGRADED"
+        else:
+            result["readiness"] = "READY"
+
+    except ImportError:
+        result["connection"] = "PARTIAL"
+        result["readiness"] = "DEGRADED"
+    except Exception as exc:
+        logger.error(f"[WRE] connect-wre check failed: {exc}")
+        result["connection"] = "PARTIAL"
+        result["readiness"] = "DEGRADED"
+
+    return result
+
+
 def run_wre_dashboard_preflight(repo_root: Path) -> bool:
     """
     Run WRE dashboard preflight at startup.
@@ -1315,4 +1390,19 @@ def main():
 
 
 if __name__ == "__main__":
+    # WSP 97 Section 4.6: --connect-wre CLI hook
+    if len(sys.argv) > 1 and sys.argv[1] == "--connect-wre":
+        repo_root = Path(__file__).resolve().parent
+        status = run_connect_wre(repo_root)
+        print(
+            f"coded={status['coded']} "
+            f"connection={status['connection']} "
+            f"readiness={status['readiness']} "
+            f"manual_enforced={status['manual_enforced']} "
+            f"auto_enforced_now={status['auto_enforced_now']} "
+            f"samples={status['sample_coverage']} "
+            f"critical={status['alert_counts']['critical']} "
+            f"warnings={status['alert_counts']['warning']}"
+        )
+        sys.exit(0 if status["readiness"] == "READY" else 1)
     main()
