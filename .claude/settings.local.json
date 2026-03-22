@@ -131,7 +131,11 @@
       "Bash(nslookup:*)",
       "Bash(ping:*)",
       "WebFetch(domain:www.antifafm.com)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(git rebase:*)",
+      "Read(//o/Foundups-Agent/**)",
+      "Bash(xargs -I {} gh run view {} --log-failed)",
+      "mcp__chrome-devtools__take_snapshot"
     ],
     "deny": [],
     "ask": [],

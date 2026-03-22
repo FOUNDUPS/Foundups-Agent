@@ -23,9 +23,49 @@ NAVIGATION:
 """
 
 import logging
+import json
+from pathlib import Path
 from typing import Any, Callable, Dict, Optional
 
 logger = logging.getLogger("pqn_research_adapter")
+
+REPO_ROOT = Path(__file__).resolve().parents[4]
+_PQN_GPD_DOSSIER_PATH = (
+    REPO_ROOT
+    / "modules"
+    / "communication"
+    / "moltbot_bridge"
+    / "workspace"
+    / "reports"
+    / "pqn_external_tool_gpd_wsp97_20260322.json"
+)
+_PQN_AUTORESEARCH_DOSSIER_PATH = (
+    REPO_ROOT
+    / "modules"
+    / "communication"
+    / "moltbot_bridge"
+    / "workspace"
+    / "reports"
+    / "pqn_external_tool_autoresearch_wsp97_20260322.json"
+)
+_PQN_KARPATHY_FAMILY_DOSSIER_PATH = (
+    REPO_ROOT
+    / "modules"
+    / "communication"
+    / "moltbot_bridge"
+    / "workspace"
+    / "reports"
+    / "pqn_external_karpathy_family_wsp97_20260322.json"
+)
+_PQN_EXTERNAL_WATCHLIST_STATUS_PATH = (
+    REPO_ROOT
+    / "modules"
+    / "communication"
+    / "moltbot_bridge"
+    / "workspace"
+    / "reports"
+    / "pqn_external_research_watchlist_status.json"
+)
 
 
 # --- Sub-intent classification keywords ---
@@ -78,10 +118,33 @@ _RUNTIME_CONTROL_KEYWORDS = [
     "stop pqn architect",
 ]
 
+_EXTERNAL_RESEARCH_KEYWORDS = [
+    "get physics done",
+    " gpd ",
+    "compare gpd",
+    "compare get physics done",
+    "should we adopt gpd",
+    "should we use gpd",
+    "autoresearch",
+    "karpathy autoresearch",
+    "should we adopt autoresearch",
+    "should we use autoresearch",
+    "karpathy",
+    "nanogpt",
+    "nano gpt",
+    "mingpt",
+    "min gpt",
+    "llm.c",
+    "llm c",
+    "nanochat",
+    "nn-zero-to-hero",
+    "zero to hero",
+]
+
 
 def _classify_sub_intent(message: str) -> str:
     """Classify RESEARCH message into sub-intent."""
-    msg_lower = message.lower()
+    msg_lower = f" {message.lower()} "
 
     for kw in _RUNTIME_CONTROL_KEYWORDS:
         if kw in msg_lower:
@@ -90,6 +153,10 @@ def _classify_sub_intent(message: str) -> str:
     for kw in _SIMULATION_KEYWORDS:
         if kw in msg_lower:
             return "simulation"
+
+    for kw in _EXTERNAL_RESEARCH_KEYWORDS:
+        if kw in msg_lower:
+            return "external_research"
 
     for kw in _DEMO_KEYWORDS:
         if kw in msg_lower:
@@ -378,6 +445,60 @@ def _holo_retrieve(query: str) -> Optional[str]:
         return None
 
 
+def _load_json(path: Path) -> Dict[str, Any]:
+    """Load a JSON artifact from disk with a bounded failure mode."""
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        logger.debug("[PQN-RESEARCH] JSON load failed for %s: %s", path, exc)
+        return {}
+
+
+def _watch_item_by_name(watch_status: Dict[str, Any], names: list[str]) -> Dict[str, Any]:
+    """Return the first watchlist status item matching any supplied name."""
+    wanted = {name.lower() for name in names}
+    for item in watch_status.get("items", []):
+        if str(item.get("name", "")).lower() in wanted:
+            return item
+    return {}
+
+
+def _format_external_research_dossier(
+    dossier: Dict[str, Any],
+    watch_item: Dict[str, Any],
+    *,
+    override_blurb: str | None = None,
+) -> str:
+    """Format a standard external research dossier response."""
+    wsp97 = dossier.get("wsp97", {})
+    upstream = dossier.get("upstream", {})
+    alignment = dossier.get("foundups_alignment", {})
+    wsp15 = wsp97.get("wsp15", {})
+    refresh_state = watch_item.get("last_refresh_result") or "not_refreshed"
+    last_checked = watch_item.get("last_checked") or "unknown"
+    blurb = override_blurb or (
+        "Foundups decision: track it as a benchmark and comparison surface for PQN research. "
+        "Do not make it an OpenClaw startup dependency or replace the internal PQN execution plane."
+    )
+
+    return (
+        "**PQN External Research Benchmark**\n\n"
+        f"Tool: {dossier.get('tool_name', 'unknown')} ({dossier.get('alias', 'n/a')})\n"
+        f"Repo: {upstream.get('full_name', 'unknown')}\n"
+        f"Upstream updated: {upstream.get('updated_at', 'unknown')}\n"
+        f"Stars/Forks: {upstream.get('stars', 'unknown')}/{upstream.get('forks', 'unknown')}\n"
+        f"WSP 97 decision: {wsp97.get('adoption_decision', 'unknown')}\n"
+        f"Integration mode: {wsp97.get('system_integration', 'unknown')}\n"
+        f"Recommended plane: {wsp97.get('recommended_plane', 'unknown')}\n"
+        f"WSP 15 priority: {wsp15.get('priority', 'unknown')} (total={wsp15.get('total', 'unknown')})\n"
+        f"Placement: {wsp97.get('placement_in_foundups', 'unknown')}\n"
+        f"Watchlist state: {refresh_state} (last_checked={last_checked})\n\n"
+        f"{blurb}\n\n"
+        f"First safe step: {wsp97.get('first_safe_step', 'refresh the dossier and compare it to PQN surfaces')}\n"
+        f"Overlap: {', '.join(alignment.get('overlap', [])) or 'none'}"
+    )
+
+
 # --- Sub-intent handlers ---
 
 def _handle_teach(message: str) -> str:
@@ -506,6 +627,144 @@ def _handle_gallery(message: str) -> str:
         )
 
 
+def _handle_external_research(
+    message: str,
+    sender: str,
+    report_action: Optional[Callable[..., None]] = None,
+) -> str:
+    """Return the current WSP 97 view of tracked external PQN research systems."""
+    msg_lower = message.lower()
+    watch_status = _load_json(_PQN_EXTERNAL_WATCHLIST_STATUS_PATH)
+
+    if "autoresearch" in msg_lower:
+        dossier = _load_json(_PQN_AUTORESEARCH_DOSSIER_PATH)
+        if not dossier:
+            _emit_action(
+                report_action,
+                "pqn_external_research",
+                "karpathy_autoresearch",
+                "dossier_unavailable",
+                sender=sender,
+            )
+            return (
+                "AutoResearch dossier is not available yet. "
+                "Refresh `scripts/refresh_pqn_research_watchlist.py` and rebuild the local dossier."
+            )
+        watch_item = _watch_item_by_name(
+            watch_status,
+            ["Karpathy AutoResearch"],
+        )
+        wsp97 = dossier.get("wsp97", {})
+        _emit_action(
+            report_action,
+            "pqn_external_research",
+            "karpathy_autoresearch",
+            "reviewed",
+            sender=sender,
+            adoption_decision=wsp97.get("adoption_decision"),
+            recommended_plane=wsp97.get("recommended_plane"),
+            refresh_state=watch_item.get("last_refresh_result") or "not_refreshed",
+        )
+        return _format_external_research_dossier(
+            dossier,
+            watch_item,
+            override_blurb=(
+                "Foundups decision: treat AutoResearch as the primary Karpathy-family PQN pilot "
+                "candidate, but only as a broker-launched isolated worker with artifact-only return."
+            ),
+        )
+
+    karpathy_terms = [
+        "karpathy",
+        "nanogpt",
+        "nano gpt",
+        "mingpt",
+        "min gpt",
+        "llm.c",
+        "llm c",
+        "nanochat",
+        "nn-zero-to-hero",
+        "zero to hero",
+    ]
+    if any(term in msg_lower for term in karpathy_terms):
+        family = _load_json(_PQN_KARPATHY_FAMILY_DOSSIER_PATH)
+        if not family:
+            _emit_action(
+                report_action,
+                "pqn_external_research",
+                "karpathy_stack",
+                "dossier_unavailable",
+                sender=sender,
+            )
+            return (
+                "Karpathy stack dossier is not available yet. "
+                "Refresh `scripts/refresh_pqn_research_watchlist.py` and rebuild the local dossier."
+            )
+
+        repos = family.get("repos", [])
+        primary = family.get("pqn_summary", {}).get("primary_candidate", "Karpathy AutoResearch")
+        secondary = family.get("pqn_summary", {}).get("secondary_candidate", "Karpathy nanochat")
+        reference_only = family.get("pqn_summary", {}).get("reference_only", [])
+        watch_names = [item.get("name") for item in watch_status.get("items", [])]
+        _emit_action(
+            report_action,
+            "pqn_external_research",
+            "karpathy_stack",
+            "reviewed",
+            sender=sender,
+            watch_count=len(watch_names),
+            primary_candidate=primary,
+        )
+        lines = ["**Karpathy Stack WSP 97 Summary**", ""]
+        lines.append(f"Primary PQN candidate: {primary}")
+        lines.append(f"Secondary supporting runtime: {secondary}")
+        if reference_only:
+            lines.append(f"Reference only: {', '.join(reference_only)}")
+        lines.append("")
+        for repo in repos:
+            lines.append(
+                f"- {repo.get('name')}: {repo.get('wsp97_decision')} "
+                f"(plane={repo.get('recommended_plane')}, priority={repo.get('wsp15', {}).get('priority', 'unknown')})"
+            )
+        lines.append("")
+        lines.append(
+            "Foundups rule: only AutoResearch and possibly nanochat are pilot candidates, "
+            "and both stay off the startup path and outside direct production mutation."
+        )
+        lines.append(
+            f"Next step: {family.get('pqn_summary', {}).get('recommended_next_step', 'run isolated PQN pilots only')}"
+        )
+        return "\n".join(lines)
+
+    dossier = _load_json(_PQN_GPD_DOSSIER_PATH)
+    if not dossier:
+        _emit_action(
+            report_action,
+            "pqn_external_research",
+            "get_physics_done",
+            "dossier_unavailable",
+            sender=sender,
+        )
+        return (
+            "External PQN research dossier is not available yet. "
+            "Refresh `scripts/refresh_pqn_research_watchlist.py` and rebuild the local dossier."
+        )
+
+    watch_item = _watch_item_by_name(watch_status, ["Get Physics Done"])
+    wsp97 = dossier.get("wsp97", {})
+    _emit_action(
+        report_action,
+        "pqn_external_research",
+        "get_physics_done",
+        "reviewed",
+        sender=sender,
+        adoption_decision=wsp97.get("adoption_decision"),
+        recommended_plane=wsp97.get("recommended_plane"),
+        refresh_state=watch_item.get("last_refresh_result") or "not_refreshed",
+    )
+    return _format_external_research_dossier(dossier, watch_item)
+
+
 def _handle_knowledge(message: str) -> str:
     """Return rESP/PQN research content via HoloIndex."""
     holo_result = _holo_retrieve(message)
@@ -553,6 +812,8 @@ def handle_pqn_research_intent(
         return _handle_runtime_control(message, sender, report_action=report_action)
     elif sub_intent == "simulation":
         return _handle_simulation(message, sender, report_action=report_action)
+    elif sub_intent == "external_research":
+        return _handle_external_research(message, sender, report_action=report_action)
     elif sub_intent == "teach":
         return _handle_teach(message)
     elif sub_intent == "demo":

@@ -10,9 +10,14 @@
     "**/node_modules",
     "**/.pytest_cache",
     "**/__pycache__",
+    "**/.mypy_cache",
+    "**/*.egg-info",
+    "**/dist",
+    "**/build",
     ".cursor",
     ".claude",
     ".agent",
+    ".worktrees",
     "archive",
     "campaign_results",
     "chroma",
@@ -35,6 +40,7 @@
     "undaodu",
     "**/skillz",
     "**/data",
-    "scripts"
+    "scripts",
+    "htmlcov"
   ]
 }

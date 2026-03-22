@@ -22,10 +22,12 @@ Provides autonomous background task execution during idle periods.
 """
 
 from .src.idle_automation_dae import IdleAutomationDAE, run_idle_automation
+from .src.self_research_refresh import SelfResearchRefresher
 
 __all__ = [
     'IdleAutomationDAE',
-    'run_idle_automation'
+    'run_idle_automation',
+    'SelfResearchRefresher',
 ]
 
 __version__ = "1.0.0"

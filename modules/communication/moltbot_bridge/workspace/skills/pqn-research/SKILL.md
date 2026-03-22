@@ -57,6 +57,19 @@ What is the Du Resonance?
 ```
 Routes to HoloIndex retrieval of rESP paper and PQN Research Plan content.
 
+### Compare External Physics Research Systems
+```
+What is Get Physics Done?
+Compare GPD to PQN research
+Should we adopt Get Physics Done?
+What is Karpathy AutoResearch?
+Should we adopt autoresearch for PQN?
+WSP 97 Karpathy stack
+```
+Routes to the local WSP 97 dossier and PQN external research watchlist.
+Use this when you need current adoption guidance for external physics-research
+repos without giving them control of the Foundups runtime.
+
 ### Share Detection Results
 ```
 Publish my results: coherence 0.72, resonance 7.08 Hz

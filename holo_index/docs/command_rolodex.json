@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-03-18T07:24:52.269478",
-  "total_cli_entrypoints": 715,
-  "wre_connected_count": 92,
-  "orphan_count": 690,
+  "generated_at": "2026-03-22T03:58:41.342360",
+  "total_cli_entrypoints": 719,
+  "wre_connected_count": 95,
+  "orphan_count": 693,
   "commands": [
     {
       "path": "modules\\ai_intelligence\\ai_overseer\\skillz\\agentic_news_ticker\\executor.py",
@@ -113,6 +113,15 @@
       "category": "communication"
     },
     {
+      "path": "modules\\infrastructure\\github_orchestrator\\skillz\\github_management\\executor.py",
+      "module_name": "modules.infrastructure.github_orchestrator.skillz.github_management.executor",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\infrastructure\\github_orchestrator\\skillz\\github_management\\SKILLz.md",
+      "line_count": 218,
+      "category": "infrastructure"
+    },
+    {
       "path": "modules\\infrastructure\\wre_core\\skillz\\qwen_bulk_import_migration\\executor.py",
       "module_name": "modules.infrastructure.wre_core.skillz.qwen_bulk_import_migration.executor",
       "has_json_flag": false,
@@ -127,7 +136,7 @@
       "has_json_flag": false,
       "wre_connected": true,
       "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\skillz\\boot_layer_rotator\\SKILLz.md",
-      "line_count": 526,
+      "line_count": 626,
       "category": "platform"
     },
     {
@@ -136,7 +145,7 @@
       "has_json_flag": true,
       "wre_connected": true,
       "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\skillz\\gcc_shipping_tracker\\SKILLz.md",
-      "line_count": 557,
+      "line_count": 568,
       "category": "platform"
     },
     {
@@ -255,7 +264,7 @@
       "has_json_flag": false,
       "wre_connected": false,
       "skillz_md_path": null,
-      "line_count": 2560,
+      "line_count": 2583,
       "category": "communication",
       "suggested_trigger": "cadence:continuous"
     },
@@ -265,7 +274,7 @@
       "has_json_flag": true,
       "wre_connected": false,
       "skillz_md_path": null,
-      "line_count": 2417,
+      "line_count": 2542,
       "category": "holoindex",
       "suggested_trigger": "manual"
     },
@@ -275,7 +284,7 @@
       "has_json_flag": true,
       "wre_connected": false,
       "skillz_md_path": null,
-      "line_count": 2285,
+      "line_count": 2297,
       "category": "platform",
       "suggested_trigger": "event:platform_trigger"
     },
@@ -285,7 +294,7 @@
       "has_json_flag": false,
       "wre_connected": false,
       "skillz_md_path": null,
-      "line_count": 2016,
+      "line_count": 2068,
       "category": "holoindex",
       "suggested_trigger": "manual"
     },
@@ -2280,6 +2289,16 @@
       "suggested_trigger": "manual"
     },
     {
+      "path": "modules\\infrastructure\\wre_core\\skillz\\wre_skills_loader.py",
+      "module_name": "modules.infrastructure.wre_core.skillz.wre_skills_loader",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 456,
+      "category": "infrastructure",
+      "suggested_trigger": "manual"
+    },
+    {
       "path": "holo_index\\adaptive_learning\\code_health_scorer.py",
       "module_name": "holo_index.adaptive_learning.code_health_scorer",
       "has_json_flag": false,
@@ -3030,6 +3049,26 @@
       "suggested_trigger": "manual"
     },
     {
+      "path": "modules\\infrastructure\\wre_core\\src\\skill_selector.py",
+      "module_name": "modules.infrastructure.wre_core.src.skill_selector",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 382,
+      "category": "infrastructure",
+      "suggested_trigger": "manual"
+    },
+    {
+      "path": "modules\\platform_integration\\linkedin_agent\\src\\content\\article_scraper.py",
+      "module_name": "modules.platform_integration.linkedin_agent.src.content.article_scraper",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 378,
+      "category": "platform",
+      "suggested_trigger": "event:platform_trigger"
+    },
+    {
       "path": "modules\\ai_intelligence\\multi_agent_system\\src\\social_media_orchestrator.py",
       "module_name": "modules.ai_intelligence.multi_agent_system.src.social_media_orchestrator",
       "has_json_flag": false,
@@ -3280,16 +3319,6 @@
       "suggested_trigger": "manual"
     },
     {
-      "path": "modules\\infrastructure\\wre_core\\skillz\\wre_skills_loader.py",
-      "module_name": "modules.infrastructure.wre_core.skillz.wre_skills_loader",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 359,
-      "category": "infrastructure",
-      "suggested_trigger": "manual"
-    },
-    {
       "path": "modules\\ai_intelligence\\training_system\\scripts\\launch.py",
       "module_name": "modules.ai_intelligence.training_system.scripts.launch",
       "has_json_flag": false,
@@ -3410,22 +3439,22 @@
       "suggested_trigger": "manual"
     },
     {
-      "path": "modules\\infrastructure\\wre_core\\src\\skill_selector.py",
-      "module_name": "modules.infrastructure.wre_core.src.skill_selector",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 345,
-      "category": "infrastructure",
-      "suggested_trigger": "manual"
-    },
-    {
       "path": "modules\\ai_intelligence\\video_indexer\\src\\nemo_data_builder.py",
       "module_name": "modules.ai_intelligence.video_indexer.src.nemo_data_builder",
       "has_json_flag": false,
       "wre_connected": false,
       "skillz_md_path": null,
       "line_count": 344,
+      "category": "ai",
+      "suggested_trigger": "manual"
+    },
+    {
+      "path": "modules\\ai_intelligence\\pqn\\scripts\\launch.py",
+      "module_name": "modules.ai_intelligence.pqn.scripts.launch",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 342,
       "category": "ai",
       "suggested_trigger": "manual"
     },
@@ -3597,16 +3626,6 @@
       "skillz_md_path": null,
       "line_count": 322,
       "category": "communication",
-      "suggested_trigger": "manual"
-    },
-    {
-      "path": "modules\\ai_intelligence\\pqn\\scripts\\launch.py",
-      "module_name": "modules.ai_intelligence.pqn.scripts.launch",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 321,
-      "category": "ai",
       "suggested_trigger": "manual"
     },
     {
@@ -3873,6 +3892,16 @@
       "path": "modules\\infrastructure\\foundups_selenium\\src\\telemetry_store.py",
       "module_name": "modules.infrastructure.foundups_selenium.src.telemetry_store",
       "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 284,
+      "category": "infrastructure",
+      "suggested_trigger": "manual"
+    },
+    {
+      "path": "modules\\infrastructure\\wre_core\\src\\git_main_merge_sentinel.py",
+      "module_name": "modules.infrastructure.wre_core.src.git_main_merge_sentinel",
+      "has_json_flag": true,
       "wre_connected": false,
       "skillz_md_path": null,
       "line_count": 284,
@@ -4670,6 +4699,16 @@
       "suggested_trigger": "manual"
     },
     {
+      "path": "modules\\infrastructure\\git_push_dae\\scripts\\launch.py",
+      "module_name": "modules.infrastructure.git_push_dae.scripts.launch",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 183,
+      "category": "infrastructure",
+      "suggested_trigger": "manual"
+    },
+    {
       "path": "modules\\ai_intelligence\\ai_overseer\\scripts\\apply_qwen_wiring.py",
       "module_name": "modules.ai_intelligence.ai_overseer.scripts.apply_qwen_wiring",
       "has_json_flag": false,
@@ -5010,6 +5049,16 @@
       "suggested_trigger": "event:platform_trigger"
     },
     {
+      "path": "modules\\platform_integration\\social_media_orchestrator\\scripts\\launch.py",
+      "module_name": "modules.platform_integration.social_media_orchestrator.scripts.launch",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 154,
+      "category": "platform",
+      "suggested_trigger": "event:platform_trigger"
+    },
+    {
       "path": "modules\\infrastructure\\shared_utilities\\llm_client\\src\\client.py",
       "module_name": "modules.infrastructure.shared_utilities.llm_client.src.client",
       "has_json_flag": false,
@@ -5070,16 +5119,6 @@
       "suggested_trigger": "manual"
     },
     {
-      "path": "modules\\infrastructure\\git_push_dae\\scripts\\launch.py",
-      "module_name": "modules.infrastructure.git_push_dae.scripts.launch",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 146,
-      "category": "infrastructure",
-      "suggested_trigger": "manual"
-    },
-    {
       "path": "modules\\platform_integration\\youtube_auth\\scripts\\authorize_set10.py",
       "module_name": "modules.platform_integration.youtube_auth.scripts.authorize_set10",
       "has_json_flag": false,
@@ -5097,6 +5136,16 @@
       "skillz_md_path": null,
       "line_count": 144,
       "category": "communication",
+      "suggested_trigger": "manual"
+    },
+    {
+      "path": "modules\\ai_intelligence\\holo_dae\\scripts\\launch.py",
+      "module_name": "modules.ai_intelligence.holo_dae.scripts.launch",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 143,
+      "category": "ai",
       "suggested_trigger": "manual"
     },
     {
@@ -5190,16 +5239,6 @@
       "suggested_trigger": "manual"
     },
     {
-      "path": "modules\\platform_integration\\social_media_orchestrator\\scripts\\launch.py",
-      "module_name": "modules.platform_integration.social_media_orchestrator.scripts.launch",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 129,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger"
-    },
-    {
       "path": "tools\\_archive\\prioritize_module.py",
       "module_name": "tools._archive.prioritize_module",
       "has_json_flag": false,
@@ -5238,6 +5277,16 @@
       "line_count": 126,
       "category": "platform",
       "suggested_trigger": "event:platform_trigger"
+    },
+    {
+      "path": "modules\\ai_intelligence\\ai_overseer\\src\\pico_claw.py",
+      "module_name": "modules.ai_intelligence.ai_overseer.src.pico_claw",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 124,
+      "category": "ai",
+      "suggested_trigger": "manual"
     },
     {
       "path": "holo_index\\reports\\codeindex_reporter.py",
@@ -5356,16 +5405,6 @@
       "wre_connected": false,
       "skillz_md_path": null,
       "line_count": 112,
-      "category": "ai",
-      "suggested_trigger": "manual"
-    },
-    {
-      "path": "modules\\ai_intelligence\\holo_dae\\scripts\\launch.py",
-      "module_name": "modules.ai_intelligence.holo_dae.scripts.launch",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 111,
       "category": "ai",
       "suggested_trigger": "manual"
     },

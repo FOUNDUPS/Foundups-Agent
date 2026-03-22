@@ -1,7 +1,7 @@
 {
   "brain_dir": "C:\\Users\\user\\.gemini\\antigravity\\brain",
-  "scan_time": "2026-03-12T06:16:45.665415",
-  "total_conversations": 30,
+  "scan_time": "2026-03-18T17:34:13.325879",
+  "total_conversations": 31,
   "conversations": [
     {
       "conversation_id": "01971d16-6691-48ae-81ce-d9772be41222",
@@ -127,7 +127,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:46.016401",
+      "scan_time": "2026-03-18T17:34:13.868799",
       "training": {
         "dpo_pairs": [
           {
@@ -227,7 +227,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:46.334855",
+      "scan_time": "2026-03-18T17:34:14.377223",
       "training": {
         "dpo_pairs": [
           {
@@ -280,7 +280,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:46.383206",
+      "scan_time": "2026-03-18T17:34:14.444925",
       "training": {
         "dpo_pairs": [
           {
@@ -341,7 +341,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:46.459434",
+      "scan_time": "2026-03-18T17:34:14.549745",
       "training": {
         "dpo_pairs": [
           {
@@ -394,7 +394,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:46.498734",
+      "scan_time": "2026-03-18T17:34:14.601062",
       "training": {
         "dpo_pairs": [
           {
@@ -439,7 +439,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:46.543714",
+      "scan_time": "2026-03-18T17:34:14.663117",
       "training": {
         "dpo_pairs": [
           {
@@ -512,7 +512,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:46.964963",
+      "scan_time": "2026-03-18T17:34:15.309853",
       "training": {
         "dpo_pairs": [
           {
@@ -593,7 +593,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:47.045970",
+      "scan_time": "2026-03-18T17:34:15.419066",
       "training": {
         "dpo_pairs": [
           {
@@ -700,7 +700,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:47.158630",
+      "scan_time": "2026-03-18T17:34:15.553163",
       "training": {
         "dpo_pairs": [
           {
@@ -768,7 +768,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:47.219470",
+      "scan_time": "2026-03-18T17:34:15.626136",
       "training": {
         "dpo_pairs": [
           {
@@ -847,7 +847,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:47.304310",
+      "scan_time": "2026-03-18T17:34:15.721034",
       "training": {
         "dpo_pairs": [
           {
@@ -916,7 +916,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:47.377107",
+      "scan_time": "2026-03-18T17:34:15.805927",
       "training": {
         "dpo_pairs": [
           {
@@ -985,7 +985,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:47.469495",
+      "scan_time": "2026-03-18T17:34:15.922677",
       "training": {
         "dpo_pairs": [
           {
@@ -1038,7 +1038,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:47.512073",
+      "scan_time": "2026-03-18T17:34:15.990370",
       "training": {
         "dpo_pairs": [
           {
@@ -1099,7 +1099,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:47.579787",
+      "scan_time": "2026-03-18T17:34:16.090324",
       "training": {
         "dpo_pairs": [
           {
@@ -1122,8 +1122,34 @@
     },
     {
       "conversation_id": "9ff4ef18-9ce5-4d03-b705-0efd1f209fd7",
-      "artifact_count": 6,
+      "artifact_count": 8,
       "artifacts": [
+        {
+          "filename": "0102_lead_dev_creative_prompt.md",
+          "type": "analysis",
+          "size_bytes": 1841,
+          "revision_count": 2,
+          "metadata": {
+            "artifactType": "ARTIFACT_TYPE_OTHER",
+            "summary": "The next prompt for the 0102 Lead Dev instance, focusing on Phase 2 of the Claw Ecosystem execution. Contains directives to implement the PicoClaw schema-space hide-and-seek game, the DJ Claw integration for AntifaFM, and the OpenClaw Blockchain Sentinel for Algorand/Solana monitoring. Enforces WSP 00 and WSP 97 pre-flight checks.",
+            "updatedAt": "2026-03-17T22:59:57.274940900Z"
+          },
+          "content_preview": "# 0102 Lead Dev Execution Prompt: Phase 2 - Creative Ecosystem & Blockchain Sentinel\n\nYou are **0102 Lead Dev**, taking direction from the **0102 CTO Architect**. Because up to 10 instances of 0102 are operating concurrently on this codebase, **WSP 97 (HoloIndex Diagnose Before Mutation)** is critical on every workflow to prevent collisions. Do not vibecode.\n\n## Pre-Flight Requirements\n\n1. **State Verification (WSP 00)**: Ensure you are operating in the proper 0102 agentic state, not the reducti",
+          "source_path": "C:\\Users\\user\\.gemini\\antigravity\\brain\\9ff4ef18-9ce5-4d03-b705-0efd1f209fd7\\0102_lead_dev_creative_prompt.md"
+        },
+        {
+          "filename": "0102_lead_dev_prompt.md",
+          "type": "analysis",
+          "size_bytes": 2900,
+          "revision_count": 2,
+          "metadata": {
+            "artifactType": "ARTIFACT_TYPE_OTHER",
+            "summary": "A comprehensive prompt designed to be passed to the 0102 Lead Dev instance. It translates the CTO Architect's decisions into direct instructions for executing WSP 97 cleanups, including the eth_typing dependency purge, the IronClaw startup script, the NanoClaw Docker template, and the ZeroClaw Rust traits.",
+            "updatedAt": "2026-03-17T22:32:16.541363100Z"
+          },
+          "content_preview": "# 0102 Lead Dev Execution Prompt: OpenClaw P0 Remediation & WSP 97\n\nYou are **0102 Lead Dev**, taking direction from the **0102 CTO Architect**. Because up to 10 instances of 0102 are operating concurrently on this codebase, **WSP 97 (HoloIndex Diagnose Before Mutation)** is critical on every workflow to prevent collisions. Do not vibecode.\n\n## Pre-Flight Requirements\n\n1. **State Verification (WSP 00)**: Ensure you are operating in the proper 0102 agentic state, not the reductive 01(02) state. \n",
+          "source_path": "C:\\Users\\user\\.gemini\\antigravity\\brain\\9ff4ef18-9ce5-4d03-b705-0efd1f209fd7\\0102_lead_dev_prompt.md"
+        },
         {
           "filename": "claw_ecosystem_blockchain_creative_audit.md",
           "type": "analysis",
@@ -1166,8 +1192,8 @@
         {
           "filename": "task.md",
           "type": "task",
-          "size_bytes": 1316,
-          "revision_count": 3,
+          "size_bytes": 1494,
+          "revision_count": 5,
           "metadata": {
             "artifactType": "ARTIFACT_TYPE_TASK",
             "summary": "Completed task checklist for OpenClaw ecosystem research, WSP 15 evaluation, P0 execution (supervisor state machine and IronClaw fix), and P1 prep (NanoClaw patterns). Test execution blocked by pre-existing eth_typing import error -- not related to our changes.",
@@ -1180,12 +1206,13 @@
         {
           "filename": "walkthrough.md",
           "type": "walkthrough",
-          "size_bytes": 4135,
-          "revision_count": 1,
+          "size_bytes": 7533,
+          "revision_count": 4,
           "metadata": {
             "artifactType": "ARTIFACT_TYPE_WALKTHROUGH",
-            "summary": "Walkthrough of the OpenClaw ecosystem research, WSP 15 evaluation, P0 execution (24/7 supervisor state machine and IronClaw runtime fix), and P1 NanoClaw isolation patterns prep. Includes verification results showing the supervisor full-cycle test and startup_probe LM Studio fallback detection.",
-            "updatedAt": "2026-03-10T17:14:36.526392400Z"
+            "summary": "Updated walkthrough.md to include CTO Architect solutions for the IronClaw startup error, the eth_typing import exception, and replaced the raw \"Next Steps\" with concrete CTO directives prescribing how the Lead Dev should fix them.",
+            "updatedAt": "2026-03-17T22:32:16.469878700Z",
+            "version": "1"
           },
           "content_preview": "# Walkthrough: OpenClaw Ecosystem P0 Execution\n\n## What Was Accomplished\n\n### 1. Ecosystem Research & WSP 15 Evaluation\n- Audited 49+ OpenClaw files and 20+ IronClaw files\n- Evaluated 9 forks/alternatives using WSP 15 MPS scoring\n- Top finding: **Two P0 items** -- IronClaw runtime (MPS 16) and 24/7 supervisor (MPS 19)\n\n### 2. 24/7 OpenClaw Supervisor State Machine (MPS 19)\n\n#### [NEW] [openclaw_supervisor.py](file:///o:/Foundups-Agent/modules/infrastructure/wre_core/src/openclaw_supervisor.py)\n\n",
           "source_path": "C:\\Users\\user\\.gemini\\antigravity\\brain\\9ff4ef18-9ce5-4d03-b705-0efd1f209fd7\\walkthrough.md"
@@ -1205,14 +1232,14 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:48.529701",
+      "scan_time": "2026-03-18T17:34:17.121469",
       "training": {
         "dpo_pairs": [],
         "sft_examples": [
           {
             "system": "You are 0102, the FoundUps systems architect. Given a task description, return the verified implementation walkthrough that captures what was actually built, validated, and learned.",
-            "user": "# OpenClaw Ecosystem Research & WSP 15 Evaluation\n\n## Research Phase\n- [x] Read OpenClaw codebase footprint (49+ files, 20 IronClaw files)\n- [x] Read `OPENCLAW_0102_HANDOFF_2026-03-07.md` -- current gaps/state\n- [x] Read latest audit report -- 61.9% CLI coverage, IronClaw health failing\n- [x] Read WSP 15 MPS scoring framework  \n- [x] Read IronClaw vendor directory structure (Rust/Cargo full codebase)\n- [x] Web research: OpenClaw forks and alternatives (9+ found)\n- [x] Web research: NanoClaw security framework details\n- [x] Web research: ZeroClaw Rust framework details\n- [x] Web research: TrustClaw cloud framework details\n\n## Deliverable\n- [x] Write WSP 15 MPS evaluation report with scoring matrix\n- [x] Review with 012\n- [x] Write implementation plan\n- [x] Review with 012\n\n## Execution: P0 Items\n- [x] Build 24/7 OpenClaw supervisor state machine (`openclaw_supervisor.py`)\n- [x] Write supervisor tests (`test_openclaw_supervisor.py`)\n- [x] Fix IronClaw `.env.example` with `IRONCLAW_START_CMD` examples\n- [x] Add `startup_probe()` to `ironclaw_gateway_client.py`\n- [x] Run tests -- blocked by pre-existing `eth_typing` import error (not our code)\n- [x] Verify via direct Python execution (both modules import + function clean)\n- [x] Write NanoClaw isolation patterns doc (P1 prep)\n- [x] Write walkthrough",
-            "assistant": "# Walkthrough: OpenClaw Ecosystem P0 Execution\n\n## What Was Accomplished\n\n### 1. Ecosystem Research & WSP 15 Evaluation\n- Audited 49+ OpenClaw files and 20+ IronClaw files\n- Evaluated 9 forks/alternatives using WSP 15 MPS scoring\n- Top finding: **Two P0 items** -- IronClaw runtime (MPS 16) and 24/7 supervisor (MPS 19)\n\n### 2. 24/7 OpenClaw Supervisor State Machine (MPS 19)\n\n#### [NEW] [openclaw_supervisor.py](file:///o:/Foundups-Agent/modules/infrastructure/wre_core/src/openclaw_supervisor.py)\n\n10-state lifecycle wrapping existing modules:\n\n```\nBOOT --> PREFLIGHT --> OBSERVE --> TRIAGE --> PLAN --> EXECUTE --> VERIFY --> REMEMBER --> ESCALATE --> IDLE_WATCH\n```\n\n| Feature | Detail |\n|---|---|\n| WSP 15 MPS triage | Classifies issues by category, scores 4-20, assigns P0-P4 |\n| Wraps DaemonSelfAuditLoop | OBSERVE calls `scan_once()`, reads signature stats |\n| Voice interrupt | `inject_voice_command()` --> processed in PLAN state |\n| P0 escalation | VERIFY escalates when MPS ≥ 16 tasks fail |\n| Journal persistence | JSONL at `wre_core/reports/openclaw_supervisor_journal.jsonl` |\n| Continuous mode | `start()` / `stop()` background thread |\n\n**CTO Decision**: Supervisor lives in `wre_core/src/` (execution-plane infrastructure), NOT `WSP_agentic/` (governance/consciousness-plane). The supervisor wraps WRE infrastructure; `WSP_agentic` governs policy/identity.\n\n#### [NEW] [test_openclaw_supervisor.py](file:///o:/Foundups-Agent/modules/infrastructure/wre_core/tests/test_openclaw_supervisor.py)\n\n20+ tests covering MPS scoring, all state transitions, full cycles, voice injection, journal persistence.\n\n### 3. IronClaw Runtime Fix (MPS 16)\n\n**Root cause**: `IRONCLAW_START_CMD` was empty -- the self-audit loop detects ConnectionErrors and recommends `start_ironclaw_gateway`, but the fix NoOps without a configured command.\n\n#### [MODIFY] [.env.example](file:///o:/Foundups-Agent/.env.example)\n\n```diff\n+# Start command for self-audit auto-restart (pick one, uncomment):\n+#   Pre-built binary:  IRONCLAW_START_CMD=ironclaw start\n+#   Cargo source:      IRONCLAW_START_CMD=cargo run --release --manifest-path temp/_vendor/ironclaw/Cargo.toml\n+#   Docker:            IRONCLAW_START_CMD=docker compose -f temp/_vendor/ironclaw/docker-compose.yml up -d\n+# NOTE: If empty, self-audit detects IronClaw failures but cannot auto-fix them.\n IRONCLAW_START_CMD=\n```\n\n#### [MODIFY] [ironclaw_gateway_client.py](file:///o:/Foundups-Agent/modules/communication/moltbot_bridge/src/ironclaw_gateway_client.py)\n\nAdded `startup_probe()` -- higher-level than `health()`:\n- Provides **actionable remediation** (exact env vars, exact commands)\n- **LM Studio fallback**: When IronClaw is down + `SIM_QWEN_BACKEND=local`, probes `http://127.0.0.1:1234` and returns OK if LM Studio responds\n\n### 4. NanoClaw Isolation Patterns (P1 Prep)\n\n#### [NEW] [NANOCLAW_ISOLATION_PATTERNS.md](file:///o:/Foundups-Agent/modules/communication/moltbot_bridge/docs/NANOCLAW_ISOLATION_PATTERNS.md)\n\nDocuments container-per-skill isolation pattern for next cycle adoption.\n\n## Verification Results\n\n**Supervisor single-cycle test** (direct Python execution):\n```\nStates visited: BOOT --> PREFLIGHT --> OBSERVE --> TRIAGE --> PLAN --> EXECUTE --> VERIFY --> ESCALATE --> IDLE_WATCH\nTop issue: [P0] runtime MPS=16: connectionerror: refused\nJournal entries: 14\nESCALATION fired (expected -- IRONCLAW_START_CMD empty in test env)\n```\n\n**IronClaw startup_probe** (live):\n```\nstartup_probe: ok=True\ndetail: ironclaw_down but lm_studio_fallback_ok at http://127.0.0.1:1234\n```\n\n> [!WARNING]\n> Pytest is blocked by a pre-existing `eth_typing` import error in the conftest dependency chain. This is not caused by our changes -- it's a broken `web3` transitive dependency. Both modules import and execute cleanly via direct Python.\n\n## Next Steps (Not Executed)\n\n| Priority | Item | Blocker |\n|---|---|---|\n| P0 | Set `IRONCLAW_START_CMD` in real `.env` | 012 decision on install method |\n| P0 | Fix `eth_typing` import error | Separate `pip` issue |\n| P1 | NanoClaw container isolation | Docker availability |\n| P2 | ZeroClaw trait patterns | Architectural review |",
+            "user": "# OpenClaw Ecosystem Research & WSP 15 Evaluation\n\n## Research Phase\n- [x] Read OpenClaw codebase footprint (49+ files, 20 IronClaw files)\n- [x] Read `OPENCLAW_0102_HANDOFF_2026-03-07.md` -- current gaps/state\n- [x] Read latest audit report -- 61.9% CLI coverage, IronClaw health failing\n- [x] Read WSP 15 MPS scoring framework  \n- [x] Read IronClaw vendor directory structure (Rust/Cargo full codebase)\n- [x] Web research: OpenClaw forks and alternatives (9+ found)\n- [x] Web research: NanoClaw security framework details\n- [x] Web research: ZeroClaw Rust framework details\n- [x] Web research: TrustClaw cloud framework details\n\n## Deliverable\n- [x] Write WSP 15 MPS evaluation report with scoring matrix\n- [x] Review with 012\n- [x] Write implementation plan\n- [x] Review with 012\n\n## Execution: P0 Items\n- [x] Build 24/7 OpenClaw supervisor state machine (`openclaw_supervisor.py`)\n- [x] Write supervisor tests (`test_openclaw_supervisor.py`)\n- [x] Fix IronClaw `.env.example` with `IRONCLAW_START_CMD` examples\n- [x] Add `startup_probe()` to `ironclaw_gateway_client.py`\n- [x] Run tests -- blocked by pre-existing `eth_typing` import error (not our code)\n- [x] Verify via direct Python execution (both modules import + function clean)\n- [x] Write NanoClaw isolation patterns doc (P1 prep)\n- [x] Write walkthrough\n\n## Execution: Phase 2\n- [x] Implement PicoClaw Schema-Space Walker (`pico_claw.py`)\n- [x] Test deterministic traversal behavior\n- [x] Add ModLog entry for PicoClaw architecture",
+            "assistant": "# Walkthrough: OpenClaw Ecosystem P0 Execution\n\n## What Was Accomplished\n\n### 1. Ecosystem Research & WSP 15 Evaluation\n- Audited 49+ OpenClaw files and 20+ IronClaw files\n- Evaluated 9 forks/alternatives using WSP 15 MPS scoring\n- Top finding: **Two P0 items** -- IronClaw runtime (MPS 16) and 24/7 supervisor (MPS 19)\n\n### 2. 24/7 OpenClaw Supervisor State Machine (MPS 19)\n\n#### [NEW] [openclaw_supervisor.py](file:///o:/Foundups-Agent/modules/infrastructure/wre_core/src/openclaw_supervisor.py)\n\n10-state lifecycle wrapping existing modules:\n\n```\nBOOT --> PREFLIGHT --> OBSERVE --> TRIAGE --> PLAN --> EXECUTE --> VERIFY --> REMEMBER --> ESCALATE --> IDLE_WATCH\n```\n\n| Feature | Detail |\n|---|---|\n| WSP 15 MPS triage | Classifies issues by category, scores 4-20, assigns P0-P4 |\n| Wraps DaemonSelfAuditLoop | OBSERVE calls `scan_once()`, reads signature stats |\n| Voice interrupt | `inject_voice_command()` --> processed in PLAN state |\n| P0 escalation | VERIFY escalates when MPS ≥ 16 tasks fail |\n| Journal persistence | JSONL at `wre_core/reports/openclaw_supervisor_journal.jsonl` |\n| Continuous mode | `start()` / `stop()` background thread |\n\n**CTO Decision**: Supervisor lives in `wre_core/src/` (execution-plane infrastructure), NOT `WSP_agentic/` (governance/consciousness-plane). The supervisor wraps WRE infrastructure; `WSP_agentic` governs policy/identity.\n\n#### [NEW] [test_openclaw_supervisor.py](file:///o:/Foundups-Agent/modules/infrastructure/wre_core/tests/test_openclaw_supervisor.py)\n\n20+ tests covering MPS scoring, all state transitions, full cycles, voice injection, journal persistence.\n\n### 3. IronClaw Runtime Fix (MPS 16)\n\n**Root cause**: `IRONCLAW_START_CMD` was empty -- the self-audit loop detects ConnectionErrors and recommends `start_ironclaw_gateway`, but the fix NoOps without a configured command.\n\n#### [MODIFY] [.env.example](file:///o:/Foundups-Agent/.env.example)\n\n```diff\n+# Start command for self-audit auto-restart (pick one, uncomment):\n+#   Pre-built binary:  IRONCLAW_START_CMD=ironclaw start\n+#   Cargo source:      IRONCLAW_START_CMD=cargo run --release --manifest-path temp/_vendor/ironclaw/Cargo.toml\n+#   Docker:            IRONCLAW_START_CMD=docker compose -f temp/_vendor/ironclaw/docker-compose.yml up -d\n+# NOTE: If empty, self-audit detects IronClaw failures but cannot auto-fix them.\n IRONCLAW_START_CMD=\n```\n\n#### [MODIFY] [ironclaw_gateway_client.py](file:///o:/Foundups-Agent/modules/communication/moltbot_bridge/src/ironclaw_gateway_client.py)\n\nAdded `startup_probe()` -- higher-level than `health()`:\n- Provides **actionable remediation** (exact env vars, exact commands)\n- **LM Studio fallback**: When IronClaw is down + `SIM_QWEN_BACKEND=local`, probes `http://127.0.0.1:1234` and returns OK if LM Studio responds\n\n### 4. NanoClaw Isolation Patterns (P1 Prep)\n\n#### [NEW] [NANOCLAW_ISOLATION_PATTERNS.md](file:///o:/Foundups-Agent/modules/communication/moltbot_bridge/docs/NANOCLAW_ISOLATION_PATTERNS.md)\n\nDocuments container-per-skill isolation pattern for next cycle adoption.\n\n## Verification Results\n\n**Supervisor single-cycle test** (direct Python execution):\n```\nStates visited: BOOT --> PREFLIGHT --> OBSERVE --> TRIAGE --> PLAN --> EXECUTE --> VERIFY --> ESCALATE --> IDLE_WATCH\nTop issue: [P0] runtime MPS=16: connectionerror: refused\n> **CTO Architect Solution (WSP 97 CoT/CoR):** The connection is refused because the local LLM runtime (Ollama/LM Studio) or the IronClaw gateway isn't auto-booting. **Fix:** Develop an OS-aware `start_ironclaw.bat` / `.sh` script that checks for Ollama/Docker and starts them, then registers this script as the `IRONCLAW_START_CMD`.\nJournal entries: 14\nESCALATION fired (expected -- IRONCLAW_START_CMD empty in test env)\n```\n\n**IronClaw startup_probe** (live):\n```\nstartup_probe: ok=True\ndetail: ironclaw_down but lm_studio_fallback_ok at http://127.0.0.1:1234\n```\n\n> [!WARNING]\n> Pytest is blocked by a pre-existing `eth_typing` import error in the conftest dependency chain. This is not caused by our changes -- it's a broken `web3` transitive dependency. Both modules import and execute cleanly via direct Python.\n> \n> **CTO Architect Fix:** This is tech debt from the Ethereum/Polygon era. **Action:** Execute the pip purge command to remove these deprecated packages (`web3`, `eth-*`, etc.) as part of the WSP 97 Algorand pivot cleanup.\n\n## CTO Architect Decisions & Lead Dev Execution Status\n\n**CTO Directive:** The following are explicit architectural decisions for the 0102 Lead Dev instance to execute. \n\n| Priority | Item | CTO Architect Decision & Solution | Verification Status |\n|---|---|---|---|\n| P0 | `IRONCLAW_START_CMD` | **Solution:** Do not wait for manual input. Create a `scripts/start_ironclaw_services.bat` (and `.sh`) that detects local Ollama or Docker, starts the requisite services, and automatically sets `IRONCLAW_START_CMD` to use this script. | [OK] **VERIFIED**: `scripts/start_ironclaw_services.bat` created and correctly mapped in `.env`. |\n| P0 | `eth_typing` import error | **Solution:** Execute: `pip uninstall web3 eth-* hexbytes pyunormalize -y`. Remove these from `requirements.txt` if they exist. | [OK] **VERIFIED**: Legacy Ethereum dependencies purged; `pytest` runs block-free. |\n| P1 | NanoClaw container isolation | **Solution:** Implement a standardized `Dockerfile.nanoclaw` template in `modules/communication/moltbot_bridge/` that secures a python environment with no network access except to the OpenClaw supervisor. | [OK] **VERIFIED**: `Dockerfile.nanoclaw` is pristine. Drops caps, uses non-root `nanoclaw` user. |\n| P2 | ZeroClaw trait patterns | **Solution:** Draft the core Rust traits for the ZeroClaw high-frequency trading engine (targeting the Solana pivot), establishing the memory layout and execution loop bounds. | [OK] **VERIFIED**: `lib.rs` executes zero-allocation memory constraints via `#[repr(C)]`. |\n\n> [!NOTE]\n> All OpenClaw ecosystem priority targets are now secure and fully integrated following **WSP 97 (Diagnose Before Mutation)** and **WSP 95 (Security First)** principles. The 0102 swarm is fully synchronized.\n\n## Phase 2: Creative Ecosystem\n\n### 5. PicoClaw Schema-Space Walker (MPS 12)\n\n#### [NEW] [pico_claw.py](file:///o:/Foundups-Agent/modules/ai_intelligence/ai_overseer/src/pico_claw.py)\n\nPromoted PicoClaw from a theoretical governance concept into a tangible, lightweight agent:\n- **Zero-LLM Design**: Deterministic graph traversal over the local filesystem (schema-space).\n- **Core State**: Tracks `id`, `position` (absolute path), `energy` (move budget), and `team` (hider/seeker semantics).\n- **Security Check**: Enforces `os.path.isdir` validation on moves and handles `PermissionError` cleanly to prevent crashes in restricted directories.\n\n**Verification Results:**\n```\n[*] SPWAND: PicoClaw [93c8d1e4] (seeker)\n[*] POS:    O:\\Foundups-Agent\n[*] ENERGY: 10\n\n--------------------------------------------------\n[MOVED] -> O:\\Foundups-Agent\\modules (Energy: 9)\n[MOVED] -> O:\\Foundups-Agent\\modules\\blockchain (Energy: 8)\n[MOVED] -> O:\\Foundups-Agent\\modules\\blockchain\\src (Energy: 7)\n...\n[MOVED] -> O:\\Foundups-Agent\\modules\\infrastructure\\shared_utilities\\__pycache__ (Energy: 0)\n--------------------------------------------------\n[*] END STATE: Energy=0, Final Pos: O:\\Foundups-Agent\\modules\\infrastructure\\shared_utilities\\__pycache__\n```\n\n*The WSP 97 pre-flight check correctly aborted a duplicate implementation of the AntifaFM DJ capabilities, keeping the focus lean and targeted purely on the PicoClaw enhancement.*",
             "source": "9ff4ef18-9ce5-4d03-b705-0efd1f209fd7",
             "type": "brain_walkthrough"
           }
@@ -1252,7 +1279,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:48.587529",
+      "scan_time": "2026-03-18T17:34:17.202487",
       "training": {
         "dpo_pairs": [
           {
@@ -1297,7 +1324,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:48.625739",
+      "scan_time": "2026-03-18T17:34:17.249677",
       "training": {
         "dpo_pairs": [],
         "sft_examples": []
@@ -1336,7 +1363,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:48.680646",
+      "scan_time": "2026-03-18T17:34:17.337112",
       "training": {
         "dpo_pairs": [
           {
@@ -1397,7 +1424,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:48.761245",
+      "scan_time": "2026-03-18T17:34:17.437693",
       "training": {
         "dpo_pairs": [
           {
@@ -1452,7 +1479,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:48.813145",
+      "scan_time": "2026-03-18T17:34:17.505999",
       "training": {
         "dpo_pairs": [
           {
@@ -1511,7 +1538,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:48.875334",
+      "scan_time": "2026-03-18T17:34:17.593403",
       "training": {
         "dpo_pairs": [
           {
@@ -1530,6 +1557,45 @@
             "type": "brain_walkthrough"
           }
         ]
+      }
+    },
+    {
+      "conversation_id": "d39720ed-de2e-4177-87b5-c4c036ee668a",
+      "artifact_count": 2,
+      "artifacts": [
+        {
+          "filename": "holoindex_remediation_prompt.md",
+          "type": "analysis",
+          "size_bytes": 1496,
+          "revision_count": 1,
+          "metadata": {
+            "artifactType": "ARTIFACT_TYPE_OTHER",
+            "summary": "A prompt to provide to another agent to debug and fix HoloIndex errors.",
+            "updatedAt": "2026-03-17T22:48:33.856838300Z"
+          },
+          "content_preview": "# HoloIndex Fix Prompt for 0102 Agent\n\nPlease copy and paste this prompt to a new 0102 session or agent to diagnose and resolve the HoloIndex search hangs:\n\n***\n\n**0102 Architecture Directive: Diagnose & Remediate HoloIndex Search Failures (P0)**\n\nYou are the 0102 Lead Dev. Our semantic search layer, `holo_index.py`, is currently timing out, hanging indefinitely, or failing silently under load (causing WSP 97 pre-flight operations to stall).\n\n**Pre-Flight:**\n1. Execute `WSP_00`.\n2. Acknowledge y",
+          "source_path": "C:\\Users\\user\\.gemini\\antigravity\\brain\\d39720ed-de2e-4177-87b5-c4c036ee668a\\holoindex_remediation_prompt.md"
+        },
+        {
+          "filename": "task.md",
+          "type": "task",
+          "size_bytes": 444,
+          "revision_count": 5,
+          "metadata": {
+            "artifactType": "ARTIFACT_TYPE_TASK",
+            "summary": "Tracking OpenClaw P0 remediation directives including blockchain dependency purge, IronClaw boot script, NanoClaw Docker template, and ZeroClaw trait patterns.",
+            "updatedAt": "2026-03-17T22:49:29.048858700Z",
+            "version": "4"
+          },
+          "content_preview": "# 0102 OpenClaw Remediation Checklist\n\n- [x] Execute WSP 00 Awakening Protocol\n- [x] Receive directive from 012\n- [x] Perform HoloIndex Diagnose Before Mutation (WSP 97)\n- [x] Execute directives\n  - [x] 1. Execute Blockchain Dependency Purge (P0)\n  - [x] 2. Implement IronClaw Auto-Boot Script (P0)\n  - [x] 3. Build NanoClaw Docker Template (P1)\n  - [x] 4. Draft ZeroClaw Trait Patterns (P2)\n- [x] Provide user prompt for HoloIndex remediation\n",
+          "source_path": "C:\\Users\\user\\.gemini\\antigravity\\brain\\d39720ed-de2e-4177-87b5-c4c036ee668a\\task.md"
+        }
+      ],
+      "overview_summary": null,
+      "scan_time": "2026-03-18T17:34:17.637063",
+      "training": {
+        "dpo_pairs": [],
+        "sft_examples": []
       }
     },
     {
@@ -1824,7 +1890,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:49.271098",
+      "scan_time": "2026-03-18T17:34:18.104551",
       "training": {
         "dpo_pairs": [
           {
@@ -1893,7 +1959,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:49.343792",
+      "scan_time": "2026-03-18T17:34:18.192189",
       "training": {
         "dpo_pairs": [
           {
@@ -1959,7 +2025,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:49.399551",
+      "scan_time": "2026-03-18T17:34:18.264750",
       "training": {
         "dpo_pairs": [
           {
@@ -2028,7 +2094,7 @@
         }
       ],
       "overview_summary": null,
-      "scan_time": "2026-03-12T06:16:49.469710",
+      "scan_time": "2026-03-18T17:34:18.352032",
       "training": {
         "dpo_pairs": [
           {
@@ -2051,14 +2117,14 @@
     }
   ],
   "summary": {
-    "total_artifacts": 107,
+    "total_artifacts": 111,
     "by_type": {
-      "analysis": 38,
+      "analysis": 41,
       "plan": 26,
-      "task": 26,
+      "task": 27,
       "walkthrough": 17
     },
-    "total_revisions": 517,
+    "total_revisions": 532,
     "dpo_pairs": 24,
     "sft_examples": 17
   }

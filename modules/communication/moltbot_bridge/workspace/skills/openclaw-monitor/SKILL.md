@@ -65,6 +65,25 @@ if dae.wre:
 "
 ```
 
+## Self Research Refresh
+
+Refresh the system's own understanding of what to update next:
+
+```bash
+cd O:/Foundups-Agent && python scripts/refresh_self_research.py
+```
+
+Primary report:
+
+- `modules/communication/moltbot_bridge/workspace/reports/openclaw_self_research_status.json`
+
+This consolidates:
+- HoloIndex freshness and refresh attempts
+- WSP compliance findings
+- daemon self-audit recurrence
+- grant watchlist changes and errors
+- ranked autonomous tasks written into `AgentDB`
+
 ## What Gets Monitored
 
 | Component | Status Source | Checks |

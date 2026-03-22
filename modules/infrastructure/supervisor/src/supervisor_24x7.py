@@ -243,6 +243,17 @@ class Supervisor24x7:
         except (ImportError, Exception) as e:
             logger.warning(f"[SUPERVISOR] BOOT: LibidoMonitor unavailable: {e}")
 
+        # Wire GitHub Orchestrator to FAM (WSP 103)
+        try:
+            from modules.infrastructure.github_orchestrator import wire_github_to_fam
+
+            if wire_github_to_fam():
+                logger.info("[SUPERVISOR] BOOT: GitHub Orchestrator wired to FAM")
+            else:
+                logger.warning("[SUPERVISOR] BOOT: GitHub Orchestrator wiring failed")
+        except ImportError as e:
+            logger.warning(f"[SUPERVISOR] BOOT: GitHub Orchestrator unavailable: {e}")
+
         self._transition_to(SupervisorState.PREFLIGHT)
 
     async def _handle_preflight(self) -> None:

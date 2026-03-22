@@ -166,9 +166,42 @@ wire_github_to_fam()
 
 - **v0.2.0** → **v0.3.0**: Added SKILLz for /github command
 
+---
+
+## 2026-03-22 - Sprint 5: Supervisor Integration (WSP 97)
+
+**Author**: 0102
+**WSP Compliance**: WSP 97, WSP 103
+
+### WSP 97 Applied
+
+| Step | Action |
+|------|--------|
+| HoloIndex | Read supervisor_24x7.py |
+| Research | Found BOOT subsystem loading pattern |
+| Hard Think | Add to BOOT as 6th subsystem |
+| First Principles | Single wire_github_to_fam() call |
+| Build | Added to _handle_boot() |
+| Follow WSP | Audit PASS, ModLogs updated |
+
+### Changes
+
+- Added `__init__.py` at module root (was missing - import failed)
+- Wired to supervisor BOOT sequence
+
+### Audit
+
+```
+[SUPERVISOR] BOOT: GitHub Orchestrator wired to FAM
+```
+
+### Version
+
+- **v0.3.0** → **v0.3.1**: Added root __init__.py, supervisor integration
+
 ### Next Steps
 
 1. Register skill in HoloIndex
-2. Test /github command flow
+2. Test /github command flow via SKILLz
 3. Add project board commands (when scope available)
 4. Create tests for executor

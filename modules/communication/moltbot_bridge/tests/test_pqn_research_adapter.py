@@ -115,3 +115,105 @@ class TestPQNResearchAdapterRuntimeControl:
         reporter.assert_called_once()
         assert reporter.call_args.args[0] == "pqn_simulation_runtime"
         assert reporter.call_args.args[2] == "starting"
+
+    def test_compare_get_physics_done_uses_wsp97_dossier(self):
+        def fake_load_json(path):
+            path_str = str(path)
+            if path_str.endswith("pqn_external_tool_gpd_wsp97_20260322.json"):
+                return {
+                    "tool_name": "Get Physics Done",
+                    "alias": "GPD",
+                    "upstream": {
+                        "full_name": "psi-oss/get-physics-done",
+                        "updated_at": "2026-03-21T20:51:26Z",
+                        "stars": 481,
+                        "forks": 69,
+                    },
+                    "wsp97": {
+                        "adoption_decision": "pilot_in_isolation",
+                        "system_integration": "integrate_via_wrapper",
+                        "recommended_plane": "external_worker",
+                        "placement_in_foundups": "pqn_research_watchlist plus pqn_research_adapter knowledge surface",
+                        "first_safe_step": "Refresh repo and README drift.",
+                        "wsp15": {"priority": "P1", "total": 13},
+                    },
+                    "foundups_alignment": {
+                        "overlap": ["research workflow orchestration", "verification-heavy physics work"],
+                    },
+                }
+            if path_str.endswith("pqn_external_research_watchlist_status.json"):
+                return {
+                    "items": [
+                        {
+                            "name": "Get Physics Done",
+                            "last_checked": "2026-03-22T00:00:00Z",
+                            "last_refresh_result": "unchanged",
+                        }
+                    ]
+                }
+            return {}
+
+        with patch(
+            "modules.communication.moltbot_bridge.src.pqn_research_adapter._load_json",
+            side_effect=fake_load_json,
+        ):
+            result = handle_pqn_research_intent(
+                "compare get physics done to pqn research",
+                "012",
+            )
+
+        assert "Get Physics Done" in result
+        assert "pilot_in_isolation" in result
+        assert "external_worker" in result
+        assert "unchanged" in result
+
+    def test_should_we_adopt_autoresearch_uses_wsp97_dossier(self):
+        def fake_load_json(path):
+            path_str = str(path)
+            if path_str.endswith("pqn_external_tool_autoresearch_wsp97_20260322.json"):
+                return {
+                    "tool_name": "Karpathy AutoResearch",
+                    "alias": "AutoResearch",
+                    "upstream": {
+                        "full_name": "karpathy/autoresearch",
+                        "updated_at": "2026-03-21T21:18:59Z",
+                        "stars": 47968,
+                        "forks": 6651,
+                    },
+                    "wsp97": {
+                        "adoption_decision": "pilot_in_isolation",
+                        "system_integration": "integrate_via_wrapper",
+                        "recommended_plane": "external_worker",
+                        "placement_in_foundups": "pqn_research_watchlist plus pqn_research_adapter plus isolated broker-launched PQN pilot",
+                        "first_safe_step": "Monitor upstream drift and design a broker-launched sandbox pilot.",
+                        "wsp15": {"priority": "P1", "total": 14},
+                    },
+                    "foundups_alignment": {
+                        "overlap": ["bounded experiment search", "research artifact generation"],
+                    },
+                }
+            if path_str.endswith("pqn_external_research_watchlist_status.json"):
+                return {
+                    "items": [
+                        {
+                            "name": "Karpathy AutoResearch",
+                            "last_checked": "2026-03-22T00:00:00Z",
+                            "last_refresh_result": "first_seen",
+                        }
+                    ]
+                }
+            return {}
+
+        with patch(
+            "modules.communication.moltbot_bridge.src.pqn_research_adapter._load_json",
+            side_effect=fake_load_json,
+        ):
+            result = handle_pqn_research_intent(
+                "should we adopt autoresearch for pqn",
+                "012",
+            )
+
+        assert "Karpathy AutoResearch" in result
+        assert "pilot_in_isolation" in result
+        assert "external_worker" in result
+        assert "first_seen" in result

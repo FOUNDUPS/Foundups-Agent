@@ -1247,3 +1247,20 @@ openclaw onboard
 - Supervisor now observes incremental DAEmon follow events, tracks restart attempts inside a rolling window, and escalates when the resident OpenClaw repair budget is exhausted.
 - Failed verify cycles now record memory and advance the event cursor before escalation.
 
+## 2026-03-22: OpenClaw autonomy external prompt pack
+
+**Author**: 0102  
+**WSP**: 22, 77, 97
+
+### Changes
+- Added `workspace/OPENCLAW_AUTONOMY_EXTERNAL_PROMPT_PACK_2026-03-22.md`.
+- Added a fresh-context master prompt plus bounded worker prompts for:
+  - autonomous task consumer
+  - supervisor unification
+  - menu/skill island routing
+- Added workspace memory note `workspace/memory/2026-03-22-openclaw-autonomy-prompt-pack.md`.
+
+### Outcome
+- 012 can now hand another `0102` context a repo-true autonomy mission without paying for another full-stack architecture re-audit.
+- OpenClaw autonomy work is now split into explicit parallelizable slices instead of one oversized prompt.
+
