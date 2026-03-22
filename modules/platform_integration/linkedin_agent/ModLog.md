@@ -2,6 +2,55 @@
 
 ## Latest Changes
 
+### V074 - Qwen3 AI-Powered Profile Evaluation (WSP 77 Phase 2)
+**Date**: 2026-03-22
+**Status**: IMPLEMENTED
+
+**Problem Identified**:
+Group member approval used hardcoded regex patterns (is_cxo(), spam keywords) - no intelligent evaluation of profile quality, engagement potential, or nuanced spam detection.
+
+**Solution - AI-Powered Profile Evaluation:**
+
+1. **Created `src/qwen_profile_evaluator.py`** (~450 lines):
+   - `Qwen3ProfileEvaluator` class using LM Studio API (preferred) or llama_cpp fallback
+   - `ProfileDecision` enum: APPROVE, APPROVE_CONNECT, DENY, DENY_INCOMPLETE, NEEDS_REVIEW
+   - `ProfileEvaluation` dataclass with confidence, reasoning, threat_level, engagement_potential
+   - Uses centralized model selection via `local_model_selection.py` (WSP 84)
+
+2. **Updated `skillz/linkedin_group_moderation/executor.py`**:
+   - Integrated Qwen3 profile evaluator into `triage_member()` function
+   - Maps ProfileDecision → TriageDecision with AI-generated reasoning
+   - Falls back to regex rules if Qwen unavailable
+
+3. **Updated `skillz/openclaw_group_news/executor.py`**:
+   - Added Qwen3 evaluation display in approval prompts
+   - Uses AI reasoning in approve/deny decisions
+
+**Decision Flow:**
+```
+Profile → Qwen3 LM Studio API → ProfileEvaluation
+  ├── APPROVE_CONNECT: CxO/founder → approve + send connection request
+  ├── APPROVE: Standard member → approve with welcome message
+  ├── DENY: Spam/bot indicators → silent deny
+  ├── DENY_INCOMPLETE: No photo → message requesting completion + deny
+  └── NEEDS_REVIEW: Edge case → skip for human review
+```
+
+**Test Results:**
+```
+CEO at AI Ventures: approve_connect (0.95) - High-value member
+No profile image: deny (0.95) - Incomplete profile
+Data Scientist: approve (0.95) - Standard member
+```
+
+**Dependencies:**
+- `dependency_launcher`: Now auto-loads Qwen model via `load_all_models()`
+- `local_model_selection.py`: Centralized model path resolution
+
+**WSP**: WSP 22 (ModLog), WSP 77 (Agent Coordination), WSP 84 (Code Reuse)
+
+---
+
 ### V073 - tSingularity (0201) Channel Added + Epoch Model
 **Date**: 2026-03-19
 **Status**: IMPLEMENTED

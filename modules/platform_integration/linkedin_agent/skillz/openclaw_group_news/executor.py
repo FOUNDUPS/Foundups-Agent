@@ -37,6 +37,19 @@ try:
 except ImportError:
     pass
 
+# Qwen3 AI-powered profile evaluation (replaces hardcoded rules)
+QWEN3_AVAILABLE = False
+try:
+    from modules.platform_integration.linkedin_agent.src.qwen_profile_evaluator import (
+        evaluate_profile_with_qwen,
+        ProfileDecision,
+        ProfileEvaluation,
+    )
+    QWEN3_AVAILABLE = True
+    logger.info("[QWEN3] Profile evaluator available")
+except ImportError:
+    logger.info("[QWEN3] Profile evaluator not available - using fallback rules")
+
 # Constants
 LINKEDIN_GROUP_ID = "6729915"
 LINKEDIN_GROUP_URL = f"https://www.linkedin.com/groups/{LINKEDIN_GROUP_ID}/"
@@ -1234,28 +1247,75 @@ class OpenClawGroupMembershipDAE:
         from selenium.webdriver.support.ui import WebDriverWait
 
         try:
-            editor = WebDriverWait(driver, 8).until(
-                EC.presence_of_element_located(
-                    (
-                        By.CSS_SELECTOR,
-                        "div.msg-form__contenteditable[contenteditable='true']",
-                    )
-                )
-            )
+            # Find all editors - prefer the modal one (usually the last/visible one)
+            editors = driver.find_elements(By.CSS_SELECTOR, "div.msg-form__contenteditable[contenteditable='true']")
+            editor = None
+            for e in reversed(editors):  # Check from last (modal) to first
+                if e.is_displayed():
+                    editor = e
+                    break
+            if not editor and editors:
+                editor = editors[-1]
+
+            if not editor:
+                logger.warning("[LN-GROUP-MEMBER] No message editor found")
+                return False
+
             editor.click()
+            time.sleep(0.3)
             editor.send_keys(Keys.CONTROL, "a")
             editor.send_keys(Keys.BACKSPACE)
-            # Send multiline text line-by-line
-            lines = [line for line in message.splitlines() if line.strip()]
-            for idx, line in enumerate(lines):
-                editor.send_keys(line)
-                if idx < len(lines) - 1:
-                    editor.send_keys(Keys.SHIFT, Keys.ENTER)
+            time.sleep(0.2)
 
-            send_btn = WebDriverWait(driver, 8).until(
-                EC.element_to_be_clickable((By.CSS_SELECTOR, "button.msg-form__send-button"))
-            )
-            send_btn.click()
+            # Type message using clipboard (supports all Unicode including emojis)
+            # Copy to clipboard using pyperclip or JS
+            try:
+                import pyperclip
+                pyperclip.copy(message)
+                editor.send_keys(Keys.CONTROL, "v")
+            except ImportError:
+                # Fallback: Use JS clipboard API
+                driver.execute_script(
+                    """
+                    const text = arguments[1];
+                    const el = arguments[0];
+                    el.focus();
+                    navigator.clipboard.writeText(text).then(() => {
+                        document.execCommand('paste');
+                    }).catch(() => {
+                        // Fallback: set innerHTML with events
+                        el.innerHTML = text.replace(/\\n/g, '<br>');
+                        el.dispatchEvent(new InputEvent('input', {bubbles: true, data: text, inputType: 'insertText'}));
+                    });
+                    """,
+                    editor,
+                    message,
+                )
+            time.sleep(0.5)
+
+            # Wait for send button to become enabled
+            send_btn = None
+            send_btns = driver.find_elements(By.CSS_SELECTOR, "button.msg-form__send-button")
+            for btn in reversed(send_btns):
+                if btn.is_displayed():
+                    send_btn = btn
+                    break
+            if not send_btn and send_btns:
+                send_btn = send_btns[-1]
+
+            if not send_btn:
+                logger.warning("[LN-GROUP-MEMBER] No send button found")
+                return False
+
+            # Wait up to 3s for button to be enabled
+            for _ in range(6):
+                if send_btn.is_enabled():
+                    break
+                time.sleep(0.5)
+
+            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", send_btn)
+            time.sleep(0.3)
+            driver.execute_script("arguments[0].click();", send_btn)
             time.sleep(random.uniform(0.7, 1.5))
             return True
         except Exception as exc:
@@ -1545,6 +1605,937 @@ def run_group_membership_cycle(
         post_news_after=post_news_after,
         post_news_dry_run=post_news_dry_run,
     )
+
+
+def run_message_existing_members(
+    dry_run: bool = True,
+    max_members: int = 10,
+    screenshot_dir: Optional[str] = None,
+    skip_already_messaged: bool = True,
+) -> Dict[str, Any]:
+    """
+    Message existing (already approved) group members.
+
+    Goes to /manage/membership/members/ and sends intro messages.
+    Tracks who has been messaged in SQLite to avoid duplicates.
+
+    Args:
+        dry_run: Preview without sending
+        max_members: Max members to message per run
+        screenshot_dir: Optional screenshot directory
+        skip_already_messaged: Skip members already in DB
+
+    Returns:
+        Summary dict with counts
+    """
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+
+    dae = OpenClawGroupMembershipDAE()
+    summary = {
+        "action": "message_existing_members",
+        "dry_run": dry_run,
+        "processed": 0,
+        "messaged": 0,
+        "skipped": 0,
+        "failed": 0,
+        "status": "started",
+    }
+
+    # URL for existing members (not pending requests)
+    members_url = f"https://www.linkedin.com/groups/{dae.group_id}/manage/membership/members/"
+
+    try:
+        # Connect to existing Chrome debug session (already logged into LinkedIn)
+        from selenium import webdriver
+        from selenium.webdriver.chrome.options import Options
+
+        driver = None
+
+        # Primary: Connect to existing Chrome debug session (port 9222)
+        try:
+            options = Options()
+            options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
+            driver = webdriver.Chrome(options=options)
+            logger.info("[LN-GROUP-MEMBERS] Connected to Chrome debug port 9222")
+        except Exception as e:
+            logger.warning(f"[LN-GROUP-MEMBERS] Chrome 9222 connection failed: {e}")
+
+        # Fallback: BrowserManager - use same session key as linkedin_company_poster
+        # This reuses the existing logged-in session (linkedin_1263645)
+        if not driver:
+            try:
+                from modules.infrastructure.foundups_selenium.src.browser_manager import get_browser_manager
+            except ImportError:
+                # Handle direct script execution (modules not in path)
+                import sys
+                from pathlib import Path
+                repo_root = Path(__file__).parents[5]  # 5 levels up to repo root
+                if str(repo_root) not in sys.path:
+                    sys.path.insert(0, str(repo_root))
+                from modules.infrastructure.foundups_selenium.src.browser_manager import get_browser_manager
+            manager = get_browser_manager()
+            # CRITICAL: Use linkedin_1263645 to reuse existing logged-in session
+            # NOT linkedin_group_6729915 which would create a new blank session
+            driver = manager.get_browser("chrome", "linkedin_1263645")
+            logger.info("[LN-GROUP-MEMBERS] Using BrowserManager (session: linkedin_1263645)")
+
+        logger.info(f"[LN-GROUP-MEMBERS] Navigating to {members_url}")
+        driver.get(members_url)
+        time.sleep(random.uniform(4.0, 6.0))  # Longer wait for page to fully load
+
+        # Wait for member list to appear
+        try:
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "ul[class*='artdeco'], div[class*='groups-manage']"))
+            )
+        except Exception:
+            logger.warning("[LN-GROUP-MEMBERS] Timeout waiting for member list")
+
+        # Screenshot directory
+        if screenshot_dir:
+            os.makedirs(screenshot_dir, exist_ok=True)
+
+        # Find member rows - based on 012's DOM inspection
+        # DOM: ul.artdeco-li.t > li.artdeco-li.t__item
+        row_selectors = [
+            "li.artdeco-list__item",
+            "li[class*='artdeco-list__item']",
+            "li[class*='groups-manage']",
+            "ul[class*='artdeco'] > li",
+            "div[class*='groups-manage'] li",
+        ]
+
+        member_rows = []
+        for selector in row_selectors:
+            try:
+                member_rows = driver.find_elements(By.CSS_SELECTOR, selector)
+                if member_rows:
+                    logger.info(f"[LN-GROUP-MEMBERS] Found {len(member_rows)} rows via: {selector}")
+                    break
+            except Exception:
+                continue
+
+        if not member_rows:
+            summary["status"] = "no_members_found"
+            return summary
+
+        # Get already-messaged members from DB
+        messaged_profiles = set()
+        if skip_already_messaged:
+            try:
+                conn = sqlite3.connect(dae.db_path)
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT member_profile_url FROM agents_social_group_actions "
+                    "WHERE action_type = 'intro_message' AND action_status = 'ok'"
+                )
+                messaged_profiles = {row[0] for row in cursor.fetchall()}
+                conn.close()
+                logger.info(f"[LN-GROUP-MEMBERS] {len(messaged_profiles)} already messaged (will skip)")
+            except Exception as e:
+                logger.warning(f"[LN-GROUP-MEMBERS] DB check failed: {e}")
+
+        processed_count = 0
+        for idx, row in enumerate(member_rows[:max_members]):
+            if processed_count >= max_members:
+                break
+
+            try:
+                # Extract member info from row
+                # LinkedIn uses div, not span for these elements (as of 2026-03)
+                name_elem = None
+                for selector in ["div.artdeco-entity-lockup__title", "span.artdeco-entity-lockup__title"]:
+                    try:
+                        name_elem = row.find_element(By.CSS_SELECTOR, selector)
+                        if name_elem:
+                            break
+                    except Exception:
+                        continue
+                name = name_elem.text.strip() if name_elem else f"Member_{idx}"
+
+                headline_elem = None
+                for selector in ["div.artdeco-entity-lockup__subtitle", "span.artdeco-entity-lockup__subtitle"]:
+                    try:
+                        headline_elem = row.find_element(By.CSS_SELECTOR, selector)
+                        if headline_elem:
+                            break
+                    except Exception:
+                        continue
+                headline = headline_elem.text.strip() if headline_elem else ""
+
+                profile_url = ""
+                try:
+                    link_elem = row.find_element(By.CSS_SELECTOR, "a[href*='/in/']")
+                    profile_url = link_elem.get_attribute("href") or ""
+                except Exception:
+                    pass
+
+                # Skip if already messaged
+                if profile_url and profile_url in messaged_profiles:
+                    logger.debug(f"[LN-GROUP-MEMBERS] Skipping {name} (already messaged)")
+                    summary["skipped"] += 1
+                    continue
+
+                member = GroupMemberRequest(
+                    name=name,
+                    headline=headline,
+                    image_url="",  # Not needed for messaging
+                )
+
+                # Use enhanced personalized message builder (012's template)
+                try:
+                    from modules.platform_integration.linkedin_agent.skillz.linkedin_group_moderation.executor import (
+                        build_enhanced_welcome_message,
+                    )
+                    message = build_enhanced_welcome_message(member)
+                except ImportError:
+                    # Fallback to generic composer
+                    message = dae.message_composer.compose(member)
+
+                logger.info(f"[LN-GROUP-MEMBERS] [{idx+1}] {name} | {headline[:40]}...")
+
+                if dry_run:
+                    logger.info(f"[DRY-RUN] Would message: {name}")
+                    logger.debug(f"[DRY-RUN] Message preview:\n{message[:200]}...")
+                    summary["processed"] += 1
+                    processed_count += 1
+                    continue
+
+                # Live mode: Click Message button directly (NOT in dropdown - it's a separate button)
+                # As of 2026-03, LinkedIn shows Message as a pill button to the right of each row
+                try:
+                    # Message button is a separate button on the row, NOT in the overflow dropdown
+                    message_btn = None
+                    message_selectors = [
+                        ".//button[normalize-space()='Message']",
+                        ".//button[contains(@aria-label,'Message')]",
+                        ".//button[contains(text(),'Message')]",
+                        ".//span[normalize-space()='Message']/ancestor::button",
+                    ]
+                    for sel in message_selectors:
+                        try:
+                            message_btn = row.find_element(By.XPATH, sel)
+                            if message_btn:
+                                break
+                        except Exception:
+                            continue
+
+                    if not message_btn:
+                        logger.warning(f"[LN-GROUP-MEMBERS] Could not find Message button for {name}")
+                        summary["failed"] += 1
+                        continue
+
+                    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", message_btn)
+                    time.sleep(random.uniform(0.3, 0.6))
+                    message_btn.click()
+                    time.sleep(random.uniform(0.8, 1.4))
+
+                    # Send the message
+                    if dae._send_welcome_message(driver, message):
+                        summary["messaged"] += 1
+                        dae._log_action(
+                            member=member,
+                            action_type="intro_message",
+                            action_status="ok",
+                            message_preview=message,
+                        )
+                        logger.info(f"[LN-GROUP-MEMBERS] Messaged: {name}")
+                    else:
+                        summary["failed"] += 1
+                        dae._log_action(
+                            member=member,
+                            action_type="intro_message",
+                            action_status="failed",
+                            error_text="send_failed",
+                        )
+
+                    summary["processed"] += 1
+                    processed_count += 1
+
+                    # Anti-detection delay between messages
+                    delay = random.uniform(30, 90)
+                    logger.info(f"[LN-GROUP-MEMBERS] Waiting {delay:.0f}s before next message...")
+                    time.sleep(delay)
+
+                    # Refresh page to get fresh DOM
+                    driver.get(members_url)
+                    time.sleep(random.uniform(2.0, 3.5))
+
+                    # Re-find rows after refresh
+                    for selector in row_selectors:
+                        try:
+                            member_rows = driver.find_elements(By.CSS_SELECTOR, selector)
+                            if member_rows:
+                                break
+                        except Exception:
+                            continue
+
+                except Exception as e:
+                    logger.warning(f"[LN-GROUP-MEMBERS] Failed to message {name}: {e}")
+                    summary["failed"] += 1
+
+            except Exception as e:
+                logger.warning(f"[LN-GROUP-MEMBERS] Row {idx} extraction failed: {e}")
+                summary["failed"] += 1
+
+        summary["status"] = "dry_run_complete" if dry_run else "live_complete"
+        return summary
+
+    except Exception as exc:
+        summary["status"] = "error"
+        summary["error"] = str(exc)
+        logger.error(f"[LN-GROUP-MEMBERS] Error: {exc}")
+        return summary
+
+
+def read_linkedin_message_history(conversation_url: Optional[str] = None, limit: int = 20) -> Dict[str, Any]:
+    """
+    Read message history from LinkedIn messaging page.
+
+    This function scrapes the current LinkedIn messaging conversation
+    to allow a second agent to understand the conversation context.
+
+    Args:
+        conversation_url: Optional URL to a specific conversation.
+                         If None, reads the currently open conversation.
+        limit: Maximum number of messages to extract.
+
+    Returns:
+        Dict with conversation info and messages list.
+    """
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+    from selenium.webdriver.common.by import By
+
+    result = {
+        "status": "started",
+        "conversation_url": "",
+        "participant": "",
+        "messages": [],
+        "error": None,
+    }
+
+    try:
+        options = Options()
+        options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
+        driver = webdriver.Chrome(options=options)
+        logger.info("[LN-MSG-READER] Connected to Chrome debug port 9222")
+
+        # Navigate to conversation if URL provided
+        if conversation_url:
+            driver.get(conversation_url)
+            time.sleep(3)
+
+        result["conversation_url"] = driver.current_url
+
+        # Extract participant name from conversation header
+        try:
+            participant_elem = driver.find_element(
+                By.CSS_SELECTOR,
+                "h2.msg-entity-lockup__entity-title, span.msg-entity-lockup__entity-title"
+            )
+            result["participant"] = participant_elem.text.strip()
+        except Exception:
+            result["participant"] = "Unknown"
+
+        # Extract messages from conversation
+        message_bubbles = driver.find_elements(
+            By.CSS_SELECTOR,
+            "div.msg-s-event-listitem__body, li.msg-s-message-list__event"
+        )
+
+        messages = []
+        for bubble in message_bubbles[-limit:]:  # Last N messages
+            try:
+                # Get message text
+                text_elem = bubble.find_element(By.CSS_SELECTOR, "p.msg-s-event-listitem__body")
+                text = text_elem.text.strip()
+
+                # Determine if sent or received
+                is_sent = "msg-s-message-list__self-message" in bubble.get_attribute("class") or ""
+
+                # Get timestamp if available
+                timestamp = ""
+                try:
+                    time_elem = bubble.find_element(By.CSS_SELECTOR, "time, span.msg-s-message-list__time-heading")
+                    timestamp = time_elem.text.strip()
+                except Exception:
+                    pass
+
+                messages.append({
+                    "text": text,
+                    "direction": "sent" if is_sent else "received",
+                    "timestamp": timestamp,
+                })
+            except Exception:
+                continue
+
+        result["messages"] = messages
+        result["status"] = "success"
+        logger.info(f"[LN-MSG-READER] Extracted {len(messages)} messages from conversation with {result['participant']}")
+
+    except Exception as exc:
+        result["status"] = "error"
+        result["error"] = str(exc)
+        logger.error(f"[LN-MSG-READER] Error: {exc}")
+
+    return result
+
+
+def run_message_pending_requests(
+    dry_run: bool = True,
+    max_requests: int = 10,
+    screenshot_dir: Optional[str] = None,
+    skip_already_messaged: bool = True,
+) -> Dict[str, Any]:
+    """
+    Message pending group membership requests (NOT yet approved members).
+
+    Goes to /manage/membership/requested/ and sends intro messages via 3-dot dropdown.
+    Tracks who has been messaged in SQLite to avoid duplicates.
+
+    Args:
+        dry_run: Preview without sending
+        max_requests: Max requests to message per run
+        screenshot_dir: Optional screenshot directory
+        skip_already_messaged: Skip profiles already in DB
+
+    Returns:
+        Summary dict with counts
+    """
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+
+    dae = OpenClawGroupMembershipDAE()
+    summary = {
+        "action": "message_pending_requests",
+        "dry_run": dry_run,
+        "processed": 0,
+        "messaged": 0,
+        "approved": 0,
+        "denied": 0,
+        "skipped": 0,
+        "failed": 0,
+        "status": "started",
+    }
+
+    # URL for PENDING REQUESTS (not approved members)
+    requests_url = f"https://www.linkedin.com/groups/{dae.group_id}/manage/membership/requested/"
+
+    try:
+        from selenium import webdriver
+        from selenium.webdriver.chrome.options import Options
+
+        driver = None
+
+        # Connect to existing Chrome debug session (port 9222)
+        try:
+            options = Options()
+            options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
+            driver = webdriver.Chrome(options=options)
+            logger.info("[LN-GROUP-REQUESTS] Connected to Chrome debug port 9222")
+        except Exception as e:
+            logger.warning(f"[LN-GROUP-REQUESTS] Chrome 9222 connection failed: {e}")
+
+        if not driver:
+            summary["status"] = "error"
+            summary["error"] = "Failed to connect to Chrome"
+            return summary
+
+        logger.info(f"[LN-GROUP-REQUESTS] Navigating to {requests_url}")
+        driver.get(requests_url)
+        time.sleep(random.uniform(4.0, 6.0))
+
+        # Wait for request list
+        try:
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "ul[class*='artdeco'], div[class*='groups-manage']"))
+            )
+        except Exception:
+            logger.warning("[LN-GROUP-REQUESTS] Timeout waiting for request list")
+
+        # Get already messaged profiles
+        messaged_profiles = set()
+        if skip_already_messaged:
+            try:
+                conn = sqlite3.connect(dae.sqlite_db)
+                cursor = conn.execute(
+                    "SELECT profile_url FROM group_membership_logs WHERE action_type = 'intro_message'"
+                )
+                messaged_profiles = {row[0] for row in cursor.fetchall() if row[0]}
+                conn.close()
+                logger.info(f"[LN-GROUP-REQUESTS] {len(messaged_profiles)} already messaged (will skip)")
+            except Exception:
+                pass
+
+        # Find request rows
+        row_selectors = [
+            "li.artdeco-list__item",
+            "li[class*='artdeco-list__item']",
+            "ul[class*='artdeco'] > li",
+        ]
+
+        request_rows = []
+        for selector in row_selectors:
+            try:
+                request_rows = driver.find_elements(By.CSS_SELECTOR, selector)
+                if request_rows:
+                    logger.info(f"[LN-GROUP-REQUESTS] Found {len(request_rows)} rows via: {selector}")
+                    break
+            except Exception:
+                continue
+
+        if not request_rows:
+            logger.warning("[LN-GROUP-REQUESTS] No request rows found")
+            summary["status"] = "no_requests"
+            return summary
+
+        processed_count = 0
+        for idx, row in enumerate(request_rows):
+            if processed_count >= max_requests:
+                break
+
+            try:
+                # Extract name
+                name_elem = None
+                for selector in ["div.artdeco-entity-lockup__title", "span.artdeco-entity-lockup__title"]:
+                    try:
+                        name_elem = row.find_element(By.CSS_SELECTOR, selector)
+                        if name_elem:
+                            break
+                    except Exception:
+                        continue
+                name = name_elem.text.strip() if name_elem else f"Member_{idx}"
+
+                # Extract headline
+                headline_elem = None
+                for selector in ["div.artdeco-entity-lockup__subtitle", "span.artdeco-entity-lockup__subtitle"]:
+                    try:
+                        headline_elem = row.find_element(By.CSS_SELECTOR, selector)
+                        if headline_elem:
+                            break
+                    except Exception:
+                        continue
+                headline = headline_elem.text.strip() if headline_elem else ""
+
+                # Get profile URL
+                profile_url = ""
+                try:
+                    link_elem = row.find_element(By.CSS_SELECTOR, "a[href*='/in/']")
+                    profile_url = link_elem.get_attribute("href") or ""
+                except Exception:
+                    pass
+
+                # Skip if already messaged
+                if profile_url and profile_url in messaged_profiles:
+                    logger.debug(f"[LN-GROUP-REQUESTS] Skipping {name} (already messaged)")
+                    summary["skipped"] += 1
+                    continue
+
+                # Check for profile image
+                has_image = False
+                image_url = ""
+                try:
+                    img_elem = row.find_element(By.CSS_SELECTOR, "img")
+                    img_src = img_elem.get_attribute("src") or ""
+                    has_image = img_src and "ghost" not in img_src.lower() and "data:image" not in img_src
+                    image_url = img_src if has_image else ""
+                except Exception:
+                    pass
+
+                member = GroupMemberRequest(name=name, headline=headline, image_url=image_url)
+
+                # === QWEN3 AI EVALUATION ===
+                qwen_evaluation = None
+                if QWEN3_AVAILABLE:
+                    try:
+                        qwen_evaluation = evaluate_profile_with_qwen(
+                            name=name,
+                            headline=headline,
+                            has_image=has_image,
+                            profile_url=profile_url
+                        )
+                        logger.info(f"[QWEN3] Evaluated {name}: {qwen_evaluation.decision.value} "
+                                   f"(confidence: {qwen_evaluation.confidence:.2f})")
+                    except Exception as qwen_err:
+                        logger.warning(f"[QWEN3] Evaluation failed for {name}: {qwen_err}")
+
+                # Use enhanced personalized message
+                try:
+                    from modules.platform_integration.linkedin_agent.skillz.linkedin_group_moderation.executor import (
+                        build_enhanced_welcome_message,
+                    )
+                    is_cxo = qwen_evaluation and qwen_evaluation.decision == ProfileDecision.APPROVE_CONNECT
+                    message = build_enhanced_welcome_message(member, is_cxo=is_cxo)
+                except ImportError:
+                    message = dae.message_composer.compose(member)
+
+                logger.info(f"[LN-GROUP-REQUESTS] [{idx+1}] {name} | {headline[:40]}...")
+
+                if dry_run:
+                    logger.info(f"[DRY-RUN] Would message: {name}")
+                    summary["processed"] += 1
+                    processed_count += 1
+                    continue
+
+                # LIVE MODE: Click 3-dot dropdown -> "Message"
+                try:
+                    # Find 3-dot dropdown trigger button
+                    dropdown_trigger = row.find_element(By.CSS_SELECTOR, "button[class*='artdeco-dropdown__trigger']")
+                    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", dropdown_trigger)
+                    time.sleep(random.uniform(0.3, 0.6))
+                    dropdown_trigger.click()
+                    time.sleep(random.uniform(0.6, 1.0))
+
+                    # Find "Message" option in the dropdown
+                    dropdown = driver.find_element(By.CSS_SELECTOR, "div.artdeco-dropdown__content--is-open")
+                    message_btn = None
+                    items = dropdown.find_elements(By.CSS_SELECTOR, "div.artdeco-dropdown__item")
+                    for item in items:
+                        if item.text.strip().lower() == "message":
+                            message_btn = item
+                            break
+
+                    if not message_btn:
+                        logger.warning(f"[LN-GROUP-REQUESTS] No 'Message' option in dropdown for {name}")
+                        summary["failed"] += 1
+                        # Click elsewhere to close dropdown
+                        driver.find_element(By.TAG_NAME, "body").click()
+                        time.sleep(0.3)
+                        continue
+
+                    message_btn.click()
+                    # Wait for message modal to fully load
+                    time.sleep(random.uniform(2.5, 3.5))
+
+                    # === WSP 97: CoT - RETRIEVE before STATING ===
+                    # Check if conversation already has messages (prevent duplicate send)
+                    existing_messages = driver.find_elements(
+                        By.CSS_SELECTOR,
+                        "p.msg-s-event-listitem__body, div.msg-s-event-listitem__body"
+                    )
+
+                    if existing_messages:
+                        # Get the last sent message text
+                        last_msg_text = ""
+                        for msg_elem in reversed(existing_messages):
+                            try:
+                                last_msg_text = msg_elem.text.strip()
+                                if last_msg_text:
+                                    break
+                            except Exception:
+                                continue
+
+                        # Compare with message we're about to send
+                        # Check if first 100 chars match (signature line may differ)
+                        if last_msg_text and message[:100].lower() in last_msg_text[:150].lower():
+                            logger.info(f"[LN-GROUP-REQUESTS] WSP 97: Duplicate detected for {name} - already messaged")
+                            summary["skipped"] += 1
+                            # Close modal and continue
+                            from selenium.webdriver.common.keys import Keys
+                            driver.find_element(By.TAG_NAME, "body").send_keys(Keys.ESCAPE)
+                            time.sleep(0.5)
+                            continue
+                        else:
+                            logger.info(f"[LN-GROUP-REQUESTS] WSP 97: Existing message found but different - showing for 012 review")
+                            print(f"\n{'='*60}")
+                            print(f"EXISTING MESSAGE FOUND:")
+                            print(f"{last_msg_text[:300]}...")
+                            print(f"{'='*60}")
+                    # === END WSP 97 ===
+
+                    # Type message into editor and wait for 012 approval
+                    logger.info(f"[LN-GROUP-REQUESTS] === COMPOSING MESSAGE ===")
+                    logger.info(f"[LN-GROUP-REQUESTS] To: {name}")
+                    logger.info(f"[LN-GROUP-REQUESTS] Headline: {headline}")
+
+                    from selenium.webdriver.common.keys import Keys
+                    editors = driver.find_elements(By.CSS_SELECTOR, "div.msg-form__contenteditable[contenteditable='true']")
+                    editor = None
+                    for e in reversed(editors):
+                        if e.is_displayed():
+                            editor = e
+                            break
+
+                    if not editor:
+                        logger.warning(f"[LN-GROUP-REQUESTS] No editor found for {name}")
+                        summary["failed"] += 1
+                        continue
+
+                    # Type the message
+                    editor.click()
+                    time.sleep(0.3)
+                    try:
+                        import pyperclip
+                        pyperclip.copy(message)
+                        editor.send_keys(Keys.CONTROL, "v")
+                    except ImportError:
+                        for line in message.split("\n"):
+                            editor.send_keys(line)
+                            editor.send_keys(Keys.SHIFT, Keys.ENTER)
+                    time.sleep(0.5)
+
+                    # PAUSE FOR 012 APPROVAL - message is visible in browser
+                    print(f"\n{'='*60}")
+                    print(f"MESSAGE READY FOR: {name}")
+                    print(f"Headline: {headline}")
+                    print(f"Has Image: {'Yes' if has_image else 'NO'}")
+
+                    # Show Qwen3 AI evaluation
+                    if qwen_evaluation:
+                        print(f"{'='*60}")
+                        print(f"[QWEN3 EVALUATION]")
+                        print(f"  Decision: {qwen_evaluation.decision.value.upper()}")
+                        print(f"  Confidence: {qwen_evaluation.confidence:.0%}")
+                        print(f"  Threat Level: {qwen_evaluation.threat_level}")
+                        print(f"  Engagement: {qwen_evaluation.engagement_potential}")
+                        print(f"  Reasoning: {qwen_evaluation.reasoning}")
+
+                    print(f"{'='*60}")
+                    print(f"\n{message}\n")
+                    print(f"{'='*60}")
+                    print(">>> 012 APPROVAL REQUIRED <<<")
+                    print("Press ENTER to SEND, or type 'skip' to skip this person")
+                    print(f"{'='*60}")
+
+                    try:
+                        approval = input().strip().lower()
+                        if approval == "skip":
+                            logger.info(f"[LN-GROUP-REQUESTS] 012 skipped: {name}")
+                            summary["skipped"] += 1
+                            driver.find_element(By.TAG_NAME, "body").send_keys(Keys.ESCAPE)
+                            time.sleep(0.5)
+                            continue
+                    except (EOFError, KeyboardInterrupt):
+                        logger.info(f"[LN-GROUP-REQUESTS] Interrupted")
+                        break
+
+                    # 012 approved - click send button
+                    send_btns = driver.find_elements(By.CSS_SELECTOR, "button.msg-form__send-button")
+                    send_btn = None
+                    for btn in reversed(send_btns):
+                        if btn.is_displayed():
+                            send_btn = btn
+                            break
+
+                    if send_btn and send_btn.is_enabled():
+                        driver.execute_script("arguments[0].click();", send_btn)
+                        time.sleep(1.0)
+                        summary["messaged"] += 1
+                        dae._log_action(member=member, action_type="intro_message", action_status="ok", message_preview=message)
+                        logger.info(f"[LN-GROUP-REQUESTS] SENT: {name}")
+
+                        # Close message modal
+                        driver.find_element(By.TAG_NAME, "body").send_keys(Keys.ESCAPE)
+                        time.sleep(1.0)
+
+                        # Navigate back to requests page
+                        driver.get(requests_url)
+                        time.sleep(2.0)
+
+                        # === QWEN3 AI-POWERED APPROVE/DENY DECISION ===
+                        # Use Qwen evaluation instead of hardcoded image check
+                        try:
+                            new_rows = driver.find_elements(By.CSS_SELECTOR, "li.artdeco-list__item")
+                            for new_row in new_rows:
+                                try:
+                                    row_name = new_row.find_element(By.CSS_SELECTOR, "div.artdeco-entity-lockup__title").text.strip()
+                                    if name in row_name or row_name in name:
+                                        # Determine action based on Qwen evaluation
+                                        should_approve = True  # Default approve if no Qwen
+                                        should_deny_incomplete = False
+
+                                        if qwen_evaluation:
+                                            if qwen_evaluation.decision in [ProfileDecision.APPROVE, ProfileDecision.APPROVE_CONNECT]:
+                                                should_approve = True
+                                                logger.info(f"[QWEN3] Decision: APPROVE ({qwen_evaluation.reasoning})")
+                                            elif qwen_evaluation.decision == ProfileDecision.DENY_INCOMPLETE:
+                                                should_approve = False
+                                                should_deny_incomplete = True
+                                                logger.info(f"[QWEN3] Decision: DENY_INCOMPLETE ({qwen_evaluation.reasoning})")
+                                            elif qwen_evaluation.decision == ProfileDecision.DENY:
+                                                should_approve = False
+                                                logger.info(f"[QWEN3] Decision: DENY ({qwen_evaluation.reasoning})")
+                                            else:
+                                                # NEEDS_REVIEW - skip for manual handling
+                                                logger.info(f"[QWEN3] Decision: NEEDS_REVIEW - skipping")
+                                                continue
+                                        else:
+                                            # Fallback: check image if Qwen unavailable
+                                            has_pic = False
+                                            try:
+                                                img_elem = new_row.find_element(By.CSS_SELECTOR, "img")
+                                                img_src = img_elem.get_attribute("src") or ""
+                                                has_pic = img_src and "ghost" not in img_src.lower() and "data:image" not in img_src
+                                            except Exception:
+                                                pass
+                                            should_approve = has_pic
+                                            should_deny_incomplete = not has_pic
+
+                                        if should_approve:
+                                            # APPROVE - Qwen says this is a good member
+                                            try:
+                                                approve_btn = new_row.find_element(By.CSS_SELECTOR, "button[class*='primary-action'], button[aria-label*='Approve']")
+                                                driver.execute_script("arguments[0].click();", approve_btn)
+                                                time.sleep(0.5)
+                                                reason = f"[QWEN3: {qwen_evaluation.decision.value}]" if qwen_evaluation else "(fallback)"
+                                                logger.info(f"[LN-GROUP-REQUESTS] APPROVED: {name} {reason}")
+                                                summary["approved"] += 1
+                                            except Exception as approve_err:
+                                                logger.warning(f"[LN-GROUP-REQUESTS] Could not approve {name}: {approve_err}")
+
+                                        elif should_deny_incomplete:
+                                            # DENY_INCOMPLETE - Message requesting profile completion, then deny
+                                            logger.info(f"[LN-GROUP-REQUESTS] DENY_INCOMPLETE: {name} - sending follow-up + deny")
+
+                                            # Open message again via 3-dot
+                                            trigger = new_row.find_element(By.CSS_SELECTOR, "button[class*='artdeco-dropdown__trigger']")
+                                            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", trigger)
+                                            time.sleep(0.3)
+                                            trigger.click()
+                                            time.sleep(0.5)
+
+                                            dd = driver.find_element(By.CSS_SELECTOR, "div.artdeco-dropdown__content--is-open")
+                                            for item in dd.find_elements(By.CSS_SELECTOR, "div.artdeco-dropdown__item"):
+                                                if item.text.strip().lower() == "message":
+                                                    item.click()
+                                                    break
+                                            time.sleep(2.0)
+
+                                            # Type "complete your profile" message
+                                            no_pic_msg = "Complete your profile (add a photo) to join. --0102"
+                                            editors = driver.find_elements(By.CSS_SELECTOR, "div.msg-form__contenteditable[contenteditable='true']")
+                                            for ed in reversed(editors):
+                                                if ed.is_displayed():
+                                                    ed.click()
+                                                    time.sleep(0.2)
+                                                    try:
+                                                        import pyperclip
+                                                        pyperclip.copy(no_pic_msg)
+                                                        ed.send_keys(Keys.CONTROL, "v")
+                                                    except ImportError:
+                                                        ed.send_keys(no_pic_msg)
+                                                    time.sleep(0.3)
+                                                    break
+
+                                            # Send the no-pic message
+                                            for sb in reversed(driver.find_elements(By.CSS_SELECTOR, "button.msg-form__send-button")):
+                                                if sb.is_displayed() and sb.is_enabled():
+                                                    driver.execute_script("arguments[0].click();", sb)
+                                                    time.sleep(0.5)
+                                                    break
+
+                                            # Close modal
+                                            driver.find_element(By.TAG_NAME, "body").send_keys(Keys.ESCAPE)
+                                            time.sleep(0.5)
+
+                                            # Navigate back and DENY
+                                            driver.get(requests_url)
+                                            time.sleep(1.5)
+                                            for r2 in driver.find_elements(By.CSS_SELECTOR, "li.artdeco-list__item"):
+                                                try:
+                                                    r2_name = r2.find_element(By.CSS_SELECTOR, "div.artdeco-entity-lockup__title").text.strip()
+                                                    if name in r2_name or r2_name in name:
+                                                        t2 = r2.find_element(By.CSS_SELECTOR, "button[class*='artdeco-dropdown__trigger']")
+                                                        t2.click()
+                                                        time.sleep(0.5)
+                                                        dd2 = driver.find_element(By.CSS_SELECTOR, "div.artdeco-dropdown__content--is-open")
+                                                        for di in dd2.find_elements(By.CSS_SELECTOR, "div.artdeco-dropdown__item"):
+                                                            if "block" in di.text.lower() or "deny" in di.text.lower():
+                                                                di.click()
+                                                                time.sleep(0.5)
+                                                                reason = f"[QWEN3: {qwen_evaluation.decision.value}]" if qwen_evaluation else "(incomplete profile)"
+                                                                logger.info(f"[LN-GROUP-REQUESTS] DENIED: {name} {reason}")
+                                                                summary["denied"] += 1
+                                                                break
+                                                        break
+                                                except Exception:
+                                                    continue
+
+                                        else:
+                                            # Plain DENY - spam/bot detected by Qwen
+                                            logger.info(f"[LN-GROUP-REQUESTS] DENY: {name} - spam/bot detected")
+                                            try:
+                                                trigger = new_row.find_element(By.CSS_SELECTOR, "button[class*='artdeco-dropdown__trigger']")
+                                                trigger.click()
+                                                time.sleep(0.5)
+                                                dd = driver.find_element(By.CSS_SELECTOR, "div.artdeco-dropdown__content--is-open")
+                                                for di in dd.find_elements(By.CSS_SELECTOR, "div.artdeco-dropdown__item"):
+                                                    if "block" in di.text.lower() or "deny" in di.text.lower():
+                                                        di.click()
+                                                        time.sleep(0.5)
+                                                        reason = f"[QWEN3: {qwen_evaluation.reasoning[:50]}]" if qwen_evaluation else "(spam)"
+                                                        logger.info(f"[LN-GROUP-REQUESTS] DENIED: {name} {reason}")
+                                                        summary["denied"] += 1
+                                                        break
+                                            except Exception as deny_err:
+                                                logger.warning(f"[LN-GROUP-REQUESTS] Could not deny {name}: {deny_err}")
+
+                                        break
+                                except Exception:
+                                    continue
+                        except Exception as action_err:
+                            logger.warning(f"[LN-GROUP-REQUESTS] Could not approve/deny {name}: {action_err}")
+
+                    else:
+                        logger.warning(f"[LN-GROUP-REQUESTS] Send button not enabled for {name}")
+                        summary["failed"] += 1
+
+                    summary["processed"] += 1
+                    processed_count += 1
+
+                    # Anti-detection delay
+                    delay = random.uniform(30, 90)
+                    logger.info(f"[LN-GROUP-REQUESTS] Waiting {delay:.0f}s before next...")
+                    time.sleep(delay)
+
+                    # Refresh page
+                    driver.get(requests_url)
+                    time.sleep(random.uniform(2.0, 3.5))
+
+                    # Re-find rows
+                    for selector in row_selectors:
+                        try:
+                            request_rows = driver.find_elements(By.CSS_SELECTOR, selector)
+                            if request_rows:
+                                break
+                        except Exception:
+                            continue
+
+                except Exception as e:
+                    logger.warning(f"[LN-GROUP-REQUESTS] Failed to message {name}: {e}")
+                    summary["failed"] += 1
+                    # Close any open modal and refresh to reset state
+                    try:
+                        driver.find_element(By.TAG_NAME, "body").send_keys(Keys.ESCAPE)
+                        time.sleep(0.5)
+                        driver.get(requests_url)
+                        time.sleep(2.0)
+                        for selector in row_selectors:
+                            try:
+                                request_rows = driver.find_elements(By.CSS_SELECTOR, selector)
+                                if request_rows:
+                                    break
+                            except Exception:
+                                continue
+                    except Exception:
+                        pass
+
+            except Exception as e:
+                logger.warning(f"[LN-GROUP-REQUESTS] Row {idx} extraction failed: {e}")
+                summary["failed"] += 1
+
+        summary["status"] = "dry_run_complete" if dry_run else "live_complete"
+        return summary
+
+    except Exception as exc:
+        summary["status"] = "error"
+        summary["error"] = str(exc)
+        logger.error(f"[LN-GROUP-REQUESTS] Error: {exc}")
+        return summary
 
 
 def _normalize_candidate_url(url: str) -> str:
@@ -2015,6 +3006,7 @@ Actions:
   approve_members  Check and approve pending group membership requests
   post_news        Search for OpenClaw news, rate, and post to group
   full_cycle       Run both: approve members first, then post news
+  message_members  Message existing (already approved) group members
 
 Examples:
   # Dry run - preview what would happen
@@ -2032,11 +3024,19 @@ Examples:
   # Full cycle: approve members then post news
   python -m modules.platform_integration.linkedin_agent.skillz.openclaw_group_news.executor \\
       --action full_cycle
+
+  # Message existing group members (dry run first!)
+  python -m modules.platform_integration.linkedin_agent.skillz.openclaw_group_news.executor \\
+      --action message_members --dry-run --max-requests 5
+
+  # Message existing members (live - with 30-90s delays between)
+  python -m modules.platform_integration.linkedin_agent.skillz.openclaw_group_news.executor \\
+      --action message_members --max-requests 10
         """
     )
 
     parser.add_argument('--action', '-a', type=str, required=True,
-                        choices=['approve_members', 'post_news', 'full_cycle'],
+                        choices=['approve_members', 'post_news', 'full_cycle', 'message_members'],
                         help='Action to perform')
     parser.add_argument('--dry-run', action='store_true',
                         help='Preview actions without executing')
@@ -2082,6 +3082,15 @@ Examples:
                 extra_comment=args.comment,
             )
         )
+
+    elif args.action == 'message_members':
+        logger.info(f"[CLI] Action: message_members | dry_run={args.dry_run} | max={args.max_requests}")
+        result.update(run_message_existing_members(
+            dry_run=args.dry_run,
+            max_members=args.max_requests,
+            screenshot_dir=args.screenshot_dir,
+            skip_already_messaged=True,
+        ))
 
     elif args.action == 'full_cycle':
         logger.info(f"[CLI] Action: full_cycle | dry_run={args.dry_run}")

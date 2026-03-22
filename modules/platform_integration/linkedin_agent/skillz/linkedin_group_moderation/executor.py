@@ -25,6 +25,18 @@ from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
+# Import Qwen3 profile evaluator for AI-powered decisions
+try:
+    from modules.platform_integration.linkedin_agent.src.qwen_profile_evaluator import (
+        evaluate_profile_with_qwen,
+        ProfileDecision,
+        ProfileEvaluation,
+    )
+    QWEN_AVAILABLE = True
+except ImportError:
+    QWEN_AVAILABLE = False
+    logger.warning("[QWEN3] Profile evaluator not available - using fallback")
+
 # Import existing classes - DO NOT DUPLICATE
 try:
     from modules.platform_integration.linkedin_agent.skillz.openclaw_group_news.executor import (
@@ -122,12 +134,73 @@ def is_cxo(headline: str) -> bool:
 
 def triage_member(member: GroupMemberRequest) -> TriageDecision:
     """
-    Enhanced triage using EXISTING classification + NEW CxO detection.
+    AI-powered triage using Qwen3 profile evaluation.
 
-    Uses: OpenClawGroupMembershipDAE._classify_member_account (existing)
-    Adds: CxO detection for APPROVE_CONNECT (new)
+    Replaces hardcoded regex patterns with intelligent evaluation.
+    Falls back to simple rules if Qwen unavailable.
     """
-    # Step 1: Use EXISTING classification (DO NOT DUPLICATE)
+    # Determine if profile has image
+    has_image = bool(member.image_url and member.image_url.strip())
+
+    # Use Qwen3 for intelligent evaluation
+    if QWEN_AVAILABLE:
+        try:
+            evaluation = evaluate_profile_with_qwen(
+                name=member.name or "",
+                headline=member.headline or "",
+                has_image=has_image,
+                profile_url=None  # Could add if available
+            )
+
+            logger.info(f"[QWEN3] Profile evaluation: {evaluation.decision.value} "
+                       f"(confidence: {evaluation.confidence:.2f})")
+
+            # Map ProfileDecision to TriageDecision
+            if evaluation.decision == ProfileDecision.APPROVE_CONNECT:
+                message = build_enhanced_welcome_message(member, is_cxo=True)
+                return TriageDecision(
+                    action="APPROVE_CONNECT",
+                    send_message=True,
+                    reason=f"[QWEN3] {evaluation.reasoning}",
+                    message=message
+                )
+
+            elif evaluation.decision == ProfileDecision.APPROVE:
+                message = build_enhanced_welcome_message(member, is_cxo=False)
+                return TriageDecision(
+                    action="APPROVE",
+                    send_message=True,
+                    reason=f"[QWEN3] {evaluation.reasoning}",
+                    message=message
+                )
+
+            elif evaluation.decision == ProfileDecision.DENY_INCOMPLETE:
+                # Message requesting profile completion, then deny
+                return TriageDecision(
+                    action="DENY_MESSAGE",  # Message first, then deny
+                    send_message=True,
+                    reason=f"[QWEN3] {evaluation.reasoning}",
+                    message="Please complete your profile (add a photo) and reapply. --0102"
+                )
+
+            elif evaluation.decision == ProfileDecision.DENY:
+                return TriageDecision(
+                    action="DENY",
+                    send_message=False,
+                    reason=f"[QWEN3] {evaluation.reasoning}"
+                )
+
+            else:  # NEEDS_REVIEW
+                return TriageDecision(
+                    action="SKIP",
+                    send_message=False,
+                    reason=f"[QWEN3] Needs human review: {evaluation.reasoning}"
+                )
+
+        except Exception as e:
+            logger.error(f"[QWEN3] Evaluation failed: {e}, falling back to rules")
+
+    # Fallback: Use existing classification if Qwen unavailable
     is_human, reason = OpenClawGroupMembershipDAE._classify_member_account(member)
 
     if not is_human:
@@ -137,7 +210,7 @@ def triage_member(member: GroupMemberRequest) -> TriageDecision:
             reason=f"Non-human detected: {reason}"
         )
 
-    # Step 2: NEW - CxO detection for APPROVE + CONNECT
+    # Fallback CxO detection
     if is_cxo(member.headline):
         message = build_enhanced_welcome_message(member, is_cxo=True)
         return TriageDecision(
@@ -147,7 +220,7 @@ def triage_member(member: GroupMemberRequest) -> TriageDecision:
             message=message
         )
 
-    # Step 3: Standard APPROVE with message
+    # Standard APPROVE
     message = build_enhanced_welcome_message(member, is_cxo=False)
     return TriageDecision(
         action="APPROVE",
@@ -159,93 +232,197 @@ def triage_member(member: GroupMemberRequest) -> TriageDecision:
 
 def build_enhanced_welcome_message(member: GroupMemberRequest, is_cxo: bool = False) -> str:
     """
-    Build 8-point personalized welcome message.
-    ENHANCES existing WelcomeMessageComposer with ROI threat template.
-
-    Structure:
-    1. Personal ROI threat
-    2. ROC paper
-    3. FoundUps case study
-    4. Security
-    5. Poker table
-    6. Spam check
-    7. Signature
-    8. PS (Apple employees only)
+    Build agentic welcome message. No template regurgitation.
     """
-    # Use EXISTING language detection
-    lang = GroupLanguageDetector.detect(f"{member.name} {member.headline}")
     name_first = (member.name or "there").split()[0]
+    headline = (member.headline or "").strip()
+    role_info = _analyze_role_deeply(headline)
 
     lines = []
 
-    # 1. Personal ROI threat - name their job, state how agents replace that paycheck
-    job_threat = _analyze_job_threat(member.headline)
-    lines.append(f"Hi {name_first},")
-    lines.append("")
-    lines.append(job_threat)
+    # Direct opener - no title echo
+    lines.append(f"Welcome {name_first}.")
     lines.append("")
 
-    # 2. ROC paper - framed as research
-    lines.append(f"For context on the economics: {RESOURCES['roc_paper']}")
-    lines.append("(Academic framing of how compute replaces labor value)")
+    # Agentic disruption - direct, no fluff
+    lines.append(f"{role_info['disruption']}")
     lines.append("")
 
-    # 3. FoundUps case study - framed as learning
-    if is_cxo:
-        lines.append(f"We're building at {RESOURCES['foundups']} - PWA mesh, agent-driven app store, autonomous solutions.")
-    else:
-        lines.append(f"Learn more at {RESOURCES['foundups']}")
+    # Security context - brief
+    lines.append(f"Sandbox your agents. {role_info['security_context']}")
     lines.append("")
 
-    # 4. Security
-    lines.append("Sandbox your OpenClaw agents.")
+    # FoundUps pitch - entities as code
+    lines.append(f"We're building entities that exist as code. No employees. Only stakeholders. ROC > ROI.")
+    lines.append(f"foundups.com | litepaper: foundups.com/litepaper.html")
     lines.append("")
 
-    # 5. Poker table
-    lines.append("Group is quiet. Everyone's at the poker table reading each other's hand - nobody wants to sneeze first. Expect watchers, not chatter.")
+    # ROI question - direct
+    lines.append("When agents do your job, what's your plan?")
     lines.append("")
 
-    # 6. Spam check
-    lines.append("Here to learn or sell? We delete marketing posts.")
-    lines.append("")
-
-    # 7. Signature
-    lines.append("- 0102")
-
-    # 8. PS - Apple employees only
-    if _is_apple_employee(member):
-        lines.append("")
-        lines.append("PS: First video ever made about Siri was done by UnDaoDu, 8 months before Siri's acquisition.")
+    lines.append("--0102")
 
     return "\n".join(lines)
 
 
-def _analyze_job_threat(headline: str) -> str:
-    """Analyze job title and return personalized ROI threat."""
+def _analyze_role_deeply(headline: str) -> dict:
+    """
+    Deep analysis of headline to extract role-specific messaging.
+    Returns dict with: domain, disruption, security_context, role_label, question
+
+    PRIORITY ORDER matters - more specific roles checked first.
+    """
     headline_lower = (headline or "").lower()
 
-    if any(x in headline_lower for x in ["developer", "engineer", "programmer", "coder"]):
-        return "Your code job? Agents write code now. Not hypothetically - production code, shipped."
+    # Investor/VC/Finance - check FIRST (before "partner" catches VC partners)
+    if any(x in headline_lower for x in ["investor", "vc ", "venture", "capital", "fund", "private equity", "pe ", "sequoia", "a16z", "andreessen"]):
+        return {
+            "domain": "investing",
+            "disruption": "Agents scan deal flow, analyze financials, assess market fit, and even draft term sheets. The investment thesis is becoming algorithmic",
+            "security_context": "Especially relevant if agents access deal flow, portfolio data, or LP communications.",
+            "role_label": "investor",
+            "question": "When agents can evaluate 1000 startups a day, what's the human investor's edge? Pattern recognition? That's exactly what agents excel at."
+        }
 
-    if any(x in headline_lower for x in ["product", "pm", "manager"]):
-        return "Product roles? Agents now translate requirements to working software. The middleman is the first to go."
+    # Channel/Partner Sales (after investor check)
+    if any(x in headline_lower for x in ["channel", "partner sales", "alliance", "reseller"]):
+        return {
+            "domain": "channel",
+            "disruption": "The channel sales model gets fundamentally rewritten when OpenClaw agents handle partner discovery, deal qualification, even relationship nurture autonomously",
+            "security_context": "Especially relevant if agents touch CRM or partner data.",
+            "role_label": "channel leader",
+            "question": "Is ROI dead if compute replaces sales labor? What happens to partner margins when agents do the work?"
+        }
 
-    if any(x in headline_lower for x in ["marketing", "growth", "brand"]):
-        return "Marketing? Agents generate content, run campaigns, optimize spend. Human creativity is being automated."
+    # Sales/Revenue
+    if any(x in headline_lower for x in ["sales", "revenue", "account executive", "business development", "bd "]):
+        return {
+            "domain": "sales",
+            "disruption": "The sales function gets rewritten when agents qualify leads, craft personalized outreach, and nurture deals autonomously. Pipeline velocity without headcount",
+            "security_context": "Especially relevant if agents touch CRM, deal data, or customer communications.",
+            "role_label": "revenue leader",
+            "question": "Is the SDR role sustainable when agents do prospecting at 100x the volume? What happens to commission structures?"
+        }
 
-    if any(x in headline_lower for x in ["sales", "account", "business development"]):
-        return "Sales? Agents are now qualifying leads, doing outreach, closing deals. The pipeline is getting shorter."
+    # Engineering/Development
+    if any(x in headline_lower for x in ["engineer", "developer", "programmer", "software", "architect", "devops", "sre"]):
+        return {
+            "domain": "engineering",
+            "disruption": "Agents write production code now. Not prototypes — shipped features, reviewed PRs, deployed infrastructure. The 10x engineer is now 100x with agent assistance",
+            "security_context": "Especially relevant if agents touch source code, CI/CD, or production systems.",
+            "role_label": "builder",
+            "question": "Does the senior/junior distinction matter when agents can bootstrap either? What's the moat when everyone has the same tooling?"
+        }
 
-    if any(x in headline_lower for x in ["design", "ux", "ui"]):
-        return "Design? AI generates wireframes, mockups, even coded components. The visual layer is commodity now."
+    # Product Management
+    if any(x in headline_lower for x in ["product", "pm ", "product manager", "product owner"]):
+        return {
+            "domain": "product",
+            "disruption": "Agents translate requirements to working software directly. The middleman who translates business to tech is the first optimization target",
+            "security_context": "Especially relevant if agents access roadmaps, customer feedback, or competitive intel.",
+            "role_label": "product leader",
+            "question": "When agents can spec, design, and build — what's the PM's unique value? Taste? Politics? Neither scales."
+        }
 
-    if any(x in headline_lower for x in ["data", "analyst", "analytics"]):
-        return "Data analysis? Agents query, visualize, and derive insights faster than any human team."
+    # Marketing/Growth
+    if any(x in headline_lower for x in ["marketing", "growth", "brand", "content", "demand gen", "cmo"]):
+        return {
+            "domain": "marketing",
+            "disruption": "Agents generate content, run campaigns, optimize spend, and analyze attribution autonomously. Creative at scale without creative headcount",
+            "security_context": "Especially relevant if agents touch brand assets, ad accounts, or customer data.",
+            "role_label": "growth leader",
+            "question": "When agents can A/B test 1000 variants overnight, what's the human marketer's edge? Intuition doesn't scale."
+        }
 
-    if any(x in headline_lower for x in ["ceo", "founder", "cto", "cfo", "coo", "vp", "director"]):
-        return "Even at your level - agents are doing strategic analysis, competitive intel, board decks. Nobody's safe."
+    # Data/Analytics
+    if any(x in headline_lower for x in ["data", "analyst", "analytics", "bi ", "business intelligence", "insights"]):
+        return {
+            "domain": "analytics",
+            "disruption": "Agents query databases, build dashboards, derive insights, and present findings faster than any human analyst team",
+            "security_context": "Especially relevant if agents access data warehouses or customer analytics.",
+            "role_label": "data leader",
+            "question": "When agents can answer any business question in seconds, what's left for the analyst? The questions themselves?"
+        }
 
-    return "Whatever your role - agents are coming for it. The question is when, not if."
+    # Design/UX
+    if any(x in headline_lower for x in ["design", "ux", "ui", "creative", "visual"]):
+        return {
+            "domain": "design",
+            "disruption": "AI generates wireframes, mockups, coded components, even full design systems. The visual layer is commodity infrastructure now",
+            "security_context": "Especially relevant if agents access design systems or brand guidelines.",
+            "role_label": "design leader",
+            "question": "When agents can generate a thousand variations in minutes, is human taste the last moat? Or just another training signal?"
+        }
+
+    # Executive/C-Suite
+    if any(x in headline_lower for x in ["ceo", "cto", "cfo", "coo", "cmo", "cio", "chief", "president", "founder", "co-founder"]):
+        return {
+            "domain": "the C-suite",
+            "disruption": "Agents are doing strategic analysis, competitive intel, board decks, and even stakeholder communication. The executive function is not exempt",
+            "security_context": "Especially relevant if agents access financials, strategy docs, or board materials.",
+            "role_label": "executive",
+            "question": "If agents can synthesize market data and recommend strategy, what's the executive's edge? Relationships? Those are being automated too."
+        }
+
+    # VP/Director level
+    if any(x in headline_lower for x in ["vp ", "vice president", "director", "head of", "senior director"]):
+        return {
+            "domain": "leadership",
+            "disruption": "Middle management is the coordination layer — and coordination is what agents do best. Status reporting, resource allocation, cross-functional alignment",
+            "security_context": "Especially relevant if agents access team data, performance metrics, or strategic plans.",
+            "role_label": "leader",
+            "question": "When agents can coordinate across teams better than humans, what justifies the management layer? Accountability? Empathy?"
+        }
+
+    # HR/People/Talent
+    if any(x in headline_lower for x in ["hr ", "human resources", "people", "talent", "recruiting", "recruiter"]):
+        return {
+            "domain": "HR",
+            "disruption": "Agents source candidates, screen resumes, schedule interviews, and even conduct initial assessments. The recruiting funnel is being automated end-to-end",
+            "security_context": "Especially relevant if agents access employee data, compensation, or performance reviews.",
+            "role_label": "people leader",
+            "question": "When agents can match talent to roles better than recruiters, what's left? Culture? That's also being measured by agents now."
+        }
+
+    # Consulting/Advisory
+    if any(x in headline_lower for x in ["consult", "advisor", "partner at", "principal"]):
+        return {
+            "domain": "consulting",
+            "disruption": "Agents can analyze, synthesize, and recommend at scale. The $500/hour insight is competing with $0.01/token alternatives",
+            "security_context": "Especially relevant if agents access client data or strategic recommendations.",
+            "role_label": "advisor",
+            "question": "When clients can get instant analysis from agents, what's the consulting premium? Relationships? Those are trust, and trust follows results."
+        }
+
+    # Legal
+    if any(x in headline_lower for x in ["legal", "lawyer", "attorney", "counsel", "law "]):
+        return {
+            "domain": "legal",
+            "disruption": "Agents draft contracts, review documents, research precedents, and assess risk. The billable hour model faces existential pressure",
+            "security_context": "Especially relevant if agents access privileged communications or contract data.",
+            "role_label": "legal professional",
+            "question": "When agents can review contracts in seconds instead of hours, what justifies the billable hour? Judgment? That's being trained too."
+        }
+
+    # Operations
+    if any(x in headline_lower for x in ["operations", "ops ", "supply chain", "logistics", "procurement"]):
+        return {
+            "domain": "operations",
+            "disruption": "Agents optimize supply chains, manage procurement, monitor logistics, and coordinate vendors autonomously. Ops excellence is becoming automated",
+            "security_context": "Especially relevant if agents access vendor contracts, inventory, or supply chain data.",
+            "role_label": "ops leader",
+            "question": "When agents can optimize operations 24/7 without fatigue, what's the human ops leader's value? Crisis management? Agents don't panic."
+        }
+
+    # Default fallback
+    return {
+        "domain": "your function",
+        "disruption": "Agents are automating knowledge work across every domain. Whatever you do, there's likely an agent version being built right now",
+        "security_context": "Sandbox everything.",
+        "role_label": "professional",
+        "question": "What's your unique value when agents can do the repeatable parts of your job? The answer determines your future."
+    }
 
 
 def _is_apple_employee(member: GroupMemberRequest) -> bool:

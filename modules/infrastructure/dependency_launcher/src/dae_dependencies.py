@@ -56,6 +56,14 @@ LM_STUDIO_PORT = int(os.getenv("LM_STUDIO_PORT", "1234"))
 UI_TARS_MODEL_ID = os.getenv("UI_TARS_MODEL_ID", "lmstudio-community/UI-TARS-1.5-7B-GGUF")
 UI_TARS_MODEL_FILE = os.getenv("UI_TARS_MODEL_FILE", "UI-TARS-1.5-7B-Q4_K_M.gguf")
 
+# Gemma model configuration for fast pattern matching (WSP 77 Phase 1)
+GEMMA_MODEL_ID = os.getenv("GEMMA_MODEL_ID", "gemma-270m")
+GEMMA_MODEL_FILE = os.getenv("GEMMA_MODEL_FILE", "gemma-3-270m-it-Q4_K_M.gguf")
+
+# Qwen model configuration for intelligent reasoning (WSP 77 Phase 2)
+QWEN_MODEL_ID = os.getenv("QWEN_MODEL_ID", "qwen3.5-4b")
+QWEN_MODEL_FILE = os.getenv("QWEN_MODEL_FILE", "Qwen3.5-4B-Q4_K_M.gguf")
+
 
 def resolve_lm_studio_path() -> Optional[str]:
     """
@@ -358,19 +366,24 @@ def launch_edge() -> Tuple[bool, str]:
 
 def launch_lm_studio(load_model: bool = True) -> Tuple[bool, str]:
     """
-    Launch LM Studio for UI-TARS vision and optionally load the model.
+    Launch LM Studio and optionally load all AI models.
+
+    Models loaded (WSP 77 Agent Coordination):
+    - UI-TARS: Vision-based automation
+    - Gemma: Fast pattern matching (Phase 1)
+    - Qwen: Intelligent reasoning (Phase 2)
 
     Args:
-        load_model: Whether to auto-load UI-TARS model via API after LM Studio starts
+        load_model: Whether to auto-load models via API after LM Studio starts
 
     Returns:
         Tuple of (success, message)
     """
     if is_lm_studio_running():
         logger.info(f"[DEPS] LM Studio already running on port {LM_STUDIO_PORT}")
-        # Even if running, try to load the model if requested
+        # Even if running, try to load all models if requested
         if load_model:
-            _load_ui_tars_model()
+            load_all_models()
         return True, "LM Studio already running"
 
     lm_studio_path = resolve_lm_studio_path()
@@ -397,18 +410,18 @@ def launch_lm_studio(load_model: bool = True) -> Tuple[bool, str]:
             if is_lm_studio_running():
                 logger.info(f"[DEPS] [OK] LM Studio API ready on port {LM_STUDIO_PORT}")
 
-                # Auto-load UI-TARS model
+                # Auto-load all AI models (UI-TARS, Gemma, Qwen)
                 if load_model:
                     time.sleep(2)  # Brief pause for API to fully initialize
-                    _load_ui_tars_model()
+                    load_all_models()
 
                 return True, f"LM Studio started on port {LM_STUDIO_PORT}"
             if i % 10 == 0 and i > 0:
                 logger.info(f"[DEPS] Still waiting for LM Studio... ({i}s)")
 
         logger.warning("[DEPS] LM Studio launched but API not responding")
-        logger.warning("[DEPS] Please ensure UI-TARS model is loaded in LM Studio")
-        return False, "LM Studio launched but API not responding - load UI-TARS model manually"
+        logger.warning("[DEPS] Please ensure models are loaded in LM Studio (UI-TARS, Gemma, Qwen)")
+        return False, "LM Studio launched but API not responding - load models manually"
 
     except Exception as e:
         logger.error(f"[DEPS] Failed to launch LM Studio: {e}")
@@ -473,6 +486,138 @@ def _load_ui_tars_model() -> bool:
     except Exception as e:
         logger.warning(f"[DEPS] UI-TARS model load failed: {e}")
         return False
+
+
+def _load_gemma_model() -> bool:
+    """
+    Load Gemma model in LM Studio via API for fast pattern matching.
+
+    WSP 77 Phase 1: Gemma handles binary classification (50-100ms).
+
+    Returns:
+        True if model loaded successfully
+    """
+    import requests
+
+    base_url = f"http://127.0.0.1:{LM_STUDIO_PORT}"
+
+    try:
+        # Check what models are available
+        resp = requests.get(f"{base_url}/v1/models", timeout=5)
+        if resp.status_code == 200:
+            models_data = resp.json()
+            models = models_data.get("data", [])
+
+            # Check if Gemma is already loaded
+            for m in models:
+                model_id = m.get("id", "")
+                if "gemma" in model_id.lower():
+                    logger.info(f"[DEPS] [OK] Gemma model already loaded: {model_id}")
+                    return True
+
+        # Try to load Gemma model
+        load_payload = {
+            "model": GEMMA_MODEL_ID,
+            "file": GEMMA_MODEL_FILE,
+        }
+
+        logger.info(f"[DEPS] Loading Gemma model: {GEMMA_MODEL_ID}")
+
+        for endpoint in ["/v1/models/load", "/api/v0/models/load", "/api/models/load"]:
+            try:
+                resp = requests.post(f"{base_url}{endpoint}", json=load_payload, timeout=30)
+                if resp.status_code in (200, 201, 202):
+                    logger.info(f"[DEPS] [OK] Gemma model load initiated via {endpoint}")
+                    return True
+            except Exception:
+                continue
+
+        logger.warning("[DEPS] Could not auto-load Gemma model via API")
+        logger.warning(f"[DEPS] Please manually load: {GEMMA_MODEL_ID} / {GEMMA_MODEL_FILE}")
+        return False
+
+    except Exception as e:
+        logger.warning(f"[DEPS] Gemma model load failed: {e}")
+        return False
+
+
+def _load_qwen_model() -> bool:
+    """
+    Load Qwen model in LM Studio via API for intelligent reasoning.
+
+    WSP 77 Phase 2: Qwen handles strategic reasoning (200-500ms).
+
+    Returns:
+        True if model loaded successfully
+    """
+    import requests
+
+    base_url = f"http://127.0.0.1:{LM_STUDIO_PORT}"
+
+    try:
+        # Check what models are available
+        resp = requests.get(f"{base_url}/v1/models", timeout=5)
+        if resp.status_code == 200:
+            models_data = resp.json()
+            models = models_data.get("data", [])
+
+            # Check if Qwen is already loaded
+            for m in models:
+                model_id = m.get("id", "")
+                if "qwen" in model_id.lower():
+                    logger.info(f"[DEPS] [OK] Qwen model already loaded: {model_id}")
+                    return True
+
+        # Try to load Qwen model
+        load_payload = {
+            "model": QWEN_MODEL_ID,
+            "file": QWEN_MODEL_FILE,
+        }
+
+        logger.info(f"[DEPS] Loading Qwen model: {QWEN_MODEL_ID}")
+
+        for endpoint in ["/v1/models/load", "/api/v0/models/load", "/api/models/load"]:
+            try:
+                resp = requests.post(f"{base_url}{endpoint}", json=load_payload, timeout=30)
+                if resp.status_code in (200, 201, 202):
+                    logger.info(f"[DEPS] [OK] Qwen model load initiated via {endpoint}")
+                    return True
+            except Exception:
+                continue
+
+        logger.warning("[DEPS] Could not auto-load Qwen model via API")
+        logger.warning(f"[DEPS] Please manually load: {QWEN_MODEL_ID} / {QWEN_MODEL_FILE}")
+        return False
+
+    except Exception as e:
+        logger.warning(f"[DEPS] Qwen model load failed: {e}")
+        return False
+
+
+def load_all_models() -> Dict[str, bool]:
+    """
+    Load all required models in LM Studio.
+
+    Models:
+    - UI-TARS: Vision-based automation
+    - Gemma: Fast pattern matching (WSP 77 Phase 1)
+    - Qwen: Intelligent reasoning (WSP 77 Phase 2)
+
+    Returns:
+        Dict with load status for each model
+    """
+    results = {}
+
+    logger.info("[DEPS] Loading all AI models in LM Studio...")
+
+    results['ui_tars'] = _load_ui_tars_model()
+    results['gemma'] = _load_gemma_model()
+    results['qwen'] = _load_qwen_model()
+
+    loaded = sum(1 for v in results.values() if v)
+    logger.info(f"[DEPS] Model loading complete: {loaded}/3 loaded")
+
+    return results
 
 
 async def ensure_dependencies(require_lm_studio: bool = True) -> Dict[str, bool]:
