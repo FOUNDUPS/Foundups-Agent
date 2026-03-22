@@ -24,3 +24,6 @@ llama-cpp-python==0.2.69
 # Web framework for Vercel deployment
 fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
+
+# Database ORM for FAM persistence layer
+sqlalchemy>=2.0.0

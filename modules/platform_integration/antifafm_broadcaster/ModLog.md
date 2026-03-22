@@ -1,5 +1,87 @@
 # antifaFM Broadcaster - ModLog
 
+## V3.2.5 - Fix Schema Rotation & GCC Tracker (2026-03-19)
+
+**Context**: Boot layer rotation not working - GCC showing planes/cookie popup, video not rotating, browser not fullscreen.
+
+**Root Causes**:
+1. **GCC URLs**: MarineTraffic has cookie consent popup blocking view
+2. **Wrong content**: MarineTraffic showing aircraft, not AIS ships
+3. **Schema handlers**: video/news schemas not wired in run_schema()
+4. **Browser sizing**: Browser source not fullscreen (small box)
+
+**Solution**:
+
+1. **GCC Tracker** - Switched to VesselFinder (no popup, ships not planes):
+   ```python
+   VESSELFINDER_HORMUZ = "https://www.vesselfinder.com/map#11/26.4/56.3/type=8"
+   VESSELFINDER_GULF = "https://www.vesselfinder.com/map#7/26.0/51.5/type=8"
+   # type=8 = TANKERS ONLY
+   ```
+
+2. **Schema Handlers** - Added video/news execution in run_schema():
+   - Video: Shows video grid (video1-9), waits 10 min
+   - News: Shows browser source, waits 10 min
+
+3. **Fullscreen Bounds** - Added `set_source_bounds_fullscreen()`:
+   ```python
+   boundsWidth: 1920.0, boundsHeight: 1080.0, boundsType: "OBS_BOUNDS_STRETCH"
+   ```
+
+**Files Modified**:
+- `gcc_shipping_tracker/executor.py` - VesselFinder URLs
+- `boot_layer_rotator/executor.py` - Schema handlers, fullscreen bounds
+
+**WSP Compliance**: WSP 27 (DAE), WSP 91 (Observability)
+
+---
+
+## V3.2.4 - Fix Dual Audio Playback (2026-03-19)
+
+**Context**: User reported hearing "2 players" in OBS - dual audio playback.
+
+**Root Causes**:
+1. **Primary**: OBS may have launched twice ("pancaked"), creating duplicate audio streams
+2. **Secondary**: Schema rotation only controlled source **visibility**, not **audio muting**
+
+**Solution**: Enhanced `configure_schema_visibility()` to also manage audio muting:
+
+```python
+async def set_source_mute(source_name: str, muted: bool) -> Dict[str, Any]:
+    """Set OBS input source mute state."""
+    client = _get_obs_client()
+    client.set_input_mute(name=source_name, muted=muted)
+```
+
+**Audio Behavior by Schema**:
+- **Video schema**: MUTE radio source, UNMUTE video sources (video audio plays)
+- **Non-video schemas** (gcc, news): UNMUTE radio source, MUTE video sources (radio plays)
+
+**Files Modified**:
+- `boot_layer_rotator/executor.py` - Added `set_source_mute()`, enhanced `configure_schema_visibility()`
+
+**WSP Compliance**: WSP 91 (Observability), WSP 27 (DAE Architecture)
+
+---
+
+## V3.2.3 - Suppress Background Daemon Console Logs (2026-03-19)
+
+**Context**: GCC daemon logs (every 2 minutes) were appearing interleaved with the main menu, disrupting UI flow.
+
+**Root Cause**: Background daemons (gcc_shipping_tracker, boot_layer_rotator, obsws_python) logged at INFO level to console while menu was waiting for input.
+
+**Solution**: Set WARNING level for background daemon loggers inside `run_boot_rotator()`:
+- `modules.platform_integration.antifafm_broadcaster.skillz.gcc_shipping_tracker.executor`
+- `modules.platform_integration.antifafm_broadcaster.skillz.boot_layer_rotator.executor`
+- `obsws_python.baseclient.ObsClient`
+- `obsws_python.reqs.ReqClient`
+
+**Impact**: INFO logs still go to file (`antifafm_broadcaster.log`), but no longer spam console during menu interaction.
+
+**WSP Compliance**: WSP 91 (Observability - logs preserved to file)
+
+---
+
 ## V3.2.2 - antifaFM DJ Audio Health Skill (2026-03-13)
 
 **Context**: No audio when OBS launched. Audio source (`antifaFM Radio`) needs monitoring and auto-restart.

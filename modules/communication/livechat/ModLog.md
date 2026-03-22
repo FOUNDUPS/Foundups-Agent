@@ -10,6 +10,71 @@ This log tracks changes specific to the **livechat** module in the **communicati
 
 ---
 
+## 2026-03-21 - Agentic Pre-Audit for Channel Rotation (Comments + Shorts + Indexing)
+
+**By:** 0102
+**WSP References:** WSP 22 (ModLog), WSP 97 (System Execution), WSP 77 (Agent Coordination)
+
+### Problem
+
+Channel rotation was processing channels in static order, hanging on channels even when all work was complete. User requirement: "FoundUps needs to be prioritized over antifaFM", "indexing and scheduling not just commenting", and "shouldn't it do an audit?"
+
+### Solution
+
+Added agentic pre-audit phase to `multi_channel_coordinator.py` for BOTH browsers:
+
+**Edge Channels (`_audit_edge_channels()`):**
+1. Comments: DOM query for `ytcp-comment-thread` count
+2. Shorts: `ScheduleTracker.has_sufficient_coverage()` check
+
+**Chrome Channels (`_audit_chrome_channels()`):**
+1. Comments: DOM query for `ytcp-comment-thread` count
+2. Shorts: `ScheduleTracker.has_sufficient_coverage()` check
+3. Indexing: `VideoIndexStore` file count check (Chrome-only)
+
+**Smart reordering**: FoundUps always first, then channels with ANY work type, then channels without work.
+
+### Flow After Fix
+
+```
+BEFORE: antifaFM (0 work) → wait → FoundUps (50 comments, shorts needed) → process
+AFTER:  🔍 Audit all work types → FoundUps (50 comments, shorts) → antifaFM (no work)
+```
+
+### Expected Log Output
+
+```
+[ROTATE] [Edge] 🔍 Running agentic pre-audit...
+[AUDIT] FoundUps: 47 comments, 📹 shorts needed
+[AUDIT] antifaFM: 0 comments, ✓ shorts covered
+[AUDIT] Order: FoundUps - 🐕 FOUNDUPS
+[AUDIT] Order: antifaFM - ○ no work
+[ROTATE] [Edge] ✅ Audit complete: ['FoundUps', 'antifaFM']
+```
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `multi_channel_coordinator.py` | Added `_audit_edge_channels()`, `_audit_chrome_channels()` + pre-audit calls |
+
+### Env Control
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `YT_AGENTIC_AUDIT_ENABLED` | `1` | Enable/disable pre-audit |
+| `YT_SHORTS_MIN_DAYS_AHEAD` | `14` | Days of coverage before skipping shorts |
+| `YT_VIDEO_INDEXING_ENABLED` | `false` | Enable indexing check (Chrome only) |
+
+### Impact
+
+- FoundUps processed first (user priority)
+- Channels with no work deprioritized
+- Checks ALL work types: comments, shorts, indexing
+- Uses existing patterns: `ytcp-comment-thread`, `has_sufficient_coverage()`, `VideoIndexStore`
+
+---
+
 ## 2026-03-18 - Session Recovery for Account Rotation
 
 **By:** 0102

@@ -14,7 +14,7 @@ Test Coverage:
 
 import asyncio
 import time
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import ANY, MagicMock, patch, AsyncMock
 
 import pytest
 
@@ -476,3 +476,109 @@ def test_command_executes_normally_when_wre_available():
     assert "Command executed via WRE" in result
     assert "Task completed successfully" in result
     assert "Advisory Mode" not in result
+
+
+def test_command_prefers_execute_skill_when_existing_wre_skill_available():
+    """COMMAND: prefers execute_skill() when an existing WRE skill is available."""
+    from modules.communication.moltbot_bridge.src.openclaw_dae import (
+        OpenClawDAE, OpenClawIntent, IntentCategory
+    )
+
+    dae = OpenClawDAE()
+
+    mock_loader = MagicMock()
+    mock_loader.has_skill.side_effect = lambda name: name in {"qwen_gitpush", "openclaw_executor"}
+    mock_loader.registry = {
+        "skills": {
+            "qwen_gitpush": {"agents": ["qwen", "gemma"]},
+            "openclaw_executor": {"agents": ["qwen"]},
+        }
+    }
+
+    mock_wre = MagicMock()
+    mock_wre.skills_loader = mock_loader
+    mock_wre.find_skill_candidates.return_value = ["qwen_gitpush", "openclaw_executor"]
+    mock_wre.select_skill_tot.return_value = ("qwen_gitpush", {"tot_confidence": 0.91})
+    mock_wre.execute_skill.return_value = {"output": "Skill pipeline completed", "success": True}
+    mock_wre.execute.return_value = "legacy execute path"
+    dae._wre = mock_wre
+
+    intent = OpenClawIntent(
+        raw_message="git commit and push changes",
+        sender="undaodu",
+        channel="test",
+        session_key="test",
+        category=IntentCategory.COMMAND,
+        confidence=0.9,
+        is_authorized_commander=True,
+        extracted_task="git commit and push changes",
+        target_domain="wre",
+    )
+
+    async def _run():
+        return await dae._execute_command(intent)
+
+    result = asyncio.run(_run())
+
+    assert "qwen_gitpush" in result
+    assert "Skill pipeline completed" in result
+    mock_wre.execute_skill.assert_called_once_with(
+        skill_name="qwen_gitpush",
+        agent="qwen",
+        input_context=ANY,
+    )
+    assert mock_wre.execute_skill.call_args.kwargs["input_context"]["task"] == "git commit and push changes"
+    mock_wre.execute.assert_not_called()
+
+
+def test_command_uses_openclaw_executor_when_no_specific_skill_matches():
+    """COMMAND: falls back to existing openclaw_executor skill before legacy execute()."""
+    from modules.communication.moltbot_bridge.src.openclaw_dae import (
+        OpenClawDAE, OpenClawIntent, IntentCategory
+    )
+
+    dae = OpenClawDAE()
+
+    mock_loader = MagicMock()
+    mock_loader.has_skill.side_effect = lambda name: name == "openclaw_executor"
+    mock_loader.registry = {
+        "skills": {
+            "openclaw_executor": {"agents": ["qwen", "gemma"]},
+        }
+    }
+
+    mock_wre = MagicMock()
+    mock_wre.skills_loader = mock_loader
+    mock_wre.find_skill_candidates.return_value = []
+    mock_wre.execute_skill.return_value = {
+        "output": "OpenClaw executor handled the command",
+        "success": True,
+    }
+    mock_wre.execute.return_value = "legacy execute path"
+    dae._wre = mock_wre
+
+    intent = OpenClawIntent(
+        raw_message="run tests and summarize failures",
+        sender="undaodu",
+        channel="test",
+        session_key="test",
+        category=IntentCategory.COMMAND,
+        confidence=0.9,
+        is_authorized_commander=True,
+        extracted_task="run tests and summarize failures",
+        target_domain="wre",
+    )
+
+    async def _run():
+        return await dae._execute_command(intent)
+
+    result = asyncio.run(_run())
+
+    assert "openclaw_executor" in result
+    assert "OpenClaw executor handled the command" in result
+    mock_wre.execute_skill.assert_called_once_with(
+        skill_name="openclaw_executor",
+        agent="qwen",
+        input_context=ANY,
+    )
+    mock_wre.execute.assert_not_called()

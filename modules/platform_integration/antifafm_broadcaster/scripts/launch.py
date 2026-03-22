@@ -476,6 +476,18 @@ def _start_obs_orchestration():
                     """Run boot layer schema rotation (GCC -> Video -> News -> ...)"""
                     try:
                         import asyncio
+                        import logging as bg_logging
+
+                        # Suppress INFO logs from background daemons to console
+                        # (logs still go to file via FileHandler)
+                        for mod_name in [
+                            'modules.platform_integration.antifafm_broadcaster.skillz.gcc_shipping_tracker.executor',
+                            'modules.platform_integration.antifafm_broadcaster.skillz.boot_layer_rotator.executor',
+                            'obsws_python.baseclient.ObsClient',
+                            'obsws_python.reqs.ReqClient',
+                        ]:
+                            bg_logging.getLogger(mod_name).setLevel(bg_logging.WARNING)
+
                         loop = asyncio.new_event_loop()
                         asyncio.set_event_loop(loop)
                         print('[OBS-ROTATOR] Starting boot layer rotation (10-min schemas)')

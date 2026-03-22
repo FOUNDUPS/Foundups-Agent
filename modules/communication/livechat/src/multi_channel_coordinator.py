@@ -466,6 +466,24 @@ class MultiChannelCoordinator:
             logger.warning("[ROTATE] To enable: Launch Edge with --remote-debugging-port=9223")
             return 0
 
+        # ============================================
+        # AGENTIC PRE-AUDIT: Check which channels have work before processing
+        # FIX 2026-03-21: Prioritize channels with pending comments, FoundUps first
+        # ============================================
+        audit_enabled = _env_truthy("YT_AGENTIC_AUDIT_ENABLED", "true")
+        if audit_enabled and edge_swapper:
+            try:
+                logger.info("[ROTATE] [Edge] 🔍 Running agentic pre-audit...")
+                audited_accounts = await self._audit_edge_channels(
+                    edge_driver, edge_swapper, edge_accounts
+                )
+                if audited_accounts:
+                    # Re-order: channels with work first, FoundUps prioritized
+                    edge_accounts = audited_accounts
+                    logger.info(f"[ROTATE] [Edge] ✅ Audit complete: {[a[0] for a in edge_accounts]}")
+            except Exception as audit_err:
+                logger.warning(f"[ROTATE] [Edge] Audit failed, using default order: {audit_err}")
+
         # Process each Edge account
         for idx, (account_name, channel_id) in enumerate(edge_accounts, 1):
             if self._should_skip_oops(account_name):
@@ -654,9 +672,18 @@ class MultiChannelCoordinator:
                         logger.info(f"[ROTATE] [Edge] {account_name} comments done → checking unlisted shorts...")
                         try:
                             from modules.platform_integration.youtube_shorts_scheduler.src.scheduler import YouTubeShortsScheduler
+                            from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import ScheduleTracker
 
                             # Map account name to channel key
                             channel_key = account_name.lower().replace(" ", "")  # "FoundUps" -> "foundups"
+
+                            # FIX 2026-03-19: Skip channels with sufficient coverage (14+ days ahead)
+                            min_days = int(os.getenv("YT_SHORTS_MIN_DAYS_AHEAD", "14"))
+                            tracker = ScheduleTracker(channel_id)
+                            has_coverage, days_ahead = tracker.has_sufficient_coverage(min_days)
+                            if has_coverage:
+                                logger.info(f"[ROTATE] [Edge] {account_name}: {days_ahead} days scheduled ahead — SKIPPING shorts")
+                                continue  # Skip to next channel
 
                             shorts_scheduler = YouTubeShortsScheduler(channel_key)
                             if shorts_scheduler.connect_browser():
@@ -798,6 +825,23 @@ class MultiChannelCoordinator:
 
             # Smart rotation: detect current account to minimize switching
             chrome_accounts = await self._optimize_rotation_order(chrome_driver, chrome_accounts)
+
+            # ============================================
+            # AGENTIC PRE-AUDIT: Check which Chrome channels have work
+            # FIX 2026-03-21: Comments + Shorts + Indexing (Chrome handles indexing)
+            # ============================================
+            audit_enabled = _env_truthy("YT_AGENTIC_AUDIT_ENABLED", "true")
+            if audit_enabled and swapper:
+                try:
+                    logger.info("[ROTATE] [Chrome] 🔍 Running agentic pre-audit...")
+                    audited_accounts = await self._audit_chrome_channels(
+                        chrome_driver, swapper, chrome_accounts
+                    )
+                    if audited_accounts:
+                        chrome_accounts = audited_accounts
+                        logger.info(f"[ROTATE] [Chrome] ✅ Audit complete: {[a[0] for a in chrome_accounts]}")
+                except Exception as audit_err:
+                    logger.warning(f"[ROTATE] [Chrome] Audit failed, using default order: {audit_err}")
 
             if not await self._driver_session_alive(chrome_driver, "Chrome"):
                 logger.warning("[ROTATE] [Chrome] Session invalid after connect; attempting immediate reconnect")
@@ -1029,9 +1073,18 @@ class MultiChannelCoordinator:
                         logger.info(f"[ROTATE] [Chrome] {account_name} comments done → checking unlisted shorts...")
                         try:
                             from modules.platform_integration.youtube_shorts_scheduler.src.scheduler import YouTubeShortsScheduler
+                            from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import ScheduleTracker
 
                             # Map account name to channel key
                             channel_key = account_name.lower().replace(" ", "")  # "Move2Japan" -> "move2japan"
+
+                            # FIX 2026-03-19: Skip channels with sufficient coverage (14+ days ahead)
+                            min_days = int(os.getenv("YT_SHORTS_MIN_DAYS_AHEAD", "14"))
+                            tracker = ScheduleTracker(channel_id)
+                            has_coverage, days_ahead = tracker.has_sufficient_coverage(min_days)
+                            if has_coverage:
+                                logger.info(f"[ROTATE] [Chrome] {account_name}: {days_ahead} days scheduled ahead — SKIPPING shorts")
+                                continue  # Skip to next channel
 
                             shorts_scheduler = YouTubeShortsScheduler(channel_key)
                             if shorts_scheduler.connect_browser():
@@ -1186,6 +1239,203 @@ class MultiChannelCoordinator:
             logger.warning(f"[ROTATE] [SMART] Failed to detect current state: {e}")
 
         return chrome_accounts
+
+    async def _audit_edge_channels(
+        self,
+        edge_driver,
+        edge_swapper,
+        edge_accounts: List[Tuple[str, str]],
+    ) -> List[Tuple[str, str]]:
+        """
+        Agentic pre-audit: Check which Edge channels have pending work.
+
+        Checks THREE work types:
+        1. Comments: DOM query for ytcp-comment-thread count
+        2. Shorts: ScheduleTracker.has_sufficient_coverage() (needs scheduling?)
+        3. Indexing: (Chrome-only, not checked here)
+
+        Returns reordered list: FoundUps first, then channels with work, then rest.
+        FIX 2026-03-21: Don't waste time on channels with no work.
+        """
+        from modules.infrastructure.dependency_launcher.src.dae_dependencies import STUDIO_FILTER
+
+        # (name, id, comment_count, needs_shorts, is_foundups)
+        channel_work: List[Tuple[str, str, int, bool, bool]] = []
+
+        # Check shorts coverage (fast, no browser navigation)
+        shorts_coverage_map: Dict[str, bool] = {}
+        try:
+            from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import ScheduleTracker
+            min_days = int(os.getenv("YT_SHORTS_MIN_DAYS_AHEAD", "14"))
+            for account_name, channel_id in edge_accounts:
+                tracker = ScheduleTracker(channel_id)
+                has_coverage, days_ahead = tracker.has_sufficient_coverage(min_days)
+                shorts_coverage_map[channel_id] = not has_coverage  # needs_shorts = NOT has_coverage
+                logger.debug(f"[AUDIT] {account_name} shorts: {'covered' if has_coverage else 'NEEDS WORK'} ({days_ahead} days)")
+        except Exception as e:
+            logger.warning(f"[AUDIT] Shorts coverage check failed: {e}")
+
+        for account_name, channel_id in edge_accounts:
+            is_foundups = account_name.lower() == "foundups"
+            comment_count = 0
+            needs_shorts = shorts_coverage_map.get(channel_id, True)  # Default: needs work
+
+            try:
+                # Quick navigate to inbox
+                studio_url = f"https://studio.youtube.com/channel/{channel_id}/comments/inbox?filter={STUDIO_FILTER}"
+                await asyncio.to_thread(edge_driver.get, studio_url)
+                await asyncio.sleep(3)  # Wait for DOM
+
+                # Count comments (same query as _verify_studio_inbox_clear)
+                comment_count = edge_driver.execute_script(
+                    "return document.querySelectorAll('ytcp-comment-thread').length || 0"
+                ) or 0
+
+                shorts_status = "📹 shorts needed" if needs_shorts else "✓ shorts covered"
+                logger.info(f"[AUDIT] {account_name}: {comment_count} comments, {shorts_status}")
+
+            except Exception as e:
+                logger.warning(f"[AUDIT] {account_name} check failed: {e}")
+
+            channel_work.append((account_name, channel_id, comment_count, needs_shorts, is_foundups))
+
+        # Sort: FoundUps first, then by total work (comments + shorts)
+        def sort_key(item):
+            name, cid, comments, needs_shorts, is_foundups = item
+            has_any_work = comments > 0 or needs_shorts
+            # Lower = higher priority
+            # FoundUps: 0, others with work: 1, others without work: 2
+            if is_foundups:
+                return (0, -comments)
+            elif has_any_work:
+                return (1, -comments, 0 if needs_shorts else 1)
+            else:
+                return (2, 0, 1)
+
+        channel_work.sort(key=sort_key)
+
+        # Log audit result
+        for name, cid, comments, needs_shorts, is_fp in channel_work:
+            work_items = []
+            if comments > 0:
+                work_items.append(f"{comments} comments")
+            if needs_shorts:
+                work_items.append("shorts")
+            work_str = ", ".join(work_items) if work_items else "no work"
+            status = "🐕 FOUNDUPS" if is_fp else ("✓ " + work_str if work_items else "○ " + work_str)
+            logger.info(f"[AUDIT] Order: {name} - {status}")
+
+        return [(name, cid) for name, cid, comments, needs_shorts, is_fp in channel_work]
+
+    async def _audit_chrome_channels(
+        self,
+        chrome_driver,
+        swapper,
+        chrome_accounts: List[Tuple[str, str]],
+    ) -> List[Tuple[str, str]]:
+        """
+        Agentic pre-audit: Check which Chrome channels have pending work.
+
+        Checks THREE work types:
+        1. Comments: DOM query for ytcp-comment-thread count
+        2. Shorts: ScheduleTracker.has_sufficient_coverage()
+        3. Indexing: Check VideoIndexStore for unindexed videos (Chrome-specific)
+
+        Returns reordered list: FoundUps first, then channels with work, then rest.
+        FIX 2026-03-21: Chrome handles indexing in addition to comments/shorts.
+        """
+        from modules.infrastructure.dependency_launcher.src.dae_dependencies import STUDIO_FILTER
+
+        # (name, id, comment_count, needs_shorts, needs_indexing, is_foundups)
+        channel_work: List[Tuple[str, str, int, bool, bool, bool]] = []
+
+        # Check shorts coverage (fast, no browser navigation)
+        shorts_coverage_map: Dict[str, bool] = {}
+        try:
+            from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import ScheduleTracker
+            min_days = int(os.getenv("YT_SHORTS_MIN_DAYS_AHEAD", "14"))
+            for account_name, channel_id in chrome_accounts:
+                tracker = ScheduleTracker(channel_id)
+                has_coverage, days_ahead = tracker.has_sufficient_coverage(min_days)
+                shorts_coverage_map[channel_id] = not has_coverage
+        except Exception as e:
+            logger.warning(f"[AUDIT] [Chrome] Shorts coverage check failed: {e}")
+
+        # Check indexing needs (fast, local file check)
+        indexing_needed_map: Dict[str, bool] = {}
+        if os.getenv("YT_VIDEO_INDEXING_ENABLED", "false").lower() in ("1", "true", "yes"):
+            try:
+                from modules.ai_intelligence.video_indexer.src.studio_ask_indexer import INDEX_ROOT, VideoIndexStore
+                for account_name, channel_id in chrome_accounts:
+                    channel_key = account_name.lower().replace(" ", "")
+                    store = VideoIndexStore(base_path=str(INDEX_ROOT / channel_key))
+                    # Check if any recent videos need indexing (simple heuristic)
+                    # If index directory is empty or very small, needs indexing
+                    index_count = len(list((INDEX_ROOT / channel_key).glob("*.json"))) if (INDEX_ROOT / channel_key).exists() else 0
+                    needs_indexing = index_count < 10  # Arbitrary threshold
+                    indexing_needed_map[channel_id] = needs_indexing
+            except Exception as e:
+                logger.debug(f"[AUDIT] [Chrome] Indexing check skipped: {e}")
+
+        for account_name, channel_id in chrome_accounts:
+            is_foundups = account_name.lower() == "foundups"
+            comment_count = 0
+            needs_shorts = shorts_coverage_map.get(channel_id, True)
+            needs_indexing = indexing_needed_map.get(channel_id, False)
+
+            try:
+                # Quick navigate to inbox
+                studio_url = f"https://studio.youtube.com/channel/{channel_id}/comments/inbox?filter={STUDIO_FILTER}"
+                await asyncio.to_thread(chrome_driver.get, studio_url)
+                await asyncio.sleep(3)
+
+                comment_count = chrome_driver.execute_script(
+                    "return document.querySelectorAll('ytcp-comment-thread').length || 0"
+                ) or 0
+
+                work_parts = []
+                if comment_count > 0:
+                    work_parts.append(f"{comment_count} comments")
+                if needs_shorts:
+                    work_parts.append("shorts")
+                if needs_indexing:
+                    work_parts.append("indexing")
+                work_str = ", ".join(work_parts) if work_parts else "no work"
+                logger.info(f"[AUDIT] [Chrome] {account_name}: {work_str}")
+
+            except Exception as e:
+                logger.warning(f"[AUDIT] [Chrome] {account_name} check failed: {e}")
+
+            channel_work.append((account_name, channel_id, comment_count, needs_shorts, needs_indexing, is_foundups))
+
+        # Sort: FoundUps first, then by total work
+        def sort_key(item):
+            name, cid, comments, needs_shorts, needs_indexing, is_foundups = item
+            has_any_work = comments > 0 or needs_shorts or needs_indexing
+            if is_foundups:
+                return (0, -comments)
+            elif has_any_work:
+                work_score = comments + (10 if needs_shorts else 0) + (5 if needs_indexing else 0)
+                return (1, -work_score)
+            else:
+                return (2, 0)
+
+        channel_work.sort(key=sort_key)
+
+        # Log audit result
+        for name, cid, comments, needs_shorts, needs_indexing, is_fp in channel_work:
+            work_items = []
+            if comments > 0:
+                work_items.append(f"{comments} comments")
+            if needs_shorts:
+                work_items.append("shorts")
+            if needs_indexing:
+                work_items.append("indexing")
+            work_str = ", ".join(work_items) if work_items else "no work"
+            status = "🐕 FOUNDUPS" if is_fp else ("✓ " + work_str if work_items else "○ " + work_str)
+            logger.info(f"[AUDIT] [Chrome] Order: {name} - {status}")
+
+        return [(name, cid) for name, cid, comments, needs_shorts, needs_indexing, is_fp in channel_work]
 
     async def _verify_and_retry_engagement(
         self,

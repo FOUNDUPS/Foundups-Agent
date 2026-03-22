@@ -9,3 +9,7 @@
 {"timestamp": "2026-03-14T22:38:02.203383+00:00", "event": "audio_health_ok", "source": "antifaFM Radio", "state": "OBS_MEDIA_STATE_PLAYING", "volume_db": -1.4555151462554932}
 {"timestamp": "2026-03-15T23:04:26.957692+00:00", "event": "audio_health_ok", "source": "antifaFM Radio", "state": "OBS_MEDIA_STATE_PLAYING", "volume_db": -1.4555151462554932}
 {"timestamp": "2026-03-16T22:32:01.842078+00:00", "event": "audio_health_ok", "source": "antifaFM Radio", "state": "OBS_MEDIA_STATE_PLAYING", "volume_db": -1.4555151462554932}
+{"timestamp": "2026-03-18T08:36:27.918203+00:00", "event": "audio_health_ok", "source": "antifaFM Radio", "state": "OBS_MEDIA_STATE_PLAYING", "volume_db": -1.4555151462554932}
+{"timestamp": "2026-03-18T23:06:04.855619+00:00", "event": "audio_health_ok", "source": "antifaFM Radio", "state": "OBS_MEDIA_STATE_PLAYING", "volume_db": -1.4555151462554932}
+{"timestamp": "2026-03-20T06:41:15.656245+00:00", "event": "audio_error", "source": "antifaFM Radio", "error": "No module named 'obsws_python'"}
+{"timestamp": "2026-03-20T06:41:15.658810+00:00", "event": "audio_error", "source": "antifaFM Radio", "error": "No module named 'obsws_python'"}
