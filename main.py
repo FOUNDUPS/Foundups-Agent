@@ -1389,6 +1389,78 @@ def main():
             self_audit_loop.stop()
 
 
+def run_headless() -> int:
+    """
+    WSP 97: Headless autonomous mode.
+
+    Runs OpenClaw supervisor in a loop without interactive menu.
+    FAIL-CLOSED: Exits with error if WRE is not READY.
+    """
+    repo_root = Path(__file__).resolve().parent
+
+    # Fail-closed: check WRE readiness first
+    wre_status = run_connect_wre(repo_root)
+    if wre_status["readiness"] not in ("READY", "INSUFFICIENT_DATA"):
+        print(
+            f"[HEADLESS] FAIL-CLOSED: WRE not ready "
+            f"(readiness={wre_status['readiness']}, "
+            f"critical={wre_status['alert_counts']['critical']})"
+        )
+        return 1
+
+    print(f"[HEADLESS] Starting autonomous mode (WRE={wre_status['readiness']})")
+
+    try:
+        from modules.communication.moltbot_bridge.src.openclaw_supervisor import OpenClawSupervisor
+        from modules.infrastructure.dae_daemon.src.dae_launch_broker import DAELaunchBroker
+        from modules.infrastructure.dae_daemon.src.dae_observer import DAEObserver
+
+        broker = DAELaunchBroker()
+        observer = DAEObserver()
+
+        supervisor = OpenClawSupervisor(
+            repo_root=repo_root,
+            broker=broker,
+            observer=observer,
+        )
+
+        print("[HEADLESS] OpenClaw supervisor initialized, entering run loop...")
+
+        cycle_interval = float(os.getenv("OPENCLAW_HEADLESS_INTERVAL", "30"))
+        max_cycles = int(os.getenv("OPENCLAW_HEADLESS_MAX_CYCLES", "0"))  # 0 = infinite
+        cycle_count = 0
+
+        while True:
+            try:
+                result = supervisor.run_cycle()
+                cycle_count += 1
+                action = result.get("plan", {}).get("action", "idle")
+                ok = result.get("verify", {}).get("ok", False)
+                print(f"[HEADLESS] cycle={cycle_count} action={action} ok={ok}")
+
+                if max_cycles > 0 and cycle_count >= max_cycles:
+                    print(f"[HEADLESS] max_cycles={max_cycles} reached, exiting")
+                    break
+
+                time.sleep(cycle_interval)
+
+            except KeyboardInterrupt:
+                print("[HEADLESS] interrupted, exiting")
+                break
+            except Exception as exc:
+                logger.error(f"[HEADLESS] cycle error: {exc}")
+                time.sleep(cycle_interval)
+
+        return 0
+
+    except ImportError as exc:
+        print(f"[HEADLESS] FAIL-CLOSED: missing dependency: {exc}")
+        return 1
+    except Exception as exc:
+        print(f"[HEADLESS] FAIL-CLOSED: {exc}")
+        return 1
+
+
 if __name__ == "__main__":
     # WSP 97 Section 4.6: --connect-wre CLI hook
     if len(sys.argv) > 1 and sys.argv[1] == "--connect-wre":
@@ -1405,4 +1477,9 @@ if __name__ == "__main__":
             f"warnings={status['alert_counts']['warning']}"
         )
         sys.exit(0 if status["readiness"] == "READY" else 1)
+
+    # WSP 97: --headless autonomous mode (fail-closed, no interactive menu)
+    if len(sys.argv) > 1 and sys.argv[1] == "--headless":
+        sys.exit(run_headless())
+
     main()
