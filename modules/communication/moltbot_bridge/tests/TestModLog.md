@@ -1,3 +1,21 @@
+## 2026-03-23: Deterministic memory queries (P0)
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_memory_queries.py -q`
+- Status: PASS
+- Result: `10 passed`
+- Coverage:
+  - Decision query: finds matching memory, returns provenance
+  - Decision query: explicit insufficient-evidence response
+  - Unresolved work: reads native queue status
+  - Unresolved work: reads self-research status
+  - Unresolved work: explicit empty response
+  - Recent sessions: lists workspace memory notes
+  - Recent sessions: handles empty memory
+  - Intent detection: decision query variants
+  - Intent detection: unresolved work variants
+  - Intent detection: non-memory queries fall through
+
+---
+
 ## 2026-03-18: Cursor-based DAE follow runtime
 
 - Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_dae_runtime_adapter.py modules/communication/moltbot_bridge/tests/test_openclaw_dae_runtime_commands.py -q`

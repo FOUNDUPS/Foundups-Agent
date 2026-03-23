@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 logger = logging.getLogger("openclaw_dae")
@@ -54,6 +55,11 @@ async def execute_query(dae: Any, intent: Any) -> str:
         if dae._is_compact_identity_query(intent.raw_message):
             return dae._build_identity_compact_runtime()
         return dae._build_identity_compact()
+
+    # Memory queries: decision recall, unresolved work, recent sessions
+    memory_response = _try_memory_query(dae, intent.raw_message)
+    if memory_response:
+        return memory_response
 
     try:
         from holo_index.core import HoloIndex
@@ -662,6 +668,298 @@ def execute_research(dae: Any, intent: Any) -> str:
     except Exception as exc:
         logger.error("[OPENCLAW-DAE] Research execution error: %s", exc)
         return f"Research error: {exc}"
+
+
+# --------------------------------------------------------------------------- #
+#  Memory Query Helpers (P0: openclaw_memory_queries)                          #
+# --------------------------------------------------------------------------- #
+
+
+def _try_memory_query(dae: Any, raw_message: str) -> Optional[str]:
+    """
+    Detect and handle deterministic memory queries.
+
+    Supported patterns:
+    - "what did we decide about X" -> decision recall
+    - "show unresolved work" / "show pending work" -> unresolved work
+    - "show recent sessions" / "show high-value sessions" -> recent sessions
+
+    IMPORTANT: Patterns must be narrow to avoid hijacking normal QUERY traffic.
+    Use word boundaries and require memory-specific nouns.
+    """
+    normalized = raw_message.lower().strip()
+
+    # Decision query: "what did we decide about X"
+    # Narrow: requires exact phrase "what did we decide"
+    decision_match = re.search(
+        r"what\s+did\s+we\s+decide\s+(?:about|on|for|regarding)\s+(.+)",
+        normalized,
+    )
+    if decision_match:
+        topic = decision_match.group(1).strip().rstrip("?")
+        return _query_decisions(dae, topic)
+
+    # Unresolved work query
+    # Narrow: requires memory noun (work|tasks|items) AND status word with word boundaries
+    # Avoids: "what openclaw..." matching via "open" substring
+    if re.search(
+        r"\b(unresolved|pending|remaining)\b.{0,20}\b(work|tasks?|items?)\b",
+        normalized,
+    ) or re.search(
+        r"\b(work|tasks?|items?)\b.{0,20}\b(unresolved|pending|remaining|left)\b",
+        normalized,
+    ):
+        return _query_unresolved_work(dae)
+
+    # Recent sessions query
+    # Narrow: requires "sessions" noun explicitly
+    # Avoids: "show latest WSP docs" matching via "latest" alone
+    if re.search(
+        r"\b(recent|high.?value|latest)\b.{0,15}\bsessions?\b",
+        normalized,
+    ) or re.search(
+        r"\bsessions?\b.{0,15}\b(recent|high.?value|latest)\b",
+        normalized,
+    ):
+        return _query_recent_sessions(dae)
+
+    return None
+
+
+def _query_decisions(dae: Any, topic: str) -> str:
+    """Search workspace memory for decisions related to a topic."""
+    matches = _scan_workspace_memory(dae, topic)
+
+    if not matches:
+        return (
+            f"**No decisions found for:** `{topic}`\n\n"
+            "I searched workspace memory notes and reports but found no matching records.\n"
+            "This may mean:\n"
+            "- The decision was made before memory notes were captured\n"
+            "- The topic uses different terminology\n"
+            "- No formal decision was recorded\n\n"
+            "Try rephrasing or ask 012 directly."
+        )
+
+    parts = [f"**Decisions related to:** `{topic}`\n"]
+    for match in matches[:5]:
+        parts.append(f"### {match['title']}")
+        parts.append(f"**Source:** `{match['path']}`")
+        parts.append(f"**Date:** {match.get('date', 'unknown')}")
+        if match.get("snippet"):
+            parts.append(f"\n{match['snippet'][:500]}")
+        parts.append("")
+
+    parts.append(f"_Searched {matches[0].get('total_scanned', '?')} memory artifacts._")
+    return "\n".join(parts)
+
+
+def _query_unresolved_work(dae: Any) -> str:
+    """Query queue status and memory for unresolved/pending work."""
+    unresolved = []
+    sources = []
+
+    # Check native execution queue
+    queue_path = _get_workspace_path(dae) / "reports/openclaw_native_execution_queue_status.json"
+    if queue_path.exists():
+        try:
+            with open(queue_path, "r", encoding="utf-8") as f:
+                queue_data = json.load(f)
+            sources.append(str(queue_path.name))
+
+            # Next ready items
+            for item in queue_data.get("next_ready", []):
+                unresolved.append({
+                    "title": item.get("title", "unknown"),
+                    "priority": item.get("priority", "?"),
+                    "source": "native_queue (ready)",
+                })
+
+            # Audit-required items
+            for item in queue_data.get("next_audit", [])[:3]:
+                unresolved.append({
+                    "title": item.get("title", "unknown"),
+                    "priority": item.get("priority", "?"),
+                    "source": "native_queue (audit_required)",
+                })
+        except Exception as exc:
+            logger.debug("Failed to read queue status: %s", exc)
+
+    # Check self-research status for update candidates
+    research_path = _get_workspace_path(dae) / "reports/openclaw_self_research_status.json"
+    if research_path.exists():
+        try:
+            with open(research_path, "r", encoding="utf-8") as f:
+                research_data = json.load(f)
+            sources.append(str(research_path.name))
+
+            for candidate in research_data.get("update_candidates", [])[:3]:
+                unresolved.append({
+                    "title": candidate.get("title", "unknown"),
+                    "priority": candidate.get("mps", {}).get("priority", "?"),
+                    "source": "self_research",
+                })
+        except Exception as exc:
+            logger.debug("Failed to read self-research status: %s", exc)
+
+    if not unresolved:
+        return (
+            "**No unresolved work found.**\n\n"
+            "Checked: native execution queue, self-research status.\n"
+            "Either all work is complete or no pending items were recorded."
+        )
+
+    parts = ["**Unresolved Work:**\n"]
+    for item in unresolved:
+        parts.append(
+            f"- [{item['priority']}] {item['title']} _(from {item['source']})_"
+        )
+
+    parts.append("")
+    parts.append(f"_Sources: {', '.join(sources)}_")
+    return "\n".join(parts)
+
+
+def _query_recent_sessions(dae: Any) -> str:
+    """List recent high-value session notes from workspace memory."""
+    memory_dir = _get_workspace_path(dae) / "memory"
+    if not memory_dir.exists():
+        return (
+            "**No session memory found.**\n\n"
+            "Workspace memory directory does not exist."
+        )
+
+    # Get recent memory notes sorted by date
+    notes = []
+    try:
+        for note_path in sorted(memory_dir.glob("*.md"), reverse=True)[:10]:
+            try:
+                content = note_path.read_text(encoding="utf-8")
+                first_line = content.split("\n")[0].strip()
+                title = first_line.lstrip("#").strip() if first_line.startswith("#") else note_path.stem
+
+                # Extract date from filename (2026-03-22-topic.md)
+                date_match = re.match(r"(\d{4}-\d{2}-\d{2})", note_path.stem)
+                date = date_match.group(1) if date_match else "unknown"
+
+                notes.append({
+                    "title": title,
+                    "date": date,
+                    "path": note_path.name,
+                    "size": len(content),
+                })
+            except Exception:
+                continue
+    except Exception as exc:
+        logger.debug("Failed to scan memory directory: %s", exc)
+
+    if not notes:
+        return (
+            "**No recent sessions found.**\n\n"
+            "Workspace memory exists but contains no readable notes."
+        )
+
+    parts = ["**Recent Sessions:**\n"]
+    for note in notes:
+        parts.append(f"- **{note['date']}**: {note['title']} (`{note['path']}`)")
+
+    parts.append("")
+    parts.append(f"_Found {len(notes)} session note(s) in workspace memory._")
+    return "\n".join(parts)
+
+
+def _scan_workspace_memory(dae: Any, topic: str) -> list[Dict[str, Any]]:
+    """
+    Scan workspace memory notes for content matching a topic.
+
+    Returns list of matches with provenance.
+    """
+    from pathlib import Path
+
+    memory_dir = _get_workspace_path(dae) / "memory"
+    if not memory_dir.exists():
+        return []
+
+    topic_lower = topic.lower()
+    topic_words = set(topic_lower.split())
+    matches = []
+    total_scanned = 0
+
+    try:
+        for note_path in memory_dir.glob("*.md"):
+            total_scanned += 1
+            try:
+                content = note_path.read_text(encoding="utf-8")
+                content_lower = content.lower()
+
+                # Check if topic appears in content
+                if topic_lower not in content_lower:
+                    # Fallback: check if any topic word appears
+                    if not any(word in content_lower for word in topic_words if len(word) > 3):
+                        continue
+
+                # Extract title and date
+                first_line = content.split("\n")[0].strip()
+                title = first_line.lstrip("#").strip() if first_line.startswith("#") else note_path.stem
+
+                date_match = re.match(r"(\d{4}-\d{2}-\d{2})", note_path.stem)
+                date = date_match.group(1) if date_match else "unknown"
+
+                # Extract snippet around topic
+                snippet = _extract_snippet(content, topic_lower)
+
+                matches.append({
+                    "title": title,
+                    "date": date,
+                    "path": str(note_path.relative_to(_get_workspace_path(dae))),
+                    "snippet": snippet,
+                    "total_scanned": total_scanned,
+                })
+            except Exception:
+                continue
+    except Exception as exc:
+        logger.debug("Failed to scan workspace memory: %s", exc)
+
+    # Sort by date descending
+    matches.sort(key=lambda m: m.get("date", ""), reverse=True)
+
+    # Propagate total_scanned to all matches
+    for match in matches:
+        match["total_scanned"] = total_scanned
+
+    return matches
+
+
+def _extract_snippet(content: str, topic: str) -> str:
+    """Extract a text snippet around the topic mention."""
+    content_lower = content.lower()
+    pos = content_lower.find(topic)
+    if pos == -1:
+        # Return first meaningful paragraph
+        lines = [l for l in content.split("\n") if l.strip() and not l.startswith("#")]
+        return lines[0] if lines else ""
+
+    # Extract context around match
+    start = max(0, pos - 100)
+    end = min(len(content), pos + len(topic) + 200)
+
+    snippet = content[start:end].strip()
+    if start > 0:
+        snippet = "..." + snippet
+    if end < len(content):
+        snippet = snippet + "..."
+
+    return snippet
+
+
+def _get_workspace_path(dae: Any) -> "Path":
+    """Get the workspace path for memory and reports."""
+    from pathlib import Path
+
+    repo_root = getattr(dae, "repo_root", None)
+    if repo_root:
+        return Path(repo_root) / "modules/communication/moltbot_bridge/workspace"
+    return Path("modules/communication/moltbot_bridge/workspace")
 
 
 def _env_truthy(name: str, default: str = "0") -> bool:
