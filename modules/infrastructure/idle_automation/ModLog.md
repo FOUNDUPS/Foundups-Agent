@@ -12,6 +12,34 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 
 ## MODLOG ENTRIES
 
+### 2026-03-23 - Memory Nudge Runtime Wiring
+
+**WSP Protocol**: WSP 22, WSP 60 (Memory Architecture), WSP 97 (Autonomy Boundaries)
+**Phase**: Automation Hardening
+**Agent**: 0102
+
+#### Changes to self_research_refresh.py
+
+- **Added**: `emit_nudges` parameter to `run()` method (default: True)
+- **Added**: `_emit_memory_nudges()` method to call memory nudge engine after report written
+- **Added**: `--no-nudges` CLI flag for disabling nudge emission
+- **Added**: `memory_nudges_emitted` count in final report
+
+#### Integration Points
+
+The memory nudge engine (from moltbot_bridge) is now called at the end of each self-research cycle:
+1. Self-research writes status reports
+2. Nudge engine scans those reports for high-value events
+3. Creates deduplicated memory notes in workspace/memory/
+4. Records breadcrumbs in AgentDB for cross-session recall
+
+#### Tests Added
+
+- `test_run_emits_memory_nudges_when_high_value_events_detected`
+- `test_run_skips_nudges_when_emit_nudges_false`
+
+---
+
 ### 2026-03-22 - OpenClaw Self-Research Refresh Loop
 **WSP Protocol**: WSP 15 (MPS Prioritization), WSP 27 (DAE Architecture), WSP 48 (Recursive Improvement), WSP 60 (Memory Architecture), WSP 84 (Code Reuse)
 **Phase**: Automation Hardening

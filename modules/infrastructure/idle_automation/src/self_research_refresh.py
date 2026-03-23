@@ -451,10 +451,12 @@ class SelfResearchRefresher:
         deferability: int,
         impact: int,
         reasoning: str,
+        stable_task_id: Optional[str] = None,
     ) -> Dict[str, Any]:
         score = manual_mps(complexity, importance, deferability, impact, reasoning)
+        task_id = stable_task_id or f"self_research_{source}_{slugify(title)}"
         return {
-            "task_id": f"self_research_{source}_{slugify(title)}",
+            "task_id": task_id,
             "source": source,
             "title": title,
             "description": description,
@@ -555,6 +557,7 @@ class SelfResearchRefresher:
                     deferability=4,
                     impact=4,
                     reasoning="External opportunities changed; quick review yields near-term funding leverage.",
+                    stable_task_id="grant_watchlist_review",
                 )
             )
 
@@ -574,6 +577,7 @@ class SelfResearchRefresher:
                     deferability=3,
                     impact=3,
                     reasoning="Watchlist fetch failures reduce external awareness but are usually quick to harden.",
+                    stable_task_id="grant_watchlist_stabilize",
                 )
             )
 
@@ -602,6 +606,7 @@ class SelfResearchRefresher:
                         "External research tooling drift can change adoption guidance and "
                         "benchmark positioning for PQN work."
                     ),
+                    stable_task_id="pqn_watchlist_review",
                 )
             )
 
@@ -627,6 +632,7 @@ class SelfResearchRefresher:
                         "External benchmark monitoring should stay healthy but is less urgent "
                         "than direct system or funding path failures."
                     ),
+                    stable_task_id="pqn_watchlist_stabilize",
                 )
             )
 
@@ -655,6 +661,7 @@ class SelfResearchRefresher:
                         "Context and memory infrastructure shifts can materially change the "
                         "OpenClaw roadmap, but should still be gated through WSP 97 review."
                     ),
+                    stable_task_id="openclaw_ecosystem_watchlist_review",
                 )
             )
 
@@ -680,6 +687,7 @@ class SelfResearchRefresher:
                         "Ecosystem drift monitoring should stay healthy so architecture "
                         "decisions are based on current upstream reality."
                     ),
+                    stable_task_id="openclaw_ecosystem_watchlist_stabilize",
                 )
             )
 
@@ -693,14 +701,85 @@ class SelfResearchRefresher:
         return candidates[: self.max_candidates]
 
     def publish_autonomous_tasks(self, candidates: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Write ranked candidates into the existing AgentDB autonomous queue."""
+        """Write ranked candidates into the existing AgentDB autonomous queue.
+
+        Grant tasks use stable task_ids (grant_watchlist_review, grant_watchlist_stabilize)
+        to prevent duplicate accumulation and enable deterministic dispatch.
+
+        Completed stable grant tasks are NOT reopened unless context materially changed.
+        """
         from modules.infrastructure.database.src.agent_db import AgentDB
 
         db = AgentDB()
+
+        # Clean up stale slugified GRANT tasks only (not PQN/ecosystem watchlist tasks)
+        # Pattern: self_research_external_watchlist_*grant* but NOT the stable grant IDs
+        stable_grant_task_ids = {"grant_watchlist_review", "grant_watchlist_stabilize"}
+        candidate_task_ids = {c["task_id"] for c in candidates}
+        if candidate_task_ids & stable_grant_task_ids:
+            try:
+                # Only remove old slugified grant-specific task IDs
+                db.db.execute_write(
+                    """
+                    DELETE FROM agents_autonomous_tasks
+                    WHERE status IN ('pending', NULL)
+                      AND task_id LIKE 'self_research_external_watchlist_%grant%'
+                      AND task_id NOT IN (?, ?)
+                    """,
+                    ("grant_watchlist_review", "grant_watchlist_stabilize"),
+                )
+            except Exception as exc:
+                logger.debug("Stale grant task cleanup skipped: %s", exc)
+
+        # Check which stable grant tasks are already completed
+        completed_stable_grants = set()
+        for task_id in stable_grant_task_ids:
+            try:
+                rows = db.db.execute_query(
+                    "SELECT status, context FROM agents_autonomous_tasks WHERE task_id = ?",
+                    (task_id,),
+                )
+                if rows and rows[0].get("status") == "completed":
+                    completed_stable_grants.add(task_id)
+            except Exception:
+                pass  # Table may not exist yet
+
         published: List[Dict[str, Any]] = []
         for candidate in candidates:
+            task_id = candidate["task_id"]
+
+            # Skip republishing completed stable grant tasks unless context changed
+            if task_id in completed_stable_grants:
+                # Check if context materially changed (different items)
+                try:
+                    rows = db.db.execute_query(
+                        "SELECT context FROM agents_autonomous_tasks WHERE task_id = ?",
+                        (task_id,),
+                    )
+                    if rows:
+                        import json as _json
+                        old_ctx = rows[0].get("context")
+                        if isinstance(old_ctx, str):
+                            old_ctx = _json.loads(old_ctx)
+                        old_items = set((old_ctx or {}).get("context", {}).get("changed_items", []) +
+                                        (old_ctx or {}).get("context", {}).get("error_items", []))
+                        new_items = set(candidate.get("context", {}).get("changed_items", []) +
+                                        candidate.get("context", {}).get("error_items", []))
+                        if old_items == new_items:
+                            # Same context, don't reopen
+                            published.append({
+                                "task_id": task_id,
+                                "title": candidate["title"],
+                                "created": False,
+                                "priority": candidate["mps"]["priority"],
+                                "skipped_reason": "completed_same_context",
+                            })
+                            continue
+                except Exception:
+                    pass  # If we can't compare, proceed with republish
+
             created = db.create_autonomous_task(
-                task_id=candidate["task_id"],
+                task_id=task_id,
                 description=candidate["description"],
                 required_skills=candidate["required_skills"],
                 estimated_complexity=float(candidate["mps"]["complexity"]),
@@ -712,9 +791,19 @@ class SelfResearchRefresher:
                     "context": candidate["context"],
                 },
             )
+            # Ensure status is set to 'pending' only for new tasks (don't reset completed)
+            if created and task_id not in completed_stable_grants:
+                try:
+                    db.db.execute_write(
+                        "UPDATE agents_autonomous_tasks SET status = 'pending' WHERE task_id = ? AND status IS NULL",
+                        (task_id,),
+                    )
+                except Exception:
+                    pass  # Status column may already be set or have a default
+
             published.append(
                 {
-                    "task_id": candidate["task_id"],
+                    "task_id": task_id,
                     "title": candidate["title"],
                     "created": bool(created),
                     "priority": candidate["mps"]["priority"],
@@ -772,6 +861,7 @@ class SelfResearchRefresher:
         run_watchlists: bool = True,
         write_tasks: bool = True,
         remember_outcome: bool = True,
+        emit_nudges: bool = True,
         force_compliance: bool = False,
     ) -> Dict[str, Any]:
         """Execute a full self-research cycle and write the consolidated report."""
@@ -842,9 +932,45 @@ class SelfResearchRefresher:
             encoding="utf-8",
         )
 
+        # Emit memory nudges for high-value events detected in fresh reports
+        nudge_paths: List[Path] = []
+        if emit_nudges:
+            nudge_paths = self._emit_memory_nudges()
+            report["memory_nudges_emitted"] = len(nudge_paths)
+            # Re-write report with nudge count included
+            self.report_path.write_text(
+                json.dumps(report, indent=2, ensure_ascii=True) + "\n",
+                encoding="utf-8",
+            )
+
         if remember_outcome:
             self.remember_outcome(report, duration_ms)
         return report
+
+    def _emit_memory_nudges(self) -> List[Path]:
+        """Emit memory nudges and record breadcrumbs."""
+        try:
+            from modules.communication.moltbot_bridge.src.memory_nudge_engine import (
+                emit_memory_nudges,
+            )
+
+            nudge_paths = emit_memory_nudges(
+                repo_root=self.repo_root,
+                record_breadcrumbs=True,
+            )
+            if nudge_paths:
+                logger.info(
+                    "[SELF-RESEARCH] Emitted %d memory nudge(s): %s",
+                    len(nudge_paths),
+                    [p.name for p in nudge_paths],
+                )
+            return nudge_paths
+        except ImportError as exc:
+            logger.debug("Memory nudge engine not available: %s", exc)
+            return []
+        except Exception as exc:
+            logger.warning("Failed to emit memory nudges: %s", exc)
+            return []
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -857,6 +983,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--no-watchlists", action="store_true")
     parser.add_argument("--no-tasks", action="store_true")
     parser.add_argument("--no-memory", action="store_true")
+    parser.add_argument("--no-nudges", action="store_true", help="Skip memory nudge emission")
     parser.add_argument("--force-compliance", action="store_true")
     args = parser.parse_args(argv)
 
@@ -868,12 +995,14 @@ def main(argv: Optional[List[str]] = None) -> int:
         run_watchlists=not args.no_watchlists,
         write_tasks=not args.no_tasks,
         remember_outcome=not args.no_memory,
+        emit_nudges=not args.no_nudges,
         force_compliance=args.force_compliance,
     )
 
     print(f"[OK] Self-research report written to {args.report_out}")
     print(f"[OK] Update candidates: {len(report.get('update_candidates', []))}")
     print(f"[OK] Autonomous tasks published: {len(report.get('autonomous_tasks', []))}")
+    print(f"[OK] Memory nudges emitted: {report.get('memory_nudges_emitted', 0)}")
     return 0
 
 

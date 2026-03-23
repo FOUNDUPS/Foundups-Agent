@@ -1,5 +1,108 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-23: Memory Nudge Runtime Wiring (P1)
+
+**Author**: 0102
+**WSP**: 22, 60, 97
+
+### Context
+
+Memory nudge engine existed (PR #237) but was not called from live loops.
+This wiring connects it to the self-research refresh cycle.
+
+### Changes
+
+1. **Enhanced emit_memory_nudges()** with `record_breadcrumbs` parameter:
+   - When enabled, records a breadcrumb in AgentDB for each emitted nudge
+   - Session ID: `self_research_{YYYYMMDD}` for daily aggregation
+   - Action: `memory_nudge_emitted` with trigger type, priority, provenance
+
+2. **Wired into self_research_refresh.py**:
+   - New `emit_nudges=True` parameter on `run()` method
+   - Called after report is written, before `remember_outcome`
+   - Report now includes `memory_nudges_emitted` count
+   - CLI flag: `--no-nudges` to disable
+
+### Files Changed
+
+- `src/memory_nudge_engine.py`: Added `_record_breadcrumb()`, updated signatures
+- `modules/infrastructure/idle_automation/src/self_research_refresh.py`: Added `_emit_memory_nudges()` method
+- `tests/test_memory_nudge_engine.py`: 3 new tests for breadcrumb recording
+
+### Verification
+
+```
+pytest test_memory_nudge_engine.py  # 19 passed
+pytest test_self_research_refresh.py  # 7 passed
+```
+
+Live test: 6 nudges emitted, 8 breadcrumbs recorded (some from earlier runs).
+
+---
+
+## 2026-03-23: Grant Task Pipeline Executable (P0)
+
+**Author**: 0102
+**WSP**: 22, 97
+
+### Problem
+
+Grant work was discovered by self-research but not autonomously executable:
+- Tasks used slugified IDs (`self_research_external_watchlist_review_5...`)
+- Dispatch expected stable IDs (`grant_watchlist_review`, `grant_watchlist_stabilize`)
+- Old tasks accumulated alongside new ones
+
+### Solution
+
+1. **Stable task IDs** (already in self_research_refresh.py, now verified working):
+   - `grant_watchlist_review` for changed grant pages
+   - `grant_watchlist_stabilize` for watchlist fetch errors
+   - INSERT OR REPLACE deduplicates by task_id PRIMARY KEY
+
+2. **Stale task cleanup** in `publish_autonomous_tasks()`:
+   - Narrowed to grant-only pattern: `self_research_external_watchlist_%grant%`
+   - Does NOT delete PQN or OpenClaw ecosystem watchlist tasks
+   - Sets `status = 'pending'` after creation (AgentDB may not set it)
+
+3. **Completed task protection**:
+   - Checks if stable grant task exists in `completed` status
+   - Compares `changed_items`/`error_items` context
+   - Skips republish with `skipped_reason: completed_same_context` if unchanged
+
+4. **Structured grant executor** (`src/grant_task_executor.py`):
+   - `execute_grant_review()`: Returns per-item findings, repo-fit assessment, recommendations
+   - `execute_grant_stabilize()`: Returns error diagnostics, remediation steps
+   - Priority mapping matches actual rescored sheet groups:
+     - `p0_apply_now` → 0.95 fit score
+     - `p1_after_one_concrete_adapter` → 0.70 fit score
+     - `p2_deprioritized_until_new_chain_surface` → 0.35 fit score
+
+5. **run_task.py dispatch** updated to use structured executor instead of OpenClawDAE
+
+### Files Changed
+
+- `modules/infrastructure/idle_automation/src/self_research_refresh.py`: Stale cleanup + completed protection
+- `modules/communication/moltbot_bridge/scripts/run_task.py`: Use grant_task_executor
+- `modules/communication/moltbot_bridge/src/grant_task_executor.py`: New file, 200 lines
+- `modules/communication/moltbot_bridge/tests/test_grant_task_execution.py`: 15 tests
+
+### Verification
+
+- `pytest test_grant_task_execution.py` → 15 passed
+- Repro 1: Completed task same context → skipped (not reopened)
+- Repro 2: Ethereum ESP (p0_apply_now) → fit_score=0.95, generates recommendations
+- Stable task_ids confirmed: `grant_watchlist_review`, `grant_watchlist_stabilize`
+
+### Human-Only Gates Intact
+
+Per SKILL.md, OpenClaw does NOT:
+- Submit applications
+- Assert identity
+- Sign wallets
+- Click final binding submit
+
+---
+
 ## 2026-03-23: Memory Nudge Engine (P0)
 
 **Author**: 0102

@@ -115,9 +115,17 @@ class MemoryNudgeEngine:
         events.extend(self._scan_worktree_pressure())
         return events
 
-    def emit_nudges(self, events: Optional[List[NudgeEvent]] = None) -> List[Path]:
+    def emit_nudges(
+        self,
+        events: Optional[List[NudgeEvent]] = None,
+        record_breadcrumbs: bool = False,
+    ) -> List[Path]:
         """
         Write memory notes for high-value events.
+
+        Args:
+            events: Events to emit (scans if None).
+            record_breadcrumbs: If True, record a breadcrumb for each emitted nudge.
 
         Returns list of created note paths.
         Deduplicates based on event signature.
@@ -136,7 +144,37 @@ class MemoryNudgeEngine:
                 created.append(note_path)
                 self._seen_signatures.add(event.signature)
 
+                # Record breadcrumb if enabled
+                if record_breadcrumbs:
+                    self._record_breadcrumb(event, note_path)
+
         return created
+
+    def _record_breadcrumb(self, event: NudgeEvent, note_path: Path) -> None:
+        """Record a breadcrumb in AgentDB for the emitted nudge."""
+        try:
+            from modules.infrastructure.database.src.agent_db import AgentDB
+
+            db = AgentDB()
+            session_id = f"self_research_{datetime.now(UTC).strftime('%Y%m%d')}"
+            db.add_breadcrumb(
+                session_id=session_id,
+                action="memory_nudge_emitted",
+                agent_id="memory_nudge_engine",
+                query=event.title,
+                data={
+                    "trigger_type": event.trigger_type,
+                    "priority": event.priority,
+                    "signature": event.signature,
+                    "provenance": event.provenance,
+                    "note_path": str(note_path.relative_to(self.repo_root)),
+                },
+            )
+            logger.debug("Recorded breadcrumb for nudge: %s", event.signature)
+        except ImportError:
+            logger.debug("AgentDB not available for breadcrumb recording")
+        except Exception as exc:
+            logger.debug("Failed to record breadcrumb: %s", exc)
 
     def _write_note(self, event: NudgeEvent) -> Optional[Path]:
         """Write a single memory note for an event."""
@@ -351,14 +389,21 @@ class MemoryNudgeEngine:
 # ------------------------------------------------------------------ #
 
 
-def emit_memory_nudges(repo_root: Optional[Path] = None) -> List[Path]:
+def emit_memory_nudges(
+    repo_root: Optional[Path] = None,
+    record_breadcrumbs: bool = False,
+) -> List[Path]:
     """
     Convenience function to scan and emit memory nudges.
+
+    Args:
+        repo_root: Repository root path.
+        record_breadcrumbs: If True, record a breadcrumb for each emitted nudge.
 
     Returns list of created note paths.
     """
     engine = MemoryNudgeEngine(repo_root=repo_root)
-    return engine.emit_nudges()
+    return engine.emit_nudges(record_breadcrumbs=record_breadcrumbs)
 
 
 def scan_nudge_events(repo_root: Optional[Path] = None) -> List[NudgeEvent]:
