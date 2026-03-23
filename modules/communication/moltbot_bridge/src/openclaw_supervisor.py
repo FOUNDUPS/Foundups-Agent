@@ -1,19 +1,53 @@
 #!/usr/bin/env python3
-"""Explicit OpenClaw 24/7 supervisor state machine."""
+"""
+Canonical OpenClaw 24/7 Supervisor State Machine.
+
+This is the CANONICAL supervisor for the FoundUps Agent runtime.
+`Supervisor24x7` in modules/infrastructure/supervisor/ is a donor/prototype.
+
+Architecture (WSP prompt pack 2026-03-22):
+- AI Overseer: observe, gate, correlate, rank
+- OpenClawSupervisor: schedule, budget, launch, verify (THIS FILE)
+- OpenClaw: executive/control plane
+- WRE + DAEs: execution
+- PatternMemory: recall and learning
+
+State machine:
+    BOOT → PREFLIGHT → OBSERVE → TRIAGE → PLAN → EXECUTE → VERIFY → REMEMBER → ESCALATE → IDLE_WATCH
+      ↑___________________________________________________________________________________|
+"""
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 import subprocess
+import sys
 import threading
 import time
+import uuid
 from collections import deque
+from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Deque, Dict, Optional
+from typing import Any, Callable, Deque, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class SupervisorMetrics:
+    """Telemetry for observability (WSP 91)."""
+
+    cycles_completed: int = 0
+    events_observed: int = 0
+    tasks_executed: int = 0
+    tasks_succeeded: int = 0
+    escalations_triggered: int = 0
+    last_state_change: float = field(default_factory=time.time)
+    state_durations: Dict[str, float] = field(default_factory=dict)
 
 
 class SupervisorState(str, Enum):
@@ -30,7 +64,12 @@ class SupervisorState(str, Enum):
 
 
 class OpenClawSupervisor:
-    """Canonical 0102 supervisor for the resident OpenClaw runtime."""
+    """
+    Canonical 0102 supervisor for the resident OpenClaw runtime.
+
+    This is the production supervisor launched by main.py.
+    Unified from OpenClawSupervisor + Supervisor24x7 behaviors (P1 2026-03-22).
+    """
 
     def __init__(
         self,
@@ -60,9 +99,34 @@ class OpenClawSupervisor:
         self._event_cursor = 0
         self._restart_attempts: Deque[float] = deque()
 
+        # Unified from Supervisor24x7 (P1 2026-03-22)
+        self.metrics = SupervisorMetrics()
+        self._ai_overseer: Any | None = None
+        self._pattern_memory: Any | None = None
+        self._libido_monitor: Any | None = None
+        self._triage_queue: List[Dict[str, Any]] = []
+        self._execution_results: List[Dict[str, Any]] = []
+
     def stop(self) -> None:
         self._stop_event.set()
         self._stop_self_audit()
+
+    def get_metrics(self) -> Dict[str, Any]:
+        """Return telemetry metrics (WSP 91 observability)."""
+        return {
+            "state": self.current_state.value,
+            "cycles_completed": self.metrics.cycles_completed,
+            "events_observed": self.metrics.events_observed,
+            "tasks_executed": self.metrics.tasks_executed,
+            "tasks_succeeded": self.metrics.tasks_succeeded,
+            "escalations_triggered": self.metrics.escalations_triggered,
+            "uptime_seconds": time.time() - self.metrics.last_state_change,
+            "restart_budget": {
+                "max_attempts": self.max_restart_attempts,
+                "window_sec": self.restart_window_sec,
+                "attempts_in_window": self._attempts_in_window(),
+            },
+        }
 
     def run_forever(self) -> Dict[str, Any]:
         while not self._stop_event.is_set():
@@ -135,6 +199,10 @@ class OpenClawSupervisor:
         }
         return self.last_cycle
 
+    # ------------------------------------------------------------------ #
+    #  Infrastructure helpers                                             #
+    # ------------------------------------------------------------------ #
+
     def _build_daemon_reporter(self) -> Callable[[str, str, Dict[str, Any]], None]:
         from modules.infrastructure.dae_daemon.src.dae_daemon import get_central_daemon
         from modules.infrastructure.dae_daemon.src.schemas import DAEEventType
@@ -179,6 +247,10 @@ class OpenClawSupervisor:
             {"state": state.value, "reason": reason},
         )
 
+    # ------------------------------------------------------------------ #
+    #  Self-Audit Lifecycle                                               #
+    # ------------------------------------------------------------------ #
+
     def _start_self_audit(self) -> None:
         if not self.self_audit_enabled or self._self_audit_loop is not None:
             return
@@ -204,6 +276,38 @@ class OpenClawSupervisor:
                 {"subsystem": "daemon_self_audit", "error": str(exc)[:200]},
             )
 
+        # Initialize unified components (ported from Supervisor24x7)
+        self._init_unified_components()
+
+    def _init_unified_components(self) -> None:
+        """Initialize AI Overseer, PatternMemory, LibidoMonitor (unified from Supervisor24x7)."""
+        # AI Overseer for PLAN state
+        try:
+            from modules.ai_intelligence.ai_overseer.src.ai_overseer import (
+                AIIntelligenceOverseer,
+            )
+            self._ai_overseer = AIIntelligenceOverseer(repo_root=self.repo_root)
+            logger.info("[SUPERVISOR] AI Overseer loaded")
+        except ImportError as e:
+            logger.debug("[SUPERVISOR] AI Overseer unavailable: %s", e)
+
+        # Pattern Memory for REMEMBER state
+        try:
+            from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
+            db_path = self.repo_root / "modules/infrastructure/wre_core/memory/pattern_memory.db"
+            self._pattern_memory = PatternMemory(db_path=db_path)
+            logger.info("[SUPERVISOR] PatternMemory loaded")
+        except (ImportError, Exception) as e:
+            logger.debug("[SUPERVISOR] PatternMemory unavailable: %s", e)
+
+        # Libido Monitor for VERIFY state (Gemma fidelity)
+        try:
+            from modules.infrastructure.wre_core.src.libido_monitor import GemmaLibidoMonitor
+            self._libido_monitor = GemmaLibidoMonitor()
+            logger.info("[SUPERVISOR] LibidoMonitor loaded")
+        except (ImportError, Exception) as e:
+            logger.debug("[SUPERVISOR] LibidoMonitor unavailable: %s", e)
+
     def _stop_self_audit(self) -> None:
         if self._self_audit_loop is None:
             return
@@ -212,10 +316,14 @@ class OpenClawSupervisor:
         finally:
             self._self_audit_loop = None
 
+    # ------------------------------------------------------------------ #
+    #  OBSERVE — poll broker, observer, git, self-audit                   #
+    # ------------------------------------------------------------------ #
+
     def _observe(self) -> Dict[str, Any]:
         broker = self._get_broker()
         observer = self._get_observer()
-        return {
+        obs: Dict[str, Any] = {
             "openclaw_runtime": broker.get_runtime_status("openclaw") if broker else {"registered": False},
             "supervisor_runtime": broker.get_runtime_status("openclaw_supervisor") if broker else {"registered": False},
             "openclaw_live": observer.get_live_status("openclaw", limit=4) if observer else {"registered": False},
@@ -235,7 +343,28 @@ class OpenClawSupervisor:
                 "window_sec": self.restart_window_sec,
                 "attempts_in_window": self._attempts_in_window(),
             },
+            "self_audit_events": [],
         }
+
+        # Poll DaemonSelfAuditLoop for real events (ported from Supervisor24x7)
+        if self._self_audit_loop and hasattr(self._self_audit_loop, "scan_once"):
+            try:
+                events = self._self_audit_loop.scan_once()
+                if events:
+                    obs["self_audit_events"] = list(events)
+                    self.metrics.events_observed += len(obs["self_audit_events"])
+                    logger.info(
+                        "[SUPERVISOR] OBSERVE: %d self-audit events detected",
+                        len(obs["self_audit_events"]),
+                    )
+            except Exception as exc:
+                logger.warning("[SUPERVISOR] OBSERVE: scan_once() failed: %s", exc)
+
+        return obs
+
+    # ------------------------------------------------------------------ #
+    #  TRIAGE — decide what action to take                                #
+    # ------------------------------------------------------------------ #
 
     def _triage(self, observation: Dict[str, Any]) -> Dict[str, Any]:
         broker = self._get_broker()
@@ -263,22 +392,76 @@ class OpenClawSupervisor:
                 "restart_budget": observation.get("restart_budget", {}),
             }
 
+        # Check AgentDB for pending autonomous tasks
+        try:
+            from modules.infrastructure.database.src.agent_db import AgentDB
+            db = AgentDB()
+            tasks = db.get_autonomous_tasks(status="pending", limit=1)
+            if tasks:
+                return {
+                    "kind": "action",
+                    "reason": "autonomous_task_pending",
+                    "action": "execute_autonomous_task",
+                    "task": tasks[0],
+                }
+        except Exception as exc:
+            logger.warning("Failed to check autonomous tasks: %s", exc)
+
+        # Check self-audit events (lower priority than restart and AgentDB tasks)
+        audit_events = observation.get("self_audit_events", [])
+        if audit_events:
+            event = audit_events[0]
+            signature = getattr(event, "signature", str(event))
+            recommended_fix = "inspect_log_and_create_patch_task"
+            auto_fixable = False
+            if self._self_audit_loop and hasattr(self._self_audit_loop, "_recommend_fix"):
+                try:
+                    recommended_fix = self._self_audit_loop._recommend_fix(signature)
+                except Exception:
+                    pass
+            if self._self_audit_loop:
+                allowed = getattr(self._self_audit_loop, "allowed_fixes", set())
+                auto_fixable = recommended_fix in allowed
+            if auto_fixable:
+                return {
+                    "kind": "action",
+                    "reason": "self_audit_event_detected",
+                    "action": "execute_self_audit_fix",
+                    "event_signature": signature,
+                    "recommended_fix": recommended_fix,
+                }
+
         return {"kind": "idle", "reason": "resident_openclaw_healthy"}
 
+    # ------------------------------------------------------------------ #
+    #  PLAN — build execution plan from triage                            #
+    # ------------------------------------------------------------------ #
+
     def _plan(self, triage: Dict[str, Any], observation: Dict[str, Any]) -> Dict[str, Any]:
-        return {
+        plan: Dict[str, Any] = {
             "action": triage["action"],
             "target": "openclaw",
             "reason": triage["reason"],
             "git_dirty_files": observation["git"]["dirty_files"],
             "restart_budget": observation.get("restart_budget", {}),
             "next_restart_attempt": self._attempts_in_window() + 1,
+            "task": triage.get("task"),
         }
+        # Carry self-audit fix metadata into plan
+        if triage["action"] == "execute_self_audit_fix":
+            plan["event_signature"] = triage.get("event_signature")
+            plan["recommended_fix"] = triage.get("recommended_fix")
+        return plan
+
+    # ------------------------------------------------------------------ #
+    #  EXECUTE — dispatch action                                          #
+    # ------------------------------------------------------------------ #
 
     def _execute(self, plan: Dict[str, Any]) -> Dict[str, Any]:
         broker = self._get_broker()
         if broker is None:
             return {"ok": False, "error": "broker_unavailable"}
+
         if plan["action"] == "start_openclaw":
             self._record_restart_attempt()
             result = broker.start_dae("openclaw", actor_id="0102")
@@ -288,12 +471,120 @@ class OpenClawSupervisor:
                 {"plan": plan, "result": result},
             )
             return result
+
+        elif plan["action"] == "execute_autonomous_task":
+            task = plan.get("task", {})
+            task_id = task.get("task_id")
+            result: Dict[str, Any] = {"ok": False, "error": "unknown"}
+            try:
+                from modules.infrastructure.database.src.agent_db import AgentDB
+
+                db = AgentDB()
+                if task_id:
+                    db.assign_autonomous_task(task_id, "openclaw_supervisor")
+
+                    # In-process dispatch via run_task.execute_task()
+                    from modules.communication.moltbot_bridge.scripts.run_task import (
+                        execute_task,
+                    )
+
+                    task_result = execute_task(task_id, repo_root=self.repo_root)
+                    result = {
+                        "ok": task_result.get("ok", False),
+                        "status": "completed" if task_result.get("ok") else "task_failed",
+                        "executor": task_result.get("executor", "unknown"),
+                        "detail": task_result.get("detail", "")[:1000],
+                        "execution_time_ms": task_result.get("execution_time_ms", 0),
+                    }
+                else:
+                    result = {"ok": False, "error": "no_task_id"}
+            except Exception as exc:
+                result = {"ok": False, "status": "execute_error", "error": str(exc)[:500]}
+
+            self._action_reporter(
+                "supervisor_execute",
+                result.get("status", result.get("error", "unknown")),
+                {"plan": plan, "result": result},
+            )
+            return result
+
+        elif plan["action"] == "execute_self_audit_fix":
+            recommended_fix = plan.get("recommended_fix", "")
+            result: Dict[str, Any] = {"ok": False, "error": "no_audit_loop"}
+            if self._self_audit_loop and hasattr(self._self_audit_loop, "_apply_policy_fix"):
+                try:
+                    success, detail = self._self_audit_loop._apply_policy_fix(recommended_fix)
+                    result = {
+                        "ok": success,
+                        "status": "applied" if success else "fix_failed",
+                        "detail": str(detail)[:500],
+                    }
+                except Exception as exc:
+                    result = {"ok": False, "status": "fix_error", "error": str(exc)[:500]}
+
+            self._action_reporter(
+                "supervisor_execute",
+                result.get("status", result.get("error", "unknown")),
+                {"plan": plan, "result": result},
+            )
+            return result
+
         return {"ok": False, "error": "unsupported_action"}
+
+    # ------------------------------------------------------------------ #
+    #  VERIFY — check execution results                                   #
+    # ------------------------------------------------------------------ #
 
     def _verify(self, plan: Dict[str, Any], action_result: Dict[str, Any]) -> Dict[str, Any]:
         broker = self._get_broker()
         if broker is None:
             return {"ok": False, "error": "broker_unavailable"}
+
+        if plan["action"] == "execute_autonomous_task":
+            task = plan.get("task", {})
+            task_id = task.get("task_id")
+            task_status = None
+
+            try:
+                from modules.infrastructure.database.src.agent_db import AgentDB
+
+                db = AgentDB()
+                completed_tasks = db.get_autonomous_tasks(status="completed", limit=100)
+                if task_id and any(item.get("task_id") == task_id for item in completed_tasks):
+                    task_status = "completed"
+            except Exception as exc:
+                logger.debug("[SUPERVISOR] VERIFY: task status check skipped: %s", exc)
+
+            ok = bool(action_result.get("ok", False) and task_status == "completed")
+            fidelity = 0.85  # Default
+
+            # Gemma fidelity validation (unified from Supervisor24x7)
+            if ok and self._libido_monitor and hasattr(self._libido_monitor, "validate_step_fidelity"):
+                try:
+                    validation = self._libido_monitor.validate_step_fidelity(
+                        step_description=f"Task: {plan.get('task', {}).get('task_id', 'unknown')}",
+                        step_output=str(action_result)[:500],
+                    )
+                    if isinstance(validation, dict):
+                        fidelity = validation.get("fidelity", 0.85)
+                    elif isinstance(validation, (int, float)):
+                        fidelity = float(validation)
+                    logger.debug("[SUPERVISOR] VERIFY: Gemma fidelity = %.3f", fidelity)
+                except Exception as e:
+                    logger.debug("[SUPERVISOR] VERIFY: Gemma validation skipped: %s", e)
+
+            error = action_result.get("error", "")
+            if not ok and not error and task_status != "completed":
+                error = "task_not_completed"
+
+            return {
+                "ok": ok,
+                "status": action_result,
+                "task_status": task_status,
+                "error": error,
+                "fidelity": fidelity,
+            }
+
         status = broker.get_runtime_status(plan["target"])
         running_states = {"starting", "running", "degraded"}
         ok = (
@@ -306,6 +597,10 @@ class OpenClawSupervisor:
         )
         return {"ok": ok, "status": status, "error": status.get("last_error", "")}
 
+    # ------------------------------------------------------------------ #
+    #  REMEMBER — store outcomes and update metrics                       #
+    # ------------------------------------------------------------------ #
+
     def _remember(
         self,
         observation: Dict[str, Any],
@@ -313,6 +608,14 @@ class OpenClawSupervisor:
         action_result: Dict[str, Any],
         verify: Dict[str, Any],
     ) -> None:
+        # Update metrics
+        self.metrics.cycles_completed += 1
+        if action_result.get("ok"):
+            self.metrics.tasks_executed += 1
+            if verify.get("ok"):
+                self.metrics.tasks_succeeded += 1
+
+        # Report to daemon
         self._action_reporter(
             "supervisor_cycle",
             "recorded",
@@ -327,8 +630,43 @@ class OpenClawSupervisor:
                 "openclaw_follow": observation.get("openclaw_follow", {}),
             },
         )
+
+        # Store to PatternMemory using proper SkillOutcome dataclass
+        if self._pattern_memory and action_result.get("ok"):
+            try:
+                from modules.infrastructure.wre_core.src.pattern_memory import SkillOutcome
+
+                skill_name = plan_or_triage.get("action", "unknown")
+                fidelity = float(verify.get("fidelity", 0.85))
+                outcome = SkillOutcome(
+                    execution_id=f"supervisor_{uuid.uuid4().hex[:12]}",
+                    skill_name=skill_name,
+                    agent="openclaw_supervisor",
+                    timestamp=datetime.now().isoformat(),
+                    input_context=json.dumps(plan_or_triage, default=str)[:2000],
+                    output_result=json.dumps(action_result, default=str)[:2000],
+                    success=bool(verify.get("ok", False)),
+                    pattern_fidelity=fidelity,
+                    outcome_quality=1.0 if verify.get("ok") else 0.0,
+                    execution_time_ms=int(action_result.get("execution_time_ms", 0)),
+                    step_count=1,
+                    notes=f"Supervisor cycle: {plan_or_triage.get('reason', '')}",
+                )
+                self._pattern_memory.store_outcome(outcome)
+                logger.debug(
+                    "[SUPERVISOR] REMEMBER: Stored SkillOutcome for %s (fidelity=%.3f)",
+                    skill_name,
+                    fidelity,
+                )
+            except Exception as e:
+                logger.debug("[SUPERVISOR] REMEMBER: PatternMemory storage skipped: %s", e)
+
         follow = observation.get("openclaw_follow", {})
         self._event_cursor = int(follow.get("next_cursor", self._event_cursor) or self._event_cursor)
+
+    # ------------------------------------------------------------------ #
+    #  Utility helpers                                                    #
+    # ------------------------------------------------------------------ #
 
     def _git_summary(self) -> Dict[str, Any]:
         try:

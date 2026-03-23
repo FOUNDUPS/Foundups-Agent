@@ -1,9 +1,20 @@
 from unittest.mock import MagicMock
 
+import pytest
+
 from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
     OpenClawSupervisor,
     SupervisorState,
 )
+from modules.infrastructure.database.src.db_manager import DatabaseManager
+
+
+@pytest.fixture(autouse=True)
+def isolated_agent_db(tmp_path, monkeypatch):
+    monkeypatch.setenv("FOUNDUPS_DB_PATH", str(tmp_path / "foundups.db"))
+    DatabaseManager.reset_for_tests()
+    yield
+    DatabaseManager.reset_for_tests()
 
 
 def test_run_cycle_starts_openclaw_when_resident_runtime_is_down(tmp_path):
@@ -75,7 +86,10 @@ def test_run_cycle_idles_when_resident_runtime_is_healthy(tmp_path):
         self_audit_factory=lambda repo_root: MagicMock(),
     )
 
-    result = supervisor.run_cycle()
+    from unittest.mock import patch
+    with patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+        mock_db.return_value.get_autonomous_tasks.return_value = []
+        result = supervisor.run_cycle()
 
     broker.start_dae.assert_not_called()
     assert result["triage"]["kind"] == "idle"
