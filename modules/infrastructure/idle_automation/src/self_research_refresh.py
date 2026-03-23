@@ -713,17 +713,20 @@ class SelfResearchRefresher:
         db = AgentDB()
 
         # Clean up stale slugified GRANT tasks only (not PQN/ecosystem watchlist tasks)
-        # Pattern: self_research_external_watchlist_*grant* but NOT the stable grant IDs
+        # Precision filter:
+        #   1. task_id LIKE 'self_research_external_watchlist_%' (old slugified pattern)
+        #   2. required_skills contains 'openclaw-grants' (grant-specific skill)
+        #   3. task_id NOT IN stable IDs (preserve new stable tasks)
         stable_grant_task_ids = {"grant_watchlist_review", "grant_watchlist_stabilize"}
         candidate_task_ids = {c["task_id"] for c in candidates}
         if candidate_task_ids & stable_grant_task_ids:
             try:
-                # Only remove old slugified grant-specific task IDs
                 db.db.execute_write(
                     """
                     DELETE FROM agents_autonomous_tasks
-                    WHERE status IN ('pending', NULL)
-                      AND task_id LIKE 'self_research_external_watchlist_%grant%'
+                    WHERE status IN ('pending', 'failed', NULL, '')
+                      AND task_id LIKE 'self_research_external_watchlist_%'
+                      AND required_skills LIKE '%openclaw-grants%'
                       AND task_id NOT IN (?, ?)
                     """,
                     ("grant_watchlist_review", "grant_watchlist_stabilize"),

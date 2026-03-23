@@ -10,7 +10,8 @@ It can be called:
 Dispatch priority:
   1. WRE execute_skill() if required_skills match a registered skill
   2. DaemonSelfAuditLoop._apply_policy_fix() for self_audit-sourced tasks
-  3. Fail with "no_executor_matched" — never silently complete
+  3. Grant task dispatch for openclaw-grants tasks (review/stabilize)
+  4. Fail with "no_executor_matched" — never silently complete
 """
 
 import argparse
@@ -75,6 +76,13 @@ def execute_task(task_id: str, repo_root: Path | None = None) -> Dict[str, Any]:
         audit_result = _try_self_audit_dispatch(repo_root, context)
         if audit_result is not None:
             result = audit_result
+
+    # ── Dispatch path 3: Grant task dispatch (openclaw-grants) ──
+    if not result["ok"] and result["detail"] == "no_executor_matched":
+        if "openclaw-grants" in required_skills:
+            grant_result = _try_grant_dispatch(repo_root, task_id, context, description)
+            if grant_result is not None:
+                result = grant_result
 
     # ── Finalize in AgentDB ──
     elapsed_ms = int((time.monotonic() - start) * 1000)
@@ -194,6 +202,59 @@ def _try_self_audit_dispatch(repo_root: Path, context: dict) -> Dict[str, Any] |
         return {"ok": False, "detail": f"self_audit_error: {e}", "executor": "self_audit"}
 
     return None
+
+
+def _try_grant_dispatch(
+    repo_root: Path, task_id: str, context: dict, description: str
+) -> Dict[str, Any] | None:
+    """
+    Execute grant watchlist review or stabilization tasks.
+
+    Handles:
+      - grant_watchlist_review: Review changed grant pages
+      - grant_watchlist_stabilize: Fix watchlist fetch errors
+
+    Returns structured, machine-verifiable results suitable for supervisor verification.
+    Human-only gates (KYC, identity, final submit) remain intact per SKILL.md.
+    """
+    try:
+        from modules.communication.moltbot_bridge.src.grant_task_executor import (
+            execute_grant_review,
+            execute_grant_stabilize,
+        )
+    except ImportError as e:
+        logger.debug("[RUN_TASK] grant_task_executor unavailable: %s", e)
+        return None
+
+    # Extract context details
+    ctx_inner = context.get("context", {}) if isinstance(context, dict) else {}
+    changed_items = ctx_inner.get("changed_items", [])
+    error_items = ctx_inner.get("error_items", [])
+
+    # Determine task type and execute
+    if task_id == "grant_watchlist_review" and changed_items:
+        logger.info("[RUN_TASK] Grant review dispatch: %d changed items", len(changed_items))
+        result = execute_grant_review(changed_items)
+        return {
+            "ok": result.get("success", False),
+            "detail": json.dumps(result, default=str)[:1000],
+            "executor": "grant:review",
+            "structured_result": result,
+        }
+
+    elif task_id == "grant_watchlist_stabilize" and error_items:
+        logger.info("[RUN_TASK] Grant stabilize dispatch: %d error items", len(error_items))
+        result = execute_grant_stabilize(error_items)
+        return {
+            "ok": result.get("success", False),
+            "detail": json.dumps(result, default=str)[:1000],
+            "executor": "grant:stabilize",
+            "structured_result": result,
+        }
+
+    else:
+        # Not a recognized grant task pattern
+        return None
 
 
 def main():

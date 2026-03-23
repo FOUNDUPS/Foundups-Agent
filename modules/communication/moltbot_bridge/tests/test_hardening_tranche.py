@@ -582,3 +582,365 @@ def test_command_uses_openclaw_executor_when_no_specific_skill_matches():
         input_context=ANY,
     )
     mock_wre.execute.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# Grant Task Dispatch Tests (run_task.py + grant_task_executor.py)
+# ---------------------------------------------------------------------------
+
+
+def test_grant_dispatch_recognizes_grant_review_task():
+    """Grant dispatch: recognizes grant_watchlist_review task and calls executor."""
+    from modules.communication.moltbot_bridge.scripts.run_task import _try_grant_dispatch
+    from pathlib import Path
+
+    context = {
+        "context": {
+            "changed_count": 3,
+            "changed_items": ["BNB Chain Grants", "NEAR Ecosystem Funding", "Starknet Grants"],
+        }
+    }
+
+    mock_result = {
+        "task_type": "grant_watchlist_review",
+        "success": True,
+        "items_reviewed": 3,
+        "findings": [{"name": "BNB Chain Grants", "repo_fit_assessment": {"fit_score": 0.8}}],
+        "detail": "reviewed_3_items",
+    }
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.grant_task_executor.execute_grant_review",
+        return_value=mock_result,
+    ) as mock_execute:
+        result = _try_grant_dispatch(
+            Path("."),
+            "grant_watchlist_review",
+            context,
+            "External funding sources changed",
+        )
+
+    assert result is not None
+    assert result["ok"] is True
+    assert result["executor"] == "grant:review"
+    assert "reviewed_3_items" in result["detail"]
+    mock_execute.assert_called_once_with(
+        ["BNB Chain Grants", "NEAR Ecosystem Funding", "Starknet Grants"]
+    )
+
+
+def test_grant_dispatch_recognizes_grant_stabilize_task():
+    """Grant dispatch: recognizes grant_watchlist_stabilize task."""
+    from modules.communication.moltbot_bridge.scripts.run_task import _try_grant_dispatch
+    from pathlib import Path
+
+    context = {
+        "context": {
+            "error_count": 1,
+            "error_items": ["Filecoin Grants"],
+        }
+    }
+
+    mock_result = {
+        "task_type": "grant_watchlist_stabilize",
+        "success": True,
+        "items_analyzed": 1,
+        "diagnostics": [{"name": "Filecoin Grants", "error_type": "rate_limit"}],
+        "detail": "analyzed_1_errors",
+    }
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.grant_task_executor.execute_grant_stabilize",
+        return_value=mock_result,
+    ) as mock_execute:
+        result = _try_grant_dispatch(
+            Path("."),
+            "grant_watchlist_stabilize",
+            context,
+            "Official-source refresh is degraded",
+        )
+
+    assert result is not None
+    assert result["ok"] is True
+    assert result["executor"] == "grant:stabilize"
+    assert "analyzed_1_errors" in result["detail"]
+    mock_execute.assert_called_once_with(["Filecoin Grants"])
+
+
+def test_grant_dispatch_returns_none_for_unrecognized_task():
+    """Grant dispatch: returns None for non-grant tasks."""
+    from modules.communication.moltbot_bridge.scripts.run_task import _try_grant_dispatch
+    from pathlib import Path
+
+    result = _try_grant_dispatch(
+        Path("."),
+        "some_other_task",
+        {"context": {}},
+        "Some description",
+    )
+
+    assert result is None
+
+
+def test_grant_dispatch_returns_none_when_context_empty():
+    """Grant dispatch: returns None when changed_items/error_items are empty."""
+    from modules.communication.moltbot_bridge.scripts.run_task import _try_grant_dispatch
+    from pathlib import Path
+
+    # grant_watchlist_review with no changed_items
+    result = _try_grant_dispatch(
+        Path("."),
+        "grant_watchlist_review",
+        {"context": {"changed_items": []}},
+        "External funding sources changed",
+    )
+
+    assert result is None
+
+
+def test_grant_executor_review_returns_structured_findings():
+    """Grant executor: review returns structured findings with repo-fit assessment."""
+    from modules.communication.moltbot_bridge.src.grant_task_executor import (
+        execute_grant_review,
+    )
+
+    # Mock the watchlist status loading
+    mock_watchlist = {
+        "items": [
+            {
+                "name": "BNB Chain Grants",
+                "ecosystem": "bnb",
+                "last_refresh_result": "changed",
+                "sources": [{"ok": True, "url": "https://example.com"}],
+            }
+        ]
+    }
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.grant_task_executor._load_watchlist_status",
+        return_value=mock_watchlist,
+    ):
+        with patch(
+            "modules.communication.moltbot_bridge.src.grant_task_executor._load_rescored_sheet",
+            return_value=None,
+        ):
+            result = execute_grant_review(["BNB Chain Grants"])
+
+    assert result["success"] is True
+    assert result["items_reviewed"] == 1
+    assert len(result["findings"]) == 1
+    assert result["findings"][0]["name"] == "BNB Chain Grants"
+    assert result["findings"][0]["ecosystem"] == "bnb"
+    assert "memory_update" in result
+
+
+def test_grant_executor_stabilize_categorizes_errors():
+    """Grant executor: stabilize categorizes errors and generates remediation."""
+    from modules.communication.moltbot_bridge.src.grant_task_executor import (
+        execute_grant_stabilize,
+    )
+
+    # Mock the watchlist status with an error item
+    mock_watchlist = {
+        "items": [
+            {
+                "name": "Filecoin Grants",
+                "ecosystem": "filecoin",
+                "last_refresh_result": "error",
+                "sources": [
+                    {"ok": False, "url": "https://fil.org/grants", "http_status": 429, "error": "HTTPError: 429"}
+                ],
+            }
+        ]
+    }
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.grant_task_executor._load_watchlist_status",
+        return_value=mock_watchlist,
+    ):
+        result = execute_grant_stabilize(["Filecoin Grants"])
+
+    assert result["success"] is True
+    assert result["items_analyzed"] == 1
+    assert len(result["diagnostics"]) == 1
+    assert result["diagnostics"][0]["error_type"] == "rate_limit"
+    assert len(result["remediation_steps"]) > 0
+    assert "memory_update" in result
+
+
+def test_stable_task_ids_in_self_research_refresh():
+    """Verify self_research_refresh uses stable task IDs for grant tasks."""
+    from modules.infrastructure.idle_automation.src.self_research_refresh import (
+        SelfResearchRefresher,
+    )
+
+    refresher = SelfResearchRefresher()
+
+    # Build candidates with mocked watchlist data
+    grant_watchlist = {
+        "status": {
+            "changed_count": 5,
+            "changed_items": ["BNB", "NEAR", "Starknet", "Stellar", "IOTA"],
+            "error_count": 1,
+            "error_items": ["Filecoin"],
+        }
+    }
+
+    candidates = refresher.build_update_candidates(
+        holo_index={"skipped": True},
+        compliance={"skipped": True},
+        self_audit={"skipped": True},
+        grant_watchlist=grant_watchlist,
+    )
+
+    # Find grant tasks
+    grant_review = next((c for c in candidates if c["task_id"] == "grant_watchlist_review"), None)
+    grant_stabilize = next((c for c in candidates if c["task_id"] == "grant_watchlist_stabilize"), None)
+
+    assert grant_review is not None, "grant_watchlist_review task not found"
+    assert grant_stabilize is not None, "grant_watchlist_stabilize task not found"
+
+    # Task IDs should be stable (not contain counts)
+    assert "5" not in grant_review["task_id"]
+    assert "1" not in grant_stabilize["task_id"]
+
+    # Titles can still include counts for display
+    assert "5" in grant_review["title"]
+    assert "1" in grant_stabilize["title"]
+
+
+def test_stale_grant_task_cleanup_preserves_pqn_and_ecosystem():
+    """
+    Stale task cleanup removes old slugified grant tasks but preserves
+    PQN watchlist and OpenClaw ecosystem watchlist tasks.
+
+    Regression test for the precision filter:
+    - task_id LIKE 'self_research_external_watchlist_%'
+    - required_skills contains 'openclaw-grants'
+    - task_id NOT IN stable IDs
+    """
+    import json
+    import os
+    import tempfile
+    from pathlib import Path
+
+    from modules.infrastructure.idle_automation.src.self_research_refresh import (
+        SelfResearchRefresher,
+    )
+    from modules.infrastructure.database.src.db_manager import DatabaseManager
+
+    # Use a fresh database for isolation via env var
+    with tempfile.TemporaryDirectory() as tmpdir:
+        db_path = Path(tmpdir) / "test_agent.db"
+        original_db_path = os.environ.get("FOUNDUPS_DB_PATH")
+        os.environ["FOUNDUPS_DB_PATH"] = str(db_path)
+
+        try:
+            # Reset singleton to pick up new path
+            DatabaseManager.reset_for_tests()
+            db = DatabaseManager()
+
+            # Create the autonomous tasks table
+            with db.get_connection() as conn:
+                conn.execute("""
+                    CREATE TABLE IF NOT EXISTS agents_autonomous_tasks (
+                        task_id TEXT PRIMARY KEY,
+                        description TEXT,
+                        required_skills JSON,
+                        estimated_complexity REAL,
+                        priority_score REAL,
+                        discovered_by TEXT DEFAULT 'test',
+                        discovered_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        context JSON,
+                        assigned_to TEXT,
+                        assigned_at DATETIME,
+                        completed_at DATETIME,
+                        status TEXT DEFAULT 'pending'
+                    )
+                """)
+
+            # Seed old slugified grant tasks (these should be deleted)
+            old_grant_review_id = "self_research_external_watchlist_review_5_changed_grant_opportunity_page_s"
+            old_grant_stabilize_id = "self_research_external_watchlist_stabilize_1_watchlist_refresh_error_s"
+
+            # Seed PQN and ecosystem tasks (these should be preserved)
+            pqn_task_id = "self_research_pqn_external_watchlist_review_7_changed_pqn_external_research_page_s"
+            ecosystem_task_id = "self_research_openclaw_ecosystem_watchlist_review_2_changed_openclaw_ecosystem_signal_s"
+
+            with db.get_connection() as conn:
+                # Old grant review (has openclaw-grants skill)
+                conn.execute(
+                    "INSERT INTO agents_autonomous_tasks (task_id, description, required_skills, status) VALUES (?, ?, ?, ?)",
+                    (old_grant_review_id, "old grant review", json.dumps(["openclaw-grants", "openclaw-monitor"]), "pending"),
+                )
+                # Old grant stabilize (has openclaw-grants skill)
+                conn.execute(
+                    "INSERT INTO agents_autonomous_tasks (task_id, description, required_skills, status) VALUES (?, ?, ?, ?)",
+                    (old_grant_stabilize_id, "old grant stabilize", json.dumps(["openclaw-grants", "openclaw-monitor"]), "pending"),
+                )
+                # PQN task (has pqn-research skill, NOT openclaw-grants)
+                conn.execute(
+                    "INSERT INTO agents_autonomous_tasks (task_id, description, required_skills, status) VALUES (?, ?, ?, ?)",
+                    (pqn_task_id, "pqn watchlist review", json.dumps(["pqn-research", "openclaw-monitor"]), "pending"),
+                )
+                # Ecosystem task (has openclaw-monitor and holo-search, NOT openclaw-grants)
+                conn.execute(
+                    "INSERT INTO agents_autonomous_tasks (task_id, description, required_skills, status) VALUES (?, ?, ?, ?)",
+                    (ecosystem_task_id, "ecosystem watchlist review", json.dumps(["openclaw-monitor", "holo-search"]), "pending"),
+                )
+
+            # Verify all 4 rows exist before cleanup
+            with db.get_connection() as conn:
+                rows = conn.execute("SELECT task_id FROM agents_autonomous_tasks").fetchall()
+                task_ids_before = {row["task_id"] for row in rows}
+
+            assert old_grant_review_id in task_ids_before
+            assert old_grant_stabilize_id in task_ids_before
+            assert pqn_task_id in task_ids_before
+            assert ecosystem_task_id in task_ids_before
+
+            # Build candidates and publish (which triggers cleanup)
+            refresher = SelfResearchRefresher()
+
+            grant_watchlist = {
+                "status": {
+                    "changed_count": 3,
+                    "changed_items": ["BNB", "NEAR", "Starknet"],
+                    "error_count": 1,
+                    "error_items": ["Filecoin"],
+                }
+            }
+
+            candidates = refresher.build_update_candidates(
+                holo_index={"skipped": True},
+                compliance={"skipped": True},
+                self_audit={"skipped": True},
+                grant_watchlist=grant_watchlist,
+            )
+
+            published = refresher.publish_autonomous_tasks(candidates)
+
+            # Verify cleanup results
+            with db.get_connection() as conn:
+                rows = conn.execute("SELECT task_id FROM agents_autonomous_tasks").fetchall()
+                task_ids_after = {row["task_id"] for row in rows}
+
+            # Old slugified grant tasks should be GONE
+            assert old_grant_review_id not in task_ids_after, "Old grant review task should be deleted"
+            assert old_grant_stabilize_id not in task_ids_after, "Old grant stabilize task should be deleted"
+
+            # PQN and ecosystem tasks should REMAIN
+            assert pqn_task_id in task_ids_after, "PQN task should be preserved"
+            assert ecosystem_task_id in task_ids_after, "Ecosystem task should be preserved"
+
+            # New stable grant tasks should EXIST
+            assert "grant_watchlist_review" in task_ids_after, "Stable grant review task should exist"
+            assert "grant_watchlist_stabilize" in task_ids_after, "Stable grant stabilize task should exist"
+
+        finally:
+            # Restore original env and reset singleton
+            if original_db_path is None:
+                os.environ.pop("FOUNDUPS_DB_PATH", None)
+            else:
+                os.environ["FOUNDUPS_DB_PATH"] = original_db_path
+            DatabaseManager.reset_for_tests()
