@@ -189,6 +189,29 @@ class OpenClawSupervisor:
             self._transition(SupervisorState.ESCALATE, triage["reason"])
             verify = {"ok": False, "error": triage["reason"]}
             self._remember(observation, triage, {}, verify)
+            # Emit nudge for high-value escalation reasons
+            escalation_reason = triage["reason"]
+            high_value_reasons = {
+                "resident_openclaw_restart_budget_exhausted",
+                "broker_or_observer_unavailable",
+                "openclaw_runtime_not_registered",
+            }
+            if escalation_reason in high_value_reasons:
+                self._emit_supervisor_nudge(
+                    trigger_type="supervisor_escalation",
+                    title=f"Supervisor escalation: {escalation_reason}",
+                    summary=(
+                        f"Supervisor reached ESCALATE state due to: {escalation_reason}. "
+                        f"Restart budget: {triage.get('restart_budget', {})}. "
+                        f"Manual intervention may be required."
+                    ),
+                    priority="P0" if "budget_exhausted" in escalation_reason else "P1",
+                    details={
+                        "escalation_reason": escalation_reason,
+                        "restart_budget": triage.get("restart_budget"),
+                        "observation_keys": list(observation.keys()),
+                    },
+                )
             self.last_cycle = {
                 "state": self.current_state.value,
                 "triage": triage,
@@ -209,6 +232,28 @@ class OpenClawSupervisor:
         if not verify["ok"]:
             self._transition(SupervisorState.ESCALATE, verify.get("error", "verify_failed"))
             self._remember(observation, plan, action_result, verify)
+            # Emit nudge for verify failure (high-value event)
+            # Include task_id and error in title to distinguish different failures
+            task_id = plan.get("task", {}).get("task_id") if plan.get("task") else None
+            verify_error = verify.get("error", "unknown")
+            title_suffix = f" [{task_id}]" if task_id else ""
+            title_suffix += f" ({verify_error})" if verify_error != "unknown" else ""
+            self._emit_supervisor_nudge(
+                trigger_type="supervisor_verify_failure",
+                title=f"Task verify failed: {plan.get('action', 'unknown')}{title_suffix}",
+                summary=(
+                    f"Execution of {plan.get('action')} completed but verification failed. "
+                    f"Error: {verify_error}. Reason: {plan.get('reason', '')}"
+                ),
+                priority="P1",
+                details={
+                    "plan_action": plan.get("action"),
+                    "plan_reason": plan.get("reason"),
+                    "verify_error": verify_error,
+                    "task_id": task_id,
+                    "fidelity": verify.get("fidelity"),
+                },
+            )
         else:
             self._transition(SupervisorState.REMEMBER, plan["action"])
             self._remember(observation, plan, action_result, verify)
@@ -736,3 +781,63 @@ class OpenClawSupervisor:
         cutoff = now - self.restart_window_sec
         while self._restart_attempts and self._restart_attempts[0] < cutoff:
             self._restart_attempts.popleft()
+
+    # ------------------------------------------------------------------ #
+    #  Memory Nudge Emission                                              #
+    # ------------------------------------------------------------------ #
+
+    def _emit_supervisor_nudge(
+        self,
+        trigger_type: str,
+        title: str,
+        summary: str,
+        priority: str,
+        details: Dict[str, Any],
+    ) -> bool:
+        """
+        Emit a memory nudge for high-value supervisor events.
+
+        Emits nudges for:
+        - supervisor_verify_failure: Task execution verification failed
+        - supervisor_escalation: Budget exhausted, broker unavailable, etc.
+
+        Returns True if nudge was emitted (not deduplicated).
+        """
+        try:
+            from modules.communication.moltbot_bridge.src.memory_nudge_engine import (
+                MemoryNudgeEngine,
+                NudgeEvent,
+            )
+
+            event = NudgeEvent(
+                trigger_type=trigger_type,
+                title=title,
+                summary=summary,
+                provenance="openclaw_supervisor",
+                priority=priority,
+                details=details,
+            )
+
+            engine = MemoryNudgeEngine(repo_root=self.repo_root)
+            created = engine.emit_nudges([event], record_breadcrumbs=True)
+
+            if created:
+                logger.info(
+                    "[SUPERVISOR] Emitted memory nudge: %s (%s)",
+                    title[:50],
+                    trigger_type,
+                )
+                return True
+            else:
+                logger.debug(
+                    "[SUPERVISOR] Nudge deduplicated: %s",
+                    event.signature,
+                )
+                return False
+
+        except ImportError:
+            logger.debug("[SUPERVISOR] MemoryNudgeEngine not available")
+            return False
+        except Exception as exc:
+            logger.debug("[SUPERVISOR] Failed to emit nudge: %s", exc)
+            return False
