@@ -60,29 +60,33 @@ class GemmaRootViolationMonitor:
     def _get_allowed_root_files(self) -> Set[str]:
         """Define allowed files in root directory per WSP standards"""
         return {
-            '012.txt',           # Core 0102 consciousness file
-            'requirements.txt',  # Package dependencies
-            'package.json',      # Node.js dependencies
-            'package-lock.json', # Node lockfile
-            'pnpm-lock.yaml',    # pnpm lockfile
-            '.gitignore',        # Git ignore rules
-            '.env',              # Environment variables
-            '.env.example',      # Environment template
-            '.coverage',         # Coverage reports
-            '.coveragerc',       # Coverage configuration
-            'Dockerfile',        # Container definition
-            'pytest.ini',        # Test configuration
-            'vercel.json',       # Deployment configuration
-            'LICENSE',           # License file
-            'README.md',         # Project documentation
-            'ROADMAP.md',        # Development roadmap
-            'ModLog.md',         # Modification log
-            'CLAUDE.md',         # Claude-specific documentation
-            'ARCHITECTURE.md',   # System architecture
-            'NAVIGATION.py',     # Navigation map / index
-            'main.py',           # Primary launcher
-            'holo_index.py',     # HoloIndex launcher
-            'SECURITY_CLEANUP_NEEDED.md'  # Security notices
+            '.coveragerc',         # Coverage configuration
+            '.coverage',           # Coverage reports
+            '.env',                # Environment variables
+            '.env.example',        # Environment template
+            '.firebaserc',         # Firebase CLI configuration
+            '.gitignore',          # Git ignore rules
+            '.mcp.json',           # MCP configuration
+            'CLAUDE.md',           # Agent instructions
+            'CONTRIBUTING.md',     # Repository contribution guide
+            'Dockerfile',          # Container definition
+            'LICENSE',             # License file
+            'ModLog.md',           # Repository changelog
+            'NAVIGATION.py',       # Navigation map / index
+            'README.md',           # Project documentation
+            'ROADMAP.md',          # Development roadmap
+            'firebase.json',       # Firebase project configuration
+            'firestore.indexes.json',  # Firestore index configuration
+            'firestore.rules',     # Firestore rules
+            'holo_index.py',       # HoloIndex launcher
+            'main.py',             # Primary launcher
+            'package-lock.json',   # Node lockfile
+            'package.json',        # Node.js dependencies
+            'pnpm-lock.yaml',      # pnpm lockfile
+            'pyrightconfig.json',  # Type-checker configuration
+            'pytest.ini',          # Test configuration
+            'requirements.txt',    # Package dependencies
+            'vercel.json',         # Deployment configuration
         }
 
     async def scan_root_violations(self) -> Dict[str, Any]:
@@ -216,6 +220,17 @@ class GemmaRootViolationMonitor:
 
     def _get_recommended_action(self, filename: str, violation_type: str) -> str:
         """Get recommended action for violation"""
+
+        if violation_type == 'unauthorized_file':
+            suffix = Path(filename).suffix.lower()
+            if suffix == '.md':
+                return f"Move {filename} to docs/ or a module docs/ directory"
+            if suffix == '.json':
+                return f"Move {filename} to data/ or a module data/ directory unless it is repo-level config"
+            if suffix in {'.txt', '.out'}:
+                return f"Move {filename} to temp/ or logs/ and gitignore it if it is only a run artifact"
+            if suffix in {'.png', '.jpg', '.jpeg', '.gif', '.svg'}:
+                return f"Move {filename} to docs/assets/ or a module docs/assets/ directory"
 
         actions = {
             'wsp_naming_violation': f'Move {filename} to docs/ directory (WSP 57 compliance)',
@@ -356,14 +371,16 @@ class GemmaRootViolationMonitor:
         try:
             src_path = self.root_path / filename
 
-            if violation_type == 'script_in_root' and filename.endswith('.py'):
+            if violation_type == 'script_in_root':
                 # Prefer deterministic placement for known root script patterns (fast, safe).
                 target_location = self._determine_target_location_qwen(filename, analysis={})
                 if target_location:
                     return self._move_with_git_or_rename(src_path, self.root_path / target_location)
 
-                # Fall back to Qwen autonomous refactoring for ambiguous cases
-                return await self._apply_qwen_refactoring(src_path, filename)
+                # Fall back to Qwen autonomous refactoring for ambiguous Python cases.
+                if filename.endswith('.py'):
+                    return await self._apply_qwen_refactoring(src_path, filename)
+                return False
 
             elif violation_type == 'debug_file_in_root' and filename.startswith('test_'):
                 # Use Qwen for test file placement
@@ -481,6 +498,21 @@ class GemmaRootViolationMonitor:
         """
 
         lower = filename.lower()
+        script_suffixes = (".py", ".sh", ".bat", ".ps1")
+
+        if lower.startswith(("check_", "approve_", "get_")) and lower.endswith(script_suffixes):
+            if "party" in lower:
+                return f"modules/communication/livechat/tests/system_tests/{filename}"
+            return f"scripts/verification/{filename}"
+
+        if lower.startswith(("diagnose_", "debug_")) and lower.endswith(script_suffixes):
+            return f"scripts/diagnostics/{filename}"
+
+        if lower.startswith("launch_") and lower.endswith(script_suffixes):
+            return f"scripts/launch/{filename}"
+
+        if lower.startswith(("fix_", "batch_", "execute_", "demo_", "close_", "backup_")) and lower.endswith(script_suffixes):
+            return f"scripts/{filename}"
 
         # Common root verification scripts → scripts/verification/
         if lower.startswith("verify_") and lower.endswith(".py"):

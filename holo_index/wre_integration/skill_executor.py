@@ -52,7 +52,8 @@ class SkillExecutor:
         return {
             "qwen_gitpush": self._skill_git_push,
             "auto_fix": self._skill_auto_fix,
-            "notify_coach": self._skill_notify_coach
+            "notify_coach": self._skill_notify_coach,
+            "github_management": self._skill_github_management,
         }
 
     def check_wre_triggers(self, monitoring_result: Any) -> List[Dict[str, Any]]:
@@ -161,3 +162,20 @@ class SkillExecutor:
         """Notify Pattern Coach (Placeholder)."""
         # This would send a message to the Pattern Coach
         self.logger.info(f"[WRE] SKILL: notify_coach triggered with {payload}")
+
+    def _skill_github_management(self, payload: Dict[str, Any]) -> None:
+        """Execute GitHub management skill (WSP 103)."""
+        import asyncio
+        try:
+            from modules.infrastructure.github_orchestrator.skillz.github_management.executor import execute
+
+            args = payload.get("args", "")
+            self.logger.info(f"[WRE] SKILL: github_management triggered with args: {args}")
+
+            # Run async executor
+            result = asyncio.run(execute(args, payload))
+            self.logger.info(f"[WRE] SKILL: github_management result: {result}")
+        except ImportError as e:
+            self.logger.warning(f"[WRE] SKILL: github_management unavailable: {e}")
+        except Exception as e:
+            self.logger.error(f"[WRE] SKILL: github_management error: {e}")

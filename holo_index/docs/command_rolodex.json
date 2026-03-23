@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-03-22T03:58:41.342360",
-  "total_cli_entrypoints": 719,
+  "generated_at": "2026-03-23T06:12:49.409558",
+  "total_cli_entrypoints": 722,
   "wre_connected_count": 95,
-  "orphan_count": 693,
+  "orphan_count": 696,
   "commands": [
     {
       "path": "modules\\ai_intelligence\\ai_overseer\\skillz\\agentic_news_ticker\\executor.py",
@@ -145,7 +145,7 @@
       "has_json_flag": true,
       "wre_connected": true,
       "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\skillz\\gcc_shipping_tracker\\SKILLz.md",
-      "line_count": 568,
+      "line_count": 714,
       "category": "platform"
     },
     {
@@ -181,7 +181,7 @@
       "has_json_flag": false,
       "wre_connected": true,
       "skillz_md_path": "modules\\platform_integration\\linkedin_agent\\skillz\\linkedin_group_moderation\\SKILLz.md",
-      "line_count": 447,
+      "line_count": 624,
       "category": "platform"
     },
     {
@@ -190,7 +190,7 @@
       "has_json_flag": false,
       "wre_connected": true,
       "skillz_md_path": "modules\\platform_integration\\linkedin_agent\\skillz\\openclaw_group_news\\SKILLz.md",
-      "line_count": 2125,
+      "line_count": 3134,
       "category": "platform"
     },
     {
@@ -609,6 +609,16 @@
       "suggested_trigger": "manual"
     },
     {
+      "path": "modules\\infrastructure\\dependency_launcher\\src\\dae_dependencies.py",
+      "module_name": "modules.infrastructure.dependency_launcher.src.dae_dependencies",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 936,
+      "category": "infrastructure",
+      "suggested_trigger": "cadence:continuous"
+    },
+    {
       "path": "modules\\infrastructure\\foundups_vision\\src\\ui_tars_bridge.py",
       "module_name": "modules.infrastructure.foundups_vision.src.ui_tars_bridge",
       "has_json_flag": false,
@@ -637,6 +647,16 @@
       "line_count": 923,
       "category": "other",
       "suggested_trigger": "manual"
+    },
+    {
+      "path": "modules\\infrastructure\\idle_automation\\src\\idle_automation_dae.py",
+      "module_name": "modules.infrastructure.idle_automation.src.idle_automation_dae",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 917,
+      "category": "infrastructure",
+      "suggested_trigger": "cadence:continuous"
     },
     {
       "path": "modules\\foundups\\simulator\\economics\\dynamic_fee_taper.py",
@@ -689,16 +709,6 @@
       "suggested_trigger": "manual"
     },
     {
-      "path": "modules\\infrastructure\\idle_automation\\src\\idle_automation_dae.py",
-      "module_name": "modules.infrastructure.idle_automation.src.idle_automation_dae",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 847,
-      "category": "infrastructure",
-      "suggested_trigger": "cadence:continuous"
-    },
-    {
       "path": "modules\\infrastructure\\instance_lock\\src\\instance_manager.py",
       "module_name": "modules.infrastructure.instance_lock.src.instance_manager",
       "has_json_flag": false,
@@ -716,6 +726,16 @@
       "skillz_md_path": null,
       "line_count": 831,
       "category": "communication",
+      "suggested_trigger": "manual"
+    },
+    {
+      "path": "modules\\infrastructure\\idle_automation\\src\\self_research_refresh.py",
+      "module_name": "modules.infrastructure.idle_automation.src.self_research_refresh",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 807,
+      "category": "infrastructure",
       "suggested_trigger": "manual"
     },
     {
@@ -767,16 +787,6 @@
       "line_count": 792,
       "category": "infrastructure",
       "suggested_trigger": "manual"
-    },
-    {
-      "path": "modules\\infrastructure\\dependency_launcher\\src\\dae_dependencies.py",
-      "module_name": "modules.infrastructure.dependency_launcher.src.dae_dependencies",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 791,
-      "category": "infrastructure",
-      "suggested_trigger": "cadence:continuous"
     },
     {
       "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\ffcpln_lyrics_library.py",
@@ -2367,6 +2377,16 @@
       "line_count": 451,
       "category": "ai",
       "suggested_trigger": "manual"
+    },
+    {
+      "path": "modules\\platform_integration\\linkedin_agent\\src\\qwen_profile_evaluator.py",
+      "module_name": "modules.platform_integration.linkedin_agent.src.qwen_profile_evaluator",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 450,
+      "category": "platform",
+      "suggested_trigger": "event:platform_trigger"
     },
     {
       "path": "modules\\ai_intelligence\\post_meeting_summarizer\\src\\post_meeting_summarizer.py",
@@ -4259,6 +4279,16 @@
       "suggested_trigger": "manual"
     },
     {
+      "path": "modules\\infrastructure\\system_health_monitor\\src\\wsp_85_validator.py",
+      "module_name": "modules.infrastructure.system_health_monitor.src.wsp_85_validator",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 237,
+      "category": "infrastructure",
+      "suggested_trigger": "manual"
+    },
+    {
       "path": "modules\\platform_integration\\antifafm_broadcaster\\main.py",
       "module_name": "modules.platform_integration.antifafm_broadcaster.main",
       "has_json_flag": false,
@@ -4616,16 +4646,6 @@
       "skillz_md_path": null,
       "line_count": 194,
       "category": "ai",
-      "suggested_trigger": "manual"
-    },
-    {
-      "path": "modules\\infrastructure\\system_health_monitor\\src\\wsp_85_validator.py",
-      "module_name": "modules.infrastructure.system_health_monitor.src.wsp_85_validator",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 194,
-      "category": "infrastructure",
       "suggested_trigger": "manual"
     },
     {
@@ -5979,6 +5999,16 @@
       "suggested_trigger": "manual"
     },
     {
+      "path": "modules\\communication\\moltbot_bridge\\scripts\\run_task.py",
+      "module_name": "modules.communication.moltbot_bridge.scripts.run_task",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 49,
+      "category": "communication",
+      "suggested_trigger": "manual"
+    },
+    {
       "path": "holo_index\\qwen_advisor\\config.py",
       "module_name": "holo_index.qwen_advisor.config",
       "has_json_flag": false,
@@ -6529,6 +6559,16 @@
       "suggested_trigger": "manual"
     },
     {
+      "path": "modules\\infrastructure\\idle_automation\\__init__.py",
+      "module_name": "modules.infrastructure.idle_automation.__init__",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 34,
+      "category": "infrastructure",
+      "suggested_trigger": "manual"
+    },
+    {
       "path": "holo_index\\temp\\check_stream_db.py",
       "module_name": "holo_index.temp.check_stream_db",
       "has_json_flag": false,
@@ -6545,16 +6585,6 @@
       "wre_connected": false,
       "skillz_md_path": null,
       "line_count": 33,
-      "category": "infrastructure",
-      "suggested_trigger": "manual"
-    },
-    {
-      "path": "modules\\infrastructure\\idle_automation\\__init__.py",
-      "module_name": "modules.infrastructure.idle_automation.__init__",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 32,
       "category": "infrastructure",
       "suggested_trigger": "manual"
     },

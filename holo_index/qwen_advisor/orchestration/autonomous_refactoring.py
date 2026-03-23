@@ -214,28 +214,37 @@ class AutonomousRefactoringOrchestrator:
             logger.warning(f"[HOLO-ADAPTER] Could not initialize HoloAdapter: {e}")
             # Graceful degradation - Qwen operates without HoloIndex context
 
-        # Initialize Qwen LLM for strategic planning
+        # Initialize Qwen LLM for strategic planning (SINGLETON - prevents redundant loading)
+        # WSP 91: Singleton pattern reduces startup lag from 2-10s to 0s for repeat calls
         self.qwen_engine = None
         if QWEN_AVAILABLE:
             try:
+                from modules.infrastructure.shared_utilities.ai_engine_singletons import (
+                    get_qwen_engine,
+                    is_qwen_loaded,
+                )
                 init_start = time.time()
-                config = QwenAdvisorConfig.from_env()
-                self.qwen_engine = QwenInferenceEngine(
-                    model_path=config.model_path,
+                was_cached = is_qwen_loaded()
+                self.qwen_engine = get_qwen_engine(
                     max_tokens=512,
                     temperature=0.2,
                     context_length=2048
                 )
                 init_time = (time.time() - init_start) * 1000
-                logger.info("[QWEN-LLM] Qwen 1.5B inference engine initialized")
 
-                # Log LLM initialization
-                self.daemon_logger.log_performance(
-                    operation="qwen_initialization",
-                    duration_ms=init_time,
-                    success=True,
-                    model_path=str(config.model_path)
-                )
+                if self.qwen_engine:
+                    if was_cached:
+                        logger.info("[QWEN-LLM] Using cached Qwen engine (singleton)")
+                    else:
+                        logger.info("[QWEN-LLM] Qwen 1.5B inference engine initialized")
+
+                    # Log LLM initialization
+                    self.daemon_logger.log_performance(
+                        operation="qwen_initialization",
+                        duration_ms=init_time,
+                        success=True,
+                        cached=was_cached
+                    )
             except Exception as e:
                 logger.warning(f"[QWEN-LLM] Could not initialize Qwen: {e}")
                 self.daemon_logger.log_error(
@@ -246,36 +255,39 @@ class AutonomousRefactoringOrchestrator:
                 )
                 self.qwen_engine = None
 
-        # Initialize Gemma LLM for pattern matching
+        # Initialize Gemma LLM for pattern matching (SINGLETON - prevents redundant loading)
         self.gemma_engine = None
         if GEMMA_AVAILABLE:
             try:
+                from modules.infrastructure.shared_utilities.ai_engine_singletons import (
+                    get_gemma_engine,
+                    is_gemma_loaded,
+                )
                 init_start = time.time()
-                gemma_model_path = resolve_triage_model_path()
-                if gemma_model_path.exists():
-                    self.gemma_engine = Llama(
-                        model_path=str(gemma_model_path),
-                        n_ctx=1024,
-                        n_threads=4,
-                        verbose=False
-                    )
-                    init_time = (time.time() - init_start) * 1000
-                    logger.info("[GEMMA-LLM] Gemma 3 270M inference engine initialized")
+                was_cached = is_gemma_loaded()
+                self.gemma_engine = get_gemma_engine(n_ctx=1024, n_threads=4)
+                init_time = (time.time() - init_start) * 1000
+
+                if self.gemma_engine:
+                    if was_cached:
+                        logger.info("[GEMMA-LLM] Using cached Gemma engine (singleton)")
+                    else:
+                        logger.info("[GEMMA-LLM] Gemma 3 270M inference engine initialized")
 
                     # Log LLM initialization
                     self.daemon_logger.log_performance(
                         operation="gemma_initialization",
                         duration_ms=init_time,
                         success=True,
-                        model_path=str(gemma_model_path)
+                        cached=was_cached
                     )
                 else:
-                    logger.warning(f"[GEMMA-LLM] Model not found at {gemma_model_path}")
+                    logger.warning("[GEMMA-LLM] Gemma engine unavailable")
                     self.daemon_logger.log_error(
-                        error_type="gemma_model_not_found",
-                        error_message=f"Model file missing at {gemma_model_path}",
-                        context={"expected_path": str(gemma_model_path)},
-                        recoverable=False
+                        error_type="gemma_unavailable",
+                        error_message="Gemma engine returned None",
+                        context={"component": "gemma_engine"},
+                        recoverable=True
                     )
             except Exception as e:
                 logger.warning(f"[GEMMA-LLM] Could not initialize Gemma: {e}")
