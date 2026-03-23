@@ -39,9 +39,15 @@ with actual activity breadcrumbs.
 - `openclaw_execution_routes.py`: Added `_query_past_work()`, `_search_breadcrumbs()`
 - `tests/test_openclaw_memory_queries.py`: +7 tests (19 total)
 
+### Audit Fixes (same PR)
+
+1. **Time qualifier normalization**: `yesterday/today/last night` → `None` (not literal topics)
+2. **No-topic includes workspace memory**: Added `_get_recent_memory_notes()` helper
+3. **Tightened tests**: Explicit assertions for both behaviors
+
 ### Verification
 
-- `pytest test_openclaw_memory_queries.py` → 19 passed
+- `pytest test_openclaw_memory_queries.py` → 20 passed
 
 ---
 

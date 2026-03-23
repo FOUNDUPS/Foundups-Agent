@@ -1,12 +1,13 @@
 ## 2026-03-23: Session recall search foundation (breadcrumb integration)
 - Command: `pytest modules/communication/moltbot_bridge/tests/test_openclaw_memory_queries.py -q`
 - Status: PASS
-- Result: `19 passed`
+- Result: `20 passed` (audit-hardened)
 - Coverage:
   - Decision query: finds matching memory + breadcrumbs, returns provenance
   - Past work query: with topic, matches workspace memory
-  - Past work query: without topic, returns recent activity
+  - Past work query: without topic, **includes workspace memory** (not breadcrumbs-only)
   - Past work query: explicit provenance tags
+  - **Time qualifier normalization**: `yesterday` → `None` (not literal topic)
   - Breadcrumb search: graceful degradation if AgentDB unavailable
   - Intent detection: past work variants (`show past work on X`)
   - Intent detection: working-on variants (`what was I working on`)
