@@ -675,6 +675,34 @@ def execute_research(dae: Any, intent: Any) -> str:
 # --------------------------------------------------------------------------- #
 
 
+# Time qualifiers that should be normalized to None (not treated as topics)
+_TIME_ONLY_QUALIFIERS = {
+    "yesterday",
+    "today",
+    "last night",
+    "this morning",
+    "this week",
+    "last week",
+    "recently",
+    "lately",
+}
+
+
+def _normalize_time_qualifier(topic: Optional[str]) -> Optional[str]:
+    """
+    Normalize time-only qualifiers to None.
+
+    "what was I working on yesterday" should query recent activity,
+    not search for the literal topic "yesterday".
+    """
+    if topic is None:
+        return None
+    topic_lower = topic.lower().strip()
+    if topic_lower in _TIME_ONLY_QUALIFIERS:
+        return None
+    return topic
+
+
 def _try_memory_query(dae: Any, raw_message: str) -> Optional[str]:
     """
     Detect and handle deterministic memory queries.
@@ -717,6 +745,8 @@ def _try_memory_query(dae: Any, raw_message: str) -> Optional[str]:
     )
     if working_on_match:
         topic = working_on_match.group(1).strip().rstrip("?") or None
+        # Normalize time-only qualifiers to None (not a topic)
+        topic = _normalize_time_qualifier(topic)
         return _query_past_work(dae, topic)
 
     # Unresolved work query
@@ -814,15 +844,16 @@ def _query_past_work(dae: Any, topic: Optional[str]) -> str:
     Query past work from workspace memory and AgentDB breadcrumbs.
 
     Combines:
-    - workspace_memory: Memory notes matching topic
+    - workspace_memory: Memory notes matching topic (or recent notes if no topic)
     - breadcrumbs: Recent AgentDB activity matching topic
 
     Returns results with explicit provenance.
     """
     results = []
 
-    # Source 1: Workspace memory (existing)
+    # Source 1: Workspace memory
     if topic:
+        # Topic-filtered search
         memory_matches = _scan_workspace_memory(dae, topic)
         for match in memory_matches[:5]:
             results.append({
@@ -831,6 +862,17 @@ def _query_past_work(dae: Any, topic: Optional[str]) -> str:
                 "date": match.get("date", "unknown"),
                 "path": match.get("path", ""),
                 "snippet": match.get("snippet", "")[:300],
+            })
+    else:
+        # No topic: include recent workspace memory notes
+        recent_notes = _get_recent_memory_notes(dae, limit=5)
+        for note in recent_notes:
+            results.append({
+                "source": "workspace_memory",
+                "title": note.get("title", "unknown"),
+                "date": note.get("date", "unknown"),
+                "path": note.get("path", ""),
+                "snippet": "",
             })
 
     # Source 2: AgentDB breadcrumbs
@@ -1040,6 +1082,40 @@ def _query_recent_sessions(dae: Any) -> str:
     parts.append("")
     parts.append(f"_Found {len(notes)} session note(s) in workspace memory._")
     return "\n".join(parts)
+
+
+def _get_recent_memory_notes(dae: Any, limit: int = 5) -> list[Dict[str, Any]]:
+    """
+    Get recent workspace memory notes without topic filtering.
+
+    Returns list of notes with title, date, path.
+    """
+    memory_dir = _get_workspace_path(dae) / "memory"
+    if not memory_dir.exists():
+        return []
+
+    notes = []
+    try:
+        for note_path in sorted(memory_dir.glob("*.md"), reverse=True)[:limit]:
+            try:
+                content = note_path.read_text(encoding="utf-8")
+                first_line = content.split("\n")[0].strip()
+                title = first_line.lstrip("#").strip() if first_line.startswith("#") else note_path.stem
+
+                date_match = re.match(r"(\d{4}-\d{2}-\d{2})", note_path.stem)
+                date = date_match.group(1) if date_match else "unknown"
+
+                notes.append({
+                    "title": title,
+                    "date": date,
+                    "path": note_path.name,
+                })
+            except Exception:
+                continue
+    except Exception as exc:
+        logger.debug("Failed to get recent memory notes: %s", exc)
+
+    return notes
 
 
 def _scan_workspace_memory(dae: Any, topic: str) -> list[Dict[str, Any]]:

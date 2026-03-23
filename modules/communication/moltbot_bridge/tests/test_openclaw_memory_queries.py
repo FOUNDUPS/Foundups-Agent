@@ -298,6 +298,25 @@ class TestMemoryQueryIntentDetection:
             result = _try_memory_query(mock_dae, query)
             assert result is not None, f"Failed to detect: {query}"
 
+    def test_time_qualifier_normalized_to_no_topic(self, mock_dae, tmp_path):
+        """Time qualifiers like 'yesterday' are NOT treated as literal topics."""
+        memory_dir = tmp_path / "modules/communication/moltbot_bridge/workspace/memory"
+        memory_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create a memory note (not named "yesterday")
+        (memory_dir / "2026-03-23-recent-work.md").write_text(
+            "# Recent Work Session\n\nWorking on autonomy.\n",
+            encoding="utf-8",
+        )
+
+        result = _try_memory_query(mock_dae, "what was I working on yesterday")
+
+        assert result is not None
+        # Must NOT return "No past work found for yesterday"
+        assert "No past work found for `yesterday`" not in result
+        # Should return recent activity instead
+        assert "Recent work" in result or "work activity" in result.lower()
+
 
 class TestPastWorkQuery:
     """Tests for 'show past work on X' queries."""
@@ -320,17 +339,25 @@ class TestPastWorkQuery:
         assert "autonomy" in result.lower()
         assert "workspace_memory" in result.lower() or "Workspace Memory" in result
 
-    def test_past_work_without_topic(self, mock_dae, tmp_path):
-        """Past work query without topic returns recent activity."""
+    def test_past_work_without_topic_includes_workspace_memory(self, mock_dae, tmp_path):
+        """Past work query without topic includes workspace memory notes."""
         memory_dir = tmp_path / "modules/communication/moltbot_bridge/workspace/memory"
         memory_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create a recent memory note
+        (memory_dir / "2026-03-23-session-work.md").write_text(
+            "# Session Work Notes\n\nWorking on supervisor.\n",
+            encoding="utf-8",
+        )
 
         # No topic provided
         result = _query_past_work(mock_dae, None)
 
         assert result is not None
-        # Should still return something (recent work or "no past work found")
-        assert "work" in result.lower()
+        # Must include workspace memory (not breadcrumbs only)
+        assert "workspace_memory" in result.lower() or "Workspace Memory" in result
+        # Must include the note title or date
+        assert "Session Work Notes" in result or "2026-03-23" in result
 
     def test_past_work_explicit_provenance(self, mock_dae, tmp_path):
         """Past work response includes explicit provenance tags."""
