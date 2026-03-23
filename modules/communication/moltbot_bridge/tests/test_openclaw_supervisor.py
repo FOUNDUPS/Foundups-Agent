@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -314,3 +314,405 @@ def test_plan_ai_analysis_exception_stores_error(tmp_path):
     assert "Holo unavailable" in ai_analysis["error"]
     # Plan should still complete even with AI analysis error
     assert result["plan"]["action"] == "execute_autonomous_task"
+
+
+# --------------------------------------------------------------------------- #
+#  Supervisor Memory Nudge Tests                                               #
+# --------------------------------------------------------------------------- #
+
+
+def test_verify_failure_emits_nudge(tmp_path):
+    """Verify failure emits a memory nudge with breadcrumb recording."""
+    nudge_calls = []
+
+    class MockNudgeEngine:
+        def __init__(self, repo_root=None, **kwargs):
+            self.repo_root = repo_root
+
+        def emit_nudges(self, events, record_breadcrumbs=False):
+            nudge_calls.append({
+                "events": events,
+                "record_breadcrumbs": record_breadcrumbs,
+            })
+            # Simulate note creation
+            return [tmp_path / "mock_note.md"]
+
+    broker = MagicMock()
+    # Always return stopped to force start attempt, then verify failure
+    broker.get_runtime_status.return_value = {
+        "registered": True,
+        "running": False,
+        "state": "stopped",
+        "last_error": "still down",
+        "enabled": True,
+    }
+    broker.start_dae.return_value = {"status": "starting"}
+
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True}
+    observer.follow_events.return_value = {
+        "events": [],
+        "next_cursor": 0,
+        "latest_sequence_id": 0,
+    }
+
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda a, r, d: None,
+        self_audit_factory=lambda repo_root: MagicMock(),
+    )
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.memory_nudge_engine.MemoryNudgeEngine",
+        MockNudgeEngine,
+    ):
+        result = supervisor.run_cycle()
+
+        # Verify failure should have occurred
+        assert result["verify"]["ok"] is False
+        assert supervisor.current_state == SupervisorState.ESCALATE
+
+        # Should have emitted a nudge
+        assert len(nudge_calls) == 1
+        assert nudge_calls[0]["record_breadcrumbs"] is True
+        event = nudge_calls[0]["events"][0]
+        assert event.trigger_type == "supervisor_verify_failure"
+        assert "verify failed" in event.title.lower()
+        assert event.priority == "P1"
+
+
+def test_escalate_budget_exhausted_emits_nudge(tmp_path, monkeypatch):
+    """Restart budget exhausted escalation emits a P0 nudge."""
+    monkeypatch.setenv("OPENCLAW_SUPERVISOR_MAX_RESTARTS", "2")
+    monkeypatch.setenv("OPENCLAW_SUPERVISOR_RESTART_WINDOW_SEC", "600")
+
+    nudge_calls = []
+
+    class MockNudgeEngine:
+        def __init__(self, repo_root=None, **kwargs):
+            pass
+
+        def emit_nudges(self, events, record_breadcrumbs=False):
+            nudge_calls.append({
+                "events": events,
+                "record_breadcrumbs": record_breadcrumbs,
+            })
+            return [tmp_path / "mock_note.md"]
+
+    broker = MagicMock()
+    broker.get_runtime_status.return_value = {
+        "registered": True,
+        "running": False,
+        "state": "stopped",
+        "last_error": "crashed",
+        "enabled": True,
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True}
+    observer.follow_events.return_value = {
+        "events": [],
+        "next_cursor": 0,
+        "latest_sequence_id": 0,
+    }
+
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda a, r, d: None,
+        self_audit_factory=lambda repo_root: MagicMock(),
+    )
+    # Exhaust restart budget
+    supervisor._restart_attempts.extend([100.0, 200.0])
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.openclaw_supervisor.time.time",
+        return_value=250.0,
+    ), patch(
+        "modules.communication.moltbot_bridge.src.memory_nudge_engine.MemoryNudgeEngine",
+        MockNudgeEngine,
+    ):
+        result = supervisor.run_cycle()
+
+        assert result["verify"]["error"] == "resident_openclaw_restart_budget_exhausted"
+        assert supervisor.current_state == SupervisorState.ESCALATE
+
+        # Should have emitted a P0 nudge
+        assert len(nudge_calls) == 1
+        event = nudge_calls[0]["events"][0]
+        assert event.trigger_type == "supervisor_escalation"
+        assert "budget_exhausted" in event.title
+        assert event.priority == "P0"
+
+
+def test_escalate_broker_unavailable_emits_nudge(tmp_path):
+    """Broker unavailable escalation emits a P1 nudge."""
+    nudge_calls = []
+
+    class MockNudgeEngine:
+        def __init__(self, repo_root=None, **kwargs):
+            pass
+
+        def emit_nudges(self, events, record_breadcrumbs=False):
+            nudge_calls.append({
+                "events": events,
+                "record_breadcrumbs": record_breadcrumbs,
+            })
+            return [tmp_path / "mock_note.md"]
+
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=MagicMock(),  # Will be overridden
+        observer=MagicMock(),
+        action_reporter=lambda a, r, d: None,
+        self_audit_factory=lambda repo_root: MagicMock(),
+    )
+    # Skip normal broker initialization and force broker/observer to None
+    supervisor._bootstrapped = True
+    supervisor._broker = None
+    supervisor._observer = None
+
+    # Mock _get_broker and _get_observer to return None (prevents lazy init)
+    supervisor._get_broker = lambda: None
+    supervisor._get_observer = lambda: None
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.memory_nudge_engine.MemoryNudgeEngine",
+        MockNudgeEngine,
+    ):
+        result = supervisor.run_cycle()
+
+        assert result["verify"]["error"] == "broker_or_observer_unavailable"
+        assert supervisor.current_state == SupervisorState.ESCALATE
+
+        # Should have emitted a P1 nudge
+        assert len(nudge_calls) == 1
+        event = nudge_calls[0]["events"][0]
+        assert event.trigger_type == "supervisor_escalation"
+        assert "broker_or_observer" in event.title
+        assert event.priority == "P1"
+
+
+def test_identical_escalation_dedupes(tmp_path):
+    """Repeated identical escalations are deduplicated by nudge engine."""
+    nudge_calls = []
+    seen_signatures = set()
+
+    class MockNudgeEngine:
+        def __init__(self, repo_root=None, **kwargs):
+            pass
+
+        def emit_nudges(self, events, record_breadcrumbs=False):
+            created = []
+            for event in events:
+                if event.signature not in seen_signatures:
+                    seen_signatures.add(event.signature)
+                    created.append(tmp_path / f"note_{event.signature}.md")
+            nudge_calls.append({
+                "events": events,
+                "created": created,
+            })
+            return created
+
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=MagicMock(),
+        observer=MagicMock(),
+        action_reporter=lambda a, r, d: None,
+        self_audit_factory=lambda repo_root: MagicMock(),
+    )
+    supervisor._bootstrapped = True
+    # Force broker/observer unavailable escalation
+    supervisor._get_broker = lambda: None
+    supervisor._get_observer = lambda: None
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.memory_nudge_engine.MemoryNudgeEngine",
+        MockNudgeEngine,
+    ):
+        # Run multiple cycles with same escalation
+        supervisor.run_cycle()
+        supervisor.run_cycle()
+        supervisor.run_cycle()
+
+        # Should have called emit_nudges 3 times, but only first creates note
+        assert len(nudge_calls) == 3
+        assert len(nudge_calls[0]["created"]) == 1  # First creates
+        assert len(nudge_calls[1]["created"]) == 0  # Second dedups
+        assert len(nudge_calls[2]["created"]) == 0  # Third dedups
+
+
+def test_different_task_failures_produce_different_signatures(tmp_path):
+    """Different task failures produce different nudge signatures (not over-deduplicated)."""
+    emitted_events = []
+
+    class MockNudgeEngine:
+        def __init__(self, repo_root=None, **kwargs):
+            pass
+
+        def emit_nudges(self, events, record_breadcrumbs=False):
+            emitted_events.extend(events)
+            return [tmp_path / f"note_{len(emitted_events)}.md"]
+
+    broker = MagicMock()
+    broker.get_runtime_status.return_value = {
+        "registered": True,
+        "running": True,
+        "state": "running",
+        "last_error": "",
+        "enabled": True,
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True}
+    observer.follow_events.return_value = {
+        "events": [],
+        "next_cursor": 0,
+        "latest_sequence_id": 0,
+    }
+
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda a, r, d: None,
+        self_audit_factory=lambda repo_root: MagicMock(),
+    )
+    supervisor._bootstrapped = True
+
+    # Create two different task failures
+    task1 = {"task_id": "grant_watchlist_review", "description": "Review grants"}
+    task2 = {"task_id": "pqn_watchlist_review", "description": "Review PQN"}
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.memory_nudge_engine.MemoryNudgeEngine",
+        MockNudgeEngine,
+    ), patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+        # First cycle: task1 fails
+        mock_db.return_value.get_autonomous_tasks.side_effect = [
+            [task1],  # pending
+            [],  # completed (task not there = failure)
+        ]
+        mock_db.return_value.assign_autonomous_task.return_value = True
+
+        # Mock execute_task to return failure
+        with patch(
+            "modules.communication.moltbot_bridge.scripts.run_task.execute_task",
+            return_value={"ok": False, "error": "task_failed"},
+        ):
+            supervisor.run_cycle()
+
+        # Second cycle: task2 fails with different error
+        mock_db.return_value.get_autonomous_tasks.side_effect = [
+            [task2],  # pending
+            [],  # completed (task not there = failure)
+        ]
+
+        with patch(
+            "modules.communication.moltbot_bridge.scripts.run_task.execute_task",
+            return_value={"ok": False, "error": "timeout"},
+        ):
+            supervisor.run_cycle()
+
+        # Both failures should have emitted events
+        assert len(emitted_events) == 2
+
+        # Signatures should be DIFFERENT (task_id and error in title)
+        sig1 = emitted_events[0].signature
+        sig2 = emitted_events[1].signature
+        assert sig1 != sig2, (
+            f"Different task failures should have different signatures: "
+            f"{emitted_events[0].title} vs {emitted_events[1].title}"
+        )
+
+        # Titles should include task_id
+        assert "grant_watchlist_review" in emitted_events[0].title
+        assert "pqn_watchlist_review" in emitted_events[1].title
+
+
+def test_successful_cycle_does_not_emit_nudge(tmp_path):
+    """Successful execution cycle does not emit any nudge."""
+    nudge_calls = []
+
+    class MockNudgeEngine:
+        def __init__(self, repo_root=None, **kwargs):
+            pass
+
+        def emit_nudges(self, events, record_breadcrumbs=False):
+            nudge_calls.append(events)
+            return []
+
+    broker = MagicMock()
+    broker.get_runtime_status.return_value = {
+        "registered": True,
+        "running": True,
+        "state": "running",
+        "last_error": "",
+        "enabled": True,
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True}
+    observer.follow_events.return_value = {
+        "events": [],
+        "next_cursor": 0,
+        "latest_sequence_id": 0,
+    }
+
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda a, r, d: None,
+        self_audit_factory=lambda repo_root: MagicMock(),
+    )
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.memory_nudge_engine.MemoryNudgeEngine",
+        MockNudgeEngine,
+    ), patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+        mock_db.return_value.get_autonomous_tasks.return_value = []
+        result = supervisor.run_cycle()
+
+        # Should be idle (healthy runtime, no pending tasks)
+        assert result["triage"]["kind"] == "idle"
+        assert supervisor.current_state == SupervisorState.IDLE_WATCH
+
+        # Should NOT have emitted any nudge
+        assert len(nudge_calls) == 0
+
+
+def test_breadcrumb_recording_invoked_on_nudge(tmp_path):
+    """Breadcrumb recording is invoked when nudge is emitted."""
+    breadcrumb_recorded = []
+
+    class MockNudgeEngine:
+        def __init__(self, repo_root=None, **kwargs):
+            pass
+
+        def emit_nudges(self, events, record_breadcrumbs=False):
+            if record_breadcrumbs:
+                breadcrumb_recorded.append(True)
+            return [tmp_path / "note.md"]
+
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=MagicMock(),
+        observer=MagicMock(),
+        action_reporter=lambda a, r, d: None,
+        self_audit_factory=lambda repo_root: MagicMock(),
+    )
+    supervisor._bootstrapped = True
+    # Force broker/observer unavailable escalation
+    supervisor._get_broker = lambda: None
+    supervisor._get_observer = lambda: None
+
+    with patch(
+        "modules.communication.moltbot_bridge.src.memory_nudge_engine.MemoryNudgeEngine",
+        MockNudgeEngine,
+    ):
+        supervisor.run_cycle()
+
+        # Should have recorded breadcrumb
+        assert len(breadcrumb_recorded) == 1
+        assert breadcrumb_recorded[0] is True

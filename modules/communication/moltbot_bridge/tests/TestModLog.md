@@ -1,3 +1,18 @@
+## 2026-03-23: Supervisor Memory Nudge Tests (P1)
+- Command: `pytest modules/communication/moltbot_bridge/tests/test_openclaw_supervisor.py -q`
+- Status: PASS
+- Result: `14 passed` (7 existing + 7 new nudge tests)
+- Coverage:
+  - VERIFY failure emits nudge: trigger_type=supervisor_verify_failure, priority=P1
+  - Budget exhausted escalation emits P0 nudge
+  - Broker unavailable escalation emits P1 nudge
+  - Identical escalations deduplicate cleanly (signature-based)
+  - **Different task failures produce different signatures** (task_id + error in title)
+  - Successful cycles do NOT emit nudges
+  - Breadcrumb recording invoked with record_breadcrumbs=True
+
+---
+
 ## 2026-03-23: Grant Task Pipeline Tests (P0)
 - Command: `pytest modules/communication/moltbot_bridge/tests/test_grant_task_execution.py modules/communication/moltbot_bridge/tests/test_hardening_tranche.py -k grant -q`
 - Status: PASS

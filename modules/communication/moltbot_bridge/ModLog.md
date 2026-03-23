@@ -1,5 +1,63 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-23: Supervisor Memory Nudge Wiring (P1)
+
+**Author**: 0102
+**WSP**: 22, 60, 97
+
+### Context
+
+Supervisor already stores PatternMemory outcomes in `_remember()` but did not emit
+dedicated nudges for high-value VERIFY/ESCALATE failures. This wiring adds targeted
+nudge emission without creating noise.
+
+### Changes
+
+1. **Added `_emit_supervisor_nudge()` helper** to `openclaw_supervisor.py`:
+   - Constructs explicit `NudgeEvent` objects
+   - Calls `MemoryNudgeEngine.emit_nudges([event], record_breadcrumbs=True)`
+   - Returns True if nudge was emitted (not deduplicated)
+
+2. **VERIFY failure path now emits nudge**:
+   - Trigger type: `supervisor_verify_failure`
+   - Priority: P1
+   - Includes: plan_action, plan_reason, verify_error, task_id, fidelity
+
+3. **ESCALATE path now emits nudge for high-value reasons**:
+   - `resident_openclaw_restart_budget_exhausted` → P0
+   - `broker_or_observer_unavailable` → P1
+   - `openclaw_runtime_not_registered` → P1
+
+4. **Signature identity for VERIFY failures**:
+   - Title includes `task_id` and `verify_error` to distinguish different failures
+   - Format: `Task verify failed: <action> [<task_id>] (<error>)`
+   - Prevents over-deduplication of materially different failures
+
+5. **Deduplication**: Identical escalations are deduplicated by nudge engine
+   (signature-based matching on trigger_type + title + provenance).
+
+### Files Changed
+
+- `src/openclaw_supervisor.py`: Added `_emit_supervisor_nudge()` method, calls in run_cycle
+- `tests/test_openclaw_supervisor.py`: 7 new tests for nudge emission
+
+### Verification
+
+```
+pytest test_openclaw_supervisor.py       # 14 passed
+pytest test_openclaw_supervisor_p0.py    # 1 passed
+pytest test_memory_nudge_engine.py       # 19 passed
+pytest test_self_research_refresh.py     # 7 passed
+```
+
+### Not Changed
+
+- Self-research nudge logic (already working from PR #238)
+- Grant execution files (completed in PR #239)
+- Gateway continuity layer (future slice)
+
+---
+
 ## 2026-03-23: Memory Nudge Runtime Wiring (P1)
 
 **Author**: 0102
