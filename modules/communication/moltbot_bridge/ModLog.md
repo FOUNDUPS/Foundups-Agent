@@ -11,16 +11,28 @@ OpenClaw supervisor initialized AI Overseer at line 289 but `_plan()` at line 44
 was a thin dict builder that never used it. The autonomy gap assessment identified
 this as P1: "AI Overseer in PLAN is still open."
 
+Additionally, `analyze_mission_requirements()` returns two response shapes:
+- Normal: `{classification: {complexity: N}, patterns_detected, recommended_team}`
+- Fallback: `{complexity: 3, requires_coordination}` (no classification object)
+
+Initial integration assumed `classification.complexity` always exists, causing
+fallback responses to degrade complexity to 0.
+
 ### Solution
 
-Integrated `ai_overseer.analyze_mission_requirements()` into `_plan()`:
-- Gemma fast classification (50-100ms latency)
-- Adds `ai_analysis` to plan with complexity, patterns, recommended_team
-- Graceful fallback if AI Overseer unavailable
+1. Integrated `ai_overseer.analyze_mission_requirements()` into `_plan()`:
+   - Gemma fast classification (50-100ms latency)
+   - Adds `ai_analysis` to plan with complexity, patterns, recommended_team
+   - Graceful fallback if AI Overseer unavailable
+
+2. Added `_normalize_ai_analysis()` helper to handle both response shapes:
+   - Extracts complexity from `classification.complexity` OR top-level `complexity`
+   - Normalizes patterns, recommended_team, method, requires_coordination
 
 ### Verification
 
-- `pytest test_openclaw_supervisor.py test_openclaw_supervisor_p0.py` → 5 passed
+- `pytest test_openclaw_supervisor.py test_openclaw_supervisor_p0.py` → 8 passed
+- Tests cover: normal shape, fallback shape, exception handling
 
 ---
 
