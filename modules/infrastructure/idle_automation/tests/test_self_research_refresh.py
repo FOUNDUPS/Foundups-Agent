@@ -167,7 +167,93 @@ def test_run_reuses_cached_compliance_section(tmp_path: Path, monkeypatch):
     monkeypatch.setattr(refresher, "publish_autonomous_tasks", lambda candidates: [])
     monkeypatch.setattr(refresher, "remember_outcome", lambda report, duration_ms: None)
 
-    report = refresher.run(write_tasks=False, remember_outcome=False)
+    report = refresher.run(write_tasks=False, remember_outcome=False, emit_nudges=False)
 
     assert report["wsp_compliance"]["cached"] is True
     assert report["wsp_compliance"]["violation_count"] == 1
+
+
+def test_run_emits_memory_nudges_when_high_value_events_detected(tmp_path: Path, monkeypatch):
+    """Verify runtime wiring: emit_nudges=True calls memory nudge engine."""
+    report_path = tmp_path / "reports" / "openclaw_self_research_status.json"
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Create workspace structure for nudge engine
+    memory_dir = tmp_path / "modules/communication/moltbot_bridge/workspace/memory"
+    reports_dir = tmp_path / "modules/communication/moltbot_bridge/workspace/reports"
+    memory_dir.mkdir(parents=True)
+    reports_dir.mkdir(parents=True)
+
+    # Create wre_core reports dir for escalations scanner
+    wre_reports = tmp_path / "modules/infrastructure/wre_core/reports"
+    wre_reports.mkdir(parents=True)
+
+    # Create self-research status with high-priority update candidate
+    status = {
+        "update_candidates": [
+            {"title": "Critical update", "mps": {"priority": "P0", "reasoning": "Security fix"}},
+        ]
+    }
+    (reports_dir / "openclaw_self_research_status.json").write_text(
+        json.dumps(status), encoding="utf-8"
+    )
+
+    refresher = SelfResearchRefresher(report_path=report_path)
+    # Override repo_root so nudge engine finds the test structure
+    refresher.repo_root = tmp_path
+
+    # Stub out all scan methods to skip external dependencies
+    monkeypatch.setattr(refresher, "refresh_holo_index", lambda: {"skipped": True})
+    monkeypatch.setattr(refresher, "scan_wsp_compliance", lambda: {"top_violation_groups": []})
+    monkeypatch.setattr(refresher, "scan_self_audit", lambda: {"top_signatures": []})
+    monkeypatch.setattr(refresher, "refresh_grant_watchlist", lambda: {"status": {}})
+    monkeypatch.setattr(refresher, "refresh_pqn_research_watchlist", lambda: {"status": {}})
+    monkeypatch.setattr(refresher, "refresh_openclaw_ecosystem_watchlist", lambda: {"status": {}})
+    monkeypatch.setattr(refresher, "publish_autonomous_tasks", lambda candidates: [])
+    monkeypatch.setattr(refresher, "remember_outcome", lambda report, duration_ms: None)
+
+    report = refresher.run(
+        write_tasks=False,
+        remember_outcome=False,
+        emit_nudges=True,
+    )
+
+    # Verify nudges were emitted
+    assert "memory_nudges_emitted" in report
+    assert report["memory_nudges_emitted"] >= 1
+
+    # Verify note files created
+    nudge_notes = list(memory_dir.glob("*-nudge-*.md"))
+    assert len(nudge_notes) >= 1
+
+    # Verify memory_nudges_emitted is persisted to disk (not just in-memory)
+    persisted_report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert "memory_nudges_emitted" in persisted_report
+    assert persisted_report["memory_nudges_emitted"] >= 1
+
+
+def test_run_skips_nudges_when_emit_nudges_false(tmp_path: Path, monkeypatch):
+    """Verify emit_nudges=False skips memory nudge emission."""
+    report_path = tmp_path / "reports" / "openclaw_self_research_status.json"
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+
+    refresher = SelfResearchRefresher(report_path=report_path)
+
+    # Stub out all scan methods
+    monkeypatch.setattr(refresher, "refresh_holo_index", lambda: {"skipped": True})
+    monkeypatch.setattr(refresher, "scan_wsp_compliance", lambda: {"top_violation_groups": []})
+    monkeypatch.setattr(refresher, "scan_self_audit", lambda: {"top_signatures": []})
+    monkeypatch.setattr(refresher, "refresh_grant_watchlist", lambda: {"status": {}})
+    monkeypatch.setattr(refresher, "refresh_pqn_research_watchlist", lambda: {"status": {}})
+    monkeypatch.setattr(refresher, "refresh_openclaw_ecosystem_watchlist", lambda: {"status": {}})
+    monkeypatch.setattr(refresher, "publish_autonomous_tasks", lambda candidates: [])
+    monkeypatch.setattr(refresher, "remember_outcome", lambda report, duration_ms: None)
+
+    report = refresher.run(
+        write_tasks=False,
+        remember_outcome=False,
+        emit_nudges=False,
+    )
+
+    # Verify nudges not emitted when disabled
+    assert "memory_nudges_emitted" not in report

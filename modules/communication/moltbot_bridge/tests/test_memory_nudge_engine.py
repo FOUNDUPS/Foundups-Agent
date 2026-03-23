@@ -413,3 +413,109 @@ class TestConvenienceFunctions:
         assert isinstance(result, list)
         # Should have created one note for the P0 item
         assert len(result) >= 1
+
+
+class TestBreadcrumbRecording:
+    """Tests for breadcrumb recording when nudges are emitted."""
+
+    def test_emit_nudges_records_breadcrumb_when_enabled(self, tmp_workspace, monkeypatch):
+        """When record_breadcrumbs=True, a breadcrumb is recorded for each nudge."""
+        # Track breadcrumb calls
+        breadcrumb_calls = []
+
+        class MockAgentDB:
+            def add_breadcrumb(self, **kwargs):
+                breadcrumb_calls.append(kwargs)
+                return 1
+
+        # Patch AgentDB import
+        import sys
+        mock_module = type(sys)("mock_agent_db")
+        mock_module.AgentDB = MockAgentDB
+        monkeypatch.setitem(
+            sys.modules,
+            "modules.infrastructure.database.src.agent_db",
+            mock_module,
+        )
+
+        engine = MemoryNudgeEngine(
+            repo_root=tmp_workspace["repo_root"],
+            memory_dir=tmp_workspace["memory_dir"],
+            reports_dir=tmp_workspace["reports_dir"],
+        )
+
+        event = NudgeEvent(
+            trigger_type="test_trigger",
+            title="Test Event",
+            summary="Test summary",
+            provenance="test/source.json",
+            priority="P1",
+        )
+
+        created = engine.emit_nudges([event], record_breadcrumbs=True)
+
+        assert len(created) == 1
+        assert len(breadcrumb_calls) == 1
+        assert breadcrumb_calls[0]["action"] == "memory_nudge_emitted"
+        assert breadcrumb_calls[0]["agent_id"] == "memory_nudge_engine"
+        assert "test_trigger" in str(breadcrumb_calls[0]["data"])
+
+    def test_emit_nudges_skips_breadcrumb_when_disabled(self, tmp_workspace, monkeypatch):
+        """When record_breadcrumbs=False, no breadcrumb is recorded."""
+        breadcrumb_calls = []
+
+        class MockAgentDB:
+            def add_breadcrumb(self, **kwargs):
+                breadcrumb_calls.append(kwargs)
+                return 1
+
+        import sys
+        mock_module = type(sys)("mock_agent_db")
+        mock_module.AgentDB = MockAgentDB
+        monkeypatch.setitem(
+            sys.modules,
+            "modules.infrastructure.database.src.agent_db",
+            mock_module,
+        )
+
+        engine = MemoryNudgeEngine(
+            repo_root=tmp_workspace["repo_root"],
+            memory_dir=tmp_workspace["memory_dir"],
+            reports_dir=tmp_workspace["reports_dir"],
+        )
+
+        event = NudgeEvent(
+            trigger_type="test_trigger",
+            title="Test Event",
+            summary="Test summary",
+            provenance="test/source.json",
+        )
+
+        created = engine.emit_nudges([event], record_breadcrumbs=False)
+
+        assert len(created) == 1
+        assert len(breadcrumb_calls) == 0
+
+    def test_emit_memory_nudges_convenience_passes_breadcrumb_flag(self, tmp_workspace):
+        """Convenience function passes record_breadcrumbs to engine."""
+        # Create wre_core reports dir
+        wre_reports = tmp_workspace["repo_root"] / "modules/infrastructure/wre_core/reports"
+        wre_reports.mkdir(parents=True, exist_ok=True)
+
+        # Create triggering condition
+        status = {
+            "update_candidates": [
+                {"title": "Test", "mps": {"priority": "P0", "reasoning": "Test"}},
+            ]
+        }
+        (tmp_workspace["reports_dir"] / "openclaw_self_research_status.json").write_text(
+            json.dumps(status), encoding="utf-8"
+        )
+
+        # Just verify it doesn't error with record_breadcrumbs=True
+        # (AgentDB import may fail in test environment, but that's OK - graceful degradation)
+        result = emit_memory_nudges(
+            repo_root=tmp_workspace["repo_root"],
+            record_breadcrumbs=True,
+        )
+        assert isinstance(result, list)
