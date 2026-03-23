@@ -69,11 +69,10 @@ class MemoryNudgeEngine:
     Automatic memory capture for high-value events.
 
     Scans existing reports and state to detect:
-    - Supervisor escalations / verify failures
+    - Supervisor escalations (recurring error signatures)
     - Self-research changed items / new autonomous tasks
-    - Architecture decision phrases
-    - Dirty worktree pressure
-    - Grant watchlist changes requiring human gate
+    - Grant watchlist changes (pages changed, refresh errors)
+    - Worktree pressure (queue backlog)
 
     Writes deduplicated memory notes to workspace/memory/.
     """
