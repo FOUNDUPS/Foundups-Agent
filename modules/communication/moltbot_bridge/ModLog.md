@@ -1,5 +1,52 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-23: Deterministic memory queries through OpenClaw (P0)
+
+**Author**: 0102
+**WSP**: 22, 97
+
+### Problem
+
+Operators had no way to query past decisions, unresolved work, or recent sessions
+through OpenClaw. The roadmap item `openclaw_memory_queries` was marked as the
+next ready P0 slice in the native execution queue.
+
+### Solution
+
+Added memory query detection and handlers in `openclaw_execution_routes.py`:
+
+1. **Decision queries**: `what did we decide about X`
+   - Scans workspace memory notes for topic matches
+   - Returns provenance-backed answers with file paths
+   - Explicit "insufficient evidence" when no matches
+
+2. **Unresolved work queries**: `show unresolved work`, `show pending tasks`
+   - Reads `openclaw_native_execution_queue_status.json`
+   - Reads `openclaw_self_research_status.json` for update candidates
+   - Returns structured list with priorities and sources
+
+3. **Recent sessions queries**: `show recent sessions`, `show high-value sessions`
+   - Lists workspace memory notes sorted by date
+   - Returns titles, dates, and file paths
+
+### Behavior Guarantees
+
+- Responses include provenance (source file paths)
+- Insufficient evidence is stated explicitly, not hallucinated
+- Existing token-usage and identity query behavior preserved
+- Memory queries route through normal QUERY path
+
+### Files Changed
+
+- `openclaw_execution_routes.py`: Added `_try_memory_query()` and helpers
+- `tests/test_openclaw_memory_queries.py`: 10 focused tests
+
+### Verification
+
+- `pytest test_openclaw_memory_queries.py` → 10 passed
+
+---
+
 ## 2026-03-23: AI Overseer integration in supervisor planning (P1)
 
 **Author**: 0102
