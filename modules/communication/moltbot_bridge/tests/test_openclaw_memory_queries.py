@@ -212,11 +212,13 @@ class TestMemoryQueryIntentDetection:
             json.dumps({"next_ready": [], "next_audit": []}), encoding="utf-8"
         )
 
+        # Note: "show open items" is intentionally NOT matched because "open"
+        # causes false positives (e.g., "openclaw" contains "open")
         variants = [
             "show unresolved work",
             "list pending tasks",
             "what remaining work is there",
-            "show open items",
+            "show pending items",
         ]
 
         for query in variants:
@@ -234,3 +236,30 @@ class TestMemoryQueryIntentDetection:
         for query in queries:
             result = _try_memory_query(mock_dae, query)
             assert result is None, f"Should not match: {query}"
+
+    def test_false_positive_openclaw_model_query(self, mock_dae):
+        """'what openclaw model' must NOT match unresolved work (contains 'open')."""
+        # This was a real false positive: "openclaw" contains "open"
+        queries = [
+            "what openclaw model are you running",
+            "what openai model is configured",
+            "show openviking status",
+        ]
+
+        for query in queries:
+            result = _try_memory_query(mock_dae, query)
+            assert result is None, f"Should not match (false positive): {query}"
+
+    def test_false_positive_latest_docs_query(self, mock_dae):
+        """'show latest WSP docs' must NOT match recent sessions."""
+        # This was a real false positive: "latest" without "sessions"
+        queries = [
+            "show latest WSP docs",
+            "list recent changes",
+            "show latest commits",
+            "what are the recent PRs",
+        ]
+
+        for query in queries:
+            result = _try_memory_query(mock_dae, query)
+            assert result is None, f"Should not match (false positive): {query}"

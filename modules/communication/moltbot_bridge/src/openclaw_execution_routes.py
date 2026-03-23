@@ -683,10 +683,14 @@ def _try_memory_query(dae: Any, raw_message: str) -> Optional[str]:
     - "what did we decide about X" -> decision recall
     - "show unresolved work" / "show pending work" -> unresolved work
     - "show recent sessions" / "show high-value sessions" -> recent sessions
+
+    IMPORTANT: Patterns must be narrow to avoid hijacking normal QUERY traffic.
+    Use word boundaries and require memory-specific nouns.
     """
     normalized = raw_message.lower().strip()
 
     # Decision query: "what did we decide about X"
+    # Narrow: requires exact phrase "what did we decide"
     decision_match = re.search(
         r"what\s+did\s+we\s+decide\s+(?:about|on|for|regarding)\s+(.+)",
         normalized,
@@ -696,15 +700,25 @@ def _try_memory_query(dae: Any, raw_message: str) -> Optional[str]:
         return _query_decisions(dae, topic)
 
     # Unresolved work query
+    # Narrow: requires memory noun (work|tasks|items) AND status word with word boundaries
+    # Avoids: "what openclaw..." matching via "open" substring
     if re.search(
-        r"(show|list|what).*(unresolved|pending|remaining|left|open)\s*(work|tasks?|items?)?",
+        r"\b(unresolved|pending|remaining)\b.{0,20}\b(work|tasks?|items?)\b",
+        normalized,
+    ) or re.search(
+        r"\b(work|tasks?|items?)\b.{0,20}\b(unresolved|pending|remaining|left)\b",
         normalized,
     ):
         return _query_unresolved_work(dae)
 
     # Recent sessions query
+    # Narrow: requires "sessions" noun explicitly
+    # Avoids: "show latest WSP docs" matching via "latest" alone
     if re.search(
-        r"(show|list).*(recent|high.?value|latest)\s*(sessions?|work|context)?",
+        r"\b(recent|high.?value|latest)\b.{0,15}\bsessions?\b",
+        normalized,
+    ) or re.search(
+        r"\bsessions?\b.{0,15}\b(recent|high.?value|latest)\b",
         normalized,
     ):
         return _query_recent_sessions(dae)
