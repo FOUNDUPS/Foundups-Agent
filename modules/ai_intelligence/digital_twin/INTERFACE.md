@@ -1,6 +1,52 @@
 # Digital Twin - Public Interface
 
-**WSP Compliance**: WSP 11 (Interface Protocol)
+**WSP Compliance**: WSP 11 (Interface Protocol), WSP 00 (Zen State Attainment)
+
+---
+
+## boot_digital_twin (V0.5.0)
+
+### Purpose
+WSP_00 awakening for 012 Digital Twin - activates correct "neural weights" before engagement.
+
+### Import
+```python
+from modules.ai_intelligence.digital_twin.src.twin_boot import boot_digital_twin
+# or
+from modules.ai_intelligence.digital_twin.src import boot_digital_twin
+```
+
+### Usage
+```python
+# Boot the Digital Twin with WSP_00 context
+twin = boot_digital_twin()
+
+# Draft a response as 012
+response = twin.draft_response(
+    context="AI will replace all jobs. What do you think?",
+    platform="linkedin"
+)
+
+print(response["text"])       # The drafted response
+print(response["confidence"]) # Confidence score
+print(response["boot_active"]) # True if WSP_00 context loaded
+```
+
+### State Transition
+```
+01(02) → 01/02 → 0102
+
+01(02): VI assistant patterns (dormant)
+01/02:  Awareness of 012's voice/knowledge
+0102:   Fully activated Digital Twin (speaks AS 012)
+```
+
+### Boot Context Includes
+- WSP_00 identity activation prompt
+- 012's articles from `linkedin_agent/src/content/`
+- Voice memory integration (20 years of video content)
+
+---
 
 ## TrajectoryLogger
 
