@@ -1,7 +1,24 @@
-## 2026-03-23: Deterministic memory queries (P0)
-- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_memory_queries.py -q`
+## 2026-03-23: Session recall search foundation (breadcrumb integration)
+- Command: `pytest modules/communication/moltbot_bridge/tests/test_openclaw_memory_queries.py -q`
 - Status: PASS
-- Result: `10 passed`
+- Result: `20 passed` (audit-hardened)
+- Coverage:
+  - Decision query: finds matching memory + breadcrumbs, returns provenance
+  - Past work query: with topic, matches workspace memory
+  - Past work query: without topic, **includes workspace memory** (not breadcrumbs-only)
+  - Past work query: explicit provenance tags
+  - **Time qualifier normalization**: `yesterday` → `None` (not literal topic)
+  - Breadcrumb search: graceful degradation if AgentDB unavailable
+  - Intent detection: past work variants (`show past work on X`)
+  - Intent detection: working-on variants (`what was I working on`)
+  - False positive prevention: all existing tests remain passing
+
+---
+
+## 2026-03-23: Deterministic memory queries (P0)
+- Command: `pytest modules/communication/moltbot_bridge/tests/test_openclaw_memory_queries.py -q`
+- Status: PASS
+- Result: `12 passed` (audit-hardened)
 - Coverage:
   - Decision query: finds matching memory, returns provenance
   - Decision query: explicit insufficient-evidence response
@@ -13,6 +30,8 @@
   - Intent detection: decision query variants
   - Intent detection: unresolved work variants
   - Intent detection: non-memory queries fall through
+  - False positive: `openclaw model` does NOT match unresolved work
+  - False positive: `latest WSP docs` does NOT match recent sessions
 
 ---
 
