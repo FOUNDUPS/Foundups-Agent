@@ -4,41 +4,32 @@
 Fix Root Directory Violations - WSP 3 Compliance
 ================================================
 
-Uses AI_Overseer + autonomous_cleanup_engine to:
-1. Move markdown docs to correct locations
-2. Move test files to correct modules
-3. Move Python scripts with import path fixes
-4. Verify all relocations
+Uses AI Overseer / Holo root monitoring as the discovery surface and applies
+known-safe relocations for recurring root pollution patterns.
 
 WSP Compliance: WSP 3, WSP 49, WSP 50, WSP 22
 """
 
-# 0102 NOTE (WSP 50 + WSP 64):
-# Use Holo's root violation monitor as source-of-truth for what is currently in root,
-# then relocate *with dependency rewrites* and update module docs/ModLogs.
-# This script contains a known-map for common cases; do not treat it as exhaustive.
-
-# === UTF-8 ENFORCEMENT (WSP 90) ===
-import sys
 import io
-if sys.platform.startswith('win'):
-    try:
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
-    except (OSError, ValueError):
-        pass
-# === END UTF-8 ENFORCEMENT ===
-
 import json
 import shutil
+import subprocess
+import sys
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Tuple
+
+if sys.platform.startswith("win"):
+    try:
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+    except (OSError, ValueError):
+        pass
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
-# Define correct locations per WSP 3
+# Use explicit, reviewed relocations only. This is a known-map fixer, not a bulk mover.
 RELOCATION_MAP = {
-    # WRE Phase completion docs -> WRE module
+    # WRE phase docs -> WRE docs
     "WRE_PHASE1_COMPLETE.md": "modules/infrastructure/wre_core/docs/",
     "WRE_PHASE1_CORRECTED_AUDIT.md": "modules/infrastructure/wre_core/docs/",
     "WRE_PHASE1_WSP_COMPLIANCE_AUDIT.md": "modules/infrastructure/wre_core/docs/",
@@ -52,65 +43,70 @@ RELOCATION_MAP = {
     "WRE_SKILLS_IMPLEMENTATION_SUMMARY.md": "modules/infrastructure/wre_core/docs/",
     "WRE_CLI_REFACTOR_READY.md": "modules/infrastructure/wre_core/docs/",
 
-    # Implementation docs -> docs/
+    # Repo docs / investigations
     "IMPLEMENTATION_INSTRUCTIONS_OPTION5.md": "docs/",
     "WRE_PHASE1_COMPLIANCE_REPORT.md": "docs/",
+    "YOUTUBE_SHORTS_INVESTIGATION_FINDINGS.md": "docs/investigations/",
+    "COMMENT_ROTATION_ISSUE_ANALYSIS.json": "docs/investigations/",
 
-    # PQN test files -> pqn_alignment module tests
+    # Tests
     "test_pqn_meta_research.py": "modules/ai_intelligence/pqn_alignment/tests/",
-
-    # AI Overseer test files -> ai_overseer module tests
     "test_ai_overseer_monitoring.py": "modules/ai_intelligence/ai_overseer/tests/",
     "test_ai_overseer_unicode_fix.py": "modules/ai_intelligence/ai_overseer/tests/",
     "test_monitor_flow.py": "modules/ai_intelligence/ai_overseer/tests/",
-
-    # Gemma test files -> appropriate module tests
     "test_gemma_nested_module_detector.py": "modules/infrastructure/doc_dae/tests/",
 
-    # PQN Python scripts -> pqn_alignment module scripts
+    # Scripts
     "async_pqn_research_orchestrator.py": "modules/ai_intelligence/pqn_alignment/scripts/",
     "pqn_cross_platform_validator.py": "modules/ai_intelligence/pqn_alignment/scripts/",
     "pqn_realtime_dashboard.py": "modules/ai_intelligence/pqn_alignment/scripts/",
     "pqn_streaming_aggregator.py": "modules/ai_intelligence/pqn_alignment/scripts/",
+    "check_port_sentinel.py": "scripts/verification/",
+
+    # Logs / run artifacts
+    "verification_log.txt": "logs/",
 }
 
 
 def ensure_directory(path: Path) -> None:
-    """Create directory if it doesn't exist"""
     path.mkdir(parents=True, exist_ok=True)
 
 
 def move_file_with_backup(src: Path, dest_dir: Path) -> Tuple[bool, str]:
-    """
-    Move file to destination with backup if exists
-
-    Returns: (success, message)
-    """
+    """Move file to destination with backup if needed."""
     try:
         ensure_directory(dest_dir)
         dest_file = dest_dir / src.name
 
-        # If destination exists, create backup
         if dest_file.exists():
             backup = dest_file.with_suffix(dest_file.suffix + ".backup")
             shutil.copy2(dest_file, backup)
-            message = f"Backed up existing {dest_file.name} to {backup.name}"
-            print(f"  [BACKUP] {message}")
+            print(f"  [BACKUP] Backed up existing {dest_file.name} to {backup.name}")
 
-        # Move file
+        git_dir = REPO_ROOT / ".git"
+        if git_dir.exists():
+            result = subprocess.run(
+                ["git", "mv", str(src), str(dest_file)],
+                cwd=REPO_ROOT,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+            )
+            if result.returncode == 0:
+                return True, f"Moved {src.name} -> {dest_dir.relative_to(REPO_ROOT)}"
+
         shutil.move(str(src), str(dest_file))
         return True, f"Moved {src.name} -> {dest_dir.relative_to(REPO_ROOT)}"
-
-    except Exception as e:
-        return False, f"Failed to move {src.name}: {str(e)}"
+    except Exception as exc:
+        return False, f"Failed to move {src.name}: {exc}"
 
 
 def verify_relocation(original: Path, new_location: Path) -> bool:
-    """Verify file was successfully relocated"""
     return new_location.exists() and not original.exists()
 
 
-def main():
+def main() -> int:
     print("[ROOT-CLEANUP] Starting root directory violation fixes")
     print(f"[REPO] {REPO_ROOT}")
     print()
@@ -121,13 +117,11 @@ def main():
         "verified": [],
     }
 
-    # Phase 1: Move files
     print("[PHASE-1] Moving files to correct locations per WSP 3")
     print("-" * 60)
 
     for filename, dest_rel_path in RELOCATION_MAP.items():
         src = REPO_ROOT / filename
-
         if not src.exists():
             print(f"  [SKIP] {filename} not found")
             continue
@@ -153,16 +147,15 @@ def main():
     print("[PHASE-2] Verifying relocations")
     print("-" * 60)
 
-    # Phase 2: Verify
     for moved in results["moved"]:
         original = REPO_ROOT / moved["file"]
         new_loc = REPO_ROOT / moved["to"] / moved["file"]
 
         if verify_relocation(original, new_loc):
-            print(f"  [VERIFY] {moved['file']} -> {moved['to']} ✓")
+            print(f"  [VERIFY] {moved['file']} -> {moved['to']}")
             results["verified"].append(moved["file"])
         else:
-            print(f"  [ERROR] {moved['file']} verification failed!")
+            print(f"  [ERROR] {moved['file']} verification failed")
 
     print()
     print("[PHASE-3] Summary")
@@ -171,12 +164,10 @@ def main():
     print(f"  Files verified: {len(results['verified'])}")
     print(f"  Failed: {len(results['failed'])}")
 
-    # Save results
     results_file = REPO_ROOT / "data" / "root_cleanup_results.json"
     ensure_directory(results_file.parent)
-
-    with open(results_file, "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2)
+    with open(results_file, "w", encoding="utf-8") as handle:
+        json.dump(results, handle, indent=2)
 
     print()
     print(f"[RESULTS] Saved to {results_file.relative_to(REPO_ROOT)}")
@@ -189,9 +180,9 @@ def main():
         return 1
 
     print()
-    print("[SUCCESS] All files relocated and verified ✓")
+    print("[SUCCESS] All files relocated and verified")
     return 0
 
 
 if __name__ == "__main__":
-    exit(main())
+    raise SystemExit(main())
