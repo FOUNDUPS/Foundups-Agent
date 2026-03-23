@@ -8,7 +8,7 @@ Uses existing repo surfaces to keep 0102's understanding current:
 - HoloIndex index refresh
 - WSP compliance scanning
 - Daemon self-audit recurrence signals
-- External opportunity watchlists
+- External opportunity and ecosystem watchlists
 
 Outputs:
 - consolidated report JSON
@@ -61,6 +61,15 @@ PQN_RESEARCH_WATCHLIST_STATUS_PATH = (
     / "workspace"
     / "reports"
     / "pqn_external_research_watchlist_status.json"
+)
+OPENCLAW_ECOSYSTEM_WATCHLIST_STATUS_PATH = (
+    REPO_ROOT
+    / "modules"
+    / "communication"
+    / "moltbot_bridge"
+    / "workspace"
+    / "reports"
+    / "openclaw_external_ecosystem_watchlist_status.json"
 )
 SEVERITY_WEIGHT = {"critical": 4, "high": 3, "medium": 2, "low": 1}
 
@@ -355,6 +364,13 @@ class SelfResearchRefresher:
             status_path=PQN_RESEARCH_WATCHLIST_STATUS_PATH,
         )
 
+    def refresh_openclaw_ecosystem_watchlist(self) -> Dict[str, Any]:
+        """Refresh the OpenClaw external ecosystem watchlist and load its status snapshot."""
+        return self._refresh_watchlist(
+            script_name="refresh_openclaw_ecosystem_watchlist.py",
+            status_path=OPENCLAW_ECOSYSTEM_WATCHLIST_STATUS_PATH,
+        )
+
     def _refresh_watchlist(self, *, script_name: str, status_path: Path) -> Dict[str, Any]:
         """Run a watchlist refresh script and load its status snapshot."""
         command = [sys.executable, str(self.repo_root / "scripts" / script_name)]
@@ -466,6 +482,7 @@ class SelfResearchRefresher:
         self_audit: Dict[str, Any],
         grant_watchlist: Dict[str, Any],
         pqn_research_watchlist: Optional[Dict[str, Any]] = None,
+        openclaw_ecosystem_watchlist: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         """Convert raw refresh signals into a ranked WSP 15 task queue."""
         candidates: List[Dict[str, Any]] = []
@@ -613,6 +630,59 @@ class SelfResearchRefresher:
                 )
             )
 
+        ecosystem_watchlist_status = (openclaw_ecosystem_watchlist or {}).get("status", {}) or {}
+        ecosystem_changed_count = int(ecosystem_watchlist_status.get("changed_count", 0) or 0)
+        ecosystem_error_count = int(ecosystem_watchlist_status.get("error_count", 0) or 0)
+        if ecosystem_changed_count > 0:
+            candidates.append(
+                self._build_manual_candidate(
+                    source="openclaw_ecosystem_watchlist",
+                    title=f"review {ecosystem_changed_count} changed OpenClaw ecosystem signal(s)",
+                    description=(
+                        "External agent-infrastructure systems changed and need WSP 97 repo-fit "
+                        "review before OpenClaw memory, context, or orchestration guidance changes."
+                    ),
+                    required_skills=["openclaw-monitor", "holo-search"],
+                    context={
+                        "changed_count": ecosystem_changed_count,
+                        "changed_items": ecosystem_watchlist_status.get("changed_items", []),
+                    },
+                    complexity=2,
+                    importance=4,
+                    deferability=3,
+                    impact=4,
+                    reasoning=(
+                        "Context and memory infrastructure shifts can materially change the "
+                        "OpenClaw roadmap, but should still be gated through WSP 97 review."
+                    ),
+                )
+            )
+
+        if ecosystem_error_count > 0:
+            candidates.append(
+                self._build_manual_candidate(
+                    source="openclaw_ecosystem_watchlist",
+                    title=f"stabilize {ecosystem_error_count} OpenClaw ecosystem watchlist error(s)",
+                    description=(
+                        "OpenClaw external ecosystem monitoring is degraded and may miss "
+                        "important infrastructure changes such as OpenViking updates."
+                    ),
+                    required_skills=["openclaw-monitor"],
+                    context={
+                        "error_count": ecosystem_error_count,
+                        "error_items": ecosystem_watchlist_status.get("error_items", []),
+                    },
+                    complexity=2,
+                    importance=3,
+                    deferability=3,
+                    impact=3,
+                    reasoning=(
+                        "Ecosystem drift monitoring should stay healthy so architecture "
+                        "decisions are based on current upstream reality."
+                    ),
+                )
+            )
+
         candidates.sort(
             key=lambda item: (
                 int(item["mps"]["total_mps"]),
@@ -712,6 +782,7 @@ class SelfResearchRefresher:
         self_audit = {"skipped": True}
         grant_watchlist = {"skipped": True}
         pqn_research_watchlist = {"skipped": True}
+        openclaw_ecosystem_watchlist = {"skipped": True}
 
         if run_holo_refresh:
             holo_index = self.refresh_holo_index()
@@ -732,6 +803,7 @@ class SelfResearchRefresher:
         if run_watchlists:
             grant_watchlist = self.refresh_grant_watchlist()
             pqn_research_watchlist = self.refresh_pqn_research_watchlist()
+            openclaw_ecosystem_watchlist = self.refresh_openclaw_ecosystem_watchlist()
 
         candidates = self.build_update_candidates(
             holo_index=holo_index,
@@ -739,6 +811,7 @@ class SelfResearchRefresher:
             self_audit=self_audit,
             grant_watchlist=grant_watchlist,
             pqn_research_watchlist=pqn_research_watchlist,
+            openclaw_ecosystem_watchlist=openclaw_ecosystem_watchlist,
         )
         published = self.publish_autonomous_tasks(candidates) if write_tasks else []
 
@@ -750,6 +823,7 @@ class SelfResearchRefresher:
             "self_audit": self_audit,
             "grant_watchlist": grant_watchlist,
             "pqn_research_watchlist": pqn_research_watchlist,
+            "openclaw_ecosystem_watchlist": openclaw_ecosystem_watchlist,
             "update_candidates": candidates,
             "autonomous_tasks": published,
             "next_actions": [item["title"] for item in candidates[:3]],

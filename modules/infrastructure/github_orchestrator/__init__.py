@@ -17,4 +17,4 @@ __all__ = [
     "create_fam_listener",
     "wire_github_to_fam",
 ]
-__version__ = "0.3.1"
+__version__ = "0.4.0"

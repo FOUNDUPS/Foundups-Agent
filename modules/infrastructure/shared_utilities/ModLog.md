@@ -1,6 +1,19 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-03-22 - AI Engine Singletons (Prevent Redundant Model Loading)
+- **Problem**: Multiple components (autonomous_refactoring.py, daemon_monitor_mixin.py, fam_adapter.py) each loaded Qwen/Gemma models independently, causing 2-10 second startup lag per component.
+- **Solution**: Added `ai_engine_singletons.py` with centralized singleton access to AI engines.
+  - `get_qwen_engine()` - Returns singleton QwenInferenceEngine (lazy loaded)
+  - `get_gemma_engine()` - Returns singleton Llama/Gemma instance (lazy loaded)
+  - `is_qwen_loaded()` / `is_gemma_loaded()` - Check load state without side effects
+  - `get_engine_status()` - Get status of all singletons
+- **Impact**: First component to request an engine loads it (~3-5s), all subsequent requests return cached instance (~0ms).
+- **Files**:
+  - `ai_engine_singletons.py` (NEW)
+  - `holo_index/qwen_advisor/orchestration/autonomous_refactoring.py` (UPDATED - uses singletons)
+- **WSP Compliance**: WSP 77 (Agent Coordination), WSP 91 (DAEMON Observability - load time logging)
+
 ## 2026-03-07 - LinkedIn Account Registry (Central Source of Truth)
 - **Problem**: LinkedIn company IDs were hardcoded across ~14+ modules, making account management fragile and creating duplication.
 - **Solution**: Added `linkedin_account_registry.py` as single source of truth for LinkedIn company accounts.

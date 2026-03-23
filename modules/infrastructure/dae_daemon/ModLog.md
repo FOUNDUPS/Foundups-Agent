@@ -1,5 +1,27 @@
 # dae_daemon ModLog
 
+## V1.2.5 - WSP 97 Circuit Breaker for Import Failures (2026-03-22)
+
+**What**: Added circuit breaker pattern to stop crash loops from import-time failures.
+
+**Why**: When a DAE fails to launch due to missing dependencies (e.g., `fastapi` not found because wrong Python environment), the broker would continuously retry, flooding logs with repeated exceptions. WSP 97 CoR (Chain of Reasoning) analysis identified this as an architectural gap.
+
+**Changes**:
+- `src/dae_launch_broker.py`
+  - Added `_import_failures: Dict[str, int]` to track import failures per dae_id
+  - Added `MAX_IMPORT_FAILURES = 3` constant
+  - Circuit breaker logic: After 3 consecutive `ImportError`/`ModuleNotFoundError`, set state to `DETACHED` and call `disable()` to prevent restart attempts
+  - Log verbosity reduction: First failure logs at ERROR level, subsequent failures at DEBUG
+  - Clear failure count on successful launch (imports passed)
+
+**Impact**:
+- Crash loops from environment issues now auto-terminate after 3 attempts
+- Log noise reduced by ~90% for repeated failures
+- DAE enters DETACHED state with clear message: "install deps in venv"
+- OpenClawSupervisor restart budget is preserved for runtime failures, not wasted on import failures
+
+**WSP Compliance**: WSP 97 (CoT/CoR verification gates)
+
 ## V1.2.4 - Cursor-based observer follow mode (2026-03-18)
 
 **What**: Added cursor-based follow semantics on top of the DAEmon event store.

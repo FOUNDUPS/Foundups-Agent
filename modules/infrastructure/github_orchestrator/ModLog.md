@@ -199,9 +199,52 @@ wire_github_to_fam()
 
 - **v0.3.0** → **v0.3.1**: Added root __init__.py, supervisor integration
 
-### Next Steps
+---
 
-1. Register skill in HoloIndex
-2. Test /github command flow via SKILLz
-3. Add project board commands (when scope available)
-4. Create tests for executor
+## 2026-03-22 - Sprint 6-8: WRE Registration + Tests (WSP 97)
+
+**Author**: 0102
+**WSP Compliance**: WSP 97, WSP 5 (Testing)
+
+### Sprint 6: Register in WRE
+
+Added `github_management` to `holo_index/wre_integration/skill_executor.py`:
+
+```python
+"github_management": self._skill_github_management
+```
+
+### Sprint 7: Test Command Flow
+
+| Command | Result |
+|---------|--------|
+| `issue list FOUNDUPS/autopost` | PASS (empty list) |
+| `repo create testfoundup` | PASS (created both repos) |
+
+### Sprint 8: Create Tests
+
+Created `tests/test_executor.py`:
+- 9 tests, all passing
+- TestParseCommand (5 tests)
+- TestExecuteIntegration (2 tests)
+- TestCommandHandlers (2 tests)
+
+### Version
+
+- **v0.3.1** → **v0.4.0**: WRE registration + test suite
+
+### Status
+
+**COMPLETE** - GitHub Orchestrator fully operational:
+- [x] Module scaffolding (v0.1.0)
+- [x] FAM wiring (v0.2.0)
+- [x] SKILLz creation (v0.3.0)
+- [x] Supervisor integration (v0.3.1)
+- [x] WRE registration (v0.4.0)
+- [x] Test suite (9/9 passing)
+
+### Remaining Work
+
+1. Add project board commands (when `project` scope added)
+2. Test collaborator add/remove with real user
+3. Delete test repos (need `delete_repo` scope)

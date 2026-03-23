@@ -110,6 +110,28 @@ def test_build_update_candidates_includes_pqn_external_watchlist(tmp_path: Path)
     assert any("PQN external research" in item["title"] for item in candidates)
 
 
+def test_build_update_candidates_includes_openclaw_ecosystem_watchlist(tmp_path: Path):
+    refresher = SelfResearchRefresher(report_path=tmp_path / "report.json")
+
+    candidates = refresher.build_update_candidates(
+        holo_index={},
+        compliance={"top_violation_groups": []},
+        self_audit={"top_signatures": []},
+        grant_watchlist={"status": {}},
+        pqn_research_watchlist={"status": {}},
+        openclaw_ecosystem_watchlist={
+            "status": {
+                "changed_count": 1,
+                "changed_items": ["OpenViking"],
+                "error_count": 0,
+            }
+        },
+    )
+
+    assert any(item["source"] == "openclaw_ecosystem_watchlist" for item in candidates)
+    assert any("OpenClaw ecosystem" in item["title"] for item in candidates)
+
+
 def test_run_reuses_cached_compliance_section(tmp_path: Path, monkeypatch):
     report_path = tmp_path / "self_research.json"
     cached_report = {
@@ -141,6 +163,7 @@ def test_run_reuses_cached_compliance_section(tmp_path: Path, monkeypatch):
     monkeypatch.setattr(refresher, "scan_self_audit", lambda: {"top_signatures": []})
     monkeypatch.setattr(refresher, "refresh_grant_watchlist", lambda: {"status": {}})
     monkeypatch.setattr(refresher, "refresh_pqn_research_watchlist", lambda: {"status": {}})
+    monkeypatch.setattr(refresher, "refresh_openclaw_ecosystem_watchlist", lambda: {"status": {}})
     monkeypatch.setattr(refresher, "publish_autonomous_tasks", lambda candidates: [])
     monkeypatch.setattr(refresher, "remember_outcome", lambda report, duration_ms: None)
 

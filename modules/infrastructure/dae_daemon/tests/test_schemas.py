@@ -28,7 +28,7 @@ class TestDAEState:
 class TestDAEEventType:
     def test_lifecycle_events(self):
         lifecycle = {"dae_registered", "dae_started", "dae_stopped",
-                     "dae_heartbeat", "dae_state_changed"}
+                     "dae_heartbeat", "dae_state_changed", "dae_detached"}
         actual = {e.value for e in DAEEventType
                   if e.value.startswith("dae_")}
         assert lifecycle == actual

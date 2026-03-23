@@ -1,7 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-24/7 Supervisor State Machine - Layer 2: Operational Handlers
+24/7 Supervisor State Machine - DONOR/PROTOTYPE
+
+⚠️  DEPRECATION NOTICE (2026-03-22):
+    This module is a DONOR/PROTOTYPE, not the canonical supervisor.
+    The canonical supervisor is: modules/communication/moltbot_bridge/src/openclaw_supervisor.py
+
+    Key behaviors from this file have been unified into OpenClawSupervisor:
+    - AI Overseer integration (PLAN)
+    - PatternMemory (REMEMBER)
+    - LibidoMonitor/Gemma fidelity (VERIFY)
+    - SupervisorMetrics telemetry
+
+    DO NOT use this module for production. Use OpenClawSupervisor instead.
+    This file is preserved for reference and potential future backports.
 
 WSP Compliance:
 - WSP 49: Module structure
