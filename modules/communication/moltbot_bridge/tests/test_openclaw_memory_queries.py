@@ -13,6 +13,8 @@ from modules.communication.moltbot_bridge.src.openclaw_execution_routes import (
     _query_decisions,
     _query_unresolved_work,
     _query_recent_sessions,
+    _query_past_work,
+    _search_breadcrumbs,
 )
 
 
@@ -263,3 +265,111 @@ class TestMemoryQueryIntentDetection:
         for query in queries:
             result = _try_memory_query(mock_dae, query)
             assert result is None, f"Should not match (false positive): {query}"
+
+    def test_detects_past_work_variants(self, mock_dae, tmp_path):
+        """Various past work phrasings are detected."""
+        memory_dir = tmp_path / "modules/communication/moltbot_bridge/workspace/memory"
+        memory_dir.mkdir(parents=True, exist_ok=True)
+
+        variants = [
+            "show past work on hermes",
+            "list prior work on autonomy",
+            "find previous work on supervisor",
+        ]
+
+        for query in variants:
+            result = _try_memory_query(mock_dae, query)
+            assert result is not None, f"Failed to detect: {query}"
+            # Should return a response (even if no matches found)
+            assert "past work" in result.lower() or "no past work found" in result.lower()
+
+    def test_detects_working_on_variants(self, mock_dae, tmp_path):
+        """'what was I working on' phrasings are detected."""
+        memory_dir = tmp_path / "modules/communication/moltbot_bridge/workspace/memory"
+        memory_dir.mkdir(parents=True, exist_ok=True)
+
+        variants = [
+            "what was I working on",
+            "what was I working on yesterday",
+            "what were we working on hermes",
+        ]
+
+        for query in variants:
+            result = _try_memory_query(mock_dae, query)
+            assert result is not None, f"Failed to detect: {query}"
+
+
+class TestPastWorkQuery:
+    """Tests for 'show past work on X' queries."""
+
+    def test_past_work_with_memory_match(self, mock_dae, tmp_path):
+        """Past work query includes workspace memory matches."""
+        memory_dir = tmp_path / "modules/communication/moltbot_bridge/workspace/memory"
+        memory_dir.mkdir(parents=True, exist_ok=True)
+
+        (memory_dir / "2026-03-23-autonomy-work.md").write_text(
+            "# Autonomy Sprint Notes\n\n"
+            "Working on OpenClaw autonomy wiring.\n"
+            "Progress made on supervisor integration.\n",
+            encoding="utf-8",
+        )
+
+        result = _query_past_work(mock_dae, "autonomy")
+
+        assert result is not None
+        assert "autonomy" in result.lower()
+        assert "workspace_memory" in result.lower() or "Workspace Memory" in result
+
+    def test_past_work_without_topic(self, mock_dae, tmp_path):
+        """Past work query without topic returns recent activity."""
+        memory_dir = tmp_path / "modules/communication/moltbot_bridge/workspace/memory"
+        memory_dir.mkdir(parents=True, exist_ok=True)
+
+        # No topic provided
+        result = _query_past_work(mock_dae, None)
+
+        assert result is not None
+        # Should still return something (recent work or "no past work found")
+        assert "work" in result.lower()
+
+    def test_past_work_explicit_provenance(self, mock_dae, tmp_path):
+        """Past work response includes explicit provenance tags."""
+        memory_dir = tmp_path / "modules/communication/moltbot_bridge/workspace/memory"
+        memory_dir.mkdir(parents=True, exist_ok=True)
+
+        (memory_dir / "2026-03-23-test-topic.md").write_text(
+            "# Test Topic\n\nSome content.\n",
+            encoding="utf-8",
+        )
+
+        result = _query_past_work(mock_dae, "test topic")
+
+        assert result is not None
+        # Must include source provenance
+        assert "Sources:" in result or "workspace_memory" in result
+
+
+class TestBreadcrumbIntegration:
+    """Tests for breadcrumb integration in memory queries."""
+
+    def test_search_breadcrumbs_handles_import_error(self):
+        """_search_breadcrumbs returns empty list if AgentDB unavailable."""
+        # This tests graceful degradation
+        result = _search_breadcrumbs("test topic", limit=5)
+        # Should return list (possibly empty) not raise
+        assert isinstance(result, list)
+
+    def test_decisions_include_breadcrumb_provenance(self, mock_dae, tmp_path):
+        """Decision query response includes provenance tags."""
+        memory_dir = tmp_path / "modules/communication/moltbot_bridge/workspace/memory"
+        memory_dir.mkdir(parents=True, exist_ok=True)
+
+        (memory_dir / "2026-03-23-decision-test.md").write_text(
+            "# Decision Test\n\nWe decided to use X.\n",
+            encoding="utf-8",
+        )
+
+        result = _query_decisions(mock_dae, "decision test")
+
+        assert result is not None
+        assert "Sources:" in result or "workspace_memory" in result

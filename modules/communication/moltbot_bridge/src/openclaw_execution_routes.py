@@ -683,6 +683,7 @@ def _try_memory_query(dae: Any, raw_message: str) -> Optional[str]:
     - "what did we decide about X" -> decision recall
     - "show unresolved work" / "show pending work" -> unresolved work
     - "show recent sessions" / "show high-value sessions" -> recent sessions
+    - "show past work on X" / "what was I working on" -> past work recall
 
     IMPORTANT: Patterns must be narrow to avoid hijacking normal QUERY traffic.
     Use word boundaries and require memory-specific nouns.
@@ -698,6 +699,25 @@ def _try_memory_query(dae: Any, raw_message: str) -> Optional[str]:
     if decision_match:
         topic = decision_match.group(1).strip().rstrip("?")
         return _query_decisions(dae, topic)
+
+    # Past work query: "show past work on X" / "what was I working on X"
+    # Narrow: requires "past work" or "working on" phrases with topic
+    past_work_match = re.search(
+        r"(?:show|list|find)\s+(?:past|prior|previous)\s+work\s+(?:on|about|for)\s+(.+)",
+        normalized,
+    )
+    if past_work_match:
+        topic = past_work_match.group(1).strip().rstrip("?")
+        return _query_past_work(dae, topic)
+
+    # "what was I working on X" variant
+    working_on_match = re.search(
+        r"what\s+(?:was|were)\s+(?:i|we|you)\s+working\s+on\s*(.*)$",
+        normalized,
+    )
+    if working_on_match:
+        topic = working_on_match.group(1).strip().rstrip("?") or None
+        return _query_past_work(dae, topic)
 
     # Unresolved work query
     # Narrow: requires memory noun (work|tasks|items) AND status word with word boundaries
@@ -727,13 +747,29 @@ def _try_memory_query(dae: Any, raw_message: str) -> Optional[str]:
 
 
 def _query_decisions(dae: Any, topic: str) -> str:
-    """Search workspace memory for decisions related to a topic."""
-    matches = _scan_workspace_memory(dae, topic)
+    """
+    Search workspace memory and breadcrumbs for decisions related to a topic.
 
-    if not matches:
+    Sources with explicit provenance:
+    - workspace_memory: Memory notes containing topic
+    - breadcrumbs: AgentDB activity related to topic
+    """
+    memory_matches = _scan_workspace_memory(dae, topic)
+    breadcrumb_matches = _search_breadcrumbs(topic, limit=10)
+
+    # Filter breadcrumbs to decision-related actions
+    decision_keywords = {"decide", "decision", "agreed", "chose", "approved", "rejected"}
+    decision_breadcrumbs = []
+    for crumb in breadcrumb_matches:
+        action = str(crumb.get("action", "")).lower()
+        query = str(crumb.get("query", "")).lower()
+        if any(kw in action or kw in query for kw in decision_keywords):
+            decision_breadcrumbs.append(crumb)
+
+    if not memory_matches and not decision_breadcrumbs:
         return (
             f"**No decisions found for:** `{topic}`\n\n"
-            "I searched workspace memory notes and reports but found no matching records.\n"
+            "I searched workspace memory notes and AgentDB breadcrumbs but found no matching records.\n"
             "This may mean:\n"
             "- The decision was made before memory notes were captured\n"
             "- The topic uses different terminology\n"
@@ -742,16 +778,154 @@ def _query_decisions(dae: Any, topic: str) -> str:
         )
 
     parts = [f"**Decisions related to:** `{topic}`\n"]
-    for match in matches[:5]:
-        parts.append(f"### {match['title']}")
-        parts.append(f"**Source:** `{match['path']}`")
-        parts.append(f"**Date:** {match.get('date', 'unknown')}")
-        if match.get("snippet"):
-            parts.append(f"\n{match['snippet'][:500]}")
+    sources = []
+
+    # Memory matches
+    if memory_matches:
+        sources.append("workspace_memory")
+        for match in memory_matches[:5]:
+            parts.append(f"### {match['title']}")
+            parts.append(f"**Source:** `workspace_memory:{match['path']}`")
+            parts.append(f"**Date:** {match.get('date', 'unknown')}")
+            if match.get("snippet"):
+                parts.append(f"\n{match['snippet'][:500]}")
+            parts.append("")
+
+    # Breadcrumb evidence
+    if decision_breadcrumbs:
+        sources.append("breadcrumbs")
+        parts.append("### Related Activity (breadcrumbs)")
+        for crumb in decision_breadcrumbs[:3]:
+            date = crumb.get("timestamp", "unknown")[:10] if crumb.get("timestamp") else "unknown"
+            action = crumb.get("action", "unknown")
+            query = crumb.get("query", "")[:80] if crumb.get("query") else ""
+            parts.append(f"- **{date}**: {action}")
+            if query:
+                parts.append(f"  > {query}")
         parts.append("")
 
-    parts.append(f"_Searched {matches[0].get('total_scanned', '?')} memory artifacts._")
+    scanned = memory_matches[0].get("total_scanned", "?") if memory_matches else "0"
+    parts.append(f"_Sources: {', '.join(sources)} | Scanned {scanned} memory artifacts._")
     return "\n".join(parts)
+
+
+def _query_past_work(dae: Any, topic: Optional[str]) -> str:
+    """
+    Query past work from workspace memory and AgentDB breadcrumbs.
+
+    Combines:
+    - workspace_memory: Memory notes matching topic
+    - breadcrumbs: Recent AgentDB activity matching topic
+
+    Returns results with explicit provenance.
+    """
+    results = []
+
+    # Source 1: Workspace memory (existing)
+    if topic:
+        memory_matches = _scan_workspace_memory(dae, topic)
+        for match in memory_matches[:5]:
+            results.append({
+                "source": "workspace_memory",
+                "title": match.get("title", "unknown"),
+                "date": match.get("date", "unknown"),
+                "path": match.get("path", ""),
+                "snippet": match.get("snippet", "")[:300],
+            })
+
+    # Source 2: AgentDB breadcrumbs
+    breadcrumb_matches = _search_breadcrumbs(topic, limit=20)
+    for crumb in breadcrumb_matches[:10]:
+        results.append({
+            "source": "breadcrumbs",
+            "title": crumb.get("action", "unknown"),
+            "date": crumb.get("timestamp", "unknown")[:10] if crumb.get("timestamp") else "unknown",
+            "agent": crumb.get("agent_id", ""),
+            "query": crumb.get("query", "")[:100] if crumb.get("query") else "",
+        })
+
+    if not results:
+        topic_str = f" for `{topic}`" if topic else ""
+        return (
+            f"**No past work found{topic_str}.**\n\n"
+            "Searched: workspace memory notes, AgentDB breadcrumbs.\n"
+            "Try a broader topic or check recent sessions."
+        )
+
+    # Build response with provenance
+    parts = []
+    if topic:
+        parts.append(f"**Past work on:** `{topic}`\n")
+    else:
+        parts.append("**Recent work activity:**\n")
+
+    # Group by source for clarity
+    memory_items = [r for r in results if r["source"] == "workspace_memory"]
+    breadcrumb_items = [r for r in results if r["source"] == "breadcrumbs"]
+
+    if memory_items:
+        parts.append("### Workspace Memory")
+        for item in memory_items:
+            parts.append(f"- **{item['date']}**: {item['title']} (`{item['path']}`)")
+            if item.get("snippet"):
+                parts.append(f"  > {item['snippet'][:150]}...")
+        parts.append("")
+
+    if breadcrumb_items:
+        parts.append("### Activity Breadcrumbs")
+        for item in breadcrumb_items:
+            agent_str = f" [{item['agent']}]" if item.get("agent") else ""
+            query_str = f": {item['query']}" if item.get("query") else ""
+            parts.append(f"- **{item['date']}**: {item['title']}{agent_str}{query_str}")
+        parts.append("")
+
+    source_str = ", ".join(sorted(set(r["source"] for r in results)))
+    parts.append(f"_Sources: {source_str}_")
+    return "\n".join(parts)
+
+
+def _search_breadcrumbs(topic: Optional[str], limit: int = 20) -> list[Dict[str, Any]]:
+    """
+    Search AgentDB breadcrumbs, optionally filtered by topic.
+
+    Returns breadcrumbs matching the topic in action, query, or data fields.
+    """
+    try:
+        from modules.infrastructure.database.src.agent_db import AgentDB
+
+        db = AgentDB()
+        all_breadcrumbs = db.get_breadcrumbs(limit=limit * 2)
+
+        if not topic:
+            # Return recent breadcrumbs without filtering
+            return all_breadcrumbs[:limit]
+
+        # Filter by topic presence in action, query, or data
+        topic_lower = topic.lower()
+        topic_words = set(topic_lower.split())
+        matches = []
+
+        for crumb in all_breadcrumbs:
+            searchable = " ".join([
+                str(crumb.get("action", "")),
+                str(crumb.get("query", "")),
+                str(crumb.get("data", "")),
+            ]).lower()
+
+            # Match if topic or any topic word (>3 chars) found
+            if topic_lower in searchable:
+                matches.append(crumb)
+            elif any(word in searchable for word in topic_words if len(word) > 3):
+                matches.append(crumb)
+
+        return matches[:limit]
+
+    except ImportError:
+        logger.debug("AgentDB not available for breadcrumb search")
+        return []
+    except Exception as exc:
+        logger.debug("Failed to search breadcrumbs: %s", exc)
+        return []
 
 
 def _query_unresolved_work(dae: Any) -> str:

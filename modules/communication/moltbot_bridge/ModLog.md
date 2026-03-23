@@ -1,5 +1,50 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-23: Session recall search foundation (breadcrumb integration)
+
+**Author**: 0102
+**WSP**: 22, 97
+
+### Problem
+
+Memory queries from PR #235 used workspace memory notes only. AgentDB breadcrumbs
+(`get_breadcrumbs()` at line 432) existed but were not wired to memory queries.
+This left a gap: operators could query past decisions but not cross-reference
+with actual activity breadcrumbs.
+
+### Solution
+
+1. **Past work queries**: `show past work on X`, `what was I working on`
+   - Merges workspace memory + AgentDB breadcrumbs
+   - Topic filtering across both sources
+   - Explicit provenance: `workspace_memory`, `breadcrumbs`
+
+2. **Enhanced decision queries** with breadcrumb evidence:
+   - Existing workspace memory search retained
+   - Adds breadcrumb evidence filtered by decision-keywords
+   - Provenance-tagged response sections
+
+3. **`_search_breadcrumbs(topic, limit)` helper**:
+   - Searches AgentDB breadcrumbs by topic
+   - Graceful degradation if AgentDB unavailable
+   - Filters by action, query, and data fields
+
+### Clean Rule Applied
+
+- Topic/decision/session queries → workspace memory + breadcrumbs + reports
+- Skill queries → rolodex + PatternMemory (not in this slice)
+
+### Files Changed
+
+- `openclaw_execution_routes.py`: Added `_query_past_work()`, `_search_breadcrumbs()`
+- `tests/test_openclaw_memory_queries.py`: +7 tests (19 total)
+
+### Verification
+
+- `pytest test_openclaw_memory_queries.py` → 19 passed
+
+---
+
 ## 2026-03-23: Deterministic memory queries through OpenClaw (P0)
 
 **Author**: 0102
