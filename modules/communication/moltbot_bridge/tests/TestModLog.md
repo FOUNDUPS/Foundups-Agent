@@ -353,6 +353,19 @@
   - Confirms `openclaw_supervisor` is exposed through the runtime adapter aliases.
   - Confirms the broker launch wrapper starts and stops the supervisor service cleanly.
 
+## 2026-03-23: AI Overseer integration in supervisor planning (P1)
+- Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_supervisor.py modules/communication/moltbot_bridge/tests/test_openclaw_supervisor_p0.py -q`
+- Status: PASS
+- Result: `8 passed`
+- Coverage:
+  - Confirms AI Overseer `analyze_mission_requirements()` is called during `_plan()` state.
+  - Confirms normal shape (`classification.complexity`) populates `ai_analysis.complexity`.
+  - Confirms fallback shape (top-level `complexity`) normalizes correctly (was degrading to 0).
+  - Confirms AI Overseer exceptions store error in `ai_analysis` without failing the plan.
+  - P0 test: Confirms headless dispatch wires through WRE.
+
+---
+
 ## 2026-03-18: OpenClaw supervisor repair-budget coverage
 - Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_supervisor.py -q`
 - Status: PASS

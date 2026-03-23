@@ -175,3 +175,142 @@ def test_run_cycle_records_failed_verify_and_advances_cursor(tmp_path):
     assert supervisor.current_state == SupervisorState.ESCALATE
     assert supervisor._event_cursor == 21
     assert any(action == "supervisor_cycle" for action, _, _ in events)
+
+
+# --------------------------------------------------------------------------- #
+#  AI Overseer analysis tests (P1 closure)                                     #
+# --------------------------------------------------------------------------- #
+
+
+def test_plan_ai_analysis_normal_shape(tmp_path):
+    """Normal analysis shape with classification.complexity populates ai_analysis."""
+    from unittest.mock import patch
+
+    broker = MagicMock()
+    broker.get_runtime_status.return_value = {
+        "registered": True, "running": True, "state": "running", "last_error": "", "enabled": True,
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True}
+    observer.follow_events.return_value = {"events": [], "next_cursor": 0, "latest_sequence_id": 0}
+
+    # Mock AI Overseer with normal shape BEFORE supervisor init
+    mock_overseer = MagicMock()
+    mock_overseer.analyze_mission_requirements.return_value = {
+        "method": "gemma_fast_classification",
+        "classification": {"complexity": 4, "category": "refactoring"},
+        "patterns_detected": ["wsp_violation", "test_gap"],
+        "recommended_team": {"lead": "qwen", "support": ["gemma"]},
+    }
+
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda a, r, d: None,
+        self_audit_factory=lambda repo_root: MagicMock(),
+    )
+    # Skip bootstrap to prevent _init_unified_components from overwriting mock
+    supervisor._bootstrapped = True
+    supervisor._ai_overseer = mock_overseer
+
+    # Provide a pending task to trigger PLAN state (not idle)
+    pending_task = {"task_id": "test_001", "prompt": "test", "status": "pending"}
+    with patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+        mock_db.return_value.get_autonomous_tasks.return_value = [pending_task]
+        mock_db.return_value.assign_autonomous_task.return_value = True
+        result = supervisor.run_cycle()
+
+    ai_analysis = result["plan"].get("ai_analysis", {})
+    assert ai_analysis.get("complexity") == 4
+    assert ai_analysis.get("patterns") == ["wsp_violation", "test_gap"]
+    assert ai_analysis.get("recommended_team") == {"lead": "qwen", "support": ["gemma"]}
+    assert ai_analysis.get("method") == "gemma_fast_classification"
+    assert "error" not in ai_analysis
+
+
+def test_plan_ai_analysis_fallback_shape(tmp_path):
+    """Fallback shape with top-level complexity populates nonzero ai_analysis.complexity."""
+    from unittest.mock import patch
+
+    broker = MagicMock()
+    broker.get_runtime_status.return_value = {
+        "registered": True, "running": True, "state": "running", "last_error": "", "enabled": True,
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True}
+    observer.follow_events.return_value = {"events": [], "next_cursor": 0, "latest_sequence_id": 0}
+
+    # Mock AI Overseer with fallback shape (no classification object)
+    mock_overseer = MagicMock()
+    mock_overseer.analyze_mission_requirements.return_value = {
+        "method": "fallback",
+        "mission_type": "custom",
+        "complexity": 3,  # top-level, not nested
+        "requires_coordination": True,
+    }
+
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda a, r, d: None,
+        self_audit_factory=lambda repo_root: MagicMock(),
+    )
+    # Skip bootstrap to prevent _init_unified_components from overwriting mock
+    supervisor._bootstrapped = True
+    supervisor._ai_overseer = mock_overseer
+
+    # Provide a pending task to trigger PLAN state (not idle)
+    pending_task = {"task_id": "test_002", "prompt": "test", "status": "pending"}
+    with patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+        mock_db.return_value.get_autonomous_tasks.return_value = [pending_task]
+        mock_db.return_value.assign_autonomous_task.return_value = True
+        result = supervisor.run_cycle()
+
+    ai_analysis = result["plan"].get("ai_analysis", {})
+    assert ai_analysis.get("complexity") == 3, "Fallback complexity=3 must not degrade to 0"
+    assert ai_analysis.get("requires_coordination") is True
+    assert ai_analysis.get("method") == "fallback"
+    assert "error" not in ai_analysis
+
+
+def test_plan_ai_analysis_exception_stores_error(tmp_path):
+    """Exception in AI Overseer stores error in ai_analysis, plan still succeeds."""
+    from unittest.mock import patch
+
+    broker = MagicMock()
+    broker.get_runtime_status.return_value = {
+        "registered": True, "running": True, "state": "running", "last_error": "", "enabled": True,
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True}
+    observer.follow_events.return_value = {"events": [], "next_cursor": 0, "latest_sequence_id": 0}
+
+    # Mock AI Overseer that raises
+    mock_overseer = MagicMock()
+    mock_overseer.analyze_mission_requirements.side_effect = RuntimeError("Holo unavailable")
+
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda a, r, d: None,
+        self_audit_factory=lambda repo_root: MagicMock(),
+    )
+    # Skip bootstrap to prevent _init_unified_components from overwriting mock
+    supervisor._bootstrapped = True
+    supervisor._ai_overseer = mock_overseer
+
+    # Provide a pending task to trigger PLAN state (not idle)
+    pending_task = {"task_id": "test_003", "prompt": "test", "status": "pending"}
+    with patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+        mock_db.return_value.get_autonomous_tasks.return_value = [pending_task]
+        mock_db.return_value.assign_autonomous_task.return_value = True
+        result = supervisor.run_cycle()
+
+    ai_analysis = result["plan"].get("ai_analysis", {})
+    assert "error" in ai_analysis
+    assert "Holo unavailable" in ai_analysis["error"]
+    # Plan should still complete even with AI analysis error
+    assert result["plan"]["action"] == "execute_autonomous_task"

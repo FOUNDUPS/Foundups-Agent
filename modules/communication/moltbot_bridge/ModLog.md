@@ -1,5 +1,41 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-23: AI Overseer integration in supervisor planning (P1)
+
+**Author**: 0102
+**WSP**: 22, 77, 97
+
+### Problem
+
+OpenClaw supervisor initialized AI Overseer at line 289 but `_plan()` at line 440
+was a thin dict builder that never used it. The autonomy gap assessment identified
+this as P1: "AI Overseer in PLAN is still open."
+
+Additionally, `analyze_mission_requirements()` returns two response shapes:
+- Normal: `{classification: {complexity: N}, patterns_detected, recommended_team}`
+- Fallback: `{complexity: 3, requires_coordination}` (no classification object)
+
+Initial integration assumed `classification.complexity` always exists, causing
+fallback responses to degrade complexity to 0.
+
+### Solution
+
+1. Integrated `ai_overseer.analyze_mission_requirements()` into `_plan()`:
+   - Gemma fast classification (50-100ms latency)
+   - Adds `ai_analysis` to plan with complexity, patterns, recommended_team
+   - Graceful fallback if AI Overseer unavailable
+
+2. Added `_normalize_ai_analysis()` helper to handle both response shapes:
+   - Extracts complexity from `classification.complexity` OR top-level `complexity`
+   - Normalizes patterns, recommended_team, method, requires_coordination
+
+### Verification
+
+- `pytest test_openclaw_supervisor.py test_openclaw_supervisor_p0.py` → 8 passed
+- Tests cover: normal shape, fallback shape, exception handling
+
+---
+
 ## 2026-03-23: OpenViking WSP 97 ecosystem watchlist integration
 
 **Author**: 0102
@@ -81,6 +117,27 @@ Do not adopt:
 - runtime ownership
 - migration/config authority
 - a second orchestration layer
+
+## 2026-03-23: Canonical native execution queue
+
+**Author**: 0102
+**WSP**: 22, 84, 97
+
+### Problem
+
+The repo had roadmap/backlog artifacts and autonomous tasks, but no canonical
+queue that locks prior WSP 97 decisions and audits repo drift before execution.
+
+### Solution
+
+Added `scripts/build_openclaw_native_execution_queue.py` and wired its status
+snapshot into the consolidated self-research report.
+
+Queue items now move through:
+- `ready`
+- `audit_required`
+
+based on whether owner modules changed after the backlog decision was recorded.
 
 ## 2026-03-22: P1 Supervisor Unification into OpenClawSupervisor
 
