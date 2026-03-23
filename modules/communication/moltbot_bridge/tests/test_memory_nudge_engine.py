@@ -240,12 +240,17 @@ class TestSelfResearchTrigger:
         assert events[0].priority == "P0"
 
     def test_detects_new_autonomous_tasks(self, tmp_workspace):
-        """Detects new autonomous tasks queued."""
+        """Detects new autonomous tasks queued (live schema: list)."""
         reports_dir = tmp_workspace["reports_dir"]
 
+        # Live schema: autonomous_tasks is a list
         status = {
             "update_candidates": [],
-            "autonomous_tasks": {"new_tasks_queued": 3},
+            "autonomous_tasks": [
+                {"task_id": "task_1", "title": "Review grants", "created": True, "priority": "P1"},
+                {"task_id": "task_2", "title": "Check ecosystem", "created": True, "priority": "P1"},
+                {"task_id": "task_3", "title": "Stabilize errors", "created": True, "priority": "P2"},
+            ],
         }
         (reports_dir / "openclaw_self_research_status.json").write_text(
             json.dumps(status), encoding="utf-8"
@@ -260,25 +265,25 @@ class TestSelfResearchTrigger:
         events = engine._scan_self_research_changes()
 
         assert len(events) == 1
-        assert "3 new autonomous task(s)" in events[0].title
+        assert "3 autonomous task(s)" in events[0].title
 
 
 class TestGrantWatchlistTrigger:
     """Tests for grant watchlist change detection."""
 
-    def test_detects_human_gate_required(self, tmp_workspace):
-        """Detects items requiring human gate."""
+    def test_detects_changed_grants(self, tmp_workspace):
+        """Detects changed grant pages requiring review."""
         reports_dir = tmp_workspace["reports_dir"]
 
+        # Live schema: changed_count, changed_items at top level
         watchlist = {
-            "items": [
-                {
-                    "id": "grant_001",
-                    "title": "Web3 Foundation Grant",
-                    "human_gate_required": True,
-                    "deadline": "2026-04-01",
-                },
-            ]
+            "generated_on": "2026-03-23T09:11:20.524604+00:00",
+            "watch_count": 15,
+            "changed_count": 3,
+            "error_count": 0,
+            "changed_items": ["BNB Chain Grants", "NEAR Ecosystem", "Starknet Grants"],
+            "error_items": [],
+            "items": [],
         }
         (reports_dir / "web3_grants_0102_watchlist_status.json").write_text(
             json.dumps(watchlist), encoding="utf-8"
@@ -294,8 +299,35 @@ class TestGrantWatchlistTrigger:
 
         assert len(events) == 1
         assert events[0].trigger_type == "grant_watchlist_change"
-        assert "Human gate required" in events[0].title
-        assert events[0].priority == "P0"
+        assert "3 grant page(s) changed" in events[0].title
+        assert events[0].priority == "P1"
+
+    def test_detects_refresh_errors(self, tmp_workspace):
+        """Detects watchlist refresh errors."""
+        reports_dir = tmp_workspace["reports_dir"]
+
+        watchlist = {
+            "changed_count": 0,
+            "error_count": 2,
+            "changed_items": [],
+            "error_items": ["Filecoin Grants", "Aleo Grants"],
+            "items": [],
+        }
+        (reports_dir / "web3_grants_0102_watchlist_status.json").write_text(
+            json.dumps(watchlist), encoding="utf-8"
+        )
+
+        engine = MemoryNudgeEngine(
+            repo_root=tmp_workspace["repo_root"],
+            memory_dir=tmp_workspace["memory_dir"],
+            reports_dir=reports_dir,
+        )
+
+        events = engine._scan_grant_watchlist_changes()
+
+        assert len(events) == 1
+        assert "2 grant watchlist error(s)" in events[0].title
+        assert events[0].priority == "P2"
 
 
 class TestWorktreePressureTrigger:

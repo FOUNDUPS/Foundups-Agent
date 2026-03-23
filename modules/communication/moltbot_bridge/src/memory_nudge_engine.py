@@ -10,11 +10,10 @@ Per HERMES_INSPIRED_FOUNDUPS_NATIVE_ROADMAP_2026-03-23:
 - dedupe to avoid noise
 
 Trigger types:
-- supervisor_escalation: verify failures, restart budget exhausted
+- supervisor_escalation: recurring error signatures in daemon self-audit
 - self_research_change: new autonomous tasks, update candidates
-- architecture_decision: decision phrases detected in outputs
-- worktree_pressure: repeated dirty worktree above threshold
-- grant_watchlist_change: human gate required soon
+- worktree_pressure: queue backlog above threshold
+- grant_watchlist_change: grant pages changed, need review
 
 WSP Compliance:
 - WSP 22: Update ModLog after significant changes
@@ -191,10 +190,11 @@ class MemoryNudgeEngine:
     # ------------------------------------------------------------------ #
 
     def _scan_supervisor_escalations(self) -> List[NudgeEvent]:
-        """Detect supervisor verify failures or escalations."""
+        """Detect recurring error signatures from daemon self-audit."""
         events: List[NudgeEvent] = []
 
         # Check daemon self-audit escalations
+        # Live schema: {signature, event_count, recommended_fix, dispatch_result, ...}
         escalations_path = (
             self.repo_root
             / "modules/infrastructure/wre_core/reports/daemon_self_audit_escalations.jsonl"
@@ -202,19 +202,27 @@ class MemoryNudgeEngine:
         if escalations_path.exists():
             try:
                 lines = escalations_path.read_text(encoding="utf-8").strip().split("\n")
-                # Only check last 5 escalations
-                for line in lines[-5:]:
+                # Only check last 10 escalations, trigger on high event_count
+                for line in lines[-10:]:
                     if not line.strip():
                         continue
                     record = json.loads(line)
-                    if record.get("severity") in ("critical", "high"):
+                    event_count = record.get("event_count", 0)
+                    signature = record.get("signature", "unknown")
+
+                    # Trigger if event_count >= 5 (recurring issue)
+                    if event_count >= 5:
                         events.append(NudgeEvent(
                             trigger_type="supervisor_escalation",
-                            title=f"Escalation: {record.get('signature', 'unknown')[:40]}",
-                            summary=record.get("description", "Supervisor escalation detected.")[:200],
+                            title=f"Recurring issue: {signature[:50]}",
+                            summary=f"Error signature seen {event_count} times. Recommended: {record.get('recommended_fix', 'investigate')}",
                             provenance=str(escalations_path.relative_to(self.repo_root)),
-                            priority="P0" if record.get("severity") == "critical" else "P1",
-                            details={"severity": record.get("severity"), "count": record.get("count", 1)},
+                            priority="P1" if event_count >= 10 else "P2",
+                            details={
+                                "event_count": event_count,
+                                "recommended_fix": record.get("recommended_fix"),
+                                "dispatch_result": record.get("dispatch_result"),
+                            },
                         ))
             except Exception as exc:
                 logger.debug("Failed to scan escalations: %s", exc)
@@ -249,22 +257,26 @@ class MemoryNudgeEngine:
                 ))
 
         # Check new autonomous tasks
-        autonomous_section = data.get("autonomous_tasks", {})
-        new_tasks = autonomous_section.get("new_tasks_queued", 0)
-        if new_tasks > 0:
-            events.append(NudgeEvent(
-                trigger_type="self_research_change",
-                title=f"{new_tasks} new autonomous task(s) queued",
-                summary="Self-research identified new autonomous tasks for OpenClaw execution.",
-                provenance=str(status_path.relative_to(self.repo_root)),
-                priority="P1",
-                details={"new_tasks": new_tasks},
-            ))
+        # Live schema: autonomous_tasks is a list of {task_id, title, created, priority}
+        autonomous_tasks = data.get("autonomous_tasks", [])
+        if isinstance(autonomous_tasks, list) and len(autonomous_tasks) > 0:
+            # Count newly created tasks
+            new_tasks = [t for t in autonomous_tasks if t.get("created")]
+            if new_tasks:
+                task_titles = [t.get("title", "unknown")[:40] for t in new_tasks[:3]]
+                events.append(NudgeEvent(
+                    trigger_type="self_research_change",
+                    title=f"{len(new_tasks)} autonomous task(s) queued",
+                    summary=f"Self-research queued: {', '.join(task_titles)}",
+                    provenance=str(status_path.relative_to(self.repo_root)),
+                    priority="P1",
+                    details={"task_count": len(new_tasks), "tasks": task_titles},
+                ))
 
         return events
 
     def _scan_grant_watchlist_changes(self) -> List[NudgeEvent]:
-        """Detect grant watchlist items requiring human gate soon."""
+        """Detect grant watchlist changes requiring review."""
         events: List[NudgeEvent] = []
 
         watchlist_path = self.reports_dir / "web3_grants_0102_watchlist_status.json"
@@ -276,26 +288,33 @@ class MemoryNudgeEngine:
         except Exception:
             return events
 
-        # Check items with human_gate_required or deadline_approaching
-        for item in data.get("items", [])[:5]:
-            if item.get("human_gate_required"):
-                events.append(NudgeEvent(
-                    trigger_type="grant_watchlist_change",
-                    title=f"Human gate required: {item.get('title', 'unknown')[:40]}",
-                    summary=f"Grant item requires human review before {item.get('deadline', 'soon')}.",
-                    provenance=str(watchlist_path.relative_to(self.repo_root)),
-                    priority="P0",
-                    details={"deadline": item.get("deadline"), "grant_id": item.get("id")},
-                ))
-            elif item.get("deadline_days", 999) <= 7:
-                events.append(NudgeEvent(
-                    trigger_type="grant_watchlist_change",
-                    title=f"Deadline approaching: {item.get('title', 'unknown')[:40]}",
-                    summary=f"Grant deadline in {item.get('deadline_days', '?')} days.",
-                    provenance=str(watchlist_path.relative_to(self.repo_root)),
-                    priority="P1",
-                    details={"deadline_days": item.get("deadline_days")},
-                ))
+        # Live schema: {changed_count, error_count, changed_items, error_items, items}
+        changed_count = data.get("changed_count", 0)
+        error_count = data.get("error_count", 0)
+        changed_items = data.get("changed_items", [])
+        error_items = data.get("error_items", [])
+
+        # Trigger on changed grants (need review)
+        if changed_count > 0:
+            events.append(NudgeEvent(
+                trigger_type="grant_watchlist_change",
+                title=f"{changed_count} grant page(s) changed",
+                summary=f"Changed: {', '.join(changed_items[:3])}{'...' if changed_count > 3 else ''}. Review for new opportunities.",
+                provenance=str(watchlist_path.relative_to(self.repo_root)),
+                priority="P1",
+                details={"changed_count": changed_count, "changed_items": changed_items[:5]},
+            ))
+
+        # Trigger on refresh errors (may miss opportunities)
+        if error_count > 0:
+            events.append(NudgeEvent(
+                trigger_type="grant_watchlist_change",
+                title=f"{error_count} grant watchlist error(s)",
+                summary=f"Failed to refresh: {', '.join(error_items[:3])}. May miss new opportunities.",
+                provenance=str(watchlist_path.relative_to(self.repo_root)),
+                priority="P2",
+                details={"error_count": error_count, "error_items": error_items[:5]},
+            ))
 
         return events
 
