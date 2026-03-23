@@ -1,3 +1,20 @@
+## 2026-03-23: Memory Nudge Engine (P0)
+- Command: `pytest modules/communication/moltbot_bridge/tests/test_memory_nudge_engine.py -q`
+- Status: PASS
+- Result: `16 passed` (audit-hardened)
+- Coverage:
+  - NudgeEvent: signature auto-generation, stability, uniqueness
+  - MemoryNudgeEngine: creates note on qualifying event
+  - Deduplication: skips repeated events, loads existing signatures
+  - Low-signal filter: ignores P3/P4 priority items
+  - Provenance: note includes source artifact path
+  - Self-research trigger: P0/P1 update candidates, new autonomous tasks
+  - Grant watchlist trigger: human gate required, deadline approaching
+  - Worktree pressure trigger: high audit backlog
+  - Convenience functions: scan_nudge_events, emit_memory_nudges
+
+---
+
 ## 2026-03-23: Session recall search foundation (breadcrumb integration)
 - Command: `pytest modules/communication/moltbot_bridge/tests/test_openclaw_memory_queries.py -q`
 - Status: PASS
