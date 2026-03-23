@@ -1,5 +1,47 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-23: Memory Nudge Engine (P0)
+
+**Author**: 0102
+**WSP**: 22, 60, 97
+
+### Problem
+
+High-value events (escalations, new autonomous tasks, grant deadlines, worktree
+pressure) were being lost to logs instead of captured as operator-readable memory.
+The system relied on humans remembering to write memory notes.
+
+### Solution
+
+Created `memory_nudge_engine.py` that automatically captures high-value events:
+
+1. **Trigger types**:
+   - `supervisor_escalation`: verify failures, critical/high severity escalations
+   - `self_research_change`: P0/P1 update candidates, new autonomous tasks
+   - `grant_watchlist_change`: human gate required, deadline approaching
+   - `worktree_pressure`: queue backlog (5+ items awaiting audit)
+
+2. **Deduplication**:
+   - Stable signature from `trigger_type:title:provenance`
+   - Loads existing nudge signatures from memory directory
+   - Same event only creates one note
+
+3. **Note format**:
+   - Concise markdown with priority, trigger, timestamp, provenance
+   - Details section with structured JSON when relevant
+   - Auto-generated signature footer
+
+### Files Added
+
+- `src/memory_nudge_engine.py`: 350 lines, MemoryNudgeEngine class
+- `tests/test_memory_nudge_engine.py`: 15 tests
+
+### Verification
+
+- `pytest test_memory_nudge_engine.py` → 15 passed
+
+---
+
 ## 2026-03-23: Session recall search foundation (breadcrumb integration)
 
 **Author**: 0102
