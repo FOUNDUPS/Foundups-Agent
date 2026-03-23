@@ -382,21 +382,42 @@ async def run_schema(schema_id: str) -> Dict[str, Any]:
                 from modules.platform_integration.antifafm_broadcaster.skillz.gcc_shipping_tracker.executor import (
                     rotation_daemon as gcc_daemon
                 )
-                result = await gcc_daemon(standalone=False)
+                # use_screenshots=True for 012 behavior (anti-WAF pattern)
+                result = await gcc_daemon(standalone=False, use_screenshots=True)
                 duration = (datetime.now(timezone.utc) - start_time).total_seconds()
                 emit_event("schema_completed", schema_id=schema_id, duration_sec=duration, success=True)
                 return result
 
             elif schema_id == "video":
-                # VIDEO schema: Show video grid for 10 minutes
-                # Videos rotate based on OBS video sources (video1-9)
-                logger.info("[ROTATOR] Video schema: showing video grid")
-                # Video sources are already visible from configure_schema_visibility
-                # Wait for schema duration, videos play from OBS
-                await asyncio.sleep(SCHEMA_DURATION_SEC)
+                # VIDEO schema: Rotate through video sources (video1-9)
+                # Each video shown for ~66 seconds (600s / 9 videos)
+                logger.info("[ROTATOR] Video schema: starting video rotation")
+
+                video_interval = SCHEMA_DURATION_SEC // len(VIDEO_SOURCES)  # ~66s per video
+                elapsed = 0.0
+
+                for i, video_src in enumerate(VIDEO_SOURCES):
+                    # Check if schema time exceeded
+                    if elapsed >= SCHEMA_DURATION_SEC:
+                        break
+
+                    # Hide all videos first
+                    for src in VIDEO_SOURCES:
+                        await set_source_visibility(src, False)
+                        await set_source_mute(src, True)
+
+                    # Show current video
+                    await set_source_visibility(video_src, True)
+                    await set_source_mute(video_src, False)
+                    logger.info(f"[ROTATOR] Video {i+1}/{len(VIDEO_SOURCES)}: {video_src}")
+
+                    # Wait for video interval
+                    await asyncio.sleep(video_interval)
+                    elapsed += video_interval
+
                 duration = (datetime.now(timezone.utc) - start_time).total_seconds()
                 emit_event("schema_completed", schema_id=schema_id, duration_sec=duration, success=True)
-                return {"schema": schema_id, "elapsed_sec": duration}
+                return {"schema": schema_id, "elapsed_sec": duration, "videos_shown": len(VIDEO_SOURCES)}
 
             elif schema_id == "news":
                 # NEWS schema: Show news ticker overlay

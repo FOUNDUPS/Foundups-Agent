@@ -18,20 +18,20 @@
       "sha256": "cfb27fe2a0cdb101cdf5f2281758d148771f114dc2b5b9b9ad9d4e2ba58d3b2b"
     },
     {
+      "path": "openclaw-grants/SKILL.md",
+      "sha256": "f1d85a4b297d914803e103801d212fce078e298bc546345fc62317226bbc57c7"
+    },
+    {
       "path": "openclaw-monitor/SKILL.md",
-      "sha256": "cbe4f1ed247e13d8d986e5defdd84db22c0406e492635e55a2f426b0e638f565"
+      "sha256": "f0ee5dae60a790d67773a21d24fdd0e2386c56eead1ceb3ca00dc14457d8e992"
     },
     {
       "path": "openclaw-schedule/SKILL.md",
       "sha256": "bac625d8493417105693111af19ca3a2f3550bd8c250d53121daedf08a0d99f1"
     },
     {
-      "path": "openclaw-grants/SKILL.md",
-      "sha256": "c43c2e87370b8bf95b84fb0a42780e274188c0f0f1c0df5974fe6a29b167b7f1"
-    },
-    {
       "path": "pqn-research/SKILL.md",
-      "sha256": "9b6987f1474840524e6935cee735c87c42360a8b04c2edf436ad06211645f10c"
+      "sha256": "52c9c22e1dbc2c56f96b25f1f1bca5e60737bc4d745bc3c1177d54c364a2c0a5"
     }
   ]
 }

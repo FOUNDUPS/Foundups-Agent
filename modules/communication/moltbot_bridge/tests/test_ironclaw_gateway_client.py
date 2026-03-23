@@ -63,3 +63,31 @@ def test_health_returns_diagnostics_when_all_probes_fail():
     assert "/api/health=404" in detail
     assert "/health=error:Exception" in detail
     assert "/v1/models=503" in detail
+
+
+def test_startup_probe_accepts_lm_studio_fallback(monkeypatch):
+    client = IronClawGatewayClient()
+    monkeypatch.setenv("SIM_QWEN_BACKEND", "local")
+    monkeypatch.setenv("SIM_QWEN_BACKEND_URL", "http://127.0.0.1:1234")
+
+    with patch.object(client, "health", return_value=(False, "health probes failed")):
+        with patch("requests.get", return_value=_mock_response(True, 200)):
+            status = client.startup_probe()
+
+    assert status["ok"] is True
+    assert status["backend"] == "lm_studio"
+    assert "lm_studio_fallback_ok" in status["detail"]
+
+
+def test_startup_probe_returns_remediation_when_all_backends_are_down(monkeypatch):
+    client = IronClawGatewayClient()
+    monkeypatch.setenv("SIM_QWEN_BACKEND", "local")
+    monkeypatch.delenv("IRONCLAW_START_CMD", raising=False)
+
+    with patch.object(client, "health", return_value=(False, "health probes failed")):
+        with patch("requests.get", side_effect=Exception("offline")):
+            status = client.startup_probe()
+
+    assert status["ok"] is False
+    assert status["backend"] is None
+    assert any("Set IRONCLAW_START_CMD" in item for item in status["remediation"])

@@ -1,23 +1,23 @@
 {
-  "updated_at": "2026-03-12T06:16:49.527219",
+  "updated_at": "2026-03-18T17:34:18.404179",
   "signature": {
     "brain_dir": "C:\\Users\\user\\.gemini\\antigravity\\brain",
-    "conversation_count": 30,
-    "markdown_files": 107,
-    "revision_files": 517,
-    "latest_mtime": 1773244567.502564
+    "conversation_count": 31,
+    "markdown_files": 111,
+    "revision_files": 532,
+    "latest_mtime": 1773801095.304469
   },
   "summary": {
-    "total_artifacts": 107,
+    "total_artifacts": 111,
     "by_type": {
-      "analysis": 38,
+      "analysis": 41,
       "plan": 26,
-      "task": 26,
+      "task": 27,
       "walkthrough": 17
     },
-    "total_revisions": 517,
+    "total_revisions": 532,
     "dpo_pairs": 24,
     "sft_examples": 17
   },
-  "conversations": 30
+  "conversations": 31
 }

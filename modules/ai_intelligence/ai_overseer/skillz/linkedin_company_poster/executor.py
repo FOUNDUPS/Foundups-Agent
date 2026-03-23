@@ -69,29 +69,29 @@ def list_accounts() -> dict:
 
 
 def get_browser():
-    """Get or create LinkedIn browser session (Edge debug port 9223)."""
+    """Get or create LinkedIn browser session (Chrome debug port 9222)."""
     from selenium import webdriver
-    from selenium.webdriver.edge.options import Options
+    from selenium.webdriver.chrome.options import Options
 
-    # Primary: Connect to existing Edge debug session (port 9223)
+    # Primary: Connect to existing Chrome debug session (port 9222)
     try:
         options = Options()
-        options.add_experimental_option("debuggerAddress", "127.0.0.1:9223")
-        driver = webdriver.Edge(options=options)
-        logger.info("[BROWSER] Connected to Edge debug port 9223")
+        options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
+        driver = webdriver.Chrome(options=options)
+        logger.info("[BROWSER] Connected to Chrome debug port 9222")
         return driver
     except Exception as e:
-        logger.warning(f"[BROWSER] Edge debug connection failed: {e}")
+        logger.warning(f"[BROWSER] Chrome debug connection failed: {e}")
 
-    # Fallback: Use BrowserManager
+    # Fallback: Use BrowserManager with Chrome
     try:
         from modules.infrastructure.foundups_selenium.src.browser_manager import get_browser_manager
         manager = get_browser_manager()
-        browser = manager.get_browser("edge", f"linkedin_{COMPANY_ID}")
+        browser = manager.get_browser("chrome", f"linkedin_{COMPANY_ID}")
         return browser
     except Exception as e2:
         logger.error(f"[BROWSER] All connection methods failed: {e2}")
-        raise RuntimeError("Cannot connect to Edge browser for LinkedIn")
+        raise RuntimeError("Cannot connect to Chrome browser for LinkedIn")
 
 
 def format_post(content: str, signature: str = SIGNATURE) -> str:

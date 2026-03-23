@@ -30,6 +30,10 @@ from typing import Dict, Any, List, Optional
 
 logger = logging.getLogger(__name__)
 
+# Screenshot cache directory (012 behavior - fetch once, display cached)
+SCREENSHOT_CACHE_DIR = Path(__file__).parent / "screenshot_cache"
+SCREENSHOT_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
 # View rotation interval (2 minutes per view)
 VIEW_INTERVAL_SEC = 120
 
@@ -275,6 +279,124 @@ def is_trusted_domain(url: str) -> bool:
     return any(domain in url.lower() for domain in TRUSTED_DOMAINS)
 
 
+async def capture_map_screenshot(
+    url: str,
+    view_name: str = "map",
+    wait_seconds: int = 8,
+    width: int = 1920,
+    height: int = 1080,
+) -> Optional[Path]:
+    """
+    Capture screenshot of shipping map using headless browser.
+
+    012 BEHAVIOR PATTERN:
+    - Single request to fetch map (not continuous iframe refresh)
+    - Cache screenshot locally
+    - OBS displays cached image (no repeated requests to site)
+    - Reduces Cloudflare/WAF detection probability
+
+    Args:
+        url: Map URL to screenshot
+        view_name: Name for cached file
+        wait_seconds: Time to wait for map tiles to load
+        width: Screenshot width
+        height: Screenshot height
+
+    Returns:
+        Path to screenshot file, or None on failure
+    """
+    screenshot_path = SCREENSHOT_CACHE_DIR / f"{view_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
+
+    try:
+        from selenium import webdriver
+        from selenium.webdriver.chrome.options import Options
+        from selenium.webdriver.chrome.service import Service
+
+        logger.info(f"[GCC-SCREENSHOT] Capturing {view_name}: {url[:50]}...")
+
+        # Use undetected-chromedriver if available (anti-detection)
+        try:
+            import undetected_chromedriver as uc
+            options = uc.ChromeOptions()
+            options.add_argument("--headless=new")
+            options.add_argument(f"--window-size={width},{height}")
+            options.add_argument("--disable-gpu")
+            options.add_argument("--no-sandbox")
+            driver = uc.Chrome(options=options)
+            logger.info("[GCC-SCREENSHOT] Using undetected-chromedriver")
+        except ImportError:
+            # Fallback to standard Chrome
+            options = Options()
+            options.add_argument("--headless=new")
+            options.add_argument(f"--window-size={width},{height}")
+            options.add_argument("--disable-gpu")
+            options.add_argument("--no-sandbox")
+            driver = webdriver.Chrome(options=options)
+            logger.info("[GCC-SCREENSHOT] Using standard Chrome (consider installing undetected-chromedriver)")
+
+        try:
+            # Human-like delay before loading
+            import random
+            await asyncio.sleep(random.uniform(1.0, 3.0))
+
+            driver.get(url)
+
+            # Wait for map tiles to load (critical for shipping maps)
+            await asyncio.sleep(wait_seconds)
+
+            # Take screenshot
+            driver.save_screenshot(str(screenshot_path))
+            logger.info(f"[GCC-SCREENSHOT] Saved: {screenshot_path.name}")
+
+            # Clean old screenshots (keep last 5)
+            await _cleanup_old_screenshots(view_name, keep=5)
+
+            return screenshot_path
+
+        finally:
+            driver.quit()
+
+    except ImportError as e:
+        logger.warning(f"[GCC-SCREENSHOT] Selenium not available: {e}")
+        return None
+    except Exception as e:
+        logger.error(f"[GCC-SCREENSHOT] Capture failed: {e}")
+        return None
+
+
+async def _cleanup_old_screenshots(view_prefix: str, keep: int = 5):
+    """Remove old screenshots, keeping only the most recent N."""
+    try:
+        screenshots = sorted(
+            SCREENSHOT_CACHE_DIR.glob(f"{view_prefix}_*.png"),
+            key=lambda p: p.stat().st_mtime,
+            reverse=True
+        )
+        for old_screenshot in screenshots[keep:]:
+            old_screenshot.unlink()
+            logger.debug(f"[GCC-SCREENSHOT] Cleaned: {old_screenshot.name}")
+    except Exception as e:
+        logger.warning(f"[GCC-SCREENSHOT] Cleanup failed: {e}")
+
+
+def get_latest_screenshot(view_name: str = "map") -> Optional[Path]:
+    """Get most recent screenshot for a view."""
+    screenshots = sorted(
+        SCREENSHOT_CACHE_DIR.glob(f"{view_name}_*.png"),
+        key=lambda p: p.stat().st_mtime,
+        reverse=True
+    )
+    return screenshots[0] if screenshots else None
+
+
+def screenshot_to_data_uri(screenshot_path: Path) -> str:
+    """Convert screenshot to data URI for OBS browser source."""
+    with open(screenshot_path, "rb") as f:
+        import base64
+        data = base64.b64encode(f.read()).decode()
+    return f"data:image/png;base64,{data}"
+
+
 async def check_url_reachable(url: str, timeout: float = 10.0) -> bool:
     """Check if a URL is reachable (basic HTTP HEAD check)."""
     # Skip check for trusted shipping domains (they block HEAD but work in browser)
@@ -369,7 +491,7 @@ def clear_stakeholder_override():
         logger.info("[GCC] Override signal cleared")
 
 
-async def rotation_daemon(standalone: bool = True):
+async def rotation_daemon(standalone: bool = True, use_screenshots: bool = False):
     """
     Boot layer daemon - 2-minute view rotation within 10-minute schema slot.
 
@@ -379,11 +501,13 @@ async def rotation_daemon(standalone: bool = True):
 
     Args:
         standalone: If True, runs indefinitely. If False, returns after schema duration.
+        use_screenshots: If True, capture screenshots instead of direct URLs (012 behavior - anti-WAF)
 
     Returns:
         Dict with schema result (elapsed time, cycles completed, override status)
     """
-    logger.info("[GCC-DAEMON] Starting GCC schema (2-min view rotation)")
+    mode = "SCREENSHOT" if use_screenshots else "DIRECT"
+    logger.info(f"[GCC-DAEMON] Starting GCC schema ({mode} mode, 2-min view rotation)")
     logger.info(f"[GCC-DAEMON] Schema duration: {SCHEMA_DURATION_SEC}s, View interval: {VIEW_INTERVAL_SEC}s")
 
     # Rotation views - VesselFinder preferred (no cookie popup, ships not planes)
@@ -432,14 +556,31 @@ async def rotation_daemon(standalone: bool = True):
         logger.info(f"[GCC-DAEMON] View {cycle_count}: {view_name} (elapsed: {elapsed:.0f}s)")
 
         # Update OBS browser source
-        obs_result = await update_obs_browser_source(view_url)
-        if obs_result.get("success"):
-            if obs_result.get("is_fallback"):
-                logger.info("[GCC-DAEMON] Showing Coming Soon fallback")
+        if use_screenshots:
+            # 012 BEHAVIOR: Capture screenshot, display cached image (anti-WAF)
+            screenshot_path = await capture_map_screenshot(view_url, view_name)
+            if screenshot_path and screenshot_path.exists():
+                # Convert to data URI for OBS browser source
+                data_uri = screenshot_to_data_uri(screenshot_path)
+                obs_result = await update_obs_browser_source(data_uri, fallback_on_fail=False)
+                if obs_result.get("success"):
+                    logger.info(f"[GCC-DAEMON] OBS updated with screenshot: {view_name}")
+                else:
+                    logger.warning(f"[GCC-DAEMON] OBS update failed: {obs_result.get('error')}")
             else:
-                logger.info(f"[GCC-DAEMON] OBS updated: {view_name}")
+                # Screenshot failed - fall back to Coming Soon
+                logger.warning(f"[GCC-DAEMON] Screenshot failed for {view_name}, showing fallback")
+                obs_result = await show_coming_soon()
         else:
-            logger.warning(f"[GCC-DAEMON] OBS update failed: {obs_result.get('error')}")
+            # Direct URL mode (original behavior)
+            obs_result = await update_obs_browser_source(view_url)
+            if obs_result.get("success"):
+                if obs_result.get("is_fallback"):
+                    logger.info("[GCC-DAEMON] Showing Coming Soon fallback")
+                else:
+                    logger.info(f"[GCC-DAEMON] OBS updated: {view_name}")
+            else:
+                logger.warning(f"[GCC-DAEMON] OBS update failed: {obs_result.get('error')}")
 
         # Check alerts
         alerts = await check_alerts()
@@ -489,6 +630,7 @@ def main():
         help="Action to perform"
     )
     parser.add_argument("--daemon", action="store_true", help="Run boot layer daemon (10-min rotation)")
+    parser.add_argument("--screenshot", action="store_true", help="Use screenshot mode (012 behavior - anti-WAF)")
     parser.add_argument("--map", action="store_true", help="Open live map in browser")
     parser.add_argument("--tankers", action="store_true", help="Filter for oil tankers")
     parser.add_argument("--alerts", action="store_true", help="Show maritime alerts")
@@ -526,9 +668,13 @@ def main():
 
     # Daemon mode
     if args.daemon or args.action == "daemon":
-        print("[GCC] Starting boot layer daemon...")
+        if args.screenshot:
+            print("[GCC] Starting boot layer daemon (SCREENSHOT mode - 012 behavior)...")
+            print("[GCC] This mode captures screenshots to avoid WAF detection")
+        else:
+            print("[GCC] Starting boot layer daemon...")
         print("[GCC] Press Ctrl+C or use --override to stop")
-        asyncio.run(rotation_daemon())
+        asyncio.run(rotation_daemon(use_screenshots=args.screenshot))
         return
 
     # Regular skill execution

@@ -1,18 +1,18 @@
 # Brain Artifact Index
 
-**Scan Time**: 2026-03-12T06:16:45.665415
-**Conversations Scanned**: 30
-**Conversations with Artifacts**: 26
-**Total Artifacts**: 107
-**Total Revision History**: 517 revisions
+**Scan Time**: 2026-03-18T17:34:13.325879
+**Conversations Scanned**: 31
+**Conversations with Artifacts**: 27
+**Total Artifacts**: 111
+**Total Revision History**: 532 revisions
 **DPO Pairs**: 24
 **SFT Examples**: 17
 
 ## Artifacts by Type
 
-- **analysis**: 38
+- **analysis**: 41
+- **task**: 27
 - **plan**: 26
-- **task**: 26
 - **walkthrough**: 17
 
 ---
@@ -137,11 +137,13 @@
 
 ### `9ff4ef18-9ce5-4d03-b705-0efd1f209fd7`
 
+- **analysis**: `0102_lead_dev_creative_prompt.md` (1841 bytes) (2 revisions)
+- **analysis**: `0102_lead_dev_prompt.md` (2900 bytes) (2 revisions)
 - **analysis**: `claw_ecosystem_blockchain_creative_audit.md` (11015 bytes) (1 revisions)
 - **plan**: `implementation_plan.md` (6020 bytes) (1 revisions)
 - **analysis**: `openclaw_ecosystem_wsp15_evaluation.md` (10155 bytes) (1 revisions)
-- **task**: `task.md` (1316 bytes) (3 revisions)
-- **walkthrough**: `walkthrough.md` (4135 bytes) (1 revisions)
+- **task**: `task.md` (1494 bytes) (5 revisions)
+- **walkthrough**: `walkthrough.md` (7533 bytes) (4 revisions)
 - **analysis**: `wsp97_forward_docs_audit.md` (4420 bytes) (1 revisions)
 - **training**: 0 DPO / 1 SFT
 
@@ -181,6 +183,11 @@
 - **task**: `task.md` (1343 bytes) (3 revisions)
 - **walkthrough**: `walkthrough.md` (4907 bytes) (1 revisions)
 - **training**: 1 DPO / 1 SFT
+
+### `d39720ed-de2e-4177-87b5-c4c036ee668a`
+
+- **analysis**: `holoindex_remediation_prompt.md` (1496 bytes) (1 revisions)
+- **task**: `task.md` (444 bytes) (5 revisions)
 
 ### `d8ed2acb-cd93-471c-bc8f-1b76343e5e85`
 

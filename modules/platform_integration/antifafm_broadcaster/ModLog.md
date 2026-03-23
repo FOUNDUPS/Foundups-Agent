@@ -1,5 +1,75 @@
 # antifaFM Broadcaster - ModLog
 
+## V3.2.7 - Fix Boot Layer Integration (2026-03-22)
+
+**Context**: Stream showing "You have been blocked" (MarineTraffic WAF) and videos not rotating (always same video).
+
+**Root Causes** (WSP 97 Hard Think analysis):
+1. **GCC schema**: `gcc_daemon()` called without `use_screenshots=True` - screenshot mode not wired
+2. **Video schema**: Showed ALL video sources (video1-9) simultaneously, no actual rotation
+
+**Fixes**:
+
+1. **GCC Screenshot Mode Wired** (`boot_layer_rotator/executor.py:385`):
+   ```python
+   # Before:
+   result = await gcc_daemon(standalone=False)  # Missing screenshot mode!
+
+   # After:
+   result = await gcc_daemon(standalone=False, use_screenshots=True)  # Anti-WAF
+   ```
+
+2. **Video Rotation Implemented** (`boot_layer_rotator/executor.py:390-418`):
+   ```python
+   # Before: Show all videos, sleep 10 minutes (no rotation)
+   # After: Cycle through video1-9, ~66 seconds each
+   for i, video_src in enumerate(VIDEO_SOURCES):
+       await set_source_visibility(video_src, True)  # Show current
+       await asyncio.sleep(video_interval)  # 66s per video
+   ```
+
+**Test Results**: 38/38 PASSED
+- `test_boot_layer_rotator.py`: 16 passed
+- `test_gcc_shipping_tracker.py`: 22 passed
+
+**WSP Compliance**: WSP 97 (CoT/CoR verification gates)
+
+---
+
+## V3.2.6 - Screenshot Mode Anti-WAF (2026-03-22)
+
+**Context**: MarineTraffic.com blocked by Cloudflare WAF - showing "You have been blocked" page during schema rotation.
+
+**Root Cause**: Repeated automated requests from OBS browser source (every 2 minutes) triggered Cloudflare anti-bot protection.
+
+**Solution** - 012 Behavior Pattern:
+1. **Screenshot capture mode** (`--screenshot` flag): Captures map screenshot via headless browser
+2. **Single request**: One fetch per view (not continuous iframe refresh)
+3. **Local cache**: Screenshots stored in `screenshot_cache/` directory
+4. **OBS displays cached image**: Data URI of screenshot, not live URL
+5. **Human-like timing**: Random delays (1-3s) before loading pages
+
+**Usage**:
+```bash
+# Anti-WAF mode (recommended when blocked)
+python executor.py --daemon --screenshot
+
+# Original mode (direct URL embedding)
+python executor.py --daemon
+```
+
+**New Functions**:
+- `capture_map_screenshot(url, view_name)` - Headless Chrome screenshot
+- `get_latest_screenshot(view_name)` - Get cached screenshot path
+- `screenshot_to_data_uri(path)` - Convert PNG to data URI for OBS
+
+**Files Modified**:
+- `gcc_shipping_tracker/executor.py` - Screenshot capture + caching
+
+**WSP Compliance**: WSP 91 (Observability), YouTube Anti-Detection Pattern (2025-12-15)
+
+---
+
 ## V3.2.5 - Fix Schema Rotation & GCC Tracker (2026-03-19)
 
 **Context**: Boot layer rotation not working - GCC showing planes/cookie popup, video not rotating, browser not fullscreen.

@@ -1,7 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-24/7 Supervisor State Machine - Layer 2: Operational Handlers
+24/7 Supervisor State Machine - DONOR/PROTOTYPE
+
+⚠️  DEPRECATION NOTICE (2026-03-22):
+    This module is a DONOR/PROTOTYPE, not the canonical supervisor.
+    The canonical supervisor is: modules/communication/moltbot_bridge/src/openclaw_supervisor.py
+
+    Key behaviors from this file have been unified into OpenClawSupervisor:
+    - AI Overseer integration (PLAN)
+    - PatternMemory (REMEMBER)
+    - LibidoMonitor/Gemma fidelity (VERIFY)
+    - SupervisorMetrics telemetry
+
+    DO NOT use this module for production. Use OpenClawSupervisor instead.
+    This file is preserved for reference and potential future backports.
 
 WSP Compliance:
 - WSP 49: Module structure
@@ -242,6 +255,17 @@ class Supervisor24x7:
             logger.info("[SUPERVISOR] BOOT: LibidoMonitor loaded")
         except (ImportError, Exception) as e:
             logger.warning(f"[SUPERVISOR] BOOT: LibidoMonitor unavailable: {e}")
+
+        # Wire GitHub Orchestrator to FAM (WSP 103)
+        try:
+            from modules.infrastructure.github_orchestrator import wire_github_to_fam
+
+            if wire_github_to_fam():
+                logger.info("[SUPERVISOR] BOOT: GitHub Orchestrator wired to FAM")
+            else:
+                logger.warning("[SUPERVISOR] BOOT: GitHub Orchestrator wiring failed")
+        except ImportError as e:
+            logger.warning(f"[SUPERVISOR] BOOT: GitHub Orchestrator unavailable: {e}")
 
         self._transition_to(SupervisorState.PREFLIGHT)
 

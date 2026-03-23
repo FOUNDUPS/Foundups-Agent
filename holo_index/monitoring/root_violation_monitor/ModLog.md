@@ -2,6 +2,24 @@
 
 **WSP 22 Compliant** | **Change Tracking** | **Chronological Documentation**
 
+## 2026-03-23: Root Script Routing + Canonical Root Config Allowlist
+
+**WSP Protocols Referenced:**
+- **WSP 85**: Root Protection
+- **WSP 50**: Diagnose Before Mutation
+- **WSP 77**: Agent Coordination
+- **WSP 22**: ModLog
+
+**Changes Made:**
+- Expanded the root allowlist to include real repo-level config files already used by this codebase, including Firebase, Firestore, MCP, Pyright, and package manifests.
+- Extended deterministic routing so root spills like `check_*.py`, `approve_*.py`, `get_*.py`, `fix_*.py`, and launcher shell scripts resolve into the existing `scripts/` surface.
+- Allowed script auto-correction for non-Python script types when a deterministic destination exists.
+
+**Impact Analysis:**
+- Reduces false positives for legitimate root config files.
+- Makes AI Overseer root auto-correct materially more useful for the current repo shape.
+- Prevents `check_*` and `fix_*` style vibecoded files from lingering in root when the monitor is used.
+
 ## [U+1F300] Module Creation & Initial Implementation
 
 ### **2025-10-15: PHASE 1 COMPLETE - Initial Release** [U+1F3C6]

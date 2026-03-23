@@ -29,6 +29,7 @@ from .voice_memory import VoiceMemory
 from .decision_policy import DecisionPolicy
 from .comment_drafter import CommentDrafter, LocalLLM
 from .style_guardrails import StyleGuardrails, get_nemo_guardrails
+from .twin_boot import boot_digital_twin, DigitalTwinBoot, ActivatedTwin
 
 __all__ = [
     # Trajectory logging
@@ -53,6 +54,10 @@ __all__ = [
     "LocalLLM",
     "StyleGuardrails",
     "get_nemo_guardrails",
+    # WSP_00 Boot (v0.5.0)
+    "boot_digital_twin",
+    "DigitalTwinBoot",
+    "ActivatedTwin",
 ]
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"

@@ -4,9 +4,96 @@
 
 | Test File | Status | Last Run | Purpose |
 |-----------|--------|----------|---------|
-| `test_obs_controller_startup.py` | NEW | 2026-03-06 | OBS start verification (no false-positive stream started) |
-| `test_suno_stt_extractor.py` | NEW | 2026-03-05 | Suno STT lyrics extraction pipeline tests |
-| `test_go_live_steps.py` | UPDATED | 2026-02-28 | Step-by-step Go Live debugging + DOM verification |
+| `test_boot_layer_rotator.py` | NEW | 2026-03-22 | Boot layer schema rotation tests (16 tests) |
+| `test_gcc_shipping_tracker.py` | NEW | 2026-03-22 | GCC shipping tracker + screenshot mode (22 tests) |
+| `test_obs_controller_startup.py` | PASS | 2026-03-06 | OBS start verification (no false-positive stream started) |
+| `test_suno_stt_extractor.py` | PASS | 2026-03-05 | Suno STT lyrics extraction pipeline tests |
+| `test_go_live_steps.py` | PASS | 2026-02-28 | Step-by-step Go Live debugging + DOM verification |
+
+---
+
+## 2026-03-22: Boot Layer Rotator + GCC Shipping Tracker Tests
+
+### Added: `test_boot_layer_rotator.py`
+**Purpose**: Test schema rotation configuration and Coming Soon fallbacks
+
+**Test Classes** (16 tests total):
+1. `TestSchemaRegistry` - Schema registry validation
+   - `test_schemas_not_empty`: Registry has entries
+   - `test_rotation_order_has_implemented_schemas`: Only implemented schemas in rotation
+   - `test_required_schema_fields`: All schemas have name/description/implemented
+   - `test_gcc_schema_exists`: GCC schema configured
+   - `test_video_schema_exists`: Video schema configured
+   - `test_news_schema_exists`: News schema configured
+
+2. `TestComingSoonURI` - Coming Soon fallback generation
+   - `test_generates_valid_data_uri`: Valid base64 data URI
+   - `test_uri_contains_schema_name`: HTML contains schema name
+   - `test_uri_contains_signature`: HTML contains 0102 signature
+
+3. `TestSchemaVisibilityConfiguration` - OBS visibility (mocked)
+   - `test_gcc_schema_hides_video_sources`: GCC hides video grid
+   - `test_video_schema_shows_video_grid`: Video shows grid
+
+4. `TestEventEmission` - Telemetry logging
+   - `test_emit_event_creates_telemetry_dir`: Creates telemetry directory
+
+5. `TestRotationOrder` - Rotation configuration
+   - `test_rotation_order_is_list`: Order is a list
+   - `test_rotation_order_minimum_schemas`: At least 2 schemas
+   - `test_rotation_order_no_duplicates`: No duplicate schemas
+   - `test_rotation_starts_with_gcc`: GCC is first
+
+### Added: `test_gcc_shipping_tracker.py`
+**Purpose**: Test shipping tracker URLs, screenshot mode, and timing
+
+**Test Classes** (22 tests total):
+1. `TestURLConstants` - URL validation
+   - VesselFinder URLs (Hormuz, Gulf, Tankers)
+   - MarineTraffic URLs (Hormuz, Gulf)
+   - All URLs have proper domains and filters
+
+2. `TestTrustedDomains` - WAF bypass domains
+   - MarineTraffic, VesselFinder, FleetMon are trusted
+   - Random domains are not trusted
+
+3. `TestTimingConstants` - Timing configuration
+   - View interval is 120s (2 min)
+   - Schema duration is 600s (10 min)
+   - 5 views fit in one schema
+
+4. `TestHormuzBounds` - Region bounding box
+   - Has required lat/lon keys
+   - Valid coordinate ranges
+
+5. `TestTankerFocusURL` - Tanker filter
+   - Returns VesselFinder URL
+   - Has type=8 tanker filter
+
+6. `TestComingSoonURI` - Fallback validation
+   - Valid data URI format
+
+7. `TestScreenshotFunctions` - 012 behavior mode
+   - Screenshot cache directory exists
+   - PNG to data URI conversion works
+   - Returns None for missing screenshots
+
+8. `TestViewRotation` - Rotation logic
+   - Function accepts use_screenshots parameter
+   - Screenshot mode is available
+
+**Run Tests**:
+```bash
+pytest modules/platform_integration/antifafm_broadcaster/tests/test_boot_layer_rotator.py -v
+pytest modules/platform_integration/antifafm_broadcaster/tests/test_gcc_shipping_tracker.py -v
+```
+
+**Results**: 38/38 PASSED (2026-03-22)
+
+**WSP Compliance**:
+- WSP 5: Test coverage for new schema rotation
+- WSP 72: Module independence (mocked OBS client)
+- WSP 91: Telemetry event emission tested
 
 ---
 

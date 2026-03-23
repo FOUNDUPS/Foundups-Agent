@@ -12,6 +12,34 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 
 ## MODLOG ENTRIES
 
+### 2026-03-22 - OpenClaw Self-Research Refresh Loop
+**WSP Protocol**: WSP 15 (MPS Prioritization), WSP 27 (DAE Architecture), WSP 48 (Recursive Improvement), WSP 60 (Memory Architecture), WSP 84 (Code Reuse)
+**Phase**: Automation Hardening
+**Agent**: 0102 Codex
+
+#### Self-Research Orchestration
+- **Added**: `src/self_research_refresh.py` to consolidate internal and external system research
+- **Reused**: `AgentDB` index freshness + autonomous task queue instead of inventing a new backlog store
+- **Integrated**: HoloIndex refresh checks, WSP compliance scan, daemon self-audit sampling, and grant watchlist refresh
+- **Applied**: WSP 15 scoring to generate ranked update candidates for 0102
+
+#### Idle DAE Wiring
+- **Added**: `AUTO_SELF_RESEARCH` and `AUTO_SELF_RESEARCH_TIMEOUT` configuration
+- **Integrated**: `_execute_self_research_refresh()` into `IdleAutomationDAE.run_idle_tasks()`
+- **Exposed**: `last_self_research` and self-research config in idle status output
+- **Verified**: Direct `IdleAutomationDAE` execution path now completes self-research refresh in cached mode
+
+#### Runtime Artifacts
+- **Created**: `scripts/refresh_self_research.py` CLI wrapper
+- **Writes**: `modules/communication/moltbot_bridge/workspace/reports/openclaw_self_research_status.json`
+- **Publishes**: Ranked tasks into `AgentDB.agents_autonomous_tasks`
+- **Stores**: Summary outcome in WRE `PatternMemory`
+
+#### Operational Result
+- **Observed**: Fast cached refresh path completes in ~18-25s
+- **Seeded**: Initial full compliance cache after scanner hardening
+- **Outcome**: 0102 now has an always-refreshable update queue rather than static research notes
+
 ### Initial Module Creation - WSP 27 DAE Architecture Implementation
 **WSP Protocol**: WSP 27 (Universal DAE Architecture), WSP 35 (Module Execution Automation), WSP 3 (Module Organization)
 **Phase**: Foundation

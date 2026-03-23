@@ -124,7 +124,11 @@ def refresh_item(item: Dict[str, Any]) -> Dict[str, Any]:
 
 def build_status_report(watchlist: Dict[str, Any]) -> Dict[str, Any]:
     items = watchlist.get("items", [])
-    changed = [item["name"] for item in items if item.get("last_refresh_result") == "changed"]
+    changed = [
+        item["name"]
+        for item in items
+        if item.get("last_refresh_result") in {"changed", "first_seen"}
+    ]
     errored = [
         item["name"]
         for item in items

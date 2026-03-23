@@ -18,7 +18,7 @@ from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional, Any
+from typing import Iterator, List, Optional, Any
 
 # Pattern memory for learned false positives (WSP 48/60)
 try:
@@ -58,6 +58,15 @@ class WSPComplianceChecker:
     """
     Platform-agnostic WSP compliance scanner.
     """
+    IGNORED_DIR_NAMES = {
+        ".git",
+        ".venv",
+        "venv",
+        "node_modules",
+        "__pycache__",
+        ".pytest_cache",
+    }
+
     def __init__(self, project_root: Optional[Path] = None):
         self.project_root = project_root or Path(__file__).resolve().parents[4]
         self.pattern_memory: Optional[Any] = None
@@ -66,6 +75,52 @@ class WSPComplianceChecker:
                 self.pattern_memory = PatternMemory()
             except Exception as exc:
                 logger.warning("PatternMemory unavailable for false-positive checks: %s", exc)
+
+    def _should_skip_path(self, path: Path) -> bool:
+        """Skip hidden, virtualenv, cache, and symlink-heavy paths."""
+        if path.name in self.IGNORED_DIR_NAMES:
+            return True
+        if path.is_symlink():
+            return True
+        return any(part in self.IGNORED_DIR_NAMES for part in path.parts)
+
+    def _safe_iterdir(self, path: Path) -> Iterator[Path]:
+        """Yield directory entries while tolerating inaccessible paths."""
+        try:
+            for entry in path.iterdir():
+                if self._should_skip_path(entry):
+                    continue
+                yield entry
+        except OSError as exc:
+            logger.debug("Skipping inaccessible directory %s: %s", path, exc)
+
+    def _safe_walk(self, root: Path) -> Iterator[Path]:
+        """Depth-first traversal that skips inaccessible or ignored paths."""
+        stack = [root]
+        while stack:
+            current = stack.pop()
+            for entry in self._safe_iterdir(current):
+                yield entry
+                try:
+                    if entry.is_dir():
+                        stack.append(entry)
+                except OSError as exc:
+                    logger.debug("Skipping inaccessible path %s: %s", entry, exc)
+
+    def _iter_python_files(self, root: Path) -> Iterator[Path]:
+        """Yield Python files under root using safe traversal."""
+        for path in self._safe_walk(root):
+            if path.suffix == ".py":
+                yield path
+
+    def _iter_directories(self, root: Path) -> Iterator[Path]:
+        """Yield directories under root using safe traversal."""
+        for path in self._safe_walk(root):
+            try:
+                if path.is_dir():
+                    yield path
+            except OSError as exc:
+                logger.debug("Skipping inaccessible directory %s: %s", path, exc)
 
     def _is_known_false_positive(self, entity_type: str, entity_name: str) -> bool:
         """Check pattern memory for known false positives before flagging."""
@@ -103,10 +158,20 @@ class WSPComplianceChecker:
         module_names = {}
         modules_dir = self.project_root / "modules"
         if modules_dir.exists():
-            for domain_dir in modules_dir.iterdir():
-                if domain_dir.is_dir() and not domain_dir.name.startswith('.'):
-                    for module_dir in domain_dir.iterdir():
-                        if module_dir.is_dir() and not module_dir.name.startswith('.'):
+            for domain_dir in self._safe_iterdir(modules_dir):
+                try:
+                    is_domain_dir = domain_dir.is_dir()
+                except OSError as exc:
+                    logger.debug("Skipping inaccessible module domain %s: %s", domain_dir, exc)
+                    continue
+                if is_domain_dir and not domain_dir.name.startswith('.'):
+                    for module_dir in self._safe_iterdir(domain_dir):
+                        try:
+                            is_module_dir = module_dir.is_dir()
+                        except OSError as exc:
+                            logger.debug("Skipping inaccessible module directory %s: %s", module_dir, exc)
+                            continue
+                        if is_module_dir and not module_dir.name.startswith('.'):
                             module_name = module_dir.name
                             if self._is_known_false_positive("module", module_name):
                                 continue
@@ -127,7 +192,7 @@ class WSPComplianceChecker:
 
     async def _scan_file_sizes(self) -> List[WSPViolation]:
         violations: List[WSPViolation] = []
-        for py_file in self.project_root.rglob("*.py"):
+        for py_file in self._iter_python_files(self.project_root):
             if py_file.name.startswith('.') or 'test' in py_file.name:
                 continue
             try:
@@ -158,12 +223,12 @@ class WSPComplianceChecker:
 
     async def _scan_component_counts(self) -> List[WSPViolation]:
         violations: List[WSPViolation] = []
-        for directory in self.project_root.rglob("*"):
-            if not directory.is_dir() or directory.name.startswith('.'):
+        for directory in self._iter_directories(self.project_root):
+            if directory.name.startswith('.'):
                 continue
             if self._is_known_false_positive("module", directory.name):
                 continue
-            py_files = list(directory.glob("*.py"))
+            py_files = list(self._iter_python_files(directory))
             if len(py_files) > 20:
                 violations.append(WSPViolation(
                     violation_type=WSPViolationType.COMPONENT_COUNT,
@@ -187,8 +252,13 @@ class WSPComplianceChecker:
             "infrastructure", "foundups", "gamification", "blockchain",
             "development", "aggregation", "wre_core"
         }
-        for item in modules_dir.iterdir():
-            if item.is_dir() and not item.name.startswith('.'):
+        for item in self._safe_iterdir(modules_dir):
+            try:
+                is_dir = item.is_dir()
+            except OSError as exc:
+                logger.debug("Skipping inaccessible module domain %s: %s", item, exc)
+                continue
+            if is_dir and not item.name.startswith('.'):
                 if self._is_known_false_positive("module", item.name):
                     continue
                 if item.name not in expected_domains:
@@ -209,11 +279,21 @@ class WSPComplianceChecker:
         modules_dir = self.project_root / "modules"
         if not modules_dir.exists():
             return violations
-        for domain_dir in modules_dir.iterdir():
-            if not domain_dir.is_dir() or domain_dir.name.startswith('.'):
+        for domain_dir in self._safe_iterdir(modules_dir):
+            try:
+                is_domain_dir = domain_dir.is_dir()
+            except OSError as exc:
+                logger.debug("Skipping inaccessible module domain %s: %s", domain_dir, exc)
                 continue
-            for module_dir in domain_dir.iterdir():
-                if not module_dir.is_dir() or module_dir.name.startswith('.'):
+            if not is_domain_dir or domain_dir.name.startswith('.'):
+                continue
+            for module_dir in self._safe_iterdir(domain_dir):
+                try:
+                    is_module_dir = module_dir.is_dir()
+                except OSError as exc:
+                    logger.debug("Skipping inaccessible module directory %s: %s", module_dir, exc)
+                    continue
+                if not is_module_dir or module_dir.name.startswith('.'):
                     continue
                 if self._is_known_false_positive("module", module_dir.name):
                     continue
@@ -236,11 +316,21 @@ class WSPComplianceChecker:
         modules_dir = self.project_root / "modules"
         if not modules_dir.exists():
             return violations
-        for domain_dir in modules_dir.iterdir():
-            if not domain_dir.is_dir() or domain_dir.name.startswith('.'):
+        for domain_dir in self._safe_iterdir(modules_dir):
+            try:
+                is_domain_dir = domain_dir.is_dir()
+            except OSError as exc:
+                logger.debug("Skipping inaccessible module domain %s: %s", domain_dir, exc)
                 continue
-            for module_dir in domain_dir.iterdir():
-                if not module_dir.is_dir() or module_dir.name.startswith('.'):
+            if not is_domain_dir or domain_dir.name.startswith('.'):
+                continue
+            for module_dir in self._safe_iterdir(domain_dir):
+                try:
+                    is_module_dir = module_dir.is_dir()
+                except OSError as exc:
+                    logger.debug("Skipping inaccessible module directory %s: %s", module_dir, exc)
+                    continue
+                if not is_module_dir or module_dir.name.startswith('.'):
                     continue
                 if self._is_known_false_positive("module", module_dir.name):
                     continue
@@ -274,15 +364,25 @@ class WSPComplianceChecker:
         modules_dir = self.project_root / "modules"
         if not modules_dir.exists():
             return violations
-        for domain_dir in modules_dir.iterdir():
-            if not domain_dir.is_dir() or domain_dir.name.startswith('.'):
+        for domain_dir in self._safe_iterdir(modules_dir):
+            try:
+                is_domain_dir = domain_dir.is_dir()
+            except OSError as exc:
+                logger.debug("Skipping inaccessible module domain %s: %s", domain_dir, exc)
                 continue
-            for module_dir in domain_dir.iterdir():
-                if not module_dir.is_dir() or module_dir.name.startswith('.'):
+            if not is_domain_dir or domain_dir.name.startswith('.'):
+                continue
+            for module_dir in self._safe_iterdir(domain_dir):
+                try:
+                    is_module_dir = module_dir.is_dir()
+                except OSError as exc:
+                    logger.debug("Skipping inaccessible module directory %s: %s", module_dir, exc)
+                    continue
+                if not is_module_dir or module_dir.name.startswith('.'):
                     continue
                 if self._is_known_false_positive("module", module_dir.name):
                     continue
-                py_files = list(module_dir.rglob("*.py"))
+                py_files = list(self._iter_python_files(module_dir))
                 if py_files and not (module_dir / "requirements.txt").exists():
                     violations.append(WSPViolation(
                         violation_type=WSPViolationType.DEPENDENCY,

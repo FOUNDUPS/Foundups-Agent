@@ -65,6 +65,7 @@ class IdleAutomationDAE:
         logger.info("[OK] Idle Automation DAE initialized")
         logger.info(f"   Auto Git Push: {self.config['auto_git_push']}")
         logger.info(f"   Auto LinkedIn: {self.config['auto_linkedin_post']}")
+        logger.info(f"   Auto Self Research: {self.config['auto_self_research']}")
         logger.info(f"   Health Score: {self.idle_state.get('health_score', 'N/A')}")
 
     def _load_idle_state(self) -> Dict[str, Any]:
@@ -216,10 +217,12 @@ class IdleAutomationDAE:
         # Boolean configurations with validation
         config["auto_git_push"] = self._parse_bool_env("AUTO_GIT_PUSH", False)
         config["auto_linkedin_post"] = self._parse_bool_env("AUTO_LINKEDIN_POST", False)
+        config["auto_self_research"] = self._parse_bool_env("AUTO_SELF_RESEARCH", True)
 
         # Numeric configurations with bounds
         config["idle_task_timeout"] = self._parse_int_env("IDLE_TASK_TIMEOUT", 300, 30, 3600)
         config["max_daily_executions"] = self._parse_int_env("MAX_DAILY_EXECUTIONS", 3, 1, 10)
+        config["self_research_timeout"] = self._parse_int_env("AUTO_SELF_RESEARCH_TIMEOUT", 900, 60, 3600)
 
         # Health monitoring thresholds
         config["health_critical_threshold"] = 20  # Below this = critical
@@ -598,6 +601,52 @@ class IdleAutomationDAE:
 
         return result
 
+    async def _execute_self_research_refresh(self) -> Dict[str, Any]:
+        """
+        Refresh internal/external research and publish a ranked autonomous task queue.
+        """
+        result = {
+            "task": "self_research_refresh",
+            "success": False,
+            "update_candidates": 0,
+            "autonomous_tasks": 0,
+            "duration": 0,
+        }
+
+        start_time = datetime.now()
+
+        try:
+            if not self.config["auto_self_research"]:
+                result["error"] = "Self research disabled"
+                return result
+
+            from modules.infrastructure.idle_automation.src.self_research_refresh import (
+                SelfResearchRefresher,
+            )
+
+            refresher = SelfResearchRefresher()
+            report = await asyncio.wait_for(
+                asyncio.to_thread(refresher.run),
+                timeout=self.config["self_research_timeout"],
+            )
+
+            result["success"] = True
+            result["update_candidates"] = len(report.get("update_candidates", []))
+            result["autonomous_tasks"] = len(report.get("autonomous_tasks", []))
+            result["next_actions"] = report.get("next_actions", [])
+            result["report_path"] = str(refresher.report_path)
+            self.idle_state["last_self_research"] = datetime.now().isoformat()
+
+        except asyncio.TimeoutError:
+            result["error"] = "Self research refresh timed out"
+        except Exception as e:
+            result["error"] = f"Self research refresh failed: {e}"
+            logger.warning(f"Self research refresh error: {e}")
+        finally:
+            result["duration"] = (datetime.now() - start_time).total_seconds()
+
+        return result
+
     def _extract_patterns_from_lines(self, lines: list) -> list:
         """
         Extract training patterns from 012.txt lines.
@@ -763,6 +812,22 @@ class IdleAutomationDAE:
             else:
                 logger.info(f"ℹ️ Pattern training skipped: {training_result.get('error', 'N/A')}")
 
+            # Phase 4: Self-research refresh (internal health + external opportunities)
+            self_research_result = await self._execute_self_research_refresh()
+            execution_result["tasks_executed"].append(self_research_result)
+
+            if self_research_result["success"]:
+                logger.info(
+                    "[BOT] Self research refresh: %s candidate(s), %s task(s)",
+                    self_research_result["update_candidates"],
+                    self_research_result["autonomous_tasks"],
+                )
+            else:
+                logger.info(
+                    "ℹ️ Self research refresh skipped: %s",
+                    self_research_result.get("error", "N/A"),
+                )
+
             # Update execution counter
             self.idle_state["execution_count_today"] += 1
 
@@ -781,6 +846,8 @@ class IdleAutomationDAE:
                     "health_score": self.idle_state.get("health_score", 100),
                     "git_duration": git_result.get("duration", 0),
                     "linkedin_duration": linkedin_result.get("duration", 0),
+                    "self_research_success": self_research_result.get("success", False),
+                    "self_research_candidates": self_research_result.get("update_candidates", 0),
                 }
             )
 
@@ -814,10 +881,12 @@ class IdleAutomationDAE:
             "last_idle_execution": self.idle_state.get("last_idle_execution"),
             "last_git_push": self.idle_state.get("last_git_push"),
             "last_linkedin_post": self.idle_state.get("last_linkedin_post"),
+            "last_self_research": self.idle_state.get("last_self_research"),
             "execution_count_today": self.idle_state.get("execution_count_today", 0),
             "idle_session_count": self.idle_state.get("idle_session_count", 0),
             "auto_git_enabled": self.config["auto_git_push"],
             "auto_linkedin_enabled": self.config["auto_linkedin_post"],
+            "auto_self_research_enabled": self.config["auto_self_research"],
             "health_score": health_score,
             "health_status": health_status,
             "circuit_breaker_reset": self.idle_state.get("circuit_breaker_reset"),
@@ -825,6 +894,7 @@ class IdleAutomationDAE:
             "config": {
                 "idle_task_timeout": self.config["idle_task_timeout"],
                 "max_daily_executions": self.config["max_daily_executions"],
+                "self_research_timeout": self.config["self_research_timeout"],
                 "health_critical_threshold": self.config["health_critical_threshold"],
                 "health_warning_threshold": self.config["health_warning_threshold"],
             }
