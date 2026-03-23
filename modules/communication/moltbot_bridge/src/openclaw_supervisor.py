@@ -63,6 +63,30 @@ class SupervisorState(str, Enum):
     IDLE_WATCH = "IDLE_WATCH"
 
 
+def _normalize_ai_analysis(analysis: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Normalize AI Overseer analysis to consistent shape.
+
+    Handles two return shapes from analyze_mission_requirements():
+    - Normal: classification.complexity, patterns_detected, recommended_team
+    - Fallback: top-level complexity, requires_coordination (no classification object)
+    """
+    # Extract complexity: prefer classification.complexity, fall back to top-level
+    classification = analysis.get("classification", {})
+    if isinstance(classification, dict) and "complexity" in classification:
+        complexity = classification.get("complexity", 0)
+    else:
+        complexity = analysis.get("complexity", 0)
+
+    return {
+        "complexity": complexity,
+        "patterns": analysis.get("patterns_detected", []),
+        "recommended_team": analysis.get("recommended_team", {}),
+        "method": analysis.get("method", "unknown"),
+        "requires_coordination": analysis.get("requires_coordination"),
+    }
+
+
 class OpenClawSupervisor:
     """
     Canonical 0102 supervisor for the resident OpenClaw runtime.
@@ -457,12 +481,7 @@ class OpenClawSupervisor:
             try:
                 mission_desc = f"{triage['action']}: {triage.get('reason', 'supervisor cycle')}"
                 analysis = self._ai_overseer.analyze_mission_requirements(mission_desc)
-                plan["ai_analysis"] = {
-                    "complexity": analysis.get("classification", {}).get("complexity", 0),
-                    "patterns": analysis.get("patterns_detected", []),
-                    "recommended_team": analysis.get("recommended_team", {}),
-                    "method": analysis.get("method", "unknown"),
-                }
+                plan["ai_analysis"] = _normalize_ai_analysis(analysis)
             except Exception as exc:
                 logger.debug(f"[SUPERVISOR] AI Overseer analysis skipped: {exc}")
                 plan["ai_analysis"] = {"error": str(exc)[:200]}
