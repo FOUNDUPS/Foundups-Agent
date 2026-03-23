@@ -1,5 +1,135 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-23: OpenViking WSP 97 ecosystem watchlist integration
+
+**Author**: 0102
+**WSP**: 22, 84, 97
+
+### Problem
+
+OpenClaw had grant and PQN benchmark watchlists, but no general external
+ecosystem watchlist for architecture-level signals affecting the whole control,
+memory, and context planes.
+
+OpenViking is explicitly positioned upstream as an agent context database for
+OpenClaw-like harnesses, so handling it as a one-off memo would let the system
+fall behind on a relevant memory/filesystem paradigm shift.
+
+### Solution
+
+Integrated OpenViking into the live self-research loop as a monitored external
+ecosystem candidate rather than a startup dependency:
+
+1. Added `workspace/reports/openclaw_external_ecosystem_watchlist.json`
+2. Added `scripts/refresh_openclaw_ecosystem_watchlist.py`
+3. Added `workspace/reports/openclaw_external_tool_openviking_wsp97_20260323.json`
+4. Updated `self_research_refresh.py` to refresh/report/rank ecosystem signals
+5. Updated `openclaw-monitor` skill docs to surface the new watchlist
+
+### Architecture Decision
+
+`volcengine/OpenViking` is:
+- `pilot_in_isolation`
+- `integrate_via_adapter_or_mirror`
+- plane=`external_context_sidecar`
+
+Not approved:
+- replacing HoloIndex or PatternMemory as source of truth
+- adding OpenViking to `main.py` startup
+- bypassing OpenClaw governance or WRE ownership
+
+### Residual Work
+
+- design a read-only context mirror pilot for retrieval comparison
+- expose OpenViking dossier answers through a dedicated OpenClaw query surface if needed
+- add more ecosystem signals to the new watchlist as they are validated
+
+## 2026-03-23: Hermes Agent WSP 97 ecosystem assessment
+
+**Author**: 0102
+**WSP**: 22, 84, 97
+
+### Problem
+
+Hermes Agent is a strong external signal because it overlaps the same persistent
+agent surface OpenClaw is trying to mature: memory, scheduling, gateway
+continuity, skills, and cross-session learning.
+
+It also explicitly positions itself as an OpenClaw migration target, so it is a
+benchmark and a replacement-risk competitor at the same time.
+
+### Solution
+
+Added Hermes to the OpenClaw external ecosystem watchlist and created a WSP 97
+dossier that makes the adoption boundary explicit.
+
+### Architecture Decision
+
+`NousResearch/hermes-agent` is:
+- `track_as_benchmark_not_runtime`
+- `selective_pattern_adoption_only`
+- plane=`feature_benchmark`
+
+Harvest patterns:
+- persistent recall
+- memory nudges
+- gateway continuity
+- scheduled NL automations
+- self-improving skill loops
+
+Do not adopt:
+- runtime ownership
+- migration/config authority
+- a second orchestration layer
+
+## 2026-03-22: P1 Supervisor Unification into OpenClawSupervisor
+
+**Author**: 0102
+**WSP**: 22, 77, 91, 97
+
+### Problem
+
+Two competing supervisor implementations existed:
+- `modules/communication/moltbot_bridge/src/openclaw_supervisor.py` (canonical, booted by main.py)
+- `modules/infrastructure/supervisor/src/supervisor_24x7.py` (donor/prototype with richer features)
+
+Per the CTO prompt pack, `OpenClawSupervisor` is canonical and `Supervisor24x7` is a donor.
+
+### Solution
+
+Unified key behaviors from `Supervisor24x7` into the canonical `OpenClawSupervisor`:
+
+1. **SupervisorMetrics** - telemetry dataclass for WSP 91 observability
+2. **AI Overseer integration** - lazy-loaded for PLAN state
+3. **PatternMemory** - SQLite outcome storage for REMEMBER state
+4. **LibidoMonitor** - Gemma fidelity validation for VERIFY state
+5. **get_metrics()** - public API for observability
+
+### Changes
+
+| File | Change |
+|------|--------|
+| `src/openclaw_supervisor.py` | Added `SupervisorMetrics`, `_init_unified_components()`, Gemma fidelity in `_verify()`, PatternMemory in `_remember()`, `get_metrics()` |
+| `modules/infrastructure/supervisor/src/supervisor_24x7.py` | Added deprecation notice marking it as donor/prototype |
+
+### Architecture Decision
+
+```
+Control Split (canonical):
+- AI Overseer + sentinels: observe, gate, correlate, rank
+- OpenClawSupervisor: schedule, budget, launch, verify (THIS FILE)
+- OpenClaw: executive/control plane
+- WRE + DAEs: execution
+- PatternMemory: recall and learning
+```
+
+### Residual Work
+
+- P1: Route highest-value menu/skill islands into OpenClaw (not done this session)
+- P2: Headless runtime mode separate from interactive menu
+
+---
+
 ## 2026-03-18: Cursor-based DAE follow commands
 
 **Author**: 0102  
@@ -1264,3 +1394,35 @@ openclaw onboard
 - 012 can now hand another `0102` context a repo-true autonomy mission without paying for another full-stack architecture re-audit.
 - OpenClaw autonomy work is now split into explicit parallelizable slices instead of one oversized prompt.
 
+## 2026-03-22: Walkthrough validation + P0 task consumer hardening
+
+**Author**: 0102  
+**WSP**: 22, 49, 77, 97
+
+### Changes
+- Validated the external OpenClaw walkthrough against repo truth and recorded the result in `workspace/memory/2026-03-22-openclaw-walkthrough-validation.md`.
+- Hardened `src/openclaw_supervisor.py` so autonomous task execution:
+  - uses `sys.executable`
+  - uses an absolute `run_task.py` path
+  - waits for the task runner to finish
+  - verifies the task actually reached `completed` in `AgentDB`
+- Updated `tests/test_openclaw_supervisor.py` to isolate `FOUNDUPS_DB_PATH` and reset the shared database singleton between tests.
+
+### Outcome
+- The P0 consumer loop no longer reports success just because a subprocess was spawned.
+- Supervisor tests are no longer contaminated by shared pending tasks in the default AgentDB.
+- The repo now distinguishes more clearly between real implemented autonomy and overstated walkthrough claims.
+
+
+## 2026-03-22: OpenClaw Autonomous Maintenance Loop (P0 Slice)
+
+**Author**: 0102
+**WSP**: 78, 97
+
+### Changes
+- Promoted OpenClawSupervisor to act as the canonical autonomous task consumer.
+- Enhanced _triage, _plan, _execute, and _verify in openclaw_supervisor.py to aggressively poll AgentDB for pending autonomous tasks whenever the resident OpenClaw runtime is healthy but idle.
+- Created scripts/run_task.py as a deterministic task dispatch script simulator to close the execution loop, advancing tasked state to completed in AgentDB.
+
+### Outcome
+- The task consumer pipeline is now wired securely. Autonomous loop execution (Producer -> AgentDB -> Supervisor -> Consumer) has deterministic boundaries.

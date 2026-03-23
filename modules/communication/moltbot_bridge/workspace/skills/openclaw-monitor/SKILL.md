@@ -82,7 +82,14 @@ This consolidates:
 - WSP compliance findings
 - daemon self-audit recurrence
 - grant watchlist changes and errors
+- OpenClaw ecosystem watchlist changes and errors
 - ranked autonomous tasks written into `AgentDB`
+
+Refresh the external ecosystem signal watchlist directly:
+
+```bash
+cd O:/Foundups-Agent && python scripts/refresh_openclaw_ecosystem_watchlist.py
+```
 
 ## What Gets Monitored
 
