@@ -451,6 +451,22 @@ class OpenClawSupervisor:
         if triage["action"] == "execute_self_audit_fix":
             plan["event_signature"] = triage.get("event_signature")
             plan["recommended_fix"] = triage.get("recommended_fix")
+
+        # WSP 77: AI Overseer fast classification (Gemma 50-100ms)
+        if self._ai_overseer is not None:
+            try:
+                mission_desc = f"{triage['action']}: {triage.get('reason', 'supervisor cycle')}"
+                analysis = self._ai_overseer.analyze_mission_requirements(mission_desc)
+                plan["ai_analysis"] = {
+                    "complexity": analysis.get("classification", {}).get("complexity", 0),
+                    "patterns": analysis.get("patterns_detected", []),
+                    "recommended_team": analysis.get("recommended_team", {}),
+                    "method": analysis.get("method", "unknown"),
+                }
+            except Exception as exc:
+                logger.debug(f"[SUPERVISOR] AI Overseer analysis skipped: {exc}")
+                plan["ai_analysis"] = {"error": str(exc)[:200]}
+
         return plan
 
     # ------------------------------------------------------------------ #
