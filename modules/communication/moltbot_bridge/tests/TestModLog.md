@@ -1,3 +1,17 @@
+## 2026-03-23: Grant Task Pipeline Tests (P0)
+- Command: `pytest modules/communication/moltbot_bridge/tests/test_grant_task_execution.py modules/communication/moltbot_bridge/tests/test_hardening_tranche.py -k grant -q`
+- Status: PASS
+- Result: `29 passed` (21 + 8)
+- Coverage:
+  - Grant executor: review returns structured findings, stabilize categorizes errors
+  - Dispatch: recognizes grant_watchlist_review/stabilize, fails closed on unknown
+  - Stable IDs: deduplication via INSERT OR REPLACE
+  - Completed protection: same-context skip, changed-context reopens
+  - Stale cleanup: combined filter (task_id LIKE + skill tag), preserves PQN/ecosystem
+  - Regression: real-DB test seeds old slugified + PQN + ecosystem rows, asserts correct deletions
+
+---
+
 ## 2026-03-23: Memory Nudge Engine (P0)
 - Command: `pytest modules/communication/moltbot_bridge/tests/test_memory_nudge_engine.py -q`
 - Status: PASS

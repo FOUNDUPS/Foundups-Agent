@@ -60,8 +60,9 @@ Grant work was discovered by self-research but not autonomously executable:
    - INSERT OR REPLACE deduplicates by task_id PRIMARY KEY
 
 2. **Stale task cleanup** in `publish_autonomous_tasks()`:
-   - Narrowed to grant-only pattern: `self_research_external_watchlist_%grant%`
-   - Does NOT delete PQN or OpenClaw ecosystem watchlist tasks
+   - Combined filter: `task_id LIKE 'self_research_external_watchlist_%'` + `required_skills LIKE '%openclaw-grants%'`
+   - Does NOT delete PQN or OpenClaw ecosystem watchlist tasks (different skill tags)
+   - Preserves stable IDs via `NOT IN (?, ?)` clause
    - Sets `status = 'pending'` after creation (AgentDB may not set it)
 
 3. **Completed task protection**:
@@ -84,11 +85,14 @@ Grant work was discovered by self-research but not autonomously executable:
 - `modules/infrastructure/idle_automation/src/self_research_refresh.py`: Stale cleanup + completed protection
 - `modules/communication/moltbot_bridge/scripts/run_task.py`: Use grant_task_executor
 - `modules/communication/moltbot_bridge/src/grant_task_executor.py`: New file, 200 lines
-- `modules/communication/moltbot_bridge/tests/test_grant_task_execution.py`: 15 tests
+- `modules/communication/moltbot_bridge/tests/test_grant_task_execution.py`: 21 tests
+- `modules/communication/moltbot_bridge/tests/test_hardening_tranche.py`: 7 grant tests + 1 regression
 
 ### Verification
 
-- `pytest test_grant_task_execution.py` → 15 passed
+- `pytest test_grant_task_execution.py` → 21 passed
+- `pytest test_hardening_tranche.py -k grant` → 8 passed (7 grant + 1 stale cleanup regression)
+- Regression test: Seeds old slugified rows + PQN/ecosystem rows, verifies only old grant rows deleted
 - Repro 1: Completed task same context → skipped (not reopened)
 - Repro 2: Ethereum ESP (p0_apply_now) → fit_score=0.95, generates recommendations
 - Stable task_ids confirmed: `grant_watchlist_review`, `grant_watchlist_stabilize`

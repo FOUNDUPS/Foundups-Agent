@@ -54,6 +54,19 @@
 - `mock_git_repo` - Fake git repository with test commits
 - `mock_linkedin_api` - Simulated LinkedIn posting responses
 
+### 2026-03-23: Grant Task Cleanup Regression Test
+
+- **Location**: `modules/communication/moltbot_bridge/tests/test_hardening_tranche.py`
+- **Test**: `test_stale_grant_task_cleanup_preserves_pqn_and_ecosystem`
+- **Status**: PASS
+- **Coverage**:
+  - Seeds old slugified grant rows, PQN rows, ecosystem rows in real temp DB
+  - Calls `SelfResearchRefresher.publish_autonomous_tasks()` with stable grant IDs
+  - Asserts: old grant rows deleted, PQN/ecosystem rows preserved, stable grant rows created
+  - Uses `DatabaseManager.reset_for_tests()` pattern for singleton isolation
+
+---
+
 ### Current Test Status: NOT IMPLEMENTED
 
 **Reason**: Module is in MVP phase with safety-disabled social media posting. Full test implementation requires:

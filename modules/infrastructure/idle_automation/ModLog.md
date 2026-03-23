@@ -12,6 +12,34 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 
 ## MODLOG ENTRIES
 
+### 2026-03-23 - Grant Task Stable IDs and Stale Cleanup
+
+**WSP Protocol**: WSP 22, WSP 97 (Autonomy Boundaries)
+**Phase**: Automation Hardening
+**Agent**: 0102
+
+#### Changes to self_research_refresh.py
+
+- **Added**: `stable_task_id` parameter to `_build_manual_candidate()` for explicit task IDs
+- **Added**: Stable IDs for all watchlist tasks:
+  - `grant_watchlist_review`, `grant_watchlist_stabilize`
+  - `pqn_watchlist_review`, `pqn_watchlist_stabilize`
+  - `openclaw_ecosystem_watchlist_review`, `openclaw_ecosystem_watchlist_stabilize`
+- **Added**: Stale task cleanup in `publish_autonomous_tasks()`:
+  - Combined filter: `task_id LIKE 'self_research_external_watchlist_%'` + `required_skills LIKE '%openclaw-grants%'`
+  - Preserves stable IDs via `NOT IN` clause
+  - Only triggers when stable grant tasks are in candidates
+- **Added**: Completed task protection - skips republish if same `changed_items`/`error_items`
+
+#### Tests
+
+Regression test in `test_hardening_tranche.py::test_stale_grant_task_cleanup_preserves_pqn_and_ecosystem`:
+- Seeds old slugified grant rows, PQN rows, ecosystem rows
+- Publishes stable grant tasks
+- Asserts only old grant rows deleted, PQN/ecosystem preserved
+
+---
+
 ### 2026-03-23 - Memory Nudge Runtime Wiring
 
 **WSP Protocol**: WSP 22, WSP 60 (Memory Architecture), WSP 97 (Autonomy Boundaries)
