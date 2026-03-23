@@ -36,9 +36,17 @@ Created `memory_nudge_engine.py` that automatically captures high-value events:
 - `src/memory_nudge_engine.py`: 350 lines, MemoryNudgeEngine class
 - `tests/test_memory_nudge_engine.py`: 15 tests
 
+### Audit Fixes (same PR)
+
+1. **autonomous_tasks schema**: Live artifact is a list, not dict
+2. **Escalations scanner**: Use `event_count` threshold, not `severity` field
+3. **Grant watchlist**: Use `changed_count`/`error_count` at top level
+4. **Removed**: `architecture_decision` trigger (not in this slice)
+
 ### Verification
 
-- `pytest test_memory_nudge_engine.py` → 15 passed
+- `pytest test_memory_nudge_engine.py` → 16 passed
+- Live scan returns 6 events (P1: 4, P2: 2)
 
 ---
 

@@ -1,7 +1,7 @@
 ## 2026-03-23: Memory Nudge Engine (P0)
 - Command: `pytest modules/communication/moltbot_bridge/tests/test_memory_nudge_engine.py -q`
 - Status: PASS
-- Result: `15 passed`
+- Result: `16 passed` (audit-hardened)
 - Coverage:
   - NudgeEvent: signature auto-generation, stability, uniqueness
   - MemoryNudgeEngine: creates note on qualifying event
