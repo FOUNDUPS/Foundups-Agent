@@ -781,9 +781,15 @@ def _run_dae_turn(
     timeout_sec: int,
     output: dict,
     done_event: threading.Event,
+    continuity_ctx=None,
 ) -> None:
     """Run one DAE turn in a background thread and store result in output dict."""
     try:
+        # Gateway Continuity Layer: Propagate CLI context as parent for OpenClaw processing
+        process_metadata = {"source_surface": "cli"}
+        if continuity_ctx is not None:
+            process_metadata["parent_continuity_id"] = continuity_ctx.continuity_id
+
         output["response"] = asyncio.run(
             asyncio.wait_for(
                 dae.process(
@@ -791,6 +797,7 @@ def _run_dae_turn(
                     sender="@012",
                     channel="voice_repl",
                     session_key=session_key,
+                    metadata=process_metadata,
                 ),
                 timeout=timeout_sec,
             )
@@ -980,7 +987,44 @@ def run_voice_repl(
     )
     print()
 
-    session_key = "voice_repl_012"
+    # Gateway Continuity Layer: Create CLI continuity context for this voice session
+    cli_continuity_ctx = None
+    session_key = "voice_repl_012"  # Default fallback
+
+    try:
+        from modules.communication.moltbot_bridge.src.continuity_context import (
+            ContinuityManager,
+        )
+        cli_continuity_ctx = ContinuityManager.from_cli(
+            command="voice_repl",
+            script_name="openclaw_voice.py",
+        )
+        # Derive unique session_key from CLI continuity to avoid child ID collision
+        session_key = f"cli_voice_{cli_continuity_ctx.continuity_id[:12]}"
+        print(f"[CONTINUITY] CLI context: {cli_continuity_ctx.continuity_id[:12]}...")
+
+        # Record CLI session start breadcrumb for cross-surface tracking
+        try:
+            from modules.infrastructure.database.src.agent_db import AgentDB
+            db = AgentDB()
+            db.add_breadcrumb(
+                session_id=session_key,
+                action="cli_voice_session_start",
+                agent_id="0102",
+                data={
+                    "backend": backend,
+                    "command": "voice_repl",
+                },
+                continuity_id=cli_continuity_ctx.continuity_id,
+                runtime_surface=cli_continuity_ctx.surface.value,
+                sender_normalized=cli_continuity_ctx.sender_normalized,
+            )
+        except Exception:
+            pass  # Breadcrumb recording is optional
+    except Exception:
+        # Graceful degradation - continuity is optional
+        pass
+
     text_mode = not stt_chain  # Start in text mode if no STT
     last_full_response = ""
     last_interrupt_ts = 0.0
@@ -1242,7 +1286,7 @@ def run_voice_repl(
             turn_done = threading.Event()
             worker = threading.Thread(
                 target=_run_dae_turn,
-                args=(dae, user_input, session_key, process_timeout_sec, turn_output, turn_done),
+                args=(dae, user_input, session_key, process_timeout_sec, turn_output, turn_done, cli_continuity_ctx),
                 daemon=True,
             )
             worker.start()

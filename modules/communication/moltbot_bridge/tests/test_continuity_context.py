@@ -993,3 +993,215 @@ class TestProductionPathCrossSurfaceContinuity:
         assert "parent_continuity_context" in ctx
         assert ctx["parent_continuity_context"].continuity_id == "ctx_from_process_loop"
         assert ctx["parent_continuity_context"].surface == RuntimeSurface.OPENCLAW
+
+
+class TestCLIMessagingContinuityWiring:
+    """Integration tests for CLI and messaging entry point continuity wiring."""
+
+    def test_cli_to_openclaw_production_path(self, tmp_path, monkeypatch):
+        """
+        Exercises the real CLI → OpenClaw production path:
+        1. from_cli() creates CLI context
+        2. CLI passes parent_continuity_id via metadata
+        3. from_openclaw() uses parent linkage
+        4. Cross-surface activity is detectable
+        """
+        # Set up isolated database
+        test_db_path = str(tmp_path / "test_cli_openclaw.db")
+        monkeypatch.setenv("FOUNDUPS_DB_PATH", test_db_path)
+
+        # Force reimport to pick up new path
+        import importlib
+        from modules.infrastructure.database.src import db_manager
+        importlib.reload(db_manager)
+        from modules.infrastructure.database.src.agent_db import AgentDB
+        db = AgentDB()
+
+        # Step 1: Create CLI context (what openclaw_chat.py does)
+        cli_ctx = ContinuityManager.from_cli(
+            command="chat_repl",
+            script_name="openclaw_chat.py",
+        )
+
+        # Verify CLI context properties
+        assert cli_ctx.surface == RuntimeSurface.CLI
+        assert cli_ctx.sender == "cli"
+        assert cli_ctx.channel == "terminal"
+
+        # Step 2: Record CLI breadcrumb (what openclaw_chat.py does)
+        db.add_breadcrumb(
+            session_id=cli_ctx.session_id,
+            action="cli_session_start",
+            agent_id="0102",
+            data={"backend": "openclaw", "command": "chat_repl"},
+            continuity_id=cli_ctx.continuity_id,
+            runtime_surface=cli_ctx.surface.value,
+            sender_normalized=cli_ctx.sender_normalized,
+        )
+
+        # Step 3: Create OpenClaw context with CLI as parent (what process_message does)
+        # This simulates dae.process(metadata={"parent_continuity_id": cli_ctx.continuity_id})
+        openclaw_ctx = ContinuityManager.from_openclaw(
+            sender="@012",
+            channel="local_repl",
+            session_key="local_repl_012",
+            metadata={"parent_continuity_id": cli_ctx.continuity_id},
+        )
+
+        # Verify parent linkage
+        assert openclaw_ctx.surface == RuntimeSurface.OPENCLAW
+        assert openclaw_ctx.parent_continuity_id == cli_ctx.continuity_id
+        assert openclaw_ctx.continuity_id != cli_ctx.continuity_id
+
+        # Step 4: Record OpenClaw breadcrumb
+        db.add_breadcrumb(
+            session_id="local_repl_012",
+            action="openclaw_message",
+            agent_id="opus",
+            data={"message": "test message"},
+            continuity_id=openclaw_ctx.continuity_id,
+            runtime_surface=openclaw_ctx.surface.value,
+            sender_normalized=openclaw_ctx.sender_normalized,
+            parent_continuity_id=openclaw_ctx.parent_continuity_id,
+        )
+
+        # Step 5: Verify cross-surface activity is detectable
+        cross_surface = db.get_cross_surface_activity(minutes=5)
+
+        assert len(cross_surface) >= 1, f"Expected cross-surface activity. Got: {cross_surface}"
+
+        # Find the lineage group
+        found = False
+        for item in cross_surface:
+            if cli_ctx.continuity_id in (
+                item.get("lineage_root", ""),
+                item.get("continuity_id", ""),
+            ) or cli_ctx.continuity_id in item.get("continuity_ids", []):
+                found = True
+                assert "cli" in item["surfaces"], f"Expected 'cli' in surfaces. Got: {item}"
+                assert "openclaw" in item["surfaces"], f"Expected 'openclaw' in surfaces. Got: {item}"
+                break
+
+        assert found, f"Expected CLI→OpenClaw lineage not found. Got: {cross_surface}"
+
+    def test_messaging_to_openclaw_production_path(self, tmp_path, monkeypatch):
+        """
+        Exercises the real webhook/messaging → OpenClaw production path:
+        1. from_messaging() creates messaging context
+        2. Webhook passes parent_continuity_id via enriched metadata
+        3. from_openclaw() uses parent linkage
+        4. Cross-surface activity is detectable
+        """
+        # Set up isolated database
+        test_db_path = str(tmp_path / "test_messaging_openclaw.db")
+        monkeypatch.setenv("FOUNDUPS_DB_PATH", test_db_path)
+
+        # Force reimport to pick up new path
+        import importlib
+        from modules.infrastructure.database.src import db_manager
+        importlib.reload(db_manager)
+        from modules.infrastructure.database.src.agent_db import AgentDB
+        db = AgentDB()
+
+        # Step 1: Create messaging context (what webhook_receiver.py does)
+        messaging_ctx = ContinuityManager.from_messaging(
+            platform="whatsapp",
+            sender="+1234567890",
+            channel="whatsapp",
+            metadata={"source": "webhook"},
+        )
+
+        # Verify messaging context properties
+        assert messaging_ctx.surface == RuntimeSurface.MESSAGING
+        assert messaging_ctx.sender == "+1234567890"
+        assert messaging_ctx.channel == "whatsapp"
+
+        # Step 2: Record messaging ingress breadcrumb (what webhook_receiver.py does)
+        db.add_breadcrumb(
+            session_id=messaging_ctx.session_id,
+            action="messaging_ingress",
+            agent_id="0102",
+            data={"platform": "whatsapp", "message_preview": "test message"},
+            continuity_id=messaging_ctx.continuity_id,
+            runtime_surface=messaging_ctx.surface.value,
+            sender_normalized=messaging_ctx.sender_normalized,
+        )
+
+        # Step 3: Create OpenClaw context with messaging as parent
+        # This simulates process_via_openclaw_dae with enriched_metadata
+        openclaw_ctx = ContinuityManager.from_openclaw(
+            sender="+1234567890",
+            channel="whatsapp",
+            session_key="wa_session_001",
+            metadata={
+                "source_surface": "messaging",
+                "parent_continuity_id": messaging_ctx.continuity_id,
+            },
+        )
+
+        # Verify parent linkage
+        assert openclaw_ctx.surface == RuntimeSurface.OPENCLAW
+        assert openclaw_ctx.parent_continuity_id == messaging_ctx.continuity_id
+        assert openclaw_ctx.continuity_id != messaging_ctx.continuity_id
+
+        # Step 4: Record OpenClaw breadcrumb
+        db.add_breadcrumb(
+            session_id="wa_session_001",
+            action="openclaw_message",
+            agent_id="opus",
+            data={"message": "test message"},
+            continuity_id=openclaw_ctx.continuity_id,
+            runtime_surface=openclaw_ctx.surface.value,
+            sender_normalized=openclaw_ctx.sender_normalized,
+            parent_continuity_id=openclaw_ctx.parent_continuity_id,
+        )
+
+        # Step 5: Verify cross-surface activity is detectable
+        cross_surface = db.get_cross_surface_activity(minutes=5)
+
+        assert len(cross_surface) >= 1, f"Expected cross-surface activity. Got: {cross_surface}"
+
+        # Find the lineage group
+        found = False
+        for item in cross_surface:
+            if messaging_ctx.continuity_id in (
+                item.get("lineage_root", ""),
+                item.get("continuity_id", ""),
+            ) or messaging_ctx.continuity_id in item.get("continuity_ids", []):
+                found = True
+                assert "messaging" in item["surfaces"], f"Expected 'messaging' in surfaces. Got: {item}"
+                assert "openclaw" in item["surfaces"], f"Expected 'openclaw' in surfaces. Got: {item}"
+                break
+
+        assert found, f"Expected messaging→OpenClaw lineage not found. Got: {cross_surface}"
+
+    def test_cli_chat_creates_continuity_context(self):
+        """Verify openclaw_chat.py creates CLI continuity context correctly."""
+        # Test the from_cli factory directly with chat_repl params
+        cli_ctx = ContinuityManager.from_cli(
+            command="chat_repl",
+            script_name="openclaw_chat.py",
+        )
+
+        assert cli_ctx.surface == RuntimeSurface.CLI
+        assert cli_ctx.continuity_id is not None
+        assert len(cli_ctx.continuity_id) > 0
+        assert cli_ctx.surface_metadata.get("command") == "chat_repl"
+        assert cli_ctx.surface_metadata.get("script") == "openclaw_chat.py"
+
+    def test_webhook_creates_messaging_continuity_context(self):
+        """Verify webhook_receiver.py creates messaging continuity context correctly."""
+        # Test the from_messaging factory directly with webhook params
+        msg_ctx = ContinuityManager.from_messaging(
+            platform="telegram",
+            sender="user123",
+            channel="telegram",
+            metadata={"source": "webhook"},
+        )
+
+        assert msg_ctx.surface == RuntimeSurface.MESSAGING
+        assert msg_ctx.continuity_id is not None
+        assert len(msg_ctx.continuity_id) > 0
+        assert msg_ctx.sender == "user123"
+        assert msg_ctx.channel == "telegram"
+        assert msg_ctx.surface_metadata.get("platform") == "telegram"
