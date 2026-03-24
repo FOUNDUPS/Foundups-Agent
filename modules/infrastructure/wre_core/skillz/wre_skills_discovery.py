@@ -10,6 +10,7 @@ import yaml
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Callable
 from dataclasses import dataclass
+from datetime import datetime, timezone
 import logging
 import time
 from threading import Thread, Event
@@ -28,6 +29,10 @@ class DiscoveredSkill:
     promotion_state: str  # Inferred from location
     wsp_chain: List[str]
     metadata: Dict[str, Any]
+    # Skills 2.0 hygiene fields
+    category: str = "workflow"  # workflow | capability-uplift
+    retirement_date: str = ""  # ISO date string or empty
+    has_evals: bool = False  # True if evals field is present and non-empty
 
 
 class WRESkillsDiscovery:
@@ -163,6 +168,72 @@ class WRESkillsDiscovery:
         logger.info(f"[WRE-DISCOVERY] Found {len(filtered)} production-ready skills (fidelity>={min_fidelity})")
         return filtered
 
+    def discover_healthy_skills(self) -> List[DiscoveredSkill]:
+        """
+        Discover all healthy skills (Skills 2.0 hygiene filter).
+
+        Excludes:
+        - Retired skills (retirement_date in the past)
+        - Skills with invalid/missing category
+
+        Returns:
+            List of healthy skills
+        """
+        all_skills = self.discover_all_skills()
+        healthy_skills = []
+
+        for skill in all_skills:
+            # Check retirement
+            if skill.retirement_date and self._is_retired(skill.retirement_date):
+                logger.debug(f"[WRE-DISCOVERY] Excluding retired skill: {skill.skill_name}")
+                continue
+
+            # Check category validity
+            if skill.category not in {"workflow", "capability-uplift"}:
+                logger.debug(
+                    f"[WRE-DISCOVERY] Excluding skill with invalid category: "
+                    f"{skill.skill_name} (category={skill.category})"
+                )
+                continue
+
+            healthy_skills.append(skill)
+
+        excluded = len(all_skills) - len(healthy_skills)
+        if excluded > 0:
+            logger.info(f"[WRE-DISCOVERY] Hygiene filter excluded {excluded}/{len(all_skills)} skills")
+
+        return healthy_skills
+
+    def _is_retired(self, retirement_date: Any) -> bool:
+        """
+        Check if skill is retired based on retirement_date.
+
+        Args:
+            retirement_date: Date string (ISO format) or None/null
+
+        Returns:
+            True if skill is retired (date is in the past)
+        """
+        if not retirement_date or retirement_date == "null":
+            return False
+
+        try:
+            # Parse ISO date string
+            if isinstance(retirement_date, str):
+                # Handle both date-only and datetime formats
+                if "T" in retirement_date:
+                    retire_dt = datetime.fromisoformat(retirement_date.replace("Z", "+00:00"))
+                else:
+                    retire_dt = datetime.strptime(retirement_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            else:
+                return False
+
+            now = datetime.now(timezone.utc)
+            return retire_dt <= now
+        except (ValueError, TypeError):
+            logger.warning(f"[WRE-DISCOVERY] Invalid retirement_date format: {retirement_date}")
+            return False
+
     def _parse_skill_file(self, skill_path: Path) -> Optional[DiscoveredSkill]:
         """
         Parse SKILL.md file to extract metadata
@@ -195,6 +266,12 @@ class WRESkillsDiscovery:
                 logger.warning(f"[WRE-DISCOVERY] No agents specified in {skill_path}")
                 return None
 
+            # Extract Skills 2.0 hygiene fields
+            category = metadata.get("category", "")
+            retirement_date = metadata.get("retirement_date")
+            evals = metadata.get("evals") or []
+            has_evals = bool(evals) and len(evals) > 0
+
             return DiscoveredSkill(
                 skill_path=skill_path,
                 skill_name=skill_name,
@@ -203,7 +280,10 @@ class WRESkillsDiscovery:
                 version=metadata.get("version", "1.0.0"),
                 promotion_state=promotion_state,
                 wsp_chain=self._parse_wsp_chain(content),
-                metadata=metadata
+                metadata=metadata,
+                category=category if category else "workflow",
+                retirement_date=str(retirement_date) if retirement_date and retirement_date != "null" else "",
+                has_evals=has_evals,
             )
 
         except Exception as e:

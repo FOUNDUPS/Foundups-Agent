@@ -2,6 +2,57 @@
 
 ## Chronological Change Log
 
+### [2026-03-25] - Skills 2.0 Hygiene Enforcement (v0.7.1)
+
+**WSP Protocol References**: WSP 96 (WRE Skills), WSP 5 (Test Coverage), WSP 11 (Interface)
+**Impact Analysis**: WRE loader/discovery now enforces Skills 2.0 hygiene fields (category, retirement_date, evals) at boundary. Retired skills blocked from execution, invalid categories flagged.
+
+#### Changes Made
+
+- `skillz/wre_skills_loader.py`:
+  - Extended `SkillMetadata` with `category`, `retirement_date`, `has_evals` fields
+  - Added `SkillHygieneStatus` dataclass for hygiene check results
+  - Added `check_skill_hygiene()` - validates retirement, category, evals
+  - Added `_is_retired()` - ISO date parsing with safe fallback
+  - Added `list_healthy_skills()` - filter by hygiene status
+  - Added `discover_healthy_skills()` - return healthy SkillMetadata
+  - Updated `load_skill()` with `enforce_hygiene=True` parameter (raises ValueError for retired)
+
+- `skillz/wre_skills_discovery.py`:
+  - Extended `DiscoveredSkill` with `category`, `retirement_date`, `has_evals` fields
+  - Added `_is_retired()` - ISO date parsing
+  - Added `discover_healthy_skills()` - filter retired and invalid category
+  - Updated `_parse_skill_file()` to extract Skills 2.0 fields from frontmatter
+
+- `tests/test_wre_skills_loader_hygiene.py` (NEW):
+  - 18 tests covering hygiene enforcement
+  - Fixtures for valid, retired, invalid category skills
+  - Tests: retirement detection, hygiene blocking, bypass flag, healthy filtering
+
+- `tests/test_wre_skills_discovery.py`:
+  - Added `TestSkillsHygiene` class (7 tests)
+  - Tests: retirement dates, category validation, healthy discovery
+
+#### Behavior Summary
+
+| Skill State | `load_skill(enforce_hygiene=True)` | `load_skill(enforce_hygiene=False)` |
+|-------------|-----------------------------------|-------------------------------------|
+| Active, valid category | ALLOWED | ALLOWED |
+| Retired (past date) | BLOCKED (ValueError) | ALLOWED |
+| Invalid category | ALLOWED (logged warning) | ALLOWED |
+| Future retirement_date | ALLOWED | ALLOWED |
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_wre_skills_loader_hygiene.py -v
+# Result: 18 passed
+python -m pytest modules/infrastructure/wre_core/tests/test_wre_skills_discovery.py::TestSkillsHygiene -v
+# Result: 7 passed
+```
+
+---
+
 ### [2026-03-18] - Git Main-Merge Sentinel
 
 **WSP Protocol References**: WSP 72 (Module Independence), WSP 91 (Observability), WSP 22 (ModLog)

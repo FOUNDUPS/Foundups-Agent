@@ -9,7 +9,8 @@ import json
 import yaml
 from pathlib import Path
 from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
 import logging
 
 logger = logging.getLogger(__name__)
@@ -25,6 +26,27 @@ class SkillMetadata:
     promotion_state: str
     location: Path
     pattern_fidelity_threshold: float
+    # Skills 2.0 hygiene fields
+    category: str = "workflow"  # workflow | capability-uplift
+    retirement_date: str = ""  # ISO date string or empty
+    has_evals: bool = False  # True if evals field is present and non-empty
+
+
+@dataclass
+class SkillHygieneStatus:
+    """Result of skill hygiene check."""
+    skill_name: str
+    is_healthy: bool
+    is_retired: bool = False
+    missing_category: bool = False
+    missing_evals: bool = False  # Warning only for production skills
+    retirement_date: str = ""
+    category: str = ""
+    issues: list = None
+
+    def __post_init__(self):
+        if self.issues is None:
+            self.issues = []
 
 
 @dataclass
@@ -154,6 +176,13 @@ class WRESkillsLoader:
             try:
                 skill_path = self.resolve_skill_file(skill_name)
                 metadata = self._extract_metadata(skill_path)
+
+                # Extract Skills 2.0 hygiene fields
+                category = metadata.get("category", "")
+                retirement_date = metadata.get("retirement_date") or ""
+                evals = metadata.get("evals") or []
+                has_evals = bool(evals) and len(evals) > 0
+
                 discovered_skills.append(SkillMetadata(
                     name=skill_name,
                     description=metadata.get("description", ""),
@@ -161,7 +190,10 @@ class WRESkillsLoader:
                     intent_type=skill_info.get("intent_type", ""),
                     promotion_state=skill_info.get("promotion_state", "prototype"),
                     location=skill_path,
-                    pattern_fidelity_threshold=metadata.get("pattern_fidelity_threshold", 0.90)
+                    pattern_fidelity_threshold=metadata.get("pattern_fidelity_threshold", 0.90),
+                    category=category if category else "workflow",
+                    retirement_date=str(retirement_date) if retirement_date and retirement_date != "null" else "",
+                    has_evals=has_evals,
                 ))
             except Exception as e:
                 logger.error(
@@ -173,11 +205,55 @@ class WRESkillsLoader:
         logger.info(f"[WRE-LOADER] Discovered {len(discovered_skills)} skills (agent={agent_type}, intent={intent_type}, state={promotion_state})")
         return discovered_skills
 
+    def discover_healthy_skills(
+        self,
+        agent_type: Optional[str] = None,
+        intent_type: Optional[str] = None,
+        promotion_state: Optional[str] = None
+    ) -> List[SkillMetadata]:
+        """
+        Discover available skills filtered by hygiene status.
+
+        Same as discover_skills() but excludes:
+        - Retired skills (retirement_date in the past)
+        - Skills with invalid/missing category
+
+        Args:
+            agent_type: Filter by agent (gemma, qwen, grok, ui-tars)
+            intent_type: Filter by intent (CLASSIFICATION, DECISION, GENERATION, TELEMETRY)
+            promotion_state: Filter by state (prototype, staged, production)
+
+        Returns:
+            List of healthy skill metadata (NOT full content)
+        """
+        all_skills = self.discover_skills(agent_type, intent_type, promotion_state)
+        healthy_skills = []
+
+        for skill in all_skills:
+            # Check retirement
+            if skill.retirement_date and self._is_retired(skill.retirement_date):
+                logger.debug(f"[WRE-LOADER] Excluding retired skill: {skill.name}")
+                continue
+
+            # Check category validity
+            if skill.category not in {"workflow", "capability-uplift"}:
+                logger.debug(f"[WRE-LOADER] Excluding skill with invalid category: {skill.name} (category={skill.category})")
+                continue
+
+            healthy_skills.append(skill)
+
+        excluded = len(all_skills) - len(healthy_skills)
+        if excluded > 0:
+            logger.info(f"[WRE-LOADER] Hygiene filter excluded {excluded}/{len(all_skills)} skills")
+
+        return healthy_skills
+
     def load_skill(
         self,
         skill_name: str,
         agent_type: str,
-        inject_context: bool = True
+        inject_context: bool = True,
+        enforce_hygiene: bool = True
     ) -> str:
         """
         Load full skill content for agent execution (on-demand)
@@ -186,9 +262,13 @@ class WRESkillsLoader:
             skill_name: Name of skill to load
             agent_type: Agent that will execute (gemma, qwen, grok, ui-tars)
             inject_context: Whether to inject dependency context
+            enforce_hygiene: If True, block retired/unhealthy skills (default: True)
 
         Returns:
             Full SKILL.md content with agent-specific filtering and context injection
+
+        Raises:
+            ValueError: If skill not found or fails hygiene check
         """
         # Check cache first
         cache_key = f"{skill_name}_{agent_type}"
@@ -200,6 +280,19 @@ class WRESkillsLoader:
         skill_info = self.registry["skills"].get(skill_name)
         if not skill_info:
             raise ValueError(f"Skill not found in registry: {skill_name}")
+
+        # Skills 2.0 hygiene gate
+        if enforce_hygiene:
+            hygiene = self.check_skill_hygiene(skill_name)
+            if hygiene.is_retired:
+                raise ValueError(
+                    f"Skill '{skill_name}' is retired (retirement_date: {hygiene.retirement_date}). "
+                    "Use enforce_hygiene=False to bypass."
+                )
+            if not hygiene.is_healthy:
+                logger.warning(
+                    f"[WRE-LOADER] Skill '{skill_name}' has hygiene issues: {hygiene.issues}"
+                )
 
         skill_path = self.resolve_skill_file(skill_name)
         if not skill_path.exists():
@@ -334,6 +427,132 @@ class WRESkillsLoader:
                 return yaml.safe_load(frontmatter)
 
         return {}
+
+    def check_skill_hygiene(self, skill_name: str) -> SkillHygieneStatus:
+        """
+        Check skill hygiene status (Skills 2.0 compliance).
+
+        Validates:
+        - retirement_date: If set and past, skill is retired
+        - category: Must be 'workflow' or 'capability-uplift'
+        - evals: Should be present for production skills (warning)
+
+        Args:
+            skill_name: Name of skill to check
+
+        Returns:
+            SkillHygieneStatus with health assessment
+        """
+        issues = []
+
+        try:
+            skill_path = self.resolve_skill_file(skill_name)
+            metadata = self._extract_metadata(skill_path)
+        except (ValueError, FileNotFoundError) as e:
+            return SkillHygieneStatus(
+                skill_name=skill_name,
+                is_healthy=False,
+                issues=[f"Cannot load skill: {e}"],
+            )
+
+        # Check retirement_date
+        retirement_date = metadata.get("retirement_date") or ""
+        is_retired = self._is_retired(retirement_date)
+        if is_retired:
+            issues.append(f"Skill retired on {retirement_date}")
+
+        # Check category
+        category = metadata.get("category") or ""
+        valid_categories = {"workflow", "capability-uplift"}
+        missing_category = category not in valid_categories
+        if missing_category:
+            issues.append(f"Invalid or missing category: '{category}' (expected: workflow, capability-uplift)")
+
+        # Check evals presence (warning for production skills)
+        evals = metadata.get("evals") or []
+        has_evals = bool(evals) and len(evals) > 0
+        promotion_state = metadata.get("promotion_state", "unknown")
+        missing_evals = promotion_state == "production" and not has_evals
+        if missing_evals:
+            issues.append("Production skill missing evals (recommended)")
+
+        is_healthy = not is_retired and not missing_category
+
+        return SkillHygieneStatus(
+            skill_name=skill_name,
+            is_healthy=is_healthy,
+            is_retired=is_retired,
+            missing_category=missing_category,
+            missing_evals=missing_evals,
+            retirement_date=str(retirement_date) if retirement_date else "",
+            category=category,
+            issues=issues,
+        )
+
+    def _is_retired(self, retirement_date: Any) -> bool:
+        """
+        Check if skill is retired based on retirement_date.
+
+        Args:
+            retirement_date: Date string (ISO format) or None/null
+
+        Returns:
+            True if skill is retired (date is in the past)
+        """
+        if not retirement_date or retirement_date == "null":
+            return False
+
+        try:
+            # Parse ISO date string
+            if isinstance(retirement_date, str):
+                # Handle both date-only and datetime formats
+                if "T" in retirement_date:
+                    retire_dt = datetime.fromisoformat(retirement_date.replace("Z", "+00:00"))
+                else:
+                    retire_dt = datetime.strptime(retirement_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            else:
+                return False
+
+            now = datetime.now(timezone.utc)
+            return retire_dt <= now
+        except (ValueError, TypeError):
+            logger.warning(f"[WRE-LOADER] Invalid retirement_date format: {retirement_date}")
+            return False
+
+    def list_healthy_skills(
+        self,
+        agent_type: Optional[str] = None,
+        promotion_state: Optional[str] = None,
+        domain: Optional[str] = None,
+    ) -> List[str]:
+        """
+        Return registered skill names filtered by hygiene status.
+
+        Only returns skills that:
+        - Are not retired
+        - Have valid category
+
+        Args:
+            agent_type: Filter by agent
+            promotion_state: Filter by state
+            domain: Filter by domain
+
+        Returns:
+            List of healthy skill names
+        """
+        all_skills = self.list_skills(agent_type, promotion_state, domain)
+        healthy = []
+
+        for skill_name in all_skills:
+            status = self.check_skill_hygiene(skill_name)
+            if status.is_healthy:
+                healthy.append(skill_name)
+            else:
+                logger.debug(
+                    f"[WRE-LOADER] Skill '{skill_name}' excluded by hygiene: {status.issues}"
+                )
+
+        return healthy
 
     def _filter_for_agent(self, content: str, agent_type: str) -> str:
         """
