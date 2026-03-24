@@ -139,10 +139,73 @@ pytest test_continuity_context.py  # 58 passed
 17. **Idle session recovery**: `run_idle_tasks()` auto-recovers origin via explicit `set_triggering_session()` only
 18. **No false idle lineage**: Idle recovery only from explicit triggering session, cleared after use
 
+13. **WRE E2E Continuity Smoke Test (round 7 - wre_e2e_continuity_smoke)**:
+    - **Problem**: Existing tests verified context propagation but not actual `execute_skill()` breadcrumb recording
+    - **Solution**: E2E smoke tests that call real WRE orchestrator with mocked skill execution
+    - `test_continuity_context.py`: Added `TestWREE2EContinuitySmoke` class with 3 tests:
+      - `test_execute_skill_records_breadcrumb_with_continuity`: Core E2E - OpenClaw context → WRE execute_skill → verify breadcrumb + lineage
+      - `test_execute_skill_without_parent_context_still_records_breadcrumb`: Orphan execution still records breadcrumb
+      - `test_openclaw_to_wre_three_hop_lineage`: OpenClaw → WRE → child-WRE all grouped under root
+    - `wre_master_orchestrator.py`: **Fix**: Exclude `parent_continuity_context` from `SkillOutcome` JSON serialization (was causing `TypeError: Object of type ContinuityContext is not JSON serializable`)
+    - **E2E path verified**: OpenClaw creates context → `_build_wre_command_context()` includes it → WRE forks via `from_wre()` → breadcrumb recorded with parent linkage → `get_cross_surface_activity()` detects lineage
+
+### Files Changed
+
+- `src/continuity_context.py` (new): Core continuity dataclass and manager with parent propagation
+- `src/openclaw_process_loop.py`: Continuity context creation
+- `src/openclaw_result_memory.py`: Breadcrumb recording with continuity
+- `src/openclaw_execution_routes.py`: Continuity query handlers + WRE context propagation
+- `src/openclaw_supervisor.py`: Supervisor continuity + run_cycle() accepts parent_context
+- `src/webhook_receiver.py`: Messaging ingress continuity + breadcrumb recording + session collision fix
+- `src/action_cli.py`: CLI action continuity + breadcrumb recording + parent propagation + session collision fix
+- `modules/infrastructure/cli/src/openclaw_chat.py`: CLI session continuity + breadcrumb recording + parent propagation + session collision fix
+- `modules/infrastructure/cli/src/openclaw_voice.py`: Voice session continuity + breadcrumb recording + parent propagation + session collision fix
+- `modules/infrastructure/database/src/agent_db.py`: Schema extension and lineage-aware queries
+- `modules/infrastructure/idle_automation/src/idle_automation_dae.py`: Idle surface + run_idle_tasks() accepts parent_context + passes origin to refresher
+- `modules/infrastructure/idle_automation/src/self_research_refresh.py`: Accepts origin_continuity_id, stamps on task creation
+- `modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py`: WRE continuity forking + breadcrumb recording + serialization fix
+- `tests/test_continuity_context.py`: 61 tests (including 3 WRE E2E smoke tests)
+
+### Verification
+
+```
+pytest test_continuity_context.py  # 61 passed
+```
+
+### Acceptance Criteria Met
+
+1. One task started on one surface can be recognized on another via shared continuity_id or lineage
+2. Breadcrumbs record source surface consistently (cli, openclaw, messaging, supervisor, idle, wre wired)
+3. Continuity state is queryable/debuggable via OpenClaw
+4. No platform-specific memory fragmentation
+5. Existing deterministic query paths not affected
+6. Session stability: same session_key always produces same continuity_id
+7. Subprocess propagation: OPENCLAW_CONTINUITY_ID env var wired
+8. Lineage propagation: from_supervisor/from_idle accept parent_context for cross-surface linkage
+9. Production entry points: run_cycle(), run_idle_tasks(), run_idle_automation() accept parent_context
+10. **OpenClaw → WRE cross-surface**: Production path tested and wired with lineage detection
+11. **CLI → OpenClaw cross-surface**: CLI session tracked, lineage into OpenClaw processing
+12. **Messaging → OpenClaw cross-surface**: Webhook ingress tracked, lineage into OpenClaw processing
+13. **Supervisor background correlation**: When executing autonomous tasks, resolves and links to origin continuity
+14. **Idle background correlation**: When creating tasks via self-research, stamps origin_continuity_id
+15. **Multi-hop lineage resolution**: `get_cross_surface_activity()` uses recursive CTE to group all descendants under ultimate root
+16. **Old root resolution**: Ancestry follows parent links outside activity window - recent children group under old roots
+17. **Idle session recovery**: `run_idle_tasks()` auto-recovers origin via explicit `set_triggering_session()` only
+18. **No false idle lineage**: Idle recovery only from explicit triggering session, cleared after use
+19. **WRE E2E breadcrumb**: `execute_skill()` records breadcrumb with correct continuity metadata and parent linkage
+20. **WRE orphan execution**: Works without parent context (breadcrumb still recorded, no parent linkage)
+21. **WRE multi-hop lineage**: Nested skill executions (OpenClaw → WRE → child-WRE) all group under ultimate root
+
 ### Remaining Work (Future Slices)
 
-- Caller wiring: auto_moderator_dae.py needs continuity context to pass to run_idle_automation() + set_triggering_session()
-- E2E smoke test: full roundtrip from real CLI/webhook through WRE back to breadcrumb
+- **Caller wiring**: auto_moderator_dae.py needs continuity context to pass to run_idle_automation() + set_triggering_session()
+- **Skill evolution continuity** (wardrobe/rolodex tracking): Pass `continuity_ctx` to `evolve_skill()`, add `origin_continuity_id` to `learning_events` table, record breadcrumb when variation created/promoted. This enables "what did this session do?" to include skill evolution events.
+- **True nested E2E**: Current three-hop test uses fabricated lineage. Add test that calls `execute_skill()` which internally triggers another skill execution.
+- **Skills 2.0 hygiene wiring** (skill consumption safety): WRE loader/orchestrator doesn't use Skills 2.0 fields. Need to:
+  - Extend `SkillMetadata` with `category`, `evals`, `retirement_date`
+  - Add `_check_skill_hygiene()` in loader - block retired skills, validate category
+  - Add pre-execution evals check - run benchmark cases before first production use
+  - Current: Cisco scanner runs, but Skills 2.0 metadata ignored
 
 ---
 

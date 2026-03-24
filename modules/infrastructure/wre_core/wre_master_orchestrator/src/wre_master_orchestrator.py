@@ -1111,12 +1111,17 @@ Final Output: [summary]
         )
 
         # Step 7: Store outcome in pattern memory (for recursive learning)
+        # Remove non-serializable keys before JSON encoding
+        serializable_context = {
+            k: v for k, v in input_context.items()
+            if k not in ("parent_continuity_context",)  # ContinuityContext not JSON-serializable
+        }
         outcome = SkillOutcome(
             execution_id=execution_id,
             skill_name=skill_name,
             agent=agent,
             timestamp=start_time.isoformat(),
-            input_context=json.dumps(input_context),
+            input_context=json.dumps(serializable_context),
             output_result=json.dumps(execution_result),
             success=True,
             pattern_fidelity=pattern_fidelity,

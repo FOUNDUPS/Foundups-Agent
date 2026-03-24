@@ -1549,3 +1549,266 @@ class TestBackgroundContinuityCorrelation:
         # Recovery should return None - no false lineage to prior idle work
         recovered = dae._try_recover_origin_continuity()
         assert recovered is None
+
+
+class TestWREE2EContinuitySmoke:
+    """E2E smoke tests proving OpenClaw → WRE preserves continuity and records lineage.
+
+    These tests exercise the REAL execute_skill() path (with mocked skill execution)
+    to verify that:
+    1. Parent continuity propagates from OpenClaw to WRE
+    2. WRE forks continuity correctly via ContinuityManager.from_wre()
+    3. Breadcrumbs are recorded with correct continuity metadata
+    4. Cross-surface queries detect the lineage
+    """
+
+    @pytest.fixture
+    def mock_db(self, tmp_path):
+        """Create AgentDB with isolated temporary database."""
+        db_path = tmp_path / "test_wre_e2e.db"
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        with patch.dict(os.environ, {"FOUNDUPS_DB_PATH": str(db_path)}):
+            import importlib
+            import modules.infrastructure.database.src.db_manager as db_manager_module
+            importlib.reload(db_manager_module)
+            from modules.infrastructure.database.src.agent_db import AgentDB
+            db = AgentDB()
+            yield db
+
+    @pytest.fixture
+    def wre_orchestrator(self, tmp_path, mock_db):
+        """Create WRE orchestrator with mocked dependencies.
+
+        Requires mock_db fixture to be created first so env var is set.
+        """
+        from modules.infrastructure.wre_core.wre_master_orchestrator.src.wre_master_orchestrator import (
+            WREMasterOrchestrator,
+        )
+
+        # WREMasterOrchestrator uses :memory: when PYTEST_CURRENT_TEST is set
+        orchestrator = WREMasterOrchestrator()
+        return orchestrator
+
+    def test_execute_skill_records_breadcrumb_with_continuity(
+        self, mock_db, wre_orchestrator, tmp_path
+    ):
+        """Verify execute_skill() records breadcrumb with correct continuity metadata.
+
+        This is the core smoke test for OpenClaw → WRE continuity preservation.
+        """
+        import uuid
+
+        # Step 1: Create OpenClaw context (simulating process_loop wiring)
+        openclaw_ctx = ContinuityManager.from_openclaw(
+            sender="012_smoke_test",
+            channel="discord_e2e",
+            session_key=f"smoke_session_{uuid.uuid4().hex[:8]}",
+        )
+
+        # Record OpenClaw breadcrumb
+        mock_db.add_breadcrumb(
+            session_id=openclaw_ctx.session_id,
+            action="openclaw_initiate_wre",
+            agent_id="opus",
+            continuity_id=openclaw_ctx.continuity_id,
+            runtime_surface=openclaw_ctx.surface.value,
+            sender_normalized=openclaw_ctx.sender_normalized,
+        )
+
+        # Step 2: Build WRE command context with parent continuity
+        # This is what _build_wre_command_context does
+        wre_command_context = {
+            "type": "orchestration",
+            "task": "e2e smoke test",
+            "command": "test_command",
+            "source": "openclaw_dae",
+            "sender": "012_smoke_test",
+            "channel": "discord_e2e",
+            "parent_continuity_context": openclaw_ctx,
+        }
+
+        # Step 3: Mock skill execution but allow real continuity flow
+        # Disable RAG to avoid JSON serialization issues with ContinuityContext
+        with patch.dict(os.environ, {"WRE_AGENTIC_RAG": "0"}):
+            # Mock executor dispatch to return a successful result (bypasses Qwen LLM)
+            with patch.object(wre_orchestrator, "_try_executor_dispatch") as mock_dispatch:
+                mock_dispatch.return_value = {
+                    "status": "ok",
+                    "output": "mocked skill output",
+                    "steps_completed": 3,
+                }
+
+                # Mock libido to allow execution
+                with patch.object(wre_orchestrator.libido_monitor, "should_execute") as mock_libido:
+                    from modules.infrastructure.wre_core.src.libido_monitor import LibidoSignal
+                    mock_libido.return_value = LibidoSignal.CONTINUE
+
+                    # Mock skill loader to return minimal content
+                    with patch.object(wre_orchestrator.skills_loader, "load_skill") as mock_load:
+                        mock_load.return_value = "# Test Skill\nDo the test."
+
+                        # Mock validate_step_fidelity for pattern fidelity
+                        with patch.object(wre_orchestrator.libido_monitor, "validate_step_fidelity") as mock_fidelity:
+                            mock_fidelity.return_value = 0.95
+
+                            # Execute skill with real continuity flow
+                            result = wre_orchestrator.execute_skill(
+                                skill_name="e2e_smoke_skill",
+                                agent="qwen",
+                                input_context=wre_command_context,
+                                force=True,
+                            )
+
+        # Step 4: Verify execution succeeded
+        assert result["success"] is True
+        assert result["skill_name"] == "e2e_smoke_skill"
+        assert result.get("continuity_id") is not None
+        assert result.get("parent_continuity_id") == openclaw_ctx.continuity_id
+
+        wre_continuity_id = result["continuity_id"]
+
+        # Step 5: Verify WRE breadcrumb was recorded
+        wre_breadcrumbs = mock_db.get_breadcrumbs_by_continuity(wre_continuity_id)
+        assert len(wre_breadcrumbs) == 1, f"Expected 1 WRE breadcrumb, got {len(wre_breadcrumbs)}"
+
+        wre_bc = wre_breadcrumbs[0]
+        assert wre_bc["runtime_surface"] == "wre"
+        assert wre_bc["action"] == "wre_skill_execution"
+        assert wre_bc["parent_continuity_id"] == openclaw_ctx.continuity_id
+
+        # Step 6: Verify cross-surface lineage detection
+        cross_surface = mock_db.get_cross_surface_activity(minutes=5)
+
+        # Find the lineage group with openclaw as root
+        our_result = [
+            r for r in cross_surface
+            if r["lineage_root"] == openclaw_ctx.continuity_id
+        ]
+        assert len(our_result) == 1, f"Expected 1 lineage group with openclaw root: {cross_surface}"
+
+        # Both surfaces should be detected
+        assert our_result[0]["surface_count"] == 2
+        assert "openclaw" in our_result[0]["surfaces"]
+        assert "wre" in our_result[0]["surfaces"]
+
+        # Both continuity IDs should be in the group
+        assert openclaw_ctx.continuity_id in our_result[0]["continuity_ids"]
+        assert wre_continuity_id in our_result[0]["continuity_ids"]
+
+    def test_execute_skill_without_parent_context_still_records_breadcrumb(
+        self, mock_db, wre_orchestrator
+    ):
+        """WRE execution without parent context still records breadcrumb (orphan execution)."""
+        # Build context WITHOUT parent_continuity_context
+        wre_command_context = {
+            "type": "orchestration",
+            "task": "orphan execution test",
+            "command": "test_command",
+            "source": "direct_call",
+        }
+
+        # Mock dependencies
+        with patch.object(wre_orchestrator, "_try_executor_dispatch") as mock_dispatch:
+            mock_dispatch.return_value = {"status": "ok", "output": "mocked", "steps_completed": 2}
+
+            with patch.object(wre_orchestrator.libido_monitor, "should_execute") as mock_libido:
+                from modules.infrastructure.wre_core.src.libido_monitor import LibidoSignal
+                mock_libido.return_value = LibidoSignal.CONTINUE
+
+                with patch.object(wre_orchestrator.skills_loader, "load_skill") as mock_load:
+                    mock_load.return_value = "# Test Skill"
+
+                    with patch.object(wre_orchestrator.libido_monitor, "validate_step_fidelity") as mock_fidelity:
+                        mock_fidelity.return_value = 0.92
+
+                        result = wre_orchestrator.execute_skill(
+                            skill_name="orphan_test_skill",
+                            agent="qwen",
+                            input_context=wre_command_context,
+                            force=True,
+                        )
+
+        # Should succeed
+        assert result["success"] is True
+        assert result.get("continuity_id") is not None
+        assert result.get("parent_continuity_id") is None  # No parent
+
+        # Breadcrumb should still be recorded
+        wre_breadcrumbs = mock_db.get_breadcrumbs_by_continuity(result["continuity_id"])
+        assert len(wre_breadcrumbs) == 1
+
+        wre_bc = wre_breadcrumbs[0]
+        assert wre_bc["runtime_surface"] == "wre"
+        assert wre_bc["parent_continuity_id"] is None
+
+    def test_openclaw_to_wre_three_hop_lineage(self, mock_db, wre_orchestrator):
+        """OpenClaw → WRE → child-WRE creates 3-hop lineage, all grouped under root.
+
+        Simulates nested skill execution where WRE calls another WRE skill.
+        """
+        import uuid
+
+        # Step 1: Create OpenClaw context (root)
+        openclaw_ctx = ContinuityManager.from_openclaw(
+            sender="012_three_hop",
+            channel="discord",
+            session_key=f"three_hop_{uuid.uuid4().hex[:8]}",
+        )
+        mock_db.add_breadcrumb(
+            session_id=openclaw_ctx.session_id,
+            action="openclaw_three_hop_start",
+            continuity_id=openclaw_ctx.continuity_id,
+            runtime_surface=openclaw_ctx.surface.value,
+            sender_normalized=openclaw_ctx.sender_normalized,
+        )
+
+        # Step 2: First WRE execution (child of OpenClaw)
+        wre_ctx_1 = ContinuityManager.from_wre(
+            skill_name="parent_skill",
+            agent="qwen",
+            parent_context=openclaw_ctx,
+        )
+        mock_db.add_breadcrumb(
+            session_id=f"wre_{wre_ctx_1.continuity_id[:8]}",
+            action="wre_skill_execution",
+            continuity_id=wre_ctx_1.continuity_id,
+            runtime_surface=wre_ctx_1.surface.value,
+            sender_normalized=wre_ctx_1.sender_normalized,
+            parent_continuity_id=wre_ctx_1.parent_continuity_id,
+        )
+
+        # Step 3: Second WRE execution (child of first WRE - grandchild of OpenClaw)
+        wre_ctx_2 = ContinuityManager.from_wre(
+            skill_name="child_skill",
+            agent="gemma",
+            parent_context=wre_ctx_1,
+        )
+        mock_db.add_breadcrumb(
+            session_id=f"wre_{wre_ctx_2.continuity_id[:8]}",
+            action="wre_skill_execution",
+            continuity_id=wre_ctx_2.continuity_id,
+            runtime_surface=wre_ctx_2.surface.value,
+            sender_normalized=wre_ctx_2.sender_normalized,
+            parent_continuity_id=wre_ctx_2.parent_continuity_id,
+        )
+
+        # Verify lineage chain
+        assert wre_ctx_1.parent_continuity_id == openclaw_ctx.continuity_id
+        assert wre_ctx_2.parent_continuity_id == wre_ctx_1.continuity_id
+
+        # Query cross-surface activity
+        results = mock_db.get_cross_surface_activity(minutes=5)
+
+        # Find the group with openclaw as root
+        our_result = [r for r in results if r["lineage_root"] == openclaw_ctx.continuity_id]
+        assert len(our_result) == 1, f"Expected 1 group: {results}"
+
+        # All 3 continuity IDs should be in one group
+        continuity_ids = our_result[0]["continuity_ids"]
+        assert openclaw_ctx.continuity_id in continuity_ids
+        assert wre_ctx_1.continuity_id in continuity_ids
+        assert wre_ctx_2.continuity_id in continuity_ids
+
+        # Should see 2 surfaces (openclaw + wre) - WRE appears once even with 2 executions
+        assert "openclaw" in our_result[0]["surfaces"]
+        assert "wre" in our_result[0]["surfaces"]
