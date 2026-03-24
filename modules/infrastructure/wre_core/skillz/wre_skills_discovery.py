@@ -281,7 +281,7 @@ class WRESkillsDiscovery:
                 promotion_state=promotion_state,
                 wsp_chain=self._parse_wsp_chain(content),
                 metadata=metadata,
-                category=category if category else "workflow",
+                category=category,  # Keep empty for hygiene filter to detect
                 retirement_date=str(retirement_date) if retirement_date and retirement_date != "null" else "",
                 has_evals=has_evals,
             )

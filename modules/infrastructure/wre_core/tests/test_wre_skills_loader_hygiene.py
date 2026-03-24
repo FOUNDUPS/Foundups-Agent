@@ -239,6 +239,22 @@ retirement_date: null
         assert "valid_skill" in names
         assert "retired_skill" not in names
         assert "invalid_category_skill" not in names
+        assert "no_category_skill" not in names  # Missing category excluded
+
+    def test_discover_healthy_skills_excludes_no_category(self, loader_with_registry):
+        """Regression: skills with missing category excluded from discover_healthy_skills."""
+        # This tests the gap where missing category was normalized to "workflow"
+        # before the hygiene filter, causing no_category_skill to pass
+        healthy = loader_with_registry.discover_healthy_skills()
+        names = [s.name for s in healthy]
+
+        # no_category_skill has no category field - should be excluded
+        assert "no_category_skill" not in names
+
+        # But check_skill_hygiene should also flag it as unhealthy
+        status = loader_with_registry.check_skill_hygiene("no_category_skill")
+        assert status.is_healthy is False
+        assert status.missing_category is True
 
 
 class TestIsRetired:
@@ -317,6 +333,63 @@ class TestSkillMetadataHygieneFields:
         assert metadata.category == "capability-uplift"
         assert metadata.retirement_date == "2099-01-01"
         assert metadata.has_evals is True
+
+
+class TestSelectorUsesHealthySkills:
+    """Regression: SkillSelector uses healthy skills, not full registry."""
+
+    def test_selector_uses_list_healthy_skills(self):
+        """Selector prefers list_healthy_skills over list_skills."""
+        from modules.infrastructure.wre_core.src.skill_selector import SkillSelector
+
+        # Mock loader that tracks which method was called
+        class MockLoader:
+            def __init__(self):
+                self.called_method = None
+
+            def list_healthy_skills(self):
+                self.called_method = "list_healthy_skills"
+                return ["healthy_gitpush"]
+
+            def list_skills(self):
+                self.called_method = "list_skills"
+                return ["healthy_gitpush", "retired_gitpush"]
+
+        mock_loader = MockLoader()
+        selector = SkillSelector(skills_loader=mock_loader)
+
+        # Call find_candidates_for_intent
+        candidates = selector.find_candidates_for_intent("git push")
+
+        # Should have called list_healthy_skills, not list_skills
+        assert mock_loader.called_method == "list_healthy_skills"
+
+    def test_selector_excludes_retired_skills(self):
+        """Selector does not return retired skills in candidates."""
+        from modules.infrastructure.wre_core.src.skill_selector import SkillSelector
+
+        class MockLoader:
+            def list_healthy_skills(self):
+                # Only returns healthy skills
+                return ["healthy_gitpush"]
+
+            @property
+            def registry(self):
+                return {
+                    "skills": {
+                        "healthy_gitpush": {"description": "git push automation"},
+                        "retired_gitpush": {"description": "old git push skill"},
+                    }
+                }
+
+        mock_loader = MockLoader()
+        selector = SkillSelector(skills_loader=mock_loader)
+
+        candidates = selector.find_candidates_for_intent("git push")
+
+        # Only healthy skill should be in candidates
+        assert "healthy_gitpush" in candidates
+        assert "retired_gitpush" not in candidates
 
 
 if __name__ == "__main__":

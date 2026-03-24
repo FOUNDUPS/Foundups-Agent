@@ -33,20 +33,24 @@
   - Added `TestSkillsHygiene` class (7 tests)
   - Tests: retirement dates, category validation, healthy discovery
 
+- `src/skill_selector.py`:
+  - Updated `find_candidates_for_intent()` to use `list_healthy_skills()` instead of `list_skills()`
+  - Retired skills now excluded at selection time, not just load time
+
 #### Behavior Summary
 
-| Skill State | `load_skill(enforce_hygiene=True)` | `load_skill(enforce_hygiene=False)` |
-|-------------|-----------------------------------|-------------------------------------|
-| Active, valid category | ALLOWED | ALLOWED |
-| Retired (past date) | BLOCKED (ValueError) | ALLOWED |
-| Invalid category | ALLOWED (logged warning) | ALLOWED |
-| Future retirement_date | ALLOWED | ALLOWED |
+| Skill State | `load_skill(enforce_hygiene=True)` | `load_skill(enforce_hygiene=False)` | `find_candidates_for_intent()` |
+|-------------|-----------------------------------|-------------------------------------|-------------------------------|
+| Active, valid category | ALLOWED | ALLOWED | INCLUDED |
+| Retired (past date) | BLOCKED (ValueError) | ALLOWED | EXCLUDED |
+| Invalid/missing category | ALLOWED (logged warning) | ALLOWED | EXCLUDED |
+| Future retirement_date | ALLOWED | ALLOWED | INCLUDED |
 
 #### Verification
 
 ```bash
 python -m pytest modules/infrastructure/wre_core/tests/test_wre_skills_loader_hygiene.py -v
-# Result: 18 passed
+# Result: 21 passed (18 original + 3 regression)
 python -m pytest modules/infrastructure/wre_core/tests/test_wre_skills_discovery.py::TestSkillsHygiene -v
 # Result: 7 passed
 ```

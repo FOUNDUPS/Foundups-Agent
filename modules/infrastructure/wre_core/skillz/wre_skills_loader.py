@@ -191,7 +191,7 @@ class WRESkillsLoader:
                     promotion_state=skill_info.get("promotion_state", "prototype"),
                     location=skill_path,
                     pattern_fidelity_threshold=metadata.get("pattern_fidelity_threshold", 0.90),
-                    category=category if category else "workflow",
+                    category=category,  # Keep empty for hygiene filter to detect
                     retirement_date=str(retirement_date) if retirement_date and retirement_date != "null" else "",
                     has_evals=has_evals,
                 ))
