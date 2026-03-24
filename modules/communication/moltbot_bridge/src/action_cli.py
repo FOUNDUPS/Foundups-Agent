@@ -288,6 +288,43 @@ async def _dispatch_via_dae(
     """
     from .openclaw_dae import OpenClawDAE
 
+    # Gateway Continuity Layer: Create CLI continuity context for this action
+    cli_continuity_ctx = None
+    effective_session_key = session_key
+    process_metadata: Dict[str, Any] = {"source_surface": "cli"}
+
+    try:
+        from .continuity_context import ContinuityManager
+        cli_continuity_ctx = ContinuityManager.from_cli(
+            command="action_cli",
+            script_name="action_cli.py",
+        )
+        # Derive unique session_key from CLI continuity to avoid child ID collision
+        effective_session_key = f"cli_action_{cli_continuity_ctx.continuity_id[:12]}"
+        process_metadata["parent_continuity_id"] = cli_continuity_ctx.continuity_id
+
+        # Record CLI action breadcrumb for cross-surface tracking
+        try:
+            from modules.infrastructure.database.src.agent_db import AgentDB
+            db = AgentDB()
+            db.add_breadcrumb(
+                session_id=effective_session_key,
+                action="cli_action_start",
+                agent_id="0102",
+                data={
+                    "backend": backend,
+                    "command": command[:100] if command else "",
+                },
+                continuity_id=cli_continuity_ctx.continuity_id,
+                runtime_surface=cli_continuity_ctx.surface.value,
+                sender_normalized=cli_continuity_ctx.sender_normalized,
+            )
+        except Exception:
+            pass  # Breadcrumb recording is optional
+    except Exception:
+        # Graceful degradation - continuity is optional
+        pass
+
     prev_openclaw_no_keys = os.getenv("OPENCLAW_NO_API_KEYS")
     prev_ironclaw_no_keys = os.getenv("IRONCLAW_NO_API_KEYS")
     try:
@@ -306,13 +343,15 @@ async def _dispatch_via_dae(
                 message=f"become {model_target}",
                 sender=sender,
                 channel=channel,
-                session_key=f"{session_key}_model_switch",
+                session_key=f"{effective_session_key}_model_switch",
+                metadata=process_metadata,
             )
         response = await dae.process(
             message=command,
             sender=sender,
             channel=channel,
-            session_key=session_key,
+            session_key=effective_session_key,
+            metadata=process_metadata,
         )
     finally:
         if prev_openclaw_no_keys is None:

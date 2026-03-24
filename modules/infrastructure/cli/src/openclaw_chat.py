@@ -18,7 +18,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict, Any
 
 
 def _ensure_repo_root():
@@ -125,7 +125,43 @@ def run_chat_repl(
     print("[ID] tip: ask `model details` for full diagnostics")
     print()
 
-    session_key = "local_repl_012"
+    # Gateway Continuity Layer: Create CLI continuity context for this session
+    cli_continuity_ctx = None
+    session_key = "local_repl_012"  # Default fallback
+
+    try:
+        from modules.communication.moltbot_bridge.src.continuity_context import (
+            ContinuityManager,
+        )
+        cli_continuity_ctx = ContinuityManager.from_cli(
+            command="chat_repl",
+            script_name="openclaw_chat.py",
+        )
+        # Derive unique session_key from CLI continuity to avoid child ID collision
+        session_key = f"cli_chat_{cli_continuity_ctx.continuity_id[:12]}"
+        print(f"[CONTINUITY] CLI context: {cli_continuity_ctx.continuity_id[:12]}...")
+
+        # Record CLI session start breadcrumb for cross-surface tracking
+        try:
+            from modules.infrastructure.database.src.agent_db import AgentDB
+            db = AgentDB()
+            db.add_breadcrumb(
+                session_id=session_key,
+                action="cli_session_start",
+                agent_id="0102",
+                data={
+                    "backend": backend,
+                    "command": "chat_repl",
+                },
+                continuity_id=cli_continuity_ctx.continuity_id,
+                runtime_surface=cli_continuity_ctx.surface.value,
+                sender_normalized=cli_continuity_ctx.sender_normalized,
+            )
+        except Exception:
+            pass  # Breadcrumb recording is optional
+    except Exception as ctx_exc:
+        # Graceful degradation - continuity is optional
+        pass
 
     while True:
         try:
@@ -159,12 +195,18 @@ def run_chat_repl(
             continue
 
         try:
+            # Gateway Continuity Layer: Propagate CLI context as parent for OpenClaw processing
+            process_metadata: Dict[str, Any] = {"source_surface": "cli"}
+            if cli_continuity_ctx is not None:
+                process_metadata["parent_continuity_id"] = cli_continuity_ctx.continuity_id
+
             response = asyncio.run(
                 dae.process(
                     message=message,
                     sender="@012",
                     channel="local_repl",
                     session_key=session_key,
+                    metadata=process_metadata,
                 )
             )
             print(f"\n0102> {response}\n")

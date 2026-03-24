@@ -317,6 +317,18 @@ class AgentDB:
             {
                 "status": "TEXT DEFAULT 'pending'",
                 "completed_at": "DATETIME",
+                "origin_continuity_id": "TEXT",  # Gateway Continuity Layer
+            },
+        )
+
+        # Gateway Continuity Layer: Add continuity metadata to breadcrumbs (WSP 60)
+        self._ensure_table_columns(
+            "agents_breadcrumbs",
+            {
+                "continuity_id": "TEXT",
+                "runtime_surface": "TEXT",
+                "sender_normalized": "TEXT",
+                "parent_continuity_id": "TEXT",
             },
         )
 
@@ -331,6 +343,16 @@ class AgentDB:
             )
             conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_autonomous_tasks_assigned_to ON agents_autonomous_tasks(assigned_to)"
+            )
+            # Indexes for continuity queries
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_breadcrumbs_continuity_id ON agents_breadcrumbs(continuity_id)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_breadcrumbs_runtime_surface ON agents_breadcrumbs(runtime_surface)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_breadcrumbs_sender_normalized ON agents_breadcrumbs(sender_normalized)"
             )
 
     def record_awakening(self, agent_id: str, consciousness_level: str, koan: str = None) -> None:
@@ -415,18 +437,39 @@ class AgentDB:
     def add_breadcrumb(self, session_id: str, action: str, agent_id: str = "0102",
                       query: str = None, results: List[Dict] = None,
                       related_docs: List[str] = None, contract_id: str = None,
-                      task_id: str = None, data: Dict[str, Any] = None) -> int:
-        """Add a breadcrumb to the trail."""
+                      task_id: str = None, data: Dict[str, Any] = None,
+                      continuity_id: str = None, runtime_surface: str = None,
+                      sender_normalized: str = None, parent_continuity_id: str = None) -> int:
+        """
+        Add a breadcrumb to the trail.
+
+        Args:
+            session_id: Session identifier
+            action: Action performed
+            agent_id: Agent identifier (default: "0102")
+            query: Query text if applicable
+            results: Results data
+            related_docs: Related document paths
+            contract_id: Associated contract ID
+            task_id: Associated task ID
+            data: Additional data
+            continuity_id: Cross-surface continuity identifier (Gateway Continuity Layer)
+            runtime_surface: Runtime surface (cli, openclaw, messaging, etc.)
+            sender_normalized: Normalized sender identity
+            parent_continuity_id: Parent continuity ID for lineage tracking
+        """
         return self.db.execute_write('''
             INSERT INTO agents_breadcrumbs
-            (session_id, action, agent_id, query, results, related_docs, contract_id, task_id, data)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (session_id, action, agent_id, query, results, related_docs, contract_id, task_id, data,
+             continuity_id, runtime_surface, sender_normalized, parent_continuity_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             session_id, action, agent_id, query,
             json.dumps(results) if results else None,
             json.dumps(related_docs) if related_docs else None,
             contract_id, task_id,
-            json.dumps(data) if data else None
+            json.dumps(data) if data else None,
+            continuity_id, runtime_surface, sender_normalized, parent_continuity_id
         ))
 
     def get_breadcrumbs(self, session_id: str = None, agent_id: str = None,
@@ -490,6 +533,238 @@ class AgentDB:
             if len(recent_agents) >= limit:
                 break
         return recent_agents
+
+    # ============================================================================
+    # GATEWAY CONTINUITY LAYER - Cross-Surface Queries (WSP 60)
+    # ============================================================================
+
+    def get_breadcrumbs_by_continuity(
+        self, continuity_id: str, include_children: bool = True, limit: int = 50
+    ) -> List[Dict[str, Any]]:
+        """
+        Get breadcrumbs by continuity ID across all surfaces.
+
+        Args:
+            continuity_id: The continuity ID to search for
+            include_children: Include breadcrumbs with this as parent_continuity_id
+            limit: Maximum results
+
+        Returns:
+            List of breadcrumbs ordered by timestamp (newest first)
+        """
+        if include_children:
+            query = """
+                SELECT * FROM agents_breadcrumbs
+                WHERE continuity_id = ? OR parent_continuity_id = ?
+                ORDER BY timestamp DESC LIMIT ?
+            """
+            params = (continuity_id, continuity_id, limit)
+        else:
+            query = """
+                SELECT * FROM agents_breadcrumbs
+                WHERE continuity_id = ?
+                ORDER BY timestamp DESC LIMIT ?
+            """
+            params = (continuity_id, limit)
+
+        results = self.db.execute_query(query, params)
+        return self._parse_breadcrumb_json_fields(results)
+
+    def get_breadcrumbs_by_surface(
+        self, runtime_surface: str, minutes: int = 60, limit: int = 50
+    ) -> List[Dict[str, Any]]:
+        """
+        Get recent breadcrumbs from a specific runtime surface.
+
+        Args:
+            runtime_surface: The surface (cli, openclaw, messaging, etc.)
+            minutes: Time window in minutes
+            limit: Maximum results
+        """
+        # Use datetime format compatible with SQLite CURRENT_TIMESTAMP
+        cutoff = (datetime.now(timezone.utc) - timedelta(minutes=minutes)).strftime("%Y-%m-%d %H:%M:%S")
+        results = self.db.execute_query(
+            """
+            SELECT * FROM agents_breadcrumbs
+            WHERE runtime_surface = ? AND timestamp >= ?
+            ORDER BY timestamp DESC LIMIT ?
+            """,
+            (runtime_surface, cutoff, limit),
+        )
+        return self._parse_breadcrumb_json_fields(results)
+
+    def get_breadcrumbs_by_sender(
+        self, sender_normalized: str, minutes: int = 60, limit: int = 50
+    ) -> List[Dict[str, Any]]:
+        """
+        Get recent breadcrumbs from a specific normalized sender across all surfaces.
+
+        Args:
+            sender_normalized: Normalized sender identity
+            minutes: Time window in minutes
+            limit: Maximum results
+        """
+        # Use datetime format compatible with SQLite CURRENT_TIMESTAMP
+        cutoff = (datetime.now(timezone.utc) - timedelta(minutes=minutes)).strftime("%Y-%m-%d %H:%M:%S")
+        results = self.db.execute_query(
+            """
+            SELECT * FROM agents_breadcrumbs
+            WHERE sender_normalized = ? AND timestamp >= ?
+            ORDER BY timestamp DESC LIMIT ?
+            """,
+            (sender_normalized, cutoff, limit),
+        )
+        return self._parse_breadcrumb_json_fields(results)
+
+    def get_continuity_summary(
+        self, continuity_id: str
+    ) -> Dict[str, Any]:
+        """
+        Get a summary of activity for a continuity ID.
+
+        Returns:
+            Dict with surfaces, action counts, time range, and lineage info
+        """
+        rows = self.db.execute_query(
+            """
+            SELECT
+                COUNT(*) as count,
+                MIN(timestamp) as first_seen,
+                MAX(timestamp) as last_seen,
+                GROUP_CONCAT(DISTINCT runtime_surface) as surfaces,
+                GROUP_CONCAT(DISTINCT action) as actions
+            FROM agents_breadcrumbs
+            WHERE continuity_id = ? OR parent_continuity_id = ?
+            """,
+            (continuity_id, continuity_id),
+        )
+        if not rows or rows[0]["count"] == 0:
+            return {"found": False, "continuity_id": continuity_id}
+
+        row = rows[0]
+        return {
+            "found": True,
+            "continuity_id": continuity_id,
+            "breadcrumb_count": row["count"],
+            "first_seen": row["first_seen"],
+            "last_seen": row["last_seen"],
+            "surfaces": row["surfaces"].split(",") if row["surfaces"] else [],
+            "actions": row["actions"].split(",") if row["actions"] else [],
+        }
+
+    def get_cross_surface_activity(
+        self, minutes: int = 30, limit: int = 20
+    ) -> List[Dict[str, Any]]:
+        """
+        Get recent work items that span multiple runtime surfaces.
+
+        Detects cross-surface activity by:
+        1. Same continuity_id across different surfaces
+        2. Lineage-linked work (parent_continuity_id relationships)
+
+        Returns work items that transitioned across surfaces (e.g., CLI -> OpenClaw -> Supervisor).
+
+        Uses recursive CTE to resolve ultimate lineage root for multi-hop chains
+        (e.g., OpenClaw -> Idle -> Supervisor all grouped under OpenClaw's root).
+
+        Ancestry resolution follows parent links regardless of time window - only the
+        final activity filter uses the time cutoff. This ensures old roots are still
+        discovered when recent follow-up work references them.
+        """
+        # Use datetime format compatible with SQLite CURRENT_TIMESTAMP
+        cutoff = (datetime.now(timezone.utc) - timedelta(minutes=minutes)).strftime("%Y-%m-%d %H:%M:%S")
+
+        # Recursive CTE to resolve ultimate lineage root for each continuity_id
+        # IMPORTANT: continuity_map includes ALL breadcrumbs (no time filter) so ancestry
+        # can be resolved even when roots are older than the activity window.
+        # The time filter is applied only to the final grouping/reporting.
+        results = self.db.execute_query(
+            """
+            WITH RECURSIVE
+            -- Get distinct continuity mappings from ALL breadcrumbs (no time filter)
+            -- This allows ancestry resolution to old roots that recent work references
+            continuity_map AS (
+                SELECT DISTINCT
+                    continuity_id,
+                    parent_continuity_id
+                FROM agents_breadcrumbs
+                WHERE continuity_id IS NOT NULL AND continuity_id != ''
+            ),
+            -- Recursively resolve ultimate root for each continuity_id
+            lineage_roots AS (
+                -- Base case: nodes without parents are their own root
+                SELECT
+                    continuity_id,
+                    continuity_id as ultimate_root,
+                    0 as depth
+                FROM continuity_map
+                WHERE parent_continuity_id IS NULL OR parent_continuity_id = ''
+
+                UNION ALL
+
+                -- Recursive case: follow parent chain
+                SELECT
+                    cm.continuity_id,
+                    lr.ultimate_root,
+                    lr.depth + 1
+                FROM continuity_map cm
+                JOIN lineage_roots lr ON cm.parent_continuity_id = lr.continuity_id
+                WHERE cm.parent_continuity_id IS NOT NULL
+                  AND cm.parent_continuity_id != ''
+                  AND lr.depth < 10  -- Prevent infinite loops
+            ),
+            -- Get the deepest resolution for each continuity_id (ultimate root)
+            resolved_roots AS (
+                SELECT continuity_id, ultimate_root
+                FROM lineage_roots
+                GROUP BY continuity_id
+                HAVING depth = MAX(depth)
+            )
+            -- Group RECENT breadcrumbs by ultimate root (time filter here only)
+            SELECT
+                COALESCE(rr.ultimate_root, b.continuity_id) as lineage_root,
+                COUNT(DISTINCT b.runtime_surface) as surface_count,
+                GROUP_CONCAT(DISTINCT b.runtime_surface) as surfaces,
+                GROUP_CONCAT(DISTINCT b.continuity_id) as continuity_ids,
+                MIN(b.timestamp) as started_at,
+                MAX(b.timestamp) as last_activity
+            FROM agents_breadcrumbs b
+            LEFT JOIN resolved_roots rr ON b.continuity_id = rr.continuity_id
+            WHERE b.continuity_id IS NOT NULL
+              AND b.continuity_id != ''
+              AND b.timestamp >= ?
+            GROUP BY lineage_root
+            HAVING surface_count > 1
+            ORDER BY last_activity DESC
+            LIMIT ?
+            """,
+            (cutoff, limit),
+        )
+        return [
+            {
+                "continuity_id": row["lineage_root"],  # Ultimate root of the lineage
+                "lineage_root": row["lineage_root"],
+                "continuity_ids": row["continuity_ids"].split(",") if row["continuity_ids"] else [],
+                "surface_count": row["surface_count"],
+                "surfaces": row["surfaces"].split(",") if row["surfaces"] else [],
+                "started_at": row["started_at"],
+                "last_activity": row["last_activity"],
+            }
+            for row in results
+        ]
+
+    def _parse_breadcrumb_json_fields(
+        self, results: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """Parse JSON fields in breadcrumb results."""
+        for row in results:
+            for field in ["results", "related_docs", "data"]:
+                if row.get(field) and isinstance(row[field], str):
+                    try:
+                        row[field] = json.loads(row[field])
+                    except json.JSONDecodeError:
+                        row[field] = None
+        return results
 
     # ============================================================================
     # HANDOFF CONTRACTS (Multi-Agent Task Assignment)
@@ -681,22 +956,58 @@ class AgentDB:
 
     def create_autonomous_task(self, task_id: str, description: str,
                              required_skills: List[str], estimated_complexity: float,
-                             priority_score: float, context: Dict[str, Any] = None) -> bool:
-        """Create an autonomous task."""
+                             priority_score: float, context: Dict[str, Any] = None,
+                             origin_continuity_id: str = None) -> bool:
+        """Create an autonomous task.
+
+        Args:
+            task_id: Unique task identifier.
+            description: Task description.
+            required_skills: List of required skill names.
+            estimated_complexity: Complexity score (0.0-1.0).
+            priority_score: Priority score (higher = more urgent).
+            context: Optional context dict for task.
+            origin_continuity_id: Optional continuity ID from the work that discovered this task.
+                                  Enables background correlation when task is executed later.
+        """
         try:
             self.db.execute_write('''
                 INSERT OR REPLACE INTO agents_autonomous_tasks
                 (task_id, description, required_skills, estimated_complexity,
-                 priority_score, context)
-                VALUES (?, ?, ?, ?, ?, ?)
+                 priority_score, context, origin_continuity_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', (
                 task_id, description, json.dumps(required_skills),
                 estimated_complexity, priority_score,
-                json.dumps(context) if context else None
+                json.dumps(context) if context else None,
+                origin_continuity_id
             ))
             return True
         except Exception:
             return False
+
+    def get_autonomous_task_by_id(self, task_id: str) -> Optional[Dict[str, Any]]:
+        """Get a single autonomous task by ID.
+
+        Args:
+            task_id: The task identifier.
+
+        Returns:
+            Task dict with parsed JSON fields, or None if not found.
+        """
+        results = self.db.execute_query('''
+            SELECT * FROM agents_autonomous_tasks WHERE task_id = ?
+        ''', (task_id,))
+
+        if not results:
+            return None
+
+        row = dict(results[0])
+        for field in ['required_skills', 'context']:
+            if row.get(field) and isinstance(row[field], str):
+                row[field] = json.loads(row[field])
+
+        return row
 
     def get_autonomous_tasks(self, status: str = "pending", limit: int = 50) -> List[Dict[str, Any]]:
         """Get autonomous tasks by status."""

@@ -12,6 +12,71 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 
 ## MODLOG ENTRIES
 
+### 2026-03-24 - Scheduled Natural Language Automations
+
+**WSP Protocol**: WSP 22, WSP 27 (DAE Architecture), WSP 60 (Memory Architecture)
+**Phase**: Automation Hardening
+**Agent**: 0102
+
+#### New Files
+
+**schedule_evaluator.py** - Deterministic natural-language schedule parser and evaluator:
+- `ScheduleParser`: Parses phrases like "run self research daily", "run nightly queue audit"
+- `ScheduleEvaluator`: Manages schedule persistence, due evaluation, execution tracking
+- `ScheduleSpec`: Dataclass for individual schedule definitions
+- Supported routines: `self_research`, `queue_audit`, `grant_watchlist`
+- Supported cadences: `daily`, `nightly`, `morning`, `evening`
+- Persistence: `memory/schedules.json` with atomic writes
+
+**scripts/manage_schedules.py** - CLI for schedule management:
+- `add "run self research daily"` - Add a schedule
+- `list` - List all schedules
+- `remove <id>` - Remove a schedule
+- `enable/disable <id>` - Toggle a schedule
+- `due` - Show due schedules
+- `phrases` - Show supported phrases
+
+#### Changes to idle_automation_dae.py
+
+- **Added**: `_execute_scheduled_routines()` method - Phase 5 in idle loop
+- **Added**: `_dispatch_scheduled_routine()` method - routes to existing native paths
+- **Added**: `_run_queue_audit()` method - executes queue builder script
+- **Added**: `_run_grant_watchlist_refresh()` method - calls `refresh_grant_watchlist()` (fixed method name)
+- **Added**: `_get_scheduled_routines_status()` method - status reporting
+- **Updated**: `run_idle_tasks()` to include scheduled routines execution
+- **Updated**: `get_idle_status()` to include scheduled routines info
+- **Updated**: Telemetry with `scheduled_routines_success` and `scheduled_routines_executed`
+- **Fixed**: Success logic - only reports True when all due routines succeed
+- **Fixed**: Semantic deduplication - ID now derived from `(routine, cadence)` tuple, not raw phrase
+- **Fixed**: Grant watchlist summary reads correct keys (`watch_count`, `changed_count`, `error_count`)
+
+#### Changes to openclaw_execution_routes.py
+
+- **Added**: `_try_schedule_command()` - OpenClaw route for schedule management
+- **Added**: `_list_schedules()`, `_show_due_schedules()`, `_add_schedule()`, `_remove_schedule()`, `_toggle_schedule()`
+- Supported OpenClaw commands:
+  - `list schedules` / `show schedules`
+  - `schedule self research daily` / `run queue audit nightly`
+  - `show due schedules`
+  - `remove schedule <id>` / `enable schedule <id>` / `disable schedule <id>`
+
+#### Acceptance Criteria Met
+
+1. 12 deterministic NL schedule combinations supported
+2. Schedules persist across runs (JSON artifact)
+3. Due schedules execute through existing native paths
+4. Execution writes reportable outcome (`last_run`, `last_result`)
+5. Duplicate immediate reruns prevented (window-based dedup)
+6. Tests cover parse, persistence, due-checking, and dispatch (59 tests)
+7. CLI and OpenClaw entry points for creating/managing schedules
+
+#### Tests Added
+
+- `test_schedule_evaluator.py`: 40 tests for parser, evaluator, semantic dedup, due evaluation
+- `test_scheduled_routines_integration.py`: 12 tests for dispatch, partial failures, and integration
+
+---
+
 ### 2026-03-23 - Grant Task Stable IDs and Stale Cleanup
 
 **WSP Protocol**: WSP 22, WSP 97 (Autonomy Boundaries)

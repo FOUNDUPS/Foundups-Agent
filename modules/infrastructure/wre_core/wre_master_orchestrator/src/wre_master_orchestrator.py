@@ -938,6 +938,21 @@ Final Output: [summary]
         execution_id = str(uuid.uuid4())
         start_time = datetime.now()
 
+        # Gateway Continuity Layer: Fork from parent context if provided (OpenClaw → WRE)
+        continuity_ctx = None
+        parent_continuity_ctx = input_context.get("parent_continuity_context")
+        try:
+            from modules.communication.moltbot_bridge.src.continuity_context import (
+                ContinuityManager,
+            )
+            continuity_ctx = ContinuityManager.from_wre(
+                skill_name=skill_name,
+                agent=agent,
+                parent_context=parent_continuity_ctx,
+            )
+        except Exception as ctx_exc:
+            logger.debug("[WRE] Continuity context creation skipped: %s", ctx_exc)
+
         # Step 1: Check libido (should we execute?)
         libido_signal = self.libido_monitor.should_execute(
             skill_name=skill_name,
@@ -1096,12 +1111,17 @@ Final Output: [summary]
         )
 
         # Step 7: Store outcome in pattern memory (for recursive learning)
+        # Remove non-serializable keys before JSON encoding
+        serializable_context = {
+            k: v for k, v in input_context.items()
+            if k not in ("parent_continuity_context",)  # ContinuityContext not JSON-serializable
+        }
         outcome = SkillOutcome(
             execution_id=execution_id,
             skill_name=skill_name,
             agent=agent,
             timestamp=start_time.isoformat(),
-            input_context=json.dumps(input_context),
+            input_context=json.dumps(serializable_context),
             output_result=json.dumps(execution_result),
             success=True,
             pattern_fidelity=pattern_fidelity,
@@ -1166,6 +1186,30 @@ Final Output: [summary]
                     "[WRE] evolve_skill failed for %s: %s", skill_name, exc
                 )
 
+        # Gateway Continuity Layer: Record breadcrumb with continuity metadata
+        if continuity_ctx is not None:
+            try:
+                from modules.infrastructure.database.src.agent_db import AgentDB
+                db = AgentDB()
+                db.add_breadcrumb(
+                    session_id=f"wre_{execution_id[:8]}",
+                    action="wre_skill_execution",
+                    agent_id=agent,
+                    data={
+                        "skill_name": skill_name,
+                        "execution_id": execution_id,
+                        "pattern_fidelity": pattern_fidelity,
+                        "execution_time_ms": execution_time_ms,
+                        "status": "completed" if pattern_fidelity >= self.react_fidelity_threshold else "low_fidelity",
+                    },
+                    continuity_id=continuity_ctx.continuity_id,
+                    runtime_surface=continuity_ctx.surface.value,
+                    sender_normalized=continuity_ctx.sender_normalized,
+                    parent_continuity_id=continuity_ctx.parent_continuity_id,
+                )
+            except Exception as bread_exc:
+                logger.debug("[WRE] Breadcrumb recording skipped: %s", bread_exc)
+
         return {
             "execution_id": execution_id,
             "skill_name": skill_name,
@@ -1174,6 +1218,8 @@ Final Output: [summary]
             "pattern_fidelity": pattern_fidelity,
             "execution_time_ms": execution_time_ms,
             "evolution_triggered": evolution_triggered,
+            "continuity_id": continuity_ctx.continuity_id if continuity_ctx else None,
+            "parent_continuity_id": continuity_ctx.parent_continuity_id if continuity_ctx else None,
             "result": execution_result
         }
 

@@ -206,11 +206,14 @@ class SelfResearchRefresher:
         self,
         repo_root: Path | None = None,
         report_path: Path | None = None,
+        origin_continuity_id: str | None = None,
     ):
         self.repo_root = Path(repo_root or REPO_ROOT).resolve()
         self.report_path = Path(report_path or DEFAULT_REPORT_PATH)
         self.evaluator = IssueMPSEvaluator()
         self.index_max_age_hours = int(os.getenv("OPENCLAW_SELF_RESEARCH_INDEX_MAX_AGE_HOURS", "6"))
+        # Gateway Continuity Layer: Store origin continuity for tasks created during refresh
+        self.origin_continuity_id = origin_continuity_id
         self.compliance_max_age_hours = int(
             os.getenv("OPENCLAW_SELF_RESEARCH_COMPLIANCE_MAX_AGE_HOURS", "24")
         )
@@ -793,6 +796,7 @@ class SelfResearchRefresher:
                     "mps": candidate["mps"],
                     "context": candidate["context"],
                 },
+                origin_continuity_id=self.origin_continuity_id,
             )
             # Ensure status is set to 'pending' only for new tasks (don't reset completed)
             if created and task_id not in completed_stable_grants:

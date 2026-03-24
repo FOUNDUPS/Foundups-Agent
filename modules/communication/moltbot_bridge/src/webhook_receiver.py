@@ -365,15 +365,62 @@ async def receive_openclaw_message(
             raise HTTPException(status_code=429, detail=reason)
 
     logger.info(f"Received from {msg.channel}/{msg.sender}: {msg.message[:50]}...")
-    
+
+    # Gateway Continuity Layer: Create messaging continuity context for this request
+    messaging_continuity_ctx = None
+    enriched_metadata = dict(msg.metadata) if msg.metadata else {}
+    enriched_metadata["source_surface"] = "messaging"
+
+    # Derive unique session_key to avoid child ID collision when sessionKey is missing/default
+    effective_session_key = msg.sessionKey
+    if not effective_session_key or effective_session_key == "default":
+        # Will be overwritten below if continuity context is created
+        effective_session_key = f"webhook_{hash(f'{msg.sender}_{msg.channel}') % 100000:05d}"
+
+    try:
+        from .continuity_context import ContinuityManager
+        messaging_continuity_ctx = ContinuityManager.from_messaging(
+            platform=msg.channel,
+            sender=msg.sender,
+            channel=msg.channel,
+            metadata=msg.metadata,
+        )
+        # Propagate messaging context as parent for OpenClaw processing
+        enriched_metadata["parent_continuity_id"] = messaging_continuity_ctx.continuity_id
+
+        # Derive unique session_key from messaging continuity to avoid child ID collision
+        if not msg.sessionKey or msg.sessionKey == "default":
+            effective_session_key = f"msg_{messaging_continuity_ctx.continuity_id[:12]}"
+
+        # Record messaging ingress breadcrumb for cross-surface tracking
+        try:
+            from modules.infrastructure.database.src.agent_db import AgentDB
+            db = AgentDB()
+            db.add_breadcrumb(
+                session_id=effective_session_key,
+                action="messaging_ingress",
+                agent_id="0102",
+                data={
+                    "platform": msg.channel,
+                    "message_preview": msg.message[:50] if msg.message else "",
+                },
+                continuity_id=messaging_continuity_ctx.continuity_id,
+                runtime_surface=messaging_continuity_ctx.surface.value,
+                sender_normalized=messaging_continuity_ctx.sender_normalized,
+            )
+        except Exception:
+            pass  # Breadcrumb recording is optional
+    except Exception as ctx_exc:
+        logger.debug(f"Messaging continuity context creation skipped: {ctx_exc}")
+
     # Route through OpenClaw DAE (Frontal Lobe) -> WRE -> Domain DAEs
     try:
         response_text = await process_via_openclaw_dae(
             message=msg.message,
             sender=msg.sender,
             channel=msg.channel,
-            session_key=msg.sessionKey,
-            metadata=msg.metadata,
+            session_key=effective_session_key,
+            metadata=enriched_metadata,
         )
     except Exception as exc:
         logger.error(f"OpenClaw DAE failed, falling back to HoloIndex: {exc}")

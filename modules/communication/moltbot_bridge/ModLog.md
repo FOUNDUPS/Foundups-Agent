@@ -1,5 +1,214 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-24: Gateway Continuity Layer (P1)
+
+**Author**: 0102
+**WSP**: 22, 60, 91, 97
+
+### Context
+
+Task and conversation continuity was fragmented across runtime surfaces (CLI, OpenClaw, messaging). Work started on one surface couldn't be recognized on another. This implementation creates a unified continuity model under FoundUps control.
+
+### Changes
+
+1. **Created `continuity_context.py`**:
+   - `RuntimeSurface` enum: cli, openclaw, messaging, social, supervisor, idle, wre, internal
+   - `ContinuityContext` dataclass: carries continuity_id, surface, session_id, sender/channel normalization, parent lineage
+   - `ContinuityManager` factory: from_openclaw(), from_cli(), from_supervisor(), from_idle(), from_wre(), from_messaging()
+   - Environment variable propagation for subprocess continuity
+
+2. **Extended AgentDB breadcrumbs** (agent_db.py):
+   - Added columns: `continuity_id`, `runtime_surface`, `sender_normalized`, `parent_continuity_id`
+   - Migration via `_ensure_table_columns()` pattern
+   - New indexes for continuity queries
+
+3. **Added cross-surface query methods**:
+   - `get_breadcrumbs_by_continuity()`: retrieve by continuity ID with children
+   - `get_breadcrumbs_by_surface()`: filter by runtime surface
+   - `get_breadcrumbs_by_sender()`: filter by normalized sender
+   - `get_continuity_summary()`: aggregated status for a continuity ID
+   - `get_cross_surface_activity()`: find work that spanned multiple surfaces
+
+4. **Integrated into OpenClaw process flow**:
+   - `openclaw_process_loop.py`: Creates continuity context at request start
+   - `openclaw_result_memory.py`: Records breadcrumb with continuity metadata after execution
+
+5. **Added continuity query endpoints** (openclaw_execution_routes.py):
+   - `show continuity <id>`: detailed status for a continuity ID
+   - `show cross-surface activity`: recent multi-surface work
+   - `what is my continuity id`: current request's continuity context
+
+6. **Wired Supervisor and Idle surfaces**:
+   - `openclaw_supervisor.py`: Creates continuity context at cycle start, records breadcrumb in `_remember()`
+   - `idle_automation_dae.py`: Creates continuity context in `run_idle_tasks()`, records breadcrumb on completion
+
+7. **Fixed critical issues from review (round 1)**:
+   - `from_openclaw()` now derives stable continuity_id from session_key (same session = same ID)
+   - `from_openclaw()` reads `OPENCLAW_CONTINUITY_ID` env var for subprocess propagation
+
+8. **Fixed critical issues from review (round 2)**:
+   - `get_cross_surface_activity()` now groups by lineage_root (COALESCE(parent_continuity_id, continuity_id))
+   - `from_supervisor()` and `from_idle()` now accept `parent_context` parameter for lineage propagation
+   - Cross-surface detection works via parent linkage, not just shared IDs
+   - Added production-path test exercising real factories with parent propagation
+
+9. **Fixed critical issues from review (round 3)**:
+   - `run_cycle()` now accepts `parent_context` and passes to `_create_continuity_context()`
+   - `run_idle_tasks()` now accepts `parent_context` and passes to `_create_continuity_context()`
+   - `run_idle_automation()` convenience function accepts and propagates `parent_context`
+   - Added 3 production entry point tests verifying propagation through actual runtime methods
+
+10. **Wired OpenClaw → WRE production path (round 4)**:
+    - `_build_wre_command_context()` now includes `parent_continuity_context` from dae
+    - `wre_master_orchestrator.py` extracts parent context and forks WRE continuity from it
+    - WRE skill execution records breadcrumb with continuity metadata and parent linkage
+    - Added 2 production path tests verifying real factory wiring and cross-surface detection
+
+11. **Wired CLI and Messaging entry points (round 5 - gateway_continuity_cli_messaging_wiring)**:
+    - `modules/infrastructure/cli/src/openclaw_chat.py`: Creates CLI context via `from_cli()`, records breadcrumb, passes parent_continuity_id to dae.process()
+    - `modules/infrastructure/cli/src/openclaw_voice.py`: Same wiring for voice REPL
+    - `src/action_cli.py`: `_dispatch_via_dae()` creates CLI context, records breadcrumb, passes metadata to dae.process()
+    - `src/webhook_receiver.py`: Creates messaging context via `from_messaging()`, records ingress breadcrumb, passes parent_continuity_id to process_via_openclaw_dae()
+    - CLI → OpenClaw lineage: CLI session start tracked, OpenClaw processing references CLI as parent
+    - Messaging → OpenClaw lineage: Webhook ingress tracked, OpenClaw processing references messaging as parent
+    - **Session collision fix**: CLI chat derives `session_key = f"cli_chat_{cli_ctx.continuity_id[:12]}"` (not fixed "local_repl_012")
+    - **Session collision fix**: CLI voice derives `session_key = f"cli_voice_{cli_ctx.continuity_id[:12]}"` (not fixed "voice_repl_012")
+    - **Session collision fix**: CLI action derives `session_key = f"cli_action_{cli_ctx.continuity_id[:12]}"` (not fixed "action_cli")
+    - **Session collision fix**: Webhook derives `session_key = f"msg_{msg_ctx.continuity_id[:12]}"` when sessionKey is default/missing
+    - Added 4 production path tests verifying CLI and messaging cross-surface wiring
+
+12. **Background work continuity correlation (round 6 - gateway_continuity_background_correlation)**:
+    - **Problem**: When supervisor/idle executes previously discovered work, lineage to the original work item was lost
+    - **Solution**: Recovery helpers + origin stamping on task creation + recursive lineage resolution
+    - `continuity_context.py`: Added `resolve_origin_continuity_from_task()` and `resolve_origin_continuity_from_session()` helpers
+    - `agent_db.py`: Added `origin_continuity_id` column to `agents_autonomous_tasks`, extended `create_autonomous_task()`, added `get_autonomous_task_by_id()`
+    - `agent_db.py`: Rewrote `get_cross_surface_activity()` with recursive CTE to resolve ultimate lineage root for multi-hop chains
+    - `agent_db.py`: **Fix**: Ancestry resolution now follows parent links outside the activity window - only final grouping filtered by time
+    - `openclaw_supervisor.py`: Added `_resolve_and_link_origin_continuity()`, called before PLAN when executing autonomous tasks
+    - `idle_automation_dae.py`: Pass continuity ID to `SelfResearchRefresher` for task origin stamping
+    - `idle_automation_dae.py`: Added `_try_recover_origin_continuity()` and `set_triggering_session()` for session-based recovery
+    - `idle_automation_dae.py`: **Fix**: Removed generic fallback - only recovers from explicit `last_triggering_session_id`, clears after use
+    - `idle_automation_dae.py`: `run_idle_tasks()` now auto-recovers origin if no parent_context provided (explicit session only)
+    - `self_research_refresh.py`: Accept `origin_continuity_id` in constructor, stamp on all created tasks
+    - **Lineage flow**: Self-research discovers work → stamps origin_continuity_id → supervisor later resolves and links
+    - **Multi-hop lineage**: OpenClaw → Idle → Supervisor all grouped under OpenClaw root via recursive CTE (even if root is old)
+    - **No false lineage**: Idle only links to explicit triggering session, not arbitrary prior idle work
+    - Added 7 background correlation tests verifying supervisor/idle/no-false-positive/multi-hop-grouping/old-root-resolution/production-wiring/no-false-lineage scenarios
+
+### Files Changed
+
+- `src/continuity_context.py` (new): Core continuity dataclass and manager with parent propagation
+- `src/openclaw_process_loop.py`: Continuity context creation
+- `src/openclaw_result_memory.py`: Breadcrumb recording with continuity
+- `src/openclaw_execution_routes.py`: Continuity query handlers + WRE context propagation
+- `src/openclaw_supervisor.py`: Supervisor continuity + run_cycle() accepts parent_context
+- `src/webhook_receiver.py`: Messaging ingress continuity + breadcrumb recording + session collision fix
+- `src/action_cli.py`: CLI action continuity + breadcrumb recording + parent propagation + session collision fix
+- `modules/infrastructure/cli/src/openclaw_chat.py`: CLI session continuity + breadcrumb recording + parent propagation + session collision fix
+- `modules/infrastructure/cli/src/openclaw_voice.py`: Voice session continuity + breadcrumb recording + parent propagation + session collision fix
+- `modules/infrastructure/database/src/agent_db.py`: Schema extension and lineage-aware queries
+- `modules/infrastructure/idle_automation/src/idle_automation_dae.py`: Idle surface + run_idle_tasks() accepts parent_context + passes origin to refresher
+- `modules/infrastructure/idle_automation/src/self_research_refresh.py`: Accepts origin_continuity_id, stamps on task creation
+- `modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py`: WRE continuity forking + breadcrumb recording
+- `tests/test_continuity_context.py`: 58 tests (including 7 background correlation tests)
+
+### Verification
+
+```
+pytest test_continuity_context.py  # 58 passed
+```
+
+### Acceptance Criteria Met
+
+1. One task started on one surface can be recognized on another via shared continuity_id or lineage
+2. Breadcrumbs record source surface consistently (cli, openclaw, messaging, supervisor, idle, wre wired)
+3. Continuity state is queryable/debuggable via OpenClaw
+4. No platform-specific memory fragmentation
+5. Existing deterministic query paths not affected
+6. Session stability: same session_key always produces same continuity_id
+7. Subprocess propagation: OPENCLAW_CONTINUITY_ID env var wired
+8. Lineage propagation: from_supervisor/from_idle accept parent_context for cross-surface linkage
+9. Production entry points: run_cycle(), run_idle_tasks(), run_idle_automation() accept parent_context
+10. **OpenClaw → WRE cross-surface**: Production path tested and wired with lineage detection
+11. **CLI → OpenClaw cross-surface**: CLI session tracked, lineage into OpenClaw processing
+12. **Messaging → OpenClaw cross-surface**: Webhook ingress tracked, lineage into OpenClaw processing
+13. **Supervisor background correlation**: When executing autonomous tasks, resolves and links to origin continuity
+14. **Idle background correlation**: When creating tasks via self-research, stamps origin_continuity_id
+15. **Multi-hop lineage resolution**: `get_cross_surface_activity()` uses recursive CTE to group all descendants under ultimate root
+16. **Old root resolution**: Ancestry follows parent links outside activity window - recent children group under old roots
+17. **Idle session recovery**: `run_idle_tasks()` auto-recovers origin via explicit `set_triggering_session()` only
+18. **No false idle lineage**: Idle recovery only from explicit triggering session, cleared after use
+
+13. **WRE E2E Continuity Smoke Test (round 7 - wre_e2e_continuity_smoke)**:
+    - **Problem**: Existing tests verified context propagation but not actual `execute_skill()` breadcrumb recording
+    - **Solution**: E2E smoke tests that call real WRE orchestrator with mocked skill execution
+    - `test_continuity_context.py`: Added `TestWREE2EContinuitySmoke` class with 3 tests:
+      - `test_execute_skill_records_breadcrumb_with_continuity`: Core E2E - OpenClaw context → WRE execute_skill → verify breadcrumb + lineage
+      - `test_execute_skill_without_parent_context_still_records_breadcrumb`: Orphan execution still records breadcrumb
+      - `test_openclaw_to_wre_three_hop_lineage`: OpenClaw → WRE → child-WRE all grouped under root
+    - `wre_master_orchestrator.py`: **Fix**: Exclude `parent_continuity_context` from `SkillOutcome` JSON serialization (was causing `TypeError: Object of type ContinuityContext is not JSON serializable`)
+    - **E2E path verified**: OpenClaw creates context → `_build_wre_command_context()` includes it → WRE forks via `from_wre()` → breadcrumb recorded with parent linkage → `get_cross_surface_activity()` detects lineage
+
+### Files Changed
+
+- `src/continuity_context.py` (new): Core continuity dataclass and manager with parent propagation
+- `src/openclaw_process_loop.py`: Continuity context creation
+- `src/openclaw_result_memory.py`: Breadcrumb recording with continuity
+- `src/openclaw_execution_routes.py`: Continuity query handlers + WRE context propagation
+- `src/openclaw_supervisor.py`: Supervisor continuity + run_cycle() accepts parent_context
+- `src/webhook_receiver.py`: Messaging ingress continuity + breadcrumb recording + session collision fix
+- `src/action_cli.py`: CLI action continuity + breadcrumb recording + parent propagation + session collision fix
+- `modules/infrastructure/cli/src/openclaw_chat.py`: CLI session continuity + breadcrumb recording + parent propagation + session collision fix
+- `modules/infrastructure/cli/src/openclaw_voice.py`: Voice session continuity + breadcrumb recording + parent propagation + session collision fix
+- `modules/infrastructure/database/src/agent_db.py`: Schema extension and lineage-aware queries
+- `modules/infrastructure/idle_automation/src/idle_automation_dae.py`: Idle surface + run_idle_tasks() accepts parent_context + passes origin to refresher
+- `modules/infrastructure/idle_automation/src/self_research_refresh.py`: Accepts origin_continuity_id, stamps on task creation
+- `modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py`: WRE continuity forking + breadcrumb recording + serialization fix
+- `tests/test_continuity_context.py`: 61 tests (including 3 WRE E2E smoke tests)
+
+### Verification
+
+```
+pytest test_continuity_context.py  # 61 passed
+```
+
+### Acceptance Criteria Met
+
+1. One task started on one surface can be recognized on another via shared continuity_id or lineage
+2. Breadcrumbs record source surface consistently (cli, openclaw, messaging, supervisor, idle, wre wired)
+3. Continuity state is queryable/debuggable via OpenClaw
+4. No platform-specific memory fragmentation
+5. Existing deterministic query paths not affected
+6. Session stability: same session_key always produces same continuity_id
+7. Subprocess propagation: OPENCLAW_CONTINUITY_ID env var wired
+8. Lineage propagation: from_supervisor/from_idle accept parent_context for cross-surface linkage
+9. Production entry points: run_cycle(), run_idle_tasks(), run_idle_automation() accept parent_context
+10. **OpenClaw → WRE cross-surface**: Production path tested and wired with lineage detection
+11. **CLI → OpenClaw cross-surface**: CLI session tracked, lineage into OpenClaw processing
+12. **Messaging → OpenClaw cross-surface**: Webhook ingress tracked, lineage into OpenClaw processing
+13. **Supervisor background correlation**: When executing autonomous tasks, resolves and links to origin continuity
+14. **Idle background correlation**: When creating tasks via self-research, stamps origin_continuity_id
+15. **Multi-hop lineage resolution**: `get_cross_surface_activity()` uses recursive CTE to group all descendants under ultimate root
+16. **Old root resolution**: Ancestry follows parent links outside activity window - recent children group under old roots
+17. **Idle session recovery**: `run_idle_tasks()` auto-recovers origin via explicit `set_triggering_session()` only
+18. **No false idle lineage**: Idle recovery only from explicit triggering session, cleared after use
+19. **WRE E2E breadcrumb**: `execute_skill()` records breadcrumb with correct continuity metadata and parent linkage
+20. **WRE orphan execution**: Works without parent context (breadcrumb still recorded, no parent linkage)
+21. **WRE multi-hop lineage**: Nested skill executions (OpenClaw → WRE → child-WRE) all group under ultimate root
+
+### Remaining Work (Future Slices)
+
+- **Caller wiring**: auto_moderator_dae.py needs continuity context to pass to run_idle_automation() + set_triggering_session()
+- **Skill evolution continuity** (wardrobe/rolodex tracking): Pass `continuity_ctx` to `evolve_skill()`, add `origin_continuity_id` to `learning_events` table, record breadcrumb when variation created/promoted. This enables "what did this session do?" to include skill evolution events.
+- **True nested E2E**: Current three-hop test uses fabricated lineage. Add test that calls `execute_skill()` which internally triggers another skill execution.
+- **Skills 2.0 hygiene wiring** (skill consumption safety): WRE loader/orchestrator doesn't use Skills 2.0 fields. Need to:
+  - Extend `SkillMetadata` with `category`, `evals`, `retirement_date`
+  - Add `_check_skill_hygiene()` in loader - block retired skills, validate category
+  - Add pre-execution evals check - run benchmark cases before first production use
+  - Current: Cisco scanner runs, but Skills 2.0 metadata ignored
+
+---
+
 ## 2026-03-23: Supervisor Memory Nudge Wiring (P1)
 
 **Author**: 0102

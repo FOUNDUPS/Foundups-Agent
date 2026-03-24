@@ -61,6 +61,11 @@ async def execute_query(dae: Any, intent: Any) -> str:
     if memory_response:
         return memory_response
 
+    # Schedule management commands
+    schedule_response = _try_schedule_command(dae, intent.raw_message)
+    if schedule_response:
+        return schedule_response
+
     try:
         from holo_index.core import HoloIndex
 
@@ -180,8 +185,11 @@ async def execute_command(dae: Any, intent: Any) -> str:
 
 
 def _build_wre_command_context(dae: Any, intent: Any) -> Dict[str, Any]:
-    """Normalize OpenClaw COMMAND context for WRE entry points."""
-    return {
+    """Normalize OpenClaw COMMAND context for WRE entry points.
+
+    Includes parent continuity context for cross-surface tracking (OpenClaw → WRE).
+    """
+    ctx: Dict[str, Any] = {
         "type": "orchestration",
         "task": intent.extracted_task or intent.raw_message,
         "command": intent.raw_message,
@@ -190,6 +198,11 @@ def _build_wre_command_context(dae: Any, intent: Any) -> Dict[str, Any]:
         "channel": intent.channel,
         "target_files": dae._extract_file_paths(intent.raw_message),
     }
+    # Gateway Continuity Layer: Propagate continuity for cross-surface tracking
+    continuity_ctx = getattr(dae, "_continuity_context", None)
+    if continuity_ctx is not None:
+        ctx["parent_continuity_context"] = continuity_ctx
+    return ctx
 
 
 def _resolve_wre_skill_execution(
@@ -773,6 +786,23 @@ def _try_memory_query(dae: Any, raw_message: str) -> Optional[str]:
     ):
         return _query_recent_sessions(dae)
 
+    # Gateway Continuity Layer queries
+    # "show continuity <id>" / "continuity status <id>"
+    continuity_id_match = re.search(
+        r"(?:show|get|lookup)\s+continuity\s+([a-f0-9]{8,16})",
+        normalized,
+    )
+    if continuity_id_match:
+        return _query_continuity_status(dae, continuity_id_match.group(1))
+
+    # "show cross-surface activity" / "cross-surface work"
+    if re.search(r"cross[- ]?surface\s+(?:activity|work|handoff)", normalized):
+        return _query_cross_surface_activity(dae)
+
+    # "what is my continuity id" / "show my continuity"
+    if re.search(r"(?:my|current)\s+continuity(?:\s+id)?", normalized):
+        return _query_current_continuity(dae)
+
     return None
 
 
@@ -1084,6 +1114,123 @@ def _query_recent_sessions(dae: Any) -> str:
     return "\n".join(parts)
 
 
+# ============================================================================
+# GATEWAY CONTINUITY LAYER - Query Handlers
+# ============================================================================
+
+
+def _query_continuity_status(dae: Any, continuity_id: str) -> str:
+    """
+    Get detailed status for a specific continuity ID.
+
+    Shows breadcrumbs, surfaces, and lineage for the given continuity ID.
+    """
+    try:
+        from modules.infrastructure.database.src.agent_db import AgentDB
+
+        db = AgentDB()
+        summary = db.get_continuity_summary(continuity_id)
+
+        if not summary.get("found"):
+            return (
+                f"**Continuity ID not found:** `{continuity_id}`\n\n"
+                "No breadcrumbs exist for this continuity ID."
+            )
+
+        parts = [f"**Continuity Status: `{continuity_id}`**\n"]
+        parts.append(f"- **Breadcrumbs:** {summary['breadcrumb_count']}")
+        parts.append(f"- **Surfaces:** {', '.join(summary['surfaces'])}")
+        parts.append(f"- **First seen:** {summary['first_seen']}")
+        parts.append(f"- **Last activity:** {summary['last_seen']}")
+
+        if summary["actions"]:
+            parts.append(f"- **Actions:** {', '.join(summary['actions'][:5])}")
+
+        # Get recent breadcrumbs for detail
+        breadcrumbs = db.get_breadcrumbs_by_continuity(continuity_id, limit=5)
+        if breadcrumbs:
+            parts.append("\n**Recent Activity:**")
+            for crumb in breadcrumbs[:5]:
+                action = crumb.get("action", "unknown")
+                surface = crumb.get("runtime_surface", "unknown")
+                timestamp = crumb.get("timestamp", "")[:19]
+                parts.append(f"- `{timestamp}` [{surface}] {action}")
+
+        return "\n".join(parts)
+
+    except Exception as exc:
+        logger.debug("Continuity query failed: %s", exc)
+        return f"**Error querying continuity:** {exc}"
+
+
+def _query_cross_surface_activity(dae: Any) -> str:
+    """
+    Show recent work that spanned multiple runtime surfaces.
+
+    Helpful for understanding how tasks transition across CLI/OpenClaw/messaging.
+    """
+    try:
+        from modules.infrastructure.database.src.agent_db import AgentDB
+
+        db = AgentDB()
+        cross_surface = db.get_cross_surface_activity(minutes=60, limit=10)
+
+        if not cross_surface:
+            return (
+                "**No cross-surface activity found.**\n\n"
+                "No work items in the past 60 minutes spanned multiple surfaces."
+            )
+
+        parts = ["**Cross-Surface Activity (last 60 min):**\n"]
+        for item in cross_surface:
+            cid = item["continuity_id"]
+            surfaces = ", ".join(item["surfaces"])
+            started = item["started_at"][:19] if item["started_at"] else "?"
+            parts.append(f"- `{cid}`: {surfaces} (started {started})")
+
+        parts.append("")
+        parts.append(f"_Found {len(cross_surface)} cross-surface work item(s)._")
+        return "\n".join(parts)
+
+    except Exception as exc:
+        logger.debug("Cross-surface query failed: %s", exc)
+        return f"**Error querying cross-surface activity:** {exc}"
+
+
+def _query_current_continuity(dae: Any) -> str:
+    """
+    Show the current continuity context for this request.
+
+    Useful for debugging continuity propagation.
+    """
+    continuity_ctx = getattr(dae, "_continuity_context", None)
+    if continuity_ctx is None:
+        return (
+            "**No continuity context available.**\n\n"
+            "This request does not have an active continuity context."
+        )
+
+    parts = ["**Current Continuity Context:**\n"]
+    parts.append(f"- **Continuity ID:** `{continuity_ctx.continuity_id}`")
+    parts.append(f"- **Surface:** {continuity_ctx.surface.value}")
+    parts.append(f"- **Session ID:** {continuity_ctx.session_id}")
+    parts.append(f"- **Sender:** {continuity_ctx.sender}")
+    parts.append(f"- **Sender (normalized):** {continuity_ctx.sender_normalized}")
+    parts.append(f"- **Channel:** {continuity_ctx.channel}")
+
+    if continuity_ctx.parent_continuity_id:
+        parts.append(f"- **Parent Continuity:** `{continuity_ctx.parent_continuity_id}`")
+
+    parts.append(f"- **Created:** {continuity_ctx.created_at}")
+
+    if continuity_ctx.surface_metadata:
+        parts.append("\n**Surface Metadata:**")
+        for key, value in continuity_ctx.surface_metadata.items():
+            parts.append(f"- {key}: {value}")
+
+    return "\n".join(parts)
+
+
 def _get_recent_memory_notes(dae: Any, limit: int = 5) -> list[Dict[str, Any]]:
     """
     Get recent workspace memory notes without topic filtering.
@@ -1223,3 +1370,185 @@ def _env_truthy(name: str, default: str = "0") -> bool:
         "y",
         "on",
     }
+
+
+# -----------------------------------------------------------------------------
+# Schedule Command Handlers
+# -----------------------------------------------------------------------------
+
+
+def _try_schedule_command(dae: Any, raw_message: str) -> Optional[str]:
+    """
+    Detect and handle schedule management commands.
+
+    Supported patterns:
+    - "schedule self research daily" / "run self research daily" -> add schedule
+    - "list schedules" / "show schedules" -> list all schedules
+    - "show due schedules" -> show currently due schedules
+    - "remove schedule <id>" -> remove a schedule
+    - "disable schedule <id>" -> disable a schedule
+    - "enable schedule <id>" -> enable a schedule
+
+    IMPORTANT: Only matches explicit schedule-related commands.
+    """
+    normalized = raw_message.lower().strip()
+
+    # List schedules: "list schedules" / "show schedules" / "show my schedules"
+    if re.search(r"\b(list|show)\s+(my\s+)?schedules?\b", normalized):
+        return _list_schedules()
+
+    # Due schedules: "show due schedules" / "what schedules are due"
+    if re.search(r"\b(due|pending)\s+schedules?\b", normalized) or re.search(
+        r"\bschedules?\s+(that\s+are\s+)?due\b", normalized
+    ):
+        return _show_due_schedules()
+
+    # Remove schedule: "remove schedule <id>" / "delete schedule <id>"
+    remove_match = re.search(
+        r"\b(remove|delete)\s+schedule\s+([a-f0-9]{12})\b", normalized
+    )
+    if remove_match:
+        return _remove_schedule(remove_match.group(2))
+
+    # Disable schedule: "disable schedule <id>"
+    disable_match = re.search(r"\bdisable\s+schedule\s+([a-f0-9]{12})\b", normalized)
+    if disable_match:
+        return _toggle_schedule(disable_match.group(1), enabled=False)
+
+    # Enable schedule: "enable schedule <id>"
+    enable_match = re.search(r"\benable\s+schedule\s+([a-f0-9]{12})\b", normalized)
+    if enable_match:
+        return _toggle_schedule(enable_match.group(1), enabled=True)
+
+    # Add schedule: "schedule X daily" / "run X daily" (must include cadence)
+    # Must match schedule patterns from ScheduleParser
+    add_match = re.search(
+        r"\b(schedule|run)\s+(.+?\s+(daily|nightly|morning|evening))\b",
+        normalized,
+    )
+    if add_match:
+        phrase = add_match.group(2).strip()
+        return _add_schedule(phrase)
+
+    return None
+
+
+def _list_schedules() -> str:
+    """List all configured schedules."""
+    try:
+        from modules.infrastructure.idle_automation.src.schedule_evaluator import (
+            ScheduleEvaluator,
+        )
+
+        evaluator = ScheduleEvaluator()
+        schedules = evaluator.list_schedules()
+
+        if not schedules:
+            return (
+                "**No schedules configured.**\n\n"
+                "Add a schedule with: `schedule self research daily`\n"
+                "Supported: self research, queue audit, grant watchlist\n"
+                "Cadences: daily, nightly, morning, evening"
+            )
+
+        parts = [f"**{len(schedules)} schedule(s) configured:**\n"]
+        for spec in schedules:
+            status = "enabled" if spec.enabled else "DISABLED"
+            last_run = spec.last_run[:10] if spec.last_run else "never"
+            parts.append(f"- `{spec.id}` [{status}]")
+            parts.append(f"  - Phrase: {spec.phrase}")
+            parts.append(f"  - Routine: {spec.routine} | Cadence: {spec.cadence}")
+            parts.append(f"  - Last run: {last_run}")
+
+        return "\n".join(parts)
+    except Exception as exc:
+        return f"**Error listing schedules:** {exc}"
+
+
+def _show_due_schedules() -> str:
+    """Show schedules that are currently due."""
+    try:
+        from modules.infrastructure.idle_automation.src.schedule_evaluator import (
+            ScheduleEvaluator,
+        )
+
+        evaluator = ScheduleEvaluator()
+        due = evaluator.get_due_schedules()
+
+        if not due:
+            return "**No schedules currently due.**\n\nSchedules run during idle automation cycles."
+
+        parts = [f"**{len(due)} schedule(s) due:**\n"]
+        for spec in due:
+            parts.append(f"- `{spec.id}`: {spec.routine} ({spec.cadence})")
+            parts.append(f"  - Phrase: {spec.phrase}")
+
+        return "\n".join(parts)
+    except Exception as exc:
+        return f"**Error checking due schedules:** {exc}"
+
+
+def _add_schedule(phrase: str) -> str:
+    """Add a new schedule from a natural-language phrase."""
+    try:
+        from modules.infrastructure.idle_automation.src.schedule_evaluator import (
+            ScheduleEvaluator,
+            ScheduleParser,
+            get_supported_phrases,
+        )
+
+        # Validate first
+        parsed = ScheduleParser.parse(phrase)
+        if parsed is None:
+            examples = get_supported_phrases()[:4]
+            return (
+                f"**Could not parse schedule phrase:** `{phrase}`\n\n"
+                "**Supported formats:**\n"
+                + "\n".join(f"- `{ex}`" for ex in examples)
+            )
+
+        evaluator = ScheduleEvaluator()
+        spec = evaluator.add_schedule(phrase)
+
+        if spec:
+            return (
+                f"**Schedule added:** `{spec.id}`\n"
+                f"- Phrase: {spec.phrase}\n"
+                f"- Routine: {spec.routine}\n"
+                f"- Cadence: {spec.cadence}\n\n"
+                "Schedule will run during next idle automation cycle when due."
+            )
+        return "**Failed to add schedule.**"
+    except Exception as exc:
+        return f"**Error adding schedule:** {exc}"
+
+
+def _remove_schedule(schedule_id: str) -> str:
+    """Remove a schedule by ID."""
+    try:
+        from modules.infrastructure.idle_automation.src.schedule_evaluator import (
+            ScheduleEvaluator,
+        )
+
+        evaluator = ScheduleEvaluator()
+        if evaluator.remove_schedule(schedule_id):
+            return f"**Schedule removed:** `{schedule_id}`"
+        return f"**Schedule not found:** `{schedule_id}`"
+    except Exception as exc:
+        return f"**Error removing schedule:** {exc}"
+
+
+def _toggle_schedule(schedule_id: str, enabled: bool) -> str:
+    """Enable or disable a schedule."""
+    try:
+        from modules.infrastructure.idle_automation.src.schedule_evaluator import (
+            ScheduleEvaluator,
+        )
+
+        evaluator = ScheduleEvaluator()
+        if evaluator.set_enabled(schedule_id, enabled):
+            status = "enabled" if enabled else "disabled"
+            return f"**Schedule {status}:** `{schedule_id}`"
+        return f"**Schedule not found:** `{schedule_id}`"
+    except Exception as exc:
+        return f"**Error updating schedule:** {exc}"
