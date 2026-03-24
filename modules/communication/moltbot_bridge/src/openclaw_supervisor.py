@@ -158,12 +158,22 @@ class OpenClawSupervisor:
             self._stop_event.wait(max(self.poll_sec, 1.0))
         return {"status": "stopped", "state": self.current_state.value}
 
-    def run_cycle(self) -> Dict[str, Any]:
+    def run_cycle(self, parent_context=None) -> Dict[str, Any]:
+        """Run one supervisor cycle.
+
+        Args:
+            parent_context: Optional parent continuity context for cross-surface lineage.
+                           Pass when supervisor is triggered by another surface's work.
+        """
         if not self._bootstrapped:
             self._transition(SupervisorState.BOOT, "startup")
             self._start_self_audit()
             self._transition(SupervisorState.PREFLIGHT, "dependencies_checked")
             self._bootstrapped = True
+
+        # Gateway Continuity Layer: Create continuity context for this cycle
+        cycle_id = f"cycle_{self.metrics.cycles_completed}"
+        self._continuity_context = self._create_continuity_context(cycle_id, parent_context)
 
         observation: Dict[str, Any] = {}
         plan: Dict[str, Any] | None = None
@@ -743,6 +753,69 @@ class OpenClawSupervisor:
 
         follow = observation.get("openclaw_follow", {})
         self._event_cursor = int(follow.get("next_cursor", self._event_cursor) or self._event_cursor)
+
+        # Gateway Continuity Layer: Record breadcrumb with continuity metadata
+        self._record_continuity_breadcrumb(plan_or_triage, action_result, verify)
+
+    def _create_continuity_context(self, cycle_id: str, parent_context=None) -> Any:
+        """Create continuity context for a supervisor cycle.
+
+        Args:
+            cycle_id: Identifier for this supervisor cycle.
+            parent_context: Optional parent continuity context for cross-surface lineage.
+                           If provided, the supervisor context will be forked as a child.
+        """
+        try:
+            from modules.communication.moltbot_bridge.src.continuity_context import (
+                ContinuityManager,
+            )
+            return ContinuityManager.from_supervisor(
+                cycle_id=cycle_id,
+                state=self.current_state.value,
+                parent_context=parent_context,
+            )
+        except Exception as exc:
+            logger.debug("[SUPERVISOR] Continuity context creation failed: %s", exc)
+            return None
+
+    def _record_continuity_breadcrumb(
+        self,
+        plan_or_triage: Dict[str, Any],
+        action_result: Dict[str, Any],
+        verify: Dict[str, Any],
+    ) -> None:
+        """Record a breadcrumb with continuity metadata for cross-surface tracking."""
+        continuity_ctx = getattr(self, "_continuity_context", None)
+        if continuity_ctx is None:
+            return
+
+        try:
+            from modules.infrastructure.database.src.agent_db import AgentDB
+
+            action = plan_or_triage.get("action", plan_or_triage.get("kind", "unknown"))
+            db = AgentDB()
+            db.add_breadcrumb(
+                session_id=continuity_ctx.session_id,
+                action=f"supervisor_{action}",
+                agent_id="openclaw_supervisor",
+                data={
+                    "state": self.current_state.value,
+                    "reason": plan_or_triage.get("reason", ""),
+                    "success": bool(verify.get("ok", False)),
+                    "action_ok": bool(action_result.get("ok", False)),
+                },
+                continuity_id=continuity_ctx.continuity_id,
+                runtime_surface=continuity_ctx.surface.value,
+                sender_normalized="supervisor",
+                parent_continuity_id=continuity_ctx.parent_continuity_id,
+            )
+            logger.debug(
+                "[SUPERVISOR] Breadcrumb recorded | continuity_id=%s surface=%s",
+                continuity_ctx.continuity_id,
+                continuity_ctx.surface.value,
+            )
+        except Exception as exc:
+            logger.debug("[SUPERVISOR] Failed to record continuity breadcrumb: %s", exc)
 
     # ------------------------------------------------------------------ #
     #  Utility helpers                                                    #

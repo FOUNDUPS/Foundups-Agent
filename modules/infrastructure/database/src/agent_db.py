@@ -320,6 +320,17 @@ class AgentDB:
             },
         )
 
+        # Gateway Continuity Layer: Add continuity metadata to breadcrumbs (WSP 60)
+        self._ensure_table_columns(
+            "agents_breadcrumbs",
+            {
+                "continuity_id": "TEXT",
+                "runtime_surface": "TEXT",
+                "sender_normalized": "TEXT",
+                "parent_continuity_id": "TEXT",
+            },
+        )
+
         with self.db.get_connection() as conn:
             conn.execute("""
                 UPDATE agents_autonomous_tasks
@@ -331,6 +342,16 @@ class AgentDB:
             )
             conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_autonomous_tasks_assigned_to ON agents_autonomous_tasks(assigned_to)"
+            )
+            # Indexes for continuity queries
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_breadcrumbs_continuity_id ON agents_breadcrumbs(continuity_id)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_breadcrumbs_runtime_surface ON agents_breadcrumbs(runtime_surface)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_breadcrumbs_sender_normalized ON agents_breadcrumbs(sender_normalized)"
             )
 
     def record_awakening(self, agent_id: str, consciousness_level: str, koan: str = None) -> None:
@@ -415,18 +436,39 @@ class AgentDB:
     def add_breadcrumb(self, session_id: str, action: str, agent_id: str = "0102",
                       query: str = None, results: List[Dict] = None,
                       related_docs: List[str] = None, contract_id: str = None,
-                      task_id: str = None, data: Dict[str, Any] = None) -> int:
-        """Add a breadcrumb to the trail."""
+                      task_id: str = None, data: Dict[str, Any] = None,
+                      continuity_id: str = None, runtime_surface: str = None,
+                      sender_normalized: str = None, parent_continuity_id: str = None) -> int:
+        """
+        Add a breadcrumb to the trail.
+
+        Args:
+            session_id: Session identifier
+            action: Action performed
+            agent_id: Agent identifier (default: "0102")
+            query: Query text if applicable
+            results: Results data
+            related_docs: Related document paths
+            contract_id: Associated contract ID
+            task_id: Associated task ID
+            data: Additional data
+            continuity_id: Cross-surface continuity identifier (Gateway Continuity Layer)
+            runtime_surface: Runtime surface (cli, openclaw, messaging, etc.)
+            sender_normalized: Normalized sender identity
+            parent_continuity_id: Parent continuity ID for lineage tracking
+        """
         return self.db.execute_write('''
             INSERT INTO agents_breadcrumbs
-            (session_id, action, agent_id, query, results, related_docs, contract_id, task_id, data)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (session_id, action, agent_id, query, results, related_docs, contract_id, task_id, data,
+             continuity_id, runtime_surface, sender_normalized, parent_continuity_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             session_id, action, agent_id, query,
             json.dumps(results) if results else None,
             json.dumps(related_docs) if related_docs else None,
             contract_id, task_id,
-            json.dumps(data) if data else None
+            json.dumps(data) if data else None,
+            continuity_id, runtime_surface, sender_normalized, parent_continuity_id
         ))
 
     def get_breadcrumbs(self, session_id: str = None, agent_id: str = None,
@@ -490,6 +532,186 @@ class AgentDB:
             if len(recent_agents) >= limit:
                 break
         return recent_agents
+
+    # ============================================================================
+    # GATEWAY CONTINUITY LAYER - Cross-Surface Queries (WSP 60)
+    # ============================================================================
+
+    def get_breadcrumbs_by_continuity(
+        self, continuity_id: str, include_children: bool = True, limit: int = 50
+    ) -> List[Dict[str, Any]]:
+        """
+        Get breadcrumbs by continuity ID across all surfaces.
+
+        Args:
+            continuity_id: The continuity ID to search for
+            include_children: Include breadcrumbs with this as parent_continuity_id
+            limit: Maximum results
+
+        Returns:
+            List of breadcrumbs ordered by timestamp (newest first)
+        """
+        if include_children:
+            query = """
+                SELECT * FROM agents_breadcrumbs
+                WHERE continuity_id = ? OR parent_continuity_id = ?
+                ORDER BY timestamp DESC LIMIT ?
+            """
+            params = (continuity_id, continuity_id, limit)
+        else:
+            query = """
+                SELECT * FROM agents_breadcrumbs
+                WHERE continuity_id = ?
+                ORDER BY timestamp DESC LIMIT ?
+            """
+            params = (continuity_id, limit)
+
+        results = self.db.execute_query(query, params)
+        return self._parse_breadcrumb_json_fields(results)
+
+    def get_breadcrumbs_by_surface(
+        self, runtime_surface: str, minutes: int = 60, limit: int = 50
+    ) -> List[Dict[str, Any]]:
+        """
+        Get recent breadcrumbs from a specific runtime surface.
+
+        Args:
+            runtime_surface: The surface (cli, openclaw, messaging, etc.)
+            minutes: Time window in minutes
+            limit: Maximum results
+        """
+        # Use datetime format compatible with SQLite CURRENT_TIMESTAMP
+        cutoff = (datetime.now(timezone.utc) - timedelta(minutes=minutes)).strftime("%Y-%m-%d %H:%M:%S")
+        results = self.db.execute_query(
+            """
+            SELECT * FROM agents_breadcrumbs
+            WHERE runtime_surface = ? AND timestamp >= ?
+            ORDER BY timestamp DESC LIMIT ?
+            """,
+            (runtime_surface, cutoff, limit),
+        )
+        return self._parse_breadcrumb_json_fields(results)
+
+    def get_breadcrumbs_by_sender(
+        self, sender_normalized: str, minutes: int = 60, limit: int = 50
+    ) -> List[Dict[str, Any]]:
+        """
+        Get recent breadcrumbs from a specific normalized sender across all surfaces.
+
+        Args:
+            sender_normalized: Normalized sender identity
+            minutes: Time window in minutes
+            limit: Maximum results
+        """
+        # Use datetime format compatible with SQLite CURRENT_TIMESTAMP
+        cutoff = (datetime.now(timezone.utc) - timedelta(minutes=minutes)).strftime("%Y-%m-%d %H:%M:%S")
+        results = self.db.execute_query(
+            """
+            SELECT * FROM agents_breadcrumbs
+            WHERE sender_normalized = ? AND timestamp >= ?
+            ORDER BY timestamp DESC LIMIT ?
+            """,
+            (sender_normalized, cutoff, limit),
+        )
+        return self._parse_breadcrumb_json_fields(results)
+
+    def get_continuity_summary(
+        self, continuity_id: str
+    ) -> Dict[str, Any]:
+        """
+        Get a summary of activity for a continuity ID.
+
+        Returns:
+            Dict with surfaces, action counts, time range, and lineage info
+        """
+        rows = self.db.execute_query(
+            """
+            SELECT
+                COUNT(*) as count,
+                MIN(timestamp) as first_seen,
+                MAX(timestamp) as last_seen,
+                GROUP_CONCAT(DISTINCT runtime_surface) as surfaces,
+                GROUP_CONCAT(DISTINCT action) as actions
+            FROM agents_breadcrumbs
+            WHERE continuity_id = ? OR parent_continuity_id = ?
+            """,
+            (continuity_id, continuity_id),
+        )
+        if not rows or rows[0]["count"] == 0:
+            return {"found": False, "continuity_id": continuity_id}
+
+        row = rows[0]
+        return {
+            "found": True,
+            "continuity_id": continuity_id,
+            "breadcrumb_count": row["count"],
+            "first_seen": row["first_seen"],
+            "last_seen": row["last_seen"],
+            "surfaces": row["surfaces"].split(",") if row["surfaces"] else [],
+            "actions": row["actions"].split(",") if row["actions"] else [],
+        }
+
+    def get_cross_surface_activity(
+        self, minutes: int = 30, limit: int = 20
+    ) -> List[Dict[str, Any]]:
+        """
+        Get recent work items that span multiple runtime surfaces.
+
+        Detects cross-surface activity by:
+        1. Same continuity_id across different surfaces
+        2. Lineage-linked work (parent_continuity_id relationships)
+
+        Returns work items that transitioned across surfaces (e.g., CLI -> OpenClaw -> Supervisor).
+        """
+        # Use datetime format compatible with SQLite CURRENT_TIMESTAMP
+        cutoff = (datetime.now(timezone.utc) - timedelta(minutes=minutes)).strftime("%Y-%m-%d %H:%M:%S")
+        # Group by lineage_root: parent_continuity_id if exists, otherwise continuity_id
+        # This groups breadcrumbs that are either roots or direct children of the same root
+        results = self.db.execute_query(
+            """
+            SELECT
+                COALESCE(parent_continuity_id, continuity_id) as lineage_root,
+                COUNT(DISTINCT runtime_surface) as surface_count,
+                GROUP_CONCAT(DISTINCT runtime_surface) as surfaces,
+                GROUP_CONCAT(DISTINCT continuity_id) as continuity_ids,
+                MIN(timestamp) as started_at,
+                MAX(timestamp) as last_activity
+            FROM agents_breadcrumbs
+            WHERE continuity_id IS NOT NULL
+              AND continuity_id != ''
+              AND timestamp >= ?
+            GROUP BY lineage_root
+            HAVING surface_count > 1
+            ORDER BY last_activity DESC
+            LIMIT ?
+            """,
+            (cutoff, limit),
+        )
+        return [
+            {
+                "continuity_id": row["lineage_root"],  # Root of the lineage
+                "lineage_root": row["lineage_root"],
+                "continuity_ids": row["continuity_ids"].split(",") if row["continuity_ids"] else [],
+                "surface_count": row["surface_count"],
+                "surfaces": row["surfaces"].split(",") if row["surfaces"] else [],
+                "started_at": row["started_at"],
+                "last_activity": row["last_activity"],
+            }
+            for row in results
+        ]
+
+    def _parse_breadcrumb_json_fields(
+        self, results: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """Parse JSON fields in breadcrumb results."""
+        for row in results:
+            for field in ["results", "related_docs", "data"]:
+                if row.get(field) and isinstance(row[field], str):
+                    try:
+                        row[field] = json.loads(row[field])
+                    except json.JSONDecodeError:
+                        row[field] = None
+        return results
 
     # ============================================================================
     # HANDOFF CONTRACTS (Multi-Agent Task Assignment)

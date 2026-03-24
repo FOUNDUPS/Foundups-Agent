@@ -6,6 +6,8 @@ import logging
 import time
 from typing import Any, Dict, Optional
 
+from .continuity_context import ContinuityManager
+
 logger = logging.getLogger("openclaw_dae")
 
 
@@ -20,6 +22,14 @@ async def process_message(
     """Run the full OpenClaw autonomy loop for one inbound message."""
     start_time = time.time()
     dae.clear_turn_cancel()
+
+    # Gateway Continuity Layer: Create continuity context for this request
+    dae._continuity_context = ContinuityManager.from_openclaw(
+        sender=sender,
+        channel=channel,
+        session_key=session_key,
+        metadata=metadata,
+    )
 
     honeypot = dae.HoneypotDefense
 

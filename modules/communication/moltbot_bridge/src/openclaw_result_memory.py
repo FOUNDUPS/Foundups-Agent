@@ -103,4 +103,51 @@ def validate_and_remember(
         len(wsp_violations),
         learning_stored,
     )
+
+    # Gateway Continuity Layer: Record breadcrumb with continuity metadata
+    _record_continuity_breadcrumb(dae, plan, result, execution_time_ms)
+
     return result
+
+
+def _record_continuity_breadcrumb(
+    dae: Any,
+    plan: Any,
+    result: Any,
+    execution_time_ms: int,
+) -> None:
+    """Record a breadcrumb with continuity metadata for cross-surface tracking."""
+    try:
+        from modules.infrastructure.database.src.agent_db import AgentDB
+
+        continuity_ctx = getattr(dae, "_continuity_context", None)
+        if continuity_ctx is None:
+            return
+
+        db = AgentDB()
+        db.add_breadcrumb(
+            session_id=continuity_ctx.session_id or "openclaw",
+            action=f"execute_{plan.intent.category.value}",
+            agent_id="openclaw_dae",
+            query=plan.intent.raw_message[:500] if plan.intent.raw_message else None,
+            data={
+                "route": plan.route,
+                "tier": plan.permission_level.value,
+                "success": result.success,
+                "execution_time_ms": execution_time_ms,
+                "pattern_fidelity": result.pattern_fidelity,
+                "channel": plan.intent.channel,
+                "extracted_task": plan.intent.extracted_task[:200] if plan.intent.extracted_task else None,
+            },
+            continuity_id=continuity_ctx.continuity_id,
+            runtime_surface=continuity_ctx.surface.value,
+            sender_normalized=continuity_ctx.sender_normalized,
+            parent_continuity_id=continuity_ctx.parent_continuity_id,
+        )
+        logger.debug(
+            "[OPENCLAW-DAE] Breadcrumb recorded | continuity_id=%s surface=%s",
+            continuity_ctx.continuity_id,
+            continuity_ctx.surface.value,
+        )
+    except Exception as exc:
+        logger.debug("[OPENCLAW-DAE] Failed to record continuity breadcrumb: %s", exc)

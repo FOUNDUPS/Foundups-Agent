@@ -1,5 +1,109 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-24: Gateway Continuity Layer (P1)
+
+**Author**: 0102
+**WSP**: 22, 60, 91, 97
+
+### Context
+
+Task and conversation continuity was fragmented across runtime surfaces (CLI, OpenClaw, messaging). Work started on one surface couldn't be recognized on another. This implementation creates a unified continuity model under FoundUps control.
+
+### Changes
+
+1. **Created `continuity_context.py`**:
+   - `RuntimeSurface` enum: cli, openclaw, messaging, social, supervisor, idle, wre, internal
+   - `ContinuityContext` dataclass: carries continuity_id, surface, session_id, sender/channel normalization, parent lineage
+   - `ContinuityManager` factory: from_openclaw(), from_cli(), from_supervisor(), from_idle(), from_wre(), from_messaging()
+   - Environment variable propagation for subprocess continuity
+
+2. **Extended AgentDB breadcrumbs** (agent_db.py):
+   - Added columns: `continuity_id`, `runtime_surface`, `sender_normalized`, `parent_continuity_id`
+   - Migration via `_ensure_table_columns()` pattern
+   - New indexes for continuity queries
+
+3. **Added cross-surface query methods**:
+   - `get_breadcrumbs_by_continuity()`: retrieve by continuity ID with children
+   - `get_breadcrumbs_by_surface()`: filter by runtime surface
+   - `get_breadcrumbs_by_sender()`: filter by normalized sender
+   - `get_continuity_summary()`: aggregated status for a continuity ID
+   - `get_cross_surface_activity()`: find work that spanned multiple surfaces
+
+4. **Integrated into OpenClaw process flow**:
+   - `openclaw_process_loop.py`: Creates continuity context at request start
+   - `openclaw_result_memory.py`: Records breadcrumb with continuity metadata after execution
+
+5. **Added continuity query endpoints** (openclaw_execution_routes.py):
+   - `show continuity <id>`: detailed status for a continuity ID
+   - `show cross-surface activity`: recent multi-surface work
+   - `what is my continuity id`: current request's continuity context
+
+6. **Wired Supervisor and Idle surfaces**:
+   - `openclaw_supervisor.py`: Creates continuity context at cycle start, records breadcrumb in `_remember()`
+   - `idle_automation_dae.py`: Creates continuity context in `run_idle_tasks()`, records breadcrumb on completion
+
+7. **Fixed critical issues from review (round 1)**:
+   - `from_openclaw()` now derives stable continuity_id from session_key (same session = same ID)
+   - `from_openclaw()` reads `OPENCLAW_CONTINUITY_ID` env var for subprocess propagation
+
+8. **Fixed critical issues from review (round 2)**:
+   - `get_cross_surface_activity()` now groups by lineage_root (COALESCE(parent_continuity_id, continuity_id))
+   - `from_supervisor()` and `from_idle()` now accept `parent_context` parameter for lineage propagation
+   - Cross-surface detection works via parent linkage, not just shared IDs
+   - Added production-path test exercising real factories with parent propagation
+
+9. **Fixed critical issues from review (round 3)**:
+   - `run_cycle()` now accepts `parent_context` and passes to `_create_continuity_context()`
+   - `run_idle_tasks()` now accepts `parent_context` and passes to `_create_continuity_context()`
+   - `run_idle_automation()` convenience function accepts and propagates `parent_context`
+   - Added 3 production entry point tests verifying propagation through actual runtime methods
+
+10. **Wired OpenClaw → WRE production path (round 4)**:
+    - `_build_wre_command_context()` now includes `parent_continuity_context` from dae
+    - `wre_master_orchestrator.py` extracts parent context and forks WRE continuity from it
+    - WRE skill execution records breadcrumb with continuity metadata and parent linkage
+    - Added 2 production path tests verifying real factory wiring and cross-surface detection
+
+### Files Changed
+
+- `src/continuity_context.py` (new): Core continuity dataclass and manager with parent propagation
+- `src/openclaw_process_loop.py`: Continuity context creation
+- `src/openclaw_result_memory.py`: Breadcrumb recording with continuity
+- `src/openclaw_execution_routes.py`: Continuity query handlers + WRE context propagation
+- `src/openclaw_supervisor.py`: Supervisor continuity + run_cycle() accepts parent_context
+- `modules/infrastructure/database/src/agent_db.py`: Schema extension and lineage-aware queries
+- `modules/infrastructure/idle_automation/src/idle_automation_dae.py`: Idle surface + run_idle_tasks() accepts parent_context
+- `modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py`: WRE continuity forking + breadcrumb recording
+- `tests/test_continuity_context.py` (new): 47 tests (including production path tests)
+
+### Verification
+
+```
+pytest test_continuity_context.py  # 47 passed
+```
+
+### Acceptance Criteria Met
+
+1. One task started on one surface can be recognized on another via shared continuity_id or lineage
+2. Breadcrumbs record source surface consistently (openclaw, supervisor, idle, wre wired)
+3. Continuity state is queryable/debuggable via OpenClaw
+4. No platform-specific memory fragmentation
+5. Existing deterministic query paths not affected
+6. Session stability: same session_key always produces same continuity_id
+7. Subprocess propagation: OPENCLAW_CONTINUITY_ID env var wired
+8. Lineage propagation: from_supervisor/from_idle accept parent_context for cross-surface linkage
+9. Production entry points: run_cycle(), run_idle_tasks(), run_idle_automation() accept parent_context
+10. **OpenClaw → WRE cross-surface**: Production path tested and wired with lineage detection
+
+### Remaining Work (Future Slices)
+
+- CLI runtime wiring: `from_cli()` factory exists, needs wiring in CLI entry points
+- Messaging runtime wiring: `from_messaging()` factory exists, needs wiring in MoltBot
+- Caller wiring: auto_moderator_dae.py needs continuity context to pass to run_idle_automation()
+- Supervisor/Idle background loops: when processing work from another surface, look up original continuity_id
+
+---
+
 ## 2026-03-23: Supervisor Memory Nudge Wiring (P1)
 
 **Author**: 0102

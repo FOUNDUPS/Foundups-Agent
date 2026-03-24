@@ -210,6 +210,63 @@ class IdleAutomationDAE:
             logger.debug(f"WRE integration not available: {e}")
             self.wre_integration = None
 
+    def _create_continuity_context(self, parent_context=None):
+        """Create continuity context for idle automation cycle (Gateway Continuity Layer).
+
+        Args:
+            parent_context: Optional parent continuity context for cross-surface lineage.
+                           If provided, the idle context will be forked as a child.
+        """
+        try:
+            from modules.communication.moltbot_bridge.src.continuity_context import (
+                ContinuityManager,
+            )
+            return ContinuityManager.from_idle(
+                task_type="idle_automation_cycle",
+                parent_context=parent_context,
+            )
+        except Exception as e:
+            logger.debug(f"[IDLE] Failed to create continuity context: {e}")
+            return None
+
+    def _record_continuity_breadcrumb(
+        self,
+        action: str,
+        success: bool,
+        details: Dict[str, Any],
+    ) -> None:
+        """Record a breadcrumb with continuity metadata for cross-surface tracking."""
+        try:
+            continuity_ctx = getattr(self, "_continuity_context", None)
+            if continuity_ctx is None:
+                return
+
+            from modules.infrastructure.database.src.agent_db import AgentDB
+
+            db = AgentDB()
+            db.add_breadcrumb(
+                session_id=continuity_ctx.session_id or "idle_automation",
+                action=action,
+                agent_id="idle_automation_dae",
+                query=None,
+                data={
+                    "success": success,
+                    "health_score": self.idle_state.get("health_score", 100),
+                    **details,
+                },
+                continuity_id=continuity_ctx.continuity_id,
+                runtime_surface=continuity_ctx.surface.value,
+                sender_normalized=continuity_ctx.sender_normalized,
+                parent_continuity_id=continuity_ctx.parent_continuity_id,
+            )
+            logger.debug(
+                "[IDLE] Breadcrumb recorded | continuity_id=%s surface=%s",
+                continuity_ctx.continuity_id,
+                continuity_ctx.surface.value,
+            )
+        except Exception as e:
+            logger.debug(f"[IDLE] Failed to record continuity breadcrumb: {e}")
+
     def _load_and_validate_config(self) -> Dict[str, Any]:
         """Load and validate configuration with defaults and bounds checking."""
         config = {}
@@ -647,6 +704,172 @@ class IdleAutomationDAE:
 
         return result
 
+    async def _execute_scheduled_routines(self) -> Dict[str, Any]:
+        """
+        Execute scheduled OpenClaw routines based on natural-language schedules.
+
+        Evaluates due schedules and dispatches to existing native paths.
+        Prevents duplicate immediate reruns by tracking last execution.
+        """
+        result = {
+            "task": "scheduled_routines",
+            "success": False,
+            "due_count": 0,
+            "executed_count": 0,
+            "skipped_count": 0,
+            "executed_routines": [],
+            "duration": 0,
+        }
+
+        start_time = datetime.now()
+
+        try:
+            # Check if scheduled routines are enabled
+            scheduled_enabled = self._parse_bool_env("AUTO_SCHEDULED_ROUTINES", True)
+            if not scheduled_enabled:
+                result["error"] = "Scheduled routines disabled"
+                return result
+
+            from modules.infrastructure.idle_automation.src.schedule_evaluator import (
+                ScheduleEvaluator,
+            )
+
+            evaluator = ScheduleEvaluator()
+            due_schedules = evaluator.get_due_schedules()
+            result["due_count"] = len(due_schedules)
+
+            if not due_schedules:
+                result["success"] = True
+                result["error"] = "No schedules due"
+                return result
+
+            failed_count = 0
+            for spec in due_schedules:
+                routine_result = await self._dispatch_scheduled_routine(spec.routine)
+                success = routine_result.get("success", False)
+                summary = routine_result.get("summary", "completed" if success else "failed")
+
+                evaluator.record_execution(spec.id, success, summary)
+
+                if success:
+                    result["executed_count"] += 1
+                    result["executed_routines"].append({
+                        "id": spec.id,
+                        "routine": spec.routine,
+                        "cadence": spec.cadence,
+                        "success": True,
+                    })
+                else:
+                    failed_count += 1
+                    result["skipped_count"] += 1
+                    result["executed_routines"].append({
+                        "id": spec.id,
+                        "routine": spec.routine,
+                        "cadence": spec.cadence,
+                        "success": False,
+                        "error": routine_result.get("error"),
+                    })
+
+            # Only report success if all due routines succeeded
+            result["success"] = failed_count == 0
+            result["failed_count"] = failed_count
+            self.idle_state["last_scheduled_routines"] = datetime.now().isoformat()
+
+        except ImportError:
+            result["error"] = "Schedule evaluator not available"
+        except Exception as e:
+            result["error"] = f"Scheduled routines failed: {e}"
+            logger.warning(f"Scheduled routines error: {e}")
+        finally:
+            result["duration"] = (datetime.now() - start_time).total_seconds()
+
+        return result
+
+    async def _dispatch_scheduled_routine(self, routine: str) -> Dict[str, Any]:
+        """
+        Dispatch a scheduled routine to its native execution path.
+
+        Only dispatches to existing safe routines - no arbitrary command execution.
+        """
+        if routine == "self_research":
+            # Reuse existing self-research refresh
+            sr_result = await self._execute_self_research_refresh()
+            return {
+                "success": sr_result.get("success", False),
+                "summary": f"{sr_result.get('update_candidates', 0)} candidates, {sr_result.get('autonomous_tasks', 0)} tasks",
+                "error": sr_result.get("error"),
+            }
+
+        if routine == "queue_audit":
+            # Run the native execution queue builder
+            return await self._run_queue_audit()
+
+        if routine == "grant_watchlist":
+            # Grant watchlist is part of self-research, run targeted refresh
+            return await self._run_grant_watchlist_refresh()
+
+        return {
+            "success": False,
+            "error": f"Unknown routine: {routine}",
+        }
+
+    async def _run_queue_audit(self) -> Dict[str, Any]:
+        """Run the OpenClaw native execution queue builder."""
+        try:
+            queue_script = self.module_path.parent.parent.parent / "scripts" / "build_openclaw_native_execution_queue.py"
+            if not queue_script.exists():
+                return {"success": False, "error": "Queue builder script not found"}
+
+            completed = subprocess.run(
+                ["python", str(queue_script)],
+                capture_output=True,
+                text=True,
+                timeout=60,
+                cwd=self.module_path.parent.parent.parent,
+            )
+
+            if completed.returncode == 0:
+                return {
+                    "success": True,
+                    "summary": "Queue refreshed",
+                }
+            return {
+                "success": False,
+                "error": completed.stderr[:200] if completed.stderr else "Queue build failed",
+            }
+        except subprocess.TimeoutExpired:
+            return {"success": False, "error": "Queue audit timed out"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    async def _run_grant_watchlist_refresh(self) -> Dict[str, Any]:
+        """Run targeted grant watchlist refresh via self-research refresher."""
+        try:
+            from modules.infrastructure.idle_automation.src.self_research_refresh import (
+                SelfResearchRefresher,
+            )
+
+            refresher = SelfResearchRefresher()
+            # Run the public grant watchlist refresh method
+            report = await asyncio.wait_for(
+                asyncio.to_thread(refresher.refresh_grant_watchlist),
+                timeout=self.config.get("self_research_timeout", 300),
+            )
+
+            # Extract counts from status snapshot
+            status = report.get("status", {})
+            watch_count = status.get("watch_count", 0)
+            changed_count = status.get("changed_count", 0)
+            error_count = status.get("error_count", 0)
+            return {
+                "success": report.get("refresh_success", False),
+                "summary": f"Grant watchlist: {watch_count} watched, {changed_count} changed, {error_count} errors",
+            }
+        except asyncio.TimeoutError:
+            return {"success": False, "error": "Grant watchlist refresh timed out"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
     def _extract_patterns_from_lines(self, lines: list) -> list:
         """
         Extract training patterns from 012.txt lines.
@@ -749,16 +972,23 @@ class IdleAutomationDAE:
 
         return patterns
 
-    async def run_idle_tasks(self) -> Dict[str, Any]:
+    async def run_idle_tasks(self, parent_context=None) -> Dict[str, Any]:
         """
         Main entry point - execute idle automation tasks.
         Called by YouTube DAE when entering idle state.
+
+        Args:
+            parent_context: Optional parent continuity context for cross-surface lineage.
+                           Pass the caller's continuity context to enable cross-surface tracking.
         """
         logger.info("[BOT] Idle Automation DAE: Executing background tasks")
 
         # Update idle session tracking
         self.idle_state["idle_session_count"] += 1
         self.idle_state["last_idle_execution"] = datetime.now().isoformat()
+
+        # Gateway Continuity Layer: Create continuity context for this idle cycle
+        self._continuity_context = self._create_continuity_context(parent_context)
 
         execution_result = {
             "session_id": self.idle_state["idle_session_count"],
@@ -828,6 +1058,22 @@ class IdleAutomationDAE:
                     self_research_result.get("error", "N/A"),
                 )
 
+            # Phase 5: Scheduled routines (natural-language schedules)
+            scheduled_result = await self._execute_scheduled_routines()
+            execution_result["tasks_executed"].append(scheduled_result)
+
+            if scheduled_result["success"]:
+                logger.info(
+                    "[BOT] Scheduled routines: %s executed, %s skipped",
+                    scheduled_result.get("executed_count", 0),
+                    scheduled_result.get("skipped_count", 0),
+                )
+            else:
+                logger.info(
+                    "ℹ️ Scheduled routines skipped: %s",
+                    scheduled_result.get("error", "N/A"),
+                )
+
             # Update execution counter
             self.idle_state["execution_count_today"] += 1
 
@@ -848,6 +1094,8 @@ class IdleAutomationDAE:
                     "linkedin_duration": linkedin_result.get("duration", 0),
                     "self_research_success": self_research_result.get("success", False),
                     "self_research_candidates": self_research_result.get("update_candidates", 0),
+                    "scheduled_routines_success": scheduled_result.get("success", False),
+                    "scheduled_routines_executed": scheduled_result.get("executed_count", 0),
                 }
             )
 
@@ -865,8 +1113,52 @@ class IdleAutomationDAE:
             execution_result["duration"] = (datetime.now() - start_time).total_seconds()
             self._save_idle_state()
 
+            # Gateway Continuity Layer: Record breadcrumb with continuity metadata
+            self._record_continuity_breadcrumb(
+                action="idle_automation_cycle",
+                success=execution_result["overall_success"],
+                details={
+                    "session_id": execution_result["session_id"],
+                    "tasks_executed": len(execution_result.get("tasks_executed", [])),
+                    "duration": execution_result["duration"],
+                    "skipped_reason": execution_result.get("skipped_reason"),
+                },
+            )
+
         logger.info(f"[U+1F3C1] Idle automation cycle completed in {execution_result['duration']:.1f}s")
         return execution_result
+
+    def _get_scheduled_routines_status(self) -> Dict[str, Any]:
+        """Get summary of scheduled routines."""
+        try:
+            from modules.infrastructure.idle_automation.src.schedule_evaluator import (
+                ScheduleEvaluator,
+            )
+
+            evaluator = ScheduleEvaluator()
+            schedules = evaluator.list_schedules()
+            due = evaluator.get_due_schedules()
+
+            return {
+                "total_count": len(schedules),
+                "enabled_count": sum(1 for s in schedules if s.enabled),
+                "due_count": len(due),
+                "schedules": [
+                    {
+                        "id": s.id,
+                        "phrase": s.phrase,
+                        "routine": s.routine,
+                        "cadence": s.cadence,
+                        "enabled": s.enabled,
+                        "last_run": s.last_run,
+                    }
+                    for s in schedules
+                ],
+            }
+        except ImportError:
+            return {"error": "Schedule evaluator not available"}
+        except Exception as e:
+            return {"error": str(e)}
 
     def get_idle_status(self) -> Dict[str, Any]:
         """Get current idle automation status (WSP 70) with health metrics."""
@@ -877,20 +1169,26 @@ class IdleAutomationDAE:
         elif health_score < self.config["health_warning_threshold"]:
             health_status = "warning"
 
+        # Get scheduled routines summary
+        scheduled_info = self._get_scheduled_routines_status()
+
         return {
             "last_idle_execution": self.idle_state.get("last_idle_execution"),
             "last_git_push": self.idle_state.get("last_git_push"),
             "last_linkedin_post": self.idle_state.get("last_linkedin_post"),
             "last_self_research": self.idle_state.get("last_self_research"),
+            "last_scheduled_routines": self.idle_state.get("last_scheduled_routines"),
             "execution_count_today": self.idle_state.get("execution_count_today", 0),
             "idle_session_count": self.idle_state.get("idle_session_count", 0),
             "auto_git_enabled": self.config["auto_git_push"],
             "auto_linkedin_enabled": self.config["auto_linkedin_post"],
             "auto_self_research_enabled": self.config["auto_self_research"],
+            "auto_scheduled_routines_enabled": self._parse_bool_env("AUTO_SCHEDULED_ROUTINES", True),
             "health_score": health_score,
             "health_status": health_status,
             "circuit_breaker_reset": self.idle_state.get("circuit_breaker_reset"),
             "recent_executions": self.execution_history[-5:] if self.execution_history else [],
+            "scheduled_routines": scheduled_info,
             "config": {
                 "idle_task_timeout": self.config["idle_task_timeout"],
                 "max_daily_executions": self.config["max_daily_executions"],
@@ -908,10 +1206,15 @@ class IdleAutomationDAE:
 
 
 # Convenience function for YouTube DAE integration
-async def run_idle_automation() -> Dict[str, Any]:
+async def run_idle_automation(parent_context=None) -> Dict[str, Any]:
     """
     Convenience function for YouTube DAE integration.
     Call this from AutoModeratorDAE when entering idle state.
+
+    Args:
+        parent_context: Optional parent continuity context for cross-surface lineage.
+                       Pass the caller's continuity context to enable cross-surface tracking.
+                       Example: run_idle_automation(parent_context=self._continuity_context)
     """
     dae = IdleAutomationDAE()
-    return await dae.run_idle_tasks()
+    return await dae.run_idle_tasks(parent_context=parent_context)
