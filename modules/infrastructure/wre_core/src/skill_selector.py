@@ -271,9 +271,12 @@ class SkillSelector:
         if not self.skills_loader:
             return []
 
-        # Get all skills from loader
+        # Get healthy skills from loader (Skills 2.0 hygiene)
         all_skills = []
-        if hasattr(self.skills_loader, 'list_skills'):
+        if hasattr(self.skills_loader, 'list_healthy_skills'):
+            # Prefer hygiene-filtered list (excludes retired/invalid category)
+            all_skills = self.skills_loader.list_healthy_skills()
+        elif hasattr(self.skills_loader, 'list_skills'):
             all_skills = self.skills_loader.list_skills()
         elif hasattr(self.skills_loader, 'skills_registry'):
             all_skills = list(self.skills_loader.skills_registry.keys())

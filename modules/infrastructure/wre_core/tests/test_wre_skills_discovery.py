@@ -226,6 +226,153 @@ class TestDiscoveredSkillDataclass:
         assert skill.agents == ["qwen"]
         assert skill.promotion_state == "prototype"
 
+    def test_discovered_skill_hygiene_fields(self):
+        """Test Skills 2.0 hygiene fields on DiscoveredSkill."""
+        skill = DiscoveredSkill(
+            skill_path=Path("test/SKILL.md"),
+            skill_name="test_skill",
+            agents=["qwen"],
+            intent_type="DECISION",
+            version="1.0.0",
+            promotion_state="production",
+            wsp_chain=["WSP 96"],
+            metadata={},
+            category="workflow",
+            retirement_date="",
+            has_evals=True,
+        )
+
+        assert skill.category == "workflow"
+        assert skill.retirement_date == ""
+        assert skill.has_evals is True
+
+
+class TestSkillsHygiene:
+    """Test Skills 2.0 hygiene filtering."""
+
+    @pytest.fixture
+    def discovery(self):
+        """Create WRE Skills Discovery instance."""
+        return WRESkillsDiscovery()
+
+    def test_is_retired_null(self, discovery):
+        """Null retirement_date means not retired."""
+        assert discovery._is_retired(None) is False
+        assert discovery._is_retired("null") is False
+        assert discovery._is_retired("") is False
+
+    def test_is_retired_future_date(self, discovery):
+        """Future retirement_date means not retired."""
+        assert discovery._is_retired("2099-12-31") is False
+        assert discovery._is_retired("2099-12-31T23:59:59+00:00") is False
+
+    def test_is_retired_past_date(self, discovery):
+        """Past retirement_date means retired."""
+        assert discovery._is_retired("2020-01-01") is True
+        assert discovery._is_retired("2020-01-01T00:00:00+00:00") is True
+
+    def test_is_retired_invalid_format(self, discovery):
+        """Invalid format returns False (not retired)."""
+        assert discovery._is_retired("not-a-date") is False
+        assert discovery._is_retired(12345) is False
+
+    def test_discover_healthy_skills_excludes_retired(self, discovery, tmp_path, monkeypatch):
+        """discover_healthy_skills excludes retired skills."""
+        # Create mock skills - one active, one retired
+        active_skill = DiscoveredSkill(
+            skill_path=tmp_path / "active/SKILLz.md",
+            skill_name="active_skill",
+            agents=["qwen"],
+            intent_type="DECISION",
+            version="1.0.0",
+            promotion_state="production",
+            wsp_chain=[],
+            metadata={},
+            category="workflow",
+            retirement_date="",
+            has_evals=True,
+        )
+        retired_skill = DiscoveredSkill(
+            skill_path=tmp_path / "retired/SKILLz.md",
+            skill_name="retired_skill",
+            agents=["qwen"],
+            intent_type="DECISION",
+            version="1.0.0",
+            promotion_state="production",
+            wsp_chain=[],
+            metadata={},
+            category="workflow",
+            retirement_date="2020-01-01",
+            has_evals=True,
+        )
+
+        # Mock discover_all_skills to return our test skills
+        monkeypatch.setattr(discovery, "discover_all_skills", lambda: [active_skill, retired_skill])
+
+        healthy = discovery.discover_healthy_skills()
+
+        assert len(healthy) == 1
+        assert healthy[0].skill_name == "active_skill"
+
+    def test_discover_healthy_skills_excludes_invalid_category(self, discovery, tmp_path, monkeypatch):
+        """discover_healthy_skills excludes skills with invalid category."""
+        valid_skill = DiscoveredSkill(
+            skill_path=tmp_path / "valid/SKILLz.md",
+            skill_name="valid_skill",
+            agents=["qwen"],
+            intent_type="DECISION",
+            version="1.0.0",
+            promotion_state="production",
+            wsp_chain=[],
+            metadata={},
+            category="workflow",
+            retirement_date="",
+            has_evals=True,
+        )
+        invalid_category_skill = DiscoveredSkill(
+            skill_path=tmp_path / "invalid/SKILLz.md",
+            skill_name="invalid_category_skill",
+            agents=["qwen"],
+            intent_type="DECISION",
+            version="1.0.0",
+            promotion_state="production",
+            wsp_chain=[],
+            metadata={},
+            category="invalid_category",  # Not workflow or capability-uplift
+            retirement_date="",
+            has_evals=True,
+        )
+
+        monkeypatch.setattr(discovery, "discover_all_skills", lambda: [valid_skill, invalid_category_skill])
+
+        healthy = discovery.discover_healthy_skills()
+
+        assert len(healthy) == 1
+        assert healthy[0].skill_name == "valid_skill"
+
+    def test_discover_healthy_skills_allows_capability_uplift(self, discovery, tmp_path, monkeypatch):
+        """discover_healthy_skills allows capability-uplift category."""
+        uplift_skill = DiscoveredSkill(
+            skill_path=tmp_path / "uplift/SKILLz.md",
+            skill_name="uplift_skill",
+            agents=["qwen"],
+            intent_type="DECISION",
+            version="1.0.0",
+            promotion_state="production",
+            wsp_chain=[],
+            metadata={},
+            category="capability-uplift",
+            retirement_date="",
+            has_evals=True,
+        )
+
+        monkeypatch.setattr(discovery, "discover_all_skills", lambda: [uplift_skill])
+
+        healthy = discovery.discover_healthy_skills()
+
+        assert len(healthy) == 1
+        assert healthy[0].category == "capability-uplift"
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

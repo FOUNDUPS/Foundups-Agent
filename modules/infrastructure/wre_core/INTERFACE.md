@@ -1,8 +1,8 @@
 # wre_core Interface Specification
 
 **WSP 11 Compliance:** Phase 3 Complete ✅
-**Last Updated:** 2026-01-11
-**Version:** 0.7.0
+**Last Updated:** 2026-03-25
+**Version:** 0.7.1
 
 ## Overview
 
@@ -437,6 +437,161 @@ class WRESkillsDiscovery:
         """
 ```
 
+### Skills 2.0 Hygiene API (NEW - v0.7.1)
+
+```python
+from dataclasses import dataclass, field
+from typing import List, Optional
+
+@dataclass
+class SkillHygieneStatus:
+    """Result of skill hygiene check per Skills 2.0 specification."""
+    skill_name: str
+    is_healthy: bool
+    is_retired: bool = False
+    retirement_date: Optional[str] = None
+    missing_category: bool = False
+    category: Optional[str] = None
+    has_evals: bool = False
+    issues: List[str] = field(default_factory=list)
+
+# Extended SkillMetadata with Skills 2.0 fields
+@dataclass
+class SkillMetadata:
+    """Skill descriptor with Skills 2.0 hygiene fields."""
+    name: str
+    description: str
+    primary_agent: str
+    intent_type: str
+    promotion_state: str
+    location: Path
+    pattern_fidelity_threshold: float
+    # Skills 2.0 hygiene fields
+    category: str = "workflow"              # workflow | capability-uplift
+    retirement_date: str = ""               # ISO date or empty
+    has_evals: bool = False                 # Has eval test cases
+
+# Extended DiscoveredSkill with Skills 2.0 fields
+@dataclass
+class DiscoveredSkill:
+    """Filesystem-discovered skill with hygiene fields."""
+    skill_path: Path
+    skill_name: str
+    agents: List[str]
+    intent_type: str
+    version: str
+    promotion_state: str
+    wsp_chain: List[str]
+    metadata: Dict[str, Any]
+    # Skills 2.0 hygiene fields
+    category: str = "workflow"
+    retirement_date: str = ""
+    has_evals: bool = False
+```
+
+#### WRESkillsLoader Hygiene Methods
+
+```python
+class WRESkillsLoader:
+    """Extended with Skills 2.0 hygiene enforcement."""
+
+    def check_skill_hygiene(self, skill_name: str) -> SkillHygieneStatus:
+        """
+        Check skill hygiene per Skills 2.0 specification.
+
+        Validates:
+        - retirement_date: If set and past, skill is retired
+        - category: Must be 'workflow' or 'capability-uplift'
+        - evals: Presence of eval test cases
+
+        Returns:
+            SkillHygieneStatus with is_healthy=True if all checks pass
+        """
+
+    def _is_retired(self, retirement_date: Optional[str]) -> bool:
+        """
+        Check if retirement_date indicates skill is retired.
+
+        Args:
+            retirement_date: ISO date string, 'null', '', or None
+
+        Returns:
+            True if date is in the past, False otherwise
+        """
+
+    def list_healthy_skills(self) -> List[str]:
+        """
+        List skill names that pass hygiene checks.
+
+        Excludes:
+        - Retired skills (retirement_date in past)
+        - Skills with invalid/missing category
+
+        Returns:
+            List of healthy skill names
+        """
+
+    def discover_healthy_skills(self) -> List[SkillMetadata]:
+        """
+        Discover and return only healthy skills.
+
+        Returns:
+            List of SkillMetadata for skills passing hygiene checks
+        """
+
+    def load_skill(
+        self,
+        skill_name: str,
+        agent: str,
+        enforce_hygiene: bool = True
+    ) -> str:
+        """
+        Load skill content with hygiene enforcement.
+
+        Args:
+            skill_name: Name of skill to load
+            agent: Agent requesting the skill
+            enforce_hygiene: If True (default), raises ValueError for retired skills
+
+        Returns:
+            Skill content string
+
+        Raises:
+            ValueError: If enforce_hygiene=True and skill is retired
+        """
+```
+
+#### WRESkillsDiscovery Hygiene Methods
+
+```python
+class WRESkillsDiscovery:
+    """Extended with Skills 2.0 hygiene filtering."""
+
+    def _is_retired(self, retirement_date: Optional[str]) -> bool:
+        """Check if retirement_date indicates skill is retired."""
+
+    def discover_healthy_skills(self) -> List[DiscoveredSkill]:
+        """
+        Discover skills that pass hygiene checks.
+
+        Filters out:
+        - Retired skills (retirement_date in past)
+        - Skills with invalid category (not workflow/capability-uplift)
+
+        Returns:
+            List of healthy DiscoveredSkill instances
+        """
+```
+
+#### Valid Categories
+
+```python
+VALID_SKILL_CATEGORIES = {"workflow", "capability-uplift"}
+```
+
+- **workflow**: Standard operational skills (permanent)
+- **capability-uplift**: Gap-filling skills (deprecated once capability goes native)
+
 ### Phase 3: HoloDAE Integration (NEW - v0.6.0)
 
 ```python
@@ -631,6 +786,19 @@ python -m pytest tests/test_skill_loader.py
 - **WREPromotionError** – Filesystem issues during prototype → wardrobe copy
 
 ## Version History
+
+### 0.7.1 (2026-03-25) - Skills 2.0 Hygiene Enforcement
+- **IMPLEMENTED**: `SkillHygieneStatus` dataclass for hygiene check results
+- **EXTENDED**: `SkillMetadata` with Skills 2.0 fields (category, retirement_date, has_evals)
+- **EXTENDED**: `DiscoveredSkill` with Skills 2.0 fields
+- **IMPLEMENTED**: `check_skill_hygiene()` - Full hygiene validation
+- **IMPLEMENTED**: `_is_retired()` - ISO date retirement detection
+- **IMPLEMENTED**: `list_healthy_skills()` - Filter healthy skills by name
+- **IMPLEMENTED**: `discover_healthy_skills()` - Filter healthy SkillMetadata/DiscoveredSkill
+- **UPDATED**: `load_skill()` with `enforce_hygiene` parameter (blocks retired skills)
+- **ADDED**: `test_wre_skills_loader_hygiene.py` (18 tests - ALL PASSED)
+- **ADDED**: `TestSkillsHygiene` class in discovery tests (7 tests - ALL PASSED)
+- **DOCUMENTED**: Valid categories: workflow, capability-uplift
 
 ### 0.5.0 (2025-10-24) - Phase 2 Complete
 - **IMPLEMENTED**: `_execute_skill_with_qwen()` - Local Qwen inference integration (wre_master_orchestrator.py:282-383)
