@@ -317,6 +317,7 @@ class AgentDB:
             {
                 "status": "TEXT DEFAULT 'pending'",
                 "completed_at": "DATETIME",
+                "origin_continuity_id": "TEXT",  # Gateway Continuity Layer
             },
         )
 
@@ -662,24 +663,76 @@ class AgentDB:
         2. Lineage-linked work (parent_continuity_id relationships)
 
         Returns work items that transitioned across surfaces (e.g., CLI -> OpenClaw -> Supervisor).
+
+        Uses recursive CTE to resolve ultimate lineage root for multi-hop chains
+        (e.g., OpenClaw -> Idle -> Supervisor all grouped under OpenClaw's root).
+
+        Ancestry resolution follows parent links regardless of time window - only the
+        final activity filter uses the time cutoff. This ensures old roots are still
+        discovered when recent follow-up work references them.
         """
         # Use datetime format compatible with SQLite CURRENT_TIMESTAMP
         cutoff = (datetime.now(timezone.utc) - timedelta(minutes=minutes)).strftime("%Y-%m-%d %H:%M:%S")
-        # Group by lineage_root: parent_continuity_id if exists, otherwise continuity_id
-        # This groups breadcrumbs that are either roots or direct children of the same root
+
+        # Recursive CTE to resolve ultimate lineage root for each continuity_id
+        # IMPORTANT: continuity_map includes ALL breadcrumbs (no time filter) so ancestry
+        # can be resolved even when roots are older than the activity window.
+        # The time filter is applied only to the final grouping/reporting.
         results = self.db.execute_query(
             """
+            WITH RECURSIVE
+            -- Get distinct continuity mappings from ALL breadcrumbs (no time filter)
+            -- This allows ancestry resolution to old roots that recent work references
+            continuity_map AS (
+                SELECT DISTINCT
+                    continuity_id,
+                    parent_continuity_id
+                FROM agents_breadcrumbs
+                WHERE continuity_id IS NOT NULL AND continuity_id != ''
+            ),
+            -- Recursively resolve ultimate root for each continuity_id
+            lineage_roots AS (
+                -- Base case: nodes without parents are their own root
+                SELECT
+                    continuity_id,
+                    continuity_id as ultimate_root,
+                    0 as depth
+                FROM continuity_map
+                WHERE parent_continuity_id IS NULL OR parent_continuity_id = ''
+
+                UNION ALL
+
+                -- Recursive case: follow parent chain
+                SELECT
+                    cm.continuity_id,
+                    lr.ultimate_root,
+                    lr.depth + 1
+                FROM continuity_map cm
+                JOIN lineage_roots lr ON cm.parent_continuity_id = lr.continuity_id
+                WHERE cm.parent_continuity_id IS NOT NULL
+                  AND cm.parent_continuity_id != ''
+                  AND lr.depth < 10  -- Prevent infinite loops
+            ),
+            -- Get the deepest resolution for each continuity_id (ultimate root)
+            resolved_roots AS (
+                SELECT continuity_id, ultimate_root
+                FROM lineage_roots
+                GROUP BY continuity_id
+                HAVING depth = MAX(depth)
+            )
+            -- Group RECENT breadcrumbs by ultimate root (time filter here only)
             SELECT
-                COALESCE(parent_continuity_id, continuity_id) as lineage_root,
-                COUNT(DISTINCT runtime_surface) as surface_count,
-                GROUP_CONCAT(DISTINCT runtime_surface) as surfaces,
-                GROUP_CONCAT(DISTINCT continuity_id) as continuity_ids,
-                MIN(timestamp) as started_at,
-                MAX(timestamp) as last_activity
-            FROM agents_breadcrumbs
-            WHERE continuity_id IS NOT NULL
-              AND continuity_id != ''
-              AND timestamp >= ?
+                COALESCE(rr.ultimate_root, b.continuity_id) as lineage_root,
+                COUNT(DISTINCT b.runtime_surface) as surface_count,
+                GROUP_CONCAT(DISTINCT b.runtime_surface) as surfaces,
+                GROUP_CONCAT(DISTINCT b.continuity_id) as continuity_ids,
+                MIN(b.timestamp) as started_at,
+                MAX(b.timestamp) as last_activity
+            FROM agents_breadcrumbs b
+            LEFT JOIN resolved_roots rr ON b.continuity_id = rr.continuity_id
+            WHERE b.continuity_id IS NOT NULL
+              AND b.continuity_id != ''
+              AND b.timestamp >= ?
             GROUP BY lineage_root
             HAVING surface_count > 1
             ORDER BY last_activity DESC
@@ -689,7 +742,7 @@ class AgentDB:
         )
         return [
             {
-                "continuity_id": row["lineage_root"],  # Root of the lineage
+                "continuity_id": row["lineage_root"],  # Ultimate root of the lineage
                 "lineage_root": row["lineage_root"],
                 "continuity_ids": row["continuity_ids"].split(",") if row["continuity_ids"] else [],
                 "surface_count": row["surface_count"],
@@ -903,22 +956,58 @@ class AgentDB:
 
     def create_autonomous_task(self, task_id: str, description: str,
                              required_skills: List[str], estimated_complexity: float,
-                             priority_score: float, context: Dict[str, Any] = None) -> bool:
-        """Create an autonomous task."""
+                             priority_score: float, context: Dict[str, Any] = None,
+                             origin_continuity_id: str = None) -> bool:
+        """Create an autonomous task.
+
+        Args:
+            task_id: Unique task identifier.
+            description: Task description.
+            required_skills: List of required skill names.
+            estimated_complexity: Complexity score (0.0-1.0).
+            priority_score: Priority score (higher = more urgent).
+            context: Optional context dict for task.
+            origin_continuity_id: Optional continuity ID from the work that discovered this task.
+                                  Enables background correlation when task is executed later.
+        """
         try:
             self.db.execute_write('''
                 INSERT OR REPLACE INTO agents_autonomous_tasks
                 (task_id, description, required_skills, estimated_complexity,
-                 priority_score, context)
-                VALUES (?, ?, ?, ?, ?, ?)
+                 priority_score, context, origin_continuity_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', (
                 task_id, description, json.dumps(required_skills),
                 estimated_complexity, priority_score,
-                json.dumps(context) if context else None
+                json.dumps(context) if context else None,
+                origin_continuity_id
             ))
             return True
         except Exception:
             return False
+
+    def get_autonomous_task_by_id(self, task_id: str) -> Optional[Dict[str, Any]]:
+        """Get a single autonomous task by ID.
+
+        Args:
+            task_id: The task identifier.
+
+        Returns:
+            Task dict with parsed JSON fields, or None if not found.
+        """
+        results = self.db.execute_query('''
+            SELECT * FROM agents_autonomous_tasks WHERE task_id = ?
+        ''', (task_id,))
+
+        if not results:
+            return None
+
+        row = dict(results[0])
+        for field in ['required_skills', 'context']:
+            if row.get(field) and isinstance(row[field], str):
+                row[field] = json.loads(row[field])
+
+        return row
 
     def get_autonomous_tasks(self, status: str = "pending", limit: int = 50) -> List[Dict[str, Any]]:
         """Get autonomous tasks by status."""

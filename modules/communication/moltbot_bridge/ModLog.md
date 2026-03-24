@@ -77,6 +77,24 @@ Task and conversation continuity was fragmented across runtime surfaces (CLI, Op
     - **Session collision fix**: Webhook derives `session_key = f"msg_{msg_ctx.continuity_id[:12]}"` when sessionKey is default/missing
     - Added 4 production path tests verifying CLI and messaging cross-surface wiring
 
+12. **Background work continuity correlation (round 6 - gateway_continuity_background_correlation)**:
+    - **Problem**: When supervisor/idle executes previously discovered work, lineage to the original work item was lost
+    - **Solution**: Recovery helpers + origin stamping on task creation + recursive lineage resolution
+    - `continuity_context.py`: Added `resolve_origin_continuity_from_task()` and `resolve_origin_continuity_from_session()` helpers
+    - `agent_db.py`: Added `origin_continuity_id` column to `agents_autonomous_tasks`, extended `create_autonomous_task()`, added `get_autonomous_task_by_id()`
+    - `agent_db.py`: Rewrote `get_cross_surface_activity()` with recursive CTE to resolve ultimate lineage root for multi-hop chains
+    - `agent_db.py`: **Fix**: Ancestry resolution now follows parent links outside the activity window - only final grouping filtered by time
+    - `openclaw_supervisor.py`: Added `_resolve_and_link_origin_continuity()`, called before PLAN when executing autonomous tasks
+    - `idle_automation_dae.py`: Pass continuity ID to `SelfResearchRefresher` for task origin stamping
+    - `idle_automation_dae.py`: Added `_try_recover_origin_continuity()` and `set_triggering_session()` for session-based recovery
+    - `idle_automation_dae.py`: **Fix**: Removed generic fallback - only recovers from explicit `last_triggering_session_id`, clears after use
+    - `idle_automation_dae.py`: `run_idle_tasks()` now auto-recovers origin if no parent_context provided (explicit session only)
+    - `self_research_refresh.py`: Accept `origin_continuity_id` in constructor, stamp on all created tasks
+    - **Lineage flow**: Self-research discovers work → stamps origin_continuity_id → supervisor later resolves and links
+    - **Multi-hop lineage**: OpenClaw → Idle → Supervisor all grouped under OpenClaw root via recursive CTE (even if root is old)
+    - **No false lineage**: Idle only links to explicit triggering session, not arbitrary prior idle work
+    - Added 7 background correlation tests verifying supervisor/idle/no-false-positive/multi-hop-grouping/old-root-resolution/production-wiring/no-false-lineage scenarios
+
 ### Files Changed
 
 - `src/continuity_context.py` (new): Core continuity dataclass and manager with parent propagation
@@ -89,14 +107,15 @@ Task and conversation continuity was fragmented across runtime surfaces (CLI, Op
 - `modules/infrastructure/cli/src/openclaw_chat.py`: CLI session continuity + breadcrumb recording + parent propagation + session collision fix
 - `modules/infrastructure/cli/src/openclaw_voice.py`: Voice session continuity + breadcrumb recording + parent propagation + session collision fix
 - `modules/infrastructure/database/src/agent_db.py`: Schema extension and lineage-aware queries
-- `modules/infrastructure/idle_automation/src/idle_automation_dae.py`: Idle surface + run_idle_tasks() accepts parent_context
+- `modules/infrastructure/idle_automation/src/idle_automation_dae.py`: Idle surface + run_idle_tasks() accepts parent_context + passes origin to refresher
+- `modules/infrastructure/idle_automation/src/self_research_refresh.py`: Accepts origin_continuity_id, stamps on task creation
 - `modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py`: WRE continuity forking + breadcrumb recording
-- `tests/test_continuity_context.py` (new): 51 tests (including CLI/messaging production path tests)
+- `tests/test_continuity_context.py`: 58 tests (including 7 background correlation tests)
 
 ### Verification
 
 ```
-pytest test_continuity_context.py  # 51 passed
+pytest test_continuity_context.py  # 58 passed
 ```
 
 ### Acceptance Criteria Met
@@ -113,11 +132,16 @@ pytest test_continuity_context.py  # 51 passed
 10. **OpenClaw → WRE cross-surface**: Production path tested and wired with lineage detection
 11. **CLI → OpenClaw cross-surface**: CLI session tracked, lineage into OpenClaw processing
 12. **Messaging → OpenClaw cross-surface**: Webhook ingress tracked, lineage into OpenClaw processing
+13. **Supervisor background correlation**: When executing autonomous tasks, resolves and links to origin continuity
+14. **Idle background correlation**: When creating tasks via self-research, stamps origin_continuity_id
+15. **Multi-hop lineage resolution**: `get_cross_surface_activity()` uses recursive CTE to group all descendants under ultimate root
+16. **Old root resolution**: Ancestry follows parent links outside activity window - recent children group under old roots
+17. **Idle session recovery**: `run_idle_tasks()` auto-recovers origin via explicit `set_triggering_session()` only
+18. **No false idle lineage**: Idle recovery only from explicit triggering session, cleared after use
 
 ### Remaining Work (Future Slices)
 
-- Caller wiring: auto_moderator_dae.py needs continuity context to pass to run_idle_automation()
-- Supervisor/Idle background loops: when processing work from another surface, look up original continuity_id
+- Caller wiring: auto_moderator_dae.py needs continuity context to pass to run_idle_automation() + set_triggering_session()
 - E2E smoke test: full roundtrip from real CLI/webhook through WRE back to breadcrumb
 
 ---

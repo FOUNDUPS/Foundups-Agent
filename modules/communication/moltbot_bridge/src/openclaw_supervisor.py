@@ -230,6 +230,11 @@ class OpenClawSupervisor:
             }
             return self.last_cycle
 
+        # Gateway Continuity Layer: Resolve origin continuity for autonomous tasks
+        # If this task was discovered by prior work, link to that origin
+        if triage.get("action") == "execute_autonomous_task" and triage.get("task"):
+            self._resolve_and_link_origin_continuity(triage["task"])
+
         self._transition(SupervisorState.PLAN, triage["reason"])
         plan = self._plan(triage, observation)
 
@@ -777,6 +782,30 @@ class OpenClawSupervisor:
         except Exception as exc:
             logger.debug("[SUPERVISOR] Continuity context creation failed: %s", exc)
             return None
+
+    def _resolve_and_link_origin_continuity(self, task: Dict[str, Any]) -> None:
+        """Resolve origin continuity from task and link to current cycle context.
+
+        When supervisor executes a task that was discovered by prior work,
+        this establishes lineage back to the originating continuity.
+        """
+        try:
+            from modules.communication.moltbot_bridge.src.continuity_context import (
+                ContinuityManager,
+            )
+            origin_ctx = ContinuityManager.resolve_origin_continuity_from_task(task)
+            if origin_ctx and self._continuity_context:
+                # Link current cycle to the original work
+                self._continuity_context.parent_continuity_id = origin_ctx.continuity_id
+                self._continuity_context.surface_metadata["origin_task_id"] = task.get("task_id")
+                self._continuity_context.surface_metadata["origin_resolution"] = "autonomous_task"
+                logger.info(
+                    "[SUPERVISOR] Linked to origin continuity: %s (task=%s)",
+                    origin_ctx.continuity_id,
+                    task.get("task_id"),
+                )
+        except Exception as exc:
+            logger.debug("[SUPERVISOR] Origin continuity resolution failed: %s", exc)
 
     def _record_continuity_breadcrumb(
         self,

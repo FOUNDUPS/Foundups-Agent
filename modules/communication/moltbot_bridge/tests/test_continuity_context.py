@@ -1205,3 +1205,347 @@ class TestCLIMessagingContinuityWiring:
         assert msg_ctx.sender == "user123"
         assert msg_ctx.channel == "telegram"
         assert msg_ctx.surface_metadata.get("platform") == "telegram"
+
+
+class TestBackgroundContinuityCorrelation:
+    """Test background work correlation to originating continuity.
+
+    When supervisor or idle automation acts on previously discovered work,
+    these tests verify the lineage is preserved back to the original work item.
+    """
+
+    @pytest.fixture
+    def mock_db(self, tmp_path):
+        """Create AgentDB with isolated temporary database."""
+        db_path = tmp_path / "test_background_correlation.db"
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        with patch.dict(os.environ, {"FOUNDUPS_DB_PATH": str(db_path)}):
+            import importlib
+            import modules.infrastructure.database.src.db_manager as db_manager_module
+            importlib.reload(db_manager_module)
+            from modules.infrastructure.database.src.agent_db import AgentDB
+            db = AgentDB()
+            yield db
+
+    def test_supervisor_correlation_from_prior_continuity(self, mock_db):
+        """Supervisor executing autonomous task links to original work item's continuity."""
+        import uuid
+
+        # Step 1: Simulate original work item discovery with continuity
+        origin_continuity_id = f"origin_{uuid.uuid4().hex[:8]}"
+
+        # Create autonomous task with origin continuity (simulates self-research output)
+        mock_db.create_autonomous_task(
+            task_id="task_001",
+            description="Test autonomous task",
+            required_skills=["test_skill"],
+            estimated_complexity=0.5,
+            priority_score=0.8,
+            context={"source": "self_research"},
+            origin_continuity_id=origin_continuity_id,
+        )
+
+        # Step 2: Simulate supervisor resolving origin continuity
+        task = mock_db.get_autonomous_task_by_id("task_001")
+        assert task is not None
+        assert task.get("origin_continuity_id") == origin_continuity_id
+
+        # Step 3: Verify resolve_origin_continuity_from_task recovers it
+        origin_ctx = ContinuityManager.resolve_origin_continuity_from_task(task)
+        assert origin_ctx is not None
+        assert origin_ctx.continuity_id == origin_continuity_id
+
+        # Step 4: Simulate supervisor creating context linked to origin
+        supervisor_ctx = ContinuityManager.from_supervisor(
+            cycle_id="exec_task_001",
+            state="EXECUTE",
+            parent_context=origin_ctx,
+        )
+
+        # Verify lineage established
+        assert supervisor_ctx.parent_continuity_id == origin_continuity_id
+        assert supervisor_ctx.continuity_id != origin_continuity_id
+
+        # Step 5: Record breadcrumbs and verify cross-surface detection
+        mock_db.add_breadcrumb(
+            session_id="origin_session",
+            action="self_research_discovery",
+            continuity_id=origin_continuity_id,
+            runtime_surface="idle",
+            sender_normalized="idle_dae",
+        )
+        mock_db.add_breadcrumb(
+            session_id=supervisor_ctx.session_id,
+            action="supervisor_execute_task",
+            continuity_id=supervisor_ctx.continuity_id,
+            runtime_surface=supervisor_ctx.surface.value,
+            sender_normalized=supervisor_ctx.sender_normalized,
+            parent_continuity_id=supervisor_ctx.parent_continuity_id,
+        )
+
+        # Verify lineage-based cross-surface detection
+        results = mock_db.get_cross_surface_activity(minutes=5)
+        our_lineage = [r for r in results if r.get("lineage_root") == origin_continuity_id]
+        assert len(our_lineage) == 1
+        assert our_lineage[0]["surface_count"] == 2
+
+    def test_idle_correlation_from_prior_continuity(self, mock_db):
+        """Idle automation executing scheduled work links to original session's continuity."""
+        import uuid
+
+        # Simulate a prior OpenClaw session that scheduled work
+        prior_session_id = f"prior_session_{uuid.uuid4().hex[:8]}"
+        prior_continuity_id = f"prior_cont_{uuid.uuid4().hex[:8]}"
+
+        # Record breadcrumb from the prior session
+        mock_db.add_breadcrumb(
+            session_id=prior_session_id,
+            action="schedule_work",
+            continuity_id=prior_continuity_id,
+            runtime_surface="openclaw",
+            sender_normalized="012",
+        )
+
+        # Resolve origin from session
+        origin_ctx = ContinuityManager.resolve_origin_continuity_from_session(prior_session_id)
+        assert origin_ctx is not None
+        assert origin_ctx.continuity_id == prior_continuity_id
+
+        # Create idle context linked to origin
+        idle_ctx = ContinuityManager.from_idle(
+            task_type="scheduled_work",
+            parent_context=origin_ctx,
+        )
+
+        # Verify lineage
+        assert idle_ctx.parent_continuity_id == prior_continuity_id
+        assert idle_ctx.continuity_id != prior_continuity_id
+
+        # Record idle breadcrumb
+        mock_db.add_breadcrumb(
+            session_id=idle_ctx.session_id,
+            action="idle_scheduled_work",
+            continuity_id=idle_ctx.continuity_id,
+            runtime_surface=idle_ctx.surface.value,
+            sender_normalized=idle_ctx.sender_normalized,
+            parent_continuity_id=idle_ctx.parent_continuity_id,
+        )
+
+        # Verify cross-surface detection
+        results = mock_db.get_cross_surface_activity(minutes=5)
+        our_lineage = [r for r in results if r.get("lineage_root") == prior_continuity_id]
+        assert len(our_lineage) == 1
+        assert our_lineage[0]["surface_count"] == 2
+
+    def test_no_false_correlation_when_no_origin_exists(self, mock_db):
+        """When no origin continuity is available, correlation returns None gracefully."""
+        # Create task without origin_continuity_id
+        mock_db.create_autonomous_task(
+            task_id="task_no_origin",
+            description="Task without origin",
+            required_skills=["skill1"],
+            estimated_complexity=0.3,
+            priority_score=0.5,
+        )
+
+        task = mock_db.get_autonomous_task_by_id("task_no_origin")
+        assert task is not None
+        assert task.get("origin_continuity_id") is None
+
+        # Resolve should return None (no false positive)
+        origin_ctx = ContinuityManager.resolve_origin_continuity_from_task(task)
+        assert origin_ctx is None
+
+        # Session lookup for non-existent session should also return None
+        origin_ctx = ContinuityManager.resolve_origin_continuity_from_session("nonexistent_session")
+        assert origin_ctx is None
+
+    def test_cross_surface_query_shows_grouped_lineage_after_background_followup(self, mock_db):
+        """After background work follows up on prior work, multi-hop lineage is grouped correctly.
+
+        Tests the recursive CTE that resolves ultimate lineage root:
+        OpenClaw → Idle → Supervisor should all group under OpenClaw's root.
+        """
+        import uuid
+
+        # Create a chain: OpenClaw → Idle (self-research) → Supervisor (execution)
+        openclaw_id = f"oc_{uuid.uuid4().hex[:8]}"
+        idle_id = f"idle_{uuid.uuid4().hex[:8]}"
+        supervisor_id = f"super_{uuid.uuid4().hex[:8]}"
+
+        # OpenClaw initiates work (root - no parent)
+        mock_db.add_breadcrumb(
+            session_id="oc_session",
+            action="openclaw_request",
+            continuity_id=openclaw_id,
+            runtime_surface="openclaw",
+            sender_normalized="012",
+        )
+
+        # Idle discovers follow-up work (child of openclaw)
+        mock_db.add_breadcrumb(
+            session_id="idle_session",
+            action="self_research_discovery",
+            continuity_id=idle_id,
+            runtime_surface="idle",
+            sender_normalized="idle_dae",
+            parent_continuity_id=openclaw_id,  # Linked to OpenClaw
+        )
+
+        # Supervisor executes the discovered work (child of idle - grandchild of openclaw)
+        mock_db.add_breadcrumb(
+            session_id="supervisor_session",
+            action="supervisor_execute",
+            continuity_id=supervisor_id,
+            runtime_surface="supervisor",
+            sender_normalized="supervisor",
+            parent_continuity_id=idle_id,  # Linked to Idle (grandchild of OpenClaw)
+        )
+
+        # Query cross-surface activity
+        results = mock_db.get_cross_surface_activity(minutes=5)
+
+        # Find the group with openclaw as root
+        our_result = [r for r in results if r["lineage_root"] == openclaw_id]
+        assert len(our_result) == 1, f"Expected 1 group with openclaw root, got {len(our_result)}: {results}"
+
+        # All three surfaces should be in one group (recursive resolution)
+        assert our_result[0]["surface_count"] == 3, (
+            f"Expected 3 surfaces in group, got {our_result[0]['surface_count']}: {our_result[0]}"
+        )
+
+        # All three continuity_ids should be in the group
+        continuity_ids = our_result[0]["continuity_ids"]
+        assert openclaw_id in continuity_ids, f"openclaw_id not in {continuity_ids}"
+        assert idle_id in continuity_ids, f"idle_id not in {continuity_ids}"
+        assert supervisor_id in continuity_ids, f"supervisor_id not in {continuity_ids}"
+
+        # All surfaces should be represented
+        surfaces = our_result[0]["surfaces"]
+        assert "openclaw" in surfaces
+        assert "idle" in surfaces
+        assert "supervisor" in surfaces
+
+        # Verify we can trace back to root via breadcrumb query
+        summary = mock_db.get_continuity_summary(openclaw_id)
+        assert summary["found"] is True
+
+    def test_old_root_outside_window_still_groups_recent_children(self, mock_db):
+        """Ancestry resolution follows parent links even when root is older than query window.
+
+        Scenario: Root breadcrumb is 2 hours old, but recent children reference it.
+        The children should still group under the old root.
+        """
+        import uuid
+        from datetime import datetime, timedelta, timezone
+
+        # Create IDs for the chain
+        openclaw_id = f"old_root_{uuid.uuid4().hex[:8]}"
+        idle_id = f"recent_idle_{uuid.uuid4().hex[:8]}"
+        supervisor_id = f"recent_super_{uuid.uuid4().hex[:8]}"
+
+        # Insert root breadcrumb with OLD timestamp (2 hours ago)
+        old_timestamp = (datetime.now(timezone.utc) - timedelta(hours=2)).strftime("%Y-%m-%d %H:%M:%S")
+        mock_db.db.execute_write(
+            """
+            INSERT INTO agents_breadcrumbs
+            (session_id, action, continuity_id, runtime_surface, sender_normalized, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            ("old_session", "old_openclaw_request", openclaw_id, "openclaw", "012", old_timestamp),
+        )
+
+        # Insert RECENT child breadcrumbs (within default window)
+        mock_db.add_breadcrumb(
+            session_id="idle_session",
+            action="recent_idle_discovery",
+            continuity_id=idle_id,
+            runtime_surface="idle",
+            sender_normalized="idle_dae",
+            parent_continuity_id=openclaw_id,  # Points to OLD root
+        )
+        mock_db.add_breadcrumb(
+            session_id="supervisor_session",
+            action="recent_supervisor_execute",
+            continuity_id=supervisor_id,
+            runtime_surface="supervisor",
+            sender_normalized="supervisor",
+            parent_continuity_id=idle_id,  # Points to recent child
+        )
+
+        # Query with 60 minute window - root is outside, children are inside
+        results = mock_db.get_cross_surface_activity(minutes=60)
+
+        # Should find a group with the OLD root as lineage_root
+        our_result = [r for r in results if r["lineage_root"] == openclaw_id]
+        assert len(our_result) == 1, (
+            f"Expected 1 group with old openclaw root, got {len(our_result)}: {results}"
+        )
+
+        # Both recent children should be in the group (root's breadcrumb is old, not counted)
+        # But lineage_root should still be the old openclaw_id
+        continuity_ids = our_result[0]["continuity_ids"]
+        assert idle_id in continuity_ids
+        assert supervisor_id in continuity_ids
+
+        # The old root breadcrumb itself is outside the window, so only 2 surfaces
+        # (idle + supervisor) have RECENT activity - but they group under the old root
+        assert our_result[0]["surface_count"] == 2
+        assert "idle" in our_result[0]["surfaces"]
+        assert "supervisor" in our_result[0]["surfaces"]
+
+    def test_idle_origin_recovery_production_wiring(self, mock_db):
+        """Verify idle DAE production path uses resolve_origin_continuity_from_session."""
+        import uuid
+        from modules.infrastructure.idle_automation.src.idle_automation_dae import IdleAutomationDAE
+
+        # Create a prior session breadcrumb that idle can recover from
+        prior_session_id = f"prior_idle_{uuid.uuid4().hex[:8]}"
+        prior_continuity_id = f"prior_cont_{uuid.uuid4().hex[:8]}"
+
+        mock_db.add_breadcrumb(
+            session_id=prior_session_id,
+            action="prior_idle_work",
+            continuity_id=prior_continuity_id,
+            runtime_surface="idle",
+            sender_normalized="idle_dae",
+        )
+
+        # Create idle DAE and set triggering session
+        dae = IdleAutomationDAE()
+        dae.set_triggering_session(prior_session_id)
+
+        # Verify triggering session is stored
+        assert dae.idle_state.get("last_triggering_session_id") == prior_session_id
+
+        # Test recovery method directly
+        recovered = dae._try_recover_origin_continuity()
+        assert recovered is not None
+        assert recovered.continuity_id == prior_continuity_id
+
+        # Triggering session should be cleared after recovery to prevent false reuse
+        assert dae.idle_state.get("last_triggering_session_id") is None
+
+    def test_idle_no_false_lineage_without_triggering_session(self, mock_db):
+        """Verify idle DAE does NOT create false lineage when no triggering session exists."""
+        import uuid
+        from modules.infrastructure.idle_automation.src.idle_automation_dae import IdleAutomationDAE
+
+        # Create a prior idle breadcrumb (but NOT via set_triggering_session)
+        prior_continuity_id = f"prior_cont_{uuid.uuid4().hex[:8]}"
+        mock_db.add_breadcrumb(
+            session_id="idle_automation",
+            action="prior_unrelated_idle",
+            continuity_id=prior_continuity_id,
+            runtime_surface="idle",
+            sender_normalized="idle_dae",
+        )
+
+        # Create idle DAE WITHOUT setting triggering session
+        dae = IdleAutomationDAE()
+        # Explicitly clear any stored session
+        dae.idle_state["last_triggering_session_id"] = None
+
+        # Recovery should return None - no false lineage to prior idle work
+        recovered = dae._try_recover_origin_continuity()
+        assert recovered is None

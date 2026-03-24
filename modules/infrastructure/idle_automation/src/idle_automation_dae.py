@@ -267,6 +267,64 @@ class IdleAutomationDAE:
         except Exception as e:
             logger.debug(f"[IDLE] Failed to record continuity breadcrumb: {e}")
 
+    def _try_recover_origin_continuity(self):
+        """Try to recover origin continuity from explicit triggering session.
+
+        When idle automation runs without explicit parent_context, this attempts
+        to recover continuity ONLY from an explicitly stored triggering session.
+
+        No generic fallback is used to avoid false lineage between unrelated
+        background cycles. If no triggering session was set, returns None and
+        the idle cycle creates its own independent continuity root.
+
+        Returns:
+            ContinuityContext if recovery succeeds, None otherwise.
+        """
+        try:
+            from modules.communication.moltbot_bridge.src.continuity_context import (
+                ContinuityManager,
+            )
+
+            # Only recover from explicit triggering session - no fallback
+            triggering_session = self.idle_state.get("last_triggering_session_id")
+            if not triggering_session:
+                logger.debug("[IDLE] No triggering session stored, skipping origin recovery")
+                return None
+
+            origin = ContinuityManager.resolve_origin_continuity_from_session(
+                triggering_session
+            )
+            if origin:
+                logger.debug(
+                    "[IDLE] Recovered origin continuity from triggering session: %s",
+                    origin.continuity_id,
+                )
+                # Clear triggering session after successful recovery to prevent
+                # false reuse on subsequent unrelated cycles
+                self.idle_state["last_triggering_session_id"] = None
+                self._save_idle_state()
+                return origin
+
+            logger.debug(
+                "[IDLE] Triggering session %s not found in breadcrumbs",
+                triggering_session,
+            )
+
+        except Exception as e:
+            logger.debug(f"[IDLE] Origin continuity recovery failed: {e}")
+
+        return None
+
+    def set_triggering_session(self, session_id: str) -> None:
+        """Store the triggering session ID for origin recovery.
+
+        Call this when another DAE triggers idle automation to enable
+        continuity correlation on subsequent autonomous runs.
+        """
+        self.idle_state["last_triggering_session_id"] = session_id
+        self._save_idle_state()
+        logger.debug("[IDLE] Stored triggering session: %s", session_id)
+
     def _load_and_validate_config(self) -> Dict[str, Any]:
         """Load and validate configuration with defaults and bounds checking."""
         config = {}
@@ -681,7 +739,11 @@ class IdleAutomationDAE:
                 SelfResearchRefresher,
             )
 
-            refresher = SelfResearchRefresher()
+            # Gateway Continuity Layer: Pass current continuity for task origin tracking
+            continuity_ctx = getattr(self, "_continuity_context", None)
+            origin_id = continuity_ctx.continuity_id if continuity_ctx else None
+
+            refresher = SelfResearchRefresher(origin_continuity_id=origin_id)
             report = await asyncio.wait_for(
                 asyncio.to_thread(refresher.run),
                 timeout=self.config["self_research_timeout"],
@@ -988,7 +1050,12 @@ class IdleAutomationDAE:
         self.idle_state["last_idle_execution"] = datetime.now().isoformat()
 
         # Gateway Continuity Layer: Create continuity context for this idle cycle
-        self._continuity_context = self._create_continuity_context(parent_context)
+        # If no parent_context provided, try to recover from last triggering session
+        effective_parent = parent_context
+        if effective_parent is None:
+            effective_parent = self._try_recover_origin_continuity()
+
+        self._continuity_context = self._create_continuity_context(effective_parent)
 
         execution_result = {
             "session_id": self.idle_state["idle_session_count"],

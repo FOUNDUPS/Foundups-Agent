@@ -412,3 +412,124 @@ class ContinuityManager:
             cls.ENV_CONTINUITY_ID: context.continuity_id,
             cls.ENV_PARENT_CONTINUITY_ID: context.parent_continuity_id or "",
         }
+
+    @classmethod
+    def resolve_origin_continuity_from_task(
+        cls, task: Dict[str, Any]
+    ) -> Optional[ContinuityContext]:
+        """
+        Resolve origin continuity context from a task's metadata.
+
+        For background work (supervisor, idle) acting on previously discovered/queued
+        work items, this recovers the originating continuity to establish lineage.
+
+        Resolution order:
+        1. task["origin_continuity_id"] - explicit column from create_autonomous_task()
+        2. task["context"]["continuity_id"] - legacy embedding in context JSON
+        3. Breadcrumb lookup by task_id - find breadcrumb that created the task
+
+        Args:
+            task: Task dict from get_autonomous_tasks() or similar.
+
+        Returns:
+            ContinuityContext with continuity_id set as parent for forking,
+            or None if no origin could be resolved.
+        """
+        origin_id = None
+
+        # 1. Check explicit origin_continuity_id column
+        origin_id = task.get("origin_continuity_id")
+
+        # 2. Fall back to context JSON embedding
+        if not origin_id:
+            context = task.get("context")
+            if isinstance(context, dict):
+                origin_id = context.get("continuity_id") or context.get("origin_continuity_id")
+
+        # 3. Fall back to breadcrumb lookup by task_id
+        if not origin_id:
+            task_id = task.get("task_id")
+            if task_id:
+                try:
+                    from modules.infrastructure.database.src.agent_db import AgentDB
+                    db = AgentDB()
+                    # Find breadcrumb that created this task
+                    results = db.db.execute_query('''
+                        SELECT continuity_id FROM agents_breadcrumbs
+                        WHERE task_id = ? AND continuity_id IS NOT NULL AND continuity_id != ''
+                        ORDER BY timestamp DESC LIMIT 1
+                    ''', (task_id,))
+                    if results:
+                        origin_id = results[0].get("continuity_id")
+                except Exception:
+                    pass  # Best-effort lookup
+
+        if not origin_id:
+            return None
+
+        # Return a minimal context suitable for use as parent
+        return ContinuityContext(
+            continuity_id=origin_id,
+            surface=RuntimeSurface.INTERNAL,  # Origin surface unknown, will be parent
+            session_id="recovered_origin",
+            sender="background_correlation",
+            channel="internal",
+            surface_metadata={
+                "origin_resolution": "task_metadata",
+                "task_id": task.get("task_id"),
+            },
+        )
+
+    @classmethod
+    def resolve_origin_continuity_from_session(
+        cls, session_id: str, surface: Optional[RuntimeSurface] = None
+    ) -> Optional[ContinuityContext]:
+        """
+        Resolve origin continuity from a known session identifier.
+
+        For scheduled work or background operations tied to a known prior session,
+        this recovers the most recent continuity from that session.
+
+        Args:
+            session_id: The session identifier to look up.
+            surface: Optional surface filter for the lookup.
+
+        Returns:
+            ContinuityContext with continuity_id set as parent for forking,
+            or None if no origin could be resolved.
+        """
+        try:
+            from modules.infrastructure.database.src.agent_db import AgentDB
+            db = AgentDB()
+
+            if surface:
+                results = db.db.execute_query('''
+                    SELECT continuity_id, runtime_surface, sender_normalized
+                    FROM agents_breadcrumbs
+                    WHERE session_id = ? AND runtime_surface = ?
+                      AND continuity_id IS NOT NULL AND continuity_id != ''
+                    ORDER BY timestamp DESC LIMIT 1
+                ''', (session_id, surface.value))
+            else:
+                results = db.db.execute_query('''
+                    SELECT continuity_id, runtime_surface, sender_normalized
+                    FROM agents_breadcrumbs
+                    WHERE session_id = ? AND continuity_id IS NOT NULL AND continuity_id != ''
+                    ORDER BY timestamp DESC LIMIT 1
+                ''', (session_id,))
+
+            if not results:
+                return None
+
+            row = results[0]
+            return ContinuityContext(
+                continuity_id=row.get("continuity_id"),
+                surface=RuntimeSurface(row.get("runtime_surface", "internal")),
+                session_id=session_id,
+                sender_normalized=row.get("sender_normalized", ""),
+                surface_metadata={
+                    "origin_resolution": "session_lookup",
+                },
+            )
+        except Exception:
+            return None
