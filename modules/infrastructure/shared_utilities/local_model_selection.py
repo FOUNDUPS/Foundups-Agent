@@ -2,6 +2,34 @@
 
 This module provides one place to map task roles to local models, so model
 upgrades do not require touching many modules.
+
+Role-Based Architecture:
+    Roles are stable capability contracts. Models are fluid candidates.
+
+    Roles resolved by this module:
+        triage   - fast validation/classification (<10ms target)
+        general  - synthesis, reasoning, non-code tasks
+        code     - resident coding, refactoring, test generation
+
+    Roles resolved elsewhere (NOT in this module):
+        vision   - ui_tars_bridge.py (UI_TARS_PATH env var)
+
+    Policy-only (not auto-resolved anywhere):
+        architect_escalation - bounded high-compute path (explicit policy)
+
+    Future roles (not yet implemented):
+        social_copy          - marketing/engagement text
+        research             - web/paper research
+
+    Promotion Path:
+        1. Train a local model on codebase patterns
+        2. Set LOCAL_MODEL_CODE_PATH or LOCAL_MODEL_CODE_DIR to trained model
+        3. Role resolution automatically picks it up
+        4. No repo-wide rewrites needed
+
+    The system selects by role, not by model name. Current defaults are
+    configurable via environment variables and can be swapped without
+    touching code that requests roles.
 """
 
 from __future__ import annotations

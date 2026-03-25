@@ -15,16 +15,32 @@ if __name__ == '__main__' and sys.platform.startswith('win'):
         pass
 # === END UTF-8 ENFORCEMENT ===
 
-WSP Orchestrator - 0102 Meta-Orchestration + Qwen/Gemma Workers
+WSP Orchestrator - 0102 Meta-Orchestration with Role-Based Model Selection
+
+Capability Roles (stable contracts - models are fluid):
+
+    Resolver-supported (local_model_selection.py):
+        - triage: fast validation/classification (<10ms target)
+        - general: synthesis, reasoning, non-code tasks
+        - code: resident coding, refactoring, test generation
+
+    Separate surfaces (not in local_model_selection.py):
+        - vision: UI_TARS_PATH via ui_tars_bridge.py (browser automation)
+
+    Policy-only (explicit escalation, not resolvable):
+        - architect_escalation: bounded high-compute path (frontier API)
+
+Role Resolution: local_model_selection.py resolves triage/general/code roles.
+Future trained models enter as role candidates, not architectural rewrites.
 
 CORRECT ARCHITECTURE (User-Specified):
     0102 Meta-Orchestration: YOU (Claude) are in charge, using WSP 15 MPS scoring
-    +--> Prompt Qwen for strategic planning
-    +--> Qwen generates plan -> 0102 modifies and improves
-    +--> Gemma for fast pattern matching (Phase 1)
-    +--> Qwen for strategic planning (Phase 2)
+    +--> Request role="code" for strategic planning (resolved at runtime)
+    +--> Local model generates plan -> 0102 modifies and improves
+    +--> role="triage" for fast pattern matching (Phase 1)
+    +--> role="code" for strategic planning (Phase 2)
     +--> 0102 supervision (Phase 3)
-    +--> Qwen/Gemma learning/memory (Phase 4)
+    +--> Pattern learning/memory (Phase 4)
 
 WSP Compliance:
     - WSP 15: MPS Prioritization (0102 decides complexity/importance/defer ability/impact)

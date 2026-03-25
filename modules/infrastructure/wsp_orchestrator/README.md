@@ -12,12 +12,22 @@ Modular "follow WSP" system where 0102 orchestrates Qwen/Gemma/MCP workers.
 
 ```
 0102 Meta-Orchestration
-    +-- Worker Bee 1: HoloIndex MCP (semantic search, WSP lookup)
-    +-- Worker Bee 2: Gemma 3 270M (fast pattern matching)
-    +-- Worker Bee 3: Qwen 1.5B (strategic planning)
-    +-- Worker Bee 4: Rules Engine (grep/regex)
+    +-- Worker 1: HoloIndex MCP (semantic search, WSP lookup)
+    +-- Worker 2: role="triage" (fast pattern matching)
+    +-- Worker 3: role="code" (strategic planning, coding)
+    +-- Worker 4: role="general" (reasoning, synthesis)
+    +-- Worker 5: role="vision" (browser/UI automation)
+    +-- Worker 6: Rules Engine (grep/regex)
     +-- 0102 Supervision (human oversight)
+    +-- Escalation: role="architect_escalation" (bounded, explicit policy)
 ```
+
+**Role-Based Selection**: `local_model_selection.py` resolves `triage/general/code` to current best
+candidates. `vision` is resolved via `ui_tars_bridge.py`. `architect_escalation` is policy-only.
+Models are fluid; roles are stable contracts. Future trained models become role candidates.
+
+**Note**: The runtime still uses model-name worker strings (`QwenPlan`, `Gemma:PatternMatch`).
+A follow-up runtime refactor slice will align execution with role-based dispatch.
 
 ### Execution Flow
 
@@ -80,14 +90,22 @@ asyncio.run(_run())
 
 ## Worker Assignment Logic
 
-| Task Type | Worker Assigned | Rationale |
-|-----------|----------------|-----------|
-| HoloIndex search | MCP:HoloIndex | Semantic code search (100ms) |
-| WSP lookup | MCP:HoloIndex | Protocol documentation (100ms) |
-| Pattern matching | Gemma:PatternMatch | Fast binary decisions (50ms) |
-| Strategic planning | Qwen:Planning | Deep analysis (250ms) |
-| Implementation | 0102:Supervision | Human oversight required |
-| ModLog updates | Qwen:Planning | Documentation generation |
+| Task Type | Role Requested | Resolution Surface | Rationale |
+|-----------|---------------|-------------------|-----------|
+| HoloIndex search | - | MCP | Semantic code search (no model) |
+| WSP lookup | - | MCP | Protocol documentation (no model) |
+| Pattern matching | triage | local_model_selection.py | Fast binary decisions (<10ms target) |
+| Strategic planning | code | local_model_selection.py | Deep analysis (resident coder) |
+| General reasoning | general | local_model_selection.py | Synthesis tasks (non-code) |
+| Browser/UI automation | vision | ui_tars_bridge.py | Screenshot/UI analysis (UI_TARS_PATH) |
+| Implementation | - | 0102 | Human oversight (manual) |
+| ModLog updates | code | local_model_selection.py | Documentation generation |
+| Architect escalation | - | explicit policy | Bounded high-compute (not auto-resolved) |
+
+**Role Resolution**:
+- `triage/general/code`: Resolved via `local_model_selection.py` (env-configurable)
+- `vision`: Separate surface via `ui_tars_bridge.py` (`UI_TARS_PATH` env var)
+- `architect_escalation`: Policy-only (requires explicit escalation, not auto-resolved)
 
 ## Dependencies
 

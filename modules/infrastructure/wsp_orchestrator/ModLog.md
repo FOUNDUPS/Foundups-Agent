@@ -33,6 +33,44 @@ Modular "follow WSP" system with **0102 in command** (not Qwen!), using WSP 15 M
 
 ## Recent Changes
 
+### V003 - Role-Based Model Policy Refresh (Docs/Comments Only)
+**Type**: Documentation/Policy Clarification
+**Date**: 2026-03-26
+**Impact**: Low - docs/comments only, no runtime behavior change
+**WSP Compliance**: WSP 22 (ModLog), WSP 77 (Agent Coordination)
+
+#### Design Principle
+**Hardcode roles, not models.** Roles are stable capability contracts; models are fluid candidates that can be swapped, trained, or promoted without architectural rewrites.
+
+#### Scope
+Docs and comments only. The runtime still uses model-name worker strings (`QwenPlan`,
+`Gemma:PatternMatch`, `_0102_prompt_qwen`). A follow-up runtime refactor slice is needed
+to align execution with role-based dispatch.
+
+#### What Changed
+- Clarified resolver boundaries: `triage/general/code` via `local_model_selection.py`,
+  `vision` via `ui_tars_bridge.py`, `architect_escalation` is policy-only
+- Added Resolution Surface column to all worker tables
+- Documented future trained model promotion path
+- Updated docstrings in `wsp_orchestrator.py` and `local_model_selection.py`
+
+#### Role Policy Table
+| Role | Resolution Surface | Purpose | Future Candidate Path |
+|------|-------------------|---------|----------------------|
+| triage | local_model_selection.py | fast validation | fine-tuned local |
+| general | local_model_selection.py | synthesis/reasoning | trained general |
+| code | local_model_selection.py | resident coding | codebase-trained |
+| vision | ui_tars_bridge.py | browser/UI analysis | trained vision adapter |
+| architect_escalation | explicit policy | high-risk arch (not auto-resolved) | frontier or top-local |
+
+#### Files Modified
+- `src/wsp_orchestrator.py`: Role-based docstring
+- `README.md`: Role-based architecture + worker table
+- `INTERFACE.md`: Role-based worker types
+- `local_model_selection.py`: Role architecture docstring
+
+---
+
 ### V002 - WSP_00 Gate Integrated into `follow_wsp` (Fail-Closed Hardening)
 **Type**: Security/Compliance Hardening  
 **Date**: 2026-02-14  

@@ -116,11 +116,21 @@ elif choice == "15":
 
 ## Worker Types
 
-| Worker ID | Description | Speed | Use Case |
-|-----------|-------------|-------|----------|
-| MCP:HoloIndex | Semantic search via MCP | 100ms | Code discovery |
-| MCP:WSP | WSP protocol lookup | 100ms | Compliance check |
-| Gemma:PatternMatch | Fast classification | 50ms | Binary decisions |
-| Qwen:Planning | Strategic analysis | 250ms | Deep planning |
-| Rules:Grep | Regex/grep checks | 5ms | Simple validation |
-| 0102:Supervision | Human oversight | Manual | Critical tasks |
+| Worker ID | Role | Resolution Surface | Speed Target | Use Case |
+|-----------|------|-------------------|--------------|----------|
+| MCP:HoloIndex | - | MCP | 100ms | Code discovery (semantic search) |
+| MCP:WSP | - | MCP | 100ms | Compliance check (protocol lookup) |
+| Local:Triage | triage | local_model_selection.py | <10ms | Binary decisions (fast classification) |
+| Local:Code | code | local_model_selection.py | 200ms | Deep planning (strategic analysis) |
+| Local:General | general | local_model_selection.py | 150ms | Synthesis tasks (reasoning) |
+| Local:Vision | vision | ui_tars_bridge.py | 2000ms | Screenshot/UI analysis (UI_TARS_PATH) |
+| Rules:Grep | - | regex | 5ms | Simple validation (regex checks) |
+| 0102:Supervision | - | manual | Manual | Critical tasks (human oversight) |
+| Escalation:Architect | - | explicit policy | API | High-risk architecture (not auto-resolved) |
+
+**Role-Based Selection**:
+- Roles are stable capability contracts; models are fluid candidates
+- `local_model_selection.py` resolves `triage/general/code` (env-configurable)
+- `vision` uses separate surface: `ui_tars_bridge.py` (`UI_TARS_PATH` env var)
+- `architect_escalation` is policy-only (requires explicit escalation, not auto-resolved)
+- Future trained models enter as role candidates via env config
