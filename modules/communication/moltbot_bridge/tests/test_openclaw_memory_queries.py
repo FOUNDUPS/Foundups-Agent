@@ -10,11 +10,13 @@ import pytest
 
 from modules.communication.moltbot_bridge.src.openclaw_execution_routes import (
     _try_memory_query,
-    _query_decisions,
-    _query_unresolved_work,
-    _query_recent_sessions,
-    _query_past_work,
-    _search_breadcrumbs,
+)
+from modules.communication.moltbot_bridge.src.openclaw_memory_queries import (
+    query_decisions,
+    query_past_work,
+    query_recent_sessions,
+    query_unresolved_work,
+    search_breadcrumbs,
 )
 
 
@@ -333,7 +335,7 @@ class TestPastWorkQuery:
             encoding="utf-8",
         )
 
-        result = _query_past_work(mock_dae, "autonomy")
+        result = query_past_work(mock_dae, "autonomy")
 
         assert result is not None
         assert "autonomy" in result.lower()
@@ -351,7 +353,7 @@ class TestPastWorkQuery:
         )
 
         # No topic provided
-        result = _query_past_work(mock_dae, None)
+        result = query_past_work(mock_dae, None)
 
         assert result is not None
         # Must include workspace memory (not breadcrumbs only)
@@ -369,7 +371,7 @@ class TestPastWorkQuery:
             encoding="utf-8",
         )
 
-        result = _query_past_work(mock_dae, "test topic")
+        result = query_past_work(mock_dae, "test topic")
 
         assert result is not None
         # Must include source provenance
@@ -379,10 +381,10 @@ class TestPastWorkQuery:
 class TestBreadcrumbIntegration:
     """Tests for breadcrumb integration in memory queries."""
 
-    def test_search_breadcrumbs_handles_import_error(self):
-        """_search_breadcrumbs returns empty list if AgentDB unavailable."""
+    def testsearch_breadcrumbs_handles_import_error(self):
+        """search_breadcrumbs returns empty list if AgentDB unavailable."""
         # This tests graceful degradation
-        result = _search_breadcrumbs("test topic", limit=5)
+        result = search_breadcrumbs("test topic", limit=5)
         # Should return list (possibly empty) not raise
         assert isinstance(result, list)
 
@@ -396,7 +398,7 @@ class TestBreadcrumbIntegration:
             encoding="utf-8",
         )
 
-        result = _query_decisions(mock_dae, "decision test")
+        result = query_decisions(mock_dae, "decision test")
 
         assert result is not None
         assert "Sources:" in result or "workspace_memory" in result
