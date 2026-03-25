@@ -2,6 +2,51 @@
 
 ## Chronological Change Log
 
+### [2026-03-25] - Skill Evolution Continuity Tracking (v0.7.2)
+
+**WSP Protocol References**: WSP 48 (Recursive Self-Improvement), WSP 91 (Observability), WSP 97 (System Execution)
+**Impact Analysis**: Skill evolution events now include continuity metadata for lineage tracking. OpenClaw can answer "what work led to this evolved skill?"
+
+#### Changes Made
+
+- `src/pattern_memory.py`:
+  - Extended `learning_events` table schema with `continuity_id`, `parent_continuity_id`, `execution_id`
+  - Added schema migration for existing databases
+  - Updated `record_learning_event()` to accept continuity fields
+  - Added `get_evolution_by_continuity()` - query events by continuity chain
+  - Added `get_evolution_by_execution()` - query events by triggering execution
+
+- `wre_master_orchestrator/src/wre_master_orchestrator.py`:
+  - Updated `evolve_skill()` signature to accept continuity metadata
+  - Updated `execute_skill()` to pass continuity context to `evolve_skill()`
+  - Evolution events now record full lineage chain
+
+- `tests/test_skill_evolution_continuity.py` (NEW):
+  - 9 tests for evolution continuity tracking
+  - Schema validation, lineage queries, integration tests
+
+#### Queryable Lineage
+
+```python
+# What work led to this evolved skill?
+events = memory.get_evolution_by_continuity("session_abc", include_children=True)
+
+# Which execution triggered this evolution?
+events = memory.get_evolution_by_execution("exec_100")
+
+# Full skill evolution history (now includes continuity)
+history = memory.get_evolution_history("gitpush_skill")
+```
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_skill_evolution_continuity.py -v
+# Result: 9 passed
+```
+
+---
+
 ### [2026-03-25] - Skills 2.0 Hygiene Enforcement (v0.7.1)
 
 **WSP Protocol References**: WSP 96 (WRE Skills), WSP 5 (Test Coverage), WSP 11 (Interface)

@@ -175,9 +175,25 @@ class PatternMemory:
                 description TEXT,
                 before_fidelity REAL,
                 after_fidelity REAL,
-                variation_id TEXT
+                variation_id TEXT,
+                continuity_id TEXT,
+                parent_continuity_id TEXT,
+                execution_id TEXT
             )
         """)
+
+        # Backfill continuity columns if table existed before schema upgrade
+        try:
+            cursor.execute("PRAGMA table_info(learning_events)")
+            columns = {row["name"] for row in cursor.fetchall()}
+            if "continuity_id" not in columns:
+                cursor.execute("ALTER TABLE learning_events ADD COLUMN continuity_id TEXT")
+            if "parent_continuity_id" not in columns:
+                cursor.execute("ALTER TABLE learning_events ADD COLUMN parent_continuity_id TEXT")
+            if "execution_id" not in columns:
+                cursor.execute("ALTER TABLE learning_events ADD COLUMN execution_id TEXT")
+        except sqlite3.OperationalError as exc:
+            logger.warning("[PATTERN-MEMORY] Learning events schema upgrade failed: %s", exc)
 
         # A/B test assignments table (Sprint 1 - TT-SI closure)
         cursor.execute("""
@@ -653,12 +669,16 @@ class PatternMemory:
         description: str,
         before_fidelity: Optional[float] = None,
         after_fidelity: Optional[float] = None,
-        variation_id: Optional[str] = None
+        variation_id: Optional[str] = None,
+        continuity_id: Optional[str] = None,
+        parent_continuity_id: Optional[str] = None,
+        execution_id: Optional[str] = None
     ) -> None:
         """
-        Record learning event for skill evolution tracking
+        Record learning event for skill evolution tracking with continuity lineage.
 
         Per WSP 48: Track self-improvement progress
+        Per WSP 91: Observability with continuity metadata
 
         Event types: variation_created, variation_promoted, threshold_tuned, rollback
 
@@ -670,14 +690,18 @@ class PatternMemory:
             before_fidelity: Fidelity before change
             after_fidelity: Fidelity after change
             variation_id: Related variation (if applicable)
+            continuity_id: Continuity ID linking to work chain
+            parent_continuity_id: Parent continuity for lineage tracking
+            execution_id: Execution ID that triggered this event
         """
         cursor = self.conn.cursor()
 
         cursor.execute("""
             INSERT INTO learning_events (
                 event_id, skill_name, event_type, timestamp,
-                description, before_fidelity, after_fidelity, variation_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                description, before_fidelity, after_fidelity, variation_id,
+                continuity_id, parent_continuity_id, execution_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             event_id,
             skill_name,
@@ -686,13 +710,17 @@ class PatternMemory:
             description,
             before_fidelity,
             after_fidelity,
-            variation_id
+            variation_id,
+            continuity_id,
+            parent_continuity_id,
+            execution_id
         ))
 
         self.conn.commit()
 
+        continuity_suffix = f", continuity={continuity_id}" if continuity_id else ""
         logger.info(f"[PATTERN-MEMORY] Learning event - skill={skill_name}, "
-                   f"type={event_type}, event_id={event_id}")
+                   f"type={event_type}, event_id={event_id}{continuity_suffix}")
 
     def get_evolution_history(self, skill_name: str) -> List[Dict]:
         """
@@ -713,6 +741,65 @@ class PatternMemory:
 
         rows = cursor.fetchall()
 
+        return [dict(row) for row in rows]
+
+    def get_evolution_by_continuity(
+        self,
+        continuity_id: str,
+        include_children: bool = False
+    ) -> List[Dict]:
+        """
+        Get evolution events linked to a continuity chain.
+
+        Per WSP 91: Observability - query evolution lineage
+        Per WSP 97: Answer "what work led to this evolved skill?"
+
+        Args:
+            continuity_id: Continuity ID to query
+            include_children: If True, also return events where this is the parent
+
+        Returns:
+            List of learning events linked to this continuity chain
+        """
+        cursor = self.conn.cursor()
+
+        if include_children:
+            cursor.execute("""
+                SELECT * FROM learning_events
+                WHERE continuity_id = ? OR parent_continuity_id = ?
+                ORDER BY timestamp ASC
+            """, (continuity_id, continuity_id))
+        else:
+            cursor.execute("""
+                SELECT * FROM learning_events
+                WHERE continuity_id = ?
+                ORDER BY timestamp ASC
+            """, (continuity_id,))
+
+        rows = cursor.fetchall()
+        return [dict(row) for row in rows]
+
+    def get_evolution_by_execution(self, execution_id: str) -> List[Dict]:
+        """
+        Get evolution events triggered by a specific execution.
+
+        Per WSP 91: Answer "which execution triggered this skill evolution?"
+
+        Args:
+            execution_id: Execution ID to query
+
+        Returns:
+            List of learning events triggered by this execution
+        """
+        cursor = self.conn.cursor()
+
+        cursor.execute("""
+            SELECT * FROM learning_events
+            WHERE execution_id = ?
+            ORDER BY timestamp ASC
+        """, (execution_id,))
+
+        rows = cursor.fetchall()
         return [dict(row) for row in rows]
 
     # ------------------------------------------------------------------ #

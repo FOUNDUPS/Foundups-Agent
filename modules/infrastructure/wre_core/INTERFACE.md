@@ -2,7 +2,7 @@
 
 **WSP 11 Compliance:** Phase 3 Complete ✅
 **Last Updated:** 2026-03-25
-**Version:** 0.7.1
+**Version:** 0.7.2
 
 ## Overview
 
@@ -273,16 +273,56 @@ class PatternMemory:
         description: str,
         before_fidelity: Optional[float] = None,
         after_fidelity: Optional[float] = None,
-        variation_id: Optional[str] = None
+        variation_id: Optional[str] = None,
+        continuity_id: Optional[str] = None,
+        parent_continuity_id: Optional[str] = None,
+        execution_id: Optional[str] = None
     ) -> None:
         """
-        Record learning event for skill evolution tracking.
+        Record learning event for skill evolution tracking with continuity lineage.
 
         Event types: variation_created, variation_promoted, threshold_tuned, rollback
+
+        Per WSP 91: Observability with continuity metadata
+        Per WSP 97: Answers "what work led to this evolved skill?"
+
+        Args:
+            continuity_id: Links event to continuity work chain
+            parent_continuity_id: Parent continuity for lineage tracking
+            execution_id: Execution ID that triggered this evolution
         """
 
     def get_evolution_history(self, skill_name: str) -> List[Dict]:
-        """Get evolution history for a skill."""
+        """Get evolution history for a skill (includes continuity metadata)."""
+
+    def get_evolution_by_continuity(
+        self,
+        continuity_id: str,
+        include_children: bool = False
+    ) -> List[Dict]:
+        """
+        Get evolution events linked to a continuity chain.
+
+        Per WSP 91: Answer "what work led to this evolved skill?"
+
+        Args:
+            continuity_id: Continuity ID to query
+            include_children: If True, also return events where this is the parent
+
+        Returns:
+            List of learning events linked to this continuity chain
+        """
+
+    def get_evolution_by_execution(self, execution_id: str) -> List[Dict]:
+        """
+        Get evolution events triggered by a specific execution.
+
+        Args:
+            execution_id: Execution ID to query
+
+        Returns:
+            List of learning events triggered by this execution
+        """
 
     def close(self) -> None:
         """Close database connection."""

@@ -1179,6 +1179,9 @@ Final Output: [summary]
                     failed_output=execution_result,
                     input_context=input_context,
                     current_fidelity=pattern_fidelity,
+                    execution_id=execution_id,
+                    continuity_id=continuity_ctx.continuity_id if continuity_ctx else None,
+                    parent_continuity_id=continuity_ctx.parent_continuity_id if continuity_ctx else None,
                 )
                 evolution_triggered = True
             except Exception as exc:
@@ -1362,6 +1365,9 @@ Final Output: [summary]
         failed_output: Dict,
         input_context: Dict,
         current_fidelity: float,
+        execution_id: Optional[str] = None,
+        continuity_id: Optional[str] = None,
+        parent_continuity_id: Optional[str] = None,
     ) -> None:
         """
         Recursive self-improvement when pattern fidelity < 0.90.
@@ -1371,10 +1377,11 @@ Final Output: [summary]
         2. Recall successful patterns for comparison
         3. Ask Qwen to reflect on failure and generate improved instructions
         4. Store variation via PatternMemory.store_variation()
-        5. Record learning_event for evolution tracking
+        5. Record learning_event for evolution tracking with continuity lineage
 
         Per WSP 48: Recursive Self-Improvement
         Per WSP 96 v1.3: Skills are trainable weights that evolve
+        Per WSP 91: Observability with continuity metadata
 
         Args:
             skill_name: Skill that underperformed
@@ -1383,6 +1390,9 @@ Final Output: [summary]
             failed_output: Qwen's execution result dict
             input_context: Input data that was used
             current_fidelity: Pattern fidelity that triggered evolution
+            execution_id: Execution ID that triggered evolution
+            continuity_id: Continuity ID for lineage tracking
+            parent_continuity_id: Parent continuity for lineage chain
         """
         if not WRE_SKILLS_AVAILABLE or not self.sqlite_memory:
             return
@@ -1448,7 +1458,7 @@ Final Output: [summary]
                 test_id, variation_id
             )
 
-        # 5. Record learning event
+        # 5. Record learning event with continuity lineage
         self.sqlite_memory.record_learning_event(
             event_id=str(uuid.uuid4()),
             skill_name=skill_name,
@@ -1461,6 +1471,9 @@ Final Output: [summary]
             before_fidelity=current_fidelity,
             after_fidelity=None,  # Not yet tested
             variation_id=variation_id,
+            continuity_id=continuity_id,
+            parent_continuity_id=parent_continuity_id,
+            execution_id=execution_id,
         )
 
         logger.info(
