@@ -12,6 +12,128 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 
 ## MODLOG ENTRIES
 
+### 2026-03-26 - Startup Maintenance Gate Execution Path Fix (P0)
+
+**WSP Protocol**: WSP 22, WSP 27 (DAE Architecture)
+**Phase**: Fix dead work gap
+**Agent**: 0102
+
+#### Problem (Round 1)
+
+Startup maintenance gate queued tasks with phantom skill names (`openclaw-monitor`, `holo-search`, `training-system`) that had no executors in `run_task.py`. Result: gate queued dead work that would always fail with `no_executor_matched`.
+
+#### Problem (Round 2)
+
+Initial fix used incorrect kwargs for `SelfResearchRefresher.run()` and routed training to wrong executor:
+- `run_training_refresh`, `run_compliance_scan`, `run_update_candidates` don't exist
+- Training was calling `SelfResearchRefresher.run()` instead of `IdleAutomationDAE._execute_pattern_training()`
+
+#### Solution
+
+Added dispatch path 4 in `run_task.py` for startup maintenance tasks:
+
+1. Detects `source == "startup_maintenance_gate"` tasks
+2. Dispatches by task_id to real executors:
+   - `startup_refresh_self_research` → `SelfResearchRefresher.run(run_compliance=True, run_self_audit=True, ...)`
+   - `startup_refresh_holo_index` → `SelfResearchRefresher.refresh_holo_index()`
+   - `startup_refresh_model_status` → `get_dependency_status()` + write JSON
+   - `startup_training_batch` → `IdleAutomationDAE()._execute_pattern_training()` via asyncio.run()
+
+#### Integration Tests (Live Dispatch)
+
+5 tests proving executability without mocking the critical paths:
+- `test_model_status_task_executes`: Proves model status has executor
+- `test_holo_index_task_executes`: Proves HoloIndex has executor (mocked to avoid 30s index)
+- `test_self_research_task_executes_live`: **LIVE** - proves kwargs are correct
+- `test_training_batch_task_executes_live`: **LIVE** - proves IdleAutomationDAE routing
+- `test_unknown_task_returns_none`: Proves unknown tasks fall through
+
+#### Files Modified
+
+- `modules/communication/moltbot_bridge/scripts/run_task.py`: +95 lines (dispatch path 4 with correct routing)
+- `tests/test_startup_maintenance_gate.py`: +90 lines (live dispatch integration tests)
+
+#### Round 3: Success Classification Fix
+
+**Problem**: `startup_refresh_self_research` returned `ok=False` even on success because success detection checked `result.get("status") == "completed"` but `SelfResearchRefresher.run()` returns a report dict with `generated_on`, not a `status` field.
+
+**Fix**: Changed success detection to `isinstance(result, dict) and "generated_on" in result`
+
+**Regression test**: `test_self_research_task_executes_live` now asserts `ok=True`
+
+#### Test Results
+
+18 tests pass (13 existing + 5 integration tests)
+
+#### Final Verification
+
+```
+startup_refresh_model_status:    ok=True
+startup_refresh_holo_index:      ok=True
+startup_refresh_self_research:   ok=True
+startup_training_batch:          ok=False (expected - training already complete)
+```
+
+---
+
+### 2026-03-24 - Startup Maintenance Gate (P0)
+
+**WSP Protocol**: WSP 22, WSP 27 (DAE Architecture)
+**Phase**: Compute-conserving startup
+**Agent**: 0102
+
+#### Problem
+
+Heavy work like training, HoloIndex refresh, and doc generation was potentially blocking startup.
+The system needed a way to detect staleness cheaply and queue maintenance for later execution.
+
+#### Solution
+
+Created `startup_maintenance_gate.py` that implements a compute-conserving startup pattern:
+
+1. **Detect** staleness without heavy execution:
+   - Self-research status (max 6h)
+   - HoloIndex freshness (max 12h)
+   - Training readiness (max 24h)
+   - Model routing status (max 24h)
+
+2. **Queue** maintenance tasks to AgentDB:
+   - `startup_refresh_self_research`
+   - `startup_refresh_holo_index`
+   - `startup_training_batch` (only if explicitly due)
+   - `startup_refresh_model_status`
+
+3. **Return quickly** without blocking startup
+
+#### Integration
+
+Added call in `main.py` after preflights pass, before `bootstrap_runtime_dae_launches()`.
+
+#### Constraints Enforced
+
+- Preflight may inspect timestamps/hashes
+- Preflight must NOT run model training
+- Preflight must NOT run full HoloIndex indexing
+- Preflight must NOT rewrite narrative docs
+- Heavy work belongs in queued/background execution
+
+#### Files Added
+
+- `src/startup_maintenance_gate.py`: 300 lines, StartupMaintenanceGate class
+- `tests/test_startup_maintenance_gate.py`: 13 tests
+
+#### Files Changed
+
+- `main.py`: Added startup maintenance gate call after preflights
+
+#### Verification
+
+- `pytest test_startup_maintenance_gate.py` → 13 passed
+- In-process: Detects 3 stale artifacts, prints `[STARTUP-MAINT] preflight=PASS stale=3`
+- No heavy compute inline (tests verify < 5s execution)
+
+---
+
 ### 2026-03-24 - Scheduled Natural Language Automations
 
 **WSP Protocol**: WSP 22, WSP 27 (DAE Architecture), WSP 60 (Memory Architecture)
