@@ -84,6 +84,12 @@ def execute_task(task_id: str, repo_root: Path | None = None) -> Dict[str, Any]:
             if grant_result is not None:
                 result = grant_result
 
+    # ── Dispatch path 4: Startup maintenance tasks ──
+    if not result["ok"] and result["detail"] == "no_executor_matched" and source == "startup_maintenance_gate":
+        startup_result = _try_startup_maintenance_dispatch(repo_root, task_id, context)
+        if startup_result is not None:
+            result = startup_result
+
     # ── Finalize in AgentDB ──
     elapsed_ms = int((time.monotonic() - start) * 1000)
     result["execution_time_ms"] = elapsed_ms
@@ -254,6 +260,121 @@ def _try_grant_dispatch(
 
     else:
         # Not a recognized grant task pattern
+        return None
+
+
+def _try_startup_maintenance_dispatch(
+    repo_root: Path, task_id: str, context: dict
+) -> Dict[str, Any] | None:
+    """
+    Execute startup maintenance tasks queued by startup_maintenance_gate.
+
+    Handles:
+      - startup_refresh_self_research: Run self-research refresh
+      - startup_refresh_holo_index: Run HoloIndex refresh
+      - startup_refresh_model_status: Run model status refresh
+      - startup_training_batch: Run training batch (if training system available)
+
+    Returns structured result or None if not a recognized startup task.
+    """
+    try:
+        from modules.infrastructure.idle_automation.src.self_research_refresh import (
+            SelfResearchRefresher,
+        )
+    except ImportError as e:
+        logger.debug("[RUN_TASK] SelfResearchRefresher unavailable: %s", e)
+        return None
+
+    refresher = SelfResearchRefresher(repo_root=repo_root)
+
+    if task_id == "startup_refresh_self_research":
+        logger.info("[RUN_TASK] Startup dispatch: self-research refresh")
+        try:
+            # Use actual SelfResearchRefresher.run() signature
+            result = refresher.run(
+                run_holo_refresh=False,
+                run_compliance=True,
+                run_self_audit=True,
+                run_watchlists=True,
+                write_tasks=True,
+                emit_nudges=True,
+            )
+            # Success = report dict with generated_on (means refresh completed)
+            success = isinstance(result, dict) and "generated_on" in result
+            return {
+                "ok": success,
+                "detail": json.dumps(result, default=str)[:1000],
+                "executor": "startup:self_research",
+                "structured_result": result,
+            }
+        except Exception as e:
+            return {"ok": False, "detail": f"self_research_error: {e}", "executor": "startup:self_research"}
+
+    elif task_id == "startup_refresh_holo_index":
+        logger.info("[RUN_TASK] Startup dispatch: HoloIndex refresh")
+        try:
+            result = refresher.refresh_holo_index()
+            success = result.get("refresh_success", False) or not result.get("code_stale", True)
+            return {
+                "ok": success,
+                "detail": json.dumps(result, default=str)[:1000],
+                "executor": "startup:holo_index",
+                "structured_result": result,
+            }
+        except Exception as e:
+            return {"ok": False, "detail": f"holo_index_error: {e}", "executor": "startup:holo_index"}
+
+    elif task_id == "startup_refresh_model_status":
+        logger.info("[RUN_TASK] Startup dispatch: model status refresh")
+        try:
+            from modules.infrastructure.dependency_launcher.src.dae_dependencies import (
+                get_dependency_status,
+            )
+            from datetime import datetime, UTC
+
+            status = get_dependency_status()
+            result = {
+                "checked_on": datetime.now(UTC).isoformat(),
+                "lm_studio_running": status.get("lm_studio", False),
+                "dependencies": status,
+            }
+            # Write status to reports dir for freshness tracking
+            reports_dir = repo_root / "modules" / "communication" / "moltbot_bridge" / "workspace" / "reports"
+            reports_dir.mkdir(parents=True, exist_ok=True)
+            status_path = reports_dir / "local_model_status.json"
+            status_path.write_text(json.dumps(result, indent=2, default=str), encoding="utf-8")
+
+            return {
+                "ok": True,
+                "detail": json.dumps(result, default=str)[:1000],
+                "executor": "startup:model_status",
+                "structured_result": result,
+            }
+        except Exception as e:
+            return {"ok": False, "detail": f"model_status_error: {e}", "executor": "startup:model_status"}
+
+    elif task_id == "startup_training_batch":
+        logger.info("[RUN_TASK] Startup dispatch: training batch")
+        try:
+            import asyncio
+            from modules.infrastructure.idle_automation.src.idle_automation_dae import (
+                IdleAutomationDAE,
+            )
+
+            dae = IdleAutomationDAE()
+            result = asyncio.run(dae._execute_pattern_training())
+            success = result.get("success", False)
+            return {
+                "ok": success,
+                "detail": json.dumps(result, default=str)[:1000],
+                "executor": "startup:training_batch",
+                "structured_result": result,
+            }
+        except Exception as e:
+            return {"ok": False, "detail": f"training_error: {e}", "executor": "startup:training_batch"}
+
+    else:
+        # Not a recognized startup task pattern
         return None
 
 
