@@ -1153,7 +1153,10 @@ Final Output: [summary]
                     skill_name=skill_name,
                     event_type="variation_promoted",
                     description=f"Auto-promoted {active_test['treatment_version']} via A/B win",
-                    variation_id=active_test['treatment_version']
+                    variation_id=active_test['treatment_version'],
+                    continuity_id=continuity_ctx.continuity_id if continuity_ctx else None,
+                    parent_continuity_id=continuity_ctx.parent_continuity_id if continuity_ctx else None,
+                    execution_id=execution_id,
                 )
                 # Sprint 2: Create improvement edge for cross-skill transfer
                 self.sqlite_memory.add_skill_edge(
