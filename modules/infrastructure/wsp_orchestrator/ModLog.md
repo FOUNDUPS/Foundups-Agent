@@ -33,6 +33,46 @@ Modular "follow WSP" system with **0102 in command** (not Qwen!), using WSP 15 M
 
 ## Recent Changes
 
+### V004 - Role-Based Runtime Dispatch Refactor
+**Type**: Runtime Refactor
+**Date**: 2026-03-26
+**Impact**: Medium - runtime dispatch uses role constants for `triage/code/0102`;
+`general` is reserved and dispatchable but not yet planner-emitted
+**WSP Compliance**: WSP 22 (ModLog), WSP 77 (Agent Coordination)
+
+#### What Changed
+- Renamed `QwenPlan` → `WorkerPlan` (role-neutral data structure)
+- Renamed `_0102_prompt_qwen()` → `_0102_request_plan()` (role-neutral method)
+- Renamed `_execute_gemma_task()` → `_execute_triage_task()` (triage role)
+- Renamed `_execute_qwen_task()` → `_execute_code_task()` (code role)
+- Added role constants: `ROLE_TRIAGE`, `ROLE_CODE`, `ROLE_GENERAL`, `ROLE_0102`
+- Worker assignments changed: `Gemma:PatternMatch` → `role:triage`,
+  `Qwen:Planning` → `role:code`, `Qwen:Documentation` → `role:code`,
+  `0102:DirectAction` → `role:0102`
+- Dispatch in `_execute_worker()` routes on `role:` prefix, not `Gemma:`/`Qwen:`
+- Added 15 tests in `tests/test_role_dispatch.py`
+
+#### Before/After Worker Dispatch
+| Before (model-name) | After (role-based) |
+|---------------------|-------------------|
+| `Gemma:PatternMatch` | `role:triage` |
+| `Qwen:Planning` | `role:code` |
+| `Qwen:Documentation` | `role:code` |
+| `0102:DirectAction` | `role:0102` |
+| `MCP:HoloIndex` | `MCP:HoloIndex` (unchanged) |
+| `MCP:WSP` | `MCP:WSP` (unchanged) |
+
+#### Remaining Model-Name Debt (Intentionally Deferred)
+- `workers.qwen_engine` / `workers.gemma_engine` — attributes on
+  `AutonomousRefactoringOrchestrator` (external module, outside slice scope)
+- `WORKERS_AVAILABLE` import block references `AutonomousRefactoringOrchestrator`
+
+#### Files Modified
+- `src/wsp_orchestrator.py`: Runtime dispatch refactored to role-based
+- `tests/test_role_dispatch.py`: 15 new tests (role constants, plan assignment, dispatch routing)
+
+---
+
 ### V003 - Role-Based Model Policy Refresh (Docs/Comments Only)
 **Type**: Documentation/Policy Clarification
 **Date**: 2026-03-26

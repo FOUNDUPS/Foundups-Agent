@@ -26,8 +26,9 @@ Modular "follow WSP" system where 0102 orchestrates Qwen/Gemma/MCP workers.
 candidates. `vision` is resolved via `ui_tars_bridge.py`. `architect_escalation` is policy-only.
 Models are fluid; roles are stable contracts. Future trained models become role candidates.
 
-**Note**: The runtime still uses model-name worker strings (`QwenPlan`, `Gemma:PatternMatch`).
-A follow-up runtime refactor slice will align execution with role-based dispatch.
+**Note**: Runtime dispatch uses role constants (`role:triage`, `role:code`, `role:0102`).
+Remaining model-name references are in the external `AutonomousRefactoringOrchestrator` API
+(`workers.qwen_engine`, `workers.gemma_engine`) which is outside this module's scope.
 
 ### Execution Flow
 
