@@ -10,6 +10,30 @@ This log tracks changes specific to the **livechat** module in the **communicati
 
 ---
 
+## 2026-03-27 - Breadcrumb Producer for Idle Handoff Continuity
+
+**By:** 0102
+**WSP References:** WSP 22 (ModLog), WSP 54 (Multi-Agent Coordination)
+
+### Problem
+
+Auto Moderator passed `triggering_session=self._last_stream_id` to idle automation, but no breadcrumb was written to AgentDB. The idle DAE's `_try_recover_origin_continuity()` could not find a matching record, so background work ran as independent roots instead of correlated lineage.
+
+### Solution
+
+Added breadcrumb write in `auto_moderator_dae.py` immediately before the idle handoff:
+- Writes `session_id=self._last_stream_id` with action `stream_ended_idle_handoff`
+- Derives deterministic `continuity_id` from session via `_derive_continuity_from_session()`
+- Enables idle recovery to find and link to the originating stream session
+
+### Files Changed
+- `auto_moderator_dae.py`: Added `AgentDB().add_breadcrumb()` call before `run_idle_automation()`
+
+### Tests
+- `test_caller_wiring.py` (in idle_automation): Proves breadcrumb → recovery → lineage path
+
+---
+
 ## 2026-03-21 - Agentic Pre-Audit for Channel Rotation (Comments + Shorts + Indexing)
 
 **By:** 0102
