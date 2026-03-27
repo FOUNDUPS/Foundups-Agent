@@ -1273,7 +1273,10 @@ class IdleAutomationDAE:
 
 
 # Convenience function for YouTube DAE integration
-async def run_idle_automation(parent_context=None) -> Dict[str, Any]:
+async def run_idle_automation(
+    parent_context=None,
+    triggering_session: str | None = None,
+) -> Dict[str, Any]:
     """
     Convenience function for YouTube DAE integration.
     Call this from AutoModeratorDAE when entering idle state.
@@ -1282,6 +1285,12 @@ async def run_idle_automation(parent_context=None) -> Dict[str, Any]:
         parent_context: Optional parent continuity context for cross-surface lineage.
                        Pass the caller's continuity context to enable cross-surface tracking.
                        Example: run_idle_automation(parent_context=self._continuity_context)
+        triggering_session: Optional session identifier (e.g. video_id) for
+                           origin recovery when no parent_context is available.
+                           Stored via set_triggering_session() so the idle DAE
+                           can correlate background work to the originating surface.
     """
     dae = IdleAutomationDAE()
+    if triggering_session and not parent_context:
+        dae.set_triggering_session(triggering_session)
     return await dae.run_idle_tasks(parent_context=parent_context)

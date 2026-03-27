@@ -2016,18 +2016,68 @@ class AutoModeratorDAE:
                 
                 # Execute idle automation tasks before waiting
                 # WSP 35: Module Execution Automation during idle periods
+                _idle_emit_start = None
+                try:
+                    from modules.infrastructure.dae_daemon.src.runtime_emitter import (
+                        emit_start as _re_start, emit_success as _re_ok, emit_failure as _re_fail,
+                    )
+                    _idle_emit_start = _re_start(
+                        "auto_moderator", "idle_handoff",
+                        details={"triggering_session": self._last_stream_id or ""},
+                    )
+                except Exception:
+                    _re_ok = _re_fail = None
+                # Write a breadcrumb anchoring this stream session in AgentDB
+                # so idle recovery can find it via resolve_origin_continuity_from_session()
+                if self._last_stream_id:
+                    try:
+                        from modules.infrastructure.database.src.agent_db import AgentDB
+                        from modules.communication.moltbot_bridge.src.continuity_context import (
+                            ContinuityManager, RuntimeSurface,
+                            _derive_continuity_from_session,
+                        )
+                        _stream_continuity_id = _derive_continuity_from_session(self._last_stream_id)
+                        AgentDB().add_breadcrumb(
+                            session_id=self._last_stream_id,
+                            action="stream_ended_idle_handoff",
+                            agent_id="auto_moderator_dae",
+                            continuity_id=_stream_continuity_id,
+                            runtime_surface=RuntimeSurface.OPENCLAW.value,
+                            sender_normalized="livechat",
+                            data={"video_id": self._last_stream_id},
+                        )
+                        logger.debug("[CONTINUITY] Breadcrumb written for stream %s", self._last_stream_id)
+                    except Exception as bc_exc:
+                        logger.debug("[CONTINUITY] Breadcrumb write failed: %s", bc_exc)
+
                 try:
                     from modules.infrastructure.idle_automation.src.idle_automation_dae import run_idle_automation
                     logger.info("[BOT] Executing idle automation tasks...")
-                    idle_result = await run_idle_automation()
+                    # Pass last stream ID so idle work can be correlated to
+                    # the originating livechat session (Gateway Continuity)
+                    idle_result = await run_idle_automation(
+                        triggering_session=self._last_stream_id,
+                    )
                     if idle_result.get("overall_success"):
                         logger.info(f"[OK] Idle automation completed successfully ({idle_result.get('duration', 0):.1f}s)")
+                        if _idle_emit_start is not None and _re_ok:
+                            _re_ok("auto_moderator", "idle_handoff", _idle_emit_start,
+                                   details={"duration_s": idle_result.get("duration", 0)})
                     else:
                         logger.info(f"[WARN] Idle automation completed with issues ({idle_result.get('duration', 0):.1f}s)")
+                        if _idle_emit_start is not None and _re_fail:
+                            _re_fail("auto_moderator", "idle_handoff", _idle_emit_start,
+                                     "completed_with_issues",
+                                     details={"duration_s": idle_result.get("duration", 0)})
                 except ImportError:
                     logger.debug("Idle automation module not available - skipping")
                 except Exception as e:
                     logger.warning(f"Idle automation failed: {e}")
+                    if _idle_emit_start is not None and _re_fail:
+                        try:
+                            _re_fail("auto_moderator", "idle_handoff", _idle_emit_start, str(e)[:200])
+                        except Exception:
+                            pass
 
                 # Quick transition - only wait 5 seconds before looking for new stream
                 await asyncio.sleep(5)
