@@ -1,3 +1,4 @@
+import os
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -215,8 +216,10 @@ def test_plan_ai_analysis_normal_shape(tmp_path):
     supervisor._ai_overseer = mock_overseer
 
     # Provide a pending task to trigger PLAN state (not idle)
+    # Enable auto-tasks circuit breaker for test
     pending_task = {"task_id": "test_001", "prompt": "test", "status": "pending"}
-    with patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+    with patch.dict(os.environ, {"OPENCLAW_AUTO_TASKS_ENABLED": "1"}), \
+         patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
         mock_db.return_value.get_autonomous_tasks.return_value = [pending_task]
         mock_db.return_value.assign_autonomous_task.return_value = True
         result = supervisor.run_cycle()
@@ -262,8 +265,10 @@ def test_plan_ai_analysis_fallback_shape(tmp_path):
     supervisor._ai_overseer = mock_overseer
 
     # Provide a pending task to trigger PLAN state (not idle)
+    # Enable auto-tasks circuit breaker for test
     pending_task = {"task_id": "test_002", "prompt": "test", "status": "pending"}
-    with patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+    with patch.dict(os.environ, {"OPENCLAW_AUTO_TASKS_ENABLED": "1"}), \
+         patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
         mock_db.return_value.get_autonomous_tasks.return_value = [pending_task]
         mock_db.return_value.assign_autonomous_task.return_value = True
         result = supervisor.run_cycle()
@@ -303,8 +308,10 @@ def test_plan_ai_analysis_exception_stores_error(tmp_path):
     supervisor._ai_overseer = mock_overseer
 
     # Provide a pending task to trigger PLAN state (not idle)
+    # Enable auto-tasks circuit breaker for test
     pending_task = {"task_id": "test_003", "prompt": "test", "status": "pending"}
-    with patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+    with patch.dict(os.environ, {"OPENCLAW_AUTO_TASKS_ENABLED": "1"}), \
+         patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
         mock_db.return_value.get_autonomous_tasks.return_value = [pending_task]
         mock_db.return_value.assign_autonomous_task.return_value = True
         result = supervisor.run_cycle()
@@ -585,7 +592,9 @@ def test_different_task_failures_produce_different_signatures(tmp_path):
     task1 = {"task_id": "grant_watchlist_review", "description": "Review grants"}
     task2 = {"task_id": "pqn_watchlist_review", "description": "Review PQN"}
 
-    with patch(
+    # Enable auto-tasks circuit breaker for test
+    with patch.dict(os.environ, {"OPENCLAW_AUTO_TASKS_ENABLED": "1"}), \
+         patch(
         "modules.communication.moltbot_bridge.src.memory_nudge_engine.MemoryNudgeEngine",
         MockNudgeEngine,
     ), patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:

@@ -477,19 +477,23 @@ class OpenClawSupervisor:
             }
 
         # Check AgentDB for pending autonomous tasks
-        try:
-            from modules.infrastructure.database.src.agent_db import AgentDB
-            db = AgentDB()
-            tasks = db.get_autonomous_tasks(status="pending", limit=1)
-            if tasks:
-                return {
-                    "kind": "action",
-                    "reason": "autonomous_task_pending",
-                    "action": "execute_autonomous_task",
-                    "task": tasks[0],
-                }
-        except Exception as exc:
-            logger.warning("Failed to check autonomous tasks: %s", exc)
+        # CIRCUIT BREAKER: Only auto-execute if explicitly enabled by 012
+        # Set OPENCLAW_AUTO_TASKS_ENABLED=1 after menu choice to activate
+        auto_tasks_enabled = os.getenv("OPENCLAW_AUTO_TASKS_ENABLED", "0") == "1"
+        if auto_tasks_enabled:
+            try:
+                from modules.infrastructure.database.src.agent_db import AgentDB
+                db = AgentDB()
+                tasks = db.get_autonomous_tasks(status="pending", limit=1)
+                if tasks:
+                    return {
+                        "kind": "action",
+                        "reason": "autonomous_task_pending",
+                        "action": "execute_autonomous_task",
+                        "task": tasks[0],
+                    }
+            except Exception as exc:
+                logger.warning("Failed to check autonomous tasks: %s", exc)
 
         # Check self-audit events (lower priority than restart and AgentDB tasks)
         audit_events = observation.get("self_audit_events", [])

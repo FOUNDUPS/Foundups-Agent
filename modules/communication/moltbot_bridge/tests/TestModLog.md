@@ -1,3 +1,22 @@
+## 2026-03-27: OpenClaw Supervisor Runtime Emitter + Test Fix
+
+**File**: `openclaw_supervisor.py` (instrumentation)
+- `_execute()` now emits `supervisor_execute` events via `runtime_emitter.py`
+- Events cover all action paths: start_openclaw, execute_autonomous_task, execute_self_audit_fix
+- Events include: action type, task_id (when applicable), executor on success, error on failure
+
+**File**: `test_openclaw_supervisor.py` (test fix)
+- Fixed 4 failing tests that didn't enable `OPENCLAW_AUTO_TASKS_ENABLED` circuit breaker
+- Tests now use `patch.dict(os.environ, {"OPENCLAW_AUTO_TASKS_ENABLED": "1"})` to trigger PLAN state
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_supervisor.py -q`
+
+**Result**:
+- `14 passed`
+
+---
+
 ## 2026-03-23: Supervisor Memory Nudge Tests (P1)
 - Command: `pytest modules/communication/moltbot_bridge/tests/test_openclaw_supervisor.py -q`
 - Status: PASS
