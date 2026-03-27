@@ -1,5 +1,25 @@
 # dae_daemon TestModLog
 
+## V1.4.0 - Runtime Emitter Tests (2026-03-27)
+
+**File**: `test_runtime_emitter.py`
+- Validates `RuntimeEvent` dataclass strips None values, includes non-None
+- Validates `emit()` writes JSONL, appends correctly
+- Validates `emit_start()` returns monotonic time for duration tracking
+- Validates `emit_success()` computes duration_ms correctly
+- Validates `emit_failure()` includes error, truncates to 500 chars
+- Validates continuity_id/parent_continuity_id propagation
+- Validates mandatory fields present (surface, event_type, status, timestamp)
+- Validates details dict stays compact (<2KB)
+
+**Run**:
+- `python -m pytest modules/infrastructure/dae_daemon/tests/test_runtime_emitter.py -q`
+
+**Result**:
+- `11 passed`
+
+---
+
 ## V1.2.4 - Cursor-based observer follow tests (2026-03-18)
 
 **Updated**: `test_dae_observer.py`

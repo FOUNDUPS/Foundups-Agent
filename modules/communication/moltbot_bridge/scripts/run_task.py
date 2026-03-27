@@ -63,6 +63,15 @@ def execute_task(task_id: str, repo_root: Path | None = None) -> Dict[str, Any]:
 
     logger.info("[RUN_TASK] Executing task %s: %s (skills=%s, source=%s)", task_id, description[:80], required_skills, source)
 
+    # Runtime emitter: structured event for troubleshooting/tuning
+    try:
+        from modules.infrastructure.dae_daemon.src.runtime_emitter import emit_start, emit_success, emit_failure
+        _emit_start = emit_start("run_task", "task_dispatch", task_id=task_id,
+                                 details={"source": source, "description": description[:80]})
+    except Exception:
+        _emit_start = None
+        emit_success = emit_failure = None  # type: ignore[assignment]
+
     result: Dict[str, Any] = {"ok": False, "detail": "no_executor_matched", "executor": "none"}
 
     # ── Dispatch path 1: WRE skill execution ──
@@ -97,6 +106,12 @@ def execute_task(task_id: str, repo_root: Path | None = None) -> Dict[str, Any]:
     if result["ok"]:
         db.complete_autonomous_task(task_id)
         logger.info("[RUN_TASK] Task %s completed (executor=%s, %dms)", task_id, result["executor"], elapsed_ms)
+        if _emit_start is not None and emit_success:
+            try:
+                emit_success("run_task", "task_dispatch", _emit_start,
+                             task_id=task_id, details={"executor": result["executor"]})
+            except Exception:
+                pass
     else:
         # Mark as failed by updating status directly (no fail_autonomous_task method yet)
         try:
@@ -107,6 +122,13 @@ def execute_task(task_id: str, repo_root: Path | None = None) -> Dict[str, Any]:
         except Exception as fail_exc:
             logger.warning("[RUN_TASK] Could not mark task %s as failed: %s", task_id, fail_exc)
         logger.warning("[RUN_TASK] Task %s failed: %s (executor=%s)", task_id, result["detail"][:200], result["executor"])
+        if _emit_start is not None and emit_failure:
+            try:
+                emit_failure("run_task", "task_dispatch", _emit_start,
+                             result["detail"][:200], task_id=task_id,
+                             details={"executor": result["executor"]})
+            except Exception:
+                pass
 
     return result
 

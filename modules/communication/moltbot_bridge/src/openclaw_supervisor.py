@@ -557,6 +557,19 @@ class OpenClawSupervisor:
         if broker is None:
             return {"ok": False, "error": "broker_unavailable"}
 
+        # Runtime emitter: structured event for supervisor execution observability
+        _rt_start = None
+        try:
+            from modules.infrastructure.dae_daemon.src.runtime_emitter import (
+                emit_start as _re_start, emit_success as _re_ok, emit_failure as _re_fail,
+            )
+            _rt_start = _re_start(
+                "openclaw_supervisor", "supervisor_execute",
+                details={"action": plan.get("action", "unknown")},
+            )
+        except Exception:
+            _re_ok = _re_fail = None
+
         if plan["action"] == "start_openclaw":
             self._record_restart_attempt()
             result = broker.start_dae("openclaw", actor_id="0102")
@@ -565,6 +578,17 @@ class OpenClawSupervisor:
                 result.get("status", result.get("error", "unknown")),
                 {"plan": plan, "result": result},
             )
+            if _rt_start is not None:
+                try:
+                    if result.get("ok") or result.get("status") == "started":
+                        _re_ok("openclaw_supervisor", "supervisor_execute", _rt_start,
+                               details={"action": "start_openclaw"})
+                    else:
+                        _re_fail("openclaw_supervisor", "supervisor_execute", _rt_start,
+                                 result.get("error", "unknown")[:200],
+                                 details={"action": "start_openclaw"})
+                except Exception:
+                    pass
             return result
 
         elif plan["action"] == "execute_autonomous_task":
@@ -601,6 +625,20 @@ class OpenClawSupervisor:
                 result.get("status", result.get("error", "unknown")),
                 {"plan": plan, "result": result},
             )
+            if _rt_start is not None:
+                try:
+                    if result.get("ok"):
+                        _re_ok("openclaw_supervisor", "supervisor_execute", _rt_start,
+                               task_id=task_id,
+                               details={"action": "execute_autonomous_task",
+                                         "executor": result.get("executor", "unknown")})
+                    else:
+                        _re_fail("openclaw_supervisor", "supervisor_execute", _rt_start,
+                                 result.get("error", result.get("status", "unknown"))[:200],
+                                 task_id=task_id,
+                                 details={"action": "execute_autonomous_task"})
+                except Exception:
+                    pass
             return result
 
         elif plan["action"] == "execute_self_audit_fix":
@@ -622,8 +660,27 @@ class OpenClawSupervisor:
                 result.get("status", result.get("error", "unknown")),
                 {"plan": plan, "result": result},
             )
+            if _rt_start is not None:
+                try:
+                    if result.get("ok"):
+                        _re_ok("openclaw_supervisor", "supervisor_execute", _rt_start,
+                               details={"action": "execute_self_audit_fix"})
+                    else:
+                        _re_fail("openclaw_supervisor", "supervisor_execute", _rt_start,
+                                 result.get("error", "unknown")[:200],
+                                 details={"action": "execute_self_audit_fix"})
+                except Exception:
+                    pass
             return result
 
+        # Fallback for unsupported actions
+        if _rt_start is not None:
+            try:
+                _re_fail("openclaw_supervisor", "supervisor_execute", _rt_start,
+                         "unsupported_action",
+                         details={"action": plan.get("action", "unknown")})
+            except Exception:
+                pass
         return {"ok": False, "error": "unsupported_action"}
 
     # ------------------------------------------------------------------ #

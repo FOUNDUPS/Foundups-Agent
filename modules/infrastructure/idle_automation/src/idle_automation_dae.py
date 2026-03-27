@@ -645,6 +645,16 @@ class IdleAutomationDAE:
 
         start_time = datetime.now()
 
+        # Runtime emitter: structured event for training observability
+        _rt_start = None
+        try:
+            from modules.infrastructure.dae_daemon.src.runtime_emitter import (
+                emit_start as _re_start, emit_success as _re_ok, emit_failure as _re_fail,
+            )
+            _rt_start = _re_start("idle_automation", "pattern_training")
+        except Exception:
+            _re_ok = _re_fail = None
+
         try:
             # Check if training is enabled via environment variable
             training_enabled = self._parse_bool_env("AUTO_PATTERN_TRAINING", True)
@@ -713,6 +723,19 @@ class IdleAutomationDAE:
             logger.warning(f"Pattern training error: {e}")
         finally:
             result["duration"] = (datetime.now() - start_time).total_seconds()
+            # Emit structured event for training observability
+            if _rt_start is not None:
+                try:
+                    if result.get("success"):
+                        _re_ok("idle_automation", "pattern_training", _rt_start,
+                               details={"patterns_stored": result.get("patterns_stored", 0),
+                                         "lines_processed": result.get("lines_processed", 0)})
+                    else:
+                        _re_fail("idle_automation", "pattern_training", _rt_start,
+                                 result.get("error", "unknown")[:200],
+                                 details={"patterns_stored": result.get("patterns_stored", 0)})
+                except Exception:
+                    pass
 
         return result
 
