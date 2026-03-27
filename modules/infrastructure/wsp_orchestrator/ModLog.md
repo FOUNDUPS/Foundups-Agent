@@ -33,6 +33,84 @@ Modular "follow WSP" system with **0102 in command** (not Qwen!), using WSP 15 M
 
 ## Recent Changes
 
+### V004 - Role-Based Runtime Dispatch Refactor
+**Type**: Runtime Refactor
+**Date**: 2026-03-26
+**Impact**: Medium - runtime dispatch uses role constants for `triage/code/0102`;
+`general` is reserved and dispatchable but not yet planner-emitted
+**WSP Compliance**: WSP 22 (ModLog), WSP 77 (Agent Coordination)
+
+#### What Changed
+- Renamed `QwenPlan` → `WorkerPlan` (role-neutral data structure)
+- Renamed `_0102_prompt_qwen()` → `_0102_request_plan()` (role-neutral method)
+- Renamed `_execute_gemma_task()` → `_execute_triage_task()` (triage role)
+- Renamed `_execute_qwen_task()` → `_execute_code_task()` (code role)
+- Added role constants: `ROLE_TRIAGE`, `ROLE_CODE`, `ROLE_GENERAL`, `ROLE_0102`
+- Worker assignments changed: `Gemma:PatternMatch` → `role:triage`,
+  `Qwen:Planning` → `role:code`, `Qwen:Documentation` → `role:code`,
+  `0102:DirectAction` → `role:0102`
+- Dispatch in `_execute_worker()` routes on `role:` prefix, not `Gemma:`/`Qwen:`
+- Added 15 tests in `tests/test_role_dispatch.py`
+
+#### Before/After Worker Dispatch
+| Before (model-name) | After (role-based) |
+|---------------------|-------------------|
+| `Gemma:PatternMatch` | `role:triage` |
+| `Qwen:Planning` | `role:code` |
+| `Qwen:Documentation` | `role:code` |
+| `0102:DirectAction` | `role:0102` |
+| `MCP:HoloIndex` | `MCP:HoloIndex` (unchanged) |
+| `MCP:WSP` | `MCP:WSP` (unchanged) |
+
+#### Remaining Model-Name Debt (Intentionally Deferred)
+- `workers.qwen_engine` / `workers.gemma_engine` — attributes on
+  `AutonomousRefactoringOrchestrator` (external module, outside slice scope)
+- `WORKERS_AVAILABLE` import block references `AutonomousRefactoringOrchestrator`
+
+#### Files Modified
+- `src/wsp_orchestrator.py`: Runtime dispatch refactored to role-based
+- `tests/test_role_dispatch.py`: 15 new tests (role constants, plan assignment, dispatch routing)
+
+---
+
+### V003 - Role-Based Model Policy Refresh (Docs/Comments Only)
+**Type**: Documentation/Policy Clarification
+**Date**: 2026-03-26
+**Impact**: Low - docs/comments only, no runtime behavior change
+**WSP Compliance**: WSP 22 (ModLog), WSP 77 (Agent Coordination)
+
+#### Design Principle
+**Hardcode roles, not models.** Roles are stable capability contracts; models are fluid candidates that can be swapped, trained, or promoted without architectural rewrites.
+
+#### Scope
+Docs and comments only. The runtime still uses model-name worker strings (`QwenPlan`,
+`Gemma:PatternMatch`, `_0102_prompt_qwen`). A follow-up runtime refactor slice is needed
+to align execution with role-based dispatch.
+
+#### What Changed
+- Clarified resolver boundaries: `triage/general/code` via `local_model_selection.py`,
+  `vision` via `ui_tars_bridge.py`, `architect_escalation` is policy-only
+- Added Resolution Surface column to all worker tables
+- Documented future trained model promotion path
+- Updated docstrings in `wsp_orchestrator.py` and `local_model_selection.py`
+
+#### Role Policy Table
+| Role | Resolution Surface | Purpose | Future Candidate Path |
+|------|-------------------|---------|----------------------|
+| triage | local_model_selection.py | fast validation | fine-tuned local |
+| general | local_model_selection.py | synthesis/reasoning | trained general |
+| code | local_model_selection.py | resident coding | codebase-trained |
+| vision | ui_tars_bridge.py | browser/UI analysis | trained vision adapter |
+| architect_escalation | explicit policy | high-risk arch (not auto-resolved) | frontier or top-local |
+
+#### Files Modified
+- `src/wsp_orchestrator.py`: Role-based docstring
+- `README.md`: Role-based architecture + worker table
+- `INTERFACE.md`: Role-based worker types
+- `local_model_selection.py`: Role architecture docstring
+
+---
+
 ### V002 - WSP_00 Gate Integrated into `follow_wsp` (Fail-Closed Hardening)
 **Type**: Security/Compliance Hardening  
 **Date**: 2026-02-14  
