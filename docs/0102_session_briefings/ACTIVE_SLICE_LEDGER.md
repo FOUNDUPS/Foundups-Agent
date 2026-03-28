@@ -68,6 +68,7 @@ If already landed:
 | `training_corpus_path_normalization` | `64fef5ca1` + `80564559b` | corpus path defaults normalized across holo tools and openclaw boundary |
 | `obs_connection_singleton` | (local, in PR #252 branch) | `boot_layer_rotator/executor.py` singleton pattern |
 | `supervisor_scan_once_fix` | (local, in PR #252 branch) | `openclaw_supervisor.py` type mismatch fixed |
+| `pqn_swarm_hub_internal_poc_scaffold` | `35d1e2275` | `modules/foundups/pqn_swarm_hub/` — contracts, 4 service modules, 18/18 tests |
 
 ---
 
@@ -75,7 +76,7 @@ If already landed:
 
 | Slice | Priority | Blocked By | Notes |
 |-------|----------|------------|-------|
-| `pqn_swarm_hub_internal_poc_scaffold` | P0 | — | PQN Swarm Hub is canonical internal PoC — module scaffold does not yet exist |
+| _(none — all current slices closed)_ | — | — | See next priority order below |
 
 ---
 
@@ -98,9 +99,8 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 
 ## Next Priority Order
 
-1. `pqn_swarm_hub_internal_poc_scaffold` — create module scaffold for PQN Swarm Hub FoundUp (internal PoC, per `PQN_SWARM_HUB_FOUNDUP_BRIEF.md`)
-2. YouTube Domain Agent Phase 1 (pending 012 review of `IMPLEMENTATION_PLAN.md`)
-3. `git_main_merge_sentinel` (plan exists, lowest urgency)
+1. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
+2. `git_main_merge_sentinel` (plan exists at `.claude/plans/quizzical-weaving-harbor.md`, lowest urgency)
 
 ---
 
