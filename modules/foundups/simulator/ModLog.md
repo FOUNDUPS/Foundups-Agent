@@ -1,5 +1,105 @@
 # Simulator ModLog
 
+## 2026-03-28 - ROC-First Property and Baseline Coverage
+
+### Why
+012 requested expanded test coverage for ROC-first sustainability logic.
+
+### Audit Findings
+| Category | Status |
+|----------|--------|
+| ROC boundary (negative/zero/positive) | Was NOT tested |
+| Gate combination matrix (2×2 ROC×ROI) | Only ROC+/ROI+ tested |
+| Invariant: `is_sustainable == both_gates` | NOT explicit |
+| FAM/pAVS baseline pinning | NOT pinned |
+
+### Changes
+- Expanded `tests/test_unified_sustainability.py`:
+  - `TestRocBoundaries`: 4 tests (formula-level boundary behavior)
+  - `TestGateCombinationMatrix`: 4 tests (calculator-driven gate combinations)
+  - `TestRocNegativeFormula`: 2 tests (negative margin formula validation)
+  - `TestInvariants`: 3 tests (ratio formula, both-gates, value-per-dollar)
+  - `TestPavsBaselineScenarios`: 4 tests (Year1 baseline, volume sensitivity)
+
+### Design Constraint Documented
+Calculator assumes `COMPUTE_GROSS_MARGIN=0.60` (positive margin). Negative ROC
+requires negative margin, which is tested at formula level (`RevenueSnapshot`)
+not calculator level. Gate matrix tests use calculator with ROC=0 (zero tasks)
+to exercise the `roc_ratio > 0` gate failure path.
+
+### Outcome
+- **26/26 tests passing** (9 original + 17 new)
+- Gate matrix now driven through `UnifiedSustainabilityCalculator`
+- Negative ROC formula behavior validated at `RevenueSnapshot` level
+- No simulator code changes required
+
+### Metrics
+| Metric | Before | After |
+|--------|--------|-------|
+| Tests | 9 | 26 |
+| Calculator-driven gate tests | 1 | 5 |
+| Formula-level ROC tests | 1 | 6 |
+| Baseline pinned | No | Yes (Year1) |
+
+---
+
+## 2026-03-28 - ROC-First Economics + WSP 97 Academic Derivation
+
+### Why
+012 requested WSP 97 rigor on ROC formula - "one mistake in the math can be huge."
+
+### Changes
+- Refactored `unified_sustainability.py`:
+  - ROC (`is_compute_positive`) now PRIMARY sustainability gate
+  - ROI (`is_roi_sustainable`) now SECONDARY gate
+  - Combined: `is_sustainable = is_compute_positive AND is_roi_sustainable`
+- Created `docs/ROC_FORMULA_DERIVATION.md`:
+  - Academic references (FinOps, BLS, TFP, arxiv:2510.26136)
+  - Variable audit (what C_compute includes/excludes)
+  - ROI vs ROC dialectic synthesis
+  - WSP 15 MPS-ROC mapping (4-dimensional scoring)
+  - Sharpe-ROC proposal (risk-adjusted, not yet implemented)
+  - Quality adjustment analysis (implicit vs explicit CABR)
+
+### WSP References
+- WSP 97: CoT/CoR verification gates
+- WSP 15: Referenced for MPS concept (NOT modified - MPS-ROC is PROPOSAL only)
+
+### Academic Sources Cited
+- FinOps Unit Economics
+- BLS Productivity Measurement
+- Wikipedia TFP
+- arxiv:2510.26136 (Beyond Benchmarks: Economics of AI Inference)
+- Sharpe Ratio
+
+### pAVS Paper ROC-First Refactoring
+- Updated `docs/FOUNDUPS_PAVS_PAPER_MANUSCRIPT.md`:
+  - Abstract equations (E0.3-E0.6) now ROC-first
+  - Sustainability definition: `is_compute_positive` (PRIMARY) AND `is_roi_sustainable` (SECONDARY)
+  - RQ1 references ROC-first gate
+  - Section 6.1.1 "ROC-First Unified Sustainability (PRIMARY)" with gate definitions
+  - Section 12 (March 2026 addendum) already ROC-first with ROC™ trademark
+
+### Correction (012 Architect Review)
+- **Reverted**: WSP 15 Section 7 (MPS-ROC) - core-protocol drift violation
+- **Fixed**: ROC_FORMULA_DERIVATION.md authority hierarchy:
+  - Changed "Canonical Reference" → "Simulator-Domain Reference"
+  - MPS-ROC marked as PROPOSAL, not active WSP modification
+  - Removed false claim that WSP 15 Section 7 exists
+- **Added**: Test assertions for new exported gates:
+  - `roc_ratio`, `is_compute_positive`, `is_roi_sustainable`, `is_sustainable`
+
+### Outcome
+- ROC formula academically grounded
+- pAVS paper refactored to ROC-first semantics
+- Research persisted for future reference
+- Dialectic (ROI challenges) documented
+- Authority hierarchy corrected (simulator-domain only)
+- WSP 15 core scaffolding preserved (unmodified)
+- 9/9 tests passing
+
+---
+
 ## 2026-02-22 - Simulator Qwen Backend Route Toggle (Local / IronClaw / WRE->IronClaw)
 
 ### Why
