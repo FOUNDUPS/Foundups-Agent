@@ -2,6 +2,28 @@
 
 ## Chronological Change Log
 
+### 2026-03-29 - foundups_domain_canonicalization (README + INTERFACE tightening)
+
+**By:** 0102
+**WSP References:** WSP 22, WSP 97
+
+**What changed**
+- `README.md`: Replaced legacy platform prose with clear canonical/historical separation
+  - Top section: Canonical Planning References table (active)
+  - New section: "What Exists Now" with implemented classes and active submodules
+  - Legacy content marked as "Historical Context" with explicit warning
+- `INTERFACE.md`: Added implementation status to all interfaces
+  - Interface Status table at top: IMPLEMENTED vs PLANNED
+  - Each planned interface marked with "(PLANNED)" and "(not yet created)" notes
+  - Web API and Integration sections marked as design specifications
+
+**Why**
+- Legacy prose was reading as current canon when it described aspirational interfaces
+- `FOUNDUPS_DOMAIN_CANONICAL_INDEX.md` called for this tightening as "Pending Audit" items
+- Agents and humans need to clearly distinguish what exists vs what's planned
+
+---
+
 ### 2026-03-29 - FoundUps Domain Canonical Index + documentation custody
 
 **By:** 0102
