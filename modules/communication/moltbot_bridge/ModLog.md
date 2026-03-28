@@ -1,5 +1,58 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-29: OpenClaw Authority & Mutation Gate Hardening (WSP 00/95)
+
+**Author**: 0102
+**WSP**: 00 (Zen State / Security Boundary), 95 (Skill Safety)
+
+### Context
+
+Security audit identified three gaps in OpenClaw's mutation gate:
+1. Commander authority derived solely from spoofable display-name matching
+2. Source-modification detection missing bare filenames (.env, .bat, .gitignore)
+3. Skill-safety failures were downgrading to conversation instead of fail-closed block
+
+### Changes
+
+1. **Commander authority trust model** (`openclaw_intent_planner.py`):
+   - Local channels (voice_repl, local_repl) inherently trusted - operator has physical access
+   - **Remote channels are NO LONGER commander** - display names are spoofable
+   - No reliable remote identity field exists (no stable platform user ID, signed origin, or cryptographic verification)
+   - Remote commander claims logged at WARNING level for security monitoring
+   - Remote channels remain advisory/non-commander until stronger identity contract added
+
+2. **Source-modification detection** (`openclaw_permission_policy.py`):
+   - `extract_file_paths()` extended with new extension pattern: `.bat`, `.cmd`, `.env`
+   - New special_pattern for dotfiles: `.env`, `.gitignore`, `.dockerignore`, `.npmrc`, `.npmignore`
+   - Word boundary handling prevents false positives (config.env does not trigger .env detection)
+
+3. **Skill-safety fail-closed** (`openclaw_process_loop.py`):
+   - Skill-safety failures return deterministic blocked output instead of downgrading to conversation
+   - Output: `[SECURITY BLOCK] Execution prevented by Skill Safety Guard: {reason}`
+   - WSP 95 / WSP 00 compliance for mutating intents
+
+4. **Tests** (`test_openclaw_dae.py`):
+   - 4 tests for commander authority (local trusted, remote NOT trusted)
+   - 6 tests for security-critical file detection (.env, .bat, .cmd, .gitignore, .dockerignore, no false positive)
+   - Updated existing tests to use local channels where commander authority expected
+
+### Design Principles
+
+- Defense in depth: Local channel = inherent trust, remote = NOT trusted (no reliable identity)
+- Fail closed: Skill-safety blocks return hard block, not soft downgrade
+- Pattern completeness: All security-critical files detected by mutation gate
+
+### Result
+
+OpenClaw mutation gate now:
+- Trusts local channels inherently (no spoofing possible)
+- **Denies commander authority on remote channels** (display-name spoofable)
+- Logs remote commander claim attempts for security monitoring
+- Detects all security-critical files (.env, scripts, dotfiles)
+- Fails closed on skill-safety gate failures
+
+---
+
 ## 2026-03-28: OpenClaw Bounded Maintenance Loop (WSP 15/77/87/97)
 
 **Author**: 0102

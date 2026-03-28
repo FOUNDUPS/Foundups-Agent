@@ -1,3 +1,30 @@
+## 2026-03-29: OpenClaw Authority & Mutation Gate Hardening (WSP 00 / WSP 95)
+
+**File**: `test_openclaw_dae.py` (extended + updated - security tests)
+- **TestIntentClassification** (updated for hardened commander authority):
+  - `test_local_channel_grants_commander_authority`: voice_repl grants authority regardless of display name
+  - `test_local_repl_grants_commander_authority`: local_repl grants authority regardless of display name
+  - `test_remote_channel_requires_display_name_match`: Remote impostor correctly blocked
+  - `test_remote_channel_with_display_name_match_is_NOT_commander`: **Remote display-name match is NOT commander** (hardened)
+  - `test_commander_detection_local_channel`: Updated to use local channel (was `test_commander_detection_undaodu`)
+- **TestSecurityCriticalFilePaths** (6 new tests for mutation gate):
+  - `test_detects_env_file`: .env detected as source modification target
+  - `test_detects_bat_file`: .bat scripts detected
+  - `test_detects_cmd_file`: .cmd scripts detected
+  - `test_detects_gitignore`: .gitignore detected
+  - `test_detects_dockerignore`: .dockerignore detected
+  - `test_no_false_positive_on_env_suffix`: config.env does not false-positive on .env
+- **TestGemmaHybridIntegration** (updated):
+  - `test_foundup_intent_with_gemma_disabled`: Updated to use `local_repl` channel
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_dae.py -q`
+
+**Result**:
+- `102 passed, 1 failed` (pre-existing unrelated shutil mock issue)
+
+---
+
 ## 2026-03-28: OpenClaw Bounded Maintenance Loop
 
 **File**: `openclaw_maintenance_selector.py` (NEW)

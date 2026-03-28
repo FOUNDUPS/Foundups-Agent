@@ -124,9 +124,9 @@ async def process_message(
                 result="blocked",
                 reason=dae._skill_scan_message,
             )
-            intent.category = dae.IntentCategory.CONVERSATION
-            intent.target_domain = "digital_twin"
-            intent.metadata["skill_safety_gate"] = dae._skill_scan_message
+            
+            # WSP 95 / WSP 00: Deterministic block and fail-closed for mutating intents.
+            return f"[SECURITY BLOCK] Execution prevented by Skill Safety Guard: {dae._skill_scan_message}"
         else:
             dae._report_daemon_action(
                 "skill_safety_gate",
