@@ -13,6 +13,7 @@ Implements WRE pattern (WSP 46): Qwen coordinates, Gemma executes
 import asyncio
 from typing import Optional, Dict, Any
 from holo_index.qwen_advisor.pattern_memory import PatternMemory
+import os
 
 # WRE CoT preflight - recursive enforcement after watch period
 try:
@@ -33,8 +34,21 @@ def run_training_system():
     # Import run_utf8_hygiene_scan from main module context
     import sys
     import os
-    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))))
+    from pathlib import Path
+    
+    repo_root = Path(__file__).resolve().parents[4]
+    sys.path.insert(0, str(repo_root))
     from main import run_utf8_hygiene_scan
+
+    corpus_name = os.getenv("OPENCLAW_TRAINING_CORPUS", "012.txt")
+    corpus_path = repo_root / corpus_name
+    total_lines = None
+    if corpus_path.exists():
+        try:
+            with open(corpus_path, "r", encoding="utf-8", errors="ignore") as f:
+                total_lines = sum(1 for _ in f) or 1
+        except Exception:
+            pass
 
     def load_memory() -> tuple[Optional[Any], Optional[Dict[str, Any]]]:
         try:
@@ -53,20 +67,25 @@ def run_training_system():
         print("[MENU] QWEN/GEMMA TRAINING SYSTEM")
         print("=" * 60)
         print("Implements WRE Pattern (WSP 46): Qwen coordinates, Gemma executes")
-        print("Training Data: 012.txt (28K+ lines of 0102 operational decisions)")
+        lines_display = f"{total_lines:,}" if total_lines else "unknown"
+        print(f"Training Data: {corpus_name} ({lines_display} lines of operational decisions)")
         print("=" * 60)
 
         if stats:
             print(f"\n[INFO] CURRENT STATUS:")
             print(f"   Patterns Stored: {stats['total_patterns']}")
-            print(f"   012.txt Progress: {stats['checkpoint_line']}/28326 ({stats['checkpoint_line']/283.26:.1f}%)")
+            if total_lines:
+                prog_pct = (stats['checkpoint_line'] / total_lines) * 100
+                print(f"   {corpus_name} Progress: {stats['checkpoint_line']}/{total_lines} ({prog_pct:.1f}%)")
+            else:
+                print(f"   {corpus_name} Progress: {stats['checkpoint_line']} lines (corpus not found, total unknown)")
             print(f"   Verification Rate: {stats['verification_rate']:.1%}")
             print(f"   Sources: {stats['sources']}")
 
         print("\n" + "-" * 60)
         print("TRAINING OPTIONS:")
         print("-" * 60)
-        print("1. Start Batch Training (Process 012.txt)")
+        print(f"1. Start Batch Training (Process {corpus_name})")
         print("2. UTF-8 Hygiene Scan (Gemma training data)")
         print("3. Gemma Policy Drill (coming soon)")
         print("4. Qwen Summary Drill (coming soon)")
@@ -126,16 +145,18 @@ def run_training_system():
                 mem = memory or PatternMemory()
                 prog_stats = mem.get_stats()
 
-                total_lines = 28326
                 processed = prog_stats["checkpoint_line"]
-                remaining = total_lines - processed
                 progress_pct = (processed / total_lines) * 100 if total_lines else 0
 
                 print(f"\n[INFO] Progress:")
-                print(f"   Total Lines: {total_lines:,}")
-                print(f"   Processed: {processed:,} ({progress_pct:.1f}%)")
-                print(f"   Remaining: {remaining:,}")
-                print(f"   Estimated Chunks: {remaining // 1000} @ 1000 lines/chunk")
+                if total_lines:
+                    remaining = total_lines - processed
+                    print(f"   Total Lines: {total_lines:,}")
+                    print(f"   Processed: {processed:,} ({progress_pct:.1f}%)")
+                    print(f"   Remaining: {remaining:,}")
+                    print(f"   Estimated Chunks: {remaining // 1000} @ 1000 lines/chunk")
+                else:
+                    print(f"   Processed: {processed:,} (corpus not found, total unknown)")
 
                 print(f"\n[INFO] Pattern Storage:")
                 print(f"   Total Patterns: {prog_stats['total_patterns']}")
@@ -309,8 +330,12 @@ def run_training_system():
                 print(f"   Verification Rate: {metrics['verification_rate']:.1%}")
                 print("   Storage Location: holo_index/memory/chroma/")
                 print(f"\n[INFO] Training Coverage:")
-                print(f"   Lines Processed: {metrics['checkpoint_line']:,} / 28,326")
-                print(f"   Progress: {metrics['checkpoint_line']/283.26:.1f}%")
+                if total_lines:
+                    prog_pct = (metrics['checkpoint_line'] / total_lines) * 100
+                    print(f"   Lines Processed: {metrics['checkpoint_line']:,} / {total_lines:,}")
+                    print(f"   Progress: {prog_pct:.1f}%")
+                else:
+                    print(f"   Lines Processed: {metrics['checkpoint_line']:,} / unknown (corpus not found)")
                 print(f"\n[INFO] Pattern Distribution:")
                 if metrics.get("sources"):
                     for source, count in metrics["sources"].items():
