@@ -1,5 +1,86 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-27: OpenClaw HoloIndex Execution Bundle (WSP 87/97)
+
+**Author**: 0102
+**WSP**: 22, 87, 97
+
+### Context
+
+OpenClaw/Kohi needed pre-execution context retrieval to make better routing and subroutine choices. Without bounded retrieval, the runtime was making execution decisions without consulting HoloIndex or prior patterns.
+
+### Changes
+
+1. **Created `openclaw_execution_bundle.py`**:
+   - `ExecutionBundle` dataclass: query, route, docs, patterns, candidate_paths, constraints, verification_hints, confidence, code_hits, wsp_hits
+   - `build_execution_bundle()`: single HoloIndex search, stores raw hits for route consumption
+   - `retrieve_bundle_for_memory_query()`: specialized high-confidence bundle for memory queries
+   - Graceful degradation when HoloIndex unavailable
+
+2. **Integrated into `openclaw_execution_routes.py`**:
+   - `execute_query()` uses bundle's code_hits/wsp_hits directly (no duplicate search)
+   - Bundle verification_hints appear in response output
+   - Candidate paths fallback when HoloIndex returns no hits
+   - Debug logging: `[OPENCLAW-DAE] [BUNDLE] query=... conf=... candidates=... code=... wsp=...`
+
+3. **Created `test_openclaw_execution_bundle.py`** (16 tests):
+   - Dataclass behavior (defaults, is_actionable, to_compact_dict, code_hits/wsp_hits)
+   - Bundle building (graceful HoloIndex unavailability, doc inference, raw hits storage)
+   - Memory query bundles (high confidence, constraints)
+   - Route integration:
+     - Proves bundle data affects response output
+     - Proves only one HoloIndex search occurs
+     - Proves candidate paths fallback behavior
+
+### Design Principles
+
+- Bundles are execution aids, not architecture authorities
+- Compact only — no giant context dumps
+- Deterministic — same query produces same bundle shape
+- Single HoloIndex search per query (no duplication)
+- Suitable for bounded doer, not open-ended cognition
+
+### Result
+
+`execute_query()` now retrieves bounded HoloIndex context via bundle and uses that data directly. All 16 focused tests pass.
+
+---
+
+## 2026-03-28: OpenClaw execution stance clarified for current tranche
+
+**Author**: 0102
+**WSP**: 15, 22, 77
+
+### Context
+
+OpenClaw documentation had drifted toward treating the runtime as if it were the primary architect. For the current tranche, that is the wrong operating model.
+
+### Clarification
+
+- `0102` remains architect, prioritizer, and reviewer
+- `OpenClaw / Kohi` is the bounded doer
+- `HoloIndex` is the retrieval and subroutine-direction surface
+- `WRE` remains the deterministic execution plane
+- optional higher-compute review lanes may critique artifacts, but do not replace 0102 authority
+
+### Current OpenClaw Job
+
+- fix simple codebase issues
+- run focused checks
+- emit runtime evidence
+- create reports and durable knowledge artifacts
+
+### Documentation Updated
+
+- `README.md`: added current operating rule
+- `INTERFACE.md`: added bounded execution contract
+- `docs/OPENCLAW_0102_HANDOFF_2026-03-07.md`: added operating clarification
+- `workspace/HERMES_INSPIRED_FOUNDUPS_NATIVE_ROADMAP_2026-03-23.md`: added execution rule for low-fruit maintenance
+
+### Result
+
+The module docs now point to the current `WSP 77` coordination shape without mutating core WSP protocol text.
+
 ## 2026-03-24: Gateway Continuity Layer (P1)
 
 **Author**: 0102

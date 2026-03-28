@@ -143,6 +143,71 @@ response = await dae.process(
 )
 ```
 
+### 2026-03-28 Operating Contract
+
+Per `WSP 77`, OpenClaw is currently a bounded execution surface, not the primary architect.
+
+- `0102` = architecture authority, prioritization, review
+- `OpenClaw / Kohi` = bounded maintenance execution
+- `HoloIndex` = retrieval bundle for direction and available subroutines
+- `WRE` = deterministic execution plane
+
+Current OpenClaw use case:
+- fix simple codebase issues
+- run focused checks
+- emit runtime events
+- write durable reports / knowledge artifacts
+
+Current execution contract:
+
+`assigned work -> retrieve bounded HoloIndex bundle -> execute -> verify -> emit -> remember`
+
+### ExecutionBundle (WSP 87/97)
+
+```python
+from modules.communication.moltbot_bridge.src.openclaw_execution_bundle import (
+    ExecutionBundle,
+    build_execution_bundle,
+    retrieve_bundle_for_memory_query,
+)
+
+# Build pre-execution context for any query
+bundle = build_execution_bundle(
+    query="find test fixtures",
+    route="holo_index",
+    limit=5,
+    include_patterns=True,
+    include_docs=True,
+)
+
+# Bundle fields:
+# - query: The original request
+# - route: Execution route (holo_index, wre_orchestrator, etc.)
+# - docs: Relevant doc paths (README, INTERFACE, ModLog)
+# - patterns: Prior successful patterns from breadcrumbs
+# - candidate_paths: File paths likely relevant to execution
+# - constraints: WSP constraints or permission requirements
+# - verification_hints: Signals for verifying successful execution
+# - confidence: Bundle quality score (0.0-1.0)
+# - code_hits: Raw HoloIndex code search results (for route consumption)
+# - wsp_hits: Raw HoloIndex WSP search results (for route consumption)
+
+# Check if bundle has enough context
+if bundle.is_actionable():
+    # proceed with execution
+    pass
+
+# Specialized memory query bundle
+memory_bundle = retrieve_bundle_for_memory_query("decisions", topic="architecture")
+# Always high confidence (0.9) for deterministic memory queries
+```
+
+Design principles:
+- Bundles are execution aids, not architecture authorities
+- Compact only — no giant context dumps
+- Deterministic — same query produces same bundle shape
+- Suitable for bounded doer, not open-ended cognition
+
 ### Intent Categories
 
 | Category | Route | Permission | Description |

@@ -17,6 +17,7 @@ from .openclaw_memory_queries import (
     query_recent_sessions,
     query_unresolved_work,
 )
+from .openclaw_execution_bundle import build_execution_bundle
 
 logger = logging.getLogger("openclaw_dae")
 
@@ -76,46 +77,58 @@ async def execute_query(dae: Any, intent: Any) -> str:
     if schedule_response:
         return schedule_response
 
-    try:
-        from holo_index.core import HoloIndex
+    # Build execution bundle with HoloIndex retrieval (single search, WSP 87/97)
+    query_text = intent.extracted_task or intent.raw_message
+    bundle = build_execution_bundle(query_text, route="holo_index", limit=5)
+    logger.debug(
+        "[OPENCLAW-DAE] [BUNDLE] query=%s conf=%.2f candidates=%d code=%d wsp=%d",
+        query_text[:50],
+        bundle.confidence,
+        len(bundle.candidate_paths),
+        len(bundle.code_hits),
+        len(bundle.wsp_hits),
+    )
 
-        holo = HoloIndex()
-        results = holo.search(intent.extracted_task or intent.raw_message, limit=3)
+    # Use bundle's pre-fetched HoloIndex hits (no duplicate search)
+    code_hits = bundle.code_hits
+    wsp_hits = bundle.wsp_hits
 
-        code_hits = results.get("code", [])
-        wsp_hits = results.get("wsps", [])
-
-        if not code_hits and not wsp_hits:
-            return (
-                f"No results found for: {intent.extracted_task}\n\n"
-                "Try rephrasing or use more specific terms."
-            )
-
-        parts = []
-        if code_hits:
-            parts.append("**Code matches:**")
-            for hit in code_hits[:3]:
-                path = hit.get("file", "unknown")
-                snippet = hit.get("content", "")[:200]
-                parts.append(f"  - `{path}`: {snippet}")
-
-        if wsp_hits:
-            parts.append("\n**WSP guidance:**")
-            for hit in wsp_hits[:2]:
-                title = hit.get("title", "WSP")
-                content = hit.get("content", "")[:200]
-                parts.append(f"  - **{title}**: {content}")
-
-        return "\n".join(parts)
-    except ImportError:
-        logger.warning("[OPENCLAW-DAE] HoloIndex not available for query")
+    if not code_hits and not wsp_hits:
+        # Bundle has no HoloIndex results - provide fallback with bundle context
+        if bundle.candidate_paths:
+            # Bundle found candidate paths via other means (breadcrumbs, etc.)
+            parts = [f"No direct matches for: {intent.extracted_task}"]
+            parts.append("\n**Related paths from prior work:**")
+            for path in bundle.candidate_paths[:3]:
+                parts.append(f"  - `{path}`")
+            return "\n".join(parts)
         return (
-            f"Received your query: {intent.raw_message[:100]}\n"
-            "HoloIndex is currently offline. Try again shortly."
+            f"No results found for: {intent.extracted_task}\n\n"
+            "Try rephrasing or use more specific terms."
         )
-    except Exception as exc:
-        logger.error("[OPENCLAW-DAE] Query execution error: %s", exc)
-        return f"Error processing query: {exc}"
+
+    parts = []
+    if code_hits:
+        parts.append("**Code matches:**")
+        for hit in code_hits[:3]:
+            path = hit.get("file", "unknown")
+            snippet = hit.get("content", "")[:200]
+            parts.append(f"  - `{path}`: {snippet}")
+
+    if wsp_hits:
+        parts.append("\n**WSP guidance:**")
+        for hit in wsp_hits[:2]:
+            title = hit.get("title", "WSP")
+            content = hit.get("content", "")[:200]
+            parts.append(f"  - **{title}**: {content}")
+
+    # Include verification hints if present
+    if bundle.verification_hints:
+        parts.append("\n**Verification:**")
+        for hint in bundle.verification_hints[:2]:
+            parts.append(f"  - {hint}")
+
+    return "\n".join(parts)
 
 
 async def execute_command(dae: Any, intent: Any) -> str:

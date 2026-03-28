@@ -1,3 +1,35 @@
+## 2026-03-27: OpenClaw HoloIndex Execution Bundle
+
+**File**: `openclaw_execution_bundle.py` (NEW)
+- `ExecutionBundle` dataclass with query, route, docs, patterns, candidate_paths, constraints, verification_hints, confidence, code_hits, wsp_hits
+- `build_execution_bundle()` retrieves compact context from HoloIndex (single search, stores raw hits)
+- `retrieve_bundle_for_memory_query()` specialized function for memory queries
+- WSP 87 (Semantic Code Discovery) + WSP 97 (System Execution) compliance
+
+**File**: `openclaw_execution_routes.py` (integration)
+- `execute_query()` uses bundle's code_hits/wsp_hits directly (no duplicate HoloIndex search)
+- Bundle verification_hints appear in response output
+- Candidate paths fallback when HoloIndex returns no hits
+- Debug logging: `[OPENCLAW-DAE] [BUNDLE] query=... conf=... candidates=... code=... wsp=...`
+
+**File**: `test_openclaw_execution_bundle.py` (NEW)
+- 16 tests covering dataclass, bundle building, memory queries, route integration
+- TestExecutionBundleDataclass: defaults, is_actionable, to_compact_dict, code_hits/wsp_hits storage
+- TestBuildExecutionBundle: graceful HoloIndex unavailability, doc inference, verification hints, raw hits storage
+- TestMemoryQueryBundle: high confidence, constraints, verification hints
+- TestExecutionRouteIntegration:
+  - `test_execute_query_uses_bundle_hits_not_separate_search`: proves bundle data affects response
+  - `test_execute_query_no_duplicate_holoindex_search`: proves only one HoloIndex search
+  - `test_bundle_candidate_paths_used_when_no_holoindex_hits`: proves fallback behavior
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_execution_bundle.py -q`
+
+**Result**:
+- `16 passed`
+
+---
+
 ## 2026-03-27: OpenClaw Supervisor Runtime Emitter + Test Fix
 
 **File**: `openclaw_supervisor.py` (instrumentation)
