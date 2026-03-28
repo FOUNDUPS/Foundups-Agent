@@ -69,6 +69,7 @@ If already landed:
 | `obs_connection_singleton` | (local, in PR #252 branch) | `boot_layer_rotator/executor.py` singleton pattern |
 | `supervisor_scan_once_fix` | (local, in PR #252 branch) | `openclaw_supervisor.py` type mismatch fixed |
 | `pqn_swarm_hub_internal_poc_scaffold` | `35d1e2275` | `modules/foundups/pqn_swarm_hub/` — contracts, 4 service modules, 18/18 tests |
+| `git_main_merge_sentinel` | `08004c100` (branch `feat/git-main-merge-sentinel-20260318`) | `wre_core/src/git_main_merge_sentinel.py` 284 lines + `main.py:1110` + `.env.example` — plan was stale, work already shipped |
 
 ---
 
@@ -100,7 +101,6 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 ## Next Priority Order
 
 1. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
-2. `git_main_merge_sentinel` (plan exists at `.claude/plans/quizzical-weaving-harbor.md`, lowest urgency)
 
 ---
 
