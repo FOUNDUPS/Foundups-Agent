@@ -56,7 +56,13 @@ def _make_intent(category: IntentCategory) -> OpenClawIntent:
 
 
 def _run_process_with_intent(dae: OpenClawDAE, intent: OpenClawIntent):
-    mock_result = SimpleNamespace(response_text="ok")
+    mock_result = SimpleNamespace(
+        response_text="ok",
+        success=True,
+        pattern_fidelity=1.0,
+        learning_stored=False,
+        wsp_violations=[]
+    )
     with patch.object(dae, "classify_intent", return_value=intent):
         with patch.object(dae, "_wsp_preflight", return_value=True):
             with patch.object(dae, "_check_permission_gate", return_value=True):
