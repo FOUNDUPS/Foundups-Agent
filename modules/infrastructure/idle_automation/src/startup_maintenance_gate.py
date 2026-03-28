@@ -27,6 +27,8 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from modules.infrastructure.shared_utilities.corpus_resolver import resolve_corpus_path
+
 logger = logging.getLogger(__name__)
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -152,8 +154,8 @@ class StartupMaintenanceGate:
                 checkpoint_line = stats.get("checkpoint_line", 0)
 
             # Get actual corpus size for percentage-based completion
-            corpus_path = self.repo_root / os.getenv("OPENCLAW_TRAINING_CORPUS", "012.txt")
-            if corpus_path.exists():
+            corpus_path = resolve_corpus_path(self.repo_root)
+            if corpus_path is not None and corpus_path.exists():
                 with open(corpus_path, "r", encoding="utf-8", errors="ignore") as f:
                     corpus_lines = sum(1 for _ in f)
 

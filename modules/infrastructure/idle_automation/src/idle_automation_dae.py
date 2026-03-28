@@ -28,6 +28,8 @@ import os
 import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
+
+from modules.infrastructure.shared_utilities.corpus_resolver import resolve_corpus_path
 from typing import Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
@@ -672,8 +674,8 @@ class IdleAutomationDAE:
             last_processed = pattern_memory.get_checkpoint()
 
             # 012.txt location
-            txt_file = Path("O:/Foundups-Agent/012.txt")
-            if not txt_file.exists():
+            txt_file = resolve_corpus_path(self.module_path.parent.parent.parent)
+            if txt_file is None:
                 result["error"] = "012.txt not found"
                 return result
 
