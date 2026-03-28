@@ -75,9 +75,7 @@ If already landed:
 
 | Slice | Priority | Blocked By | Notes |
 |-------|----------|------------|-------|
-| `training_corpus_source_of_truth` | P0 | — | Verify 3179bc1af fully closes it first |
-
-> **Check before starting**: Run `git log --oneline modules/communication/moltbot_bridge/src/openclaw_execution_routes.py` and inspect `3179bc1af` scope. If corpus resolver is the full intent, this slice is closed.
+| `pqn_swarm_hub_internal_poc_scaffold` | P0 | — | PQN Swarm Hub is canonical internal PoC — module scaffold does not yet exist |
 
 ---
 
@@ -100,10 +98,9 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 
 ## Next Priority Order
 
-1. Verify `training_corpus_source_of_truth` is fully closed by `3179bc1af` scope
-2. If closed → open `training_corpus_source_of_truth` is the next slice to confirm and mark done
-3. After training corpus: YouTube Domain Agent Phase 1 (pending 012 review of `IMPLEMENTATION_PLAN.md`)
-4. After YouTube Phase 1: `git_main_merge_sentinel` (plan exists, lowest urgency)
+1. `pqn_swarm_hub_internal_poc_scaffold` — create module scaffold for PQN Swarm Hub FoundUp (internal PoC, per `PQN_SWARM_HUB_FOUNDUP_BRIEF.md`)
+2. YouTube Domain Agent Phase 1 (pending 012 review of `IMPLEMENTATION_PLAN.md`)
+3. `git_main_merge_sentinel` (plan exists, lowest urgency)
 
 ---
 
