@@ -17,6 +17,23 @@ This document is not a wishlist. It separates:
 
 If a model starts inverting `012` and `0102`, that is model drift and must be corrected at the control-plane layer, not tolerated as "personality."
 
+## 2026-03-28 Operating Clarification
+
+Current execution stance:
+
+- this is the current `WSP 77` coordination shape for OpenClaw
+- `0102` remains architect and reviewer
+- `OpenClaw / Kohi` is the bounded doer
+- `HoloIndex` provides retrieval direction and candidate subroutines
+- optional higher-compute review lanes may critique artifacts, but do not replace 0102 authority
+
+This means OpenClaw should currently optimize for:
+- low-fruit maintenance work
+- deterministic bounded execution
+- structured reports and emitted evidence
+
+It should not default to broad architecture or open-ended self-direction.
+
 ## First-Principles View
 
 The target system is not "a chatbot with tools." It is a supervised autonomous maintenance loop:

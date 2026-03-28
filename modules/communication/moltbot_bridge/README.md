@@ -27,6 +27,26 @@ OpenClaw becomes **0102** — the Digital Twin of 012:
                                    └── skills/ (foundups-wsp, holo-search)
 ```
 
+## 2026-03-28 Operating Rule
+
+Current OpenClaw execution mode is `Kohi`: a bounded maintainer under `WSP 77`.
+
+- `0102` = architect / prioritizer / reviewer
+- `OpenClaw` = doer / maintainer / reporter
+- `HoloIndex` = retrieval and direction surface
+- `WRE` = deterministic skill execution
+- optional higher-compute reviewer = critique/tuning lane, not a second authority
+
+Current OpenClaw job:
+- work low-fruit codebase tasks
+- run bounded checks
+- create structured reports/artifacts
+- hand results upward for review and tuning
+
+Current OpenClaw loop:
+
+`assigned work -> retrieve bounded HoloIndex bundle -> execute -> verify -> emit -> write durable knowledge`
+
 ## Setup
 
 > ⚠️ **Important**: See [docs/INSTALL_OPENCLAW.md](docs/INSTALL_OPENCLAW.md) for full guide
