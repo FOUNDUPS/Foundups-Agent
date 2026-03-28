@@ -28,9 +28,10 @@ We then separate this negative result from a broader design hypothesis: a unifie
 |----|----------|-------|--------|
 | E0.1 | `S(x) = 1 / (1 + exp(-k(x - 0.5)))` | dimensionless | token_economics.py:26-39 |
 | E0.2 | `release_pct = (S(adoption) - S(0)) / (S(1) - S(0))` | dimensionless [0,1] | token_economics.py:60-73 |
-| E0.3 | `net_revenue_btc = combined_revenue_platform_capture_btc - operational_cost_btc` | BTC/year | ten_year_projection.py:852 |
-| E0.4 | `downside_ratio_p10 = downside.revenue_cost_ratio_p10 * platform_capture_share` | dimensionless | ten_year_projection.py:869 |
-| E0.5 | `is_self_sustaining = (net_revenue_btc > 0) AND (downside_ratio_p10 >= 1.0)` | boolean | ten_year_projection.py:877 |
+| E0.3 | `ROC = (V_generated - C_compute) / C_compute` | dimensionless | unified_sustainability.py:179-183 |
+| E0.4 | `is_compute_positive = ROC > 0` | boolean | unified_sustainability.py:473 |
+| E0.5 | `is_roi_sustainable = combined_revenue - monthly_burn >= 0` | boolean | unified_sustainability.py:477 |
+| E0.6 | `is_sustainable = is_compute_positive AND is_roi_sustainable` | boolean | unified_sustainability.py:480 |
 
 ### Abstract Assumption Register
 
@@ -54,8 +55,8 @@ Core vocabulary before you read:
 - `UPS` = settlement unit (cash-like rail, 1 UPS = 1 sat accounting unit).
 - `F_i` = FoundUp venture token (earned via work or stake paths).
 - `CABR` = validation gate that controls whether economic flow is allowed.
-- `ROC` = Return on Compute, defined as `(V_generated - C_compute) / C_compute`.
-- "Sustainable" in this paper means both: `net_revenue_btc > 0` and `downside_ratio_p10 >= 1.0`.
+- `ROC` = Return on Compute (ROC™), defined as `(V_generated - C_compute) / C_compute`. See [ROC_FORMULA_DERIVATION.md](ROC_FORMULA_DERIVATION.md) for academic foundation.
+- "Sustainable" in this paper means: `is_compute_positive` (ROC > 0, PRIMARY) AND `is_roi_sustainable` (revenue >= burn, SECONDARY).
 
 Fast reading route:
 1. Read Sections 1, 2.6, and 2.7 for intuition.
@@ -68,7 +69,7 @@ Decentralized autonomous organizations face a fundamental economic trilemma: **c
 
 The FoundUps pAVS model proposes an alternative: a dual-token architecture where autonomous agents earn through validated work (Proof of Benefit), while human participants allocate compute resources through stake-based participation. This paper evaluates whether such a system can achieve self-sustainability under realistic market conditions.
 
-Interpretive thesis used throughout: Bitcoin provides the scarcity base layer, while pAVS provides the utility layer by locking BTC in reserves and routing circulating UPS into validated work. In that framing, the decision metric shifts from ROI-first capital allocation to ROC-first compute allocation (`roi financed labor; roc finances verified compute`).
+Interpretive thesis used throughout: Bitcoin provides the scarcity base layer, while pAVS provides the utility layer by locking BTC in reserves and routing circulating UPS into validated work. In that framing, the decision metric shifts from ROI-first capital allocation to ROC-first compute allocation (`roi financed labor; roc finances verified compute`). The ROC metric is academically grounded in FinOps unit economics and TFP productivity measurement; see [ROC_FORMULA_DERIVATION.md](ROC_FORMULA_DERIVATION.md) for the complete derivation with external references.
 
 **First-Principles Constraints**:
 1. **Conservation**: Total token supply is fixed (21M F_i per FoundUp); value cannot be created from nothing
@@ -88,7 +89,7 @@ Interpretive thesis used throughout: Bitcoin provides the scarcity base layer, w
 
 ### 1.2 Research Questions
 
-- **RQ1**: Under what parameter ranges does the pAVS model satisfy the simulator sustainability gate (`net_revenue_btc > 0` and `downside_ratio_p10 >= 1.0`)?
+- **RQ1**: Under what parameter ranges does the pAVS model satisfy the ROC-first sustainability gate (`is_compute_positive` AND `is_roi_sustainable`)?
 
 - **RQ2**: How does the S-curve adoption model affect token distribution fairness across early vs late participants?
 
@@ -721,9 +722,9 @@ This section reports primary metrics from simulator runs, identifies threshold c
 
 **Implication**: 10-year projections in Abstract assume scale that current tick-level simulation does NOT achieve. The gap is ~1000x.
 
-### 6.1 Primary Sustainability Metrics
+### 6.1 Fee-Only Sustainability (Negative Result)
 
-The sustainability matrix evaluates downside/base/upside scenarios with confidence bands. The primary metric is the **fee-to-burn ratio**: total fee revenue divided by operational costs (demurrage redistribution + treasury expenses). A ratio >= 1.0 indicates fee-positive operation.
+The fee-only sustainability matrix evaluates downside/base/upside scenarios with confidence bands. The **legacy metric** is the fee-to-burn ratio: total fee revenue divided by operational costs. This metric is **SECONDARY** in ROC-first economics (see Section 6.2 for PRIMARY ROC gate).
 
 **CRITICAL FINDING: Architecture-Scale Gap**
 
@@ -757,9 +758,14 @@ The sustainability matrix evaluates downside/base/upside scenarios with confiden
 2. Increasing volume by 3+ orders of magnitude
 3. Adding revenue streams not currently modeled (subscriptions, etc.)
 
-### 6.1.1 Unified Sustainability Analysis (NEW)
+### 6.1.1 ROC-First Unified Sustainability (PRIMARY)
 
-**Resolution**: The gap closes when ALL revenue streams are combined.
+**Resolution**: The gap closes when compute economics are evaluated ROC-first.
+
+**Sustainability Gates** (per unified_sustainability.py):
+- **PRIMARY**: `is_compute_positive` = ROC > 0 (compute creates value)
+- **SECONDARY**: `is_roi_sustainable` = revenue >= burn (traditional breakeven)
+- **COMBINED**: Both gates must pass
 
 The `unified_sustainability.py` calculator combines:
 - Stream 1: Fee revenue (DEX + exit + creation)

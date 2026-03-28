@@ -58,7 +58,11 @@ def test_burn_baseline_is_27k() -> None:
 
 
 def test_sustainability_at_minimum_subscribers() -> None:
-    """Find minimum subscribers for sustainability."""
+    """Find minimum subscribers for ROI-path sustainability (subscription breakeven).
+
+    NOTE: This tests ROI-path (revenue > burn), not ROC-first (compute productivity).
+    With tasks_per_month=0, ROC gate cannot pass (no compute activity).
+    """
     calc = UnifiedSustainabilityCalculator()
 
     # Binary search for minimum sustainable subscribers
@@ -71,7 +75,8 @@ def test_sustainability_at_minimum_subscribers() -> None:
             tasks_per_month=0,
             monthly_dex_volume_usd=0,
         )
-        if metrics.is_sustainable:
+        # Use ROI-path gate (not ROC-first) since no compute activity
+        if metrics.is_roi_sustainable:
             high = mid
         else:
             low = mid
@@ -134,11 +139,22 @@ def test_to_dict_exports_return_on_compute_fields() -> None:
     )
 
     blob = metrics.to_dict()
+    # Legacy RoC fields
     assert "return_on_compute_ratio" in blob
     assert "return_on_compute_percent" in blob
     assert "value_per_compute_dollar" in blob
     assert "compute_generated_value_usd" in blob
     assert "is_compute_profitable" in blob
+    # ROC-FIRST gates (2026-03-28)
+    assert "roc_ratio" in blob
+    assert "is_compute_positive" in blob
+    assert "is_roi_sustainable" in blob
+    assert "is_sustainable" in blob
+    # Value assertions
+    assert blob["roc_ratio"] == pytest.approx(metrics.roc_ratio)
+    assert blob["is_compute_positive"] == metrics.is_compute_positive
+    assert blob["is_roi_sustainable"] == metrics.is_roi_sustainable
+    assert blob["is_sustainable"] == metrics.is_sustainable
     assert blob["revenue"]["compute_spend_usd"] == pytest.approx(
         metrics.revenue.compute_spend_usd
     )

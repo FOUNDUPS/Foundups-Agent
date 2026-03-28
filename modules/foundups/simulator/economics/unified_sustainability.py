@@ -212,8 +212,14 @@ class SustainabilityMetrics:
     # Compute backing
     compute_backing: ComputeBackingState
 
-    # Sustainability claim
-    is_sustainable: bool
+    # ROC-FIRST: Primary sustainability gate (compute productivity)
+    is_compute_positive: bool         # ROC > 0 = PRIMARY GATE
+
+    # ROI-PATH: Secondary gate (traditional revenue breakeven)
+    is_roi_sustainable: bool          # Revenue > Burn = SECONDARY
+
+    # Combined
+    is_sustainable: bool              # Both gates pass
     sustainability_margin_usd: float  # Revenue - Burn
     months_runway: float              # At current rates
 
@@ -234,14 +240,26 @@ class SustainabilityMetrics:
         return self.revenue.value_per_compute_dollar
 
     @property
+    def roc_ratio(self) -> float:
+        """ROC = (V_generated - C_compute) / C_compute - PRIMARY METRIC."""
+        return self.return_on_compute_ratio
+
+    @property
     def is_compute_profitable(self) -> bool:
-        return self.revenue.compute_margin_usd > 0 and self.revenue.compute_spend_usd > 0
+        """Legacy alias for is_compute_positive."""
+        return self.is_compute_positive
 
     def to_dict(self) -> Dict:
         """Export for JSON serialization."""
         return {
+            # ROC-FIRST: Primary gate
+            "roc_ratio": self.roc_ratio,
+            "is_compute_positive": self.is_compute_positive,
+            # ROI-PATH: Secondary gate
             "fee_only_ratio": self.fee_only_ratio,
             "combined_ratio": self.combined_ratio,
+            "is_roi_sustainable": self.is_roi_sustainable,
+            # Combined
             "is_sustainable": self.is_sustainable,
             "sustainability_margin_usd": self.sustainability_margin_usd,
             "months_runway": self.months_runway,
@@ -249,7 +267,7 @@ class SustainabilityMetrics:
             "return_on_compute_percent": self.return_on_compute_percent,
             "value_per_compute_dollar": self.value_per_compute_dollar,
             "compute_generated_value_usd": self.compute_generated_value_usd,
-            "is_compute_profitable": self.is_compute_profitable,
+            "is_compute_profitable": self.is_compute_positive,  # Legacy alias
             "revenue": {
                 "fee_dex_usd": self.revenue.fee_dex_usd,
                 "fee_exit_usd": self.revenue.fee_exit_usd,
@@ -467,9 +485,17 @@ class UnifiedSustainabilityCalculator:
         fee_only_ratio = fee_only / self.monthly_burn_usd if self.monthly_burn_usd > 0 else 0
         combined_ratio = combined / self.monthly_burn_usd if self.monthly_burn_usd > 0 else 0
 
-        # Sustainability determination
+        # ROC-FIRST: Primary sustainability gate (compute productivity)
+        # ROC = (V_generated - C_compute) / C_compute
+        roc_ratio = compute_margin / compute_cost if compute_cost > 0 else 0.0
+        is_compute_positive = roc_ratio > 0  # PRIMARY GATE
+
+        # ROI-PATH: Secondary gate (traditional revenue breakeven)
         margin = combined - self.monthly_burn_usd
-        is_sustainable = margin >= 0
+        is_roi_sustainable = margin >= 0  # SECONDARY GATE
+
+        # Combined: Both gates must pass for full sustainability
+        is_sustainable = is_compute_positive and is_roi_sustainable
 
         # Runway calculation
         if margin < 0:
@@ -487,6 +513,9 @@ class UnifiedSustainabilityCalculator:
             fee_only_ratio=fee_only_ratio,
             combined_ratio=combined_ratio,
             compute_backing=self.compute_backing,
+            # ROC-FIRST gates
+            is_compute_positive=is_compute_positive,
+            is_roi_sustainable=is_roi_sustainable,
             is_sustainable=is_sustainable,
             sustainability_margin_usd=margin,
             months_runway=months_runway,
@@ -535,11 +564,16 @@ def compare_sustainability_models() -> None:
     print(f"  {'-' * 28}")
     print(f"  TOTAL:         ${metrics.revenue.total_revenue_usd:,.0f}")
 
-    print(f"\n{'SUSTAINABILITY RATIOS':-^40}")
-    print(f"  Fee-only ratio:  {metrics.fee_only_ratio:.4f} (OLD metric)")
-    print(f"  Combined ratio:  {metrics.combined_ratio:.2f} (NEW metric)")
-    print(f"  Is sustainable:  {metrics.is_sustainable}")
-    print(f"  Monthly margin:  ${metrics.sustainability_margin_usd:,.0f}")
+    print(f"\n{'ROC-FIRST SUSTAINABILITY':-^40}")
+    print(f"  ROC (ratio):         {metrics.roc_ratio:.4f}")
+    print(f"  ROC (percent):       {metrics.return_on_compute_percent:.2f}%")
+    print(f"  Is compute positive: {metrics.is_compute_positive} [PRIMARY GATE]")
+    print()
+    print(f"  ROI-path ratio:      {metrics.combined_ratio:.2f}")
+    print(f"  Is ROI sustainable:  {metrics.is_roi_sustainable} [SECONDARY GATE]")
+    print()
+    print(f"  COMBINED SUSTAINABLE:{metrics.is_sustainable}")
+    print(f"  Monthly margin:      ${metrics.sustainability_margin_usd:,.0f}")
 
     print(f"\n{'COMPUTE BACKING':-^40}")
     print(f"  Total compute spend: ${metrics.compute_backing.total_compute_usd:,.2f}")
