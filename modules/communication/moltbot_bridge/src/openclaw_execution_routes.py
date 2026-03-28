@@ -45,6 +45,8 @@ async def execute_plan(dae: Any, plan: Any) -> str:
         return execute_foundup(dae, intent)
     if route == "pqn_research_adapter":
         return execute_research(dae, intent)
+    if route == "training_controller":
+        return execute_training(dae, intent)
 
     social_control = await dae._try_conversation_social_control(intent)
     if social_control:
@@ -704,6 +706,145 @@ def execute_research(dae: Any, intent: Any) -> str:
     except Exception as exc:
         logger.error("[OPENCLAW-DAE] Research execution error: %s", exc)
         return f"Research error: {exc}"
+
+
+def execute_training(dae: Any, intent: Any) -> str:
+    """Route TRAINING intent to corpus training controller (012 only).
+
+    Commands:
+    - "training status" -> show checkpoint, due status, progress
+    - "start training" / "run training batch" -> trigger batch
+    - "is training due" -> boolean check
+    """
+    if not intent.is_authorized_commander:
+        return "Training commands require @012 authorization. Your request has been logged."
+
+    msg_lower = intent.raw_message.lower().strip()
+
+    # Dispatch by sub-command
+    if _is_training_status_query(msg_lower):
+        return _get_training_status()
+    if _is_training_start_command(msg_lower):
+        return _start_training_batch()
+    if _is_training_due_query(msg_lower):
+        status = _get_training_status_data()
+        due = status.get("training_due", False)
+        progress = status.get("progress_pct", 0.0)
+        return f"Training due: **{'YES' if due else 'NO'}** (progress: {progress:.1f}%, threshold: 95%)"
+
+    # Default: show status
+    return _get_training_status()
+
+
+def _is_training_status_query(msg: str) -> bool:
+    """Detect training status queries."""
+    return any(
+        kw in msg
+        for kw in ("training status", "training progress", "checkpoint status", "show training")
+    )
+
+
+def _is_training_start_command(msg: str) -> bool:
+    """Detect training start commands."""
+    return any(
+        kw in msg
+        for kw in ("start training", "run training", "training batch", "begin training")
+    )
+
+
+def _is_training_due_query(msg: str) -> bool:
+    """Detect training due queries."""
+    return any(
+        kw in msg
+        for kw in ("is training due", "training due", "need training", "should train")
+    )
+
+
+def _get_training_status_data() -> dict:
+    """Fetch training status data from startup_maintenance_gate."""
+    try:
+        from pathlib import Path
+        from modules.infrastructure.idle_automation.src.startup_maintenance_gate import (
+            StartupMaintenanceGate,
+        )
+
+        gate = StartupMaintenanceGate(Path("O:/Foundups-Agent"))
+        return gate.check_training_readiness()
+    except Exception as exc:
+        logger.warning("[OPENCLAW-DAE] Training status fetch failed: %s", exc)
+        return {"error": str(exc)}
+
+
+def _get_training_status() -> str:
+    """Build human-readable training status report.
+
+    Uses startup_maintenance_gate as single source of truth for:
+    - checkpoint_line
+    - corpus_lines
+    - progress_pct
+    - training_due
+    """
+    status = _get_training_status_data()
+
+    if "error" in status:
+        return f"**Training Status: ERROR**\n\nCould not fetch status: {status['error']}"
+
+    checkpoint = status.get("checkpoint_line")
+    corpus_lines = status.get("corpus_lines")
+    progress = status.get("progress_pct", 0.0)
+    training_due = status.get("training_due", False)
+    exists = status.get("exists", False)
+    age_hours = status.get("age_hours")
+
+    parts = ["**Training Status**", ""]
+    parts.append(f"- **Checkpoint**: {checkpoint or 'none'} / {corpus_lines or 'unknown'} lines")
+    parts.append(f"- **Progress**: {progress:.1f}%")
+    parts.append(f"- **Due**: {'YES' if training_due else 'NO'} (threshold: 95%)")
+    parts.append(f"- **Status artifact exists**: {'yes' if exists else 'no'}")
+    if age_hours is not None:
+        parts.append(f"- **Last updated**: {age_hours:.1f} hours ago")
+
+    if training_due:
+        parts.append("")
+        parts.append("_Training is due. Use `start training` to begin batch._")
+
+    return "\n".join(parts)
+
+
+def _start_training_batch() -> str:
+    """Trigger training batch execution via startup_maintenance_gate."""
+    try:
+        from pathlib import Path
+        from modules.communication.moltbot_bridge.scripts.run_task import (
+            _try_startup_maintenance_dispatch,
+        )
+
+        result = _try_startup_maintenance_dispatch(
+            repo_root=Path("O:/Foundups-Agent"),
+            task_id="startup_training_batch",
+            context={"source": "openclaw_training_command"},
+        )
+
+        if result is None:
+            return "**Training Batch: NOT STARTED**\n\nDispatcher returned None (task may not be configured)."
+
+        # Contract: dispatcher returns {ok, detail, executor, structured_result}
+        ok = result.get("ok", False)
+        detail = result.get("detail", "No detail")
+        executor = result.get("executor", "unknown")
+
+        # Detect "already complete" case: not a failure, just no-op
+        if not ok and "Already processed" in detail:
+            return f"**Training Batch: COMPLETE**\n\nNo new data to process.\n\nExecutor: `{executor}`\n\n{detail[:500]}"
+
+        if ok:
+            return f"**Training Batch: STARTED**\n\nExecutor: `{executor}`\n\n{detail[:500]}"
+        else:
+            return f"**Training Batch: FAILED**\n\nExecutor: `{executor}`\n\n{detail[:500]}"
+
+    except Exception as exc:
+        logger.error("[OPENCLAW-DAE] Training batch start failed: %s", exc)
+        return f"**Training Batch: ERROR**\n\nCould not start: {exc}"
 
 
 def _try_memory_query(dae: Any, raw_message: str) -> Optional[str]:
