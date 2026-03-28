@@ -725,3 +725,271 @@ def test_breadcrumb_recording_invoked_on_nudge(tmp_path):
         # Should have recorded breadcrumb
         assert len(breadcrumb_recorded) == 1
         assert breadcrumb_recorded[0] is True
+
+
+# --------------------------------------------------------------------------- #
+#  Self-Audit Triage Path Tests                                                #
+# --------------------------------------------------------------------------- #
+
+
+def test_self_audit_triage_returns_execute_action(tmp_path):
+    """Self-audit event from JSONL triggers execute_self_audit_fix action."""
+    import json
+
+    broker = MagicMock()
+    broker.get_runtime_status.return_value = {
+        "registered": True,
+        "running": True,
+        "state": "running",
+        "last_error": "",
+        "enabled": True,
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True}
+    observer.follow_events.return_value = {
+        "events": [],
+        "next_cursor": 0,
+        "latest_sequence_id": 0,
+    }
+
+    # Create a mock self-audit loop with a JSONL file containing pending events
+    audit_loop = MagicMock()
+    audit_loop.allowed_fixes = {"start_ironclaw_gateway", "diagnose_microphone_device"}
+    audit_loop.scan_once.return_value = 0  # No new events in this scan
+    audit_loop._apply_policy_fix.return_value = (True, "start_command_dispatched")
+
+    # Create JSONL with a pending event that has an allowed fix
+    task_log = tmp_path / "daemon_self_audit_tasks.jsonl"
+    event = {
+        "timestamp": 1700000000,
+        "source_file": "/logs/test.log",
+        "signature": "ironclaw runtime is unavailable",
+        "line": "[ERROR] IronClaw runtime is unavailable",
+        "recommended_fix": "start_ironclaw_gateway",
+        "auto_fix_attempted": False,
+        "auto_fix_result": "not_attempted",
+    }
+    task_log.write_text(json.dumps(event) + "\n", encoding="utf-8")
+    audit_loop.task_log_path = task_log
+
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda a, r, d: None,
+        self_audit_factory=lambda repo_root: audit_loop,
+    )
+
+    with patch.dict(os.environ, {"OPENCLAW_SELF_AUDIT_ENABLED": "1"}), \
+         patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+        mock_db.return_value.get_autonomous_tasks.return_value = []
+        result = supervisor.run_cycle()
+
+    # Should have triggered execute_self_audit_fix action
+    # When action is taken, result has "plan" instead of "triage"
+    assert "plan" in result
+    assert result["plan"]["action"] == "execute_self_audit_fix"
+    assert result["plan"]["recommended_fix"] == "start_ironclaw_gateway"
+    assert "ironclaw" in result["plan"]["event_signature"]
+    # Verify the execution happened
+    assert result["action_result"]["ok"] is True
+
+
+def test_self_audit_triage_skips_already_attempted(tmp_path):
+    """Self-audit events that were already attempted are skipped."""
+    import json
+
+    broker = MagicMock()
+    broker.get_runtime_status.return_value = {
+        "registered": True,
+        "running": True,
+        "state": "running",
+        "last_error": "",
+        "enabled": True,
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True}
+    observer.follow_events.return_value = {
+        "events": [],
+        "next_cursor": 0,
+        "latest_sequence_id": 0,
+    }
+
+    audit_loop = MagicMock()
+    audit_loop.allowed_fixes = {"start_ironclaw_gateway"}
+    audit_loop.scan_once.return_value = 0
+
+    # Create JSONL with an already-attempted event
+    task_log = tmp_path / "daemon_self_audit_tasks.jsonl"
+    event = {
+        "timestamp": 1700000000,
+        "source_file": "/logs/test.log",
+        "signature": "ironclaw runtime is unavailable",
+        "line": "[ERROR] IronClaw runtime is unavailable",
+        "recommended_fix": "start_ironclaw_gateway",
+        "auto_fix_attempted": True,  # Already attempted
+        "auto_fix_result": "start_command_dispatched",
+    }
+    task_log.write_text(json.dumps(event) + "\n", encoding="utf-8")
+    audit_loop.task_log_path = task_log
+
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda a, r, d: None,
+        self_audit_factory=lambda repo_root: audit_loop,
+    )
+
+    with patch.dict(os.environ, {"OPENCLAW_SELF_AUDIT_ENABLED": "1"}), \
+         patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+        mock_db.return_value.get_autonomous_tasks.return_value = []
+        result = supervisor.run_cycle()
+
+    # Should idle because all events were already attempted
+    assert result["triage"]["kind"] == "idle"
+
+
+def test_self_audit_triage_ignores_non_allowed_fixes(tmp_path):
+    """Self-audit events with non-allowed fixes are ignored."""
+    import json
+
+    broker = MagicMock()
+    broker.get_runtime_status.return_value = {
+        "registered": True,
+        "running": True,
+        "state": "running",
+        "last_error": "",
+        "enabled": True,
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True}
+    observer.follow_events.return_value = {
+        "events": [],
+        "next_cursor": 0,
+        "latest_sequence_id": 0,
+    }
+
+    audit_loop = MagicMock()
+    audit_loop.allowed_fixes = {"start_ironclaw_gateway"}  # inspect_log not allowed
+    audit_loop.scan_once.return_value = 0
+
+    # Create JSONL with an event that recommends a non-allowed fix
+    task_log = tmp_path / "daemon_self_audit_tasks.jsonl"
+    event = {
+        "timestamp": 1700000000,
+        "source_file": "/logs/test.log",
+        "signature": "random error pattern",
+        "line": "[ERROR] Something went wrong",
+        "recommended_fix": "inspect_log_and_create_patch_task",  # Not in allowed_fixes
+        "auto_fix_attempted": False,
+        "auto_fix_result": "not_attempted",
+    }
+    task_log.write_text(json.dumps(event) + "\n", encoding="utf-8")
+    audit_loop.task_log_path = task_log
+
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda a, r, d: None,
+        self_audit_factory=lambda repo_root: audit_loop,
+    )
+
+    with patch.dict(os.environ, {"OPENCLAW_SELF_AUDIT_ENABLED": "1"}), \
+         patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+        mock_db.return_value.get_autonomous_tasks.return_value = []
+        result = supervisor.run_cycle()
+
+    # Should idle because the fix is not in allowed_fixes
+    assert result["triage"]["kind"] == "idle"
+
+
+# --------------------------------------------------------------------------- #
+#  End-to-End Maintenance Loop Tests                                           #
+# --------------------------------------------------------------------------- #
+
+
+def test_maintenance_loop_e2e_self_audit_via_agentdb(tmp_path, monkeypatch):
+    """End-to-end: AgentDB task with source=self_audit flows through run_task.py."""
+    import uuid
+
+    # Set up test environment
+    monkeypatch.setenv("OPENCLAW_MAINTENANCE_ENABLED", "1")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ENABLED", "0")  # Disable JSONL path for this test
+
+    broker = MagicMock()
+    broker.get_runtime_status.return_value = {
+        "registered": True,
+        "running": True,
+        "state": "running",
+        "last_error": "",
+        "enabled": True,
+    }
+    observer = MagicMock()
+    observer.get_live_status.return_value = {"registered": True}
+    observer.follow_events.return_value = {
+        "events": [],
+        "next_cursor": 0,
+        "latest_sequence_id": 0,
+    }
+
+    # Create a real AgentDB task with source=self_audit
+    task_id = f"e2e-test-{uuid.uuid4().hex[:8]}"
+    pending_task = {
+        "task_id": task_id,
+        "description": "Apply policy fix for IronClaw gateway",
+        "status": "pending",
+        "required_skills": [],
+        "context": {
+            "source": "self_audit",
+            "context": {"recommended_fix": "start_ironclaw_gateway"},
+        },
+    }
+
+    # Mock the supervisor's components
+    supervisor = OpenClawSupervisor(
+        repo_root=tmp_path,
+        broker=broker,
+        observer=observer,
+        action_reporter=lambda a, r, d: None,
+        self_audit_factory=lambda repo_root: MagicMock(scan_once=MagicMock(return_value=0)),
+    )
+
+    # Mock AgentDB to return our task
+    with patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db_class:
+        mock_db = MagicMock()
+        mock_db_class.return_value = mock_db
+
+        # First call returns pending task, subsequent calls return empty
+        call_count = [0]
+
+        def get_tasks_side_effect(status=None, limit=None):
+            call_count[0] += 1
+            if status == "pending" and call_count[0] == 1:
+                return [pending_task]
+            if status == "assigned":
+                # run_task.py looks for assigned tasks
+                return [dict(pending_task, status="assigned")]
+            return []
+
+        mock_db.get_autonomous_tasks.side_effect = get_tasks_side_effect
+        mock_db.assign_autonomous_task.return_value = True
+        mock_db.complete_autonomous_task.return_value = True
+
+        # Mock the DaemonSelfAuditLoop for run_task.py dispatch
+        with patch(
+            "modules.infrastructure.wre_core.src.daemon_self_audit_loop.DaemonSelfAuditLoop"
+        ) as mock_audit_loop:
+            mock_loop_instance = MagicMock()
+            mock_loop_instance._apply_policy_fix.return_value = (True, "start_command_dispatched")
+            mock_audit_loop.return_value = mock_loop_instance
+
+            result = supervisor.run_cycle()
+
+    # Verify the maintenance task was selected and executed
+    assert "plan" in result
+    assert result["plan"]["action"] == "execute_maintenance_task"
+    assert result["plan"]["task"]["family"] == "self_audit_fix"
+    assert result["action_result"]["ok"] is True
+    assert "self_audit" in result["action_result"]["executor"]

@@ -1,3 +1,48 @@
+## 2026-03-28: OpenClaw Bounded Maintenance Loop
+
+**File**: `openclaw_maintenance_selector.py` (NEW)
+- `MaintenanceTask` dataclass with family, risk_level, escalation tracking
+- `select_maintenance_task()` selects safe low-risk tasks with HoloIndex bundle
+- `write_maintenance_report()` writes structured report artifacts
+- **ALLOWED_TASK_FAMILIES (Phase 1 - real executors only)**:
+  - `self_audit_fix`: source == "self_audit"
+  - `grant_review`: "openclaw-grants" in required_skills
+  - `startup_maintenance`: source == "startup_maintenance_gate"
+- `BLOCKED_TASK_FAMILIES`: source_edit, architecture_change, dependency_update, config_mutation, external_api_call
+
+**File**: `openclaw_supervisor.py` (integration)
+- `_triage()` now includes bounded maintenance task selection (gated by `OPENCLAW_MAINTENANCE_ENABLED`)
+- `_triage()` reads self-audit events from JSONL and triggers `execute_self_audit_fix` action
+- `_get_pending_self_audit_event()` reads pending events with allowed fixes from JSONL
+- `_execute()` handles `execute_maintenance_task` and `execute_self_audit_fix` actions
+- `_verify()` validates maintenance tasks and writes report artifacts
+- `_plan()` carries maintenance_selection metadata
+
+**File**: `test_openclaw_maintenance_selector.py` (NEW)
+- 13 tests covering task selection, escalation, report generation
+- TestMaintenanceTaskDataclass: is_safe logic, serialization
+- TestSelectMaintenanceTask: safe selection, escalation, unknown family handling
+- TestWriteMaintenanceReport: success/failure artifact generation
+- TestAllowedTaskFamilies: configuration validation
+
+**File**: `test_openclaw_supervisor.py` (extended)
+- 3 new tests for self-audit triage path (JSONL)
+- `test_self_audit_triage_returns_execute_action`: JSONL event with allowed fix triggers action
+- `test_self_audit_triage_skips_already_attempted`: Events with `auto_fix_attempted=True` skipped
+- `test_self_audit_triage_ignores_non_allowed_fixes`: Events with non-allowed fixes ignored
+- 1 new end-to-end test for maintenance loop (AgentDB -> run_task.py)
+- `test_maintenance_loop_e2e_self_audit_via_agentdb`: Full flow through AgentDB task selection, supervisor triage, run_task dispatch, and completion
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_maintenance_selector.py -q`
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_supervisor.py -q`
+
+**Result**:
+- `13 passed` (maintenance selector)
+- `18 passed` (supervisor with self-audit triage + e2e tests)
+
+---
+
 ## 2026-03-27: OpenClaw HoloIndex Execution Bundle
 
 **File**: `openclaw_execution_bundle.py` (NEW)

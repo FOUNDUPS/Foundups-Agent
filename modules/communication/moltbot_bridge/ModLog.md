@@ -1,5 +1,66 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-28: OpenClaw Bounded Maintenance Loop (WSP 15/77/87/97)
+
+**Author**: 0102
+**WSP**: 15, 22, 77, 87, 97
+
+### Context
+
+OpenClaw needed a real maintenance loop that selects safe bounded tasks, executes through existing routes, verifies results, and writes durable reports. Without this, the supervisor could only restart OpenClaw or execute arbitrary autonomous tasks without safety filtering.
+
+### Changes
+
+1. **Created `openclaw_maintenance_selector.py`**:
+   - `MaintenanceTask` dataclass with family, risk_level, bundle_confidence, escalation tracking
+   - `select_maintenance_task()` uses HoloIndex bundle for task direction
+   - `write_maintenance_report()` writes structured JSON artifacts to workspace/reports
+   - **Allowed families (Phase 1 - real executors only)**:
+     - `self_audit_fix`: source == "self_audit" -> self_audit_dispatch
+     - `grant_review`: "openclaw-grants" in required_skills -> grant_dispatch
+     - `startup_maintenance`: source == "startup_maintenance_gate" -> startup_maintenance_dispatch
+   - Blocked families: source_edit, architecture_change, dependency_update, config_mutation, external_api_call
+
+2. **Extended `openclaw_supervisor.py`**:
+   - `_triage()` includes bounded maintenance selection (gated by `OPENCLAW_MAINTENANCE_ENABLED=1`)
+   - `_triage()` reads self-audit events from JSONL and triggers `execute_self_audit_fix` action
+   - `_get_pending_self_audit_event()` reads pending events with allowed fixes from JSONL
+   - `_execute()` handles `execute_maintenance_task` action via existing `run_task.execute_task()`
+   - `_verify()` validates maintenance tasks and writes report artifacts
+   - `_plan()` carries maintenance_selection metadata for observability
+
+3. **Created `test_openclaw_maintenance_selector.py`** (13 tests):
+   - Task dataclass behavior (is_safe logic, serialization)
+   - Task selection (safe selection, escalation paths, unknown family handling)
+   - Report generation (success/failure artifacts)
+   - Configuration validation
+
+4. **Added self-audit triage tests in `test_openclaw_supervisor.py`** (3 tests):
+   - `test_self_audit_triage_returns_execute_action`: JSONL event triggers action
+   - `test_self_audit_triage_skips_already_attempted`: Already-attempted events skipped
+   - `test_self_audit_triage_ignores_non_allowed_fixes`: Non-allowed fixes ignored
+
+### Design Principles
+
+- Uses existing supervisor loop (no new control plane)
+- Uses HoloIndex execution bundle for direction (no second planner)
+- Writes durable report artifacts (inspectable outcomes)
+- Escalates ambiguous/high-risk work (fail closed)
+- Only low-risk families in Phase 1
+
+### Activation
+
+```bash
+export OPENCLAW_MAINTENANCE_ENABLED=1
+# Supervisor will now select bounded maintenance tasks
+```
+
+### Result
+
+OpenClaw can run real bounded maintenance cycles end-to-end. Safe tasks are selected via HoloIndex-guided filtering, executed through existing routes, verified, and reported.
+
+---
+
 ## 2026-03-27: OpenClaw HoloIndex Execution Bundle (WSP 87/97)
 
 **Author**: 0102
