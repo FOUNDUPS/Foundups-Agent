@@ -36,6 +36,14 @@ from .registry import (
 from .submission_sink import DuplicateSubmissionError, SubmissionSink
 from .verification import VerificationEngine
 from .detector_bridge import DetectorBridge
+from .gate import (
+    GateDecision,
+    ParticipantGate,
+    ParticipantIdentity,
+    ParticipantStatus,
+    ParticipantTier,
+)
+from .fam_adapter import FAMAdapter, FAMAdapterError, get_fam_adapter
 
 __all__ = [
     # Contracts
@@ -47,12 +55,22 @@ __all__ = [
     "SubmissionStatus",
     "generate_id",
     "utc_now",
+    # Gate (Phase 1)
+    "ParticipantIdentity",
+    "ParticipantStatus",
+    "ParticipantTier",
+    "GateDecision",
+    "ParticipantGate",
     # Services
     "WorkUnitRegistry",
     "SubmissionSink",
     "VerificationEngine",
     "ContributionReporter",
     "DetectorBridge",
+    # FAM Adapter (Phase 1)
+    "FAMAdapter",
+    "FAMAdapterError",
+    "get_fam_adapter",
     # Errors
     "WorkUnitNotFoundError",
     "InvalidStatusTransitionError",

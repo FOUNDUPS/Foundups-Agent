@@ -29,9 +29,9 @@
 - [ ] SQLite persistence for contracts
 - [x] Integration with pqn_alignment detector via API calls — `DetectorBridge` + `submit_from_detector()`
 - [ ] Integration with moltbook_distribution_adapter for downstream publish
-- [ ] Participant gate (who can submit to this FoundUp)
+- [x] Participant gate (who can submit to this FoundUp) — `src/gate.py`
 - [ ] Reproducible runbook documented
-- [ ] Adapter boundaries to shared infrastructure documented
+- [x] Adapter boundaries to shared infrastructure documented — `src/fam_adapter.py` + `INTERFACE.md`
 
 **Acceptance Criteria**:
 - Work units persist across restarts
@@ -82,12 +82,13 @@
 
 **Phase 1 Progress**:
 - [x] `pqn_swarm_hub_detector_bridge` — DetectorBridge wires pqn_alignment.run_detector() into submission flow
+- [x] `pqn_swarm_hub_gate` — ParticipantGate with tier system, policy hooks, internal-first auto-approve
+- [x] `pqn_swarm_hub_fam_adapter` — FAMAdapter with emit_contribution_event(), stub fallback
 
 **Next Slices** (Phase 1 remaining):
 1. `pqn_swarm_hub_persistence` — SQLite for contracts
 2. `pqn_swarm_hub_publication_adapter` — MoltBook integration
-3. `pqn_swarm_hub_gate` — Participant entry policy
-4. `pqn_swarm_hub_runbook` — Reproducible documentation
+3. `pqn_swarm_hub_runbook` — Reproducible documentation
 
 ---
 

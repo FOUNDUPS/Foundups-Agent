@@ -1,5 +1,76 @@
 # ModLog - PQN Swarm Hub FoundUp
 
+## V0.3.0 - Gate & FAM Adapter Integration
+
+**Slice**: `pqn_swarm_hub_gate` + `pqn_swarm_hub_fam_adapter`
+**Author**: 0102
+**Date**: 2026-03-29
+
+### WSP 97 Due Diligence
+
+Executed WSP 97 repo strategy decision:
+- **Decision**: INTEGRATED_MODULE (not separate repo)
+- **Rationale**: Still-moving surfaces, FAMDaemon integration untested, exfoliation protocol mandates internal-first
+- **Proto trigger**: Defined in `PROTO_EXFOLIATION_CHECKLIST.md`
+
+### Changes
+
+- Added `src/gate.py`:
+  - `ParticipantGate` class for entry policy enforcement
+  - `ParticipantIdentity` dataclass (model type, compute capacity, capability tags)
+  - `GateDecision` dataclass (audit-safe decision records)
+  - `ParticipantTier` enum (OBSERVER, CONTRIBUTOR, VERIFIER, COORDINATOR)
+  - `ParticipantStatus` enum (PENDING, APPROVED, REJECTED, SUSPENDED)
+  - Policy hooks for capability verification and WSP 00 checks
+  - Phase 1: Internal-first auto-approve, external-ready structure
+
+- Added `src/fam_adapter.py`:
+  - `FAMAdapter` class for FAMDaemon integration
+  - `emit_contribution_event(ContributionRecord)` — ONLY allowed emission point
+  - `emit_verification_event(VerificationDecision)` — secondary audit trail
+  - Lazy connection to FAMDaemon singleton
+  - Stub fallback when FAMDaemon unavailable
+  - `get_fam_adapter()` singleton accessor
+
+- Updated `src/__init__.py`:
+  - Exported gate contracts and services
+  - Exported FAMAdapter and error types
+
+- Updated `INTERFACE.md`:
+  - Documented Phase 1 contracts (ParticipantIdentity, GateDecision)
+  - Documented Phase 1 API functions (gate, FAM adapter)
+  - Documented adapter boundary (HARD: allowed vs not allowed)
+
+- Updated `ROADMAP.md`:
+  - Marked gate slice complete
+  - Marked adapter boundary slice complete
+  - Updated next slices list
+
+- Created `PROTO_EXFOLIATION_CHECKLIST.md`:
+  - Spin-out trigger criteria
+  - Current status tracking (7/10 slices, 1/3 work unit types)
+  - Target future path documentation
+
+### Adapter Boundary (HARD)
+
+Per WSP 97 directive:
+- **ALLOWED**: `emit_contribution_event()`, `emit_verification_event()`
+- **NOT ALLOWED**: Direct FAM event store mutation, core control-plane imports
+
+### Test Count
+
+- Before: 23 tests (Phase 0 + detector bridge)
+- After: 23 tests (gate/adapter tests pending)
+- Gate/adapter integration tests needed
+
+### WSP References
+
+- WSP 72: Module independence
+- WSP 91: Observability (contribution events audit-safe)
+- WSP 97: Lifecycle evaluation (repo strategy decision)
+
+---
+
 ## V0.2.0 - Detector Bridge Integration
 
 **Slice**: `pqn_swarm_hub_detector_bridge`
