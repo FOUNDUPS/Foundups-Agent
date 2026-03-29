@@ -200,5 +200,24 @@ Shows invite distribution statistics.
 
 ---
 
+## STT/TTS Boundary Note (2026-03-30)
+
+**Substrate Available:** STT/TTS provider registry and voice cloning policy now exist in `modules/infrastructure/shared_utilities/`:
+- `audio_provider_registry.py` — provider metadata with production/eval-only gating
+- `voice_cloning_policy.py` — consent + whitelist + kill switch enforcement
+- `local_model_selection.py` — `asr` and `tts` role resolution
+
+**Not Wired in LiveChat:**
+- This module does NOT currently use STT for voice command input
+- This module does NOT currently use TTS for audio output
+- Any future STT integration is **observational only** until owner/mod command gates are explicitly wired
+- Any future TTS voice cloning **must pass** `voice_cloning_policy.py` before synthesis
+
+**Runtime Authority:**
+- `openclaw_voice.py` (CLI) is the current STT/TTS runtime — uses legacy backends
+- LiveChat remains text-only until explicit integration is approved and scoped
+
+---
+
 **WSP 11 Compliance:** Complete
-**Last Updated:** 2026-02-12
+**Last Updated:** 2026-03-30

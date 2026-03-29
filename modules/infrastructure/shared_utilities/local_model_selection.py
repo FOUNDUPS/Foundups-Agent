@@ -10,6 +10,8 @@ Role-Based Architecture:
         triage   - fast validation/classification (<10ms target)
         general  - synthesis, reasoning, non-code tasks
         code     - resident coding, refactoring, test generation
+        asr      - speech-to-text transcription (Cohere Transcribe 2B default)
+        tts      - text-to-speech synthesis (Qwen3-TTS default)
 
     Roles resolved elsewhere (NOT in this module):
         vision   - ui_tars_bridge.py (UI_TARS_PATH env var)
@@ -43,12 +45,15 @@ from typing import Dict, List, Optional, Tuple
 
 
 DEFAULT_LOCAL_MODEL_ROOT = Path("E:/LM_studio/models/local")
+HOLOINDEX_MODEL_ROOT = Path("E:/HoloIndex/models")
 
 # Task roles -> default model folders under LOCAL_MODEL_ROOT
 MODEL_DIR_DEFAULTS: Dict[str, str] = {
     "triage": "gemma-270m",
     "general": "qwen3.5-4b",
     "code": "qwen-coder-7b",
+    "asr": "cohere-transcribe-2b",
+    "tts": "qwen3-tts",
 }
 
 # Role-specific env vars:
@@ -58,6 +63,8 @@ ROLE_ENV_VARS: Dict[str, Tuple[str, str]] = {
     "triage": ("LOCAL_MODEL_TRIAGE_PATH", "LOCAL_MODEL_TRIAGE_DIR"),
     "general": ("LOCAL_MODEL_GENERAL_PATH", "LOCAL_MODEL_GENERAL_DIR"),
     "code": ("LOCAL_MODEL_CODE_PATH", "LOCAL_MODEL_CODE_DIR"),
+    "asr": ("LOCAL_MODEL_ASR_PATH", "LOCAL_MODEL_ASR_DIR"),
+    "tts": ("LOCAL_MODEL_TTS_PATH", "LOCAL_MODEL_TTS_DIR"),
 }
 
 # Backward-compatible env aliases currently used around the repo.
@@ -65,6 +72,8 @@ ROLE_ENV_ALIASES: Dict[str, Tuple[str, ...]] = {
     "triage": ("HOLO_GEMMA_MODEL",),
     "general": (),
     "code": ("HOLO_QWEN_MODEL",),
+    "asr": (),
+    "tts": (),
 }
 
 # Legacy file fallbacks (kept for compatibility while migrating).
@@ -78,12 +87,20 @@ LEGACY_FILE_FALLBACKS: Dict[str, List[Path]] = {
         Path("E:/HoloIndex/models/qwen-coder-1.5b.gguf"),
         Path("E:/LLM_Models/qwen-coder-1.5b.gguf"),
     ],
+    "asr": [
+        HOLOINDEX_MODEL_ROOT / "cohere-transcribe-2b",
+    ],
+    "tts": [
+        HOLOINDEX_MODEL_ROOT / "qwen3-tts",
+    ],
 }
 
 ROLE_GGUF_PATTERNS: Dict[str, List[str]] = {
     "triage": ["*gemma*270m*.gguf", "*gemma*.gguf", "*.gguf"],
     "general": ["*qwen*3.5*4b*.gguf", "*qwen*35*4b*.gguf", "*qwen*3*4b*.gguf", "*qwen*4b*.gguf", "*.gguf"],
     "code": ["*qwen*coder*7b*.gguf", "*coder*7b*.gguf", "*.gguf"],
+    "asr": ["*cohere*transcribe*.gguf", "*transcribe*.gguf", "*.gguf"],
+    "tts": ["*qwen*tts*.gguf", "*tts*.gguf", "*.gguf"],
 }
 
 # Default placeholder names used only if no file can be discovered.
@@ -91,6 +108,8 @@ ROLE_DEFAULT_FILENAMES: Dict[str, str] = {
     "triage": "gemma-270m.gguf",
     "general": "qwen3.5-4b.gguf",
     "code": "qwen-coder-7b.gguf",
+    "asr": "cohere-transcribe-2b.gguf",
+    "tts": "qwen3-tts.gguf",
 }
 
 
@@ -256,6 +275,16 @@ def resolve_general_model_path() -> Path:
 def resolve_code_model_path() -> Path:
     """Return coding model path (Qwen Coder 7B default)."""
     return resolve_model_path("code")
+
+
+def resolve_asr_model_path() -> Path:
+    """Return ASR model path (Cohere Transcribe 2B default)."""
+    return resolve_model_path("asr")
+
+
+def resolve_tts_model_path() -> Path:
+    """Return TTS model path (Qwen3-TTS default)."""
+    return resolve_model_path("tts")
 
 
 def get_model_selections() -> Dict[str, ModelSelection]:

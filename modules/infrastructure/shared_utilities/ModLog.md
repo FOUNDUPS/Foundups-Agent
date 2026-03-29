@@ -1,6 +1,23 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-03-30 - Audio Provider Registry and Voice Cloning Policy
+
+- **Context**: News integration pass for Cohere Transcribe, Qwen3-TTS, Mistral Voxtral.
+- **Changes**:
+  - `local_model_selection.py`: Added `asr` and `tts` roles with Cohere Transcribe 2B and Qwen3-TTS defaults
+  - `audio_provider_registry.py` (NEW): Provider registry with production/eval-only flags
+    - `cohere_transcribe`: preferred ASR, production_enabled=true
+    - `qwen3_tts`: preferred TTS, production_enabled=true
+    - `voxtral_tts_eval`: production_enabled=false (eval-only, licensing restrictions)
+  - `voice_cloning_policy.py` (NEW): Safety gate for voice cloning operations
+    - Consent + whitelist requirements
+    - Emergency kill switch
+    - Audit logging hook
+- **Model Storage**: All models to `E:/HoloIndex/models/` per existing convention
+- **Research Doc**: `docs/research/2026-03-30-audio-agents.md`
+- **WSP Compliance**: WSP 3 (shared utilities), WSP 60 (module memory)
+
 ## 2026-03-22 - AI Engine Singletons (Prevent Redundant Model Loading)
 - **Problem**: Multiple components (autonomous_refactoring.py, daemon_monitor_mixin.py, fam_adapter.py) each loaded Qwen/Gemma models independently, causing 2-10 second startup lag per component.
 - **Solution**: Added `ai_engine_singletons.py` with centralized singleton access to AI engines.

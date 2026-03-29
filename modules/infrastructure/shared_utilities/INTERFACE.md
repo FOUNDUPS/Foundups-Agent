@@ -1,58 +1,144 @@
 # shared_utilities Interface Specification
 
-**WSP 11 Compliance:** In Progress
-**Last Updated:** 2025-09-25
-**Version:** 0.1.0
+**WSP 11 Compliance:** Complete
+**Last Updated:** 2026-03-30
+**Version:** 0.3.0
 
 ## [OVERVIEW] Module Overview
 
 **Domain:** infrastructure
-**Purpose:** [Brief description of module functionality]
+**Purpose:** Cross-cutting utilities for model selection, registry management, and policy enforcement
 
 ## [API] Public API
 
-### Primary Classes
+### Local Model Selection
 
-#### SharedUtilities
+Role-based model path resolution for local AI models. Models stored at `E:/HoloIndex/models/`.
+
 ```python
-class SharedUtilities:
-    """Main class for [module functionality]"""
+from modules.infrastructure.shared_utilities.local_model_selection import (
+    resolve_model_selection,
+    resolve_model_path,
+    resolve_triage_model_path,
+    resolve_general_model_path,
+    resolve_code_model_path,
+    resolve_asr_model_path,
+    resolve_tts_model_path,
+    get_model_selections,
+    ModelSelection,
+)
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
-        """Initialize SharedUtilities
+# Resolve best-available model for a role
+selection = resolve_model_selection("triage")
+print(f"Path: {selection.path}, Exists: {selection.exists}")
 
-        Args:
-            config: Optional configuration dictionary
-        """
+# Convenience helpers
+triage_path = resolve_triage_model_path()  # Gemma 270M
+general_path = resolve_general_model_path()  # Qwen3.5 4B
+code_path = resolve_code_model_path()  # Qwen Coder 7B
+asr_path = resolve_asr_model_path()  # Cohere Transcribe 2B
+tts_path = resolve_tts_model_path()  # Qwen3-TTS
 
-    def process(self, [parameters]) -> [ReturnType]:
-        """[Method description]
-
-        Args:
-            [parameters]: [Parameter description]
-
-        Returns:
-            [ReturnType]: [Return value description]
-
-        Raises:
-            [ExceptionType]: [When exception is raised]
-        """
+# Get all role selections
+all_selections = get_model_selections()
 ```
 
-### Utility Functions
+#### Supported Roles
 
-#### utility_shared_utilities
+| Role | Default Model | Env Override |
+|------|--------------|--------------|
+| `triage` | gemma-270m | `LOCAL_MODEL_TRIAGE_PATH` |
+| `general` | qwen3.5-4b | `LOCAL_MODEL_GENERAL_PATH` |
+| `code` | qwen-coder-7b | `LOCAL_MODEL_CODE_PATH` |
+| `asr` | cohere-transcribe-2b | `LOCAL_MODEL_ASR_PATH` |
+| `tts` | qwen3-tts | `LOCAL_MODEL_TTS_PATH` |
+
+### Audio Provider Registry
+
+Provider metadata with production/eval-only gating.
+
 ```python
-def utility_shared_utilities([parameters]) -> [ReturnType]:
-    """[Function description]
+from modules.infrastructure.shared_utilities.audio_provider_registry import (
+    get_audio_registry,
+    get_preferred_asr,
+    get_preferred_tts,
+    is_voxtral_allowed,
+    AudioProvider,
+    AudioProviderType,
+    AudioLicense,
+)
 
-    Args:
-        [parameters]: [Parameter description]
+# Get preferred providers
+asr = get_preferred_asr()  # cohere_transcribe (preferred=True, production_enabled=True)
+tts = get_preferred_tts()  # qwen3_tts (preferred=True, production_enabled=True)
 
-    Returns:
-        [ReturnType]: [Return value description]
-    """
+# Check production gating
+registry = get_audio_registry()
+registry.is_production_enabled("voxtral_tts_eval")  # False (eval-only)
+
+# List providers
+all_tts = registry.list_providers("tts")
+prod_only = registry.list_providers(production_only=True)
+cloning_capable = registry.list_voice_cloning_providers()
+
+# Voxtral is blocked unless AUDIO_ALLOW_EVAL_PROVIDERS=1
+is_voxtral_allowed()  # False in production
 ```
+
+#### Registered Providers
+
+| Provider | Type | License | Production | Preferred |
+|----------|------|---------|------------|-----------|
+| `cohere_transcribe` | ASR | Apache 2.0 | Yes | Yes |
+| `whisper_local` | ASR | MIT | Yes | No |
+| `qwen3_tts` | TTS | Apache 2.0 | Yes | Yes |
+| `edge_tts` | TTS | Proprietary | Yes | No |
+| `voxtral_tts_eval` | TTS | Eval-only | **No** | No |
+
+### Voice Cloning Policy
+
+Safety gate enforcing consent + whitelist + kill switch for voice cloning.
+
+```python
+from modules.infrastructure.shared_utilities.voice_cloning_policy import (
+    get_voice_policy,
+    VoiceCloneRequest,
+    PolicyResult,
+    VoiceCloningPolicy,
+)
+
+policy = get_voice_policy()
+
+# Check if cloning is allowed
+request = VoiceCloneRequest(
+    voice_id="voice_012",
+    requester="system",
+    purpose="stream_tts",
+)
+result = policy.check(request)
+if result.allowed:
+    # Proceed with voice cloning
+    ...
+else:
+    print(f"Denied: {result.reason}")
+
+# Admin operations
+policy.add_to_whitelist("voice_012")
+policy.record_consent("voice_012", consented_by="operator_012")
+policy.engage_kill_switch()  # Emergency disable all cloning
+policy.disengage_kill_switch()
+```
+
+#### Policy Requirements
+
+Voice cloning is **denied** unless ALL conditions are met:
+1. Kill switch is not engaged
+2. Voice ID is in `allowed_voices` whitelist
+3. Valid (non-expired) consent is recorded for voice ID
+
+#### Consent Storage
+
+Consents persist to `memory/voice_cloning_consents.json` (configurable via `VOICE_CONSENT_STORE` env var).
 
 ### YouTube Channel Registry
 ```python
@@ -170,48 +256,29 @@ company_id = get_company_id(LinkedInCompany.MOVE2JAPAN)
 
 ## [CONFIG] Configuration
 
-### Required Configuration
-```python
-# Example configuration
-config = {
-    "setting1": "value1",
-    "setting2": 42
-}
+### Model Selection Environment Variables
+```bash
+# Model root directory
+LOCAL_MODEL_ROOT=E:/LM_studio/models/local
+
+# Role-specific overrides (optional)
+LOCAL_MODEL_TRIAGE_PATH=/path/to/triage.gguf
+LOCAL_MODEL_GENERAL_PATH=/path/to/general.gguf
+LOCAL_MODEL_CODE_PATH=/path/to/code.gguf
+LOCAL_MODEL_ASR_PATH=/path/to/asr.gguf
+LOCAL_MODEL_TTS_PATH=/path/to/tts.gguf
+
+# Legacy fallback (disabled by default)
+LOCAL_MODEL_ENABLE_LEGACY_FALLBACK=0
 ```
 
-### Optional Configuration
-```python
-# Optional settings with defaults
-optional_config = {
-    "timeout": 30,  # Default: 30 seconds
-    "retries": 3    # Default: 3 attempts
-}
-```
+### Audio Provider Environment Variables
+```bash
+# Allow eval-only providers (for research environments only)
+AUDIO_ALLOW_EVAL_PROVIDERS=0
 
-## [USAGE] Usage Examples
-
-### Basic Usage
-```python
-from modules.infrastructure.shared_utilities import SharedUtilities
-
-# Initialize
-instance = SharedUtilities(config)
-
-# Use main functionality
-result = instance.process([example_parameters])
-print(f"Result: {result}")
-```
-
-### Advanced Usage
-```python
-# With custom configuration
-custom_config = {
-    "special_setting": "custom_value"
-}
-advanced_instance = SharedUtilities(custom_config)
-
-# Use utility function
-processed = utility_shared_utilities([input_data])
+# Voice cloning consent storage
+VOICE_CONSENT_STORE=memory/voice_cloning_consents.json
 ```
 
 ## [DEPENDENCIES] Dependencies
@@ -226,13 +293,20 @@ processed = utility_shared_utilities([input_data])
 
 ### Running Tests
 ```bash
-cd modules/infrastructure/shared_utilities
-python -m pytest tests/
+# All shared utilities tests
+python -m pytest modules/infrastructure/shared_utilities/tests/ -v
+
+# Model selection tests
+python -m pytest modules/infrastructure/shared_utilities/tests/test_local_model_selection.py -q
+
+# Audio provider and voice cloning tests
+python -m pytest modules/infrastructure/shared_utilities/tests/test_audio_provider_registry.py -q
 ```
 
 ### Test Coverage
-- **Current:** 0% (implementation needed)
-- **Target:** >=90%
+- **Model Selection:** 4 tests (role resolution, legacy fallback, env overrides)
+- **Audio Registry:** 7 tests (preferred providers, production gating, voice cloning list)
+- **Voice Policy:** 7 tests (whitelist, consent, expiry, kill switch, persistence)
 
 ## [PERFORMANCE] Performance Characteristics
 
@@ -260,24 +334,36 @@ class [SpecificError]([ModuleName]Error):
 
 ## [HISTORY] Version History
 
+### 0.3.0 (2026-03-30)
+- Added `asr` and `tts` roles to local_model_selection.py
+- Added audio_provider_registry.py with production/eval-only gating
+- Added voice_cloning_policy.py with consent/whitelist/kill-switch enforcement
+- Research doc: docs/research/2026-03-30-audio-agents.md
+
+### 0.2.0 (2026-03-07)
+- Added LinkedIn account registry
+- Added YouTube channel registry
+- Added managed environment loader
+
 ### 0.1.0 (2025-09-25)
 - Initial interface specification
-- Basic API structure defined
-- Placeholder implementation created
 
 ## [NOTES] Development Notes
 
-### Current Status
-- [x] WSP 49 structure compliance
-- [x] Interface specification defined
-- [ ] Functional implementation (TODO)
-- [ ] Comprehensive testing (TODO)
+### Runtime Boundary
+
+This module provides **substrate only** — metadata, model paths, policy gates.
+
+**Not wired to runtime:**
+- `openclaw_voice.py` still uses legacy STT/TTS chain (WhisperSTT, EdgeTTS)
+- Future integration will replace backends using these registries
+- Voice cloning requires explicit policy check before any TTS synthesis
 
 ### Future Enhancements
-- [Enhancement 1]
-- [Enhancement 2]
-- [Integration with other modules]
+- Wire cohere_transcribe into openclaw_voice.py STT chain
+- Wire qwen3_tts into openclaw_voice.py TTS chain
+- ARC-AGI-3 evaluation harness implementation
 
 ---
 
-**WSP 11 Interface Compliance:** Structure Complete, Implementation Pending
+**WSP 11 Interface Compliance:** Complete
