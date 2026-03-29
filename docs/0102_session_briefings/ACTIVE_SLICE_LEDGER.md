@@ -74,7 +74,8 @@ If already landed:
 | `model_provider_switching_cleanup` | `b1d66d7ce` | `openclaw_runtime_support.py` — `get_model_availability_snapshot(dae=None)` standalone; `generated_on` timestamp; startup refresh writes same canonical shape; 25 tests in `test_model_provider_status.py` |
 | `skill_evolution_loop_phase1_report_surface` | `3ae311767` | `openclaw_skill_evolution.py` + `openclaw_supervisor.py` idle-path integration; env gate `OPENCLAW_SKILL_EVOLUTION_ENABLED=1`; 18 tests in `test_openclaw_skill_evolution.py`; no WRE mutation |
 | `pqn_swarm_hub_persistence` | `ae886b4c2` | `persistence.py` + store injection across all 6 services; 41/41 tests; TestModLog.md |
-| `pqn_swarm_hub_publication_adapter` | `(this commit)` | `publication_adapter.py` wraps MoltBook; 57/57 tests; rejected decisions gate |
+| `pqn_swarm_hub_publication_adapter` | `09fada474` | `publication_adapter.py` wraps MoltBook; 57/57 tests; rejected decisions gate |
+| `pqn_swarm_hub_runbook` | `(this commit)` | `RUNBOOK.md` reproducible execution guide; Phase 1 COMPLETE (10/10 slices) |
 
 ---
 
@@ -82,7 +83,7 @@ If already landed:
 
 | Slice | Priority | Blocked By | Notes |
 |-------|----------|------------|-------|
-| `pqn_swarm_hub_runbook` | P1 | — | Reproducible execution guide documentation |
+| _(Phase 1 complete — proto-readiness review next)_ | — | — | See Next Priority Order |
 
 ---
 
@@ -104,7 +105,7 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 
 ## Next Priority Order
 
-1. `pqn_swarm_hub_runbook` — reproducible execution guide
+1. **PQN Swarm Hub Proto-Readiness Review** — Phase 1 complete, architect decision on Phase 2 entry
 2. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
 3. `skill_evolution_loop_phase2_mutation_surface` (future: gated A/B testing and promotion)
 

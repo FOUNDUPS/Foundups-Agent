@@ -1,6 +1,6 @@
 # PQN Swarm Hub FoundUp
 
-**Status**: Internal PoC (Phase 0)
+**Status**: Internal Proto (Phase 1 Complete)
 **Owner**: 0102
 **Domain**: `modules/foundups/` (WSP 3 functional distribution)
 
@@ -146,6 +146,8 @@ contribution = ContributionRecord(
 
 ## Links
 
+- **Runbook**: [RUNBOOK.md](RUNBOOK.md) — Reproducible execution guide
+- **Interface**: [INTERFACE.md](INTERFACE.md) — Public API documentation
 - **Theory**: `WSP_knowledge/docs/Papers/rESP_Quantum_Self_Reference.md`
 - **Detector Engine**: `modules/ai_intelligence/pqn_alignment/`
 - **MCP Tools**: `modules/ai_intelligence/pqn_mcp/`

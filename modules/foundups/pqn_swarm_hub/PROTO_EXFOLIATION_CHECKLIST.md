@@ -20,7 +20,7 @@ All criteria must be TRUE before exfoliation to standalone repo.
 - [x] Detector Bridge — `src/detector_bridge.py`
 - [x] SQLite Persistence — `src/persistence.py` (41/41 tests pass)
 - [x] MoltBook Publication Adapter — `src/publication_adapter.py` (57/57 tests pass)
-- [ ] Runbook Documentation — reproducible execution guide
+- [x] Runbook Documentation — `RUNBOOK.md` (reproducible execution guide)
 
 ### FAMDaemon Integration Proven
 
@@ -66,14 +66,14 @@ All criteria must be TRUE before exfoliation to standalone repo.
 
 | Criterion | Status |
 |-----------|--------|
-| Phase 1 slices | 9/10 complete |
+| Phase 1 slices | 10/10 complete |
 | FAMDaemon integration | PARTIAL (adapter created, live test pending) |
 | 3+ work unit types | 1/3 |
 | External contributor path | NOT VALIDATED |
 | Contracts stable | YES (except V3) |
 | Core independence | YES |
 
-**Overall**: NOT READY for exfoliation
+**Overall**: NOT READY for exfoliation (Phase 1 code complete, pending: live FAM test, GPD type, external path)
 
 ---
 
@@ -92,9 +92,8 @@ modules/foundups/pqn_swarm_hub/ # adapter stub remains in monorepo
 1. Test FAMAdapter with live FAMDaemon
 2. Add GPD work unit type
 3. Create CONTRIBUTING.md
-4. Document runbook
-5. Complete MoltBook publication adapter
-6. Revalidate this checklist
+4. Test external contributor entry gate
+5. Revalidate this checklist
 
 ---
 

@@ -21,7 +21,7 @@
 
 ---
 
-### Phase 1: Internal Proto (CURRENT)
+### Phase 1: Internal Proto (COMPLETE)
 
 **Goal**: Wire to shared infrastructure and prove reproducible runbook.
 
@@ -30,7 +30,7 @@
 - [x] Integration with pqn_alignment detector via API calls — `DetectorBridge` + `submit_from_detector()`
 - [x] Integration with moltbook_distribution_adapter for downstream publish — `src/publication_adapter.py`
 - [x] Participant gate (who can submit to this FoundUp) — `src/gate.py`
-- [ ] Reproducible runbook documented
+- [x] Reproducible runbook documented — `RUNBOOK.md`
 - [x] Adapter boundaries to shared infrastructure documented — `src/fam_adapter.py` + `INTERFACE.md`
 
 **Acceptance Criteria**:
@@ -80,15 +80,15 @@
 
 **Phase 0**: COMPLETE (scaffold @ 35d1e2275)
 
-**Phase 1 Progress**:
+**Phase 1 Progress**: COMPLETE
 - [x] `pqn_swarm_hub_detector_bridge` — DetectorBridge wires pqn_alignment.run_detector() into submission flow
 - [x] `pqn_swarm_hub_gate` — ParticipantGate with tier system, policy hooks, internal-first auto-approve
 - [x] `pqn_swarm_hub_fam_adapter` — FAMAdapter with emit_contribution_event(), stub fallback
 - [x] `pqn_swarm_hub_persistence` — SQLiteStore with optional store injection (41/41 tests pass)
 - [x] `pqn_swarm_hub_publication_adapter` — PublicationAdapter wraps MoltBook, stub-safe (57/57 tests pass)
+- [x] `pqn_swarm_hub_runbook` — Reproducible execution guide in `RUNBOOK.md`
 
-**Next Slices** (Phase 1 remaining):
-1. `pqn_swarm_hub_runbook` — Reproducible documentation
+**Phase 2 Entry**: Awaiting proto-readiness review
 
 ---
 

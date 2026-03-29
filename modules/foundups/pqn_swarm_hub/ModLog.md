@@ -1,5 +1,55 @@
 # ModLog - PQN Swarm Hub FoundUp
 
+## V0.6.0 - Runbook (Phase 1 Complete)
+
+**Slice**: `pqn_swarm_hub_runbook`
+**Author**: 0102
+**Date**: 2026-03-29
+
+### Changes
+
+- Added `RUNBOOK.md`:
+  - Reproducible execution guide for another 0102/operator
+  - Flow A: In-memory happy path
+  - Flow B: SQLite-backed persistence path
+  - Flow C: Stub-safe publication path
+  - Flow D: Participant gate path
+  - Flow E: Detector bridge path
+  - Expected artifacts documentation
+  - Validation commands (pytest, smoke tests)
+  - Failure modes and recovery
+  - Operator notes for Phase 1 vs Proto-only
+
+- Updated `README.md`:
+  - Status: Phase 0 → Phase 1 Complete
+  - Added RUNBOOK.md and INTERFACE.md links
+
+- Updated `ROADMAP.md`:
+  - Marked runbook deliverable complete
+  - Phase 1: CURRENT → COMPLETE
+  - Phase 2 entry: Awaiting proto-readiness review
+
+### Phase 1 Status
+
+**COMPLETE** (10/10 slices):
+1. Registry + contracts (V0.1.0)
+2. Submission sink (V0.1.0)
+3. Verification engine (V0.1.0)
+4. Contribution reporter (V0.1.0)
+5. Detector bridge (V0.2.0)
+6. Participant gate (V0.3.0)
+7. FAM adapter (V0.3.0)
+8. SQLite persistence (V0.4.0)
+9. Publication adapter (V0.5.0)
+10. Runbook (V0.6.0)
+
+### WSP References
+
+- WSP 22: Documentation discipline (runbook as phase closure artifact)
+- WSP 97: Internal-first proto before externalization
+
+---
+
 ## V0.5.0 - Publication Adapter (MoltBook Integration)
 
 **Slice**: `pqn_swarm_hub_publication_adapter`
