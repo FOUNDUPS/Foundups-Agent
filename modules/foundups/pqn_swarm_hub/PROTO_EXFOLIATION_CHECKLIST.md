@@ -1,6 +1,6 @@
 # Proto Exfoliation Checklist - PQN Swarm Hub
 
-**Status**: Phase 2 Complete → Exfoliation Review Ready (2026-03-29)
+**Status**: Phase 3 Prep Complete → Migration Blocked on 012 Approval (2026-03-29)
 **Decision**: INTEGRATED_MODULE (per WSP 97 due diligence 2026-03-29)
 
 ---
@@ -105,7 +105,7 @@
 | Contracts stable | YES (except V3) |
 | Core independence | YES |
 
-**Overall**: Phase 2 COMPLETE. READY for exfoliation review (0 true blockers remain).
+**Overall**: Phase 3 Prep COMPLETE. Migration blocked on 012 approval.
 
 ---
 
@@ -115,7 +115,35 @@
 2. ~~`pqn_swarm_hub_external_submission_type`~~ — COMPLETE (14/14 tests)
 3. ~~`pqn_swarm_hub_external_contributor_path`~~ — COMPLETE (22/22 tests)
 
-**Phase 2 COMPLETE**: All true blockers cleared. Ready for exfoliation review.
+**Phase 2 COMPLETE**: All true blockers cleared.
+
+---
+
+## Phase 3 Prep (Migration Scaffold)
+
+### Preparation Artifacts (COMPLETE)
+
+- [x] `MIGRATION_MANIFEST.md` — File disposition list
+- [x] `DUAL_REMOTE_PLAN.md` — Repo setup commands
+- [x] `EXFOLIATION_PLAN.md` — Full procedure
+
+### Approval Gates (BLOCKED)
+
+| Gate | Status |
+|------|--------|
+| Prep artifacts complete | COMPLETE |
+| 012 approval for repo creation | PENDING |
+| 012 approval for migration push | PENDING |
+
+### Migration Actions (Blocked on 012)
+
+- [ ] `gh repo create FOUNDUPS/pqn-swarm-hub`
+- [ ] `gh repo create Foundup/pqn-swarm-hub`
+- [ ] Copy files per manifest
+- [ ] Create package structure
+- [ ] Verify tests pass standalone
+- [ ] Push to both remotes
+- [ ] Update monorepo stub
 
 ---
 
@@ -130,4 +158,4 @@ modules/foundups/pqn_swarm_hub/ # adapter stub remains in monorepo
 ---
 
 *Created: 2026-03-29*
-*Last Updated: 2026-03-29 (Phase 2 complete — external contributor path)*
+*Last Updated: 2026-03-29 (Phase 3 prep complete — migration scaffold)*

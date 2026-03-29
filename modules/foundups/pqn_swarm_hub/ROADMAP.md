@@ -77,19 +77,27 @@
 
 ---
 
-### Phase 3: Spin-Out
+### Phase 3: Spin-Out (PREP COMPLETE)
 
 **Goal**: Externalize to standalone FoundUp repo.
 
-**Deliverables**:
-- [ ] Create `FOUNDUPS/PQNSwarmHub` as origin
-- [ ] Create `Foundup/PQNSwarmHub` as backup
-- [ ] Migrate product code
-- [ ] Leave monorepo bridge/docs only where needed
+**Phase 3 Prep** (2026-03-29):
+- [x] `MIGRATION_MANIFEST.md` — file disposition list
+- [x] `DUAL_REMOTE_PLAN.md` — repo setup commands
+- [x] `EXFOLIATION_PLAN.md` — full procedure with rollback
+- [ ] 012 approval for execution — **PENDING**
+
+**Migration Deliverables** (blocked on 012):
+- [ ] Create `FOUNDUPS/pqn-swarm-hub` as origin
+- [ ] Create `Foundup/pqn-swarm-hub` as backup
+- [ ] Migrate product code per manifest
+- [ ] Create adapter stubs for internal deps
+- [ ] Leave monorepo stub pointing to external package
 
 **Acceptance Criteria**:
 - Standalone repo operational
-- Monorepo bridge working
+- All 108 tests pass standalone
+- Monorepo stub imports from external package
 - Independent release cadence possible
 
 ---
@@ -115,7 +123,9 @@
 
 **Total tests**: 108 passing
 
-**Next phase**: Phase 3 Prep (dual-remote repo setup, migration scaffold)
+**Phase 3 Prep**: COMPLETE (migration scaffold ready)
+
+**Next action**: 012 approval for repo creation and migration execution
 
 ---
 

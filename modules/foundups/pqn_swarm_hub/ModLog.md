@@ -1,5 +1,74 @@
 # ModLog - PQN Swarm Hub FoundUp
 
+## V0.12.0 - Phase 3 Prep Scaffold (Migration Ready)
+
+**Slice**: `pqn_swarm_hub_phase3_prep_scaffold`
+**Author**: 0102
+**Date**: 2026-03-29
+
+### Changes
+
+Created migration scaffold for standalone exfoliation:
+
+- Added `MIGRATION_MANIFEST.md`:
+  - File disposition list (migrate vs keep vs stub)
+  - Standalone repo structure
+  - Monorepo stub structure post-migration
+  - Dependencies to resolve
+  - Migration checklist with approval gates
+
+- Added `DUAL_REMOTE_PLAN.md`:
+  - Repository configuration (origin/backup)
+  - Creation commands (blocked on 012)
+  - Sync strategy and git aliases
+  - CI/CD setup template
+  - Verification checklist
+
+- Added `EXFOLIATION_PLAN.md`:
+  - Executive summary with current state
+  - Phase 3 procedure (5 stages)
+  - Approval gates table
+  - Adapter stub strategy
+  - Rollback plan
+  - Risk assessment
+
+- Updated `PROTO_EXFOLIATION_CHECKLIST.md`:
+  - Phase 3 Prep section added
+  - Status → Migration blocked on 012
+
+- Updated `ROADMAP.md`:
+  - Phase 3 → PREP COMPLETE
+  - Next action → 012 approval
+
+### Migration Boundary
+
+**What moves to standalone**:
+- All `src/*.py` (11 files, ~1,840 lines)
+- All `tests/*.py` (8 files, 108 tests)
+- All documentation (7 files)
+- `requirements.txt`
+
+**What stays in monorepo**:
+- Stub `__init__.py` re-exporting from package
+- Redirect `README.md`
+- Historical docs (checklist, manifest, plan)
+
+### Approval Gates
+
+| Gate | Status |
+|------|--------|
+| Prep artifacts | COMPLETE |
+| 012 approval | PENDING |
+| Repo creation | BLOCKED |
+| Migration push | BLOCKED |
+
+### WSP References
+
+- WSP 97: Lifecycle evaluation (exfoliation prep)
+- WSP 22: Documentation discipline (migration docs)
+
+---
+
 ## V0.11.0 - Exfoliation Review Decision (Phase 3 Entry)
 
 **Slice**: `pqn_swarm_hub_exfoliation_review_decision`

@@ -1,7 +1,7 @@
 # Active Slice Ledger
 
 **Authority**: 0102 architect lane
-**Updated**: 2026-03-29 (Phase 2 complete)
+**Updated**: 2026-03-29 (Phase 3 prep complete)
 **Rule**: Every agent reads this first. If repo truth contradicts an entry, update this ledger — not 012.
 
 ---
@@ -80,7 +80,8 @@ If already landed:
 | `pqn_swarm_hub_fam_live_validation` | `d5fca817d` | 15/15 live FAM tests; 72/72 module total; adapter boundary respected |
 | `pqn_swarm_hub_external_submission_type` | `70115efff` | 14/14 tests; source field in contracts; register_external + submit_external methods |
 | `pqn_swarm_hub_external_contributor_path` | `db9df7598` | CONTRIBUTING.md + 22/22 gate tests; Phase 2 COMPLETE |
-| `pqn_swarm_hub_exfoliation_review_decision` | (pending commit) | Architect decision: APPROVE_PHASE_3_PREP; doc reconciliation |
+| `pqn_swarm_hub_exfoliation_review_decision` | `c0cf513de` | Architect decision: APPROVE_PHASE_3_PREP; doc reconciliation |
+| `pqn_swarm_hub_phase3_prep_scaffold` | `16026b4ac` | Migration scaffold: MANIFEST + DUAL_REMOTE + EXFOLIATION plans |
 
 ---
 
@@ -88,7 +89,7 @@ If already landed:
 
 | Slice | Priority | Blocked By | Notes |
 |-------|----------|------------|-------|
-| `pqn_swarm_hub_phase3_prep_scaffold` | P1 | 012 approval | Dual-remote repo setup, migration script, stub adapter |
+| `pqn_swarm_hub_phase3_migration_exec` | P1 | 012 approval | Actual repo creation + migration push |
 
 ---
 
