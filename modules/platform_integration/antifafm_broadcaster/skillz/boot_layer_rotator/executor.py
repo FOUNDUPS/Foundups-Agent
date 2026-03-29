@@ -2,7 +2,7 @@
 Boot Layer Rotator - Master schema rotation for antifaFM stream
 
 Cycles through visual schemas every 10 minutes:
-  GCC Shipping → Chess → Karaoke → Video → (repeat)
+  GCC Shipping -> Chess -> Karaoke -> Video -> (repeat)
 
 Each schema has its own 2-minute internal view rotation.
 Stakeholder/Delegate can override to pause or skip schemas.
@@ -26,6 +26,10 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional, Callable
 
 logger = logging.getLogger(__name__)
+
+# Suppress obsws_python password logging (security)
+logging.getLogger("obsws_python.baseclient").setLevel(logging.WARNING)
+logging.getLogger("obsws_python.reqs").setLevel(logging.WARNING)
 
 # Telemetry path for event logging
 TELEMETRY_DIR = Path(__file__).parent.parent.parent / "telemetry"
@@ -138,10 +142,10 @@ SCHEMAS: Dict[str, Dict[str, Any]] = {
         "implemented": True,  # Existing functionality
     },
     "news": {
-        "name": "News Ticker",
-        "description": "Live news headlines and updates",
-        "executor": "news_ticker",
-        "implemented": True,  # Existing functionality
+        "name": "News Maps",
+        "description": "Conflict maps + shipping tracker with ticker",
+        "executor": "news_maps",
+        "implemented": True,
     },
     "cams": {
         "name": "Live Cams",
@@ -155,18 +159,6 @@ SCHEMAS: Dict[str, Dict[str, Any]] = {
         "executor": None,
         "implemented": False,
     },
-    "weather": {
-        "name": "Weather Map",
-        "description": "Global weather visualization",
-        "executor": None,
-        "implemented": False,
-    },
-    "crypto": {
-        "name": "Crypto Ticker",
-        "description": "BTC/ETH price charts",
-        "executor": None,
-        "implemented": False,
-    },
 }
 
 # Default rotation order (10 min each schema)
@@ -177,19 +169,62 @@ ROTATION_ORDER = ["gcc", "video", "news"]  # "video" and "news" are aliases
 
 # OBS source names that need visibility control
 # Video grid sources to hide during non-video schemas
-VIDEO_SOURCES = ["video1", "video2", "video3", "video4", "video5", "video6", "video7", "video8", "video9"]
+# These are the ACTUAL source names in OBS (not generic video1,2,3...)
+# Configure via env: OBS_VIDEO_SOURCES="France 24,Al Jazeera,Telaviv,BBC Straits,DW News"
+_default_video_sources = "France 24,Al Jazeera,Telaviv,BBC Straits,DW News"
+VIDEO_SOURCES = [s.strip() for s in os.getenv("OBS_VIDEO_SOURCES", _default_video_sources).split(",") if s.strip()]
 BROWSER_SOURCE = os.getenv("OBS_BROWSER_SOURCE", "antifaFM Website")
+
+# News map image source (for screenshot-based news maps)
+NEWS_MAP_SOURCE = os.getenv("OBS_NEWS_MAP_SOURCE", "News Map")
+
+# Connection singleton - reuse connection to avoid OBS WebSocket spam
+_obs_client = None
+_obs_client_lock = None  # Will be initialized on first use
 
 
 def _get_obs_client():
-    """Get OBS WebSocket client."""
+    """Get OBS WebSocket client (singleton pattern to prevent connection spam)."""
+    global _obs_client, _obs_client_lock
     import obsws_python as obs
+    import threading
 
-    host = os.getenv("OBS_WEBSOCKET_HOST", "localhost")
-    port = int(os.getenv("OBS_WEBSOCKET_PORT", 4455))
-    password = os.getenv("OBS_WEBSOCKET_PASSWORD", "")
+    # Initialize lock on first use (thread-safe lazy init)
+    if _obs_client_lock is None:
+        _obs_client_lock = threading.Lock()
 
-    return obs.ReqClient(host=host, port=port, password=password)
+    with _obs_client_lock:
+        # Validate existing connection
+        if _obs_client is not None:
+            try:
+                # Quick ping to verify connection is alive
+                _obs_client.get_version()
+                return _obs_client
+            except Exception:
+                # Connection dead, recreate
+                logger.debug("[ROTATOR] OBS connection stale, reconnecting...")
+                _obs_client = None
+
+        # Create new connection
+        host = os.getenv("OBS_WEBSOCKET_HOST", "localhost")
+        port = int(os.getenv("OBS_WEBSOCKET_PORT", 4455))
+        password = os.getenv("OBS_WEBSOCKET_PASSWORD", "")
+
+        _obs_client = obs.ReqClient(host=host, port=port, password=password)
+        logger.info(f"[ROTATOR] OBS WebSocket connected to {host}:{port}")
+        return _obs_client
+
+
+def _close_obs_client():
+    """Close OBS WebSocket connection (call on shutdown)."""
+    global _obs_client
+    if _obs_client is not None:
+        try:
+            _obs_client.disconnect()
+        except Exception:
+            pass
+        _obs_client = None
+        logger.debug("[ROTATOR] OBS WebSocket disconnected")
 
 
 async def set_source_visibility(source_name: str, visible: bool, scene_name: str = None) -> Dict[str, Any]:
@@ -235,13 +270,14 @@ async def set_source_visibility(source_name: str, visible: bool, scene_name: str
         return {"success": False, "error": str(e)}
 
 
-async def set_source_mute(source_name: str, muted: bool) -> Dict[str, Any]:
+async def set_source_mute(source_name: str, muted: bool, silent_fail: bool = True) -> Dict[str, Any]:
     """
     Set OBS input source mute state.
 
     Args:
         source_name: Name of the audio source in OBS
         muted: True to mute, False to unmute
+        silent_fail: If True, don't log warning on missing source (graceful degradation)
     """
     try:
         client = _get_obs_client()
@@ -249,8 +285,9 @@ async def set_source_mute(source_name: str, muted: bool) -> Dict[str, Any]:
         logger.debug(f"[ROTATOR] Set {source_name} muted={muted}")
         return {"success": True, "source": source_name, "muted": muted}
     except Exception as e:
-        logger.warning(f"[ROTATOR] Mute control failed for {source_name}: {e}")
-        return {"success": False, "error": str(e)}
+        if not silent_fail:
+            logger.warning(f"[ROTATOR] Mute control failed for {source_name}: {e}")
+        return {"success": False, "error": str(e), "silent": silent_fail}
 
 
 async def set_source_bounds_fullscreen(source_name: str) -> Dict[str, Any]:
@@ -409,6 +446,20 @@ async def run_schema(schema_id: str) -> Dict[str, Any]:
                     # Show current video
                     await set_source_visibility(video_src, True)
                     await set_source_mute(video_src, False)
+
+                    # Auto-fix layout if video is too small
+                    try:
+                        from modules.platform_integration.antifafm_broadcaster.skillz.visual_layout_validator.executor import (
+                            validate_and_fix
+                        )
+                        layout_result = await validate_and_fix(auto_fix=True)
+                        if layout_result.get("fixes_applied", 0) > 0:
+                            logger.info(f"[ROTATOR] Layout auto-fixed: {layout_result['fixes_applied']} adjustments")
+                    except ImportError:
+                        pass  # Layout validator not available
+                    except Exception as e:
+                        logger.debug(f"[ROTATOR] Layout check skipped: {e}")
+
                     logger.info(f"[ROTATOR] Video {i+1}/{len(VIDEO_SOURCES)}: {video_src}")
 
                     # Wait for video interval
@@ -420,13 +471,46 @@ async def run_schema(schema_id: str) -> Dict[str, Any]:
                 return {"schema": schema_id, "elapsed_sec": duration, "videos_shown": len(VIDEO_SOURCES)}
 
             elif schema_id == "news":
-                # NEWS schema: Show news ticker overlay
-                logger.info("[ROTATOR] News schema: headlines via browser source")
-                # News ticker uses the browser source which is now visible
-                await asyncio.sleep(SCHEMA_DURATION_SEC)
+                # NEWS schema: Conflict maps + shipping tracker with screenshot rotation
+                from modules.platform_integration.antifafm_broadcaster.skillz.news_maps.executor import (
+                    capture_screenshot,
+                    get_all_ticker_events,
+                    NEWS_ROTATION as NEWS_MAP_ROTATION,
+                    VIEW_ROTATION_SEC,
+                )
+
+                logger.info("[ROTATOR] News schema: conflict/shipping maps rotation")
+
+                # Update OBS image source with news map screenshots
+                elapsed = 0.0
+                map_index = 0
+
+                while elapsed < SCHEMA_DURATION_SEC:
+                    source_id = NEWS_MAP_ROTATION[map_index]
+
+                    # Capture screenshot (uses cache if recent)
+                    screenshot = await capture_screenshot(source_id)
+                    if screenshot:
+                        # Update OBS image source
+                        try:
+                            client = _get_obs_client()
+                            client.set_input_settings(
+                                name=NEWS_MAP_SOURCE,
+                                settings={"file": str(screenshot.absolute())},
+                                overlay=True
+                            )
+                            logger.info(f"[ROTATOR] News map: {source_id}")
+                        except Exception as e:
+                            logger.warning(f"[ROTATOR] Failed to update news map source: {e}")
+
+                    # Wait for view rotation interval
+                    await asyncio.sleep(VIEW_ROTATION_SEC)
+                    elapsed += VIEW_ROTATION_SEC
+                    map_index = (map_index + 1) % len(NEWS_MAP_ROTATION)
+
                 duration = (datetime.now(timezone.utc) - start_time).total_seconds()
                 emit_event("schema_completed", schema_id=schema_id, duration_sec=duration, success=True)
-                return {"schema": schema_id, "elapsed_sec": duration}
+                return {"schema": schema_id, "elapsed_sec": duration, "maps_shown": len(NEWS_MAP_ROTATION)}
 
             # Add other schema imports here as they're implemented
         except ImportError as e:
@@ -522,7 +606,7 @@ async def rotation_daemon():
     Stakeholder can override to pause or skip.
     """
     logger.info("[ROTATOR] Starting boot layer rotation daemon")
-    logger.info(f"[ROTATOR] Schemas: {' → '.join(ROTATION_ORDER)}")
+    logger.info(f"[ROTATOR] Schemas: {' -> '.join(ROTATION_ORDER)}")
     logger.info(f"[ROTATOR] Schema duration: {SCHEMA_DURATION_SEC}s each")
     emit_event("rotation_started", schemas=ROTATION_ORDER, duration_sec=SCHEMA_DURATION_SEC)
 
@@ -606,10 +690,10 @@ def main():
     if args.list:
         print("\n=== Available Schemas ===")
         for sid, schema in SCHEMAS.items():
-            status = "✓" if schema["implemented"] else "○"
+            status = "[x]" if schema["implemented"] else "[ ]"
             print(f"  {status} {sid}: {schema['name']}")
             print(f"      {schema['description']}")
-        print(f"\nRotation order: {' → '.join(ROTATION_ORDER)}")
+        print(f"\nRotation order: {' -> '.join(ROTATION_ORDER)}")
         print(f"Schema duration: {SCHEMA_DURATION_SEC}s each")
         return
 
