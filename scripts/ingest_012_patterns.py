@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from datetime import datetime
@@ -20,8 +21,9 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from holo_index.qwen_advisor.pattern_memory import PatternMemory  # noqa: E402
+from modules.infrastructure.shared_utilities.corpus_resolver import resolve_corpus_path  # noqa: E402
 
-DEFAULT_012_PATH = REPO_ROOT / "012.txt"
+DEFAULT_012_PATH = resolve_corpus_path(REPO_ROOT)
 TASK_EXPORT = REPO_ROOT / "holo_index" / "memory" / "012_pattern_tasks.json"
 KEYWORDS = [
     "Option",

@@ -2,9 +2,15 @@ from fastmcp import FastMCP
 import asyncio
 import sys
 import os
+from pathlib import Path
 
 # Add Foundups paths
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../'))
+
+from modules.infrastructure.shared_utilities.corpus_resolver import resolve_corpus_path
+
+_SERVER_DIR = Path(__file__).resolve()
+_REPO_ROOT = _SERVER_DIR.parents[3]  # foundups-mcp-p1/servers/holo_index/ -> repo root
 
 from holo_index.core.holo_index import HoloIndex
 
@@ -277,7 +283,7 @@ class HoloIndexMCPServer:
     @app.tool()
     async def mine_012_conversations_for_patterns(
         self,
-        txt_file: str = "O:/Foundups-Agent/012.txt",
+        txt_file: str = "",
         chunk_size: int = 8000,
         verify_code: bool = True
     ) -> dict:
@@ -308,6 +314,9 @@ class HoloIndexMCPServer:
         from pathlib import Path
 
         try:
+            if not txt_file:
+                resolved = resolve_corpus_path(_REPO_ROOT)
+                txt_file = str(resolved) if resolved else ""
             log_file = Path(txt_file)
             if not log_file.exists():
                 return {

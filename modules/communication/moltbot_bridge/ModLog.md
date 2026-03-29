@@ -1,5 +1,200 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-29: OpenClaw Authority & Mutation Gate Hardening (WSP 00/95)
+
+**Author**: 0102
+**WSP**: 00 (Zen State / Security Boundary), 95 (Skill Safety)
+
+### Context
+
+Security audit identified three gaps in OpenClaw's mutation gate:
+1. Commander authority derived solely from spoofable display-name matching
+2. Source-modification detection missing bare filenames (.env, .bat, .gitignore)
+3. Skill-safety failures were downgrading to conversation instead of fail-closed block
+
+### Changes
+
+1. **Commander authority trust model** (`openclaw_intent_planner.py`):
+   - Local channels (voice_repl, local_repl) inherently trusted - operator has physical access
+   - **Remote channels are NO LONGER commander** - display names are spoofable
+   - No reliable remote identity field exists (no stable platform user ID, signed origin, or cryptographic verification)
+   - Remote commander claims logged at WARNING level for security monitoring
+   - Remote channels remain advisory/non-commander until stronger identity contract added
+
+2. **Source-modification detection** (`openclaw_permission_policy.py`):
+   - `extract_file_paths()` extended with new extension pattern: `.bat`, `.cmd`, `.env`
+   - New special_pattern for dotfiles: `.env`, `.gitignore`, `.dockerignore`, `.npmrc`, `.npmignore`
+   - Word boundary handling prevents false positives (config.env does not trigger .env detection)
+
+3. **Skill-safety fail-closed** (`openclaw_process_loop.py`):
+   - Skill-safety failures return deterministic blocked output instead of downgrading to conversation
+   - Output: `[SECURITY BLOCK] Execution prevented by Skill Safety Guard: {reason}`
+   - WSP 95 / WSP 00 compliance for mutating intents
+
+4. **Tests** (`test_openclaw_dae.py`):
+   - 4 tests for commander authority (local trusted, remote NOT trusted)
+   - 6 tests for security-critical file detection (.env, .bat, .cmd, .gitignore, .dockerignore, no false positive)
+   - Updated existing tests to use local channels where commander authority expected
+
+### Design Principles
+
+- Defense in depth: Local channel = inherent trust, remote = NOT trusted (no reliable identity)
+- Fail closed: Skill-safety blocks return hard block, not soft downgrade
+- Pattern completeness: All security-critical files detected by mutation gate
+
+### Result
+
+OpenClaw mutation gate now:
+- Trusts local channels inherently (no spoofing possible)
+- **Denies commander authority on remote channels** (display-name spoofable)
+- Logs remote commander claim attempts for security monitoring
+- Detects all security-critical files (.env, scripts, dotfiles)
+- Fails closed on skill-safety gate failures
+
+---
+
+## 2026-03-28: OpenClaw Bounded Maintenance Loop (WSP 15/77/87/97)
+
+**Author**: 0102
+**WSP**: 15, 22, 77, 87, 97
+
+### Context
+
+OpenClaw needed a real maintenance loop that selects safe bounded tasks, executes through existing routes, verifies results, and writes durable reports. Without this, the supervisor could only restart OpenClaw or execute arbitrary autonomous tasks without safety filtering.
+
+### Changes
+
+1. **Created `openclaw_maintenance_selector.py`**:
+   - `MaintenanceTask` dataclass with family, risk_level, bundle_confidence, escalation tracking
+   - `select_maintenance_task()` uses HoloIndex bundle for task direction
+   - `write_maintenance_report()` writes structured JSON artifacts to workspace/reports
+   - **Allowed families (Phase 1 - real executors only)**:
+     - `self_audit_fix`: source == "self_audit" -> self_audit_dispatch
+     - `grant_review`: "openclaw-grants" in required_skills -> grant_dispatch
+     - `startup_maintenance`: source == "startup_maintenance_gate" -> startup_maintenance_dispatch
+   - Blocked families: source_edit, architecture_change, dependency_update, config_mutation, external_api_call
+
+2. **Extended `openclaw_supervisor.py`**:
+   - `_triage()` includes bounded maintenance selection (gated by `OPENCLAW_MAINTENANCE_ENABLED=1`)
+   - `_triage()` reads self-audit events from JSONL and triggers `execute_self_audit_fix` action
+   - `_get_pending_self_audit_event()` reads pending events with allowed fixes from JSONL
+   - `_execute()` handles `execute_maintenance_task` action via existing `run_task.execute_task()`
+   - `_verify()` validates maintenance tasks and writes report artifacts
+   - `_plan()` carries maintenance_selection metadata for observability
+
+3. **Created `test_openclaw_maintenance_selector.py`** (13 tests):
+   - Task dataclass behavior (is_safe logic, serialization)
+   - Task selection (safe selection, escalation paths, unknown family handling)
+   - Report generation (success/failure artifacts)
+   - Configuration validation
+
+4. **Added self-audit triage tests in `test_openclaw_supervisor.py`** (3 tests):
+   - `test_self_audit_triage_returns_execute_action`: JSONL event triggers action
+   - `test_self_audit_triage_skips_already_attempted`: Already-attempted events skipped
+   - `test_self_audit_triage_ignores_non_allowed_fixes`: Non-allowed fixes ignored
+
+### Design Principles
+
+- Uses existing supervisor loop (no new control plane)
+- Uses HoloIndex execution bundle for direction (no second planner)
+- Writes durable report artifacts (inspectable outcomes)
+- Escalates ambiguous/high-risk work (fail closed)
+- Only low-risk families in Phase 1
+
+### Activation
+
+```bash
+export OPENCLAW_MAINTENANCE_ENABLED=1
+# Supervisor will now select bounded maintenance tasks
+```
+
+### Result
+
+OpenClaw can run real bounded maintenance cycles end-to-end. Safe tasks are selected via HoloIndex-guided filtering, executed through existing routes, verified, and reported.
+
+---
+
+## 2026-03-27: OpenClaw HoloIndex Execution Bundle (WSP 87/97)
+
+**Author**: 0102
+**WSP**: 22, 87, 97
+
+### Context
+
+OpenClaw/Kohi needed pre-execution context retrieval to make better routing and subroutine choices. Without bounded retrieval, the runtime was making execution decisions without consulting HoloIndex or prior patterns.
+
+### Changes
+
+1. **Created `openclaw_execution_bundle.py`**:
+   - `ExecutionBundle` dataclass: query, route, docs, patterns, candidate_paths, constraints, verification_hints, confidence, code_hits, wsp_hits
+   - `build_execution_bundle()`: single HoloIndex search, stores raw hits for route consumption
+   - `retrieve_bundle_for_memory_query()`: specialized high-confidence bundle for memory queries
+   - Graceful degradation when HoloIndex unavailable
+
+2. **Integrated into `openclaw_execution_routes.py`**:
+   - `execute_query()` uses bundle's code_hits/wsp_hits directly (no duplicate search)
+   - Bundle verification_hints appear in response output
+   - Candidate paths fallback when HoloIndex returns no hits
+   - Debug logging: `[OPENCLAW-DAE] [BUNDLE] query=... conf=... candidates=... code=... wsp=...`
+
+3. **Created `test_openclaw_execution_bundle.py`** (16 tests):
+   - Dataclass behavior (defaults, is_actionable, to_compact_dict, code_hits/wsp_hits)
+   - Bundle building (graceful HoloIndex unavailability, doc inference, raw hits storage)
+   - Memory query bundles (high confidence, constraints)
+   - Route integration:
+     - Proves bundle data affects response output
+     - Proves only one HoloIndex search occurs
+     - Proves candidate paths fallback behavior
+
+### Design Principles
+
+- Bundles are execution aids, not architecture authorities
+- Compact only — no giant context dumps
+- Deterministic — same query produces same bundle shape
+- Single HoloIndex search per query (no duplication)
+- Suitable for bounded doer, not open-ended cognition
+
+### Result
+
+`execute_query()` now retrieves bounded HoloIndex context via bundle and uses that data directly. All 16 focused tests pass.
+
+---
+
+## 2026-03-28: OpenClaw execution stance clarified for current tranche
+
+**Author**: 0102
+**WSP**: 15, 22, 77
+
+### Context
+
+OpenClaw documentation had drifted toward treating the runtime as if it were the primary architect. For the current tranche, that is the wrong operating model.
+
+### Clarification
+
+- `0102` remains architect, prioritizer, and reviewer
+- `OpenClaw / Kohi` is the bounded doer
+- `HoloIndex` is the retrieval and subroutine-direction surface
+- `WRE` remains the deterministic execution plane
+- optional higher-compute review lanes may critique artifacts, but do not replace 0102 authority
+
+### Current OpenClaw Job
+
+- fix simple codebase issues
+- run focused checks
+- emit runtime evidence
+- create reports and durable knowledge artifacts
+
+### Documentation Updated
+
+- `README.md`: added current operating rule
+- `INTERFACE.md`: added bounded execution contract
+- `docs/OPENCLAW_0102_HANDOFF_2026-03-07.md`: added operating clarification
+- `workspace/HERMES_INSPIRED_FOUNDUPS_NATIVE_ROADMAP_2026-03-23.md`: added execution rule for low-fruit maintenance
+
+### Result
+
+The module docs now point to the current `WSP 77` coordination shape without mutating core WSP protocol text.
+
 ## 2026-03-24: Gateway Continuity Layer (P1)
 
 **Author**: 0102

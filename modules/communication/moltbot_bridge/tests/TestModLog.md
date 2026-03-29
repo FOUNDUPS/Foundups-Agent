@@ -1,3 +1,126 @@
+## 2026-03-29: OpenClaw Authority & Mutation Gate Hardening (WSP 00 / WSP 95)
+
+**File**: `test_openclaw_dae.py` (extended + updated - security tests)
+- **TestIntentClassification** (updated for hardened commander authority):
+  - `test_local_channel_grants_commander_authority`: voice_repl grants authority regardless of display name
+  - `test_local_repl_grants_commander_authority`: local_repl grants authority regardless of display name
+  - `test_remote_channel_requires_display_name_match`: Remote impostor correctly blocked
+  - `test_remote_channel_with_display_name_match_is_NOT_commander`: **Remote display-name match is NOT commander** (hardened)
+  - `test_commander_detection_local_channel`: Updated to use local channel (was `test_commander_detection_undaodu`)
+- **TestSecurityCriticalFilePaths** (6 new tests for mutation gate):
+  - `test_detects_env_file`: .env detected as source modification target
+  - `test_detects_bat_file`: .bat scripts detected
+  - `test_detects_cmd_file`: .cmd scripts detected
+  - `test_detects_gitignore`: .gitignore detected
+  - `test_detects_dockerignore`: .dockerignore detected
+  - `test_no_false_positive_on_env_suffix`: config.env does not false-positive on .env
+- **TestGemmaHybridIntegration** (updated):
+  - `test_foundup_intent_with_gemma_disabled`: Updated to use `local_repl` channel
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_dae.py -q`
+
+**Result**:
+- `102 passed, 1 failed` (pre-existing unrelated shutil mock issue)
+
+---
+
+## 2026-03-28: OpenClaw Bounded Maintenance Loop
+
+**File**: `openclaw_maintenance_selector.py` (NEW)
+- `MaintenanceTask` dataclass with family, risk_level, escalation tracking
+- `select_maintenance_task()` selects safe low-risk tasks with HoloIndex bundle
+- `write_maintenance_report()` writes structured report artifacts
+- **ALLOWED_TASK_FAMILIES (Phase 1 - real executors only)**:
+  - `self_audit_fix`: source == "self_audit"
+  - `grant_review`: "openclaw-grants" in required_skills
+  - `startup_maintenance`: source == "startup_maintenance_gate"
+- `BLOCKED_TASK_FAMILIES`: source_edit, architecture_change, dependency_update, config_mutation, external_api_call
+
+**File**: `openclaw_supervisor.py` (integration)
+- `_triage()` now includes bounded maintenance task selection (gated by `OPENCLAW_MAINTENANCE_ENABLED`)
+- `_triage()` reads self-audit events from JSONL and triggers `execute_self_audit_fix` action
+- `_get_pending_self_audit_event()` reads pending events with allowed fixes from JSONL
+- `_execute()` handles `execute_maintenance_task` and `execute_self_audit_fix` actions
+- `_verify()` validates maintenance tasks and writes report artifacts
+- `_plan()` carries maintenance_selection metadata
+
+**File**: `test_openclaw_maintenance_selector.py` (NEW)
+- 13 tests covering task selection, escalation, report generation
+- TestMaintenanceTaskDataclass: is_safe logic, serialization
+- TestSelectMaintenanceTask: safe selection, escalation, unknown family handling
+- TestWriteMaintenanceReport: success/failure artifact generation
+- TestAllowedTaskFamilies: configuration validation
+
+**File**: `test_openclaw_supervisor.py` (extended)
+- 3 new tests for self-audit triage path (JSONL)
+- `test_self_audit_triage_returns_execute_action`: JSONL event with allowed fix triggers action
+- `test_self_audit_triage_skips_already_attempted`: Events with `auto_fix_attempted=True` skipped
+- `test_self_audit_triage_ignores_non_allowed_fixes`: Events with non-allowed fixes ignored
+- 1 new end-to-end test for maintenance loop (AgentDB -> run_task.py)
+- `test_maintenance_loop_e2e_self_audit_via_agentdb`: Full flow through AgentDB task selection, supervisor triage, run_task dispatch, and completion
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_maintenance_selector.py -q`
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_supervisor.py -q`
+
+**Result**:
+- `13 passed` (maintenance selector)
+- `18 passed` (supervisor with self-audit triage + e2e tests)
+
+---
+
+## 2026-03-27: OpenClaw HoloIndex Execution Bundle
+
+**File**: `openclaw_execution_bundle.py` (NEW)
+- `ExecutionBundle` dataclass with query, route, docs, patterns, candidate_paths, constraints, verification_hints, confidence, code_hits, wsp_hits
+- `build_execution_bundle()` retrieves compact context from HoloIndex (single search, stores raw hits)
+- `retrieve_bundle_for_memory_query()` specialized function for memory queries
+- WSP 87 (Semantic Code Discovery) + WSP 97 (System Execution) compliance
+
+**File**: `openclaw_execution_routes.py` (integration)
+- `execute_query()` uses bundle's code_hits/wsp_hits directly (no duplicate HoloIndex search)
+- Bundle verification_hints appear in response output
+- Candidate paths fallback when HoloIndex returns no hits
+- Debug logging: `[OPENCLAW-DAE] [BUNDLE] query=... conf=... candidates=... code=... wsp=...`
+
+**File**: `test_openclaw_execution_bundle.py` (NEW)
+- 16 tests covering dataclass, bundle building, memory queries, route integration
+- TestExecutionBundleDataclass: defaults, is_actionable, to_compact_dict, code_hits/wsp_hits storage
+- TestBuildExecutionBundle: graceful HoloIndex unavailability, doc inference, verification hints, raw hits storage
+- TestMemoryQueryBundle: high confidence, constraints, verification hints
+- TestExecutionRouteIntegration:
+  - `test_execute_query_uses_bundle_hits_not_separate_search`: proves bundle data affects response
+  - `test_execute_query_no_duplicate_holoindex_search`: proves only one HoloIndex search
+  - `test_bundle_candidate_paths_used_when_no_holoindex_hits`: proves fallback behavior
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_execution_bundle.py -q`
+
+**Result**:
+- `16 passed`
+
+---
+
+## 2026-03-27: OpenClaw Supervisor Runtime Emitter + Test Fix
+
+**File**: `openclaw_supervisor.py` (instrumentation)
+- `_execute()` now emits `supervisor_execute` events via `runtime_emitter.py`
+- Events cover all action paths: start_openclaw, execute_autonomous_task, execute_self_audit_fix
+- Events include: action type, task_id (when applicable), executor on success, error on failure
+
+**File**: `test_openclaw_supervisor.py` (test fix)
+- Fixed 4 failing tests that didn't enable `OPENCLAW_AUTO_TASKS_ENABLED` circuit breaker
+- Tests now use `patch.dict(os.environ, {"OPENCLAW_AUTO_TASKS_ENABLED": "1"})` to trigger PLAN state
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_supervisor.py -q`
+
+**Result**:
+- `14 passed`
+
+---
+
 ## 2026-03-23: Supervisor Memory Nudge Tests (P1)
 - Command: `pytest modules/communication/moltbot_bridge/tests/test_openclaw_supervisor.py -q`
 - Status: PASS

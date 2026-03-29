@@ -176,6 +176,7 @@ class IntentCategory(Enum):
     CONVERSATION = "conversation"   # Chat: casual dialogue, greeting
     FOUNDUP = "foundup"             # FoundUp launch and management
     RESEARCH = "research"           # PQN detection, Duism, Oracle teaching
+    TRAINING = "training"           # Corpus training: status, start, progress
 
 
 class AutonomyTier(Enum):
@@ -593,6 +594,11 @@ class OpenClawDAE:
             "thanks", "thank you", "bye", "goodbye", "see you",
             "talk", "conversation", "chat with",
         ],
+        IntentCategory.TRAINING: [
+            "training", "train", "corpus", "012.txt", "checkpoint",
+            "training status", "start training", "is training due",
+            "training progress", "pattern memory", "batch training",
+        ],
     }
 
     # Domain routing map: intent category -> target domain/DAE
@@ -607,6 +613,7 @@ class OpenClawDAE:
         IntentCategory.CONVERSATION: "digital_twin",
         IntentCategory.FOUNDUP: "fam_adapter",
         IntentCategory.RESEARCH: "pqn_research_adapter",
+        IntentCategory.TRAINING: "training_controller",
     }
 
     # Runtime profiles (OpenClaw/IronClaw/ZeroClaw) and aliases.

@@ -2,6 +2,90 @@
 
 ## Chronological Change Log
 
+### 2026-03-29 - foundups_domain_canonicalization (README + INTERFACE tightening)
+
+**By:** 0102
+**WSP References:** WSP 22, WSP 97
+
+**What changed**
+- `README.md`: Replaced legacy platform prose with clear canonical/historical separation
+  - Top section: Canonical Planning References table (active)
+  - New section: "What Exists Now" with implemented classes and active submodules
+  - Legacy content marked as "Historical Context" with explicit warning
+- `INTERFACE.md`: Added implementation status to all interfaces
+  - Interface Status table at top: IMPLEMENTED vs PLANNED
+  - Each planned interface marked with "(PLANNED)" and "(not yet created)" notes
+  - Web API and Integration sections marked as design specifications
+
+**Why**
+- Legacy prose was reading as current canon when it described aspirational interfaces
+- `FOUNDUPS_DOMAIN_CANONICAL_INDEX.md` called for this tightening as "Pending Audit" items
+- Agents and humans need to clearly distinguish what exists vs what's planned
+
+---
+
+### 2026-03-29 - FoundUps Domain Canonical Index + documentation custody
+
+**By:** 0102
+**WSP References:** WSP 3, WSP 22, WSP 65, WSP 77, WSP 97
+
+**What changed**
+- Added:
+  - `modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md`
+- Updated:
+  - `modules/foundups/README.md`
+  - `modules/foundups/ROADMAP.md`
+
+**Why**
+- FoundUps needed one current source for:
+  - canonical vs planning vs pending-audit vs historical document status
+  - current core / incubating / proto-ready / externalized portfolio classification
+  - documentation chain of custody before automated cleanup work
+- Repo truth already has:
+  - an existing autonomous task plane (`AgentDB` + `OpenClawSupervisor` + `run_task.py`)
+  - documentation audit surfaces (`DocDAE`, `AI Overseer`, `WSPFrameworkSentinel`)
+- so the right move was to define a canonical index and custody process, not invent a new jobs module
+
+**Decision**
+- No new FoundUps "Claw jobs" module for now
+- Use the existing AgentDB/OpenClaw task plane for bounded FoundUps documentation and audit work
+- Treat root FoundUps docs carefully:
+  - `README.md` top canonical block is active
+  - older sections remain context until revalidated
+  - `INTERFACE.md` is pending audit, not automatic current truth
+
+### 2026-03-29 - FoundUp Exfoliation Protocol + PQN Swarm Hub Brief
+
+**By:** 0102
+**WSP References:** WSP 15, WSP 22, WSP 77, WSP 97
+
+**What changed**
+- Added FoundUp decision policy for internal incubation vs repo spin-out:
+  - `modules/foundups/docs/FOUNDUP_EXFOLIATION_PROTOCOL.md`
+- Added PQN Swarm Hub FoundUp brief with explicit PoC placement decision:
+  - `modules/foundups/docs/PQN_SWARM_HUB_FOUNDUP_BRIEF.md`
+- Updated domain references:
+  - `modules/foundups/README.md`
+  - `modules/foundups/ROADMAP.md`
+
+**Why**
+- 012 requested a repo-grounded determination for where new FoundUps should begin:
+  internal monorepo PoC vs external repo from day one.
+- The codebase already shows both incubation and migration patterns:
+  monorepo FoundUp modules plus dual-remote federation plans.
+- The domain needed one explicit rule for:
+  - what is core
+  - what should exfoliate
+  - when product FoundUps should spin out
+
+**Decision**
+- Default: internal first, external at Proto
+- Exception: external off the bat only when the FoundUp is already clearly
+  standalone, low-coupling, independently deployable, and intended for early
+  multi-contributor participation
+- PQN Swarm Hub specifically should start internal, not external, because it still
+  depends on moving platform contracts (`PQN`, `rESP`, `ROC`, queue/gate/ledger interfaces)
+
 ### 2026-03-13 - Social Twin FoundUp Architecture Lock
 
 **By:** 0102

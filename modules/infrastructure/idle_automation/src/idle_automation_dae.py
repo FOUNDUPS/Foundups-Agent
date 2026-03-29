@@ -28,6 +28,8 @@ import os
 import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
+
+from modules.infrastructure.shared_utilities.corpus_resolver import resolve_corpus_path
 from typing import Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
@@ -645,6 +647,16 @@ class IdleAutomationDAE:
 
         start_time = datetime.now()
 
+        # Runtime emitter: structured event for training observability
+        _rt_start = None
+        try:
+            from modules.infrastructure.dae_daemon.src.runtime_emitter import (
+                emit_start as _re_start, emit_success as _re_ok, emit_failure as _re_fail,
+            )
+            _rt_start = _re_start("idle_automation", "pattern_training")
+        except Exception:
+            _re_ok = _re_fail = None
+
         try:
             # Check if training is enabled via environment variable
             training_enabled = self._parse_bool_env("AUTO_PATTERN_TRAINING", True)
@@ -662,8 +674,8 @@ class IdleAutomationDAE:
             last_processed = pattern_memory.get_checkpoint()
 
             # 012.txt location
-            txt_file = Path("O:/Foundups-Agent/012.txt")
-            if not txt_file.exists():
+            txt_file = resolve_corpus_path(self.module_path.parent.parent.parent)
+            if txt_file is None:
                 result["error"] = "012.txt not found"
                 return result
 
@@ -713,6 +725,19 @@ class IdleAutomationDAE:
             logger.warning(f"Pattern training error: {e}")
         finally:
             result["duration"] = (datetime.now() - start_time).total_seconds()
+            # Emit structured event for training observability
+            if _rt_start is not None:
+                try:
+                    if result.get("success"):
+                        _re_ok("idle_automation", "pattern_training", _rt_start,
+                               details={"patterns_stored": result.get("patterns_stored", 0),
+                                         "lines_processed": result.get("lines_processed", 0)})
+                    else:
+                        _re_fail("idle_automation", "pattern_training", _rt_start,
+                                 result.get("error", "unknown")[:200],
+                                 details={"patterns_stored": result.get("patterns_stored", 0)})
+                except Exception:
+                    pass
 
         return result
 
@@ -1273,7 +1298,10 @@ class IdleAutomationDAE:
 
 
 # Convenience function for YouTube DAE integration
-async def run_idle_automation(parent_context=None) -> Dict[str, Any]:
+async def run_idle_automation(
+    parent_context=None,
+    triggering_session: str | None = None,
+) -> Dict[str, Any]:
     """
     Convenience function for YouTube DAE integration.
     Call this from AutoModeratorDAE when entering idle state.
@@ -1282,6 +1310,12 @@ async def run_idle_automation(parent_context=None) -> Dict[str, Any]:
         parent_context: Optional parent continuity context for cross-surface lineage.
                        Pass the caller's continuity context to enable cross-surface tracking.
                        Example: run_idle_automation(parent_context=self._continuity_context)
+        triggering_session: Optional session identifier (e.g. video_id) for
+                           origin recovery when no parent_context is available.
+                           Stored via set_triggering_session() so the idle DAE
+                           can correlate background work to the originating surface.
     """
     dae = IdleAutomationDAE()
+    if triggering_session and not parent_context:
+        dae.set_triggering_session(triggering_session)
     return await dae.run_idle_tasks(parent_context=parent_context)

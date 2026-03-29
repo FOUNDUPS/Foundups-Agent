@@ -750,6 +750,40 @@ List 4-6 specific tasks. Be concise."""
         """
         worker = task.worker_assignment or ""
 
+        # Runtime emitter: structured dispatch event
+        _rt_start = None
+        try:
+            from modules.infrastructure.dae_daemon.src.runtime_emitter import (
+                emit_start, emit_success, emit_failure,
+            )
+            _rt_start = emit_start(
+                "wsp_orchestrator", "worker_dispatch",
+                details={"worker": worker, "task_type": task.task_type,
+                         "description": task.description[:80]},
+            )
+        except Exception:
+            emit_success = emit_failure = None  # type: ignore[assignment]
+
+        try:
+            result = await self._dispatch_worker_inner(task, worker)
+        except Exception as exc:
+            if _rt_start is not None and emit_failure:
+                emit_failure("wsp_orchestrator", "worker_dispatch", _rt_start,
+                             str(exc)[:200], details={"worker": worker})
+            raise
+        else:
+            is_error = "ERROR" in result or "UNAVAILABLE" in result
+            if _rt_start is not None:
+                if is_error and emit_failure:
+                    emit_failure("wsp_orchestrator", "worker_dispatch", _rt_start,
+                                 result[:200], details={"worker": worker})
+                elif emit_success:
+                    emit_success("wsp_orchestrator", "worker_dispatch", _rt_start,
+                                 details={"worker": worker})
+            return result
+
+    async def _dispatch_worker_inner(self, task: WSPTask, worker: str) -> str:
+        """Inner dispatch logic (separated for emitter wrapping)."""
         if worker.startswith("MCP:"):
             if not self.mcp_executor:
                 return "[MCP-UNAVAILABLE] MCP executor not initialized"

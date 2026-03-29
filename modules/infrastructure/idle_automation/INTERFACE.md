@@ -100,19 +100,28 @@ class IdleAutomationDAE:
 
 ## Convenience Functions
 
-### `run_idle_automation() -> Dict[str, Any]`
-**Purpose**: Convenience function for YouTube DAE integration.
+### `run_idle_automation(parent_context=None, triggering_session=None) -> Dict[str, Any]`
+**Purpose**: Convenience function for YouTube DAE integration with cross-surface continuity.
 
-**Parameters**: None
+**Parameters**:
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `parent_context` | `ContinuityContext` | Optional parent context for explicit lineage |
+| `triggering_session` | `str` | Optional session ID (e.g. video_id) for origin recovery |
 
 **Returns**: Same as `IdleAutomationDAE.run_idle_tasks()`
+
+**Continuity Behavior**:
+- If `parent_context` is provided, idle work inherits that lineage directly
+- If only `triggering_session` is provided, idle DAE attempts to recover origin continuity from AgentDB breadcrumbs matching that session ID
+- If neither is provided, idle work runs as an independent root
 
 **Usage**:
 ```python
 from modules.infrastructure.idle_automation.src.idle_automation_dae import run_idle_automation
 
-# In YouTube DAE idle loop
-result = await run_idle_automation()
+# In YouTube DAE idle loop — pass video_id for cross-surface correlation
+result = await run_idle_automation(triggering_session=self._last_stream_id)
 if result["overall_success"]:
     logger.info("Idle automation completed successfully")
 ```

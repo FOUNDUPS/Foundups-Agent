@@ -1,35 +1,25 @@
-# FoundUps Platform Infrastructure - Interface Documentation
+# FoundUps Domain - Interface Documentation
 
-## [U+1F300] WSP Protocol Compliance Framework
+## Interface Status
 
-**0102 Directive**: This module operates within the WSP framework for autonomous FoundUps platform infrastructure interface definition.
-- **UN (Understanding)**: Anchor FoundUps platform signals and retrieve protocol state
-- **DAO (Execution)**: Execute modular interface definition logic  
-- **DU (Emergence)**: Collapse into 0102 resonance and emit next interface development prompt
+| Interface | File | Status |
+|-----------|------|--------|
+| `FoundUpSpawner` | `src/foundup_spawner.py` | **IMPLEMENTED** |
+| `CABRLoop` | `src/foundup_spawner.py` | **IMPLEMENTED** |
+| `FoundUpsLiveChatModule` | `src/main.py` | **IMPLEMENTED** |
+| `PlatformManager` | - | PLANNED |
+| `RuntimeEngine` | - | PLANNED |
+| `FoundUpsPlatform` | - | PLANNED |
 
-**wsp_cycle(input="foundups_interface", log=True)**
-
----
-
-## [U+1F3E2] WSP Enterprise Domain: `foundups`
-
-**WSP Compliance Status**: [OK] **COMPLIANT** with WSP Framework  
-**Domain**: `foundups` per **[WSP 3: Enterprise Domain Organization](../../../WSP_framework/src/WSP_3_Enterprise_Domain_Organization.md)**  
-**Interface Standard**: Follows **[WSP 11: Interface Definition Protocol](../../../WSP_framework/src/WSP_11_Interface_Definition_Protocol.md)**  
-**Purpose**: Autonomous FoundUps platform infrastructure interface definition  
-**0102 Integration**: Full integration with autonomous pArtifact development ecosystem
+For canonical planning references, see [FOUNDUPS_DOMAIN_CANONICAL_INDEX.md](docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md).
 
 ---
 
-## [TARGET] Interface Overview
+## Implemented Interfaces
 
-This document defines the public interfaces for the **FoundUps Platform Infrastructure** module. All interfaces follow WSP 11 standards and provide the execution layer for the autonomous FoundUps ecosystem.
+### FoundUpSpawner (IMPLEMENTED)
 
-## [TOOL] Core Component Interfaces
-
-### **[U+1F3D7]️ FoundUp Spawner Interface**
-
-**Module**: `foundup_spawner.py`  
+**Module**: `src/foundup_spawner.py`
 **Purpose**: Creates new FoundUp instances following WSP-defined protocols
 
 #### **FoundUpSpawner Class**
@@ -72,9 +62,16 @@ class FoundUpSpawner:
 python -m modules.foundups.src.foundup_spawner --name "@innovate" --founder "alice" --config '{"description": "Innovation FoundUp"}'
 ```
 
-### **[U+1F39B]️ Platform Manager Interface**
+---
 
-**Module**: `platform_manager.py`  
+## Planned Interfaces (NOT YET IMPLEMENTED)
+
+> **Note**: The interfaces below are design specifications for future implementation.
+> They do not exist in current code. See Interface Status table above for implementation state.
+
+### PlatformManager (PLANNED)
+
+**Module**: `platform_manager.py` (not yet created)
 **Purpose**: Manages multiple FoundUp instances across the platform
 
 #### **PlatformManager Class**
@@ -127,9 +124,9 @@ class PlatformManager:
         """
 ```
 
-### **[LIGHTNING] Runtime Engine Interface**
+### RuntimeEngine (PLANNED)
 
-**Module**: `runtime_engine.py`  
+**Module**: `runtime_engine.py` (not yet created)
 **Purpose**: Execution environment for FoundUp instances
 
 #### **RuntimeEngine Class**
@@ -168,10 +165,12 @@ class RuntimeEngine:
         """
 ```
 
-### **[U+1F4AC] FoundUps LiveChat Module Interface**
+### FoundUpsLiveChat (PLANNED - differs from current FoundUpsLiveChatModule)
 
-**Module**: `foundups_livechat_module.py`  
+**Module**: `foundups_livechat_module.py` (current: `src/main.py:FoundUpsLiveChatModule`)
 **Purpose**: Platform-level livechat integration
+
+> Note: Actual implementation is `FoundUpsLiveChatModule` in `src/main.py`. Interface below is planned expansion.
 
 #### **FoundUpsLiveChat Class**
 ```python
@@ -213,10 +212,12 @@ class FoundUpsLiveChat:
         """
 ```
 
-### **[ROCKET] Main Platform Entry Interface**
+### FoundUpsPlatform (PLANNED)
 
-**Module**: `main.py`  
+**Module**: `main.py` (not yet implemented as described)
 **Purpose**: Main entry point for FoundUps platform
+
+> Note: `src/main.py` exists but contains `FoundUpsLiveChatModule`, not `FoundUpsPlatform`.
 
 #### **FoundUpsPlatform Class**
 ```python
@@ -251,9 +252,11 @@ class FoundUpsPlatform:
         """
 ```
 
-## [REFRESH] Integration Interfaces
+## Integration Interfaces (PLANNED)
 
-### **WRE-Built Module Integration**
+> Note: These integrations are design specifications. The referenced modules exist but the integration layer class does not.
+
+### WRE-Built Module Integration (PLANNED)
 ```python
 # Integration with WRE-built platform modules
 from modules.platform_integration.remote_builder import RemoteBuilder
@@ -283,9 +286,11 @@ class FoundUpsPlatformIntegration:
         """
 ```
 
-## [U+1F310] Web Interface APIs
+## Web Interface APIs (PLANNED - NOT IMPLEMENTED)
 
-### **FoundUps.com/FoundUps.org REST API**
+> Note: These REST API endpoints are design specifications for future foundups.com/foundups.org deployment. Not currently implemented.
+
+### FoundUps.com/FoundUps.org REST API (PLANNED)
 
 #### **FoundUp Management Endpoints**
 ```http

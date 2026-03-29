@@ -115,12 +115,12 @@ class TestIntentClassification:
         assert intent.category == IntentCategory.CONVERSATION
         assert intent.target_domain == "digital_twin"
 
-    def test_commander_detection_undaodu(self):
-        """Commander authority detected for @UnDaoDu."""
+    def test_commander_detection_local_channel(self):
+        """Commander authority granted on local channel (channel proves identity)."""
         intent = self.dae.classify_intent(
             message="Hello",
             sender="@UnDaoDu",
-            channel="discord",
+            channel="voice_repl",  # Local channel - inherently trusted
             session_key="sess7",
         )
         assert intent.is_authorized_commander is True
@@ -134,6 +134,99 @@ class TestIntentClassification:
             session_key="sess8",
         )
         assert intent.is_authorized_commander is False
+
+    def test_local_channel_grants_commander_authority(self):
+        """Local channel (voice_repl) grants commander authority regardless of display name."""
+        intent = self.dae.classify_intent(
+            message="run tests",
+            sender="any_user",  # Not in AUTHORIZED_COMMANDERS
+            channel="voice_repl",
+            session_key="local1",
+        )
+        assert intent.is_authorized_commander is True
+
+    def test_local_repl_grants_commander_authority(self):
+        """Local channel (local_repl) grants commander authority regardless of display name."""
+        intent = self.dae.classify_intent(
+            message="deploy app",
+            sender="unknown_sender",
+            channel="local_repl",
+            session_key="local2",
+        )
+        assert intent.is_authorized_commander is True
+
+    def test_remote_channel_requires_display_name_match(self):
+        """Remote channel without display name match is not commander."""
+        intent = self.dae.classify_intent(
+            message="execute command",
+            sender="impostor",
+            channel="discord",
+            session_key="remote1",
+        )
+        assert intent.is_authorized_commander is False
+
+    def test_remote_channel_with_display_name_match_is_NOT_commander(self):
+        """Remote channel with display name match is NOT commander (hardened: display-name spoofable)."""
+        intent = self.dae.classify_intent(
+            message="run task",
+            sender="012",  # Even authorized display name
+            channel="telegram",  # Remote channel
+            session_key="remote2",
+        )
+        # WSP 00: Remote display-name is spoofable, no trusted identity field exists
+        assert intent.is_authorized_commander is False
+
+
+class TestSecurityCriticalFilePaths:
+    """Test extract_file_paths catches security-critical files (WSP 00 / mutation gate)."""
+
+    def test_detects_env_file(self):
+        """Detects .env as source modification target."""
+        from modules.communication.moltbot_bridge.src.openclaw_permission_policy import (
+            extract_file_paths,
+        )
+        paths = extract_file_paths("edit .env")
+        assert ".env" in paths
+
+    def test_detects_bat_file(self):
+        """Detects .bat scripts as source modification target."""
+        from modules.communication.moltbot_bridge.src.openclaw_permission_policy import (
+            extract_file_paths,
+        )
+        paths = extract_file_paths("modify launch.bat")
+        assert "launch.bat" in paths
+
+    def test_detects_cmd_file(self):
+        """Detects .cmd scripts as source modification target."""
+        from modules.communication.moltbot_bridge.src.openclaw_permission_policy import (
+            extract_file_paths,
+        )
+        paths = extract_file_paths("edit setup.cmd")
+        assert "setup.cmd" in paths
+
+    def test_detects_gitignore(self):
+        """Detects .gitignore as source modification target."""
+        from modules.communication.moltbot_bridge.src.openclaw_permission_policy import (
+            extract_file_paths,
+        )
+        paths = extract_file_paths("update .gitignore")
+        assert ".gitignore" in paths
+
+    def test_detects_dockerignore(self):
+        """Detects .dockerignore as source modification target."""
+        from modules.communication.moltbot_bridge.src.openclaw_permission_policy import (
+            extract_file_paths,
+        )
+        paths = extract_file_paths("change .dockerignore")
+        assert ".dockerignore" in paths
+
+    def test_no_false_positive_on_env_suffix(self):
+        """Does not false-positive on files ending with .env (like config.env)."""
+        from modules.communication.moltbot_bridge.src.openclaw_permission_policy import (
+            extract_file_paths,
+        )
+        paths = extract_file_paths("edit config.env")
+        assert paths == ["config.env"]  # Should NOT also include ".env"
 
 
 class TestConversationRuntimeFlags:
@@ -941,10 +1034,7 @@ class TestConversationRuntimeFlags:
             dae = OpenClawDAE(repo_root=project_root)
             dae._ironclaw_autostart_wait_sec = 4.0
 
-            with patch(
-                "modules.communication.moltbot_bridge.src.openclaw_dae.shutil.which",
-                return_value=None,
-            ):
+            with patch("shutil.which", return_value=None):
                 started = time.time()
                 recovered, detail = dae._attempt_ironclaw_autostart()
                 elapsed = time.time() - started
@@ -1346,7 +1436,7 @@ class TestGemmaHybridIntegration:
             intent = self.dae.classify_intent(
                 message="Launch a new foundup and create a token",
                 sender="@UnDaoDu",
-                channel="discord",
+                channel="local_repl",  # Local channel for commander authority
                 session_key="sess_foundup",
             )
             assert intent.category == IntentCategory.FOUNDUP
@@ -1774,16 +1864,16 @@ class TestEndToEndProcess:
         assert len(result) > 0
         assert "0102" in result or "Digital Twin" in result
 
-    def test_blocked_command_downgrades_to_conversation(self):
-        """Non-commander COMMAND downgrades to conversation response."""
+    def test_blocked_command_returns_security_block(self):
+        """Non-commander COMMAND returns an explicit security block."""
         result = asyncio.run(self.dae.process(
             message="Run the deploy script now",
             sender="random_user",
             channel="whatsapp",
         ))
         assert isinstance(result, str)
-        # Should get a conversational response, not execution
-        assert "0102" in result or "Digital Twin" in result or "received" in result.lower()
+        # It should hit the skill safety block returning a deterministic string
+        assert "[SECURITY BLOCK]" in result
 
     def test_monitor_returns_status(self):
         """MONITOR intent returns system status."""

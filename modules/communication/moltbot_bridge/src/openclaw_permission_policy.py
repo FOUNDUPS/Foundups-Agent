@@ -29,17 +29,39 @@ SOURCE_KEYWORDS = frozenset(
 
 
 def extract_file_paths(message: str) -> List[str]:
-    """Extract workspace file paths from free-form command text."""
+    """Extract workspace file paths from free-form command text.
+
+    Security-hardened to catch:
+    - Standard source files: .py, .md, .json, .yaml, etc.
+    - Scripts: .sh, .ps1, .bat, .cmd
+    - Secrets/config: .env, .gitignore, .dockerignore
+    - Build files: Dockerfile, Makefile, docker-compose*
+    """
     paths: List[str] = []
-    path_pattern = re.compile(
+    # Pattern for files with extensions (including security-critical ones)
+    # Added: bat, cmd (scripts), env (secrets)
+    extension_pattern = re.compile(
         r"""(?:["'])?"""
-        r"""((?:[\w.@-]+[/\\]){1,}[\w.@-]+\.(?:py|md|json|yaml|yml|txt|toml|cfg|ini|sh|ps1))"""
+        r"""((?:[\w.@-]+[/\\])*[\w.@-]+\.(?:py|md|json|yaml|yml|txt|toml|cfg|ini|sh|ps1|bat|cmd|env))"""
         r"""(?:["'])?""",
         re.IGNORECASE,
     )
-    for match in path_pattern.finditer(message):
+    # Pattern for special files without standard extensions
+    # Added: .gitignore, .dockerignore, .env (dotfiles at any path level)
+    # Uses word boundary to prevent matching substrings (e.g., config.env should not match .env)
+    special_pattern = re.compile(
+        r"""(?:^|[\s"'])"""
+        r"""((?:[\w.@-]+[/\\])*(?:Dockerfile|Makefile|docker-compose[\w.-]*|\.env|\.gitignore|\.dockerignore|\.npmrc|\.npmignore))"""
+        r"""(?:[\s"']|$)""",
+        re.IGNORECASE,
+    )
+    for match in extension_pattern.finditer(message):
         raw = match.group(1).replace("\\", "/")
         paths.append(raw)
+    for match in special_pattern.finditer(message):
+        raw = match.group(1).replace("\\", "/")
+        if raw not in paths:  # Avoid duplicates
+            paths.append(raw)
     return paths
 
 

@@ -103,10 +103,13 @@ def resolve_source_path(repo_root: Path, source_arg: str) -> Optional[Path]:
             candidate = repo_root / source
         return candidate if candidate.exists() else None
 
+    import os
+    env_corpus = os.getenv("OPENCLAW_TRAINING_CORPUS", "012.txt")
     candidates = [
-        repo_root / "012.txt",
-        repo_root / "holo_index" / "data" / "012.txt",
-        repo_root / "docs" / "012_moshpit" / "012.txt",
+        repo_root / env_corpus,
+        repo_root / "holo_index" / "data" / env_corpus,
+        repo_root / "docs" / "012_moshpit" / env_corpus,
+        repo_root / "012.txt",  # Fallback
     ]
     for candidate in candidates:
         if candidate.exists():

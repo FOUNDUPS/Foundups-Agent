@@ -94,11 +94,30 @@ implementation sources of truth:
 3. Simulator stress packs for DEX/liquidity and PoB yield.
 4. Social Twin FoundUp vertical slice:
    Discord/OpenClaw review plane -> approved social execution -> follow-up queue.
+5. FoundUp exfoliation lane:
+   default internal PoC -> external at Proto for product FoundUps such as `gotjunk`
+   and future white-label products.
+6. PQN Swarm Hub internal PoC:
+   incubate inside `modules/foundups/` until gate/registry/rESP/ROC contracts stabilize.
 
 ### P2 (After)
 1. Dynamic pricing and queue optimization.
 2. Advanced market analytics and policy auto-tuning.
 3. Operator automation and escalation loops.
+4. Spin-out execution for Proto-ready product FoundUps using dual-remote federation.
+
+## FoundUp Boundary Rule
+
+Default decision:
+- incubate new FoundUps internally
+- externalize at Proto when contracts, deploy path, and contributor boundary are stable
+
+Use:
+- `modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md`
+- `modules/foundups/docs/FOUNDUP_EXFOLIATION_PROTOCOL.md`
+- `modules/foundups/docs/PQN_SWARM_HUB_FOUNDUP_BRIEF.md`
+
+Do not keep product FoundUps in core indefinitely once they pass the exfoliation gate.
 
 ## Continuity Requirements (must stay current)
 - Update:

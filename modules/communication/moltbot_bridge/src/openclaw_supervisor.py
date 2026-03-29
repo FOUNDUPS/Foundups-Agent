@@ -400,6 +400,47 @@ class OpenClawSupervisor:
         finally:
             self._self_audit_loop = None
 
+    def _get_pending_self_audit_event(self) -> Optional[Dict[str, Any]]:
+        """Read first pending self-audit event from JSONL.
+
+        Returns event where auto_fix_attempted is False and recommended_fix
+        is in the allowed fixes list (has a real executor).
+        """
+        if self._self_audit_loop is None:
+            return None
+
+        task_log_path = getattr(self._self_audit_loop, "task_log_path", None)
+        if task_log_path is None or not Path(task_log_path).exists():
+            return None
+
+        # Get allowed fixes from the loop (these have real executors)
+        allowed_fixes = getattr(self._self_audit_loop, "allowed_fixes", set())
+        if not allowed_fixes:
+            return None
+
+        try:
+            # Read last N lines (recent events) to avoid scanning entire file
+            lines = Path(task_log_path).read_text(encoding="utf-8").strip().split("\n")
+            # Process most recent first (last 50 lines)
+            for line in reversed(lines[-50:]):
+                if not line.strip():
+                    continue
+                try:
+                    event = json.loads(line)
+                    # Skip already-attempted fixes
+                    if event.get("auto_fix_attempted", False):
+                        continue
+                    # Only return events with executable fixes
+                    fix = event.get("recommended_fix", "")
+                    if fix.lower() in allowed_fixes:
+                        return event
+                except json.JSONDecodeError:
+                    continue
+        except Exception as exc:
+            logger.debug("[SUPERVISOR] Failed to read self-audit JSONL: %s", exc)
+
+        return None
+
     # ------------------------------------------------------------------ #
     #  OBSERVE — poll broker, observer, git, self-audit                   #
     # ------------------------------------------------------------------ #
@@ -427,19 +468,20 @@ class OpenClawSupervisor:
                 "window_sec": self.restart_window_sec,
                 "attempts_in_window": self._attempts_in_window(),
             },
-            "self_audit_events": [],
+            "self_audit_event_count": 0,
         }
 
         # Poll DaemonSelfAuditLoop for real events (ported from Supervisor24x7)
+        # NOTE: scan_once() returns int (count of events), not an iterable
         if self._self_audit_loop and hasattr(self._self_audit_loop, "scan_once"):
             try:
-                events = self._self_audit_loop.scan_once()
-                if events:
-                    obs["self_audit_events"] = list(events)
-                    self.metrics.events_observed += len(obs["self_audit_events"])
+                event_count = self._self_audit_loop.scan_once()
+                if event_count and event_count > 0:
+                    obs["self_audit_event_count"] = event_count
+                    self.metrics.events_observed += event_count
                     logger.info(
                         "[SUPERVISOR] OBSERVE: %d self-audit events detected",
-                        len(obs["self_audit_events"]),
+                        event_count,
                     )
             except Exception as exc:
                 logger.warning("[SUPERVISOR] OBSERVE: scan_once() failed: %s", exc)
@@ -477,42 +519,82 @@ class OpenClawSupervisor:
             }
 
         # Check AgentDB for pending autonomous tasks
-        try:
-            from modules.infrastructure.database.src.agent_db import AgentDB
-            db = AgentDB()
-            tasks = db.get_autonomous_tasks(status="pending", limit=1)
-            if tasks:
-                return {
-                    "kind": "action",
-                    "reason": "autonomous_task_pending",
-                    "action": "execute_autonomous_task",
-                    "task": tasks[0],
-                }
-        except Exception as exc:
-            logger.warning("Failed to check autonomous tasks: %s", exc)
+        # CIRCUIT BREAKER: Only auto-execute if explicitly enabled by 012
+        # Set OPENCLAW_AUTO_TASKS_ENABLED=1 after menu choice to activate
+        auto_tasks_enabled = os.getenv("OPENCLAW_AUTO_TASKS_ENABLED", "0") == "1"
+        if auto_tasks_enabled:
+            try:
+                from modules.infrastructure.database.src.agent_db import AgentDB
+                db = AgentDB()
+                tasks = db.get_autonomous_tasks(status="pending", limit=1)
+                if tasks:
+                    return {
+                        "kind": "action",
+                        "reason": "autonomous_task_pending",
+                        "action": "execute_autonomous_task",
+                        "task": tasks[0],
+                    }
+            except Exception as exc:
+                logger.warning("Failed to check autonomous tasks: %s", exc)
 
-        # Check self-audit events (lower priority than restart and AgentDB tasks)
-        audit_events = observation.get("self_audit_events", [])
-        if audit_events:
-            event = audit_events[0]
-            signature = getattr(event, "signature", str(event))
-            recommended_fix = "inspect_log_and_create_patch_task"
-            auto_fixable = False
-            if self._self_audit_loop and hasattr(self._self_audit_loop, "_recommend_fix"):
-                try:
-                    recommended_fix = self._self_audit_loop._recommend_fix(signature)
-                except Exception:
-                    pass
-            if self._self_audit_loop:
-                allowed = getattr(self._self_audit_loop, "allowed_fixes", set())
-                auto_fixable = recommended_fix in allowed
-            if auto_fixable:
+        # Bounded maintenance task selection (WSP 77/87/97)
+        # Uses maintenance selector to find safe, low-risk tasks with HoloIndex direction
+        maintenance_enabled = os.getenv("OPENCLAW_MAINTENANCE_ENABLED", "0") == "1"
+        if maintenance_enabled:
+            try:
+                from modules.infrastructure.database.src.agent_db import AgentDB
+                from .openclaw_maintenance_selector import select_maintenance_task
+
+                db = AgentDB()
+                pending_tasks = db.get_autonomous_tasks(status="pending", limit=10)
+                selection = select_maintenance_task(
+                    pending_tasks=pending_tasks,
+                    observation=observation,
+                    repo_root=self.repo_root,
+                )
+
+                if selection.selected_task:
+                    task = selection.selected_task
+                    if task.is_safe():
+                        # Safe bounded task - execute it
+                        return {
+                            "kind": "action",
+                            "reason": "bounded_maintenance_task",
+                            "action": "execute_maintenance_task",
+                            "task": {
+                                "task_id": task.task_id,
+                                "family": task.family,
+                                "description": task.description,
+                                "source": task.source,
+                                "required_skills": [],
+                                "context": {"source": task.source},
+                            },
+                            "maintenance_selection": selection.to_dict(),
+                        }
+                    else:
+                        # Task requires escalation
+                        return {
+                            "kind": "escalate",
+                            "reason": f"maintenance_escalation:{task.escalation_reason}",
+                            "task": task.to_dict(),
+                            "maintenance_selection": selection.to_dict(),
+                        }
+            except Exception as exc:
+                logger.warning("Failed to select maintenance task: %s", exc)
+
+        # Check self-audit events from JSONL (lower priority than restart and AgentDB tasks)
+        # DaemonSelfAuditLoop persists events to JSONL with recommended_fix field
+        self_audit_enabled = os.getenv("OPENCLAW_SELF_AUDIT_ENABLED", "1") != "0"
+        if self_audit_enabled and self._self_audit_loop:
+            pending_event = self._get_pending_self_audit_event()
+            if pending_event:
                 return {
                     "kind": "action",
-                    "reason": "self_audit_event_detected",
+                    "reason": "self_audit_event_pending",
                     "action": "execute_self_audit_fix",
-                    "event_signature": signature,
-                    "recommended_fix": recommended_fix,
+                    "event_signature": pending_event.get("signature", ""),
+                    "recommended_fix": pending_event.get("recommended_fix", ""),
+                    "source_file": pending_event.get("source_file", ""),
                 }
 
         return {"kind": "idle", "reason": "resident_openclaw_healthy"}
@@ -536,6 +618,10 @@ class OpenClawSupervisor:
             plan["event_signature"] = triage.get("event_signature")
             plan["recommended_fix"] = triage.get("recommended_fix")
 
+        # Carry maintenance selection metadata into plan (WSP 77/87/97)
+        if triage["action"] == "execute_maintenance_task":
+            plan["maintenance_selection"] = triage.get("maintenance_selection", {})
+
         # WSP 77: AI Overseer fast classification (Gemma 50-100ms)
         if self._ai_overseer is not None:
             try:
@@ -557,6 +643,19 @@ class OpenClawSupervisor:
         if broker is None:
             return {"ok": False, "error": "broker_unavailable"}
 
+        # Runtime emitter: structured event for supervisor execution observability
+        _rt_start = None
+        try:
+            from modules.infrastructure.dae_daemon.src.runtime_emitter import (
+                emit_start as _re_start, emit_success as _re_ok, emit_failure as _re_fail,
+            )
+            _rt_start = _re_start(
+                "openclaw_supervisor", "supervisor_execute",
+                details={"action": plan.get("action", "unknown")},
+            )
+        except Exception:
+            _re_ok = _re_fail = None
+
         if plan["action"] == "start_openclaw":
             self._record_restart_attempt()
             result = broker.start_dae("openclaw", actor_id="0102")
@@ -565,6 +664,17 @@ class OpenClawSupervisor:
                 result.get("status", result.get("error", "unknown")),
                 {"plan": plan, "result": result},
             )
+            if _rt_start is not None:
+                try:
+                    if result.get("ok") or result.get("status") == "started":
+                        _re_ok("openclaw_supervisor", "supervisor_execute", _rt_start,
+                               details={"action": "start_openclaw"})
+                    else:
+                        _re_fail("openclaw_supervisor", "supervisor_execute", _rt_start,
+                                 result.get("error", "unknown")[:200],
+                                 details={"action": "start_openclaw"})
+                except Exception:
+                    pass
             return result
 
         elif plan["action"] == "execute_autonomous_task":
@@ -601,6 +711,75 @@ class OpenClawSupervisor:
                 result.get("status", result.get("error", "unknown")),
                 {"plan": plan, "result": result},
             )
+            if _rt_start is not None:
+                try:
+                    if result.get("ok"):
+                        _re_ok("openclaw_supervisor", "supervisor_execute", _rt_start,
+                               task_id=task_id,
+                               details={"action": "execute_autonomous_task",
+                                         "executor": result.get("executor", "unknown")})
+                    else:
+                        _re_fail("openclaw_supervisor", "supervisor_execute", _rt_start,
+                                 result.get("error", result.get("status", "unknown"))[:200],
+                                 task_id=task_id,
+                                 details={"action": "execute_autonomous_task"})
+                except Exception:
+                    pass
+            return result
+
+        elif plan["action"] == "execute_maintenance_task":
+            # Bounded maintenance task execution (WSP 77/87/97)
+            task = plan.get("task", {})
+            task_id = task.get("task_id")
+            family = task.get("family", "unknown")
+            result: Dict[str, Any] = {"ok": False, "error": "unknown"}
+            try:
+                from modules.infrastructure.database.src.agent_db import AgentDB
+                from .openclaw_maintenance_selector import write_maintenance_report
+
+                db = AgentDB()
+                if task_id:
+                    db.assign_autonomous_task(task_id, "openclaw_supervisor")
+
+                    # Dispatch via run_task.execute_task() (same as autonomous tasks)
+                    from modules.communication.moltbot_bridge.scripts.run_task import (
+                        execute_task,
+                    )
+
+                    task_result = execute_task(task_id, repo_root=self.repo_root)
+                    result = {
+                        "ok": task_result.get("ok", False),
+                        "status": "completed" if task_result.get("ok") else "task_failed",
+                        "executor": task_result.get("executor", "unknown"),
+                        "detail": task_result.get("detail", "")[:1000],
+                        "execution_time_ms": task_result.get("execution_time_ms", 0),
+                        "family": family,
+                    }
+                else:
+                    result = {"ok": False, "error": "no_task_id", "family": family}
+            except Exception as exc:
+                result = {"ok": False, "status": "execute_error", "error": str(exc)[:500], "family": family}
+
+            self._action_reporter(
+                "supervisor_execute",
+                result.get("status", result.get("error", "unknown")),
+                {"plan": plan, "result": result, "maintenance": True},
+            )
+            if _rt_start is not None:
+                try:
+                    if result.get("ok"):
+                        _re_ok("openclaw_supervisor", "supervisor_execute", _rt_start,
+                               task_id=task_id,
+                               details={"action": "execute_maintenance_task",
+                                        "family": family,
+                                        "executor": result.get("executor", "unknown")})
+                    else:
+                        _re_fail("openclaw_supervisor", "supervisor_execute", _rt_start,
+                                 result.get("error", result.get("status", "unknown"))[:200],
+                                 task_id=task_id,
+                                 details={"action": "execute_maintenance_task", "family": family})
+                except Exception:
+                    pass
             return result
 
         elif plan["action"] == "execute_self_audit_fix":
@@ -622,8 +801,27 @@ class OpenClawSupervisor:
                 result.get("status", result.get("error", "unknown")),
                 {"plan": plan, "result": result},
             )
+            if _rt_start is not None:
+                try:
+                    if result.get("ok"):
+                        _re_ok("openclaw_supervisor", "supervisor_execute", _rt_start,
+                               details={"action": "execute_self_audit_fix"})
+                    else:
+                        _re_fail("openclaw_supervisor", "supervisor_execute", _rt_start,
+                                 result.get("error", "unknown")[:200],
+                                 details={"action": "execute_self_audit_fix"})
+                except Exception:
+                    pass
             return result
 
+        # Fallback for unsupported actions
+        if _rt_start is not None:
+            try:
+                _re_fail("openclaw_supervisor", "supervisor_execute", _rt_start,
+                         "unsupported_action",
+                         details={"action": plan.get("action", "unknown")})
+            except Exception:
+                pass
         return {"ok": False, "error": "unsupported_action"}
 
     # ------------------------------------------------------------------ #
@@ -678,6 +876,83 @@ class OpenClawSupervisor:
                 "task_status": task_status,
                 "error": error,
                 "fidelity": fidelity,
+            }
+
+        if plan["action"] == "execute_maintenance_task":
+            # Bounded maintenance task verification (WSP 77/87/97)
+            task = plan.get("task", {})
+            task_id = task.get("task_id")
+            family = task.get("family", "unknown")
+            task_status = None
+
+            try:
+                from modules.infrastructure.database.src.agent_db import AgentDB
+
+                db = AgentDB()
+                completed_tasks = db.get_autonomous_tasks(status="completed", limit=100)
+                if task_id and any(item.get("task_id") == task_id for item in completed_tasks):
+                    task_status = "completed"
+            except Exception as exc:
+                logger.debug("[SUPERVISOR] VERIFY: maintenance task status check skipped: %s", exc)
+
+            ok = bool(action_result.get("ok", False) and task_status == "completed")
+            fidelity = 0.85  # Default for maintenance tasks
+
+            # Gemma fidelity validation for maintenance tasks
+            if ok and self._libido_monitor and hasattr(self._libido_monitor, "validate_step_fidelity"):
+                try:
+                    validation = self._libido_monitor.validate_step_fidelity(
+                        step_description=f"Maintenance [{family}]: {task_id}",
+                        step_output=str(action_result)[:500],
+                    )
+                    if isinstance(validation, dict):
+                        fidelity = validation.get("fidelity", 0.85)
+                    elif isinstance(validation, (int, float)):
+                        fidelity = float(validation)
+                    logger.debug("[SUPERVISOR] VERIFY: Maintenance fidelity = %.3f", fidelity)
+                except Exception as e:
+                    logger.debug("[SUPERVISOR] VERIFY: Maintenance Gemma validation skipped: %s", e)
+
+            error = action_result.get("error", "")
+            if not ok and not error and task_status != "completed":
+                error = "maintenance_task_not_completed"
+
+            # Write maintenance report artifact
+            try:
+                from .openclaw_maintenance_selector import (
+                    MaintenanceSelectionResult,
+                    MaintenanceTask,
+                    write_maintenance_report,
+                )
+
+                selection = plan.get("maintenance_selection", {})
+                selection_result = MaintenanceSelectionResult(
+                    selected_task=MaintenanceTask(
+                        task_id=task_id or "",
+                        family=family,
+                        description=task.get("description", "")[:200],
+                        source=task.get("source", ""),
+                        risk_level="low",
+                    ) if task_id else None,
+                    candidates_evaluated=selection.get("candidates_evaluated", 0),
+                    selection_reason=selection.get("selection_reason", "maintenance"),
+                    bundle_used=selection.get("bundle_used", False),
+                )
+                verify_result = {"ok": ok, "fidelity": fidelity, "error": error}
+                report_path = write_maintenance_report(
+                    selection_result, action_result, verify_result, self.repo_root
+                )
+                logger.info("[SUPERVISOR] VERIFY: Maintenance report: %s", report_path.name)
+            except Exception as exc:
+                logger.debug("[SUPERVISOR] VERIFY: Maintenance report write failed: %s", exc)
+
+            return {
+                "ok": ok,
+                "status": action_result,
+                "task_status": task_status,
+                "error": error,
+                "fidelity": fidelity,
+                "family": family,
             }
 
         status = broker.get_runtime_status(plan["target"])

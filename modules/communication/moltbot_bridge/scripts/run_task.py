@@ -63,6 +63,15 @@ def execute_task(task_id: str, repo_root: Path | None = None) -> Dict[str, Any]:
 
     logger.info("[RUN_TASK] Executing task %s: %s (skills=%s, source=%s)", task_id, description[:80], required_skills, source)
 
+    # Runtime emitter: structured event for troubleshooting/tuning
+    try:
+        from modules.infrastructure.dae_daemon.src.runtime_emitter import emit_start, emit_success, emit_failure
+        _emit_start = emit_start("run_task", "task_dispatch", task_id=task_id,
+                                 details={"source": source, "description": description[:80]})
+    except Exception:
+        _emit_start = None
+        emit_success = emit_failure = None  # type: ignore[assignment]
+
     result: Dict[str, Any] = {"ok": False, "detail": "no_executor_matched", "executor": "none"}
 
     # ── Dispatch path 1: WRE skill execution ──
@@ -97,6 +106,12 @@ def execute_task(task_id: str, repo_root: Path | None = None) -> Dict[str, Any]:
     if result["ok"]:
         db.complete_autonomous_task(task_id)
         logger.info("[RUN_TASK] Task %s completed (executor=%s, %dms)", task_id, result["executor"], elapsed_ms)
+        if _emit_start is not None and emit_success:
+            try:
+                emit_success("run_task", "task_dispatch", _emit_start,
+                             task_id=task_id, details={"executor": result["executor"]})
+            except Exception:
+                pass
     else:
         # Mark as failed by updating status directly (no fail_autonomous_task method yet)
         try:
@@ -107,6 +122,13 @@ def execute_task(task_id: str, repo_root: Path | None = None) -> Dict[str, Any]:
         except Exception as fail_exc:
             logger.warning("[RUN_TASK] Could not mark task %s as failed: %s", task_id, fail_exc)
         logger.warning("[RUN_TASK] Task %s failed: %s (executor=%s)", task_id, result["detail"][:200], result["executor"])
+        if _emit_start is not None and emit_failure:
+            try:
+                emit_failure("run_task", "task_dispatch", _emit_start,
+                             result["detail"][:200], task_id=task_id,
+                             details={"executor": result["executor"]})
+            except Exception:
+                pass
 
     return result
 
@@ -327,18 +349,22 @@ def _try_startup_maintenance_dispatch(
     elif task_id == "startup_refresh_model_status":
         logger.info("[RUN_TASK] Startup dispatch: model status refresh")
         try:
-            from modules.infrastructure.dependency_launcher.src.dae_dependencies import (
-                get_dependency_status,
+            from modules.communication.moltbot_bridge.src.openclaw_runtime_support import (
+                get_model_availability_snapshot,
             )
-            from datetime import datetime, UTC
 
-            status = get_dependency_status()
-            result = {
-                "checked_on": datetime.now(UTC).isoformat(),
-                "lm_studio_running": status.get("lm_studio", False),
-                "dependencies": status,
-            }
-            # Write status to reports dir for freshness tracking
+            result = get_model_availability_snapshot(dae=None, live_probe=False)
+
+            # Supplement with LM Studio running status (extra field, does not change shape)
+            try:
+                from modules.infrastructure.dependency_launcher.src.dae_dependencies import (
+                    get_dependency_status,
+                )
+                dep_status = get_dependency_status()
+                result["lm_studio_running"] = dep_status.get("lm_studio", False)
+            except Exception:
+                result["lm_studio_running"] = None
+
             reports_dir = repo_root / "modules" / "communication" / "moltbot_bridge" / "workspace" / "reports"
             reports_dir.mkdir(parents=True, exist_ok=True)
             status_path = reports_dir / "local_model_status.json"

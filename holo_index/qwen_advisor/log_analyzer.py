@@ -423,7 +423,9 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         log_path = Path(sys.argv[1])
     else:
-        log_path = Path("O:/Foundups-Agent/012.txt")
+        import os
+        corpus_name = os.getenv("OPENCLAW_TRAINING_CORPUS", "012.txt")
+        log_path = Path(f"O:/Foundups-Agent/{corpus_name}")
 
     # Create analyzer
     analyzer = QwenLogAnalyzer()

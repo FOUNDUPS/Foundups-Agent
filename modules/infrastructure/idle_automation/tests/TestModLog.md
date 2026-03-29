@@ -1,10 +1,34 @@
 # Idle Automation Test Module Log
 
 **Module**: `modules/infrastructure/idle_automation`
-**Test Coverage**: 0% (implementation needed)
 **Framework**: pytest
-**Last Updated**: 2025-10-11
+**Last Updated**: 2026-03-27
 **WSP Compliance**: WSP 22 (Module ModLog Protocol), WSP 34 (Test Validation)
+
+---
+
+## 2026-03-27: Caller Wiring + Runtime Emitter Instrumentation
+
+**File**: `test_caller_wiring.py`
+- Validates `run_idle_automation()` propagates `triggering_session` to DAE
+- Validates `parent_context` takes precedence over `triggering_session`
+- Validates empty string `triggering_session` treated as absent
+- Validates auto_moderator caller site passes `self._last_stream_id`
+- Validates breadcrumb written before idle handoff (source wiring)
+- Validates breadcrumb → recovery → lineage path (integration test)
+- Validates no false lineage when breadcrumb absent
+
+**Run**:
+- `python -m pytest modules/infrastructure/idle_automation/tests/test_caller_wiring.py -q`
+
+**Result**:
+- `8 passed`
+
+**Runtime Emitter**:
+- `_execute_pattern_training()` now emits `pattern_training` events via `runtime_emitter.py`
+- Events include: patterns_stored, lines_processed, error on failure
+
+---
 
 ## Test Implementation Status
 

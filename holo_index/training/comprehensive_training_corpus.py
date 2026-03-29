@@ -18,6 +18,7 @@ WSP Compliance: WSP 90 (UTF-8), WSP 49 (Module Structure), WSP 22 (ModLog)
 
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Dict, List, Optional
 from datetime import datetime
@@ -27,6 +28,7 @@ from modules.infrastructure.wre_core.scripts.extract_brain_artifacts import (
     DEFAULT_BRAIN_DIR,
     build_training_examples,
 )
+from modules.infrastructure.shared_utilities.corpus_resolver import resolve_corpus_path
 
 logger = logging.getLogger(__name__)
 
@@ -131,8 +133,8 @@ class ComprehensiveTrainingCorpus:
         """
         logger.info("[CORPUS] Collecting 012.txt operations data...")
 
-        txt_file = self.root / "012.txt"
-        if not txt_file.exists():
+        txt_file = resolve_corpus_path(self.root)
+        if txt_file is None or not txt_file.exists():
             logger.warning("[CORPUS] 012.txt not found - skipping")
             return
 

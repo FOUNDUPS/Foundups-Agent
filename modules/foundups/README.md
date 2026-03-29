@@ -1,17 +1,52 @@
-# FoundUps Platform Infrastructure
+# FoundUps Domain
 
-## Current Canonical Planning References
+## Canonical Planning References
 
 For active execution, use these first:
-- `modules/foundups/ROADMAP.md` (domain-level layered roadmap)
-- `modules/foundups/docs/OCCAM_LAYERED_EXECUTION_PLAN.md` (architecture intent)
-- `modules/foundups/docs/CONTINUATION_RUNBOOK.md` (resume/handoff workflow)
-- `modules/foundups/docs/AIONUI_FOUNDUP_FACTORY_WSP97_ARCHITECTURE_2026-03-16.md` (external orchestration surface over FoundUp factory)
-- `modules/foundups/agent_market/ROADMAP.md` (execution ledger roadmap)
-- `modules/foundups/simulator/ROADMAP.md` (simulation and DEX roadmap)
-- `modules/foundups/social_twin/ROADMAP.md` (human-in-the-loop social engagement FoundUp)
 
-The rest of this README contains historical context.
+| Document | Purpose |
+|----------|---------|
+| [FOUNDUPS_DOMAIN_CANONICAL_INDEX.md](docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md) | Domain truth: canonical vs planning vs pending-audit vs historical |
+| [ROADMAP.md](ROADMAP.md) | Domain-level layered roadmap |
+| [FOUNDUP_EXFOLIATION_PROTOCOL.md](docs/FOUNDUP_EXFOLIATION_PROTOCOL.md) | Core vs spin-out decision rule |
+| [PQN_SWARM_HUB_FOUNDUP_BRIEF.md](docs/PQN_SWARM_HUB_FOUNDUP_BRIEF.md) | Internal-first PQN swarm FoundUp brief |
+
+### Submodule Roadmaps
+
+| Submodule | Status |
+|-----------|--------|
+| [agent_market/ROADMAP.md](agent_market/ROADMAP.md) | Execution ledger (active) |
+| [simulator/ROADMAP.md](simulator/ROADMAP.md) | Simulation and DEX (active) |
+| [social_twin/ROADMAP.md](social_twin/ROADMAP.md) | Human-in-the-loop (PoC lock) |
+
+---
+
+## What Exists Now
+
+### Implemented Classes
+
+| Class | File | Status |
+|-------|------|--------|
+| `FoundUpSpawner` | `src/foundup_spawner.py` | Implemented |
+| `CABRLoop` | `src/foundup_spawner.py` | Implemented |
+| `FoundUpsLiveChatModule` | `src/main.py` | Implemented |
+
+### Active Submodules
+
+| Submodule | Purpose | Status |
+|-----------|---------|--------|
+| `agent_market/` | FAM daemon, CABR hooks, execution ledger | Active |
+| `simulator/` | Sustainability simulation, DEX prototype | Active |
+| `move2japan/` | Internal FoundUp instance | Incubating |
+| `gotjunk/` | Proto-ready spin-out candidate | Ready for exfoliation |
+
+---
+
+## Historical Context
+
+> **Note**: The content below is legacy platform framing from earlier architecture iterations.
+> It describes aspirational interfaces and patterns that are not yet implemented.
+> Treat as context, not current canon. See `FOUNDUPS_DOMAIN_CANONICAL_INDEX.md` for authoritative classification.
 
 ## [U+1F300] WSP Protocol Compliance Framework
 

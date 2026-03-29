@@ -665,7 +665,7 @@ class ExecutionLogLibrarian:
         print(f"Progress: {self.state.processed_chunks}/{self.state.total_chunks} chunks completed")
 
 # Main execution interface for librarian coordination
-def coordinate_execution_log_processing(log_file_path: str = "012.txt", daemon_mode: bool = False):
+def coordinate_execution_log_processing(log_file_path: str = os.getenv("OPENCLAW_TRAINING_CORPUS", "012.txt"), daemon_mode: bool = False):
     """
     Main coordinator function for the execution log analysis system.
     This is the entry point that 0102 calls to begin the systematic analysis.
@@ -680,7 +680,7 @@ def coordinate_execution_log_processing(log_file_path: str = "012.txt", daemon_m
         return run_interactive_log_analysis(log_file_path)
 
 
-def run_interactive_log_analysis(log_file_path: str = "012.txt"):
+def run_interactive_log_analysis(log_file_path: str = os.getenv("OPENCLAW_TRAINING_CORPUS", "012.txt")):
     """
     Interactive mode: Step-by-step advisor-guided analysis
     """
@@ -729,7 +729,7 @@ def run_interactive_log_analysis(log_file_path: str = "012.txt"):
     return librarian
 
 
-def run_log_analysis_daemon(log_file_path: str = "012.txt"):
+def run_log_analysis_daemon(log_file_path: str = os.getenv("OPENCLAW_TRAINING_CORPUS", "012.txt")):
     """
     Daemon mode: Autonomous background processing of entire log file
     Follows WSP 80 DAE orchestration - once triggered by advisor, operates independently

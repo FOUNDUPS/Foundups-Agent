@@ -27,6 +27,8 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from modules.infrastructure.shared_utilities.corpus_resolver import resolve_corpus_path
+
 logger = logging.getLogger(__name__)
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -138,9 +140,11 @@ class StartupMaintenanceGate:
         status = _load_json_safe(path)
         age = _artifact_age_hours(status)
 
-        # Also check PatternMemory stats if available
+        # Check PatternMemory stats and corpus size for consistent due/progress
         training_due = False
         checkpoint_line = None
+        corpus_lines = None
+        progress_pct = 0.0
         try:
             from holo_index.qwen_advisor.pattern_memory import PatternMemory
 
@@ -148,8 +152,20 @@ class StartupMaintenanceGate:
             stats = mem.get_stats()
             if stats:
                 checkpoint_line = stats.get("checkpoint_line", 0)
-                # Training is due if less than 50% complete
-                training_due = checkpoint_line < 14000  # ~50% of 28K lines
+
+            # Get actual corpus size for percentage-based completion
+            corpus_path = resolve_corpus_path(self.repo_root)
+            if corpus_path is not None and corpus_path.exists():
+                with open(corpus_path, "r", encoding="utf-8", errors="ignore") as f:
+                    corpus_lines = sum(1 for _ in f)
+
+            # Training is due if less than 95% complete (consistent policy)
+            if corpus_lines and checkpoint_line is not None:
+                progress_pct = (checkpoint_line / corpus_lines) * 100
+                training_due = progress_pct < 95.0
+            elif checkpoint_line is None:
+                # No checkpoint means training never started
+                training_due = True
         except Exception:
             pass
 
@@ -161,6 +177,8 @@ class StartupMaintenanceGate:
             "max_age_hours": self.max_training_status_age_hours,
             "stale": age is None or age > self.max_training_status_age_hours,
             "checkpoint_line": checkpoint_line,
+            "corpus_lines": corpus_lines,
+            "progress_pct": progress_pct,
             "training_due": training_due,
         }
 

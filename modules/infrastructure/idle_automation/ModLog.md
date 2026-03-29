@@ -12,6 +12,32 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 
 ## MODLOG ENTRIES
 
+### 2026-03-27 - Cross-Surface Continuity Wiring (triggering_session)
+
+**WSP Protocol**: WSP 22, WSP 54 (Multi-Agent Coordination)
+**Phase**: Gateway Continuity closure
+**Agent**: 0102
+
+#### Problem
+
+`run_idle_automation()` had no way to correlate background work to the originating livechat session. Idle tasks ran as independent roots even when triggered from auto_moderator with a known video_id.
+
+#### Solution
+
+Added `triggering_session` parameter to `run_idle_automation()`:
+- When provided (and no `parent_context`), calls `set_triggering_session()` before execution
+- `_try_recover_origin_continuity()` looks up AgentDB breadcrumbs by session_id
+- Returns parent-linked context if breadcrumb found, otherwise independent root
+
+#### Files Changed
+- `idle_automation_dae.py`: Added `triggering_session` param, wired to `set_triggering_session()`
+- `INTERFACE.md`: Updated `run_idle_automation()` signature and continuity docs
+
+#### Tests
+- `test_caller_wiring.py`: 8 tests proving session storage, precedence, and recovery
+
+---
+
 ### 2026-03-26 - Startup Maintenance Gate Execution Path Fix (P0)
 
 **WSP Protocol**: WSP 22, WSP 27 (DAE Architecture)

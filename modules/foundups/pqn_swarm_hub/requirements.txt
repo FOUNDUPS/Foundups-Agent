@@ -1,0 +1,3 @@
+# PQN Swarm Hub FoundUp
+# All dependencies are from Python stdlib only for PoC phase
+# Phase 1 will add SQLite persistence (no additional deps needed)

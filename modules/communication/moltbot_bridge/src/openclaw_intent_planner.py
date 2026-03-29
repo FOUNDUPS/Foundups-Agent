@@ -32,8 +32,28 @@ def classify_intent(
         return re.search(pattern, text) is not None
 
     sender_lower = sender.lower()
-    is_commander = any(cmd_id in sender_lower for cmd_id in dae.AUTHORIZED_COMMANDERS)
     is_direct_channel = channel in ("voice_repl", "local_repl")
+    display_name_match = sender_lower in dae.AUTHORIZED_COMMANDERS
+
+    # Commander authority trust model (WSP 00 / 012 security boundary):
+    # 1. LOCAL CHANNEL: Inherently trusted - operator has physical/terminal access.
+    #    No spoofing possible; channel proves identity.
+    # 2. REMOTE CHANNEL: NOT trusted - display names are spoofable.
+    #    No reliable remote identity field exists today (no stable platform user ID,
+    #    signed origin, or cryptographic verification in webhook metadata).
+    #    Remote channels remain advisory/non-commander until stronger identity is added.
+    if is_direct_channel:
+        is_commander = True
+    else:
+        is_commander = False
+        # Audit: log remote commander claim attempts for security monitoring
+        if display_name_match:
+            logger.warning(
+                "[OPENCLAW-DAE] [AUTHORITY] Remote commander claim DENIED (display-name spoofable): "
+                "sender=%s channel=%s - remote channels are non-commander",
+                sender,
+                channel,
+            )
 
     if re.match(r"^\s*(hi|hey|hello)\b", msg_lower):
         category = dae.IntentCategory.CONVERSATION
