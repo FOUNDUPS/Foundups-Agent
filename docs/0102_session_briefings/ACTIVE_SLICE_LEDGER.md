@@ -72,6 +72,7 @@ If already landed:
 | `git_main_merge_sentinel` | `08004c100` (branch `feat/git-main-merge-sentinel-20260318`) | `wre_core/src/git_main_merge_sentinel.py` 284 lines + `main.py:1110` + `.env.example` — plan was stale, work already shipped |
 | `openclaw_roadmap_reconciliation` | `a0549830b` | `HERMES_INSPIRED_FOUNDUPS_NATIVE_ROADMAP_2026-03-23.md` — all P0+P1 items audited; 5 closed, 1 partial, 1 not-started; planning_snapshot banner added |
 | `model_provider_switching_cleanup` | `b1d66d7ce` | `openclaw_runtime_support.py` — `get_model_availability_snapshot(dae=None)` standalone; `generated_on` timestamp; startup refresh writes same canonical shape; 25 tests in `test_model_provider_status.py` |
+| `skill_evolution_loop_phase1_report_surface` | `3ae311767` | `openclaw_skill_evolution.py` + `openclaw_supervisor.py` idle-path integration; env gate `OPENCLAW_SKILL_EVOLUTION_ENABLED=1`; 18 tests in `test_openclaw_skill_evolution.py`; no WRE mutation |
 
 ---
 
@@ -101,8 +102,8 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 
 ## Next Priority Order
 
-1. `skill_evolution_loop` (OpenClaw-facing loop surface in `moltbot_bridge/src`)
-2. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
+1. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
+2. `skill_evolution_loop_phase2_mutation_surface` (future: gated A/B testing and promotion)
 
 ---
 
