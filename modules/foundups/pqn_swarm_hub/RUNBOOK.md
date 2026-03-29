@@ -1,8 +1,14 @@
 # RUNBOOK - PQN Swarm Hub
 
-**Version**: Phase 2 Complete
-**Status**: Reproducible execution guide (ready for Phase 3 prep)
+**Version**: Phase 3 Complete
+**Status**: Migration executed — standalone repos live (2026-03-30)
 **Author**: 0102
+
+> **Note**: This module has been exfoliated to standalone repositories:
+> - **Origin**: https://github.com/FOUNDUPS/science-swarm-hub
+> - **Backup**: https://github.com/Foundup/science-swarm-hub
+>
+> This runbook applies to both the monorepo reference and standalone deployment.
 
 ---
 
@@ -430,7 +436,7 @@ print(f"Smoke test OK: {cr.contribution_id}")
 
 ### Rejected Verification
 
-**Cause**: Coherence below φ-floor (0.618) or manual reject
+**Cause**: Coherence below rho-floor (0.618) or manual reject
 
 **Behavior**:
 - `auto_verify()` returns decision with `decision="reject"`
@@ -492,7 +498,7 @@ print(f"Smoke test OK: {cr.contribution_id}")
 
 ## 7. Operator Notes
 
-### Phase 2 Complete
+### Phase 3 Complete
 
 The following are implemented and tested (108 tests passing):
 
@@ -513,23 +519,24 @@ The following are implemented and tested (108 tests passing):
 - V3 consensus schema: Not stable (Shapley/ZK future scope)
 - GPD work unit type: Separate bootstrap lane (not blocker)
 
-### Ready for Exfoliation Review
+### Exfoliation Complete
 
 Per `PROTO_EXFOLIATION_CHECKLIST.md`:
 - Phase 1: 10/10 slices complete
 - Phase 2: 3/3 slices complete (FAM live, external submission, contributor path)
 - All true exfoliation blockers: CLEARED
 - Architect decision: APPROVE_PHASE_3_PREP
+- Migration execution: COMPLETE (2026-03-30)
 
-### Externalization Path (Phase 3 Prep)
+### Standalone Repos (LIVE)
 
 ```
-FOUNDUPS/pqn-swarm-hub          # origin (org repo)
-Foundup/pqn-swarm-hub           # backup (personal repo)
-modules/foundups/pqn_swarm_hub/ # adapter stub remains in monorepo
+FOUNDUPS/science-swarm-hub          # origin (org repo) - LIVE
+Foundup/science-swarm-hub           # backup (personal repo) - LIVE
+modules/foundups/pqn_swarm_hub/     # monorepo reference (stub cutover DEFERRED)
 ```
 
-**Next slice**: `pqn_swarm_hub_phase3_prep_scaffold` — dual-remote setup, migration script, stub adapter
+**Status**: Migration COMPLETE. Monorepo stub cutover DEFERRED.
 
 ---
 
@@ -537,7 +544,7 @@ modules/foundups/pqn_swarm_hub/ # adapter stub remains in monorepo
 
 ### Verification Thresholds
 
-- φ-floor coherence: 0.618 (configurable)
+- rho-floor coherence: 0.618 (configurable)
 - PQN rate floor: 0.0 (configurable)
 
 ### Deterministic IDs
@@ -551,13 +558,17 @@ generate_id("work_unit", description, str(config), creator_id)
 
 ```
 WorkUnitRegistry
-       ↓
+       |
+       v
 SubmissionSink(registry)
-       ↓
+       |
+       v
 VerificationEngine(sink)
-       ↓
+       |
+       v
 ContributionReporter(engine)
-       ↓
+       |
+       v
 PublicationAdapter (optional)
 ```
 
@@ -577,4 +588,4 @@ gate = ParticipantGate(store=store)
 ---
 
 *Created: 2026-03-29*
-*Last Updated: 2026-03-29 (Phase 2 complete — exfoliation review)*
+*Last Updated: 2026-03-30 (Phase 3 migration complete — standalone repos live)*

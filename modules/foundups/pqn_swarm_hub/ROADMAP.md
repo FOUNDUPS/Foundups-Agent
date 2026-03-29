@@ -12,7 +12,7 @@
 - [x] `src/contracts.py` with dataclasses
 - [x] `src/registry.py` with in-memory work unit registry
 - [x] `src/submission_sink.py` with rESP intake
-- [x] `src/verification.py` with accept/reject logic (φ-floor 0.618, manual override)
+- [x] `src/verification.py` with accept/reject logic (rho-floor 0.618, manual override)
 - [x] `src/contribution.py` with ROC reporting + durable JSON artifact
 - [x] One end-to-end PoC path (register -> submit -> verify -> record) — 18/18 tests pass
 - [x] Basic tests for contracts and flows
@@ -55,7 +55,7 @@
 - [x] External contributor path — `pqn_swarm_hub_external_contributor_path` (22/22 tests)
 - [x] Interfaces frozen (except V3 consensus — future scope)
 - [x] Standalone deploy path verified (RUNBOOK.md + stub-safe adapters)
-- [ ] Dual-remote repo setup prepared — **Phase 3 scope**
+- [x] Dual-remote repo setup prepared — **Phase 3 scope**
 - [x] Monorepo stub/adapter strategy documented (PROTO_EXFOLIATION_CHECKLIST.md)
 
 **True Blockers for Exfoliation**: ALL CLEARED
@@ -68,16 +68,16 @@
 - V3 consensus schema (Shapley/ZK)
 
 **Acceptance Criteria**: ALL MET
-- FAM events appear in live FAM store ✓
-- External submission type tested (14 tests) ✓
-- External contributor can request entry (22 tests) ✓
-- No interface-breaking changes after freeze ✓
-- Module can deploy independently (with adapter stubs) ✓
-- Migration path to `FOUNDUPS/PQNSwarmHub` documented ✓
+- FAM events appear in live FAM store
+- External submission type tested (14 tests)
+- External contributor can request entry (22 tests)
+- No interface-breaking changes after freeze
+- Module can deploy independently (with adapter stubs)
+- Migration path to `FOUNDUPS/science-swarm-hub` documented
 
 ---
 
-### Phase 3: Spin-Out (PREP COMPLETE)
+### Phase 3: Spin-Out (MIGRATION COMPLETE)
 
 **Goal**: Externalize to standalone FoundUp repo.
 
@@ -85,20 +85,20 @@
 - [x] `MIGRATION_MANIFEST.md` — file disposition list
 - [x] `DUAL_REMOTE_PLAN.md` — repo setup commands
 - [x] `EXFOLIATION_PLAN.md` — full procedure with rollback
-- [ ] 012 approval for execution — **PENDING**
+- [x] 012 approval for execution — **APPROVED**
 
-**Migration Deliverables** (blocked on 012):
-- [ ] Create `FOUNDUPS/pqn-swarm-hub` as origin
-- [ ] Create `Foundup/pqn-swarm-hub` as backup
-- [ ] Migrate product code per manifest
-- [ ] Create adapter stubs for internal deps
-- [ ] Leave monorepo stub pointing to external package
+**Migration Execution** (2026-03-30):
+- [x] Create `FOUNDUPS/science-swarm-hub` as origin — **LIVE**
+- [x] Create `Foundup/science-swarm-hub` as backup — **LIVE**
+- [x] Migrate product code per manifest — **COMPLETE**
+- [x] Standalone tests pass — **108/108 PASSING**
+- [x] Monorepo stub cutover — **COMPLETE** (2026-03-30)
 
 **Acceptance Criteria**:
-- Standalone repo operational
-- All 108 tests pass standalone
-- Monorepo stub imports from external package
-- Independent release cadence possible
+- [x] Standalone repo operational
+- [x] All 108 tests pass standalone
+- [x] Monorepo stub imports from external package — COMPLETE
+- [x] Independent release cadence possible
 
 ---
 
@@ -123,9 +123,13 @@
 
 **Total tests**: 108 passing
 
-**Phase 3 Prep**: COMPLETE (migration scaffold ready)
+**Phase 3**: COMPLETE (2026-03-30 migration executed)
 
-**Next action**: 012 approval for repo creation and migration execution
+**Standalone Repos**:
+- Origin: https://github.com/FOUNDUPS/science-swarm-hub
+- Backup: https://github.com/Foundup/science-swarm-hub
+
+**Status**: Exfoliation COMPLETE — monorepo stub cutover executed 2026-03-30
 
 ---
 
@@ -146,5 +150,6 @@
 - Standalone deploy smoke test passes
 
 ### Phase 3
-- External repo accepts PRs
-- Independent release shipped
+- [x] External repo accepts PRs
+- [x] Independent release shipped
+- [x] Monorepo stub cutover — COMPLETE

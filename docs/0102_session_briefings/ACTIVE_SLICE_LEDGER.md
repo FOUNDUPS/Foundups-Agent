@@ -1,7 +1,7 @@
 # Active Slice Ledger
 
 **Authority**: 0102 architect lane
-**Updated**: 2026-03-29 (Phase 3 prep complete)
+**Updated**: 2026-03-30 (science-swarm-hub stub cutover complete)
 **Rule**: Every agent reads this first. If repo truth contradicts an entry, update this ledger — not 012.
 
 ---
@@ -81,7 +81,10 @@ If already landed:
 | `pqn_swarm_hub_external_submission_type` | `70115efff` | 14/14 tests; source field in contracts; register_external + submit_external methods |
 | `pqn_swarm_hub_external_contributor_path` | `db9df7598` | CONTRIBUTING.md + 22/22 gate tests; Phase 2 COMPLETE |
 | `pqn_swarm_hub_exfoliation_review_decision` | `c0cf513de` | Architect decision: APPROVE_PHASE_3_PREP; doc reconciliation |
-| `pqn_swarm_hub_phase3_prep_scaffold` | `16026b4ac` | Migration scaffold: MANIFEST + DUAL_REMOTE + EXFOLIATION plans |
+| `pqn_swarm_hub_phase3_prep_scaffold` | `1dbdd1dcb` | Migration scaffold: MANIFEST + DUAL_REMOTE + EXFOLIATION plans |
+| `pqn_swarm_hub_phase3_migration_exec` | (standalone) | External repos created and pushed: `FOUNDUPS/science-swarm-hub` + `Foundup/science-swarm-hub` — standalone tests pass |
+| `science_swarm_hub_monorepo_reconciliation` | (previous slice) | Monorepo docs reconciled post-migration; stale "blocked" language removed |
+| `science_swarm_hub_monorepo_stub_cutover` | (this slice) | Stub cutover complete: src/ and tests/ deleted, __init__.py replaced with package import stub |
 
 ---
 
@@ -89,7 +92,7 @@ If already landed:
 
 | Slice | Priority | Blocked By | Notes |
 |-------|----------|------------|-------|
-| `pqn_swarm_hub_phase3_migration_exec` | P1 | 012 approval | Actual repo creation + migration push |
+| _(none)_ | — | — | — |
 
 ---
 
@@ -113,9 +116,12 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 
 1. ~~**`pqn_swarm_hub_external_contributor_path`**~~ — COMPLETE (Phase 2 Gate 3)
 2. ~~**`pqn_swarm_hub_exfoliation_review_decision`**~~ — COMPLETE (APPROVE_PHASE_3_PREP)
-3. `pqn_swarm_hub_phase3_prep_scaffold` — dual-remote repo, migration script, stub adapter
-4. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
-5. `skill_evolution_loop_phase2_mutation_surface` (future: gated A/B testing and promotion)
+3. ~~**`pqn_swarm_hub_phase3_prep_scaffold`**~~ — COMPLETE (`1dbdd1dcb`)
+4. ~~**`pqn_swarm_hub_phase3_migration_exec`**~~ — COMPLETE (standalone repos live)
+5. ~~**`science_swarm_hub_monorepo_reconciliation`**~~ — COMPLETE (docs updated post-migration)
+6. ~~**`science_swarm_hub_monorepo_stub_cutover`**~~ — COMPLETE (stub cutover executed)
+7. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
+8. `skill_evolution_loop_phase2_mutation_surface` (future: gated A/B testing and promotion)
 
 ---
 
@@ -130,7 +136,7 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 ## Update Protocol
 
 When a slice lands:
-1. Move it from Open → Closed with commit hash
+1. Move it from Open to Closed with commit hash
 2. Remove it from Blocked if it was blocked
 3. Add the actual next open slice if known
 4. Commit this file as part of the slice's completion commit or immediately after

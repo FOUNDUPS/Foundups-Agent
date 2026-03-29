@@ -1,5 +1,192 @@
 # ModLog - PQN Swarm Hub FoundUp
 
+## V0.15.0 - Monorepo Stub Cutover
+
+**Slice**: `science_swarm_hub_monorepo_stub_cutover`
+**Author**: 0102
+**Date**: 2026-03-30
+
+### Changes
+
+Executed monorepo stub cutover to complete exfoliation:
+
+- **Replaced `__init__.py`** with stub that imports from external package:
+  - Tries to import from `pqn_swarm_hub` package
+  - Raises `ImportError` with install instructions if package not found
+  - Docstring points to both FOUNDUPS and Foundup repos
+
+- **Updated `README.md`** to redirect notice:
+  - Status: STUB
+  - Links to both external repos
+  - Installation instructions
+  - Lists preserved historical docs
+
+- **Deleted `src/` directory** (12 files, ~1,840 lines):
+  - All source code migrated to `FOUNDUPS/science-swarm-hub`
+  - No longer needed in monorepo
+
+- **Deleted `tests/` directory** (9 files, 108 tests):
+  - All tests migrated to `FOUNDUPS/science-swarm-hub`
+  - No longer needed in monorepo
+
+- **Preserved historical docs**:
+  - `PROTO_EXFOLIATION_CHECKLIST.md`
+  - `MIGRATION_MANIFEST.md`
+  - `DUAL_REMOTE_PLAN.md`
+  - `EXFOLIATION_PLAN.md`
+  - `ROADMAP.md`
+  - `ModLog.md` (this file)
+  - `CONTRIBUTING.md`
+  - `INTERFACE.md`
+  - `RUNBOOK.md`
+  - `docs/` directory
+
+### Verification
+
+- Stub import raises `ImportError` when package not installed (expected)
+- Historical docs remain for audit trail
+- External repos unchanged by this slice
+
+### Coherence Lock
+
+- Closed groundwork: Migration executed, release prep complete, reconciliation complete
+- Open target: Monorepo still had full source code (duplicated)
+- Chosen slice: science_swarm_hub_monorepo_stub_cutover
+- Not this slice: External repo changes, new product features
+
+### WSP References
+
+- WSP 22: Documentation discipline (ModLog update)
+- WSP 97: Lifecycle evaluation (stub cutover as final exfoliation step)
+
+---
+
+## V0.14.0 - Monorepo Reconciliation (Post-Migration)
+
+**Slice**: `science_swarm_hub_monorepo_reconciliation_after_migration`
+**Author**: 0102
+**Date**: 2026-03-30
+
+### Changes
+
+Reconciled monorepo docs after standalone migration execution:
+
+- Updated `ACTIVE_SLICE_LEDGER.md`:
+  - Added `pqn_swarm_hub_phase3_migration_exec` to closed slices (standalone repos live)
+  - Added `science_swarm_hub_monorepo_reconciliation` to closed slices
+  - Moved `pqn_swarm_hub_monorepo_stub_cutover` to open slices (DEFERRED)
+  - Updated Next Priority Order with migration complete markers
+
+- Updated `README.md`:
+  - Status: "EXFOLIATED — Standalone repos live"
+  - Added migration notice with repo links
+
+- Updated `ROADMAP.md`:
+  - Phase 3: "MIGRATION COMPLETE" (was "PREP COMPLETE")
+  - Migration execution checklist all marked DONE
+  - Monorepo stub cutover marked DEFERRED
+
+- Updated `PROTO_EXFOLIATION_CHECKLIST.md`:
+  - Status: "Phase 3 COMPLETE — Standalone Repos Live"
+  - Migration actions all marked COMPLETE
+  - Monorepo stub cutover marked DEFERRED
+
+- Updated `MIGRATION_MANIFEST.md`:
+  - Status: "Phase 3 COMPLETE — Migration Executed"
+  - All file dispositions marked DONE/MIGRATED
+  - Monorepo stub cutover marked DEFERRED
+
+- Updated `DUAL_REMOTE_PLAN.md`:
+  - Status: "Phase 3 COMPLETE — Repos Live"
+  - All execution steps marked EXECUTED
+  - Verification checklist all marked DONE
+
+- Updated `EXFOLIATION_PLAN.md`:
+  - Status: "Phase 3 COMPLETE — Migration Executed"
+  - All execution stages marked COMPLETE
+  - Monorepo stub update marked DEFERRED
+
+- Updated `RUNBOOK.md`:
+  - Version: "Phase 3 Complete"
+  - Added migration notice at top
+  - Section 7 updated with "Exfoliation Complete" status
+  - Standalone repos section shows LIVE status
+
+### Coherence Lock
+
+- Closed groundwork: migration executed, external repos live
+- Open target: monorepo docs still showed "blocked" / stale language
+- Chosen slice: science_swarm_hub_monorepo_reconciliation_after_migration
+- Not this slice: stub cutover, external repo changes
+
+### Stale Language Removed
+
+- "blocked on 012 approval" -> APPROVED/COMPLETE
+- "PENDING" -> DONE/COMPLETE
+- "Phase 3 Prep" -> "Phase 3 COMPLETE"
+- "blocked on 012" -> "DEFERRED"
+
+### Deferred Items
+
+- Monorepo stub cutover: Module remains as reference until prioritized
+
+### WSP References
+
+- WSP 22: Documentation discipline (post-migration reconciliation)
+- WSP 97: Lifecycle evaluation (migration complete documentation)
+
+---
+
+## V0.13.0 - Discord Community Scaffold
+
+**Slice**: `science_swarm_hub_discord_seed_scaffold`
+**Author**: 0102
+**Date**: 2026-03-30
+
+### Changes
+
+- Created `docs/DISCORD_COMMUNITY_SCAFFOLD.md`:
+  - Server overview and philosophy (verified contribution, not narrative activity)
+  - Channel map (5 categories, 12 channels)
+  - Role definitions (observer, contributor, verifier, coordinator, maintainer)
+  - Role promotion paths with clear requirements
+  - 7-step contributor intake path (Discord join to contribution record)
+  - Activity-to-location mapping table (Discord vs GitHub)
+  - Onboarding copy templates:
+    - #readme pinned message
+    - #getting-started pinned message
+    - Introduction template
+    - Work unit announcement template
+    - Submission announcement template
+    - Verification decision template
+  - Moderation guidelines (auto-mod rules, manual moderation, escalation path)
+  - Office hours schedule and format
+  - GitHub webhook integration plan
+  - Success metrics (turnaround times, retention targets)
+  - Phase rollout (Seed -> Active -> Scaled)
+  - Server setup commands and role permissions matrix
+
+### Non-Blockers
+
+This document is explicitly non-blocking for repo release:
+- Discord is an engagement surface, not a dependency
+- Repo can launch without Discord operational
+- Discord setup can follow repo creation
+
+### Coherence Lock
+
+- Closed groundwork: CONTRIBUTING.md exists (2026-03-29)
+- Open target: No Discord structure documented
+- Chosen slice: science_swarm_hub_discord_seed_scaffold
+- Not this slice: product code, contracts, repo release blocking
+
+### WSP References
+
+- WSP 22: Documentation discipline (community scaffold as artifact)
+- WSP 97: External contributor path (Discord maps to CONTRIBUTING.md)
+
+---
+
 ## V0.12.0 - Phase 3 Prep Scaffold (Migration Ready)
 
 **Slice**: `pqn_swarm_hub_phase3_prep_scaffold`

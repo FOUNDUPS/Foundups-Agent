@@ -1,7 +1,26 @@
 # Proto Exfoliation Checklist - PQN Swarm Hub
 
-**Status**: Phase 3 Prep Complete → Migration Blocked on 012 Approval (2026-03-29)
+**Status**: Phase 3 COMPLETE — Standalone Repos Live (2026-03-30)
 **Decision**: INTEGRATED_MODULE (per WSP 97 due diligence 2026-03-29)
+
+---
+
+## Migration Status
+
+### Standalone Repositories (LIVE)
+
+| Repo | Status | URL |
+|------|--------|-----|
+| `FOUNDUPS/science-swarm-hub` | LIVE | https://github.com/FOUNDUPS/science-swarm-hub |
+| `Foundup/science-swarm-hub` | LIVE | https://github.com/Foundup/science-swarm-hub |
+
+### Monorepo Status
+
+| Item | Status |
+|------|--------|
+| Migration executed | COMPLETE |
+| Standalone tests pass | 108/108 PASSING |
+| Monorepo stub cutover | COMPLETE (2026-03-30) |
 
 ---
 
@@ -93,33 +112,27 @@
 
 ---
 
-## Current Status
+## Final Status
 
 | Criterion | Status |
 |-----------|--------|
 | Phase 1 slices | 10/10 COMPLETE |
 | Phase 2 entry | APPROVED |
+| Phase 2 slices | 3/3 COMPLETE |
 | FAMDaemon live test | COMPLETE (72/72 tests) |
 | External submission type | COMPLETE (14/14 tests) |
 | External contributor path | COMPLETE (22/22 tests) |
 | Contracts stable | YES (except V3) |
 | Core independence | YES |
+| Migration executed | COMPLETE |
+| Standalone tests | 108/108 PASSING |
+| Monorepo stub cutover | DEFERRED |
 
-**Overall**: Phase 3 Prep COMPLETE. Migration blocked on 012 approval.
-
----
-
-## Next Implementation Order (Phase 2)
-
-1. ~~`pqn_swarm_hub_fam_live_validation`~~ — COMPLETE (15/15 tests)
-2. ~~`pqn_swarm_hub_external_submission_type`~~ — COMPLETE (14/14 tests)
-3. ~~`pqn_swarm_hub_external_contributor_path`~~ — COMPLETE (22/22 tests)
-
-**Phase 2 COMPLETE**: All true blockers cleared.
+**Overall**: Phase 3 Migration COMPLETE. Standalone repos live.
 
 ---
 
-## Phase 3 Prep (Migration Scaffold)
+## Phase 3 Migration Execution (2026-03-30)
 
 ### Preparation Artifacts (COMPLETE)
 
@@ -127,35 +140,35 @@
 - [x] `DUAL_REMOTE_PLAN.md` — Repo setup commands
 - [x] `EXFOLIATION_PLAN.md` — Full procedure
 
-### Approval Gates (BLOCKED)
+### Approval Gates (ALL CLEARED)
 
 | Gate | Status |
 |------|--------|
 | Prep artifacts complete | COMPLETE |
-| 012 approval for repo creation | PENDING |
-| 012 approval for migration push | PENDING |
+| 012 approval for repo creation | APPROVED |
+| 012 approval for migration push | APPROVED |
 
-### Migration Actions (Blocked on 012)
+### Migration Actions (COMPLETE)
 
-- [ ] `gh repo create FOUNDUPS/pqn-swarm-hub`
-- [ ] `gh repo create Foundup/pqn-swarm-hub`
-- [ ] Copy files per manifest
-- [ ] Create package structure
-- [ ] Verify tests pass standalone
-- [ ] Push to both remotes
-- [ ] Update monorepo stub
+- [x] `gh repo create FOUNDUPS/science-swarm-hub` — LIVE
+- [x] `gh repo create Foundup/science-swarm-hub` — LIVE
+- [x] Copy files per manifest — COMPLETE
+- [x] Create package structure — COMPLETE
+- [x] Verify tests pass standalone — 108/108 PASSING
+- [x] Push to both remotes — COMPLETE
+- [x] Update monorepo stub — COMPLETE
 
 ---
 
-## Target Future Path (Post-Proto)
+## Current Path (Post-Migration)
 
 ```
-FOUNDUPS/pqn-swarm-hub          # origin (org repo)
-Foundup/pqn-swarm-hub           # backup (personal repo)
-modules/foundups/pqn_swarm_hub/ # adapter stub remains in monorepo
+FOUNDUPS/science-swarm-hub          # origin (org repo) - LIVE
+Foundup/science-swarm-hub           # backup (personal repo) - LIVE
+modules/foundups/pqn_swarm_hub/     # monorepo stub (cutover COMPLETE)
 ```
 
 ---
 
 *Created: 2026-03-29*
-*Last Updated: 2026-03-29 (Phase 3 prep complete — migration scaffold)*
+*Last Updated: 2026-03-30 (stub cutover complete — exfoliation finished)*
