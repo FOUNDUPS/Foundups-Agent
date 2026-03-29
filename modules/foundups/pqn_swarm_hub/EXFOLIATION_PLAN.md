@@ -122,9 +122,9 @@ Similar adapters for:
 - `moltbook_distribution_adapter`
 - `fam_daemon`
 
-### Monorepo Stub (DEFERRED)
+### Monorepo Stub (IMPLEMENTED)
 
-After stub cutover, `modules/foundups/pqn_swarm_hub/__init__.py` will become:
+After stub cutover (2026-03-30), `modules/foundups/pqn_swarm_hub/__init__.py` is now:
 
 ```python
 """
