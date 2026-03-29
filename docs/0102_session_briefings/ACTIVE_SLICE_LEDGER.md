@@ -70,7 +70,8 @@ If already landed:
 | `supervisor_scan_once_fix` | (local, in PR #252 branch) | `openclaw_supervisor.py` type mismatch fixed |
 | `pqn_swarm_hub_internal_poc_scaffold` | `35d1e2275` | `modules/foundups/pqn_swarm_hub/` — contracts, 4 service modules, 18/18 tests |
 | `git_main_merge_sentinel` | `08004c100` (branch `feat/git-main-merge-sentinel-20260318`) | `wre_core/src/git_main_merge_sentinel.py` 284 lines + `main.py:1110` + `.env.example` — plan was stale, work already shipped |
-| `openclaw_roadmap_reconciliation` | (local, uncommitted) | `HERMES_INSPIRED_FOUNDUPS_NATIVE_ROADMAP_2026-03-23.md` — all P0+P1 items audited; 5 closed, 1 partial, 1 not-started; planning_snapshot banner added |
+| `openclaw_roadmap_reconciliation` | `a0549830b` | `HERMES_INSPIRED_FOUNDUPS_NATIVE_ROADMAP_2026-03-23.md` — all P0+P1 items audited; 5 closed, 1 partial, 1 not-started; planning_snapshot banner added |
+| `model_provider_switching_cleanup` | (local, uncommitted) | `openclaw_runtime_support.py` — dedup `local_target_dirs()`, `provider_has_key()`, `resolve_external_target()` from policy; `dae=None` standalone; `generated_on`; startup refresh uses same builder; `run_task.py` updated; 25 focused tests |
 
 ---
 
@@ -78,7 +79,7 @@ If already landed:
 
 | Slice | Priority | Blocked By | Notes |
 |-------|----------|------------|-------|
-| _(none — all current slices closed)_ | — | — | See next priority order below |
+| `model_provider_switching_cleanup` | P1 | — | Canonical snapshot builder in `openclaw_runtime_support.py`; startup refresh writes same shape |
 
 ---
 
@@ -86,7 +87,6 @@ If already landed:
 
 | Slice | Reason |
 |-------|--------|
-| `git_main_merge_sentinel` | Plan exists (plan file), not yet started — lower priority than training/foundups work |
 | `chrome_update_147` | Requires 012 manual action (Chrome browser update) |
 | `youtube_domain_phase1` | Awaiting 012 review of `IMPLEMENTATION_PLAN.md` before any code |
 
@@ -101,7 +101,9 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 
 ## Next Priority Order
 
-1. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
+1. `model_provider_switching_cleanup` (in progress — see Open Slices)
+2. `skill_evolution_loop` (queued behind #1)
+3. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
 
 ---
 
@@ -109,7 +111,7 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 
 | PR | Branch | Status | Contents |
 |----|--------|--------|----------|
-| [#252](https://github.com/FOUNDUPS/Foundups-Agent/pull/252) | `feat/training-and-foundups-docs` | Open | Training tests + FoundUps docs |
+| _(none)_ | — | — | — |
 
 ---
 

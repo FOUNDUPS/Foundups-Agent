@@ -8,8 +8,15 @@ import shlex
 import shutil
 import subprocess
 import time
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
+
+from .openclaw_model_policy import (
+    local_target_dirs,
+    provider_has_key,
+    resolve_external_target,
+)
 
 logger = logging.getLogger("openclaw_dae")
 
@@ -215,7 +222,7 @@ def resolve_identity_model_name(
         and preferred_provider
         and preferred_model
         and dae._allow_external_llm
-        and dae._provider_has_key(preferred_provider)
+        and provider_has_key(preferred_provider)
     ):
         model_hint = f"{preferred_provider}/{preferred_model}"
     elif dae._conversation_backend == "ironclaw":
@@ -247,7 +254,7 @@ def probe_provider_endpoint(
     provider_name = (provider or "").strip().lower()
     if not provider_name:
         return False, "invalid_provider"
-    if not dae._provider_has_key(provider_name):
+    if not provider_has_key(provider_name):
         return False, "no_key"
 
     try:
@@ -306,23 +313,25 @@ def probe_provider_endpoint(
 
 
 def get_model_availability_snapshot(
-    dae: Any,
+    dae: Optional[Any] = None,
     live_probe: bool = False,
     timeout_sec: float = 2.0,
 ) -> Dict[str, Any]:
-    """Return startup model/provider availability for voice/chat diagnostics."""
+    """Return canonical model/provider availability snapshot.
+
+    Callable with or without a DAE instance:
+    - dae=None: standalone use (startup refresh, scripts) — skips runtime-specific fields
+    - dae=<instance>: full use from runtime — includes effective_model_name
+
+    Output shape is stable regardless of caller. Both startup refresh and runtime
+    status surfaces must use this function as the single snapshot builder.
+    """
     local_root = Path(
         os.getenv("LOCAL_MODEL_ROOT", "E:/LM_studio/models/local")
     ).expanduser()
 
-    local_targets = {
-        "local/qwen-coder-7b": "qwen-coder-7b",
-        "local/qwen3-4b": "qwen3-4b",
-        "local/qwen3.5-4b": "qwen3.5-4b",
-        "local/gemma-270m": "gemma-270m",
-    }
     local_status: Dict[str, str] = {}
-    for target_id, folder in local_targets.items():
+    for target_id, folder in local_target_dirs().items():
         model_dir = local_root / folder
         if not model_dir.exists() or not model_dir.is_dir():
             local_status[target_id] = "missing"
@@ -336,7 +345,7 @@ def get_model_availability_snapshot(
     providers = ("openai", "anthropic", "grok", "gemini")
     provider_status: Dict[str, str] = {}
     for provider in providers:
-        if not dae._provider_has_key(provider):
+        if not provider_has_key(provider):
             provider_status[provider] = "no_key"
             continue
         if not live_probe:
@@ -345,26 +354,36 @@ def get_model_availability_snapshot(
         _, detail = probe_provider_endpoint(dae, provider, timeout_sec=timeout_sec)
         provider_status[provider] = detail
 
-    target = dae._conversation_model_target_id or "local/qwen-coder-7b"
+    if dae is not None:
+        target = dae._conversation_model_target_id or "local/qwen-coder-7b"
+    else:
+        target = (
+            os.getenv("OPENCLAW_CONVERSATION_MODEL_TARGET", "").strip()
+            or "local/qwen-coder-7b"
+        )
     target_status = "unknown"
     if target in local_status:
         target_status = local_status[target]
     else:
-        external = dae._resolve_external_target(target)
+        external = resolve_external_target(target)
         if external:
             provider_name, _ = external
             target_status = provider_status.get(provider_name, "no_key")
 
-    local_code = resolve_local_code_model_snapshot()
-    ironclaw_runtime = {
-        "healthy": "N/A",
-        "detail": "not_probed",
-        "model": os.getenv("IRONCLAW_MODEL", "local/qwen-coder-7b").strip() or "local/qwen-coder-7b",
-        "models": "none",
-    }
-    effective_model_name = resolve_identity_model_name(dae, local_code, ironclaw_runtime)
+    if dae is not None:
+        local_code = resolve_local_code_model_snapshot()
+        ironclaw_runtime = {
+            "healthy": "N/A",
+            "detail": "not_probed",
+            "model": os.getenv("IRONCLAW_MODEL", "local/qwen-coder-7b").strip() or "local/qwen-coder-7b",
+            "models": "none",
+        }
+        effective_model_name = resolve_identity_model_name(dae, local_code, ironclaw_runtime)
+    else:
+        effective_model_name = "model"
 
     return {
+        "generated_on": datetime.now(timezone.utc).isoformat(),
         "probe_mode": "live" if live_probe else "keys_only",
         "local_root": str(local_root),
         "local": local_status,
