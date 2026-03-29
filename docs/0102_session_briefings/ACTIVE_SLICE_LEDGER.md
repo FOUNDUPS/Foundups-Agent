@@ -70,6 +70,7 @@ If already landed:
 | `supervisor_scan_once_fix` | (local, in PR #252 branch) | `openclaw_supervisor.py` type mismatch fixed |
 | `pqn_swarm_hub_internal_poc_scaffold` | `35d1e2275` | `modules/foundups/pqn_swarm_hub/` — contracts, 4 service modules, 18/18 tests |
 | `git_main_merge_sentinel` | `08004c100` (branch `feat/git-main-merge-sentinel-20260318`) | `wre_core/src/git_main_merge_sentinel.py` 284 lines + `main.py:1110` + `.env.example` — plan was stale, work already shipped |
+| `openclaw_roadmap_reconciliation` | (local, uncommitted) | `HERMES_INSPIRED_FOUNDUPS_NATIVE_ROADMAP_2026-03-23.md` — all P0+P1 items audited; 5 closed, 1 partial, 1 not-started; planning_snapshot banner added |
 
 ---
 
