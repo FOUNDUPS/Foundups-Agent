@@ -71,7 +71,7 @@ If already landed:
 | `pqn_swarm_hub_internal_poc_scaffold` | `35d1e2275` | `modules/foundups/pqn_swarm_hub/` — contracts, 4 service modules, 18/18 tests |
 | `git_main_merge_sentinel` | `08004c100` (branch `feat/git-main-merge-sentinel-20260318`) | `wre_core/src/git_main_merge_sentinel.py` 284 lines + `main.py:1110` + `.env.example` — plan was stale, work already shipped |
 | `openclaw_roadmap_reconciliation` | `a0549830b` | `HERMES_INSPIRED_FOUNDUPS_NATIVE_ROADMAP_2026-03-23.md` — all P0+P1 items audited; 5 closed, 1 partial, 1 not-started; planning_snapshot banner added |
-| `model_provider_switching_cleanup` | (local, uncommitted) | `openclaw_runtime_support.py` — dedup `local_target_dirs()`, `provider_has_key()`, `resolve_external_target()` from policy; `dae=None` standalone; `generated_on`; startup refresh uses same builder; `run_task.py` updated; 25 focused tests |
+| `model_provider_switching_cleanup` | `b1d66d7ce` | `openclaw_runtime_support.py` — `get_model_availability_snapshot(dae=None)` standalone; `generated_on` timestamp; startup refresh writes same canonical shape; 25 tests in `test_model_provider_status.py` |
 
 ---
 
