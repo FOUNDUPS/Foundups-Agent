@@ -1,5 +1,47 @@
 # ModLog - PQN Swarm Hub FoundUp
 
+## V0.7.0 - Proto-Readiness Review (Phase 2 Entry)
+
+**Slice**: `pqn_swarm_hub_proto_readiness_review`
+**Author**: 0102
+**Date**: 2026-03-29
+
+### Review Decision
+
+- **Phase 2 Entry**: APPROVED
+- **Exfoliation**: NOT APPROVED (3 true blockers remain)
+
+### Gate Classification
+
+**True Blockers for Externalization**:
+1. Live FAMDaemon validation (adapter created, live test pending)
+2. Generic external submission type (NOT GPD-specific)
+3. External contributor path (CONTRIBUTING.md + entry gate test)
+
+**Not Blockers** (optional/future):
+- GPD work unit type — separate bootstrap lane, not core PQN
+- V3 consensus schema — Shapley/ZK is future scope
+- 3+ work unit types — generic external type sufficient
+
+### Next Implementation Order
+
+1. `pqn_swarm_hub_fam_live_validation`
+2. `pqn_swarm_hub_external_submission_type`
+3. `pqn_swarm_hub_external_contributor_path`
+
+### Updated Files
+
+- `PROTO_EXFOLIATION_CHECKLIST.md` — Gate classification added
+- `ROADMAP.md` — Phase 2 entry approved, deliverables ordered
+- `ACTIVE_SLICE_LEDGER.md` — Review closed, Phase 2 slices opened
+
+### WSP References
+
+- WSP 97: Lifecycle evaluation (proto-readiness gates)
+- WSP 22: Documentation discipline (review as ModLog entry)
+
+---
+
 ## V0.6.0 - Runbook (Phase 1 Complete)
 
 **Slice**: `pqn_swarm_hub_runbook`

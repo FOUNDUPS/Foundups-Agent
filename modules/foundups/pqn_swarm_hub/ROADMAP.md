@@ -42,17 +42,34 @@
 
 ---
 
-### Phase 2: Externalization Readiness
+### Phase 2: Externalization Readiness (CURRENT)
 
-**Goal**: Lock interfaces and verify standalone deploy path.
+**Goal**: Complete externalization gates and lock interfaces.
+
+**Entry Approved**: 2026-03-29 (proto-readiness review)
 
 **Deliverables**:
+- [ ] Live FAMDaemon validation — `pqn_swarm_hub_fam_live_validation`
+- [ ] Generic external submission type — `pqn_swarm_hub_external_submission_type`
+- [ ] External contributor path — `pqn_swarm_hub_external_contributor_path`
 - [ ] Interfaces frozen
 - [ ] Standalone deploy path verified
 - [ ] Dual-remote repo setup prepared
 - [ ] Monorepo stub/adapter strategy documented
 
+**True Blockers for Exfoliation**:
+1. FAMAdapter live test with actual FAMDaemon
+2. Generic external submission work-unit type (NOT GPD-specific)
+3. CONTRIBUTING.md + entry gate test with external identity
+
+**Not Blockers** (optional/future):
+- GPD work unit type (separate bootstrap lane)
+- V3 consensus schema (Shapley/ZK)
+
 **Acceptance Criteria**:
+- FAM events appear in live FAM store
+- External submission type tested
+- External contributor can request entry
 - No interface-breaking changes allowed
 - Module can deploy independently (with adapter stubs)
 - Migration path to `FOUNDUPS/PQNSwarmHub` documented
@@ -88,7 +105,14 @@
 - [x] `pqn_swarm_hub_publication_adapter` — PublicationAdapter wraps MoltBook, stub-safe (57/57 tests pass)
 - [x] `pqn_swarm_hub_runbook` — Reproducible execution guide in `RUNBOOK.md`
 
-**Phase 2 Entry**: Awaiting proto-readiness review
+**Phase 2 Entry**: APPROVED (2026-03-29 proto-readiness review)
+
+**Phase 2 Slices** (ordered):
+1. `pqn_swarm_hub_fam_live_validation` — Test FAMAdapter with live FAMDaemon
+2. `pqn_swarm_hub_external_submission_type` — Generic work unit type for external rESP
+3. `pqn_swarm_hub_external_contributor_path` — CONTRIBUTING.md + entry gate test
+
+**Next slice**: `pqn_swarm_hub_fam_live_validation`
 
 ---
 

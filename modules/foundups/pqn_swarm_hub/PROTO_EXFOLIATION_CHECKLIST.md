@@ -1,15 +1,43 @@
 # Proto Exfoliation Checklist - PQN Swarm Hub
 
-**Status**: Internal PoC → Proto gate tracking
+**Status**: Phase 1 Complete → Phase 2 Entry Review (2026-03-29)
 **Decision**: INTEGRATED_MODULE (per WSP 97 due diligence 2026-03-29)
 
 ---
 
-## Spin-Out Trigger Criteria
+## Gate Classification (Proto-Readiness Review 2026-03-29)
 
-All criteria must be TRUE before exfoliation to standalone repo.
+### Required for Phase 2 Entry
 
-### Phase 1 Slices Complete
+- [x] Phase 1 slices complete (10/10)
+- [x] Contracts stable (except V3)
+- [x] Core independence proven
+- [x] Runbook documented
+
+**Status**: APPROVED — Phase 2 scope: complete externalization gates below.
+
+### Required for Exfoliation (TRUE BLOCKERS)
+
+| Gate | Status | Slice |
+|------|--------|-------|
+| Live FAMDaemon validation | PENDING | `pqn_swarm_hub_fam_live_validation` |
+| External submission type | PENDING | `pqn_swarm_hub_external_submission_type` |
+| CONTRIBUTING.md | PENDING | `pqn_swarm_hub_external_contributor_path` |
+| Entry gate tested with external identity | PENDING | `pqn_swarm_hub_external_contributor_path` |
+| Shared touchpoints documented | PENDING | `pqn_swarm_hub_external_contributor_path` |
+
+### Optional / Post-Proto (NOT BLOCKERS)
+
+| Item | Rationale |
+|------|-----------|
+| GPD work unit type | Separate bootstrap lane, not core PQN |
+| V3 consensus schema | Shapley/ZK is future scope |
+| Issue/PR template | Nice-to-have, not required for first external PR |
+| 3+ work unit types | Generic external type sufficient; GPD optional |
+
+---
+
+## Phase 1 Slices Complete
 
 - [x] Registry (Slice 1) — `src/registry.py`
 - [x] rESP Sink (Slice 2) — `src/submission_sink.py`
@@ -22,7 +50,9 @@ All criteria must be TRUE before exfoliation to standalone repo.
 - [x] MoltBook Publication Adapter — `src/publication_adapter.py` (57/57 tests pass)
 - [x] Runbook Documentation — `RUNBOOK.md` (reproducible execution guide)
 
-### FAMDaemon Integration Proven
+---
+
+## FAMDaemon Integration
 
 - [x] FAMAdapter created with stub fallback
 - [ ] emit_contribution_event() tested with live FAMDaemon
@@ -30,20 +60,29 @@ All criteria must be TRUE before exfoliation to standalone repo.
 - [ ] Event appears in FAM event store
 - [ ] No direct core mutation detected
 
-### 3+ Work Unit Types Supported
+---
+
+## Work Unit Types
 
 - [x] Type 1: CMST Detector (via DetectorBridge)
-- [ ] Type 2: GPD physics task
-- [ ] Type 3: External submission (generic rESP)
+- [ ] Type 2: External submission (generic rESP) — **next priority**
+- [ ] Type 3: GPD physics task — **optional/future**
 
-### External Contributor Path Validated
+**Note**: Generic external submission type is the correct next step, NOT GPD-specific.
+GPD is a separate runtime/bootstrap lane.
+
+---
+
+## External Contributor Path
 
 - [ ] CONTRIBUTING.md exists
-- [ ] Issue/PR template exists
 - [ ] Entry gate tested with external identity
-- [ ] Documentation sufficient for onboarding
+- [ ] Shared touchpoints documented
+- [ ] Stub adapter viable post-exfoliation
 
-### Contracts Stable Enough to Freeze
+---
+
+## Contracts Stable
 
 - [x] PQNWorkUnit — stable
 - [x] rESPSubmission — stable
@@ -51,14 +90,7 @@ All criteria must be TRUE before exfoliation to standalone repo.
 - [x] ContributionRecord — stable
 - [x] ParticipantIdentity — stable (Phase 1)
 - [x] GateDecision — stable (Phase 1)
-- [ ] V3 consensus schema — NOT stable (Shapley/ZK future)
-
-### No Core Changes Required for External PRs
-
-- [x] Adapter boundary respected
-- [x] No imports from core control-plane beyond stable interfaces
-- [ ] All shared touchpoints documented
-- [ ] Stub adapter remains viable post-exfoliation
+- [ ] V3 consensus schema — NOT stable (optional/future)
 
 ---
 
@@ -66,14 +98,25 @@ All criteria must be TRUE before exfoliation to standalone repo.
 
 | Criterion | Status |
 |-----------|--------|
-| Phase 1 slices | 10/10 complete |
-| FAMDaemon integration | PARTIAL (adapter created, live test pending) |
-| 3+ work unit types | 1/3 |
-| External contributor path | NOT VALIDATED |
+| Phase 1 slices | 10/10 COMPLETE |
+| Phase 2 entry | APPROVED |
+| FAMDaemon live test | PENDING (blocker) |
+| External submission type | PENDING (blocker) |
+| External contributor path | PENDING (blocker) |
 | Contracts stable | YES (except V3) |
 | Core independence | YES |
 
-**Overall**: NOT READY for exfoliation (Phase 1 code complete, pending: live FAM test, GPD type, external path)
+**Overall**: Phase 2 APPROVED. NOT READY for exfoliation (3 true blockers remain).
+
+---
+
+## Next Implementation Order (Phase 2)
+
+1. `pqn_swarm_hub_fam_live_validation` — Test FAMAdapter with live FAMDaemon
+2. `pqn_swarm_hub_external_submission_type` — Generic work unit type for external rESP
+3. `pqn_swarm_hub_external_contributor_path` — CONTRIBUTING.md + entry gate test
+
+**After these 3 slices**: Re-evaluate exfoliation readiness.
 
 ---
 
@@ -87,15 +130,5 @@ modules/foundups/pqn_swarm_hub/ # adapter stub remains in monorepo
 
 ---
 
-## Next Steps to Proto
-
-1. Test FAMAdapter with live FAMDaemon
-2. Add GPD work unit type
-3. Create CONTRIBUTING.md
-4. Test external contributor entry gate
-5. Revalidate this checklist
-
----
-
 *Created: 2026-03-29*
-*Last Updated: 2026-03-29*
+*Last Updated: 2026-03-29 (Proto-readiness review)*
