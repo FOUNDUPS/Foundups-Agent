@@ -2,7 +2,7 @@
 
 ## Phase Plan (per Exfoliation Protocol)
 
-### Phase 0: Internal PoC (CURRENT)
+### Phase 0: Internal PoC (COMPLETE)
 
 **Goal**: Minimal scaffold with explicit contracts and one end-to-end flow.
 
@@ -17,22 +17,17 @@
 - [x] One end-to-end PoC path (register -> submit -> verify -> record) — 18/18 tests pass
 - [x] Basic tests for contracts and flows
 
-**Acceptance Criteria**:
-- At least one PQN work unit can be registered
-- At least one rESP submission can be made
-- Verification can distinguish accepted vs rejected
-- A durable result artifact is written
-- ROC-style contribution reporting exists for accepted work
+**Acceptance Criteria**: ALL MET
 
 ---
 
-### Phase 1: Internal Proto
+### Phase 1: Internal Proto (CURRENT)
 
 **Goal**: Wire to shared infrastructure and prove reproducible runbook.
 
 **Deliverables**:
 - [ ] SQLite persistence for contracts
-- [ ] Integration with pqn_alignment detector via API calls
+- [x] Integration with pqn_alignment detector via API calls — `DetectorBridge` + `submit_from_detector()`
 - [ ] Integration with moltbook_distribution_adapter for downstream publish
 - [ ] Participant gate (who can submit to this FoundUp)
 - [ ] Reproducible runbook documented
@@ -83,17 +78,16 @@
 
 ## Current Execution Priority
 
-**Phase 0 PoC Slice** (this scaffold):
-1. Module structure created
-2. Contracts defined in INTERFACE.md
-3. Reuse boundaries explicit
-4. Minimal end-to-end path specified
+**Phase 0**: COMPLETE (scaffold @ 35d1e2275)
 
-**Next Slice** (Phase 0 implementation):
-1. Implement `src/contracts.py` with dataclasses
-2. Implement in-memory registry
-3. Write one end-to-end test
-4. Prove the PoC acceptance criteria
+**Phase 1 Progress**:
+- [x] `pqn_swarm_hub_detector_bridge` — DetectorBridge wires pqn_alignment.run_detector() into submission flow
+
+**Next Slices** (Phase 1 remaining):
+1. `pqn_swarm_hub_persistence` — SQLite for contracts
+2. `pqn_swarm_hub_publication_adapter` — MoltBook integration
+3. `pqn_swarm_hub_gate` — Participant entry policy
+4. `pqn_swarm_hub_runbook` — Reproducible documentation
 
 ---
 

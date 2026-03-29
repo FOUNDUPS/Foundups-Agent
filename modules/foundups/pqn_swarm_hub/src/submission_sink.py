@@ -85,6 +85,43 @@ class SubmissionSink:
             items = [s for s in items if s.status == status_filter]
         return items[:limit]
 
+    def submit_from_detector(
+        self,
+        work_unit_id: str,
+        bridge_result: dict,
+        submitter_id: str,
+    ) -> rESPSubmission:
+        """
+        Accept an rESP submission from DetectorBridge output.
+
+        Extracts metrics and artifact paths from bridge_result.
+        Phase 1: Bridges detector output to submission flow.
+
+        Args:
+            work_unit_id: ID of the work unit
+            bridge_result: Dict from DetectorBridge.run() containing:
+                - metrics: {coherence, pqn_rate, paradox_rate, resonance_hz, ...}
+                - events_path: str path to JSONL
+                - metrics_csv: str path to CSV
+            submitter_id: ID of the submitting agent
+
+        Returns:
+            rESPSubmission with metrics and artifact paths
+        """
+        metrics = bridge_result.get("metrics", {})
+        artifacts = []
+        if bridge_result.get("events_path"):
+            artifacts.append(bridge_result["events_path"])
+        if bridge_result.get("metrics_csv"):
+            artifacts.append(bridge_result["metrics_csv"])
+
+        return self.submit(
+            work_unit_id=work_unit_id,
+            submitter_id=submitter_id,
+            metrics=metrics,
+            artifacts=artifacts,
+        )
+
     def update_status(
         self,
         submission_id: str,

@@ -30,6 +30,7 @@ from .src import (
     SubmissionSink,
     VerificationEngine,
     ContributionReporter,
+    DetectorBridge,
     # Errors
     WorkUnitNotFoundError,
     InvalidStatusTransitionError,
@@ -49,6 +50,7 @@ __all__ = [
     "SubmissionSink",
     "VerificationEngine",
     "ContributionReporter",
+    "DetectorBridge",
     "WorkUnitNotFoundError",
     "InvalidStatusTransitionError",
     "DuplicateSubmissionError",

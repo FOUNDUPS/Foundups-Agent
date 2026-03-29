@@ -93,9 +93,14 @@ class ContributionRecord:
 
 ### rESP Submission Sink
 
-- `submit_resp(work_unit_id, submitter_id, metrics, artifacts) -> rESPSubmission`
+- `submit(work_unit_id, submitter_id, metrics, artifacts) -> rESPSubmission`
+- `submit_from_detector(work_unit_id, bridge_result, submitter_id) -> rESPSubmission` (Phase 1)
 - `get_submission(submission_id) -> Optional[rESPSubmission]`
 - `list_submissions(work_unit_id, status_filter, limit) -> List[rESPSubmission]`
+
+### Detector Bridge (Phase 1)
+
+- `DetectorBridge.run(work_unit) -> Dict[str, Any]` - calls pqn_alignment.run_detector() and parses artifacts
 
 ### Verification
 
@@ -114,25 +119,47 @@ class ContributionRecord:
 
 ## Integration Points
 
-### Detector Engine (pqn_alignment)
+### Detector Engine via DetectorBridge (Phase 1)
+
+```python
+from modules.foundups.pqn_swarm_hub import (
+    WorkUnitRegistry,
+    SubmissionSink,
+    DetectorBridge,
+)
+
+# Setup
+registry = WorkUnitRegistry()
+sink = SubmissionSink(registry)
+bridge = DetectorBridge()
+
+# Register work unit
+work_unit = registry.register(
+    description="7.05Hz resonance sweep",
+    config={"script": "^^^&&&", "steps": 1200, "dt": 0.071},
+    creator_id="agent_x",
+)
+
+# Run detector via bridge (calls pqn_alignment.run_detector internally)
+bridge_result = bridge.run(work_unit)
+# Returns: {events_path, metrics_csv, metrics: {coherence, pqn_rate, ...}, steps, raw_config}
+
+# Submit from detector output
+submission = sink.submit_from_detector(
+    work_unit_id=work_unit.work_unit_id,
+    bridge_result=bridge_result,
+    submitter_id="agent_x",
+)
+```
+
+### Raw Detector (without bridge)
 
 ```python
 from modules.ai_intelligence.pqn_alignment import run_detector
 
-# Execute detector for a work unit
-result = run_detector({
-    "script": work_unit.config.get("script", "^^^&&&"),
-    "steps": work_unit.config.get("steps", 1200),
-    "dt": work_unit.config.get("dt", 0.071),
-})
-
-# Submit result to this FoundUp
-submission = submit_resp(
-    work_unit_id=work_unit.work_unit_id,
-    submitter_id=agent_id,
-    metrics=result["metrics"],
-    artifacts=[result["events_path"], result["metrics_csv"]],
-)
+# Direct detector call returns (events_path, metrics_csv) tuple
+events_path, metrics_csv = run_detector(work_unit.config)
+# Must parse artifacts manually to extract metrics
 ```
 
 ### Downstream Distribution (moltbook_distribution_adapter)

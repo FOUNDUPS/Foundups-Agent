@@ -1,5 +1,49 @@
 # ModLog - PQN Swarm Hub FoundUp
 
+## V0.2.0 - Detector Bridge Integration
+
+**Slice**: `pqn_swarm_hub_detector_bridge`
+**Author**: 0102
+
+### Changes
+
+- Added `src/detector_bridge.py`:
+  - `DetectorBridge` class bridges pqn_swarm_hub to pqn_alignment detector
+  - `run(work_unit)` calls `pqn_alignment.run_detector()` and parses artifacts
+  - Extracts metrics from CSV (coherence) and JSONL (pqn_rate, paradox_rate, resonance_hz)
+  - No changes to pqn_alignment source code (reuse only per WSP 84)
+
+- Updated `src/submission_sink.py`:
+  - Added `submit_from_detector(work_unit_id, bridge_result, submitter_id)` method
+  - Extracts metrics and artifact paths from bridge output
+  - Creates rESPSubmission with detector-derived data
+
+- Added `tests/test_detector_bridge.py`:
+  - 5 new tests for detector bridge integration
+  - Real detector runs with truthful verification verdicts
+  - Happy-path test uses manual_verify() for guaranteed contribution flow
+
+### Metrics Derivation
+
+From detector artifacts:
+- `coherence`: mean of C column from CSV
+- `pqn_rate`: PQN_DETECTED event count / steps
+- `paradox_rate`: PARADOX_RISK event count / steps
+- `resonance_hz`: modal frequency from RESONANCE_HIT events
+
+### Test Count
+
+- Before: 18 tests (Phase 0)
+- After: 23 tests (18 Phase 0 + 5 detector bridge)
+- All passing
+
+### WSP References
+
+- WSP 72: Module independence (no circular deps)
+- WSP 84: Code reuse (reuses pqn_alignment detector, doesn't recreate)
+
+---
+
 ## V0.1.0 - Initial PoC Scaffold
 
 **Slice**: `pqn_swarm_hub_internal_poc_scaffold`

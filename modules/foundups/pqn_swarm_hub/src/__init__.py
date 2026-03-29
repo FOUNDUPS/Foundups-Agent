@@ -35,6 +35,7 @@ from .registry import (
 )
 from .submission_sink import DuplicateSubmissionError, SubmissionSink
 from .verification import VerificationEngine
+from .detector_bridge import DetectorBridge
 
 __all__ = [
     # Contracts
@@ -51,6 +52,7 @@ __all__ = [
     "SubmissionSink",
     "VerificationEngine",
     "ContributionReporter",
+    "DetectorBridge",
     # Errors
     "WorkUnitNotFoundError",
     "InvalidStatusTransitionError",
