@@ -21,7 +21,7 @@
 | Gate | Status | Slice |
 |------|--------|-------|
 | Live FAMDaemon validation | COMPLETE | `pqn_swarm_hub_fam_live_validation` |
-| External submission type | PENDING | `pqn_swarm_hub_external_submission_type` |
+| External submission type | COMPLETE | `pqn_swarm_hub_external_submission_type` |
 | CONTRIBUTING.md | PENDING | `pqn_swarm_hub_external_contributor_path` |
 | Entry gate tested with external identity | PENDING | `pqn_swarm_hub_external_contributor_path` |
 | Shared touchpoints documented | PENDING | `pqn_swarm_hub_external_contributor_path` |
@@ -65,11 +65,10 @@
 ## Work Unit Types
 
 - [x] Type 1: CMST Detector (via DetectorBridge)
-- [ ] Type 2: External submission (generic rESP) — **next priority**
+- [x] Type 2: External submission (generic rESP) — COMPLETE (14/14 tests)
 - [ ] Type 3: GPD physics task — **optional/future**
 
-**Note**: Generic external submission type is the correct next step, NOT GPD-specific.
-GPD is a separate runtime/bootstrap lane.
+**Note**: Generic external submission type complete. GPD is optional (separate bootstrap lane).
 
 ---
 
@@ -101,22 +100,22 @@ GPD is a separate runtime/bootstrap lane.
 | Phase 1 slices | 10/10 COMPLETE |
 | Phase 2 entry | APPROVED |
 | FAMDaemon live test | COMPLETE (72/72 tests) |
-| External submission type | PENDING (blocker) |
+| External submission type | COMPLETE (14/14 tests) |
 | External contributor path | PENDING (blocker) |
 | Contracts stable | YES (except V3) |
 | Core independence | YES |
 
-**Overall**: Phase 2 IN PROGRESS. NOT READY for exfoliation (2 true blockers remain).
+**Overall**: Phase 2 IN PROGRESS. NOT READY for exfoliation (1 true blocker remains).
 
 ---
 
 ## Next Implementation Order (Phase 2)
 
 1. ~~`pqn_swarm_hub_fam_live_validation`~~ — COMPLETE (15/15 tests)
-2. `pqn_swarm_hub_external_submission_type` — Generic work unit type for external rESP
+2. ~~`pqn_swarm_hub_external_submission_type`~~ — COMPLETE (14/14 tests)
 3. `pqn_swarm_hub_external_contributor_path` — CONTRIBUTING.md + entry gate test
 
-**After remaining 2 slices**: Re-evaluate exfoliation readiness.
+**After remaining 1 slice**: Re-evaluate exfoliation readiness.
 
 ---
 
@@ -131,4 +130,4 @@ modules/foundups/pqn_swarm_hub/ # adapter stub remains in monorepo
 ---
 
 *Created: 2026-03-29*
-*Last Updated: 2026-03-29 (FAM live validation complete)*
+*Last Updated: 2026-03-29 (External submission type complete)*

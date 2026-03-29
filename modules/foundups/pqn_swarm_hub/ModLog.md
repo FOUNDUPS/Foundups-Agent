@@ -1,5 +1,81 @@
 # ModLog - PQN Swarm Hub FoundUp
 
+## V0.9.0 - External Submission Type (Phase 2 Gate 2)
+
+**Slice**: `pqn_swarm_hub_external_submission_type`
+**Author**: 0102
+**Date**: 2026-03-29
+
+### Changes
+
+- Updated `src/contracts.py`:
+  - Added `source: str = "internal"` field to `PQNWorkUnit`
+  - Added `source: str = "internal"` field to `rESPSubmission`
+  - Default "internal" for detector bridge, "external" for external submissions
+
+- Updated `src/registry.py`:
+  - Added `source` parameter to `register()` method
+  - Added `register_external()` convenience method (sets source="external")
+
+- Updated `src/submission_sink.py`:
+  - Added `source` parameter to `submit()` method
+  - Added `submit_external()` convenience method (sets source="external")
+
+- Updated `src/persistence.py`:
+  - Added `source` column to work_units table schema
+  - Added `source` column to submissions table schema
+  - Added `_migrate_source_columns()` for existing databases
+  - Updated save/get methods to handle source field
+
+- Added `tests/test_external_submission.py` (14 tests):
+  - External work unit registration tests
+  - External submission tests
+  - Full external flow (register -> submit -> verify -> contribution)
+  - Persistence round-trip for source field
+  - Contract source field defaults
+
+### External Submission API
+
+```python
+# Register external work unit
+work_unit = registry.register_external(
+    description="External GPD result",
+    config={"tool": "gpd", "version": "2.0"},
+    creator_id="external_contributor_001",
+)
+# work_unit.source == "external"
+
+# Submit external results
+submission = sink.submit_external(
+    work_unit_id=work_unit.work_unit_id,
+    submitter_id="external_contributor_001",
+    metrics={"coherence": 0.75, "custom_metric": 42},
+)
+# submission.source == "external"
+```
+
+### Test Count
+
+- Before: 72 tests (Phase 1 + FAM live validation)
+- After: 86 tests (72 + 14 external submission)
+- All passing
+
+### Phase 2 Progress
+
+- [x] `pqn_swarm_hub_fam_live_validation` — COMPLETE (15 tests)
+- [x] `pqn_swarm_hub_external_submission_type` — COMPLETE (14 tests)
+- [ ] `pqn_swarm_hub_external_contributor_path` — NEXT
+
+**True blockers remaining**: 1 (external contributor path)
+
+### WSP References
+
+- WSP 72: Module independence (generic external type, not tool-specific)
+- WSP 97: Lifecycle evaluation (externalization gate)
+- WSP 84: Code reuse (extends existing contracts minimally)
+
+---
+
 ## V0.8.0 - FAM Live Validation (Phase 2 Gate 1)
 
 **Slice**: `pqn_swarm_hub_fam_live_validation`

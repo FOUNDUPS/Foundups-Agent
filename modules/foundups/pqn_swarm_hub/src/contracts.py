@@ -69,6 +69,10 @@ class PQNWorkUnit:
 
     Represents a single PQN detection work unit that can be assigned,
     executed, and verified.
+
+    Attributes:
+        source: Origin of work unit. "internal" for detector bridge,
+                "external" for externally-sourced submissions.
     """
 
     description: str
@@ -76,6 +80,7 @@ class PQNWorkUnit:
     creator_id: str
     work_unit_id: str = field(default="")
     status: WorkUnitStatus = WorkUnitStatus.PENDING
+    source: str = "internal"
     created_at: datetime = field(default_factory=utc_now)
     updated_at: datetime = field(default_factory=utc_now)
 
@@ -95,6 +100,10 @@ class rESPSubmission:
     Structured rESP result intake.
 
     Represents a submission of detection results for a work unit.
+
+    Attributes:
+        source: Origin of submission. "internal" for detector bridge,
+                "external" for externally-sourced results.
     """
 
     work_unit_id: str
@@ -103,6 +112,7 @@ class rESPSubmission:
     artifacts: List[str] = field(default_factory=list)
     submission_id: str = field(default="")
     status: SubmissionStatus = SubmissionStatus.PENDING_VERIFICATION
+    source: str = "internal"
     submitted_at: datetime = field(default_factory=utc_now)
 
     def __post_init__(self):

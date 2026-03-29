@@ -60,11 +60,19 @@ class SubmissionSink:
         submitter_id: str,
         metrics: dict,
         artifacts: Optional[List[str]] = None,
+        source: str = "internal",
     ) -> rESPSubmission:
         """
         Accept an rESP submission for a registered work unit.
 
         Idempotent: returns existing submission if same IDs would be generated.
+
+        Args:
+            work_unit_id: ID of the registered work unit
+            submitter_id: ID of the submitting agent/participant
+            metrics: Dict of result metrics (coherence, pqn_rate, etc.)
+            artifacts: Optional list of artifact file paths
+            source: Origin of submission ("internal" or "external")
         """
         # Validate work unit exists
         unit = self._registry.get(work_unit_id)  # raises WorkUnitNotFoundError
@@ -74,6 +82,7 @@ class SubmissionSink:
             submitter_id=submitter_id,
             metrics=metrics,
             artifacts=artifacts or [],
+            source=source,
         )
 
         # Idempotency: check memory then store
@@ -90,6 +99,36 @@ class SubmissionSink:
             self._registry.transition(work_unit_id, WorkUnitStatus.IN_PROGRESS)
 
         return submission
+
+    def submit_external(
+        self,
+        work_unit_id: str,
+        submitter_id: str,
+        metrics: dict,
+        artifacts: Optional[List[str]] = None,
+    ) -> rESPSubmission:
+        """
+        Accept an externally-sourced submission.
+
+        Convenience method for external contributions (non-detector).
+        Sets source="external" automatically.
+
+        Args:
+            work_unit_id: ID of the registered work unit
+            submitter_id: ID of the external contributor
+            metrics: Dict of result metrics from external source
+            artifacts: Optional list of artifact file paths
+
+        Returns:
+            rESPSubmission with source="external"
+        """
+        return self.submit(
+            work_unit_id=work_unit_id,
+            submitter_id=submitter_id,
+            metrics=metrics,
+            artifacts=artifacts,
+            source="external",
+        )
 
     def get(self, submission_id: str) -> Optional[rESPSubmission]:
         """Get submission by ID. Checks memory first, then store."""

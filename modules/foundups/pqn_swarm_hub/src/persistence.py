@@ -60,11 +60,13 @@ class SQLiteStore:
         config_json TEXT NOT NULL,
         creator_id TEXT NOT NULL,
         status TEXT NOT NULL DEFAULT 'pending',
+        source TEXT NOT NULL DEFAULT 'internal',
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_work_units_status ON work_units(status);
     CREATE INDEX IF NOT EXISTS idx_work_units_creator ON work_units(creator_id);
+    CREATE INDEX IF NOT EXISTS idx_work_units_source ON work_units(source);
 
     -- Submissions
     CREATE TABLE IF NOT EXISTS submissions (
@@ -74,11 +76,13 @@ class SQLiteStore:
         metrics_json TEXT NOT NULL,
         artifacts_json TEXT NOT NULL,
         status TEXT NOT NULL DEFAULT 'pending_verification',
+        source TEXT NOT NULL DEFAULT 'internal',
         submitted_at TEXT NOT NULL,
         FOREIGN KEY (work_unit_id) REFERENCES work_units(work_unit_id)
     );
     CREATE INDEX IF NOT EXISTS idx_submissions_work_unit ON submissions(work_unit_id);
     CREATE INDEX IF NOT EXISTS idx_submissions_status ON submissions(status);
+    CREATE INDEX IF NOT EXISTS idx_submissions_source ON submissions(source);
 
     -- Verification Decisions
     CREATE TABLE IF NOT EXISTS verification_decisions (
@@ -159,7 +163,25 @@ class SQLiteStore:
             conn.execute("PRAGMA journal_mode=WAL")
             conn.execute("PRAGMA synchronous=NORMAL")
             conn.executescript(self.SCHEMA)
+            # Migration: Add source columns for existing databases (Phase 2)
+            self._migrate_source_columns(conn)
             conn.commit()
+
+    def _migrate_source_columns(self, conn: sqlite3.Connection) -> None:
+        """Add source columns to existing tables if missing."""
+        # Check work_units table
+        cursor = conn.execute("PRAGMA table_info(work_units)")
+        columns = {row[1] for row in cursor.fetchall()}
+        if "source" not in columns:
+            conn.execute("ALTER TABLE work_units ADD COLUMN source TEXT NOT NULL DEFAULT 'internal'")
+            logger.info("[SWARM-STORE] Migrated work_units: added source column")
+
+        # Check submissions table
+        cursor = conn.execute("PRAGMA table_info(submissions)")
+        columns = {row[1] for row in cursor.fetchall()}
+        if "source" not in columns:
+            conn.execute("ALTER TABLE submissions ADD COLUMN source TEXT NOT NULL DEFAULT 'internal'")
+            logger.info("[SWARM-STORE] Migrated submissions: added source column")
 
     def _connect(self) -> sqlite3.Connection:
         """Return a configured SQLite connection."""
@@ -180,8 +202,8 @@ class SQLiteStore:
                 conn.execute(
                     """
                     INSERT OR REPLACE INTO work_units
-                    (work_unit_id, description, config_json, creator_id, status, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    (work_unit_id, description, config_json, creator_id, status, source, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         unit.work_unit_id,
@@ -189,6 +211,7 @@ class SQLiteStore:
                         json.dumps(unit.config),
                         unit.creator_id,
                         unit.status.value,
+                        unit.source,
                         unit.created_at.isoformat(),
                         unit.updated_at.isoformat(),
                     ),
@@ -233,6 +256,7 @@ class SQLiteStore:
             creator_id=row["creator_id"],
             work_unit_id=row["work_unit_id"],
             status=WorkUnitStatus(row["status"]),
+            source=row["source"] if "source" in row.keys() else "internal",
             created_at=datetime.fromisoformat(row["created_at"]),
             updated_at=datetime.fromisoformat(row["updated_at"]),
         )
@@ -249,8 +273,8 @@ class SQLiteStore:
                 conn.execute(
                     """
                     INSERT OR REPLACE INTO submissions
-                    (submission_id, work_unit_id, submitter_id, metrics_json, artifacts_json, status, submitted_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    (submission_id, work_unit_id, submitter_id, metrics_json, artifacts_json, status, source, submitted_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         sub.submission_id,
@@ -259,6 +283,7 @@ class SQLiteStore:
                         json.dumps(sub.metrics),
                         json.dumps(sub.artifacts),
                         sub.status.value,
+                        sub.source,
                         sub.submitted_at.isoformat(),
                     ),
                 )
@@ -305,6 +330,7 @@ class SQLiteStore:
             artifacts=json.loads(row["artifacts_json"]),
             submission_id=row["submission_id"],
             status=SubmissionStatus(row["status"]),
+            source=row["source"] if "source" in row.keys() else "internal",
             submitted_at=datetime.fromisoformat(row["submitted_at"]),
         )
         return sub

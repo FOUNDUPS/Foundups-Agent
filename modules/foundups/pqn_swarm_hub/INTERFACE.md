@@ -29,6 +29,7 @@ class PQNWorkUnit:
     config: Dict[str, Any]     # CMST detector config (steps, dt, seed, etc.)
     creator_id: str            # Agent/user who created this work unit
     status: WorkUnitStatus     # pending, in_progress, completed, cancelled
+    source: str                # Origin: "internal" (detector) or "external"
     created_at: datetime
     updated_at: datetime
 ```
@@ -46,6 +47,7 @@ class rESPSubmission:
     metrics: Dict[str, Any]    # {coherence, pqn_rate, paradox_rate, resonance_hz}
     artifacts: List[str]       # Paths or URIs to result artifacts
     status: SubmissionStatus   # pending_verification, accepted, rejected
+    source: str                # Origin: "internal" (detector) or "external"
     submitted_at: datetime
 ```
 
@@ -86,17 +88,20 @@ class ContributionRecord:
 
 ### Work Unit Registry
 
-- `register_work_unit(description, config, creator_id) -> PQNWorkUnit`
-- `get_work_unit(work_unit_id) -> Optional[PQNWorkUnit]`
-- `list_work_units(status_filter, limit) -> List[PQNWorkUnit]`
-- `cancel_work_unit(work_unit_id, actor_id) -> bool`
+- `register(description, config, creator_id, source="internal") -> PQNWorkUnit`
+- `register_external(description, config, creator_id) -> PQNWorkUnit` - Convenience for source="external"
+- `get(work_unit_id) -> PQNWorkUnit` - Raises WorkUnitNotFoundError
+- `list(status_filter, limit) -> List[PQNWorkUnit]`
+- `transition(work_unit_id, new_status) -> PQNWorkUnit`
 
 ### rESP Submission Sink
 
-- `submit(work_unit_id, submitter_id, metrics, artifacts) -> rESPSubmission`
-- `submit_from_detector(work_unit_id, bridge_result, submitter_id) -> rESPSubmission` (Phase 1)
-- `get_submission(submission_id) -> Optional[rESPSubmission]`
-- `list_submissions(work_unit_id, status_filter, limit) -> List[rESPSubmission]`
+- `submit(work_unit_id, submitter_id, metrics, artifacts, source="internal") -> rESPSubmission`
+- `submit_external(work_unit_id, submitter_id, metrics, artifacts) -> rESPSubmission` - Convenience for source="external"
+- `submit_from_detector(work_unit_id, bridge_result, submitter_id) -> rESPSubmission` - Phase 1 detector integration
+- `get(submission_id) -> Optional[rESPSubmission]`
+- `list(work_unit_id, status_filter, limit) -> List[rESPSubmission]`
+- `update_status(submission_id, new_status) -> rESPSubmission`
 
 ### Detector Bridge (Phase 1)
 
@@ -160,6 +165,63 @@ from modules.ai_intelligence.pqn_alignment import run_detector
 # Direct detector call returns (events_path, metrics_csv) tuple
 events_path, metrics_csv = run_detector(work_unit.config)
 # Must parse artifacts manually to extract metrics
+```
+
+### External Submission (Phase 2)
+
+For externally-sourced rESP-style results (non-detector):
+
+```python
+from modules.foundups.pqn_swarm_hub import (
+    WorkUnitRegistry,
+    SubmissionSink,
+    VerificationEngine,
+    ContributionReporter,
+)
+
+# Setup services
+registry = WorkUnitRegistry()
+sink = SubmissionSink(registry)
+engine = VerificationEngine(sink)
+reporter = ContributionReporter(engine)
+
+# 1. Register external work unit
+work_unit = registry.register_external(
+    description="External GPD result",
+    config={
+        "tool": "gpd",
+        "version": "2.0",
+        "parameters": {"sweep_range": [6.5, 7.5]},
+    },
+    creator_id="external_contributor_001",
+)
+# work_unit.source == "external"
+
+# 2. Submit external results
+submission = sink.submit_external(
+    work_unit_id=work_unit.work_unit_id,
+    submitter_id="external_contributor_001",
+    metrics={
+        "coherence": 0.75,
+        "pqn_rate": 0.08,
+        "custom_metric": 42,
+    },
+    artifacts=["external/gpd_output.json"],
+)
+# submission.source == "external"
+
+# 3. Verify (same as internal)
+decision = engine.auto_verify(submission.submission_id)
+
+# 4. Record contribution (same as internal)
+if decision.decision == "accept":
+    contribution = reporter.record(
+        work_unit_id=work_unit.work_unit_id,
+        submission_id=submission.submission_id,
+        decision_id=decision.decision_id,
+        contributor_id="external_contributor_001",
+        score=0.82,
+    )
 ```
 
 ### Downstream Distribution (moltbook_distribution_adapter)

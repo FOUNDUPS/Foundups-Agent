@@ -59,17 +59,54 @@ class WorkUnitRegistry:
         description: str,
         config: dict,
         creator_id: str,
+        source: str = "internal",
     ) -> PQNWorkUnit:
-        """Register a new bounded PQN work unit."""
+        """
+        Register a new bounded PQN work unit.
+
+        Args:
+            description: Human-readable work unit description
+            config: Configuration dict (detector config, external params, etc.)
+            creator_id: ID of the creating agent/participant
+            source: Origin of work unit ("internal" for detector, "external" for external)
+        """
         unit = PQNWorkUnit(
             description=description,
             config=config,
             creator_id=creator_id,
+            source=source,
         )
         self._memory[unit.work_unit_id] = unit
         if self._store:
             self._store.save_work_unit(unit)
         return unit
+
+    def register_external(
+        self,
+        description: str,
+        config: dict,
+        creator_id: str,
+    ) -> PQNWorkUnit:
+        """
+        Register an externally-sourced work unit.
+
+        Convenience method for external submissions (non-detector).
+        Sets source="external" automatically.
+
+        Args:
+            description: Human-readable work unit description
+            config: Configuration dict from external source
+            creator_id: ID of the external contributor
+
+        Returns:
+            PQNWorkUnit with source="external"
+        """
+        return self.register(
+            description=description,
+            config=config,
+            creator_id=creator_id,
+            source="external",
+        )
 
     def get(self, work_unit_id: str) -> PQNWorkUnit:
         """Get work unit by ID. Checks memory first, then store."""
