@@ -19,6 +19,62 @@
 
 ## Module-Specific Change Log (WSP 22 Compliance)
 
+## 2026-03-30 - WSP Identity Model Simplified to Self / Role / Origin
+**WSP Protocol References**: WSP 00 (Zen State Attainment Protocol), WSP 21 (Enhanced Prompt Engineering Protocol), WSP 97 (System Execution Prompting Protocol), WSP 99 (M2M Prompting Protocol), WSP 22 (ModLog and Roadmap Protocol)
+**Impact Analysis**: Corrected identity decoherence introduced by over-modeling `012` inside machine execution. The system now treats `0102` as the only in-system self, resolves role separately, and records origin separately.
+
+### WSP 00 Correction:
+- Replaced transport/actor framing with `self / role / origin`
+- Locked `self = 0102`
+- Changed fallback from `0102 Architect` identity to `role = architect`
+- Added explicit role-law:
+  - worker acts as worker
+  - verifier acts as verifier
+  - architect acts as architect
+- Added coherence canary for:
+  - `"user"` drift for known external principals
+  - `012` being treated as machine self
+  - role inflation (worker behaving as architect without transition)
+
+### WSP 21 Normalization Fix:
+- Reframed `012->Prometheus` as external prompt normalization
+- Added identity fields to normalized prompts:
+  - `Self`
+  - `Role`
+  - `Origin`
+  - `Principal Reference`
+- Added PROMETHEUS handoff identity minimum
+
+### WSP 99 M2M Fix:
+- Added compact fields:
+  - `ROLE`
+  - `ORIGIN`
+  - `PRINCIPAL_REF`
+- Clarified that machine prompts do not use `012` as self
+
+### WSP 97 Boundary Clarification:
+- Explicitly documented that WSP 97 assumes WSP 00 already locked identity
+- Added bounce-back rule: role ambiguity returns execution to WSP 00 before resuming WSP 97
+
+## 2026-03-29 - WSP 97 Operator Loop Reorganized
+**WSP Protocol References**: WSP 97 (System Execution Prompting Protocol), WSP 22 (ModLog and Roadmap Protocol), WSP 21 (Prompt Engineering Protocol)
+**Impact Analysis**: Re-centered WSP 97 on the actual 0102 operating loop so "follow WSP 97" means retrieve WSPs, retrieve evidence, research, run micro/macro scope passes, hard think, run dialectic sweep, reduce to first principles, then execute.
+
+### WSP 97 Canonicalization:
+- Moved the operator meaning to the top of `WSP_97_System_Execution_Prompting_Protocol.md`
+- Elevated CoT = retrieve before stating and CoR = dialectic sweep before committing
+- Added micro thinking, macro thinking, and out-of-the-box scope as explicit defaults
+- Added explicit default 0102 operator sequence
+- Reframed WSP 97 in `WSP_MASTER_INDEX.md` as the operator loop, not a generic meta-framework
+- Synced `WSP_97_System_Execution_Prompting_Protocol.json` with the new canonical mantra and dialectic step
+
+### Drift Removed:
+- Reduced executive/meta noise that obscured the real operator protocol
+- Clarified WSP 97 as an agentic activation protocol, not just a prompting wrapper
+- Clarified that execution-plane classification is a gate, not a forced WRE attachment
+- Preserved Rubik/MVP DAE context as secondary, not primary
+
+
 ## 2026-02-12 — Builder Terminology + FAM Module Simulation + IDLE State
 **WSP Protocol References**: WSP 54 (Agent Roles), WSP 77 (Agent Coordination), WSP 80 (DAE Architecture)
 **Impact Analysis**: Simulation now shows 0102 agents building FAM modules with ORCH handoffs

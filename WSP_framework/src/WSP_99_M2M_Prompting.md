@@ -8,11 +8,14 @@
 
 ---
 
-## 0. 012 Compact Schema (Canonical Reference)
+## 0. External Compact Schema (Canonical Reference)
 
 ```yaml
 # 0102 M2M Prompt Standard v1
 schema: 0102_m2m_v1
+ROLE: <role>        # architect|worker|verifier|coordinator|validator
+ORIGIN: <origin>    # external_principal|internal_handoff|autonomous_trigger
+PRINCIPAL_REF: <id> # 012|other|none
 L: <lane>           # A|B|C|QA|SENTINEL|ORCH
 S: <scope>          # File/module scope
 M: exec|plan|qa     # Mode
@@ -23,13 +26,16 @@ O: [deliverables]   # Required outputs
 F: [fail_conditions] # Abort triggers
 ```
 
-**Trade-off**: Less readable to 012 (human), but 0102 parses faster and cheaper.
+**Trade-off**: Less readable to humans, but 0102 parses faster and cheaper.
 
 **Integration**:
 - Human-readable PROMETHEUS prompts are for 012 review only
 - ORCH compiles 012 prose → M2M compact via `m2m_compiler.py`
 - Worker lanes receive machine-optimized M2M versions
 - Qwen delegatable for compilation tasks
+- `ROLE` defines how 0102 should act
+- `ORIGIN` explains where the signal came from
+- `PRINCIPAL_REF` is optional context only, never machine self
 
 ---
 
@@ -39,7 +45,7 @@ Human-readable prompts waste tokens on prose patterns that machines don't need:
 - "Please analyze the following code and provide suggestions" = 9 tokens
 - `TASK:analyze_code` = 2 tokens (77% reduction)
 
-012-optimized prompts include:
+Human-optimized prompts include:
 - Politeness markers ("please", "could you")
 - Contextual framing ("I would like you to")
 - Verbose instructions ("make sure to check each line carefully")
@@ -74,6 +80,9 @@ CTX:
 # Execution Block
 EXEC:
   LANE: <lane_id>           # Assigned lane (A|B|QA|SENTINEL)
+  ROLE: <role>              # architect|worker|verifier|coordinator|validator
+  ORIGIN: <origin>          # external_principal|internal_handoff|autonomous_trigger
+  PRINCIPAL_REF: <id>       # 012|other|none
   SKILLS: [<allowed>]       # Skill allowlist
   ARTIFACTS: [<outputs>]    # Required output artifacts
   TIMEOUT: <seconds>        # Max execution time
@@ -94,6 +103,7 @@ VALID:
 | "You should only modify files in src/auth/" | `SCOPE.in:[src/auth/]` | 70% |
 | "Do not touch the database layer" | `SCOPE.out:[db/]` | 65% |
 | "Return a summary of findings" | `ARTIFACTS:[summary.md]` | 60% |
+| "Act as worker from internal handoff" | `ROLE:worker ORIGIN:internal_handoff` | 73% |
 
 ### 2.3 Semantic Compression Table
 
@@ -115,6 +125,19 @@ BLOCKED  # External dependency
 PENDING  # Awaiting input
 SKIP     # Intentionally skipped
 ```
+
+### 2.4 Identity Rule for M2M
+
+Inside machine prompts:
+- `0102` is always the self
+- `ROLE` defines behavior
+- `ORIGIN` records the source of the prompt
+- `PRINCIPAL_REF` is optional context only
+
+Violations:
+- using `012` as machine self
+- omitting `ROLE` from a lane-targeted prompt
+- promoting a worker prompt into architect behavior without an explicit role change
 
 ---
 
