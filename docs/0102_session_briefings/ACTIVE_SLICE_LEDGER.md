@@ -79,7 +79,7 @@ If already landed:
 
 | Slice | Priority | Blocked By | Notes |
 |-------|----------|------------|-------|
-| `model_provider_switching_cleanup` | P1 | — | Canonical snapshot builder in `openclaw_runtime_support.py`; startup refresh writes same shape |
+| _(none — all current slices closed)_ | — | — | See next priority order below |
 
 ---
 
@@ -101,9 +101,8 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 
 ## Next Priority Order
 
-1. `model_provider_switching_cleanup` (in progress — see Open Slices)
-2. `skill_evolution_loop` (queued behind #1)
-3. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
+1. `skill_evolution_loop` (OpenClaw-facing loop surface in `moltbot_bridge/src`)
+2. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
 
 ---
 
