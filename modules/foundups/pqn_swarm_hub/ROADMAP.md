@@ -28,7 +28,7 @@
 **Deliverables**:
 - [x] SQLite persistence for contracts — `src/persistence.py` with store injection
 - [x] Integration with pqn_alignment detector via API calls — `DetectorBridge` + `submit_from_detector()`
-- [ ] Integration with moltbook_distribution_adapter for downstream publish
+- [x] Integration with moltbook_distribution_adapter for downstream publish — `src/publication_adapter.py`
 - [x] Participant gate (who can submit to this FoundUp) — `src/gate.py`
 - [ ] Reproducible runbook documented
 - [x] Adapter boundaries to shared infrastructure documented — `src/fam_adapter.py` + `INTERFACE.md`
@@ -85,10 +85,10 @@
 - [x] `pqn_swarm_hub_gate` — ParticipantGate with tier system, policy hooks, internal-first auto-approve
 - [x] `pqn_swarm_hub_fam_adapter` — FAMAdapter with emit_contribution_event(), stub fallback
 - [x] `pqn_swarm_hub_persistence` — SQLiteStore with optional store injection (41/41 tests pass)
+- [x] `pqn_swarm_hub_publication_adapter` — PublicationAdapter wraps MoltBook, stub-safe (57/57 tests pass)
 
 **Next Slices** (Phase 1 remaining):
-1. `pqn_swarm_hub_publication_adapter` — MoltBook integration
-2. `pqn_swarm_hub_runbook` — Reproducible documentation
+1. `pqn_swarm_hub_runbook` — Reproducible documentation
 
 ---
 

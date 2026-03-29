@@ -1,5 +1,68 @@
 # ModLog - PQN Swarm Hub FoundUp
 
+## V0.5.0 - Publication Adapter (MoltBook Integration)
+
+**Slice**: `pqn_swarm_hub_publication_adapter`
+**Author**: 0102
+**Date**: 2026-03-29
+
+### Changes
+
+- Added `src/publication_adapter.py`:
+  - `PublicationAdapter` class wraps `moltbook_distribution_adapter`
+  - `publish(work_unit, submission, decision, contribution)` main API
+  - `PublicationResult` dataclass for structured return
+  - Gate: only publishes accepted decisions (rejects return immediately)
+  - Stub fallback: graceful handling when MoltBook unavailable
+  - `get_publication_adapter()` singleton accessor
+  - `reset_publication_adapter()` for testing
+
+- Added `tests/test_publication_adapter.py`:
+  - 16 tests for publication adapter
+  - Success path with mocked MoltBook
+  - Rejected decision does NOT publish (gate test)
+  - Stub fallback when MoltBook unavailable
+  - Payload formatting tests
+  - Error handling tests
+
+- Updated exports:
+  - `PublicationAdapter`, `PublicationAdapterError`, `PublicationResult`
+  - `get_publication_adapter()`, `reset_publication_adapter()`
+
+- Updated `INTERFACE.md`:
+  - Documented PublicationResult contract
+  - Documented Publication Adapter API
+  - Added usage examples for publish, rejection gate, stub fallback
+
+### Publication Boundary
+
+Per WSP 72 (module independence):
+- **Owns**: Formatting PQN data for MoltBook, publication decision gate
+- **Does NOT Own**: Retry logic, Discord webhooks (stays in moltbook_distribution_adapter)
+- **Stub-Safe**: Graceful fallback records locally if MoltBook unavailable
+
+### Publication Gate
+
+Only accepted decisions publish:
+```python
+if decision.decision != "accept":
+    return PublicationResult(status="rejected_decision", ...)
+```
+
+### Test Count
+
+- Before: 41 tests (persistence)
+- After: 57 tests (41 + 16 publication)
+- All passing
+
+### WSP References
+
+- WSP 72: Module independence (wraps, doesn't duplicate)
+- WSP 91: Observability (publication events traceable)
+- WSP 84: Code reuse (reuses moltbook_distribution_adapter)
+
+---
+
 ## V0.4.0 - SQLite Persistence Layer
 
 **Slice**: `pqn_swarm_hub_persistence`

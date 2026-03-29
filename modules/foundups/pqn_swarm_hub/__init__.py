@@ -45,6 +45,12 @@ from .src import (
     SQLiteStore,
     get_sqlite_store,
     reset_sqlite_store,
+    # Publication Adapter (Phase 1)
+    PublicationAdapter,
+    PublicationAdapterError,
+    PublicationResult,
+    get_publication_adapter,
+    reset_publication_adapter,
     # Errors
     WorkUnitNotFoundError,
     InvalidStatusTransitionError,
@@ -81,6 +87,12 @@ __all__ = [
     "SQLiteStore",
     "get_sqlite_store",
     "reset_sqlite_store",
+    # Publication Adapter (Phase 1)
+    "PublicationAdapter",
+    "PublicationAdapterError",
+    "PublicationResult",
+    "get_publication_adapter",
+    "reset_publication_adapter",
     # Errors
     "WorkUnitNotFoundError",
     "InvalidStatusTransitionError",

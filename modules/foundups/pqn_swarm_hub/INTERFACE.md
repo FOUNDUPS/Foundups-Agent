@@ -421,3 +421,109 @@ sink = SubmissionSink(registry)  # In-memory only
 stats = store.get_stats()
 # {"work_units": N, "submissions": N, "verification_decisions": N, ...}
 ```
+
+---
+
+## Phase 1 Publication Adapter (New)
+
+### PublicationResult
+
+Result of a publication attempt.
+
+```python
+@dataclass
+class PublicationResult:
+    success: bool               # Whether publication succeeded
+    post_id: Optional[str]      # MoltBook post ID if published
+    channel: Optional[str]      # "pqn_research", "stub", etc.
+    status: str                 # "published", "failed", "rejected_decision", "stub"
+    message: str                # Human-readable result message
+    timestamp: datetime         # When publication was attempted
+    duplicate: bool             # True if already published (idempotent)
+```
+
+### Publication Adapter API
+
+- `PublicationAdapter.connect() -> bool` - Connect to MoltBook (returns False if unavailable)
+- `PublicationAdapter.publish(work_unit, submission, decision, contribution, actor_id) -> PublicationResult`
+- `PublicationAdapter.is_connected -> bool` - Check connection status
+- `PublicationAdapter.get_stub_publications() -> List[Dict]` - Get stub publications for later sync
+- `PublicationAdapter.clear_stub_publications() -> int` - Clear stubs after sync
+- `PublicationAdapter.get_status() -> Dict[str, Any]` - Adapter status
+- `get_publication_adapter(auto_connect) -> PublicationAdapter` - Singleton
+
+### Publication Adapter Usage
+
+```python
+from modules.foundups.pqn_swarm_hub import (
+    get_publication_adapter,
+    WorkUnitRegistry,
+    SubmissionSink,
+    VerificationEngine,
+    ContributionReporter,
+)
+
+# Setup services
+registry = WorkUnitRegistry()
+sink = SubmissionSink(registry)
+engine = VerificationEngine(sink)
+reporter = ContributionReporter(engine)
+
+# Execute flow
+work_unit = registry.register("7.05Hz sweep", {"steps": 1200}, "agent_x")
+submission = sink.submit(work_unit.work_unit_id, "agent_x", {"coherence": 0.85})
+decision = engine.manual_verify(submission.submission_id, "accept", "auto", "Meets φ-floor")
+contribution = reporter.record(
+    work_unit.work_unit_id,
+    submission.submission_id,
+    decision.decision_id,
+    "agent_x",
+    0.95,
+)
+
+# Publish to MoltBook
+adapter = get_publication_adapter(auto_connect=True)
+result = adapter.publish(
+    work_unit=work_unit,
+    submission=submission,
+    decision=decision,
+    contribution=contribution,
+    actor_id="pqn_swarm_hub",
+)
+
+if result.success:
+    print(f"Published: {result.post_id}")
+else:
+    print(f"Failed: {result.message}")
+```
+
+### Publication Gate: Only Accepted Decisions
+
+```python
+# Rejected decisions do NOT publish
+reject_decision = engine.manual_verify(sub_id, "reject", "auto", "Below threshold")
+result = adapter.publish(work_unit, submission, reject_decision, contribution)
+
+assert result.success is False
+assert result.status == "rejected_decision"
+# MoltBook NOT called
+```
+
+### Stub Fallback (MoltBook Unavailable)
+
+```python
+# If MoltBook unavailable, adapter records locally
+adapter = get_publication_adapter()  # Not connected
+
+result = adapter.publish(work_unit, submission, decision, contribution)
+assert result.success is True  # Stub succeeds
+assert result.status == "stub"
+assert result.channel == "stub"
+
+# Retrieve stubs for later sync
+stubs = adapter.get_stub_publications()
+# [{"payload": {...}, "actor_id": "...", "timestamp": "..."}]
+
+# Clear after syncing
+adapter.clear_stub_publications()
+```

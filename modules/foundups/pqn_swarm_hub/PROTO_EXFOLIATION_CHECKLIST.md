@@ -19,7 +19,7 @@ All criteria must be TRUE before exfoliation to standalone repo.
 - [x] FAM Adapter (Slice 6) — `src/fam_adapter.py`
 - [x] Detector Bridge — `src/detector_bridge.py`
 - [x] SQLite Persistence — `src/persistence.py` (41/41 tests pass)
-- [ ] MoltBook Publication Adapter — integration (not started)
+- [x] MoltBook Publication Adapter — `src/publication_adapter.py` (57/57 tests pass)
 - [ ] Runbook Documentation — reproducible execution guide
 
 ### FAMDaemon Integration Proven
@@ -66,7 +66,7 @@ All criteria must be TRUE before exfoliation to standalone repo.
 
 | Criterion | Status |
 |-----------|--------|
-| Phase 1 slices | 8/10 complete |
+| Phase 1 slices | 9/10 complete |
 | FAMDaemon integration | PARTIAL (adapter created, live test pending) |
 | 3+ work unit types | 1/3 |
 | External contributor path | NOT VALIDATED |

@@ -73,7 +73,8 @@ If already landed:
 | `openclaw_roadmap_reconciliation` | `a0549830b` | `HERMES_INSPIRED_FOUNDUPS_NATIVE_ROADMAP_2026-03-23.md` — all P0+P1 items audited; 5 closed, 1 partial, 1 not-started; planning_snapshot banner added |
 | `model_provider_switching_cleanup` | `b1d66d7ce` | `openclaw_runtime_support.py` — `get_model_availability_snapshot(dae=None)` standalone; `generated_on` timestamp; startup refresh writes same canonical shape; 25 tests in `test_model_provider_status.py` |
 | `skill_evolution_loop_phase1_report_surface` | `3ae311767` | `openclaw_skill_evolution.py` + `openclaw_supervisor.py` idle-path integration; env gate `OPENCLAW_SKILL_EVOLUTION_ENABLED=1`; 18 tests in `test_openclaw_skill_evolution.py`; no WRE mutation |
-| `pqn_swarm_hub_persistence` | `(this commit)` | `persistence.py` + store injection across all 6 services; 41/41 tests; TestModLog.md |
+| `pqn_swarm_hub_persistence` | `ae886b4c2` | `persistence.py` + store injection across all 6 services; 41/41 tests; TestModLog.md |
+| `pqn_swarm_hub_publication_adapter` | `(this commit)` | `publication_adapter.py` wraps MoltBook; 57/57 tests; rejected decisions gate |
 
 ---
 
@@ -81,7 +82,7 @@ If already landed:
 
 | Slice | Priority | Blocked By | Notes |
 |-------|----------|------------|-------|
-| `pqn_swarm_hub_publication_adapter` | P1 | — | MoltBook downstream publish for verified contributions |
+| `pqn_swarm_hub_runbook` | P1 | — | Reproducible execution guide documentation |
 
 ---
 
@@ -103,10 +104,9 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 
 ## Next Priority Order
 
-1. `pqn_swarm_hub_publication_adapter` — MoltBook downstream publish
-2. `pqn_swarm_hub_runbook` — reproducible execution guide
-3. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
-4. `skill_evolution_loop_phase2_mutation_surface` (future: gated A/B testing and promotion)
+1. `pqn_swarm_hub_runbook` — reproducible execution guide
+2. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
+3. `skill_evolution_loop_phase2_mutation_surface` (future: gated A/B testing and promotion)
 
 ---
 

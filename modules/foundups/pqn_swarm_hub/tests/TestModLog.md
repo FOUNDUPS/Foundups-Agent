@@ -4,12 +4,34 @@
 
 | File | Tests | Purpose | Slices Covered |
 |------|-------|---------|----------------|
-| `test_contracts.py` | 10 | Contract creation, deterministic IDs, status values | Contracts |
+| `test_contracts.py` | 13 | Contract creation, deterministic IDs, status values | Contracts |
 | `test_poc_flow.py` | 5 | End-to-end flows (accept, reject, manual, idempotent, stats) | Registry, Sink, Verification, Contribution |
 | `test_detector_bridge.py` | 5 | DetectorBridge integration with pqn_alignment | Detector Bridge |
 | `test_persistence.py` | 18 | SQLite CRUD, service integration, full flow persistence | Persistence |
+| `test_publication_adapter.py` | 16 | MoltBook publish, rejection gate, stub fallback | Publication Adapter |
 
-**Total**: 41 tests (all passing)
+**Total**: 57 tests (all passing)
+
+---
+
+## V0.5.0 - Publication Adapter Tests
+
+**Date**: 2026-03-29
+
+Added `test_publication_adapter.py` (15 tests):
+
+- `TestPublicationAdapterInit` (3 tests): Init defaults, no auto-connect, get_status
+- `TestPublishSuccess` (2 tests): Successful publish via mocked MoltBook, duplicate flag
+- `TestRejectedDecision` (2 tests): Rejected decision does NOT publish, reason in message
+- `TestStubFallback` (3 tests): Stub when not connected, records publication, clear stubs
+- `TestPayloadFormatting` (3 tests): Required fields, content includes metrics, artifacts
+- `TestMoltBookError` (1 test): Graceful failure on MoltBook error
+- `TestSingleton` (1 test): get_publication_adapter returns singleton
+
+**Key Coverage**:
+- Publication gate: only accepted decisions publish
+- Stub fallback: graceful handling when MoltBook unavailable
+- Payload formatting: PQN data mapped to MoltBook research format
 
 ---
 
