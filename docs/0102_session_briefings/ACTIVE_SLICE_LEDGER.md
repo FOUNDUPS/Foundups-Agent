@@ -85,6 +85,7 @@ If already landed:
 | `pqn_swarm_hub_phase3_migration_exec` | (standalone) | External repos created and pushed: `FOUNDUPS/science-swarm-hub` + `Foundup/science-swarm-hub` — standalone tests pass |
 | `science_swarm_hub_monorepo_reconciliation` | (previous slice) | Monorepo docs reconciled post-migration; stale "blocked" language removed |
 | `science_swarm_hub_monorepo_stub_cutover` | (this slice) | Stub cutover complete: src/ and tests/ deleted, __init__.py replaced with package import stub |
+| `youtube_domain_phase1` | (this slice) | G1: stall check wired to heartbeat; G2: rotation_checkpoint.py + supervisor integration |
 
 ---
 
@@ -101,7 +102,6 @@ If already landed:
 | Slice | Reason |
 |-------|--------|
 | `chrome_update_147` | Requires 012 manual action (Chrome browser update) |
-| `youtube_domain_phase1` | Awaiting 012 review of `IMPLEMENTATION_PLAN.md` before any code |
 
 ---
 
@@ -120,8 +120,9 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 4. ~~**`pqn_swarm_hub_phase3_migration_exec`**~~ — COMPLETE (standalone repos live)
 5. ~~**`science_swarm_hub_monorepo_reconciliation`**~~ — COMPLETE (docs updated post-migration)
 6. ~~**`science_swarm_hub_monorepo_stub_cutover`**~~ — COMPLETE (stub cutover executed)
-7. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
-8. `skill_evolution_loop_phase2_mutation_surface` (future: gated A/B testing and promotion)
+7. ~~**YouTube Domain Agent Phase 1**~~ — COMPLETE (G1+G2 implemented)
+8. YouTube Domain Agent Phase 2 (G3+G5: per-channel tracking + cycle watchdog)
+9. `skill_evolution_loop_phase2_mutation_surface` (future: gated A/B testing and promotion)
 
 ---
 

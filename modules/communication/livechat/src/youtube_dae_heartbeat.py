@@ -183,6 +183,11 @@ class YouTubeDAEHeartbeat:
                 self.total_errors_detected += errors_detected
                 self.total_fixes_applied += fixes_applied
 
+                # Check for rotation stalls and auto-trigger recovery (G1)
+                stall_result = self.ai_overseer.check_rotation_stalls(minutes=5, auto_trigger=True)
+                if stall_result.get("rotations_triggered", 0) > 0:
+                    logger.info(f"[HEARTBEAT] Auto-triggered rotation recovery (PID: {stall_result.get('rotation_pid')})")
+
             # Determine health status
             status = self._calculate_health_status(
                 uptime, memory_usage, cpu_usage, errors_detected
