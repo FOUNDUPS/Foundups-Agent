@@ -351,3 +351,73 @@ Per WSP 97 directive:
 - Importing FAM internals beyond `get_fam_daemon`
 
 Adapter falls back to stub mode if FAMDaemon unavailable.
+
+---
+
+## Phase 1 Persistence (New)
+
+### SQLiteStore
+
+Thread-safe SQLite persistence for all contracts.
+
+```python
+from modules.foundups.pqn_swarm_hub import (
+    SQLiteStore,
+    get_sqlite_store,
+    reset_sqlite_store,
+)
+
+# Get singleton store (creates db in data/pqn_swarm_hub/swarm.db)
+store = get_sqlite_store()
+
+# Or create custom store
+store = SQLiteStore(
+    db_dir=Path("custom/path"),
+    db_filename="custom.db",
+)
+```
+
+### Service Integration with Persistence
+
+All services accept optional `store` parameter for persistence:
+
+```python
+from modules.foundups.pqn_swarm_hub import (
+    get_sqlite_store,
+    WorkUnitRegistry,
+    SubmissionSink,
+    VerificationEngine,
+    ContributionReporter,
+    ParticipantGate,
+)
+
+# Get shared store
+store = get_sqlite_store()
+
+# Wire services with persistence
+registry = WorkUnitRegistry(store=store)
+sink = SubmissionSink(registry, store=store)
+engine = VerificationEngine(sink, store=store)
+reporter = ContributionReporter(engine, store=store)
+gate = ParticipantGate(store=store)
+
+# All operations now persist to SQLite
+wu = registry.register("Work unit", {}, "agent_x")
+# Survives restart - can retrieve with new service instances
+```
+
+### Backward Compatibility
+
+Omit `store` parameter for in-memory only (Phase 0 behavior):
+
+```python
+registry = WorkUnitRegistry()  # In-memory only
+sink = SubmissionSink(registry)  # In-memory only
+```
+
+### Store Stats
+
+```python
+stats = store.get_stats()
+# {"work_units": N, "submissions": N, "verification_decisions": N, ...}
+```

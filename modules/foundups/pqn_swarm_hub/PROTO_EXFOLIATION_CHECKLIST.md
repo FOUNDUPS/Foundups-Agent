@@ -18,7 +18,7 @@ All criteria must be TRUE before exfoliation to standalone repo.
 - [x] Gate (Slice 5) — `src/gate.py`
 - [x] FAM Adapter (Slice 6) — `src/fam_adapter.py`
 - [x] Detector Bridge — `src/detector_bridge.py`
-- [ ] SQLite Persistence — `src/persistence.py` (not started)
+- [x] SQLite Persistence — `src/persistence.py` (41/41 tests pass)
 - [ ] MoltBook Publication Adapter — integration (not started)
 - [ ] Runbook Documentation — reproducible execution guide
 
@@ -66,7 +66,7 @@ All criteria must be TRUE before exfoliation to standalone repo.
 
 | Criterion | Status |
 |-----------|--------|
-| Phase 1 slices | 7/10 complete |
+| Phase 1 slices | 8/10 complete |
 | FAMDaemon integration | PARTIAL (adapter created, live test pending) |
 | 3+ work unit types | 1/3 |
 | External contributor path | NOT VALIDATED |
@@ -89,11 +89,11 @@ modules/foundups/pqn_swarm_hub/ # adapter stub remains in monorepo
 
 ## Next Steps to Proto
 
-1. Complete SQLite persistence slice
-2. Test FAMAdapter with live FAMDaemon
-3. Add GPD work unit type
-4. Create CONTRIBUTING.md
-5. Document runbook
+1. Test FAMAdapter with live FAMDaemon
+2. Add GPD work unit type
+3. Create CONTRIBUTING.md
+4. Document runbook
+5. Complete MoltBook publication adapter
 6. Revalidate this checklist
 
 ---

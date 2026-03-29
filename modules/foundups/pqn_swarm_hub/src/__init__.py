@@ -44,6 +44,7 @@ from .gate import (
     ParticipantTier,
 )
 from .fam_adapter import FAMAdapter, FAMAdapterError, get_fam_adapter
+from .persistence import SQLiteStore, get_sqlite_store, reset_sqlite_store
 
 __all__ = [
     # Contracts
@@ -71,6 +72,10 @@ __all__ = [
     "FAMAdapter",
     "FAMAdapterError",
     "get_fam_adapter",
+    # Persistence (Phase 1)
+    "SQLiteStore",
+    "get_sqlite_store",
+    "reset_sqlite_store",
     # Errors
     "WorkUnitNotFoundError",
     "InvalidStatusTransitionError",

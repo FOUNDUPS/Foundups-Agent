@@ -3,6 +3,7 @@ PQN Swarm Hub - Verification Engine
 
 Accept/reject logic for rESP submissions.
 Phase 0: rule-based auto-verifier + manual override path.
+Phase 1: Optional SQLite persistence via store injection.
 
 Rules (Phase 0 defaults, configurable):
   - coherence >= 0.618 (φ-floor, canonical threshold)
@@ -11,10 +12,15 @@ Rules (Phase 0 defaults, configurable):
 WSP 72: Module independence
 """
 
-from typing import Dict, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict, Optional
 
 from .contracts import SubmissionStatus, VerificationDecision, utc_now
 from .submission_sink import SubmissionSink
+
+if TYPE_CHECKING:
+    from .persistence import SQLiteStore
 
 
 # Phase 0 auto-verification thresholds (012-configurable)
@@ -29,6 +35,8 @@ class VerificationEngine:
     Two paths:
     - auto_verify(): rule-based decision using metric thresholds
     - manual_verify(): explicit accept/reject from a human/agent verifier
+
+    Supports both in-memory (Phase 0) and SQLite (Phase 1) storage.
     """
 
     def __init__(
@@ -36,11 +44,22 @@ class VerificationEngine:
         sink: SubmissionSink,
         coherence_floor: float = DEFAULT_COHERENCE_FLOOR,
         pqn_rate_floor: float = DEFAULT_PQN_RATE_FLOOR,
+        store: Optional[SQLiteStore] = None,
     ) -> None:
+        """
+        Initialize verification engine.
+
+        Args:
+            sink: SubmissionSink for submission lookup/update
+            coherence_floor: Minimum coherence for auto-accept (default: 0.618)
+            pqn_rate_floor: Minimum PQN rate for auto-accept (default: 0.0)
+            store: Optional SQLiteStore for persistence. If None, in-memory only.
+        """
         self._sink = sink
         self._coherence_floor = coherence_floor
         self._pqn_rate_floor = pqn_rate_floor
-        self._store: Dict[str, VerificationDecision] = {}
+        self._memory: Dict[str, VerificationDecision] = {}
+        self._store = store
 
     def auto_verify(self, submission_id: str) -> VerificationDecision:
         """
@@ -110,7 +129,9 @@ class VerificationEngine:
             rationale=rationale,
         )
         dec.confidence = confidence
-        self._store[dec.decision_id] = dec
+        self._memory[dec.decision_id] = dec
+        if self._store:
+            self._store.save_decision(dec)
 
         # Update submission status to reflect verdict
         new_status = (
@@ -123,4 +144,10 @@ class VerificationEngine:
         return dec
 
     def get(self, decision_id: str) -> Optional[VerificationDecision]:
-        return self._store.get(decision_id)
+        """Get decision by ID. Checks memory first, then store."""
+        dec = self._memory.get(decision_id)
+        if dec is None and self._store:
+            dec = self._store.get_decision(decision_id)
+            if dec:
+                self._memory[decision_id] = dec  # Cache in memory
+        return dec

@@ -3,6 +3,7 @@ PQN Swarm Hub - Participant Gate
 
 Internal-first participant entry policy for PQN Swarm Hub.
 Phase 1: In-memory gate exercised internally. External-ready structure.
+Phase 1+: Optional SQLite persistence via store injection.
 
 WSP 72: Module independence
 WSP 97: Gate preparation for future external researchers
@@ -15,12 +16,17 @@ Entry Requirements (per MOLTbook spec):
 Trust Model: No trust by declaration. Only behavior, output, verification.
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 from .contracts import generate_id, utc_now
+
+if TYPE_CHECKING:
+    from .persistence import SQLiteStore
 
 
 class ParticipantStatus(str, Enum):
@@ -103,6 +109,7 @@ class ParticipantGate:
 
     Validates participant entry before allowing work unit interaction.
     Supports policy hooks for capability verification and WSP 00 checks.
+    Supports both in-memory (Phase 1) and SQLite (Phase 1+) storage.
 
     Phase 1: In-memory, internal participants only.
     Proto+: External-ready with challenge-response.
@@ -113,11 +120,22 @@ class ParticipantGate:
         default_tier: ParticipantTier = ParticipantTier.CONTRIBUTOR,
         require_capability_check: bool = False,
         require_wsp00_check: bool = False,
+        store: Optional[SQLiteStore] = None,
     ) -> None:
+        """
+        Initialize participant gate.
+
+        Args:
+            default_tier: Default tier for new participants
+            require_capability_check: Require capability verification
+            require_wsp00_check: Require WSP 00 validation
+            store: Optional SQLiteStore for persistence. If None, in-memory only.
+        """
         self._participants: Dict[str, ParticipantIdentity] = {}
         self._decisions: Dict[str, GateDecision] = {}
         self._status: Dict[str, ParticipantStatus] = {}
         self._tiers: Dict[str, ParticipantTier] = {}
+        self._store = store
 
         self._default_tier = default_tier
         self._require_capability_check = require_capability_check
@@ -153,8 +171,10 @@ class ParticipantGate:
         Returns:
             GateDecision with approval/rejection
         """
-        # Store identity
+        # Store identity (memory + SQLite)
         self._participants[identity.participant_id] = identity
+        if self._store:
+            self._store.save_participant(identity)
 
         # Default tier
         tier = requested_tier or self._default_tier
@@ -209,6 +229,8 @@ class ParticipantGate:
             decider_id=decider_id,
         )
         self._decisions[dec.decision_id] = dec
+        if self._store:
+            self._store.save_gate_decision(dec)
 
         # Update status
         if decision == "approve":
@@ -250,7 +272,13 @@ class ParticipantGate:
         return current_level >= required_level
 
     def get_participant(self, participant_id: str) -> Optional[ParticipantIdentity]:
-        return self._participants.get(participant_id)
+        """Get participant by ID. Checks memory first, then store."""
+        p = self._participants.get(participant_id)
+        if p is None and self._store:
+            p = self._store.get_participant(participant_id)
+            if p:
+                self._participants[participant_id] = p  # Cache in memory
+        return p
 
     def get_status(self, participant_id: str) -> Optional[ParticipantStatus]:
         return self._status.get(participant_id)

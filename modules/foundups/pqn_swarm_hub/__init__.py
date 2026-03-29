@@ -25,12 +25,26 @@ from .src import (
     WorkUnitStatus,
     generate_id,
     utc_now,
+    # Gate (Phase 1)
+    ParticipantIdentity,
+    ParticipantStatus,
+    ParticipantTier,
+    GateDecision,
+    ParticipantGate,
     # Services
     WorkUnitRegistry,
     SubmissionSink,
     VerificationEngine,
     ContributionReporter,
     DetectorBridge,
+    # FAM Adapter (Phase 1)
+    FAMAdapter,
+    FAMAdapterError,
+    get_fam_adapter,
+    # Persistence (Phase 1)
+    SQLiteStore,
+    get_sqlite_store,
+    reset_sqlite_store,
     # Errors
     WorkUnitNotFoundError,
     InvalidStatusTransitionError,
@@ -38,6 +52,7 @@ from .src import (
 )
 
 __all__ = [
+    # Contracts
     "PQNWorkUnit",
     "rESPSubmission",
     "VerificationDecision",
@@ -46,11 +61,27 @@ __all__ = [
     "SubmissionStatus",
     "generate_id",
     "utc_now",
+    # Gate (Phase 1)
+    "ParticipantIdentity",
+    "ParticipantStatus",
+    "ParticipantTier",
+    "GateDecision",
+    "ParticipantGate",
+    # Services
     "WorkUnitRegistry",
     "SubmissionSink",
     "VerificationEngine",
     "ContributionReporter",
     "DetectorBridge",
+    # FAM Adapter (Phase 1)
+    "FAMAdapter",
+    "FAMAdapterError",
+    "get_fam_adapter",
+    # Persistence (Phase 1)
+    "SQLiteStore",
+    "get_sqlite_store",
+    "reset_sqlite_store",
+    # Errors
     "WorkUnitNotFoundError",
     "InvalidStatusTransitionError",
     "DuplicateSubmissionError",

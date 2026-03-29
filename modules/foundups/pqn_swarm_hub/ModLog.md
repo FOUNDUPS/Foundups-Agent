@@ -1,5 +1,57 @@
 # ModLog - PQN Swarm Hub FoundUp
 
+## V0.4.0 - SQLite Persistence Layer
+
+**Slice**: `pqn_swarm_hub_persistence`
+**Author**: 0102
+**Date**: 2026-03-29
+
+### Changes
+
+- Added `src/persistence.py`:
+  - `SQLiteStore` class for all 6 contract types
+  - Tables: work_units, submissions, verification_decisions, contributions, participants, gate_decisions
+  - Thread-safe with lock pattern (following FAMEventStore)
+  - WAL mode + foreign key constraints enabled
+  - `get_sqlite_store()` singleton accessor
+  - `reset_sqlite_store()` for testing
+
+- Updated service classes with optional store injection:
+  - `WorkUnitRegistry(store=SQLiteStore)` — persist work units
+  - `SubmissionSink(registry, store=SQLiteStore)` — persist submissions
+  - `VerificationEngine(sink, store=SQLiteStore)` — persist decisions
+  - `ContributionReporter(engine, store=SQLiteStore)` — persist contributions
+  - `ParticipantGate(store=SQLiteStore)` — persist participants/gate decisions
+
+- Updated exports:
+  - Root `__init__.py` exports persistence classes
+  - `src/__init__.py` exports persistence classes
+
+- Added `tests/test_persistence.py`:
+  - 18 tests for SQLiteStore CRUD operations
+  - Service integration tests with store injection
+  - Full flow persistence test
+
+### Backward Compatibility
+
+All services maintain backward compatibility:
+- `store=None` (default) = in-memory only (Phase 0 behavior)
+- `store=SQLiteStore` = memory + SQLite dual-write
+
+### Test Count
+
+- Before: 23 tests
+- After: 41 tests (23 existing + 18 persistence)
+- All passing
+
+### WSP References
+
+- WSP 72: Module independence
+- WSP 91: Observability (persistent audit trail)
+- WSP 97: Internal-first persistence before externalization
+
+---
+
 ## V0.3.0 - Gate & FAM Adapter Integration
 
 **Slice**: `pqn_swarm_hub_gate` + `pqn_swarm_hub_fam_adapter`

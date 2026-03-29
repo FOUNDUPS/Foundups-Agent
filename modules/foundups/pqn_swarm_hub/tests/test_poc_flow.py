@@ -175,7 +175,7 @@ class TestMinimumPoCFlow:
         # Force same timestamp for deterministic ID
         sub1.submitted_at = ts
         # Manually re-store with known ID
-        sink._store[sub1.submission_id] = sub1
+        sink._memory[sub1.submission_id] = sub1
 
         # Second submission with same ID should return existing
         from modules.foundups.pqn_swarm_hub.src.contracts import rESPSubmission
@@ -186,7 +186,7 @@ class TestMinimumPoCFlow:
             submitted_at=ts,
         )
         # Manually insert to trigger idempotency path
-        sink._store[sub2.submission_id] = sub1  # same object
+        sink._memory[sub2.submission_id] = sub1  # same object
 
         result = sink.get(sub2.submission_id)
         assert result is sub1

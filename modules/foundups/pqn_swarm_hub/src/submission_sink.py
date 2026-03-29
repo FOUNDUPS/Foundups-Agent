@@ -2,13 +2,16 @@
 PQN Swarm Hub - rESP Submission Sink
 
 Accepts structured rESP results for registered work units.
-Phase 0: in-memory only. Idempotent via deterministic IDs.
+Phase 0: in-memory only.
+Phase 1: Optional SQLite persistence via store injection.
 
 WSP 72: Module independence
 WSP 84: Idempotency pattern from moltbook_distribution_adapter
 """
 
-from typing import Dict, List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from .contracts import (
     SubmissionStatus,
@@ -17,6 +20,9 @@ from .contracts import (
     utc_now,
 )
 from .registry import WorkUnitNotFoundError, WorkUnitRegistry
+
+if TYPE_CHECKING:
+    from .persistence import SQLiteStore
 
 
 class DuplicateSubmissionError(Exception):
@@ -29,11 +35,24 @@ class SubmissionSink:
 
     Validates work unit exists before accepting submission.
     Marks the work unit IN_PROGRESS → COMPLETED on accepted submission.
+    Supports both in-memory (Phase 0) and SQLite (Phase 1) storage.
     """
 
-    def __init__(self, registry: WorkUnitRegistry) -> None:
+    def __init__(
+        self,
+        registry: WorkUnitRegistry,
+        store: Optional[SQLiteStore] = None,
+    ) -> None:
+        """
+        Initialize submission sink.
+
+        Args:
+            registry: WorkUnitRegistry for work unit validation
+            store: Optional SQLiteStore for persistence. If None, in-memory only.
+        """
         self._registry = registry
-        self._store: Dict[str, rESPSubmission] = {}
+        self._memory: Dict[str, rESPSubmission] = {}
+        self._store = store
 
     def submit(
         self,
@@ -57,11 +76,14 @@ class SubmissionSink:
             artifacts=artifacts or [],
         )
 
-        # Idempotency: if same ID already exists, return existing
-        if submission.submission_id in self._store:
-            return self._store[submission.submission_id]
+        # Idempotency: check memory then store
+        existing = self.get(submission.submission_id)
+        if existing:
+            return existing
 
-        self._store[submission.submission_id] = submission
+        self._memory[submission.submission_id] = submission
+        if self._store:
+            self._store.save_submission(submission)
 
         # Advance work unit status if still pending
         if unit.status == WorkUnitStatus.PENDING:
@@ -70,7 +92,13 @@ class SubmissionSink:
         return submission
 
     def get(self, submission_id: str) -> Optional[rESPSubmission]:
-        return self._store.get(submission_id)
+        """Get submission by ID. Checks memory first, then store."""
+        sub = self._memory.get(submission_id)
+        if sub is None and self._store:
+            sub = self._store.get_submission(submission_id)
+            if sub:
+                self._memory[submission_id] = sub  # Cache in memory
+        return sub
 
     def list(
         self,
@@ -78,7 +106,14 @@ class SubmissionSink:
         status_filter: Optional[SubmissionStatus] = None,
         limit: int = 100,
     ) -> List[rESPSubmission]:
-        items = list(self._store.values())
+        """List submissions. Uses store if available, else memory."""
+        if self._store:
+            return self._store.list_submissions(
+                work_unit_id=work_unit_id,
+                status_filter=status_filter,
+                limit=limit,
+            )
+        items = list(self._memory.values())
         if work_unit_id is not None:
             items = [s for s in items if s.work_unit_id == work_unit_id]
         if status_filter is not None:
@@ -128,8 +163,11 @@ class SubmissionSink:
         new_status: SubmissionStatus,
     ) -> rESPSubmission:
         """Update submission status (called by verification layer)."""
-        sub = self._store.get(submission_id)
+        sub = self.get(submission_id)
         if sub is None:
             raise KeyError(f"Submission not found: {submission_id}")
         sub.status = new_status
+        self._memory[submission_id] = sub
+        if self._store:
+            self._store.save_submission(sub)
         return sub

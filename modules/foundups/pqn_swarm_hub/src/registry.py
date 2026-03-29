@@ -1,16 +1,22 @@
 """
 PQN Swarm Hub - Work Unit Registry
 
-In-memory registry for PQNWorkUnit lifecycle management.
-Phase 0: in-memory only. Phase 1 will add SQLite persistence.
+Registry for PQNWorkUnit lifecycle management.
+Phase 0: in-memory only.
+Phase 1: Optional SQLite persistence via store injection.
 
 WSP 72: Module independence (no circular imports)
 WSP 84: Code reuse (deterministic IDs from contracts.py)
 """
 
-from typing import Dict, List, Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from .contracts import PQNWorkUnit, WorkUnitStatus, generate_id, utc_now
+
+if TYPE_CHECKING:
+    from .persistence import SQLiteStore
 
 
 class WorkUnitNotFoundError(Exception):
@@ -32,14 +38,21 @@ _TRANSITIONS: Dict[WorkUnitStatus, List[WorkUnitStatus]] = {
 
 class WorkUnitRegistry:
     """
-    In-memory registry for PQN work units.
+    Registry for PQN work units.
 
-    Single source of truth for work unit state within this PoC.
-    Not thread-safe in Phase 0.
+    Supports both in-memory (Phase 0) and SQLite (Phase 1) storage.
+    Pass store parameter for persistence; omit for in-memory only.
     """
 
-    def __init__(self) -> None:
-        self._store: Dict[str, PQNWorkUnit] = {}
+    def __init__(self, store: Optional[SQLiteStore] = None) -> None:
+        """
+        Initialize registry.
+
+        Args:
+            store: Optional SQLiteStore for persistence. If None, in-memory only.
+        """
+        self._memory: Dict[str, PQNWorkUnit] = {}
+        self._store = store
 
     def register(
         self,
@@ -53,11 +66,18 @@ class WorkUnitRegistry:
             config=config,
             creator_id=creator_id,
         )
-        self._store[unit.work_unit_id] = unit
+        self._memory[unit.work_unit_id] = unit
+        if self._store:
+            self._store.save_work_unit(unit)
         return unit
 
     def get(self, work_unit_id: str) -> PQNWorkUnit:
-        unit = self._store.get(work_unit_id)
+        """Get work unit by ID. Checks memory first, then store."""
+        unit = self._memory.get(work_unit_id)
+        if unit is None and self._store:
+            unit = self._store.get_work_unit(work_unit_id)
+            if unit:
+                self._memory[work_unit_id] = unit  # Cache in memory
         if unit is None:
             raise WorkUnitNotFoundError(work_unit_id)
         return unit
@@ -67,7 +87,10 @@ class WorkUnitRegistry:
         status_filter: Optional[WorkUnitStatus] = None,
         limit: int = 100,
     ) -> List[PQNWorkUnit]:
-        units = list(self._store.values())
+        """List work units. Uses store if available, else memory."""
+        if self._store:
+            return self._store.list_work_units(status_filter=status_filter, limit=limit)
+        units = list(self._memory.values())
         if status_filter is not None:
             units = [u for u in units if u.status == status_filter]
         return units[:limit]
@@ -86,4 +109,6 @@ class WorkUnitRegistry:
             )
         unit.status = new_status
         unit.updated_at = utc_now()
+        if self._store:
+            self._store.save_work_unit(unit)
         return unit
