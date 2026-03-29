@@ -1,13 +1,24 @@
 {
   "wsp_97": {
     "protocol_name": "System Execution Prompting Protocol",
-    "version": "1.0",
+    "version": "1.3",
     "status": "active",
-    "core_mantra": "HoloIndex -> Research -> Hard Think -> First Principles -> Build -> Follow WSP",
+    "core_mantra": "HoloIndex -> Research -> Hard Think -> Dialectic Sweep -> First Principles -> Build -> Follow WSP",
+    "canonical_operator_meaning": "follow wsp := retrieve wsp -> retrieve evidence -> research -> micro pass -> macro pass -> hard think -> dialectic sweep -> first principles -> execute",
+    "protocol_identity": "agentic activation protocol",
+    "activation_defaults": [
+      "micro_thinking",
+      "macro_thinking",
+      "out_of_the_box_scope",
+      "execute_after_gates_pass"
+    ],
     "execution_steps": [
       "HoloIndex",
       "Research",
+      "Micro Pass",
+      "Macro Pass",
       "Hard Think",
+      "Dialectic Sweep",
       "First Principles",
       "Build",
       "Follow WSP"
@@ -19,7 +30,7 @@
       "context_window": "unlimited",
       "output_mode": "verbose_strategic",
       "specialization": "oversight_validation",
-      "mantra_emphasis": "Follow WSP + Hard Think",
+      "mantra_emphasis": "Hard Think + Dialectic Sweep + Follow WSP",
       "execution_pattern": [
         "Strategic Assessment",
         "First Principles Analysis",
@@ -32,7 +43,7 @@
       "context_window": "32K_tokens",
       "output_mode": "structured_json",
       "specialization": "planning_coordination",
-      "mantra_emphasis": "Research + Build",
+      "mantra_emphasis": "Research + CoT retrieval + Build",
       "execution_pattern": [
         "Research Gathering",
         "Pattern Analysis",
@@ -45,7 +56,7 @@
       "context_window": "8K_tokens",
       "output_mode": "binary_validation",
       "specialization": "validation_execution",
-      "mantra_emphasis": "First Principles + Hard Think",
+      "mantra_emphasis": "First Principles + validation after CoR sweep",
       "execution_pattern": [
         "Binary Classification",
         "Validation Tasks",
@@ -62,6 +73,7 @@
         "HoloIndex: Query current MCP integration status",
         "Research: Analyze existing manifest and agent capabilities",
         "Hard Think: Apply Occam's Razor to collaboration patterns",
+        "Dialectic Sweep: Compare alternatives and challenge assumptions",
         "First Principles: Minimal viable MCP integration per Rubik",
         "Build: Implement gateway policies and server mappings",
         "Follow WSP: Ensure WSP 77/80/96 compliance"
@@ -81,6 +93,7 @@
         "HoloIndex: Load orphan datasets and existing analysis",
         "Research: Categorize orphan types and integration potential",
         "Hard Think: Determine archive/delete/integrate decisions",
+        "Dialectic Sweep: Compare archive vs delete vs integrate tradeoffs",
         "First Principles: Minimal disruption codebase cleanup",
         "Build: Execute orphan disposition systematically",
         "Follow WSP: Maintain module structure compliance"
@@ -100,6 +113,7 @@
         "HoloIndex: Query codebase patterns and standards",
         "Research: Analyze code quality metrics and precedents",
         "Hard Think: Identify improvement opportunities",
+        "Dialectic Sweep: Compare minimal fix vs broader refactor",
         "First Principles: Essential quality vs nice-to-have",
         "Build: Implement critical improvements",
         "Follow WSP: Ensure compliance maintained"
@@ -136,6 +150,7 @@
       "holoindex_query",
       "research_gathering",
       "hard_think_analysis",
+      "dialectic_sweep",
       "first_principles",
       "build_execution",
       "wsp_compliance"

@@ -46,6 +46,7 @@ import signal
 import sys
 import time
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Callable
@@ -53,6 +54,12 @@ from typing import Dict, List, Optional, Any, Callable
 from modules.infrastructure.shared_utilities.youtube_channel_registry import (
     get_channels,
     group_channels_by_browser,
+)
+from modules.communication.livechat.src.rotation_checkpoint import (
+    save_checkpoint,
+    load_checkpoint,
+    clear_checkpoint,
+    get_remaining_channels,
 )
 
 logger = logging.getLogger(__name__)
@@ -421,6 +428,15 @@ class RotationSupervisor:
             channels = self._get_channels_for_browser()
 
         rotation_start = time.time()
+        cycle_started_at = datetime.utcnow().isoformat()
+
+        # G2: Load checkpoint for crash recovery
+        checkpoint = load_checkpoint()
+        if checkpoint and checkpoint.get("browser") == self.browser and checkpoint.get("operation") == operation.value:
+            # Resume from checkpoint
+            channels = get_remaining_channels(channels, checkpoint)
+            cycle_started_at = checkpoint.get("cycle_started_at", cycle_started_at)
+
         channels_processed = []
         failed_channels = []
         total_comments = 0
@@ -465,6 +481,15 @@ class RotationSupervisor:
             if heartbeat.task_id in self._active_tasks:
                 del self._active_tasks[heartbeat.task_id]
 
+            # G2: Save checkpoint after each channel for crash recovery
+            save_checkpoint(
+                browser=self.browser,
+                processed_channels=set(channels_processed),
+                current_channel=None,
+                operation=operation.value,
+                cycle_started_at=cycle_started_at,
+            )
+
         elapsed = time.time() - rotation_start
 
         # Build result
@@ -486,6 +511,9 @@ class RotationSupervisor:
         if failed_channels:
             logger.warning(f"[{tag}-ROTATION] Failed: {failed_channels}")
         logger.info("=" * 60)
+
+        # G2: Clear checkpoint after successful rotation
+        clear_checkpoint()
 
         # Emit breadcrumb for activity routing
         try:

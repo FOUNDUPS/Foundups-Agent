@@ -10,6 +10,50 @@ This log tracks changes specific to the **livechat** module in the **communicati
 
 ---
 
+## 2026-03-30 - YouTube Domain Agent Phase 1 (G1 + G2)
+
+**By:** 0102
+**WSP References:** WSP 22 (ModLog), WSP 77 (Agent Coordination), WSP 91 (Observability)
+
+### Problem
+
+YouTube rotation system lacked:
+- **G1**: Automatic stall recovery (rotation hangs undetected)
+- **G2**: Crash resilience (restart loses progress)
+
+### Solution
+
+**G1: Wire AI Overseer Stall Check to Heartbeat**
+- Added `check_rotation_stalls()` call in `youtube_dae_heartbeat.py:_pulse()`
+- Checks breadcrumb telemetry for stall patterns every heartbeat pulse
+- Auto-triggers rotation recovery if stalls detected (`auto_trigger=True`)
+
+**G2: Rotation Checkpoint for Crash Recovery**
+- Created `rotation_checkpoint.py` (~100 lines):
+  - `save_checkpoint()` - persists processed channels to JSON
+  - `load_checkpoint()` - restores state on startup
+  - `clear_checkpoint()` - cleans up after successful rotation
+  - `get_remaining_channels()` - filters already-processed channels
+- Integrated into `rotation_supervisor.py`:
+  - Load checkpoint at rotation start (resume from crash)
+  - Save checkpoint after each channel completes
+  - Clear checkpoint after rotation completes
+
+### Files Changed
+- `youtube_dae_heartbeat.py`: Added stall check in `_pulse()` (4 lines)
+- `rotation_checkpoint.py`: NEW - checkpoint persistence (~100 lines)
+- `rotation_supervisor.py`: Integrated checkpoint load/save/clear
+
+### Tests
+- All imports verified
+- Checkpoint save/load/clear functional test passed
+- `get_remaining_channels(['ch1','ch2','ch3'], checkpoint) → ['ch3']` ✓
+
+### Reference
+- Implementation Plan: `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`
+
+---
+
 ## 2026-03-27 - Breadcrumb Producer for Idle Handoff Continuity
 
 **By:** 0102

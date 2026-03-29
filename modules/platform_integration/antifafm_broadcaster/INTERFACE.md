@@ -290,7 +290,54 @@ karaoke = manager.get_modular_schema("karaoke")
 
 See [schemas/README.md](schemas/README.md) for full documentation.
 
+## Boot Layer Rotator (OBS Schema Rotation)
+
+Master schema rotation for OBS visual layers.
+
+### CLI
+
+```bash
+# List schemas
+python skillz/boot_layer_rotator/executor.py --list
+
+# Start rotation daemon (10 min per schema)
+python skillz/boot_layer_rotator/executor.py --daemon
+
+# Skip to specific schema
+python skillz/boot_layer_rotator/executor.py --skip-to video
+
+# Pause/resume
+python skillz/boot_layer_rotator/executor.py --override
+python skillz/boot_layer_rotator/executor.py --clear
+```
+
+### Schemas
+
+| Schema | Status | Description |
+|--------|--------|-------------|
+| `gcc` | BLOCKED | GCC shipping tracker (WAF blocks screenshots) |
+| `video` | **WORKING** | Video rotation (France 24, Al Jazeera, etc.) |
+| `news` | BLOCKED | Conflict maps (LiveUAMap blocks automation) |
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OBS_VIDEO_SOURCES` | `France 24,Al Jazeera,Telaviv,BBC Straits,DW News` | OBS video source names |
+| `OBS_BROWSER_SOURCE` | `antifaFM Website` | Browser source for web content |
+| `OBS_NEWS_MAP_SOURCE` | `News Map` | Image source for map screenshots |
+| `OBS_WEBSOCKET_HOST` | `localhost` | OBS WebSocket host |
+| `OBS_WEBSOCKET_PORT` | `4455` | OBS WebSocket port |
+| `OBS_WEBSOCKET_PASSWORD` | (empty) | OBS WebSocket password |
+
+### Rotation Timing
+
+- **Schema duration**: 600 seconds (10 minutes)
+- **Video rotation**: ~66 seconds per source (600s / N sources)
+- **News rotation**: 60 seconds per map (if working)
+
 ## Dependencies
 
 - **System**: FFmpeg binary (`ffmpeg` in PATH)
 - **Python**: psutil (optional, for process monitoring)
+- **OBS**: obsws-python (for boot layer rotator)

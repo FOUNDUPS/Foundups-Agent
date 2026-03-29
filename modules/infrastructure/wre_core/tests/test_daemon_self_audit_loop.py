@@ -195,3 +195,29 @@ def test_self_audit_escalation_dispatches_configured_command(tmp_path: Path, mon
     assert len(escalations) == 1
     assert escalations[0]["dispatch_attempted"] is True
     assert "dispatch" in escalations[0]["dispatch_result"]
+
+
+def test_self_audit_filters_noise_signatures(tmp_path: Path, monkeypatch):
+    """Noise signatures (traceback headers, generic raises) should be ignored."""
+    logs = tmp_path / "logs"
+    logs.mkdir(parents=True)
+    log_file = logs / "daemon.log"
+    # Write noise patterns that match ERROR_PATTERNS but are in NOISE_SIGNATURES
+    log_file.write_text(
+        "Traceback (most recent call last):\n"
+        "  File foo.py, line 42\n"
+        "raise exception_class(message, screen, stacktrace)\n"
+        "ntdll!RtlInitializeExceptionChain [0x7707d81b+6b]\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "logs/**/*.log")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "0")
+
+    loop = DaemonSelfAuditLoop(repo_root=tmp_path)
+    events = loop.scan_once()
+
+    # All lines should be filtered as noise — no events opened
+    assert events == 0
+    rows = _read_jsonl(loop.task_log_path)
+    assert len(rows) == 0

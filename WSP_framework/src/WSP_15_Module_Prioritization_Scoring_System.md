@@ -1,12 +1,12 @@
 # WSP 15: Module Prioritization Scoring (MPS) System
 - **Status:** Active
-- **Purpose:** To provide a consistent, objective methodology for evaluating and ranking modules to guide development priorities.
-- **Trigger:** When planning a new development cycle; when a new module is proposed.
-- **Input:** A module or list of modules to be evaluated, including internally-proposed modules and externally-triaged tasks or user-submitted goals.
-- **Output:** A priority score (P0-P4) for each module, documented in `modules_to_score.yaml`.
+- **Purpose:** To provide a consistent, objective methodology for evaluating and ranking modules and approved work items to guide development priorities.
+- **Trigger:** When planning a new development cycle; when a new module is proposed; when approved work items need ordering across queue, backlog, or recall surfaces.
+- **Input:** A module, work item, or scored bundle to be evaluated, including internally-proposed modules, externally-triaged tasks, user-submitted goals, and domain-specific prioritization variants explicitly defined by other WSPs.
+- **Output:** A priority score (P0-P4) recorded in the appropriate planning artifact for the domain, such as `modules_to_score.yaml`, queue/backlog artifacts, or a variant-specific output contract.
 - **Responsible Agent(s):** ScoringAgent
 
-The **Module Prioritization Scoring (MPS) System** provides a consistent, objective methodology for evaluating and ranking modules based on their strategic importance and implementation considerations. This is augmented by the **LLME Semantic Triplet Rating** (see `WSP 11`), which provides a qualitative layer for understanding a module's state, local impact, and systemic importance. This combined approach enables the development team to:
+The **Module Prioritization Scoring (MPS) System** provides a consistent, objective methodology for evaluating and ranking modules. The same 4-dimension scaffold may also be applied to approved non-module work items through explicit domain variants such as memory prioritization. This is augmented by the **LLME Semantic Triplet Rating** (see `WSP 11`), which provides a qualitative layer for understanding a module's state, local impact, and systemic importance. This combined approach enables the development team to:
 
 -   Focus efforts on the highest-value modules first.
 -   Make informed decisions about resource allocation.
@@ -17,7 +17,7 @@ The **Module Prioritization Scoring (MPS) System** provides a consistent, object
 
 ## 1.5. External Input Integration
 
-The MPS System processes both internal module proposals and external feedback sources to ensure comprehensive priority assessment:
+The MPS System processes both internal proposals and external feedback sources to ensure comprehensive priority assessment:
 
 ### 1.5.1 Input Source Types
 
@@ -100,10 +100,13 @@ Each module receives a score from 1 (lowest) to 5 (highest) in four dimensions. 
 
 ## 3. Scoring Process
 
-1.  **Assess MPS**: For each module, assign scores (1-5) for Complexity, Importance, Deferability, and Impact.
-2.  **Assign LLME**: Assign or review the module's current and target LLME score (e.g., "112").
+1.  **Assess MPS**: For each module or approved work item, assign scores (1-5) for Complexity, Importance, Deferability, and Impact.
+2.  **Assign LLME**: Assign or review the module's current and target LLME score (e.g., "112") when the scored object is a module and LLME is applicable.
 3.  **Calculate Score**: Sum the four MPS dimensions: `MPS Score = Complexity + Importance + Deferability + Impact`.
-4.  **Document**: Maintain scores and rationale in `modules_to_score.yaml`.
+4.  **Document**: Maintain scores and rationale in the appropriate planning artifact for the domain:
+    - `modules_to_score.yaml` for module planning
+    - queue/backlog artifacts for scored work items
+    - variant-specific output contracts for explicit MPS derivatives such as `MPS-M`
 
 ## 4. Priority Classification
 
@@ -201,3 +204,4 @@ Apply trust weighting to the MPS-M score before ordering:
 
 -   Run MPS for modules when planning changes.
 -   Run MPS-M for memory bundles when responding to queries (HoloIndex output contract).
+-   Record scores in the owning artifact surface for that domain rather than forcing every use case through `modules_to_score.yaml`.

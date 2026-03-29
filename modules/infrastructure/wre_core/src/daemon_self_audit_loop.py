@@ -57,6 +57,14 @@ class DaemonSelfAuditLoop:
         re.compile(r"unique constraint failed", re.IGNORECASE),
     ]
 
+    # Noise signatures to ignore — these match ERROR_PATTERNS but are not actionable
+    NOISE_SIGNATURES = [
+        "traceback (most recent call last):",  # generic traceback header
+        "raise exception_class(message, screen, stacktrace)",  # Selenium generic raise
+        "ntdll!rtlinitializeexceptionchain",  # Windows crash stack noise
+        "from fastapi import fastapi",  # import line in stack trace
+    ]
+
     def __init__(self, repo_root: Path):
         self.repo_root = Path(repo_root).resolve()
         self.interval_sec = float(os.getenv("OPENCLAW_SELF_AUDIT_INTERVAL_SEC", "5"))
@@ -136,6 +144,8 @@ class DaemonSelfAuditLoop:
                 if not self._is_error_line(line):
                     continue
                 signature = self._normalize_signature(line)
+                if self._is_noise_signature(signature):
+                    continue
                 if self._is_duplicate(signature):
                     continue
                 self._seen[signature] = time.time()
@@ -203,6 +213,10 @@ class DaemonSelfAuditLoop:
         now = time.time()
         last = float(self._seen.get(signature, 0))
         return (now - last) < max(self.dedupe_window_sec, 1)
+
+    def _is_noise_signature(self, signature: str) -> bool:
+        """Return True if signature matches a known noise pattern (not actionable)."""
+        return any(noise in signature for noise in self.NOISE_SIGNATURES)
 
     def _recommend_fix(self, signature: str) -> str:
         candidates: List[str]

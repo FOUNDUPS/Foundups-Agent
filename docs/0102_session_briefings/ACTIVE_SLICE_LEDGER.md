@@ -1,7 +1,7 @@
 # Active Slice Ledger
 
 **Authority**: 0102 architect lane
-**Updated**: 2026-03-29
+**Updated**: 2026-03-30 (science-swarm-hub stub cutover complete)
 **Rule**: Every agent reads this first. If repo truth contradicts an entry, update this ledger — not 012.
 
 ---
@@ -66,12 +66,26 @@ If already landed:
 | `foundups_domain_canonicalization` | `50eed2f4c` | `README.md` + `INTERFACE.md` tightened, IMPLEMENTED/PLANNED separation |
 | `training_corpus_source_of_truth` | `3179bc1af` | `corpus_resolver.py` shared utility, 5 consumers migrated, 8 unit tests |
 | `training_corpus_path_normalization` | `64fef5ca1` + `80564559b` | corpus path defaults normalized across holo tools and openclaw boundary |
-| `obs_connection_singleton` | (local, in PR #252 branch) | `boot_layer_rotator/executor.py` singleton pattern |
-| `supervisor_scan_once_fix` | (local, in PR #252 branch) | `openclaw_supervisor.py` type mismatch fixed |
+| `obs_connection_singleton` | `d4d6898f8` | `boot_layer_rotator/executor.py` singleton pattern |
+| `supervisor_scan_once_fix` | `71f248d04` | `openclaw_supervisor.py` type mismatch fixed (was in bounded maintenance loop commit) |
 | `pqn_swarm_hub_internal_poc_scaffold` | `35d1e2275` | `modules/foundups/pqn_swarm_hub/` — contracts, 4 service modules, 18/18 tests |
 | `git_main_merge_sentinel` | `08004c100` (branch `feat/git-main-merge-sentinel-20260318`) | `wre_core/src/git_main_merge_sentinel.py` 284 lines + `main.py:1110` + `.env.example` — plan was stale, work already shipped |
 | `openclaw_roadmap_reconciliation` | `a0549830b` | `HERMES_INSPIRED_FOUNDUPS_NATIVE_ROADMAP_2026-03-23.md` — all P0+P1 items audited; 5 closed, 1 partial, 1 not-started; planning_snapshot banner added |
 | `model_provider_switching_cleanup` | `b1d66d7ce` | `openclaw_runtime_support.py` — `get_model_availability_snapshot(dae=None)` standalone; `generated_on` timestamp; startup refresh writes same canonical shape; 25 tests in `test_model_provider_status.py` |
+| `skill_evolution_loop_phase1_report_surface` | `3ae311767` | `openclaw_skill_evolution.py` + `openclaw_supervisor.py` idle-path integration; env gate `OPENCLAW_SKILL_EVOLUTION_ENABLED=1`; 18 tests in `test_openclaw_skill_evolution.py`; no WRE mutation |
+| `pqn_swarm_hub_persistence` | `ae886b4c2` | `persistence.py` + store injection across all 6 services; 41/41 tests; TestModLog.md |
+| `pqn_swarm_hub_publication_adapter` | `09fada474` | `publication_adapter.py` wraps MoltBook; 57/57 tests; rejected decisions gate |
+| `pqn_swarm_hub_runbook` | `08b3f3f35` | `RUNBOOK.md` reproducible execution guide; Phase 1 COMPLETE (10/10 slices) |
+| `pqn_swarm_hub_proto_readiness_review` | `97b5e952c` | Phase 2 entry APPROVED; 3 true blockers classified; GPD NOT blocker |
+| `pqn_swarm_hub_fam_live_validation` | `d5fca817d` | 15/15 live FAM tests; 72/72 module total; adapter boundary respected |
+| `pqn_swarm_hub_external_submission_type` | `70115efff` | 14/14 tests; source field in contracts; register_external + submit_external methods |
+| `pqn_swarm_hub_external_contributor_path` | `db9df7598` | CONTRIBUTING.md + 22/22 gate tests; Phase 2 COMPLETE |
+| `pqn_swarm_hub_exfoliation_review_decision` | `c0cf513de` | Architect decision: APPROVE_PHASE_3_PREP; doc reconciliation |
+| `pqn_swarm_hub_phase3_prep_scaffold` | `1dbdd1dcb` | Migration scaffold: MANIFEST + DUAL_REMOTE + EXFOLIATION plans |
+| `pqn_swarm_hub_phase3_migration_exec` | (standalone) | External repos created and pushed: `FOUNDUPS/science-swarm-hub` + `Foundup/science-swarm-hub` — standalone tests pass |
+| `science_swarm_hub_monorepo_reconciliation` | (previous slice) | Monorepo docs reconciled post-migration; stale "blocked" language removed |
+| `science_swarm_hub_monorepo_stub_cutover` | (this slice) | Stub cutover complete: src/ and tests/ deleted, __init__.py replaced with package import stub |
+| `youtube_domain_phase1` | (this slice) | G1: stall check wired to heartbeat; G2: rotation_checkpoint.py + supervisor integration |
 
 ---
 
@@ -79,7 +93,7 @@ If already landed:
 
 | Slice | Priority | Blocked By | Notes |
 |-------|----------|------------|-------|
-| _(none — all current slices closed)_ | — | — | See next priority order below |
+| _(none)_ | — | — | — |
 
 ---
 
@@ -88,7 +102,6 @@ If already landed:
 | Slice | Reason |
 |-------|--------|
 | `chrome_update_147` | Requires 012 manual action (Chrome browser update) |
-| `youtube_domain_phase1` | Awaiting 012 review of `IMPLEMENTATION_PLAN.md` before any code |
 
 ---
 
@@ -101,8 +114,15 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 
 ## Next Priority Order
 
-1. `skill_evolution_loop` (OpenClaw-facing loop surface in `moltbot_bridge/src`)
-2. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
+1. ~~**`pqn_swarm_hub_external_contributor_path`**~~ — COMPLETE (Phase 2 Gate 3)
+2. ~~**`pqn_swarm_hub_exfoliation_review_decision`**~~ — COMPLETE (APPROVE_PHASE_3_PREP)
+3. ~~**`pqn_swarm_hub_phase3_prep_scaffold`**~~ — COMPLETE (`1dbdd1dcb`)
+4. ~~**`pqn_swarm_hub_phase3_migration_exec`**~~ — COMPLETE (standalone repos live)
+5. ~~**`science_swarm_hub_monorepo_reconciliation`**~~ — COMPLETE (docs updated post-migration)
+6. ~~**`science_swarm_hub_monorepo_stub_cutover`**~~ — COMPLETE (stub cutover executed)
+7. ~~**YouTube Domain Agent Phase 1**~~ — COMPLETE (G1+G2 implemented)
+8. YouTube Domain Agent Phase 2 (G3+G5: per-channel tracking + cycle watchdog)
+9. `skill_evolution_loop_phase2_mutation_surface` (future: gated A/B testing and promotion)
 
 ---
 
@@ -117,7 +137,7 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 ## Update Protocol
 
 When a slice lands:
-1. Move it from Open → Closed with commit hash
+1. Move it from Open to Closed with commit hash
 2. Remove it from Blocked if it was blocked
 3. Add the actual next open slice if known
 4. Commit this file as part of the slice's completion commit or immediately after

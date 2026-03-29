@@ -508,7 +508,7 @@ class StreamResolver:
                 self.logger.info(f"[ROCKET] INSTANT reconnection successful using cached stream!")
                 return video_id, chat_id
             else:
-                self.logger.info("[ERROR] Cached stream no longer active, proceeding to fresh search")
+                self.logger.debug("Cached stream no longer active, proceeding to fresh search")
         
         # PRIORITY 2: Check circuit breaker before making API calls
         if self.circuit_breaker and hasattr(self.circuit_breaker, 'state') and self.circuit_breaker.state == "OPEN":
@@ -808,7 +808,7 @@ class StreamResolver:
                     self.logger.info(f"[SUCCESS] Found and cached new livestream for future instant access")
                     return video_id, chat_id
                 else:
-                    self.logger.info("[ERROR] No active livestream found")
+                    self.logger.info("No active livestream found")
                     return None
                     
             except QuotaExceededError:
@@ -841,7 +841,7 @@ class StreamResolver:
                         self.logger.info(f"[SUCCESS] Found and cached new livestream with rotated credentials")
                         return video_id, chat_id
                     else:
-                        self.logger.info("[ERROR] No active livestream found with rotated credentials")
+                        self.logger.info("No active livestream found with rotated credentials")
                         return None
                 else:
                     self.logger.error("[ERROR] Credential rotation failed for stream search")
