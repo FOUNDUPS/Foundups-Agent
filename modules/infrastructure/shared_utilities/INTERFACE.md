@@ -362,7 +362,6 @@ This module provides **substrate only** — metadata, model paths, policy gates.
 ### Future Enhancements
 - Wire cohere_transcribe into openclaw_voice.py STT chain
 - Wire qwen3_tts into openclaw_voice.py TTS chain
-- ARC-AGI-3 evaluation harness implementation
 
 ---
 
