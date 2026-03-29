@@ -1,6 +1,6 @@
 # PQN Swarm Hub FoundUp
 
-**Status**: Internal Proto (Phase 1 Complete)
+**Status**: Internal Proto (Phase 2 Complete — ready for exfoliation review)
 **Owner**: 0102
 **Domain**: `modules/foundups/` (WSP 3 functional distribution)
 
@@ -146,6 +146,7 @@ contribution = ContributionRecord(
 
 ## Links
 
+- **Contributing**: [CONTRIBUTING.md](CONTRIBUTING.md) — External contributor guide
 - **Runbook**: [RUNBOOK.md](RUNBOOK.md) — Reproducible execution guide
 - **Interface**: [INTERFACE.md](INTERFACE.md) — Public API documentation
 - **Theory**: `WSP_knowledge/docs/Papers/rESP_Quantum_Self_Reference.md`

@@ -1,7 +1,7 @@
 # Active Slice Ledger
 
 **Authority**: 0102 architect lane
-**Updated**: 2026-03-29
+**Updated**: 2026-03-29 (Phase 2 complete)
 **Rule**: Every agent reads this first. If repo truth contradicts an entry, update this ledger — not 012.
 
 ---
@@ -79,6 +79,7 @@ If already landed:
 | `pqn_swarm_hub_proto_readiness_review` | `97b5e952c` | Phase 2 entry APPROVED; 3 true blockers classified; GPD NOT blocker |
 | `pqn_swarm_hub_fam_live_validation` | `d5fca817d` | 15/15 live FAM tests; 72/72 module total; adapter boundary respected |
 | `pqn_swarm_hub_external_submission_type` | `70115efff` | 14/14 tests; source field in contracts; register_external + submit_external methods |
+| `pqn_swarm_hub_external_contributor_path` | `a40c38cfd` | CONTRIBUTING.md + 22/22 gate tests; Phase 2 COMPLETE |
 
 ---
 
@@ -86,7 +87,7 @@ If already landed:
 
 | Slice | Priority | Blocked By | Notes |
 |-------|----------|------------|-------|
-| `pqn_swarm_hub_external_contributor_path` | P0 | — | CONTRIBUTING.md + entry gate test (last blocker) |
+| _(none)_ | — | — | PQN Swarm Hub Phase 2 complete |
 
 ---
 
@@ -108,9 +109,10 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 
 ## Next Priority Order
 
-1. **`pqn_swarm_hub_external_contributor_path`** — CONTRIBUTING.md + entry gate test (Phase 2 Gate 3 — last blocker for exfoliation)
+1. ~~**`pqn_swarm_hub_external_contributor_path`**~~ — COMPLETE (Phase 2 Gate 3 — all blockers cleared)
 2. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
 3. `skill_evolution_loop_phase2_mutation_surface` (future: gated A/B testing and promotion)
+4. PQN Swarm Hub exfoliation review (Phase 2 complete — ready for 012 decision)
 
 ---
 

@@ -1,6 +1,6 @@
 # Proto Exfoliation Checklist - PQN Swarm Hub
 
-**Status**: Phase 1 Complete → Phase 2 Entry Review (2026-03-29)
+**Status**: Phase 2 Complete → Exfoliation Review Ready (2026-03-29)
 **Decision**: INTEGRATED_MODULE (per WSP 97 due diligence 2026-03-29)
 
 ---
@@ -22,9 +22,9 @@
 |------|--------|-------|
 | Live FAMDaemon validation | COMPLETE | `pqn_swarm_hub_fam_live_validation` |
 | External submission type | COMPLETE | `pqn_swarm_hub_external_submission_type` |
-| CONTRIBUTING.md | PENDING | `pqn_swarm_hub_external_contributor_path` |
-| Entry gate tested with external identity | PENDING | `pqn_swarm_hub_external_contributor_path` |
-| Shared touchpoints documented | PENDING | `pqn_swarm_hub_external_contributor_path` |
+| CONTRIBUTING.md | COMPLETE | `pqn_swarm_hub_external_contributor_path` |
+| Entry gate tested with external identity | COMPLETE | `pqn_swarm_hub_external_contributor_path` |
+| Shared touchpoints documented | COMPLETE | `pqn_swarm_hub_external_contributor_path` |
 
 ### Optional / Post-Proto (NOT BLOCKERS)
 
@@ -74,10 +74,10 @@
 
 ## External Contributor Path
 
-- [ ] CONTRIBUTING.md exists
-- [ ] Entry gate tested with external identity
-- [ ] Shared touchpoints documented
-- [ ] Stub adapter viable post-exfoliation
+- [x] CONTRIBUTING.md exists
+- [x] Entry gate tested with external identity (22 tests in test_external_contributor.py)
+- [x] Shared touchpoints documented
+- [x] Stub adapter viable post-exfoliation
 
 ---
 
@@ -101,11 +101,11 @@
 | Phase 2 entry | APPROVED |
 | FAMDaemon live test | COMPLETE (72/72 tests) |
 | External submission type | COMPLETE (14/14 tests) |
-| External contributor path | PENDING (blocker) |
+| External contributor path | COMPLETE (22/22 tests) |
 | Contracts stable | YES (except V3) |
 | Core independence | YES |
 
-**Overall**: Phase 2 IN PROGRESS. NOT READY for exfoliation (1 true blocker remains).
+**Overall**: Phase 2 COMPLETE. READY for exfoliation review (0 true blockers remain).
 
 ---
 
@@ -113,9 +113,9 @@
 
 1. ~~`pqn_swarm_hub_fam_live_validation`~~ — COMPLETE (15/15 tests)
 2. ~~`pqn_swarm_hub_external_submission_type`~~ — COMPLETE (14/14 tests)
-3. `pqn_swarm_hub_external_contributor_path` — CONTRIBUTING.md + entry gate test
+3. ~~`pqn_swarm_hub_external_contributor_path`~~ — COMPLETE (22/22 tests)
 
-**After remaining 1 slice**: Re-evaluate exfoliation readiness.
+**Phase 2 COMPLETE**: All true blockers cleared. Ready for exfoliation review.
 
 ---
 
@@ -130,4 +130,4 @@ modules/foundups/pqn_swarm_hub/ # adapter stub remains in monorepo
 ---
 
 *Created: 2026-03-29*
-*Last Updated: 2026-03-29 (External submission type complete)*
+*Last Updated: 2026-03-29 (Phase 2 complete — external contributor path)*

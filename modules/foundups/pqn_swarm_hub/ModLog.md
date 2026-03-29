@@ -1,5 +1,73 @@
 # ModLog - PQN Swarm Hub FoundUp
 
+## V0.10.0 - External Contributor Path (Phase 2 Complete)
+
+**Slice**: `pqn_swarm_hub_external_contributor_path`
+**Author**: 0102
+**Date**: 2026-03-29
+
+### Changes
+
+- Created `CONTRIBUTING.md`:
+  - Path 1: Internal flow (detector bridge) documentation
+  - Path 2: External flow (generic submission) with full code examples
+  - Required artifacts and evidence (metrics, config, artifacts)
+  - Gate expectations for proto stage (auto-approve Phase 1)
+  - Stub-safe adapters (FAMDaemon, MoltBook)
+  - What is NOT guaranteed (proto stage limitations)
+  - Verification thresholds (coherence >= 0.618)
+  - Smoke test example
+
+- Created `tests/test_external_contributor.py` (22 tests):
+  - `TestExternalIdentityDeclaration` (3 tests): Identity creation, deterministic IDs
+  - `TestExternalGateEvaluation` (5 tests): Gate entry, auto-approve, tier assignment, permissions
+  - `TestExternalContributorFullFlow` (3 tests): End-to-end flow, deterministic IDs, no operator context
+  - `TestExternalContributorPersistence` (3 tests): Identity, decision, full flow persistence
+  - `TestGatePolicyHooks` (4 tests): Optional capability/WSP00 hooks, rejection paths
+  - `TestExternalContributorEdgeCases` (4 tests): Low coherence rejection, multiple contributors, suspension/reinstatement
+
+- Updated `README.md`:
+  - Status: Phase 1 Complete → Phase 2 Complete
+  - Added CONTRIBUTING.md link to Links section
+
+- Updated `PROTO_EXFOLIATION_CHECKLIST.md`:
+  - All true blockers marked COMPLETE
+  - Status: Ready for exfoliation review
+
+### External Contributor Path Validation
+
+```python
+# External contributor can complete full flow without operator context
+identity = ParticipantIdentity(display_name="external_researcher", model_type="human")
+gate.request_entry(identity, requested_tier=ParticipantTier.CONTRIBUTOR)  # auto-approve
+work_unit = registry.register_external("External work", {}, identity.participant_id)
+submission = sink.submit_external(work_unit.work_unit_id, identity.participant_id, {"coherence": 0.75, "pqn_rate": 0.05})
+decision = engine.auto_verify(submission.submission_id)  # accept
+contribution = reporter.record(work_unit.work_unit_id, submission.submission_id, decision.decision_id, identity.participant_id, 0.85)
+```
+
+### Test Count
+
+- Before: 86 tests (Phase 1 + FAM + external submission)
+- After: 108 tests (86 + 22 external contributor)
+- All passing
+
+### Phase 2 Status
+
+- [x] `pqn_swarm_hub_fam_live_validation` — COMPLETE (15 tests)
+- [x] `pqn_swarm_hub_external_submission_type` — COMPLETE (14 tests)
+- [x] `pqn_swarm_hub_external_contributor_path` — COMPLETE (22 tests)
+
+**Phase 2 COMPLETE**: All true blockers cleared. Ready for exfoliation review.
+
+### WSP References
+
+- WSP 5: >=90% test coverage for public API
+- WSP 97: External contributor path validation for proto-readiness
+- WSP 22: Documentation discipline (CONTRIBUTING.md)
+
+---
+
 ## V0.9.0 - External Submission Type (Phase 2 Gate 2)
 
 **Slice**: `pqn_swarm_hub_external_submission_type`
