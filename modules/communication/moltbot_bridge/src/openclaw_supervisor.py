@@ -597,7 +597,39 @@ class OpenClawSupervisor:
                     "source_file": pending_event.get("source_file", ""),
                 }
 
-        return {"kind": "idle", "reason": "resident_openclaw_healthy"}
+        # Skill Evolution Loop — Phase 1: report surface (idle path only, lowest priority)
+        # Build/write report as idle-path observability; do not create a new action branch
+        skill_evolution_report: Dict[str, Any] | None = None
+        skill_evolution_enabled = os.getenv("OPENCLAW_SKILL_EVOLUTION_ENABLED", "0") == "1"
+        if skill_evolution_enabled and self._pattern_memory:
+            try:
+                from .openclaw_skill_evolution import (
+                    build_skill_evolution_report,
+                    skill_evolution_report_due,
+                    write_skill_evolution_report,
+                )
+
+                if skill_evolution_report_due(self.repo_root):
+                    report = build_skill_evolution_report(self._pattern_memory)
+                    report_path = write_skill_evolution_report(self.repo_root, report)
+                    skill_evolution_report = {
+                        "report_path": str(report_path),
+                        "skills_evaluated": report.get("skills_evaluated", 0),
+                        "candidate_count": report.get("candidate_count", 0),
+                        "generated_on": report.get("generated_on"),
+                    }
+                    logger.info(
+                        "[SUPERVISOR] Skill evolution report generated: %d skills, %d candidates",
+                        skill_evolution_report["skills_evaluated"],
+                        skill_evolution_report["candidate_count"],
+                    )
+            except Exception as exc:
+                logger.debug("[SUPERVISOR] Skill evolution report skipped: %s", exc)
+
+        idle_result: Dict[str, Any] = {"kind": "idle", "reason": "resident_openclaw_healthy"}
+        if skill_evolution_report:
+            idle_result["skill_evolution_report"] = skill_evolution_report
+        return idle_result
 
     # ------------------------------------------------------------------ #
     #  PLAN — build execution plan from triage                            #
