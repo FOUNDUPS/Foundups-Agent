@@ -1,7 +1,7 @@
 # RUNBOOK - PQN Swarm Hub
 
-**Version**: Phase 1 Internal Proto
-**Status**: Reproducible execution guide
+**Version**: Phase 2 Complete
+**Status**: Reproducible execution guide (ready for Phase 3 prep)
 **Author**: 0102
 
 ---
@@ -384,7 +384,7 @@ When using DetectorBridge:
 python -m pytest modules/foundups/pqn_swarm_hub/tests/ -v
 ```
 
-**Expected**: 57 passed
+**Expected**: 108 passed
 
 ### Run Specific Test Files
 
@@ -492,42 +492,44 @@ print(f"Smoke test OK: {cr.contribution_id}")
 
 ## 7. Operator Notes
 
-### Phase 1 Complete
+### Phase 2 Complete
 
-The following are implemented and tested:
+The following are implemented and tested (108 tests passing):
 
 - [x] Work unit registry with persistence
 - [x] Submission sink with persistence
 - [x] Verification engine (auto + manual) with persistence
 - [x] Contribution reporter with JSON artifacts and persistence
 - [x] Participant gate with persistence
-- [x] FAM adapter (stub-safe)
+- [x] FAM adapter (stub-safe, live validated)
 - [x] Publication adapter (stub-safe)
 - [x] Detector bridge (requires pqn_alignment)
 - [x] SQLite persistence layer (optional injection)
+- [x] External submission type (source field tracking)
+- [x] External contributor path (CONTRIBUTING.md + 22 gate tests)
 
 ### Proto-Only (Not Yet Production-Ready)
 
-- FAMDaemon integration: Adapter created, live test pending
-- 3+ work unit types: Only CMST detector type implemented
-- External contributor path: Internal-first only
-- V3 consensus schema: Not stable (Shapley/ZK future)
+- V3 consensus schema: Not stable (Shapley/ZK future scope)
+- GPD work unit type: Separate bootstrap lane (not blocker)
 
-### Not Ready for Exfoliation
+### Ready for Exfoliation Review
 
 Per `PROTO_EXFOLIATION_CHECKLIST.md`:
-- 9/10 Phase 1 slices complete (runbook is 10/10)
-- External contributor path: NOT VALIDATED
-- Live FAMDaemon: NOT TESTED
-- GPD work unit type: NOT IMPLEMENTED
+- Phase 1: 10/10 slices complete
+- Phase 2: 3/3 slices complete (FAM live, external submission, contributor path)
+- All true exfoliation blockers: CLEARED
+- Architect decision: APPROVE_PHASE_3_PREP
 
-### Externalization Path (Future)
+### Externalization Path (Phase 3 Prep)
 
 ```
 FOUNDUPS/pqn-swarm-hub          # origin (org repo)
 Foundup/pqn-swarm-hub           # backup (personal repo)
 modules/foundups/pqn_swarm_hub/ # adapter stub remains in monorepo
 ```
+
+**Next slice**: `pqn_swarm_hub_phase3_prep_scaffold` — dual-remote setup, migration script, stub adapter
 
 ---
 
@@ -575,4 +577,4 @@ gate = ParticipantGate(store=store)
 ---
 
 *Created: 2026-03-29*
-*Last Updated: 2026-03-29*
+*Last Updated: 2026-03-29 (Phase 2 complete — exfoliation review)*

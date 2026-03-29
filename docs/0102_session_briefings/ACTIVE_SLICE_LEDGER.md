@@ -79,7 +79,8 @@ If already landed:
 | `pqn_swarm_hub_proto_readiness_review` | `97b5e952c` | Phase 2 entry APPROVED; 3 true blockers classified; GPD NOT blocker |
 | `pqn_swarm_hub_fam_live_validation` | `d5fca817d` | 15/15 live FAM tests; 72/72 module total; adapter boundary respected |
 | `pqn_swarm_hub_external_submission_type` | `70115efff` | 14/14 tests; source field in contracts; register_external + submit_external methods |
-| `pqn_swarm_hub_external_contributor_path` | `a40c38cfd` | CONTRIBUTING.md + 22/22 gate tests; Phase 2 COMPLETE |
+| `pqn_swarm_hub_external_contributor_path` | `db9df7598` | CONTRIBUTING.md + 22/22 gate tests; Phase 2 COMPLETE |
+| `pqn_swarm_hub_exfoliation_review_decision` | (pending commit) | Architect decision: APPROVE_PHASE_3_PREP; doc reconciliation |
 
 ---
 
@@ -87,7 +88,7 @@ If already landed:
 
 | Slice | Priority | Blocked By | Notes |
 |-------|----------|------------|-------|
-| _(none)_ | — | — | PQN Swarm Hub Phase 2 complete |
+| `pqn_swarm_hub_phase3_prep_scaffold` | P1 | 012 approval | Dual-remote repo setup, migration script, stub adapter |
 
 ---
 
@@ -109,10 +110,11 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 
 ## Next Priority Order
 
-1. ~~**`pqn_swarm_hub_external_contributor_path`**~~ — COMPLETE (Phase 2 Gate 3 — all blockers cleared)
-2. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
-3. `skill_evolution_loop_phase2_mutation_surface` (future: gated A/B testing and promotion)
-4. PQN Swarm Hub exfoliation review (Phase 2 complete — ready for 012 decision)
+1. ~~**`pqn_swarm_hub_external_contributor_path`**~~ — COMPLETE (Phase 2 Gate 3)
+2. ~~**`pqn_swarm_hub_exfoliation_review_decision`**~~ — COMPLETE (APPROVE_PHASE_3_PREP)
+3. `pqn_swarm_hub_phase3_prep_scaffold` — dual-remote repo, migration script, stub adapter
+4. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
+5. `skill_evolution_loop_phase2_mutation_surface` (future: gated A/B testing and promotion)
 
 ---
 

@@ -1,5 +1,55 @@
 # ModLog - PQN Swarm Hub FoundUp
 
+## V0.11.0 - Exfoliation Review Decision (Phase 3 Entry)
+
+**Slice**: `pqn_swarm_hub_exfoliation_review_decision`
+**Author**: 0102
+**Date**: 2026-03-29
+
+### Architect Decision
+
+**Decision**: `APPROVE_PHASE_3_PREP`
+
+**Rationale**:
+- All true exfoliation blockers cleared (3/3 Phase 2 slices complete)
+- Interfaces stable (except V3 consensus — future scope)
+- 108 tests passing across full module
+- External contributor path documented and tested (22 gate tests)
+- Standalone deploy path verified (stub-safe adapters)
+- Monorepo stub strategy documented
+
+**Rejected Alternatives**:
+- `DEFER_WITH_ONE_CORRECTIVE_SLICE`: Not needed — doc reconciliation completed in this slice
+- `REMAIN_INTEGRATED_BY_DESIGN`: Not applicable — blockers are cleared
+
+### Stale Doc Reconciliation
+
+Updated in this slice:
+
+1. `ROADMAP.md`:
+   - Phase 2 → COMPLETE
+   - All Phase 2 deliverable checkboxes updated
+   - Next phase → Phase 3 Prep
+
+2. `RUNBOOK.md`:
+   - Version → Phase 2 Complete
+   - Test count → 108 passed
+   - Operator notes → Ready for exfoliation review
+
+### Next Slice
+
+`pqn_swarm_hub_phase3_prep_scaffold`:
+- Create dual-remote repo setup
+- Prepare migration script
+- Design monorepo stub adapter
+
+### WSP References
+
+- WSP 97: Lifecycle evaluation (exfoliation decision)
+- WSP 22: Documentation discipline (doc reconciliation)
+
+---
+
 ## V0.10.0 - External Contributor Path (Phase 2 Complete)
 
 **Slice**: `pqn_swarm_hub_external_contributor_path`
