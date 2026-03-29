@@ -66,8 +66,8 @@ If already landed:
 | `foundups_domain_canonicalization` | `50eed2f4c` | `README.md` + `INTERFACE.md` tightened, IMPLEMENTED/PLANNED separation |
 | `training_corpus_source_of_truth` | `3179bc1af` | `corpus_resolver.py` shared utility, 5 consumers migrated, 8 unit tests |
 | `training_corpus_path_normalization` | `64fef5ca1` + `80564559b` | corpus path defaults normalized across holo tools and openclaw boundary |
-| `obs_connection_singleton` | (local, in PR #252 branch) | `boot_layer_rotator/executor.py` singleton pattern |
-| `supervisor_scan_once_fix` | (local, in PR #252 branch) | `openclaw_supervisor.py` type mismatch fixed |
+| `obs_connection_singleton` | `d4d6898f8` | `boot_layer_rotator/executor.py` singleton pattern |
+| `supervisor_scan_once_fix` | `71f248d04` | `openclaw_supervisor.py` type mismatch fixed (was in bounded maintenance loop commit) |
 | `pqn_swarm_hub_internal_poc_scaffold` | `35d1e2275` | `modules/foundups/pqn_swarm_hub/` — contracts, 4 service modules, 18/18 tests |
 | `git_main_merge_sentinel` | `08004c100` (branch `feat/git-main-merge-sentinel-20260318`) | `wre_core/src/git_main_merge_sentinel.py` 284 lines + `main.py:1110` + `.env.example` — plan was stale, work already shipped |
 | `openclaw_roadmap_reconciliation` | `a0549830b` | `HERMES_INSPIRED_FOUNDUPS_NATIVE_ROADMAP_2026-03-23.md` — all P0+P1 items audited; 5 closed, 1 partial, 1 not-started; planning_snapshot banner added |

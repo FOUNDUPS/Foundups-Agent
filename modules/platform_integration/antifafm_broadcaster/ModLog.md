@@ -1,5 +1,72 @@
 # antifaFM Broadcaster - ModLog
 
+## V3.2.8 - News Maps Schema + VIDEO_SOURCES Fix (2026-03-25)
+
+**Context**: OBS rotator broken - VIDEO_SOURCES used `video1-9` but actual OBS sources are `France 24`, `Al Jazeera`, etc. News schema needed conflict/shipping map rotation.
+
+**WSP 97 Analysis Applied**:
+- CoT: Retrieved actual OBS source names from 012 screenshot
+- CoR: Evaluated VesselFinder embed (BLOCKED), LiveUAMap screenshot (BLOCKED)
+
+**Changes**:
+
+1. **VIDEO_SOURCES Fix** (`boot_layer_rotator/executor.py:170`):
+   ```python
+   # Before:
+   _default_video_sources = "video1,video2,video3,video4,video5,video6,video7,video8,video9"
+
+   # After:
+   _default_video_sources = "France 24,Al Jazeera,Telaviv,BBC Straits,DW News"
+   ```
+
+2. **OBS Client Singleton** (`boot_layer_rotator/executor.py:177-223`):
+   - Added `_obs_client` singleton with thread-safe lock
+   - Connection reuse prevents WebSocket spam
+   - Auto-reconnect on stale connection
+
+3. **News Maps Executor Created** (`news_maps/executor.py`):
+   - Screenshot capture via undetected-chromedriver
+   - Ticker scraping from conflict map sources
+   - 5-minute cache to reduce request frequency
+   - Human-like delays (1-4s random)
+
+4. **News Schema Integration** (`boot_layer_rotator/executor.py:419-459`):
+   - Imports `capture_screenshot` from news_maps
+   - Rotates through map screenshots (60s each)
+   - Updates OBS image source with cached screenshots
+
+**Files Created**:
+- `skillz/news_maps/executor.py` (400+ lines)
+- `skillz/news_maps/SKILLz.md`
+- `skillz/news_maps/cache/` directory structure
+
+**Files Modified**:
+- `skillz/boot_layer_rotator/executor.py` - VIDEO_SOURCES, singleton, news integration
+
+**CRITICAL STATUS - NEWS MAPS BLOCKED**:
+- LiveUAMap: IP blocked ("automatic behavior detected")
+- VesselFinder: Connection timeout on embed script
+- VesselFinder screenshots: Timeout on page load
+- **Impact**: News schema cannot capture maps - only VIDEO schema works
+
+**Tested**:
+- [x] `boot_layer_rotator --list` works (Windows Unicode fixed)
+- [x] Rocket alerts ticker: 8 events scraped from rocketalert.live
+- [ ] VIDEO rotation in OBS (UNTESTED)
+- [ ] News maps in OBS (BLOCKED - sources detect automation)
+
+**WSP Compliance**:
+- WSP 15: Priority assessment (VIDEO schema = P0, news = PARK)
+- WSP 22: ModLog updated
+- WSP 97: CoT/CoR gates applied
+
+**Next Steps**:
+1. Test VIDEO schema rotation in OBS
+2. Consider paid AIS API (aisstream.io) for shipping data
+3. News maps require fundamentally different approach
+
+---
+
 ## V3.2.7 - Fix Boot Layer Integration (2026-03-22)
 
 **Context**: Stream showing "You have been blocked" (MarineTraffic WAF) and videos not rotating (always same video).
