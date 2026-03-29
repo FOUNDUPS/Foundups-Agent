@@ -1,5 +1,49 @@
 # HoloIndex Package ModLog
 
+## [2026-03-30] Audio Model Bootstrap Scripts
+
+**Agent**: 0102
+**WSP References**: WSP 60 (Module Memory), Audio Provider Registry
+**Status**: COMPLETE
+
+### Context
+
+Added download scripts for ASR/TTS models to support the new audio provider registry in `shared_utilities`.
+
+### Scripts Added
+
+| Script | Model | Format | Size |
+|--------|-------|--------|------|
+| `scripts/download_qwen3_tts.py` | Qwen3-TTS 1.7B | GGUF | ~1.2GB (Q4_K_M) |
+| `scripts/download_cohere_transcribe.py` | Cohere Transcribe 2B | transformers | ~4GB |
+
+### Model Locations
+
+Default target: `E:/LM_studio/models/local/` (matches `LOCAL_MODEL_ROOT`)
+
+| Role | Directory | Runtime |
+|------|-----------|---------|
+| `tts` | `qwen3-tts/` | llama.cpp, LM Studio, Ollama |
+| `asr` | `cohere-transcribe-2b/` | transformers, vLLM |
+
+### Usage
+
+```bash
+# Download TTS (GGUF - llama.cpp compatible)
+python holo_index/scripts/download_qwen3_tts.py --quant Q4_K_M
+
+# Download ASR (transformers format - requires HF_TOKEN for gated model)
+python holo_index/scripts/download_cohere_transcribe.py
+```
+
+### Notes
+
+- Cohere Transcribe is a gated model requiring HuggingFace authentication
+- Scripts load `.env` for `HF_TOKEN`
+- Qwen3-TTS supports `--ollama` flag to create Modelfile for Ollama custom model
+
+---
+
 ## [2026-03-18] Skills 2.0 Compliance - Full System Update
 
 **Agent**: 0102
