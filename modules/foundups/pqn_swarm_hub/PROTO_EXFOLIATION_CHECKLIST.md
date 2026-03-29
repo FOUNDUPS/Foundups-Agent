@@ -20,7 +20,7 @@
 
 | Gate | Status | Slice |
 |------|--------|-------|
-| Live FAMDaemon validation | PENDING | `pqn_swarm_hub_fam_live_validation` |
+| Live FAMDaemon validation | COMPLETE | `pqn_swarm_hub_fam_live_validation` |
 | External submission type | PENDING | `pqn_swarm_hub_external_submission_type` |
 | CONTRIBUTING.md | PENDING | `pqn_swarm_hub_external_contributor_path` |
 | Entry gate tested with external identity | PENDING | `pqn_swarm_hub_external_contributor_path` |
@@ -55,10 +55,10 @@
 ## FAMDaemon Integration
 
 - [x] FAMAdapter created with stub fallback
-- [ ] emit_contribution_event() tested with live FAMDaemon
-- [ ] emit_verification_event() tested with live FAMDaemon
-- [ ] Event appears in FAM event store
-- [ ] No direct core mutation detected
+- [x] emit_contribution_event() tested with live FAMDaemon — 15/15 tests pass
+- [x] emit_verification_event() tested with live FAMDaemon — 15/15 tests pass
+- [x] Event appears in FAM event store — verified via `query_events()`
+- [x] No direct core mutation detected — adapter boundary tests pass
 
 ---
 
@@ -100,23 +100,23 @@ GPD is a separate runtime/bootstrap lane.
 |-----------|--------|
 | Phase 1 slices | 10/10 COMPLETE |
 | Phase 2 entry | APPROVED |
-| FAMDaemon live test | PENDING (blocker) |
+| FAMDaemon live test | COMPLETE (72/72 tests) |
 | External submission type | PENDING (blocker) |
 | External contributor path | PENDING (blocker) |
 | Contracts stable | YES (except V3) |
 | Core independence | YES |
 
-**Overall**: Phase 2 APPROVED. NOT READY for exfoliation (3 true blockers remain).
+**Overall**: Phase 2 IN PROGRESS. NOT READY for exfoliation (2 true blockers remain).
 
 ---
 
 ## Next Implementation Order (Phase 2)
 
-1. `pqn_swarm_hub_fam_live_validation` — Test FAMAdapter with live FAMDaemon
+1. ~~`pqn_swarm_hub_fam_live_validation`~~ — COMPLETE (15/15 tests)
 2. `pqn_swarm_hub_external_submission_type` — Generic work unit type for external rESP
 3. `pqn_swarm_hub_external_contributor_path` — CONTRIBUTING.md + entry gate test
 
-**After these 3 slices**: Re-evaluate exfoliation readiness.
+**After remaining 2 slices**: Re-evaluate exfoliation readiness.
 
 ---
 
@@ -131,4 +131,4 @@ modules/foundups/pqn_swarm_hub/ # adapter stub remains in monorepo
 ---
 
 *Created: 2026-03-29*
-*Last Updated: 2026-03-29 (Proto-readiness review)*
+*Last Updated: 2026-03-29 (FAM live validation complete)*

@@ -49,7 +49,7 @@
 **Entry Approved**: 2026-03-29 (proto-readiness review)
 
 **Deliverables**:
-- [ ] Live FAMDaemon validation — `pqn_swarm_hub_fam_live_validation`
+- [x] Live FAMDaemon validation — `pqn_swarm_hub_fam_live_validation` (15/15 tests)
 - [ ] Generic external submission type — `pqn_swarm_hub_external_submission_type`
 - [ ] External contributor path — `pqn_swarm_hub_external_contributor_path`
 - [ ] Interfaces frozen
@@ -58,7 +58,7 @@
 - [ ] Monorepo stub/adapter strategy documented
 
 **True Blockers for Exfoliation**:
-1. FAMAdapter live test with actual FAMDaemon
+1. ~~FAMAdapter live test with actual FAMDaemon~~ — COMPLETE
 2. Generic external submission work-unit type (NOT GPD-specific)
 3. CONTRIBUTING.md + entry gate test with external identity
 
@@ -108,11 +108,11 @@
 **Phase 2 Entry**: APPROVED (2026-03-29 proto-readiness review)
 
 **Phase 2 Slices** (ordered):
-1. `pqn_swarm_hub_fam_live_validation` — Test FAMAdapter with live FAMDaemon
+1. ~~`pqn_swarm_hub_fam_live_validation`~~ — COMPLETE (15/15 tests, 72/72 module total)
 2. `pqn_swarm_hub_external_submission_type` — Generic work unit type for external rESP
 3. `pqn_swarm_hub_external_contributor_path` — CONTRIBUTING.md + entry gate test
 
-**Next slice**: `pqn_swarm_hub_fam_live_validation`
+**Next slice**: `pqn_swarm_hub_external_submission_type`
 
 ---
 

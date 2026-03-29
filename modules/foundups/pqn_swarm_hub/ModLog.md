@@ -1,5 +1,53 @@
 # ModLog - PQN Swarm Hub FoundUp
 
+## V0.8.0 - FAM Live Validation (Phase 2 Gate 1)
+
+**Slice**: `pqn_swarm_hub_fam_live_validation`
+**Author**: 0102
+**Date**: 2026-03-29
+
+### Changes
+
+- Added `tests/test_fam_live_validation.py` (15 tests):
+  - Live FAMDaemon connection tests
+  - `emit_contribution_event()` live emission and store verification
+  - `emit_verification_event()` live emission and store verification
+  - Adapter boundary tests (no direct mutation)
+  - Full flow integration tests
+  - FAM store statistics verification
+
+### Validation Evidence
+
+| Test | Result |
+|------|--------|
+| emit_contribution_event() with live FAMDaemon | PASS |
+| emit_verification_event() with live FAMDaemon | PASS |
+| Events appear in FAM event store | PASS |
+| Adapter uses only emit() interface | PASS |
+| No direct event store access | PASS |
+
+### Test Count
+
+- Before: 57 tests (Phase 1)
+- After: 72 tests (57 + 15 FAM live validation)
+- All passing
+
+### Phase 2 Progress
+
+- [x] `pqn_swarm_hub_fam_live_validation` — COMPLETE
+- [ ] `pqn_swarm_hub_external_submission_type` — NEXT
+- [ ] `pqn_swarm_hub_external_contributor_path` — PENDING
+
+**True blockers remaining**: 2 (external submission type, contributor path)
+
+### WSP References
+
+- WSP 72: Module independence (adapter boundary respected)
+- WSP 91: Observability (contribution events audit-safe)
+- WSP 97: Lifecycle evaluation (externalization gate)
+
+---
+
 ## V0.7.0 - Proto-Readiness Review (Phase 2 Entry)
 
 **Slice**: `pqn_swarm_hub_proto_readiness_review`
