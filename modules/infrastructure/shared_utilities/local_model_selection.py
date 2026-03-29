@@ -108,9 +108,12 @@ ROLE_DEFAULT_FILENAMES: Dict[str, str] = {
     "triage": "gemma-270m.gguf",
     "general": "qwen3.5-4b.gguf",
     "code": "qwen-coder-7b.gguf",
-    "asr": "cohere-transcribe-2b.gguf",
+    "asr": "",  # ASR uses transformers format (directory, not GGUF)
     "tts": "qwen3-tts.gguf",
 }
+
+# Roles that use transformers format (directory with config.json) instead of GGUF
+TRANSFORMERS_FORMAT_ROLES: set = {"asr"}
 
 
 @dataclass(frozen=True)
@@ -181,10 +184,21 @@ def _ranked_gguf_files(model_dir: Path, role: str) -> List[Path]:
     return files
 
 
+def _is_transformers_dir(candidate: Path) -> bool:
+    """Check if directory contains a transformers model (has config.json)."""
+    return candidate.is_dir() and (candidate / "config.json").exists()
+
+
 def _resolve_candidate(candidate: Path, role: str) -> Optional[Path]:
     if candidate.is_file():
         return candidate
     if candidate.is_dir():
+        # For transformers-format roles (ASR), return directory if config.json exists
+        if role in TRANSFORMERS_FORMAT_ROLES:
+            if _is_transformers_dir(candidate):
+                return candidate
+            return None
+        # For GGUF roles, look for .gguf files
         ranked = _ranked_gguf_files(candidate, role)
         if ranked:
             return ranked[0]
@@ -238,17 +252,34 @@ def resolve_model_selection(role: str) -> ModelSelection:
                     source=source,
                 )
             elif candidate.is_dir() or str(candidate).lower().endswith(("/", "\\")):
-                unresolved_fallback = ModelSelection(
-                    role=role,
-                    path=candidate / ROLE_DEFAULT_FILENAMES[role],
-                    exists=False,
-                    source=source,
-                )
+                # For transformers-format roles, the path IS the directory
+                if role in TRANSFORMERS_FORMAT_ROLES:
+                    unresolved_fallback = ModelSelection(
+                        role=role,
+                        path=candidate,
+                        exists=False,
+                        source=source,
+                    )
+                else:
+                    unresolved_fallback = ModelSelection(
+                        role=role,
+                        path=candidate / ROLE_DEFAULT_FILENAMES[role],
+                        exists=False,
+                        source=source,
+                    )
 
     if unresolved_fallback is not None:
         return unresolved_fallback
 
     model_dir = get_role_model_dir(role)
+    # For transformers-format roles, the path IS the directory
+    if role in TRANSFORMERS_FORMAT_ROLES:
+        return ModelSelection(
+            role=role,
+            path=model_dir,
+            exists=False,
+            source="default_placeholder",
+        )
     return ModelSelection(
         role=role,
         path=model_dir / ROLE_DEFAULT_FILENAMES[role],

@@ -6,6 +6,7 @@
 - **Context**: News integration pass for Cohere Transcribe, Qwen3-TTS, Mistral Voxtral.
 - **Changes**:
   - `local_model_selection.py`: Added `asr` and `tts` roles with Cohere Transcribe 2B and Qwen3-TTS defaults
+  - `local_model_selection.py`: Added `TRANSFORMERS_FORMAT_ROLES` for non-GGUF models (ASR uses transformers format)
   - `audio_provider_registry.py` (NEW): Provider registry with production/eval-only flags
     - `cohere_transcribe`: preferred ASR, production_enabled=true
     - `qwen3_tts`: preferred TTS, production_enabled=true
@@ -14,7 +15,8 @@
     - Consent + whitelist requirements
     - Emergency kill switch
     - Audit logging hook
-- **Model Storage**: All models to `E:/HoloIndex/models/` per existing convention
+- **Model Storage**: `E:/LM_studio/models/local/` (zero-config default via LOCAL_MODEL_ROOT)
+- **Model Formats**: GGUF (tts/triage/general/code) vs transformers (asr)
 - **Research Doc**: `docs/research/2026-03-30-audio-agents.md`
 - **WSP Compliance**: WSP 3 (shared utilities), WSP 60 (module memory)
 
