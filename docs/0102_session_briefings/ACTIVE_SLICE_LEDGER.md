@@ -78,6 +78,7 @@ If already landed:
 | `pqn_swarm_hub_runbook` | `08b3f3f35` | `RUNBOOK.md` reproducible execution guide; Phase 1 COMPLETE (10/10 slices) |
 | `pqn_swarm_hub_proto_readiness_review` | `97b5e952c` | Phase 2 entry APPROVED; 3 true blockers classified; GPD NOT blocker |
 | `pqn_swarm_hub_fam_live_validation` | `d5fca817d` | 15/15 live FAM tests; 72/72 module total; adapter boundary respected |
+| `pqn_swarm_hub_external_submission_type` | `70115efff` | 14/14 tests; source field in contracts; register_external + submit_external methods |
 
 ---
 
@@ -85,8 +86,7 @@ If already landed:
 
 | Slice | Priority | Blocked By | Notes |
 |-------|----------|------------|-------|
-| `pqn_swarm_hub_external_submission_type` | P0 | — | Generic work unit type for external rESP |
-| `pqn_swarm_hub_external_contributor_path` | P1 | external_submission_type | CONTRIBUTING.md + entry gate test |
+| `pqn_swarm_hub_external_contributor_path` | P0 | — | CONTRIBUTING.md + entry gate test (last blocker) |
 
 ---
 
@@ -108,10 +108,9 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 
 ## Next Priority Order
 
-1. **`pqn_swarm_hub_external_submission_type`** — Generic work unit type for external rESP (Phase 2 Gate 2)
-2. `pqn_swarm_hub_external_contributor_path` — CONTRIBUTING.md + entry gate test (Phase 2 Gate 3)
-3. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
-4. `skill_evolution_loop_phase2_mutation_surface` (future: gated A/B testing and promotion)
+1. **`pqn_swarm_hub_external_contributor_path`** — CONTRIBUTING.md + entry gate test (Phase 2 Gate 3 — last blocker for exfoliation)
+2. YouTube Domain Agent Phase 1 (pending 012 review of `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`)
+3. `skill_evolution_loop_phase2_mutation_surface` (future: gated A/B testing and promotion)
 
 ---
 
