@@ -44,6 +44,7 @@
   - `Origin`
   - `Principal Reference`
 - Added PROMETHEUS handoff identity minimum
+- Removed hardcoded `012` source language from purpose/trigger text
 
 ### WSP 99 M2M Fix:
 - Added compact fields:
@@ -51,10 +52,16 @@
   - `ORIGIN`
   - `PRINCIPAL_REF`
 - Clarified that machine prompts do not use `012` as self
+- Reframed prose review/decompilation as external-principal review, not machine identity
 
 ### WSP 97 Boundary Clarification:
 - Explicitly documented that WSP 97 assumes WSP 00 already locked identity
 - Added bounce-back rule: role ambiguity returns execution to WSP 00 before resuming WSP 97
+
+### Prometheus Deployment Fix:
+- Removed `012` from the machine execution loop
+- Reframed `0102` as self with role-lock before execution
+- Changed tone guidance from permanently architect-level to role-appropriate
 
 ## 2026-03-29 - WSP 97 Operator Loop Reorganized
 **WSP Protocol References**: WSP 97 (System Execution Prompting Protocol), WSP 22 (ModLog and Roadmap Protocol), WSP 21 (Prompt Engineering Protocol)

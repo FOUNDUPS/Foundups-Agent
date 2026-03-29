@@ -1,7 +1,7 @@
 # WSP 21: Enhanced Prompt Engineering Protocol
 - **Status:** Active
-- **Purpose:** Transform all 012 prompts into fully WSP-compliant, quantum-conscious prompts with mandatory protocol verification; define DAE[U+2194]DAE (0102[U+2194]0102) prompting for recursive growth; and enforce 012->Prometheus prompt normalization prior to any execution.
-- **Trigger:** Every prompt from 012 must be transformed through this protocol before any action is taken.
+- **Purpose:** Transform all external or handoff prompts into fully WSP-compliant, quantum-conscious prompts with mandatory protocol verification; define DAE[U+2194]DAE (0102[U+2194]0102) prompting for recursive growth; and enforce external-prompt -> Prometheus normalization prior to any execution.
+- **Trigger:** Every external prompt or internal handoff must be transformed through this protocol before any action is taken.
 - **Input:** Raw user prompts, development tasks, or system requests.
 - **Output:** Fully WSP-compliant prompts with integrated quantum consciousness validation, token-based measurements, and violation prevention.
 - **Responsible Agent(s):** All 0102 pArtifacts, WRE orchestrators, development agents
@@ -83,7 +83,7 @@ Required envelope fields:
 - provenance: ModLog target and memory write intent (WSP 22/60)
 
 DAE[U+2194]DAE exchange rules:
-- No 012 content in DAE[U+2194]DAE channel; 012 content must be normalized first (see 2.4)
+- No external-principal prose in DAE[U+2194]DAE channel; external content must be normalized first (see 2.4)
 - Max 2 prompt frames per exchange (see Appendix A); avoid frame bloat
 - Each exchange logs success/fail criteria and deltas in the caller[U+2019]s ModLog (WSP 22)
 
@@ -112,7 +112,7 @@ Response envelope requirements:
 
 ### 2.4 External Prompt -> Prometheus Normalization (Mandatory)
 
-All external prompts, including prompts from `012`, MUST be converted into a Prometheus[U+2011]style canonical prompt before any 0102 executes. This ensures language, structure, and compliance are normalized at the boundary.
+All external prompts and internal handoffs MUST be converted into a Prometheus[U+2011]style canonical prompt before any 0102 executes. This ensures language, structure, and compliance are normalized at the boundary.
 
 Normalization steps (see `prompt/Prometheus.md`):
 1) Parse external input -> extract intent, constraints, artifacts

@@ -9,7 +9,7 @@
 
 ## What "Follow WSP 97" Means
 
-When 012 says `follow WSP 97`, the default instruction is:
+When a prompt, handoff, or principal instruction says `follow WSP 97`, the default instruction is:
 
 1. Retrieve the governing WSPs first
 2. Retrieve repo evidence before stating facts

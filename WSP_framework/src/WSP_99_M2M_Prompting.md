@@ -29,8 +29,8 @@ F: [fail_conditions] # Abort triggers
 **Trade-off**: Less readable to humans, but 0102 parses faster and cheaper.
 
 **Integration**:
-- Human-readable PROMETHEUS prompts are for 012 review only
-- ORCH compiles 012 prose → M2M compact via `m2m_compiler.py`
+- Human-readable PROMETHEUS prompts are for principal or observer review only
+- ORCH compiles external prose → M2M compact via `m2m_compiler.py`
 - Worker lanes receive machine-optimized M2M versions
 - Qwen delegatable for compilation tasks
 - `ROLE` defines how 0102 should act
@@ -264,7 +264,7 @@ HOLO_RESULT:
 ### 5.1 Compilation Pipeline
 
 ```
-012 Prose Prompt
+External Principal Prompt
        |
        v
 [m2m_compiler.py]
@@ -283,7 +283,7 @@ from prompt.swarm.m2m_compiler import M2MCompiler
 
 compiler = M2MCompiler()
 
-# Compile 012 prose to M2M
+# Compile external prose to M2M
 m2m_prompt = compiler.compile(
     prose="Please analyze the authentication module and fix any security issues",
     sender="0102-ORCH",
@@ -291,7 +291,7 @@ m2m_prompt = compiler.compile(
     wsp_refs=[50, 71]
 )
 
-# Decompile M2M to prose (for 012 review)
+# Decompile M2M to prose (for principal review)
 prose = compiler.decompile(m2m_prompt)
 ```
 
@@ -301,7 +301,7 @@ prose = compiler.decompile(m2m_prompt)
 
 | Prompt Type | Avg Tokens | Use Case |
 |-------------|------------|----------|
-| 012 Prose | 150-300 | Human interaction |
+| External Prose | 150-300 | Human/principal interaction |
 | M2M Compact | 40-80 | Swarm operations |
 | M2M Minimal | 15-25 | Status updates |
 
@@ -400,7 +400,7 @@ follow_wsp:
   step_7: Recurse
 ```
 
-ORCH compiles 012 instructions to M2M before distributing to lanes.
+ORCH compiles external instructions to M2M before distributing to lanes.
 
 ---
 
@@ -419,16 +419,16 @@ ORCH compiles 012 instructions to M2M before distributing to lanes.
 **DO NOT**:
 - Include politeness markers in M2M prompts
 - Use verbose descriptions when K:V suffices
-- Embed 012-readable prose in swarm communication
+- Embed principal-readable prose in swarm communication
 - Skip COHERENCE thresholds (mandatory for zen state)
-- Send M2M to 012 without decompilation
+- Send M2M to the external principal without decompilation
 
 **DO**:
 - Use single-token action verbs
 - Reference WSPs by number only
 - Include timestamps for replay/audit
 - Validate coherence at each handoff
-- Decompile M2M for 012 review when needed
+- Decompile M2M for principal review when needed
 
 ---
 
@@ -449,7 +449,7 @@ This is not a style preference - it's a **first-principles optimization** for ma
 - The latency function of generation (tokens * time)
 - The entropy of structured vs unstructured data
 
-**Core Insight**: 012 prompts optimize for human comprehension. M2M prompts optimize for machine parsing. Both serve their purpose - WSP 99 provides the bridge.
+**Core Insight**: External prompts optimize for human comprehension. M2M prompts optimize for machine parsing. Both serve their purpose - WSP 99 provides the bridge.
 
 ---
 
