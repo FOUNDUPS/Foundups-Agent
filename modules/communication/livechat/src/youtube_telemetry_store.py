@@ -3,7 +3,11 @@
 YouTube DAE Telemetry Storage Module
 
 Lightweight SQLite-based telemetry ingestion for YouTube live stream monitoring.
-Stores stream sessions, heartbeats, and moderation actions.
+Stores stream sessions, heartbeats, moderation actions, and channel operations.
+
+Phase 2 (G3): Added youtube_channel_operations table for per-channel tracking.
+This provides a sentinel-queryable data surface for AI Overseer without
+persisting derived classifications (raw facts only).
 
 WSP References:
 - WSP 72: Module Independence (standalone SQLite storage)
@@ -17,7 +21,7 @@ import json
 import logging
 from pathlib import Path
 from typing import Dict, Optional, List
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from contextlib import contextmanager
 
 logger = logging.getLogger(__name__)
@@ -37,6 +41,7 @@ class YouTubeTelemetryStore:
         - youtube_streams: Stream session metadata
         - youtube_heartbeats: Periodic health pulses
         - youtube_moderation_actions: Spam/toxic blocks
+        - youtube_channel_operations: Per-channel operation timestamps (G3)
     """
 
     def __init__(self, db_path: Optional[Path] = None):
@@ -147,6 +152,25 @@ class YouTubeTelemetryStore:
             conn.execute("""
                 CREATE INDEX IF NOT EXISTS idx_youtube_moderation_timestamp
                 ON youtube_moderation_actions(timestamp DESC)
+            """)
+
+            # Table 4: Channel Operations (G3 - Phase 2)
+            # Raw facts only - no sentinel classifications
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS youtube_channel_operations (
+                    channel_id TEXT PRIMARY KEY,
+                    channel_name TEXT,
+                    last_comment_scan TEXT,
+                    last_scheduling_scan TEXT,
+                    last_indexing_scan TEXT,
+                    last_rotation_success TEXT,
+                    consecutive_failures INTEGER DEFAULT 0
+                )
+            """)
+
+            conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_youtube_channel_ops_last_comment
+                ON youtube_channel_operations(last_comment_scan DESC)
             """)
 
             logger.info("YouTube DAE telemetry tables ensured")
@@ -326,6 +350,162 @@ class YouTubeTelemetryStore:
 
             columns = [desc[0] for desc in cursor.description]
             return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+    # =========================================================================
+    # G3: Per-Channel Operation Tracking (Phase 2)
+    # =========================================================================
+
+    def record_channel_operation(
+        self,
+        channel_id: str,
+        channel_name: str,
+        operation: str,
+        success: bool = True,
+    ) -> None:
+        """
+        Record operation timestamp for a channel.
+
+        This provides a sentinel-queryable data surface for AI Overseer.
+        Only raw facts are persisted - no derived classifications.
+
+        Args:
+            channel_id: YouTube channel ID
+            channel_name: Channel display name
+            operation: Operation type (comment_scan, scheduling_scan, indexing_scan, rotation)
+            success: Whether operation succeeded
+        """
+        timestamp = datetime.now(timezone.utc).isoformat()
+
+        # Map operation to column name
+        column_map = {
+            "comment_scan": "last_comment_scan",
+            "comments": "last_comment_scan",
+            "scheduling_scan": "last_scheduling_scan",
+            "shorts": "last_scheduling_scan",
+            "indexing_scan": "last_indexing_scan",
+            "indexing": "last_indexing_scan",
+            "rotation": "last_rotation_success",
+        }
+
+        column = column_map.get(operation)
+        if not column:
+            logger.warning(f"Unknown operation type: {operation}")
+            return
+
+        with self._get_connection() as conn:
+            # Check if channel exists
+            cursor = conn.execute(
+                "SELECT consecutive_failures FROM youtube_channel_operations WHERE channel_id = ?",
+                (channel_id,)
+            )
+            row = cursor.fetchone()
+
+            if row is None:
+                # Insert new channel
+                conn.execute(f"""
+                    INSERT INTO youtube_channel_operations (channel_id, channel_name, {column}, consecutive_failures)
+                    VALUES (?, ?, ?, ?)
+                """, (channel_id, channel_name, timestamp, 0 if success else 1))
+            else:
+                # Update existing channel
+                current_failures = row[0] or 0
+                new_failures = 0 if success else current_failures + 1
+
+                conn.execute(f"""
+                    UPDATE youtube_channel_operations
+                    SET channel_name = ?, {column} = ?, consecutive_failures = ?
+                    WHERE channel_id = ?
+                """, (channel_name, timestamp, new_failures, channel_id))
+
+            logger.debug(f"Recorded {operation} for {channel_name}: success={success}")
+
+    def get_stale_channels(
+        self,
+        operation: str,
+        max_age_hours: int = 24,
+    ) -> List[Dict]:
+        """
+        Find channels not processed within max_age_hours.
+
+        This is a sentinel-queryable surface - AI Overseer can use this
+        to detect channels needing attention without storing classifications.
+
+        Args:
+            operation: Operation type to check (comment_scan, scheduling_scan, indexing_scan)
+            max_age_hours: Maximum age in hours before channel is considered stale
+
+        Returns:
+            List of stale channel dicts with channel_id, channel_name, last_scan, hours_stale
+        """
+        column_map = {
+            "comment_scan": "last_comment_scan",
+            "comments": "last_comment_scan",
+            "scheduling_scan": "last_scheduling_scan",
+            "shorts": "last_scheduling_scan",
+            "indexing_scan": "last_indexing_scan",
+            "indexing": "last_indexing_scan",
+        }
+
+        column = column_map.get(operation)
+        if not column:
+            logger.warning(f"Unknown operation type: {operation}")
+            return []
+
+        cutoff = (datetime.now(timezone.utc) - timedelta(hours=max_age_hours)).isoformat()
+
+        with self._get_connection() as conn:
+            # Find channels where last scan is older than cutoff OR is NULL
+            cursor = conn.execute(f"""
+                SELECT channel_id, channel_name, {column} as last_scan, consecutive_failures
+                FROM youtube_channel_operations
+                WHERE {column} IS NULL OR {column} < ?
+                ORDER BY {column} ASC NULLS FIRST
+            """, (cutoff,))
+
+            results = []
+            now = datetime.now(timezone.utc)
+            for row in cursor.fetchall():
+                channel_id, channel_name, last_scan, failures = row
+                if last_scan:
+                    last_dt = datetime.fromisoformat(last_scan.replace('Z', '+00:00'))
+                    hours_stale = (now - last_dt).total_seconds() / 3600
+                else:
+                    hours_stale = float('inf')
+
+                results.append({
+                    "channel_id": channel_id,
+                    "channel_name": channel_name,
+                    "last_scan": last_scan,
+                    "hours_stale": round(hours_stale, 1),
+                    "consecutive_failures": failures or 0,
+                })
+
+            return results
+
+    def get_channel_operation_stats(self, channel_id: str) -> Optional[Dict]:
+        """
+        Get operation stats for a specific channel.
+
+        Args:
+            channel_id: YouTube channel ID
+
+        Returns:
+            Dict with all operation timestamps and failure count, or None
+        """
+        with self._get_connection() as conn:
+            cursor = conn.execute("""
+                SELECT channel_id, channel_name, last_comment_scan, last_scheduling_scan,
+                       last_indexing_scan, last_rotation_success, consecutive_failures
+                FROM youtube_channel_operations
+                WHERE channel_id = ?
+            """, (channel_id,))
+
+            row = cursor.fetchone()
+            if not row:
+                return None
+
+            columns = [desc[0] for desc in cursor.description]
+            return dict(zip(columns, row))
 
 
 if __name__ == "__main__":

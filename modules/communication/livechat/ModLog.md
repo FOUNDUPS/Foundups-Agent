@@ -10,6 +10,65 @@ This log tracks changes specific to the **livechat** module in the **communicati
 
 ---
 
+## 2026-03-30 - YouTube Domain Agent Phase 2 (G3 + G5)
+
+**By:** 0102
+**WSP References:** WSP 22 (ModLog), WSP 77 (Agent Coordination), WSP 91 (Observability)
+
+### Problem
+
+YouTube rotation system lacked:
+- **G3**: Per-channel operation tracking (no visibility into channel staleness)
+- **G5**: Cycle watchdog (rotation hangs with no timeout)
+
+### Solution
+
+**G3: Per-Channel Operation Tracking**
+- Added `youtube_channel_operations` table to `youtube_telemetry_store.py`:
+  - Columns: `channel_id`, `channel_name`, `last_comment_scan`, `last_scheduling_scan`, `last_indexing_scan`, `last_rotation_success`, `consecutive_failures`
+  - Raw facts ONLY - no derived classifications (STT/TTS boundary)
+- Added methods:
+  - `record_channel_operation(channel_id, channel_name, operation, success)` - upserts timestamps
+  - `get_stale_channels(operation, max_age_hours)` - sentinel-queryable surface
+  - `get_channel_operation_stats(channel_id)` - full stats for channel
+- Added `_record_channel_op()` helper to `rotation_supervisor.py`:
+  - Called after each channel completes (success or failure)
+  - Lazy imports telemetry store to avoid circular dependencies
+
+**G5: Cycle Watchdog**
+- Added `MAX_CYCLE_DURATION_HOURS` constant (env: `YT_MAX_CYCLE_DURATION_HOURS`, default: 2.0)
+- Added duration check in `run_rotation()` loop:
+  - Checks `elapsed_hours > MAX_CYCLE_DURATION_HOURS` at start of each iteration
+  - Emits `rotation_cycle_stalled` breadcrumb with metadata
+  - Breaks out of loop to prevent infinite hangs
+
+### STT/TTS Boundary Encoded
+
+**Principle**: AI Overseer sentinels are OBSERVATIONAL, not AUTHORITATIVE.
+
+- Raw facts stored: timestamps, consecutive_failures
+- NO sentinel classifications stored (DEAD/ALIVE/WEAK computed at query time)
+- Authority separation:
+  - STT (observe) → Can recommend actions
+  - TTS (command) → Requires owner/mod approval
+  - Rotation recovery → Autonomous (no user impact)
+  - Moderation → NEVER autonomous (user impact)
+
+### Files Changed
+- `youtube_telemetry_store.py`: Added table + 3 methods (~150 lines)
+- `rotation_supervisor.py`: Added constant + watchdog + channel op recording (~50 lines)
+
+### Tests
+- `test_channel_operations.py`: 17 tests (table, CRUD, staleness, raw facts boundary)
+- `test_cycle_watchdog.py`: 10 tests (constant, watchdog logic, breadcrumb metadata)
+- All 27 tests passing
+
+### Reference
+- Implementation Plan: `docs/audits/youtube_domain_agent/IMPLEMENTATION_PLAN.md`
+- INTERFACE.md updated with STT/TTS boundary protocol
+
+---
+
 ## 2026-03-30 - YouTube Domain Agent Phase 1 (G1 + G2)
 
 **By:** 0102

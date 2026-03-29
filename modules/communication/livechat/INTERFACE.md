@@ -200,7 +200,72 @@ Shows invite distribution statistics.
 
 ---
 
-## STT/TTS Boundary Note (2026-03-30)
+## YouTube Telemetry Store (Phase 2)
+
+### `YouTubeTelemetryStore`
+SQLite-based storage for YouTube DAE cardiovascular telemetry.
+
+#### Public Methods
+
+##### `record_channel_operation(channel_id: str, channel_name: str, operation: str, success: bool = True)`
+Record operation timestamp for a channel (sentinel-queryable raw facts).
+
+**Parameters:**
+- `channel_id`: YouTube channel ID
+- `channel_name`: Channel display name
+- `operation`: Operation type (`comment_scan`, `shorts`, `indexing`, `rotation`)
+- `success`: Whether operation succeeded
+
+##### `get_stale_channels(operation: str, max_age_hours: int = 24) -> List[Dict]`
+Find channels not processed within max_age_hours.
+
+**Parameters:**
+- `operation`: Operation type to check
+- `max_age_hours`: Maximum age before channel is considered stale
+
+**Returns:**
+- List of dicts with `channel_id`, `channel_name`, `last_scan`, `hours_stale`, `consecutive_failures`
+
+##### `get_channel_operation_stats(channel_id: str) -> Optional[Dict]`
+Get all operation timestamps and failure count for a channel.
+
+---
+
+## Rotation Supervisor (Phase 2)
+
+### Constants
+
+- `MAX_CYCLE_DURATION_HOURS`: Maximum cycle duration before emitting stall breadcrumb (env: `YT_MAX_CYCLE_DURATION_HOURS`, default: `2.0`)
+
+### Watchdog Behavior
+
+When rotation cycle exceeds `MAX_CYCLE_DURATION_HOURS`:
+1. Emits `rotation_cycle_stalled` breadcrumb with metadata
+2. Breaks out of rotation loop
+3. AI Overseer can query breadcrumbs to detect and recover
+
+---
+
+## STT/TTS Boundary Protocol (2026-03-30)
+
+### AI Overseer Sentinel Layer
+
+**Principle:** AI Overseer sentinels are OBSERVATIONAL, not AUTHORITATIVE.
+
+```
+SQLite (raw facts) → Sentinel Query (STT/observe) → Command Gate (TTS/act)
+```
+
+**Rules:**
+1. **Raw Facts Only**: Telemetry stores timestamps and counts, NOT classifications
+2. **Ephemeral Classifications**: Sentinel computes DEAD/ALIVE/WEAK at query time
+3. **Authority Separation**:
+   - STT (observe) → Can recommend actions
+   - TTS (command) → Requires owner/mod approval
+   - Rotation recovery → Autonomous (no user impact)
+   - Moderation → NEVER autonomous (user impact)
+
+### Audio STT/TTS Substrate
 
 **Substrate Available:** STT/TTS provider registry and voice cloning policy now exist in `modules/infrastructure/shared_utilities/`:
 - `audio_provider_registry.py` — provider metadata with production/eval-only gating

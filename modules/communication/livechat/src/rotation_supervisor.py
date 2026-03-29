@@ -35,6 +35,7 @@ Usage:
 
 Author: 0102
 Created: 2026-02-27
+Updated: 2026-03-30 (Phase 2: G5 cycle watchdog + G3 channel operation tracking)
 WSP: 77 (Agent Coordination), 91 (Observability)
 """
 
@@ -63,6 +64,13 @@ from modules.communication.livechat.src.rotation_checkpoint import (
 )
 
 logger = logging.getLogger(__name__)
+
+# =============================================================================
+# G5: Cycle Watchdog Constants (Phase 2)
+# =============================================================================
+# Maximum duration for entire rotation cycle before emitting stall breadcrumb.
+# This is a sentinel-queryable raw fact - AI Overseer interprets severity.
+MAX_CYCLE_DURATION_HOURS = float(os.getenv("YT_MAX_CYCLE_DURATION_HOURS", "2.0"))
 
 
 class OperationType(Enum):
@@ -214,6 +222,33 @@ class RotationSupervisor:
             for channel in group_channels_by_browser(role="comments").get(self.browser, [])
             if channel.get("name")
         ]
+
+    def _record_channel_op(self, channel: str, operation: str, success: bool = True) -> None:
+        """
+        G3: Record channel operation timestamp for sentinel tracking.
+
+        Lazy import to avoid circular dependencies. This persists raw facts
+        (timestamps, success/failure) for AI Overseer to query - no derived
+        classifications are stored here.
+
+        Args:
+            channel: Channel name (resolved to ID via registry)
+            operation: Operation type (comments, shorts, indexing)
+            success: Whether operation completed successfully
+        """
+        try:
+            from modules.communication.livechat.src.youtube_telemetry_store import YouTubeTelemetryStore
+            channel_id = self._resolve_channel_id(channel)
+            store = YouTubeTelemetryStore()
+            store.record_channel_operation(
+                channel_id=channel_id,
+                channel_name=channel,
+                operation=operation,
+                success=success,
+            )
+        except Exception as e:
+            # Non-critical - don't fail rotation for telemetry errors
+            logger.debug(f"[SUPERVISOR] Failed to record channel operation: {e}")
 
     def _resolve_channel_id(self, channel: str) -> str:
         """Resolve a channel name/key/id to the canonical registry channel ID."""
@@ -451,6 +486,33 @@ class RotationSupervisor:
         logger.info("=" * 60)
 
         for idx, channel in enumerate(channels, 1):
+            # G5: Cycle watchdog - check if cycle has exceeded max duration
+            elapsed_hours = (time.time() - rotation_start) / 3600
+            if elapsed_hours > MAX_CYCLE_DURATION_HOURS:
+                logger.error(f"[{tag}-ROTATION] Cycle exceeded {MAX_CYCLE_DURATION_HOURS}h ({elapsed_hours:.2f}h) - emitting stall")
+                try:
+                    from modules.communication.livechat.src.breadcrumb_telemetry import get_breadcrumb_telemetry
+                    telemetry = get_breadcrumb_telemetry()
+                    telemetry.store_breadcrumb(
+                        source_dae="rotation_supervisor",
+                        event_type="rotation_cycle_stalled",
+                        message=f"{tag} rotation cycle exceeded max duration",
+                        phase=operation.value.upper(),
+                        metadata={
+                            "browser": self.browser,
+                            "operation": operation.value,
+                            "cycle_started_at": cycle_started_at,
+                            "elapsed_hours": round(elapsed_hours, 2),
+                            "max_hours": MAX_CYCLE_DURATION_HOURS,
+                            "channels_processed": len(channels_processed),
+                            "channels_remaining": len(channels) - idx + 1,
+                            "failed_channels": failed_channels,
+                        },
+                    )
+                except Exception as e:
+                    logger.warning(f"[{tag}-ROTATION] Failed to emit stall breadcrumb: {e}")
+                break  # Exit rotation loop
+
             logger.info("")
             logger.info(f"[{tag}-ROTATION] [{idx}/{len(channels)}] {channel}")
             logger.info("-" * 40)
@@ -470,12 +532,18 @@ class RotationSupervisor:
                 channels_processed.append(channel)
                 total_comments += heartbeat.comments_processed
                 logger.info(f"[{tag}-ROTATION] {channel} COMPLETE: {heartbeat.comments_processed} processed")
+                # G3: Record successful channel operation for sentinel tracking
+                self._record_channel_op(channel, operation.value, success=True)
             elif final_state in (TaskState.TIMEOUT, TaskState.KILLED):
                 failed_channels.append(channel)
                 logger.warning(f"[{tag}-ROTATION] {channel} {final_state.value}: rotating to next")
+                # G3: Record failed channel operation for sentinel tracking
+                self._record_channel_op(channel, operation.value, success=False)
             else:
                 failed_channels.append(channel)
                 logger.error(f"[{tag}-ROTATION] {channel} {final_state.value}: {heartbeat.error}")
+                # G3: Record failed channel operation for sentinel tracking
+                self._record_channel_op(channel, operation.value, success=False)
 
             # Clean up
             if heartbeat.task_id in self._active_tasks:
@@ -514,6 +582,11 @@ class RotationSupervisor:
 
         # G2: Clear checkpoint after successful rotation
         clear_checkpoint()
+
+        # G3: Record rotation success for all processed channels
+        # This tracks "when was this channel last part of a successful rotation cycle"
+        for channel in channels_processed:
+            self._record_channel_op(channel, "rotation", success=True)
 
         # Emit breadcrumb for activity routing
         try:
