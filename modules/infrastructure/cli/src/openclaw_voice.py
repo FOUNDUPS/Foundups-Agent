@@ -1,16 +1,21 @@
 """
 OpenClaw Voice REPL - Talk to 0102 with your headset.
 
-STT chain:  faster-whisper (local) -> speech_recognition/Google (cloud) -> keyboard fallback
+STT chain:  Cohere Transcribe (local, lazy) -> faster-whisper (local) -> Google (cloud)
 TTS chain:  edge-tts (neural) -> pyttsx3 (local SAPI5) -> print-only fallback
 
 Usage:
     python -m modules.infrastructure.cli.src.openclaw_voice
     python main.py --voice
 
+Env vars:
+    OPENCLAW_VOICE_DISABLE_COHERE_STT=1  Skip Cohere (use Whisper as primary)
+    OPENCLAW_VOICE_DISABLE_WASAPI=1      Disable WASAPI shared mode
+
 WSP Compliance:
     WSP 73: Partner (012 voice) -> Principal (OpenClawDAE) -> Associates (domain DAEs)
     WSP 84: Reuses FasterWhisperSTT from voice_command_ingestion
+    WSP 91: Lazy singleton loading for Cohere Transcribe (observability)
 """
 
 import asyncio
@@ -23,7 +28,7 @@ import tempfile
 import threading
 import time
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import numpy as np
 
@@ -107,6 +112,175 @@ class GoogleSTTBackend:
             return self._recognizer.recognize_google(audio_data)
         except Exception as exc:
             logger.debug("[STT-GOOGLE] Recognition failed: %s", exc)
+            return None
+
+
+# ---------------------------------------------------------------------------
+# Cohere Transcribe STT - Lazy Singleton Pattern (WSP 91)
+# ---------------------------------------------------------------------------
+
+# Module-level singleton state
+_cohere_model: Optional[Any] = None
+_cohere_processor: Optional[Any] = None
+_cohere_initialized: bool = False
+_cohere_load_time_sec: float = 0.0
+
+
+def _is_cohere_stt_loaded() -> bool:
+    """Check if Cohere STT is loaded (no side effects)."""
+    return _cohere_initialized and _cohere_model is not None
+
+
+def _get_cohere_stt_singleton() -> tuple:
+    """
+    Get or create Cohere Transcribe singleton (lazy loading).
+
+    Returns (processor, model) tuple, or (None, None) if unavailable.
+    Logs load time for WSP 91 observability.
+    """
+    global _cohere_model, _cohere_processor, _cohere_initialized, _cohere_load_time_sec
+
+    if _cohere_initialized:
+        return (_cohere_processor, _cohere_model)
+
+    # Check if model path exists
+    try:
+        from modules.infrastructure.shared_utilities.local_model_selection import (
+            resolve_asr_model_path,
+        )
+        model_path = resolve_asr_model_path()
+    except ImportError:
+        logger.debug("[COHERE-STT] local_model_selection not available")
+        _cohere_initialized = True
+        return (None, None)
+
+    if not model_path.exists():
+        logger.debug("[COHERE-STT] Model path not found: %s", model_path)
+        _cohere_initialized = True
+        return (None, None)
+
+    config_path = model_path / "config.json"
+    if not config_path.exists():
+        logger.debug("[COHERE-STT] config.json not found in %s", model_path)
+        _cohere_initialized = True
+        return (None, None)
+
+    # Load model with transformers
+    try:
+        import time as _time
+        import warnings
+        warnings.filterwarnings("ignore", category=UserWarning)
+
+        from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq
+        import torch
+
+        t0 = _time.time()
+        logger.info("[COHERE-STT] Loading Cohere Transcribe from %s...", model_path)
+
+        _cohere_processor = AutoProcessor.from_pretrained(
+            str(model_path),
+            trust_remote_code=True,
+        )
+
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        dtype = torch.float16 if device == "cuda" else torch.float32
+
+        _cohere_model = AutoModelForSpeechSeq2Seq.from_pretrained(
+            str(model_path),
+            trust_remote_code=True,
+            torch_dtype=dtype,
+            low_cpu_mem_usage=True,
+        )
+
+        if device == "cuda":
+            _cohere_model = _cohere_model.to(device)
+
+        _cohere_load_time_sec = _time.time() - t0
+        _cohere_initialized = True
+        logger.info(
+            "[COHERE-STT] Loaded in %.2fs (device=%s)",
+            _cohere_load_time_sec,
+            device.upper(),
+        )
+        return (_cohere_processor, _cohere_model)
+
+    except Exception as exc:
+        logger.warning("[COHERE-STT] Failed to load: %s", exc)
+        _cohere_initialized = True
+        return (None, None)
+
+
+class CohereTranscribeBackend:
+    """Primary STT: Cohere Transcribe 2B (local, transformers format).
+
+    Uses lazy singleton pattern - model loads on first transcribe, not on init.
+    This prevents 60s cold-start blocking voice REPL boot.
+    """
+
+    name = "Cohere Transcribe"
+
+    def __init__(self):
+        self._validated = None  # None = not checked, True/False = result
+
+    def available(self) -> bool:
+        """Check if Cohere Transcribe can be used (lightweight check)."""
+        if self._validated is not None:
+            return self._validated
+
+        # Quick path check without loading model
+        try:
+            from modules.infrastructure.shared_utilities.local_model_selection import (
+                resolve_asr_model_path,
+            )
+            model_path = resolve_asr_model_path()
+            config_exists = (model_path / "config.json").exists()
+            self._validated = config_exists
+            return config_exists
+        except Exception:
+            self._validated = False
+            return False
+
+    def transcribe(self, audio: np.ndarray, sample_rate: int = 16000) -> Optional[str]:
+        """Transcribe audio using Cohere Transcribe (lazy loads model on first call)."""
+        processor, model = _get_cohere_stt_singleton()
+        if processor is None or model is None:
+            return None
+
+        try:
+            import torch
+
+            # Cohere Transcribe expects 16kHz audio
+            if sample_rate != 16000:
+                ratio = 16000 / sample_rate
+                new_len = int(len(audio) * ratio)
+                audio = np.interp(
+                    np.linspace(0, len(audio), new_len),
+                    np.arange(len(audio)),
+                    audio,
+                ).astype(np.float32)
+
+            # Process audio
+            inputs = processor(
+                audio,
+                sampling_rate=16000,
+                return_tensors="pt",
+            )
+
+            device = next(model.parameters()).device
+            inputs = {k: v.to(device) for k, v in inputs.items()}
+
+            with torch.no_grad():
+                generated_ids = model.generate(**inputs, max_new_tokens=256)
+
+            transcription = processor.batch_decode(
+                generated_ids,
+                skip_special_tokens=True,
+            )[0].strip()
+
+            return transcription if transcription else None
+
+        except Exception as exc:
+            logger.debug("[COHERE-STT] Transcription failed: %s", exc)
             return None
 
 
@@ -330,13 +504,28 @@ def _ensure_repo_root():
 
 
 def _init_stt_chain() -> list:
-    """Initialize STT backends in priority order."""
-    backends = [WhisperSTTBackend(), GoogleSTTBackend()]
+    """Initialize STT backends in priority order.
+
+    Chain: Cohere Transcribe (local, lazy) -> Whisper (local) -> Google (cloud)
+
+    Cohere is lazy-loaded on first transcribe to avoid 60s boot delay.
+    Set OPENCLAW_VOICE_DISABLE_COHERE_STT=1 to skip Cohere entirely.
+    """
+    backends = []
+
+    # Cohere Transcribe first (if not disabled)
+    if not _env_truthy("OPENCLAW_VOICE_DISABLE_COHERE_STT", "0"):
+        backends.append(CohereTranscribeBackend())
+
+    # Fallback chain
+    backends.extend([WhisperSTTBackend(), GoogleSTTBackend()])
+
     available = []
     for b in backends:
         if b.available():
             available.append(b)
-            print(f"  [OK] STT: {b.name}")
+            lazy_note = " (lazy)" if b.name == "Cohere Transcribe" else ""
+            print(f"  [OK] STT: {b.name}{lazy_note}")
         else:
             print(f"  [--] STT: {b.name} (unavailable)")
     return available
