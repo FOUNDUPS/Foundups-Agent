@@ -1,11 +1,17 @@
-"""Tests for OpenClaw skill evolution report surface.
+"""Tests for OpenClaw skill evolution report surface (Phase 1 + Phase 2).
 
 WSP Compliance: WSP 5 (Test Coverage), WSP 48 (Recursive Self-Improvement)
 
-Verifies:
+Phase 1 Verifies:
 1. Report builder discovers only openclaw_ skills and classifies correctly
 2. Supervisor integration: env gate, idle path, higher-priority blocking
 3. Regression: no WRE mutation APIs called
+
+Phase 2 Verifies:
+4. Mutation surface env gates (fail-closed)
+5. Mutation surface report generation and status classification
+6. A/B test status and promotion readiness queries (via WRE primitives)
+7. Supervisor integration for mutation surface on idle path
 """
 
 from __future__ import annotations
@@ -630,6 +636,567 @@ class TestNoWREMutation:
 
         # Verify no mutation methods called
         memory.evolve_skill.assert_not_called()
+        memory.schedule_ab_test.assert_not_called()
+        memory.promote_variation.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# 4. Phase 2: Mutation Surface Env Gates (Fail-Closed)
+# ---------------------------------------------------------------------------
+
+
+class TestMutationSurfaceEnvGates:
+    """Mutation surface env gates are fail-closed (default off)."""
+
+    def test_mutation_surface_disabled_by_default(self, monkeypatch):
+        """OPENCLAW_MUTATION_SURFACE_ENABLED defaults to 0 (off)."""
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            _is_mutation_surface_enabled,
+        )
+
+        # Clear env var to test default
+        monkeypatch.delenv("OPENCLAW_MUTATION_SURFACE_ENABLED", raising=False)
+        assert _is_mutation_surface_enabled() is False
+
+    def test_ab_scheduling_disabled_by_default(self, monkeypatch):
+        """OPENCLAW_AB_SCHEDULING_ENABLED defaults to 0 (off)."""
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            _is_ab_scheduling_enabled,
+        )
+
+        monkeypatch.delenv("OPENCLAW_AB_SCHEDULING_ENABLED", raising=False)
+        assert _is_ab_scheduling_enabled() is False
+
+    def test_promotion_disabled_by_default(self, monkeypatch):
+        """OPENCLAW_PROMOTION_ENABLED defaults to 0 (off)."""
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            _is_promotion_enabled,
+        )
+
+        monkeypatch.delenv("OPENCLAW_PROMOTION_ENABLED", raising=False)
+        assert _is_promotion_enabled() is False
+
+    def test_gates_enabled_when_set_to_1(self, monkeypatch):
+        """All gates enabled when explicitly set to '1'."""
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            _is_mutation_surface_enabled,
+            _is_ab_scheduling_enabled,
+            _is_promotion_enabled,
+        )
+
+        monkeypatch.setenv("OPENCLAW_MUTATION_SURFACE_ENABLED", "1")
+        monkeypatch.setenv("OPENCLAW_AB_SCHEDULING_ENABLED", "1")
+        monkeypatch.setenv("OPENCLAW_PROMOTION_ENABLED", "1")
+
+        assert _is_mutation_surface_enabled() is True
+        assert _is_ab_scheduling_enabled() is True
+        assert _is_promotion_enabled() is True
+
+
+class TestMutationSurfaceReportDue:
+    """mutation_surface_report_due() respects gate and freshness."""
+
+    def test_never_due_when_gate_disabled(self, tmp_path, monkeypatch):
+        """Returns False when gate is disabled (even if report missing)."""
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            mutation_surface_report_due,
+        )
+
+        monkeypatch.setenv("OPENCLAW_MUTATION_SURFACE_ENABLED", "0")
+        # No report exists, but gate is off
+        assert mutation_surface_report_due(tmp_path) is False
+
+    def test_due_when_gate_enabled_and_missing(self, tmp_path, monkeypatch):
+        """Returns True when gate enabled and report missing."""
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            mutation_surface_report_due,
+        )
+
+        monkeypatch.setenv("OPENCLAW_MUTATION_SURFACE_ENABLED", "1")
+        assert mutation_surface_report_due(tmp_path) is True
+
+    def test_not_due_when_fresh(self, tmp_path, monkeypatch):
+        """Returns False when gate enabled and report fresh."""
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            get_mutation_surface_report_path,
+            mutation_surface_report_due,
+        )
+
+        monkeypatch.setenv("OPENCLAW_MUTATION_SURFACE_ENABLED", "1")
+
+        report_path = get_mutation_surface_report_path(tmp_path)
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        report_path.write_text('{"generated_on": "2026-03-29T10:00:00Z"}')
+
+        assert mutation_surface_report_due(tmp_path, max_age_sec=3600) is False
+
+
+# ---------------------------------------------------------------------------
+# 5. Phase 2: Mutation Surface Report Generation
+# ---------------------------------------------------------------------------
+
+
+class TestBuildMutationSurfaceReport:
+    """build_mutation_surface_report() produces correct contract."""
+
+    @pytest.fixture
+    def pattern_memory_with_skills(self, tmp_path):
+        """Create PatternMemory with varied skills for mutation surface testing."""
+        from modules.infrastructure.wre_core.src.pattern_memory import (
+            PatternMemory,
+            SkillOutcome,
+        )
+
+        db_path = tmp_path / "test_mutation_surface.db"
+        memory = PatternMemory(db_path=db_path)
+
+        # Healthy skill (high fidelity - stable)
+        for i in range(5):
+            memory.store_outcome(
+                SkillOutcome(
+                    execution_id=f"exec_stable_{i}",
+                    skill_name="openclaw_stable",
+                    agent="openclaw_dae",
+                    timestamp="2026-03-29T10:00:00",
+                    input_context="{}",
+                    output_result="{}",
+                    success=True,
+                    pattern_fidelity=0.95,
+                    outcome_quality=0.95,
+                    execution_time_ms=100,
+                    step_count=1,
+                )
+            )
+
+        # Candidate skill (low fidelity - eligible_for_ab)
+        for i in range(5):
+            memory.store_outcome(
+                SkillOutcome(
+                    execution_id=f"exec_eligible_{i}",
+                    skill_name="openclaw_eligible",
+                    agent="openclaw_dae",
+                    timestamp="2026-03-29T10:00:00",
+                    input_context="{}",
+                    output_result="{}",
+                    success=True,
+                    pattern_fidelity=0.75,
+                    outcome_quality=0.70,
+                    execution_time_ms=200,
+                    step_count=2,
+                )
+            )
+
+        # Insufficient data skill (blocked)
+        memory.store_outcome(
+            SkillOutcome(
+                execution_id="exec_blocked_0",
+                skill_name="openclaw_blocked",
+                agent="openclaw_dae",
+                timestamp="2026-03-29T10:00:00",
+                input_context="{}",
+                output_result="{}",
+                success=True,
+                pattern_fidelity=0.60,
+                outcome_quality=0.60,
+                execution_time_ms=300,
+                step_count=1,
+            )
+        )
+
+        return memory
+
+    def test_report_disabled_when_gate_off(self, pattern_memory_with_skills, monkeypatch):
+        """Report returns disabled state when gate is off."""
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            build_mutation_surface_report,
+        )
+
+        monkeypatch.setenv("OPENCLAW_MUTATION_SURFACE_ENABLED", "0")
+
+        report = build_mutation_surface_report(pattern_memory_with_skills)
+
+        assert report["enabled"] is False
+        assert "blocked_reason" in report
+        assert report["skills_evaluated"] == 0
+        assert report["candidates"] == []
+
+    def test_report_enabled_when_gate_on(self, pattern_memory_with_skills, monkeypatch):
+        """Report evaluates skills when gate is on."""
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            build_mutation_surface_report,
+        )
+
+        monkeypatch.setenv("OPENCLAW_MUTATION_SURFACE_ENABLED", "1")
+
+        report = build_mutation_surface_report(pattern_memory_with_skills)
+
+        assert report["enabled"] is True
+        assert report["skills_evaluated"] == 3  # stable, eligible, blocked
+
+    def test_report_has_required_top_level_fields(self, pattern_memory_with_skills, monkeypatch):
+        """Report contains all required top-level fields."""
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            build_mutation_surface_report,
+        )
+
+        monkeypatch.setenv("OPENCLAW_MUTATION_SURFACE_ENABLED", "1")
+
+        report = build_mutation_surface_report(pattern_memory_with_skills)
+
+        assert "generated_on" in report
+        assert "enabled" in report
+        assert "period_days" in report
+        assert "min_executions" in report
+        assert "fidelity_threshold" in report
+        assert "skills_evaluated" in report
+        assert "summary" in report
+        assert "gates" in report
+        assert "candidates" in report
+
+    def test_report_summary_counts(self, pattern_memory_with_skills, monkeypatch):
+        """Report summary has correct mutation status counts."""
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            build_mutation_surface_report,
+        )
+
+        monkeypatch.setenv("OPENCLAW_MUTATION_SURFACE_ENABLED", "1")
+
+        report = build_mutation_surface_report(pattern_memory_with_skills)
+        summary = report["summary"]
+
+        assert "stable" in summary
+        assert "ab_test_active" in summary
+        assert "eligible_for_ab" in summary
+        assert "blocked" in summary
+
+
+class TestBuildMutationSurfaceEntry:
+    """build_mutation_surface_entry() classifies correctly."""
+
+    @pytest.fixture
+    def pattern_memory(self, tmp_path):
+        """Create basic PatternMemory."""
+        from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
+
+        db_path = tmp_path / "test_entry.db"
+        return PatternMemory(db_path=db_path)
+
+    def test_stable_skill_classification(self, pattern_memory, monkeypatch):
+        """Healthy skill classified as stable."""
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            build_mutation_surface_entry,
+        )
+
+        monkeypatch.setenv("OPENCLAW_MUTATION_SURFACE_ENABLED", "1")
+
+        metrics = {"execution_count": 10, "avg_fidelity": 0.95, "success_rate": 0.95, "avg_time_ms": 100}
+        entry = build_mutation_surface_entry(pattern_memory, "openclaw_test", metrics)
+
+        assert entry["mutation_status"] == "stable"
+        assert entry["recommended_action"] == "no_action"
+        assert entry["requires_approval"] is False
+
+    def test_eligible_for_ab_classification(self, pattern_memory, monkeypatch):
+        """Low-fidelity skill classified as eligible_for_ab."""
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            build_mutation_surface_entry,
+        )
+
+        monkeypatch.setenv("OPENCLAW_MUTATION_SURFACE_ENABLED", "1")
+
+        metrics = {"execution_count": 10, "avg_fidelity": 0.75, "success_rate": 0.75, "avg_time_ms": 200}
+        entry = build_mutation_surface_entry(pattern_memory, "openclaw_test", metrics)
+
+        assert entry["mutation_status"] == "eligible_for_ab"
+        assert entry["recommended_action"] == "schedule_ab_test"
+
+    def test_blocked_when_insufficient_data(self, pattern_memory, monkeypatch):
+        """Insufficient data skill classified as blocked."""
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            build_mutation_surface_entry,
+        )
+
+        monkeypatch.setenv("OPENCLAW_MUTATION_SURFACE_ENABLED", "1")
+
+        metrics = {"execution_count": 1, "avg_fidelity": 0.60, "success_rate": 0.60, "avg_time_ms": 300}
+        entry = build_mutation_surface_entry(pattern_memory, "openclaw_test", metrics)
+
+        assert entry["mutation_status"] == "blocked"
+        assert entry["blocked_reason"] == "insufficient_execution_data"
+
+    def test_entry_has_required_fields(self, pattern_memory, monkeypatch):
+        """Entry contains all required fields."""
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            build_mutation_surface_entry,
+        )
+
+        monkeypatch.setenv("OPENCLAW_MUTATION_SURFACE_ENABLED", "1")
+
+        metrics = {"execution_count": 5, "avg_fidelity": 0.80}
+        entry = build_mutation_surface_entry(pattern_memory, "openclaw_test", metrics)
+
+        assert "skill_name" in entry
+        assert "execution_count" in entry
+        assert "avg_fidelity" in entry
+        assert "mutation_status" in entry
+        assert "recommended_action" in entry
+        assert "requires_approval" in entry
+        assert "active_ab_test" in entry
+        assert "ab_promotion_status" in entry
+        assert "promotion_readiness" in entry
+        assert "gates" in entry
+
+
+# ---------------------------------------------------------------------------
+# 6. Phase 2: WRE Primitive Query Tests
+# ---------------------------------------------------------------------------
+
+
+class TestGetActiveABTestStatus:
+    """get_active_ab_test_status() queries PatternMemory correctly."""
+
+    def test_returns_none_when_no_active_test(self, tmp_path):
+        """Returns None when no active A/B test for skill."""
+        from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            get_active_ab_test_status,
+        )
+
+        db_path = tmp_path / "test_ab.db"
+        memory = PatternMemory(db_path=db_path)
+
+        result = get_active_ab_test_status(memory, "openclaw_test")
+        assert result is None
+
+    def test_returns_none_when_no_method(self):
+        """Returns None when PatternMemory lacks get_active_ab_test method."""
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            get_active_ab_test_status,
+        )
+
+        # Mock PatternMemory without the method
+        mock_memory = MagicMock(spec=[])
+        result = get_active_ab_test_status(mock_memory, "openclaw_test")
+        assert result is None
+
+
+class TestCheckABPromotionStatus:
+    """check_ab_promotion_status() queries PatternMemory correctly."""
+
+    def test_blocked_when_no_active_test(self, tmp_path):
+        """Returns blocked when no active A/B test."""
+        from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            check_ab_promotion_status,
+        )
+
+        db_path = tmp_path / "test_promotion.db"
+        memory = PatternMemory(db_path=db_path)
+
+        result = check_ab_promotion_status(memory, "openclaw_test")
+
+        assert result["has_active_test"] is False
+        assert result["blocked_reason"] == "no_active_ab_test"
+
+
+class TestCheckPromotionReadiness:
+    """check_promotion_readiness() queries WRESkillsRegistryV2 correctly."""
+
+    def test_returns_blocked_when_registry_raises_exception(self):
+        """Returns blocked state when WRESkillsRegistryV2 raises exception."""
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            check_promotion_readiness,
+        )
+
+        mock_memory = MagicMock()
+
+        # Patch the actual module's class to raise on instantiation
+        with patch(
+            "modules.infrastructure.wre_core.skillz.skills_registry_v2.WRESkillsRegistryV2"
+        ) as mock_registry:
+            mock_registry.side_effect = Exception("database unavailable")
+            result = check_promotion_readiness(mock_memory, "openclaw_test")
+
+        assert result["ready"] is False
+        assert result["blocked_reason"] is not None
+        assert "check_failed" in result["blocked_reason"]
+
+
+# ---------------------------------------------------------------------------
+# 7. Phase 2: Supervisor Integration for Mutation Surface
+# ---------------------------------------------------------------------------
+
+
+class TestSupervisorMutationSurfaceGate:
+    """Supervisor mutation surface gate controls report generation."""
+
+    @pytest.fixture
+    def mock_broker_observer(self):
+        """Create healthy broker/observer mocks."""
+        broker = MagicMock()
+        broker.get_runtime_status.return_value = {
+            "registered": True,
+            "running": True,
+            "state": "running",
+            "last_error": "",
+            "enabled": True,
+        }
+        observer = MagicMock()
+        observer.get_live_status.return_value = {"registered": True, "recent_events": []}
+        observer.follow_events.return_value = {
+            "events": [],
+            "next_cursor": 0,
+            "latest_sequence_id": 0,
+        }
+        return broker, observer
+
+    def test_mutation_surface_not_generated_when_gate_off(
+        self, tmp_path, monkeypatch, mock_broker_observer
+    ):
+        """When OPENCLAW_MUTATION_SURFACE_ENABLED=0, no mutation surface in idle."""
+        from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
+            OpenClawSupervisor,
+        )
+
+        monkeypatch.setenv("OPENCLAW_MUTATION_SURFACE_ENABLED", "0")
+        broker, observer = mock_broker_observer
+
+        supervisor = OpenClawSupervisor(
+            repo_root=tmp_path,
+            broker=broker,
+            observer=observer,
+            action_reporter=lambda *args: None,
+            self_audit_factory=lambda repo_root: MagicMock(),
+        )
+
+        with patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+            mock_db.return_value.get_autonomous_tasks.return_value = []
+            result = supervisor.run_cycle()
+
+        assert result["triage"]["kind"] == "idle"
+        assert "mutation_surface_report" not in result["triage"]
+
+    def test_mutation_surface_generated_when_gate_on(
+        self, tmp_path, monkeypatch, mock_broker_observer
+    ):
+        """When gate on and report due, generates mutation surface in idle."""
+        from datetime import datetime
+        from modules.communication.moltbot_bridge.src.openclaw_supervisor import (
+            OpenClawSupervisor,
+        )
+        from modules.infrastructure.wre_core.src.pattern_memory import (
+            PatternMemory,
+            SkillOutcome,
+        )
+
+        monkeypatch.setenv("OPENCLAW_MUTATION_SURFACE_ENABLED", "1")
+        broker, observer = mock_broker_observer
+
+        # Create PatternMemory with a skill
+        db_path = tmp_path / "wre_core" / "memory" / "pattern_memory.db"
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+        memory = PatternMemory(db_path=db_path)
+
+        current_ts = datetime.now().isoformat()
+        for i in range(5):
+            memory.store_outcome(
+                SkillOutcome(
+                    execution_id=f"exec_mut_{i}",
+                    skill_name="openclaw_mutation_test",
+                    agent="openclaw_dae",
+                    timestamp=current_ts,
+                    input_context="{}",
+                    output_result="{}",
+                    success=True,
+                    pattern_fidelity=0.75,
+                    outcome_quality=0.75,
+                    execution_time_ms=100,
+                    step_count=1,
+                )
+            )
+
+        supervisor = OpenClawSupervisor(
+            repo_root=tmp_path,
+            broker=broker,
+            observer=observer,
+            action_reporter=lambda *args: None,
+            self_audit_factory=lambda repo_root: MagicMock(),
+        )
+
+        # Bootstrap then inject memory
+        with patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+            mock_db.return_value.get_autonomous_tasks.return_value = []
+            supervisor.run_cycle()
+
+        supervisor._pattern_memory = memory
+
+        # Delete any existing report
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            get_mutation_surface_report_path,
+        )
+        report_path = get_mutation_surface_report_path(tmp_path)
+        if report_path.exists():
+            report_path.unlink()
+
+        with patch("modules.infrastructure.database.src.agent_db.AgentDB") as mock_db:
+            mock_db.return_value.get_autonomous_tasks.return_value = []
+            result = supervisor.run_cycle()
+
+        assert result["triage"]["kind"] == "idle"
+        assert "mutation_surface_report" in result["triage"]
+        assert result["triage"]["mutation_surface_report"]["enabled"] is True
+
+        # Verify file was written
+        assert report_path.exists()
+
+
+class TestMutationSurfaceNoMutation:
+    """Phase 2 mutation surface does NOT call WRE mutation APIs."""
+
+    def test_build_mutation_surface_does_not_call_schedule_ab_test(self, tmp_path, monkeypatch):
+        """build_mutation_surface_report does not call schedule_ab_test."""
+        from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            build_mutation_surface_report,
+        )
+
+        monkeypatch.setenv("OPENCLAW_MUTATION_SURFACE_ENABLED", "1")
+
+        db_path = tmp_path / "test_no_ab.db"
+        memory = PatternMemory(db_path=db_path)
+
+        # Patch mutation methods
+        memory.schedule_ab_test = MagicMock()
+        memory.record_ab_outcome = MagicMock()
+        memory.promote_variation = MagicMock()
+        memory.archive_variation = MagicMock()
+
+        build_mutation_surface_report(memory)
+
+        # Verify no mutation methods called
+        memory.schedule_ab_test.assert_not_called()
+        memory.record_ab_outcome.assert_not_called()
+        memory.promote_variation.assert_not_called()
+        memory.archive_variation.assert_not_called()
+
+    def test_build_mutation_surface_entry_does_not_mutate(self, tmp_path, monkeypatch):
+        """build_mutation_surface_entry does not call WRE mutation APIs."""
+        from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
+        from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+            build_mutation_surface_entry,
+        )
+
+        monkeypatch.setenv("OPENCLAW_MUTATION_SURFACE_ENABLED", "1")
+
+        db_path = tmp_path / "test_no_entry_mutation.db"
+        memory = PatternMemory(db_path=db_path)
+
+        memory.schedule_ab_test = MagicMock()
+        memory.promote_variation = MagicMock()
+
+        metrics = {"execution_count": 10, "avg_fidelity": 0.75}
+        build_mutation_surface_entry(memory, "openclaw_test", metrics)
+
         memory.schedule_ab_test.assert_not_called()
         memory.promote_variation.assert_not_called()
 

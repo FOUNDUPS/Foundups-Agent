@@ -1,7 +1,7 @@
 # Active Slice Ledger
 
 **Authority**: 0102 architect lane
-**Updated**: 2026-03-30 (youtube_domain_phase3 complete - G4+G6)
+**Updated**: 2026-03-29 (skill_evolution_loop_phase2_mutation_surface complete)
 **Rule**: Every agent reads this first. If repo truth contradicts an entry, update this ledger — not 012.
 
 ---
@@ -87,7 +87,9 @@ If already landed:
 | `science_swarm_hub_monorepo_stub_cutover` | (this slice) | Stub cutover complete: src/ and tests/ deleted, __init__.py replaced with package import stub |
 | `youtube_domain_phase1` | (previous slice) | G1: stall check wired to heartbeat; G2: rotation_checkpoint.py + supervisor integration |
 | `youtube_domain_phase2` | `029c57e9a` | G3: youtube_channel_operations table + sentinel methods; G5: cycle watchdog + breadcrumb; STT/TTS boundary; 27 tests |
-| `youtube_domain_phase3` | (this commit) | G4: schedule_audit_unhealthy breadcrumb; G6: escalation path with human_intervention_required; 16 tests |
+| `youtube_domain_phase3` | (previous commit) | G4: schedule_audit_unhealthy breadcrumb; G6: escalation path with human_intervention_required; 16 tests |
+| `chrome_146_pin_workaround` | (local) | Pinned `version_main=146` in news_maps executor; Chrome 147 not yet rolled out |
+| `skill_evolution_loop_phase2_mutation_surface` | `1fa146c59` | Phase 2 mutation surface: 3 env gates (fail-closed), A/B test status + promotion readiness queries via WRE primitives; supervisor idle-path integration; 23 new tests (41 total) |
 
 ---
 
@@ -95,7 +97,7 @@ If already landed:
 
 | Slice | Priority | Blocked By | Notes |
 |-------|----------|------------|-------|
-| `skill_evolution_loop_phase2_mutation_surface` | P2 | — | Gated A/B testing and promotion |
+| _(none)_ | — | — | — |
 
 ---
 
@@ -103,7 +105,7 @@ If already landed:
 
 | Slice | Reason |
 |-------|--------|
-| `chrome_update_147` | Requires 012 manual action (Chrome browser update) |
+| _(none)_ | — |
 
 ---
 
@@ -125,7 +127,8 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 7. ~~**YouTube Domain Agent Phase 1**~~ — COMPLETE (G1+G2 implemented)
 8. ~~**YouTube Domain Agent Phase 2**~~ — COMPLETE (G3+G5: per-channel tracking + cycle watchdog + STT/TTS boundary)
 9. ~~**YouTube Domain Agent Phase 3**~~ — COMPLETE (G4+G6: schedule reconciliation breadcrumb + escalation path)
-10. **`skill_evolution_loop_phase2_mutation_surface`** — NEXT (gated A/B testing and promotion)
+10. ~~**`skill_evolution_loop_phase2_mutation_surface`**~~ — COMPLETE (gated mutation surface with 3 env gates, WRE primitive queries)
+11. _(awaiting next slice from 012)_
 
 ---
 

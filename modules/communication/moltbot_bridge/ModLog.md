@@ -1,5 +1,56 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-29: Skill Evolution Loop Phase 2 - Mutation Surface (WSP 48/77)
+
+**Author**: 0102
+**WSP**: 48 (Recursive Self-Improvement), 77 (Agent Coordination)
+**Slice**: `skill_evolution_loop_phase2_mutation_surface`
+
+### Context
+
+Phase 1 (commit `3ae311767`) provided a read-only report surface for skill evolution candidates. Phase 2 adds a bounded mutation surface that queries existing WRE primitives for A/B test status and promotion readiness without duplicating engines.
+
+### Changes
+
+1. **Extended `openclaw_skill_evolution.py`** with Phase 2 mutation surface:
+   - Three env gates (fail-closed): `OPENCLAW_MUTATION_SURFACE_ENABLED`, `OPENCLAW_AB_SCHEDULING_ENABLED`, `OPENCLAW_PROMOTION_ENABLED`
+   - `get_active_ab_test_status()`: Queries PatternMemory for active A/B test
+   - `check_ab_promotion_status()`: Queries PatternMemory for promotion decision
+   - `check_promotion_readiness()`: Queries WRESkillsRegistryV2 for promotion readiness
+   - `build_mutation_surface_entry()`: Builds entry with mutation_status, active_ab_test, promotion_readiness
+   - `build_mutation_surface_report()`: Builds full report with summary counts and gate states
+   - Mutation status values: `stable`, `ab_test_active`, `eligible_for_ab`, `blocked`
+
+2. **Extended `openclaw_supervisor.py`**:
+   - Mutation surface generation added to idle path alongside Phase 1 report
+   - Gated by `OPENCLAW_MUTATION_SURFACE_ENABLED`
+   - Reports `mutation_surface_report` in idle result with summary and gates
+
+3. **Extended `test_openclaw_skill_evolution.py`** with Phase 2 tests:
+   - Env gate tests (fail-closed by default, enabled when "1")
+   - Report generation tests (disabled state, enabled state, summary counts)
+   - Mutation entry classification tests (stable, eligible_for_ab, blocked)
+   - WRE primitive query tests (no mutation calls verified)
+   - Supervisor integration tests (gate off = no report, gate on = report generated)
+
+4. **Updated `INTERFACE.md`**:
+   - Skill Evolution Loop section with Phase 1 and Phase 2 documentation
+   - Env var table with all gates
+   - Supervisor integration contract
+
+### Design Principles
+
+- **Reuse WRE ownership**: Queries PatternMemory and WRESkillsRegistryV2 - no duplicate A/B or promotion engines
+- **Fail-closed gates**: All mutation features disabled by default (set to "0" or unset)
+- **Read-only surface**: Phase 2 surfaces eligibility/readiness but does NOT mutate
+- **Idle path only**: Lower priority than restarts, autonomous tasks, and self-audit events
+
+### Result
+
+Phase 2 mutation surface is complete. Skills can now be classified as `stable`, `ab_test_active`, `eligible_for_ab`, or `blocked` with full A/B test and promotion readiness context from WRE primitives.
+
+---
+
 ## 2026-03-29: OpenClaw Authority & Mutation Gate Hardening (WSP 00/95)
 
 **Author**: 0102
