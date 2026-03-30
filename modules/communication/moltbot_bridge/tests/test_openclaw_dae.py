@@ -847,6 +847,13 @@ class TestConversationRuntimeFlags:
         assert OpenClawDAE._parse_model_switch_target("become o3 pro") == "o3-pro"
         assert OpenClawDAE._parse_model_switch_target("become haiku") == "claude-haiku-4-5-20251001"
 
+    def test_parse_model_switch_target_coder_alias(self):
+        """Test that 'coder' alias resolves to local qwen-coder-7b."""
+        assert OpenClawDAE._parse_model_switch_target("switch to coder") == "local/qwen-coder-7b"
+        assert OpenClawDAE._parse_model_switch_target("switch model to coder") == "local/qwen-coder-7b"
+        assert OpenClawDAE._parse_model_switch_target("become coder") == "local/qwen-coder-7b"
+        assert OpenClawDAE._parse_model_switch_target("change to coder 7b") == "local/qwen-coder-7b"
+
     def test_resolve_external_target_includes_quick_models(self):
         assert OpenClawDAE._resolve_external_target("grok-4-fast") == ("grok", "grok-4-fast")
         assert OpenClawDAE._resolve_external_target("gemini-2.5-flash") == ("gemini", "gemini-2.5-flash")

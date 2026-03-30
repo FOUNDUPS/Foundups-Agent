@@ -67,6 +67,7 @@ def has_model_switch_intent(message: str) -> bool:
         "qwen",
         "qwen3",
         "gemma",
+        "coder",
         "grok",
         "codex",
         "opus",
@@ -95,6 +96,8 @@ def parse_model_switch_target(message: str) -> Optional[str]:
         "qwen coder 7b": "local/qwen-coder-7b",
         "qwen 2 5": "local/qwen-coder-7b",
         "qwen2 5": "local/qwen-coder-7b",
+        "coder": "local/qwen-coder-7b",
+        "coder 7b": "local/qwen-coder-7b",
         "qwen3": "local/qwen3-4b",
         "qwen 3": "local/qwen3-4b",
         "qwen three": "local/qwen3-4b",
@@ -158,13 +161,13 @@ def model_switch_target_help(dae: Any) -> str:
     if dae._no_api_keys:
         return (
             "0102: model switch request received. "
-            "Say `switch model to qwen3.5`, `switch model to qwen3`, `switch model to qwen`, "
+            "Say `switch model to coder`, `switch model to qwen3.5`, `switch model to qwen3`, "
             "or `switch model to gemma`. "
             "Use `model details` to verify active runtime engine."
         )
     return (
         "0102: model switch request received. "
-        "Say `switch model to qwen3.5`, `switch model to qwen3`, `switch model to qwen`, "
+        "Say `switch model to coder`, `switch model to qwen3.5`, `switch model to qwen3`, "
         "`switch model to gemma`, "
         "`become grok`, `become grok fast`, `become codex`, `become gpt5`, "
         "`become opus`, `become haiku`, or `become gemini flash`. "
