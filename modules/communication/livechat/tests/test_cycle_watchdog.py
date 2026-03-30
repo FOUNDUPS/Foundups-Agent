@@ -128,19 +128,19 @@ class TestCycleWatchdogLogic:
     @pytest.mark.asyncio
     async def test_watchdog_breadcrumb_contains_metadata(self, supervisor):
         """Test watchdog breadcrumb contains required metadata."""
-        captured_metadata = {}
+        captured_breadcrumbs = []
 
         def capture_breadcrumb(**kwargs):
-            if kwargs.get("event_type") == "rotation_cycle_stalled":
-                captured_metadata.update(kwargs.get("metadata", {}))
+            captured_breadcrumbs.append(kwargs)
 
         telemetry_mock = MagicMock()
         telemetry_mock.store_breadcrumb = capture_breadcrumb
 
-        with patch.object(supervisor, "_get_channels_for_browser", return_value=["Ch1", "Ch2"]), \
+        with patch.object(supervisor, "_get_channels_for_browser", return_value=["Ch1", "Ch2", "Ch3"]), \
              patch.object(supervisor, "_spawn_task") as mock_spawn, \
              patch.object(supervisor, "_monitor_task") as mock_monitor, \
              patch.object(supervisor, "_record_channel_op"), \
+             patch.object(supervisor, "_check_escalation"), \
              patch.object(rs_module, "MAX_CYCLE_DURATION_HOURS", 0), \
              patch("modules.communication.livechat.src.breadcrumb_telemetry.get_breadcrumb_telemetry", return_value=telemetry_mock):
 
@@ -153,8 +153,15 @@ class TestCycleWatchdogLogic:
 
             await supervisor.run_rotation(
                 operation=OperationType.COMMENTS,
-                channels=["Ch1", "Ch2"],
+                channels=["Ch1", "Ch2", "Ch3"],
             )
+
+            # Find the stall breadcrumb and check metadata
+            stall_breadcrumbs = [b for b in captured_breadcrumbs
+                                 if b.get("event_type") == "rotation_cycle_stalled"]
+            assert len(stall_breadcrumbs) >= 1, f"Expected stall breadcrumb, got: {captured_breadcrumbs}"
+
+            captured_metadata = stall_breadcrumbs[0].get("metadata", {})
 
             # Verify metadata fields (contract from Phase 2)
             assert "elapsed_hours" in captured_metadata

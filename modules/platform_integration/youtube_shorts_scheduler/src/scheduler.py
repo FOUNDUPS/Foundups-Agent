@@ -596,6 +596,27 @@ class YouTubeShortsScheduler:
                         f"{len(audit_report.get('false_positives', []))} false positives, "
                         f"{len(audit_report.get('time_collisions', []))} time collisions"
                     )
+                    # G4: Emit breadcrumb for AI Overseer sentinel detection (Phase 3)
+                    try:
+                        from modules.communication.livechat.src.breadcrumb_telemetry import get_breadcrumb_telemetry
+                        telemetry = get_breadcrumb_telemetry()
+                        telemetry.store_breadcrumb(
+                            source_dae="youtube_shorts_scheduler",
+                            event_type="schedule_audit_unhealthy",
+                            message=f"Schedule audit failed for {self.channel_key}",
+                            phase="POST_AUDIT",
+                            metadata={
+                                "channel_key": self.channel_key,
+                                "channel_id": self.channel_id,
+                                "false_positives": len(audit_report.get("false_positives", [])),
+                                "time_collisions": len(audit_report.get("time_collisions", [])),
+                                "missing_from_tracker": len(audit_report.get("missing_from_tracker", [])),
+                                "auto_heal": auto_heal,
+                                "healed": len(audit_report.get("healed", [])),
+                            },
+                        )
+                    except Exception as bc_err:
+                        logger.debug(f"[SCHEDULER] Breadcrumb emission failed: {bc_err}")
             except Exception as e:
                 logger.debug(f"[SCHEDULER] Post-cycle audit skipped: {e}")
 

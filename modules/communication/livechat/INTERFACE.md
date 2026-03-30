@@ -231,18 +231,26 @@ Get all operation timestamps and failure count for a channel.
 
 ---
 
-## Rotation Supervisor (Phase 2)
+## Rotation Supervisor (Phase 2 + Phase 3)
 
 ### Constants
 
 - `MAX_CYCLE_DURATION_HOURS`: Maximum cycle duration before emitting stall breadcrumb (env: `YT_MAX_CYCLE_DURATION_HOURS`, default: `2.0`)
+- `ESCALATION_FAILURE_THRESHOLD`: Consecutive failure count triggering escalation breadcrumb (env: `YT_ESCALATION_FAILURE_THRESHOLD`, default: `3`)
 
-### Watchdog Behavior
+### Watchdog Behavior (Phase 2 G5)
 
 When rotation cycle exceeds `MAX_CYCLE_DURATION_HOURS`:
 1. Emits `rotation_cycle_stalled` breadcrumb with metadata
 2. Breaks out of rotation loop
 3. AI Overseer can query breadcrumbs to detect and recover
+
+### Escalation Behavior (Phase 3 G6)
+
+When channel `consecutive_failures >= ESCALATION_FAILURE_THRESHOLD`:
+1. Emits `human_intervention_required` breadcrumb with metadata
+2. Includes channel_id, channel_name, failure count, threshold, operation
+3. Does NOT modify telemetry store (read-only escalation check)
 
 ---
 

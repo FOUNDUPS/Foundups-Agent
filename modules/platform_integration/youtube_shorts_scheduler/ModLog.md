@@ -1,5 +1,39 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-03-30 - YouTube Domain Agent Phase 3 (G4 Schedule Reconciliation)
+
+**By:** 0102
+**WSP References:** WSP 22 (ModLog), WSP 77 (Agent Coordination), WSP 91 (Observability)
+
+### Problem
+
+Schedule audit in `run_scheduling_cycle()` logs warnings but does not emit breadcrumbs for AI Overseer sentinel detection.
+
+### Solution
+
+**G4: Schedule Reconciliation Breadcrumb**
+- Added breadcrumb emission to post-audit block in `scheduler.py`
+- Emits `schedule_audit_unhealthy` when `audit_report["healthy"] == False`
+- Uses existing gate: `YT_SCHEDULER_POST_AUDIT=true` (default: false)
+- Breadcrumb metadata includes:
+  - `channel_key`, `channel_id`
+  - `false_positives`, `time_collisions`, `missing_from_tracker` (counts)
+  - `auto_heal`, `healed` (count)
+
+### Design Decisions
+
+- **Reuses existing audit**: No changes to `schedule_auditor.py`
+- **Gate preserved**: Default remains opt-in (false) to avoid noise
+- **Raw facts only**: Counts are integers, not full report objects
+
+### Files Changed
+- `scheduler.py`: Added breadcrumb emission in post-audit block (~15 lines)
+
+### Tests Added
+- `test_schedule_audit_breadcrumb.py`: 5 tests covering breadcrumb emission, metadata, gating
+
+---
+
 ## 2026-03-18 - Hardened Tab Close for Chrome 146
 
 **WSP References**: WSP 97 (CoT/CoR), WSP 91 (Observability)

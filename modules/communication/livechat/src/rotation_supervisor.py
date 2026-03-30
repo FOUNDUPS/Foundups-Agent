@@ -72,6 +72,13 @@ logger = logging.getLogger(__name__)
 # This is a sentinel-queryable raw fact - AI Overseer interprets severity.
 MAX_CYCLE_DURATION_HOURS = float(os.getenv("YT_MAX_CYCLE_DURATION_HOURS", "2.0"))
 
+# =============================================================================
+# G6: Escalation Threshold Constants (Phase 3)
+# =============================================================================
+# Consecutive failure count that triggers human_intervention_required breadcrumb.
+# Uses Phase 2 consecutive_failures from youtube_channel_operations table.
+ESCALATION_FAILURE_THRESHOLD = int(os.getenv("YT_ESCALATION_FAILURE_THRESHOLD", "3"))
+
 
 class OperationType(Enum):
     """Discrete operations that can be rotated."""
@@ -260,6 +267,62 @@ class RotationSupervisor:
             if token in {name, key, channel_id.lower()} and channel_id:
                 return channel_id
         return channel
+
+    def _check_escalation(self, operation: str) -> None:
+        """
+        G6: Check for channels requiring human intervention.
+
+        Queries Phase 2 consecutive_failures and emits human_intervention_required
+        breadcrumb when threshold exceeded. This is the escalation path for
+        repeatedly failing channels.
+
+        Args:
+            operation: Operation type that just completed (for context)
+        """
+        try:
+            from modules.communication.livechat.src.youtube_telemetry_store import YouTubeTelemetryStore
+            store = YouTubeTelemetryStore()
+
+            # Query channels with high consecutive failures
+            # Use get_stale_channels with large window to get all tracked channels
+            stale = store.get_stale_channels(operation=operation, max_age_hours=24 * 30)
+
+            escalation_channels = [
+                ch for ch in stale
+                if ch.get("consecutive_failures", 0) >= ESCALATION_FAILURE_THRESHOLD
+            ]
+
+            if not escalation_channels:
+                return
+
+            # Emit escalation breadcrumb for AI Overseer
+            from modules.communication.livechat.src.breadcrumb_telemetry import get_breadcrumb_telemetry
+            telemetry = get_breadcrumb_telemetry()
+
+            for ch in escalation_channels:
+                telemetry.store_breadcrumb(
+                    source_dae="rotation_supervisor",
+                    event_type="human_intervention_required",
+                    message=f"Channel {ch.get('channel_name', ch.get('channel_id'))} requires human intervention",
+                    phase="ESCALATION",
+                    metadata={
+                        "channel_id": ch.get("channel_id"),
+                        "channel_name": ch.get("channel_name"),
+                        "consecutive_failures": ch.get("consecutive_failures", 0),
+                        "operation": operation,
+                        "threshold": ESCALATION_FAILURE_THRESHOLD,
+                        "action": "human_intervention_required",
+                        "hours_stale": ch.get("hours_stale"),
+                    },
+                )
+                logger.warning(
+                    f"[SUPERVISOR] ESCALATION: {ch.get('channel_name')} has "
+                    f"{ch.get('consecutive_failures')} consecutive failures (threshold: {ESCALATION_FAILURE_THRESHOLD})"
+                )
+
+        except Exception as e:
+            # Non-critical - don't fail rotation for escalation check errors
+            logger.debug(f"[SUPERVISOR] Escalation check failed: {e}")
 
     def _build_task_command(
         self,
@@ -601,6 +664,9 @@ class RotationSupervisor:
             )
         except Exception:
             pass
+
+        # G6: Check for channels requiring escalation (Phase 3)
+        self._check_escalation(operation.value)
 
         return result
 

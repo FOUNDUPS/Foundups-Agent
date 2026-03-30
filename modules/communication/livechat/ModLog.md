@@ -10,6 +10,44 @@ This log tracks changes specific to the **livechat** module in the **communicati
 
 ---
 
+## 2026-03-30 - YouTube Domain Agent Phase 3 (G6 Escalation)
+
+**By:** 0102
+**WSP References:** WSP 22 (ModLog), WSP 77 (Agent Coordination), WSP 91 (Observability)
+
+### Problem
+
+YouTube rotation system lacked escalation path:
+- **G6**: No human intervention trigger when channels fail repeatedly
+
+### Solution
+
+**G6: Escalation Path**
+- Added `ESCALATION_FAILURE_THRESHOLD` constant (env: `YT_ESCALATION_FAILURE_THRESHOLD`, default: 3)
+- Added `_check_escalation()` method to `rotation_supervisor.py`:
+  - Queries Phase 2 `consecutive_failures` from `YouTubeTelemetryStore.get_stale_channels()`
+  - Emits `human_intervention_required` breadcrumb when threshold exceeded
+  - Called after each rotation completes
+- Breadcrumb metadata includes:
+  - `channel_id`, `channel_name`
+  - `consecutive_failures`, `threshold`
+  - `operation`, `hours_stale`
+  - `action: "human_intervention_required"`
+
+### Design Decisions
+
+- **Reuses Phase 2 telemetry**: Does NOT create a second failure tracking system
+- **Read-only**: Escalation check queries but never writes to telemetry store
+- **Threshold is configurable**: Via env var for tuning without code changes
+
+### Files Changed
+- `rotation_supervisor.py`: Added constant + `_check_escalation()` method + call site (~65 lines)
+
+### Tests Added
+- `test_escalation.py`: 11 tests covering threshold behavior, breadcrumb emission, integration
+
+---
+
 ## 2026-03-30 - YouTube Domain Agent Phase 2 (G3 + G5)
 
 **By:** 0102
