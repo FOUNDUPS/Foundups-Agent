@@ -1,5 +1,32 @@
 # HoloIndex Package ModLog
 
+## [2026-03-31] Core Split Phase 2 — Indexing Surface (holoindex_core_split_phase2_indexing_surface)
+
+**Agent**: 0102
+**WSP References**: WSP 87 (Size Limits), WSP 72 (Block Independence), WSP 49 (Module Structure)
+**Status**: COMPLETE
+
+### Context
+
+PROMETHEUS HANDOFF from 012: extract the indexing surface from `holo_index/core/holo_index.py` into a focused `indexing_engine.py` module, continuing the core split begun in phase 1 (search surface).
+
+### Changes
+
+1. **Created** `holo_index/core/indexing_engine.py` (595 lines) — all indexing orchestrators as module-level functions:
+   - `index_code_entries(holo)`, `index_symbol_entries(holo, roots)`, `index_wsp_entries(holo, paths)`, `index_test_registry(holo)`, `index_skillz_entries(holo)`
+   - `_collect_web_asset_entries(holo)`, `_resolve_web_index_roots(holo)`
+   - Stateless helpers: `_extract_wsp_id()`, `_classify_document_type()`, `_calculate_document_priority()`
+2. **Replaced** 6 indexing methods + 4 helpers in `holo_index.py` with thin delegates (551 lines removed, 1,446 → 895 lines)
+3. **Preserved** `_get_embedding()`, `_infer_cube_tag()`, `_ensure_collection()`, `_reset_collection()` on HoloIndex (test stubs depend on instance-level monkey-patches)
+4. **Updated** `INTERFACE.md` Core Module Layout with `indexing_engine.py`
+5. **Cleaned** unused top-level `import ast` from `holo_index.py`
+
+### Test Results
+
+16 passed, 1 skipped — no test changes required (engine calls back via `holo._get_embedding()` etc., so existing stubs intercepted).
+
+---
+
 ## [2026-03-31] CLI Command Extraction (holoindex_cli_extraction)
 
 **Agent**: 0102
