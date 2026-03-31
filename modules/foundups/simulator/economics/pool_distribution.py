@@ -117,6 +117,14 @@ class StakerHurdleState(IntEnum):
 # Default hurdle target multiple for BTC stakers
 STAKER_HURDLE_TARGET_MULTIPLE = 10.0
 
+# Post-hurdle rate reduction factor (matches investor lane ratio: 0.64/12.16 ≈ 5.26%)
+# POST_HURDLE_LOCKED stakers receive this fraction of their normal distribution
+STAKER_POST_HURDLE_RATE_FACTOR = 0.0526
+
+# UPS-to-BTC conversion rate for hurdle tracking (placeholder - same as F_i rate)
+# Used to convert UPS distributions to BTC-equivalent for hurdle threshold checks
+UPS_TO_BTC_RATE = 0.00001
+
 
 # Pool percentages (of total epoch rewards)
 POOL_PERCENTAGES = {
@@ -386,6 +394,18 @@ class StakerPosition:
 
         return StakerHurdleState.PRE_HURDLE
 
+    @property
+    def distribution_rate_factor(self) -> float:
+        """Rate factor applied to distributions based on hurdle state.
+
+        Returns:
+            1.0 for PRE_HURDLE/HURDLE_MET (full rate)
+            STAKER_POST_HURDLE_RATE_FACTOR for POST_HURDLE_LOCKED (reduced rate)
+        """
+        if self.hurdle_state == StakerHurdleState.POST_HURDLE_LOCKED:
+            return STAKER_POST_HURDLE_RATE_FACTOR
+        return 1.0
+
     def record_distribution_btc(self, amount_btc: float) -> StakerHurdleState:
         """Record a BTC-equivalent distribution and update hurdle state.
 
@@ -645,6 +665,7 @@ class PoolDistributor:
         # Distribute pools with proper tier sharing
         for participant in self.participants.values():
             total_reward = 0.0
+            du_pool_reward = 0.0  # Track Du pool distribution for hurdle accounting
 
             for pool_name in participant.get_accessible_pools():
                 pool_amount = pools.get(pool_name, 0.0)
@@ -656,6 +677,13 @@ class PoolDistributor:
                 count_at_tier = pool_tier_counts[pool_name][participant.activity_level]
                 if count_at_tier > 0:
                     individual_share = tier_share / count_at_tier
+
+                    # Apply hurdle rate reduction for Du pool stakers
+                    if pool_name == "stakeholder_du" and participant.staker_position is not None:
+                        rate_factor = participant.staker_position.distribution_rate_factor
+                        individual_share *= rate_factor
+                        du_pool_reward = individual_share  # Track for BTC-equivalent recording
+
                     total_reward += individual_share
 
             if total_reward > 0:
@@ -663,6 +691,11 @@ class PoolDistributor:
                 result.participant_rewards[participant.participant_id] = (
                     result.participant_rewards.get(participant.participant_id, 0.0) + total_reward
                 )
+
+                # Record BTC-equivalent distribution for hurdle tracking (Du pool only)
+                if du_pool_reward > 0 and participant.staker_position is not None:
+                    btc_equivalent = du_pool_reward * UPS_TO_BTC_RATE
+                    participant.staker_position.record_distribution_btc(btc_equivalent)
 
     def _distribute_network_drip(self, result: EpochDistribution) -> None:
         """Distribute Network 16% as drip rewards (re-injected).

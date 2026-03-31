@@ -88,6 +88,8 @@ from .pool_distribution import (
     distribute_weighted_staker_pool,
     # Staker hurdle mechanics (BTC staker specific)
     STAKER_HURDLE_TARGET_MULTIPLE,
+    STAKER_POST_HURDLE_RATE_FACTOR,
+    UPS_TO_BTC_RATE,
 )
 
 from .dilution_scenario import (
@@ -415,6 +417,8 @@ __all__ = [
     "distribute_weighted_staker_pool",
     # Staker hurdle mechanics (BTC staker specific)
     "STAKER_HURDLE_TARGET_MULTIPLE",
+    "STAKER_POST_HURDLE_RATE_FACTOR",
+    "UPS_TO_BTC_RATE",
     # Dilution analysis (012-confirmed 2026-02-14)
     "AdoptionModel",
     "AdoptionConfig",

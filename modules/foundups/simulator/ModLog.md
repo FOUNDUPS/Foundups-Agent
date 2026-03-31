@@ -14,7 +14,15 @@ class StakerHurdleState(IntEnum):
     POST_HURDLE_LOCKED = 2  # Permanent (>10x, locked)
 
 STAKER_HURDLE_TARGET_MULTIPLE = 10.0
+STAKER_POST_HURDLE_RATE_FACTOR = 0.0526  # ~5.26% of pre-hurdle rate
+UPS_TO_BTC_RATE = 0.00001  # UPS-to-BTC conversion for hurdle tracking
 ```
+
+### Distribution Integration
+`_distribute_stakeholder_pools()` modified to:
+1. Apply `distribution_rate_factor` for POST_HURDLE_LOCKED stakers (5.26% of normal)
+2. Convert UPS distributions to BTC-equivalent via `UPS_TO_BTC_RATE`
+3. Call `record_distribution_btc()` to track cumulative and trigger locks
 
 ### StakerPosition Extended
 | Field | Type | Purpose |
@@ -30,11 +38,14 @@ STAKER_HURDLE_TARGET_MULTIPLE = 10.0
 | `hurdle_target_btc` | float | stake * multiple |
 | `hurdle_progress` | float | 0.0-1.0+ progress ratio |
 | `hurdle_state` | StakerHurdleState | Current state machine state |
+| `distribution_rate_factor` | float | 1.0 or 0.0526 based on hurdle state |
 | `record_distribution_btc(amount)` | StakerHurdleState | Record and check for lock |
 
 ### Exports Added to `economics/__init__.py`
 - `StakerHurdleState`
 - `STAKER_HURDLE_TARGET_MULTIPLE`
+- `STAKER_POST_HURDLE_RATE_FACTOR`
+- `UPS_TO_BTC_RATE`
 
 ### Test Coverage
 | Test Class | Tests | Status |
@@ -49,7 +60,8 @@ STAKER_HURDLE_TARGET_MULTIPLE = 10.0
 | TestHurdleWithWeightedStake | 2 | PASS |
 | TestEdgeCases | 3 | PASS |
 | TestConservation | 2 | PASS |
-| **TOTAL** | **41** | **PASS** |
+| TestDistributionRateFactor | 8 | PASS |
+| **TOTAL** | **49** | **PASS** |
 
 ### Key Behaviors Verified
 - 10x threshold triggers permanent lock
@@ -57,6 +69,8 @@ STAKER_HURDLE_TARGET_MULTIPLE = 10.0
 - Weighted stake (Slice 3) unaffected by hurdle state
 - Zero/negative distributions ignored
 - Deterministic state transitions
+- POST_HURDLE_LOCKED stakers get 5.26% of normal rate
+- Rate factor permanence after lock
 
 ### Boundary Compliance
 - `investor_staking.py` untouched (separate I_i lane)

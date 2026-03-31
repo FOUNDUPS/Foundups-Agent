@@ -10,6 +10,8 @@ import pytest
 
 from modules.foundups.simulator.economics.pool_distribution import (
     STAKER_HURDLE_TARGET_MULTIPLE,
+    STAKER_POST_HURDLE_RATE_FACTOR,
+    UPS_TO_BTC_RATE,
     StakerHurdleState,
     StakerPosition,
 )
@@ -360,3 +362,78 @@ class TestConservation:
         assert p1.hurdle_state == p2.hurdle_state
         assert p1.post_hurdle_locked == p2.post_hurdle_locked
         assert p1.cumulative_distributions_btc == p2.cumulative_distributions_btc
+
+
+class TestDistributionRateFactor:
+    """Test distribution_rate_factor property for rate reduction."""
+
+    def test_post_hurdle_rate_factor_constant(self) -> None:
+        """Post-hurdle rate factor matches investor lane ratio (~5.26%)."""
+        assert STAKER_POST_HURDLE_RATE_FACTOR == pytest.approx(0.0526, rel=1e-3)
+
+    def test_ups_to_btc_rate_exists(self) -> None:
+        """UPS-to-BTC conversion rate is defined."""
+        assert UPS_TO_BTC_RATE > 0
+        assert UPS_TO_BTC_RATE == 0.00001  # Same as F_i rate placeholder
+
+    def test_pre_hurdle_rate_factor_is_1(self) -> None:
+        """PRE_HURDLE staker gets full rate (factor = 1.0)."""
+        position = StakerPosition(original_stake_btc=1.0)
+        assert position.hurdle_state == StakerHurdleState.PRE_HURDLE
+        assert position.distribution_rate_factor == 1.0
+
+    def test_hurdle_met_rate_factor_is_1(self) -> None:
+        """HURDLE_MET staker gets full rate (factor = 1.0)."""
+        position = StakerPosition(
+            original_stake_btc=1.0,
+            cumulative_distributions_btc=10.0,
+            post_hurdle_locked=False,
+        )
+        assert position.hurdle_state == StakerHurdleState.HURDLE_MET
+        assert position.distribution_rate_factor == 1.0
+
+    def test_post_hurdle_locked_rate_factor_is_reduced(self) -> None:
+        """POST_HURDLE_LOCKED staker gets reduced rate."""
+        position = StakerPosition(original_stake_btc=1.0)
+        position.record_distribution_btc(10.0)  # Triggers lock
+
+        assert position.hurdle_state == StakerHurdleState.POST_HURDLE_LOCKED
+        assert position.distribution_rate_factor == pytest.approx(
+            STAKER_POST_HURDLE_RATE_FACTOR, rel=1e-9
+        )
+
+    def test_rate_factor_reduction_ratio(self) -> None:
+        """Post-hurdle rate is ~5.26% of pre-hurdle rate."""
+        position_pre = StakerPosition(original_stake_btc=1.0)
+        position_post = StakerPosition(original_stake_btc=1.0, post_hurdle_locked=True)
+
+        ratio = position_post.distribution_rate_factor / position_pre.distribution_rate_factor
+        assert ratio == pytest.approx(0.0526, rel=1e-3)
+
+    def test_rate_factor_after_crossing_threshold(self) -> None:
+        """Rate factor changes after crossing hurdle threshold."""
+        position = StakerPosition(original_stake_btc=1.0)
+
+        # Before crossing
+        assert position.distribution_rate_factor == 1.0
+
+        # Cross threshold incrementally
+        position.record_distribution_btc(5.0)
+        assert position.distribution_rate_factor == 1.0  # Still pre-hurdle
+
+        position.record_distribution_btc(5.0)  # Now at 10.0, triggers lock
+        assert position.distribution_rate_factor == pytest.approx(
+            STAKER_POST_HURDLE_RATE_FACTOR, rel=1e-9
+        )
+
+    def test_rate_factor_permanence(self) -> None:
+        """Rate factor stays reduced permanently after lock."""
+        position = StakerPosition(original_stake_btc=1.0)
+        position.record_distribution_btc(10.0)
+
+        # Record more distributions
+        for _ in range(10):
+            position.record_distribution_btc(100.0)
+            assert position.distribution_rate_factor == pytest.approx(
+                STAKER_POST_HURDLE_RATE_FACTOR, rel=1e-9
+            )
