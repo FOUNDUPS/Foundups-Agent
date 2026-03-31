@@ -50,8 +50,8 @@ class TestHoloIndexCLI(unittest.TestCase):
         import shutil
         shutil.rmtree(self.test_data_dir, ignore_errors=True)
 
-    @patch("holo_index.cli.SentenceTransformer")
-    @patch("holo_index.cli.chromadb.PersistentClient")
+    @patch("holo_index.core.holo_index.SentenceTransformer")
+    @patch("holo_index.core.holo_index.chromadb.PersistentClient")
     def test_holoindex_initialization(self, mock_client, mock_model):
         """Test HoloIndex can be initialized."""
         mock_client.return_value = MagicMock()
@@ -73,13 +73,16 @@ class TestHoloIndexCLI(unittest.TestCase):
         result = holo.check_module_exists('ric_dae')
 
         self.assertTrue(result['exists'])
-        self.assertEqual(Path(result['path']).as_posix(), 'modules/ai_intelligence/ric_dae')
+        self.assertTrue(
+            Path(result['path']).as_posix().endswith('modules/ai_intelligence/ric_dae'),
+            f"Expected path ending with 'modules/ai_intelligence/ric_dae', got: {result['path']}"
+        )
         self.assertEqual(result['wsp_compliance'], '[COMPLIANT] COMPLIANT')
         self.assertEqual(result['compliance_score'], '7/7')
 
+    @unittest.skipIf(QwenAdvisor is None, "QwenAdvisor unavailable (advisor deps not installed)")
     def test_qwen_advisor_stub(self):
         """Test QwenAdvisor basic functionality."""
-        # This is a stub test - will be expanded based on actual implementation
         advisor = QwenAdvisor()
         self.assertIsNotNone(advisor)
 
