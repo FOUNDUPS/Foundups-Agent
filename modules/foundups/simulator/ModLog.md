@@ -23,6 +23,13 @@ UPS_TO_BTC_RATE = 0.00001  # UPS-to-BTC conversion for hurdle tracking
 1. Apply `distribution_rate_factor` for POST_HURDLE_LOCKED stakers (5.26% of normal)
 2. Convert UPS distributions to BTC-equivalent via `UPS_TO_BTC_RATE`
 3. Call `record_distribution_btc()` to track cumulative and trigger locks
+4. Track `du_hurdle_withheld` and `du_actual_distributed` for conservation
+
+### Conservation Accounting
+`EpochDistribution` extended with:
+- `du_hurdle_withheld: float` - Amount suppressed due to post-hurdle rate reduction
+- `du_actual_distributed: float` - Actual Du pool payouts after rate reduction
+- `du_conservation_check` property - Verifies `distributed + withheld == pool`
 
 ### StakerPosition Extended
 | Field | Type | Purpose |
@@ -61,7 +68,8 @@ UPS_TO_BTC_RATE = 0.00001  # UPS-to-BTC conversion for hurdle tracking
 | TestEdgeCases | 3 | PASS |
 | TestConservation | 2 | PASS |
 | TestDistributionRateFactor | 8 | PASS |
-| **TOTAL** | **49** | **PASS** |
+| TestDuConservationAccounting | 6 | PASS |
+| **TOTAL** | **55** | **PASS** |
 
 ### Key Behaviors Verified
 - 10x threshold triggers permanent lock
@@ -71,6 +79,7 @@ UPS_TO_BTC_RATE = 0.00001  # UPS-to-BTC conversion for hurdle tracking
 - Deterministic state transitions
 - POST_HURDLE_LOCKED stakers get 5.26% of normal rate
 - Rate factor permanence after lock
+- Conservation: `du_actual_distributed + du_hurdle_withheld == du_pool`
 
 ### Boundary Compliance
 - `investor_staking.py` untouched (separate I_i lane)

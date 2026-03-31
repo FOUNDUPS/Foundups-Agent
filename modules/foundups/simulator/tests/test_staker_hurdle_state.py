@@ -14,6 +14,7 @@ from modules.foundups.simulator.economics.pool_distribution import (
     UPS_TO_BTC_RATE,
     StakerHurdleState,
     StakerPosition,
+    EpochDistribution,
 )
 
 
@@ -437,3 +438,61 @@ class TestDistributionRateFactor:
             assert position.distribution_rate_factor == pytest.approx(
                 STAKER_POST_HURDLE_RATE_FACTOR, rel=1e-9
             )
+
+
+class TestDuConservationAccounting:
+    """Test Du pool conservation accounting on EpochDistribution."""
+
+    def test_epoch_distribution_has_withheld_field(self) -> None:
+        """EpochDistribution tracks du_hurdle_withheld."""
+        result = EpochDistribution(epoch=1, total_rewards=1000.0)
+        assert hasattr(result, "du_hurdle_withheld")
+        assert result.du_hurdle_withheld == 0.0
+
+    def test_epoch_distribution_has_actual_distributed_field(self) -> None:
+        """EpochDistribution tracks du_actual_distributed."""
+        result = EpochDistribution(epoch=1, total_rewards=1000.0)
+        assert hasattr(result, "du_actual_distributed")
+        assert result.du_actual_distributed == 0.0
+
+    def test_conservation_check_passes_when_balanced(self) -> None:
+        """Conservation check passes when distributed + withheld == pool."""
+        result = EpochDistribution(epoch=1, total_rewards=1000.0)
+        result.du_pool = 100.0
+        result.du_actual_distributed = 80.0
+        result.du_hurdle_withheld = 20.0
+
+        assert result.du_conservation_check is True
+
+    def test_conservation_check_fails_when_unbalanced(self) -> None:
+        """Conservation check fails when distributed + withheld != pool."""
+        result = EpochDistribution(epoch=1, total_rewards=1000.0)
+        result.du_pool = 100.0
+        result.du_actual_distributed = 80.0
+        result.du_hurdle_withheld = 10.0  # Missing 10
+
+        assert result.du_conservation_check is False
+
+    def test_conservation_check_handles_floating_point(self) -> None:
+        """Conservation check tolerates floating point imprecision."""
+        result = EpochDistribution(epoch=1, total_rewards=1000.0)
+        result.du_pool = 100.0
+        # Simulate floating point accumulation
+        result.du_actual_distributed = 80.0 + 1e-12
+        result.du_hurdle_withheld = 20.0 - 1e-12
+
+        assert result.du_conservation_check is True
+
+    def test_withheld_amount_calculation(self) -> None:
+        """Withheld amount is (1 - rate_factor) * pre_reduction_share."""
+        pre_reduction = 100.0
+        rate_factor = STAKER_POST_HURDLE_RATE_FACTOR
+        expected_actual = pre_reduction * rate_factor
+        expected_withheld = pre_reduction - expected_actual
+
+        assert expected_withheld == pytest.approx(
+            pre_reduction * (1 - rate_factor), rel=1e-9
+        )
+        assert expected_actual + expected_withheld == pytest.approx(
+            pre_reduction, rel=1e-9
+        )

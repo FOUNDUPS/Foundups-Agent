@@ -121,7 +121,8 @@ STAKER_HURDLE_TARGET_MULTIPLE = 10.0
 # POST_HURDLE_LOCKED stakers receive this fraction of their normal distribution
 STAKER_POST_HURDLE_RATE_FACTOR = 0.0526
 
-# UPS-to-BTC conversion rate for hurdle tracking (placeholder - same as F_i rate)
+# UPS-to-BTC conversion rate for hurdle tracking
+# 1 UPS = 1000 sats = 0.00001 BTC (1/100,000 BTC)
 # Used to convert UPS distributions to BTC-equivalent for hurdle threshold checks
 UPS_TO_BTC_RATE = 0.00001
 
@@ -530,6 +531,21 @@ class EpochDistribution:
     drip_distributed: float = 0.0
     fund_accumulated: float = 0.0
 
+    # Du hurdle conservation tracking
+    # POST_HURDLE_LOCKED stakers receive reduced rate; withheld amount tracked here
+    du_hurdle_withheld: float = 0.0  # Amount suppressed due to post-hurdle rate reduction
+    du_actual_distributed: float = 0.0  # Actual Du pool payouts after rate reduction
+
+    @property
+    def du_conservation_check(self) -> bool:
+        """Verify Du pool conservation: distributed + withheld == pool allocation.
+
+        Returns True if conservation holds within floating point tolerance.
+        """
+        expected = self.du_pool
+        actual = self.du_actual_distributed + self.du_hurdle_withheld
+        return abs(expected - actual) < 1e-9
+
 
 class PoolDistributor:
     """Distributes epoch rewards according to WSP 26 pool structure.
@@ -680,9 +696,18 @@ class PoolDistributor:
 
                     # Apply hurdle rate reduction for Du pool stakers
                     if pool_name == "stakeholder_du" and participant.staker_position is not None:
+                        pre_reduction_share = individual_share  # Amount before hurdle reduction
                         rate_factor = participant.staker_position.distribution_rate_factor
-                        individual_share *= rate_factor
+                        individual_share = pre_reduction_share * rate_factor
                         du_pool_reward = individual_share  # Track for BTC-equivalent recording
+
+                        # Track withheld amount for conservation accounting
+                        withheld = pre_reduction_share - individual_share
+                        result.du_hurdle_withheld += withheld
+                        result.du_actual_distributed += individual_share
+                    elif pool_name == "stakeholder_du":
+                        # Du pool participant without staker_position (full rate)
+                        result.du_actual_distributed += individual_share
 
                     total_reward += individual_share
 
