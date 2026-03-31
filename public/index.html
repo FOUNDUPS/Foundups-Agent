@@ -2005,7 +2005,7 @@
       // Check if user is already signed in with Clerk
       if (window.Clerk.user) {
         enterBtn.textContent = 'ENTER';
-        enterBtn.title = 'Go to your dashboard';
+        enterBtn.title = 'Enter the Mall';
       }
 
       // Listen for Clerk auth state changes
@@ -2773,7 +2773,7 @@
       <button id="closeSignInModal" style="position:absolute;top:1rem;right:1rem;background:transparent;border:none;color:var(--text-dim);font-size:1.5rem;cursor:pointer;padding:0.5rem;line-height:1;">&times;</button>
       <div class="disclaimer-icon">🔑</div>
       <h2>Welcome Back</h2>
-      <p class="disclaimer-text">Sign in to access your dashboard</p>
+      <p class="disclaimer-text">Sign in to enter the Mall</p>
       <div class="disclaimer-buttons" style="gap:1rem;">
         <button type="button" id="signInGoogle" class="btn-primary" style="padding:0.9rem 2rem;display:inline-flex;align-items:center;gap:10px;width:100%;justify-content:center;">
           <svg width="20" height="20" viewBox="0 0 24 24">

@@ -1,5 +1,34 @@
 # Member Area Module Change Log
 
+## [2026-03-31] Invite-Gated Mall Cutover
+
+**Who**: 0102 (Codex)
+**Type**: Experience Cutover
+
+**What**: Replaced the admitted `/member/` shell with a Firebase-hosted p.fMALL experience while preserving the existing invite/auth gateway.
+
+**Files Modified**:
+- `public/member/index.html`
+- `public/member/css/member.css`
+- `public/member/README.md`
+- `public/member/INTERFACE.md`
+- `public/member/ModLog.md`
+
+**Files Created**:
+- `public/member/mall-catalog.json`
+
+**Behavior Change**:
+1. Invite validation and username claim remain unchanged.
+2. Authenticated admitted users now land in a swipe-first Mall shell instead of the legacy member shell.
+3. Invite codes moved into the Red Dog concierge sheet.
+4. No gateway rewrite or landing-page redirect surgery was required.
+
+**Why**:
+- `foundups.com` gateway behavior was already working and had to stay stable.
+- The operational bug was the admitted `/member/` destination, not the invite gate itself.
+
+---
+
 ## [2026-02-18] Layer 1: Shell Implementation
 
 **Who**: 0102 (Claude Opus 4.5)

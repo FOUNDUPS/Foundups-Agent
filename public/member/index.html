@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Member Area | FoundUPS</title>
-  <meta name="description" content="Your FoundUPS member dashboard. Manage your UPS tokens, FoundUps, and agent deployments.">
+  <title>p.fMALL | FoundUPS</title>
+  <meta name="description" content="Invite-only FoundUPS Mall. Swipe through FoundUps and enter their shell handoff surfaces.">
   <meta name="theme-color" content="#08080f">
   <meta name="robots" content="noindex, nofollow">
 
@@ -175,233 +175,91 @@
     }
   </style>
 
-  <!-- Main member area (hidden until auth confirmed) -->
   <div id="memberArea" class="member-area" style="display:none;">
-
-    <!-- Sidebar Navigation -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <a href="/" class="logo">
-          <img src="/logo-dog.png" alt="" class="logo-img">
-          <span class="logo-text">Found<span class="logo-ups">UPS</span></span>
-        </a>
-      </div>
-
-      <nav class="sidebar-nav">
-        <a href="#dashboard" class="nav-item active" data-section="dashboard">
-          <span class="nav-icon">&#x1F4CA;</span>
-          <span class="nav-label">Dashboard</span>
-        </a>
-        <a href="#wallet" class="nav-item" data-section="wallet">
-          <span class="nav-icon">&#x1F4B0;</span>
-          <span class="nav-label">Wallet</span>
-        </a>
-        <a href="#foundups" class="nav-item" data-section="foundups">
-          <span class="nav-icon">&#x1F9CA;</span>
-          <span class="nav-label">My FoundUps</span>
-        </a>
-        <a href="#marketplace" class="nav-item" data-section="marketplace">
-          <span class="nav-icon">&#x1F310;</span>
-          <span class="nav-label">Marketplace</span>
-        </a>
-        <a href="#agents" class="nav-item" data-section="agents">
-          <span class="nav-icon">&#x1F916;</span>
-          <span class="nav-label">My Agents</span>
-        </a>
-      </nav>
-
-      <div class="sidebar-footer">
-        <a href="#profile" class="nav-item" data-section="profile">
-          <span class="nav-icon">&#x2699;</span>
-          <span class="nav-label">Settings</span>
-        </a>
-        <button id="logoutBtn" class="logout-btn">
-          <span class="nav-icon">&#x1F6AA;</span>
-          <span class="nav-label">Sign Out</span>
-        </button>
-      </div>
-    </aside>
-
-    <!-- Main Content Area -->
-    <main class="main-content">
-
-      <!-- Top Bar -->
-      <header class="topbar">
-        <div class="topbar-left">
-          <button id="mobileMenuBtn" class="mobile-menu-btn">&#x2630;</button>
-          <h1 class="page-title" id="pageTitle">Dashboard</h1>
-        </div>
-        <div class="topbar-right">
-          <div class="user-info">
-            <span class="user-name" id="userName">Loading...</span>
-            <img src="/logo-dog.png" alt="" class="user-avatar" id="userAvatar">
+    <div class="mall-shell">
+      <header class="mall-header">
+        <a href="/" class="mall-brand" aria-label="FoundUPS home">
+          <img src="/logo-dog.png" alt="" class="mall-brand-logo">
+          <div class="mall-brand-copy">
+            <span class="mall-brand-kicker">Invite access granted</span>
+            <strong>p.fMALL</strong>
           </div>
+        </a>
+        <div class="mall-userline">
+          <span class="mall-status-chip">invite admitted</span>
+          <span id="mallUserHandle" class="mall-user-handle">@member</span>
         </div>
       </header>
 
-      <!-- Content Sections (only one visible at a time) -->
-      <div class="content-wrapper">
-
-        <!-- Dashboard Section -->
-        <section id="dashboard" class="content-section active">
-          <div class="section-header">
-            <h2>Welcome back!</h2>
-            <p class="section-subtitle">Your FoundUPS overview</p>
-          </div>
-
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-icon">&#x1F4B0;</div>
-              <div class="stat-content">
-                <div class="stat-value" id="upsBalance">--</div>
-                <div class="stat-label">UPS Balance</div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon">&#x1F9CA;</div>
-              <div class="stat-content">
-                <div class="stat-value" id="foundupCount">0</div>
-                <div class="stat-label">My FoundUps</div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon">&#x1F916;</div>
-              <div class="stat-content">
-                <div class="stat-value" id="agentCount">0</div>
-                <div class="stat-label">Active Agents</div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon">&#x1F381;</div>
-              <div class="stat-content">
-                <div class="stat-value" id="inviteCount">5</div>
-                <div class="stat-label">Invites Left</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="dashboard-grid">
-            <div class="card activity-card">
-              <h3 class="card-title">Recent Activity</h3>
-              <div class="activity-list" id="activityList">
-                <div class="empty-state">
-                  <p>No recent activity yet.</p>
-                  <p class="hint">Start by creating a FoundUP or joining one!</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="card invites-card">
-              <h3 class="card-title">Your Invite Codes</h3>
-              <div class="invite-codes" id="inviteCodes">
-                <div class="loading-inline">Loading invite codes...</div>
-              </div>
-              <p class="card-hint">Share these codes to invite others. You get rewards when they join!</p>
-            </div>
-          </div>
+      <main class="mall-main">
+        <section class="mall-copy">
+          <p class="mall-eyebrow">FoundUPS Mall</p>
+          <h1>Swipe through the FoundUps. Tap one to enter its shell.</h1>
+          <p class="mall-lede">The gate stays exactly where it is. Once admitted, this page becomes your Mall.</p>
         </section>
 
-        <!-- Wallet Section (Layer 3 - placeholder) -->
-        <section id="wallet" class="content-section">
-          <div class="section-header">
-            <h2>Wallet</h2>
-            <p class="section-subtitle">Manage your UPS and F<sub>i</sub> tokens</p>
+        <section class="mall-carousel-shell" aria-label="FoundUp carousel">
+          <div id="mallTrack" class="mall-track">
+            <div class="mall-loading-card">Loading the Mall...</div>
           </div>
-          <div class="coming-soon">
-            <div class="coming-soon-icon">&#x1F4B0;</div>
-            <h3>Wallet Module Coming Soon</h3>
-            <p>Track your UPS balance, stake tokens, and view transaction history.</p>
-          </div>
+          <div id="mallDots" class="mall-dots" aria-hidden="true"></div>
         </section>
 
-        <!-- FoundUps Section (Layer 4 - placeholder) -->
-        <section id="foundups" class="content-section">
-          <div class="section-header">
-            <h2>My FoundUps</h2>
-            <p class="section-subtitle">Create and manage your tokenized ventures</p>
-          </div>
-          <div class="coming-soon">
-            <div class="coming-soon-icon">&#x1F9CA;</div>
-            <h3>FoundUps Module Coming Soon</h3>
-            <p>Create new FoundUps, contribute to existing ones, track your portfolio.</p>
-          </div>
+        <section id="mallFocus" class="mall-focus" aria-live="polite">
+          <div class="mall-focus-loading">Preparing catalog context...</div>
         </section>
+      </main>
 
-        <!-- Marketplace Section (Layer 6 - placeholder) -->
-        <section id="marketplace" class="content-section">
-          <div class="section-header">
-            <h2>Marketplace</h2>
-            <p class="section-subtitle">Discover and join FoundUps</p>
-          </div>
-          <div class="coming-soon">
-            <div class="coming-soon-icon">&#x1F310;</div>
-            <h3>Marketplace Module Coming Soon</h3>
-            <p>Browse FoundUps, stake UPS, earn F<sub>i</sub> tokens.</p>
-          </div>
-        </section>
+      <button id="redDogBtn" class="red-dog-btn" aria-label="Open Red Dog concierge">
+        <img src="/logo-dog.png" alt="">
+      </button>
 
-        <!-- Agents Section (Layer 5 - placeholder) -->
-        <section id="agents" class="content-section">
-          <div class="section-header">
-            <h2>My Agents</h2>
-            <p class="section-subtitle">Deploy and manage OpenClaw agents</p>
-          </div>
-          <div class="coming-soon">
-            <div class="coming-soon-icon">&#x1F916;</div>
-            <h3>Agents Module Coming Soon</h3>
-            <p>Deploy agents, assign tasks, track earnings.</p>
-          </div>
-        </section>
+      <div id="overlayScrim" class="overlay-scrim" hidden></div>
 
-        <!-- Profile/Settings Section -->
-        <section id="profile" class="content-section">
-          <div class="section-header">
-            <h2>Settings</h2>
-            <p class="section-subtitle">Manage your account</p>
+      <aside id="redDogPanel" class="red-dog-panel" hidden aria-label="Red Dog concierge panel">
+        <div class="red-dog-header">
+          <img src="/logo-dog.png" alt="" class="red-dog-avatar">
+          <div>
+            <p class="red-dog-name">Red Dog</p>
+            <p class="red-dog-subtitle">Concierge for the gated Mall</p>
           </div>
-          <div class="settings-grid">
-            <div class="card">
-              <h3 class="card-title">Profile</h3>
-              <div class="form-group">
-                <label>Username</label>
-                <div style="display:flex;align-items:center;gap:0.5rem;">
-                  <span style="color:#7c5cfc;font-weight:600;">@</span>
-                  <input type="text" id="usernameDisplay" class="form-input" disabled style="flex:1;">
-                </div>
-                <p style="font-size:0.8rem;color:rgba(228,226,236,0.5);margin-top:0.5rem;">Your permanent identity. Can't be changed.</p>
-              </div>
-              <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="emailDisplay" class="form-input" disabled>
-              </div>
-            </div>
+        </div>
 
-            <div class="card">
-              <h3 class="card-title">Notifications</h3>
-              <div class="toggle-group">
-                <label class="toggle">
-                  <input type="checkbox" id="emailNotifs" checked>
-                  <span class="toggle-slider"></span>
-                  <span class="toggle-label">Email notifications</span>
-                </label>
-              </div>
-              <div class="toggle-group">
-                <label class="toggle">
-                  <input type="checkbox" id="agentAlerts" checked>
-                  <span class="toggle-slider"></span>
-                  <span class="toggle-label">Agent activity alerts</span>
-                </label>
-              </div>
-            </div>
+        <div class="red-dog-section">
+          <p class="red-dog-label">Member</p>
+          <p id="agentHandle" class="red-dog-strong">@member</p>
+          <p id="agentEmail" class="red-dog-muted">loading...</p>
+        </div>
+
+        <div class="red-dog-section">
+          <p class="red-dog-label">Current FoundUp</p>
+          <p id="agentFoundupName" class="red-dog-strong">Loading...</p>
+          <p id="agentFoundupHint" class="red-dog-muted">Swipe to change context.</p>
+        </div>
+
+        <div class="red-dog-section">
+          <div class="red-dog-inline">
+            <p class="red-dog-label">Invite codes</p>
+            <span id="agentInviteCount" class="red-dog-chip">0 active</span>
           </div>
-        </section>
+          <div id="agentInviteCodes" class="invite-stack">
+            <p class="red-dog-muted">Loading invite codes...</p>
+          </div>
+        </div>
 
-      </div>
-    </main>
+        <div class="red-dog-section">
+          <p class="red-dog-label">Agent note</p>
+          <p id="agentMessage" class="red-dog-message">The gateway is preserved. Swipe the Mall, tap a card, and I will keep the context steady.</p>
+        </div>
+
+        <button id="logoutBtn" class="red-dog-logout">Sign Out</button>
+      </aside>
+
+      <section id="foundupOverlay" class="foundup-overlay" hidden aria-label="FoundUp handoff">
+        <div id="foundupOverlayBody" class="foundup-overlay-body"></div>
+      </section>
+    </div>
   </div>
-
-  <!-- Mobile Sidebar Overlay -->
-  <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
   <!-- Firebase SDK (for Firestore data) + Clerk Auth -->
   <script type="module">
@@ -415,17 +273,43 @@
 
     const db = getFirestore(app);
 
-    // DOM elements
     const loadingState = document.getElementById('loadingState');
     const memberArea = document.getElementById('memberArea');
     const inviteGate = document.getElementById('inviteGate');
-    const userName = document.getElementById('userName');
-    const userAvatar = document.getElementById('userAvatar');
+    const mallUserHandle = document.getElementById('mallUserHandle');
+    const mallTrack = document.getElementById('mallTrack');
+    const mallDots = document.getElementById('mallDots');
+    const mallFocus = document.getElementById('mallFocus');
+    const overlayScrim = document.getElementById('overlayScrim');
+    const redDogBtn = document.getElementById('redDogBtn');
+    const redDogPanel = document.getElementById('redDogPanel');
+    const foundupOverlay = document.getElementById('foundupOverlay');
+    const foundupOverlayBody = document.getElementById('foundupOverlayBody');
+    const agentHandle = document.getElementById('agentHandle');
+    const agentEmail = document.getElementById('agentEmail');
+    const agentInviteCount = document.getElementById('agentInviteCount');
+    const agentInviteCodes = document.getElementById('agentInviteCodes');
+    const agentFoundupName = document.getElementById('agentFoundupName');
+    const agentFoundupHint = document.getElementById('agentFoundupHint');
+    const agentMessage = document.getElementById('agentMessage');
     const logoutBtn = document.getElementById('logoutBtn');
-    const inviteCodes = document.getElementById('inviteCodes');
 
-    // Store current user for gate functions
+    const MALL_CATALOG_URL = '/member/mall-catalog.json';
+    const READINESS_LABELS = {
+      ready: 'Ready',
+      conditional: 'Conditional',
+      discoverable_only: 'Discoverable Only'
+    };
+    const READINESS_COPY = {
+      ready: 'This FoundUp is ready to receive direct shell handoff.',
+      conditional: 'This FoundUp is real, but still needs one or two conditions cleared before direct handoff.',
+      discoverable_only: 'This FoundUp is visible in the Mall, but stays inside shell discovery for now.'
+    };
+
     let currentClerkUser = null;
+    let mallCatalog = [];
+    let activeMallIndex = 0;
+    let scrollFrame = null;
 
     // ─── CLERK AUTH CHECK ───
     // Wait for Clerk to load, then check auth
@@ -452,63 +336,41 @@
       }
 
       currentClerkUser = user;
-      console.log('[Member] Clerk user:', user ? user.id : 'none');
 
-      if (user) {
-        // Check for cached invite code from landing page
-        const pendingCode = localStorage.getItem('pendingInviteCode');
-        if (pendingCode) {
-          console.log('[Member] Found pending invite code:', pendingCode);
-          // Try to validate the cached code
-          const codeValidated = await tryValidateCachedCode(user.id, pendingCode);
-          if (codeValidated) {
-            console.log('[Member] Cached code validated successfully');
-          }
-          // Clear the cached code regardless of result
-          localStorage.removeItem('pendingInviteCode');
-        }
-
-        // User is signed in via Clerk - check invite status
-        const hasValidInvite = await checkInviteStatus(user.id, user);
-
-        loadingState.style.display = 'none';
-
-        if (hasValidInvite) {
-          // Check if user has claimed a username
-          const userRef = doc(db, 'users', user.id);
-          const userDoc = await getDoc(userRef);
-          const userData = userDoc.exists() ? userDoc.data() : {};
-
-          if (!userData.username) {
-            // User needs to claim username first
-            document.getElementById('usernameModal').style.display = 'flex';
-          } else {
-            // User has username - show member area
-            memberArea.style.display = 'flex';
-
-            // Set user info - prefer @username format
-            userName.textContent = userData.username ? '@' + userData.username : (user.firstName || user.primaryEmailAddress?.emailAddress || 'Member');
-            if (user.imageUrl) {
-              userAvatar.src = user.imageUrl;
-            }
-
-            // Load full user data
-            await loadUserData(user.id, user);
-          }
-        } else {
-          // User has NO valid invite - show invite gate
-          inviteGate.style.display = 'flex';
-
-          // Set email in waitlist panel
-          const gateUserEmail = document.getElementById('gateUserEmail');
-          if (gateUserEmail) {
-            gateUserEmail.textContent = user.primaryEmailAddress?.emailAddress || 'your email';
-          }
-        }
-      } else {
-        // User is not signed in - redirect to landing
+      if (!user) {
         window.location.href = '/?signin=required';
+        return;
       }
+
+      const pendingCode = localStorage.getItem('pendingInviteCode');
+      if (pendingCode) {
+        await tryValidateCachedCode(user.id, pendingCode);
+        localStorage.removeItem('pendingInviteCode');
+      }
+
+      const hasValidInvite = await checkInviteStatus(user.id, user);
+      loadingState.style.display = 'none';
+
+      if (!hasValidInvite) {
+        inviteGate.style.display = 'flex';
+        const gateUserEmail = document.getElementById('gateUserEmail');
+        if (gateUserEmail) {
+          gateUserEmail.textContent = user.primaryEmailAddress?.emailAddress || 'your email';
+        }
+        return;
+      }
+
+      const userRef = doc(db, 'users', user.id);
+      const userDoc = await getDoc(userRef);
+      const userData = userDoc.exists() ? userDoc.data() : {};
+
+      if (!userData.username) {
+        document.getElementById('usernameModal').style.display = 'flex';
+        return;
+      }
+
+      memberArea.style.display = 'block';
+      await initializeMall(user.id, userData, user);
     }
 
     // Check if user has a valid invite in Firestore
@@ -614,7 +476,247 @@
       }
     }
 
-    initClerkAuth();
+    async function initializeMall(clerkUserId, userData, clerkUser) {
+      const handle = userData.username ? '@' + userData.username : (clerkUser.firstName || clerkUser.primaryEmailAddress?.emailAddress || 'member');
+      mallUserHandle.textContent = handle;
+      agentHandle.textContent = handle;
+      agentEmail.textContent = userData.email || clerkUser.primaryEmailAddress?.emailAddress || 'No email on file';
+
+      await Promise.all([
+        loadMallCatalog(),
+        loadInviteContext(clerkUserId, clerkUser)
+      ]);
+
+      renderMallCatalog();
+      bindMallInteractions();
+      updateActiveContext(activeMallIndex);
+    }
+
+    async function loadMallCatalog() {
+      const response = await fetch(MALL_CATALOG_URL, { cache: 'no-store' });
+      if (!response.ok) {
+        throw new Error('Failed to load catalog: HTTP ' + response.status);
+      }
+      mallCatalog = await response.json();
+    }
+
+    function renderMallCatalog() {
+      if (!Array.isArray(mallCatalog) || mallCatalog.length === 0) {
+        mallTrack.innerHTML = '<div class="mall-loading-card">The Mall is empty right now.</div>';
+        mallDots.innerHTML = '';
+        mallFocus.innerHTML = '<div class="mall-focus-loading">No FoundUps are currently visible.</div>';
+        return;
+      }
+
+      mallTrack.innerHTML = mallCatalog.map((item, index) => `
+        <article class="mall-card theme-${escapeAttr(item.theme)}" data-index="${index}" tabindex="0" aria-label="${escapeAttr(item.name)}">
+          <div class="mall-card-topline">
+            <span class="mini-badge">${escapeHtml(item.category)}</span>
+            <span class="mini-badge">${escapeHtml(READINESS_LABELS[item.launch_readiness] || item.launch_readiness)}</span>
+          </div>
+          <div class="mall-card-art">
+            <span class="mall-card-token">${escapeHtml(item.token_symbol)}</span>
+            <span class="mall-card-hero">${escapeHtml(item.hero_label)}</span>
+          </div>
+          <div class="mall-card-copy">
+            <p class="mall-card-name">${escapeHtml(item.name)}</p>
+            <p class="mall-card-tagline">${escapeHtml(item.tagline)}</p>
+          </div>
+        </article>
+      `).join('');
+
+      mallDots.innerHTML = mallCatalog.map((_, index) => `
+        <span class="mall-dot${index === 0 ? ' active' : ''}" data-index="${index}"></span>
+      `).join('');
+
+      requestAnimationFrame(() => scrollToMallIndex(0, false));
+    }
+
+    function bindMallInteractions() {
+      const cards = mallTrack.querySelectorAll('.mall-card');
+
+      cards.forEach(card => {
+        card.addEventListener('click', () => {
+          const index = Number(card.dataset.index || 0);
+          activeMallIndex = index;
+          updateActiveContext(index);
+          openFoundupOverlay(mallCatalog[index]);
+        });
+        card.addEventListener('focus', () => {
+          const index = Number(card.dataset.index || 0);
+          activeMallIndex = index;
+          updateActiveContext(index);
+        });
+      });
+
+      mallTrack.addEventListener('scroll', () => {
+        if (scrollFrame) cancelAnimationFrame(scrollFrame);
+        scrollFrame = requestAnimationFrame(syncActiveCardFromScroll);
+      }, { passive: true });
+
+      mallTrack.addEventListener('wheel', (event) => {
+        if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+          event.preventDefault();
+          mallTrack.scrollBy({ left: event.deltaY * 1.1, behavior: 'auto' });
+        }
+      }, { passive: false });
+
+      redDogBtn.addEventListener('click', toggleRedDogPanel);
+      overlayScrim.addEventListener('click', closeSurfaces);
+      logoutBtn.addEventListener('click', async () => {
+        try {
+          await window.Clerk.signOut();
+        } finally {
+          window.location.href = '/';
+        }
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          closeSurfaces();
+          return;
+        }
+        if (document.activeElement?.tagName === 'INPUT') return;
+        if (event.key === 'ArrowRight') {
+          scrollToMallIndex(Math.min(activeMallIndex + 1, mallCatalog.length - 1));
+        } else if (event.key === 'ArrowLeft') {
+          scrollToMallIndex(Math.max(activeMallIndex - 1, 0));
+        }
+      });
+    }
+
+    function scrollToMallIndex(index, smooth = true) {
+      const cards = mallTrack.querySelectorAll('.mall-card');
+      const card = cards[index];
+      if (!card) return;
+      card.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'nearest', inline: 'center' });
+      activeMallIndex = index;
+      updateActiveContext(index);
+    }
+
+    function syncActiveCardFromScroll() {
+      const cards = Array.from(mallTrack.querySelectorAll('.mall-card'));
+      if (!cards.length) return;
+
+      const center = mallTrack.scrollLeft + (mallTrack.clientWidth / 2);
+      let nearestIndex = 0;
+      let nearestDistance = Number.POSITIVE_INFINITY;
+
+      cards.forEach((card, index) => {
+        const cardCenter = card.offsetLeft + (card.offsetWidth / 2);
+        const distance = Math.abs(center - cardCenter);
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearestIndex = index;
+        }
+      });
+
+      if (nearestIndex !== activeMallIndex) {
+        activeMallIndex = nearestIndex;
+        updateActiveContext(nearestIndex);
+      }
+    }
+
+    function updateActiveContext(index) {
+      const item = mallCatalog[index];
+      if (!item) return;
+
+      mallFocus.innerHTML = `
+        <div class="mall-focus-head">
+          <span class="focus-badge focus-${escapeAttr(item.launch_readiness)}">${escapeHtml(READINESS_LABELS[item.launch_readiness] || item.launch_readiness)}</span>
+          <span class="focus-meta">${escapeHtml(item.lifecycle_stage)} · ${escapeHtml(item.tier)} · ${escapeHtml(item.category)}</span>
+        </div>
+        <h2>${escapeHtml(item.name)}</h2>
+        <p class="mall-focus-tagline">${escapeHtml(item.description)}</p>
+        <div class="mall-focus-grid">
+          <div>
+            <span class="focus-label">Token</span>
+            <span class="focus-value">${escapeHtml(item.token_symbol)}</span>
+          </div>
+          <div>
+            <span class="focus-label">Route</span>
+            <span class="focus-value">${escapeHtml(item.routing_prefix)}</span>
+          </div>
+          <div>
+            <span class="focus-label">Posture</span>
+            <span class="focus-value">${escapeHtml(item.entry_copy)}</span>
+          </div>
+        </div>
+        <p class="mall-focus-hint">Swipe sideways to browse. Tap the active card to enter its shell handoff.</p>
+      `;
+
+      agentFoundupName.textContent = item.name;
+      agentFoundupHint.textContent = item.hero_mood;
+      agentMessage.textContent = READINESS_COPY[item.launch_readiness] || 'This FoundUp is visible in the Mall.';
+
+      document.querySelectorAll('.mall-dot').forEach((dot, dotIndex) => {
+        dot.classList.toggle('active', dotIndex === index);
+      });
+
+      document.querySelectorAll('.mall-card').forEach((card, cardIndex) => {
+        card.classList.toggle('is-active', cardIndex === index);
+      });
+    }
+
+    function openFoundupOverlay(item) {
+      if (!item) return;
+      foundupOverlayBody.innerHTML = `
+        <div class="foundup-overlay-card theme-${escapeAttr(item.theme)}">
+          <div class="foundup-overlay-topline">
+            <span class="mini-badge">${escapeHtml(item.category)}</span>
+            <span class="mini-badge">${escapeHtml(item.lifecycle_stage)}</span>
+          </div>
+          <div class="foundup-overlay-hero">
+            <span class="foundup-overlay-token">${escapeHtml(item.token_symbol)}</span>
+            <span class="foundup-overlay-name">${escapeHtml(item.name)}</span>
+          </div>
+          <p class="foundup-overlay-tagline">${escapeHtml(item.tagline)}</p>
+          <p class="foundup-overlay-description">${escapeHtml(item.description)}</p>
+          <div class="foundup-overlay-meta">
+            <div>
+              <span class="focus-label">Launch readiness</span>
+              <span class="focus-value">${escapeHtml(READINESS_LABELS[item.launch_readiness] || item.launch_readiness)}</span>
+            </div>
+            <div>
+              <span class="focus-label">Shell route</span>
+              <span class="focus-value">${escapeHtml(item.routing_prefix)}</span>
+            </div>
+            <div>
+              <span class="focus-label">Entry</span>
+              <span class="focus-value">${escapeHtml(item.entry_copy)}</span>
+            </div>
+          </div>
+          <p class="foundup-overlay-footnote">Tap outside this sheet to return to the Mall.</p>
+        </div>
+      `;
+
+      foundupOverlay.hidden = false;
+      redDogPanel.hidden = true;
+      overlayScrim.hidden = false;
+      document.body.classList.add('surface-open');
+    }
+
+    function toggleRedDogPanel() {
+      const willOpen = redDogPanel.hidden;
+      foundupOverlay.hidden = true;
+      redDogPanel.hidden = !willOpen;
+      overlayScrim.hidden = !willOpen;
+      document.body.classList.toggle('surface-open', willOpen);
+    }
+
+    function closeSurfaces() {
+      redDogPanel.hidden = true;
+      foundupOverlay.hidden = true;
+      overlayScrim.hidden = true;
+      document.body.classList.remove('surface-open');
+    }
+
+    initClerkAuth().catch(error => {
+      console.error('Failed to initialize member Mall:', error);
+      loadingState.style.display = 'none';
+      inviteGate.style.display = 'flex';
+      document.getElementById('gateInviteStatus').innerHTML = '<span style="color:#ff6b6b;">Unable to initialize the Mall right now.</span>';
+    });
 
     // ─── INVITE GATE LOGIC ───
     // Toggle between invite/waitlist panels
@@ -670,7 +772,7 @@
 
           // If user is already validated, skip to username claim
           if (existingUserData.inviteValidated === true) {
-            gateInviteStatus.innerHTML = '<span style="color:#00d4aa;">You\'re already validated! Setting up...</span>';
+            gateInviteStatus.innerHTML = '<span style="color:#00d4aa;">You are already validated. Loading the Mall...</span>';
             setTimeout(() => {
               inviteGate.style.display = 'none';
               if (!existingUserData.username) {
@@ -690,7 +792,7 @@
             gateInviteStatus.innerHTML = '<span style="color:#ff6b6b;">This code has expired</span>';
           } else {
             // Valid code! Grant access
-            gateInviteStatus.innerHTML = '<span style="color:#00d4aa;">Valid! Setting up your account...</span>';
+            gateInviteStatus.innerHTML = '<span style="color:#00d4aa;">Valid. Setting up your Mall access...</span>';
 
             // IMPORTANT: Update user record FIRST (critical write)
             try {
@@ -857,7 +959,7 @@
           usernameClaimedAt: new Date().toISOString()
         }, { merge: true });
 
-        // Reload to show member dashboard
+        // Reload to show the admitted Mall shell
         setTimeout(() => window.location.reload(), 1000);
 
       } catch (error) {
@@ -868,173 +970,110 @@
       }
     });
 
-    // Load user data from Firestore (keyed by Clerk user ID)
-    async function loadUserData(clerkUserId, clerkUser) {
+    async function loadInviteContext(clerkUserId, clerkUser) {
       try {
-        // Get user document (keyed by Clerk user ID)
         const userRef = doc(db, 'users', clerkUserId);
         const userDoc = await getDoc(userRef);
 
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-
-          // Update UI with Firestore data - username is single source of truth
-          if (userData.username) {
-            userName.textContent = '@' + userData.username;
-            const usernameDisplay = document.getElementById('usernameDisplay');
-            if (usernameDisplay) usernameDisplay.value = userData.username;
-          }
-          if (userData.email) {
-            const emailDisplay = document.getElementById('emailDisplay');
-            if (emailDisplay) emailDisplay.value = userData.email;
-          }
-
-          // Load invite codes with live status from invites collection
-          if (userData.inviteCodes && userData.inviteCodes.length > 0) {
-            await loadAndRenderInviteCodes(userData.inviteCodes);
-            const inviteCount = document.getElementById('inviteCount');
-            if (inviteCount) inviteCount.textContent = userData.inviteCodes.length;
-          } else {
-            if (inviteCodes) inviteCodes.innerHTML = '<p class="empty-hint">No invite codes available.</p>';
-            const inviteCount = document.getElementById('inviteCount');
-            if (inviteCount) inviteCount.textContent = '0';
-          }
-        } else {
-          // User doesn't exist in Firestore yet - create initial record
-          // This happens on first sign-in via Clerk
-          const newUserData = {
-            clerkUserId: clerkUserId,
+        if (!userDoc.exists()) {
+          await setDoc(userRef, {
+            clerkUserId,
             email: clerkUser.primaryEmailAddress?.emailAddress || '',
             createdAt: new Date().toISOString(),
             inviteCodes: [],
             upsBalance: 0
-          };
-          await setDoc(userRef, newUserData);
-          console.log('Created new user record for Clerk user:', clerkUserId);
+          });
+          renderInviteCodes([]);
+          return;
+        }
 
-          // Update UI with new user data
-          if (inviteCodes) inviteCodes.innerHTML = '<p class="empty-hint">No invite codes available yet.</p>';
-          const inviteCount = document.getElementById('inviteCount');
-          if (inviteCount) inviteCount.textContent = '0';
+        const userData = userDoc.data();
+        if (userData.email) {
+          agentEmail.textContent = userData.email;
+        }
+
+        if (userData.inviteCodes && userData.inviteCodes.length > 0) {
+          const codesWithStatus = await loadInviteCodeStatuses(userData.inviteCodes);
+          renderInviteCodes(codesWithStatus);
+        } else {
+          renderInviteCodes([]);
         }
       } catch (error) {
-        console.error('Error loading user data:', error);
+        console.error('Error loading invite context:', error);
+        renderInviteCodes([]);
       }
     }
 
-    // Load invite codes with status from invites collection
-    async function loadAndRenderInviteCodes(codes) {
+    async function loadInviteCodeStatuses(codes) {
       const codesWithStatus = [];
-      let activeCount = 0;
 
       for (const code of codes) {
         try {
-          // Query the invites collection for this code's status
           const q = query(collection(db, 'invites'), where('code', '==', code));
           const querySnapshot = await getDocs(q);
 
           if (!querySnapshot.empty) {
             const inviteData = querySnapshot.docs[0].data();
             const isActive = inviteData.status === 'active' && !inviteData.usedBy;
-            codesWithStatus.push({ code, status: isActive ? 'active' : 'used', usedBy: inviteData.usedBy });
-            if (isActive) activeCount++;
+            codesWithStatus.push({ code, status: isActive ? 'active' : 'used' });
           } else {
-            // Code not in collection (legacy) - assume active
-            codesWithStatus.push({ code, status: 'active', usedBy: null });
-            activeCount++;
+            codesWithStatus.push({ code, status: 'active' });
           }
         } catch (err) {
           console.error('[Member] Error checking code status:', code, err);
-          codesWithStatus.push({ code, status: 'unknown', usedBy: null });
+          codesWithStatus.push({ code, status: 'unknown' });
         }
       }
 
-      // Update active count in stats
-      const inviteCount = document.getElementById('inviteCount');
-      if (inviteCount) inviteCount.textContent = activeCount;
-
-      // Render with status
-      renderInviteCodes(codesWithStatus);
+      return codesWithStatus;
     }
 
-    // Render invite codes with status
     function renderInviteCodes(codesWithStatus) {
-      inviteCodes.innerHTML = codesWithStatus.map(({ code, status }) => `
-        <div class="invite-code-item ${status === 'used' ? 'used' : ''}">
-          <code style="${status === 'used' ? 'opacity:0.5;text-decoration:line-through;' : ''}">${code}</code>
-          ${status === 'used'
-            ? '<span style="color:#ff6b6b;font-size:0.8rem;">Used</span>'
-            : `<button class="copy-btn" onclick="copyCode('${code}')">Copy</button>`
-          }
-        </div>
+      const activeCount = codesWithStatus.filter(item => item.status === 'active').length;
+      agentInviteCount.textContent = `${activeCount} active`;
+
+      if (!codesWithStatus.length) {
+        agentInviteCodes.innerHTML = '<p class="red-dog-muted">No invite codes available yet.</p>';
+        return;
+      }
+
+      agentInviteCodes.innerHTML = codesWithStatus.map(({ code, status }) => `
+        <button class="invite-chip ${escapeAttr(status)}" data-code="${escapeAttr(code)}" type="button">
+          <span>${escapeHtml(code)}</span>
+          <span>${escapeHtml(status)}</span>
+        </button>
       `).join('');
+
+      agentInviteCodes.querySelectorAll('.invite-chip').forEach(chip => {
+        chip.addEventListener('click', async () => {
+          const code = chip.dataset.code;
+          if (!code || chip.classList.contains('used')) return;
+          try {
+            await navigator.clipboard.writeText(code);
+            const original = chip.innerHTML;
+            chip.classList.add('copied');
+            chip.innerHTML = '<span>Copied</span><span>ready</span>';
+            setTimeout(() => {
+              chip.innerHTML = original;
+              chip.classList.remove('copied');
+            }, 1400);
+          } catch (err) {
+            console.error('Copy failed:', err);
+          }
+        });
+      });
     }
 
-    // Copy code to clipboard
-    window.copyCode = async function(code) {
-      try {
-        await navigator.clipboard.writeText(code);
-        // Show feedback
-        const btn = event.target;
-        const originalText = btn.textContent;
-        btn.textContent = 'Copied!';
-        btn.classList.add('copied');
-        setTimeout(() => {
-          btn.textContent = originalText;
-          btn.classList.remove('copied');
-        }, 2000);
-      } catch (err) {
-        console.error('Copy failed:', err);
-      }
-    };
+    function escapeHtml(value) {
+      if (value === null || value === undefined) return '';
+      const div = document.createElement('div');
+      div.textContent = String(value);
+      return div.innerHTML;
+    }
 
-    // Logout via Clerk
-    logoutBtn.addEventListener('click', async () => {
-      try {
-        await window.Clerk.signOut();
-        window.location.href = '/';
-      } catch (error) {
-        console.error('Logout error:', error);
-      }
-    });
-
-    // Navigation
-    const navItems = document.querySelectorAll('.nav-item[data-section]');
-    const sections = document.querySelectorAll('.content-section');
-    const pageTitle = document.getElementById('pageTitle');
-
-    navItems.forEach(item => {
-      item.addEventListener('click', (e) => {
-        e.preventDefault();
-        const sectionId = item.dataset.section;
-
-        // Update active nav
-        navItems.forEach(n => n.classList.remove('active'));
-        item.classList.add('active');
-
-        // Show section
-        sections.forEach(s => s.classList.remove('active'));
-        document.getElementById(sectionId).classList.add('active');
-
-        // Update page title
-        pageTitle.textContent = item.querySelector('.nav-label').textContent;
-
-        // Close mobile sidebar
-        document.querySelector('.sidebar').classList.remove('open');
-        document.getElementById('sidebarOverlay').classList.remove('show');
-      });
-    });
-
-    // Mobile menu toggle
-    document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-      document.querySelector('.sidebar').classList.toggle('open');
-      document.getElementById('sidebarOverlay').classList.toggle('show');
-    });
-
-    document.getElementById('sidebarOverlay').addEventListener('click', () => {
-      document.querySelector('.sidebar').classList.remove('open');
-      document.getElementById('sidebarOverlay').classList.remove('show');
-    });
+    function escapeAttr(value) {
+      return String(value ?? '').replace(/"/g, '&quot;');
+    }
   </script>
 </body>
 </html>
