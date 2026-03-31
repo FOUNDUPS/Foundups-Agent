@@ -78,6 +78,46 @@ All 5 helpers had **zero import references** and **zero function-call references
 
 ---
 
+## [2026-03-31] Core Search Surface Extraction (holoindex_core_split_phase1_search_surface)
+
+**Agent**: 0102
+**WSP References**: WSP 62 (File Size), WSP 72 (Block Independence), WSP 87 (Size Limits)
+**Status**: COMPLETE
+
+### Context
+
+PROMETHEUS HANDOFF from 012: extract the search surface from `holo_index/core/holo_index.py` into a focused `search_engine.py` module, preserving `HoloIndex.search()` as a thin delegate.
+
+### Changes
+
+1. **Created** `holo_index/core/search_engine.py` (~480 lines) — all search logic:
+   - `execute_search()` — main entry point (delegates from `HoloIndex.search()`)
+   - `_search_collection()` — vector search with hybrid keyword scoring
+   - `_lexical_search_collection()` — keyword fallback when embeddings unavailable
+   - `_rg_symbol_search()` — ripgrep symbol fallback for NAVIGATION gaps
+   - `_merge_hits()` — path-normalized deduplication
+   - `_format_hit()` — shared hit formatting (consolidates duplicate formatting logic)
+   - `_tokenize_query()`, `_is_symbol_query()`, `_notify_holodae_search()`
+
+2. **Trimmed** `holo_index/core/holo_index.py`: 2,068 → 1,445 lines (-623 lines, -30.1%)
+   - `search()` reduced to 4-line delegate calling `search_engine.execute_search()`
+   - Removed 6 dead methods: `_generate_warnings`, `_warnings_from_wsp_hits`, `_generate_context_reminders`, `_reminders_from_wsp_hits`, `_dedupe`, `_should_show_fmas_hint`
+   - Cleaned unused imports: `sys`, `io`, `subprocess`, `shutil`, `time`
+
+3. **Updated** `test_doc_type_filtering.py` — stubs now patch `search_engine._search_collection` instead of instance method
+
+### Public API
+
+Unchanged. `holo.search(query)` returns the same payload contract.
+
+### Verification
+
+- 14 tests pass, 1 skipped (all HoloIndex test suites)
+- `search_engine` module imports cleanly
+- No behavioral change — search results identical
+
+---
+
 ## [2026-03-31] CLI Dead Code Prune (holoindex_cli_dead_code_prune)
 
 **Agent**: 0102

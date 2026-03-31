@@ -177,6 +177,20 @@ from holo_index.cli import HoloIndex     # core class
 from holo_index.cli import QwenAdvisor   # advisor (may be None)
 ```
 
+## Core Module Layout
+
+```
+holo_index/core/
+  __init__.py         # Exports HoloIndex, SearchCache, get_search_cache
+  holo_index.py       # HoloIndex class — indexing, bootstrap, module helpers
+  search_engine.py    # Extracted search surface — execute_search() entry point
+  search_cache.py     # LRU+TTL search cache
+```
+
+`HoloIndex.search()` delegates to `search_engine.execute_search(holo, ...)`.
+All search logic (vector, lexical, ripgrep symbol, hit merging) lives in `search_engine.py`.
+The public API (`holo.search(query)`) is unchanged.
+
 ## Compatibility Notes
 - `code` / `wsps` keys remain present for backward compatibility.
 - `search()` degrades to lexical mode when embedding model is unavailable.
