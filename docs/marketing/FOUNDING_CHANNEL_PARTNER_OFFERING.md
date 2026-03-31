@@ -97,17 +97,17 @@ The Du pool allocation structure:
 
 ```
 Total Epoch Distribution (100%)
-├── Stakeholder Pools (80%)
-│   ├── Un Pool (60%) - Active engagement
-│   ├── Dao Pool (16%) - Active work
-│   └── Du Pool (4%) - Protocol participants
-│       ├── ActiveFounderPool (80% of Du)
-│       └── PassiveParticipationPool (20% of Du)
-│           ├── BTCStakerPool (weighted allocation)
-│           └── ChannelPartnerPool (equal split) ← YOU ARE HERE
-└── Network Pools (20%)
-    ├── Network Pool (16%) - Drip rewards
-    └── Fund Pool (4%) - Protocol operations
++-- Stakeholder Pools (80%)
+|   +-- Un Pool (60%) - Active engagement
+|   +-- Dao Pool (16%) - Active work
+|   +-- Du Pool (4%) - Protocol participants
+|       +-- ActiveFounderPool (80% of Du)
+|       +-- PassiveParticipationPool (20% of Du)
+|           +-- BTCStakerPool (weighted allocation)
+|           +-- ChannelPartnerPool (equal split) <-- YOU ARE HERE
++-- Network Pools (20%)
+    +-- Network Pool (16%) - Drip rewards
+    +-- Fund Pool (4%) - Protocol operations
 ```
 
 Founding Channel Partners participate in the ChannelPartnerPool, which is a bounded partition of the PassiveParticipationPool within the Du pool.

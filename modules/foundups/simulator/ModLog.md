@@ -18,7 +18,7 @@ using protocol-participation language for the already-locked channel partner mec
 | What Partners Receive | Allocations, genesis status |
 | What This Is Not | Explicit non-claims (not investment) |
 | Protocol Allocation Structure | Du pool partition visual |
-| Registration Timeline | Pre-launch → Genesis → Closed |
+| Registration Timeline | Pre-launch -> Genesis -> Closed |
 | Important Boundaries | No legal/outcome/regulatory claims |
 
 ### Terminology Compliance

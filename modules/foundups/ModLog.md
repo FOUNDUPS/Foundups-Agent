@@ -2,6 +2,38 @@
 
 ## Chronological Change Log
 
+### 2026-03-31 - p.fMALL Member Catalog Export Sync
+
+**By:** 0102
+**WSP References:** WSP 11 (Interface Contract), WSP 50 (Pre-Action Verification)
+**Slice:** `pfmall_member_catalog_export_sync` (P1)
+
+**What changed**
+- Created `modules/foundups/pfmall/member_presentation.py` — canonical source for 4 UI-only fields
+  - `theme`, `hero_label`, `hero_mood`, `entry_copy` keyed by foundup_id
+  - Safe defaults for tenants without overrides
+- Created `modules/foundups/pfmall/member_catalog_export.py` — export generator
+  - `build_mall_catalog()`: merges tile truth + presentation overrides
+  - `export_mall_catalog()`: writes `public/member/mall-catalog.json`
+  - CLI: `python -m modules.foundups.pfmall.member_catalog_export`
+- Regenerated `public/member/mall-catalog.json` from canonical source
+- Updated `public/member/README.md`: documents generated artifact + regen command
+- Added 15 export tests in `test_member_catalog_export.py` (157 total suite, all passing)
+
+**Why**
+- `mall-catalog.json` was a hand-maintained duplicate of manifest truth
+- Any manifest change (readiness, lifecycle, new tenant) would drift unless manually synced
+- Single canonical source eliminates drift risk
+
+**Data flow**
+```
+foundup_manifest.json (x3) → pfmall shell core → api.list_foundups()
+                                                       ↓
+                              member_presentation.py → merge → mall-catalog.json
+```
+
+---
+
 ### 2026-03-31 - p.fMALL Catalog Shell UI Phase 1
 
 **By:** 0102

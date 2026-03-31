@@ -1,21 +1,5 @@
 [
   {
-    "foundup_id": "antifafm_001",
-    "name": "antifaFM",
-    "tagline": "24/7 resistance radio",
-    "description": "24/7 headless radio broadcaster with visual layers. Bridges Icecast to YouTube Live via FFmpeg.",
-    "category": "media",
-    "tier": "F0_DAE",
-    "lifecycle_stage": "proto",
-    "launch_readiness": "discoverable_only",
-    "token_symbol": "ANTI",
-    "routing_prefix": "/f/antifafm_001",
-    "theme": "antifafm",
-    "hero_label": "SIGNAL",
-    "hero_mood": "Signal-first, always on, discoverable inside the shell.",
-    "entry_copy": "The broadcast stack is real, but shell entry stays discoverable-only until tenant handoff is wired."
-  },
-  {
     "foundup_id": "gotjunk_001",
     "name": "GotJunk",
     "tagline": "Turn your junk into someone's treasure",
@@ -46,5 +30,21 @@
     "hero_label": "FRAG",
     "hero_mood": "Visible, sharp, still incubating until the test surface catches up.",
     "entry_copy": "MAGADOOM remains in shell discovery mode while its public-facing test expectations are brought back into line."
+  },
+  {
+    "foundup_id": "antifafm_001",
+    "name": "antifaFM",
+    "tagline": "24/7 resistance radio",
+    "description": "24/7 headless radio broadcaster with visual layers. Bridges Icecast to YouTube Live via FFmpeg.",
+    "category": "media",
+    "tier": "F0_DAE",
+    "lifecycle_stage": "proto",
+    "launch_readiness": "discoverable_only",
+    "token_symbol": "ANTI",
+    "routing_prefix": "/f/antifafm_001",
+    "theme": "antifafm",
+    "hero_label": "SIGNAL",
+    "hero_mood": "Signal-first, always on, discoverable inside the shell.",
+    "entry_copy": "The broadcast stack is real, but shell entry stays discoverable-only until tenant handoff is wired."
   }
 ]

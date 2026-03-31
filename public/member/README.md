@@ -43,13 +43,16 @@ public/member/
 
 ## Source Of Truth
 
-The current catalog is a Firebase-hosted static seed at:
+`mall-catalog.json` is a **generated artifact**, not hand-maintained.
 
-```text
-/member/mall-catalog.json
+Canonical source: `modules/foundups/pfmall/` (manifests + presentation overrides).
+
+Regenerate:
+```bash
+python -m modules.foundups.pfmall.member_catalog_export
 ```
 
-This keeps the live site compatible with Firebase hosting while the deeper p.fMALL transport surfaces continue maturing elsewhere in the repo.
+This keeps the live site compatible with Firebase hosting while the deeper p.fMALL transport surfaces continue maturing elsewhere in the repo. Do not hand-edit `mall-catalog.json` — edit the source manifests or `member_presentation.py` instead, then regenerate.
 
 ---
 
