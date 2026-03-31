@@ -36,7 +36,45 @@ All consumers unchanged — `from holo_index.cli import main` still works via `_
 ### Pending
 
 - ~~Inline code in `_cli_main.py` shadowed by dispatch calls — awaiting 012 approval to remove~~ DONE (see dead code prune below)
-- Orphaned helpers need evaluation for connection or retirement → deferred to `holoindex_cli_orphan_helper_prune`
+- ~~Orphaned helpers need evaluation for connection or retirement~~ DONE (see orphan helper prune below)
+
+---
+
+## [2026-03-31] CLI Orphan Helper Prune (holoindex_cli_orphan_helper_prune)
+
+**Agent**: 0102
+**WSP References**: WSP 62 (File Size), WSP 84 (Code Reuse)
+**Status**: COMPLETE
+
+### Context
+
+PROMETHEUS HANDOFF from 012: disposition the 5 orphaned helper modules under `holo_index/cli/`.
+
+### Audit Findings
+
+All 5 helpers had **zero import references** and **zero function-call references** from any `.py` file. Each was a thin wrapper around an upstream module with no unique logic.
+
+### Disposition: DELETE all 5
+
+| File | Lines | Reason |
+|------|-------|--------|
+| `adaptive_pipeline.py` | 109 | Wraps `AdaptiveLearningOrchestrator` — never imported |
+| `auto_refresh.py` | 146 | Wraps `AutonomousHoloDAE` + `AgentDB` — never imported |
+| `holo_request.py` | 59 | Wraps `QwenOrchestrator` — never imported |
+| `pattern_coach.py` | 49 | Wraps `PatternCoach.analyze_and_coach()` — never imported, also duplicated at `cli_pattern_coach_helper.py` |
+| `root_alerts.py` | 37 | Wraps `get_root_violation_alert()` — never imported |
+
+**Total removed**: 400 lines across 5 files
+
+### Out of Scope
+
+- `holo_index/cli_pattern_coach_helper.py` (also orphaned but outside `cli/` package)
+- JSON catalog entries referencing these helpers (docs, not code)
+
+### Verification
+
+- CLI tests green: 11 passed, 1 skipped
+- No import breakage (zero consumers existed)
 
 ---
 

@@ -168,11 +168,6 @@ holo_index/
                              #   --slow-mode, --pattern-memory, --mcp-hooks/log, --thought-log,
                              #   --monitor-work
       modules_cmd.py         # --link-modules, --query-modules, --wsp, --list-modules
-    adaptive_pipeline.py     # (orphaned helper — not wired to _cli_main)
-    auto_refresh.py          # (orphaned helper — not wired to _cli_main)
-    holo_request.py          # (orphaned helper — not wired to _cli_main)
-    pattern_coach.py         # (orphaned helper — not wired to _cli_main)
-    root_alerts.py           # (orphaned helper — not wired to _cli_main)
 ```
 
 All public imports remain stable:
