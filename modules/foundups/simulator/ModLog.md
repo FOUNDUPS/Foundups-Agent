@@ -1,5 +1,46 @@
 # Simulator ModLog
 
+## 2026-03-31 - Algorand Du Pool Contract Specification
+
+### Why
+Architect/CTO handoff (WSP 97 Slice 5): Create chain-agnostic economic spec with
+Algorand-first mapping. Translate simulator Du mechanics to contract-ready spec.
+
+### Created
+- `ALGORAND_DU_POOL_CONTRACT_SPEC.md` (comprehensive spec document)
+
+### Spec Coverage
+| Section | Content |
+|---------|---------|
+| Simulator Mapping | Constants, enums, functions → contract equivalents |
+| State Schema | Global (17 keys), Local/per-staker (7 keys), Box (partners) |
+| Method Specs | 8 methods with preconditions/effects/returns |
+| Algorand Notes | Storage decisions, fixed-point math, off-chain requirements |
+| Invariants | 6 explicit invariants (determinism, permanence, conservation) |
+
+### Key Mappings
+| Simulator | Contract |
+|-----------|----------|
+| `btc_stake_weight()` | `compute_weight()` with fixed-point |
+| `StakerHurdleState` | `hurdle_state` local state (0/1/2) |
+| `StakerPosition` | Local state per opted-in account |
+| `ChannelPartnerPool` | Box storage with 21 cap |
+| `EpochDistribution.du_hurdle_withheld` | `cumulative_du_withheld` global |
+
+### What Remains Off-Chain
+- Epoch triggering (scheduled)
+- Batch distribution iteration
+- BTC reserve verification (oracle)
+- UPS conversion (external rate)
+
+### Outcome
+- Spec-first approach (no PyTeal yet)
+- Simulator-to-contract traceability complete
+- Conservation invariants explicit
+- Slice is merge-ready
+
+---
+
 ## 2026-03-31 - BTC Staker Hurdle State Machine
 
 ### Why
