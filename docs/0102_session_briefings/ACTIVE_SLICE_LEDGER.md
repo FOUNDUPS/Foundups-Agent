@@ -1,7 +1,7 @@
 # Active Slice Ledger
 
 **Authority**: 0102 architect lane
-**Updated**: 2026-03-31 (training_system_utf8_import_boundary_fix complete)
+**Updated**: 2026-03-31 (ledger_reconciliation_2026_03_31)
 **Rule**: Every agent reads this first. If repo truth contradicts an entry, update this ledger — not 012.
 
 ---
@@ -92,6 +92,12 @@ If already landed:
 | `skill_evolution_loop_phase2_mutation_surface` | `448424358` | Phase 2 mutation surface: 3 env gates (fail-closed), A/B test status + promotion readiness queries via WRE primitives; supervisor idle-path integration; 23 new tests (41 total) |
 | `antifafm_voxtral_eval_contract` | `ebacf5cc1` | `VOXTRAL_EVAL_CONTRACT.md` eval-only lane; 4 TTS candidate surfaces; success metrics (<500ms, quality >=4.0); shared audio substrate + voice cloning policy enforcement |
 | `training_system_utf8_import_boundary_fix` | `f7b19311b` | 7 regression tests; imports fixed to scanner.py (not main.py); root cause: WSP 62 refactor stopped main.py exports |
+| `pfmall_architecture_and_template_contract` | `a4eb171f1` | `PFMALL_ARCHITECTURE_CONTRACT.md` — template structure, state overlay design |
+| `pfmall_state_overlay_contract` | `14e8c6063` | `PFMALL_STATE_OVERLAY_CONTRACT.md` — state provider interface, overlay lifecycle |
+| `openclaw_pfmall_catalog_integration` | `fd583820c` | OpenClaw catalog integration for p.fMALL template discovery |
+| `pfmall_state_provider_poc` | `6670ae433` | p.fMALL state provider PoC implementation |
+| `holoindex_cli_extraction` | `e3d9fd181` | HoloIndex CLI command structure extracted from monolith |
+| `holoindex_cli_compatibility_hardening` | `c724f574c` + `9db825088` | CLI test compatibility hardened; accidental cli.py re-creation removed |
 
 ---
 
@@ -120,16 +126,16 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 
 ## Next Priority Order
 
-1. ~~**`pqn_swarm_hub_external_contributor_path`**~~ — COMPLETE (Phase 2 Gate 3)
-2. ~~**`pqn_swarm_hub_exfoliation_review_decision`**~~ — COMPLETE (APPROVE_PHASE_3_PREP)
-3. ~~**`pqn_swarm_hub_phase3_prep_scaffold`**~~ — COMPLETE (`1dbdd1dcb`)
-4. ~~**`pqn_swarm_hub_phase3_migration_exec`**~~ — COMPLETE (standalone repos live)
-5. ~~**`science_swarm_hub_monorepo_reconciliation`**~~ — COMPLETE (docs updated post-migration)
-6. ~~**`science_swarm_hub_monorepo_stub_cutover`**~~ — COMPLETE (stub cutover executed)
-7. ~~**YouTube Domain Agent Phase 1**~~ — COMPLETE (G1+G2 implemented)
-8. ~~**YouTube Domain Agent Phase 2**~~ — COMPLETE (G3+G5: per-channel tracking + cycle watchdog + STT/TTS boundary)
-9. ~~**YouTube Domain Agent Phase 3**~~ — COMPLETE (G4+G6: schedule reconciliation breadcrumb + escalation path)
-10. ~~**`skill_evolution_loop_phase2_mutation_surface`**~~ — COMPLETE (gated mutation surface with 3 env gates, WRE primitive queries)
+1. ~~**`skill_evolution_loop_phase2_mutation_surface`**~~ — COMPLETE (`448424358`)
+2. ~~**`antifafm_voxtral_eval_contract`**~~ — COMPLETE (`ebacf5cc1`)
+3. ~~**`training_system_utf8_import_boundary_fix`**~~ — COMPLETE (`f7b19311b`)
+4. ~~**`pfmall_architecture_and_template_contract`**~~ — COMPLETE (`a4eb171f1`)
+5. ~~**`pfmall_state_overlay_contract`**~~ — COMPLETE (`14e8c6063`)
+6. ~~**`openclaw_pfmall_catalog_integration`**~~ — COMPLETE (`fd583820c`)
+7. ~~**`pfmall_state_provider_poc`**~~ — COMPLETE (`6670ae433`)
+8. ~~**`holoindex_cli_extraction`**~~ — COMPLETE (`e3d9fd181`)
+9. ~~**`holoindex_cli_compatibility_hardening`**~~ — COMPLETE (`c724f574c` + `9db825088`)
+10. ~~**`ledger_reconciliation_2026_03_31`**~~ — COMPLETE (this commit)
 11. _(awaiting next slice from 012)_
 
 ---

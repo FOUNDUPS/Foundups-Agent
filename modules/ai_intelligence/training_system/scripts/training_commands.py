@@ -17,11 +17,11 @@ from holo_index.qwen_advisor.pattern_memory import PatternMemory
 
 def execute_training_command(command: str, targets: Optional[str], json_output: bool) -> None:
     """Execute training commands headlessly for 0102."""
-    # Import run_utf8_hygiene_scan and summarize_utf8_findings from main module
-    import sys
-    import os
-    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))))
-    from main import run_utf8_hygiene_scan, summarize_utf8_findings
+    # Import UTF-8 hygiene functions from canonical module (WSP 62)
+    from modules.ai_intelligence.utf8_hygiene.scripts.scanner import (
+        run_utf8_hygiene_scan,
+        summarize_utf8_findings,
+    )
 
     response: Dict[str, Any] = {"command": command, "status": "error"}
     memory: Optional[PatternMemory] = None
