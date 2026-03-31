@@ -144,6 +144,127 @@ POOL_ACCESS = {
     ParticipantType.DU: ["stakeholder_un", "stakeholder_dao", "stakeholder_du"],
 }
 
+# =============================================================================
+# WEIGHTED STAKE ALLOCATION (BTCStakerPool mechanics)
+# =============================================================================
+#
+# BTC stakers receive weighted allocations based on stake size.
+# Formula: weight = stake^exponent (default exponent = 1.5)
+#
+# This creates exponential advantage for larger stakes:
+#   0.1 BTC  → weight ≈ 0.0316
+#   1.0 BTC  → weight = 1.0
+#   10 BTC   → weight ≈ 31.6
+#   100 BTC  → weight = 1000
+#
+# Ratio: btc_stake_weight(100) / btc_stake_weight(1) = 100^1.5 / 1^1.5 = 1000
+#
+# This is SEPARATE from the degressive tier model (du/dao/un tiers).
+# Weighted allocation applies WITHIN the BTCStakerPool partition.
+
+STAKE_WEIGHT_EXPONENT = 1.5  # stake * sqrt(stake)
+
+
+def btc_stake_weight(stake_btc: float, exponent: float = STAKE_WEIGHT_EXPONENT) -> float:
+    """Calculate weighted stake using exponential formula.
+
+    Formula: weight = stake^exponent
+
+    With default exponent 1.5:
+      btc_stake_weight(1) = 1.0
+      btc_stake_weight(100) = 1000.0
+      btc_stake_weight(100) / btc_stake_weight(1) = 1000
+
+    Args:
+        stake_btc: BTC amount staked
+        exponent: Weighting exponent (default 1.5 = stake * sqrt(stake))
+
+    Returns:
+        Weighted stake value
+    """
+    if stake_btc <= 0:
+        return 0.0
+    return stake_btc ** exponent
+
+
+def calculate_weighted_share(
+    stake_btc: float,
+    total_weighted_stake: float,
+    pool_amount: float,
+    exponent: float = STAKE_WEIGHT_EXPONENT,
+) -> float:
+    """Calculate staker's share of pool using weighted formula.
+
+    Formula: share = (weight / total_weight) * pool_amount
+
+    Args:
+        stake_btc: This staker's BTC amount
+        total_weighted_stake: Sum of all stakers' weighted stakes
+        pool_amount: Total F_i in the pool to distribute
+        exponent: Weighting exponent
+
+    Returns:
+        This staker's share of the pool
+    """
+    if total_weighted_stake <= 0 or pool_amount <= 0:
+        return 0.0
+    weight = btc_stake_weight(stake_btc, exponent)
+    return (weight / total_weighted_stake) * pool_amount
+
+
+def calculate_total_weighted_stake(
+    stakes: List[float],
+    exponent: float = STAKE_WEIGHT_EXPONENT,
+) -> float:
+    """Calculate total weighted stake for a list of BTC stakes.
+
+    Args:
+        stakes: List of BTC stake amounts
+        exponent: Weighting exponent
+
+    Returns:
+        Sum of weighted stakes
+    """
+    return sum(btc_stake_weight(s, exponent) for s in stakes)
+
+
+def distribute_weighted_staker_pool(
+    stakes: Dict[str, float],
+    pool_amount: float,
+    exponent: float = STAKE_WEIGHT_EXPONENT,
+) -> Dict[str, float]:
+    """Distribute pool amount to stakers using weighted allocation.
+
+    Each staker receives: (their_weight / total_weight) * pool_amount
+
+    Conservation property: sum of distributions == pool_amount
+
+    Args:
+        stakes: Dict of staker_id -> BTC stake amount
+        pool_amount: Total F_i to distribute
+        exponent: Weighting exponent
+
+    Returns:
+        Dict of staker_id -> F_i allocation
+    """
+    if not stakes or pool_amount <= 0:
+        return {}
+
+    # Calculate total weighted stake
+    total_weight = sum(btc_stake_weight(s, exponent) for s in stakes.values())
+
+    if total_weight <= 0:
+        return {staker_id: 0.0 for staker_id in stakes}
+
+    # Distribute proportionally
+    distributions: Dict[str, float] = {}
+    for staker_id, stake_btc in stakes.items():
+        weight = btc_stake_weight(stake_btc, exponent)
+        share = (weight / total_weight) * pool_amount
+        distributions[staker_id] = share
+
+    return distributions
+
 
 @dataclass
 class ComputeMetrics:
@@ -166,10 +287,18 @@ class ComputeMetrics:
 
 @dataclass
 class StakerPosition:
-    """Tracks a staker's position for degressive tier calculation."""
+    """Tracks a staker's position for degressive tier calculation and weighted allocation."""
     original_stake_btc: float = 0.0   # Initial BTC staked
     total_earned_fi: float = 0.0      # Total F_i earned lifetime
     stake_timestamp: str = ""          # When they staked
+
+    @property
+    def weighted_stake(self) -> float:
+        """Weighted stake for BTCStakerPool allocation.
+
+        Uses stake^1.5 formula for exponential advantage.
+        """
+        return btc_stake_weight(self.original_stake_btc)
 
     @property
     def earned_ratio(self) -> float:

@@ -1,5 +1,54 @@
 # Simulator ModLog
 
+## 2026-03-31 - Weighted Stake Allocation for BTC Staker Pool
+
+### Why
+Architect/CTO handoff (WSP 97): Implement weighted stake allocation where `weight = stake^1.5`.
+100x stake produces 1000x weight, rewarding larger commitments exponentially.
+
+### Added to `pool_distribution.py`
+```python
+STAKE_WEIGHT_EXPONENT = 1.5  # stake * sqrt(stake)
+
+def btc_stake_weight(stake_btc, exponent=1.5) -> float
+def calculate_weighted_share(stake_btc, total_weighted_stake, pool_amount) -> float
+def calculate_total_weighted_stake(stakes: List[float]) -> float
+def distribute_weighted_staker_pool(stakes: Dict[str, float], pool_amount) -> Dict[str, float]
+```
+
+### StakerPosition Enhancement
+- Added `weighted_stake` property: `btc_stake_weight(self.original_stake_btc)`
+
+### Exports Added to `economics/__init__.py`
+- `STAKE_WEIGHT_EXPONENT`
+- `btc_stake_weight`
+- `calculate_weighted_share`
+- `calculate_total_weighted_stake`
+- `distribute_weighted_staker_pool`
+
+### Test Coverage
+| Test Class | Tests | Status |
+|------------|-------|--------|
+| TestStakeWeight | 8 | PASS |
+| TestCalculateWeightedShare | 4 | PASS |
+| TestDistributeWeightedStakerPool | 7 | PASS |
+| TestCalculateTotalWeightedStake | 2 | PASS |
+| TestStakerPositionWeightedStake | 2 | PASS |
+| **TOTAL** | **23** | **PASS** |
+
+### Key Math Verified
+- `btc_stake_weight(1.0) == 1.0`
+- `btc_stake_weight(10.0) == 31.62...` (10^1.5)
+- `btc_stake_weight(100.0) / btc_stake_weight(1.0) == 1000.0` (100x stake → 1000x weight)
+- Conservation: sum of distributions equals pool amount
+
+### Outcome
+- Weighted stake mechanics are deterministic and tested
+- Pure helper functions (no new BTCStakerPool class needed)
+- Slice is merge-ready
+
+---
+
 ## 2026-03-31 - Genesis Channel Partner Pool Spec
 
 ### Why

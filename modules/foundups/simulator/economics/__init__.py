@@ -79,6 +79,12 @@ from .pool_distribution import (
     STAKER_CAP_EARLY,
     STAKER_MIN_BTC,
     STAKER_RECOMMENDED_BTC,
+    # Weighted stake allocation (BTCStakerPool mechanics)
+    STAKE_WEIGHT_EXPONENT,
+    btc_stake_weight,
+    calculate_weighted_share,
+    calculate_total_weighted_stake,
+    distribute_weighted_staker_pool,
 )
 
 from .dilution_scenario import (
@@ -397,6 +403,12 @@ __all__ = [
     "STAKER_CAP_EARLY",
     "STAKER_MIN_BTC",
     "STAKER_RECOMMENDED_BTC",
+    # Weighted stake allocation (BTCStakerPool mechanics)
+    "STAKE_WEIGHT_EXPONENT",
+    "btc_stake_weight",
+    "calculate_weighted_share",
+    "calculate_total_weighted_stake",
+    "distribute_weighted_staker_pool",
     # Dilution analysis (012-confirmed 2026-02-14)
     "AdoptionModel",
     "AdoptionConfig",
