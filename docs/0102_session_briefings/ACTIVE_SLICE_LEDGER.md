@@ -126,17 +126,9 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 
 ## Next Priority Order
 
-1. ~~**`skill_evolution_loop_phase2_mutation_surface`**~~ — COMPLETE (`448424358`)
-2. ~~**`antifafm_voxtral_eval_contract`**~~ — COMPLETE (`ebacf5cc1`)
-3. ~~**`training_system_utf8_import_boundary_fix`**~~ — COMPLETE (`f7b19311b`)
-4. ~~**`pfmall_architecture_and_template_contract`**~~ — COMPLETE (`a4eb171f1`)
-5. ~~**`pfmall_state_overlay_contract`**~~ — COMPLETE (`14e8c6063`)
-6. ~~**`openclaw_pfmall_catalog_integration`**~~ — COMPLETE (`fd583820c`)
-7. ~~**`pfmall_state_provider_poc`**~~ — COMPLETE (`6670ae433`)
-8. ~~**`holoindex_cli_extraction`**~~ — COMPLETE (`e3d9fd181`)
-9. ~~**`holoindex_cli_compatibility_hardening`**~~ — COMPLETE (`c724f574c` + `9db825088`)
-10. ~~**`ledger_reconciliation_2026_03_31`**~~ — COMPLETE (this commit)
-11. _(awaiting next slice from 012)_
+_(awaiting next slice from 012)_
+
+All previously queued slices are closed. See Closed Slices table for history.
 
 ---
 
