@@ -1,5 +1,65 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-31: p.fMALL Catalog Integration (WSP 11/72/84)
+
+**Author**: 0102
+**WSP**: 11 (Interface Contract), 72 (Module Independence), 84 (Code Reuse)
+**Slice**: `openclaw_pfmall_catalog_integration`
+
+### Context
+
+OpenClaw FOUNDUP route needed catalog/status/routing commands to integrate with p.fMALL contracts. The manifest and state overlay contracts were defined in `pfmall_architecture_and_template_contract` and `pfmall_state_overlay_contract` slices.
+
+### Changes
+
+1. **Created `pfmall_catalog.py`** (~450 lines):
+   - `CatalogEntry` dataclass (subset of manifest for catalog display)
+   - `FoundUpStateOverlay` dataclass (per PFMALL_STATE_OVERLAY_CONTRACT.md)
+   - `StateOverlayProvider` protocol (abstract provider interface)
+   - `PfmallCatalogManager` class:
+     - Manifest discovery from known registry + JSON files
+     - State overlay consumption with graceful degradation
+     - `list_foundups()`, `get_catalog()`, `get_status()`, `get_open_target()`
+   - Command handlers: `handle_list_foundups`, `handle_foundup_catalog`, `handle_foundup_status`, `handle_open_foundup`
+   - `parse_catalog_command()` parser for FOUNDUP intent
+
+2. **Extended `fam_adapter.py`**:
+   - Catalog commands routed before launch commands
+   - Help text updated with new commands
+
+3. **Created `tests/test_pfmall_catalog.py`** (36 tests):
+   - CatalogEntry and StateOverlay dataclass tests
+   - PfmallCatalogManager tests (list, get, status, open, provider)
+   - Command handler tests
+   - Parser tests
+   - FAM adapter integration tests
+
+4. **Updated `INTERFACE.md`**:
+   - FOUNDUP Route Contract now includes catalog commands
+   - Documents p.fMALL contract consumption
+
+### Design Principles
+
+- **Provider abstraction**: State overlay consumed via protocol, not simulator import
+- **Graceful degradation**: Status shows "unknown" when provider unavailable
+- **Known registry**: PoC uses static registry until real manifests exist
+- **Manifest-driven**: Real manifests loaded from `foundup_manifest.json` when present
+
+### Commands Added
+
+| Command | Description |
+|---------|-------------|
+| `list foundups` | Show all FoundUps in catalog |
+| `foundup catalog [category]` | Browse by category |
+| `foundup status <name>` | Show manifest + state overlay |
+| `open <foundup>` | Get routing target |
+
+### Result
+
+OpenClaw can now list FoundUps, show status, and return routing targets. State overlay is consumed cleanly via provider interface with graceful degradation when unavailable.
+
+---
+
 ## 2026-03-29: Skill Evolution Loop Phase 2 - Mutation Surface (WSP 48/77)
 
 **Author**: 0102

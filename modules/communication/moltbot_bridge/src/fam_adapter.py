@@ -448,11 +448,23 @@ def handle_fam_intent(message: str, sender: str) -> str:
     Handle FAM-related intent from OpenClaw.
 
     Entry point for openclaw_dae.py domain routing.
-    Routes to: launch commands, Qwen knowledge queries, or help.
+    Routes to: catalog commands, launch commands, knowledge queries, or help.
     """
+    # Try catalog commands first (list, status, open)
+    try:
+        from .pfmall_catalog import parse_catalog_command
+
+        catalog_response = parse_catalog_command(message)
+        if catalog_response:
+            return catalog_response
+    except ImportError:
+        logger.debug("[FAM] pfmall_catalog not available")
+    except Exception as exc:
+        logger.warning("[FAM] Catalog command error: %s", exc)
+
     adapter = FAMAdapter(use_in_memory=True)
 
-    # Try to parse launch request first
+    # Try to parse launch request
     request = adapter.parse_launch_intent(message, sender)
     if request:
         response = adapter.launch_foundup(request, actor_id=sender)
@@ -480,8 +492,10 @@ def handle_fam_intent(message: str, sender: str) -> str:
         return (
             f"{base}\n\n"
             "Commands:\n"
-            "  - `launch foundup <name> with token <SYMBOL>`\n"
-            "  - `create foundup <name> token <SYMBOL>`"
+            "  - `list foundups` - Show catalog\n"
+            "  - `foundup status <name>` - Show FoundUp status\n"
+            "  - `open <foundup>` - Get routing target\n"
+            "  - `launch foundup <name> with token <SYMBOL>`"
         )
 
     # Fallback help
@@ -489,8 +503,11 @@ def handle_fam_intent(message: str, sender: str) -> str:
         "FoundUps Agent Market (FAM)\n"
         "Ask me about: pAVS, CABR, tokens, investors, hardenings\n"
         "Commands:\n"
-        "  - `launch foundup <name> with token <SYMBOL>`\n"
-        "  - `create foundup <name> token <SYMBOL>`"
+        "  - `list foundups` - Show catalog\n"
+        "  - `foundup catalog [category]` - Browse by category\n"
+        "  - `foundup status <name>` - Show FoundUp status\n"
+        "  - `open <foundup>` - Get routing target\n"
+        "  - `launch foundup <name> with token <SYMBOL>`"
     )
 
 

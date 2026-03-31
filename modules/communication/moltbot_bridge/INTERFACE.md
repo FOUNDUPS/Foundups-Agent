@@ -334,13 +334,27 @@ Operational rule:
 
 ### FOUNDUP Route Contract (FAM Adapter)
 
-- Launch command examples:
-  - `launch foundup <name> with token <SYMBOL>`
-  - `create foundup <name> token <SYMBOL>`
-- Token symbol resolution:
-  - If token is omitted, parser auto-generates from FoundUp name.
-  - If token is `AUTO` (or legacy `FUP` seed), adapter auto-generates and resolves collisions.
-  - Collision resolution is deterministic (`BASE`, `BASE2`, `BASE3`, ...), then handed to Agent Market.
+#### Catalog Commands (p.fMALL Integration)
+
+- `list foundups` - Show all FoundUps in catalog
+- `foundup catalog [category]` - Browse catalog by category (marketplace, media, science, games, community)
+- `foundup status <name>` - Show FoundUp status (manifest + state overlay)
+- `open <foundup>` - Get routing target URL (`/f/{foundup_id}`)
+
+Catalog commands consume:
+- Static manifests from `foundup_manifest.json` (per PFMALL_FOUNDUP_MANIFEST_SCHEMA.md)
+- State overlay via provider interface (per PFMALL_STATE_OVERLAY_CONTRACT.md)
+- Degrades gracefully when state provider unavailable (shows "unknown" status)
+
+#### Launch Commands
+
+- `launch foundup <name> with token <SYMBOL>`
+- `create foundup <name> token <SYMBOL>`
+
+Token symbol resolution:
+- If token is omitted, parser auto-generates from FoundUp name.
+- If token is `AUTO` (or legacy `FUP` seed), adapter auto-generates and resolves collisions.
+- Collision resolution is deterministic (`BASE`, `BASE2`, `BASE3`, ...), then handed to Agent Market.
 
 ### Autonomy Tiers (Graduated)
 
