@@ -58,9 +58,9 @@ Founding Channel Partners contribute to the ecosystem through:
 - **Distribution reach**: Access to audiences, communities, and markets
 - **Channel visibility**: Placement, promotion, and awareness surfaces
 - **Network effects**: Connections that expand ecosystem participation
-- **Early commitment**: Pre-launch engagement signals ecosystem viability
+- **Early commitment (in-kind infrastructure)**: Compute, cloud services, APIs, developer tools, hosting, and infrastructure that enable founders to build without capital expenditure
 
-Partners are selected based on their ability to contribute meaningful distribution value to the protocol ecosystem.
+Partners are selected based on their ability to contribute meaningful distribution and/or infrastructure value to the protocol ecosystem. In-kind contributions -- compute, services, tools -- are the foundation that allows FoundUp founders to build and scale without paying rent on someone else's platform.
 
 ---
 
@@ -167,6 +167,50 @@ Founding Channel Partners are a finite cohort of protocol participants who contr
 
 ---
 
-*Document version: 1.0.0*
+## Appendix: LinkedIn Post Example
+
+The following is a social post template for channel partner outreach. It uses simplified, jargon-free language suitable for LinkedIn audiences.
+
+---
+
+**21 Founding Channel Partners. Then the gate closes forever.**
+
+We're building an ecosystem that makes app stores obsolete.
+
+Built on web-first technology. Driven by automation. No gatekeepers. No 30% cut. No permission required.
+
+**The startup is dead. The FoundUp replaces it.**
+
+Traditional startups raise money, burn money, and hope for an exit. Most don't make it. The model is broken and everyone knows it.
+
+FoundUps run on compute, not capital. Machines do the work. Participants share the output. No fundraising. No burn rate. No begging for permission to exist.
+
+**What's a Channel Partner?**
+
+You have something we need. Compute. Services. Tools. Infrastructure.
+
+You don't write a check. You open a door.
+
+Your compute, your platform, your services -- they become the foundation that founders build on. Without paying rent. Without burning runway. Without asking anyone's permission.
+
+In return, the protocol recognizes your contribution. Permanently. Every cycle it runs.
+
+**Why 21?**
+
+Because that's it. 21 founding partners. Equal standing. No tiers. No upsell.
+
+When the ecosystem goes live, the registry closes. Forever. You're either one of the 21 or you're not.
+
+**What we're looking for:**
+
+Compute. Cloud. APIs. Developer tools. Hosting. Infrastructure. Distribution. Reach.
+
+If you provide something founders need to build -- and you believe the next economy runs on compute, not capital -- this is your window.
+
+**21 seats. One genesis. DM me.**
+
+---
+
+*Document version: 1.1.0*
 *Date: 2026-03-31*
 *Status: Pre-publication draft for 012 review*
