@@ -76,6 +76,7 @@
   </script>
 
   <link rel="stylesheet" href="css/member.css">
+  <link rel="stylesheet" href="css/account-concierge.css">
 </head>
 <body>
   <!-- Loading state (shown while checking auth) -->
@@ -175,6 +176,60 @@
     }
   </style>
 
+  <!-- Account Concierge Plane (slides down from top) -->
+  <div id="accountPlaneScrim" class="account-plane-scrim"></div>
+  <aside id="accountPlane" class="account-plane" aria-label="Account concierge">
+    <div class="account-plane-handle"></div>
+
+    <!-- Identity block -->
+    <div class="account-identity">
+      <div class="account-avatar" data-account-avatar-link>
+        <img class="account-avatar-img" data-account-avatar-img src="" alt="" style="display:none;">
+        <span class="account-avatar-placeholder" data-account-avatar-placeholder>&#x1F464;</span>
+      </div>
+      <div class="account-identity-text">
+        <span class="account-identity-name" data-account-name>Member</span>
+        <span class="account-identity-handle" data-account-handle>@member</span>
+      </div>
+    </div>
+
+    <!-- FoundUps -->
+    <div class="account-section">
+      <div class="account-section-label">FoundUps</div>
+      <div class="account-foundups-grid" data-account-foundups-grid></div>
+    </div>
+
+    <!-- Invites (hidden by default) -->
+    <div class="account-section">
+      <button class="account-invites-toggle" data-account-invites-toggle type="button">
+        <span>Invites <span data-invite-count></span></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="account-invites-drawer" data-account-invites-drawer></div>
+    </div>
+
+    <!-- Options -->
+    <div class="account-section">
+      <div class="account-section-label">Options</div>
+      <div class="account-options-list">
+        <button class="account-option-btn" data-account-signout type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign out
+        </button>
+      </div>
+    </div>
+
+    <!-- Concierge essentials -->
+    <div class="account-section">
+      <div class="account-section-label">Concierge</div>
+      <div class="account-concierge-hints">
+        <p class="account-concierge-hint">This is the p.fMALL — your invite-gated FoundUp catalog.</p>
+        <p class="account-concierge-hint">Swipe sideways to browse FoundUps. Tap a card to enter.</p>
+        <p class="account-concierge-hint">Swipe down from the top to open this panel. Swipe up to close.</p>
+      </div>
+    </div>
+  </aside>
+
   <div id="memberArea" class="member-area" style="display:none;">
     <div class="mall-shell">
       <header class="mall-header">
@@ -188,6 +243,10 @@
         <div class="mall-userline">
           <span class="mall-status-chip">invite admitted</span>
           <span id="mallUserHandle" class="mall-user-handle">@member</span>
+          <button id="mallAvatarTrigger" class="mall-avatar-trigger" aria-label="Open account">
+            <img src="" alt="" style="display:none;">
+            <span class="account-avatar-placeholder">&#x1F464;</span>
+          </button>
         </div>
       </header>
 
@@ -250,6 +309,20 @@
         <div class="red-dog-section">
           <p class="red-dog-label">Agent note</p>
           <p id="agentMessage" class="red-dog-message">The gateway is preserved. Swipe the Mall, tap a card, and I will keep the context steady.</p>
+        </div>
+
+        <div class="red-dog-section">
+          <p class="red-dog-label">Readiness guide</p>
+          <div class="red-dog-readiness-key">
+            <div class="red-dog-readiness-row"><span class="rd-dot rd-dot-ready"></span><span class="red-dog-readiness-text"><strong>Ready</strong> — live frontend, direct shell handoff when wired.</span></div>
+            <div class="red-dog-readiness-row"><span class="rd-dot rd-dot-conditional"></span><span class="red-dog-readiness-text"><strong>Conditional</strong> — working frontend with known gaps.</span></div>
+            <div class="red-dog-readiness-row"><span class="rd-dot rd-dot-discoverable"></span><span class="red-dog-readiness-text"><strong>Discoverable only</strong> — backend service, no web frontend yet.</span></div>
+          </div>
+        </div>
+
+        <div class="red-dog-section">
+          <p class="red-dog-label">Navigation</p>
+          <p class="red-dog-message">Swipe sideways to browse FoundUps. Tap a card to see its full entry page. Each entry page is deep-linkable.</p>
         </div>
 
         <button id="logoutBtn" class="red-dog-logout">Sign Out</button>
@@ -486,6 +559,12 @@
         loadMallCatalog(),
         loadInviteContext(clerkUserId, clerkUser)
       ]);
+
+      // Populate account concierge plane
+      if (window.accountConcierge) {
+        window.accountConcierge.setIdentity(clerkUser, userData);
+        window.accountConcierge.setFoundUps(mallCatalog);
+      }
 
       renderMallCatalog();
       bindMallInteractions();
@@ -1030,6 +1109,11 @@
     }
 
     function renderInviteCodes(codesWithStatus) {
+      // Feed invite data to account concierge plane
+      if (window.accountConcierge) {
+        window.accountConcierge.setInvites(codesWithStatus);
+      }
+
       const activeCount = codesWithStatus.filter(item => item.status === 'active').length;
       agentInviteCount.textContent = `${activeCount} active`;
 
@@ -1076,5 +1160,7 @@
       return String(value ?? '').replace(/"/g, '&quot;');
     }
   </script>
+  <script src="js/account-concierge.js"></script>
+  <script src="js/red-dog-concierge.js"></script>
 </body>
 </html>

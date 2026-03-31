@@ -1,0 +1,296 @@
+/* Account Concierge Plane — slides down from top */
+
+.account-plane-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 5, 9, 0.6);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.account-plane-scrim.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.account-plane {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 201;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: rgba(14, 14, 28, 0.97);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0 0 1.5rem 1.5rem;
+  padding: 0 1.25rem 1.25rem;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.5);
+  transform: translateY(-100%);
+  transition: transform 0.3s ease;
+}
+.account-plane.open {
+  transform: translateY(0);
+}
+
+/* Drag handle */
+.account-plane-handle {
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem 0 0.5rem;
+  cursor: grab;
+}
+.account-plane-handle::after {
+  content: '';
+  width: 2.5rem;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* Identity block */
+.account-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.5rem 0 1rem;
+}
+
+.account-avatar {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.account-avatar-img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(141, 113, 255, 0.3);
+  background: rgba(255, 255, 255, 0.04);
+}
+.account-avatar-placeholder {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px dashed rgba(141, 113, 255, 0.3);
+  background: rgba(141, 113, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(141, 113, 255, 0.6);
+  font-size: 1.25rem;
+}
+
+.account-identity-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.account-identity-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text, #f3f1f8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.account-identity-handle {
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  font-size: 0.8rem;
+  color: var(--text-muted, rgba(243, 241, 248, 0.46));
+}
+
+/* Section dividers */
+.account-section {
+  padding: 0.75rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.account-section-label {
+  font-size: 0.7rem;
+  color: rgba(243, 241, 248, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.6rem;
+}
+
+/* FoundUps tile grid */
+.account-foundups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+  gap: 0.6rem;
+}
+.account-foundup-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.6rem 0.4rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  text-decoration: none;
+  color: var(--text, #f3f1f8);
+  transition: background 0.15s, border-color 0.15s;
+  cursor: pointer;
+}
+.account-foundup-tile:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.account-foundup-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.9);
+}
+.account-foundup-icon.theme-antifafm {
+  background: linear-gradient(135deg, rgba(122, 20, 28, 0.8), rgba(60, 11, 16, 0.9));
+}
+.account-foundup-icon.theme-gotjunk {
+  background: linear-gradient(135deg, rgba(27, 108, 92, 0.8), rgba(15, 60, 56, 0.9));
+}
+.account-foundup-icon.theme-magadoom {
+  background: linear-gradient(135deg, rgba(89, 28, 113, 0.8), rgba(27, 17, 56, 0.9));
+}
+.account-foundup-name {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.account-foundup-status {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.account-foundup-status.status-ready { background: #4ade80; }
+.account-foundup-status.status-conditional { background: #ffd700; }
+.account-foundup-status.status-discoverable_only { background: rgba(243, 241, 248, 0.3); }
+
+/* Invites expander */
+.account-invites-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--text-dim, rgba(243, 241, 248, 0.7));
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.account-invites-toggle:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.account-invites-toggle svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.2s;
+}
+.account-invites-toggle.expanded svg {
+  transform: rotate(180deg);
+}
+.account-invites-drawer {
+  display: none;
+  margin-top: 0.5rem;
+}
+.account-invites-drawer.open {
+  display: block;
+}
+
+/* Options */
+.account-options-list {
+  display: grid;
+  gap: 0.35rem;
+}
+.account-option-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.75rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--text-dim, rgba(243, 241, 248, 0.7));
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.account-option-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+.account-option-btn svg {
+  width: 16px;
+  height: 16px;
+  opacity: 0.5;
+}
+
+/* Concierge essentials */
+.account-concierge-hints {
+  display: grid;
+  gap: 0.4rem;
+}
+.account-concierge-hint {
+  font-size: 0.82rem;
+  color: rgba(243, 241, 248, 0.55);
+  line-height: 1.45;
+  padding-left: 0.75rem;
+  border-left: 2px solid rgba(141, 113, 255, 0.2);
+}
+
+/* Avatar trigger in header */
+.mall-avatar-trigger {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  flex-shrink: 0;
+}
+.mall-avatar-trigger img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(141, 113, 255, 0.25);
+}
+.mall-avatar-trigger .account-avatar-placeholder {
+  width: 36px;
+  height: 36px;
+  font-size: 0.85rem;
+}
+
+@media (min-width: 640px) {
+  .account-plane {
+    max-width: 28rem;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -100%);
+    border-radius: 0 0 1.5rem 1.5rem;
+  }
+  .account-plane.open {
+    transform: translate(-50%, 0);
+  }
+}
