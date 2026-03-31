@@ -180,6 +180,27 @@ class TestValidateManifest:
             errors = validate_manifest(data)
             assert errors == [], f"Stage {stage} should be valid"
 
+    def test_valid_launch_readiness(self):
+        """All valid launch_readiness values pass."""
+        for readiness in ["ready", "conditional", "discoverable_only"]:
+            data = _valid_manifest_data(launch_readiness=readiness)
+            errors = validate_manifest(data)
+            assert errors == [], f"Readiness {readiness} should be valid"
+
+    def test_invalid_launch_readiness(self):
+        """Invalid launch_readiness value produces error."""
+        data = _valid_manifest_data(launch_readiness="shipped")
+        errors = validate_manifest(data)
+        assert any("launch_readiness" in e for e in errors)
+
+    def test_launch_readiness_omitted_is_valid(self):
+        """Omitting launch_readiness is valid (defaults to discoverable_only)."""
+        data = _valid_manifest_data()
+        # Ensure no launch_readiness key
+        data.pop("launch_readiness", None)
+        errors = validate_manifest(data)
+        assert errors == []
+
 
 # ---------------------------------------------------------------------------
 # Manifest Loading
@@ -243,6 +264,13 @@ class TestLoadManifest:
         assert manifest.capabilities == []
         assert manifest.data_namespace == ""
         assert manifest.holo_collections == []
+        assert manifest.launch_readiness == "discoverable_only"
+
+    def test_load_launch_readiness(self):
+        """launch_readiness is loaded from manifest data."""
+        data = _valid_manifest_data(launch_readiness="conditional")
+        manifest = load_manifest(data)
+        assert manifest.launch_readiness == "conditional"
 
     def test_load_unsupported_type(self):
         """Unsupported source type returns None."""
@@ -584,6 +612,18 @@ class TestBuildFoundUpTile:
         assert tile.active_agents == 0
         assert tile.tasks_in_flight == 0
 
+    def test_tile_propagates_launch_readiness(self):
+        """Tile inherits launch_readiness from manifest."""
+        manifest = _make_manifest(launch_readiness="conditional")
+        tile = build_foundup_tile(manifest)
+        assert tile.launch_readiness == "conditional"
+
+    def test_tile_launch_readiness_default(self):
+        """Tile defaults to discoverable_only when manifest omits it."""
+        manifest = _make_manifest()
+        tile = build_foundup_tile(manifest)
+        assert tile.launch_readiness == "discoverable_only"
+
 
 # ---------------------------------------------------------------------------
 # PfmallShell Integration
@@ -813,6 +853,9 @@ class TestRealManifestDiscovery:
         assert m.lifecycle_stage == "proto"
         assert m.token_symbol == "JUNK"
         assert m.is_invite_only is True
+        assert m.launch_readiness == "conditional"
+        assert m.entry_url == "frontend/index.html"
+        assert m.icon_url == "frontend/public/icon-192.svg"
 
     def test_magadoom_manifest(self, shell):
         """MAGADOOM manifest has correct fields."""
@@ -822,6 +865,8 @@ class TestRealManifestDiscovery:
         assert m.name == "MAGADOOM"
         assert m.category == "games"
         assert m.token_symbol == "DOOM"
+        assert m.lifecycle_stage == "incubating"
+        assert m.launch_readiness == "discoverable_only"
 
     def test_antifafm_manifest(self, shell):
         """antifaFM manifest has correct fields."""
@@ -832,6 +877,8 @@ class TestRealManifestDiscovery:
         assert m.category == "media"
         assert m.token_symbol == "ANTI"
         assert m.required_subscription_tier == "starter"
+        assert m.launch_readiness == "discoverable_only"
+        assert m.icon_url == "assets/antifaFMlogo.png"
 
     def test_route_resolution_for_seeded_foundup(self, shell):
         """Route resolves for a real seeded FoundUp."""

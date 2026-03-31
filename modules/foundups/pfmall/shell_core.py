@@ -50,6 +50,12 @@ VALID_STAGES = frozenset({
     "incubating", "externalized", "federated",
 })
 
+VALID_READINESS = frozenset({
+    "ready",              # Frontend exists, tests pass, can be loaded in shell
+    "conditional",        # Frontend exists but has known gaps
+    "discoverable_only",  # No frontend, catalog info card only
+})
+
 SHELL_ROUTES = frozenset({
     "/", "/discover", "/wallet", "/search", "/settings", "/auth/callback",
 })
@@ -140,6 +146,7 @@ class FoundUpManifest:
     holo_collections: List[str] = field(default_factory=list)
     category: str = "uncategorized"
     is_invite_only: bool = True
+    launch_readiness: str = "discoverable_only"
     signature: str = ""
     created_at: str = ""
     updated_at: str = ""
@@ -169,6 +176,7 @@ class FoundUpTile:
     token_symbol: str = ""
     is_invite_only: bool = True
     icon_url: str = ""
+    launch_readiness: str = "discoverable_only"
 
     # Overlay (advisory)
     health_status: str = "unknown"
@@ -268,6 +276,11 @@ def validate_manifest(data: dict) -> List[str]:
     if isinstance(fid, str) and fid and len(fid) < 3:
         errors.append("foundup_id too short (minimum 3 characters)")
 
+    # Launch readiness (optional, validated if present)
+    readiness = data.get("launch_readiness", "")
+    if readiness and readiness not in VALID_READINESS:
+        errors.append(f"invalid launch_readiness: {readiness}")
+
     return errors
 
 
@@ -314,6 +327,7 @@ def load_manifest(source: Union[Path, dict]) -> Optional[FoundUpManifest]:
         holo_collections=data.get("holo_collections", []),
         category=data.get("category", "uncategorized"),
         is_invite_only=data.get("is_invite_only", True),
+        launch_readiness=data.get("launch_readiness", "discoverable_only"),
         signature=data.get("signature", ""),
         created_at=data.get("created_at", ""),
         updated_at=data.get("updated_at", ""),
@@ -464,6 +478,7 @@ def build_foundup_tile(
         token_symbol=manifest.token_symbol,
         is_invite_only=manifest.is_invite_only,
         icon_url=manifest.icon_url,
+        launch_readiness=manifest.launch_readiness,
     )
 
     if overlay is not None:

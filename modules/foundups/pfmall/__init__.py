@@ -25,6 +25,7 @@ from modules.foundups.pfmall.shell_core import (
     ShellCatalog,
     ShellConfig,
     PfmallShell,
+    VALID_READINESS,
 )
 
 __all__ = [
@@ -42,4 +43,5 @@ __all__ = [
     "ShellCatalog",
     "ShellConfig",
     "PfmallShell",
+    "VALID_READINESS",
 ]

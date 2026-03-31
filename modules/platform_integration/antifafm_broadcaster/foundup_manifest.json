@@ -9,7 +9,7 @@
   "lifecycle_stage": "proto",
   "entry_url": "",
   "routing_prefix": "/f/antifafm_001",
-  "icon_url": "",
+  "icon_url": "assets/antifaFMlogo.png",
   "required_subscription_tier": "starter",
   "is_invite_only": true,
   "capabilities": ["search", "agents_basic", "offline"],
@@ -24,6 +24,7 @@
   "owner_id": "012",
   "token_symbol": "ANTI",
   "category": "media",
+  "launch_readiness": "discoverable_only",
   "created_at": "2025-09-01T00:00:00Z",
   "signature": ""
 }

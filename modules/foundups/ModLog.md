@@ -2,6 +2,41 @@
 
 ## Chronological Change Log
 
+### 2026-03-31 - p.fMALL Manifest Readiness Hardening
+
+**By:** 0102
+**WSP References:** WSP 11 (Interface Contract), WSP 49 (Structure), WSP 50 (Pre-Action Verification)
+**Slice:** `pfmall_manifest_readiness_hardening` (P0)
+
+**What changed**
+- Added `launch_readiness` schema field to shell core: `ready | conditional | discoverable_only`
+  - New constant `VALID_READINESS` in `shell_core.py`
+  - Field added to `FoundUpManifest`, `FoundUpTile`, validation, loading, tile building
+  - Exported `VALID_READINESS` from `pfmall/__init__.py`
+- Hardened 3 seeded manifests to reflect repo truth:
+  - **antifaFM**: `icon_url` → `assets/antifaFMlogo.png`, `launch_readiness` → `discoverable_only`
+  - **GotJunk**: `icon_url` → `frontend/public/icon-192.svg`, `entry_url` → `frontend/index.html`, `launch_readiness` → `conditional`
+  - **MAGADOOM**: `lifecycle_stage` → `incubating` (downgrade from proto), `launch_readiness` → `discoverable_only`
+- Added 6 new tests (83 total, all passing):
+  - Validation: valid readiness values, invalid readiness, omitted readiness
+  - Loading: launch_readiness loaded, default value
+  - Tile: propagation from manifest, default value
+
+**Why**
+- Catalog must distinguish loadable web apps from backend-only services
+- antifaFM and MAGADOOM have no web frontend — cannot be loaded as iframe micro-frontends
+- GotJunk has React PWA frontend but known gaps → `conditional`
+- MAGADOOM test drift (pytest failures) warrants `incubating` not `proto`
+
+**Catalog posture after hardening**
+| Tenant | launch_readiness | lifecycle_stage | icon_url | entry_url |
+|--------|-----------------|-----------------|----------|-----------|
+| antifaFM | discoverable_only | proto | assets/antifaFMlogo.png | (empty) |
+| GotJunk | conditional | proto | frontend/public/icon-192.svg | frontend/index.html |
+| MAGADOOM | discoverable_only | incubating | (empty) | (empty) |
+
+---
+
 ### 2026-03-31 - p.fMALL Manifest Seed Phase 1
 
 **By:** 0102

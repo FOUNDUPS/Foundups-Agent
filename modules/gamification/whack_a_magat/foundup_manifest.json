@@ -6,7 +6,7 @@
   "description": "Gamified moderation engine. Quake-style fragging XP from YouTube live chat timeouts.",
   "tagline": "Gamified moderation for live streams",
   "tier": "F0_DAE",
-  "lifecycle_stage": "proto",
+  "lifecycle_stage": "incubating",
   "entry_url": "",
   "routing_prefix": "/f/magadoom_001",
   "icon_url": "",
@@ -24,6 +24,7 @@
   "owner_id": "012",
   "token_symbol": "DOOM",
   "category": "games",
+  "launch_readiness": "discoverable_only",
   "created_at": "2025-08-01T00:00:00Z",
   "signature": ""
 }
