@@ -1,5 +1,39 @@
 # HoloIndex Package ModLog
 
+## [2026-03-31] Core Split Phase 3 — Introspection Surface (holoindex_core_split_phase3_module_introspection_surface)
+
+**Agent**: 0102
+**WSP References**: WSP 87 (Size Limits), WSP 72 (Block Independence), WSP 49 (Module Structure)
+**Status**: COMPLETE
+
+### Context
+
+PROMETHEUS HANDOFF from 012: extract the module-introspection / preview-enrichment surface from `holo_index/core/holo_index.py` into a focused `introspection_engine.py` module, completing the three-phase core split.
+
+### Changes
+
+1. **Created** `holo_index/core/introspection_engine.py` (486 lines) — module compliance and preview enrichment:
+   - `check_module_exists(holo, module_name)` — WSP compliance introspection
+   - `enhance_code_results_with_previews(holo, code_hits)` — search result enrichment
+   - `_extract_typescript_entities(holo, file_path)` — cached TS entity parsing
+   - `_resolve_location_parts(holo, location)`, `_find_symbol_line(file_path, symbol)`
+   - `_match_typescript_entity(symbol, entities)`, `_extract_ast_preview(filepath, match_line, context)`
+   - `parse_typescript_entities(lines, context)` + 7 TS regex patterns + stateless helpers
+2. **Replaced** 7 instance methods + 4 module-level items in `holo_index.py` with 3 thin delegates + 1 re-export (895 → 439 lines, 456 lines removed)
+3. **Preserved** import stability: `from holo_index.core.holo_index import parse_typescript_entities` via re-export
+4. **Updated** `INTERFACE.md` Core Module Layout with `introspection_engine.py`
+5. **Cleaned** unused imports: `re`, `Tuple`
+
+### Test Results
+
+17 passed, 1 skipped, 1 pre-existing failure (setter key normalization collision in `test_parse_typescript_entities` — verified same failure on parent commit).
+
+### Pre-existing Bug Noted
+
+`parse_typescript_entities` setter detection has a key collision: `_normalize_symbol_key("PendingClassificationItem")` == `_normalize_symbol_key("pendingClassificationItem")` → both produce `pendingclassificationitem`, so the setter entry is silently dropped. Not caused by this extraction — documented for future fix.
+
+---
+
 ## [2026-03-31] Core Split Phase 2 — Indexing Surface (holoindex_core_split_phase2_indexing_surface)
 
 **Agent**: 0102

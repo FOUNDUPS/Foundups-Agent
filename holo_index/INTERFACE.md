@@ -181,11 +181,12 @@ from holo_index.cli import QwenAdvisor   # advisor (may be None)
 
 ```
 holo_index/core/
-  __init__.py         # Exports HoloIndex, SearchCache, get_search_cache
-  holo_index.py       # HoloIndex class — bootstrap, collection helpers, module compliance
-  search_engine.py    # Extracted search surface — execute_search() entry point
-  indexing_engine.py  # Extracted indexing surface — index_*() orchestrators
-  search_cache.py     # LRU+TTL search cache
+  __init__.py              # Exports HoloIndex, SearchCache, get_search_cache
+  holo_index.py            # HoloIndex class — bootstrap, collection helpers, thin delegates
+  search_engine.py         # Extracted search surface — execute_search() entry point
+  indexing_engine.py       # Extracted indexing surface — index_*() orchestrators
+  introspection_engine.py  # Module compliance, preview enrichment, TS entity parsing
+  search_cache.py          # LRU+TTL search cache
 ```
 
 `HoloIndex.search()` delegates to `search_engine.execute_search(holo, ...)`.
@@ -194,7 +195,10 @@ All search logic (vector, lexical, ripgrep symbol, hit merging) lives in `search
 `HoloIndex.index_*()` methods delegate to `indexing_engine.index_*(holo, ...)`.
 All indexing orchestrators, document classification, and web asset collection live in `indexing_engine.py`.
 
-The public API (`holo.search(query)`, `holo.index_code_entries()`, etc.) is unchanged.
+`HoloIndex.check_module_exists()` and preview enrichment delegate to `introspection_engine`.
+`parse_typescript_entities` is re-exported from `holo_index.py` for import stability.
+
+The public API (`holo.search(query)`, `holo.index_code_entries()`, `holo.check_module_exists()`, etc.) is unchanged.
 
 ## Compatibility Notes
 - `code` / `wsps` keys remain present for backward compatibility.
