@@ -99,6 +99,18 @@ from .staker_viability import (
     run_staker_matrix,
 )
 
+from .channel_partner_pool import (
+    CHANNEL_PARTNER_CAP,
+    CHANNEL_PARTNER_PASSIVE_SHARE,
+    RegistryState,
+    ChannelPartner,
+    GenesisClosureEvent,
+    ChannelPartnerDistribution,
+    ChannelPartnerPool,
+    get_channel_partner_pool,
+    reset_channel_partner_pool,
+)
+
 from .fee_simulation import (
     FeeScenario,
     SimulationResult,
@@ -399,6 +411,16 @@ __all__ = [
     "calculate_staker_distributions",
     "find_optimal_staker_count",
     "run_staker_matrix",
+    # Channel Partner Pool (genesis founding partners)
+    "CHANNEL_PARTNER_CAP",
+    "CHANNEL_PARTNER_PASSIVE_SHARE",
+    "RegistryState",
+    "ChannelPartner",
+    "GenesisClosureEvent",
+    "ChannelPartnerDistribution",
+    "ChannelPartnerPool",
+    "get_channel_partner_pool",
+    "reset_channel_partner_pool",
     # Fee simulation (test different economic parameters)
     "FeeScenario",
     "SimulationResult",

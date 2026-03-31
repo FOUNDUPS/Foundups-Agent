@@ -1,5 +1,75 @@
 # Simulator ModLog
 
+## 2026-03-31 - Genesis Channel Partner Pool Spec
+
+### Why
+Architect/CTO handoff (WSP 97): Implement deterministic ChannelPartnerPool mechanics
+as part of the Du 4% passive participation partition.
+
+### Created
+- `modules/foundups/simulator/economics/channel_partner_pool.py` (250+ lines)
+- `modules/foundups/simulator/tests/test_channel_partner_pool.py` (15 tests)
+
+### Channel Partner Rules Implemented
+| Rule | Implementation |
+|------|----------------|
+| Pre-launch only | `RegistryState.OPEN` → `CLOSED` |
+| Hard cap | `CHANNEL_PARTNER_CAP = 21` |
+| Equal split | `pool_amount / partner_count` |
+| Duplicate rejection | Check `partner_id in _partners` |
+| Launch closure | `close_on_mainnet_genesis(event_id, timestamp, foundup_id)` |
+
+### API Surface
+```python
+# Registration
+pool.register_partner(partner_id, display_name, channel_url) -> (success, msg)
+
+# Closure
+pool.close_on_mainnet_genesis(event_id, timestamp, foundup_id) -> bool
+
+# Distribution
+pool.distribute_epoch(epoch, pool_amount) -> ChannelPartnerDistribution
+
+# Queries
+pool.list_partners() -> List[ChannelPartner]
+pool.get_partner(partner_id) -> Optional[ChannelPartner]
+pool.get_stats() -> Dict
+```
+
+### Exports Added to `economics/__init__.py`
+- `CHANNEL_PARTNER_CAP`
+- `CHANNEL_PARTNER_PASSIVE_SHARE`
+- `RegistryState`
+- `ChannelPartner`
+- `GenesisClosureEvent`
+- `ChannelPartnerDistribution`
+- `ChannelPartnerPool`
+- `get_channel_partner_pool`
+- `reset_channel_partner_pool`
+
+### Test Coverage
+| Test Class | Tests | Status |
+|------------|-------|--------|
+| TestRegistration | 5 | PASS |
+| TestClosure | 3 | PASS |
+| TestDistribution | 5 | PASS |
+| TestStatistics | 2 | PASS |
+| **TOTAL** | **15** | **PASS** |
+
+### What Remains for Future Slices
+- BTCStakerPool weighted allocation (Slice 3)
+- Hurdle state machine (Slice 4)
+- Algorand contract spec (Slice 5)
+- Marketing doc (Slice 6)
+
+### Outcome
+- Genesis channel partner mechanics are deterministic
+- Equal-split math is explicit and tested
+- Closure-at-launch rule is modeled
+- Slice is merge-ready
+
+---
+
 ## 2026-03-31 - Du Pool Boundary and Partition Reconciliation
 
 ### Why
