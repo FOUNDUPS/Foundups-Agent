@@ -122,6 +122,39 @@ class TestHandoffPage:
 
 
 # ---------------------------------------------------------------------------
+# FoundUp Route Handoff (/f/{foundup_id})
+# ---------------------------------------------------------------------------
+
+class TestFoundUpRouteHandoff:
+    """Tests for /f/{foundup_id} redirect to handoff UI."""
+
+    def test_f_route_redirects(self):
+        """GET /f/{id} redirects to handoff UI."""
+        r = client.get("/f/gotjunk_001", follow_redirects=False)
+        assert r.status_code == 307
+        assert "/pfmall/ui/handoff.html?id=gotjunk_001" in r.headers["location"]
+
+    def test_f_route_with_subpath_redirects(self):
+        """GET /f/{id}/listings/search strips sub-path and redirects."""
+        r = client.get("/f/gotjunk_001/listings/search", follow_redirects=False)
+        assert r.status_code == 307
+        assert "/pfmall/ui/handoff.html?id=gotjunk_001" in r.headers["location"]
+
+    def test_f_route_unknown_id_still_redirects(self):
+        """Unknown FoundUp ID still redirects; handoff page shows not-found."""
+        r = client.get("/f/nonexistent_999", follow_redirects=False)
+        assert r.status_code == 307
+        assert "id=nonexistent_999" in r.headers["location"]
+
+    def test_f_route_follows_to_handoff(self):
+        """Following redirect lands on handoff HTML page."""
+        r = client.get("/f/gotjunk_001")
+        assert r.status_code == 200
+        assert "text/html" in r.headers["content-type"]
+        assert "handoff" in r.text.lower()
+
+
+# ---------------------------------------------------------------------------
 # JSON API Regressions (ensure UI mount didn't break API)
 # ---------------------------------------------------------------------------
 
