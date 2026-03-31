@@ -1,7 +1,7 @@
 # Active Slice Ledger
 
 **Authority**: 0102 architect lane
-**Updated**: 2026-03-29 (antifafm_voxtral_eval_contract complete)
+**Updated**: 2026-03-31 (antifafm_voxtral_eval_contract complete)
 **Rule**: Every agent reads this first. If repo truth contradicts an entry, update this ledger — not 012.
 
 ---
