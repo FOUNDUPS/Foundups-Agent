@@ -2,6 +2,41 @@
 
 ## Chronological Change Log
 
+### 2026-03-31 - p.fMALL Shell Core Scaffold
+
+**By:** 0102
+**WSP References:** WSP 11 (Interface Contract), WSP 72 (Module Independence), WSP 84 (Code Reuse)
+**Slice:** `pfmall_shell_core_scaffold` (P0)
+
+**What changed**
+- Created `pfmall/` package under `modules/foundups/`:
+  - `shell_core.py` (~370 lines): Manifest discovery, validation, catalog assembly, route resolution, manifest+overlay merge, shell bootstrap
+  - `tests/test_shell_core.py` (69 tests): Full coverage of validation, discovery, catalog, routing, tile building, graceful degradation
+  - `__init__.py`: Public API re-exports
+
+**Shell Core API surface**
+- `discover_manifests(search_paths)` — find `foundup_manifest.json` files
+- `load_manifest(source)` / `validate_manifest(data)` — load from Path or dict, validate against schema
+- `ShellCatalog` — register/get/find/list manifests, filter by category
+- `resolve_route(path, catalog)` → `RouteTarget` (SHELL / FOUNDUP / NOT_FOUND)
+- `build_foundup_tile(manifest, overlay)` → merged view model
+- `PfmallShell` — orchestrator with `.boot()`, `.discover_foundups()`, `.build_catalog()`, `.resolve_route()`, `.build_foundup_tile()`
+- `create_pfmall_shell(search_paths, state_provider)` — factory
+
+**Why**
+- Architecture docs (Shell Contract, Manifest Schema, Routing Model) exist but no runtime scaffold
+- OpenClaw catalog integration (`pfmall_catalog.py`) is a command layer, not the shell core
+- Need typed primitives before any UI work can begin
+
+**Key decisions**
+- Package lives at `modules/foundups/pfmall/` — shell is a FoundUp-domain concept
+- Types defined locally (no cross-domain import from moltbot_bridge)
+- Overlay consumed through provider boundary only — graceful degradation when absent
+- Phase 1 routing: shell routes fixed set, FoundUp routes via `/f/{id}/*`, no morphing
+- No UI, no auth, no module federation, no HMAC verification (all later slices)
+
+---
+
 ### 2026-03-31 - p.fMALL State Provider PoC
 
 **By:** 0102

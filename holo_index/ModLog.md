@@ -4,7 +4,7 @@
 
 **Agent**: 0102
 **WSP References**: WSP 49 (Module Structure), WSP 62 (File Size), WSP 84 (Code Reuse)
-**Status**: IN PROGRESS
+**Status**: COMPLETE
 
 ### Context
 
@@ -35,8 +35,50 @@ All consumers unchanged — `from holo_index.cli import main` still works via `_
 
 ### Pending
 
-- Inline code in `_cli_main.py` shadowed by dispatch calls — awaiting 012 approval to remove
-- Orphaned helpers need evaluation for connection or retirement
+- ~~Inline code in `_cli_main.py` shadowed by dispatch calls — awaiting 012 approval to remove~~ DONE (see dead code prune below)
+- Orphaned helpers need evaluation for connection or retirement → deferred to `holoindex_cli_orphan_helper_prune`
+
+---
+
+## [2026-03-31] CLI Dead Code Prune (holoindex_cli_dead_code_prune)
+
+**Agent**: 0102
+**WSP References**: WSP 62 (File Size), WSP 84 (Code Reuse)
+**Status**: COMPLETE
+
+### Context
+
+PROMETHEUS HANDOFF from 012: remove shadowed inline handler blocks from `_cli_main.py` now that extracted command modules own the dispatch.
+
+### Changes
+
+Removed 3 shadowed inline blocks (389 lines total):
+
+| Shadow | Handler | Lines Removed |
+|--------|---------|---------------|
+| HoloDAE lifecycle | `--start-holodae`, `--stop-holodae`, `--holodae-status` | ~33 |
+| Module linking/queries | `--link-modules`, `--query-modules`, `--wsp`, `--list-modules` | ~162 |
+| HoloDAE features | `--pattern-coach`, `--module-analysis`, `--health-check`, etc. (12 flags) | ~191 |
+
+**Before**: 1,863 lines | **After**: 1,474 lines | **Reduction**: 389 lines (20.9%)
+
+### Orphaned Helpers (kept, per 012 conservative directive)
+
+5 helper files in `holo_index/cli/` have zero external references. Kept for now — deferred to `holoindex_cli_orphan_helper_prune`:
+
+| File | Lines | Export |
+|------|-------|--------|
+| `adaptive_pipeline.py` | 109 | `run_adaptive_pipeline()` |
+| `auto_refresh.py` | 146 | `ensure_autonomous_daemon_running()` |
+| `holo_request.py` | 59 | `run_holo_request()` |
+| `pattern_coach.py` | 49 | `get_pattern_coach_guidance()` |
+| `root_alerts.py` | 37 | `get_root_alert_summary()` |
+
+### Verification
+
+- All 11 tests pass, 1 skipped (QwenAdvisor stub)
+- CLI `--help`, `--bundle-json`, `--system-check` dispatch verified
+- No behavioral change — dispatch calls already owned all routing
 
 ---
 
