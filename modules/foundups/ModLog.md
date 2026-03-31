@@ -2,6 +2,31 @@
 
 ## Chronological Change Log
 
+### 2026-03-31 - p.fMALL HTTP Read Surface
+
+**By:** 0102
+**WSP References:** WSP 11 (Interface Contract), WSP 72 (Module Independence)
+**Slice:** `pfmall_http_read_surface` (P1)
+
+**What changed**
+- Created `modules/foundups/pfmall/http_api.py` — minimal read-only FastAPI surface
+  - `GET /pfmall/health` — boot status, catalog count
+  - `GET /pfmall/catalog` — full catalog as tile dicts, optional `?category=` filter
+  - `GET /pfmall/foundups/{foundup_id}` — single tile lookup, 404 on miss
+  - `GET /pfmall/resolve-route?path=` — route resolution dict
+- Added 13 HTTP endpoint tests in `test_http_api.py` (120 total suite, all passing)
+
+**Why**
+- Adapter layer exists but has no transport surface for other processes or future shell frontend
+- FastAPI is the standard HTTP framework in this repo (4 existing apps, in requirements.txt)
+
+**Design**
+- Pure transport — all logic delegated to `pfmall/api.py`
+- No auth, no mutation, no business logic duplication
+- Run: `uvicorn modules.foundups.pfmall.http_api:app --port 8100`
+
+---
+
 ### 2026-03-31 - p.fMALL API Adapter
 
 **By:** 0102
