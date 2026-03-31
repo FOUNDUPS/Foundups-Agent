@@ -393,17 +393,64 @@ class PfmallCatalogManager:
 
 
 # ---------------------------------------------------------------------------
+# Provider Loader
+# ---------------------------------------------------------------------------
+
+def _try_load_simulator_provider() -> Optional[StateOverlayProvider]:
+    """Try to load the simulator state provider.
+
+    Returns None if simulator not available or not configured.
+    This is the only place that imports simulator internals.
+    """
+    try:
+        from modules.foundups.simulator.adapters.pfmall_state_provider import (
+            create_simulator_provider,
+        )
+        from modules.foundups.simulator.state_store import StateStore
+        from modules.foundups.simulator.event_bus import EventBus
+
+        # Create a minimal state store for querying
+        # In production, this would connect to a running simulator
+        event_bus = EventBus()
+        state_store = StateStore(event_bus)
+        provider = create_simulator_provider(state_store=state_store)
+        logger.info("[PFMALL-CATALOG] Simulator provider loaded")
+        return provider
+    except ImportError as exc:
+        logger.debug("[PFMALL-CATALOG] Simulator provider not available: %s", exc)
+        return None
+    except Exception as exc:
+        logger.warning("[PFMALL-CATALOG] Failed to load simulator provider: %s", exc)
+        return None
+
+
+# ---------------------------------------------------------------------------
 # Command Handlers
 # ---------------------------------------------------------------------------
 
 _catalog_manager: Optional[PfmallCatalogManager] = None
+_state_provider: Optional[StateOverlayProvider] = None
+
+
+def configure_state_provider(provider: StateOverlayProvider) -> None:
+    """Configure the state overlay provider for the catalog.
+
+    Call this at startup to wire in a provider.
+    """
+    global _state_provider, _catalog_manager
+    _state_provider = provider
+    _catalog_manager = None  # Reset to pick up new provider
+    logger.info("[PFMALL-CATALOG] Provider configured: %s", provider.provider_id)
 
 
 def _get_catalog_manager() -> PfmallCatalogManager:
     """Get or create the catalog manager singleton."""
-    global _catalog_manager
+    global _catalog_manager, _state_provider
     if _catalog_manager is None:
-        _catalog_manager = PfmallCatalogManager()
+        # Try to load simulator provider if none configured
+        if _state_provider is None:
+            _state_provider = _try_load_simulator_provider()
+        _catalog_manager = PfmallCatalogManager(state_provider=_state_provider)
     return _catalog_manager
 
 

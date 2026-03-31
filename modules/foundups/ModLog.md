@@ -2,6 +2,41 @@
 
 ## Chronological Change Log
 
+### 2026-03-31 - p.fMALL State Provider PoC
+
+**By:** 0102
+**WSP References:** WSP 11 (Interface Contract), WSP 72 (Module Independence), WSP 84 (Code Reuse)
+**Slice:** `pfmall_state_provider_poc` (P0)
+
+**What changed**
+- Added `simulator/adapters/pfmall_state_provider.py` (~280 lines):
+  - `SimulatorStateProvider` class implementing StateOverlayProvider protocol
+  - Single translation boundary from `FoundUpTile` to `FoundUpStateOverlay`
+  - Health/availability derivation from daemon and activity state
+  - CABR trend tracking with rolling history
+  - Reserve health abstraction (strong/adequate/low/critical)
+  - Freshness TTL calculation from tick delta
+- Added `simulator/tests/test_pfmall_state_provider.py` (32 tests):
+  - Provider behavior tests (health, availability, lifecycle, activity)
+  - Graceful degradation tests (no store, unknown FoundUp)
+  - Protocol compliance tests
+- Extended `pfmall_catalog.py`:
+  - `_try_load_simulator_provider()` for automatic provider loading
+  - `configure_state_provider()` for explicit provider injection
+
+**Why**
+- `PFMALL_STATE_OVERLAY_CONTRACT.md` defined the overlay schema but no concrete provider
+- `openclaw_pfmall_catalog_integration` added catalog commands that degrade gracefully
+- This slice adds a PoC provider so OpenClaw can show live state when simulator is available
+
+**Key decisions**
+- Provider lives in `simulator/adapters/` — keeps simulator internals in one place
+- `pfmall_catalog.py` imports provider only in `_try_load_simulator_provider()`
+- Catalog still degrades gracefully when provider fails or returns None
+- No changes to overlay contract or manifest schema
+
+---
+
 ### 2026-03-31 - p.fMALL State Overlay Contract
 
 **By:** 0102
