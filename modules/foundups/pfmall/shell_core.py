@@ -151,6 +151,35 @@ class FoundUpManifest:
     created_at: str = ""
     updated_at: str = ""
 
+    def to_dict(self) -> Dict[str, Any]:
+        """Deterministic dict serialization of manifest fields."""
+        return {
+            "foundup_id": self.foundup_id,
+            "name": self.name,
+            "version": self.version,
+            "description": self.description,
+            "tagline": self.tagline,
+            "icon_url": self.icon_url,
+            "tier": self.tier,
+            "lifecycle_stage": self.lifecycle_stage,
+            "entry_url": self.entry_url,
+            "routing_prefix": self.routing_prefix,
+            "required_subscription_tier": self.required_subscription_tier,
+            "capabilities": list(self.capabilities),
+            "agent_routes": list(self.agent_routes),
+            "cabr_contract": dict(self.cabr_contract),
+            "owner_id": self.owner_id,
+            "token_symbol": self.token_symbol,
+            "data_namespace": self.data_namespace,
+            "holo_collections": list(self.holo_collections),
+            "category": self.category,
+            "is_invite_only": self.is_invite_only,
+            "launch_readiness": self.launch_readiness,
+            "signature": self.signature,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at,
+        }
+
 
 # ---------------------------------------------------------------------------
 # FoundUp Tile (merged view model)
@@ -190,6 +219,33 @@ class FoundUpTile:
     freshness_ttl: int = 0
     last_updated_at: str = ""
 
+    def to_dict(self) -> Dict[str, Any]:
+        """Deterministic dict serialization of tile fields."""
+        return {
+            "foundup_id": self.foundup_id,
+            "name": self.name,
+            "tagline": self.tagline,
+            "description": self.description,
+            "category": self.category,
+            "tier": self.tier,
+            "lifecycle_stage": self.lifecycle_stage,
+            "routing_prefix": self.routing_prefix,
+            "token_symbol": self.token_symbol,
+            "is_invite_only": self.is_invite_only,
+            "icon_url": self.icon_url,
+            "launch_readiness": self.launch_readiness,
+            "health_status": self.health_status,
+            "availability": self.availability,
+            "cabr_score": self.cabr_score,
+            "cabr_trend": self.cabr_trend,
+            "active_agents": self.active_agents,
+            "tasks_in_flight": self.tasks_in_flight,
+            "reserve_health": self.reserve_health,
+            "state_provider": self.state_provider,
+            "freshness_ttl": self.freshness_ttl,
+            "last_updated_at": self.last_updated_at,
+        }
+
 
 # ---------------------------------------------------------------------------
 # Route Target
@@ -204,6 +260,20 @@ class RouteTarget:
     foundup_id: str = ""
     foundup_path: str = ""
     error: str = ""
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Deterministic dict serialization of route target."""
+        d: Dict[str, Any] = {
+            "kind": self.kind.value,
+            "path": self.path,
+        }
+        if self.foundup_id:
+            d["foundup_id"] = self.foundup_id
+        if self.foundup_path:
+            d["foundup_path"] = self.foundup_path
+        if self.error:
+            d["error"] = self.error
+        return d
 
 
 # ---------------------------------------------------------------------------

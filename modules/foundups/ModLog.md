@@ -2,6 +2,41 @@
 
 ## Chronological Change Log
 
+### 2026-03-31 - p.fMALL API Adapter
+
+**By:** 0102
+**WSP References:** WSP 11 (Interface Contract), WSP 72 (Module Independence), WSP 84 (Code Reuse)
+**Slice:** `pfmall_api_adapter` (P1)
+
+**What changed**
+- Created `modules/foundups/pfmall/api.py` — thin read-only adapter over shell core
+  - `get_default_shell()`: boots singleton shell with 3-domain search paths
+  - `list_foundups(category)`: catalog listing as list[dict]
+  - `get_foundup(foundup_id)`: single tile lookup as dict | None
+  - `resolve_foundup_route(path)`: route resolution as dict
+- Added `to_dict()` serialization to `FoundUpManifest`, `FoundUpTile`, `RouteTarget` in shell_core.py
+  - `RouteTarget.to_dict()` converts `RouteKind` enum to string value
+  - `RouteTarget.to_dict()` omits empty optional fields (foundup_id, foundup_path, error)
+  - List/dict fields return copies, not references
+- Updated `pfmall/__init__.py` with adapter exports
+- Added 24 adapter tests in `test_api.py` (107 total suite, all passing)
+
+**Why**
+- Shell core is usable internally but has no stable dict-based surface for other modules
+- Serialization gap: dataclasses had no `to_dict()`, enum wasn't string-serialized
+- Default shell singleton avoids repeated boot/discovery for internal callers
+
+**Default search paths**
+```python
+DEFAULT_SEARCH_PATHS = [
+    REPO_ROOT / "modules" / "foundups",
+    REPO_ROOT / "modules" / "gamification",
+    REPO_ROOT / "modules" / "platform_integration",
+]
+```
+
+---
+
 ### 2026-03-31 - p.fMALL Manifest Readiness Hardening
 
 **By:** 0102
