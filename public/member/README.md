@@ -20,6 +20,7 @@ The gateway is preserved. The change is the admitted state.
 ```text
 public/member/
 |- index.html
+|- foundup.html
 |- css/member.css
 |- mall-catalog.json
 |- README.md
@@ -30,7 +31,8 @@ public/member/
 ## Current UX
 
 - swipe or scroll horizontally through FoundUps
-- tap a card to open its shell handoff sheet
+- tap a card to navigate to its dedicated entry page (`foundup.html?id={foundup_id}`)
+- entry page shows readiness posture, details, and what-happens-next copy
 - use the Red Dog icon to open concierge context
 - invite codes remain available from the Red Dog sheet
 

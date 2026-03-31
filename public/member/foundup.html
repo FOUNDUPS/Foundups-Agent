@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>p.fMALL | FoundUp Entry</title>
+  <meta name="description" content="FoundUp entry view inside the p.fMALL shell.">
+  <meta name="theme-color" content="#08080f">
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/logo-dog.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/member.css">
+  <style>
+    /* Entry page layout */
+    .entry-shell {
+      min-height: 100vh;
+      background: #08080f;
+      color: #e4e2ec;
+    }
+
+    .entry-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: rgba(228,226,236,0.6);
+      text-decoration: none;
+      font-size: 0.9rem;
+      padding: 1rem 1.5rem;
+      transition: color 0.15s;
+    }
+    .entry-back:hover { color: #7c5cfc; }
+    .entry-back svg { width: 16px; height: 16px; }
+
+    .entry-hero {
+      padding: 2rem 1.5rem 1.5rem;
+      text-align: center;
+    }
+    .entry-hero-token {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(228,226,236,0.4);
+      margin-bottom: 0.75rem;
+    }
+    .entry-hero-name {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.5rem;
+    }
+    .entry-hero-tagline {
+      font-size: 1rem;
+      color: rgba(228,226,236,0.6);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .entry-badges {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      padding: 1rem 1.5rem;
+    }
+
+    .entry-readiness-block {
+      margin: 1.5rem 1.5rem;
+      padding: 1.5rem;
+      border-radius: 16px;
+      text-align: center;
+    }
+    .entry-readiness-block.readiness-ready {
+      background: rgba(74,222,128,0.08);
+      border: 1px solid rgba(74,222,128,0.2);
+    }
+    .entry-readiness-block.readiness-conditional {
+      background: rgba(255,215,0,0.06);
+      border: 1px solid rgba(255,215,0,0.2);
+    }
+    .entry-readiness-block.readiness-discoverable_only {
+      background: rgba(228,226,236,0.04);
+      border: 1px solid rgba(228,226,236,0.1);
+    }
+    .entry-readiness-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    .readiness-ready .entry-readiness-label { color: #4ade80; }
+    .readiness-conditional .entry-readiness-label { color: #ffd700; }
+    .readiness-discoverable_only .entry-readiness-label { color: rgba(228,226,236,0.5); }
+    .entry-readiness-copy {
+      font-size: 0.95rem;
+      color: rgba(228,226,236,0.7);
+      line-height: 1.5;
+    }
+
+    .entry-details {
+      margin: 1.5rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .entry-detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .entry-detail-row:last-child { border-bottom: none; }
+    .entry-detail-label {
+      font-size: 0.8rem;
+      color: rgba(228,226,236,0.45);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .entry-detail-value {
+      font-size: 0.9rem;
+      color: rgba(228,226,236,0.85);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .entry-what-next {
+      margin: 1.5rem;
+      padding: 1.25rem;
+      background: rgba(124,92,252,0.06);
+      border: 1px solid rgba(124,92,252,0.15);
+      border-radius: 16px;
+    }
+    .entry-what-next h3 {
+      font-size: 0.85rem;
+      color: #7c5cfc;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .entry-what-next p {
+      font-size: 0.9rem;
+      color: rgba(228,226,236,0.65);
+      line-height: 1.5;
+    }
+
+    .entry-description {
+      margin: 1.5rem;
+      padding: 1.25rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+    }
+    .entry-description h3 {
+      font-size: 0.8rem;
+      color: rgba(228,226,236,0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.5rem;
+    }
+    .entry-description p {
+      font-size: 0.95rem;
+      color: rgba(228,226,236,0.7);
+      line-height: 1.6;
+    }
+
+    .entry-not-found {
+      text-align: center;
+      padding: 4rem 1.5rem;
+    }
+    .entry-not-found h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .entry-not-found p {
+      color: rgba(228,226,236,0.5);
+      margin-bottom: 1.5rem;
+    }
+    .entry-not-found a {
+      color: #7c5cfc;
+      text-decoration: none;
+    }
+
+    .entry-footer {
+      text-align: center;
+      padding: 2rem 1.5rem 3rem;
+    }
+    .entry-return-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: rgba(124,92,252,0.1);
+      border: 1px solid rgba(124,92,252,0.25);
+      border-radius: 12px;
+      color: #7c5cfc;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: background 0.15s;
+    }
+    .entry-return-btn:hover {
+      background: rgba(124,92,252,0.18);
+    }
+
+    /* Red Dog floating button (reused from Mall) */
+    .entry-red-dog {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c5cfc, #00d4aa);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(124,92,252,0.3);
+      z-index: 50;
+    }
+    .entry-red-dog img { width: 28px; height: 28px; }
+
+    @media (min-width: 640px) {
+      .entry-hero { padding: 3rem 2rem 2rem; }
+      .entry-hero-name { font-size: 2.5rem; }
+      .entry-readiness-block,
+      .entry-details,
+      .entry-what-next,
+      .entry-description { margin: 1.5rem auto; max-width: 560px; }
+      .entry-footer { padding-bottom: 4rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="entry-shell">
+    <nav>
+      <a href="/member/" class="entry-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        Back to Mall
+      </a>
+    </nav>
+
+    <div id="entryContent">
+      <div style="text-align:center;padding:4rem 1.5rem;color:rgba(228,226,236,0.5);">Loading FoundUp...</div>
+    </div>
+
+    <button id="entryRedDog" class="entry-red-dog" aria-label="Open Red Dog concierge">
+      <img src="/logo-dog.png" alt="">
+    </button>
+  </div>
+
+  <script>
+  (function() {
+    const MALL_CATALOG_URL = '/member/mall-catalog.json';
+    const READINESS_LABELS = {
+      ready: 'Ready',
+      conditional: 'Conditional',
+      discoverable_only: 'Discoverable Only'
+    };
+    const WHAT_NEXT = {
+      ready: 'This FoundUp is ready for direct shell handoff. When tenant embedding is wired, you will enter its live surface from here.',
+      conditional: 'This FoundUp has a working frontend but carries known gaps. When conditions are cleared, it will move to full readiness.',
+      discoverable_only: 'This FoundUp is a backend service visible in the Mall for discovery. It cannot be loaded as a live tenant yet because it has no web frontend.'
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const foundupId = params.get('id');
+    const container = document.getElementById('entryContent');
+
+    if (!foundupId) {
+      renderNotFound('No FoundUp specified');
+      return;
+    }
+
+    fetch(MALL_CATALOG_URL, { cache: 'no-store' })
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(catalog => {
+        const item = catalog.find(e => e.foundup_id === foundupId);
+        if (!item) {
+          renderNotFound('FoundUp not found: ' + esc(foundupId));
+          return;
+        }
+        document.title = 'p.fMALL | ' + item.name;
+        renderEntry(item);
+      })
+      .catch(err => {
+        container.innerHTML = '<div class="entry-not-found"><h2>Error</h2><p>' + esc(err.message) + '</p><a href="/member/">Return to Mall</a></div>';
+      });
+
+    function renderEntry(item) {
+      const readinessClass = 'readiness-' + (item.launch_readiness || 'discoverable_only');
+      container.innerHTML = `
+        <div class="entry-hero">
+          <div class="entry-hero-token">${esc(item.token_symbol)}</div>
+          <h1 class="entry-hero-name">${esc(item.name)}</h1>
+          <p class="entry-hero-tagline">${esc(item.tagline)}</p>
+        </div>
+
+        <div class="entry-badges">
+          <span class="mini-badge">${esc(item.category)}</span>
+          <span class="mini-badge">${esc(item.lifecycle_stage)}</span>
+          <span class="mini-badge">${esc(item.tier)}</span>
+          <span class="mini-badge">${esc(READINESS_LABELS[item.launch_readiness] || item.launch_readiness)}</span>
+        </div>
+
+        <div class="entry-readiness-block ${readinessClass}">
+          <div class="entry-readiness-label">${esc(READINESS_LABELS[item.launch_readiness] || item.launch_readiness)}</div>
+          <div class="entry-readiness-copy">${esc(item.entry_copy || WHAT_NEXT[item.launch_readiness] || '')}</div>
+        </div>
+
+        <div class="entry-details">
+          <div class="entry-detail-row">
+            <span class="entry-detail-label">FoundUp ID</span>
+            <span class="entry-detail-value">${esc(item.foundup_id)}</span>
+          </div>
+          <div class="entry-detail-row">
+            <span class="entry-detail-label">Token</span>
+            <span class="entry-detail-value">${esc(item.token_symbol)}</span>
+          </div>
+          <div class="entry-detail-row">
+            <span class="entry-detail-label">Route</span>
+            <span class="entry-detail-value">${esc(item.routing_prefix)}</span>
+          </div>
+          <div class="entry-detail-row">
+            <span class="entry-detail-label">Lifecycle</span>
+            <span class="entry-detail-value">${esc(item.lifecycle_stage)}</span>
+          </div>
+          <div class="entry-detail-row">
+            <span class="entry-detail-label">Tier</span>
+            <span class="entry-detail-value">${esc(item.tier)}</span>
+          </div>
+        </div>
+
+        <div class="entry-what-next">
+          <h3>What happens next</h3>
+          <p>${esc(WHAT_NEXT[item.launch_readiness] || 'This FoundUp is visible in the Mall.')}</p>
+        </div>
+
+        <div class="entry-description">
+          <h3>About</h3>
+          <p>${esc(item.description)}</p>
+        </div>
+
+        <div class="entry-footer">
+          <a href="/member/" class="entry-return-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M15 18l-6-6 6-6"/></svg>
+            Return to Mall
+          </a>
+        </div>
+      `;
+    }
+
+    function renderNotFound(message) {
+      container.innerHTML = `
+        <div class="entry-not-found">
+          <h2>Not Found</h2>
+          <p>${message}</p>
+          <a href="/member/">Return to Mall</a>
+        </div>
+      `;
+    }
+
+    function esc(s) {
+      if (!s) return '';
+      var d = document.createElement('div');
+      d.textContent = String(s);
+      return d.innerHTML;
+    }
+
+    // Red Dog → return to Mall with concierge context
+    document.getElementById('entryRedDog').addEventListener('click', function() {
+      window.location.href = '/member/';
+    });
+  })();
+  </script>
+</body>
+</html>

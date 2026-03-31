@@ -538,9 +538,10 @@
       cards.forEach(card => {
         card.addEventListener('click', () => {
           const index = Number(card.dataset.index || 0);
-          activeMallIndex = index;
-          updateActiveContext(index);
-          openFoundupOverlay(mallCatalog[index]);
+          const item = mallCatalog[index];
+          if (item && item.foundup_id) {
+            window.location.href = '/member/foundup.html?id=' + encodeURIComponent(item.foundup_id);
+          }
         });
         card.addEventListener('focus', () => {
           const index = Number(card.dataset.index || 0);

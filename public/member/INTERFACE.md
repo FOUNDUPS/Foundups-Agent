@@ -23,7 +23,7 @@
 It owns:
 - invite-gated post-auth landing
 - swipe-driven FoundUp catalog
-- tap-to-enter FoundUp handoff sheet
+- tap-to-enter FoundUp entry page (deep-linkable)
 - Red Dog concierge sheet for invite codes and account context
 
 It does not yet own:
@@ -35,6 +35,7 @@ It does not yet own:
 
 ```text
 /member/index.html
+/member/foundup.html
 /member/css/member.css
 /member/mall-catalog.json
 ```
@@ -83,7 +84,7 @@ interface InviteDoc {
 
 - primary navigation is horizontal swipe / scroll-snap movement across FoundUp cards
 - primary explicit control is the Red Dog icon
-- FoundUp cards are tappable and open a shell-owned handoff sheet
+- FoundUp cards are tappable and navigate to a dedicated entry page (`/member/foundup.html?id={foundup_id}`)
 - invite gate and username claim remain blocking surfaces ahead of the Mall
 
 ---

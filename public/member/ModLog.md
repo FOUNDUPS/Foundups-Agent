@@ -1,5 +1,33 @@
 # Member Area Module Change Log
 
+## [2026-03-31] FoundUp Entry Page (Phase 1)
+
+**Who**: 0102 (Claude Opus 4.6)
+**Type**: Feature Addition
+**Slice**: `pfmall_member_foundup_entry_phase1`
+
+**What**: Card taps now navigate to a dedicated entry page instead of an in-page overlay.
+
+**Files Created**:
+- `public/member/foundup.html` — dedicated FoundUp entry view
+
+**Files Modified**:
+- `public/member/index.html` — card click navigates to `foundup.html?id={id}` instead of `openFoundupOverlay()`
+- `public/member/README.md` — added `foundup.html` to runtime shape
+- `public/member/INTERFACE.md` — updated hosted assets and UI contract
+- `public/member/ModLog.md` — this entry
+
+**Behavior Change**:
+1. Tapping a FoundUp card navigates to `/member/foundup.html?id={foundup_id}`.
+2. Entry page is deep-linkable (share URL, bookmark, back button works).
+3. Shows readiness posture, detail rows, what-happens-next copy, and description.
+4. Not-found state for unknown IDs. Back-to-Mall navigation.
+5. Red Dog button present (currently returns to Mall).
+
+**Why**: In-page overlays are not deep-linkable and break browser history. Dedicated page enables sharing, bookmarks, and proper back-button behavior.
+
+---
+
 ## [2026-03-31] Invite-Gated Mall Cutover
 
 **Who**: 0102 (Codex)
