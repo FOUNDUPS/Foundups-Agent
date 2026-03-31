@@ -752,3 +752,100 @@ class TestPfmallShell:
         # Unknown route fails cleanly
         target = shell.resolve_route("/f/nonexistent")
         assert target.kind == RouteKind.NOT_FOUND
+
+
+# ---------------------------------------------------------------------------
+# Real Repo Manifest Discovery (pfmall_manifest_seed_phase1)
+# ---------------------------------------------------------------------------
+
+class TestRealManifestDiscovery:
+    """Integration tests against real seeded manifests in the repo.
+
+    These tests verify that the p.fMALL shell can discover and load
+    the Phase 1 manifest cohort from actual repo paths.
+    """
+
+    REPO_ROOT = Path("O:/Foundups-Agent")
+    SEARCH_PATHS = [
+        REPO_ROOT / "modules" / "foundups",
+        REPO_ROOT / "modules" / "gamification",
+        REPO_ROOT / "modules" / "platform_integration",
+    ]
+
+    EXPECTED_IDS = {"gotjunk_001", "magadoom_001", "antifafm_001"}
+
+    @pytest.fixture
+    def shell(self):
+        """Create shell with real repo search paths."""
+        return create_pfmall_shell(search_paths=self.SEARCH_PATHS)
+
+    def test_discover_finds_seeded_manifests(self, shell):
+        """Shell discovers all Phase 1 manifests from real repo paths."""
+        manifests = shell.discover_foundups()
+        discovered_ids = {m.foundup_id for m in manifests}
+        assert self.EXPECTED_IDS.issubset(discovered_ids), (
+            f"Missing: {self.EXPECTED_IDS - discovered_ids}"
+        )
+
+    def test_manifests_validate_against_schema(self, shell):
+        """All seeded manifests pass schema validation."""
+        shell.boot()
+        for fid in self.EXPECTED_IDS:
+            manifest = shell.catalog.get(fid)
+            assert manifest is not None, f"{fid} not in catalog"
+            assert manifest.name, f"{fid} has no name"
+            assert manifest.tier in {"F0_DAE", "F1_OPO", "F2_GROWTH", "F3_INFRA", "F4_MEGA", "F5_SYSTEMIC"}
+            assert manifest.category in {"marketplace", "media", "games", "community", "science"}
+
+    def test_catalog_not_empty(self, shell):
+        """Shell catalog is no longer empty after boot."""
+        shell.boot()
+        assert shell.catalog.count >= 3
+
+    def test_gotjunk_manifest(self, shell):
+        """GotJunk manifest has correct fields."""
+        shell.boot()
+        m = shell.catalog.get("gotjunk_001")
+        assert m is not None
+        assert m.name == "GotJunk"
+        assert m.category == "marketplace"
+        assert m.tier == "F0_DAE"
+        assert m.lifecycle_stage == "proto"
+        assert m.token_symbol == "JUNK"
+        assert m.is_invite_only is True
+
+    def test_magadoom_manifest(self, shell):
+        """MAGADOOM manifest has correct fields."""
+        shell.boot()
+        m = shell.catalog.get("magadoom_001")
+        assert m is not None
+        assert m.name == "MAGADOOM"
+        assert m.category == "games"
+        assert m.token_symbol == "DOOM"
+
+    def test_antifafm_manifest(self, shell):
+        """antifaFM manifest has correct fields."""
+        shell.boot()
+        m = shell.catalog.get("antifafm_001")
+        assert m is not None
+        assert m.name == "antifaFM"
+        assert m.category == "media"
+        assert m.token_symbol == "ANTI"
+        assert m.required_subscription_tier == "starter"
+
+    def test_route_resolution_for_seeded_foundup(self, shell):
+        """Route resolves for a real seeded FoundUp."""
+        shell.boot()
+        target = shell.resolve_route("/f/gotjunk_001/listings")
+        assert target.kind == RouteKind.FOUNDUP
+        assert target.foundup_id == "gotjunk_001"
+        assert target.foundup_path == "/listings"
+
+    def test_tile_build_for_seeded_foundup(self, shell):
+        """Tile can be built for a seeded FoundUp (no provider)."""
+        shell.boot()
+        tile = shell.build_foundup_tile("gotjunk_001")
+        assert tile is not None
+        assert tile.name == "GotJunk"
+        assert tile.health_status == "unknown"  # No provider
+        assert tile.state_provider == "none"

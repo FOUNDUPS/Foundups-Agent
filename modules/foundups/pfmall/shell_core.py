@@ -44,7 +44,10 @@ VALID_TIERS = frozenset({
 })
 
 VALID_STAGES = frozenset({
+    # Simulator stages
     "idea", "poc", "soft-proto", "proto", "mvp", "launch",
+    # Exfoliation protocol stages (per PFMALL_FOUNDUP_MANIFEST_SCHEMA.md)
+    "incubating", "externalized", "federated",
 })
 
 SHELL_ROUTES = frozenset({

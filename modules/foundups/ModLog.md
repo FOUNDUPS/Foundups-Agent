@@ -2,6 +2,38 @@
 
 ## Chronological Change Log
 
+### 2026-03-31 - p.fMALL Manifest Seed Phase 1
+
+**By:** 0102
+**WSP References:** WSP 11 (Interface Contract), WSP 49 (Structure), WSP 97 (Concatenation Gate)
+**Slice:** `pfmall_manifest_seed_phase1` (P0)
+
+**What changed**
+- Seeded 3 `foundup_manifest.json` files — first real p.fMALL tenant manifests:
+  - `modules/foundups/gotjunk/foundup_manifest.json` (marketplace, proto, JUNK)
+  - `modules/gamification/whack_a_magat/foundup_manifest.json` (games, proto, DOOM)
+  - `modules/platform_integration/antifafm_broadcaster/foundup_manifest.json` (media, proto, ANTI)
+- Updated `pfmall/shell_core.py`: added exfoliation protocol stages to VALID_STAGES
+- Added `TestRealManifestDiscovery` (8 integration tests) verifying shell discovers real repo manifests
+
+**Why**
+- Shell core exists but boots an empty catalog — zero `foundup_manifest.json` files in repo
+- Manifests must exist before any UI/discovery surface work
+- Three tenants selected based on repo truth audit: all have production code, docs, and clear product boundaries
+
+**Tenant qualification**
+- GotJunk: deployed Cloud Run PWA, React+FastAPI, Phase 2 in progress
+- MAGADOOM: production v2.0, 13 Python modules, 20+ test files, formal INTERFACE.md
+- antifaFM: V3.2.9, 18 src modules, 10K+ LOC, OBS+YouTube integration
+
+**Key decisions**
+- IDs match existing `_KNOWN_FOUNDUPS` registry in pfmall_catalog.py
+- Fields filled only from repo truth — no speculative entry_url, icon_url, or signature
+- HoloIndex remains infrastructure, not a catalog tenant
+- Shell searches three domain paths: foundups, gamification, platform_integration
+
+---
+
 ### 2026-03-31 - p.fMALL Shell Core Scaffold
 
 **By:** 0102

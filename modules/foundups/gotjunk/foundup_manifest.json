@@ -1,0 +1,29 @@
+{
+  "$schema": "https://foundups.org/schemas/foundup-manifest/v1.json",
+  "foundup_id": "gotjunk_001",
+  "name": "GotJunk",
+  "version": "0.3.0",
+  "description": "Peer-to-peer marketplace for selling unwanted items. List it, price it, move it.",
+  "tagline": "Turn your junk into someone's treasure",
+  "tier": "F0_DAE",
+  "lifecycle_stage": "proto",
+  "entry_url": "",
+  "routing_prefix": "/f/gotjunk_001",
+  "icon_url": "",
+  "required_subscription_tier": "free",
+  "is_invite_only": true,
+  "capabilities": ["search", "agents_basic", "marketplace", "offline"],
+  "agent_routes": ["openclaw_query", "openclaw_task"],
+  "holo_collections": [],
+  "data_namespace": "idb_gotjunk_001",
+  "cabr_contract": {
+    "v1_gate": "default",
+    "v2_proof": "default",
+    "v3_score_min": 0.5
+  },
+  "owner_id": "012",
+  "token_symbol": "JUNK",
+  "category": "marketplace",
+  "created_at": "2026-03-01T00:00:00Z",
+  "signature": ""
+}
