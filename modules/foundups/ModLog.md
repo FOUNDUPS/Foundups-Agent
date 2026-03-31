@@ -2,6 +2,35 @@
 
 ## Chronological Change Log
 
+### 2026-03-31 - p.fMALL Architecture (Shell Contract & FoundUp Template Schema)
+
+**By:** 0102
+**WSP References:** WSP 3, WSP 29, WSP 49, WSP 72, WSP 97, WSP 100
+**Slice:** `pfmall_architecture_and_template_contract` (P0)
+
+**What changed**
+- Added 5 architecture docs defining p.fMALL — the PWA shell/gateway for hosting multiple FoundUps:
+  - `PFMALL_SHELL_CONTRACT.md` — Shell responsibilities, boot sequence, postMessage API schema, env contract
+  - `PFMALL_FOUNDUP_MANIFEST_SCHEMA.md` — `foundup_manifest.json` schema, HMAC signing, validation rules, gotjunk example
+  - `PFMALL_ROUTING_DISCOVERY_MODEL.md` — URL structure, catalog loading, iframe load sequence, deep linking, offline routing
+  - `PFMALL_DATA_ISOLATION_MODEL.md` — 4-layer isolation (iframe/IndexedDB/HoloIndex ACL/agent gate), sentinel layer, encryption model
+  - `PFMALL_LAUNCH_CATALOG_TAXONOMY.md` — 5 categories, initial portfolio classification, launch order, readiness gate
+
+**Why**
+- 012 PROMETHEUS HANDOFF required architecture-first design before any PWA code
+- GotJunk multi-PWA pattern (3 apps sharing IndexedDB) proved iframe isolation works
+- Existing HMAC signing (`skill_manifest_guard.py`) and graduated autonomy (`agent_permission_manager.py`) patterns reused
+- HERMES roadmap rule enforced: "OpenClaw=control, WRE=execution, HoloIndex=memory" — shell adds no second runtime or memory authority
+
+**Key decisions**
+- Phase 1: iframe isolation (no module federation yet)
+- No morphing: each FoundUp is a separate origin-isolated app
+- HoloIndex is infrastructure, not a FoundUp — consumed through shell search API
+- All FoundUps pre-OPO are invite-only (Angel tier gate)
+- Infrastructure (OpenClaw, WRE, HoloIndex) NEVER appears in the launch catalog
+
+---
+
 ### 2026-03-29 - foundups_domain_canonicalization (README + INTERFACE tightening)
 
 **By:** 0102
