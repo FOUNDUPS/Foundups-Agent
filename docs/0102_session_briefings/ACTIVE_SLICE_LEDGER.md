@@ -1,7 +1,7 @@
 # Active Slice Ledger
 
 **Authority**: 0102 architect lane
-**Updated**: 2026-03-31 (antifafm_voxtral_eval_contract complete)
+**Updated**: 2026-03-31 (training_system_utf8_import_boundary_fix complete)
 **Rule**: Every agent reads this first. If repo truth contradicts an entry, update this ledger — not 012.
 
 ---
@@ -91,6 +91,7 @@ If already landed:
 | `chrome_146_pin_workaround` | (local) | Pinned `version_main=146` in news_maps executor; Chrome 147 not yet rolled out |
 | `skill_evolution_loop_phase2_mutation_surface` | `448424358` | Phase 2 mutation surface: 3 env gates (fail-closed), A/B test status + promotion readiness queries via WRE primitives; supervisor idle-path integration; 23 new tests (41 total) |
 | `antifafm_voxtral_eval_contract` | `ebacf5cc1` | `VOXTRAL_EVAL_CONTRACT.md` eval-only lane; 4 TTS candidate surfaces; success metrics (<500ms, quality >=4.0); shared audio substrate + voice cloning policy enforcement |
+| `training_system_utf8_import_boundary_fix` | `f7b19311b` | 7 regression tests; imports fixed to scanner.py (not main.py); root cause: WSP 62 refactor stopped main.py exports |
 
 ---
 
