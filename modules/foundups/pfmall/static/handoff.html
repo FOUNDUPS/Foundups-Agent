@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>p.fMALL - Route Handoff</title>
+    <link rel="stylesheet" href="/pfmall/static/styles.css">
+</head>
+<body>
+    <header class="shell-header">
+        <h1>p.fMALL <span>handoff</span></h1>
+        <nav class="shell-nav">
+            <a href="/pfmall/ui/">Catalog</a>
+        </nav>
+    </header>
+
+    <main class="shell-main">
+        <a href="/pfmall/ui/" class="back-link">&larr; Back to catalog</a>
+
+        <div id="handoff">
+            <div class="loading">Resolving route...</div>
+        </div>
+    </main>
+
+    <script>
+    (async function() {
+        const container = document.getElementById("handoff");
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get("id");
+
+        if (!id) {
+            container.innerHTML = '<div class="handoff-box"><h2>No FoundUp specified</h2><p>Provide a FoundUp ID to resolve routing.</p></div>';
+            return;
+        }
+
+        const routePath = "/f/" + id;
+
+        try {
+            // Resolve route and get tile in parallel
+            const [routeRes, tileRes] = await Promise.all([
+                fetch("/pfmall/resolve-route?path=" + encodeURIComponent(routePath)),
+                fetch("/pfmall/foundups/" + encodeURIComponent(id))
+            ]);
+
+            const route = await routeRes.json();
+            const tile = tileRes.status === 200 ? await tileRes.json() : null;
+
+            if (route.kind === "not_found" || !tile) {
+                document.title = "p.fMALL - Not Found";
+                container.innerHTML = `
+                    <div class="handoff-box">
+                        <h2>FoundUp Not Found</h2>
+                        <p>No registered FoundUp for <strong>${esc(id)}</strong></p>
+                        <div class="handoff-status handoff-status-not-found">not found</div>
+                    </div>
+                `;
+                return;
+            }
+
+            document.title = "p.fMALL - " + tile.name + " Handoff";
+
+            const readiness = tile.launch_readiness;
+            let statusClass, statusText, explanation;
+
+            if (readiness === "ready") {
+                statusClass = "handoff-status-ready";
+                statusText = "Ready to Launch";
+                explanation = "This FoundUp has a verified frontend and can be loaded in the shell.";
+            } else if (readiness === "conditional") {
+                statusClass = "handoff-status-conditional";
+                statusText = "Conditional";
+                explanation = "This FoundUp has a frontend but with known gaps. Launch may have limitations.";
+            } else {
+                statusClass = "handoff-status-discoverable";
+                statusText = "Discoverable Only";
+                explanation = "This FoundUp is a backend service with no web frontend. It cannot be loaded as a shell tenant yet.";
+            }
+
+            container.innerHTML = `
+                <div class="handoff-box">
+                    <h2>${esc(tile.name)}</h2>
+                    <p>${esc(tile.tagline || tile.description)}</p>
+
+                    <div class="handoff-status ${statusClass}">${statusText}</div>
+
+                    <p style="margin-top: 20px; font-size: 14px;">${explanation}</p>
+
+                    <div style="margin-top: 24px; font-size: 13px; color: var(--text-muted);">
+                        <div>Route: <strong>${esc(route.path)}</strong></div>
+                        <div>Kind: <strong>${esc(route.kind)}</strong></div>
+                        <div>Lifecycle: <strong>${esc(tile.lifecycle_stage)}</strong></div>
+                        <div>Category: <strong>${esc(tile.category)}</strong></div>
+                    </div>
+
+                    <div style="margin-top: 24px;">
+                        <a href="/pfmall/ui/detail.html?id=${encodeURIComponent(tile.foundup_id)}" class="back-link" style="margin:0">
+                            View full details &rarr;
+                        </a>
+                    </div>
+                </div>
+            `;
+        } catch (err) {
+            container.innerHTML = '<div class="error-msg">Route resolution failed: ' + esc(err.message) + '</div>';
+        }
+    })();
+
+    function esc(s) {
+        if (!s) return "";
+        const d = document.createElement("div");
+        d.textContent = String(s);
+        return d.innerHTML;
+    }
+    </script>
+</body>
+</html>

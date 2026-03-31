@@ -1,27 +1,35 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-p.fMALL HTTP Read Surface — minimal read-only FastAPI endpoints.
+p.fMALL HTTP Read Surface — minimal read-only FastAPI endpoints + shell UI.
 
 Thin transport layer delegating to pfmall/api.py. No business logic,
-no mutation, no auth. Read-only JSON surface only.
+no mutation, no auth. Read-only JSON surface + static shell UI.
 
 Run:
     uvicorn modules.foundups.pfmall.http_api:app --port 8100
 
-Endpoints:
+JSON Endpoints:
     GET /pfmall/health
     GET /pfmall/catalog
     GET /pfmall/catalog?category=<category>
     GET /pfmall/foundups/{foundup_id}
     GET /pfmall/resolve-route?path=<path>
+
+Shell UI:
+    GET /pfmall/ui/              -> Catalog view
+    GET /pfmall/ui/detail.html   -> FoundUp detail view
+    GET /pfmall/ui/handoff.html  -> Route handoff view
+    GET /pfmall/static/...       -> CSS/assets
 """
 
 import logging
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from modules.foundups.pfmall.api import (
     get_default_shell,
@@ -37,6 +45,11 @@ app = FastAPI(
     description="Read-only p.fMALL catalog, tile lookup, and route resolution.",
     version="0.1.0",
 )
+
+# Static files and shell UI
+_STATIC_DIR = Path(__file__).parent / "static"
+app.mount("/pfmall/static", StaticFiles(directory=str(_STATIC_DIR)), name="pfmall_static")
+app.mount("/pfmall/ui", StaticFiles(directory=str(_STATIC_DIR), html=True), name="pfmall_ui")
 
 
 # ---------------------------------------------------------------------------

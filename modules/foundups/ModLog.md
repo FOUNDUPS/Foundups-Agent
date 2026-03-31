@@ -2,6 +2,47 @@
 
 ## Chronological Change Log
 
+### 2026-03-31 - p.fMALL Catalog Shell UI Phase 1
+
+**By:** 0102
+**WSP References:** WSP 11 (Interface Contract), WSP 72 (Module Independence)
+**Slice:** `pfmall_catalog_shell_ui_phase1` (P1)
+
+**What changed**
+- Created `modules/foundups/pfmall/static/` with 4 files:
+  - `styles.css` — shell UI theme (dark mode, responsive, readiness badges)
+  - `index.html` — catalog view: lists FoundUps with readiness/category/lifecycle/tier badges
+  - `detail.html` — single FoundUp detail: identity, overlay status, route handoff link
+  - `handoff.html` — route handoff: resolves `/f/{id}`, shows launch readiness posture or not-found
+- Updated `http_api.py` to mount static files at `/pfmall/static/` and `/pfmall/ui/`
+- Added 18 UI tests in `test_shell_ui.py` (138 total suite, all passing)
+
+**Why**
+- All backend layers exist (shell core, adapter, HTTP surface) but no user-facing shell UI
+- First visual surface needed to validate catalog posture before any tenant embedding work
+
+**UI pattern**
+- Static HTML + fetch() to existing JSON API endpoints
+- No build step, no React, no Jinja2 — follows PQN Portal pattern
+- FastAPI StaticFiles mount with `html=True` for clean URLs
+
+**Shell views**
+| View | URL | Fetches |
+|------|-----|---------|
+| Catalog | `/pfmall/ui/` | `GET /pfmall/catalog` |
+| Detail | `/pfmall/ui/detail.html?id={id}` | `GET /pfmall/foundups/{id}` |
+| Handoff | `/pfmall/ui/handoff.html?id={id}` | `GET /pfmall/resolve-route` + `GET /pfmall/foundups/{id}` |
+
+**`/f/{foundup_id}` handling**
+- Handoff page resolves route via API, fetches tile, shows readiness posture
+- `ready` → "Ready to Launch" (green)
+- `conditional` → "Conditional" with gap warning (yellow)
+- `discoverable_only` → "Discoverable Only" with no-frontend explanation (muted)
+- Unknown ID → "Not Found" (red)
+- No tenant execution — shell-owned handoff only
+
+---
+
 ### 2026-03-31 - p.fMALL HTTP Read Surface
 
 **By:** 0102

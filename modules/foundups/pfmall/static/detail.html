@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>p.fMALL - FoundUp Detail</title>
+    <link rel="stylesheet" href="/pfmall/static/styles.css">
+</head>
+<body>
+    <header class="shell-header">
+        <h1>p.fMALL <span>detail</span></h1>
+        <nav class="shell-nav">
+            <a href="/pfmall/ui/">Catalog</a>
+        </nav>
+    </header>
+
+    <main class="shell-main">
+        <a href="/pfmall/ui/" class="back-link">&larr; Back to catalog</a>
+
+        <div id="detail">
+            <div class="loading">Loading FoundUp...</div>
+        </div>
+    </main>
+
+    <script>
+    (async function() {
+        const container = document.getElementById("detail");
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get("id");
+
+        if (!id) {
+            container.innerHTML = '<div class="error-msg">No FoundUp ID specified.</div>';
+            return;
+        }
+
+        try {
+            const res = await fetch("/pfmall/foundups/" + encodeURIComponent(id));
+            if (res.status === 404) {
+                container.innerHTML = '<div class="error-msg">FoundUp not found: ' + esc(id) + '</div>';
+                return;
+            }
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            const t = await res.json();
+
+            document.title = "p.fMALL - " + t.name;
+
+            container.innerHTML = `
+                <h2 class="page-title">${esc(t.name)}</h2>
+                <p class="page-subtitle">${esc(t.tagline || t.description)}</p>
+
+                <div class="badges" style="margin-bottom: 20px;">
+                    <span class="badge badge-readiness-${t.launch_readiness}">${readinessLabel(t.launch_readiness)}</span>
+                    <span class="badge badge-category">${esc(t.category)}</span>
+                    <span class="badge badge-lifecycle">${esc(t.lifecycle_stage)}</span>
+                    <span class="badge badge-tier">${esc(t.tier)}</span>
+                </div>
+
+                <div class="detail-section">
+                    <h2>Identity</h2>
+                    <div class="detail-grid">
+                        <div class="detail-label">FoundUp ID</div>
+                        <div class="detail-value">${esc(t.foundup_id)}</div>
+                        <div class="detail-label">Token</div>
+                        <div class="detail-value">${esc(t.token_symbol || "none")}</div>
+                        <div class="detail-label">Routing Prefix</div>
+                        <div class="detail-value">${esc(t.routing_prefix)}</div>
+                        <div class="detail-label">Invite Only</div>
+                        <div class="detail-value">${t.is_invite_only ? "Yes" : "No"}</div>
+                        <div class="detail-label">Icon</div>
+                        <div class="detail-value">${esc(t.icon_url || "none")}</div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h2>Overlay Status</h2>
+                    <div class="detail-grid">
+                        <div class="detail-label">Health</div>
+                        <div class="detail-value"><span class="overlay-dot overlay-dot-${t.health_status}"></span> ${esc(t.health_status)}</div>
+                        <div class="detail-label">Availability</div>
+                        <div class="detail-value">${esc(t.availability)}</div>
+                        <div class="detail-label">CABR Score</div>
+                        <div class="detail-value">${t.cabr_score.toFixed(2)}</div>
+                        <div class="detail-label">CABR Trend</div>
+                        <div class="detail-value">${esc(t.cabr_trend)}</div>
+                        <div class="detail-label">Active Agents</div>
+                        <div class="detail-value">${t.active_agents}</div>
+                        <div class="detail-label">Tasks in Flight</div>
+                        <div class="detail-value">${t.tasks_in_flight}</div>
+                        <div class="detail-label">Reserve Health</div>
+                        <div class="detail-value">${esc(t.reserve_health)}</div>
+                        <div class="detail-label">State Provider</div>
+                        <div class="detail-value">${esc(t.state_provider)}</div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h2>Route Handoff</h2>
+                    <div class="detail-grid">
+                        <div class="detail-label">Shell Route</div>
+                        <div class="detail-value">
+                            <a href="/pfmall/ui/handoff.html?id=${encodeURIComponent(t.foundup_id)}" class="back-link" style="margin:0">
+                                ${esc(t.routing_prefix)} &rarr;
+                            </a>
+                        </div>
+                        <div class="detail-label">Launch Readiness</div>
+                        <div class="detail-value">${readinessLabel(t.launch_readiness)}</div>
+                    </div>
+                </div>
+            `;
+        } catch (err) {
+            container.innerHTML = '<div class="error-msg">Failed to load: ' + esc(err.message) + '</div>';
+        }
+    })();
+
+    function readinessLabel(r) {
+        return { ready: "Ready", conditional: "Conditional", discoverable_only: "Discoverable Only" }[r] || r;
+    }
+
+    function esc(s) {
+        if (!s) return "";
+        const d = document.createElement("div");
+        d.textContent = String(s);
+        return d.innerHTML;
+    }
+    </script>
+</body>
+</html>
