@@ -1,5 +1,62 @@
 # Simulator ModLog
 
+## 2026-03-31 - Du Pool Boundary and Partition Reconciliation
+
+### Why
+Architect/CTO handoff (WSP 97): Du-pool surfaces had terminology drift mixing CABR/PoB
+language with old investor/ROI framing. Also needed canonical Du 4% partition model.
+
+### Audit Findings
+| Surface | Status Before |
+|---------|---------------|
+| pool_distribution.py | Mixed - had "investor economics", "investor dividend", "returns" |
+| staker_viability.py | COMPLIANT - already CABR/PoB framed |
+| dilution_scenario.py | COMPLIANT - already uses dist_ratio |
+| investor_staking.py | SEPARATE LANE - I_i bonding-curve (untouched) |
+
+### Changes
+- `pool_distribution.py`:
+  - Replaced "investor economics" with "CABR/PoB economics"
+  - Replaced "investor treatment" with "Protocol participants"
+  - Replaced "investor dividend" with "epoch distributions"
+  - Added canonical Du 4% partition model in docstring
+  - Added boundary note separating Du-pool from I_i lane
+  - Updated comments: "returns" → "distributions"
+- `staker_viability.py`:
+  - Fixed comment: "ROI at key timepoints" → "Distribution ratio at key timepoints"
+  - Added boundary note
+- `dilution_scenario.py`:
+  - Fixed print statement: "return for founding members" → "distribution ratios for founding participants"
+  - Added boundary note
+
+### Canonical Du 4% Partition Model
+```
+DuPool (4% of epoch distribution)
+├── ActiveFounderPool (80% of Du = 3.2% of total)
+│   └── Active founders with degressive tier progression
+└── PassiveParticipationPool (20% of Du = 0.8% of total)
+    ├── BTCStakerPool (weighted by deterministic formula)
+    └── ChannelPartnerPool (equal split, max 21, genesis only)
+```
+
+### Boundary Documented
+- Du pool stakers = CABR/PoB participation lane
+- I_i holders in `investor_staking.py` = SEPARATE bonding-curve lane
+- Future agents must NOT conflate these two models
+
+### What Remains Unchanged
+- `investor_staking.py` — separate I_i bonding-curve lane, untouched
+- `INVESTOR_ECONOMICS.md` — belongs to I_i lane, untouched
+
+### Outcome
+- Du-pool terminology now CABR/PoB compliant
+- Canonical partition model documented
+- Clear boundary prevents future conflation
+- No runtime behavior changes (comments/docs only)
+- Slice is merge-ready
+
+---
+
 ## 2026-03-28 - ROC-First Property and Baseline Coverage
 
 ### Why

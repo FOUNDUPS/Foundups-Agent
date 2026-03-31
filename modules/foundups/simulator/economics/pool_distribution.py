@@ -6,38 +6,46 @@ Pool Structure (100% total):
 - Stakeholders: 80%
   - Un (0-Pool):  60% - 012 stakeholders (engagement-based, ACTIVE)
   - Dao (1-Pool): 16% - 0102 agents (3V work-based, ACTIVE)
-  - Du (2-Pool):   4% - BTC STAKERS ONLY (investor economics, PASSIVE)
+  - Du (2-Pool):   4% - Protocol participants (CABR/PoB economics)
 - Network: 20%
   - Network:      16% - Drip rewards (F_i → exchange → BTC → UPS)
   - Fund:          4% - Treasury fund (pAVS operations)
 
 CRITICAL SEPARATION (012-confirmed 2026-02-14):
 - Members (subscription) = Build UPs through WORK → Dao/Un pools ONLY
-- BTC Stakers (anonymous) = Passive income → Du pool (investor treatment)
+- BTC Stakers (anonymous) = Protocol participants → Du pool distributions
 
 This separation prevents dilution:
 - Unlimited subscribers → doesn't dilute Du pool
-- Du pool capped at ~100-500 stakers for viable returns
-- Stakers ARE investors (real BTC at risk)
+- Du pool capped at ~100-500 stakers for viable distributions
+- Stakers provide LIQUIDITY (BTC commitment)
 
 Earning Modes:
-- Du (4%):  PASSIVE - BTC stakers earn every epoch (investor dividend)
+- Du (4%):  PASSIVE - Protocol participants receive epoch distributions
 - Dao (16%): ACTIVE - 0102 agents earn per 3V task completion
 - Un (60%):  ACTIVE - 012 stakeholders earn per engagement (FoundUpCube)
 
-Activity Tiers (share within Du pool):
-- du (2): 80% of pool - <10x earned (new stakers)
-- dao (1): 16% of pool - 10x-100x earned (profitable stakers)
-- un (0): 4% of pool - >100x earned (lifetime floor)
+CANONICAL DU POOL PARTITION (2026-03-31):
+  DuPool (4% of epoch distribution)
+  ├── ActiveFounderPool (80% of Du = 3.2% of total)
+  │   └── Active founders with degressive tier progression
+  └── PassiveParticipationPool (20% of Du = 0.8% of total)
+      ├── BTCStakerPool (weighted by deterministic formula)
+      └── ChannelPartnerPool (equal split, max 21, genesis only)
 
-Degressive Staker Model:
+Degressive Tier Model (WITHIN ActiveFounderPool):
+- du (2): 80% of ActiveFounderPool - <10x allocation ratio (new participants)
+- dao (1): 16% of ActiveFounderPool - 10x-100x allocation ratio
+- un (0): 4% of ActiveFounderPool - >100x allocation ratio (lifetime floor)
+
+The degressive model rewards early participants:
 - Early stakers (low ratio) get the lion's share (80%)
 - As they earn more, share decreases (degressive)
 - Lifetime floor ensures ALL stakers always earn something (0.16% total)
 
 Genesis Member Special Class:
 - Earns on ALL FoundUps (ecosystem-wide)
-- Class closes at launch (creates FOMO)
+- Class closes at mainnet launch (creates scarcity)
 - Future stakers only earn on FoundUps they stake into
 
 Staker Pool Economics (dilution_scenario.py analysis):
@@ -46,11 +54,17 @@ Staker Pool Economics (dilution_scenario.py analysis):
 - 500+ stakers: diminishing allocations
 - RECOMMENDATION: Cap genesis cohort at 100 stakers
 
-PARADIGM NOTE (CABR/PoB, not CAGR/ROI):
+PARADIGM: CABR/PoB (not CAGR/ROI)
 - Stakers provide LIQUIDITY (energy for UPS capacity)
 - BTC → Reserve → Backs UPS → Protocol runs
 - Stakers receive F_i DISTRIBUTIONS (protocol mechanics)
 - This is PROTOCOL PARTICIPATION, not investment
+
+BOUNDARY NOTE (2026-03-31):
+- Du pool stakers = CABR/PoB participation lane (this file)
+- I_i holders in investor_staking.py = SEPARATE bonding-curve lane
+- Do NOT conflate these two models
+- See: memory/terminology.md for canonical distinction
 
 Token Naming (STANDARDIZED):
 - UPS = Universal participation token (bio-decaying)
@@ -108,11 +122,11 @@ STAKER_TIER_THRESHOLDS = {
 
 # Staker pool controls (prevents dilution)
 # Based on dilution_scenario.py analysis:
-# - 10-25 stakers: 10x in 10-26 months
-# - 50-100 stakers: 10x in 1-3 years
-# - 500+ stakers: diminishing returns
-STAKER_CAP_GENESIS = 100      # Genesis cohort cap (best returns)
-STAKER_CAP_EARLY = 500        # Early cohort cap (good returns)
+# - 10-25 stakers: 10x distribution ratio in 10-26 months
+# - 50-100 stakers: 10x distribution ratio in 1-3 years
+# - 500+ stakers: diminishing allocations
+STAKER_CAP_GENESIS = 100      # Genesis cohort cap (best distributions)
+STAKER_CAP_EARLY = 500        # Early cohort cap (good distributions)
 STAKER_MIN_BTC = 0.001        # Minimum stake (~$100 at $100k BTC)
 STAKER_RECOMMENDED_BTC = 0.01  # Recommended stake (~$1k at $100k BTC)
 
