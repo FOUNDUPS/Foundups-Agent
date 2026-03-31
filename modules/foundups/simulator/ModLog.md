@@ -1,5 +1,51 @@
 # Simulator ModLog
 
+## 2026-03-31 - Founding Channel Partner Offering Document
+
+### Why
+Architect/CTO handoff (WSP 97 Slice 6): Create external-facing offering document
+using protocol-participation language for the already-locked channel partner mechanics.
+
+### Created
+- `docs/marketing/FOUNDING_CHANNEL_PARTNER_OFFERING.md`
+
+### Content Coverage
+| Section | Purpose |
+|---------|---------|
+| What This Is | Protocol participation framing |
+| Key Mechanics | 21 cap, pre-launch, equal split, closure |
+| What Partners Contribute | Distribution, visibility, network effects |
+| What Partners Receive | Allocations, genesis status |
+| What This Is Not | Explicit non-claims (not investment) |
+| Protocol Allocation Structure | Du pool partition visual |
+| Registration Timeline | Pre-launch → Genesis → Closed |
+| Important Boundaries | No legal/outcome/regulatory claims |
+
+### Terminology Compliance
+| Prohibited | Used Instead |
+|------------|--------------|
+| investor | participant, partner |
+| investment | protocol participation |
+| ROI/returns | allocations, distributions |
+| dividend | allocation |
+| passive income | epoch distributions |
+| profit | (avoided) |
+
+### Boundary Compliance
+- No outcome promises
+- No legal claims
+- No regulatory assurances
+- Market-dependent value explicit
+- Document is not a contract
+
+### Outcome
+- External-facing doc ready for 012 review
+- Mechanics match locked architecture
+- Regulatory-safe terminology
+- Slice is merge-ready
+
+---
+
 ## 2026-03-31 - Algorand Du Pool Contract Specification
 
 ### Why
