@@ -149,6 +149,39 @@ python holo_index.py --health-check
 - `HOLO_INDEX_WEB=1`: include web assets during `--index-code`.
 - `HOLO_SYMBOL_AUTO=1`: auto symbol indexing during `--index-code`.
 
+## Internal CLI Module Layout
+
+The monolithic `cli.py` has been restructured into a package:
+
+```
+holo_index/
+  _cli_main.py              # Entrypoint (argparse, search, indexing, advisor)
+  cli/
+    __init__.py              # Backward-compat shim — re-exports main, HoloIndex, QwenAdvisor
+    commands/
+      __init__.py            # Package marker
+      bundle_json.py         # --bundle-json handler
+      compliance.py          # --wsp88, --audit-docs, --check-module, --check-wsp-docs,
+                             #   --rollback-ascii, --fix-violations, --docs-file
+      holodae.py             # --start/stop/status-holodae, --pattern-coach, --module-analysis,
+                             #   --health-check, --performance-metrics, --system-check,
+                             #   --slow-mode, --pattern-memory, --mcp-hooks/log, --thought-log,
+                             #   --monitor-work
+      modules_cmd.py         # --link-modules, --query-modules, --wsp, --list-modules
+    adaptive_pipeline.py     # (orphaned helper — not wired to _cli_main)
+    auto_refresh.py          # (orphaned helper — not wired to _cli_main)
+    holo_request.py          # (orphaned helper — not wired to _cli_main)
+    pattern_coach.py         # (orphaned helper — not wired to _cli_main)
+    root_alerts.py           # (orphaned helper — not wired to _cli_main)
+```
+
+All public imports remain stable:
+```python
+from holo_index.cli import main          # entrypoint
+from holo_index.cli import HoloIndex     # core class
+from holo_index.cli import QwenAdvisor   # advisor (may be None)
+```
+
 ## Compatibility Notes
 - `code` / `wsps` keys remain present for backward compatibility.
 - `search()` degrades to lexical mode when embedding model is unavailable.

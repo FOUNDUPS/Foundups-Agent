@@ -1,5 +1,87 @@
 # HoloIndex Package ModLog
 
+## [2026-03-31] CLI Command Extraction (holoindex_cli_extraction)
+
+**Agent**: 0102
+**WSP References**: WSP 49 (Module Structure), WSP 62 (File Size), WSP 84 (Code Reuse)
+**Status**: IN PROGRESS
+
+### Context
+
+PROMETHEUS HANDOFF from 012: extract the 2,542-line `cli.py` monolith into a command-oriented package.
+
+### Changes
+
+1. **Renamed** `holo_index/cli.py` -> `holo_index/_cli_main.py` (resolves Python module/package naming conflict)
+2. **Created** `holo_index/cli/__init__.py` — backward-compat shim re-exporting `main`, `HoloIndex`, `QwenAdvisor`, `_is_fast_search_enabled`, `_render_fast_search_summary`
+3. **Created** `holo_index/cli/commands/` package with 4 command modules:
+   - `bundle_json.py` — `--bundle-json` handler (~284 lines)
+   - `compliance.py` — 7 compliance/audit handlers (~425 lines)
+   - `holodae.py` — lifecycle + 12 menu feature handlers (~245 lines)
+   - `modules_cmd.py` — module linking + query handlers (~181 lines)
+4. **Wired** dispatch calls in `_cli_main.py` before each inline block (inline originals kept per 012 directive)
+5. **Documented** orphaned helpers: `adaptive_pipeline.py`, `auto_refresh.py`, `holo_request.py`, `pattern_coach.py`, `root_alerts.py` (pre-existing, not wired)
+
+### Import Compatibility
+
+All consumers unchanged — `from holo_index.cli import main` still works via `__init__.py` shim.
+
+| Consumer | Import | Status |
+|----------|--------|--------|
+| `holo_index.py` | `from holo_index.cli import main` | OK |
+| `test_cli.py` | `from holo_index.cli import HoloIndex, QwenAdvisor` | OK |
+| `test_fast_search_mode.py` | `from holo_index.cli import _is_fast_search_enabled` | OK |
+| `holoindex_plugin.py` | `from holo_index.cli import HoloIndex` | OK |
+
+### Pending
+
+- Inline code in `_cli_main.py` shadowed by dispatch calls — awaiting 012 approval to remove
+- Orphaned helpers need evaluation for connection or retirement
+
+---
+
+## [2026-03-30] TurboQuant Architecture Audit
+
+**Agent**: 0102
+**WSP References**: WSP 62 (File Size), WSP 97 (System Execution), WSP 87 (Navigation)
+**Status**: COMPLETE
+
+### Context
+
+Comprehensive architecture audit to evaluate HoloIndex current state, TurboQuant positioning, and vNext definition.
+
+### Findings
+
+| Metric | Value |
+|--------|-------|
+| Total size | 358 MB |
+| Python files | 254 |
+| cli.py | 2,542 lines |
+| core/holo_index.py | 2,068 lines |
+| qwen_advisor/ total | 21,493 lines |
+| adaptive_learning/ total | 6,533 lines |
+
+### Decisions
+
+1. **TurboQuant**: Feature in HoloIndex core (int8 embeddings), NOT separate product
+2. **AI Sentinel**: Extract breadcrumb_tracer + execution_log_analyzer to ai_sentinel module
+3. **Rewrite**: Incremental refactor, NOT full rewrite
+4. **vNext Target**: <5,000 lines, <50 MB
+
+### Next Slices
+
+| Slice | Priority | Effort |
+|-------|----------|--------|
+| `holoindex_cli_extraction` | P0 | 2 sessions |
+| `holoindex_delete_legacy` | P0 | 1 session |
+| `holoindex_core_split` | P1 | 2 sessions |
+
+### Deliverables
+
+Full audit report: `docs/0102_session_briefings/HOLOINDEX_TURBOQUANT_AUDIT_2026-03-30.md`
+
+---
+
 ## [2026-03-30] Audio Model Bootstrap Scripts
 
 **Agent**: 0102
