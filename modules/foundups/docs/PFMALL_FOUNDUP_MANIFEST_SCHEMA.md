@@ -303,4 +303,4 @@ The manifest is a **static contract** — it declares what a FoundUp is, what it
 | Agent activity, ROC metrics | State overlay (dynamic) | Real-time |
 | CABR scores (V3 valuation) | State overlay (dynamic) | Per validation cycle |
 
-The simulator (`modules/foundups/simulator/`) may serve as one PoC provider of state overlay data, but it is not the permanent architecture. The state overlay contract will be defined in a future slice — this manifest schema intentionally covers only the static contract surface.
+The simulator (`modules/foundups/simulator/`) may serve as one PoC provider of state overlay data, but it is not the permanent architecture. See `PFMALL_STATE_OVERLAY_CONTRACT.md` for the dynamic state plane contract.

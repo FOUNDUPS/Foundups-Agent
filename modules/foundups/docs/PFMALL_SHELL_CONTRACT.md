@@ -207,4 +207,4 @@ FoundUp routes (`/f/{foundup_id}/*`) are delegated to the loaded FoundUp via pos
 3. **No cross-FoundUp data access**: IndexedDB namespaced by `foundup_id`. iframe origin isolation enforced.
 4. **Infrastructure stays core**: HoloIndex, OpenClaw, WRE are infrastructure — never in the catalog.
 5. **HERMES rule**: "OpenClaw=control plane, WRE=execution, HoloIndex=memory" — shell does not add a second runtime or memory authority.
-6. **Static contract only**: The shell loads FoundUps based on their static manifest (`foundup_manifest.json`). Dynamic state (lifecycle health, economics, agent metrics) is provided by a separate state overlay layer — not by the shell or manifest. The simulator may serve as one PoC state provider, but is not the permanent architecture for state overlay.
+6. **Static contract only**: The shell loads FoundUps based on their static manifest (`foundup_manifest.json`). Dynamic state (lifecycle health, economics, agent metrics) is provided by a separate state overlay layer — not by the shell or manifest. See `PFMALL_STATE_OVERLAY_CONTRACT.md` for the overlay contract. The simulator serves as PoC provider; production uses pAVS services.

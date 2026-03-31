@@ -2,6 +2,34 @@
 
 ## Chronological Change Log
 
+### 2026-03-31 - p.fMALL State Overlay Contract
+
+**By:** 0102
+**WSP References:** WSP 29 (CABR Engine), WSP 91 (Observability), WSP 97 (Concatenation Gate)
+**Slice:** `pfmall_state_overlay_contract` (P0)
+
+**What changed**
+- Added `PFMALL_STATE_OVERLAY_CONTRACT.md` — the dynamic state plane for p.fMALL:
+  - Static vs dynamic boundary (manifest = identity/contract, overlay = live condition)
+  - `FoundUpStateOverlay` schema: health_status, availability, cabr_score, lifecycle_progress, agent_activity
+  - Abstract `StateOverlayProvider` interface for PoC/production pluggability
+  - Trust/freshness rules: Fresh (0-60s), Warm (60-300s), Stale (300s+), Unavailable
+  - Shell consumption rules (badges, filters, routing warnings)
+  - Shell prohibitions (never infer authority from overlay, never mutate manifest)
+
+**Why**
+- `PFMALL_SHELL_CONTRACT.md` Section 11.6 referenced a "separate state overlay layer" — this fulfills that reference
+- Simulator (`state_store.py`) has FoundUpTile with lifecycle_stage, cabr_score, tasks — needed overlay contract to expose it
+- Production will use pAVS services, not simulator — abstract provider interface enables clean swap
+
+**Key decisions**
+- Overlay is advisory only — shell displays badges but does not block or gate based on overlay
+- SIM is PoC provider, not architecture — adapter transforms SIM internals into overlay contract
+- Shell code NEVER imports simulator dataclasses directly — uses provider interface
+- Freshness TTL model mirrors existing circuit breaker patterns
+
+---
+
 ### 2026-03-31 - p.fMALL Architecture (Shell Contract & FoundUp Template Schema)
 
 **By:** 0102
