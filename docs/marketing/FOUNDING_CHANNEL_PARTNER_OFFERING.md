@@ -22,6 +22,8 @@ Founding Channel Partners are registered before mainnet launch and receive proto
 
 The Founding Channel Partner registry is limited to **21 partners maximum**. This cap is encoded in the protocol and cannot be changed after deployment.
 
+For outward brand storytelling, public outreach may refer to **19 public seats** to mirror the 19 perimeter glyphs in the FoundUps seal. This does **not** change the protocol cap of 21 total founding seats.
+
 ### Pre-Launch Only
 
 Registration is available **only before mainnet launch**. The registry closes permanently at the first mainnet FoundUp genesis event (token issuance). No additional partners can be added after closure.
@@ -155,6 +157,7 @@ Contact methods and formal registration procedures will be communicated to quali
 | Attribute | Value |
 |-----------|-------|
 | Hard Cap | 21 partners |
+| Public Outreach Framing | 19 public seats / 21 total protocol cap |
 | Registration | Pre-launch only |
 | Closure Trigger | First mainnet FoundUp genesis |
 | Allocation Model | Equal split |
@@ -169,11 +172,11 @@ Founding Channel Partners are a finite cohort of protocol participants who contr
 
 ## Appendix: LinkedIn Post Example
 
-The following is a social post template for channel partner outreach. It uses simplified, jargon-free language suitable for LinkedIn audiences.
+The following is a social post template for channel partner outreach. It uses simplified, jargon-free language suitable for LinkedIn audiences and the **19 public seats** framing. Protocol cap remains **21 total**.
 
 ---
 
-**21 Founding Channel Partners. Then the gate closes forever.**
+**19 public founding seats. Then the gate closes forever.**
 
 We're building an ecosystem that makes app stores obsolete.
 
@@ -195,11 +198,11 @@ Your compute, your platform, your services -- they become the foundation that fo
 
 In return, the protocol recognizes your contribution. Permanently. Every cycle it runs.
 
-**Why 21?**
+**Why 19 public?**
 
-Because that's it. 21 founding partners. Equal standing. No tiers. No upsell.
+The seal carries 19 perimeter glyphs around two central figures. That gives us a clean public-seat story for outreach. The protocol cap remains 21 total founding seats.
 
-When the ecosystem goes live, the registry closes. Forever. You're either one of the 21 or you're not.
+When the ecosystem goes live, the registry closes. Forever. You're either one of the public 19 or you're not.
 
 **What we're looking for:**
 
@@ -207,10 +210,10 @@ Compute. Cloud. APIs. Developer tools. Hosting. Infrastructure. Distribution. Re
 
 If you provide something founders need to build -- and you believe the next economy runs on compute, not capital -- this is your window.
 
-**21 seats. One genesis. DM me.**
+**19 public seats. 21 total. One genesis. DM me.**
 
 ---
 
-*Document version: 1.1.0*
-*Date: 2026-03-31*
+*Document version: 1.2.0*
+*Date: 2026-04-01*
 *Status: Pre-publication draft for 012 review*

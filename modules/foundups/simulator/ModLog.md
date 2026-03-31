@@ -1,5 +1,21 @@
 # Simulator ModLog
 
+## 2026-04-01 - Founding Channel Partner Public-Seat Framing Clarification
+
+### Why
+Clarify outward-facing copy so the 19-glyph seal can support a public-seat story
+without changing the protocol truth of 21 total founding channel partner seats.
+
+### Updated
+- `docs/marketing/FOUNDING_CHANNEL_PARTNER_OFFERING.md`
+
+### Clarification
+- Protocol cap remains `21`
+- Public outreach may use `19 public seats`
+- This is a branding/storytelling distinction, not a protocol change
+
+---
+
 ## 2026-03-31 - Founding Channel Partner Offering Document
 
 ### Why
