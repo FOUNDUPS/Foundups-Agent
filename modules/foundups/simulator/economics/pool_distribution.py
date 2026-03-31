@@ -95,6 +95,29 @@ class ActivityLevel(IntEnum):
     DU = 2   # Tier 2: 80% of pool ÷ count_at_tier (degressive: <10x earned)
 
 
+class StakerHurdleState(IntEnum):
+    """BTC staker hurdle state for Du-pool distribution rate transitions.
+
+    State machine for tracking whether a staker has reached 10x allocation ratio.
+    Once POST_HURDLE_LOCKED, the state is permanent (no re-entry to PRE_HURDLE).
+
+    Rate impact (local to BTC staker positions):
+    - PRE_HURDLE: Staker receives standard weighted allocation
+    - HURDLE_MET: Transition state (10x reached, about to lock)
+    - POST_HURDLE_LOCKED: Permanent reduced rate (allocation capped)
+
+    Note: This is SEPARATE from I_i investor hurdle logic in investor_staking.py.
+    BTC stakers have their own hurdle tracking within the Du-pool partition.
+    """
+    PRE_HURDLE = 0         # <10x cumulative distributions (standard rate)
+    HURDLE_MET = 1         # Exactly reached 10x (transition/audit visibility)
+    POST_HURDLE_LOCKED = 2  # >10x and permanently locked (reduced rate)
+
+
+# Default hurdle target multiple for BTC stakers
+STAKER_HURDLE_TARGET_MULTIPLE = 10.0
+
+
 # Pool percentages (of total epoch rewards)
 POOL_PERCENTAGES = {
     "stakeholder_un": 0.60,   # 60% - 012 stakeholders (ACTIVE, engagement)
@@ -287,10 +310,24 @@ class ComputeMetrics:
 
 @dataclass
 class StakerPosition:
-    """Tracks a staker's position for degressive tier calculation and weighted allocation."""
+    """Tracks a staker's position for degressive tier calculation, weighted allocation, and hurdle state.
+
+    Hurdle mechanics (BTC staker specific):
+    - Staker receives distributions until cumulative BTC-equivalent reaches 10x original stake
+    - Once 10x is reached, hurdle locks permanently (POST_HURDLE_LOCKED)
+    - Post-hurdle stakers continue receiving distributions but at reduced rate
+    - This is SEPARATE from I_i investor hurdle (do not conflate)
+    """
+    # Core position fields
     original_stake_btc: float = 0.0   # Initial BTC staked
     total_earned_fi: float = 0.0      # Total F_i earned lifetime
     stake_timestamp: str = ""          # When they staked
+
+    # Hurdle accounting fields (BTC staker specific)
+    cumulative_distributions_btc: float = 0.0  # BTC-equivalent distributions received
+    hurdle_target_multiple: float = STAKER_HURDLE_TARGET_MULTIPLE  # Default 10x
+    post_hurdle_locked: bool = False  # Once True, never reverts
+    hurdle_locked_at_btc: Optional[float] = None  # BTC level when lock triggered
 
     @property
     def weighted_stake(self) -> float:
@@ -308,6 +345,80 @@ class StakerPosition:
         # Convert F_i to BTC equivalent (simplified: assume 1 F_i = 0.00001 BTC)
         fi_in_btc = self.total_earned_fi * 0.00001
         return fi_in_btc / self.original_stake_btc
+
+    @property
+    def hurdle_target_btc(self) -> float:
+        """BTC threshold for hurdle (original_stake * target_multiple)."""
+        return self.original_stake_btc * self.hurdle_target_multiple
+
+    @property
+    def hurdle_progress(self) -> float:
+        """Progress toward hurdle as ratio (0.0 to 1.0+).
+
+        Returns:
+            0.0 = no distributions yet
+            0.5 = halfway to hurdle
+            1.0 = exactly at hurdle
+            >1.0 = past hurdle
+        """
+        target = self.hurdle_target_btc
+        if target <= 0:
+            return 0.0
+        return self.cumulative_distributions_btc / target
+
+    @property
+    def hurdle_state(self) -> StakerHurdleState:
+        """Current hurdle state for this staker position.
+
+        State transitions:
+        - PRE_HURDLE: cumulative < 10x and not locked
+        - HURDLE_MET: cumulative >= 10x and about to lock (transient)
+        - POST_HURDLE_LOCKED: locked permanently
+
+        Note: Once post_hurdle_locked=True, state is always POST_HURDLE_LOCKED
+        regardless of cumulative_distributions_btc value.
+        """
+        if self.post_hurdle_locked:
+            return StakerHurdleState.POST_HURDLE_LOCKED
+
+        if self.cumulative_distributions_btc >= self.hurdle_target_btc:
+            return StakerHurdleState.HURDLE_MET
+
+        return StakerHurdleState.PRE_HURDLE
+
+    def record_distribution_btc(self, amount_btc: float) -> StakerHurdleState:
+        """Record a BTC-equivalent distribution and update hurdle state.
+
+        This method:
+        1. Adds amount to cumulative_distributions_btc
+        2. Checks if hurdle threshold is reached
+        3. Locks post_hurdle_locked if threshold crossed
+        4. Returns the new hurdle state
+
+        Args:
+            amount_btc: BTC-equivalent amount of this distribution
+
+        Returns:
+            Current StakerHurdleState after recording
+        """
+        if amount_btc <= 0:
+            return self.hurdle_state
+
+        self.cumulative_distributions_btc += amount_btc
+
+        # Check for hurdle transition
+        if not self.post_hurdle_locked and self.hurdle_target_btc > 0:
+            if self.cumulative_distributions_btc >= self.hurdle_target_btc:
+                self.post_hurdle_locked = True
+                self.hurdle_locked_at_btc = self.cumulative_distributions_btc
+                logger.info(
+                    "[StakerPosition] Hurdle locked at %.6f BTC (target: %.6f BTC, multiple: %.1fx)",
+                    self.cumulative_distributions_btc,
+                    self.hurdle_target_btc,
+                    self.hurdle_target_multiple,
+                )
+
+        return self.hurdle_state
 
     def get_degressive_tier(self) -> ActivityLevel:
         """Get activity tier based on degressive model.

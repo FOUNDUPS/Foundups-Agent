@@ -64,6 +64,7 @@ from .token_economics import (
 from .pool_distribution import (
     ParticipantType,
     ActivityLevel,
+    StakerHurdleState,
     ComputeMetrics,
     StakerPosition,
     Participant,
@@ -85,6 +86,8 @@ from .pool_distribution import (
     calculate_weighted_share,
     calculate_total_weighted_stake,
     distribute_weighted_staker_pool,
+    # Staker hurdle mechanics (BTC staker specific)
+    STAKER_HURDLE_TARGET_MULTIPLE,
 )
 
 from .dilution_scenario import (
@@ -388,6 +391,7 @@ __all__ = [
     # Pool distribution (Un/Dao/Du)
     "ParticipantType",
     "ActivityLevel",
+    "StakerHurdleState",
     "ComputeMetrics",
     "StakerPosition",
     "Participant",
@@ -409,6 +413,8 @@ __all__ = [
     "calculate_weighted_share",
     "calculate_total_weighted_stake",
     "distribute_weighted_staker_pool",
+    # Staker hurdle mechanics (BTC staker specific)
+    "STAKER_HURDLE_TARGET_MULTIPLE",
     # Dilution analysis (012-confirmed 2026-02-14)
     "AdoptionModel",
     "AdoptionConfig",

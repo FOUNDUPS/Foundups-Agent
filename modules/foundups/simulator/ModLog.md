@@ -1,5 +1,74 @@
 # Simulator ModLog
 
+## 2026-03-31 - BTC Staker Hurdle State Machine
+
+### Why
+Architect/CTO handoff (WSP 97 Slice 4): Implement local hurdle mechanics for BTC stakers
+in Du-pool partition. 10x threshold detection with permanent post-hurdle lock.
+
+### Added to `pool_distribution.py`
+```python
+class StakerHurdleState(IntEnum):
+    PRE_HURDLE = 0         # <10x cumulative distributions
+    HURDLE_MET = 1         # Transition state (10x reached)
+    POST_HURDLE_LOCKED = 2  # Permanent (>10x, locked)
+
+STAKER_HURDLE_TARGET_MULTIPLE = 10.0
+```
+
+### StakerPosition Extended
+| Field | Type | Purpose |
+|-------|------|---------|
+| `cumulative_distributions_btc` | float | BTC-equivalent distributions received |
+| `hurdle_target_multiple` | float | Default 10x |
+| `post_hurdle_locked` | bool | Permanent lock flag |
+| `hurdle_locked_at_btc` | Optional[float] | BTC level when lock triggered |
+
+### Properties/Methods Added
+| Name | Returns | Purpose |
+|------|---------|---------|
+| `hurdle_target_btc` | float | stake * multiple |
+| `hurdle_progress` | float | 0.0-1.0+ progress ratio |
+| `hurdle_state` | StakerHurdleState | Current state machine state |
+| `record_distribution_btc(amount)` | StakerHurdleState | Record and check for lock |
+
+### Exports Added to `economics/__init__.py`
+- `StakerHurdleState`
+- `STAKER_HURDLE_TARGET_MULTIPLE`
+
+### Test Coverage
+| Test Class | Tests | Status |
+|------------|-------|--------|
+| TestStakerHurdleStateEnum | 4 | PASS |
+| TestStakerPositionHurdleFields | 4 | PASS |
+| TestHurdleTargetBtc | 4 | PASS |
+| TestHurdleProgress | 5 | PASS |
+| TestHurdleState | 6 | PASS |
+| TestRecordDistributionBtc | 5 | PASS |
+| TestHurdleLocking | 6 | PASS |
+| TestHurdleWithWeightedStake | 2 | PASS |
+| TestEdgeCases | 3 | PASS |
+| TestConservation | 2 | PASS |
+| **TOTAL** | **41** | **PASS** |
+
+### Key Behaviors Verified
+- 10x threshold triggers permanent lock
+- Lock state survives additional distributions
+- Weighted stake (Slice 3) unaffected by hurdle state
+- Zero/negative distributions ignored
+- Deterministic state transitions
+
+### Boundary Compliance
+- `investor_staking.py` untouched (separate I_i lane)
+- `ChannelPartnerPool` untouched
+- Local implementation in `pool_distribution.py` only
+
+### Outcome
+- BTC staker hurdle mechanics are deterministic and tested
+- Slice is merge-ready
+
+---
+
 ## 2026-03-31 - Weighted Stake Allocation for BTC Staker Pool
 
 ### Why
