@@ -1,0 +1,285 @@
+[
+  {
+    "foundup_id": "move2japan",
+    "title": "Move to Japan",
+    "creator": "012",
+    "entity": "Move2Japan",
+    "source_type": "youtube_channel",
+    "source_id": "UC-LSSlOZwpGIRIYihaz8zCw",
+    "source_handle": "@MOVE2JAPAN",
+    "category": "travel",
+    "tags": ["japan", "relocation", "fukui", "life", "expat"],
+    "geo": "Fukui, Japan",
+    "status": "active",
+    "video_count": 5,
+    "poster_url": "/media/posters/move2japan.jpg",
+    "videos": [
+      {
+        "video_id": "m2j_001",
+        "title": "Why I Moved to Rural Japan",
+        "thumbnail_url": "https://i.ytimg.com/vi/placeholder/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/placeholder",
+        "source_url": "https://www.youtube.com/watch?v=placeholder",
+        "timestamp": "2026-03-15T10:00:00Z",
+        "duration_seconds": 312
+      },
+      {
+        "video_id": "m2j_002",
+        "title": "Fukui Prefecture First Impressions",
+        "thumbnail_url": "https://i.ytimg.com/vi/placeholder/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/placeholder",
+        "source_url": "https://www.youtube.com/watch?v=placeholder",
+        "timestamp": "2026-03-10T14:30:00Z",
+        "duration_seconds": 245
+      },
+      {
+        "video_id": "m2j_003",
+        "title": "Japanese Countryside Living Costs",
+        "thumbnail_url": "https://i.ytimg.com/vi/placeholder/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/placeholder",
+        "source_url": "https://www.youtube.com/watch?v=placeholder",
+        "timestamp": "2026-03-05T09:00:00Z",
+        "duration_seconds": 420
+      },
+      {
+        "video_id": "m2j_004",
+        "title": "Getting a Japanese Drivers License",
+        "thumbnail_url": "https://i.ytimg.com/vi/placeholder/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/placeholder",
+        "source_url": "https://www.youtube.com/watch?v=placeholder",
+        "timestamp": "2026-02-28T11:00:00Z",
+        "duration_seconds": 380
+      },
+      {
+        "video_id": "m2j_005",
+        "title": "My Japanese Apartment Tour",
+        "thumbnail_url": "https://i.ytimg.com/vi/placeholder/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/placeholder",
+        "source_url": "https://www.youtube.com/watch?v=placeholder",
+        "timestamp": "2026-02-20T16:00:00Z",
+        "duration_seconds": 290
+      }
+    ]
+  },
+  {
+    "foundup_id": "antifafm",
+    "title": "antifaFM",
+    "creator": "012",
+    "entity": "antifaFM",
+    "source_type": "youtube_channel",
+    "source_id": "UCVSmg5aOhP4tnQ9KFUg97qA",
+    "source_handle": "@antifaFM",
+    "category": "media",
+    "tags": ["radio", "resistance", "24/7", "live", "music", "news"],
+    "geo": null,
+    "status": "active",
+    "video_count": 4,
+    "poster_url": "/media/posters/antifafm.jpg",
+    "videos": [
+      {
+        "video_id": "afm_001",
+        "title": "antifaFM LIVE - 24/7 Resistance Radio",
+        "thumbnail_url": "https://i.ytimg.com/vi/placeholder/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/placeholder",
+        "source_url": "https://www.youtube.com/watch?v=placeholder",
+        "timestamp": "2026-04-01T00:00:00Z",
+        "duration_seconds": 0,
+        "is_live": true
+      },
+      {
+        "video_id": "afm_002",
+        "title": "GCC Shipping Tracker - Hormuz Strait",
+        "thumbnail_url": "https://i.ytimg.com/vi/placeholder/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/placeholder",
+        "source_url": "https://www.youtube.com/watch?v=placeholder",
+        "timestamp": "2026-03-30T12:00:00Z",
+        "duration_seconds": 600
+      },
+      {
+        "video_id": "afm_003",
+        "title": "News Maps - Global Conflict Monitor",
+        "thumbnail_url": "https://i.ytimg.com/vi/placeholder/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/placeholder",
+        "source_url": "https://www.youtube.com/watch?v=placeholder",
+        "timestamp": "2026-03-29T08:00:00Z",
+        "duration_seconds": 600
+      },
+      {
+        "video_id": "afm_004",
+        "title": "Karaoke Mode - UnDaoDu Tracks",
+        "thumbnail_url": "https://i.ytimg.com/vi/placeholder/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/placeholder",
+        "source_url": "https://www.youtube.com/watch?v=placeholder",
+        "timestamp": "2026-03-28T20:00:00Z",
+        "duration_seconds": 1800
+      }
+    ]
+  },
+  {
+    "foundup_id": "foundups_main",
+    "title": "FoundUps",
+    "creator": "012",
+    "entity": "FoundUps",
+    "source_type": "youtube_channel",
+    "source_id": "UCSNTUXjAgpd4sgWYP0xoJgw",
+    "source_handle": "@FoundUps",
+    "category": "startup",
+    "tags": ["pAVS", "founders", "ventures", "btc", "autonomous"],
+    "geo": null,
+    "status": "active",
+    "video_count": 3,
+    "poster_url": "/media/posters/foundups.jpg",
+    "videos": [
+      {
+        "video_id": "fup_001",
+        "title": "What is pAVS? Peer Autonomous Venture System",
+        "thumbnail_url": "https://i.ytimg.com/vi/placeholder/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/placeholder",
+        "source_url": "https://www.youtube.com/watch?v=placeholder",
+        "timestamp": "2026-03-20T15:00:00Z",
+        "duration_seconds": 480
+      },
+      {
+        "video_id": "fup_002",
+        "title": "Red Dog - Your Digital Twin",
+        "thumbnail_url": "https://i.ytimg.com/vi/placeholder/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/placeholder",
+        "source_url": "https://www.youtube.com/watch?v=placeholder",
+        "timestamp": "2026-03-15T10:00:00Z",
+        "duration_seconds": 360
+      },
+      {
+        "video_id": "fup_003",
+        "title": "The Mall - Discovering FoundUps",
+        "thumbnail_url": "https://i.ytimg.com/vi/placeholder/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/placeholder",
+        "source_url": "https://www.youtube.com/watch?v=placeholder",
+        "timestamp": "2026-03-10T12:00:00Z",
+        "duration_seconds": 300
+      }
+    ]
+  },
+  {
+    "foundup_id": "undaodu",
+    "title": "UnDaoDu",
+    "creator": "012",
+    "entity": "UnDaoDu",
+    "source_type": "youtube_channel",
+    "source_id": "UCfHM9Fw9HD-NwiS0seD_oIA",
+    "source_handle": "@UnDaoDu",
+    "category": "music",
+    "tags": ["music", "original", "resistance", "artist", "producer"],
+    "geo": "Fukui, Japan",
+    "status": "active",
+    "video_count": 4,
+    "poster_url": "/media/posters/undaodu.jpg",
+    "videos": [
+      {
+        "video_id": "udd_001",
+        "title": "Promesas Rotas (Broken Promises)",
+        "thumbnail_url": "https://i.ytimg.com/vi/placeholder/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/placeholder",
+        "source_url": "https://www.youtube.com/watch?v=placeholder",
+        "timestamp": "2026-03-25T18:00:00Z",
+        "duration_seconds": 198
+      },
+      {
+        "video_id": "udd_002",
+        "title": "The Country Bleeds for Renee",
+        "thumbnail_url": "https://i.ytimg.com/vi/placeholder/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/placeholder",
+        "source_url": "https://www.youtube.com/watch?v=placeholder",
+        "timestamp": "2026-03-20T14:00:00Z",
+        "duration_seconds": 240
+      },
+      {
+        "video_id": "udd_003",
+        "title": "Resist (Live Session)",
+        "thumbnail_url": "https://i.ytimg.com/vi/placeholder/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/placeholder",
+        "source_url": "https://www.youtube.com/watch?v=placeholder",
+        "timestamp": "2026-03-15T20:00:00Z",
+        "duration_seconds": 285
+      },
+      {
+        "video_id": "udd_004",
+        "title": "Digital Dawn",
+        "thumbnail_url": "https://i.ytimg.com/vi/placeholder/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/placeholder",
+        "source_url": "https://www.youtube.com/watch?v=placeholder",
+        "timestamp": "2026-03-10T16:00:00Z",
+        "duration_seconds": 210
+      }
+    ]
+  },
+  {
+    "foundup_id": "linkedin_012",
+    "title": "012 LinkedIn",
+    "creator": "012",
+    "entity": "012 Professional",
+    "source_type": "linkedin_profile",
+    "source_id": null,
+    "source_handle": null,
+    "category": "professional",
+    "tags": ["linkedin", "thought-leadership", "founder", "tech"],
+    "geo": "Fukui, Japan",
+    "status": "placeholder",
+    "video_count": 2,
+    "poster_url": "/media/posters/linkedin-012.jpg",
+    "videos": [
+      {
+        "video_id": "li_001",
+        "title": "Building Autonomous Venture Systems",
+        "thumbnail_url": "/media/thumbs/li-placeholder.jpg",
+        "embed_url": null,
+        "source_url": null,
+        "timestamp": "2026-03-28T09:00:00Z",
+        "duration_seconds": 120
+      },
+      {
+        "video_id": "li_002",
+        "title": "Why BTC-Native Matters",
+        "thumbnail_url": "/media/thumbs/li-placeholder.jpg",
+        "embed_url": null,
+        "source_url": null,
+        "timestamp": "2026-03-22T10:00:00Z",
+        "duration_seconds": 90
+      }
+    ]
+  },
+  {
+    "foundup_id": "x_ravingantifa",
+    "title": "RavingANTIFA",
+    "creator": "012",
+    "entity": "RavingANTIFA",
+    "source_type": "x_profile",
+    "source_id": null,
+    "source_handle": "@RavingANTIFA",
+    "category": "activism",
+    "tags": ["x", "twitter", "resistance", "activism", "news"],
+    "geo": null,
+    "status": "placeholder",
+    "video_count": 2,
+    "poster_url": "/media/posters/x-ravingantifa.jpg",
+    "videos": [
+      {
+        "video_id": "x_001",
+        "title": "Thread: ICE Resistance Minneapolis",
+        "thumbnail_url": "/media/thumbs/x-placeholder.jpg",
+        "embed_url": null,
+        "source_url": null,
+        "timestamp": "2026-03-30T15:00:00Z",
+        "duration_seconds": 45
+      },
+      {
+        "video_id": "x_002",
+        "title": "Thread: Gulf Crisis Update",
+        "thumbnail_url": "/media/thumbs/x-placeholder.jpg",
+        "embed_url": null,
+        "source_url": null,
+        "timestamp": "2026-03-29T12:00:00Z",
+        "duration_seconds": 60
+      }
+    ]
+  }
+]
