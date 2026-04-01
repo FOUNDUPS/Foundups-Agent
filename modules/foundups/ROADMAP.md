@@ -119,6 +119,31 @@ Use:
 
 Do not keep product FoundUps in core indefinitely once they pass the exfoliation gate.
 
+## Mall / FoundUp Runtime Boundary
+
+The Mall and the FoundUp are not the same runtime concern.
+
+Locked model:
+
+```text
+Mall PWA = control shell
+FoundUp = external product/app
+Connection = metadata + task API + deep link
+```
+
+Execution rule:
+- keep the Mall as the installed control shell
+- allow FoundUps to live in separate repos once externalized
+- deploy FoundUps into an in-scope route contract when the experience should
+  still feel like one app
+- do not collapse FoundUp business logic back into the Mall shell repo by
+  default
+
+Use:
+- `modules/foundups/docs/PFMALL_SHELL_CONTRACT.md`
+- `modules/foundups/docs/PFMALL_ROUTING_DISCOVERY_MODEL.md`
+- `modules/foundups/docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md`
+
 ## Continuity Requirements (must stay current)
 - Update:
   - `ModLog.md` and `tests/TestModLog.md` in every touched module

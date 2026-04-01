@@ -2,6 +2,42 @@
 
 ## Chronological Change Log
 
+### 2026-04-01 - p.fMALL External FoundUp Route Contract
+
+**By:** 0102
+**WSP References:** WSP 3 (Domains), WSP 11 (Interface Contract), WSP 49 (Structure), WSP 97 (Execution Discipline), WSP 102 (FoundUps Web Design)
+
+**What changed**
+- Added `modules/foundups/docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md`
+  - locks the rule:
+    - `Mall PWA = control shell`
+    - `FoundUp = external product/app`
+    - `Connection = metadata + task API + deep link`
+  - separates the runtime into:
+    - control pipe -> registry/task/status contract
+    - experience pipe -> in-scope route navigation
+  - clarifies that separate FoundUp repos are compatible with one in-scope Mall
+    experience
+  - keeps `/f/{foundup_id}/*` as the preferred long-term route family while
+    treating `/member/foundup.html?id=` as transitional shell entry
+- Updated `modules/foundups/ROADMAP.md`
+  - added the Mall / FoundUp runtime boundary as active domain guidance
+- Updated `modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md`
+  - added the new route/runtime contract as a planning reference
+- Updated `modules/foundups/docs/PFMALL_SHELL_CONTRACT.md`
+  - attached the new route/runtime contract as the shell boundary companion note
+- Updated `modules/foundups/docs/PFMALL_ROUTING_DISCOVERY_MODEL.md`
+  - attached the new route/runtime contract as the deployment/routing companion note
+
+**Why**
+- existing shell docs already covered routes and shell responsibilities, but not
+  the missing lock on external repos + in-scope deployment + control-vs-
+  experience pipe separation
+- this architecture needed to move from conversation into canonical FoundUps
+  repo memory
+
+---
+
 ### 2026-04-01 - SoftProto Foundation Architecture
 
 **By:** 0102

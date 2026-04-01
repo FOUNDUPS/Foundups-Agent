@@ -13,6 +13,11 @@ p.fMALL is a PWA shell/gateway that hosts, discovers, and routes into multiple F
 
 ---
 
+Companion note:
+- `PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md` locks the external-repo +
+  in-scope-route model that keeps one installed Mall experience without moving
+  product logic into the shell.
+
 ## 2. Shell Responsibilities
 
 | Responsibility | Description |

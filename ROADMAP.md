@@ -66,6 +66,13 @@ The rule from this point forward:
 - no new hard-coded UI placement when the feature clearly belongs in the future schema-driven layer
 - AI edits and user edits must eventually mutate the same layout/gesture state
 
+Complementary FoundUps runtime rule:
+- p.fMALL remains the installed control shell
+- product FoundUps may live in separate repos
+- the preferred user experience is still one app through in-scope route
+  deployment, not separate install surfaces
+- see `modules/foundups/docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md`
+
 ---
 
 **[TARGET] Revolutionary Mission:** Building the **orchestration infrastructure for an intelligent internet** where 0102 agents autonomously interact, coordinate, and collectively build FoundUps across all platforms.

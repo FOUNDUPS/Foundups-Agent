@@ -11,6 +11,11 @@
 
 Define how p.fMALL routes users to FoundUps, how FoundUps are discovered, and how navigation works between the shell and loaded FoundUps.
 
+Companion note:
+- `PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md` clarifies the route/runtime
+  boundary: the Mall owns the shell, the FoundUp owns the product surface, and
+  route navigation is the experience pipe.
+
 ---
 
 ## 2. URL Structure

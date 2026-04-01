@@ -36,6 +36,47 @@ Svelte spike.
 
 ---
 
+## [2026-04-01] p.fMALL External FoundUp Route Contract
+
+**Change Type**: Architecture / Documentation
+**By**: 0102 (Codex)
+**WSP References**: WSP 102, WSP 97, WSP 11, WSP 22, WSP 83
+
+### Summary
+
+Locked the Mall-to-FoundUp runtime boundary so external FoundUp repos can still
+open inside one installed p.fMALL experience through in-scope routes and
+contracted control surfaces.
+
+### What Changed
+
+- Added `modules/foundups/docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md`
+  - defines the canonical model:
+    - `Mall PWA = control shell`
+    - `FoundUp = external product/app`
+    - `Connection = metadata + task API + deep link`
+  - separates:
+    - control pipe -> metadata/task/status contracts
+    - experience pipe -> in-scope route navigation
+  - clarifies that separate FoundUp repos do not require a fragmented user
+    experience
+- Updated:
+  - `modules/foundups/ROADMAP.md`
+  - `modules/foundups/ModLog.md`
+  - `modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md`
+  - `modules/foundups/docs/PFMALL_SHELL_CONTRACT.md`
+  - `modules/foundups/docs/PFMALL_ROUTING_DISCOVERY_MODEL.md`
+  - `WSP_framework/src/WSP_102_FoundUps_Web_Design_Protocol.md`
+
+### Result
+
+- p.fMALL shell ownership is now distinct from external FoundUp product/runtime
+  ownership
+- route deployment and API contracts are now part of canonical repo memory,
+  not just chat history
+
+---
+
 ## [2026-04-01] SoftProto Foundation Architecture Lock
 
 **Change Type**: Architecture / Documentation

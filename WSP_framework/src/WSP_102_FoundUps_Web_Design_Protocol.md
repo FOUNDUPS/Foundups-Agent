@@ -191,6 +191,38 @@ Nested interaction requirement:
   - object
 - local overrides must be able to fall back to parent defaults
 
+## 8A. Mall / FoundUp Runtime Boundary
+
+FoundUps web surfaces must preserve the runtime split between the shell and the
+product experience.
+
+Canonical model:
+
+```text
+Mall PWA = control shell
+FoundUp = external product/app
+Connection = metadata + task API + deep link
+```
+
+Direction lock:
+- the Mall owns discovery, auth context, navigation, and shared shell controls
+- the FoundUp owns its own product logic, task surface, and product UI
+- separate FoundUp repos are compatible with one installed app experience when
+  deployment stays inside the shell route scope
+
+Current runtime note:
+- `modules/foundups/docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md`
+
+Preferred route family:
+- `/f/{foundup_id}`
+- `/f/{foundup_id}/{path}`
+
+Implication:
+- route navigation is the experience pipe
+- metadata/task/status contracts are the control pipe
+- UI customization work such as SoftProto belongs to the shell-side interface
+  layer and must not erase the Mall-vs-FoundUp boundary
+
 ## 9. Testing Checklist
 
 - [ ] Click count audit (target Grade B or better)

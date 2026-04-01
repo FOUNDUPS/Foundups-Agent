@@ -117,6 +117,9 @@ Use four statuses:
   - current architecture lock for the future schema-driven UI operating layer
 - `modules/foundups/docs/SOFTPROTO_ROLLOUT_PLAN_2026-04-01.md`
   - current rollout order, worker boundaries, and indexing requirements
+- `modules/foundups/docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md`
+  - current runtime boundary for Mall shell vs external FoundUp repos and
+    in-scope route deployment
 - `modules/foundups/docs/FOUNDUP_FEDERATION_MIGRATION_PLAN.md`
   - useful, but still draft and not proof that all migrations have happened
 - submodule roadmaps:
