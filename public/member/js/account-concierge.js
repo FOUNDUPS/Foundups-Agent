@@ -42,6 +42,7 @@
     plane.classList.add('open');
     scrim.classList.add('open');
     document.body.classList.add('surface-open');
+    setAnchorState('active');
   }
 
   function closePlane() {
@@ -50,6 +51,7 @@
     plane.classList.remove('open');
     scrim.classList.remove('open');
     document.body.classList.remove('surface-open');
+    if (!listeningVisible) setAnchorState('idle');
   }
 
   function togglePlane() {
@@ -57,11 +59,133 @@
     else openPlane();
   }
 
+  // ---- Red Dog anchor interaction grammar ----
+  var anchor = document.getElementById('redDogAnchor');
+  var summaryEl = document.getElementById('redDogSummary');
+  var summaryContent = summaryEl && summaryEl.querySelector('[data-reddog-summary-content]');
+  var listeningEl = document.getElementById('redDogListening');
+  var stateRing = redDogTrigger && redDogTrigger.querySelector('[data-reddog-anchor-state]');
+
+  var lastTapTime = 0;
+  var tapTimer = null;
+  var DOUBLE_TAP_WINDOW = 300;
+  var holdTimer = null;
+  var HOLD_THRESHOLD = 500;
+  var isHolding = false;
+  var summaryVisible = false;
+  var listeningVisible = false;
+
+  // Anchor state: idle | active | listening
+  function setAnchorState(state) {
+    if (stateRing) stateRing.setAttribute('data-reddog-anchor-state', state);
+  }
+
+  function showSummary() {
+    if (!summaryEl || !summaryContent) return;
+    // Build shell-owned summary from loaded data
+    var lines = [];
+    var grid = plane.querySelector('[data-account-foundups-grid]');
+    var tileCount = grid ? grid.querySelectorAll('.account-foundup-tile').length : 0;
+    var readyCount = grid ? grid.querySelectorAll('.status-ready').length : 0;
+    var countEl = plane.querySelector('[data-invite-count]');
+    var inviteText = countEl ? countEl.textContent : '';
+
+    if (tileCount > 0) {
+      lines.push(tileCount + ' FoundUp' + (tileCount !== 1 ? 's' : '') + (readyCount > 0 ? ' \u00b7 ' + readyCount + ' ready' : ''));
+    } else {
+      lines.push('No FoundUps loaded yet');
+    }
+    if (inviteText) {
+      lines.push('Invites: ' + inviteText);
+    }
+    lines.push('Tap to open \u00b7 Hold to talk');
+
+    summaryContent.innerHTML = lines.map(function (l) { return '<p>' + esc(l) + '</p>'; }).join('');
+    summaryEl.hidden = false;
+    summaryVisible = true;
+    setAnchorState('active');
+
+    // Auto-dismiss after 3s
+    setTimeout(function () { dismissSummary(); }, 3000);
+  }
+
+  function dismissSummary() {
+    if (!summaryEl) return;
+    summaryEl.hidden = true;
+    summaryVisible = false;
+    if (!listeningVisible && !isOpen) setAnchorState('idle');
+  }
+
+  function startListening() {
+    if (!listeningEl) return;
+    isHolding = true;
+    listeningVisible = true;
+    listeningEl.hidden = false;
+    dismissSummary();
+    setAnchorState('listening');
+    if (redDogTrigger) redDogTrigger.classList.add('red-dog-btn-listening');
+  }
+
+  function stopListening() {
+    if (!listeningEl) return;
+    isHolding = false;
+    listeningVisible = false;
+    listeningEl.hidden = true;
+    if (redDogTrigger) redDogTrigger.classList.remove('red-dog-btn-listening');
+    if (!isOpen) setAnchorState('idle');
+  }
+
   // ---- Red Dog trigger (primary entry point) ----
   if (redDogTrigger) {
-    redDogTrigger.addEventListener('click', function (e) {
+    // Pointer-based interactions for tap / double-tap / hold
+    redDogTrigger.addEventListener('pointerdown', function (e) {
       e.stopPropagation();
-      togglePlane();
+      // Start hold timer
+      holdTimer = setTimeout(function () {
+        startListening();
+      }, HOLD_THRESHOLD);
+    });
+
+    redDogTrigger.addEventListener('pointerup', function (e) {
+      e.stopPropagation();
+      clearTimeout(holdTimer);
+
+      // If we were holding, stop listening — don't fire tap
+      if (isHolding) {
+        stopListening();
+        return;
+      }
+
+      var now = Date.now();
+      if (now - lastTapTime < DOUBLE_TAP_WINDOW) {
+        // Double-tap: show quick summary
+        clearTimeout(tapTimer);
+        lastTapTime = 0;
+        showSummary();
+      } else {
+        // Single tap: toggle plane (delayed to wait for possible double-tap)
+        lastTapTime = now;
+        tapTimer = setTimeout(function () {
+          lastTapTime = 0;
+          if (summaryVisible) { dismissSummary(); return; }
+          togglePlane();
+        }, DOUBLE_TAP_WINDOW);
+      }
+    });
+
+    redDogTrigger.addEventListener('pointerleave', function () {
+      clearTimeout(holdTimer);
+      if (isHolding) stopListening();
+    });
+
+    redDogTrigger.addEventListener('pointercancel', function () {
+      clearTimeout(holdTimer);
+      if (isHolding) stopListening();
+    });
+
+    // Prevent context menu on long press (mobile)
+    redDogTrigger.addEventListener('contextmenu', function (e) {
+      e.preventDefault();
     });
   }
 
@@ -154,6 +278,11 @@
     close: closePlane,
     toggle: togglePlane,
     isOpen: function () { return isOpen; },
+    showSummary: showSummary,
+    dismissSummary: dismissSummary,
+    startListening: startListening,
+    stopListening: stopListening,
+    anchorState: function () { return stateRing ? stateRing.getAttribute('data-reddog-anchor-state') : 'idle'; },
 
     /** Populate identity block from Clerk user + Firestore data */
     setIdentity: function (clerkUser, userData) {

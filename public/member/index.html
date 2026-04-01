@@ -549,10 +549,7 @@
 
     function bindMallInteractions() {
       // Tile field handles its own interactions via mall-tile-field.js
-      // Red Dog button opens the unified plane
-      redDogBtn.addEventListener('click', function () {
-        if (window.redDog) window.redDog.toggle();
-      });
+      // Red Dog button interactions handled by account-concierge.js (tap/double-tap/hold)
       overlayScrim.addEventListener('click', closeSurfaces);
 
       // Global Escape handler (D's guardrail - LOCKED)
