@@ -1,0 +1,340 @@
+/**
+ * Mall Video Player — Fullscreen video layer with queue rail.
+ *
+ * Structure:
+ *   .video-player-fullscreen (fixed overlay)
+ *     .video-player-top-bar (back, share, save, info, more)
+ *     .video-player-stage (video element)
+ *     .video-player-queue-rail (bottom, auto-hide)
+ *
+ * Gestures (via gesture-engine.js):
+ *   - swipe-up = next video in queue
+ *   - swipe-down = exit fullscreen
+ *   - pinch-in = exit fullscreen
+ *   - tap = toggle chrome
+ *   - swipe-left = save hook
+ *   - swipe-right = dismiss hook
+ *
+ * Rail:
+ *   - hidden by default
+ *   - swipe-up from bottom edge reveals
+ *   - auto-hides after inactivity
+ *   - tap thumbnail = autoplay that video
+ */
+
+/* ─── Fullscreen Container ─── */
+.video-player-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: #000;
+  display: none;
+  flex-direction: column;
+  touch-action: pan-y pinch-zoom;
+}
+
+.video-player-fullscreen.open {
+  display: flex;
+}
+
+/* ─── Top Bar ─── */
+.video-player-top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9010;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+  background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.video-player-fullscreen.chrome-hidden .video-player-top-bar {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.video-player-top-bar-left,
+.video-player-top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.video-player-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: rgba(255,255,255,0.1);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.video-player-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+.video-player-btn:active {
+  background: rgba(255,255,255,0.3);
+}
+
+.video-player-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+.video-player-title {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0 0.75rem;
+}
+
+/* ─── Video Stage ─── */
+.video-player-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.video-player-stage video,
+.video-player-stage iframe {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+.video-player-stage iframe {
+  border: none;
+}
+
+/* Loading/error states */
+.video-player-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.6);
+  font-size: 0.9rem;
+}
+
+.video-player-loading::after {
+  content: '';
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255,255,255,0.2);
+  border-top-color: #7c5cfc;
+  border-radius: 50%;
+  animation: video-spin 0.8s linear infinite;
+  margin-right: 0.75rem;
+}
+
+@keyframes video-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ─── Queue Rail (Bottom) ─── */
+.video-player-queue-rail {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9010;
+  padding: 0.5rem;
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.video-player-queue-rail.visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.video-player-fullscreen.chrome-hidden .video-player-queue-rail {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.video-player-queue-track {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.25rem 0;
+}
+
+.video-player-queue-track::-webkit-scrollbar {
+  display: none;
+}
+
+.video-player-queue-item {
+  flex: 0 0 auto;
+  width: 100px;
+  scroll-snap-align: start;
+  cursor: pointer;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.video-player-queue-item:hover {
+  border-color: rgba(255,255,255,0.3);
+}
+
+.video-player-queue-item.active {
+  border-color: #7c5cfc;
+}
+
+.video-player-queue-item:active {
+  transform: scale(0.95);
+}
+
+.video-player-queue-thumb {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  background: #1a1a1a;
+  display: block;
+}
+
+.video-player-queue-label {
+  padding: 0.25rem 0.4rem;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  font-size: 0.65rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Edge Trigger Zone (Bottom) ─── */
+.video-player-edge-trigger {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  z-index: 9005;
+}
+
+/* ─── Gesture Feedback ─── */
+.video-player-gesture-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.video-player-gesture-hint.show {
+  opacity: 1;
+}
+
+/* ─── Expand Control (On Tiles) ─── */
+.tile-expand-control {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  background: rgba(0,0,0,0.6);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s ease, background 0.15s ease;
+  z-index: 10;
+}
+
+.mall-tile:hover .tile-expand-control,
+.mall-tile:focus-within .tile-expand-control {
+  opacity: 1;
+}
+
+.tile-expand-control:hover {
+  background: rgba(124,92,252,0.8);
+}
+
+.tile-expand-control svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* ─── Mobile Optimizations ─── */
+@media (max-width: 480px) {
+  .video-player-top-bar {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .video-player-btn {
+    width: 36px;
+    height: 36px;
+  }
+
+  .video-player-title {
+    font-size: 0.8rem;
+    max-width: 140px;
+  }
+
+  .video-player-queue-item {
+    width: 80px;
+  }
+}
+
+/* ─── Landscape Mode ─── */
+@media (orientation: landscape) and (max-height: 500px) {
+  .video-player-top-bar {
+    padding: 0.25rem 0.75rem;
+  }
+
+  .video-player-queue-rail {
+    padding: 0.25rem;
+  }
+
+  .video-player-queue-item {
+    width: 80px;
+  }
+}
