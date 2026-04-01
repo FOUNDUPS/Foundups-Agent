@@ -258,8 +258,11 @@ class TestTermsGateBehavior:
 # PWA Phase 1
 # ---------------------------------------------------------------------------
 
+SW = Path(__file__).resolve().parents[4] / "public" / "sw.js"
+
+
 class TestPWAPhase1:
-    """PWA manifest and metadata present."""
+    """PWA manifest, service worker, and metadata present."""
 
     def test_manifest_link_in_head(self):
         html = GATEWAY.read_text(encoding="utf-8")
@@ -278,6 +281,60 @@ class TestPWAPhase1:
         assert "display" in data
         assert "icons" in data
 
+    def test_manifest_has_scope(self):
+        import json
+        data = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        assert "scope" in data
+        assert data["scope"] == "/"
+
+    def test_manifest_has_id(self):
+        import json
+        data = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        assert "id" in data
+
+    def test_manifest_has_192_icon(self):
+        """Chrome requires a 192x192 icon for installability."""
+        import json
+        data = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        sizes = [icon.get("sizes") for icon in data["icons"]]
+        assert "192x192" in sizes, f"Missing 192x192 icon, got: {sizes}"
+
+    def test_manifest_has_512_icon(self):
+        import json
+        data = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        sizes = [icon.get("sizes") for icon in data["icons"]]
+        assert "512x512" in sizes
+
     def test_theme_color_meta(self):
         html = GATEWAY.read_text(encoding="utf-8")
         assert 'name="theme-color"' in html
+
+    def test_service_worker_file_exists(self):
+        assert SW.is_file(), "public/sw.js must exist"
+
+    def test_service_worker_registration_in_gateway(self):
+        """Gateway must register the service worker."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "serviceWorker" in html
+        assert "register" in html
+        assert "sw.js" in html
+
+    def test_service_worker_does_not_cache_clerk(self):
+        """Service worker must never cache Clerk SDK."""
+        sw = SW.read_text(encoding="utf-8")
+        assert "clerk" in sw.lower(), "SW must have Clerk in NEVER_CACHE list"
+
+    def test_service_worker_does_not_cache_member(self):
+        """Service worker must never cache /member/ routes."""
+        sw = SW.read_text(encoding="utf-8")
+        assert "/member/" in sw
+
+    def test_service_worker_does_not_cache_firebase(self):
+        """Service worker must never cache Firebase SDK/API."""
+        sw = SW.read_text(encoding="utf-8")
+        assert "firebase" in sw.lower()
+
+    def test_service_worker_has_cache_name(self):
+        """Service worker must define a versioned cache name."""
+        sw = SW.read_text(encoding="utf-8")
+        assert "CACHE_NAME" in sw
