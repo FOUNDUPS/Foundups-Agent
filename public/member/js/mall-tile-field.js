@@ -227,6 +227,15 @@
    */
   function togglePlay(index) {
     var tiles = tileField.querySelectorAll('.mall-tile');
+    var targetTile = tiles[index];
+
+    // Immediate visual feedback: tap pulse
+    if (targetTile) {
+      targetTile.classList.remove('tap-pulse');
+      // Force reflow to restart animation
+      void targetTile.offsetWidth;
+      targetTile.classList.add('tap-pulse');
+    }
 
     // Clear previous playing state
     tiles.forEach(function(t) {
@@ -264,15 +273,23 @@
       return;
     }
 
-    expandedFoundUp = index;
-    playingIndex = null;
-    renderTiles();
-    bindInteractions();
+    // Fade transition for smooth feel
+    tileField.classList.add('transitioning');
 
-    // Show collapse hint
-    if (collapseHint) {
-      collapseHint.style.opacity = '1';
-    }
+    setTimeout(function() {
+      expandedFoundUp = index;
+      playingIndex = null;
+      renderTiles();
+      bindInteractions();
+
+      // Remove transition class after render
+      tileField.classList.remove('transitioning');
+
+      // Show collapse hint with animation
+      if (collapseHint) {
+        collapseHint.classList.add('visible');
+      }
+    }, 60);
   }
 
   /**
@@ -281,15 +298,23 @@
   function collapseFoundUp() {
     if (expandedFoundUp === null) return;
 
-    expandedFoundUp = null;
-    playingIndex = null;
-    renderTiles();
-    bindInteractions();
-
-    // Hide collapse hint
+    // Hide collapse hint first
     if (collapseHint) {
-      collapseHint.style.opacity = '0';
+      collapseHint.classList.remove('visible');
     }
+
+    // Fade transition for smooth feel
+    tileField.classList.add('transitioning');
+
+    setTimeout(function() {
+      expandedFoundUp = null;
+      playingIndex = null;
+      renderTiles();
+      bindInteractions();
+
+      // Remove transition class after render
+      tileField.classList.remove('transitioning');
+    }, 60);
   }
 
   // ========== Motion Mode Control ==========

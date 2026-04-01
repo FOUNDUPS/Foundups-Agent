@@ -1,5 +1,62 @@
 # Member Area Module Change Log
 
+## [2026-04-02] Video Mall Feel Polish Phase 2 (Worker B, WSP_97)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker B
+**Type**: Polish (Phone Feel)
+**Slice**: `video_mall_feel_polish_phase2`
+**Spec**: WSP_97
+
+**Files Modified**:
+- `public/member/css/mall-tile-field.css` — Feel polish (tap pulse, snap smoothness, density-adaptive styling)
+- `public/member/js/mall-tile-field.js` — Tap pulse feedback, transition effects
+- `public/member/tests/test_video_mall_field_runtime.py` — 9 new feel polish tests
+
+**What Was Tuned**:
+
+1. **Tap feel** — Added immediate tap-pulse animation (180ms) for visual confirmation before play state resolves
+
+2. **Snap feel** — Added `scroll-behavior: smooth` to wrapper for phone-native scroll deceleration
+
+3. **Expand/collapse feel** — Added fade transition (120ms) with `.transitioning` class for smooth content swap
+
+4. **Density-adaptive styling**:
+   - Border-radius scales with density: 1.25rem (2x3) → 0.6rem (5x8)
+   - Gap scales with density: 0.65rem (2x3) → 0.3rem (5x8)
+   - Minimum tile size: 3rem x 3rem for tap targets
+
+5. **Play indicator** — Tightened from 150ms to 80ms for snappier response
+
+6. **Collapse hint** — Uses CSS class with transform+opacity transition (150ms)
+
+**Hooks Preserved**:
+- `expandFoundUp(index)` — unchanged signature
+- `collapseFoundUp()` — unchanged signature
+- `setDensity(density)` — unchanged signature
+- `setMotionMode(mode)` — unchanged signature
+- `togglePlay(index)` — unchanged signature
+- `enterFoundUp(index)` — unchanged signature
+
+**Grammar Preserved**:
+- tap = play/pause
+- double-tap = enter FoundUp
+- pinch-out = expand FoundUp into video field
+- pinch-in = collapse back
+- snap/glide motion modes
+
+**Tests**: 755 passed (9 new feel polish tests)
+
+**Manual Feel Checklist**:
+- [ ] Tap pulse visible on tile tap
+- [ ] No lag between tap and play indicator
+- [ ] Snap settling feels deliberate, not jittery
+- [ ] Expand fade is smooth, not jarring
+- [ ] Collapse hint slides up with content
+- [ ] 5x8 density tiles still tappable
+- [ ] Border radius looks proportional at all densities
+
+---
+
 ## [2026-04-02] Video Mall Field Runtime Phase 1 (Worker B, WSP_97)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B

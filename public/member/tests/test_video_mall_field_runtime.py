@@ -266,3 +266,59 @@ class TestNoRegression:
         """mallPlanes.openFoundUp is still called."""
         js = _read("js/mall-tile-field.js")
         assert "window.mallPlanes.openFoundUp" in js
+
+
+class TestFeelPolish:
+    """Test phase 2 feel polish improvements."""
+
+    def test_tap_pulse_animation(self):
+        """Tap pulse class exists for immediate feedback."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile.tap-pulse" in css
+        assert "tile-tap-pulse" in css
+
+    def test_tap_pulse_applied_on_toggle(self):
+        """togglePlay adds tap-pulse class for visual feedback."""
+        js = _read("js/mall-tile-field.js")
+        assert "tap-pulse" in js
+        assert "classList.add('tap-pulse')" in js
+
+    def test_scroll_behavior_smooth(self):
+        """Wrapper has scroll-behavior: smooth for phone feel."""
+        css = _read("css/mall-tile-field.css")
+        assert "scroll-behavior: smooth" in css
+
+    def test_density_adaptive_radius(self):
+        """Tile radius scales with density."""
+        css = _read("css/mall-tile-field.css")
+        assert "--tile-radius" in css
+        assert "border-radius: var(--tile-radius" in css
+
+    def test_density_adaptive_gap(self):
+        """Gap scales with density."""
+        css = _read("css/mall-tile-field.css")
+        assert "--tile-gap" in css
+        assert "gap: var(--tile-gap" in css
+
+    def test_transition_class_on_expand(self):
+        """Transitioning class used for smooth expand."""
+        js = _read("js/mall-tile-field.js")
+        assert "transitioning" in js
+        assert "classList.add('transitioning')" in js
+
+    def test_collapse_hint_animation(self):
+        """Collapse hint uses CSS class for animation."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile-field-collapse-hint.visible" in css
+
+    def test_play_indicator_snappy(self):
+        """Play indicator has fast transition timing."""
+        css = _read("css/mall-tile-field.css")
+        # Should be 80ms or faster for snappy feel
+        assert "80ms" in css or "transition: transform 80ms" in css
+
+    def test_minimum_tile_size(self):
+        """Tiles have minimum size for tap targets."""
+        css = _read("css/mall-tile-field.css")
+        assert "min-width: 3rem" in css
+        assert "min-height: 3rem" in css
