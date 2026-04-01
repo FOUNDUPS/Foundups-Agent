@@ -54,6 +54,12 @@
        + 'routing prefix, and lifecycle stage.'
     },
     {
+      q: 'Who is Red Dog?',
+      a: 'Red Dog is your digital twin inside FoundUPS. '
+       + 'I show you truthful context about this FoundUp and suggest actions '
+       + 'you can take right now. As the ecosystem grows, I become more capable.'
+    },
+    {
       q: 'What do readiness states mean?',
       a: 'Ready = live frontend, shell handoff coming. '
        + 'Conditional = frontend works with known gaps. '
@@ -61,8 +67,8 @@
     },
     {
       q: 'How do I go back?',
-      a: 'Use the Back to Mall link at the top or the Return to Mall button '
-       + 'at the bottom of this page.'
+      a: 'Use the Back to Mall link at the top, or tap Return to Mall '
+       + 'in the suggested actions above.'
     }
   ] : [];
 

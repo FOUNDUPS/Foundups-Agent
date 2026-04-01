@@ -355,6 +355,56 @@
     .concierge-back:hover { text-decoration: underline; }
     .concierge-back svg { width: 14px; height: 14px; }
 
+    /* FAB state ring when concierge is open */
+    .entry-red-dog.active {
+      box-shadow: 0 0 0 3px rgba(124,92,252,0.5), 0 4px 16px rgba(124,92,252,0.3);
+    }
+
+    /* Briefing lines inside concierge */
+    .entry-briefing-line {
+      font-size: 0.84rem;
+      color: rgba(228,226,236,0.7);
+      line-height: 1.5;
+      padding: 0.2rem 0;
+    }
+    .entry-briefing-line::before {
+      content: "\25B8";
+      margin-right: 0.4rem;
+      font-size: 0.65rem;
+      color: rgba(228,226,236,0.35);
+    }
+
+    /* Recommendation pills */
+    .entry-recs-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.25rem;
+    }
+    .entry-rec-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid rgba(124,92,252,0.25);
+      background: rgba(124,92,252,0.08);
+      color: rgba(228,226,236,0.85);
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      min-height: 36px;
+    }
+    .entry-rec-action:hover {
+      background: rgba(124,92,252,0.18);
+      border-color: rgba(124,92,252,0.4);
+    }
+
+    @media (max-width: 480px) {
+      .entry-rec-action { min-height: 44px; }
+    }
+
     @media (min-width: 640px) {
       .entry-hero { padding: 3rem 2rem 2rem; }
       .entry-hero-name { font-size: 2.5rem; }
@@ -386,13 +436,23 @@
         <img src="/logo-dog.png" alt="">
         <div class="concierge-header-text">
           <p class="concierge-name">Red Dog</p>
-          <p class="concierge-subtitle">Shell concierge</p>
+          <p class="concierge-subtitle">Your digital twin</p>
         </div>
       </div>
 
       <div id="conciergeContext" class="concierge-section">
         <div class="concierge-section-label">This FoundUp</div>
         <div id="conciergeContextBody" class="concierge-item">Loading...</div>
+      </div>
+
+      <div class="concierge-section" data-reddog-briefing>
+        <div class="concierge-section-label">Briefing</div>
+        <div id="entryBriefingBody"></div>
+      </div>
+
+      <div class="concierge-section" data-reddog-recommendations>
+        <div class="concierge-section-label">Suggested actions</div>
+        <div id="entryRecsBody"></div>
       </div>
 
       <div class="concierge-section">
@@ -556,19 +616,25 @@
     var conciergeScrim = document.getElementById('conciergeScrim');
     var conciergeOpen = false;
 
+    var entryRedDogBtn = document.getElementById('entryRedDog');
+    var currentItem = null;
+
     function toggleConcierge() {
       conciergeOpen = !conciergeOpen;
       conciergeSheet.classList.toggle('open', conciergeOpen);
       conciergeScrim.classList.toggle('open', conciergeOpen);
+      entryRedDogBtn.classList.toggle('active', conciergeOpen);
     }
 
     function closeConcierge() {
       conciergeOpen = false;
       conciergeSheet.classList.remove('open');
       conciergeScrim.classList.remove('open');
+      entryRedDogBtn.classList.remove('active');
     }
 
     function populateConciergeContext(item) {
+      currentItem = item;
       var body = document.getElementById('conciergeContextBody');
       if (!item) {
         body.innerHTML = 'No FoundUp loaded.';
@@ -578,14 +644,119 @@
       body.innerHTML =
         '<strong>' + esc(item.name) + '</strong> is currently <strong>' + esc(readinessLabel) + '</strong>.' +
         '<br>' + esc(item.entry_copy || WHAT_NEXT[item.launch_readiness] || '');
+      renderBriefing(item);
+      renderRecommendations(item);
     }
 
-    document.getElementById('entryRedDog').addEventListener('click', toggleConcierge);
+    // -- Briefing: shell-truthful context lines --
+    function renderBriefing(item) {
+      var el = document.getElementById('entryBriefingBody');
+      if (!el || !item) return;
+      var lines = [];
+      var readinessLabel = READINESS_LABELS[item.launch_readiness] || item.launch_readiness || 'Unknown';
+      lines.push('You are viewing <strong>' + esc(item.name) + '</strong>');
+      lines.push('Readiness: <strong>' + esc(readinessLabel) + '</strong>');
+      if (item.token_symbol) lines.push('Token: <strong>' + esc(item.token_symbol) + '</strong>');
+      if (item.lifecycle_stage) lines.push('Lifecycle: <strong>' + esc(item.lifecycle_stage) + '</strong>');
+      if (item.tier) lines.push('Tier: <strong>' + esc(item.tier) + '</strong>');
+      if (item.routing_prefix) lines.push('Route: <strong>' + esc(item.routing_prefix) + '</strong>');
+      el.innerHTML = lines.map(function(l) {
+        return '<div class="entry-briefing-line">' + l + '</div>';
+      }).join('');
+    }
+
+    // -- Recommended actions: truthful, local-only --
+    var ENTRY_RECOMMENDATIONS = [
+      {
+        id: 'return_to_mall',
+        label: 'Return to Mall',
+        run: function() { window.location.href = '/member/'; }
+      },
+      {
+        id: 'scroll_readiness',
+        label: 'Review readiness',
+        run: function() {
+          closeConcierge();
+          var el = document.querySelector('.entry-readiness-block');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      },
+      {
+        id: 'scroll_about',
+        label: 'View about',
+        run: function() {
+          closeConcierge();
+          var el = document.querySelector('.entry-description');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      },
+      {
+        id: 'copy_link',
+        label: 'Copy link',
+        run: function() {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(window.location.href);
+          }
+        }
+      }
+    ];
+
+    function renderRecommendations() {
+      var el = document.getElementById('entryRecsBody');
+      if (!el) return;
+      var html = '<div class="entry-recs-row">';
+      for (var i = 0; i < ENTRY_RECOMMENDATIONS.length; i++) {
+        var rec = ENTRY_RECOMMENDATIONS[i];
+        html += '<button class="entry-rec-action" data-rec-id="' + rec.id + '">' + esc(rec.label) + '</button>';
+      }
+      html += '</div>';
+      el.innerHTML = html;
+      el.addEventListener('click', function(e) {
+        var btn = e.target.closest('.entry-rec-action');
+        if (!btn) return;
+        var id = btn.getAttribute('data-rec-id');
+        for (var j = 0; j < ENTRY_RECOMMENDATIONS.length; j++) {
+          if (ENTRY_RECOMMENDATIONS[j].id === id) {
+            ENTRY_RECOMMENDATIONS[j].run();
+            break;
+          }
+        }
+      });
+    }
+
+    // -- Gather entry context (mirrors Mall Red Dog getContext) --
+    function getEntryContext() {
+      var ctx = {
+        page: 'entry',
+        conciergeOpen: conciergeOpen,
+        foundupId: foundupId
+      };
+      if (currentItem) {
+        ctx.name = currentItem.name;
+        ctx.readiness = currentItem.launch_readiness;
+        ctx.token = currentItem.token_symbol;
+        ctx.tier = currentItem.tier;
+        ctx.lifecycle = currentItem.lifecycle_stage;
+        ctx.route = currentItem.routing_prefix;
+      }
+      return ctx;
+    }
+
+    entryRedDogBtn.addEventListener('click', toggleConcierge);
     conciergeScrim.addEventListener('click', closeConcierge);
 
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && conciergeOpen) closeConcierge();
     });
+
+    // -- Public API: window.entryRedDog --
+    window.entryRedDog = {
+      open: function() { if (!conciergeOpen) toggleConcierge(); },
+      close: closeConcierge,
+      toggle: toggleConcierge,
+      isOpen: function() { return conciergeOpen; },
+      getContext: getEntryContext
+    };
   })();
   </script>
   <script src="js/red-dog-concierge.js"></script>
