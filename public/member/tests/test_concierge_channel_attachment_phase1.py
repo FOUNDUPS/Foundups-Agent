@@ -89,9 +89,9 @@ class TestChannelListRendering:
         content = CONCIERGE_JS.read_text(encoding="utf-8")
         assert "function getChannelsFromCatalog()" in content
 
-    def test_reads_mall_video_catalog(self):
+    def test_reads_stored_catalog(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
-        assert "_mallVideoCatalog" in content
+        assert "storedCatalog" in content
 
     def test_channel_row_markup(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
@@ -110,6 +110,12 @@ class TestChannelListRendering:
     def test_inject_channels_function(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
         assert "function injectChannels()" in content
+
+    def test_set_foundups_stores_catalog(self):
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        set_block = content[content.find("setFoundUps:"):]
+        set_block = set_block[:set_block.find("},")]
+        assert "storedCatalog" in set_block
 
     def test_channels_injected_on_plane_open(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
@@ -183,20 +189,23 @@ class TestMallProjectionHooks:
         content = CONCIERGE_JS.read_text(encoding="utf-8")
         assert "open_search_mall" in content
 
-    def test_personal_mall_uses_projection(self):
+    def test_personal_mall_uses_real_b_api(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
-        # Should call setProjection('personal')
-        assert "setProjection('personal')" in content
+        # Should call projectPersonalMall() — not setProjection('personal')
+        assert "projectPersonalMall()" in content
+        assert "setProjection('personal')" not in content
 
-    def test_search_mall_uses_projection(self):
+    def test_search_mall_emits_only(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
-        assert "setProjection('search')" in content
+        # Search Mall scope not yet landed by B — emit command only
+        assert "setProjection('search')" not in content
 
     def test_projection_typeof_guard(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
-        # All projection calls should be guarded with typeof checks
+        # Personal Mall calls should be guarded with typeof checks
         populate_block = content[content.find("populate_my_mall"):]
-        assert "typeof" in populate_block[:300]
+        assert "typeof" in populate_block[:200]
+        assert "projectPersonalMall" in populate_block[:200]
 
 
 # -- 5. window.redDog API extensions --

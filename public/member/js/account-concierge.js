@@ -617,6 +617,7 @@
   // ---- channel attachment surface ----
   var channelsEl = null;
   var attachedChannels = {}; // id -> boolean
+  var storedCatalog = []; // set by setFoundUps()
 
   var CHANNEL_PLATFORMS = [
     { type: 'youtube_channel',  icon: '\u25B6',  label: 'YouTube' },
@@ -633,8 +634,8 @@
   }
 
   function getChannelsFromCatalog() {
-    // Read from mall-video-catalog if loaded on window
-    var catalog = window._mallVideoCatalog || [];
+    // Read from catalog stored by setFoundUps()
+    var catalog = storedCatalog;
     return catalog.map(function (item) {
       return {
         id: item.foundup_id,
@@ -729,25 +730,23 @@
 
       if (e.target.closest('[data-reddog-populate-mall]')) {
         emitRedDogCommand('populate_my_mall', {});
-        if (window.mallTileField && typeof window.mallTileField.setProjection === 'function') {
-          window.mallTileField.setProjection('personal');
+        if (window.mallTileField && typeof window.mallTileField.projectPersonalMall === 'function') {
+          window.mallTileField.projectPersonalMall();
         }
         return;
       }
 
       if (e.target.closest('[data-reddog-personal-mall]')) {
         emitRedDogCommand('open_personal_mall', {});
-        if (window.mallTileField && typeof window.mallTileField.setProjection === 'function') {
-          window.mallTileField.setProjection('personal');
+        if (window.mallTileField && typeof window.mallTileField.projectPersonalMall === 'function') {
+          window.mallTileField.projectPersonalMall();
         }
         return;
       }
 
       if (e.target.closest('[data-reddog-search-mall]')) {
         emitRedDogCommand('open_search_mall', {});
-        if (window.mallTileField && typeof window.mallTileField.setProjection === 'function') {
-          window.mallTileField.setProjection('search');
-        }
+        // Search Mall scope not yet landed by B — emit command only
         return;
       }
     });
@@ -1060,21 +1059,19 @@
     toggleChannel: toggleChannelAttach,
     populateMyMall: function () {
       emitRedDogCommand('populate_my_mall', {});
-      if (window.mallTileField && typeof window.mallTileField.setProjection === 'function') {
-        window.mallTileField.setProjection('personal');
+      if (window.mallTileField && typeof window.mallTileField.projectPersonalMall === 'function') {
+        window.mallTileField.projectPersonalMall();
       }
     },
     openPersonalMall: function () {
       emitRedDogCommand('open_personal_mall', {});
-      if (window.mallTileField && typeof window.mallTileField.setProjection === 'function') {
-        window.mallTileField.setProjection('personal');
+      if (window.mallTileField && typeof window.mallTileField.projectPersonalMall === 'function') {
+        window.mallTileField.projectPersonalMall();
       }
     },
     openSearchMall: function () {
       emitRedDogCommand('open_search_mall', {});
-      if (window.mallTileField && typeof window.mallTileField.setProjection === 'function') {
-        window.mallTileField.setProjection('search');
-      }
+      // Search Mall scope not yet landed by B — emit command only
     },
 
     /** Populate identity block from Clerk user + Firestore data */
@@ -1121,6 +1118,7 @@
 
     /** Populate FoundUps grid from catalog data */
     setFoundUps: function (catalog) {
+      storedCatalog = catalog || [];
       var grid = plane.querySelector('[data-account-foundups-grid]');
       if (!grid || !catalog) return;
 
