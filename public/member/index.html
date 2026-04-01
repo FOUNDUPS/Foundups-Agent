@@ -279,9 +279,21 @@
         </section>
       </main>
 
-      <button id="redDogBtn" class="red-dog-btn" data-reddog-trigger aria-label="Open Red Dog">
-        <img src="/logo-dog.png" alt="">
-      </button>
+      <div id="redDogAnchor" class="red-dog-anchor" data-reddog-anchor>
+        <button id="redDogBtn" class="red-dog-btn" data-reddog-trigger aria-label="Open Red Dog">
+          <img src="/logo-dog.png" alt="">
+          <span class="red-dog-state-ring" data-reddog-anchor-state="idle"></span>
+        </button>
+        <div id="redDogSummary" class="red-dog-summary" data-reddog-summary hidden>
+          <div class="red-dog-summary-content" data-reddog-summary-content></div>
+        </div>
+        <div id="redDogListening" class="red-dog-listening" data-reddog-listening hidden>
+          <span class="red-dog-listening-label">Listening...</span>
+          <div class="red-dog-listening-waves">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      </div>
 
       <div id="overlayScrim" class="overlay-scrim" hidden></div>
 

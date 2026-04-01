@@ -1,0 +1,360 @@
+/* Mall Tile Field — Low-chrome discovery surface
+   Replaces carousel with square tile grid
+   SoftProto mount point: #mallTileField[data-softproto-mount="tile-field"]
+*/
+
+/* ========== Tile Field Container ========== */
+
+.mall-tile-field {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(160px, 45vw), 1fr));
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+}
+
+@media (min-width: 600px) {
+  .mall-tile-field {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 900px) {
+  .mall-tile-field {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+/* ========== Tile ========== */
+
+.mall-tile {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.mall-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.12), transparent 40%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.06), transparent 50%);
+  pointer-events: none;
+}
+
+.mall-tile:hover,
+.mall-tile:focus-visible {
+  transform: scale(1.02);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+  outline: none;
+}
+
+.mall-tile:active {
+  transform: scale(0.98);
+}
+
+.mall-tile.is-inspecting {
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
+}
+
+/* ========== Tile Content ========== */
+
+.mall-tile-inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0.85rem;
+  position: relative;
+  z-index: 1;
+}
+
+.mall-tile-token {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.mall-tile-hero {
+  font-size: clamp(2.2rem, 10vw, 3.5rem);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.06em;
+  color: rgba(255, 255, 255, 0.92);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mall-tile-name {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.88);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mall-tile-badge {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 0.35rem;
+  background: rgba(0, 0, 0, 0.4);
+  color: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.mall-tile-badge.ready {
+  background: rgba(40, 180, 99, 0.3);
+  color: #81f0a3;
+}
+
+.mall-tile-badge.conditional {
+  background: rgba(180, 130, 40, 0.3);
+  color: #ffcf79;
+}
+
+/* ========== Theme Colors (reuse from carousel) ========== */
+
+.mall-tile.theme-antifafm {
+  background: linear-gradient(145deg, rgba(60, 11, 16, 0.96), rgba(122, 20, 28, 0.72) 60%, rgba(24, 7, 10, 0.98));
+}
+
+.mall-tile.theme-gotjunk {
+  background: linear-gradient(145deg, rgba(15, 60, 56, 0.96), rgba(27, 108, 92, 0.76) 60%, rgba(17, 25, 19, 0.98));
+}
+
+.mall-tile.theme-magadoom {
+  background: linear-gradient(145deg, rgba(27, 17, 56, 0.96), rgba(89, 28, 113, 0.76) 60%, rgba(12, 14, 28, 0.98));
+}
+
+.mall-tile.theme-tq {
+  background: linear-gradient(145deg, rgba(11, 29, 60, 0.96), rgba(20, 80, 160, 0.72) 60%, rgba(8, 12, 28, 0.98));
+}
+
+.mall-tile.theme-vsa {
+  background: linear-gradient(145deg, rgba(40, 40, 45, 0.96), rgba(80, 82, 88, 0.72) 60%, rgba(22, 22, 26, 0.98));
+}
+
+.mall-tile.theme-pqn {
+  background: linear-gradient(145deg, rgba(20, 50, 30, 0.96), rgba(50, 120, 70, 0.72) 60%, rgba(12, 20, 14, 0.98));
+}
+
+.mall-tile.theme-default {
+  background: linear-gradient(145deg, rgba(30, 30, 35, 0.96), rgba(60, 60, 68, 0.72) 60%, rgba(18, 18, 22, 0.98));
+}
+
+/* ========== Inspector Overlay ========== */
+
+.tile-inspector-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 180;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+
+.tile-inspector-scrim.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tile-inspector {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  width: min(90vw, 380px);
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--surface);
+  backdrop-filter: blur(32px);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+  z-index: 181;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.tile-inspector.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.tile-inspector-header {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.tile-inspector-badges {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.tile-inspector-badge {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border-radius: 0.4rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.tile-inspector-badge.ready {
+  background: rgba(40, 180, 99, 0.25);
+  color: #81f0a3;
+}
+
+.tile-inspector-badge.conditional {
+  background: rgba(180, 130, 40, 0.25);
+  color: #ffcf79;
+}
+
+.tile-inspector-name {
+  margin: 0 0 0.4rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.tile-inspector-tagline {
+  margin: 0 0 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.tile-inspector-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.tile-inspector-field {
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tile-inspector-label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 0.2rem;
+}
+
+.tile-inspector-value {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.tile-inspector-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.tile-inspector-enter {
+  flex: 1;
+  padding: 0.85rem 1rem;
+  border: none;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+
+.tile-inspector-enter:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.tile-inspector-hint {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: center;
+}
+
+/* ========== Reduced Mall Copy ========== */
+
+.mall-copy-minimal {
+  padding: 0.5rem 0 0.75rem;
+}
+
+.mall-copy-minimal h1 {
+  margin: 0;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  max-width: none;
+}
+
+/* ========== Loading State ========== */
+
+.mall-tile-field-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+/* ========== Empty State ========== */
+
+.mall-tile-field-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  gap: 0.5rem;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.mall-tile-field-empty-icon {
+  font-size: 2rem;
+  opacity: 0.5;
+}
