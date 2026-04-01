@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>p.fMALL | FoundUp Entry</title>
-  <meta name="description" content="FoundUp entry view inside the p.fMALL shell.">
+  <title>FoundUps Mall | Entry</title>
+  <meta name="description" content="FoundUp entry view in the FoundUps Mall shell.">
   <meta name="theme-color" content="#08080f">
   <meta name="robots" content="noindex, nofollow">
 
@@ -210,7 +210,7 @@
       background: rgba(124,92,252,0.18);
     }
 
-    /* Red Dog floating button (reused from Mall) */
+    /* Red Dog floating button */
     .entry-red-dog {
       position: fixed;
       bottom: 1.5rem;
@@ -226,8 +226,126 @@
       justify-content: center;
       box-shadow: 0 4px 16px rgba(124,92,252,0.3);
       z-index: 50;
+      transition: transform 0.15s;
     }
+    .entry-red-dog:hover { transform: scale(1.08); }
     .entry-red-dog img { width: 28px; height: 28px; }
+
+    /* Concierge scrim + sheet */
+    .concierge-scrim {
+      position: fixed;
+      inset: 0;
+      background: rgba(5,5,9,0.6);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .concierge-scrim.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .concierge-sheet {
+      position: fixed;
+      right: 1.25rem;
+      bottom: 5rem;
+      width: min(22rem, calc(100vw - 2rem));
+      max-height: calc(100vh - 7rem);
+      overflow-y: auto;
+      background: rgba(24,24,38,0.96);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 1.25rem;
+      padding: 1.25rem;
+      z-index: 101;
+      display: none;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.4);
+    }
+    .concierge-sheet.open { display: block; }
+
+    .concierge-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .concierge-header img { width: 36px; height: 36px; }
+    .concierge-header-text { display: flex; flex-direction: column; gap: 0.1rem; }
+    .concierge-name {
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0;
+    }
+    .concierge-subtitle {
+      font-size: 0.75rem;
+      color: rgba(228,226,236,0.5);
+      margin: 0;
+    }
+
+    .concierge-section {
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .concierge-section:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    .concierge-section-label {
+      font-size: 0.7rem;
+      color: rgba(228,226,236,0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+    .concierge-item {
+      font-size: 0.88rem;
+      color: rgba(228,226,236,0.75);
+      line-height: 1.5;
+      margin-bottom: 0.5rem;
+    }
+    .concierge-item:last-child { margin-bottom: 0; }
+    .concierge-item strong {
+      color: rgba(228,226,236,0.9);
+      font-weight: 600;
+    }
+
+    .concierge-readiness-key {
+      display: grid;
+      gap: 0.5rem;
+    }
+    .concierge-readiness-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      line-height: 1.4;
+    }
+    .concierge-readiness-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 0.3rem;
+    }
+    .concierge-readiness-dot.dot-ready { background: #4ade80; }
+    .concierge-readiness-dot.dot-conditional { background: #ffd700; }
+    .concierge-readiness-dot.dot-discoverable { background: rgba(228,226,236,0.35); }
+    .concierge-readiness-text { color: rgba(228,226,236,0.7); }
+
+    .concierge-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: #7c5cfc;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .concierge-back:hover { text-decoration: underline; }
+    .concierge-back svg { width: 14px; height: 14px; }
 
     @media (min-width: 640px) {
       .entry-hero { padding: 3rem 2rem 2rem; }
@@ -252,6 +370,54 @@
     <div id="entryContent">
       <div style="text-align:center;padding:4rem 1.5rem;color:rgba(228,226,236,0.5);">Loading FoundUp...</div>
     </div>
+
+    <div id="conciergeScrim" class="concierge-scrim"></div>
+
+    <aside id="conciergeSheet" class="concierge-sheet" aria-label="Red Dog concierge">
+      <div class="concierge-header">
+        <img src="/logo-dog.png" alt="">
+        <div class="concierge-header-text">
+          <p class="concierge-name">Red Dog</p>
+          <p class="concierge-subtitle">Shell concierge</p>
+        </div>
+      </div>
+
+      <div id="conciergeContext" class="concierge-section">
+        <div class="concierge-section-label">This FoundUp</div>
+        <div id="conciergeContextBody" class="concierge-item">Loading...</div>
+      </div>
+
+      <div class="concierge-section">
+        <div class="concierge-section-label">Readiness guide</div>
+        <div class="concierge-readiness-key">
+          <div class="concierge-readiness-row">
+            <span class="concierge-readiness-dot dot-ready"></span>
+            <span class="concierge-readiness-text"><strong>Ready</strong> — live frontend, direct shell handoff when tenant embedding is wired.</span>
+          </div>
+          <div class="concierge-readiness-row">
+            <span class="concierge-readiness-dot dot-conditional"></span>
+            <span class="concierge-readiness-text"><strong>Conditional</strong> — working frontend with known gaps. Will move to ready when conditions clear.</span>
+          </div>
+          <div class="concierge-readiness-row">
+            <span class="concierge-readiness-dot dot-discoverable"></span>
+            <span class="concierge-readiness-text"><strong>Discoverable only</strong> — backend service visible in the Mall. No web frontend to load yet.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="concierge-section">
+        <div class="concierge-section-label">Navigation</div>
+        <p class="concierge-item">Use <strong>Back to Mall</strong> to return and browse other FoundUps.</p>
+        <p class="concierge-item">This entry page is deep-linkable. You can share or bookmark this URL.</p>
+      </div>
+
+      <div class="concierge-section">
+        <a href="/member/" class="concierge-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+          Return to Mall
+        </a>
+      </div>
+    </aside>
 
     <button id="entryRedDog" class="entry-red-dog" aria-label="Open Red Dog concierge">
       <img src="/logo-dog.png" alt="">
@@ -289,8 +455,9 @@
           renderNotFound('FoundUp not found: ' + esc(foundupId));
           return;
         }
-        document.title = 'p.fMALL | ' + item.name;
+        document.title = 'FoundUps Mall | ' + item.name;
         renderEntry(item);
+        populateConciergeContext(item);
       })
       .catch(err => {
         container.innerHTML = '<div class="entry-not-found"><h2>Error</h2><p>' + esc(err.message) + '</p><a href="/member/">Return to Mall</a></div>';
@@ -327,7 +494,7 @@
             <span class="entry-detail-value">${esc(item.token_symbol)}</span>
           </div>
           <div class="entry-detail-row">
-            <span class="entry-detail-label">Route</span>
+            <span class="entry-detail-label">Target Route</span>
             <span class="entry-detail-value">${esc(item.routing_prefix)}</span>
           </div>
           <div class="entry-detail-row">
@@ -376,11 +543,43 @@
       return d.innerHTML;
     }
 
-    // Red Dog → return to Mall with concierge context
-    document.getElementById('entryRedDog').addEventListener('click', function() {
-      window.location.href = '/member/';
+    // Red Dog concierge
+    var conciergeSheet = document.getElementById('conciergeSheet');
+    var conciergeScrim = document.getElementById('conciergeScrim');
+    var conciergeOpen = false;
+
+    function toggleConcierge() {
+      conciergeOpen = !conciergeOpen;
+      conciergeSheet.classList.toggle('open', conciergeOpen);
+      conciergeScrim.classList.toggle('open', conciergeOpen);
+    }
+
+    function closeConcierge() {
+      conciergeOpen = false;
+      conciergeSheet.classList.remove('open');
+      conciergeScrim.classList.remove('open');
+    }
+
+    function populateConciergeContext(item) {
+      var body = document.getElementById('conciergeContextBody');
+      if (!item) {
+        body.innerHTML = 'No FoundUp loaded.';
+        return;
+      }
+      var readinessLabel = READINESS_LABELS[item.launch_readiness] || item.launch_readiness || 'Unknown';
+      body.innerHTML =
+        '<strong>' + esc(item.name) + '</strong> is currently <strong>' + esc(readinessLabel) + '</strong>.' +
+        '<br>' + esc(item.entry_copy || WHAT_NEXT[item.launch_readiness] || '');
+    }
+
+    document.getElementById('entryRedDog').addEventListener('click', toggleConcierge);
+    conciergeScrim.addEventListener('click', closeConcierge);
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && conciergeOpen) closeConcierge();
     });
   })();
   </script>
+  <script src="js/red-dog-concierge.js"></script>
 </body>
 </html>

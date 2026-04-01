@@ -1,5 +1,38 @@
 # Member Area Module Change Log
 
+## [2026-04-02] FoundUp Entry Shell Alignment Phase 3 (Worker B)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker B
+**Type**: Refinement
+**Slice**: `pfmall_foundup_entry_shell_alignment_phase3`
+
+**Files Modified**:
+- `public/member/foundup.html` — aligned branding and route-contract language
+
+**Files Created**:
+- `public/member/tests/test_foundup_entry_shell.py` — 19 focused entry shell tests
+
+**Stale Branding Removed**:
+- `p.fMALL` → `FoundUps Mall` (title, meta, dynamic title)
+- "carousel" → removed from navigation copy
+
+**Route Contract Wording**:
+- "Route" → "Target Route" (clarifies not yet live)
+- `routing_prefix` displayed as target, not active link
+
+**Transitional Path Preserved**:
+- `/member/foundup.html?id={foundup_id}` — unchanged, still the shell-owned entry
+
+**Protected Behaviors (unchanged)**:
+- Back to Mall navigation
+- Red Dog concierge sheet
+- Deep-linkable entry pages
+- Readiness guide content
+
+**Test Results**: 388 passed, 2 warnings
+
+---
+
 ## [2026-04-01] FoundUp Handoff Plane Phase 2 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B

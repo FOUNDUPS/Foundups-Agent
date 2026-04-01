@@ -628,3 +628,107 @@ class TestPublicMetadataPhase5:
         html = GATEWAY.read_text(encoding="utf-8")
         assert 'rel="canonical"' in html
         assert "foundups.com" in html
+
+
+# ---------------------------------------------------------------------------
+# Structured Data Phase 6
+# ---------------------------------------------------------------------------
+
+class TestStructuredDataPhase6:
+    """JSON-LD structured data is truthful and aligned."""
+
+    def _get_jsonld(self):
+        import json, re
+        html = GATEWAY.read_text(encoding="utf-8")
+        match = re.search(
+            r'<script type="application/ld\+json">\s*(.*?)\s*</script>',
+            html, re.DOTALL
+        )
+        assert match, "JSON-LD script block not found"
+        return json.loads(match.group(1))
+
+    def test_jsonld_script_exists(self):
+        """Structured data script must exist in head."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert 'application/ld+json' in html
+
+    def test_jsonld_is_valid_json(self):
+        """JSON-LD must parse as valid JSON."""
+        self._get_jsonld()  # will assert if invalid
+
+    def test_jsonld_has_context(self):
+        data = self._get_jsonld()
+        assert data["@context"] == "https://schema.org"
+
+    def test_jsonld_has_organization(self):
+        """Organization schema must be present."""
+        data = self._get_jsonld()
+        types = [item["@type"] for item in data["@graph"]]
+        assert "Organization" in types
+
+    def test_jsonld_has_website(self):
+        """WebSite schema must be present."""
+        data = self._get_jsonld()
+        types = [item["@type"] for item in data["@graph"]]
+        assert "WebSite" in types
+
+    def test_organization_has_required_fields(self):
+        data = self._get_jsonld()
+        org = [item for item in data["@graph"] if item["@type"] == "Organization"][0]
+        assert "name" in org
+        assert "url" in org
+        assert "logo" in org
+        assert "description" in org
+
+    def test_organization_name_is_foundups(self):
+        data = self._get_jsonld()
+        org = [item for item in data["@graph"] if item["@type"] == "Organization"][0]
+        assert org["name"] == "FoundUPS"
+
+    def test_organization_url_matches_canonical(self):
+        data = self._get_jsonld()
+        org = [item for item in data["@graph"] if item["@type"] == "Organization"][0]
+        assert org["url"] == "https://foundups.com/"
+
+    def test_organization_description_matches_meta(self):
+        """Structured data description must match meta description."""
+        import re
+        html = GATEWAY.read_text(encoding="utf-8")
+        meta_match = re.search(r'<meta name="description"[^>]*content="([^"]*)"', html)
+        data = self._get_jsonld()
+        org = [item for item in data["@graph"] if item["@type"] == "Organization"][0]
+        assert org["description"] == meta_match.group(1)
+
+    def test_organization_logo_matches_og_image(self):
+        data = self._get_jsonld()
+        org = [item for item in data["@graph"] if item["@type"] == "Organization"][0]
+        assert "logo-dog.png" in org["logo"]
+
+    def test_organization_has_sameas(self):
+        """Organization must have sameAs social links."""
+        data = self._get_jsonld()
+        org = [item for item in data["@graph"] if item["@type"] == "Organization"][0]
+        assert "sameAs" in org
+        assert len(org["sameAs"]) >= 1
+
+    def test_no_pob_in_structured_data(self):
+        """No Proof of Benefit in structured data."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        import re
+        match = re.search(
+            r'<script type="application/ld\+json">(.*?)</script>',
+            html, re.DOTALL
+        )
+        assert "Proof of Benefit" not in match.group(1)
+
+    def test_no_securities_in_structured_data(self):
+        """No securities language in structured data."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        import re
+        match = re.search(
+            r'<script type="application/ld\+json">(.*?)</script>',
+            html, re.DOTALL
+        )
+        block = match.group(1)
+        assert "21M tokens" not in block
+        assert "backed by BTC" not in block
