@@ -1,5 +1,80 @@
 # Member Area Module Change Log
 
+## [2026-04-02] Localhost Mall Dev Harness Phase 3 (Worker B)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker B
+**Type**: Developer Tooling
+**Slice**: `pfmall_localhost_dev_harness_phase3`
+
+**Files Modified**:
+- `public/member/index.html` — localhost dev harness (bypasses Clerk/Firestore)
+- `public/member/js/gesture-engine.js` — added `onTap` callback for desktop parity
+- `public/f/index.html` — preserve devMall param on redirect
+
+**Files Created**:
+- `public/member/tests/test_localhost_dev_harness.py` — 28 harness tests
+
+**Localhost Dev Harness**:
+
+Activation requires BOTH:
+```javascript
+const isLocalhost = host === 'localhost' || host === '127.0.0.1';
+const hasDevFlag = params.get('devMall') === '1';
+return isLocalhost && hasDevFlag;
+```
+
+Mock data seeded:
+```javascript
+const mockUserData = {
+  id: 'dev_member_001',
+  username: 'devmember',
+  email: 'dev@localhost',
+  inviteValidated: true,
+  inviteCodes: ['DEV-0001-0001', ...],
+  upsBalance: 1000
+};
+```
+
+Usage:
+```
+# Serve with firebase emulator or any local server
+firebase serve --only hosting
+
+# Test Mall
+http://localhost:5000/member/?devMall=1
+
+# Test Entry
+http://localhost:5000/member/foundup.html?id=antifafm_001&devMall=1
+
+# Test Route Bridge
+http://localhost:5000/f/antifafm_001?devMall=1
+```
+
+**Gesture Engine Desktop Parity**:
+
+Added `onTap` callback:
+```javascript
+gestureZone(el, {
+  onTap: function() { /* single tap/click */ },
+  onDoubleTap: function() { /* double tap/click */ },
+  onSwipe: function(dir) { /* swipe direction */ }
+});
+```
+
+Desktop parity:
+- click = tap (fires after TAP_CONFIRM_DELAY if not double)
+- double-click = double-tap (cancels pending tap)
+- click-drag = swipe (unchanged)
+
+**Protected Behaviors (unchanged)**:
+- Production Clerk/Firestore auth flow
+- Production invite gate
+- Production route handling
+
+**Test Results**: 627 passed (full member suite)
+
+---
+
 ## [2026-04-02] Route Bridge Hosting Activation Phase 2 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B

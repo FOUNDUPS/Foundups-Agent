@@ -96,14 +96,26 @@
       targetUrl += '&subpath=' + encodeURIComponent(subpath);
     }
 
+    // Preserve devMall param for localhost harness continuity
+    var searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get('devMall') === '1') {
+      targetUrl += '&devMall=1';
+    }
+
     window.location.replace(targetUrl);
 
     function showError(title, message) {
+      // Preserve devMall in error link for continuity
+      var mallLink = MALL_HOME;
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('devMall') === '1') {
+        mallLink += '?devMall=1';
+      }
       document.getElementById('bridgeContent').innerHTML =
         '<div class="bridge-error">' +
           '<h1>' + escapeHtml(title) + '</h1>' +
           '<p>' + escapeHtml(message) + '</p>' +
-          '<a href="' + MALL_HOME + '">Return to Mall</a>' +
+          '<a href="' + mallLink + '">Return to Mall</a>' +
         '</div>';
     }
 

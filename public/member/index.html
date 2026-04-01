@@ -613,12 +613,86 @@
       if (window.mallPlanes) window.mallPlanes.closeView();
     }
 
-    initClerkAuth().catch(error => {
-      console.error('Failed to initialize member Mall:', error);
+    // ─── LOCALHOST DEV HARNESS ───
+    // Opt-in bypass for local testing only
+    // Requires BOTH: localhost/127.0.0.1 AND ?devMall=1
+    function isDevHarnessActive() {
+      const host = window.location.hostname;
+      const isLocalhost = host === 'localhost' || host === '127.0.0.1';
+      const params = new URLSearchParams(window.location.search);
+      const hasDevFlag = params.get('devMall') === '1';
+      return isLocalhost && hasDevFlag;
+    }
+
+    async function initDevHarness() {
+      console.log('[DevHarness] Localhost dev mode active — bypassing Clerk/Firestore');
+
+      // Mock member data
+      const mockUserData = {
+        id: 'dev_member_001',
+        username: 'devmember',
+        email: 'dev@localhost',
+        inviteValidated: true,
+        inviteCodes: ['DEV-0001-0001', 'DEV-0001-0002', 'DEV-0001-0003', 'DEV-0001-0004', 'DEV-0001-0005'],
+        upsBalance: 1000,
+        createdAt: new Date().toISOString()
+      };
+
+      // Mock Clerk-like user object for components that expect it
+      const mockClerkUser = {
+        id: mockUserData.id,
+        firstName: 'Dev',
+        lastName: 'Member',
+        primaryEmailAddress: { emailAddress: mockUserData.email },
+        imageUrl: null
+      };
+
+      // Hide loading, show Mall
       loadingState.style.display = 'none';
-      inviteGate.style.display = 'flex';
-      document.getElementById('gateInviteStatus').innerHTML = '<span style="color:#ff6b6b;">Unable to initialize the Mall right now.</span>';
-    });
+      memberArea.style.display = 'block';
+
+      // Set handle
+      mallUserHandle.textContent = '@' + mockUserData.username;
+
+      // Load catalog (same as production)
+      await loadMallCatalog();
+
+      // Initialize components with mock data
+      if (window.redDog) {
+        window.redDog.setIdentity(mockClerkUser, mockUserData);
+        window.redDog.setFoundUps(mallCatalog);
+      }
+
+      if (window.mallTileField) {
+        window.mallTileField.initialize(mallCatalog);
+      }
+
+      // Stub for carousel sync
+      window.mallPlanesSync = function(index) {};
+
+      if (window.mallPlanes) {
+        window.mallPlanes.setCatalog(mallCatalog);
+      }
+
+      bindMallInteractions();
+
+      console.log('[DevHarness] Mall initialized with', mallCatalog.length, 'FoundUps');
+    }
+
+    // Entry point: dev harness or production auth
+    if (isDevHarnessActive()) {
+      initDevHarness().catch(error => {
+        console.error('[DevHarness] Failed to initialize:', error);
+        loadingState.innerHTML = '<div style="text-align:center;color:#ff6b6b;padding:2rem;">Dev harness error: ' + error.message + '</div>';
+      });
+    } else {
+      initClerkAuth().catch(error => {
+        console.error('Failed to initialize member Mall:', error);
+        loadingState.style.display = 'none';
+        inviteGate.style.display = 'flex';
+        document.getElementById('gateInviteStatus').innerHTML = '<span style="color:#ff6b6b;">Unable to initialize the Mall right now.</span>';
+      });
+    }
 
     // ─── INVITE GATE LOGIC ───
     // Toggle between invite/waitlist panels
