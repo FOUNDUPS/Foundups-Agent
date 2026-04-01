@@ -1,4 +1,4 @@
-// FoundUPS Root Service Worker — Phase 1
+// FoundUPS Root Service Worker - Phase 1
 // Safe static-asset caching only. No aggressive offline behavior.
 // Does NOT cache auth flows, Clerk SDK, Firebase SDK, or dynamic API calls.
 
@@ -13,7 +13,7 @@ const STATIC_ASSETS = [
   '/js/foundup-cube.js'
 ];
 
-// URLs that must NEVER be cached — auth, legal, dynamic
+// URLs that must NEVER be cached - auth, legal, dynamic
 const NEVER_CACHE = [
   'clerk.accounts.dev',
   'clerk.',
