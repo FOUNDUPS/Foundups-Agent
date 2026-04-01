@@ -77,6 +77,8 @@
 
   <link rel="stylesheet" href="css/member.css">
   <link rel="stylesheet" href="css/account-concierge.css">
+  <link rel="stylesheet" href="css/mall-planes.css">
+  <link rel="stylesheet" href="css/mall-tile-field.css">
 </head>
 <body>
   <!-- Loading state (shown while checking auth) -->
@@ -176,13 +178,22 @@
     }
   </style>
 
-  <!-- Account Concierge Plane (slides down from top) -->
+  <!-- Red Dog Unified Plane (slides down from top) -->
   <div id="accountPlaneScrim" class="account-plane-scrim"></div>
-  <aside id="accountPlane" class="account-plane" aria-label="Account concierge">
+  <aside id="accountPlane" class="account-plane" aria-label="Red Dog" data-reddog-plane>
     <div class="account-plane-handle"></div>
 
+    <!-- Red Dog header -->
+    <div class="reddog-header" data-reddog-state>
+      <img src="/logo-dog.png" alt="" class="reddog-header-avatar">
+      <div class="reddog-header-text">
+        <span class="reddog-header-name">Red Dog</span>
+        <span class="reddog-header-greeting" data-reddog-greeting>Your personal agent</span>
+      </div>
+    </div>
+
     <!-- Identity block -->
-    <div class="account-identity">
+    <div class="account-identity" data-reddog-identity>
       <div class="account-avatar" data-account-avatar-link>
         <img class="account-avatar-img" data-account-avatar-img src="" alt="" style="display:none;">
         <span class="account-avatar-placeholder" data-account-avatar-placeholder>&#x1F464;</span>
@@ -194,13 +205,13 @@
     </div>
 
     <!-- FoundUps -->
-    <div class="account-section">
-      <div class="account-section-label">FoundUps</div>
+    <div class="account-section" data-reddog-foundups>
+      <div class="account-section-label">Your FoundUps</div>
       <div class="account-foundups-grid" data-account-foundups-grid></div>
     </div>
 
     <!-- Invites (hidden by default) -->
-    <div class="account-section">
+    <div class="account-section" data-reddog-invites>
       <button class="account-invites-toggle" data-account-invites-toggle type="button">
         <span>Invites <span data-invite-count></span></span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
@@ -209,7 +220,7 @@
     </div>
 
     <!-- Options -->
-    <div class="account-section">
+    <div class="account-section" data-reddog-options>
       <div class="account-section-label">Options</div>
       <div class="account-options-list">
         <button class="account-option-btn" data-account-signout type="button">
@@ -219,15 +230,23 @@
       </div>
     </div>
 
-    <!-- Concierge essentials -->
-    <div class="account-section">
-      <div class="account-section-label">Concierge</div>
-      <div class="account-concierge-hints">
-        <p class="account-concierge-hint">This is the p.fMALL — your invite-gated FoundUp catalog.</p>
-        <p class="account-concierge-hint">Swipe sideways to browse FoundUps. Tap a card to enter.</p>
-        <p class="account-concierge-hint">Swipe down from the top to open this panel. Swipe up to close.</p>
+    <!-- Red Dog concierge guidance -->
+    <div class="account-section" data-reddog-concierge>
+      <div class="account-section-label">Red Dog</div>
+      <div class="reddog-concierge-guidance">
+        <p class="reddog-guidance-item">Welcome to the p.fMALL. I keep track of your FoundUps and help you find your way around.</p>
+        <p class="reddog-guidance-item">Swipe sideways to browse FoundUps. Tap a card to enter.</p>
+        <p class="reddog-guidance-item">Swipe down from the top or tap my button to open this panel. Swipe up to close.</p>
       </div>
     </div>
+  </aside>
+
+  <!-- FoundUp View Plane (slides up from bottom) -->
+  <div id="foundupViewScrim" class="foundup-view-scrim"></div>
+  <aside id="foundupViewPlane" class="foundup-view-plane" aria-label="FoundUp quick view">
+    <div class="fv-handle"></div>
+    <button id="foundupViewClose" class="fv-close-btn" aria-label="Close">&times;</button>
+    <div id="foundupViewBody"></div>
   </aside>
 
   <div id="memberArea" class="member-area" style="display:none;">
@@ -251,82 +270,20 @@
       </header>
 
       <main class="mall-main">
-        <section class="mall-copy">
-          <p class="mall-eyebrow">FoundUPS Mall</p>
-          <h1>Swipe through the FoundUps. Tap one to enter its shell.</h1>
-          <p class="mall-lede">The gate stays exactly where it is. Once admitted, this page becomes your Mall.</p>
+        <section class="mall-copy mall-copy-minimal">
+          <h1>Tap to inspect. Double-tap to enter.</h1>
         </section>
 
-        <section class="mall-carousel-shell" aria-label="FoundUp carousel">
-          <div id="mallTrack" class="mall-track">
-            <div class="mall-loading-card">Loading the Mall...</div>
-          </div>
-          <div id="mallDots" class="mall-dots" aria-hidden="true"></div>
-        </section>
-
-        <section id="mallFocus" class="mall-focus" aria-live="polite">
-          <div class="mall-focus-loading">Preparing catalog context...</div>
+        <section id="mallTileField" class="mall-tile-field" data-softproto-mount="tile-field" aria-label="FoundUp tiles">
+          <div class="mall-tile-field-loading">Loading the Mall...</div>
         </section>
       </main>
 
-      <button id="redDogBtn" class="red-dog-btn" aria-label="Open Red Dog concierge">
+      <button id="redDogBtn" class="red-dog-btn" data-reddog-trigger aria-label="Open Red Dog">
         <img src="/logo-dog.png" alt="">
       </button>
 
       <div id="overlayScrim" class="overlay-scrim" hidden></div>
-
-      <aside id="redDogPanel" class="red-dog-panel" hidden aria-label="Red Dog concierge panel">
-        <div class="red-dog-header">
-          <img src="/logo-dog.png" alt="" class="red-dog-avatar">
-          <div>
-            <p class="red-dog-name">Red Dog</p>
-            <p class="red-dog-subtitle">Concierge for the gated Mall</p>
-          </div>
-        </div>
-
-        <div class="red-dog-section">
-          <p class="red-dog-label">Member</p>
-          <p id="agentHandle" class="red-dog-strong">@member</p>
-          <p id="agentEmail" class="red-dog-muted">loading...</p>
-        </div>
-
-        <div class="red-dog-section">
-          <p class="red-dog-label">Current FoundUp</p>
-          <p id="agentFoundupName" class="red-dog-strong">Loading...</p>
-          <p id="agentFoundupHint" class="red-dog-muted">Swipe to change context.</p>
-        </div>
-
-        <div class="red-dog-section">
-          <div class="red-dog-inline">
-            <p class="red-dog-label">Invite codes</p>
-            <span id="agentInviteCount" class="red-dog-chip">0 active</span>
-          </div>
-          <div id="agentInviteCodes" class="invite-stack">
-            <p class="red-dog-muted">Loading invite codes...</p>
-          </div>
-        </div>
-
-        <div class="red-dog-section">
-          <p class="red-dog-label">Agent note</p>
-          <p id="agentMessage" class="red-dog-message">The gateway is preserved. Swipe the Mall, tap a card, and I will keep the context steady.</p>
-        </div>
-
-        <div class="red-dog-section">
-          <p class="red-dog-label">Readiness guide</p>
-          <div class="red-dog-readiness-key">
-            <div class="red-dog-readiness-row"><span class="rd-dot rd-dot-ready"></span><span class="red-dog-readiness-text"><strong>Ready</strong> — live frontend, direct shell handoff when wired.</span></div>
-            <div class="red-dog-readiness-row"><span class="rd-dot rd-dot-conditional"></span><span class="red-dog-readiness-text"><strong>Conditional</strong> — working frontend with known gaps.</span></div>
-            <div class="red-dog-readiness-row"><span class="rd-dot rd-dot-discoverable"></span><span class="red-dog-readiness-text"><strong>Discoverable only</strong> — backend service, no web frontend yet.</span></div>
-          </div>
-        </div>
-
-        <div class="red-dog-section">
-          <p class="red-dog-label">Navigation</p>
-          <p class="red-dog-message">Swipe sideways to browse FoundUps. Tap a card to see its full entry page. Each entry page is deep-linkable.</p>
-        </div>
-
-        <button id="logoutBtn" class="red-dog-logout">Sign Out</button>
-      </aside>
 
       <section id="foundupOverlay" class="foundup-overlay" hidden aria-label="FoundUp handoff">
         <div id="foundupOverlayBody" class="foundup-overlay-body"></div>
@@ -350,22 +307,11 @@
     const memberArea = document.getElementById('memberArea');
     const inviteGate = document.getElementById('inviteGate');
     const mallUserHandle = document.getElementById('mallUserHandle');
-    const mallTrack = document.getElementById('mallTrack');
-    const mallDots = document.getElementById('mallDots');
-    const mallFocus = document.getElementById('mallFocus');
+    const mallTileField = document.getElementById('mallTileField');
     const overlayScrim = document.getElementById('overlayScrim');
     const redDogBtn = document.getElementById('redDogBtn');
-    const redDogPanel = document.getElementById('redDogPanel');
     const foundupOverlay = document.getElementById('foundupOverlay');
     const foundupOverlayBody = document.getElementById('foundupOverlayBody');
-    const agentHandle = document.getElementById('agentHandle');
-    const agentEmail = document.getElementById('agentEmail');
-    const agentInviteCount = document.getElementById('agentInviteCount');
-    const agentInviteCodes = document.getElementById('agentInviteCodes');
-    const agentFoundupName = document.getElementById('agentFoundupName');
-    const agentFoundupHint = document.getElementById('agentFoundupHint');
-    const agentMessage = document.getElementById('agentMessage');
-    const logoutBtn = document.getElementById('logoutBtn');
 
     const MALL_CATALOG_URL = '/member/mall-catalog.json';
     const READINESS_LABELS = {
@@ -381,8 +327,6 @@
 
     let currentClerkUser = null;
     let mallCatalog = [];
-    let activeMallIndex = 0;
-    let scrollFrame = null;
 
     // ─── CLERK AUTH CHECK ───
     // Wait for Clerk to load, then check auth
@@ -552,23 +496,35 @@
     async function initializeMall(clerkUserId, userData, clerkUser) {
       const handle = userData.username ? '@' + userData.username : (clerkUser.firstName || clerkUser.primaryEmailAddress?.emailAddress || 'member');
       mallUserHandle.textContent = handle;
-      agentHandle.textContent = handle;
-      agentEmail.textContent = userData.email || clerkUser.primaryEmailAddress?.emailAddress || 'No email on file';
 
       await Promise.all([
         loadMallCatalog(),
         loadInviteContext(clerkUserId, clerkUser)
       ]);
 
-      // Populate account concierge plane
-      if (window.accountConcierge) {
-        window.accountConcierge.setIdentity(clerkUser, userData);
-        window.accountConcierge.setFoundUps(mallCatalog);
+      // Populate unified Red Dog plane
+      if (window.redDog) {
+        window.redDog.setIdentity(clerkUser, userData);
+        window.redDog.setFoundUps(mallCatalog);
       }
 
-      renderMallCatalog();
+      // Initialize tile field with catalog
+      if (window.mallTileField) {
+        window.mallTileField.initialize(mallCatalog);
+      }
+
+      // Stub for carousel sync (tile field doesn't need index-based scrolling)
+      window.mallPlanesSync = function(index) {
+        // In tile field mode, opening a FoundUp from inspector already updates context
+        // No scrolling needed - tiles are visible in grid
+      };
+
+      // Wire up navigation planes
+      if (window.mallPlanes) {
+        window.mallPlanes.setCatalog(mallCatalog);
+      }
+
       bindMallInteractions();
-      updateActiveContext(activeMallIndex);
     }
 
     async function loadMallCatalog() {
@@ -579,162 +535,24 @@
       mallCatalog = await response.json();
     }
 
-    function renderMallCatalog() {
-      if (!Array.isArray(mallCatalog) || mallCatalog.length === 0) {
-        mallTrack.innerHTML = '<div class="mall-loading-card">The Mall is empty right now.</div>';
-        mallDots.innerHTML = '';
-        mallFocus.innerHTML = '<div class="mall-focus-loading">No FoundUps are currently visible.</div>';
-        return;
-      }
-
-      mallTrack.innerHTML = mallCatalog.map((item, index) => `
-        <article class="mall-card theme-${escapeAttr(item.theme)}" data-index="${index}" tabindex="0" aria-label="${escapeAttr(item.name)}">
-          <div class="mall-card-topline">
-            <span class="mini-badge">${escapeHtml(item.category)}</span>
-            <span class="mini-badge">${escapeHtml(READINESS_LABELS[item.launch_readiness] || item.launch_readiness)}</span>
-          </div>
-          <div class="mall-card-art">
-            <span class="mall-card-token">${escapeHtml(item.token_symbol)}</span>
-            <span class="mall-card-hero">${escapeHtml(item.hero_label)}</span>
-          </div>
-          <div class="mall-card-copy">
-            <p class="mall-card-name">${escapeHtml(item.name)}</p>
-            <p class="mall-card-tagline">${escapeHtml(item.tagline)}</p>
-          </div>
-        </article>
-      `).join('');
-
-      mallDots.innerHTML = mallCatalog.map((_, index) => `
-        <span class="mall-dot${index === 0 ? ' active' : ''}" data-index="${index}"></span>
-      `).join('');
-
-      requestAnimationFrame(() => scrollToMallIndex(0, false));
-    }
-
     function bindMallInteractions() {
-      const cards = mallTrack.querySelectorAll('.mall-card');
-
-      cards.forEach(card => {
-        card.addEventListener('click', () => {
-          const index = Number(card.dataset.index || 0);
-          const item = mallCatalog[index];
-          if (item && item.foundup_id) {
-            window.location.href = '/member/foundup.html?id=' + encodeURIComponent(item.foundup_id);
-          }
-        });
-        card.addEventListener('focus', () => {
-          const index = Number(card.dataset.index || 0);
-          activeMallIndex = index;
-          updateActiveContext(index);
-        });
+      // Tile field handles its own interactions via mall-tile-field.js
+      // Red Dog button opens the unified plane
+      redDogBtn.addEventListener('click', function () {
+        if (window.redDog) window.redDog.toggle();
       });
-
-      mallTrack.addEventListener('scroll', () => {
-        if (scrollFrame) cancelAnimationFrame(scrollFrame);
-        scrollFrame = requestAnimationFrame(syncActiveCardFromScroll);
-      }, { passive: true });
-
-      mallTrack.addEventListener('wheel', (event) => {
-        if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
-          event.preventDefault();
-          mallTrack.scrollBy({ left: event.deltaY * 1.1, behavior: 'auto' });
-        }
-      }, { passive: false });
-
-      redDogBtn.addEventListener('click', toggleRedDogPanel);
       overlayScrim.addEventListener('click', closeSurfaces);
-      logoutBtn.addEventListener('click', async () => {
-        try {
-          await window.Clerk.signOut();
-        } finally {
-          window.location.href = '/';
-        }
-      });
 
+      // Global Escape handler (D's guardrail - LOCKED)
       document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
+          // Close tile inspector first if open
+          if (window.mallTileField && window.mallTileField.isInspectorOpen()) {
+            window.mallTileField.closeInspector();
+            return;
+          }
           closeSurfaces();
-          return;
         }
-        if (document.activeElement?.tagName === 'INPUT') return;
-        if (event.key === 'ArrowRight') {
-          scrollToMallIndex(Math.min(activeMallIndex + 1, mallCatalog.length - 1));
-        } else if (event.key === 'ArrowLeft') {
-          scrollToMallIndex(Math.max(activeMallIndex - 1, 0));
-        }
-      });
-    }
-
-    function scrollToMallIndex(index, smooth = true) {
-      const cards = mallTrack.querySelectorAll('.mall-card');
-      const card = cards[index];
-      if (!card) return;
-      card.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'nearest', inline: 'center' });
-      activeMallIndex = index;
-      updateActiveContext(index);
-    }
-
-    function syncActiveCardFromScroll() {
-      const cards = Array.from(mallTrack.querySelectorAll('.mall-card'));
-      if (!cards.length) return;
-
-      const center = mallTrack.scrollLeft + (mallTrack.clientWidth / 2);
-      let nearestIndex = 0;
-      let nearestDistance = Number.POSITIVE_INFINITY;
-
-      cards.forEach((card, index) => {
-        const cardCenter = card.offsetLeft + (card.offsetWidth / 2);
-        const distance = Math.abs(center - cardCenter);
-        if (distance < nearestDistance) {
-          nearestDistance = distance;
-          nearestIndex = index;
-        }
-      });
-
-      if (nearestIndex !== activeMallIndex) {
-        activeMallIndex = nearestIndex;
-        updateActiveContext(nearestIndex);
-      }
-    }
-
-    function updateActiveContext(index) {
-      const item = mallCatalog[index];
-      if (!item) return;
-
-      mallFocus.innerHTML = `
-        <div class="mall-focus-head">
-          <span class="focus-badge focus-${escapeAttr(item.launch_readiness)}">${escapeHtml(READINESS_LABELS[item.launch_readiness] || item.launch_readiness)}</span>
-          <span class="focus-meta">${escapeHtml(item.lifecycle_stage)} · ${escapeHtml(item.tier)} · ${escapeHtml(item.category)}</span>
-        </div>
-        <h2>${escapeHtml(item.name)}</h2>
-        <p class="mall-focus-tagline">${escapeHtml(item.description)}</p>
-        <div class="mall-focus-grid">
-          <div>
-            <span class="focus-label">Token</span>
-            <span class="focus-value">${escapeHtml(item.token_symbol)}</span>
-          </div>
-          <div>
-            <span class="focus-label">Route</span>
-            <span class="focus-value">${escapeHtml(item.routing_prefix)}</span>
-          </div>
-          <div>
-            <span class="focus-label">Posture</span>
-            <span class="focus-value">${escapeHtml(item.entry_copy)}</span>
-          </div>
-        </div>
-        <p class="mall-focus-hint">Swipe sideways to browse. Tap the active card to enter its shell handoff.</p>
-      `;
-
-      agentFoundupName.textContent = item.name;
-      agentFoundupHint.textContent = item.hero_mood;
-      agentMessage.textContent = READINESS_COPY[item.launch_readiness] || 'This FoundUp is visible in the Mall.';
-
-      document.querySelectorAll('.mall-dot').forEach((dot, dotIndex) => {
-        dot.classList.toggle('active', dotIndex === index);
-      });
-
-      document.querySelectorAll('.mall-card').forEach((card, cardIndex) => {
-        card.classList.toggle('is-active', cardIndex === index);
       });
     }
 
@@ -771,24 +589,17 @@
       `;
 
       foundupOverlay.hidden = false;
-      redDogPanel.hidden = true;
+      if (window.redDog) window.redDog.close();
       overlayScrim.hidden = false;
       document.body.classList.add('surface-open');
     }
 
-    function toggleRedDogPanel() {
-      const willOpen = redDogPanel.hidden;
-      foundupOverlay.hidden = true;
-      redDogPanel.hidden = !willOpen;
-      overlayScrim.hidden = !willOpen;
-      document.body.classList.toggle('surface-open', willOpen);
-    }
-
     function closeSurfaces() {
-      redDogPanel.hidden = true;
+      if (window.redDog) window.redDog.close();
       foundupOverlay.hidden = true;
       overlayScrim.hidden = true;
       document.body.classList.remove('surface-open');
+      if (window.mallPlanes) window.mallPlanes.closeView();
     }
 
     initClerkAuth().catch(error => {
@@ -1068,9 +879,6 @@
         }
 
         const userData = userDoc.data();
-        if (userData.email) {
-          agentEmail.textContent = userData.email;
-        }
 
         if (userData.inviteCodes && userData.inviteCodes.length > 0) {
           const codesWithStatus = await loadInviteCodeStatuses(userData.inviteCodes);
@@ -1109,44 +917,10 @@
     }
 
     function renderInviteCodes(codesWithStatus) {
-      // Feed invite data to account concierge plane
-      if (window.accountConcierge) {
-        window.accountConcierge.setInvites(codesWithStatus);
+      // Feed invite data to unified Red Dog plane
+      if (window.redDog) {
+        window.redDog.setInvites(codesWithStatus);
       }
-
-      const activeCount = codesWithStatus.filter(item => item.status === 'active').length;
-      agentInviteCount.textContent = `${activeCount} active`;
-
-      if (!codesWithStatus.length) {
-        agentInviteCodes.innerHTML = '<p class="red-dog-muted">No invite codes available yet.</p>';
-        return;
-      }
-
-      agentInviteCodes.innerHTML = codesWithStatus.map(({ code, status }) => `
-        <button class="invite-chip ${escapeAttr(status)}" data-code="${escapeAttr(code)}" type="button">
-          <span>${escapeHtml(code)}</span>
-          <span>${escapeHtml(status)}</span>
-        </button>
-      `).join('');
-
-      agentInviteCodes.querySelectorAll('.invite-chip').forEach(chip => {
-        chip.addEventListener('click', async () => {
-          const code = chip.dataset.code;
-          if (!code || chip.classList.contains('used')) return;
-          try {
-            await navigator.clipboard.writeText(code);
-            const original = chip.innerHTML;
-            chip.classList.add('copied');
-            chip.innerHTML = '<span>Copied</span><span>ready</span>';
-            setTimeout(() => {
-              chip.innerHTML = original;
-              chip.classList.remove('copied');
-            }, 1400);
-          } catch (err) {
-            console.error('Copy failed:', err);
-          }
-        });
-      });
     }
 
     function escapeHtml(value) {
@@ -1160,6 +934,18 @@
       return String(value ?? '').replace(/"/g, '&quot;');
     }
   </script>
+  <!-- Gesture hints (shown once on first visit) -->
+  <div id="gestureHints" class="gesture-hints" style="display:none;">
+    <div class="gesture-hint-item"><span class="gesture-hint-icon">&#8596;</span> Swipe sideways to browse FoundUps</div>
+    <div class="gesture-hint-item"><span class="gesture-hint-icon">&#8595;</span> Swipe down from top for your account</div>
+    <div class="gesture-hint-item"><span class="gesture-hint-icon">&#8226;</span> Tap any card to open its quick view</div>
+    <p class="gesture-hint-dismiss">Tap anywhere to dismiss</p>
+  </div>
+
+  <script src="js/gesture-engine.js"></script>
+  <script src="js/mall-planes.js"></script>
+  <script src="js/mall-tile-field.js"></script>
+  <script src="js/gesture-hints.js"></script>
   <script src="js/account-concierge.js"></script>
   <script src="js/red-dog-concierge.js"></script>
 </body>

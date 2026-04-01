@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for Account Concierge plane (phase 1).
+"""Tests for Red Dog unified plane (migrated from account concierge phase 1).
 
 Validates:
   1. account concierge host structure
@@ -21,7 +21,7 @@ INDEX_HTML = MEMBER_ROOT / "index.html"
 FOUNDUP_HTML = MEMBER_ROOT / "foundup.html"
 
 
-# ── 1. account concierge host structure ──
+# -- 1. account concierge host structure --
 
 
 class TestAccountConciergeHost:
@@ -55,14 +55,14 @@ class TestAccountConciergeHost:
 
     def test_plane_has_aria_label(self):
         content = INDEX_HTML.read_text(encoding="utf-8")
-        assert 'aria-label="Account concierge"' in content
+        assert 'aria-label="Red Dog"' in content
 
     def test_plane_has_drag_handle(self):
         content = INDEX_HTML.read_text(encoding="utf-8")
         assert "account-plane-handle" in content
 
 
-# ── 2. identity/avatar affordance presence ──
+# -- 2. identity/avatar affordance presence --
 
 
 class TestIdentityAvatar:
@@ -108,20 +108,14 @@ class TestIdentityAvatar:
         assert "upload" not in content.lower(), "Must not implement fake upload behavior"
 
 
-# ── 3. FoundUps section naming and grid/tile structure ──
+# -- 3. FoundUps section naming and grid/tile structure --
 
 
 class TestFoundUpsSection:
 
-    def test_section_labeled_foundups(self):
+    def test_section_labeled_your_foundups(self):
         content = INDEX_HTML.read_text(encoding="utf-8")
-        # The label should be "FoundUps", not "Current FoundUps"
-        assert ">FoundUps<" in content, "Section must be labeled 'FoundUps'"
-
-    def test_no_current_foundups_label(self):
-        content = INDEX_HTML.read_text(encoding="utf-8")
-        # Should NOT use the old "Current FoundUps" naming
-        assert "Current FoundUps" not in content, "Must not use 'Current FoundUps' label"
+        assert ">Your FoundUps<" in content, "Section must be labeled 'Your FoundUps'"
 
     def test_grid_container_exists(self):
         content = INDEX_HTML.read_text(encoding="utf-8")
@@ -146,7 +140,7 @@ class TestFoundUpsSection:
         assert "account-foundup-status" in content, "Tiles must show readiness indicator"
 
 
-# ── 4. invite codes hidden by default ──
+# -- 4. invite codes hidden by default --
 
 
 class TestInvitesHidden:
@@ -162,7 +156,6 @@ class TestInvitesHidden:
     def test_drawer_hidden_by_default_in_css(self):
         content = CONCIERGE_CSS.read_text(encoding="utf-8")
         assert "account-invites-drawer" in content
-        # The drawer should have display: none by default
         assert "display: none" in content or "display:none" in content, "Drawer must be hidden by default"
 
     def test_drawer_open_class(self):
@@ -174,10 +167,9 @@ class TestInvitesHidden:
         assert "invitesToggle" in content, "JS must reference invites toggle"
         assert "invitesDrawer" in content, "JS must reference invites drawer"
 
-    def test_invite_codes_not_shown_in_account_plane_by_default(self):
-        """The account plane HTML should not contain any raw invite code text."""
+    def test_invite_codes_not_shown_in_plane_by_default(self):
+        """The plane HTML should not contain any raw invite code text."""
         content = INDEX_HTML.read_text(encoding="utf-8")
-        # Between accountPlane and its closing aside, no FUP- codes should appear
         import re
         plane_match = re.search(
             r'id="accountPlane".*?</aside>',
@@ -186,10 +178,10 @@ class TestInvitesHidden:
         )
         assert plane_match, "Account plane aside must exist"
         plane_html = plane_match.group()
-        assert "FUP-" not in plane_html, "No invite codes should be hardcoded in the account plane"
+        assert "FUP-" not in plane_html, "No invite codes should be hardcoded in the plane"
 
 
-# ── 5. options section contains sign out ──
+# -- 5. options section contains sign out --
 
 
 class TestOptionsSection:
@@ -200,7 +192,7 @@ class TestOptionsSection:
 
     def test_signout_in_options(self):
         content = INDEX_HTML.read_text(encoding="utf-8")
-        assert "data-account-signout" in content, "Sign out button must exist in account plane"
+        assert "data-account-signout" in content, "Sign out button must exist in plane"
 
     def test_signout_label(self):
         content = INDEX_HTML.read_text(encoding="utf-8")
@@ -217,7 +209,6 @@ class TestOptionsSection:
         )
         assert plane_match
         plane_html = plane_match.group()
-        # Sign out should appear AFTER Options label
         options_pos = plane_html.find(">Options<")
         signout_pos = plane_html.find("data-account-signout")
         assert options_pos < signout_pos, "Sign out must appear after Options section label"
@@ -227,7 +218,7 @@ class TestOptionsSection:
         assert "signOut" in content, "JS must handle sign out action"
 
 
-# ── 6. no regression to member entry flow ──
+# -- 6. no regression to member entry flow --
 
 
 class TestNoRegression:
@@ -259,14 +250,6 @@ class TestNoRegression:
     def test_red_dog_concierge_still_loaded(self):
         content = INDEX_HTML.read_text(encoding="utf-8")
         assert "js/red-dog-concierge.js" in content, "Red Dog concierge must still be loaded"
-
-    def test_mall_carousel_still_exists(self):
-        content = INDEX_HTML.read_text(encoding="utf-8")
-        assert "mallTrack" in content, "Mall carousel must still exist"
-
-    def test_concierge_essentials_present(self):
-        content = INDEX_HTML.read_text(encoding="utf-8")
-        assert ">Concierge<" in content, "Concierge section must exist"
 
     def test_swipe_instructions_present(self):
         content = INDEX_HTML.read_text(encoding="utf-8")

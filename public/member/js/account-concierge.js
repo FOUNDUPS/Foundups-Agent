@@ -1,8 +1,10 @@
 /**
- * Account Concierge Plane — swipe-down account/concierge surface.
+ * Red Dog Unified Plane — the user's personal agent surface.
  *
- * Manages the account plane that slides down from the top of the Mall.
- * Triggered by: tapping the user avatar in the header, or swipe-down gesture.
+ * Red Dog IS the user panel. The user panel IS the concierge. One surface.
+ *
+ * Manages the unified plane that slides down from the top of the Mall.
+ * Triggered by: Red Dog FAB button, avatar tap in header, or swipe-down gesture.
  * Closed by: swipe-up on the plane, tapping the scrim, or pressing Escape.
  *
  * Depends on:
@@ -20,6 +22,7 @@
   if (!plane || !scrim) return;
 
   var avatarTrigger = document.getElementById('mallAvatarTrigger');
+  var redDogTrigger = document.getElementById('redDogBtn');
   var invitesToggle = plane.querySelector('[data-account-invites-toggle]');
   var invitesDrawer = plane.querySelector('[data-account-invites-drawer]');
   var signOutBtn = plane.querySelector('[data-account-signout]');
@@ -54,7 +57,15 @@
     else openPlane();
   }
 
-  // ---- avatar trigger ----
+  // ---- Red Dog trigger (primary entry point) ----
+  if (redDogTrigger) {
+    redDogTrigger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      togglePlane();
+    });
+  }
+
+  // ---- avatar trigger (secondary entry point) ----
   if (avatarTrigger) {
     avatarTrigger.addEventListener('click', function (e) {
       e.stopPropagation();
@@ -137,8 +148,8 @@
     });
   }
 
-  // ---- public API for Mall init to populate ----
-  window.accountConcierge = {
+  // ---- public API: window.redDog ----
+  var api = {
     open: openPlane,
     close: closePlane,
     toggle: togglePlane,
@@ -175,7 +186,7 @@
       if (nameEl) nameEl.textContent = displayName || handle || 'Member';
       if (handleEl) handleEl.textContent = handle;
 
-      // Avatar tap goes to Clerk user profile (most truthful profile action)
+      // Avatar tap goes to Clerk user profile
       var avatarLink = plane.querySelector('[data-account-avatar-link]');
       if (avatarLink) {
         avatarLink.addEventListener('click', function () {
@@ -236,6 +247,12 @@
       });
     }
   };
+
+  // Primary API: window.redDog
+  window.redDog = api;
+
+  // Backward compat alias (will be removed in future)
+  window.accountConcierge = api;
 
   // ---- escape helper ----
   function esc(s) {
