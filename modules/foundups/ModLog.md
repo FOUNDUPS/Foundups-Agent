@@ -2,6 +2,39 @@
 
 ## Chronological Change Log
 
+### 2026-04-01 - SoftProto Foundation Architecture
+
+**By:** 0102
+**WSP References:** WSP 102 (Web Design), WSP 11 (Interface Contract), WSP 60 (Memory Architecture), WSP 97 (Execution Discipline)
+
+**What changed**
+- Added `modules/foundups/docs/SOFTPROTO_FOUNDATION_ARCHITECTURE_2026-04-01.md`
+  - defines SoftProto as the future schema-driven UI operating layer
+  - locks the rule that layout and gestures must become config/state driven
+  - positions `Svelte` as the rendering layer, not the system itself
+  - adds the nested interaction contract:
+    - app -> plane -> module -> submodule -> object
+    - local override + parent fallback
+    - AI/user shared command addressing
+  - defines the phased adoption order:
+    - architecture contract
+    - surface audits
+    - isolated member-shell spike
+    - phased rollout across gateway, Mall, user panel, and FoundUp views
+- Added `modules/foundups/docs/SOFTPROTO_ROLLOUT_PLAN_2026-04-01.md`
+  - formalizes rollout phases, worker boundaries, repo tracking, and reindex requirements
+- Updated `modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md`
+  - added SoftProto architecture note to planning references
+  - added WSP 102 to the FoundUps domain baseline
+  - added SoftProto rollout plan to planning references
+
+**Why**
+- FoundUps now has multiple active UI surfaces and needs one shared contract
+  before customization work branches into incompatible local systems
+- SoftProto must be discoverable as domain truth, not just session memory
+
+---
+
 ### 2026-03-31 - p.fMALL Member Catalog Export Sync
 
 **By:** 0102
