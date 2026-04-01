@@ -4,6 +4,33 @@ Test evolution log for the p.fMALL member shell test suite.
 
 ---
 
+## 2026-04-02 | Search Mall Concierge Wiring Phase 1 (WSP 97)
+
+**File**: `test_search_mall_concierge_wiring_phase1.py`
+**Tests**: 45 | **Classes**: 8 | **Result**: 45 passed
+**Worker**: C
+
+Validates concierge search surface wired to B's real field-scope API:
+
+| Class | Count | What it covers |
+|-------|-------|----------------|
+| TestCreatorSearchPill | 4 | Pill exists, emits command, injects channels, opens search input |
+| TestSearchMallButton | 3 | Button exists, emits command, opens search input |
+| TestSearchInputWiring | 10 | Input calls searchByCreator, clears on empty, Escape, clear button |
+| TestTypeofGuards | 2 | typeof guards on searchByCreator and clearFieldScope |
+| TestPublicAPISearch | 8 | openSearchMall/searchByCreator/clearSearch on window.redDog |
+| TestBSearchAPIExists | 5 | B's real APIs exist: searchByCreator/filterByCategory/Tag/clear/get |
+| TestSearchCSS | 6 | Container, input 44px, clear 44px, placeholder styling |
+| TestNoRegression | 7 | Personal Mall, channel attachment, AI tools, briefing, modes |
+
+**Key design decisions**:
+- Creator search pill and Search Mall button both open the same search input
+- Search input calls `mallTileField.searchByCreator(query)` on every keystroke
+- Clear resets input, hides container, and calls `mallTileField.clearFieldScope()`
+- `setProjection('search')` is NOT used — confirmed not a valid projection value
+
+---
+
 ## 2026-04-02 | Concierge Channel Attachment Phase 1 (WSP 97)
 
 **File**: `test_concierge_channel_attachment_phase1.py`
