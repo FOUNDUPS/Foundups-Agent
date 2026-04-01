@@ -1,5 +1,56 @@
 # Member Area Module Change Log
 
+## [2026-04-02] Personal Mall Projection Phase 1 (Worker B, WSP_97)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker B
+**Type**: Feature (Field Scope)
+**Slice**: `personal_mall_projection_phase1`
+**Spec**: WSP_97
+
+**Files Modified**:
+- `public/member/js/mall-tile-field.js` — Added field scope system
+- `public/member/tests/test_video_mall_field_runtime.py` — 10 new Personal Mall tests
+
+**New Hooks**:
+```javascript
+// Project Personal Mall (012 lanes only)
+window.mallTileField.projectPersonalMall();
+
+// Clear scope (show all lanes)
+window.mallTileField.clearFieldScope();
+
+// Get current scope ('personal' or null)
+window.mallTileField.getFieldScope();
+```
+
+**Scope Logic**:
+- Filter: `creator === '012'`
+- Sort order within scope:
+  1. `video_count > 0` first
+  2. Then `display_order` ascending
+  3. Zero-video lanes at end
+
+**State Variables Added**:
+- `currentFieldScope` — null (all) or 'personal' (012 lanes)
+- `fullCatalog` — Unscoped catalog reference for reset
+
+**Grammar Preserved**:
+- tap = play/pause
+- double-tap = enter FoundUp
+- pinch expand/collapse
+- density/motion unchanged
+- projection sorts still work within scope
+
+**Not Touched**:
+- Red Dog controls
+- Concierge
+- Search
+- Backend AI
+
+**Tests**: 765 passed (10 new Personal Mall tests)
+
+---
+
 ## [2026-04-02] Video Mall Feel Polish Phase 2 (Worker B, WSP_97)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B

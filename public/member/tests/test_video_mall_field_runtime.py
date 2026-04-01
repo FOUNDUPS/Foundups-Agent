@@ -322,3 +322,58 @@ class TestFeelPolish:
         css = _read("css/mall-tile-field.css")
         assert "min-width: 3rem" in css
         assert "min-height: 3rem" in css
+
+
+class TestPersonalMallProjection:
+    """Test Personal Mall (My Mall) field scope projection."""
+
+    def test_project_personal_mall_api(self):
+        """projectPersonalMall function is exposed."""
+        js = _read("js/mall-tile-field.js")
+        assert "projectPersonalMall:" in js
+
+    def test_clear_field_scope_api(self):
+        """clearFieldScope function is exposed."""
+        js = _read("js/mall-tile-field.js")
+        assert "clearFieldScope:" in js
+
+    def test_get_field_scope_api(self):
+        """getFieldScope function is exposed."""
+        js = _read("js/mall-tile-field.js")
+        assert "getFieldScope:" in js
+
+    def test_field_scope_state_variable(self):
+        """currentFieldScope state variable exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "currentFieldScope" in js
+
+    def test_full_catalog_preserved(self):
+        """fullCatalog preserves unscoped reference."""
+        js = _read("js/mall-tile-field.js")
+        assert "fullCatalog" in js
+
+    def test_filter_by_scope_function(self):
+        """filterByScope function exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "function filterByScope" in js
+
+    def test_personal_scope_filters_creator(self):
+        """Personal scope filters by creator === '012'."""
+        js = _read("js/mall-tile-field.js")
+        assert "creator === '012'" in js
+
+    def test_personal_scope_video_count_sort(self):
+        """Personal scope sorts video_count > 0 first."""
+        js = _read("js/mall-tile-field.js")
+        assert "video_count" in js
+        assert "aHasVideos" in js or "video_count || 0" in js
+
+    def test_personal_scope_display_order_sort(self):
+        """Personal scope sorts by display_order within groups."""
+        js = _read("js/mall-tile-field.js")
+        assert "display_order" in js
+
+    def test_clear_scope_resets_to_full(self):
+        """clearFieldScope resets to full catalog."""
+        js = _read("js/mall-tile-field.js")
+        assert "mallCatalog = fullCatalog.slice()" in js

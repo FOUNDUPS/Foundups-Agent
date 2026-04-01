@@ -36,6 +36,10 @@
   var currentProjection = 'default';
   var originalOrder = [];  // Preserve original catalog order
 
+  // Field scope state (filter before projection)
+  var currentFieldScope = null;  // null = all, 'personal' = 012 lanes only
+  var fullCatalog = [];  // Unscoped catalog reference
+
   // Video Mall runtime state
   var motionMode = 'snap'; // 'snap' | 'glide'
   var currentDensity = '2x3';
@@ -47,8 +51,10 @@
    * @param {Array} catalog - Array of FoundUp objects (with video data)
    */
   function initialize(catalog) {
-    mallCatalog = catalog || [];
+    fullCatalog = catalog || [];
+    mallCatalog = fullCatalog.slice();
     originalOrder = mallCatalog.slice();  // Preserve original order
+    currentFieldScope = null;  // Reset scope on init
     tileField = document.getElementById('mallTileField');
 
     if (!tileField) {
@@ -544,6 +550,79 @@
     });
   }
 
+  // ========== Field Scope System ==========
+
+  /**
+   * Apply field scope filter to catalog
+   * @param {string} scope - 'personal' or null (all)
+   * @returns {Array} Filtered catalog
+   */
+  function filterByScope(scope) {
+    if (!scope) return fullCatalog.slice();
+
+    if (scope === 'personal') {
+      // Filter to 012 lanes only
+      var personal = fullCatalog.filter(function(item) {
+        return item.creator === '012';
+      });
+
+      // Sort: video_count > 0 first, then display_order asc, zero-video at end
+      personal.sort(function(a, b) {
+        var aHasVideos = (a.video_count || 0) > 0;
+        var bHasVideos = (b.video_count || 0) > 0;
+
+        // Videos first, zero-video at end
+        if (aHasVideos && !bHasVideos) return -1;
+        if (!aHasVideos && bHasVideos) return 1;
+
+        // Within same video status, sort by display_order
+        var orderA = a.display_order || 999;
+        var orderB = b.display_order || 999;
+        return orderA - orderB;
+      });
+
+      return personal;
+    }
+
+    return fullCatalog.slice();
+  }
+
+  /**
+   * Project Personal Mall (012 lanes only)
+   * Scopes field to creator_id === '012'
+   */
+  function projectPersonalMall() {
+    currentFieldScope = 'personal';
+    mallCatalog = filterByScope('personal');
+    originalOrder = mallCatalog.slice();
+    currentProjection = 'default';
+    renderTiles();
+    bindInteractions();
+    updateProjectionChips();
+  }
+
+  /**
+   * Clear field scope (show all lanes)
+   */
+  function clearFieldScope() {
+    if (currentFieldScope === null) return;
+    currentFieldScope = null;
+    mallCatalog = fullCatalog.slice();
+    originalOrder = mallCatalog.slice();
+    currentProjection = 'default';
+    renderTiles();
+    bindInteractions();
+    updateProjectionChips();
+  }
+
+  /**
+   * Get current field scope
+   * @returns {string|null} 'personal' or null
+   */
+  function getFieldScope() {
+    return currentFieldScope;
+  }
+
   // Expose public API
   window.mallTileField = {
     // Core
@@ -569,7 +648,12 @@
     // Projection
     setProjection: setProjection,
     getProjection: getProjection,
-    resetProjection: resetProjection
+    resetProjection: resetProjection,
+
+    // Field Scope (My Mall)
+    projectPersonalMall: projectPersonalMall,
+    clearFieldScope: clearFieldScope,
+    getFieldScope: getFieldScope
   };
 
 })();
