@@ -74,15 +74,58 @@ body.surface-open {
 
 .mall-shell {
   min-height: 100vh;
-  padding: 1.5rem 1.5rem 2rem;
+  padding: 1rem 1rem 6rem;
+  display: flex;
+  flex-direction: column;
 }
+
+/* ========== Anchor Model ========== */
+
+.mall-anchor-top {
+  flex-shrink: 0;
+}
+
+.mall-anchor-middle {
+  flex: 1;
+  min-height: 0;
+}
+
+.mall-anchor-bottom {
+  /* Positioned fixed, see .red-dog-anchor */
+}
+
+/* ========== Top Anchor: Self / Account ========== */
 
 .mall-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
+}
+
+.mall-brand-minimal {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+.mall-brand-minimal:hover {
+  opacity: 1;
+}
+
+.mall-brand-logo-sm {
+  width: 28px;
+  height: 28px;
+}
+
+.mall-self-anchor {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
 }
 
 .mall-brand {
@@ -139,12 +182,46 @@ body.surface-open {
 
 .mall-user-handle {
   font-family: var(--mono);
+  font-size: 0.85rem;
   color: var(--text-dim);
 }
 
+.mall-avatar-trigger {
+  width: 40px;
+  height: 40px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.mall-avatar-trigger:hover,
+.mall-avatar-trigger:focus-visible {
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+  outline: none;
+}
+
+.mall-avatar-trigger img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.account-avatar-placeholder {
+  font-size: 1.1rem;
+  opacity: 0.7;
+}
+
 .mall-main {
-  display: grid;
-  gap: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
 .mall-copy {

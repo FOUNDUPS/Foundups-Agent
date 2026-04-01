@@ -53,10 +53,10 @@ class TestTileFieldStructure:
         """Tile field JS is loaded."""
         assert 'src="js/mall-tile-field.js"' in index_html
 
-    def test_reduced_mall_copy(self, index_html):
-        """Mall copy is minimal (low chrome)."""
-        assert 'mall-copy-minimal' in index_html
-        # Old verbose copy should be removed
+    def test_mall_copy_removed(self, index_html):
+        """Mall copy section removed entirely (anchor model chrome reduction)."""
+        # Phase 2 removed mall-copy entirely - tiles speak for themselves
+        assert 'mall-copy' not in index_html
         assert 'Swipe through the FoundUps' not in index_html
         assert 'The gate stays exactly where it is' not in index_html
 
@@ -156,6 +156,39 @@ class TestInitialization:
     def test_red_dog_concierge_still_wired(self, index_html):
         """Red Dog concierge is still populated with FoundUps."""
         assert 'redDog.setFoundUps(mallCatalog)' in index_html
+
+
+class TestAnchorModel:
+    """Test the 3-anchor shell structure."""
+
+    def test_top_anchor_exists(self, index_html):
+        """Top anchor (self/account) exists."""
+        assert 'data-anchor="top"' in index_html
+
+    def test_middle_anchor_exists(self, index_html):
+        """Middle anchor (discovery field) exists."""
+        assert 'data-anchor="middle"' in index_html
+
+    def test_bottom_anchor_exists(self, index_html):
+        """Bottom anchor (Red Dog) exists."""
+        assert 'data-anchor="bottom"' in index_html
+
+    def test_avatar_trigger_in_top_anchor(self, index_html):
+        """Avatar trigger is in top anchor for account access."""
+        assert 'id="mallAvatarTrigger"' in index_html
+
+    def test_tile_field_in_middle_anchor(self, index_html):
+        """Tile field is in middle anchor."""
+        assert 'id="mallTileField"' in index_html
+
+    def test_red_dog_btn_in_bottom_anchor(self, index_html):
+        """Red Dog button is in bottom anchor."""
+        assert 'id="redDogBtn"' in index_html
+        assert 'id="redDogAnchor"' in index_html
+
+    def test_no_mall_copy_chrome(self, index_html):
+        """Mall copy instruction section removed (chrome reduction)."""
+        assert 'mall-copy' not in index_html
 
 
 class TestNoRegression:

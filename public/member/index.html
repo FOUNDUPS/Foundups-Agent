@@ -251,16 +251,12 @@
 
   <div id="memberArea" class="member-area" style="display:none;">
     <div class="mall-shell">
-      <header class="mall-header">
-        <a href="/" class="mall-brand" aria-label="FoundUPS home">
-          <img src="/logo-dog.png" alt="" class="mall-brand-logo">
-          <div class="mall-brand-copy">
-            <span class="mall-brand-kicker">Invite access granted</span>
-            <strong>p.fMALL</strong>
-          </div>
+      <!-- TOP ANCHOR: Self / Account -->
+      <header class="mall-header mall-anchor-top" data-anchor="top">
+        <a href="/" class="mall-brand-minimal" aria-label="FoundUPS home">
+          <img src="/logo-dog.png" alt="" class="mall-brand-logo-sm">
         </a>
-        <div class="mall-userline">
-          <span class="mall-status-chip">invite admitted</span>
+        <div class="mall-self-anchor">
           <span id="mallUserHandle" class="mall-user-handle">@member</span>
           <button id="mallAvatarTrigger" class="mall-avatar-trigger" aria-label="Open account">
             <img src="" alt="" style="display:none;">
@@ -269,17 +265,15 @@
         </div>
       </header>
 
-      <main class="mall-main">
-        <section class="mall-copy mall-copy-minimal">
-          <h1>Tap to inspect. Double-tap to enter.</h1>
-        </section>
-
+      <!-- MIDDLE FIELD: Discovery / Navigation -->
+      <main class="mall-main mall-anchor-middle" data-anchor="middle">
         <section id="mallTileField" class="mall-tile-field" data-softproto-mount="tile-field" aria-label="FoundUp tiles">
           <div class="mall-tile-field-loading">Loading the Mall...</div>
         </section>
       </main>
 
-      <div id="redDogAnchor" class="red-dog-anchor" data-reddog-anchor>
+      <!-- BOTTOM ANCHOR: Red Dog / Digital Twin -->
+      <div id="redDogAnchor" class="red-dog-anchor mall-anchor-bottom" data-anchor="bottom" data-reddog-anchor>
         <button id="redDogBtn" class="red-dog-btn" data-reddog-trigger aria-label="Open Red Dog">
           <img src="/logo-dog.png" alt="">
           <span class="red-dog-state-ring" data-reddog-anchor-state="idle"></span>

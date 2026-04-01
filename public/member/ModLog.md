@@ -1,5 +1,47 @@
 # Member Area Module Change Log
 
+## [2026-04-01] Mall Anchor Shell Phase 2 (Worker B)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker B
+**Type**: Shell Refinement
+**Slice**: `pfmall_mall_anchor_shell_phase2`
+
+**Files Modified**:
+- `public/member/index.html` — aligned shell to 3-anchor model
+- `public/member/css/member.css` — anchor layout, minimal header, self-anchor styles
+- `public/member/css/mall-tile-field.css` — tile field takes full middle space
+- `public/member/tests/test_mall_tile_field.py` — added 7 anchor model tests
+
+**Anchor Model Alignment**:
+```
++---------------------------+
+|       TOP ANCHOR          |  data-anchor="top"
+|  (minimal brand + avatar) |  Self / Account access
++---------------------------+
+|                           |
+|      MIDDLE FIELD         |  data-anchor="middle"
+|   (#mallTileField)        |  Discovery / Navigation
+|                           |
++---------------------------+
+|      BOTTOM ANCHOR        |  data-anchor="bottom"
+|   (#redDogAnchor)         |  Red Dog / Digital Twin
++---------------------------+
+```
+
+**Chrome Reduction**:
+- REMOVED: `.mall-copy` instruction section ("Tap to inspect...")
+- REMOVED: `.mall-brand-kicker` ("Invite access granted")
+- REMOVED: `.mall-status-chip` ("invite admitted")
+- MINIMIZED: Brand to small logo only (self-anchor dominates)
+
+**Ownership Boundaries**:
+- B owns: shell structure, anchor positioning, chrome
+- C owns: account-plane content, Red Dog panel content/logic
+
+**Test Results**: 259 passed, 2 warnings
+
+---
+
 ## [2026-04-01] Tile Field Phase 1 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B

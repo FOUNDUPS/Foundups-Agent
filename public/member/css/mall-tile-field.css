@@ -1,15 +1,18 @@
 /* Mall Tile Field — Low-chrome discovery surface
    Replaces carousel with square tile grid
    SoftProto mount point: #mallTileField[data-softproto-mount="tile-field"]
+
+   Anchor model: This is the MIDDLE FIELD — dominates the Mall experience
 */
 
 /* ========== Tile Field Container ========== */
 
 .mall-tile-field {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(160px, 45vw), 1fr));
-  gap: 0.75rem;
-  padding: 0.75rem 0;
+  grid-template-columns: repeat(auto-fill, minmax(min(140px, 44vw), 1fr));
+  gap: 0.65rem;
+  padding: 0;
+  flex: 1;
 }
 
 @media (min-width: 600px) {
