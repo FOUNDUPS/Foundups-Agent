@@ -25,12 +25,17 @@
   var inspector = null;
   var mallCatalog = [];
 
+  // Projection state
+  var currentProjection = 'default';
+  var originalOrder = [];  // Preserve original catalog order
+
   /**
    * Initialize tile field with catalog data
    * @param {Array} catalog - Array of FoundUp objects
    */
   function initialize(catalog) {
     mallCatalog = catalog || [];
+    originalOrder = mallCatalog.slice();  // Preserve original order
     tileField = document.getElementById('mallTileField');
 
     if (!tileField) {
@@ -41,6 +46,7 @@
     createInspector();
     renderTiles();
     bindInteractions();
+    bindProjectionChips();
   }
 
   /**
@@ -287,6 +293,117 @@
       .replace(/'/g, '&#39;');
   }
 
+  // ========== Projection System ==========
+
+  /**
+   * Readiness priority for sorting (higher = more ready)
+   */
+  var READINESS_ORDER = {
+    'ready': 3,
+    'conditional': 2,
+    'discoverable_only': 1
+  };
+
+  /**
+   * Sort catalog by projection mode
+   * @param {string} projection - Projection name
+   * @returns {Array} Sorted catalog
+   */
+  function sortByProjection(projection) {
+    var sorted = mallCatalog.slice();
+
+    switch (projection) {
+      case 'alpha':
+        sorted.sort(function(a, b) {
+          var nameA = (a.name || '').toLowerCase();
+          var nameB = (b.name || '').toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+        break;
+
+      case 'readiness':
+        sorted.sort(function(a, b) {
+          var readA = READINESS_ORDER[a.launch_readiness] || 0;
+          var readB = READINESS_ORDER[b.launch_readiness] || 0;
+          // Higher readiness first, then alpha
+          if (readB !== readA) return readB - readA;
+          return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase());
+        });
+        break;
+
+      case 'category':
+        sorted.sort(function(a, b) {
+          var catA = (a.category || 'zzz').toLowerCase();
+          var catB = (b.category || 'zzz').toLowerCase();
+          if (catA !== catB) return catA.localeCompare(catB);
+          return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase());
+        });
+        break;
+
+      default:
+        // 'default' - restore original order
+        sorted = originalOrder.slice();
+        break;
+    }
+
+    return sorted;
+  }
+
+  /**
+   * Set projection mode and re-render tiles
+   * @param {string} projection - Projection name: default, alpha, readiness, category
+   */
+  function setProjection(projection) {
+    if (!['default', 'alpha', 'readiness', 'category'].includes(projection)) {
+      projection = 'default';
+    }
+
+    currentProjection = projection;
+    mallCatalog = sortByProjection(projection);
+    renderTiles();
+    bindInteractions();
+    updateProjectionChips();
+  }
+
+  /**
+   * Get current projection mode
+   * @returns {string}
+   */
+  function getProjection() {
+    return currentProjection;
+  }
+
+  /**
+   * Reset to default projection
+   */
+  function resetProjection() {
+    setProjection('default');
+  }
+
+  /**
+   * Update projection chip active states
+   */
+  function updateProjectionChips() {
+    var chips = document.querySelectorAll('.mall-projection-chip');
+    chips.forEach(function(chip) {
+      var proj = chip.dataset.projection;
+      chip.classList.toggle('active', proj === currentProjection);
+    });
+  }
+
+  /**
+   * Bind projection chip click handlers
+   */
+  function bindProjectionChips() {
+    var chips = document.querySelectorAll('.mall-projection-chip');
+    chips.forEach(function(chip) {
+      chip.addEventListener('click', function() {
+        var proj = chip.dataset.projection || 'default';
+        setProjection(proj);
+      });
+    });
+  }
+
   // Expose public API
   window.mallTileField = {
     initialize: initialize,
@@ -294,7 +411,10 @@
     closeInspector: closeInspector,
     enterFoundUp: enterFoundUp,
     getInspectingIndex: getInspectingIndex,
-    isInspectorOpen: isInspectorOpen
+    isInspectorOpen: isInspectorOpen,
+    setProjection: setProjection,
+    getProjection: getProjection,
+    resetProjection: resetProjection
   };
 
 })();

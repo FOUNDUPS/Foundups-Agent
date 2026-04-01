@@ -1,5 +1,50 @@
 # Member Area Module Change Log
 
+## [2026-04-01] Mall Projection Shell Phase 1 (Worker B)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker B
+**Type**: Feature Addition
+**Slice**: `pfmall_mall_projection_shell_phase1`
+
+**Files Modified**:
+- `public/member/index.html` — added projection controls nav in middle anchor
+- `public/member/css/mall-tile-field.css` — projection chip styles (already present from phase 1)
+- `public/member/js/mall-tile-field.js` — projection sorting logic and API
+- `public/member/tests/test_mall_tile_field.py` — added 19 projection tests
+
+**Projection Controls**:
+```html
+<nav id="mallProjection" class="mall-projection" aria-label="Sort FoundUps">
+  <button data-projection="default">All</button>
+  <button data-projection="alpha">A-Z</button>
+  <button data-projection="readiness">Readiness</button>
+  <button data-projection="category">Category</button>
+</nav>
+```
+
+**Sort Modes (using catalog fields only)**:
+- `default` — original catalog order preserved
+- `alpha` — sort by `name` A-Z
+- `readiness` — sort by `launch_readiness` (ready > conditional > discoverable_only)
+- `category` — sort by `category`, then alpha
+
+**Public API Extended**:
+```javascript
+window.mallTileField.setProjection(name)   // Set projection mode
+window.mallTileField.getProjection()       // Get current projection
+window.mallTileField.resetProjection()     // Reset to default
+```
+
+**Chrome Minimal**: Chips are compact pills (0.72rem), low-contrast until active
+
+**Ownership Boundaries**:
+- B owns: projection UI, sorting logic, chip wiring
+- C owns: account-plane content, Red Dog panel content/logic (untouched)
+
+**Test Results**: 52 passed, 2 warnings
+
+---
+
 ## [2026-04-01] Mall Anchor Shell Phase 2 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B

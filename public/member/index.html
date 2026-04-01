@@ -267,6 +267,14 @@
 
       <!-- MIDDLE FIELD: Discovery / Navigation -->
       <main class="mall-main mall-anchor-middle" data-anchor="middle">
+        <!-- Projection Controls (compact, subordinate to tiles) -->
+        <nav id="mallProjection" class="mall-projection" aria-label="Sort FoundUps">
+          <button class="mall-projection-chip active" data-projection="default">All</button>
+          <button class="mall-projection-chip" data-projection="alpha">A-Z</button>
+          <button class="mall-projection-chip" data-projection="readiness">Readiness</button>
+          <button class="mall-projection-chip" data-projection="category">Category</button>
+        </nav>
+
         <section id="mallTileField" class="mall-tile-field" data-softproto-mount="tile-field" aria-label="FoundUp tiles">
           <div class="mall-tile-field-loading">Loading the Mall...</div>
         </section>

@@ -215,3 +215,98 @@ class TestNoRegression:
     def test_mall_planes_loaded(self, index_html):
         """Mall planes JS is still loaded."""
         assert 'js/mall-planes.js' in index_html
+
+
+class TestProjectionControls:
+    """Test the projection shell for tile sorting."""
+
+    def test_projection_container_exists(self, index_html):
+        """Projection controls container exists."""
+        assert 'id="mallProjection"' in index_html
+
+    def test_projection_has_aria_label(self, index_html):
+        """Projection nav has accessibility label."""
+        assert 'aria-label="Sort FoundUps"' in index_html
+
+    def test_default_projection_chip(self, index_html):
+        """Default (All) projection chip exists."""
+        assert 'data-projection="default"' in index_html
+        assert '>All</button>' in index_html
+
+    def test_alpha_projection_chip(self, index_html):
+        """Alphabetical projection chip exists."""
+        assert 'data-projection="alpha"' in index_html
+        assert '>A-Z</button>' in index_html
+
+    def test_readiness_projection_chip(self, index_html):
+        """Readiness projection chip exists."""
+        assert 'data-projection="readiness"' in index_html
+        assert '>Readiness</button>' in index_html
+
+    def test_category_projection_chip(self, index_html):
+        """Category projection chip exists."""
+        assert 'data-projection="category"' in index_html
+        assert '>Category</button>' in index_html
+
+    def test_default_chip_is_active(self, index_html):
+        """Default projection chip has active class."""
+        # Check the active class is on the default chip
+        assert 'mall-projection-chip active" data-projection="default"' in index_html
+
+
+class TestProjectionCSS:
+    """Test projection controls CSS."""
+
+    def test_projection_container_styles(self, tile_field_css):
+        """Projection container has flex layout."""
+        assert '.mall-projection {' in tile_field_css
+        assert 'display: flex' in tile_field_css
+
+    def test_projection_chip_styles(self, tile_field_css):
+        """Projection chips have pill styling."""
+        assert '.mall-projection-chip {' in tile_field_css
+        assert 'border-radius: 999px' in tile_field_css
+
+    def test_active_chip_highlight(self, tile_field_css):
+        """Active projection chip has visual highlight."""
+        assert '.mall-projection-chip.active {' in tile_field_css
+
+    def test_chip_hover_state(self, tile_field_css):
+        """Projection chips have hover state."""
+        assert '.mall-projection-chip:hover' in tile_field_css
+
+
+class TestProjectionJS:
+    """Test projection logic in JS."""
+
+    def test_projection_api_setProjection(self, tile_field_js):
+        """setProjection function is exposed."""
+        assert 'setProjection:' in tile_field_js
+
+    def test_projection_api_getProjection(self, tile_field_js):
+        """getProjection function is exposed."""
+        assert 'getProjection:' in tile_field_js
+
+    def test_projection_api_resetProjection(self, tile_field_js):
+        """resetProjection function is exposed."""
+        assert 'resetProjection:' in tile_field_js
+
+    def test_projection_state_variable(self, tile_field_js):
+        """currentProjection state variable exists."""
+        assert 'currentProjection' in tile_field_js
+
+    def test_original_order_preserved(self, tile_field_js):
+        """Original order is preserved for reset."""
+        assert 'originalOrder' in tile_field_js
+
+    def test_readiness_order_defined(self, tile_field_js):
+        """Readiness sort order is defined."""
+        assert 'READINESS_ORDER' in tile_field_js
+
+    def test_sort_by_projection_function(self, tile_field_js):
+        """sortByProjection function exists."""
+        assert 'sortByProjection' in tile_field_js
+
+    def test_bind_projection_chips_called(self, tile_field_js):
+        """bindProjectionChips is called in initialize."""
+        assert 'bindProjectionChips()' in tile_field_js
