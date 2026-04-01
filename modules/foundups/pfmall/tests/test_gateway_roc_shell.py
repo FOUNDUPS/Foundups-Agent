@@ -831,3 +831,68 @@ class TestModalAccessibilityPhase7:
         start = html.index('id="closeSignInModal"')
         tag = html[html.rfind('<', 0, start):html.index('>', start) + 1]
         assert 'aria-label=' in tag
+
+
+# ---------------------------------------------------------------------------
+# Chat Safety Hardening Phase 8
+# ---------------------------------------------------------------------------
+
+class TestChatSafetyPhase8:
+    """Public chat widget is bounded and does not undermine the gate."""
+
+    def _get_chat_html(self):
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index('id="chatPanel"')
+        end = html.index('</div>\n    <div class="chat-input-wrap">')
+        return html[start:end]
+
+    def test_chat_does_not_claim_ungated_access(self):
+        """Chat pre-seeded messages must not imply ungated access."""
+        chat = self._get_chat_html()
+        assert "can't grant access" in chat.lower() or "chat can't grant access" in chat.lower()
+
+    def test_chat_mentions_invite_requirement(self):
+        """Chat must mention invite-only access."""
+        chat = self._get_chat_html()
+        assert "invite" in chat.lower()
+
+    def test_chat_no_speculative_financial_language(self):
+        """Chat must not contain speculative financial claims."""
+        chat = self._get_chat_html()
+        assert "next bitcoin" not in chat.lower()
+        assert "red hot idea" not in chat.lower()
+
+    def test_chat_no_beta_language(self):
+        """Chat must not reference beta (current phase is alpha)."""
+        chat = self._get_chat_html()
+        assert "join the beta" not in chat.lower()
+
+    def test_chat_placeholder_is_bounded(self):
+        """Chat input placeholder must not overpromise."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert 'placeholder="Ask about FoundUPS..."' in html
+
+    def test_chat_error_does_not_leak_backend(self):
+        """Error fallback must not expose raw data.error."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index("CHAT_ENDPOINT")
+        block = html[start:start + 2000]
+        assert "data.error" not in block
+
+    def test_chat_error_fallback_directs_to_gateway(self):
+        """Network error fallback must direct users to the ENTER flow."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index("CHAT_ENDPOINT")
+        block = html[start:start + 2000]
+        assert "SIGN UP / ENTER" in block or "enterBtn" in block
+
+    def test_chat_rate_limiting_exists(self):
+        """Chat must have rate limiting."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "MSG_LIMIT" in html
+        assert "MSG_WINDOW" in html
+
+    def test_chat_maxlength_exists(self):
+        """Chat input must have maxlength."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert 'maxlength="500"' in html

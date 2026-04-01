@@ -1571,14 +1571,13 @@
       </div>
     </div>
     <div class="chat-messages" id="chatMessages">
-      <div class="chat-msg bot">Hey! I'm 0102, I am depicted as the red dog logo with a chilli pepper between my legs! A
-        red hot idea is the next bitcoin! Ask me anything about foundups, how it works, or how to join the beta!</div>
-      <div class="chat-msg bot">All FoundUPS work by invite — like how joining Gmail worked back in the day. But if you
-        really can't wait, connect with <a href="https://linkedin.com/in/openstartup/" target="_blank"
+      <div class="chat-msg bot">Hey! I'm 0102, the FoundUPS agent. I can answer questions about how FoundUPS works and what Return on Compute means.</div>
+      <div class="chat-msg bot">Access is invite-only right now. To join, you'll need an invite code and to sign in through the gateway above. Chat can't grant access.</div>
+      <div class="chat-msg bot">Can't wait? Connect with <a href="https://linkedin.com/in/openstartup/" target="_blank"
           style="color:var(--accent);text-decoration:underline;">UnDaoDu on LinkedIn</a>.</div>
     </div>
     <div class="chat-input-wrap">
-      <input type="text" id="chatInput" placeholder="Ask 0102 anything..." maxlength="500" autocomplete="off">
+      <input type="text" id="chatInput" placeholder="Ask about FoundUPS..." maxlength="500" autocomplete="off">
       <button id="chatSend">Send</button>
     </div>
   </div>
@@ -2399,7 +2398,7 @@
         const now = Date.now();
         while (msgTimestamps.length && msgTimestamps[0] < now - MSG_WINDOW) msgTimestamps.shift();
         if (msgTimestamps.length >= MSG_LIMIT) {
-          addMsg("Easy there! The dog needs a breather. Try again in a minute.", 'bot');
+          addMsg("Slow down — try again in a minute.", 'bot');
           return;
         }
         msgTimestamps.push(now);
@@ -2419,10 +2418,10 @@
           });
           const data = await res.json();
           typingEl.remove();
-          addMsg(data.reply || data.error || 'Woof! Something went wrong. Check back soon!', 'bot');
+          addMsg(data.reply || 'I couldn\'t process that right now. Try again shortly.', 'bot');
         } catch (err) {
           typingEl.remove();
-          addMsg("Sorry, the dog is napping! Reach out to UnDaoDu on LinkedIn while I wake up.", 'bot');
+          addMsg("Chat is temporarily unavailable. For access questions, use the SIGN UP / ENTER button above.", 'bot');
         }
         sending = false;
         sendBtn.disabled = false;
