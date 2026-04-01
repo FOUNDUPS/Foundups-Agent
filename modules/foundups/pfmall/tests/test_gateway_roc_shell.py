@@ -366,3 +366,91 @@ class TestPWAPhase1:
         """Banner must hide on appinstalled event."""
         html = GATEWAY.read_text(encoding="utf-8")
         assert "appinstalled" in html
+
+
+# ---------------------------------------------------------------------------
+# Install Fallback Phase 3
+# ---------------------------------------------------------------------------
+
+class TestInstallFallbackPhase3:
+    """Installed-state suppression + unsupported-browser fallback."""
+
+    def test_standalone_detection_exists(self):
+        """Gateway must detect standalone/installed state."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "display-mode: standalone" in html
+
+    def test_navigator_standalone_check(self):
+        """Gateway must check navigator.standalone for iOS."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "navigator.standalone" in html
+
+    def test_standalone_css_suppression(self):
+        """CSS must hide install affordances in standalone mode."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "@media (display-mode: standalone)" in html
+
+    def test_standalone_suppresses_install_banner(self):
+        """Standalone CSS rule must target install-banner."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        # Find the standalone media query block
+        start = html.index("@media (display-mode: standalone)")
+        block = html[start:start + 200]
+        assert ".install-banner" in block
+
+    def test_fallback_hint_element_exists(self):
+        """Fallback hint element must exist for unsupported browsers."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert 'id="installFallbackHint"' in html
+
+    def test_fallback_hint_class_defined(self):
+        """Fallback hint CSS class must be defined."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert ".install-fallback-hint" in html
+
+    def test_ios_detection_for_fallback(self):
+        """Fallback must detect iOS for Add to Home Screen hint."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "iPad|iPhone|iPod" in html
+
+    def test_fallback_respects_dismiss_persistence(self):
+        """Fallback must check installDismissed before showing."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        # Find the fallback setTimeout block (not the variable declaration)
+        fallback_start = html.index("installFallbackHint.textContent")
+        fallback_block = html[fallback_start - 500:fallback_start]
+        assert "installDismissed" in fallback_block
+
+    def test_fallback_respects_accepted_persistence(self):
+        """Fallback must not show if install was already accepted."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        fallback_start = html.index("installFallbackHint.textContent")
+        fallback_block = html[fallback_start - 500:fallback_start]
+        assert "installAccepted" in fallback_block
+
+    def test_deferred_prompt_still_works(self):
+        """Original beforeinstallprompt capture must still exist."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "deferredInstallPrompt" in html
+        assert "beforeinstallprompt" in html
+
+    def test_standalone_suppresses_fallback_hint(self):
+        """Standalone CSS rule must also target fallback hint."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index("@media (display-mode: standalone)")
+        block = html[start:start + 200]
+        assert ".install-fallback-hint" in block
+
+    def test_isStandalone_guards_beforeinstallprompt(self):
+        """beforeinstallprompt handler must check isStandalone."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        bip_start = html.index("beforeinstallprompt")
+        bip_block = html[bip_start:bip_start + 300]
+        assert "isStandalone" in bip_block
+
+    def test_appinstalled_hides_fallback_hint(self):
+        """appinstalled handler must also hide fallback hint."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index("appinstalled")
+        block = html[start:start + 300]
+        assert "installFallbackHint" in block

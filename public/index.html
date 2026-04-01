@@ -1297,6 +1297,27 @@
       color: var(--text-muted);
       border: 1px solid var(--border);
     }
+
+    .install-fallback-hint {
+      display: none;
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      padding: 0.5rem 1rem;
+      line-height: 1.5;
+    }
+
+    .install-fallback-hint.show {
+      display: block;
+    }
+
+    /* Hide all install affordances when running standalone */
+    @media (display-mode: standalone) {
+      .install-banner,
+      .install-fallback-hint {
+        display: none !important;
+      }
+    }
   </style>
 </head>
 
@@ -2441,6 +2462,9 @@
     <button class="install-dismiss" id="installDismiss">Not now</button>
   </div>
 
+  <!-- INSTALL FALLBACK HINT (iOS / unsupported browsers) -->
+  <div class="install-fallback-hint" id="installFallbackHint"></div>
+
   <!-- SERVICE WORKER REGISTRATION + INSTALL PROMPT -->
   <script>
     if ('serviceWorker' in navigator) {
@@ -2449,18 +2473,25 @@
       });
     }
 
+    // Standalone detection - suppress all install affordances if already installed
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true;
+
     // PWA install prompt - capture and defer
     let deferredInstallPrompt = null;
+    let installPromptFired = false;
     const installBanner = document.getElementById('installBanner');
     const installBtn = document.getElementById('installBtn');
     const installDismiss = document.getElementById('installDismiss');
+    const installFallbackHint = document.getElementById('installFallbackHint');
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredInstallPrompt = e;
+      installPromptFired = true;
 
-      // Only show if user hasn't dismissed before
-      if (!localStorage.getItem('installDismissed')) {
+      // Only show if user hasn't dismissed before and not standalone
+      if (!isStandalone && !localStorage.getItem('installDismissed')) {
         installBanner.classList.add('show');
       }
     });
@@ -2481,11 +2512,32 @@
       localStorage.setItem('installDismissed', '1');
     });
 
-    // Hide banner if already installed
+    // Hide all install affordances if already installed
     window.addEventListener('appinstalled', () => {
       installBanner.classList.remove('show');
+      installFallbackHint.classList.remove('show');
       deferredInstallPrompt = null;
     });
+
+    // Fallback hint for browsers without beforeinstallprompt (iOS Safari, Firefox)
+    // Show after a delay to allow beforeinstallprompt to fire first
+    if (!isStandalone) {
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          if (installPromptFired) return;
+          if (localStorage.getItem('installDismissed')) return;
+          if (localStorage.getItem('installAccepted')) return;
+
+          const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+          if (isIOS) {
+            installFallbackHint.textContent = 'Tap the share button, then "Add to Home Screen" to install FoundUPS.';
+          } else {
+            installFallbackHint.textContent = 'Use your browser menu to install FoundUPS for quick access.';
+          }
+          installFallbackHint.classList.add('show');
+        }, 3000);
+      });
+    }
   </script>
 
 </body>
