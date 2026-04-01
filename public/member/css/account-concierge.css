@@ -478,6 +478,83 @@
   min-width: 3.5rem;
 }
 
+/* Channel attachment section */
+.reddog-channels-section {
+  padding: 0.75rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.reddog-channel-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.4rem;
+  border-radius: 0.5rem;
+  transition: background 0.12s;
+}
+.reddog-channel-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+.reddog-channel-icon {
+  width: 1.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  color: rgba(228, 226, 236, 0.6);
+}
+.reddog-channel-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  min-width: 0;
+  flex: 1;
+}
+.reddog-channel-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(228, 226, 236, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.reddog-channel-meta {
+  font-size: 0.68rem;
+  color: rgba(228, 226, 236, 0.4);
+}
+.reddog-channel-toggle {
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(141, 113, 255, 0.15);
+  background: rgba(141, 113, 255, 0.05);
+  color: rgba(228, 226, 236, 0.5);
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  min-height: 28px;
+  flex-shrink: 0;
+}
+.reddog-channel-toggle.attached {
+  background: rgba(74, 222, 128, 0.12);
+  border-color: rgba(74, 222, 128, 0.3);
+  color: #4ade80;
+}
+.reddog-channel-toggle:hover {
+  background: rgba(141, 113, 255, 0.12);
+  border-color: rgba(141, 113, 255, 0.3);
+}
+.reddog-channel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+}
+.reddog-channel-empty {
+  font-size: 0.78rem;
+  color: rgba(228, 226, 236, 0.4);
+  margin: 0;
+  padding: 0.3rem 0;
+}
+
 /* ========== Phone ergonomics ========== */
 
 /* Small screens: tighter plane, larger tap targets */
@@ -561,6 +638,17 @@
   /* Red Dog header: compact */
   .reddog-header {
     padding: 0.35rem 0 0.5rem;
+  }
+
+  /* Channel rows: ensure 44px touch targets on phone */
+  .reddog-channel-row {
+    padding: 0.5rem 0.4rem;
+    min-height: 44px;
+  }
+  .reddog-channel-toggle {
+    min-height: 36px;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.72rem;
   }
 
   /* AI tools: ensure 44px touch targets on phone */

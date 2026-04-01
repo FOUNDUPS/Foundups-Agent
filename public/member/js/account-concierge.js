@@ -198,6 +198,7 @@
     { id: 'summary',   label: 'Summary',     icon: '\u2139' },
     { id: 'listen',    label: 'Listen',       icon: '\uD83C\uDFA4' },
     { id: 'tools',     label: 'AI Tools',     icon: '\uD83D\uDD27' },
+    { id: 'channels',  label: 'Channels',     icon: '\uD83D\uDCE1' },
     { id: 'foundups',  label: 'My FoundUps',  icon: '\uD83D\uDCE6' },
     { id: 'invites',   label: 'Invites',      icon: '\uD83D\uDCE8' },
     { id: 'options',   label: 'Options',      icon: '\u2699' }
@@ -249,6 +250,12 @@
         injectAITools();
         var toolsSection = plane.querySelector('[data-reddog-tools]');
         if (toolsSection) toolsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        break;
+      case 'channels':
+        openPlane();
+        injectChannels();
+        var channelsSection = plane.querySelector('[data-reddog-channels]');
+        if (channelsSection) channelsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         break;
       case 'foundups':
         openPlane();
@@ -607,6 +614,147 @@
     });
   }
 
+  // ---- channel attachment surface ----
+  var channelsEl = null;
+  var attachedChannels = {}; // id -> boolean
+
+  var CHANNEL_PLATFORMS = [
+    { type: 'youtube_channel',  icon: '\u25B6',  label: 'YouTube' },
+    { type: 'linkedin_profile', icon: '\uD83D\uDD17', label: 'LinkedIn' },
+    { type: 'x_account',       icon: '\uD835\uDD4F', label: 'X' },
+    { type: 'autopost',        icon: '\u2699',  label: 'AutoPost' }
+  ];
+
+  function getPlatformMeta(sourceType) {
+    for (var i = 0; i < CHANNEL_PLATFORMS.length; i++) {
+      if (CHANNEL_PLATFORMS[i].type === sourceType) return CHANNEL_PLATFORMS[i];
+    }
+    return { type: sourceType, icon: '\u2022', label: sourceType };
+  }
+
+  function getChannelsFromCatalog() {
+    // Read from mall-video-catalog if loaded on window
+    var catalog = window._mallVideoCatalog || [];
+    return catalog.map(function (item) {
+      return {
+        id: item.foundup_id,
+        name: item.title || item.entity || item.foundup_id,
+        sourceType: item.source_type,
+        sourceHandle: item.source_handle || '',
+        videoCount: item.video_count || 0,
+        attached: attachedChannels[item.foundup_id] !== false
+      };
+    });
+  }
+
+  function toggleChannelAttach(channelId) {
+    var current = attachedChannels[channelId] !== false;
+    attachedChannels[channelId] = !current;
+    var action = current ? 'detach_channel' : 'attach_channel';
+    emitRedDogCommand(action, { channelId: channelId, attached: !current });
+    refreshChannelsUI();
+    renderBriefing();
+  }
+
+  function refreshChannelsUI() {
+    if (!channelsEl) return;
+    var channels = getChannelsFromCatalog();
+    var listEl = channelsEl.querySelector('[data-reddog-channel-list]');
+    if (!listEl) return;
+
+    if (!channels.length) {
+      listEl.innerHTML = '<p class="reddog-channel-empty">No channels loaded yet.</p>';
+      return;
+    }
+
+    listEl.innerHTML = channels.map(function (ch) {
+      var meta = getPlatformMeta(ch.sourceType);
+      var attached = ch.attached;
+      return '<div class="reddog-channel-row" data-reddog-channel="' + esc(ch.id) + '">'
+        + '<span class="reddog-channel-icon">' + meta.icon + '</span>'
+        + '<div class="reddog-channel-info">'
+        + '<span class="reddog-channel-name">' + esc(ch.name) + '</span>'
+        + '<span class="reddog-channel-meta">' + esc(meta.label)
+        + (ch.videoCount > 0 ? ' \u00b7 ' + ch.videoCount + ' videos' : '')
+        + (ch.sourceHandle ? ' \u00b7 ' + esc(ch.sourceHandle) : '')
+        + '</span>'
+        + '</div>'
+        + '<button class="reddog-channel-toggle' + (attached ? ' attached' : '') + '"'
+        + ' data-reddog-channel-toggle="' + esc(ch.id) + '" type="button">'
+        + (attached ? 'On' : 'Off')
+        + '</button>'
+        + '</div>';
+    }).join('');
+  }
+
+  function injectChannels() {
+    if (channelsEl) return;
+    var conciergeHost = plane.querySelector('[data-reddog-concierge]');
+    if (!conciergeHost) return;
+
+    channelsEl = document.createElement('div');
+    channelsEl.className = 'reddog-channels-section';
+    channelsEl.setAttribute('data-reddog-channels', '');
+
+    var html = '<div class="reddog-tools-label">Channels</div>';
+    html += '<div data-reddog-channel-list></div>';
+
+    // Mall projection quick-switch
+    html += '<div class="reddog-channel-actions">';
+    html += '<button class="reddog-tool-pill" data-reddog-populate-mall type="button">Populate My Mall</button>';
+    html += '<button class="reddog-tool-pill" data-reddog-personal-mall type="button">Personal Mall</button>';
+    html += '<button class="reddog-tool-pill" data-reddog-search-mall type="button">Search Mall</button>';
+    html += '</div>';
+
+    channelsEl.innerHTML = html;
+
+    // Insert after AI tools, before options
+    var aiTools = plane.querySelector('[data-reddog-tools]');
+    var optionsSection = plane.querySelector('[data-reddog-options]');
+    if (aiTools && aiTools.nextSibling) {
+      aiTools.parentNode.insertBefore(channelsEl, aiTools.nextSibling);
+    } else if (optionsSection) {
+      optionsSection.parentNode.insertBefore(channelsEl, optionsSection);
+    } else if (conciergeHost) {
+      conciergeHost.appendChild(channelsEl);
+    }
+
+    // Wire handlers
+    channelsEl.addEventListener('click', function (e) {
+      var toggleBtn = e.target.closest('[data-reddog-channel-toggle]');
+      if (toggleBtn) {
+        toggleChannelAttach(toggleBtn.getAttribute('data-reddog-channel-toggle'));
+        return;
+      }
+
+      if (e.target.closest('[data-reddog-populate-mall]')) {
+        emitRedDogCommand('populate_my_mall', {});
+        if (window.mallTileField && typeof window.mallTileField.setProjection === 'function') {
+          window.mallTileField.setProjection('personal');
+        }
+        return;
+      }
+
+      if (e.target.closest('[data-reddog-personal-mall]')) {
+        emitRedDogCommand('open_personal_mall', {});
+        if (window.mallTileField && typeof window.mallTileField.setProjection === 'function') {
+          window.mallTileField.setProjection('personal');
+        }
+        return;
+      }
+
+      if (e.target.closest('[data-reddog-search-mall]')) {
+        emitRedDogCommand('open_search_mall', {});
+        if (window.mallTileField && typeof window.mallTileField.setProjection === 'function') {
+          window.mallTileField.setProjection('search');
+        }
+        return;
+      }
+    });
+
+    refreshChannelsUI();
+  }
+
   // ---- context briefing ----
   var briefingEl = null;
 
@@ -871,6 +1019,7 @@
     injectRecommendations();
     renderRecommendations();
     injectAITools();
+    injectChannels();
   };
 
   // ---- public API: window.redDog ----
@@ -904,6 +1053,29 @@
     getDensity: function () { return currentDensity; },
     setMotionMode: setMotionMode,
     getMotionMode: function () { return currentMotionMode; },
+
+    // Channel attachment
+    openChannels: function () { injectChannels(); executeMode('channels'); },
+    getChannels: getChannelsFromCatalog,
+    toggleChannel: toggleChannelAttach,
+    populateMyMall: function () {
+      emitRedDogCommand('populate_my_mall', {});
+      if (window.mallTileField && typeof window.mallTileField.setProjection === 'function') {
+        window.mallTileField.setProjection('personal');
+      }
+    },
+    openPersonalMall: function () {
+      emitRedDogCommand('open_personal_mall', {});
+      if (window.mallTileField && typeof window.mallTileField.setProjection === 'function') {
+        window.mallTileField.setProjection('personal');
+      }
+    },
+    openSearchMall: function () {
+      emitRedDogCommand('open_search_mall', {});
+      if (window.mallTileField && typeof window.mallTileField.setProjection === 'function') {
+        window.mallTileField.setProjection('search');
+      }
+    },
 
     /** Populate identity block from Clerk user + Firestore data */
     setIdentity: function (clerkUser, userData) {
