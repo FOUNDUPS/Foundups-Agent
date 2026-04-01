@@ -533,3 +533,98 @@ class TestMemberHandoffPhase4:
         start = html.index("enterBtn.addEventListener('click'")
         block = html[start:start + 800]
         assert "disclaimerModal" in block
+
+
+# ---------------------------------------------------------------------------
+# Public Metadata Phase 5
+# ---------------------------------------------------------------------------
+
+class TestPublicMetadataPhase5:
+    """Public metadata is ROC-first, consistent, and non-securities."""
+
+    def test_title_contains_compute(self):
+        """Title must use compute-first language."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        head = html[:html.index("</head>")]
+        assert "<title>" in head
+        title_start = head.index("<title>") + len("<title>")
+        title_end = head.index("</title>")
+        title = head[title_start:title_end]
+        assert "Compute" in title
+
+    def test_meta_description_expands_roc(self):
+        """Meta description must spell out Return on Compute, not just ROC."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        import re
+        match = re.search(r'<meta name="description"[^>]*content="([^"]*)"', html)
+        assert match, "Meta description not found"
+        desc = match.group(1)
+        assert "Return on Compute" in desc
+
+    def test_og_title_matches_page_title(self):
+        """OG title must match page title."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        head = html[:html.index("</head>")]
+        import re
+        title_match = re.search(r"<title>(.*?)</title>", head)
+        og_match = re.search(r'og:title" content="([^"]*)"', head)
+        assert title_match and og_match
+        assert title_match.group(1) == og_match.group(1)
+
+    def test_og_description_matches_meta(self):
+        """OG description must match meta description."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        head = html[:html.index("</head>")]
+        import re
+        meta_match = re.search(r'<meta name="description"[^>]*content="([^"]*)"', head)
+        og_match = re.search(r'og:description"[^>]*content="([^"]*)"', head)
+        assert meta_match and og_match
+        assert meta_match.group(1) == og_match.group(1)
+
+    def test_twitter_description_matches_meta(self):
+        """Twitter description must match meta description."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        head = html[:html.index("</head>")]
+        import re
+        meta_match = re.search(r'<meta name="description"[^>]*content="([^"]*)"', head)
+        tw_match = re.search(r'twitter:description" content="([^"]*)"', head)
+        assert meta_match and tw_match
+        assert meta_match.group(1) == tw_match.group(1)
+
+    def test_twitter_title_matches_og(self):
+        """Twitter title must match OG title."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        head = html[:html.index("</head>")]
+        import re
+        og_match = re.search(r'og:title" content="([^"]*)"', head)
+        tw_match = re.search(r'twitter:title" content="([^"]*)"', head)
+        assert og_match and tw_match
+        assert og_match.group(1) == tw_match.group(1)
+
+    def test_no_pob_in_metadata(self):
+        """No Proof of Benefit language in any metadata."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        head = html[:html.index("</head>")]
+        assert "Proof of Benefit" not in head
+
+    def test_no_securities_in_metadata(self):
+        """No securities-style language in metadata."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        head = html[:html.index("</head>")]
+        assert "21M tokens" not in head
+        assert "backed by BTC" not in head
+        assert "tokenomics" not in head.lower()
+
+    def test_og_image_uses_logo(self):
+        """OG image must reference the logo asset."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        import re
+        match = re.search(r'og:image" content="([^"]*)"', html)
+        assert match
+        assert "logo-dog.png" in match.group(1)
+
+    def test_canonical_url_present(self):
+        """Canonical URL must be present."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert 'rel="canonical"' in html
+        assert "foundups.com" in html

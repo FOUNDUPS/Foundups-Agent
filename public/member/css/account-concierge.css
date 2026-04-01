@@ -368,6 +368,26 @@
   white-space: nowrap;
 }
 
+/* Red Dog context briefing */
+.reddog-context-briefing {
+  padding: 0.5rem 0.6rem;
+  margin-bottom: 0.5rem;
+  border-radius: 10px;
+  background: rgba(141, 113, 255, 0.06);
+  border: 1px solid rgba(141, 113, 255, 0.12);
+}
+.reddog-briefing-line {
+  font-size: 0.78rem;
+  color: rgba(228, 226, 236, 0.7);
+  line-height: 1.55;
+  margin: 0;
+  padding: 0.1rem 0;
+}
+.reddog-briefing-line:first-child {
+  font-weight: 600;
+  color: rgba(228, 226, 236, 0.85);
+}
+
 @media (min-width: 640px) {
   .account-plane {
     max-width: 28rem;

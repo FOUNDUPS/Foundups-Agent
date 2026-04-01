@@ -421,6 +421,119 @@
     });
   }
 
+  // ---- context briefing ----
+  var briefingEl = null;
+
+  function gatherContext() {
+    var ctx = {
+      planeOpen: isOpen,
+      modesVisible: modesVisible,
+      currentMode: currentMode,
+      tileCount: 0,
+      readyCount: 0,
+      inviteText: '',
+      projection: null,
+      inspecting: null,
+      inspectorOpen: false,
+      viewOpen: false,
+      viewIndex: -1
+    };
+
+    // DOM-derived counts from loaded plane data
+    var grid = plane.querySelector('[data-account-foundups-grid]');
+    ctx.tileCount = grid ? grid.querySelectorAll('.account-foundup-tile').length : 0;
+    ctx.readyCount = grid ? grid.querySelectorAll('.status-ready').length : 0;
+    var countEl = plane.querySelector('[data-invite-count]');
+    ctx.inviteText = countEl ? countEl.textContent : '';
+
+    // Mall tile field signals (B's public API, read-only)
+    if (window.mallTileField) {
+      if (typeof window.mallTileField.getProjection === 'function') {
+        ctx.projection = window.mallTileField.getProjection();
+      }
+      if (typeof window.mallTileField.getInspectingIndex === 'function') {
+        ctx.inspecting = window.mallTileField.getInspectingIndex();
+      }
+      if (typeof window.mallTileField.isInspectorOpen === 'function') {
+        ctx.inspectorOpen = window.mallTileField.isInspectorOpen();
+      }
+    }
+
+    // Mall planes signals (B's public API, read-only)
+    if (window.mallPlanes) {
+      if (typeof window.mallPlanes.isOpen === 'function') {
+        ctx.viewOpen = window.mallPlanes.isOpen();
+      }
+      if (typeof window.mallPlanes.getActiveIndex === 'function') {
+        ctx.viewIndex = window.mallPlanes.getActiveIndex();
+      }
+    }
+
+    return ctx;
+  }
+
+  function renderBriefing() {
+    if (!briefingEl) return;
+    var ctx = gatherContext();
+    var lines = [];
+
+    // FoundUp summary
+    if (ctx.tileCount > 0) {
+      var line = ctx.tileCount + ' FoundUp' + (ctx.tileCount !== 1 ? 's' : '');
+      if (ctx.readyCount > 0) line += ' \u00b7 ' + ctx.readyCount + ' ready';
+      lines.push(line);
+    } else {
+      lines.push('No FoundUps loaded');
+    }
+
+    // Invite count
+    if (ctx.inviteText) {
+      lines.push('Invites: ' + ctx.inviteText);
+    }
+
+    // Projection mode
+    if (ctx.projection && ctx.projection !== 'default') {
+      lines.push('Sorted: ' + ctx.projection);
+    }
+
+    // Active inspection
+    if (ctx.inspectorOpen && ctx.inspecting !== null) {
+      lines.push('Inspecting tile #' + (ctx.inspecting + 1));
+    }
+
+    // FoundUp view plane
+    if (ctx.viewOpen && ctx.viewIndex >= 0) {
+      lines.push('Viewing FoundUp #' + (ctx.viewIndex + 1));
+    }
+
+    briefingEl.innerHTML = lines.map(function (l) {
+      return '<p class="reddog-briefing-line">' + esc(l) + '</p>';
+    }).join('');
+  }
+
+  function injectBriefing() {
+    if (briefingEl) return;
+    var conciergeHost = plane.querySelector('[data-reddog-concierge]');
+    if (!conciergeHost) return;
+
+    briefingEl = document.createElement('div');
+    briefingEl.className = 'reddog-context-briefing';
+    briefingEl.setAttribute('data-reddog-briefing', '');
+    briefingEl.setAttribute('role', 'status');
+    briefingEl.setAttribute('aria-label', 'Red Dog context briefing');
+
+    // Insert at the top of the concierge section
+    conciergeHost.insertBefore(briefingEl, conciergeHost.firstChild);
+  }
+
+  // Refresh briefing every time plane opens
+  var _origOpenPlane = openPlane;
+  openPlane = function () {
+    _origOpenPlane();
+    injectBriefing();
+    renderBriefing();
+  };
+
   // ---- public API: window.redDog ----
   var api = {
     open: openPlane,
@@ -438,6 +551,8 @@
     setMode: executeMode,
     currentMode: function () { return currentMode; },
     isModeSheetOpen: function () { return modesVisible; },
+    getContext: gatherContext,
+    refreshBriefing: function () { injectBriefing(); renderBriefing(); },
 
     /** Populate identity block from Clerk user + Firestore data */
     setIdentity: function (clerkUser, userData) {
