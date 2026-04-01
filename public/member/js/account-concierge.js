@@ -609,6 +609,8 @@
       var creatorBtn = e.target.closest('[data-reddog-creator-search]');
       if (creatorBtn) {
         emitRedDogCommand('search_creator', {});
+        injectChannels();
+        toggleSearchInput(true);
         return;
       }
     });
@@ -707,6 +709,12 @@
     html += '<button class="reddog-tool-pill" data-reddog-search-mall type="button">Search Mall</button>';
     html += '</div>';
 
+    // Search input (hidden by default)
+    html += '<div class="reddog-search-container" data-reddog-search-container style="display:none;">';
+    html += '<input type="text" class="reddog-search-input" data-reddog-search-input placeholder="Search by creator..." autocomplete="off">';
+    html += '<button class="reddog-search-clear" data-reddog-search-clear type="button">&times;</button>';
+    html += '</div>';
+
     channelsEl.innerHTML = html;
 
     // Insert after AI tools, before options
@@ -746,12 +754,67 @@
 
       if (e.target.closest('[data-reddog-search-mall]')) {
         emitRedDogCommand('open_search_mall', {});
-        // Search Mall scope not yet landed by B — emit command only
+        toggleSearchInput(true);
+        return;
+      }
+
+      if (e.target.closest('[data-reddog-search-clear]')) {
+        clearSearch();
         return;
       }
     });
 
+    // Search input handler
+    var searchInput = channelsEl.querySelector('[data-reddog-search-input]');
+    if (searchInput) {
+      searchInput.addEventListener('input', function (e) {
+        var query = e.target.value.trim();
+        if (window.mallTileField && typeof window.mallTileField.searchByCreator === 'function') {
+          if (query.length > 0) {
+            window.mallTileField.searchByCreator(query);
+          } else {
+            window.mallTileField.clearFieldScope();
+          }
+        }
+      });
+
+      searchInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          clearSearch();
+        }
+      });
+    }
+
     refreshChannelsUI();
+  }
+
+  /**
+   * Toggle search input visibility
+   * @param {boolean} show - true to show, false to hide
+   */
+  function toggleSearchInput(show) {
+    var container = document.querySelector('[data-reddog-search-container]');
+    var input = document.querySelector('[data-reddog-search-input]');
+    if (container) {
+      container.style.display = show ? 'flex' : 'none';
+      if (show && input) {
+        input.focus();
+      }
+    }
+  }
+
+  /**
+   * Clear search and hide input
+   */
+  function clearSearch() {
+    var input = document.querySelector('[data-reddog-search-input]');
+    if (input) {
+      input.value = '';
+    }
+    toggleSearchInput(false);
+    if (window.mallTileField && typeof window.mallTileField.clearFieldScope === 'function') {
+      window.mallTileField.clearFieldScope();
+    }
   }
 
   // ---- context briefing ----
@@ -1071,8 +1134,16 @@
     },
     openSearchMall: function () {
       emitRedDogCommand('open_search_mall', {});
-      // Search Mall scope not yet landed by B — emit command only
+      injectChannels();
+      toggleSearchInput(true);
     },
+    searchByCreator: function (query) {
+      emitRedDogCommand('search_creator', { query: query });
+      if (window.mallTileField && typeof window.mallTileField.searchByCreator === 'function') {
+        window.mallTileField.searchByCreator(query);
+      }
+    },
+    clearSearch: clearSearch,
 
     /** Populate identity block from Clerk user + Firestore data */
     setIdentity: function (clerkUser, userData) {

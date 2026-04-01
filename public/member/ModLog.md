@@ -1,5 +1,52 @@
 # Member Area Module Change Log
 
+## [2026-04-02] Search Mall Concierge Wiring Phase 1 (Worker B, WSP_97)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker B
+**Type**: Feature (UI Wiring)
+**Slice**: `search_mall_concierge_wiring_phase1`
+**Spec**: WSP_97
+
+**Files Modified**:
+- `public/member/js/account-concierge.js` — Search input UI, wiring to field scope APIs
+- `public/member/css/account-concierge.css` — Search input styling
+- `public/member/tests/test_account_concierge.py` — 13 new Search Mall wiring tests
+
+**UI Added**:
+```html
+<!-- Search input (hidden by default, shown on Search Mall click) -->
+<div class="reddog-search-container" data-reddog-search-container>
+  <input type="text" class="reddog-search-input" data-reddog-search-input placeholder="Search by creator...">
+  <button class="reddog-search-clear" data-reddog-search-clear>&times;</button>
+</div>
+```
+
+**Functions Added**:
+- `toggleSearchInput(show)` — Show/hide search input
+- `clearSearch()` — Clear input and reset field scope
+
+**Wiring**:
+| Button/Input | Wires To |
+|--------------|----------|
+| Search Mall button | `toggleSearchInput(true)` → shows input |
+| Search input (typing) | `mallTileField.searchByCreator(query)` |
+| Clear button | `clearSearch()` → `mallTileField.clearFieldScope()` |
+| Escape key | `clearSearch()` |
+| `redDog.openSearchMall()` | `toggleSearchInput(true)` |
+
+**CSS Added**:
+- `.reddog-search-container` — flex container with rounded border
+- `.reddog-search-input` — 44px min-height, transparent background
+- `.reddog-search-clear` — 44px circular button
+
+**Gaps Closed**:
+- G-01: Search Mall button now wired to searchByCreator() ✓
+- G-02: Creator search pill now wired ✓
+
+**Tests**: 857 passed (13 new Search Mall wiring tests)
+
+---
+
 ## [2026-04-02] Search Mall Projection Phase 1 (Worker B, WSP_97)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B

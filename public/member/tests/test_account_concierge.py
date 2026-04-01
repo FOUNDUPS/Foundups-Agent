@@ -254,3 +254,84 @@ class TestNoRegression:
     def test_swipe_instructions_present(self):
         content = INDEX_HTML.read_text(encoding="utf-8")
         assert "Swipe" in content, "Swipe instructions must be present"
+
+
+# -- 7. Search Mall Concierge Wiring --
+
+
+class TestSearchMallWiring:
+    """Test Search Mall button wiring to field scope APIs."""
+
+    def test_search_mall_button_exists(self):
+        """Search Mall button exists in concierge."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert 'data-reddog-search-mall' in content
+
+    def test_search_input_container_created(self):
+        """Search input container is created."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert 'data-reddog-search-container' in content
+
+    def test_search_input_created(self):
+        """Search input field is created."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert 'data-reddog-search-input' in content
+
+    def test_search_clear_button_created(self):
+        """Search clear button is created."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert 'data-reddog-search-clear' in content
+
+    def test_toggle_search_input_function(self):
+        """toggleSearchInput function exists."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert 'function toggleSearchInput' in content
+
+    def test_clear_search_function(self):
+        """clearSearch function exists."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert 'function clearSearch' in content
+
+    def test_search_wires_to_searchByCreator(self):
+        """Search input wires to mallTileField.searchByCreator."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert 'searchByCreator' in content
+
+    def test_clear_wires_to_clearFieldScope(self):
+        """Clear search wires to mallTileField.clearFieldScope."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert 'clearFieldScope' in content
+
+    def test_open_search_mall_api_wired(self):
+        """openSearchMall API calls toggleSearchInput."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        # Find the openSearchMall function block
+        import re
+        # Match the function with its body (may span multiple lines)
+        match = re.search(r'openSearchMall:\s*function\s*\(\s*\)\s*\{[\s\S]*?toggleSearchInput', content)
+        assert match, "openSearchMall must call toggleSearchInput"
+
+
+class TestSearchMallCSS:
+    """Test Search Mall CSS styling."""
+
+    def test_search_container_styles(self):
+        """Search container has flex layout."""
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert '.reddog-search-container' in content
+
+    def test_search_input_styles(self):
+        """Search input has styling."""
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert '.reddog-search-input' in content
+
+    def test_search_clear_styles(self):
+        """Search clear button has styling."""
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert '.reddog-search-clear' in content
+
+    def test_search_input_touch_target(self):
+        """Search input has 44px min-height for WCAG touch target."""
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        # Check for min-height: 44px in search input
+        assert 'min-height: 44px' in content
