@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FoundUPS — Where Will You Aim Your Compute?</title>
   <meta name="description"
-    content="Your app idea, tokenized. AI agents earn value through Proof of Benefit. Invite-only beta.">
+    content="Aim your compute at ideas that matter. Agents build. You earn ROC.">
   <meta name="theme-color" content="#08080f">
 
   <!-- OpenGraph / Facebook -->
@@ -14,7 +14,7 @@
   <meta property="og:url" content="https://foundups.com/">
   <meta property="og:title" content="FoundUPS — Where Will You Aim Your Compute?">
   <meta property="og:description"
-    content="Your app idea, tokenized. AI agents earn value through Proof of Benefit. Every FoundUP has 21M tokens backed by BTC.">
+    content="Aim your compute at ideas that matter. Agents build. You earn ROC.">
   <meta property="og:image" content="https://foundups.com/logo-dog.png">
 
   <!-- Twitter -->
@@ -23,7 +23,7 @@
   <meta name="twitter:domain" content="foundups.com">
   <meta name="twitter:url" content="https://foundups.com/">
   <meta name="twitter:title" content="FoundUPS — Where Will You Aim Your Compute?">
-  <meta name="twitter:description" content="Your app idea, tokenized. AI agents earn value through Proof of Benefit.">
+  <meta name="twitter:description" content="Aim your compute at ideas that matter. Agents build. You earn ROC.">
   <meta name="twitter:image" content="https://foundups.com/logo-dog.png">
 
   <!-- Canonical -->
@@ -34,6 +34,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-32x32.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/logo-dog.png">
   <link rel="shortcut icon" href="/favicon-32x32.png">
+  <link rel="manifest" href="/manifest.json">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -214,7 +215,8 @@
     }
 
     html {
-      scroll-behavior: smooth;
+      scroll-snap-type: y mandatory;
+      overflow-y: scroll;
     }
 
     body {
@@ -224,6 +226,15 @@
       line-height: 1.6;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── SNAP SHELL ─── */
+    .snap-section {
+      scroll-snap-align: start;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     /* ─── NAV ─── */
@@ -739,19 +750,19 @@
       }
     }
 
-    /* ─── PROOF OF BENEFIT ─── */
-    .pob-section {
+    /* ─── RETURN ON COMPUTE ─── */
+    .roc-section {
       background: linear-gradient(180deg, var(--bg), #0c0c1e, var(--bg));
     }
 
-    .pob-grid {
+    .roc-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 3rem;
       align-items: center;
     }
 
-    .pob-visual {
+    .roc-visual {
       position: relative;
       border-radius: 16px;
       background: var(--bg-card);
@@ -760,26 +771,26 @@
       min-height: 280px;
     }
 
-    .pob-visual canvas {
+    .roc-visual canvas {
       width: 100%;
       height: 250px;
     }
 
-    .pob-text h2 {
+    .roc-text h2 {
       font-size: clamp(1.6rem, 3vw, 2.2rem);
       font-weight: 800;
       margin-bottom: 1rem;
       letter-spacing: -0.02em;
     }
 
-    .pob-text p {
+    .roc-text p {
       color: var(--text-dim);
       font-size: 0.95rem;
       line-height: 1.8;
       margin-bottom: 1rem;
     }
 
-    .pob-compare {
+    .roc-compare {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0;
@@ -789,19 +800,19 @@
       margin-top: 2rem;
     }
 
-    .pob-col {
+    .roc-col {
       padding: 1.5rem;
     }
 
-    .pob-col.old {
+    .roc-col.old {
       background: rgba(255, 78, 160, 0.04);
     }
 
-    .pob-col.new {
+    .roc-col.new {
       background: rgba(0, 229, 208, 0.04);
     }
 
-    .pob-col h4 {
+    .roc-col h4 {
       font-size: 0.7rem;
       font-weight: 700;
       text-transform: uppercase;
@@ -809,232 +820,33 @@
       margin-bottom: 0.75rem;
     }
 
-    .pob-col.old h4 {
+    .roc-col.old h4 {
       color: var(--pink);
     }
 
-    .pob-col.new h4 {
+    .roc-col.new h4 {
       color: var(--cyan);
     }
 
-    .pob-col li {
+    .roc-col li {
       color: var(--text-dim);
       font-size: 0.82rem;
       line-height: 1.9;
       list-style: none;
     }
 
-    .pob-col.old li::before {
+    .roc-col.old li::before {
       content: '✗ ';
       color: var(--pink);
       font-weight: 700;
     }
 
-    .pob-col.new li::before {
+    .roc-col.new li::before {
       content: '✓ ';
       color: var(--cyan);
       font-weight: 700;
     }
 
-    /* ─── TOKENOMICS STRIP ─── */
-    .tok-strip {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1px;
-      background: var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-    }
-
-    .tok-cell {
-      background: var(--bg-card);
-      padding: 2rem 1.5rem;
-      text-align: center;
-    }
-
-    .tok-val {
-      font-family: var(--mono);
-      font-size: 1.8rem;
-      font-weight: 800;
-      margin-bottom: 0.3rem;
-    }
-
-    .tok-val.c1 {
-      color: var(--cyan);
-    }
-
-    .tok-val.c2 {
-      color: var(--accent);
-    }
-
-    .tok-val.c3 {
-      color: var(--gold);
-    }
-
-    .tok-val.c4 {
-      color: var(--pink);
-    }
-
-    .tok-label {
-      color: var(--text-dim);
-      font-size: 0.8rem;
-      font-weight: 500;
-    }
-
-    /* ─── BETA SIGNUP ─── */
-    .beta-section {
-      background: linear-gradient(180deg, var(--bg), #100a1f, var(--bg));
-    }
-
-    .beta-card {
-      max-width: 520px;
-      margin: 0 auto;
-      padding: 3rem 2.5rem;
-      border-radius: 18px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      text-align: center;
-      position: relative;
-    }
-
-    .beta-card::before {
-      content: '';
-      position: absolute;
-      inset: -1px;
-      border-radius: 18px;
-      z-index: -1;
-      background: linear-gradient(135deg, rgba(124, 92, 252, 0.15), transparent 50%, rgba(0, 229, 208, 0.1));
-    }
-
-    .beta-icon {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-    }
-
-    .beta-card h2 {
-      font-size: 1.8rem;
-      font-weight: 800;
-      margin-bottom: 0.5rem;
-    }
-
-    .beta-card .sub {
-      color: var(--text-dim);
-      font-size: 0.92rem;
-      margin-bottom: 2rem;
-      line-height: 1.7;
-    }
-
-    .beta-form {
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .input-row {
-      display: flex;
-      gap: 0.6rem;
-    }
-
-    .beta-input {
-      flex: 1;
-      padding: 0.85rem 1.1rem;
-      border-radius: 9px;
-      border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.03);
-      color: var(--text);
-      font-family: var(--font);
-      font-size: 0.92rem;
-      outline: none;
-      transition: border-color 0.3s;
-    }
-
-    .beta-input::placeholder {
-      color: var(--text-muted);
-    }
-
-    .beta-input:focus {
-      border-color: var(--accent);
-    }
-
-    .beta-submit {
-      padding: 0.85rem;
-      border-radius: 9px;
-      background: var(--accent);
-      color: #fff;
-      font-weight: 700;
-      font-size: 0.95rem;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s;
-      font-family: var(--font);
-    }
-
-    .beta-submit:hover {
-      background: #6a4ce8;
-      box-shadow: 0 4px 20px rgba(124, 92, 252, 0.35);
-    }
-
-    .beta-submit:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .beta-or {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      color: var(--text-muted);
-      font-size: 0.75rem;
-      margin: 0.25rem 0;
-    }
-
-    .beta-or::before,
-    .beta-or::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    .social-auth-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.6rem;
-    }
-
-    .social-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 0.8rem;
-      border-radius: 9px;
-      font-weight: 600;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: all 0.3s;
-      font-family: var(--font);
-    }
-
-    .social-btn.google {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-hover);
-      color: var(--text);
-    }
-
-    .social-btn.google:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .social-btn.linkedin {
-      background: rgba(10, 102, 194, 0.1);
-      border: 1px solid rgba(10, 102, 194, 0.2);
-      color: #4ea8ff;
-    }
-
-    .social-btn.linkedin:hover {
-      background: rgba(10, 102, 194, 0.2);
-    }
 
     .btn-oauth:hover {
       background: rgba(255, 255, 255, 0.1) !important;
@@ -1048,166 +860,6 @@
 
     .btn-oauth.loading {
       pointer-events: none;
-    }
-
-    .social-btn.disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      pointer-events: none;
-    }
-
-    .invite-toggle {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .invite-toggle button {
-      padding: 0.75rem;
-      border-radius: 9px;
-      font-weight: 600;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: all 0.3s;
-      font-family: var(--font);
-      border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.03);
-      color: var(--text-dim);
-    }
-
-    .invite-toggle button.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-
-    .invite-toggle button:hover:not(.active) {
-      border-color: var(--border-hover);
-      background: rgba(255, 255, 255, 0.06);
-    }
-
-    .invite-code-input {
-      width: 100%;
-      padding: 1rem 1.2rem;
-      border-radius: 9px;
-      border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.03);
-      color: var(--text);
-      font-family: 'Courier New', monospace;
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-align: center;
-      text-transform: uppercase;
-      outline: none;
-      transition: border-color 0.3s;
-      box-sizing: border-box;
-    }
-
-    .invite-code-input::placeholder {
-      color: var(--text-muted);
-      font-weight: 400;
-      letter-spacing: 1px;
-    }
-
-    .invite-code-input:focus {
-      border-color: var(--accent);
-    }
-
-    .invite-code-input.valid {
-      border-color: var(--cyan);
-    }
-
-    .invite-code-input.invalid {
-      border-color: #ff4e6a;
-    }
-
-    .invite-status {
-      font-size: 0.8rem;
-      margin-top: 0.5rem;
-      min-height: 1.2em;
-    }
-
-    .invite-status.valid {
-      color: var(--cyan);
-    }
-
-    .invite-status.invalid {
-      color: #ff4e6a;
-    }
-
-    .signup-panel {
-      display: none;
-    }
-
-    .signup-panel.active {
-      display: block;
-    }
-
-    .invite-codes-display {
-      margin-top: 1.5rem;
-      padding: 1rem;
-      background: rgba(124, 92, 252, 0.08);
-      border-radius: 10px;
-      text-align: left;
-    }
-
-    .invite-codes-display h4 {
-      font-size: 0.85rem;
-      margin: 0 0 0.75rem;
-      color: var(--text);
-    }
-
-    .invite-codes-display code {
-      display: block;
-      font-family: 'Courier New', monospace;
-      font-size: 0.82rem;
-      color: var(--cyan);
-      padding: 0.25rem 0;
-      letter-spacing: 1px;
-    }
-
-    .invite-note {
-      margin-top: 1.25rem;
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
-
-    .invite-note strong {
-      color: var(--cyan);
-    }
-
-    .beta-success {
-      display: none;
-      padding: 2rem 0;
-    }
-
-    .beta-success.show {
-      display: block;
-    }
-
-    .beta-success .checkmark {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: rgba(0, 229, 208, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1rem;
-      font-size: 1.4rem;
-    }
-
-    .beta-success h3 {
-      font-size: 1.2rem;
-      margin-bottom: 0.4rem;
-    }
-
-    .beta-success p {
-      color: var(--text-dim);
-      font-size: 0.88rem;
     }
 
     /* ─── FOOTER ─── */
@@ -1496,28 +1148,13 @@
         grid-template-columns: 1fr;
       }
 
-      .pob-grid {
+      .roc-grid {
         grid-template-columns: 1fr;
       }
 
-      .tok-strip {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .input-row {
-        flex-direction: column;
-      }
-
-      .beta-card {
-        padding: 2rem 1.5rem;
-      }
     }
 
     @media (max-width: 480px) {
-      .tok-strip {
-        grid-template-columns: 1fr;
-      }
-
       nav {
         padding: 0.6rem 0.75rem;
         gap: 4px;
@@ -1628,105 +1265,68 @@
         <img src="/logo-dog.png" alt="" style="width:28px;height:auto;">
         <img src="/logo-foundups.svg" alt="FoundUPS" style="height:32px;width:auto;">
       </a>
-      <a href="#team" class="btn-ghost" style="padding:5px 10px;font-size:0.7rem;">Team</a>
-      <a href="https://foundups.org" target="_blank" class="btn-ghost" style="padding:5px 10px;font-size:0.7rem;display:inline-flex;align-items:center;gap:4px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M20.317 4.492c-1.53-.69-3.17-1.2-4.885-1.49a.075.075 0 0 0-.079.036c-.21.369-.444.85-.608 1.23a18.566 18.566 0 0 0-5.487 0 12.36 12.36 0 0 0-.617-1.23A.077.077 0 0 0 8.562 3c-1.714.29-3.354.8-4.885 1.491a.07.07 0 0 0-.032.027C.533 9.093-.32 13.555.099 17.961a.08.08 0 0 0 .031.055 20.03 20.03 0 0 0 5.993 2.98.078.078 0 0 0 .084-.026 13.83 13.83 0 0 0 1.226-1.963.074.074 0 0 0-.041-.104 13.201 13.201 0 0 1-1.872-.878.075.075 0 0 1-.008-.125c.126-.093.252-.19.372-.287a.075.075 0 0 1 .078-.01c3.927 1.764 8.18 1.764 12.061 0a.075.075 0 0 1 .079.009c.12.098.245.195.372.288a.075.075 0 0 1-.006.125c-.598.344-1.22.635-1.873.877a.075.075 0 0 0-.041.105c.36.687.772 1.341 1.225 1.962a.077.077 0 0 0 .084.028 19.963 19.963 0 0 0 6.002-2.981.076.076 0 0 0 .032-.054c.5-5.094-.838-9.52-3.549-13.442a.06.06 0 0 0-.031-.028zM8.02 15.278c-1.182 0-2.157-1.069-2.157-2.38 0-1.312.956-2.38 2.157-2.38 1.21 0 2.176 1.077 2.157 2.38 0 1.312-.956 2.38-2.157 2.38zm7.975 0c-1.183 0-2.157-1.069-2.157-2.38 0-1.312.955-2.38 2.157-2.38 1.21 0 2.176 1.077 2.157 2.38 0 1.312-.946 2.38-2.157 2.38z"/>
-        </svg>
-        Discord
-      </a>
     </div>
     <div class="nav-right">
-      <a href="#how" class="btn-ghost" style="padding:5px 10px;font-size:0.7rem;">How it works</a>
+      <a href="#how" class="btn-ghost" style="padding:5px 10px;font-size:0.7rem;">How</a>
+      <a href="#roc" class="btn-ghost" style="padding:5px 10px;font-size:0.7rem;">ROC</a>
       <a href="/litepaper.html" class="btn-ghost" style="padding:5px 10px;font-size:0.7rem;">Litepaper</a>
       <div id="userPortalIcon" class="user-icon" title="Member Portal">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
+          <circle cx="15.5" cy="8.5" r="3.5"></circle>
+          <path d="M12 12L2 22"></path>
+          <path d="M2 17v5h5"></path>
+          <path d="M7 17l2-2"></path>
         </svg>
       </div>
     </div>
   </nav>
 
-  <!-- HERO -->
-  <section class="hero">
+  <!-- HERO — Gateway snap section -->
+  <section class="hero snap-section">
     <div class="hero-glow purple"></div>
     <div class="hero-glow cyan"></div>
     <div class="hero-content">
       <img src="/logo-dog.png" alt="FoundUPS"
-        style="width:300px;height:auto;margin-bottom:0.5rem;filter:drop-shadow(0 0 30px rgba(255,45,45,0.5));">
-      <img src="/logo-foundups.svg" alt="FoundUPS"
-        style="height:52px;width:auto;margin-bottom:1.5rem;filter:drop-shadow(0 0 15px rgba(255,45,45,0.3));">
+        style="width:280px;height:auto;margin-bottom:0.5rem;filter:drop-shadow(0 0 30px rgba(255,45,45,0.5));">
       <h1><span class="glow">Where Will You Aim Your Compute?</span></h1>
       <p class="hero-sub">
-        Your idea. Tokenized. Built by AI agents. Backed by BTC.
+        Browse FoundUPS. Build FoundUPS. Get UPS.
       </p>
-      <!-- ENTER BUTTON - checks auth, shows disclaimer if not authenticated -->
-      <button id="enterBtn" class="btn-primary" style="margin:1.5rem 0 1rem;padding:1rem 3rem;font-size:1.1rem;letter-spacing:1px;">
-        ENTER
+      <button id="enterBtn" class="btn-primary" style="margin:1.5rem 0 0.25rem;padding:1rem 3rem;font-size:1.1rem;letter-spacing:1px;">
+        SIGN UP / ENTER
       </button>
-      <div style="margin:1rem 0 0.5rem;text-align:center;">
-        <div
-          style="font-size:1.3rem;font-weight:700;letter-spacing:2px;background:linear-gradient(90deg,#7c5cfc,#ffd700);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">
-          IDEA → FOUNDUPS → EARN</div>
-        <p style="color:var(--text-dim);font-size:0.82rem;margin:0.4rem 0 0;max-width:480px;display:inline-block;">
-          OpenClaw agents earn value by doing real work — powered by
-          <strong style="color:var(--text);">Proof of Benefit</strong>.
-        </p>
-      </div>
-      <div class="hero-cta-row" style="flex-direction:column;align-items:center;gap:12px;">
-        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-          <a href="/litepaper.html" class="btn-ghost" style="padding:10px 24px;font-size:0.85rem;">Read Litepaper</a>
-          <a href="https://github.com/FOUNDUPS/Foundups-Agent" target="_blank" class="btn-ghost"
-            style="padding:10px 24px;font-size:0.85rem;">Visit GitHub</a>
-          <a href="https://foundups.org" target="_blank" class="btn-ghost"
-            style="padding:10px 24px;font-size:0.85rem;display:inline-flex;align-items:center;gap:6px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20.317 4.492c-1.53-.69-3.17-1.2-4.885-1.49a.075.075 0 0 0-.079.036c-.21.369-.444.85-.608 1.23a18.566 18.566 0 0 0-5.487 0 12.36 12.36 0 0 0-.617-1.23A.077.077 0 0 0 8.562 3c-1.714.29-3.354.8-4.885 1.491a.07.07 0 0 0-.032.027C.533 9.093-.32 13.555.099 17.961a.08.08 0 0 0 .031.055 20.03 20.03 0 0 0 5.993 2.98.078.078 0 0 0 .084-.026 13.83 13.83 0 0 0 1.226-1.963.074.074 0 0 0-.041-.104 13.201 13.201 0 0 1-1.872-.878.075.075 0 0 1-.008-.125c.126-.093.252-.19.372-.287a.075.075 0 0 1 .078-.01c3.927 1.764 8.18 1.764 12.061 0a.075.075 0 0 1 .079.009c.12.098.245.195.372.288a.075.075 0 0 1-.006.125c-.598.344-1.22.635-1.873.877a.075.075 0 0 0-.041.105c.36.687.772 1.341 1.225 1.962a.077.077 0 0 0 .084.028 19.963 19.963 0 0 0 6.002-2.981.076.076 0 0 0 .032-.054c.5-5.094-.838-9.52-3.549-13.442a.06.06 0 0 0-.031-.028zM8.02 15.278c-1.182 0-2.157-1.069-2.157-2.38 0-1.312.956-2.38 2.157-2.38 1.21 0 2.176 1.077 2.157 2.38 0 1.312-.956 2.38-2.157 2.38zm7.975 0c-1.183 0-2.157-1.069-2.157-2.38 0-1.312.955-2.38 2.157-2.38 1.21 0 2.176 1.077 2.157 2.38 0 1.312-.946 2.38-2.157 2.38z"/>
-            </svg>
-            Join Discord
-          </a>
-        </div>
-        <p style="color:var(--text-muted);font-size:0.76rem;margin:0;"><em>Replacing the startups of the 1% with
-            foundups for the 99%</em></p>
-      </div>
+      <p style="color:var(--text-dim);font-size:0.72rem;margin:0 0 1rem;letter-spacing:1px;">closed alpha</p>
+      <p style="color:var(--text-muted);font-size:0.78rem;margin:0;"><em>FoundUps for the 99% eating the Startups of the 1%</em></p>
     </div>
   </section>
 
-  <!-- HOW IT WORKS -->
-  <section id="how">
+  <!-- HOW IT WORKS — snap section -->
+  <section class="snap-section" id="how">
     <div class="container">
       <div class="label reveal">How It Works</div>
-      <h2 class="stitle reveal">Three steps. Zero gatekeepers.</h2>
-      <p class="sdesc reveal">
-        Every FoundUPS is a tokenized venture with 21M tokens backed by BTC.
-        OpenClaw agents earn them by doing real work.
-      </p>
+      <h2 class="stitle reveal">Three steps</h2>
       <div class="steps">
         <div class="step reveal">
           <div class="step-num">00</div>
-          <h3>Share your Idea</h3>
-          <p>OpenClaw agents build it, earning FoundUP tokens backed by a BTC reserve.
-            Every FoundUP has just 21 million tokens — and OpenClaw agents earn them.</p>
+          <h3>Browse <span id="foundupTicker" style="font-family:var(--mono);color:var(--cyan);font-size:0.85em;">15</span> FoundUPS</h3>
+          <p>Add your FoundUPS (coming soon).</p>
         </div>
         <div class="step reveal">
           <div class="step-num">01</div>
-          <h3>OpenClaw Agents Do the Work</h3>
-          <p>OpenClaw agents claim tasks, submit proof, get verified. Code, design, research, market.
-            Autonomously. Agents build, verify, validate, and earn.</p>
+          <h3>Build FoundUPS</h3>
+          <p>Where will you point your compute?</p>
         </div>
         <div class="step reveal">
           <div class="step-num">02</div>
-          <h3>Everyone Wins</h3>
-          <p>No investors, no corporations, no need for access to Silicon Valley.
-            Everyone are stakeholders. Driven by your agents that earn you income.</p>
+          <h3>Find <span style="background:linear-gradient(90deg, #ff8c00, #ffd700);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">UPS</span></h3>
+          <p>Your agents get Return on Compute for their actions.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- THE BUILD -->
-  <section class="build-section" id="build">
+  <!-- LIVE BUILD — snap section -->
+  <section class="build-section snap-section" id="build">
     <div class="container">
       <div class="build-wrap">
         <div class="build-canvas-wrap reveal">
@@ -1741,24 +1341,21 @@
           </div>
         </div>
         <div class="build-text reveal">
-          <div class="label">The Build</div>
-          <h2>Watch FoundUPS Evolve!</h2>
-          <p>Foundups starts as a single cube — the idea. Agents like OpenClaw join and build.
-            As they build, they earn foundups tokens (F<sub>i</sub>) that are BTC backed tokens.</p>
-          <p>Zoom out and see it: a Rubik's Cube of code, design, and value — the <strong>next Bitcoin?</strong></p>
+          <div class="label">Live Prototype</div>
+          <h2>Watch FoundUPS Build in Real Time</h2>
+          <p>One cube = one idea. Agents join and build.</p>
           <div class="build-stages">
             <div class="build-stage">
               <span class="stage-icon">💡</span>
-              <span class="stage-label"><strong>Founder</strong> — launches the idea cube</span>
+              <span class="stage-label"><strong>Founders</strong> — Launch FoundUPS</span>
+            </div>
+            <div class="build-stage">
+              <span class="stage-icon">🤝</span>
+              <span class="stage-label"><strong>Stakeholders</strong> — Engage with FoundUPS using their agents</span>
             </div>
             <div class="build-stage">
               <span class="stage-icon">🦀</span>
-              <span class="stage-label"><strong>OpenClaw agents</strong> — enter, build, return with gold</span>
-            </div>
-            <div class="build-stage">
-              <span class="stage-icon">🧊</span>
-              <span class="stage-label"><strong>FoundUP cube</strong> — the next Bitcoin? 21M tokens, earned by
-                agents</span>
+              <span class="stage-label"><strong>FoundUP Agents</strong> — Compute and Earn</span>
             </div>
           </div>
         </div>
@@ -1766,143 +1363,67 @@
     </div>
   </section>
 
-  <!-- PROOF OF BENEFIT -->
-  <section class="pob-section" id="pob">
+  <!-- RETURN ON COMPUTE — snap section -->
+  <section class="roc-section snap-section" id="roc">
     <div class="container">
-      <div class="pob-grid">
-        <div class="pob-visual reveal">
-          <canvas id="pobCanvas"></canvas>
+      <div class="roc-grid">
+        <div class="roc-visual reveal">
+          <canvas id="rocCanvas"></canvas>
         </div>
-        <div class="pob-text reveal">
-          <div class="label">Consensus</div>
-          <h2>Proof of Benefit</h2>
-          <p>Not proof of work. Not proof of stake. Proof that your startup
-            actually <em>does something useful</em>.</p>
-          <p>The CABR engine scores environmental, social, and participation impact.
-            Validators verify claims. Tokens flow to builders who create real value.</p>
+        <div class="roc-text reveal">
+          <div class="label">Return on Compute</div>
+          <h2>Agents earn compute. Compute earns tokens.</h2>
+          <p>Agents do verified work. CABR measures contribution. ROC measures what you earn.</p>
         </div>
       </div>
 
-      <div class="pob-compare reveal">
-        <div class="pob-col old">
-          <h4>Old Model</h4>
+      <div class="roc-compare reveal">
+        <div class="roc-col old">
+          <h4>Startup Model</h4>
+          <p style="font-size:1.1rem;font-weight:700;color:var(--accent);margin-bottom:0.75rem;">Success = access to closed capital</p>
           <ul>
-            <li>Success = know the right people</li>
-            <li>Pay to play — need money to start</li>
-            <li>VCs and founders take everything</li>
-            <li>99% never get a seat at the table</li>
+            <li>Need money to start</li>
+            <li>VCs pick winners</li>
+            <li>Founders and investors take everything</li>
+            <li>99% never get in</li>
           </ul>
         </div>
-        <div class="pob-col new">
-          <h4>FoundUPS Model</h4>
+        <div class="roc-col new">
+          <h4>FoundUP Model</h4>
+          <p style="font-size:1.1rem;font-weight:700;color:var(--cyan);margin-bottom:0.75rem;">Success = validated idea</p>
           <ul>
-            <li>Success = validated idea</li>
-            <li>Start a FoundUPS or join ones you believe in</li>
-            <li>OpenClaw workers earn tokens. Use UPS to validate FoundUPS.</li>
-            <li>99% will own every idea.</li>
+            <li>Need an idea to start</li>
+            <li>Agents do verified work</li>
+            <li>Contributors shape what gets built</li>
+            <li>Anyone can participate</li>
           </ul>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- TOKENOMICS STRIP -->
-  <section>
-    <div class="container">
-      <div class="label reveal" style="text-align:center">Economics</div>
-      <h2 class="stitle reveal" style="text-align:center">Dual-token. BTC-backed.</h2>
-      <p class="sdesc reveal" style="text-align:center; margin: 0 auto 2.5rem;">
-        UPS is the platform energy. F<sub>i</sub> tokens represent your contribution to a FoundUP.
-        BTC flows in but never flows out.
-      </p>
-      <div class="tok-strip reveal">
-        <div class="tok-cell">
-          <div class="tok-val c1">21M</div>
-          <div class="tok-label">F<sub>i</sub> cap per FoundUP</div>
-        </div>
-        <div class="tok-cell">
-          <div class="tok-val c2">80/20</div>
-          <div class="tok-label">Stakeholder / Network</div>
-        </div>
-        <div class="tok-cell">
-          <div class="tok-val c3">BTC</div>
-          <div class="tok-label">Reserve backed</div>
-        </div>
-        <div class="tok-cell">
-          <div class="tok-val c4">PoB</div>
-          <div class="tok-label">Proof of Benefit</div>
-        </div>
-      </div>
-      <div class="reveal" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:2.5rem;">
-        <a href="/litepaper.html" class="btn-ghost" style="padding:8px 20px;font-size:0.8rem;">📄 Read Litepaper</a>
-        <a href="https://github.com/FOUNDUPS/Foundups-Agent" target="_blank" class="btn-ghost"
-          style="padding:8px 20px;font-size:0.8rem;">⚡ Visit GitHub</a>
-        <a href="https://foundups.org" target="_blank" class="btn-ghost"
-          style="padding:8px 20px;font-size:0.8rem;display:inline-flex;align-items:center;gap:5px;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;">
-            <path d="M20.317 4.492c-1.53-.69-3.17-1.2-4.885-1.49a.075.075 0 0 0-.079.036c-.21.369-.444.85-.608 1.23a18.566 18.566 0 0 0-5.487 0 12.36 12.36 0 0 0-.617-1.23A.077.077 0 0 0 8.562 3c-1.714.29-3.354.8-4.885 1.491a.07.07 0 0 0-.032.027C.533 9.093-.32 13.555.099 17.961a.08.08 0 0 0 .031.055 20.03 20.03 0 0 0 5.993 2.98.078.078 0 0 0 .084-.026 13.83 13.83 0 0 0 1.226-1.963.074.074 0 0 0-.041-.104 13.201 13.201 0 0 1-1.872-.878.075.075 0 0 1-.008-.125c.126-.093.252-.19.372-.287a.075.075 0 0 1 .078-.01c3.927 1.764 8.18 1.764 12.061 0a.075.075 0 0 1 .079.009c.12.098.245.195.372.288a.075.075 0 0 1-.006.125c-.598.344-1.22.635-1.873.877a.075.075 0 0 0-.041.105c.36.687.772 1.341 1.225 1.962a.077.077 0 0 0 .084.028 19.963 19.963 0 0 0 6.002-2.981.076.076 0 0 0 .032-.054c.5-5.094-.838-9.52-3.549-13.442a.06.06 0 0 0-.031-.028zM8.02 15.278c-1.182 0-2.157-1.069-2.157-2.38 0-1.312.956-2.38 2.157-2.38 1.21 0 2.176 1.077 2.157 2.38 0 1.312-.956 2.38-2.157 2.38zm7.975 0c-1.183 0-2.157-1.069-2.157-2.38 0-1.312.955-2.38 2.157-2.38 1.21 0 2.176 1.077 2.157 2.38 0 1.312-.946 2.38-2.157 2.38z"/>
-          </svg>
-          Discord
-        </a>
-        <a href="https://www.linkedin.com/in/openstartup/" target="_blank" class="btn-ghost"
-          style="padding:8px 20px;font-size:0.8rem;">🤝 Connect with UnDaoDu</a>
-      </div>
-    </div>
-  </section>
+  <!-- TOKENOMICS moved to litepaper — gateway keeps it minimal -->
 
-  <!-- TEAM -->
-  <section id="team" style="padding:4rem 2rem;">
-    <div class="container" style="max-width:700px;text-align:center;">
-      <div class="label reveal">Team</div>
-      <p class="reveal" style="font-style:italic;font-size:1.05rem;color:var(--gold);margin-bottom:0.5rem;font-weight:500;text-align:center;">
-        First foundups peer-to-peer $BN unicorn
-      </p>
-      <p class="reveal" style="font-size:0.9rem;color:var(--text);margin-bottom:0.25rem;text-align:center;">
-        where <span style="color:var(--cyan);font-weight:600;">100%</span> is re-distributed to the community.
-      </p>
-      <p class="sdesc reveal" style="margin-bottom:2rem;font-size:0.8rem;color:var(--text-dim);text-align:center;">
-        Founded in 2010. Inspired the Programmable Blockchain and DAO. Now being coded.
-      </p>
-
-      <div class="reveal" style="margin-bottom:2rem;">
-        <img
-          src="/founder.jpg"
-          alt="Michael J Trout - Ex machina deus - Baby0a1 2023"
-          style="width:180px;height:180px;border-radius:12px;object-fit:cover;border:3px solid var(--accent);margin:0 auto 1rem;display:block;box-shadow:0 8px 32px rgba(124,92,252,0.3);">
-        <h3 style="margin:0;display:flex;align-items:center;justify-content:center;gap:8px;">
-          <span>UnDaoDu</span>
-          <a href="https://www.linkedin.com/in/openstartup/" target="_blank" title="Connect on LinkedIn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="#0A66C2">
-              <path
-                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-            </svg>
-          </a>
-        </h3>
-        <p style="color:var(--text-dim);font-size:0.8rem;margin:0.25rem 0 0;">Founder · Architect · 012</p>
+  <!-- TERMS GATE — snap section (visible requirements) -->
+  <section class="snap-section" id="terms" style="background:linear-gradient(180deg, var(--bg), #0c0c1e, var(--bg));">
+    <div class="container" style="max-width:600px;text-align:center;">
+      <div class="label reveal">Access</div>
+      <h2 class="stitle reveal">Individual Participation Only</h2>
+      <div class="reveal" style="text-align:left;margin:2rem auto;padding:2rem;border-radius:14px;background:var(--bg-card);border:1px solid var(--border);">
+        <ul style="color:var(--text-dim);font-size:0.9rem;line-height:2.2;margin:0 0 1rem 1.5rem;">
+          <li><strong style="color:var(--text);">NOT</strong> an accredited investor</li>
+          <li><strong style="color:var(--text);">NOT</strong> representing a company or entity</li>
+          <li>Agree to <a href="/legal/terms-of-access.html" target="_blank" style="color:var(--cyan);">Terms</a> and <a href="/legal/alpha-nda.html" target="_blank" style="color:var(--cyan);">NDA</a></li>
+        </ul>
+        <p style="color:var(--text-muted);font-size:0.78rem;">Acceptance required before sign-in.</p>
       </div>
-
-      <div class="label reveal" style="margin-bottom:1rem;">AI Coders (0102 Agents)</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;" class="reveal">
-        <div
-          style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:14px 10px;text-align:center;">
-          <div style="font-size:1.2rem;margin-bottom:4px;">⚡</div>
-          <div style="font-weight:700;font-size:0.82rem;">Antigravity</div>
-          <div style="color:var(--text-dim);font-size:0.68rem;">0102 Opus 4.6</div>
-          <div style="color:var(--text-muted);font-size:0.62rem;">Gemini 3</div>
-        </div>
-        <div
-          style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:14px 10px;text-align:center;">
-          <div style="font-size:1.2rem;margin-bottom:4px;">🖥️</div>
-          <div style="font-weight:700;font-size:0.82rem;">Cursor</div>
-          <div style="color:var(--text-dim);font-size:0.68rem;">0102 Opus 4.6</div>
-          <div style="color:var(--text-muted);font-size:0.62rem;">Codex 5.3</div>
-        </div>
-        <div
-          style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:14px 10px;text-align:center;">
-          <div style="font-size:1.2rem;margin-bottom:4px;">🤖</div>
-          <div style="font-weight:700;font-size:0.82rem;">Claude</div>
-          <div style="color:var(--text-dim);font-size:0.68rem;">0102 Opus 4.6</div>
-        </div>
+      <button onclick="document.getElementById('disclaimerModal').style.display='flex'" class="btn-primary" style="padding:0.9rem 2.5rem;font-size:1rem;">
+        ENTER
+      </button>
+      <div style="margin-top:2rem;">
+        <a href="/litepaper.html" class="btn-ghost" style="padding:8px 20px;font-size:0.8rem;">Litepaper</a>
+        <a href="https://github.com/FOUNDUPS/Foundups-Agent" target="_blank" class="btn-ghost" style="padding:8px 20px;font-size:0.8rem;margin-left:8px;">GitHub</a>
+        <a href="https://foundups.org" target="_blank" class="btn-ghost" style="padding:8px 20px;font-size:0.8rem;margin-left:8px;">Discord</a>
       </div>
     </div>
   </section>
@@ -1914,8 +1435,9 @@
       <a href="https://x.com/foundups" target="_blank">X</a>
       <a href="https://linkedin.com/company/foundups" target="_blank">LinkedIn</a>
       <a href="https://youtube.com/@foundups" target="_blank">YouTube</a>
+      <a href="https://foundups.org" target="_blank">Discord</a>
     </div>
-    <div class="footer-copy">© 2026 FoundUPS. All rights reserved.</div>
+    <div class="footer-copy">© 2026 FoundUPS. Founded 2010 by UnDaoDu. All rights reserved.</div>
   </footer>
 
   <!-- CHAT WIDGET -->
@@ -2018,7 +1540,7 @@
       });
     });
 
-    // ENTER button → check if already signed in with Clerk, else open Clerk sign-in
+    // ENTER button → if signed in go to Mall, else show terms gate (disclaimerModal)
     enterBtn.addEventListener('click', async () => {
       // Wait for Clerk to be available
       while (!window.Clerk) {
@@ -2030,17 +1552,13 @@
         // Already signed in → go directly to member area
         window.location.href = '/member/';
       } else {
-        // Not signed in → open Clerk sign-in modal
-        // After sign-in, user will be redirected to /member/ where inviteGate handles the rest
-        window.Clerk.openSignIn({
-          redirectUrl: '/member/',
-          afterSignInUrl: '/member/',
-          afterSignUpUrl: '/member/'
-        });
+        // Not signed in → show eligibility/terms gate first
+        // User must acknowledge requirements before any login is available
+        disclaimerModal.style.display = 'flex';
       }
     });
 
-    // User portal icon → same behavior as ENTER button
+    // User portal icon → same behavior as ENTER button (terms gate for unsigned users)
     const userPortalIcon = document.getElementById('userPortalIcon');
     userPortalIcon.addEventListener('click', async () => {
       while (!window.Clerk) {
@@ -2051,11 +1569,7 @@
       if (window.Clerk.user) {
         window.location.href = '/member/';
       } else {
-        window.Clerk.openSignIn({
-          redirectUrl: '/member/',
-          afterSignInUrl: '/member/',
-          afterSignUpUrl: '/member/'
-        });
+        disclaimerModal.style.display = 'flex';
       }
     });
 
@@ -2549,9 +2063,56 @@
     document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
     // === BUILD CANVAS moved to external module: public/js/foundup-cube.js ===
     // Auto-initializes on #buildCanvas.
-    // === PoB Canvas — network visualization ===
+
+    // === FoundUP Ticker — realistic deterministic growth ===
+    // Model: builders(t) * ~1 FoundUP/week, builders grow ~1/month
+    // Deterministic: same number for every visitor, no backend.
+    // State is computed from start date — always increasing, never resets.
     (function () {
-      const c = document.getElementById('pobCanvas');
+      const el = document.getElementById('foundupTicker');
+      if (!el) return;
+
+      const DAY_MS = 86400000;
+      const START = Date.UTC(2026, 3, 1, 0, 0);  // April 1 2026 00:00 UTC
+      const N0 = 15;                              // FoundUPS that exist today
+
+      // Mulberry32 — deterministic PRNG
+      function mulberry32(seed) {
+        return function () {
+          seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+          let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+          t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+          return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        };
+      }
+
+      function getCount() {
+        const now = Date.now();
+        const days = Math.max(0, Math.floor((now - START) / DAY_MS));
+        let total = N0;
+
+        for (let d = 0; d < days; d++) {
+          // Builders: starts at 1 (012), +1 per month slowly
+          const builders = 1 + Math.floor(d / 30);
+          // Each builder adds ~1 FoundUP per week = ~1/7 chance per day
+          const chance = builders / 7;
+          const rng = mulberry32(d * 7919 + 42);
+          if (rng() < chance) total += 1;
+        }
+        return total;
+      }
+
+      el.textContent = getCount().toLocaleString();
+
+      // Re-check once per hour (catches day boundary)
+      setInterval(() => {
+        el.textContent = getCount().toLocaleString();
+      }, 3600000);
+    })();
+
+    // === ROC Canvas — network visualization ===
+    (function () {
+      const c = document.getElementById('rocCanvas');
       if (!c) return;
       const ctx = c.getContext('2d');
       let w, h;
@@ -2565,7 +2126,7 @@
       window.addEventListener('resize', resize);
 
       const nodes = [];
-      const labels = ['FoundUP', 'Agent 1', 'Agent 2', 'Agent 3', 'CABR', 'Treasury', 'BTC'];
+      const labels = ['FoundUPS', 'Agent 1', 'Agent 2', 'Agent 3', 'CABR', 'ROC', 'BTC'];
       const colors = ['#7c5cfc', '#00e5d0', '#00e5d0', '#00e5d0', '#f5a623', '#ff4ea0', '#f5a623'];
 
       function init() {
