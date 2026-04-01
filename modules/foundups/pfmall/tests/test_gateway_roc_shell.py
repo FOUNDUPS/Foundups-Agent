@@ -338,3 +338,31 @@ class TestPWAPhase1:
         """Service worker must define a versioned cache name."""
         sw = SW.read_text(encoding="utf-8")
         assert "CACHE_NAME" in sw
+
+    def test_install_banner_exists(self):
+        """Install banner element must exist in gateway."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert 'id="installBanner"' in html
+
+    def test_install_button_exists(self):
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert 'id="installBtn"' in html
+
+    def test_install_dismiss_exists(self):
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert 'id="installDismiss"' in html
+
+    def test_beforeinstallprompt_captured(self):
+        """Gateway must capture beforeinstallprompt event."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "beforeinstallprompt" in html
+
+    def test_install_does_not_force_prompt(self):
+        """Install must check localStorage before showing banner."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "installDismissed" in html
+
+    def test_appinstalled_hides_banner(self):
+        """Banner must hide on appinstalled event."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "appinstalled" in html

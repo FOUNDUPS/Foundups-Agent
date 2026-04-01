@@ -1253,6 +1253,50 @@
       gap: 0.75rem;
       align-items: center;
     }
+
+    /* --- INSTALL BANNER --- */
+    .install-banner {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 900;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      padding: 0.75rem 1.25rem;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      backdrop-filter: blur(12px);
+    }
+
+    .install-banner.show {
+      display: flex;
+    }
+
+    .install-banner button {
+      padding: 0.4rem 1rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      font-family: var(--font);
+    }
+
+    .install-banner .install-btn {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .install-banner .install-dismiss {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
   </style>
 </head>
 
@@ -2390,13 +2434,58 @@
     </div>
   </div>
 
-  <!-- SERVICE WORKER REGISTRATION -->
+  <!-- INSTALL BANNER -->
+  <div class="install-banner" id="installBanner">
+    <span>Install FoundUPS for quick access</span>
+    <button class="install-btn" id="installBtn">Install</button>
+    <button class="install-dismiss" id="installDismiss">Not now</button>
+  </div>
+
+  <!-- SERVICE WORKER REGISTRATION + INSTALL PROMPT -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js').catch(() => {});
       });
     }
+
+    // PWA install prompt - capture and defer
+    let deferredInstallPrompt = null;
+    const installBanner = document.getElementById('installBanner');
+    const installBtn = document.getElementById('installBtn');
+    const installDismiss = document.getElementById('installDismiss');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+
+      // Only show if user hasn't dismissed before
+      if (!localStorage.getItem('installDismissed')) {
+        installBanner.classList.add('show');
+      }
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      const result = await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      installBanner.classList.remove('show');
+      if (result.outcome === 'accepted') {
+        localStorage.setItem('installAccepted', '1');
+      }
+    });
+
+    installDismiss.addEventListener('click', () => {
+      installBanner.classList.remove('show');
+      localStorage.setItem('installDismissed', '1');
+    });
+
+    // Hide banner if already installed
+    window.addEventListener('appinstalled', () => {
+      installBanner.classList.remove('show');
+      deferredInstallPrompt = null;
+    });
   </script>
 
 </body>
