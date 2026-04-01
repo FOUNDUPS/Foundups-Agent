@@ -290,10 +290,10 @@
   border-left: 2px solid rgba(141, 113, 255, 0.2);
 }
 
-/* Avatar trigger in header */
+/* Avatar trigger in header — 44px minimum for WCAG touch target */
 .mall-avatar-trigger {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
   padding: 0;
@@ -302,16 +302,16 @@
   flex-shrink: 0;
 }
 .mall-avatar-trigger img {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid rgba(141, 113, 255, 0.25);
 }
 .mall-avatar-trigger .account-avatar-placeholder {
-  width: 36px;
-  height: 36px;
-  font-size: 0.85rem;
+  width: 44px;
+  height: 44px;
+  font-size: 0.95rem;
 }
 
 /* Red Dog mode sheet */
@@ -417,6 +417,114 @@
 }
 .reddog-rec-action:active {
   background: rgba(141, 113, 255, 0.24);
+}
+
+/* ========== Phone ergonomics ========== */
+
+/* Small screens: tighter plane, larger tap targets */
+@media (max-width: 480px) {
+  .account-plane {
+    padding: 0 0.75rem 1rem;
+    padding-left: max(0.75rem, var(--safe-left, 0px));
+    padding-right: max(0.75rem, var(--safe-right, 0px));
+    max-height: 90vh;
+    max-height: 90dvh;
+  }
+
+  .account-identity {
+    gap: 0.6rem;
+    padding: 0.35rem 0 0.75rem;
+  }
+
+  .account-avatar {
+    width: 48px;
+    height: 48px;
+  }
+  .account-avatar-img {
+    width: 48px;
+    height: 48px;
+  }
+  .account-avatar-placeholder {
+    width: 48px;
+    height: 48px;
+  }
+
+  .account-identity-name {
+    font-size: 1rem;
+  }
+
+  /* FoundUps grid: 2 columns max on small phone */
+  .account-foundups-grid {
+    grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+    gap: 0.5rem;
+  }
+
+  .account-foundup-tile {
+    padding: 0.5rem 0.3rem;
+    min-height: 44px;
+  }
+
+  /* Options: ensure 44px touch targets */
+  .account-option-btn {
+    min-height: 44px;
+    padding: 0.7rem 0.75rem;
+  }
+
+  /* Invites toggle: ensure 44px touch target */
+  .account-invites-toggle {
+    min-height: 44px;
+  }
+
+  /* Mode sheet: larger action buttons for phone */
+  .reddog-mode-action {
+    min-height: 44px;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .reddog-mode-sheet {
+    min-width: 180px;
+  }
+
+  /* Briefing: slightly larger text on phone */
+  .reddog-briefing-line {
+    font-size: 0.82rem;
+    padding: 0.15rem 0;
+  }
+
+  /* Recommendations: ensure pill tap targets */
+  .reddog-rec-action {
+    min-height: 36px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  /* Red Dog header: compact */
+  .reddog-header {
+    padding: 0.35rem 0 0.5rem;
+  }
+}
+
+/* Safe-area padding for account plane on all screens */
+.account-plane {
+  padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+}
+
+/* Landscape phone: reduce plane height, ensure scroll */
+@media (max-height: 500px) {
+  .account-plane {
+    max-height: 95vh;
+    max-height: 95dvh;
+  }
+
+  .account-identity {
+    padding: 0.25rem 0 0.5rem;
+  }
+
+  .reddog-header {
+    padding: 0.25rem 0 0.35rem;
+  }
 }
 
 @media (min-width: 640px) {
