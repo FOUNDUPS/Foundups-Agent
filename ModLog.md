@@ -1,5 +1,41 @@
 # FoundUps Agent - Development Log
 
+## [2026-04-01] SoftProto Audit Prompt Batch
+
+**Change Type**: Architecture / Coordination
+**By**: 0102 (Codex)
+**WSP References**: WSP 102, WSP 97, WSP 22, WSP 83
+
+### Summary
+
+Added the bounded SoftProto audit prompts for the gateway, Mall, concierge /
+Red Dog, and guardrails, plus the implementation prompt for the isolated
+Svelte spike.
+
+### What Changed
+
+- Added operator prompts under `docs/0102_session_briefings/`:
+  - `SOFTPROTO_A_GATEWAY_AUDIT_PROMPT_2026-04-01.md`
+  - `SOFTPROTO_B_MALL_AUDIT_PROMPT_2026-04-01.md`
+  - `SOFTPROTO_C_CONCIERGE_REDDOG_AUDIT_PROMPT_2026-04-01.md`
+  - `SOFTPROTO_D_GUARDRAILS_AUDIT_PROMPT_2026-04-01.md`
+  - `SOFTPROTO_SVELTE_SPIKE_PHASE1_PROMPT_2026-04-01.md`
+- Updated `docs/0102_session_briefings/README.md`
+- Expanded the SoftProto foundation note with the nested interaction contract:
+  - app -> plane -> module -> submodule -> object
+  - scoped gesture bindings
+  - inheritance / override rules
+  - addressable command paths
+
+### Result
+
+- the next SoftProto move is now bounded and executable
+- A/B/C/D can audit without drifting into independent implementations
+- the eventual spike owner has a single implementation prompt grounded in the
+  same contract
+
+---
+
 ## [2026-04-01] SoftProto Foundation Architecture Lock
 
 **Change Type**: Architecture / Documentation
