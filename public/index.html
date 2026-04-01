@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
   <title>FoundUPS — Where Will You Aim Your Compute?</title>
   <meta name="description"
     content="Aim your compute at ideas that matter. Agents build. You earn Return on Compute.">
@@ -1394,6 +1394,21 @@
       color: var(--text-dim);
       letter-spacing: 0.5px;
     }
+
+    /* ─── KEYBOARD RESILIENCE ─── */
+    body.keyboard-open .chat-fab:not(.open) {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    body.keyboard-open .install-banner {
+      display: none !important;
+    }
+
+    body.keyboard-open .disclaimer-card {
+      max-height: calc(var(--visual-viewport-height, 100vh) - 2rem);
+    }
   </style>
 </head>
 
@@ -1819,6 +1834,13 @@
       disclaimerInvitePanel.style.display = 'none';
       // Clear cached code when switching to waitlist
       localStorage.removeItem('pendingInviteCode');
+    });
+
+    // Scroll invite input into view on mobile keyboard open
+    disclaimerInviteCode?.addEventListener('focus', () => {
+      setTimeout(() => {
+        disclaimerInviteCode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
     });
 
     // Auto-format invite code input
@@ -2613,6 +2635,21 @@
     // Standalone detection - suppress all install affordances if already installed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
       || window.navigator.standalone === true;
+
+    // Keyboard/viewport resize detection
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => {
+        const keyboardHeight = window.innerHeight - window.visualViewport.height;
+        document.documentElement.style.setProperty(
+          '--visual-viewport-height', window.visualViewport.height + 'px'
+        );
+        if (keyboardHeight > 100) {
+          document.body.classList.add('keyboard-open');
+        } else {
+          document.body.classList.remove('keyboard-open');
+        }
+      });
+    }
 
     // PWA install prompt - capture and defer
     let deferredInstallPrompt = null;

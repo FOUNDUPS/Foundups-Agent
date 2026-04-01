@@ -984,3 +984,56 @@ class TestMobileErgonomicsPhase9:
                 found = True
                 break
         assert found, "480px breakpoint must include .disclaimer-card padding reduction"
+
+
+# ---------------------------------------------------------------------------
+# Keyboard Resilience Phase 10
+# ---------------------------------------------------------------------------
+
+class TestKeyboardResiliencePhase10:
+    """Mobile keyboard/viewport resize resilience."""
+
+    def test_interactive_widget_in_viewport(self):
+        """Viewport meta must include interactive-widget for keyboard handling."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "interactive-widget=resizes-content" in html
+
+    def test_visual_viewport_listener_exists(self):
+        """Gateway must listen to visualViewport resize events."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "visualViewport" in html
+
+    def test_keyboard_open_class_toggled(self):
+        """visualViewport handler must toggle keyboard-open class."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "keyboard-open" in html
+
+    def test_keyboard_open_hides_chat_fab(self):
+        """keyboard-open must hide chat FAB when not active."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "keyboard-open .chat-fab" in html
+
+    def test_keyboard_open_hides_install_banner(self):
+        """keyboard-open must hide install banner."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "keyboard-open .install-banner" in html
+
+    def test_keyboard_open_modal_uses_viewport_height(self):
+        """keyboard-open must limit modal card to visual viewport height."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "visual-viewport-height" in html
+
+    def test_invite_input_scrolls_on_focus(self):
+        """Invite code input must scroll into view on focus."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        # Find the focus listener for invite code
+        start = html.index("scrollIntoView")
+        block = html[start - 300:start + 100]
+        assert "disclaimerInviteCode" in block
+
+    def test_visual_viewport_height_css_var(self):
+        """visualViewport handler must set --visual-viewport-height CSS var."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index("visualViewport")
+        block = html[start:start + 500]
+        assert "--visual-viewport-height" in block
