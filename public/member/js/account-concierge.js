@@ -189,6 +189,155 @@
     });
   }
 
+  // ---- mode sheet (JS-injected into anchor) ----
+  var modeSheetEl = null;
+  var modesVisible = false;
+  var currentMode = 'idle';
+
+  var MODE_ACTIONS = [
+    { id: 'summary',   label: 'Summary',     icon: '\u2139' },
+    { id: 'listen',    label: 'Listen',       icon: '\uD83C\uDFA4' },
+    { id: 'foundups',  label: 'My FoundUps',  icon: '\uD83D\uDCE6' },
+    { id: 'invites',   label: 'Invites',      icon: '\uD83D\uDCE8' },
+    { id: 'options',   label: 'Options',      icon: '\u2699' }
+  ];
+
+  function injectModeSheet() {
+    if (modeSheetEl || !anchor) return;
+    modeSheetEl = document.createElement('div');
+    modeSheetEl.className = 'reddog-mode-sheet';
+    modeSheetEl.setAttribute('data-reddog-mode-sheet', '');
+    modeSheetEl.hidden = true;
+
+    var html = '<div class="reddog-mode-sheet-actions" data-reddog-mode-actions>';
+    for (var i = 0; i < MODE_ACTIONS.length; i++) {
+      var a = MODE_ACTIONS[i];
+      html += '<button class="reddog-mode-action" data-reddog-mode="' + a.id + '" type="button">'
+            + '<span class="reddog-mode-action-icon">' + a.icon + '</span>'
+            + '<span class="reddog-mode-action-label">' + a.label + '</span>'
+            + '</button>';
+    }
+    html += '</div>';
+    modeSheetEl.innerHTML = html;
+
+    // Insert before the button in the anchor
+    anchor.insertBefore(modeSheetEl, redDogTrigger);
+
+    // Wire action clicks
+    modeSheetEl.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-reddog-mode]');
+      if (!btn) return;
+      var mode = btn.getAttribute('data-reddog-mode');
+      executeMode(mode);
+    });
+  }
+
+  function executeMode(mode) {
+    currentMode = mode;
+    closeModes();
+
+    switch (mode) {
+      case 'summary':
+        showSummary();
+        break;
+      case 'listen':
+        startListening();
+        break;
+      case 'foundups':
+        openPlane();
+        var foundups = plane.querySelector('[data-reddog-foundups]');
+        if (foundups) foundups.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        break;
+      case 'invites':
+        openPlane();
+        var invites = plane.querySelector('[data-reddog-invites]');
+        if (invites) invites.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (invitesToggle && invitesDrawer && !invitesDrawer.classList.contains('open')) {
+          invitesDrawer.classList.add('open');
+          invitesToggle.classList.add('expanded');
+        }
+        break;
+      case 'options':
+        openPlane();
+        var opts = plane.querySelector('[data-reddog-options]');
+        if (opts) opts.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        break;
+      default:
+        break;
+    }
+  }
+
+  function openModes() {
+    injectModeSheet();
+    if (!modeSheetEl || modesVisible) return;
+    modesVisible = true;
+    modeSheetEl.hidden = false;
+    dismissSummary();
+    stopListening();
+    setAnchorState('active');
+  }
+
+  function closeModes() {
+    if (!modeSheetEl || !modesVisible) return;
+    modesVisible = false;
+    modeSheetEl.hidden = true;
+    if (!isOpen && !listeningVisible) setAnchorState('idle');
+  }
+
+  function toggleModes() {
+    if (modesVisible) closeModes();
+    else openModes();
+  }
+
+  // ---- local swipe-up on anchor to open mode sheet ----
+  var anchorTouchStartY = 0;
+  var anchorTouchCurrentY = 0;
+  var anchorSwiping = false;
+  var ANCHOR_SWIPE_THRESHOLD = 40;
+
+  if (anchor) {
+    anchor.addEventListener('touchstart', function (e) {
+      // Only capture swipes that start on the anchor (not the button's pointer events)
+      anchorTouchStartY = e.touches[0].clientY;
+      anchorTouchCurrentY = anchorTouchStartY;
+      anchorSwiping = true;
+    }, { passive: true });
+
+    anchor.addEventListener('touchmove', function (e) {
+      if (!anchorSwiping) return;
+      anchorTouchCurrentY = e.touches[0].clientY;
+    }, { passive: true });
+
+    anchor.addEventListener('touchend', function () {
+      if (!anchorSwiping) return;
+      anchorSwiping = false;
+      var delta = anchorTouchStartY - anchorTouchCurrentY;
+      if (delta > ANCHOR_SWIPE_THRESHOLD) {
+        // Swipe up on anchor = open mode sheet
+        if (modesVisible) closeModes();
+        else openModes();
+      } else if (delta < -ANCHOR_SWIPE_THRESHOLD) {
+        // Swipe down on anchor = close mode sheet
+        closeModes();
+      }
+      anchorTouchStartY = 0;
+      anchorTouchCurrentY = 0;
+    }, { passive: true });
+  }
+
+  // Close mode sheet on escape
+  var origEscapeHandler = null;
+
+  // Extend existing escape handler to also close mode sheet
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && modesVisible) {
+      closeModes();
+    }
+  });
+
+  // Close mode sheet when plane opens (modes are a pre-plane action)
+  var origOpenPlane = openPlane;
+
   // ---- avatar trigger (secondary entry point) ----
   if (avatarTrigger) {
     avatarTrigger.addEventListener('click', function (e) {
@@ -283,6 +432,12 @@
     startListening: startListening,
     stopListening: stopListening,
     anchorState: function () { return stateRing ? stateRing.getAttribute('data-reddog-anchor-state') : 'idle'; },
+    openModes: openModes,
+    closeModes: closeModes,
+    toggleModes: toggleModes,
+    setMode: executeMode,
+    currentMode: function () { return currentMode; },
+    isModeSheetOpen: function () { return modesVisible; },
 
     /** Populate identity block from Clerk user + Firestore data */
     setIdentity: function (clerkUser, userData) {

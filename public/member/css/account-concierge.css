@@ -314,6 +314,60 @@
   font-size: 0.85rem;
 }
 
+/* Red Dog mode sheet */
+.reddog-mode-sheet {
+  background: rgba(14, 14, 28, 0.95);
+  border: 1px solid rgba(141, 113, 255, 0.2);
+  border-radius: 14px;
+  padding: 0.4rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  animation: reddog-mode-in 0.2s ease-out;
+  min-width: 160px;
+}
+@keyframes reddog-mode-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.reddog-mode-sheet-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.reddog-mode-action {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: rgba(228, 226, 236, 0.8);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s;
+  text-align: left;
+}
+.reddog-mode-action:hover,
+.reddog-mode-action:focus-visible {
+  background: rgba(141, 113, 255, 0.1);
+  color: rgba(228, 226, 236, 0.95);
+  outline: none;
+}
+.reddog-mode-action:active {
+  background: rgba(141, 113, 255, 0.18);
+}
+.reddog-mode-action-icon {
+  width: 1.4rem;
+  text-align: center;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+.reddog-mode-action-label {
+  white-space: nowrap;
+}
+
 @media (min-width: 640px) {
   .account-plane {
     max-width: 28rem;
