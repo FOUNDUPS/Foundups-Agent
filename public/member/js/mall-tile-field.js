@@ -554,51 +554,143 @@
 
   /**
    * Apply field scope filter to catalog
-   * @param {string} scope - 'personal' or null (all)
+   * @param {Object|string|null} scope - Scope options or 'personal' or null
    * @returns {Array} Filtered catalog
    */
   function filterByScope(scope) {
     if (!scope) return fullCatalog.slice();
 
+    // Legacy string support
     if (scope === 'personal') {
+      scope = { type: 'personal' };
+    }
+
+    if (scope.type === 'personal') {
       // Filter to 012 lanes only
       var personal = fullCatalog.filter(function(item) {
         return item.creator === '012';
       });
+      return sortScopedResults(personal);
+    }
 
-      // Sort: video_count > 0 first, then display_order asc, zero-video at end
-      personal.sort(function(a, b) {
-        var aHasVideos = (a.video_count || 0) > 0;
-        var bHasVideos = (b.video_count || 0) > 0;
-
-        // Videos first, zero-video at end
-        if (aHasVideos && !bHasVideos) return -1;
-        if (!aHasVideos && bHasVideos) return 1;
-
-        // Within same video status, sort by display_order
-        var orderA = a.display_order || 999;
-        var orderB = b.display_order || 999;
-        return orderA - orderB;
+    if (scope.type === 'creator' && scope.query) {
+      // Filter by creator name (case-insensitive substring match)
+      var query = scope.query.toLowerCase();
+      var matches = fullCatalog.filter(function(item) {
+        var creator = (item.creator || '').toLowerCase();
+        var entity = (item.entity || '').toLowerCase();
+        return creator.indexOf(query) !== -1 || entity.indexOf(query) !== -1;
       });
+      return sortScopedResults(matches);
+    }
 
-      return personal;
+    if (scope.type === 'category' && scope.query) {
+      // Filter by category (case-insensitive match)
+      var catQuery = scope.query.toLowerCase();
+      var catMatches = fullCatalog.filter(function(item) {
+        return (item.category || '').toLowerCase() === catQuery;
+      });
+      return sortScopedResults(catMatches);
+    }
+
+    if (scope.type === 'tag' && scope.query) {
+      // Filter by tag (exact match in tags array)
+      var tagQuery = scope.query.toLowerCase();
+      var tagMatches = fullCatalog.filter(function(item) {
+        if (!item.tags || !Array.isArray(item.tags)) return false;
+        return item.tags.some(function(t) {
+          return t.toLowerCase() === tagQuery;
+        });
+      });
+      return sortScopedResults(tagMatches);
     }
 
     return fullCatalog.slice();
   }
 
   /**
-   * Project Personal Mall (012 lanes only)
-   * Scopes field to creator_id === '012'
+   * Sort scoped results: video_count > 0 first, then display_order
+   * @param {Array} items - Filtered items
+   * @returns {Array} Sorted items
    */
-  function projectPersonalMall() {
-    currentFieldScope = 'personal';
-    mallCatalog = filterByScope('personal');
+  function sortScopedResults(items) {
+    items.sort(function(a, b) {
+      var aHasVideos = (a.video_count || 0) > 0;
+      var bHasVideos = (b.video_count || 0) > 0;
+
+      // Videos first, zero-video at end
+      if (aHasVideos && !bHasVideos) return -1;
+      if (!aHasVideos && bHasVideos) return 1;
+
+      // Within same video status, sort by display_order
+      var orderA = a.display_order || 999;
+      var orderB = b.display_order || 999;
+      return orderA - orderB;
+    });
+    return items;
+  }
+
+  /**
+   * Set field scope with options
+   * @param {Object} options - { type: 'personal'|'creator'|'category'|'tag', query?: string }
+   */
+  function setFieldScope(options) {
+    if (!options || !options.type) {
+      clearFieldScope();
+      return;
+    }
+
+    currentFieldScope = options;
+    mallCatalog = filterByScope(options);
     originalOrder = mallCatalog.slice();
     currentProjection = 'default';
     renderTiles();
     bindInteractions();
     updateProjectionChips();
+  }
+
+  /**
+   * Project Personal Mall (012 lanes only)
+   * Scopes field to creator === '012'
+   */
+  function projectPersonalMall() {
+    setFieldScope({ type: 'personal' });
+  }
+
+  /**
+   * Search by creator name (string match, no backend)
+   * @param {string} query - Creator name search string
+   */
+  function searchByCreator(query) {
+    if (!query || !query.trim()) {
+      clearFieldScope();
+      return;
+    }
+    setFieldScope({ type: 'creator', query: query.trim() });
+  }
+
+  /**
+   * Filter by category
+   * @param {string} category - Category name
+   */
+  function filterByCategory(category) {
+    if (!category || !category.trim()) {
+      clearFieldScope();
+      return;
+    }
+    setFieldScope({ type: 'category', query: category.trim() });
+  }
+
+  /**
+   * Filter by tag
+   * @param {string} tag - Tag name
+   */
+  function filterByTag(tag) {
+    if (!tag || !tag.trim()) {
+      clearFieldScope();
+      return;
+    }
+    setFieldScope({ type: 'tag', query: tag.trim() });
   }
 
   /**
@@ -617,7 +709,7 @@
 
   /**
    * Get current field scope
-   * @returns {string|null} 'personal' or null
+   * @returns {Object|null} Scope options or null
    */
   function getFieldScope() {
     return currentFieldScope;
@@ -650,10 +742,14 @@
     getProjection: getProjection,
     resetProjection: resetProjection,
 
-    // Field Scope (My Mall)
+    // Field Scope (My Mall + Search)
     projectPersonalMall: projectPersonalMall,
+    setFieldScope: setFieldScope,
     clearFieldScope: clearFieldScope,
-    getFieldScope: getFieldScope
+    getFieldScope: getFieldScope,
+    searchByCreator: searchByCreator,
+    filterByCategory: filterByCategory,
+    filterByTag: filterByTag
   };
 
 })();

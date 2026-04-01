@@ -377,3 +377,70 @@ class TestPersonalMallProjection:
         """clearFieldScope resets to full catalog."""
         js = _read("js/mall-tile-field.js")
         assert "mallCatalog = fullCatalog.slice()" in js
+
+
+class TestSearchMallProjection:
+    """Test Search Mall field scope projections."""
+
+    def test_set_field_scope_api(self):
+        """setFieldScope function is exposed."""
+        js = _read("js/mall-tile-field.js")
+        assert "setFieldScope:" in js
+
+    def test_search_by_creator_api(self):
+        """searchByCreator function is exposed."""
+        js = _read("js/mall-tile-field.js")
+        assert "searchByCreator:" in js
+
+    def test_filter_by_category_api(self):
+        """filterByCategory function is exposed."""
+        js = _read("js/mall-tile-field.js")
+        assert "filterByCategory:" in js
+
+    def test_filter_by_tag_api(self):
+        """filterByTag function is exposed."""
+        js = _read("js/mall-tile-field.js")
+        assert "filterByTag:" in js
+
+    def test_creator_scope_type(self):
+        """Creator scope type exists in filterByScope."""
+        js = _read("js/mall-tile-field.js")
+        assert "scope.type === 'creator'" in js
+
+    def test_category_scope_type(self):
+        """Category scope type exists in filterByScope."""
+        js = _read("js/mall-tile-field.js")
+        assert "scope.type === 'category'" in js
+
+    def test_tag_scope_type(self):
+        """Tag scope type exists in filterByScope."""
+        js = _read("js/mall-tile-field.js")
+        assert "scope.type === 'tag'" in js
+
+    def test_creator_search_case_insensitive(self):
+        """Creator search is case-insensitive."""
+        js = _read("js/mall-tile-field.js")
+        assert "toLowerCase()" in js
+        assert "indexOf(query)" in js
+
+    def test_category_filter_exact_match(self):
+        """Category filter uses exact match."""
+        js = _read("js/mall-tile-field.js")
+        assert "=== catQuery" in js
+
+    def test_tag_filter_array_search(self):
+        """Tag filter searches tags array."""
+        js = _read("js/mall-tile-field.js")
+        assert "item.tags" in js
+        assert ".some(" in js
+
+    def test_sort_scoped_results_function(self):
+        """sortScopedResults function exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "function sortScopedResults" in js
+
+    def test_scope_options_object(self):
+        """setFieldScope accepts options object with type and query."""
+        js = _read("js/mall-tile-field.js")
+        assert "options.type" in js
+        assert "scope.query" in js

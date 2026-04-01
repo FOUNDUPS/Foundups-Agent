@@ -1,5 +1,57 @@
 # Member Area Module Change Log
 
+## [2026-04-02] Search Mall Projection Phase 1 (Worker B, WSP_97)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker B
+**Type**: Feature (Field Scope Search)
+**Slice**: `search_mall_projection_phase1`
+**Spec**: WSP_97
+
+**Files Modified**:
+- `public/member/js/mall-tile-field.js` — Extended field scope with search/filter APIs
+- `public/member/tests/test_video_mall_field_runtime.py` — 12 new Search Mall tests
+
+**New Hooks**:
+```javascript
+// Generic scope setter (replaces direct string scope)
+window.mallTileField.setFieldScope({ type: 'creator', query: 'Move2Japan' });
+window.mallTileField.setFieldScope({ type: 'category', query: 'travel' });
+window.mallTileField.setFieldScope({ type: 'tag', query: '012-lane' });
+
+// Convenience wrappers
+window.mallTileField.searchByCreator('012');     // case-insensitive substring
+window.mallTileField.filterByCategory('music');  // exact match
+window.mallTileField.filterByTag('ffcpln');      // exact tag match
+```
+
+**Scope Types**:
+| Type | Match Logic | Fields Searched |
+|------|-------------|-----------------|
+| `personal` | exact `creator === '012'` | creator |
+| `creator` | case-insensitive substring | creator, entity |
+| `category` | exact match (case-insensitive) | category |
+| `tag` | exact match in tags array | tags[] |
+
+**Sort Order** (all scopes):
+1. `video_count > 0` first
+2. `display_order` ascending
+3. Zero-video lanes at end
+
+**Grammar Preserved**:
+- tap = play/pause
+- double-tap = enter FoundUp
+- pinch expand/collapse
+- density/motion unchanged
+- projection sorts work within scope
+
+**No Backend**:
+- String match only, no API calls
+- Filters against `fullCatalog` in memory
+
+**Tests**: 843 passed (12 new Search Mall tests)
+
+---
+
 ## [2026-04-02] Personal Mall Projection Phase 1 (Worker B, WSP_97)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B
