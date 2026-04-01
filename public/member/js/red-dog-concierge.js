@@ -37,7 +37,7 @@
     },
     {
       q: 'How do I browse?',
-      a: 'Tap any tile to inspect it. Double-tap to enter its dedicated page. '
+      a: 'Tap any tile to play/pause its video. Double-tap to enter its dedicated page. '
        + 'On desktop, use keyboard navigation or scroll.'
     },
     {

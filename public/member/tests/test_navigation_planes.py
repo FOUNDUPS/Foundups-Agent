@@ -184,7 +184,7 @@ class TestGestureHints:
         html = _read("index.html")
         assert "Swipe sideways to browse" in html
         assert "Swipe down from top" in html
-        assert "Tap any card" in html
+        assert "Tap to play/pause" in html
 
     def test_dismiss_text_present(self):
         html = _read("index.html")
