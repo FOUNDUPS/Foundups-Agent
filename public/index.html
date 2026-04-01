@@ -1644,6 +1644,7 @@
     const iAmAccredited = document.getElementById('iAmAccredited');
     const closeSorryModal = document.getElementById('closeSorryModal');
     const joinWaitlistFromSorry = document.getElementById('joinWaitlistFromSorry');
+    const signInModal = document.getElementById('signInModal');
 
     // ─── CLERK AUTHENTICATION ───
     // Wait for Clerk to load, then check auth state
@@ -1683,7 +1684,7 @@
       } else {
         // Not signed in → show eligibility/terms gate first
         // User must acknowledge requirements before any login is available
-        disclaimerModal.style.display = 'flex';
+        openModal(disclaimerModal);
       }
     });
 
@@ -1698,7 +1699,7 @@
       if (window.Clerk.user) {
         navigateToMember();
       } else {
-        disclaimerModal.style.display = 'flex';
+        openModal(disclaimerModal);
       }
     });
 
@@ -1814,17 +1815,17 @@
     // "I am accredited" button → show sorry modal
     iAmAccredited.addEventListener('click', () => {
       disclaimerModal.style.display = 'none';
-      accreditedSorryModal.style.display = 'flex';
+      openModal(accreditedSorryModal);
     });
 
     // Close sorry modal
     closeSorryModal.addEventListener('click', () => {
-      accreditedSorryModal.style.display = 'none';
+      closeModal(accreditedSorryModal);
     });
 
     // Join waitlist from sorry modal (beta section removed - redirect to main flow)
     joinWaitlistFromSorry.addEventListener('click', () => {
-      accreditedSorryModal.style.display = 'none';
+      closeModal(accreditedSorryModal);
       const betaSection = document.getElementById('beta');
       if (betaSection) {
         betaSection.scrollIntoView({ behavior: 'smooth' });
@@ -1835,16 +1836,61 @@
       }
     });
 
+    // ─── MODAL ACCESSIBILITY ───
+    let lastFocusedElement = null;
+
+    function openModal(modal) {
+      lastFocusedElement = document.activeElement;
+      modal.style.display = 'flex';
+      const focusable = modal.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (focusable) focusable.focus();
+    }
+
+    function closeModal(modal) {
+      modal.style.display = 'none';
+      if (lastFocusedElement) lastFocusedElement.focus();
+    }
+
+    // Focus trap for active modal
+    function trapFocus(modal, e) {
+      const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    // Escape key and focus trap for all dialogs
+    document.addEventListener('keydown', (e) => {
+      const activeModal =
+        disclaimerModal.style.display === 'flex' ? disclaimerModal :
+        signInModal.style.display === 'flex' ? signInModal :
+        accreditedSorryModal.style.display === 'flex' ? accreditedSorryModal :
+        null;
+      if (!activeModal) return;
+      if (e.key === 'Escape') {
+        closeModal(activeModal);
+      }
+      if (e.key === 'Tab') {
+        trapFocus(activeModal, e);
+      }
+    });
+
     // Close modals on overlay click
     disclaimerModal.addEventListener('click', (e) => {
-      if (e.target === disclaimerModal) disclaimerModal.style.display = 'none';
+      if (e.target === disclaimerModal) closeModal(disclaimerModal);
     });
     accreditedSorryModal.addEventListener('click', (e) => {
-      if (e.target === accreditedSorryModal) accreditedSorryModal.style.display = 'none';
+      if (e.target === accreditedSorryModal) closeModal(accreditedSorryModal);
     });
 
     // ─── SIGN IN MODAL LOGIC (for existing members) ───
-    const signInModal = document.getElementById('signInModal');
     const showSignInModalBtn = document.getElementById('showSignInModal');
     const closeSignInModalBtn = document.getElementById('closeSignInModal');
     const signInGoogle = document.getElementById('signInGoogle');
@@ -1856,22 +1902,22 @@
     showSignInModalBtn.addEventListener('click', (e) => {
       e.preventDefault();
       disclaimerModal.style.display = 'none';
-      signInModal.style.display = 'flex';
+      openModal(signInModal);
     });
 
     // Close sign in modal
     closeSignInModalBtn.addEventListener('click', () => {
-      signInModal.style.display = 'none';
+      closeModal(signInModal);
     });
     signInModal.addEventListener('click', (e) => {
-      if (e.target === signInModal) signInModal.style.display = 'none';
+      if (e.target === signInModal) closeModal(signInModal);
     });
 
     // Back to disclaimer
     backToDisclaimer.addEventListener('click', (e) => {
       e.preventDefault();
       signInModal.style.display = 'none';
-      disclaimerModal.style.display = 'flex';
+      openModal(disclaimerModal);
     });
 
     // Sign in with Google (existing member)
@@ -2391,10 +2437,10 @@
   <script src="js/foundup-cube.js?v=2"></script>
 
   <!-- ELIGIBILITY REQUIREMENTS MODAL (for non-authenticated ENTER clicks) -->
-  <div id="disclaimerModal" class="disclaimer-overlay" style="display:none;">
+  <div id="disclaimerModal" class="disclaimer-overlay" role="dialog" aria-modal="true" aria-labelledby="disclaimerModalTitle" style="display:none;">
     <div class="disclaimer-card">
       <div class="disclaimer-icon">⚠️</div>
-      <h2>Alpha Access Requirements</h2>
+      <h2 id="disclaimerModalTitle">Alpha Access Requirements</h2>
       <p class="disclaimer-text">
         Foundups Alpha is currently available <strong>only to individuals</strong> who:
       </p>
@@ -2458,11 +2504,11 @@
   </div>
 
   <!-- SIGN IN MODAL (for existing members) -->
-  <div id="signInModal" class="disclaimer-overlay" style="display:none;">
+  <div id="signInModal" class="disclaimer-overlay" role="dialog" aria-modal="true" aria-labelledby="signInModalTitle" style="display:none;">
     <div class="disclaimer-card" style="position:relative;">
-      <button id="closeSignInModal" style="position:absolute;top:1rem;right:1rem;background:transparent;border:none;color:var(--text-dim);font-size:1.5rem;cursor:pointer;padding:0.5rem;line-height:1;">&times;</button>
+      <button id="closeSignInModal" style="position:absolute;top:1rem;right:1rem;background:transparent;border:none;color:var(--text-dim);font-size:1.5rem;cursor:pointer;padding:0.5rem;line-height:1;" aria-label="Close sign-in dialog">&times;</button>
       <div class="disclaimer-icon">🔑</div>
-      <h2>Welcome Back</h2>
+      <h2 id="signInModalTitle">Welcome Back</h2>
       <p class="disclaimer-text">Sign in to enter the Mall</p>
       <div class="disclaimer-buttons" style="gap:1rem;">
         <button type="button" id="signInGoogle" class="btn-primary" style="padding:0.9rem 2rem;display:inline-flex;align-items:center;gap:10px;width:100%;justify-content:center;">
@@ -2489,11 +2535,11 @@
   </div>
 
   <!-- ACCREDITED SORRY MODAL -->
-  <div id="accreditedSorryModal" class="disclaimer-overlay" style="display:none;">
+  <div id="accreditedSorryModal" class="disclaimer-overlay" role="dialog" aria-modal="true" aria-labelledby="accreditedSorryModalTitle" style="display:none;">
     <div class="disclaimer-card" style="position:relative;">
-      <button id="closeSorryModal" style="position:absolute;top:1rem;right:1rem;background:transparent;border:none;color:var(--text-dim);font-size:1.5rem;cursor:pointer;padding:0.5rem;line-height:1;" title="Return to landing">&times;</button>
+      <button id="closeSorryModal" style="position:absolute;top:1rem;right:1rem;background:transparent;border:none;color:var(--text-dim);font-size:1.5rem;cursor:pointer;padding:0.5rem;line-height:1;" title="Return to landing" aria-label="Close dialog">&times;</button>
       <div class="disclaimer-icon">🔒</div>
-      <h2>Alpha Not Available at this time</h2>
+      <h2 id="accreditedSorryModalTitle">Alpha Not Available at this time</h2>
       <p class="disclaimer-text">
         Thank you for your interest.<br>
         Foundups Alpha is currently only available to non-accredited individuals.

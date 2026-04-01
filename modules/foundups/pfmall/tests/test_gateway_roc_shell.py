@@ -732,3 +732,102 @@ class TestStructuredDataPhase6:
         block = match.group(1)
         assert "21M tokens" not in block
         assert "backed by BTC" not in block
+
+
+# ---------------------------------------------------------------------------
+# Modal Accessibility Phase 7
+# ---------------------------------------------------------------------------
+
+class TestModalAccessibilityPhase7:
+    """Modal dialog semantics, focus management, and keyboard behavior."""
+
+    def test_disclaimer_modal_has_dialog_role(self):
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert 'id="disclaimerModal"' in html
+        start = html.index('id="disclaimerModal"')
+        tag = html[html.rfind('<', 0, start):html.index('>', start) + 1]
+        assert 'role="dialog"' in tag
+
+    def test_disclaimer_modal_has_aria_modal(self):
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index('id="disclaimerModal"')
+        tag = html[html.rfind('<', 0, start):html.index('>', start) + 1]
+        assert 'aria-modal="true"' in tag
+
+    def test_disclaimer_modal_has_aria_labelledby(self):
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index('id="disclaimerModal"')
+        tag = html[html.rfind('<', 0, start):html.index('>', start) + 1]
+        assert 'aria-labelledby=' in tag
+
+    def test_signin_modal_has_dialog_role(self):
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index('id="signInModal"')
+        tag = html[html.rfind('<', 0, start):html.index('>', start) + 1]
+        assert 'role="dialog"' in tag
+
+    def test_signin_modal_has_aria_modal(self):
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index('id="signInModal"')
+        tag = html[html.rfind('<', 0, start):html.index('>', start) + 1]
+        assert 'aria-modal="true"' in tag
+
+    def test_sorry_modal_has_dialog_role(self):
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index('id="accreditedSorryModal"')
+        tag = html[html.rfind('<', 0, start):html.index('>', start) + 1]
+        assert 'role="dialog"' in tag
+
+    def test_sorry_modal_has_aria_modal(self):
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index('id="accreditedSorryModal"')
+        tag = html[html.rfind('<', 0, start):html.index('>', start) + 1]
+        assert 'aria-modal="true"' in tag
+
+    def test_modal_title_ids_exist(self):
+        """Each dialog must have a title element with matching id."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert 'id="disclaimerModalTitle"' in html
+        assert 'id="signInModalTitle"' in html
+        assert 'id="accreditedSorryModalTitle"' in html
+
+    def test_escape_handler_exists(self):
+        """Keydown handler must listen for Escape to close modals."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "Escape" in html
+
+    def test_focus_trap_exists(self):
+        """trapFocus function must exist for Tab cycling."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "trapFocus" in html
+
+    def test_open_modal_function_exists(self):
+        """openModal function must exist for focus management."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "function openModal" in html
+
+    def test_close_modal_function_exists(self):
+        """closeModal function must exist for focus restoration."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "function closeModal" in html
+
+    def test_close_modal_restores_focus(self):
+        """closeModal must restore focus to lastFocusedElement."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index("function closeModal")
+        block = html[start:start + 200]
+        assert "lastFocusedElement" in block
+
+    def test_handoff_overlay_is_not_dialog(self):
+        """Handoff overlay must NOT have dialog role (it is a transition)."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index('id="handoffOverlay"')
+        tag = html[html.rfind('<', 0, start):html.index('>', start) + 1]
+        assert 'role="dialog"' not in tag
+
+    def test_close_buttons_have_aria_label(self):
+        """Modal close buttons should have aria-label."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index('id="closeSignInModal"')
+        tag = html[html.rfind('<', 0, start):html.index('>', start) + 1]
+        assert 'aria-label=' in tag

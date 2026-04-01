@@ -42,8 +42,8 @@ class TestEnterButtonGate:
         assert "disclaimerModal" in handler_body, (
             "ENTER handler must reference disclaimerModal for unsigned users"
         )
-        assert "display = 'flex'" in handler_body or "display='flex'" in handler_body, (
-            "ENTER handler must show disclaimerModal (display flex)"
+        assert "openModal(disclaimerModal)" in handler_body or "display = 'flex'" in handler_body or "display='flex'" in handler_body, (
+            "ENTER handler must show disclaimerModal"
         )
 
     def test_enter_handler_does_not_directly_open_clerk_signin(self):
