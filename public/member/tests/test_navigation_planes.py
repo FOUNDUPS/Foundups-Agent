@@ -104,27 +104,40 @@ class TestSwipeLeftRight:
         assert "mallPlanesSync" in js
 
 
-# ─── 4. Double-Tap Save ───────────────────────────────────────
+# ─── 4. FoundUp Handoff ───────────────────────────────────────
 
-class TestDoubleTapSave:
-    """Verify double-tap triggers save to localStorage."""
+class TestFoundUpHandoff:
+    """Verify FoundUp handoff plane is coherent."""
 
-    def test_double_tap_handler_wired(self):
+    def test_open_link_exists(self):
+        """View plane has Open FoundUp link."""
         js = _read("js/mall-planes.js")
-        assert "onDoubleTap: toggleSave" in js
+        assert "fv-open-link" in js
+        assert "Open FoundUp" in js
 
-    def test_save_uses_localstorage(self):
+    def test_transitional_route_used(self):
+        """Handoff uses transitional /member/foundup.html route."""
         js = _read("js/mall-planes.js")
-        assert "localStorage.setItem" in js
-        assert "pfmall_saved_" in js
+        assert "/member/foundup.html?id=" in js
 
-    def test_save_indicator_in_render(self):
+    def test_routing_prefix_surfaced(self):
+        """routing_prefix is shown in handoff link."""
         js = _read("js/mall-planes.js")
-        assert "fvSaveIndicator" in js
+        assert "routing_prefix" in js
 
-    def test_toggle_save_removes_on_second(self):
+    def test_no_stale_save_semantics(self):
+        """Save/favorite semantics removed from view plane."""
         js = _read("js/mall-planes.js")
-        assert "localStorage.removeItem" in js
+        assert "toggleSave" not in js
+        assert "fvSaveIndicator" not in js
+        assert "pfmall_saved_" not in js
+
+    def test_hint_text_updated(self):
+        """Hint text no longer mentions save."""
+        js = _read("js/mall-planes.js")
+        assert "Swipe up to close" in js
+        assert "Swipe sideways for next" in js
+        assert "Double-tap to save" not in js
 
 
 # ─── 5. Desktop Parity ────────────────────────────────────────

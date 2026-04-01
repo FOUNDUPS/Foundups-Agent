@@ -1,5 +1,43 @@
 # Member Area Module Change Log
 
+## [2026-04-01] FoundUp Handoff Plane Phase 2 (Worker B)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker B
+**Type**: Refinement
+**Slice**: `pfmall_foundup_handoff_plane_phase2`
+
+**Files Modified**:
+- `public/member/js/mall-planes.js` — refined handoff plane, removed stale semantics
+- `public/member/tests/test_navigation_planes.py` — updated TestDoubleTapSave → TestFoundUpHandoff
+
+**Stale Behaviors Removed**:
+- Save/favorite localStorage logic (`toggleSave`, `isSaved`, `pfmall_saved_` prefix)
+- `fvSaveIndicator` element in view plane
+- "Double-tap to save" hint text
+- `onDoubleTap: toggleSave` gesture binding
+
+**Handoff Language Updated**:
+- "Full details" → "Open FoundUp"
+- `fv-detail-link` class → `fv-open-link` class
+- Routing prefix surfaced in CTA: "Open FoundUp → /f/antifafm"
+- Hint simplified to: "Swipe up to close · Swipe sideways for next"
+
+**Fallback Path (truthful today)**:
+- `/member/foundup.html?id={foundup_id}` — transitional shell-owned entry
+- Future: `/f/{foundup_id}` when in-scope routes are live
+
+**Protected Behaviors (unchanged)**:
+- Tile tap → inspect
+- Tile double-tap → enter view plane
+- Swipe-up → close view plane
+- Swipe left/right → navigate between FoundUps
+- Escape → close view plane
+- Account plane / Red Dog access
+
+**Test Results**: 321 passed, 2 warnings
+
+---
+
 ## [2026-04-01] Mall Projection Shell Phase 1 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B
