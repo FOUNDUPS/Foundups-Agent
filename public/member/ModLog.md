@@ -1,5 +1,40 @@
 # Member Area Module Change Log
 
+## [2026-04-02] Route Bridge Hosting Activation Phase 2 (Worker B)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker B
+**Type**: Operational Deployment
+**Slice**: `route_bridge_hosting_activation_phase2`
+
+**Action**: Firebase Hosting deployment to activate route bridge rewrites
+
+**Hosting Configuration** (firebase.json - gitignored):
+```json
+"rewrites": [
+  { "source": "/f/**", "destination": "/f/index.html" },
+  { "source": "**", "destination": "/index.html" }
+]
+```
+
+**Deployment Target**: `foundupscom` site (https://foundupscom.web.app)
+
+**Verified Route Contract**:
+| Route | Behavior |
+|-------|----------|
+| `/f/{id}` | Serves bridge, JS redirects to `/member/foundup.html?id={id}` |
+| `/f/` (no id) | Bridge shows error: "No FoundUp specified" |
+| `/f/{invalid}` | Bridge shows error: "Invalid FoundUp ID" |
+| `/**` (other) | Catch-all to gateway `/index.html` |
+
+**Runtime Verification**:
+- `curl -I /f/antifafm` → HTTP 200, text/html (bridge served)
+- WebFetch confirms redirect logic executes
+- Destination `/member/foundup.html?id=` loads correctly
+
+**Note**: firebase.json is gitignored; this deployment is operational, not code-tracked.
+
+---
+
 ## [2026-04-02] Mobile Thumb-Zone Refinement Phase 2 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B
