@@ -154,14 +154,14 @@ class TestSignedInFlow:
         html = GATEWAY.read_text(encoding="utf-8")
         start = html.index("enterBtn.addEventListener('click'")
         handler_body = html[start:start + 800]
-        # The if branch (signed in) must go to /member/
-        assert "/member/" in handler_body
+        # The if branch (signed in) must route to /member/ via handoff
+        assert "navigateToMember" in handler_body
 
     def test_clerk_listener_redirects_on_signin(self):
         """Clerk auth listener redirects to /member/ after sign-in."""
         html = GATEWAY.read_text(encoding="utf-8")
         assert "addListener" in html
-        # After sign-in, should redirect to /member/
+        # After sign-in, should route to /member/ via handoff
         listener_section = html[html.index("addListener"):]
         redirect_end = listener_section[:500]
-        assert "/member/" in redirect_end
+        assert "navigateToMember" in redirect_end

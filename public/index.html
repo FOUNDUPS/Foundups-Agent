@@ -1318,6 +1318,34 @@
         display: none !important;
       }
     }
+
+    .handoff-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 1100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .handoff-overlay.show {
+      display: flex;
+    }
+
+    .handoff-overlay img {
+      width: 80px;
+      height: 80px;
+      border-radius: 16px;
+    }
+
+    .handoff-overlay .handoff-status {
+      font-size: 1rem;
+      color: var(--text-dim);
+      letter-spacing: 0.5px;
+    }
   </style>
 </head>
 
@@ -1570,6 +1598,16 @@
     let verifiedInviteCode = null;
     let currentPanel = 'invite';
 
+    // ─── MEMBER HANDOFF ───
+    const handoffOverlay = document.getElementById('handoffOverlay');
+    const handoffStatus = document.getElementById('handoffStatus');
+
+    function navigateToMember(statusText) {
+      handoffStatus.textContent = statusText || 'Opening FoundUPS Mall...';
+      handoffOverlay.classList.add('show');
+      setTimeout(() => { window.location.href = '/member/'; }, 600);
+    }
+
     // ─── ENTER BUTTON LOGIC ───
     const enterBtn = document.getElementById('enterBtn');
     const disclaimerModal = document.getElementById('disclaimerModal');
@@ -1600,7 +1638,7 @@
         if (user) {
           // User just signed in → go to member area
           disclaimerModal.style.display = 'none';
-          window.location.href = '/member/';
+          navigateToMember('Signing you in...');
         }
       });
     });
@@ -1615,7 +1653,7 @@
 
       if (window.Clerk.user) {
         // Already signed in → go directly to member area
-        window.location.href = '/member/';
+        navigateToMember();
       } else {
         // Not signed in → show eligibility/terms gate first
         // User must acknowledge requirements before any login is available
@@ -1632,7 +1670,7 @@
       await window.Clerk.load({ appearance: window.FOUNDUPS_CLERK_APPEARANCE });
 
       if (window.Clerk.user) {
-        window.location.href = '/member/';
+        navigateToMember();
       } else {
         disclaimerModal.style.display = 'flex';
       }
@@ -1767,7 +1805,7 @@
         setTimeout(() => showPanel('waitlist'), 500);
       } else {
         // Beta section removed - use main ENTER flow instead
-        window.location.href = '/member/';
+        navigateToMember();
       }
     });
 
@@ -1825,7 +1863,7 @@
 
         if (userDoc.exists()) {
           // User exists → go to member area
-          window.location.href = '/member/';
+          navigateToMember('Checking admission...');
         } else {
           // User doesn't exist → need to sign up first
           await auth.signOut(); // Sign out since they don't have an account
@@ -1858,7 +1896,7 @@
 
         if (userDoc.exists()) {
           // User exists → go to member area
-          window.location.href = '/member/';
+          navigateToMember('Checking admission...');
         } else {
           // User doesn't exist → need to sign up first
           await auth.signOut();
@@ -1956,7 +1994,7 @@
 
       if (result.data.success) {
         // Redirect to member area after successful signup
-        window.location.href = '/member/';
+        navigateToMember('Welcome to FoundUPS...');
       }
     }
 
@@ -2464,6 +2502,12 @@
 
   <!-- INSTALL FALLBACK HINT (iOS / unsupported browsers) -->
   <div class="install-fallback-hint" id="installFallbackHint"></div>
+
+  <!-- MEMBER HANDOFF OVERLAY -->
+  <div class="handoff-overlay" id="handoffOverlay">
+    <img src="/logo-dog.png" alt="FoundUPS">
+    <span class="handoff-status" id="handoffStatus">Opening FoundUPS Mall...</span>
+  </div>
 
   <!-- SERVICE WORKER REGISTRATION + INSTALL PROMPT -->
   <script>

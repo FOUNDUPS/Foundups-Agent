@@ -243,7 +243,7 @@ class TestTermsGateBehavior:
         html = GATEWAY.read_text(encoding="utf-8")
         start = html.index("enterBtn.addEventListener('click'")
         handler_body = html[start:start + 800]
-        assert "/member/" in handler_body
+        assert "navigateToMember" in handler_body
 
     def test_disclaimer_modal_exists(self):
         html = GATEWAY.read_text(encoding="utf-8")
@@ -454,3 +454,82 @@ class TestInstallFallbackPhase3:
         start = html.index("appinstalled")
         block = html[start:start + 300]
         assert "installFallbackHint" in block
+
+
+# ---------------------------------------------------------------------------
+# Member Handoff Phase 4
+# ---------------------------------------------------------------------------
+
+class TestMemberHandoffPhase4:
+    """Root-to-member handoff overlay and navigateToMember function."""
+
+    def test_handoff_overlay_exists(self):
+        """Handoff overlay element must exist."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert 'id="handoffOverlay"' in html
+
+    def test_handoff_status_element_exists(self):
+        """Handoff status text element must exist."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert 'id="handoffStatus"' in html
+
+    def test_handoff_overlay_css_defined(self):
+        """Handoff overlay CSS class must be defined."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert ".handoff-overlay" in html
+
+    def test_navigate_to_member_function_exists(self):
+        """navigateToMember function must be defined."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "function navigateToMember" in html
+
+    def test_navigate_to_member_shows_overlay(self):
+        """navigateToMember must show the handoff overlay."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index("function navigateToMember")
+        block = html[start:start + 300]
+        assert "handoffOverlay" in block
+
+    def test_navigate_to_member_redirects(self):
+        """navigateToMember must redirect to /member/."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index("function navigateToMember")
+        block = html[start:start + 300]
+        assert "/member/" in block
+
+    def test_signed_in_enter_uses_handoff(self):
+        """Signed-in ENTER click must use navigateToMember."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index("enterBtn.addEventListener('click'")
+        block = html[start:start + 800]
+        assert "navigateToMember" in block
+
+    def test_clerk_listener_uses_handoff(self):
+        """Clerk addListener sign-in must use navigateToMember."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index("Clerk.addListener")
+        block = html[start:start + 300]
+        assert "navigateToMember" in block
+
+    def test_portal_icon_uses_handoff(self):
+        """userPortalIcon click must use navigateToMember when signed in."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index("userPortalIcon.addEventListener")
+        block = html[start:start + 400]
+        assert "navigateToMember" in block
+
+    def test_no_direct_member_redirect_outside_handoff(self):
+        """Only navigateToMember should contain direct /member/ redirect."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        import re
+        # Find all window.location.href = '/member/' occurrences
+        matches = [m.start() for m in re.finditer(r"window\.location\.href\s*=\s*'/member/'", html)]
+        # Should be exactly 1 (inside navigateToMember)
+        assert len(matches) == 1, f"Expected 1 direct /member/ redirect, found {len(matches)}"
+
+    def test_terms_gate_still_works_for_unsigned(self):
+        """Unsigned ENTER must still show disclaimerModal, not handoff."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index("enterBtn.addEventListener('click'")
+        block = html[start:start + 800]
+        assert "disclaimerModal" in block
