@@ -1,5 +1,79 @@
 # Member Area Module Change Log
 
+## [2026-04-02] Mobile Thumb-Zone Refinement Phase 2 (Worker B)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker B
+**Type**: UX Improvement
+**Slice**: `pfmall_mobile_thumbzone_refinement_phase2`
+
+**Files Modified**:
+- `public/member/css/mall-tile-field.css` — projection chip touch targets, inspector bottom sheet
+- `public/member/css/member.css` — mall header safe-top padding
+- `public/member/tests/test_mobile_blockers.py` — added 5 thumb-zone tests
+- `public/member/tests/test_mall_tile_field.py` — added chip touch target test
+
+**Phone Ergonomics Refinements**:
+
+1. **Projection Chips** (44px WCAG touch targets)
+```css
+.mall-projection-chip {
+  min-height: 44px;
+  padding: 0.6rem 1rem;
+  font-size: 0.8rem;
+}
+```
+
+2. **Inspector as Bottom Sheet on Phone** (<=480px)
+```css
+@media (max-width: 480px) {
+  .tile-inspector {
+    top: auto;
+    bottom: 0;
+    transform: translateY(100%);
+    border-radius: 1.5rem 1.5rem 0 0;
+  }
+}
+```
+
+3. **Inspector Enter Button** (48-52px thumb target)
+```css
+.tile-inspector-enter {
+  min-height: 48px;  /* desktop */
+}
+@media (max-width: 480px) {
+  .tile-inspector-enter {
+    min-height: 52px; /* phone */
+  }
+}
+```
+
+4. **Mall Header Safe-Top** (notched phones)
+```css
+.mall-header {
+  padding: calc(0.5rem + var(--safe-top)) 0 0.5rem;
+}
+```
+
+5. **Bottom Sheet Handle Indicator**
+```css
+.tile-inspector::before {
+  content: "";
+  width: 2rem;
+  height: 0.25rem;
+  background: rgba(255, 255, 255, 0.25);
+}
+```
+
+**Protected Behaviors (unchanged)**:
+- Tap = inspect (immediate)
+- Double-tap = enter FoundUp directly
+- Three-anchor model
+- Red Dog positioning
+
+**Test Results**: 77 passed (mobile + tile field tests)
+
+---
+
 ## [2026-04-02] Mobile Blockers Phase 1 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B

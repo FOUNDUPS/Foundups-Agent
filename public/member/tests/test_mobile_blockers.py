@@ -135,6 +135,43 @@ class TestInspectEnterSemanticsPreserved:
         assert "inspectorEnterBtn" in js
 
 
+class TestThumbZoneRefinement:
+    """Test Phase 2 thumb-zone ergonomics improvements."""
+
+    def test_projection_chip_touch_target(self):
+        """Projection chips have 44px min-height for WCAG compliance."""
+        css = _read("css/mall-tile-field.css")
+        assert "min-height: 44px" in css
+        assert ".mall-projection-chip" in css
+
+    def test_inspector_enter_button_touch_target(self):
+        """Inspector enter button has comfortable thumb target."""
+        css = _read("css/mall-tile-field.css")
+        # Check for 48px min-height on the enter button
+        assert ".tile-inspector-enter" in css
+        assert "min-height: 48px" in css
+
+    def test_inspector_bottom_sheet_on_phone(self):
+        """Inspector becomes bottom sheet on small screens."""
+        css = _read("css/mall-tile-field.css")
+        assert "@media (max-width: 480px)" in css
+        # Inspector should be bottom-anchored on mobile
+        assert "bottom: 0" in css
+        assert "translateY(100%)" in css
+
+    def test_inspector_handle_indicator(self):
+        """Bottom sheet has drag handle indicator."""
+        css = _read("css/mall-tile-field.css")
+        # Handle is created via ::before pseudo-element
+        assert ".tile-inspector::before" in css
+        assert 'content: ""' in css
+
+    def test_mall_header_safe_top(self):
+        """Mall header includes safe-area-inset-top for notched phones."""
+        css = _read("css/member.css")
+        assert "calc(0.5rem + var(--safe-top))" in css
+
+
 class TestNoRegression:
     """Test existing shell behaviors are preserved."""
 

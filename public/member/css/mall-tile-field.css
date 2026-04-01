@@ -5,6 +5,64 @@
    Anchor model: This is the MIDDLE FIELD — dominates the Mall experience
 */
 
+/* ========== Projection Controls ========== */
+
+.mall-projection {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0 0 0.75rem;
+  flex-wrap: wrap;
+}
+
+.mall-projection-chip {
+  min-height: 44px; /* WCAG touch target */
+  padding: 0.6rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mall-projection-chip:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.mall-projection-chip.active {
+  border-color: rgba(141, 113, 255, 0.5);
+  background: rgba(141, 113, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.mall-projection-chip:focus-visible {
+  outline: 2px solid rgba(141, 113, 255, 0.6);
+  outline-offset: 2px;
+}
+
+/* Category headers (when grouped) */
+.mall-tile-category-header {
+  grid-column: 1 / -1;
+  padding: 0.5rem 0 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.mall-tile-category-header:first-child {
+  padding-top: 0;
+}
+
 /* ========== Tile Field Container ========== */
 
 .mall-tile-field {
@@ -295,12 +353,13 @@
 
 .tile-inspector-enter {
   flex: 1;
+  min-height: 48px; /* Thumb-comfortable tap target */
   padding: 0.85rem 1rem;
   border: none;
   border-radius: 0.75rem;
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 140ms ease;
@@ -310,6 +369,11 @@
   background: rgba(255, 255, 255, 0.18);
 }
 
+.tile-inspector-enter:active {
+  background: rgba(255, 255, 255, 0.24);
+  transform: scale(0.98);
+}
+
 .tile-inspector-hint {
   margin-top: 1rem;
   padding-top: 0.75rem;
@@ -317,6 +381,60 @@
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.45);
   text-align: center;
+}
+
+/* ========== Phone Thumb-Zone: Inspector as Bottom Sheet ========== */
+
+@media (max-width: 480px) {
+  .tile-inspector {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transform: translateY(100%);
+    width: 100%;
+    max-width: none;
+    max-height: 85vh;
+    border-radius: 1.5rem 1.5rem 0 0;
+    padding: 1.25rem 1.25rem calc(1.25rem + var(--safe-bottom, 0px));
+  }
+
+  .tile-inspector.visible {
+    transform: translateY(0);
+  }
+
+  /* Compact grid on small screens */
+  .tile-inspector-grid {
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .tile-inspector-field {
+    padding: 0.5rem 0.65rem;
+  }
+
+  /* Larger action button for thumb reach */
+  .tile-inspector-enter {
+    min-height: 52px;
+    font-size: 1rem;
+  }
+
+  /* Handle indicator at top */
+  .tile-inspector::before {
+    content: "";
+    position: absolute;
+    top: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2rem;
+    height: 0.25rem;
+    border-radius: 0.125rem;
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  .tile-inspector-header {
+    padding-top: 0.5rem;
+  }
 }
 
 /* ========== Reduced Mall Copy ========== */

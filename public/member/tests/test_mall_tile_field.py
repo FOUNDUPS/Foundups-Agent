@@ -275,6 +275,10 @@ class TestProjectionCSS:
         """Projection chips have hover state."""
         assert '.mall-projection-chip:hover' in tile_field_css
 
+    def test_chip_touch_target(self, tile_field_css):
+        """Projection chips have 44px min-height for phone ergonomics."""
+        assert 'min-height: 44px' in tile_field_css
+
 
 class TestProjectionJS:
     """Test projection logic in JS."""
