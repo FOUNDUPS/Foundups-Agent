@@ -1,5 +1,44 @@
 # Member Area Module Change Log
 
+## [2026-04-02] Route Contract Bridge Phase 1 (Worker B)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker B
+**Type**: Feature Addition
+**Slice**: `pfmall_route_contract_bridge_phase1`
+
+**Files Created**:
+- `public/f/index.html` — route bridge for `/f/{foundup_id}`
+- `public/member/tests/test_route_contract_bridge.py` — 15 route bridge tests
+
+**Files Modified**:
+- `firebase.json` — added `/f/**` rewrite rule before catch-all
+
+**Bridge Behavior**:
+```
+/f/{foundup_id}  →  parse id  →  /member/foundup.html?id={foundup_id}
+/f/{id}/{subpath} →  redirect with subpath param preserved
+/f/ (no id)       →  error: "No FoundUp specified" + Mall link
+/f/{invalid}      →  error: "Invalid FoundUp ID" + Mall link
+```
+
+**Firebase Hosting**:
+```json
+"rewrites": [
+  { "source": "/f/**", "destination": "/f/index.html" },
+  { "source": "**", "destination": "/index.html" }
+]
+```
+
+**Route Contract Truth**:
+- `/f/{id}` is the canonical route family per contract
+- Current bridge redirects to transitional entry (shell-owned)
+- No fake tenant runtime — explicit redirect to `/member/foundup.html`
+- Subpath preserved for future routing expansion
+
+**Test Results**: 403 passed, 2 warnings
+
+---
+
 ## [2026-04-02] FoundUp Entry Shell Alignment Phase 3 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B

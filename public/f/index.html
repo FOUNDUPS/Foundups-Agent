@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FoundUps Mall | Route Bridge</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #08080f;
+      color: #e4e2ec;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .bridge-loading {
+      text-align: center;
+      padding: 2rem;
+    }
+    .bridge-loading p {
+      color: rgba(228, 226, 236, 0.6);
+      font-size: 0.9rem;
+    }
+    .bridge-error {
+      text-align: center;
+      padding: 2rem;
+    }
+    .bridge-error h1 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+    .bridge-error p {
+      color: rgba(228, 226, 236, 0.6);
+      margin-bottom: 1rem;
+    }
+    .bridge-error a {
+      color: #7c5cfc;
+      text-decoration: none;
+    }
+    .bridge-error a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div id="bridgeContent">
+    <div class="bridge-loading">
+      <p>Routing to FoundUp...</p>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    /**
+     * Route Contract Bridge
+     *
+     * Parses /f/{foundup_id} and redirects to the shell-owned
+     * transitional entry: /member/foundup.html?id={foundup_id}
+     *
+     * This bridge exists because:
+     * - Route contract says /f/{id} is the canonical route family
+     * - Transitional entry at /member/foundup.html is still live
+     * - External FoundUp tenant runtime is not yet deployed
+     */
+
+    var TRANSITIONAL_ENTRY = '/member/foundup.html';
+    var MALL_HOME = '/member/';
+
+    // Parse foundup_id from path: /f/{foundup_id} or /f/{foundup_id}/...
+    var path = window.location.pathname;
+    var match = path.match(/^\/f\/([^\/]+)/);
+
+    if (!match || !match[1]) {
+      // No valid foundup_id in path - show error or redirect to Mall
+      showError('No FoundUp specified', 'The route /f/ requires a FoundUp ID.');
+      return;
+    }
+
+    var foundupId = decodeURIComponent(match[1]);
+
+    // Validate foundup_id format (alphanumeric with underscores)
+    if (!/^[a-zA-Z0-9_]+$/.test(foundupId)) {
+      showError('Invalid FoundUp ID', 'The FoundUp ID "' + escapeHtml(foundupId) + '" is not valid.');
+      return;
+    }
+
+    // Redirect to transitional entry
+    var targetUrl = TRANSITIONAL_ENTRY + '?id=' + encodeURIComponent(foundupId);
+
+    // Preserve any additional path segments as a hint for future routing
+    var subpath = path.replace(/^\/f\/[^\/]+/, '');
+    if (subpath && subpath !== '/') {
+      targetUrl += '&subpath=' + encodeURIComponent(subpath);
+    }
+
+    window.location.replace(targetUrl);
+
+    function showError(title, message) {
+      document.getElementById('bridgeContent').innerHTML =
+        '<div class="bridge-error">' +
+          '<h1>' + escapeHtml(title) + '</h1>' +
+          '<p>' + escapeHtml(message) + '</p>' +
+          '<a href="' + MALL_HOME + '">Return to Mall</a>' +
+        '</div>';
+    }
+
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+  })();
+  </script>
+</body>
+</html>
