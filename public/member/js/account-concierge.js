@@ -197,6 +197,7 @@
   var MODE_ACTIONS = [
     { id: 'summary',   label: 'Summary',     icon: '\u2139' },
     { id: 'listen',    label: 'Listen',       icon: '\uD83C\uDFA4' },
+    { id: 'tools',     label: 'AI Tools',     icon: '\uD83D\uDD27' },
     { id: 'foundups',  label: 'My FoundUps',  icon: '\uD83D\uDCE6' },
     { id: 'invites',   label: 'Invites',      icon: '\uD83D\uDCE8' },
     { id: 'options',   label: 'Options',      icon: '\u2699' }
@@ -242,6 +243,12 @@
         break;
       case 'listen':
         startListening();
+        break;
+      case 'tools':
+        openPlane();
+        injectAITools();
+        var toolsSection = plane.querySelector('[data-reddog-tools]');
+        if (toolsSection) toolsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         break;
       case 'foundups':
         openPlane();
@@ -421,6 +428,185 @@
     });
   }
 
+  // ---- AI tools: projection, density, motion mode ----
+  var aiToolsEl = null;
+
+  // Local state (truthful — these represent the user's current choice)
+  var currentCategory = 'all';
+  var currentDensity = '3x4';
+  var currentMotionMode = 'snap';
+
+  var CATEGORIES = [
+    { id: 'all',       label: 'All' },
+    { id: 'startups',  label: 'Startups' },
+    { id: 'travel',    label: 'Travel' },
+    { id: 'music',     label: 'Music' },
+    { id: 'food',      label: 'Food' },
+    { id: 'tech',      label: 'Tech' }
+  ];
+
+  var DENSITY_PRESETS = [
+    { id: '2x3', cols: 2, rows: 3 },
+    { id: '3x4', cols: 3, rows: 4 },
+    { id: '3x5', cols: 3, rows: 5 },
+    { id: '5x8', cols: 5, rows: 8 }
+  ];
+
+  function emitRedDogCommand(command, detail) {
+    document.dispatchEvent(new CustomEvent('reddog:command', {
+      detail: Object.assign({ command: command }, detail || {})
+    }));
+  }
+
+  function setCategory(categoryId) {
+    currentCategory = categoryId;
+    // Call B's API if available
+    if (categoryId === 'all') {
+      if (window.mallTileField && typeof window.mallTileField.resetProjection === 'function') {
+        window.mallTileField.resetProjection();
+      }
+    } else {
+      if (window.mallTileField && typeof window.mallTileField.setProjection === 'function') {
+        window.mallTileField.setProjection(categoryId);
+      }
+    }
+    emitRedDogCommand('set_projection', { category: categoryId });
+    refreshToolsUI();
+    renderBriefing();
+  }
+
+  function setDensity(presetId) {
+    currentDensity = presetId;
+    var preset = null;
+    for (var i = 0; i < DENSITY_PRESETS.length; i++) {
+      if (DENSITY_PRESETS[i].id === presetId) { preset = DENSITY_PRESETS[i]; break; }
+    }
+    if (window.mallTileField && typeof window.mallTileField.setDensity === 'function') {
+      window.mallTileField.setDensity(preset ? preset.cols : 3, preset ? preset.rows : 4);
+    }
+    emitRedDogCommand('set_density', { preset: presetId, cols: preset ? preset.cols : 3, rows: preset ? preset.rows : 4 });
+    refreshToolsUI();
+  }
+
+  function setMotionMode(mode) {
+    currentMotionMode = mode;
+    if (window.mallTileField && typeof window.mallTileField.setMotionMode === 'function') {
+      window.mallTileField.setMotionMode(mode);
+    }
+    emitRedDogCommand('set_motion_mode', { mode: mode });
+    refreshToolsUI();
+  }
+
+  function refreshToolsUI() {
+    if (!aiToolsEl) return;
+
+    // Update category active states
+    var catBtns = aiToolsEl.querySelectorAll('[data-reddog-category]');
+    for (var i = 0; i < catBtns.length; i++) {
+      catBtns[i].classList.toggle('active', catBtns[i].getAttribute('data-reddog-category') === currentCategory);
+    }
+
+    // Update density active states
+    var denBtns = aiToolsEl.querySelectorAll('[data-reddog-density]');
+    for (var j = 0; j < denBtns.length; j++) {
+      denBtns[j].classList.toggle('active', denBtns[j].getAttribute('data-reddog-density') === currentDensity);
+    }
+
+    // Update motion mode toggle
+    var motionBtns = aiToolsEl.querySelectorAll('[data-reddog-motion]');
+    for (var k = 0; k < motionBtns.length; k++) {
+      motionBtns[k].classList.toggle('active', motionBtns[k].getAttribute('data-reddog-motion') === currentMotionMode);
+    }
+  }
+
+  function injectAITools() {
+    if (aiToolsEl) return;
+    var conciergeHost = plane.querySelector('[data-reddog-concierge]');
+    if (!conciergeHost) return;
+
+    aiToolsEl = document.createElement('div');
+    aiToolsEl.className = 'reddog-ai-tools';
+    aiToolsEl.setAttribute('data-reddog-tools', '');
+
+    var html = '';
+
+    // Category projection
+    html += '<div class="reddog-tools-group">';
+    html += '<div class="reddog-tools-label">Category</div>';
+    html += '<div class="reddog-tools-row">';
+    for (var i = 0; i < CATEGORIES.length; i++) {
+      var c = CATEGORIES[i];
+      html += '<button class="reddog-tool-pill' + (c.id === currentCategory ? ' active' : '') + '"'
+            + ' data-reddog-category="' + c.id + '" type="button">' + esc(c.label) + '</button>';
+    }
+    html += '</div></div>';
+
+    // Creator/entity projection hook
+    html += '<div class="reddog-tools-group">';
+    html += '<div class="reddog-tools-label">Creator / Entity</div>';
+    html += '<div class="reddog-tools-row">';
+    html += '<button class="reddog-tool-pill" data-reddog-creator-search type="button">Search\u2026</button>';
+    html += '</div></div>';
+
+    // Density presets
+    html += '<div class="reddog-tools-group">';
+    html += '<div class="reddog-tools-label">Density</div>';
+    html += '<div class="reddog-tools-row">';
+    for (var j = 0; j < DENSITY_PRESETS.length; j++) {
+      var d = DENSITY_PRESETS[j];
+      html += '<button class="reddog-tool-pill reddog-density-pill' + (d.id === currentDensity ? ' active' : '') + '"'
+            + ' data-reddog-density="' + d.id + '" type="button">' + d.id + '</button>';
+    }
+    html += '</div></div>';
+
+    // Motion mode: Snap / Glide
+    html += '<div class="reddog-tools-group">';
+    html += '<div class="reddog-tools-label">Motion</div>';
+    html += '<div class="reddog-tools-row">';
+    html += '<button class="reddog-tool-pill reddog-motion-pill' + (currentMotionMode === 'snap' ? ' active' : '') + '"'
+          + ' data-reddog-motion="snap" type="button">Snap</button>';
+    html += '<button class="reddog-tool-pill reddog-motion-pill' + (currentMotionMode === 'glide' ? ' active' : '') + '"'
+          + ' data-reddog-motion="glide" type="button">Glide</button>';
+    html += '</div></div>';
+
+    aiToolsEl.innerHTML = html;
+
+    // Insert before options section
+    var optionsSection = plane.querySelector('[data-reddog-options]');
+    if (optionsSection) {
+      optionsSection.parentNode.insertBefore(aiToolsEl, optionsSection);
+    } else {
+      conciergeHost.appendChild(aiToolsEl);
+    }
+
+    // Wire click handlers
+    aiToolsEl.addEventListener('click', function (e) {
+      var catBtn = e.target.closest('[data-reddog-category]');
+      if (catBtn) {
+        setCategory(catBtn.getAttribute('data-reddog-category'));
+        return;
+      }
+
+      var denBtn = e.target.closest('[data-reddog-density]');
+      if (denBtn) {
+        setDensity(denBtn.getAttribute('data-reddog-density'));
+        return;
+      }
+
+      var motBtn = e.target.closest('[data-reddog-motion]');
+      if (motBtn) {
+        setMotionMode(motBtn.getAttribute('data-reddog-motion'));
+        return;
+      }
+
+      var creatorBtn = e.target.closest('[data-reddog-creator-search]');
+      if (creatorBtn) {
+        emitRedDogCommand('search_creator', {});
+        return;
+      }
+    });
+  }
+
   // ---- context briefing ----
   var briefingEl = null;
 
@@ -492,8 +678,18 @@
     }
 
     // Projection mode
-    if (ctx.projection && ctx.projection !== 'default') {
+    if (currentCategory !== 'all') {
+      lines.push('Category: ' + currentCategory);
+    } else if (ctx.projection && ctx.projection !== 'default') {
       lines.push('Sorted: ' + ctx.projection);
+    }
+
+    // Density and motion
+    if (currentDensity !== '3x4') {
+      lines.push('Density: ' + currentDensity);
+    }
+    if (currentMotionMode !== 'snap') {
+      lines.push('Motion: ' + currentMotionMode);
     }
 
     // Active inspection
@@ -674,6 +870,7 @@
     renderBriefing();
     injectRecommendations();
     renderRecommendations();
+    injectAITools();
   };
 
   // ---- public API: window.redDog ----
@@ -698,6 +895,15 @@
     getRecommendations: getRecommendations,
     runRecommendation: runRecommendation,
     refreshRecommendations: function () { injectRecommendations(); renderRecommendations(); },
+
+    // AI Tools: projection, density, motion mode
+    openTools: function () { injectAITools(); executeMode('tools'); },
+    setCategory: setCategory,
+    getCategory: function () { return currentCategory; },
+    setDensity: setDensity,
+    getDensity: function () { return currentDensity; },
+    setMotionMode: setMotionMode,
+    getMotionMode: function () { return currentMotionMode; },
 
     /** Populate identity block from Clerk user + Firestore data */
     setIdentity: function (clerkUser, userData) {

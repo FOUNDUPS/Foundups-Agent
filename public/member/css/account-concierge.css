@@ -419,6 +419,65 @@
   background: rgba(141, 113, 255, 0.24);
 }
 
+/* Red Dog AI tools section */
+.reddog-ai-tools {
+  padding: 0.75rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.reddog-tools-group {
+  margin-bottom: 0.65rem;
+}
+.reddog-tools-group:last-child {
+  margin-bottom: 0;
+}
+.reddog-tools-label {
+  font-size: 0.7rem;
+  color: rgba(243, 241, 248, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.4rem;
+}
+.reddog-tools-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.reddog-tool-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(141, 113, 255, 0.15);
+  background: rgba(141, 113, 255, 0.05);
+  color: rgba(228, 226, 236, 0.7);
+  font-size: 0.76rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  white-space: nowrap;
+  min-height: 32px;
+}
+.reddog-tool-pill:hover {
+  background: rgba(141, 113, 255, 0.12);
+  border-color: rgba(141, 113, 255, 0.3);
+  color: rgba(228, 226, 236, 0.9);
+}
+.reddog-tool-pill.active {
+  background: rgba(141, 113, 255, 0.2);
+  border-color: rgba(141, 113, 255, 0.45);
+  color: rgba(228, 226, 236, 0.95);
+  font-weight: 600;
+}
+.reddog-density-pill {
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+}
+.reddog-motion-pill {
+  min-width: 3.5rem;
+}
+
 /* ========== Phone ergonomics ========== */
 
 /* Small screens: tighter plane, larger tap targets */
@@ -502,6 +561,13 @@
   /* Red Dog header: compact */
   .reddog-header {
     padding: 0.35rem 0 0.5rem;
+  }
+
+  /* AI tools: ensure 44px touch targets on phone */
+  .reddog-tool-pill {
+    min-height: 44px;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.8rem;
   }
 }
 
