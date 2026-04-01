@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>FoundUPS — Where Will You Aim Your Compute?</title>
   <meta name="description"
     content="Aim your compute at ideas that matter. Agents build. You earn Return on Compute.">
@@ -258,6 +258,7 @@
     .snap-section {
       scroll-snap-align: start;
       min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -359,6 +360,7 @@
     /* ─── HERO ─── */
     .hero {
       min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -922,8 +924,8 @@
     /* ─── CHAT WIDGET ─── */
     .chat-fab {
       position: fixed;
-      bottom: 24px;
-      right: 24px;
+      bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+      right: max(24px, env(safe-area-inset-right, 0px));
       z-index: 1000;
       width: 56px;
       height: 56px;
@@ -950,8 +952,8 @@
 
     .chat-panel {
       position: fixed;
-      bottom: 90px;
-      right: 24px;
+      bottom: calc(90px + env(safe-area-inset-bottom, 0px));
+      right: max(24px, env(safe-area-inset-right, 0px));
       z-index: 999;
       width: 360px;
       max-height: 480px;
@@ -1107,11 +1109,11 @@
       .chat-panel {
         width: calc(100vw - 32px);
         right: 16px;
-        bottom: 80px;
+        bottom: calc(80px + env(safe-area-inset-bottom, 0px));
       }
 
       .chat-fab {
-        bottom: 16px;
+        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
         right: 16px;
       }
     }
@@ -1205,6 +1207,19 @@
       .hero-sub {
         font-size: 0.8rem;
       }
+
+      .disclaimer-card {
+        padding: 1.5rem;
+      }
+
+      .disclaimer-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .disclaimer-card h2 {
+        font-size: 1.2rem;
+      }
     }
 
     /* ─── DISCLAIMER MODAL ─── */
@@ -1218,6 +1233,8 @@
       align-items: center;
       justify-content: center;
       padding: 1rem;
+      padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+      padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
       animation: fadeIn 0.3s ease;
     }
 
@@ -1227,6 +1244,10 @@
       border-radius: 16px;
       padding: 2.5rem;
       max-width: 520px;
+      max-height: calc(100vh - 2rem);
+      max-height: calc(100dvh - 2rem);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       text-align: center;
       animation: scaleIn 0.3s ease;
     }
@@ -1291,6 +1312,7 @@
       background: var(--bg-card);
       border-top: 1px solid var(--border);
       padding: 0.75rem 1.25rem;
+      padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
       align-items: center;
       justify-content: center;
       gap: 1rem;

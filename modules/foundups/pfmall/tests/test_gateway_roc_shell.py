@@ -896,3 +896,91 @@ class TestChatSafetyPhase8:
         """Chat input must have maxlength."""
         html = GATEWAY.read_text(encoding="utf-8")
         assert 'maxlength="500"' in html
+
+
+# ---------------------------------------------------------------------------
+# Mobile Ergonomics Phase 9
+# ---------------------------------------------------------------------------
+
+class TestMobileErgonomicsPhase9:
+    """Phone-first viewport, safe-area, and modal fit."""
+
+    def test_viewport_fit_cover(self):
+        """Viewport meta must include viewport-fit=cover for notch handling."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        assert "viewport-fit=cover" in html
+
+    def test_snap_section_uses_dvh(self):
+        """Snap sections must use 100dvh for mobile-safe height."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index(".snap-section")
+        block = html[start:start + 200]
+        assert "100dvh" in block
+
+    def test_hero_uses_dvh(self):
+        """Hero must use 100dvh for mobile-safe height."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        # Find the .hero CSS rule (not .hero-sub)
+        import re
+        match = re.search(r'\.hero\s*\{[^}]+\}', html)
+        assert match
+        assert "100dvh" in match.group(0)
+
+    def test_snap_section_has_vh_fallback(self):
+        """Snap sections must keep 100vh as fallback before 100dvh."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index(".snap-section")
+        block = html[start:start + 200]
+        assert "100vh" in block
+
+    def test_safe_area_in_install_banner(self):
+        """Install banner must account for safe-area-inset-bottom."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index(".install-banner")
+        block = html[start:start + 400]
+        assert "safe-area-inset-bottom" in block
+
+    def test_safe_area_in_chat_fab(self):
+        """Chat FAB must account for safe-area-inset-bottom."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index(".chat-fab")
+        block = html[start:start + 300]
+        assert "safe-area-inset-bottom" in block
+
+    def test_safe_area_in_modal_overlay(self):
+        """Modal overlay must account for safe-area insets."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index(".disclaimer-overlay")
+        block = html[start:start + 400]
+        assert "safe-area-inset" in block
+
+    def test_modal_card_scrollable(self):
+        """Modal card must have overflow-y for small screens."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        # Find the main .disclaimer-card rule (after DISCLAIMER MODAL comment)
+        start = html.index("DISCLAIMER MODAL")
+        card_start = html.index(".disclaimer-card", start)
+        block = html[card_start:card_start + 400]
+        assert "overflow-y" in block
+
+    def test_modal_card_max_height(self):
+        """Modal card must have max-height to prevent clipping."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        start = html.index("DISCLAIMER MODAL")
+        card_start = html.index(".disclaimer-card", start)
+        block = html[card_start:card_start + 400]
+        assert "max-height" in block
+
+    def test_small_screen_modal_padding(self):
+        """480px breakpoint must reduce modal card padding."""
+        html = GATEWAY.read_text(encoding="utf-8")
+        # Find the 480px media query that contains disclaimer-card
+        import re
+        blocks = list(re.finditer(r'@media\s*\(max-width:\s*480px\)', html))
+        found = False
+        for m in blocks:
+            block = html[m.start():m.start() + 500]
+            if ".disclaimer-card" in block:
+                found = True
+                break
+        assert found, "480px breakpoint must include .disclaimer-card padding reduction"
