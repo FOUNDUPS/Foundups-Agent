@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>FoundUps Mall | Entry</title>
   <meta name="description" content="FoundUp entry view in the FoundUps Mall shell.">
   <meta name="theme-color" content="#08080f">
@@ -20,8 +20,16 @@
     /* Entry page layout */
     .entry-shell {
       min-height: 100vh;
+      min-height: 100dvh;
       background: #08080f;
       color: #e4e2ec;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    @supports not (min-height: 100dvh) {
+      .entry-shell {
+        min-height: -webkit-fill-available;
+      }
     }
 
     .entry-back {
@@ -213,8 +221,8 @@
     /* Red Dog floating button */
     .entry-red-dog {
       position: fixed;
-      bottom: 1.5rem;
-      right: 1.5rem;
+      bottom: calc(1.5rem + var(--safe-bottom));
+      right: max(1.5rem, env(safe-area-inset-right, 0px));
       width: 52px;
       height: 52px;
       border-radius: 50%;
@@ -249,10 +257,10 @@
 
     .concierge-sheet {
       position: fixed;
-      right: 1.25rem;
-      bottom: 5rem;
+      right: max(1.25rem, env(safe-area-inset-right, 0px));
+      bottom: calc(5rem + var(--safe-bottom));
       width: min(22rem, calc(100vw - 2rem));
-      max-height: calc(100vh - 7rem);
+      max-height: calc(100dvh - 7rem - var(--safe-bottom));
       overflow-y: auto;
       background: rgba(24,24,38,0.96);
       border: 1px solid rgba(255,255,255,0.08);

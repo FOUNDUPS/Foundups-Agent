@@ -1,5 +1,65 @@
 # Member Area Module Change Log
 
+## [2026-04-02] Mobile Blockers Phase 1 (Worker B)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker B
+**Type**: Bug Fix / UX Improvement
+**Slice**: `pfmall_mobile_blockers_phase1`
+
+**Files Modified**:
+- `public/member/css/member.css` — safe area variables, dynamic viewport height
+- `public/member/js/mall-tile-field.js` — immediate tap response (no 300ms delay)
+- `public/member/index.html` — viewport-fit=cover meta
+- `public/member/foundup.html` — viewport-fit=cover, safe area, dynamic height
+- `public/member/tests/test_mall_tile_field.py` — updated for renamed variable
+
+**Files Created**:
+- `public/member/tests/test_mobile_blockers.py` — 19 mobile blocker tests
+
+**P0 Fixes Applied**:
+
+1. **Safe Area Insets** (iPhone home indicator)
+```css
+:root {
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+.red-dog-anchor {
+  bottom: calc(1.25rem + var(--safe-bottom));
+}
+```
+
+2. **Dynamic Viewport Height** (iOS Safari 100vh bug)
+```css
+.member-area, .mall-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+@supports not (min-height: 100dvh) {
+  min-height: -webkit-fill-available;
+}
+```
+
+3. **Tap Latency Fix** (300ms delay removed)
+```javascript
+// OLD: setTimeout wait before openInspector
+// NEW: openInspector(index) called immediately
+// Double-tap still works to bypass inspector and enter directly
+```
+
+**Behavioral Change**:
+- Tap → opens inspector **immediately** (was: 300ms delay)
+- Double-tap → enters FoundUp directly (unchanged semantics)
+
+**Protected Behaviors (unchanged)**:
+- Tile inspector overlay
+- Tile enter flow (via inspector button or double-tap)
+- Three-anchor structure
+- /member/foundup.html?id= fallback path
+
+**Test Results**: 485 passed, 2 warnings
+
+---
+
 ## [2026-04-02] Route Contract Bridge Phase 1 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B

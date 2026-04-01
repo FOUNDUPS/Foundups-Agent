@@ -13,7 +13,9 @@
 (function() {
   'use strict';
 
-  var DOUBLE_TAP_DELAY = 300;
+  // Double-tap detection window (ms) - only for bypassing inspector to enter directly
+  // Single taps now open inspector immediately (no delay)
+  var DOUBLE_TAP_WINDOW = 300;
   var inspectorVisible = false;
   var inspectingIndex = null;
   var lastTapTime = 0;
@@ -105,28 +107,24 @@
     var tiles = tileField.querySelectorAll('.mall-tile');
 
     tiles.forEach(function(tile) {
-      // Touch/click handling for tap vs double-tap
+      // Touch/click handling - immediate tap response, double-tap bypasses inspector
       tile.addEventListener('click', function(e) {
         var index = Number(tile.dataset.index || 0);
         var now = Date.now();
 
-        // Check for double-tap
-        if (lastTapTarget === tile && (now - lastTapTime) < DOUBLE_TAP_DELAY) {
-          // Double-tap: enter FoundUp directly
+        // Check for double-tap (second tap within window)
+        if (lastTapTarget === tile && (now - lastTapTime) < DOUBLE_TAP_WINDOW) {
+          // Double-tap: close inspector if open and enter FoundUp directly
           e.preventDefault();
           lastTapTime = 0;
           lastTapTarget = null;
+          closeInspector();
           enterFoundUp(index);
         } else {
-          // Single tap: show inspector (with delay to detect double-tap)
+          // Single tap: open inspector immediately (no delay)
           lastTapTime = now;
           lastTapTarget = tile;
-
-          setTimeout(function() {
-            if (lastTapTarget === tile && (Date.now() - lastTapTime) >= DOUBLE_TAP_DELAY) {
-              openInspector(index);
-            }
-          }, DOUBLE_TAP_DELAY + 10);
+          openInspector(index);
         }
       });
 

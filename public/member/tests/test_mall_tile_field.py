@@ -106,7 +106,7 @@ class TestTileFieldJS:
 
     def test_double_tap_detection(self, tile_field_js):
         """Double-tap detection is implemented."""
-        assert 'DOUBLE_TAP_DELAY' in tile_field_js
+        assert 'DOUBLE_TAP_WINDOW' in tile_field_js
         assert 'lastTapTime' in tile_field_js
 
     def test_inspector_creation(self, tile_field_js):
