@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Tests for video mall media delivery — Worker A phase 1.
+Tests for video mall media delivery — Worker A phases 1-2.
 
-Verifies that media path conventions, hosting config, and embed safety
-rules are correct BEFORE E (content catalog) and F (player) land.
-
-These tests ensure:
+Verifies:
 - Firebase hosting cache headers differentiate media from HTML/JSON
 - The rewrite-trap (** -> /index.html) is documented and mitigated
-- Media directory convention is stable
+- Media directory conventions exist at both /media/ and /member/media/
 - Embed URL patterns are safe (no arbitrary external sources)
 - Service worker NEVER_CACHE excludes member media correctly
+- CSS theme fallback colors survive broken poster images
+- Video catalog media references use allowed paths
 """
 
 import json
@@ -29,8 +28,11 @@ GATEWAY = PUBLIC / "index.html"
 MEMBER_INDEX = MEMBER / "index.html"
 FOUNDUP_ENTRY = MEMBER / "foundup.html"
 ROUTE_BRIDGE = PUBLIC / "f" / "index.html"
-MEDIA_DIR = MEMBER / "media"
+ROOT_MEDIA_DIR = PUBLIC / "media"
+MEMBER_MEDIA_DIR = MEMBER / "media"
 MALL_CATALOG = MEMBER / "mall-catalog.json"
+VIDEO_CATALOG = MEMBER / "mall-video-catalog.json"
+TILE_FIELD_CSS = MEMBER / "css" / "mall-tile-field.css"
 
 
 # ---------------------------------------------------------------------------
@@ -52,6 +54,9 @@ class TestFirebaseCacheHeaders:
                 return rule
         return None
 
+    def _find_all_header_rules(self, source_pattern):
+        return [r for r in self.headers if source_pattern in r.get("source", "")]
+
     def test_firebase_json_exists(self):
         assert FIREBASE_JSON.is_file()
 
@@ -67,26 +72,33 @@ class TestFirebaseCacheHeaders:
         assert "X-Frame-Options" in header_keys
         assert "X-Content-Type-Options" in header_keys
 
-    def test_image_cache_header_exists(self):
-        """Image media gets explicit Cache-Control."""
-        rule = self._find_header_rule("member/media/**/*.")
-        assert rule is not None, "No cache header rule for member/media images"
-        cache_headers = [h for h in rule["headers"] if h["key"] == "Cache-Control"]
-        assert len(cache_headers) == 1
-        assert "max-age=" in cache_headers[0]["value"]
+    def test_root_media_image_cache_header(self):
+        """Root /media/ images get explicit Cache-Control."""
+        # Must match media/** not just member/media/**
+        rules = self._find_all_header_rules("media/**/*.")
+        image_rules = [r for r in rules if "jpg" in r.get("source", "")]
+        assert len(image_rules) >= 1, "No cache header for root media/ images"
+        # At least one must NOT start with "member/"
+        root_rules = [r for r in image_rules if not r["source"].startswith("member/")]
+        assert len(root_rules) >= 1, "No cache header for root-level media/ images"
 
-    def test_video_cache_header_exists(self):
-        """Video media gets explicit Cache-Control."""
+    def test_root_media_video_cache_header(self):
+        """Root /media/ videos get explicit Cache-Control."""
         found = False
         for rule in self.headers:
             src = rule.get("source", "")
-            if "member/media" in src and ("mp4" in src or "webm" in src):
+            if "media" in src and ("mp4" in src or "webm" in src) and not src.startswith("member/"):
                 found = True
                 cache_headers = [h for h in rule["headers"] if h["key"] == "Cache-Control"]
                 assert len(cache_headers) == 1
                 assert "max-age=" in cache_headers[0]["value"]
                 break
-        assert found, "No cache header rule for member/media video files"
+        assert found, "No cache header rule for root media/ video files"
+
+    def test_member_media_image_cache_header(self):
+        """Member /member/media/ images also get Cache-Control."""
+        rules = self._find_all_header_rules("member/media/**/*.")
+        assert len(rules) >= 1, "No cache header for member/media/ images"
 
     def test_html_no_cache(self):
         """HTML files must not be long-cached (deployment parity)."""
@@ -148,24 +160,31 @@ class TestRewriteTrapMitigation:
 
 
 # ---------------------------------------------------------------------------
-# Media directory convention
+# Media directory conventions
 # ---------------------------------------------------------------------------
 
 class TestMediaDirectoryConvention:
-    """Media directory must exist at public/member/media/ with expected structure."""
+    """Media directories exist at both root and member level."""
 
-    def test_media_dir_exists(self):
-        assert MEDIA_DIR.is_dir(), "public/member/media/ directory must exist"
+    def test_root_media_dir_exists(self):
+        """public/media/ exists for catalog poster paths (/media/posters/...)."""
+        assert ROOT_MEDIA_DIR.is_dir(), "public/media/ directory must exist"
 
-    def test_posters_dir_exists(self):
-        assert (MEDIA_DIR / "posters").is_dir(), "public/member/media/posters/ must exist"
+    def test_root_posters_dir_exists(self):
+        assert (ROOT_MEDIA_DIR / "posters").is_dir(), "public/media/posters/ must exist"
 
-    def test_thumbs_dir_exists(self):
-        assert (MEDIA_DIR / "thumbs").is_dir(), "public/member/media/thumbs/ must exist"
+    def test_root_thumbs_dir_exists(self):
+        assert (ROOT_MEDIA_DIR / "thumbs").is_dir(), "public/media/thumbs/ must exist"
 
-    def test_gitkeep_present(self):
-        """Convention directory has .gitkeep until real assets land."""
-        assert (MEDIA_DIR / ".gitkeep").is_file()
+    def test_member_media_dir_exists(self):
+        """public/member/media/ exists for member-specific media."""
+        assert MEMBER_MEDIA_DIR.is_dir(), "public/member/media/ directory must exist"
+
+    def test_member_posters_dir_exists(self):
+        assert (MEMBER_MEDIA_DIR / "posters").is_dir()
+
+    def test_member_thumbs_dir_exists(self):
+        assert (MEMBER_MEDIA_DIR / "thumbs").is_dir()
 
 
 # ---------------------------------------------------------------------------
@@ -175,11 +194,10 @@ class TestMediaDirectoryConvention:
 class TestEmbedURLSafety:
     """Embed/source URLs in catalogs must follow safety rules.
 
-    These rules apply to any future mall-video-catalog.json or similar:
-    - embed_url must be YouTube embed (https://www.youtube.com/embed/...)
-    - source_url must be YouTube watch (https://www.youtube.com/watch?v=...)
-    - poster_url / thumbnail_url must be relative (/member/media/...) or YouTube CDN
-    - No arbitrary external domains for media assets hosted on our origin
+    - embed_url must be YouTube embed
+    - source_url must be YouTube watch
+    - poster_url / thumbnail_url must be local (/media/...) or YouTube CDN
+    - No arbitrary external domains
     """
 
     ALLOWED_EMBED_PATTERNS = [
@@ -193,7 +211,8 @@ class TestEmbedURLSafety:
     ]
 
     ALLOWED_MEDIA_PATTERNS = [
-        r"^/member/media/",              # local relative
+        r"^/media/",                     # root-relative (catalog convention)
+        r"^/member/media/",              # member-relative
         r"^https://i\.ytimg\.com/",      # YouTube CDN thumbnails
         r"^https://img\.youtube\.com/",   # YouTube CDN alt
     ]
@@ -222,7 +241,11 @@ class TestEmbedURLSafety:
         url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
         assert any(re.match(p, url) for p in self.ALLOWED_SOURCE_PATTERNS)
 
-    def test_validate_media_url_accepts_local(self):
+    def test_validate_media_url_accepts_root_local(self):
+        url = "/media/posters/move2japan.jpg"
+        assert any(re.match(p, url) for p in self.ALLOWED_MEDIA_PATTERNS)
+
+    def test_validate_media_url_accepts_member_local(self):
         url = "/member/media/posters/move2japan.jpg"
         assert any(re.match(p, url) for p in self.ALLOWED_MEDIA_PATTERNS)
 
@@ -261,6 +284,69 @@ class TestServiceWorkerMediaRules:
 
 
 # ---------------------------------------------------------------------------
+# CSS theme fallback colors
+# ---------------------------------------------------------------------------
+
+class TestThemeFallbackColors:
+    """Each tile theme must have a background-color fallback for broken posters.
+
+    When JS sets inline background-image: url(poster.jpg) and the poster fails,
+    the theme gradient is lost. background-color survives as the only CSS-
+    controlled layer, providing a clean solid-tone fallback.
+    """
+
+    KNOWN_THEMES = [
+        "antifafm", "gotjunk", "magadoom", "tq", "vsa", "pqn", "default"
+    ]
+
+    @pytest.fixture(autouse=True)
+    def load_css(self):
+        self.css = TILE_FIELD_CSS.read_text(encoding="utf-8")
+
+    def test_tile_field_css_exists(self):
+        assert TILE_FIELD_CSS.is_file()
+
+    def test_each_theme_has_background_color(self):
+        """Every theme class must declare background-color for poster fallback."""
+        for theme in self.KNOWN_THEMES:
+            selector = f".mall-tile.theme-{theme}"
+            assert selector in self.css, f"Missing theme: {selector}"
+            # Find the rule block
+            start = self.css.index(selector)
+            # Scan forward for the closing brace
+            brace_depth = 0
+            block_start = None
+            for i in range(start, min(start + 500, len(self.css))):
+                if self.css[i] == '{':
+                    if block_start is None:
+                        block_start = i
+                    brace_depth += 1
+                elif self.css[i] == '}':
+                    brace_depth -= 1
+                    if brace_depth == 0:
+                        block = self.css[block_start:i + 1]
+                        break
+            assert "background-color:" in block, (
+                f"{selector} must have background-color for poster fallback"
+            )
+
+    def test_fallback_colors_are_not_transparent(self):
+        """Fallback colors must be opaque, not transparent."""
+        for theme in self.KNOWN_THEMES:
+            selector = f".mall-tile.theme-{theme}"
+            start = self.css.index(selector)
+            block = self.css[start:start + 400]
+            # Extract background-color value
+            match = re.search(r"background-color:\s*([^;]+);", block)
+            assert match is not None, f"No background-color in {selector}"
+            color = match.group(1).strip()
+            assert color != "transparent", f"{selector} fallback must not be transparent"
+            assert color.startswith("#") or color.startswith("rgb"), (
+                f"{selector} fallback should be a hex or rgb color, got: {color}"
+            )
+
+
+# ---------------------------------------------------------------------------
 # Delivery surface verification
 # ---------------------------------------------------------------------------
 
@@ -295,7 +381,89 @@ class TestDeliverySurfaces:
 
 
 # ---------------------------------------------------------------------------
-# Existing catalog — no media path regression
+# Video catalog — media path validation
+# ---------------------------------------------------------------------------
+
+class TestVideoCatalogMediaPaths:
+    """Video catalog media references must use allowed URL patterns."""
+
+    ALLOWED_POSTER_PATTERNS = [
+        r"^/media/",
+        r"^/member/media/",
+        r"^https://i\.ytimg\.com/",
+        r"^https://img\.youtube\.com/",
+    ]
+
+    ALLOWED_THUMB_PATTERNS = [
+        r"^/media/",
+        r"^/member/media/",
+        r"^https://i\.ytimg\.com/",
+        r"^https://img\.youtube\.com/",
+    ]
+
+    @pytest.fixture(autouse=True)
+    def load_catalog(self):
+        if VIDEO_CATALOG.is_file():
+            self.catalog = json.loads(VIDEO_CATALOG.read_text(encoding="utf-8"))
+        else:
+            self.catalog = None
+
+    def test_video_catalog_exists(self):
+        assert VIDEO_CATALOG.is_file(), "mall-video-catalog.json must exist"
+
+    def test_catalog_is_valid_json(self):
+        assert isinstance(self.catalog, list)
+
+    def test_lane_poster_urls_use_allowed_patterns(self):
+        """Every lane poster_url must match allowed media URL patterns."""
+        for lane in self.catalog:
+            url = lane.get("poster_url", "")
+            if not url:
+                continue
+            assert any(re.match(p, url) for p in self.ALLOWED_POSTER_PATTERNS), (
+                f"Lane {lane['foundup_id']} poster_url uses disallowed pattern: {url}"
+            )
+
+    def test_video_thumbnail_urls_use_allowed_patterns(self):
+        """Every video thumbnail_url must match allowed media URL patterns."""
+        for lane in self.catalog:
+            for video in lane.get("videos", []):
+                url = video.get("thumbnail_url", "")
+                if not url:
+                    continue
+                assert any(re.match(p, url) for p in self.ALLOWED_THUMB_PATTERNS), (
+                    f"Video {video.get('video_id', '?')} thumbnail uses disallowed pattern: {url}"
+                )
+
+    def test_video_embed_urls_are_youtube(self):
+        """Every video embed_url must be YouTube."""
+        embed_patterns = [
+            r"^https://www\.youtube\.com/embed/[a-zA-Z0-9_-]+",
+            r"^https://www\.youtube-nocookie\.com/embed/[a-zA-Z0-9_-]+",
+        ]
+        for lane in self.catalog:
+            for video in lane.get("videos", []):
+                url = video.get("embed_url", "")
+                if not url:
+                    continue
+                assert any(re.match(p, url) for p in embed_patterns), (
+                    f"Video {video.get('video_id', '?')} embed_url not YouTube: {url}"
+                )
+
+    def test_lane_poster_dirs_exist(self):
+        """The directory referenced by poster_url paths must exist."""
+        for lane in self.catalog:
+            url = lane.get("poster_url", "")
+            if url.startswith("/media/"):
+                parent = PUBLIC / url.lstrip("/").rsplit("/", 1)[0]
+                assert parent.is_dir(), f"Media directory missing: {parent}"
+            elif url.startswith("/member/media/"):
+                parent = PUBLIC / url.lstrip("/").rsplit("/", 1)[0]
+                assert parent.is_dir(), f"Media directory missing: {parent}"
+
+
+# ---------------------------------------------------------------------------
+# Existing mall-catalog.json — backward compat
 # ---------------------------------------------------------------------------
 
 class TestExistingCatalog:

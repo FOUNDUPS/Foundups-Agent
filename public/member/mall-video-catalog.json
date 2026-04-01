@@ -9,12 +9,15 @@
     "source_handle": "@MOVE2JAPAN",
     "category": "travel",
     "tags": [
-      "japan",
-      "relocation",
-      "fukui",
-      "life",
+      "012-lane",
       "expat",
-      "ffcpln"
+      "expat-life",
+      "ffcpln",
+      "fukui",
+      "japan",
+      "japan-relocation",
+      "life",
+      "relocation"
     ],
     "geo": "Fukui, Japan",
     "status": "active",
@@ -5178,7 +5181,15 @@
         "timestamp": "2026-01-31T14:53:11Z",
         "duration_seconds": 60
       }
-    ]
+    ],
+    "creator_id": "012",
+    "creator_display": "UnDaoDu (012)",
+    "topic_family": "life",
+    "related_lanes": [
+      "undaodu",
+      "linkedin_012"
+    ],
+    "display_order": 1
   },
   {
     "foundup_id": "undaodu",
@@ -5190,11 +5201,14 @@
     "source_handle": "@UnDaoDu",
     "category": "music",
     "tags": [
-      "music",
-      "original",
+      "0102",
+      "012-lane",
+      "ambient",
+      "consciousness",
       "meditation",
       "mindfulness",
-      "0102",
+      "music",
+      "original",
       "quantum"
     ],
     "geo": "Fukui, Japan",
@@ -9810,7 +9824,16 @@
         "timestamp": "2026-01-13T01:35:53Z",
         "duration_seconds": 665
       }
-    ]
+    ],
+    "creator_id": "012",
+    "creator_display": "UnDaoDu (012)",
+    "topic_family": "consciousness",
+    "related_lanes": [
+      "move2japan",
+      "linkedin_012",
+      "linkedin_esingularity"
+    ],
+    "display_order": 2
   },
   {
     "foundup_id": "foundups_main",
@@ -9822,14 +9845,17 @@
     "source_handle": "@FoundUps",
     "category": "startup",
     "tags": [
-      "pAVS",
-      "founders",
-      "ventures",
-      "btc",
+      "012-lane",
+      "ai-agents",
       "autonomous",
-      "openclaw"
+      "btc",
+      "founders",
+      "openclaw",
+      "pAVS",
+      "venture",
+      "ventures"
     ],
-    "geo": null,
+    "geo": "Global",
     "status": "active",
     "video_count": 44,
     "poster_url": "/media/posters/foundups_main.jpg",
@@ -10230,7 +10256,15 @@
         "timestamp": "2026-02-22T13:05:50Z",
         "duration_seconds": 60
       }
-    ]
+    ],
+    "creator_id": "012",
+    "creator_display": "UnDaoDu (012)",
+    "topic_family": "startup",
+    "related_lanes": [
+      "linkedin_foundups",
+      "linkedin_esingularity"
+    ],
+    "display_order": 3
   },
   {
     "foundup_id": "antifafm",
@@ -10242,15 +10276,18 @@
     "source_handle": "@antifaFM",
     "category": "media",
     "tags": [
-      "radio",
-      "resistance",
+      "012-lane",
       "24/7",
+      "activism",
+      "anti-fascist",
+      "ffcpln",
       "live",
       "music",
       "news",
-      "ffcpln"
+      "radio",
+      "resistance"
     ],
-    "geo": null,
+    "geo": "Global",
     "status": "active",
     "video_count": 34,
     "poster_url": "/media/posters/antifafm.jpg",
@@ -10561,7 +10598,14 @@
         "timestamp": "2026-03-10T10:27:28Z",
         "duration_seconds": 60
       }
-    ]
+    ],
+    "creator_id": "012",
+    "creator_display": "UnDaoDu (012)",
+    "topic_family": "resistance",
+    "related_lanes": [
+      "move2japan"
+    ],
+    "display_order": 4
   },
   {
     "foundup_id": "linkedin_012",
@@ -10569,21 +10613,33 @@
     "creator": "012",
     "entity": "UnDaoDu Michael J Trout",
     "source_type": "linkedin_profile",
-    "source_id": null,
+    "source_id": "urn:li:person:openstartup",
     "source_handle": "@openstartup",
-    "category": "professional",
+    "category": "thought-leadership",
     "tags": [
-      "linkedin",
-      "thought-leadership",
-      "founder",
       "0102",
-      "quantum"
+      "012-lane",
+      "articles",
+      "founder",
+      "linkedin",
+      "quantum",
+      "thought-leadership"
     ],
     "geo": "Fukui, Japan",
     "status": "active",
     "video_count": 0,
     "poster_url": "/media/posters/linkedin-012.jpg",
-    "videos": []
+    "videos": [],
+    "creator_id": "012",
+    "creator_display": "UnDaoDu (012)",
+    "topic_family": "consciousness",
+    "related_lanes": [
+      "undaodu",
+      "move2japan",
+      "linkedin_esingularity",
+      "linkedin_tsingularity"
+    ],
+    "display_order": 5
   },
   {
     "foundup_id": "linkedin_esingularity",
@@ -10592,20 +10648,32 @@
     "entity": "eSingularity",
     "source_type": "linkedin_profile",
     "source_id": "2199715",
-    "source_handle": null,
-    "category": "ai",
+    "source_handle": "esingularity",
+    "category": "ai-education",
     "tags": [
-      "singularity",
+      "0102",
+      "0102-epoch",
+      "012-lane",
+      "ai",
       "dae",
       "education",
-      "0102",
-      "ai"
+      "learning",
+      "singularity"
     ],
-    "geo": null,
+    "geo": "Global",
     "status": "active",
     "video_count": 0,
     "poster_url": "/media/posters/esingularity.jpg",
-    "videos": []
+    "videos": [],
+    "creator_id": "012",
+    "creator_display": "UnDaoDu (012)",
+    "topic_family": "consciousness",
+    "related_lanes": [
+      "linkedin_012",
+      "linkedin_tsingularity",
+      "undaodu"
+    ],
+    "display_order": 6
   },
   {
     "foundup_id": "linkedin_tsingularity",
@@ -10614,20 +10682,31 @@
     "entity": "tSingularity",
     "source_type": "linkedin_profile",
     "source_id": "65471449",
-    "source_handle": null,
-    "category": "ai",
+    "source_handle": "tsingularity",
+    "category": "ai-research",
     "tags": [
-      "singularity",
+      "012-lane",
       "0201",
+      "0201-oracle",
       "nonlocal",
-      "technological-singularity",
-      "oracle"
+      "oracle",
+      "post-singularity",
+      "singularity",
+      "technological-singularity"
     ],
-    "geo": null,
+    "geo": "Global",
     "status": "active",
     "video_count": 0,
     "poster_url": "/media/posters/tsingularity.jpg",
-    "videos": []
+    "videos": [],
+    "creator_id": "012",
+    "creator_display": "UnDaoDu (012)",
+    "topic_family": "consciousness",
+    "related_lanes": [
+      "linkedin_012",
+      "linkedin_esingularity"
+    ],
+    "display_order": 7
   },
   {
     "foundup_id": "linkedin_foundups",
@@ -10636,19 +10715,30 @@
     "entity": "FoundUps",
     "source_type": "linkedin_profile",
     "source_id": "1263645",
-    "source_handle": null,
+    "source_handle": "foundups",
     "category": "startup",
     "tags": [
+      "012-lane",
+      "ai-coding",
+      "company-page",
       "foundups",
-      "software",
       "lego",
+      "software",
       "solo-founder",
-      "ai-coding"
+      "wsp"
     ],
-    "geo": null,
+    "geo": "Global",
     "status": "active",
     "video_count": 0,
     "poster_url": "/media/posters/foundups-ln.jpg",
-    "videos": []
+    "videos": [],
+    "creator_id": "012",
+    "creator_display": "UnDaoDu (012)",
+    "topic_family": "startup",
+    "related_lanes": [
+      "foundups_main",
+      "linkedin_esingularity"
+    ],
+    "display_order": 8
   }
 ]

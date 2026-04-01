@@ -182,3 +182,64 @@ class TestCategoryDiversity:
         expected = {"travel", "media", "music"}
         for cat in expected:
             assert cat in categories, f"Expected category '{cat}' not found"
+
+
+class TestProjectionMetadata:
+    """Test projection-ready enrichment fields (Phase 2)."""
+
+    PROJECTION_FIELDS = [
+        "creator_id",
+        "creator_display",
+        "topic_family",
+        "related_lanes",
+        "display_order",
+    ]
+
+    def test_all_entries_have_projection_fields(self, catalog: list[dict]):
+        """All lanes must have projection metadata for Red Dog filtering."""
+        for entry in catalog:
+            for field in self.PROJECTION_FIELDS:
+                assert field in entry, (
+                    f"Missing projection field '{field}' in {entry['foundup_id']}"
+                )
+
+    def test_creator_id_is_consistent(self, catalog: list[dict]):
+        """All 012 lanes should share same creator_id."""
+        creator_ids = {entry["creator_id"] for entry in catalog}
+        assert "012" in creator_ids, "Expected creator_id '012' in catalog"
+
+    def test_topic_family_values(self, catalog: list[dict]):
+        """topic_family must be one of defined values."""
+        valid_families = {"life", "consciousness", "startup", "resistance"}
+        for entry in catalog:
+            assert entry["topic_family"] in valid_families, (
+                f"Invalid topic_family '{entry['topic_family']}' in {entry['foundup_id']}"
+            )
+
+    def test_related_lanes_are_valid_refs(self, catalog: list[dict]):
+        """related_lanes must reference existing foundup_ids."""
+        all_ids = {entry["foundup_id"] for entry in catalog}
+        for entry in catalog:
+            for ref in entry["related_lanes"]:
+                assert ref in all_ids, (
+                    f"Invalid related_lane '{ref}' in {entry['foundup_id']} - not in catalog"
+                )
+
+    def test_display_order_is_unique(self, catalog: list[dict]):
+        """display_order must be unique across all lanes."""
+        orders = [entry["display_order"] for entry in catalog]
+        assert len(orders) == len(set(orders)), "Duplicate display_order found"
+
+    def test_geo_is_filled(self, catalog: list[dict]):
+        """All lanes must have non-null geo for location projection."""
+        for entry in catalog:
+            assert entry.get("geo") is not None, (
+                f"Missing geo in {entry['foundup_id']}"
+            )
+
+    def test_all_tags_include_012_lane(self, catalog: list[dict]):
+        """All 012 lanes should have '012-lane' tag for filtering."""
+        for entry in catalog:
+            assert "012-lane" in entry["tags"], (
+                f"Missing '012-lane' tag in {entry['foundup_id']}"
+            )

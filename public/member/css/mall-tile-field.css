@@ -363,33 +363,46 @@
 }
 
 /* ========== Theme Colors (reuse from carousel) ========== */
+/*
+ * Each theme sets background-color as a fallback for broken poster images.
+ * JS sets inline style="background-image: url(...)" which overrides the
+ * gradient. background-color survives that override, so failed posters
+ * degrade to a solid theme tone instead of transparent black.
+ */
 
 .mall-tile.theme-antifafm {
   background: linear-gradient(145deg, rgba(60, 11, 16, 0.96), rgba(122, 20, 28, 0.72) 60%, rgba(24, 7, 10, 0.98));
+  background-color: #3c0b10;
 }
 
 .mall-tile.theme-gotjunk {
   background: linear-gradient(145deg, rgba(15, 60, 56, 0.96), rgba(27, 108, 92, 0.76) 60%, rgba(17, 25, 19, 0.98));
+  background-color: #0f3c38;
 }
 
 .mall-tile.theme-magadoom {
   background: linear-gradient(145deg, rgba(27, 17, 56, 0.96), rgba(89, 28, 113, 0.76) 60%, rgba(12, 14, 28, 0.98));
+  background-color: #1b1138;
 }
 
 .mall-tile.theme-tq {
   background: linear-gradient(145deg, rgba(11, 29, 60, 0.96), rgba(20, 80, 160, 0.72) 60%, rgba(8, 12, 28, 0.98));
+  background-color: #0b1d3c;
 }
 
 .mall-tile.theme-vsa {
   background: linear-gradient(145deg, rgba(40, 40, 45, 0.96), rgba(80, 82, 88, 0.72) 60%, rgba(22, 22, 26, 0.98));
+  background-color: #28282d;
 }
 
 .mall-tile.theme-pqn {
   background: linear-gradient(145deg, rgba(20, 50, 30, 0.96), rgba(50, 120, 70, 0.72) 60%, rgba(12, 20, 14, 0.98));
+  background-color: #14321e;
 }
 
 .mall-tile.theme-default {
   background: linear-gradient(145deg, rgba(30, 30, 35, 0.96), rgba(60, 60, 68, 0.72) 60%, rgba(18, 18, 22, 0.98));
+  background-color: #1e1e23;
 }
 
 /* ========== Inspector Overlay ========== */
