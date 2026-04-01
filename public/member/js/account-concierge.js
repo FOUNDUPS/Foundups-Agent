@@ -526,12 +526,154 @@
     conciergeHost.insertBefore(briefingEl, conciergeHost.firstChild);
   }
 
-  // Refresh briefing every time plane opens
+  // ---- recommended actions ----
+  var recsEl = null;
+
+  var RECOMMENDATION_RULES = [
+    {
+      id: 'return_to_mall',
+      label: 'Return to Mall',
+      test: function (ctx) { return ctx.viewOpen; },
+      run: function () {
+        if (window.mallPlanes && typeof window.mallPlanes.closeView === 'function') {
+          window.mallPlanes.closeView();
+        }
+      }
+    },
+    {
+      id: 'enter_foundup',
+      label: 'Enter FoundUp',
+      test: function (ctx) { return ctx.inspectorOpen && ctx.inspecting !== null; },
+      run: function () {
+        var idx = window.mallTileField && typeof window.mallTileField.getInspectingIndex === 'function'
+          ? window.mallTileField.getInspectingIndex() : null;
+        if (idx !== null && window.mallTileField && typeof window.mallTileField.enterFoundUp === 'function') {
+          window.mallTileField.enterFoundUp(idx);
+        }
+      }
+    },
+    {
+      id: 'reset_projection',
+      label: 'Reset to All',
+      test: function (ctx) { return ctx.projection && ctx.projection !== 'default'; },
+      run: function () {
+        if (window.mallTileField && typeof window.mallTileField.resetProjection === 'function') {
+          window.mallTileField.resetProjection();
+        }
+      }
+    },
+    {
+      id: 'view_ready',
+      label: 'View ready FoundUps',
+      test: function (ctx) {
+        return ctx.readyCount > 0 && (!ctx.projection || ctx.projection === 'default');
+      },
+      run: function () {
+        if (window.mallTileField && typeof window.mallTileField.setProjection === 'function') {
+          window.mallTileField.setProjection('readiness');
+        }
+      }
+    },
+    {
+      id: 'open_invites',
+      label: 'Check Invites',
+      test: function (ctx) {
+        return ctx.inviteText && invitesDrawer && !invitesDrawer.classList.contains('open');
+      },
+      run: function () { executeMode('invites'); }
+    },
+    {
+      id: 'view_foundups',
+      label: 'View My FoundUps',
+      test: function (ctx) { return ctx.tileCount > 0 && !isOpen; },
+      run: function () { executeMode('foundups'); }
+    },
+    {
+      id: 'show_summary',
+      label: 'Show Summary',
+      test: function () { return true; },
+      run: function () { showSummary(); }
+    }
+  ];
+
+  var MAX_RECOMMENDATIONS = 3;
+
+  function getRecommendations() {
+    var ctx = gatherContext();
+    // Also check invites drawer expanded state
+    ctx.invitesExpanded = invitesDrawer ? invitesDrawer.classList.contains('open') : false;
+    var recs = [];
+    for (var i = 0; i < RECOMMENDATION_RULES.length && recs.length < MAX_RECOMMENDATIONS; i++) {
+      var rule = RECOMMENDATION_RULES[i];
+      if (rule.test(ctx)) {
+        recs.push({ id: rule.id, label: rule.label });
+      }
+    }
+    return recs;
+  }
+
+  function runRecommendation(id) {
+    for (var i = 0; i < RECOMMENDATION_RULES.length; i++) {
+      if (RECOMMENDATION_RULES[i].id === id) {
+        RECOMMENDATION_RULES[i].run();
+        // Refresh after action
+        renderRecommendations();
+        renderBriefing();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function renderRecommendations() {
+    if (!recsEl) return;
+    var recs = getRecommendations();
+    if (!recs.length) {
+      recsEl.innerHTML = '';
+      return;
+    }
+    recsEl.innerHTML = recs.map(function (r) {
+      return '<button class="reddog-rec-action" data-reddog-rec="' + esc(r.id) + '" type="button">'
+        + esc(r.label) + '</button>';
+    }).join('');
+  }
+
+  function injectRecommendations() {
+    if (recsEl) return;
+    var conciergeHost = plane.querySelector('[data-reddog-concierge]');
+    if (!conciergeHost) return;
+
+    recsEl = document.createElement('div');
+    recsEl.className = 'reddog-recommendations';
+    recsEl.setAttribute('data-reddog-recommendations', '');
+    recsEl.setAttribute('aria-label', 'Recommended actions');
+
+    // Insert after briefing (if present) or at top
+    var briefing = conciergeHost.querySelector('[data-reddog-briefing]');
+    if (briefing && briefing.nextSibling) {
+      conciergeHost.insertBefore(recsEl, briefing.nextSibling);
+    } else if (briefing) {
+      conciergeHost.appendChild(recsEl);
+    } else {
+      conciergeHost.insertBefore(recsEl, conciergeHost.firstChild);
+    }
+
+    // Delegate clicks
+    recsEl.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-reddog-rec]');
+      if (!btn) return;
+      runRecommendation(btn.getAttribute('data-reddog-rec'));
+    });
+  }
+
+  // Refresh briefing and recommendations every time plane opens
   var _origOpenPlane = openPlane;
   openPlane = function () {
     _origOpenPlane();
     injectBriefing();
     renderBriefing();
+    injectRecommendations();
+    renderRecommendations();
   };
 
   // ---- public API: window.redDog ----
@@ -553,6 +695,9 @@
     isModeSheetOpen: function () { return modesVisible; },
     getContext: gatherContext,
     refreshBriefing: function () { injectBriefing(); renderBriefing(); },
+    getRecommendations: getRecommendations,
+    runRecommendation: runRecommendation,
+    refreshRecommendations: function () { injectRecommendations(); renderRecommendations(); },
 
     /** Populate identity block from Clerk user + Firestore data */
     setIdentity: function (clerkUser, userData) {

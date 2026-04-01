@@ -388,6 +388,37 @@
   color: rgba(228, 226, 236, 0.85);
 }
 
+/* Red Dog recommended actions */
+.reddog-recommendations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+.reddog-rec-action {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(141, 113, 255, 0.2);
+  background: rgba(141, 113, 255, 0.08);
+  color: rgba(228, 226, 236, 0.85);
+  font-size: 0.76rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  white-space: nowrap;
+}
+.reddog-rec-action:hover,
+.reddog-rec-action:focus-visible {
+  background: rgba(141, 113, 255, 0.16);
+  border-color: rgba(141, 113, 255, 0.35);
+  outline: none;
+}
+.reddog-rec-action:active {
+  background: rgba(141, 113, 255, 0.24);
+}
+
 @media (min-width: 640px) {
   .account-plane {
     max-width: 28rem;
