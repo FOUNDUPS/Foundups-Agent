@@ -1,5 +1,60 @@
 # Member Area Module Change Log
 
+## [2026-04-02] Video Mall Field Runtime Phase 1 (Worker B, WSP_97)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker B
+**Type**: Feature (Video Runtime)
+**Slice**: `video_mall_runtime_foundation_phase1`
+**Spec**: WSP_97
+
+**Files Modified**:
+- `public/member/js/mall-tile-field.js` — Video runtime (tap=play/pause, pinch expand/collapse)
+- `public/member/js/gesture-engine.js` — Pinch detection (two-finger + ctrl+wheel)
+- `public/member/css/mall-tile-field.css` — Video runtime styles (snap, density, play indicator)
+- `public/member/index.html` — Escape handler uses isExpanded/collapseFoundUp
+- `public/member/tests/test_mall_tile_field.py` — Updated for video runtime API
+- `public/member/tests/test_mobile_blockers.py` — Updated for video runtime API
+
+**Files Created**:
+- `public/member/tests/test_video_mall_field_runtime.py` — 38 video runtime tests
+
+**Video Runtime Features**:
+
+Motion modes:
+```javascript
+window.mallTileField.setMotionMode('snap'); // Default - discrete paging
+window.mallTileField.setMotionMode('glide'); // Fluid scroll override
+```
+
+Density presets (AI-controlled):
+```javascript
+window.mallTileField.setDensity('2x3'); // Default
+window.mallTileField.setDensity('3x4');
+window.mallTileField.setDensity('3x5');
+window.mallTileField.setDensity('5x8');
+```
+
+Gesture behaviors:
+- Tap tile = play/pause in Mall context
+- Double-tap tile = enter FoundUp view
+- Pinch-out = expand into FoundUp's video field
+- Pinch-in = collapse back to Mall
+- Escape = collapse expanded view
+
+**Pinch Detection** (gesture-engine.js):
+```javascript
+gestureZone(el, {
+  onPinchOut: function() { /* expand */ },
+  onPinchIn: function() { /* collapse */ }
+});
+// Touch: two-finger distance change > 30px
+// Desktop: ctrl+wheel
+```
+
+**Tests**: 746 passed (38 new video runtime tests)
+
+---
+
 ## [2026-04-02] Localhost Mall Dev Harness Phase 3 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B

@@ -1,0 +1,268 @@
+"""
+Video Mall Field Runtime Tests
+
+Tests for the video-backed Mall field with:
+  - Snapped field motion (default)
+  - Glide mode override
+  - Poster + queue count tiles
+  - tap = play/pause
+  - double-tap = enter FoundUp
+  - pinch-out = expand into video field
+  - pinch-in = collapse back
+  - AI-controlled density presets
+"""
+import os
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def _read(relpath):
+    with open(os.path.join(ROOT, relpath), encoding="utf-8") as f:
+        return f.read()
+
+
+class TestSnappedFieldMotion:
+    """Test snapped field motion as default."""
+
+    def test_scroll_snap_type_in_css(self):
+        """Wrapper has scroll-snap-type for snapped motion."""
+        css = _read("css/mall-tile-field.css")
+        assert "scroll-snap-type: both mandatory" in css
+
+    def test_tiles_have_snap_align(self):
+        """Tiles have scroll-snap-align for snap targets."""
+        css = _read("css/mall-tile-field.css")
+        assert "scroll-snap-align: start" in css
+
+    def test_wrapper_class_exists(self):
+        """Wrapper class exists for scroll container."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile-field-wrapper" in css
+
+
+class TestGlideMode:
+    """Test glide mode override."""
+
+    def test_glide_class_removes_snap(self):
+        """Glide mode class removes scroll-snap-type."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile-field-wrapper.motion-glide" in css
+        assert "scroll-snap-type: none" in css
+
+    def test_set_motion_mode_api(self):
+        """setMotionMode function exists in JS."""
+        js = _read("js/mall-tile-field.js")
+        assert "setMotionMode:" in js
+
+    def test_get_motion_mode_api(self):
+        """getMotionMode function exists in JS."""
+        js = _read("js/mall-tile-field.js")
+        assert "getMotionMode:" in js
+
+
+class TestVideoBackedTiles:
+    """Test poster and queue count on tiles."""
+
+    def test_poster_url_as_background(self):
+        """Tiles use poster_url as background-image."""
+        js = _read("js/mall-tile-field.js")
+        assert "poster_url" in js
+        assert "background-image" in js
+
+    def test_queue_count_badge(self):
+        """Tiles show video queue count badge."""
+        js = _read("js/mall-tile-field.js")
+        assert "video_count" in js
+        assert "mall-tile-queue-count" in js
+
+    def test_queue_count_css_exists(self):
+        """Queue count badge CSS exists."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile-queue-count" in css
+
+    def test_background_size_cover(self):
+        """Tiles have background-size: cover for posters."""
+        css = _read("css/mall-tile-field.css")
+        assert "background-size: cover" in css
+
+
+class TestTapPlayPause:
+    """Test tap = play/pause behavior."""
+
+    def test_toggle_play_function(self):
+        """togglePlay function exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "function togglePlay" in js
+
+    def test_playing_index_tracked(self):
+        """Playing index is tracked."""
+        js = _read("js/mall-tile-field.js")
+        assert "playingIndex" in js
+
+    def test_is_playing_class(self):
+        """is-playing class is applied to tile."""
+        js = _read("js/mall-tile-field.js")
+        assert "is-playing" in js
+
+    def test_play_indicator_css(self):
+        """Play indicator CSS exists."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile-play-indicator" in css
+
+
+class TestDoubleTapEnter:
+    """Test double-tap = enter FoundUp."""
+
+    def test_double_tap_window(self):
+        """Double-tap detection window exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "DOUBLE_TAP_WINDOW" in js
+
+    def test_enter_foundup_on_double_tap(self):
+        """Double-tap calls enterFoundUp."""
+        js = _read("js/mall-tile-field.js")
+        assert "enterFoundUp(index)" in js
+
+
+class TestPinchExpandCollapse:
+    """Test pinch expand/collapse behavior."""
+
+    def test_expand_foundup_function(self):
+        """expandFoundUp function exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "function expandFoundUp" in js
+
+    def test_collapse_foundup_function(self):
+        """collapseFoundUp function exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "function collapseFoundUp" in js
+
+    def test_expanded_foundup_state(self):
+        """expandedFoundUp state variable exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "expandedFoundUp" in js
+
+    def test_expanded_mode_class(self):
+        """expanded-mode class is applied to field."""
+        js = _read("js/mall-tile-field.js")
+        assert "expanded-mode" in js
+
+    def test_collapse_hint_exists(self):
+        """Collapse hint element is created."""
+        js = _read("js/mall-tile-field.js")
+        assert "mall-tile-field-collapse-hint" in js
+
+    def test_pinch_handlers_wired(self):
+        """Pinch handlers are wired via gestureZone."""
+        js = _read("js/mall-tile-field.js")
+        assert "onPinchOut" in js
+        assert "onPinchIn" in js
+
+    def test_get_expanded_videos(self):
+        """getExpandedVideos function maps videos to tiles."""
+        js = _read("js/mall-tile-field.js")
+        assert "function getExpandedVideos" in js
+
+
+class TestDensityPresets:
+    """Test AI-controlled density presets."""
+
+    def test_set_density_api(self):
+        """setDensity function exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "setDensity:" in js
+
+    def test_get_density_api(self):
+        """getDensity function exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "getDensity:" in js
+
+    def test_density_css_variables(self):
+        """CSS variables for field columns exist."""
+        css = _read("css/mall-tile-field.css")
+        assert "--field-columns" in css
+
+    def test_density_preset_classes(self):
+        """Density preset data attributes exist in CSS."""
+        css = _read("css/mall-tile-field.css")
+        assert 'data-density="2x3"' in css
+        assert 'data-density="3x4"' in css
+        assert 'data-density="3x5"' in css
+        assert 'data-density="5x8"' in css
+
+
+class TestGestureEnginePinch:
+    """Test pinch detection in gesture engine."""
+
+    def test_pinch_threshold(self):
+        """PINCH_THRESHOLD constant exists."""
+        js = _read("js/gesture-engine.js")
+        assert "PINCH_THRESHOLD" in js
+
+    def test_pinch_out_handler(self):
+        """onPinchOut handler is supported."""
+        js = _read("js/gesture-engine.js")
+        assert "onPinchOut" in js
+
+    def test_pinch_in_handler(self):
+        """onPinchIn handler is supported."""
+        js = _read("js/gesture-engine.js")
+        assert "onPinchIn" in js
+
+    def test_two_finger_touch_detection(self):
+        """Two-finger touch is detected for pinch."""
+        js = _read("js/gesture-engine.js")
+        assert "e.touches.length === 2" in js
+
+    def test_ctrl_wheel_pinch(self):
+        """Ctrl+wheel triggers pinch on desktop."""
+        js = _read("js/gesture-engine.js")
+        assert "e.ctrlKey" in js
+        assert "deltaY" in js
+
+
+class TestPublicAPI:
+    """Test public API surface."""
+
+    def test_api_has_video_runtime_methods(self):
+        """API exposes video runtime methods."""
+        js = _read("js/mall-tile-field.js")
+        assert "togglePlay:" in js
+        assert "getPlayingIndex:" in js
+        assert "expandFoundUp:" in js
+        assert "collapseFoundUp:" in js
+        assert "isExpanded:" in js
+        assert "getExpandedIndex:" in js
+
+    def test_api_has_motion_methods(self):
+        """API exposes motion mode methods."""
+        js = _read("js/mall-tile-field.js")
+        assert "setMotionMode:" in js
+        assert "getMotionMode:" in js
+
+    def test_api_has_density_methods(self):
+        """API exposes density methods."""
+        js = _read("js/mall-tile-field.js")
+        assert "setDensity:" in js
+        assert "getDensity:" in js
+
+
+class TestNoRegression:
+    """Test no regression in existing functionality."""
+
+    def test_projection_still_works(self):
+        """Projection system still exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "setProjection:" in js
+        assert "getProjection:" in js
+        assert "resetProjection:" in js
+
+    def test_enter_foundup_still_works(self):
+        """enterFoundUp function still exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "enterFoundUp:" in js
+
+    def test_mall_planes_integration(self):
+        """mallPlanes.openFoundUp is still called."""
+        js = _read("js/mall-tile-field.js")
+        assert "window.mallPlanes.openFoundUp" in js

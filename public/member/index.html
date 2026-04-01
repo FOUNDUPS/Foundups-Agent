@@ -79,6 +79,7 @@
   <link rel="stylesheet" href="css/account-concierge.css">
   <link rel="stylesheet" href="css/mall-planes.css">
   <link rel="stylesheet" href="css/mall-tile-field.css">
+  <link rel="stylesheet" href="css/mall-video-player.css">
 </head>
 <body>
   <!-- Loading state (shown while checking auth) -->
@@ -557,9 +558,9 @@
       // Global Escape handler (D's guardrail - LOCKED)
       document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
-          // Close tile inspector first if open
-          if (window.mallTileField && window.mallTileField.isInspectorOpen()) {
-            window.mallTileField.closeInspector();
+          // Close expanded video field first if open
+          if (window.mallTileField && window.mallTileField.isExpanded()) {
+            window.mallTileField.collapseFoundUp();
             return;
           }
           closeSurfaces();
@@ -1030,6 +1031,7 @@
   <script src="js/gesture-engine.js"></script>
   <script src="js/mall-planes.js"></script>
   <script src="js/mall-tile-field.js"></script>
+  <script src="js/mall-video-player.js"></script>
   <script src="js/gesture-hints.js"></script>
   <script src="js/account-concierge.js"></script>
   <script src="js/red-dog-concierge.js"></script>

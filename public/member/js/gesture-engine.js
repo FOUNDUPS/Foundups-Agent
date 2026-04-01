@@ -5,11 +5,13 @@
  *   - swipe-left, swipe-right, swipe-up, swipe-down
  *   - tap / click (single)
  *   - double-tap / double-click
+ *   - pinch-in / pinch-out (touch: two-finger, desktop: ctrl+wheel)
  *
  * Desktop parity:
  *   - click = tap
  *   - double-click = double-tap
  *   - click-drag = swipe
+ *   - ctrl+wheel = pinch
  *
  * Both touch and mouse-drag produce the same callbacks.
  * No external dependencies.
@@ -21,11 +23,12 @@
   var TAP_THRESHOLD = 15;
   var DOUBLE_TAP_DELAY = 300;
   var TAP_CONFIRM_DELAY = 300; // Wait to confirm single vs double tap
+  var PINCH_THRESHOLD = 30; // Minimum distance change for pinch
 
   /**
    * Attach gesture detection to an element.
    * @param {HTMLElement} el - Target element
-   * @param {Object} handlers - { onSwipe(direction), onTap(), onDoubleTap() }
+   * @param {Object} handlers - { onSwipe(direction), onTap(), onDoubleTap(), onPinchIn(), onPinchOut() }
    * @returns {{ destroy: Function }}
    */
   function gestureZone(el, handlers) {
@@ -34,6 +37,10 @@
     var tracking = false;
     var lastTapTime = 0;
     var tapTimer = null;
+
+    // Pinch tracking
+    var pinchStartDistance = 0;
+    var isPinching = false;
 
     function handleEnd(endX, endY) {
       if (!tracking) return;
@@ -82,13 +89,61 @@
     }
 
     // ---- touch events ----
+    function getTouchDistance(touches) {
+      if (touches.length < 2) return 0;
+      var dx = touches[1].clientX - touches[0].clientX;
+      var dy = touches[1].clientY - touches[0].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
     function onTouchStart(e) {
+      if (e.touches.length === 2) {
+        // Two-finger touch: start pinch tracking
+        isPinching = true;
+        tracking = false;
+        pinchStartDistance = getTouchDistance(e.touches);
+        return;
+      }
       startX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
       tracking = true;
+      isPinching = false;
+    }
+
+    function onTouchMove(e) {
+      if (isPinching && e.touches.length === 2) {
+        // Prevent scroll during pinch
+        e.preventDefault();
+      }
     }
 
     function onTouchEnd(e) {
+      if (isPinching) {
+        // Check pinch result
+        var endDistance = pinchStartDistance;
+        if (e.touches.length === 1) {
+          // One finger lifted, use remaining touch + changed touch
+          var dx = e.changedTouches[0].clientX - e.touches[0].clientX;
+          var dy = e.changedTouches[0].clientY - e.touches[0].clientY;
+          endDistance = Math.sqrt(dx * dx + dy * dy);
+        } else if (e.touches.length === 0 && e.changedTouches.length === 2) {
+          endDistance = getTouchDistance(e.changedTouches);
+        }
+
+        var delta = endDistance - pinchStartDistance;
+        if (Math.abs(delta) > PINCH_THRESHOLD) {
+          if (delta > 0 && handlers.onPinchOut) {
+            handlers.onPinchOut();
+          } else if (delta < 0 && handlers.onPinchIn) {
+            handlers.onPinchIn();
+          }
+        }
+
+        isPinching = false;
+        pinchStartDistance = 0;
+        return;
+      }
+
       var t = e.changedTouches[0];
       handleEnd(t.clientX, t.clientY);
     }
@@ -111,10 +166,23 @@
       if (handlers.onDoubleTap) handlers.onDoubleTap();
     }
 
+    // Desktop pinch: ctrl+wheel
+    function onWheel(e) {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      if (e.deltaY < 0 && handlers.onPinchOut) {
+        handlers.onPinchOut();
+      } else if (e.deltaY > 0 && handlers.onPinchIn) {
+        handlers.onPinchIn();
+      }
+    }
+
     el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
     el.addEventListener('touchend', onTouchEnd, { passive: true });
     el.addEventListener('mousedown', onMouseDown);
     el.addEventListener('dblclick', onDblClick);
+    el.addEventListener('wheel', onWheel, { passive: false });
 
     return {
       destroy: function () {
@@ -123,9 +191,11 @@
           tapTimer = null;
         }
         el.removeEventListener('touchstart', onTouchStart);
+        el.removeEventListener('touchmove', onTouchMove);
         el.removeEventListener('touchend', onTouchEnd);
         el.removeEventListener('mousedown', onMouseDown);
         el.removeEventListener('dblclick', onDblClick);
+        el.removeEventListener('wheel', onWheel);
       }
     };
   }

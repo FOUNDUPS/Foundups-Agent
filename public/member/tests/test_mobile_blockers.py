@@ -96,16 +96,13 @@ class TestTapLatencyFix:
         # Old delay variable should not exist
         assert "DOUBLE_TAP_DELAY = 300" not in js
 
-    def test_immediate_inspector_open(self):
-        """Single tap opens inspector immediately (no setTimeout wait)."""
+    def test_immediate_tap_action(self):
+        """Single tap toggles play/pause immediately."""
         js = _read("js/mall-tile-field.js")
-        # Should NOT have setTimeout waiting before openInspector
-        # Old pattern: setTimeout(function() { ... openInspector ...
-        # New pattern: direct openInspector(index) call
-        assert "openInspector(index);" in js
-        # The setTimeout for delayed inspector should be removed
-        # Check for the new immediate pattern comment
-        assert "open inspector immediately" in js.lower()
+        # Video runtime: tap = play/pause (not inspector)
+        assert "togglePlay(index)" in js
+        # Should have togglePlay function
+        assert "function togglePlay" in js
 
     def test_double_tap_still_enters_foundup(self):
         """Double-tap still enters FoundUp directly."""
@@ -114,13 +111,13 @@ class TestTapLatencyFix:
         assert "DOUBLE_TAP_WINDOW" in js
 
 
-class TestInspectEnterSemanticsPreserved:
-    """Test tap=inspect, double-tap=enter semantics are preserved."""
+class TestVideoRuntimeSemantics:
+    """Test tap=play/pause, double-tap=enter semantics for video runtime."""
 
-    def test_tap_opens_inspector(self):
-        """Tap gesture opens inspector."""
+    def test_tap_toggles_play(self):
+        """Tap gesture toggles play/pause."""
         js = _read("js/mall-tile-field.js")
-        assert "openInspector" in js
+        assert "togglePlay" in js
 
     def test_double_tap_enters_foundup(self):
         """Double-tap gesture enters FoundUp."""
@@ -128,11 +125,11 @@ class TestInspectEnterSemanticsPreserved:
         # Double-tap should call enterFoundUp
         assert "enterFoundUp(index)" in js
 
-    def test_inspector_enter_button_exists(self):
-        """Inspector has Enter FoundUp button."""
+    def test_pinch_expand_collapse_exists(self):
+        """Pinch gestures for expand/collapse exist."""
         js = _read("js/mall-tile-field.js")
-        assert "Enter FoundUp" in js
-        assert "inspectorEnterBtn" in js
+        assert "expandFoundUp" in js
+        assert "collapseFoundUp" in js
 
 
 class TestThumbZoneRefinement:
@@ -175,12 +172,12 @@ class TestThumbZoneRefinement:
 class TestNoRegression:
     """Test existing shell behaviors are preserved."""
 
-    def test_tile_inspector_still_works(self):
-        """Tile inspector overlay still exists."""
+    def test_video_runtime_api_exists(self):
+        """Video runtime API exists (replaced inspector system)."""
         js = _read("js/mall-tile-field.js")
-        assert "tile-inspector" in js
-        assert "openInspector" in js
-        assert "closeInspector" in js
+        assert "togglePlay" in js
+        assert "expandFoundUp" in js
+        assert "collapseFoundUp" in js
 
     def test_foundup_entry_path_unchanged(self):
         """/member/foundup.html?id= path still works."""

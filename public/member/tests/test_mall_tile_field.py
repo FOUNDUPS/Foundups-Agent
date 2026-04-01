@@ -72,9 +72,10 @@ class TestTileFieldCSS:
     """Test the tile field CSS."""
 
     def test_tile_field_grid(self, tile_field_css):
-        """Tile field uses CSS grid."""
+        """Tile field uses CSS grid with density variables."""
         assert 'display: grid' in tile_field_css
-        assert 'grid-template-columns: repeat(auto-fill' in tile_field_css
+        # Video Mall runtime uses CSS variables for density control
+        assert '--field-columns' in tile_field_css
 
     def test_tile_square_aspect(self, tile_field_css):
         """Tiles are square."""
@@ -100,19 +101,21 @@ class TestTileFieldJS:
         """Public API is exposed on window.mallTileField."""
         assert 'window.mallTileField' in tile_field_js
         assert 'initialize:' in tile_field_js
-        assert 'openInspector:' in tile_field_js
-        assert 'closeInspector:' in tile_field_js
         assert 'enterFoundUp:' in tile_field_js
+        # Video runtime API (replaced inspector with play/pause)
+        assert 'togglePlay:' in tile_field_js
+        assert 'expandFoundUp:' in tile_field_js
+        assert 'collapseFoundUp:' in tile_field_js
 
     def test_double_tap_detection(self, tile_field_js):
         """Double-tap detection is implemented."""
         assert 'DOUBLE_TAP_WINDOW' in tile_field_js
         assert 'lastTapTime' in tile_field_js
 
-    def test_inspector_creation(self, tile_field_js):
-        """Inspector overlay is created dynamically."""
-        assert 'createInspector' in tile_field_js
-        assert 'tile-inspector-scrim' in tile_field_js
+    def test_video_runtime_elements(self, tile_field_js):
+        """Video runtime elements are created dynamically."""
+        assert 'mall-tile-field-collapse-hint' in tile_field_js
+        assert 'mall-tile-queue-count' in tile_field_js
 
     def test_foundup_id_attribute(self, tile_field_js):
         """Tiles have data-foundup-id for SoftProto targeting."""
@@ -127,11 +130,11 @@ class TestTileFieldJS:
 class TestGuardrailsRespected:
     """Test that D's guardrails are respected."""
 
-    def test_escape_closes_inspector_first(self, index_html):
-        """Escape key closes inspector before other surfaces."""
-        # The escape handler should check inspector first
-        assert 'mallTileField.isInspectorOpen()' in index_html
-        assert 'mallTileField.closeInspector()' in index_html
+    def test_escape_closes_expanded_first(self, index_html):
+        """Escape key closes expanded video field before other surfaces."""
+        # The escape handler should check expanded state first
+        assert 'mallTileField.isExpanded()' in index_html
+        assert 'mallTileField.collapseFoundUp()' in index_html
 
     def test_red_dog_button_preserved(self, index_html):
         """Red Dog button is still present and functional."""
