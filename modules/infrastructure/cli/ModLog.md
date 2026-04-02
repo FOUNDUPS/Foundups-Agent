@@ -2,6 +2,24 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## V0.3.15 - Cohere Transcribe STT Backend (2026-03-30)
+
+### Added
+- `src/openclaw_voice.py`
+  - **CohereTranscribeBackend**: Lazy singleton STT using Cohere Transcribe 2B
+  - Lazy loading pattern (WSP 91): model loads on first transcribe, not on boot
+  - Prevents 60s cold-start blocking voice REPL initialization
+  - New env var: `OPENCLAW_VOICE_DISABLE_COHERE_STT=1` to skip Cohere
+
+### Changed
+- STT chain priority: Cohere (local, lazy) -> Whisper (local) -> Google (cloud)
+
+### WSP Compliance
+- **WSP 91**: DAEMON observability (load time logging)
+- **WSP 22**: ModLog documentation
+
+---
+
 ## V0.3.14 - OpenClaw menu aligned to resident broker runtime (2026-03-18)
 
 ### Changed

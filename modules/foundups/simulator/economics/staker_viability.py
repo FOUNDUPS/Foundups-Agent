@@ -16,6 +16,11 @@ This separation solves the dilution problem:
 3. Stakers are SELF-LIMITING (requires real BTC commitment)
 
 The Du 4% pool is for PROTOCOL PARTICIPANTS who provide BTC liquidity.
+
+BOUNDARY NOTE (2026-03-31):
+- Du pool stakers = CABR/PoB participation lane (this file)
+- I_i holders in investor_staking.py = SEPARATE bonding-curve lane
+- Do NOT conflate these two models
 """
 
 from __future__ import annotations
@@ -130,7 +135,7 @@ def calculate_staker_distributions(
         epochs_to_10x = None
         epochs_to_100x = None
 
-    # ROI at key timepoints
+    # Distribution ratio at key timepoints
     dist_ratio_1_month = (30 * epoch_value_btc) / avg_stake_btc if avg_stake_btc > 0 else 0
     dist_ratio_6_months = (180 * epoch_value_btc) / avg_stake_btc if avg_stake_btc > 0 else 0
     dist_ratio_1_year = (360 * epoch_value_btc) / avg_stake_btc if avg_stake_btc > 0 else 0

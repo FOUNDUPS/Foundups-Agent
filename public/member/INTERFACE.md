@@ -1,122 +1,92 @@
 # Member Area Interface
 
 **Module**: `public/member/`
-**Version**: 1.0.0 (Layer 1 - Shell)
+**Version**: 2.0.0
 
 ## Public Interface
 
 ### Entry URL
-```
+```text
 /member/
 ```
 
 ### Auth Requirements
-- Firebase Auth user session required
-- Redirects to `/?signin=required` if not authenticated
+- Clerk session required
+- invite validation required
+- username claim required before admitted users enter the Mall
+- redirects to `/?signin=required` if not authenticated
 
-### Navigation Sections
+### Runtime Surface
 
-| Hash | Section | Status |
-|------|---------|--------|
-| `#dashboard` | Overview dashboard | Shell |
-| `#wallet` | UPS/F_i wallet | Placeholder |
-| `#foundups` | FoundUp management | Placeholder |
-| `#marketplace` | FoundUp discovery | Placeholder |
-| `#agents` | OpenClaw agents | Placeholder |
-| `#profile` | Account settings | Shell |
+`/member/` is now the admitted-user p.fMALL shell hosted from Firebase static assets.
 
-### JavaScript API
+It owns:
+- invite-gated post-auth landing
+- swipe-driven FoundUp catalog
+- tap-to-enter FoundUp entry page (deep-linkable)
+- Red Dog concierge sheet for invite codes and account context
 
-```javascript
-// Navigation (internal)
-window.location.hash = '#wallet';
+It does not yet own:
+- direct tenant execution
+- `/f/{foundup_id}` transport routing
+- wallet or agent operations
 
-// Copy invite code
-window.copyCode(code: string): Promise<void>
+### Hosted Assets
+
+```text
+/member/index.html
+/member/foundup.html
+/member/css/member.css
+/member/mall-catalog.json
 ```
 
-### Firebase Integration
+### JavaScript Surface
 
-**Auth State Listener**:
-```javascript
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    // Show member area
-    // Load user data from Firestore
-  } else {
-    // Redirect to landing
-  }
-});
+The page bootstraps these internal behaviors:
+- `initClerkAuth()`
+- `initializeMall(clerkUserId, userData, clerkUser)`
+- `loadMallCatalog()`
+- `loadInviteContext(clerkUserId, clerkUser)`
+
+### Data Expectations
+
+**Catalog source**
+```json
+/member/mall-catalog.json
 ```
 
-**User Document Schema**:
+**User document shape**
 ```typescript
 interface UserDoc {
-  displayName: string;
   email: string;
-  username: string;
+  username?: string;
+  inviteValidated?: boolean;
+  usedInviteCode?: string;
   inviteCodes: string[];
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-  // Future: upsBalance, foundups[], agents[]
+  waitlistJoined?: string;
+  createdAt: string;
 }
 ```
 
-### CSS Variables
-
-The member area uses the same design tokens as the landing page:
-
-```css
---bg: #08080f;
---bg-card: rgba(14, 14, 28, 0.8);
---accent: #7c5cfc;
---cyan: #00e5d0;
---gold: #f5a623;
---pink: #ff4ea0;
---red: #ff2d2d;
+**Invite document shape**
+```typescript
+interface InviteDoc {
+  code: string;
+  status: "active" | "used";
+  createdBy: string;
+  createdAt: string;
+  usedBy: string | null;
+  usedAt: string | null;
+}
 ```
 
-## Internal Interfaces (Future Modules)
+### UI Contract
 
-### Dashboard Module (Layer 2)
-```javascript
-// dashboard.js
-export async function loadDashboard(uid: string): Promise<void>
-export async function loadActivityFeed(uid: string): Promise<Activity[]>
-```
-
-### Wallet Module (Layer 3)
-```javascript
-// wallet.js
-export async function getUPSBalance(uid: string): Promise<number>
-export async function getStakedPositions(uid: string): Promise<StakePosition[]>
-export async function getTransactionHistory(uid: string): Promise<Transaction[]>
-```
-
-### FoundUps Module (Layer 4)
-```javascript
-// foundups.js
-export async function createFoundUp(data: FoundUpInput): Promise<FoundUp>
-export async function getMyFoundUps(uid: string): Promise<FoundUp[]>
-export async function contributeToFoundUp(foundupId: string, amount: number): Promise<void>
-```
-
-### Agents Module (Layer 5)
-```javascript
-// agents.js
-export async function deployAgent(config: AgentConfig): Promise<Agent>
-export async function getMyAgents(uid: string): Promise<Agent[]>
-export async function getAgentEarnings(agentId: string): Promise<Earnings>
-```
-
-### Marketplace Module (Layer 6)
-```javascript
-// marketplace.js
-export async function browseFoundUps(filters: SearchFilters): Promise<FoundUp[]>
-export async function joinFoundUp(foundupId: string): Promise<void>
-export async function stakeInFoundUp(foundupId: string, amount: number): Promise<void>
-```
+- primary navigation is horizontal swipe / scroll-snap movement across FoundUp cards
+- primary explicit control is the Red Dog icon
+- FoundUp cards are tappable and navigate to a dedicated entry page (`/member/foundup.html?id={foundup_id}`)
+- invite gate and username claim remain blocking surfaces ahead of the Mall
 
 ---
 
-*WSP 11 Compliant | Last Updated: 2026-02-18*
+*Last Updated: 2026-03-31*

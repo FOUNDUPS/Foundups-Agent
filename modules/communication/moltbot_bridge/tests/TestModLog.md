@@ -1,3 +1,47 @@
+## 2026-03-29: Skill Evolution Loop Phase 2 - Mutation Surface Tests (WSP 48/77)
+
+**File**: `test_openclaw_skill_evolution.py` (extended - 23 new tests)
+- **TestMutationSurfaceEnvGates** (4 tests - fail-closed verification):
+  - `test_mutation_surface_disabled_by_default`: OPENCLAW_MUTATION_SURFACE_ENABLED defaults to 0
+  - `test_ab_scheduling_disabled_by_default`: OPENCLAW_AB_SCHEDULING_ENABLED defaults to 0
+  - `test_promotion_disabled_by_default`: OPENCLAW_PROMOTION_ENABLED defaults to 0
+  - `test_gates_enabled_when_set_to_1`: All gates enabled when explicitly set
+- **TestMutationSurfaceReportDue** (3 tests):
+  - `test_never_due_when_gate_disabled`: Returns False even if report missing
+  - `test_due_when_gate_enabled_and_missing`: Returns True when gate on
+  - `test_not_due_when_fresh`: Returns False when gate on and report fresh
+- **TestBuildMutationSurfaceReport** (4 tests):
+  - `test_report_disabled_when_gate_off`: Returns disabled state
+  - `test_report_enabled_when_gate_on`: Evaluates skills when gate on
+  - `test_report_has_required_top_level_fields`: Contract verification
+  - `test_report_summary_counts`: Summary mutation status counts
+- **TestBuildMutationSurfaceEntry** (4 tests):
+  - `test_stable_skill_classification`: Healthy skill = stable
+  - `test_eligible_for_ab_classification`: Low fidelity = eligible_for_ab
+  - `test_blocked_when_insufficient_data`: Insufficient data = blocked
+  - `test_entry_has_required_fields`: All required fields present
+- **TestGetActiveABTestStatus** (2 tests):
+  - `test_returns_none_when_no_active_test`: No A/B test = None
+  - `test_returns_none_when_no_method`: Missing method = None
+- **TestCheckABPromotionStatus** (1 test):
+  - `test_blocked_when_no_active_test`: No A/B test = blocked
+- **TestCheckPromotionReadiness** (1 test):
+  - `test_returns_blocked_when_registry_raises_exception`: Exception = blocked
+- **TestSupervisorMutationSurfaceGate** (2 tests):
+  - `test_mutation_surface_not_generated_when_gate_off`: No report in idle
+  - `test_mutation_surface_generated_when_gate_on`: Report generated in idle
+- **TestMutationSurfaceNoMutation** (2 tests - regression):
+  - `test_build_mutation_surface_does_not_call_schedule_ab_test`: No mutation calls
+  - `test_build_mutation_surface_entry_does_not_mutate`: No mutation calls
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_skill_evolution.py -q`
+
+**Result**:
+- `41 passed` (18 Phase 1 + 23 Phase 2)
+
+---
+
 ## 2026-03-29: OpenClaw Authority & Mutation Gate Hardening (WSP 00 / WSP 95)
 
 **File**: `test_openclaw_dae.py` (extended + updated - security tests)

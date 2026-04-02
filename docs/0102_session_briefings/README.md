@@ -11,6 +11,13 @@ Purpose: session-start onboarding briefs for 0102 agents. These are read-once op
 - `SESSION_BRIEFING_2026_02_07.md`
 - `YOUTUBE_DOMAIN_AUDIT_PROMPT.md` (audit-first prompt for the YouTube vertical)
 
+## SoftProto Prompt Set
+- `SOFTPROTO_A_GATEWAY_AUDIT_PROMPT_2026-04-01.md`
+- `SOFTPROTO_B_MALL_AUDIT_PROMPT_2026-04-01.md`
+- `SOFTPROTO_C_CONCIERGE_REDDOG_AUDIT_PROMPT_2026-04-01.md`
+- `SOFTPROTO_D_GUARDRAILS_AUDIT_PROMPT_2026-04-01.md`
+- `SOFTPROTO_SVELTE_SPIKE_PHASE1_PROMPT_2026-04-01.md`
+
 Usage:
 1. Read `WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md` first.
 2. **Read `ACTIVE_SLICE_LEDGER.md`** — recover repo truth before any work.

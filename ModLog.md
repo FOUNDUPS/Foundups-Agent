@@ -1,5 +1,194 @@
 # FoundUps Agent - Development Log
 
+## [2026-04-01] SoftProto Audit Prompt Batch
+
+**Change Type**: Architecture / Coordination
+**By**: 0102 (Codex)
+**WSP References**: WSP 102, WSP 97, WSP 22, WSP 83
+
+### Summary
+
+Added the bounded SoftProto audit prompts for the gateway, Mall, concierge /
+Red Dog, and guardrails, plus the implementation prompt for the isolated
+Svelte spike.
+
+### What Changed
+
+- Added operator prompts under `docs/0102_session_briefings/`:
+  - `SOFTPROTO_A_GATEWAY_AUDIT_PROMPT_2026-04-01.md`
+  - `SOFTPROTO_B_MALL_AUDIT_PROMPT_2026-04-01.md`
+  - `SOFTPROTO_C_CONCIERGE_REDDOG_AUDIT_PROMPT_2026-04-01.md`
+  - `SOFTPROTO_D_GUARDRAILS_AUDIT_PROMPT_2026-04-01.md`
+  - `SOFTPROTO_SVELTE_SPIKE_PHASE1_PROMPT_2026-04-01.md`
+- Updated `docs/0102_session_briefings/README.md`
+- Expanded the SoftProto foundation note with the nested interaction contract:
+  - app -> plane -> module -> submodule -> object
+  - scoped gesture bindings
+  - inheritance / override rules
+  - addressable command paths
+
+### Result
+
+- the next SoftProto move is now bounded and executable
+- A/B/C/D can audit without drifting into independent implementations
+- the eventual spike owner has a single implementation prompt grounded in the
+  same contract
+
+---
+
+## [2026-04-01] p.fMALL External FoundUp Route Contract
+
+**Change Type**: Architecture / Documentation
+**By**: 0102 (Codex)
+**WSP References**: WSP 102, WSP 97, WSP 11, WSP 22, WSP 83
+
+### Summary
+
+Locked the Mall-to-FoundUp runtime boundary so external FoundUp repos can still
+open inside one installed p.fMALL experience through in-scope routes and
+contracted control surfaces.
+
+### What Changed
+
+- Added `modules/foundups/docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md`
+  - defines the canonical model:
+    - `Mall PWA = control shell`
+    - `FoundUp = external product/app`
+    - `Connection = metadata + task API + deep link`
+  - separates:
+    - control pipe -> metadata/task/status contracts
+    - experience pipe -> in-scope route navigation
+  - clarifies that separate FoundUp repos do not require a fragmented user
+    experience
+- Updated:
+  - `modules/foundups/ROADMAP.md`
+  - `modules/foundups/ModLog.md`
+  - `modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md`
+  - `modules/foundups/docs/PFMALL_SHELL_CONTRACT.md`
+  - `modules/foundups/docs/PFMALL_ROUTING_DISCOVERY_MODEL.md`
+  - `WSP_framework/src/WSP_102_FoundUps_Web_Design_Protocol.md`
+
+### Result
+
+- p.fMALL shell ownership is now distinct from external FoundUp product/runtime
+  ownership
+- route deployment and API contracts are now part of canonical repo memory,
+  not just chat history
+
+---
+
+## [2026-04-01] SoftProto Foundation Architecture Lock
+
+**Change Type**: Architecture / Documentation
+**By**: 0102 (Codex)
+**WSP References**: WSP 102, WSP 11, WSP 60, WSP 97, WSP 22, WSP 83
+
+### Summary
+
+Locked the first canonical architecture for `SoftProto` as the future
+schema-driven UI operating layer for FoundUps.
+
+### What Changed
+
+- Added `modules/foundups/docs/SOFTPROTO_FOUNDATION_ARCHITECTURE_2026-04-01.md`
+  - defines the core rule:
+    - `UI = render(layout_schema + gesture_schema + module_registry + user_prefs)`
+  - establishes `Svelte` as the rendering layer, not the system itself
+  - locks the adoption sequence:
+    - architecture contract
+    - surface audits
+    - isolated spike in `/member/`
+    - phased rollout
+  - maps the active surface split:
+    - gateway
+    - Mall
+    - user panel / Red Dog
+    - FoundUp view
+- Added `modules/foundups/docs/SOFTPROTO_ROLLOUT_PLAN_2026-04-01.md`
+  - formalizes rollout order
+  - formalizes worker boundaries
+  - formalizes root tracking and HoloIndex refresh requirements
+- Expanded the SoftProto contract with the nested interaction model:
+  - app -> plane -> module -> submodule -> object
+  - scoped gesture bindings
+  - inheritance / override rules
+  - addressable command paths for AI + user editing
+- Updated `ROADMAP.md` with the active SoftProto architecture program
+- Attached the new direction to WSP discovery surfaces:
+  - `WSP_framework/src/WSP_102_FoundUps_Web_Design_Protocol.md`
+  - `WSP_framework/src/WSP_MASTER_INDEX.md`
+  - `modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md`
+
+### Why
+
+- FoundUps now has multiple active UI surfaces and would drift into incompatible
+  local interaction systems without a shared contract
+- SoftProto needs one canonical architecture before A/B/C/D integrate their own
+  surfaces into it
+- HoloIndex retrieval needs this note attached to the same documentation chain
+  as the governing web-design protocol
+
+### Result
+
+- SoftProto is now a documented architecture decision in the repo, not just a
+  conversation artifact
+- future UI customization work can plug into one shared schema/gesture/command
+  model
+
+---
+
+## [2026-04-01] Gateway Redesign — ROC-First Snap Shell
+
+**Change Type**: Feature / UX Redesign
+**By**: 0102 (Claude Opus 4.6)
+**Slice**: `foundups_gateway_roc_pwa_shell_phase1`
+
+### Summary
+
+Redesigned `foundups.com` root gateway from a long-scroll marketing page into a simplified, vertical snap-based shell with ROC-first framing.
+
+### What Changed
+
+- **`public/index.html`** — Full gateway redesign:
+  - Added vertical `scroll-snap-type: y mandatory` shell with 5 snap sections
+  - Hero: ROC-first ("Return on Compute"), minimal copy, ENTER button
+  - How It Works: Compressed to 3 tight steps
+  - Live Build: Cube canvas with cleaner heading
+  - ROC section: Reworked from PoB — CAGR drives ROI, CABR drives ROC, PoB as protocol
+  - Terms Gate: Visible requirements section (not accredited, not representative, legal links)
+  - Removed Tokenomics section (gateway-inappropriate depth)
+  - Team info compressed into footer line
+  - Nav simplified (logo + How/ROC/Litepaper/portal)
+  - Meta descriptions updated from PoB to ROC framing
+  - Canvas visualization labels updated (Treasury → ROC)
+- **`public/manifest.json`** — Created PWA phase-1 manifest (name, icons, theme, standalone display)
+
+### Files Created
+
+- `public/manifest.json`
+- `modules/foundups/pfmall/tests/test_gateway_roc_shell.py` — 30 tests
+
+### D Audit Addendum Applied
+
+- Removed securities framing from all meta descriptions ("21M tokens backed by BTC")
+- Reworked ROC section: value-first ("Work earns compute. Compute earns tokens."), not acronym-first
+- Removed equity/ownership language ("99% own every idea")
+- Replaced all public-facing PoB with verified-work/ROC language
+- Stripped verbose paragraphs across all sections (16-year-old readable)
+- Added light Red Dog preview in hero ("Red Dog is your guide inside")
+- Gateway and Mall feel like one product
+
+### Verification
+
+- 33/33 new ROC shell tests passing
+- 18/18 existing terms gate tests passing
+- Terms gate behavior preserved (ENTER → disclaimerModal for unsigned users)
+- `/member/` flow intact
+- All modals preserved (disclaimer, signIn, accreditedSorry)
+- All JS handlers preserved (Clerk auth, Firebase, chat widget)
+
+---
+
 ## [2026-03-23] Root Surface Cleanup via Existing AI Overseer / Holo Fix Path
 
 **Change Type**: Infrastructure / Compliance

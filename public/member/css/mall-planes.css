@@ -1,0 +1,233 @@
+/* Mall Planes — FoundUp view plane + gesture hints */
+
+/* ---- FoundUp View scrim ---- */
+.foundup-view-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 5, 9, 0.7);
+  backdrop-filter: blur(10px);
+  z-index: 150;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.foundup-view-scrim.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ---- FoundUp View plane (slides up from bottom) ---- */
+.foundup-view-plane {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 151;
+  max-height: 88vh;
+  max-height: 88dvh;
+  overflow-y: auto;
+  background: rgba(14, 14, 28, 0.97);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.5rem 1.5rem 0 0;
+  box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.5);
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  padding: 0 1.25rem 2rem;
+}
+.foundup-view-plane.open {
+  transform: translateY(0);
+}
+
+/* Drag handle */
+.fv-handle {
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem 0 0.5rem;
+  cursor: grab;
+}
+.fv-handle::after {
+  content: '';
+  width: 2.5rem;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* Close button */
+.fv-close-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  line-height: 1;
+}
+.fv-close-btn:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* ---- View content ---- */
+.fv-hero {
+  padding: 1.5rem 0;
+  text-align: center;
+  border-radius: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.fv-token {
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 0.5rem;
+}
+
+.fv-hero-label {
+  font-size: clamp(3rem, 12vw, 7rem);
+  line-height: 0.9;
+  letter-spacing: -0.06em;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.92);
+  margin-bottom: 0.75rem;
+}
+
+.fv-name {
+  margin: 0 0 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text, #f3f1f8);
+}
+
+.fv-badge {
+  display: inline-block;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.fv-badge-ready { color: #4ade80; border-color: rgba(74, 222, 128, 0.3); }
+.fv-badge-conditional { color: #ffd700; border-color: rgba(255, 215, 0, 0.3); }
+.fv-badge-discoverable_only { color: var(--text-dim, rgba(243, 241, 248, 0.7)); }
+
+.fv-tagline {
+  text-align: center;
+  color: var(--text-dim, rgba(243, 241, 248, 0.7));
+  margin: 0 0 1rem;
+}
+
+.fv-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.fv-detail-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.6rem 1.2rem;
+  background: rgba(124, 92, 252, 0.1);
+  border: 1px solid rgba(124, 92, 252, 0.25);
+  border-radius: 10px;
+  color: #7c5cfc;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+.fv-detail-link:hover {
+  background: rgba(124, 92, 252, 0.18);
+}
+
+.fv-save-indicator {
+  font-size: 0.82rem;
+  color: var(--text-muted, rgba(243, 241, 248, 0.46));
+  min-width: 4rem;
+  text-align: center;
+  transition: color 0.2s;
+}
+.fv-save-indicator.saved {
+  color: #ff5a4d;
+  animation: fvSaved 0.4s ease;
+}
+
+@keyframes fvSaved {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.fv-hint {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-muted, rgba(243, 241, 248, 0.46));
+  margin: 0;
+}
+
+/* ---- Desktop breakpoint ---- */
+@media (min-width: 640px) {
+  .foundup-view-plane {
+    max-width: 32rem;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, 100%);
+    border-radius: 1.5rem 1.5rem 0 0;
+  }
+  .foundup-view-plane.open {
+    transform: translate(-50%, 0);
+  }
+}
+
+/* ---- Gesture hints overlay ---- */
+.gesture-hints {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  background: rgba(8, 8, 15, 0.88);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+.gesture-hints.hint-dismiss {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gesture-hint-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  color: var(--text-dim, rgba(243, 241, 248, 0.7));
+  font-size: 0.9rem;
+}
+
+.gesture-hint-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.gesture-hint-dismiss {
+  font-size: 0.75rem;
+  color: var(--text-muted, rgba(243, 241, 248, 0.46));
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin: 0;
+}

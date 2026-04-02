@@ -1,5 +1,54 @@
 # antifaFM Broadcaster - ModLog
 
+## V3.2.9 - Voxtral TTS Evaluation Contract (2026-03-29)
+
+**Context**: WSP 97 evaluation of Mistral Voxtral TTS (4B parameter model with zero-shot voice cloning) for potential antifaFM integration.
+
+**Evaluation Contract Created** (`docs/VOXTRAL_EVAL_CONTRACT.md`):
+
+1. **Voice Output Surfaces Audited** (6 surfaces):
+   - Icecast stream: Pure relay (NOT TTS candidate)
+   - Karaoke overlay: STT only (NOT TTS candidate)
+   - News ticker: Text display → narration (TTS candidate)
+   - DJ interstitials: PRIMARY TTS candidate
+   - Emergency alerts: Safety-critical TTS candidate
+   - Branded intros/outros: Future TTS candidate
+
+2. **Shared Audio Substrate Binding**:
+   - Must use `audio_provider_registry.py` (NOT broadcaster-local registry)
+   - Voxtral registered as `voxtral_tts_eval` with `production_enabled=False`
+   - Env gate: `AUDIO_ALLOW_EVAL_PROVIDERS=1` required for eval
+
+3. **Voice Cloning Policy Gate**:
+   - Generic synthetic voices: OK without consent
+   - Cloned DJ personas: REQUIRES `voice_cloning_policy.py` consent + whitelist
+   - Kill switch support for emergency disable
+
+4. **Success Metrics Defined**:
+   - First-audio latency: < 500ms (blocker)
+   - Quality score: >= 4.0/5.0 (blocker)
+   - FFmpeg integration: Working (blocker)
+   - Policy gate: 100% enforced (blocker)
+
+**Out of Scope** (explicitly excluded):
+- Production TTS swap (remains eval-only)
+- EdgeTTS replacement in openclaw_voice.py
+- Cloned DJ persona without consent
+- Broadcaster-local duplicate provider registry
+
+**WSP Compliance**:
+- WSP 97: CoT/CoR evaluation applied
+- WSP 22: ModLog updated
+- WSP 72: Shared audio substrate, not broadcaster-local
+
+**Next Steps** (Phase 2 when triggered):
+1. Run latency benchmark with `AUDIO_ALLOW_EVAL_PROVIDERS=1`
+2. Generate quality samples for DJ interstitials
+3. Test FFmpeg audio mixing integration
+4. Document results in `VOXTRAL_EVAL_RESULTS.md`
+
+---
+
 ## V3.2.8 - News Maps Schema + VIDEO_SOURCES Fix (2026-03-25)
 
 **Context**: OBS rotator broken - VIDEO_SOURCES used `video1-9` but actual OBS sources are `France 24`, `Al Jazeera`, etc. News schema needed conflict/shipping map rotation.

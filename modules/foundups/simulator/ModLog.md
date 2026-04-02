@@ -1,5 +1,376 @@
 # Simulator ModLog
 
+## 2026-04-01 - Founding Channel Partner Public-Seat Framing Clarification
+
+### Why
+Clarify outward-facing copy so the 19-glyph seal can support a public-seat story
+without changing the protocol truth of 21 total founding channel partner seats.
+
+### Updated
+- `docs/marketing/FOUNDING_CHANNEL_PARTNER_OFFERING.md`
+
+### Clarification
+- Protocol cap remains `21`
+- Public outreach may use `19 public seats`
+- This is a branding/storytelling distinction, not a protocol change
+
+---
+
+## 2026-03-31 - Founding Channel Partner Offering Document
+
+### Why
+Architect/CTO handoff (WSP 97 Slice 6): Create external-facing offering document
+using protocol-participation language for the already-locked channel partner mechanics.
+
+### Created
+- `docs/marketing/FOUNDING_CHANNEL_PARTNER_OFFERING.md`
+
+### Content Coverage
+| Section | Purpose |
+|---------|---------|
+| What This Is | Protocol participation framing |
+| Key Mechanics | 21 cap, pre-launch, equal split, closure |
+| What Partners Contribute | Distribution, visibility, network effects |
+| What Partners Receive | Allocations, genesis status |
+| What This Is Not | Explicit non-claims (not investment) |
+| Protocol Allocation Structure | Du pool partition visual |
+| Registration Timeline | Pre-launch -> Genesis -> Closed |
+| Important Boundaries | No legal/outcome/regulatory claims |
+
+### Terminology Compliance
+| Prohibited | Used Instead |
+|------------|--------------|
+| investor | participant, partner |
+| investment | protocol participation |
+| ROI/returns | allocations, distributions |
+| dividend | allocation |
+| passive income | epoch distributions |
+| profit | (avoided) |
+
+### Boundary Compliance
+- No outcome promises
+- No legal claims
+- No regulatory assurances
+- Market-dependent value explicit
+- Document is not a contract
+
+### Outcome
+- External-facing doc ready for 012 review
+- Mechanics match locked architecture
+- Regulatory-safe terminology
+- Slice is merge-ready
+
+---
+
+## 2026-03-31 - Algorand Du Pool Contract Specification
+
+### Why
+Architect/CTO handoff (WSP 97 Slice 5): Create chain-agnostic economic spec with
+Algorand-first mapping. Translate simulator Du mechanics to contract-ready spec.
+
+### Created
+- `ALGORAND_DU_POOL_CONTRACT_SPEC.md` (comprehensive spec document)
+
+### Spec Coverage
+| Section | Content |
+|---------|---------|
+| Simulator Mapping | Constants, enums, functions → contract equivalents |
+| State Schema | Global (17 keys), Local/per-staker (7 keys), Box (partners) |
+| Method Specs | 8 methods with preconditions/effects/returns |
+| Algorand Notes | Storage decisions, fixed-point math, off-chain requirements |
+| Invariants | 6 explicit invariants (determinism, permanence, conservation) |
+
+### Key Mappings
+| Simulator | Contract |
+|-----------|----------|
+| `btc_stake_weight()` | `compute_weight()` with fixed-point |
+| `StakerHurdleState` | `hurdle_state` local state (0/1/2) |
+| `StakerPosition` | Local state per opted-in account |
+| `ChannelPartnerPool` | Box storage with 21 cap |
+| `EpochDistribution.du_hurdle_withheld` | `cumulative_du_withheld` global |
+
+### What Remains Off-Chain
+- Epoch triggering (scheduled)
+- Batch distribution iteration
+- BTC reserve verification (oracle)
+- UPS conversion (external rate)
+
+### Outcome
+- Spec-first approach (no PyTeal yet)
+- Simulator-to-contract traceability complete
+- Conservation invariants explicit
+- Slice is merge-ready
+
+---
+
+## 2026-03-31 - BTC Staker Hurdle State Machine
+
+### Why
+Architect/CTO handoff (WSP 97 Slice 4): Implement local hurdle mechanics for BTC stakers
+in Du-pool partition. 10x threshold detection with permanent post-hurdle lock.
+
+### Added to `pool_distribution.py`
+```python
+class StakerHurdleState(IntEnum):
+    PRE_HURDLE = 0         # <10x cumulative distributions
+    HURDLE_MET = 1         # Transition state (10x reached)
+    POST_HURDLE_LOCKED = 2  # Permanent (>10x, locked)
+
+STAKER_HURDLE_TARGET_MULTIPLE = 10.0
+STAKER_POST_HURDLE_RATE_FACTOR = 0.0526  # ~5.26% of pre-hurdle rate
+UPS_TO_BTC_RATE = 0.00001  # UPS-to-BTC conversion for hurdle tracking
+```
+
+### Distribution Integration
+`_distribute_stakeholder_pools()` modified to:
+1. Apply `distribution_rate_factor` for POST_HURDLE_LOCKED stakers (5.26% of normal)
+2. Convert UPS distributions to BTC-equivalent via `UPS_TO_BTC_RATE`
+3. Call `record_distribution_btc()` to track cumulative and trigger locks
+4. Track `du_hurdle_withheld` and `du_actual_distributed` for conservation
+
+### Conservation Accounting
+`EpochDistribution` extended with:
+- `du_hurdle_withheld: float` - Amount suppressed due to post-hurdle rate reduction
+- `du_actual_distributed: float` - Actual Du pool payouts after rate reduction
+- `du_conservation_check` property - Verifies `distributed + withheld == pool`
+
+### StakerPosition Extended
+| Field | Type | Purpose |
+|-------|------|---------|
+| `cumulative_distributions_btc` | float | BTC-equivalent distributions received |
+| `hurdle_target_multiple` | float | Default 10x |
+| `post_hurdle_locked` | bool | Permanent lock flag |
+| `hurdle_locked_at_btc` | Optional[float] | BTC level when lock triggered |
+
+### Properties/Methods Added
+| Name | Returns | Purpose |
+|------|---------|---------|
+| `hurdle_target_btc` | float | stake * multiple |
+| `hurdle_progress` | float | 0.0-1.0+ progress ratio |
+| `hurdle_state` | StakerHurdleState | Current state machine state |
+| `distribution_rate_factor` | float | 1.0 or 0.0526 based on hurdle state |
+| `record_distribution_btc(amount)` | StakerHurdleState | Record and check for lock |
+
+### Exports Added to `economics/__init__.py`
+- `StakerHurdleState`
+- `STAKER_HURDLE_TARGET_MULTIPLE`
+- `STAKER_POST_HURDLE_RATE_FACTOR`
+- `UPS_TO_BTC_RATE`
+
+### Test Coverage
+| Test Class | Tests | Status |
+|------------|-------|--------|
+| TestStakerHurdleStateEnum | 4 | PASS |
+| TestStakerPositionHurdleFields | 4 | PASS |
+| TestHurdleTargetBtc | 4 | PASS |
+| TestHurdleProgress | 5 | PASS |
+| TestHurdleState | 6 | PASS |
+| TestRecordDistributionBtc | 5 | PASS |
+| TestHurdleLocking | 6 | PASS |
+| TestHurdleWithWeightedStake | 2 | PASS |
+| TestEdgeCases | 3 | PASS |
+| TestConservation | 2 | PASS |
+| TestDistributionRateFactor | 8 | PASS |
+| TestDuConservationAccounting | 6 | PASS |
+| **TOTAL** | **55** | **PASS** |
+
+### Key Behaviors Verified
+- 10x threshold triggers permanent lock
+- Lock state survives additional distributions
+- Weighted stake (Slice 3) unaffected by hurdle state
+- Zero/negative distributions ignored
+- Deterministic state transitions
+- POST_HURDLE_LOCKED stakers get 5.26% of normal rate
+- Rate factor permanence after lock
+- Conservation: `du_actual_distributed + du_hurdle_withheld == du_pool`
+
+### Boundary Compliance
+- `investor_staking.py` untouched (separate I_i lane)
+- `ChannelPartnerPool` untouched
+- Local implementation in `pool_distribution.py` only
+
+### Outcome
+- BTC staker hurdle mechanics are deterministic and tested
+- Slice is merge-ready
+
+---
+
+## 2026-03-31 - Weighted Stake Allocation for BTC Staker Pool
+
+### Why
+Architect/CTO handoff (WSP 97): Implement weighted stake allocation where `weight = stake^1.5`.
+100x stake produces 1000x weight, rewarding larger commitments exponentially.
+
+### Added to `pool_distribution.py`
+```python
+STAKE_WEIGHT_EXPONENT = 1.5  # stake * sqrt(stake)
+
+def btc_stake_weight(stake_btc, exponent=1.5) -> float
+def calculate_weighted_share(stake_btc, total_weighted_stake, pool_amount) -> float
+def calculate_total_weighted_stake(stakes: List[float]) -> float
+def distribute_weighted_staker_pool(stakes: Dict[str, float], pool_amount) -> Dict[str, float]
+```
+
+### StakerPosition Enhancement
+- Added `weighted_stake` property: `btc_stake_weight(self.original_stake_btc)`
+
+### Exports Added to `economics/__init__.py`
+- `STAKE_WEIGHT_EXPONENT`
+- `btc_stake_weight`
+- `calculate_weighted_share`
+- `calculate_total_weighted_stake`
+- `distribute_weighted_staker_pool`
+
+### Test Coverage
+| Test Class | Tests | Status |
+|------------|-------|--------|
+| TestStakeWeight | 8 | PASS |
+| TestCalculateWeightedShare | 4 | PASS |
+| TestDistributeWeightedStakerPool | 7 | PASS |
+| TestCalculateTotalWeightedStake | 2 | PASS |
+| TestStakerPositionWeightedStake | 2 | PASS |
+| **TOTAL** | **23** | **PASS** |
+
+### Key Math Verified
+- `btc_stake_weight(1.0) == 1.0`
+- `btc_stake_weight(10.0) == 31.62...` (10^1.5)
+- `btc_stake_weight(100.0) / btc_stake_weight(1.0) == 1000.0` (100x stake → 1000x weight)
+- Conservation: sum of distributions equals pool amount
+
+### Outcome
+- Weighted stake mechanics are deterministic and tested
+- Pure helper functions (no new BTCStakerPool class needed)
+- Slice is merge-ready
+
+---
+
+## 2026-03-31 - Genesis Channel Partner Pool Spec
+
+### Why
+Architect/CTO handoff (WSP 97): Implement deterministic ChannelPartnerPool mechanics
+as part of the Du 4% passive participation partition.
+
+### Created
+- `modules/foundups/simulator/economics/channel_partner_pool.py` (250+ lines)
+- `modules/foundups/simulator/tests/test_channel_partner_pool.py` (15 tests)
+
+### Channel Partner Rules Implemented
+| Rule | Implementation |
+|------|----------------|
+| Pre-launch only | `RegistryState.OPEN` → `CLOSED` |
+| Hard cap | `CHANNEL_PARTNER_CAP = 21` |
+| Equal split | `pool_amount / partner_count` |
+| Duplicate rejection | Check `partner_id in _partners` |
+| Launch closure | `close_on_mainnet_genesis(event_id, timestamp, foundup_id)` |
+
+### API Surface
+```python
+# Registration
+pool.register_partner(partner_id, display_name, channel_url) -> (success, msg)
+
+# Closure
+pool.close_on_mainnet_genesis(event_id, timestamp, foundup_id) -> bool
+
+# Distribution
+pool.distribute_epoch(epoch, pool_amount) -> ChannelPartnerDistribution
+
+# Queries
+pool.list_partners() -> List[ChannelPartner]
+pool.get_partner(partner_id) -> Optional[ChannelPartner]
+pool.get_stats() -> Dict
+```
+
+### Exports Added to `economics/__init__.py`
+- `CHANNEL_PARTNER_CAP`
+- `CHANNEL_PARTNER_PASSIVE_SHARE`
+- `RegistryState`
+- `ChannelPartner`
+- `GenesisClosureEvent`
+- `ChannelPartnerDistribution`
+- `ChannelPartnerPool`
+- `get_channel_partner_pool`
+- `reset_channel_partner_pool`
+
+### Test Coverage
+| Test Class | Tests | Status |
+|------------|-------|--------|
+| TestRegistration | 5 | PASS |
+| TestClosure | 3 | PASS |
+| TestDistribution | 5 | PASS |
+| TestStatistics | 2 | PASS |
+| **TOTAL** | **15** | **PASS** |
+
+### What Remains for Future Slices
+- BTCStakerPool weighted allocation (Slice 3)
+- Hurdle state machine (Slice 4)
+- Algorand contract spec (Slice 5)
+- Marketing doc (Slice 6)
+
+### Outcome
+- Genesis channel partner mechanics are deterministic
+- Equal-split math is explicit and tested
+- Closure-at-launch rule is modeled
+- Slice is merge-ready
+
+---
+
+## 2026-03-31 - Du Pool Boundary and Partition Reconciliation
+
+### Why
+Architect/CTO handoff (WSP 97): Du-pool surfaces had terminology drift mixing CABR/PoB
+language with old investor/ROI framing. Also needed canonical Du 4% partition model.
+
+### Audit Findings
+| Surface | Status Before |
+|---------|---------------|
+| pool_distribution.py | Mixed - had "investor economics", "investor dividend", "returns" |
+| staker_viability.py | COMPLIANT - already CABR/PoB framed |
+| dilution_scenario.py | COMPLIANT - already uses dist_ratio |
+| investor_staking.py | SEPARATE LANE - I_i bonding-curve (untouched) |
+
+### Changes
+- `pool_distribution.py`:
+  - Replaced "investor economics" with "CABR/PoB economics"
+  - Replaced "investor treatment" with "Protocol participants"
+  - Replaced "investor dividend" with "epoch distributions"
+  - Added canonical Du 4% partition model in docstring
+  - Added boundary note separating Du-pool from I_i lane
+  - Updated comments: "returns" → "distributions"
+- `staker_viability.py`:
+  - Fixed comment: "ROI at key timepoints" → "Distribution ratio at key timepoints"
+  - Added boundary note
+- `dilution_scenario.py`:
+  - Fixed print statement: "return for founding members" → "distribution ratios for founding participants"
+  - Added boundary note
+
+### Canonical Du 4% Partition Model
+```
+DuPool (4% of epoch distribution)
+├── ActiveFounderPool (80% of Du = 3.2% of total)
+│   └── Active founders with degressive tier progression
+└── PassiveParticipationPool (20% of Du = 0.8% of total)
+    ├── BTCStakerPool (weighted by deterministic formula)
+    └── ChannelPartnerPool (equal split, max 21, genesis only)
+```
+
+### Boundary Documented
+- Du pool stakers = CABR/PoB participation lane
+- I_i holders in `investor_staking.py` = SEPARATE bonding-curve lane
+- Future agents must NOT conflate these two models
+
+### What Remains Unchanged
+- `investor_staking.py` — separate I_i bonding-curve lane, untouched
+- `INVESTOR_ECONOMICS.md` — belongs to I_i lane, untouched
+
+### Outcome
+- Du-pool terminology now CABR/PoB compliant
+- Canonical partition model documented
+- Clear boundary prevents future conflation
+- No runtime behavior changes (comments/docs only)
+- Slice is merge-ready
+
+---
+
 ## 2026-03-28 - ROC-First Property and Baseline Coverage
 
 ### Why

@@ -31,15 +31,12 @@ def run_training_system():
     Qwen/Gemma Training System submenu.
     Implements WRE pattern (WSP 46): Qwen coordinates, Gemma executes.
     """
-    # Import run_utf8_hygiene_scan from main module context
-    import sys
-    import os
     from pathlib import Path
-    
-    repo_root = Path(__file__).resolve().parents[4]
-    sys.path.insert(0, str(repo_root))
-    from main import run_utf8_hygiene_scan
 
+    # Import UTF-8 hygiene functions from canonical module (WSP 62)
+    from modules.ai_intelligence.utf8_hygiene.scripts.scanner import run_utf8_hygiene_scan
+
+    repo_root = Path(__file__).resolve().parents[4]
     corpus_name = os.getenv("OPENCLAW_TRAINING_CORPUS", "012.txt")
     corpus_path = repo_root / corpus_name
     total_lines = None

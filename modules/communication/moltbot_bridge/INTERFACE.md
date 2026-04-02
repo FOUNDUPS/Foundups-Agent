@@ -334,13 +334,27 @@ Operational rule:
 
 ### FOUNDUP Route Contract (FAM Adapter)
 
-- Launch command examples:
-  - `launch foundup <name> with token <SYMBOL>`
-  - `create foundup <name> token <SYMBOL>`
-- Token symbol resolution:
-  - If token is omitted, parser auto-generates from FoundUp name.
-  - If token is `AUTO` (or legacy `FUP` seed), adapter auto-generates and resolves collisions.
-  - Collision resolution is deterministic (`BASE`, `BASE2`, `BASE3`, ...), then handed to Agent Market.
+#### Catalog Commands (p.fMALL Integration)
+
+- `list foundups` - Show all FoundUps in catalog
+- `foundup catalog [category]` - Browse catalog by category (marketplace, media, science, games, community)
+- `foundup status <name>` - Show FoundUp status (manifest + state overlay)
+- `open <foundup>` - Get routing target URL (`/f/{foundup_id}`)
+
+Catalog commands consume:
+- Static manifests from `foundup_manifest.json` (per PFMALL_FOUNDUP_MANIFEST_SCHEMA.md)
+- State overlay via provider interface (per PFMALL_STATE_OVERLAY_CONTRACT.md)
+- Degrades gracefully when state provider unavailable (shows "unknown" status)
+
+#### Launch Commands
+
+- `launch foundup <name> with token <SYMBOL>`
+- `create foundup <name> token <SYMBOL>`
+
+Token symbol resolution:
+- If token is omitted, parser auto-generates from FoundUp name.
+- If token is `AUTO` (or legacy `FUP` seed), adapter auto-generates and resolves collisions.
+- Collision resolution is deterministic (`BASE`, `BASE2`, `BASE3`, ...), then handed to Agent Market.
 
 ### Autonomy Tiers (Graduated)
 
@@ -489,3 +503,89 @@ OpenClaw can now read the DAEmon live ledger for itself and broker-managed DAEs:
 - `tail holodae`
 
 These commands are read-only. They use the central DAEmon observer surface and do not mutate runtime state.
+
+## Skill Evolution Loop
+
+### Phase 1: Report Surface (Read-Only)
+
+```python
+from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+    build_skill_evolution_report,
+    skill_evolution_report_due,
+    write_skill_evolution_report,
+)
+
+# Check if report generation is due (missing or stale)
+if skill_evolution_report_due(repo_root, max_age_sec=3600):
+    report = build_skill_evolution_report(pattern_memory)
+    write_skill_evolution_report(repo_root, report)
+```
+
+Phase 1 is **read-only**: surfaces review candidates from PatternMemory without mutating WRE skills or scheduling promotions.
+
+Report contract:
+- `generated_on`: ISO timestamp
+- `period_days`: Evaluation window
+- `skills_evaluated`: Count of `openclaw_*` skills found
+- `candidate_count`: Skills with `status=candidate_for_review`
+- `candidates[]`: Array with `skill_name`, `execution_count`, `avg_fidelity`, `recommendation`
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OPENCLAW_SKILL_EVOLUTION_ENABLED` | `0` | Enable Phase 1 report generation on idle path |
+
+### Phase 2: Mutation Surface (Bounded, Gated)
+
+```python
+from modules.communication.moltbot_bridge.src.openclaw_skill_evolution import (
+    build_mutation_surface_report,
+    mutation_surface_report_due,
+    write_mutation_surface_report,
+)
+
+# Only due when gate enabled AND report missing/stale
+if mutation_surface_report_due(repo_root, max_age_sec=3600):
+    report = build_mutation_surface_report(pattern_memory)
+    write_mutation_surface_report(repo_root, report)
+```
+
+Phase 2 adds a **bounded mutation surface** that:
+- Surfaces A/B test status and promotion readiness per skill
+- Gates all mutation operations behind explicit env vars (fail-closed)
+- Reuses existing WRE primitives (PatternMemory, WRESkillsRegistryV2)
+- Does NOT introduce duplicate A/B or promotion engines
+
+Mutation status values:
+- `stable`: High fidelity, no action needed
+- `ab_test_active`: A/B test in progress
+- `eligible_for_ab`: Candidate for A/B test scheduling
+- `blocked`: Insufficient data or other blocker
+
+Report contract (extends Phase 1):
+- `enabled`: Whether mutation surface gate is on
+- `summary`: Counts by mutation_status
+- `gates`: Current gate states
+- `candidates[]`: Extended with `mutation_status`, `active_ab_test`, `ab_promotion_status`, `promotion_readiness`
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OPENCLAW_MUTATION_SURFACE_ENABLED` | `0` | Enable Phase 2 mutation surface report generation |
+| `OPENCLAW_AB_SCHEDULING_ENABLED` | `0` | Enable A/B test scheduling (future) |
+| `OPENCLAW_PROMOTION_ENABLED` | `0` | Enable skill promotion (future) |
+
+**All gates are fail-closed by default**. Setting to `"0"` or leaving unset disables the feature.
+
+### Supervisor Integration
+
+Both Phase 1 and Phase 2 reports are generated on the supervisor **idle path only** (lowest priority):
+
+```python
+# In openclaw_supervisor.py _triage()
+idle_result = {"kind": "idle", "reason": "resident_openclaw_healthy"}
+if skill_evolution_report:
+    idle_result["skill_evolution_report"] = skill_evolution_report
+if mutation_surface_report:
+    idle_result["mutation_surface_report"] = mutation_surface_report
+```
+
+Higher-priority work (restarts, autonomous tasks, self-audit events) blocks skill evolution report generation.

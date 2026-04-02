@@ -1,12 +1,17 @@
 """Du Pool Dilution Scenario Analysis.
 
-Models the core economic question: "Do founding members get diluted out?"
+Models the core economic question: "What distribution ratios do participants receive?"
 
 PARADIGM: CABR/PoB (not CAGR/ROI)
 - Stakers provide LIQUIDITY (energy for UPS capacity)
 - BTC → Reserve → Backs UPS → Protocol runs
 - Stakers receive F_i DISTRIBUTIONS (protocol mechanics)
 - This is PROTOCOL PARTICIPATION, not investment
+
+BOUNDARY NOTE (2026-03-31):
+- Du pool stakers = CABR/PoB participation lane (this file)
+- I_i holders in investor_staking.py = SEPARATE bonding-curve lane
+- Do NOT conflate these two models
 
 Key Questions:
 1. At what member count does Du pool distribution become negligible?
@@ -505,7 +510,7 @@ if __name__ == "__main__":
     # Run analysis
     print("\n" + "=" * 80)
     print("FOUNDUPS DU POOL DILUTION ANALYSIS")
-    print("Is there a return for founding members/stakers?")
+    print("What are the distribution ratios for founding participants?")
     print("=" * 80)
 
     # Compare adoption models

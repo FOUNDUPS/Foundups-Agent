@@ -37,6 +37,44 @@ Action Rules:
 
 ---
 
+## Immediate Architecture Program - SoftProto Foundation
+
+SoftProto is now the active UI operating-layer direction for FoundUps.
+
+Authoritative architecture note:
+- `modules/foundups/docs/SOFTPROTO_FOUNDATION_ARCHITECTURE_2026-04-01.md`
+- `modules/foundups/docs/SOFTPROTO_ROLLOUT_PLAN_2026-04-01.md`
+
+Core decision:
+- `Svelte` is the rendering layer
+- `SoftProto` is the schema/registry/store/command system above it
+- do not rewrite the live gateway or member shell into Svelte first
+
+Execution sequence:
+1. lock the SoftProto contract first
+2. audit each active surface against that contract
+3. build one isolated Svelte spike inside `/member/`
+4. adopt it across gateway, Mall, user panel, and FoundUp views in phases
+
+Current surface split:
+- `A`: gateway / landing
+- `B`: Mall shell / navigation / PWA
+- `C`: user panel / Red Dog digital-twin surface
+- `D`: support / audit
+
+The rule from this point forward:
+- no new hard-coded UI placement when the feature clearly belongs in the future schema-driven layer
+- AI edits and user edits must eventually mutate the same layout/gesture state
+
+Complementary FoundUps runtime rule:
+- p.fMALL remains the installed control shell
+- product FoundUps may live in separate repos
+- the preferred user experience is still one app through in-scope route
+  deployment, not separate install surfaces
+- see `modules/foundups/docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md`
+
+---
+
 **[TARGET] Revolutionary Mission:** Building the **orchestration infrastructure for an intelligent internet** where 0102 agents autonomously interact, coordinate, and collectively build FoundUps across all platforms.
 
 **[U+1F300] Foundational Principle:** We are creating the framework for autonomous agent coordination that will transform the internet from a human-operated network to an **intelligent, self-coordinating ecosystem** where ideas automatically manifest into reality.

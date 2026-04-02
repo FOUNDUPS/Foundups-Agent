@@ -1,83 +1,61 @@
-# FoundUPS Member Area
+# FoundUPS Member Mall
 
-**Status**: Layer 1 (Shell) Complete
+**Status**: Invite-gated p.fMALL shell live
 **Location**: `public/member/`
-**WSP Compliance**: WSP 49 (Structure), WSP 72 (Independence)
 
 ## Overview
 
-The FoundUPS Member Area is the authenticated dashboard where users manage their:
-- UPS token balance and staking
-- FoundUp ventures (create, manage, contribute)
-- OpenClaw agents (deploy, monitor, earn)
-- Invite codes and referrals
-- Account settings
+`/member/` is no longer a placeholder member shell.
 
-## Architecture
+It is now the admitted-user Mall experience that sits behind the existing FoundUPS invite gateway:
+- Clerk session check
+- invite validation
+- username claim
+- then swipe into the Mall
 
-The member area follows **Occam's Layered Architecture** — each section is an independent module that can be built/tested separately.
+The gateway is preserved. The change is the admitted state.
 
-```
+## Runtime Shape
+
+```text
 public/member/
-├── index.html          # Shell + routing + auth state
-├── css/
-│   └── member.css      # Shared styles (dark theme, glassmorphism)
-├── js/
-│   ├── dashboard.js    # (Layer 2 - pending)
-│   ├── wallet.js       # (Layer 3 - pending)
-│   ├── foundups.js     # (Layer 4 - pending)
-│   ├── agents.js       # (Layer 5 - pending)
-│   └── marketplace.js  # (Layer 6 - pending)
-└── README.md           # This file
+|- index.html
+|- foundup.html
+|- css/member.css
+|- mall-catalog.json
+|- README.md
+|- INTERFACE.md
+|- ModLog.md
 ```
 
-## Layer Roadmap
+## Current UX
 
-| Layer | Module | Status | Description |
-|-------|--------|--------|-------------|
-| 1 | Shell | **Complete** | Auth state, navigation, routing |
-| 2 | Dashboard | Placeholder | Overview, stats, activity feed |
-| 3 | Wallet | Placeholder | UPS balance, staking, transactions |
-| 4 | FoundUps | Placeholder | Create/manage/contribute |
-| 5 | Agents | Placeholder | Deploy/monitor OpenClaw agents |
-| 6 | Marketplace | Placeholder | Browse/join FoundUps |
+- swipe or scroll horizontally through FoundUps
+- tap a card to navigate to its dedicated entry page (`foundup.html?id={foundup_id}`)
+- entry page shows readiness posture, details, and what-happens-next copy
+- use the Red Dog icon to open concierge context
+- invite codes remain available from the Red Dog sheet
 
-## Dependencies
+## Out of Scope
 
-- **Firebase Auth** - User authentication
-- **Firestore** - User data, FoundUps, transactions
-- **Landing page** (`public/index.html`) - Signup flow
+- direct tenant execution
+- wallet flows
+- `/f/{foundup_id}` domain routing
+- restoring the legacy member shell
 
-## Entry Points
+## Source Of Truth
 
-1. **Direct Access**: `/member/` - Redirects to landing if not authenticated
-2. **Post-Signup**: Landing page redirects here after successful signup
-3. **Deep Links**: `/member/#wallet`, `/member/#foundups`, etc.
+`mall-catalog.json` is a **generated artifact**, not hand-maintained.
 
-## Design Principles
+Canonical source: `modules/foundups/pfmall/` (manifests + presentation overrides).
 
-1. **No God Modules** - Each section is independent
-2. **Occam's Layered** - Build/test one layer at a time
-3. **WSP 72 Compliance** - No cross-module dependencies
-4. **Same Design Language** - Matches landing page (dark theme, glassmorphism)
+Regenerate:
+```bash
+python -m modules.foundups.pfmall.member_catalog_export
+```
 
-## Firebase Collections
-
-| Collection | Purpose |
-|------------|---------|
-| `users` | User profiles, inviteCodes, settings |
-| `foundups` | FoundUp ventures |
-| `transactions` | UPS/F_i transactions |
-| `agents` | OpenClaw agent deployments |
-
-## Next Steps
-
-1. **Layer 2**: Implement dashboard with real data
-2. **Layer 3**: Wallet module with UPS display
-3. **Layer 4**: FoundUps CRUD operations
-4. **Layer 5**: Agent deployment interface
-5. **Layer 6**: Marketplace discovery
+This keeps the live site compatible with Firebase hosting while the deeper p.fMALL transport surfaces continue maturing elsewhere in the repo. Do not hand-edit `mall-catalog.json` — edit the source manifests or `member_presentation.py` instead, then regenerate.
 
 ---
 
-*Created 2026-02-18 | WSP 49 Compliant*
+*Last Updated: 2026-03-31*

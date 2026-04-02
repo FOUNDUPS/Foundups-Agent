@@ -158,7 +158,72 @@ public/
     └── styles.css      # Shared styles
 ```
 
-## 8. Testing Checklist
+## 8. SoftProto Direction
+
+FoundUps interfaces are moving toward a schema-driven UI operating layer.
+
+Direction lock:
+- layout should become user-owned, not hard-coded
+- gestures should become user-owned, not hard-coded
+- future AI edits and direct user edits must mutate the same underlying state
+
+Current implementation note:
+- `modules/foundups/docs/SOFTPROTO_FOUNDATION_ARCHITECTURE_2026-04-01.md`
+- `modules/foundups/docs/SOFTPROTO_ROLLOUT_PLAN_2026-04-01.md`
+
+Interpretation:
+- `WSP 102` remains the governing web design protocol
+- `SoftProto` is the active implementation direction for configurable FoundUps surfaces
+- `Svelte` may be used as the rendering layer for SoftProto, but the system itself is the schema/registry/store/command model, not the framework alone
+
+Adoption order:
+1. architecture contract
+2. surface audits
+3. isolated spike inside `/member/`
+4. phased rollout across gateway, Mall, user panel, and FoundUp views
+
+Nested interaction requirement:
+- gesture resolution must eventually support recursive scopes across:
+  - app
+  - plane
+  - module
+  - submodule
+  - object
+- local overrides must be able to fall back to parent defaults
+
+## 8A. Mall / FoundUp Runtime Boundary
+
+FoundUps web surfaces must preserve the runtime split between the shell and the
+product experience.
+
+Canonical model:
+
+```text
+Mall PWA = control shell
+FoundUp = external product/app
+Connection = metadata + task API + deep link
+```
+
+Direction lock:
+- the Mall owns discovery, auth context, navigation, and shared shell controls
+- the FoundUp owns its own product logic, task surface, and product UI
+- separate FoundUp repos are compatible with one installed app experience when
+  deployment stays inside the shell route scope
+
+Current runtime note:
+- `modules/foundups/docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md`
+
+Preferred route family:
+- `/f/{foundup_id}`
+- `/f/{foundup_id}/{path}`
+
+Implication:
+- route navigation is the experience pipe
+- metadata/task/status contracts are the control pipe
+- UI customization work such as SoftProto belongs to the shell-side interface
+  layer and must not erase the Mall-vs-FoundUp boundary
+
+## 9. Testing Checklist
 
 - [ ] Click count audit (target Grade B or better)
 - [ ] Mobile touch target verification (44px minimum)

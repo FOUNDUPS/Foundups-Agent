@@ -1,0 +1,660 @@
+/* Mall Tile Field — Low-chrome discovery surface
+   Replaces carousel with square tile grid
+   SoftProto mount point: #mallTileField[data-softproto-mount="tile-field"]
+
+   Anchor model: This is the MIDDLE FIELD — dominates the Mall experience
+
+   Motion modes:
+   - Snap (default): page-style discrete movement
+   - Glide: fluid scroll override
+
+   Density presets (AI-controlled):
+   - 2x3, 3x4, 3x5, 5x8
+*/
+
+:root {
+  --field-columns: 2;
+  --field-rows: 3;
+}
+
+/* ========== Projection Controls ========== */
+
+.mall-projection {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0 0 0.75rem;
+  flex-wrap: wrap;
+}
+
+.mall-projection-chip {
+  min-height: 44px; /* WCAG touch target */
+  padding: 0.6rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mall-projection-chip:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.mall-projection-chip.active {
+  border-color: rgba(141, 113, 255, 0.5);
+  background: rgba(141, 113, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.mall-projection-chip:focus-visible {
+  outline: 2px solid rgba(141, 113, 255, 0.6);
+  outline-offset: 2px;
+}
+
+/* Category headers (when grouped) */
+.mall-tile-category-header {
+  grid-column: 1 / -1;
+  padding: 0.5rem 0 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.mall-tile-category-header:first-child {
+  padding-top: 0;
+}
+
+/* ========== Tile Field Container ========== */
+
+.mall-tile-field-wrapper {
+  flex: 1;
+  overflow: auto;
+  scroll-snap-type: both mandatory;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  /* Smooth deceleration for phone-native feel */
+  scroll-padding: 0;
+}
+
+/* Glide mode: remove snap for fluid scrolling */
+.mall-tile-field-wrapper.motion-glide {
+  scroll-snap-type: none;
+}
+
+.mall-tile-field {
+  display: grid;
+  grid-template-columns: repeat(var(--field-columns, 2), 1fr);
+  grid-auto-rows: 1fr;
+  gap: var(--tile-gap, 0.65rem);
+  padding: 0;
+  min-height: 100%;
+  /* Content fade transition for expand/collapse */
+  transition: opacity 120ms ease-out;
+}
+
+.mall-tile-field.transitioning {
+  opacity: 0.7;
+}
+
+/* Density presets with adaptive styling */
+.mall-tile-field[data-density="2x3"] {
+  --field-columns: 2;
+  --field-rows: 3;
+  --tile-radius: 1.25rem;
+  --tile-gap: 0.65rem;
+}
+.mall-tile-field[data-density="3x4"] {
+  --field-columns: 3;
+  --field-rows: 4;
+  --tile-radius: 1rem;
+  --tile-gap: 0.5rem;
+}
+.mall-tile-field[data-density="3x5"] {
+  --field-columns: 3;
+  --field-rows: 5;
+  --tile-radius: 0.85rem;
+  --tile-gap: 0.4rem;
+}
+.mall-tile-field[data-density="5x8"] {
+  --field-columns: 5;
+  --field-rows: 8;
+  --tile-radius: 0.6rem;
+  --tile-gap: 0.3rem;
+}
+
+@media (min-width: 600px) {
+  .mall-tile-field {
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 900px) {
+  .mall-tile-field {
+    gap: 1.25rem;
+  }
+}
+
+/* ========== Tile ========== */
+
+.mall-tile {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--tile-radius, 1.25rem);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface);
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  cursor: pointer;
+  /* Snappy transitions for phone feel */
+  transition: transform 100ms ease-out, border-color 100ms ease-out, box-shadow 100ms ease-out;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  scroll-snap-align: start;
+  /* Ensure minimum tappable size */
+  min-width: 3rem;
+  min-height: 3rem;
+}
+
+.mall-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.12), transparent 40%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.06), transparent 50%);
+  pointer-events: none;
+}
+
+.mall-tile:hover,
+.mall-tile:focus-visible {
+  transform: scale(1.02);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+  outline: none;
+}
+
+.mall-tile:active {
+  transform: scale(0.97);
+}
+
+/* Tap confirmation pulse — immediate visual feedback */
+.mall-tile.tap-pulse {
+  animation: tile-tap-pulse 180ms ease-out;
+}
+
+@keyframes tile-tap-pulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.mall-tile.is-inspecting {
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
+}
+
+/* ========== Tile Content ========== */
+
+.mall-tile-inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0.85rem;
+  position: relative;
+  z-index: 1;
+}
+
+.mall-tile-token {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.mall-tile-hero {
+  font-size: clamp(2.2rem, 10vw, 3.5rem);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.06em;
+  color: rgba(255, 255, 255, 0.92);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mall-tile-name {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.88);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mall-tile-badge {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.55rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: 0.35rem;
+  background: rgba(0, 0, 0, 0.4);
+  color: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.mall-tile-badge.ready {
+  background: rgba(40, 180, 99, 0.3);
+  color: #81f0a3;
+}
+
+.mall-tile-badge.conditional {
+  background: rgba(180, 130, 40, 0.3);
+  color: #ffcf79;
+}
+
+/* Video queue count badge */
+.mall-tile-queue-count {
+  position: absolute;
+  bottom: 0.6rem;
+  right: 0.6rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  font-family: var(--mono);
+  border-radius: 0.35rem;
+  background: rgba(0, 0, 0, 0.6);
+  color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+}
+
+/* Play state indicator — snappy for immediate feel */
+.mall-tile-play-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Tightened timing for phone-native feel */
+  transition: transform 80ms ease-out, opacity 80ms ease-out;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mall-tile.is-playing .mall-tile-play-indicator {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+.mall-tile-play-indicator::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0.5rem 0 0.5rem 0.8rem;
+  border-color: transparent transparent transparent #fff;
+  margin-left: 0.15rem;
+}
+
+.mall-tile.is-playing .mall-tile-play-indicator::before {
+  /* Pause icon: two bars */
+  border: none;
+  width: 0.6rem;
+  height: 0.9rem;
+  background: linear-gradient(to right, #fff 35%, transparent 35%, transparent 65%, #fff 65%);
+  margin-left: 0;
+}
+
+/* Expanded FoundUp video field mode */
+.mall-tile-field.expanded-mode {
+  /* When viewing a single FoundUp's videos */
+}
+
+.mall-tile-field.expanded-mode .mall-tile {
+  /* Video tiles in expanded mode */
+}
+
+/* Collapse indicator (shown in expanded mode) */
+.mall-tile-field-collapse-hint {
+  position: fixed;
+  bottom: calc(6rem + var(--safe-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%) translateY(0.5rem);
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.75);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease-out, transform 150ms ease-out;
+}
+
+.mall-tile-field-collapse-hint.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ========== Theme Colors (reuse from carousel) ========== */
+/*
+ * Each theme sets background-color as a fallback for broken poster images.
+ * JS sets inline style="background-image: url(...)" which overrides the
+ * gradient. background-color survives that override, so failed posters
+ * degrade to a solid theme tone instead of transparent black.
+ */
+
+.mall-tile.theme-antifafm {
+  background: linear-gradient(145deg, rgba(60, 11, 16, 0.96), rgba(122, 20, 28, 0.72) 60%, rgba(24, 7, 10, 0.98));
+  background-color: #3c0b10;
+}
+
+.mall-tile.theme-gotjunk {
+  background: linear-gradient(145deg, rgba(15, 60, 56, 0.96), rgba(27, 108, 92, 0.76) 60%, rgba(17, 25, 19, 0.98));
+  background-color: #0f3c38;
+}
+
+.mall-tile.theme-magadoom {
+  background: linear-gradient(145deg, rgba(27, 17, 56, 0.96), rgba(89, 28, 113, 0.76) 60%, rgba(12, 14, 28, 0.98));
+  background-color: #1b1138;
+}
+
+.mall-tile.theme-tq {
+  background: linear-gradient(145deg, rgba(11, 29, 60, 0.96), rgba(20, 80, 160, 0.72) 60%, rgba(8, 12, 28, 0.98));
+  background-color: #0b1d3c;
+}
+
+.mall-tile.theme-vsa {
+  background: linear-gradient(145deg, rgba(40, 40, 45, 0.96), rgba(80, 82, 88, 0.72) 60%, rgba(22, 22, 26, 0.98));
+  background-color: #28282d;
+}
+
+.mall-tile.theme-pqn {
+  background: linear-gradient(145deg, rgba(20, 50, 30, 0.96), rgba(50, 120, 70, 0.72) 60%, rgba(12, 20, 14, 0.98));
+  background-color: #14321e;
+}
+
+.mall-tile.theme-default {
+  background: linear-gradient(145deg, rgba(30, 30, 35, 0.96), rgba(60, 60, 68, 0.72) 60%, rgba(18, 18, 22, 0.98));
+  background-color: #1e1e23;
+}
+
+/* ========== Inspector Overlay ========== */
+
+.tile-inspector-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 180;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+
+.tile-inspector-scrim.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tile-inspector {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  width: min(90vw, 380px);
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--surface);
+  backdrop-filter: blur(32px);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+  z-index: 181;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.tile-inspector.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.tile-inspector-header {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.tile-inspector-badges {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.tile-inspector-badge {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border-radius: 0.4rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.tile-inspector-badge.ready {
+  background: rgba(40, 180, 99, 0.25);
+  color: #81f0a3;
+}
+
+.tile-inspector-badge.conditional {
+  background: rgba(180, 130, 40, 0.25);
+  color: #ffcf79;
+}
+
+.tile-inspector-name {
+  margin: 0 0 0.4rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.tile-inspector-tagline {
+  margin: 0 0 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.tile-inspector-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.tile-inspector-field {
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tile-inspector-label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 0.2rem;
+}
+
+.tile-inspector-value {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.tile-inspector-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.tile-inspector-enter {
+  flex: 1;
+  min-height: 48px; /* Thumb-comfortable tap target */
+  padding: 0.85rem 1rem;
+  border: none;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+
+.tile-inspector-enter:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.tile-inspector-enter:active {
+  background: rgba(255, 255, 255, 0.24);
+  transform: scale(0.98);
+}
+
+.tile-inspector-hint {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: center;
+}
+
+/* ========== Phone Thumb-Zone: Inspector as Bottom Sheet ========== */
+
+@media (max-width: 480px) {
+  .tile-inspector {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transform: translateY(100%);
+    width: 100%;
+    max-width: none;
+    max-height: 85vh;
+    border-radius: 1.5rem 1.5rem 0 0;
+    padding: 1.25rem 1.25rem calc(1.25rem + var(--safe-bottom, 0px));
+  }
+
+  .tile-inspector.visible {
+    transform: translateY(0);
+  }
+
+  /* Compact grid on small screens */
+  .tile-inspector-grid {
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .tile-inspector-field {
+    padding: 0.5rem 0.65rem;
+  }
+
+  /* Larger action button for thumb reach */
+  .tile-inspector-enter {
+    min-height: 52px;
+    font-size: 1rem;
+  }
+
+  /* Handle indicator at top */
+  .tile-inspector::before {
+    content: "";
+    position: absolute;
+    top: 0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2rem;
+    height: 0.25rem;
+    border-radius: 0.125rem;
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  .tile-inspector-header {
+    padding-top: 0.5rem;
+  }
+}
+
+/* ========== Reduced Mall Copy ========== */
+
+.mall-copy-minimal {
+  padding: 0.5rem 0 0.75rem;
+}
+
+.mall-copy-minimal h1 {
+  margin: 0;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  max-width: none;
+}
+
+/* ========== Loading State ========== */
+
+.mall-tile-field-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+/* ========== Empty State ========== */
+
+.mall-tile-field-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  gap: 0.5rem;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.mall-tile-field-empty-icon {
+  font-size: 2rem;
+  opacity: 0.5;
+}

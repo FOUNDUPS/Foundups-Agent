@@ -64,6 +64,7 @@ from .token_economics import (
 from .pool_distribution import (
     ParticipantType,
     ActivityLevel,
+    StakerHurdleState,
     ComputeMetrics,
     StakerPosition,
     Participant,
@@ -79,6 +80,16 @@ from .pool_distribution import (
     STAKER_CAP_EARLY,
     STAKER_MIN_BTC,
     STAKER_RECOMMENDED_BTC,
+    # Weighted stake allocation (BTCStakerPool mechanics)
+    STAKE_WEIGHT_EXPONENT,
+    btc_stake_weight,
+    calculate_weighted_share,
+    calculate_total_weighted_stake,
+    distribute_weighted_staker_pool,
+    # Staker hurdle mechanics (BTC staker specific)
+    STAKER_HURDLE_TARGET_MULTIPLE,
+    STAKER_POST_HURDLE_RATE_FACTOR,
+    UPS_TO_BTC_RATE,
 )
 
 from .dilution_scenario import (
@@ -97,6 +108,18 @@ from .staker_viability import (
     calculate_staker_distributions,
     find_optimal_staker_count,
     run_staker_matrix,
+)
+
+from .channel_partner_pool import (
+    CHANNEL_PARTNER_CAP,
+    CHANNEL_PARTNER_PASSIVE_SHARE,
+    RegistryState,
+    ChannelPartner,
+    GenesisClosureEvent,
+    ChannelPartnerDistribution,
+    ChannelPartnerPool,
+    get_channel_partner_pool,
+    reset_channel_partner_pool,
 )
 
 from .fee_simulation import (
@@ -370,6 +393,7 @@ __all__ = [
     # Pool distribution (Un/Dao/Du)
     "ParticipantType",
     "ActivityLevel",
+    "StakerHurdleState",
     "ComputeMetrics",
     "StakerPosition",
     "Participant",
@@ -385,6 +409,16 @@ __all__ = [
     "STAKER_CAP_EARLY",
     "STAKER_MIN_BTC",
     "STAKER_RECOMMENDED_BTC",
+    # Weighted stake allocation (BTCStakerPool mechanics)
+    "STAKE_WEIGHT_EXPONENT",
+    "btc_stake_weight",
+    "calculate_weighted_share",
+    "calculate_total_weighted_stake",
+    "distribute_weighted_staker_pool",
+    # Staker hurdle mechanics (BTC staker specific)
+    "STAKER_HURDLE_TARGET_MULTIPLE",
+    "STAKER_POST_HURDLE_RATE_FACTOR",
+    "UPS_TO_BTC_RATE",
     # Dilution analysis (012-confirmed 2026-02-14)
     "AdoptionModel",
     "AdoptionConfig",
@@ -399,6 +433,16 @@ __all__ = [
     "calculate_staker_distributions",
     "find_optimal_staker_count",
     "run_staker_matrix",
+    # Channel Partner Pool (genesis founding partners)
+    "CHANNEL_PARTNER_CAP",
+    "CHANNEL_PARTNER_PASSIVE_SHARE",
+    "RegistryState",
+    "ChannelPartner",
+    "GenesisClosureEvent",
+    "ChannelPartnerDistribution",
+    "ChannelPartnerPool",
+    "get_channel_partner_pool",
+    "reset_channel_partner_pool",
     # Fee simulation (test different economic parameters)
     "FeeScenario",
     "SimulationResult",

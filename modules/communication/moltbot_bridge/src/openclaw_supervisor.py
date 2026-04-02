@@ -626,9 +626,42 @@ class OpenClawSupervisor:
             except Exception as exc:
                 logger.debug("[SUPERVISOR] Skill evolution report skipped: %s", exc)
 
+        # Skill Evolution Loop — Phase 2: mutation surface (idle path only, gated)
+        # Surfaces mutation eligibility/readiness but does NOT mutate
+        mutation_surface_report: Dict[str, Any] | None = None
+        mutation_surface_enabled = os.getenv("OPENCLAW_MUTATION_SURFACE_ENABLED", "0") == "1"
+        if mutation_surface_enabled and self._pattern_memory:
+            try:
+                from .openclaw_skill_evolution import (
+                    build_mutation_surface_report,
+                    mutation_surface_report_due,
+                    write_mutation_surface_report,
+                )
+
+                if mutation_surface_report_due(self.repo_root):
+                    report = build_mutation_surface_report(self._pattern_memory)
+                    report_path = write_mutation_surface_report(self.repo_root, report)
+                    mutation_surface_report = {
+                        "report_path": str(report_path),
+                        "enabled": report.get("enabled", False),
+                        "skills_evaluated": report.get("skills_evaluated", 0),
+                        "summary": report.get("summary", {}),
+                        "gates": report.get("gates", {}),
+                        "generated_on": report.get("generated_on"),
+                    }
+                    logger.info(
+                        "[SUPERVISOR] Mutation surface report generated: %d skills, summary=%s",
+                        mutation_surface_report["skills_evaluated"],
+                        mutation_surface_report["summary"],
+                    )
+            except Exception as exc:
+                logger.debug("[SUPERVISOR] Mutation surface report skipped: %s", exc)
+
         idle_result: Dict[str, Any] = {"kind": "idle", "reason": "resident_openclaw_healthy"}
         if skill_evolution_report:
             idle_result["skill_evolution_report"] = skill_evolution_report
+        if mutation_surface_report:
+            idle_result["mutation_surface_report"] = mutation_surface_report
         return idle_result
 
     # ------------------------------------------------------------------ #

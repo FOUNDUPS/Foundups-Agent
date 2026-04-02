@@ -26,6 +26,7 @@ FoundUps domain work should be read through:
 - `WSP 22`: README / ROADMAP / ModLog discipline
 - `WSP 49`: module structure
 - `WSP 65`: consolidation / separation when boundaries drift
+- `WSP 102`: FoundUps web design and interface direction
 - `WSP 77`: multi-agent audit coordination
 - `WSP 97`: execution discipline for slices, audits, and corrections
 
@@ -112,6 +113,13 @@ Use four statuses:
 
 - `modules/foundups/docs/OCCAM_LAYERED_EXECUTION_PLAN.md`
 - `modules/foundups/docs/CONTINUATION_RUNBOOK.md`
+- `modules/foundups/docs/SOFTPROTO_FOUNDATION_ARCHITECTURE_2026-04-01.md`
+  - current architecture lock for the future schema-driven UI operating layer
+- `modules/foundups/docs/SOFTPROTO_ROLLOUT_PLAN_2026-04-01.md`
+  - current rollout order, worker boundaries, and indexing requirements
+- `modules/foundups/docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md`
+  - current runtime boundary for Mall shell vs external FoundUp repos and
+    in-scope route deployment
 - `modules/foundups/docs/FOUNDUP_FEDERATION_MIGRATION_PLAN.md`
   - useful, but still draft and not proof that all migrations have happened
 - submodule roadmaps:

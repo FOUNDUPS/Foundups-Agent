@@ -1,0 +1,750 @@
+/* Red Dog Unified Plane — slides down from top */
+
+.account-plane-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 5, 9, 0.6);
+  backdrop-filter: blur(8px);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.account-plane-scrim.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.account-plane {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 201;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: rgba(14, 14, 28, 0.97);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0 0 1.5rem 1.5rem;
+  padding: 0 1.25rem 1.25rem;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.5);
+  transform: translateY(-100%);
+  transition: transform 0.3s ease;
+}
+.account-plane.open {
+  transform: translateY(0);
+}
+
+/* Drag handle */
+.account-plane-handle {
+  display: flex;
+  justify-content: center;
+  padding: 0.75rem 0 0.5rem;
+  cursor: grab;
+}
+.account-plane-handle::after {
+  content: '';
+  width: 2.5rem;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* Identity block */
+.account-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.5rem 0 1rem;
+}
+
+.account-avatar {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.account-avatar-img {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(141, 113, 255, 0.3);
+  background: rgba(255, 255, 255, 0.04);
+}
+.account-avatar-placeholder {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px dashed rgba(141, 113, 255, 0.3);
+  background: rgba(141, 113, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(141, 113, 255, 0.6);
+  font-size: 1.25rem;
+}
+
+.account-identity-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.account-identity-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text, #f3f1f8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.account-identity-handle {
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  font-size: 0.8rem;
+  color: var(--text-muted, rgba(243, 241, 248, 0.46));
+}
+
+/* Section dividers */
+.account-section {
+  padding: 0.75rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.account-section-label {
+  font-size: 0.7rem;
+  color: rgba(243, 241, 248, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.6rem;
+}
+
+/* FoundUps tile grid */
+.account-foundups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+  gap: 0.6rem;
+}
+.account-foundup-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.6rem 0.4rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  text-decoration: none;
+  color: var(--text, #f3f1f8);
+  transition: background 0.15s, border-color 0.15s;
+  cursor: pointer;
+}
+.account-foundup-tile:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.account-foundup-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.9);
+}
+.account-foundup-icon.theme-antifafm {
+  background: linear-gradient(135deg, rgba(122, 20, 28, 0.8), rgba(60, 11, 16, 0.9));
+}
+.account-foundup-icon.theme-gotjunk {
+  background: linear-gradient(135deg, rgba(27, 108, 92, 0.8), rgba(15, 60, 56, 0.9));
+}
+.account-foundup-icon.theme-magadoom {
+  background: linear-gradient(135deg, rgba(89, 28, 113, 0.8), rgba(27, 17, 56, 0.9));
+}
+.account-foundup-name {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.account-foundup-status {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.account-foundup-status.status-ready { background: #4ade80; }
+.account-foundup-status.status-conditional { background: #ffd700; }
+.account-foundup-status.status-discoverable_only { background: rgba(243, 241, 248, 0.3); }
+
+/* Invites expander */
+.account-invites-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--text-dim, rgba(243, 241, 248, 0.7));
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.account-invites-toggle:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.account-invites-toggle svg {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.2s;
+}
+.account-invites-toggle.expanded svg {
+  transform: rotate(180deg);
+}
+.account-invites-drawer {
+  display: none;
+  margin-top: 0.5rem;
+}
+.account-invites-drawer.open {
+  display: block;
+}
+
+/* Options */
+.account-options-list {
+  display: grid;
+  gap: 0.35rem;
+}
+.account-option-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.75rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--text-dim, rgba(243, 241, 248, 0.7));
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.account-option-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+.account-option-btn svg {
+  width: 16px;
+  height: 16px;
+  opacity: 0.5;
+}
+
+/* Red Dog header */
+.reddog-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 0.25rem;
+}
+.reddog-header-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(124, 92, 252, 0.3);
+  background: rgba(124, 92, 252, 0.06);
+}
+.reddog-header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.reddog-header-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text, #f3f1f8);
+}
+.reddog-header-greeting {
+  font-size: 0.78rem;
+  color: rgba(141, 113, 255, 0.7);
+  font-style: italic;
+}
+
+/* Red Dog concierge guidance */
+.reddog-concierge-guidance {
+  display: grid;
+  gap: 0.4rem;
+}
+.reddog-guidance-item {
+  font-size: 0.82rem;
+  color: rgba(243, 241, 248, 0.55);
+  line-height: 1.45;
+  padding-left: 0.75rem;
+  border-left: 2px solid rgba(141, 113, 255, 0.2);
+}
+
+/* Avatar trigger in header — 44px minimum for WCAG touch target */
+.mall-avatar-trigger {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  flex-shrink: 0;
+}
+.mall-avatar-trigger img {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(141, 113, 255, 0.25);
+}
+.mall-avatar-trigger .account-avatar-placeholder {
+  width: 44px;
+  height: 44px;
+  font-size: 0.95rem;
+}
+
+/* Red Dog mode sheet */
+.reddog-mode-sheet {
+  background: rgba(14, 14, 28, 0.95);
+  border: 1px solid rgba(141, 113, 255, 0.2);
+  border-radius: 14px;
+  padding: 0.4rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  animation: reddog-mode-in 0.2s ease-out;
+  min-width: 160px;
+}
+@keyframes reddog-mode-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.reddog-mode-sheet-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.reddog-mode-action {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: rgba(228, 226, 236, 0.8);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s;
+  text-align: left;
+}
+.reddog-mode-action:hover,
+.reddog-mode-action:focus-visible {
+  background: rgba(141, 113, 255, 0.1);
+  color: rgba(228, 226, 236, 0.95);
+  outline: none;
+}
+.reddog-mode-action:active {
+  background: rgba(141, 113, 255, 0.18);
+}
+.reddog-mode-action-icon {
+  width: 1.4rem;
+  text-align: center;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+.reddog-mode-action-label {
+  white-space: nowrap;
+}
+
+/* Red Dog context briefing */
+.reddog-context-briefing {
+  padding: 0.5rem 0.6rem;
+  margin-bottom: 0.5rem;
+  border-radius: 10px;
+  background: rgba(141, 113, 255, 0.06);
+  border: 1px solid rgba(141, 113, 255, 0.12);
+}
+.reddog-briefing-line {
+  font-size: 0.78rem;
+  color: rgba(228, 226, 236, 0.7);
+  line-height: 1.55;
+  margin: 0;
+  padding: 0.1rem 0;
+}
+.reddog-briefing-line:first-child {
+  font-weight: 600;
+  color: rgba(228, 226, 236, 0.85);
+}
+
+/* Red Dog recommended actions */
+.reddog-recommendations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+.reddog-rec-action {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(141, 113, 255, 0.2);
+  background: rgba(141, 113, 255, 0.08);
+  color: rgba(228, 226, 236, 0.85);
+  font-size: 0.76rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  white-space: nowrap;
+}
+.reddog-rec-action:hover,
+.reddog-rec-action:focus-visible {
+  background: rgba(141, 113, 255, 0.16);
+  border-color: rgba(141, 113, 255, 0.35);
+  outline: none;
+}
+.reddog-rec-action:active {
+  background: rgba(141, 113, 255, 0.24);
+}
+
+/* Red Dog AI tools section */
+.reddog-ai-tools {
+  padding: 0.75rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.reddog-tools-group {
+  margin-bottom: 0.65rem;
+}
+.reddog-tools-group:last-child {
+  margin-bottom: 0;
+}
+.reddog-tools-label {
+  font-size: 0.7rem;
+  color: rgba(243, 241, 248, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.4rem;
+}
+.reddog-tools-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.reddog-tool-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(141, 113, 255, 0.15);
+  background: rgba(141, 113, 255, 0.05);
+  color: rgba(228, 226, 236, 0.7);
+  font-size: 0.76rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  white-space: nowrap;
+  min-height: 32px;
+}
+.reddog-tool-pill:hover {
+  background: rgba(141, 113, 255, 0.12);
+  border-color: rgba(141, 113, 255, 0.3);
+  color: rgba(228, 226, 236, 0.9);
+}
+.reddog-tool-pill.active {
+  background: rgba(141, 113, 255, 0.2);
+  border-color: rgba(141, 113, 255, 0.45);
+  color: rgba(228, 226, 236, 0.95);
+  font-weight: 600;
+}
+.reddog-density-pill {
+  font-family: var(--mono, 'JetBrains Mono', monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+}
+.reddog-motion-pill {
+  min-width: 3.5rem;
+}
+
+/* Channel attachment section */
+.reddog-channels-section {
+  padding: 0.75rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.reddog-channel-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.4rem;
+  border-radius: 0.5rem;
+  transition: background 0.12s;
+}
+.reddog-channel-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+.reddog-channel-icon {
+  width: 1.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  color: rgba(228, 226, 236, 0.6);
+}
+.reddog-channel-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  min-width: 0;
+  flex: 1;
+}
+.reddog-channel-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: rgba(228, 226, 236, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.reddog-channel-meta {
+  font-size: 0.68rem;
+  color: rgba(228, 226, 236, 0.4);
+}
+.reddog-channel-toggle {
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(141, 113, 255, 0.15);
+  background: rgba(141, 113, 255, 0.05);
+  color: rgba(228, 226, 236, 0.5);
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  min-height: 28px;
+  flex-shrink: 0;
+}
+.reddog-channel-toggle.attached {
+  background: rgba(74, 222, 128, 0.12);
+  border-color: rgba(74, 222, 128, 0.3);
+  color: #4ade80;
+}
+.reddog-channel-toggle:hover {
+  background: rgba(141, 113, 255, 0.12);
+  border-color: rgba(141, 113, 255, 0.3);
+}
+.reddog-channel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+}
+.reddog-channel-empty {
+  font-size: 0.78rem;
+  color: rgba(228, 226, 236, 0.4);
+  margin: 0;
+  padding: 0.3rem 0;
+}
+
+/* ========== Phone ergonomics ========== */
+
+/* Small screens: tighter plane, larger tap targets */
+@media (max-width: 480px) {
+  .account-plane {
+    padding: 0 0.75rem 1rem;
+    padding-left: max(0.75rem, var(--safe-left, 0px));
+    padding-right: max(0.75rem, var(--safe-right, 0px));
+    max-height: 90vh;
+    max-height: 90dvh;
+  }
+
+  .account-identity {
+    gap: 0.6rem;
+    padding: 0.35rem 0 0.75rem;
+  }
+
+  .account-avatar {
+    width: 48px;
+    height: 48px;
+  }
+  .account-avatar-img {
+    width: 48px;
+    height: 48px;
+  }
+  .account-avatar-placeholder {
+    width: 48px;
+    height: 48px;
+  }
+
+  .account-identity-name {
+    font-size: 1rem;
+  }
+
+  /* FoundUps grid: 2 columns max on small phone */
+  .account-foundups-grid {
+    grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr));
+    gap: 0.5rem;
+  }
+
+  .account-foundup-tile {
+    padding: 0.5rem 0.3rem;
+    min-height: 44px;
+  }
+
+  /* Options: ensure 44px touch targets */
+  .account-option-btn {
+    min-height: 44px;
+    padding: 0.7rem 0.75rem;
+  }
+
+  /* Invites toggle: ensure 44px touch target */
+  .account-invites-toggle {
+    min-height: 44px;
+  }
+
+  /* Mode sheet: larger action buttons for phone */
+  .reddog-mode-action {
+    min-height: 44px;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .reddog-mode-sheet {
+    min-width: 180px;
+  }
+
+  /* Briefing: slightly larger text on phone */
+  .reddog-briefing-line {
+    font-size: 0.82rem;
+    padding: 0.15rem 0;
+  }
+
+  /* Recommendations: ensure pill tap targets */
+  .reddog-rec-action {
+    min-height: 36px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  /* Red Dog header: compact */
+  .reddog-header {
+    padding: 0.35rem 0 0.5rem;
+  }
+
+  /* Channel rows: ensure 44px touch targets on phone */
+  .reddog-channel-row {
+    padding: 0.5rem 0.4rem;
+    min-height: 44px;
+  }
+  .reddog-channel-toggle {
+    min-height: 36px;
+    padding: 0.3rem 0.65rem;
+    font-size: 0.72rem;
+  }
+
+  /* AI tools: ensure 44px touch targets on phone */
+  .reddog-tool-pill {
+    min-height: 44px;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* Safe-area padding for account plane on all screens */
+.account-plane {
+  padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
+}
+
+/* Landscape phone: reduce plane height, ensure scroll */
+@media (max-height: 500px) {
+  .account-plane {
+    max-height: 95vh;
+    max-height: 95dvh;
+  }
+
+  .account-identity {
+    padding: 0.25rem 0 0.5rem;
+  }
+
+  .reddog-header {
+    padding: 0.25rem 0 0.35rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .account-plane {
+    max-width: 28rem;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -100%);
+    border-radius: 0 0 1.5rem 1.5rem;
+  }
+  .account-plane.open {
+    transform: translate(-50%, 0);
+  }
+}
+
+/* ========== Search Input ========== */
+
+.reddog-search-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+}
+
+.reddog-search-input {
+  flex: 1;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.reddog-search-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.reddog-search-input:focus {
+  outline: none;
+}
+
+.reddog-search-clear {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.reddog-search-clear:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.reddog-search-clear:active {
+  transform: scale(0.95);
+}

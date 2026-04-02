@@ -1,5 +1,268 @@
 # HoloIndex Package ModLog
 
+## [2026-03-31] Core Split Phase 3 — Introspection Surface (holoindex_core_split_phase3_module_introspection_surface)
+
+**Agent**: 0102
+**WSP References**: WSP 87 (Size Limits), WSP 72 (Block Independence), WSP 49 (Module Structure)
+**Status**: COMPLETE
+
+### Context
+
+PROMETHEUS HANDOFF from 012: extract the module-introspection / preview-enrichment surface from `holo_index/core/holo_index.py` into a focused `introspection_engine.py` module, completing the three-phase core split.
+
+### Changes
+
+1. **Created** `holo_index/core/introspection_engine.py` (486 lines) — module compliance and preview enrichment:
+   - `check_module_exists(holo, module_name)` — WSP compliance introspection
+   - `enhance_code_results_with_previews(holo, code_hits)` — search result enrichment
+   - `_extract_typescript_entities(holo, file_path)` — cached TS entity parsing
+   - `_resolve_location_parts(holo, location)`, `_find_symbol_line(file_path, symbol)`
+   - `_match_typescript_entity(symbol, entities)`, `_extract_ast_preview(filepath, match_line, context)`
+   - `parse_typescript_entities(lines, context)` + 7 TS regex patterns + stateless helpers
+2. **Replaced** 7 instance methods + 4 module-level items in `holo_index.py` with 3 thin delegates + 1 re-export (895 → 439 lines, 456 lines removed)
+3. **Preserved** import stability: `from holo_index.core.holo_index import parse_typescript_entities` via re-export
+4. **Updated** `INTERFACE.md` Core Module Layout with `introspection_engine.py`
+5. **Cleaned** unused imports: `re`, `Tuple`
+
+### Test Results
+
+17 passed, 1 skipped, 1 pre-existing failure (setter key normalization collision in `test_parse_typescript_entities` — verified same failure on parent commit).
+
+### Pre-existing Bug Noted
+
+`parse_typescript_entities` setter detection has a key collision: `_normalize_symbol_key("PendingClassificationItem")` == `_normalize_symbol_key("pendingClassificationItem")` → both produce `pendingclassificationitem`, so the setter entry is silently dropped. Not caused by this extraction — documented for future fix.
+
+---
+
+## [2026-03-31] Core Split Phase 2 — Indexing Surface (holoindex_core_split_phase2_indexing_surface)
+
+**Agent**: 0102
+**WSP References**: WSP 87 (Size Limits), WSP 72 (Block Independence), WSP 49 (Module Structure)
+**Status**: COMPLETE
+
+### Context
+
+PROMETHEUS HANDOFF from 012: extract the indexing surface from `holo_index/core/holo_index.py` into a focused `indexing_engine.py` module, continuing the core split begun in phase 1 (search surface).
+
+### Changes
+
+1. **Created** `holo_index/core/indexing_engine.py` (595 lines) — all indexing orchestrators as module-level functions:
+   - `index_code_entries(holo)`, `index_symbol_entries(holo, roots)`, `index_wsp_entries(holo, paths)`, `index_test_registry(holo)`, `index_skillz_entries(holo)`
+   - `_collect_web_asset_entries(holo)`, `_resolve_web_index_roots(holo)`
+   - Stateless helpers: `_extract_wsp_id()`, `_classify_document_type()`, `_calculate_document_priority()`
+2. **Replaced** 6 indexing methods + 4 helpers in `holo_index.py` with thin delegates (551 lines removed, 1,446 → 895 lines)
+3. **Preserved** `_get_embedding()`, `_infer_cube_tag()`, `_ensure_collection()`, `_reset_collection()` on HoloIndex (test stubs depend on instance-level monkey-patches)
+4. **Updated** `INTERFACE.md` Core Module Layout with `indexing_engine.py`
+5. **Cleaned** unused top-level `import ast` from `holo_index.py`
+
+### Test Results
+
+16 passed, 1 skipped — no test changes required (engine calls back via `holo._get_embedding()` etc., so existing stubs intercepted).
+
+---
+
+## [2026-03-31] CLI Command Extraction (holoindex_cli_extraction)
+
+**Agent**: 0102
+**WSP References**: WSP 49 (Module Structure), WSP 62 (File Size), WSP 84 (Code Reuse)
+**Status**: COMPLETE
+
+### Context
+
+PROMETHEUS HANDOFF from 012: extract the 2,542-line `cli.py` monolith into a command-oriented package.
+
+### Changes
+
+1. **Renamed** `holo_index/cli.py` -> `holo_index/_cli_main.py` (resolves Python module/package naming conflict)
+2. **Created** `holo_index/cli/__init__.py` — backward-compat shim re-exporting `main`, `HoloIndex`, `QwenAdvisor`, `_is_fast_search_enabled`, `_render_fast_search_summary`
+3. **Created** `holo_index/cli/commands/` package with 4 command modules:
+   - `bundle_json.py` — `--bundle-json` handler (~284 lines)
+   - `compliance.py` — 7 compliance/audit handlers (~425 lines)
+   - `holodae.py` — lifecycle + 12 menu feature handlers (~245 lines)
+   - `modules_cmd.py` — module linking + query handlers (~181 lines)
+4. **Wired** dispatch calls in `_cli_main.py` before each inline block (inline originals kept per 012 directive)
+5. **Documented** orphaned helpers: `adaptive_pipeline.py`, `auto_refresh.py`, `holo_request.py`, `pattern_coach.py`, `root_alerts.py` (pre-existing, not wired)
+
+### Import Compatibility
+
+All consumers unchanged — `from holo_index.cli import main` still works via `__init__.py` shim.
+
+| Consumer | Import | Status |
+|----------|--------|--------|
+| `holo_index.py` | `from holo_index.cli import main` | OK |
+| `test_cli.py` | `from holo_index.cli import HoloIndex, QwenAdvisor` | OK |
+| `test_fast_search_mode.py` | `from holo_index.cli import _is_fast_search_enabled` | OK |
+| `holoindex_plugin.py` | `from holo_index.cli import HoloIndex` | OK |
+
+### Pending
+
+- ~~Inline code in `_cli_main.py` shadowed by dispatch calls — awaiting 012 approval to remove~~ DONE (see dead code prune below)
+- ~~Orphaned helpers need evaluation for connection or retirement~~ DONE (see orphan helper prune below)
+
+---
+
+## [2026-03-31] CLI Orphan Helper Prune (holoindex_cli_orphan_helper_prune)
+
+**Agent**: 0102
+**WSP References**: WSP 62 (File Size), WSP 84 (Code Reuse)
+**Status**: COMPLETE
+
+### Context
+
+PROMETHEUS HANDOFF from 012: disposition the 5 orphaned helper modules under `holo_index/cli/`.
+
+### Audit Findings
+
+All 5 helpers had **zero import references** and **zero function-call references** from any `.py` file. Each was a thin wrapper around an upstream module with no unique logic.
+
+### Disposition: DELETE all 5
+
+| File | Lines | Reason |
+|------|-------|--------|
+| `adaptive_pipeline.py` | 109 | Wraps `AdaptiveLearningOrchestrator` — never imported |
+| `auto_refresh.py` | 146 | Wraps `AutonomousHoloDAE` + `AgentDB` — never imported |
+| `holo_request.py` | 59 | Wraps `QwenOrchestrator` — never imported |
+| `pattern_coach.py` | 49 | Wraps `PatternCoach.analyze_and_coach()` — never imported, also duplicated at `cli_pattern_coach_helper.py` |
+| `root_alerts.py` | 37 | Wraps `get_root_violation_alert()` — never imported |
+
+**Total removed**: 400 lines across 5 files
+
+### Out of Scope
+
+- `holo_index/cli_pattern_coach_helper.py` (also orphaned but outside `cli/` package)
+- JSON catalog entries referencing these helpers (docs, not code)
+
+### Verification
+
+- CLI tests green: 11 passed, 1 skipped
+- No import breakage (zero consumers existed)
+
+---
+
+## [2026-03-31] Core Search Surface Extraction (holoindex_core_split_phase1_search_surface)
+
+**Agent**: 0102
+**WSP References**: WSP 62 (File Size), WSP 72 (Block Independence), WSP 87 (Size Limits)
+**Status**: COMPLETE
+
+### Context
+
+PROMETHEUS HANDOFF from 012: extract the search surface from `holo_index/core/holo_index.py` into a focused `search_engine.py` module, preserving `HoloIndex.search()` as a thin delegate.
+
+### Changes
+
+1. **Created** `holo_index/core/search_engine.py` (~480 lines) — all search logic:
+   - `execute_search()` — main entry point (delegates from `HoloIndex.search()`)
+   - `_search_collection()` — vector search with hybrid keyword scoring
+   - `_lexical_search_collection()` — keyword fallback when embeddings unavailable
+   - `_rg_symbol_search()` — ripgrep symbol fallback for NAVIGATION gaps
+   - `_merge_hits()` — path-normalized deduplication
+   - `_format_hit()` — shared hit formatting (consolidates duplicate formatting logic)
+   - `_tokenize_query()`, `_is_symbol_query()`, `_notify_holodae_search()`
+
+2. **Trimmed** `holo_index/core/holo_index.py`: 2,068 → 1,445 lines (-623 lines, -30.1%)
+   - `search()` reduced to 4-line delegate calling `search_engine.execute_search()`
+   - Removed 6 dead methods: `_generate_warnings`, `_warnings_from_wsp_hits`, `_generate_context_reminders`, `_reminders_from_wsp_hits`, `_dedupe`, `_should_show_fmas_hint`
+   - Cleaned unused imports: `sys`, `io`, `subprocess`, `shutil`, `time`
+
+3. **Updated** `test_doc_type_filtering.py` — stubs now patch `search_engine._search_collection` instead of instance method
+
+### Public API
+
+Unchanged. `holo.search(query)` returns the same payload contract.
+
+### Verification
+
+- 14 tests pass, 1 skipped (all HoloIndex test suites)
+- `search_engine` module imports cleanly
+- No behavioral change — search results identical
+
+---
+
+## [2026-03-31] CLI Dead Code Prune (holoindex_cli_dead_code_prune)
+
+**Agent**: 0102
+**WSP References**: WSP 62 (File Size), WSP 84 (Code Reuse)
+**Status**: COMPLETE
+
+### Context
+
+PROMETHEUS HANDOFF from 012: remove shadowed inline handler blocks from `_cli_main.py` now that extracted command modules own the dispatch.
+
+### Changes
+
+Removed 3 shadowed inline blocks (389 lines total):
+
+| Shadow | Handler | Lines Removed |
+|--------|---------|---------------|
+| HoloDAE lifecycle | `--start-holodae`, `--stop-holodae`, `--holodae-status` | ~33 |
+| Module linking/queries | `--link-modules`, `--query-modules`, `--wsp`, `--list-modules` | ~162 |
+| HoloDAE features | `--pattern-coach`, `--module-analysis`, `--health-check`, etc. (12 flags) | ~191 |
+
+**Before**: 1,863 lines | **After**: 1,474 lines | **Reduction**: 389 lines (20.9%)
+
+### Orphaned Helpers (kept, per 012 conservative directive)
+
+5 helper files in `holo_index/cli/` have zero external references. Kept for now — deferred to `holoindex_cli_orphan_helper_prune`:
+
+| File | Lines | Export |
+|------|-------|--------|
+| `adaptive_pipeline.py` | 109 | `run_adaptive_pipeline()` |
+| `auto_refresh.py` | 146 | `ensure_autonomous_daemon_running()` |
+| `holo_request.py` | 59 | `run_holo_request()` |
+| `pattern_coach.py` | 49 | `get_pattern_coach_guidance()` |
+| `root_alerts.py` | 37 | `get_root_alert_summary()` |
+
+### Verification
+
+- All 11 tests pass, 1 skipped (QwenAdvisor stub)
+- CLI `--help`, `--bundle-json`, `--system-check` dispatch verified
+- No behavioral change — dispatch calls already owned all routing
+
+---
+
+## [2026-03-30] TurboQuant Architecture Audit
+
+**Agent**: 0102
+**WSP References**: WSP 62 (File Size), WSP 97 (System Execution), WSP 87 (Navigation)
+**Status**: COMPLETE
+
+### Context
+
+Comprehensive architecture audit to evaluate HoloIndex current state, TurboQuant positioning, and vNext definition.
+
+### Findings
+
+| Metric | Value |
+|--------|-------|
+| Total size | 358 MB |
+| Python files | 254 |
+| cli.py | 2,542 lines |
+| core/holo_index.py | 2,068 lines |
+| qwen_advisor/ total | 21,493 lines |
+| adaptive_learning/ total | 6,533 lines |
+
+### Decisions
+
+1. **TurboQuant**: Feature in HoloIndex core (int8 embeddings), NOT separate product
+2. **AI Sentinel**: Extract breadcrumb_tracer + execution_log_analyzer to ai_sentinel module
+3. **Rewrite**: Incremental refactor, NOT full rewrite
+4. **vNext Target**: <5,000 lines, <50 MB
+
+### Next Slices
+
+| Slice | Priority | Effort |
+|-------|----------|--------|
+| `holoindex_cli_extraction` | P0 | 2 sessions |
+| `holoindex_delete_legacy` | P0 | 1 session |
+| `holoindex_core_split` | P1 | 2 sessions |
+
+### Deliverables
+
+Full audit report: `docs/0102_session_briefings/HOLOINDEX_TURBOQUANT_AUDIT_2026-03-30.md`
+
+---
+
 ## [2026-03-30] Audio Model Bootstrap Scripts
 
 **Agent**: 0102

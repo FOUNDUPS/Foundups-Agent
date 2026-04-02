@@ -6,38 +6,46 @@ Pool Structure (100% total):
 - Stakeholders: 80%
   - Un (0-Pool):  60% - 012 stakeholders (engagement-based, ACTIVE)
   - Dao (1-Pool): 16% - 0102 agents (3V work-based, ACTIVE)
-  - Du (2-Pool):   4% - BTC STAKERS ONLY (investor economics, PASSIVE)
+  - Du (2-Pool):   4% - Protocol participants (CABR/PoB economics)
 - Network: 20%
   - Network:      16% - Drip rewards (F_i → exchange → BTC → UPS)
   - Fund:          4% - Treasury fund (pAVS operations)
 
 CRITICAL SEPARATION (012-confirmed 2026-02-14):
 - Members (subscription) = Build UPs through WORK → Dao/Un pools ONLY
-- BTC Stakers (anonymous) = Passive income → Du pool (investor treatment)
+- BTC Stakers (anonymous) = Protocol participants → Du pool distributions
 
 This separation prevents dilution:
 - Unlimited subscribers → doesn't dilute Du pool
-- Du pool capped at ~100-500 stakers for viable returns
-- Stakers ARE investors (real BTC at risk)
+- Du pool capped at ~100-500 stakers for viable distributions
+- Stakers provide LIQUIDITY (BTC commitment)
 
 Earning Modes:
-- Du (4%):  PASSIVE - BTC stakers earn every epoch (investor dividend)
+- Du (4%):  PASSIVE - Protocol participants receive epoch distributions
 - Dao (16%): ACTIVE - 0102 agents earn per 3V task completion
 - Un (60%):  ACTIVE - 012 stakeholders earn per engagement (FoundUpCube)
 
-Activity Tiers (share within Du pool):
-- du (2): 80% of pool - <10x earned (new stakers)
-- dao (1): 16% of pool - 10x-100x earned (profitable stakers)
-- un (0): 4% of pool - >100x earned (lifetime floor)
+CANONICAL DU POOL PARTITION (2026-03-31):
+  DuPool (4% of epoch distribution)
+  ├── ActiveFounderPool (80% of Du = 3.2% of total)
+  │   └── Active founders with degressive tier progression
+  └── PassiveParticipationPool (20% of Du = 0.8% of total)
+      ├── BTCStakerPool (weighted by deterministic formula)
+      └── ChannelPartnerPool (equal split, max 21, genesis only)
 
-Degressive Staker Model:
+Degressive Tier Model (WITHIN ActiveFounderPool):
+- du (2): 80% of ActiveFounderPool - <10x allocation ratio (new participants)
+- dao (1): 16% of ActiveFounderPool - 10x-100x allocation ratio
+- un (0): 4% of ActiveFounderPool - >100x allocation ratio (lifetime floor)
+
+The degressive model rewards early participants:
 - Early stakers (low ratio) get the lion's share (80%)
 - As they earn more, share decreases (degressive)
 - Lifetime floor ensures ALL stakers always earn something (0.16% total)
 
 Genesis Member Special Class:
 - Earns on ALL FoundUps (ecosystem-wide)
-- Class closes at launch (creates FOMO)
+- Class closes at mainnet launch (creates scarcity)
 - Future stakers only earn on FoundUps they stake into
 
 Staker Pool Economics (dilution_scenario.py analysis):
@@ -46,11 +54,17 @@ Staker Pool Economics (dilution_scenario.py analysis):
 - 500+ stakers: diminishing allocations
 - RECOMMENDATION: Cap genesis cohort at 100 stakers
 
-PARADIGM NOTE (CABR/PoB, not CAGR/ROI):
+PARADIGM: CABR/PoB (not CAGR/ROI)
 - Stakers provide LIQUIDITY (energy for UPS capacity)
 - BTC → Reserve → Backs UPS → Protocol runs
 - Stakers receive F_i DISTRIBUTIONS (protocol mechanics)
 - This is PROTOCOL PARTICIPATION, not investment
+
+BOUNDARY NOTE (2026-03-31):
+- Du pool stakers = CABR/PoB participation lane (this file)
+- I_i holders in investor_staking.py = SEPARATE bonding-curve lane
+- Do NOT conflate these two models
+- See: memory/terminology.md for canonical distinction
 
 Token Naming (STANDARDIZED):
 - UPS = Universal participation token (bio-decaying)
@@ -81,6 +95,38 @@ class ActivityLevel(IntEnum):
     DU = 2   # Tier 2: 80% of pool ÷ count_at_tier (degressive: <10x earned)
 
 
+class StakerHurdleState(IntEnum):
+    """BTC staker hurdle state for Du-pool distribution rate transitions.
+
+    State machine for tracking whether a staker has reached 10x allocation ratio.
+    Once POST_HURDLE_LOCKED, the state is permanent (no re-entry to PRE_HURDLE).
+
+    Rate impact (local to BTC staker positions):
+    - PRE_HURDLE: Staker receives standard weighted allocation
+    - HURDLE_MET: Transition state (10x reached, about to lock)
+    - POST_HURDLE_LOCKED: Permanent reduced rate (allocation capped)
+
+    Note: This is SEPARATE from I_i investor hurdle logic in investor_staking.py.
+    BTC stakers have their own hurdle tracking within the Du-pool partition.
+    """
+    PRE_HURDLE = 0         # <10x cumulative distributions (standard rate)
+    HURDLE_MET = 1         # Exactly reached 10x (transition/audit visibility)
+    POST_HURDLE_LOCKED = 2  # >10x and permanently locked (reduced rate)
+
+
+# Default hurdle target multiple for BTC stakers
+STAKER_HURDLE_TARGET_MULTIPLE = 10.0
+
+# Post-hurdle rate reduction factor (matches investor lane ratio: 0.64/12.16 ≈ 5.26%)
+# POST_HURDLE_LOCKED stakers receive this fraction of their normal distribution
+STAKER_POST_HURDLE_RATE_FACTOR = 0.0526
+
+# UPS-to-BTC conversion rate for hurdle tracking
+# 1 UPS = 1000 sats = 0.00001 BTC (1/100,000 BTC)
+# Used to convert UPS distributions to BTC-equivalent for hurdle threshold checks
+UPS_TO_BTC_RATE = 0.00001
+
+
 # Pool percentages (of total epoch rewards)
 POOL_PERCENTAGES = {
     "stakeholder_un": 0.60,   # 60% - 012 stakeholders (ACTIVE, engagement)
@@ -108,11 +154,11 @@ STAKER_TIER_THRESHOLDS = {
 
 # Staker pool controls (prevents dilution)
 # Based on dilution_scenario.py analysis:
-# - 10-25 stakers: 10x in 10-26 months
-# - 50-100 stakers: 10x in 1-3 years
-# - 500+ stakers: diminishing returns
-STAKER_CAP_GENESIS = 100      # Genesis cohort cap (best returns)
-STAKER_CAP_EARLY = 500        # Early cohort cap (good returns)
+# - 10-25 stakers: 10x distribution ratio in 10-26 months
+# - 50-100 stakers: 10x distribution ratio in 1-3 years
+# - 500+ stakers: diminishing allocations
+STAKER_CAP_GENESIS = 100      # Genesis cohort cap (best distributions)
+STAKER_CAP_EARLY = 500        # Early cohort cap (good distributions)
 STAKER_MIN_BTC = 0.001        # Minimum stake (~$100 at $100k BTC)
 STAKER_RECOMMENDED_BTC = 0.01  # Recommended stake (~$1k at $100k BTC)
 
@@ -129,6 +175,127 @@ POOL_ACCESS = {
     ParticipantType.DAO: ["stakeholder_un", "stakeholder_dao"],
     ParticipantType.DU: ["stakeholder_un", "stakeholder_dao", "stakeholder_du"],
 }
+
+# =============================================================================
+# WEIGHTED STAKE ALLOCATION (BTCStakerPool mechanics)
+# =============================================================================
+#
+# BTC stakers receive weighted allocations based on stake size.
+# Formula: weight = stake^exponent (default exponent = 1.5)
+#
+# This creates exponential advantage for larger stakes:
+#   0.1 BTC  → weight ≈ 0.0316
+#   1.0 BTC  → weight = 1.0
+#   10 BTC   → weight ≈ 31.6
+#   100 BTC  → weight = 1000
+#
+# Ratio: btc_stake_weight(100) / btc_stake_weight(1) = 100^1.5 / 1^1.5 = 1000
+#
+# This is SEPARATE from the degressive tier model (du/dao/un tiers).
+# Weighted allocation applies WITHIN the BTCStakerPool partition.
+
+STAKE_WEIGHT_EXPONENT = 1.5  # stake * sqrt(stake)
+
+
+def btc_stake_weight(stake_btc: float, exponent: float = STAKE_WEIGHT_EXPONENT) -> float:
+    """Calculate weighted stake using exponential formula.
+
+    Formula: weight = stake^exponent
+
+    With default exponent 1.5:
+      btc_stake_weight(1) = 1.0
+      btc_stake_weight(100) = 1000.0
+      btc_stake_weight(100) / btc_stake_weight(1) = 1000
+
+    Args:
+        stake_btc: BTC amount staked
+        exponent: Weighting exponent (default 1.5 = stake * sqrt(stake))
+
+    Returns:
+        Weighted stake value
+    """
+    if stake_btc <= 0:
+        return 0.0
+    return stake_btc ** exponent
+
+
+def calculate_weighted_share(
+    stake_btc: float,
+    total_weighted_stake: float,
+    pool_amount: float,
+    exponent: float = STAKE_WEIGHT_EXPONENT,
+) -> float:
+    """Calculate staker's share of pool using weighted formula.
+
+    Formula: share = (weight / total_weight) * pool_amount
+
+    Args:
+        stake_btc: This staker's BTC amount
+        total_weighted_stake: Sum of all stakers' weighted stakes
+        pool_amount: Total F_i in the pool to distribute
+        exponent: Weighting exponent
+
+    Returns:
+        This staker's share of the pool
+    """
+    if total_weighted_stake <= 0 or pool_amount <= 0:
+        return 0.0
+    weight = btc_stake_weight(stake_btc, exponent)
+    return (weight / total_weighted_stake) * pool_amount
+
+
+def calculate_total_weighted_stake(
+    stakes: List[float],
+    exponent: float = STAKE_WEIGHT_EXPONENT,
+) -> float:
+    """Calculate total weighted stake for a list of BTC stakes.
+
+    Args:
+        stakes: List of BTC stake amounts
+        exponent: Weighting exponent
+
+    Returns:
+        Sum of weighted stakes
+    """
+    return sum(btc_stake_weight(s, exponent) for s in stakes)
+
+
+def distribute_weighted_staker_pool(
+    stakes: Dict[str, float],
+    pool_amount: float,
+    exponent: float = STAKE_WEIGHT_EXPONENT,
+) -> Dict[str, float]:
+    """Distribute pool amount to stakers using weighted allocation.
+
+    Each staker receives: (their_weight / total_weight) * pool_amount
+
+    Conservation property: sum of distributions == pool_amount
+
+    Args:
+        stakes: Dict of staker_id -> BTC stake amount
+        pool_amount: Total F_i to distribute
+        exponent: Weighting exponent
+
+    Returns:
+        Dict of staker_id -> F_i allocation
+    """
+    if not stakes or pool_amount <= 0:
+        return {}
+
+    # Calculate total weighted stake
+    total_weight = sum(btc_stake_weight(s, exponent) for s in stakes.values())
+
+    if total_weight <= 0:
+        return {staker_id: 0.0 for staker_id in stakes}
+
+    # Distribute proportionally
+    distributions: Dict[str, float] = {}
+    for staker_id, stake_btc in stakes.items():
+        weight = btc_stake_weight(stake_btc, exponent)
+        share = (weight / total_weight) * pool_amount
+        distributions[staker_id] = share
+
+    return distributions
 
 
 @dataclass
@@ -152,10 +319,32 @@ class ComputeMetrics:
 
 @dataclass
 class StakerPosition:
-    """Tracks a staker's position for degressive tier calculation."""
+    """Tracks a staker's position for degressive tier calculation, weighted allocation, and hurdle state.
+
+    Hurdle mechanics (BTC staker specific):
+    - Staker receives distributions until cumulative BTC-equivalent reaches 10x original stake
+    - Once 10x is reached, hurdle locks permanently (POST_HURDLE_LOCKED)
+    - Post-hurdle stakers continue receiving distributions but at reduced rate
+    - This is SEPARATE from I_i investor hurdle (do not conflate)
+    """
+    # Core position fields
     original_stake_btc: float = 0.0   # Initial BTC staked
     total_earned_fi: float = 0.0      # Total F_i earned lifetime
     stake_timestamp: str = ""          # When they staked
+
+    # Hurdle accounting fields (BTC staker specific)
+    cumulative_distributions_btc: float = 0.0  # BTC-equivalent distributions received
+    hurdle_target_multiple: float = STAKER_HURDLE_TARGET_MULTIPLE  # Default 10x
+    post_hurdle_locked: bool = False  # Once True, never reverts
+    hurdle_locked_at_btc: Optional[float] = None  # BTC level when lock triggered
+
+    @property
+    def weighted_stake(self) -> float:
+        """Weighted stake for BTCStakerPool allocation.
+
+        Uses stake^1.5 formula for exponential advantage.
+        """
+        return btc_stake_weight(self.original_stake_btc)
 
     @property
     def earned_ratio(self) -> float:
@@ -165,6 +354,92 @@ class StakerPosition:
         # Convert F_i to BTC equivalent (simplified: assume 1 F_i = 0.00001 BTC)
         fi_in_btc = self.total_earned_fi * 0.00001
         return fi_in_btc / self.original_stake_btc
+
+    @property
+    def hurdle_target_btc(self) -> float:
+        """BTC threshold for hurdle (original_stake * target_multiple)."""
+        return self.original_stake_btc * self.hurdle_target_multiple
+
+    @property
+    def hurdle_progress(self) -> float:
+        """Progress toward hurdle as ratio (0.0 to 1.0+).
+
+        Returns:
+            0.0 = no distributions yet
+            0.5 = halfway to hurdle
+            1.0 = exactly at hurdle
+            >1.0 = past hurdle
+        """
+        target = self.hurdle_target_btc
+        if target <= 0:
+            return 0.0
+        return self.cumulative_distributions_btc / target
+
+    @property
+    def hurdle_state(self) -> StakerHurdleState:
+        """Current hurdle state for this staker position.
+
+        State transitions:
+        - PRE_HURDLE: cumulative < 10x and not locked
+        - HURDLE_MET: cumulative >= 10x and about to lock (transient)
+        - POST_HURDLE_LOCKED: locked permanently
+
+        Note: Once post_hurdle_locked=True, state is always POST_HURDLE_LOCKED
+        regardless of cumulative_distributions_btc value.
+        """
+        if self.post_hurdle_locked:
+            return StakerHurdleState.POST_HURDLE_LOCKED
+
+        if self.cumulative_distributions_btc >= self.hurdle_target_btc:
+            return StakerHurdleState.HURDLE_MET
+
+        return StakerHurdleState.PRE_HURDLE
+
+    @property
+    def distribution_rate_factor(self) -> float:
+        """Rate factor applied to distributions based on hurdle state.
+
+        Returns:
+            1.0 for PRE_HURDLE/HURDLE_MET (full rate)
+            STAKER_POST_HURDLE_RATE_FACTOR for POST_HURDLE_LOCKED (reduced rate)
+        """
+        if self.hurdle_state == StakerHurdleState.POST_HURDLE_LOCKED:
+            return STAKER_POST_HURDLE_RATE_FACTOR
+        return 1.0
+
+    def record_distribution_btc(self, amount_btc: float) -> StakerHurdleState:
+        """Record a BTC-equivalent distribution and update hurdle state.
+
+        This method:
+        1. Adds amount to cumulative_distributions_btc
+        2. Checks if hurdle threshold is reached
+        3. Locks post_hurdle_locked if threshold crossed
+        4. Returns the new hurdle state
+
+        Args:
+            amount_btc: BTC-equivalent amount of this distribution
+
+        Returns:
+            Current StakerHurdleState after recording
+        """
+        if amount_btc <= 0:
+            return self.hurdle_state
+
+        self.cumulative_distributions_btc += amount_btc
+
+        # Check for hurdle transition
+        if not self.post_hurdle_locked and self.hurdle_target_btc > 0:
+            if self.cumulative_distributions_btc >= self.hurdle_target_btc:
+                self.post_hurdle_locked = True
+                self.hurdle_locked_at_btc = self.cumulative_distributions_btc
+                logger.info(
+                    "[StakerPosition] Hurdle locked at %.6f BTC (target: %.6f BTC, multiple: %.1fx)",
+                    self.cumulative_distributions_btc,
+                    self.hurdle_target_btc,
+                    self.hurdle_target_multiple,
+                )
+
+        return self.hurdle_state
 
     def get_degressive_tier(self) -> ActivityLevel:
         """Get activity tier based on degressive model.
@@ -255,6 +530,21 @@ class EpochDistribution:
     # Network drip tracking
     drip_distributed: float = 0.0
     fund_accumulated: float = 0.0
+
+    # Du hurdle conservation tracking
+    # POST_HURDLE_LOCKED stakers receive reduced rate; withheld amount tracked here
+    du_hurdle_withheld: float = 0.0  # Amount suppressed due to post-hurdle rate reduction
+    du_actual_distributed: float = 0.0  # Actual Du pool payouts after rate reduction
+
+    @property
+    def du_conservation_check(self) -> bool:
+        """Verify Du pool conservation: distributed + withheld == pool allocation.
+
+        Returns True if conservation holds within floating point tolerance.
+        """
+        expected = self.du_pool
+        actual = self.du_actual_distributed + self.du_hurdle_withheld
+        return abs(expected - actual) < 1e-9
 
 
 class PoolDistributor:
@@ -391,6 +681,7 @@ class PoolDistributor:
         # Distribute pools with proper tier sharing
         for participant in self.participants.values():
             total_reward = 0.0
+            du_pool_reward = 0.0  # Track Du pool distribution for hurdle accounting
 
             for pool_name in participant.get_accessible_pools():
                 pool_amount = pools.get(pool_name, 0.0)
@@ -402,6 +693,22 @@ class PoolDistributor:
                 count_at_tier = pool_tier_counts[pool_name][participant.activity_level]
                 if count_at_tier > 0:
                     individual_share = tier_share / count_at_tier
+
+                    # Apply hurdle rate reduction for Du pool stakers
+                    if pool_name == "stakeholder_du" and participant.staker_position is not None:
+                        pre_reduction_share = individual_share  # Amount before hurdle reduction
+                        rate_factor = participant.staker_position.distribution_rate_factor
+                        individual_share = pre_reduction_share * rate_factor
+                        du_pool_reward = individual_share  # Track for BTC-equivalent recording
+
+                        # Track withheld amount for conservation accounting
+                        withheld = pre_reduction_share - individual_share
+                        result.du_hurdle_withheld += withheld
+                        result.du_actual_distributed += individual_share
+                    elif pool_name == "stakeholder_du":
+                        # Du pool participant without staker_position (full rate)
+                        result.du_actual_distributed += individual_share
+
                     total_reward += individual_share
 
             if total_reward > 0:
@@ -409,6 +716,11 @@ class PoolDistributor:
                 result.participant_rewards[participant.participant_id] = (
                     result.participant_rewards.get(participant.participant_id, 0.0) + total_reward
                 )
+
+                # Record BTC-equivalent distribution for hurdle tracking (Du pool only)
+                if du_pool_reward > 0 and participant.staker_position is not None:
+                    btc_equivalent = du_pool_reward * UPS_TO_BTC_RATE
+                    participant.staker_position.record_distribution_btc(btc_equivalent)
 
     def _distribute_network_drip(self, result: EpochDistribution) -> None:
         """Distribute Network 16% as drip rewards (re-injected).

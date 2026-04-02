@@ -149,6 +149,57 @@ python holo_index.py --health-check
 - `HOLO_INDEX_WEB=1`: include web assets during `--index-code`.
 - `HOLO_SYMBOL_AUTO=1`: auto symbol indexing during `--index-code`.
 
+## Internal CLI Module Layout
+
+The monolithic `cli.py` has been restructured into a package:
+
+```
+holo_index/
+  _cli_main.py              # Entrypoint (argparse, search, indexing, advisor)
+  cli/
+    __init__.py              # Backward-compat shim — re-exports main, HoloIndex, QwenAdvisor
+    commands/
+      __init__.py            # Package marker
+      bundle_json.py         # --bundle-json handler
+      compliance.py          # --wsp88, --audit-docs, --check-module, --check-wsp-docs,
+                             #   --rollback-ascii, --fix-violations, --docs-file
+      holodae.py             # --start/stop/status-holodae, --pattern-coach, --module-analysis,
+                             #   --health-check, --performance-metrics, --system-check,
+                             #   --slow-mode, --pattern-memory, --mcp-hooks/log, --thought-log,
+                             #   --monitor-work
+      modules_cmd.py         # --link-modules, --query-modules, --wsp, --list-modules
+```
+
+All public imports remain stable:
+```python
+from holo_index.cli import main          # entrypoint
+from holo_index.cli import HoloIndex     # core class
+from holo_index.cli import QwenAdvisor   # advisor (may be None)
+```
+
+## Core Module Layout
+
+```
+holo_index/core/
+  __init__.py              # Exports HoloIndex, SearchCache, get_search_cache
+  holo_index.py            # HoloIndex class — bootstrap, collection helpers, thin delegates
+  search_engine.py         # Extracted search surface — execute_search() entry point
+  indexing_engine.py       # Extracted indexing surface — index_*() orchestrators
+  introspection_engine.py  # Module compliance, preview enrichment, TS entity parsing
+  search_cache.py          # LRU+TTL search cache
+```
+
+`HoloIndex.search()` delegates to `search_engine.execute_search(holo, ...)`.
+All search logic (vector, lexical, ripgrep symbol, hit merging) lives in `search_engine.py`.
+
+`HoloIndex.index_*()` methods delegate to `indexing_engine.index_*(holo, ...)`.
+All indexing orchestrators, document classification, and web asset collection live in `indexing_engine.py`.
+
+`HoloIndex.check_module_exists()` and preview enrichment delegate to `introspection_engine`.
+`parse_typescript_entities` is re-exported from `holo_index.py` for import stability.
+
+The public API (`holo.search(query)`, `holo.index_code_entries()`, `holo.check_module_exists()`, etc.) is unchanged.
+
 ## Compatibility Notes
 - `code` / `wsps` keys remain present for backward compatibility.
 - `search()` degrades to lexical mode when embedding model is unavailable.

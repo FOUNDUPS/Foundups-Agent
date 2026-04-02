@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Member Area | FoundUPS</title>
-  <meta name="description" content="Your FoundUPS member dashboard. Manage your UPS tokens, FoundUps, and agent deployments.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>p.fMALL | FoundUPS</title>
+  <meta name="description" content="Invite-only FoundUPS Mall. Swipe through FoundUps and enter their shell handoff surfaces.">
   <meta name="theme-color" content="#08080f">
   <meta name="robots" content="noindex, nofollow">
 
@@ -76,6 +76,10 @@
   </script>
 
   <link rel="stylesheet" href="css/member.css">
+  <link rel="stylesheet" href="css/account-concierge.css">
+  <link rel="stylesheet" href="css/mall-planes.css">
+  <link rel="stylesheet" href="css/mall-tile-field.css">
+  <link rel="stylesheet" href="css/mall-video-player.css">
 </head>
 <body>
   <!-- Loading state (shown while checking auth) -->
@@ -175,233 +179,132 @@
     }
   </style>
 
-  <!-- Main member area (hidden until auth confirmed) -->
-  <div id="memberArea" class="member-area" style="display:none;">
+  <!-- Red Dog Unified Plane (slides down from top) -->
+  <div id="accountPlaneScrim" class="account-plane-scrim"></div>
+  <aside id="accountPlane" class="account-plane" aria-label="Red Dog" data-reddog-plane>
+    <div class="account-plane-handle"></div>
 
-    <!-- Sidebar Navigation -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <a href="/" class="logo">
-          <img src="/logo-dog.png" alt="" class="logo-img">
-          <span class="logo-text">Found<span class="logo-ups">UPS</span></span>
-        </a>
+    <!-- Red Dog header -->
+    <div class="reddog-header" data-reddog-state>
+      <img src="/logo-dog.png" alt="" class="reddog-header-avatar">
+      <div class="reddog-header-text">
+        <span class="reddog-header-name">Red Dog</span>
+        <span class="reddog-header-greeting" data-reddog-greeting>Your personal agent</span>
       </div>
+    </div>
 
-      <nav class="sidebar-nav">
-        <a href="#dashboard" class="nav-item active" data-section="dashboard">
-          <span class="nav-icon">&#x1F4CA;</span>
-          <span class="nav-label">Dashboard</span>
-        </a>
-        <a href="#wallet" class="nav-item" data-section="wallet">
-          <span class="nav-icon">&#x1F4B0;</span>
-          <span class="nav-label">Wallet</span>
-        </a>
-        <a href="#foundups" class="nav-item" data-section="foundups">
-          <span class="nav-icon">&#x1F9CA;</span>
-          <span class="nav-label">My FoundUps</span>
-        </a>
-        <a href="#marketplace" class="nav-item" data-section="marketplace">
-          <span class="nav-icon">&#x1F310;</span>
-          <span class="nav-label">Marketplace</span>
-        </a>
-        <a href="#agents" class="nav-item" data-section="agents">
-          <span class="nav-icon">&#x1F916;</span>
-          <span class="nav-label">My Agents</span>
-        </a>
-      </nav>
+    <!-- Identity block -->
+    <div class="account-identity" data-reddog-identity>
+      <div class="account-avatar" data-account-avatar-link>
+        <img class="account-avatar-img" data-account-avatar-img src="" alt="" style="display:none;">
+        <span class="account-avatar-placeholder" data-account-avatar-placeholder>&#x1F464;</span>
+      </div>
+      <div class="account-identity-text">
+        <span class="account-identity-name" data-account-name>Member</span>
+        <span class="account-identity-handle" data-account-handle>@member</span>
+      </div>
+    </div>
 
-      <div class="sidebar-footer">
-        <a href="#profile" class="nav-item" data-section="profile">
-          <span class="nav-icon">&#x2699;</span>
-          <span class="nav-label">Settings</span>
-        </a>
-        <button id="logoutBtn" class="logout-btn">
-          <span class="nav-icon">&#x1F6AA;</span>
-          <span class="nav-label">Sign Out</span>
+    <!-- FoundUps -->
+    <div class="account-section" data-reddog-foundups>
+      <div class="account-section-label">Your FoundUps</div>
+      <div class="account-foundups-grid" data-account-foundups-grid></div>
+    </div>
+
+    <!-- Invites (hidden by default) -->
+    <div class="account-section" data-reddog-invites>
+      <button class="account-invites-toggle" data-account-invites-toggle type="button">
+        <span>Invites <span data-invite-count></span></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="account-invites-drawer" data-account-invites-drawer></div>
+    </div>
+
+    <!-- Options -->
+    <div class="account-section" data-reddog-options>
+      <div class="account-section-label">Options</div>
+      <div class="account-options-list">
+        <button class="account-option-btn" data-account-signout type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign out
         </button>
       </div>
-    </aside>
+    </div>
 
-    <!-- Main Content Area -->
-    <main class="main-content">
+    <!-- Red Dog concierge guidance -->
+    <div class="account-section" data-reddog-concierge>
+      <div class="account-section-label">Red Dog</div>
+      <div class="reddog-concierge-guidance">
+        <p class="reddog-guidance-item">Welcome to the p.fMALL. I keep track of your FoundUps and help you find your way around.</p>
+        <p class="reddog-guidance-item">Swipe sideways to browse FoundUps. Tap a card to enter.</p>
+        <p class="reddog-guidance-item">Swipe down from the top or tap my button to open this panel. Swipe up to close.</p>
+      </div>
+    </div>
+  </aside>
 
-      <!-- Top Bar -->
-      <header class="topbar">
-        <div class="topbar-left">
-          <button id="mobileMenuBtn" class="mobile-menu-btn">&#x2630;</button>
-          <h1 class="page-title" id="pageTitle">Dashboard</h1>
-        </div>
-        <div class="topbar-right">
-          <div class="user-info">
-            <span class="user-name" id="userName">Loading...</span>
-            <img src="/logo-dog.png" alt="" class="user-avatar" id="userAvatar">
-          </div>
+  <!-- FoundUp View Plane (slides up from bottom) -->
+  <div id="foundupViewScrim" class="foundup-view-scrim"></div>
+  <aside id="foundupViewPlane" class="foundup-view-plane" aria-label="FoundUp quick view">
+    <div class="fv-handle"></div>
+    <button id="foundupViewClose" class="fv-close-btn" aria-label="Close">&times;</button>
+    <div id="foundupViewBody"></div>
+  </aside>
+
+  <div id="memberArea" class="member-area" style="display:none;">
+    <div class="mall-shell">
+      <!-- TOP ANCHOR: Self / Account -->
+      <header class="mall-header mall-anchor-top" data-anchor="top">
+        <a href="/" class="mall-brand-minimal" aria-label="FoundUPS home">
+          <img src="/logo-dog.png" alt="" class="mall-brand-logo-sm">
+        </a>
+        <div class="mall-self-anchor">
+          <span id="mallUserHandle" class="mall-user-handle">@member</span>
+          <button id="mallAvatarTrigger" class="mall-avatar-trigger" aria-label="Open account">
+            <img src="" alt="" style="display:none;">
+            <span class="account-avatar-placeholder">&#x1F464;</span>
+          </button>
         </div>
       </header>
 
-      <!-- Content Sections (only one visible at a time) -->
-      <div class="content-wrapper">
+      <!-- MIDDLE FIELD: Discovery / Navigation -->
+      <main class="mall-main mall-anchor-middle" data-anchor="middle">
+        <!-- Projection Controls (compact, subordinate to tiles) -->
+        <nav id="mallProjection" class="mall-projection" aria-label="Sort FoundUps">
+          <button class="mall-projection-chip active" data-projection="default">All</button>
+          <button class="mall-projection-chip" data-projection="alpha">A-Z</button>
+          <button class="mall-projection-chip" data-projection="readiness">Readiness</button>
+          <button class="mall-projection-chip" data-projection="category">Category</button>
+        </nav>
 
-        <!-- Dashboard Section -->
-        <section id="dashboard" class="content-section active">
-          <div class="section-header">
-            <h2>Welcome back!</h2>
-            <p class="section-subtitle">Your FoundUPS overview</p>
-          </div>
-
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-icon">&#x1F4B0;</div>
-              <div class="stat-content">
-                <div class="stat-value" id="upsBalance">--</div>
-                <div class="stat-label">UPS Balance</div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon">&#x1F9CA;</div>
-              <div class="stat-content">
-                <div class="stat-value" id="foundupCount">0</div>
-                <div class="stat-label">My FoundUps</div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon">&#x1F916;</div>
-              <div class="stat-content">
-                <div class="stat-value" id="agentCount">0</div>
-                <div class="stat-label">Active Agents</div>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon">&#x1F381;</div>
-              <div class="stat-content">
-                <div class="stat-value" id="inviteCount">5</div>
-                <div class="stat-label">Invites Left</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="dashboard-grid">
-            <div class="card activity-card">
-              <h3 class="card-title">Recent Activity</h3>
-              <div class="activity-list" id="activityList">
-                <div class="empty-state">
-                  <p>No recent activity yet.</p>
-                  <p class="hint">Start by creating a FoundUP or joining one!</p>
-                </div>
-              </div>
-            </div>
-
-            <div class="card invites-card">
-              <h3 class="card-title">Your Invite Codes</h3>
-              <div class="invite-codes" id="inviteCodes">
-                <div class="loading-inline">Loading invite codes...</div>
-              </div>
-              <p class="card-hint">Share these codes to invite others. You get rewards when they join!</p>
-            </div>
-          </div>
+        <section id="mallTileField" class="mall-tile-field" data-softproto-mount="tile-field" aria-label="FoundUp tiles">
+          <div class="mall-tile-field-loading">Loading the Mall...</div>
         </section>
+      </main>
 
-        <!-- Wallet Section (Layer 3 - placeholder) -->
-        <section id="wallet" class="content-section">
-          <div class="section-header">
-            <h2>Wallet</h2>
-            <p class="section-subtitle">Manage your UPS and F<sub>i</sub> tokens</p>
+      <!-- BOTTOM ANCHOR: Red Dog / Digital Twin -->
+      <div id="redDogAnchor" class="red-dog-anchor mall-anchor-bottom" data-anchor="bottom" data-reddog-anchor>
+        <button id="redDogBtn" class="red-dog-btn" data-reddog-trigger aria-label="Open Red Dog">
+          <img src="/logo-dog.png" alt="">
+          <span class="red-dog-state-ring" data-reddog-anchor-state="idle"></span>
+        </button>
+        <div id="redDogSummary" class="red-dog-summary" data-reddog-summary hidden>
+          <div class="red-dog-summary-content" data-reddog-summary-content></div>
+        </div>
+        <div id="redDogListening" class="red-dog-listening" data-reddog-listening hidden>
+          <span class="red-dog-listening-label">Listening...</span>
+          <div class="red-dog-listening-waves">
+            <span></span><span></span><span></span>
           </div>
-          <div class="coming-soon">
-            <div class="coming-soon-icon">&#x1F4B0;</div>
-            <h3>Wallet Module Coming Soon</h3>
-            <p>Track your UPS balance, stake tokens, and view transaction history.</p>
-          </div>
-        </section>
-
-        <!-- FoundUps Section (Layer 4 - placeholder) -->
-        <section id="foundups" class="content-section">
-          <div class="section-header">
-            <h2>My FoundUps</h2>
-            <p class="section-subtitle">Create and manage your tokenized ventures</p>
-          </div>
-          <div class="coming-soon">
-            <div class="coming-soon-icon">&#x1F9CA;</div>
-            <h3>FoundUps Module Coming Soon</h3>
-            <p>Create new FoundUps, contribute to existing ones, track your portfolio.</p>
-          </div>
-        </section>
-
-        <!-- Marketplace Section (Layer 6 - placeholder) -->
-        <section id="marketplace" class="content-section">
-          <div class="section-header">
-            <h2>Marketplace</h2>
-            <p class="section-subtitle">Discover and join FoundUps</p>
-          </div>
-          <div class="coming-soon">
-            <div class="coming-soon-icon">&#x1F310;</div>
-            <h3>Marketplace Module Coming Soon</h3>
-            <p>Browse FoundUps, stake UPS, earn F<sub>i</sub> tokens.</p>
-          </div>
-        </section>
-
-        <!-- Agents Section (Layer 5 - placeholder) -->
-        <section id="agents" class="content-section">
-          <div class="section-header">
-            <h2>My Agents</h2>
-            <p class="section-subtitle">Deploy and manage OpenClaw agents</p>
-          </div>
-          <div class="coming-soon">
-            <div class="coming-soon-icon">&#x1F916;</div>
-            <h3>Agents Module Coming Soon</h3>
-            <p>Deploy agents, assign tasks, track earnings.</p>
-          </div>
-        </section>
-
-        <!-- Profile/Settings Section -->
-        <section id="profile" class="content-section">
-          <div class="section-header">
-            <h2>Settings</h2>
-            <p class="section-subtitle">Manage your account</p>
-          </div>
-          <div class="settings-grid">
-            <div class="card">
-              <h3 class="card-title">Profile</h3>
-              <div class="form-group">
-                <label>Username</label>
-                <div style="display:flex;align-items:center;gap:0.5rem;">
-                  <span style="color:#7c5cfc;font-weight:600;">@</span>
-                  <input type="text" id="usernameDisplay" class="form-input" disabled style="flex:1;">
-                </div>
-                <p style="font-size:0.8rem;color:rgba(228,226,236,0.5);margin-top:0.5rem;">Your permanent identity. Can't be changed.</p>
-              </div>
-              <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="emailDisplay" class="form-input" disabled>
-              </div>
-            </div>
-
-            <div class="card">
-              <h3 class="card-title">Notifications</h3>
-              <div class="toggle-group">
-                <label class="toggle">
-                  <input type="checkbox" id="emailNotifs" checked>
-                  <span class="toggle-slider"></span>
-                  <span class="toggle-label">Email notifications</span>
-                </label>
-              </div>
-              <div class="toggle-group">
-                <label class="toggle">
-                  <input type="checkbox" id="agentAlerts" checked>
-                  <span class="toggle-slider"></span>
-                  <span class="toggle-label">Agent activity alerts</span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </section>
-
+        </div>
       </div>
-    </main>
-  </div>
 
-  <!-- Mobile Sidebar Overlay -->
-  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+      <div id="overlayScrim" class="overlay-scrim" hidden></div>
+
+      <section id="foundupOverlay" class="foundup-overlay" hidden aria-label="FoundUp handoff">
+        <div id="foundupOverlayBody" class="foundup-overlay-body"></div>
+      </section>
+    </div>
+  </div>
 
   <!-- Firebase SDK (for Firestore data) + Clerk Auth -->
   <script type="module">
@@ -415,17 +318,30 @@
 
     const db = getFirestore(app);
 
-    // DOM elements
     const loadingState = document.getElementById('loadingState');
     const memberArea = document.getElementById('memberArea');
     const inviteGate = document.getElementById('inviteGate');
-    const userName = document.getElementById('userName');
-    const userAvatar = document.getElementById('userAvatar');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const inviteCodes = document.getElementById('inviteCodes');
+    const mallUserHandle = document.getElementById('mallUserHandle');
+    const mallTileField = document.getElementById('mallTileField');
+    const overlayScrim = document.getElementById('overlayScrim');
+    const redDogBtn = document.getElementById('redDogBtn');
+    const foundupOverlay = document.getElementById('foundupOverlay');
+    const foundupOverlayBody = document.getElementById('foundupOverlayBody');
 
-    // Store current user for gate functions
+    const MALL_CATALOG_URL = '/member/mall-catalog.json';
+    const READINESS_LABELS = {
+      ready: 'Ready',
+      conditional: 'Conditional',
+      discoverable_only: 'Discoverable Only'
+    };
+    const READINESS_COPY = {
+      ready: 'This FoundUp is ready to receive direct shell handoff.',
+      conditional: 'This FoundUp is real, but still needs one or two conditions cleared before direct handoff.',
+      discoverable_only: 'This FoundUp is visible in the Mall, but stays inside shell discovery for now.'
+    };
+
     let currentClerkUser = null;
+    let mallCatalog = [];
 
     // ─── CLERK AUTH CHECK ───
     // Wait for Clerk to load, then check auth
@@ -452,63 +368,41 @@
       }
 
       currentClerkUser = user;
-      console.log('[Member] Clerk user:', user ? user.id : 'none');
 
-      if (user) {
-        // Check for cached invite code from landing page
-        const pendingCode = localStorage.getItem('pendingInviteCode');
-        if (pendingCode) {
-          console.log('[Member] Found pending invite code:', pendingCode);
-          // Try to validate the cached code
-          const codeValidated = await tryValidateCachedCode(user.id, pendingCode);
-          if (codeValidated) {
-            console.log('[Member] Cached code validated successfully');
-          }
-          // Clear the cached code regardless of result
-          localStorage.removeItem('pendingInviteCode');
-        }
-
-        // User is signed in via Clerk - check invite status
-        const hasValidInvite = await checkInviteStatus(user.id, user);
-
-        loadingState.style.display = 'none';
-
-        if (hasValidInvite) {
-          // Check if user has claimed a username
-          const userRef = doc(db, 'users', user.id);
-          const userDoc = await getDoc(userRef);
-          const userData = userDoc.exists() ? userDoc.data() : {};
-
-          if (!userData.username) {
-            // User needs to claim username first
-            document.getElementById('usernameModal').style.display = 'flex';
-          } else {
-            // User has username - show member area
-            memberArea.style.display = 'flex';
-
-            // Set user info - prefer @username format
-            userName.textContent = userData.username ? '@' + userData.username : (user.firstName || user.primaryEmailAddress?.emailAddress || 'Member');
-            if (user.imageUrl) {
-              userAvatar.src = user.imageUrl;
-            }
-
-            // Load full user data
-            await loadUserData(user.id, user);
-          }
-        } else {
-          // User has NO valid invite - show invite gate
-          inviteGate.style.display = 'flex';
-
-          // Set email in waitlist panel
-          const gateUserEmail = document.getElementById('gateUserEmail');
-          if (gateUserEmail) {
-            gateUserEmail.textContent = user.primaryEmailAddress?.emailAddress || 'your email';
-          }
-        }
-      } else {
-        // User is not signed in - redirect to landing
+      if (!user) {
         window.location.href = '/?signin=required';
+        return;
       }
+
+      const pendingCode = localStorage.getItem('pendingInviteCode');
+      if (pendingCode) {
+        await tryValidateCachedCode(user.id, pendingCode);
+        localStorage.removeItem('pendingInviteCode');
+      }
+
+      const hasValidInvite = await checkInviteStatus(user.id, user);
+      loadingState.style.display = 'none';
+
+      if (!hasValidInvite) {
+        inviteGate.style.display = 'flex';
+        const gateUserEmail = document.getElementById('gateUserEmail');
+        if (gateUserEmail) {
+          gateUserEmail.textContent = user.primaryEmailAddress?.emailAddress || 'your email';
+        }
+        return;
+      }
+
+      const userRef = doc(db, 'users', user.id);
+      const userDoc = await getDoc(userRef);
+      const userData = userDoc.exists() ? userDoc.data() : {};
+
+      if (!userData.username) {
+        document.getElementById('usernameModal').style.display = 'flex';
+        return;
+      }
+
+      memberArea.style.display = 'block';
+      await initializeMall(user.id, userData, user);
     }
 
     // Check if user has a valid invite in Firestore
@@ -614,7 +508,192 @@
       }
     }
 
-    initClerkAuth();
+    async function initializeMall(clerkUserId, userData, clerkUser) {
+      const handle = userData.username ? '@' + userData.username : (clerkUser.firstName || clerkUser.primaryEmailAddress?.emailAddress || 'member');
+      mallUserHandle.textContent = handle;
+
+      await Promise.all([
+        loadMallCatalog(),
+        loadInviteContext(clerkUserId, clerkUser)
+      ]);
+
+      // Populate unified Red Dog plane
+      if (window.redDog) {
+        window.redDog.setIdentity(clerkUser, userData);
+        window.redDog.setFoundUps(mallCatalog);
+      }
+
+      // Initialize tile field with catalog
+      if (window.mallTileField) {
+        window.mallTileField.initialize(mallCatalog);
+      }
+
+      // Stub for carousel sync (tile field doesn't need index-based scrolling)
+      window.mallPlanesSync = function(index) {
+        // In tile field mode, opening a FoundUp from inspector already updates context
+        // No scrolling needed - tiles are visible in grid
+      };
+
+      // Wire up navigation planes
+      if (window.mallPlanes) {
+        window.mallPlanes.setCatalog(mallCatalog);
+      }
+
+      bindMallInteractions();
+    }
+
+    async function loadMallCatalog() {
+      const response = await fetch(MALL_CATALOG_URL, { cache: 'no-store' });
+      if (!response.ok) {
+        throw new Error('Failed to load catalog: HTTP ' + response.status);
+      }
+      mallCatalog = await response.json();
+    }
+
+    function bindMallInteractions() {
+      // Tile field handles its own interactions via mall-tile-field.js
+      // Red Dog button interactions handled by account-concierge.js (tap/double-tap/hold)
+      overlayScrim.addEventListener('click', closeSurfaces);
+
+      // Global Escape handler (D's guardrail - LOCKED)
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          // Close expanded video field first if open
+          if (window.mallTileField && window.mallTileField.isExpanded()) {
+            window.mallTileField.collapseFoundUp();
+            return;
+          }
+          closeSurfaces();
+        }
+      });
+    }
+
+    function openFoundupOverlay(item) {
+      if (!item) return;
+      foundupOverlayBody.innerHTML = `
+        <div class="foundup-overlay-card theme-${escapeAttr(item.theme)}">
+          <div class="foundup-overlay-topline">
+            <span class="mini-badge">${escapeHtml(item.category)}</span>
+            <span class="mini-badge">${escapeHtml(item.lifecycle_stage)}</span>
+          </div>
+          <div class="foundup-overlay-hero">
+            <span class="foundup-overlay-token">${escapeHtml(item.token_symbol)}</span>
+            <span class="foundup-overlay-name">${escapeHtml(item.name)}</span>
+          </div>
+          <p class="foundup-overlay-tagline">${escapeHtml(item.tagline)}</p>
+          <p class="foundup-overlay-description">${escapeHtml(item.description)}</p>
+          <div class="foundup-overlay-meta">
+            <div>
+              <span class="focus-label">Launch readiness</span>
+              <span class="focus-value">${escapeHtml(READINESS_LABELS[item.launch_readiness] || item.launch_readiness)}</span>
+            </div>
+            <div>
+              <span class="focus-label">Shell route</span>
+              <span class="focus-value">${escapeHtml(item.routing_prefix)}</span>
+            </div>
+            <div>
+              <span class="focus-label">Entry</span>
+              <span class="focus-value">${escapeHtml(item.entry_copy)}</span>
+            </div>
+          </div>
+          <p class="foundup-overlay-footnote">Tap outside this sheet to return to the Mall.</p>
+        </div>
+      `;
+
+      foundupOverlay.hidden = false;
+      if (window.redDog) window.redDog.close();
+      overlayScrim.hidden = false;
+      document.body.classList.add('surface-open');
+    }
+
+    function closeSurfaces() {
+      if (window.redDog) window.redDog.close();
+      foundupOverlay.hidden = true;
+      overlayScrim.hidden = true;
+      document.body.classList.remove('surface-open');
+      if (window.mallPlanes) window.mallPlanes.closeView();
+    }
+
+    // ─── LOCALHOST DEV HARNESS ───
+    // Opt-in bypass for local testing only
+    // Requires BOTH: localhost/127.0.0.1 AND ?devMall=1
+    function isDevHarnessActive() {
+      const host = window.location.hostname;
+      const isLocalhost = host === 'localhost' || host === '127.0.0.1';
+      const params = new URLSearchParams(window.location.search);
+      const hasDevFlag = params.get('devMall') === '1';
+      return isLocalhost && hasDevFlag;
+    }
+
+    async function initDevHarness() {
+      console.log('[DevHarness] Localhost dev mode active — bypassing Clerk/Firestore');
+
+      // Mock member data
+      const mockUserData = {
+        id: 'dev_member_001',
+        username: 'devmember',
+        email: 'dev@localhost',
+        inviteValidated: true,
+        inviteCodes: ['DEV-0001-0001', 'DEV-0001-0002', 'DEV-0001-0003', 'DEV-0001-0004', 'DEV-0001-0005'],
+        upsBalance: 1000,
+        createdAt: new Date().toISOString()
+      };
+
+      // Mock Clerk-like user object for components that expect it
+      const mockClerkUser = {
+        id: mockUserData.id,
+        firstName: 'Dev',
+        lastName: 'Member',
+        primaryEmailAddress: { emailAddress: mockUserData.email },
+        imageUrl: null
+      };
+
+      // Hide loading, show Mall
+      loadingState.style.display = 'none';
+      memberArea.style.display = 'block';
+
+      // Set handle
+      mallUserHandle.textContent = '@' + mockUserData.username;
+
+      // Load catalog (same as production)
+      await loadMallCatalog();
+
+      // Initialize components with mock data
+      if (window.redDog) {
+        window.redDog.setIdentity(mockClerkUser, mockUserData);
+        window.redDog.setFoundUps(mallCatalog);
+      }
+
+      if (window.mallTileField) {
+        window.mallTileField.initialize(mallCatalog);
+      }
+
+      // Stub for carousel sync
+      window.mallPlanesSync = function(index) {};
+
+      if (window.mallPlanes) {
+        window.mallPlanes.setCatalog(mallCatalog);
+      }
+
+      bindMallInteractions();
+
+      console.log('[DevHarness] Mall initialized with', mallCatalog.length, 'FoundUps');
+    }
+
+    // Entry point: dev harness or production auth
+    if (isDevHarnessActive()) {
+      initDevHarness().catch(error => {
+        console.error('[DevHarness] Failed to initialize:', error);
+        loadingState.innerHTML = '<div style="text-align:center;color:#ff6b6b;padding:2rem;">Dev harness error: ' + error.message + '</div>';
+      });
+    } else {
+      initClerkAuth().catch(error => {
+        console.error('Failed to initialize member Mall:', error);
+        loadingState.style.display = 'none';
+        inviteGate.style.display = 'flex';
+        document.getElementById('gateInviteStatus').innerHTML = '<span style="color:#ff6b6b;">Unable to initialize the Mall right now.</span>';
+      });
+    }
 
     // ─── INVITE GATE LOGIC ───
     // Toggle between invite/waitlist panels
@@ -670,7 +749,7 @@
 
           // If user is already validated, skip to username claim
           if (existingUserData.inviteValidated === true) {
-            gateInviteStatus.innerHTML = '<span style="color:#00d4aa;">You\'re already validated! Setting up...</span>';
+            gateInviteStatus.innerHTML = '<span style="color:#00d4aa;">You are already validated. Loading the Mall...</span>';
             setTimeout(() => {
               inviteGate.style.display = 'none';
               if (!existingUserData.username) {
@@ -690,7 +769,7 @@
             gateInviteStatus.innerHTML = '<span style="color:#ff6b6b;">This code has expired</span>';
           } else {
             // Valid code! Grant access
-            gateInviteStatus.innerHTML = '<span style="color:#00d4aa;">Valid! Setting up your account...</span>';
+            gateInviteStatus.innerHTML = '<span style="color:#00d4aa;">Valid. Setting up your Mall access...</span>';
 
             // IMPORTANT: Update user record FIRST (critical write)
             try {
@@ -857,7 +936,7 @@
           usernameClaimedAt: new Date().toISOString()
         }, { merge: true });
 
-        // Reload to show member dashboard
+        // Reload to show the admitted Mall shell
         setTimeout(() => window.location.reload(), 1000);
 
       } catch (error) {
@@ -868,173 +947,92 @@
       }
     });
 
-    // Load user data from Firestore (keyed by Clerk user ID)
-    async function loadUserData(clerkUserId, clerkUser) {
+    async function loadInviteContext(clerkUserId, clerkUser) {
       try {
-        // Get user document (keyed by Clerk user ID)
         const userRef = doc(db, 'users', clerkUserId);
         const userDoc = await getDoc(userRef);
 
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-
-          // Update UI with Firestore data - username is single source of truth
-          if (userData.username) {
-            userName.textContent = '@' + userData.username;
-            const usernameDisplay = document.getElementById('usernameDisplay');
-            if (usernameDisplay) usernameDisplay.value = userData.username;
-          }
-          if (userData.email) {
-            const emailDisplay = document.getElementById('emailDisplay');
-            if (emailDisplay) emailDisplay.value = userData.email;
-          }
-
-          // Load invite codes with live status from invites collection
-          if (userData.inviteCodes && userData.inviteCodes.length > 0) {
-            await loadAndRenderInviteCodes(userData.inviteCodes);
-            const inviteCount = document.getElementById('inviteCount');
-            if (inviteCount) inviteCount.textContent = userData.inviteCodes.length;
-          } else {
-            if (inviteCodes) inviteCodes.innerHTML = '<p class="empty-hint">No invite codes available.</p>';
-            const inviteCount = document.getElementById('inviteCount');
-            if (inviteCount) inviteCount.textContent = '0';
-          }
-        } else {
-          // User doesn't exist in Firestore yet - create initial record
-          // This happens on first sign-in via Clerk
-          const newUserData = {
-            clerkUserId: clerkUserId,
+        if (!userDoc.exists()) {
+          await setDoc(userRef, {
+            clerkUserId,
             email: clerkUser.primaryEmailAddress?.emailAddress || '',
             createdAt: new Date().toISOString(),
             inviteCodes: [],
             upsBalance: 0
-          };
-          await setDoc(userRef, newUserData);
-          console.log('Created new user record for Clerk user:', clerkUserId);
+          });
+          renderInviteCodes([]);
+          return;
+        }
 
-          // Update UI with new user data
-          if (inviteCodes) inviteCodes.innerHTML = '<p class="empty-hint">No invite codes available yet.</p>';
-          const inviteCount = document.getElementById('inviteCount');
-          if (inviteCount) inviteCount.textContent = '0';
+        const userData = userDoc.data();
+
+        if (userData.inviteCodes && userData.inviteCodes.length > 0) {
+          const codesWithStatus = await loadInviteCodeStatuses(userData.inviteCodes);
+          renderInviteCodes(codesWithStatus);
+        } else {
+          renderInviteCodes([]);
         }
       } catch (error) {
-        console.error('Error loading user data:', error);
+        console.error('Error loading invite context:', error);
+        renderInviteCodes([]);
       }
     }
 
-    // Load invite codes with status from invites collection
-    async function loadAndRenderInviteCodes(codes) {
+    async function loadInviteCodeStatuses(codes) {
       const codesWithStatus = [];
-      let activeCount = 0;
 
       for (const code of codes) {
         try {
-          // Query the invites collection for this code's status
           const q = query(collection(db, 'invites'), where('code', '==', code));
           const querySnapshot = await getDocs(q);
 
           if (!querySnapshot.empty) {
             const inviteData = querySnapshot.docs[0].data();
             const isActive = inviteData.status === 'active' && !inviteData.usedBy;
-            codesWithStatus.push({ code, status: isActive ? 'active' : 'used', usedBy: inviteData.usedBy });
-            if (isActive) activeCount++;
+            codesWithStatus.push({ code, status: isActive ? 'active' : 'used' });
           } else {
-            // Code not in collection (legacy) - assume active
-            codesWithStatus.push({ code, status: 'active', usedBy: null });
-            activeCount++;
+            codesWithStatus.push({ code, status: 'active' });
           }
         } catch (err) {
           console.error('[Member] Error checking code status:', code, err);
-          codesWithStatus.push({ code, status: 'unknown', usedBy: null });
+          codesWithStatus.push({ code, status: 'unknown' });
         }
       }
 
-      // Update active count in stats
-      const inviteCount = document.getElementById('inviteCount');
-      if (inviteCount) inviteCount.textContent = activeCount;
-
-      // Render with status
-      renderInviteCodes(codesWithStatus);
+      return codesWithStatus;
     }
 
-    // Render invite codes with status
     function renderInviteCodes(codesWithStatus) {
-      inviteCodes.innerHTML = codesWithStatus.map(({ code, status }) => `
-        <div class="invite-code-item ${status === 'used' ? 'used' : ''}">
-          <code style="${status === 'used' ? 'opacity:0.5;text-decoration:line-through;' : ''}">${code}</code>
-          ${status === 'used'
-            ? '<span style="color:#ff6b6b;font-size:0.8rem;">Used</span>'
-            : `<button class="copy-btn" onclick="copyCode('${code}')">Copy</button>`
-          }
-        </div>
-      `).join('');
+      // Feed invite data to unified Red Dog plane
+      if (window.redDog) {
+        window.redDog.setInvites(codesWithStatus);
+      }
     }
 
-    // Copy code to clipboard
-    window.copyCode = async function(code) {
-      try {
-        await navigator.clipboard.writeText(code);
-        // Show feedback
-        const btn = event.target;
-        const originalText = btn.textContent;
-        btn.textContent = 'Copied!';
-        btn.classList.add('copied');
-        setTimeout(() => {
-          btn.textContent = originalText;
-          btn.classList.remove('copied');
-        }, 2000);
-      } catch (err) {
-        console.error('Copy failed:', err);
-      }
-    };
+    function escapeHtml(value) {
+      if (value === null || value === undefined) return '';
+      const div = document.createElement('div');
+      div.textContent = String(value);
+      return div.innerHTML;
+    }
 
-    // Logout via Clerk
-    logoutBtn.addEventListener('click', async () => {
-      try {
-        await window.Clerk.signOut();
-        window.location.href = '/';
-      } catch (error) {
-        console.error('Logout error:', error);
-      }
-    });
-
-    // Navigation
-    const navItems = document.querySelectorAll('.nav-item[data-section]');
-    const sections = document.querySelectorAll('.content-section');
-    const pageTitle = document.getElementById('pageTitle');
-
-    navItems.forEach(item => {
-      item.addEventListener('click', (e) => {
-        e.preventDefault();
-        const sectionId = item.dataset.section;
-
-        // Update active nav
-        navItems.forEach(n => n.classList.remove('active'));
-        item.classList.add('active');
-
-        // Show section
-        sections.forEach(s => s.classList.remove('active'));
-        document.getElementById(sectionId).classList.add('active');
-
-        // Update page title
-        pageTitle.textContent = item.querySelector('.nav-label').textContent;
-
-        // Close mobile sidebar
-        document.querySelector('.sidebar').classList.remove('open');
-        document.getElementById('sidebarOverlay').classList.remove('show');
-      });
-    });
-
-    // Mobile menu toggle
-    document.getElementById('mobileMenuBtn').addEventListener('click', () => {
-      document.querySelector('.sidebar').classList.toggle('open');
-      document.getElementById('sidebarOverlay').classList.toggle('show');
-    });
-
-    document.getElementById('sidebarOverlay').addEventListener('click', () => {
-      document.querySelector('.sidebar').classList.remove('open');
-      document.getElementById('sidebarOverlay').classList.remove('show');
-    });
+    function escapeAttr(value) {
+      return String(value ?? '').replace(/"/g, '&quot;');
+    }
   </script>
+  <!-- Gesture hints (shown once on first visit) -->
+  <div id="gestureHints" class="gesture-hints" style="display:none;">
+    <div class="gesture-hint-item"><span class="gesture-hint-icon">&#8596;</span> Swipe sideways to browse FoundUps</div>
+    <div class="gesture-hint-item"><span class="gesture-hint-icon">&#8595;</span> Swipe down from top for your account</div>
+    <div class="gesture-hint-item"><span class="gesture-hint-icon">&#8226;</span> Tap to play/pause, double-tap to enter</div>
+    <p class="gesture-hint-dismiss">Tap anywhere to dismiss</p>
+  </div>
+
+  <script src="js/gesture-engine.js"></script>
+  <script src="js/mall-planes.js"></script>
+  <script src="js/mall-tile-field.js"></script>
+  <script src="js/mall-video-player.js"></script>
+  <script src="js/account-concierge.js"></script>
+  <script src="js/red-dog-concierge.js"></script>
 </body>
 </html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>p.fMALL - Catalog</title>
+    <link rel="stylesheet" href="/pfmall/static/styles.css">
+</head>
+<body>
+    <header class="shell-header">
+        <h1>p.fMALL <span>catalog</span></h1>
+        <nav class="shell-nav">
+            <a href="/pfmall/ui/" class="active">Catalog</a>
+        </nav>
+    </header>
+
+    <main class="shell-main">
+        <h2 class="page-title">FoundUps</h2>
+        <p class="page-subtitle">Registered tenants in the p.fMALL shell</p>
+
+        <div id="catalog" class="catalog-grid">
+            <div class="loading">Loading catalog...</div>
+        </div>
+    </main>
+
+    <script>
+    (async function() {
+        const grid = document.getElementById("catalog");
+        try {
+            const res = await fetch("/pfmall/catalog");
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            const tiles = await res.json();
+
+            if (tiles.length === 0) {
+                grid.innerHTML = '<div class="loading">No FoundUps registered yet.</div>';
+                return;
+            }
+
+            grid.innerHTML = tiles.map(t => `
+                <a class="tile-card" href="/pfmall/ui/detail.html?id=${encodeURIComponent(t.foundup_id)}">
+                    <div class="tile-card-header">
+                        <div class="tile-icon">${t.icon_url ? "&#x1f3af;" : "&#x1f4e6;"}</div>
+                        <div class="tile-name">${esc(t.name)}</div>
+                    </div>
+                    <div class="tile-tagline">${esc(t.tagline || t.description || "No description")}</div>
+                    <div class="badges">
+                        <span class="badge badge-readiness-${t.launch_readiness}">${readinessLabel(t.launch_readiness)}</span>
+                        <span class="badge badge-category">${esc(t.category)}</span>
+                        <span class="badge badge-lifecycle">${esc(t.lifecycle_stage)}</span>
+                        <span class="badge badge-tier">${esc(t.tier)}</span>
+                    </div>
+                    <div class="overlay-row">
+                        <span><span class="overlay-dot overlay-dot-${t.health_status}"></span>${esc(t.health_status)}</span>
+                        <span>${esc(t.token_symbol)}</span>
+                        ${t.state_provider !== "none" ? "<span>provider: " + esc(t.state_provider) + "</span>" : ""}
+                    </div>
+                </a>
+            `).join("");
+        } catch (err) {
+            grid.innerHTML = '<div class="error-msg">Failed to load catalog: ' + esc(err.message) + '</div>';
+        }
+    })();
+
+    function readinessLabel(r) {
+        return { ready: "Ready", conditional: "Conditional", discoverable_only: "Discoverable Only" }[r] || r;
+    }
+
+    function esc(s) {
+        if (!s) return "";
+        const d = document.createElement("div");
+        d.textContent = String(s);
+        return d.innerHTML;
+    }
+    </script>
+</body>
+</html>

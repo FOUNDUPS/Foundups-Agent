@@ -1,5 +1,116 @@
 # ModLog - moltbot_bridge
 
+## 2026-03-31: p.fMALL Catalog Integration (WSP 11/72/84)
+
+**Author**: 0102
+**WSP**: 11 (Interface Contract), 72 (Module Independence), 84 (Code Reuse)
+**Slice**: `openclaw_pfmall_catalog_integration`
+
+### Context
+
+OpenClaw FOUNDUP route needed catalog/status/routing commands to integrate with p.fMALL contracts. The manifest and state overlay contracts were defined in `pfmall_architecture_and_template_contract` and `pfmall_state_overlay_contract` slices.
+
+### Changes
+
+1. **Created `pfmall_catalog.py`** (~450 lines):
+   - `CatalogEntry` dataclass (subset of manifest for catalog display)
+   - `FoundUpStateOverlay` dataclass (per PFMALL_STATE_OVERLAY_CONTRACT.md)
+   - `StateOverlayProvider` protocol (abstract provider interface)
+   - `PfmallCatalogManager` class:
+     - Manifest discovery from known registry + JSON files
+     - State overlay consumption with graceful degradation
+     - `list_foundups()`, `get_catalog()`, `get_status()`, `get_open_target()`
+   - Command handlers: `handle_list_foundups`, `handle_foundup_catalog`, `handle_foundup_status`, `handle_open_foundup`
+   - `parse_catalog_command()` parser for FOUNDUP intent
+
+2. **Extended `fam_adapter.py`**:
+   - Catalog commands routed before launch commands
+   - Help text updated with new commands
+
+3. **Created `tests/test_pfmall_catalog.py`** (36 tests):
+   - CatalogEntry and StateOverlay dataclass tests
+   - PfmallCatalogManager tests (list, get, status, open, provider)
+   - Command handler tests
+   - Parser tests
+   - FAM adapter integration tests
+
+4. **Updated `INTERFACE.md`**:
+   - FOUNDUP Route Contract now includes catalog commands
+   - Documents p.fMALL contract consumption
+
+### Design Principles
+
+- **Provider abstraction**: State overlay consumed via protocol, not simulator import
+- **Graceful degradation**: Status shows "unknown" when provider unavailable
+- **Known registry**: PoC uses static registry until real manifests exist
+- **Manifest-driven**: Real manifests loaded from `foundup_manifest.json` when present
+
+### Commands Added
+
+| Command | Description |
+|---------|-------------|
+| `list foundups` | Show all FoundUps in catalog |
+| `foundup catalog [category]` | Browse by category |
+| `foundup status <name>` | Show manifest + state overlay |
+| `open <foundup>` | Get routing target |
+
+### Result
+
+OpenClaw can now list FoundUps, show status, and return routing targets. State overlay is consumed cleanly via provider interface with graceful degradation when unavailable.
+
+---
+
+## 2026-03-29: Skill Evolution Loop Phase 2 - Mutation Surface (WSP 48/77)
+
+**Author**: 0102
+**WSP**: 48 (Recursive Self-Improvement), 77 (Agent Coordination)
+**Slice**: `skill_evolution_loop_phase2_mutation_surface`
+
+### Context
+
+Phase 1 (commit `3ae311767`) provided a read-only report surface for skill evolution candidates. Phase 2 adds a bounded mutation surface that queries existing WRE primitives for A/B test status and promotion readiness without duplicating engines.
+
+### Changes
+
+1. **Extended `openclaw_skill_evolution.py`** with Phase 2 mutation surface:
+   - Three env gates (fail-closed): `OPENCLAW_MUTATION_SURFACE_ENABLED`, `OPENCLAW_AB_SCHEDULING_ENABLED`, `OPENCLAW_PROMOTION_ENABLED`
+   - `get_active_ab_test_status()`: Queries PatternMemory for active A/B test
+   - `check_ab_promotion_status()`: Queries PatternMemory for promotion decision
+   - `check_promotion_readiness()`: Queries WRESkillsRegistryV2 for promotion readiness
+   - `build_mutation_surface_entry()`: Builds entry with mutation_status, active_ab_test, promotion_readiness
+   - `build_mutation_surface_report()`: Builds full report with summary counts and gate states
+   - Mutation status values: `stable`, `ab_test_active`, `eligible_for_ab`, `blocked`
+
+2. **Extended `openclaw_supervisor.py`**:
+   - Mutation surface generation added to idle path alongside Phase 1 report
+   - Gated by `OPENCLAW_MUTATION_SURFACE_ENABLED`
+   - Reports `mutation_surface_report` in idle result with summary and gates
+
+3. **Extended `test_openclaw_skill_evolution.py`** with Phase 2 tests:
+   - Env gate tests (fail-closed by default, enabled when "1")
+   - Report generation tests (disabled state, enabled state, summary counts)
+   - Mutation entry classification tests (stable, eligible_for_ab, blocked)
+   - WRE primitive query tests (no mutation calls verified)
+   - Supervisor integration tests (gate off = no report, gate on = report generated)
+
+4. **Updated `INTERFACE.md`**:
+   - Skill Evolution Loop section with Phase 1 and Phase 2 documentation
+   - Env var table with all gates
+   - Supervisor integration contract
+
+### Design Principles
+
+- **Reuse WRE ownership**: Queries PatternMemory and WRESkillsRegistryV2 - no duplicate A/B or promotion engines
+- **Fail-closed gates**: All mutation features disabled by default (set to "0" or unset)
+- **Read-only surface**: Phase 2 surfaces eligibility/readiness but does NOT mutate
+- **Idle path only**: Lower priority than restarts, autonomous tasks, and self-audit events
+
+### Result
+
+Phase 2 mutation surface is complete. Skills can now be classified as `stable`, `ab_test_active`, `eligible_for_ab`, or `blocked` with full A/B test and promotion readiness context from WRE primitives.
+
+---
+
 ## 2026-03-29: OpenClaw Authority & Mutation Gate Hardening (WSP 00/95)
 
 **Author**: 0102

@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>FoundUps Mall | Entry</title>
+  <meta name="description" content="FoundUp entry view in the FoundUps Mall shell.">
+  <meta name="theme-color" content="#08080f">
+  <meta name="robots" content="noindex, nofollow">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/logo-dog.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/member.css">
+  <style>
+    /* Entry page layout */
+    .entry-shell {
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: #08080f;
+      color: #e4e2ec;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    @supports not (min-height: 100dvh) {
+      .entry-shell {
+        min-height: -webkit-fill-available;
+      }
+    }
+
+    .entry-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: rgba(228,226,236,0.6);
+      text-decoration: none;
+      font-size: 0.9rem;
+      padding: 1rem 1.5rem;
+      transition: color 0.15s;
+    }
+    .entry-back:hover { color: #7c5cfc; }
+    .entry-back svg { width: 16px; height: 16px; }
+
+    .entry-hero {
+      padding: 2rem 1.5rem 1.5rem;
+      text-align: center;
+    }
+    .entry-hero-token {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(228,226,236,0.4);
+      margin-bottom: 0.75rem;
+    }
+    .entry-hero-name {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.5rem;
+    }
+    .entry-hero-tagline {
+      font-size: 1rem;
+      color: rgba(228,226,236,0.6);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .entry-badges {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      padding: 1rem 1.5rem;
+    }
+
+    .entry-readiness-block {
+      margin: 1.5rem 1.5rem;
+      padding: 1.5rem;
+      border-radius: 16px;
+      text-align: center;
+    }
+    .entry-readiness-block.readiness-ready {
+      background: rgba(74,222,128,0.08);
+      border: 1px solid rgba(74,222,128,0.2);
+    }
+    .entry-readiness-block.readiness-conditional {
+      background: rgba(255,215,0,0.06);
+      border: 1px solid rgba(255,215,0,0.2);
+    }
+    .entry-readiness-block.readiness-discoverable_only {
+      background: rgba(228,226,236,0.04);
+      border: 1px solid rgba(228,226,236,0.1);
+    }
+    .entry-readiness-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+    .readiness-ready .entry-readiness-label { color: #4ade80; }
+    .readiness-conditional .entry-readiness-label { color: #ffd700; }
+    .readiness-discoverable_only .entry-readiness-label { color: rgba(228,226,236,0.5); }
+    .entry-readiness-copy {
+      font-size: 0.95rem;
+      color: rgba(228,226,236,0.7);
+      line-height: 1.5;
+    }
+
+    .entry-details {
+      margin: 1.5rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .entry-detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .entry-detail-row:last-child { border-bottom: none; }
+    .entry-detail-label {
+      font-size: 0.8rem;
+      color: rgba(228,226,236,0.45);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .entry-detail-value {
+      font-size: 0.9rem;
+      color: rgba(228,226,236,0.85);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .entry-what-next {
+      margin: 1.5rem;
+      padding: 1.25rem;
+      background: rgba(124,92,252,0.06);
+      border: 1px solid rgba(124,92,252,0.15);
+      border-radius: 16px;
+    }
+    .entry-what-next h3 {
+      font-size: 0.85rem;
+      color: #7c5cfc;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .entry-what-next p {
+      font-size: 0.9rem;
+      color: rgba(228,226,236,0.65);
+      line-height: 1.5;
+    }
+
+    .entry-description {
+      margin: 1.5rem;
+      padding: 1.25rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+    }
+    .entry-description h3 {
+      font-size: 0.8rem;
+      color: rgba(228,226,236,0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.5rem;
+    }
+    .entry-description p {
+      font-size: 0.95rem;
+      color: rgba(228,226,236,0.7);
+      line-height: 1.6;
+    }
+
+    .entry-not-found {
+      text-align: center;
+      padding: 4rem 1.5rem;
+    }
+    .entry-not-found h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .entry-not-found p {
+      color: rgba(228,226,236,0.5);
+      margin-bottom: 1.5rem;
+    }
+    .entry-not-found a {
+      color: #7c5cfc;
+      text-decoration: none;
+    }
+
+    .entry-footer {
+      text-align: center;
+      padding: 2rem 1.5rem 3rem;
+    }
+    .entry-return-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: rgba(124,92,252,0.1);
+      border: 1px solid rgba(124,92,252,0.25);
+      border-radius: 12px;
+      color: #7c5cfc;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: background 0.15s;
+    }
+    .entry-return-btn:hover {
+      background: rgba(124,92,252,0.18);
+    }
+
+    /* Red Dog floating button */
+    .entry-red-dog {
+      position: fixed;
+      bottom: calc(1.5rem + var(--safe-bottom));
+      right: max(1.5rem, env(safe-area-inset-right, 0px));
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c5cfc, #00d4aa);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(124,92,252,0.3);
+      z-index: 50;
+      transition: transform 0.15s;
+    }
+    .entry-red-dog:hover { transform: scale(1.08); }
+    .entry-red-dog img { width: 28px; height: 28px; }
+
+    /* Concierge scrim + sheet */
+    .concierge-scrim {
+      position: fixed;
+      inset: 0;
+      background: rgba(5,5,9,0.6);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .concierge-scrim.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .concierge-sheet {
+      position: fixed;
+      right: max(1.25rem, env(safe-area-inset-right, 0px));
+      bottom: calc(5rem + var(--safe-bottom));
+      width: min(22rem, calc(100vw - 2rem));
+      max-height: calc(100dvh - 7rem - var(--safe-bottom));
+      overflow-y: auto;
+      background: rgba(24,24,38,0.96);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 1.25rem;
+      padding: 1.25rem;
+      z-index: 101;
+      display: none;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.4);
+    }
+    .concierge-sheet.open { display: block; }
+
+    .concierge-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .concierge-header img { width: 36px; height: 36px; }
+    .concierge-header-text { display: flex; flex-direction: column; gap: 0.1rem; }
+    .concierge-name {
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0;
+    }
+    .concierge-subtitle {
+      font-size: 0.75rem;
+      color: rgba(228,226,236,0.5);
+      margin: 0;
+    }
+
+    .concierge-section {
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .concierge-section:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    .concierge-section-label {
+      font-size: 0.7rem;
+      color: rgba(228,226,236,0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+    .concierge-item {
+      font-size: 0.88rem;
+      color: rgba(228,226,236,0.75);
+      line-height: 1.5;
+      margin-bottom: 0.5rem;
+    }
+    .concierge-item:last-child { margin-bottom: 0; }
+    .concierge-item strong {
+      color: rgba(228,226,236,0.9);
+      font-weight: 600;
+    }
+
+    .concierge-readiness-key {
+      display: grid;
+      gap: 0.5rem;
+    }
+    .concierge-readiness-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      line-height: 1.4;
+    }
+    .concierge-readiness-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 0.3rem;
+    }
+    .concierge-readiness-dot.dot-ready { background: #4ade80; }
+    .concierge-readiness-dot.dot-conditional { background: #ffd700; }
+    .concierge-readiness-dot.dot-discoverable { background: rgba(228,226,236,0.35); }
+    .concierge-readiness-text { color: rgba(228,226,236,0.7); }
+
+    .concierge-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: #7c5cfc;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .concierge-back:hover { text-decoration: underline; }
+    .concierge-back svg { width: 14px; height: 14px; }
+
+    /* FAB state ring when concierge is open */
+    .entry-red-dog.active {
+      box-shadow: 0 0 0 3px rgba(124,92,252,0.5), 0 4px 16px rgba(124,92,252,0.3);
+    }
+
+    /* Briefing lines inside concierge */
+    .entry-briefing-line {
+      font-size: 0.84rem;
+      color: rgba(228,226,236,0.7);
+      line-height: 1.5;
+      padding: 0.2rem 0;
+    }
+    .entry-briefing-line::before {
+      content: "\25B8";
+      margin-right: 0.4rem;
+      font-size: 0.65rem;
+      color: rgba(228,226,236,0.35);
+    }
+
+    /* Recommendation pills */
+    .entry-recs-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.25rem;
+    }
+    .entry-rec-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid rgba(124,92,252,0.25);
+      background: rgba(124,92,252,0.08);
+      color: rgba(228,226,236,0.85);
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      min-height: 36px;
+    }
+    .entry-rec-action:hover {
+      background: rgba(124,92,252,0.18);
+      border-color: rgba(124,92,252,0.4);
+    }
+
+    @media (max-width: 480px) {
+      .entry-rec-action { min-height: 44px; }
+    }
+
+    @media (min-width: 640px) {
+      .entry-hero { padding: 3rem 2rem 2rem; }
+      .entry-hero-name { font-size: 2.5rem; }
+      .entry-readiness-block,
+      .entry-details,
+      .entry-what-next,
+      .entry-description { margin: 1.5rem auto; max-width: 560px; }
+      .entry-footer { padding-bottom: 4rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="entry-shell">
+    <nav>
+      <a href="/member/" class="entry-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        Back to Mall
+      </a>
+    </nav>
+
+    <div id="entryContent">
+      <div style="text-align:center;padding:4rem 1.5rem;color:rgba(228,226,236,0.5);">Loading FoundUp...</div>
+    </div>
+
+    <div id="conciergeScrim" class="concierge-scrim"></div>
+
+    <aside id="conciergeSheet" class="concierge-sheet" aria-label="Red Dog concierge">
+      <div class="concierge-header">
+        <img src="/logo-dog.png" alt="">
+        <div class="concierge-header-text">
+          <p class="concierge-name">Red Dog</p>
+          <p class="concierge-subtitle">Your digital twin</p>
+        </div>
+      </div>
+
+      <div id="conciergeContext" class="concierge-section">
+        <div class="concierge-section-label">This FoundUp</div>
+        <div id="conciergeContextBody" class="concierge-item">Loading...</div>
+      </div>
+
+      <div class="concierge-section" data-reddog-briefing>
+        <div class="concierge-section-label">Briefing</div>
+        <div id="entryBriefingBody"></div>
+      </div>
+
+      <div class="concierge-section" data-reddog-recommendations>
+        <div class="concierge-section-label">Suggested actions</div>
+        <div id="entryRecsBody"></div>
+      </div>
+
+      <div class="concierge-section">
+        <div class="concierge-section-label">Readiness guide</div>
+        <div class="concierge-readiness-key">
+          <div class="concierge-readiness-row">
+            <span class="concierge-readiness-dot dot-ready"></span>
+            <span class="concierge-readiness-text"><strong>Ready</strong> — live frontend, direct shell handoff when tenant embedding is wired.</span>
+          </div>
+          <div class="concierge-readiness-row">
+            <span class="concierge-readiness-dot dot-conditional"></span>
+            <span class="concierge-readiness-text"><strong>Conditional</strong> — working frontend with known gaps. Will move to ready when conditions clear.</span>
+          </div>
+          <div class="concierge-readiness-row">
+            <span class="concierge-readiness-dot dot-discoverable"></span>
+            <span class="concierge-readiness-text"><strong>Discoverable only</strong> — backend service visible in the Mall. No web frontend to load yet.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="concierge-section">
+        <div class="concierge-section-label">Navigation</div>
+        <p class="concierge-item">Use <strong>Back to Mall</strong> to return and browse other FoundUps.</p>
+        <p class="concierge-item">This entry page is deep-linkable. You can share or bookmark this URL.</p>
+      </div>
+
+      <div class="concierge-section">
+        <a href="/member/" class="concierge-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+          Return to Mall
+        </a>
+      </div>
+    </aside>
+
+    <button id="entryRedDog" class="entry-red-dog" aria-label="Open Red Dog concierge">
+      <img src="/logo-dog.png" alt="">
+    </button>
+  </div>
+
+  <script>
+  (function() {
+    const MALL_CATALOG_URL = '/member/mall-catalog.json';
+    const READINESS_LABELS = {
+      ready: 'Ready',
+      conditional: 'Conditional',
+      discoverable_only: 'Discoverable Only'
+    };
+    const WHAT_NEXT = {
+      ready: 'This FoundUp is ready for direct shell handoff. When tenant embedding is wired, you will enter its live surface from here.',
+      conditional: 'This FoundUp has a working frontend but carries known gaps. When conditions are cleared, it will move to full readiness.',
+      discoverable_only: 'This FoundUp is a backend service visible in the Mall for discovery. It cannot be loaded as a live tenant yet because it has no web frontend.'
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const foundupId = params.get('id');
+    const container = document.getElementById('entryContent');
+
+    if (!foundupId) {
+      renderNotFound('No FoundUp specified');
+      return;
+    }
+
+    fetch(MALL_CATALOG_URL, { cache: 'no-store' })
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(catalog => {
+        const item = catalog.find(e => e.foundup_id === foundupId);
+        if (!item) {
+          renderNotFound('FoundUp not found: ' + esc(foundupId));
+          return;
+        }
+        document.title = 'FoundUps Mall | ' + item.name;
+        renderEntry(item);
+        populateConciergeContext(item);
+      })
+      .catch(err => {
+        container.innerHTML = '<div class="entry-not-found"><h2>Error</h2><p>' + esc(err.message) + '</p><a href="/member/">Return to Mall</a></div>';
+      });
+
+    function renderEntry(item) {
+      const readinessClass = 'readiness-' + (item.launch_readiness || 'discoverable_only');
+      container.innerHTML = `
+        <div class="entry-hero">
+          <div class="entry-hero-token">${esc(item.token_symbol)}</div>
+          <h1 class="entry-hero-name">${esc(item.name)}</h1>
+          <p class="entry-hero-tagline">${esc(item.tagline)}</p>
+        </div>
+
+        <div class="entry-badges">
+          <span class="mini-badge">${esc(item.category)}</span>
+          <span class="mini-badge">${esc(item.lifecycle_stage)}</span>
+          <span class="mini-badge">${esc(item.tier)}</span>
+          <span class="mini-badge">${esc(READINESS_LABELS[item.launch_readiness] || item.launch_readiness)}</span>
+        </div>
+
+        <div class="entry-readiness-block ${readinessClass}">
+          <div class="entry-readiness-label">${esc(READINESS_LABELS[item.launch_readiness] || item.launch_readiness)}</div>
+          <div class="entry-readiness-copy">${esc(item.entry_copy || WHAT_NEXT[item.launch_readiness] || '')}</div>
+        </div>
+
+        <div class="entry-details">
+          <div class="entry-detail-row">
+            <span class="entry-detail-label">FoundUp ID</span>
+            <span class="entry-detail-value">${esc(item.foundup_id)}</span>
+          </div>
+          <div class="entry-detail-row">
+            <span class="entry-detail-label">Token</span>
+            <span class="entry-detail-value">${esc(item.token_symbol)}</span>
+          </div>
+          <div class="entry-detail-row">
+            <span class="entry-detail-label">Target Route</span>
+            <span class="entry-detail-value">${esc(item.routing_prefix)}</span>
+          </div>
+          <div class="entry-detail-row">
+            <span class="entry-detail-label">Lifecycle</span>
+            <span class="entry-detail-value">${esc(item.lifecycle_stage)}</span>
+          </div>
+          <div class="entry-detail-row">
+            <span class="entry-detail-label">Tier</span>
+            <span class="entry-detail-value">${esc(item.tier)}</span>
+          </div>
+        </div>
+
+        <div class="entry-what-next">
+          <h3>What happens next</h3>
+          <p>${esc(WHAT_NEXT[item.launch_readiness] || 'This FoundUp is visible in the Mall.')}</p>
+        </div>
+
+        <div class="entry-description">
+          <h3>About</h3>
+          <p>${esc(item.description)}</p>
+        </div>
+
+        <div class="entry-footer">
+          <a href="/member/" class="entry-return-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M15 18l-6-6 6-6"/></svg>
+            Return to Mall
+          </a>
+        </div>
+      `;
+    }
+
+    function renderNotFound(message) {
+      container.innerHTML = `
+        <div class="entry-not-found">
+          <h2>Not Found</h2>
+          <p>${message}</p>
+          <a href="/member/">Return to Mall</a>
+        </div>
+      `;
+    }
+
+    function esc(s) {
+      if (!s) return '';
+      var d = document.createElement('div');
+      d.textContent = String(s);
+      return d.innerHTML;
+    }
+
+    // Red Dog concierge
+    var conciergeSheet = document.getElementById('conciergeSheet');
+    var conciergeScrim = document.getElementById('conciergeScrim');
+    var conciergeOpen = false;
+
+    var entryRedDogBtn = document.getElementById('entryRedDog');
+    var currentItem = null;
+
+    function toggleConcierge() {
+      conciergeOpen = !conciergeOpen;
+      conciergeSheet.classList.toggle('open', conciergeOpen);
+      conciergeScrim.classList.toggle('open', conciergeOpen);
+      entryRedDogBtn.classList.toggle('active', conciergeOpen);
+    }
+
+    function closeConcierge() {
+      conciergeOpen = false;
+      conciergeSheet.classList.remove('open');
+      conciergeScrim.classList.remove('open');
+      entryRedDogBtn.classList.remove('active');
+    }
+
+    function populateConciergeContext(item) {
+      currentItem = item;
+      var body = document.getElementById('conciergeContextBody');
+      if (!item) {
+        body.innerHTML = 'No FoundUp loaded.';
+        return;
+      }
+      var readinessLabel = READINESS_LABELS[item.launch_readiness] || item.launch_readiness || 'Unknown';
+      body.innerHTML =
+        '<strong>' + esc(item.name) + '</strong> is currently <strong>' + esc(readinessLabel) + '</strong>.' +
+        '<br>' + esc(item.entry_copy || WHAT_NEXT[item.launch_readiness] || '');
+      renderBriefing(item);
+      renderRecommendations(item);
+    }
+
+    // -- Briefing: shell-truthful context lines --
+    function renderBriefing(item) {
+      var el = document.getElementById('entryBriefingBody');
+      if (!el || !item) return;
+      var lines = [];
+      var readinessLabel = READINESS_LABELS[item.launch_readiness] || item.launch_readiness || 'Unknown';
+      lines.push('You are viewing <strong>' + esc(item.name) + '</strong>');
+      lines.push('Readiness: <strong>' + esc(readinessLabel) + '</strong>');
+      if (item.token_symbol) lines.push('Token: <strong>' + esc(item.token_symbol) + '</strong>');
+      if (item.lifecycle_stage) lines.push('Lifecycle: <strong>' + esc(item.lifecycle_stage) + '</strong>');
+      if (item.tier) lines.push('Tier: <strong>' + esc(item.tier) + '</strong>');
+      if (item.routing_prefix) lines.push('Route: <strong>' + esc(item.routing_prefix) + '</strong>');
+      el.innerHTML = lines.map(function(l) {
+        return '<div class="entry-briefing-line">' + l + '</div>';
+      }).join('');
+    }
+
+    // -- Recommended actions: truthful, local-only --
+    var ENTRY_RECOMMENDATIONS = [
+      {
+        id: 'return_to_mall',
+        label: 'Return to Mall',
+        run: function() { window.location.href = '/member/'; }
+      },
+      {
+        id: 'scroll_readiness',
+        label: 'Review readiness',
+        run: function() {
+          closeConcierge();
+          var el = document.querySelector('.entry-readiness-block');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      },
+      {
+        id: 'scroll_about',
+        label: 'View about',
+        run: function() {
+          closeConcierge();
+          var el = document.querySelector('.entry-description');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      },
+      {
+        id: 'copy_link',
+        label: 'Copy link',
+        run: function() {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(window.location.href);
+          }
+        }
+      }
+    ];
+
+    function renderRecommendations() {
+      var el = document.getElementById('entryRecsBody');
+      if (!el) return;
+      var html = '<div class="entry-recs-row">';
+      for (var i = 0; i < ENTRY_RECOMMENDATIONS.length; i++) {
+        var rec = ENTRY_RECOMMENDATIONS[i];
+        html += '<button class="entry-rec-action" data-rec-id="' + rec.id + '">' + esc(rec.label) + '</button>';
+      }
+      html += '</div>';
+      el.innerHTML = html;
+      el.addEventListener('click', function(e) {
+        var btn = e.target.closest('.entry-rec-action');
+        if (!btn) return;
+        var id = btn.getAttribute('data-rec-id');
+        for (var j = 0; j < ENTRY_RECOMMENDATIONS.length; j++) {
+          if (ENTRY_RECOMMENDATIONS[j].id === id) {
+            ENTRY_RECOMMENDATIONS[j].run();
+            break;
+          }
+        }
+      });
+    }
+
+    // -- Gather entry context (mirrors Mall Red Dog getContext) --
+    function getEntryContext() {
+      var ctx = {
+        page: 'entry',
+        conciergeOpen: conciergeOpen,
+        foundupId: foundupId
+      };
+      if (currentItem) {
+        ctx.name = currentItem.name;
+        ctx.readiness = currentItem.launch_readiness;
+        ctx.token = currentItem.token_symbol;
+        ctx.tier = currentItem.tier;
+        ctx.lifecycle = currentItem.lifecycle_stage;
+        ctx.route = currentItem.routing_prefix;
+      }
+      return ctx;
+    }
+
+    entryRedDogBtn.addEventListener('click', toggleConcierge);
+    conciergeScrim.addEventListener('click', closeConcierge);
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && conciergeOpen) closeConcierge();
+    });
+
+    // -- Public API: window.entryRedDog --
+    window.entryRedDog = {
+      open: function() { if (!conciergeOpen) toggleConcierge(); },
+      close: closeConcierge,
+      toggle: toggleConcierge,
+      isOpen: function() { return conciergeOpen; },
+      getContext: getEntryContext
+    };
+  })();
+  </script>
+  <script src="js/red-dog-concierge.js"></script>
+</body>
+</html>

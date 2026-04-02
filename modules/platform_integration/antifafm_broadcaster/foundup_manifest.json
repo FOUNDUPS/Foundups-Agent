@@ -1,0 +1,30 @@
+{
+  "$schema": "https://foundups.org/schemas/foundup-manifest/v1.json",
+  "foundup_id": "antifafm_001",
+  "name": "antifaFM",
+  "version": "3.2.9",
+  "description": "24/7 headless radio broadcaster with visual layers. Bridges Icecast to YouTube Live via FFmpeg.",
+  "tagline": "24/7 resistance radio",
+  "tier": "F0_DAE",
+  "lifecycle_stage": "proto",
+  "entry_url": "",
+  "routing_prefix": "/f/antifafm_001",
+  "icon_url": "assets/antifaFMlogo.png",
+  "required_subscription_tier": "starter",
+  "is_invite_only": true,
+  "capabilities": ["search", "agents_basic", "offline"],
+  "agent_routes": ["openclaw_query", "openclaw_task"],
+  "holo_collections": [],
+  "data_namespace": "idb_antifafm_001",
+  "cabr_contract": {
+    "v1_gate": "default",
+    "v2_proof": "default",
+    "v3_score_min": 0.5
+  },
+  "owner_id": "012",
+  "token_symbol": "ANTI",
+  "category": "media",
+  "launch_readiness": "discoverable_only",
+  "created_at": "2025-09-01T00:00:00Z",
+  "signature": ""
+}
