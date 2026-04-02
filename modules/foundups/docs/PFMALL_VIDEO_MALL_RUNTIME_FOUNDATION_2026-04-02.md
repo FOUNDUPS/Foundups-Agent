@@ -111,11 +111,11 @@ Current insertion points that already exist:
 
 ---
 
-## 4. End-State Product Model
+## 4. Product Model
 
-### 4.1 Mall
+### 4.1 Mall (Runtime)
 
-The Mall should become:
+The Mall is:
 
 - a phone-first visual browsing surface
 - a field of square video-backed FoundUp tiles
@@ -477,15 +477,15 @@ app.member
 Current repo status by scope:
 
 - `module.topBar`
-  - real
+  - runtime
 - `module.tileField`
-  - real
+  - runtime (video-backed, field scope APIs)
 - `module.redDog`
-  - real
+  - runtime (concierge, search wiring)
 - `module.videoPlayer`
-  - not yet real
+  - runtime (fullscreen player shell)
 - `plane.foundupInterior`
-  - not yet real
+  - stub (transitional entry shell)
 
 Future requirement for every scope:
 
@@ -580,33 +580,34 @@ The rule is:
   distinct founder+idea lane
 - do not flatten all 012 presence into one creator record
 
-### 9.2 Existing Hook Surfaces
+### 9.2 Current Hook Surfaces (Runtime)
 
-Existing repo surfaces that indicate usable content hooks already exist:
+Active repo surfaces for video Mall catalog:
 
-- `docs/audits/VIDEO_INDEXING_ECOSYSTEM_AUDIT_20260116.md`
-  - confirms a stable video indexing ecosystem exists elsewhere in the repo
+- `public/member/mall-video-catalog.json`
+  - **current runtime catalog** (1,163 videos, 8 lanes)
+  - schema: `PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md`
 - `modules/foundups/pfmall/member_catalog_export.py`
-  - existing shell-side export path for Mall catalog data
+  - shell-side export path for Mall catalog data
 - `modules/communication/moltbot_bridge/src/pfmall_catalog.py`
   - shell-side catalog loading path
-- current `public/member/mall-catalog.json`
-  - existing shell-owned demo catalog pattern
+- `docs/audits/VIDEO_INDEXING_ECOSYSTEM_AUDIT_20260116.md`
+  - confirms a stable video indexing ecosystem exists elsewhere in the repo
 
-### 9.3 Rule For Phase 1
+### 9.3 Phase 1 Rules (Landed)
 
-Do:
+Done:
 
-- use real 012 video/content references
-- export or hand-curate a stable manifest
-- keep the first video Mall shell-owned
+- ✓ use real 012 video/content references
+- ✓ export or hand-curate a stable manifest
+- ✓ keep the first video Mall shell-owned
 
-Do not:
+Still deferred:
 
-- start with live YouTube API ingestion
-- start with LinkedIn scraping/runtime dependency
-- start with cross-platform sync
-- start with multi-tenant external feed federation
+- live YouTube API ingestion
+- LinkedIn scraping/runtime dependency
+- cross-platform sync
+- multi-tenant external feed federation
 
 ---
 

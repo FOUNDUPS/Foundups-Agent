@@ -31,7 +31,8 @@ public/member/
 |- js/gesture-hints.js
 |- js/account-concierge.js      <- Unified Red Dog plane (window.redDog)
 |- js/red-dog-concierge.js      <- Legacy FAQ topics (deprecated)
-|- mall-catalog.json
+|- mall-video-catalog.json      <- Video Mall data source
+|- mall-catalog.json            <- Legacy FoundUp catalog (non-video)
 |- tests/
 |- README.md
 |- INTERFACE.md
@@ -94,7 +95,20 @@ public/member/
 
 ## Source Of Truth
 
-`mall-catalog.json` is a **generated artifact**, not hand-maintained.
+### Video Mall Catalog (Primary)
+
+`mall-video-catalog.json` is the **primary data source** for the Video Mall.
+
+Schema: `modules/foundups/docs/PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md`
+
+This catalog powers:
+- Video Mall tile field (`mall-tile-field.js`)
+- Creator search / field scope filtering
+- Video queue for fullscreen player
+
+### Legacy FoundUp Catalog
+
+`mall-catalog.json` is a **legacy artifact** for non-video FoundUp cards.
 
 Canonical source: `modules/foundups/pfmall/` (manifests + presentation overrides).
 
@@ -103,7 +117,7 @@ Regenerate:
 python -m modules.foundups.pfmall.member_catalog_export
 ```
 
-This keeps the live site compatible with Firebase hosting while the deeper p.fMALL transport surfaces continue maturing elsewhere in the repo. Do not hand-edit `mall-catalog.json` — edit the source manifests or `member_presentation.py` instead, then regenerate.
+Do not hand-edit either catalog — edit source manifests, then regenerate.
 
 ---
 
