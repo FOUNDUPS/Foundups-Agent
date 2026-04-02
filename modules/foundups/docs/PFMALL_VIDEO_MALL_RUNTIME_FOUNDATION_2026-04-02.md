@@ -49,11 +49,11 @@ It sits beside them:
 - `SOFTPROTO_FOUNDATION_ARCHITECTURE_2026-04-01.md`
   - future configurable interface/runtime layer
 
-Important:
+Status (2026-04-03):
 
-- the current live Mall contract still says `tap = inspect`, `double-tap = enter`
-- this document defines the next target runtime direction
-- do not silently rewrite the live contract until the video-backed runtime slice lands
+- `PFMALL_MALL_NAVIGATION_CONTRACT.md` is now v2.0.0 Runtime Contract
+- tap = play/pause, double-tap = enter, pinch-out/in, Snap/Glide — all landed
+- this document and the navigation contract are now aligned
 
 ---
 
