@@ -174,6 +174,44 @@ Manages in-page FoundUp view plane (slides up from bottom).
 
 ---
 
+#### `window.mallVideoPlayer` (Fullscreen Player API)
+
+**Source**: `js/mall-video-player.js`
+**Contract**: `modules/foundups/docs/PFMALL_FULLSCREEN_PLAYER_CONTRACT.md`
+
+Fullscreen video player with queue rail. Queue-constrained to single FoundUp.
+
+| Method | Description |
+|--------|-------------|
+| `open(foundupId, queue, startIndex)` | Open player with FoundUp queue |
+| `close()` | Exit fullscreen |
+| `goToVideo(index)` | Navigate to video index |
+| `next()` | Next video in queue |
+| `prev()` | Previous video in queue |
+| `isOpen()` | Returns boolean |
+| `getFoundUpId()` | Current queue constraint |
+| `getCurrentIndex()` | Current video index |
+| `getQueueLength()` | Queue length |
+
+**Gesture Semantics**:
+| Gesture | Action |
+|---------|--------|
+| swipe-up | Next video |
+| swipe-down | Exit fullscreen |
+| pinch-in | Exit fullscreen |
+| tap | Toggle chrome |
+
+**Events**:
+| Event | Payload |
+|-------|---------|
+| `videoPlayerOpen` | `{ foundupId, videoIndex }` |
+| `videoPlayerClose` | none |
+| `videoPlayerNavigate` | `{ foundupId, videoIndex }` |
+| `videoPlayerSave` | `{ foundupId, video }` |
+| `videoPlayerShare` | `{ foundupId, video }` |
+
+---
+
 #### Legacy: `js/red-dog-concierge.js`
 
 Self-contained IIFE for FAQ topics. Will be removed when OpenClaw lands.
