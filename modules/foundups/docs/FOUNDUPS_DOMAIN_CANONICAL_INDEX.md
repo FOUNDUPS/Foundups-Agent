@@ -108,6 +108,10 @@ Use four statuses:
 - `modules/foundups/ROADMAP.md`
 - `modules/foundups/docs/FOUNDUP_EXFOLIATION_PROTOCOL.md`
 - `modules/foundups/docs/PQN_SWARM_HUB_FOUNDUP_BRIEF.md`
+- `modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md`
+  - runtime contract for Mall gesture grammar, field scope APIs
+- `modules/foundups/docs/PFMALL_VIDEO_MALL_RUNTIME_FOUNDATION_2026-04-02.md`
+  - runtime foundation (phase 1 landed 2026-04-03)
 
 ### Planning Reference
 
