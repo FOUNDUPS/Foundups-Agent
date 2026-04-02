@@ -116,6 +116,8 @@ Use four statuses:
   - media path conventions, cache headers, embed allowlist, fallback rules (50 tests)
 - `modules/foundups/docs/PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md`
   - active runtime schema for `mall-video-catalog.json` (1,163 videos, 8 lanes, 25 tests)
+- `modules/foundups/docs/PFMALL_FULLSCREEN_PLAYER_CONTRACT.md`
+  - fullscreen video player and queue rail contract (entry, gestures, safe-area, no cross-FoundUp drift)
 
 ### Planning Reference
 

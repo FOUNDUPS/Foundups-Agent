@@ -48,6 +48,8 @@ It sits beside them:
   - current Red Dog identity truth
 - `SOFTPROTO_FOUNDATION_ARCHITECTURE_2026-04-01.md`
   - future configurable interface/runtime layer
+- `PFMALL_FULLSCREEN_PLAYER_CONTRACT.md`
+  - fullscreen video player and queue rail contract
 
 Status (2026-04-03):
 
