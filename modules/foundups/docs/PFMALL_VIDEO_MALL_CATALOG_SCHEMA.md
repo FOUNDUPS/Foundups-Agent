@@ -1,0 +1,342 @@
+# Video Mall Catalog Schema
+
+**Status**: Active runtime schema
+**Version**: 1.0.0
+**Date**: 2026-04-03
+**Owner**: 0102
+**Location**: `public/member/mall-video-catalog.json`
+**Tests**: `modules/foundups/pfmall/tests/test_mall_video_catalog.py`
+
+---
+
+## 1. Purpose
+
+This document defines the schema for `mall-video-catalog.json`, the manifest that powers the Video Mall tile field.
+
+The Video Mall Catalog is **not** the full FoundUp runtime manifest. It is a projection-optimized data structure for:
+
+- Displaying video-backed FoundUp tiles in the Mall field
+- Enabling Red Dog to filter/project by category, creator, topic, geo
+- Providing queue metadata for the fullscreen video player
+- Supporting related-lane discovery
+
+For the full FoundUp runtime manifest (CABR, capabilities, signing), see `PFMALL_FOUNDUP_MANIFEST_SCHEMA.md`.
+
+---
+
+## 2. Schema Overview
+
+```
+mall-video-catalog.json
+├── FoundUpEntry[]           # Array of FoundUp lanes
+│   ├── Identity fields      # foundup_id, title, entity
+│   ├── Creator fields       # creator, creator_id, creator_display
+│   ├── Source fields        # source_type, source_id, source_handle
+│   ├── Classification       # category, tags, topic_family
+│   ├── Projection fields    # geo, status, display_order, related_lanes
+│   ├── Media fields         # poster_url, video_count
+│   └── videos[]             # Video queue
+│       ├── video_id
+│       ├── title
+│       ├── thumbnail_url
+│       ├── embed_url
+│       ├── source_url
+│       ├── timestamp
+│       └── duration_seconds
+```
+
+---
+
+## 3. FoundUp Entry Schema
+
+### 3.1 Full Entry Definition
+
+```json
+{
+  "foundup_id": "string (lowercase snake_case)",
+  "title": "string",
+  "creator": "string",
+  "creator_id": "string",
+  "creator_display": "string",
+  "entity": "string",
+  "source_type": "youtube_channel | linkedin_profile | x_profile | tiktok_profile | instagram_profile",
+  "source_id": "string | null",
+  "source_handle": "string | null",
+  "category": "string",
+  "tags": ["string"],
+  "topic_family": "string",
+  "geo": "string",
+  "status": "active | placeholder | archived | pending",
+  "display_order": "number",
+  "related_lanes": ["string (foundup_id references)"],
+  "poster_url": "string",
+  "video_count": "number",
+  "videos": ["VideoEntry"]
+}
+```
+
+### 3.2 Field Definitions
+
+#### Identity Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `foundup_id` | string | YES | Unique lane identifier. Lowercase snake_case. |
+| `title` | string | YES | Human-readable lane title for display. |
+| `entity` | string | YES | The entity/brand this lane represents. NOT collapsed to creator. |
+
+#### Creator Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `creator` | string | YES | Creator short identifier (e.g., "012"). |
+| `creator_id` | string | YES | Stable creator identifier for filtering. |
+| `creator_display` | string | YES | Human-readable creator name (e.g., "UnDaoDu (012)"). |
+
+#### Source Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `source_type` | enum | YES | Platform type. See Section 4. |
+| `source_id` | string | NO | Platform-specific ID (e.g., YouTube channel ID). |
+| `source_handle` | string | NO | Platform handle (e.g., "@MOVE2JAPAN"). |
+
+#### Classification Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `category` | string | YES | Primary category for filtering. See Section 5. |
+| `tags` | string[] | YES | Searchable tags. Must include "012-lane" for 012 content. |
+| `topic_family` | string | YES | Topic grouping for projection. See Section 6. |
+
+#### Projection Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `geo` | string | YES | Geographic scope. "Global" or specific location. |
+| `status` | enum | YES | Lane status. See Section 7. |
+| `display_order` | number | YES | Default sort priority (1 = highest). Must be unique. |
+| `related_lanes` | string[] | YES | References to related `foundup_id` values. |
+
+#### Media Fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `poster_url` | string | YES | Path to lane poster image. |
+| `video_count` | number | YES | Count of videos. Must match `videos.length`. |
+| `videos` | VideoEntry[] | YES | Video queue. See Section 8. |
+
+---
+
+## 4. Source Types
+
+| Value | Platform | Example source_id |
+|-------|----------|-------------------|
+| `youtube_channel` | YouTube | `UC-LSSlOZwpGIRIYihaz8zCw` |
+| `linkedin_profile` | LinkedIn | `urn:li:person:openstartup` or company ID |
+| `x_profile` | X (Twitter) | Account ID |
+| `tiktok_profile` | TikTok | Account ID |
+| `instagram_profile` | Instagram | Account ID |
+
+---
+
+## 5. Categories
+
+Current active categories:
+
+| Category | Description |
+|----------|-------------|
+| `travel` | Travel, relocation, expat life |
+| `music` | Music, ambient, meditation |
+| `startup` | Startups, founders, ventures |
+| `media` | Radio, broadcasting, news |
+| `thought-leadership` | Articles, essays, long-form |
+| `ai-education` | AI learning, education |
+| `ai-research` | AI research, technical |
+
+Categories are projection axes for Red Dog filtering.
+
+---
+
+## 6. Topic Families
+
+| Family | Description | Example Lanes |
+|--------|-------------|---------------|
+| `life` | Daily life, travel, relocation | move2japan |
+| `consciousness` | Meditation, quantum, 0102 | undaodu, linkedin_012, linkedin_esingularity |
+| `startup` | Ventures, founders, pAVS | foundups_main, linkedin_foundups |
+| `resistance` | Activism, anti-fascist | antifafm |
+
+Topic families enable cross-category projection (e.g., "show all consciousness content").
+
+---
+
+## 7. Status Values
+
+| Status | Description |
+|--------|-------------|
+| `active` | Lane is live and has content |
+| `placeholder` | Lane exists but content pending |
+| `archived` | Lane is historical, not actively updated |
+| `pending` | Lane awaiting activation |
+
+---
+
+## 8. Video Entry Schema
+
+### 8.1 Full Video Definition
+
+```json
+{
+  "video_id": "string",
+  "title": "string",
+  "thumbnail_url": "string",
+  "embed_url": "string",
+  "source_url": "string",
+  "timestamp": "string (ISO 8601: YYYY-MM-DDTHH:MM:SSZ)",
+  "duration_seconds": "number"
+}
+```
+
+### 8.2 Field Definitions
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `video_id` | string | YES | Platform-specific video ID. Unique within lane. |
+| `title` | string | YES | Video title. |
+| `thumbnail_url` | string | NO | URL to thumbnail image. |
+| `embed_url` | string | NO | Embeddable player URL. |
+| `source_url` | string | NO | Direct link to video on platform. |
+| `timestamp` | string | YES | ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`. |
+| `duration_seconds` | number | YES | Video duration. 0 or positive. |
+
+---
+
+## 9. Validation Rules
+
+The test suite (`test_mall_video_catalog.py`) enforces:
+
+### Structure
+- Catalog is a non-empty array
+- At least 4 distinct FoundUp lanes (no flattening)
+- All `foundup_id` values unique
+
+### Entry Shape
+- All required fields present
+- `foundup_id` is lowercase snake_case
+- `source_type` is valid enum value
+- `status` is valid enum value
+- `tags` is array of strings
+- `video_count` matches `videos.length`
+
+### Video Shape
+- All required video fields present
+- `video_id` unique within lane
+- `timestamp` matches ISO 8601 format
+- `duration_seconds` is non-negative
+
+### Projection Metadata
+- All projection fields present (`creator_id`, `topic_family`, `related_lanes`, `display_order`)
+- `topic_family` is valid value
+- `related_lanes` reference valid `foundup_id` values
+- `display_order` is unique
+- `geo` is non-null
+- All lanes include `012-lane` tag
+
+---
+
+## 10. Relationship to FoundUp Manifest
+
+| Concern | Video Mall Catalog | FoundUp Manifest |
+|---------|-------------------|------------------|
+| **Purpose** | Mall projection/display | Shell runtime loading |
+| **Scope** | Video-backed tiles only | Full FoundUp capabilities |
+| **File** | `mall-video-catalog.json` | `foundup_manifest.json` |
+| **Signing** | Not required | HMAC-SHA256 required |
+| **CABR** | Not included | V1/V2/V3 contract |
+| **Capabilities** | Not included | Declared capabilities |
+| **Agent routes** | Not included | OpenClaw routes |
+| **When used** | Mall field rendering | FoundUp iframe loading |
+
+The catalog is a lightweight projection index.
+The manifest is a security-signed runtime contract.
+
+A FoundUp may appear in both:
+- In the catalog for Mall display
+- In a manifest for full shell loading
+
+---
+
+## 11. Data Sources
+
+The catalog is populated from:
+
+| Source | Location | Data |
+|--------|----------|------|
+| Video Index | `memory/video_index/{channel}/*.json` | Video IDs, titles, segments |
+| YouTube Channels | `modules/infrastructure/shared_utilities/memory/youtube_channels.json` | Channel IDs, handles |
+| LinkedIn Map | `modules/platform_integration/linkedin_agent/data/linkedin_publishing_map.json` | Entity IDs, handles |
+
+Builder tool: `holo_index/skillz/video_catalog_builder/` (planned)
+
+---
+
+## 12. Example Entry
+
+```json
+{
+  "foundup_id": "move2japan",
+  "title": "Move to Japan",
+  "creator": "012",
+  "creator_id": "012",
+  "creator_display": "UnDaoDu (012)",
+  "entity": "Move2Japan",
+  "source_type": "youtube_channel",
+  "source_id": "UC-LSSlOZwpGIRIYihaz8zCw",
+  "source_handle": "@MOVE2JAPAN",
+  "category": "travel",
+  "tags": ["012-lane", "expat", "japan", "relocation", "life", "ffcpln"],
+  "topic_family": "life",
+  "geo": "Fukui, Japan",
+  "status": "active",
+  "display_order": 1,
+  "related_lanes": ["undaodu", "linkedin_012"],
+  "poster_url": "/media/posters/move2japan.jpg",
+  "video_count": 573,
+  "videos": [
+    {
+      "video_id": "CjJTdM4wjms",
+      "title": "Resist #ICE #FFCPLN",
+      "thumbnail_url": "https://i.ytimg.com/vi/CjJTdM4wjms/hqdefault.jpg",
+      "embed_url": "https://www.youtube.com/embed/CjJTdM4wjms",
+      "source_url": "https://www.youtube.com/watch?v=CjJTdM4wjms",
+      "timestamp": "2026-03-20T00:00:00Z",
+      "duration_seconds": 60
+    }
+  ]
+}
+```
+
+---
+
+## 13. Current Catalog Stats
+
+As of 2026-04-03:
+
+| Metric | Value |
+|--------|-------|
+| Total lanes | 8 |
+| YouTube lanes | 4 |
+| LinkedIn lanes | 4 |
+| Total videos | 1,163 |
+| Tests | 25/25 passing |
+
+Lane breakdown:
+- move2japan: 573 videos
+- undaodu: 512 videos
+- foundups_main: 44 videos
+- antifafm: 34 videos
+- linkedin_012: 0 (profile lane)
+- linkedin_esingularity: 0 (profile lane)
+- linkedin_tsingularity: 0 (profile lane)
+- linkedin_foundups: 0 (profile lane)

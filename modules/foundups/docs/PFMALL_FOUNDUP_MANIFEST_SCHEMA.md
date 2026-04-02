@@ -11,6 +11,21 @@
 
 Every FoundUp that runs inside p.fMALL declares itself through a `foundup_manifest.json`. This manifest is the contract between a FoundUp and the shell. It tells the shell what the FoundUp needs, what it provides, and how to load it.
 
+### 1.1 Relationship to Video Mall Catalog
+
+This document describes the **full FoundUp runtime manifest** — a signed contract for shell loading with CABR, capabilities, and agent routes.
+
+The **Video Mall Catalog** (`mall-video-catalog.json`) is a separate, simpler schema for Mall tile projection. See `PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md` for that schema.
+
+| Concern | This Schema | Video Mall Catalog |
+|---------|-------------|-------------------|
+| Purpose | Shell runtime loading | Mall field projection |
+| File | `foundup_manifest.json` | `mall-video-catalog.json` |
+| Signing | HMAC-SHA256 required | Not required |
+| CABR | V1/V2/V3 contract | Not included |
+| Capabilities | Declared | Not included |
+| Videos | Not included | Primary content |
+
 ---
 
 ## 2. Manifest Schema
