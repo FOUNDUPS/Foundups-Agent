@@ -22,9 +22,9 @@
 
 It owns:
 - invite-gated post-auth landing
-- swipe-driven FoundUp catalog
-- tap-to-enter FoundUp entry page (deep-linkable)
-- Red Dog concierge with readiness guide, navigation tips, and context-aware FoundUp guidance
+- Video Mall tile field with gesture-driven navigation
+- FoundUp entry page (deep-linkable via `foundup.html?id={id}`)
+- Red Dog unified plane with AI tools, channels, and context briefing
 
 It does not yet own:
 - direct tenant execution
@@ -39,12 +39,15 @@ It does not yet own:
 /member/css/member.css
 /member/css/account-concierge.css
 /member/css/mall-planes.css
+/member/css/mall-tile-field.css
 /member/js/gesture-engine.js
 /member/js/mall-planes.js
+/member/js/mall-tile-field.js
 /member/js/gesture-hints.js
 /member/js/account-concierge.js
 /member/js/red-dog-concierge.js
-/member/mall-catalog.json
+/member/mall-video-catalog.json     <- Video Mall data source
+/member/mall-catalog.json           <- Legacy FoundUp catalog
 ```
 
 ### JavaScript Surface
@@ -193,7 +196,13 @@ Self-contained IIFE for FAQ topics. Will be removed when OpenClaw lands.
 
 ### Data Expectations
 
-**Catalog source**
+**Video Mall Catalog** (primary)
+```json
+/member/mall-video-catalog.json
+```
+Schema: `modules/foundups/docs/PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md`
+
+**Legacy FoundUp Catalog**
 ```json
 /member/mall-catalog.json
 ```
@@ -225,14 +234,26 @@ interface InviteDoc {
 
 ### UI Contract
 
-- primary navigation is horizontal swipe / scroll-snap movement across FoundUp cards
-- card taps open an in-page FoundUp quick view (slides up from bottom)
-- "Full details" link inside the view navigates to `/member/foundup.html?id={foundup_id}` (deep-linkable)
-- swipe up closes the FoundUp view; swipe left/right navigates between FoundUps
-- double-tap/click in FoundUp view toggles shell-local save (localStorage)
-- desktop mouse drag on Mall track maps to touch swipe (drag-scroll parity)
-- first-time visitors see a gesture discovery hint overlay (dismissible, shown once)
+**Mall Context (tile field)**:
+- tap tile: play/pause video in Mall context
+- double-tap tile: enter FoundUp view directly
+- pinch-out on tile: expand into FoundUp's video field
+- swipe: navigate snapped field (default) or glide (override)
+- desktop mouse drag: maps to touch swipe (drag-scroll parity)
+
+**FoundUp View (expanded)**:
+- pinch-in: collapse back to Mall
+- swipe up: close FoundUp view
+- swipe left/right: navigate between FoundUps
+- double-tap: toggle shell-local save (localStorage)
+- "Full details" link: navigate to `/member/foundup.html?id={foundup_id}` (deep-linkable)
+
+**Red Dog Plane**:
+- swipe down from top or tap avatar: open Red Dog plane
 - primary explicit control is the Red Dog icon
+
+**Other**:
+- first-time visitors see a gesture discovery hint overlay (dismissible, shown once)
 - invite gate and username claim remain blocking surfaces ahead of the Mall
 
 ---

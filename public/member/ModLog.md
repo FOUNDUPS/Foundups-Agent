@@ -1,5 +1,38 @@
 # Member Area Module Change Log
 
+## [2026-04-03] Member Doc Residual Sync Phase 2 (Worker C, WSP_97)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker C
+**Type**: Documentation Fix
+**Slice**: `MEMBER_DOC_RESIDUAL_SYNC_PHASE2`
+**Spec**: WSP_97
+
+**Files Modified**:
+- `public/member/README.md` — Fixed catalog references, added Video Mall as primary
+- `public/member/INTERFACE.md` — Fixed UI Contract gestures, updated catalog sources
+
+**Drift Fixed**:
+
+| Issue | Fix |
+|-------|-----|
+| `mall-catalog.json` as primary | → `mall-video-catalog.json` is primary |
+| "tap-to-enter" | → "double-tap tile: enter FoundUp view" |
+| "quick view" | → "FoundUp view" |
+| "card taps open" | → Updated to current gesture grammar |
+
+**Catalog Truth**:
+- `mall-video-catalog.json` — Video Mall data source (primary)
+- `mall-catalog.json` — Legacy FoundUp catalog (non-video)
+
+**UI Contract Updated**:
+- Mall Context: tap=play/pause, double-tap=enter, pinch=expand/collapse
+- FoundUp View: pinch-in=collapse, swipe up=close, double-tap=save
+- Red Dog Plane: swipe down or tap avatar
+
+**Tests**: 902 passed (no runtime changes)
+
+---
+
 ## [2026-04-03] Member Surface Doc Sync Phase 1 (Worker C, WSP_97)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker C
