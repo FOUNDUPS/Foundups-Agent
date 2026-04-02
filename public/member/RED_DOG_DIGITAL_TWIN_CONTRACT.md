@@ -37,21 +37,21 @@
 
 ### The Unified Surface
 
-**Current state** (what exists):
+**Current state** (implemented):
 ```
-Red Dog button → Opens FAQ panel (red-dog-concierge.js)
-Avatar trigger → Opens account plane (account-concierge.js)
-```
-
-**Target state** (what should exist):
-```
-Red Dog button → Opens THE UNIFIED PANEL (Red Dog = user panel = concierge)
-Avatar → Also opens the same unified panel
+Avatar trigger → Opens unified Red Dog plane (account-concierge.js)
+window.redDog → Public API for all concierge operations
 ```
 
-**The concierge and user panel are the same thing.**
+**The concierge and user panel are the same thing.** DONE.
 
 Red Dog IS the user panel. The user panel IS the concierge. They are one surface.
+
+**Implementation**:
+- `account-concierge.js` owns the unified plane
+- `window.redDog` is the public API (see INTERFACE.md for full API)
+- `window.accountConcierge` is a backward-compat alias (will be removed)
+- `red-dog-concierge.js` is legacy FAQ topics (will be removed when OpenClaw lands)
 
 ### Surface Hierarchy
 
@@ -227,23 +227,32 @@ The following are explicitly NOT part of this contract and should remain unimple
 
 ---
 
-## 7. Implementation Guidance for Worker C
+## 7. Implementation Status
 
-### Merge Strategy
+### Unified Plane (COMPLETE)
 
 ```javascript
-// BEFORE: Two separate surfaces
-red-dog-concierge.js  → FAQ topics into #redDogPanel
-account-concierge.js  → Account plane with identity/foundups
+// CURRENT IMPLEMENTATION:
+account-concierge.js  → Unified Red Dog plane
+                      → Exposes window.redDog API
+                      → Identity block
+                      → AI Tools (projection, density, motion)
+                      → Channels (Personal Mall, Search Mall)
+                      → Context briefing
+                      → Recommendations
 
-// AFTER: One unified surface
-red-dog-unified.js    → Single panel with all content
-                      → Red Dog state at top
-                      → Identity below
-                      → FoundUps grid
-                      → Invites drawer
-                      → Contextual guidance (replaces FAQ)
+red-dog-concierge.js  → Legacy FAQ topics (deprecated)
+                      → Will be removed when OpenClaw lands
 ```
+
+### Shell-Local vs OpenClaw
+
+| Feature | Shell-Local (Current) | OpenClaw (Future) |
+|---------|----------------------|-------------------|
+| Search Mall | Text input, string match | AI semantic search |
+| Recommendations | Static | AI-generated |
+| Context briefing | DOM-derived | AI-aware |
+| Red Dog state | Mocked (always AWAKE) | Real compute tracking |
 
 ### State Machine (mockable)
 
@@ -300,18 +309,21 @@ const GREETINGS = {
 
 ## 8. Success Criteria
 
-Worker C implementation is complete when:
+Worker C implementation status:
 
-1. [ ] Single unified panel replaces both current surfaces
-2. [ ] Red Dog state is displayed (can be mocked)
-3. [ ] Hunger/energy meters are visible (can be mocked)
-4. [ ] Identity block is present
-5. [ ] FoundUps grid is present
-6. [ ] Invites drawer is present
-7. [ ] Context changes based on page (Mall vs Entry)
-8. [ ] Feed CTA exists (stub is acceptable)
-9. [ ] Personality messages vary
-10. [ ] Red Dog feels like a companion, not a widget
+1. [x] Single unified panel replaces both current surfaces — `account-concierge.js`
+2. [ ] Red Dog state is displayed (can be mocked) — DEFERRED (OpenClaw)
+3. [ ] Hunger/energy meters are visible (can be mocked) — DEFERRED (OpenClaw)
+4. [x] Identity block is present — `setIdentity()`
+5. [x] FoundUps grid is present — `setFoundUps()`
+6. [x] Invites drawer is present — `setInvites()`
+7. [x] Context changes based on page (Mall vs Entry) — `getContext()`
+8. [ ] Feed CTA exists (stub is acceptable) — DEFERRED (OpenClaw)
+9. [ ] Personality messages vary — DEFERRED (OpenClaw)
+10. [x] Red Dog feels like a companion, not a widget — unified plane with AI tools
+
+**Phase 1 Complete**: Unified plane, identity, AI tools, channels, search.
+**Deferred to OpenClaw**: State display, hunger/energy, feed CTA, personality.
 
 ---
 
@@ -332,4 +344,5 @@ This contract defines the product truth for Red Dog as a digital twin. It does n
 
 *Contract Author: Worker E (0102)*
 *Contract Date: 2026-04-01*
-*Contract Status: ACTIVE*
+*Last Updated: 2026-04-03 (C: doc sync)*
+*Contract Status: ACTIVE — Phase 1 Complete, OpenClaw Deferred*

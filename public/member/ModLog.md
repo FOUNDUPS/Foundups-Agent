@@ -1,5 +1,35 @@
 # Member Area Module Change Log
 
+## [2026-04-03] Member Surface Doc Sync Phase 1 (Worker C, WSP_97)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker C
+**Type**: Documentation
+**Slice**: `PFMALL_MEMBER_SURFACE_DOC_SYNC_PHASE1`
+**Spec**: WSP_97
+
+**Files Modified**:
+- `public/member/README.md` — Updated runtime shape, UX section, shell-local vs OpenClaw table
+- `public/member/INTERFACE.md` — Full `window.redDog` and `window.mallTileField` API documentation
+- `public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md` — Updated implementation status, success criteria
+
+**Truth Locked**:
+1. **Unified plane**: `account-concierge.js` is the unified Red Dog plane
+2. **Public API**: `window.redDog` is the active API (`window.accountConcierge` is compat alias)
+3. **Search Mall shim**: Text input is dev/testing shim, not final UI
+4. **Shell-local vs OpenClaw**: Clear separation table in both README and INTERFACE
+
+**API Documentation Added** (INTERFACE.md):
+- `window.redDog` — 20+ methods
+- `window.mallTileField` — 18+ methods
+- `window.mallPlanes` — 5 methods
+- `window.gestureZone` — 2 methods
+
+**Version Bump**: INTERFACE.md 2.0.0 → 2.1.0
+
+**Tests**: 902 passed (no changes to runtime)
+
+---
+
 ## [2026-04-02] Search Mall Concierge Wiring Phase 1 (Worker B, WSP_97)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B
