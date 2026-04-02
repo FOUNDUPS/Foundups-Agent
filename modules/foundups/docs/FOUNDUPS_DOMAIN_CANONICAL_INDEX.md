@@ -114,10 +114,6 @@ Use four statuses:
   - runtime foundation (phase 1 landed 2026-04-03)
 - `modules/foundups/docs/PFMALL_MEDIA_DELIVERY_CONTRACT.md`
   - media path conventions, cache headers, embed allowlist, fallback rules (50 tests)
-- `modules/foundups/docs/PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md`
-  - active runtime schema for `mall-video-catalog.json` (1,163 videos, 8 lanes, 25 tests)
-- `modules/foundups/docs/PFMALL_FULLSCREEN_PLAYER_CONTRACT.md`
-  - fullscreen video player and queue rail contract (entry, gestures, safe-area, no cross-FoundUp drift)
 
 ### Planning Reference
 
@@ -130,9 +126,6 @@ Use four statuses:
 - `modules/foundups/docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md`
   - current runtime boundary for Mall shell vs external FoundUp repos and
     in-scope route deployment
-- `modules/foundups/docs/PFMALL_FOUNDUP_MANIFEST_SCHEMA.md`
-  - future full FoundUp runtime manifest (CABR, signing, capabilities)
-  - distinct from current Video Mall catalog
 - `modules/foundups/docs/FOUNDUP_FEDERATION_MIGRATION_PLAN.md`
   - useful, but still draft and not proof that all migrations have happened
 - submodule roadmaps:
