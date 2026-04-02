@@ -112,6 +112,8 @@ Use four statuses:
   - runtime contract for Mall gesture grammar, field scope APIs
 - `modules/foundups/docs/PFMALL_VIDEO_MALL_RUNTIME_FOUNDATION_2026-04-02.md`
   - runtime foundation (phase 1 landed 2026-04-03)
+- `modules/foundups/docs/PFMALL_MEDIA_DELIVERY_CONTRACT.md`
+  - media path conventions, cache headers, embed allowlist, fallback rules (50 tests)
 
 ### Planning Reference
 
