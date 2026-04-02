@@ -48,14 +48,12 @@ It sits beside them:
   - current Red Dog identity truth
 - `SOFTPROTO_FOUNDATION_ARCHITECTURE_2026-04-01.md`
   - future configurable interface/runtime layer
-- `PFMALL_FULLSCREEN_PLAYER_CONTRACT.md`
-  - fullscreen video player and queue rail contract
 
-Status (2026-04-03):
+Important:
 
-- `PFMALL_MALL_NAVIGATION_CONTRACT.md` is now v2.0.0 Runtime Contract
-- tap = play/pause, double-tap = enter, pinch-out/in, Snap/Glide — all landed
-- this document and the navigation contract are now aligned
+- the current live Mall contract still says `tap = inspect`, `double-tap = enter`
+- this document defines the next target runtime direction
+- do not silently rewrite the live contract until the video-backed runtime slice lands
 
 ---
 
@@ -113,11 +111,11 @@ Current insertion points that already exist:
 
 ---
 
-## 4. Product Model
+## 4. End-State Product Model
 
-### 4.1 Mall (Runtime)
+### 4.1 Mall
 
-The Mall is:
+The Mall should become:
 
 - a phone-first visual browsing surface
 - a field of square video-backed FoundUp tiles
@@ -479,15 +477,15 @@ app.member
 Current repo status by scope:
 
 - `module.topBar`
-  - runtime
+  - real
 - `module.tileField`
-  - runtime (video-backed, field scope APIs)
+  - real
 - `module.redDog`
-  - runtime (concierge, search wiring)
+  - real
 - `module.videoPlayer`
-  - runtime (fullscreen player shell)
+  - not yet real
 - `plane.foundupInterior`
-  - stub (transitional entry shell)
+  - not yet real
 
 Future requirement for every scope:
 
@@ -582,34 +580,33 @@ The rule is:
   distinct founder+idea lane
 - do not flatten all 012 presence into one creator record
 
-### 9.2 Current Hook Surfaces (Runtime)
+### 9.2 Existing Hook Surfaces
 
-Active repo surfaces for video Mall catalog:
+Existing repo surfaces that indicate usable content hooks already exist:
 
-- `public/member/mall-video-catalog.json`
-  - **current runtime catalog** (1,163 videos, 8 lanes)
-  - schema: `PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md`
-- `modules/foundups/pfmall/member_catalog_export.py`
-  - shell-side export path for Mall catalog data
-- `modules/communication/moltbot_bridge/src/pfmall_catalog.py`
-  - shell-side catalog loading path
 - `docs/audits/VIDEO_INDEXING_ECOSYSTEM_AUDIT_20260116.md`
   - confirms a stable video indexing ecosystem exists elsewhere in the repo
+- `modules/foundups/pfmall/member_catalog_export.py`
+  - existing shell-side export path for Mall catalog data
+- `modules/communication/moltbot_bridge/src/pfmall_catalog.py`
+  - shell-side catalog loading path
+- current `public/member/mall-catalog.json`
+  - existing shell-owned demo catalog pattern
 
-### 9.3 Phase 1 Rules (Landed)
+### 9.3 Rule For Phase 1
 
-Done:
+Do:
 
-- ✓ use real 012 video/content references
-- ✓ export or hand-curate a stable manifest
-- ✓ keep the first video Mall shell-owned
+- use real 012 video/content references
+- export or hand-curate a stable manifest
+- keep the first video Mall shell-owned
 
-Still deferred:
+Do not:
 
-- live YouTube API ingestion
-- LinkedIn scraping/runtime dependency
-- cross-platform sync
-- multi-tenant external feed federation
+- start with live YouTube API ingestion
+- start with LinkedIn scraping/runtime dependency
+- start with cross-platform sync
+- start with multi-tenant external feed federation
 
 ---
 
