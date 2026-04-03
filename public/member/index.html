@@ -577,7 +577,7 @@
       const displayReadiness = READINESS_LABELS[item.launch_readiness] || item.launch_readiness || item.status || 'active';
       const displayRoute = item.routing_prefix || '/f/' + item.foundup_id;
       foundupOverlayBody.innerHTML = `
-        <div class="foundup-overlay-card theme-${escapeAttr(item.theme || 'default')}">
+        <div class="foundup-overlay-card theme-${escapeAttr(item.theme || item.foundup_id || 'default')}">
           <div class="foundup-overlay-topline">
             <span class="mini-badge">${escapeHtml(item.category)}</span>
             <span class="mini-badge">${escapeHtml(item.lifecycle_stage || item.status || '')}</span>

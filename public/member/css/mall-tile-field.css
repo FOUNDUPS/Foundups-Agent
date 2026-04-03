@@ -442,6 +442,43 @@
   background-color: #122616;
 }
 
+/* Category-derived themes — fallback when no lane-specific theme matches */
+
+.mall-tile.theme-cat-travel {
+  background: linear-gradient(145deg, rgba(16, 42, 58, 0.96), rgba(30, 90, 120, 0.72) 60%, rgba(8, 18, 28, 0.98));
+  background-color: #102a3a;
+}
+
+.mall-tile.theme-cat-music {
+  background: linear-gradient(145deg, rgba(38, 18, 52, 0.96), rgba(80, 40, 110, 0.72) 60%, rgba(18, 10, 28, 0.98));
+  background-color: #261234;
+}
+
+.mall-tile.theme-cat-startup {
+  background: linear-gradient(145deg, rgba(14, 40, 28, 0.96), rgba(30, 90, 60, 0.72) 60%, rgba(8, 20, 14, 0.98));
+  background-color: #0e281c;
+}
+
+.mall-tile.theme-cat-media {
+  background: linear-gradient(145deg, rgba(60, 11, 16, 0.96), rgba(122, 20, 28, 0.72) 60%, rgba(24, 7, 10, 0.98));
+  background-color: #3c0b10;
+}
+
+.mall-tile.theme-cat-thought-leadership {
+  background: linear-gradient(145deg, rgba(10, 32, 56, 0.96), rgba(22, 70, 120, 0.72) 60%, rgba(6, 14, 28, 0.98));
+  background-color: #0a2038;
+}
+
+.mall-tile.theme-cat-ai-education {
+  background: linear-gradient(145deg, rgba(40, 28, 10, 0.96), rgba(100, 70, 22, 0.72) 60%, rgba(20, 14, 6, 0.98));
+  background-color: #281c0a;
+}
+
+.mall-tile.theme-cat-ai-research {
+  background: linear-gradient(145deg, rgba(20, 14, 42, 0.96), rgba(50, 30, 100, 0.72) 60%, rgba(10, 8, 22, 0.98));
+  background-color: #140e2a;
+}
+
 .mall-tile.theme-default {
   background: linear-gradient(145deg, rgba(30, 30, 35, 0.96), rgba(60, 60, 68, 0.72) 60%, rgba(18, 18, 22, 0.98));
   background-color: #1e1e23;

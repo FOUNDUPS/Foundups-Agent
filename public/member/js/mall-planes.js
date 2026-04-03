@@ -77,7 +77,7 @@
     var routeHint = item.routing_prefix ? ' \u2192 ' + esc(item.routing_prefix) : '';
     var videoHint = item.video_count ? ' \u00b7 ' + item.video_count + ' videos' : '';
     body.innerHTML =
-      '<div class="fv-hero theme-' + esc(item.theme || 'default') + '">' +
+      '<div class="fv-hero theme-' + esc(item.theme || item.foundup_id || 'default') + '">' +
         '<div class="fv-token">' + esc(displayToken) + '</div>' +
         '<div class="fv-hero-label">' + esc(displayHero) + '</div>' +
         '<h2 class="fv-name">' + esc(displayName) + '</h2>' +

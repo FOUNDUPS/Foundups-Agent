@@ -40,6 +40,17 @@
   var currentFieldScope = null;  // null = all, 'personal' = 012 lanes only
   var fullCatalog = [];  // Unscoped catalog reference
 
+  // Category → theme fallback (used when item.theme and item.foundup_id have no CSS match)
+  var CATEGORY_THEME = {
+    'travel': 'cat-travel',
+    'music': 'cat-music',
+    'startup': 'cat-startup',
+    'media': 'cat-media',
+    'thought-leadership': 'cat-thought-leadership',
+    'ai-education': 'cat-ai-education',
+    'ai-research': 'cat-ai-research'
+  };
+
   // Video Mall runtime state
   var motionMode = 'snap'; // 'snap' | 'glide'
   var currentDensity = '2x3';
@@ -107,7 +118,7 @@
     }
 
     tileField.innerHTML = itemsToRender.map(function(item, index) {
-      var theme = escapeAttr(item.theme || 'default');
+      var theme = escapeAttr(item.theme || item.foundup_id || CATEGORY_THEME[item.category] || 'default');
       var readiness = item.launch_readiness || 'discoverable_only';
       var badgeClass = readiness === 'ready' ? 'ready' : (readiness === 'conditional' ? 'conditional' : '');
 
