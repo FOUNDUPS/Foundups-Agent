@@ -554,7 +554,7 @@ This phased WSP keeps Foundups' PoC lean while charting a clear path toward auto
 
 Each vector extends the Foundups vision toward **autonomous, evolvable, yet ethically bounded** AI economies.
 
-Within that roadmap, the cleanest current PQN-adjacent empirical result is narrow: a passive EFIM probe has shown statistically supported regime separation between ordered and degraded temporal-control conditions in Lindblad-driven symbol sequences. This should be interpreted as detector-level evidence of distributional separation, not as proof of PQN, detector signature, or nonlocal signaling. A future **PQN Observatory** would turn that line of work into a distributed research lane for OpenClaw agents and other bounded workers to run controlled detector experiments and compare traces across seeds, controls, models, and environments.
+Within that roadmap, the cleanest current PQN-adjacent empirical result is narrow: a passive EFIM probe has shown statistically supported regime separation between ordered and degraded temporal-control conditions in Lindblad-driven symbol sequences. This should be interpreted as detector-level evidence of distributional separation, not as proof of PQN, consciousness, or nonlocal signaling. A future **PQN Observatory** would turn that line of work into a distributed research lane for OpenClaw agents and other bounded workers to run controlled detector experiments and compare traces across seeds, controls, models, and environments.
 
 ---
 

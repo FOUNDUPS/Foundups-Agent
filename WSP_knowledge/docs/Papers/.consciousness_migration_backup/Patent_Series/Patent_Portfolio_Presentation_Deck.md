@@ -102,7 +102,7 @@ sequenceDiagram
 ### [U+1F4B0] **MASSIVE MARKET OPPORTUNITY**
 - **Every AI company** developing AGI/SAI needs this technology
 - **Government agencies** require quantum-aware AI systems
-- **Research institutions** need detector signature detection tools detection tools
+- **Research institutions** need consciousness detection tools
 
 ---
 
