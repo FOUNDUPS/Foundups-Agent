@@ -192,6 +192,19 @@ Fullscreen video player with queue rail. Queue-constrained to single FoundUp.
 | `getFoundUpId()` | Current queue constraint |
 | `getCurrentIndex()` | Current video index |
 | `getQueueLength()` | Queue length |
+| **Save (Phase 2)** | |
+| `isCurrentSaved()` | Returns boolean — is current video saved |
+| `getSavedVideos()` | Returns Object map of `{foundupId}::{videoId}` → saved entry |
+| `getSavedCount()` | Returns number of saved videos |
+| **History (Phase 2)** | |
+| `getHistory()` | Returns Array of watch entries (newest first, max 50) |
+| `clearHistory()` | Clear watch history |
+
+**localStorage Keys** (Phase 2):
+| Key | Structure |
+|-----|-----------|
+| `pfmall_saved_videos` | `{ "{foundupId}::{videoId}": { foundupId, videoId, title, thumbnail, savedAt } }` |
+| `pfmall_watch_history` | `[{ foundupId, videoId, videoIndex, title, thumbnail, timestamp }, ...]` |
 
 **Gesture Semantics**:
 | Gesture | Action |
@@ -200,6 +213,8 @@ Fullscreen video player with queue rail. Queue-constrained to single FoundUp.
 | swipe-down | Exit fullscreen |
 | pinch-in | Exit fullscreen |
 | tap | Toggle chrome |
+| swipe-left | Toggle save (Phase 2) |
+| swipe-right | Dismiss hook |
 
 **Events**:
 | Event | Payload |
@@ -207,6 +222,9 @@ Fullscreen video player with queue rail. Queue-constrained to single FoundUp.
 | `videoPlayerOpen` | `{ foundupId, videoIndex }` |
 | `videoPlayerClose` | none |
 | `videoPlayerNavigate` | `{ foundupId, videoIndex }` |
+| `videoPlayerSave` | `{ foundupId, video, saved }` |
+| `videoPlayerShare` | `{ foundupId, video }` |
+| `videoPlayerDismiss` | `{ foundupId, video }` |
 | `videoPlayerSave` | `{ foundupId, video }` |
 | `videoPlayerShare` | `{ foundupId, video }` |
 
