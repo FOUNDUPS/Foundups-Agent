@@ -1,8 +1,8 @@
 # p.fMALL Navigation Contract
 
-**Version**: 1.0.0
-**Date**: 2026-04-01
-**Status**: Contract
+**Version**: 2.0.0
+**Date**: 2026-04-03
+**Status**: Runtime Contract
 
 ---
 
@@ -89,20 +89,27 @@ X axis = category / cluster / similarity band
          right = shift to adjacent cluster
 ```
 
-### 4.2 Gesture Bindings (Fixed)
+### 4.2 Gesture Bindings (Runtime)
 
 | Gesture | Mall Action | Status |
 |---------|-------------|--------|
-| swipe-up | Navigate: further/less relevant | FIXED |
-| swipe-down | Navigate: nearer/more relevant | FIXED |
-| swipe-left | Navigate: cluster shift left | FIXED |
-| swipe-right | Navigate: cluster shift right | FIXED |
-| tap | Inspect FoundUp (preview/focus) | FIXED |
-| double-tap | Enter FoundUp | FIXED |
-| long-press | Reserved (future: quick actions) | FIXED |
-| pinch | Reserved (future: zoom) | FIXED |
+| swipe | Navigate: snapped field motion (default) or glide (override) | RUNTIME |
+| tap tile | Play/pause video in Mall context | RUNTIME |
+| double-tap tile | Enter FoundUp | RUNTIME |
+| pinch-out tile | Expand FoundUp into its video field | RUNTIME |
+| pinch-in (expanded) | Collapse back to Mall | RUNTIME |
+| long-press | Reserved (future: quick actions) | RESERVED |
 
-### 4.3 Keyboard Bindings (Fixed)
+### 4.3 Motion Modes (Runtime)
+
+| Mode | Behavior | Status |
+|------|----------|--------|
+| Snap (default) | Discrete paging like iPhone home screens | RUNTIME |
+| Glide | Fluid scroll for browsing (AI-tools override) | RUNTIME |
+
+Set via `mallTileField.setMotionMode('snap')` or `mallTileField.setMotionMode('glide')`.
+
+### 4.4 Keyboard Bindings (Fixed)
 
 | Key | Mall Action | Status |
 |-----|-------------|--------|
@@ -113,7 +120,7 @@ X axis = category / cluster / similarity band
 | Enter | Enter focused FoundUp | FIXED |
 | Escape | Reset view / close overlay | FIXED |
 
-### 4.4 What Users Cannot Do
+### 4.5 What Users Cannot Do
 
 Users cannot:
 - Remap swipe directions in the Mall
@@ -137,7 +144,27 @@ This means:
 - AI changes what the field looks like
 - Swipe grammar remains stable regardless of projection
 
-### 5.2 Projection Commands (AI-Controlled)
+### 5.2 Field Scope API (Runtime)
+
+The Mall field scope filters the catalog before projection.
+
+| API | Purpose | Status |
+|-----|---------|--------|
+| `setFieldScope({ type, query })` | Generic scope setter | RUNTIME |
+| `projectPersonalMall()` | Filter to creator === '012' | RUNTIME |
+| `searchByCreator(query)` | Case-insensitive substring on creator/entity | RUNTIME |
+| `filterByCategory(category)` | Exact category match | RUNTIME |
+| `filterByTag(tag)` | Exact tag match in tags array | RUNTIME |
+| `clearFieldScope()` | Reset to full catalog | RUNTIME |
+| `getFieldScope()` | Get current scope | RUNTIME |
+
+Scope types:
+- `personal` — `creator === '012'`
+- `creator` — substring match on creator/entity
+- `category` — exact match (case-insensitive)
+- `tag` — exact match in tags array
+
+### 5.3 Projection Commands (AI-Controlled)
 
 AI can reproject the Mall based on:
 - "show FoundUps near me"
@@ -147,7 +174,7 @@ AI can reproject the Mall based on:
 - "show by newest"
 - "show by my network"
 
-### 5.3 Invariant
+### 5.4 Invariant
 
 **AI projection changes tile placement, not navigation grammar.**
 

@@ -1,5 +1,123 @@
 # Member Area Module Change Log
 
+## [2026-04-03] Search Mall Filter UI Phase 2 (Worker C, WSP_97)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker C
+**Type**: Feature (Filter UI)
+**Slice**: `SEARCH_MALL_FILTER_UI_PHASE2`
+**Spec**: WSP_97
+
+**Files Modified**:
+- `public/member/js/account-concierge.js` — Category pills + tag dropdown
+- `public/member/css/account-concierge.css` — Filter row styling
+- `public/member/tests/test_account_concierge.py` — 14 new filter tests
+- `public/member/tests/test_search_mall_concierge_wiring_phase1.py` — Fixed block sizes
+
+**UI Added**:
+```html
+<!-- Category filter pills -->
+<div class="reddog-filter-row" data-reddog-category-filters>
+  <span class="reddog-filter-label">Category:</span>
+  <button class="reddog-filter-pill" data-reddog-category="travel">travel</button>
+  <!-- ... music, media, startup, ai-education, ai-research, thought-leadership -->
+</div>
+
+<!-- Tag filter dropdown -->
+<div class="reddog-filter-row">
+  <span class="reddog-filter-label">Tag:</span>
+  <select class="reddog-tag-select" data-reddog-tag-select>
+    <option value="">All tags</option>
+    <option value="012-lane">012-lane</option>
+    <!-- ... ffcpln, consciousness, meditation, founders, ai, music, resistance, japan, expat -->
+  </select>
+</div>
+```
+
+**Wiring**:
+| Filter | API | Command |
+|--------|-----|---------|
+| Category pill click | `mallTileField.filterByCategory(cat)` | `filter_category` |
+| Tag select change | `mallTileField.filterByTag(tag)` | `filter_tag` |
+| Clear (×) | `mallTileField.clearFieldScope()` | — |
+
+**Mutual Exclusivity**:
+- Selecting category clears tag and search input
+- Selecting tag clears category and search input
+- Typing in search clears category and tag
+
+**CSS Added**:
+- `.reddog-filter-row` — flex row with wrap
+- `.reddog-filter-pill` — small rounded pill button
+- `.reddog-filter-pill.active` — orange highlight
+- `.reddog-tag-select` — styled dropdown
+
+**Tests**: 916 passed (14 new filter tests)
+
+---
+
+## [2026-04-03] Member Doc Residual Sync Phase 2 (Worker C, WSP_97)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker C
+**Type**: Documentation Fix
+**Slice**: `MEMBER_DOC_RESIDUAL_SYNC_PHASE2`
+**Spec**: WSP_97
+
+**Files Modified**:
+- `public/member/README.md` — Fixed catalog references, added Video Mall as primary
+- `public/member/INTERFACE.md` — Fixed UI Contract gestures, updated catalog sources
+
+**Drift Fixed**:
+
+| Issue | Fix |
+|-------|-----|
+| `mall-catalog.json` as primary | → `mall-video-catalog.json` is primary |
+| "tap-to-enter" | → "double-tap tile: enter FoundUp view" |
+| "quick view" | → "FoundUp view" |
+| "card taps open" | → Updated to current gesture grammar |
+
+**Catalog Truth**:
+- `mall-video-catalog.json` — Video Mall data source (primary)
+- `mall-catalog.json` — Legacy FoundUp catalog (non-video)
+
+**UI Contract Updated**:
+- Mall Context: tap=play/pause, double-tap=enter, pinch=expand/collapse
+- FoundUp View: pinch-in=collapse, swipe up=close, double-tap=save
+- Red Dog Plane: swipe down or tap avatar
+
+**Tests**: 902 passed (no runtime changes)
+
+---
+
+## [2026-04-03] Member Surface Doc Sync Phase 1 (Worker C, WSP_97)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker C
+**Type**: Documentation
+**Slice**: `PFMALL_MEMBER_SURFACE_DOC_SYNC_PHASE1`
+**Spec**: WSP_97
+
+**Files Modified**:
+- `public/member/README.md` — Updated runtime shape, UX section, shell-local vs OpenClaw table
+- `public/member/INTERFACE.md` — Full `window.redDog` and `window.mallTileField` API documentation
+- `public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md` — Updated implementation status, success criteria
+
+**Truth Locked**:
+1. **Unified plane**: `account-concierge.js` is the unified Red Dog plane
+2. **Public API**: `window.redDog` is the active API (`window.accountConcierge` is compat alias)
+3. **Search Mall shim**: Text input is dev/testing shim, not final UI
+4. **Shell-local vs OpenClaw**: Clear separation table in both README and INTERFACE
+
+**API Documentation Added** (INTERFACE.md):
+- `window.redDog` — 20+ methods
+- `window.mallTileField` — 18+ methods
+- `window.mallPlanes` — 5 methods
+- `window.gestureZone` — 2 methods
+
+**Version Bump**: INTERFACE.md 2.0.0 → 2.1.0
+
+**Tests**: 902 passed (no changes to runtime)
+
+---
+
 ## [2026-04-02] Search Mall Concierge Wiring Phase 1 (Worker B, WSP_97)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B

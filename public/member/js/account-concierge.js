@@ -711,8 +711,32 @@
 
     // Search input (hidden by default)
     html += '<div class="reddog-search-container" data-reddog-search-container style="display:none;">';
+    html += '<div class="reddog-search-row">';
     html += '<input type="text" class="reddog-search-input" data-reddog-search-input placeholder="Search by creator..." autocomplete="off">';
     html += '<button class="reddog-search-clear" data-reddog-search-clear type="button">&times;</button>';
+    html += '</div>';
+
+    // Category filter pills
+    html += '<div class="reddog-filter-row" data-reddog-category-filters>';
+    html += '<span class="reddog-filter-label">Category:</span>';
+    var categories = ['travel', 'music', 'media', 'startup', 'ai-education', 'ai-research', 'thought-leadership'];
+    for (var i = 0; i < categories.length; i++) {
+      html += '<button class="reddog-filter-pill" data-reddog-category="' + categories[i] + '" type="button">' + categories[i] + '</button>';
+    }
+    html += '</div>';
+
+    // Tag filter dropdown
+    html += '<div class="reddog-filter-row">';
+    html += '<span class="reddog-filter-label">Tag:</span>';
+    html += '<select class="reddog-tag-select" data-reddog-tag-select>';
+    html += '<option value="">All tags</option>';
+    var tags = ['012-lane', 'ffcpln', 'consciousness', 'meditation', 'founders', 'ai', 'music', 'resistance', 'japan', 'expat'];
+    for (var j = 0; j < tags.length; j++) {
+      html += '<option value="' + tags[j] + '">' + tags[j] + '</option>';
+    }
+    html += '</select>';
+    html += '</div>';
+
     html += '</div>';
 
     channelsEl.innerHTML = html;
@@ -785,6 +809,53 @@
       });
     }
 
+    // Category filter handlers
+    var categoryFilters = channelsEl.querySelectorAll('[data-reddog-category]');
+    categoryFilters.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var category = btn.getAttribute('data-reddog-category');
+        emitRedDogCommand('filter_category', { category: category });
+
+        // Clear other active states
+        categoryFilters.forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+
+        // Clear tag select
+        var tagSelect = channelsEl.querySelector('[data-reddog-tag-select]');
+        if (tagSelect) tagSelect.value = '';
+
+        // Clear search input
+        if (searchInput) searchInput.value = '';
+
+        if (window.mallTileField && typeof window.mallTileField.filterByCategory === 'function') {
+          window.mallTileField.filterByCategory(category);
+        }
+      });
+    });
+
+    // Tag filter handler
+    var tagSelect = channelsEl.querySelector('[data-reddog-tag-select]');
+    if (tagSelect) {
+      tagSelect.addEventListener('change', function () {
+        var tag = tagSelect.value;
+        emitRedDogCommand('filter_tag', { tag: tag });
+
+        // Clear category active states
+        categoryFilters.forEach(function (b) { b.classList.remove('active'); });
+
+        // Clear search input
+        if (searchInput) searchInput.value = '';
+
+        if (window.mallTileField) {
+          if (tag && typeof window.mallTileField.filterByTag === 'function') {
+            window.mallTileField.filterByTag(tag);
+          } else if (typeof window.mallTileField.clearFieldScope === 'function') {
+            window.mallTileField.clearFieldScope();
+          }
+        }
+      });
+    }
+
     refreshChannelsUI();
   }
 
@@ -811,6 +882,15 @@
     if (input) {
       input.value = '';
     }
+
+    // Clear category filter active states
+    var categoryFilters = document.querySelectorAll('[data-reddog-category]');
+    categoryFilters.forEach(function (b) { b.classList.remove('active'); });
+
+    // Clear tag select
+    var tagSelect = document.querySelector('[data-reddog-tag-select]');
+    if (tagSelect) tagSelect.value = '';
+
     toggleSearchInput(false);
     if (window.mallTileField && typeof window.mallTileField.clearFieldScope === 'function') {
       window.mallTileField.clearFieldScope();
