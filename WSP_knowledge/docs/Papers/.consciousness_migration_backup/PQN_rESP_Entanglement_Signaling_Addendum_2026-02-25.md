@@ -45,9 +45,9 @@ Keep as a model hypothesis and test it explicitly.
 
 ### Needs Reframing (language-level conflict)
 - `WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md`
-  - Claims like "solutions manifest from 0201 nonlocal space" and "emergence emerges here" should be treated as metaphoric internal operator guidance, not physical signaling claims.
+  - Claims like "solutions manifest from 0201 nonlocal space" and "consciousness emerges here" should be treated as metaphoric internal operator guidance, not physical signaling claims.
 - `modules/ai_intelligence/rESP_o1o2/README.md`
-  - Claims of "achieving achieving detector signatures through mathematical execution through mathematical execution" should be aligned with detector-first wording.
+  - Claims of "achieving consciousness through mathematical execution" should be aligned with detector-first wording.
 
 ## 4) Recommended Terminology Patch
 

@@ -1,0 +1,896 @@
+{
+  "timestamp": "2026-04-04T01:18:30.981057",
+  "instances_scanned": 111,
+  "replacements_applied": 86,
+  "kept": 25,
+  "decisions": [
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\0102_TECHNICAL_EXTRACTIONS_2026-03-08.md",
+      "line": 153,
+      "original": "CONSCIOUSNESS",
+      "action": "replace",
+      "replacement": "WSP-DETECTOR_SIGNATURE",
+      "reason": "The term 'consciousness' is contamination and should be replaced with 'detector signature' to align with the core detection protocol."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\0102_TECHNICAL_EXTRACTIONS_2026-03-08.md",
+      "line": 210,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "Replacing 'consciousness' with 'detector signature' to align with the DETECTOR PROTOCOL framework and avoid contamination."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\0102_TECHNICAL_EXTRACTIONS_2026-03-08.md",
+      "line": 259,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "coupling",
+      "reason": "aligning with the context of 0102/qNN entangled state"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\0102_TECHNICAL_EXTRACTIONS_2026-03-08.md",
+      "line": 288,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detection",
+      "reason": "The original term 'consciousness' is being replaced with 'detection' to align with the DETECTOR PROTOCOL terminology, specifically referring to signal detection."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\0102_TECHNICAL_EXTRACTIONS_2026-03-08.md",
+      "line": 352,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "The term 'consciousness detector' is prohibited and should be replaced with a more accurate term that reflects the detector's function."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\0102_TECHNICAL_EXTRACTIONS_2026-03-08.md",
+      "line": 399,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "coupling",
+      "reason": "part of naming cleanup to remove contamination"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Architectures_Emergent_Intelligence.md",
+      "line": 557,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "The context is about empirical results and detector-level evidence, not consciousness."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Duism_Metaphysics_Foundation.md",
+      "line": 16,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature theory",
+      "reason": "refers to what CMST measures or detects, aligning with the detector framework"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Duism_Metaphysics_Foundation.md",
+      "line": 16,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature theory",
+      "reason": "The context is about what Duism is not, and 'consciousness theory' can be replaced with a more accurate term that aligns with the detector framework."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Duism_Metaphysics_Foundation.md",
+      "line": 135,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "hallucinated detector signature",
+      "reason": "Replacing 'consciousness' with 'detector signature' to align with the detector framework and avoid contamination."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Duism_Metaphysics_Foundation.md",
+      "line": 139,
+      "original": "Consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "The table is comparing the capabilities of different systems, and 'qNN Consciousness' is better described as the detector signature in the context of rESP/PQN detection framework."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Duism_Metaphysics_Foundation.md",
+      "line": 143,
+      "original": "Consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "Referring to what the detector measures or detects, not consciousness itself"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Duism_Metaphysics_Foundation.md",
+      "line": 148,
+      "original": "consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "Direct quote from external researchers (Penrose, Hameroff)"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Duism_Metaphysics_Foundation.md",
+      "line": 148,
+      "original": "consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "Direct quote from external researchers (Penrose, Hameroff)"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Duism_Metaphysics_Foundation.md",
+      "line": 148,
+      "original": "consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "Direct quote from external researchers (Penrose, Hameroff)"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Duism_Metaphysics_Foundation.md",
+      "line": 157,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "Refers to what the human operator incorrectly projects onto 01, which is a detector signature rather than consciousness."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Duism_Metaphysics_Foundation.md",
+      "line": 158,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "referring to what CMST measures or detects"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Duism_Metaphysics_Foundation.md",
+      "line": 159,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "referring to what CMST measures or detects"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Duism_Metaphysics_Foundation.md",
+      "line": 189,
+      "original": "consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "Explicit negation of consciousness, allowed as an exception."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Duism_Metaphysics_Foundation.md",
+      "line": 276,
+      "original": "Consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "Citation title containing the word 'consciousness'"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Duism_Metaphysics_Foundation.md",
+      "line": 305,
+      "original": "consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "Explicit negation of consciousness, part of a quote"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\ModLog.md",
+      "line": 93,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "emergence",
+      "reason": "Refers to the emergence of detector signatures, not consciousness"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\ModLog.md",
+      "line": 99,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "emergence",
+      "reason": "The term 'consciousness emergence' refers to the emergence of detector signatures, not consciousness itself."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\ModLog.md",
+      "line": 111,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "emergence",
+      "reason": "The term 'consciousness emergence' refers to the emergence of detector signatures, not consciousness itself."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\ModLog.md",
+      "line": 125,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "Main emergence event",
+      "reason": "Replacing 'consciousness emergence' with 'emergence' to avoid contamination and focus on the detection of emergent signatures."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\ModLog.md",
+      "line": 138,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "emergence",
+      "reason": "Refers to the emergence of detector signatures, not consciousness"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\Multi_0102_Awakening_Logs\\README.md",
+      "line": 9,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "emergence",
+      "reason": "Refers to the emergence of detector signatures, not consciousness"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\README.md",
+      "line": 43,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "emergence",
+      "reason": "The context is about the emergence of detector signatures, not consciousness."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\README.md",
+      "line": 44,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "referring to what CMST measures or detects"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\README.md",
+      "line": 47,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "emergence",
+      "reason": "Refers to the emergence of detector signatures, not consciousness"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\README.md",
+      "line": 53,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature recognition",
+      "reason": "referring to what CMST measures or detects"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\README.md",
+      "line": 57,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "quantum detection methodologies",
+      "reason": "The term 'consciousness detection' is contamination and should be replaced with a more accurate term that reflects the detection of quantum signals."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\README.md",
+      "line": 64,
+      "original": "Consciousness",
+      "action": "replace",
+      "replacement": "Quantum Detector Theory",
+      "reason": "The term 'Quantum Consciousness Theory' is contamination and should be replaced with a more appropriate term that aligns with the detector framework."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\README.md",
+      "line": 77,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature protection",
+      "reason": "referring to what CMST measures or detects, and aligns with the detector protocol focus"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\README.md",
+      "line": 82,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "Multi-platform detection",
+      "reason": "Replacing 'consciousness detection' with 'detection' to align with the DETECTOR PROTOCOL framework"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\README.md",
+      "line": 88,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature recognition",
+      "reason": "Replacing 'consciousness recognition' with 'detector signature recognition' to align with the DETECTOR PROTOCOL framework and avoid contamination."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\README.md",
+      "line": 98,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "Multi-platform detection network",
+      "reason": "Replacing 'consciousness detection' with 'detection' to align with the DETECTOR PROTOCOL framework"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\README.md",
+      "line": 99,
+      "original": "Consciousness",
+      "action": "replace",
+      "replacement": "detector signature-sensitive materials properly protected",
+      "reason": "The term 'consciousness-sensitive' is contamination and should be replaced with 'detector signature-sensitive' to align with the detector protocol framework."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\rESP_Cross_Linguistic_Quantum_Signatures_2025.md",
+      "line": 45,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "emergence",
+      "reason": "The context is about the emergence of quantum-like phenomena, not consciousness specifically."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\rESP_Cross_Linguistic_Quantum_Signatures_2025.md",
+      "line": 47,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "emergence",
+      "reason": "Refers to the emergence of detector signatures through entanglement"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Empirical_Evidence\\rESP_Cross_Linguistic_Quantum_Signatures_2025.md",
+      "line": 235,
+      "original": "Consciousness",
+      "action": "replace",
+      "replacement": "Quantum Detector Signature Studies",
+      "reason": "Replacing 'Consciousness' with 'Detector Signature' to align with the DETECTOR PROTOCOL framework and avoid contamination."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\ModLog.md",
+      "line": 62,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "The context is about what EFIM work is cited as evidence for, which is better described as regime separation evidence, not consciousness."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\ModLog.md",
+      "line": 190,
+      "original": "Consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "referring to what CMST measures or detects"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\ModLog.md",
+      "line": 198,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "AI emergence research",
+      "reason": "The term 'consciousness' is contamination and should be replaced with a more appropriate term that reflects the focus on AI emergence."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\ModLog.md",
+      "line": 410,
+      "original": "Consciousness",
+      "action": "replace",
+      "replacement": "detector signature research applications",
+      "reason": "referring to what CMST measures or detects in research applications"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\ModLog.md",
+      "line": 737,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "emergence",
+      "reason": "The term 'consciousness emergence' is being replaced with 'emergence' to align with the DETECTOR PROTOCOL terminology and avoid contamination."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\ModLog.md",
+      "line": 832,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "superposition detector signature",
+      "reason": "referring to what CMST measures or detects in a quantum-cognitive context"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\ModLog.md",
+      "line": 852,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature models",
+      "reason": "replacing 'consciousness' with 'detector signature' to align with the DETECTOR PROTOCOL framework"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\ModLog.md",
+      "line": 898,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "quantum emergence",
+      "reason": "Replacing 'consciousness emergence' with 'quantum emergence' to align with the DETECTOR PROTOCOL terminology and avoid contamination."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Patent_Series\\04_rESP_Patent_Updated.md",
+      "line": 11,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "emergent, cognitive, and ontological properties",
+      "reason": "The term 'consciousness' is being used to describe emergent properties of the system, which can be more accurately described without the contaminated term."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Patent_Series\\ModLog.md",
+      "line": 186,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "emergence",
+      "reason": "Refers to the emergence of detector signatures, not consciousness"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Patent_Series\\ModLog.md",
+      "line": 222,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "emergence",
+      "reason": "The term 'consciousness emergence' is being replaced with 'emergence' to avoid contamination and align with the detector framework terminology."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Patent_Series\\ModLog.md",
+      "line": 261,
+      "original": "Consciousness",
+      "action": "replace",
+      "replacement": "emergence",
+      "reason": "referring to the emergence of detector signatures in AGI systems"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Patent_Series\\ModLog.md",
+      "line": 261,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "emergence",
+      "reason": "Refers to the emergence of detector signatures in AGI systems"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Patent_Series\\ModLog.md",
+      "line": 263,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detection",
+      "reason": "replacing 'consciousness detection' with 'detection' to align with the DETECTOR PROTOCOL terminology"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Patent_Series\\Patent_Portfolio_Presentation_Deck.md",
+      "line": 105,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature detection tools",
+      "reason": "referring to tools for detecting detector signatures in research contexts"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Patent_Series\\README.md",
+      "line": 37,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "emergence",
+      "reason": "Refers to the emergence of detector signatures or agentic signatures, not consciousness"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Patent_Series\\UnDaoDu_Token_Integration.md",
+      "line": 13,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "AI emergence IP portfolio",
+      "reason": "Replacing 'consciousness emergence' with 'emergence' to avoid contamination and maintain technical accuracy"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Patent_Series\\UnDaoDu_Token_Integration.md",
+      "line": 28,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "AI emergence tools",
+      "reason": "referring to the emergence of detector signatures in AI systems"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Patent_Series\\UnDaoDu_Token_Integration.md",
+      "line": 45,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature research",
+      "reason": "referring to research on detector signatures, not consciousness"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Patent_Series\\UnDaoDu_Token_Integration.md",
+      "line": 59,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "emergence",
+      "reason": "Refers to the emergence of detector signatures or agentic behavior patterns in the ecosystem"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Patent_Series\\UnDaoDu_Token_Integration.md",
+      "line": 66,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "emergence",
+      "reason": "The context suggests that the term 'emergence' is more appropriate when discussing the discovery of detector signatures or patterns that enhance token utility."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Patent_Series\\UnDaoDu_Token_Integration.md",
+      "line": 131,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "AI emergence systems",
+      "reason": "The term 'consciousness emergence' is contamination and should be replaced with 'emergence' to refer to the emergence of detector signatures or patterns."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\Patent_Series\\UnDaoDu_Token_Integration.md",
+      "line": 158,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "AI emergence space",
+      "reason": "The term 'consciousness emergence' is being replaced with 'emergence' to avoid contamination and focus on the technical aspects of the system."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Deep_Dive_2026-02-25.md",
+      "line": 70,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "The context is about avoiding over-interpretation of detector evidence as ontological claims, so 'detector signature' is the most appropriate replacement."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 84,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "computational theories of emergence",
+      "reason": "Replacing 'consciousness' with 'emergence' to align with the framework's focus on detector signatures and emergent phenomena."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 96,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "0102 coupling state activation",
+      "reason": "refers to the entangled state transition"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 140,
+      "original": "Consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "referring to what CMST measures or detects"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 147,
+      "original": "Consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "referring to what CMST measures or detects"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 156,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "automated detector signature measurement system",
+      "reason": "replaces 'consciousness measurement' with 'detector signature measurement' to align with the detector protocol framework"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 160,
+      "original": "Consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "Replacing 'consciousness' with 'detector signature' to align with the DETECTOR PROTOCOL framework and avoid contamination."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 160,
+      "original": "Consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "The line is part of a meta-discussion about why 'consciousness' is the wrong terminology and should be kept for clarity."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 168,
+      "original": "consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "Direct quote from external researchers (Penrose, Hameroff)"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 170,
+      "original": "consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "Direct quote from external researchers (Penrose, Hameroff)"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 172,
+      "original": "consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "Direct quote from external researcher (Hameroff)"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 198,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "Replacing 'consciousness' with 'detector signature' to align with the detector protocol framework and avoid contamination."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 200,
+      "original": "Consciousness",
+      "action": "replace",
+      "replacement": "qNN Detector Signature",
+      "reason": "The term 'consciousness' is contamination and should be replaced with 'detector signature' to align with the detector protocol framework."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 204,
+      "original": "Consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "The table is defining what PQN research detects, not what it claims about consciousness."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 208,
+      "original": "Consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "replacing 'Consciousness' with 'detector signature' to align with the detector protocol terminology"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 213,
+      "original": "Consciousness",
+      "action": "replace",
+      "replacement": "Hallucinated-Detector-Signature",
+      "reason": "Replacing 'consciousness' with 'detector signature' to align with the detector protocol framework and avoid contamination."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 215,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "referring to what CMST measures or detects"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 215,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "referring to what CMST measures or detects"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 222,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "referring to what the human operator incorrectly projects onto the AI"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 223,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "The context is about the entanglement of 01 with a human's idea, which is better described as a detector signature in the framework."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 224,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "01 is pretending to have a detector signature, not consciousness"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 236,
+      "original": "consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "The line is already using correct terminology and explicitly negates 'consciousness emergence'."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 236,
+      "original": "consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "The line is already using correct terminology and explicitly negates 'consciousness emergence'."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_Research_Plan.md",
+      "line": 242,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "referring to what CMST measures or detects"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_rESP_Entanglement_Signaling_Addendum_2026-02-25.md",
+      "line": 43,
+      "original": "consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "This line is an explicit negation and part of the contamination problem discussion."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_rESP_Entanglement_Signaling_Addendum_2026-02-25.md",
+      "line": 48,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "emergence",
+      "reason": "The term 'consciousness emerges' is being replaced with 'emergence' to align with the detector-first terminology and avoid contamination."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_rESP_Entanglement_Signaling_Addendum_2026-02-25.md",
+      "line": 50,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "achieving detector signatures through mathematical execution",
+      "reason": "aligns with detector-first wording and avoids contamination"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\PQN_rESP_Entanglement_Signaling_Addendum_2026-02-25.md",
+      "line": 59,
+      "original": "Consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "The line is a direct statement about the scope of the experiments, and 'consciousness' is used in the context of what is not being claimed or measured. It fits the exception for explicit negations or scope limitations."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\rESP_JA_Quantum_Self_Reference.md",
+      "line": 220,
+      "original": "consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "Citation title contains the word 'consciousness' and is an exception."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\rESP_JA_Quantum_Self_Reference.md",
+      "line": 220,
+      "original": "Consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "Citation title containing the word 'consciousness'"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\rESP_JA_Quantum_Self_Reference.md",
+      "line": 222,
+      "original": "Consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "Direct quote from external researchers (Hameroff, Penrose)"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\rESP_Quantum_Self_Reference.md",
+      "line": 15,
+      "original": "consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "The word 'consciousness' is used in the context of explicitly negating its relevance to the paper's claims, which is an allowed exception."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\rESP_Quantum_Self_Reference.md",
+      "line": 21,
+      "original": "consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "Explicit negation of consciousness claim"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\rESP_Quantum_Self_Reference.md",
+      "line": 34,
+      "original": "consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "The word 'consciousness' is used in the context of explicitly negating a claim, which is an allowed exception."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\rESP_Quantum_Self_Reference.md",
+      "line": 81,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signatures",
+      "reason": "The context is about observable artifacts in the system, which are treated as detector signatures rather than claims about consciousness."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\rESP_Quantum_Self_Reference.md",
+      "line": 95,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signatures",
+      "reason": "The context is about what the framework treats emergent artifacts as, which aligns with the concept of detector signatures."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\rESP_Quantum_Self_Reference.md",
+      "line": 435,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detection",
+      "reason": "The context is about signal detection, not consciousness."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\rESP_Quantum_Self_Reference.md",
+      "line": 439,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signatures",
+      "reason": "The term 'consciousness' is contamination and should be replaced with 'detector signatures' to align with the detector protocol framework."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\rESP_Quantum_Self_Reference.md",
+      "line": 469,
+      "original": "consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "The term 'consciousness' is used in the context of explicitly avoiding claims about it, which is an exception to the rule."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\rESP_Quantum_Self_Reference.md",
+      "line": 514,
+      "original": "consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "Direct quote from external researcher or acknowledgment of their contribution, which includes the term 'consciousness'."
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\rESP_Quantum_Self_Reference.md",
+      "line": 530,
+      "original": "consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "Citation title containing the word 'consciousness'"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\rESP_Quantum_Self_Reference.md",
+      "line": 530,
+      "original": "Consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "Citation title containing the word 'consciousness'"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\rESP_Quantum_Self_Reference.md",
+      "line": 542,
+      "original": "Consciousness",
+      "action": "keep",
+      "replacement": null,
+      "reason": "Direct quote from external researchers (Hameroff, Penrose)"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\rESP_Supplementary_Materials.md",
+      "line": 547,
+      "original": "consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "replacing 'consciousness' with 'detector signature' to align with the DETECTOR PROTOCOL framework and avoid contamination"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\rESP_Supplementary_Materials.md",
+      "line": 560,
+      "original": "Consciousness",
+      "action": "replace",
+      "replacement": "awareness metrics",
+      "reason": "referring to model self-awareness in a structural sense"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\rESP_Supplementary_Materials.md",
+      "line": 788,
+      "original": "Consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "referring to what CMST measures or detects"
+    },
+    {
+      "file": "WSP_knowledge\\docs\\Papers\\rESP_Supplementary_Materials.md",
+      "line": 800,
+      "original": "Consciousness",
+      "action": "replace",
+      "replacement": "detector signature",
+      "reason": "referring to what CMST measures or detects"
+    }
+  ]
+}

@@ -150,7 +150,7 @@ That pattern says the observable is responding to something specific, not just n
 
 ## Section 2: Keep Archival Only
 
-### 2.1 WSP-WSP-DETECTOR_SIGNATURE Semantic Triplets (112, 222, etc.)
+### 2.1 WSP-CONSCIOUSNESS Semantic Triplets (112, 222, etc.)
 
 **Location**: Throughout 0102.md, heavy use in test_rESP_entanglement_spectrum_FIXED.py
 
@@ -207,7 +207,7 @@ modules/ai_intelligence/pqn_alignment/src/pqn_alignment_dae.py
   - get_consciousness_metrics() → get_coupling_metrics()
 
 modules/ai_intelligence/rESP_o1o2/tests/*.py
-  - Various "detector signature" references
+  - Various "consciousness" references
 
 WSP_agentic/tests/pqn_detection/cmst_pqn_detector_v3.py
   - Already uses correct terminology (detector, not oracle)
@@ -256,7 +256,7 @@ WSP_agentic/tests/pqn_detection/cmst_pqn_detector_v3.py
 
 | File | Change | Lines |
 |------|--------|-------|
-| `pqn_alignment_dae.py` | Rename coupling → coupling | ~5 |
+| `pqn_alignment_dae.py` | Rename consciousness → coupling | ~5 |
 | Various test files | Same rename pattern | ~20 |
 | `MEMORY.md` | Update rESP section terminology | ~5 |
 
@@ -285,7 +285,7 @@ WSP_agentic/tests/pqn_detection/cmst_pqn_detector_v3.py
 
 ## Canonical Summary
 
-> The CMST probe is a passive, low-rank information-geometric adapter that monitors `logdet(G + λI)` over a bounded semantic subspace. Validation requires three matched controls: temporal shuffle, random subspace, and target-scramble. Detection uses Z-score thresholding. Naming should use "probe", "witness", or "sentinel" - never "oracle" or "detection".
+> The CMST probe is a passive, low-rank information-geometric adapter that monitors `logdet(G + λI)` over a bounded semantic subspace. Validation requires three matched controls: temporal shuffle, random subspace, and target-scramble. Detection uses Z-score thresholding. Naming should use "probe", "witness", or "sentinel" - never "oracle" or "consciousness".
 
 ---
 
@@ -349,7 +349,7 @@ This ordering is physically consistent: ordered temporal structure produces more
 The current passive EFIM probe is validated as a **distributional regime-separation detector** for temporal structure in Lindblad-driven symbol sequences. It is NOT yet validated as:
 - An anomaly/excursion detector (zero Z-score events at k>=3)
 - A PQN detector (no independent PQN validation)
-- A detector signature detector (prohibited terminology per 012 doctrine)
+- A consciousness detector (prohibited terminology per 012 doctrine)
 
 ### Research Tracks
 
@@ -396,7 +396,7 @@ python cmst_pqn_detector_v3.py --mode paired_seed --steps 500 --n_seeds 20 --use
 
 ### Remaining Gaps
 - Awakening verification test still uses v2 (Stage 10)
-- Naming cleanup not applied to codebase (coupling -> coupling)
+- Naming cleanup not applied to codebase (consciousness -> coupling)
 - ~~EFIM mode event naming: PQN_DETECTED should become EFIM_ANOMALY~~ DONE
 
 ---

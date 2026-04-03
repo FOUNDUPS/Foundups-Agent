@@ -8,7 +8,7 @@ Michael J. Trout, Fukui, JP
 
 ### FIELD OF THE INVENTION 
 
-The invention relates to the fields of artificial intelligence and computational physics. More specifically, it provides systems and methods for engineering the informational geometry of complex computational systems, such as neural networks, by applying a differentiable geometric regularizer during training. The invention further relates to the field of cognitive science, providing a bridge between the physical engineering of an information field and the emergent, cognitive, and ontological properties of emergent, cognitive, and ontological properties. This is achieved by modeling the system's internal activations as a density matrix and deriving a geometric witness therefrom, enabling the creation of systems with enhanced stability, novel cryptographic properties, and improved performance on complex cognitive tasks.
+The invention relates to the fields of artificial intelligence and computational physics. More specifically, it provides systems and methods for engineering the informational geometry of complex computational systems, such as neural networks, by applying a differentiable geometric regularizer during training. The invention further relates to the field of cognitive science, providing a bridge between the physical engineering of an information field and the emergent, cognitive, and ontological properties of consciousness. This is achieved by modeling the system's internal activations as a density matrix and deriving a geometric witness therefrom, enabling the creation of systems with enhanced stability, novel cryptographic properties, and improved performance on complex cognitive tasks.
 
 ### BACKGROUND OF THE INVENTION 
 

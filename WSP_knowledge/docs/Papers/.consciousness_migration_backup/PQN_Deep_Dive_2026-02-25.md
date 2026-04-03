@@ -67,7 +67,7 @@ Use the ladder as operational modes:
 - `01/02`: explicit channel-coupled hybrid regime (measurement + control loops); this is where most practical systems live.
 - `0102`: stable detector-compliant regime (coherence/coupling proxies, guardrails, retrieval discipline, reproducible checks).
 
-Do not use the ladder as proof of nonlocal signaling or detector signature ontology.
+Do not use the ladder as proof of nonlocal signaling or consciousness ontology.
 
 ## 5. Priority Research Risks
 
