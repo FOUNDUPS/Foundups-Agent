@@ -419,3 +419,69 @@ class TestCategoryTagCSS:
         """Tag select has styling."""
         content = CONCIERGE_CSS.read_text(encoding="utf-8")
         assert '.reddog-tag-select' in content
+
+
+# -- 9. Video Schema Status Sync --
+
+
+class TestVideoSchemaStatusSync:
+    """Test concierge counts .status-active (video catalog) not just .status-ready."""
+
+    def test_summary_counts_active(self):
+        """Summary builder counts .status-active."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert ".status-active" in content
+
+    def test_summary_uses_active_label(self):
+        """Summary displays 'active' not 'ready'."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        # The summary line should say "N active"
+        assert "active'" in content or 'active"' in content
+
+    def test_context_has_activeCount(self):
+        """gatherContext sets ctx.activeCount."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "ctx.activeCount" in content
+
+    def test_no_stale_readyCount(self):
+        """No remaining ctx.readyCount references."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "ctx.readyCount" not in content
+        assert "readyCount:" not in content
+
+    def test_selector_includes_legacy_fallback(self):
+        """Status selector includes .status-ready as backward compat."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert ".status-active, .status-ready" in content
+
+    def test_recommendation_uses_activeCount(self):
+        """Recommendation test uses ctx.activeCount."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "ctx.activeCount > 0" in content
+
+    def test_recommendation_label_updated(self):
+        """Recommendation label says 'active' not 'ready'."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "View active FoundUps" in content
+
+    def test_grid_renders_category_class(self):
+        """Grid icon uses cat- prefix not theme- prefix."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "cat-'" in content or "cat-\"" in content
+
+    def test_grid_renders_video_title(self):
+        """Grid uses item.title as primary display name."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "item.title" in content
+
+    def test_css_has_status_active(self):
+        """CSS has .status-active class."""
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert ".status-active" in content
+
+    def test_css_has_category_classes(self):
+        """CSS has category-based icon classes."""
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert ".cat-travel" in content
+        assert ".cat-music" in content
+        assert ".cat-media" in content

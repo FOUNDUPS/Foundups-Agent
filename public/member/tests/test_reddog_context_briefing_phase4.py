@@ -72,10 +72,10 @@ class TestGatherContext:
         assert "account-foundup-tile" in content
         assert "tileCount" in content
 
-    def test_reads_ready_count(self):
+    def test_reads_active_count(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
-        assert "status-ready" in content
-        assert "readyCount" in content
+        assert "status-active" in content
+        assert "activeCount" in content
 
     def test_reads_invite_text(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
@@ -138,10 +138,10 @@ class TestRenderBriefing:
         assert "FoundUp" in content
         assert "tileCount" in content
 
-    def test_shows_ready_count(self):
+    def test_shows_active_count(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
-        assert "readyCount" in content
-        assert "ready" in content
+        assert "activeCount" in content
+        assert "active" in content
 
     def test_shows_projection_mode(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")

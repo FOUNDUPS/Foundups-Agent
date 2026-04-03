@@ -108,10 +108,10 @@ class TestRecommendationRules:
         assert "'reset_projection'" in content
         assert "Reset to All" in content
 
-    def test_rule_view_ready(self):
+    def test_rule_view_active(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
-        assert "'view_ready'" in content
-        assert "View ready FoundUps" in content
+        assert "'view_active'" in content
+        assert "View active FoundUps" in content
 
     def test_rule_open_invites(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
@@ -145,9 +145,9 @@ class TestRecommendationRules:
         content = CONCIERGE_JS.read_text(encoding="utf-8")
         assert "ctx.projection" in content
 
-    def test_rules_check_ready_count(self):
+    def test_rules_check_active_count(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
-        assert "ctx.readyCount" in content
+        assert "ctx.activeCount" in content
 
     def test_rules_check_tile_count(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")

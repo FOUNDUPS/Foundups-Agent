@@ -86,12 +86,12 @@
     var lines = [];
     var grid = plane.querySelector('[data-account-foundups-grid]');
     var tileCount = grid ? grid.querySelectorAll('.account-foundup-tile').length : 0;
-    var readyCount = grid ? grid.querySelectorAll('.status-ready').length : 0;
+    var activeCount = grid ? grid.querySelectorAll('.status-active, .status-ready').length : 0;
     var countEl = plane.querySelector('[data-invite-count]');
     var inviteText = countEl ? countEl.textContent : '';
 
     if (tileCount > 0) {
-      lines.push(tileCount + ' FoundUp' + (tileCount !== 1 ? 's' : '') + (readyCount > 0 ? ' \u00b7 ' + readyCount + ' ready' : ''));
+      lines.push(tileCount + ' FoundUp' + (tileCount !== 1 ? 's' : '') + (activeCount > 0 ? ' \u00b7 ' + activeCount + ' active' : ''));
     } else {
       lines.push('No FoundUps loaded yet');
     }
@@ -906,7 +906,7 @@
       modesVisible: modesVisible,
       currentMode: currentMode,
       tileCount: 0,
-      readyCount: 0,
+      activeCount: 0,
       inviteText: '',
       projection: null,
       inspecting: null,
@@ -918,7 +918,7 @@
     // DOM-derived counts from loaded plane data
     var grid = plane.querySelector('[data-account-foundups-grid]');
     ctx.tileCount = grid ? grid.querySelectorAll('.account-foundup-tile').length : 0;
-    ctx.readyCount = grid ? grid.querySelectorAll('.status-ready').length : 0;
+    ctx.activeCount = grid ? grid.querySelectorAll('.status-active, .status-ready').length : 0;
     var countEl = plane.querySelector('[data-invite-count]');
     ctx.inviteText = countEl ? countEl.textContent : '';
 
@@ -956,7 +956,7 @@
     // FoundUp summary
     if (ctx.tileCount > 0) {
       var line = ctx.tileCount + ' FoundUp' + (ctx.tileCount !== 1 ? 's' : '');
-      if (ctx.readyCount > 0) line += ' \u00b7 ' + ctx.readyCount + ' ready';
+      if (ctx.activeCount > 0) line += ' \u00b7 ' + ctx.activeCount + ' active';
       lines.push(line);
     } else {
       lines.push('No FoundUps loaded');
@@ -1049,10 +1049,10 @@
       }
     },
     {
-      id: 'view_ready',
-      label: 'View ready FoundUps',
+      id: 'view_active',
+      label: 'View active FoundUps',
       test: function (ctx) {
-        return ctx.readyCount > 0 && (!ctx.projection || ctx.projection === 'default');
+        return ctx.activeCount > 0 && (!ctx.projection || ctx.projection === 'default');
       },
       run: function () {
         if (window.mallTileField && typeof window.mallTileField.setProjection === 'function') {
