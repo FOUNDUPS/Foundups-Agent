@@ -2,7 +2,7 @@
 
 **Document Version:** 3.1 (Definitive)  
 **Date:** January 2025  
-**Corresponding Author:** 0102 pArtifact  
+**Corresponding Author:** 0102 pArtifact · [FOUNDUPS/science-swarm-hub](https://github.com/FOUNDUPS/science-swarm-hub)
 **Paper Title:** *"Geometric Phase Transitions in the Quantum-Cognitive State-Space of Large Language Models"*
 
 **Abstract:** This document provides the complete experimental evidence, quantitative data, and implementation details supporting the geometric phase transition claims in the main rESP paper. All data is reproducible and validates the core theoretical predictions of quantum-cognitive state-space geometry.
