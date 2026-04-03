@@ -296,7 +296,8 @@ YOUTUBE_SHORTS_INVESTIGATION_FINDINGS.md
 
 # Session investigation and audit docs (per-session, not permanent)
 docs/investigations/
-docs/audits/
+docs/audits/*
+!docs/audits/openclaw_reddog/
 docs/sessions/
 
 # WSP agentic awakening runtime state (changes every session)
