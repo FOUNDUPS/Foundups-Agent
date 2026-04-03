@@ -1,5 +1,42 @@
 # Member Area Module Change Log
 
+## [2026-04-03] Concierge Video Schema Sync Phase 1 (Worker C, WSP_97)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker C
+**Type**: Fix (Schema Drift)
+**Slice**: `CONCIERGE_VIDEO_SCHEMA_SYNC_PHASE1`
+**Spec**: WSP_97
+
+**Files Modified**:
+- `public/member/js/account-concierge.js` — FoundUps grid renders video catalog fields
+- `public/member/css/account-concierge.css` — Category-based icon colors, video status classes
+
+**Stale Fields Removed**:
+
+| Old Field | New Field | Fallback |
+|-----------|-----------|----------|
+| `item.theme` | `item.category` | `'default'` |
+| `item.token_symbol` | `item.creator_display` or `item.creator` | Sliced to 4 chars |
+| `item.name` | `item.title` or `item.entity` | `item.name` (legacy) |
+| `item.launch_readiness` | `item.status` | `item.launch_readiness` (legacy) |
+
+**CSS Changes**:
+
+| Old Class | New Class |
+|-----------|-----------|
+| `.theme-antifafm` | `.cat-media` |
+| `.theme-gotjunk` | `.cat-startup` |
+| `.theme-magadoom` | `.cat-games` |
+| — | `.cat-travel`, `.cat-music`, `.cat-ai-education`, `.cat-ai-research`, `.cat-thought-leadership`, `.cat-default` |
+| `.status-ready` | `.status-active` (+ legacy compat kept) |
+| — | `.status-placeholder`, `.status-archived`, `.status-pending` |
+
+**Backward Compatible**: Legacy `item.name` and `item.launch_readiness` remain as fallbacks.
+
+**Tests**: 916 passed (full member suite)
+
+---
+
 ## [2026-04-03] Search Mall Filter UI Phase 2 (Worker C, WSP_97)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker C

@@ -1274,10 +1274,16 @@
       if (!grid || !catalog) return;
 
       grid.innerHTML = catalog.map(function (item) {
-        return '<a class="account-foundup-tile" href="/member/foundup.html?id=' + encodeURIComponent(item.foundup_id) + '">'
-          + '<div class="account-foundup-icon theme-' + esc(item.theme) + '">' + esc(item.token_symbol) + '</div>'
-          + '<span class="account-foundup-name">' + esc(item.name) + '</span>'
-          + '<span class="account-foundup-status status-' + esc(item.launch_readiness) + '"></span>'
+        var displayName = item.title || item.entity || item.name || item.foundup_id;
+        var iconLabel = item.creator_display || item.creator || displayName.slice(0, 3);
+        var category = item.category || 'default';
+        var status = item.status || item.launch_readiness || 'placeholder';
+        var videoHint = (item.video_count > 0) ? ' data-video-count="' + item.video_count + '"' : '';
+
+        return '<a class="account-foundup-tile" href="/member/foundup.html?id=' + encodeURIComponent(item.foundup_id) + '"' + videoHint + '>'
+          + '<div class="account-foundup-icon cat-' + esc(category) + '">' + esc(iconLabel.slice(0, 4)) + '</div>'
+          + '<span class="account-foundup-name">' + esc(displayName) + '</span>'
+          + '<span class="account-foundup-status status-' + esc(status) + '"></span>'
           + '</a>';
       }).join('');
     },

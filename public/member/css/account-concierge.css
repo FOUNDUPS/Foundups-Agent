@@ -155,13 +155,36 @@
   letter-spacing: 0.04em;
   color: rgba(255, 255, 255, 0.9);
 }
-.account-foundup-icon.theme-antifafm {
+/* Category-based icon colors (video catalog) */
+.account-foundup-icon.cat-travel {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(30, 64, 175, 0.9));
+}
+.account-foundup-icon.cat-music {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.8), rgba(88, 28, 135, 0.9));
+}
+.account-foundup-icon.cat-media {
   background: linear-gradient(135deg, rgba(122, 20, 28, 0.8), rgba(60, 11, 16, 0.9));
 }
-.account-foundup-icon.theme-gotjunk {
+.account-foundup-icon.cat-startup {
   background: linear-gradient(135deg, rgba(27, 108, 92, 0.8), rgba(15, 60, 56, 0.9));
 }
-.account-foundup-icon.theme-magadoom {
+.account-foundup-icon.cat-ai-education {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.8), rgba(133, 77, 14, 0.9));
+}
+.account-foundup-icon.cat-ai-research {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.8), rgba(3, 105, 161, 0.9));
+}
+.account-foundup-icon.cat-thought-leadership {
+  background: linear-gradient(135deg, rgba(244, 114, 182, 0.8), rgba(157, 23, 77, 0.9));
+}
+.account-foundup-icon.cat-default {
+  background: linear-gradient(135deg, rgba(100, 100, 120, 0.8), rgba(40, 40, 56, 0.9));
+}
+/* Legacy theme classes (backward compat with mall-catalog.json) */
+.account-foundup-icon.cat-marketplace {
+  background: linear-gradient(135deg, rgba(27, 108, 92, 0.8), rgba(15, 60, 56, 0.9));
+}
+.account-foundup-icon.cat-games {
   background: linear-gradient(135deg, rgba(89, 28, 113, 0.8), rgba(27, 17, 56, 0.9));
 }
 .account-foundup-name {
@@ -178,6 +201,12 @@
   height: 6px;
   border-radius: 50%;
 }
+/* Video catalog status values */
+.account-foundup-status.status-active { background: #4ade80; }
+.account-foundup-status.status-placeholder { background: rgba(243, 241, 248, 0.3); }
+.account-foundup-status.status-archived { background: rgba(243, 241, 248, 0.15); }
+.account-foundup-status.status-pending { background: #ffd700; }
+/* Legacy status values (backward compat with mall-catalog.json) */
 .account-foundup-status.status-ready { background: #4ade80; }
 .account-foundup-status.status-conditional { background: #ffd700; }
 .account-foundup-status.status-discoverable_only { background: rgba(243, 241, 248, 0.3); }
