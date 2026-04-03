@@ -296,7 +296,10 @@ class TestThemeFallbackColors:
     """
 
     KNOWN_THEMES = [
-        "antifafm", "gotjunk", "magadoom", "tq", "vsa", "pqn", "default"
+        "antifafm", "gotjunk", "magadoom", "tq", "vsa", "pqn", "default",
+        # Video Mall catalog lane themes
+        "move2japan", "undaodu", "foundups_main",
+        "linkedin_012", "linkedin_esingularity", "linkedin_tsingularity", "linkedin_foundups",
     ]
 
     @pytest.fixture(autouse=True)
