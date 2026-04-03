@@ -698,13 +698,20 @@
 
 .reddog-search-container {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 0.5rem;
   margin-top: 0.75rem;
   padding: 0.5rem 0.75rem;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 0.75rem;
+}
+
+.reddog-search-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
 }
 
 .reddog-search-input {
@@ -747,4 +754,62 @@
 
 .reddog-search-clear:active {
   transform: scale(0.95);
+}
+
+/* ========== Filter Rows ========== */
+
+.reddog-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.reddog-filter-label {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  margin-right: 0.25rem;
+}
+
+.reddog-filter-pill {
+  padding: 0.25rem 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.reddog-filter-pill:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.reddog-filter-pill.active {
+  background: rgba(255, 140, 0, 0.25);
+  border-color: rgba(255, 140, 0, 0.5);
+  color: rgba(255, 200, 100, 1);
+}
+
+.reddog-tag-select {
+  padding: 0.35rem 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.75rem;
+  cursor: pointer;
+  min-width: 100px;
+}
+
+.reddog-tag-select:focus {
+  outline: none;
+  border-color: rgba(255, 140, 0, 0.5);
+}
+
+.reddog-tag-select option {
+  background: #1a1a2e;
+  color: rgba(255, 255, 255, 0.9);
 }

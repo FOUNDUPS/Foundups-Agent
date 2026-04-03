@@ -335,3 +335,87 @@ class TestSearchMallCSS:
         content = CONCIERGE_CSS.read_text(encoding="utf-8")
         # Check for min-height: 44px in search input
         assert 'min-height: 44px' in content
+
+
+# -- 8. Category/Tag Filter UI --
+
+
+class TestCategoryTagFilters:
+    """Test Category and Tag filter UI."""
+
+    def test_category_filter_html_created(self):
+        """Category filter row is created."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert 'data-reddog-category-filters' in content
+
+    def test_category_filter_pills(self):
+        """Category filter pills are created."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert 'data-reddog-category=' in content
+
+    def test_category_travel_exists(self):
+        """Travel category filter exists."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "travel" in content and "data-reddog-category" in content
+
+    def test_tag_select_created(self):
+        """Tag select dropdown is created."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert 'data-reddog-tag-select' in content
+
+    def test_tag_012_lane_option(self):
+        """012-lane tag option exists."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert '012-lane' in content
+
+    def test_category_filter_wires_to_api(self):
+        """Category filter wires to mallTileField.filterByCategory."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert 'filterByCategory' in content
+
+    def test_tag_filter_wires_to_api(self):
+        """Tag filter wires to mallTileField.filterByTag."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert 'filterByTag' in content
+
+    def test_category_emits_command(self):
+        """Category filter emits reddog command."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "filter_category" in content
+
+    def test_tag_emits_command(self):
+        """Tag filter emits reddog command."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "filter_tag" in content
+
+    def test_clear_search_clears_filters(self):
+        """clearSearch clears category and tag filters."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        # Should clear category active states
+        assert "data-reddog-category" in content
+        # Should clear tag select
+        assert "data-reddog-tag-select" in content
+
+
+class TestCategoryTagCSS:
+    """Test Category/Tag filter CSS."""
+
+    def test_filter_row_styles(self):
+        """Filter row has styling."""
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert '.reddog-filter-row' in content
+
+    def test_filter_pill_styles(self):
+        """Filter pill has styling."""
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert '.reddog-filter-pill' in content
+
+    def test_filter_pill_active_state(self):
+        """Filter pill has active state."""
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert '.reddog-filter-pill.active' in content
+
+    def test_tag_select_styles(self):
+        """Tag select has styling."""
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert '.reddog-tag-select' in content

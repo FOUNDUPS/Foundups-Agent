@@ -113,13 +113,13 @@ class TestSearchInputWiring:
     def test_clear_search_hides_container(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
         clear_block = content[content.find("function clearSearch()"):]
-        clear_block = clear_block[:300]
+        clear_block = clear_block[:600]
         assert "toggleSearchInput(false)" in clear_block
 
     def test_clear_search_calls_clear_field_scope(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
         clear_block = content[content.find("function clearSearch()"):]
-        clear_block = clear_block[:400]
+        clear_block = clear_block[:700]
         assert "clearFieldScope" in clear_block
 
 
