@@ -155,13 +155,36 @@
   letter-spacing: 0.04em;
   color: rgba(255, 255, 255, 0.9);
 }
-.account-foundup-icon.theme-antifafm {
+/* Category-based icon colors (video catalog) */
+.account-foundup-icon.cat-travel {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(30, 64, 175, 0.9));
+}
+.account-foundup-icon.cat-music {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.8), rgba(88, 28, 135, 0.9));
+}
+.account-foundup-icon.cat-media {
   background: linear-gradient(135deg, rgba(122, 20, 28, 0.8), rgba(60, 11, 16, 0.9));
 }
-.account-foundup-icon.theme-gotjunk {
+.account-foundup-icon.cat-startup {
   background: linear-gradient(135deg, rgba(27, 108, 92, 0.8), rgba(15, 60, 56, 0.9));
 }
-.account-foundup-icon.theme-magadoom {
+.account-foundup-icon.cat-ai-education {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.8), rgba(133, 77, 14, 0.9));
+}
+.account-foundup-icon.cat-ai-research {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.8), rgba(3, 105, 161, 0.9));
+}
+.account-foundup-icon.cat-thought-leadership {
+  background: linear-gradient(135deg, rgba(244, 114, 182, 0.8), rgba(157, 23, 77, 0.9));
+}
+.account-foundup-icon.cat-default {
+  background: linear-gradient(135deg, rgba(100, 100, 120, 0.8), rgba(40, 40, 56, 0.9));
+}
+/* Legacy theme classes (backward compat with mall-catalog.json) */
+.account-foundup-icon.cat-marketplace {
+  background: linear-gradient(135deg, rgba(27, 108, 92, 0.8), rgba(15, 60, 56, 0.9));
+}
+.account-foundup-icon.cat-games {
   background: linear-gradient(135deg, rgba(89, 28, 113, 0.8), rgba(27, 17, 56, 0.9));
 }
 .account-foundup-name {
@@ -178,6 +201,12 @@
   height: 6px;
   border-radius: 50%;
 }
+/* Video catalog status values */
+.account-foundup-status.status-active { background: #4ade80; }
+.account-foundup-status.status-placeholder { background: rgba(243, 241, 248, 0.3); }
+.account-foundup-status.status-archived { background: rgba(243, 241, 248, 0.15); }
+.account-foundup-status.status-pending { background: #ffd700; }
+/* Legacy status values (backward compat with mall-catalog.json) */
 .account-foundup-status.status-ready { background: #4ade80; }
 .account-foundup-status.status-conditional { background: #ffd700; }
 .account-foundup-status.status-discoverable_only { background: rgba(243, 241, 248, 0.3); }
@@ -812,4 +841,110 @@
 .reddog-tag-select option {
   background: #1a1a2e;
   color: rgba(255, 255, 255, 0.9);
+}
+
+/* ========== Saved Videos Section ========== */
+
+.reddog-saved-section {
+  margin-top: 1rem;
+  padding: 0 0.25rem;
+}
+
+.reddog-saved-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.reddog-saved-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.35rem;
+  background: rgba(255, 140, 0, 0.25);
+  border-radius: 0.75rem;
+  color: rgba(255, 200, 100, 1);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.reddog-saved-empty {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1.4;
+  margin: 0.5rem 0;
+}
+
+.reddog-saved-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.reddog-saved-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.reddog-saved-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.reddog-saved-card:active {
+  transform: scale(0.98);
+}
+
+.reddog-saved-thumb {
+  width: 4rem;
+  height: 2.25rem;
+  border-radius: 0.35rem;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.reddog-saved-thumb-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reddog-saved-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.reddog-saved-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reddog-saved-meta {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

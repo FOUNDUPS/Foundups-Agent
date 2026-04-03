@@ -344,6 +344,7 @@ body.surface-open {
   opacity: 1;
 }
 
+/* Legacy FoundUp themes */
 .theme-antifafm {
   background: linear-gradient(145deg, rgba(60, 11, 16, 0.96), rgba(122, 20, 28, 0.72) 48%, rgba(24, 7, 10, 0.98));
 }
@@ -354,6 +355,64 @@ body.surface-open {
 
 .theme-magadoom {
   background: linear-gradient(145deg, rgba(27, 17, 56, 0.96), rgba(89, 28, 113, 0.76) 48%, rgba(12, 14, 28, 0.98));
+}
+
+/* Video Mall lane themes (overlay/preview surfaces) */
+.theme-move2japan {
+  background: linear-gradient(145deg, rgba(16, 42, 58, 0.96), rgba(30, 90, 120, 0.72) 48%, rgba(8, 18, 28, 0.98));
+}
+
+.theme-undaodu {
+  background: linear-gradient(145deg, rgba(38, 18, 52, 0.96), rgba(80, 40, 110, 0.72) 48%, rgba(18, 10, 28, 0.98));
+}
+
+.theme-foundups_main {
+  background: linear-gradient(145deg, rgba(14, 40, 28, 0.96), rgba(30, 90, 60, 0.72) 48%, rgba(8, 20, 14, 0.98));
+}
+
+.theme-linkedin_012 {
+  background: linear-gradient(145deg, rgba(10, 32, 56, 0.96), rgba(22, 70, 120, 0.72) 48%, rgba(6, 14, 28, 0.98));
+}
+
+.theme-linkedin_esingularity {
+  background: linear-gradient(145deg, rgba(40, 28, 10, 0.96), rgba(100, 70, 22, 0.72) 48%, rgba(20, 14, 6, 0.98));
+}
+
+.theme-linkedin_tsingularity {
+  background: linear-gradient(145deg, rgba(20, 14, 42, 0.96), rgba(50, 30, 100, 0.72) 48%, rgba(10, 8, 22, 0.98));
+}
+
+.theme-linkedin_foundups {
+  background: linear-gradient(145deg, rgba(18, 38, 22, 0.96), rgba(40, 85, 50, 0.72) 48%, rgba(10, 18, 12, 0.98));
+}
+
+/* Category fallback themes (overlay/preview surfaces) */
+.theme-cat-travel {
+  background: linear-gradient(145deg, rgba(16, 42, 58, 0.96), rgba(30, 90, 120, 0.72) 48%, rgba(8, 18, 28, 0.98));
+}
+
+.theme-cat-music {
+  background: linear-gradient(145deg, rgba(38, 18, 52, 0.96), rgba(80, 40, 110, 0.72) 48%, rgba(18, 10, 28, 0.98));
+}
+
+.theme-cat-startup {
+  background: linear-gradient(145deg, rgba(14, 40, 28, 0.96), rgba(30, 90, 60, 0.72) 48%, rgba(8, 20, 14, 0.98));
+}
+
+.theme-cat-media {
+  background: linear-gradient(145deg, rgba(60, 11, 16, 0.96), rgba(122, 20, 28, 0.72) 48%, rgba(24, 7, 10, 0.98));
+}
+
+.theme-cat-thought-leadership {
+  background: linear-gradient(145deg, rgba(10, 32, 56, 0.96), rgba(22, 70, 120, 0.72) 48%, rgba(6, 14, 28, 0.98));
+}
+
+.theme-cat-ai-education {
+  background: linear-gradient(145deg, rgba(40, 28, 10, 0.96), rgba(100, 70, 22, 0.72) 48%, rgba(20, 14, 6, 0.98));
+}
+
+.theme-cat-ai-research {
+  background: linear-gradient(145deg, rgba(20, 14, 42, 0.96), rgba(50, 30, 100, 0.72) 48%, rgba(10, 8, 22, 0.98));
 }
 
 .mall-card-topline,

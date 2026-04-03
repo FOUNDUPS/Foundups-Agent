@@ -83,7 +83,7 @@ class TestDevHarnessFunctionality:
         assert "inviteCodes:" in html
 
     def test_harness_loads_real_catalog(self):
-        """Harness uses real mall-catalog.json."""
+        """Harness uses real mall-video-catalog.json."""
         html = _read("index.html")
         assert "loadMallCatalog()" in html
 

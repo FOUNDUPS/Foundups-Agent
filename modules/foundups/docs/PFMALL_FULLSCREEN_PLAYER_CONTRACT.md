@@ -1,8 +1,8 @@
 # p.fMALL Fullscreen Player Contract
 
-**Version**: 1.0.0  
+**Version**: 2.0.0  
 **Date**: 2026-04-03  
-**Status**: Phase 1 landed  
+**Status**: Phase 2 landed (save/share/history)  
 **Owner**: Worker F (0102)
 
 ---
@@ -120,8 +120,8 @@ Exit methods:
 | swipe-down | Exit fullscreen |
 | pinch-in | Exit fullscreen (scale < 0.7) |
 | tap | Toggle chrome visibility |
-| swipe-left | Save hook (stub) |
-| swipe-right | Dismiss hook (stub) |
+| swipe-left | Toggle save (Phase 2) |
+| swipe-right | Dismiss hook |
 
 **Keyboard**:
 | Key | Action |
@@ -138,9 +138,20 @@ Exit methods:
 | Button | Action | Event |
 |--------|--------|-------|
 | Back | Close player | none |
-| Save | Mark saved (stub) | `videoPlayerSave` |
-| Share | Share video (stub) | `videoPlayerShare` |
+| Save | Toggle save (localStorage) | `videoPlayerSave` |
+| Share | Share video (native or clipboard) | `videoPlayerShare` |
 | More | Show options (stub) | none |
+
+**Save behavior** (Phase 2):
+- Toggles saved state per video
+- Button shows `.saved` class when saved
+- Persists to `pfmall_saved_videos` in localStorage
+
+**Share behavior** (Phase 2):
+- Tier 1: `navigator.share()` (mobile native)
+- Tier 2: `navigator.clipboard.writeText()` (desktop)
+- Tier 3: `document.execCommand('copy')` (legacy)
+- URL source: `embed_url || source_url`
 
 **Chrome visibility**:
 - Top bar fades to `opacity: 0` when `.chrome-hidden` is set
@@ -204,7 +215,7 @@ Top bar and queue rail respect notched device safe areas:
 | `videoPlayerOpen` | `{ foundupId, videoIndex }` | Player opens |
 | `videoPlayerClose` | none | Player closes |
 | `videoPlayerNavigate` | `{ foundupId, videoIndex }` | Video changes |
-| `videoPlayerSave` | `{ foundupId, video }` | Save button/swipe |
+| `videoPlayerSave` | `{ foundupId, video, saved }` | Save toggle (Phase 2) |
 | `videoPlayerShare` | `{ foundupId, video }` | Share button |
 | `videoPlayerDismiss` | `{ foundupId, video }` | Swipe-right dismiss |
 
@@ -214,6 +225,7 @@ Top bar and queue rail respect notched device safe areas:
 
 ```javascript
 window.mallVideoPlayer = {
+  // Core
   open(foundupId, queue, startIndex),  // Open with queue
   close(),                              // Exit fullscreen
   goToVideo(index),                     // Jump to index
@@ -222,9 +234,24 @@ window.mallVideoPlayer = {
   isOpen(),                             // Returns boolean
   getFoundUpId(),                       // Returns current constraint
   getCurrentIndex(),                    // Returns current index
-  getQueueLength()                      // Returns queue length
+  getQueueLength(),                     // Returns queue length
+
+  // Save (Phase 2)
+  isCurrentSaved(),                     // Returns boolean
+  getSavedVideos(),                     // Returns Object map (not array)
+  getSavedCount(),                      // Returns number
+
+  // History (Phase 2)
+  getHistory(),                         // Returns Array (newest first, max 50)
+  clearHistory()                        // Clears watch history
 };
 ```
+
+**localStorage Keys** (Phase 2):
+| Key | Structure |
+|-----|-----------|
+| `pfmall_saved_videos` | `{ "{foundupId}::{videoId}": { foundupId, videoId, title, thumbnail, savedAt } }` |
+| `pfmall_watch_history` | `[{ foundupId, videoId, videoIndex, title, thumbnail, timestamp }, ...]` |
 
 ---
 
@@ -256,7 +283,7 @@ YouTube embeds use `?autoplay=1&rel=0` to start immediately and hide related vid
 
 ---
 
-## 16. Non-Goals (Phase 1)
+## 16. Non-Goals
 
 These are explicitly deferred:
 
@@ -266,7 +293,7 @@ These are explicitly deferred:
 - **Cross-FoundUp playlists**: Violates topic constraint
 - **Recommendation rail**: Would require AI integration
 - **Comment overlay**: Requires backend integration
-- **Save/share persistence**: Currently stubs only
+- **Backend sync**: Save/share/history are localStorage only (no server)
 
 ---
 
@@ -282,14 +309,22 @@ These are explicitly deferred:
 
 ---
 
-## 18. Future Phases
+## 18. Phase Status
 
-**Phase 2** (planned):
-- Save/share persistence to backend
-- Watch history tracking
+**Phase 1** (landed):
+- Fullscreen entry/exit
+- Queue-constrained playback
+- Gesture navigation
+- Top bar and queue rail
+
+**Phase 2** (landed):
+- Save toggle (localStorage: `pfmall_saved_videos`)
+- Share (native share → clipboard fallback)
+- Watch history (localStorage: `pfmall_watch_history`, max 50, newest first)
+
+**Phase 3** (future):
+- Backend sync for save/history
 - Resume position
-
-**Phase 3** (planned):
 - AI-driven "more like this" rail (still queue-constrained)
 - Chapter markers for long-form content
 - Transcript/subtitle integration

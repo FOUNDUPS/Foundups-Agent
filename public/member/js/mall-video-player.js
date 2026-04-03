@@ -37,6 +37,7 @@
   var edgeTrigger = null;
   var gestureHint = null;
   var titleEl = null;
+  var saveBtn = null;
 
   var isOpen = false;
   var currentQueue = [];       // Array of video objects from one FoundUp
@@ -46,6 +47,11 @@
   var railTimer = null;
   var chromeTimer = null;
   var initialPinchDistance = 0;
+
+  // ─── localStorage Keys ───
+  var SAVED_KEY = 'pfmall_saved_videos';
+  var HISTORY_KEY = 'pfmall_watch_history';
+  var HISTORY_MAX = 50; // Max history entries
 
   // ─── Initialize DOM ───
   function ensureDOM() {
@@ -93,6 +99,7 @@
     edgeTrigger = container.querySelector('.video-player-edge-trigger');
     gestureHint = container.querySelector('.video-player-gesture-hint');
     titleEl = container.querySelector('.video-player-title');
+    saveBtn = container.querySelector('[data-action="save"]');
 
     // Attach listeners
     topBar.addEventListener('click', handleTopBarClick);
@@ -122,6 +129,12 @@
     renderRail();
     attachGestures();
     resetChromeTimer();
+
+    // Update save button state
+    updateSaveButtonState(isVideoSaved(currentFoundUpId, currentQueue[currentIndex]));
+
+    // Record watch history
+    recordWatch(currentFoundUpId, currentQueue[currentIndex], currentIndex);
 
     // Dispatch event for external listeners
     window.dispatchEvent(new CustomEvent('videoPlayerOpen', {
@@ -159,6 +172,12 @@
     renderVideo(currentQueue[index]);
     updateRailSelection();
     resetChromeTimer();
+
+    // Update save button state
+    updateSaveButtonState(isVideoSaved(currentFoundUpId, currentQueue[index]));
+
+    // Record watch history
+    recordWatch(currentFoundUpId, currentQueue[index], index);
 
     window.dispatchEvent(new CustomEvent('videoPlayerNavigate', {
       detail: { foundupId: currentFoundUpId, videoIndex: index }
@@ -280,10 +299,10 @@
         } else if (dir === 'down') {
           close();
         } else if (dir === 'left') {
-          // Save hook (stub)
-          showHint('Saved');
+          // Save toggle
+          var wasSaved = toggleSave();
           window.dispatchEvent(new CustomEvent('videoPlayerSave', {
-            detail: { foundupId: currentFoundUpId, video: currentQueue[currentIndex] }
+            detail: { foundupId: currentFoundUpId, video: currentQueue[currentIndex], saved: wasSaved }
           }));
         } else if (dir === 'right') {
           // Dismiss hook (stub)
@@ -341,13 +360,13 @@
         close();
         break;
       case 'save':
-        showHint('Saved');
+        var wasSaved = toggleSave();
         window.dispatchEvent(new CustomEvent('videoPlayerSave', {
-          detail: { foundupId: currentFoundUpId, video: currentQueue[currentIndex] }
+          detail: { foundupId: currentFoundUpId, video: currentQueue[currentIndex], saved: wasSaved }
         }));
         break;
       case 'share':
-        showHint('Share');
+        shareVideo();
         window.dispatchEvent(new CustomEvent('videoPlayerShare', {
           detail: { foundupId: currentFoundUpId, video: currentQueue[currentIndex] }
         }));
@@ -388,6 +407,168 @@
         toggleChrome();
         break;
     }
+  }
+
+  // ─── Save (localStorage) ───
+  function getSavedVideos() {
+    try {
+      return JSON.parse(localStorage.getItem(SAVED_KEY)) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function setSavedVideos(saved) {
+    try {
+      localStorage.setItem(SAVED_KEY, JSON.stringify(saved));
+    } catch (e) { /* quota exceeded or private mode */ }
+  }
+
+  function getSaveKey(foundupId, video) {
+    var videoId = video.video_id || video.videoId || video.id || '';
+    return foundupId + '::' + videoId;
+  }
+
+  function isVideoSaved(foundupId, video) {
+    var saved = getSavedVideos();
+    return !!saved[getSaveKey(foundupId, video)];
+  }
+
+  function toggleSave() {
+    if (!currentFoundUpId || currentIndex < 0) return false;
+
+    var video = currentQueue[currentIndex];
+    var key = getSaveKey(currentFoundUpId, video);
+    var saved = getSavedVideos();
+
+    if (saved[key]) {
+      delete saved[key];
+      setSavedVideos(saved);
+      updateSaveButtonState(false);
+      showHint('Removed');
+      return false;
+    } else {
+      saved[key] = {
+        foundupId: currentFoundUpId,
+        videoId: video.video_id || video.videoId || video.id,
+        title: video.title,
+        thumbnail: video.thumbnail_url || video.thumbnailUrl,
+        savedAt: new Date().toISOString()
+      };
+      setSavedVideos(saved);
+      updateSaveButtonState(true);
+      showHint('Saved');
+      return true;
+    }
+  }
+
+  function updateSaveButtonState(isSaved) {
+    if (!saveBtn) return;
+    saveBtn.classList.toggle('saved', isSaved);
+    saveBtn.setAttribute('aria-pressed', String(isSaved));
+  }
+
+  // ─── Share (navigator.share or clipboard) ───
+  function getShareUrl(video) {
+    // Priority: embed_url > source_url
+    return video.embed_url || video.embedUrl || video.source_url || video.sourceUrl || '';
+  }
+
+  function shareVideo() {
+    if (!currentFoundUpId || currentIndex < 0) return;
+
+    var video = currentQueue[currentIndex];
+    var url = getShareUrl(video);
+
+    if (!url) {
+      showHint('No share link');
+      return;
+    }
+
+    var shareData = {
+      title: video.title || 'Video',
+      url: url
+    };
+
+    // Try native share first
+    if (navigator.share) {
+      navigator.share(shareData)
+        .then(function () { showHint('Shared'); })
+        .catch(function (err) {
+          if (err.name !== 'AbortError') {
+            copyToClipboard(url);
+          }
+        });
+    } else {
+      copyToClipboard(url);
+    }
+  }
+
+  function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text)
+        .then(function () { showHint('Link copied'); })
+        .catch(function () { showHint('Copy failed'); });
+    } else {
+      // Fallback for older browsers
+      var textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showHint('Link copied');
+      } catch (e) {
+        showHint('Copy failed');
+      }
+      document.body.removeChild(textarea);
+    }
+  }
+
+  // ─── Watch History (localStorage) ───
+  function getWatchHistory() {
+    try {
+      return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function setWatchHistory(history) {
+    try {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    } catch (e) { /* quota exceeded or private mode */ }
+  }
+
+  function recordWatch(foundupId, video, videoIndex) {
+    var history = getWatchHistory();
+    var videoId = video.video_id || video.videoId || video.id || '';
+
+    var entry = {
+      foundupId: foundupId,
+      videoId: videoId,
+      videoIndex: videoIndex,
+      title: video.title,
+      thumbnail: video.thumbnail_url || video.thumbnailUrl,
+      timestamp: new Date().toISOString()
+    };
+
+    // Remove duplicate if exists (same foundupId + videoId)
+    history = history.filter(function (h) {
+      return !(h.foundupId === foundupId && h.videoId === videoId);
+    });
+
+    // Add to front
+    history.unshift(entry);
+
+    // Trim to max
+    if (history.length > HISTORY_MAX) {
+      history = history.slice(0, HISTORY_MAX);
+    }
+
+    setWatchHistory(history);
   }
 
   // ─── Helpers ───
@@ -451,6 +632,42 @@
      * Get current queue length.
      * @returns {number}
      */
-    getQueueLength: function () { return currentQueue.length; }
+    getQueueLength: function () { return currentQueue.length; },
+
+    /**
+     * Check if current video is saved.
+     * @returns {boolean}
+     */
+    isCurrentSaved: function () {
+      if (!currentFoundUpId || currentIndex < 0) return false;
+      return isVideoSaved(currentFoundUpId, currentQueue[currentIndex]);
+    },
+
+    /**
+     * Get all saved videos.
+     * @returns {Object} Map of saveKey → saved entry
+     */
+    getSavedVideos: getSavedVideos,
+
+    /**
+     * Get saved video count.
+     * @returns {number}
+     */
+    getSavedCount: function () {
+      return Object.keys(getSavedVideos()).length;
+    },
+
+    /**
+     * Get watch history.
+     * @returns {Array} Recent watch entries (newest first)
+     */
+    getHistory: getWatchHistory,
+
+    /**
+     * Clear watch history.
+     */
+    clearHistory: function () {
+      setWatchHistory([]);
+    }
   };
 })();

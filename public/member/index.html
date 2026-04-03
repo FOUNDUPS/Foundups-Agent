@@ -236,7 +236,7 @@
       <div class="account-section-label">Red Dog</div>
       <div class="reddog-concierge-guidance">
         <p class="reddog-guidance-item">Welcome to the p.fMALL. I keep track of your FoundUps and help you find your way around.</p>
-        <p class="reddog-guidance-item">Swipe sideways to browse FoundUps. Tap a card to enter.</p>
+        <p class="reddog-guidance-item">Tap a tile to play. Double-tap to enter a FoundUp. Pinch to expand.</p>
         <p class="reddog-guidance-item">Swipe down from the top or tap my button to open this panel. Swipe up to close.</p>
       </div>
     </div>
@@ -328,7 +328,7 @@
     const foundupOverlay = document.getElementById('foundupOverlay');
     const foundupOverlayBody = document.getElementById('foundupOverlayBody');
 
-    const MALL_CATALOG_URL = '/member/mall-catalog.json';
+    const MALL_CATALOG_URL = '/member/mall-video-catalog.json';
     const READINESS_LABELS = {
       ready: 'Ready',
       conditional: 'Conditional',
@@ -570,30 +570,36 @@
 
     function openFoundupOverlay(item) {
       if (!item) return;
+      const displayName = item.name || item.title || item.entity || item.foundup_id;
+      const displayToken = item.token_symbol || (item.source_handle ? item.source_handle : '');
+      const displayTagline = item.tagline || (item.entity ? item.entity + (item.geo ? ' \u00b7 ' + item.geo : '') : '');
+      const displayDesc = item.description || (item.video_count ? item.video_count + ' videos \u00b7 ' + (item.source_type || '').replace('_', ' ') : '');
+      const displayReadiness = READINESS_LABELS[item.launch_readiness] || item.launch_readiness || item.status || 'active';
+      const displayRoute = item.routing_prefix || '/f/' + item.foundup_id;
       foundupOverlayBody.innerHTML = `
-        <div class="foundup-overlay-card theme-${escapeAttr(item.theme)}">
+        <div class="foundup-overlay-card theme-${escapeAttr(item.theme || item.foundup_id || 'default')}">
           <div class="foundup-overlay-topline">
             <span class="mini-badge">${escapeHtml(item.category)}</span>
-            <span class="mini-badge">${escapeHtml(item.lifecycle_stage)}</span>
+            <span class="mini-badge">${escapeHtml(item.lifecycle_stage || item.status || '')}</span>
           </div>
           <div class="foundup-overlay-hero">
-            <span class="foundup-overlay-token">${escapeHtml(item.token_symbol)}</span>
-            <span class="foundup-overlay-name">${escapeHtml(item.name)}</span>
+            <span class="foundup-overlay-token">${escapeHtml(displayToken)}</span>
+            <span class="foundup-overlay-name">${escapeHtml(displayName)}</span>
           </div>
-          <p class="foundup-overlay-tagline">${escapeHtml(item.tagline)}</p>
-          <p class="foundup-overlay-description">${escapeHtml(item.description)}</p>
+          <p class="foundup-overlay-tagline">${escapeHtml(displayTagline)}</p>
+          <p class="foundup-overlay-description">${escapeHtml(displayDesc)}</p>
           <div class="foundup-overlay-meta">
             <div>
-              <span class="focus-label">Launch readiness</span>
-              <span class="focus-value">${escapeHtml(READINESS_LABELS[item.launch_readiness] || item.launch_readiness)}</span>
+              <span class="focus-label">Readiness</span>
+              <span class="focus-value">${escapeHtml(displayReadiness)}</span>
             </div>
             <div>
               <span class="focus-label">Shell route</span>
-              <span class="focus-value">${escapeHtml(item.routing_prefix)}</span>
+              <span class="focus-value">${escapeHtml(displayRoute)}</span>
             </div>
             <div>
-              <span class="focus-label">Entry</span>
-              <span class="focus-value">${escapeHtml(item.entry_copy)}</span>
+              <span class="focus-label">Creator</span>
+              <span class="focus-value">${escapeHtml(item.creator_display || item.creator || item.entity || '')}</span>
             </div>
           </div>
           <p class="foundup-overlay-footnote">Tap outside this sheet to return to the Mall.</p>
@@ -1029,6 +1035,7 @@
   </div>
 
   <script src="js/gesture-engine.js"></script>
+  <script src="js/shell-bridge-interceptor.js"></script>
   <script src="js/mall-planes.js"></script>
   <script src="js/mall-tile-field.js"></script>
   <script src="js/mall-video-player.js"></script>

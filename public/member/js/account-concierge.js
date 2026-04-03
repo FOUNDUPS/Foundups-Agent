@@ -86,12 +86,12 @@
     var lines = [];
     var grid = plane.querySelector('[data-account-foundups-grid]');
     var tileCount = grid ? grid.querySelectorAll('.account-foundup-tile').length : 0;
-    var readyCount = grid ? grid.querySelectorAll('.status-ready').length : 0;
+    var activeCount = grid ? grid.querySelectorAll('.status-active, .status-ready').length : 0;
     var countEl = plane.querySelector('[data-invite-count]');
     var inviteText = countEl ? countEl.textContent : '';
 
     if (tileCount > 0) {
-      lines.push(tileCount + ' FoundUp' + (tileCount !== 1 ? 's' : '') + (readyCount > 0 ? ' \u00b7 ' + readyCount + ' ready' : ''));
+      lines.push(tileCount + ' FoundUp' + (tileCount !== 1 ? 's' : '') + (activeCount > 0 ? ' \u00b7 ' + activeCount + ' active' : ''));
     } else {
       lines.push('No FoundUps loaded yet');
     }
@@ -270,6 +270,12 @@
           invitesDrawer.classList.add('open');
           invitesToggle.classList.add('expanded');
         }
+        break;
+      case 'saved':
+        openPlane();
+        injectSavedVideos();
+        var savedSection = plane.querySelector('[data-reddog-saved]');
+        if (savedSection) savedSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         break;
       case 'options':
         openPlane();
@@ -906,7 +912,7 @@
       modesVisible: modesVisible,
       currentMode: currentMode,
       tileCount: 0,
-      readyCount: 0,
+      activeCount: 0,
       inviteText: '',
       projection: null,
       inspecting: null,
@@ -918,7 +924,7 @@
     // DOM-derived counts from loaded plane data
     var grid = plane.querySelector('[data-account-foundups-grid]');
     ctx.tileCount = grid ? grid.querySelectorAll('.account-foundup-tile').length : 0;
-    ctx.readyCount = grid ? grid.querySelectorAll('.status-ready').length : 0;
+    ctx.activeCount = grid ? grid.querySelectorAll('.status-active, .status-ready').length : 0;
     var countEl = plane.querySelector('[data-invite-count]');
     ctx.inviteText = countEl ? countEl.textContent : '';
 
@@ -956,7 +962,7 @@
     // FoundUp summary
     if (ctx.tileCount > 0) {
       var line = ctx.tileCount + ' FoundUp' + (ctx.tileCount !== 1 ? 's' : '');
-      if (ctx.readyCount > 0) line += ' \u00b7 ' + ctx.readyCount + ' ready';
+      if (ctx.activeCount > 0) line += ' \u00b7 ' + ctx.activeCount + ' active';
       lines.push(line);
     } else {
       lines.push('No FoundUps loaded');
@@ -1049,10 +1055,10 @@
       }
     },
     {
-      id: 'view_ready',
-      label: 'View ready FoundUps',
+      id: 'view_active',
+      label: 'View active FoundUps',
       test: function (ctx) {
-        return ctx.readyCount > 0 && (!ctx.projection || ctx.projection === 'default');
+        return ctx.activeCount > 0 && (!ctx.projection || ctx.projection === 'default');
       },
       run: function () {
         if (window.mallTileField && typeof window.mallTileField.setProjection === 'function') {
@@ -1152,6 +1158,126 @@
     });
   }
 
+  // ---- saved videos section ----
+  var savedEl = null;
+
+  function injectSavedVideos() {
+    if (savedEl) {
+      renderSavedVideos();
+      return;
+    }
+
+    savedEl = document.createElement('section');
+    savedEl.setAttribute('data-reddog-saved', '');
+    savedEl.className = 'reddog-saved-section';
+
+    var channelsSection = plane.querySelector('[data-reddog-channels]');
+    var optionsSection = plane.querySelector('[data-reddog-options]');
+    if (channelsSection && channelsSection.nextSibling) {
+      channelsSection.parentNode.insertBefore(savedEl, channelsSection.nextSibling);
+    } else if (optionsSection) {
+      optionsSection.parentNode.insertBefore(savedEl, optionsSection);
+    } else if (conciergeHost) {
+      conciergeHost.appendChild(savedEl);
+    }
+
+    renderSavedVideos();
+  }
+
+  function renderSavedVideos() {
+    if (!savedEl) return;
+
+    var player = window.mallVideoPlayer;
+    var savedMap = (player && typeof player.getSavedVideos === 'function') ? player.getSavedVideos() : {};
+    var keys = Object.keys(savedMap);
+    var count = keys.length;
+
+    var html = '<div class="reddog-saved-header">';
+    html += '<span class="reddog-section-label">Saved Videos</span>';
+    html += '<span class="reddog-saved-count">' + count + '</span>';
+    html += '</div>';
+
+    if (count === 0) {
+      html += '<p class="reddog-saved-empty">No saved videos yet. Double-tap a video in the player to save it.</p>';
+      savedEl.innerHTML = html;
+      return;
+    }
+
+    // Sort by savedAt descending (newest first)
+    var entries = keys.map(function (k) { return savedMap[k]; });
+    entries.sort(function (a, b) {
+      return (b.savedAt || '').localeCompare(a.savedAt || '');
+    });
+
+    html += '<div class="reddog-saved-list">';
+    entries.forEach(function (entry) {
+      var thumb = esc(entry.thumbnail || '');
+      var title = esc(entry.title || 'Untitled');
+      var foundupId = esc(entry.foundupId || '');
+      var videoId = esc(entry.videoId || '');
+      var savedDate = entry.savedAt ? new Date(entry.savedAt).toLocaleDateString() : '';
+
+      html += '<button class="reddog-saved-card" data-saved-foundup="' + foundupId + '" data-saved-video="' + videoId + '" type="button">';
+      if (thumb) {
+        html += '<img class="reddog-saved-thumb" src="' + thumb + '" alt="" loading="lazy">';
+      } else {
+        html += '<div class="reddog-saved-thumb reddog-saved-thumb-empty"></div>';
+      }
+      html += '<div class="reddog-saved-info">';
+      html += '<span class="reddog-saved-title">' + title + '</span>';
+      html += '<span class="reddog-saved-meta">' + foundupId + (savedDate ? ' · ' + savedDate : '') + '</span>';
+      html += '</div>';
+      html += '</button>';
+    });
+    html += '</div>';
+
+    savedEl.innerHTML = html;
+
+    // Wire click handlers for re-entry
+    savedEl.querySelectorAll('[data-saved-foundup]').forEach(function (card) {
+      card.addEventListener('click', function () {
+        var fid = card.getAttribute('data-saved-foundup');
+        var vid = card.getAttribute('data-saved-video');
+        reenterSavedVideo(fid, vid);
+      });
+    });
+  }
+
+  function reenterSavedVideo(foundupId, videoId) {
+    emitRedDogCommand('reenter_saved_video', { foundupId: foundupId, videoId: videoId });
+
+    // Try to reconstruct queue from catalog and open fullscreen player
+    var player = window.mallVideoPlayer;
+    if (player && typeof player.open === 'function' && storedCatalog) {
+      var foundup = null;
+      for (var i = 0; i < storedCatalog.length; i++) {
+        if (storedCatalog[i].foundup_id === foundupId) {
+          foundup = storedCatalog[i];
+          break;
+        }
+      }
+
+      if (foundup && foundup.videos && foundup.videos.length > 0) {
+        // Find video index in queue
+        var startIdx = 0;
+        for (var j = 0; j < foundup.videos.length; j++) {
+          var v = foundup.videos[j];
+          if ((v.video_id || v.videoId || v.id) === videoId) {
+            startIdx = j;
+            break;
+          }
+        }
+        closePlane();
+        player.open(foundupId, foundup.videos, startIdx);
+        return;
+      }
+    }
+
+    // Fallback: open FoundUp entry page
+    closePlane();
+    window.location.href = '/member/foundup.html?id=' + encodeURIComponent(foundupId);
+  }
+
   // Refresh briefing and recommendations every time plane opens
   var _origOpenPlane = openPlane;
   openPlane = function () {
@@ -1162,6 +1288,7 @@
     renderRecommendations();
     injectAITools();
     injectChannels();
+    injectSavedVideos();
   };
 
   // ---- public API: window.redDog ----
@@ -1217,6 +1344,10 @@
       injectChannels();
       toggleSearchInput(true);
     },
+    // Saved Videos
+    openSaved: function () { injectSavedVideos(); executeMode('saved'); },
+    refreshSaved: function () { renderSavedVideos(); },
+
     searchByCreator: function (query) {
       emitRedDogCommand('search_creator', { query: query });
       if (window.mallTileField && typeof window.mallTileField.searchByCreator === 'function') {
@@ -1274,10 +1405,16 @@
       if (!grid || !catalog) return;
 
       grid.innerHTML = catalog.map(function (item) {
-        return '<a class="account-foundup-tile" href="/member/foundup.html?id=' + encodeURIComponent(item.foundup_id) + '">'
-          + '<div class="account-foundup-icon theme-' + esc(item.theme) + '">' + esc(item.token_symbol) + '</div>'
-          + '<span class="account-foundup-name">' + esc(item.name) + '</span>'
-          + '<span class="account-foundup-status status-' + esc(item.launch_readiness) + '"></span>'
+        var displayName = item.title || item.entity || item.name || item.foundup_id;
+        var iconLabel = item.creator_display || item.creator || displayName.slice(0, 3);
+        var category = item.category || 'default';
+        var status = item.status || item.launch_readiness || 'placeholder';
+        var videoHint = (item.video_count > 0) ? ' data-video-count="' + item.video_count + '"' : '';
+
+        return '<a class="account-foundup-tile" href="/member/foundup.html?id=' + encodeURIComponent(item.foundup_id) + '"' + videoHint + '>'
+          + '<div class="account-foundup-icon cat-' + esc(category) + '">' + esc(iconLabel.slice(0, 4)) + '</div>'
+          + '<span class="account-foundup-name">' + esc(displayName) + '</span>'
+          + '<span class="account-foundup-status status-' + esc(status) + '"></span>'
           + '</a>';
       }).join('');
     },

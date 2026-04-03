@@ -1,27 +1,40 @@
 ---
 name: supervisor_24x7
-description: 24/7 Autonomous Supervisor state machine for continuous system monitoring, triage, execution, and learning
+description: DEPRECATED DONOR/PROTOTYPE - Canonical supervisor is OpenClawSupervisor (moltbot_bridge)
 version: 2.1.0
 author: 0102 (Opus 4.5)
 created: 2026-03-11
-updated: 2026-03-22
+updated: 2026-04-03
 agents: [qwen]
 primary_agent: qwen
 intent_type: ORCHESTRATION
-promotion_state: production
+promotion_state: prototype
 pattern_fidelity_threshold: 0.85
-category: workflow
+category: capability-uplift
 evals: []
-retirement_date: null
+retirement_date: 2026-03-22
 trigger:
-  cadence: continuous
-  startup: main.py
-  env: SUPERVISOR_24X7_ENABLED=1
+  manual  # NOT wired to startup - use OpenClawSupervisor instead
 wsp_chain: [49, 77, 91, 96, 97]
 ---
-# Supervisor 24x7
+# Supervisor 24x7 (DONOR/PROTOTYPE)
 
-## Purpose
+## Deprecation Notice (2026-03-22)
+
+**This module is a DONOR/PROTOTYPE, not the canonical supervisor.**
+
+| Canonical | `modules/communication/moltbot_bridge/src/openclaw_supervisor.py` |
+|-----------|-------------------------------------------------------------------|
+| Startup wiring | `main.py` lines 166-167, 949, 1071-1077 |
+| Env gate | `OPENCLAW_SUPERVISOR_ENABLED=1` (default ON) |
+
+Key behaviors from this file have been **unified into OpenClawSupervisor**:
+- AI Overseer integration (PLAN)
+- PatternMemory (REMEMBER)
+- LibidoMonitor/Gemma fidelity (VERIFY)
+- SupervisorMetrics telemetry
+
+## Purpose (Historical)
 
 10-state autonomous supervisor that orchestrates existing components for continuous system operation. Follows the principle: **"The 24/7 system should be state-driven, not chat-driven."**
 

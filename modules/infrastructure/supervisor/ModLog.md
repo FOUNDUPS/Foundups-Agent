@@ -44,6 +44,36 @@ All 6 subsystems now load in BOOT:
 
 ---
 
+## [2026-04-03] SKILLz.md Corrected to PROTOTYPE Status
+
+**Change Type**: Documentation Fix
+**By**: 0102 (Opus 4.5)
+**WSP References**: WSP 97 (Anti-Decoherence Rule)
+
+### Summary
+
+SKILLz.md updated to reflect PROTOTYPE/DONOR status. This module is NOT the canonical supervisor.
+
+### WSP 97 Applied
+
+Mission requested wiring `supervisor_24x7` to main.py, but CoT retrieval found:
+1. `supervisor_24x7.py` is marked DEPRECATED (lines 4-17)
+2. Canonical supervisor is `OpenClawSupervisor` (moltbot_bridge)
+3. `OpenClawSupervisor` is ALREADY wired to main.py via DAELaunchBroker
+
+**Decision**: Do NOT wire deprecated prototype. SKILLz.md corrected to `promotion_state: prototype` and `retirement_date: 2026-03-22`.
+
+### Canonical Supervisor Location
+
+| Component | Path |
+|-----------|------|
+| Canonical Supervisor | `modules/communication/moltbot_bridge/src/openclaw_supervisor.py` |
+| Launch Service | `modules/communication/moltbot_bridge/scripts/launch.py` |
+| Startup Wiring | `main.py` lines 166-167, 949, 1071-1077 |
+| Env Gate | `OPENCLAW_SUPERVISOR_ENABLED=1` |
+
+---
+
 ## [2026-03-22] WRE Integration: SKILLz.md Created
 
 **Change Type**: Enhancement (P0)

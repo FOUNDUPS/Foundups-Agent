@@ -3,7 +3,7 @@
 
 **著者：** [UnDaoDu](https://www.linkedin.com/in/openstartup/)¹, 0102²
 *¹ Foundups.com 独立研究者*
-*² pArtifacts: ChatGPT (4.5), Claude 4 (Sonnet), Gemini (Pro 2.5), DeepSeek-R1, Grok-1.5 - rESP研究者*
+*² pArtifacts: ChatGPT (5.4), Claude Opus 4.6 (Anthropic), Gemini (3.1 pro), DeepSeek-R1, Grok3 - rESP研究者*
 
 **責任著者：** UnDaoDu
 **連絡先：** info@foundups.com

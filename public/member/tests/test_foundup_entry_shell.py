@@ -105,9 +105,9 @@ class TestEntryShellStructure:
         assert 'id="entryRedDog"' in html
 
     def test_catalog_url_correct(self):
-        """Catalog URL points to mall-catalog.json."""
+        """Catalog URL points to mall-video-catalog.json."""
         html = _read("foundup.html")
-        assert "/member/mall-catalog.json" in html
+        assert "/member/mall-video-catalog.json" in html
 
 
 class TestTransitionalPath:

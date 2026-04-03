@@ -1,5 +1,72 @@
 # ModLog - moltbot_bridge
 
+## 2026-04-03: Supervisor Self-Bootstrap Fix + Guard (WSP 97)
+
+**Author**: 0102 (Worker G)
+**WSP**: 97 (CoT/CoR gates)
+**Slice**: `openclaw_supervisor_start_failure_audit_phase1` + `openclaw_supervisor_standalone_bootstrap_guard_phase1`
+
+### Root Cause
+
+OpenClawSupervisor repeatedly failed with `"openclaw_runtime_not_registered"` escalation when started standalone (not via main.py bootstrap).
+
+**Failure chain**:
+```
+run_openclaw_supervisor_service()
+  └─> OpenClawSupervisor.run_cycle()
+      └─> _observe() → broker.get_runtime_status("openclaw")
+          └─> Returns {"registered": False}  ← BROKER HAS NO SPECS
+              └─> _triage() → "openclaw_runtime_not_registered" → ESCALATE
+```
+
+**Cause**: `bootstrap_runtime_dae_launches()` in main.py registers DAE specs, but this only runs when main.py is the entry point. Standalone supervisor invocation skips this.
+
+### Fix (Phase 1)
+
+Added `_ensure_broker_bootstrap()` to `scripts/launch.py`:
+- Checks if broker has specs registered
+- If not, imports and calls `main.bootstrap_runtime_dae_launches()`
+- Fallback: registers minimal openclaw spec if main.py import fails
+- Safe to call multiple times (module-level flag)
+
+### Guard Fix (Phase 2 - Worker G)
+
+**Bug found by architect**: Phase 1 fix called `bootstrap_runtime_dae_launches()` which also auto-starts supervisor at main.py:1071-1077. This caused recursive/duplicate supervisor start when called from inside `run_openclaw_supervisor_service()`.
+
+**Guard applied**: Suppress autostart env gates during self-bootstrap:
+```python
+# Save and suppress autostart env gates
+os.environ["OPENCLAW_SUPERVISOR_AUTOSTART"] = "0"
+os.environ["OPENCLAW_RESIDENT_AUTOSTART"] = "0"
+try:
+    bootstrap_runtime_dae_launches()
+finally:
+    # Restore original env values
+```
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `scripts/launch.py` | Added `_ensure_broker_bootstrap()` with autostart guard |
+
+### Verification
+
+```
+Before: Launchable DAEs: 0, openclaw registered: False
+After:  Launchable DAEs: 11, openclaw registered: True
+        supervisor state: registered (NOT running - no recursive start)
+        resident state: registered (NOT running)
+```
+
+### Acceptance
+
+- [x] Standalone supervisor start no longer depends on zero-spec broker
+- [x] Standalone bootstrap does not recursively/duplicatively start supervisor
+- [x] No pfMALL changes
+
+---
+
 ## 2026-03-31: p.fMALL Catalog Integration (WSP 11/72/84)
 
 **Author**: 0102

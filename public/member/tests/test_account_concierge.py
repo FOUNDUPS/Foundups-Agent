@@ -419,3 +419,189 @@ class TestCategoryTagCSS:
         """Tag select has styling."""
         content = CONCIERGE_CSS.read_text(encoding="utf-8")
         assert '.reddog-tag-select' in content
+
+
+# -- 9. Video Schema Status Sync --
+
+
+class TestVideoSchemaStatusSync:
+    """Test concierge counts .status-active (video catalog) not just .status-ready."""
+
+    def test_summary_counts_active(self):
+        """Summary builder counts .status-active."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert ".status-active" in content
+
+    def test_summary_uses_active_label(self):
+        """Summary displays 'active' not 'ready'."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        # The summary line should say "N active"
+        assert "active'" in content or 'active"' in content
+
+    def test_context_has_activeCount(self):
+        """gatherContext sets ctx.activeCount."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "ctx.activeCount" in content
+
+    def test_no_stale_readyCount(self):
+        """No remaining ctx.readyCount references."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "ctx.readyCount" not in content
+        assert "readyCount:" not in content
+
+    def test_selector_includes_legacy_fallback(self):
+        """Status selector includes .status-ready as backward compat."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert ".status-active, .status-ready" in content
+
+    def test_recommendation_uses_activeCount(self):
+        """Recommendation test uses ctx.activeCount."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "ctx.activeCount > 0" in content
+
+    def test_recommendation_label_updated(self):
+        """Recommendation label says 'active' not 'ready'."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "View active FoundUps" in content
+
+    def test_grid_renders_category_class(self):
+        """Grid icon uses cat- prefix not theme- prefix."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "cat-'" in content or "cat-\"" in content
+
+    def test_grid_renders_video_title(self):
+        """Grid uses item.title as primary display name."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "item.title" in content
+
+    def test_css_has_status_active(self):
+        """CSS has .status-active class."""
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert ".status-active" in content
+
+    def test_css_has_category_classes(self):
+        """CSS has category-based icon classes."""
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert ".cat-travel" in content
+        assert ".cat-music" in content
+        assert ".cat-media" in content
+
+
+# -- 10. Saved Videos Surface --
+
+
+class TestSavedVideosSurface:
+    """Test Saved Videos section in concierge."""
+
+    def test_inject_saved_videos_function(self):
+        """injectSavedVideos function exists."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "function injectSavedVideos" in content
+
+    def test_render_saved_videos_function(self):
+        """renderSavedVideos function exists."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "function renderSavedVideos" in content
+
+    def test_reenter_saved_video_function(self):
+        """reenterSavedVideo function exists."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "function reenterSavedVideo" in content
+
+    def test_saved_section_data_attr(self):
+        """Saved section uses data-reddog-saved attribute."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "data-reddog-saved" in content
+
+    def test_reads_getSavedVideos(self):
+        """Reads from mallVideoPlayer.getSavedVideos."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "getSavedVideos" in content
+
+    def test_saved_count_displayed(self):
+        """Saved count badge is rendered."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "reddog-saved-count" in content
+
+    def test_empty_state_message(self):
+        """Empty state message is present."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "No saved videos yet" in content
+
+    def test_saved_card_rendered(self):
+        """Saved video cards are rendered."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "reddog-saved-card" in content
+
+    def test_saved_card_has_thumbnail(self):
+        """Saved card includes thumbnail."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "reddog-saved-thumb" in content
+
+    def test_saved_card_has_title(self):
+        """Saved card includes title."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "reddog-saved-title" in content
+
+    def test_reentry_uses_player_open(self):
+        """Re-entry opens fullscreen player if queue available."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "player.open(" in content
+
+    def test_reentry_fallback_to_entry_page(self):
+        """Re-entry falls back to FoundUp entry page."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "foundup.html?id=" in content
+
+    def test_reentry_emits_command(self):
+        """Re-entry emits reddog command."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "reenter_saved_video" in content
+
+    def test_saved_mode_in_execute(self):
+        """executeMode handles 'saved' case."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "case 'saved':" in content
+
+    def test_open_saved_api(self):
+        """openSaved function exposed in public API."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "openSaved:" in content
+
+    def test_refresh_saved_api(self):
+        """refreshSaved function exposed in public API."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "refreshSaved:" in content
+
+    def test_injected_on_plane_open(self):
+        """Saved videos injected when plane opens."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "injectSavedVideos()" in content
+
+
+class TestSavedVideosCSS:
+    """Test Saved Videos CSS."""
+
+    def test_saved_section_styles(self):
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert ".reddog-saved-section" in content
+
+    def test_saved_card_styles(self):
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert ".reddog-saved-card" in content
+
+    def test_saved_thumb_styles(self):
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert ".reddog-saved-thumb" in content
+
+    def test_saved_title_styles(self):
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert ".reddog-saved-title" in content
+
+    def test_saved_empty_styles(self):
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert ".reddog-saved-empty" in content
+
+    def test_saved_count_styles(self):
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert ".reddog-saved-count" in content

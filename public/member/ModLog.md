@@ -1,11 +1,187 @@
 # Member Area Module Change Log
 
-## [2026-04-03] Search Mall Filter UI Phase 2 (Worker C, WSP_97)
+## [2026-04-03] Saved Videos Surface Phase 1 (Worker C, WSP_97)
+
+**Who**: 0102 (Claude Opus 4.6) — Worker C
+**Type**: Feature (Saved Videos UI)
+**Slice**: `pfMALL_SAVED_VIDEOS_SURFACE_PHASE1`
+**Spec**: WSP_97
+
+**Files Modified**:
+- `public/member/js/account-concierge.js` — Saved Videos section + re-entry logic
+- `public/member/css/account-concierge.css` — Saved card/list styling
+- `public/member/tests/test_account_concierge.py` — 23 new tests
+
+**Surface Added**:
+- Saved Videos section in Red Dog plane (after Channels)
+- Saved count badge
+- Video cards with thumbnail, title, foundupId, savedAt
+- Empty state: "No saved videos yet. Double-tap a video in the player to save it."
+
+**Re-entry Behavior**:
+1. If catalog has the FoundUp with videos → open fullscreen player at saved video index
+2. Fallback → navigate to `/member/foundup.html?id={foundupId}`
+
+**Public API**:
+| Method | Description |
+|--------|-------------|
+| `redDog.openSaved()` | Open plane scrolled to Saved Videos |
+| `redDog.refreshSaved()` | Re-render saved list |
+
+**Command Emitted**: `reenter_saved_video` `{ foundupId, videoId }`
+
+**Tests**: 987 passed (23 new Saved Videos tests)
+
+---
+
+## [2026-04-03] Shell Bridge Interceptor Phase 1 (Worker F)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker F
+**Type**: Feature (External FoundUp Integration)
+**Slice**: `PFMALL_SHELL_BRIDGE_INTERCEPTOR_PHASE1`
+**Protocol**: WSP 15, WSP 97
+
+**Purpose**: Shell-side postMessage listener for external FoundUp iframes. Intercepts `agent_request` events and dispatches to backend, then posts `agent_response` back to origin iframe.
+
+**Contract**: `holo_index/docs/EXTERNAL_FOUNDUP_BRIDGE_CONTRACT.md`
+
+**Files Created**:
+- `public/member/js/shell-bridge-interceptor.js` — Main interceptor module
+
+**Files Modified**:
+- `public/member/index.html` — Added script include (line 1038)
+- `public/member/foundup.html` — Added script include (line 786)
+
+**Message Structure** (per bridge contract):
+```
+Inbound:  { type: "agent_request", route: "openclaw_search", payload: { action: "..." } }
+Outbound: { type: "agent_response", status: "success|error", data: {...} }
+```
+
+**Supported Routes**:
+| Route | Actions |
+|-------|---------|
+| `openclaw_search` | `semantic_search`, `wsp_lookup` |
+
+**Features**:
+- Origin validation (allowlist + same-origin)
+- Stub responses for Phase 1 (backend not wired)
+- `window.shellBridgeInterceptor` API for runtime config
+- Debug mode via `?debug=1`
+
+**Phase 2 Integration Points**:
+- `window.shellBridgeBackend.search()` — Real semantic search
+- `window.shellBridgeBackend.wspLookup()` — Real WSP lookup
+- `CONFIG.backendUrl` — Backend API endpoint
+
+**Tests**: 37 tests in `test_shell_bridge_interceptor.py`
+
+| Test Class | Count | Coverage |
+|------------|-------|----------|
+| TestInterceptorExists | 4 | File structure, IIFE, init |
+| TestMessageTypeHandling | 3 | Type validation |
+| TestRouteHandling | 4 | Route dispatch |
+| TestActionHandlers | 6 | semantic_search, wsp_lookup |
+| TestResponseFormat | 5 | Contract Section 3.1 |
+| TestOriginValidation | 4 | Security |
+| TestStubMode | 4 | Phase 1 stubs |
+| TestPublicAPI | 4 | window.shellBridgeInterceptor |
+| TestHTMLIntegration | 3 | HTML includes |
+
+---
+
+## [2026-04-03] Fullscreen Player Save Share History Phase 2 (Worker F)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker F
+**Type**: Feature (Shell-Local Persistence)
+**Slice**: `pfMALL_FULLSCREEN_PLAYER_SAVE_SHARE_HISTORY_PHASE2`
+**Protocol**: WSP 97
+
+**Files Modified**:
+- `public/member/js/mall-video-player.js` — Save, share, history implementation
+- `public/member/css/mall-video-player.css` — Saved button state styling
+- `modules/foundups/pfmall/tests/test_mall_video_player.py` — 27 new tests
+
+**localStorage Keys**:
+| Key | Purpose |
+|-----|---------|
+| `pfmall_saved_videos` | Map of `{foundupId}::{videoId}` → saved entry |
+| `pfmall_watch_history` | Array of watch entries (max 50, newest first) |
+
+**Save Behavior**:
+- Toggle save per video within FoundUp queue
+- Button state reflects saved vs unsaved (`.saved` class)
+- Swipe-left gesture also toggles save
+- Event emission preserved: `videoPlayerSave`
+
+**Share Behavior**:
+- `navigator.share` when available (mobile native share)
+- Clipboard fallback (`navigator.clipboard.writeText` or `execCommand`)
+- URL priority: `embed_url` > `source_url`
+- Event emission preserved: `videoPlayerShare`
+
+**Watch History**:
+- Records on open and navigate
+- Entry: `{ foundupId, videoId, videoIndex, title, thumbnail, timestamp }`
+- Deduplicates by foundupId + videoId
+- Max 50 entries (oldest trimmed)
+
+**New API Methods**:
+```javascript
+mallVideoPlayer.isCurrentSaved()   // boolean
+mallVideoPlayer.getSavedVideos()   // Map
+mallVideoPlayer.getSavedCount()    // number
+mallVideoPlayer.getHistory()       // Array
+mallVideoPlayer.clearHistory()     // void
+```
+
+**Tests**: 69 player tests passed, 927 member tests passed
+
+---
+
+## [2026-04-03] Concierge Video Schema Sync Phase 1 (Worker C)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker C
+**Type**: Fix (Schema Drift)
+**Slice**: `CONCIERGE_VIDEO_SCHEMA_SYNC_PHASE1`
+**Protocol**: WSP 97
+
+**Files Modified**:
+- `public/member/js/account-concierge.js` — FoundUps grid renders video catalog fields
+- `public/member/css/account-concierge.css` — Category-based icon colors, video status classes
+
+**Stale Fields Removed**:
+
+| Old Field | New Field | Fallback |
+|-----------|-----------|----------|
+| `item.theme` | `item.category` | `'default'` |
+| `item.token_symbol` | `item.creator_display` or `item.creator` | Sliced to 4 chars |
+| `item.name` | `item.title` or `item.entity` | `item.name` (legacy) |
+| `item.launch_readiness` | `item.status` | `item.launch_readiness` (legacy) |
+
+**CSS Changes**:
+
+| Old Class | New Class |
+|-----------|-----------|
+| `.theme-antifafm` | `.cat-media` |
+| `.theme-gotjunk` | `.cat-startup` |
+| `.theme-magadoom` | `.cat-games` |
+| — | `.cat-travel`, `.cat-music`, `.cat-ai-education`, `.cat-ai-research`, `.cat-thought-leadership`, `.cat-default` |
+| `.status-ready` | `.status-active` (+ legacy compat kept) |
+| — | `.status-placeholder`, `.status-archived`, `.status-pending` |
+
+**Backward Compatible**: Legacy `item.name` and `item.launch_readiness` remain as fallbacks.
+
+**Tests**: 916 passed (full member suite)
+
+---
+
+## [2026-04-03] Search Mall Filter UI Phase 2 (Worker C)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker C
 **Type**: Feature (Filter UI)
 **Slice**: `SEARCH_MALL_FILTER_UI_PHASE2`
-**Spec**: WSP_97
+**Protocol**: WSP 97
 
 **Files Modified**:
 - `public/member/js/account-concierge.js` — Category pills + tag dropdown
@@ -55,12 +231,12 @@
 
 ---
 
-## [2026-04-03] Member Doc Residual Sync Phase 2 (Worker C, WSP_97)
+## [2026-04-03] Member Doc Residual Sync Phase 2 (Worker C)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker C
 **Type**: Documentation Fix
 **Slice**: `MEMBER_DOC_RESIDUAL_SYNC_PHASE2`
-**Spec**: WSP_97
+**Protocol**: WSP 97
 
 **Files Modified**:
 - `public/member/README.md` — Fixed catalog references, added Video Mall as primary
@@ -88,12 +264,12 @@
 
 ---
 
-## [2026-04-03] Member Surface Doc Sync Phase 1 (Worker C, WSP_97)
+## [2026-04-03] Member Surface Doc Sync Phase 1 (Worker C)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker C
 **Type**: Documentation
 **Slice**: `PFMALL_MEMBER_SURFACE_DOC_SYNC_PHASE1`
-**Spec**: WSP_97
+**Protocol**: WSP 97
 
 **Files Modified**:
 - `public/member/README.md` — Updated runtime shape, UX section, shell-local vs OpenClaw table
@@ -118,12 +294,12 @@
 
 ---
 
-## [2026-04-02] Search Mall Concierge Wiring Phase 1 (Worker B, WSP_97)
+## [2026-04-02] Search Mall Concierge Wiring Phase 1 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B
 **Type**: Feature (UI Wiring)
 **Slice**: `search_mall_concierge_wiring_phase1`
-**Spec**: WSP_97
+**Protocol**: WSP 97
 
 **Files Modified**:
 - `public/member/js/account-concierge.js` — Search input UI, wiring to field scope APIs
@@ -165,12 +341,12 @@
 
 ---
 
-## [2026-04-02] Search Mall Projection Phase 1 (Worker B, WSP_97)
+## [2026-04-02] Search Mall Projection Phase 1 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B
 **Type**: Feature (Field Scope Search)
 **Slice**: `search_mall_projection_phase1`
-**Spec**: WSP_97
+**Protocol**: WSP 97
 
 **Files Modified**:
 - `public/member/js/mall-tile-field.js` — Extended field scope with search/filter APIs
@@ -217,12 +393,12 @@ window.mallTileField.filterByTag('ffcpln');      // exact tag match
 
 ---
 
-## [2026-04-02] Personal Mall Projection Phase 1 (Worker B, WSP_97)
+## [2026-04-02] Personal Mall Projection Phase 1 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B
 **Type**: Feature (Field Scope)
 **Slice**: `personal_mall_projection_phase1`
-**Spec**: WSP_97
+**Protocol**: WSP 97
 
 **Files Modified**:
 - `public/member/js/mall-tile-field.js` — Added field scope system
@@ -268,12 +444,12 @@ window.mallTileField.getFieldScope();
 
 ---
 
-## [2026-04-02] Video Mall Feel Polish Phase 2 (Worker B, WSP_97)
+## [2026-04-02] Video Mall Feel Polish Phase 2 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B
 **Type**: Polish (Phone Feel)
 **Slice**: `video_mall_feel_polish_phase2`
-**Spec**: WSP_97
+**Protocol**: WSP 97
 
 **Files Modified**:
 - `public/member/css/mall-tile-field.css` — Feel polish (tap pulse, snap smoothness, density-adaptive styling)
@@ -325,12 +501,12 @@ window.mallTileField.getFieldScope();
 
 ---
 
-## [2026-04-02] Video Mall Field Runtime Phase 1 (Worker B, WSP_97)
+## [2026-04-02] Video Mall Field Runtime Phase 1 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B
 **Type**: Feature (Video Runtime)
 **Slice**: `video_mall_runtime_foundation_phase1`
-**Spec**: WSP_97
+**Protocol**: WSP 97
 
 **Files Modified**:
 - `public/member/js/mall-tile-field.js` — Video runtime (tap=play/pause, pinch expand/collapse)

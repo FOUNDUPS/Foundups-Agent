@@ -97,6 +97,16 @@
   fill: none;
 }
 
+/* Save button saved state */
+.video-player-btn[data-action="save"].saved {
+  background: rgba(124, 92, 252, 0.4);
+}
+
+.video-player-btn[data-action="save"].saved svg {
+  fill: #7c5cfc;
+  stroke: #7c5cfc;
+}
+
 .video-player-title {
   color: #fff;
   font-size: 0.9rem;

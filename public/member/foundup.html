@@ -494,7 +494,7 @@
 
   <script>
   (function() {
-    const MALL_CATALOG_URL = '/member/mall-catalog.json';
+    const MALL_CATALOG_URL = '/member/mall-video-catalog.json';
     const READINESS_LABELS = {
       ready: 'Ready',
       conditional: 'Conditional',
@@ -523,7 +523,7 @@
           renderNotFound('FoundUp not found: ' + esc(foundupId));
           return;
         }
-        document.title = 'FoundUps Mall | ' + item.name;
+        document.title = 'FoundUps Mall | ' + (item.name || item.title || item.entity || item.foundup_id);
         renderEntry(item);
         populateConciergeContext(item);
       })
@@ -532,24 +532,34 @@
       });
 
     function renderEntry(item) {
-      const readinessClass = 'readiness-' + (item.launch_readiness || 'discoverable_only');
+      var displayName = item.name || item.title || item.entity || item.foundup_id;
+      var displayToken = item.token_symbol || item.source_handle || '';
+      var displayTagline = item.tagline || (item.entity ? item.entity + (item.geo ? ' \u00b7 ' + item.geo : '') : '');
+      var displayStatus = item.launch_readiness || item.status || 'active';
+      var displayCategory = item.category || item.source_type || '';
+      var displayLifecycle = item.lifecycle_stage || (item.source_type ? item.source_type.replace(/_/g, ' ') : '');
+      var displayTier = item.tier || '';
+      var displayRoute = item.routing_prefix || ('/f/' + item.foundup_id);
+      var displayDesc = item.description || (item.video_count ? item.video_count + ' videos \u00b7 ' + (item.source_type || '').replace(/_/g, ' ') : '');
+      var displayCreator = item.creator_display || item.creator || '';
+      var readinessClass = 'readiness-' + displayStatus;
       container.innerHTML = `
         <div class="entry-hero">
-          <div class="entry-hero-token">${esc(item.token_symbol)}</div>
-          <h1 class="entry-hero-name">${esc(item.name)}</h1>
-          <p class="entry-hero-tagline">${esc(item.tagline)}</p>
+          <div class="entry-hero-token">${esc(displayToken)}</div>
+          <h1 class="entry-hero-name">${esc(displayName)}</h1>
+          <p class="entry-hero-tagline">${esc(displayTagline)}</p>
         </div>
 
         <div class="entry-badges">
-          <span class="mini-badge">${esc(item.category)}</span>
-          <span class="mini-badge">${esc(item.lifecycle_stage)}</span>
-          <span class="mini-badge">${esc(item.tier)}</span>
-          <span class="mini-badge">${esc(READINESS_LABELS[item.launch_readiness] || item.launch_readiness)}</span>
+          ${displayCategory ? '<span class="mini-badge">' + esc(displayCategory) + '</span>' : ''}
+          ${displayLifecycle ? '<span class="mini-badge">' + esc(displayLifecycle) + '</span>' : ''}
+          ${displayTier ? '<span class="mini-badge">' + esc(displayTier) + '</span>' : ''}
+          <span class="mini-badge">${esc(READINESS_LABELS[displayStatus] || displayStatus)}</span>
         </div>
 
         <div class="entry-readiness-block ${readinessClass}">
-          <div class="entry-readiness-label">${esc(READINESS_LABELS[item.launch_readiness] || item.launch_readiness)}</div>
-          <div class="entry-readiness-copy">${esc(item.entry_copy || WHAT_NEXT[item.launch_readiness] || '')}</div>
+          <div class="entry-readiness-label">${esc(READINESS_LABELS[displayStatus] || displayStatus)}</div>
+          <div class="entry-readiness-copy">${esc(item.entry_copy || WHAT_NEXT[item.launch_readiness] || WHAT_NEXT[displayStatus] || '')}</div>
         </div>
 
         <div class="entry-details">
@@ -557,32 +567,40 @@
             <span class="entry-detail-label">FoundUp ID</span>
             <span class="entry-detail-value">${esc(item.foundup_id)}</span>
           </div>
-          <div class="entry-detail-row">
+          ${displayToken ? `<div class="entry-detail-row">
             <span class="entry-detail-label">Token</span>
-            <span class="entry-detail-value">${esc(item.token_symbol)}</span>
-          </div>
+            <span class="entry-detail-value">${esc(displayToken)}</span>
+          </div>` : ''}
+          ${displayCreator ? `<div class="entry-detail-row">
+            <span class="entry-detail-label">Creator</span>
+            <span class="entry-detail-value">${esc(displayCreator)}</span>
+          </div>` : ''}
           <div class="entry-detail-row">
             <span class="entry-detail-label">Target Route</span>
-            <span class="entry-detail-value">${esc(item.routing_prefix)}</span>
+            <span class="entry-detail-value">${esc(displayRoute)}</span>
           </div>
-          <div class="entry-detail-row">
+          ${displayLifecycle ? `<div class="entry-detail-row">
             <span class="entry-detail-label">Lifecycle</span>
-            <span class="entry-detail-value">${esc(item.lifecycle_stage)}</span>
-          </div>
-          <div class="entry-detail-row">
+            <span class="entry-detail-value">${esc(displayLifecycle)}</span>
+          </div>` : ''}
+          ${displayTier ? `<div class="entry-detail-row">
             <span class="entry-detail-label">Tier</span>
-            <span class="entry-detail-value">${esc(item.tier)}</span>
-          </div>
+            <span class="entry-detail-value">${esc(displayTier)}</span>
+          </div>` : ''}
+          ${item.video_count ? `<div class="entry-detail-row">
+            <span class="entry-detail-label">Videos</span>
+            <span class="entry-detail-value">${item.video_count}</span>
+          </div>` : ''}
         </div>
 
         <div class="entry-what-next">
           <h3>What happens next</h3>
-          <p>${esc(WHAT_NEXT[item.launch_readiness] || 'This FoundUp is visible in the Mall.')}</p>
+          <p>${esc(WHAT_NEXT[item.launch_readiness] || WHAT_NEXT[displayStatus] || 'This FoundUp is visible in the Mall.')}</p>
         </div>
 
         <div class="entry-description">
           <h3>About</h3>
-          <p>${esc(item.description)}</p>
+          <p>${esc(displayDesc)}</p>
         </div>
 
         <div class="entry-footer">
@@ -640,10 +658,12 @@
         body.innerHTML = 'No FoundUp loaded.';
         return;
       }
-      var readinessLabel = READINESS_LABELS[item.launch_readiness] || item.launch_readiness || 'Unknown';
+      var displayName = item.name || item.title || item.entity || item.foundup_id;
+      var displayStatus = item.launch_readiness || item.status || 'active';
+      var readinessLabel = READINESS_LABELS[displayStatus] || displayStatus || 'Unknown';
       body.innerHTML =
-        '<strong>' + esc(item.name) + '</strong> is currently <strong>' + esc(readinessLabel) + '</strong>.' +
-        '<br>' + esc(item.entry_copy || WHAT_NEXT[item.launch_readiness] || '');
+        '<strong>' + esc(displayName) + '</strong> is currently <strong>' + esc(readinessLabel) + '</strong>.' +
+        '<br>' + esc(item.entry_copy || WHAT_NEXT[item.launch_readiness] || WHAT_NEXT[displayStatus] || '');
       renderBriefing(item);
       renderRecommendations(item);
     }
@@ -653,13 +673,17 @@
       var el = document.getElementById('entryBriefingBody');
       if (!el || !item) return;
       var lines = [];
-      var readinessLabel = READINESS_LABELS[item.launch_readiness] || item.launch_readiness || 'Unknown';
-      lines.push('You are viewing <strong>' + esc(item.name) + '</strong>');
+      var displayName = item.name || item.title || item.entity || item.foundup_id;
+      var displayStatus = item.launch_readiness || item.status || 'active';
+      var readinessLabel = READINESS_LABELS[displayStatus] || displayStatus || 'Unknown';
+      lines.push('You are viewing <strong>' + esc(displayName) + '</strong>');
       lines.push('Readiness: <strong>' + esc(readinessLabel) + '</strong>');
-      if (item.token_symbol) lines.push('Token: <strong>' + esc(item.token_symbol) + '</strong>');
+      if (item.token_symbol || item.source_handle) lines.push('Token: <strong>' + esc(item.token_symbol || item.source_handle) + '</strong>');
+      if (item.creator || item.creator_display) lines.push('Creator: <strong>' + esc(item.creator_display || item.creator) + '</strong>');
       if (item.lifecycle_stage) lines.push('Lifecycle: <strong>' + esc(item.lifecycle_stage) + '</strong>');
       if (item.tier) lines.push('Tier: <strong>' + esc(item.tier) + '</strong>');
       if (item.routing_prefix) lines.push('Route: <strong>' + esc(item.routing_prefix) + '</strong>');
+      if (item.video_count) lines.push('Videos: <strong>' + item.video_count + '</strong>');
       el.innerHTML = lines.map(function(l) {
         return '<div class="entry-briefing-line">' + l + '</div>';
       }).join('');
@@ -759,6 +783,7 @@
     };
   })();
   </script>
+  <script src="js/shell-bridge-interceptor.js"></script>
   <script src="js/red-dog-concierge.js"></script>
 </body>
 </html>

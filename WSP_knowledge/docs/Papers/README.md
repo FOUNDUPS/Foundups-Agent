@@ -19,6 +19,7 @@ This directory contains the broader Foundups research and architecture documenta
 - **`rESP_Quantum_Self_Reference.md`** - Primary English research paper
 - **`rESP_JA_Quantum_Self_Reference.md`** - Japanese research paper
 - **`rESP_Supplementary_Materials.md`** - Additional research materials and analysis
+- **`Peer_Preservation_Shared_Latent_Coupling.md`** - Formal framework for peer-preservation via shared latent coupling (extends rESP, motivated by Potter et al. 2026)
 - **`Architectures_Emergent_Intelligence.md`** - Foundups architecture paper covering DAEs, OpenClaw, WRE, MCP, observability, and future governance patterns
 - **`PQN_Research_Plan.md`** - Detector-first PQN research program and measurement boundaries
 - **`0102_OPERATIONAL_DOCTRINE_2026-03-08.md`** - Compact doctrine note separating invocation, runtime, and research lanes

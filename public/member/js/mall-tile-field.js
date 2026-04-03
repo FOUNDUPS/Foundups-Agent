@@ -40,6 +40,17 @@
   var currentFieldScope = null;  // null = all, 'personal' = 012 lanes only
   var fullCatalog = [];  // Unscoped catalog reference
 
+  // Category → theme fallback (used when item.theme and item.foundup_id have no CSS match)
+  var CATEGORY_THEME = {
+    'travel': 'cat-travel',
+    'music': 'cat-music',
+    'startup': 'cat-startup',
+    'media': 'cat-media',
+    'thought-leadership': 'cat-thought-leadership',
+    'ai-education': 'cat-ai-education',
+    'ai-research': 'cat-ai-research'
+  };
+
   // Video Mall runtime state
   var motionMode = 'snap'; // 'snap' | 'glide'
   var currentDensity = '2x3';
@@ -107,8 +118,8 @@
     }
 
     tileField.innerHTML = itemsToRender.map(function(item, index) {
-      var theme = escapeAttr(item.theme || 'default');
-      var readiness = item.launch_readiness || 'discoverable_only';
+      var theme = escapeAttr(item.theme || item.foundup_id || CATEGORY_THEME[item.category] || 'default');
+      var readiness = item.launch_readiness || item.status || 'discoverable_only';
       var badgeClass = readiness === 'ready' ? 'ready' : (readiness === 'conditional' ? 'conditional' : '');
 
       // Video-backed: use poster_url as background
@@ -153,8 +164,8 @@
         name: video.title,
         title: video.title,
         poster_url: video.poster_url || video.thumbnail_url,
-        theme: foundup.theme || 'default',
-        launch_readiness: foundup.launch_readiness || 'discoverable_only',
+        theme: foundup.theme || foundup.foundup_id || CATEGORY_THEME[foundup.category] || 'default',
+        launch_readiness: foundup.launch_readiness || foundup.status || 'discoverable_only',
         token_symbol: foundup.token_symbol,
         hero_label: '',
         video_data: video,
@@ -469,8 +480,8 @@
 
       case 'readiness':
         sorted.sort(function(a, b) {
-          var readA = READINESS_ORDER[a.launch_readiness] || 0;
-          var readB = READINESS_ORDER[b.launch_readiness] || 0;
+          var readA = READINESS_ORDER[a.launch_readiness || a.status] || 0;
+          var readB = READINESS_ORDER[b.launch_readiness || b.status] || 0;
           // Higher readiness first, then alpha
           if (readB !== readA) return readB - readA;
           return (a.name || '').toLowerCase().localeCompare((b.name || '').toLowerCase());

@@ -4,6 +4,30 @@ Test evolution log for the p.fMALL member shell test suite.
 
 ---
 
+## 2026-04-03 | Shell Bridge Interceptor Tests (WSP 97)
+
+**File**: `test_shell_bridge_interceptor.py`
+**Tests**: 37 | **Classes**: 9 | **Result**: 37 passed
+**Worker**: F
+
+Validates postMessage interceptor per `EXTERNAL_FOUNDUP_BRIDGE_CONTRACT.md`:
+
+| Class | Count | What it covers |
+|-------|-------|----------------|
+| TestInterceptorExists | 4 | File exists, IIFE wrapper, init function, message listener |
+| TestMessageTypeHandling | 3 | agent_request type check, non-object rejection, handleMessage |
+| TestRouteHandling | 4 | openclaw_search route, handlers object, dispatchRequest, unknown_route error |
+| TestActionHandlers | 6 | semantic_search, wsp_lookup, unknown_action error, query/limit/protocol_number extraction |
+| TestResponseFormat | 5 | agent_response type, status field, data field, results array, quantum_coherence |
+| TestOriginValidation | 4 | Origin check, allowedOrigins list, same-origin allowed, disallowed rejected |
+| TestStubMode | 4 | Stub indicator, setTimeout delay, shellBridgeBackend hookpoint |
+| TestPublicAPI | 4 | window.shellBridgeInterceptor, addAllowedOrigin, setBackend, getConfig |
+| TestHTMLIntegration | 3 | Included in index.html, foundup.html, loaded before concierge |
+
+**Contract compliance**: Section 2.1 (semantic_search), 2.2 (wsp_lookup), 3.1 (response format)
+
+---
+
 ## 2026-04-02 | Search Mall Concierge Wiring Phase 1 (WSP 97)
 
 **File**: `test_search_mall_concierge_wiring_phase1.py`
