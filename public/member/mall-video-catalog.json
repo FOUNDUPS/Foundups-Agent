@@ -5189,7 +5189,12 @@
       "undaodu",
       "linkedin_012"
     ],
-    "display_order": 1
+    "display_order": 1,
+    "tagline": "Expat life and FFCPLN activism from Fukui, Japan",
+    "lifecycle_stage": "active",
+    "tier": "F0_DAE",
+    "description": "012 documents life in rural Japan — relocation, culture, and political activism through the FFCPLN movement. 573 videos spanning daily life, resistance music, and community building.",
+    "launch_readiness": "discoverable_only"
   },
   {
     "foundup_id": "undaodu",
@@ -9833,7 +9838,12 @@
       "linkedin_012",
       "linkedin_esingularity"
     ],
-    "display_order": 2
+    "display_order": 2,
+    "tagline": "Music, activism, and life from 012",
+    "lifecycle_stage": "active",
+    "tier": "F0_DAE",
+    "description": "012 personal channel covering music production, political commentary, and creative experiments. The longest-running content lane in the FoundUPS ecosystem.",
+    "launch_readiness": "discoverable_only"
   },
   {
     "foundup_id": "foundups_main",
@@ -10264,7 +10274,12 @@
       "linkedin_foundups",
       "linkedin_esingularity"
     ],
-    "display_order": 3
+    "display_order": 3,
+    "tagline": "The FoundUPS project channel",
+    "lifecycle_stage": "active",
+    "tier": "F0_DAE",
+    "description": "Official FoundUPS YouTube presence. Product updates, ecosystem explainers, and development milestones.",
+    "launch_readiness": "discoverable_only"
   },
   {
     "foundup_id": "antifafm",
@@ -10605,7 +10620,12 @@
     "related_lanes": [
       "move2japan"
     ],
-    "display_order": 4
+    "display_order": 4,
+    "tagline": "24/7 resistance radio",
+    "lifecycle_stage": "proto",
+    "tier": "F0_DAE",
+    "description": "24/7 headless radio broadcaster with visual layers. Bridges Icecast to YouTube Live via FFmpeg. The broadcast stack is real.",
+    "launch_readiness": "discoverable_only"
   },
   {
     "foundup_id": "linkedin_012",
@@ -10639,7 +10659,12 @@
       "linkedin_esingularity",
       "linkedin_tsingularity"
     ],
-    "display_order": 5
+    "display_order": 5,
+    "tagline": "Professional profile and thought leadership",
+    "lifecycle_stage": "staging",
+    "tier": "F0_DAE",
+    "description": "012 LinkedIn professional presence. No video content yet — lane reserved for future cross-platform content bridging.",
+    "launch_readiness": "discoverable_only"
   },
   {
     "foundup_id": "linkedin_esingularity",
@@ -10673,7 +10698,12 @@
       "linkedin_tsingularity",
       "undaodu"
     ],
-    "display_order": 6
+    "display_order": 6,
+    "tagline": "AI education and singularity research",
+    "lifecycle_stage": "staging",
+    "tier": "F0_DAE",
+    "description": "eSingularity LinkedIn page focused on AI education. No video content yet — lane reserved for future content.",
+    "launch_readiness": "discoverable_only"
   },
   {
     "foundup_id": "linkedin_tsingularity",
@@ -10706,7 +10736,12 @@
       "linkedin_012",
       "linkedin_esingularity"
     ],
-    "display_order": 7
+    "display_order": 7,
+    "tagline": "Technological singularity research",
+    "lifecycle_stage": "staging",
+    "tier": "F0_DAE",
+    "description": "tSingularity LinkedIn page focused on technological singularity research. No video content yet — lane reserved.",
+    "launch_readiness": "discoverable_only"
   },
   {
     "foundup_id": "linkedin_foundups",
@@ -10739,6 +10774,11 @@
       "foundups_main",
       "linkedin_esingularity"
     ],
-    "display_order": 8
+    "display_order": 8,
+    "tagline": "FoundUPS company presence on LinkedIn",
+    "lifecycle_stage": "staging",
+    "tier": "F0_DAE",
+    "description": "Official FoundUPS LinkedIn company page. No video content yet — lane reserved for corporate and ecosystem updates.",
+    "launch_readiness": "discoverable_only"
   }
 ]

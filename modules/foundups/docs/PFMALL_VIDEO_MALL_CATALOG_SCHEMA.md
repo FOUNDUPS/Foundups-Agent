@@ -34,6 +34,7 @@ mall-video-catalog.json
 │   ├── Source fields        # source_type, source_id, source_handle
 │   ├── Classification       # category, tags, topic_family
 │   ├── Projection fields    # geo, status, display_order, related_lanes
+│   ├── Entry surface fields  # tagline, description, tier, lifecycle_stage, launch_readiness
 │   ├── Media fields         # poster_url, video_count
 │   └── videos[]             # Video queue
 │       ├── video_id
@@ -69,6 +70,11 @@ mall-video-catalog.json
   "status": "active | placeholder | archived | pending",
   "display_order": "number",
   "related_lanes": ["string (foundup_id references)"],
+  "tagline": "string | null",
+  "description": "string | null",
+  "tier": "string | null",
+  "lifecycle_stage": "string | null",
+  "launch_readiness": "string | null",
   "poster_url": "string",
   "video_count": "number",
   "videos": ["VideoEntry"]
@@ -117,6 +123,18 @@ mall-video-catalog.json
 | `status` | enum | YES | Lane status. See Section 7. |
 | `display_order` | number | YES | Default sort priority (1 = highest). Must be unique. |
 | `related_lanes` | string[] | YES | References to related `foundup_id` values. |
+
+#### Entry Surface Fields (Optional)
+
+These fields enrich the entry page (`foundup.html`) when present. They are optional and additive — the entry page renders gracefully without them.
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `tagline` | string | NO | Short lane description for display. |
+| `description` | string | NO | Longer description of the lane and its content. |
+| `tier` | string | NO | FoundUp tier classification (e.g., `F0_DAE`). |
+| `lifecycle_stage` | string | NO | Lane maturity: `active`, `proto`, `staging`, `incubating`. |
+| `launch_readiness` | string | NO | Entry-page readiness posture: `ready`, `conditional`, `discoverable_only`. |
 
 #### Media Fields
 
@@ -301,6 +319,11 @@ Builder tool: `holo_index/skillz/video_catalog_builder/` (planned)
   "status": "active",
   "display_order": 1,
   "related_lanes": ["undaodu", "linkedin_012"],
+  "tagline": "Expat life and FFCPLN activism from Fukui, Japan",
+  "description": "012 documents life in rural Japan — relocation, culture, and political activism through the FFCPLN movement.",
+  "tier": "F0_DAE",
+  "lifecycle_stage": "active",
+  "launch_readiness": "discoverable_only",
   "poster_url": "/media/posters/move2japan.jpg",
   "video_count": 573,
   "videos": [
