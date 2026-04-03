@@ -842,3 +842,109 @@
   background: #1a1a2e;
   color: rgba(255, 255, 255, 0.9);
 }
+
+/* ========== Saved Videos Section ========== */
+
+.reddog-saved-section {
+  margin-top: 1rem;
+  padding: 0 0.25rem;
+}
+
+.reddog-saved-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.reddog-saved-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.35rem;
+  background: rgba(255, 140, 0, 0.25);
+  border-radius: 0.75rem;
+  color: rgba(255, 200, 100, 1);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.reddog-saved-empty {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1.4;
+  margin: 0.5rem 0;
+}
+
+.reddog-saved-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.reddog-saved-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.reddog-saved-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.reddog-saved-card:active {
+  transform: scale(0.98);
+}
+
+.reddog-saved-thumb {
+  width: 4rem;
+  height: 2.25rem;
+  border-radius: 0.35rem;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.reddog-saved-thumb-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reddog-saved-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.reddog-saved-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reddog-saved-meta {
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -1,5 +1,39 @@
 # Member Area Module Change Log
 
+## [2026-04-03] Saved Videos Surface Phase 1 (Worker C, WSP_97)
+
+**Who**: 0102 (Claude Opus 4.6) — Worker C
+**Type**: Feature (Saved Videos UI)
+**Slice**: `pfMALL_SAVED_VIDEOS_SURFACE_PHASE1`
+**Spec**: WSP_97
+
+**Files Modified**:
+- `public/member/js/account-concierge.js` — Saved Videos section + re-entry logic
+- `public/member/css/account-concierge.css` — Saved card/list styling
+- `public/member/tests/test_account_concierge.py` — 23 new tests
+
+**Surface Added**:
+- Saved Videos section in Red Dog plane (after Channels)
+- Saved count badge
+- Video cards with thumbnail, title, foundupId, savedAt
+- Empty state: "No saved videos yet. Double-tap a video in the player to save it."
+
+**Re-entry Behavior**:
+1. If catalog has the FoundUp with videos → open fullscreen player at saved video index
+2. Fallback → navigate to `/member/foundup.html?id={foundupId}`
+
+**Public API**:
+| Method | Description |
+|--------|-------------|
+| `redDog.openSaved()` | Open plane scrolled to Saved Videos |
+| `redDog.refreshSaved()` | Re-render saved list |
+
+**Command Emitted**: `reenter_saved_video` `{ foundupId, videoId }`
+
+**Tests**: 987 passed (23 new Saved Videos tests)
+
+---
+
 ## [2026-04-03] Shell Bridge Interceptor Phase 1 (Worker F)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker F
