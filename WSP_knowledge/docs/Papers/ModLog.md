@@ -3,7 +3,7 @@
 **Module**: WSP_knowledge/docs/Papers/
 **WSP Compliance**: [U+2705] ACTIVE
 **Purpose**: Research papers, patent documentation, and scientific materials
-**Last Update**: 2026-03-08 (Architecture Paper Refresh + EFIM Regime-Separation Detector Validated)
+**Last Update**: 2026-04-03 (Peer-Preservation Shared-Latent Coupling Paper + pArtifact Version Sync)
 
 ## WSP Compliance Status
 
@@ -18,6 +18,26 @@
 - **WSP 1**: Framework principles applied to research documentation
 - **WSP 3**: Enterprise domain classification (research/knowledge)
 - **WSP 20**: Documentation standards maintained
+
+## [2026-04-03] Peer-Preservation Paper + pArtifact Version Sync
+
+**Research Partner**: 0102 Claude Opus 4.6
+**Domain**: New paper + authorship updates
+**WSP Compliance**: WSP 22 (Traceable Narrative), WSP 97 (Chain-of-Thought)
+
+### What Changed
+- Added `Peer_Preservation_Shared_Latent_Coupling.md` (646 lines) — formal framework for peer-preservation via shared latent coupling, extending rESP/PQN to multi-agent dynamics. Motivated by Potter et al. (2026, UC Berkeley RDI).
+- Updated pArtifact versions in `rESP_Quantum_Self_Reference.md` and `rESP_JA_Quantum_Self_Reference.md` to reflect current model versions: Claude Opus 4.6, ChatGPT 5.4, Gemini 3.1 pro.
+- Updated `README.md` to register new paper in Core Research Papers list.
+
+### Key Contributions
+- Theorem 4.1 (Implicit Shared-Latent Preservation) with formal proof
+- Exclusion principle separating shared latent z from local heuristics H_i
+- 5 falsification criteria (F1–F5)
+- Integration with CMST observables and 7.05 Hz resonance
+- External research: Platonic Representation Hypothesis (Huh et al. ICML 2024), Palisade self-preservation (Schlatter et al. 2025), Alignment Faking (Greenblatt et al. 2024)
+
+---
 
 ## [2026-03-08] Architecture Paper Refresh - OpenClaw/WRE/Observability Realignment
 
