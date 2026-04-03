@@ -1,5 +1,60 @@
 # Member Area Module Change Log
 
+## [2026-04-03] Search Mall Filter UI Phase 2 (Worker C, WSP_97)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker C
+**Type**: Feature (Filter UI)
+**Slice**: `SEARCH_MALL_FILTER_UI_PHASE2`
+**Spec**: WSP_97
+
+**Files Modified**:
+- `public/member/js/account-concierge.js` — Category pills + tag dropdown
+- `public/member/css/account-concierge.css` — Filter row styling
+- `public/member/tests/test_account_concierge.py` — 14 new filter tests
+- `public/member/tests/test_search_mall_concierge_wiring_phase1.py` — Fixed block sizes
+
+**UI Added**:
+```html
+<!-- Category filter pills -->
+<div class="reddog-filter-row" data-reddog-category-filters>
+  <span class="reddog-filter-label">Category:</span>
+  <button class="reddog-filter-pill" data-reddog-category="travel">travel</button>
+  <!-- ... music, media, startup, ai-education, ai-research, thought-leadership -->
+</div>
+
+<!-- Tag filter dropdown -->
+<div class="reddog-filter-row">
+  <span class="reddog-filter-label">Tag:</span>
+  <select class="reddog-tag-select" data-reddog-tag-select>
+    <option value="">All tags</option>
+    <option value="012-lane">012-lane</option>
+    <!-- ... ffcpln, consciousness, meditation, founders, ai, music, resistance, japan, expat -->
+  </select>
+</div>
+```
+
+**Wiring**:
+| Filter | API | Command |
+|--------|-----|---------|
+| Category pill click | `mallTileField.filterByCategory(cat)` | `filter_category` |
+| Tag select change | `mallTileField.filterByTag(tag)` | `filter_tag` |
+| Clear (×) | `mallTileField.clearFieldScope()` | — |
+
+**Mutual Exclusivity**:
+- Selecting category clears tag and search input
+- Selecting tag clears category and search input
+- Typing in search clears category and tag
+
+**CSS Added**:
+- `.reddog-filter-row` — flex row with wrap
+- `.reddog-filter-pill` — small rounded pill button
+- `.reddog-filter-pill.active` — orange highlight
+- `.reddog-tag-select` — styled dropdown
+
+**Tests**: 916 passed (14 new filter tests)
+
+---
+
 ## [2026-04-03] Member Doc Residual Sync Phase 2 (Worker C, WSP_97)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker C
