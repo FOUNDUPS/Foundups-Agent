@@ -300,6 +300,9 @@ class TestThemeFallbackColors:
         # Video Mall catalog lane themes
         "move2japan", "undaodu", "foundups_main",
         "linkedin_012", "linkedin_esingularity", "linkedin_tsingularity", "linkedin_foundups",
+        # Category-derived fallback themes
+        "cat-travel", "cat-music", "cat-startup", "cat-media",
+        "cat-thought-leadership", "cat-ai-education", "cat-ai-research",
     ]
 
     @pytest.fixture(autouse=True)
