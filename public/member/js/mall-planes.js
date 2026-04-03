@@ -69,17 +69,23 @@
 
   // ---- render ----
   function renderView(item) {
+    var displayName = item.name || item.title || item.entity || item.foundup_id;
+    var displayToken = item.token_symbol || item.source_handle || '';
+    var displayHero = item.hero_label || '';
+    var displayTagline = item.tagline || (item.entity ? item.entity + (item.geo ? ' \u00b7 ' + item.geo : '') : '');
+    var displayReadiness = item.launch_readiness || item.status || 'active';
     var routeHint = item.routing_prefix ? ' \u2192 ' + esc(item.routing_prefix) : '';
+    var videoHint = item.video_count ? ' \u00b7 ' + item.video_count + ' videos' : '';
     body.innerHTML =
-      '<div class="fv-hero theme-' + esc(item.theme) + '">' +
-        '<div class="fv-token">' + esc(item.token_symbol) + '</div>' +
-        '<div class="fv-hero-label">' + esc(item.hero_label) + '</div>' +
-        '<h2 class="fv-name">' + esc(item.name) + '</h2>' +
-        '<span class="fv-badge fv-badge-' + esc(item.launch_readiness) + '">' +
-          esc(READINESS_LABELS[item.launch_readiness] || item.launch_readiness) +
+      '<div class="fv-hero theme-' + esc(item.theme || 'default') + '">' +
+        '<div class="fv-token">' + esc(displayToken) + '</div>' +
+        '<div class="fv-hero-label">' + esc(displayHero) + '</div>' +
+        '<h2 class="fv-name">' + esc(displayName) + '</h2>' +
+        '<span class="fv-badge fv-badge-' + esc(displayReadiness) + '">' +
+          esc(READINESS_LABELS[displayReadiness] || displayReadiness) +
         '</span>' +
       '</div>' +
-      '<p class="fv-tagline">' + esc(item.tagline) + '</p>' +
+      '<p class="fv-tagline">' + esc(displayTagline) + esc(videoHint) + '</p>' +
       '<div class="fv-actions">' +
         '<a href="/member/foundup.html?id=' + encodeURIComponent(item.foundup_id) + '" class="fv-open-link">Open FoundUp' + routeHint + '</a>' +
       '</div>' +

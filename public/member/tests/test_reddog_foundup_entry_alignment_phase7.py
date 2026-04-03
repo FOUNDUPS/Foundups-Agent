@@ -337,7 +337,7 @@ class TestNoRegression:
 
     def test_catalog_fetch_preserved(self):
         content = FOUNDUP_HTML.read_text(encoding="utf-8")
-        assert "mall-catalog.json" in content
+        assert "mall-video-catalog.json" in content
 
     def test_render_entry_preserved(self):
         content = FOUNDUP_HTML.read_text(encoding="utf-8")
