@@ -1,5 +1,61 @@
 # Member Area Module Change Log
 
+## [2026-04-03] Shell Bridge Interceptor Phase 1 (Worker F)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker F
+**Type**: Feature (External FoundUp Integration)
+**Slice**: `PFMALL_SHELL_BRIDGE_INTERCEPTOR_PHASE1`
+**Protocol**: WSP 15, WSP 97
+
+**Purpose**: Shell-side postMessage listener for external FoundUp iframes. Intercepts `agent_request` events and dispatches to backend, then posts `agent_response` back to origin iframe.
+
+**Contract**: `holo_index/docs/EXTERNAL_FOUNDUP_BRIDGE_CONTRACT.md`
+
+**Files Created**:
+- `public/member/js/shell-bridge-interceptor.js` — Main interceptor module
+
+**Files Modified**:
+- `public/member/index.html` — Added script include (line 1038)
+- `public/member/foundup.html` — Added script include (line 786)
+
+**Message Structure** (per bridge contract):
+```
+Inbound:  { type: "agent_request", route: "openclaw_search", payload: { action: "..." } }
+Outbound: { type: "agent_response", status: "success|error", data: {...} }
+```
+
+**Supported Routes**:
+| Route | Actions |
+|-------|---------|
+| `openclaw_search` | `semantic_search`, `wsp_lookup` |
+
+**Features**:
+- Origin validation (allowlist + same-origin)
+- Stub responses for Phase 1 (backend not wired)
+- `window.shellBridgeInterceptor` API for runtime config
+- Debug mode via `?debug=1`
+
+**Phase 2 Integration Points**:
+- `window.shellBridgeBackend.search()` — Real semantic search
+- `window.shellBridgeBackend.wspLookup()` — Real WSP lookup
+- `CONFIG.backendUrl` — Backend API endpoint
+
+**Tests**: 37 tests in `test_shell_bridge_interceptor.py`
+
+| Test Class | Count | Coverage |
+|------------|-------|----------|
+| TestInterceptorExists | 4 | File structure, IIFE, init |
+| TestMessageTypeHandling | 3 | Type validation |
+| TestRouteHandling | 4 | Route dispatch |
+| TestActionHandlers | 6 | semantic_search, wsp_lookup |
+| TestResponseFormat | 5 | Contract Section 3.1 |
+| TestOriginValidation | 4 | Security |
+| TestStubMode | 4 | Phase 1 stubs |
+| TestPublicAPI | 4 | window.shellBridgeInterceptor |
+| TestHTMLIntegration | 3 | HTML includes |
+
+---
+
 ## [2026-04-03] Fullscreen Player Save Share History Phase 2 (Worker F)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker F
