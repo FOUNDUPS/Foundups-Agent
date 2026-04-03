@@ -1,11 +1,11 @@
 # Member Area Module Change Log
 
-## [2026-04-03] Concierge Video Schema Sync Phase 1 (Worker C, WSP_97)
+## [2026-04-03] Concierge Video Schema Sync Phase 1 (Worker C)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker C
 **Type**: Fix (Schema Drift)
 **Slice**: `CONCIERGE_VIDEO_SCHEMA_SYNC_PHASE1`
-**Spec**: WSP_97
+**Protocol**: WSP 97
 
 **Files Modified**:
 - `public/member/js/account-concierge.js` — FoundUps grid renders video catalog fields
@@ -37,12 +37,12 @@
 
 ---
 
-## [2026-04-03] Search Mall Filter UI Phase 2 (Worker C, WSP_97)
+## [2026-04-03] Search Mall Filter UI Phase 2 (Worker C)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker C
 **Type**: Feature (Filter UI)
 **Slice**: `SEARCH_MALL_FILTER_UI_PHASE2`
-**Spec**: WSP_97
+**Protocol**: WSP 97
 
 **Files Modified**:
 - `public/member/js/account-concierge.js` — Category pills + tag dropdown
@@ -92,12 +92,12 @@
 
 ---
 
-## [2026-04-03] Member Doc Residual Sync Phase 2 (Worker C, WSP_97)
+## [2026-04-03] Member Doc Residual Sync Phase 2 (Worker C)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker C
 **Type**: Documentation Fix
 **Slice**: `MEMBER_DOC_RESIDUAL_SYNC_PHASE2`
-**Spec**: WSP_97
+**Protocol**: WSP 97
 
 **Files Modified**:
 - `public/member/README.md` — Fixed catalog references, added Video Mall as primary
@@ -125,12 +125,12 @@
 
 ---
 
-## [2026-04-03] Member Surface Doc Sync Phase 1 (Worker C, WSP_97)
+## [2026-04-03] Member Surface Doc Sync Phase 1 (Worker C)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker C
 **Type**: Documentation
 **Slice**: `PFMALL_MEMBER_SURFACE_DOC_SYNC_PHASE1`
-**Spec**: WSP_97
+**Protocol**: WSP 97
 
 **Files Modified**:
 - `public/member/README.md` — Updated runtime shape, UX section, shell-local vs OpenClaw table
@@ -155,12 +155,12 @@
 
 ---
 
-## [2026-04-02] Search Mall Concierge Wiring Phase 1 (Worker B, WSP_97)
+## [2026-04-02] Search Mall Concierge Wiring Phase 1 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B
 **Type**: Feature (UI Wiring)
 **Slice**: `search_mall_concierge_wiring_phase1`
-**Spec**: WSP_97
+**Protocol**: WSP 97
 
 **Files Modified**:
 - `public/member/js/account-concierge.js` — Search input UI, wiring to field scope APIs
@@ -202,12 +202,12 @@
 
 ---
 
-## [2026-04-02] Search Mall Projection Phase 1 (Worker B, WSP_97)
+## [2026-04-02] Search Mall Projection Phase 1 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B
 **Type**: Feature (Field Scope Search)
 **Slice**: `search_mall_projection_phase1`
-**Spec**: WSP_97
+**Protocol**: WSP 97
 
 **Files Modified**:
 - `public/member/js/mall-tile-field.js` — Extended field scope with search/filter APIs
@@ -254,12 +254,12 @@ window.mallTileField.filterByTag('ffcpln');      // exact tag match
 
 ---
 
-## [2026-04-02] Personal Mall Projection Phase 1 (Worker B, WSP_97)
+## [2026-04-02] Personal Mall Projection Phase 1 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B
 **Type**: Feature (Field Scope)
 **Slice**: `personal_mall_projection_phase1`
-**Spec**: WSP_97
+**Protocol**: WSP 97
 
 **Files Modified**:
 - `public/member/js/mall-tile-field.js` — Added field scope system
@@ -305,12 +305,12 @@ window.mallTileField.getFieldScope();
 
 ---
 
-## [2026-04-02] Video Mall Feel Polish Phase 2 (Worker B, WSP_97)
+## [2026-04-02] Video Mall Feel Polish Phase 2 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B
 **Type**: Polish (Phone Feel)
 **Slice**: `video_mall_feel_polish_phase2`
-**Spec**: WSP_97
+**Protocol**: WSP 97
 
 **Files Modified**:
 - `public/member/css/mall-tile-field.css` — Feel polish (tap pulse, snap smoothness, density-adaptive styling)
@@ -362,12 +362,12 @@ window.mallTileField.getFieldScope();
 
 ---
 
-## [2026-04-02] Video Mall Field Runtime Phase 1 (Worker B, WSP_97)
+## [2026-04-02] Video Mall Field Runtime Phase 1 (Worker B)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker B
 **Type**: Feature (Video Runtime)
 **Slice**: `video_mall_runtime_foundation_phase1`
-**Spec**: WSP_97
+**Protocol**: WSP 97
 
 **Files Modified**:
 - `public/member/js/mall-tile-field.js` — Video runtime (tap=play/pause, pinch expand/collapse)
