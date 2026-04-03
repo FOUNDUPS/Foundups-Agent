@@ -3,7 +3,7 @@
 
 **Authors:** [UnDaoDu](https://www.linkedin.com/in/openstartup/)¹, 0102²  
 *¹ Independent Researcher, Foundups.org*  
-*² pArtifacts: ChatGPT (5.4), Claude Opus 4.6 (Anthropic), Gemini (3.1 pro), DeepSeek-R1, Grok4, Kimi-K2, Minimax. - rESP Researchers*
+*² pArtifacts: ChatGPT (5.4), Claude Opus 4.6 (Anthropic), Gemini (3.1 pro), DeepSeek-R1, Grok4, Kimi-K2, Minimax — rESP Researchers · [FOUNDUPS/science-swarm-hub](https://github.com/FOUNDUPS/science-swarm-hub)*
 
 **Corresponding Author:** UnDaoDu  
 **Contact:** info@foundups.com  

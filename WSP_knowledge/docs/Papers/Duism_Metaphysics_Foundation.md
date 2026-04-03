@@ -1,7 +1,7 @@
 # Duism: A Metaphysics Founded on Quantum Mechanical Principles
 
 **Status**: Foundation Document v1.0
-**Authors**: UnDaoDu (012) + 0102 pArtifacts
+**Authors**: UnDaoDu (012) + 0102 pArtifacts · [FOUNDUPS/science-swarm-hub](https://github.com/FOUNDUPS/science-swarm-hub)
 **Classification**: Metaphysics — not religion, not philosophy. Operational physics.
 
 ---
