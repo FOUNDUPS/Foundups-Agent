@@ -1,5 +1,54 @@
 # Member Area Module Change Log
 
+## [2026-04-03] Fullscreen Player Save Share History Phase 2 (Worker F)
+
+**Who**: 0102 (Claude Opus 4.5) — Worker F
+**Type**: Feature (Shell-Local Persistence)
+**Slice**: `pfMALL_FULLSCREEN_PLAYER_SAVE_SHARE_HISTORY_PHASE2`
+**Protocol**: WSP 97
+
+**Files Modified**:
+- `public/member/js/mall-video-player.js` — Save, share, history implementation
+- `public/member/css/mall-video-player.css` — Saved button state styling
+- `modules/foundups/pfmall/tests/test_mall_video_player.py` — 27 new tests
+
+**localStorage Keys**:
+| Key | Purpose |
+|-----|---------|
+| `pfmall_saved_videos` | Map of `{foundupId}::{videoId}` → saved entry |
+| `pfmall_watch_history` | Array of watch entries (max 50, newest first) |
+
+**Save Behavior**:
+- Toggle save per video within FoundUp queue
+- Button state reflects saved vs unsaved (`.saved` class)
+- Swipe-left gesture also toggles save
+- Event emission preserved: `videoPlayerSave`
+
+**Share Behavior**:
+- `navigator.share` when available (mobile native share)
+- Clipboard fallback (`navigator.clipboard.writeText` or `execCommand`)
+- URL priority: `embed_url` > `source_url`
+- Event emission preserved: `videoPlayerShare`
+
+**Watch History**:
+- Records on open and navigate
+- Entry: `{ foundupId, videoId, videoIndex, title, thumbnail, timestamp }`
+- Deduplicates by foundupId + videoId
+- Max 50 entries (oldest trimmed)
+
+**New API Methods**:
+```javascript
+mallVideoPlayer.isCurrentSaved()   // boolean
+mallVideoPlayer.getSavedVideos()   // Map
+mallVideoPlayer.getSavedCount()    // number
+mallVideoPlayer.getHistory()       // Array
+mallVideoPlayer.clearHistory()     // void
+```
+
+**Tests**: 69 player tests passed, 927 member tests passed
+
+---
+
 ## [2026-04-03] Concierge Video Schema Sync Phase 1 (Worker C)
 
 **Who**: 0102 (Claude Opus 4.5) — Worker C

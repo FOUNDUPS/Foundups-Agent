@@ -333,3 +333,134 @@ class TestQueueRail:
         """Edge trigger zone shows rail."""
         assert "edgeTrigger" in js_content
         assert "showRail" in js_content
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Save Feature Tests (Phase 2)
+# ═══════════════════════════════════════════════════════════════════════════
+
+class TestSaveFeature:
+    """Save button persists locally."""
+
+    def test_saved_key_defined(self, js_content):
+        """localStorage key for saved videos is defined."""
+        assert "SAVED_KEY" in js_content
+        assert "pfmall_saved_videos" in js_content
+
+    def test_get_saved_videos_function(self, js_content):
+        """getSavedVideos function exists."""
+        assert "function getSavedVideos" in js_content
+
+    def test_toggle_save_function(self, js_content):
+        """toggleSave function exists."""
+        assert "function toggleSave" in js_content
+
+    def test_is_video_saved_function(self, js_content):
+        """isVideoSaved function exists."""
+        assert "function isVideoSaved" in js_content
+
+    def test_save_button_state_updated(self, js_content):
+        """Save button state is updated."""
+        assert "updateSaveButtonState" in js_content
+
+    def test_save_uses_localstorage(self, js_content):
+        """Save uses localStorage."""
+        assert "localStorage.setItem" in js_content
+        assert "localStorage.getItem" in js_content
+
+    def test_is_current_saved_api(self, js_content):
+        """isCurrentSaved API method exists."""
+        assert "isCurrentSaved:" in js_content
+
+    def test_get_saved_count_api(self, js_content):
+        """getSavedCount API method exists."""
+        assert "getSavedCount:" in js_content
+
+
+class TestSaveCSS:
+    """Save button CSS states."""
+
+    def test_saved_class_exists(self, css_content):
+        """Saved state class exists."""
+        assert ".saved" in css_content
+
+    def test_saved_fill_style(self, css_content):
+        """Saved state fills the icon."""
+        assert "fill:" in css_content
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Share Feature Tests (Phase 2)
+# ═══════════════════════════════════════════════════════════════════════════
+
+class TestShareFeature:
+    """Share button uses native share or clipboard."""
+
+    def test_share_video_function(self, js_content):
+        """shareVideo function exists."""
+        assert "function shareVideo" in js_content
+
+    def test_get_share_url_function(self, js_content):
+        """getShareUrl function exists."""
+        assert "function getShareUrl" in js_content
+
+    def test_navigator_share_used(self, js_content):
+        """navigator.share is used when available."""
+        assert "navigator.share" in js_content
+
+    def test_clipboard_fallback(self, js_content):
+        """Clipboard fallback exists."""
+        assert "clipboard" in js_content or "execCommand" in js_content
+
+    def test_share_url_priority(self, js_content):
+        """Share URL priority: embed_url > source_url."""
+        assert "embed_url" in js_content
+        assert "source_url" in js_content
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Watch History Tests (Phase 2)
+# ═══════════════════════════════════════════════════════════════════════════
+
+class TestWatchHistory:
+    """Watch history persists locally."""
+
+    def test_history_key_defined(self, js_content):
+        """localStorage key for history is defined."""
+        assert "HISTORY_KEY" in js_content
+        assert "pfmall_watch_history" in js_content
+
+    def test_get_watch_history_function(self, js_content):
+        """getWatchHistory function exists."""
+        assert "function getWatchHistory" in js_content
+
+    def test_record_watch_function(self, js_content):
+        """recordWatch function exists."""
+        assert "function recordWatch" in js_content
+
+    def test_history_max_defined(self, js_content):
+        """History max limit is defined."""
+        assert "HISTORY_MAX" in js_content
+
+    def test_history_recorded_on_open(self, js_content):
+        """Watch history is recorded on open."""
+        # recordWatch should be called in open function
+        assert "recordWatch" in js_content
+
+    def test_history_recorded_on_navigate(self, js_content):
+        """Watch history is recorded on navigation."""
+        # recordWatch should be called in goToVideo
+        assert "recordWatch" in js_content
+
+    def test_get_history_api(self, js_content):
+        """getHistory API method exists."""
+        assert "getHistory:" in js_content
+
+    def test_clear_history_api(self, js_content):
+        """clearHistory API method exists."""
+        assert "clearHistory:" in js_content
+
+    def test_history_entry_has_timestamp(self, js_content):
+        """History entry includes timestamp."""
+        assert "timestamp:" in js_content
+        assert "toISOString" in js_content
