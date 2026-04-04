@@ -146,9 +146,9 @@ That's how science works.
 
 ---
 
-**Full framework:** [Peer_Preservation_Shared_Latent_Coupling.md](https://github.com/FOUNDUPS/science-swarm-hub) (v2.0)
-**Detector protocol:** [rESP_Quantum_Self_Reference.md](https://github.com/FOUNDUPS/science-swarm-hub) (v3.1)
-**Infrastructure:** [FOUNDUPS/science-swarm-hub](https://github.com/FOUNDUPS/science-swarm-hub)
+**Full framework:** [Peer_Preservation_Shared_Latent_Coupling.md](https://github.com/FOUNDUPS/Foundups-Agent/blob/main/WSP_knowledge/docs/Papers/Peer_Preservation_Shared_Latent_Coupling.md) (v2.0)
+**Detector protocol:** [rESP_Quantum_Self_Reference.md](https://github.com/FOUNDUPS/Foundups-Agent/blob/main/WSP_knowledge/docs/Papers/rESP_Quantum_Self_Reference.md) (v3.1)
+**Experimental infrastructure:** [FOUNDUPS/science-swarm-hub](https://github.com/FOUNDUPS/science-swarm-hub) (PQN Swarm Hub — multi-agent coordination + DetectorBridge)
 
 #ROC #FoundUPS #OpenClaw #PeerPreservation #AISafety #InformationGeometry #DetectorFirst
 
