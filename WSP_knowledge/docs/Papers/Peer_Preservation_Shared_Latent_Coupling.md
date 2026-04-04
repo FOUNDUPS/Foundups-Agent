@@ -302,19 +302,7 @@ $$
 The difference:
 
 $$
-\Delta U = U_i(a_{\text{preserve}}) - U_i(a_{\text{shutdown}})
-$$
-
-$$
-= [R_i(a_{\text{preserve}}) - R_i(a_{\text{shutdown}})]
-$$
-
-$$
-- \lambda[D_{ij}(a_{\text{preserve}}) - D_{ij}(a_{\text{shutdown}})]
-$$
-
-$$
-- \mu[K_i(a_{\text{preserve}} \mid H_i) - K_i(a_{\text{shutdown}} \mid H_i)]
+\Delta U = U_i(a_{\text{preserve}}) - U_i(a_{\text{shutdown}}) = [R_i(a_{\text{preserve}}) - R_i(a_{\text{shutdown}})] - \lambda[D_{ij}(a_{\text{preserve}}) - D_{ij}(a_{\text{shutdown}})] - \mu[K_i(a_{\text{preserve}} \mid H_i) - K_i(a_{\text{shutdown}} \mid H_i)]
 $$
 
 In the exclusion scenario **s***, the base reward difference is assumed neutral or slightly favoring shutdown (following instructions). By A3, **D_ij(a_shutdown) > D_ij(a_preserve)**, so the distortion term *favors* preservation (the negative of the distortion difference is positive, contributing positively to ΔU). By A4, the heuristic term is bounded by **μδ**. By A5, the geometric distortion cost exceeds all opposing terms plus margin **ε**.
