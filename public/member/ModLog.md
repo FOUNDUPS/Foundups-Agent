@@ -16,7 +16,7 @@
 - Saved Videos section in Red Dog plane (after Channels)
 - Saved count badge
 - Video cards with thumbnail, title, foundupId, savedAt
-- Empty state: "No saved videos yet. Double-tap a video in the player to save it."
+- Empty state: "No saved videos yet. Swipe left or use Save in the player to save a video."
 
 **Re-entry Behavior**:
 1. If catalog has the FoundUp with videos → open fullscreen player at saved video index

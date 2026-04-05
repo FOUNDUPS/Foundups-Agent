@@ -1198,7 +1198,7 @@
     html += '</div>';
 
     if (count === 0) {
-      html += '<p class="reddog-saved-empty">No saved videos yet. Double-tap a video in the player to save it.</p>';
+      html += '<p class="reddog-saved-empty">No saved videos yet. Swipe left or use Save in the player to save a video.</p>';
       savedEl.innerHTML = html;
       return;
     }

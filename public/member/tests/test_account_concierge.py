@@ -526,7 +526,7 @@ class TestSavedVideosSurface:
     def test_empty_state_message(self):
         """Empty state message is present."""
         content = CONCIERGE_JS.read_text(encoding="utf-8")
-        assert "No saved videos yet" in content
+        assert "No saved videos yet. Swipe left or use Save in the player to save a video." in content
 
     def test_saved_card_rendered(self):
         """Saved video cards are rendered."""
