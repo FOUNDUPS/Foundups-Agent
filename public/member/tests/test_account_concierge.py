@@ -17,6 +17,7 @@ import pytest
 MEMBER_ROOT = Path(__file__).resolve().parents[1]
 CONCIERGE_JS = MEMBER_ROOT / "js" / "account-concierge.js"
 CONCIERGE_CSS = MEMBER_ROOT / "css" / "account-concierge.css"
+MALL_VIDEO_PLAYER_JS = MEMBER_ROOT / "js" / "mall-video-player.js"
 INDEX_HTML = MEMBER_ROOT / "index.html"
 FOUNDUP_HTML = MEMBER_ROOT / "foundup.html"
 
@@ -749,3 +750,56 @@ class TestWatchHistoryCSS:
     def test_history_clear_styles(self):
         content = CONCIERGE_CSS.read_text(encoding="utf-8")
         assert ".reddog-history-clear" in content
+
+    def test_continue_badge_styles(self):
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert ".reddog-history-continue-badge" in content
+
+
+class TestWatchHistoryResumePosition:
+    """pfMALL_RESUME_POSITION_PHASE1 — shell-local continue-watching."""
+
+    def test_format_continue_at_in_js(self):
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "function formatContinueAt" in content
+        assert "Continue at" in content
+
+    def test_history_card_continue_badge_markup(self):
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "reddog-history-continue-badge" in content
+        assert "entry.playbackPosition" in content
+
+    def test_video_player_close_refreshes_history(self):
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "videoPlayerClose" in content
+        assert "renderWatchHistory()" in content
+
+    def test_reenter_passes_resume_to_open(self):
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "resumeOpt" in content
+        assert "player.open(foundupId, foundup.videos, startIdx, resumeOpt)" in content
+
+
+class TestMallVideoPlayerResume:
+    """Static checks on mall-video-player resume behavior."""
+
+    def test_player_js_exists(self):
+        assert MALL_VIDEO_PLAYER_JS.is_file()
+
+    def test_resume_helpers_present(self):
+        content = MALL_VIDEO_PLAYER_JS.read_text(encoding="utf-8")
+        assert "MIN_RESUME_SECONDS" in content
+        assert "COMPLETE_RATIO" in content
+        assert "normalizeResumeSeconds" in content
+        assert "mergeHistoryResume" in content
+        assert "flushCurrentPlaybackPosition" in content
+        assert "playbackPosition" in content
+
+    def test_open_accepts_resume_opts(self):
+        content = MALL_VIDEO_PLAYER_JS.read_text(encoding="utf-8")
+        assert "resumeOpts" in content
+        assert "pendingResumeSeconds" in content
+
+    def test_embed_clears_resume(self):
+        content = MALL_VIDEO_PLAYER_JS.read_text(encoding="utf-8")
+        assert "cannot read playback time" in content or "resume N/A" in content

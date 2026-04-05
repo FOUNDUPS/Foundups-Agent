@@ -110,7 +110,7 @@ The primary public API for the unified Red Dog plane. All concierge interactions
 | Saved Videos | `mallVideoPlayer.getSavedVideos()` (localStorage) | Reconstruct queue from catalog, open player |
 | Recently Watched | `mallVideoPlayer.getHistory()` (localStorage) | Reconstruct queue from catalog, open player |
 
-Both surfaces render cards with thumbnail, title, and meta. Click-to-reenter opens the fullscreen player at the saved/watched video's position within its FoundUp queue.
+Both surfaces render cards with thumbnail, title, and meta. **Recently Watched** cards may show a **Continue at m:ss** badge when `playbackPosition` is valid (local HTML5 progress only). Click-to-reenter opens the player at the matching queue index and seeks to `playbackPosition` when present and valid (file sources only).
 
 ---
 
@@ -198,7 +198,7 @@ Fullscreen video player with queue rail. Queue-constrained to single FoundUp.
 
 | Method | Description |
 |--------|-------------|
-| `open(foundupId, queue, startIndex)` | Open player with FoundUp queue |
+| `open(foundupId, queue, startIndex, resumeOpts?)` | Open player with FoundUp queue. Optional `resumeOpts`: `{ resumeSeconds: number }` (HTML5 file sources only; embeds ignore) |
 | `close()` | Exit fullscreen |
 | `goToVideo(index)` | Navigate to video index |
 | `next()` | Next video in queue |
@@ -219,7 +219,7 @@ Fullscreen video player with queue rail. Queue-constrained to single FoundUp.
 | Key | Structure |
 |-----|-----------|
 | `pfmall_saved_videos` | `{ "{foundupId}::{videoId}": { foundupId, videoId, title, thumbnail, savedAt } }` |
-| `pfmall_watch_history` | `[{ foundupId, videoId, videoIndex, title, thumbnail, timestamp }, ...]` |
+| `pfmall_watch_history` | `[{ foundupId, videoId, videoIndex, title, thumbnail, timestamp, playbackPosition? }, ...]` — `playbackPosition` is shell-local seconds for **direct file** (`<video>`) items only; omitted or cleared when below resume threshold or near end; **not** set for iframe embeds (cannot read time truthfully). |
 
 **Gesture Semantics**:
 | Gesture | Action |

@@ -1315,6 +1315,14 @@
     renderWatchHistory();
   }
 
+  /** Match mall-video-player MIN_RESUME_SECONDS (5) — only then show “Continue at …”. */
+  function formatContinueAt(seconds) {
+    if (seconds == null || typeof seconds !== 'number' || isNaN(seconds) || seconds < 5) return '';
+    var m = Math.floor(seconds / 60);
+    var s = Math.floor(seconds % 60);
+    return 'Continue at ' + m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
   function renderWatchHistory() {
     if (!historyEl) return;
 
@@ -1354,6 +1362,10 @@
       html += '<div class="reddog-history-info">';
       html += '<span class="reddog-history-title">' + title + '</span>';
       html += '<span class="reddog-history-meta">' + foundupId + (watchDate ? ' \u00b7 ' + watchDate : '') + '</span>';
+      var contLabel = formatContinueAt(entry.playbackPosition);
+      if (contLabel) {
+        html += '<span class="reddog-history-continue-badge">' + esc(contLabel) + '</span>';
+      }
       html += '</div>';
       html += '</button>';
     });
@@ -1386,6 +1398,18 @@
 
     // Try to reconstruct queue from catalog and open fullscreen player
     var player = window.mallVideoPlayer;
+    var resumeOpt = null;
+    if (player && typeof player.getHistory === 'function') {
+      var hist = player.getHistory();
+      for (var hi = 0; hi < hist.length; hi++) {
+        if (hist[hi].foundupId === foundupId && hist[hi].videoId === videoId) {
+          if (typeof hist[hi].playbackPosition === 'number' && !isNaN(hist[hi].playbackPosition)) {
+            resumeOpt = { resumeSeconds: hist[hi].playbackPosition };
+          }
+          break;
+        }
+      }
+    }
     if (player && typeof player.open === 'function' && storedCatalog) {
       var foundup = null;
       for (var i = 0; i < storedCatalog.length; i++) {
@@ -1406,7 +1430,7 @@
           }
         }
         closePlane();
-        player.open(foundupId, foundup.videos, startIdx);
+        player.open(foundupId, foundup.videos, startIdx, resumeOpt);
         return;
       }
     }
@@ -1415,6 +1439,10 @@
     closePlane();
     window.location.href = '/member/foundup.html?id=' + encodeURIComponent(foundupId);
   }
+
+  window.addEventListener('videoPlayerClose', function () {
+    if (historyEl) renderWatchHistory();
+  });
 
   function clearWatchHistory() {
     var player = window.mallVideoPlayer;

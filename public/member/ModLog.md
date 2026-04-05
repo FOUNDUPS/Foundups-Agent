@@ -1,5 +1,15 @@
 # Member Area Module Change Log
 
+## [2026-04-05] Resume position Phase 1 (Worker F, WSP 97)
+
+**Who**: 0102 — Worker F  
+**Slice**: `pfMALL_RESUME_POSITION_PHASE1`  
+**What**: `playbackPosition` on `pfmall_watch_history` for HTML5 file sources; flush on close / queue change; seek on re-entry; **Continue at m:ss** badge in Recently Watched; `videoPlayerClose` refreshes history list; `open(..., { resumeSeconds })`.
+
+**Files**: `js/mall-video-player.js`, `js/account-concierge.js`, `css/account-concierge.css`, `INTERFACE.md`, `tests/test_account_concierge.py`, `modules/foundups/docs/PFMALL_FULLSCREEN_PLAYER_CONTRACT.md`.
+
+---
+
 ## [2026-04-05] Shell bridge backend registration seam (Worker H, WSP 97)
 
 **Who**: 0102 — Worker H  

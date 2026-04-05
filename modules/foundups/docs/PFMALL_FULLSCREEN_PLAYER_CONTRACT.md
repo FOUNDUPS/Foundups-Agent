@@ -110,6 +110,13 @@ Exit methods:
 4. Queue and state cleared
 5. Dispatches `videoPlayerClose` CustomEvent
 
+### 6.1 Resume position (Phase 1, shell-local)
+
+- Optional **continue-watching** for **`pfmall_watch_history`** only; same `localStorage` key, entries may include `playbackPosition` (seconds).
+- **Written** on exit (`close`) and when **changing** the active queue index (`goToVideo`), for **HTML5 `<video>`** sources only; **not** for cross-origin embeds (no guessed timestamps).
+- **Normalized away** when progress is below ~5s or at or above ~97% of duration (treated as finished).
+- **Re-entry**: `mallVideoPlayer.open(foundupId, queue, startIndex, { resumeSeconds })` seeks after metadata load when applicable.
+
 ---
 
 ## 7. Gesture Semantics
