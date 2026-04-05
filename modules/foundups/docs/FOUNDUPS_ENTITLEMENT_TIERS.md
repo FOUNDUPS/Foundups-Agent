@@ -69,7 +69,7 @@ Community ──[012 assigns]──→ Operator/Core
 |------|-------------|-------|
 | Guest | (not on Discord) | — |
 | Visitor | (not on Discord) | — |
-| Community (new) | @Unverified → @Member | Reaction role in #start-here |
+| Community (new) | @Unverified → @Stakeholder | Reaction role in #start-here |
 | Community (active) | @Contributor | Earned via GitHub activity |
 | Community (trusted) | @Core | Manual promotion by 012 |
 | Stakeholder | @Stakeholder | Mirror only — PWA is authoritative |

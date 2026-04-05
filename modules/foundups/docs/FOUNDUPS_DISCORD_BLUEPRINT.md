@@ -80,16 +80,10 @@ SCIENCE SWARM HUB            ← first FoundUp
 | `@Operator` | Red | Full admin | 012 only |
 | `@Core` | Gold | Long-term trusted contributors | Manual assignment by 012 |
 | `@Contributor` | Green | Active contributor to any FoundUp | Proven by GitHub activity |
-| `@Member` | Blue | Verified, onboarded | Completed #start-here flow |
+| `@Stakeholder` | Purple | Verified, onboarded | Completed #start-here flow |
 | `@Unverified` | Grey | Just joined | Auto-assigned on join |
 
-### Mirror roles (optional, synced from PWA when bridge exists)
-
-| Role | Color | Purpose |
-|------|-------|---------|
-| `@Stakeholder` | Purple | Reflects wallet-verified status from PWA |
-
-**@Stakeholder is cosmetic/informational only.** It grants no Discord-exclusive access. The PWA is authoritative for stake status. If someone loses their stake, PWA revokes interior access and the Discord role updates to match.
+**@Stakeholder on Discord** reflects community membership. When PWA wallet gate exists, it will also mirror stake status. The PWA is authoritative for economic access — Discord role reflects status, does not determine it.
 
 ### Per-FoundUp roles
 
@@ -106,7 +100,7 @@ SCIENCE SWARM HUB            ← first FoundUp
 |------------------|-----------------|--------------|
 | Guest | pfMALL (no account) | (not on Discord) |
 | Visitor | FoundUp Welcome PWA | (not on Discord) |
-| Community | Joins Discord + verifies | @Member → @Contributor → @Core |
+| Community | Joins Discord + verifies | @Stakeholder → @Contributor → @Core |
 | Stakeholder | PWA wallet gate | @Stakeholder (mirror only) |
 | Operator | 012 | @Operator |
 
@@ -116,7 +110,7 @@ SCIENCE SWARM HUB            ← first FoundUp
 
 ### FOUNDUPS category
 
-| Channel | @Unverified | @Member | @Contributor | @Core | @Operator |
+| Channel | @Unverified | @Stakeholder | @Contributor | @Core | @Operator |
 |---------|-------------|---------|-------------|-------|-----------|
 | `#rules` | R | R | R | R | R, P |
 | `#start-here` | R | R | R | R | R, P |
@@ -125,7 +119,7 @@ SCIENCE SWARM HUB            ← first FoundUp
 
 ### COMMONS category
 
-| Channel | @Unverified | @Member | @Contributor | @Core | @Operator |
+| Channel | @Unverified | @Stakeholder | @Contributor | @Core | @Operator |
 |---------|-------------|---------|-------------|-------|-----------|
 | `#general` | — | R, P | R, P | R, P | R, P, M |
 | `#off-topic` | — | R, P | R, P | R, P | R, P, M |
@@ -133,7 +127,7 @@ SCIENCE SWARM HUB            ← first FoundUp
 
 ### OPERATOR category
 
-| Channel | @Unverified | @Member | @Contributor | @Core | @Operator |
+| Channel | @Unverified | @Stakeholder | @Contributor | @Core | @Operator |
 |---------|-------------|---------|-------------|-------|-----------|
 | `#operator-log` | R | R | R | R | R, P |
 | `#bot-feeds` | — | R | R | R | R |
@@ -141,7 +135,7 @@ SCIENCE SWARM HUB            ← first FoundUp
 
 ### SCIENCE SWARM HUB category
 
-| Channel | @Unverified | @Member | @swarm-contributor | @Core | @Operator |
+| Channel | @Unverified | @Stakeholder | @swarm-contributor | @Core | @Operator |
 |---------|-------------|---------|-------------------|-------|-----------|
 | `#swarm-general` | — | R | R, P, T | R, P, T | R, P, T, M |
 | `#swarm-github` | — | R | R | R | R |
@@ -154,7 +148,7 @@ Legend: R = read, P = post, T = create threads, M = manage messages
 
 **@Unverified sees**: `#rules`, `#start-here`, `#announcements`, `#operator-log` only. All read-only. This gives them enough to orient and verify without noise.
 
-**Verification flow**: @Unverified completes reaction-role in `#start-here` → gains @Member → sees all public channels.
+**Verification flow**: @Unverified completes reaction-role in `#start-here` → gains @Stakeholder → sees all public channels.
 
 ---
 
@@ -167,7 +161,7 @@ Join server
   → Reads #rules
   → Goes to #start-here
   → Reacts to role-assignment message (picks FoundUp interests)
-  → Gains @Member + optional @swarm-notify
+  → Gains @Stakeholder + optional @swarm-notify
   → Can now see and post in COMMONS and read FoundUp categories
   → To post in a FoundUp category: request @swarm-contributor (or earn it via GitHub activity)
 ```
@@ -190,7 +184,7 @@ Join server
 
 | What | Why |
 |------|-----|
-| @Member → @Contributor promotion | Requires seeing GitHub activity |
+| @Stakeholder → @Contributor promotion | Requires seeing GitHub activity |
 | @Contributor → @Core promotion | Trust decision |
 | @Stakeholder sync | Until PWA↔Discord bridge exists |
 | Adding a new FoundUp category | Structural decision, 15-min setup |
@@ -247,7 +241,7 @@ Welcome to FOUNDUPS.
 This server is the community layer for all FoundUp projects.
 
 Step 1: Read #rules
-Step 2: React below to get your @Member role and unlock channels
+Step 2: React below to get your @Stakeholder role and unlock channels
 Step 3: Pick which FoundUps interest you (react for notifications)
 Step 4: Introduce yourself in #introductions
 Step 5: Find work — check a FoundUp's #[prefix]-work channel or its GitHub repo
@@ -256,7 +250,7 @@ Current FoundUps:
 🔬 Science Swarm Hub — Physics research (PQN)
    GitHub: github.com/FOUNDUPS/science-swarm-hub
 
-React with ✅ to verify → gain @Member
+React with ✅ to verify → gain @Stakeholder
 React with 🔬 to follow → gain @swarm-notify
 ```
 
@@ -294,7 +288,7 @@ You cannot post here — it's read-only for everyone except the operator.
 
 - No stake gate implementation exists today
 - No sentinel agent exists today
-- @Stakeholder role is planned, not active
+- @Stakeholder role is active on Discord (243 members); PWA wallet-gate sync is not yet implemented
 - YAGPDB is recommended, not yet installed
 - GitHub webhooks are recommended, not yet configured
 - Current server may have existing channels/bots to clean up first

@@ -65,7 +65,7 @@ Time: ~15 minutes
 
 For `#[prefix]-general` and `#[prefix]-work`:
 - [ ] `@Unverified` → deny all
-- [ ] `@Member` → read only
+- [ ] `@Stakeholder` → read only
 - [ ] `@[prefix]-contributor` → send messages, create threads
 - [ ] `@Core` → send messages, create threads
 - [ ] `@Operator` → send messages, create threads, manage messages
@@ -75,7 +75,7 @@ For `#[prefix]-github`:
 
 For `[prefix]-voice`:
 - [ ] `@Unverified` → deny
-- [ ] `@Member` and above → join
+- [ ] `@Stakeholder` and above → join
 
 ### Pins and integration
 
