@@ -1,0 +1,213 @@
+{
+  "$schema": "openclaw_integration_manifest/v1",
+  "description": "Machine-readable ledger of all OpenClaw integration points. Source of truth: docs/audits/openclaw_plugins/OPENCLAW_PLUGIN_LEDGER_AUDIT.md",
+  "generated": "2026-04-05",
+  "integrations": [
+    {
+      "name": "IronClaw Gateway",
+      "type": "conversation_provider",
+      "owner_module": "modules/communication/moltbot_bridge",
+      "status": "landed",
+      "default": "off",
+      "env_keys": [
+        "OPENCLAW_CONVERSATION_BACKEND",
+        "OPENCLAW_IRONCLAW_STRICT",
+        "OPENCLAW_IRONCLAW_ALLOW_LOCAL_FALLBACK",
+        "OPENCLAW_IRONCLAW_AUTOSTART",
+        "IRONCLAW_BASE_URL",
+        "IRONCLAW_MODEL"
+      ],
+      "secret_keys": ["IRONCLAW_AUTH_TOKEN"],
+      "external_service": "local_service",
+      "fail_mode": "fail_closed_strict_or_fail_open_fallback",
+      "consumers": ["openclaw_provider_chain", "main.py"]
+    },
+    {
+      "name": "Local Ollama / Qwen",
+      "type": "conversation_provider",
+      "owner_module": "modules/communication/moltbot_bridge",
+      "status": "landed",
+      "default": "on",
+      "env_keys": ["OPENCLAW_OLLAMA_MODEL"],
+      "secret_keys": [],
+      "external_service": "local_service",
+      "fail_mode": "fail_closed",
+      "consumers": ["openclaw_bootstrap_config", "openclaw_provider_chain"]
+    },
+    {
+      "name": "AI Gateway - OpenAI",
+      "type": "ai_gateway_provider",
+      "owner_module": "modules/communication/moltbot_bridge",
+      "status": "landed",
+      "default": "off",
+      "env_keys": ["OPENCLAW_ALLOW_EXTERNAL_LLM"],
+      "secret_keys": ["OPENAI_API_KEY"],
+      "external_service": "external_service",
+      "fail_mode": "fail_open",
+      "consumers": ["ai_gateway"]
+    },
+    {
+      "name": "AI Gateway - Anthropic",
+      "type": "ai_gateway_provider",
+      "owner_module": "modules/communication/moltbot_bridge",
+      "status": "landed",
+      "default": "off",
+      "env_keys": ["OPENCLAW_ALLOW_EXTERNAL_LLM"],
+      "secret_keys": ["ANTHROPIC_API_KEY"],
+      "external_service": "external_service",
+      "fail_mode": "fail_open",
+      "consumers": ["ai_gateway"]
+    },
+    {
+      "name": "AI Gateway - Grok/XAI",
+      "type": "ai_gateway_provider",
+      "owner_module": "modules/communication/moltbot_bridge",
+      "status": "landed",
+      "default": "off",
+      "env_keys": ["OPENCLAW_ALLOW_EXTERNAL_LLM"],
+      "secret_keys": ["GROK_API_KEY", "XAI_API_KEY"],
+      "external_service": "external_service",
+      "fail_mode": "fail_open",
+      "consumers": ["ai_gateway"]
+    },
+    {
+      "name": "AI Gateway - Google Gemini",
+      "type": "ai_gateway_provider",
+      "owner_module": "modules/communication/moltbot_bridge",
+      "status": "landed",
+      "default": "off",
+      "env_keys": ["OPENCLAW_ALLOW_EXTERNAL_LLM"],
+      "secret_keys": ["GEMINI_API_KEY"],
+      "external_service": "external_service",
+      "fail_mode": "fail_open",
+      "consumers": ["ai_gateway"]
+    },
+    {
+      "name": "OpenRouter",
+      "type": "standalone_llm_router",
+      "owner_module": "modules/infrastructure/openrouter_client",
+      "status": "landed",
+      "default": "off",
+      "env_keys": [
+        "OPENROUTER_BASE_URL",
+        "OPENROUTER_DEFAULT_MODEL",
+        "OPENROUTER_PRESET",
+        "OPENROUTER_FALLBACK_ENABLED",
+        "OPENROUTER_WEB_SEARCH",
+        "OPENROUTER_TIMEOUT_SEC"
+      ],
+      "secret_keys": ["OPENROUTER_API_KEY"],
+      "external_service": "external_service",
+      "fail_mode": "fail_open",
+      "consumers": ["holo_index/skillz/consciousness_migration/executor.py"]
+    },
+    {
+      "name": "Resident OpenClaw",
+      "type": "service_daemon",
+      "owner_module": "modules/communication/moltbot_bridge",
+      "status": "landed",
+      "default": "on",
+      "env_keys": ["OPENCLAW_RESIDENT_ENABLED", "OPENCLAW_RESIDENT_AUTOSTART"],
+      "secret_keys": ["FOUNDUPS_WEBHOOK_TOKEN"],
+      "external_service": "local_service",
+      "fail_mode": "fail_open",
+      "consumers": ["main.py"]
+    },
+    {
+      "name": "Supervisor",
+      "type": "service_daemon",
+      "owner_module": "modules/communication/moltbot_bridge",
+      "status": "landed",
+      "default": "on",
+      "env_keys": ["OPENCLAW_SUPERVISOR_ENABLED"],
+      "secret_keys": [],
+      "external_service": "local_service",
+      "fail_mode": "fail_open",
+      "consumers": ["main.py"]
+    },
+    {
+      "name": "WRE Orchestrator",
+      "type": "service_daemon",
+      "owner_module": "modules/infrastructure/wre_core",
+      "status": "landed",
+      "default": "on",
+      "env_keys": [],
+      "secret_keys": [],
+      "external_service": "local_service",
+      "fail_mode": "fail_open",
+      "consumers": ["main.py", "openclaw_dae"]
+    },
+    {
+      "name": "Skill Safety Gate",
+      "type": "security_gate",
+      "owner_module": "modules/communication/moltbot_bridge",
+      "status": "landed",
+      "default": "on",
+      "env_keys": [
+        "OPENCLAW_SKILL_SCAN_REQUIRED",
+        "OPENCLAW_SKILL_SCAN_ENFORCED",
+        "OPENCLAW_SKILL_MANIFEST_REQUIRED",
+        "OPENCLAW_SKILL_MANIFEST_ENFORCED"
+      ],
+      "secret_keys": [],
+      "external_service": "local_service",
+      "fail_mode": "fail_closed",
+      "consumers": ["wre_core", "openclaw_dae"]
+    },
+    {
+      "name": "Permission Manager",
+      "type": "security_gate",
+      "owner_module": "modules/ai_intelligence/agent_permissions",
+      "status": "landed",
+      "default": "on",
+      "env_keys": [],
+      "secret_keys": [],
+      "external_service": "local_service",
+      "fail_mode": "fail_closed",
+      "consumers": ["openclaw_dae"]
+    },
+    {
+      "name": "Key Isolation",
+      "type": "security_gate",
+      "owner_module": "modules/communication/moltbot_bridge",
+      "status": "landed",
+      "default": "on",
+      "env_keys": ["OPENCLAW_NO_API_KEYS", "IRONCLAW_NO_API_KEYS"],
+      "secret_keys": [],
+      "external_service": null,
+      "fail_mode": "fail_closed",
+      "consumers": ["main.py", "openclaw_bootstrap_config"]
+    },
+    {
+      "name": "Dep Security Preflight",
+      "type": "security_gate",
+      "owner_module": "modules/communication/moltbot_bridge",
+      "status": "landed",
+      "default": "on",
+      "env_keys": [
+        "OPENCLAW_DEP_SECURITY_PREFLIGHT",
+        "OPENCLAW_DEP_SECURITY_PREFLIGHT_ENFORCED"
+      ],
+      "secret_keys": [],
+      "external_service": "local_service",
+      "fail_mode": "fail_open",
+      "consumers": ["main.py"]
+    },
+    {
+      "name": "Self-Audit Loop",
+      "type": "security_gate",
+      "owner_module": "modules/infrastructure/wre_core",
+      "status": "landed",
+      "default": "on",
+      "env_keys": [
+        "OPENCLAW_SELF_AUDIT_ENABLED",
+        "OPENCLAW_SELF_AUDIT_AUTO_FIX",
+        "OPENCLAW_SELF_AUDIT_INTERVAL_SEC"
+      ],
+      "secret_keys": [],
+      "external_service": "local_service",
+      "fail_mode": "fail_open",
+      "consumers": ["main.py", "wre_core"]
+    }
+  ]
+}
