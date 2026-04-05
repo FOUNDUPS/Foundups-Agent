@@ -204,10 +204,15 @@ Reason:
 ### Already Externalized
 
 - `AutoPost`
-  - repo truth shows it already exists externally as `Foundup/AutoPost`
-  - current migration plan says it still needs dual-remote normalization to:
-    - `FOUNDUPS/AutoPost` as origin
-    - `Foundup/AutoPost` as backup
+  - repo: `FOUNDUPS/autopost` (live on GitHub)
+  - web: `autopost.foundups.com` (redirect)
+  - status: PoC — Vite + React + TypeScript + Gemini API, camera capture-to-post
+  - classification: `CANDIDATE_FOUNDUP` (HIGH priority) — both a FoundUp AND a tool
+  - role: content pipeline for entire FOUNDUPS ecosystem (users post unlisted videos → YouTube → FoundUp routing → pfMALL display + social distribution)
+  - part of: AI Automation service FoundUp
+  - Discord: AUTOPOST category planned (#autopost-general doubles as user troubleshooting, monitored by 0102/OBAI)
+  - docs: ROADMAP.md and ModLog.md added 2026-04-06
+  - dual-remote normalization: `FOUNDUPS/autopost` is origin (confirmed), backup TBD
 
 ### Future Candidate, Not Yet Classified As A FoundUp
 
