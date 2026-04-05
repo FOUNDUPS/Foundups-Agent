@@ -212,14 +212,16 @@ All three must be True for healthy. Any False triggers recovery.
 
 ```bash
 # Required
-ANTIFAFM_DISCORD_BOT_TOKEN=           # Bot token (from Discord Developer Portal)
-ANTIFAFM_DISCORD_GUILD_ID=            # FOUNDUPS server ID
-ANTIFAFM_DISCORD_VOICE_CHANNEL_ID=    # Target voice channel ID
+ANTIFAFM_BOT=                                      # Bot token (in .env as of 2026-04-06)
+ANTIFAFM_DISCORD_GUILD_ID=412646632992014336        # FOUNDUPS server
+ANTIFAFM_DISCORD_VOICE_CHANNEL_ID=1490463995256115261  # #antifafm-radio
 
 # Optional
 ANTIFAFM_DISCORD_VOICE_ENABLED=false  # Master switch (default off until configured)
 ANTIFAFM_DISCORD_VOICE_VOLUME=1.0     # 0.0-2.0 (PCMVolumeTransformer, optional)
 ```
+
+**Bot user ID**: `1490483262794240030` (antifaFM Radio, Beneficial AI role assigned)
 
 **Stream URL is NOT duplicated** — uses the same `ANTIFAFM_STREAM_URL` as the YouTube output.
 
@@ -243,12 +245,12 @@ class AntifaFMBroadcaster(SkillTriggerMixin):
 
     def _init_discord_output(self):
         """Initialize Discord voice output if configured."""
-        bot_token = os.getenv("ANTIFAFM_DISCORD_BOT_TOKEN", "")
-        guild_id = os.getenv("ANTIFAFM_DISCORD_GUILD_ID", "")
-        channel_id = os.getenv("ANTIFAFM_DISCORD_VOICE_CHANNEL_ID", "")
+        bot_token = os.getenv("ANTIFAFM_BOT", "")
+        guild_id = os.getenv("ANTIFAFM_DISCORD_GUILD_ID", "412646632992014336")
+        channel_id = os.getenv("ANTIFAFM_DISCORD_VOICE_CHANNEL_ID", "1490463995256115261")
 
-        if not all([bot_token, guild_id, channel_id]):
-            logger.warning("[DISCORD] Missing config — need BOT_TOKEN, GUILD_ID, VOICE_CHANNEL_ID")
+        if not bot_token:
+            logger.warning("[DISCORD] Missing ANTIFAFM_BOT token")
             return
 
         self.discord_output = DiscordVoiceOutput(
@@ -437,15 +439,21 @@ These are module-local dependencies. The broadcaster's own `requirements.txt` al
 
 ## 10. Discord Bot Setup Prerequisites
 
-Before implementation, the operator (012) must:
+**Status: COMPLETE** (2026-04-06, Phase 5B)
 
-1. **Create a Discord Application** at https://discord.com/developers/applications
-2. **Create a Bot** within the application
-3. **Copy the bot token** → set as `ANTIFAFM_DISCORD_BOT_TOKEN` in `.env`
-4. **Enable these Privileged Gateway Intents**: None required (voice doesn't need Message Content, Members, or Presence intents)
-5. **Invite the bot** to the FOUNDUPS server with permission integer `3145728`
-6. **Create a voice channel** (e.g., `#antifafm-radio`) and note its ID → set as `ANTIFAFM_DISCORD_VOICE_CHANNEL_ID`
-7. **Note the server ID** → set as `ANTIFAFM_DISCORD_GUILD_ID`
+| Step | Status | Detail |
+|------|--------|--------|
+| Discord Application created | DONE | "antifaFM Radio" |
+| Bot created + token set | DONE | `ANTIFAFM_BOT` in `.env` |
+| Privileged intents | DONE | All OFF (none needed for voice) |
+| Bot invited to FOUNDUPS | DONE | Permissions: View Channels, Connect, Speak, Use Voice Activity, Send Messages, Embed Links, Read Message History, Use Slash Commands |
+| Beneficial AI role assigned | DONE | Inherits voice permissions in #antifafm-radio |
+| Voice channel created | DONE | `#antifafm-radio` — listen-only for users, speak for bots/operators |
+| Bot user ID | `1490483262794240030` | |
+| Guild ID | `412646632992014336` | |
+| Voice channel ID | `1490463995256115261` | |
+
+**No prerequisites remain. Implementation can begin immediately.**
 
 ---
 
