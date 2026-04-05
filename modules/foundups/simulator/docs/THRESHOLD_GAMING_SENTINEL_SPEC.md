@@ -234,9 +234,19 @@ signal_filter.py  ←  NEW: converts raw events to verified signals
         - cross-surface inconsistency
   │
   ▼
+participation_input.py  ←  NEW: adapter contract between signals and CABR
+  │    Accepts: List[VerifiedParticipationSignal] + sentinel alerts
+  │    Produces: ParticipationInput (aggregated, typed, sentinel-annotated)
+  │    NOTE: update_participation() currently only accepts aggregated counts
+  │          (tasks_completed, tasks_total, active_agents, verifications).
+  │          Do NOT force raw events through that interface.
+  │          The adapter either extends update_participation() deliberately
+  │          or provides a new upstream participation-input object.
+  │
+  ▼
 cabr_estimator.py
   │
-  ├── part_score calculation (with sentinel-filtered inputs)
+  ├── part_score calculation (with adapter-provided inputs)
   ├── governance_engagement (currently placeholder 0.15)
   └── cross_foundup_collaboration (currently placeholder 0.15)
   │
@@ -358,9 +368,15 @@ Place a new `threshold_sentinel.py` in `modules/foundups/simulator/economics/` a
 - Create `signal_filter.py`
 - Define event schema for Discord, GitHub, FAM inputs
 - Implement raw-event → verified-signal conversion
-- Wire into `cabr_estimator.py:update_participation()`
-- Replace hardcoded governance (0.15) and cross_foundup (0.15) with real filtered inputs
 - Test: filter correctly passes organic signals, blocks empty/duplicate signals
+
+**Layer 1.5** — Participation Input Contract (adapter boundary)
+- Create `participation_input.py`
+- Define `ParticipationInput` dataclass that carries aggregated, typed, sentinel-annotated signals
+- Do NOT force raw events through existing `update_participation()` — it only accepts counts
+- Either extend `update_participation()` deliberately to accept `ParticipationInput`, or add a new method
+- Replace hardcoded governance (0.15) and cross_foundup (0.15) with real adapter-provided inputs
+- Test: adapter produces correct aggregated input from filtered signals
 
 **Layer 2** — Threshold-Edge Detector (highest-value detection)
 - Create `threshold_sentinel.py` with `ThresholdEdgeDetector`
