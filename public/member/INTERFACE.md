@@ -90,12 +90,27 @@ The primary public API for the unified Red Dog plane. All concierge interactions
 | `refreshBriefing()` | Refresh context briefing |
 | `getRecommendations()` | Get AI recommendations |
 | `runRecommendation(action)` | Execute a recommendation |
+| **Saved Videos** | |
+| `openSaved()` | Open Saved Videos section in concierge plane |
+| `refreshSaved()` | Re-render saved videos from localStorage |
+| **Watch History** | |
+| `openHistory()` | Open Recently Watched section in concierge plane |
+| `refreshHistory()` | Re-render watch history from localStorage |
+| `clearHistory()` | Clear watch history (delegates to `mallVideoPlayer.clearHistory()`) |
 | **Identity** | |
 | `setIdentity(clerkUser, userData)` | Set identity block |
 | `setFoundUps(foundupDocs)` | Set FoundUps grid |
 | `setInvites(inviteDocs)` | Set invites drawer |
 
 **Backward Compatibility**: `window.accountConcierge` is an alias for `window.redDog` (will be removed).
+
+**Concierge Plane Surfaces**:
+| Surface | Data Source | Re-entry Action |
+|---------|-------------|-----------------|
+| Saved Videos | `mallVideoPlayer.getSavedVideos()` (localStorage) | Reconstruct queue from catalog, open player |
+| Recently Watched | `mallVideoPlayer.getHistory()` (localStorage) | Reconstruct queue from catalog, open player |
+
+Both surfaces render cards with thumbnail, title, and meta. Click-to-reenter opens the fullscreen player at the saved/watched video's position within its FoundUp queue.
 
 ---
 
@@ -314,4 +329,4 @@ interface InviteDoc {
 
 ---
 
-*Last Updated: 2026-04-03*
+*Last Updated: 2026-04-05*

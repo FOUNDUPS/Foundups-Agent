@@ -321,6 +321,7 @@ These are explicitly deferred:
 - Save toggle (localStorage: `pfmall_saved_videos`)
 - Share (native share → clipboard fallback)
 - Watch history (localStorage: `pfmall_watch_history`, max 50, newest first)
+- Concierge browse surfaces: Saved Videos and Recently Watched sections in Red Dog plane (see `public/member/INTERFACE.md` → `window.redDog`)
 
 **Phase 3** (future):
 - Backend sync for save/history

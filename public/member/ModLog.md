@@ -1,5 +1,25 @@
 # Member Area Module Change Log
 
+## [2026-04-05] Saved/History Surface Doc Sync (Worker F, WSP_97)
+
+**Who**: 0102 (Claude Opus 4.6) — Worker F
+**Type**: Documentation
+**Slice**: `pfMALL_SAVED_HISTORY_SURFACE_DOC_SYNC_PHASE1`
+**Spec**: WSP_97
+
+**Files Modified**:
+- `public/member/INTERFACE.md` — Added Saved Videos and Watch History methods to `window.redDog` API table
+- `modules/foundups/docs/PFMALL_FULLSCREEN_PLAYER_CONTRACT.md` — Added concierge browse surfaces note to Phase 2
+
+**Documented**:
+- `openSaved()`, `refreshSaved()` — Saved Videos concierge surface
+- `openHistory()`, `refreshHistory()`, `clearHistory()` — Watch History concierge surface
+- Concierge Plane Surfaces table (data source + re-entry action)
+
+**No runtime changes** — docs-only slice.
+
+---
+
 ## [2026-04-05] Watch History Surface Phase 1 (Worker C, WSP_97)
 
 **Who**: 0102 (Claude Opus 4.6) — Worker C
