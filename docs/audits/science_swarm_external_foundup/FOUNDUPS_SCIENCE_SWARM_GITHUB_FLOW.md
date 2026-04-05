@@ -190,11 +190,11 @@ Full details: `CONTRIBUTING.md` in the repo.
 
 | Event | GitHub → Discord |
 |-------|-----------------|
-| Issue opened | Webhook posts to `#swarm-github` |
-| Issue closed | Webhook posts to `#swarm-github` |
-| PR opened | Webhook posts to `#swarm-github` |
-| PR merged | Webhook posts to `#swarm-github` |
-| Release published | Webhook posts to `#swarm-github` |
+| Issue opened | Manual post by operator (or approved integration if available) |
+| Issue closed | Manual post by operator (or approved integration if available) |
+| PR opened | Manual post by operator (or approved integration if available) |
+| PR merged | Manual post by operator (or approved integration if available) |
+| Release published | Manual post by operator (or approved integration if available) |
 
 | Event | Discord → GitHub |
 |-------|-----------------|
@@ -202,7 +202,7 @@ Full details: `CONTRIBUTING.md` in the repo.
 | Question | Manual — contributor opens issue if recurring |
 | Work claim | Manual — contributor comments on issue |
 
-**No bidirectional automation.** Discord reads from GitHub (via webhook). GitHub does not read from Discord.
+**No bidirectional automation.** GitHub activity reaches Discord via manual posts or official GitHub Discord app (not custom webhooks). GitHub does not read from Discord.
 
 ---
 
@@ -212,7 +212,7 @@ Full details: `CONTRIBUTING.md` in the repo.
 - No automated issue creation from Discord
 - No automated PR creation from Discord
 - No automated verification from Discord commands
-- Webhook is one-way (GitHub → Discord), not bidirectional
+- No custom webhook integration (manual feed or official GitHub app only)
 
 See: `FOUNDUPS_SCIENCE_SWARM_NONCLAIMS.md` for full list.
 

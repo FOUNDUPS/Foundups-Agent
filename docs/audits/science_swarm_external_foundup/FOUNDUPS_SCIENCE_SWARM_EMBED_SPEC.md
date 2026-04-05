@@ -58,7 +58,7 @@ FOUNDUPS (server root)
 | Channel | Type | Purpose |
 |---------|------|---------|
 | `#swarm-general` | text | Project discussion, questions, coordination |
-| `#swarm-github` | text | Read-only GitHub webhook feed (issues, PRs, releases) |
+| `#swarm-github` | text | Read-only GitHub activity feed (manual or official app) |
 | `#swarm-work` | text | "What are you working on?" — links to active issues/PRs |
 | `swarm-voice` | voice | Real-time project discussion |
 

@@ -36,15 +36,15 @@ This document explicitly lists what does NOT exist, is NOT implemented, and must
 
 **Discord roles reflect community membership, not economic stake.** The PWA stake gate (when implemented) will be authoritative. Discord mirrors status, does not determine it.
 
-### No Fake Webhook Assumptions
+### No Custom Webhook Integration
 
 | Claim | Truth |
 |-------|-------|
-| "Webhook posts verification results to Discord" | NO — webhook posts GitHub events only |
-| "Webhook creates Discord threads for PRs" | NO — not configured |
+| "GitHub webhook posts to Discord" | NO — no custom webhook configured |
+| "Webhook creates Discord threads for PRs" | NO — not implemented |
 | "Webhook syncs contribution scores" | NO — no such integration |
 
-**The GitHub webhook (when configured) posts issue/PR/release events to `#swarm-github`. Nothing else.**
+**GitHub activity reaches `#swarm-github` via manual operator posts or official GitHub Discord app (if available). Custom webhooks are not used.**
 
 ---
 
@@ -164,7 +164,7 @@ When something new is falsely claimed:
 | Discord | No verification commands |
 | Discord | No work unit commands |
 | Discord | No contribution tracking |
-| Webhook | One-way only (GitHub → Discord) |
+| Webhook | No custom webhook configured |
 | Webhook | No thread creation |
 | Webhook | No score sync |
 | Package | No PyPI publish |
