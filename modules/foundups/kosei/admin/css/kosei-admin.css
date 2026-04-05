@@ -1,0 +1,449 @@
+/**
+ * Kosei Admin -- Operator Console Styles
+ * Extends kosei.css variables and reset
+ */
+
+/* ============================================
+   Admin-specific variables
+   ============================================ */
+:root {
+  --ka-sidebar-width: 0px;
+  --ka-header-height: 56px;
+  --ka-tab-height: 44px;
+  --ka-detail-width: 420px;
+}
+
+/* ============================================
+   Auth Gate
+   ============================================ */
+.ka-auth-gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--space-lg);
+}
+
+.ka-auth-card {
+  text-align: center;
+  background: var(--kosei-bg-card);
+  border: 1px solid var(--kosei-border);
+  border-radius: 12px;
+  padding: var(--space-2xl) var(--space-xl);
+  max-width: 360px;
+  width: 100%;
+}
+
+.ka-auth-card .kosei-logo {
+  justify-content: center;
+  margin-bottom: var(--space-md);
+}
+
+.ka-auth-subtitle {
+  color: var(--kosei-text-muted);
+  margin: 0 0 var(--space-xl);
+  font-size: 0.875rem;
+}
+
+.ka-auth-btn {
+  width: 100%;
+}
+
+.ka-auth-error {
+  margin-top: var(--space-md);
+  color: var(--kosei-error);
+  font-size: 0.8125rem;
+}
+
+/* ============================================
+   Admin Shell
+   ============================================ */
+.kosei-admin-body {
+  overflow: hidden;
+  height: 100vh;
+}
+
+.ka-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ============================================
+   Header
+   ============================================ */
+.ka-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--ka-header-height);
+  padding: 0 var(--space-lg);
+  background: var(--kosei-bg-elevated);
+  border-bottom: 1px solid var(--kosei-border);
+  flex-shrink: 0;
+}
+
+.ka-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.ka-header-title {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.ka-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.ka-header-email {
+  color: var(--kosei-text-muted);
+  font-size: 0.8125rem;
+}
+
+.ka-header-signout {
+  background: none;
+  border: 1px solid var(--kosei-border);
+  color: var(--kosei-text-muted);
+  padding: 4px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  transition: all 0.15s;
+}
+
+.ka-header-signout:hover {
+  color: var(--kosei-text);
+  border-color: var(--kosei-text-muted);
+}
+
+/* ============================================
+   Tabs
+   ============================================ */
+.ka-tabs {
+  display: flex;
+  height: var(--ka-tab-height);
+  padding: 0 var(--space-lg);
+  background: var(--kosei-bg-elevated);
+  border-bottom: 1px solid var(--kosei-border);
+  flex-shrink: 0;
+  gap: var(--space-xs);
+}
+
+.ka-tab {
+  background: none;
+  border: none;
+  color: var(--kosei-text-muted);
+  padding: 0 var(--space-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+
+.ka-tab:hover {
+  color: var(--kosei-text);
+}
+
+.ka-tab--active {
+  color: var(--kosei-accent);
+  border-bottom-color: var(--kosei-accent);
+}
+
+/* ============================================
+   Content Area
+   ============================================ */
+.ka-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-lg);
+}
+
+.ka-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-lg);
+}
+
+.ka-panel-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.ka-filter-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.ka-select {
+  background: var(--kosei-bg-card);
+  color: var(--kosei-text);
+  border: 1px solid var(--kosei-border);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.ka-count {
+  color: var(--kosei-text-muted);
+  font-size: 0.8125rem;
+}
+
+/* ============================================
+   List Items
+   ============================================ */
+.ka-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.ka-loading {
+  color: var(--kosei-text-muted);
+  text-align: center;
+  padding: var(--space-2xl);
+}
+
+.ka-empty {
+  color: var(--kosei-text-muted);
+  text-align: center;
+  padding: var(--space-2xl);
+  font-style: italic;
+}
+
+.ka-card {
+  background: var(--kosei-bg-card);
+  border: 1px solid var(--kosei-border);
+  border-radius: 8px;
+  padding: var(--space-md) var(--space-lg);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.ka-card:hover {
+  border-color: var(--kosei-accent);
+}
+
+.ka-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-xs);
+}
+
+.ka-card-name {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.ka-card-meta {
+  display: flex;
+  gap: var(--space-md);
+  color: var(--kosei-text-muted);
+  font-size: 0.8125rem;
+  flex-wrap: wrap;
+}
+
+.ka-card-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ============================================
+   Status Badges
+   ============================================ */
+.ka-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Audit statuses */
+.ka-badge--pending      { background: rgba(234,179,8,0.15);  color: #eab308; }
+.ka-badge--in_progress  { background: rgba(59,130,246,0.15); color: #3b82f6; }
+.ka-badge--complete     { background: rgba(34,197,94,0.15);  color: #22c55e; }
+.ka-badge--accepted     { background: rgba(99,102,241,0.15); color: #6366f1; }
+.ka-badge--expired      { background: rgba(107,114,128,0.15);color: #6b7280; }
+
+/* Workspace statuses */
+.ka-badge--onboarding   { background: rgba(59,130,246,0.15); color: #3b82f6; }
+.ka-badge--active       { background: rgba(34,197,94,0.15);  color: #22c55e; }
+.ka-badge--paused       { background: rgba(234,179,8,0.15);  color: #eab308; }
+.ka-badge--churned      { background: rgba(239,68,68,0.15);  color: #ef4444; }
+
+/* Trial statuses */
+.ka-badge--converted    { background: rgba(99,102,241,0.15); color: #6366f1; }
+.ka-badge--cancelled    { background: rgba(239,68,68,0.15);  color: #ef4444; }
+
+/* Connection statuses */
+.ka-badge--disconnected { background: rgba(107,114,128,0.15);color: #6b7280; }
+.ka-badge--connecting   { background: rgba(234,179,8,0.15);  color: #eab308; }
+.ka-badge--connected    { background: rgba(34,197,94,0.15);  color: #22c55e; }
+.ka-badge--error        { background: rgba(239,68,68,0.15);  color: #ef4444; }
+.ka-badge--revoked      { background: rgba(239,68,68,0.15);  color: #ef4444; }
+
+/* ============================================
+   Detail Panel
+   ============================================ */
+.ka-detail-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: var(--ka-detail-width);
+  max-width: 100vw;
+  height: 100vh;
+  background: var(--kosei-bg-elevated);
+  border-left: 1px solid var(--kosei-border);
+  box-shadow: -4px 0 24px rgba(0,0,0,0.3);
+  z-index: 100;
+  overflow-y: auto;
+}
+
+.ka-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-lg);
+  border-bottom: 1px solid var(--kosei-border);
+  position: sticky;
+  top: 0;
+  background: var(--kosei-bg-elevated);
+}
+
+.ka-detail-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.ka-detail-close {
+  background: none;
+  border: none;
+  color: var(--kosei-text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.ka-detail-close:hover {
+  color: var(--kosei-text);
+}
+
+.ka-detail-content {
+  padding: var(--space-lg);
+}
+
+/* Detail sections */
+.ka-detail-section {
+  margin-bottom: var(--space-xl);
+}
+
+.ka-detail-section h4 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--kosei-text-muted);
+  margin: 0 0 var(--space-sm);
+}
+
+.ka-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--kosei-border);
+  font-size: 0.875rem;
+}
+
+.ka-detail-label {
+  color: var(--kosei-text-muted);
+}
+
+.ka-detail-value {
+  font-weight: 500;
+  text-align: right;
+  max-width: 60%;
+  word-break: break-word;
+}
+
+/* Notes section in detail */
+.ka-notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.ka-note {
+  background: var(--kosei-bg-card);
+  border-radius: 6px;
+  padding: var(--space-sm) var(--space-md);
+  font-size: 0.8125rem;
+}
+
+.ka-note-meta {
+  color: var(--kosei-text-muted);
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+}
+
+.ka-note-add {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.ka-note-input {
+  flex: 1;
+  background: var(--kosei-bg-card);
+  border: 1px solid var(--kosei-border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: var(--kosei-text);
+  font-size: 0.8125rem;
+}
+
+.ka-note-submit {
+  background: var(--kosei-accent);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 768px) {
+  .ka-detail-panel {
+    width: 100vw;
+  }
+
+  .ka-header-email {
+    display: none;
+  }
+
+  .ka-panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+}

@@ -1,5 +1,30 @@
 # Kosei AI Systems — ModLog
 
+## 2026-04-06 — Phase 1: Admin Operator Surface
+
+**Worker**: I
+**Slice**: `KOSEI_ADMIN_OPERATOR_SURFACE_PHASE1`
+
+- Created `admin/` directory with internal operator console
+- Auth gate: Firebase Auth + `kosei_admin: true` custom claim check
+- Three tabs: Leads, Clients, Trials — each with real-time Firestore subscription + status filter
+- Slide-in detail panel shows full record: contact, intake answers, audit status, onboarding step, posting preferences, platform connections, operator notes, trial usage, timeline
+- Status models: audit (5 states), workspace (4 states), trial (4 states), connection (5 states)
+- Operator notes: read + write to `kosei_workspaces/{id}/notes` subcollection
+- Boundaries: no public landing changes, no client workspace, no AutoPost code
+- `noindex, nofollow` on admin HTML — not crawlable
+- Protocol: WSP 97 (collections, fields, and statuses match KOSEI_DATA_MODEL.md)
+
+Files created:
+- `admin/index.html` — admin shell (auth gate + tabbed UI + detail panel)
+- `admin/css/kosei-admin.css` — admin styles (extends kosei.css)
+- `admin/js/kosei-admin-auth.js` — Firebase Auth + admin claim gating
+- `admin/js/kosei-admin-data.js` — Firestore real-time subscriptions + reads + note writes
+- `admin/js/kosei-admin-ui.js` — list/detail rendering, tab switching, filtering
+- `admin/README.md` — admin surface documentation
+
+---
+
 ## 2026-04-06 — Phase 1: Public Landing PWA
 
 **Worker**: H
