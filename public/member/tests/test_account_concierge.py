@@ -605,3 +605,147 @@ class TestSavedVideosCSS:
     def test_saved_count_styles(self):
         content = CONCIERGE_CSS.read_text(encoding="utf-8")
         assert ".reddog-saved-count" in content
+
+
+# -- Watch History Surface --
+
+
+class TestWatchHistorySurface:
+    """Test Watch History section in concierge."""
+
+    def test_inject_watch_history_function(self):
+        """injectWatchHistory function exists."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "function injectWatchHistory" in content
+
+    def test_render_watch_history_function(self):
+        """renderWatchHistory function exists."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "function renderWatchHistory" in content
+
+    def test_reenter_history_video_function(self):
+        """reenterHistoryVideo function exists."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "function reenterHistoryVideo" in content
+
+    def test_clear_watch_history_function(self):
+        """clearWatchHistory function exists."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "function clearWatchHistory" in content
+
+    def test_history_section_data_attr(self):
+        """History section uses data-reddog-history attribute."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "data-reddog-history" in content
+
+    def test_reads_getHistory(self):
+        """Reads from mallVideoPlayer.getHistory."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "getHistory" in content
+
+    def test_history_count_displayed(self):
+        """History count badge is rendered."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "reddog-history-count" in content
+
+    def test_empty_state_message(self):
+        """Empty state message is present."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "No watch history yet. Videos you play will appear here." in content
+
+    def test_history_card_rendered(self):
+        """History video cards are rendered."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "reddog-history-card" in content
+
+    def test_history_card_has_thumbnail(self):
+        """History card includes thumbnail."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "reddog-history-thumb" in content
+
+    def test_history_card_has_title(self):
+        """History card includes title."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "reddog-history-title" in content
+
+    def test_reentry_uses_player_open(self):
+        """Re-entry opens fullscreen player if queue available."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "player.open(" in content
+
+    def test_reentry_fallback_to_entry_page(self):
+        """Re-entry falls back to FoundUp entry page."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "foundup.html?id=" in content
+
+    def test_reentry_emits_command(self):
+        """Re-entry emits reddog command."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "reenter_history_video" in content
+
+    def test_history_mode_in_execute(self):
+        """executeMode handles 'history' case."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "case 'history':" in content
+
+    def test_open_history_api(self):
+        """openHistory function exposed in public API."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "openHistory:" in content
+
+    def test_refresh_history_api(self):
+        """refreshHistory function exposed in public API."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "refreshHistory:" in content
+
+    def test_clear_history_api(self):
+        """clearHistory exposed in public API."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "clearHistory:" in content
+
+    def test_clear_calls_player_api(self):
+        """clearWatchHistory calls player.clearHistory."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "player.clearHistory()" in content
+
+    def test_clear_button_rendered(self):
+        """Clear button rendered when history exists."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "data-reddog-history-clear" in content
+
+    def test_injected_on_plane_open(self):
+        """Watch history injected when plane opens."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "injectWatchHistory()" in content
+
+
+class TestWatchHistoryCSS:
+    """Test Watch History CSS."""
+
+    def test_history_section_styles(self):
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert ".reddog-history-section" in content
+
+    def test_history_card_styles(self):
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert ".reddog-history-card" in content
+
+    def test_history_thumb_styles(self):
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert ".reddog-history-thumb" in content
+
+    def test_history_title_styles(self):
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert ".reddog-history-title" in content
+
+    def test_history_empty_styles(self):
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert ".reddog-history-empty" in content
+
+    def test_history_count_styles(self):
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert ".reddog-history-count" in content
+
+    def test_history_clear_styles(self):
+        content = CONCIERGE_CSS.read_text(encoding="utf-8")
+        assert ".reddog-history-clear" in content

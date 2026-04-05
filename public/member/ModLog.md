@@ -1,5 +1,39 @@
 # Member Area Module Change Log
 
+## [2026-04-05] Watch History Surface Phase 1 (Worker C, WSP_97)
+
+**Who**: 0102 (Claude Opus 4.6) — Worker C
+**Type**: Feature (Watch History UI)
+**Slice**: `pfMALL_WATCH_HISTORY_SURFACE_PHASE1`
+**Spec**: WSP_97
+
+**Files Modified**:
+- `public/member/js/account-concierge.js` — Watch History section + re-entry + clear
+- `public/member/css/account-concierge.css` — History card/list/clear styling
+- `public/member/tests/test_account_concierge.py` — 28 new tests (21 surface + 7 CSS)
+
+**Surface Added**:
+- Recently Watched section in Red Dog plane (after Saved Videos)
+- History count badge (purple theme to distinguish from saved's orange)
+- Video cards with thumbnail, title, foundupId, watched date
+- Clear History button wired to `mallVideoPlayer.clearHistory()`
+- Empty state: "No watch history yet. Videos you play will appear here."
+
+**Re-entry Behavior**:
+- Primary: reconstruct queue from storedCatalog → find video by videoId → player.open()
+- Fallback: navigate to `/member/foundup.html?id={foundupId}`
+
+**Public API Added**:
+- `window.redDog.openHistory()` — inject + scroll to history section
+- `window.redDog.refreshHistory()` — re-render history cards
+- `window.redDog.clearHistory()` — clear all watch history
+
+**Mode Sheet**: Added `History` entry to MODE_ACTIONS
+
+**Test Count**: 987 → 1015 (+28 new, 0 regressions)
+
+---
+
 ## [2026-04-03] Saved Videos Surface Phase 1 (Worker C, WSP_97)
 
 **Who**: 0102 (Claude Opus 4.6) — Worker C
