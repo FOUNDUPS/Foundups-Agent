@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from modules.foundups.kosei_ai_systems.src.contracts import (
+from modules.foundups.kosei.src.contracts import (
     AuditRequest,
     AuditReport,
     AuditStatus,
@@ -116,7 +116,7 @@ class TestModuleScaffold:
     def test_module_json_valid(self):
         module_json = MODULE_ROOT / "module.json"
         data = json.loads(module_json.read_text(encoding="utf-8"))
-        assert data["name"] == "kosei_ai_systems"
+        assert data["name"] == "kosei"
         assert data["type"] == "foundup"
         assert data["domain"] == "foundups"
 

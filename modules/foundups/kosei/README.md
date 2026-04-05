@@ -1,6 +1,6 @@
 # Kosei AI Systems FoundUp
 
-**Domain**: `foundups/kosei_ai_systems`
+**Domain**: `foundups/kosei`
 **Type**: FoundUp instance under `modules/foundups/`
 **Status**: Scaffold (Phase 0)
 
@@ -30,7 +30,7 @@ Kosei is the service orchestration and commercial surface. It is **not** the con
 |---------|-----------------|----------|
 | **What** | Business/service layer | Content creation engine |
 | **Scope** | Audit, onboard, orchestrate, bill | Capture, process, publish |
-| **Repo** | `modules/foundups/kosei_ai_systems/` | External: `O:\repos\AutoPost` (separate repo) |
+| **Repo** | `modules/foundups/kosei/` | External: `O:\repos\AutoPost` (separate repo) |
 | **Users** | Clients, operators, agents | End users (direct tool) |
 | **Relationship** | Consumes AutoPost as a service | Independent open-source tool |
 | **pAVS role** | FoundUp (commercial entity) | Product/tool (may become FoundUp later) |
@@ -56,7 +56,7 @@ Client -> Kosei Audit Funnel -> Content Gap Analysis
 
 | WSP | Concern |
 |-----|---------|
-| WSP 3 | Domain placement: `foundups/kosei_ai_systems` |
+| WSP 3 | Domain placement: `foundups/kosei` |
 | WSP 11 | Interface contract: `INTERFACE.md` |
 | WSP 22 | Change log: `ModLog.md` |
 | WSP 49 | Module structure: README, INTERFACE, ROADMAP, tests |
