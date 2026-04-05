@@ -1,8 +1,8 @@
 # p.fMALL Fullscreen Player Contract
 
-**Version**: 2.0.0  
-**Date**: 2026-04-03  
-**Status**: Phase 2 landed (save/share/history)  
+**Version**: 2.1.0
+**Date**: 2026-04-05
+**Status**: Phase 2 landed (save/share/history/resume)
 **Owner**: Worker F (0102)
 
 ---
@@ -70,13 +70,14 @@ This is NOT a global feed or discovery surface. It is a focused playback layer f
 
 ## 5. Fullscreen Entry
 
-Entry point: `mallVideoPlayer.open(foundupId, queue, startIndex)`
+Entry point: `mallVideoPlayer.open(foundupId, queue, startIndex, resumeOpts?)`
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `foundupId` | string | The FoundUp ID — constrains the queue |
 | `queue` | Array | Array of video objects from that FoundUp |
 | `startIndex` | number | Index to start at (default: 0) |
+| `resumeOpts` | object? | Optional `{ resumeSeconds: number }` — seeks after metadata load (HTML5 `<video>` only; embeds ignore) |
 
 **Behavior**:
 1. DOM container is created lazily on first open
@@ -233,7 +234,7 @@ Top bar and queue rail respect notched device safe areas:
 ```javascript
 window.mallVideoPlayer = {
   // Core
-  open(foundupId, queue, startIndex),  // Open with queue
+  open(foundupId, queue, startIndex, resumeOpts?),  // Open with queue; resumeOpts: { resumeSeconds } (HTML5 only)
   close(),                              // Exit fullscreen
   goToVideo(index),                     // Jump to index
   next(),                               // Next video
@@ -258,7 +259,7 @@ window.mallVideoPlayer = {
 | Key | Structure |
 |-----|-----------|
 | `pfmall_saved_videos` | `{ "{foundupId}::{videoId}": { foundupId, videoId, title, thumbnail, savedAt } }` |
-| `pfmall_watch_history` | `[{ foundupId, videoId, videoIndex, title, thumbnail, timestamp }, ...]` |
+| `pfmall_watch_history` | `[{ foundupId, videoId, videoIndex, title, thumbnail, timestamp, playbackPosition? }, ...]` — `playbackPosition` is shell-local seconds for HTML5 `<video>` items only; omitted when below 5s or near end (97%+); not set for iframe embeds. |
 
 ---
 
@@ -329,10 +330,10 @@ These are explicitly deferred:
 - Share (native share → clipboard fallback)
 - Watch history (localStorage: `pfmall_watch_history`, max 50, newest first)
 - Concierge browse surfaces: Saved Videos and Recently Watched sections in Red Dog plane (see `public/member/INTERFACE.md` → `window.redDog`)
+- Resume position: shell-local, HTML5 `<video>` only (see section 6.1)
 
 **Phase 3** (future):
-- Backend sync for save/history
-- Resume position
+- Backend sync for save/history/resume
 - AI-driven "more like this" rail (still queue-constrained)
 - Chapter markers for long-form content
 - Transcript/subtitle integration
@@ -350,4 +351,4 @@ These are explicitly deferred:
 
 ---
 
-*This contract locks the fullscreen player behavior for p.fMALL phase 1. Changes require 0102 review.*
+*This contract locks the fullscreen player behavior for p.fMALL phase 2. Changes require 0102 review.*
