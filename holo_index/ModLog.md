@@ -1,5 +1,30 @@
 # HoloIndex Package ModLog
 
+## [2026-04-05] External FoundUp — shell backend registration (bridge contract doc only)
+
+**Agent**: 0102 — Worker H  
+**Slice**: `HOLOINDEX_SHELL_BACKEND_REGISTRATION_PHASE1`  
+**What**: `docs/EXTERNAL_FOUNDUP_BRIDGE_CONTRACT.md` §5 documents the shell-side `registerShellBridgeBackend` seam; browser path remains non-HTTP to core. Python adapter unchanged this slice.
+
+---
+
+## [2026-04-04] Operator notices — HoloIndex gate until 0102 ack
+
+**Agent**: 0102  
+**WSP**: WSP 91 (observability), WSP 97 (explicit gates)
+
+### What
+
+- **`holo_index/utils/operator_notice.py`**: JSON store (`holo_index/memory/operator_notices.json`, override `HOLO_OPERATOR_NOTICES_PATH`) with `raise_operator_notice`, `list_pending`, `ack_operator_notice`, `inject_operator_notices_into_results`.
+- **CLI**: `--list-operator-notices`, `--ack-operator-notice ID`, `--operator-notice-resolution`, `--operator-notice-cleared-by`, `--quiet-operator-notices`. List/ack run before bundle-json path.
+- **Search**: Banner on CLI startup when pending; notices prepended to `results["warnings"]` (full throttler + `--fast-search` + offline lexical path via `_render_fast_search_summary`).
+- **Suppress**: `HOLO_SUPPRESS_OPERATOR_NOTICES=1` or `--quiet-operator-notices`.
+- **Optional**: `HOLO_RAISE_NOTICE_ON_STUDIO=1` in `studio_interruption_monitor` raises a critical notice when Studio challenge is logged.
+- **Tests**: `holo_index/tests/test_operator_notice.py`
+- **gitignore**: `holo_index/memory/operator_notices.json`
+
+---
+
 ## [2026-03-31] Core Split Phase 3 — Introspection Surface (holoindex_core_split_phase3_module_introspection_surface)
 
 **Agent**: 0102

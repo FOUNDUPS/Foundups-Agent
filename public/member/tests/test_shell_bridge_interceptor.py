@@ -10,6 +10,8 @@ WSP References: WSP 11 (Interface Contract), WSP 97 (Execution Discipline)
 import json
 import os
 import re
+import shutil
+import subprocess
 
 import pytest
 
@@ -267,10 +269,53 @@ class TestPublicAPI:
         js = _read_js()
         assert "setBackend" in js
 
+    def test_register_shell_bridge_backend_method(self):
+        """Explicit registration API (truthful seam)."""
+        js = _read_js()
+        assert "registerShellBridgeBackend" in js
+
+    def test_clear_shell_bridge_backend_method(self):
+        """Clear returns to stub mode."""
+        js = _read_js()
+        assert "clearShellBridgeBackend" in js
+
+    def test_get_shell_bridge_backend_status_method(self):
+        """Status introspection for stub vs registered (no false live claims)."""
+        js = _read_js()
+        assert "getShellBridgeBackendStatus" in js
+
+    def test_backend_registration_state_tracked(self):
+        """Registration mode is tracked separately from window reference."""
+        js = _read_js()
+        assert "backendRegistration" in js
+
     def test_get_config_method(self):
         """API has getConfig method."""
         js = _read_js()
         assert "getConfig" in js
+
+
+# ---------------------------------------------------------------------------
+# VM runtime (node) — registration + stub vs real paths
+# ---------------------------------------------------------------------------
+
+
+class TestVMRuntimeShellBridge:
+    """Node vm exercises registration + stub paths (focused runtime proof)."""
+
+    @pytest.mark.skipif(not shutil.which("node"), reason="node not on PATH")
+    def test_shell_bridge_interceptor_vm_script_passes(self):
+        mjs = os.path.join(os.path.dirname(__file__), "shell_bridge_interceptor_vm.mjs")
+        proc = subprocess.run(
+            ["node", mjs],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=30,
+            cwd=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        )
+        assert proc.returncode == 0, proc.stdout + proc.stderr
 
 
 # ---------------------------------------------------------------------------

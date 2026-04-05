@@ -1,5 +1,13 @@
 # Member Area Module Change Log
 
+## [2026-04-05] Shell bridge backend registration seam (Worker H, WSP 97)
+
+**Who**: 0102 — Worker H  
+**Slice**: `HOLOINDEX_SHELL_BACKEND_REGISTRATION_PHASE1`  
+**What**: Explicit `registerShellBridgeBackend` / `clearShellBridgeBackend` / `getShellBridgeBackendStatus` on `shell-bridge-interceptor.js`; stub vs registered routing; Node `vm` harness `tests/shell_bridge_interceptor_vm.mjs`; pytest subprocess + static tests.
+
+---
+
 ## [2026-04-05] Saved/History Surface Doc Sync (Worker F, WSP_97)
 
 **Who**: 0102 (Claude Opus 4.6) — Worker F

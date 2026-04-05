@@ -86,11 +86,11 @@ The internal adapter is now hooked to the bridge contract:
 
 | Action | Adapter (Python) | Browser path | UI | Status |
 |--------|------------------|--------------|-----|--------|
-| `semantic_search` | MCP-backed, contract-shaped | Stub unless `window.shellBridgeBackend` is registered | Ready | **Adapter-ready** |
-| `wsp_lookup` | MCP-backed, contract-shaped | Stub unless `window.shellBridgeBackend` is registered | Ready | **Adapter-ready** |
-| `health` | Local / contract-shaped | Interceptor can answer shape; real backend still needs registration | Ready | **Adapter-ready** |
+| `semantic_search` | MCP-backed, contract-shaped | Stub unless backend registered via `registerShellBridgeBackend` | Ready | **Adapter-ready** / **Registered seam** when host supplies backend |
+| `wsp_lookup` | MCP-backed, contract-shaped | Same | Ready | **Adapter-ready** / **Registered seam** when host supplies backend |
+| `health` | Local / contract-shaped | Same | Ready | **Adapter-ready** / **Registered seam** when host supplies backend |
 
-**Truthfulness**: **LIVE** (end-to-end through the browser) is **not** claimed here. The adapter and tests are code-real; full browser ↔ core routing requires a truthful **`shellBridgeBackend`** registration seam (next slice).
+**Truthfulness**: **LIVE** (end-to-end production search authority) is **not** claimed here. Registration is an **explicit local seam**; core remains internal — no browser→core HTTP in this slice.
 
 ### Truthfulness Preserved
 
@@ -102,7 +102,18 @@ The internal adapter is now hooked to the bridge contract:
 ### Architect — Worker H closure + next slice
 
 - **Closed for this lane**: `HOLOINDEX_EXTERNAL_FOUNDUP_ADAPTER_HOOKUP_PHASE1` (contract-shaped adapter, exports, `21` focused tests, interceptor `health`, this report).
-- **Next HoloIndex slice**: `HOLOINDEX_SHELL_BACKEND_REGISTRATION_PHASE1` — register a truthful `window.shellBridgeBackend` in environments that can host both shell UI and the adapter, so `semantic_search` / `wsp_lookup` (and related actions) can leave stub fallback by design; add focused interceptor tests around that seam.
+- **Follow-on**: `HOLOINDEX_SHELL_BACKEND_REGISTRATION_PHASE1` (see below).
+
+## Shell backend registration seam (2026-04-05)
+
+**Worker**: H  
+**Slice**: `HOLOINDEX_SHELL_BACKEND_REGISTRATION_PHASE1`
+
+- **Registration**: `window.shellBridgeInterceptor.registerShellBridgeBackend(backend, { label })` validates `search` / `wspLookup` / `health` (all functions returning Promises). Clears with `clearShellBridgeBackend()`. Status: `getShellBridgeBackendStatus()` → `mode: stub|registered` (explicit **stub** responses keep `data.stub === true`; registered path does not imply “fully live HoloIndex production”).
+- **Tests**: `public/member/tests/shell_bridge_interceptor_vm.mjs` (Node `vm` runtime) + `public/member/tests/test_shell_bridge_interceptor.py` (static + subprocess node).
+- **Contract pointer**: `holo_index/docs/EXTERNAL_FOUNDUP_BRIDGE_CONTRACT.md` §5.
+
+**Architect**: This slice is **closed** for the registration seam + focused verification; wiring a *particular* host (e.g. Electron IPC → Python adapter) is a future host-specific step, not a second HoloIndex runtime.
 
 ## Classification
 
