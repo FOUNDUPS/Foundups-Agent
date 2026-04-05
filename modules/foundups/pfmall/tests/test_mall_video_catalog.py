@@ -75,7 +75,7 @@ class TestFoundUpEntryShape:
             assert fid == fid.lower().replace(" ", "_"), f"foundup_id should be lowercase snake_case: {fid}"
 
     def test_source_type_values(self, catalog: list[dict]):
-        valid_types = {"youtube_channel", "linkedin_profile", "x_profile", "tiktok_profile", "instagram_profile"}
+        valid_types = {"youtube_channel", "linkedin_profile", "x_profile", "tiktok_profile", "instagram_profile", "derived"}
         for entry in catalog:
             assert entry["source_type"] in valid_types, f"Invalid source_type: {entry['source_type']}"
 
@@ -210,7 +210,7 @@ class TestProjectionMetadata:
 
     def test_topic_family_values(self, catalog: list[dict]):
         """topic_family must be one of defined values."""
-        valid_families = {"life", "consciousness", "startup", "resistance"}
+        valid_families = {"life", "consciousness", "startup", "resistance", "ai-education"}
         for entry in catalog:
             assert entry["topic_family"] in valid_families, (
                 f"Invalid topic_family '{entry['topic_family']}' in {entry['foundup_id']}"
