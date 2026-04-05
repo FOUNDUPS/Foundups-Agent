@@ -213,6 +213,19 @@ Reason:
   - Discord: AUTOPOST category planned (#autopost-general doubles as user troubleshooting, monitored by 0102/OBAI)
   - docs: ROADMAP.md and ModLog.md added 2026-04-06
   - dual-remote normalization: `FOUNDUPS/autopost` is origin (confirmed), backup TBD
+  - **monorepo footprint**: references only — no `modules/foundups/autopost/` directory
+  - **boundary audit**: `docs/audits/kosei_ai_systems/AUTOPOST_VS_KOSEI_BOUNDARY_REPORT.md`
+
+#### Externalized FoundUp Monorepo Rules
+
+Externalized FoundUps (like AutoPost) carry only the following in the monorepo:
+
+1. **Catalog taxonomy reference** — `PFMALL_LAUNCH_CATALOG_TAXONOMY.md` entry
+2. **Canonical index entry** — this document
+3. **Channel platform type** — `account-concierge.js` CHANNEL_PLATFORMS (if applicable)
+4. **pfMALL catalog entry** — deferred until schema supports `external_app` source type
+
+No product code, no business logic, no `modules/foundups/{name}/` directory.
 
 ### Future Candidate, Not Yet Classified As A FoundUp
 
