@@ -2,6 +2,7 @@
   "$schema": "openclaw_integration_manifest/v1",
   "description": "Machine-readable ledger of all OpenClaw integration points. Source of truth: docs/audits/openclaw_plugins/OPENCLAW_PLUGIN_LEDGER_AUDIT.md",
   "generated": "2026-04-05",
+  "maintenance": "When adding a new OPENCLAW_*/IRONCLAW_*/OPENROUTER_* env key to main.py or wre_defaults.env, add it to the owning integration entry here. Run: pytest modules/communication/moltbot_bridge/tests/test_openclaw_integration_manifest.py",
   "integrations": [
     {
       "name": "IronClaw Gateway",
