@@ -80,6 +80,9 @@ env/
 .cursor/cache/
 .cursor/temp/
 
+# HoloIndex — local operator-notice queue (0102 ack clears)
+holo_index/memory/operator_notices.json
+
 # Logs and runtime data
 *.log
 logs/
@@ -298,6 +301,8 @@ YOUTUBE_SHORTS_INVESTIGATION_FINDINGS.md
 docs/investigations/
 docs/audits/*
 !docs/audits/openclaw_reddog/
+!docs/audits/holoindex_external_foundup/
+!docs/audits/holoindex_external_foundup/**
 docs/sessions/
 
 # WSP agentic awakening runtime state (changes every session)

@@ -53,7 +53,7 @@
   var handlers = {
     /**
      * Handle openclaw_search route requests
-     * Actions: semantic_search, wsp_lookup
+     * Actions: semantic_search, wsp_lookup, health
      */
     openclaw_search: function(payload, callback) {
       var action = payload.action;
@@ -62,6 +62,8 @@
         handleSemanticSearch(payload, callback);
       } else if (action === 'wsp_lookup') {
         handleWspLookup(payload, callback);
+      } else if (action === 'health') {
+        handleHealthCheck(payload, callback);
       } else {
         callback({
           type: 'agent_response',
@@ -161,6 +163,54 @@
           }
         });
       }, 50);
+    }
+  }
+
+  // ---- Health Check Handler ----
+  function handleHealthCheck(payload, callback) {
+    log('debug', 'Health check request');
+
+    // Phase 1: Stub response
+    // Phase 2: Real backend health check
+    if (window.shellBridgeBackend && typeof window.shellBridgeBackend.health === 'function') {
+      window.shellBridgeBackend.health()
+        .then(function(result) {
+          callback({
+            type: 'agent_response',
+            status: 'success',
+            data: result
+          });
+        })
+        .catch(function(err) {
+          callback({
+            type: 'agent_response',
+            status: 'error',
+            data: { error: 'backend_error', message: String(err) }
+          });
+        });
+    } else {
+      // Stub response - report interceptor health
+      var startTime = performance.now();
+      setTimeout(function() {
+        var latency = Math.round(performance.now() - startTime);
+        callback({
+          type: 'agent_response',
+          status: 'success',
+          data: {
+            results: [{
+              content: JSON.stringify({
+                status: 'healthy',
+                backend: 'stub',
+                latency_ms: latency
+              }),
+              path: '/f/holoindex/status',
+              relevance: 1.0
+            }],
+            quantum_coherence: 0.5,
+            stub: true
+          }
+        });
+      }, 10);
     }
   }
 
