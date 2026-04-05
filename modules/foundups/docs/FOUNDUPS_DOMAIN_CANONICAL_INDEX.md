@@ -106,6 +106,14 @@ Use four statuses:
 ### Canonical
 
 - `modules/foundups/ROADMAP.md`
+- `modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md`
+  - **master document**: five-layer funnel (Discovery → Welcome → Community → Gate → Interior), entitlement tiers, repeating unit per FoundUp, document map
+- `modules/foundups/docs/FOUNDUPS_DISCORD_BLUEPRINT.md`
+  - embedded server layout (14 channels), role hierarchy, permission matrix, automation, onboarding flow, per-FoundUp category pattern
+- `modules/foundups/docs/FOUNDUPS_ENTITLEMENT_TIERS.md`
+  - formal tier definitions (Guest/Visitor/Community/Stakeholder/Operator), per-surface access matrix, agent participation rules, graceful denial
+- `modules/foundups/docs/FOUNDUP_TEMPLATE.md`
+  - repeatable 7-component checklist for adding a new FoundUp to the system
 - `modules/foundups/docs/FOUNDUP_EXFOLIATION_PROTOCOL.md`
 - `modules/foundups/docs/PQN_SWARM_HUB_FOUNDUP_BRIEF.md`
 - `modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md`
