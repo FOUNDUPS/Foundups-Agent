@@ -307,6 +307,8 @@ docs/audits/*
 !docs/audits/openclaw_reddog/
 !docs/audits/holoindex_external_foundup/
 !docs/audits/holoindex_external_foundup/**
+!docs/audits/domain_ops/
+!docs/audits/domain_ops/**
 !docs/audits/science_swarm_external_foundup/
 !docs/audits/science_swarm_external_foundup/**
 docs/sessions/

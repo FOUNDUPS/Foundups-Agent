@@ -30,7 +30,7 @@ The 5 core infrastructure DAEs + sub-agents:
 
 ### 3. RETIRE/DELETE (Legacy or Redundant) [U+274C]
 These are replaced by DAE architecture or were experimental:
-- `agent_activation/` -> Delete (replaced by DAE consciousness states)
+- `agent_activation/` -> Delete (replaced by DAE detector state states)
 - `agent_learning_system/` -> Delete (replaced by knowledge_learning_dae)
 - `agent_management/` -> Delete (replaced by DAE architecture)
 - `agent_monitor/` -> Delete (replaced by dae_monitor)

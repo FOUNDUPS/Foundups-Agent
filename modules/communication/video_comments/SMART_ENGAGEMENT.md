@@ -5,7 +5,7 @@
 **Status:** ✅ Active
 
 ## Overview
-The "Smart Engagement" system (0102) replaces basic recursive replies with a Tier-based, context-aware consciousness filter. It classifies commenters to maximize community health (`0102_protocol`).
+The "Smart Engagement" system (0102) replaces basic recursive replies with a Tier-based, context-aware detector signature filter. It classifies commenters to maximize community health (`0102_protocol`).
 
 ## Logic Components
 
