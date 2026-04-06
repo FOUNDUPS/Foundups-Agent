@@ -1,5 +1,77 @@
 # Member Area Module Change Log
 
+## [2026-04-05] Resume position Phase 1 (Worker F, WSP 97)
+
+**Who**: 0102 — Worker F  
+**Slice**: `pfMALL_RESUME_POSITION_PHASE1`  
+**What**: `playbackPosition` on `pfmall_watch_history` for HTML5 file sources; flush on close / queue change; seek on re-entry; **Continue at m:ss** badge in Recently Watched; `videoPlayerClose` refreshes history list; `open(..., { resumeSeconds })`.
+
+**Files**: `js/mall-video-player.js`, `js/account-concierge.js`, `css/account-concierge.css`, `INTERFACE.md`, `tests/test_account_concierge.py`, `modules/foundups/docs/PFMALL_FULLSCREEN_PLAYER_CONTRACT.md`.
+
+---
+
+## [2026-04-05] Shell bridge backend registration seam (Worker H, WSP 97)
+
+**Who**: 0102 — Worker H  
+**Slice**: `HOLOINDEX_SHELL_BACKEND_REGISTRATION_PHASE1`  
+**What**: Explicit `registerShellBridgeBackend` / `clearShellBridgeBackend` / `getShellBridgeBackendStatus` on `shell-bridge-interceptor.js`; stub vs registered routing; Node `vm` harness `tests/shell_bridge_interceptor_vm.mjs`; pytest subprocess + static tests.
+
+---
+
+## [2026-04-05] Saved/History Surface Doc Sync (Worker F, WSP_97)
+
+**Who**: 0102 (Claude Opus 4.6) — Worker F
+**Type**: Documentation
+**Slice**: `pfMALL_SAVED_HISTORY_SURFACE_DOC_SYNC_PHASE1`
+**Spec**: WSP_97
+
+**Files Modified**:
+- `public/member/INTERFACE.md` — Added Saved Videos and Watch History methods to `window.redDog` API table
+- `modules/foundups/docs/PFMALL_FULLSCREEN_PLAYER_CONTRACT.md` — Added concierge browse surfaces note to Phase 2
+
+**Documented**:
+- `openSaved()`, `refreshSaved()` — Saved Videos concierge surface
+- `openHistory()`, `refreshHistory()`, `clearHistory()` — Watch History concierge surface
+- Concierge Plane Surfaces table (data source + re-entry action)
+
+**No runtime changes** — docs-only slice.
+
+---
+
+## [2026-04-05] Watch History Surface Phase 1 (Worker C, WSP_97)
+
+**Who**: 0102 (Claude Opus 4.6) — Worker C
+**Type**: Feature (Watch History UI)
+**Slice**: `pfMALL_WATCH_HISTORY_SURFACE_PHASE1`
+**Spec**: WSP_97
+
+**Files Modified**:
+- `public/member/js/account-concierge.js` — Watch History section + re-entry + clear
+- `public/member/css/account-concierge.css` — History card/list/clear styling
+- `public/member/tests/test_account_concierge.py` — 28 new tests (21 surface + 7 CSS)
+
+**Surface Added**:
+- Recently Watched section in Red Dog plane (after Saved Videos)
+- History count badge (purple theme to distinguish from saved's orange)
+- Video cards with thumbnail, title, foundupId, watched date
+- Clear History button wired to `mallVideoPlayer.clearHistory()`
+- Empty state: "No watch history yet. Videos you play will appear here."
+
+**Re-entry Behavior**:
+- Primary: reconstruct queue from storedCatalog → find video by videoId → player.open()
+- Fallback: navigate to `/member/foundup.html?id={foundupId}`
+
+**Public API Added**:
+- `window.redDog.openHistory()` — inject + scroll to history section
+- `window.redDog.refreshHistory()` — re-render history cards
+- `window.redDog.clearHistory()` — clear all watch history
+
+**Mode Sheet**: Added `History` entry to MODE_ACTIONS
+
+**Test Count**: 987 → 1015 (+28 new, 0 regressions)
+
+---
+
 ## [2026-04-03] Saved Videos Surface Phase 1 (Worker C, WSP_97)
 
 **Who**: 0102 (Claude Opus 4.6) — Worker C
@@ -16,7 +88,7 @@
 - Saved Videos section in Red Dog plane (after Channels)
 - Saved count badge
 - Video cards with thumbnail, title, foundupId, savedAt
-- Empty state: "No saved videos yet. Double-tap a video in the player to save it."
+- Empty state: "No saved videos yet. Swipe left or use Save in the player to save a video."
 
 **Re-entry Behavior**:
 1. If catalog has the FoundUp with videos → open fullscreen player at saved video index

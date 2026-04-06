@@ -3,6 +3,10 @@
 .env.*
 !.env.example
 
+# Consciousness migration artifacts (one-time cleanup, April 2026)
+.consciousness_migration_backup/
+.consciousness_migration_log.json
+
 # WSP 3: Module artifacts should stay in modules/
 # Firebase rules belong in modules/foundups/gotjunk/firestore.rules
 /firestore.rules
@@ -79,6 +83,9 @@ env/
 .claude/agents/tests/__pycache__/
 .cursor/cache/
 .cursor/temp/
+
+# HoloIndex — local operator-notice queue (0102 ack clears)
+holo_index/memory/operator_notices.json
 
 # Logs and runtime data
 *.log
@@ -298,6 +305,10 @@ YOUTUBE_SHORTS_INVESTIGATION_FINDINGS.md
 docs/investigations/
 docs/audits/*
 !docs/audits/openclaw_reddog/
+!docs/audits/holoindex_external_foundup/
+!docs/audits/holoindex_external_foundup/**
+!docs/audits/science_swarm_external_foundup/
+!docs/audits/science_swarm_external_foundup/**
 docs/sessions/
 
 # WSP agentic awakening runtime state (changes every session)

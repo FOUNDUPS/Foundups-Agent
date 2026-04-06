@@ -9836,7 +9836,8 @@
     "related_lanes": [
       "move2japan",
       "linkedin_012",
-      "linkedin_esingularity"
+      "linkedin_esingularity",
+      "eduit"
     ],
     "display_order": 2,
     "tagline": "Music, activism, and life from 012",
@@ -10780,5 +10781,231 @@
     "tier": "F0_DAE",
     "description": "Official FoundUPS LinkedIn company page. No video content yet — lane reserved for corporate and ecosystem updates.",
     "launch_readiness": "discoverable_only"
+  },
+  {
+    "foundup_id": "eduit",
+    "title": "EDUIT",
+    "creator": "012",
+    "creator_id": "012",
+    "creator_display": "Michael Trout",
+    "entity": "EDUIT, Inc",
+    "source_type": "derived",
+    "source_id": "UCfHM9Fw9HD-NwiS0seD_oIA",
+    "source_handle": "@UnDaoDu",
+    "category": "ai-education",
+    "tags": [
+      "012-lane",
+      "eduit",
+      "esingularity",
+      "education",
+      "autonomous-learning",
+      "hapticsign"
+    ],
+    "topic_family": "ai-education",
+    "geo": "Global",
+    "status": "active",
+    "display_order": 9,
+    "related_lanes": [
+      "undaodu",
+      "linkedin_esingularity"
+    ],
+    "tagline": "FoundUP for autonomous learning on any device",
+    "description": "EDUIT (eSingularity) — autonomous learning platform. Content derived from 012 UnDaoDu channel covering the eSingularity educational initiative.",
+    "tier": "F0_DAE",
+    "lifecycle_stage": "staging",
+    "launch_readiness": "discoverable_only",
+    "poster_url": "/media/posters/eduit.jpg",
+    "video_count": 21,
+    "videos": [
+      {
+        "video_id": "xmddOFcp__o",
+        "title": "Why this book is important, E-Singularity.",
+        "thumbnail_url": "https://i.ytimg.com/vi/xmddOFcp__o/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/xmddOFcp__o",
+        "source_url": "https://www.youtube.com/watch?v=xmddOFcp__o",
+        "timestamp": "2026-01-12T18:20:37Z",
+        "duration_seconds": 379
+      },
+      {
+        "video_id": "xbuqnDLKoH8",
+        "title": "Part 3: The eSingularity (The Solution)",
+        "thumbnail_url": "https://i.ytimg.com/vi/xbuqnDLKoH8/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/xbuqnDLKoH8",
+        "source_url": "https://www.youtube.com/watch?v=xbuqnDLKoH8",
+        "timestamp": "2026-01-12T17:18:08Z",
+        "duration_seconds": 445
+      },
+      {
+        "video_id": "W5TakB17F14",
+        "title": "eSingularity Educational Initiative",
+        "thumbnail_url": "https://i.ytimg.com/vi/W5TakB17F14/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/W5TakB17F14",
+        "source_url": "https://www.youtube.com/watch?v=W5TakB17F14",
+        "timestamp": "2026-01-12T17:16:20Z",
+        "duration_seconds": 450
+      },
+      {
+        "video_id": "uWr8rS8y9NE",
+        "title": "Michael Trout: eSingularity Will Collapse Certification Industry",
+        "thumbnail_url": "https://i.ytimg.com/vi/uWr8rS8y9NE/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/uWr8rS8y9NE",
+        "source_url": "https://www.youtube.com/watch?v=uWr8rS8y9NE",
+        "timestamp": "2026-01-12T18:21:03Z",
+        "duration_seconds": 227
+      },
+      {
+        "video_id": "UrlE9HLh6L8",
+        "title": "Education ESingularity Prize, Global Education Prize",
+        "thumbnail_url": "https://i.ytimg.com/vi/UrlE9HLh6L8/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/UrlE9HLh6L8",
+        "source_url": "https://www.youtube.com/watch?v=UrlE9HLh6L8",
+        "timestamp": "2026-01-12T23:50:29Z",
+        "duration_seconds": 482
+      },
+      {
+        "video_id": "Rhvuc5FrdkQ",
+        "title": "Education and E-Singularity - Middle School and High School",
+        "thumbnail_url": "https://i.ytimg.com/vi/Rhvuc5FrdkQ/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/Rhvuc5FrdkQ",
+        "source_url": "https://www.youtube.com/watch?v=Rhvuc5FrdkQ",
+        "timestamp": "2026-01-12T17:32:08Z",
+        "duration_seconds": 306
+      },
+      {
+        "video_id": "pY4ZWArX4g8",
+        "title": "The Blood for Esingularity",
+        "thumbnail_url": "https://i.ytimg.com/vi/pY4ZWArX4g8/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/pY4ZWArX4g8",
+        "source_url": "https://www.youtube.com/watch?v=pY4ZWArX4g8",
+        "timestamp": "2026-01-12T17:33:57Z",
+        "duration_seconds": 276
+      },
+      {
+        "video_id": "pXXlbAqDJOI",
+        "title": "Impact of E-Singularity on Higher Education",
+        "thumbnail_url": "https://i.ytimg.com/vi/pXXlbAqDJOI/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/pXXlbAqDJOI",
+        "source_url": "https://www.youtube.com/watch?v=pXXlbAqDJOI",
+        "timestamp": "2026-01-12T19:20:12Z",
+        "duration_seconds": 490
+      },
+      {
+        "video_id": "NUh28WcX404",
+        "title": "Three Stages of eSingularity",
+        "thumbnail_url": "https://i.ytimg.com/vi/NUh28WcX404/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/NUh28WcX404",
+        "source_url": "https://www.youtube.com/watch?v=NUh28WcX404",
+        "timestamp": "2026-01-12T20:11:28Z",
+        "duration_seconds": 189
+      },
+      {
+        "video_id": "mSam-JyF7qQ",
+        "title": "The eSingularity Prize for Global Education",
+        "thumbnail_url": "https://i.ytimg.com/vi/mSam-JyF7qQ/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/mSam-JyF7qQ",
+        "source_url": "https://www.youtube.com/watch?v=mSam-JyF7qQ",
+        "timestamp": "2026-01-12T19:49:59Z",
+        "duration_seconds": 352
+      },
+      {
+        "video_id": "Lz08gejqSUw",
+        "title": "ESINGULARITY Commercial Ad Strategy by Michael Trout",
+        "thumbnail_url": "https://i.ytimg.com/vi/Lz08gejqSUw/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/Lz08gejqSUw",
+        "source_url": "https://www.youtube.com/watch?v=Lz08gejqSUw",
+        "timestamp": "2026-01-12T17:06:15Z",
+        "duration_seconds": 176
+      },
+      {
+        "video_id": "KXt1DtmE3XA",
+        "title": "The eSingularity",
+        "thumbnail_url": "https://i.ytimg.com/vi/KXt1DtmE3XA/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/KXt1DtmE3XA",
+        "source_url": "https://www.youtube.com/watch?v=KXt1DtmE3XA",
+        "timestamp": "2026-01-12T18:31:27Z",
+        "duration_seconds": 488
+      },
+      {
+        "video_id": "Kge-icfXJl8",
+        "title": "The Esingularity Prize",
+        "thumbnail_url": "https://i.ytimg.com/vi/Kge-icfXJl8/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/Kge-icfXJl8",
+        "source_url": "https://www.youtube.com/watch?v=Kge-icfXJl8",
+        "timestamp": "2026-01-12T19:42:38Z",
+        "duration_seconds": 300
+      },
+      {
+        "video_id": "JR_7biWI6fg",
+        "title": "Will eSingularity Happen in 10 Years?",
+        "thumbnail_url": "https://i.ytimg.com/vi/JR_7biWI6fg/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/JR_7biWI6fg",
+        "source_url": "https://www.youtube.com/watch?v=JR_7biWI6fg",
+        "timestamp": "2026-01-12T18:33:51Z",
+        "duration_seconds": 523
+      },
+      {
+        "video_id": "HUneSmY_9sQ",
+        "title": "The eSingularity Platform: Every Child",
+        "thumbnail_url": "https://i.ytimg.com/vi/HUneSmY_9sQ/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/HUneSmY_9sQ",
+        "source_url": "https://www.youtube.com/watch?v=HUneSmY_9sQ",
+        "timestamp": "2026-01-12T19:26:18Z",
+        "duration_seconds": 219
+      },
+      {
+        "video_id": "fk5ZwzIDIFk",
+        "title": "Eduit: The vision",
+        "thumbnail_url": "https://i.ytimg.com/vi/fk5ZwzIDIFk/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/fk5ZwzIDIFk",
+        "source_url": "https://www.youtube.com/watch?v=fk5ZwzIDIFk",
+        "timestamp": "2026-01-13T01:14:44Z",
+        "duration_seconds": 386
+      },
+      {
+        "video_id": "EfMZVAm6NPE",
+        "title": "Why is Flattening Global Education Important? #TheSingularityInitiative #MichaelTrout",
+        "thumbnail_url": "https://i.ytimg.com/vi/EfMZVAm6NPE/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/EfMZVAm6NPE",
+        "source_url": "https://www.youtube.com/watch?v=EfMZVAm6NPE",
+        "timestamp": "2026-01-12T17:21:59Z",
+        "duration_seconds": 468
+      },
+      {
+        "video_id": "CjVyzXvAXhg",
+        "title": "Video blog - E-Singularity",
+        "thumbnail_url": "https://i.ytimg.com/vi/CjVyzXvAXhg/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/CjVyzXvAXhg",
+        "source_url": "https://www.youtube.com/watch?v=CjVyzXvAXhg",
+        "timestamp": "2026-01-12T18:34:43Z",
+        "duration_seconds": 178
+      },
+      {
+        "video_id": "9W4O4c3CVwo",
+        "title": "Using Nintendo 3DS as Alpha eSingularity Platform",
+        "thumbnail_url": "https://i.ytimg.com/vi/9W4O4c3CVwo/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/9W4O4c3CVwo",
+        "source_url": "https://www.youtube.com/watch?v=9W4O4c3CVwo",
+        "timestamp": "2026-01-12T18:43:18Z",
+        "duration_seconds": 568
+      },
+      {
+        "video_id": "6ut-dfG3fpg",
+        "title": "e-Singularity Prize",
+        "thumbnail_url": "https://i.ytimg.com/vi/6ut-dfG3fpg/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/6ut-dfG3fpg",
+        "source_url": "https://www.youtube.com/watch?v=6ut-dfG3fpg",
+        "timestamp": "2026-01-12T23:58:37Z",
+        "duration_seconds": 511
+      },
+      {
+        "video_id": "36gnsogfqYI",
+        "title": "EduIT CEO Michael Trout",
+        "thumbnail_url": "https://i.ytimg.com/vi/36gnsogfqYI/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/36gnsogfqYI",
+        "source_url": "https://www.youtube.com/watch?v=36gnsogfqYI",
+        "timestamp": "2026-01-12T17:12:16Z",
+        "duration_seconds": 54
+      }
+    ]
   }
 ]

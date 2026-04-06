@@ -1,0 +1,38 @@
+{
+  "name": "kosei",
+  "type": "foundup",
+  "domain": "foundups",
+  "version": "0.0.1",
+  "status": "scaffold",
+  "description": "Business layer for AI-powered content automation — audit funnel, onboarding, client workspace, white-label config",
+  "surfaces": {
+    "web": "kosei.ai"
+  },
+  "wsp_compliance": [
+    "WSP 3", "WSP 11", "WSP 22", "WSP 49", "WSP 72"
+  ],
+  "external_dependencies": {
+    "autopost": {
+      "location": "external_repo",
+      "relationship": "consumed_as_service",
+      "note": "Content creation engine — separate repo, not embedded"
+    }
+  },
+  "boundary": {
+    "kosei_owns": [
+      "audit_funnel",
+      "onboarding",
+      "service_orchestration",
+      "client_workspace",
+      "admin_workspace",
+      "trial_management",
+      "whitelabel_config"
+    ],
+    "kosei_does_not_own": [
+      "content_creation_engine",
+      "video_capture",
+      "ai_processing_pipeline",
+      "platform_publishing"
+    ]
+  }
+}

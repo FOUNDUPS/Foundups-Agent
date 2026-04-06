@@ -90,12 +90,27 @@ The primary public API for the unified Red Dog plane. All concierge interactions
 | `refreshBriefing()` | Refresh context briefing |
 | `getRecommendations()` | Get AI recommendations |
 | `runRecommendation(action)` | Execute a recommendation |
+| **Saved Videos** | |
+| `openSaved()` | Open Saved Videos section in concierge plane |
+| `refreshSaved()` | Re-render saved videos from localStorage |
+| **Watch History** | |
+| `openHistory()` | Open Recently Watched section in concierge plane |
+| `refreshHistory()` | Re-render watch history from localStorage |
+| `clearHistory()` | Clear watch history (delegates to `mallVideoPlayer.clearHistory()`) |
 | **Identity** | |
 | `setIdentity(clerkUser, userData)` | Set identity block |
 | `setFoundUps(foundupDocs)` | Set FoundUps grid |
 | `setInvites(inviteDocs)` | Set invites drawer |
 
 **Backward Compatibility**: `window.accountConcierge` is an alias for `window.redDog` (will be removed).
+
+**Concierge Plane Surfaces**:
+| Surface | Data Source | Re-entry Action |
+|---------|-------------|-----------------|
+| Saved Videos | `mallVideoPlayer.getSavedVideos()` (localStorage) | Reconstruct queue from catalog, open player |
+| Recently Watched | `mallVideoPlayer.getHistory()` (localStorage) | Reconstruct queue from catalog, open player |
+
+Both surfaces render cards with thumbnail, title, and meta. **Recently Watched** cards may show a **Continue at m:ss** badge when `playbackPosition` is valid (local HTML5 progress only). Click-to-reenter opens the player at the matching queue index and seeks to `playbackPosition` when present and valid (file sources only).
 
 ---
 
@@ -183,7 +198,7 @@ Fullscreen video player with queue rail. Queue-constrained to single FoundUp.
 
 | Method | Description |
 |--------|-------------|
-| `open(foundupId, queue, startIndex)` | Open player with FoundUp queue |
+| `open(foundupId, queue, startIndex, resumeOpts?)` | Open player with FoundUp queue. Optional `resumeOpts`: `{ resumeSeconds: number }` (HTML5 file sources only; embeds ignore) |
 | `close()` | Exit fullscreen |
 | `goToVideo(index)` | Navigate to video index |
 | `next()` | Next video in queue |
@@ -204,7 +219,7 @@ Fullscreen video player with queue rail. Queue-constrained to single FoundUp.
 | Key | Structure |
 |-----|-----------|
 | `pfmall_saved_videos` | `{ "{foundupId}::{videoId}": { foundupId, videoId, title, thumbnail, savedAt } }` |
-| `pfmall_watch_history` | `[{ foundupId, videoId, videoIndex, title, thumbnail, timestamp }, ...]` |
+| `pfmall_watch_history` | `[{ foundupId, videoId, videoIndex, title, thumbnail, timestamp, playbackPosition? }, ...]` — `playbackPosition` is shell-local seconds for **direct file** (`<video>`) items only; omitted or cleared when below resume threshold or near end; **not** set for iframe embeds (cannot read time truthfully). |
 
 **Gesture Semantics**:
 | Gesture | Action |
@@ -314,4 +329,4 @@ interface InviteDoc {
 
 ---
 
-*Last Updated: 2026-04-03*
+*Last Updated: 2026-04-05*

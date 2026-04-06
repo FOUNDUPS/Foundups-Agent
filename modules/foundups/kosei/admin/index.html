@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kosei Admin - Operator Console</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+
+  <!-- Shared styles + admin overrides -->
+  <link rel="stylesheet" href="/kosei/css/kosei.css">
+  <link rel="stylesheet" href="/kosei/admin/css/kosei-admin.css">
+
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="kosei-admin-body">
+
+  <!-- Auth gate (shown when not authenticated) -->
+  <div id="authGate" class="ka-auth-gate">
+    <div class="ka-auth-card">
+      <div class="kosei-logo">
+        <svg class="kosei-logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="32" height="32" rx="8" fill="#6366f1"/>
+          <path d="M8 16L14 10L20 16L14 22L8 16Z" fill="white"/>
+          <path d="M14 16L20 10L26 16L20 22L14 16Z" fill="white" fill-opacity="0.6"/>
+        </svg>
+        <span>Kosei Admin</span>
+      </div>
+      <p class="ka-auth-subtitle">Operator access only</p>
+      <button id="googleSignIn" class="kosei-btn kosei-btn--primary ka-auth-btn">
+        Sign in with Google
+      </button>
+      <div id="authError" class="ka-auth-error" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- Admin shell (shown after auth + admin claim verified) -->
+  <div id="adminShell" class="ka-shell" style="display:none;">
+
+    <!-- Header -->
+    <header class="ka-header">
+      <div class="ka-header-left">
+        <svg class="kosei-logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:28px;height:28px;">
+          <rect width="32" height="32" rx="8" fill="#6366f1"/>
+          <path d="M8 16L14 10L20 16L14 22L8 16Z" fill="white"/>
+          <path d="M14 16L20 10L26 16L20 22L14 16Z" fill="white" fill-opacity="0.6"/>
+        </svg>
+        <span class="ka-header-title">Kosei Admin</span>
+      </div>
+      <div class="ka-header-right">
+        <span id="adminEmail" class="ka-header-email"></span>
+        <button id="signOutBtn" class="ka-header-signout">Sign Out</button>
+      </div>
+    </header>
+
+    <!-- Tab navigation -->
+    <nav class="ka-tabs">
+      <button class="ka-tab ka-tab--active" data-tab="leads">Leads</button>
+      <button class="ka-tab" data-tab="clients">Clients</button>
+      <button class="ka-tab" data-tab="trials">Trials</button>
+    </nav>
+
+    <!-- Content area -->
+    <main class="ka-content">
+
+      <!-- Leads tab -->
+      <section id="tab-leads" class="ka-tab-panel ka-tab-panel--active">
+        <div class="ka-panel-header">
+          <h2>Lead Pipeline</h2>
+          <div class="ka-filter-row">
+            <select id="leadStatusFilter" class="ka-select">
+              <option value="all">All statuses</option>
+              <option value="pending">Pending</option>
+              <option value="in_progress">In Progress</option>
+              <option value="complete">Complete</option>
+              <option value="accepted">Accepted</option>
+              <option value="expired">Expired</option>
+            </select>
+            <span id="leadCount" class="ka-count"></span>
+          </div>
+        </div>
+        <div id="leadsList" class="ka-list">
+          <div class="ka-loading">Loading leads...</div>
+        </div>
+      </section>
+
+      <!-- Clients tab -->
+      <section id="tab-clients" class="ka-tab-panel" style="display:none;">
+        <div class="ka-panel-header">
+          <h2>Clients</h2>
+          <div class="ka-filter-row">
+            <select id="clientStatusFilter" class="ka-select">
+              <option value="all">All statuses</option>
+              <option value="onboarding">Onboarding</option>
+              <option value="active">Active</option>
+              <option value="paused">Paused</option>
+              <option value="churned">Churned</option>
+            </select>
+            <span id="clientCount" class="ka-count"></span>
+          </div>
+        </div>
+        <div id="clientsList" class="ka-list">
+          <div class="ka-loading">Loading clients...</div>
+        </div>
+      </section>
+
+      <!-- Trials tab -->
+      <section id="tab-trials" class="ka-tab-panel" style="display:none;">
+        <div class="ka-panel-header">
+          <h2>Active Trials</h2>
+          <div class="ka-filter-row">
+            <select id="trialStatusFilter" class="ka-select">
+              <option value="all">All statuses</option>
+              <option value="active">Active</option>
+              <option value="expired">Expired</option>
+              <option value="converted">Converted</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <span id="trialCount" class="ka-count"></span>
+          </div>
+        </div>
+        <div id="trialsList" class="ka-list">
+          <div class="ka-loading">Loading trials...</div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Detail panel (slides in from right) -->
+    <aside id="detailPanel" class="ka-detail-panel" style="display:none;">
+      <div class="ka-detail-header">
+        <h3 id="detailTitle">Detail</h3>
+        <button id="closeDetail" class="ka-detail-close">&times;</button>
+      </div>
+      <div id="detailContent" class="ka-detail-content"></div>
+    </aside>
+
+  </div>
+
+  <!-- Scripts -->
+  <script src="/kosei/admin/js/kosei-admin-auth.js"></script>
+  <script src="/kosei/admin/js/kosei-admin-data.js"></script>
+  <script src="/kosei/admin/js/kosei-admin-ui.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      window.koseiAdminAuth.init();
+    });
+  </script>
+</body>
+</html>

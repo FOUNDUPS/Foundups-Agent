@@ -52,6 +52,55 @@
   var SAVED_KEY = 'pfmall_saved_videos';
   var HISTORY_KEY = 'pfmall_watch_history';
   var HISTORY_MAX = 50; // Max history entries
+  /** Local-only resume: omit sub-threshold & “finished” positions (HTML5 video only; embeds cannot read time). */
+  var MIN_RESUME_SECONDS = 5;
+  var COMPLETE_RATIO = 0.97;
+  var pendingResumeSeconds = null;
+
+  function normalizeResumeSeconds(sec, durationSec) {
+    if (sec == null || typeof sec !== 'number' || isNaN(sec)) return null;
+    if (sec < MIN_RESUME_SECONDS) return null;
+    var dur = typeof durationSec === 'number' && durationSec > 0 ? durationSec : 0;
+    if (dur > 0 && sec >= dur * COMPLETE_RATIO) return null;
+    return Math.round(sec * 10) / 10;
+  }
+
+  function mergeHistoryResume(foundupId, video, positionSec, durationSec) {
+    var videoId = video && (video.video_id || video.videoId || video.id || '');
+    if (!foundupId || !videoId || !video) return;
+    var pos = normalizeResumeSeconds(positionSec, durationSec);
+    var history = getWatchHistory();
+    var changed = false;
+    for (var i = 0; i < history.length; i++) {
+      if (history[i].foundupId === foundupId && history[i].videoId === videoId) {
+        if (pos == null) {
+          if ('playbackPosition' in history[i]) {
+            delete history[i].playbackPosition;
+            changed = true;
+          }
+        } else if (history[i].playbackPosition !== pos) {
+          history[i].playbackPosition = pos;
+          changed = true;
+        }
+        break;
+      }
+    }
+    if (changed) setWatchHistory(history);
+  }
+
+  function flushCurrentPlaybackPosition() {
+    if (!isOpen || currentIndex < 0 || !currentFoundUpId || !stage) return;
+    var video = currentQueue[currentIndex];
+    if (!video) return;
+    if (video.embed_url || video.embedUrl) return;
+    var vid = stage.querySelector('video');
+    if (!vid) return;
+    var t = vid.currentTime;
+    var d = vid.duration;
+    if (!isFinite(t)) t = 0;
+    if (!isFinite(d)) d = 0;
+    mergeHistoryResume(currentFoundUpId, video, t, d);
+  }
 
   // ─── Initialize DOM ───
   function ensureDOM() {
@@ -112,10 +161,20 @@
   }
 
   // ─── Open Fullscreen ───
-  function open(foundupId, queue, startIndex) {
+  function open(foundupId, queue, startIndex, resumeOpts) {
     if (!queue || !queue.length) return;
 
     ensureDOM();
+
+    var rs = null;
+    if (resumeOpts != null && resumeOpts !== undefined) {
+      if (typeof resumeOpts === 'number') {
+        rs = resumeOpts;
+      } else if (typeof resumeOpts === 'object' && typeof resumeOpts.resumeSeconds === 'number') {
+        rs = resumeOpts.resumeSeconds;
+      }
+    }
+    pendingResumeSeconds = normalizeResumeSeconds(rs, 0);
 
     currentFoundUpId = foundupId;
     currentQueue = queue;
@@ -146,6 +205,9 @@
   function close() {
     if (!isOpen) return;
 
+    flushCurrentPlaybackPosition();
+    pendingResumeSeconds = null;
+
     isOpen = false;
     container.classList.remove('open');
     document.body.style.overflow = '';
@@ -168,6 +230,8 @@
   // ─── Navigate Queue ───
   function goToVideo(index) {
     if (index < 0 || index >= currentQueue.length) return;
+    flushCurrentPlaybackPosition();
+    pendingResumeSeconds = null;
     currentIndex = index;
     renderVideo(currentQueue[index]);
     updateRailSelection();
@@ -211,12 +275,37 @@
     var sourceUrl = video.source_url || video.sourceUrl;
 
     if (embedUrl) {
-      // YouTube/Vimeo embed
+      pendingResumeSeconds = null;
+      // YouTube/Vimeo embed — cannot read playback time from shell; resume N/A
       stage.innerHTML = '<iframe src="' + esc(embedUrl) + '?autoplay=1&rel=0" allowfullscreen allow="autoplay; encrypted-media"></iframe>';
     } else if (sourceUrl && sourceUrl.match(/\.(mp4|webm|ogg)$/i)) {
-      // Direct video file
+      // Direct video file — resume seek when pendingResumeSeconds is valid
+      var resumeTarget = pendingResumeSeconds;
+      pendingResumeSeconds = null;
       stage.innerHTML = '<video src="' + esc(sourceUrl) + '" autoplay controls playsinline></video>';
+      var ve = stage.querySelector('video');
+      if (ve && resumeTarget != null) {
+        function applyResumeSeek() {
+          var dur = ve.duration;
+          if (!isFinite(dur)) dur = 0;
+          var n = normalizeResumeSeconds(resumeTarget, dur);
+          if (n == null) return;
+          var cap = dur > 0 ? Math.min(n, Math.max(MIN_RESUME_SECONDS, dur - 0.25)) : n;
+          try {
+            ve.currentTime = cap;
+          } catch (err) { /* clamp edge */ }
+        }
+        ve.addEventListener('loadedmetadata', function onLm() {
+          ve.removeEventListener('loadedmetadata', onLm);
+          applyResumeSeek();
+        });
+        ve.addEventListener('canplay', function onCp() {
+          ve.removeEventListener('canplay', onCp);
+          applyResumeSeek();
+        });
+      }
     } else {
+      pendingResumeSeconds = null;
       // Placeholder
       stage.innerHTML = '<div class="video-player-loading">Loading video...</div>';
     }

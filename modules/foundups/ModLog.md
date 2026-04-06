@@ -2,6 +2,57 @@
 
 ## Chronological Change Log
 
+### 2026-04-06 - AutoPost external alignment
+
+**By:** 0102 (Worker G) · **Slice:** `AUTOPOST_EXTERNAL_ALIGNMENT_PHASE1`
+**WSP References:** WSP 15, WSP 97
+
+**What changed**
+- Updated `FOUNDUPS_DOMAIN_CANONICAL_INDEX.md` AutoPost entry:
+  - Added monorepo footprint note (references only, no module directory)
+  - Added cross-reference to boundary audit
+  - Added "Externalized FoundUp Monorepo Rules" section
+
+**Why**
+- AutoPost is properly externalized at `FOUNDUPS/autopost`
+- Monorepo should carry only references, not product code
+- Boundary audit exists at `docs/audits/kosei_ai_systems/AUTOPOST_VS_KOSEI_BOUNDARY_REPORT.md`
+- pfMALL catalog entry deferred until schema supports `external_app` source type
+
+**Confirmed**
+- No `modules/foundups/autopost/` directory created
+- No fake catalog schema added
+
+---
+
+### 2026-04-05 - Geoze FoundUp scaffold
+
+**By:** 0102
+**WSP References:** WSP 3, WSP 11, WSP 15, WSP 22, WSP 49, WSP 84, WSP 97
+
+**What changed**
+- Added `modules/foundups/geoze/` as a new FoundUp module scaffold
+- Locked the rule that:
+  - `geoze` is the FoundUp
+  - `gMUD` is an internal module/surface of Geoze
+- Added minimal typed contracts, docs index, tests, and module manifest
+
+**Why**
+- Geoze previously existed only as a candidate/account identity in repo truth
+- 012 clarified that `gMUD` belongs inside Geoze, not as a separate FoundUp
+- smallest correct move was to create a real module scaffold without inventing a
+  live runtime
+
+---
+
+### 2026-04-05 - PFMALL_FULLSCREEN_PLAYER_CONTRACT — resume position Phase 1
+
+**By:** 0102 (Worker F) · **Slice:** `pfMALL_RESUME_POSITION_PHASE1`
+
+**What changed:** `docs/PFMALL_FULLSCREEN_PLAYER_CONTRACT.md` §6.1 — shell-local `playbackPosition` on watch history; HTML5-only; re-entry via `open(..., { resumeSeconds })`.
+
+---
+
 ### 2026-04-01 - p.fMALL External FoundUp Route Contract
 
 **By:** 0102

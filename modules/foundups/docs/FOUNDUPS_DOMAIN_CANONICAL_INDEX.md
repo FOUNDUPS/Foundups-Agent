@@ -106,6 +106,14 @@ Use four statuses:
 ### Canonical
 
 - `modules/foundups/ROADMAP.md`
+- `modules/foundups/docs/FOUNDUPS_MASTER_ARCHITECTURE.md`
+  - **master document**: five-layer funnel (Discovery → Welcome → Community → Gate → Interior), entitlement tiers, repeating unit per FoundUp, document map
+- `modules/foundups/docs/FOUNDUPS_DISCORD_BLUEPRINT.md`
+  - embedded server layout (14 channels), role hierarchy, permission matrix, automation, onboarding flow, per-FoundUp category pattern
+- `modules/foundups/docs/FOUNDUPS_ENTITLEMENT_TIERS.md`
+  - formal tier definitions (Guest/Visitor/Community/Stakeholder/Operator), per-surface access matrix, agent participation rules, graceful denial
+- `modules/foundups/docs/FOUNDUP_TEMPLATE.md`
+  - repeatable 7-component checklist for adding a new FoundUp to the system
 - `modules/foundups/docs/FOUNDUP_EXFOLIATION_PROTOCOL.md`
 - `modules/foundups/docs/PQN_SWARM_HUB_FOUNDUP_BRIEF.md`
 - `modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md`
@@ -196,10 +204,28 @@ Reason:
 ### Already Externalized
 
 - `AutoPost`
-  - repo truth shows it already exists externally as `Foundup/AutoPost`
-  - current migration plan says it still needs dual-remote normalization to:
-    - `FOUNDUPS/AutoPost` as origin
-    - `Foundup/AutoPost` as backup
+  - repo: `FOUNDUPS/autopost` (live on GitHub)
+  - web: `autopost.foundups.com` (redirect)
+  - status: PoC — Vite + React + TypeScript + Gemini API, camera capture-to-post
+  - classification: `CANDIDATE_FOUNDUP` (HIGH priority) — both a FoundUp AND a tool
+  - role: content pipeline for entire FOUNDUPS ecosystem (users post unlisted videos → YouTube → FoundUp routing → pfMALL display + social distribution)
+  - part of: AI Automation service FoundUp
+  - Discord: AUTOPOST category planned (#autopost-general doubles as user troubleshooting, monitored by 0102/OBAI)
+  - docs: ROADMAP.md and ModLog.md added 2026-04-06
+  - dual-remote normalization: `FOUNDUPS/autopost` is origin (confirmed), backup TBD
+  - **monorepo footprint**: references only — no `modules/foundups/autopost/` directory
+  - **boundary audit**: `docs/audits/kosei_ai_systems/AUTOPOST_VS_KOSEI_BOUNDARY_REPORT.md`
+
+#### Externalized FoundUp Monorepo Rules
+
+Externalized FoundUps (like AutoPost) carry only the following in the monorepo:
+
+1. **Catalog taxonomy reference** — `PFMALL_LAUNCH_CATALOG_TAXONOMY.md` entry
+2. **Canonical index entry** — this document
+3. **Channel platform type** — `account-concierge.js` CHANNEL_PLATFORMS (if applicable)
+4. **pfMALL catalog entry** — deferred until schema supports `external_app` source type
+
+No product code, no business logic, no `modules/foundups/{name}/` directory.
 
 ### Future Candidate, Not Yet Classified As A FoundUp
 

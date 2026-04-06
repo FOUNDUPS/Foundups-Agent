@@ -1,0 +1,616 @@
+/**
+ * Kosei Client Workspace -- Styles
+ * Extends kosei.css variables. Prefixed kc- (kosei-client).
+ */
+
+/* ============================================
+   Client-specific variables
+   ============================================ */
+:root {
+  --kc-header-height: 56px;
+  --kc-tab-height: 44px;
+}
+
+/* ============================================
+   Auth Gate
+   ============================================ */
+.kc-auth-gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--space-lg);
+}
+
+.kc-auth-card {
+  text-align: center;
+  background: var(--kosei-bg-card);
+  border: 1px solid var(--kosei-border);
+  border-radius: 12px;
+  padding: var(--space-2xl) var(--space-xl);
+  max-width: 400px;
+  width: 100%;
+}
+
+.kc-auth-card .kosei-logo {
+  justify-content: center;
+  margin-bottom: var(--space-md);
+}
+
+.kc-auth-subtitle {
+  color: var(--kosei-text-muted);
+  margin: 0 0 var(--space-xl);
+  font-size: 0.875rem;
+}
+
+.kc-auth-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin: var(--space-lg) 0;
+  color: var(--kosei-text-muted);
+  font-size: 0.75rem;
+}
+
+.kc-auth-divider::before,
+.kc-auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--kosei-border);
+}
+
+.kc-auth-email-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.kc-auth-input {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--kosei-bg);
+  border: 1px solid var(--kosei-border);
+  border-radius: 8px;
+  color: var(--kosei-text);
+  font-size: 0.9375rem;
+}
+
+.kc-auth-input:focus {
+  outline: none;
+  border-color: var(--kosei-accent);
+}
+
+.kc-auth-btn {
+  width: 100%;
+  margin-bottom: var(--space-sm);
+}
+
+.kc-auth-error {
+  margin-top: var(--space-md);
+  color: var(--kosei-error);
+  font-size: 0.8125rem;
+}
+
+/* ============================================
+   No Workspace State
+   ============================================ */
+.kc-no-workspace {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--space-lg);
+  text-align: center;
+}
+
+.kc-no-workspace-card {
+  background: var(--kosei-bg-card);
+  border: 1px solid var(--kosei-border);
+  border-radius: 12px;
+  padding: var(--space-2xl);
+  max-width: 480px;
+}
+
+.kc-no-workspace-card h2 {
+  margin: 0 0 var(--space-md);
+}
+
+.kc-no-workspace-card p {
+  color: var(--kosei-text-muted);
+  margin: 0 0 var(--space-lg);
+}
+
+/* ============================================
+   App Shell
+   ============================================ */
+.kosei-app-body {
+  overflow: hidden;
+  height: 100vh;
+}
+
+.kc-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ============================================
+   Header
+   ============================================ */
+.kc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--kc-header-height);
+  padding: 0 var(--space-lg);
+  background: var(--kosei-bg-elevated);
+  border-bottom: 1px solid var(--kosei-border);
+  flex-shrink: 0;
+}
+
+.kc-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.kc-header-title {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.kc-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.kc-header-email {
+  color: var(--kosei-text-muted);
+  font-size: 0.8125rem;
+}
+
+.kc-header-signout {
+  background: none;
+  border: 1px solid var(--kosei-border);
+  color: var(--kosei-text-muted);
+  padding: 4px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  transition: all 0.15s;
+}
+
+.kc-header-signout:hover {
+  color: var(--kosei-text);
+  border-color: var(--kosei-text-muted);
+}
+
+/* ============================================
+   Tabs
+   ============================================ */
+.kc-tabs {
+  display: flex;
+  height: var(--kc-tab-height);
+  padding: 0 var(--space-lg);
+  background: var(--kosei-bg-elevated);
+  border-bottom: 1px solid var(--kosei-border);
+  flex-shrink: 0;
+  gap: var(--space-xs);
+}
+
+.kc-tab {
+  background: none;
+  border: none;
+  color: var(--kosei-text-muted);
+  padding: 0 var(--space-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+
+.kc-tab:hover {
+  color: var(--kosei-text);
+}
+
+.kc-tab--active {
+  color: var(--kosei-accent);
+  border-bottom-color: var(--kosei-accent);
+}
+
+/* ============================================
+   Content Area
+   ============================================ */
+.kc-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-lg);
+}
+
+/* ============================================
+   Dashboard Cards
+   ============================================ */
+.kc-dash-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-lg);
+}
+
+@media (min-width: 768px) {
+  .kc-dash-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.kc-card {
+  background: var(--kosei-bg-card);
+  border: 1px solid var(--kosei-border);
+  border-radius: 10px;
+  padding: var(--space-lg);
+}
+
+.kc-card-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--kosei-text-muted);
+  margin: 0 0 var(--space-md);
+}
+
+/* ============================================
+   Identity Bar
+   ============================================ */
+.kc-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.kc-identity-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.kc-identity-meta {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+/* ============================================
+   Trial Section
+   ============================================ */
+.kc-trial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.kc-trial-stat {
+  text-align: center;
+}
+
+.kc-trial-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--kosei-accent);
+}
+
+.kc-trial-stat-label {
+  font-size: 0.75rem;
+  color: var(--kosei-text-muted);
+}
+
+.kc-progress-bar {
+  height: 6px;
+  background: var(--kosei-bg);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.kc-progress-fill {
+  height: 100%;
+  background: var(--kosei-accent);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+/* ============================================
+   Onboarding Checklist
+   ============================================ */
+.kc-step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+}
+
+.kc-step-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.kc-step--done .kc-step-icon {
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+}
+
+.kc-step--current .kc-step-icon {
+  background: var(--kosei-accent-soft);
+  color: var(--kosei-accent);
+}
+
+.kc-step--pending .kc-step-icon {
+  background: rgba(107, 114, 128, 0.15);
+  color: #6b7280;
+}
+
+.kc-step--done .kc-step-label {
+  color: var(--kosei-text-muted);
+  text-decoration: line-through;
+}
+
+.kc-step--current .kc-step-label {
+  color: var(--kosei-text);
+  font-weight: 600;
+}
+
+.kc-step--pending .kc-step-label {
+  color: var(--kosei-text-muted);
+}
+
+/* ============================================
+   Platform List
+   ============================================ */
+.kc-platform-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--kosei-border);
+  font-size: 0.875rem;
+}
+
+.kc-platform-name {
+  font-weight: 500;
+  text-transform: capitalize;
+  min-width: 80px;
+}
+
+.kc-platform-handle {
+  color: var(--kosei-text-muted);
+  font-size: 0.8125rem;
+}
+
+.kc-platform-health {
+  color: var(--kosei-text-muted);
+  font-size: 0.75rem;
+  margin-left: auto;
+}
+
+/* ============================================
+   Preferences
+   ============================================ */
+.kc-pref-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--kosei-border);
+  font-size: 0.875rem;
+}
+
+.kc-pref-label {
+  color: var(--kosei-text-muted);
+}
+
+/* ============================================
+   Reporting Stats
+   ============================================ */
+.kc-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+}
+
+@media (min-width: 768px) {
+  .kc-stats-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.kc-stat {
+  text-align: center;
+  padding: var(--space-md);
+  background: var(--kosei-bg);
+  border-radius: 8px;
+}
+
+.kc-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--kosei-accent);
+}
+
+.kc-stat-label {
+  font-size: 0.6875rem;
+  color: var(--kosei-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* ============================================
+   Issues
+   ============================================ */
+.kc-issue-card {
+  background: var(--kosei-bg);
+  border: 1px solid var(--kosei-border);
+  border-radius: 8px;
+  padding: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.kc-issue-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-xs);
+}
+
+.kc-issue-title {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.kc-issue-meta {
+  display: flex;
+  gap: var(--space-md);
+  color: var(--kosei-text-muted);
+  font-size: 0.75rem;
+  margin-bottom: var(--space-sm);
+}
+
+.kc-issue-desc {
+  color: var(--kosei-text-muted);
+  font-size: 0.8125rem;
+}
+
+.kc-issue-resolution {
+  margin-top: var(--space-sm);
+  padding: var(--space-sm);
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  color: #22c55e;
+}
+
+/* Issue form */
+.kc-issue-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+}
+
+.kc-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.kc-form-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--kosei-text-muted);
+}
+
+.kc-form-input,
+.kc-form-select,
+.kc-form-textarea {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--kosei-bg);
+  border: 1px solid var(--kosei-border);
+  border-radius: 8px;
+  color: var(--kosei-text);
+  font-size: 0.9375rem;
+  font-family: inherit;
+}
+
+.kc-form-input:focus,
+.kc-form-select:focus,
+.kc-form-textarea:focus {
+  outline: none;
+  border-color: var(--kosei-accent);
+}
+
+.kc-form-textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.kc-form-status {
+  display: none;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.kc-form-status--success {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--kosei-success);
+}
+
+.kc-form-status--error {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--kosei-error);
+}
+
+/* ============================================
+   Badges (reuse admin badge colors)
+   ============================================ */
+.kc-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.kc-badge--onboarding   { background: rgba(59,130,246,0.15); color: #3b82f6; }
+.kc-badge--active       { background: rgba(34,197,94,0.15);  color: #22c55e; }
+.kc-badge--paused       { background: rgba(234,179,8,0.15);  color: #eab308; }
+.kc-badge--churned      { background: rgba(239,68,68,0.15);  color: #ef4444; }
+.kc-badge--converted    { background: rgba(99,102,241,0.15); color: #6366f1; }
+.kc-badge--disconnected { background: rgba(107,114,128,0.15);color: #6b7280; }
+.kc-badge--connecting   { background: rgba(234,179,8,0.15);  color: #eab308; }
+.kc-badge--connected    { background: rgba(34,197,94,0.15);  color: #22c55e; }
+.kc-badge--error        { background: rgba(239,68,68,0.15);  color: #ef4444; }
+.kc-badge--open         { background: rgba(59,130,246,0.15); color: #3b82f6; }
+.kc-badge--in_progress  { background: rgba(234,179,8,0.15);  color: #eab308; }
+.kc-badge--resolved     { background: rgba(34,197,94,0.15);  color: #22c55e; }
+.kc-badge--closed       { background: rgba(107,114,128,0.15);color: #6b7280; }
+
+/* ============================================
+   Utility
+   ============================================ */
+.kc-empty {
+  color: var(--kosei-text-muted);
+  text-align: center;
+  padding: var(--space-xl);
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 640px) {
+  .kc-trial-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kc-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .kc-header-email {
+    display: none;
+  }
+}

@@ -60,7 +60,7 @@ mall-video-catalog.json
   "creator_id": "string",
   "creator_display": "string",
   "entity": "string",
-  "source_type": "youtube_channel | linkedin_profile | x_profile | tiktok_profile | instagram_profile",
+  "source_type": "youtube_channel | linkedin_profile | x_profile | tiktok_profile | instagram_profile | derived",
   "source_id": "string | null",
   "source_handle": "string | null",
   "category": "string",
@@ -155,6 +155,16 @@ These fields enrich the entry page (`foundup.html`) when present. They are optio
 | `x_profile` | X (Twitter) | Account ID |
 | `tiktok_profile` | TikTok | Account ID |
 | `instagram_profile` | Instagram | Account ID |
+| `derived` | Content classified from a parent channel | Parent channel ID (e.g., `UCfHM9Fw9HD-NwiS0seD_oIA`) |
+
+### Derived Lanes
+
+A `derived` lane has no source channel of its own. Its videos are a topic-classified subset of another lane's content.
+
+- `source_id` and `source_handle` point to the **parent** source channel
+- Videos are copied from the parent lane at catalog build time, not moved
+- The same video may appear in both the parent lane and derived lane(s)
+- Parent lane's `related_lanes` should include the derived lane's `foundup_id`
 
 ---
 
@@ -184,8 +194,9 @@ Categories are projection axes for Red Dog filtering.
 | `consciousness` | Meditation, quantum, 0102 | undaodu, linkedin_012, linkedin_esingularity |
 | `startup` | Ventures, founders, pAVS | foundups_main, linkedin_foundups |
 | `resistance` | Activism, anti-fascist | antifafm |
+| `ai-education` | AI learning, autonomous education | eduit |
 
-Topic families enable cross-category projection (e.g., "show all consciousness content").
+Topic families enable cross-category projection (e.g., "show all detector signature content").
 
 ---
 
@@ -344,21 +355,22 @@ Builder tool: `holo_index/skillz/video_catalog_builder/` (planned)
 
 ## 13. Current Catalog Stats
 
-As of 2026-04-03:
+As of 2026-04-05:
 
 | Metric | Value |
 |--------|-------|
-| Total lanes | 8 |
+| Total lanes | 9 |
 | YouTube lanes | 4 |
 | LinkedIn lanes | 4 |
-| Total videos | 1,163 |
-| Tests | 25/25 passing |
+| Derived lanes | 1 |
+| Total videos | 1,184 (21 shared with undaodu via derived lane) |
 
 Lane breakdown:
 - move2japan: 573 videos
 - undaodu: 512 videos
 - foundups_main: 44 videos
 - antifafm: 34 videos
+- eduit: 21 videos (derived from undaodu)
 - linkedin_012: 0 (profile lane)
 - linkedin_esingularity: 0 (profile lane)
 - linkedin_tsingularity: 0 (profile lane)

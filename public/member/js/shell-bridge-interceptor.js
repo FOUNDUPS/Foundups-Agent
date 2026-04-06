@@ -8,6 +8,12 @@
  * Contract: EXTERNAL_FOUNDUP_BRIDGE_CONTRACT.md
  * WSP References: WSP 11 (Interface), WSP 97 (Execution Discipline)
  *
+ * Backend seam:
+ * - Without registration: explicit stub responses (`data.stub === true` where applicable).
+ * - With registration: `window.shellBridgeBackend` must expose `search`, `wspLookup`, `health`
+ *   (Promises). Use `shellBridgeInterceptor.registerShellBridgeBackend(obj, { label })` — local,
+ *   explicit, bounded. No automatic fetch to HoloIndex core from the browser.
+ *
  * @module shell-bridge-interceptor
  */
 
@@ -16,9 +22,7 @@
 
   // ---- Configuration ----
   var CONFIG = {
-    // Backend endpoint for agent requests (Phase 2: real endpoint)
     backendUrl: '/api/agent/request',
-    // Allowed origins for external FoundUp iframes (Phase 2: registry-driven)
     allowedOrigins: [
       window.location.origin,
       'http://localhost:3000',
@@ -26,9 +30,73 @@
       'http://127.0.0.1:3000',
       'http://127.0.0.1:5173'
     ],
-    // Debug mode
     debug: window.location.search.indexOf('debug=1') !== -1
   };
+
+  /** @typedef {{ mode: 'stub'|'registered', registered: boolean, label: string|null }} BackendStatus */
+  var backendRegistration = {
+    mode: 'stub',
+    label: null
+  };
+
+  function validateShellBackend(backend) {
+    if (!backend || typeof backend !== 'object') {
+      return 'backend must be a non-null object';
+    }
+    if (typeof backend.search !== 'function') {
+      return 'backend.search must be a function';
+    }
+    if (typeof backend.wspLookup !== 'function') {
+      return 'backend.wspLookup must be a function';
+    }
+    if (typeof backend.health !== 'function') {
+      return 'backend.health must be a function';
+    }
+    return null;
+  }
+
+  /**
+   * Normalize backend payload to bridge contract data shape (results + quantum_coherence).
+   * Does not claim full "live" search — only shapes the envelope.
+   */
+  function normalizeAgentData(raw) {
+    if (!raw || typeof raw !== 'object') {
+      return { results: [], quantum_coherence: 0.5 };
+    }
+    if (Array.isArray(raw.results)) {
+      var out = {
+        results: raw.results,
+        quantum_coherence: typeof raw.quantum_coherence === 'number' ? raw.quantum_coherence : 0.618
+      };
+      if (raw.stub === true) out.stub = true;
+      return out;
+    }
+    // Single protocol-style object → one row in results
+    if (raw.protocol !== undefined || raw.title !== undefined || raw.path) {
+      return {
+        results: [{
+          content: raw.content || '',
+          path: raw.path || '',
+          relevance: typeof raw.relevance === 'number' ? raw.relevance : 1.0,
+          protocol: raw.protocol,
+          title: raw.title,
+          status: raw.status
+        }],
+        quantum_coherence: typeof raw.quantum_coherence === 'number' ? raw.quantum_coherence : 0.8
+      };
+    }
+    return { results: [], quantum_coherence: 0.5 };
+  }
+
+  function hasRegisteredBackend() {
+    return (
+      backendRegistration.mode === 'registered' &&
+      window.shellBridgeBackend &&
+      typeof window.shellBridgeBackend.search === 'function' &&
+      typeof window.shellBridgeBackend.wspLookup === 'function' &&
+      typeof window.shellBridgeBackend.health === 'function'
+    );
+  }
 
   // ---- Logging ----
   function log(level, msg, data) {
@@ -41,20 +109,12 @@
     }
   }
 
-  // ---- Origin Validation ----
   function isAllowedOrigin(origin) {
-    // Allow same-origin always
     if (origin === window.location.origin) return true;
-    // Check allowlist
     return CONFIG.allowedOrigins.indexOf(origin) !== -1;
   }
 
-  // ---- Request Handlers ----
   var handlers = {
-    /**
-     * Handle openclaw_search route requests
-     * Actions: semantic_search, wsp_lookup
-     */
     openclaw_search: function(payload, callback) {
       var action = payload.action;
 
@@ -62,6 +122,8 @@
         handleSemanticSearch(payload, callback);
       } else if (action === 'wsp_lookup') {
         handleWspLookup(payload, callback);
+      } else if (action === 'health') {
+        handleHealthCheck(payload, callback);
       } else {
         callback({
           type: 'agent_response',
@@ -72,26 +134,20 @@
     }
   };
 
-  // ---- Semantic Search Handler ----
   function handleSemanticSearch(payload, callback) {
     var query = payload.query || '';
     var limit = payload.limit || 5;
 
     log('debug', 'Semantic search request', { query: query, limit: limit });
 
-    // Phase 1: Stub response (simulates backend)
-    // Phase 2: Real fetch to CONFIG.backendUrl
-    if (window.shellBridgeBackend && typeof window.shellBridgeBackend.search === 'function') {
-      // Real backend available
+    if (hasRegisteredBackend()) {
       window.shellBridgeBackend.search(query, limit)
-        .then(function(results) {
+        .then(function(resultsEnvelope) {
+          var data = normalizeAgentData(resultsEnvelope);
           callback({
             type: 'agent_response',
             status: 'success',
-            data: {
-              results: results,
-              quantum_coherence: 0.8
-            }
+            data: data
           });
         })
         .catch(function(err) {
@@ -102,7 +158,6 @@
           });
         });
     } else {
-      // Stub response for Phase 1
       setTimeout(function() {
         callback({
           type: 'agent_response',
@@ -123,21 +178,19 @@
     }
   }
 
-  // ---- WSP Lookup Handler ----
   function handleWspLookup(payload, callback) {
     var protocolNumber = payload.protocol_number || '';
 
     log('debug', 'WSP lookup request', { protocol_number: protocolNumber });
 
-    // Phase 1: Stub response
-    // Phase 2: Real fetch
-    if (window.shellBridgeBackend && typeof window.shellBridgeBackend.wspLookup === 'function') {
+    if (hasRegisteredBackend()) {
       window.shellBridgeBackend.wspLookup(protocolNumber)
         .then(function(result) {
+          var data = normalizeAgentData(result);
           callback({
             type: 'agent_response',
             status: 'success',
-            data: result
+            data: data
           });
         })
         .catch(function(err) {
@@ -148,7 +201,6 @@
           });
         });
     } else {
-      // Stub response
       setTimeout(function() {
         callback({
           type: 'agent_response',
@@ -157,14 +209,66 @@
             protocol: 'WSP ' + protocolNumber,
             title: '[Stub] Protocol ' + protocolNumber,
             status: 'stub',
-            stub: true
+            stub: true,
+            results: [
+              {
+                content: '[Stub] Protocol ' + protocolNumber,
+                path: 'WSP_framework/stub/WSP_' + protocolNumber + '.md',
+                relevance: 0.5
+              }
+            ],
+            quantum_coherence: 0.5
           }
         });
       }, 50);
     }
   }
 
-  // ---- Message Dispatcher ----
+  function handleHealthCheck(payload, callback) {
+    log('debug', 'Health check request');
+
+    if (hasRegisteredBackend()) {
+      window.shellBridgeBackend.health()
+        .then(function(result) {
+          var data = normalizeAgentData(result);
+          callback({
+            type: 'agent_response',
+            status: 'success',
+            data: data
+          });
+        })
+        .catch(function(err) {
+          callback({
+            type: 'agent_response',
+            status: 'error',
+            data: { error: 'backend_error', message: String(err) }
+          });
+        });
+    } else {
+      var startTime = performance.now();
+      setTimeout(function() {
+        var latency = Math.round(performance.now() - startTime);
+        callback({
+          type: 'agent_response',
+          status: 'success',
+          data: {
+            results: [{
+              content: JSON.stringify({
+                status: 'healthy',
+                backend: 'stub',
+                latency_ms: latency
+              }),
+              path: '/f/holoindex/status',
+              relevance: 1.0
+            }],
+            quantum_coherence: 0.5,
+            stub: true
+          }
+        });
+      }, 10);
+    }
+  }
+
   function dispatchRequest(request, sourceWindow, origin) {
     var route = request.route;
     var payload = request.payload || {};
@@ -185,52 +289,75 @@
     });
   }
 
-  // ---- Main Message Listener ----
   function handleMessage(event) {
-    // Validate origin
     if (!isAllowedOrigin(event.origin)) {
       log('debug', 'Ignored message from disallowed origin', event.origin);
       return;
     }
 
-    // Validate message structure
     var data = event.data;
     if (!data || typeof data !== 'object') return;
     if (data.type !== 'agent_request') return;
 
     log('info', 'Received agent_request', { route: data.route, origin: event.origin });
 
-    // Dispatch to handler
     dispatchRequest(data, event.source, event.origin);
   }
 
-  // ---- Initialization ----
+  function registerShellBridgeBackend(backend, options) {
+    var err = validateShellBackend(backend);
+    if (err) {
+      log('warn', 'Backend registration rejected', err);
+      return { ok: false, error: err };
+    }
+    window.shellBridgeBackend = backend;
+    backendRegistration.mode = 'registered';
+    backendRegistration.label = (options && options.label) ? String(options.label) : null;
+    log('info', 'Shell bridge backend registered (explicit, local seam)', {
+      label: backendRegistration.label
+    });
+    return { ok: true };
+  }
+
+  function clearShellBridgeBackend() {
+    window.shellBridgeBackend = null;
+    backendRegistration.mode = 'stub';
+    backendRegistration.label = null;
+    log('info', 'Shell bridge backend cleared — stub mode');
+  }
+
+  function getShellBridgeBackendStatus() {
+    return {
+      mode: backendRegistration.mode,
+      registered: hasRegisteredBackend(),
+      label: backendRegistration.label
+    };
+  }
+
   function init() {
     window.addEventListener('message', handleMessage, false);
     log('info', 'Shell Bridge Interceptor initialized');
 
-    // Expose API for shell integration
     window.shellBridgeInterceptor = {
-      // Allow shell to configure allowed origins at runtime
       addAllowedOrigin: function(origin) {
         if (CONFIG.allowedOrigins.indexOf(origin) === -1) {
           CONFIG.allowedOrigins.push(origin);
           log('info', 'Added allowed origin', origin);
         }
       },
-      // Allow shell to register a real backend
+      /** @deprecated Prefer registerShellBridgeBackend — setBackend is a thin alias */
       setBackend: function(backend) {
-        window.shellBridgeBackend = backend;
-        log('info', 'Backend registered');
+        return registerShellBridgeBackend(backend, { label: 'legacy-setBackend' });
       },
-      // Get current config (for debugging)
+      registerShellBridgeBackend: registerShellBridgeBackend,
+      clearShellBridgeBackend: clearShellBridgeBackend,
+      getShellBridgeBackendStatus: getShellBridgeBackendStatus,
       getConfig: function() {
         return Object.assign({}, CONFIG);
       }
     };
   }
 
-  // Auto-init when DOM ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
