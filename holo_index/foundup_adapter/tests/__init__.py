@@ -1,1 +1,0 @@
-# HoloIndex FoundUp Adapter Tests
