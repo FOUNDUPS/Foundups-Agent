@@ -67,23 +67,25 @@ How to contribute: Read CONTRIBUTING.md in the repo.
 
 | Field | Value |
 |-------|-------|
-| **Purpose** | Read-only feed of GitHub activity (issues, PRs, releases) |
+| **Purpose** | Read-only feed of notable GitHub activity (issues, PRs, releases) |
 | **Who can read** | `@Stakeholder`, `@swarm-contributor`, `@Core`, `@Operator` |
-| **Who can post** | Webhook only (no humans) |
+| **Who can post** | Operator only (manual posts or approved integration) |
 | **Threads** | Disabled |
 | **Slow mode** | OFF |
 
 **Topic** (copy-paste):
 ```
-GitHub webhook feed — read-only. All activity is on github.com/FOUNDUPS/science-swarm-hub
+GitHub activity feed — read-only. All activity is on github.com/FOUNDUPS/science-swarm-hub
 ```
 
-**Pinned message**: None (webhook content is self-explanatory)
+**Pinned message**: None (feed content is self-explanatory)
 
-**Webhook setup** (when implemented):
-1. Go to GitHub repo Settings → Webhooks
-2. Add Discord webhook URL (created in channel settings)
-3. Events: Issues (opened, closed), PRs (opened, merged), Releases (published)
+**Feed implementation** (phase-dependent):
+- **Phase 1 (current)**: Manual — operator posts notable GitHub events
+- **Phase 2 (optional)**: Official GitHub Discord integration/app if available
+- **Phase 3 (if needed)**: Custom relay/bridge
+
+**Do NOT**: Create Discord webhook URLs and paste them into GitHub repo settings. This approach has been rejected.
 
 ---
 
