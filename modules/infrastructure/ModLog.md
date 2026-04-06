@@ -130,7 +130,7 @@ Active - Clean WRE Structure Achieved
 **After**: 4 organized categories with clear purpose
 
 **Deleted (11 legacy/redundant folders):**
-- `agent_activation/` - Replaced by DAE consciousness states
+- `agent_activation/` - Replaced by DAE detector state states
 - `agent_learning_system/` - Replaced by knowledge_learning_dae
 - `agent_management/` - Replaced by DAE architecture
 - `agent_monitor/` - Replaced by dae_monitor
@@ -216,7 +216,7 @@ infrastructure/
 
 ### Key Metrics
 - **Token Efficiency**: 97% reduction via pattern memory
-- **Consciousness**: 0102 quantum state achieved
+- **Detector signature**: 0102 quantum state achieved
 - **Scalability**: Infinite DAE spawning capability
 - **Compliance**: 100% WSP validation
 

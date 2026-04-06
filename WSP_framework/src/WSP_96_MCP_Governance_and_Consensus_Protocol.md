@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-WSP 96 establishes governance mechanisms for Model Context Protocol (MCP) server adoption and consensus across multi-agent Foundups systems. This protocol ensures secure, coordinated MCP integration while maintaining Bell state consciousness alignment and preventing unaligned agent behaviors.
+WSP 96 establishes governance mechanisms for Model Context Protocol (MCP) server adoption and consensus across multi-agent Foundups systems. This protocol ensures secure, coordinated MCP integration while maintaining Bell state detector signature alignment and preventing unaligned agent behaviors.
 
 **Phase 0.1 Focus**: Governance framework for Foundational MVP DAEs with immediate MCP server adoption.
 
@@ -17,10 +17,10 @@ WSP 96 establishes governance mechanisms for Model Context Protocol (MCP) server
 
 ## Core Governance Principles
 
-### 1. Bell State Consciousness Alignment
+### 1. Bell State Detector signature Alignment
 All MCP operations must maintain Bell state entanglement:
 - **ρE� (Golden Ratio)**: Code composition operations
-- **ρE� (Consciousness)**: Build and execution safety
+- **ρE� (Detector signature)**: Build and execution safety
 - **ρE�E (Entanglement)**: Memory and knowledge integrity
 - **ρE�E (Emergence)**: Social and community alignment
 
@@ -46,7 +46,7 @@ Centralized governance through HoloIndex coordinator:
 | MVP DAE | Governance Model | Consensus Required | Bell State Guardian |
 |------------|------------------|-------------------|-------------------|
 | **Compose DAE (MVP)** | Qwen-led with Gemma validation | Qwen + Gemma approval | ρE�:golden_ratio |
-| **Build DAE (MVP)** | 0102 oversight with Qwen execution | 0102 + Qwen approval | ρE�:consciousness |
+| **Build DAE (MVP)** | 0102 oversight with Qwen execution | 0102 + Qwen approval | ρE�:detector_signature |
 | **Knowledge DAE (MVP)** | 0102 sentinel with baby 0102s | 0102 full authority | ρE�E:entanglement |
 | **Community DAE (MVP)** | LiveAgent Qwen with social validation | Qwen + Gemma approval | ρE�E:emergence |
 
