@@ -311,6 +311,8 @@ docs/audits/*
 !docs/audits/domain_ops/**
 !docs/audits/science_swarm_external_foundup/
 !docs/audits/science_swarm_external_foundup/**
+!docs/audits/autoagent_wre/
+!docs/audits/autoagent_wre/**
 docs/sessions/
 
 # WSP agentic awakening runtime state (changes every session)
