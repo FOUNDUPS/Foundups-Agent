@@ -31,6 +31,26 @@ python -m modules.infrastructure.autoagent_lab.src.cli run --spec my_experiment.
 - Loads experiment specs from YAML
 - Enforces safety gates (file allowlist, iteration budget, workspace isolation)
 - Validates configs before any mutation
+- **Scores skill configs** (0.0-1.0) using deterministic eval harness
+
+## Quick Score (Layer 2)
+
+```python
+from modules.infrastructure.autoagent_lab.src.eval_harness import eval_skill_config
+
+result = eval_skill_config(
+    "path/to/SKILL.md",
+    context={"historical_fidelity": 0.85, "historical_quality": 0.80},
+)
+print(f"Score: {result.total_score:.2f}")
+print(f"Reasons: {result.reasons}")
+```
+
+Score components:
+- `config_validity` (0.2) — YAML valid, required fields present
+- `wsp_compliance` (0.2) — WSP refs are valid numbers (1-200)
+- `historical_fidelity` (0.3) — From context (PatternMemory adapter future)
+- `historical_quality` (0.3) — From context (PatternMemory adapter future)
 
 ## What This Does NOT Do
 
