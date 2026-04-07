@@ -75,7 +75,11 @@ class TestFoundUpEntryShape:
             assert fid == fid.lower().replace(" ", "_"), f"foundup_id should be lowercase snake_case: {fid}"
 
     def test_source_type_values(self, catalog: list[dict]):
-        valid_types = {"youtube_channel", "linkedin_profile", "x_profile", "tiktok_profile", "instagram_profile", "derived"}
+        valid_types = {
+            "youtube_channel", "linkedin_profile", "x_profile",
+            "tiktok_profile", "instagram_profile", "derived",
+            "github_repo", "external_app", "internal_service",
+        }
         for entry in catalog:
             assert entry["source_type"] in valid_types, f"Invalid source_type: {entry['source_type']}"
 
@@ -210,7 +214,10 @@ class TestProjectionMetadata:
 
     def test_topic_family_values(self, catalog: list[dict]):
         """topic_family must be one of defined values."""
-        valid_families = {"life", "consciousness", "startup", "resistance", "ai-education"}
+        valid_families = {
+            "life", "consciousness", "startup", "resistance",
+            "ai-education", "science", "media",
+        }
         for entry in catalog:
             assert entry["topic_family"] in valid_families, (
                 f"Invalid topic_family '{entry['topic_family']}' in {entry['foundup_id']}"
@@ -243,3 +250,68 @@ class TestProjectionMetadata:
             assert "012-lane" in entry["tags"], (
                 f"Missing '012-lane' tag in {entry['foundup_id']}"
             )
+
+
+class TestNonVideoFoundUps:
+    """Test non-video FoundUp types (github_repo, external_app, internal_service)."""
+
+    NON_VIDEO_SOURCE_TYPES = {"github_repo", "external_app", "internal_service"}
+
+    def test_external_url_present_for_non_video_types(self, catalog: list[dict]):
+        """Non-video source types must have external_url."""
+        for entry in catalog:
+            if entry["source_type"] in self.NON_VIDEO_SOURCE_TYPES:
+                assert "external_url" in entry and entry["external_url"], (
+                    f"Missing external_url in {entry['foundup_id']} "
+                    f"(source_type={entry['source_type']})"
+                )
+
+    def test_external_url_is_https(self, catalog: list[dict]):
+        """external_url must be a valid https URL."""
+        for entry in catalog:
+            url = entry.get("external_url")
+            if url:
+                assert url.startswith("https://"), (
+                    f"external_url must be https in {entry['foundup_id']}: {url}"
+                )
+
+
+class TestDerivedLanes:
+    """Test derived lane conditional fields."""
+
+    def test_derived_lanes_have_parent_channels(self, catalog: list[dict]):
+        """Derived lanes must declare parent_channels."""
+        for entry in catalog:
+            if entry["source_type"] == "derived":
+                assert "parent_channels" in entry, (
+                    f"Missing parent_channels in derived lane {entry['foundup_id']}"
+                )
+                assert isinstance(entry["parent_channels"], list), (
+                    f"parent_channels must be a list in {entry['foundup_id']}"
+                )
+                assert len(entry["parent_channels"]) > 0, (
+                    f"parent_channels must not be empty in {entry['foundup_id']}"
+                )
+
+    def test_derived_lanes_have_derivation_method(self, catalog: list[dict]):
+        """Derived lanes must declare derivation_method."""
+        valid_methods = {"manual_curation", "topic_tag", "ai_classification"}
+        for entry in catalog:
+            if entry["source_type"] == "derived":
+                assert "derivation_method" in entry, (
+                    f"Missing derivation_method in derived lane {entry['foundup_id']}"
+                )
+                assert entry["derivation_method"] in valid_methods, (
+                    f"Invalid derivation_method '{entry['derivation_method']}' "
+                    f"in {entry['foundup_id']}"
+                )
+
+    def test_parent_channels_reference_valid_lanes(self, catalog: list[dict]):
+        """parent_channels must reference existing foundup_ids."""
+        all_ids = {entry["foundup_id"] for entry in catalog}
+        for entry in catalog:
+            if entry["source_type"] == "derived" and "parent_channels" in entry:
+                for ref in entry["parent_channels"]:
+                    assert ref in all_ids, (
+                        f"Invalid parent_channel '{ref}' in {entry['foundup_id']}"
+                    )
