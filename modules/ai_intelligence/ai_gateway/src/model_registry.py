@@ -3,7 +3,7 @@
 UPDATE THIS FILE when providers release new models.
 All other modules should import from here, not hardcode model IDs.
 
-Last Updated: 2026-04-05
+Last Updated: 2026-02-22
 """
 
 from dataclasses import dataclass
@@ -318,12 +318,6 @@ LOCAL_MODELS: Dict[str, ModelInfo] = {
         status=ModelStatus.CURRENT,
         notes="Fast local triage/classification model (gemma-270m)"
     ),
-    "local/gemma4-e2b": ModelInfo(
-        model_id="local/gemma4-e2b",
-        provider="lm_studio_local",
-        status=ModelStatus.CURRENT,
-        notes="Multimodal local model (text+image+audio, 2.3B params, Q4_K_M 3.46GB)"
-    ),
     "qwen2.5:7b": ModelInfo(
         model_id="qwen2.5:7b",
         provider="ollama",
@@ -374,7 +368,6 @@ RECOMMENDED_MODELS = {
     "local_fast": ["local/gemma-270m"],
     "local_smart": ["local/qwen3-4b"],
     "local_code": ["local/qwen-coder-7b"],
-    "local_multimodal": ["local/gemma4-e2b"],
 }
 
 # =============================================================================
