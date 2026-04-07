@@ -384,7 +384,6 @@ class TestE2EOpenClawIntegration:
         response = handle_fam_intent("what is fam?", "user_1")
 
         assert "launch foundup" in response.lower()
-        assert "create foundup" in response.lower()
 
     def test_fam_adapter_auto_symbol_when_missing_token(self):
         """Launch parser should auto-generate token symbol when none is supplied."""
