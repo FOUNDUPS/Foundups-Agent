@@ -54,7 +54,11 @@ Current OpenClaw loop:
 1. **Install Node.js in WSL**: Required first! (not Windows Node)
 2. **Install OpenClaw**: `npm i -g openclaw && openclaw onboard`
 3. **Configure workspace**: Point to this module's `workspace/` directory
-4. **Set env**: `DISCORD_BOT_TOKEN`, `FOUNDUPS_WEBHOOK_TOKEN`
+4. **Set env**: `DISCORD_0102_BOT_TOKEN`, `FOUNDUPS_WEBHOOK_TOKEN`
+
+Legacy compatibility:
+- Older OpenClaw gateway setups may still read `DISCORD_BOT_TOKEN`
+- During transition, export both and map `DISCORD_BOT_TOKEN` to the same value as `DISCORD_0102_BOT_TOKEN`
 
 ## IronClaw Sidecar Mode (Optional)
 

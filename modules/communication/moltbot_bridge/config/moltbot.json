@@ -28,7 +28,7 @@
         },
         "discord": {
             "enabled": true,
-            "botToken": "${DISCORD_BOT_TOKEN}"
+            "botToken": "${DISCORD_0102_BOT_TOKEN}"
         }
     },
     "talk": {

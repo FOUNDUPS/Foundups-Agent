@@ -68,13 +68,18 @@ The wizard will prompt for:
   "channels": {
     "discord": {
       "enabled": true,
-      "botToken": "${DISCORD_BOT_TOKEN}"
+      "botToken": "${DISCORD_0102_BOT_TOKEN}"
     }
   }
 }
 ```
 
-Or set env: `export DISCORD_BOT_TOKEN=your-token-here`
+Or set env:
+
+```bash
+export DISCORD_0102_BOT_TOKEN=your-token-here
+export DISCORD_BOT_TOKEN="$DISCORD_0102_BOT_TOKEN"   # Legacy alias during transition
+```
 
 ---
 

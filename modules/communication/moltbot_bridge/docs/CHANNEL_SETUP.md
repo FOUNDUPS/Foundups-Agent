@@ -97,7 +97,7 @@ openclaw start
   "channels": {
     "discord": {
       "enabled": true,
-      "botToken": "${DISCORD_BOT_TOKEN}",
+      "botToken": "${DISCORD_0102_BOT_TOKEN}",
       "guilds": {
         "YOUR_GUILD_ID": {
           "channels": ["CHANNEL_ID"],
@@ -163,7 +163,7 @@ openclaw start
     },
     "discord": {
       "enabled": true,
-      "botToken": "${DISCORD_BOT_TOKEN}"
+      "botToken": "${DISCORD_0102_BOT_TOKEN}"
     }
   },
   "talk": {
@@ -185,7 +185,8 @@ Add to `.env` or shell profile:
 
 ```bash
 TELEGRAM_BOT_TOKEN=123456789:ABCdefGHI...
-DISCORD_BOT_TOKEN=MTIz...
+DISCORD_0102_BOT_TOKEN=MTIz...
+DISCORD_BOT_TOKEN=${DISCORD_0102_BOT_TOKEN}
 ELEVENLABS_API_KEY=sk_...
 ELEVENLABS_VOICE_ID=...
 FOUNDUPS_WEBHOOK_TOKEN=your-secret
