@@ -191,6 +191,12 @@ Exit methods:
 
 **Rule**: The player never leaves the current FoundUp's queue.
 
+**Autoplay-advance** (video ends → next video plays):
+- YouTube embeds: via YouTube IFrame API `onStateChange` → `ENDED`
+- HTML5 `<video>`: via native `ended` event
+- Other embeds (Vimeo, etc.): NOT supported — no cross-origin ended event
+- End of queue: `showEndOfQueue()` renders replay/close UI instead of advancing
+
 When the user reaches the end of the queue:
 - `nextVideo()` shows "End of queue" hint
 - No automatic jump to another FoundUp
@@ -265,15 +271,20 @@ window.mallVideoPlayer = {
 
 ## 14. Video Rendering
 
-The player supports two video source types:
+The player supports three video source types:
 
-| Source | Detection | Render |
-|--------|-----------|--------|
-| YouTube/Vimeo | `embed_url` present | `<iframe src="..." autoplay>` |
-| Direct file | `.mp4`, `.webm`, `.ogg` | `<video src="..." autoplay controls>` |
-| Neither | fallback | Loading placeholder |
+| Source | Detection | Render | Autoplay-advance |
+|--------|-----------|--------|-----------------|
+| YouTube | `embed_url` matches `youtube.com/embed/{id}` | YouTube IFrame API (`YT.Player`) | YES — `onStateChange` → `ENDED` triggers next |
+| Other embed | `embed_url` present, not YouTube | `<iframe src="..." autoplay>` | NO — no ended detection |
+| Direct file | `.mp4`, `.webm`, `.ogg` | `<video src="..." autoplay controls>` | YES — `ended` event triggers next |
+| Neither | fallback | Loading placeholder | NO |
 
-YouTube embeds use `?autoplay=1&rel=0` to start immediately and hide related videos.
+**YouTube IFrame API**: The player loads `youtube.com/iframe_api` on first YouTube embed. This provides `onStateChange` callbacks, enabling queue autoplay-advance when a video ends. The API is loaded once and reused. `YT.Player` instances are destroyed on video navigation and player close.
+
+YouTube embeds use `autoplay=1`, `rel=0`, `modestbranding=1`.
+
+**Non-YouTube embeds** (Vimeo, etc.) fall back to raw `<iframe>`. These do not support autoplay-advance because there is no cross-origin ended event.
 
 ---
 

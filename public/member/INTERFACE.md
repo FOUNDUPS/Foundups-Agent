@@ -125,7 +125,7 @@ Video Mall tile grid with field scope projections.
 | `initialize(config)` | Initialize tile field |
 | `enterFoundUp(index)` | Enter FoundUp view |
 | **Video Runtime** | |
-| `togglePlay()` | Toggle video play/pause |
+| `togglePlay(index)` | Open fullscreen player from tile (routes to `openFullscreenFromTile`) |
 | `getPlayingIndex()` | Get currently playing tile index |
 | `expandFoundUp(index)` | Expand tile to FoundUp view |
 | `collapseFoundUp()` | Collapse back to Mall |
@@ -198,7 +198,7 @@ Fullscreen video player with queue rail. Queue-constrained to single FoundUp.
 
 | Method | Description |
 |--------|-------------|
-| `open(foundupId, queue, startIndex, resumeOpts?)` | Open player with FoundUp queue. Optional `resumeOpts`: `{ resumeSeconds: number }` (HTML5 file sources only; embeds ignore) |
+| `open(foundupId, queue, startIndex, resumeOpts?)` | Open player with FoundUp queue. Optional `resumeOpts`: `{ resumeSeconds: number }` (HTML5 file sources only; embeds ignore). YouTube embeds use IFrame API for autoplay-advance; other embeds use raw iframe (no ended detection). |
 | `close()` | Exit fullscreen |
 | `goToVideo(index)` | Navigate to video index |
 | `next()` | Next video in queue |
@@ -306,7 +306,7 @@ interface InviteDoc {
 ### UI Contract
 
 **Mall Context (tile field)**:
-- tap tile: play/pause video in Mall context
+- tap tile: open fullscreen player with FoundUp queue
 - double-tap tile: enter FoundUp view directly
 - pinch-out on tile: expand into FoundUp's video field
 - swipe: navigate snapped field (default) or glide (override)
