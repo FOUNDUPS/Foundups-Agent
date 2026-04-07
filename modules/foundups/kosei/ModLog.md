@@ -1,5 +1,54 @@
 # Kosei AI Systems — ModLog
 
+## 2026-04-07 — Phase 2: Issue Triage and Priority
+
+**Worker**: Y2
+**Slice**: `KOSEI_ISSUES_TRIAGE_AND_PRIORITY_PHASE2`
+
+### Admin Issues Tab (Operator Triage)
+
+- Added fourth tab "Issues" to admin console
+- Real-time Firestore subscription to `kosei_issues` collection
+- Dual filters: status + priority
+- Issue cards display: title, status badge, priority badge, category, workspace ID (truncated), assignment status, created date
+- Issue detail panel with full triage controls:
+  - Status dropdown: open, in_progress, waiting_client, resolved, closed
+  - Priority dropdown: low, medium, high, urgent
+  - Assigned operator field
+  - Resolution textarea + "Mark Resolved" action
+
+### Client Priority Features
+
+- Added priority selector to issue submission form (default: medium)
+- `submitIssue()` now accepts priority parameter
+- Issue cards display priority badge alongside status badge
+- Clients see: status, priority, resolution
+- Clients do NOT see: assigned_to, internal triage controls
+
+### Files Modified
+
+Admin surface:
+- `admin/index.html` — Issues tab button + panel with filters
+- `admin/js/kosei-admin-data.js` — `subscribeIssues()`, `getIssue()`, `updateIssueStatus()`, `updateIssuePriority()`, `resolveIssue()`
+- `admin/js/kosei-admin-ui.js` — `renderIssues()`, `openIssueDetail()`, `saveIssueTriage()`, `resolveIssueTriage()`
+- `admin/css/kosei-admin.css` — issue/priority badges, form elements
+
+Client surface:
+- `app/index.html` — priority selector in issue form
+- `app/js/kosei-app-ui.js` — priority in submit + display
+- `app/js/kosei-app-data.js` — priority parameter in `submitIssue()`
+- `app/css/kosei-app.css` — priority badge styles
+
+Tests:
+- `tests/test_issue_triage.py` — 20 focused tests for issue triage features
+- `tests/test_client_workspace.py` — updated boundary test (priority is client-settable)
+
+### WSP 97 Applied
+
+Status/priority model verified against `KOSEI_DATA_MODEL.md` Section 7 (IssueDoc interface). All values match canonical spec.
+
+---
+
 ## 2026-04-06 — Phase 1: Admin Operator Surface
 
 **Worker**: I

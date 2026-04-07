@@ -297,6 +297,18 @@
 .ka-badge--error        { background: rgba(239,68,68,0.15);  color: #ef4444; }
 .ka-badge--revoked      { background: rgba(239,68,68,0.15);  color: #ef4444; }
 
+/* Issue statuses */
+.ka-badge--open           { background: rgba(59,130,246,0.15); color: #3b82f6; }
+.ka-badge--waiting_client { background: rgba(234,179,8,0.15);  color: #eab308; }
+.ka-badge--resolved       { background: rgba(34,197,94,0.15);  color: #22c55e; }
+.ka-badge--closed         { background: rgba(107,114,128,0.15);color: #6b7280; }
+
+/* Issue priorities */
+.ka-badge--priority-low    { background: rgba(107,114,128,0.15);color: #6b7280; }
+.ka-badge--priority-medium { background: rgba(59,130,246,0.15); color: #3b82f6; }
+.ka-badge--priority-high   { background: rgba(234,179,8,0.15);  color: #eab308; }
+.ka-badge--priority-urgent { background: rgba(239,68,68,0.15);  color: #ef4444; }
+
 /* ============================================
    Detail Panel
    ============================================ */
@@ -427,6 +439,69 @@
   padding: 6px 12px;
   font-size: 0.8125rem;
   cursor: pointer;
+}
+
+/* Form elements in detail panel */
+.ka-input {
+  background: var(--kosei-bg-card);
+  border: 1px solid var(--kosei-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--kosei-text);
+  font-size: 0.875rem;
+}
+
+.ka-input:focus {
+  outline: none;
+  border-color: var(--kosei-accent);
+}
+
+.ka-textarea {
+  width: 100%;
+  background: var(--kosei-bg-card);
+  border: 1px solid var(--kosei-border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: var(--kosei-text);
+  font-size: 0.875rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.ka-textarea:focus {
+  outline: none;
+  border-color: var(--kosei-accent);
+}
+
+.ka-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+}
+
+.ka-btn--primary {
+  background: var(--kosei-accent);
+  color: white;
+}
+
+.ka-btn--primary:hover {
+  opacity: 0.9;
+}
+
+.ka-btn--success {
+  background: #22c55e;
+  color: white;
+}
+
+.ka-btn--success:hover {
+  background: #16a34a;
 }
 
 /* ============================================

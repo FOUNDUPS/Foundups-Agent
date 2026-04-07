@@ -144,7 +144,7 @@ async function fetchTrial() {
  * Submit a client feedback/issue.
  * Per KOSEI_DATA_MODEL.md Section 7: kosei_issues collection.
  */
-async function submitIssue(title, description, category) {
+async function submitIssue(title, description, category, priority) {
   if (!_db || !_workspaceId) return null;
   const user = window.koseiAppAuth?.getCurrentUser();
 
@@ -155,7 +155,7 @@ async function submitIssue(title, description, category) {
     title: title,
     description: description,
     category: category || 'general',
-    priority: 'medium',
+    priority: priority || 'medium',
     status: 'open',
     created_at: firebase.firestore.FieldValue.serverTimestamp(),
     updated_at: firebase.firestore.FieldValue.serverTimestamp()

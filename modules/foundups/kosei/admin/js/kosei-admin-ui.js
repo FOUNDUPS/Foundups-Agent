@@ -8,6 +8,7 @@
 let _leads = [];
 let _clients = [];
 let _trials = [];
+let _issues = [];
 
 /**
  * Initialize UI: tabs, filters, detail panel close.
@@ -27,6 +28,12 @@ function initUI() {
   });
   document.getElementById('trialStatusFilter')?.addEventListener('change', () => {
     renderTrials(_trials);
+  });
+  document.getElementById('issueStatusFilter')?.addEventListener('change', () => {
+    renderIssues(_issues);
+  });
+  document.getElementById('issuePriorityFilter')?.addEventListener('change', () => {
+    renderIssues(_issues);
   });
 
   // Detail panel close
@@ -352,6 +359,168 @@ async function openTrialDetail(id) {
 }
 
 // ============================================
+// Issues rendering
+// ============================================
+
+function renderIssues(issues) {
+  _issues = issues;
+  const statusFilter = document.getElementById('issueStatusFilter')?.value || 'all';
+  const priorityFilter = document.getElementById('issuePriorityFilter')?.value || 'all';
+
+  let filtered = issues;
+  if (statusFilter !== 'all') {
+    filtered = filtered.filter(i => i.status === statusFilter);
+  }
+  if (priorityFilter !== 'all') {
+    filtered = filtered.filter(i => i.priority === priorityFilter);
+  }
+
+  const container = document.getElementById('issuesList');
+  const countEl = document.getElementById('issueCount');
+  if (countEl) countEl.textContent = `${filtered.length} of ${issues.length}`;
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="ka-empty">No issues found</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(issue => `
+    <div class="ka-card" data-type="issue" data-id="${issue.id}">
+      <div class="ka-card-top">
+        <span class="ka-card-name">${esc(issue.title || 'Untitled')}</span>
+        <span class="ka-badge ka-badge--${issue.status || 'open'}">${issue.status || 'open'}</span>
+        <span class="ka-badge ka-badge--priority-${issue.priority || 'medium'}">${issue.priority || 'medium'}</span>
+      </div>
+      <div class="ka-card-meta">
+        <span>${esc(issue.category || 'general')}</span>
+        <span>WS: ${esc(issue.workspace_id?.slice(0, 8) || '--')}</span>
+        ${issue.assigned_to ? `<span>Assigned: ${esc(issue.assigned_to)}</span>` : '<span style="color:var(--kosei-warning);">Unassigned</span>'}
+        <span>${formatDate(issue.created_at)}</span>
+      </div>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.ka-card').forEach(card => {
+    card.addEventListener('click', () => openIssueDetail(card.dataset.id));
+  });
+}
+
+async function openIssueDetail(id) {
+  const issue = await window.koseiAdminData?.getIssue(id);
+  if (!issue) return;
+
+  const statusOptions = ['open', 'in_progress', 'waiting_client', 'resolved', 'closed']
+    .map(s => `<option value="${s}" ${issue.status === s ? 'selected' : ''}>${s.replace('_', ' ')}</option>`)
+    .join('');
+
+  const priorityOptions = ['low', 'medium', 'high', 'urgent']
+    .map(p => `<option value="${p}" ${issue.priority === p ? 'selected' : ''}>${p}</option>`)
+    .join('');
+
+  const html = `
+    <div class="ka-detail-section">
+      <h4>Issue Details</h4>
+      <div class="ka-detail-row"><span class="ka-detail-label">Title</span><span class="ka-detail-value">${esc(issue.title || '--')}</span></div>
+      <div class="ka-detail-row"><span class="ka-detail-label">Category</span><span class="ka-detail-value">${esc(issue.category || 'general')}</span></div>
+      <div class="ka-detail-row"><span class="ka-detail-label">Workspace</span><span class="ka-detail-value">${esc(issue.workspace_id || '--')}</span></div>
+      <div class="ka-detail-row"><span class="ka-detail-label">Author</span><span class="ka-detail-value">${esc(issue.author_role || 'client')}</span></div>
+    </div>
+
+    <div class="ka-detail-section">
+      <h4>Description</h4>
+      <div style="color:var(--kosei-text-muted);font-size:0.875rem;white-space:pre-wrap;">${esc(issue.description || 'No description provided.')}</div>
+    </div>
+
+    <div class="ka-detail-section">
+      <h4>Triage</h4>
+      <div class="ka-detail-row">
+        <span class="ka-detail-label">Status</span>
+        <select id="issueStatusSelect" class="ka-select" style="flex:1;">
+          ${statusOptions}
+        </select>
+      </div>
+      <div class="ka-detail-row">
+        <span class="ka-detail-label">Priority</span>
+        <select id="issuePrioritySelect" class="ka-select" style="flex:1;">
+          ${priorityOptions}
+        </select>
+      </div>
+      <div class="ka-detail-row">
+        <span class="ka-detail-label">Assigned To</span>
+        <input id="issueAssignedInput" class="ka-input" placeholder="Operator name or email" value="${esc(issue.assigned_to || '')}" style="flex:1;" />
+      </div>
+      <div style="margin-top:var(--space-md);">
+        <button class="ka-btn ka-btn--primary" onclick="saveIssueTriage('${issue.id}')">Save Triage</button>
+      </div>
+    </div>
+
+    ${issue.status !== 'resolved' && issue.status !== 'closed' ? `
+    <div class="ka-detail-section">
+      <h4>Resolve Issue</h4>
+      <textarea id="issueResolutionInput" class="ka-textarea" placeholder="Resolution notes..." rows="3"></textarea>
+      <div style="margin-top:var(--space-md);">
+        <button class="ka-btn ka-btn--success" onclick="resolveIssueTriage('${issue.id}')">Mark Resolved</button>
+      </div>
+    </div>
+    ` : `
+    <div class="ka-detail-section">
+      <h4>Resolution</h4>
+      <div style="color:var(--kosei-text-muted);font-size:0.875rem;white-space:pre-wrap;">${esc(issue.resolution || 'No resolution notes.')}</div>
+      <div class="ka-detail-row"><span class="ka-detail-label">Resolved</span><span class="ka-detail-value">${formatDate(issue.resolved_at)}</span></div>
+    </div>
+    `}
+
+    ${issue.attachment_urls?.length ? `
+    <div class="ka-detail-section">
+      <h4>Attachments</h4>
+      ${issue.attachment_urls.map(url => `<a href="${esc(url)}" target="_blank" rel="noopener" style="display:block;margin-bottom:var(--space-xs);color:var(--kosei-primary);">${esc(url.split('/').pop())}</a>`).join('')}
+    </div>
+    ` : ''}
+
+    <div class="ka-detail-section">
+      <h4>Timeline</h4>
+      <div class="ka-detail-row"><span class="ka-detail-label">Created</span><span class="ka-detail-value">${formatDate(issue.created_at)}</span></div>
+      <div class="ka-detail-row"><span class="ka-detail-label">Updated</span><span class="ka-detail-value">${formatDate(issue.updated_at)}</span></div>
+    </div>
+  `;
+
+  showDetail(issue.title || 'Issue', html);
+}
+
+async function saveIssueTriage(issueId) {
+  const status = document.getElementById('issueStatusSelect')?.value;
+  const priority = document.getElementById('issuePrioritySelect')?.value;
+  const assigned = document.getElementById('issueAssignedInput')?.value?.trim();
+
+  try {
+    if (status) {
+      await window.koseiAdminData?.updateIssueStatus(issueId, status, assigned || null);
+    }
+    if (priority) {
+      await window.koseiAdminData?.updateIssuePriority(issueId, priority);
+    }
+    openIssueDetail(issueId);
+  } catch (err) {
+    console.error('[Kosei Admin] Triage save error:', err);
+  }
+}
+
+async function resolveIssueTriage(issueId) {
+  const resolution = document.getElementById('issueResolutionInput')?.value?.trim();
+  if (!resolution) {
+    alert('Please enter resolution notes.');
+    return;
+  }
+
+  try {
+    await window.koseiAdminData?.resolveIssue(issueId, resolution);
+    openIssueDetail(issueId);
+  } catch (err) {
+    console.error('[Kosei Admin] Resolve error:', err);
+  }
+}
+
+// ============================================
 // Detail panel
 // ============================================
 
@@ -400,9 +569,12 @@ if (typeof window !== 'undefined') {
     renderLeads,
     renderClients,
     renderTrials,
+    renderIssues,
     closeDetail
   };
 
-  // Make submitNote accessible from onclick
+  // Make onclick handlers accessible
   window.submitNote = submitNote;
+  window.saveIssueTriage = saveIssueTriage;
+  window.resolveIssueTriage = resolveIssueTriage;
 }
