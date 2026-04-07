@@ -1,0 +1,34 @@
+# AutoAgent Lab — Experiment Spec Template
+#
+# Copy this file, fill in the target, and run:
+#   python -m modules.infrastructure.autoagent_lab.src.cli run --spec <path>
+
+# Human-readable experiment name
+name: "example-skill-optimization"
+
+# What to optimize
+target:
+  # Path to the SKILL.md file (relative to repo root)
+  skill_path: "modules/example_module/skills/example_skill/SKILL.md"
+  # Which fields to vary (subset of: agents, wsp_chain, domains, tokens_budget, prompt)
+  mutable_fields:
+    - agents
+    - tokens_budget
+
+# Eval configuration
+eval:
+  # Score components and weights (must sum to 1.0)
+  weights:
+    config_validity: 0.2
+    wsp_compliance: 0.2
+    historical_fidelity: 0.3
+    historical_quality: 0.3
+
+# Experiment budget
+budget:
+  max_iterations: 10
+  # Minimum score improvement to keep a change (0.0 = any improvement)
+  min_improvement: 0.0
+
+# Logging
+log_level: "INFO"
