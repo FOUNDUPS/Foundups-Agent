@@ -4,7 +4,7 @@
 **Owner**: 0102 (Worker R)
 **Slice**: `OBAI_DISCORD_BOT_SPEC_PHASE1`
 **Date**: 2026-04-07
-**Parent**: moltbot_bridge module, Discord dual-bot architecture
+**Parent**: obai_discord_bot module, Discord dual-bot architecture
 
 ---
 
@@ -12,7 +12,7 @@
 
 OBAI exists as a Discord application with scoped permissions (no admin), but no code process is running behind it. The bot appears offline. Science Swarm has 5 seeded research threads in #swarm-work with zero participants because no agent can join or post in them.
 
-The moltbot_bridge module is webhook-based — it receives messages FROM OpenClaw Gateway via HTTP POST, not directly from Discord. There is no discord.py Client, no gateway connection, no event handlers. The `DISCORD_BOT_TOKEN` in `moltbot.json` is consumed by the OpenClaw Gateway (Node.js), not by the Python service.
+The moltbot_bridge module is webhook-based — it receives messages FROM OpenClaw Gateway via HTTP POST, not directly from Discord. There is no discord.py Client, no gateway connection, no event handlers. The `DISCORD_0102_BOT_TOKEN` in `moltbot.json` is consumed by the OpenClaw Gateway (Node.js), not by the Python service.
 
 OBAI needs a Discord gateway bot — a running Python process that connects to Discord directly, can join threads, post structured messages, and observe channel activity.
 
@@ -54,11 +54,11 @@ OBAI needs a Discord gateway bot — a running Python process that connects to D
 | Token used | FOUNDUPS_WEBHOOK_TOKEN (shared secret) | OBAI bot token (Discord auth) |
 | Thread participation | Cannot — webhook receiver doesn't know about threads | Native — discord.py Thread API |
 
-**Decision**: Standalone discord.py bot in a new file. Not an adaptation of moltbot_bridge's webhook receiver.
+**Decision**: Standalone discord.py bot in its own module. Not an adaptation of moltbot_bridge's webhook receiver.
 
-**Location**: `modules/communication/moltbot_bridge/src/obai_discord_bot.py`
+**Location**: `modules/communication/obai_discord_bot/src/obai_discord_bot.py`
 
-**Why moltbot_bridge, not a new module**: OBAI is the community-facing surface of the OpenClaw/moltbot system. The module already owns "communication bridge between 0102 systems and external platforms." Adding a Discord gateway bot is an output adapter — same pattern as the antifaFM Discord voice output.
+**Why a new module, not moltbot_bridge**: moltbot_bridge is 0102's runtime — its config says "You are 0102", its INTERFACE.md describes OpenClawDAE, its token is 0102's token. Grafting OBAI into that runtime would violate the dual-bot identity boundary and create a permission confusion surface (0102 is ADMINISTRATOR; OBAI must never be). A separate module enforces identity and permission isolation at the process level.
 
 ### Future Bridge Points
 
@@ -270,14 +270,17 @@ OBAI's Discord permissions (set during invite, integer `311452617792`):
 ### 8.1 Where It Lives
 
 ```
-modules/communication/moltbot_bridge/
+modules/communication/obai_discord_bot/
+  README.md
+  INTERFACE.md
+  ModLog.md
+  requirements.txt
   src/
-    webhook_receiver.py         ← existing (OpenClaw webhook endpoint)
-    openclaw_dae.py             ← existing (OpenClaw autonomy engine)
-    moltbook_distribution_adapter.py  ← existing (FAM milestone publishing)
-    obai_discord_bot.py         ← NEW (Discord gateway bot)
-  config/
-    moltbot.json                ← existing (add OBAI section)
+    __init__.py
+    obai_discord_bot.py         ← Discord gateway bot
+  tests/
+    __init__.py
+    test_obai_discord_bot.py
   docs/
     OBAI_DISCORD_BOT_SPEC.md   ← THIS FILE
 ```
