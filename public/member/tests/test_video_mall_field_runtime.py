@@ -99,10 +99,10 @@ class TestTapPlayPause:
         js = _read("js/mall-tile-field.js")
         assert "playingIndex" in js
 
-    def test_is_playing_class(self):
-        """is-playing class is applied to tile."""
+    def test_toggle_play_opens_fullscreen(self):
+        """togglePlay routes to fullscreen player via openFullscreenFromTile."""
         js = _read("js/mall-tile-field.js")
-        assert "is-playing" in js
+        assert "openFullscreenFromTile(index)" in js
 
     def test_play_indicator_css(self):
         """Play indicator CSS exists."""

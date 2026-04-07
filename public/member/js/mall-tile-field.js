@@ -132,10 +132,15 @@
       // Play indicator
       var playIndicator = '<div class="mall-tile-play-indicator"></div>';
 
+      // Corner expand button for explicit fullscreen entry
+      var hasVideos = (item.videos && item.videos.length) || item.video_count;
+      var expandBtn = hasVideos ? '<button class="mall-tile-expand" aria-label="Open fullscreen" title="Fullscreen">&#9654;</button>' : '';
+
       return '<article class="mall-tile theme-' + theme + '" data-index="' + index + '" data-foundup-id="' + escapeAttr(item.foundup_id || item.id || '') + '" tabindex="0" aria-label="' + escapeAttr(item.name || item.title || '') + '" style="' + posterStyle + '">' +
         '<span class="mall-tile-badge ' + badgeClass + '">' + escapeHtml(readiness.replace('_', ' ')) + '</span>' +
         queueBadge +
         playIndicator +
+        expandBtn +
         '<div class="mall-tile-inner">' +
           '<span class="mall-tile-token">' + escapeHtml(item.token_symbol || '') + '</span>' +
           '<span class="mall-tile-hero">' + escapeHtml(item.hero_label || '') + '</span>' +
@@ -229,6 +234,18 @@
       }
     });
 
+    // Corner expand buttons — open fullscreen, stop event from reaching tile tap
+    var expandBtns = tileField.querySelectorAll('.mall-tile-expand');
+    expandBtns.forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var tile = btn.closest('.mall-tile');
+        if (!tile) return;
+        var index = Number(tile.dataset.index || 0);
+        openFullscreenFromTile(index);
+      });
+    });
+
     // Global escape handler - collapse expanded view
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && expandedFoundUp !== null) {
@@ -254,26 +271,33 @@
       targetTile.classList.add('tap-pulse');
     }
 
-    // Clear previous playing state
-    tiles.forEach(function(t) {
-      t.classList.remove('is-playing');
-    });
+    // Open fullscreen player with real playback
+    openFullscreenFromTile(index);
+  }
 
-    if (playingIndex === index) {
-      // Pause: was playing this one
-      playingIndex = null;
+  /**
+   * Open fullscreen player from a tile interaction.
+   * In Mall mode: opens the FoundUp's video queue starting at first video.
+   * In expanded mode: opens at the specific video index.
+   * @param {number} index - Tile index
+   */
+  function openFullscreenFromTile(index) {
+    if (!window.mallVideoPlayer) return;
+
+    if (expandedFoundUp !== null) {
+      // Expanded mode: tiles are individual videos from one FoundUp
+      var parentItem = mallCatalog[expandedFoundUp];
+      if (!parentItem || !parentItem.videos || !parentItem.videos.length) return;
+      var foundupId = parentItem.foundup_id || parentItem.id || '';
+      window.mallVideoPlayer.open(foundupId, parentItem.videos, index);
     } else {
-      // Play: new tile
-      playingIndex = index;
-      if (tiles[index]) {
-        tiles[index].classList.add('is-playing');
-      }
-    }
-
-    // Notify listeners (for video player integration)
-    if (window.mallVideoPlayer && typeof window.mallVideoPlayer.setPlaying === 'function') {
+      // Mall mode: tiles are FoundUps — open queue at first video
       var item = mallCatalog[index];
-      window.mallVideoPlayer.setPlaying(playingIndex !== null ? item : null);
+      if (!item) return;
+      var foundupId = item.foundup_id || item.id || '';
+      var queue = item.videos || [];
+      if (!queue.length) return; // No videos to play
+      window.mallVideoPlayer.open(foundupId, queue, 0);
     }
   }
 
