@@ -582,10 +582,17 @@
 .kc-badge--connecting   { background: rgba(234,179,8,0.15);  color: #eab308; }
 .kc-badge--connected    { background: rgba(34,197,94,0.15);  color: #22c55e; }
 .kc-badge--error        { background: rgba(239,68,68,0.15);  color: #ef4444; }
-.kc-badge--open         { background: rgba(59,130,246,0.15); color: #3b82f6; }
-.kc-badge--in_progress  { background: rgba(234,179,8,0.15);  color: #eab308; }
-.kc-badge--resolved     { background: rgba(34,197,94,0.15);  color: #22c55e; }
-.kc-badge--closed       { background: rgba(107,114,128,0.15);color: #6b7280; }
+.kc-badge--open           { background: rgba(59,130,246,0.15); color: #3b82f6; }
+.kc-badge--in_progress    { background: rgba(234,179,8,0.15);  color: #eab308; }
+.kc-badge--waiting_client { background: rgba(234,179,8,0.15);  color: #eab308; }
+.kc-badge--resolved       { background: rgba(34,197,94,0.15);  color: #22c55e; }
+.kc-badge--closed         { background: rgba(107,114,128,0.15);color: #6b7280; }
+
+/* Issue priorities */
+.kc-badge--priority-low    { background: rgba(107,114,128,0.15);color: #6b7280; }
+.kc-badge--priority-medium { background: rgba(59,130,246,0.15); color: #3b82f6; }
+.kc-badge--priority-high   { background: rgba(234,179,8,0.15);  color: #eab308; }
+.kc-badge--priority-urgent { background: rgba(239,68,68,0.15);  color: #ef4444; }
 
 /* ============================================
    Utility

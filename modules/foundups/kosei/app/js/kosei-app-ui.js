@@ -201,6 +201,7 @@ async function handleIssueSubmit(e) {
   const title = form.querySelector('[name="issueTitle"]')?.value?.trim();
   const desc = form.querySelector('[name="issueDesc"]')?.value?.trim();
   const cat = form.querySelector('[name="issueCat"]')?.value || 'general';
+  const priority = form.querySelector('[name="issuePriority"]')?.value || 'medium';
 
   if (!title) return;
 
@@ -210,7 +211,7 @@ async function handleIssueSubmit(e) {
   const status = document.getElementById('issueStatus');
 
   try {
-    await window.koseiAppData?.submitIssue(title, desc, cat);
+    await window.koseiAppData?.submitIssue(title, desc, cat, priority);
     form.reset();
     if (status) {
       status.textContent = 'Issue submitted. We\'ll get back to you soon.';
@@ -245,7 +246,8 @@ async function loadIssues() {
     <div class="kc-issue-card">
       <div class="kc-issue-top">
         <span class="kc-issue-title">${esc(issue.title)}</span>
-        <span class="kc-badge kc-badge--${issue.status || 'open'}">${issue.status || 'open'}</span>
+        <span class="kc-badge kc-badge--${issue.status || 'open'}">${(issue.status || 'open').replace('_', ' ')}</span>
+        <span class="kc-badge kc-badge--priority-${issue.priority || 'medium'}">${issue.priority || 'medium'}</span>
       </div>
       <div class="kc-issue-meta">
         <span>${esc(issue.category || 'general')}</span>

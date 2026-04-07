@@ -65,6 +65,7 @@
       <button class="ka-tab ka-tab--active" data-tab="leads">Leads</button>
       <button class="ka-tab" data-tab="clients">Clients</button>
       <button class="ka-tab" data-tab="trials">Trials</button>
+      <button class="ka-tab" data-tab="issues">Issues</button>
     </nav>
 
     <!-- Content area -->
@@ -128,6 +129,34 @@
         </div>
         <div id="trialsList" class="ka-list">
           <div class="ka-loading">Loading trials...</div>
+        </div>
+      </section>
+
+      <!-- Issues tab -->
+      <section id="tab-issues" class="ka-tab-panel" style="display:none;">
+        <div class="ka-panel-header">
+          <h2>Client Issues</h2>
+          <div class="ka-filter-row">
+            <select id="issueStatusFilter" class="ka-select">
+              <option value="all">All statuses</option>
+              <option value="open">Open</option>
+              <option value="in_progress">In Progress</option>
+              <option value="waiting_client">Waiting on Client</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+            </select>
+            <select id="issuePriorityFilter" class="ka-select">
+              <option value="all">All priorities</option>
+              <option value="urgent">Urgent</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+            <span id="issueCount" class="ka-count"></span>
+          </div>
+        </div>
+        <div id="issuesList" class="ka-list">
+          <div class="ka-loading">Loading issues...</div>
         </div>
       </section>
 

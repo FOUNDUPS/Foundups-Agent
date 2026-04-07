@@ -19,6 +19,7 @@ let _db = null;
 let _unsubLeads = null;
 let _unsubClients = null;
 let _unsubTrials = null;
+let _unsubIssues = null;
 
 /**
  * Initialize data layer with Firestore instance.
@@ -29,6 +30,7 @@ function initData(db) {
     subscribeLeads();
     subscribeClients();
     subscribeTrials();
+    subscribeIssues();
   }
 }
 
@@ -184,8 +186,31 @@ async function getTrial(id) {
 }
 
 // ============================================
-// Issues (kosei_issues) -- read for detail view
+// Issues (kosei_issues)
 // ============================================
+
+function subscribeIssues() {
+  if (_unsubIssues) _unsubIssues();
+  if (!_db) return;
+
+  _unsubIssues = _db
+    .collection('kosei_issues')
+    .orderBy('created_at', 'desc')
+    .limit(100)
+    .onSnapshot(
+      snapshot => {
+        const issues = [];
+        snapshot.forEach(doc => {
+          issues.push({ id: doc.id, ...doc.data() });
+        });
+        window.koseiAdminUI?.renderIssues(issues);
+      },
+      err => {
+        console.error('[Kosei Admin] Issues subscription error:', err);
+        window.koseiAdminUI?.renderIssues([]);
+      }
+    );
+}
 
 async function getIssuesForWorkspace(workspaceId) {
   if (!_db) return [];
@@ -199,6 +224,54 @@ async function getIssuesForWorkspace(workspaceId) {
   return issues;
 }
 
+/**
+ * Get single issue by ID.
+ */
+async function getIssue(id) {
+  if (!_db) return null;
+  const doc = await _db.collection('kosei_issues').doc(id).get();
+  return doc.exists ? { id: doc.id, ...doc.data() } : null;
+}
+
+/**
+ * Update issue status (triage).
+ */
+async function updateIssueStatus(id, newStatus, assignedTo) {
+  if (!_db) return;
+  const update = {
+    status: newStatus,
+    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  if (assignedTo !== undefined) {
+    update.assigned_to = assignedTo;
+  }
+  await _db.collection('kosei_issues').doc(id).update(update);
+}
+
+/**
+ * Resolve an issue with resolution text.
+ */
+async function resolveIssue(id, resolution) {
+  if (!_db) return;
+  await _db.collection('kosei_issues').doc(id).update({
+    status: 'resolved',
+    resolution: resolution,
+    resolved_at: firebase.firestore.FieldValue.serverTimestamp(),
+    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
+/**
+ * Update issue priority.
+ */
+async function updateIssuePriority(id, priority) {
+  if (!_db) return;
+  await _db.collection('kosei_issues').doc(id).update({
+    priority: priority,
+    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
 // ============================================
 // Cleanup
 // ============================================
@@ -207,6 +280,7 @@ function destroy() {
   if (_unsubLeads) _unsubLeads();
   if (_unsubClients) _unsubClients();
   if (_unsubTrials) _unsubTrials();
+  if (_unsubIssues) _unsubIssues();
   _db = null;
 }
 
@@ -218,8 +292,12 @@ if (typeof window !== 'undefined') {
     getLead,
     getClient,
     getTrial,
+    getIssue,
     getIssuesForWorkspace,
     updateLeadStatus,
+    updateIssueStatus,
+    updateIssuePriority,
+    resolveIssue,
     addNote
   };
 }

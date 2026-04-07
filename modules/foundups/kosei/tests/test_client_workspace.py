@@ -296,9 +296,9 @@ class TestBoundaryEnforcement:
         assert 'value="billing"' not in self.html
 
     def test_no_internal_triage_labels(self):
-        # No priority=urgent or assigned_to in UI
+        # assigned_to is admin-only triage field
+        # (priority is client-settable, including urgent)
         assert "assigned_to" not in self.ui_js
-        assert "urgent" not in self.html
 
 
 class TestFileStructure:
