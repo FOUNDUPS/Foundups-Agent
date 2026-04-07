@@ -53,6 +53,4 @@ python -m modules.communication.obai_discord_bot.src.obai_discord_bot
 
 ## Related Specs
 
-- `docs/audits/discord_bots/OBAI_DISCORD_BOT_SPEC_PHASE1.md`
-- `docs/audits/discord_bots/OBAI_DISCORD_PERMISSION_BOUNDARY.md`
-- `docs/audits/discord_bots/OBAI_THREAD_PARTICIPATION_MODEL.md`
+- `docs/OBAI_DISCORD_BOT_SPEC.md` (in this module)
