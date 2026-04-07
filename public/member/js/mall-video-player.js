@@ -56,6 +56,41 @@
   var MIN_RESUME_SECONDS = 5;
   var COMPLETE_RATIO = 0.97;
   var pendingResumeSeconds = null;
+  var ytPlayer = null;           // YouTube IFrame API player instance
+  var ytAPIReady = false;        // YouTube IFrame API loaded
+
+  // ─── YouTube IFrame API ───
+  function ensureYouTubeAPI(callback) {
+    if (window.YT && window.YT.Player) {
+      ytAPIReady = true;
+      callback();
+      return;
+    }
+    var prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function () {
+      ytAPIReady = true;
+      if (prev) prev();
+      callback();
+    };
+    if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+      var tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(tag);
+    }
+  }
+
+  function extractYouTubeVideoId(embedUrl) {
+    if (!embedUrl) return null;
+    var m = embedUrl.match(/youtube\.com\/embed\/([A-Za-z0-9_-]+)/);
+    return m ? m[1] : null;
+  }
+
+  function destroyYTPlayer() {
+    if (ytPlayer) {
+      try { ytPlayer.destroy(); } catch (e) { /* already destroyed */ }
+      ytPlayer = null;
+    }
+  }
 
   function normalizeResumeSeconds(sec, durationSec) {
     if (sec == null || typeof sec !== 'number' || isNaN(sec)) return null;
@@ -213,6 +248,7 @@
     document.body.style.overflow = '';
 
     // Stop video
+    destroyYTPlayer();
     stage.innerHTML = '';
 
     // Cleanup
@@ -268,15 +304,45 @@
   function renderVideo(video) {
     if (!video) return;
 
+    destroyYTPlayer();
     titleEl.textContent = video.title || '';
 
     // Determine embed type
     var embedUrl = video.embed_url || video.embedUrl;
     var sourceUrl = video.source_url || video.sourceUrl;
+    var ytId = extractYouTubeVideoId(embedUrl);
 
-    if (embedUrl) {
+    if (ytId) {
+      pendingResumeSeconds = null; // cannot read playback time from YouTube embed; resume N/A
+      // YouTube embed via IFrame API — onStateChange gives us ended detection
+      var holderDiv = document.createElement('div');
+      holderDiv.id = 'ytPlayerHost_' + Date.now();
+      stage.innerHTML = '';
+      stage.appendChild(holderDiv);
+
+      function createYTPlayer() {
+        destroyYTPlayer();
+        ytPlayer = new window.YT.Player(holderDiv.id, {
+          videoId: ytId,
+          playerVars: { autoplay: 1, rel: 0, modestbranding: 1 },
+          events: {
+            onStateChange: function (ev) {
+              if (ev.data === window.YT.PlayerState.ENDED) {
+                handleVideoEnded();
+              }
+            }
+          }
+        });
+      }
+
+      if (ytAPIReady && window.YT && window.YT.Player) {
+        createYTPlayer();
+      } else {
+        ensureYouTubeAPI(createYTPlayer);
+      }
+    } else if (embedUrl) {
       pendingResumeSeconds = null;
-      // YouTube/Vimeo embed — cannot read playback time from shell; resume N/A
+      // Non-YouTube embed (Vimeo, etc.) — raw iframe, no ended detection
       stage.innerHTML = '<iframe src="' + esc(embedUrl) + '?autoplay=1&rel=0" allowfullscreen allow="autoplay; encrypted-media"></iframe>';
     } else if (sourceUrl && sourceUrl.match(/\.(mp4|webm|ogg)$/i)) {
       // Direct video file — resume seek when pendingResumeSeconds is valid
@@ -284,25 +350,30 @@
       pendingResumeSeconds = null;
       stage.innerHTML = '<video src="' + esc(sourceUrl) + '" autoplay controls playsinline></video>';
       var ve = stage.querySelector('video');
-      if (ve && resumeTarget != null) {
-        function applyResumeSeek() {
-          var dur = ve.duration;
-          if (!isFinite(dur)) dur = 0;
-          var n = normalizeResumeSeconds(resumeTarget, dur);
-          if (n == null) return;
-          var cap = dur > 0 ? Math.min(n, Math.max(MIN_RESUME_SECONDS, dur - 0.25)) : n;
-          try {
-            ve.currentTime = cap;
-          } catch (err) { /* clamp edge */ }
+      if (ve) {
+        // Queue autoplay: advance to next video when current ends
+        ve.addEventListener('ended', handleVideoEnded);
+
+        if (resumeTarget != null) {
+          function applyResumeSeek() {
+            var dur = ve.duration;
+            if (!isFinite(dur)) dur = 0;
+            var n = normalizeResumeSeconds(resumeTarget, dur);
+            if (n == null) return;
+            var cap = dur > 0 ? Math.min(n, Math.max(MIN_RESUME_SECONDS, dur - 0.25)) : n;
+            try {
+              ve.currentTime = cap;
+            } catch (err) { /* clamp edge */ }
+          }
+          ve.addEventListener('loadedmetadata', function onLm() {
+            ve.removeEventListener('loadedmetadata', onLm);
+            applyResumeSeek();
+          });
+          ve.addEventListener('canplay', function onCp() {
+            ve.removeEventListener('canplay', onCp);
+            applyResumeSeek();
+          });
         }
-        ve.addEventListener('loadedmetadata', function onLm() {
-          ve.removeEventListener('loadedmetadata', onLm);
-          applyResumeSeek();
-        });
-        ve.addEventListener('canplay', function onCp() {
-          ve.removeEventListener('canplay', onCp);
-          applyResumeSeek();
-        });
       }
     } else {
       pendingResumeSeconds = null;

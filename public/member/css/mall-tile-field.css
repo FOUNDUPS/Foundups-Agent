@@ -331,6 +331,36 @@
   margin-left: 0;
 }
 
+/* ─── Expand Button (Fullscreen Entry on Tile) ─── */
+.mall-tile-expand {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  opacity: 0;
+  transition: opacity 150ms ease, background 150ms ease;
+  z-index: 10;
+}
+
+.mall-tile:hover .mall-tile-expand,
+.mall-tile:focus-within .mall-tile-expand {
+  opacity: 1;
+}
+
+.mall-tile-expand:hover {
+  background: rgba(124, 92, 252, 0.8);
+}
+
 /* Expanded FoundUp video field mode */
 .mall-tile-field.expanded-mode {
   /* When viewing a single FoundUp's videos */
