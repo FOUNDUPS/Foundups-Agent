@@ -559,6 +559,25 @@
         throw new Error('Failed to load catalog: HTTP ' + response.status);
       }
       mallCatalog = await response.json();
+
+      // Detect SW offline fallback (empty catalog with header)
+      if (mallCatalog.length === 0 && response.headers.get('X-Offline-Fallback') === '1') {
+        showOfflineNotice();
+      }
+    }
+
+    function showOfflineNotice() {
+      var existing = document.getElementById('offlineNotice');
+      if (existing) return;
+      var notice = document.createElement('div');
+      notice.id = 'offlineNotice';
+      notice.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;padding:0.6rem 1rem;background:#1a1a2e;color:#9e9baf;text-align:center;font-size:0.85rem;border-bottom:1px solid rgba(124,92,252,0.2);';
+      notice.textContent = 'You\u2019re offline \u2014 some content may be unavailable.';
+      document.body.appendChild(notice);
+      // Auto-dismiss when back online
+      window.addEventListener('online', function() {
+        if (notice.parentNode) notice.parentNode.removeChild(notice);
+      }, { once: true });
     }
 
     function bindMallInteractions() {

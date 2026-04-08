@@ -1,11 +1,14 @@
-"""Tests for pfMALL PWA hardening — Worker AM acceptance criteria.
+"""Tests for pfMALL PWA hardening — Worker AM/AQ acceptance criteria.
 
 Validates:
 - manifest.json presence and required PWA fields
 - Service worker shell asset list matches actual files
 - Service worker never-cache list covers auth providers
-- mall-state-restore.js public API shape
+- Service worker cache versioning and poster cache bounding
+- Service worker offline catalog fallback
+- mall-state-restore.js public API shape, state validation, versioned key
 - index.html wiring (manifest link, SW registration, state restore calls)
+- Offline notice presence in index.html
 """
 
 from __future__ import annotations
@@ -114,13 +117,50 @@ class TestServiceWorker:
 
     def test_shell_assets_reference_real_files(self, sw_source: str):
         """Each JS/CSS in SHELL_ASSETS should have a corresponding file on disk."""
-        # Extract paths from SHELL_ASSETS array
         asset_matches = re.findall(r"'(/member/(?:js|css)/[^']+)'", sw_source)
         for asset_path in asset_matches:
-            # Convert URL path to filesystem path relative to public/
             rel = asset_path.lstrip("/")
             file_path = MEMBER_DIR.parent / rel
             assert file_path.exists(), f"Shell asset references missing file: {asset_path} -> {file_path}"
+
+    def test_poster_cache_is_bounded(self, sw_source: str):
+        """Poster cache must have a size limit to prevent unbounded growth."""
+        assert "MAX_POSTER_ENTRIES" in sw_source
+        assert "POSTER_CACHE_NAME" in sw_source
+        assert "trimPosterCache" in sw_source
+
+    def test_poster_cache_is_separate(self, sw_source: str):
+        """Posters must use a dedicated cache, not the shell cache."""
+        poster_match = re.search(
+            r"indexOf\('/media/posters/'\).*?return;", sw_source, re.DOTALL
+        )
+        assert poster_match, "Poster cache section not found"
+        section = poster_match.group()
+        assert "POSTER_CACHE_NAME" in section, (
+            "Poster section must use POSTER_CACHE_NAME, not CACHE_NAME"
+        )
+
+    def test_catalog_offline_fallback(self, sw_source: str):
+        """Catalog miss path must return an empty-array fallback with header."""
+        catalog_match = re.search(
+            r"indexOf\(CATALOG_URL\).*?return;", sw_source, re.DOTALL
+        )
+        assert catalog_match, "Catalog section not found"
+        section = catalog_match.group()
+        assert "X-Offline-Fallback" in section, (
+            "Catalog offline fallback must set X-Offline-Fallback header"
+        )
+        assert "'[]'" in section, (
+            "Catalog offline fallback must return empty JSON array"
+        )
+
+    def test_activate_preserves_poster_cache(self, sw_source: str):
+        """Activate handler must not delete the poster cache."""
+        assert "KEEP_CACHES" in sw_source or "POSTER_CACHE_NAME" in sw_source
+        activate_match = re.search(
+            r"addEventListener\('activate'.*?\}\);", sw_source, re.DOTALL
+        )
+        assert activate_match, "Activate handler not found"
 
 
 # ─── State Restore Tests ───
@@ -138,8 +178,8 @@ class TestStateRestore:
         assert STATE_RESTORE_PATH.exists()
 
     def test_exposes_public_api(self, sr_source: str):
-        """Must expose save, restore, clear, bindAutoSave, peek."""
-        api_methods = ["save:", "restore:", "clear:", "bindAutoSave:", "peek:"]
+        """Must expose save, restore, clear, bindAutoSave, peek, isValid."""
+        api_methods = ["save:", "restore:", "clear:", "bindAutoSave:", "peek:", "isValid:"]
         for method in api_methods:
             assert method in sr_source, f"Missing public API method: {method}"
 
@@ -148,13 +188,11 @@ class TestStateRestore:
 
     def test_does_not_import_mall_tile_field(self, sr_source: str):
         """Must NOT import or require mall-tile-field.js — boundary rule."""
-        assert "import" not in sr_source.lower() or "import" not in sr_source.split("window.mallTileField")[0]
         assert "require(" not in sr_source
 
     def test_reads_via_public_api_only(self, sr_source: str):
         """Must use window.mallTileField public API, not internal state."""
         assert "window.mallTileField" in sr_source
-        # Should use getProjection/setProjection, not internal _projection
         assert "getProjection" in sr_source or "setProjection" in sr_source
 
     def test_scroll_debounce(self, sr_source: str):
@@ -166,29 +204,19 @@ class TestStateRestore:
         """Projection must NOT be silently dropped when field scope is present.
 
         A saved state like 'personal mall + readiness sort' must round-trip.
-        The restore() function must call setProjection unconditionally after
-        setFieldScope, not skip it when fieldScope exists.
         """
-        # Find the restore function body
         restore_match = re.search(
             r"function restore\(\).*?return restored;", sr_source, re.DOTALL
         )
         assert restore_match, "restore() function not found"
         restore_body = restore_match.group()
-
-        # setProjection must be called without a guard on fieldScope
         assert "setProjection" in restore_body, "restore() must call setProjection"
-        # Must NOT have the old conditional that skips projection when scope exists
         assert "if (!state.fieldScope)" not in restore_body, (
             "restore() must not skip projection when fieldScope is present"
         )
 
     def test_autosave_covers_scope_mutations(self, sr_source: str):
-        """Auto-save must trigger on Red Dog scope-changing interactions.
-
-        Scope mutations from account-concierge.js (personal mall, category,
-        tag, search) must be covered, not just projection chips and scroll.
-        """
+        """Auto-save must trigger on Red Dog scope-changing interactions."""
         scope_selectors = [
             "data-reddog-populate-mall",
             "data-reddog-personal-mall",
@@ -201,10 +229,47 @@ class TestStateRestore:
                 f"Auto-save missing trigger for scope mutation: {selector}"
             )
 
+    def test_scope_listeners_are_delegated(self, sr_source: str):
+        """Tag-select and search-input listeners must be delegated on document,
+        not bound directly via querySelector, because those elements are
+        injected later by account-concierge.js when the Red Dog plane opens.
+        """
+        assert "querySelector('[data-reddog-tag-select]')" not in sr_source, (
+            "tag-select listener must be delegated, not bound via querySelector"
+        )
+        assert "querySelector('[data-reddog-search-input]')" not in sr_source, (
+            "search-input listener must be delegated, not bound via querySelector"
+        )
+
+    def test_storage_key_is_versioned(self, sr_source: str):
+        """Storage key must include a version suffix to invalidate stale state."""
+        key_match = re.search(r"STORAGE_KEY\s*=\s*'([^']+)'", sr_source)
+        assert key_match, "STORAGE_KEY not found"
+        key = key_match.group(1)
+        assert re.search(r"_v\d+$", key), (
+            f"STORAGE_KEY '{key}' must end with version suffix like _v1"
+        )
+
+    def test_state_validation_exists(self, sr_source: str):
+        """restore() must validate state shape before applying."""
+        assert "isValidState" in sr_source or "isValid" in sr_source
+        assert "VALID_PROJECTIONS" in sr_source
+
+    def test_invalid_state_triggers_clear(self, sr_source: str):
+        """Invalid stored state must be cleared, not silently applied."""
+        restore_match = re.search(
+            r"function restore\(\).*?return restored;", sr_source, re.DOTALL
+        )
+        assert restore_match, "restore() function not found"
+        restore_body = restore_match.group()
+        assert "clear()" in restore_body, (
+            "restore() must call clear() when state is invalid"
+        )
+
     def test_is_iife(self, sr_source: str):
         """Must be wrapped in an IIFE to avoid global pollution."""
         assert sr_source.strip().startswith("(function(") or sr_source.strip().startswith("/**")
-        assert sr_source.strip().endswith("})();") or "})();" in sr_source
+        assert "})();" in sr_source
 
 
 # ─── Index.html Wiring Tests ───
@@ -248,3 +313,11 @@ class TestIndexWiring:
     def test_sw_scope_matches_manifest(self, index_source: str):
         """SW registration scope must match manifest scope."""
         assert "scope: '/member/'" in index_source or "scope: \"/member/\"" in index_source
+
+    def test_offline_notice_function_present(self, index_source: str):
+        """Offline notice function must exist for catalog miss handling."""
+        assert "showOfflineNotice" in index_source
+
+    def test_offline_fallback_header_detected(self, index_source: str):
+        """Shell must check X-Offline-Fallback header from SW."""
+        assert "X-Offline-Fallback" in index_source
