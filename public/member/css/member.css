@@ -839,6 +839,30 @@ body.surface-open {
   font-size: 0.9rem;
 }
 
+.foundup-overlay-source-type {
+  font-size: 0.78rem;
+  text-transform: capitalize;
+  color: var(--text-muted, rgba(243, 241, 248, 0.46));
+  letter-spacing: 0.04em;
+}
+
+.foundup-overlay-source-cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.6rem 1.2rem;
+  background: rgba(0, 212, 170, 0.1);
+  border: 1px solid rgba(0, 212, 170, 0.25);
+  border-radius: 10px;
+  color: #00d4aa;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+.foundup-overlay-source-cta:hover {
+  background: rgba(0, 212, 170, 0.18);
+}
+
 @media (min-width: 900px) {
   .mall-shell {
     padding: 2rem;

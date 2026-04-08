@@ -341,6 +341,13 @@
       discoverable_only: 'This FoundUp is visible in the Mall, but stays inside shell discovery for now.'
     };
 
+    const OVERLAY_SOURCE_TYPE_CTA = {
+      github_repo:      { label: 'View Repo',    icon: '\u2197', urlField: 'external_url' },
+      external_app:     { label: 'Open App',      icon: '\u2197', urlField: 'external_url' },
+      internal_service: { label: 'Open Service',  icon: '\u2197', urlField: 'external_url' },
+    };
+    const OVERLAY_NON_VIDEO_TYPES = new Set(['github_repo', 'external_app', 'internal_service']);
+
     let currentClerkUser = null;
     let mallCatalog = [];
 
@@ -584,9 +591,25 @@
       const displayName = item.name || item.title || item.entity || item.foundup_id;
       const displayToken = item.token_symbol || (item.source_handle ? item.source_handle : '');
       const displayTagline = item.tagline || (item.entity ? item.entity + (item.geo ? ' \u00b7 ' + item.geo : '') : '');
-      const displayDesc = item.description || (item.video_count ? item.video_count + ' videos \u00b7 ' + (item.source_type || '').replace('_', ' ') : '');
+      const isNonVideo = OVERLAY_NON_VIDEO_TYPES.has(item.source_type);
+      const displayDesc = item.description || (isNonVideo
+        ? (item.source_type || '').replace(/_/g, ' ')
+        : (item.video_count ? item.video_count + ' videos \u00b7 ' + (item.source_type || '').replace('_', ' ') : ''));
       const displayReadiness = READINESS_LABELS[item.launch_readiness] || item.launch_readiness || item.status || 'active';
       const displayRoute = item.routing_prefix || '/f/' + item.foundup_id;
+
+      // Source-type metadata for non-video entries
+      const sourceTypeLabel = isNonVideo
+        ? `<div class="foundup-overlay-source-type">${escapeHtml((item.source_type || '').replace(/_/g, ' '))}</div>`
+        : '';
+
+      // Source-type-aware CTA for non-video entries
+      const ctaDef = OVERLAY_SOURCE_TYPE_CTA[item.source_type];
+      const ctaUrl = ctaDef ? item[ctaDef.urlField] : null;
+      const sourceCtaHtml = (ctaDef && ctaUrl)
+        ? `<a href="${escapeAttr(ctaUrl)}" target="_blank" rel="noopener noreferrer" class="foundup-overlay-source-cta">${escapeHtml(ctaDef.label)} ${ctaDef.icon}</a>`
+        : '';
+
       foundupOverlayBody.innerHTML = `
         <div class="foundup-overlay-card theme-${escapeAttr(item.theme || item.foundup_id || 'default')}">
           <div class="foundup-overlay-topline">
@@ -597,8 +620,10 @@
             <span class="foundup-overlay-token">${escapeHtml(displayToken)}</span>
             <span class="foundup-overlay-name">${escapeHtml(displayName)}</span>
           </div>
+          ${sourceTypeLabel}
           <p class="foundup-overlay-tagline">${escapeHtml(displayTagline)}</p>
           <p class="foundup-overlay-description">${escapeHtml(displayDesc)}</p>
+          ${sourceCtaHtml}
           <div class="foundup-overlay-meta">
             <div>
               <span class="focus-label">Readiness</span>
