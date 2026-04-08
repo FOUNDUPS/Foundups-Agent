@@ -1071,3 +1071,16 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.reddog-history-continue-badge {
+  display: inline-block;
+  margin-top: 0.25rem;
+  padding: 0.15rem 0.4rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #00d4aa;
+  background: rgba(0, 212, 170, 0.15);
+  border-radius: 4px;
+}
