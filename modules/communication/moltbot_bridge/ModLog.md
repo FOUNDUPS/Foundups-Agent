@@ -1,5 +1,53 @@
 # ModLog - moltbot_bridge
 
+## 2026-04-09: Discord Operator Surface Verification (WSP 15/97)
+
+**Author**: 0102 (Worker AW)
+**WSP**: 15 (Pre-Check), 97 (CoT/CoR gates)
+**Slice**: `MOLTBOT_DISCORD_OPERATOR_SURFACE_VERIFICATION_PHASE1`
+
+### Context
+
+0102 bot was successfully authorized in the FOUNDUPS Discord server after resolving OAuth install issue. This slice documents the verified operator surface.
+
+### OAuth Install Issue
+
+**Problem**: Discord Developer Portal's `Install Link` setting defaulted to `None`, causing:
+- `"Integration requires code grant"` error on invite attempt
+- Blocked OAuth authorization flow
+
+**Fix**: Use `Discord Provided Link` or direct OAuth URL with `scope=bot+applications.commands`.
+
+### Verified Operator Surface
+
+| Item | Status |
+|------|--------|
+| Bot presence in server | ✅ Verified |
+| Required scopes | `bot`, `applications.commands` |
+| Required intents | All 3 Privileged (Presence, Server Members, Message Content) |
+| DM routing | ✅ Verified |
+| Mention response | ✅ Verified |
+| Slash commands | ❌ Not registered (future) |
+| Thread auto-create | ❌ Not implemented (future) |
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `docs/DISCORD_OPERATOR_SURFACE.md` | Created — full operator runbook |
+| `docs/CHANNEL_SETUP.md` | Added OAuth fix, intent checklist, runbook link |
+| `README.md` | Added Discord install section with OAuth fix note |
+
+### Acceptance
+
+- [x] OAuth fix documented truthfully
+- [x] Bot requirements (scopes, intents, permissions) documented
+- [x] Runtime boundary explicit (verified vs not implemented)
+- [x] Operator runbook added
+- [x] No OBAI or antifaFM edits
+
+---
+
 ## 2026-04-03: Supervisor Self-Bootstrap Fix + Guard (WSP 97)
 
 **Author**: 0102 (Worker G)

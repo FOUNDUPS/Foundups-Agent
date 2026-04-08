@@ -60,6 +60,16 @@ Legacy compatibility:
 - Older OpenClaw gateway setups may still read `DISCORD_BOT_TOKEN`
 - During transition, export both and map `DISCORD_BOT_TOKEN` to the same value as `DISCORD_0102_BOT_TOKEN`
 
+### Discord Bot Install
+
+> **OAuth Fix**: If you see `"Integration requires code grant"` when adding the bot, use a direct OAuth URL instead of Discord's Install Link (which defaults to `None`).
+
+See [docs/DISCORD_OPERATOR_SURFACE.md](docs/DISCORD_OPERATOR_SURFACE.md) for:
+- Verified install flow and OAuth URL
+- Required scopes (`bot`, `applications.commands`)
+- Required intents (all three Privileged Gateway Intents)
+- Operator runbook and smoke tests
+
 ## IronClaw Sidecar Mode (Optional)
 
 OpenClaw DAE can route conversational responses through an IronClaw

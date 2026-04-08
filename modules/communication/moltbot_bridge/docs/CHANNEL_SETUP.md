@@ -72,20 +72,28 @@ openclaw start
 
 ## 3. Discord (Bot API)
 
+> **Full runbook**: See [DISCORD_OPERATOR_SURFACE.md](DISCORD_OPERATOR_SURFACE.md) for verified install flow, permissions, and troubleshooting.
+
 ### Setup Steps
 1. Create app at [Discord Developer Portal](https://discord.com/developers/applications):
    - New Application → Name: `FoundupsDigitalTwin`
    - Bot → Add Bot → Copy Token
 
-2. Enable Gateway Intents:
-   - ✅ Message Content Intent
+2. Enable **ALL THREE** Gateway Intents (Bot → Privileged Gateway Intents):
+   - ✅ Presence Intent
    - ✅ Server Members Intent
+   - ✅ Message Content Intent
 
 3. Generate Invite URL (OAuth2 → URL Generator):
    - Scopes: `bot`, `applications.commands`
    - Permissions: View Channels, Send Messages, Read History, Embed Links, Attach Files, Add Reactions
 
 4. Invite bot to your server using generated URL
+
+> **OAuth Fix**: If Developer Portal shows `Install Link = None` and you see `"Integration requires code grant"`, use a direct OAuth URL:
+> ```
+> https://discord.com/oauth2/authorize?client_id=YOUR_APP_ID&scope=bot+applications.commands&permissions=YOUR_PERMS
+> ```
 
 5. Get IDs (enable Developer Mode in Discord settings):
    - Right-click server → Copy Server ID
