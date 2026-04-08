@@ -21,10 +21,13 @@
 (function() {
   'use strict';
 
-  var STORAGE_KEY = 'pfmall_mall_state';
+  var STORAGE_KEY = 'pfmall_mall_state_v1';
   var SCROLL_DEBOUNCE_MS = 300;
   var scrollTimer = null;
   var initialized = false;
+
+  // Valid projection values for state validation
+  var VALID_PROJECTIONS = ['default', 'alpha', 'readiness', 'category'];
 
   // ─── Storage Helpers ───
 
@@ -84,9 +87,27 @@
 
   // ─── Restore (Public) ───
 
+  function isValidState(state) {
+    if (!state || typeof state !== 'object') return false;
+    // Reject if projection is present but not a known value
+    if (state.projection && VALID_PROJECTIONS.indexOf(state.projection) === -1) return false;
+    // Reject if fieldScope is present but not an object
+    if (state.fieldScope && typeof state.fieldScope !== 'object') return false;
+    // Reject if scroll values are non-numeric
+    if (state.scrollTop !== undefined && typeof state.scrollTop !== 'number') return false;
+    if (state.scrollLeft !== undefined && typeof state.scrollLeft !== 'number') return false;
+    return true;
+  }
+
   function restore() {
     var state = loadState();
     if (!state) return false;
+
+    // Validate stored state shape — clear and bail if corrupt
+    if (!isValidState(state)) {
+      clear();
+      return false;
+    }
 
     var tf = window.mallTileField;
     if (!tf) return false;
@@ -152,22 +173,20 @@
       }
     });
 
-    // Save on Red Dog tag select changes
-    var tagSelect = document.querySelector('[data-reddog-tag-select]');
-    if (tagSelect) {
-      tagSelect.addEventListener('change', function() {
+    // Save on Red Dog tag select changes (delegated — element injected later by account-concierge)
+    document.addEventListener('change', function(e) {
+      if (e.target.matches && e.target.matches('[data-reddog-tag-select]')) {
         setTimeout(save, 50);
-      });
-    }
+      }
+    });
 
-    // Save on Red Dog search input (debounced — shares scroll timer)
-    var searchInput = document.querySelector('[data-reddog-search-input]');
-    if (searchInput) {
-      searchInput.addEventListener('input', function() {
+    // Save on Red Dog search input (delegated + debounced — element injected later)
+    document.addEventListener('input', function(e) {
+      if (e.target.matches && e.target.matches('[data-reddog-search-input]')) {
         clearTimeout(scrollTimer);
         scrollTimer = setTimeout(save, SCROLL_DEBOUNCE_MS);
-      });
-    }
+      }
+    });
 
     // Save on scroll (debounced)
     var wrapper = document.querySelector('.mall-tile-field-wrapper');
@@ -205,7 +224,10 @@
     bindAutoSave: bindAutoSave,
 
     /** Get stored state without applying it (for inspection/testing). */
-    peek: loadState
+    peek: loadState,
+
+    /** Validate a state object shape (for testing). */
+    isValid: isValidState
   };
 
 })();
