@@ -81,6 +81,78 @@ asyncio.run(broadcaster.start())
 
 Requires `discord.py` and `PyNaCl` (see module `requirements.txt`). Discord start failure does not stop YouTube/OBS streaming.
 
+#### Live Discord Voice Setup (FOUNDUPS Server — Verified 2026-04-09)
+
+**Bot Authorization Status**: `antifaFM Radio` bot is authorized in the FOUNDUPS Discord server.
+
+**Required Discord Permissions** (set via role or channel override):
+| Permission | Required | Why |
+|------------|----------|-----|
+| Connect | Yes | Join the voice channel |
+| Speak | Yes | Transmit FFmpeg→Opus audio |
+| Use Voice Activity | Yes | Continuous audio without push-to-talk |
+
+**Startup Sequence**:
+1. YouTube/OBS lane starts first (primary output)
+2. If `ANTIFAFM_DISCORD_VOICE_ENABLED=1` and token/guild/channel valid:
+   - `DiscordVoiceOutput.start()` called after YouTube success
+   - Bot connects to guild, joins voice channel, begins FFmpeg→Opus playback
+   - Own `StreamHealthMonitor` instance with 15s check interval
+3. Discord failure does NOT fail YouTube lane (isolated P1 output)
+
+**Smoke Verification Runbook**:
+
+```bash
+# 1. Set env vars (example — use real snowflakes)
+export ANTIFAFM_DISCORD_VOICE_ENABLED=1
+export ANTIFAFM_BOT="<bot-token>"
+export ANTIFAFM_DISCORD_GUILD_ID="<server-id>"
+export ANTIFAFM_DISCORD_VOICE_CHANNEL_ID="<channel-id>"
+export ANTIFAFM_YOUTUBE_STREAM_KEY="<stream-key>"
+
+# 2. Launch broadcaster
+python -c "
+import asyncio
+from modules.platform_integration.antifafm_broadcaster.src import AntifaFMBroadcaster
+b = AntifaFMBroadcaster(enable_ai_monitoring=False)
+asyncio.run(b.start())
+"
+
+# 3. Success indicators (in logs):
+#    [DISCORD] Voice adapter ready (start deferred until YouTube lane is up)
+#    [DISCORD] Voice output started in #<channel_id>
+#
+# 4. Verify in Discord: bot appears in voice channel, audio plays
+```
+
+**What Is Verified in Code** (no live run required):
+- Env parsing and fail-closed on invalid snowflakes (`_parse_snowflake_env`)
+- Adapter construction via `build_discord_voice_from_env()`
+- Discord lane isolated from YouTube lane (failure doesn't cascade)
+- Health monitor wiring with restart callback
+- Volume filter applied via FFmpeg `-af volume=`
+
+**What Requires Live Voice Channel Run**:
+- Actual bot→guild→channel connection
+- FFmpeg→Opus audio quality
+- Reconnect behavior under network disruption
+- Real health monitor recovery cycle
+
+**Common Failure Modes**:
+| Symptom | Likely Cause | Fix |
+|---------|--------------|-----|
+| "Guild not visible to bot" | Bot not in server or wrong guild ID | Re-invite bot; verify `ANTIFAFM_DISCORD_GUILD_ID` |
+| "Voice channel not found" | Wrong channel ID or not a voice channel | Check `ANTIFAFM_DISCORD_VOICE_CHANNEL_ID` |
+| "discord.py / PyNaCl not installed" | Missing dependencies | `pip install discord.py PyNaCl` |
+| Bot joins but no audio | FFmpeg not in PATH or Icecast down | Check `ffmpeg -version`; test stream URL |
+| Audio but low/loud | Volume misconfigured | Adjust `ANTIFAFM_DISCORD_VOICE_VOLUME` (0.0–2.0) |
+
+**Boundary Clarity**:
+- **Primary output**: YouTube Live (or OBS→YouTube)
+- **Discord voice**: Optional sibling lane — same Icecast source, separate output
+- This is NOT a full production validation — only the code path is verified
+- Live VC testing remains manual until automated Discord test infrastructure exists
+
 ### OBS Mode Audio (ANTIFAFM_USE_OBS=1)
 
 When using OBS mode, OBS handles streaming directly. You **must** configure an audio source in OBS:
