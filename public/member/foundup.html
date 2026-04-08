@@ -218,6 +218,38 @@
       background: rgba(124,92,252,0.18);
     }
 
+    /* Source-type CTA block */
+    .entry-cta-block {
+      margin: 1.5rem;
+      text-align: center;
+    }
+    .entry-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      background: rgba(124,92,252,0.12);
+      border: 1px solid rgba(124,92,252,0.3);
+      border-radius: 12px;
+      color: #7c5cfc;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background 0.15s, border-color 0.15s;
+      min-height: 48px;
+    }
+    .entry-cta-btn:hover {
+      background: rgba(124,92,252,0.22);
+      border-color: rgba(124,92,252,0.5);
+    }
+    .entry-source-type-label {
+      font-size: 0.75rem;
+      color: rgba(228,226,236,0.4);
+      margin-top: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
     /* Red Dog floating button */
     .entry-red-dog {
       position: fixed;
@@ -495,6 +527,13 @@
   <script>
   (function() {
     const MALL_CATALOG_URL = '/member/mall-video-catalog.json';
+    // Source-type-aware CTA config
+    const SOURCE_TYPE_CTA = {
+      github_repo:      { label: 'View Repo',    icon: '\u2197', urlField: 'external_url' },
+      external_app:     { label: 'Open App',     icon: '\u2197', urlField: 'external_url' },
+      internal_service: { label: 'Open Service', icon: '\u2197', urlField: 'external_url' },
+    };
+    const NON_VIDEO_SOURCE_TYPES = new Set(['github_repo', 'external_app', 'internal_service']);
     const READINESS_LABELS = {
       ready: 'Ready',
       conditional: 'Conditional',
@@ -562,6 +601,8 @@
           <div class="entry-readiness-copy">${esc(item.entry_copy || WHAT_NEXT[item.launch_readiness] || WHAT_NEXT[displayStatus] || '')}</div>
         </div>
 
+        ${renderSourceTypeCTA(item)}
+
         <div class="entry-details">
           <div class="entry-detail-row">
             <span class="entry-detail-label">FoundUp ID</span>
@@ -591,6 +632,14 @@
             <span class="entry-detail-label">Videos</span>
             <span class="entry-detail-value">${item.video_count}</span>
           </div>` : ''}
+          ${NON_VIDEO_SOURCE_TYPES.has(item.source_type) ? `<div class="entry-detail-row">
+            <span class="entry-detail-label">Source Type</span>
+            <span class="entry-detail-value">${esc((item.source_type || '').replace(/_/g, ' '))}</span>
+          </div>` : ''}
+          ${item.external_url ? `<div class="entry-detail-row">
+            <span class="entry-detail-label">URL</span>
+            <span class="entry-detail-value"><a href="${esc(item.external_url)}" target="_blank" rel="noopener noreferrer" style="color:#7c5cfc;text-decoration:none;">${esc(item.external_url)}</a></span>
+          </div>` : ''}
         </div>
 
         <div class="entry-what-next">
@@ -608,6 +657,22 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M15 18l-6-6 6-6"/></svg>
             Return to Mall
           </a>
+        </div>
+      `;
+    }
+
+    function renderSourceTypeCTA(item) {
+      var cta = SOURCE_TYPE_CTA[item.source_type];
+      if (!cta) return '';
+      var url = item[cta.urlField];
+      if (!url) return '';
+      var sourceLabel = (item.source_type || '').replace(/_/g, ' ');
+      return `
+        <div class="entry-cta-block" data-source-type="${esc(item.source_type)}">
+          <a href="${esc(url)}" target="_blank" rel="noopener noreferrer" class="entry-cta-btn">
+            ${esc(cta.label)} ${cta.icon}
+          </a>
+          <div class="entry-source-type-label">${esc(sourceLabel)}</div>
         </div>
       `;
     }
@@ -684,6 +749,10 @@
       if (item.tier) lines.push('Tier: <strong>' + esc(item.tier) + '</strong>');
       if (item.routing_prefix) lines.push('Route: <strong>' + esc(item.routing_prefix) + '</strong>');
       if (item.video_count) lines.push('Videos: <strong>' + item.video_count + '</strong>');
+      if (NON_VIDEO_SOURCE_TYPES.has(item.source_type)) {
+        lines.push('Type: <strong>' + esc((item.source_type || '').replace(/_/g, ' ')) + '</strong>');
+        if (item.external_url) lines.push('URL: <strong>' + esc(item.external_url) + '</strong>');
+      }
       el.innerHTML = lines.map(function(l) {
         return '<div class="entry-briefing-line">' + l + '</div>';
       }).join('');
@@ -728,9 +797,19 @@
     function renderRecommendations() {
       var el = document.getElementById('entryRecsBody');
       if (!el) return;
+      var recs = ENTRY_RECOMMENDATIONS.slice();
+      // Add source-type-aware CTA as first recommendation
+      if (currentItem && SOURCE_TYPE_CTA[currentItem.source_type] && currentItem.external_url) {
+        var cta = SOURCE_TYPE_CTA[currentItem.source_type];
+        recs.unshift({
+          id: 'source_type_action',
+          label: cta.label + ' ' + cta.icon,
+          run: function() { window.open(currentItem.external_url, '_blank', 'noopener'); }
+        });
+      }
       var html = '<div class="entry-recs-row">';
-      for (var i = 0; i < ENTRY_RECOMMENDATIONS.length; i++) {
-        var rec = ENTRY_RECOMMENDATIONS[i];
+      for (var i = 0; i < recs.length; i++) {
+        var rec = recs[i];
         html += '<button class="entry-rec-action" data-rec-id="' + rec.id + '">' + esc(rec.label) + '</button>';
       }
       html += '</div>';
@@ -739,9 +818,9 @@
         var btn = e.target.closest('.entry-rec-action');
         if (!btn) return;
         var id = btn.getAttribute('data-rec-id');
-        for (var j = 0; j < ENTRY_RECOMMENDATIONS.length; j++) {
-          if (ENTRY_RECOMMENDATIONS[j].id === id) {
-            ENTRY_RECOMMENDATIONS[j].run();
+        for (var j = 0; j < recs.length; j++) {
+          if (recs[j].id === id) {
+            recs[j].run();
             break;
           }
         }
