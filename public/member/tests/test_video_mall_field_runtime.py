@@ -5,7 +5,9 @@ Tests for the video-backed Mall field with:
   - Snapped field motion (default)
   - Glide mode override
   - Poster + queue count tiles
-  - tap = play/pause
+  - tap = inline preview play/pause
+  - speaker toggle = mute/unmute inline preview
+  - expand button = fullscreen player
   - double-tap = enter FoundUp
   - pinch-out = expand into video field
   - pinch-in = collapse back
@@ -86,8 +88,8 @@ class TestVideoBackedTiles:
         assert "background-size: cover" in css
 
 
-class TestTapPlayPause:
-    """Test tap = play/pause behavior."""
+class TestTapInlinePreview:
+    """Test tap = inline preview behavior."""
 
     def test_toggle_play_function(self):
         """togglePlay function exists."""
@@ -95,19 +97,69 @@ class TestTapPlayPause:
         assert "function togglePlay" in js
 
     def test_playing_index_tracked(self):
-        """Playing index is tracked."""
+        """Playing index is tracked for the active preview tile."""
         js = _read("js/mall-tile-field.js")
         assert "playingIndex" in js
 
-    def test_toggle_play_opens_fullscreen(self):
-        """togglePlay routes to fullscreen player via openFullscreenFromTile."""
+    def test_toggle_play_starts_inline_preview(self):
+        """togglePlay starts inline preview for a new tile."""
         js = _read("js/mall-tile-field.js")
-        assert "openFullscreenFromTile(index)" in js
+        assert "startInlinePreview(index, false)" in js
+
+    def test_toggle_play_pauses_active_preview(self):
+        """togglePlay pauses an active inline preview."""
+        js = _read("js/mall-tile-field.js")
+        assert "pauseInlinePreview()" in js
+        assert "previewPaused" in js
+
+    def test_toggle_play_resumes_paused_preview(self):
+        """togglePlay resumes a paused inline preview."""
+        js = _read("js/mall-tile-field.js")
+        assert "resumeInlinePreview()" in js
 
     def test_play_indicator_css(self):
         """Play indicator CSS exists."""
         css = _read("css/mall-tile-field.css")
         assert ".mall-tile-play-indicator" in css
+
+    def test_only_one_preview_active_at_a_time(self):
+        """Starting a new preview stops the previous active preview."""
+        js = _read("js/mall-tile-field.js")
+        assert "playingIndex !== null && playingIndex !== index" in js
+        assert "stopInlinePreview()" in js
+
+
+class TestPreviewControls:
+    """Test explicit tile controls for preview/fullscreen."""
+
+    def test_audio_button_markup_exists(self):
+        """Tiles render a speaker/mute control."""
+        js = _read("js/mall-tile-field.js")
+        assert "mall-tile-audio" in js
+        assert "Start muted preview" in js
+
+    def test_audio_button_css_exists(self):
+        """Speaker button CSS exists."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile-audio" in css
+
+    def test_audio_button_toggle_handler_exists(self):
+        """Audio button toggles preview mute state."""
+        js = _read("js/mall-tile-field.js")
+        assert "togglePreviewMute(index)" in js
+        assert "setPreviewMutedState(!previewMuted)" in js
+
+    def test_expand_button_keeps_fullscreen_path(self):
+        """Expand button still opens the fullscreen player explicitly."""
+        js = _read("js/mall-tile-field.js")
+        assert "mall-tile-expand" in js
+        assert "openFullscreenFromTile(index)" in js
+
+    def test_open_fullscreen_stops_inline_preview(self):
+        """Fullscreen handoff stops any active inline preview first."""
+        js = _read("js/mall-tile-field.js")
+        assert "function openFullscreenFromTile" in js
+        assert "stopInlinePreview();" in js
 
 
 class TestDoubleTapEnter:
@@ -322,6 +374,12 @@ class TestFeelPolish:
         css = _read("css/mall-tile-field.css")
         assert "min-width: 3rem" in css
         assert "min-height: 3rem" in css
+
+    def test_inline_preview_layer_exists(self):
+        """Inline preview layer CSS exists for in-grid playback."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile-preview" in css
+        assert ".mall-tile.is-previewing .mall-tile-preview" in css
 
 
 class TestPersonalMallProjection:

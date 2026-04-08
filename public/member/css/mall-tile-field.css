@@ -177,6 +177,7 @@
     radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.12), transparent 40%),
     linear-gradient(145deg, rgba(255, 255, 255, 0.06), transparent 50%);
   pointer-events: none;
+  z-index: 1;
 }
 
 .mall-tile:hover,
@@ -216,7 +217,11 @@
   height: 100%;
   padding: 0.85rem;
   position: relative;
-  z-index: 1;
+  z-index: 2;
+}
+
+.mall-tile.has-video-controls .mall-tile-inner {
+  padding-top: 2.4rem;
 }
 
 .mall-tile-token {
@@ -261,6 +266,7 @@
   background: rgba(0, 0, 0, 0.4);
   color: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(8px);
+  z-index: 4;
 }
 
 .mall-tile-badge.ready {
@@ -277,7 +283,7 @@
 .mall-tile-queue-count {
   position: absolute;
   bottom: 0.6rem;
-  right: 0.6rem;
+  left: 0.6rem;
   padding: 0.2rem 0.5rem;
   font-size: 0.65rem;
   font-weight: 700;
@@ -286,6 +292,55 @@
   background: rgba(0, 0, 0, 0.6);
   color: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(8px);
+  z-index: 4;
+}
+
+.mall-tile-preview {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mall-tile-preview::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.2), transparent 25%, transparent 65%, rgba(0, 0, 0, 0.38)),
+    linear-gradient(0deg, rgba(6, 8, 16, 0.45), transparent 55%);
+  z-index: 1;
+}
+
+.mall-tile-preview-stage,
+.mall-tile-preview-host,
+.mall-tile-preview-media,
+.mall-tile-preview-stage iframe,
+.mall-tile-preview-stage video {
+  width: 100%;
+  height: 100%;
+}
+
+.mall-tile-preview-stage {
+  position: absolute;
+  inset: 0;
+}
+
+.mall-tile-preview-host,
+.mall-tile-preview-media,
+.mall-tile-preview-stage iframe,
+.mall-tile-preview-stage video {
+  display: block;
+  object-fit: cover;
+  border: 0;
+  pointer-events: none;
+}
+
+.mall-tile.is-previewing .mall-tile-preview {
+  opacity: 1;
 }
 
 /* Play state indicator — snappy for immediate feel */
@@ -305,11 +360,17 @@
   transition: transform 80ms ease-out, opacity 80ms ease-out;
   opacity: 0;
   pointer-events: none;
+  z-index: 3;
 }
 
 .mall-tile.is-playing .mall-tile-play-indicator {
   transform: translate(-50%, -50%) scale(1);
   opacity: 1;
+}
+
+.mall-tile.is-previewing .mall-tile-play-indicator {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
 }
 
 .mall-tile-play-indicator::before {
@@ -334,8 +395,8 @@
 /* ─── Expand Button (Fullscreen Entry on Tile) ─── */
 .mall-tile-expand {
   position: absolute;
-  bottom: 8px;
   right: 8px;
+  bottom: 8px;
   width: 32px;
   height: 32px;
   background: rgba(0, 0, 0, 0.6);
@@ -349,16 +410,72 @@
   font-size: 0.85rem;
   opacity: 0;
   transition: opacity 150ms ease, background 150ms ease;
-  z-index: 10;
+  z-index: 5;
+}
+
+.mall-tile-expand svg,
+.mall-tile-audio svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .mall-tile:hover .mall-tile-expand,
-.mall-tile:focus-within .mall-tile-expand {
+.mall-tile:focus-within .mall-tile-expand,
+.mall-tile.is-previewing .mall-tile-expand {
   opacity: 1;
 }
 
 .mall-tile-expand:hover {
   background: rgba(124, 92, 252, 0.8);
+}
+
+.mall-tile-audio {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 150ms ease, background 150ms ease, color 150ms ease;
+  z-index: 5;
+}
+
+.mall-tile:hover .mall-tile-audio,
+.mall-tile:focus-within .mall-tile-audio,
+.mall-tile.is-previewing .mall-tile-audio {
+  opacity: 1;
+}
+
+.mall-tile-audio:hover {
+  background: rgba(66, 160, 255, 0.8);
+}
+
+.mall-tile-audio.is-muted {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.mall-tile.is-paused .mall-tile-preview {
+  opacity: 0.75;
+}
+
+@media (hover: none) {
+  .mall-tile-expand,
+  .mall-tile-audio {
+    opacity: 1;
+  }
 }
 
 /* Expanded FoundUp video field mode */

@@ -5,7 +5,7 @@
  * SoftProto mount point: #mallTileField[data-softproto-mount="tile-field"]
  *
  * Gestures (Mall context):
- *   - Tap tile: Play/pause video in Mall context
+ *   - Tap tile: Play/pause inline preview in Mall context
  *   - Double-tap tile: Enter FoundUp view directly
  *   - Pinch-out on tile: Expand into FoundUp's video field
  *   - Pinch-in (expanded): Collapse back to Mall
@@ -55,7 +55,14 @@
   var motionMode = 'snap'; // 'snap' | 'glide'
   var currentDensity = '2x3';
   var expandedFoundUp = null; // Index of expanded FoundUp, or null
-  var playingIndex = null; // Index of currently playing tile
+  var playingIndex = null; // Index of currently previewing tile
+  var previewPaused = false;
+  var previewMuted = false;
+  var inlinePreviewVideo = null;
+  var inlinePreviewYTPlayer = null;
+  var inlinePreviewSession = 0;
+  var ytPreviewAPIReady = false;
+  var ytPreviewWaiters = [];
 
   /**
    * Initialize tile field with catalog data
@@ -86,6 +93,11 @@
 
     // Create collapse hint
     createCollapseHint();
+
+    // Warm the YouTube IFrame API so first inline preview is responsive.
+    if (mallCatalog.some(function(item) { return hasTileVideos(item); })) {
+      ensureYouTubeAPI(function () {});
+    }
 
     // Set initial density
     setDensity(currentDensity);
@@ -121,6 +133,7 @@
       var theme = escapeAttr(item.theme || item.foundup_id || CATEGORY_THEME[item.category] || 'default');
       var readiness = item.launch_readiness || item.status || 'discoverable_only';
       var badgeClass = readiness === 'ready' ? 'ready' : (readiness === 'conditional' ? 'conditional' : '');
+      var hasVideos = hasTileVideos(item);
 
       // Video-backed: use poster_url as background
       var posterStyle = item.poster_url ? 'background-image: url(' + escapeAttr(item.poster_url) + ')' : '';
@@ -132,14 +145,24 @@
       // Play indicator
       var playIndicator = '<div class="mall-tile-play-indicator"></div>';
 
-      // Corner expand button for explicit fullscreen entry
-      var hasVideos = (item.videos && item.videos.length) || item.video_count;
-      var expandBtn = hasVideos ? '<button class="mall-tile-expand" aria-label="Open fullscreen" title="Fullscreen">&#9654;</button>' : '';
+      var previewStage = hasVideos ? '<div class="mall-tile-preview" aria-hidden="true"><div class="mall-tile-preview-stage"></div></div>' : '';
+      var audioBtn = hasVideos ? [
+        '<button class="mall-tile-audio" aria-label="Start muted preview" title="Start muted preview">',
+        '  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8.5a5 5 0 0 1 0 7M17 6a8.5 8.5 0 0 1 0 12M5 9h4l5-4v14l-5-4H5z"/></svg>',
+        '</button>'
+      ].join('') : '';
+      var expandBtn = hasVideos ? [
+        '<button class="mall-tile-expand" aria-label="Open fullscreen" title="Open fullscreen">',
+        '  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5"/></svg>',
+        '</button>'
+      ].join('') : '';
 
-      return '<article class="mall-tile theme-' + theme + '" data-index="' + index + '" data-foundup-id="' + escapeAttr(item.foundup_id || item.id || '') + '" tabindex="0" aria-label="' + escapeAttr(item.name || item.title || '') + '" style="' + posterStyle + '">' +
+      return '<article class="mall-tile' + (hasVideos ? ' has-video-controls' : '') + ' theme-' + theme + '" data-index="' + index + '" data-foundup-id="' + escapeAttr(item.foundup_id || item.id || '') + '" tabindex="0" aria-label="' + escapeAttr(item.name || item.title || '') + '" style="' + posterStyle + '">' +
+        previewStage +
         '<span class="mall-tile-badge ' + badgeClass + '">' + escapeHtml(readiness.replace('_', ' ')) + '</span>' +
         queueBadge +
         playIndicator +
+        audioBtn +
         expandBtn +
         '<div class="mall-tile-inner">' +
           '<span class="mall-tile-token">' + escapeHtml(item.token_symbol || '') + '</span>' +
@@ -151,6 +174,7 @@
 
     // Update expanded mode class
     tileField.classList.toggle('expanded-mode', expandedFoundUp !== null);
+    applyTilePreviewState();
   }
 
   /**
@@ -179,6 +203,323 @@
     });
   }
 
+  function hasTileVideos(item) {
+    if (!item) return false;
+    if (item.video_data) return true;
+    return !!((item.videos && item.videos.length) || item.video_count);
+  }
+
+  function getTileItem(index) {
+    var items = expandedFoundUp !== null ? getExpandedVideos() : mallCatalog;
+    return items[index] || null;
+  }
+
+  function getTilePreviewVideo(index) {
+    var item = getTileItem(index);
+    if (!item) return null;
+    if (item.video_data) return item.video_data;
+    if (item.videos && item.videos.length) return item.videos[0];
+    return null;
+  }
+
+  function getTileElement(index) {
+    if (!tileField) return null;
+    return tileField.querySelector('.mall-tile[data-index="' + index + '"]');
+  }
+
+  function ensureYouTubeAPI(callback) {
+    if (window.YT && window.YT.Player) {
+      ytPreviewAPIReady = true;
+      if (callback) callback();
+      return;
+    }
+
+    if (callback) {
+      ytPreviewWaiters.push(callback);
+    }
+
+    var prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = function() {
+      ytPreviewAPIReady = true;
+      if (typeof prev === 'function') prev();
+      while (ytPreviewWaiters.length) {
+        try {
+          ytPreviewWaiters.shift()();
+        } catch (err) {
+          console.warn('[mall-tile-field] YouTube preview callback failed', err);
+        }
+      }
+    };
+
+    if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+      var tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(tag);
+    }
+  }
+
+  function extractYouTubeVideoId(embedUrl) {
+    if (!embedUrl) return null;
+    var match = embedUrl.match(/youtube\.com\/embed\/([A-Za-z0-9_-]+)/);
+    return match ? match[1] : null;
+  }
+
+  function destroyInlineYTPlayer() {
+    if (inlinePreviewYTPlayer) {
+      try {
+        inlinePreviewYTPlayer.destroy();
+      } catch (err) {
+        // Player was already torn down.
+      }
+      inlinePreviewYTPlayer = null;
+    }
+  }
+
+  function applyTilePreviewState() {
+    if (!tileField) return;
+
+    var tiles = tileField.querySelectorAll('.mall-tile');
+    tiles.forEach(function(tile, index) {
+      var isActive = index === playingIndex;
+      tile.classList.toggle('is-previewing', isActive);
+      tile.classList.toggle('is-playing', isActive && !previewPaused);
+      tile.classList.toggle('is-paused', isActive && previewPaused);
+      tile.classList.toggle('is-muted', isActive && previewMuted);
+
+      var audioBtn = tile.querySelector('.mall-tile-audio');
+      if (audioBtn) {
+        var label = 'Start muted preview';
+        if (isActive) {
+          label = previewMuted ? 'Unmute preview' : 'Mute preview';
+        }
+        audioBtn.classList.toggle('is-active', isActive);
+        audioBtn.classList.toggle('is-muted', isActive && previewMuted);
+        audioBtn.setAttribute('aria-label', label);
+        audioBtn.setAttribute('title', label);
+      }
+    });
+  }
+
+  function stopInlinePreview() {
+    inlinePreviewSession += 1;
+
+    if (inlinePreviewVideo) {
+      try {
+        inlinePreviewVideo.pause();
+      } catch (err) {
+        // Ignore teardown issues from detached media nodes.
+      }
+      inlinePreviewVideo = null;
+    }
+
+    destroyInlineYTPlayer();
+
+    if (tileField) {
+      var stages = tileField.querySelectorAll('.mall-tile-preview-stage');
+      stages.forEach(function(stageEl) {
+        stageEl.innerHTML = '';
+      });
+    }
+
+    playingIndex = null;
+    previewPaused = false;
+    previewMuted = false;
+    applyTilePreviewState();
+  }
+
+  function setPreviewMutedState(muted) {
+    previewMuted = !!muted;
+
+    if (inlinePreviewVideo) {
+      inlinePreviewVideo.muted = previewMuted;
+    }
+
+    if (inlinePreviewYTPlayer) {
+      if (previewMuted && inlinePreviewYTPlayer.mute) {
+        inlinePreviewYTPlayer.mute();
+      } else if (!previewMuted && inlinePreviewYTPlayer.unMute) {
+        inlinePreviewYTPlayer.unMute();
+      }
+    }
+
+    applyTilePreviewState();
+  }
+
+  function pauseInlinePreview() {
+    if (playingIndex === null) return;
+    previewPaused = true;
+
+    if (inlinePreviewVideo) {
+      inlinePreviewVideo.pause();
+    }
+
+    if (inlinePreviewYTPlayer && inlinePreviewYTPlayer.pauseVideo) {
+      inlinePreviewYTPlayer.pauseVideo();
+    }
+
+    applyTilePreviewState();
+  }
+
+  function resumeInlinePreview() {
+    if (playingIndex === null) return;
+    previewPaused = false;
+
+    if (inlinePreviewVideo) {
+      var playPromise = inlinePreviewVideo.play();
+      if (playPromise && playPromise.catch) {
+        playPromise.catch(function() {
+          previewPaused = true;
+          applyTilePreviewState();
+        });
+      }
+    }
+
+    if (inlinePreviewYTPlayer && inlinePreviewYTPlayer.playVideo) {
+      inlinePreviewYTPlayer.playVideo();
+    }
+
+    applyTilePreviewState();
+  }
+
+  function startInlinePreview(index, muted) {
+    var video = getTilePreviewVideo(index);
+    var tile = getTileElement(index);
+    var stageEl = tile && tile.querySelector('.mall-tile-preview-stage');
+    var embedUrl = video && (video.embed_url || video.embedUrl);
+    var sourceUrl = video && (video.source_url || video.sourceUrl);
+    var ytId = extractYouTubeVideoId(embedUrl);
+
+    if (!video || !tile || !stageEl) return false;
+
+    if (playingIndex !== null && playingIndex !== index) {
+      stopInlinePreview();
+    } else if (playingIndex === index) {
+      destroyInlineYTPlayer();
+      if (inlinePreviewVideo) {
+        inlinePreviewVideo.pause();
+        inlinePreviewVideo = null;
+      }
+      stageEl.innerHTML = '';
+    }
+
+    playingIndex = index;
+    previewPaused = false;
+    previewMuted = !!muted;
+    inlinePreviewSession += 1;
+    var session = inlinePreviewSession;
+
+    applyTilePreviewState();
+
+    if (ytId) {
+      function createYTPreview() {
+        if (session !== inlinePreviewSession || playingIndex !== index) return;
+
+        stageEl.innerHTML = '';
+        var holder = document.createElement('div');
+        holder.id = 'mallTilePreviewHost_' + index + '_' + session;
+        holder.className = 'mall-tile-preview-host';
+        stageEl.appendChild(holder);
+        destroyInlineYTPlayer();
+
+        inlinePreviewYTPlayer = new window.YT.Player(holder.id, {
+          videoId: ytId,
+          playerVars: {
+            autoplay: 1,
+            controls: 0,
+            rel: 0,
+            modestbranding: 1,
+            playsinline: 1
+          },
+          events: {
+            onReady: function(event) {
+              if (session !== inlinePreviewSession || playingIndex !== index) return;
+              if (previewMuted && event.target.mute) {
+                event.target.mute();
+              } else if (event.target.unMute) {
+                event.target.unMute();
+              }
+              if (previewPaused && event.target.pauseVideo) {
+                event.target.pauseVideo();
+              } else if (event.target.playVideo) {
+                event.target.playVideo();
+              }
+            },
+            onStateChange: function(event) {
+              if (session !== inlinePreviewSession || playingIndex !== index) return;
+
+              if (event.data === window.YT.PlayerState.ENDED) {
+                stopInlinePreview();
+              } else if (event.data === window.YT.PlayerState.PAUSED) {
+                previewPaused = true;
+                applyTilePreviewState();
+              } else if (event.data === window.YT.PlayerState.PLAYING) {
+                previewPaused = false;
+                applyTilePreviewState();
+              }
+            }
+          }
+        });
+      }
+
+      if (ytPreviewAPIReady && window.YT && window.YT.Player) {
+        createYTPreview();
+      } else {
+        ensureYouTubeAPI(createYTPreview);
+      }
+      return true;
+    }
+
+    if (sourceUrl && sourceUrl.match(/\.(mp4|webm|ogg)$/i)) {
+      stageEl.innerHTML = '';
+      inlinePreviewVideo = document.createElement('video');
+      inlinePreviewVideo.className = 'mall-tile-preview-media';
+      inlinePreviewVideo.src = sourceUrl;
+      inlinePreviewVideo.autoplay = true;
+      inlinePreviewVideo.controls = false;
+      inlinePreviewVideo.loop = false;
+      inlinePreviewVideo.playsInline = true;
+      inlinePreviewVideo.muted = previewMuted;
+      inlinePreviewVideo.preload = 'metadata';
+      inlinePreviewVideo.setAttribute('playsinline', '');
+      inlinePreviewVideo.addEventListener('play', function() {
+        if (session !== inlinePreviewSession || playingIndex !== index) return;
+        previewPaused = false;
+        applyTilePreviewState();
+      });
+      inlinePreviewVideo.addEventListener('pause', function() {
+        if (session !== inlinePreviewSession || playingIndex !== index) return;
+        previewPaused = true;
+        applyTilePreviewState();
+      });
+      inlinePreviewVideo.addEventListener('ended', function() {
+        if (session !== inlinePreviewSession || playingIndex !== index) return;
+        stopInlinePreview();
+      });
+      stageEl.appendChild(inlinePreviewVideo);
+
+      var playPromise = inlinePreviewVideo.play();
+      if (playPromise && playPromise.catch) {
+        playPromise.catch(function() {
+          previewPaused = true;
+          applyTilePreviewState();
+        });
+      }
+      return true;
+    }
+
+    stopInlinePreview();
+    return false;
+  }
+
+  function togglePreviewMute(index) {
+    if (playingIndex !== index) {
+      startInlinePreview(index, true);
+      return;
+    }
+
+    setPreviewMutedState(!previewMuted);
+  }
+
   /**
    * Bind tile interactions (video Mall runtime)
    */
@@ -186,7 +527,7 @@
     var tiles = tileField.querySelectorAll('.mall-tile');
 
     tiles.forEach(function(tile) {
-      // Touch/click handling: tap = play/pause, double-tap = enter
+      // Touch/click handling: tap = inline preview play/pause, double-tap = enter
       tile.addEventListener('click', function(e) {
         var index = Number(tile.dataset.index || 0);
         var now = Date.now();
@@ -199,7 +540,7 @@
           lastTapTarget = null;
           enterFoundUp(index);
         } else {
-          // Single tap: play/pause in Mall context
+          // Single tap: toggle inline preview in Mall context
           lastTapTime = now;
           lastTapTarget = tile;
           togglePlay(index);
@@ -246,22 +587,37 @@
       });
     });
 
+    var audioBtns = tileField.querySelectorAll('.mall-tile-audio');
+    audioBtns.forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var tile = btn.closest('.mall-tile');
+        if (!tile) return;
+        var index = Number(tile.dataset.index || 0);
+        togglePreviewMute(index);
+      });
+    });
+
     // Global escape handler - collapse expanded view
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && expandedFoundUp !== null) {
         e.stopPropagation();
         collapseFoundUp();
+      } else if (e.key === 'Escape' && playingIndex !== null) {
+        e.stopPropagation();
+        stopInlinePreview();
       }
     });
   }
 
   /**
-   * Toggle play/pause for a tile
+   * Toggle inline preview play/pause for a tile
    * @param {number} index - Tile index
    */
   function togglePlay(index) {
     var tiles = tileField.querySelectorAll('.mall-tile');
     var targetTile = tiles[index];
+    var previewVideo = getTilePreviewVideo(index);
 
     // Immediate visual feedback: tap pulse
     if (targetTile) {
@@ -271,8 +627,18 @@
       targetTile.classList.add('tap-pulse');
     }
 
-    // Open fullscreen player with real playback
-    openFullscreenFromTile(index);
+    if (!previewVideo) return;
+
+    if (playingIndex === index) {
+      if (previewPaused) {
+        resumeInlinePreview();
+      } else {
+        pauseInlinePreview();
+      }
+      return;
+    }
+
+    startInlinePreview(index, false);
   }
 
   /**
@@ -283,6 +649,8 @@
    */
   function openFullscreenFromTile(index) {
     if (!window.mallVideoPlayer) return;
+
+    stopInlinePreview();
 
     if (expandedFoundUp !== null) {
       // Expanded mode: tiles are individual videos from one FoundUp
@@ -314,12 +682,13 @@
       return;
     }
 
+    stopInlinePreview();
+
     // Fade transition for smooth feel
     tileField.classList.add('transitioning');
 
     setTimeout(function() {
       expandedFoundUp = index;
-      playingIndex = null;
       renderTiles();
       bindInteractions();
 
@@ -339,6 +708,8 @@
   function collapseFoundUp() {
     if (expandedFoundUp === null) return;
 
+    stopInlinePreview();
+
     // Hide collapse hint first
     if (collapseHint) {
       collapseHint.classList.remove('visible');
@@ -349,7 +720,6 @@
 
     setTimeout(function() {
       expandedFoundUp = null;
-      playingIndex = null;
       renderTiles();
       bindInteractions();
 
@@ -440,6 +810,8 @@
    * @param {number} index - Tile index
    */
   function enterFoundUp(index) {
+    stopInlinePreview();
+
     // If in expanded mode, enter the parent FoundUp
     var targetIndex = index;
     if (expandedFoundUp !== null) {
@@ -540,6 +912,7 @@
     }
 
     currentProjection = projection;
+    stopInlinePreview();
     mallCatalog = sortByProjection(projection);
     renderTiles();
     bindInteractions();
@@ -676,6 +1049,7 @@
     }
 
     currentFieldScope = options;
+    stopInlinePreview();
     mallCatalog = filterByScope(options);
     originalOrder = mallCatalog.slice();
     currentProjection = 'default';
@@ -734,6 +1108,7 @@
   function clearFieldScope() {
     if (currentFieldScope === null) return;
     currentFieldScope = null;
+    stopInlinePreview();
     mallCatalog = fullCatalog.slice();
     originalOrder = mallCatalog.slice();
     currentProjection = 'default';
