@@ -99,13 +99,10 @@
       restored = true;
     }
 
-    // Restore projection (after scope, since scope resets it)
+    // Restore projection (after scope, since scope may reset it to default)
     if (state.projection && state.projection !== 'default' && typeof tf.setProjection === 'function') {
-      // Only restore non-default if scope didn't just reset it
-      if (!state.fieldScope) {
-        tf.setProjection(state.projection);
-        restored = true;
-      }
+      tf.setProjection(state.projection);
+      restored = true;
     }
 
     // Restore scroll position (deferred to next frame for layout)
@@ -141,11 +138,36 @@
 
     // Save on projection chip clicks
     document.addEventListener('click', function(e) {
-      if (e.target.closest && e.target.closest('.mall-projection-chip')) {
+      if (!e.target.closest) return;
+      if (e.target.closest('.mall-projection-chip')) {
         // Defer save to allow mallTileField to update state first
         setTimeout(save, 50);
       }
+      // Save on Red Dog scope mutations (personal mall, category, tag, search)
+      if (e.target.closest('[data-reddog-populate-mall]') ||
+          e.target.closest('[data-reddog-personal-mall]') ||
+          e.target.closest('[data-reddog-category]') ||
+          e.target.closest('[data-reddog-search-clear]')) {
+        setTimeout(save, 50);
+      }
     });
+
+    // Save on Red Dog tag select changes
+    var tagSelect = document.querySelector('[data-reddog-tag-select]');
+    if (tagSelect) {
+      tagSelect.addEventListener('change', function() {
+        setTimeout(save, 50);
+      });
+    }
+
+    // Save on Red Dog search input (debounced — shares scroll timer)
+    var searchInput = document.querySelector('[data-reddog-search-input]');
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(save, SCROLL_DEBOUNCE_MS);
+      });
+    }
 
     // Save on scroll (debounced)
     var wrapper = document.querySelector('.mall-tile-field-wrapper');

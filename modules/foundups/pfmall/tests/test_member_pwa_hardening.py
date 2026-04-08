@@ -162,6 +162,45 @@ class TestStateRestore:
         assert "SCROLL_DEBOUNCE_MS" in sr_source
         assert "setTimeout" in sr_source
 
+    def test_projection_restored_with_scope(self, sr_source: str):
+        """Projection must NOT be silently dropped when field scope is present.
+
+        A saved state like 'personal mall + readiness sort' must round-trip.
+        The restore() function must call setProjection unconditionally after
+        setFieldScope, not skip it when fieldScope exists.
+        """
+        # Find the restore function body
+        restore_match = re.search(
+            r"function restore\(\).*?return restored;", sr_source, re.DOTALL
+        )
+        assert restore_match, "restore() function not found"
+        restore_body = restore_match.group()
+
+        # setProjection must be called without a guard on fieldScope
+        assert "setProjection" in restore_body, "restore() must call setProjection"
+        # Must NOT have the old conditional that skips projection when scope exists
+        assert "if (!state.fieldScope)" not in restore_body, (
+            "restore() must not skip projection when fieldScope is present"
+        )
+
+    def test_autosave_covers_scope_mutations(self, sr_source: str):
+        """Auto-save must trigger on Red Dog scope-changing interactions.
+
+        Scope mutations from account-concierge.js (personal mall, category,
+        tag, search) must be covered, not just projection chips and scroll.
+        """
+        scope_selectors = [
+            "data-reddog-populate-mall",
+            "data-reddog-personal-mall",
+            "data-reddog-category",
+            "data-reddog-tag-select",
+            "data-reddog-search-input",
+        ]
+        for selector in scope_selectors:
+            assert selector in sr_source, (
+                f"Auto-save missing trigger for scope mutation: {selector}"
+            )
+
     def test_is_iife(self, sr_source: str):
         """Must be wrapped in an IIFE to avoid global pollution."""
         assert sr_source.strip().startswith("(function(") or sr_source.strip().startswith("/**")
