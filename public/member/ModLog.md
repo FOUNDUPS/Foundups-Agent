@@ -1,5 +1,25 @@
 # Member Area Module Change Log
 
+## [2026-04-09] Inline Preview Audio & Controls Polish Phase 2 (Worker AR, WSP 97)
+
+**Who**: 0102 — Worker AR
+**Slice**: `PFMALL_INLINE_PREVIEW_AUDIO_AND_CONTROLS_POLISH_PHASE2`
+**What**: Inline grid preview for video-backed tiles. Tap plays video inside the tile (not fullscreen). Audio button with 4 CSS states. Expand button routes to fullscreen player.
+
+**Files Modified**:
+- `public/member/js/mall-tile-field.js` — `startInlinePreview()`, `stopInlinePreview()`, `pauseInlinePreview()`, `resumeInlinePreview()`, `togglePreviewMute()`, `applyTilePreviewState()`, `ensureYouTubeAPI()`, `extractYouTubeVideoId()`, session-guarded callbacks via `previewGeneration`
+- `public/member/css/mall-tile-field.css` — `.mall-tile-preview`, `.mall-tile-audio` (4 states: `.is-active`, `:not(.is-muted)`, `.is-muted`, `.is-paused`), `.is-previewing`, touch override `(hover: none)`
+- `public/member/tests/test_video_mall_field_runtime.py` — 6 new AR test classes replacing `TestTapPlayPause`
+
+**Key Decisions**:
+- Media fields use canonical `embed_url` / `source_url` (matching `PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md` and `mall-video-player.js`)
+- Audio button `aria-label` and `title` update per mute state ("Unmute preview" / "Mute preview")
+- Old `TestTapPlayPause` removed (was asserting stale fullscreen-on-tap behavior)
+
+**Test Count**: 118 passed (was 82 pre-AR)
+
+---
+
 ## [2026-04-08] Expanded Video Field Animation Phase 1 (Worker AK, WSP 97)
 
 **Who**: 0102 — Worker AK

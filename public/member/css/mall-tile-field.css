@@ -86,6 +86,49 @@
   -webkit-overflow-scrolling: touch;
   /* Smooth deceleration for phone-native feel */
   scroll-padding: 0;
+  /* Desktop drag affordance */
+  cursor: grab;
+  /* Touch gesture clarity */
+  touch-action: pan-x pan-y;
+  /* For scroll shadow pseudo-elements */
+  position: relative;
+}
+
+/* Active drag state */
+.mall-tile-field-wrapper.is-dragging {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  scroll-behavior: auto;
+  user-select: none;
+}
+
+/* Scroll edge shadows for spatial awareness */
+.mall-tile-field-wrapper::before,
+.mall-tile-field-wrapper::after {
+  content: '';
+  position: sticky;
+  left: 0;
+  right: 0;
+  height: 24px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+  z-index: 10;
+}
+
+.mall-tile-field-wrapper::before {
+  top: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.15), transparent);
+}
+
+.mall-tile-field-wrapper::after {
+  bottom: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.15), transparent);
+}
+
+.mall-tile-field-wrapper.can-scroll-up::before,
+.mall-tile-field-wrapper.can-scroll-down::after {
+  opacity: 1;
 }
 
 /* Glide mode: remove snap for fluid scrolling */
@@ -331,6 +374,146 @@
   margin-left: 0;
 }
 
+/* ========== Inline Preview Layer ========== */
+
+.mall-tile-preview {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mall-tile-preview::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.25) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.mall-tile-preview-stage {
+  width: 100%;
+  height: 100%;
+}
+
+.mall-tile-preview-host,
+.mall-tile-preview-media,
+.mall-tile-preview-stage iframe,
+.mall-tile-preview-stage video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: none;
+}
+
+/* Active preview: show the preview layer */
+.mall-tile.is-previewing .mall-tile-preview {
+  opacity: 1;
+}
+
+/* Hide play indicator during active preview */
+.mall-tile.is-previewing .mall-tile-play-indicator {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+}
+
+/* Paused preview: show pause bars in play indicator */
+.mall-tile.is-previewing.is-paused .mall-tile-play-indicator {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.mall-tile.is-previewing.is-paused .mall-tile-play-indicator::before {
+  /* Pause bars */
+  border: none;
+  width: 0.6rem;
+  height: 0.9rem;
+  background: linear-gradient(to right, #fff 35%, transparent 35%, transparent 65%, #fff 65%);
+  margin-left: 0;
+}
+
+/* Paused preview dims the preview layer slightly */
+.mall-tile.is-paused .mall-tile-preview {
+  opacity: 0.75;
+}
+
+/* Video-control tiles get extra top padding for controls */
+.mall-tile.has-video-controls .mall-tile-inner {
+  padding-top: 2.4rem;
+}
+
+/* ========== Audio Button (Inline Preview Mute Toggle) ========== */
+
+.mall-tile-audio {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 150ms ease, background 150ms ease;
+  z-index: 10;
+}
+
+.mall-tile-audio svg,
+.mall-tile-expand svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Audio button state: active (preview is playing for this tile) */
+.mall-tile-audio.is-active {
+  background: rgba(66, 160, 255, 0.45);
+}
+
+/* Audio button state: active and unmuted (sound is on) */
+.mall-tile-audio.is-active:not(.is-muted) {
+  background: rgba(66, 160, 255, 0.55);
+  color: #fff;
+}
+
+/* Audio button state: active and muted (sound is off) */
+.mall-tile-audio.is-active.is-muted {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* Audio button state: paused preview */
+.mall-tile.is-paused .mall-tile-audio.is-active {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Touch devices: always show controls (no hover) */
+@media (hover: none) {
+  .mall-tile-expand,
+  .mall-tile-audio {
+    opacity: 1;
+  }
+
+  /* Video-backed tiles need control padding when controls are always visible */
+  .mall-tile:has(.mall-tile-audio) .mall-tile-inner {
+    padding-top: 2.4rem;
+  }
+}
+
 /* ─── Expand Button (Fullscreen Entry on Tile) ─── */
 .mall-tile-expand {
   position: absolute;
@@ -353,7 +536,14 @@
 }
 
 .mall-tile:hover .mall-tile-expand,
-.mall-tile:focus-within .mall-tile-expand {
+.mall-tile:focus-within .mall-tile-expand,
+.mall-tile.is-previewing .mall-tile-expand {
+  opacity: 1;
+}
+
+.mall-tile:hover .mall-tile-audio,
+.mall-tile:focus-within .mall-tile-audio,
+.mall-tile.is-previewing .mall-tile-audio {
   opacity: 1;
 }
 

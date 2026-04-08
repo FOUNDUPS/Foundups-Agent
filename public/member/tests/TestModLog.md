@@ -4,6 +4,26 @@ Test evolution log for the p.fMALL member shell test suite.
 
 ---
 
+## 2026-04-09 | Inline Preview AR Tests (WSP 97)
+
+**File**: `test_video_mall_field_runtime.py` (extended)
+**Tests**: +40 new, -4 removed | **Result**: 118 passed total
+**Worker**: AR
+
+Removed `TestTapPlayPause` (4 tests — asserted stale fullscreen-on-tap behavior).
+Added 6 AR test classes:
+
+| Class | Tests | Covers |
+|-------|-------|--------|
+| TestTapInlinePreviewAR | 12 | Preview lifecycle, generation guard, YouTube/HTML5 paths |
+| TestPreviewControlsAR | 7 | Audio/expand buttons, public API exposure |
+| TestInlinePreviewAudioStatesAR | 8 | 4 CSS states, SVG paths, innerHTML swap |
+| TestPausedPreviewIndicatorAR | 4 | Paused state visibility, touch override |
+| TestMediaFieldMappingAR | 5 | `embed_url`/`source_url` canonical fields, priority order |
+| TestAudioButtonAccessibilityAR | 4 | `aria-label`/`title` update per mute state |
+
+---
+
 ## 2026-04-08 | Expanded Video Field Animation Tests (WSP 97)
 
 **File**: `test_video_mall_field_runtime.py` (extended)
