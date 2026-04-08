@@ -274,6 +274,9 @@
     applyTilePreviewState(playingIndex, { previewing: true, paused: previewPaused, muted: previewMuted });
   }
 
+  // Locomotion state
+  var dragScrollInstance = null;
+
   /**
    * Initialize tile field with catalog data
    * @param {Array} catalog - Array of FoundUp objects (with video data)
@@ -307,9 +310,107 @@
     // Set initial density
     setDensity(currentDensity);
 
+    // Enable desktop drag-to-scroll
+    bindDragScroll();
+
+    // Track scroll state for edge shadows
+    bindScrollState();
+
     renderTiles();
     bindInteractions();
     bindProjectionChips();
+  }
+
+  /**
+   * Enable drag-to-scroll on desktop for the wrapper
+   * Uses custom implementation with tap guard (gesture-engine lacks 2D + guard)
+   */
+  function bindDragScroll() {
+    if (!tileFieldWrapper) return;
+
+    // Clean up previous instance
+    if (dragScrollInstance && dragScrollInstance.destroy) {
+      dragScrollInstance.destroy();
+    }
+
+    // Custom implementation: 2D scroll + tap guard + is-dragging class
+    {
+      var isDragging = false;
+      var startX = 0;
+      var startY = 0;
+      var scrollStartX = 0;
+      var scrollStartY = 0;
+      var dragMoved = false;
+
+      function onMouseDown(e) {
+        // Ignore if on interactive elements
+        if (e.target.closest('button, a, [tabindex]')) return;
+        if (e.button !== 0) return;
+
+        isDragging = true;
+        dragMoved = false;
+        startX = e.clientX;
+        startY = e.clientY;
+        scrollStartX = tileFieldWrapper.scrollLeft;
+        scrollStartY = tileFieldWrapper.scrollTop;
+        tileFieldWrapper.classList.add('is-dragging');
+        e.preventDefault();
+      }
+
+      function onMouseMove(e) {
+        if (!isDragging) return;
+        var dx = e.clientX - startX;
+        var dy = e.clientY - startY;
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+          dragMoved = true;
+          tapGuardActive = true;
+        }
+        tileFieldWrapper.scrollLeft = scrollStartX - dx;
+        tileFieldWrapper.scrollTop = scrollStartY - dy;
+      }
+
+      function onMouseUp() {
+        if (!isDragging) return;
+        isDragging = false;
+        tileFieldWrapper.classList.remove('is-dragging');
+        // Brief guard to prevent tap after drag
+        if (dragMoved) {
+          setTimeout(function() { tapGuardActive = false; }, 100);
+        } else {
+          tapGuardActive = false;
+        }
+      }
+
+      tileFieldWrapper.addEventListener('mousedown', onMouseDown);
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+
+      dragScrollInstance = {
+        destroy: function() {
+          tileFieldWrapper.removeEventListener('mousedown', onMouseDown);
+          document.removeEventListener('mousemove', onMouseMove);
+          document.removeEventListener('mouseup', onMouseUp);
+        }
+      };
+    }
+  }
+
+  /**
+   * Track scroll state for edge shadow indicators
+   */
+  function bindScrollState() {
+    if (!tileFieldWrapper) return;
+
+    function updateScrollState() {
+      var canScrollUp = tileFieldWrapper.scrollTop > 10;
+      var canScrollDown = tileFieldWrapper.scrollTop < (tileFieldWrapper.scrollHeight - tileFieldWrapper.clientHeight - 10);
+      tileFieldWrapper.classList.toggle('can-scroll-up', canScrollUp);
+      tileFieldWrapper.classList.toggle('can-scroll-down', canScrollDown);
+    }
+
+    tileFieldWrapper.addEventListener('scroll', updateScrollState, { passive: true });
+    // Initial check
+    updateScrollState();
   }
 
   /**
@@ -414,6 +515,9 @@
     tiles.forEach(function(tile) {
       // Touch/click handling: tap = play/pause, double-tap = enter
       tile.addEventListener('click', function(e) {
+        // Ignore tap if guard is active (just finished dragging)
+        if (tapGuardActive) return;
+
         var index = Number(tile.dataset.index || 0);
         var now = Date.now();
 
@@ -465,6 +569,8 @@
     expandBtns.forEach(function(btn) {
       btn.addEventListener('click', function(e) {
         e.stopPropagation();
+        // Ignore if guard is active (just finished dragging)
+        if (tapGuardActive) return;
         var tile = btn.closest('.mall-tile');
         if (!tile) return;
         var index = Number(tile.dataset.index || 0);

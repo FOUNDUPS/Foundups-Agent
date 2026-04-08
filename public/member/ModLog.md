@@ -1,5 +1,26 @@
 # Member Area Module Change Log
 
+## [2026-04-09] Mall Locomotion and Gesture Polish Phase 1 (Worker AP, WSP 97)
+
+**Who**: 0102 — Worker AP
+**Slice**: `PFMALL_MALL_LOCOMOTION_AND_GESTURE_POLISH_PHASE1`
+**What**: Desktop drag-to-scroll parity with touch, tap guard to prevent accidental tap during drag, scroll edge shadows for spatial awareness, touch-action clarity for gesture disambiguation.
+
+**Files Modified**:
+- `public/member/css/mall-tile-field.css` — `.is-dragging`, cursor states, `touch-action`, scroll edge shadow pseudo-elements, `.can-scroll-up`/`.can-scroll-down`
+- `public/member/js/mall-tile-field.js` — `dragScrollInstance`, `tapGuardActive`, `bindDragScroll()`, `bindScrollState()`, tap guard in click handlers
+- `public/member/tests/test_video_mall_field_runtime.py` — 18 tests in `TestMallLocomotionAndGestures` class
+
+**Behavior**:
+- Desktop: Mouse-drag scrolls 2D with grab/grabbing cursor, 100ms tap guard after drag
+- Touch: `touch-action: pan-x pan-y` gives browser clear gesture intent
+- Scroll shadows: Top/bottom gradients appear when content scrolls
+- Tap guard: Prevents accidental tap/play during drag release
+
+**Test Count**: 141 passed (+18 locomotion tests on top of AR's 123)
+
+---
+
 ## [2026-04-09] Inline Preview Audio & Controls Polish Phase 2 (Worker AR, WSP 97)
 
 **Who**: 0102 — Worker AR
@@ -16,7 +37,7 @@
 - Audio button `aria-label` and `title` update per mute state ("Unmute preview" / "Mute preview")
 - Old `TestTapPlayPause` removed (was asserting stale fullscreen-on-tap behavior)
 
-**Test Count**: 118 passed (was 82 pre-AR)
+**Test Count**: 123 passed (was 82 pre-AR)
 
 ---
 

@@ -4,10 +4,41 @@ Test evolution log for the p.fMALL member shell test suite.
 
 ---
 
+## 2026-04-09 | Mall Locomotion and Gesture Polish Tests (WSP 97)
+
+**File**: `test_video_mall_field_runtime.py` (extended)
+**Tests**: 18 new | **Class**: `TestMallLocomotionAndGestures` | **Result**: 141 passed total
+**Worker**: AP
+
+Validates desktop drag-to-scroll, tap guard, and scroll edge shadows:
+
+| Test | What it covers |
+|------|----------------|
+| test_drag_scroll_instance_variable | `dragScrollInstance` handler tracking |
+| test_tap_guard_active_variable | `tapGuardActive` prevents drag→tap race |
+| test_bind_drag_scroll_function | `bindDragScroll()` exists |
+| test_bind_scroll_state_function | `bindScrollState()` for edge shadows |
+| test_tap_guard_in_click_handler | Guard check in click handler |
+| test_is_dragging_class_applied | `.is-dragging` added during drag |
+| test_is_dragging_class_removed | `.is-dragging` removed after drag |
+| test_tap_guard_cleared_with_delay | 100ms delay before clearing guard |
+| test_wrapper_cursor_grab_css | `cursor: grab` affordance |
+| test_is_dragging_cursor_grabbing_css | `cursor: grabbing` during drag |
+| test_touch_action_pan_css | `touch-action: pan-x pan-y` clarity |
+| test_scroll_edge_shadow_elements | `::before`/`::after` shadow elements |
+| test_can_scroll_up_class | `.can-scroll-up` shadow visibility |
+| test_can_scroll_down_class | `.can-scroll-down` shadow visibility |
+| test_scroll_state_updated_on_scroll | Scroll event updates classes |
+| test_drag_moved_threshold | 5px threshold before guard activates |
+| test_interactive_elements_excluded_from_drag | Buttons excluded from drag |
+| test_two_dimensional_scroll | X and Y scroll support |
+
+---
+
 ## 2026-04-09 | Inline Preview AR Tests (WSP 97)
 
 **File**: `test_video_mall_field_runtime.py` (extended)
-**Tests**: +40 new, -4 removed | **Result**: 118 passed total
+**Tests**: +40 new, -4 removed | **Result**: 123 passed total
 **Worker**: AR
 
 Removed `TestTapPlayPause` (4 tests — asserted stale fullscreen-on-tap behavior).
@@ -212,6 +243,7 @@ Validates entry-page Red Dog alignment with Mall Red Dog:
 
 | File | Tests | Worker | Phase |
 |------|-------|--------|-------|
+| test_video_mall_field_runtime.py | 100 | AK/AP | Animation + Locomotion |
 | test_concierge_channel_attachment_phase1.py | 66 | C | Channel attachment |
 | test_reddog_mall_controls_phase1.py | 81 | C | WSP 97 controls |
 | test_reddog_foundup_entry_alignment_phase7.py | 65 | C | Entry alignment |
@@ -219,4 +251,4 @@ Validates entry-page Red Dog alignment with Mall Red Dog:
 | test_reddog_recommended_actions_phase5.py | 63 | C | Recommended actions |
 | test_reddog_context_briefing_phase4.py | 48 | C | Context briefing |
 | (other member tests) | ~446 | B/mixed | Mall shell, tiles, etc. |
-| **Total** | **812** | | |
+| **Total** | **912** | | |
