@@ -1,5 +1,31 @@
 # OBAI Discord Bot — ModLog
 
+## V0.1.1 — Live Guild Verification (2026-04-09)
+
+**Worker**: AX
+**Slice**: OBAI_DISCORD_LIVE_GUILD_VERIFICATION_PHASE1
+
+### Updated
+- README.md: Added full operator runbook with:
+  - Live guild setup truth (guild ID, app ID, intents, permissions)
+  - Startup command and expected logs
+  - Smoke-check procedure (5 manual tests)
+  - Failure checklist with symptoms and fixes
+  - Explicit "What OBAI Does NOT Do (Yet)" section
+- INTERFACE.md: Added `get_status()` response shape, clarified which events are handled vs. spec-only
+
+### Verified
+- Runtime matches docs (26 tests pass)
+- Bot is authorized in FOUNDUPS guild
+- MESSAGE_CONTENT intent requirement documented
+- Permission integer `311452617792` documented
+
+### Not Changed
+- No runtime code modifications
+- No new features (this is verification, not feature build)
+
+---
+
 ## V0.1.0 — Phase 1 Layer 1 (2026-04-07)
 
 **Worker**: AA

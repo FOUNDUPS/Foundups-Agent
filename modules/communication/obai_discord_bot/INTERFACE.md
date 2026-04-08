@@ -33,18 +33,47 @@ class OBAIConfig:
 
 ```python
 class OBAIDiscordBot:
-    async def start(self) -> None
-    async def stop(self) -> None
-    def is_connected(self) -> bool
-    def get_status(self) -> dict
+    async def start(self) -> None      # Connect and run (blocks until closed)
+    async def stop(self) -> None       # Graceful disconnect
+    def is_connected(self) -> bool     # True if gateway is ready
+    def get_status(self) -> dict       # Status dict for monitoring
+```
+
+### get_status() Response
+
+```python
+{
+    "connected": True,                          # Gateway ready
+    "enabled": True,                            # Master switch
+    "guild_id": 412646632992014336,            # Target guild
+    "bot_user": "OBAI#1234",                   # Bot identity
+    "started_at": "2026-04-09T12:00:00+00:00"  # ISO timestamp
+}
 ```
 
 ## Events Handled
 
-| Event | Behavior |
-|-------|----------|
-| `on_ready` | Log bot user, guild, channel count. Set activity status. |
-| `on_message` | If bot is mentioned, reply with helper text. |
+| Event | Current Behavior |
+|-------|------------------|
+| `on_ready` | Log bot user, guild, channel count. Set activity status "Watching FOUNDUPS threads". |
+| `on_message` | If bot is mentioned (not @everyone, not bot, not DM), reply with generic HELP_TEXT. |
+
+### Events NOT Handled (Spec-Only)
+
+| Event | Spec Reference |
+|-------|----------------|
+| `on_thread_create` | Designed in spec (Layer 2), not implemented |
+| Keyword routing | Designed in spec (Layer 3), not implemented |
+| Slash commands | Phase 2 |
+
+## Discord Intents Required
+
+```python
+intents = discord.Intents.default()
+intents.message_content = True    # REQUIRED — privileged, must enable in portal
+intents.guilds = True             # Default on
+intents.guild_messages = True     # Default on
+```
 
 ## Environment Variables
 
