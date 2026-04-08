@@ -358,7 +358,7 @@
 
       // Speaker button for mute/unmute (top-left, video-backed only)
       var speakerSvg = '<svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
-      var audioBtn = hasVideos ? '<button class="mall-tile-audio" aria-label="Toggle audio" title="Toggle audio">' + speakerSvg + '</button>' : '';
+      var audioBtn = hasVideos ? '<button class="mall-tile-audio" aria-label="Start muted preview" title="Start muted preview">' + speakerSvg + '</button>' : '';
 
       return '<article class="mall-tile theme-' + theme + '" data-index="' + index + '" data-foundup-id="' + escapeAttr(item.foundup_id || item.id || '') + '" tabindex="0" aria-label="' + escapeAttr(item.name || item.title || '') + '" style="' + posterStyle + '">' +
         previewContainer +

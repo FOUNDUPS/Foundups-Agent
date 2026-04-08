@@ -507,6 +507,11 @@
   .mall-tile-audio {
     opacity: 1;
   }
+
+  /* Video-backed tiles need control padding when controls are always visible */
+  .mall-tile:has(.mall-tile-audio) .mall-tile-inner {
+    padding-top: 2.4rem;
+  }
 }
 
 /* ─── Expand Button (Fullscreen Entry on Tile) ─── */

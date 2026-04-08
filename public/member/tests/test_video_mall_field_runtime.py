@@ -578,7 +578,7 @@ class TestPreviewControlsAR:
         """Audio button rendered with mall-tile-audio class."""
         js = _read("js/mall-tile-field.js")
         assert "mall-tile-audio" in js
-        assert "Toggle audio" in js
+        assert "Start muted preview" in js
 
     def test_audio_button_css(self):
         """Audio button CSS exists."""
@@ -745,3 +745,47 @@ class TestAudioButtonAccessibilityAR:
         """title property updated alongside aria-label."""
         js = _read("js/mall-tile-field.js")
         assert "audioBtn.title = " in js
+
+    def test_initial_label_matches_inactive_action(self):
+        """Inactive audio button says 'Start muted preview', not 'Toggle audio'."""
+        js = _read("js/mall-tile-field.js")
+        assert 'aria-label="Start muted preview"' in js
+        assert 'title="Start muted preview"' in js
+        assert 'aria-label="Toggle audio"' not in js
+
+    def test_three_label_states(self):
+        """Three distinct label states: initial, muted-active, unmuted-active."""
+        js = _read("js/mall-tile-field.js")
+        assert "Start muted preview" in js
+        assert "Unmute preview" in js
+        assert "Mute preview" in js
+
+
+class TestTouchModePaddingAR:
+    """Test touch-mode video tiles get control padding even when inactive."""
+
+    def test_touch_has_selector_padding(self):
+        """Touch media query adds padding for tiles with audio button via :has()."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile:has(.mall-tile-audio) .mall-tile-inner" in css
+
+    def test_touch_padding_inside_hover_none(self):
+        """The :has() padding rule is inside the (hover: none) media query."""
+        css = _read("css/mall-tile-field.css")
+        # Find the hover:none block and confirm it contains the :has rule
+        in_hover_none = False
+        found = False
+        for line in css.splitlines():
+            if "hover: none" in line:
+                in_hover_none = True
+            if in_hover_none and ".mall-tile:has(.mall-tile-audio)" in line:
+                found = True
+                break
+        assert found, ":has(.mall-tile-audio) padding must be inside @media (hover: none)"
+
+    def test_touch_padding_value(self):
+        """Touch padding matches the has-video-controls padding (2.4rem)."""
+        css = _read("css/mall-tile-field.css")
+        # Both rules should use 2.4rem
+        lines_with_padding = [l for l in css.splitlines() if "padding-top: 2.4rem" in l]
+        assert len(lines_with_padding) >= 2, "Expected 2.4rem padding in both .has-video-controls and :has(.mall-tile-audio) rules"
