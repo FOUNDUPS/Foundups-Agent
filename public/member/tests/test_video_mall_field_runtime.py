@@ -379,6 +379,86 @@ class TestPersonalMallProjection:
         assert "mallCatalog = fullCatalog.slice()" in js
 
 
+class TestExpandCollapseAnimation:
+    """Test FLIP animation for expand/collapse transitions."""
+
+    def test_flip_layer_class_exists(self):
+        """FLIP transition layer class exists in CSS."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-flip-layer" in css
+
+    def test_flip_animating_transition_class(self):
+        """Expanding uses flip-animating class with CSS transitions."""
+        css = _read("css/mall-tile-field.css")
+        assert ".flip-animating" in css
+        js = _read("js/mall-tile-field.js")
+        assert "flip-animating" in js
+
+    def test_flip_collapsing_transition_class(self):
+        """Collapsing uses flip-collapsing class with CSS transitions."""
+        css = _read("css/mall-tile-field.css")
+        assert ".flip-collapsing" in css
+        js = _read("js/mall-tile-field.js")
+        assert "flip-collapsing" in js
+
+    def test_geometry_transition_properties(self):
+        """FLIP layer transitions left, top, width, height."""
+        css = _read("css/mall-tile-field.css")
+        # Check that all geometry properties are transitioned
+        assert "left 280ms" in css or "left 250ms" in css
+        assert "top 280ms" in css or "top 250ms" in css
+        assert "width 280ms" in css or "width 250ms" in css
+        assert "height 280ms" in css or "height 250ms" in css
+
+    def test_reduced_motion_bypass(self):
+        """Reduced-motion media query bypasses animation."""
+        css = _read("css/mall-tile-field.css")
+        assert "prefers-reduced-motion: reduce" in css
+
+    def test_prefers_reduced_motion_function(self):
+        """prefersReducedMotion function exists in JS."""
+        js = _read("js/mall-tile-field.js")
+        assert "function prefersReducedMotion" in js
+
+    def test_create_flip_layer_function(self):
+        """createFlipLayer function exists in JS."""
+        js = _read("js/mall-tile-field.js")
+        assert "function createFlipLayer" in js
+
+    def test_cleanup_flip_layer_function(self):
+        """cleanupFlipLayer function exists in JS."""
+        js = _read("js/mall-tile-field.js")
+        assert "function cleanupFlipLayer" in js
+
+    def test_expand_source_index_tracked(self):
+        """Source index is tracked for collapse animation."""
+        js = _read("js/mall-tile-field.js")
+        assert "expandSourceIndex" in js
+
+    def test_expand_source_visual_stored(self):
+        """Source visual (bgImage, bgColor) stored for collapse continuity."""
+        js = _read("js/mall-tile-field.js")
+        assert "expandSourceVisual" in js
+        assert "expandSourceVisual.bgImage" in js or "bgImage: bgImage" in js
+
+    def test_flip_layer_positioned_fixed(self):
+        """FLIP layer uses fixed positioning."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-flip-layer" in css
+        # Position fixed for viewport-relative animation
+        assert "position: fixed" in css
+
+    def test_animation_cleanup_happens(self):
+        """cleanupFlipLayer is called after animation."""
+        js = _read("js/mall-tile-field.js")
+        assert "cleanupFlipLayer(flipLayer)" in js
+
+    def test_will_change_optimization(self):
+        """FLIP layer has will-change for GPU acceleration."""
+        css = _read("css/mall-tile-field.css")
+        assert "will-change:" in css
+
+
 class TestSearchMallProjection:
     """Test Search Mall field scope projections."""
 
