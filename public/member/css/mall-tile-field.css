@@ -856,6 +856,59 @@
   max-width: none;
 }
 
+/* ========== FLIP Transition Layer ========== */
+
+.mall-flip-layer {
+  position: fixed;
+  z-index: 200;
+  pointer-events: none;
+  border-radius: var(--tile-radius, 1.25rem);
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  will-change: transform, width, height, border-radius;
+}
+
+.mall-flip-layer.flip-expanding {
+  animation: flip-expand 280ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+.mall-flip-layer.flip-collapsing {
+  animation: flip-collapse 250ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+@keyframes flip-expand {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    border-radius: 0;
+  }
+}
+
+@keyframes flip-collapse {
+  0% {
+    opacity: 1;
+    border-radius: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Reduced-motion: skip animation, instant transition */
+@media (prefers-reduced-motion: reduce) {
+  .mall-flip-layer {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .mall-tile-field.transitioning {
+    transition: none;
+  }
+}
+
 /* ========== Loading State ========== */
 
 .mall-tile-field-loading {

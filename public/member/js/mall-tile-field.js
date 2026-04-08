@@ -55,6 +55,7 @@
   var motionMode = 'snap'; // 'snap' | 'glide'
   var currentDensity = '2x3';
   var expandedFoundUp = null; // Index of expanded FoundUp, or null
+  var expandSourceIndex = null; // Original tile index for collapse animation
   var playingIndex = null; // Index of currently previewing tile
   var previewPaused = false;
   var previewMuted = false;
@@ -670,6 +671,48 @@
   }
 
   /**
+   * Check if reduced-motion is preferred
+   * @returns {boolean}
+   */
+  function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  /**
+   * Create FLIP transition layer for expand/collapse animation
+   * @param {DOMRect} sourceRect - Starting bounding rect
+   * @param {string} backgroundImage - CSS background-image value
+   * @param {string} backgroundColor - Fallback background color
+   * @returns {HTMLElement} Transition layer element
+   */
+  function createFlipLayer(sourceRect, backgroundImage, backgroundColor) {
+    var layer = document.createElement('div');
+    layer.className = 'mall-flip-layer';
+    layer.style.left = sourceRect.left + 'px';
+    layer.style.top = sourceRect.top + 'px';
+    layer.style.width = sourceRect.width + 'px';
+    layer.style.height = sourceRect.height + 'px';
+    if (backgroundImage) {
+      layer.style.backgroundImage = backgroundImage;
+    }
+    if (backgroundColor) {
+      layer.style.backgroundColor = backgroundColor;
+    }
+    document.body.appendChild(layer);
+    return layer;
+  }
+
+  /**
+   * Clean up FLIP transition layer
+   * @param {HTMLElement} layer - Transition layer to remove
+   */
+  function cleanupFlipLayer(layer) {
+    if (layer && layer.parentNode) {
+      layer.parentNode.removeChild(layer);
+    }
+  }
+
+  /**
    * Expand a FoundUp into its video field
    * @param {number} index - FoundUp index in catalog
    */
@@ -684,22 +727,60 @@
 
     stopInlinePreview();
 
-    // Fade transition for smooth feel
-    tileField.classList.add('transitioning');
+    var sourceTile = getTileElement(index);
+    var sourceRect = sourceTile ? sourceTile.getBoundingClientRect() : null;
+    var reducedMotion = prefersReducedMotion();
 
-    setTimeout(function() {
+    // Store source index for collapse animation
+    expandSourceIndex = index;
+
+    // FLIP animation (skip if reduced motion)
+    if (sourceRect && !reducedMotion) {
+      var bgImage = sourceTile.style.backgroundImage || '';
+      var bgColor = window.getComputedStyle(sourceTile).backgroundColor;
+      var flipLayer = createFlipLayer(sourceRect, bgImage, bgColor);
+
+      // Target: full viewport (the expanded field area)
+      var targetRect = tileField.getBoundingClientRect();
+
+      // Force reflow before animation
+      void flipLayer.offsetWidth;
+
+      // Animate to target
+      flipLayer.style.left = targetRect.left + 'px';
+      flipLayer.style.top = targetRect.top + 'px';
+      flipLayer.style.width = targetRect.width + 'px';
+      flipLayer.style.height = targetRect.height + 'px';
+      flipLayer.classList.add('flip-expanding');
+
+      // Render actual content during animation
+      tileField.classList.add('transitioning');
       expandedFoundUp = index;
       renderTiles();
       bindInteractions();
 
-      // Remove transition class after render
-      tileField.classList.remove('transitioning');
+      // Cleanup after animation
+      setTimeout(function() {
+        cleanupFlipLayer(flipLayer);
+        tileField.classList.remove('transitioning');
+        if (collapseHint) {
+          collapseHint.classList.add('visible');
+        }
+      }, 300);
+    } else {
+      // Reduced motion or no source: instant transition
+      tileField.classList.add('transitioning');
 
-      // Show collapse hint with animation
-      if (collapseHint) {
-        collapseHint.classList.add('visible');
-      }
-    }, 60);
+      setTimeout(function() {
+        expandedFoundUp = index;
+        renderTiles();
+        bindInteractions();
+        tileField.classList.remove('transitioning');
+        if (collapseHint) {
+          collapseHint.classList.add('visible');
+        }
+      }, 60);
+    }
   }
 
   /**
@@ -715,17 +796,64 @@
       collapseHint.classList.remove('visible');
     }
 
-    // Fade transition for smooth feel
-    tileField.classList.add('transitioning');
+    var sourceIndex = expandSourceIndex;
+    var expandedRect = tileField.getBoundingClientRect();
+    var reducedMotion = prefersReducedMotion();
 
-    setTimeout(function() {
+    // FLIP animation (skip if reduced motion)
+    if (sourceIndex !== null && !reducedMotion) {
+      // Capture first frame from expanded field
+      var firstTile = tileField.querySelector('.mall-tile');
+      var bgImage = firstTile ? firstTile.style.backgroundImage || '' : '';
+      var bgColor = firstTile ? window.getComputedStyle(firstTile).backgroundColor : '';
+      var flipLayer = createFlipLayer(expandedRect, bgImage, bgColor);
+      flipLayer.style.borderRadius = '0';
+
+      // Render mall tiles (to get target rect)
+      tileField.classList.add('transitioning');
       expandedFoundUp = null;
       renderTiles();
       bindInteractions();
 
-      // Remove transition class after render
-      tileField.classList.remove('transitioning');
-    }, 60);
+      // Find target tile position
+      var targetTile = getTileElement(sourceIndex);
+      var targetRect = targetTile ? targetTile.getBoundingClientRect() : null;
+
+      if (targetRect) {
+        // Force reflow
+        void flipLayer.offsetWidth;
+
+        // Animate to target tile position
+        flipLayer.style.left = targetRect.left + 'px';
+        flipLayer.style.top = targetRect.top + 'px';
+        flipLayer.style.width = targetRect.width + 'px';
+        flipLayer.style.height = targetRect.height + 'px';
+        flipLayer.classList.add('flip-collapsing');
+
+        // Cleanup after animation
+        setTimeout(function() {
+          cleanupFlipLayer(flipLayer);
+          tileField.classList.remove('transitioning');
+          expandSourceIndex = null;
+        }, 270);
+      } else {
+        // No target found, instant cleanup
+        cleanupFlipLayer(flipLayer);
+        tileField.classList.remove('transitioning');
+        expandSourceIndex = null;
+      }
+    } else {
+      // Reduced motion: instant transition
+      tileField.classList.add('transitioning');
+
+      setTimeout(function() {
+        expandedFoundUp = null;
+        renderTiles();
+        bindInteractions();
+        tileField.classList.remove('transitioning');
+        expandSourceIndex = null;
+      }, 60);
+    }
   }
 
   // ========== Motion Mode Control ==========
