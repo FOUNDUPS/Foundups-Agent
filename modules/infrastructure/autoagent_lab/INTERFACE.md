@@ -136,6 +136,64 @@ context = pattern_memory_adapter.get_context("skill_name")
 result = eval_skill_config(path, context)
 ```
 
+## Target Surface IO (Layer 3)
+
+```python
+from modules.infrastructure.autoagent_lab.src.target_surface import (
+    SkillSurface,
+    load_skill_surface,
+    create_workspace_copy,
+    write_candidate_surface,
+    get_candidate_path,
+    TargetSurfaceError,
+)
+
+# Load a production skill (read-only)
+surface = load_skill_surface("path/to/SKILL.md")
+print(surface.skill_id)           # Derived from 'name' or filename
+print(surface.mutable_fields)     # {agents, domains, tokens_budget, ...}
+print(surface.immutable_fields)   # {name, version, description, ...}
+
+# Create isolated workspace copy
+workspace = Path("modules/infrastructure/autoagent_lab/workspace")
+surface = create_workspace_copy(surface, workspace_root=workspace)
+print(surface.workspace_path)  # Now set
+
+# Write candidate with updated mutable fields
+candidate_path = write_candidate_surface(
+    surface,
+    updated_mutable_fields={"agents": ["haiku"], "tokens_budget": 1000},
+)
+```
+
+### SkillSurface
+
+```python
+@dataclass
+class SkillSurface:
+    source_path: Path               # Original production file (read-only)
+    workspace_path: Optional[Path]  # Workspace copy (if created)
+    skill_id: str                   # From 'name' field or filename
+    immutable_fields: dict          # Cannot be changed by experiments
+    mutable_fields: dict            # Can be mutated
+    body_content: str               # Markdown body after frontmatter
+```
+
+### Mutable vs Immutable Fields
+
+| Mutable (can change) | Immutable (preserved) |
+|---------------------|----------------------|
+| agents | name |
+| wsp_chain | version |
+| domains | description |
+| tokens_budget | author |
+| prompt | category, dependencies, etc. |
+
+### Production Read-Only
+
+The original `SKILL.md` file is NEVER modified. All mutations happen in
+isolated workspace copies under `workspace/exp_{hash}/`.
+
 ## WSP Compliance
 
 - WSP 49: Standard module structure
