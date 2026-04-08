@@ -136,11 +136,15 @@
     if (audioBtn && state.previewing) {
       audioBtn.classList.add('is-active');
       if (state.muted) audioBtn.classList.add('is-muted');
-      // Update SVG icon
+      // Update SVG icon and accessibility text
       if (state.muted) {
         audioBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+        audioBtn.setAttribute('aria-label', 'Unmute preview');
+        audioBtn.title = 'Unmute preview';
       } else {
         audioBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg>';
+        audioBtn.setAttribute('aria-label', 'Mute preview');
+        audioBtn.title = 'Mute preview';
       }
     }
   }
@@ -192,7 +196,7 @@
     var videoData = getTilePreviewVideo(index);
     if (!videoData) return;
 
-    var videoUrl = videoData.url || videoData.video_url || '';
+    var videoUrl = videoData.embed_url || videoData.embedUrl || videoData.source_url || videoData.sourceUrl || '';
     var ytId = extractYouTubeVideoId(videoUrl);
     var tile = getTileElement(index);
     if (!tile) return;

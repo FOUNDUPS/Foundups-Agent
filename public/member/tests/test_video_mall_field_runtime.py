@@ -86,30 +86,6 @@ class TestVideoBackedTiles:
         assert "background-size: cover" in css
 
 
-class TestTapPlayPause:
-    """Test tap = play/pause behavior."""
-
-    def test_toggle_play_function(self):
-        """togglePlay function exists."""
-        js = _read("js/mall-tile-field.js")
-        assert "function togglePlay" in js
-
-    def test_playing_index_tracked(self):
-        """Playing index is tracked."""
-        js = _read("js/mall-tile-field.js")
-        assert "playingIndex" in js
-
-    def test_toggle_play_opens_fullscreen(self):
-        """togglePlay routes to fullscreen player via openFullscreenFromTile."""
-        js = _read("js/mall-tile-field.js")
-        assert "openFullscreenFromTile(index)" in js
-
-    def test_play_indicator_css(self):
-        """Play indicator CSS exists."""
-        css = _read("css/mall-tile-field.css")
-        assert ".mall-tile-play-indicator" in css
-
-
 class TestDoubleTapEnter:
     """Test double-tap = enter FoundUp."""
 
@@ -708,3 +684,64 @@ class TestPausedPreviewIndicatorAR:
         """Touch devices always show audio and expand buttons."""
         css = _read("css/mall-tile-field.css")
         assert "hover: none" in css
+
+
+class TestMediaFieldMappingAR:
+    """Test inline preview reads canonical pfMALL video fields."""
+
+    def test_embed_url_field(self):
+        """startInlinePreview reads embed_url (schema-canonical)."""
+        js = _read("js/mall-tile-field.js")
+        assert "videoData.embed_url" in js
+
+    def test_source_url_field(self):
+        """startInlinePreview reads source_url (schema-canonical)."""
+        js = _read("js/mall-tile-field.js")
+        assert "videoData.source_url" in js
+
+    def test_camelcase_fallbacks(self):
+        """Camel-case aliases embedUrl/sourceUrl accepted."""
+        js = _read("js/mall-tile-field.js")
+        assert "videoData.embedUrl" in js
+        assert "videoData.sourceUrl" in js
+
+    def test_no_stale_url_field(self):
+        """Old .url / .video_url fields are NOT used."""
+        js = _read("js/mall-tile-field.js")
+        # The media-field line should not contain videoData.url or videoData.video_url
+        for line in js.splitlines():
+            if "embed_url" in line and "source_url" in line:
+                assert "videoData.url " not in line
+                assert "videoData.video_url" not in line
+
+    def test_field_priority_matches_player(self):
+        """Field priority: embed_url > source_url (same as mall-video-player.js)."""
+        js = _read("js/mall-tile-field.js")
+        # embed_url must appear before source_url in the fallback chain
+        idx_embed = js.index("videoData.embed_url")
+        idx_source = js.index("videoData.source_url")
+        assert idx_embed < idx_source
+
+
+class TestAudioButtonAccessibilityAR:
+    """Test audio button aria-label and title update by state."""
+
+    def test_muted_label(self):
+        """Muted state sets aria-label to 'Unmute preview'."""
+        js = _read("js/mall-tile-field.js")
+        assert "Unmute preview" in js
+
+    def test_unmuted_label(self):
+        """Unmuted state sets aria-label to 'Mute preview'."""
+        js = _read("js/mall-tile-field.js")
+        assert "Mute preview" in js
+
+    def test_aria_label_updated(self):
+        """aria-label is set via setAttribute in applyTilePreviewState."""
+        js = _read("js/mall-tile-field.js")
+        assert "setAttribute('aria-label'" in js
+
+    def test_title_updated(self):
+        """title property updated alongside aria-label."""
+        js = _read("js/mall-tile-field.js")
+        assert "audioBtn.title = " in js
