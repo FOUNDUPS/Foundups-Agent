@@ -10,6 +10,7 @@
 
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="apple-touch-icon" sizes="180x180" href="/logo-dog.png">
+  <link rel="manifest" href="/member/manifest.json">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -528,6 +529,11 @@
         window.mallTileField.initialize(mallCatalog);
       }
 
+      // Restore saved mall state (projection, scope, scroll)
+      if (window.mallStateRestore) {
+        window.mallStateRestore.restore();
+      }
+
       // Stub for carousel sync (tile field doesn't need index-based scrolling)
       window.mallPlanesSync = function(index) {
         // In tile field mode, opening a FoundUp from inspector already updates context
@@ -540,6 +546,11 @@
       }
 
       bindMallInteractions();
+
+      // Bind auto-save for mall state persistence
+      if (window.mallStateRestore) {
+        window.mallStateRestore.bindAutoSave();
+      }
     }
 
     async function loadMallCatalog() {
@@ -674,6 +685,11 @@
         window.mallTileField.initialize(mallCatalog);
       }
 
+      // Restore saved mall state (projection, scope, scroll)
+      if (window.mallStateRestore) {
+        window.mallStateRestore.restore();
+      }
+
       // Stub for carousel sync
       window.mallPlanesSync = function(index) {};
 
@@ -682,6 +698,11 @@
       }
 
       bindMallInteractions();
+
+      // Bind auto-save for mall state persistence
+      if (window.mallStateRestore) {
+        window.mallStateRestore.bindAutoSave();
+      }
 
       console.log('[DevHarness] Mall initialized with', mallCatalog.length, 'FoundUps');
     }
@@ -1041,5 +1062,15 @@
   <script src="js/mall-video-player.js"></script>
   <script src="js/account-concierge.js"></script>
   <script src="js/red-dog-concierge.js"></script>
+  <script src="js/mall-state-restore.js"></script>
+
+  <!-- Member Service Worker registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/member/member-sw.js', { scope: '/member/' })
+        .then(function(reg) { console.log('[SW] Member service worker registered:', reg.scope); })
+        .catch(function(err) { console.warn('[SW] Member service worker registration failed:', err); });
+    }
+  </script>
 </body>
 </html>
