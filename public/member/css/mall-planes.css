@@ -156,7 +156,7 @@
   background: rgba(0, 212, 170, 0.18);
 }
 
-.fv-detail-link {
+.fv-open-link {
   display: inline-flex;
   align-items: center;
   padding: 0.6rem 1.2rem;
@@ -169,7 +169,7 @@
   font-weight: 500;
   transition: background 0.15s;
 }
-.fv-detail-link:hover {
+.fv-open-link:hover {
   background: rgba(124, 92, 252, 0.18);
 }
 
