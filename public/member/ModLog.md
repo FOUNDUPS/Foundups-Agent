@@ -1,5 +1,33 @@
 # Member Area Module Change Log
 
+## [2026-04-09] Red Dog Watch History Continue Badge CSS (Worker AV, WSP 97)
+
+**Who**: 0102 — Worker AV
+**Slice**: `PFMALL_REDDOG_WATCH_HISTORY_BADGE_CSS_PHASE1`
+**What**: Add missing `.reddog-history-continue-badge` CSS for watch history cards.
+
+**Files Modified**:
+- `public/member/css/account-concierge.css` — Added `.reddog-history-continue-badge` selector
+
+**CSS Added**:
+```css
+.reddog-history-continue-badge {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: rgba(124, 92, 252, 1);
+  background: rgba(124, 92, 252, 0.15);
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.2rem;
+  margin-top: 0.15rem;
+  white-space: nowrap;
+}
+```
+
+**Test Count**: 142 passed (account concierge suite)
+
+---
+
 ## [2026-04-09] Mall Locomotion and Gesture Polish Phase 1 (Worker AP, WSP 97)
 
 **Who**: 0102 — Worker AP
