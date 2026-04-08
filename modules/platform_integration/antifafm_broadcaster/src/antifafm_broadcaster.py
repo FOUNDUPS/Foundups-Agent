@@ -32,7 +32,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 from .ffmpeg_streamer import FFmpegStreamer, StreamConfig, StreamState, FFmpegStreamerError
 from .stream_health_monitor import StreamHealthMonitor, RecoveryConfig, HealthState
@@ -146,6 +146,11 @@ class AntifaFMBroadcaster(SkillTriggerMixin):
         self._heartbeat_task: Optional[asyncio.Task] = None
         self._running = False
 
+        # Optional Discord voice lane (ANTIFAFM_DISCORD_VOICE_ENABLED) — sibling to YouTube FFmpeg
+        self.discord_output: Optional[Any] = None
+        if _env_truthy("ANTIFAFM_DISCORD_VOICE_ENABLED"):
+            self._init_discord_output()
+
         # AI Overseer integration (WSP 77)
         self.enable_ai_monitoring = enable_ai_monitoring
         self.ai_overseer = None
@@ -187,6 +192,25 @@ class AntifaFMBroadcaster(SkillTriggerMixin):
         except Exception as e:
             logger.warning(f"[RADIO] AI Overseer init failed: {e}")
             self.ai_overseer = None
+
+    def _init_discord_output(self) -> None:
+        """Optional Discord voice lane: same Icecast URL; requires discord.py + token/guild/channel."""
+        try:
+            from .discord_voice_output import DISCORD_VOICE_AVAILABLE, build_discord_voice_from_env
+        except ImportError as e:
+            logger.warning("[DISCORD] discord_voice_output import failed: %s", e)
+            return
+
+        if not DISCORD_VOICE_AVAILABLE:
+            logger.warning(
+                "[DISCORD] discord.py / PyNaCl not installed — voice lane skipped "
+                "(pip install -r modules/platform_integration/antifafm_broadcaster/requirements.txt)"
+            )
+            return
+
+        self.discord_output = build_discord_voice_from_env(self.stream_url)
+        if self.discord_output:
+            logger.info("[DISCORD] Voice adapter ready (start deferred until YouTube lane is up)")
 
     def _resolve_ingest_url(self) -> str:
         """
@@ -298,6 +322,26 @@ class AntifaFMBroadcaster(SkillTriggerMixin):
             self.start_time = time.time()
             logger.info("[OK] antifaFM broadcasting to YouTube Live")
 
+            # Discord voice sibling lane — failures must not affect YouTube
+            if self.discord_output:
+                try:
+                    discord_ok = await self.discord_output.start()
+                    if not discord_ok:
+                        logger.warning("[DISCORD] Voice lane failed to start — YouTube continues")
+                        try:
+                            await self.discord_output.stop()
+                        except Exception:
+                            pass
+                        self.discord_output = None
+                except Exception as e:
+                    logger.error("[DISCORD] Voice lane exception: %s", e, exc_info=True)
+                    try:
+                        if self.discord_output:
+                            await self.discord_output.stop()
+                    except Exception:
+                        pass
+                    self.discord_output = None
+
             # Log telemetry
             self._write_telemetry()
 
@@ -345,6 +389,13 @@ class AntifaFMBroadcaster(SkillTriggerMixin):
         if self.streamer:
             self.streamer.stop()
             self.streamer = None
+
+        if self.discord_output:
+            try:
+                await self.discord_output.stop()
+            except Exception as e:
+                logger.error("[DISCORD] stop error: %s", e)
+            self.discord_output = None
 
         self.status = BroadcasterStatus.OFFLINE
         self.start_time = None
@@ -478,12 +529,16 @@ class AntifaFMBroadcaster(SkillTriggerMixin):
                 error_message=error_msg,
             )
 
+            payload = telemetry.to_dict()
+            if self.discord_output:
+                payload["discord_voice"] = self.discord_output.get_status()
+
             # Ensure directory exists
             self.telemetry_path.parent.mkdir(parents=True, exist_ok=True)
 
             # Append to JSONL
             with open(self.telemetry_path, "a", encoding="utf-8") as f:
-                f.write(json.dumps(telemetry.to_dict()) + "\n")
+                f.write(json.dumps(payload) + "\n")
 
         except Exception as e:
             logger.debug(f"[RADIO] Telemetry write failed: {e}")
@@ -523,7 +578,7 @@ class AntifaFMBroadcaster(SkillTriggerMixin):
         if WRE_AVAILABLE and hasattr(self, 'get_trigger_status'):
             wre_status = self.get_trigger_status()
 
-        return {
+        out: Dict[str, Any] = {
             "status": self.status.value,
             "enabled": self.enabled,
             "uptime_seconds": uptime,
@@ -535,6 +590,9 @@ class AntifaFMBroadcaster(SkillTriggerMixin):
             "health": health_metrics,
             "wre": wre_status,
         }
+        out["discord_voice"] = self.discord_output.get_status() if self.discord_output else None
+        out["discord_voice_enabled_flag"] = _env_truthy("ANTIFAFM_DISCORD_VOICE_ENABLED")
+        return out
 
     @staticmethod
     def _format_uptime(seconds: Optional[float]) -> str:

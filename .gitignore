@@ -384,6 +384,8 @@ tmp_*.log
 youtube_foundups/
 # Large video files
 modules/platform_integration/antifafm_broadcaster/assets/backgrounds/*.mp4
+# Runtime telemetry (local JSONL; do not version WSP 91 sink output)
+modules/platform_integration/antifafm_broadcaster/telemetry.jsonl
 campaign_results/
 tools/gitleaks/
 modules/ai_intelligence/pqn_alignment/artifact_results/theory_archive_simulation/
