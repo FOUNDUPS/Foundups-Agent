@@ -445,17 +445,28 @@ class TestExpandCollapseAnimation:
         css = _read("css/mall-tile-field.css")
         assert ".mall-flip-layer" in css
 
-    def test_flip_expanding_animation(self):
-        """Expanding animation class exists."""
+    def test_flip_animating_transition_class(self):
+        """Expanding uses flip-animating class with CSS transitions."""
         css = _read("css/mall-tile-field.css")
-        assert ".flip-expanding" in css
-        assert "flip-expand" in css
+        assert ".flip-animating" in css
+        js = _read("js/mall-tile-field.js")
+        assert "flip-animating" in js
 
-    def test_flip_collapsing_animation(self):
-        """Collapsing animation class exists."""
+    def test_flip_collapsing_transition_class(self):
+        """Collapsing uses flip-collapsing class with CSS transitions."""
         css = _read("css/mall-tile-field.css")
         assert ".flip-collapsing" in css
-        assert "flip-collapse" in css
+        js = _read("js/mall-tile-field.js")
+        assert "flip-collapsing" in js
+
+    def test_geometry_transition_properties(self):
+        """FLIP layer transitions left, top, width, height."""
+        css = _read("css/mall-tile-field.css")
+        # Check that all geometry properties are transitioned
+        assert "left 280ms" in css or "left 250ms" in css
+        assert "top 280ms" in css or "top 250ms" in css
+        assert "width 280ms" in css or "width 250ms" in css
+        assert "height 280ms" in css or "height 250ms" in css
 
     def test_reduced_motion_bypass(self):
         """Reduced-motion media query bypasses animation."""
@@ -481,6 +492,12 @@ class TestExpandCollapseAnimation:
         """Source index is tracked for collapse animation."""
         js = _read("js/mall-tile-field.js")
         assert "expandSourceIndex" in js
+
+    def test_expand_source_visual_stored(self):
+        """Source visual (bgImage, bgColor) stored for collapse continuity."""
+        js = _read("js/mall-tile-field.js")
+        assert "expandSourceVisual" in js
+        assert "expandSourceVisual.bgImage" in js or "bgImage: bgImage" in js
 
     def test_flip_layer_positioned_fixed(self):
         """FLIP layer uses fixed positioning."""

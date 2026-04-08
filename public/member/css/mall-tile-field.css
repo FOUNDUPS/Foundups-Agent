@@ -866,41 +866,32 @@
   background-size: cover;
   background-position: center;
   overflow: hidden;
-  will-change: transform, width, height, border-radius;
+  will-change: left, top, width, height, border-radius;
 }
 
-.mall-flip-layer.flip-expanding {
-  animation: flip-expand 280ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+/* Geometry transition: animate left, top, width, height, border-radius */
+.mall-flip-layer.flip-animating {
+  transition:
+    left 280ms cubic-bezier(0.32, 0.72, 0, 1),
+    top 280ms cubic-bezier(0.32, 0.72, 0, 1),
+    width 280ms cubic-bezier(0.32, 0.72, 0, 1),
+    height 280ms cubic-bezier(0.32, 0.72, 0, 1),
+    border-radius 280ms cubic-bezier(0.32, 0.72, 0, 1);
 }
 
+/* Collapse uses slightly faster timing */
 .mall-flip-layer.flip-collapsing {
-  animation: flip-collapse 250ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
-}
-
-@keyframes flip-expand {
-  0% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 1;
-    border-radius: 0;
-  }
-}
-
-@keyframes flip-collapse {
-  0% {
-    opacity: 1;
-    border-radius: 0;
-  }
-  100% {
-    opacity: 1;
-  }
+  transition:
+    left 250ms cubic-bezier(0.32, 0.72, 0, 1),
+    top 250ms cubic-bezier(0.32, 0.72, 0, 1),
+    width 250ms cubic-bezier(0.32, 0.72, 0, 1),
+    height 250ms cubic-bezier(0.32, 0.72, 0, 1),
+    border-radius 250ms cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 /* Reduced-motion: skip animation, instant transition */
 @media (prefers-reduced-motion: reduce) {
   .mall-flip-layer {
-    animation: none !important;
     transition: none !important;
   }
 

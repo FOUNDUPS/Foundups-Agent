@@ -56,6 +56,7 @@
   var currentDensity = '2x3';
   var expandedFoundUp = null; // Index of expanded FoundUp, or null
   var expandSourceIndex = null; // Original tile index for collapse animation
+  var expandSourceVisual = null; // { bgImage, bgColor } for collapse continuity
   var playingIndex = null; // Index of currently previewing tile
   var previewPaused = false;
   var previewMuted = false;
@@ -731,27 +732,34 @@
     var sourceRect = sourceTile ? sourceTile.getBoundingClientRect() : null;
     var reducedMotion = prefersReducedMotion();
 
-    // Store source index for collapse animation
+    // Store source index and visual for collapse animation continuity
     expandSourceIndex = index;
+    var bgImage = sourceTile ? sourceTile.style.backgroundImage || '' : '';
+    var bgColor = sourceTile ? window.getComputedStyle(sourceTile).backgroundColor : '';
+    expandSourceVisual = { bgImage: bgImage, bgColor: bgColor };
 
     // FLIP animation (skip if reduced motion)
     if (sourceRect && !reducedMotion) {
-      var bgImage = sourceTile.style.backgroundImage || '';
-      var bgColor = window.getComputedStyle(sourceTile).backgroundColor;
       var flipLayer = createFlipLayer(sourceRect, bgImage, bgColor);
 
       // Target: full viewport (the expanded field area)
       var targetRect = tileField.getBoundingClientRect();
 
-      // Force reflow before animation
+      // Force reflow to establish initial geometry
       void flipLayer.offsetWidth;
 
-      // Animate to target
+      // Add transition class BEFORE setting target (enables CSS transition)
+      flipLayer.classList.add('flip-animating');
+
+      // Force another reflow so browser registers the transition
+      void flipLayer.offsetWidth;
+
+      // Animate to target geometry
       flipLayer.style.left = targetRect.left + 'px';
       flipLayer.style.top = targetRect.top + 'px';
       flipLayer.style.width = targetRect.width + 'px';
       flipLayer.style.height = targetRect.height + 'px';
-      flipLayer.classList.add('flip-expanding');
+      flipLayer.style.borderRadius = '0';
 
       // Render actual content during animation
       tileField.classList.add('transitioning');
@@ -801,11 +809,10 @@
     var reducedMotion = prefersReducedMotion();
 
     // FLIP animation (skip if reduced motion)
-    if (sourceIndex !== null && !reducedMotion) {
-      // Capture first frame from expanded field
-      var firstTile = tileField.querySelector('.mall-tile');
-      var bgImage = firstTile ? firstTile.style.backgroundImage || '' : '';
-      var bgColor = firstTile ? window.getComputedStyle(firstTile).backgroundColor : '';
+    if (sourceIndex !== null && expandSourceVisual && !reducedMotion) {
+      // Use stored source visual for continuity (not first tile in expanded view)
+      var bgImage = expandSourceVisual.bgImage || '';
+      var bgColor = expandSourceVisual.bgColor || '';
       var flipLayer = createFlipLayer(expandedRect, bgImage, bgColor);
       flipLayer.style.borderRadius = '0';
 
@@ -820,7 +827,13 @@
       var targetRect = targetTile ? targetTile.getBoundingClientRect() : null;
 
       if (targetRect) {
-        // Force reflow
+        // Force reflow to establish initial geometry
+        void flipLayer.offsetWidth;
+
+        // Add transition class BEFORE setting target (enables CSS transition)
+        flipLayer.classList.add('flip-collapsing');
+
+        // Force another reflow so browser registers the transition
         void flipLayer.offsetWidth;
 
         // Animate to target tile position
@@ -828,19 +841,21 @@
         flipLayer.style.top = targetRect.top + 'px';
         flipLayer.style.width = targetRect.width + 'px';
         flipLayer.style.height = targetRect.height + 'px';
-        flipLayer.classList.add('flip-collapsing');
+        flipLayer.style.borderRadius = '';  // Return to tile radius
 
         // Cleanup after animation
         setTimeout(function() {
           cleanupFlipLayer(flipLayer);
           tileField.classList.remove('transitioning');
           expandSourceIndex = null;
+          expandSourceVisual = null;
         }, 270);
       } else {
         // No target found, instant cleanup
         cleanupFlipLayer(flipLayer);
         tileField.classList.remove('transitioning');
         expandSourceIndex = null;
+        expandSourceVisual = null;
       }
     } else {
       // Reduced motion: instant transition
@@ -852,6 +867,7 @@
         bindInteractions();
         tileField.classList.remove('transitioning');
         expandSourceIndex = null;
+        expandSourceVisual = null;
       }, 60);
     }
   }
