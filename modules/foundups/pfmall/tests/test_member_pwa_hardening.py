@@ -201,6 +201,19 @@ class TestStateRestore:
                 f"Auto-save missing trigger for scope mutation: {selector}"
             )
 
+    def test_scope_listeners_are_delegated(self, sr_source: str):
+        """Tag-select and search-input listeners must be delegated on document,
+        not bound directly via querySelector, because those elements are
+        injected later by account-concierge.js when the Red Dog plane opens.
+        """
+        # Must NOT grab these elements directly for binding
+        assert "querySelector('[data-reddog-tag-select]')" not in sr_source, (
+            "tag-select listener must be delegated, not bound via querySelector"
+        )
+        assert "querySelector('[data-reddog-search-input]')" not in sr_source, (
+            "search-input listener must be delegated, not bound via querySelector"
+        )
+
     def test_is_iife(self, sr_source: str):
         """Must be wrapped in an IIFE to avoid global pollution."""
         assert sr_source.strip().startswith("(function(") or sr_source.strip().startswith("/**")

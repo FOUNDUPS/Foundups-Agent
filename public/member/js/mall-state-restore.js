@@ -152,22 +152,20 @@
       }
     });
 
-    // Save on Red Dog tag select changes
-    var tagSelect = document.querySelector('[data-reddog-tag-select]');
-    if (tagSelect) {
-      tagSelect.addEventListener('change', function() {
+    // Save on Red Dog tag select changes (delegated — element injected later by account-concierge)
+    document.addEventListener('change', function(e) {
+      if (e.target.matches && e.target.matches('[data-reddog-tag-select]')) {
         setTimeout(save, 50);
-      });
-    }
+      }
+    });
 
-    // Save on Red Dog search input (debounced — shares scroll timer)
-    var searchInput = document.querySelector('[data-reddog-search-input]');
-    if (searchInput) {
-      searchInput.addEventListener('input', function() {
+    // Save on Red Dog search input (delegated + debounced — element injected later)
+    document.addEventListener('input', function(e) {
+      if (e.target.matches && e.target.matches('[data-reddog-search-input]')) {
         clearTimeout(scrollTimer);
         scrollTimer = setTimeout(save, SCROLL_DEBOUNCE_MS);
-      });
-    }
+      }
+    });
 
     // Save on scroll (debounced)
     var wrapper = document.querySelector('.mall-tile-field-wrapper');
