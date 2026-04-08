@@ -1,5 +1,25 @@
 # Member Area Module Change Log
 
+## [2026-04-08] Expanded Video Field Animation Phase 1 (Worker AK, WSP 97)
+
+**Who**: 0102 — Worker AK
+**Slice**: `PFMALL_EXPANDED_VIDEO_FIELD_ANIMATION_PHASE1`
+**What**: FLIP-style animation for pinch-out (tile expands to video field) and pinch-in (collapse back). Tile visually morphs during expand/collapse with geometry transitions.
+
+**Files Modified**:
+- `public/member/css/mall-tile-field.css` — `.mall-flip-layer`, `.flip-animating`, `.flip-collapsing` transition classes
+- `public/member/js/mall-tile-field.js` — `expandSourceIndex`, `expandSourceVisual`, `prefersReducedMotion()`, `createFlipLayer()`, `cleanupFlipLayer()`, FLIP logic in `expandFoundUp()` / `collapseFoundUp()`
+- `public/member/tests/test_video_mall_field_runtime.py` — 13 tests in `TestExpandCollapseAnimation` class
+
+**Animation Behavior**:
+- Expand: Capture source tile rect → create transition layer → animate left/top/width/height/border-radius to field rect
+- Collapse: Use stored source visual (not first expanded tile) → animate back to original tile position
+- Reduced-motion bypass via `prefers-reduced-motion: reduce` media query
+
+**Test Count**: 82 passed (+13 animation tests)
+
+---
+
 ## [2026-04-05] Resume position Phase 1 (Worker F, WSP 97)
 
 **Who**: 0102 — Worker F  

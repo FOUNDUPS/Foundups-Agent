@@ -4,6 +4,32 @@ Test evolution log for the p.fMALL member shell test suite.
 
 ---
 
+## 2026-04-08 | Expanded Video Field Animation Tests (WSP 97)
+
+**File**: `test_video_mall_field_runtime.py` (extended)
+**Tests**: 13 new | **Class**: `TestExpandCollapseAnimation` | **Result**: 82 passed total
+**Worker**: AK
+
+Validates FLIP animation for expand/collapse transitions:
+
+| Test | What it covers |
+|------|----------------|
+| test_flip_layer_class_exists | `.mall-flip-layer` in CSS |
+| test_flip_animating_transition_class | `.flip-animating` class in CSS and JS |
+| test_flip_collapsing_transition_class | `.flip-collapsing` class in CSS and JS |
+| test_geometry_transition_properties | left/top/width/height 280ms/250ms transitions |
+| test_reduced_motion_bypass | `prefers-reduced-motion: reduce` media query |
+| test_prefers_reduced_motion_function | `prefersReducedMotion()` helper |
+| test_create_flip_layer_function | `createFlipLayer()` helper |
+| test_cleanup_flip_layer_function | `cleanupFlipLayer()` helper |
+| test_expand_source_index_tracked | `expandSourceIndex` state |
+| test_expand_source_visual_stored | `expandSourceVisual` for collapse continuity |
+| test_flip_layer_positioned_fixed | `position: fixed` on layer |
+| test_animation_cleanup_happens | `cleanupFlipLayer(flipLayer)` called |
+| test_will_change_optimization | `will-change:` GPU hint |
+
+---
+
 ## 2026-04-03 | Shell Bridge Interceptor Tests (WSP 97)
 
 **File**: `test_shell_bridge_interceptor.py`
