@@ -60,7 +60,7 @@ mall-video-catalog.json
   "creator_id": "string",
   "creator_display": "string",
   "entity": "string",
-  "source_type": "youtube_channel | linkedin_profile | x_profile | tiktok_profile | instagram_profile | derived",
+  "source_type": "youtube_channel | linkedin_profile | x_profile | tiktok_profile | instagram_profile | derived | github_repo | external_app | internal_service",
   "source_id": "string | null",
   "source_handle": "string | null",
   "category": "string",
@@ -106,6 +106,9 @@ mall-video-catalog.json
 | `source_type` | enum | YES | Platform type. See Section 4. |
 | `source_id` | string | NO | Platform-specific ID (e.g., YouTube channel ID). |
 | `source_handle` | string | NO | Platform handle (e.g., "@MOVE2JAPAN"). |
+| `external_url` | string | NO | External URL. Present when `source_type` is `external_app`, `github_repo`, or `internal_service`. See Section 4. |
+| `parent_channels` | string[] | NO | Parent lane references. Required when `source_type` is `derived`. See Section 4. |
+| `derivation_method` | string | NO | How content was classified. Required when `source_type` is `derived`. See Section 4. |
 
 #### Classification Fields
 
@@ -156,6 +159,9 @@ These fields enrich the entry page (`foundup.html`) when present. They are optio
 | `tiktok_profile` | TikTok | Account ID |
 | `instagram_profile` | Instagram | Account ID |
 | `derived` | Content classified from a parent channel | Parent channel ID (e.g., `UCfHM9Fw9HD-NwiS0seD_oIA`) |
+| `github_repo` | Repo-backed FoundUp (code/research) | `"org/repo-name"` (e.g., `"FOUNDUPS/science-swarm-hub"`) |
+| `external_app` | Externalized product FoundUp (own deploy) | `"org/repo-name"` (e.g., `"FOUNDUPS/autopost"`) |
+| `internal_service` | Monorepo-internal service FoundUp | Module path (e.g., `"modules/foundups/kosei"`) |
 
 ### Derived Lanes
 
@@ -165,6 +171,31 @@ A `derived` lane has no source channel of its own. Its videos are a topic-classi
 - Videos are copied from the parent lane at catalog build time, not moved
 - The same video may appear in both the parent lane and derived lane(s)
 - Parent lane's `related_lanes` should include the derived lane's `foundup_id`
+
+Required conditional fields for `source_type: "derived"`:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `parent_channels` | string[] | YES | Array of `foundup_id` references whose content feeds this lane. |
+| `derivation_method` | string | YES | How content was classified: `manual_curation`, `topic_tag`, `ai_classification`. |
+
+### Non-Video FoundUps (`github_repo`, `external_app`, `internal_service`)
+
+These source types represent FoundUps whose value is in code, tools, or services rather than media content. They have `videos: []` with `video_count: 0`, which is explicitly valid. LinkedIn profile lanes already prove this pattern works across all pfMALL surfaces.
+
+Conditional field for non-video FoundUps:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `external_url` | string (URL) | YES | URL to external deploy, repository, or planned production domain. |
+
+Resolution rules:
+
+| source_type | `external_url` resolves to |
+|-------------|---------------------------|
+| `github_repo` | GitHub repo URL or project site |
+| `external_app` | Production app URL |
+| `internal_service` | Planned production domain (may not be live yet) |
 
 ---
 
@@ -181,6 +212,7 @@ Current active categories:
 | `thought-leadership` | Articles, essays, long-form |
 | `ai-education` | AI learning, education |
 | `ai-research` | AI research, technical |
+| `science` | Science, research, multi-agent |
 
 Categories are projection axes for Red Dog filtering.
 
@@ -195,6 +227,8 @@ Categories are projection axes for Red Dog filtering.
 | `startup` | Ventures, founders, pAVS | foundups_main, linkedin_foundups |
 | `resistance` | Activism, anti-fascist | antifafm |
 | `ai-education` | AI learning, autonomous education | eduit |
+| `science` | Science, research coordination | science_swarm |
+| `media` | Content automation, tools | autopost, kosei |
 
 Topic families enable cross-category projection (e.g., "show all detector signature content").
 
@@ -355,23 +389,30 @@ Builder tool: `holo_index/skillz/video_catalog_builder/` (planned)
 
 ## 13. Current Catalog Stats
 
-As of 2026-04-05:
+As of 2026-04-07:
 
 | Metric | Value |
 |--------|-------|
-| Total lanes | 9 |
+| Total lanes | 12 |
 | YouTube lanes | 4 |
 | LinkedIn lanes | 4 |
 | Derived lanes | 1 |
+| GitHub repo lanes | 1 |
+| External app lanes | 1 |
+| Internal service lanes | 1 |
 | Total videos | 1,184 (21 shared with undaodu via derived lane) |
+| Source types in use | 6 (youtube_channel, linkedin_profile, derived, github_repo, external_app, internal_service) |
 
 Lane breakdown:
-- move2japan: 573 videos
-- undaodu: 512 videos
-- foundups_main: 44 videos
-- antifafm: 34 videos
+- move2japan: 573 videos (youtube_channel)
+- undaodu: 512 videos (youtube_channel)
+- foundups_main: 44 videos (youtube_channel)
+- antifafm: 34 videos (youtube_channel)
 - eduit: 21 videos (derived from undaodu)
-- linkedin_012: 0 (profile lane)
-- linkedin_esingularity: 0 (profile lane)
-- linkedin_tsingularity: 0 (profile lane)
-- linkedin_foundups: 0 (profile lane)
+- linkedin_012: 0 (linkedin_profile)
+- linkedin_esingularity: 0 (linkedin_profile)
+- linkedin_tsingularity: 0 (linkedin_profile)
+- linkedin_foundups: 0 (linkedin_profile)
+- science_swarm: 0 (github_repo)
+- autopost: 0 (external_app)
+- kosei: 0 (internal_service)

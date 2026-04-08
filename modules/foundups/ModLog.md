@@ -2,6 +2,28 @@
 
 ## Chronological Change Log
 
+### 2026-04-07 - pfMALL Catalog Schema Expansion
+
+**By:** 0102 (Worker AG) · **Slice:** `PFMALL_CATALOG_SCHEMA_EXPANSION_PHASE1`
+**WSP References:** WSP 15, WSP 22, WSP 97
+
+**Added**
+- 3 new source_types: `github_repo`, `external_app`, `internal_service`
+- 3 new catalog entries: `science_swarm`, `autopost`, `kosei`
+- Conditional field: `external_url` (required for non-video types)
+- Derived lane fields: `parent_channels`, `derivation_method` (eduit updated)
+- New category: `science`
+- New topic families: `science`, `media`
+- 5 new tests (TestNonVideoFoundUps: 2, TestDerivedLanes: 3)
+- 2 existing validation tests expanded for new types
+
+**Notes**
+- Zero runtime code changes
+- Zero breaking changes
+- Catalog: 9 → 12 lanes, 3 → 6 source_types
+
+---
+
 ### 2026-04-06 - AutoPost external alignment
 
 **By:** 0102 (Worker G) · **Slice:** `AUTOPOST_EXTERNAL_ALIGNMENT_PHASE1`

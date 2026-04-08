@@ -11006,6 +11006,122 @@
         "timestamp": "2026-01-12T17:12:16Z",
         "duration_seconds": 54
       }
-    ]
+    ],
+    "parent_channels": [
+      "undaodu"
+    ],
+    "derivation_method": "manual_curation"
+  },
+  {
+    "foundup_id": "science_swarm",
+    "title": "Science Swarm Hub",
+    "creator": "012",
+    "creator_id": "012",
+    "creator_display": "012",
+    "entity": "Science Swarm Hub",
+    "source_type": "github_repo",
+    "source_id": "FOUNDUPS/science-swarm-hub",
+    "source_handle": "science-swarm-hub",
+    "external_url": "https://github.com/FOUNDUPS/science-swarm-hub",
+    "category": "science",
+    "tags": [
+      "012-lane",
+      "multi-agent",
+      "pqn",
+      "research",
+      "science",
+      "swarm"
+    ],
+    "topic_family": "science",
+    "geo": "Global",
+    "status": "active",
+    "display_order": 10,
+    "related_lanes": [
+      "foundups_main",
+      "linkedin_esingularity"
+    ],
+    "tagline": "Multi-agent research coordination",
+    "description": "Science Swarm Hub — multi-agent research coordination platform for PQN alignment and scientific inquiry.",
+    "tier": "F0_DAE",
+    "lifecycle_stage": "externalized",
+    "launch_readiness": "discoverable_only",
+    "poster_url": "/media/posters/science_swarm.jpg",
+    "video_count": 0,
+    "videos": []
+  },
+  {
+    "foundup_id": "autopost",
+    "title": "AutoPost",
+    "creator": "012",
+    "creator_id": "012",
+    "creator_display": "012",
+    "entity": "AutoPost",
+    "source_type": "external_app",
+    "source_id": "FOUNDUPS/autopost",
+    "source_handle": "autopost",
+    "external_url": "https://autopost.foundups.com",
+    "category": "media",
+    "tags": [
+      "012-lane",
+      "ai",
+      "automation",
+      "camera-to-post",
+      "content",
+      "media",
+      "social"
+    ],
+    "topic_family": "media",
+    "geo": "Global",
+    "status": "active",
+    "display_order": 11,
+    "related_lanes": [
+      "foundups_main"
+    ],
+    "tagline": "Camera-to-post AI content engine",
+    "description": "AutoPost — AI-powered camera-to-post content engine. Externalized product FoundUp with own repo and domain.",
+    "tier": "F0_DAE",
+    "lifecycle_stage": "externalized",
+    "launch_readiness": "discoverable_only",
+    "poster_url": "/media/posters/autopost.jpg",
+    "video_count": 0,
+    "videos": []
+  },
+  {
+    "foundup_id": "kosei",
+    "title": "Kosei AI Systems",
+    "creator": "012",
+    "creator_id": "012",
+    "creator_display": "012",
+    "entity": "Kosei AI Systems",
+    "source_type": "internal_service",
+    "source_id": "modules/foundups/kosei",
+    "source_handle": "kosei",
+    "external_url": "https://kosei.ai",
+    "category": "media",
+    "tags": [
+      "012-lane",
+      "ai",
+      "automation",
+      "b2b",
+      "content",
+      "kosei",
+      "service"
+    ],
+    "topic_family": "media",
+    "geo": "Global",
+    "status": "active",
+    "display_order": 12,
+    "related_lanes": [
+      "foundups_main",
+      "autopost"
+    ],
+    "tagline": "AI content automation for businesses",
+    "description": "Kosei AI Systems — AI content automation service for businesses. Internal service FoundUp with planned production domain.",
+    "tier": "F0_DAE",
+    "lifecycle_stage": "incubating",
+    "launch_readiness": "discoverable_only",
+    "poster_url": "/media/posters/kosei.jpg",
+    "video_count": 0,
+    "videos": []
   }
 ]
