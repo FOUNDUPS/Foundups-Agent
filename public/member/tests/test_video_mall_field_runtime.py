@@ -524,3 +524,187 @@ class TestSearchMallProjection:
         js = _read("js/mall-tile-field.js")
         assert "options.type" in js
         assert "scope.query" in js
+
+
+class TestTapInlinePreviewAR:
+    """Test tap = inline preview play/pause behavior (AR slice)."""
+
+    def test_start_inline_preview_function(self):
+        """startInlinePreview function exists for inline playback."""
+        js = _read("js/mall-tile-field.js")
+        assert "function startInlinePreview" in js
+
+    def test_pause_inline_preview_function(self):
+        """pauseInlinePreview function exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "function pauseInlinePreview" in js
+
+    def test_resume_inline_preview_function(self):
+        """resumeInlinePreview function exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "function resumeInlinePreview" in js
+
+    def test_stop_inline_preview_function(self):
+        """stopInlinePreview function exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "function stopInlinePreview" in js
+
+    def test_one_active_preview_rule(self):
+        """Starting a new preview stops the previous one."""
+        js = _read("js/mall-tile-field.js")
+        assert "playingIndex !== null && playingIndex !== index" in js
+        assert "stopInlinePreview()" in js
+
+    def test_toggle_play_starts_inline(self):
+        """togglePlay calls startInlinePreview for new tile."""
+        js = _read("js/mall-tile-field.js")
+        assert "startInlinePreview(index, false)" in js
+
+    def test_toggle_play_pauses_active(self):
+        """togglePlay pauses active inline preview."""
+        js = _read("js/mall-tile-field.js")
+        assert "pauseInlinePreview()" in js
+        assert "previewPaused" in js
+
+    def test_toggle_play_resumes_paused(self):
+        """togglePlay resumes a paused inline preview."""
+        js = _read("js/mall-tile-field.js")
+        assert "resumeInlinePreview()" in js
+
+    def test_preview_generation_guard(self):
+        """previewGeneration prevents stale async callbacks."""
+        js = _read("js/mall-tile-field.js")
+        assert "previewGeneration" in js
+        assert "gen !== previewGeneration" in js
+
+    def test_youtube_api_loader(self):
+        """ensureYouTubeAPI function lazy-loads IFrame API."""
+        js = _read("js/mall-tile-field.js")
+        assert "function ensureYouTubeAPI" in js
+        assert "iframe_api" in js
+
+    def test_youtube_video_id_extractor(self):
+        """extractYouTubeVideoId parses YouTube URLs."""
+        js = _read("js/mall-tile-field.js")
+        assert "function extractYouTubeVideoId" in js
+
+    def test_html5_video_fallback(self):
+        """HTML5 video element created for non-YouTube sources."""
+        js = _read("js/mall-tile-field.js")
+        assert "mall-tile-preview-media" in js
+        assert "video.playsInline" in js
+
+
+class TestPreviewControlsAR:
+    """Test audio button and expand button for inline preview."""
+
+    def test_audio_button_markup(self):
+        """Audio button rendered with mall-tile-audio class."""
+        js = _read("js/mall-tile-field.js")
+        assert "mall-tile-audio" in js
+        assert "Toggle audio" in js
+
+    def test_audio_button_css(self):
+        """Audio button CSS exists."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile-audio" in css
+
+    def test_toggle_preview_mute_function(self):
+        """togglePreviewMute function handles audio toggle."""
+        js = _read("js/mall-tile-field.js")
+        assert "function togglePreviewMute" in js
+
+    def test_expand_button_fullscreen_path(self):
+        """Expand button calls openFullscreenFromTile."""
+        js = _read("js/mall-tile-field.js")
+        assert "openFullscreenFromTile(index)" in js
+
+    def test_fullscreen_stops_preview(self):
+        """openFullscreenFromTile stops inline preview first."""
+        js = _read("js/mall-tile-field.js")
+        assert "function openFullscreenFromTile" in js
+        assert "stopInlinePreview();" in js
+
+    def test_preview_container_markup(self):
+        """Preview container and stage rendered for video tiles."""
+        js = _read("js/mall-tile-field.js")
+        assert "mall-tile-preview" in js
+        assert "mall-tile-preview-stage" in js
+
+    def test_public_api_exposes_preview(self):
+        """Public API exposes inline preview methods."""
+        js = _read("js/mall-tile-field.js")
+        assert "startInlinePreview:" in js
+        assert "stopInlinePreview:" in js
+        assert "pauseInlinePreview:" in js
+        assert "resumeInlinePreview:" in js
+        assert "togglePreviewMute:" in js
+
+
+class TestInlinePreviewAudioStatesAR:
+    """Test audio button visual state clarity (AR slice)."""
+
+    def test_audio_active_css(self):
+        """Audio button has is-active state CSS."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile-audio.is-active" in css
+
+    def test_audio_unmuted_css(self):
+        """Active unmuted state has distinct background."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile-audio.is-active:not(.is-muted)" in css
+
+    def test_audio_muted_css(self):
+        """Active muted state has distinct background."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile-audio.is-active.is-muted" in css
+
+    def test_audio_paused_css(self):
+        """Paused preview audio state has dimmed background."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile.is-paused .mall-tile-audio.is-active" in css
+
+    def test_svg_muted_icon(self):
+        """Muted SVG uses speaker body + X lines."""
+        js = _read("js/mall-tile-field.js")
+        assert 'x1="23" y1="9" x2="17" y2="15"' in js
+
+    def test_svg_waves_icon(self):
+        """Unmuted SVG uses speaker+waves path."""
+        js = _read("js/mall-tile-field.js")
+        assert "M15.54 8.46a5 5 0 010 7.07" in js
+
+    def test_svg_body_path(self):
+        """Speaker body path exists in SVG markup."""
+        js = _read("js/mall-tile-field.js")
+        assert "M11 5L6 9H2v6h4l5 4V5z" in js
+
+    def test_audio_btn_innerHTML_updated(self):
+        """Audio button innerHTML is updated on state change."""
+        js = _read("js/mall-tile-field.js")
+        assert "audioBtn.innerHTML" in js
+
+
+class TestPausedPreviewIndicatorAR:
+    """Test paused preview shows visible play indicator (AR slice)."""
+
+    def test_paused_preview_visible_css(self):
+        """Paused preview shows play indicator."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile.is-previewing.is-paused .mall-tile-play-indicator" in css
+
+    def test_inline_preview_layer_css(self):
+        """Inline preview layer CSS exists for in-grid playback."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile-preview" in css
+        assert ".mall-tile.is-previewing .mall-tile-preview" in css
+
+    def test_preview_stage_css(self):
+        """Preview stage CSS exists."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile-preview-stage" in css
+
+    def test_touch_devices_show_controls(self):
+        """Touch devices always show audio and expand buttons."""
+        css = _read("css/mall-tile-field.css")
+        assert "hover: none" in css
