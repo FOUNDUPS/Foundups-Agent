@@ -37,6 +37,13 @@
     discoverable_only: 'Discoverable Only'
   };
 
+  var SOURCE_TYPE_CTA = {
+    github_repo:      { label: 'View Repo',    icon: '\u2197', urlField: 'external_url' },
+    external_app:     { label: 'Open App',      icon: '\u2197', urlField: 'external_url' },
+    internal_service: { label: 'Open Service',  icon: '\u2197', urlField: 'external_url' }
+  };
+  var NON_VIDEO_SOURCE_TYPES = { github_repo: true, external_app: true, internal_service: true };
+
   // ---- open / close ----
   function openFoundUp(index) {
     if (index < 0 || index >= catalog.length) return;
@@ -75,7 +82,26 @@
     var displayTagline = item.tagline || (item.entity ? item.entity + (item.geo ? ' \u00b7 ' + item.geo : '') : '');
     var displayReadiness = item.launch_readiness || item.status || 'active';
     var routeHint = item.routing_prefix ? ' \u2192 ' + esc(item.routing_prefix) : '';
-    var videoHint = item.video_count ? ' \u00b7 ' + item.video_count + ' videos' : '';
+    var isNonVideo = NON_VIDEO_SOURCE_TYPES[item.source_type] || false;
+    var videoHint = (!isNonVideo && item.video_count) ? ' \u00b7 ' + item.video_count + ' videos' : '';
+
+    // Source-type metadata line for non-video entries
+    var sourceTypeMeta = '';
+    if (isNonVideo) {
+      var sourceLabel = (item.source_type || '').replace(/_/g, ' ');
+      sourceTypeMeta = '<p class="fv-source-type-label">' + esc(sourceLabel) + '</p>';
+    }
+
+    // Source-type-aware CTA for non-video entries
+    var ctaHtml = '';
+    var ctaDef = SOURCE_TYPE_CTA[item.source_type];
+    if (ctaDef && item[ctaDef.urlField]) {
+      ctaHtml =
+        '<a href="' + esc(item[ctaDef.urlField]) + '" target="_blank" rel="noopener noreferrer" class="fv-source-cta">' +
+          esc(ctaDef.label) + ' ' + ctaDef.icon +
+        '</a>';
+    }
+
     body.innerHTML =
       '<div class="fv-hero theme-' + esc(item.theme || item.foundup_id || 'default') + '">' +
         '<div class="fv-token">' + esc(displayToken) + '</div>' +
@@ -85,8 +111,10 @@
           esc(READINESS_LABELS[displayReadiness] || displayReadiness) +
         '</span>' +
       '</div>' +
+      sourceTypeMeta +
       '<p class="fv-tagline">' + esc(displayTagline) + esc(videoHint) + '</p>' +
       '<div class="fv-actions">' +
+        ctaHtml +
         '<a href="/member/foundup.html?id=' + encodeURIComponent(item.foundup_id) + '" class="fv-open-link">Open FoundUp' + routeHint + '</a>' +
       '</div>' +
       '<p class="fv-hint">Swipe up to close \u00b7 Swipe sideways for next</p>';
