@@ -9,6 +9,7 @@
 | `test_obs_controller_startup.py` | PASS | 2026-03-06 | OBS start verification (no false-positive stream started) |
 | `test_suno_stt_extractor.py` | PASS | 2026-03-05 | Suno STT lyrics extraction pipeline tests |
 | `test_go_live_steps.py` | PASS | 2026-02-28 | Step-by-step Go Live debugging + DOM verification |
+| `test_discord_voice_broadcaster_integration.py` | PASS | 2026-04-07 | Discord voice lane boot/runtime wiring (+ invalid snowflake env case; 6 tests) |
 
 ---
 

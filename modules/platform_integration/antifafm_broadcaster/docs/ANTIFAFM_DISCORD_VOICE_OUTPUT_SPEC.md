@@ -218,7 +218,7 @@ ANTIFAFM_DISCORD_VOICE_CHANNEL_ID=1490463995256115261  # #antifafm-radio
 
 # Optional
 ANTIFAFM_DISCORD_VOICE_ENABLED=false  # Master switch (default off until configured)
-ANTIFAFM_DISCORD_VOICE_VOLUME=1.0     # 0.0-2.0 (PCMVolumeTransformer, optional)
+ANTIFAFM_DISCORD_VOICE_VOLUME=1.0     # 0.0-2.0 — FFmpeg -af volume=… (not PCMVolumeTransformer; Opus-safe)
 ```
 
 **Bot user ID**: `1490483262794240030` (antifaFM Radio, Beneficial AI role assigned)
@@ -461,13 +461,13 @@ These are module-local dependencies. The broadcaster's own `requirements.txt` al
 
 | Component | Status | Evidence |
 |-----------|--------|----------|
-| AntifaFMBroadcaster | LIVE | `src/antifafm_broadcaster.py` — 586 lines, async lifecycle |
-| FFmpegStreamer | LIVE | `src/ffmpeg_streamer.py` — 890 lines, YouTube RTMPS output |
-| StreamHealthMonitor | LIVE | `src/stream_health_monitor.py` — 274 lines, generic callbacks |
+| AntifaFMBroadcaster | LIVE | `src/antifafm_broadcaster.py` — async lifecycle + optional Discord lane |
+| FFmpegStreamer | LIVE | `src/ffmpeg_streamer.py` — YouTube RTMPS output |
+| StreamHealthMonitor | LIVE | `src/stream_health_monitor.py` — generic callbacks |
 | OBS Controller | LIVE | `src/obs_controller.py` — alt YouTube output |
-| Discord voice output | DOES NOT EXIST | This spec defines it |
-| Discord bot framework | DOES NOT EXIST | Only webhook-based (moltbot_bridge) |
-| PyNaCl / discord.py | NOT INSTALLED | Need to add to requirements.txt |
+| Discord voice output | INTEGRATED | `src/discord_voice_output.py` — starts/stops with broadcaster when `ANTIFAFM_DISCORD_VOICE_ENABLED` |
+| Discord bot framework | VOICE ADAPTER ONLY | Headless `discord.Client` in module (no slash commands) |
+| PyNaCl / discord.py | MODULE DEPS | `modules/platform_integration/antifafm_broadcaster/requirements.txt` |
 
 ---
 

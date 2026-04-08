@@ -69,6 +69,18 @@ asyncio.run(broadcaster.start())
 | `ANTIFAFM_DEFAULT_VISUAL` | `assets/default_visual.png` | Static image overlay |
 | `ANTIFAFM_HEARTBEAT_INTERVAL` | `30` | Health check interval (seconds) |
 
+### Optional Discord voice lane (sibling output)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ANTIFAFM_DISCORD_VOICE_ENABLED` | unset / `false` | When truthy, starts Discord voice after YouTube lane is up |
+| `ANTIFAFM_BOT` | — | Bot token (or `ANTIFAFM_DISCORD_BOT_TOKEN`) |
+| `ANTIFAFM_DISCORD_GUILD_ID` | — | Discord server id |
+| `ANTIFAFM_DISCORD_VOICE_CHANNEL_ID` | — | Voice channel id |
+| `ANTIFAFM_DISCORD_VOICE_VOLUME` | `1.0` | FFmpeg `volume` filter gain (0.0–2.0); unity = no `-af` |
+
+Requires `discord.py` and `PyNaCl` (see module `requirements.txt`). Discord start failure does not stop YouTube/OBS streaming.
+
 ### OBS Mode Audio (ANTIFAFM_USE_OBS=1)
 
 When using OBS mode, OBS handles streaming directly. You **must** configure an audio source in OBS:

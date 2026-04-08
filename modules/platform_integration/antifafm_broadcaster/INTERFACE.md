@@ -164,7 +164,17 @@ builder.get_status() -> dict
 | `ANTIFAFM_STREAM_URL` | No | `https://antifaFM.com/radio.mp3` | Icecast URL |
 | `ANTIFAFM_DEFAULT_VISUAL` | No | `assets/default_visual.png` | Visual overlay |
 | `ANTIFAFM_HEARTBEAT_INTERVAL` | No | `30` | Health check interval |
-| `ANTIFAFM_TELEMETRY_PATH` | No | `telemetry.jsonl` | Telemetry output |
+| `ANTIFAFM_TELEMETRY_PATH` | No | `modules/.../telemetry.jsonl` | Telemetry JSONL (runtime file; gitignored under default path) |
+
+### Optional: Discord voice lane
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `ANTIFAFM_DISCORD_VOICE_ENABLED` | No | off | Truthy = start Discord voice after YouTube lane |
+| `ANTIFAFM_BOT` | If lane on | - | Bot token (or `ANTIFAFM_DISCORD_BOT_TOKEN`) |
+| `ANTIFAFM_DISCORD_GUILD_ID` | If lane on | - | Server snowflake (invalid → lane skipped) |
+| `ANTIFAFM_DISCORD_VOICE_CHANNEL_ID` | If lane on | - | Voice channel snowflake |
+| `ANTIFAFM_DISCORD_VOICE_VOLUME` | No | `1.0` | FFmpeg `volume` filter (0.0–2.0) |
 
 ### Layer 2.5: Visual Effects
 

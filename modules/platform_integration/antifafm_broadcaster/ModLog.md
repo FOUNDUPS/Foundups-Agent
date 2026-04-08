@@ -1,5 +1,27 @@
 # antifaFM Broadcaster - ModLog
 
+## V3.3.1 - Discord voice hardening (2026-04-07)
+
+**Follow-up**: FFmpeg `-af volume=` for `ANTIFAFM_DISCORD_VOICE_VOLUME` (replaces `PCMVolumeTransformer`, which rejects Opus sources). Guild/channel env IDs fail closed via `_parse_snowflake_env`. `telemetry.jsonl` removed from version control + `.gitignore` (runtime WSP 91 sink only).
+
+---
+
+## V3.3.0 - Discord voice output runtime integration (2026-04-07)
+
+**Slice**: `ANTIFAFM_DISCORD_VOICE_OUTPUT_INTEGRATION_PHASE2`
+
+**What changed**
+- `src/discord_voice_output.py`: bounded adapter (Icecast → `FFmpegOpusAudio`, own `StreamHealthMonitor`, start/stop/get_status); optional import when `discord.py` missing.
+- `src/antifafm_broadcaster.py`: env-gated `self.discord_output`, `_init_discord_output()`, start after YouTube success (isolated failure), stop cleans Discord lane, `get_status` + JSONL telemetry include `discord_voice`.
+- `requirements.txt`: `discord.py>=2.3.0`, `PyNaCl>=1.5.0`.
+- `tests/test_discord_voice_broadcaster_integration.py`: boot-path mocks (5 tests).
+
+**Env gates**: `ANTIFAFM_DISCORD_VOICE_ENABLED`, `ANTIFAFM_BOT` (or `ANTIFAFM_DISCORD_BOT_TOKEN`), `ANTIFAFM_DISCORD_GUILD_ID`, `ANTIFAFM_DISCORD_VOICE_CHANNEL_ID`, optional `ANTIFAFM_DISCORD_VOICE_VOLUME`.
+
+**WSP**: WSP 15 (optional P1 lane), WSP 27 (DAE lifecycle), WSP 64 (secrets via env), WSP 97 (evidence + test).
+
+---
+
 ## V3.2.9 - Voxtral TTS Evaluation Contract (2026-03-29)
 
 **Context**: WSP 97 evaluation of Mistral Voxtral TTS (4B parameter model with zero-shot voice cloning) for potential antifaFM integration.
