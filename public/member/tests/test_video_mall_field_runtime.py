@@ -789,3 +789,104 @@ class TestTouchModePaddingAR:
         # Both rules should use 2.4rem
         lines_with_padding = [l for l in css.splitlines() if "padding-top: 2.4rem" in l]
         assert len(lines_with_padding) >= 2, "Expected 2.4rem padding in both .has-video-controls and :has(.mall-tile-audio) rules"
+
+
+class TestMallLocomotionAndGestures:
+    """Test mall locomotion (desktop drag, touch) and gesture conflict prevention."""
+
+    def test_drag_scroll_instance_variable(self):
+        """dragScrollInstance tracks the drag-to-scroll handler."""
+        js = _read("js/mall-tile-field.js")
+        assert "dragScrollInstance" in js
+
+    def test_tap_guard_active_variable(self):
+        """tapGuardActive prevents accidental taps during/after drag."""
+        js = _read("js/mall-tile-field.js")
+        assert "tapGuardActive" in js
+
+    def test_bind_drag_scroll_function(self):
+        """bindDragScroll function exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "function bindDragScroll" in js
+
+    def test_bind_scroll_state_function(self):
+        """bindScrollState function exists for edge shadow tracking."""
+        js = _read("js/mall-tile-field.js")
+        assert "function bindScrollState" in js
+
+    def test_tap_guard_in_click_handler(self):
+        """Click handler checks tapGuardActive before processing."""
+        js = _read("js/mall-tile-field.js")
+        assert "if (tapGuardActive) return" in js
+
+    def test_is_dragging_class_applied(self):
+        """is-dragging class added during drag."""
+        js = _read("js/mall-tile-field.js")
+        assert "classList.add('is-dragging')" in js
+
+    def test_is_dragging_class_removed(self):
+        """is-dragging class removed after drag ends."""
+        js = _read("js/mall-tile-field.js")
+        assert "classList.remove('is-dragging')" in js
+
+    def test_tap_guard_cleared_with_delay(self):
+        """Tap guard is cleared after brief delay to prevent race."""
+        js = _read("js/mall-tile-field.js")
+        assert "setTimeout" in js
+        assert "tapGuardActive = false" in js
+
+    def test_wrapper_cursor_grab_css(self):
+        """Wrapper has cursor: grab for drag affordance."""
+        css = _read("css/mall-tile-field.css")
+        assert "cursor: grab" in css
+
+    def test_is_dragging_cursor_grabbing_css(self):
+        """is-dragging state has cursor: grabbing."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile-field-wrapper.is-dragging" in css
+        assert "cursor: grabbing" in css
+
+    def test_touch_action_pan_css(self):
+        """touch-action set for clear pan gesture."""
+        css = _read("css/mall-tile-field.css")
+        assert "touch-action: pan-x pan-y" in css
+
+    def test_scroll_edge_shadow_elements(self):
+        """Wrapper has pseudo-elements for scroll edge shadows."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile-field-wrapper::before" in css
+        assert ".mall-tile-field-wrapper::after" in css
+
+    def test_can_scroll_up_class(self):
+        """can-scroll-up class controls top shadow visibility."""
+        css = _read("css/mall-tile-field.css")
+        assert ".can-scroll-up" in css
+
+    def test_can_scroll_down_class(self):
+        """can-scroll-down class controls bottom shadow visibility."""
+        css = _read("css/mall-tile-field.css")
+        assert ".can-scroll-down" in css
+
+    def test_scroll_state_updated_on_scroll(self):
+        """Scroll event listener updates scroll state classes."""
+        js = _read("js/mall-tile-field.js")
+        assert "updateScrollState" in js
+        assert "addEventListener('scroll'" in js
+
+    def test_drag_moved_threshold(self):
+        """Drag requires movement threshold before activating guard."""
+        js = _read("js/mall-tile-field.js")
+        assert "Math.abs(dx) > 5" in js or "Math.abs(dy) > 5" in js
+
+    def test_interactive_elements_excluded_from_drag(self):
+        """Drag ignores clicks on buttons and interactive elements."""
+        js = _read("js/mall-tile-field.js")
+        assert "e.target.closest('button, a, [tabindex]')" in js
+
+    def test_two_dimensional_scroll(self):
+        """Drag scroll works in both X and Y directions."""
+        js = _read("js/mall-tile-field.js")
+        assert "scrollStartX" in js
+        assert "scrollStartY" in js
+        assert "scrollLeft" in js
+        assert "scrollTop" in js
