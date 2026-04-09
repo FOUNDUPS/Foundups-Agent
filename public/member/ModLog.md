@@ -1,5 +1,37 @@
 # Member Area Module Change Log
 
+## [2026-04-10] Inline Preview Resource Hardening Phase 1 (Worker BD, WSP 15/97)
+
+**Who**: 0102 — Worker BD
+**Slice**: `PFMALL_PREVIEW_RESOURCE_HARDENING_PHASE1`
+**What**: Harden pfMALL inline preview resource behavior for mobile/PWA reality.
+
+**Files Modified**:
+- `public/member/js/mall-tile-field.js` — Teardown hygiene, visibility handler, error fail-safes
+- `public/member/tests/test_video_mall_field_runtime.py` — 13 new tests for resource hardening
+
+**Lifecycle/Resource Safeguards Added**:
+1. **Stale callback guard**: `previewGeneration` incremented FIRST in `stopInlinePreview()` to invalidate pending async callbacks
+2. **HTML5 video teardown hygiene**:
+   - `onerror` handler cleared before teardown
+   - `video.load()` called to release media buffers
+   - DOM node removed from parent
+3. **Page visibility handler**: `visibilitychange` pauses preview when tab/page is hidden (battery discipline)
+4. **Invalid URL fail-safe**: Validates URL length before attempting preview
+5. **YouTube error callback**: `onError` handler guards against generation and cleans up
+6. **HTML5 error handler**: `onerror` fails quietly without poisoning state
+7. **Autoplay failure cleanup**: `.catch()` on `video.play()` calls `stopInlinePreview()`
+
+**Cleanup Paths Improved**:
+- `stopInlinePreview()`: Now increments generation first, clears error handlers, calls `load()`, removes DOM node
+- `startInlinePreview()`: Defensive cleanup (always stops previous), URL validation, error handlers on both YT and HTML5
+
+**WSP 97 Applied**: Runtime boundary respected — no changes to UX semantics, service worker, or PWA caching.
+
+**Test Count**: 154 passed (141 existing + 13 new resource hardening tests)
+
+---
+
 ## [2026-04-09] Non-Video Quick-View Action Surface Phase 2 (Worker BB, WSP 15/97)
 
 **Who**: 0102 — Worker BB

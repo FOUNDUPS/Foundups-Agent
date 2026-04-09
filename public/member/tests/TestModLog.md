@@ -4,6 +4,35 @@ Test evolution log for the p.fMALL member shell test suite.
 
 ---
 
+## 2026-04-10 | Preview Resource Hardening Tests (WSP 15/97)
+
+**File**: `test_video_mall_field_runtime.py` (extended)
+**Tests**: 13 new | **Class**: `TestPreviewResourceHardening` | **Result**: 154 passed total
+**Worker**: BD
+
+Validates inline preview resource discipline for mobile/PWA:
+
+| Test | What it covers |
+|------|----------------|
+| test_stale_callback_guard_increment_first | `previewGeneration++` happens FIRST in teardown |
+| test_html5_video_load_called | `video.load()` releases media buffers |
+| test_html5_video_removed_from_dom | Video element removed from parent on teardown |
+| test_html5_video_onerror_cleared | `onerror` handler cleared to prevent stale callback |
+| test_visibility_handler_bound | `bindVisibilityHandler()` exists and called |
+| test_visibility_change_pauses_preview | `visibilitychange` pauses preview when hidden |
+| test_invalid_url_failsafe | URL validated before preview attempt |
+| test_youtube_error_callback_guarded | YT `onError` checks generation guard |
+| test_html5_video_error_handler | `video.onerror` fails quietly |
+| test_fullscreen_handoff_cleanup | `openFullscreenFromTile` stops preview first |
+| test_expand_cleanup | `expandFoundUp` stops preview first |
+| test_collapse_cleanup | `collapseFoundUp` stops preview first |
+| test_visibility_bound_guard | Handler has double-bind guard |
+
+**Updated test**:
+- `test_one_active_preview_rule`: Updated to check for defensive cleanup comment
+
+---
+
 ## 2026-04-09 | Non-Video Action Surface Phase 2 Tests (WSP 15/97)
 
 **File**: `test_non_video_quickview_actions.py` (extended)

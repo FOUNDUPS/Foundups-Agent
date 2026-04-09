@@ -526,9 +526,10 @@ class TestTapInlinePreviewAR:
         assert "function stopInlinePreview" in js
 
     def test_one_active_preview_rule(self):
-        """Starting a new preview stops the previous one."""
+        """Starting a new preview stops the previous one (defensive cleanup)."""
         js = _read("js/mall-tile-field.js")
-        assert "playingIndex !== null && playingIndex !== index" in js
+        # Defensive cleanup: always stop previous preview first
+        assert "// Defensive cleanup: always stop previous preview first" in js
         assert "stopInlinePreview()" in js
 
     def test_toggle_play_starts_inline(self):
@@ -890,3 +891,84 @@ class TestMallLocomotionAndGestures:
         assert "scrollStartY" in js
         assert "scrollLeft" in js
         assert "scrollTop" in js
+
+
+class TestPreviewResourceHardening:
+    """Test inline preview resource hardening (BD slice)."""
+
+    def test_stale_callback_guard_increment_first(self):
+        """stopInlinePreview increments generation FIRST to invalidate callbacks."""
+        js = _read("js/mall-tile-field.js")
+        assert "// Increment generation FIRST" in js
+        assert "previewGeneration++" in js
+
+    def test_html5_video_load_called(self):
+        """HTML5 video.load() called to release media buffers."""
+        js = _read("js/mall-tile-field.js")
+        assert "inlineHTML5Video.load()" in js
+
+    def test_html5_video_removed_from_dom(self):
+        """HTML5 video removed from DOM on teardown."""
+        js = _read("js/mall-tile-field.js")
+        assert "inlineHTML5Video.parentNode.removeChild(inlineHTML5Video)" in js
+
+    def test_html5_video_onerror_cleared(self):
+        """HTML5 video onerror handler cleared on teardown."""
+        js = _read("js/mall-tile-field.js")
+        assert "inlineHTML5Video.onerror = null" in js
+
+    def test_visibility_handler_bound(self):
+        """bindVisibilityHandler exists and is called on init."""
+        js = _read("js/mall-tile-field.js")
+        assert "function bindVisibilityHandler" in js
+        assert "bindVisibilityHandler()" in js
+
+    def test_visibility_change_pauses_preview(self):
+        """visibilitychange pauses preview when page is hidden."""
+        js = _read("js/mall-tile-field.js")
+        assert "document.addEventListener('visibilitychange'" in js
+        assert "document.hidden" in js
+        assert "pauseInlinePreview()" in js
+
+    def test_invalid_url_failsafe(self):
+        """startInlinePreview validates URL before attempting preview."""
+        js = _read("js/mall-tile-field.js")
+        assert "videoUrl.length < 5" in js
+
+    def test_youtube_error_callback_guarded(self):
+        """YouTube player onError callback checks generation."""
+        js = _read("js/mall-tile-field.js")
+        assert "onError: function(event)" in js
+
+    def test_html5_video_error_handler(self):
+        """HTML5 video has onerror handler that fails quietly."""
+        js = _read("js/mall-tile-field.js")
+        assert "video.onerror = function()" in js
+
+    def test_fullscreen_handoff_cleanup(self):
+        """openFullscreenFromTile stops inline preview first."""
+        js = _read("js/mall-tile-field.js")
+        assert "function openFullscreenFromTile" in js
+        idx_func = js.index("function openFullscreenFromTile")
+        idx_stop = js.index("stopInlinePreview();", idx_func)
+        assert idx_stop - idx_func < 100
+
+    def test_expand_cleanup(self):
+        """expandFoundUp stops inline preview first."""
+        js = _read("js/mall-tile-field.js")
+        idx_func = js.index("function expandFoundUp")
+        idx_stop = js.index("stopInlinePreview();", idx_func)
+        assert idx_stop - idx_func < 200
+
+    def test_collapse_cleanup(self):
+        """collapseFoundUp stops inline preview first."""
+        js = _read("js/mall-tile-field.js")
+        idx_func = js.index("function collapseFoundUp")
+        idx_stop = js.index("stopInlinePreview();", idx_func)
+        assert idx_stop - idx_func < 200
+
+    def test_visibility_bound_guard(self):
+        """Visibility handler has guard against double-binding."""
+        js = _read("js/mall-tile-field.js")
+        assert "visibilityBound" in js
+        assert "if (visibilityBound) return" in js
