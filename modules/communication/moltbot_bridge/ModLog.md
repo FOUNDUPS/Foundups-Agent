@@ -23,8 +23,8 @@
 | Item | Status |
 |------|--------|
 | Bot presence in server | ✅ Verified |
-| Required scopes | `bot`, `applications.commands` |
-| Required intents | All 3 Privileged (Presence, Server Members, Message Content) |
+| Required scopes | `bot` (required), `applications.commands` (optional/future) |
+| Required intents | Message Content + Server Members (required), Presence (optional) |
 | DM routing | ✅ Verified |
 | Mention response | ✅ Verified |
 | Slash commands | ❌ Not registered (future) |

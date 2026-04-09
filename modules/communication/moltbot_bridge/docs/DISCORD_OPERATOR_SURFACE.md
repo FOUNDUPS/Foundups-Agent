@@ -58,19 +58,21 @@ Where:
 | Scope | Required | Purpose |
 |-------|----------|---------|
 | `bot` | **Yes** | Bot user presence in guild |
-| `applications.commands` | **Yes** | Slash command registration |
+| `applications.commands` | Optional | Slash command registration (not currently deployed) |
+
+> **Note**: `applications.commands` is included in OAuth URLs for future compatibility but is not required for current functionality.
 
 ---
 
 ## Required Intents
 
-All three Privileged Gateway Intents must be **enabled** in Developer Portal:
+Enable these Privileged Gateway Intents in Developer Portal:
 
 | Intent | Required | Purpose |
 |--------|----------|---------|
-| **Presence Intent** | Yes | See member online status |
-| **Server Members Intent** | Yes | Access member list, join/leave events |
-| **Message Content Intent** | Yes | Read message text (non-slash) |
+| **Message Content Intent** | **Yes** | Read message text (non-slash DMs, mentions) |
+| **Server Members Intent** | **Yes** | Access member list, join/leave events |
+| **Presence Intent** | Optional | See member online status (not currently used) |
 
 > Without Message Content Intent, OpenClaw cannot process non-slash DMs or mentions.
 
@@ -84,14 +86,12 @@ For **production operator use** (not admin):
 |------------|-----|---------|
 | View Channels | `1024` | See channels |
 | Send Messages | `2048` | Respond |
-| Send Messages in Threads | `274877906944` | Thread replies |
 | Embed Links | `16384` | Rich embeds |
 | Attach Files | `32768` | File uploads |
 | Read Message History | `65536` | Context |
 | Add Reactions | `64` | Reactions |
-| Use Slash Commands | `2147483648` | Slash commands |
 
-**Minimum permission integer**: `2147558464` (without file/embed) or `2147614784` (with)
+**Minimum permission integer**: `68672` (basic) or `117824` (with embed/file)
 
 Current 0102 config uses **Administrator** (`8`) for operational simplicity during development.
 

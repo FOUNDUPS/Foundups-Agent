@@ -66,8 +66,8 @@ Legacy compatibility:
 
 See [docs/DISCORD_OPERATOR_SURFACE.md](docs/DISCORD_OPERATOR_SURFACE.md) for:
 - Verified install flow and OAuth URL
-- Required scopes (`bot`, `applications.commands`)
-- Required intents (all three Privileged Gateway Intents)
+- Required scopes (`bot`) and optional scopes (`applications.commands`)
+- Required intents (Message Content, Server Members) and optional (Presence)
 - Operator runbook and smoke tests
 
 ## IronClaw Sidecar Mode (Optional)

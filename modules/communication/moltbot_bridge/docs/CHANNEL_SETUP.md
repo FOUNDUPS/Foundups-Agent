@@ -79,13 +79,13 @@ openclaw start
    - New Application → Name: `FoundupsDigitalTwin`
    - Bot → Add Bot → Copy Token
 
-2. Enable **ALL THREE** Gateway Intents (Bot → Privileged Gateway Intents):
-   - ✅ Presence Intent
-   - ✅ Server Members Intent
-   - ✅ Message Content Intent
+2. Enable Gateway Intents (Bot → Privileged Gateway Intents):
+   - ✅ Message Content Intent (required)
+   - ✅ Server Members Intent (required)
+   - ⬜ Presence Intent (optional — not currently used)
 
 3. Generate Invite URL (OAuth2 → URL Generator):
-   - Scopes: `bot`, `applications.commands`
+   - Scopes: `bot` (required), `applications.commands` (optional — for future slash commands)
    - Permissions: View Channels, Send Messages, Read History, Embed Links, Attach Files, Add Reactions
 
 4. Invite bot to your server using generated URL
