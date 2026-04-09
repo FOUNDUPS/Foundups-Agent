@@ -331,6 +331,35 @@
   backdrop-filter: blur(8px);
 }
 
+/* ========== Non-Video Tiles ========== */
+
+/* Source action badge ("View Repo", "Open App", "Open Service") */
+.mall-tile-action-badge {
+  position: absolute;
+  bottom: 0.6rem;
+  left: 0.6rem;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border-radius: 0.35rem;
+  background: rgba(141, 113, 255, 0.35);
+  color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+
+/* Non-video tiles: subtle border accent, no video controls */
+.mall-tile.non-video {
+  border-color: rgba(141, 113, 255, 0.15);
+}
+
+.mall-tile.non-video:hover,
+.mall-tile.non-video:focus-visible {
+  border-color: rgba(141, 113, 255, 0.35);
+}
+
 /* Play state indicator — snappy for immediate feel */
 .mall-tile-play-indicator {
   position: absolute;

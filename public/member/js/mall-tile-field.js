@@ -443,28 +443,43 @@
       // Video-backed: use poster_url as background
       var posterStyle = item.poster_url ? 'background-image: url(' + escapeAttr(item.poster_url) + ')' : '';
 
-      // Queue count (video_count or videos array length)
+      // Determine if tile has videos (includes expanded video tiles with video_data)
+      var hasVideos = (item.videos && item.videos.length) || item.video_count || item.video_data;
+
+      // Queue count (video_count or videos array length) — video tiles only
       var queueCount = item.video_count || (item.videos ? item.videos.length : 0);
       var queueBadge = queueCount > 0 ? '<span class="mall-tile-queue-count">' + queueCount + ' videos</span>' : '';
 
-      // Play indicator
-      var playIndicator = '<div class="mall-tile-play-indicator"></div>';
+      // Play indicator — video tiles only
+      var playIndicator = hasVideos ? '<div class="mall-tile-play-indicator"></div>' : '';
 
-      // Corner expand button for explicit fullscreen entry
-      var hasVideos = (item.videos && item.videos.length) || item.video_count;
+      // Corner expand button for explicit fullscreen entry — video tiles only
       var expandBtn = hasVideos ? '<button class="mall-tile-expand" aria-label="Open fullscreen" title="Fullscreen">&#9654;</button>' : '';
 
-      // Inline preview container (YouTube iframe or HTML5 video goes here)
+      // Inline preview container (YouTube iframe or HTML5 video goes here) — video tiles only
       var previewContainer = hasVideos ? '<div class="mall-tile-preview"><div class="mall-tile-preview-stage"></div></div>' : '';
 
       // Speaker button for mute/unmute (top-left, video-backed only)
       var speakerSvg = '<svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
       var audioBtn = hasVideos ? '<button class="mall-tile-audio" aria-label="Start muted preview" title="Start muted preview">' + speakerSvg + '</button>' : '';
 
-      return '<article class="mall-tile theme-' + theme + '" data-index="' + index + '" data-foundup-id="' + escapeAttr(item.foundup_id || item.id || '') + '" tabindex="0" aria-label="' + escapeAttr(item.name || item.title || '') + '" style="' + posterStyle + '">' +
+      // Non-video source type action badge
+      var sourceTypeActions = {
+        'github_repo': 'View Repo',
+        'external_app': 'Open App',
+        'internal_service': 'Open Service'
+      };
+      var sourceAction = !hasVideos && item.source_type && sourceTypeActions[item.source_type];
+      var sourceActionBadge = sourceAction ? '<span class="mall-tile-action-badge">' + sourceAction + '</span>' : '';
+
+      // Non-video tile class modifier
+      var tileClass = 'mall-tile theme-' + theme + (hasVideos ? '' : ' non-video');
+
+      return '<article class="' + tileClass + '" data-index="' + index + '" data-foundup-id="' + escapeAttr(item.foundup_id || item.id || '') + '" tabindex="0" aria-label="' + escapeAttr(item.name || item.title || '') + '" style="' + posterStyle + '">' +
         previewContainer +
         '<span class="mall-tile-badge ' + badgeClass + '">' + escapeHtml(readiness.replace('_', ' ')) + '</span>' +
         queueBadge +
+        sourceActionBadge +
         playIndicator +
         audioBtn +
         expandBtn +
@@ -623,7 +638,21 @@
       targetTile.classList.add('tap-pulse');
     }
 
-    // Inline preview: tap same tile = pause/resume, tap different = start new
+    // Get item to check if it has videos (includes expanded video tiles with video_data)
+    var items = expandedFoundUp !== null ? getExpandedVideos() : mallCatalog;
+    var item = items[index];
+    var hasVideos = item && ((item.videos && item.videos.length) || item.video_count || item.video_data);
+
+    // Non-video tiles: open quick-view instead of trying inline preview
+    if (!hasVideos) {
+      var foundupId = item && (item.foundup_id || item.id);
+      if (foundupId && window.mallPlanes && typeof window.mallPlanes.openFoundUpById === 'function') {
+        window.mallPlanes.openFoundUpById(foundupId);
+      }
+      return;
+    }
+
+    // Video tiles: inline preview behavior
     if (playingIndex === index) {
       if (previewPaused) resumeInlinePreview();
       else pauseInlinePreview();

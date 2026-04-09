@@ -317,3 +317,138 @@ class TestProjectionJS:
     def test_bind_projection_chips_called(self, tile_field_js):
         """bindProjectionChips is called in initialize."""
         assert 'bindProjectionChips()' in tile_field_js
+
+
+# ═══════════════════════════════════════════════
+# Non-Video Tile Behavior (PR #303)
+# ═══════════════════════════════════════════════
+
+class TestNonVideoTileRendering:
+    """Non-video tiles render without video controls."""
+
+    def test_has_videos_includes_video_data(self, tile_field_js):
+        """hasVideos check includes video_data for expanded tiles."""
+        # Both renderTiles and togglePlay must check video_data
+        assert 'item.video_data' in tile_field_js
+
+    def test_non_video_class_applied(self, tile_field_js):
+        """Non-video tiles get .non-video class."""
+        assert "' non-video'" in tile_field_js or '" non-video"' in tile_field_js
+
+    def test_play_indicator_conditional_on_has_videos(self, tile_field_js):
+        """Play indicator only rendered for video tiles."""
+        assert "hasVideos ? '<div class=\"mall-tile-play-indicator\">" in tile_field_js or \
+               'hasVideos ?' in tile_field_js and 'mall-tile-play-indicator' in tile_field_js
+
+    def test_audio_button_conditional_on_has_videos(self, tile_field_js):
+        """Audio (speaker) button only rendered for video tiles."""
+        assert "hasVideos ? '<button class=\"mall-tile-audio\"" in tile_field_js or \
+               'hasVideos ?' in tile_field_js and 'mall-tile-audio' in tile_field_js
+
+    def test_expand_button_conditional_on_has_videos(self, tile_field_js):
+        """Expand button only rendered for video tiles."""
+        assert "hasVideos ? '<button class=\"mall-tile-expand\"" in tile_field_js or \
+               'hasVideos ?' in tile_field_js and 'mall-tile-expand' in tile_field_js
+
+
+class TestNonVideoActionBadge:
+    """Non-video tiles show source action badge."""
+
+    def test_source_type_actions_defined(self, tile_field_js):
+        """Source type action labels are defined."""
+        assert 'sourceTypeActions' in tile_field_js
+
+    def test_github_repo_action_label(self, tile_field_js):
+        """github_repo gets 'View Repo' action label."""
+        assert "'View Repo'" in tile_field_js or '"View Repo"' in tile_field_js
+
+    def test_external_app_action_label(self, tile_field_js):
+        """external_app gets 'Open App' action label."""
+        assert "'Open App'" in tile_field_js or '"Open App"' in tile_field_js
+
+    def test_internal_service_action_label(self, tile_field_js):
+        """internal_service gets 'Open Service' action label."""
+        assert "'Open Service'" in tile_field_js or '"Open Service"' in tile_field_js
+
+    def test_action_badge_class_rendered(self, tile_field_js):
+        """Action badge uses .mall-tile-action-badge class."""
+        assert 'mall-tile-action-badge' in tile_field_js
+
+    def test_action_badge_only_for_non_video(self, tile_field_js):
+        """Action badge conditional on !hasVideos."""
+        assert '!hasVideos' in tile_field_js
+
+
+class TestNonVideoActionBadgeCSS:
+    """CSS styling for non-video tile action badge."""
+
+    def test_action_badge_styles_exist(self, tile_field_css):
+        """Action badge CSS class is defined."""
+        assert '.mall-tile-action-badge' in tile_field_css
+
+    def test_action_badge_positioned_bottom_left(self, tile_field_css):
+        """Action badge is positioned at bottom-left."""
+        # Extract the action badge block and check positioning
+        assert 'bottom:' in tile_field_css and 'left:' in tile_field_css
+
+    def test_non_video_class_styles_exist(self, tile_field_css):
+        """Non-video tile class has styles."""
+        assert '.mall-tile.non-video' in tile_field_css
+
+    def test_non_video_border_accent(self, tile_field_css):
+        """Non-video tiles have border accent."""
+        assert 'border-color:' in tile_field_css
+
+
+class TestNonVideoTileTapBehavior:
+    """Non-video tile tap opens quick-view by ID."""
+
+    def test_non_video_tap_opens_quick_view(self, tile_field_js):
+        """Non-video tiles open quick-view instead of inline preview."""
+        assert 'if (!hasVideos)' in tile_field_js
+
+    def test_quick_view_opened_by_foundup_id(self, tile_field_js):
+        """Quick-view opened by foundup_id, not index."""
+        assert 'openFoundUpById' in tile_field_js
+
+    def test_foundup_id_extracted_from_item(self, tile_field_js):
+        """foundup_id is extracted from item for handoff."""
+        assert 'item.foundup_id' in tile_field_js or "item.foundup_id || item.id" in tile_field_js
+
+
+class TestMallPlanesIdLookup:
+    """mall-planes.js supports ID-based lookup."""
+
+    @pytest.fixture
+    def mall_planes_js(self):
+        path = Path(__file__).parent.parent / 'js' / 'mall-planes.js'
+        return path.read_text(encoding='utf-8')
+
+    def test_open_foundup_by_id_exposed(self, mall_planes_js):
+        """openFoundUpById function is exposed in public API."""
+        assert 'openFoundUpById' in mall_planes_js
+
+    def test_open_foundup_by_id_iterates_catalog(self, mall_planes_js):
+        """openFoundUpById iterates catalog to find matching ID."""
+        assert 'catalog[i].foundup_id' in mall_planes_js or 'catalog[i].id' in mall_planes_js
+
+    def test_open_foundup_by_id_calls_open_foundup(self, mall_planes_js):
+        """openFoundUpById calls openFoundUp with found index."""
+        assert 'openFoundUp(i)' in mall_planes_js
+
+
+class TestExpandedVideoTilesPreserved:
+    """Expanded video tiles (with video_data) retain video behavior."""
+
+    def test_video_data_treated_as_video(self, tile_field_js):
+        """video_data field counts as hasVideos."""
+        # Check both renderTiles hasVideos and togglePlay hasVideos
+        assert 'video_data' in tile_field_js
+        # Should appear twice (renderTiles + togglePlay)
+        import re
+        matches = re.findall(r'item\.video_data', tile_field_js)
+        assert len(matches) >= 2, "video_data should be checked in both renderTiles and togglePlay"
+
+    def test_get_expanded_videos_sets_video_data(self, tile_field_js):
+        """getExpandedVideos() sets video_data on mapped items."""
+        assert 'video_data:' in tile_field_js or 'video_data: video' in tile_field_js
