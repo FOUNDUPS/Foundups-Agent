@@ -1,5 +1,39 @@
 # antifaFM Broadcaster - ModLog
 
+## V3.3.2 - Discord voice live guild verification (2026-04-09)
+
+**Slice**: `ANTIFAFM_DISCORD_VOICE_LIVE_GUILD_VERIFICATION_PHASE1`
+
+**Context**: `antifaFM Radio` bot now authorized in FOUNDUPS server with Connect/Speak/Use Voice Activity permissions. This slice verifies and documents the live Discord voice lane.
+
+**Documentation Added** (`README.md`):
+- Live Discord Voice Setup section with bot authorization status
+- Required Discord permissions table (Connect, Speak, Use Voice Activity)
+- Startup sequence explanation (YouTube first, then Discord if enabled)
+- Smoke verification runbook with env setup + launch command
+- What is verified in code vs what requires live VC run
+- Common failure modes table with symptoms/causes/fixes
+- Boundary clarity: YouTube primary, Discord optional sibling
+
+**What Was Already Verified** (code-level, V3.3.0–V3.3.1):
+- Env parsing with fail-closed snowflake validation
+- Adapter construction and isolated failure handling
+- Health monitor wiring with restart callback
+- Volume filter via FFmpeg `-af`
+- Unit tests for boot paths (5 tests)
+
+**What Requires Manual Live Run**:
+- Actual bot→guild→channel connection
+- FFmpeg→Opus audio quality in Discord
+- Reconnect under network disruption
+- Real health monitor recovery cycle
+
+**No Code Changes**: Documentation-only slice.
+
+**WSP**: WSP 15 (pre-action verification), WSP 22 (ModLog), WSP 97 (evidence).
+
+---
+
 ## V3.3.1 - Discord voice hardening (2026-04-07)
 
 **Follow-up**: FFmpeg `-af volume=` for `ANTIFAFM_DISCORD_VOICE_VOLUME` (replaces `PCMVolumeTransformer`, which rejects Opus sources). Guild/channel env IDs fail closed via `_parse_snowflake_env`. `telemetry.jsonl` removed from version control + `.gitignore` (runtime WSP 91 sink only).
