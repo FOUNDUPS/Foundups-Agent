@@ -443,8 +443,8 @@
       // Video-backed: use poster_url as background
       var posterStyle = item.poster_url ? 'background-image: url(' + escapeAttr(item.poster_url) + ')' : '';
 
-      // Determine if tile has videos
-      var hasVideos = (item.videos && item.videos.length) || item.video_count;
+      // Determine if tile has videos (includes expanded video tiles with video_data)
+      var hasVideos = (item.videos && item.videos.length) || item.video_count || item.video_data;
 
       // Queue count (video_count or videos array length) — video tiles only
       var queueCount = item.video_count || (item.videos ? item.videos.length : 0);
@@ -638,15 +638,16 @@
       targetTile.classList.add('tap-pulse');
     }
 
-    // Get item to check if it has videos
+    // Get item to check if it has videos (includes expanded video tiles with video_data)
     var items = expandedFoundUp !== null ? getExpandedVideos() : mallCatalog;
     var item = items[index];
-    var hasVideos = item && ((item.videos && item.videos.length) || item.video_count);
+    var hasVideos = item && ((item.videos && item.videos.length) || item.video_count || item.video_data);
 
     // Non-video tiles: open quick-view instead of trying inline preview
     if (!hasVideos) {
-      if (window.mallPlanes && typeof window.mallPlanes.openFoundUp === 'function') {
-        window.mallPlanes.openFoundUp(index);
+      var foundupId = item && (item.foundup_id || item.id);
+      if (foundupId && window.mallPlanes && typeof window.mallPlanes.openFoundUpById === 'function') {
+        window.mallPlanes.openFoundUpById(foundupId);
       }
       return;
     }

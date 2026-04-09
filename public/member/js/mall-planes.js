@@ -161,9 +161,20 @@
   }
 
   // ---- public API ----
+  function openFoundUpById(foundupId) {
+    if (!foundupId) return;
+    for (var i = 0; i < catalog.length; i++) {
+      if ((catalog[i].foundup_id || catalog[i].id) === foundupId) {
+        openFoundUp(i);
+        return;
+      }
+    }
+  }
+
   window.mallPlanes = {
     setCatalog: function (c) { catalog = c || []; },
     openFoundUp: openFoundUp,
+    openFoundUpById: openFoundUpById,
     closeView: closeView,
     isOpen: function () { return isOpen; },
     getActiveIndex: function () { return activeIndex; }
