@@ -222,11 +222,17 @@
   pointer-events: none;
 }
 
-.mall-tile:hover,
-.mall-tile:focus-visible {
+.mall-tile:hover {
   transform: scale(1.02);
   border-color: rgba(255, 255, 255, 0.18);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+}
+
+/* Keyboard focus: clear visible ring for accessibility */
+.mall-tile:focus-visible {
+  transform: scale(1.02);
+  border-color: rgba(141, 113, 255, 0.6);
+  box-shadow: 0 0 0 3px rgba(141, 113, 255, 0.35), 0 8px 32px rgba(0, 0, 0, 0.24);
   outline: none;
 }
 
@@ -578,6 +584,15 @@
 
 .mall-tile-expand:hover {
   background: rgba(124, 92, 252, 0.8);
+}
+
+/* Focus states for control buttons (keyboard accessibility) */
+.mall-tile-audio:focus-visible,
+.mall-tile-expand:focus-visible {
+  opacity: 1;
+  outline: 2px solid rgba(141, 113, 255, 0.8);
+  outline-offset: 2px;
+  background: rgba(124, 92, 252, 0.6);
 }
 
 /* Expanded FoundUp video field mode */

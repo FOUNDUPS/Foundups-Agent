@@ -69,6 +69,11 @@
 .fv-close-btn:hover {
   color: rgba(255, 255, 255, 0.8);
 }
+.fv-close-btn:focus-visible {
+  outline: 2px solid rgba(141, 113, 255, 0.8);
+  outline-offset: 2px;
+  color: rgba(255, 255, 255, 0.9);
+}
 
 /* ---- View content ---- */
 .fv-hero {
@@ -163,6 +168,11 @@
 .fv-primary-cta:active {
   transform: scale(0.98);
 }
+.fv-primary-cta:focus-visible {
+  outline: 2px solid rgba(0, 212, 170, 0.8);
+  outline-offset: 2px;
+  background: rgba(0, 212, 170, 0.25);
+}
 
 /* Secondary actions container */
 .fv-secondary-actions {
@@ -183,6 +193,11 @@
 .fv-secondary-link:hover {
   color: var(--text-dim, rgba(243, 241, 248, 0.7));
   text-decoration: underline;
+}
+.fv-secondary-link:focus-visible {
+  outline: 2px solid rgba(141, 113, 255, 0.6);
+  outline-offset: 2px;
+  color: var(--text-dim, rgba(243, 241, 248, 0.7));
 }
 
 /* Legacy classes (kept for backwards compatibility) */

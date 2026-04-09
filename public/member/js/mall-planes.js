@@ -30,6 +30,7 @@
   var activeIndex = -1;
   var isOpen = false;
   var gestureRef = null;
+  var returnFocusId = null;  // foundup_id for focus return (stable across projections)
 
   var READINESS_LABELS = {
     ready: 'Ready',
@@ -47,13 +48,18 @@
   // ---- open / close ----
   function openFoundUp(index) {
     if (index < 0 || index >= catalog.length) return;
+    // Save focus return ID (stable across projection/filter changes)
+    var item = catalog[index];
+    returnFocusId = item.foundup_id || item.id || null;
     activeIndex = index;
-    renderView(catalog[index]);
+    renderView(item);
     plane.classList.add('open');
     if (scrim) scrim.classList.add('open');
     document.body.classList.add('surface-open');
     isOpen = true;
     attachGestures();
+    // Move focus to close button for keyboard users
+    if (closeBtn) closeBtn.focus();
   }
 
   function closeView() {
@@ -63,6 +69,15 @@
     document.body.classList.remove('surface-open');
     isOpen = false;
     if (gestureRef) { gestureRef.destroy(); gestureRef = null; }
+    // Return focus to originating tile by stable ID (survives projection changes)
+    if (returnFocusId) {
+      var tileField = document.getElementById('mallTileField');
+      if (tileField) {
+        var tile = tileField.querySelector('.mall-tile[data-foundup-id="' + returnFocusId + '"]');
+        if (tile && typeof tile.focus === 'function') tile.focus();
+      }
+      returnFocusId = null;
+    }
   }
 
   function navigateFoundUp(delta) {
@@ -70,6 +85,9 @@
     if (next < 0 || next >= catalog.length) return;
     activeIndex = next;
     renderView(catalog[next]);
+    // Update return focus ID to navigated item (stable identity)
+    var navItem = catalog[next];
+    returnFocusId = navItem.foundup_id || navItem.id || null;
     // Sync Mall carousel position
     if (window.mallPlanesSync) window.mallPlanesSync(next);
   }
