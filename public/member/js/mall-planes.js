@@ -81,25 +81,36 @@
     var displayHero = item.hero_label || '';
     var displayTagline = item.tagline || (item.entity ? item.entity + (item.geo ? ' \u00b7 ' + item.geo : '') : '');
     var displayReadiness = item.launch_readiness || item.status || 'active';
-    var routeHint = item.routing_prefix ? ' \u2192 ' + esc(item.routing_prefix) : '';
     var isNonVideo = NON_VIDEO_SOURCE_TYPES[item.source_type] || false;
     var videoHint = (!isNonVideo && item.video_count) ? ' \u00b7 ' + item.video_count + ' videos' : '';
 
-    // Source-type metadata line for non-video entries
-    var sourceTypeMeta = '';
+    // Source-type context for non-video entries
+    var sourceContext = '';
     if (isNonVideo) {
       var sourceLabel = (item.source_type || '').replace(/_/g, ' ');
-      sourceTypeMeta = '<p class="fv-source-type-label">' + esc(sourceLabel) + '</p>';
+      var destination = item.external_url ? extractDomain(item.external_url) : '';
+      var destHint = destination ? ' \u2192 ' + esc(destination) : '';
+      sourceContext = '<p class="fv-source-context">' + esc(sourceLabel) + destHint + '</p>';
     }
 
-    // Source-type-aware CTA for non-video entries
-    var ctaHtml = '';
+    // Primary CTA: source-type action for non-video, or entry page for video
+    var primaryCtaHtml = '';
+    var secondaryLinkHtml = '';
     var ctaDef = SOURCE_TYPE_CTA[item.source_type];
-    if (ctaDef && item[ctaDef.urlField]) {
-      ctaHtml =
-        '<a href="' + esc(item[ctaDef.urlField]) + '" target="_blank" rel="noopener noreferrer" class="fv-source-cta">' +
+
+    if (isNonVideo && ctaDef && item[ctaDef.urlField]) {
+      // Non-video: primary CTA is the source action (View Repo, Open App, Open Service)
+      primaryCtaHtml =
+        '<a href="' + esc(item[ctaDef.urlField]) + '" target="_blank" rel="noopener noreferrer" class="fv-primary-cta">' +
           esc(ctaDef.label) + ' ' + ctaDef.icon +
         '</a>';
+      // Secondary: demoted entry-page link
+      secondaryLinkHtml =
+        '<a href="/member/foundup.html?id=' + encodeURIComponent(item.foundup_id) + '" class="fv-secondary-link">More about ' + esc(displayName) + '</a>';
+    } else {
+      // Video-backed: primary CTA is entry page
+      primaryCtaHtml =
+        '<a href="/member/foundup.html?id=' + encodeURIComponent(item.foundup_id) + '" class="fv-primary-cta">Open FoundUp</a>';
     }
 
     body.innerHTML =
@@ -111,13 +122,23 @@
           esc(READINESS_LABELS[displayReadiness] || displayReadiness) +
         '</span>' +
       '</div>' +
-      sourceTypeMeta +
+      sourceContext +
       '<p class="fv-tagline">' + esc(displayTagline) + esc(videoHint) + '</p>' +
       '<div class="fv-actions">' +
-        ctaHtml +
-        '<a href="/member/foundup.html?id=' + encodeURIComponent(item.foundup_id) + '" class="fv-open-link">Open FoundUp' + routeHint + '</a>' +
+        primaryCtaHtml +
       '</div>' +
+      (secondaryLinkHtml ? '<div class="fv-secondary-actions">' + secondaryLinkHtml + '</div>' : '') +
       '<p class="fv-hint">Swipe up to close \u00b7 Swipe sideways for next</p>';
+  }
+
+  // Extract domain from URL for destination hint
+  function extractDomain(url) {
+    try {
+      var u = new URL(url);
+      return u.hostname.replace(/^www\./, '');
+    } catch (e) {
+      return '';
+    }
   }
 
   // ---- gestures ----

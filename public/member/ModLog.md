@@ -1,5 +1,31 @@
 # Member Area Module Change Log
 
+## [2026-04-09] Non-Video Quick-View Action Surface Phase 2 (Worker BB, WSP 15/97)
+
+**Who**: 0102 — Worker BB
+**Slice**: `PFMALL_OBJECT_ACTION_SURFACE_PHASE2`
+**What**: Strengthen non-video quick-view/overlay into a decisive action surface with dominant primary CTA and demoted secondary path.
+
+**Files Modified**:
+- `public/member/js/mall-planes.js` — Primary/secondary CTA split, source context with domain, extractDomain helper
+- `public/member/css/mall-planes.css` — `.fv-primary-cta`, `.fv-secondary-link`, `.fv-source-context`, `.fv-secondary-actions`
+- `public/member/index.html` — Overlay action surface update, extractDomain helper
+- `public/member/css/member.css` — `.foundup-overlay-primary-cta`, `.foundup-overlay-secondary-link`, `.foundup-overlay-source-context`
+- `public/member/tests/test_non_video_quickview_actions.py` — Updated/added tests for Phase 2 action surface
+
+**Behavior**:
+- **Non-video quick-view**: Primary CTA is source action (View Repo/Open App/Open Service), visually dominant
+- **Secondary link**: "More about {name}" demoted to subtle text link below primary CTA
+- **Source context**: Shows source type + destination domain (e.g., "github repo → github.com")
+- **Video entries unchanged**: Primary CTA is "Open FoundUp" for video-backed entries
+- **Open FoundUp retained**: Demoted but available for non-video entries needing full entry page
+
+**WSP 97 Applied**: Action surface clarity achieved — primary CTA is visually and behaviorally dominant, secondary path does not compete.
+
+**Test Count**: 42 passed (non-video quickview action surface)
+
+---
+
 ## [2026-04-09] Red Dog Watch History Continue Badge CSS (Worker AV, WSP 97)
 
 **Who**: 0102 — Worker AV

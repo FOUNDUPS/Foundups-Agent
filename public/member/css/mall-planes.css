@@ -127,18 +127,65 @@
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
-.fv-source-type-label {
+/* Source context: type + destination domain */
+.fv-source-context {
   text-align: center;
   font-size: 0.78rem;
   text-transform: capitalize;
   color: var(--text-muted, rgba(243, 241, 248, 0.46));
   letter-spacing: 0.04em;
-  margin: 0 0 0.25rem;
+  margin: 0 0 0.5rem;
 }
 
+/* Primary CTA: dominant action button */
+.fv-primary-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1.75rem;
+  min-width: 180px;
+  background: rgba(0, 212, 170, 0.15);
+  border: 1px solid rgba(0, 212, 170, 0.4);
+  border-radius: 12px;
+  color: #00d4aa;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: background 0.15s, transform 0.1s;
+}
+.fv-primary-cta:hover {
+  background: rgba(0, 212, 170, 0.25);
+}
+.fv-primary-cta:active {
+  transform: scale(0.98);
+}
+
+/* Secondary actions container */
+.fv-secondary-actions {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* Secondary link: demoted, subtle entry-page path */
+.fv-secondary-link {
+  display: inline-block;
+  padding: 0.4rem 0.75rem;
+  color: var(--text-muted, rgba(243, 241, 248, 0.46));
+  text-decoration: none;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  transition: color 0.15s;
+}
+.fv-secondary-link:hover {
+  color: var(--text-dim, rgba(243, 241, 248, 0.7));
+  text-decoration: underline;
+}
+
+/* Legacy classes (kept for backwards compatibility) */
 .fv-source-cta {
   display: inline-flex;
   align-items: center;
@@ -156,7 +203,7 @@
   background: rgba(0, 212, 170, 0.18);
 }
 
-.fv-detail-link {
+.fv-open-link {
   display: inline-flex;
   align-items: center;
   padding: 0.6rem 1.2rem;
@@ -169,7 +216,7 @@
   font-weight: 500;
   transition: background 0.15s;
 }
-.fv-detail-link:hover {
+.fv-open-link:hover {
   background: rgba(124, 92, 252, 0.18);
 }
 

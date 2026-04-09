@@ -617,17 +617,26 @@
       const displayReadiness = READINESS_LABELS[item.launch_readiness] || item.launch_readiness || item.status || 'active';
       const displayRoute = item.routing_prefix || '/f/' + item.foundup_id;
 
-      // Source-type metadata for non-video entries
-      const sourceTypeLabel = isNonVideo
-        ? `<div class="foundup-overlay-source-type">${escapeHtml((item.source_type || '').replace(/_/g, ' '))}</div>`
-        : '';
-
-      // Source-type-aware CTA for non-video entries
+      // Source context for non-video entries (type + destination)
       const ctaDef = OVERLAY_SOURCE_TYPE_CTA[item.source_type];
       const ctaUrl = ctaDef ? item[ctaDef.urlField] : null;
-      const sourceCtaHtml = (ctaDef && ctaUrl)
-        ? `<a href="${escapeAttr(ctaUrl)}" target="_blank" rel="noopener noreferrer" class="foundup-overlay-source-cta">${escapeHtml(ctaDef.label)} ${ctaDef.icon}</a>`
-        : '';
+      let sourceContextHtml = '';
+      if (isNonVideo) {
+        const sourceLabel = (item.source_type || '').replace(/_/g, ' ');
+        const destination = ctaUrl ? extractDomain(ctaUrl) : '';
+        const destHint = destination ? ' \u2192 ' + escapeHtml(destination) : '';
+        sourceContextHtml = `<div class="foundup-overlay-source-context">${escapeHtml(sourceLabel)}${destHint}</div>`;
+      }
+
+      // Primary CTA: source action for non-video, entry page for video
+      let primaryCtaHtml = '';
+      let secondaryLinkHtml = '';
+      if (isNonVideo && ctaDef && ctaUrl) {
+        primaryCtaHtml = `<a href="${escapeAttr(ctaUrl)}" target="_blank" rel="noopener noreferrer" class="foundup-overlay-primary-cta">${escapeHtml(ctaDef.label)} ${ctaDef.icon}</a>`;
+        secondaryLinkHtml = `<a href="/member/foundup.html?id=${encodeURIComponent(item.foundup_id)}" class="foundup-overlay-secondary-link">More about ${escapeHtml(displayName)}</a>`;
+      } else {
+        primaryCtaHtml = `<a href="/member/foundup.html?id=${encodeURIComponent(item.foundup_id)}" class="foundup-overlay-primary-cta">Open FoundUp</a>`;
+      }
 
       foundupOverlayBody.innerHTML = `
         <div class="foundup-overlay-card theme-${escapeAttr(item.theme || item.foundup_id || 'default')}">
@@ -639,10 +648,13 @@
             <span class="foundup-overlay-token">${escapeHtml(displayToken)}</span>
             <span class="foundup-overlay-name">${escapeHtml(displayName)}</span>
           </div>
-          ${sourceTypeLabel}
+          ${sourceContextHtml}
           <p class="foundup-overlay-tagline">${escapeHtml(displayTagline)}</p>
           <p class="foundup-overlay-description">${escapeHtml(displayDesc)}</p>
-          ${sourceCtaHtml}
+          <div class="foundup-overlay-actions">
+            ${primaryCtaHtml}
+          </div>
+          ${secondaryLinkHtml ? `<div class="foundup-overlay-secondary-actions">${secondaryLinkHtml}</div>` : ''}
           <div class="foundup-overlay-meta">
             <div>
               <span class="focus-label">Readiness</span>
@@ -1089,6 +1101,15 @@
 
     function escapeAttr(value) {
       return String(value ?? '').replace(/"/g, '&quot;');
+    }
+
+    function extractDomain(url) {
+      try {
+        const u = new URL(url);
+        return u.hostname.replace(/^www\./, '');
+      } catch (e) {
+        return '';
+      }
     }
   </script>
   <!-- Gesture hints (shown once on first visit) -->

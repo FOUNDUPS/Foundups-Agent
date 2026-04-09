@@ -4,6 +4,36 @@ Test evolution log for the p.fMALL member shell test suite.
 
 ---
 
+## 2026-04-09 | Non-Video Action Surface Phase 2 Tests (WSP 15/97)
+
+**File**: `test_non_video_quickview_actions.py` (extended)
+**Tests**: 17 new/updated | **Classes**: `TestQuickViewActionSurface`, `TestOverlayActionSurface`, `TestQuickViewActionCSS`, `TestOverlayActionCSS` | **Result**: 42 passed total
+**Worker**: BB
+
+Validates dominant primary CTA and demoted secondary path:
+
+| Test | What it covers |
+|------|----------------|
+| test_renders_primary_cta_class | `.fv-primary-cta` used for source action |
+| test_renders_secondary_link_class | `.fv-secondary-link` for demoted entry path |
+| test_renders_source_context | `.fv-source-context` shows type + domain |
+| test_extract_domain_helper | `extractDomain()` for destination context |
+| test_secondary_link_says_more_about | "More about {name}" text |
+| test_overlay_renders_primary_cta_class | Overlay uses `.foundup-overlay-primary-cta` |
+| test_overlay_renders_secondary_link_class | Overlay uses `.foundup-overlay-secondary-link` |
+| test_overlay_renders_source_context | Overlay context with domain |
+| test_overlay_has_actions_container | `.foundup-overlay-actions` container |
+| test_overlay_extract_domain_helper | Overlay `extractDomain()` helper |
+| test_video_primary_cta_is_open_foundup | Video entries retain Open FoundUp |
+| test_overlay_video_primary_cta_is_open_foundup | Overlay video entries unchanged |
+| test_primary_cta_styles (CSS) | `.fv-primary-cta` styled dominant |
+| test_secondary_link_styles (CSS) | `.fv-secondary-link` styled demoted |
+| test_source_context_styles (CSS) | `.fv-source-context` styled subtle |
+| test_overlay_primary_cta_styles (CSS) | Overlay primary CTA styled |
+| test_overlay_actions_container (CSS) | Overlay actions container styled |
+
+---
+
 ## 2026-04-09 | Mall Locomotion and Gesture Polish Tests (WSP 97)
 
 **File**: `test_video_mall_field_runtime.py` (extended)

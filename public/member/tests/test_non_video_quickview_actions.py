@@ -74,26 +74,40 @@ class TestQuickViewSourceTypeConfig:
 
 
 # ═══════════════════════════════════════════════
-# 2. Quick-view renders source-type CTA
+# 2. Quick-view renders action surface (Phase 2)
 # ═══════════════════════════════════════════════
 
-class TestQuickViewCTARendering:
-    """renderView() in mall-planes.js uses source-type-aware CTAs."""
+class TestQuickViewActionSurface:
+    """renderView() in mall-planes.js uses dominant primary CTA."""
 
-    def test_renders_fv_source_cta_class(self, mall_planes_js):
-        assert "fv-source-cta" in mall_planes_js
+    def test_renders_primary_cta_class(self, mall_planes_js):
+        """Primary CTA uses .fv-primary-cta class."""
+        assert "fv-primary-cta" in mall_planes_js
 
-    def test_renders_source_type_label(self, mall_planes_js):
-        assert "fv-source-type-label" in mall_planes_js
+    def test_renders_secondary_link_class(self, mall_planes_js):
+        """Secondary link uses .fv-secondary-link class."""
+        assert "fv-secondary-link" in mall_planes_js
+
+    def test_renders_source_context(self, mall_planes_js):
+        """Source context uses .fv-source-context class."""
+        assert "fv-source-context" in mall_planes_js
 
     def test_non_video_suppresses_video_hint(self, mall_planes_js):
         """Non-video entries must not get 'N videos' hint."""
         assert "isNonVideo" in mall_planes_js
-        # videoHint is conditional on !isNonVideo
         assert "!isNonVideo" in mall_planes_js
 
     def test_cta_uses_target_blank(self, mall_planes_js):
+        """Non-video primary CTA opens in new tab."""
         assert 'target="_blank"' in mall_planes_js or "target=\\'_blank\\'" in mall_planes_js
+
+    def test_extract_domain_helper(self, mall_planes_js):
+        """extractDomain helper function exists for destination context."""
+        assert "extractDomain" in mall_planes_js
+
+    def test_secondary_link_says_more_about(self, mall_planes_js):
+        """Secondary link text is 'More about {name}'."""
+        assert "More about" in mall_planes_js
 
 
 # ═══════════════════════════════════════════════
@@ -120,21 +134,39 @@ class TestOverlaySourceTypeConfig:
 
 
 # ═══════════════════════════════════════════════
-# 4. Overlay renders source-type CTA
+# 4. Overlay renders action surface (Phase 2)
 # ═══════════════════════════════════════════════
 
-class TestOverlayCTARendering:
-    """openFoundupOverlay() renders source-type-aware CTAs."""
+class TestOverlayActionSurface:
+    """openFoundupOverlay() renders dominant primary CTA."""
 
-    def test_overlay_renders_source_type_class(self, index_html):
-        assert "foundup-overlay-source-type" in index_html
+    def test_overlay_renders_primary_cta_class(self, index_html):
+        """Overlay uses .foundup-overlay-primary-cta class."""
+        assert "foundup-overlay-primary-cta" in index_html
 
-    def test_overlay_renders_source_cta_class(self, index_html):
-        assert "foundup-overlay-source-cta" in index_html
+    def test_overlay_renders_secondary_link_class(self, index_html):
+        """Overlay uses .foundup-overlay-secondary-link class."""
+        assert "foundup-overlay-secondary-link" in index_html
+
+    def test_overlay_renders_source_context(self, index_html):
+        """Overlay uses .foundup-overlay-source-context class."""
+        assert "foundup-overlay-source-context" in index_html
+
+    def test_overlay_has_actions_container(self, index_html):
+        """Overlay has actions container class."""
+        assert "foundup-overlay-actions" in index_html
 
     def test_overlay_non_video_description_no_video_count(self, index_html):
         """Non-video overlay description must not use video_count."""
         assert "isNonVideo" in index_html
+
+    def test_overlay_extract_domain_helper(self, index_html):
+        """extractDomain helper function exists for destination context."""
+        assert "extractDomain" in index_html
+
+    def test_overlay_secondary_link_says_more_about(self, index_html):
+        """Overlay secondary link text is 'More about {name}'."""
+        assert "More about" in index_html
 
 
 # ═══════════════════════════════════════════════
@@ -148,13 +180,17 @@ class TestVideoEntriesUnchanged:
         """Video entries still get 'N videos' hint."""
         assert "video_count" in mall_planes_js
 
-    def test_open_foundup_link_always_present(self, mall_planes_js):
-        """All entries still get 'Open FoundUp' link to entry page."""
+    def test_video_primary_cta_is_open_foundup(self, mall_planes_js):
+        """Video entries get 'Open FoundUp' as primary CTA."""
         assert "Open FoundUp" in mall_planes_js
 
     def test_overlay_video_count_still_used(self, index_html):
         """Video entries still use video_count in description."""
         assert "video_count" in index_html
+
+    def test_overlay_video_primary_cta_is_open_foundup(self, index_html):
+        """Overlay video entries get 'Open FoundUp' as primary CTA."""
+        assert "Open FoundUp" in index_html
 
 
 # ═══════════════════════════════════════════════
@@ -210,3 +246,63 @@ class TestCatalogNonVideoTruth:
         assert entry is not None, "kosei not in catalog"
         assert entry["source_type"] == "internal_service"
         assert entry.get("external_url"), "kosei missing external_url"
+
+
+# ═══════════════════════════════════════════════
+# 8. Action surface CSS styling (Phase 2)
+# ═══════════════════════════════════════════════
+
+MALL_PLANES_CSS = "public/member/css/mall-planes.css"
+MEMBER_CSS = "public/member/css/member.css"
+
+
+@pytest.fixture(scope="module")
+def mall_planes_css():
+    with open(MALL_PLANES_CSS, encoding="utf-8") as f:
+        return f.read()
+
+
+@pytest.fixture(scope="module")
+def member_css():
+    with open(MEMBER_CSS, encoding="utf-8") as f:
+        return f.read()
+
+
+class TestQuickViewActionCSS:
+    """CSS for quick-view action surface in mall-planes.css."""
+
+    def test_primary_cta_styles(self, mall_planes_css):
+        """Primary CTA class is styled."""
+        assert ".fv-primary-cta" in mall_planes_css
+
+    def test_secondary_link_styles(self, mall_planes_css):
+        """Secondary link class is styled."""
+        assert ".fv-secondary-link" in mall_planes_css
+
+    def test_source_context_styles(self, mall_planes_css):
+        """Source context class is styled."""
+        assert ".fv-source-context" in mall_planes_css
+
+    def test_secondary_actions_container(self, mall_planes_css):
+        """Secondary actions container is styled."""
+        assert ".fv-secondary-actions" in mall_planes_css
+
+
+class TestOverlayActionCSS:
+    """CSS for overlay action surface in member.css."""
+
+    def test_overlay_primary_cta_styles(self, member_css):
+        """Overlay primary CTA class is styled."""
+        assert ".foundup-overlay-primary-cta" in member_css
+
+    def test_overlay_secondary_link_styles(self, member_css):
+        """Overlay secondary link class is styled."""
+        assert ".foundup-overlay-secondary-link" in member_css
+
+    def test_overlay_source_context_styles(self, member_css):
+        """Overlay source context class is styled."""
+        assert ".foundup-overlay-source-context" in member_css
+
+    def test_overlay_actions_container(self, member_css):
+        """Overlay actions container is styled."""
+        assert ".foundup-overlay-actions" in member_css
