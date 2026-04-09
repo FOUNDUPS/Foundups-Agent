@@ -9,7 +9,44 @@
 | `test_obs_controller_startup.py` | PASS | 2026-03-06 | OBS start verification (no false-positive stream started) |
 | `test_suno_stt_extractor.py` | PASS | 2026-03-05 | Suno STT lyrics extraction pipeline tests |
 | `test_go_live_steps.py` | PASS | 2026-02-28 | Step-by-step Go Live debugging + DOM verification |
-| `test_discord_voice_broadcaster_integration.py` | PASS | 2026-04-07 | Discord voice lane boot/runtime wiring (+ invalid snowflake env case; 6 tests) |
+| `test_discord_voice_broadcaster_integration.py` | PASS | 2026-04-09 | Discord voice lane boot/runtime wiring (+ invalid snowflake env case; 6 tests) |
+
+---
+
+## 2026-04-09: Discord Voice Live Guild Verification (Worker AY)
+
+**Slice**: `ANTIFAFM_DISCORD_VOICE_LIVE_GUILD_VERIFICATION_PHASE1`
+
+**Test File**: `test_discord_voice_broadcaster_integration.py` (no changes — verification only)
+
+**Tests Re-verified** (6 tests, all PASS):
+| Test | What it covers |
+|------|----------------|
+| `test_discord_lane_absent_when_flag_off` | Lane not initialized when `ANTIFAFM_DISCORD_VOICE_ENABLED` unset |
+| `test_discord_flag_on_without_token_no_adapter` | No adapter when token missing |
+| `test_broadcaster_start_await_discord_start_when_configured` | Discord starts after YouTube success |
+| `test_discord_start_failure_does_not_fail_youtube` | Isolated failure — YouTube continues |
+| `test_build_discord_voice_from_env_returns_none_without_token` | `build_discord_voice_from_env` returns None without token |
+| `test_build_discord_voice_from_env_invalid_guild_skips_lane` | Invalid snowflake fails closed |
+
+**What Tests Verify** (code-level, no live Discord):
+- Env parsing and fail-closed behavior
+- Adapter construction via `build_discord_voice_from_env()`
+- Isolated failure handling (Discord doesn't cascade to YouTube)
+- Health monitor wiring
+
+**What Requires Manual Live VC Run** (not testable without real Discord):
+- Actual bot→guild→channel connection
+- FFmpeg→Opus audio quality
+- Reconnect behavior under network disruption
+- Real health monitor recovery cycle
+
+**Run Command**:
+```bash
+pytest modules/platform_integration/antifafm_broadcaster/tests/test_discord_voice_broadcaster_integration.py -v
+```
+
+**Result**: 6 passed in 14.84s
 
 ---
 
