@@ -308,7 +308,7 @@ The existing FOUNDUPS server needs to be restructured:
 7. Create invite link
 8. Smoke test with a second account
 
-See: `FOUNDUPS_DISCORD_SETUP_CHECKLIST.md` for step-by-step execution.
+See: `docs/audits/science_swarm_external_foundup/SCIENCE_SWARM_EMBEDDED_CATEGORY_BUILD_CHECKLIST.md` for Science Swarm category setup.
 
 ---
 

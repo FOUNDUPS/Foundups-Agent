@@ -138,7 +138,7 @@ The following documents in this directory describe a **standalone server** appro
 | `DISCORD_PERMISSION_MATRIX.md` | SUPERSEDED by embedded model |
 | `DISCORD_PINNED_MESSAGES.md` | PARTIALLY REUSABLE — pin content adapts to embedded context |
 | `DISCORD_CHANNEL_TOPICS.md` | PARTIALLY REUSABLE |
-| `DISCORD_NEXT_BUILD_ORDER.md` | SUPERSEDED — build order now follows `FOUNDUPS_DISCORD_SETUP_CHECKLIST.md` |
+| `DISCORD_NEXT_BUILD_ORDER.md` | SUPERSEDED — build order now follows `SCIENCE_SWARM_EMBEDDED_CATEGORY_BUILD_CHECKLIST.md` |
 
 **Do not create a standalone Science Swarm server.** Use the embedded pattern in `modules/foundups/docs/FOUNDUPS_DISCORD_BLUEPRINT.md`.
 
