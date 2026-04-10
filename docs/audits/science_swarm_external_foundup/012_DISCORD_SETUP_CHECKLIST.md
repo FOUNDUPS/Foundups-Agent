@@ -1,8 +1,13 @@
 # 012 Discord Setup Checklist
 
+> **SUPERSEDED**: This checklist is for the REJECTED standalone server model.
+> For the current embedded model, use: `SCIENCE_SWARM_EMBEDDED_CATEGORY_BUILD_CHECKLIST.md`
+> Decision documented in: `FOUNDUPS_SCIENCE_SWARM_EMBED_SPEC.md`
+
 **Worker**: I
 **Date**: 2026-04-05
 **Reference**: `DISCORD_OPERATOR_RUNBOOK.md`
+**Status**: SUPERSEDED (standalone server rejected 2026-04-06)
 
 Execute in this exact order. Check each box as you complete it.
 
