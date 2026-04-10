@@ -1024,7 +1024,8 @@ class TestFoundUpEntryTrigger:
         js = _read("js/mall-tile-field.js")
         # Handler should get foundupId from tile dataset, not index
         assert "tile.dataset.foundupId" in js
-        assert "openFoundUpById(foundupId)" in js
+        # Uses parentId for canonical route (after extracting from synthetic IDs)
+        assert "parentId" in js
 
     def test_entry_button_stops_propagation(self):
         """Entry button click stops propagation to prevent tile tap."""
@@ -1073,14 +1074,28 @@ class TestFoundUpEntryTrigger:
         # and togglePlay starts preview for video tiles
         assert "startInlinePreview(index" in js
 
-    def test_no_direct_pwa_launch(self):
-        """Entry does not launch PWA directly from wall."""
+    def test_navigates_to_canonical_route(self):
+        """Entry button navigates directly to canonical /f/{id} route (WSP 104)."""
         js = _read("js/mall-tile-field.js")
-        # Entry button handler should use mallPlanes, not direct PWA launch
+        # Entry button handler should navigate to canonical route
         idx_entry = js.index("entryBtns.forEach")
         idx_end = js.index("});", idx_entry + 50)
         entry_handler = js[idx_entry:idx_end]
-        assert "mallPlanes.openFoundUpById" in entry_handler
-        # Should NOT have direct window.open or location navigation
+        # Should navigate to /f/ canonical route
+        assert "location.href = '/f/'" in entry_handler
+        assert "encodeURIComponent(parentId)" in entry_handler
+        # Should NOT use preview plane API
+        assert "mallPlanes.openFoundUpById" not in entry_handler
+        # Should NOT use window.open (PWA launch)
         assert "window.open" not in entry_handler
-        assert "location.href" not in entry_handler
+
+    def test_expanded_mode_extracts_parent_id(self):
+        """Entry button extracts parent ID from expanded-mode synthetic IDs."""
+        js = _read("js/mall-tile-field.js")
+        # Should strip _video_N suffix from synthetic IDs
+        assert "_video_" in js  # synthetic ID pattern exists
+        idx_entry = js.index("entryBtns.forEach")
+        idx_end = js.index("});", idx_entry + 50)
+        entry_handler = js[idx_entry:idx_end]
+        # Should extract parent ID
+        assert "replace(/_video_" in entry_handler

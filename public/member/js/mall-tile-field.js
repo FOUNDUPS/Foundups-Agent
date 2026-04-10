@@ -667,6 +667,7 @@
     });
 
     // Entry buttons — explicit FoundUp landing entry using stable identity
+    // Routes directly to canonical /f/{foundup_id} landing (WSP 104), not preview plane
     var entryBtns = tileField.querySelectorAll('.mall-tile-entry');
     entryBtns.forEach(function(btn) {
       btn.addEventListener('click', function(e) {
@@ -675,9 +676,11 @@
         var tile = btn.closest('.mall-tile');
         if (!tile) return;
         var foundupId = tile.dataset.foundupId;
-        if (foundupId && window.mallPlanes && typeof window.mallPlanes.openFoundUpById === 'function') {
-          window.mallPlanes.openFoundUpById(foundupId);
-        }
+        if (!foundupId) return;
+        // Extract parent ID from expanded-mode synthetic IDs (e.g., "abc123_video_0" -> "abc123")
+        var parentId = foundupId.replace(/_video_\d+$/, '');
+        // Navigate directly to canonical landing route (WSP 104)
+        window.location.href = '/f/' + encodeURIComponent(parentId);
       });
     });
 

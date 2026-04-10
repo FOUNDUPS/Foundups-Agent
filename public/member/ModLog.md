@@ -9,13 +9,14 @@
 **Files Modified**:
 - `public/member/js/mall-tile-field.js` — Entry button rendering in `renderTiles()`, click handler in `bindInteractions()`
 - `public/member/css/mall-tile-field.css` — `.mall-tile-entry` button styles, visibility rules
-- `public/member/tests/test_video_mall_field_runtime.py` — 11 new tests for entry trigger behavior
+- `public/member/tests/test_video_mall_field_runtime.py` — 12 new tests for entry trigger behavior
 
 **Entry Trigger Behavior**:
 1. **Button placement**: Bottom-left corner, 24px info icon (circle with i)
-2. **Routing**: Uses stable `data-foundup-id` attribute, calls `mallPlanes.openFoundUpById(foundupId)`
-3. **Tap guard**: Respects `tapGuardActive` to prevent accidental activation during drag
-4. **Event isolation**: `e.stopPropagation()` prevents tile tap handler interference
+2. **Routing**: Navigates directly to canonical `/f/{foundup_id}` route (WSP 104)
+3. **Expanded mode**: Extracts parent ID from synthetic IDs (`abc123_video_0` → `abc123`)
+4. **Tap guard**: Respects `tapGuardActive` to prevent accidental activation during drag
+5. **Event isolation**: `e.stopPropagation()` prevents tile tap handler interference
 
 **Visual Treatment**:
 - **Default**: Hidden (not polluting browse wall)
@@ -40,13 +41,13 @@
 .mall-tile-entry:hover { background: rgba(0, 212, 170, 0.8); }
 ```
 
-**Stable Identity Routing**: Entry button queries `tile.dataset.foundupId` (not raw index), ensuring correct routing survives projection/filter changes.
+**Stable Identity Routing**: Entry button queries `tile.dataset.foundupId` (not raw index), extracts parent ID from expanded-mode synthetic IDs, and navigates to canonical `/f/{parentId}` route. Survives projection/filter changes.
 
-**No PWA Direct Launch**: Entry trigger does NOT launch PWA directly — routes through `mallPlanes.openFoundUpById()` for truthful handoff.
+**Direct Landing Navigation (WSP 104)**: Entry button navigates directly to canonical FoundUp landing route, bypassing preview plane for truthful entry path.
 
-**WSP 97 Applied**: Minimal surface addition — one button, stable identity, existing API handoff.
+**WSP 97 Applied**: Minimal surface addition — one button, stable identity, canonical route handoff.
 
-**Test Count**: 170 passed (159 existing + 11 new entry trigger tests)
+**Test Count**: 171 passed (159 existing + 12 new entry trigger tests)
 
 ---
 
