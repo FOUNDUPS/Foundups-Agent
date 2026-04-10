@@ -1,5 +1,45 @@
 # GitHub Orchestrator - ModLog
 
+## 2026-04-10 - WSP 11 Interface Closure (Worker BI)
+
+**Author**: 0102 — Worker BI
+**WSP Compliance**: WSP 11 (Interface Protocol), WSP 22 (ModLog)
+
+### Created
+
+- `INTERFACE.md` — Public API contract per WSP 11
+
+### Contract Fixes (Architect Review)
+
+- `create_project_item(..., status=...)`: Documented as accepted but **not implemented** — item lands in default column, use `move_card()` after creation
+- Token scopes table: Removed misleading HAVE/NEED "Current" column; replaced with "Required For" describing feature dependencies; added note that module uses `gh auth status` not scope inspection
+
+### Documented Public Symbols
+
+| Symbol | Type | Source |
+|--------|------|--------|
+| `GitHubOrchestrator` | Class | `src/orchestrator.py` |
+| `get_github_orchestrator()` | Function | `src/orchestrator.py` |
+| `create_fam_listener()` | Function | `src/orchestrator.py` |
+| `wire_github_to_fam()` | Function | `src/orchestrator.py` |
+| `execute(args, context)` | Skill entry | `skillz/github_management/executor.py` |
+
+### Orchestrator Methods Documented
+
+- Issue: `create_issue`, `close_issue`, `list_issues`
+- Repo: `create_federated_repo`
+- Access: `add_collaborator`, `remove_collaborator`, `add_team_member`
+- Project: `list_projects`, `create_project_item`, `move_card`
+- FAM: `handle_fam_event`
+
+### Verification
+
+- Tests: 9/9 passing (`tests/test_executor.py`)
+- All symbols verified against `src/__init__.py` `__all__`
+- Environment variables documented with defaults
+
+---
+
 ## 2026-03-15 - Module Creation
 
 **Author**: 0102
