@@ -75,7 +75,7 @@ The primary public API for the unified Red Dog plane. All concierge interactions
 | **AI Tools** | |
 | `setCategory(id)` | Set projection category |
 | `getCategory()` | Get current category |
-| `setDensity(preset)` | Set density preset (2x3, 3x4, 3x5, 5x8) |
+| `setDensity(preset)` | Set density preset (3x4, 3x5, 4x6, 5x8) |
 | `getDensity()` | Get current density |
 | `setMotionMode(mode)` | Set motion mode (snap, glide) |
 | `getMotionMode()` | Get current motion mode |

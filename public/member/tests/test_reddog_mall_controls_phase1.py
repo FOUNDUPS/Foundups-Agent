@@ -150,9 +150,9 @@ class TestDensityPresets:
         content = CONCIERGE_JS.read_text(encoding="utf-8")
         assert "DENSITY_PRESETS" in content
 
-    def test_density_2x3(self):
+    def test_density_4x6(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
-        assert "id: '2x3'" in content
+        assert "id: '4x6'" in content
 
     def test_density_3x4(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
@@ -185,9 +185,9 @@ class TestDensityPresets:
         content = CONCIERGE_JS.read_text(encoding="utf-8")
         assert "data-reddog-density" in content
 
-    def test_default_density_is_3x4(self):
+    def test_default_density_is_3x5(self):
         content = CONCIERGE_JS.read_text(encoding="utf-8")
-        assert "currentDensity = '3x4'" in content
+        assert "currentDensity = '3x5'" in content
 
 
 # -- 5. Snap / Glide motion mode --

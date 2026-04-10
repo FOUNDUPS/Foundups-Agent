@@ -1,7 +1,7 @@
 /**
  * Mall Tile Field — Video-backed discovery surface
  *
- * Video Mall runtime with snapped field motion.
+ * Portrait-first 9:16 video wall (Shorts-style)
  * SoftProto mount point: #mallTileField[data-softproto-mount="tile-field"]
  *
  * Gestures (Mall context):
@@ -16,7 +16,7 @@
  *   - Glide: fluid scroll for browsing
  *
  * Density presets (AI-controlled):
- *   - 2x3, 3x4, 3x5, 5x8
+ *   - 3x4, 3x5, 4x6, 5x8 (default: 3x5 for mobile-first dense wall)
  */
 (function() {
   'use strict';
@@ -53,7 +53,7 @@
 
   // Video Mall runtime state
   var motionMode = 'snap'; // 'snap' | 'glide'
-  var currentDensity = '2x3';
+  var currentDensity = '3x5';
   var expandedFoundUp = null; // Index of expanded FoundUp, or null
   var expandSourceIndex = null; // Original tile index for collapse animation
   var expandSourceVisual = null; // { bgImage, bgColor } for collapse continuity
@@ -982,12 +982,12 @@
 
   /**
    * Set field density preset
-   * @param {string} density - '2x3' | '3x4' | '3x5' | '5x8'
+   * @param {string} density - '3x4' | '3x5' | '4x6' | '5x8'
    */
   function setDensity(density) {
-    var validDensities = ['2x3', '3x4', '3x5', '5x8'];
+    var validDensities = ['3x4', '3x5', '4x6', '5x8'];
     if (!validDensities.includes(density)) {
-      density = '2x3';
+      density = '3x5';
     }
     currentDensity = density;
 

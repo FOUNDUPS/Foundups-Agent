@@ -161,10 +161,41 @@ class TestDensityPresets:
     def test_density_preset_classes(self):
         """Density preset data attributes exist in CSS."""
         css = _read("css/mall-tile-field.css")
-        assert 'data-density="2x3"' in css
         assert 'data-density="3x4"' in css
         assert 'data-density="3x5"' in css
+        assert 'data-density="4x6"' in css
         assert 'data-density="5x8"' in css
+
+
+class TestPortraitTileGeometry:
+    """Test portrait-first 9:16 tile geometry."""
+
+    def test_tiles_are_portrait_aspect(self):
+        """Tiles use portrait 9:16 aspect ratio."""
+        css = _read("css/mall-tile-field.css")
+        assert "aspect-ratio: 9 / 16" in css
+
+    def test_default_columns_is_three(self):
+        """Default field layout is 3 columns for mobile-first dense wall."""
+        css = _read("css/mall-tile-field.css")
+        assert "--field-columns: 3" in css
+
+    def test_tile_radius_is_minimal(self):
+        """Default tile radius is small for low-chrome look."""
+        css = _read("css/mall-tile-field.css")
+        # Default value in .mall-tile should be 0.4rem or similar
+        assert "border-radius: var(--tile-radius, 0.4rem)" in css
+
+    def test_gap_is_tight(self):
+        """Default gap is tight for dense wall feel."""
+        css = _read("css/mall-tile-field.css")
+        # Default gap should be 0.2rem or similar
+        assert "gap: var(--tile-gap, 0.2rem)" in css
+
+    def test_js_default_density_is_3x5(self):
+        """JS default density is 3x5 for mobile-first."""
+        js = _read("js/mall-tile-field.js")
+        assert "currentDensity = '3x5'" in js
 
 
 class TestGestureEnginePinch:
@@ -785,11 +816,11 @@ class TestTouchModePaddingAR:
         assert found, ":has(.mall-tile-audio) padding must be inside @media (hover: none)"
 
     def test_touch_padding_value(self):
-        """Touch padding matches the has-video-controls padding (2.4rem)."""
+        """Touch padding matches the has-video-controls padding (1.5rem for low-chrome)."""
         css = _read("css/mall-tile-field.css")
-        # Both rules should use 2.4rem
-        lines_with_padding = [l for l in css.splitlines() if "padding-top: 2.4rem" in l]
-        assert len(lines_with_padding) >= 2, "Expected 2.4rem padding in both .has-video-controls and :has(.mall-tile-audio) rules"
+        # Both rules should use 1.5rem for low-chrome portrait layout
+        lines_with_padding = [l for l in css.splitlines() if "padding-top: 1.5rem" in l]
+        assert len(lines_with_padding) >= 2, "Expected 1.5rem padding in both .has-video-controls and :has(.mall-tile-audio) rules"
 
 
 class TestMallLocomotionAndGestures:

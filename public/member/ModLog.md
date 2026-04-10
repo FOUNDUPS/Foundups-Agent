@@ -1,5 +1,41 @@
 # Member Area Module Change Log
 
+## [2026-04-10] Portrait-First Video Wall Layout Phase 1 (Worker BJ, WSP 15/97)
+
+**Who**: 0102 — Worker BJ
+**Slice**: `PFMALL_TIGHT_VIDEO_TILE_GRID_PHASE1`
+**What**: Refactor pfMALL default browse surface from square tiles to portrait-first Shorts-style video wall.
+
+**Files Modified**:
+- `public/member/css/mall-tile-field.css` — Portrait 9:16 aspect ratio, tight gaps, reduced chrome
+- `public/member/js/mall-tile-field.js` — Updated density presets (3x4, 3x5, 4x6, 5x8), default 3x5
+- `public/member/tests/test_video_mall_field_runtime.py` — 5 new tests for portrait geometry
+
+**Layout Changes**:
+1. **Tile aspect ratio**: Changed from `1` (square) to `9 / 16` (portrait Shorts-style)
+2. **Default density**: Changed from `2x3` to `3x5` for mobile-first dense wall
+3. **Density presets**: Updated from `2x3/3x4/3x5/5x8` to `3x4/3x5/4x6/5x8`
+4. **Gap values**: Tightened from `0.65rem-0.3rem` to `0.25rem-0.1rem` for denser feel
+5. **Border radius**: Reduced from `1.25rem-0.6rem` to `0.5rem-0.25rem` for less rounded-card feel
+
+**Chrome Reduction**:
+- Tile inner padding: `0.85rem` → `0.35rem`
+- Token font: `0.65rem` → `0.5rem`
+- Hero font: `clamp(2.2rem, 10vw, 3.5rem)` → `clamp(1.2rem, 6vw, 1.8rem)`
+- Name font: `0.85rem` → `0.6rem`
+- Badge sizes: Reduced positioning and padding
+- Audio/expand buttons: `32px` → `24px`
+- Play indicator: `3rem` → `2rem`
+- Video control padding: `2.4rem` → `1.5rem`
+
+**Runtime Semantics Preserved**: Preview, audio, expand functionality unchanged.
+
+**WSP 97 Applied**: Layout-only changes — no UX flow modifications.
+
+**Test Count**: 159 passed (154 existing + 5 new portrait geometry tests)
+
+---
+
 ## [2026-04-10] Inline Preview Resource Hardening Phase 1 (Worker BD, WSP 15/97)
 
 **Who**: 0102 — Worker BD
