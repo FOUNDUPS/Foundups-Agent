@@ -21,6 +21,9 @@
      * Canonical FoundUp Landing Page
      * Route: /f/{foundup_id}
      * WSP 104: This is the canonical FoundUp landing namespace.
+     *
+     * Full Red Dog concierge runtime ported from foundup.html.
+     * Identity parsed from pathname, not query params (WSP 97).
      */
 
     /* Entry page layout */
@@ -276,18 +279,280 @@
       color: rgba(228,226,236,0.35);
       text-align: center;
     }
+
+    /* Red Dog floating button */
+    .entry-red-dog {
+      position: fixed;
+      bottom: calc(1.5rem + var(--safe-bottom));
+      right: max(1.5rem, env(safe-area-inset-right, 0px));
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c5cfc, #00d4aa);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(124,92,252,0.3);
+      z-index: 50;
+      transition: transform 0.15s;
+    }
+    .entry-red-dog:hover { transform: scale(1.08); }
+    .entry-red-dog img { width: 28px; height: 28px; }
+
+    /* Concierge scrim + sheet */
+    .concierge-scrim {
+      position: fixed;
+      inset: 0;
+      background: rgba(5,5,9,0.6);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .concierge-scrim.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .concierge-sheet {
+      position: fixed;
+      right: max(1.25rem, env(safe-area-inset-right, 0px));
+      bottom: calc(5rem + var(--safe-bottom));
+      width: min(22rem, calc(100vw - 2rem));
+      max-height: calc(100dvh - 7rem - var(--safe-bottom));
+      overflow-y: auto;
+      background: rgba(24,24,38,0.96);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 1.25rem;
+      padding: 1.25rem;
+      z-index: 101;
+      display: none;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.4);
+    }
+    .concierge-sheet.open { display: block; }
+
+    .concierge-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .concierge-header img { width: 36px; height: 36px; }
+    .concierge-header-text { display: flex; flex-direction: column; gap: 0.1rem; }
+    .concierge-name {
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0;
+    }
+    .concierge-subtitle {
+      font-size: 0.75rem;
+      color: rgba(228,226,236,0.5);
+      margin: 0;
+    }
+
+    .concierge-section {
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .concierge-section:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    .concierge-section-label {
+      font-size: 0.7rem;
+      color: rgba(228,226,236,0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+    .concierge-item {
+      font-size: 0.88rem;
+      color: rgba(228,226,236,0.75);
+      line-height: 1.5;
+      margin-bottom: 0.5rem;
+    }
+    .concierge-item:last-child { margin-bottom: 0; }
+    .concierge-item strong {
+      color: rgba(228,226,236,0.9);
+      font-weight: 600;
+    }
+
+    .concierge-readiness-key {
+      display: grid;
+      gap: 0.5rem;
+    }
+    .concierge-readiness-row {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      line-height: 1.4;
+    }
+    .concierge-readiness-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 0.3rem;
+    }
+    .concierge-readiness-dot.dot-ready { background: #4ade80; }
+    .concierge-readiness-dot.dot-conditional { background: #ffd700; }
+    .concierge-readiness-dot.dot-discoverable { background: rgba(228,226,236,0.35); }
+    .concierge-readiness-text { color: rgba(228,226,236,0.7); }
+
+    .concierge-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: #7c5cfc;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    .concierge-back:hover { text-decoration: underline; }
+    .concierge-back svg { width: 14px; height: 14px; }
+
+    /* FAB state ring when concierge is open */
+    .entry-red-dog.active {
+      box-shadow: 0 0 0 3px rgba(124,92,252,0.5), 0 4px 16px rgba(124,92,252,0.3);
+    }
+
+    /* Briefing lines inside concierge */
+    .entry-briefing-line {
+      font-size: 0.84rem;
+      color: rgba(228,226,236,0.7);
+      line-height: 1.5;
+      padding: 0.2rem 0;
+    }
+    .entry-briefing-line::before {
+      content: "\25B8";
+      margin-right: 0.4rem;
+      font-size: 0.65rem;
+      color: rgba(228,226,236,0.35);
+    }
+
+    /* Recommendation pills */
+    .entry-recs-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.25rem;
+    }
+    .entry-rec-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid rgba(124,92,252,0.25);
+      background: rgba(124,92,252,0.08);
+      color: rgba(228,226,236,0.85);
+      font-size: 0.78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      min-height: 36px;
+    }
+    .entry-rec-action:hover {
+      background: rgba(124,92,252,0.18);
+      border-color: rgba(124,92,252,0.4);
+    }
+
+    @media (max-width: 480px) {
+      .entry-rec-action { min-height: 44px; }
+    }
+
+    @media (min-width: 640px) {
+      .entry-hero { padding: 3rem 2rem 2rem; }
+      .entry-hero-name { font-size: 2.5rem; }
+      .entry-readiness-block,
+      .entry-details,
+      .entry-what-next,
+      .entry-description { margin: 1.5rem auto; max-width: 560px; }
+      .entry-footer { padding-bottom: 4rem; }
+      .entry-canonical-route { max-width: 560px; margin-left: auto; margin-right: auto; }
+    }
   </style>
 </head>
 <body>
   <div class="entry-shell">
-    <a href="/member/" class="entry-back">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-      Back to Mall
-    </a>
+    <nav>
+      <a href="/member/" class="entry-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        Back to Mall
+      </a>
+    </nav>
 
     <div id="entryContent">
       <div style="text-align:center;padding:4rem 1.5rem;color:rgba(228,226,236,0.5);">Loading FoundUp...</div>
     </div>
+
+    <div id="conciergeScrim" class="concierge-scrim"></div>
+
+    <aside id="conciergeSheet" class="concierge-sheet" aria-label="Red Dog concierge">
+      <div class="concierge-header">
+        <img src="/logo-dog.png" alt="">
+        <div class="concierge-header-text">
+          <p class="concierge-name">Red Dog</p>
+          <p class="concierge-subtitle">Your digital twin</p>
+        </div>
+      </div>
+
+      <div id="conciergeContext" class="concierge-section">
+        <div class="concierge-section-label">This FoundUp</div>
+        <div id="conciergeContextBody" class="concierge-item">Loading...</div>
+      </div>
+
+      <div class="concierge-section" data-reddog-briefing>
+        <div class="concierge-section-label">Briefing</div>
+        <div id="entryBriefingBody"></div>
+      </div>
+
+      <div class="concierge-section" data-reddog-recommendations>
+        <div class="concierge-section-label">Suggested actions</div>
+        <div id="entryRecsBody"></div>
+      </div>
+
+      <div class="concierge-section">
+        <div class="concierge-section-label">Readiness guide</div>
+        <div class="concierge-readiness-key">
+          <div class="concierge-readiness-row">
+            <span class="concierge-readiness-dot dot-ready"></span>
+            <span class="concierge-readiness-text"><strong>Ready</strong> - live frontend, direct shell handoff when tenant embedding is wired.</span>
+          </div>
+          <div class="concierge-readiness-row">
+            <span class="concierge-readiness-dot dot-conditional"></span>
+            <span class="concierge-readiness-text"><strong>Conditional</strong> - working frontend with known gaps. Will move to ready when conditions clear.</span>
+          </div>
+          <div class="concierge-readiness-row">
+            <span class="concierge-readiness-dot dot-discoverable"></span>
+            <span class="concierge-readiness-text"><strong>Discoverable only</strong> - backend service visible in the Mall. No web frontend to load yet.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="concierge-section">
+        <div class="concierge-section-label">Navigation</div>
+        <p class="concierge-item">Use <strong>Back to Mall</strong> to return and browse other FoundUps.</p>
+        <p class="concierge-item">This entry page is deep-linkable. You can share or bookmark this URL.</p>
+      </div>
+
+      <div class="concierge-section">
+        <a href="/member/" class="concierge-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+          Return to Mall
+        </a>
+      </div>
+    </aside>
+
+    <button id="entryRedDog" class="entry-red-dog" aria-label="Open Red Dog concierge">
+      <img src="/logo-dog.png" alt="">
+    </button>
   </div>
 
   <script>
@@ -297,12 +562,14 @@
      *
      * WSP 104: /f/{foundup_id} is the canonical landing namespace.
      * This page renders the FoundUp landing content directly.
-     * No redirect to /member/foundup.html — canonical route stays visible.
+     * No redirect to /member/foundup.html - canonical route stays visible.
      *
      * Route parsing:
      *   /f/{foundup_id}           -> landing surface
      *   /f/{foundup_id}/app       -> future app mount (Phase 2)
      *   /f/{foundup_id}/app/{...} -> future app deep links
+     *
+     * Full Red Dog concierge runtime ported from foundup.html.
      */
 
     var MALL_CATALOG_URL = '/member/mall-video-catalog.json';
@@ -328,7 +595,7 @@
 
     var container = document.getElementById('entryContent');
 
-    // Parse foundup_id from path: /f/{foundup_id} or /f/{foundup_id}/...
+    // WSP 104: Parse foundup_id from pathname, not query params
     var path = window.location.pathname;
     var match = path.match(/^\/f\/([^\/]+)/);
 
@@ -338,168 +605,121 @@
     }
 
     var foundupId = decodeURIComponent(match[1]);
+    // Capture subpath for future /app mount (WSP 104 forward compatibility)
+    var subpathMatch = path.match(/^\/f\/[^\/]+\/(.+)$/);
+    var subpath = subpathMatch ? subpathMatch[1] : null;
 
-    // Validate foundup_id format (alphanumeric with underscores/hyphens)
-    if (!/^[a-zA-Z0-9_-]+$/.test(foundupId)) {
-      renderNotFound('Invalid FoundUp ID', 'The FoundUp ID "' + esc(foundupId) + '" is not valid.');
-      return;
-    }
-
-    // Capture subpath for forward compatibility (future /app mount)
-    var subpath = path.replace(/^\/f\/[^\/]+/, '');
-    var hasSubpath = subpath && subpath !== '/';
-
-    // Future: if subpath is /app or /app/..., mount tenant app
-    // For now, landing surface handles all subpaths
-
-    // Fetch catalog and render
-    fetch(MALL_CATALOG_URL, { cache: 'no-store' })
+    fetch(MALL_CATALOG_URL)
       .then(function(r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
+        if (!r.ok) throw new Error('Catalog fetch failed');
         return r.json();
       })
       .then(function(catalog) {
-        var item = null;
-        for (var i = 0; i < catalog.length; i++) {
-          if (catalog[i].foundup_id === foundupId) {
-            item = catalog[i];
-            break;
-          }
-        }
+        var items = catalog.items || [];
+        var item = items.find(function(i) { return i.foundup_id === foundupId; });
         if (!item) {
-          renderNotFound('FoundUp not found', 'No FoundUp with ID "' + esc(foundupId) + '" exists in the catalog.');
+          renderNotFound('FoundUp not found', 'The FoundUp "' + esc(foundupId) + '" does not exist in the catalog.');
           return;
         }
-        document.title = 'FoundUps Mall | ' + (item.name || item.title || item.entity || item.foundup_id);
-        renderEntry(item, hasSubpath, subpath);
+        renderEntry(item);
+        populateConciergeContext(item);
       })
       .catch(function(err) {
-        container.innerHTML = '<div class="entry-not-found"><h2>Error</h2><p>' + esc(err.message) + '</p><a href="' + MALL_HOME + '">Return to Mall</a></div>';
+        console.error('Catalog load error:', err);
+        renderNotFound('Error', 'Failed to load FoundUp catalog.');
       });
 
-    function renderEntry(item, hasSubpath, subpath) {
+    function renderEntry(item) {
       var displayName = item.name || item.title || item.entity || item.foundup_id;
-      var displayToken = item.token_symbol || item.source_handle || '';
-      var displayTagline = item.tagline || (item.entity ? item.entity + (item.geo ? ' \u00b7 ' + item.geo : '') : '');
-      var displayStatus = item.launch_readiness || item.status || 'active';
-      var displayCategory = item.category || item.source_type || '';
-      var displayLifecycle = item.lifecycle_stage || (item.source_type ? item.source_type.replace(/_/g, ' ') : '');
-      var displayTier = item.tier || '';
-      var displayRoute = item.routing_prefix || ('/f/' + item.foundup_id);
-      var displayDesc = item.description || (item.video_count ? item.video_count + ' videos \u00b7 ' + (item.source_type || '').replace(/_/g, ' ') : '');
-      var displayCreator = item.creator_display || item.creator || '';
-      var readinessClass = 'readiness-' + displayStatus;
+      var displayToken = item.token_symbol || item.source_handle || item.foundup_id;
+      var tagline = item.tagline || item.summary || '';
+      var description = item.description || '';
+      var readiness = item.launch_readiness || item.status || 'active';
+      var readinessLabel = READINESS_LABELS[readiness] || readiness || 'Unknown';
+      var entryCopy = item.entry_copy || WHAT_NEXT[readiness] || '';
 
-      // Canonical route indicator
-      var canonicalRoute = '/f/' + item.foundup_id;
-      var canonicalHtml = '<div class="entry-canonical-route">Canonical route: ' + esc(canonicalRoute) + '</div>';
+      var isNonVideo = NON_VIDEO_SOURCE_TYPES[item.source_type];
+      var ctaConfig = SOURCE_TYPE_CTA[item.source_type];
+      var ctaUrl = ctaConfig && item[ctaConfig.urlField] ? item[ctaConfig.urlField] : null;
 
-      // Subpath info for forward compatibility
-      var subpathHtml = '';
-      if (hasSubpath) {
-        subpathHtml = '<div class="entry-subpath-info">Subpath: ' + esc(subpath) + ' (landing surface; /app mount not yet active)</div>';
+      var html = '';
+
+      // Canonical route indicator (WSP 104)
+      html += '<div class="entry-canonical-route">Canonical: /f/' + esc(foundupId) + '</div>';
+
+      // Subpath indicator (forward-compat)
+      if (subpath) {
+        html += '<div class="entry-subpath-info">Subpath: /' + esc(subpath) + ' (reserved for future /app mount)</div>';
       }
 
-      container.innerHTML =
-        canonicalHtml +
-        subpathHtml +
-        '<div class="entry-hero">' +
-          '<div class="entry-hero-token">' + esc(displayToken) + '</div>' +
-          '<h1 class="entry-hero-name">' + esc(displayName) + '</h1>' +
-          '<p class="entry-hero-tagline">' + esc(displayTagline) + '</p>' +
-        '</div>' +
+      // Hero
+      html += '<section class="entry-hero">';
+      html += '<div class="entry-hero-token">$' + esc(displayToken) + '</div>';
+      html += '<h1 class="entry-hero-name">' + esc(displayName) + '</h1>';
+      if (tagline) html += '<p class="entry-hero-tagline">' + esc(tagline) + '</p>';
+      html += '</section>';
 
-        '<div class="entry-badges">' +
-          (displayCategory ? '<span class="mini-badge">' + esc(displayCategory) + '</span>' : '') +
-          (displayLifecycle ? '<span class="mini-badge">' + esc(displayLifecycle) + '</span>' : '') +
-          (displayTier ? '<span class="mini-badge">' + esc(displayTier) + '</span>' : '') +
-          '<span class="mini-badge">' + esc(READINESS_LABELS[displayStatus] || displayStatus) + '</span>' +
-        '</div>' +
+      // Readiness block
+      html += '<div class="entry-readiness-block readiness-' + esc(readiness) + '">';
+      html += '<div class="entry-readiness-label">' + esc(readinessLabel) + '</div>';
+      if (entryCopy) html += '<p class="entry-readiness-copy">' + esc(entryCopy) + '</p>';
+      html += '</div>';
 
-        '<div class="entry-readiness-block ' + readinessClass + '">' +
-          '<div class="entry-readiness-label">' + esc(READINESS_LABELS[displayStatus] || displayStatus) + '</div>' +
-          '<div class="entry-readiness-copy">' + esc(item.entry_copy || WHAT_NEXT[item.launch_readiness] || WHAT_NEXT[displayStatus] || '') + '</div>' +
-        '</div>' +
+      // CTA for non-video source types
+      if (isNonVideo && ctaUrl && ctaConfig) {
+        html += '<div class="entry-cta-block">';
+        html += '<a href="' + esc(ctaUrl) + '" target="_blank" rel="noopener" class="entry-cta-btn">';
+        html += '<span>' + esc(ctaConfig.label) + '</span>';
+        html += '<span>' + ctaConfig.icon + '</span>';
+        html += '</a>';
+        html += '<div class="entry-source-type-label">' + esc((item.source_type || '').replace(/_/g, ' ')) + '</div>';
+        html += '</div>';
+      }
 
-        renderSourceTypeCTA(item) +
+      // Details table
+      var details = [];
+      if (item.creator || item.creator_display) details.push(['Creator', item.creator_display || item.creator]);
+      if (item.lifecycle_stage) details.push(['Lifecycle', item.lifecycle_stage]);
+      if (item.tier) details.push(['Tier', item.tier]);
+      if (item.routing_prefix) details.push(['Route', item.routing_prefix]);
+      if (item.video_count) details.push(['Videos', item.video_count]);
 
-        '<div class="entry-details">' +
-          '<div class="entry-detail-row">' +
-            '<span class="entry-detail-label">FoundUp ID</span>' +
-            '<span class="entry-detail-value">' + esc(item.foundup_id) + '</span>' +
-          '</div>' +
-          (displayToken ? '<div class="entry-detail-row">' +
-            '<span class="entry-detail-label">Token</span>' +
-            '<span class="entry-detail-value">' + esc(displayToken) + '</span>' +
-          '</div>' : '') +
-          (displayCreator ? '<div class="entry-detail-row">' +
-            '<span class="entry-detail-label">Creator</span>' +
-            '<span class="entry-detail-value">' + esc(displayCreator) + '</span>' +
-          '</div>' : '') +
-          '<div class="entry-detail-row">' +
-            '<span class="entry-detail-label">Canonical Route</span>' +
-            '<span class="entry-detail-value">' + esc(canonicalRoute) + '</span>' +
-          '</div>' +
-          (displayLifecycle ? '<div class="entry-detail-row">' +
-            '<span class="entry-detail-label">Lifecycle</span>' +
-            '<span class="entry-detail-value">' + esc(displayLifecycle) + '</span>' +
-          '</div>' : '') +
-          (displayTier ? '<div class="entry-detail-row">' +
-            '<span class="entry-detail-label">Tier</span>' +
-            '<span class="entry-detail-value">' + esc(displayTier) + '</span>' +
-          '</div>' : '') +
-          (item.video_count ? '<div class="entry-detail-row">' +
-            '<span class="entry-detail-label">Videos</span>' +
-            '<span class="entry-detail-value">' + item.video_count + '</span>' +
-          '</div>' : '') +
-          (NON_VIDEO_SOURCE_TYPES[item.source_type] ? '<div class="entry-detail-row">' +
-            '<span class="entry-detail-label">Source Type</span>' +
-            '<span class="entry-detail-value">' + esc((item.source_type || '').replace(/_/g, ' ')) + '</span>' +
-          '</div>' : '') +
-          (item.external_url ? '<div class="entry-detail-row">' +
-            '<span class="entry-detail-label">URL</span>' +
-            '<span class="entry-detail-value"><a href="' + esc(item.external_url) + '" target="_blank" rel="noopener noreferrer" style="color:#7c5cfc;text-decoration:none;">' + esc(item.external_url) + '</a></span>' +
-          '</div>' : '') +
-        '</div>' +
+      if (details.length) {
+        html += '<div class="entry-details">';
+        details.forEach(function(d) {
+          html += '<div class="entry-detail-row">';
+          html += '<span class="entry-detail-label">' + esc(d[0]) + '</span>';
+          html += '<span class="entry-detail-value">' + esc(d[1]) + '</span>';
+          html += '</div>';
+        });
+        html += '</div>';
+      }
 
-        '<div class="entry-what-next">' +
-          '<h3>What happens next</h3>' +
-          '<p>' + esc(WHAT_NEXT[item.launch_readiness] || WHAT_NEXT[displayStatus] || 'This FoundUp is visible in the Mall.') + '</p>' +
-        '</div>' +
+      // Description
+      if (description) {
+        html += '<div class="entry-description">';
+        html += '<h3>About</h3>';
+        html += '<p>' + esc(description) + '</p>';
+        html += '</div>';
+      }
 
-        '<div class="entry-description">' +
-          '<h3>About</h3>' +
-          '<p>' + esc(displayDesc) + '</p>' +
-        '</div>' +
+      // Footer
+      html += '<footer class="entry-footer">';
+      html += '<a href="' + MALL_HOME + '" class="entry-return-btn">';
+      html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M15 18l-6-6 6-6"/></svg>';
+      html += 'Return to Mall';
+      html += '</a>';
+      html += '</footer>';
 
-        '<div class="entry-footer">' +
-          '<a href="' + MALL_HOME + '" class="entry-return-btn">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M15 18l-6-6 6-6"/></svg>' +
-            'Return to Mall' +
-          '</a>' +
-        '</div>';
-    }
-
-    function renderSourceTypeCTA(item) {
-      var cta = SOURCE_TYPE_CTA[item.source_type];
-      if (!cta) return '';
-      var url = item[cta.urlField];
-      if (!url) return '';
-      var sourceLabel = (item.source_type || '').replace(/_/g, ' ');
-      return '<div class="entry-cta-block" data-source-type="' + esc(item.source_type) + '">' +
-          '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" class="entry-cta-btn">' +
-            esc(cta.label) + ' ' + cta.icon +
-          '</a>' +
-          '<div class="entry-source-type-label">' + esc(sourceLabel) + '</div>' +
-        '</div>';
+      container.innerHTML = html;
+      document.title = displayName + ' | FoundUps Mall';
     }
 
     function renderNotFound(title, message) {
-      container.innerHTML =
-        '<div class="entry-not-found">' +
-          '<h2>' + esc(title) + '</h2>' +
-          '<p>' + esc(message) + '</p>' +
-          '<a href="' + MALL_HOME + '">Return to Mall</a>' +
+      container.innerHTML = '<div class="entry-not-found">' +
+        '<h2>' + esc(title) + '</h2>' +
+        '<p>' + esc(message) + '</p>' +
+        '<a href="' + MALL_HOME + '">Return to Mall</a>' +
         '</div>';
     }
 
@@ -509,7 +729,152 @@
       d.textContent = String(s);
       return d.innerHTML;
     }
+
+    // -- Red Dog concierge --
+    var conciergeSheet = document.getElementById('conciergeSheet');
+    var conciergeScrim = document.getElementById('conciergeScrim');
+    var conciergeOpen = false;
+
+    var entryRedDogBtn = document.getElementById('entryRedDog');
+    var currentItem = null;
+
+    function toggleConcierge() {
+      conciergeOpen = !conciergeOpen;
+      conciergeSheet.classList.toggle('open', conciergeOpen);
+      conciergeScrim.classList.toggle('open', conciergeOpen);
+      entryRedDogBtn.classList.toggle('active', conciergeOpen);
+    }
+
+    function closeConcierge() {
+      conciergeOpen = false;
+      conciergeSheet.classList.remove('open');
+      conciergeScrim.classList.remove('open');
+      entryRedDogBtn.classList.remove('active');
+    }
+
+    function populateConciergeContext(item) {
+      currentItem = item;
+      var body = document.getElementById('conciergeContextBody');
+      if (!item) {
+        body.innerHTML = 'No FoundUp loaded.';
+        return;
+      }
+      var displayName = item.name || item.title || item.entity || item.foundup_id;
+      var displayStatus = item.launch_readiness || item.status || 'active';
+      var readinessLabel = READINESS_LABELS[displayStatus] || displayStatus || 'Unknown';
+      body.innerHTML =
+        '<strong>' + esc(displayName) + '</strong> is currently <strong>' + esc(readinessLabel) + '</strong>.' +
+        '<br>' + esc(item.entry_copy || WHAT_NEXT[item.launch_readiness] || WHAT_NEXT[displayStatus] || '');
+      renderBriefing(item);
+      renderRecommendations(item);
+    }
+
+    // -- Briefing: shell-truthful context lines --
+    function renderBriefing(item) {
+      var el = document.getElementById('entryBriefingBody');
+      if (!el || !item) return;
+      var lines = [];
+      var displayName = item.name || item.title || item.entity || item.foundup_id;
+      var displayStatus = item.launch_readiness || item.status || 'active';
+      var readinessLabel = READINESS_LABELS[displayStatus] || displayStatus || 'Unknown';
+      lines.push('You are viewing <strong>' + esc(displayName) + '</strong>');
+      lines.push('Readiness: <strong>' + esc(readinessLabel) + '</strong>');
+      if (item.token_symbol || item.source_handle) lines.push('Token: <strong>' + esc(item.token_symbol || item.source_handle) + '</strong>');
+      if (item.creator || item.creator_display) lines.push('Creator: <strong>' + esc(item.creator_display || item.creator) + '</strong>');
+      if (item.lifecycle_stage) lines.push('Lifecycle: <strong>' + esc(item.lifecycle_stage) + '</strong>');
+      if (item.tier) lines.push('Tier: <strong>' + esc(item.tier) + '</strong>');
+      if (item.routing_prefix) lines.push('Route: <strong>' + esc(item.routing_prefix) + '</strong>');
+      if (item.video_count) lines.push('Videos: <strong>' + item.video_count + '</strong>');
+      if (NON_VIDEO_SOURCE_TYPES[item.source_type]) {
+        lines.push('Type: <strong>' + esc((item.source_type || '').replace(/_/g, ' ')) + '</strong>');
+        if (item.external_url) lines.push('URL: <strong>' + esc(item.external_url) + '</strong>');
+      }
+      el.innerHTML = lines.map(function(l) {
+        return '<div class="entry-briefing-line">' + l + '</div>';
+      }).join('');
+    }
+
+    // -- Recommended actions: truthful, local-only --
+    var ENTRY_RECOMMENDATIONS = [
+      {
+        id: 'return_to_mall',
+        label: 'Return to Mall',
+        run: function() { window.location.href = MALL_HOME; }
+      },
+      {
+        id: 'scroll_readiness',
+        label: 'Review readiness',
+        run: function() {
+          closeConcierge();
+          var el = document.querySelector('.entry-readiness-block');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      },
+      {
+        id: 'scroll_about',
+        label: 'View about',
+        run: function() {
+          closeConcierge();
+          var el = document.querySelector('.entry-description');
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    ];
+
+    function renderRecommendations(item) {
+      var el = document.getElementById('entryRecsBody');
+      if (!el) return;
+      var recs = ENTRY_RECOMMENDATIONS.slice();
+      // Add source-specific CTA
+      if (NON_VIDEO_SOURCE_TYPES[item.source_type] && SOURCE_TYPE_CTA[item.source_type] && item.external_url) {
+        var cta = SOURCE_TYPE_CTA[item.source_type];
+        recs.unshift({
+          id: 'open_source',
+          label: cta.label,
+          run: function() { window.open(item.external_url, '_blank'); }
+        });
+      }
+      var html = '<div class="entry-recs-row">';
+      recs.forEach(function(rec, idx) {
+        html += '<button class="entry-rec-action" data-rec-idx="' + idx + '">' + esc(rec.label) + '</button>';
+      });
+      html += '</div>';
+      el.innerHTML = html;
+      el.querySelectorAll('.entry-rec-action').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var idx = parseInt(btn.getAttribute('data-rec-idx'), 10);
+          if (recs[idx] && recs[idx].run) recs[idx].run();
+        });
+      });
+    }
+
+    function getEntryContext() {
+      return {
+        foundupId: foundupId,
+        subpath: subpath,
+        item: currentItem,
+        conciergeOpen: conciergeOpen
+      };
+    }
+
+    entryRedDogBtn.addEventListener('click', toggleConcierge);
+    conciergeScrim.addEventListener('click', closeConcierge);
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && conciergeOpen) closeConcierge();
+    });
+
+    // -- Public API: window.entryRedDog --
+    window.entryRedDog = {
+      open: function() { if (!conciergeOpen) toggleConcierge(); },
+      close: closeConcierge,
+      toggle: toggleConcierge,
+      isOpen: function() { return conciergeOpen; },
+      getContext: getEntryContext
+    };
   })();
   </script>
+  <script src="/member/js/shell-bridge-interceptor.js"></script>
+  <script src="/member/js/red-dog-concierge.js"></script>
 </body>
 </html>

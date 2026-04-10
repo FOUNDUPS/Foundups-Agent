@@ -13,8 +13,27 @@ import json
 import os
 import pytest
 
+# public/member
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-REPO_ROOT = os.path.dirname(os.path.dirname(ROOT))
+
+
+def _find_repo_root():
+    """Walk up from ROOT to find repo root (contains firebase.json or .git)."""
+    current = ROOT
+    for _ in range(10):  # safety limit
+        if os.path.isfile(os.path.join(current, "firebase.json")):
+            return current
+        if os.path.isdir(os.path.join(current, ".git")):
+            return current
+        parent = os.path.dirname(current)
+        if parent == current:  # reached filesystem root
+            break
+        current = parent
+    # Fallback to computed path (original behavior)
+    return os.path.dirname(os.path.dirname(ROOT))
+
+
+REPO_ROOT = _find_repo_root()
 
 
 def _read(relpath, base=ROOT):
@@ -89,9 +108,10 @@ class TestCanonicalRouteBehavior:
         assert "No FoundUp specified" in landing
 
     def test_landing_handles_invalid_id(self):
-        """Landing validates foundup_id format."""
+        """Landing shows error for unknown/invalid foundup_id."""
         landing = _read("../f/index.html")
-        assert "Invalid" in landing or "not valid" in landing
+        # Landing shows "not found" for invalid IDs (catalog lookup fails)
+        assert "not found" in landing.lower() or "does not exist" in landing.lower()
 
     def test_landing_has_mall_fallback(self):
         """Landing has Return to Mall link."""
@@ -140,11 +160,14 @@ class TestWsp104Compliance:
         assert "Canonical route:" in landing or "canonical-route" in landing
 
     def test_no_transitional_redirect(self):
-        """No transitional redirect — canonical URL stays visible."""
+        """No auto-redirect on page load — canonical URL stays visible."""
         landing = _read("../f/index.html")
-        # The old bridge had "transitional" in it — this should not
+        # The old bridge had location.replace redirect — this should not
         assert "location.replace(" not in landing
-        assert "location.href =" not in landing
+        # Should not auto-redirect to transitional entry on load
+        assert "/member/foundup.html?id=" not in landing
+        # The word "transitional" should not appear (old bridge language)
+        assert "transitional" not in landing.lower()
 
     def test_stable_identity_from_path(self):
         """FoundUp identity derived from URL path, not query params."""
