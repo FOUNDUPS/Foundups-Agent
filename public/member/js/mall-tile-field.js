@@ -151,10 +151,20 @@
 
   function stopInlinePreview() {
     if (playingIndex === null) return;
+    // Increment generation FIRST to invalidate any pending async callbacks
+    previewGeneration++;
     destroyInlineYTPlayer();
     if (inlineHTML5Video) {
+      // Remove error handler to prevent stale callback
+      inlineHTML5Video.onerror = null;
       inlineHTML5Video.pause();
       inlineHTML5Video.src = '';
+      // Call load() to release media buffers (mobile resource discipline)
+      try { inlineHTML5Video.load(); } catch (e) { /* ignore */ }
+      // Remove from DOM to ensure cleanup
+      if (inlineHTML5Video.parentNode) {
+        inlineHTML5Video.parentNode.removeChild(inlineHTML5Video);
+      }
       inlineHTML5Video = null;
     }
     var tile = getTileElement(playingIndex);
@@ -188,15 +198,17 @@
   }
 
   function startInlinePreview(index, muted) {
-    if (playingIndex !== null && playingIndex !== index) {
-      stopInlinePreview();
-    } else {
-      stopInlinePreview();
-    }
+    // Defensive cleanup: always stop previous preview first
+    stopInlinePreview();
+
     var videoData = getTilePreviewVideo(index);
     if (!videoData) return;
 
     var videoUrl = videoData.embed_url || videoData.embedUrl || videoData.source_url || videoData.sourceUrl || '';
+    // Invalid URL fail-safe: don't attempt preview with empty/malformed URLs
+    if (!videoUrl || typeof videoUrl !== 'string' || videoUrl.length < 5) {
+      return;
+    }
     var ytId = extractYouTubeVideoId(videoUrl);
     var tile = getTileElement(index);
     if (!tile) return;
@@ -231,6 +243,11 @@
               if (previewMuted) event.target.mute();
               else event.target.unMute();
               event.target.playVideo();
+            },
+            onError: function(event) {
+              // YouTube player error: fail quietly, clean up state
+              if (gen !== previewGeneration) return;
+              stopInlinePreview();
             }
           }
         });
@@ -238,16 +255,25 @@
     } else if (videoUrl) {
       var video = document.createElement('video');
       video.className = 'mall-tile-preview-media';
-      video.src = videoUrl;
       video.muted = previewMuted;
       video.autoplay = true;
       video.loop = true;
       video.playsInline = true;
       video.setAttribute('playsinline', '');
+      // Error handler: fail quietly without poisoning state
+      video.onerror = function() {
+        if (gen !== previewGeneration) return;
+        stopInlinePreview();
+      };
       stage.innerHTML = '';
       stage.appendChild(video);
       inlineHTML5Video = video;
-      video.play().catch(function() { /* autoplay may be blocked */ });
+      video.src = videoUrl;
+      video.play().catch(function() {
+        // Autoplay may be blocked — fail quietly, stop preview state
+        if (gen !== previewGeneration) return;
+        stopInlinePreview();
+      });
     }
   }
 
@@ -272,6 +298,28 @@
       }
     }
     applyTilePreviewState(playingIndex, { previewing: true, paused: previewPaused, muted: previewMuted });
+  }
+
+  // ========== Page Visibility Resource Discipline ==========
+
+  var visibilityBound = false;
+
+  /**
+   * Bind page visibility handler - pause preview when tab/page is hidden
+   * to avoid burning resources offscreen (mobile battery discipline)
+   */
+  function bindVisibilityHandler() {
+    if (visibilityBound) return;
+    visibilityBound = true;
+
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden && playingIndex !== null) {
+        // Page hidden: pause preview to save resources
+        pauseInlinePreview();
+      }
+      // Note: we do NOT auto-resume on visible - user taps to resume
+      // This is intentional: prevents unexpected audio/video playback
+    });
   }
 
   // Locomotion state
@@ -315,6 +363,9 @@
 
     // Track scroll state for edge shadows
     bindScrollState();
+
+    // Bind page visibility handler for resource discipline
+    bindVisibilityHandler();
 
     renderTiles();
     bindInteractions();
