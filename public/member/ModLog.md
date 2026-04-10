@@ -1,5 +1,50 @@
 # Member Area Module Change Log
 
+## [2026-04-11] Canonical FoundUp Landing Route Cutover Phase 1 (Worker BM, WSP 15/97/104)
+
+**Who**: 0102 — Worker BM
+**Slice**: `PFMALL_CANONICAL_FOUNDUP_ROUTE_CUTOVER_PHASE1`
+**What**: Make `/f/{foundup_id}` a real shell-owned landing route with full Red Dog concierge.
+
+**Files Modified**:
+- `public/f/index.html` — Full runtime ported from `foundup.html` (Red Dog concierge, briefings, recommendations, `window.entryRedDog` API)
+- `public/member/tests/test_route_contract_bridge.py` — Robust REPO_ROOT discovery, updated test assertions
+
+**Route Behavior Change**:
+
+| Aspect | Before | After |
+|--------|--------|-------|
+| URL visible | `/member/foundup.html?id={id}` | `/f/{foundup_id}` (stays) |
+| Redirect | Yes (`location.replace`) | No (direct render) |
+| Identity source | Query param (`?id=`) | URL path (`/f/{id}`) |
+| Subpath support | Forwarded as `&subpath=` | Captured for future `/app` |
+
+**Red Dog Concierge** (architect-required):
+- Full concierge HTML structure (`#conciergeScrim`, `#conciergeSheet`, `#entryRedDog`)
+- Concierge CSS (floating FAB, sheet, scrim, readiness key)
+- Concierge JS (toggle, briefing, recommendations)
+- `window.entryRedDog` public API (open/close/toggle/isOpen/getContext)
+- Script hooks: `shell-bridge-interceptor.js`, `red-dog-concierge.js`
+
+**WSP 104 Compliance**:
+- `/f/{foundup_id}` is the canonical landing namespace
+- No redirect to transitional `/member/foundup.html?id=`
+- Canonical URL stays visible in address bar
+- Subpath captured for future `/f/{foundup_id}/app` mount
+- Transitional entry preserved at `/member/foundup.html` for backward compat
+
+**Test Fixes**:
+- Robust REPO_ROOT: walks up directory tree to find `firebase.json` or `.git`
+- Updated `test_landing_handles_invalid_id`: checks for "not found" (catalog behavior)
+- Updated `test_no_transitional_redirect`: checks for auto-redirect patterns, not user nav
+
+**Test Results**: 22 route contract + 19 entry shell = 41 passed
+
+**WSP 104 Applied**: Canonical route namespace; no root sprawl; identity from path.
+**WSP 97 Applied**: Landing content renders truthfully; stable identity routing.
+
+---
+
 ## [2026-04-10] Portrait-First Video Wall Layout Phase 1 (Worker BJ, WSP 15/97)
 
 **Who**: 0102 — Worker BJ

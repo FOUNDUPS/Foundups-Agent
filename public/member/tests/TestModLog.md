@@ -4,6 +4,32 @@ Test evolution log for the p.fMALL member shell test suite.
 
 ---
 
+## 2026-04-10 | Route Contract Bridge Tests (WSP 104/97)
+
+**File**: `test_route_contract_bridge.py` (rewritten)
+**Tests**: 22 | **Classes**: 7 | **Result**: 22 passed
+**Worker**: BM
+
+Validates WSP 104 canonical landing route cutover from redirect bridge to direct render:
+
+| Class | Count | What it covers |
+|-------|-------|----------------|
+| TestCanonicalRouteExists | 3 | Landing HTML exists, parses foundup_id, fetches catalog |
+| TestFirebaseRouting | 3 | firebase.json has /f/** rewrite before catchall |
+| TestCanonicalRouteBehavior | 4 | Missing ID error, invalid ID, mall fallback, subpath capture |
+| TestCanonicalRouteRendering | 3 | No redirect, renders entry content directly, marks canonical |
+| TestWsp104Compliance | 3 | Canonical route displayed, no transitional redirect, path-based identity |
+| TestSubpathForwardCompatibility | 3 | Subpath captured, info displayed, /app mount comment |
+| TestTransitionalFallbackPreserved | 3 | foundup.html still exists and accepts id param |
+
+**Key changes**:
+- Tests verify `/f/{foundup_id}` renders content directly (no `location.replace`)
+- Tests verify identity from `window.location.pathname`, not query params
+- Tests verify subpath capture for future `/f/{id}/app` mount
+- Transitional fallback (`/member/foundup.html?id=`) preserved for backward compat
+
+---
+
 ## 2026-04-10 | Portrait Tile Geometry Tests (WSP 15/97)
 
 **File**: `test_video_mall_field_runtime.py` (extended)
