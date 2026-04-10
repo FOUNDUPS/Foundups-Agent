@@ -12,7 +12,7 @@
 | Metric | Value |
 |--------|-------|
 | **Total modules missing INTERFACE.md** | 26 |
-| **Generated** | 2026-04-10T08:23:05Z |
+| **Generated** | 2026-04-10T09:54:52Z |
 | **Queue file** | `docs/audits/wsp49_interface_closure_queue.json` |
 | **Scanner skill** | `modules/ai_intelligence/ai_overseer/skillz/wsp49_interface_gap_scanner/` |
 
