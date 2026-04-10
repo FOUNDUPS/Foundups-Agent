@@ -69,6 +69,11 @@
   var previewGeneration = 0;       // Guard against stale callbacks
   var tapGuardActive = false;      // Prevent double-fire on audio button tap
 
+  // Lane autoplay state
+  var autoplayLaneIndex = null;    // FoundUp index for current lane autoplay (Mall mode only)
+  var autoplayVideoIndex = 0;      // Current video index within lane's videos[] array
+  var AUTOPLAY_LOOP_POLICY = 'loop'; // 'loop' = restart at 0, 'stop' = halt on last
+
   // ========== YouTube IFrame API Helpers ==========
 
   function ensureYouTubeAPI() {
@@ -175,6 +180,9 @@
     applyTilePreviewState(null, null);
     playingIndex = null;
     previewPaused = false;
+    // Clear lane autoplay state
+    autoplayLaneIndex = null;
+    autoplayVideoIndex = 0;
   }
 
   function pauseInlinePreview() {
@@ -257,7 +265,7 @@
       video.className = 'mall-tile-preview-media';
       video.muted = previewMuted;
       video.autoplay = true;
-      video.loop = true;
+      video.loop = false; // No loop — lane autoplay handles advancement
       video.playsInline = true;
       video.setAttribute('playsinline', '');
       // Error handler: fail quietly without poisoning state
@@ -265,12 +273,155 @@
         if (gen !== previewGeneration) return;
         stopInlinePreview();
       };
+      // Lane autoplay: advance to next video when current ends
+      video.onended = function() {
+        if (gen !== previewGeneration) return;
+        advanceLaneAutoplay();
+      };
       stage.innerHTML = '';
       stage.appendChild(video);
       inlineHTML5Video = video;
       video.src = videoUrl;
       video.play().catch(function() {
         // Autoplay may be blocked — fail quietly, stop preview state
+        if (gen !== previewGeneration) return;
+        stopInlinePreview();
+      });
+    }
+  }
+
+  /**
+   * Advance lane autoplay to next video in the lane's queue.
+   * Called when inline preview video ends.
+   */
+  function advanceLaneAutoplay() {
+    // Only advance in Mall mode (not expanded mode)
+    if (expandedFoundUp !== null) return;
+    if (autoplayLaneIndex === null) return;
+
+    var lane = mallCatalog[autoplayLaneIndex];
+    if (!lane || !lane.videos || !lane.videos.length) {
+      stopInlinePreview();
+      return;
+    }
+
+    var nextVideoIdx = autoplayVideoIndex + 1;
+
+    // Queue end policy
+    if (nextVideoIdx >= lane.videos.length) {
+      if (AUTOPLAY_LOOP_POLICY === 'loop') {
+        nextVideoIdx = 0;
+      } else {
+        // 'stop' policy: halt on last video
+        stopInlinePreview();
+        return;
+      }
+    }
+
+    autoplayVideoIndex = nextVideoIdx;
+    startLaneVideoAtIndex(autoplayLaneIndex, nextVideoIdx);
+  }
+
+  /**
+   * Start inline preview for a specific video within a lane.
+   * @param {number} laneIndex - Index of the FoundUp in mallCatalog
+   * @param {number} videoIdx - Index within the lane's videos[] array
+   */
+  function startLaneVideoAtIndex(laneIndex, videoIdx) {
+    var lane = mallCatalog[laneIndex];
+    if (!lane || !lane.videos || !lane.videos[videoIdx]) return;
+
+    var video = lane.videos[videoIdx];
+    var tile = getTileElement(laneIndex);
+    if (!tile) return;
+    var stage = tile.querySelector('.mall-tile-preview-stage');
+    if (!stage) return;
+
+    // Update playing state (tile index stays the same, it's the lane)
+    playingIndex = laneIndex;
+    previewPaused = false;
+    previewGeneration++;
+    var gen = previewGeneration;
+
+    applyTilePreviewState(laneIndex, { previewing: true, paused: false, muted: previewMuted });
+
+    var videoUrl = video.embed_url || video.embedUrl || video.source_url || video.sourceUrl || '';
+    if (!videoUrl || typeof videoUrl !== 'string' || videoUrl.length < 5) {
+      stopInlinePreview();
+      return;
+    }
+
+    var ytId = extractYouTubeVideoId(videoUrl);
+
+    if (ytId) {
+      ensureYouTubeAPI().then(function() {
+        if (gen !== previewGeneration) return;
+        destroyInlineYTPlayer();
+        var hostDiv = document.createElement('div');
+        hostDiv.className = 'mall-tile-preview-host';
+        hostDiv.id = 'yt-preview-' + laneIndex + '-' + gen;
+        stage.innerHTML = '';
+        stage.appendChild(hostDiv);
+        inlineYTPlayer = new YT.Player(hostDiv.id, {
+          videoId: ytId,
+          playerVars: {
+            autoplay: 1, mute: previewMuted ? 1 : 0, controls: 0, modestbranding: 1,
+            rel: 0, playsinline: 1, loop: 0
+          },
+          events: {
+            onReady: function(event) {
+              if (gen !== previewGeneration) return;
+              if (previewMuted) event.target.mute();
+              else event.target.unMute();
+              event.target.playVideo();
+            },
+            onStateChange: function(event) {
+              if (gen !== previewGeneration) return;
+              // YT.PlayerState.ENDED = 0
+              if (event.data === 0) {
+                advanceLaneAutoplay();
+              }
+            },
+            onError: function() {
+              if (gen !== previewGeneration) return;
+              stopInlinePreview();
+            }
+          }
+        });
+      });
+    } else {
+      // HTML5 video
+      destroyInlineYTPlayer();
+      if (inlineHTML5Video) {
+        inlineHTML5Video.onerror = null;
+        inlineHTML5Video.onended = null;
+        inlineHTML5Video.pause();
+        inlineHTML5Video.src = '';
+        try { inlineHTML5Video.load(); } catch (e) {}
+        if (inlineHTML5Video.parentNode) inlineHTML5Video.parentNode.removeChild(inlineHTML5Video);
+        inlineHTML5Video = null;
+      }
+
+      var vid = document.createElement('video');
+      vid.className = 'mall-tile-preview-media';
+      vid.muted = previewMuted;
+      vid.autoplay = true;
+      vid.loop = false;
+      vid.playsInline = true;
+      vid.setAttribute('playsinline', '');
+      vid.onerror = function() {
+        if (gen !== previewGeneration) return;
+        stopInlinePreview();
+      };
+      vid.onended = function() {
+        if (gen !== previewGeneration) return;
+        advanceLaneAutoplay();
+      };
+      stage.innerHTML = '';
+      stage.appendChild(vid);
+      inlineHTML5Video = vid;
+      vid.src = videoUrl;
+      vid.play().catch(function() {
         if (gen !== previewGeneration) return;
         stopInlinePreview();
       });
@@ -729,7 +880,18 @@
       else pauseInlinePreview();
       return;
     }
-    startInlinePreview(index, false);
+
+    // Initialize lane autoplay state (Mall mode only)
+    if (expandedFoundUp === null && item.videos && item.videos.length) {
+      autoplayLaneIndex = index;
+      autoplayVideoIndex = 0;
+      startLaneVideoAtIndex(index, 0);
+    } else {
+      // Expanded mode or single video: use legacy single-video preview
+      autoplayLaneIndex = null;
+      autoplayVideoIndex = 0;
+      startInlinePreview(index, false);
+    }
   }
 
   /**

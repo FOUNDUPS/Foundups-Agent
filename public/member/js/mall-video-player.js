@@ -161,6 +161,10 @@
       '    <button class="video-player-btn" data-action="share" aria-label="Share">',
       '      <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>',
       '    </button>',
+      '    <button class="video-player-btn video-player-btn-entry" data-action="enter" aria-label="Enter FoundUp">',
+      '      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>',
+      '      <span class="video-player-btn-label">Enter FoundUp</span>',
+      '    </button>',
       '    <button class="video-player-btn" data-action="more" aria-label="More options">',
       '      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>',
       '    </button>',
@@ -297,6 +301,19 @@
     if (currentIndex > 0) {
       goToVideo(currentIndex - 1);
       showHint('Previous');
+    }
+  }
+
+  /**
+   * Handle video ended event — auto-advance to next in queue.
+   * Called by YouTube onStateChange(ENDED) and HTML5 video 'ended' event.
+   */
+  function handleVideoEnded() {
+    if (currentIndex < currentQueue.length - 1) {
+      goToVideo(currentIndex + 1);
+    } else {
+      // End of queue: loop back to start (consistent with lane autoplay policy)
+      goToVideo(0);
     }
   }
 
@@ -534,7 +551,23 @@
       case 'more':
         showHint('More options');
         break;
+      case 'enter':
+        enterFoundUp();
+        break;
     }
+  }
+
+  /**
+   * Navigate to the FoundUp landing page using stable identity.
+   */
+  function enterFoundUp() {
+    if (!currentFoundUpId) {
+      showHint('No FoundUp');
+      return;
+    }
+    // Navigate to FoundUp entry page using stable foundup_id
+    var entryUrl = '/member/foundup.html?id=' + encodeURIComponent(currentFoundUpId);
+    window.location.href = entryUrl;
   }
 
   function handleRailClick(e) {

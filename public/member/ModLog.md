@@ -1,5 +1,49 @@
 # Member Area Module Change Log
 
+## [2026-04-10] Lane Autoplay & Fullscreen FoundUp Entry Phase 1 (Worker BL, WSP 15/97)
+
+**Who**: 0102 — Worker BL
+**Slice**: `YOUTUBE_CHANNEL_LANE_AUTOPLAY_AND_FULLSCREEN_ENTRY_PHASE1`
+**What**: Turn pfMALL channel tiles into real lane browsers with autoplay and explicit fullscreen FoundUp entry.
+
+**Files Modified**:
+- `public/member/js/mall-tile-field.js` — Lane autoplay state, `advanceLaneAutoplay()`, `startLaneVideoAtIndex()`
+- `public/member/js/mall-video-player.js` — Added `handleVideoEnded()`, "Enter FoundUp" button, `enterFoundUp()`
+- `public/member/css/mall-video-player.css` — `.video-player-btn-entry` styling
+- `public/member/tests/test_lane_autoplay_fullscreen_entry.py` — 31 new tests
+
+**Lane Autoplay Behavior**:
+1. **Tap on video-backed tile** → Starts lane autoplay (not single video)
+2. **Auto-advance** → When current video ends, advances to next in lane's `videos[]`
+3. **Queue constraint** → Autoplay stays within the lane, never drifts to other FoundUps
+4. **Loop policy** → At queue end, loops back to first video (`AUTOPLAY_LOOP_POLICY = 'loop'`)
+5. **Mall mode only** → Expanded mode uses legacy single-video preview
+
+**Lane Autoplay State**:
+```javascript
+autoplayLaneIndex = null;    // FoundUp index for current lane
+autoplayVideoIndex = 0;      // Position within lane's videos[]
+AUTOPLAY_LOOP_POLICY = 'loop'; // Queue-end behavior
+```
+
+**Fullscreen "Enter FoundUp" Button**:
+- **Location**: Top bar, between Share and More buttons
+- **Style**: Prominent pill with icon + "Enter FoundUp" label
+- **Routing**: `/member/foundup.html?id={currentFoundUpId}` — stable identity
+- **No PWA launch**: Routes to landing page, not direct PWA
+
+**Fixed Bug**: `handleVideoEnded` was called but never defined in `mall-video-player.js` — now properly advances queue.
+
+**Non-Video Truth**: Non-video tiles (github_repo, external_app, internal_service) retain their quick-view path, no fake autoplay semantics.
+
+**Expanded Mode**: Pinch-out/pinch-in behavior unchanged — expanded inventory view still works.
+
+**WSP 97 Applied**: Autoplay constrained to lane truth, explicit entry surface, stable identity routing.
+
+**Test Count**: 31 new focused tests, all passing.
+
+---
+
 ## [2026-04-10] Explicit FoundUp Entry Trigger Phase 1 (Worker BK, WSP 15/97)
 
 **Who**: 0102 — Worker BK

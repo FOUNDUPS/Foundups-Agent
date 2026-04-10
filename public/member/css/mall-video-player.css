@@ -107,6 +107,33 @@
   stroke: #7c5cfc;
 }
 
+/* Enter FoundUp button — prominent entry action */
+.video-player-btn-entry {
+  width: auto;
+  padding: 0 0.75rem;
+  border-radius: 20px;
+  gap: 0.4rem;
+  background: rgba(124, 92, 252, 0.3);
+  border: 1px solid rgba(124, 92, 252, 0.5);
+}
+
+.video-player-btn-entry:hover {
+  background: rgba(124, 92, 252, 0.5);
+}
+
+.video-player-btn-entry svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.video-player-btn-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
 .video-player-title {
   color: #fff;
   font-size: 0.9rem;

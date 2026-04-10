@@ -4,6 +4,36 @@ Test evolution log for the p.fMALL member shell test suite.
 
 ---
 
+## 2026-04-10 | Lane Autoplay & Fullscreen Entry Tests (WSP 15/97)
+
+**File**: `test_lane_autoplay_fullscreen_entry.py` (new)
+**Tests**: 31 | **Classes**: 10 | **Result**: 31 passed
+**Worker**: BL
+
+Validates channel lane autoplay and fullscreen FoundUp entry:
+
+| Test Class | Tests | What it covers |
+|------------|-------|----------------|
+| TestLaneAutoplayState | 3 | `autoplayLaneIndex`, `autoplayVideoIndex`, `AUTOPLAY_LOOP_POLICY` vars |
+| TestLaneAutoplayBehavior | 5 | `advanceLaneAutoplay()`, `startLaneVideoAtIndex()`, ended handlers |
+| TestLaneAutoplayQueueConstraint | 3 | Mall mode only, checks `lane.videos`, stops if no videos |
+| TestTogglePlayLaneInit | 3 | `togglePlay` sets lane index, video index 0, calls `startLaneVideoAtIndex` |
+| TestStopInlinePreviewClearsLane | 2 | `stopInlinePreview` resets lane state |
+| TestFullscreenEnterFoundUp | 5 | Enter button, action handler, `enterFoundUp()`, stable routing |
+| TestFullscreenEnterFoundUpCSS | 2 | `.video-player-btn-entry`, `.video-player-btn-label` styles |
+| TestFullscreenVideoEnded | 3 | `handleVideoEnded()` exists, advances queue, loops at end |
+| TestNonVideoTruth | 2 | Non-video opens quick-view, `hasVideos` check |
+| TestExpandedModeUnaffected | 3 | Expanded mode class, pinch-out/pinch-in still work |
+
+**Key implementation verified**:
+- Lane autoplay advances through `videos[]` array, constrained to single lane
+- Loop policy resets to video 0 at queue end
+- Fullscreen "Enter FoundUp" button uses stable `currentFoundUpId`
+- Non-video tiles retain truthful quick-view path
+- `handleVideoEnded()` now defined (was missing, caused runtime error)
+
+---
+
 ## 2026-04-10 | FoundUp Entry Trigger Tests (WSP 15/97)
 
 **File**: `test_video_mall_field_runtime.py` (extended)
