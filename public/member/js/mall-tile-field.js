@@ -507,6 +507,10 @@
       // Corner expand button for explicit fullscreen entry — video tiles only
       var expandBtn = hasVideos ? '<button class="mall-tile-expand" aria-label="Open fullscreen" title="Fullscreen">&#9654;</button>' : '';
 
+      // FoundUp entry button (bottom-left) — all tiles, explicit entry path
+      var entryBtnSvg = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>';
+      var entryBtn = '<button class="mall-tile-entry" aria-label="About ' + escapeAttr(item.name || item.title || 'this FoundUp') + '" title="About">' + entryBtnSvg + '</button>';
+
       // Inline preview container (YouTube iframe or HTML5 video goes here) — video tiles only
       var previewContainer = hasVideos ? '<div class="mall-tile-preview"><div class="mall-tile-preview-stage"></div></div>' : '';
 
@@ -534,6 +538,7 @@
         playIndicator +
         audioBtn +
         expandBtn +
+        entryBtn +
         '<div class="mall-tile-inner">' +
           '<span class="mall-tile-token">' + escapeHtml(item.token_symbol || '') + '</span>' +
           '<span class="mall-tile-hero">' + escapeHtml(item.hero_label || '') + '</span>' +
@@ -657,6 +662,21 @@
           togglePreviewMute();
         } else {
           startInlinePreview(index, true);
+        }
+      });
+    });
+
+    // Entry buttons — explicit FoundUp landing entry using stable identity
+    var entryBtns = tileField.querySelectorAll('.mall-tile-entry');
+    entryBtns.forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (tapGuardActive) return;
+        var tile = btn.closest('.mall-tile');
+        if (!tile) return;
+        var foundupId = tile.dataset.foundupId;
+        if (foundupId && window.mallPlanes && typeof window.mallPlanes.openFoundUpById === 'function') {
+          window.mallPlanes.openFoundUpById(foundupId);
         }
       });
     });

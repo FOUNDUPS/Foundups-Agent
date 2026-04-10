@@ -1,5 +1,55 @@
 # Member Area Module Change Log
 
+## [2026-04-10] Explicit FoundUp Entry Trigger Phase 1 (Worker BK, WSP 15/97)
+
+**Who**: 0102 — Worker BK
+**Slice**: `PFMALL_FOUNDUP_ENTRY_TRIGGER_PHASE1`
+**What**: Add explicit truthful entry path to FoundUp landing on all pfMALL tiles.
+
+**Files Modified**:
+- `public/member/js/mall-tile-field.js` — Entry button rendering in `renderTiles()`, click handler in `bindInteractions()`
+- `public/member/css/mall-tile-field.css` — `.mall-tile-entry` button styles, visibility rules
+- `public/member/tests/test_video_mall_field_runtime.py` — 11 new tests for entry trigger behavior
+
+**Entry Trigger Behavior**:
+1. **Button placement**: Bottom-left corner, 24px info icon (circle with i)
+2. **Routing**: Uses stable `data-foundup-id` attribute, calls `mallPlanes.openFoundUpById(foundupId)`
+3. **Tap guard**: Respects `tapGuardActive` to prevent accidental activation during drag
+4. **Event isolation**: `e.stopPropagation()` prevents tile tap handler interference
+
+**Visual Treatment**:
+- **Default**: Hidden (not polluting browse wall)
+- **Hover**: Visible on `.mall-tile:hover`
+- **Focus**: Visible on `.mall-tile:focus-within` and `.mall-tile-entry:focus-visible`
+- **Preview**: Visible when `.inline-preview-active`
+- **Touch**: Always visible on `@media (hover: none)` for touch-only devices
+
+**CSS Styles**:
+```css
+.mall-tile-entry {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+}
+.mall-tile-entry:hover { background: rgba(0, 212, 170, 0.8); }
+```
+
+**Stable Identity Routing**: Entry button queries `tile.dataset.foundupId` (not raw index), ensuring correct routing survives projection/filter changes.
+
+**No PWA Direct Launch**: Entry trigger does NOT launch PWA directly — routes through `mallPlanes.openFoundUpById()` for truthful handoff.
+
+**WSP 97 Applied**: Minimal surface addition — one button, stable identity, existing API handoff.
+
+**Test Count**: 170 passed (159 existing + 11 new entry trigger tests)
+
+---
+
 ## [2026-04-10] Portrait-First Video Wall Layout Phase 1 (Worker BJ, WSP 15/97)
 
 **Who**: 0102 — Worker BJ

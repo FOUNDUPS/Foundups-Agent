@@ -4,6 +4,36 @@ Test evolution log for the p.fMALL member shell test suite.
 
 ---
 
+## 2026-04-10 | FoundUp Entry Trigger Tests (WSP 15/97)
+
+**File**: `test_video_mall_field_runtime.py` (extended)
+**Tests**: 11 new | **Class**: `TestFoundUpEntryTrigger` | **Result**: 170 passed total
+**Worker**: BK
+
+Validates explicit FoundUp entry trigger on all pfMALL tiles:
+
+| Test | What it covers |
+|------|----------------|
+| test_entry_button_rendered | `.mall-tile-entry` button exists in tile markup |
+| test_entry_button_svg_icon | Info icon SVG (circle + i paths) |
+| test_entry_button_aria_label | Accessible label "About {name}" |
+| test_entry_button_click_handler | Click handler bound in `bindInteractions()` |
+| test_entry_uses_stable_foundup_id | Queries `tile.dataset.foundupId`, not raw index |
+| test_entry_calls_open_foundup_by_id | Calls `mallPlanes.openFoundUpById(foundupId)` |
+| test_entry_stops_propagation | `e.stopPropagation()` prevents tile tap |
+| test_entry_respects_tap_guard | Checks `tapGuardActive` before routing |
+| test_entry_visible_on_hover | CSS shows button on `.mall-tile:hover` |
+| test_entry_visible_on_touch_devices | `@media (hover: none)` always-visible rule |
+| test_no_pwa_direct_launch | No `navigator.standalone` or `window.open` in handler |
+
+**Key implementation verified**:
+- Stable identity routing via `data-foundup-id` (survives projection/filter changes)
+- Visual restraint: button hidden by default, visible on hover/focus/preview/touch
+- Tap guard integration prevents accidental activation during drag-to-scroll
+- No PWA direct launch — routes through existing `mallPlanes.openFoundUpById()` API
+
+---
+
 ## 2026-04-10 | Portrait Tile Geometry Tests (WSP 15/97)
 
 **File**: `test_video_mall_field_runtime.py` (extended)

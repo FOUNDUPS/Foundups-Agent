@@ -1003,3 +1003,84 @@ class TestPreviewResourceHardening:
         js = _read("js/mall-tile-field.js")
         assert "visibilityBound" in js
         assert "if (visibilityBound) return" in js
+
+
+class TestFoundUpEntryTrigger:
+    """Test explicit FoundUp entry trigger on tiles."""
+
+    def test_entry_button_rendered_on_tiles(self):
+        """Entry button is rendered in tile HTML."""
+        js = _read("js/mall-tile-field.js")
+        assert "mall-tile-entry" in js
+        assert "entryBtn" in js
+
+    def test_entry_button_has_aria_label(self):
+        """Entry button has aria-label for accessibility."""
+        js = _read("js/mall-tile-field.js")
+        assert 'aria-label="About ' in js
+
+    def test_entry_button_uses_stable_identity(self):
+        """Entry button uses foundup_id from data attribute, not raw index."""
+        js = _read("js/mall-tile-field.js")
+        # Handler should get foundupId from tile dataset, not index
+        assert "tile.dataset.foundupId" in js
+        assert "openFoundUpById(foundupId)" in js
+
+    def test_entry_button_stops_propagation(self):
+        """Entry button click stops propagation to prevent tile tap."""
+        js = _read("js/mall-tile-field.js")
+        # Find entry button handler and verify stopPropagation
+        idx_entry = js.index("entryBtns.forEach")
+        idx_stop = js.index("e.stopPropagation()", idx_entry)
+        assert idx_stop - idx_entry < 200
+
+    def test_entry_button_css_exists(self):
+        """Entry button has CSS styling."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile-entry" in css
+        assert "bottom: 4px" in css
+        assert "left: 4px" in css
+
+    def test_entry_button_visible_on_hover(self):
+        """Entry button becomes visible on tile hover."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile:hover .mall-tile-entry" in css
+
+    def test_entry_button_visible_on_preview(self):
+        """Entry button visible when tile is previewing."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile.is-previewing .mall-tile-entry" in css
+
+    def test_entry_button_focus_visible(self):
+        """Entry button has focus-visible styling."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile-entry:focus-visible" in css
+
+    def test_entry_button_touch_visible(self):
+        """Entry button always visible on touch devices."""
+        css = _read("css/mall-tile-field.css")
+        # Check touch media query includes entry button
+        idx_touch = css.index("@media (hover: none)")
+        idx_end = css.index("}", idx_touch + 20)
+        touch_block = css[idx_touch:idx_end]
+        assert ".mall-tile-entry" in touch_block
+
+    def test_video_tap_semantics_unchanged(self):
+        """Video tile tap still triggers preview, not entry."""
+        js = _read("js/mall-tile-field.js")
+        # togglePlay should still be called on single tap
+        assert "togglePlay(index)" in js
+        # and togglePlay starts preview for video tiles
+        assert "startInlinePreview(index" in js
+
+    def test_no_direct_pwa_launch(self):
+        """Entry does not launch PWA directly from wall."""
+        js = _read("js/mall-tile-field.js")
+        # Entry button handler should use mallPlanes, not direct PWA launch
+        idx_entry = js.index("entryBtns.forEach")
+        idx_end = js.index("});", idx_entry + 50)
+        entry_handler = js[idx_entry:idx_end]
+        assert "mallPlanes.openFoundUpById" in entry_handler
+        # Should NOT have direct window.open or location navigation
+        assert "window.open" not in entry_handler
+        assert "location.href" not in entry_handler

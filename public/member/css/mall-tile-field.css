@@ -539,7 +539,8 @@
 /* Touch devices: always show controls (no hover) */
 @media (hover: none) {
   .mall-tile-expand,
-  .mall-tile-audio {
+  .mall-tile-audio,
+  .mall-tile-entry {
     opacity: 1;
   }
 
@@ -586,9 +587,50 @@
   background: rgba(124, 92, 252, 0.8);
 }
 
+/* ─── Entry Button (FoundUp Landing Entry on Tile) ─── */
+.mall-tile-entry {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  width: 24px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 150ms ease, background 150ms ease;
+  z-index: 10;
+}
+
+.mall-tile-entry svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.mall-tile:hover .mall-tile-entry,
+.mall-tile:focus-within .mall-tile-entry,
+.mall-tile.is-previewing .mall-tile-entry {
+  opacity: 1;
+}
+
+.mall-tile-entry:hover {
+  background: rgba(0, 212, 170, 0.8);
+}
+
 /* Focus states for control buttons (keyboard accessibility) */
 .mall-tile-audio:focus-visible,
-.mall-tile-expand:focus-visible {
+.mall-tile-expand:focus-visible,
+.mall-tile-entry:focus-visible {
   opacity: 1;
   outline: 2px solid rgba(141, 113, 255, 0.8);
   outline-offset: 2px;
