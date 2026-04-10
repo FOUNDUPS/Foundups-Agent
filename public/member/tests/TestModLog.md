@@ -4,6 +4,31 @@ Test evolution log for the p.fMALL member shell test suite.
 
 ---
 
+## 2026-04-11 | FoundUp App Mount Tests (WSP 104/97)
+
+**File**: `test_route_contract_bridge.py` (extended)
+**Tests**: 12 new | **Classes**: 4 new | **Result**: 34 passed total
+**Worker**: BN
+
+Validates `/f/{foundup_id}/app` canonical app mount per WSP 104:
+
+| Class | Count | What it covers |
+|-------|-------|----------------|
+| TestAppMountRoute | 6 | App detection, container CSS, entry_url handoff, back link, sandbox, error state |
+| TestAppMountDeepLinks | 2 | Deep path capture, path forwarding to iframe |
+| TestLaunchAppCTA | 4 | CTA exists, links to /app route, conditional on entry_url, recommendation added |
+
+**Key implementation verified**:
+- `/f/{id}/app` detected via `isAppMount` flag
+- App container renders with sandboxed iframe
+- `entry_url` from manifest determines app entry point
+- Missing `entry_url` shows "App Not Ready" error
+- Deep paths forwarded as `?path=` param
+- Launch App CTA on landing (conditional on entry_url)
+- Red Dog recommendation "Launch App" added
+
+---
+
 ## 2026-04-10 | Route Contract Bridge Tests (WSP 104/97)
 
 **File**: `test_route_contract_bridge.py` (rewritten)

@@ -280,6 +280,114 @@
       text-align: center;
     }
 
+    /* App mount container (WSP 104) */
+    .app-mount-container {
+      position: fixed;
+      inset: 0;
+      background: #08080f;
+      z-index: 10;
+    }
+    .app-mount-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .app-mount-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 48px;
+      background: rgba(8,8,15,0.95);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      gap: 1rem;
+      z-index: 11;
+    }
+    .app-mount-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: rgba(228,226,236,0.7);
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+    .app-mount-back:hover {
+      background: rgba(255,255,255,0.06);
+      color: #7c5cfc;
+    }
+    .app-mount-back svg { width: 14px; height: 14px; }
+    .app-mount-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: rgba(228,226,236,0.9);
+    }
+    .app-mount-body {
+      position: absolute;
+      top: 48px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+    .app-mount-error {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 2rem;
+      text-align: center;
+    }
+    .app-mount-error h2 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+      color: rgba(228,226,236,0.9);
+    }
+    .app-mount-error p {
+      color: rgba(228,226,236,0.5);
+      margin-bottom: 1rem;
+    }
+    .app-mount-error a {
+      color: #7c5cfc;
+      text-decoration: none;
+    }
+
+    /* Launch App CTA on landing */
+    .entry-launch-app-block {
+      margin: 1.5rem;
+      text-align: center;
+    }
+    .entry-launch-app-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      background: linear-gradient(135deg, rgba(124,92,252,0.15), rgba(0,212,170,0.1));
+      border: 1px solid rgba(124,92,252,0.35);
+      border-radius: 12px;
+      color: #7c5cfc;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+      min-height: 48px;
+    }
+    .entry-launch-app-btn:hover {
+      background: linear-gradient(135deg, rgba(124,92,252,0.25), rgba(0,212,170,0.15));
+      border-color: rgba(124,92,252,0.5);
+      transform: translateY(-1px);
+    }
+    .entry-launch-app-hint {
+      font-size: 0.75rem;
+      color: rgba(228,226,236,0.4);
+      margin-top: 0.5rem;
+    }
+
     /* Red Dog floating button */
     .entry-red-dog {
       position: fixed;
@@ -605,9 +713,15 @@
     }
 
     var foundupId = decodeURIComponent(match[1]);
-    // Capture subpath for future /app mount (WSP 104 forward compatibility)
+    // Capture subpath for /app mount (WSP 104)
     var subpathMatch = path.match(/^\/f\/[^\/]+\/(.+)$/);
     var subpath = subpathMatch ? subpathMatch[1] : null;
+
+    // WSP 104: Detect app mount mode
+    // /f/{id}/app -> app root
+    // /f/{id}/app/{path...} -> app deep link
+    var isAppMount = subpath && (subpath === 'app' || subpath.startsWith('app/'));
+    var appSubpath = isAppMount && subpath.length > 3 ? subpath.substring(4) : null;
 
     fetch(MALL_CATALOG_URL)
       .then(function(r) {
@@ -621,13 +735,97 @@
           renderNotFound('FoundUp not found', 'The FoundUp "' + esc(foundupId) + '" does not exist in the catalog.');
           return;
         }
-        renderEntry(item);
-        populateConciergeContext(item);
+
+        // WSP 104: Route to app mount or landing
+        if (isAppMount) {
+          renderAppMount(item, appSubpath);
+        } else {
+          renderEntry(item);
+          populateConciergeContext(item);
+        }
       })
       .catch(function(err) {
         console.error('Catalog load error:', err);
         renderNotFound('Error', 'Failed to load FoundUp catalog.');
       });
+
+    /**
+     * WSP 104: App Mount Rendering
+     * Loads the tenant app in an isolated container.
+     * Uses manifest entry_url to determine app entry point.
+     */
+    function renderAppMount(item, deepPath) {
+      var displayName = item.name || item.title || item.entity || item.foundup_id;
+      var entryUrl = item.entry_url;
+      var routingPrefix = item.routing_prefix || '/f/' + foundupId;
+
+      // Hide landing content, Red Dog FAB, and concierge
+      container.style.display = 'none';
+      document.getElementById('entryRedDog').style.display = 'none';
+      document.getElementById('conciergeSheet').style.display = 'none';
+      document.getElementById('conciergeScrim').style.display = 'none';
+
+      // Create app mount container
+      var appContainer = document.createElement('div');
+      appContainer.className = 'app-mount-container';
+      appContainer.id = 'appMountContainer';
+
+      // Check if app is ready to mount
+      if (!entryUrl) {
+        appContainer.innerHTML =
+          '<div class="app-mount-header">' +
+            '<a href="/f/' + esc(foundupId) + '" class="app-mount-back">' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>' +
+              'Back to FoundUp' +
+            '</a>' +
+            '<span class="app-mount-title">' + esc(displayName) + '</span>' +
+          '</div>' +
+          '<div class="app-mount-body">' +
+            '<div class="app-mount-error">' +
+              '<h2>App Not Ready</h2>' +
+              '<p>This FoundUp does not have an app entry configured yet.</p>' +
+              '<a href="/f/' + esc(foundupId) + '">Return to FoundUp landing</a>' +
+            '</div>' +
+          '</div>';
+        document.body.appendChild(appContainer);
+        document.title = displayName + ' | App Not Ready';
+        return;
+      }
+
+      // Resolve entry_url (relative to FoundUp manifest location or absolute)
+      var resolvedUrl = entryUrl;
+      if (!entryUrl.startsWith('http://') && !entryUrl.startsWith('https://') && !entryUrl.startsWith('/')) {
+        // Relative URL - resolve relative to FoundUp module location
+        // For now, prefix with the FoundUp's routing prefix
+        resolvedUrl = routingPrefix + '/' + entryUrl;
+      }
+
+      // Append deep path if present
+      if (deepPath) {
+        resolvedUrl += (resolvedUrl.includes('?') ? '&' : '?') + 'path=' + encodeURIComponent(deepPath);
+      }
+
+      appContainer.innerHTML =
+        '<div class="app-mount-header">' +
+          '<a href="/f/' + esc(foundupId) + '" class="app-mount-back">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>' +
+            'Back to FoundUp' +
+          '</a>' +
+          '<span class="app-mount-title">' + esc(displayName) + '</span>' +
+        '</div>' +
+        '<div class="app-mount-body">' +
+          '<iframe ' +
+            'class="app-mount-frame" ' +
+            'src="' + esc(resolvedUrl) + '" ' +
+            'title="' + esc(displayName) + ' App" ' +
+            'sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" ' +
+            'loading="eager">' +
+          '</iframe>' +
+        '</div>';
+
+      document.body.appendChild(appContainer);
+      document.title = displayName + ' | App';
+    }
 
     function renderEntry(item) {
       var displayName = item.name || item.title || item.entity || item.foundup_id;
@@ -673,6 +871,18 @@
         html += '<span>' + ctaConfig.icon + '</span>';
         html += '</a>';
         html += '<div class="entry-source-type-label">' + esc((item.source_type || '').replace(/_/g, ' ')) + '</div>';
+        html += '</div>';
+      }
+
+      // WSP 104: Launch App CTA (only if entry_url is configured)
+      if (item.entry_url) {
+        var appRoute = '/f/' + foundupId + '/app';
+        html += '<div class="entry-launch-app-block">';
+        html += '<a href="' + esc(appRoute) + '" class="entry-launch-app-btn">';
+        html += '<span>Launch App</span>';
+        html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>';
+        html += '</a>';
+        html += '<div class="entry-launch-app-hint">Opens ' + esc(displayName) + ' in the FoundUp shell</div>';
         html += '</div>';
       }
 
@@ -825,6 +1035,14 @@
       var el = document.getElementById('entryRecsBody');
       if (!el) return;
       var recs = ENTRY_RECOMMENDATIONS.slice();
+      // WSP 104: Add Launch App if entry_url is configured
+      if (item.entry_url) {
+        recs.unshift({
+          id: 'launch_app',
+          label: 'Launch App',
+          run: function() { window.location.href = '/f/' + foundupId + '/app'; }
+        });
+      }
       // Add source-specific CTA
       if (NON_VIDEO_SOURCE_TYPES[item.source_type] && SOURCE_TYPE_CTA[item.source_type] && item.external_url) {
         var cta = SOURCE_TYPE_CTA[item.source_type];

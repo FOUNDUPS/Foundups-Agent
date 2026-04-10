@@ -1,5 +1,50 @@
 # Member Area Module Change Log
 
+## [2026-04-11] Canonical FoundUp App Mount Phase 1 (Worker BN, WSP 15/97/104)
+
+**Who**: 0102 — Worker BN
+**Slice**: `PFMALL_FOUNDUP_APP_MOUNT_PHASE1`
+**What**: Establish canonical tenant app mount at `/f/{foundup_id}/app` under WSP 104 route contract.
+
+**Files Modified**:
+- `public/f/index.html` — App mount routing, container, iframe, Launch App CTA
+- `public/member/tests/test_route_contract_bridge.py` — 12 new tests for app mount behavior
+
+**App Route Behavior**:
+
+| Route | Behavior |
+|-------|----------|
+| `/f/{id}` | Landing/about surface (unchanged) |
+| `/f/{id}/app` | App runtime mount (new) |
+| `/f/{id}/app/{path...}` | App deep link (new, forwarded as `?path=`) |
+
+**App Mount Container**:
+- Fixed position overlay with header (back link + title)
+- Sandboxed iframe loads tenant `entry_url` from manifest
+- `sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"`
+- Deep path forwarded to iframe as `?path=` param
+
+**Landing → App Handoff**:
+- "Launch App" CTA on landing (only shown when `entry_url` exists)
+- Links to `/f/{foundup_id}/app` (canonical app route)
+- Red Dog recommendation "Launch App" added when app available
+
+**Safe Failure Behavior**:
+- Missing `entry_url`: Shows "App Not Ready" error with return link
+- Invalid `foundup_id`: Shows "FoundUp not found" (existing behavior)
+- Back link always returns to `/f/{foundup_id}` landing
+
+**Forward Compatibility**:
+- `appSubpath` captures path after `/app/`
+- Deep links forwarded to iframe for tenant-internal routing
+
+**Test Results**: 34 route contract tests passed (22 existing + 12 new)
+
+**WSP 104 Applied**: App mount under canonical namespace `/f/{id}/app`; no root sprawl; tenant isolation via iframe sandbox.
+**WSP 97 Applied**: Minimal surface addition; stable identity routing; existing landing unchanged.
+
+---
+
 ## [2026-04-11] Canonical FoundUp Landing Route Cutover Phase 1 (Worker BM, WSP 15/97/104)
 
 **Who**: 0102 — Worker BM

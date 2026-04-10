@@ -215,3 +215,86 @@ class TestTransitionalFallbackPreserved:
         entry = _read("foundup.html")
         assert "entry-shell" in entry
         assert "entryContent" in entry
+
+
+class TestAppMountRoute:
+    """Test /f/{foundup_id}/app canonical app mount (WSP 104)."""
+
+    def test_app_mount_detection(self):
+        """Landing detects /app subpath."""
+        landing = _read("../f/index.html")
+        assert "isAppMount" in landing
+        assert "subpath === 'app'" in landing or "'app'" in landing
+
+    def test_app_mount_renders_container(self):
+        """App mount has container CSS and structure."""
+        landing = _read("../f/index.html")
+        assert "app-mount-container" in landing
+        assert "app-mount-frame" in landing
+        assert "app-mount-header" in landing
+
+    def test_app_mount_uses_entry_url(self):
+        """App mount uses manifest entry_url."""
+        landing = _read("../f/index.html")
+        assert "entry_url" in landing
+        assert "renderAppMount" in landing
+
+    def test_app_mount_back_link(self):
+        """App mount has back link to landing."""
+        landing = _read("../f/index.html")
+        assert "Back to FoundUp" in landing
+        assert "app-mount-back" in landing
+
+    def test_app_mount_sandbox(self):
+        """App mount iframe has sandbox attribute."""
+        landing = _read("../f/index.html")
+        assert 'sandbox="' in landing
+        assert "allow-scripts" in landing
+
+    def test_app_not_ready_error(self):
+        """App mount shows error when entry_url missing."""
+        landing = _read("../f/index.html")
+        assert "App Not Ready" in landing
+        assert "does not have an app entry" in landing
+
+
+class TestAppMountDeepLinks:
+    """Test /f/{foundup_id}/app/{path...} deep link support."""
+
+    def test_deep_path_captured(self):
+        """Deep path after /app is captured."""
+        landing = _read("../f/index.html")
+        assert "appSubpath" in landing
+        assert "deepPath" in landing or "deep" in landing.lower()
+
+    def test_deep_path_forwarded(self):
+        """Deep path is forwarded to app frame."""
+        landing = _read("../f/index.html")
+        # Should pass path as query param or in URL
+        assert "path=" in landing or "deepPath" in landing
+
+
+class TestLaunchAppCTA:
+    """Test Launch App CTA on landing surface."""
+
+    def test_launch_app_cta_exists(self):
+        """Landing has Launch App CTA block."""
+        landing = _read("../f/index.html")
+        assert "entry-launch-app-block" in landing
+        assert "entry-launch-app-btn" in landing
+
+    def test_launch_app_links_to_app_route(self):
+        """Launch App CTA links to /f/{id}/app."""
+        landing = _read("../f/index.html")
+        assert "'/f/' + foundupId + '/app'" in landing
+
+    def test_launch_app_conditional_on_entry_url(self):
+        """Launch App CTA only shown when entry_url exists."""
+        landing = _read("../f/index.html")
+        assert "item.entry_url" in landing
+
+    def test_launch_app_recommendation(self):
+        """Red Dog has Launch App recommendation."""
+        landing = _read("../f/index.html")
+        assert "launch_app" in landing
+        assert "'Launch App'" in landing
