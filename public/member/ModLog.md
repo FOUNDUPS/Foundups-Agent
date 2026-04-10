@@ -32,6 +32,36 @@
 
 ---
 
+## [2026-04-09] Tile Keyboard Accessibility Phase 1 (Worker BC, WSP 15/97)
+
+**Who**: 0102 — Worker BC
+**Slice**: `PFMALL_TILE_A11Y_AND_KEYBOARD_PARITY_PHASE1`
+**What**: Add WCAG 2.1 Level AA keyboard accessibility to pfMALL tiles.
+
+**Files Modified**:
+- `public/member/css/mall-tile-field.css` — Distinct `:focus-visible` ring, control button focus styles
+- `public/member/css/mall-planes.css` — Close button, CTA, secondary link focus-visible styles
+- `public/member/js/mall-planes.js` — Focus return by stable `foundup_id` (survives projection changes)
+- `public/member/tests/test_tile_keyboard_a11y.py` — New test suite (27 tests)
+
+**A11y Improvements**:
+1. **Focus visibility**: Tiles now have clear purple focus ring (`box-shadow: 0 0 0 3px rgba(141, 113, 255, 0.35)`) separate from hover
+2. **Control focus**: Audio/expand buttons have `:focus-visible` outline
+3. **Focus return by stable ID**: When closing quick-view, focus returns to originating tile by `data-foundup-id` (not `data-index`)
+4. **Focus on open**: Close button receives focus when plane opens for immediate keyboard control
+5. **Navigation tracking**: Arrow key navigation updates `returnFocusId` to navigated item's identity
+
+**Projection-safe focus return**: Uses `returnFocusId` (foundup_id) and queries `[data-foundup-id="..."]` on close, so focus return works correctly even if Mall projection/filter changes while plane is open.
+
+**Keyboard Behavior** (unchanged, now tested):
+- **Space**: togglePlay (video tiles play/pause, non-video opens quick-view)
+- **Enter**: enterFoundUp (opens quick-view plane)
+- **Escape**: Close expanded view or stop preview
+
+**Test Count**: 27 passed (tile keyboard accessibility suite)
+
+---
+
 ## [2026-04-09] Non-Video Quick-View Action Surface Phase 2 (Worker BB, WSP 15/97)
 
 **Who**: 0102 — Worker BB

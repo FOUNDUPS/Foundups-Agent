@@ -33,6 +33,32 @@ Validates inline preview resource discipline for mobile/PWA:
 
 ---
 
+## 2026-04-09 | Tile Keyboard Accessibility Tests (WSP 15/97)
+
+**File**: `test_tile_keyboard_a11y.py` (new)
+**Tests**: 27 | **Classes**: 6 | **Result**: 27 passed
+**Worker**: BC
+
+Validates WCAG 2.1 Level AA keyboard accessibility for Mall tiles:
+
+| Class | Count | What it covers |
+|-------|-------|----------------|
+| TestTileFocusVisibility | 5 | tabindex, aria-label, focus-visible ring, hover/focus separation |
+| TestKeyboardActivation | 4 | keydown handler, Space/Enter/Escape key behavior |
+| TestControlAccessibility | 7 | Audio/expand button aria-labels, titles, focus-visible CSS |
+| TestFocusReturn | 5 | returnFocusId tracking, focus restore by stable identity |
+| TestMallPlanesFocusStyles | 4 | Close button, CTA, secondary link focus styles |
+| TestARIASemantics | 2 | Article element, mall-planes keyboard handler |
+
+**Key A11y improvements verified**:
+- Tiles have visible purple focus ring (`box-shadow: 0 0 0 3px rgba(141, 113, 255, 0.35)`)
+- Keyboard Enter/Space parity with pointer interactions
+- Focus returns to originating tile by `foundup_id` (stable across projection/filter changes)
+- Control buttons (audio/expand) focusable with proper labels
+- `test_focus_return_uses_stable_identity` validates closeView queries by `data-foundup-id`, not `data-index`
+
+---
+
 ## 2026-04-09 | Non-Video Action Surface Phase 2 Tests (WSP 15/97)
 
 **File**: `test_non_video_quickview_actions.py` (extended)
