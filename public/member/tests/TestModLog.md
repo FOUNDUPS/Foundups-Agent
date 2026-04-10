@@ -4,6 +4,28 @@ Test evolution log for the p.fMALL member shell test suite.
 
 ---
 
+## 2026-04-10 | Portrait Tile Geometry Tests (WSP 15/97)
+
+**File**: `test_video_mall_field_runtime.py` (extended)
+**Tests**: 5 new | **Class**: `TestPortraitTileGeometry` | **Result**: 159 passed total
+**Worker**: BJ
+
+Validates portrait-first 9:16 tile geometry for Shorts-style video wall:
+
+| Test | What it covers |
+|------|----------------|
+| test_tiles_are_portrait_aspect | `aspect-ratio: 9 / 16` in CSS |
+| test_default_columns_is_three | `--field-columns: 3` default for mobile-first |
+| test_tile_radius_is_minimal | `border-radius: var(--tile-radius, 0.4rem)` for low chrome |
+| test_gap_is_tight | `gap: var(--tile-gap, 0.2rem)` for dense wall |
+| test_js_default_density_is_3x5 | `currentDensity = '3x5'` in JS |
+
+**Updated tests**:
+- `test_density_preset_classes`: Updated from `2x3/3x4/3x5/5x8` to `3x4/3x5/4x6/5x8`
+- `test_touch_padding_value`: Updated from `2.4rem` to `1.5rem` for low-chrome layout
+
+---
+
 ## 2026-04-10 | Preview Resource Hardening Tests (WSP 15/97)
 
 **File**: `test_video_mall_field_runtime.py` (extended)
