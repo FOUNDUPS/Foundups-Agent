@@ -454,7 +454,7 @@
 
   // Local state (truthful — these represent the user's current choice)
   var currentCategory = 'all';
-  var currentDensity = '3x4';
+  var currentDensity = '3x5';
   var currentMotionMode = 'snap';
 
   var CATEGORIES = [
@@ -467,10 +467,10 @@
   ];
 
   var DENSITY_PRESETS = [
-    { id: '2x3', cols: 2, rows: 3 },
-    { id: '3x4', cols: 3, rows: 4 },
-    { id: '3x5', cols: 3, rows: 5 },
-    { id: '5x8', cols: 5, rows: 8 }
+    { id: '3x4' },
+    { id: '3x5' },
+    { id: '4x6' },
+    { id: '5x8' }
   ];
 
   function emitRedDogCommand(command, detail) {
@@ -498,14 +498,10 @@
 
   function setDensity(presetId) {
     currentDensity = presetId;
-    var preset = null;
-    for (var i = 0; i < DENSITY_PRESETS.length; i++) {
-      if (DENSITY_PRESETS[i].id === presetId) { preset = DENSITY_PRESETS[i]; break; }
-    }
     if (window.mallTileField && typeof window.mallTileField.setDensity === 'function') {
-      window.mallTileField.setDensity(preset ? preset.cols : 3, preset ? preset.rows : 4);
+      window.mallTileField.setDensity(presetId);
     }
-    emitRedDogCommand('set_density', { preset: presetId, cols: preset ? preset.cols : 3, rows: preset ? preset.rows : 4 });
+    emitRedDogCommand('set_density', { preset: presetId });
     refreshToolsUI();
   }
 

@@ -77,9 +77,9 @@ class TestTileFieldCSS:
         # Video Mall runtime uses CSS variables for density control
         assert '--field-columns' in tile_field_css
 
-    def test_tile_square_aspect(self, tile_field_css):
-        """Tiles are square."""
-        assert 'aspect-ratio: 1' in tile_field_css
+    def test_tile_portrait_aspect(self, tile_field_css):
+        """Tiles are portrait (9:16 video aspect)."""
+        assert 'aspect-ratio: 9 / 16' in tile_field_css
 
     def test_tile_themes_exist(self, tile_field_css):
         """Theme classes exist for tiles."""
