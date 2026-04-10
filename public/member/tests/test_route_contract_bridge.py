@@ -298,3 +298,48 @@ class TestLaunchAppCTA:
         landing = _read("../f/index.html")
         assert "launch_app" in landing
         assert "'Launch App'" in landing
+
+
+class TestGotJunkTenantBinding:
+    """Test GotJunk as first bound tenant (WSP 104)."""
+
+    def test_gotjunk_in_catalog(self):
+        """GotJunk exists in mall-video-catalog.json."""
+        catalog = _read("mall-video-catalog.json")
+        assert '"foundup_id": "gotjunk_001"' in catalog
+
+    def test_gotjunk_has_entry_url(self):
+        """GotJunk catalog entry has entry_url field."""
+        catalog = _read("mall-video-catalog.json")
+        assert '"entry_url":' in catalog
+        # Should be absolute path, not relative
+        assert '"/foundups/gotjunk_001/' in catalog
+
+    def test_gotjunk_has_routing_prefix(self):
+        """GotJunk catalog entry has correct routing_prefix."""
+        catalog = _read("mall-video-catalog.json")
+        assert '"/f/gotjunk_001"' in catalog
+
+    def test_gotjunk_has_data_namespace(self):
+        """GotJunk catalog entry has data_namespace."""
+        catalog = _read("mall-video-catalog.json")
+        assert '"idb_gotjunk_001"' in catalog
+
+
+class TestCatalogArrayHandling:
+    """Test catalog array format handling."""
+
+    def test_landing_handles_array_catalog(self):
+        """Landing handles catalog as direct array (not wrapped)."""
+        landing = _read("../f/index.html")
+        assert "Array.isArray(catalog)" in landing
+
+    def test_url_resolution_uses_foundups_path(self):
+        """Relative URLs resolve to /foundups/{id}/ not routing_prefix."""
+        landing = _read("../f/index.html")
+        assert "'/foundups/' + foundupId" in landing
+        # Should NOT use routingPrefix for asset resolution
+        idx = landing.find("resolvedUrl = ")
+        if idx > 0:
+            snippet = landing[idx:idx+200]
+            assert "routingPrefix + '/'" not in snippet

@@ -11123,5 +11123,39 @@
     "poster_url": "/media/posters/kosei.jpg",
     "video_count": 0,
     "videos": []
+  },
+  {
+    "foundup_id": "gotjunk_001",
+    "title": "GotJunk",
+    "name": "GotJunk",
+    "creator": "012",
+    "entity": "GotJunk",
+    "source_type": "internal_app",
+    "category": "marketplace",
+    "tags": [
+      "marketplace",
+      "peer-to-peer",
+      "selling",
+      "local"
+    ],
+    "topic_family": "commerce",
+    "geo": "Global",
+    "status": "active",
+    "display_order": 100,
+    "related_lanes": [
+      "foundups_main"
+    ],
+    "tagline": "Turn your junk into someone's treasure",
+    "description": "Peer-to-peer marketplace for selling unwanted items. List it, price it, move it.",
+    "tier": "F0_DAE",
+    "lifecycle_stage": "proto",
+    "launch_readiness": "conditional",
+    "routing_prefix": "/f/gotjunk_001",
+    "data_namespace": "idb_gotjunk_001",
+    "entry_url": "/foundups/gotjunk_001/index.html",
+    "token_symbol": "JUNK",
+    "poster_url": "/media/posters/gotjunk.jpg",
+    "video_count": 0,
+    "videos": []
   }
 ]

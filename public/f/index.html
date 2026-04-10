@@ -729,7 +729,8 @@
         return r.json();
       })
       .then(function(catalog) {
-        var items = catalog.items || [];
+        // Catalog may be array directly or { items: [...] }
+        var items = Array.isArray(catalog) ? catalog : (catalog.items || []);
         var item = items.find(function(i) { return i.foundup_id === foundupId; });
         if (!item) {
           renderNotFound('FoundUp not found', 'The FoundUp "' + esc(foundupId) + '" does not exist in the catalog.');
@@ -792,12 +793,13 @@
         return;
       }
 
-      // Resolve entry_url (relative to FoundUp manifest location or absolute)
+      // Use entry_url directly - catalog should provide fully resolved URLs
+      // Absolute URLs (http://, https://, /) are used as-is
+      // Relative URLs are resolved relative to /foundups/{foundup_id}/ deployment path
       var resolvedUrl = entryUrl;
       if (!entryUrl.startsWith('http://') && !entryUrl.startsWith('https://') && !entryUrl.startsWith('/')) {
-        // Relative URL - resolve relative to FoundUp module location
-        // For now, prefix with the FoundUp's routing prefix
-        resolvedUrl = routingPrefix + '/' + entryUrl;
+        // Relative URL - resolve to FoundUp deployment path (not routing_prefix)
+        resolvedUrl = '/foundups/' + foundupId + '/' + entryUrl;
       }
 
       // Append deep path if present

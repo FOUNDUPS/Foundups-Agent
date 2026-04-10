@@ -38,7 +38,12 @@
 - `appSubpath` captures path after `/app/`
 - Deep links forwarded to iframe for tenant-internal routing
 
-**Test Results**: 34 route contract tests passed (22 existing + 12 new)
+**Test Results**: 40 route contract tests passed (22 existing + 18 new)
+
+**Fixes Applied** (from architect review):
+1. **Catalog array handling**: Landing now handles catalog as direct array (`Array.isArray(catalog)`)
+2. **URL resolution**: Relative entry_url resolves to `/foundups/{foundup_id}/` (not routing_prefix)
+3. **GotJunk binding**: Added `gotjunk_001` to catalog with proper `entry_url`, `routing_prefix`, `data_namespace`
 
 **WSP 104 Applied**: App mount under canonical namespace `/f/{id}/app`; no root sprawl; tenant isolation via iframe sandbox.
 **WSP 97 Applied**: Minimal surface addition; stable identity routing; existing landing unchanged.
