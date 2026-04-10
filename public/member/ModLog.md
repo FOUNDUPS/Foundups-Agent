@@ -1,5 +1,46 @@
 # Member Area Module Change Log
 
+## [2026-04-11] Canonical FoundUp Landing Route Cutover Phase 1 (Worker BM, WSP 15/97/104)
+
+**Who**: 0102 — Worker BM
+**Slice**: `PFMALL_CANONICAL_FOUNDUP_ROUTE_CUTOVER_PHASE1`
+**What**: Make `/f/{foundup_id}` a real shell-owned landing route (no redirect bounce).
+
+**Files Modified**:
+- `public/f/index.html` — Rewritten from redirect bridge to canonical landing page
+- `public/member/tests/test_route_contract_bridge.py` — Updated tests for canonical behavior
+
+**Route Behavior Change**:
+
+| Aspect | Before | After |
+|--------|--------|-------|
+| URL visible | `/member/foundup.html?id={id}` | `/f/{foundup_id}` (stays) |
+| Redirect | Yes (`location.replace`) | No (direct render) |
+| Identity source | Query param (`?id=`) | URL path (`/f/{id}`) |
+| Subpath support | Forwarded as `&subpath=` | Captured for future `/app` |
+
+**WSP 104 Compliance**:
+- `/f/{foundup_id}` is the canonical landing namespace
+- No redirect to transitional `/member/foundup.html?id=`
+- Canonical URL stays visible in address bar
+- Subpath captured for future `/f/{foundup_id}/app` mount
+- Transitional entry preserved at `/member/foundup.html` for backward compat
+
+**Landing Content**:
+- Same hero/readiness/details/CTA content as transitional entry
+- Canonical route displayed in "Canonical Route" detail row
+- Subpath info displayed when visiting `/f/{id}/something`
+
+**Test Changes**:
+- Removed: `test_bridge_does_not_render_foundup`, `test_bridge_is_transitional`
+- Added: `TestCanonicalRouteRendering`, `TestWsp104Compliance`, `TestSubpathForwardCompatibility`
+- Total: 22 route contract tests, 19 entry shell tests (all passing)
+
+**WSP 104 Applied**: Canonical route namespace; no root sprawl; identity from path.
+**WSP 97 Applied**: Landing content renders truthfully; stable identity routing.
+
+---
+
 ## [2026-04-10] Portrait-First Video Wall Layout Phase 1 (Worker BJ, WSP 15/97)
 
 **Who**: 0102 — Worker BJ
