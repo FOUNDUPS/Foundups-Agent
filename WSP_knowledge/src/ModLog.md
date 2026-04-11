@@ -1,5 +1,21 @@
 # WSP Framework Change Log
 
+## 2026-04-11 - Anchored FoundUp Namespace Guardrails in WSP 104
+
+**WSP References**: WSP 104, WSP 98, WSP 103, WSP 22, WSP 97
+
+**Changes Made**:
+- Added Section 9 "Namespace Guardrails (Compliance Gate)" to `WSP_104_FoundUp_Route_Namespace_and_Tenant_Isolation_Protocol.md`
+- Added prerequisite note to `WSP_98_FoundUps_Mesh_Native_Architecture_Protocol.md` - mesh-readiness requires WSP 104 compliance
+- Added prerequisite note to `WSP_103_FoundUp_Federation_Protocol.md` - federation binding requires WSP 104 compliance
+- Updated `WSP_MASTER_INDEX.md` with WSP 104 row and bumped next available to 105
+
+**Result**:
+- Namespace guardrails are now canonically attached to WSP 104
+- WSP 98 and WSP 103 reference WSP 104 as prerequisite for onboarding
+
+---
+
 ## 2026-03-15 - PQN Research Architecture Updated for Claw-Era Control Plane
 
 **WSP References**: WSP 22, WSP 77, WSP 96, WSP 97
