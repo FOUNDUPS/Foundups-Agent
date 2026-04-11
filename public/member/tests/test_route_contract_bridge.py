@@ -326,18 +326,20 @@ class TestGotJunkTenantBinding:
         catalog = _read("mall-video-catalog.json")
         assert '"idb_gotjunk_001"' in catalog
 
-    def test_gotjunk_no_entry_url_yet(self):
-        """GotJunk has no entry_url until production deployment exists.
+    def test_gotjunk_no_entry_url_until_frame_compatible(self):
+        """GotJunk has no entry_url until Cloud Run headers allow iframe embed.
 
-        Current state: GotJunk is deployed to Cloud Run via AI Studio,
-        but production URL is not yet configured in catalog.
-        App mount will show "App Not Ready" which is truthful.
+        BLOCKER: Cloud Run returns X-Frame-Options: SAMEORIGIN which blocks
+        the shell iframe mount at /f/gotjunk_001/app. entry_url must remain
+        absent until the deployment is configured with frame-compatible headers.
+
+        Unblock by: adding X-Frame-Options: ALLOWALL or removing the header
+        and setting Content-Security-Policy frame-ancestors to include the
+        shell origin, then re-adding entry_url to catalog and manifest.
         """
         catalog = _read("mall-video-catalog.json")
-        # Find gotjunk_001 entry and verify no entry_url
         idx = catalog.find('"foundup_id": "gotjunk_001"')
         assert idx > 0
-        # Look for next foundup_id or end of file to bound the entry
         next_entry = catalog.find('"foundup_id":', idx + 30)
         if next_entry < 0:
             next_entry = len(catalog)

@@ -1,5 +1,38 @@
 # Member Area Module Change Log
 
+## [2026-04-11] GotJunk App Binding Attempted + X-Frame-Options Blocker (Worker BS, WSP 15/97/104)
+
+**Who**: 0102 - Worker BS
+**Slice**: `GOTJUNK_REAL_APP_BINDING_PHASE1`
+**What**: Attempted to bind `gotjunk_001` to Cloud Run deployment. Reverted due to iframe blocker.
+
+**BLOCKER**: Cloud Run returns `X-Frame-Options: SAMEORIGIN` which prevents iframe embed at `/f/gotjunk_001/app`. The shell app mount uses an `<iframe>` to load tenant apps.
+
+**Files Modified**:
+- `modules/foundups/gotjunk/foundup_manifest.json` - Set `entry_url` to null (was `frontend/index.html`)
+- `modules/foundups/gotjunk/INTERFACE.md` - Documented production URL
+- `public/member/tests/test_route_contract_bridge.py` - Test guards against premature entry_url
+
+**What Stays True**:
+- Cloud Run deployment exists: `https://gotjunk-56566376153.us-west1.run.app/`
+- Auto-deploy works (Cloud Build trigger on main)
+- Manifest and catalog agree: no entry_url until frame-compatible
+
+**Unblock Path**:
+Configure nginx in `modules/foundups/gotjunk/frontend/Dockerfile` or nginx config to:
+1. Remove `X-Frame-Options: SAMEORIGIN`, OR
+2. Set `X-Frame-Options: ALLOWALL`, OR
+3. Use `Content-Security-Policy: frame-ancestors` with shell origin
+
+Then re-add `entry_url` to catalog and manifest.
+
+**WSP 104 Applied**: No root sprawl; app mount route ready but waiting for frame-compatible headers.
+**WSP 97 Applied**: Truthful readiness - "App Not Ready" shown because it genuinely isn't embeddable yet.
+
+**Test Results**: 40 passed
+
+---
+
 ## [2026-04-11] Lane Autoplay and FoundUp Entry Phase 1 (Worker BL, WSP 15/97/104)
 
 **Who**: 0102 — Worker BL

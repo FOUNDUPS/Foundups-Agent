@@ -4,6 +4,22 @@ Test evolution log for the p.fMALL member shell test suite.
 
 ---
 
+## 2026-04-11 | GotJunk Frame-Compatibility Guard Test (WSP 104/97)
+
+**File**: `test_route_contract_bridge.py` (modified)
+**Tests**: 1 updated | **Class**: `TestGotJunkTenantBinding` | **Result**: 40 passed
+**Worker**: BS
+
+Updated test to guard against premature `entry_url` binding:
+
+| Test | What it checks |
+|------|----------------|
+| `test_gotjunk_no_entry_url_until_frame_compatible` | entry_url absent until Cloud Run X-Frame-Options fixed |
+
+**Key context**: Cloud Run returns `X-Frame-Options: SAMEORIGIN` which blocks iframe embed. Test enforces truthful readiness by asserting no entry_url until deployment allows framing.
+
+---
+
 ## 2026-04-11 | Lane Autoplay and Enter FoundUp Tests (WSP 15/97/104)
 
 **File**: `test_video_mall_field_runtime.py` (extended)

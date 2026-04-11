@@ -7,7 +7,7 @@
   "tagline": "Turn your junk into someone's treasure",
   "tier": "F0_DAE",
   "lifecycle_stage": "proto",
-  "entry_url": "frontend/index.html",
+  "entry_url": null,
   "routing_prefix": "/f/gotjunk_001",
   "icon_url": "frontend/public/icon-192.svg",
   "required_subscription_tier": "free",
