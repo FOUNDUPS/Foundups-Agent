@@ -1,5 +1,40 @@
 # Member Area Module Change Log
 
+## [2026-04-11] GotJunk Real App Binding Phase 1 (Worker BS, WSP 15/97/104)
+
+**Who**: 0102 - Worker BS
+**Slice**: `GOTJUNK_REAL_APP_BINDING_PHASE1`
+**What**: Bind `gotjunk_001` to real Cloud Run deployment so `/f/gotjunk_001/app` loads actual tenant app.
+
+**Files Modified**:
+- `public/member/mall-video-catalog.json` - Added `entry_url` for gotjunk_001
+- `modules/foundups/gotjunk/foundup_manifest.json` - Updated `entry_url` to production Cloud Run URL
+- `modules/foundups/gotjunk/INTERFACE.md` - Added production URL, last sync date
+- `public/member/tests/test_route_contract_bridge.py` - Updated test to verify real entry_url
+
+**Runtime Source**:
+- **Cloud Run URL**: `https://gotjunk-56566376153.us-west1.run.app/`
+- **Auto-deploy**: Triggered by merge to `main` branch
+- **Build**: Vite + nginx (via Dockerfile)
+
+**Catalog/Manifest Agreement**:
+- `entry_url`: `https://gotjunk-56566376153.us-west1.run.app/`
+- `routing_prefix`: `/f/gotjunk_001`
+- `data_namespace`: `idb_gotjunk_001`
+
+**Behavior Change**:
+| Route | Before | After |
+|-------|--------|-------|
+| `/f/gotjunk_001/app` | "App Not Ready" | Loads GotJunk PWA in iframe |
+| Landing "Launch App" CTA | Not shown | Shows and navigates to `/f/gotjunk_001/app` |
+
+**WSP 104 Applied**: Tenant app loads at `/f/gotjunk_001/app` via shell-owned mount; no root sprawl.
+**WSP 97 Applied**: entry_url reflects real deployed runtime; truthful readiness.
+
+**Test Results**: 40 passed
+
+---
+
 ## [2026-04-11] Lane Autoplay and FoundUp Entry Phase 1 (Worker BL, WSP 15/97/104)
 
 **Who**: 0102 — Worker BL

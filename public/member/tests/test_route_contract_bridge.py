@@ -326,15 +326,14 @@ class TestGotJunkTenantBinding:
         catalog = _read("mall-video-catalog.json")
         assert '"idb_gotjunk_001"' in catalog
 
-    def test_gotjunk_no_entry_url_yet(self):
-        """GotJunk has no entry_url until production deployment exists.
+    def test_gotjunk_has_entry_url(self):
+        """GotJunk has entry_url pointing to Cloud Run deployment.
 
-        Current state: GotJunk is deployed to Cloud Run via AI Studio,
-        but production URL is not yet configured in catalog.
-        App mount will show "App Not Ready" which is truthful.
+        GotJunk is deployed to Cloud Run via AI Studio with auto-deploy.
+        The catalog entry_url must point to the real production URL.
         """
         catalog = _read("mall-video-catalog.json")
-        # Find gotjunk_001 entry and verify no entry_url
+        # Find gotjunk_001 entry and verify entry_url exists
         idx = catalog.find('"foundup_id": "gotjunk_001"')
         assert idx > 0
         # Look for next foundup_id or end of file to bound the entry
@@ -342,7 +341,10 @@ class TestGotJunkTenantBinding:
         if next_entry < 0:
             next_entry = len(catalog)
         gotjunk_entry = catalog[idx:next_entry]
-        assert '"entry_url"' not in gotjunk_entry
+        assert '"entry_url"' in gotjunk_entry
+        # Verify it's a real Cloud Run URL
+        assert "gotjunk-" in gotjunk_entry
+        assert ".run.app" in gotjunk_entry
 
 
 class TestCatalogArrayHandling:

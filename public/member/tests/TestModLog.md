@@ -4,6 +4,27 @@ Test evolution log for the p.fMALL member shell test suite.
 
 ---
 
+## 2026-04-11 | GotJunk Tenant Binding Test (WSP 104/97)
+
+**File**: `test_route_contract_bridge.py` (modified)
+**Tests**: 1 updated | **Class**: `TestGotJunkTenantBinding` | **Result**: 40 passed
+**Worker**: BS
+
+Updated test to verify GotJunk now has real Cloud Run `entry_url`:
+
+| Test | Before | After |
+|------|--------|-------|
+| `test_gotjunk_no_entry_url_yet` | Verified entry_url missing | `test_gotjunk_has_entry_url` - verifies Cloud Run URL present |
+
+**Key verifications**:
+- `entry_url` field exists in gotjunk_001 catalog entry
+- URL contains `gotjunk-` (Cloud Run service name)
+- URL contains `.run.app` (Cloud Run domain)
+
+**Test rationale**: GotJunk is now bound to real Cloud Run deployment at `https://gotjunk-56566376153.us-west1.run.app/`, so test must verify the binding rather than assert missing.
+
+---
+
 ## 2026-04-11 | Lane Autoplay and Enter FoundUp Tests (WSP 15/97/104)
 
 **File**: `test_video_mall_field_runtime.py` (extended)

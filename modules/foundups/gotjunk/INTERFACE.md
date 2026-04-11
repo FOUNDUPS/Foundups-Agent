@@ -8,7 +8,7 @@
 
 ### Deployment Endpoints
 
-**Production URL**: [To be added after deployment]
+**Production URL**: https://gotjunk-56566376153.us-west1.run.app/
 **AI Studio Editor**: https://ai.studio/apps/drive/1R_lBYHwMJHOxWjI_HAAx5DU9fqePG9nA
 
 ### Redeployment Process
@@ -329,5 +329,5 @@ const apiKey = "<DO_NOT_HARDCODE_API_KEYS>"  # NEVER commit this!
 ---
 
 **Deployment Status**: POC Complete, ready for Prototype phase
-**Last Synced**: [To be updated on deployment]
-**Cloud Run URL**: [To be added after deployment]
+**Last Synced**: 2026-04-11
+**Cloud Run URL**: https://gotjunk-56566376153.us-west1.run.app/
