@@ -302,7 +302,8 @@ These guardrails are **normative**. A FoundUp that violates any guardrail is not
 
 Cross-references:
 - WSP 98 (Mesh-Native Architecture): mesh-readiness requires WSP 104 compliance
-- WSP 103 (FoundUp Federation): federation binding requires WSP 104 compliance
+- WSP_knowledge WSP 103 (FoundUp Federation Protocol): federation binding requires WSP 104 compliance
+  - Note: framework WSP 103 is CLI Interface Standard; federation protocol is knowledge-tree only
 
 ---
 
