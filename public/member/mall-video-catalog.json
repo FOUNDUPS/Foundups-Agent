@@ -11152,7 +11152,6 @@
     "launch_readiness": "conditional",
     "routing_prefix": "/f/gotjunk_001",
     "data_namespace": "idb_gotjunk_001",
-    "entry_url": "https://gotjunk-56566376153.us-west1.run.app/",
     "token_symbol": "JUNK",
     "poster_url": "/media/posters/gotjunk.jpg",
     "video_count": 0,

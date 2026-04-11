@@ -1,35 +1,33 @@
 # Member Area Module Change Log
 
-## [2026-04-11] GotJunk Real App Binding Phase 1 (Worker BS, WSP 15/97/104)
+## [2026-04-11] GotJunk App Binding Attempted + X-Frame-Options Blocker (Worker BS, WSP 15/97/104)
 
 **Who**: 0102 - Worker BS
 **Slice**: `GOTJUNK_REAL_APP_BINDING_PHASE1`
-**What**: Bind `gotjunk_001` to real Cloud Run deployment so `/f/gotjunk_001/app` loads actual tenant app.
+**What**: Attempted to bind `gotjunk_001` to Cloud Run deployment. Reverted due to iframe blocker.
+
+**BLOCKER**: Cloud Run returns `X-Frame-Options: SAMEORIGIN` which prevents iframe embed at `/f/gotjunk_001/app`. The shell app mount uses an `<iframe>` to load tenant apps.
 
 **Files Modified**:
-- `public/member/mall-video-catalog.json` - Added `entry_url` for gotjunk_001
-- `modules/foundups/gotjunk/foundup_manifest.json` - Updated `entry_url` to production Cloud Run URL
-- `modules/foundups/gotjunk/INTERFACE.md` - Added production URL, last sync date
-- `public/member/tests/test_route_contract_bridge.py` - Updated test to verify real entry_url
+- `modules/foundups/gotjunk/foundup_manifest.json` - Set `entry_url` to null (was `frontend/index.html`)
+- `modules/foundups/gotjunk/INTERFACE.md` - Documented production URL
+- `public/member/tests/test_route_contract_bridge.py` - Test guards against premature entry_url
 
-**Runtime Source**:
-- **Cloud Run URL**: `https://gotjunk-56566376153.us-west1.run.app/`
-- **Auto-deploy**: Triggered by merge to `main` branch
-- **Build**: Vite + nginx (via Dockerfile)
+**What Stays True**:
+- Cloud Run deployment exists: `https://gotjunk-56566376153.us-west1.run.app/`
+- Auto-deploy works (Cloud Build trigger on main)
+- Manifest and catalog agree: no entry_url until frame-compatible
 
-**Catalog/Manifest Agreement**:
-- `entry_url`: `https://gotjunk-56566376153.us-west1.run.app/`
-- `routing_prefix`: `/f/gotjunk_001`
-- `data_namespace`: `idb_gotjunk_001`
+**Unblock Path**:
+Configure nginx in `modules/foundups/gotjunk/frontend/Dockerfile` or nginx config to:
+1. Remove `X-Frame-Options: SAMEORIGIN`, OR
+2. Set `X-Frame-Options: ALLOWALL`, OR
+3. Use `Content-Security-Policy: frame-ancestors` with shell origin
 
-**Behavior Change**:
-| Route | Before | After |
-|-------|--------|-------|
-| `/f/gotjunk_001/app` | "App Not Ready" | Loads GotJunk PWA in iframe |
-| Landing "Launch App" CTA | Not shown | Shows and navigates to `/f/gotjunk_001/app` |
+Then re-add `entry_url` to catalog and manifest.
 
-**WSP 104 Applied**: Tenant app loads at `/f/gotjunk_001/app` via shell-owned mount; no root sprawl.
-**WSP 97 Applied**: entry_url reflects real deployed runtime; truthful readiness.
+**WSP 104 Applied**: No root sprawl; app mount route ready but waiting for frame-compatible headers.
+**WSP 97 Applied**: Truthful readiness - "App Not Ready" shown because it genuinely isn't embeddable yet.
 
 **Test Results**: 40 passed
 
