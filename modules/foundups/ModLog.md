@@ -9,40 +9,21 @@
 
 **Added**
 
-- `modules/foundups/tests/test_namespace_guardrail.py` — 16 tests enforcing WSP 104 namespace rules:
-  - **Namespace uniqueness**: No duplicate `foundup_id`, `routing_prefix`, or `data_namespace` across catalog/manifests
-  - **Canonical route shape**: `routing_prefix` must match `/f/{foundup_id}`, `data_namespace` must match `idb_{foundup_id}`
+- `modules/foundups/tests/test_namespace_guardrail.py` — 23 tests enforcing WSP 104 namespace rules:
+  - **Namespace uniqueness** (global): No duplicate `routing_prefix` or `data_namespace` across catalog AND manifests
+  - **Canonical route shape** (both sources): Pattern checks for catalog AND manifest routing_prefix/data_namespace
   - **Catalog/manifest consistency**: Values must match when both sources define the same field
-  - **No root sprawl**: Rejects reserved paths (`/member`, `/foundups`, `/api`, etc.) and root-level routes
+  - **No root sprawl** (both sources): Rejects reserved paths and root-level routes in catalog AND manifests
   - **Manifest structure**: Required fields validation (`foundup_id`, `routing_prefix`, `data_namespace`)
+  - **Routed catalog requires manifest**: Any catalog entry with `routing_prefix` must have corresponding manifest
   - **GotJunk first tenant**: Verifies first bound tenant compliance
 
 **Notes**
 
 - Guardrail designed to prevent collision at scale (100+ FoundUps)
-- All 16 tests pass against current catalog (13 entries) and manifest (1 file)
+- All 23 tests pass against current catalog (13 entries) and manifest (1 file)
+- Manifest-centric validation ensures WSP 104 rules cannot be violated via manifest-only claims
 - HoloIndex top hit: `modules\development\cursor_multi_agent_bridge\src\wsp_validator.py`
-
----
-
-### 2026-04-11 - FoundUp AI hooks + DAEmon surface contract (Phase 1)
-
-**By:** 0102 (Worker BP) · **Slice:** `FOUNDUP_AI_HOOKS_AND_DAEMON_DOC_CONTRACT_PHASE1`  
-**WSP References:** WSP 15, WSP 91, WSP 97, WSP 104  
-
-**Added**
-
-- Canonical contract: `modules/foundups/docs/FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_CONTRACT.md` (FoundUp-local; backs onto WSP 91 + WSP 104 without duplicating full protocol text).
-- `FOUNDUP_TEMPLATE.md` v1.1.0 — required README section block + copy-paste + compliance test pointer.
-- Compliance tests: `modules/foundups/tests/test_foundup_ai_hooks_daemon_contract_compliance.py` (discovers `module.json` / `foundup_manifest.json` FoundUps; validates README headings, WSP 91/104 literals, contract filename).
-
-**Updated**
-
-- README surface sections for FoundUps under `modules/foundups/` that declare `module.json` or `foundup_manifest.json` (route, app mount, AI hooks, DAEmon outputs, data namespace, WSP refs).
-
-**Notes**
-
-- No new WSP. Runtime pfMALL / tenant features out of scope for this slice.
 
 ---
 
