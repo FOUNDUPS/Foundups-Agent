@@ -38,12 +38,15 @@
 - `appSubpath` captures path after `/app/`
 - Deep links forwarded to iframe for tenant-internal routing
 
-**Test Results**: 40 route contract tests passed (22 existing + 18 new)
+**Test Results**: 40 route contract tests (37 always run + 3 conditional on firebase.json)
 
 **Fixes Applied** (from architect review):
 1. **Catalog array handling**: Landing now handles catalog as direct array (`Array.isArray(catalog)`)
 2. **URL resolution**: Relative entry_url resolves to `/foundups/{foundup_id}/` (not routing_prefix)
-3. **GotJunk binding**: Added `gotjunk_001` to catalog with proper `entry_url`, `routing_prefix`, `data_namespace`
+3. **GotJunk binding**: Added `gotjunk_001` to catalog with `routing_prefix`, `data_namespace` (no `entry_url` yet - production deployment pending)
+4. **Test isolation**: TestFirebaseRouting skipped in clean checkouts (firebase.json not tracked); repo root uses `.git`
+
+**GotJunk State**: Catalog entry exists, but no `entry_url` until Cloud Run production URL is configured. App mount shows "App Not Ready" which is truthful.
 
 **WSP 104 Applied**: App mount under canonical namespace `/f/{id}/app`; no root sprawl; tenant isolation via iframe sandbox.
 **WSP 97 Applied**: Minimal surface addition; stable identity routing; existing landing unchanged.
