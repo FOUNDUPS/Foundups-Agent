@@ -4,6 +4,34 @@ Test evolution log for the p.fMALL member shell test suite.
 
 ---
 
+## 2026-04-11 | Lane Autoplay and Enter FoundUp Tests (WSP 15/97/104)
+
+**File**: `test_video_mall_field_runtime.py` (extended)
+**Tests**: 25 new/updated | **Classes**: 2 | **Result**: 182 passed total
+**Worker**: BL
+
+Validates Shorts-style lane autoplay and Enter FoundUp button:
+
+| Class | Count | What it covers |
+|-------|-------|----------------|
+| TestEnterFoundUpButton | 11 | Button in tile HTML, navigateToFoundUp function, stable ID routing, canonical /f/ route, click handler, CSS exists, visible on preview, **fullscreen Enter button**, **fullscreen handler**, **expanded mode parent routing**, **expanded mode ID resolution** |
+| TestLaneAutoplay | 14 | Lane state variables, startLanePreview, advanceToNextInLane, loop policy, YouTube onStateChange, HTML5 ended event, togglePlay uses lane, stop resets state, API exposed, no double-tap entry, keyboard Enter opens fullscreen, **lane state survives preview startup** |
+
+**Key behaviors verified**:
+- Lane autoplay tracks `currentLaneFoundupIndex` and `laneVideoIndex`
+- Video end detected via YouTube `onStateChange` (data === 0) and HTML5 `ended` event
+- Queue end policy: loop to start (Shorts-style)
+- `navigateToFoundUp(foundupId)` uses stable identity from `data-foundup-id`
+- Navigation routes to `/f/{foundup_id}` (WSP 104 canonical)
+- Double-tap entry removed from tile click handler
+- Keyboard Enter opens fullscreen (not enterFoundUp)
+- `stopInlinePreview()` resets lane state
+- **Lane state set AFTER stopInlinePreview** (survives startup)
+- **Fullscreen player has Enter FoundUp button** with `data-action="enter"`
+- **Expanded mode routes to parent FoundUp ID** via `mallCatalog[expandedFoundUp]`
+
+---
+
 ## 2026-04-11 | FoundUp App Mount Tests (WSP 104/97)
 
 **File**: `test_route_contract_bridge.py` (extended)
@@ -408,7 +436,7 @@ Validates entry-page Red Dog alignment with Mall Red Dog:
 
 | File | Tests | Worker | Phase |
 |------|-------|--------|-------|
-| test_video_mall_field_runtime.py | 100 | AK/AP | Animation + Locomotion |
+| test_video_mall_field_runtime.py | 182 | AK/AP/BL | Animation + Locomotion + Lane Autoplay |
 | test_concierge_channel_attachment_phase1.py | 66 | C | Channel attachment |
 | test_reddog_mall_controls_phase1.py | 81 | C | WSP 97 controls |
 | test_reddog_foundup_entry_alignment_phase7.py | 65 | C | Entry alignment |
@@ -416,4 +444,4 @@ Validates entry-page Red Dog alignment with Mall Red Dog:
 | test_reddog_recommended_actions_phase5.py | 63 | C | Recommended actions |
 | test_reddog_context_briefing_phase4.py | 48 | C | Context briefing |
 | (other member tests) | ~446 | B/mixed | Mall shell, tiles, etc. |
-| **Total** | **912** | | |
+| **Total** | **994** | | |

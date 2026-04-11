@@ -155,6 +155,9 @@
       '    <span class="video-player-title"></span>',
       '  </div>',
       '  <div class="video-player-top-bar-right">',
+      '    <button class="video-player-btn video-player-enter-btn" data-action="enter" aria-label="Enter FoundUp">',
+      '      <svg viewBox="0 0 24 24"><path d="M15 3h6v6M14 10l6.1-6.1M9 21H3v-6M10 14l-6.1 6.1"/></svg>',
+      '    </button>',
       '    <button class="video-player-btn" data-action="save" aria-label="Save">',
       '      <svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>',
       '    </button>',
@@ -518,6 +521,13 @@
     switch (action) {
       case 'back':
         close();
+        break;
+      case 'enter':
+        // Enter FoundUp: navigate to canonical /f/{foundup_id} route (WSP 104)
+        if (currentFoundUpId) {
+          close();
+          window.location.href = '/f/' + encodeURIComponent(currentFoundUpId);
+        }
         break;
       case 'save':
         var wasSaved = toggleSave();

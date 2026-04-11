@@ -53,8 +53,8 @@ public/member/
 
 ### Mall Navigation
 - swipe or scroll horizontally through FoundUps (desktop: mouse drag on carousel track)
-- tap a tile to play/pause video in Mall context
-- double-tap a tile to enter FoundUp view directly
+- tap a tile to start lane autoplay through its video queue (Shorts-style)
+- Enter FoundUp button to navigate to `/f/{foundup_id}` (tile or fullscreen)
 - pinch-out on tile to expand into FoundUp's video field
 - pinch-in (expanded) to collapse back to Mall
 

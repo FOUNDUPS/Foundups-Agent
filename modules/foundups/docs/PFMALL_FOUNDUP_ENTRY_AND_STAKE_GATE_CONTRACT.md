@@ -24,33 +24,37 @@ This is the **target architecture**. Current runtime (`foundup.html`) is a trans
 
 ## 2. Entry Gestures
 
-### 2.1 Primary Gesture: Double-Tap / Double-Click
+### 2.1 Primary Gesture: Tap for Lane Autoplay
 
 | Context | Gesture | Result |
 |---------|---------|--------|
-| Mall tile (video playing) | double-tap | Enter FoundUp Welcome |
-| Mall tile (video paused) | double-tap | Play video (first tap = play, second = enter) |
-| Mall tile (desktop) | double-click | Enter FoundUp Welcome |
+| Mall tile | tap | Start lane autoplay through FoundUp's video queue |
+| Lane playing | video ends | Auto-advance to next video (Shorts-style) |
+| Queue end | auto | Loop to start (continuous play) |
 
-**Rationale**: Single-tap controls playback; double-tap signals entry intent.
+**Rationale**: Tap starts video consumption; explicit button signals entry intent. This aligns with Shorts-style UX where content plays continuously.
 
-### 2.2 Visible Fallback: Entry Control
+### 2.2 Explicit Entry: Enter FoundUp Button
 
-A visible button/control on the tile provides explicit entry for:
-- Users unfamiliar with gesture grammar
-- Accessibility (screen readers, switch access)
-- Touch devices where double-tap is unreliable
+A visible "Enter FoundUp" button provides explicit entry:
+- On tile: bottom-left corner, visible during preview
+- In fullscreen: top bar alongside back/share/save controls
+- Routes to `/f/{foundup_id}` (WSP 104 canonical)
 
-Placement: corner overlay on tile (e.g., expand icon or "Enter" label).
+This is the **primary entry mechanism** (not a fallback):
+- Clear user intent (no accidental entry)
+- Accessibility (screen readers, switch access, keyboard Enter)
+- Consistent across tile and fullscreen contexts
 
 ### 2.3 Entry from Fullscreen Player
 
-| Context | Gesture | Result |
+| Context | Control | Result |
 |---------|---------|--------|
+| Fullscreen player | Enter FoundUp button (top bar) | Navigate to `/f/{foundup_id}` |
 | Fullscreen player | swipe-down | Exit to Mall |
-| Fullscreen player | tap "info" or "more" | Show FoundUp info sheet with "Enter FoundUp" action |
+| Fullscreen player | pinch-in | Exit to Mall |
 
-The fullscreen player is a video consumption layer, not an entry surface. Entry requires explicit action from the info sheet.
+The fullscreen player now has explicit entry via the Enter FoundUp button in the top bar, alongside back/share/save controls.
 
 ---
 
@@ -61,7 +65,7 @@ The entry flow progresses through distinct surfaces:
 ```
 Mall Discovery
     │
-    ▼ (double-tap / entry control)
+    ▼ (Enter FoundUp button)
 FoundUp Welcome
     │
     ▼ (public entry → Discord/community)
@@ -88,7 +92,7 @@ Stakeholder Interior
 
 ### 3.2 FoundUp Welcome
 
-**What it is**: The landing surface after entry intent (double-tap or entry control).
+**What it is**: The landing surface after entry intent (Enter FoundUp button on tile or fullscreen).
 
 **Current implementation**: `public/member/foundup.html?id={foundup_id}` — transitional shell-owned surface.
 

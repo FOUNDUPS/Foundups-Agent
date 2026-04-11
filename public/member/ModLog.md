@@ -1,5 +1,62 @@
 # Member Area Module Change Log
 
+## [2026-04-11] Lane Autoplay and FoundUp Entry Phase 1 (Worker BL, WSP 15/97/104)
+
+**Who**: 0102 — Worker BL
+**Slice**: `YOUTUBE_CHANNEL_LANE_AUTOPLAY_AND_FULLSCREEN_ENTRY_PHASE1`
+**What**: Turn pfMALL channel tiles into real lane browsers with Shorts-style autoplay.
+
+**Files Modified**:
+- `public/member/js/mall-tile-field.js` — Lane autoplay state, video end detection, Enter FoundUp navigation
+- `public/member/js/mall-video-player.js` — Fullscreen Enter FoundUp button and handler
+- `public/member/css/mall-tile-field.css` — Enter FoundUp button styling
+- `public/member/css/mall-video-player.css` — Fullscreen Enter button green highlight
+- `public/member/index.html` — Updated guidance text (removed double-tap references)
+- `public/member/INTERFACE.md` — Updated UI Contract for new entry model
+- `public/member/tests/test_video_mall_field_runtime.py` — 25 new/updated tests
+
+**Lane Autoplay Behavior**:
+1. **Tap tile**: Starts lane autoplay through the FoundUp's `videos[]` queue
+2. **Video end**: Auto-advances to next video in queue
+3. **Queue end policy**: **Loop to start** (Shorts-style continuous play)
+4. **State tracking**: `currentLaneFoundupIndex`, `laneVideoIndex`
+
+**Entry Behavior Changes**:
+- **Double-tap removed**: No longer enters FoundUp (was redundant with fullscreen)
+- **Enter FoundUp button**: New button on tiles (bottom-left, visible during preview)
+- **Keyboard Enter**: Now opens fullscreen (was enterFoundUp)
+
+**FoundUp Entry Path**:
+- `navigateToFoundUp(foundupId)` — Uses stable `foundup_id` from `data-foundup-id` attribute
+- Routes to `/f/{foundup_id}` (WSP 104 canonical route)
+- Stops any active preview before navigation
+
+**Video End Detection**:
+- YouTube: `onStateChange` with `event.data === 0` (YT.PlayerState.ENDED)
+- HTML5: `ended` event listener
+- Error handling: Advances to next on playback failure
+
+**Non-Video Tiles**: Unchanged — tap opens quick-view via `mallPlanes.openFoundUpById()`
+
+**WSP 104 Applied**: Enter FoundUp uses stable `foundup_id` identity and routes to canonical `/f/{foundup_id}`.
+
+**WSP 97 Applied**: Boundary respected — no changes to quick-view, PWA, or service worker behavior.
+
+**Test Count**: 182 passed (159 existing + 11 in TestEnterFoundUpButton + 14 in TestLaneAutoplay - 2 overlapped)
+
+**Bug Fixes Applied** (from architect review 2026-04-11):
+1. **Lane state survives preview startup**: Moved `currentLaneFoundupIndex` and `laneVideoIndex` assignment AFTER `stopInlinePreview()` call (was getting cleared immediately)
+2. **Fullscreen Enter FoundUp button**: Added `data-action="enter"` button to `mall-video-player.js` top bar with handler routing to `/f/{foundup_id}`
+3. **Expanded mode parent routing**: Enter FoundUp in expanded mode now resolves parent `foundup_id` from `mallCatalog[expandedFoundUp]` instead of synthetic video tile ID
+
+**Documentation Updates** (from architect review 2026-04-11):
+- `public/member/index.html` — Updated Red Dog guidance and gesture hints (removed double-tap references)
+- `public/member/INTERFACE.md` — Updated UI Contract to reflect tap=lane autoplay, Enter button=entry
+- `modules/foundups/docs/PFMALL_MALL_NAVIGATION_CONTRACT.md` — Updated gesture table
+- `modules/foundups/docs/PFMALL_FOUNDUP_ENTRY_AND_STAKE_GATE_CONTRACT.md` — Rewrote Section 2 (Entry Gestures) for explicit button entry model
+
+---
+
 ## [2026-04-11] Canonical FoundUp App Mount Phase 1 (Worker BN, WSP 15/97/104)
 
 **Who**: 0102 — Worker BN

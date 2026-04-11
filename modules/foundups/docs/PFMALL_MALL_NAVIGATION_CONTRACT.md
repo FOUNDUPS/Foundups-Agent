@@ -94,8 +94,8 @@ X axis = category / cluster / similarity band
 | Gesture | Mall Action | Status |
 |---------|-------------|--------|
 | swipe | Navigate: snapped field motion (default) or glide (override) | RUNTIME |
-| tap tile | Play/pause video in Mall context | RUNTIME |
-| double-tap tile | Enter FoundUp | RUNTIME |
+| tap tile | Start lane autoplay through FoundUp's video queue (Shorts-style) | RUNTIME |
+| Enter button | Navigate to `/f/{foundup_id}` (WSP 104 canonical) | RUNTIME |
 | pinch-out tile | Expand FoundUp into its video field | RUNTIME |
 | pinch-in (expanded) | Collapse back to Mall | RUNTIME |
 | long-press | Reserved (future: quick actions) | RESERVED |
@@ -198,7 +198,7 @@ If user swipes down, they always move toward "nearer/more relevant" in the curre
 |--------|---------|--------|
 | Open account | Swipe-down from top | User identity access |
 | Open concierge | Tap Red Dog | Help/recovery path |
-| Enter FoundUp | Double-tap / Enter | Core navigation |
+| Enter FoundUp | Enter button (tile or fullscreen) | Core navigation |
 | Close overlay | Escape | Universal escape |
 
 ### 6.3 Cannot Be Hidden or Disabled

@@ -33,11 +33,11 @@
       q: 'What is the Mall?',
       a: 'The p.fMALL is your invite-gated home inside FoundUPS. '
        + 'Each tile represents a FoundUp \u2014 an autonomous venture in the pAVS ecosystem. '
-       + 'Browse the catalog, check readiness states, and tap a tile to see its full entry page.'
+       + 'Browse the catalog, check readiness states, and tap a tile to play its video queue.'
     },
     {
       q: 'How do I browse?',
-      a: 'Tap any tile to play/pause its video. Double-tap to enter its dedicated page. '
+      a: 'Tap any tile to play its video queue. Use the Enter button to visit its page. '
        + 'On desktop, use keyboard navigation or scroll.'
     },
     {
