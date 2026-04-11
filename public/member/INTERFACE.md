@@ -123,9 +123,11 @@ Video Mall tile grid with field scope projections.
 | Method | Description |
 |--------|-------------|
 | `initialize(config)` | Initialize tile field |
-| `enterFoundUp(index)` | Enter FoundUp view |
+| `navigateToFoundUp(foundupId)` | Navigate to `/f/{foundup_id}` (WSP 104 canonical) |
 | **Video Runtime** | |
-| `togglePlay(index)` | Open fullscreen player from tile (routes to `openFullscreenFromTile`) |
+| `startLanePreview(foundupIndex, videoIndex, muted)` | Start lane autoplay through FoundUp's video queue |
+| `advanceToNextInLane()` | Advance to next video in queue (loops at end) |
+| `togglePlay(index)` | Start lane autoplay on tile (entry point for tap gesture) |
 | `getPlayingIndex()` | Get currently playing tile index |
 | `expandFoundUp(index)` | Expand tile to FoundUp view |
 | `collapseFoundUp()` | Collapse back to Mall |
@@ -306,8 +308,8 @@ interface InviteDoc {
 ### UI Contract
 
 **Mall Context (tile field)**:
-- tap tile: open fullscreen player with FoundUp queue
-- double-tap tile: enter FoundUp view directly
+- tap tile: start lane autoplay through FoundUp's video queue (Shorts-style)
+- Enter FoundUp button: navigate to `/f/{foundup_id}` (WSP 104 canonical)
 - pinch-out on tile: expand into FoundUp's video field
 - swipe: navigate snapped field (default) or glide (override)
 - desktop mouse drag: maps to touch swipe (drag-scroll parity)

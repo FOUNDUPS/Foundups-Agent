@@ -107,6 +107,19 @@
   stroke: #7c5cfc;
 }
 
+/* Enter FoundUp button — distinct green highlight (WSP 104 canonical route) */
+.video-player-enter-btn {
+  background: rgba(40, 180, 99, 0.3);
+}
+
+.video-player-enter-btn:hover {
+  background: rgba(40, 180, 99, 0.5);
+}
+
+.video-player-enter-btn:active {
+  background: rgba(40, 180, 99, 0.7);
+}
+
 .video-player-title {
   color: #fff;
   font-size: 0.9rem;

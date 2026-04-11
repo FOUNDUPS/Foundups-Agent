@@ -5,8 +5,8 @@
  * SoftProto mount point: #mallTileField[data-softproto-mount="tile-field"]
  *
  * Gestures (Mall context):
- *   - Tap tile: Play/pause video in Mall context
- *   - Double-tap tile: Enter FoundUp view directly
+ *   - Tap tile: Start lane autoplay through FoundUp's video queue (Shorts-style)
+ *   - Enter button: Navigate to /f/{foundup_id} (WSP 104 canonical)
  *   - Pinch-out on tile: Expand into FoundUp's video field
  *   - Pinch-in (expanded): Collapse back to Mall
  *   - Swipe: Navigate snapped field (default) or glide (override)
@@ -69,6 +69,11 @@
   var previewGeneration = 0;       // Guard against stale callbacks
   var tapGuardActive = false;      // Prevent double-fire on audio button tap
 
+  // Lane autoplay state (Shorts-style queue traversal)
+  var currentLaneFoundupIndex = null;  // Which FoundUp lane is playing (catalog index)
+  var laneVideoIndex = 0;              // Current position in lane's videos[] queue
+  var laneAutoplayEnabled = true;      // Whether to auto-advance on video end
+
   // ========== YouTube IFrame API Helpers ==========
 
   function ensureYouTubeAPI() {
@@ -112,7 +117,148 @@
     var items = expandedFoundUp !== null ? getExpandedVideos() : mallCatalog;
     var item = items[index];
     if (!item) return null;
-    return item.video_data || (item.videos && item.videos[0]) || null;
+    // In expanded mode or single video_data, use direct reference
+    if (item.video_data) return item.video_data;
+    // In lane mode, use current lane video index
+    if (item.videos && item.videos.length) {
+      var vidIdx = (currentLaneFoundupIndex === index) ? laneVideoIndex : 0;
+      return item.videos[vidIdx] || item.videos[0];
+    }
+    return null;
+  }
+
+  /**
+   * Get video from lane queue at specific position
+   * @param {number} foundupIndex - FoundUp index in catalog
+   * @param {number} videoIndex - Position in videos[] queue
+   * @returns {Object|null} Video data object
+   */
+  function getLaneVideo(foundupIndex, videoIndex) {
+    var item = mallCatalog[foundupIndex];
+    if (!item || !item.videos || !item.videos.length) return null;
+    return item.videos[videoIndex] || null;
+  }
+
+  /**
+   * Advance to next video in current lane queue
+   * Policy: Loop to start when queue ends (Shorts-style continuous play)
+   */
+  function advanceToNextInLane() {
+    if (currentLaneFoundupIndex === null || !laneAutoplayEnabled) return;
+    var item = mallCatalog[currentLaneFoundupIndex];
+    if (!item || !item.videos || !item.videos.length) return;
+
+    var nextIndex = laneVideoIndex + 1;
+    // Loop policy: wrap to start when queue ends
+    if (nextIndex >= item.videos.length) {
+      nextIndex = 0;
+    }
+    laneVideoIndex = nextIndex;
+    // Start preview at new position (keep mute state)
+    startLanePreview(currentLaneFoundupIndex, laneVideoIndex, previewMuted);
+  }
+
+  /**
+   * Start lane preview at specific video position
+   * @param {number} foundupIndex - FoundUp catalog index
+   * @param {number} videoIndex - Position in videos[] queue
+   * @param {boolean} muted - Whether to start muted
+   */
+  function startLanePreview(foundupIndex, videoIndex, muted) {
+    var item = mallCatalog[foundupIndex];
+    if (!item || !item.videos || !item.videos.length) return;
+
+    var video = item.videos[videoIndex];
+    if (!video) return;
+
+    // Get the tile element for this FoundUp
+    var tile = getTileElement(foundupIndex);
+    if (!tile) return;
+
+    // Stop any existing preview FIRST (this clears lane state)
+    stopInlinePreview();
+
+    // Set lane state AFTER stopInlinePreview so it survives
+    currentLaneFoundupIndex = foundupIndex;
+    laneVideoIndex = videoIndex;
+
+    var videoUrl = video.embed_url || video.embedUrl || video.source_url || video.sourceUrl || '';
+    if (!videoUrl || typeof videoUrl !== 'string' || videoUrl.length < 5) return;
+
+    var ytId = extractYouTubeVideoId(videoUrl);
+    var stage = tile.querySelector('.mall-tile-preview-stage');
+    if (!stage) return;
+
+    playingIndex = foundupIndex;
+    previewPaused = false;
+    previewMuted = muted !== false;
+    previewGeneration++;
+    var gen = previewGeneration;
+
+    applyTilePreviewState(foundupIndex, { previewing: true, paused: false, muted: previewMuted });
+
+    if (ytId) {
+      ensureYouTubeAPI().then(function() {
+        if (gen !== previewGeneration) return;
+        var hostDiv = document.createElement('div');
+        hostDiv.className = 'mall-tile-preview-host';
+        hostDiv.id = 'yt-preview-' + foundupIndex + '-' + gen;
+        stage.innerHTML = '';
+        stage.appendChild(hostDiv);
+        inlineYTPlayer = new YT.Player(hostDiv.id, {
+          videoId: ytId,
+          playerVars: {
+            autoplay: 1, mute: 1, controls: 0, modestbranding: 1,
+            rel: 0, playsinline: 1
+            // Note: removed loop - we handle advancement manually
+          },
+          events: {
+            onReady: function(event) {
+              if (gen !== previewGeneration) return;
+              if (previewMuted) event.target.mute();
+              else event.target.unMute();
+              event.target.playVideo();
+            },
+            onStateChange: function(event) {
+              if (gen !== previewGeneration) return;
+              // YT.PlayerState.ENDED = 0
+              if (event.data === 0) {
+                advanceToNextInLane();
+              }
+            },
+            onError: function(event) {
+              if (gen !== previewGeneration) return;
+              // Skip to next on error
+              advanceToNextInLane();
+            }
+          }
+        });
+      });
+    } else if (videoUrl) {
+      var videoEl = document.createElement('video');
+      videoEl.className = 'mall-tile-preview-media';
+      videoEl.muted = previewMuted;
+      videoEl.autoplay = true;
+      videoEl.playsInline = true;
+      videoEl.setAttribute('playsinline', '');
+      // Advance on video end
+      videoEl.addEventListener('ended', function() {
+        if (gen !== previewGeneration) return;
+        advanceToNextInLane();
+      });
+      videoEl.onerror = function() {
+        if (gen !== previewGeneration) return;
+        advanceToNextInLane();
+      };
+      stage.innerHTML = '';
+      stage.appendChild(videoEl);
+      inlineHTML5Video = videoEl;
+      videoEl.src = videoUrl;
+      videoEl.play().catch(function() {
+        if (gen !== previewGeneration) return;
+        advanceToNextInLane();
+      });
+    }
   }
 
   // ========== Inline Preview Runtime ==========
@@ -175,6 +321,9 @@
     applyTilePreviewState(null, null);
     playingIndex = null;
     previewPaused = false;
+    // Reset lane state
+    currentLaneFoundupIndex = null;
+    laneVideoIndex = 0;
   }
 
   function pauseInlinePreview() {
@@ -507,6 +656,10 @@
       // Corner expand button for explicit fullscreen entry — video tiles only
       var expandBtn = hasVideos ? '<button class="mall-tile-expand" aria-label="Open fullscreen" title="Fullscreen">&#9654;</button>' : '';
 
+      // Enter FoundUp button (bottom-left, visible during preview) — video tiles only
+      // Uses stable foundup_id for WSP 104 canonical routing
+      var enterFoundupBtn = hasVideos ? '<button class="mall-tile-enter" aria-label="Enter FoundUp" title="Enter FoundUp"><svg viewBox="0 0 24 24"><path d="M15 3h6v6M14 10l6.1-6.1M9 21H3v-6M10 14l-6.1 6.1"/></svg></button>' : '';
+
       // Inline preview container (YouTube iframe or HTML5 video goes here) — video tiles only
       var previewContainer = hasVideos ? '<div class="mall-tile-preview"><div class="mall-tile-preview-stage"></div></div>' : '';
 
@@ -533,6 +686,7 @@
         sourceActionBadge +
         playIndicator +
         audioBtn +
+        enterFoundupBtn +
         expandBtn +
         '<div class="mall-tile-inner">' +
           '<span class="mall-tile-token">' + escapeHtml(item.token_symbol || '') + '</span>' +
@@ -579,30 +733,19 @@
     var tiles = tileField.querySelectorAll('.mall-tile');
 
     tiles.forEach(function(tile) {
-      // Touch/click handling: tap = play/pause, double-tap = enter
+      // Touch/click handling: tap = lane autoplay (no double-tap entry)
+      // FoundUp entry is explicit via fullscreen "Enter FoundUp" button
       tile.addEventListener('click', function(e) {
         // Ignore tap if guard is active (just finished dragging)
         if (tapGuardActive) return;
 
         var index = Number(tile.dataset.index || 0);
-        var now = Date.now();
-
-        // Check for double-tap (second tap within window)
-        if (lastTapTarget === tile && (now - lastTapTime) < DOUBLE_TAP_WINDOW) {
-          // Double-tap: enter FoundUp directly
-          e.preventDefault();
-          lastTapTime = 0;
-          lastTapTarget = null;
-          enterFoundUp(index);
-        } else {
-          // Single tap: play/pause in Mall context
-          lastTapTime = now;
-          lastTapTarget = tile;
-          togglePlay(index);
-        }
+        // Single tap: start/toggle lane autoplay
+        togglePlay(index);
       });
 
       // Keyboard support
+      // Space = lane autoplay, Enter = expand to fullscreen (where Enter FoundUp lives)
       tile.addEventListener('keydown', function(e) {
         var index = Number(tile.dataset.index || 0);
         if (e.key === ' ') {
@@ -610,7 +753,8 @@
           togglePlay(index);
         } else if (e.key === 'Enter') {
           e.preventDefault();
-          enterFoundUp(index);
+          // Open fullscreen context (Enter FoundUp available there)
+          openFullscreenFromTile(index);
         }
       });
 
@@ -661,6 +805,32 @@
       });
     });
 
+    // Enter FoundUp buttons — navigate to canonical /f/{foundup_id} route
+    var enterBtns = tileField.querySelectorAll('.mall-tile-enter');
+    enterBtns.forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (tapGuardActive) return;
+        var tile = btn.closest('.mall-tile');
+        if (!tile) return;
+        var index = Number(tile.dataset.index || 0);
+
+        // In expanded mode, route to PARENT FoundUp, not synthetic video ID
+        var foundupId;
+        if (expandedFoundUp !== null) {
+          var parentItem = mallCatalog[expandedFoundUp];
+          foundupId = parentItem ? (parentItem.foundup_id || parentItem.id) : null;
+        } else {
+          // In Mall mode, use stable foundup_id from data attribute
+          foundupId = tile.dataset.foundupId;
+        }
+
+        if (foundupId) {
+          navigateToFoundUp(foundupId);
+        }
+      });
+    });
+
     // Global escape handler - collapse expanded view or stop preview
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && expandedFoundUp !== null) {
@@ -675,6 +845,8 @@
 
   /**
    * Toggle play/pause for a tile
+   * In Mall mode: starts lane autoplay through the FoundUp's videos[] queue
+   * In expanded mode: plays the specific video
    * @param {number} index - Tile index
    */
   function togglePlay(index) {
@@ -709,7 +881,14 @@
       else pauseInlinePreview();
       return;
     }
-    startInlinePreview(index, false);
+
+    // In Mall mode (not expanded): use lane autoplay through videos[] queue
+    if (expandedFoundUp === null && item.videos && item.videos.length) {
+      startLanePreview(index, 0, false);
+    } else {
+      // Expanded mode or single video: use existing preview
+      startInlinePreview(index, false);
+    }
   }
 
   /**
@@ -1031,7 +1210,20 @@
   }
 
   /**
-   * Enter FoundUp view
+   * Navigate to canonical FoundUp landing page
+   * Uses WSP 104 routing: /f/{foundup_id}
+   * @param {string} foundupId - Stable FoundUp identity
+   */
+  function navigateToFoundUp(foundupId) {
+    if (!foundupId) return;
+    // Stop any active preview before navigation
+    stopInlinePreview();
+    // Navigate to canonical route (WSP 104)
+    window.location.href = '/f/' + encodeURIComponent(foundupId);
+  }
+
+  /**
+   * Enter FoundUp view (legacy - opens quick-view plane)
    * @param {number} index - Tile index
    */
   function enterFoundUp(index) {
@@ -1352,6 +1544,7 @@
     // Core
     initialize: initialize,
     enterFoundUp: enterFoundUp,
+    navigateToFoundUp: navigateToFoundUp,
 
     // Video runtime
     togglePlay: togglePlay,
@@ -1360,6 +1553,12 @@
     collapseFoundUp: collapseFoundUp,
     isExpanded: isExpanded,
     getExpandedIndex: getExpandedIndex,
+
+    // Lane autoplay
+    startLanePreview: startLanePreview,
+    advanceToNextInLane: advanceToNextInLane,
+    getLaneVideoIndex: function() { return laneVideoIndex; },
+    getCurrentLaneFoundupIndex: function() { return currentLaneFoundupIndex; },
 
     // Inline preview
     startInlinePreview: startInlinePreview,

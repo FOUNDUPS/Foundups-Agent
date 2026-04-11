@@ -5,11 +5,12 @@ Tests for the video-backed Mall field with:
   - Snapped field motion (default)
   - Glide mode override
   - Poster + queue count tiles
-  - tap = play/pause
-  - double-tap = enter FoundUp
+  - tap = lane autoplay (Shorts-style queue traversal)
   - pinch-out = expand into video field
   - pinch-in = collapse back
   - AI-controlled density presets
+  - Enter FoundUp button for WSP 104 canonical routing
+  - Lane autoplay with video end detection
 """
 import os
 
@@ -86,18 +87,71 @@ class TestVideoBackedTiles:
         assert "background-size: cover" in css
 
 
-class TestDoubleTapEnter:
-    """Test double-tap = enter FoundUp."""
+class TestEnterFoundUpButton:
+    """Test Enter FoundUp button for WSP 104 canonical routing."""
 
-    def test_double_tap_window(self):
-        """Double-tap detection window exists."""
+    def test_enter_button_in_tile_html(self):
+        """Enter FoundUp button included in tile HTML."""
         js = _read("js/mall-tile-field.js")
-        assert "DOUBLE_TAP_WINDOW" in js
+        assert "mall-tile-enter" in js
+        assert "Enter FoundUp" in js
 
-    def test_enter_foundup_on_double_tap(self):
-        """Double-tap calls enterFoundUp."""
+    def test_navigate_to_foundup_function(self):
+        """navigateToFoundUp function exists for WSP 104 routing."""
         js = _read("js/mall-tile-field.js")
-        assert "enterFoundUp(index)" in js
+        assert "function navigateToFoundUp" in js
+
+    def test_navigate_uses_stable_id(self):
+        """Navigation uses foundup_id from data attribute, not index."""
+        js = _read("js/mall-tile-field.js")
+        assert "tile.dataset.foundupId" in js
+
+    def test_navigate_to_canonical_route(self):
+        """Navigation goes to /f/{foundup_id} canonical route."""
+        js = _read("js/mall-tile-field.js")
+        assert "'/f/' + encodeURIComponent(foundupId)" in js
+
+    def test_enter_button_click_handler(self):
+        """Enter button has click handler."""
+        js = _read("js/mall-tile-field.js")
+        assert ".mall-tile-enter" in js
+        assert "navigateToFoundUp(foundupId)" in js
+
+    def test_enter_button_css_exists(self):
+        """Enter button has CSS styling."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile-enter" in css
+
+    def test_enter_button_visible_on_preview(self):
+        """Enter button visible during preview."""
+        css = _read("css/mall-tile-field.css")
+        assert ".mall-tile.is-previewing .mall-tile-enter" in css
+
+    def test_fullscreen_has_enter_foundup_button(self):
+        """Fullscreen video player has Enter FoundUp button."""
+        js = _read("js/mall-video-player.js")
+        assert 'data-action="enter"' in js
+        assert "Enter FoundUp" in js
+
+    def test_fullscreen_enter_action_handler(self):
+        """Fullscreen Enter action navigates to /f/{foundup_id}."""
+        js = _read("js/mall-video-player.js")
+        assert "case 'enter':" in js
+        assert "'/f/' + encodeURIComponent(currentFoundUpId)" in js
+
+    def test_fullscreen_enter_button_css(self):
+        """Fullscreen Enter button has distinct styling."""
+        css = _read("css/mall-video-player.css")
+        assert ".video-player-enter-btn" in css
+
+    def test_expanded_mode_routes_to_parent(self):
+        """In expanded mode, Enter FoundUp routes to parent FoundUp ID."""
+        js = _read("js/mall-tile-field.js")
+        # Check that expanded mode uses mallCatalog[expandedFoundUp] for ID
+        idx = js.index("// In expanded mode, route to PARENT")
+        section = js[idx:idx+300]
+        assert "mallCatalog[expandedFoundUp]" in section
+        assert "parentItem.foundup_id" in section
 
 
 class TestPinchExpandCollapse:
@@ -1003,3 +1057,98 @@ class TestPreviewResourceHardening:
         js = _read("js/mall-tile-field.js")
         assert "visibilityBound" in js
         assert "if (visibilityBound) return" in js
+
+
+class TestLaneAutoplay:
+    """Test Shorts-style lane autoplay through videos[] queue."""
+
+    def test_lane_video_index_state(self):
+        """Lane video index state variable exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "laneVideoIndex" in js
+
+    def test_current_lane_foundup_index_state(self):
+        """Current lane FoundUp index state variable exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "currentLaneFoundupIndex" in js
+
+    def test_lane_autoplay_enabled_flag(self):
+        """Lane autoplay enabled flag exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "laneAutoplayEnabled" in js
+
+    def test_start_lane_preview_function(self):
+        """startLanePreview function exists for lane autoplay."""
+        js = _read("js/mall-tile-field.js")
+        assert "function startLanePreview" in js
+
+    def test_advance_to_next_in_lane_function(self):
+        """advanceToNextInLane function exists for queue traversal."""
+        js = _read("js/mall-tile-field.js")
+        assert "function advanceToNextInLane" in js
+
+    def test_loop_policy_on_queue_end(self):
+        """Lane autoplay loops to start when queue ends."""
+        js = _read("js/mall-tile-field.js")
+        # Check for loop policy comment and implementation
+        assert "Loop policy" in js or "loop to start" in js
+        assert "nextIndex = 0" in js
+
+    def test_youtube_onstate_change_handler(self):
+        """YouTube player has onStateChange for end detection."""
+        js = _read("js/mall-tile-field.js")
+        assert "onStateChange" in js
+        assert "event.data === 0" in js  # YT.PlayerState.ENDED
+
+    def test_html5_ended_event_handler(self):
+        """HTML5 video has ended event for lane advancement."""
+        js = _read("js/mall-tile-field.js")
+        assert "'ended'" in js
+        assert "advanceToNextInLane()" in js
+
+    def test_toggle_play_uses_lane_preview(self):
+        """togglePlay uses startLanePreview in Mall mode."""
+        js = _read("js/mall-tile-field.js")
+        assert "startLanePreview(index, 0, false)" in js
+
+    def test_stop_preview_resets_lane_state(self):
+        """stopInlinePreview resets lane state."""
+        js = _read("js/mall-tile-field.js")
+        idx = js.index("function stopInlinePreview")
+        section = js[idx:idx+1200]
+        assert "currentLaneFoundupIndex = null" in section
+        assert "laneVideoIndex = 0" in section
+
+    def test_lane_state_survives_preview_startup(self):
+        """Lane state is set AFTER stopInlinePreview in startLanePreview."""
+        js = _read("js/mall-tile-field.js")
+        idx = js.index("function startLanePreview")
+        section = js[idx:idx+600]
+        # stopInlinePreview must come BEFORE setting lane state
+        stop_idx = section.index("stopInlinePreview()")
+        lane_idx = section.index("currentLaneFoundupIndex = foundupIndex")
+        assert stop_idx < lane_idx, "stopInlinePreview must precede lane state assignment"
+
+    def test_lane_api_exposed(self):
+        """Lane autoplay API exposed on window.mallTileField."""
+        js = _read("js/mall-tile-field.js")
+        assert "startLanePreview:" in js
+        assert "advanceToNextInLane:" in js
+        assert "getLaneVideoIndex:" in js
+
+    def test_no_double_tap_entry(self):
+        """Tap handler does not call enterFoundUp on double-tap."""
+        js = _read("js/mall-tile-field.js")
+        # The click handler should NOT have double-tap logic calling enterFoundUp
+        idx = js.index("tile.addEventListener('click'")
+        handler_end = js.index("});", idx)
+        click_handler = js[idx:handler_end]
+        assert "enterFoundUp(index)" not in click_handler
+
+    def test_keyboard_enter_opens_fullscreen(self):
+        """Keyboard Enter opens fullscreen (not enterFoundUp)."""
+        js = _read("js/mall-tile-field.js")
+        # Find the keydown handler
+        idx = js.index("e.key === 'Enter'")
+        section = js[idx:idx+200]
+        assert "openFullscreenFromTile(index)" in section
