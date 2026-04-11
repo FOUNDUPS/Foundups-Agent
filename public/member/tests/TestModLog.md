@@ -4,6 +4,38 @@ Test evolution log for the p.fMALL member shell test suite.
 
 ---
 
+## 2026-04-11 | FoundUp App Mount Tests (WSP 104/97)
+
+**File**: `test_route_contract_bridge.py` (extended)
+**Tests**: 18 new | **Classes**: 6 new | **Result**: 37-40 passed (3 skipped if firebase.json absent)
+**Worker**: BN
+
+Validates `/f/{foundup_id}/app` canonical app mount per WSP 104:
+
+| Class | Count | What it covers |
+|-------|-------|----------------|
+| TestFirebaseRouting | 3 | Skipped if firebase.json not tracked (deployment config) |
+| TestAppMountRoute | 6 | App detection, container CSS, entry_url handoff, back link, sandbox, error state |
+| TestAppMountDeepLinks | 2 | Deep path capture, path forwarding to iframe |
+| TestLaunchAppCTA | 4 | CTA exists, links to /app route, conditional on entry_url, recommendation added |
+| TestGotJunkTenantBinding | 4 | Catalog entry, routing_prefix, data_namespace, no entry_url yet |
+| TestCatalogArrayHandling | 2 | Array.isArray check, /foundups/ URL resolution |
+
+**Key implementation verified**:
+- `/f/{id}/app` detected via `isAppMount` flag
+- App container renders with sandboxed iframe
+- `entry_url` from catalog determines app entry point (fully resolved)
+- Missing `entry_url` shows "App Not Ready" error (GotJunk current state)
+- Deep paths forwarded as `?path=` param
+- Launch App CTA on landing (conditional on entry_url)
+- Red Dog recommendation "Launch App" added
+- GotJunk catalog entry exists (routing_prefix, data_namespace) but no entry_url yet
+- Catalog array format handled correctly
+- Relative URLs resolve to `/foundups/{id}/` not routing_prefix
+- TestFirebaseRouting uses pytest.mark.skipif for clean checkout compatibility
+
+---
+
 ## 2026-04-10 | Route Contract Bridge Tests (WSP 104/97)
 
 **File**: `test_route_contract_bridge.py` (rewritten)
