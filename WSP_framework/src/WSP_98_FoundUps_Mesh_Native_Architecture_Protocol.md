@@ -5,7 +5,20 @@
 - **Input:** FoundUp requirements, user base size, DAE coordination needs
 - **Output:** Mesh-enabled FoundUp architecture, SDK integration guidance, DAE mesh patterns
 - **Responsible Agent(s):** 0102, FoundUp architects, DAE orchestrators
-- **Dependencies:** WSP 27 (Universal DAE Architecture), WSP 80 (Cube-Level DAE Orchestration), WSP 3 (Enterprise Domain Organization), WSP 97 (System Execution Prompting)
+- **Dependencies:** WSP 27 (Universal DAE Architecture), WSP 80 (Cube-Level DAE Orchestration), WSP 3 (Enterprise Domain Organization), WSP 97 (System Execution Prompting), WSP 104 (Route Namespace and Tenant Isolation)
+
+## Prerequisite: WSP 104 Namespace Guardrails
+
+**Before a FoundUp is treated as mesh-ready**, it must satisfy the WSP 104 namespace guardrails:
+
+- unique `foundup_id`
+- unique `routing_prefix` = `/f/{foundup_id}`
+- unique `data_namespace` = `idb_{foundup_id}`
+- no root-level tenant route claims
+
+A FoundUp that fails namespace validation must not be onboarded to the mesh network.
+
+---
 
 ## 🌐 Vision: User-as-Infrastructure
 
