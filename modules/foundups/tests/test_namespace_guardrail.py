@@ -72,8 +72,14 @@ def _get_catalog_entries_with_routing() -> list[dict[str, Any]]:
     return [e for e in catalog if e.get("routing_prefix")]
 
 
+def _get_manifests_with_routing() -> list[tuple[str, dict[str, Any]]]:
+    """Return (foundup_id, manifest) tuples for manifests with routing_prefix."""
+    manifests = _load_manifests()
+    return [(fid, m) for fid, m in manifests.items() if m.get("routing_prefix")]
+
+
 class TestNamespaceUniqueness:
-    """Enforce globally unique namespaces across all FoundUps."""
+    """Enforce globally unique namespaces across all FoundUps (catalog + manifests)."""
 
     def test_foundup_ids_unique_in_catalog(self):
         """No duplicate foundup_id values in catalog."""
@@ -82,25 +88,64 @@ class TestNamespaceUniqueness:
         duplicates = [fid for fid in ids if ids.count(fid) > 1]
         assert not duplicates, f"Duplicate foundup_ids in catalog: {set(duplicates)}"
 
-    def test_routing_prefixes_unique_in_catalog(self):
-        """No duplicate routing_prefix values in catalog."""
-        entries = _get_catalog_entries_with_routing()
-        prefixes = [e["routing_prefix"] for e in entries]
-        duplicates = [p for p in prefixes if prefixes.count(p) > 1]
-        assert not duplicates, f"Duplicate routing_prefixes: {set(duplicates)}"
+    def test_routing_prefixes_unique_globally(self):
+        """No duplicate routing_prefix across catalog AND manifests."""
+        # Collect all routing_prefix values from both sources
+        all_prefixes: list[tuple[str, str, str]] = []  # (prefix, source, foundup_id)
 
-    def test_data_namespaces_unique_in_catalog(self):
-        """No duplicate data_namespace values in catalog."""
+        for e in _get_catalog_entries_with_routing():
+            all_prefixes.append((e["routing_prefix"], "catalog", e.get("foundup_id", "?")))
+
+        for fid, m in _get_manifests_with_routing():
+            all_prefixes.append((m["routing_prefix"], "manifest", fid))
+
+        # Check for duplicates (same prefix from different foundup_ids)
+        prefix_to_sources: dict[str, list[str]] = {}
+        for prefix, source, fid in all_prefixes:
+            key = f"{source}:{fid}"
+            prefix_to_sources.setdefault(prefix, []).append(key)
+
+        violations = []
+        for prefix, sources in prefix_to_sources.items():
+            # Dedupe by foundup_id (catalog and manifest for same foundup is OK)
+            unique_fids = {s.split(":")[1] for s in sources}
+            if len(unique_fids) > 1:
+                violations.append(f"{prefix} claimed by: {sources}")
+
+        assert not violations, f"Duplicate routing_prefixes: {violations}"
+
+    def test_data_namespaces_unique_globally(self):
+        """No duplicate data_namespace across catalog AND manifests."""
+        all_namespaces: list[tuple[str, str, str]] = []  # (namespace, source, foundup_id)
+
         catalog = _load_catalog()
-        namespaces = [e.get("data_namespace") for e in catalog if e.get("data_namespace")]
-        duplicates = [ns for ns in namespaces if namespaces.count(ns) > 1]
-        assert not duplicates, f"Duplicate data_namespaces: {set(duplicates)}"
+        for e in catalog:
+            ns = e.get("data_namespace")
+            if ns:
+                all_namespaces.append((ns, "catalog", e.get("foundup_id", "?")))
+
+        manifests = _load_manifests()
+        for fid, m in manifests.items():
+            ns = m.get("data_namespace")
+            if ns:
+                all_namespaces.append((ns, "manifest", fid))
+
+        # Check for duplicates (same namespace from different foundup_ids)
+        ns_to_sources: dict[str, list[str]] = {}
+        for ns, source, fid in all_namespaces:
+            key = f"{source}:{fid}"
+            ns_to_sources.setdefault(ns, []).append(key)
+
+        violations = []
+        for ns, sources in ns_to_sources.items():
+            unique_fids = {s.split(":")[1] for s in sources}
+            if len(unique_fids) > 1:
+                violations.append(f"{ns} claimed by: {sources}")
+
+        assert not violations, f"Duplicate data_namespaces: {violations}"
 
     def test_foundup_ids_unique_in_manifests(self):
         """No duplicate foundup_id across manifest files."""
-        manifests = _load_manifests()
-        # Manifests are keyed by foundup_id, so duplicates would overwrite.
-        # Check by scanning all manifest files directly.
         seen: dict[str, Path] = {}
         for d in _foundups_root().iterdir():
             if not d.is_dir():
@@ -117,20 +162,29 @@ class TestNamespaceUniqueness:
 
 
 class TestCanonicalRouteShape:
-    """Enforce /f/{foundup_id} canonical route structure."""
+    """Enforce /f/{foundup_id} canonical route structure (catalog + manifests)."""
 
-    def test_routing_prefix_matches_canonical_pattern(self):
-        """All routing_prefix values must match /f/{foundup_id} pattern."""
+    def test_catalog_routing_prefix_matches_canonical_pattern(self):
+        """Catalog routing_prefix values must match /f/{foundup_id} pattern."""
         entries = _get_catalog_entries_with_routing()
         violations = []
         for e in entries:
             prefix = e["routing_prefix"]
             if not CANONICAL_ROUTE_PATTERN.match(prefix):
-                violations.append(f"{e.get('foundup_id')}: {prefix}")
-        assert not violations, f"Non-canonical routing_prefix: {violations}"
+                violations.append(f"catalog:{e.get('foundup_id')}: {prefix}")
+        assert not violations, f"Non-canonical routing_prefix in catalog: {violations}"
 
-    def test_routing_prefix_contains_foundup_id(self):
-        """routing_prefix must contain the foundup_id."""
+    def test_manifest_routing_prefix_matches_canonical_pattern(self):
+        """Manifest routing_prefix values must match /f/{foundup_id} pattern."""
+        violations = []
+        for fid, m in _get_manifests_with_routing():
+            prefix = m["routing_prefix"]
+            if not CANONICAL_ROUTE_PATTERN.match(prefix):
+                violations.append(f"manifest:{fid}: {prefix}")
+        assert not violations, f"Non-canonical routing_prefix in manifests: {violations}"
+
+    def test_catalog_routing_prefix_contains_foundup_id(self):
+        """Catalog routing_prefix must contain the foundup_id."""
         entries = _get_catalog_entries_with_routing()
         violations = []
         for e in entries:
@@ -138,21 +192,41 @@ class TestCanonicalRouteShape:
             prefix = e["routing_prefix"]
             expected = f"/f/{fid}"
             if prefix != expected:
-                violations.append(f"{fid}: got {prefix}, expected {expected}")
-        assert not violations, f"routing_prefix does not match foundup_id: {violations}"
+                violations.append(f"catalog:{fid}: got {prefix}, expected {expected}")
+        assert not violations, f"routing_prefix mismatch in catalog: {violations}"
 
-    def test_data_namespace_matches_pattern(self):
-        """data_namespace must match idb_{foundup_id} pattern."""
+    def test_manifest_routing_prefix_contains_foundup_id(self):
+        """Manifest routing_prefix must contain the foundup_id."""
+        violations = []
+        for fid, m in _get_manifests_with_routing():
+            prefix = m["routing_prefix"]
+            expected = f"/f/{fid}"
+            if prefix != expected:
+                violations.append(f"manifest:{fid}: got {prefix}, expected {expected}")
+        assert not violations, f"routing_prefix mismatch in manifests: {violations}"
+
+    def test_catalog_data_namespace_matches_pattern(self):
+        """Catalog data_namespace must match idb_{foundup_id} pattern."""
         catalog = _load_catalog()
         violations = []
         for e in catalog:
             ns = e.get("data_namespace")
             if ns and not DATA_NAMESPACE_PATTERN.match(ns):
-                violations.append(f"{e.get('foundup_id')}: {ns}")
-        assert not violations, f"Non-canonical data_namespace: {violations}"
+                violations.append(f"catalog:{e.get('foundup_id')}: {ns}")
+        assert not violations, f"Non-canonical data_namespace in catalog: {violations}"
 
-    def test_data_namespace_contains_foundup_id(self):
-        """data_namespace must contain the foundup_id."""
+    def test_manifest_data_namespace_matches_pattern(self):
+        """Manifest data_namespace must match idb_{foundup_id} pattern."""
+        manifests = _load_manifests()
+        violations = []
+        for fid, m in manifests.items():
+            ns = m.get("data_namespace")
+            if ns and not DATA_NAMESPACE_PATTERN.match(ns):
+                violations.append(f"manifest:{fid}: {ns}")
+        assert not violations, f"Non-canonical data_namespace in manifests: {violations}"
+
+    def test_catalog_data_namespace_contains_foundup_id(self):
+        """Catalog data_namespace must contain the foundup_id."""
         catalog = _load_catalog()
         violations = []
         for e in catalog:
@@ -161,8 +235,20 @@ class TestCanonicalRouteShape:
             if ns:
                 expected = f"idb_{fid}"
                 if ns != expected:
-                    violations.append(f"{fid}: got {ns}, expected {expected}")
-        assert not violations, f"data_namespace does not match foundup_id: {violations}"
+                    violations.append(f"catalog:{fid}: got {ns}, expected {expected}")
+        assert not violations, f"data_namespace mismatch in catalog: {violations}"
+
+    def test_manifest_data_namespace_contains_foundup_id(self):
+        """Manifest data_namespace must contain the foundup_id."""
+        manifests = _load_manifests()
+        violations = []
+        for fid, m in manifests.items():
+            ns = m.get("data_namespace")
+            if ns:
+                expected = f"idb_{fid}"
+                if ns != expected:
+                    violations.append(f"manifest:{fid}: got {ns}, expected {expected}")
+        assert not violations, f"data_namespace mismatch in manifests: {violations}"
 
 
 class TestCatalogManifestConsistency:
@@ -209,31 +295,49 @@ class TestCatalogManifestConsistency:
 
 
 class TestNoRootSprawl:
-    """Prevent FoundUps from claiming reserved root paths."""
+    """Prevent FoundUps from claiming reserved root paths (catalog + manifests)."""
 
-    def test_routing_prefix_not_reserved_root(self):
-        """routing_prefix must not be a reserved root path."""
+    def test_catalog_routing_prefix_not_reserved_root(self):
+        """Catalog routing_prefix must not be a reserved root path."""
         entries = _get_catalog_entries_with_routing()
         violations = []
         for e in entries:
             prefix = e["routing_prefix"]
-            # Check if prefix is or starts with a reserved path
             for reserved in RESERVED_ROOT_PATHS:
                 if prefix == reserved or (prefix.startswith(reserved + "/") and reserved != "/f"):
-                    violations.append(f"{e.get('foundup_id')}: {prefix} conflicts with {reserved}")
-        assert not violations, f"Root sprawl violations: {violations}"
+                    violations.append(f"catalog:{e.get('foundup_id')}: {prefix} conflicts with {reserved}")
+        assert not violations, f"Root sprawl in catalog: {violations}"
 
-    def test_no_root_level_routing_prefix(self):
-        """routing_prefix must not be a single segment (root level)."""
+    def test_manifest_routing_prefix_not_reserved_root(self):
+        """Manifest routing_prefix must not be a reserved root path."""
+        violations = []
+        for fid, m in _get_manifests_with_routing():
+            prefix = m["routing_prefix"]
+            for reserved in RESERVED_ROOT_PATHS:
+                if prefix == reserved or (prefix.startswith(reserved + "/") and reserved != "/f"):
+                    violations.append(f"manifest:{fid}: {prefix} conflicts with {reserved}")
+        assert not violations, f"Root sprawl in manifests: {violations}"
+
+    def test_catalog_no_root_level_routing_prefix(self):
+        """Catalog routing_prefix must not be a single segment (root level)."""
         entries = _get_catalog_entries_with_routing()
         violations = []
         for e in entries:
             prefix = e["routing_prefix"]
-            # Valid: /f/gotjunk_001 (3+ segments), Invalid: /gotjunk (2 segments)
             segments = [s for s in prefix.split("/") if s]
             if len(segments) < 2:
-                violations.append(f"{e.get('foundup_id')}: {prefix} is root-level (needs /f/ prefix)")
-        assert not violations, f"Root-level routing violations: {violations}"
+                violations.append(f"catalog:{e.get('foundup_id')}: {prefix} is root-level")
+        assert not violations, f"Root-level routing in catalog: {violations}"
+
+    def test_manifest_no_root_level_routing_prefix(self):
+        """Manifest routing_prefix must not be a single segment (root level)."""
+        violations = []
+        for fid, m in _get_manifests_with_routing():
+            prefix = m["routing_prefix"]
+            segments = [s for s in prefix.split("/") if s]
+            if len(segments) < 2:
+                violations.append(f"manifest:{fid}: {prefix} is root-level")
+        assert not violations, f"Root-level routing in manifests: {violations}"
 
 
 class TestManifestStructure:
@@ -254,6 +358,31 @@ class TestManifestStructure:
             if missing:
                 violations.append(f"{fid}: missing {missing}")
         assert not violations, f"Manifest missing required fields: {violations}"
+
+
+class TestCatalogRoutedRequiresManifest:
+    """Catalog entries with routing must have a corresponding manifest."""
+
+    def test_routed_catalog_entry_has_manifest(self):
+        """Any catalog entry with routing_prefix must have a manifest file.
+
+        This ensures the "100+ FoundUps" guardrail is meaningful:
+        - Catalog alone is not sufficient for namespace claims
+        - Shell runtime needs manifest for full tenant binding
+        """
+        catalog_routed = _get_catalog_entries_with_routing()
+        manifests = _load_manifests()
+
+        violations = []
+        for e in catalog_routed:
+            fid = e.get("foundup_id")
+            if fid and fid not in manifests:
+                violations.append(f"{fid}: has routing_prefix in catalog but no manifest")
+
+        assert not violations, (
+            f"Catalog-routed FoundUps missing manifest: {violations}. "
+            "Create modules/foundups/{name}/foundup_manifest.json per WSP 104."
+        )
 
 
 class TestGotJunkFirstTenant:
