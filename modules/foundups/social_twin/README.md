@@ -86,3 +86,51 @@ deterministic as possible and use models only for bounded drafting fallbacks.
 - Phase: PoC architecture lock
 - Version: 0.1.0
 - Last updated: 2026-03-13
+
+---
+
+## Route Namespace
+
+Canonical contract: `modules/foundups/docs/FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_CONTRACT.md`. Routing follows **WSP 104** (`/f/{foundup_id}`).
+
+| Field | Value |
+|-------|-------|
+| `foundup_id` | `social_twin` |
+| `routing_prefix` | `/f/social_twin` |
+| Landing route | `/f/social_twin` |
+| App mount | `/f/social_twin/app` |
+
+---
+
+## App Mount
+
+Shell contract: **`/f/social_twin/app`**. PoC stage — control plane via Discord/Telegram; pfMALL mount pending.
+
+---
+
+## AI Capability Hooks
+
+Contract surface (implementation staged): `get_status`, `get_context`, `navigate`, `launch_capability`, shell handoff/return — see `FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_CONTRACT.md`.
+
+---
+
+## DAEmon Outputs
+
+Per **WSP 91** (when DAEMON workers attach): health status, last action, error state, recommended next action, queue/work state (scan queue, approval state, engagement execution), telemetry scoped by `foundup_id` / `data_namespace`.
+
+---
+
+## Data / Telemetry Namespace
+
+| Field | Value |
+|-------|-------|
+| `foundup_id` | `social_twin` |
+| `data_namespace` | `idb_social_twin` |
+| Tenant bounds | Queue state, approval records, engagement logs — all tenant-scoped per WSP 104 |
+
+---
+
+## WSP References
+
+- **WSP 91** — DAEMON observability (`WSP_knowledge/src/WSP_91_DAEMON_Observability_Protocol.md`)
+- **WSP 104** — FoundUp route namespace (`WSP_knowledge/src/WSP_104_FoundUp_Route_Namespace_and_Tenant_Isolation_Protocol.md`)

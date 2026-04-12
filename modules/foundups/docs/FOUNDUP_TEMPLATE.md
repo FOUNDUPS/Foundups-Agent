@@ -159,3 +159,57 @@ After completing available components:
 ---
 
 *Use this template each time a new FoundUp is added. Update the template if the pattern changes.*
+
+---
+
+## Required README Sections (WSP 91 + WSP 104 Compliance)
+
+Every FoundUp with `module.json` or `foundup_manifest.json` MUST include these sections in its README.md. See `FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_CONTRACT.md` for the full contract.
+
+---
+
+## Route Namespace
+
+Canonical contract: `modules/foundups/docs/FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_CONTRACT.md`. Routing follows **WSP 104** (`/f/{foundup_id}`).
+
+| Field | Value |
+|-------|-------|
+| `foundup_id` | `{your_id}` |
+| `routing_prefix` | `/f/{your_id}` |
+| Landing route | `/f/{your_id}` |
+| App mount | `/f/{your_id}/app` |
+
+---
+
+## App Mount
+
+Shell contract: **`/f/{foundup_id}/app`**. State current hosting (pfMALL mount, external, or not yet deployed).
+
+---
+
+## AI Capability Hooks
+
+Contract surface (implementation staged): `get_status`, `get_context`, `navigate`, `launch_capability`, shell handoff/return — see `FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_CONTRACT.md`.
+
+---
+
+## DAEmon Outputs
+
+Per **WSP 91** (when DAEMON workers attach): health status, last action, error state, recommended next action, queue/work state, telemetry scoped by `foundup_id` / `data_namespace`.
+
+---
+
+## Data / Telemetry Namespace
+
+| Field | Value |
+|-------|-------|
+| `foundup_id` | `{your_id}` |
+| `data_namespace` | `idb_{your_id}` or manifest field |
+| Tenant bounds | Cache, storage, telemetry stay tenant-scoped per WSP 104 |
+
+---
+
+## WSP References
+
+- **WSP 91** — DAEMON observability (`WSP_knowledge/src/WSP_91_DAEMON_Observability_Protocol.md`)
+- **WSP 104** — FoundUp route namespace (`WSP_knowledge/src/WSP_104_FoundUp_Route_Namespace_and_Tenant_Isolation_Protocol.md`)

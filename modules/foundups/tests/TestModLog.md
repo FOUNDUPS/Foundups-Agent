@@ -40,4 +40,47 @@ Following WSP guidance for module compliance:
 
 ---
 
+## 2026-04-12 | AI Hooks + DAEmon Surface Contract Compliance (Worker BP)
+
+**File**: `test_foundup_ai_hooks_daemon_contract_compliance.py`
+**Tests**: 8 | **Result**: 8 passed
+**Worker**: BP
+
+| Test | What it validates |
+|------|-------------------|
+| `test_canonical_contract_doc_exists_and_references_wsps` | Contract doc exists, references WSP 91 + WSP 104 |
+| `test_foundup_template_requires_contract_sections` | FOUNDUP_TEMPLATE.md has 6 required sections |
+| `test_foundup_readme_surface_contract[gotjunk]` | gotjunk README compliant |
+| `test_foundup_readme_surface_contract[kosei]` | kosei README compliant |
+| `test_foundup_readme_surface_contract[move2japan]` | move2japan README compliant |
+| `test_foundup_readme_surface_contract[pqn_portal]` | pqn_portal README compliant |
+| `test_foundup_readme_surface_contract[social_twin]` | social_twin README compliant |
+| `test_validator_detects_gaps_in_minimal_readme` | Validator catches missing sections |
+
+**Note**: Discovery requires `module.json` or `foundup_manifest.json`. geoze has local module.json not yet committed to main.
+
+**Required sections** (per `FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_CONTRACT.md`):
+1. `## Route Namespace`
+2. `## App Mount`
+3. `## AI Capability Hooks`
+4. `## DAEmon Outputs`
+5. `## Data / Telemetry Namespace`
+6. `## WSP References`
+
+**Literal requirements**: README must contain `WSP 91`, `WSP 104`, and `FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_CONTRACT.md`.
+
+---
+
+## 2026-04-11 | Namespace Guardrail Validator (Worker BQ)
+
+**File**: `test_namespace_guardrail.py`
+**Tests**: 23 | **Result**: 23 passed
+**Worker**: BQ
+
+Validates WSP 104 namespace rules across catalog + manifests.
+
+---
+
+---
+
 *This log exists for 0102 pArtifacts to track testing evolution and ensure system coherence per WSP 34. It is not noise but a critical component for autonomous agent learning and recursive improvement.* 
