@@ -79,14 +79,17 @@ Canonical contract: `modules/foundups/docs/FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_C
 
 ## App Mount
 
-Shell contract: **`/f/kosei/app`**. Hosting paths provisioned:
-- `public/kosei/` — landing page (`/kosei/`)
-- `public/kosei/app/` — client workspace (`/kosei/app/`)
+Shell contract: **`/f/kosei/app`**. App bundle staged at `public/kosei/app/`.
 
-**Deploy requirements**:
-1. Add CSP + X-Frame-Options override to local `firebase.json` (gitignored — see ModLog for exact config including `X-Frame-Options: ""` to clear inherited DENY)
-2. Run `firebase deploy --only hosting`
-3. Verify headers: `curl -sI https://foundupscom.web.app/kosei/app/ | grep -iE "(content-security|x-frame)"`
+**Blockers before shell embedding**:
+1. **P1 UNVERIFIED**: Iframe header fix — whether `X-Frame-Options: ""` clears inherited global `DENY` is untested. See ModLog for proposed config.
+2. **P2**: Landing page (`/kosei/`) not deployed — source needs cleanup.
+
+**Deploy + verify**:
+```bash
+firebase deploy --only hosting
+curl -sI https://foundupscom.web.app/kosei/app/ | grep -iE "(x-frame|content-security)"
+```
 
 ---
 

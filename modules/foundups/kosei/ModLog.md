@@ -7,25 +7,21 @@
 
 ### Hosting Path Provisioned
 
-Created `public/kosei/` hosting structure:
-
-**Landing** (from `frontend/`):
-- `public/kosei/index.html` — public landing page
-- `public/kosei/manifest.json` — PWA manifest
-- `public/kosei/sw.js` — service worker
-- `public/kosei/js/` — i18n, intake scripts
-
-**App** (from `app/`):
+Created `public/kosei/app/` hosting structure (app bundle only):
 - `public/kosei/css/kosei.css` — shared styles
 - `public/kosei/app/index.html` — client workspace HTML
 - `public/kosei/app/css/kosei-app.css` — app-specific styles
 - `public/kosei/app/js/` — auth, data, UI scripts
 
-**Source of truth**: `modules/foundups/kosei/{frontend,app}/` are source, `public/kosei/` is deploy target.
+**Source of truth**: `modules/foundups/kosei/app/` is source, `public/kosei/app/` is deploy target.
 
-### CSP Header Override (Ops-Managed)
+**NOT deployed**: Landing page (`/kosei/`) deferred to separate slice — source has encoding issues and missing assets.
 
-Root `firebase.json` is gitignored (ops-managed, not repo-tracked). The following config must be added to the local `firebase.json` before deploy:
+### Iframe Embed Blocker (UNVERIFIED)
+
+Root `firebase.json` is gitignored (ops-managed). The global header at `source: "**"` sets `X-Frame-Options: DENY`.
+
+**Proposed config** (requires deploy-time verification):
 
 ```json
 {
@@ -39,37 +35,37 @@ Root `firebase.json` is gitignored (ops-managed, not repo-tracked). The followin
 }
 ```
 
-**CRITICAL**: The `X-Frame-Options: ""` entry explicitly clears the inherited global `X-Frame-Options: DENY`. Without this, the global header still applies and blocks iframe embedding even with CSP `frame-ancestors` set.
-
-**Note**: `firebase.json` already updated locally on this machine. Config is NOT version-controlled.
-
-### Current State (WSP 97)
-
-- **Hosting path**: Provisioned ✓
-- **CSP header**: Configured ✓
-- **Deployed**: NO — `firebase deploy` not yet run
-- **entry_url**: Remains `null` — truthful state until deploy + header verification
-- **Route tests**: 45 passed
-
-### Verification After Deploy
+**WARNING**: Whether `X-Frame-Options: ""` actually clears the inherited global `DENY` is **unverified**. Firebase Hosting docs describe ordered header application but do not confirm "empty value clears inherited header" semantics. This remains a deploy-time blocker until verified via:
 
 ```bash
 firebase deploy --only hosting
-curl -sI https://foundupscom.web.app/kosei/app/ | grep -i content-security
-# Expected: Content-Security-Policy: frame-ancestors ...
+curl -sI https://foundupscom.web.app/kosei/app/ | grep -iE "(x-frame|content-security)"
 ```
 
-### Remaining Blockers (P2)
+### Current State (WSP 97)
 
-1. Firebase API keys in `kosei-app-auth.js` are empty — runtime uses `/__/firebase/init.json` auto-config fallback
-2. Kosei Firestore collections/rules not provisioned — needed before client data writes
-3. Admin claim provisioning not implemented — needed for `/admin/` access
+- **App bundle**: Staged at `public/kosei/app/` ✓
+- **Landing page**: NOT deployed (deferred)
+- **Iframe header fix**: UNVERIFIED blocker
+- **entry_url**: Remains `null` — truthful state until deploy + header verification
+- **Route tests**: 45 passed
+
+### Remaining Blockers
+
+| Blocker | Severity | Notes |
+|---------|----------|-------|
+| X-Frame-Options override behavior | P1 | Unverified — must test at deploy time |
+| Landing page not deployed | P2 | Source needs cleanup; app CTA to `/kosei/` will 404 |
+| Firebase API keys empty | P2 | Runtime uses `/__/firebase/init.json` auto-config |
+| Kosei Firestore rules | P2 | Needed before client data writes |
+
+**Note**: The app workspace has a "Request an Audit" CTA that links to `/kosei/`. This will 404 until the landing page is deployed in a follow-up slice.
 
 ### WSP References
 
-- WSP 15: Smallest correct move (hosting + CSP only)
-- WSP 97: Current-truth (entry_url null until verified)
-- WSP 104: Route namespace (`/kosei/app/**` CSP scope)
+- WSP 15: Smallest correct move (app bundle only)
+- WSP 97: Current-truth (entry_url null, header fix unverified)
+- WSP 104: Route namespace (`/kosei/app/**` scope)
 
 ---
 
