@@ -347,6 +347,57 @@ class TestGotJunkTenantBinding:
         assert '"entry_url"' not in gotjunk_entry
 
 
+class TestKoseiTenantBinding:
+    """Test Kosei as second bound tenant (WSP 104).
+
+    Kosei is bound to the canonical shell route family after GotJunk.
+    Unlike GotJunk, Kosei has no embeddable runtime yet (discoverable_only).
+    """
+
+    def test_kosei_in_catalog(self):
+        """Kosei exists in mall-video-catalog.json."""
+        catalog = _read("mall-video-catalog.json")
+        assert '"foundup_id": "kosei"' in catalog
+
+    def test_kosei_has_routing_prefix(self):
+        """Kosei catalog entry has correct routing_prefix."""
+        catalog = _read("mall-video-catalog.json")
+        assert '"/f/kosei"' in catalog
+
+    def test_kosei_has_data_namespace(self):
+        """Kosei catalog entry has data_namespace."""
+        catalog = _read("mall-video-catalog.json")
+        assert '"idb_kosei"' in catalog
+
+    def test_kosei_no_entry_url_truthfully(self):
+        """Kosei has no entry_url because no embeddable app exists yet.
+
+        Kosei is discoverable_only - users can see the landing page at /f/kosei
+        but /f/kosei/app will show "App Not Ready" because there's no runtime
+        URL to embed. This is truthful: no fake URLs, no promises we can't keep.
+        """
+        catalog = _read("mall-video-catalog.json")
+        idx = catalog.find('"foundup_id": "kosei"')
+        assert idx > 0
+        next_entry = catalog.find('"foundup_id":', idx + 20)
+        if next_entry < 0:
+            next_entry = len(catalog)
+        kosei_entry = catalog[idx:next_entry]
+        # entry_url should not appear in kosei's catalog entry
+        assert '"entry_url"' not in kosei_entry
+
+    def test_kosei_launch_readiness_is_discoverable_only(self):
+        """Kosei is discoverable_only - landing exists but app is not ready."""
+        catalog = _read("mall-video-catalog.json")
+        idx = catalog.find('"foundup_id": "kosei"')
+        assert idx > 0
+        next_entry = catalog.find('"foundup_id":', idx + 20)
+        if next_entry < 0:
+            next_entry = len(catalog)
+        kosei_entry = catalog[idx:next_entry]
+        assert '"discoverable_only"' in kosei_entry
+
+
 class TestCatalogArrayHandling:
     """Test catalog array format handling."""
 
