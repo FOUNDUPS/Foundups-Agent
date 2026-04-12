@@ -1,9 +1,14 @@
 """
-Test: Command Rolodex WRE Connection Alignment
+Integration Test: Command Rolodex WRE Connection Alignment
 
 Verifies that JSON and SQLite rolodex metadata match actual serialized rows,
 and that `wre_connected_count` derives from the same source as the per-row
 `wre_connected` flag.
+
+NOTE: These are integration tests over generated artifacts, not hermetic unit
+tests. The JSON artifact is committed; the SQLite artifact is gitignored
+(*.db) and only exists after a local `python holo_index.py --index-cli` run.
+SQLite and cross-format tests skip gracefully when the .db is absent.
 
 Worker CE — ROLODEX_WRE_CONNECTION_ALIGNMENT_PHASE1
 """
@@ -18,11 +23,19 @@ REPO_ROOT = Path(__file__).parent.parent.parent
 ROLODEX_JSON = REPO_ROOT / "holo_index" / "docs" / "command_rolodex.json"
 ROLODEX_DB = REPO_ROOT / "holo_index" / "docs" / "command_rolodex.db"
 
+_needs_json = pytest.mark.skipif(
+    not ROLODEX_JSON.exists(),
+    reason="command_rolodex.json not found — run: python holo_index.py --index-cli",
+)
+_needs_db = pytest.mark.skipif(
+    not ROLODEX_DB.exists(),
+    reason="command_rolodex.db not found (gitignored) — run: python holo_index.py --index-cli",
+)
+
 
 @pytest.fixture
 def json_data():
     """Load JSON rolodex."""
-    assert ROLODEX_JSON.exists(), f"Missing {ROLODEX_JSON} — run: python holo_index.py --index-cli"
     with open(ROLODEX_JSON, "r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -30,7 +43,6 @@ def json_data():
 @pytest.fixture
 def sqlite_data():
     """Load SQLite rolodex metadata and row counts."""
-    assert ROLODEX_DB.exists(), f"Missing {ROLODEX_DB} — run: python holo_index.py --index-cli"
     conn = sqlite3.connect(str(ROLODEX_DB))
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
@@ -49,6 +61,7 @@ def sqlite_data():
     return {"meta": meta, "total_rows": total_rows, "connected_rows": connected_rows, "orphan_rows": orphan_rows}
 
 
+@_needs_json
 class TestJSONAlignment:
     """JSON metadata matches actual serialized command rows."""
 
@@ -80,8 +93,9 @@ class TestJSONAlignment:
         assert meta_total == actual_total
 
 
+@_needs_db
 class TestSQLiteAlignment:
-    """SQLite metadata matches actual row counts."""
+    """SQLite metadata matches actual row counts (requires local --index-cli run)."""
 
     def test_wre_connected_count_matches_rows(self, sqlite_data):
         meta_count = int(sqlite_data["meta"]["wre_connected_count"])
@@ -109,8 +123,10 @@ class TestSQLiteAlignment:
         assert meta_total == actual_total
 
 
+@_needs_db
+@_needs_json
 class TestCrossFormatParity:
-    """JSON and SQLite report the same counts."""
+    """JSON and SQLite report the same counts (requires both artifacts)."""
 
     def test_connected_count_parity(self, json_data, sqlite_data):
         j = json_data["wre_connected_count"]
@@ -128,6 +144,7 @@ class TestCrossFormatParity:
         assert j == s, f"JSON total ({j}) != SQLite total ({s})"
 
 
+@_needs_json
 class TestWREConnectionSemantics:
     """wre_connected means: CLI entrypoint has a matching SKILLz.md in its directory tree."""
 

@@ -9,15 +9,16 @@
 
 **Definition**: `wre_connected` means a CLI entrypoint (`if __name__ == "__main__"`) has a matching SKILLz.md file in its directory tree. `registered_skills` is the total count of SKILLz.md files (a superset, since many skills don't map 1:1 to CLI entrypoints).
 
-**Fix**: Four sites in `_cli_main.py` now derive `wre_connected_count` from `len(scan_result.wre_connected)`. Added `registered_skillz_count` as a separate metadata field. Regenerated both artifacts. Added 13-test alignment suite.
+**Fix**: Four sites in `_cli_main.py` now derive `wre_connected_count` from `len(scan_result.wre_connected)`. Added `registered_skillz_count` as a separate metadata field. Added integration test suite.
 
 **Counts after fix**: 732 total, 29 connected, 703 orphans, 105 registered SKILLz.md
 
-Files:
+Files shipped:
 - `holo_index/_cli_main.py` — four metadata emission sites corrected
 - `holo_index/docs/command_rolodex.json` — regenerated with aligned counts
-- `holo_index/docs/command_rolodex.db` — regenerated with aligned counts
-- `holo_index/tests/test_rolodex_wre_alignment.py` — 13 tests (JSON, SQLite, cross-format parity, semantics)
+- `holo_index/tests/test_rolodex_wre_alignment.py` — 13 integration tests (JSON, SQLite, cross-format parity, semantics); SQLite tests skip if `.db` not present (gitignored artifact, regenerated locally via `python holo_index.py --index-cli`)
+
+Note: `command_rolodex.db` is gitignored (`*.db`). The generator fix ensures it aligns on next local `--index-cli` run.
 
 WSP 97 applied: metadata now reports truthful connection counts.
 
