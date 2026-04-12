@@ -1,5 +1,31 @@
 # Member Area Module Change Log
 
+## [2026-04-12] Kosei Shell Route Binding (Worker BU, WSP 15/97/104)
+
+**Who**: 0102 - Worker BU
+**Slice**: `KOSEI_LANDING_AND_APP_BINDING_PHASE1`
+**What**: Codify Kosei as second canonical shell-bound FoundUp after GotJunk.
+
+**Files Modified**:
+- `public/member/tests/test_route_contract_bridge.py` - Added `TestKoseiTenantBinding` (5 tests)
+
+**Binding Truth**:
+- Landing: `/f/kosei` resolves through canonical shell contract
+- App mount: `/f/kosei/app` shows "App Not Ready" (truthful - no embeddable runtime yet)
+- `entry_url`: omitted (no fake URL)
+- `launch_readiness`: `discoverable_only`
+
+**Pre-existing Truth** (no changes needed):
+- `modules/foundups/kosei/foundup_manifest.json` - Already has `routing_prefix: /f/kosei`, `data_namespace: idb_kosei`, `entry_url: null`
+- `public/member/mall-video-catalog.json` - Already has matching routing fields, no entry_url
+
+**WSP 104 Applied**: No root sprawl; route family is `/f/kosei` and `/f/kosei/app`.
+**WSP 97 Applied**: Truthful readiness - "discoverable_only" state, no fake URLs.
+
+**Test Results**: 45 passed (was 40)
+
+---
+
 ## [2026-04-11] GotJunk App Binding Attempted + X-Frame-Options Blocker (Worker BS, WSP 15/97/104)
 
 **Who**: 0102 - Worker BS

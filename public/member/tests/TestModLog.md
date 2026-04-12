@@ -4,6 +4,26 @@ Test evolution log for the p.fMALL member shell test suite.
 
 ---
 
+## 2026-04-12 | Kosei Tenant Binding Tests (WSP 104/97)
+
+**File**: `test_route_contract_bridge.py` (extended)
+**Tests**: 5 added | **Class**: `TestKoseiTenantBinding` | **Result**: 45 passed
+**Worker**: BU
+
+Validates Kosei as second canonical shell-bound FoundUp:
+
+| Test | What it checks |
+|------|----------------|
+| `test_kosei_in_catalog` | Kosei exists in mall-video-catalog.json |
+| `test_kosei_has_routing_prefix` | Catalog has `/f/kosei` routing |
+| `test_kosei_has_data_namespace` | Catalog has `idb_kosei` namespace |
+| `test_kosei_no_entry_url_truthfully` | No fake entry_url (no embeddable app yet) |
+| `test_kosei_launch_readiness_is_discoverable_only` | Kosei is discoverable_only |
+
+**Key context**: Kosei is bound to canonical shell routes but has no embeddable runtime yet. Landing exists at `/f/kosei`, app mount shows "App Not Ready" truthfully.
+
+---
+
 ## 2026-04-11 | GotJunk Frame-Compatibility Guard Test (WSP 104/97)
 
 **File**: `test_route_contract_bridge.py` (modified)
