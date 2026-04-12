@@ -79,7 +79,17 @@ Canonical contract: `modules/foundups/docs/FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_C
 
 ## App Mount
 
-Shell contract: **`/f/kosei/app`**. Scaffold only — no pfMALL mount yet; service orchestration surface pending.
+Shell contract: **`/f/kosei/app`**. App bundle staged at `public/kosei/app/`.
+
+**Blockers before shell embedding**:
+1. **P1 UNVERIFIED**: Iframe header fix — whether `X-Frame-Options: ""` clears inherited global `DENY` is untested. See ModLog for proposed config.
+2. **P2**: Landing page (`/kosei/`) not deployed — source needs cleanup.
+
+**Deploy + verify**:
+```bash
+firebase deploy --only hosting
+curl -sI https://foundupscom.web.app/kosei/app/ | grep -iE "(x-frame|content-security)"
+```
 
 ---
 

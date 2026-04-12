@@ -1,5 +1,74 @@
 # Kosei AI Systems — ModLog
 
+## 2026-04-12 — Firebase Hosting Deploy Phase 1
+
+**Worker**: BX2
+**Slice**: `KOSEI_FIREBASE_HOSTING_DEPLOY_PHASE1`
+
+### Hosting Path Provisioned
+
+Created `public/kosei/app/` hosting structure (app bundle only):
+- `public/kosei/css/kosei.css` — shared styles
+- `public/kosei/app/index.html` — client workspace HTML
+- `public/kosei/app/css/kosei-app.css` — app-specific styles
+- `public/kosei/app/js/` — auth, data, UI scripts
+
+**Source of truth**: `modules/foundups/kosei/app/` is source, `public/kosei/app/` is deploy target.
+
+**NOT deployed**: Landing page (`/kosei/`) deferred to separate slice — source has encoding issues and missing assets.
+
+### Iframe Embed Blocker (UNVERIFIED)
+
+Root `firebase.json` is gitignored (ops-managed). The global header at `source: "**"` sets `X-Frame-Options: DENY`.
+
+**Proposed config** (requires deploy-time verification):
+
+```json
+{
+  "source": "/kosei/app/**",
+  "headers": [
+    { "key": "Content-Security-Policy", "value": "frame-ancestors https://foundups.com https://*.foundups.com https://foundupscom.web.app https://foundupscom.firebaseapp.com http://localhost:* https://localhost:*" },
+    { "key": "X-Frame-Options", "value": "" },
+    { "key": "X-Content-Type-Options", "value": "nosniff" },
+    { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+  ]
+}
+```
+
+**WARNING**: Whether `X-Frame-Options: ""` actually clears the inherited global `DENY` is **unverified**. Firebase Hosting docs describe ordered header application but do not confirm "empty value clears inherited header" semantics. This remains a deploy-time blocker until verified via:
+
+```bash
+firebase deploy --only hosting
+curl -sI https://foundupscom.web.app/kosei/app/ | grep -iE "(x-frame|content-security)"
+```
+
+### Current State (WSP 97)
+
+- **App bundle**: Staged at `public/kosei/app/` ✓
+- **Landing page**: NOT deployed (deferred)
+- **Iframe header fix**: UNVERIFIED blocker
+- **entry_url**: Remains `null` — truthful state until deploy + header verification
+- **Route tests**: 45 passed
+
+### Remaining Blockers
+
+| Blocker | Severity | Notes |
+|---------|----------|-------|
+| X-Frame-Options override behavior | P1 | Unverified — must test at deploy time |
+| Landing page not deployed | P2 | Source needs cleanup before deploy |
+| Firebase API keys empty | P2 | Runtime uses `/__/firebase/init.json` auto-config |
+| Kosei Firestore rules | P2 | Needed before client data writes |
+
+**UI fix**: No-workspace state CTA changed from dead link to informational text ("Contact support to request an audit").
+
+### WSP References
+
+- WSP 15: Smallest correct move (app bundle only)
+- WSP 97: Current-truth (entry_url null, header fix unverified)
+- WSP 104: Route namespace (`/kosei/app/**` scope)
+
+---
+
 ## 2026-04-11 — Runtime Readiness Audit
 
 **Worker**: BX

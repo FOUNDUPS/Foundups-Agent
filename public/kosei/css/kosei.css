@@ -1,0 +1,591 @@
+/**
+ * Kosei AI Systems - Landing Page Styles
+ * Mobile-first, dark theme with indigo accent
+ */
+
+/* ============================================
+   CSS Variables
+   ============================================ */
+:root {
+  /* Colors */
+  --kosei-bg: #0a0a12;
+  --kosei-bg-elevated: #12121c;
+  --kosei-bg-card: #1a1a28;
+  --kosei-text: #e8e8ed;
+  --kosei-text-muted: #9898a8;
+  --kosei-accent: #6366f1;
+  --kosei-accent-hover: #818cf8;
+  --kosei-accent-soft: rgba(99, 102, 241, 0.15);
+  --kosei-success: #22c55e;
+  --kosei-error: #ef4444;
+  --kosei-border: rgba(255, 255, 255, 0.08);
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-jp: 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+
+  /* Sizing */
+  --container-max: 1200px;
+  --header-height: 64px;
+}
+
+/* ============================================
+   Reset & Base
+   ============================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--kosei-bg);
+  color: var(--kosei-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+html[lang="ja"] body {
+  font-family: var(--font-jp), var(--font-sans);
+}
+
+a {
+  color: var(--kosei-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--kosei-accent-hover);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ============================================
+   Layout
+   ============================================ */
+.kosei-container {
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+.kosei-section {
+  padding: var(--space-3xl) 0;
+}
+
+.kosei-section--alt {
+  background: var(--kosei-bg-elevated);
+}
+
+/* ============================================
+   Header / Navigation
+   ============================================ */
+.kosei-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-height);
+  background: rgba(10, 10, 18, 0.9);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--kosei-border);
+  z-index: 100;
+}
+
+.kosei-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.kosei-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--kosei-text);
+}
+
+.kosei-logo-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.kosei-nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+}
+
+.kosei-nav-link {
+  color: var(--kosei-text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.kosei-nav-link:hover {
+  color: var(--kosei-text);
+}
+
+.kosei-lang-toggle {
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--kosei-accent-soft);
+  border: 1px solid var(--kosei-accent);
+  border-radius: 4px;
+  color: var(--kosei-accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.kosei-lang-toggle:hover {
+  background: var(--kosei-accent);
+  color: white;
+}
+
+/* ============================================
+   Hero Section
+   ============================================ */
+.kosei-hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding-top: var(--header-height);
+  text-align: center;
+}
+
+.kosei-hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.kosei-hero-title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin: 0 0 var(--space-lg);
+  background: linear-gradient(135deg, var(--kosei-text) 0%, var(--kosei-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.kosei-hero-subtitle {
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  color: var(--kosei-text-muted);
+  margin: 0 0 var(--space-xl);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+.kosei-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-xl);
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.kosei-btn--primary {
+  background: var(--kosei-accent);
+  color: white;
+}
+
+.kosei-btn--primary:hover {
+  background: var(--kosei-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+}
+
+.kosei-btn--secondary {
+  background: transparent;
+  color: var(--kosei-accent);
+  border: 2px solid var(--kosei-accent);
+}
+
+.kosei-btn--secondary:hover {
+  background: var(--kosei-accent-soft);
+}
+
+.kosei-btn:disabled,
+.kosei-btn.loading {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ============================================
+   Value Props Grid
+   ============================================ */
+.kosei-section-title {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 var(--space-2xl);
+}
+
+.kosei-values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-lg);
+}
+
+.kosei-value-card {
+  background: var(--kosei-bg-card);
+  border: 1px solid var(--kosei-border);
+  border-radius: 12px;
+  padding: var(--space-xl);
+}
+
+.kosei-value-icon {
+  width: 48px;
+  height: 48px;
+  background: var(--kosei-accent-soft);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-md);
+  font-size: 1.5rem;
+}
+
+.kosei-value-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 var(--space-sm);
+}
+
+.kosei-value-desc {
+  color: var(--kosei-text-muted);
+  font-size: 0.9375rem;
+  margin: 0;
+}
+
+/* ============================================
+   Audit Section
+   ============================================ */
+.kosei-audit-section {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-2xl);
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .kosei-audit-section {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.kosei-audit-info h2 {
+  font-size: 1.75rem;
+  margin: 0 0 var(--space-md);
+}
+
+.kosei-audit-subtitle {
+  color: var(--kosei-text-muted);
+  margin: 0 0 var(--space-xl);
+}
+
+.kosei-audit-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.kosei-audit-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.kosei-audit-list li::before {
+  content: '✓';
+  color: var(--kosei-accent);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* ============================================
+   Intake Form
+   ============================================ */
+.kosei-form-card {
+  background: var(--kosei-bg-card);
+  border: 1px solid var(--kosei-border);
+  border-radius: 16px;
+  padding: var(--space-xl);
+}
+
+.kosei-form-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 var(--space-lg);
+  text-align: center;
+}
+
+.kosei-form-group {
+  margin-bottom: var(--space-md);
+}
+
+.kosei-form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--kosei-text-muted);
+  margin-bottom: var(--space-xs);
+}
+
+.kosei-form-input,
+.kosei-form-select,
+.kosei-form-textarea {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  font-size: 1rem;
+  font-family: inherit;
+  background: var(--kosei-bg);
+  border: 1px solid var(--kosei-border);
+  border-radius: 8px;
+  color: var(--kosei-text);
+  transition: border-color 0.2s;
+}
+
+.kosei-form-input:focus,
+.kosei-form-select:focus,
+.kosei-form-textarea:focus {
+  outline: none;
+  border-color: var(--kosei-accent);
+}
+
+.kosei-form-textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.kosei-form-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.kosei-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--kosei-bg);
+  border: 1px solid var(--kosei-border);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.kosei-checkbox-label:has(input:checked) {
+  background: var(--kosei-accent-soft);
+  border-color: var(--kosei-accent);
+}
+
+.kosei-checkbox-label input {
+  display: none;
+}
+
+.kosei-form-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  font-size: 0.875rem;
+  color: var(--kosei-text-muted);
+}
+
+.kosei-form-consent input {
+  margin-top: 4px;
+}
+
+.kosei-form-submit {
+  width: 100%;
+  margin-top: var(--space-md);
+}
+
+.form-status {
+  display: none;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  text-align: center;
+  margin-top: var(--space-md);
+}
+
+.form-status.success {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--kosei-success);
+}
+
+.form-status.error {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--kosei-error);
+}
+
+/* ============================================
+   Trust Section
+   ============================================ */
+.kosei-trust-stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3xl);
+  flex-wrap: wrap;
+}
+
+.kosei-stat {
+  text-align: center;
+}
+
+.kosei-stat-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--kosei-accent);
+}
+
+.kosei-stat-label {
+  color: var(--kosei-text-muted);
+  font-size: 0.875rem;
+}
+
+/* ============================================
+   Footer
+   ============================================ */
+.kosei-footer {
+  background: var(--kosei-bg-elevated);
+  border-top: 1px solid var(--kosei-border);
+  padding: var(--space-2xl) 0 var(--space-lg);
+}
+
+.kosei-footer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-xl);
+  margin-bottom: var(--space-xl);
+}
+
+.kosei-footer-brand {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+}
+
+.kosei-footer-tagline {
+  color: var(--kosei-text-muted);
+  font-size: 0.875rem;
+}
+
+.kosei-footer-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--kosei-text-muted);
+  margin-bottom: var(--space-md);
+}
+
+.kosei-footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.kosei-footer-links li {
+  margin-bottom: var(--space-sm);
+}
+
+.kosei-footer-links a {
+  color: var(--kosei-text-muted);
+  font-size: 0.875rem;
+}
+
+.kosei-footer-links a:hover {
+  color: var(--kosei-text);
+}
+
+.kosei-footer-bottom {
+  text-align: center;
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--kosei-border);
+  color: var(--kosei-text-muted);
+  font-size: 0.8125rem;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+@media (max-width: 640px) {
+  .kosei-nav-links {
+    gap: var(--space-md);
+  }
+
+  .kosei-nav-link {
+    font-size: 0.75rem;
+  }
+
+  .kosei-hero {
+    padding-top: calc(var(--header-height) + var(--space-lg));
+    min-height: auto;
+    padding-bottom: var(--space-2xl);
+  }
+
+  .kosei-trust-stats {
+    gap: var(--space-xl);
+  }
+}
+
+/* ============================================
+   PWA Install Banner (optional future)
+   ============================================ */
+.kosei-install-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--kosei-bg-card);
+  border-top: 1px solid var(--kosei-border);
+  padding: var(--space-md);
+  display: none;
+  justify-content: center;
+  gap: var(--space-md);
+  z-index: 50;
+}
+
+.kosei-install-banner.show {
+  display: flex;
+}
