@@ -46,21 +46,5 @@
     "hero_label": "SIGNAL",
     "hero_mood": "Signal-first, always on, discoverable inside the shell.",
     "entry_copy": "The broadcast stack is real, but shell entry stays discoverable-only until tenant handoff is wired."
-  },
-  {
-    "foundup_id": "holoindex_prod_01",
-    "name": "HoloIndex",
-    "tagline": "Memory and Intent. Unified.",
-    "description": "Quantum-entangled codebase memory and semantic intelligence visualization layer.",
-    "category": "infrastructure",
-    "tier": "F3_INFRA",
-    "lifecycle_stage": "incubating",
-    "launch_readiness": "discoverable_only",
-    "token_symbol": "HOLO",
-    "routing_prefix": "/f/holoindex_prod_01",
-    "theme": "holoindex",
-    "hero_label": "MEMORY",
-    "hero_mood": "Clean, explicitly stubbed connection validating the new shell bridge contract.",
-    "entry_copy": "HoloIndex is discoverable inside the shell, serving as the first live verification of the WSP 97 bridge."
   }
 ]
