@@ -1,5 +1,65 @@
 # Kosei AI Systems — ModLog
 
+## 2026-04-13 — In-Browser Iframe Embed Verification
+
+**Worker**: BX4
+**Slice**: `KOSEI_IN_BROWSER_IFRAME_EMBED_VERIFICATION_PHASE1`
+
+### Verification Performed
+
+Tested actual iframe embedding in a modern browser (Chrome) against the FoundUps shell domain.
+
+**Browser path used**: `https://foundupscom.web.app/f/kosei`
+**Iframe source**: `https://foundupscom.web.app/kosei/app/`
+**Method**: Injected iframe via JavaScript on the shell page
+
+### Result: VERIFIED EMBEDDABLE
+
+The Kosei app **successfully renders** inside an iframe on the FoundUps shell domain.
+
+**Screenshot evidence**: Kosei auth gate fully visible inside iframe:
+- Kosei logo and title
+- "Sign in to your workspace" text
+- "Sign in with Google" button
+- Email/Password input fields
+- "Sign in with Email" button
+
+### Finding: CSP Takes Precedence
+
+Per W3C CSP3 spec, modern browsers ignore `X-Frame-Options` when `Content-Security-Policy: frame-ancestors` is present. This is now **confirmed** in practice:
+- Headers still show both `frame-ancestors` and `X-Frame-Options: DENY`
+- Chrome correctly ignores `X-Frame-Options` and allows embedding
+- The iframe renders without any frame policy errors
+
+### Current State (WSP 97)
+
+- **Iframe embedding**: VERIFIED ✓
+- **CSP frame-ancestors**: Working correctly ✓
+- **entry_url**: Remains `null` pending tiny metadata restore slice
+- **App renders**: Auth gate fully functional in iframe
+
+### Next Step
+
+**`BX5 — KOSEI_RESTORE_ENTRY_URL_PHASE1`**: Tiny metadata update to:
+1. Set `entry_url` to `/f/kosei/app` in `foundup_manifest.json`
+2. Update `mall-video-catalog.json` if needed
+3. Kosei will then appear as embeddable in the shell instead of "DISCOVERABLE ONLY"
+
+### Remaining Blockers (P2)
+
+| Blocker | Severity | Notes |
+|---------|----------|-------|
+| Landing page not deployed | P2 | Source needs cleanup before deploy |
+| Firebase API keys empty | P2 | Runtime uses `/__/firebase/init.json` auto-config |
+
+### WSP References
+
+- WSP 15: Browser verification only, no fake readiness
+- WSP 97: entry_url stays null until metadata slice (verification complete, metadata pending)
+- WSP 104: Verified on `/f/kosei` shell route embedding `/kosei/app/`
+
+---
+
 ## 2026-04-12 — Deploy-Time Header Verification
 
 **Worker**: BX3
