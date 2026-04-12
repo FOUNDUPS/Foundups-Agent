@@ -7,13 +7,21 @@
 
 ### Hosting Path Provisioned
 
-Created `public/kosei/app/` hosting structure:
-- `public/kosei/css/kosei.css` — shared styles (copied from `frontend/css/`)
-- `public/kosei/app/index.html` — client workspace HTML (copied from `app/`)
+Created `public/kosei/` hosting structure:
+
+**Landing** (from `frontend/`):
+- `public/kosei/index.html` — public landing page
+- `public/kosei/manifest.json` — PWA manifest
+- `public/kosei/sw.js` — service worker
+- `public/kosei/js/` — i18n, intake scripts
+
+**App** (from `app/`):
+- `public/kosei/css/kosei.css` — shared styles
+- `public/kosei/app/index.html` — client workspace HTML
 - `public/kosei/app/css/kosei-app.css` — app-specific styles
 - `public/kosei/app/js/` — auth, data, UI scripts
 
-**Source of truth**: `modules/foundups/kosei/app/` is source, `public/kosei/app/` is deploy target.
+**Source of truth**: `modules/foundups/kosei/{frontend,app}/` are source, `public/kosei/` is deploy target.
 
 ### CSP Header Override (Ops-Managed)
 
@@ -24,13 +32,14 @@ Root `firebase.json` is gitignored (ops-managed, not repo-tracked). The followin
   "source": "/kosei/app/**",
   "headers": [
     { "key": "Content-Security-Policy", "value": "frame-ancestors https://foundups.com https://*.foundups.com https://foundupscom.web.app https://foundupscom.firebaseapp.com http://localhost:* https://localhost:*" },
+    { "key": "X-Frame-Options", "value": "" },
     { "key": "X-Content-Type-Options", "value": "nosniff" },
     { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
   ]
 }
 ```
 
-This overrides the global `X-Frame-Options: DENY` for the Kosei app path, enabling shell iframe embedding after deploy.
+**CRITICAL**: The `X-Frame-Options: ""` entry explicitly clears the inherited global `X-Frame-Options: DENY`. Without this, the global header still applies and blocks iframe embedding even with CSP `frame-ancestors` set.
 
 **Note**: `firebase.json` already updated locally on this machine. Config is NOT version-controlled.
 

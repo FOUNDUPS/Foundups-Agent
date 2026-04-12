@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kosei AI Systems - AI-Powered Content Automation</title>
+  <meta name="description" content="Stop spending hours creating content. Our AI agents analyze your brand, create posts, and publish across all platforms automatically.">
+
+  <!-- PWA -->
+  <link rel="manifest" href="/kosei/manifest.json">
+  <meta name="theme-color" content="#6366f1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kosei">
+
+  <!-- Icons -->
+  <link rel="icon" href="/kosei/assets/kosei-icon-32.svg" sizes="32x32" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/kosei/assets/kosei-icon-192.svg">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/kosei/css/kosei.css">
+
+  <!-- Firebase SDK (compat for simpler init) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="kosei-header">
+    <nav class="kosei-nav kosei-container">
+      <div class="kosei-logo">
+        <svg class="kosei-logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="32" height="32" rx="8" fill="#6366f1"/>
+          <path d="M8 16L14 10L20 16L14 22L8 16Z" fill="white"/>
+          <path d="M14 16L20 10L26 16L20 22L14 16Z" fill="white" fill-opacity="0.6"/>
+        </svg>
+        <span>Kosei</span>
+      </div>
+      <div class="kosei-nav-links">
+        <a href="#audit" class="kosei-nav-link" data-i18n="nav_audit">Free Audit</a>
+        <a href="#pricing" class="kosei-nav-link" data-i18n="nav_pricing">Pricing</a>
+        <a href="/kosei/login" class="kosei-nav-link" data-i18n="nav_login">Client Login</a>
+        <button id="langToggle" class="kosei-lang-toggle" data-i18n="lang_toggle">JP</button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="kosei-hero kosei-section">
+      <div class="kosei-container">
+        <div class="kosei-hero-content">
+          <h1 class="kosei-hero-title" data-i18n="hero_title">AI-Powered Content That Works While You Sleep</h1>
+          <p class="kosei-hero-subtitle" data-i18n="hero_subtitle">Stop spending hours creating content. Our AI agents analyze your brand, create posts, and publish across all platforms — automatically.</p>
+          <a href="#audit" class="kosei-btn kosei-btn--primary" data-i18n="hero_cta">Get Your Free 20-Minute Audit</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Value Propositions -->
+    <section class="kosei-section kosei-section--alt">
+      <div class="kosei-container">
+        <h2 class="kosei-section-title" data-i18n="value_title">Why Creators Choose Kosei</h2>
+        <div class="kosei-values-grid">
+          <div class="kosei-value-card">
+            <div class="kosei-value-icon">⏱️</div>
+            <h3 class="kosei-value-title" data-i18n="value_1_title">Save 10+ Hours Weekly</h3>
+            <p class="kosei-value-desc" data-i18n="value_1_desc">AI agents handle research, writing, scheduling, and publishing. You focus on your expertise.</p>
+          </div>
+          <div class="kosei-value-card">
+            <div class="kosei-value-icon">🎯</div>
+            <h3 class="kosei-value-title" data-i18n="value_2_title">Consistent Brand Voice</h3>
+            <p class="kosei-value-desc" data-i18n="value_2_desc">We analyze your existing content to match your tone, style, and messaging perfectly.</p>
+          </div>
+          <div class="kosei-value-card">
+            <div class="kosei-value-icon">🌐</div>
+            <h3 class="kosei-value-title" data-i18n="value_3_title">Multi-Platform Publishing</h3>
+            <p class="kosei-value-desc" data-i18n="value_3_desc">YouTube, LinkedIn, X, Instagram — one creation, optimized for each platform automatically.</p>
+          </div>
+          <div class="kosei-value-card">
+            <div class="kosei-value-icon">👁️</div>
+            <h3 class="kosei-value-title" data-i18n="value_4_title">Human Review Option</h3>
+            <p class="kosei-value-desc" data-i18n="value_4_desc">Approve posts before they go live, or trust our AI to handle everything.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Audit Section -->
+    <section id="audit" class="kosei-section">
+      <div class="kosei-container">
+        <div class="kosei-audit-section">
+          <div class="kosei-audit-info">
+            <h2 data-i18n="audit_title">Start With a Free Content Audit</h2>
+            <p class="kosei-audit-subtitle" data-i18n="audit_subtitle">In 20 minutes, we'll analyze your content gaps and show you exactly how AI can help.</p>
+            <h3 data-i18n="audit_what_title">What You'll Get</h3>
+            <ul class="kosei-audit-list">
+              <li data-i18n="audit_what_1">Content gap analysis across your platforms</li>
+              <li data-i18n="audit_what_2">Competitor positioning insights</li>
+              <li data-i18n="audit_what_3">Custom AI content strategy recommendation</li>
+              <li data-i18n="audit_what_4">ROI projection for your specific case</li>
+            </ul>
+          </div>
+
+          <div class="kosei-form-card">
+            <h3 class="kosei-form-title" data-i18n="form_title">Book Your Free Audit</h3>
+            <form id="koseiIntakeForm">
+              <div class="kosei-form-group">
+                <label class="kosei-form-label" data-i18n="form_name">Your Name</label>
+                <input type="text" name="name" class="kosei-form-input" required>
+              </div>
+
+              <div class="kosei-form-group">
+                <label class="kosei-form-label" data-i18n="form_email">Email Address</label>
+                <input type="email" name="email" class="kosei-form-input" required>
+              </div>
+
+              <div class="kosei-form-group">
+                <label class="kosei-form-label" data-i18n="form_business">Business / Brand Name</label>
+                <input type="text" name="business" class="kosei-form-input">
+              </div>
+
+              <div class="kosei-form-group">
+                <label class="kosei-form-label" data-i18n="form_platforms">Platforms You Use</label>
+                <div class="kosei-form-checkboxes">
+                  <label class="kosei-checkbox-label">
+                    <input type="checkbox" name="platforms" value="youtube">
+                    <span data-i18n="form_platform_youtube">YouTube</span>
+                  </label>
+                  <label class="kosei-checkbox-label">
+                    <input type="checkbox" name="platforms" value="linkedin">
+                    <span data-i18n="form_platform_linkedin">LinkedIn</span>
+                  </label>
+                  <label class="kosei-checkbox-label">
+                    <input type="checkbox" name="platforms" value="x">
+                    <span data-i18n="form_platform_x">X (Twitter)</span>
+                  </label>
+                  <label class="kosei-checkbox-label">
+                    <input type="checkbox" name="platforms" value="instagram">
+                    <span data-i18n="form_platform_instagram">Instagram</span>
+                  </label>
+                  <label class="kosei-checkbox-label">
+                    <input type="checkbox" name="platforms" value="tiktok">
+                    <span data-i18n="form_platform_tiktok">TikTok</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="kosei-form-group">
+                <label class="kosei-form-label" data-i18n="form_handle">Primary Social Handle</label>
+                <input type="text" name="handle" class="kosei-form-input" data-i18n="form_handle_placeholder" placeholder="@yourhandle or URL">
+              </div>
+
+              <div class="kosei-form-group">
+                <label class="kosei-form-label" data-i18n="form_frequency">Current Posting Frequency</label>
+                <select name="frequency" class="kosei-form-select">
+                  <option value="daily" data-i18n="form_freq_daily">Daily</option>
+                  <option value="weekly" data-i18n="form_freq_weekly">2-3 times per week</option>
+                  <option value="monthly" data-i18n="form_freq_monthly">A few times per month</option>
+                  <option value="rarely" data-i18n="form_freq_rarely">Rarely or never</option>
+                </select>
+              </div>
+
+              <div class="kosei-form-group">
+                <label class="kosei-form-label" data-i18n="form_goals">What are your content goals?</label>
+                <textarea name="goals" class="kosei-form-textarea" data-i18n="form_goals_placeholder" placeholder="E.g., grow audience, establish thought leadership, drive sales..."></textarea>
+              </div>
+
+              <div class="kosei-form-group">
+                <label class="kosei-form-consent">
+                  <input type="checkbox" name="consent" required>
+                  <span data-i18n="form_consent">I agree to be contacted about Kosei services</span>
+                </label>
+              </div>
+
+              <button type="submit" class="kosei-btn kosei-btn--primary kosei-form-submit" data-i18n="form_submit">Request Free Audit</button>
+              <div id="formStatus" class="form-status"></div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trust Section -->
+    <section class="kosei-section kosei-section--alt">
+      <div class="kosei-container">
+        <h2 class="kosei-section-title" data-i18n="trust_title">Trusted by Creators Worldwide</h2>
+        <div class="kosei-trust-stats">
+          <div class="kosei-stat">
+            <div class="kosei-stat-value" data-i18n="trust_stat_1">500+</div>
+            <div class="kosei-stat-label" data-i18n="trust_stat_1_label">Creators Served</div>
+          </div>
+          <div class="kosei-stat">
+            <div class="kosei-stat-value" data-i18n="trust_stat_2">50K+</div>
+            <div class="kosei-stat-label" data-i18n="trust_stat_2_label">Posts Delivered</div>
+          </div>
+          <div class="kosei-stat">
+            <div class="kosei-stat-value" data-i18n="trust_stat_3">10hrs</div>
+            <div class="kosei-stat-label" data-i18n="trust_stat_3_label">Avg. Time Saved Weekly</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing Teaser -->
+    <section id="pricing" class="kosei-section">
+      <div class="kosei-container" style="text-align: center;">
+        <h2 class="kosei-section-title" data-i18n="pricing_title">Simple, Transparent Pricing</h2>
+        <p style="color: var(--kosei-text-muted); margin-bottom: var(--space-lg);" data-i18n="pricing_trial">Start with a 14-day free trial</p>
+        <a href="/kosei/pricing" class="kosei-btn kosei-btn--secondary" data-i18n="pricing_cta">View Pricing</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="kosei-footer">
+    <div class="kosei-container">
+      <div class="kosei-footer-grid">
+        <div>
+          <div class="kosei-footer-brand">Kosei AI Systems</div>
+          <p class="kosei-footer-tagline" data-i18n="footer_tagline">AI content automation for creators who mean business.</p>
+        </div>
+        <div>
+          <div class="kosei-footer-title" data-i18n="footer_links">Quick Links</div>
+          <ul class="kosei-footer-links">
+            <li><a href="#audit" data-i18n="nav_audit">Free Audit</a></li>
+            <li><a href="#pricing" data-i18n="nav_pricing">Pricing</a></li>
+            <li><a href="/kosei/login" data-i18n="nav_login">Client Login</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="kosei-footer-title" data-i18n="footer_legal">Legal</div>
+          <ul class="kosei-footer-links">
+            <li><a href="/kosei/privacy" data-i18n="footer_privacy">Privacy Policy</a></li>
+            <li><a href="/kosei/terms" data-i18n="footer_terms">Terms of Service</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="kosei-footer-title" data-i18n="footer_contact">Contact</div>
+          <ul class="kosei-footer-links">
+            <li><a href="mailto:hello@kosei.ai">hello@kosei.ai</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="kosei-footer-bottom" data-i18n="footer_copyright">
+        2026 Kosei AI Systems. Part of the FoundUps ecosystem.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/kosei/js/kosei-i18n.js"></script>
+  <script src="/kosei/js/kosei-intake.js"></script>
+  <script>
+    // Initialize i18n
+    document.addEventListener('DOMContentLoaded', () => {
+      window.koseiI18n?.init();
+      window.koseiIntake?.init();
+    });
+
+    // Lang toggle
+    document.getElementById('langToggle')?.addEventListener('click', () => {
+      window.koseiI18n?.toggle();
+    });
+
+    // Register service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/kosei/sw.js')
+        .then(reg => console.log('[Kosei] SW registered:', reg.scope))
+        .catch(err => console.error('[Kosei] SW registration failed:', err));
+    }
+  </script>
+</body>
+</html>
