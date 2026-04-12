@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://foundups.org/schemas/mobile-worker/worker-handoff-pipeline.v1.schema.json",
+  "title": "FoundUps mobile worker handoff artifacts (v1)",
+  "description": "Canonical JSON shapes for foundups-code-task-parser, foundups-scope-locker, foundups-task-packet-writer, foundups-result-interpreter. Used for documentation and handoff validation; runtime may enforce subsets.",
+  "$defs": {
+    "ParserOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["intent", "summary", "constraints", "open_questions", "suggested_next_skill"],
+      "properties": {
+        "intent": { "type": "string", "enum": ["read", "edit", "mixed", "unclear"] },
+        "summary": { "type": "string", "maxLength": 400 },
+        "constraints": { "type": "array", "items": { "type": "string" } },
+        "open_questions": { "type": "array", "items": { "type": "string" } },
+        "suggested_next_skill": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string", "const": "foundups-scope-locker" }
+          ]
+        }
+      }
+    },
+    "ScopeOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope_ok",
+        "allowed_operations",
+        "explicit_non_goals",
+        "handoff_required",
+        "rationale"
+      ],
+      "properties": {
+        "scope_ok": { "type": "boolean" },
+        "allowed_operations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["read_tree", "draft_patch", "tests_only", "none"]
+          }
+        },
+        "explicit_non_goals": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 2
+        },
+        "handoff_required": { "type": "boolean" },
+        "rationale": { "type": "string", "maxLength": 500 }
+      }
+    },
+    "PacketOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "packet_version",
+        "title",
+        "objective",
+        "files_allowlist",
+        "forbidden_paths",
+        "acceptance_criteria",
+        "evidence_required",
+        "wsp_refs"
+      ],
+      "properties": {
+        "packet_version": { "type": "string", "const": "1" },
+        "title": { "type": "string", "maxLength": 120 },
+        "objective": { "type": "string", "maxLength": 4000 },
+        "files_allowlist": { "type": "array", "items": { "type": "string" } },
+        "forbidden_paths": { "type": "array", "items": { "type": "string" } },
+        "acceptance_criteria": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "evidence_required": { "type": "array", "items": { "type": "string" } },
+        "wsp_refs": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "ResultOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "headline", "failures", "next_action"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["pass", "fail", "partial", "unknown"]
+        },
+        "headline": { "type": "string", "maxLength": 300 },
+        "failures": { "type": "array", "items": { "type": "string" } },
+        "next_action": { "type": "string", "maxLength": 500 }
+      }
+    },
+    "PipelineEnvelopeV1": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pipeline_version", "parser", "scope", "packet"],
+      "properties": {
+        "pipeline_version": { "type": "string", "const": "1" },
+        "parser": { "$ref": "#/$defs/ParserOutput" },
+        "scope": { "$ref": "#/$defs/ScopeOutput" },
+        "packet": { "$ref": "#/$defs/PacketOutput" },
+        "result": { "$ref": "#/$defs/ResultOutput" }
+      }
+    },
+    "HandoffValidationResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["validator_version", "valid", "errors", "warnings"],
+      "properties": {
+        "validator_version": { "type": "string", "const": "1" },
+        "valid": { "type": "boolean" },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["stage", "message"],
+            "additionalProperties": false,
+            "properties": {
+              "stage": {
+                "type": "string",
+                "enum": ["parser", "scope", "packet", "result", "envelope"]
+              },
+              "message": { "type": "string" }
+            }
+          }
+        },
+        "warnings": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

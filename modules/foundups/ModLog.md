@@ -2,6 +2,37 @@
 
 ## Chronological Change Log
 
+### 2026-04-12 - Matrix A local import runbook (prompts 38214 / 84726 / 55108)
+
+**By:** 0102  
+
+**Added**
+
+- `modules/foundups/mobile_worker_skills/MATRIX_A_LOCAL_IMPORT_RUN.md` — step order: import `foundups-edge-load-smoke` → `ping` / `LOAD_OK`; then import `foundups-code-task-parser` → fixed test phrase; pass/fail + example JSON; URL loading explicitly out of scope for this session.
+
+**Updated**
+
+- `modules/foundups/mobile_worker_skills/README.md` — link to Matrix A runbook.
+
+**Note:** Execution is **on-device** (012); repo cannot perform Gallery import from CI.
+
+---
+
+### 2026-04-12 - Device Edge Gallery validation prep (prompt 10003)
+
+**By:** 0102 · **WSP:** 3, 83, 97, 104  
+
+**Added**
+
+- `modules/foundups/mobile_worker_skills/DEVICE_EDGE_GALLERY_VALIDATION.md` — device test matrix, pass/fail, 012 report template, Pages notes (**raw GitHub ≠ Gallery**).
+- `modules/foundups/mobile_worker_skills/foundups-edge-load-smoke/SKILL.md` — minimal load smoke (`ping` → `LOAD_OK`).
+
+**Updated**
+
+- `modules/foundups/mobile_worker_skills/README.md` — device checklist link; smoke skill row.
+
+---
+
 ### 2026-04-12 - Kosei FoundUp Manifest and Route Binding (WSP 104)
 
 **By:** 0102 (Worker BT) - **Slice:** `KOSEI_FOUNDUP_MANIFEST_AND_ROUTE_BINDING_PHASE1`
