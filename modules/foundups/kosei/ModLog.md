@@ -7,9 +7,10 @@
 
 - Created `docs/RUNTIME_READINESS_AUDIT.md` — full deployment truth audit
 - Canonical candidate for `/f/kosei/app`: `app/` surface (client workspace)
-- **Finding**: No deployment exists — no Dockerfile, no firebase.json, no Cloud Build, no live URL
+- **Finding**: Root Firebase substrate exists and is reusable (project `gen-lang-client-0061781628`, `.firebaserc`, service contract confirms reuse)
+- **Finding**: Kosei-specific hosting/runtime not provisioned — no hosting target, no assets in `public/`, API keys empty, Firestore collections/rules not created
 - **Finding**: Root `firebase.json` sends `X-Frame-Options: DENY` on all paths — blocks iframe embedding
-- Two P0 hard blockers: (1) no deploy pipeline, (2) no Firebase project binding
+- Two P0 hard blockers: (1) no deploy pipeline, (2) Kosei hosting/runtime not provisioned
 - Two P2 soft blockers: (3) no build tooling (not blocking Phase 1 static HTML), (4) Firestore rules unverified
 - Recommended next slice: `BX2 — KOSEI_FIREBASE_HOSTING_DEPLOY_PHASE1`
 - WSP 97 (truth-first), WSP 104 (route namespace)

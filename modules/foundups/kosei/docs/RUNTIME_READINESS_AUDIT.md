@@ -27,18 +27,29 @@ The `frontend/` surface is the public landing (discovery), not the tenant app. T
 
 ## 2. Deployment Truth
 
-### Current State: **No deployment exists**
+### Current State: **Source exists, no Kosei-specific deployment provisioned**
+
+**Root Firebase substrate exists** (shared project `gen-lang-client-0061781628`):
+- Root `firebase.json` -- hosting, functions, Firestore config
+- Root `.firebaserc` -- exists but targets are empty (`{}`)
+- `KOSEI_SERVICE_CONTRACT.md` Section 2 confirms Kosei reuses root project
+- `kosei-app-auth.js` already wired for Firebase auto-config via `/__/firebase/init.json`
+
+**What is NOT provisioned for Kosei**:
 
 | Check | Result |
 |-------|--------|
-| Dockerfile | **NONE** -- no container build config anywhere in `modules/foundups/kosei/` |
-| package.json | **NONE** -- no build tooling, no dependencies declared |
-| firebase.json (Kosei-specific) | **NONE** -- Kosei has no Firebase Hosting config |
-| Cloud Build trigger | **NONE** -- no `cloudbuild.yaml` or GCP trigger config |
-| Deploy scripts | **NONE** -- no deploy, CI/CD, or release automation |
-| Files in `public/kosei/` | **NONE** -- Kosei assets are not deployed to the Firebase Hosting public directory |
+| Kosei hosting site target | **NONE** -- `.firebaserc` targets empty, no Kosei entry |
+| Files in `public/kosei/` | **NONE** -- Kosei assets not deployed to Firebase Hosting public dir |
 | Files in `public/f/kosei/` | **NONE** -- no route-namespace deployment |
-| Live URL | **NONE** -- no Cloud Run service, no Firebase Hosting path |
+| Firebase API keys populated | **EMPTY** -- `kosei-app-auth.js` lines 12, 17, 18 have empty strings |
+| Kosei Firestore collections | **NONE** -- `kosei_*` collections not created |
+| Kosei Firestore security rules | **NONE** -- no rules for Kosei collections in root `firestore.rules` |
+| `kosei_admin` auth claim | **NONE** -- no Cloud Function or script to set admin claim |
+| Dockerfile | **NONE** -- not needed for Phase 1 (static HTML via Firebase Hosting) |
+| package.json | **NONE** -- not needed for Phase 1 (no build step) |
+| Cloud Build trigger | **NONE** -- not needed for Firebase Hosting deploy path |
+| Live URL | **NONE** -- no deployed surface at any URL |
 
 ### What Exists (Source Only)
 
@@ -110,11 +121,23 @@ No Dockerfile, no firebase.json hosting entry, no Cloud Build trigger. The sourc
 
 **Resolution**: Choose deploy target (Firebase Hosting or Cloud Run), create deploy config, deploy at least the `app/` surface.
 
-### Blocker 2: No Firebase Project Binding (P0 -- Hard Block)
+### Blocker 2: Kosei-Specific Hosting/Runtime Not Provisioned (P0 -- Hard Block)
 
-The app uses Firebase Auth and Firestore but there is no `firebase.json` in the Kosei module, no `.firebaserc`, and no Firebase project configuration. The HTML loads Firebase SDK from CDN but the runtime config (API key, project ID) must be provided.
+The root Firebase substrate exists and is reusable:
+- Firebase project `gen-lang-client-0061781628` (shared with GotJunk, root landing)
+- Root `.firebaserc` exists (currently empty targets)
+- Root `firebase.json` defines hosting, functions, and Firestore
+- `KOSEI_SERVICE_CONTRACT.md` Section 2 explicitly says Kosei reuses this project
+- `kosei-app-auth.js` already has project config + `/__/firebase/init.json` auto-config fallback
 
-**Resolution**: Bind to existing Firebase project (likely `foundupscom`) or create dedicated project. Add runtime config.
+What is **not yet provisioned** for Kosei specifically:
+- No Kosei site target in `.firebaserc` (`targets` is empty `{}`)
+- No Kosei assets deployed to `public/` (source lives only in `modules/foundups/kosei/`)
+- Firebase API keys in `kosei-app-auth.js` are empty strings (lines 12, 17, 18)
+- Kosei Firestore collections (`kosei_*`) not created and no security rules written
+- No `kosei_admin` custom auth claim provisioned
+
+**Resolution**: Add Kosei hosting target to `.firebaserc`, populate API keys, provision Firestore collections and rules, deploy assets to `public/kosei/`.
 
 ### Blocker 3: X-Frame-Options Header (P1 -- Deploy-Time Block)
 
@@ -141,7 +164,7 @@ No `package.json`, no Vite config. Current Phase 1 is static HTML which requires
 | # | Blocker | Severity | Type | Resolution |
 |---|---------|----------|------|------------|
 | 1 | No deploy pipeline | P0 | Hard | Create deploy config (Firebase Hosting or Cloud Run) |
-| 2 | No Firebase project binding | P0 | Hard | Bind to Firebase project, add runtime config |
+| 2 | Kosei hosting/runtime not provisioned | P0 | Hard | Add hosting target, populate API keys, provision Firestore collections/rules |
 | 3 | X-Frame-Options: DENY | P1 | Deploy-time | Add CSP frame-ancestors override for Kosei paths |
 | 4 | No build tooling | P2 | Soft | Not blocking Phase 1 (static HTML needs no build) |
 | 5 | Firestore rules unverified | P2 | Soft | Verify rules before public deploy |
@@ -155,16 +178,16 @@ No `package.json`, no Vite config. Current Phase 1 is static HTML which requires
 **Scope**: Deploy Kosei `app/` surface to Firebase Hosting under `public/kosei/app/` with CSP header override.
 
 **Steps**:
-1. Copy `modules/foundups/kosei/app/` assets to `public/kosei/app/`
-2. Add Firebase runtime config (API key, project ID) to a shared config file
-3. Add path-specific CSP header override in root `firebase.json` for `/kosei/app/**`
-4. Deploy to Firebase Hosting (`firebase deploy --only hosting`)
-5. Verify `curl -sI https://foundupscom.web.app/kosei/app/` returns `Content-Security-Policy: frame-ancestors`
-6. If verified: set `entry_url` in `foundup_manifest.json` and `mall-video-catalog.json`
+1. Add Kosei hosting site target to `.firebaserc`
+2. Copy `modules/foundups/kosei/app/` assets to `public/kosei/app/`
+3. Populate Firebase API keys in `kosei-app-auth.js` (or verify auto-config works once hosted)
+4. Add path-specific CSP header override in root `firebase.json` for `/kosei/app/**`
+5. Provision Kosei Firestore collections and add security rules to root `firestore.rules`
+6. Deploy to Firebase Hosting (`firebase deploy --only hosting`)
+7. Verify `curl -sI https://foundupscom.web.app/kosei/app/` returns `Content-Security-Policy: frame-ancestors`
+8. If verified: set `entry_url` in `foundup_manifest.json` and `mall-video-catalog.json`
 
-**Alternative slice** (if Cloud Run preferred): `BX2 -- KOSEI_CLOUD_RUN_DEPLOY_PHASE1` -- Create Dockerfile with nginx + CSP, set up Cloud Build trigger.
-
-**Recommendation**: Firebase Hosting is simpler for Phase 1 (static HTML, no build step, already have the project). Cloud Run makes more sense after Vite migration.
+**Recommendation**: Firebase Hosting via the existing root project is the natural path for Phase 1 (static HTML, no build step, substrate already exists). Cloud Run makes more sense after Vite migration.
 
 ---
 
@@ -176,9 +199,9 @@ No `package.json`, no Vite config. Current Phase 1 is static HTML which requires
 | Deploy target | Cloud Run (Dockerfile + nginx) | Firebase Hosting (recommended) or Cloud Run |
 | CSP fix | In Dockerfile nginx config (PR #325) | Needs firebase.json header override |
 | Current state | Deployed but stale (Feb 2026 build) | **Not deployed at all** |
-| Blocker | Ops must trigger Cloud Build rebuild | Ops must create deploy config + deploy |
+| Blocker | Ops must trigger Cloud Build rebuild | Ops must provision Kosei hosting target + deploy assets |
 | entry_url | null (blocked on redeploy) | null (blocked on first deploy) |
 
 ---
 
-*Worker BX -- audit complete. Kosei app/ is the canonical candidate for /f/kosei/app. No deployment exists. Two P0 hard blockers (deploy pipeline + Firebase binding) must be resolved before any app-binding slice can proceed truthfully.*
+*Worker BX -- audit complete. Kosei app/ is the canonical candidate for /f/kosei/app. Root Firebase substrate exists and is reusable, but Kosei-specific hosting/runtime is not provisioned. Two P0 hard blockers (deploy pipeline + Kosei hosting/runtime provisioning) must be resolved before any app-binding slice can proceed truthfully.*
