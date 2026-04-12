@@ -229,7 +229,9 @@ Canonical contract: `modules/foundups/docs/FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_C
 
 ## App Mount
 
-Shell contract: **`/f/gotjunk_001/app`**. Currently deployed to Cloud Run via AI Studio; pfMALL mount pending production URL configuration.
+Shell contract: **`/f/gotjunk_001/app`**. Currently deployed to Cloud Run via AI Studio.
+
+**Iframe Embedding**: Dockerfile updated to use `Content-Security-Policy: frame-ancestors` scoped to FoundUps-owned origins only (replaces broad `X-Frame-Options`). Redeploy required before shell can embed the app. See `INTERFACE.md` for allowed origins and verification steps.
 
 ---
 

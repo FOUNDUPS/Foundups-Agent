@@ -328,6 +328,31 @@ const apiKey = "<DO_NOT_HARDCODE_API_KEYS>"  # NEVER commit this!
 
 ---
 
+## Shell Embedding (WSP 104)
+
+**Canonical Route**: `/f/gotjunk_001/app` (shell mounts Cloud Run app in iframe)
+
+**Frame Policy**: `Content-Security-Policy: frame-ancestors` allows embedding from FoundUps-owned origins only:
+- `https://foundups.com` (production shell - apex)
+- `https://*.foundups.com` (production shell - subdomains)
+- `https://foundupscom.web.app` (Firebase hosting)
+- `https://foundupscom.firebaseapp.com` (Firebase legacy)
+- `http://localhost:*` / `https://localhost:*` (development)
+
+**Dockerfile Config**: `frontend/Dockerfile` line 44 sets the frame-ancestors header.
+
+**Deployment Requirement**: After Dockerfile changes, redeploy via:
+1. Cloud Build: `gcloud builds submit --config=cloudbuild.yaml`
+2. Or AI Studio: Upload changed files → "Redeploy app"
+
+**Verification**: Check `Content-Security-Policy` header after deployment:
+```bash
+curl -sI https://gotjunk-56566376153.us-west1.run.app/ | grep -i content-security
+```
+
+---
+
 **Deployment Status**: POC Complete, ready for Prototype phase
-**Last Synced**: 2026-04-11
+**Last Synced**: 2026-04-12
 **Cloud Run URL**: https://gotjunk-56566376153.us-west1.run.app/
+**Shell Embed Status**: Dockerfile fix in place; redeploy required for entry_url activation

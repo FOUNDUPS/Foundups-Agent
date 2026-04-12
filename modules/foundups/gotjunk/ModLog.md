@@ -1,3 +1,32 @@
+## Iframe Embed Unblock - Shell Compatibility Fix (2026-04-12)
+
+**Worker**: BV
+**Slice**: `GOTJUNK_IFRAME_EMBED_UNBLOCK_PHASE1`
+**WSP References**: WSP 15, WSP 97, WSP 104
+
+**Problem**: Cloud Run deployment blocked shell embedding due to `X-Frame-Options: SAMEORIGIN` header in nginx config (Dockerfile line 47).
+
+**Fix Applied**:
+- Replaced `X-Frame-Options "SAMEORIGIN"` with `Content-Security-Policy: frame-ancestors`
+- Allowed origins (FoundUps-owned only): `https://foundups.com`, `https://*.foundups.com`, `https://foundupscom.web.app`, `https://foundupscom.firebaseapp.com`, `localhost:*`
+- File: `frontend/Dockerfile` line 48
+
+**Current State**:
+- Dockerfile fix committed
+- **Redeploy required** before shell can embed the app
+- `entry_url` remains `null` in manifest until embed is verified
+- Live headers still show old config (pre-redeploy)
+
+**Verification After Redeploy**:
+```bash
+curl -sI https://gotjunk-56566376153.us-west1.run.app/ | grep -i content-security
+# Expected: Content-Security-Policy: frame-ancestors https://*.foundups.com ...
+```
+
+**Next Step**: Redeploy via Cloud Build or AI Studio, then restore `entry_url` in manifest and catalog.
+
+---
+
 ## WSP 3 Violation Fix - Firebase Rules Location (2025-11-29)
 
 **Session Summary**: Removed duplicate firestore.rules from repository root. Module artifacts should stay within module directory per WSP 3.
