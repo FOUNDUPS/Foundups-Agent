@@ -1,5 +1,28 @@
 # Member Area Module Change Log
 
+## [2026-04-13] Kosei entry_url Restored (Worker BX5, WSP 97/104)
+
+**Who**: 0102 - Worker BX5
+**Slice**: `KOSEI_RESTORE_ENTRY_URL_PHASE1`
+**What**: Restored Kosei `entry_url` after BX4 verified iframe embeddability.
+
+**Files Modified**:
+- `public/member/mall-video-catalog.json` - Added `entry_url`, changed `launch_readiness` to `ready`
+- `public/member/tests/test_route_contract_bridge.py` - Updated Kosei tests to verify entry_url presence
+
+**Binding Truth (After BX5)**:
+- Landing: `/f/kosei` resolves through canonical shell contract
+- App mount: `/f/kosei/app` embeds deployed app (verified in BX4)
+- `entry_url`: `https://foundupscom.web.app/kosei/app/`
+- `launch_readiness`: `ready`
+
+**WSP 104 Applied**: Route family `/f/kosei` and `/f/kosei/app` unchanged.
+**WSP 97 Applied**: Truthful metadata — entry_url set only after browser verification.
+
+**Test Results**: 45 passed
+
+---
+
 ## [2026-04-12] Kosei Shell Route Binding (Worker BU, WSP 15/97/104)
 
 **Who**: 0102 - Worker BU

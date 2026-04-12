@@ -4,6 +4,23 @@ Test evolution log for the p.fMALL member shell test suite.
 
 ---
 
+## 2026-04-13 | Kosei entry_url Restored (WSP 104/97)
+
+**File**: `test_route_contract_bridge.py` (modified)
+**Tests**: 2 updated | **Class**: `TestKoseiTenantBinding` | **Result**: 45 passed
+**Worker**: BX5
+
+Updated tests after BX4 verified iframe embeddability:
+
+| Test | What it checks |
+|------|----------------|
+| `test_kosei_has_entry_url` | entry_url is set to deployed app URL |
+| `test_kosei_launch_readiness_is_ready` | Kosei is ready |
+
+**Key context**: BX4 (PR #337) verified Kosei app renders inside FoundUps shell iframe. entry_url now truthfully set.
+
+---
+
 ## 2026-04-12 | Kosei Tenant Binding Tests (WSP 104/97)
 
 **File**: `test_route_contract_bridge.py` (extended)
@@ -17,10 +34,10 @@ Validates Kosei as second canonical shell-bound FoundUp:
 | `test_kosei_in_catalog` | Kosei exists in mall-video-catalog.json |
 | `test_kosei_has_routing_prefix` | Catalog has `/f/kosei` routing |
 | `test_kosei_has_data_namespace` | Catalog has `idb_kosei` namespace |
-| `test_kosei_no_entry_url_truthfully` | No fake entry_url (no embeddable app yet) |
-| `test_kosei_launch_readiness_is_discoverable_only` | Kosei is discoverable_only |
+| `test_kosei_has_entry_url` | entry_url is set (after BX5) |
+| `test_kosei_launch_readiness_is_ready` | Kosei is ready (after BX5) |
 
-**Key context**: Kosei is bound to canonical shell routes but has no embeddable runtime yet. Landing exists at `/f/kosei`, app mount shows "App Not Ready" truthfully.
+**Key context**: Kosei is bound to canonical shell routes with verified embeddable runtime. Landing at `/f/kosei`, app mount at `/f/kosei/app` embeds the deployed app.
 
 ---
 

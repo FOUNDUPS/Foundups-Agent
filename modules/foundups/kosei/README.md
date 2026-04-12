@@ -81,11 +81,11 @@ Canonical contract: `modules/foundups/docs/FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_C
 
 Shell contract: **`/f/kosei/app`**. App bundle deployed at `https://foundupscom.web.app/kosei/app/`.
 
-**Embedding status** (verified 2026-04-13): **VERIFIED EMBEDDABLE**
+**Embedding status** (verified 2026-04-13): **APP READY**
 
 In-browser iframe test confirmed: Kosei app successfully renders inside the FoundUps shell iframe. CSP `frame-ancestors` takes precedence over `X-Frame-Options: DENY` in modern browsers as per W3C CSP3 spec.
 
-**Next step**: `BX5` — tiny metadata slice to restore `entry_url` in manifest/catalog.
+**entry_url**: `https://foundupscom.web.app/kosei/app/` (restored in BX5)
 
 **Remaining blockers** (P2):
 - Landing page (`/kosei/`) not deployed — source needs cleanup

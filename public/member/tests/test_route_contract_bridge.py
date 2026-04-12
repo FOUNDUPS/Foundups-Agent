@@ -369,12 +369,11 @@ class TestKoseiTenantBinding:
         catalog = _read("mall-video-catalog.json")
         assert '"idb_kosei"' in catalog
 
-    def test_kosei_no_entry_url_truthfully(self):
-        """Kosei has no entry_url because no embeddable app exists yet.
+    def test_kosei_has_entry_url(self):
+        """Kosei has entry_url after BX4 iframe verification confirmed embeddability.
 
-        Kosei is discoverable_only - users can see the landing page at /f/kosei
-        but /f/kosei/app will show "App Not Ready" because there's no runtime
-        URL to embed. This is truthful: no fake URLs, no promises we can't keep.
+        BX4 (PR #337) verified the Kosei app renders inside the FoundUps shell iframe.
+        entry_url is now truthfully set to the deployed app URL.
         """
         catalog = _read("mall-video-catalog.json")
         idx = catalog.find('"foundup_id": "kosei"')
@@ -383,11 +382,11 @@ class TestKoseiTenantBinding:
         if next_entry < 0:
             next_entry = len(catalog)
         kosei_entry = catalog[idx:next_entry]
-        # entry_url should not appear in kosei's catalog entry
-        assert '"entry_url"' not in kosei_entry
+        # entry_url should be present after iframe verification
+        assert '"entry_url": "https://foundupscom.web.app/kosei/app/"' in kosei_entry
 
-    def test_kosei_launch_readiness_is_discoverable_only(self):
-        """Kosei is discoverable_only - landing exists but app is not ready."""
+    def test_kosei_launch_readiness_is_ready(self):
+        """Kosei is ready after iframe embed verification (BX4)."""
         catalog = _read("mall-video-catalog.json")
         idx = catalog.find('"foundup_id": "kosei"')
         assert idx > 0
@@ -395,7 +394,7 @@ class TestKoseiTenantBinding:
         if next_entry < 0:
             next_entry = len(catalog)
         kosei_entry = catalog[idx:next_entry]
-        assert '"discoverable_only"' in kosei_entry
+        assert '"ready"' in kosei_entry
 
 
 class TestCatalogArrayHandling:
