@@ -7,12 +7,17 @@
   "tagline": "AI content automation for businesses",
   "tier": "F0_DAE",
   "lifecycle_stage": "incubating",
-  "entry_url": null,
+  "entry_url": "https://foundupscom.web.app/kosei/app/",
   "routing_prefix": "/f/kosei",
   "icon_url": null,
   "required_subscription_tier": "free",
   "is_invite_only": true,
-  "capabilities": ["audit_funnel", "onboarding", "service_orchestration", "client_workspace"],
+  "capabilities": [
+    "audit_funnel",
+    "onboarding",
+    "service_orchestration",
+    "client_workspace"
+  ],
   "agent_routes": [],
   "holo_collections": [],
   "data_namespace": "idb_kosei",
@@ -24,7 +29,7 @@
   "owner_id": "012",
   "token_symbol": "KOSEI",
   "category": "media",
-  "launch_readiness": "discoverable_only",
+  "launch_readiness": "ready",
   "created_at": "2026-04-06T00:00:00Z",
   "signature": ""
 }

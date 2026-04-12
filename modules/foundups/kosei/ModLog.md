@@ -1,5 +1,36 @@
 # Kosei AI Systems — ModLog
 
+## 2026-04-13 — Restore entry_url After Iframe Verification
+
+**Worker**: BX5
+**Slice**: `KOSEI_RESTORE_ENTRY_URL_PHASE1`
+
+### Changes
+
+Restored Kosei's `entry_url` now that BX4 (PR #337) verified iframe embeddability.
+
+| Field | Before | After |
+|-------|--------|-------|
+| `entry_url` | `null` | `https://foundupscom.web.app/kosei/app/` |
+| `launch_readiness` | `discoverable_only` | `ready` |
+
+### Files Updated
+
+- `modules/foundups/kosei/foundup_manifest.json` — restored `entry_url`, changed `launch_readiness`
+- `public/member/mall-video-catalog.json` — matching catalog update
+- `public/member/tests/test_route_contract_bridge.py` — tests now verify `entry_url` presence
+
+### Result
+
+Kosei is now **ready**. The shell at `/f/kosei/app` will embed the deployed app instead of showing "App Not Ready".
+
+### WSP References
+
+- WSP 97: Truthful metadata — `entry_url` set only after browser verification
+- WSP 104: Route namespace `/f/kosei` → `/f/kosei/app` is canonical
+
+---
+
 ## 2026-04-13 — In-Browser Iframe Embed Verification
 
 **Worker**: BX4
