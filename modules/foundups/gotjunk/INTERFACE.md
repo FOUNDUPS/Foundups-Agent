@@ -332,10 +332,11 @@ const apiKey = "<DO_NOT_HARDCODE_API_KEYS>"  # NEVER commit this!
 
 **Canonical Route**: `/f/gotjunk_001/app` (shell mounts Cloud Run app in iframe)
 
-**Frame Policy**: `Content-Security-Policy: frame-ancestors` allows embedding from:
-- `https://*.foundups.com` (production shell)
-- `https://*.web.app` (Firebase hosting)
-- `https://*.firebaseapp.com` (Firebase legacy)
+**Frame Policy**: `Content-Security-Policy: frame-ancestors` allows embedding from FoundUps-owned origins only:
+- `https://foundups.com` (production shell - apex)
+- `https://*.foundups.com` (production shell - subdomains)
+- `https://foundupscom.web.app` (Firebase hosting)
+- `https://foundupscom.firebaseapp.com` (Firebase legacy)
 - `http://localhost:*` / `https://localhost:*` (development)
 
 **Dockerfile Config**: `frontend/Dockerfile` line 44 sets the frame-ancestors header.

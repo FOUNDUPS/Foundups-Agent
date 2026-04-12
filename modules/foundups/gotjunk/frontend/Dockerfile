@@ -45,7 +45,7 @@ RUN echo 'server { \
     # Enable CORS for IPFS \
     add_header Access-Control-Allow-Origin *; \
     # Security headers - WSP 104 shell embedding \
-    add_header Content-Security-Policy "frame-ancestors https://*.foundups.com https://foundups.com https://*.web.app https://*.firebaseapp.com http://localhost:* https://localhost:*" always; \
+    add_header Content-Security-Policy "frame-ancestors https://foundups.com https://*.foundups.com https://foundupscom.web.app https://foundupscom.firebaseapp.com http://localhost:* https://localhost:*" always; \
     add_header X-Content-Type-Options "nosniff" always; \
     add_header X-XSS-Protection "1; mode=block" always; \
     # Cache static assets \

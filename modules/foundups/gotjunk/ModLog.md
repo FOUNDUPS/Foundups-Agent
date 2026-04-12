@@ -8,8 +8,8 @@
 
 **Fix Applied**:
 - Replaced `X-Frame-Options "SAMEORIGIN"` with `Content-Security-Policy: frame-ancestors`
-- Allowed origins: `https://*.foundups.com`, `https://*.web.app`, `https://*.firebaseapp.com`, `localhost:*`
-- File: `frontend/Dockerfile` line 44
+- Allowed origins (FoundUps-owned only): `https://foundups.com`, `https://*.foundups.com`, `https://foundupscom.web.app`, `https://foundupscom.firebaseapp.com`, `localhost:*`
+- File: `frontend/Dockerfile` line 48
 
 **Current State**:
 - Dockerfile fix committed
