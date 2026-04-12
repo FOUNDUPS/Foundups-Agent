@@ -1,3 +1,17 @@
+## Redeploy + Verify + Restore entry_url (2026-04-12)
+
+**Worker**: BW
+**Slice**: `GOTJUNK_REDEPLOY_VERIFY_AND_RESTORE_ENTRY_URL_PHASE1`
+**WSP References**: WSP 15, WSP 97, WSP 104
+
+**Purpose**: Trigger Cloud Build redeploy so BV's Dockerfile header fix goes live, verify frame-ancestors header, restore entry_url if embeddable.
+
+**Pre-redeploy state**: Live runtime still returns `X-Frame-Options: SAMEORIGIN` (build from 2026-02-20). Dockerfile fix merged to main via #325 but Cloud Build did not auto-trigger.
+
+**Redeploy method**: Merge this commit to main triggers Cloud Build via `modules/foundups/gotjunk/**` path filter.
+
+---
+
 ## Iframe Embed Unblock - Shell Compatibility Fix (2026-04-12)
 
 **Worker**: BV
