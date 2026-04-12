@@ -2,6 +2,30 @@
 
 ## Chronological Change Log
 
+### 2026-04-12 - Kosei FoundUp Manifest and Route Binding (WSP 104)
+
+**By:** 0102 (Worker BT) - **Slice:** `KOSEI_FOUNDUP_MANIFEST_AND_ROUTE_BINDING_PHASE1`
+**WSP References:** WSP 15, WSP 97, WSP 104
+
+**Added**:
+- `modules/foundups/kosei/foundup_manifest.json` - Canonical FoundUp manifest
+
+**Updated**:
+- `public/member/mall-video-catalog.json` - Added `routing_prefix`, `data_namespace`, `token_symbol` to kosei entry
+
+**Metadata**:
+| Field | Value |
+|-------|-------|
+| `foundup_id` | `kosei` |
+| `routing_prefix` | `/f/kosei` |
+| `data_namespace` | `idb_kosei` |
+| `entry_url` | `null` (no deployed runtime yet) |
+| `launch_readiness` | `discoverable_only` |
+
+**Test Results**: 23 namespace guardrail + 8 contract compliance + 37 route contract = 68 passed, 3 skipped
+
+---
+
 ### 2026-04-11 - Namespace Guardrail Validator (WSP 104 Enforcement)
 
 **By:** 0102 (Worker BQ) · **Slice:** `FOUNDUP_NAMESPACE_GUARDRAIL_PHASE1`  

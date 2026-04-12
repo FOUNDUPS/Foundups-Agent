@@ -1,0 +1,30 @@
+{
+  "$schema": "https://foundups.org/schemas/foundup-manifest/v1.json",
+  "foundup_id": "kosei",
+  "name": "Kosei AI Systems",
+  "version": "0.1.0",
+  "description": "AI content automation service for businesses. Audit funnel, onboarding, client workspace, white-label config.",
+  "tagline": "AI content automation for businesses",
+  "tier": "F0_DAE",
+  "lifecycle_stage": "incubating",
+  "entry_url": null,
+  "routing_prefix": "/f/kosei",
+  "icon_url": null,
+  "required_subscription_tier": "free",
+  "is_invite_only": true,
+  "capabilities": ["audit_funnel", "onboarding", "service_orchestration", "client_workspace"],
+  "agent_routes": [],
+  "holo_collections": [],
+  "data_namespace": "idb_kosei",
+  "cabr_contract": {
+    "v1_gate": "default",
+    "v2_proof": "default",
+    "v3_score_min": 0.5
+  },
+  "owner_id": "012",
+  "token_symbol": "KOSEI",
+  "category": "media",
+  "launch_readiness": "discoverable_only",
+  "created_at": "2026-04-06T00:00:00Z",
+  "signature": ""
+}
