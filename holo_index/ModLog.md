@@ -1,5 +1,18 @@
 # HoloIndex Package ModLog
 
+## [2026-04-12] External FoundUp — catalog and route binding phase 1
+
+**Agent**: 0102 — Worker H  
+**Slice**: `HOLOINDEX_FOUNDUP_CATALOG_AND_ROUTE_BINDING_PHASE1` (BW)  
+**What**: Added HoloIndex to the p.fMALL member shell catalog `mall-catalog.json`.
+
+### Changes:
+- Registered `holoindex_prod_01` inside `public/member/mall-catalog.json`.
+- Maintained truthful `discoverable_only` readiness without faking full production search authority.
+- Confirmed canonical `routing_prefix` points to `/f/holoindex_prod_01`.
+
+---
+
 ## [2026-04-12] External FoundUp — bridge adapter phase 1 hookup
 
 **Agent**: 0102 — Worker H  
