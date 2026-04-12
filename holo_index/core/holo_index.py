@@ -50,24 +50,36 @@ HOLO_ENCODE_TIMEOUT = float(os.getenv("HOLO_ENCODE_TIMEOUT", "3"))              
 HOLO_SEARCH_TIMEOUT = float(os.getenv("HOLO_SEARCH_TIMEOUT", "15"))             # 15s default
 
 
-def _run_with_timeout(func, timeout_sec: float, default=None, error_msg: str = "Operation timed out"):
+def _run_with_timeout(func, timeout_sec: float, default=None, error_msg: str = "Operation timed out",
+                      missing_dep_hint: str = None):
     """
     Execute a function with a hard timeout using ThreadPoolExecutor.
     Returns default value on timeout or exception instead of hanging.
+
+    Distinguishes between:
+    - Actual timeout (FuturesTimeoutError): Log as timeout with remediation hints
+    - Missing dependency (ImportError/ModuleNotFoundError): Log with install hint
+    - Other exceptions: Log with original error message
 
     WSP 97: Prevents indefinite hangs in HoloIndex operations.
     """
     from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
+    logger = logging.getLogger(__name__)
     with ThreadPoolExecutor(max_workers=1) as executor:
         future = executor.submit(func)
         try:
             return future.result(timeout=timeout_sec)
         except FuturesTimeoutError:
-            logging.getLogger(__name__).warning(f"{error_msg} (>{timeout_sec}s)")
+            logger.warning(f"{error_msg} (>{timeout_sec}s). Try HOLO_SKIP_MODEL=1 or HOLO_OFFLINE=1")
+            return default
+        except (ImportError, ModuleNotFoundError) as e:
+            # Missing dependency - distinct from timeout
+            hint = missing_dep_hint or "pip install -r holo_index/requirements.txt"
+            logger.warning(f"Missing dependency: {e}. Fix: {hint}")
             return default
         except Exception as e:
-            logging.getLogger(__name__).warning(f"{error_msg}: {e}")
+            logger.warning(f"{error_msg}: {e}")
             return default
 
 
@@ -195,7 +207,8 @@ class HoloIndex:
                     _import_sentence_transformers,
                     timeout_sec=HOLO_MODEL_IMPORT_TIMEOUT,
                     default=None,
-                    error_msg="SentenceTransformer import timed out"
+                    error_msg="SentenceTransformer import timed out",
+                    missing_dep_hint="pip install sentence-transformers (or use HOLO_SKIP_MODEL=1 for lexical-only)"
                 )
                 if SentenceTransformer is None:
                     self._log_agent_action("SentenceTransformer unavailable; falling back to lexical search", "WARN")

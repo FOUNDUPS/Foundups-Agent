@@ -76,6 +76,44 @@ WSP 97 applied: metadata now reports truthful connection counts.
 
 ---
 
+## [2026-04-11] Fix: Distinguish missing dependency from timeout in warning messages
+
+**Agent**: 0102 — Worker BZ
+**WSP References**: WSP 97 (Pre-flight Compliance), WSP 91 (Observability)
+**Status**: COMPLETE
+
+### Problem
+
+Warning message conflated missing `sentence_transformers` dependency with actual timeout:
+```
+WARNING:holo_index.core.holo_index:SentenceTransformer import timed out: No module named 'sentence_transformers'
+```
+
+This was confusing because the import didn't time out — the dependency was simply not installed.
+
+### Fix
+
+Enhanced `_run_with_timeout()` in `core/holo_index.py` to distinguish:
+
+1. **Missing dependency** (ImportError/ModuleNotFoundError):
+   `"Missing dependency: No module named 'sentence_transformers'. Fix: pip install sentence-transformers (or use HOLO_SKIP_MODEL=1 for lexical-only)"`
+
+2. **Actual timeout** (FuturesTimeoutError):
+   `"SentenceTransformer import timed out (>5s). Try HOLO_SKIP_MODEL=1 or HOLO_OFFLINE=1"`
+
+### Supported Remediation Paths
+
+- Install: `pip install -r holo_index/requirements.txt`
+- Lexical fallback: `HOLO_SKIP_MODEL=1` or `--offline`
+- Pre-cache model: Ensure `E:/HoloIndex/models/` has model files
+
+### Tests
+
+- All existing HoloIndex tests pass (13 passed, 1 skipped)
+- Manual verification confirms distinct warning messages
+
+---
+
 ## [2026-04-05] External FoundUp — shell backend registration (bridge contract doc only)
 
 **Agent**: 0102 — Worker H  
