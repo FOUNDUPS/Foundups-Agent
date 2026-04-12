@@ -104,9 +104,22 @@ Use cautious FoundUps-native framing. Do not over-freeze uncertain ontology.
 | **Skill** | Capability unit — a discrete executable action | Confirmed |
 | **SKILLZ** | Internal/native capability layer — repo-local skill manifests (`SKILLz.md`) | Confirmed |
 | **Wardrobe** | Equip/loadout layer — active capability configuration for a session or agent | Confirmed |
-| **Rolodex** | Discovery/lookup/routing layer — the registry of available capabilities | **Provisional** — structure under active design |
+| **Rolodex** | CLI capability discovery/lookup/routing registry | Confirmed |
 
-The `command_rolodex.json` exists as a CLI capability catalog (722 entrypoints, 95 WRE-connected). The broader Rolodex concept for dynamic capability discovery remains provisional.
+### Rolodex Implementation
+
+The Rolodex is implemented as a dual-write system:
+
+- **`holo_index/docs/command_rolodex.json`** — JSON format for machine reading
+- **`holo_index/docs/command_rolodex.db`** — SQLite format for indexed queries
+
+Generated via: `python holo_index.py --index-cli`
+
+Current state (722 CLI entrypoints, 95 WRE-connected, 696 orphans).
+
+Key integration points:
+- `holo_index/_cli_main.py`: `_generate_cli_rolodex_json()`, `_generate_cli_rolodex_sqlite()`
+- `modules/infrastructure/wre_core/skillz/wre_skills_discovery.py`: `load_command_rolodex()`, `get_orphan_capabilities()`, `get_wre_connection_progress()`
 
 ---
 
@@ -137,7 +150,7 @@ This architecture explicitly rejects:
 
 - Multiple retrieval paths must be maintained (HoloIndex + OpenClaw + pattern memory)
 - Operators must understand which layer to query for which purpose
-- Rolodex design remains provisional until exercised in production
+- Rolodex orphan rate is high (96%) — most CLI capabilities are not WRE-connected
 - Some duplication between layers is accepted to maintain separation
 
 ---
@@ -150,7 +163,7 @@ This architecture explicitly rejects:
 | `execution_event_schema_for_memory_and_overseer` | Schema for normalized events eligible for memory ingestion |
 | `capability_pack_manifest_schema` | Standard manifest format for Wardrobe loadouts |
 | `holoindex_execution_memory_ingestion_contract` | Rules for when/how execution outcomes enter HoloIndex |
-| `wardrobe_loadout_and_rolodex_registry_model` | Finalize Rolodex design and Wardrobe configuration model |
+| `wardrobe_loadout_model_and_orphan_connection_strategy` | Define Wardrobe configuration model and reduce Rolodex orphan rate |
 
 ---
 
