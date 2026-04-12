@@ -1,5 +1,59 @@
 # Member Area Module Change Log
 
+## [2026-04-13] YouTube Channel Pull Delta Generator (Worker CM)
+
+**Who**: 0102 - Worker CM
+**Slice**: `YOUTUBE_CHANNEL_PULL_PHASE1`
+**What**: First truthful YouTube-to-catalog ingest path for pfMALL.
+
+**Implementation**:
+- New module: `modules/communication/youtube_channel_pull/`
+- Reads channel IDs from existing `source_id` fields in `mall-video-catalog.json`
+- Fetches latest videos via YouTube Data API (reuses `youtube_auth` credentials)
+- Generates reviewable delta artifact (no blind catalog mutation)
+- Default dry-run mode; manual merge step for human review
+
+**Live API Test Result**:
+- Channel: `move2japan` (UC-LSSlOZwpGIRIYihaz8zCw)
+- Pulled: 19 videos from API
+- New: 19 (not yet in catalog)
+- Delta artifact: `docs/audits/pfmall_youtube_ingest/youtube_channel_pull_delta.json`
+
+**Operator Workflow**:
+1. `python -m modules.communication.youtube_channel_pull.src.pull_cli`
+2. Inspect delta artifact
+3. Manually merge approved videos into catalog
+
+**Tests**: 13/13 passed (channel identity, duplicate detection, delta generation)
+
+**WSP 97 Applied**: Live API verification confirmed pull path is truthful.
+
+---
+
+## [2026-04-13] pfMALL YouTube Ingest Audit (Worker CI)
+
+**Who**: 0102 - Worker CI
+**Slice**: `PFMALL_YOUTUBE_SEARCH_AND_INGEST_AUDIT_PHASE1`
+**What**: Audit how YouTube videos populate pfMALL to determine if search/ingest path exists.
+
+**Findings**:
+- `mall-video-catalog.json` is MANUALLY MAINTAINED (no automated pipeline)
+- No YouTube Data API integration exists
+- `member_catalog_export.py` exports catalog metadata, does NOT generate video entries
+- `video_indexer/` is for Digital Twin learning, not catalog population
+- `youtube_ingest_resolver.py` is for RTMPS live streaming, not catalog
+
+**Answer**: No search or ingest path exists. Catalog is hand-edited JSON.
+
+**Recommended Next Slice**: `YOUTUBE_CHANNEL_PULL_PHASE1`
+- Fetch videos from channel IDs via YouTube Data API
+- Output delta JSON for human review
+- Module location: `modules/communication/youtube_channel_pull/`
+
+**Artifact**: [docs/audits/pfmall_youtube_ingest/PFMALL_YOUTUBE_INGEST_AUDIT.md](../../docs/audits/pfmall_youtube_ingest/PFMALL_YOUTUBE_INGEST_AUDIT.md)
+
+---
+
 ## [2026-04-12] Adaptive Desktop 6x3 Tile Layout (Worker CL)
 
 **Who**: 0102 - Worker CL
