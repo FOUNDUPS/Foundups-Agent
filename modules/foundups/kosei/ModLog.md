@@ -1,5 +1,62 @@
 # Kosei AI Systems — ModLog
 
+## 2026-04-12 — Deploy-Time Header Verification
+
+**Worker**: BX3
+**Slice**: `KOSEI_DEPLOY_TIME_HEADER_VERIFICATION_PHASE1`
+
+### Verification Performed
+
+Deployed Firebase Hosting with path-specific header config and checked live headers.
+
+**Deploy method**: `firebase deploy --only hosting --project gen-lang-client-0061781628`
+**Live URL checked**: `https://foundupscom.web.app/kosei/app/`
+
+### Live Headers Observed
+
+```
+HTTP/1.1 200 OK
+Content-Security-Policy: frame-ancestors https://foundups.com https://*.foundups.com https://foundupscom.web.app https://foundupscom.firebaseapp.com http://localhost:* https://localhost:*
+X-Frame-Options: DENY
+```
+
+### Finding: Firebase Cannot Clear Inherited Headers
+
+Setting `X-Frame-Options: ""` does NOT clear the inherited global `X-Frame-Options: DENY`. Firebase Hosting's header rules are **additive** — path-specific rules add headers but cannot remove headers set by broader rules.
+
+### Embeddability Assessment
+
+**Per W3C CSP3 spec** (https://www.w3.org/TR/CSP3/):
+> If a Content-Security-Policy header that contains the frame-ancestors directive is delivered with the resource, the X-Frame-Options header MUST be ignored.
+
+This means:
+- **Modern browsers** (Chrome 40+, Firefox 35+, Safari 10+, Edge 15+) should ignore `X-Frame-Options` and use `frame-ancestors`
+- **Legacy browsers** would still honor `X-Frame-Options: DENY` and block embedding
+- **Actual embeddability requires in-browser iframe test**
+
+### Current State (WSP 97)
+
+- **CSP frame-ancestors**: Live and correct ✓
+- **X-Frame-Options**: Still present (cannot be cleared via Firebase config)
+- **entry_url**: Remains `null` — truthful state until in-browser test confirms embedding
+- **Next step**: In-browser iframe test to confirm CSP precedence
+
+### Remaining Blockers
+
+| Blocker | Severity | Notes |
+|---------|----------|-------|
+| In-browser iframe test needed | P1 | CSP should take precedence, but needs browser confirmation |
+| Landing page not deployed | P2 | Source needs cleanup before deploy |
+| Firebase API keys empty | P2 | Runtime uses `/__/firebase/init.json` auto-config |
+
+### WSP References
+
+- WSP 15: Verification only, no fake readiness
+- WSP 97: entry_url null until browser test confirms embedding
+- WSP 104: Verified on `/kosei/app/` path
+
+---
+
 ## 2026-04-12 — Firebase Hosting Deploy Phase 1
 
 **Worker**: BX2
