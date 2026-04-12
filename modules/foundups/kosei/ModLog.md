@@ -1,5 +1,69 @@
 # Kosei AI Systems — ModLog
 
+## 2026-04-12 — Firebase Hosting Deploy Phase 1
+
+**Worker**: BX2
+**Slice**: `KOSEI_FIREBASE_HOSTING_DEPLOY_PHASE1`
+
+### Hosting Path Provisioned
+
+Created `public/kosei/app/` hosting structure:
+- `public/kosei/css/kosei.css` — shared styles (copied from `frontend/css/`)
+- `public/kosei/app/index.html` — client workspace HTML (copied from `app/`)
+- `public/kosei/app/css/kosei-app.css` — app-specific styles
+- `public/kosei/app/js/` — auth, data, UI scripts
+
+**Source of truth**: `modules/foundups/kosei/app/` is source, `public/kosei/app/` is deploy target.
+
+### CSP Header Override (Ops-Managed)
+
+Root `firebase.json` is gitignored (ops-managed, not repo-tracked). The following config must be added to the local `firebase.json` before deploy:
+
+```json
+{
+  "source": "/kosei/app/**",
+  "headers": [
+    { "key": "Content-Security-Policy", "value": "frame-ancestors https://foundups.com https://*.foundups.com https://foundupscom.web.app https://foundupscom.firebaseapp.com http://localhost:* https://localhost:*" },
+    { "key": "X-Content-Type-Options", "value": "nosniff" },
+    { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+  ]
+}
+```
+
+This overrides the global `X-Frame-Options: DENY` for the Kosei app path, enabling shell iframe embedding after deploy.
+
+**Note**: `firebase.json` already updated locally on this machine. Config is NOT version-controlled.
+
+### Current State (WSP 97)
+
+- **Hosting path**: Provisioned ✓
+- **CSP header**: Configured ✓
+- **Deployed**: NO — `firebase deploy` not yet run
+- **entry_url**: Remains `null` — truthful state until deploy + header verification
+- **Route tests**: 45 passed
+
+### Verification After Deploy
+
+```bash
+firebase deploy --only hosting
+curl -sI https://foundupscom.web.app/kosei/app/ | grep -i content-security
+# Expected: Content-Security-Policy: frame-ancestors ...
+```
+
+### Remaining Blockers (P2)
+
+1. Firebase API keys in `kosei-app-auth.js` are empty — runtime uses `/__/firebase/init.json` auto-config fallback
+2. Kosei Firestore collections/rules not provisioned — needed before client data writes
+3. Admin claim provisioning not implemented — needed for `/admin/` access
+
+### WSP References
+
+- WSP 15: Smallest correct move (hosting + CSP only)
+- WSP 97: Current-truth (entry_url null until verified)
+- WSP 104: Route namespace (`/kosei/app/**` CSP scope)
+
+---
+
 ## 2026-04-11 — Runtime Readiness Audit
 
 **Worker**: BX

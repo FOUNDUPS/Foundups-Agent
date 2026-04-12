@@ -79,7 +79,12 @@ Canonical contract: `modules/foundups/docs/FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_C
 
 ## App Mount
 
-Shell contract: **`/f/kosei/app`**. Scaffold only — no pfMALL mount yet; service orchestration surface pending.
+Shell contract: **`/f/kosei/app`**. Hosting path provisioned at `public/kosei/app/`.
+
+**Deploy requirements**:
+1. Add CSP `frame-ancestors` override to local `firebase.json` (gitignored, see ModLog for config)
+2. Run `firebase deploy --only hosting`
+3. Verify header: `curl -sI https://foundupscom.web.app/kosei/app/ | grep -i content-security`
 
 ---
 

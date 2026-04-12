@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kosei - Client Workspace</title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700&display=swap">
+
+  <!-- Shared styles + client overrides -->
+  <link rel="stylesheet" href="/kosei/css/kosei.css">
+  <link rel="stylesheet" href="/kosei/app/css/kosei-app.css">
+
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="kosei-app-body">
+
+  <!-- Auth gate (shown when not authenticated) -->
+  <div id="authGate" class="kc-auth-gate">
+    <div class="kc-auth-card">
+      <div class="kosei-logo" style="display:flex;align-items:center;gap:8px;font-size:1.25rem;font-weight:700;">
+        <svg class="kosei-logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:32px;height:32px;">
+          <rect width="32" height="32" rx="8" fill="#6366f1"/>
+          <path d="M8 16L14 10L20 16L14 22L8 16Z" fill="white"/>
+          <path d="M14 16L20 10L26 16L20 22L14 16Z" fill="white" fill-opacity="0.6"/>
+        </svg>
+        <span>Kosei</span>
+      </div>
+      <p class="kc-auth-subtitle">Sign in to your workspace</p>
+
+      <button id="googleSignIn" class="kosei-btn kosei-btn--primary kc-auth-btn">
+        Sign in with Google
+      </button>
+
+      <div class="kc-auth-divider">or</div>
+
+      <div class="kc-auth-email-group">
+        <input id="emailInput" type="email" class="kc-auth-input" placeholder="Email address">
+        <input id="passwordInput" type="password" class="kc-auth-input" placeholder="Password">
+      </div>
+
+      <button id="emailSignIn" class="kosei-btn kosei-btn--secondary kc-auth-btn">
+        Sign in with Email
+      </button>
+
+      <div id="authError" class="kc-auth-error" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- No workspace state -->
+  <div id="noWorkspace" class="kc-no-workspace" style="display:none;">
+    <div class="kc-no-workspace-card">
+      <h2>No Workspace Found</h2>
+      <p>Your account doesn't have a Kosei workspace yet. If you've completed an audit, your workspace may still be in setup.</p>
+      <a href="/kosei/" class="kosei-btn kosei-btn--primary">Request an Audit</a>
+    </div>
+  </div>
+
+  <!-- App shell (shown after auth) -->
+  <div id="appShell" class="kc-shell" style="display:none;">
+
+    <!-- Header -->
+    <header class="kc-header">
+      <div class="kc-header-left">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:28px;height:28px;">
+          <rect width="32" height="32" rx="8" fill="#6366f1"/>
+          <path d="M8 16L14 10L20 16L14 22L8 16Z" fill="white"/>
+          <path d="M14 16L20 10L26 16L20 22L14 16Z" fill="white" fill-opacity="0.6"/>
+        </svg>
+        <span class="kc-header-title">Kosei</span>
+      </div>
+      <div class="kc-header-right">
+        <span id="clientEmail" class="kc-header-email"></span>
+        <button id="signOutBtn" class="kc-header-signout">Sign Out</button>
+      </div>
+    </header>
+
+    <!-- Tab navigation -->
+    <nav class="kc-tabs">
+      <button class="kc-tab kc-tab--active" data-tab="dashboard">Dashboard</button>
+      <button class="kc-tab" data-tab="platforms">Platforms</button>
+      <button class="kc-tab" data-tab="support">Support</button>
+    </nav>
+
+    <!-- Content area -->
+    <main class="kc-content">
+
+      <!-- Dashboard tab -->
+      <section id="tab-dashboard" class="kc-tab-panel">
+
+        <!-- Identity bar -->
+        <div class="kc-identity" style="margin-bottom:var(--space-xl);">
+          <span id="wsName" class="kc-identity-name">--</span>
+          <div class="kc-identity-meta">
+            <span id="wsTier" class="kc-badge kc-badge--onboarding">TRIAL</span>
+            <span id="wsLocale" class="kc-badge" style="background:rgba(107,114,128,0.15);color:#6b7280;">EN</span>
+          </div>
+        </div>
+
+        <div class="kc-dash-grid">
+
+          <!-- Trial Status -->
+          <div id="trialSection" class="kc-card" style="display:none;">
+            <div class="kc-card-title">Trial Status</div>
+            <div class="kc-trial-grid">
+              <div class="kc-trial-stat">
+                <div id="trialDays" class="kc-trial-stat-value">--</div>
+                <div class="kc-trial-stat-label">Days Left</div>
+              </div>
+              <div class="kc-trial-stat">
+                <div id="trialUsage" class="kc-trial-stat-value" style="font-size:0.875rem;color:var(--kosei-text);">--</div>
+                <div class="kc-trial-stat-label">Usage</div>
+              </div>
+              <div class="kc-trial-stat">
+                <div id="trialPlatforms" class="kc-trial-stat-value" style="font-size:0.875rem;color:var(--kosei-text);">--</div>
+                <div class="kc-trial-stat-label">Platforms</div>
+              </div>
+            </div>
+            <div class="kc-progress-bar">
+              <div id="trialProgress" class="kc-progress-fill" style="width:0%;"></div>
+            </div>
+          </div>
+
+          <!-- Onboarding -->
+          <div class="kc-card">
+            <div class="kc-card-title">Onboarding</div>
+            <div id="onboardStep" style="font-size:0.875rem;margin-bottom:var(--space-sm);font-weight:600;">--</div>
+            <div id="onboardChecklist"></div>
+          </div>
+
+          <!-- Posting Preferences -->
+          <div class="kc-card">
+            <div class="kc-card-title">Posting Preferences</div>
+            <div id="preferencesSection"></div>
+          </div>
+
+          <!-- Reporting -->
+          <div class="kc-card" style="grid-column: 1 / -1;">
+            <div class="kc-card-title">Reporting</div>
+            <div class="kc-stats-grid">
+              <div class="kc-stat">
+                <div id="statCreated" class="kc-stat-value">0</div>
+                <div class="kc-stat-label">Created</div>
+              </div>
+              <div class="kc-stat">
+                <div id="statPublished" class="kc-stat-value">0</div>
+                <div class="kc-stat-label">Published</div>
+              </div>
+              <div class="kc-stat">
+                <div id="statPending" class="kc-stat-value">0</div>
+                <div class="kc-stat-label">Pending</div>
+              </div>
+              <div class="kc-stat">
+                <div id="statReplies" class="kc-stat-value">0</div>
+                <div class="kc-stat-label">Replies</div>
+              </div>
+              <div class="kc-stat">
+                <div id="statPlatforms" class="kc-stat-value">0</div>
+                <div class="kc-stat-label">Connected</div>
+              </div>
+              <div class="kc-stat">
+                <div id="statDaysLeft" class="kc-stat-value">--</div>
+                <div class="kc-stat-label">Trial Days</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Platforms tab -->
+      <section id="tab-platforms" class="kc-tab-panel" style="display:none;">
+        <div class="kc-card">
+          <div class="kc-card-title">Connected Platforms</div>
+          <div id="platformsList">
+            <div class="kc-empty">Loading platforms...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Support tab -->
+      <section id="tab-support" class="kc-tab-panel" style="display:none;">
+        <div class="kc-card">
+          <div class="kc-card-title">Submit Feedback or Issue</div>
+          <form id="issueForm" class="kc-issue-form">
+            <div class="kc-form-group">
+              <label class="kc-form-label">Subject</label>
+              <input type="text" name="issueTitle" class="kc-form-input" placeholder="Brief summary of your issue" required>
+            </div>
+            <div class="kc-form-group">
+              <label class="kc-form-label">Category</label>
+              <select name="issueCat" class="kc-form-select">
+                <option value="general">General</option>
+                <option value="bug">Bug Report</option>
+                <option value="feature_request">Feature Request</option>
+                <option value="content_issue">Content Issue</option>
+              </select>
+            </div>
+            <div class="kc-form-group">
+              <label class="kc-form-label">Priority</label>
+              <select name="issuePriority" class="kc-form-select">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
+            <div class="kc-form-group">
+              <label class="kc-form-label">Description</label>
+              <textarea name="issueDesc" class="kc-form-textarea" placeholder="Describe your issue or feedback in detail..."></textarea>
+            </div>
+            <button type="submit" class="kosei-btn kosei-btn--primary">Submit</button>
+            <div id="issueStatus" class="kc-form-status"></div>
+          </form>
+        </div>
+
+        <div class="kc-card" style="margin-top:var(--space-lg);">
+          <div class="kc-card-title">Your Issues</div>
+          <div id="issuesList">
+            <div class="kc-empty">No issues submitted yet</div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/kosei/app/js/kosei-app-auth.js"></script>
+  <script src="/kosei/app/js/kosei-app-data.js"></script>
+  <script src="/kosei/app/js/kosei-app-ui.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      window.koseiAppAuth.init();
+    });
+  </script>
+</body>
+</html>
