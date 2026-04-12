@@ -5,7 +5,7 @@
 **Worker**: CF
 **Slice**: `ROLODEX_ORPHAN_CONNECTION_STRATEGY_PHASE1`
 
-- Created `docs/ROLODEX_ORPHAN_CONNECTION_STRATEGY.md` — evidence-based orphan reduction strategy
+- Created `holo_index/docs/ROLODEX_ORPHAN_CONNECTION_STRATEGY.md` — evidence-based orphan reduction strategy
 - Classified 703 orphans into 8 categories (false positives, DAEmons, core infra, platform, simulator, dev tools, small utilities, AI/overseer)
 - Identified ~57 false positives (`__init__.py` etc.) inflating orphan count
 - Defined 6 connection criteria and 6 non-connection criteria

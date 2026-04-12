@@ -25,6 +25,8 @@ The 29 connected commands are all `executor.py` or `run_skill.py` files inside `
 
 ## 2. Orphan Categories
 
+Categories below are based on primary classification heuristics (path, trigger type, line count). Counts marked with `~` are estimates — some commands could reasonably belong in multiple categories. The categories are presented as a triage lens, not a partition. Exact classification per-command is deferred to CF2 (the `orphan_class` field).
+
 ### Category A: False Positives (57 commands, ~8%)
 
 These should **never** be counted as orphans. They are not CLI entrypoints in any meaningful sense.
