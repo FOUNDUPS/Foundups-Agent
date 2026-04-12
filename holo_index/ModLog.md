@@ -1,5 +1,18 @@
 # HoloIndex Package ModLog
 
+## [2026-04-12] External FoundUp — bridge adapter phase 1 hookup
+
+**Agent**: 0102 — Worker H  
+**Slice**: `HOLOINDEX_EXTERNAL_FOUNDUP_ADAPTER_HOOKUP_PHASE1`  
+**What**: Restored and completed `HoloIndexBridgeAdapter` in `holo_index/foundup_adapter/bridge_stub.py` to handle the shell bridge contract. Added explicit testing via `holo_index/foundup_adapter/tests/test_bridge_stub.py`.
+
+### Changes:
+- Re-implemented `HoloIndexBridgeAdapter` mapping internal MCP tool outputs to the strict JSON-RPC `agent_response` contract.
+- Added support for `semantic_search`, `wsp_lookup`, and `health` actions based on `EXTERNAL_FOUNDUP_BRIDGE_CONTRACT.md` §3.1.
+- Implemented `test_bridge_stub.py` providing robust testing. 7/7 tests passing ensuring payload compliance.
+
+---
+
 ## [2026-04-05] External FoundUp — shell backend registration (bridge contract doc only)
 
 **Agent**: 0102 — Worker H  
