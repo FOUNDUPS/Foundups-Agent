@@ -1,5 +1,21 @@
 # Kosei AI Systems — ModLog
 
+## 2026-04-11 — Runtime Readiness Audit
+
+**Worker**: BX
+**Slice**: `KOSEI_RUNTIME_READINESS_AUDIT_PHASE1`
+
+- Created `docs/RUNTIME_READINESS_AUDIT.md` — full deployment truth audit
+- Canonical candidate for `/f/kosei/app`: `app/` surface (client workspace)
+- **Finding**: No deployment exists — no Dockerfile, no firebase.json, no Cloud Build, no live URL
+- **Finding**: Root `firebase.json` sends `X-Frame-Options: DENY` on all paths — blocks iframe embedding
+- Two P0 hard blockers: (1) no deploy pipeline, (2) no Firebase project binding
+- Two P2 soft blockers: (3) no build tooling (not blocking Phase 1 static HTML), (4) Firestore rules unverified
+- Recommended next slice: `BX2 — KOSEI_FIREBASE_HOSTING_DEPLOY_PHASE1`
+- WSP 97 (truth-first), WSP 104 (route namespace)
+
+---
+
 ## 2026-04-07 — Phase 2: Issue Triage and Priority
 
 **Worker**: Y2
