@@ -55,11 +55,11 @@ curl -sI https://foundupscom.web.app/kosei/app/ | grep -iE "(x-frame|content-sec
 | Blocker | Severity | Notes |
 |---------|----------|-------|
 | X-Frame-Options override behavior | P1 | Unverified — must test at deploy time |
-| Landing page not deployed | P2 | Source needs cleanup; app CTA to `/kosei/` will 404 |
+| Landing page not deployed | P2 | Source needs cleanup before deploy |
 | Firebase API keys empty | P2 | Runtime uses `/__/firebase/init.json` auto-config |
 | Kosei Firestore rules | P2 | Needed before client data writes |
 
-**Note**: The app workspace has a "Request an Audit" CTA that links to `/kosei/`. This will 404 until the landing page is deployed in a follow-up slice.
+**UI fix**: No-workspace state CTA changed from dead link to informational text ("Contact support to request an audit").
 
 ### WSP References
 
