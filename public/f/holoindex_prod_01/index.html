@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HoloIndex</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="glass-container">
+        <header>
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#A855F7" stroke="#9333EA" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M2 17L12 22L22 17" stroke="#9333EA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 12L12 17L22 12" stroke="#9333EA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <h1>HoloIndex</h1>
+            </div>
+            <div class="status-indicator" id="connectionStatus">
+                <span class="dot disconnected"></span>
+                <span class="text">Disconnected</span>
+            </div>
+        </header>
+
+        <main>
+            <div class="search-section">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search the WSP and codebase memory..." autocomplete="off">
+                    <button id="searchBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="search-icon">
+                            <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="search-filters">
+                    <button class="filter-btn active" data-action="semantic_search">Semantic</button>
+                    <button class="filter-btn" data-action="wsp_lookup">WSP Protocol</button>
+                    <button class="filter-btn" data-action="health">Health Check</button>
+                </div>
+            </div>
+
+            <div class="results-container" id="resultsArea">
+                <div class="placeholder-state" id="placeholderState">
+                    <div class="hologram-pulse"></div>
+                    <p>Awaiting query intent...</p>
+                </div>
+                <div class="loading-state hidden" id="loadingState">
+                    <div class="spinner"></div>
+                    <p>Entangling vectors...</p>
+                </div>
+                <div class="results-list hidden" id="resultsList"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Template for a single search result -->
+    <template id="resultTemplate">
+        <div class="result-card">
+            <div class="result-header">
+                <span class="result-path"></span>
+                <span class="result-score"></span>
+            </div>
+            <div class="result-content-box">
+                <pre><code class="result-content"></code></pre>
+            </div>
+        </div>
+    </template>
+
+    <script src="js/connector.js"></script>
+</body>
+</html>

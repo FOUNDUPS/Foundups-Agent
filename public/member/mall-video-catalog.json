@@ -11159,5 +11159,38 @@
     "poster_url": "/media/posters/gotjunk.jpg",
     "video_count": 0,
     "videos": []
+  },
+  {
+    "foundup_id": "holoindex_prod_01",
+    "title": "HoloIndex",
+    "name": "HoloIndex",
+    "creator": "012",
+    "entity": "HoloIndex",
+    "source_type": "external_foundup",
+    "category": "core",
+    "tags": [
+      "search",
+      "wsp",
+      "catalog",
+      "index"
+    ],
+    "topic_family": "technology",
+    "geo": "Global",
+    "status": "active",
+    "display_order": 5,
+    "related_lanes": [
+      "foundups_main"
+    ],
+    "tagline": "Semantic Shell Command & Catalog Search",
+    "description": "Natural language search index for the p.fMALL catalog and WSP protocols.",
+    "tier": "UX_0",
+    "lifecycle_stage": "proto",
+    "launch_readiness": "discoverable_only",
+    "routing_prefix": "/f/holoindex_prod_01",
+    "data_namespace": "idb_holoindex",
+    "token_symbol": "HOLO",
+    "poster_url": "/media/posters/placeholder.jpg",
+    "video_count": 0,
+    "videos": []
   }
 ]
