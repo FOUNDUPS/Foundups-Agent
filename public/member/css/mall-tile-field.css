@@ -8,8 +8,9 @@
    - Snap (default): page-style discrete movement
    - Glide: fluid scroll override
 
-   Density presets (AI-controlled):
-   - 3x4, 3x5, 4x6, 5x8 (default: 3x5 for mobile-first dense wall)
+   Density presets (AI-controlled or viewport-adaptive):
+   - 3x4, 3x5, 4x6, 5x8 (portrait-first dense walls)
+   - 6x3 (desktop wide viewport - auto-selected for fine-pointer + landscape)
 */
 
 :root {
@@ -175,6 +176,13 @@
   --field-rows: 8;
   --tile-radius: 0.25rem;
   --tile-gap: 0.1rem;
+}
+/* Desktop-optimized: wide landscape with 6 columns, 3 rows */
+.mall-tile-field[data-density="6x3"] {
+  --field-columns: 6;
+  --field-rows: 3;
+  --tile-radius: 0.5rem;
+  --tile-gap: 0.35rem;
 }
 
 @media (min-width: 600px) {

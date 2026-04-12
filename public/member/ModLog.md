@@ -1,5 +1,67 @@
 # Member Area Module Change Log
 
+## [2026-04-12] Adaptive Desktop 6x3 Tile Layout (Worker CL)
+
+**Who**: 0102 - Worker CL
+**Slice**: `PFMALL_DESKTOP_6X3_ADAPTIVE_LAYOUT_PHASE1`
+**What**: Added viewport-adaptive density selection for desktop/fine-pointer viewports.
+
+**Changes**:
+- Added `6x3` density preset (6 columns, 3 rows) optimized for wide desktop viewports
+- Implemented viewport detection using `matchMedia('(pointer: coarse)')` + width/height checks
+- Auto-selects `6x3` for fine-pointer + landscape + ≥1024px viewports
+- Auto-selects `4x6` for coarse-pointer + landscape + ≥768px (tablet landscape)
+- Defaults to `3x5` for mobile-first portrait viewports
+- Added resize listener for dynamic re-evaluation
+- Manual `setDensity()` calls mark override, preventing auto-selection
+- Added `resetDensityOverride()` to restore auto-selection
+
+**Files Modified**:
+- `public/member/js/mall-tile-field.js` - Viewport detection, auto-selection, 6x3 preset
+- `public/member/css/mall-tile-field.css` - 6x3 density CSS variables
+
+**API Surface**:
+- `setDensity(density, isManual)` - Now tracks manual override
+- `detectOptimalDensity()` - Returns optimal density for current viewport
+- `autoSelectDensity()` - Auto-selects if not manually set
+- `resetDensityOverride()` - Clears manual flag, re-evaluates viewport
+
+---
+
+## [2026-04-13] pfMALL YouTube Wall Live Verification (Worker CH, WSP 97/104)
+
+**Who**: 0102 - Worker CH
+**Slice**: `PFMALL_YOUTUBE_WALL_LIVE_VERIFICATION_PHASE1`
+**What**: End-to-end browser verification of pfMALL tile wall with YouTube-backed FoundUp queues.
+
+**Method**: Local HTTP server (`python -m http.server 8090`) serving `public/`, Clerk auth bypassed via JS injection, Chrome DevTools MCP for automated verification.
+
+**Catalog Truth** (13 entries, 4 targets verified):
+
+| FoundUp | videos | poster | tap→play | lane advance | expand | collapse |
+|---------|--------|--------|----------|-------------|--------|----------|
+| `move2japan` | 573 | /media/posters/move2japan.jpg | PASS | 0→1 PASS | 573 tiles PASS | 13 tiles PASS |
+| `undaodu` | 512 | /media/posters/undaodu.jpg | PASS | 0→1 PASS | 512 tiles PASS | 13 tiles PASS |
+| `foundups_main` | 44 | /media/posters/foundups_main.jpg | PASS | 0→1 PASS | 44 tiles PASS | 13 tiles PASS |
+| `antifafm` | 34 | /media/posters/antifafm.jpg | PASS | 0→1 PASS | 34 tiles PASS | 13 tiles PASS |
+
+**Fullscreen Player**: `mallVideoPlayer.open()` loads YouTube iframe, shows video title, play controls, Enter FoundUp button (WSP 104 route `/f/{foundup_id}`). `mallVideoPlayer.close()` returns to tile wall cleanly.
+
+**Projection Controls**: All, A-Z, Readiness, Category — all re-sort tiles correctly.
+
+**UI Elements per tile**: poster background, readiness badge, queue count badge, audio button, enter button, expand button, preview stage — all present for video-backed tiles.
+
+**API surface verified**: `initialize`, `togglePlay`, `advanceToNextInLane`, `expandFoundUp`, `collapseFoundUp`, `setProjection`, `startLanePreview`, `stopInlinePreview`.
+
+**Pytest**: 258 passed (test_video_mall_field_runtime.py + test_mall_tile_field.py)
+
+**No bugs found. No code changes required.**
+
+**WSP 97 Applied**: Browser-verified, not assumed.
+**WSP 104 Applied**: Enter FoundUp routes to `/f/{foundup_id}` canonical path.
+
+---
+
 ## [2026-04-13] Kosei entry_url Restored (Worker BX5, WSP 97/104)
 
 **Who**: 0102 - Worker BX5

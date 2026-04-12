@@ -15,8 +15,9 @@
  *   - Snap (default): discrete paging like iPhone home screens
  *   - Glide: fluid scroll for browsing
  *
- * Density presets (AI-controlled):
- *   - 3x4, 3x5, 4x6, 5x8 (default: 3x5 for mobile-first dense wall)
+ * Density presets (AI-controlled or viewport-adaptive):
+ *   - 3x4, 3x5, 4x6, 5x8 (portrait-first dense walls)
+ *   - 6x3 (desktop wide viewport - auto-selected for fine-pointer + landscape)
  */
 (function() {
   'use strict';
@@ -54,6 +55,7 @@
   // Video Mall runtime state
   var motionMode = 'snap'; // 'snap' | 'glide'
   var currentDensity = '3x5';
+  var densityManuallySet = false; // Whether user has manually overridden density
   var expandedFoundUp = null; // Index of expanded FoundUp, or null
   var expandSourceIndex = null; // Original tile index for collapse animation
   var expandSourceVisual = null; // { bgImage, bgColor } for collapse continuity
@@ -504,8 +506,11 @@
     // Create collapse hint
     createCollapseHint();
 
-    // Set initial density
-    setDensity(currentDensity);
+    // Auto-select density based on viewport (respects manual override)
+    autoSelectDensity();
+
+    // Bind resize handler for adaptive density
+    window.addEventListener('resize', handleResize);
 
     // Enable desktop drag-to-scroll
     bindDragScroll();
@@ -1161,14 +1166,20 @@
 
   /**
    * Set field density preset
-   * @param {string} density - '3x4' | '3x5' | '4x6' | '5x8'
+   * @param {string} density - '3x4' | '3x5' | '4x6' | '5x8' | '6x3'
+   * @param {boolean} [isManual=true] - Whether this is a manual user override
    */
-  function setDensity(density) {
-    var validDensities = ['3x4', '3x5', '4x6', '5x8'];
+  function setDensity(density, isManual) {
+    var validDensities = ['3x4', '3x5', '4x6', '5x8', '6x3'];
     if (!validDensities.includes(density)) {
       density = '3x5';
     }
     currentDensity = density;
+
+    // Track manual override (defaults to true for API calls)
+    if (isManual !== false) {
+      densityManuallySet = true;
+    }
 
     if (tileField) {
       tileField.dataset.density = density;
@@ -1181,6 +1192,56 @@
    */
   function getDensity() {
     return currentDensity;
+  }
+
+  /**
+   * Detect viewport class and return optimal density
+   * Desktop/fine-pointer wide viewports get 6x3
+   * Mobile/tablet/coarse-pointer get appropriate portrait densities
+   * @returns {string} Optimal density preset
+   */
+  function detectOptimalDensity() {
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+    var isCoarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    var isLandscape = width > height;
+
+    // Desktop: fine pointer + wide viewport (1024px+) + landscape
+    if (!isCoarsePointer && width >= 1024 && isLandscape) {
+      return '6x3';
+    }
+
+    // Tablet landscape: coarse pointer but wide
+    if (isCoarsePointer && width >= 768 && isLandscape) {
+      return '4x6';
+    }
+
+    // Default mobile-first
+    return '3x5';
+  }
+
+  /**
+   * Auto-select density based on viewport (only if not manually set)
+   */
+  function autoSelectDensity() {
+    if (densityManuallySet) return;
+    var optimal = detectOptimalDensity();
+    setDensity(optimal, false); // false = not manual
+  }
+
+  /**
+   * Handle viewport resize - re-evaluate density if not manually set
+   */
+  function handleResize() {
+    autoSelectDensity();
+  }
+
+  /**
+   * Reset manual density override - allows auto-selection to resume
+   */
+  function resetDensityOverride() {
+    densityManuallySet = false;
+    autoSelectDensity();
   }
 
   // ========== Expanded State Queries ==========
@@ -1574,6 +1635,9 @@
     // Density
     setDensity: setDensity,
     getDensity: getDensity,
+    detectOptimalDensity: detectOptimalDensity,
+    autoSelectDensity: autoSelectDensity,
+    resetDensityOverride: resetDensityOverride,
 
     // Projection
     setProjection: setProjection,
