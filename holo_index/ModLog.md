@@ -1,5 +1,41 @@
 # HoloIndex Package ModLog
 
+## [2026-04-13] Rolodex false-positive exclusion and classification
+
+**Worker**: CF2
+**Slice**: `ROLODEX_FALSE_POSITIVE_EXCLUSION_AND_CLASSIFICATION_PHASE1`
+
+**Changes**:
+1. Excluded `__init__.py` files from CLI entrypoint scan (false positives)
+2. Excluded `_archived`, `_deprecated`, `temp/`, `scratch/` paths
+3. Added `orphan_class` field to rolodex schema (JSON + SQLite)
+4. Implemented automatic classification: `candidate`, `trivial`, `developer_tool`, `wre_internal`, `research`
+5. Added 5 new alignment tests for orphan classification
+
+**Note**: `__main__.py` files are NOT excluded — some are legitimate connected CLIs (e.g., `linkedin_company_poster/__main__.py`).
+
+**Impact**:
+- Total CLI entrypoints: 732 → 680 (52 `__init__.py` false positives excluded)
+- Orphan count: 703 → 651 (honest reduction, not fake connection)
+- Connected: 29 (unchanged)
+
+**Classification breakdown** (of 651 orphans):
+- `candidate`: 481 (74%) — should be connected to WRE
+- `trivial`: 69 (11%) — <50 lines, simple launchers
+- `developer_tool`: 37 (6%) — audit/compliance/check scripts
+- `wre_internal`: 35 (5%) — WRE machinery (circular dep risk)
+- `research`: 29 (4%) — simulation/analysis tools
+
+Files modified:
+- `holo_index/skillz/orphan_capability_scanner/executor.py` — false-positive exclusion + classification logic
+- `holo_index/_cli_main.py` — orphan_class in JSON/SQLite schema
+- `holo_index/tests/test_rolodex_wre_alignment.py` — 5 new classification tests
+- `holo_index/docs/command_rolodex.json` — regenerated with classification
+
+WSP 97: Truthful orphan counts (excluded inflators, not fake-connected them).
+
+---
+
 ## [2026-04-12] Rolodex orphan connection strategy
 
 **Worker**: CF
