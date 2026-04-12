@@ -81,15 +81,14 @@ Canonical contract: `modules/foundups/docs/FOUNDUP_AI_HOOKS_AND_DAEMON_SURFACE_C
 
 Shell contract: **`/f/kosei/app`**. App bundle deployed at `https://foundupscom.web.app/kosei/app/`.
 
-**Header state** (verified 2026-04-12):
-- `Content-Security-Policy: frame-ancestors ...` ✓ (correctly set)
-- `X-Frame-Options: DENY` still present (Firebase cannot clear inherited headers)
+**Embedding status** (verified 2026-04-13): **VERIFIED EMBEDDABLE**
 
-**Per W3C CSP3 spec**: Modern browsers should ignore X-Frame-Options when frame-ancestors is present. Embeddability requires in-browser iframe test to confirm.
+In-browser iframe test confirmed: Kosei app successfully renders inside the FoundUps shell iframe. CSP `frame-ancestors` takes precedence over `X-Frame-Options: DENY` in modern browsers as per W3C CSP3 spec.
 
-**Blockers before shell embedding**:
-1. **P1**: In-browser iframe test needed — CSP should take precedence, but needs browser confirmation
-2. **P2**: Landing page (`/kosei/`) not deployed — source needs cleanup
+**Next step**: `BX5` — tiny metadata slice to restore `entry_url` in manifest/catalog.
+
+**Remaining blockers** (P2):
+- Landing page (`/kosei/`) not deployed — source needs cleanup
 
 ---
 
