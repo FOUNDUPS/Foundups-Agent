@@ -11119,13 +11119,14 @@
     "description": "Kosei AI Systems — AI content automation service for businesses. Internal service FoundUp with planned production domain.",
     "tier": "F0_DAE",
     "lifecycle_stage": "incubating",
-    "launch_readiness": "discoverable_only",
+    "launch_readiness": "ready",
     "routing_prefix": "/f/kosei",
     "data_namespace": "idb_kosei",
     "token_symbol": "KOSEI",
     "poster_url": "/media/posters/kosei.jpg",
     "video_count": 0,
-    "videos": []
+    "videos": [],
+    "entry_url": "https://foundupscom.web.app/kosei/app/"
   },
   {
     "foundup_id": "gotjunk_001",
