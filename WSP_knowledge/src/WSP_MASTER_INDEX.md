@@ -248,10 +248,10 @@ See WSP 48 (Recursive Self-Improvement) and WSP 70 (System Status Reporting) for
 
 ## [U+1F4CA] WSP STATUS SUMMARY
 
- - **Total Numbered Slots Tracked**: 104 (WSP 00-103)
- - **Highest Assigned Number**: WSP 103
+ - **Total Numbered Slots Tracked**: 105 (WSP 00-104)
+ - **Highest Assigned Number**: WSP 104
  - **In-Range Available Slots**: 0
- - **Next Available Number**: WSP 104
+ - **Next Available Number**: WSP 105
 
 ### WSP 100+ Layer (Extended Protocols)
 | WSP | Title | Status | Purpose |
@@ -260,6 +260,7 @@ See WSP 48 (Recursive Self-Improvement) and WSP 70 (System Status Reporting) for
 | **WSP 101** | UPS Utility Classification Protocol | Active | UPS token classification |
 | **WSP 102** | FoundUps Web Design Protocol | Active | Web design standards |
 | **WSP 103** | FoundUp Federation Protocol | Active | Independent FoundUp repos connect via pAVS MCP |
+| **WSP 104** | FoundUp Route Namespace and Tenant Isolation Protocol | Active | Namespace guardrails for FoundUp onboarding |
  - **Status Mix**: Active/deprecated/superseded/historical protocols are explicitly marked per-row in the catalog table above
  - **Layers**: Entry 00; Foundation 1-19; Operational 20-39; Advanced 40-59; Memory/Knowledge 60-99
 

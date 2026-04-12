@@ -4,7 +4,20 @@
 **Version**: 1.0
 **Date**: 2026-03-15
 **Author**: 0102 (012 directive)
-**Dependencies**: WSP 96 (MCP Governance), WSP 98 (Mesh Architecture), WSP 27 (DAE Architecture)
+**Dependencies**: WSP 96 (MCP Governance), WSP 98 (Mesh Architecture), WSP 27 (DAE Architecture), WSP 104 (Route Namespace and Tenant Isolation)
+
+---
+
+## Prerequisite: WSP 104 Namespace Guardrails
+
+**Before a federated FoundUp is bound to pAVS infrastructure**, it must satisfy the WSP 104 namespace guardrails:
+
+- unique `foundup_id`
+- unique `routing_prefix` = `/f/{foundup_id}`
+- unique `data_namespace` = `idb_{foundup_id}`
+- no root-level tenant route claims
+
+A federated FoundUp that fails namespace validation must not receive pAVS MCP access or be included in the federation registry.
 
 ---
 
