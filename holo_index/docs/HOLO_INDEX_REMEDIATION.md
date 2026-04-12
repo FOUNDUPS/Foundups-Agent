@@ -1,8 +1,26 @@
 # HoloIndex Search Hang Remediation (WSP 97 Compliance)
 
-**Date**: 2026-03-18
+**Date**: 2026-03-18 (updated 2026-04-11)
 **Status**: RESOLVED
 **Issue**: HoloIndex `--search` command hanging indefinitely, blocking WSP 97 pre-flight operations
+
+---
+
+## 2026-04-11 Fix: Distinguish Missing Dependency from Timeout
+
+**Problem**: Warning message conflated missing `sentence_transformers` with actual timeout:
+```
+WARNING:holo_index.core.holo_index:SentenceTransformer import timed out: No module named 'sentence_transformers'
+```
+
+**Fix**: `_run_with_timeout()` now distinguishes:
+- **Missing dependency** (ImportError/ModuleNotFoundError): `"Missing dependency: No module named 'sentence_transformers'. Fix: pip install sentence-transformers (or use HOLO_SKIP_MODEL=1 for lexical-only)"`
+- **Actual timeout** (FuturesTimeoutError): `"SentenceTransformer import timed out (>5s). Try HOLO_SKIP_MODEL=1 or HOLO_OFFLINE=1"`
+
+**Supported Paths**:
+1. **Install dependency**: `pip install -r holo_index/requirements.txt`
+2. **Use lexical fallback**: `HOLO_SKIP_MODEL=1` or `--offline` flag
+3. **Pre-cache model**: Ensure `E:/HoloIndex/models/` has the model files
 
 ---
 
