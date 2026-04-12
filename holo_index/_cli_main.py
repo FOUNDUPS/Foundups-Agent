@@ -415,16 +415,28 @@ def _generate_cli_catalog(scan_result, catalog_path: Path) -> None:
 
 
 def _generate_cli_rolodex_json(scan_result, rolodex_path: Path) -> None:
-    """Generate machine-readable command_rolodex.json for agent consumption."""
+    """Generate machine-readable command_rolodex.json for agent consumption.
+
+    Metrics definition (ADR: SENTINEL_HOLOINDEX_OPENCLAW_ARCHITECTURE_BOUNDARY):
+    - wre_connected_count: CLI entrypoints with matching SKILLz.md (discoverable by WRE)
+    - registered_skillz_count: Total SKILLz.md files in repo (may exceed wre_connected)
+    - orphan_count: CLI entrypoints without SKILLz.md (not WRE-discoverable)
+    - total_cli_entrypoints: wre_connected_count + orphan_count
+
+    Connection model: A CLI is "wre_connected" if it has a SKILLz.md file, making it
+    discoverable by WRE (Windsurf Recursive Engine) for autonomous invocation.
+    """
     import json
     from datetime import datetime
 
+    # Build rolodex with metrics derived from actual scan results
+    # IMPORTANT: wre_connected_count must equal len(wre_connected) to match serialized rows
     rolodex = {
         "generated_at": datetime.now().isoformat(),
         "total_cli_entrypoints": scan_result.total_cli_entrypoints,
-        "wre_connected_count": len(scan_result.wre_connected),
-        "registered_skillz_count": scan_result.registered_skills,
-        "orphan_count": len(scan_result.orphans),
+        "wre_connected_count": len(scan_result.wre_connected),  # Actual connected CLI count
+        "registered_skillz_count": scan_result.registered_skills,  # Total SKILLz.md files
+        "orphan_count": len(scan_result.orphans),  # CLIs without SKILLz.md
         "commands": []
     }
 
@@ -464,6 +476,10 @@ def _generate_cli_rolodex_sqlite(scan_result, db_path: Path) -> None:
     - Fast queries by WRESkillsDiscovery
     - Gemma pattern-matching for SKILLz.md suggestions
     - Analytics on orphan reduction progress
+
+    Metrics alignment: SQLite metadata must match JSON metadata exactly.
+    Both derive counts from the same scan_result fields to ensure consistency.
+    See _generate_cli_rolodex_json for metric definitions.
     """
     import sqlite3
     from datetime import datetime
