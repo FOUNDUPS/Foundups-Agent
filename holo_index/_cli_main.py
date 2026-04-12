@@ -440,7 +440,7 @@ def _generate_cli_rolodex_json(scan_result, rolodex_path: Path) -> None:
         "commands": []
     }
 
-    # Add WRE-connected commands
+    # Add WRE-connected commands (orphan_class = "connected" for these)
     for cap in scan_result.wre_connected:
         rolodex["commands"].append({
             "path": cap.path,
@@ -450,9 +450,10 @@ def _generate_cli_rolodex_json(scan_result, rolodex_path: Path) -> None:
             "skillz_md_path": cap.skillz_md_path,
             "line_count": cap.line_count,
             "category": cap.category,
+            "orphan_class": "connected",
         })
 
-    # Add orphan commands
+    # Add orphan commands with classification (CF2: orphan_class field)
     for cap in scan_result.orphans:
         rolodex["commands"].append({
             "path": cap.path,
@@ -463,6 +464,7 @@ def _generate_cli_rolodex_json(scan_result, rolodex_path: Path) -> None:
             "line_count": cap.line_count,
             "category": cap.category,
             "suggested_trigger": cap.suggested_trigger,
+            "orphan_class": cap.orphan_class,
         })
 
     rolodex_path.write_text(json.dumps(rolodex, indent=2), encoding="utf-8")
@@ -487,7 +489,11 @@ def _generate_cli_rolodex_sqlite(scan_result, db_path: Path) -> None:
     conn = sqlite3.connect(str(db_path))
     cursor = conn.cursor()
 
-    # Create schema
+    # Drop existing tables for schema upgrade (CF2: added orphan_class column)
+    cursor.execute("DROP TABLE IF EXISTS cli_commands")
+    cursor.execute("DROP TABLE IF EXISTS rolodex_metadata")
+
+    # Create schema (CF2: added orphan_class column)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS cli_commands (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -499,6 +505,7 @@ def _generate_cli_rolodex_sqlite(scan_result, db_path: Path) -> None:
             line_count INTEGER DEFAULT 0,
             category TEXT DEFAULT 'unknown',
             suggested_trigger TEXT DEFAULT 'manual',
+            orphan_class TEXT DEFAULT 'unclassified',
             indexed_at TEXT NOT NULL
         )
     """)
@@ -510,10 +517,11 @@ def _generate_cli_rolodex_sqlite(scan_result, db_path: Path) -> None:
         )
     """)
 
-    # Create indexes for fast queries
+    # Create indexes for fast queries (CF2: added orphan_class index)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_wre_connected ON cli_commands(wre_connected)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_has_json ON cli_commands(has_json_flag)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_category ON cli_commands(category)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_orphan_class ON cli_commands(orphan_class)")
 
     # Clear existing data (full refresh)
     cursor.execute("DELETE FROM cli_commands")
@@ -521,21 +529,21 @@ def _generate_cli_rolodex_sqlite(scan_result, db_path: Path) -> None:
 
     indexed_at = datetime.now().isoformat()
 
-    # Insert WRE-connected commands
+    # Insert WRE-connected commands (orphan_class = "connected")
     for cap in scan_result.wre_connected:
         cursor.execute("""
             INSERT OR REPLACE INTO cli_commands
-            (path, module_name, has_json_flag, wre_connected, skillz_md_path, line_count, category, suggested_trigger, indexed_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (cap.path, cap.module_name, cap.has_json_flag, True, cap.skillz_md_path, cap.line_count, cap.category, "wre_skill", indexed_at))
+            (path, module_name, has_json_flag, wre_connected, skillz_md_path, line_count, category, suggested_trigger, orphan_class, indexed_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (cap.path, cap.module_name, cap.has_json_flag, True, cap.skillz_md_path, cap.line_count, cap.category, "wre_skill", "connected", indexed_at))
 
-    # Insert orphan commands
+    # Insert orphan commands with classification (CF2: orphan_class field)
     for cap in scan_result.orphans:
         cursor.execute("""
             INSERT OR REPLACE INTO cli_commands
-            (path, module_name, has_json_flag, wre_connected, skillz_md_path, line_count, category, suggested_trigger, indexed_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (cap.path, cap.module_name, cap.has_json_flag, False, None, cap.line_count, cap.category, cap.suggested_trigger, indexed_at))
+            (path, module_name, has_json_flag, wre_connected, skillz_md_path, line_count, category, suggested_trigger, orphan_class, indexed_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (cap.path, cap.module_name, cap.has_json_flag, False, None, cap.line_count, cap.category, cap.suggested_trigger, cap.orphan_class, indexed_at))
 
     # Store metadata
     cursor.execute("INSERT INTO rolodex_metadata VALUES (?, ?)", ("indexed_at", indexed_at))

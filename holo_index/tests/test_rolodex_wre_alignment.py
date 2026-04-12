@@ -161,3 +161,57 @@ class TestWREConnectionSemantics:
                 assert not cmd.get("skillz_md_path"), (
                     f"Orphan command {cmd['path']} has skillz_md_path={cmd.get('skillz_md_path')}"
                 )
+
+
+@_needs_json
+class TestOrphanClassification:
+    """CF2: orphan_class field validates orphan categorization."""
+
+    VALID_ORPHAN_CLASSES = {
+        "connected",       # WRE-connected (has SKILLz.md)
+        "candidate",       # Should be connected to WRE
+        "false_positive",  # Should never be counted (__init__.py, archived)
+        "developer_tool",  # Manual tools used during dev
+        "research",        # Simulation/analysis tools
+        "wre_internal",    # Part of WRE machinery (circular dependency risk)
+        "trivial",         # <50 lines, simple launchers
+        "unclassified",    # Not yet classified
+    }
+
+    def test_all_commands_have_orphan_class(self, json_data):
+        """Every command must have an orphan_class field."""
+        for cmd in json_data["commands"]:
+            assert "orphan_class" in cmd, (
+                f"Command {cmd['path']} missing orphan_class field"
+            )
+
+    def test_orphan_class_values_valid(self, json_data):
+        """orphan_class must be one of the defined categories."""
+        for cmd in json_data["commands"]:
+            orphan_class = cmd.get("orphan_class", "unclassified")
+            assert orphan_class in self.VALID_ORPHAN_CLASSES, (
+                f"Command {cmd['path']} has invalid orphan_class: {orphan_class}"
+            )
+
+    def test_connected_commands_have_connected_class(self, json_data):
+        """WRE-connected commands must have orphan_class='connected'."""
+        for cmd in json_data["commands"]:
+            if cmd.get("wre_connected"):
+                assert cmd.get("orphan_class") == "connected", (
+                    f"Connected command {cmd['path']} has orphan_class={cmd.get('orphan_class')}, expected 'connected'"
+                )
+
+    def test_orphans_not_marked_connected(self, json_data):
+        """Orphan commands must not have orphan_class='connected'."""
+        for cmd in json_data["commands"]:
+            if not cmd.get("wre_connected"):
+                assert cmd.get("orphan_class") != "connected", (
+                    f"Orphan command {cmd['path']} incorrectly marked as orphan_class='connected'"
+                )
+
+    def test_no_init_files_in_rolodex(self, json_data):
+        """CF2: __init__.py files should be excluded from rolodex."""
+        for cmd in json_data["commands"]:
+            assert not cmd["path"].endswith("__init__.py"), (
+                f"False positive __init__.py included in rolodex: {cmd['path']}"
+            )

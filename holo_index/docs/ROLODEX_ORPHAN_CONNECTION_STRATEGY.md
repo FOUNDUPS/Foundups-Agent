@@ -172,18 +172,38 @@ Add an `orphan_class` field to rolodex entries: `candidate`, `false_positive`, `
 
 ## 7. Recommended Next Slice
 
-### `CF2 — ROLODEX_FALSE_POSITIVE_EXCLUSION_AND_CLASSIFICATION_PHASE1`
+### `CF2 — ROLODEX_FALSE_POSITIVE_EXCLUSION_AND_CLASSIFICATION_PHASE1` ✓ COMPLETE
 
-**Scope**:
-1. Exclude `__init__.py` files from `OrphanCapabilityScanner._find_cli_entrypoints()`
-2. Add `orphan_class` field to rolodex schema (JSON + SQLite)
-3. Classify the top ~50 orphans by line count into the categories above
-4. Regenerate rolodex with classification
-5. Update alignment tests to verify the new field
+**Delivered** (2026-04-13):
+1. ✓ Excluded `__init__.py` from scan (52 false positives removed)
+2. ✓ Added `orphan_class` field to rolodex schema (JSON + SQLite)
+3. ✓ Automatic classification of all 651 orphans into 5 categories
+4. ✓ Regenerated rolodex with classification
+5. ✓ Added 5 alignment tests for `orphan_class` field
 
-**Why this before mass SKILLz.md generation**: Classification is cheaper than connection and produces better data for deciding what to connect. Generating SKILLz.md wrappers for 703 commands is waste if 200+ of them shouldn't be wrapped.
+**Note**: `__main__.py` NOT excluded — some are legitimate connected CLIs.
 
-**After CF2**: A targeted `CF3 — TOP_10_DAEMON_SKILLZ_GENERATION_PHASE1` slice can generate SKILLz.md wrappers for the 10 priority candidates listed above, with high confidence they belong in WRE.
+**Results**:
+- Total: 732 → 680 CLI entrypoints (52 `__init__.py` excluded)
+- Orphans: 703 → 651 (honest reduction)
+- Connected: 29 (unchanged)
+- Classification: 481 candidates, 69 trivial, 37 dev tools, 35 wre-internal, 29 research
+
+### `CF3 — TOP_10_DAEMON_SKILLZ_GENERATION_PHASE1` (Next)
+
+**Scope**: Generate SKILLz.md wrappers for the 10 priority candidates from Section 5:
+1. `antifafm_broadcaster/scripts/launch.py`
+2. `antifafm_broadcaster/src/youtube_go_live.py`
+3. `livechat/src/auto_moderator_dae.py`
+4. `git_push_dae/src/git_push_dae.py`
+5. `idle_automation/src/idle_automation_dae.py`
+6. `linkedin_agent/src/git_linkedin_bridge.py`
+7. `x_twitter/src/x_twitter_dae.py`
+8. `youtube_shorts_scheduler/src/scheduler.py`
+9. `wsp_framework_dae/src/wsp_framework_dae.py`
+10. `doc_dae/src/doc_dae.py`
+
+**Why now**: CF2 classification proves these are `candidate` class. Connecting them raises connection rate from 4.1% to 5.6% with high-value DAEmons.
 
 ---
 

@@ -40,6 +40,7 @@ class CapabilityInfo:
     line_count: int = 0
     suggested_trigger: str = "manual"
     category: str = "unknown"
+    orphan_class: str = "unclassified"  # candidate, false_positive, developer_tool, research, wre_internal, trivial
 
 
 @dataclass
@@ -73,8 +74,31 @@ class OrphanCapabilityScanner:
     # Test patterns (excluded by default, include with --include-tests)
     TEST_PATTERNS = {"tests", "test_", "_test.py", "conftest.py"}
 
+    # False positive patterns - files with `if __name__` but not real CLI entrypoints
+    # These are excluded from orphan counting per CF2 (ROLODEX_FALSE_POSITIVE_EXCLUSION)
+    # NOTE: __main__.py is NOT excluded - some are legitimate connected CLIs
+    # (e.g., linkedin_company_poster/__main__.py has a matching SKILLz.md)
+    FALSE_POSITIVE_PATTERNS = {
+        "__init__.py",   # Package markers with guard (51+ files)
+    }
+
+    # Path patterns indicating false positives (archived, temp, deprecated)
+    FALSE_POSITIVE_PATH_PATTERNS = {"_archived", "_deprecated", "temp/", "scratch/"}
+
     # Known entry point patterns (not orphans)
     ENTRY_POINT_NAMES = {"main.py", "__main__.py", "cli.py", "run_skill.py", "executor.py"}
+
+    # WRE-internal files - should not be wrapped (circular dependency risk)
+    WRE_INTERNAL_PATTERNS = {
+        "wre_master_orchestrator", "wre_skills_loader", "wre_config_manager",
+        "pattern_memory", "libido_monitor", "wre_core",
+    }
+
+    # Research/simulation patterns - low WRE value
+    RESEARCH_PATTERNS = {"simulator", "economics", "projection", "analysis"}
+
+    # Developer tool patterns
+    DEVELOPER_PATTERNS = {"audit", "compliance", "check", "verify", "lint", "scan"}
 
     def __init__(self, repo_root: Optional[Path] = None, include_tests: bool = False):
         self.repo_root = repo_root or REPO_ROOT
@@ -130,7 +154,11 @@ class OrphanCapabilityScanner:
         return result
 
     def _find_cli_entrypoints(self):
-        """Find all Python files with `if __name__ == "__main__"` blocks."""
+        """Find all Python files with `if __name__ == "__main__"` blocks.
+
+        Per CF2 (ROLODEX_FALSE_POSITIVE_EXCLUSION): Excludes __init__.py files
+        which inflate orphan counts without representing real CLI capabilities.
+        """
         main_pattern = re.compile(r'if\s+__name__\s*==\s*["\']__main__["\']')
         json_pattern = re.compile(r'--json|argparse.*json|\.add_argument.*json')
 
@@ -142,6 +170,14 @@ class OrphanCapabilityScanner:
             for py_file in dir_path.rglob("*.py"):
                 # Skip excluded directories
                 if any(excl in str(py_file) for excl in self.EXCLUDE_PATTERNS):
+                    continue
+
+                # Skip false positive files (CF2: __init__.py, __main__.py)
+                if py_file.name in self.FALSE_POSITIVE_PATTERNS:
+                    continue
+
+                # Skip archived/deprecated paths
+                if any(fp in str(py_file).lower() for fp in self.FALSE_POSITIVE_PATH_PATTERNS):
                     continue
 
                 # Skip test files unless explicitly included
@@ -167,6 +203,9 @@ class OrphanCapabilityScanner:
                     # Suggest trigger based on category
                     trigger = self._suggest_trigger(category, py_file.name)
 
+                    # Classify orphan (will be updated after SKILLz.md cross-reference)
+                    orphan_class = self._classify_orphan(rel_path, line_count)
+
                     cap = CapabilityInfo(
                         path=str(rel_path),
                         module_name=self._path_to_module(rel_path),
@@ -175,6 +214,7 @@ class OrphanCapabilityScanner:
                         line_count=line_count,
                         category=category,
                         suggested_trigger=trigger,
+                        orphan_class=orphan_class,
                     )
 
                     self.capabilities[str(rel_path)] = cap
@@ -270,6 +310,46 @@ class OrphanCapabilityScanner:
         if parts[-1].endswith(".py"):
             parts[-1] = parts[-1][:-3]
         return ".".join(parts)
+
+    def _classify_orphan(self, rel_path: Path, line_count: int) -> str:
+        """
+        Classify an orphan CLI into categories per CF2 strategy.
+
+        Categories:
+        - candidate: Should be connected to WRE (DAEmons, platform tools)
+        - false_positive: Should never be counted (__init__.py, archived)
+        - developer_tool: Manual tools used by 012/0102 during dev
+        - research: Simulation/analysis tools
+        - wre_internal: Part of WRE machinery (circular dependency risk)
+        - trivial: <50 lines, simple launchers
+        """
+        path_str = str(rel_path).lower()
+        filename = rel_path.name.lower()
+
+        # Check false positives (already excluded by scanner, but classify anyway)
+        if filename in self.FALSE_POSITIVE_PATTERNS:
+            return "false_positive"
+        if any(fp in path_str for fp in self.FALSE_POSITIVE_PATH_PATTERNS):
+            return "false_positive"
+
+        # Check WRE-internal (circular dependency risk)
+        if any(wre in path_str for wre in self.WRE_INTERNAL_PATTERNS):
+            return "wre_internal"
+
+        # Check research/simulation
+        if any(res in path_str for res in self.RESEARCH_PATTERNS):
+            return "research"
+
+        # Check developer tools
+        if any(dev in filename for dev in self.DEVELOPER_PATTERNS):
+            return "developer_tool"
+
+        # Check trivial (<50 lines)
+        if line_count < 50:
+            return "trivial"
+
+        # Default: candidate for WRE connection
+        return "candidate"
 
     def generate_templates(self, orphans: List[CapabilityInfo], limit: int = 10) -> List[str]:
         """
