@@ -115,7 +115,7 @@ The Rolodex is implemented as a dual-write system:
 
 Generated via: `python holo_index.py --index-cli`
 
-Current state (722 CLI entrypoints, 95 WRE-connected, 696 orphans).
+**Note:** Metrics between JSON metadata and SQLite are not yet fully synchronized. The majority of CLI entrypoints are currently orphaned (not WRE-connected). Exact counts should be verified at query time rather than assumed from this document.
 
 Key integration points:
 - `holo_index/_cli_main.py`: `_generate_cli_rolodex_json()`, `_generate_cli_rolodex_sqlite()`
@@ -150,7 +150,7 @@ This architecture explicitly rejects:
 
 - Multiple retrieval paths must be maintained (HoloIndex + OpenClaw + pattern memory)
 - Operators must understand which layer to query for which purpose
-- Rolodex orphan rate is high (96%) — most CLI capabilities are not WRE-connected
+- Rolodex orphan rate is high — most CLI capabilities are not yet WRE-connected
 - Some duplication between layers is accepted to maintain separation
 
 ---
