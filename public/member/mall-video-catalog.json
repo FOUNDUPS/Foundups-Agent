@@ -11120,6 +11120,9 @@
     "tier": "F0_DAE",
     "lifecycle_stage": "incubating",
     "launch_readiness": "discoverable_only",
+    "routing_prefix": "/f/kosei",
+    "data_namespace": "idb_kosei",
+    "token_symbol": "KOSEI",
     "poster_url": "/media/posters/kosei.jpg",
     "video_count": 0,
     "videos": []
