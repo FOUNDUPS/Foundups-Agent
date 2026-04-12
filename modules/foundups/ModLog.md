@@ -22,7 +22,7 @@
 | `entry_url` | `null` (no deployed runtime yet) |
 | `launch_readiness` | `discoverable_only` |
 
-**Test Results**: 23 namespace guardrail + 9 contract compliance + 40 route contract = 72 passed
+**Test Results**: 23 namespace guardrail + 8 contract compliance + 37 route contract = 68 passed, 3 skipped
 
 ---
 
