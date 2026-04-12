@@ -17,7 +17,7 @@
 | Orphans | 703 (96.0%) |
 | Registered SKILLz.md | 105 |
 
-The 29 connected commands are all `executor.py` or `run_skill.py` files inside `skillz/` directories — the only path the cross-reference logic matches. The remaining 703 include everything from core infrastructure DAEmons to `__init__.py` files with trivial `if __name__` guards.
+The 29 connected commands are those with a matching `SKILLz.md` in their directory tree — often but not exclusively wrapper-style files like `executor.py` or `run_skill.py`. The remaining 703 include everything from core infrastructure DAEmons to `__init__.py` files with trivial `if __name__` guards.
 
 **The 96% orphan rate is not a crisis.** Most orphans are not WRE candidates. The meaningful question is: how many _should_ be connected, and what is the cheapest way to connect the ones that matter?
 
