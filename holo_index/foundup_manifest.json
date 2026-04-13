@@ -1,0 +1,11 @@
+{
+  "foundup_id": "holoindex_prod_01",
+  "name": "HoloIndex",
+  "version": "0.1.0",
+  "description": "Enterprise-grade artifact and memory retrieval system for the p.fMALL shell.",
+  "routing_prefix": "/f/holoindex_prod_01",
+  "data_namespace": "idb_holoindex_prod_01",
+  "capabilities": ["semantic_search", "wsp_lookup"],
+  "entry_point": "public/f/holoindex_prod_01/index.html",
+  "capabilities_adapter": "holo_index.foundup_adapter.bridge_stub"
+}
