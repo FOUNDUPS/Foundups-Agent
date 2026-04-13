@@ -75,7 +75,7 @@ The primary public API for the unified Red Dog plane. All concierge interactions
 | **AI Tools** | |
 | `setCategory(id)` | Set projection category |
 | `getCategory()` | Get current category |
-| `setDensity(preset)` | Set density preset (3x4, 3x5, 4x6, 5x8) |
+| `setDensity(preset)` | Set density preset (3x4, 3x5, 4x6, 5x8, 6x3) |
 | `getDensity()` | Get current density |
 | `setMotionMode(mode)` | Set motion mode (snap, glide) |
 | `getMotionMode()` | Get current motion mode |
@@ -137,8 +137,10 @@ Video Mall tile grid with field scope projections.
 | `setMotionMode(mode)` | Set snap or glide |
 | `getMotionMode()` | Get current motion mode |
 | **Density** | |
-| `setDensity(preset)` | Set density preset |
+| `setDensity(preset, isManual)` | Set density preset (3x4, 3x5, 4x6, 5x8, 6x3). `isManual=true` prevents auto-override. |
 | `getDensity()` | Get current density |
+| `autoSelectDensity()` | Auto-select density based on viewport (fine-pointer + 1024px+ landscape → 6x3) |
+| `resetDensityOverride()` | Clear manual override, allow auto-selection to resume |
 | **Projection** | |
 | `setProjection(type)` | Set projection sort |
 | `getProjection()` | Get current projection |

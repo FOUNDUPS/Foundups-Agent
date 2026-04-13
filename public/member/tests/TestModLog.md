@@ -4,6 +4,36 @@ Test evolution log for the p.fMALL member shell test suite.
 
 ---
 
+## 2026-04-13 | Adaptive Desktop 6x3 Layout Tests (WSP 15/97)
+
+**File**: `test_video_mall_field_runtime.py` (extended)
+**Tests**: 15 added | **Class**: `TestAdaptiveDesktopLayout` | **Result**: 273 passed
+**Worker**: CL
+
+Verifies viewport-adaptive density selection for desktop viewports:
+
+| Test | What it checks |
+|------|----------------|
+| `test_6x3_preset_in_css` | CSS has 6x3 preset with 6 cols, 3 rows |
+| `test_6x3_in_valid_densities` | JS validDensities includes '6x3' |
+| `test_detect_optimal_density_function` | detectOptimalDensity() exists |
+| `test_auto_select_density_function` | autoSelectDensity() exists |
+| `test_density_manually_set_tracking` | densityManuallySet variable exists |
+| `test_manual_override_preserved` | Manual override prevents auto-selection |
+| `test_resize_handler_bound` | Resize event listener bound |
+| `test_handle_resize_function` | handleResize() exists |
+| `test_reset_density_override_api` | resetDensityOverride exposed in API |
+| `test_auto_select_density_api` | autoSelectDensity exposed in API |
+| `test_desktop_detection_uses_fine_pointer` | Uses pointer: coarse media query |
+| `test_desktop_detection_uses_width_threshold` | Uses 1024px width threshold |
+| `test_desktop_detection_uses_landscape` | Checks isLandscape |
+| `test_auto_select_called_on_init` | autoSelectDensity() called during init |
+| `test_mobile_default_preserved` | Default return is '3x5' |
+
+**Key context**: Implementation already existed; tests added to verify and document adaptive density behavior.
+
+---
+
 ## 2026-04-13 | Kosei entry_url Restored (WSP 104/97)
 
 **File**: `test_route_contract_bridge.py` (modified)

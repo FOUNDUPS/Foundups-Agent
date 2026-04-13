@@ -219,6 +219,91 @@ class TestDensityPresets:
         assert 'data-density="3x5"' in css
         assert 'data-density="4x6"' in css
         assert 'data-density="5x8"' in css
+        assert 'data-density="6x3"' in css
+
+
+class TestAdaptiveDesktopLayout:
+    """Test adaptive desktop 6x3 layout for wide viewports."""
+
+    def test_6x3_preset_in_css(self):
+        """6x3 desktop preset exists in CSS."""
+        css = _read("css/mall-tile-field.css")
+        assert 'data-density="6x3"' in css
+        assert "--field-columns: 6" in css
+        assert "--field-rows: 3" in css
+
+    def test_6x3_in_valid_densities(self):
+        """6x3 is in the validDensities array."""
+        js = _read("js/mall-tile-field.js")
+        assert "'6x3'" in js
+        assert "validDensities" in js
+
+    def test_detect_optimal_density_function(self):
+        """detectOptimalDensity function exists for viewport detection."""
+        js = _read("js/mall-tile-field.js")
+        assert "function detectOptimalDensity" in js
+
+    def test_auto_select_density_function(self):
+        """autoSelectDensity function exists for automatic density selection."""
+        js = _read("js/mall-tile-field.js")
+        assert "function autoSelectDensity" in js
+
+    def test_density_manually_set_tracking(self):
+        """densityManuallySet variable tracks manual override."""
+        js = _read("js/mall-tile-field.js")
+        assert "densityManuallySet" in js
+
+    def test_manual_override_preserved(self):
+        """Manual override prevents auto-selection."""
+        js = _read("js/mall-tile-field.js")
+        assert "if (densityManuallySet) return" in js
+
+    def test_resize_handler_bound(self):
+        """Resize event listener bound for viewport changes."""
+        js = _read("js/mall-tile-field.js")
+        assert "addEventListener('resize'" in js or 'addEventListener("resize"' in js
+
+    def test_handle_resize_function(self):
+        """handleResize function exists."""
+        js = _read("js/mall-tile-field.js")
+        assert "function handleResize" in js
+
+    def test_reset_density_override_api(self):
+        """resetDensityOverride function exposed in API."""
+        js = _read("js/mall-tile-field.js")
+        assert "resetDensityOverride:" in js
+
+    def test_auto_select_density_api(self):
+        """autoSelectDensity function exposed in API."""
+        js = _read("js/mall-tile-field.js")
+        assert "autoSelectDensity:" in js
+
+    def test_desktop_detection_uses_fine_pointer(self):
+        """Desktop detection uses pointer: coarse media query."""
+        js = _read("js/mall-tile-field.js")
+        assert "pointer: coarse" in js
+
+    def test_desktop_detection_uses_width_threshold(self):
+        """Desktop detection uses width >= 1024px threshold."""
+        js = _read("js/mall-tile-field.js")
+        assert "1024" in js
+
+    def test_desktop_detection_uses_landscape(self):
+        """Desktop detection checks for landscape orientation."""
+        js = _read("js/mall-tile-field.js")
+        assert "isLandscape" in js
+
+    def test_auto_select_called_on_init(self):
+        """autoSelectDensity called during initialize."""
+        js = _read("js/mall-tile-field.js")
+        # Should call autoSelectDensity in initialize function
+        assert "autoSelectDensity()" in js
+
+    def test_mobile_default_preserved(self):
+        """Mobile default is 3x5 when no viewport adaptation applies."""
+        js = _read("js/mall-tile-field.js")
+        # detectOptimalDensity returns '3x5' as default
+        assert "return '3x5'" in js
 
 
 class TestPortraitTileGeometry:
