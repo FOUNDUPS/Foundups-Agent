@@ -21,7 +21,7 @@
     ],
     "geo": "Fukui, Japan",
     "status": "active",
-    "video_count": 592,
+    "video_count": 594,
     "poster_url": "/media/posters/move2japan.jpg",
     "videos": [
       {
@@ -5351,6 +5351,22 @@
         "source_url": "https://www.youtube.com/watch?v=-7z4n1uuvm8",
         "timestamp": "2026-01-31T14:53:11Z",
         "duration_seconds": 60
+      },
+      {
+        "video_id": "pP804fq9ttE",
+        "title": "💀 #ICE Cruelty Exposed! #FFCPLN Music ⚠️",
+        "thumbnail_url": "https://i.ytimg.com/vi/pP804fq9ttE/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/pP804fq9ttE",
+        "source_url": "https://www.youtube.com/watch?v=pP804fq9ttE",
+        "timestamp": "2026-04-13T10:27:22.774539Z"
+      },
+      {
+        "video_id": "ZJqB_jeaPCQ",
+        "title": "⚠️ #FFCPLN Exposes #MAGA - 160 Songs! See Desc! 🎶",
+        "thumbnail_url": "https://i.ytimg.com/vi/ZJqB_jeaPCQ/hqdefault.jpg",
+        "embed_url": "https://www.youtube.com/embed/ZJqB_jeaPCQ",
+        "source_url": "https://www.youtube.com/watch?v=ZJqB_jeaPCQ",
+        "timestamp": "2026-04-13T10:27:22.774539Z"
       }
     ],
     "creator_id": "012",
