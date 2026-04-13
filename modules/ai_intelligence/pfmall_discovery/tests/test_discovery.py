@@ -56,6 +56,7 @@ class TestDiscoveryProposal:
 
         assert proposal.matched_foundup_id is None
         assert proposal.confidence == 0.0
+        assert proposal.ambiguous_candidates == []
         assert proposal.review_status == "proposed"
 
 
@@ -108,7 +109,7 @@ class TestFoundUpMatching:
 
     def test_exact_channel_match(self, catalog_targets):
         """Exact channel_id match returns confidence 1.0."""
-        matched_id, reason, confidence = match_to_foundup(
+        matched_id, reason, confidence, ambiguous = match_to_foundup(
             channel_id="UC-LSSlOZwpGIRIYihaz8zCw",
             title="Some video",
             description="Description",
@@ -118,24 +119,43 @@ class TestFoundUpMatching:
         assert matched_id == "move2japan"
         assert reason == "channel_id_match"
         assert confidence == 1.0
+        assert ambiguous == []
 
-    def test_tag_overlap_match(self, catalog_targets):
-        """Tag overlap match returns intermediate confidence."""
-        matched_id, reason, confidence = match_to_foundup(
-            channel_id="UC_UNKNOWN",
-            title="FFCPLN music activism video",
-            description="Anti-fascist music",
+    def test_ambiguous_shared_topic_match(self, catalog_targets):
+        """Shared topic (FFCPLN) returns ambiguous match with candidates."""
+        matched_id, reason, confidence, ambiguous = match_to_foundup(
+            channel_id="UC_UNKNOWN",  # Unknown channel
+            title="FFCPLN music video",
+            description="Anti-fascist ffcpln content",
             targets=catalog_targets,
         )
 
-        # Should match antifafm due to "music", "activism", "ffcpln" tags
-        assert matched_id in ["antifafm", "move2japan"]  # Could match either
-        assert "tag_overlap" in reason or "category" in reason
-        assert 0.2 <= confidence <= 0.7
+        # Both move2japan and antifafm have "ffcpln" tag
+        # Should detect ambiguity
+        assert reason == "ambiguous_shared_topic"
+        assert matched_id is None  # No single match when ambiguous
+        assert confidence <= 0.5  # Reduced confidence for ambiguity
+        assert "move2japan" in ambiguous
+        assert "antifafm" in ambiguous
+
+    def test_single_tag_overlap_match(self, catalog_targets):
+        """Single FoundUp tag match returns unambiguous result."""
+        matched_id, reason, confidence, ambiguous = match_to_foundup(
+            channel_id="UC_UNKNOWN",
+            title="Japan relocation expat video",
+            description="Moving to Japan advice",
+            targets=catalog_targets,
+        )
+
+        # Only move2japan has "japan", "expat", "relocation" tags
+        assert matched_id == "move2japan"
+        assert "tag_overlap" in reason
+        assert confidence >= 0.3
+        assert ambiguous == []
 
     def test_category_match(self, catalog_targets):
         """Category match returns low confidence."""
-        matched_id, reason, confidence = match_to_foundup(
+        matched_id, reason, confidence, ambiguous = match_to_foundup(
             channel_id="UC_UNKNOWN",
             title="Travel vlog",
             description="My travel adventures",
@@ -145,10 +165,11 @@ class TestFoundUpMatching:
         assert matched_id == "move2japan"
         assert "category" in reason or "tag" in reason
         assert confidence >= 0.2
+        assert ambiguous == []
 
     def test_no_match(self, catalog_targets):
         """No match returns None."""
-        matched_id, reason, confidence = match_to_foundup(
+        matched_id, reason, confidence, ambiguous = match_to_foundup(
             channel_id="UC_UNKNOWN",
             title="Random cooking video",
             description="How to make pasta",
@@ -158,10 +179,11 @@ class TestFoundUpMatching:
         assert matched_id is None
         assert reason == "no_match"
         assert confidence == 0.0
+        assert ambiguous == []
 
     def test_empty_targets(self):
         """Empty targets returns no match."""
-        matched_id, reason, confidence = match_to_foundup(
+        matched_id, reason, confidence, ambiguous = match_to_foundup(
             channel_id="UC123",
             title="Test",
             description="Test",
@@ -171,6 +193,7 @@ class TestFoundUpMatching:
         assert matched_id is None
         assert reason == "no_targets"
         assert confidence == 0.0
+        assert ambiguous == []
 
 
 class TestMatchProposals:
@@ -201,6 +224,44 @@ class TestMatchProposals:
 
         assert matched[0].matched_foundup_id == "move2japan"
         assert matched[0].confidence == 1.0
+        assert matched[0].ambiguous_candidates == []
+
+    def test_match_proposals_detects_ambiguity(self):
+        """match_proposals correctly identifies ambiguous shared-topic matches."""
+        proposals = [
+            DiscoveryProposal(
+                query="FFCPLN music",
+                candidate_type="video",
+                channel_id="UC_UNKNOWN",  # Unknown channel
+                title="FFCPLN music video",
+                description="Anti-fascist ffcpln content",
+            ),
+        ]
+
+        targets = [
+            CatalogTarget(
+                foundup_id="move2japan",
+                source_id="UC-LSSlOZwpGIRIYihaz8zCw",
+                source_handle="@MOVE2JAPAN",
+                tags=["japan", "expat", "ffcpln"],
+                category="travel",
+            ),
+            CatalogTarget(
+                foundup_id="antifafm",
+                source_id="UCVSmg5aOhP4tnQ9KFUg97qA",
+                source_handle="@antifaFM",
+                tags=["music", "activism", "ffcpln"],
+                category="media",
+            ),
+        ]
+
+        matched = match_proposals(proposals, targets)
+
+        # Should detect ambiguity
+        assert matched[0].matched_foundup_id is None
+        assert matched[0].match_reason == "ambiguous_shared_topic"
+        assert "move2japan" in matched[0].ambiguous_candidates
+        assert "antifafm" in matched[0].ambiguous_candidates
 
 
 class TestProposalFormatting:

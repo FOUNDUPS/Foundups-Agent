@@ -1,15 +1,17 @@
 """
 FoundUp Matcher - Map discovered content to existing catalog FoundUps.
 
-Matching policy:
+Matching policy (priority order):
 1. Exact channel_id match (confidence: 1.0)
-2. Tag overlap match (confidence: 0.3-0.7 based on overlap)
-3. Category match (confidence: 0.2)
-4. Unmatched (confidence: 0.0)
+2. High-confidence known-channel match (confidence: 0.9)
+3. Ambiguous shared-topic match - multiple FoundUps viable (confidence: 0.3-0.5)
+4. Single tag overlap match (confidence: 0.3-0.7)
+5. Category match (confidence: 0.2)
+6. Unmatched (confidence: 0.0)
 
 WSP References:
 - WSP 3: AI Intelligence domain
-- WSP 97: Truthful matching (no invented mappings)
+- WSP 97: Truthful matching (no invented mappings, represent ambiguity honestly)
 """
 
 from __future__ import annotations
@@ -105,15 +107,16 @@ def match_to_foundup(
     title: str,
     description: str,
     targets: List[CatalogTarget],
-) -> Tuple[Optional[str], str, float]:
+) -> Tuple[Optional[str], str, float, List[str]]:
     """
     Match a discovered item to an existing FoundUp.
 
     Matching policy (priority order):
     1. Exact channel_id match -> confidence 1.0
-    2. Tag overlap from title/description -> confidence 0.3-0.7
-    3. Category hint from title/description -> confidence 0.2
-    4. No match -> confidence 0.0
+    2. Ambiguous shared-topic match -> confidence 0.3-0.5 with candidates list
+    3. Single tag overlap match -> confidence 0.3-0.7
+    4. Category match -> confidence 0.2
+    5. No match -> confidence 0.0
 
     Args:
         channel_id: YouTube channel ID of discovered item
@@ -122,44 +125,78 @@ def match_to_foundup(
         targets: List of catalog targets to match against
 
     Returns:
-        Tuple of (matched_foundup_id, match_reason, confidence)
+        Tuple of (matched_foundup_id, match_reason, confidence, ambiguous_candidates)
     """
     if not targets:
-        return None, "no_targets", 0.0
+        return None, "no_targets", 0.0, []
+
+    # Priority 1: Exact channel_id match (unambiguous)
+    for target in targets:
+        if channel_id and target.source_id and channel_id == target.source_id:
+            return target.foundup_id, "channel_id_match", 1.0, []
 
     # Extract keywords from title and description for matching
     text = f"{title} {description}".lower()
     text_words = set(text.split())
 
-    best_match: Optional[str] = None
-    best_reason = "no_match"
-    best_confidence = 0.0
+    # Collect all candidates with tag overlap scores
+    tag_candidates: List[Tuple[str, float]] = []
+    category_candidates: List[Tuple[str, float]] = []
 
     for target in targets:
-        # Priority 1: Exact channel_id match
-        if channel_id and target.source_id and channel_id == target.source_id:
-            return target.foundup_id, "channel_id_match", 1.0
-
-        # Priority 2: Tag overlap
+        # Tag overlap scoring
         tag_overlap = _calculate_tag_overlap(list(text_words), target.tags)
-        if tag_overlap > best_confidence:
-            best_match = target.foundup_id
-            best_reason = f"tag_overlap:{tag_overlap:.2f}"
-            best_confidence = tag_overlap
+        if tag_overlap >= 0.2:  # Minimum threshold for consideration
+            tag_candidates.append((target.foundup_id, tag_overlap))
 
-        # Priority 3: Category match
+        # Category scoring
         if target.category and target.category in text:
-            category_score = 0.2
-            if category_score > best_confidence:
-                best_match = target.foundup_id
-                best_reason = f"category_match:{target.category}"
-                best_confidence = category_score
+            category_candidates.append((target.foundup_id, 0.2))
 
-    # Only return match if confidence meets threshold
-    if best_confidence >= 0.2:
-        return best_match, best_reason, best_confidence
+    # Priority 2: Check for ambiguous shared-topic match
+    # If multiple FoundUps have significant tag overlap, this is ambiguous
+    significant_tag_matches = [(fid, score) for fid, score in tag_candidates if score >= 0.3]
 
-    return None, "no_match", 0.0
+    if len(significant_tag_matches) > 1:
+        # Multiple FoundUps share this topic space - ambiguous!
+        # Sort by score descending
+        significant_tag_matches.sort(key=lambda x: x[1], reverse=True)
+        ambiguous_ids = [fid for fid, _ in significant_tag_matches]
+
+        # Use best score but cap confidence due to ambiguity
+        best_score = significant_tag_matches[0][1]
+        ambiguous_confidence = min(0.5, best_score * 0.7)  # Penalize for ambiguity
+
+        logger.info(
+            f"[MATCHER] Ambiguous shared-topic match: {ambiguous_ids} "
+            f"(confidence {ambiguous_confidence:.2f})"
+        )
+
+        return (
+            None,  # No single match
+            "ambiguous_shared_topic",
+            ambiguous_confidence,
+            ambiguous_ids,
+        )
+
+    # Priority 3: Single tag overlap match (unambiguous)
+    if tag_candidates:
+        tag_candidates.sort(key=lambda x: x[1], reverse=True)
+        best_fid, best_score = tag_candidates[0]
+        return best_fid, f"tag_overlap:{best_score:.2f}", best_score, []
+
+    # Priority 4: Category match
+    if category_candidates:
+        # Check for ambiguous category matches too
+        if len(category_candidates) > 1:
+            ambiguous_ids = [fid for fid, _ in category_candidates]
+            return None, "ambiguous_category", 0.15, ambiguous_ids
+
+        best_fid, best_score = category_candidates[0]
+        return best_fid, f"category_match", best_score, []
+
+    # Priority 5: No match
+    return None, "no_match", 0.0, []
 
 
 def match_proposals(
@@ -174,13 +211,14 @@ def match_proposals(
         targets: Optional pre-loaded targets (loads from catalog if None)
 
     Returns:
-        Proposals with matched_foundup_id, match_reason, confidence populated
+        Proposals with matched_foundup_id, match_reason, confidence,
+        and ambiguous_candidates populated
     """
     if targets is None:
         targets = load_catalog_targets()
 
     for proposal in proposals:
-        matched_id, reason, confidence = match_to_foundup(
+        matched_id, reason, confidence, ambiguous = match_to_foundup(
             channel_id=proposal.channel_id,
             title=proposal.title,
             description=proposal.description,
@@ -190,5 +228,6 @@ def match_proposals(
         proposal.matched_foundup_id = matched_id
         proposal.match_reason = reason
         proposal.confidence = confidence
+        proposal.ambiguous_candidates = ambiguous
 
     return proposals
