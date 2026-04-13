@@ -38,6 +38,7 @@ class DiscoveryProposal:
     matched_foundup_id: Optional[str] = None
     match_reason: str = ""
     confidence: float = 0.0
+    ambiguous_candidates: List[str] = field(default_factory=list)
     # Review status
     review_status: str = "proposed"
 
@@ -58,6 +59,7 @@ class DiscoveryProposal:
             "matched_foundup_id": self.matched_foundup_id,
             "match_reason": self.match_reason,
             "confidence": self.confidence,
+            "ambiguous_candidates": self.ambiguous_candidates,
             "review_status": self.review_status,
         }
 

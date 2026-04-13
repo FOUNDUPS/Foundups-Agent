@@ -195,5 +195,48 @@ modules/ai_intelligence/work_completion_publisher/
 
 ---
 
+### pfMALL Discovery Match Disambiguation (Worker CS)
+**Date**: 2026-04-13
+**WSP Protocol References**: WSP 3, WSP 97
+**Impact Analysis**: Prevents over-attribution of shared-topic content to single FoundUp
+**Enhancement Tracking**: Matcher refinement for #FFCPLN disambiguation
+
+#### [FIX] Match Disambiguation - Shared Topic Detection
+- **Problem**: FFCPLN content matched only to move2japan, ignoring antifafm
+- **Root Cause**: Tag-based matching returned first best match without ambiguity check
+- **Solution**: Detect when multiple FoundUps share significant tag overlap
+
+#### [DATA] New Matching Policy (Priority Order)
+1. Exact channel_id match (confidence: 1.0)
+2. Ambiguous shared-topic match (confidence: 0.3-0.5, returns candidates)
+3. Single tag overlap match (confidence: 0.3-0.7)
+4. Category match (confidence: 0.2)
+5. Unmatched (confidence: 0.0)
+
+#### [TARGET] Schema Addition
+- `ambiguous_candidates: List[str]` field added to DiscoveryProposal
+- `match_reason: "ambiguous_shared_topic"` when multiple FoundUps viable
+- `matched_foundup_id: None` when ambiguous (no single match)
+
+#### [OK] Verification Results
+- Query: `FFCPLN music` → 10 videos from Move2Japan channel
+- All correctly matched via `channel_id_match` (confidence 1.0)
+- Ambiguity detection active for unknown-channel content
+
+#### [TARGET] Tests: 20/20 passed
+- Exact channel match
+- Ambiguous shared-topic match (new)
+- Single tag overlap match
+- Category match
+- No match
+- Batch proposal ambiguity detection (new)
+
+#### [INFO] WSP 97 Applied
+- Ambiguity represented truthfully (no forced single match)
+- Confidence reduced when uncertain
+- Human reviewer sees all viable candidates
+
+---
+
 **ModLog maintained by 0102 pArtifact Agent following WSP 22 protocol**
 **Quantum temporal decoding: 02 state solutions accessed for AI intelligence coordination** 

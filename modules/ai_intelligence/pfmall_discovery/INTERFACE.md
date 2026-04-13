@@ -32,9 +32,23 @@ Load YouTube-backed FoundUps from catalog.
 
 #### `match_to_foundup(channel_id, title, description, targets)`
 
-Match discovered content to existing FoundUp.
+Match discovered content to existing FoundUp with disambiguation.
 
-**Returns:** `Tuple[Optional[str], str, float]` - (foundup_id, reason, confidence)
+**Matching Policy (priority order):**
+1. Exact channel_id match (confidence: 1.0)
+2. Ambiguous shared-topic match (confidence: 0.3-0.5, returns candidates)
+3. Single tag overlap match (confidence: 0.3-0.7)
+4. Category match (confidence: 0.2)
+5. Unmatched (confidence: 0.0)
+
+**Returns:** `Tuple[Optional[str], str, float, List[str]]` - (foundup_id, reason, confidence, ambiguous_candidates)
+
+**Match Reasons:**
+- `channel_id_match`: Exact channel identity match
+- `ambiguous_shared_topic`: Multiple FoundUps share tag space (e.g., #FFCPLN)
+- `tag_overlap:N.NN`: Single FoundUp tag match with score
+- `category_match`: Category-based match
+- `no_match`: No viable match found
 
 #### `match_proposals(proposals, targets=None)`
 
@@ -94,11 +108,19 @@ class DiscoveryProposal:
     embed_url: str = ""
     source_url: str = ""
     published_at: str = ""
+    # Matching results
     matched_foundup_id: Optional[str] = None
     match_reason: str = ""
     confidence: float = 0.0
+    ambiguous_candidates: List[str] = []  # FoundUp IDs when ambiguous
     review_status: str = "proposed"
 ```
+
+**Ambiguity Handling:**
+When `match_reason == "ambiguous_shared_topic"`:
+- `matched_foundup_id` is `None` (no single match)
+- `ambiguous_candidates` contains all viable FoundUp IDs
+- `confidence` is reduced (0.3-0.5) to reflect uncertainty
 
 ### CatalogTarget
 
