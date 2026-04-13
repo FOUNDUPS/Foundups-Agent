@@ -7,6 +7,17 @@
 
 ## Change Log
 
+### 2026-04-08 - INTERFACE.md (CR — WSP49_FIRST_REAL_INTERFACE_HANDOFF_PHASE1)
+
+**By:** 0102  
+**WSP:** WSP 11 (INTERFACE), WSP 22 (this log), WSP 49  
+
+#### Summary
+
+Added `INTERFACE.md` documenting public exports (`WardrobeSkill`, recorder and skills_store callables), parameters, returns, `None` / `FileNotFoundError` / `NotImplementedError` where applicable, env vars from `src/config.py`, and integration pointers. Grounded in `src/`; no API fiction. Judgment: `docs/0102_session_briefings/CR_WSP49_FIRST_REAL_INTERFACE_HANDOFF_PHASE1.md`.
+
+---
+
 ### 2024-12-10 - Initial Implementation: Foundation Layer v0.0.1
 
 **By:** 0102
