@@ -45,6 +45,21 @@
     "theme": "antifafm",
     "hero_label": "SIGNAL",
     "hero_mood": "Signal-first, always on, discoverable inside the shell.",
-    "entry_copy": "The broadcast stack is real, but shell entry stays discoverable-only until tenant handoff is wired."
+  },
+  {
+    "foundup_id": "holoindex_prod_01",
+    "name": "HoloIndex",
+    "tagline": "System Knowledge Retrieval",
+    "description": "Enterprise-grade artifact and memory retrieval system for the p.fMALL shell.",
+    "category": "infrastructure",
+    "tier": "INFRA",
+    "lifecycle_stage": "incubating",
+    "launch_readiness": "discoverable_only",
+    "token_symbol": "HOLO",
+    "routing_prefix": "/f/holoindex_prod_01",
+    "theme": "holoindex",
+    "hero_label": "SEARCH",
+    "hero_mood": "System search interface, securely intercepting queries for external bridging.",
+    "entry_copy": "HoloIndex is discoverable but remains in explicit stub mode until the backend relay clears."
   }
 ]

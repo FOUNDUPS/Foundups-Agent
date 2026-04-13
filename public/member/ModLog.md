@@ -1,5 +1,47 @@
 # Member Area Module Change Log
 
+## [2026-04-13] pfMALL YouTube Discovery AI Hook (Worker CQ)
+
+**Who**: 0102 - Worker CQ
+**Slice**: `PFMALL_YOUTUBE_DISCOVERY_AI_HOOK_PHASE1`
+**What**: AI hook for exploratory YouTube discovery beyond known catalog channels.
+
+**Implementation**:
+- New module: `modules/ai_intelligence/pfmall_discovery/`
+- Search YouTube via Data API for videos/channels
+- Match discovered content to existing FoundUps
+- Generate reviewable proposal artifacts (no catalog mutation)
+
+**Discovery Inputs Supported (Phase 1)**:
+- Free-text search query (e.g., "FFCPLN music", "Japan expat")
+- Search type: video or channel
+
+**Matching Policy**:
+| Priority | Match Type | Confidence |
+|----------|------------|------------|
+| 1 | Exact channel_id match | 1.0 |
+| 2 | Tag overlap | 0.3-0.7 |
+| 3 | Category match | 0.2 |
+| 4 | No match | 0.0 |
+
+**Live Discovery Test**:
+- Query: "FFCPLN music"
+- Results: 10 videos found
+- Matched: 10/10 to move2japan (channel_id_match)
+- Artifact: `docs/audits/pfmall_youtube_ingest/youtube_discovery_proposals.json`
+
+**Key Boundary**:
+- Discovery produces PROPOSALS only
+- No catalog mutation in this layer
+- Human review required before any apply
+- Separate from deterministic channel-pull
+
+**Tests**: 18/18 passed
+
+**WSP 97 Applied**: Discovery does not claim "web search" - only YouTube search via Data API.
+
+---
+
 ## [2026-04-13] YouTube Delta Review and Catalog Apply (Worker CP)
 
 **Who**: 0102 - Worker CP

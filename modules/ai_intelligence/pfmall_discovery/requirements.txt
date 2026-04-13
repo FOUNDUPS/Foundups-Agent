@@ -1,0 +1,6 @@
+# pfMALL Discovery Requirements
+# WSP 70: Externalized configuration and dependencies
+
+google-api-python-client>=2.0.0
+# youtube_auth provided by platform_integration
+# Logger provided by standard library
