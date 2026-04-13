@@ -1,5 +1,35 @@
 # Member Area Module Change Log
 
+## [2026-04-13] YouTube Delta Review and Catalog Apply (Worker CP)
+
+**Who**: 0102 - Worker CP
+**Slice**: `YOUTUBE_DELTA_REVIEW_AND_CATALOG_APPLY_PHASE1`
+**What**: Review and apply YouTube channel pull delta to live catalog.
+
+**Review Summary**:
+- **Source**: `docs/audits/pfmall_youtube_ingest/youtube_channel_pull_delta.json`
+- **Target**: `move2japan` (UC-LSSlOZwpGIRIYihaz8zCw)
+- **Delta Generated**: 2026-04-13T06:35:57Z (Worker CM pull)
+- **Videos Reviewed**: 19 (all approved)
+- **Duplicates Found**: 0
+
+**Apply Result**:
+- **Before**: 573 videos
+- **After**: 592 videos (+19)
+- **Schema Preserved**: video_id, title, thumbnail_url, embed_url, source_url, timestamp, duration_seconds
+- **Order Policy**: Newest-first (prepended to existing array)
+
+**Skipped**: None (all 19 videos approved after review)
+
+**Files Modified**:
+- `public/member/mall-video-catalog.json` - Added 19 videos, updated video_count
+
+**Tests**: 258 passed (pfMALL wall behavior intact)
+
+**WSP 97 Applied**: Every video reviewed for channel match, dedup verified, schema preserved.
+
+---
+
 ## [2026-04-13] YouTube Channel Pull Delta Generator (Worker CM)
 
 **Who**: 0102 - Worker CM
