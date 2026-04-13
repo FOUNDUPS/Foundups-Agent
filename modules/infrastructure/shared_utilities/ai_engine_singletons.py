@@ -27,7 +27,6 @@ Usage:
 
 import logging
 import time
-from pathlib import Path
 from typing import Optional, Any
 
 logger = logging.getLogger(__name__)
@@ -60,17 +59,18 @@ def get_qwen_engine(
     """
     Get or create singleton Qwen inference engine.
 
-    Uses QwenInferenceEngine from holo_index with lazy loading.
-    Logs load time for WSP 91 observability.
+    Uses local_llm_resolver to select best available backend:
+    1. LM Studio API (if available) - avoids file lock conflicts, no config needed
+    2. Direct llama_cpp loading (fallback) - requires QwenAdvisorConfig
 
     Args:
-        max_tokens: Maximum tokens to generate
-        temperature: Sampling temperature
+        max_tokens: Maximum tokens to generate (unused by backend, kept for API compat)
+        temperature: Sampling temperature (unused by backend, kept for API compat)
         context_length: Context window size
         force_reinit: Force re-initialization (use with caution)
 
     Returns:
-        QwenInferenceEngine instance, or None if unavailable
+        LocalLLMBackend instance with .generate_response() compatibility, or None
     """
     global _qwen_engine, _qwen_initialized
 
@@ -80,29 +80,34 @@ def get_qwen_engine(
         return _qwen_engine
 
     try:
-        from holo_index.qwen_advisor.llm_engine import QwenInferenceEngine
-        from holo_index.qwen_advisor.config import QwenAdvisorConfig
+        from modules.infrastructure.shared_utilities.local_llm_resolver import resolve_qwen_backend
 
         start_time = time.time()
-        logger.info("[AI-SINGLETON] Loading Qwen engine (singleton)...")
+        logger.info("[AI-SINGLETON] Resolving Qwen backend...")
 
-        config = QwenAdvisorConfig.from_env()
-        engine = QwenInferenceEngine(
-            model_path=config.model_path,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            context_length=context_length,
-        )
+        # First try without model_path (LM Studio path - no config needed)
+        engine = resolve_qwen_backend(n_ctx=context_length)
 
-        # Initialize the model
-        if engine.initialize():
+        # If LM Studio unavailable, try with config for llama_cpp fallback
+        if engine is None:
+            try:
+                from holo_index.qwen_advisor.config import QwenAdvisorConfig
+                config = QwenAdvisorConfig.from_env()
+                engine = resolve_qwen_backend(
+                    model_path=config.model_path,
+                    n_ctx=context_length,
+                )
+            except Exception as config_err:
+                logger.debug(f"[AI-SINGLETON] Config load failed, LM Studio was only option: {config_err}")
+
+        if engine is not None:
             load_time = (time.time() - start_time) * 1000
-            logger.info(f"[AI-SINGLETON] Qwen engine loaded in {load_time:.0f}ms")
+            logger.info(f"[AI-SINGLETON] Qwen engine ready ({engine.backend_name}) in {load_time:.0f}ms")
             _qwen_engine = engine
             _qwen_initialized = True
             return _qwen_engine
         else:
-            logger.warning("[AI-SINGLETON] Qwen engine initialization failed")
+            logger.warning("[AI-SINGLETON] Qwen engine: no backend available")
             return None
 
     except ImportError as e:
@@ -121,8 +126,9 @@ def get_gemma_engine(
     """
     Get or create singleton Gemma inference engine.
 
-    Uses llama_cpp directly with the triage model path.
-    Logs load time for WSP 91 observability.
+    Uses local_llm_resolver to select best available backend:
+    1. LM Studio API (if available) - avoids file lock conflicts, no config needed
+    2. Direct llama_cpp loading (fallback) - requires model path resolution
 
     Args:
         n_ctx: Context window size
@@ -130,7 +136,7 @@ def get_gemma_engine(
         force_reinit: Force re-initialization (use with caution)
 
     Returns:
-        Llama instance for Gemma, or None if unavailable
+        LocalLLMBackend instance (callable), or None if unavailable
     """
     global _gemma_engine, _gemma_initialized
 
@@ -140,52 +146,41 @@ def get_gemma_engine(
         return _gemma_engine
 
     try:
-        from llama_cpp import Llama
-        from modules.infrastructure.shared_utilities.local_model_selection import (
-            resolve_triage_model_path,
-        )
-        import os
-
-        model_path = resolve_triage_model_path()
-        if not model_path.exists():
-            logger.warning(f"[AI-SINGLETON] Gemma model not found: {model_path}")
-            return None
+        from modules.infrastructure.shared_utilities.local_llm_resolver import resolve_gemma_backend
 
         start_time = time.time()
-        logger.info(f"[AI-SINGLETON] Loading Gemma engine from {model_path} (singleton)...")
+        logger.info("[AI-SINGLETON] Resolving Gemma backend...")
 
-        # Suppress llama.cpp loading noise
-        old_stdout = os.dup(1)
-        old_stderr = os.dup(2)
-        devnull = os.open(os.devnull, os.O_WRONLY)
+        # First try without model_path (LM Studio path - no config needed)
+        engine = resolve_gemma_backend(n_ctx=n_ctx, n_threads=n_threads)
 
-        try:
-            os.dup2(devnull, 1)
-            os.dup2(devnull, 2)
+        # If LM Studio unavailable, try with model path for llama_cpp fallback
+        if engine is None:
+            try:
+                from modules.infrastructure.shared_utilities.local_model_selection import (
+                    resolve_triage_model_path,
+                )
+                model_path = resolve_triage_model_path()
+                engine = resolve_gemma_backend(
+                    model_path=model_path,
+                    n_ctx=n_ctx,
+                    n_threads=n_threads,
+                )
+            except Exception as path_err:
+                logger.debug(f"[AI-SINGLETON] Model path resolution failed, LM Studio was only option: {path_err}")
 
-            engine = Llama(
-                model_path=str(model_path),
-                n_ctx=n_ctx,
-                n_threads=n_threads,
-                n_gpu_layers=0,  # CPU-only for fast pattern matching
-                verbose=False,
-            )
-        finally:
-            os.dup2(old_stdout, 1)
-            os.dup2(old_stderr, 2)
-            os.close(devnull)
-            os.close(old_stdout)
-            os.close(old_stderr)
-
-        load_time = (time.time() - start_time) * 1000
-        logger.info(f"[AI-SINGLETON] Gemma engine loaded in {load_time:.0f}ms")
-
-        _gemma_engine = engine
-        _gemma_initialized = True
-        return _gemma_engine
+        if engine is not None:
+            load_time = (time.time() - start_time) * 1000
+            logger.info(f"[AI-SINGLETON] Gemma engine ready ({engine.backend_name}) in {load_time:.0f}ms")
+            _gemma_engine = engine
+            _gemma_initialized = True
+            return _gemma_engine
+        else:
+            logger.warning("[AI-SINGLETON] Gemma engine: no backend available")
+            return None
 
     except ImportError as e:
-        logger.warning(f"[AI-SINGLETON] Gemma engine unavailable (llama_cpp not installed): {e}")
+        logger.warning(f"[AI-SINGLETON] Gemma engine unavailable: {e}")
         return None
     except Exception as e:
         logger.error(f"[AI-SINGLETON] Gemma engine load failed: {e}")

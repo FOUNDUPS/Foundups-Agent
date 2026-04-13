@@ -296,6 +296,7 @@ def get_backend(name: str) -> WardrobeBackendBase:
 ## WSP Compliance
 
 - **WSP 3**: Module Organization - Proper infrastructure domain placement
+- **WSP 11**: Interface Protocol - `INTERFACE.md` (public API)
 - **WSP 49**: Module Structure - README, tests, src/ layout
 - **WSP 72**: Module Independence - Minimal external dependencies
 
@@ -306,6 +307,7 @@ modules/infrastructure/wardrobe_ide/
 ├── __init__.py                  # Package exports
 ├── __main__.py                  # CLI entry point
 ├── README.md                    # This file
+├── INTERFACE.md                 # Public API (WSP 11)
 ├── requirements.txt             # Dependencies
 ├── backends/
 │   ├── __init__.py              # Backend interface + resolver
