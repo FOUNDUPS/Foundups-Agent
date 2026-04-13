@@ -96,6 +96,53 @@ python -m modules.communication.youtube_channel_pull.src.pull_cli [OPTIONS]
 | `--max-results` | int | 50 | Videos per channel |
 | `--output` | path | auto | Delta output path |
 
+### refresh_scheduler.py
+
+#### `run_refresh(foundup_filter=None, max_results=50, trigger_mode="manual")`
+
+Run the channel refresh workflow. Main entrypoint for scheduled/triggered refresh.
+
+**Parameters:**
+- `foundup_filter`: Optional FoundUp ID to filter (default: all)
+- `max_results`: Max videos per channel (default: 50)
+- `trigger_mode`: How triggered ("manual", "scheduled", "ci")
+
+**Returns:** `RefreshResult` with:
+```python
+{
+    "success": bool,
+    "foundups_checked": int,
+    "new_videos_found": int,
+    "delta_path": str,
+    "error": str | None,
+    "triggered_at": str,  # ISO timestamp
+    "trigger_mode": str,
+}
+```
+
+**Review-First Guarantee:** This function NEVER mutates the catalog.
+It only generates delta artifacts for human review.
+
+## Scheduler CLI
+
+```bash
+python -m modules.communication.youtube_channel_pull.src.refresh_scheduler [OPTIONS]
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `--foundup` | str | all | Refresh only specified FoundUp |
+| `--max-results` | int | 50 | Videos per channel |
+| `--scheduled` | flag | false | Mark as scheduled run |
+| `--no-log` | flag | false | Skip refresh log |
+
+## Output Artifacts
+
+| Artifact | Path | Purpose |
+|----------|------|---------|
+| Delta | `docs/audits/pfmall_youtube_ingest/youtube_channel_pull_delta.json` | New videos for review |
+| Refresh Log | `docs/audits/pfmall_youtube_ingest/refresh_log.json` | Scheduler run history |
+
 ## Dependencies
 
 - `youtube_auth`: For `get_authenticated_service()`
