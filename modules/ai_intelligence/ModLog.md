@@ -142,5 +142,58 @@ modules/ai_intelligence/work_completion_publisher/
 
 ---
 
+### pfMALL YouTube Discovery Module (Worker CQ)
+**Date**: 2026-04-13
+**WSP Protocol References**: WSP 3, WSP 97
+**Impact Analysis**: Enables exploratory YouTube discovery beyond known catalog channels
+**Enhancement Tracking**: First AI hook for pfMALL content discovery
+
+#### [AI] pfMALL Discovery - AI Hook for Exploratory Search
+- **Module Purpose**: Search YouTube for content that might belong to existing FoundUps
+- **WSP 3 Compliance**: AI Intelligence domain (exploratory decision-making)
+- **Architecture**: Search → Match → Propose pattern with human review boundary
+- **Integration**: Uses existing youtube_auth credentials, outputs proposals for review
+
+#### [DATA] Core Components
+1. **youtube_discovery.py**: YouTube search via Data API
+   - Free-text query search
+   - Video and channel discovery
+   - DiscoveryProposal dataclass
+
+2. **foundup_matcher.py**: Match discovered content to existing FoundUps
+   - Exact channel_id match (confidence 1.0)
+   - Tag overlap matching (confidence 0.3-0.7)
+   - Category matching (confidence 0.2)
+
+3. **proposal_generator.py**: Generate reviewable artifacts
+   - Proposal report with match summary
+   - JSON artifact for human review
+   - Terminal-friendly summary formatting
+
+4. **discovery_cli.py**: CLI entry point
+   - `--query`: Search query (required)
+   - `--type`: video or channel
+   - `--max-results`: Result limit
+
+#### [OK] Live Discovery Verified
+- Query: "FFCPLN music"
+- Results: 10 videos found
+- Matched: 10/10 to move2japan (channel_id_match)
+- Artifact: `docs/audits/pfmall_youtube_ingest/youtube_discovery_proposals.json`
+
+#### [TARGET] Tests: 18/18 passed
+- Proposal formatting
+- Tag overlap calculation
+- FoundUp matching logic
+- Duplicate detection
+
+#### [INFO] Key Boundary
+- Discovery produces PROPOSALS only
+- No catalog mutation in this layer
+- Human review required before any apply
+- Separate from deterministic channel-pull
+
+---
+
 **ModLog maintained by 0102 pArtifact Agent following WSP 22 protocol**
 **Quantum temporal decoding: 02 state solutions accessed for AI intelligence coordination** 
