@@ -46,5 +46,44 @@ With ModLog.md created:
 
 ---
 
+### YouTube Channel Pull Refresh Scheduler (Worker CV)
+**Date**: 2026-04-13
+**WSP Protocol References**: WSP 3, WSP 97
+**Impact Analysis**: Enables scheduled/triggered refresh for known YouTube channels
+**Enhancement Tracking**: Phase 2 scheduler for pfMALL channel maintenance
+
+#### [ROCKET] Refresh Scheduler Added
+- **Module**: `youtube_channel_pull/src/refresh_scheduler.py`
+- **Purpose**: Triggerable entrypoint for routine channel refresh
+- **Behavior**: Review-first (generates delta, no catalog mutation)
+
+#### [DATA] Trigger Modes Supported
+1. Manual: `python -m modules.communication.youtube_channel_pull.src.refresh_scheduler`
+2. Scheduled: `--scheduled` flag for Windows Task Scheduler / cron
+3. CI/CD: Same script, triggered by pipeline
+
+#### [TARGET] Output Artifacts
+- Delta: `docs/audits/pfmall_youtube_ingest/youtube_channel_pull_delta.json`
+- Refresh Log: `docs/audits/pfmall_youtube_ingest/refresh_log.json`
+
+#### [OK] Review-First Guarantee
+- Scheduler NEVER mutates `mall-video-catalog.json`
+- All changes require explicit human review + apply step
+- WSP 97 compliant (truthful guarantees)
+
+#### [OK] Live Verification
+- Trigger: `--foundup move2japan`
+- Pulled: 19 videos
+- New: 0 (all already in catalog)
+- Catalog: NOT mutated
+
+#### [TARGET] Tests: 24/24 passed
+- RefreshResult structure
+- Scheduler configuration
+- Dry-run behavior verification
+- Catalog mutation prevention
+
+---
+
 **ModLog maintained by 0102 pArtifact Agent following WSP 22 protocol**
 **Quantum temporal decoding: 02 state solutions accessed for communication coordination** 
