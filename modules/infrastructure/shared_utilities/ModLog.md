@@ -1,6 +1,33 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-04-13 - Local LLM Backend Adapter Layer (LM Studio API Support)
+
+- **Problem**: Qwen/Gemma model loading fails when LM Studio holds file locks on GGUF files. Startup log shows `PermissionError` or silent failures.
+- **Solution**: Added backend adapter layer with LM Studio API fallback.
+  - `local_llm_backends.py` (NEW): Abstract `LocalLLMBackend` base + two implementations:
+    - `LlamaCppBackend`: Direct GGUF file loading via llama_cpp (original behavior)
+    - `LMStudioBackend`: OpenAI-compatible API client for LM Studio (localhost:1234)
+    - `is_lm_studio_available()`: Health check for LM Studio API
+    - Compatibility methods: `.generate_response()` and `__call__()` for existing callers
+  - `local_llm_resolver.py` (NEW): Backend selection logic
+    - `resolve_qwen_backend()`: Try LM Studio first, fall back to llama_cpp
+    - `resolve_gemma_backend()`: Same pattern
+    - Model ID mapping: `{"qwen": "qwen-coder-7b", "gemma": "gemma-270m"}`
+  - `ai_engine_singletons.py` (UPDATED): Now uses resolver instead of direct loading
+    - `get_qwen_engine()` / `get_gemma_engine()` call resolvers
+    - Returns `LocalLLMBackend` with API-compatible methods
+    - Singletons remain cache/lifecycle only
+- **Caller Compatibility**:
+  - Qwen callers: `.generate_response(prompt, max_tokens)` works (returns string)
+  - Gemma callers: `engine(prompt, max_tokens, temperature)` callable works (returns dict)
+- **Impact**: Qwen/Gemma load succeeds when LM Studio is running (verified). Fallback to direct llama_cpp loading is implemented but not yet verified in production (LM Studio currently always available).
+- **Files**:
+  - `local_llm_backends.py` (NEW)
+  - `local_llm_resolver.py` (NEW)
+  - `ai_engine_singletons.py` (UPDATED)
+- **WSP Compliance**: WSP 77 (Agent Coordination), WSP 91 (DAEMON Observability)
+
 ## 2026-03-30 - Audio Provider Registry and Voice Cloning Policy
 
 - **Context**: News integration pass for Cohere Transcribe, Qwen3-TTS, Mistral Voxtral.
