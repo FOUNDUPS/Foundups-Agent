@@ -6,6 +6,23 @@
 
 ---
 
+## 2026-04-03 - WSP49 gap scanner: restore CO context-weighted ranking
+
+**Author**: 0102  
+**WSP**: 49, 97  
+
+### Changes
+
+- `skillz/wsp49_interface_gap_scanner/executor.py`: `rank_gaps()` sorts by domain, then **`-len(context_files)`**, then module name, then discovery index (remediates checkout drift back to CO spec).
+- `skillz/wsp49_interface_gap_scanner/SKILLz.md`: ranking description aligned.
+- `tests/test_wsp49_interface_gap_scanner.py`: `test_context_files_rank_before_alphabet_within_domain`.
+
+### Why
+
+Operator call: do not prioritize thin modules (e.g. `code_quality`) when richer-context gaps exist in the same domain; keep handoff queue aligned with pilot intent.
+
+---
+
 ## 2026-03-18 - PicoClaw Schema-Space Walker
 
 **Author**: 0102

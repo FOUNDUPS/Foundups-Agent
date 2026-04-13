@@ -25,7 +25,7 @@ This skill is **read-only**: it does not create or edit repo files. It aligns wi
 ## What it does
 
 1. Scans `modules/{WSP3_domain}/*/` for directories without `INTERFACE.md`.
-2. **Ranks** by domain order: `infrastructure` → `platform_integration` → … → `blockchain`, then module name.
+2. **Ranks** by domain order: `infrastructure` → `platform_integration` → … → `blockchain`; **within each domain**, modules with **more** listed context files first, then module name (A–Z) for ties.
 3. Collects **context file list** (`README.md`, `src/__init__.py`, `requirements.txt`, … when present).
 4. **Lightweight AST hints** from `src/__init__.py` (`__all__` or top-level defs/classes).
 5. Emits a **prompt_pack** string per module for paste into Codex/0102.

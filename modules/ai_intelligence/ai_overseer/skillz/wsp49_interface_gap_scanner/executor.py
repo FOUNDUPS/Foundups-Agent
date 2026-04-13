@@ -192,10 +192,15 @@ def discover_interface_gaps(repo_root: Path) -> List[Dict[str, Any]]:
 
 
 def rank_gaps(rows: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Stable sort: domain priority, then module name."""
+    """Stable sort: domain priority (WSP 3), then richer context first (CO), then name."""
     indexed = list(enumerate(rows))
     indexed.sort(
-        key=lambda it: (_domain_rank(it[1]["domain"]), it[1]["module_name"].lower(), it[0])
+        key=lambda it: (
+            _domain_rank(it[1]["domain"]),
+            -len(it[1].get("context_files") or []),
+            it[1]["module_name"].lower(),
+            it[0],
+        )
     )
     ranked: List[Dict[str, Any]] = []
     for r, (_, row) in enumerate(indexed, start=1):
