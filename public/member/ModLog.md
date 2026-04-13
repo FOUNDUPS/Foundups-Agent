@@ -1,5 +1,45 @@
 # Member Area Module Change Log
 
+## [2026-04-13] YouTube Discovery Proposal Review and Apply (Worker CT)
+
+**Who**: 0102 - Worker CT
+**Slice**: `PFMALL_DISCOVERY_PROPOSAL_REVIEW_AND_APPLY_PHASE1`
+**What**: Review and apply approved YouTube discovery proposals to live catalog.
+
+**Proposal Artifact Reviewed**:
+- `docs/audits/pfmall_youtube_ingest/youtube_discovery_proposals.json`
+- Generated: 2026-04-13T07:06:16Z
+- Query: "FFCPLN music"
+- Total proposals: 10
+
+**Review Result**:
+| Status | Count | Reason |
+|--------|-------|--------|
+| Approved | 2 | channel_id_match (confidence 1.0), not in catalog |
+| Skipped | 8 | Already in catalog (duplicates) |
+| Rejected | 0 | N/A |
+
+**Applied Videos**:
+| video_id | Title | Match Reason |
+|----------|-------|--------------|
+| pP804fq9ttE | ICE Cruelty Exposed! FFCPLN Music | channel_id_match |
+| ZJqB_jeaPCQ | FFCPLN Exposes MAGA - 160 Songs | channel_id_match |
+
+**Catalog Update**:
+- **Target**: move2japan
+- **Before**: 592 videos
+- **After**: 594 videos (+2)
+
+**Key Boundary Preserved**:
+- Discovery proposals → human review → selective apply
+- 8 duplicates correctly skipped
+- No auto-approval of all proposals
+- Exploratory discovery remains separate from deterministic known-channel refresh
+
+**WSP 97 Applied**: Only applied proposals with channel_id_match (confidence 1.0). Duplicates skipped. No ambiguous or weak-confidence proposals force-applied.
+
+---
+
 ## [2026-04-13] pfMALL YouTube Discovery AI Hook (Worker CQ)
 
 **Who**: 0102 - Worker CQ
