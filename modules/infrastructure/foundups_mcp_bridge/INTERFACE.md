@@ -271,6 +271,80 @@ Get summary of changes across a commit range.
 
 ---
 
+### Impact Prediction (v1.2)
+
+#### `get_change_impact_score(target_type, target)`
+
+Compute blast-radius and risk score for a change target.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| target_type | str | Yes | "module", "file", "diff", or "commit_range" |
+| target | str | Yes | Module name, file path, or commit range |
+
+**Returns:**
+```python
+{
+    "target_type": str,
+    "target": str,
+    "affected_modules": [
+        {
+            "module": str,
+            "risk_weight": float,  # 1.0 = base, higher = more critical
+            "is_primary": bool,    # Directly changed vs reverse dep
+            "is_critical": bool,   # In CRITICAL_MODULES list
+            "internal_dep_count": int,
+        }
+    ],
+    "risk_level": "low" | "medium" | "high" | "critical",
+    "risk_score": float,  # 0-1 composite score
+    "risk_factors": [str],  # Explanations for risk level
+    "test_coverage": {
+        "covered": int,
+        "total": int,
+        "gaps": [str],  # Module names without tests
+        "coverage_ratio": float,
+    },
+    "prior_failures": [
+        {
+            "pattern": str,
+            "last_seen": str,
+            "frequency": int,
+        }
+    ],
+    "confidence": float,  # 0-1 based on data completeness
+    "confidence_factors": [str],  # What reduced confidence
+}
+```
+
+**Risk Level Thresholds:**
+- `low`: score < 0.3
+- `medium`: score 0.3-0.5
+- `high`: score 0.5-0.7
+- `critical`: score >= 0.85
+
+**Risk Factors Considered:**
+1. Number of affected modules (0-0.3)
+2. Critical module involvement (0-0.25)
+3. Test coverage gaps (0-0.25)
+4. Prior failure patterns (0-0.2)
+
+**Critical Modules** (elevated risk weight):
+- shared_utilities (1.5x)
+- database (1.4x)
+- wre_core (1.3x)
+- ai_overseer (1.2x)
+- foundups_selenium (1.2x)
+
+**Confidence Reduction:**
+- No test coverage data: -0.2
+- No prior failure data: -0.15
+- HoloIndex not available: -0.1
+- Many affected modules (>10): -0.1
+- Limited dependency resolution: -0.1
+
+---
+
 ### Execution Stubs (v1 Disabled)
 
 These tools return `{"status": "disabled_in_v1"}` with schema information.

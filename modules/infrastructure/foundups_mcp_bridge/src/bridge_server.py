@@ -41,6 +41,7 @@ from . import overseer_tools
 from . import execution_stubs
 from . import dependency_tools
 from . import diff_tools
+from . import impact_scoring
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +56,7 @@ class FoundUpsMCPBridge:
     Provides read-only perception layer for AI-assisted architectural execution.
     """
 
-    VERSION = "1.1.0"
+    VERSION = "1.2.0"
     MODE = "perception-only"
 
     def __init__(self, repo_root: Optional[Path] = None):
@@ -100,6 +101,9 @@ class FoundUpsMCPBridge:
         # Diff perception tools
         self._tools["get_file_diff"] = self._wrap(diff_tools.get_file_diff)
         self._tools["get_diff_summary"] = self._wrap(diff_tools.get_diff_summary)
+
+        # Impact prediction tools
+        self._tools["get_change_impact_score"] = self._wrap(impact_scoring.get_change_impact_score)
 
         # Execution stubs (disabled in v1)
         self._tools["coordinate_mission"] = execution_stubs.coordinate_mission
@@ -193,6 +197,7 @@ class FoundUpsMCPBridge:
                     "overseer_read": True,
                     "dependency_analysis": True,
                     "diff_perception": True,
+                    "impact_prediction": True,
                     "holoindex_search": False,  # v2
                     "execution": False,  # v2
                 },

@@ -75,14 +75,14 @@ class TestBridgeStatus:
     def test_bridge_initialization(self, bridge):
         """Bridge initializes with repo root."""
         assert bridge.repo_root.exists()
-        assert bridge.VERSION == "1.1.0"
+        assert bridge.VERSION == "1.2.0"
         assert bridge.MODE == "perception-only"
 
     def test_get_status(self, bridge):
         """get_status returns valid response."""
         result = bridge.get_status()
         assert result["status"] == "ok"
-        assert result["data"]["version"] == "1.1.0"
+        assert result["data"]["version"] == "1.2.0"
         assert result["data"]["mode"] == "perception-only"
         assert result["data"]["repo_exists"] is True
         assert result["data"]["capabilities"]["repo_perception"] is True
@@ -351,6 +351,138 @@ class TestDiffTools:
         """get_diff_summary handles invalid commit range."""
         result = bridge.call_tool("get_diff_summary", commit_range="invalid..range")
         assert result["status"] == "error"
+
+
+# ==================== Impact Scoring Tests ====================
+
+
+class TestImpactScoring:
+    """Test impact prediction tools."""
+
+    def test_impact_score_module_input(self, bridge):
+        """get_change_impact_score handles module input."""
+        result = bridge.call_tool(
+            "get_change_impact_score",
+            target_type="module",
+            target="shared_utilities",
+        )
+        assert result["status"] == "ok"
+        assert "affected_modules" in result["data"]
+        assert "risk_level" in result["data"]
+        assert result["data"]["risk_level"] in ("low", "medium", "high", "critical")
+        assert "test_coverage" in result["data"]
+        assert "confidence" in result["data"]
+
+    def test_impact_score_file_input(self, bridge):
+        """get_change_impact_score handles file input."""
+        result = bridge.call_tool(
+            "get_change_impact_score",
+            target_type="file",
+            target="modules/infrastructure/foundups_mcp_bridge/src/bridge_server.py",
+        )
+        assert result["status"] == "ok"
+        assert "affected_modules" in result["data"]
+        assert "risk_level" in result["data"]
+        assert "prior_failures" in result["data"]
+
+    def test_impact_score_commit_range_input(self, bridge):
+        """get_change_impact_score handles commit_range input."""
+        result = bridge.call_tool(
+            "get_change_impact_score",
+            target_type="commit_range",
+            target="HEAD~3..HEAD",
+        )
+        assert result["status"] == "ok"
+        assert "affected_modules" in result["data"]
+        assert "risk_level" in result["data"]
+
+    def test_impact_score_invalid_target_type(self, bridge):
+        """get_change_impact_score rejects invalid target_type."""
+        result = bridge.call_tool(
+            "get_change_impact_score",
+            target_type="invalid",
+            target="test",
+        )
+        assert result["status"] == "error"
+        assert "invalid" in result["error"].lower()
+
+    def test_impact_score_nonexistent_module(self, bridge):
+        """get_change_impact_score handles nonexistent module."""
+        result = bridge.call_tool(
+            "get_change_impact_score",
+            target_type="module",
+            target="nonexistent_module_xyz",
+        )
+        # Should return ok with low risk (no affected modules)
+        assert result["status"] == "ok"
+        assert result["data"]["risk_level"] == "low"
+
+    def test_impact_score_critical_module(self, bridge):
+        """get_change_impact_score flags critical modules."""
+        result = bridge.call_tool(
+            "get_change_impact_score",
+            target_type="module",
+            target="shared_utilities",
+        )
+        assert result["status"] == "ok"
+        # shared_utilities is in CRITICAL_MODULES
+        affected = result["data"]["affected_modules"]
+        if affected:
+            shared = next((m for m in affected if m["module"] == "shared_utilities"), None)
+            if shared:
+                assert shared["is_critical"] is True
+
+    def test_impact_score_test_coverage_gaps(self, bridge):
+        """get_change_impact_score reports test coverage."""
+        result = bridge.call_tool(
+            "get_change_impact_score",
+            target_type="module",
+            target="ai_overseer",
+        )
+        assert result["status"] == "ok"
+        coverage = result["data"]["test_coverage"]
+        assert "covered" in coverage
+        assert "total" in coverage
+        assert "gaps" in coverage
+        assert isinstance(coverage["gaps"], list)
+
+    def test_impact_score_confidence_factors(self, bridge):
+        """get_change_impact_score returns confidence factors."""
+        result = bridge.call_tool(
+            "get_change_impact_score",
+            target_type="module",
+            target="foundups_mcp_bridge",
+        )
+        assert result["status"] == "ok"
+        assert "confidence" in result["data"]
+        assert "confidence_factors" in result["data"]
+        assert isinstance(result["data"]["confidence_factors"], list)
+        # Confidence should be between 0 and 1
+        assert 0 <= result["data"]["confidence"] <= 1
+
+    def test_impact_score_no_prior_failures_reduces_confidence(self, bridge):
+        """Confidence is reduced when no prior failure data."""
+        result = bridge.call_tool(
+            "get_change_impact_score",
+            target_type="module",
+            target="foundups_mcp_bridge",
+        )
+        assert result["status"] == "ok"
+        # New module likely has no failure history
+        factors = result["data"]["confidence_factors"]
+        # Should mention missing data or HoloIndex
+        assert any("failure" in f.lower() or "holoindex" in f.lower() for f in factors)
+
+    def test_impact_score_risk_factors(self, bridge):
+        """get_change_impact_score explains risk factors."""
+        result = bridge.call_tool(
+            "get_change_impact_score",
+            target_type="module",
+            target="ai_overseer",
+        )
+        assert result["status"] == "ok"
+        assert "risk_factors" in result["data"]
+        assert isinstance(result["data"]["risk_factors"], list)
 
 
 # ==================== Execution Stub Tests ====================

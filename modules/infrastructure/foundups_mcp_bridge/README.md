@@ -58,6 +58,11 @@ The bridge allows 0102 (ChatGPT) to:
 | `get_file_diff` | What changed in file Y? |
 | `get_diff_summary` | What changed across commit range Z? |
 
+### Impact Prediction (Active - v1.2)
+| Tool | Description |
+|------|-------------|
+| `get_change_impact_score` | What is the blast radius? Risk level, test gaps, prior failures |
+
 ### Execution Stubs (Disabled in v1)
 | Tool | Status | Future Use |
 |------|--------|------------|
@@ -107,6 +112,16 @@ python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server \
 python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server \
     --call get_diff_summary \
     --args '{"commit_range": "HEAD~5..HEAD"}'
+
+# Get change impact score (v1.2)
+python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server \
+    --call get_change_impact_score \
+    --args '{"target_type": "module", "target": "ai_overseer"}'
+
+# Impact score for commit range
+python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server \
+    --call get_change_impact_score \
+    --args '{"target_type": "commit_range", "target": "HEAD~3..HEAD"}'
 ```
 
 ### Programmatic Use
@@ -118,7 +133,7 @@ bridge = FoundUpsMCPBridge()
 
 # Get status
 status = bridge.get_status()
-print(status["data"]["version"])  # "1.1.0"
+print(status["data"]["version"])  # "1.2.0"
 print(status["data"]["mode"])     # "perception-only"
 
 # Read WSP docs
@@ -185,7 +200,7 @@ Disabled tool responses:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│                    FoundUpsMCPBridge v1.1.0                              │
+│                    FoundUpsMCPBridge v1.2.0                              │
 ├──────────────────────────────────────────────────────────────────────────┤
 │  Repo Tools       │  Doc Tools        │  Overseer Tools                  │
 │  - get_repo_tree  │  - get_wsp_docs   │  - get_mission_history           │
@@ -199,6 +214,9 @@ Disabled tool responses:
 │  Dependency Tools (v1.1)       │  Diff Tools (v1.1)                      │
 │  - get_module_dependencies     │  - get_file_diff                        │
 │  - get_reverse_dependencies    │  - get_diff_summary                     │
+├──────────────────────────────────────────────────────────────────────────┤
+│  Impact Prediction (v1.2)                                                │
+│  - get_change_impact_score (risk_level, test_coverage, prior_failures)   │
 ├──────────────────────────────────────────────────────────────────────────┤
 │  Execution Stubs (DISABLED in v1)                                        │
 │  - coordinate_mission, spawn_agent_team, trigger_skill                   │
