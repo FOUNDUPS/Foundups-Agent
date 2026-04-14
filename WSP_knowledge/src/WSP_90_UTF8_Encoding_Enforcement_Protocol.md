@@ -101,6 +101,43 @@ import logging
 - ✅ Production emojis work correctly in logs (🍣🧘🐕🔌💰⚠️)
 - ❌ Module-level enforcement causes import conflicts and wrapping issues
 
+### CRITICAL BUG FIX (2026-02-25)
+
+**Problem**: 379 modules incorrectly applied WSP 90 UTF-8 wrapping at import time.
+Each module re-wraps stderr, eventually causing "lost sys.stderr" error.
+
+**Detection Command**:
+```bash
+grep -r "sys.stderr = io.TextIOWrapper" modules/ --include="*.py" | wc -l
+# Expected: 0 (only main.py should have this)
+```
+
+**Correct Pattern (main.py sets flag first)**:
+```python
+# In main.py - SET FLAG BEFORE WRAPPING
+import os
+os.environ['FOUNDUPS_UTF8_WRAPPED'] = '1'
+
+if sys.platform.startswith('win'):
+    sys.stdout = io.TextIOWrapper(...)
+    sys.stderr = io.TextIOWrapper(...)
+```
+
+**If Module MUST Have UTF-8 (rare - prefer removing)**:
+```python
+# Check flag to prevent double-wrapping
+import os
+if sys.platform.startswith('win') and not os.environ.get('FOUNDUPS_UTF8_WRAPPED'):
+    sys.stdout = io.TextIOWrapper(...)
+    sys.stderr = io.TextIOWrapper(...)
+```
+
+**Bulk Fix Script**:
+```bash
+python modules/development/wsp_tools/scripts/fix_wsp90_utf8_bulk.py --dry-run
+python modules/development/wsp_tools/scripts/fix_wsp90_utf8_bulk.py --apply
+```
+
 ### 2. Environment-Level Enforcement (RECOMMENDED)
 
 **Set before running Python**:
