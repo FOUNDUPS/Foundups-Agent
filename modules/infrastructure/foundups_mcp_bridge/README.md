@@ -1,0 +1,192 @@
+# FoundUps Private MCP Bridge
+
+Private, read-only MCP bridge for AI-assisted architectural execution.
+
+## Purpose
+
+This module provides the **perception layer** for the AI architect workflow:
+
+```
+MCP Bridge (perception) → 0102 (reasoning) → 012 (decision) → Cursor (execution)
+```
+
+The bridge allows 0102 (ChatGPT) to:
+- Inspect repository structure and files
+- Access WSP protocol documents
+- Read module documentation (README, INTERFACE, ModLog)
+- Query AI Overseer state (missions, patterns, failures)
+- Generate precise Windsurf prompts based on real repo state
+
+## v1 Capabilities
+
+### Repo Perception (Active)
+| Tool | Description |
+|------|-------------|
+| `get_repo_tree` | Directory structure with depth control |
+| `read_file` | File content access (size-limited, path-filtered) |
+| `search_repo` | ripgrep-based search |
+| `get_recent_changes` | Git commit history |
+
+### Documentation Access (Active)
+| Tool | Description |
+|------|-------------|
+| `get_wsp_docs` | List all WSP protocol documents |
+| `get_module_docs` | Module README.md |
+| `get_interface_doc` | Module INTERFACE.md (public API) |
+| `get_test_docs` | TestModLog and test README |
+| `get_modlog` | Recent ModLog entries |
+| `get_violations` | Known WSP violations |
+
+### Overseer Perception (Active)
+| Tool | Description |
+|------|-------------|
+| `get_mission_history` | AI Overseer mission records |
+| `get_pattern_memory` | Learned patterns (WSP 48) |
+| `get_overseer_status` | Current system status |
+| `get_coordination_state` | Active teams and phases |
+| `get_known_failure_patterns` | Error avoidance patterns |
+
+### Execution Stubs (Disabled in v1)
+| Tool | Status | Future Use |
+|------|--------|------------|
+| `coordinate_mission` | disabled_in_v1 | Agent team coordination |
+| `spawn_agent_team` | disabled_in_v1 | WSP 54 team creation |
+| `trigger_skill` | disabled_in_v1 | WRE skill dispatch |
+| `write_file` | disabled_in_v1 | Audited file writes |
+| `create_branch` | disabled_in_v1 | Git branch creation |
+| `create_pr` | disabled_in_v1 | PR creation |
+
+## Usage
+
+### CLI Testing
+
+```bash
+# Show bridge status
+python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server --status
+
+# List available tools
+python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server --list-tools
+
+# Call a tool
+python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server \
+    --call get_repo_tree \
+    --args '{"path": "modules", "depth": 2}'
+
+# Read a file
+python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server \
+    --call read_file \
+    --args '{"path": "WSP.txt"}'
+
+# Get overseer status
+python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server \
+    --call get_overseer_status
+```
+
+### Programmatic Use
+
+```python
+from modules.infrastructure.foundups_mcp_bridge.src import FoundUpsMCPBridge
+
+bridge = FoundUpsMCPBridge()
+
+# Get status
+status = bridge.get_status()
+print(status["data"]["version"])  # "1.0.0"
+print(status["data"]["mode"])     # "perception-only"
+
+# Read WSP docs
+wsp_docs = bridge.call_tool("get_wsp_docs")
+for doc in wsp_docs["data"]["wsp_docs"]:
+    print(doc["name"])
+
+# Get overseer mission history
+missions = bridge.call_tool("get_mission_history", limit=10)
+for m in missions["data"]["missions"]:
+    print(f"{m['mission_id']}: {m['status']}")
+
+# Call disabled tool (returns schema, no execution)
+result = bridge.call_tool("coordinate_mission", mission_description="Test")
+print(result["status"])  # "disabled_in_v1"
+print(result["data"]["schema"])  # Schema definition
+```
+
+## Response Schema
+
+All tools return unified responses:
+
+```json
+{
+  "status": "ok",
+  "data": { ... },
+  "meta": {
+    "timestamp": "2026-04-14T...",
+    "source": "repo|overseer|wsp|..."
+  }
+}
+```
+
+Error responses:
+```json
+{
+  "status": "error",
+  "error": "Error message",
+  "meta": { ... }
+}
+```
+
+Disabled tool responses:
+```json
+{
+  "status": "disabled_in_v1",
+  "error": "Tool 'X' is disabled in v1 (perception-only mode)",
+  "data": {
+    "tool": "X",
+    "schema": { ... }
+  }
+}
+```
+
+## Security
+
+- **Private only** - Not exposed publicly
+- **Read-only** - No writes, no execution
+- **Path filtering** - Blocks .env, credentials, secrets
+- **Size limits** - 200KB max file read
+- **No secrets** - Explicit pattern blocking
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    FoundUpsMCPBridge                        │
+├─────────────────────────────────────────────────────────────┤
+│  Repo Tools     │  Doc Tools      │  Overseer Tools        │
+│  - get_repo_tree│  - get_wsp_docs │  - get_mission_history │
+│  - read_file    │  - get_module_  │  - get_pattern_memory  │
+│  - search_repo  │    docs         │  - get_overseer_status │
+│  - get_recent_  │  - get_interface│  - get_coordination_   │
+│    changes      │    _doc         │    state               │
+│                 │  - get_test_docs│  - get_known_failure_  │
+│                 │  - get_modlog   │    patterns            │
+│                 │  - get_violations│                       │
+├─────────────────────────────────────────────────────────────┤
+│  Execution Stubs (DISABLED in v1)                          │
+│  - coordinate_mission, spawn_agent_team, trigger_skill     │
+│  - write_file, create_branch, create_pr                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## WSP References
+
+- **WSP 97**: Truthful verification (no fake data)
+- **WSP 48**: Recursive Self-Improvement (pattern memory access)
+- **WSP 77**: Agent Coordination (mission state access)
+- **WSP 49**: Module structure (doc file locations)
+- **WSP 22**: ModLog documentation
+
+## Future (v2)
+
+- HoloIndex semantic search integration
+- Gated execution capabilities
+- Agent team spawning
+- Skill dispatch with approval workflow
