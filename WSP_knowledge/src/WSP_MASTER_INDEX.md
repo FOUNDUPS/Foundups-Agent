@@ -179,9 +179,15 @@ Advanced protocols for complex system behaviors and architectural concerns.
 | WSP 94 | Agent Coordination Protocol | Deprecated -> Redirect to WSP 77 | Duplicate protocol retained as redirect artifact; use WSP 77 for canonical agent coordination | WSP 77 | Historical redirect only |
 | WSP 95 | WRE Skills Wardrobe Protocol | Active | Establishes the Wardrobe-Cube pattern (Micro Chain-of-Thought) for AI agent instructions; defines the prototype-staged-production lifecycle for task-specific skills with mandatory scanner-gated promotion/runtime controls | WSP 3, WSP 77, WSP 50, WSP 22, WSP 71 | AI agent instruction management, skill evolution, pattern fidelity scoring, task execution, supply-chain security |
 | WSP 96 | MCP Governance & Consensus Protocol | Active | Establishes MCP-based governance architecture with clear evolution path: PoC (0102 centralized) -> Prototype (Event Replay Archive) -> MVP (community voting + blockchain integration); includes Qwen Sentinel validation, tech-agnostic chain adapters (EVM/Solana), Chainlink-style MCP relays, and mandatory skill supply-chain gates for MCP activation | WSP 21, WSP 27, WSP 54, WSP 80, WSP 91, WSP 71, WSP 95 | MCP governance, Event Replay Archive, community voting, blockchain integration, Qwen Sentinel, skill scanner, activation gate |
-| WSP 97 | System Execution Prompting Protocol | Active | **META-FRAMEWORK** - Establishes baked-in execution methodology with core mantra "HoloIndex -> Research -> Hard Think -> First Principles -> Build -> Follow WSP"; defines agent profiles (0102/Qwen/Gemma), mission templates, and compliance validation for building Rubik Cubes (MVP DAEs). Rubik = fully agentic PWA connecting to any blockchain via FoundUp MCPs | WSP 21, WSP 77, WSP 80, WSP 35 | Execution methodology, agent profiles, mission templates, Rubik cubes, MVP DAEs, PWA blockchain connectivity |
+| WSP 97 | System Execution Prompting Protocol | Active | **AGENTIC ACTIVATION OPERATOR LOOP** - Canonical 0102 execution method: retrieve WSPs -> retrieve evidence -> research -> micro pass -> macro pass -> hard think -> dialectic sweep -> first principles -> execute. Core mantra: "HoloIndex -> Research -> Hard Think -> Dialectic Sweep -> First Principles -> Build -> Follow WSP". Defines CoT/CoR gates, out-of-the-box scope discipline, and execution-plane classification, with WRE classified only when actually required. | WSP 21, WSP 46, WSP 77, WSP 80, WSP 35, WSP 95, WSP 99 | Agentic activation, execution methodology, CoT/CoR, dialectic sweep, micro/macro thinking, scope discipline, execution-plane classification |
 | WSP 98 | FoundUps Mesh-Native Architecture Protocol | Active | Establishes mesh-native architecture for FoundUps with user-as-infrastructure patterns, DAE-to-DAE mesh communication, distributed compute, and zero-server operation guidance | WSP 27, WSP 80, WSP 3, WSP 97 | Mesh-native FoundUps, P2P infrastructure, distributed DAE coordination |
-| WSP 99 | Machine-to-Machine (M2M) Prompting Protocol | Active | Compact K:V schema prompting for 0102 swarm operations; extends WSP 21 with machine-optimized format reducing tokens 4x; Qwen-delegatable compiler for 012 prose -> M2M conversion; integrates with ANNEX_PROMETHEUS_RECURSION philosophy | WSP 21 (parent), WSP 77, WSP 95, WSP 97 | M2M prompting, token efficiency, swarm communication, Qwen delegation, compact schema |
+| WSP 99 | Machine-to-Machine (M2M) Prompting Protocol | Active | Compact K:V schema prompting for 0102 swarm operations; extends WSP 21 with machine-optimized format reducing tokens 4x; Qwen-delegatable compiler for external prose -> M2M conversion; integrates with ANNEX_PROMETHEUS_RECURSION philosophy | WSP 21 (parent), WSP 77, WSP 95, WSP 97 | M2M prompting, token efficiency, swarm communication, Qwen delegation, compact schema |
+| WSP 100 | DAE SmartDAO Escalation Protocol | Active | Defines escalation patterns from DAE to SmartDAO including tier progression, governance triggers, and autonomous-to-collective decision handoffs | WSP 27, WSP 80, WSP 26 | DAE escalation, SmartDAO, governance, tier progression |
+| WSP 101 | UPS Utility Classification Protocol | Active | Classifies UPS token utility types (staking, compute, governance, access) and their economic behaviors within the pAVS ecosystem | WSP 26, WSP 29, WSP 58 | UPS utility, token classification, economic behavior |
+| WSP 102 | FoundUps Web Design Protocol | Active | Establishes web design patterns for FoundUps interfaces including component libraries, accessibility standards, responsive patterns, the schema-driven direction for user-owned customizable surfaces, recursive scoped interaction domains, and the Mall-shell vs external-FoundUp route/runtime boundary | WSP 42, WSP 3, WSP 11, WSP 60, WSP 97 | Web design, UI patterns, accessibility, schema-driven UI, SoftProto, scoped interaction, p.fMALL route contract |
+| WSP 103 | FoundUp Federation Protocol | Active | Federation protocol for multi-FoundUp coordination: cross-FoundUp routing, shared resource pools, trust boundaries, consensus mechanisms. Enables FoundUp mesh networks | WSP 96, WSP 98, WSP 27, WSP 104 | Federation, mesh network, cross-FoundUp, consensus |
+| WSP 104 | FoundUp Route Namespace and Tenant Isolation Protocol | Active | Namespace guardrails for FoundUp onboarding: unique foundup_id, routing_prefix, data_namespace; canonical /f/{foundup_id} route shape; manifest/catalog consistency; no root-level tenant routes | WSP 3, WSP 49, WSP 57, WSP 98 | FoundUp namespace, tenant isolation, route guardrails, onboarding compliance |
+| WSP 105 | CLI Interface Standard | Active | Standardizes CLI interfaces for agent automation: --json output, exit codes, flag conventions, catalog requirements. Enables OpenClaw/IronClaw to invoke module CLIs reliably | WSP 77, WSP 91, WSP 90 | CLI, JSON output, agent automation, OpenClaw, IronClaw |
 
 ### PLATFORM INTEGRATION MODULES (Non-WSP Components)
 For platform/module catalogs, see `WSP_framework/src/MODULE_MASTER.md`.
@@ -248,19 +254,10 @@ See WSP 48 (Recursive Self-Improvement) and WSP 70 (System Status Reporting) for
 
 ## [U+1F4CA] WSP STATUS SUMMARY
 
- - **Total Numbered Slots Tracked**: 105 (WSP 00-104)
- - **Highest Assigned Number**: WSP 104
- - **In-Range Available Slots**: 0
- - **Next Available Number**: WSP 105
-
-### WSP 100+ Layer (Extended Protocols)
-| WSP | Title | Status | Purpose |
-|-----|-------|--------|---------|
-| **WSP 100** | DAE SmartDAO Escalation Protocol | Active | FoundUp tier escalation patterns |
-| **WSP 101** | UPS Utility Classification Protocol | Active | UPS token classification |
-| **WSP 102** | FoundUps Web Design Protocol | Active | Web design standards |
-| **WSP 103** | FoundUp Federation Protocol | Active | Independent FoundUp repos connect via pAVS MCP |
-| **WSP 104** | FoundUp Route Namespace and Tenant Isolation Protocol | Active | Namespace guardrails for FoundUp onboarding |
+ - **Total Numbered Slots Tracked**: 106 (WSP 00-105)
+ - **Highest Assigned Number**: WSP 105
+ - **Recently Added**: WSP 100 (DAE Escalation), WSP 101 (UPS Classification), WSP 102 (Web Design), WSP 103 (Federation), WSP 104 (Route Namespace), WSP 105 (CLI Standard)
+ - **Next Available Number**: WSP 106
  - **Status Mix**: Active/deprecated/superseded/historical protocols are explicitly marked per-row in the catalog table above
  - **Layers**: Entry 00; Foundation 1-19; Operational 20-39; Advanced 40-59; Memory/Knowledge 60-99
 

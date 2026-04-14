@@ -108,16 +108,20 @@ Governance checks are injected at distinct layers:
 
 This split prevents control-plane duplication and keeps policy authority centralized.
 
-### Research-Plane Routing Requirement (2026-03-15 Claw Alignment)
+### External Non-MCP Runtime Intake Rule (2026-03-15)
 
-For research domains that use MCP surfaces, including PQN:
+Tools that do not natively speak MCP, but perform autonomous research or coding loops, must not be treated as MCP-native just because they are useful.
 
-- `main.py` handles readiness preflight and service bootstrap
-- OpenClaw handles mission intake and execution-plane routing
-- MCP servers remain gated tool surfaces, not independent user-facing principals
-- worker agents may participate in research sessions, but only under the active Claw-governed session context
+Required sequence:
+1. evaluate under WSP 97 and WSP 15
+2. pilot in isolation
+3. wrap behind FoundUps launch/control surfaces
+4. expose MCP status/report surfaces only after wrapper stability
 
-This prevents MCP-enabled research swarms from bypassing the OpenClaw control plane.
+Default posture:
+- external research runtime first
+- MCP wrapper later
+- no direct production repo mutation
 
 ### Skill Supply-Chain Security Gate
 

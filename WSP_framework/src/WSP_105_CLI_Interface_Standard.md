@@ -1,4 +1,4 @@
-# WSP 103: CLI Interface Standard (Typeball Architecture)
+# WSP 105: CLI Interface Standard (Typeball Architecture)
 
 **Status**: ACTIVE
 **Version**: 2.0 (Digital Twin Mappings)

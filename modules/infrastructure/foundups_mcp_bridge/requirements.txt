@@ -1,0 +1,2 @@
+# FoundUps MCP Bridge dependencies
+# No external dependencies for v1 - uses stdlib only

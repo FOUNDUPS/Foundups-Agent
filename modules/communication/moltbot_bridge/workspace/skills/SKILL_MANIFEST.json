@@ -23,7 +23,7 @@
     },
     {
       "path": "openclaw-monitor/SKILL.md",
-      "sha256": "f0ee5dae60a790d67773a21d24fdd0e2386c56eead1ceb3ca00dc14457d8e992"
+      "sha256": "a8054ea4e7145d6713ab1a2720c6dca359025fb14ceeaa798a2e906f775561a2"
     },
     {
       "path": "openclaw-schedule/SKILL.md",
@@ -31,7 +31,7 @@
     },
     {
       "path": "pqn-research/SKILL.md",
-      "sha256": "52c9c22e1dbc2c56f96b25f1f1bca5e60737bc4d745bc3c1177d54c364a2c0a5"
+      "sha256": "c01ba2e4d56afaa117e3a0991014d67bae98ce40c98c42bca2b2edf1360fad57"
     }
   ]
 }
