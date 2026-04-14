@@ -46,6 +46,18 @@ The bridge allows 0102 (ChatGPT) to:
 | `get_coordination_state` | Active teams and phases |
 | `get_known_failure_patterns` | Error avoidance patterns |
 
+### Dependency Perception (Active - v1.1)
+| Tool | Description |
+|------|-------------|
+| `get_module_dependencies` | What does module X depend on? |
+| `get_reverse_dependencies` | What depends on module X? (blast radius) |
+
+### Diff Perception (Active - v1.1)
+| Tool | Description |
+|------|-------------|
+| `get_file_diff` | What changed in file Y? |
+| `get_diff_summary` | What changed across commit range Z? |
+
 ### Execution Stubs (Disabled in v1)
 | Tool | Status | Future Use |
 |------|--------|------------|
@@ -80,6 +92,21 @@ python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server \
 # Get overseer status
 python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server \
     --call get_overseer_status
+
+# Get module dependencies (v1.1)
+python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server \
+    --call get_module_dependencies \
+    --args '{"module_name": "ai_overseer"}'
+
+# Get reverse dependencies / blast radius (v1.1)
+python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server \
+    --call get_reverse_dependencies \
+    --args '{"module_name": "shared_utilities"}'
+
+# Get diff summary (v1.1)
+python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server \
+    --call get_diff_summary \
+    --args '{"commit_range": "HEAD~5..HEAD"}'
 ```
 
 ### Programmatic Use
@@ -91,7 +118,7 @@ bridge = FoundUpsMCPBridge()
 
 # Get status
 status = bridge.get_status()
-print(status["data"]["version"])  # "1.0.0"
+print(status["data"]["version"])  # "1.1.0"
 print(status["data"]["mode"])     # "perception-only"
 
 # Read WSP docs
@@ -157,23 +184,26 @@ Disabled tool responses:
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    FoundUpsMCPBridge                        │
-├─────────────────────────────────────────────────────────────┤
-│  Repo Tools     │  Doc Tools      │  Overseer Tools        │
-│  - get_repo_tree│  - get_wsp_docs │  - get_mission_history │
-│  - read_file    │  - get_module_  │  - get_pattern_memory  │
-│  - search_repo  │    docs         │  - get_overseer_status │
-│  - get_recent_  │  - get_interface│  - get_coordination_   │
-│    changes      │    _doc         │    state               │
-│                 │  - get_test_docs│  - get_known_failure_  │
-│                 │  - get_modlog   │    patterns            │
-│                 │  - get_violations│                       │
-├─────────────────────────────────────────────────────────────┤
-│  Execution Stubs (DISABLED in v1)                          │
-│  - coordinate_mission, spawn_agent_team, trigger_skill     │
-│  - write_file, create_branch, create_pr                    │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────┐
+│                    FoundUpsMCPBridge v1.1.0                              │
+├──────────────────────────────────────────────────────────────────────────┤
+│  Repo Tools       │  Doc Tools        │  Overseer Tools                  │
+│  - get_repo_tree  │  - get_wsp_docs   │  - get_mission_history           │
+│  - read_file      │  - get_module_docs│  - get_pattern_memory            │
+│  - search_repo    │  - get_interface_ │  - get_overseer_status           │
+│  - get_recent_    │    doc            │  - get_coordination_state        │
+│    changes        │  - get_test_docs  │  - get_known_failure_patterns    │
+│                   │  - get_modlog     │                                  │
+│                   │  - get_violations │                                  │
+├──────────────────────────────────────────────────────────────────────────┤
+│  Dependency Tools (v1.1)       │  Diff Tools (v1.1)                      │
+│  - get_module_dependencies     │  - get_file_diff                        │
+│  - get_reverse_dependencies    │  - get_diff_summary                     │
+├──────────────────────────────────────────────────────────────────────────┤
+│  Execution Stubs (DISABLED in v1)                                        │
+│  - coordinate_mission, spawn_agent_team, trigger_skill                   │
+│  - write_file, create_branch, create_pr                                  │
+└──────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## WSP References

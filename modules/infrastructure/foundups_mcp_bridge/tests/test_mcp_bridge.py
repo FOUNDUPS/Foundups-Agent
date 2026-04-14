@@ -75,14 +75,14 @@ class TestBridgeStatus:
     def test_bridge_initialization(self, bridge):
         """Bridge initializes with repo root."""
         assert bridge.repo_root.exists()
-        assert bridge.VERSION == "1.0.0"
+        assert bridge.VERSION == "1.1.0"
         assert bridge.MODE == "perception-only"
 
     def test_get_status(self, bridge):
         """get_status returns valid response."""
         result = bridge.get_status()
         assert result["status"] == "ok"
-        assert result["data"]["version"] == "1.0.0"
+        assert result["data"]["version"] == "1.1.0"
         assert result["data"]["mode"] == "perception-only"
         assert result["data"]["repo_exists"] is True
         assert result["data"]["capabilities"]["repo_perception"] is True
@@ -238,6 +238,119 @@ class TestOverseerTools:
         result = bridge.call_tool("get_known_failure_patterns", limit=10)
         assert result["status"] == "ok"
         assert "failures" in result["data"]
+
+
+# ==================== Dependency Tools Tests ====================
+
+
+class TestDependencyTools:
+    """Test dependency perception tools."""
+
+    def test_get_module_dependencies_valid(self, bridge):
+        """get_module_dependencies returns deps for valid module."""
+        result = bridge.call_tool("get_module_dependencies", module_name="foundups_mcp_bridge")
+        assert result["status"] == "ok"
+        assert "module" in result["data"]
+        assert "internal_dependencies" in result["data"]
+        assert "external_dependencies" in result["data"]
+        assert "files_analyzed" in result["data"]
+
+    def test_get_module_dependencies_not_found(self, bridge):
+        """get_module_dependencies returns error for nonexistent module."""
+        result = bridge.call_tool("get_module_dependencies", module_name="nonexistent_module_xyz")
+        assert result["status"] == "error"
+        assert "not found" in result["error"].lower()
+
+    def test_get_module_dependencies_with_internal(self, bridge):
+        """get_module_dependencies identifies internal deps."""
+        # Use a module known to have internal deps
+        result = bridge.call_tool("get_module_dependencies", module_name="ai_overseer")
+        if result["status"] == "ok":
+            assert "internal_dependencies" in result["data"]
+            assert isinstance(result["data"]["internal_dependencies"], list)
+
+    def test_get_reverse_dependencies_valid(self, bridge):
+        """get_reverse_dependencies returns dependents."""
+        # Use a core module that others depend on
+        result = bridge.call_tool("get_reverse_dependencies", module_name="shared_utilities")
+        assert result["status"] == "ok"
+        assert "dependents" in result["data"]
+        assert "dependent_count" in result["data"]
+        assert "blast_radius" in result["data"]
+
+    def test_get_reverse_dependencies_isolated(self, bridge):
+        """get_reverse_dependencies handles isolated module."""
+        result = bridge.call_tool("get_reverse_dependencies", module_name="foundups_mcp_bridge")
+        assert result["status"] == "ok"
+        # New module likely has no dependents
+        assert "dependents" in result["data"]
+        assert isinstance(result["data"]["dependents"], list)
+
+    def test_get_reverse_dependencies_not_found(self, bridge):
+        """get_reverse_dependencies returns error for nonexistent module."""
+        result = bridge.call_tool("get_reverse_dependencies", module_name="nonexistent_module_xyz")
+        assert result["status"] == "error"
+        assert "not found" in result["error"].lower()
+
+
+# ==================== Diff Tools Tests ====================
+
+
+class TestDiffTools:
+    """Test diff perception tools."""
+
+    def test_get_file_diff_no_changes(self, bridge):
+        """get_file_diff handles file with no changes."""
+        result = bridge.call_tool("get_file_diff", path="README.md")
+        assert result["status"] == "ok"
+        assert "has_changes" in result["data"]
+        assert "path" in result["data"]
+
+    def test_get_file_diff_blocked_path(self, bridge):
+        """get_file_diff blocks sensitive files."""
+        result = bridge.call_tool("get_file_diff", path=".env")
+        assert result["status"] == "error"
+        assert "not allowed" in result["error"].lower()
+
+    def test_get_file_diff_with_range(self, bridge):
+        """get_file_diff accepts commit range."""
+        result = bridge.call_tool("get_file_diff", path="README.md", commit_range="HEAD~1..HEAD")
+        # May or may not have changes depending on recent commits
+        assert result["status"] == "ok"
+        assert "commit_range" in result["data"]
+
+    def test_get_diff_summary_valid(self, bridge):
+        """get_diff_summary returns change summary."""
+        result = bridge.call_tool("get_diff_summary", commit_range="HEAD~3..HEAD")
+        assert result["status"] == "ok"
+        assert "commit_range" in result["data"]
+        assert "files_changed" in result["data"]
+        assert "overall_stats" in result["data"]
+
+    def test_get_diff_summary_with_grouping(self, bridge):
+        """get_diff_summary groups by module."""
+        result = bridge.call_tool(
+            "get_diff_summary",
+            commit_range="HEAD~5..HEAD",
+            group_by_module=True,
+        )
+        assert result["status"] == "ok"
+        assert "grouped_by_module" in result["data"]
+
+    def test_get_diff_summary_scoped(self, bridge):
+        """get_diff_summary respects path scope."""
+        result = bridge.call_tool(
+            "get_diff_summary",
+            commit_range="HEAD~3..HEAD",
+            path="modules/",
+        )
+        assert result["status"] == "ok"
+        assert result["data"]["path_scope"] == "modules/"
+
+    def test_get_diff_summary_invalid_range(self, bridge):
+        """get_diff_summary handles invalid commit range."""
+        result = bridge.call_tool("get_diff_summary", commit_range="invalid..range")
+        assert result["status"] == "error"
 
 
 # ==================== Execution Stub Tests ====================
