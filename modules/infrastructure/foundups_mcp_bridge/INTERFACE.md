@@ -163,6 +163,114 @@ Get error patterns for avoidance.
 
 ---
 
+### Dependency Perception (v1.1)
+
+#### `get_module_dependencies(module_name, include_external=True, max_depth=1)`
+
+Get dependencies for a FoundUps module.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| module_name | str | - | Module name (e.g., "ai_overseer") |
+| include_external | bool | True | Include external package dependencies |
+| max_depth | int | 1 | Depth of internal dependency traversal |
+
+**Returns:**
+```python
+{
+    "module": str,
+    "module_path": str,
+    "files_analyzed": int,
+    "internal_dependencies": [
+        {"module": str, "imported_by": [str], "import_count": int, "confidence": str}
+    ],
+    "external_dependencies": [
+        {"package": str, "imported_by": [str], "import_count": int}
+    ],
+    "declared_requirements": [str],
+}
+```
+
+**Confidence values:** `direct_import`, `manifest_declared`, `search_inferred`
+
+#### `get_reverse_dependencies(module_name, search_scope="modules")`
+
+Find modules that depend on the specified module (blast radius analysis).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| module_name | str | - | Module to find dependents of |
+| search_scope | str | "modules" | Scope: "modules" or "all" |
+
+**Returns:**
+```python
+{
+    "module": str,
+    "dependents": [
+        {"module": str, "import_details": [...], "import_count": int}
+    ],
+    "dependent_count": int,
+    "blast_radius": str,  # "isolated", "low", "medium", "high", "critical"
+}
+```
+
+---
+
+### Diff Perception (v1.1)
+
+#### `get_file_diff(path, commit_range=None)`
+
+Get diff for a specific file.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| path | str | - | Relative file path |
+| commit_range | str | None | Git commit range (e.g., "HEAD~3..HEAD") |
+
+**Behavior:**
+- If `commit_range` provided: diff across that range
+- If omitted: working tree vs HEAD
+
+**Returns:**
+```python
+{
+    "path": str,
+    "commit_range": str,
+    "has_changes": bool,
+    "diff": str,  # Truncated if > 500 lines or 100KB
+    "stats": {"additions": int, "deletions": int, "total_changes": int},
+    "truncated": bool,
+    "commit_info": [{"hash": str, "author": str, "message": str}],
+}
+```
+
+**Security:** Blocks .env, credentials, secrets, .pem, .key files
+
+#### `get_diff_summary(commit_range, path=".", group_by_module=True)`
+
+Get summary of changes across a commit range.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| commit_range | str | - | Git commit range |
+| path | str | "." | Scope path |
+| group_by_module | bool | True | Group files by module/domain |
+
+**Returns:**
+```python
+{
+    "commit_range": str,
+    "commit_count": int,
+    "files_changed": int,
+    "overall_stats": {"files_changed": int, "insertions": int, "deletions": int},
+    "changed_files": [{"path": str, "status": str}],
+    "grouped_by_module": {"domain/module": [str]},
+    "commit_messages": [str],
+}
+```
+
+---
+
 ### Execution Stubs (v1 Disabled)
 
 These tools return `{"status": "disabled_in_v1"}` with schema information.

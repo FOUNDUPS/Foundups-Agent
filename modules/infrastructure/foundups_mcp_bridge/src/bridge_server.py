@@ -39,6 +39,8 @@ from . import repo_tools
 from . import doc_tools
 from . import overseer_tools
 from . import execution_stubs
+from . import dependency_tools
+from . import diff_tools
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +55,7 @@ class FoundUpsMCPBridge:
     Provides read-only perception layer for AI-assisted architectural execution.
     """
 
-    VERSION = "1.0.0"
+    VERSION = "1.1.0"
     MODE = "perception-only"
 
     def __init__(self, repo_root: Optional[Path] = None):
@@ -90,6 +92,14 @@ class FoundUpsMCPBridge:
         self._tools["get_overseer_status"] = self._wrap(overseer_tools.get_overseer_status)
         self._tools["get_coordination_state"] = self._wrap(overseer_tools.get_coordination_state)
         self._tools["get_known_failure_patterns"] = self._wrap(overseer_tools.get_known_failure_patterns)
+
+        # Dependency perception tools
+        self._tools["get_module_dependencies"] = self._wrap(dependency_tools.get_module_dependencies)
+        self._tools["get_reverse_dependencies"] = self._wrap(dependency_tools.get_reverse_dependencies)
+
+        # Diff perception tools
+        self._tools["get_file_diff"] = self._wrap(diff_tools.get_file_diff)
+        self._tools["get_diff_summary"] = self._wrap(diff_tools.get_diff_summary)
 
         # Execution stubs (disabled in v1)
         self._tools["coordinate_mission"] = execution_stubs.coordinate_mission
@@ -181,6 +191,8 @@ class FoundUpsMCPBridge:
                     "wsp_docs": True,
                     "module_docs": True,
                     "overseer_read": True,
+                    "dependency_analysis": True,
+                    "diff_perception": True,
                     "holoindex_search": False,  # v2
                     "execution": False,  # v2
                 },
