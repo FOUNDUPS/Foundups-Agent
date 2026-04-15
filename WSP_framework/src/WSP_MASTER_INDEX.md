@@ -188,6 +188,7 @@ Advanced protocols for complex system behaviors and architectural concerns.
 | WSP 103 | FoundUp Federation Protocol | Active | Federation protocol for multi-FoundUp coordination: cross-FoundUp routing, shared resource pools, trust boundaries, consensus mechanisms. Enables FoundUp mesh networks | WSP 96, WSP 98, WSP 27, WSP 104 | Federation, mesh network, cross-FoundUp, consensus |
 | WSP 104 | FoundUp Route Namespace and Tenant Isolation Protocol | Active | Namespace guardrails for FoundUp onboarding: unique foundup_id, routing_prefix, data_namespace; canonical /f/{foundup_id} route shape; manifest/catalog consistency; no root-level tenant routes | WSP 3, WSP 49, WSP 57, WSP 98 | FoundUp namespace, tenant isolation, route guardrails, onboarding compliance |
 | WSP 105 | CLI Interface Standard | Active | Standardizes CLI interfaces for agent automation: --json output, exit codes, flag conventions, catalog requirements. Enables OpenClaw/IronClaw to invoke module CLIs reliably | WSP 77, WSP 91, WSP 90 | CLI, JSON output, agent automation, OpenClaw, IronClaw |
+| WSP 106 | FoundUp API Gateway Protocol | Active | External API Gateway for FoundUp onboarding, token deployment, marketplace listing, agent compute enrollment. Wraps FAM service contracts as REST/gRPC endpoints with Ed25519 auth. Bakery → FoundUp journey | WSP 29, WSP 39, WSP 77, WSP 100, WSP 103, WSP 104 | API Gateway, onboarding, token, pFMALL, compute, CABR, Hermes |
 
 ### PLATFORM INTEGRATION MODULES (Non-WSP Components)
 For platform/module catalogs, see `WSP_framework/src/MODULE_MASTER.md`.
@@ -254,10 +255,10 @@ See WSP 48 (Recursive Self-Improvement) and WSP 70 (System Status Reporting) for
 
 ## [U+1F4CA] WSP STATUS SUMMARY
 
- - **Total Numbered Slots Tracked**: 106 (WSP 00-105)
- - **Highest Assigned Number**: WSP 105
- - **Recently Added**: WSP 100 (DAE Escalation), WSP 101 (UPS Classification), WSP 102 (Web Design), WSP 103 (Federation), WSP 104 (Route Namespace), WSP 105 (CLI Standard)
- - **Next Available Number**: WSP 106
+ - **Total Numbered Slots Tracked**: 107 (WSP 00-106)
+ - **Highest Assigned Number**: WSP 106
+ - **Recently Added**: WSP 100 (DAE Escalation), WSP 101 (UPS Classification), WSP 102 (Web Design), WSP 103 (Federation), WSP 104 (Route Namespace), WSP 105 (CLI Standard), WSP 106 (API Gateway)
+ - **Next Available Number**: WSP 107
  - **Status Mix**: Active/deprecated/superseded/historical protocols are explicitly marked per-row in the catalog table above
  - **Layers**: Entry 00; Foundation 1-19; Operational 20-39; Advanced 40-59; Memory/Knowledge 60-99
 
