@@ -43,6 +43,7 @@ from . import dependency_tools
 from . import diff_tools
 from . import impact_scoring
 from . import holo_tools
+from . import signal_normalization
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +58,7 @@ class FoundUpsMCPBridge:
     Provides read-only perception layer for AI-assisted architectural execution.
     """
 
-    VERSION = "1.3.0"
+    VERSION = "1.4.0"
     MODE = "perception-only"
 
     def __init__(self, repo_root: Optional[Path] = None):
@@ -112,6 +113,14 @@ class FoundUpsMCPBridge:
         self._tools["holo_failure_memory"] = self._wrap(holo_tools.holo_failure_memory)
         self._tools["holo_pattern_search"] = self._wrap(holo_tools.holo_pattern_search)
         self._tools["holo_task_packet"] = self._wrap(holo_tools.holo_task_packet)
+
+        # Signal normalization tools (state compression)
+        self._tools["get_overseer_summary"] = self._wrap(signal_normalization.get_overseer_summary)
+        self._tools["get_hot_modules"] = self._wrap(signal_normalization.get_hot_modules)
+        self._tools["get_repeated_failures"] = self._wrap(signal_normalization.get_repeated_failures)
+        self._tools["get_active_risks"] = self._wrap(signal_normalization.get_active_risks)
+        self._tools["get_recommended_focus"] = self._wrap(signal_normalization.get_recommended_focus)
+        self._tools["get_prompt_context_packet"] = self._wrap(signal_normalization.get_prompt_context_packet)
 
         # Execution stubs (disabled in v1)
         self._tools["coordinate_mission"] = execution_stubs.coordinate_mission
@@ -207,6 +216,7 @@ class FoundUpsMCPBridge:
                     "diff_perception": True,
                     "impact_prediction": True,
                     "holoindex_recall": True,  # v1.3
+                    "signal_normalization": True,  # v1.4
                     "execution": False,  # v2
                 },
             },

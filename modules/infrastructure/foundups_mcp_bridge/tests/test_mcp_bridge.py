@@ -75,14 +75,14 @@ class TestBridgeStatus:
     def test_bridge_initialization(self, bridge):
         """Bridge initializes with repo root."""
         assert bridge.repo_root.exists()
-        assert bridge.VERSION == "1.3.0"
+        assert bridge.VERSION == "1.4.0"
         assert bridge.MODE == "perception-only"
 
     def test_get_status(self, bridge):
         """get_status returns valid response."""
         result = bridge.get_status()
         assert result["status"] == "ok"
-        assert result["data"]["version"] == "1.3.0"
+        assert result["data"]["version"] == "1.4.0"
         assert result["data"]["mode"] == "perception-only"
         assert result["data"]["repo_exists"] is True
         assert result["data"]["capabilities"]["repo_perception"] is True
@@ -642,6 +642,214 @@ class TestHoloTools:
         holo_tools = [t for t in result["data"]["tools"] if t["name"].startswith("holo_")]
         for tool in holo_tools:
             assert tool["status"] == "active", f"{tool['name']} should be active"
+
+
+# ==================== Signal Normalization Tests ====================
+
+
+class TestSignalNormalization:
+    """Test state compression and signal normalization tools."""
+
+    # --- Overseer Summary Tests ---
+
+    def test_overseer_summary_basic(self, bridge):
+        """get_overseer_summary returns compressed state."""
+        result = bridge.call_tool("get_overseer_summary")
+        assert result["status"] == "ok"
+        assert "top_concerns" in result["data"]
+        assert "mission_activity" in result["data"]
+        assert "failure_clusters" in result["data"]
+        assert "hot_modules" in result["data"]
+        assert "system_posture" in result["data"]
+        assert "recommended_focus" in result["data"]
+
+    def test_overseer_summary_has_confidence(self, bridge):
+        """get_overseer_summary returns confidence score."""
+        result = bridge.call_tool("get_overseer_summary")
+        assert result["status"] == "ok"
+        assert "confidence" in result["meta"]
+        assert 0 <= result["meta"]["confidence"] <= 1
+
+    def test_overseer_summary_has_sources(self, bridge):
+        """get_overseer_summary reports sources used."""
+        result = bridge.call_tool("get_overseer_summary")
+        assert result["status"] == "ok"
+        assert "sources_used" in result["meta"]
+        assert isinstance(result["meta"]["sources_used"], list)
+
+    # --- Hot Modules Tests ---
+
+    def test_hot_modules_basic(self, bridge):
+        """get_hot_modules returns ranked module list."""
+        result = bridge.call_tool("get_hot_modules", limit=5)
+        assert result["status"] == "ok"
+        assert "modules" in result["data"]
+        assert "total_scored" in result["data"]
+        assert "scoring_note" in result["data"]
+
+    def test_hot_modules_structure(self, bridge):
+        """get_hot_modules returns proper module structure."""
+        result = bridge.call_tool("get_hot_modules", limit=10)
+        assert result["status"] == "ok"
+        for module in result["data"].get("modules", []):
+            assert "module" in module
+            assert "heat_score" in module
+            assert "factors" in module
+            assert isinstance(module["factors"], list)
+
+    def test_hot_modules_empty_is_valid(self, bridge):
+        """get_hot_modules handles empty state gracefully."""
+        result = bridge.call_tool("get_hot_modules", limit=5)
+        assert result["status"] == "ok"
+        # Empty modules list is valid
+        assert isinstance(result["data"]["modules"], list)
+
+    # --- Repeated Failures Tests ---
+
+    def test_repeated_failures_basic(self, bridge):
+        """get_repeated_failures returns clustered failures."""
+        result = bridge.call_tool("get_repeated_failures", limit=5)
+        assert result["status"] == "ok"
+        assert "clusters" in result["data"]
+        assert "total_clusters" in result["data"]
+        assert "total_failures_analyzed" in result["data"]
+
+    def test_repeated_failures_cluster_structure(self, bridge):
+        """get_repeated_failures returns proper cluster structure."""
+        result = bridge.call_tool("get_repeated_failures", limit=10)
+        assert result["status"] == "ok"
+        for cluster in result["data"].get("clusters", []):
+            assert "signature" in cluster
+            assert "count" in cluster
+            assert "severity" in cluster
+
+    def test_repeated_failures_no_results(self, bridge):
+        """get_repeated_failures handles no failures gracefully."""
+        result = bridge.call_tool("get_repeated_failures", limit=5)
+        assert result["status"] == "ok"
+        # Should have note if no failures
+        assert "note" in result["data"] or len(result["data"]["clusters"]) > 0
+
+    # --- Active Risks Tests ---
+
+    def test_active_risks_basic(self, bridge):
+        """get_active_risks returns normalized risk list."""
+        result = bridge.call_tool("get_active_risks", limit=5)
+        assert result["status"] == "ok"
+        assert "risks" in result["data"]
+        assert "total_risks" in result["data"]
+        assert "risk_taxonomy" in result["data"]
+
+    def test_active_risks_structure(self, bridge):
+        """get_active_risks returns proper risk structure."""
+        result = bridge.call_tool("get_active_risks", limit=10)
+        assert result["status"] == "ok"
+        for risk in result["data"].get("risks", []):
+            assert "risk_type" in risk
+            assert "scope" in risk
+            assert "severity" in risk
+            assert "confidence" in risk
+
+    def test_active_risks_severity_values(self, bridge):
+        """get_active_risks uses valid severity levels."""
+        result = bridge.call_tool("get_active_risks", limit=10)
+        assert result["status"] == "ok"
+        valid_severities = {"low", "medium", "high", "critical"}
+        for risk in result["data"].get("risks", []):
+            assert risk["severity"] in valid_severities
+
+    # --- Recommended Focus Tests ---
+
+    def test_recommended_focus_basic(self, bridge):
+        """get_recommended_focus returns prioritized items."""
+        result = bridge.call_tool("get_recommended_focus", limit=5)
+        assert result["status"] == "ok"
+        assert "focus_items" in result["data"]
+        assert "total_items" in result["data"]
+        assert "priority_note" in result["data"]
+
+    def test_recommended_focus_structure(self, bridge):
+        """get_recommended_focus returns proper focus structure."""
+        result = bridge.call_tool("get_recommended_focus", limit=10)
+        assert result["status"] == "ok"
+        for item in result["data"].get("focus_items", []):
+            assert "focus" in item
+            assert "why_now" in item
+            assert "priority" in item
+
+    def test_recommended_focus_priority_order(self, bridge):
+        """get_recommended_focus returns items in priority order."""
+        result = bridge.call_tool("get_recommended_focus", limit=10)
+        assert result["status"] == "ok"
+        items = result["data"].get("focus_items", [])
+        if len(items) >= 2:
+            # Items should be sorted by priority (lower = higher priority)
+            priorities = [i["priority"] for i in items]
+            assert priorities == sorted(priorities)
+
+    # --- Prompt Context Packet Tests ---
+
+    def test_prompt_context_packet_basic(self, bridge):
+        """get_prompt_context_packet returns assembled context."""
+        result = bridge.call_tool("get_prompt_context_packet")
+        assert result["status"] == "ok"
+        assert "system_posture" in result["data"]
+        assert "hot_modules" in result["data"]
+        assert "active_risks" in result["data"]
+        assert "repeated_failures" in result["data"]
+        assert "recommended_focus" in result["data"]
+
+    def test_prompt_context_packet_with_task(self, bridge):
+        """get_prompt_context_packet includes task relevance."""
+        result = bridge.call_tool(
+            "get_prompt_context_packet",
+            task_description="Fix bug in ai_overseer module"
+        )
+        assert result["status"] == "ok"
+        assert "task_relevance" in result["data"]
+        # Task relevance should include the task
+        if result["data"]["task_relevance"]:
+            assert "task" in result["data"]["task_relevance"]
+
+    def test_prompt_context_packet_without_task(self, bridge):
+        """get_prompt_context_packet works without task description."""
+        result = bridge.call_tool("get_prompt_context_packet", task_description=None)
+        assert result["status"] == "ok"
+        # task_relevance should be None when no task provided
+        assert result["data"]["task_relevance"] is None
+
+    def test_prompt_context_packet_confidence(self, bridge):
+        """get_prompt_context_packet returns confidence in valid range."""
+        result = bridge.call_tool("get_prompt_context_packet")
+        assert result["status"] == "ok"
+        assert "confidence" in result["meta"]
+        assert 0 <= result["meta"]["confidence"] <= 1
+
+    # --- Tool Listing Tests ---
+
+    def test_signal_tools_listed(self, bridge):
+        """All signal normalization tools appear in tool listing."""
+        result = bridge.list_tools()
+        assert result["status"] == "ok"
+        tool_names = [t["name"] for t in result["data"]["tools"]]
+        assert "get_overseer_summary" in tool_names
+        assert "get_hot_modules" in tool_names
+        assert "get_repeated_failures" in tool_names
+        assert "get_active_risks" in tool_names
+        assert "get_recommended_focus" in tool_names
+        assert "get_prompt_context_packet" in tool_names
+
+    def test_signal_tools_are_active(self, bridge):
+        """All signal normalization tools have active status."""
+        result = bridge.list_tools()
+        assert result["status"] == "ok"
+        signal_tools = [
+            "get_overseer_summary", "get_hot_modules", "get_repeated_failures",
+            "get_active_risks", "get_recommended_focus", "get_prompt_context_packet"
+        ]
+        for tool in result["data"]["tools"]:
+            if tool["name"] in signal_tools:
+                assert tool["status"] == "active", f"{tool['name']} should be active"
 
 
 # ==================== Execution Stub Tests ====================
