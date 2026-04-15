@@ -2,7 +2,7 @@
 
 Private, read-only MCP bridge for AI-assisted architectural execution.
 
-**Version**: 1.3.0 (perception + recall)
+**Version**: 1.4.0 (perception + recall + state compression)
 
 ## Purpose
 
@@ -73,6 +73,16 @@ The bridge allows 0102 (ChatGPT) to:
 | `holo_failure_memory` | Recall failure patterns from memory |
 | `holo_pattern_search` | Search learned patterns (adaptive learning + ChromaDB) |
 | `holo_task_packet` | Assemble context packet for a task |
+
+### Signal Normalization (Active - v1.4)
+| Tool | Description |
+|------|-------------|
+| `get_overseer_summary` | Compressed situational awareness (concerns, posture, focus) |
+| `get_hot_modules` | Modules ranked by volatility/risk/change frequency |
+| `get_repeated_failures` | Clustered recurring failure patterns |
+| `get_active_risks` | Normalized risk objects with severity/confidence |
+| `get_recommended_focus` | Prioritized next-action recommendations |
+| `get_prompt_context_packet` | Auto-assembled context for Windsurf prompts |
 
 ### Execution Stubs (Disabled in v1)
 | Tool | Status | Future Use |
@@ -236,7 +246,7 @@ Disabled tool responses:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│                    FoundUpsMCPBridge v1.3.0                              │
+│                    FoundUpsMCPBridge v1.4.0                              │
 ├──────────────────────────────────────────────────────────────────────────┤
 │  Repo Tools       │  Doc Tools        │  Overseer Tools                  │
 │  - get_repo_tree  │  - get_wsp_docs   │  - get_mission_history           │
@@ -257,6 +267,10 @@ Disabled tool responses:
 │  HoloIndex Recall (v1.3)                                                 │
 │  - holo_search, holo_related, holo_failure_memory                        │
 │  - holo_pattern_search, holo_task_packet                                 │
+├──────────────────────────────────────────────────────────────────────────┤
+│  Signal Normalization (v1.4)                                             │
+│  - get_overseer_summary, get_hot_modules, get_repeated_failures          │
+│  - get_active_risks, get_recommended_focus, get_prompt_context_packet    │
 ├──────────────────────────────────────────────────────────────────────────┤
 │  Execution Stubs (DISABLED in v1)                                        │
 │  - coordinate_mission, spawn_agent_team, trigger_skill                   │

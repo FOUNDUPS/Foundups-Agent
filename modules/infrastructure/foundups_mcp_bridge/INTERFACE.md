@@ -499,6 +499,178 @@ Assemble context packet for a task.
 
 ---
 
+### Signal Normalization (v1.4)
+
+#### `get_overseer_summary()`
+
+Get compressed overseer situational awareness.
+
+**Returns:**
+```python
+{
+    "top_concerns": [
+        {"type": str, "summary": str, "severity": str}
+    ],
+    "mission_activity": {
+        "total": int,
+        "by_status": dict,
+        "completion_rate": float,
+    },
+    "failure_clusters": [...],
+    "hot_modules": [...],
+    "system_posture": "stable" | "degraded" | "critical" | "drifting" | "unmonitored",
+    "recommended_focus": [...],
+}
+```
+
+**Confidence sources:** overseer_status, mission_history, failure_patterns, hot_modules, recommended_focus
+
+#### `get_hot_modules(limit=10)`
+
+Get modules ranked by recent volatility and risk.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| limit | int | 10 | Maximum modules to return |
+
+**Returns:**
+```python
+{
+    "modules": [
+        {
+            "module": str,
+            "heat_score": float,  # Heuristic score
+            "factors": [str],     # What contributed to score
+            "change_count": int,
+            "failure_count": int,
+            "dependency_count": int,
+            "is_critical": bool,
+        }
+    ],
+    "total_scored": int,
+    "scoring_note": str,
+}
+```
+
+**Scoring inputs:** change frequency, critical module status, failure association, dependency centrality
+
+#### `get_repeated_failures(limit=10)`
+
+Get clustered recurring failure patterns.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| limit | int | 10 | Maximum clusters to return |
+
+**Returns:**
+```python
+{
+    "clusters": [
+        {
+            "signature": str,
+            "count": int,
+            "total_frequency": int,
+            "modules": [str],
+            "last_seen": str,
+            "severity": str,
+            "samples": [...],
+        }
+    ],
+    "total_clusters": int,
+    "total_failures_analyzed": int,
+}
+```
+
+**Sources:** known_failures, holo_failure_memory
+
+#### `get_active_risks(limit=10)`
+
+Get normalized active risk objects.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| limit | int | 10 | Maximum risks to return |
+
+**Returns:**
+```python
+{
+    "risks": [
+        {
+            "risk_type": str,  # See taxonomy below
+            "scope": str,
+            "severity": "low" | "medium" | "high" | "critical",
+            "confidence": float,
+            "evidence_sources": [str],
+            "why_it_matters": str,
+        }
+    ],
+    "total_risks": int,
+    "risk_taxonomy": [str],
+}
+```
+
+**Risk taxonomy:**
+- `regression_risk`: Risk of breaking existing functionality
+- `coordination_risk`: Risk from multi-agent coordination
+- `dependency_risk`: Risk from module dependency chains
+- `repeated_failure_risk`: Risk from recurring failure patterns
+- `drift_risk`: Risk from state or architecture drift
+- `context_gap_risk`: Risk from incomplete information
+
+#### `get_recommended_focus(limit=10)`
+
+Get prioritized next-action recommendations.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| limit | int | 10 | Maximum items to return |
+
+**Returns:**
+```python
+{
+    "focus_items": [
+        {
+            "focus": str,           # What to do
+            "why_now": str,         # Why it's urgent
+            "priority": int,        # 1=critical, 2=high, 3=medium, 4=low
+            "suggested_context": [str],  # Modules/files to load
+        }
+    ],
+    "total_items": int,
+    "priority_note": str,
+}
+```
+
+#### `get_prompt_context_packet(task_description=None)`
+
+Assemble compressed context for Windsurf prompt.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| task_description | str | None | Optional task for relevance filtering |
+
+**Returns:**
+```python
+{
+    "system_posture": str,
+    "hot_modules": [{"module": str, "score": float}],
+    "active_risks": [{"type": str, "scope": str, "severity": str}],
+    "repeated_failures": [{"signature": str, "count": int}],
+    "recommended_focus": [{"focus": str, "priority": int}],
+    "suggested_files": [str],
+    "suggested_wsp": [{"title": str, "path": str}],
+    "task_relevance": {
+        "task": str,
+        "relevant_modules": [str],
+        "suggested_wsp": [str],
+    } | None,
+}
+```
+
+**Use case:** Auto-prepare state for next Windsurf prompt. Answers: what should I worry about? what is unstable? what should I load first?
+
+---
+
 ### Execution Stubs (v1 Disabled)
 
 These tools return `{"status": "disabled_in_v1"}` with schema information.
