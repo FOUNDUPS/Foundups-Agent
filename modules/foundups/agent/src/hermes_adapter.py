@@ -4,6 +4,7 @@ Hermes FoundUp Builder Adapter
 Bounded Hermes agent wrapper for FoundUp extraction tasks.
 All execution gated through AI Overseer security sentinel.
 Qwen backend via LM Studio for local inference.
+MCP Bridge v1.4 perception layer for intelligent extraction decisions.
 
 WSP References:
 - WSP 29: CABR Engine (quality gates)
@@ -24,6 +25,16 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
+
+# Import MCP Bridge for perception layer
+try:
+    from modules.infrastructure.foundups_mcp_bridge.src.bridge_server import (
+        FoundUpsMCPBridge,
+    )
+    MCP_BRIDGE_AVAILABLE = True
+except ImportError:
+    MCP_BRIDGE_AVAILABLE = False
+    logger.debug("[HERMES] MCP Bridge not available - running without perception")
 
 # Default Qwen configuration for LM Studio (legacy - use HermesModelRouter)
 DEFAULT_QWEN_CONFIG = {
@@ -111,6 +122,15 @@ class HermesFoundUpBuilder:
         self.dry_run = os.environ.get("HERMES_BUILDER_DRY_RUN", "0") == "1"
         self.require_security_gate = os.environ.get("HERMES_BUILDER_SECURITY_GATE", "1") == "1"
 
+        # MCP Bridge perception layer (v1.4)
+        self._mcp_bridge = None
+        if MCP_BRIDGE_AVAILABLE:
+            try:
+                self._mcp_bridge = FoundUpsMCPBridge(repo_root=self.repo_root)
+                logger.info("[HERMES] MCP Bridge v1.4 perception layer enabled")
+            except Exception as e:
+                logger.warning("[HERMES] MCP Bridge init failed: %s", e)
+
         # Add vendor to path for Hermes imports
         vendor_path = self.repo_root / "vendor" / "hermes-agent"
         if vendor_path.exists() and str(vendor_path) not in sys.path:
@@ -177,10 +197,11 @@ class HermesFoundUpBuilder:
         """
         Analyze module boundary for exfoliation readiness.
 
-        Scans imports to identify:
-        - Product code (stays with FoundUp)
-        - Core dependencies (need adapters)
-        - Blockers for exfoliation
+        Uses MCP Bridge perception layer (if available) for:
+        - Dependency graph analysis (get_module_dependencies)
+        - Blast radius calculation (get_reverse_dependencies)
+
+        Falls back to import scanning if MCP Bridge unavailable.
 
         Args:
             module_path: Relative path to module (e.g., "modules/foundups/gotjunk")
@@ -195,7 +216,27 @@ class HermesFoundUpBuilder:
             analysis.blockers.append(f"Module not found: {module_path}")
             return analysis
 
-        # Scan Python files for imports
+        # Use MCP Bridge for enhanced dependency perception
+        mcp_deps = None
+        mcp_reverse = None
+        if self._mcp_bridge:
+            try:
+                # Get forward dependencies
+                mcp_deps = self._mcp_bridge.call_tool(
+                    "get_module_dependencies",
+                    module_path=module_path
+                )
+                # Get reverse dependencies (blast radius)
+                mcp_reverse = self._mcp_bridge.call_tool(
+                    "get_reverse_dependencies",
+                    module_path=module_path
+                )
+                logger.debug("[HERMES] MCP perception: deps=%s, reverse=%s",
+                             mcp_deps.get("status"), mcp_reverse.get("status"))
+            except Exception as e:
+                logger.warning("[HERMES] MCP dependency analysis failed: %s", e)
+
+        # Scan Python files for imports (always run for product file list)
         core_import_set = set()
         product_files = []
 
@@ -213,6 +254,17 @@ class HermesFoundUpBuilder:
 
             except Exception as e:
                 logger.debug("[HERMES] Error reading %s: %s", py_file, e)
+
+        # Enrich with MCP dependency data if available
+        if mcp_deps and mcp_deps.get("status") == "ok":
+            mcp_data = mcp_deps.get("data", {})
+            internal_deps = mcp_data.get("internal_dependencies", [])
+            for dep in internal_deps:
+                dep_path = dep.get("path", "")
+                # Map dependency paths to core module names
+                for core_module in self.CORE_MODULES:
+                    if core_module.replace(".", "/") in dep_path:
+                        core_import_set.add(core_module)
 
         analysis.product_files = product_files
         analysis.core_imports = list(core_import_set)
@@ -238,6 +290,12 @@ class HermesFoundUpBuilder:
         if not (full_path / "foundup_manifest.json").exists():
             analysis.blockers.append("Missing foundup_manifest.json")
 
+        # Add blast radius info from MCP if high impact
+        if mcp_reverse and mcp_reverse.get("status") == "ok":
+            blast_radius = mcp_reverse.get("data", {}).get("blast_radius", "unknown")
+            if blast_radius in ("high", "critical"):
+                analysis.blockers.append(f"High blast radius: {blast_radius} - review dependents before extraction")
+
         analysis.exfoliation_ready = len(analysis.blockers) == 0
 
         return analysis
@@ -245,6 +303,11 @@ class HermesFoundUpBuilder:
     def check_exfoliation_gate(self, module_path: str) -> ExfoliationGate:
         """
         Run exfoliation readiness gate per FOUNDUP_EXFOLIATION_PROTOCOL.md.
+
+        Uses MCP Bridge perception layer (if available) for:
+        - Impact scoring (get_change_impact_score)
+        - Test coverage analysis
+        - Prior failure pattern detection
 
         Args:
             module_path: Relative path to module
@@ -254,6 +317,24 @@ class HermesFoundUpBuilder:
         """
         gate = ExfoliationGate()
         full_path = self.repo_root / module_path
+
+        # Use MCP Bridge for impact prediction
+        impact_data = None
+        if self._mcp_bridge:
+            try:
+                impact_result = self._mcp_bridge.call_tool(
+                    "get_change_impact_score",
+                    target_type="module",
+                    target=module_path
+                )
+                if impact_result.get("status") == "ok":
+                    impact_data = impact_result.get("data", {})
+                    logger.info("[HERMES] Impact score for %s: %s (risk: %s)",
+                                module_path,
+                                impact_data.get("risk_score", "?"),
+                                impact_data.get("risk_level", "?"))
+            except Exception as e:
+                logger.warning("[HERMES] MCP impact scoring failed: %s", e)
 
         # 1. Module boundary is clear
         analysis = self.analyze_boundary(module_path)
@@ -267,7 +348,18 @@ class HermesFoundUpBuilder:
 
         # 3. Runtime is independently testable
         tests_dir = full_path / "tests"
-        gate.runtime_testable = tests_dir.exists() and any(tests_dir.glob("test_*.py"))
+        has_tests = tests_dir.exists() and any(tests_dir.glob("test_*.py"))
+
+        # Enhance with MCP test coverage data
+        if impact_data:
+            test_coverage = impact_data.get("test_coverage", {})
+            coverage_ratio = test_coverage.get("ratio", 0)
+            # Warn if low coverage but don't block
+            if coverage_ratio < 0.5 and has_tests:
+                logger.warning("[HERMES] Low test coverage: %.1f%% for %s",
+                               coverage_ratio * 100, module_path)
+
+        gate.runtime_testable = has_tests
 
         # 4. Deploy surface is understood
         deploy_indicators = [
@@ -282,7 +374,12 @@ class HermesFoundUpBuilder:
         gate.shared_deps_adapter_level = len(analysis.adapters_needed) <= 5
 
         # 6. Another Claw could participate
-        gate.claw_can_participate = gate.contracts_explicit
+        # Block if MCP says critical risk level
+        if impact_data and impact_data.get("risk_level") == "critical":
+            logger.warning("[HERMES] Critical risk level - blocking claw participation")
+            gate.claw_can_participate = False
+        else:
+            gate.claw_can_participate = gate.contracts_explicit
 
         # Overall gate
         gate.passed = all([
@@ -583,6 +680,10 @@ class MCPBridgeAdapter:
         """
         Run Hermes agent with Qwen to execute FoundUp extraction.
 
+        Uses MCP Bridge perception layer to inject context:
+        - Hot modules and risks via get_prompt_context_packet
+        - Module-specific risks and failure patterns
+
         Spawns Hermes CLI with:
         - Qwen backend via LM Studio (localhost:1234)
         - Tool parser: qwen
@@ -615,12 +716,48 @@ class MCPBridgeAdapter:
         module_name = Path(source_module).name
         full_module_path = self.repo_root / source_module
 
+        # Get MCP context packet for intelligent extraction
+        context_section = ""
+        if self._mcp_bridge:
+            try:
+                context_result = self._mcp_bridge.call_tool(
+                    "get_prompt_context_packet",
+                    task_description=f"Extract FoundUp {module_name} from {source_module}"
+                )
+                if context_result.get("status") == "ok":
+                    ctx_data = context_result.get("data", {})
+
+                    # Extract relevant context for Hermes
+                    risks = ctx_data.get("active_risks", [])
+                    failures = ctx_data.get("repeated_failures", [])
+                    focus = ctx_data.get("suggested_focus", [])
+
+                    if risks or failures or focus:
+                        context_section = "\n## MCP Perception Context\n"
+                        if risks:
+                            risk_strs = [f"- {r.get('type', '?')}: {r.get('description', '?')}"
+                                         for r in risks[:3]]
+                            context_section += f"Active Risks:\n" + "\n".join(risk_strs) + "\n"
+                        if failures:
+                            fail_strs = [f"- {f.get('pattern', '?')} ({f.get('frequency', '?')} occurrences)"
+                                         for f in failures[:3]]
+                            context_section += f"Known Failure Patterns:\n" + "\n".join(fail_strs) + "\n"
+                        if focus:
+                            focus_strs = [f"- {item}" for item in focus[:3]]
+                            context_section += f"Suggested Focus:\n" + "\n".join(focus_strs) + "\n"
+
+                        logger.info("[HERMES] Injecting MCP context: %d risks, %d failures, %d focus items",
+                                    len(risks), len(failures), len(focus))
+
+            except Exception as e:
+                logger.warning("[HERMES] MCP context packet failed: %s", e)
+
         extraction_prompt = f"""Extract FoundUp '{module_name}' from monorepo to external repository.
 
 Source: {full_module_path}
 Target: github.com/{target_org}/{module_name}
 Backup: github.com/Foundup/{module_name}
-
+{context_section}
 Execute these steps:
 1. Verify git filter-repo is installed
 2. Create extraction directory: O:/tmp/{module_name}-extraction
@@ -763,6 +900,40 @@ Do NOT modify the original monorepo. Work only in the extraction directory."""
             }
 
         return capabilities
+
+    def get_perception(self, tool_name: str, **kwargs) -> Dict[str, Any]:
+        """
+        Direct MCP Bridge perception query.
+
+        Exposes the MCP Bridge v1.4 perception layer for custom queries.
+        See bridge_server.py for available tools.
+
+        Common tools:
+        - get_overseer_summary: Quick triage (posture, signals)
+        - get_hot_modules: Ranked by change × criticality × failures
+        - get_change_impact_score: Risk analysis for a module
+        - holo_search: Semantic code search
+        - get_prompt_context_packet: Pre-assembled context
+
+        Args:
+            tool_name: MCP tool to call
+            **kwargs: Tool-specific arguments
+
+        Returns:
+            MCP response dict with status and data
+        """
+        if not self._mcp_bridge:
+            return {
+                "status": "error",
+                "error": "MCP Bridge not available",
+                "available": False,
+            }
+
+        try:
+            return self._mcp_bridge.call_tool(tool_name, **kwargs)
+        except Exception as e:
+            logger.error("[HERMES] MCP perception error: %s", e)
+            return {"status": "error", "error": str(e)}
 
     def run_with_vision(
         self,
