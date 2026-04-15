@@ -1,0 +1,43 @@
+# Hermes FoundUp Builder Configuration
+# Uses Qwen via LM Studio for local inference
+# WSP 97: System Execution Prompting Protocol
+
+model:
+  # Qwen Coder 7B via LM Studio
+  default: "qwen-coder-7b"
+  provider: "lmstudio"
+  base_url: "http://localhost:1234/v1"
+  # No API key needed for local server
+
+# Terminal executes in FoundUp source directory
+terminal:
+  backend: "local"
+  cwd: "."
+  timeout: 180
+
+# Compression for long extraction sessions
+compression:
+  enabled: true
+  threshold: 0.50
+  target_ratio: 0.20
+  protect_last_n: 20
+
+# Agent limits for FoundUp extraction
+agent:
+  max_turns: 30
+  verbose: false
+  reasoning_effort: "medium"
+
+# FoundUp builder only needs file and terminal tools
+platform_toolsets:
+  cli: [terminal, file]
+
+# Display settings
+display:
+  compact: true
+  tool_progress: all
+  streaming: true
+
+# Skills for FoundUp extraction
+skills:
+  creation_nudge_interval: 0  # Disable - we have our own workflow
