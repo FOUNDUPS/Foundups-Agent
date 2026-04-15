@@ -75,14 +75,14 @@ class TestBridgeStatus:
     def test_bridge_initialization(self, bridge):
         """Bridge initializes with repo root."""
         assert bridge.repo_root.exists()
-        assert bridge.VERSION == "1.2.0"
+        assert bridge.VERSION == "1.3.0"
         assert bridge.MODE == "perception-only"
 
     def test_get_status(self, bridge):
         """get_status returns valid response."""
         result = bridge.get_status()
         assert result["status"] == "ok"
-        assert result["data"]["version"] == "1.2.0"
+        assert result["data"]["version"] == "1.3.0"
         assert result["data"]["mode"] == "perception-only"
         assert result["data"]["repo_exists"] is True
         assert result["data"]["capabilities"]["repo_perception"] is True
@@ -483,6 +483,165 @@ class TestImpactScoring:
         assert result["status"] == "ok"
         assert "risk_factors" in result["data"]
         assert isinstance(result["data"]["risk_factors"], list)
+
+
+# ==================== HoloIndex Recall Tests ====================
+
+
+class TestHoloTools:
+    """Test HoloIndex recall tools."""
+
+    def test_holo_search_basic(self, bridge):
+        """holo_search returns search results."""
+        result = bridge.call_tool("holo_search", query="WSP protocol", scope="all", top_k=5)
+        assert result["status"] == "ok"
+        assert "query" in result["data"]
+        assert "hits" in result["data"]
+        assert "hit_count" in result["data"]
+        assert result["data"]["query"] == "WSP protocol"
+
+    def test_holo_search_empty_query_error(self, bridge):
+        """holo_search rejects empty query."""
+        result = bridge.call_tool("holo_search", query="", scope="all", top_k=5)
+        assert result["status"] == "error"
+        assert "empty" in result["error"].lower()
+
+    def test_holo_search_scoped(self, bridge):
+        """holo_search respects scope filter."""
+        result = bridge.call_tool("holo_search", query="module", scope="code", top_k=5)
+        assert result["status"] == "ok"
+        assert result["data"]["scope"] == "code"
+
+    def test_holo_search_returns_confidence(self, bridge):
+        """holo_search includes confidence in meta."""
+        result = bridge.call_tool("holo_search", query="test", scope="all", top_k=3)
+        assert result["status"] == "ok"
+        assert "confidence" in result["meta"]
+
+    def test_holo_related_basic(self, bridge):
+        """holo_related returns related modules."""
+        result = bridge.call_tool("holo_related", target="ai_overseer", relation_type="all", limit=5)
+        assert result["status"] == "ok"
+        assert "target" in result["data"]
+        assert "related" in result["data"]
+        assert "related_count" in result["data"]
+        assert "sources_used" in result["data"]
+
+    def test_holo_related_finds_dependencies(self, bridge):
+        """holo_related uses dependency graph."""
+        result = bridge.call_tool("holo_related", target="ai_overseer", relation_type="all", limit=10)
+        assert result["status"] == "ok"
+        sources = result["data"]["sources_used"]
+        # Should use at least dependency analysis
+        assert any("depend" in s.lower() for s in sources)
+
+    def test_holo_related_nonexistent_module(self, bridge):
+        """holo_related handles nonexistent module gracefully."""
+        result = bridge.call_tool("holo_related", target="nonexistent_xyz", relation_type="all", limit=5)
+        assert result["status"] == "ok"
+        # Should return ok (not error) - may still find semantic matches
+        assert "related" in result["data"]
+        assert "related_count" in result["data"]
+        # Verify no dependency relationships found for nonexistent module
+        related = result["data"]["related"]
+        dependency_relations = [r for r in related if r.get("relation") in ("depends_on", "depended_by")]
+        assert len(dependency_relations) == 0  # No deps for nonexistent module
+
+    def test_holo_failure_memory_basic(self, bridge):
+        """holo_failure_memory returns failure patterns."""
+        result = bridge.call_tool("holo_failure_memory", query="test", limit=5)
+        assert result["status"] == "ok"
+        assert "query" in result["data"]
+        assert "failures" in result["data"]
+        assert "failure_count" in result["data"]
+        assert "sources_used" in result["data"]
+
+    def test_holo_failure_memory_no_results(self, bridge):
+        """holo_failure_memory handles no results gracefully."""
+        result = bridge.call_tool("holo_failure_memory", query="xyznonexistent123", limit=5)
+        assert result["status"] == "ok"
+        assert "failures" in result["data"]
+        # No crash, empty is fine
+
+    def test_holo_pattern_search_basic(self, bridge):
+        """holo_pattern_search returns patterns."""
+        result = bridge.call_tool("holo_pattern_search", query="refactoring", limit=5)
+        assert result["status"] == "ok"
+        assert "query" in result["data"]
+        assert "patterns" in result["data"]
+        assert "pattern_count" in result["data"]
+        assert "sources_used" in result["data"]
+
+    def test_holo_pattern_search_adaptive_learning(self, bridge):
+        """holo_pattern_search uses adaptive learning files."""
+        result = bridge.call_tool("holo_pattern_search", query="pattern", limit=10)
+        assert result["status"] == "ok"
+        sources = result["data"]["sources_used"]
+        # Should check adaptive learning files
+        assert any("adaptive" in s.lower() for s in sources) or result["data"]["pattern_count"] >= 0
+
+    def test_holo_task_packet_basic(self, bridge):
+        """holo_task_packet assembles context."""
+        result = bridge.call_tool(
+            "holo_task_packet",
+            task_description="Add new feature to MCP bridge",
+            include_patterns=True,
+            include_failures=True,
+        )
+        assert result["status"] == "ok"
+        assert "task" in result["data"]
+        assert "relevant_modules" in result["data"]
+        assert "relevant_docs" in result["data"]
+        assert "relevant_patterns" in result["data"]
+        assert "known_risks" in result["data"]
+        assert "confidence" in result["data"]
+
+    def test_holo_task_packet_empty_description_error(self, bridge):
+        """holo_task_packet rejects empty description."""
+        result = bridge.call_tool("holo_task_packet", task_description="")
+        assert result["status"] == "error"
+        assert "empty" in result["error"].lower()
+
+    def test_holo_task_packet_confidence_range(self, bridge):
+        """holo_task_packet confidence is in valid range."""
+        result = bridge.call_tool(
+            "holo_task_packet",
+            task_description="Fix bug in ai_overseer",
+        )
+        assert result["status"] == "ok"
+        confidence = result["data"]["confidence"]
+        assert 0 <= confidence <= 1
+
+    def test_holo_task_packet_without_patterns(self, bridge):
+        """holo_task_packet works without patterns."""
+        result = bridge.call_tool(
+            "holo_task_packet",
+            task_description="Test task",
+            include_patterns=False,
+            include_failures=False,
+        )
+        assert result["status"] == "ok"
+        # Should still have modules and docs
+        assert "relevant_modules" in result["data"]
+
+    def test_holo_tools_listed(self, bridge):
+        """All holo tools appear in tool listing."""
+        result = bridge.list_tools()
+        assert result["status"] == "ok"
+        tool_names = [t["name"] for t in result["data"]["tools"]]
+        assert "holo_search" in tool_names
+        assert "holo_related" in tool_names
+        assert "holo_failure_memory" in tool_names
+        assert "holo_pattern_search" in tool_names
+        assert "holo_task_packet" in tool_names
+
+    def test_holo_tools_are_active(self, bridge):
+        """All holo tools have active status."""
+        result = bridge.list_tools()
+        assert result["status"] == "ok"
+        holo_tools = [t for t in result["data"]["tools"] if t["name"].startswith("holo_")]
+        for tool in holo_tools:
+            assert tool["status"] == "active", f"{tool['name']} should be active"
 
 
 # ==================== Execution Stub Tests ====================

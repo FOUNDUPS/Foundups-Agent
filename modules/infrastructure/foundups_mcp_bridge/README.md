@@ -2,6 +2,8 @@
 
 Private, read-only MCP bridge for AI-assisted architectural execution.
 
+**Version**: 1.3.0 (perception + recall)
+
 ## Purpose
 
 This module provides the **perception layer** for the AI architect workflow:
@@ -63,6 +65,15 @@ The bridge allows 0102 (ChatGPT) to:
 |------|-------------|
 | `get_change_impact_score` | What is the blast radius? Risk level, test gaps, prior failures |
 
+### HoloIndex Recall (Active - v1.3)
+| Tool | Description |
+|------|-------------|
+| `holo_search` | Semantic search across repo (HoloIndex + ripgrep fallback) |
+| `holo_related` | Find modules related to target (deps + semantic + co-change) |
+| `holo_failure_memory` | Recall failure patterns from memory |
+| `holo_pattern_search` | Search learned patterns (adaptive learning + ChromaDB) |
+| `holo_task_packet` | Assemble context packet for a task |
+
 ### Execution Stubs (Disabled in v1)
 | Tool | Status | Future Use |
 |------|--------|------------|
@@ -122,6 +133,31 @@ python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server \
 python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server \
     --call get_change_impact_score \
     --args '{"target_type": "commit_range", "target": "HEAD~3..HEAD"}'
+
+# Semantic search (v1.3)
+python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server \
+    --call holo_search \
+    --args '{"query": "WSP protocol validation", "scope": "all", "top_k": 10}'
+
+# Find related modules (v1.3)
+python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server \
+    --call holo_related \
+    --args '{"target": "ai_overseer", "relation_type": "all", "limit": 10}'
+
+# Search failure memory (v1.3)
+python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server \
+    --call holo_failure_memory \
+    --args '{"query": "import error", "limit": 5}'
+
+# Search learned patterns (v1.3)
+python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server \
+    --call holo_pattern_search \
+    --args '{"query": "refactoring", "limit": 10}'
+
+# Assemble task context (v1.3)
+python -m modules.infrastructure.foundups_mcp_bridge.src.bridge_server \
+    --call holo_task_packet \
+    --args '{"task_description": "Add new validation to ai_overseer"}'
 ```
 
 ### Programmatic Use
@@ -200,7 +236,7 @@ Disabled tool responses:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│                    FoundUpsMCPBridge v1.2.0                              │
+│                    FoundUpsMCPBridge v1.3.0                              │
 ├──────────────────────────────────────────────────────────────────────────┤
 │  Repo Tools       │  Doc Tools        │  Overseer Tools                  │
 │  - get_repo_tree  │  - get_wsp_docs   │  - get_mission_history           │
@@ -217,6 +253,10 @@ Disabled tool responses:
 ├──────────────────────────────────────────────────────────────────────────┤
 │  Impact Prediction (v1.2)                                                │
 │  - get_change_impact_score (risk_level, test_coverage, prior_failures)   │
+├──────────────────────────────────────────────────────────────────────────┤
+│  HoloIndex Recall (v1.3)                                                 │
+│  - holo_search, holo_related, holo_failure_memory                        │
+│  - holo_pattern_search, holo_task_packet                                 │
 ├──────────────────────────────────────────────────────────────────────────┤
 │  Execution Stubs (DISABLED in v1)                                        │
 │  - coordinate_mission, spawn_agent_team, trigger_skill                   │
