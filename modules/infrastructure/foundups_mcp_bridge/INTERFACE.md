@@ -345,6 +345,160 @@ Compute blast-radius and risk score for a change target.
 
 ---
 
+### HoloIndex Recall (v1.3)
+
+#### `holo_search(query, scope="all", top_k=10)`
+
+Semantic search across the repository using HoloIndex.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| query | str | - | Search query |
+| scope | str | "all" | Filter: "all", "code", "wsp", "test", "skill" |
+| top_k | int | 10 | Maximum results |
+
+**Returns:**
+```python
+{
+    "query": str,
+    "scope": str,
+    "hits": [
+        {
+            "type": "code" | "wsp" | "test" | "skill",
+            "path": str,
+            "relevance": float,  # 0-1 semantic similarity
+            "preview": str,
+        }
+    ],
+    "hit_count": int,
+    "fallback_note": str,  # Present if using ripgrep fallback
+}
+```
+
+**Fallback:** Uses ripgrep text search if HoloIndex unavailable.
+
+#### `holo_related(target, relation_type="all", limit=10)`
+
+Find modules related to target via multiple signals.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| target | str | - | Module name or file path |
+| relation_type | str | "all" | "dependency", "co_change", "failure", "all" |
+| limit | int | 10 | Maximum results |
+
+**Returns:**
+```python
+{
+    "target": str,
+    "relation_type": str,
+    "related": [
+        {
+            "module": str,
+            "relation": "depends_on" | "depended_by" | "semantic_similar" | "co_changed",
+            "strength": float,  # 0-1 relation strength
+        }
+    ],
+    "related_count": int,
+    "sources_used": [str],  # e.g., ["dependencies", "holoindex_semantic", "co_change"]
+}
+```
+
+**Sources:** Dependency graph, HoloIndex semantic search, git co-change analysis.
+
+#### `holo_failure_memory(query, limit=10)`
+
+Recall failure patterns from memory.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| query | str | - | Search query for failures |
+| limit | int | 10 | Maximum results |
+
+**Returns:**
+```python
+{
+    "query": str,
+    "failures": [
+        {
+            "pattern": str,
+            "module": str,
+            "last_seen": str,
+            "frequency": int,
+            "severity": str,
+            "source": "adaptive_learning" | "holoindex" | "modlog",
+        }
+    ],
+    "failure_count": int,
+    "sources_used": [str],
+}
+```
+
+**Sources:** AI Overseer adaptive learning, HoloIndex, ModLog scanning.
+
+#### `holo_pattern_search(query, limit=10)`
+
+Search learned patterns.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| query | str | - | Pattern search query |
+| limit | int | 10 | Maximum results |
+
+**Returns:**
+```python
+{
+    "query": str,
+    "patterns": [
+        {
+            "name": str,
+            "type": "learned_pattern" | "012_pattern" | "wsp_pattern",
+            "data_preview": str,
+            "relevance": float,
+        }
+    ],
+    "pattern_count": int,
+    "sources_used": [str],
+}
+```
+
+**Sources:** adaptive_learning/*.json, ChromaDB PatternMemory, WSP protocols.
+
+#### `holo_task_packet(task_description, include_patterns=True, include_failures=True)`
+
+Assemble context packet for a task.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| task_description | str | - | Description of the task |
+| include_patterns | bool | True | Include relevant patterns |
+| include_failures | bool | True | Include failure warnings |
+
+**Returns:**
+```python
+{
+    "task": str,
+    "relevant_modules": [
+        {"module": str, "path": str, "relevance": float}
+    ],
+    "relevant_docs": [
+        {"module": str, "doc_type": str, "excerpt": str}
+    ],
+    "relevant_patterns": [...],
+    "known_risks": [
+        {"risk": str, "module": str, "severity": str}
+    ],
+    "suggested_wsp": [
+        {"title": str, "path": str, "summary": str}
+    ],
+    "confidence": float,  # 0-1 based on data completeness
+}
+```
+
+**Use case:** Pre-task context assembly for better prompts.
+
+---
+
 ### Execution Stubs (v1 Disabled)
 
 These tools return `{"status": "disabled_in_v1"}` with schema information.

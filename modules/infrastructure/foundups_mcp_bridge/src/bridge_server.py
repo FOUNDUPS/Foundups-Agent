@@ -42,6 +42,7 @@ from . import execution_stubs
 from . import dependency_tools
 from . import diff_tools
 from . import impact_scoring
+from . import holo_tools
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +57,7 @@ class FoundUpsMCPBridge:
     Provides read-only perception layer for AI-assisted architectural execution.
     """
 
-    VERSION = "1.2.0"
+    VERSION = "1.3.0"
     MODE = "perception-only"
 
     def __init__(self, repo_root: Optional[Path] = None):
@@ -104,6 +105,13 @@ class FoundUpsMCPBridge:
 
         # Impact prediction tools
         self._tools["get_change_impact_score"] = self._wrap(impact_scoring.get_change_impact_score)
+
+        # HoloIndex recall tools
+        self._tools["holo_search"] = self._wrap(holo_tools.holo_search)
+        self._tools["holo_related"] = self._wrap(holo_tools.holo_related)
+        self._tools["holo_failure_memory"] = self._wrap(holo_tools.holo_failure_memory)
+        self._tools["holo_pattern_search"] = self._wrap(holo_tools.holo_pattern_search)
+        self._tools["holo_task_packet"] = self._wrap(holo_tools.holo_task_packet)
 
         # Execution stubs (disabled in v1)
         self._tools["coordinate_mission"] = execution_stubs.coordinate_mission
@@ -198,7 +206,7 @@ class FoundUpsMCPBridge:
                     "dependency_analysis": True,
                     "diff_perception": True,
                     "impact_prediction": True,
-                    "holoindex_search": False,  # v2
+                    "holoindex_recall": True,  # v1.3
                     "execution": False,  # v2
                 },
             },
