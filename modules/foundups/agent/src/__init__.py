@@ -29,9 +29,15 @@ __all__ = [
     "get_model_router",
     "route_to_model",
     "MCP_BRIDGE_AVAILABLE",
+    "FAM_DAEMON_AVAILABLE",
 ]
 
-from .hermes_adapter import HermesFoundUpBuilder, DEFAULT_QWEN_CONFIG, MCP_BRIDGE_AVAILABLE
+from .hermes_adapter import (
+    HermesFoundUpBuilder,
+    DEFAULT_QWEN_CONFIG,
+    MCP_BRIDGE_AVAILABLE,
+    FAM_DAEMON_AVAILABLE,
+)
 from .hermes_model_router import (
     HermesModelRouter,
     TaskCapability,

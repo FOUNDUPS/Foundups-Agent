@@ -36,6 +36,18 @@ except ImportError:
     MCP_BRIDGE_AVAILABLE = False
     logger.debug("[HERMES] MCP Bridge not available - running without perception")
 
+# Import FAM Daemon for breadcrumb events
+try:
+    from modules.foundups.agent_market.src.fam_daemon import (
+        FAMDaemon,
+        FAMEventType,
+        get_fam_daemon,
+    )
+    FAM_DAEMON_AVAILABLE = True
+except ImportError:
+    FAM_DAEMON_AVAILABLE = False
+    logger.debug("[HERMES] FAM Daemon not available - running without breadcrumbs")
+
 # Default Qwen configuration for LM Studio (legacy - use HermesModelRouter)
 DEFAULT_QWEN_CONFIG = {
     "model": "qwen-coder-7b",
@@ -131,10 +143,41 @@ class HermesFoundUpBuilder:
             except Exception as e:
                 logger.warning("[HERMES] MCP Bridge init failed: %s", e)
 
+        # FAM Daemon for breadcrumb events
+        self._fam_daemon = None
+        if FAM_DAEMON_AVAILABLE:
+            try:
+                self._fam_daemon = get_fam_daemon()
+                logger.info("[HERMES] FAM Daemon breadcrumb system enabled")
+            except Exception as e:
+                logger.warning("[HERMES] FAM Daemon init failed: %s", e)
+
         # Add vendor to path for Hermes imports
         vendor_path = self.repo_root / "vendor" / "hermes-agent"
         if vendor_path.exists() and str(vendor_path) not in sys.path:
             sys.path.insert(0, str(vendor_path))
+
+    def _emit_breadcrumb(self, event_type: str, payload: Dict[str, Any]) -> None:
+        """
+        Emit FAM event breadcrumb for audit trail.
+
+        Args:
+            event_type: FAMEventType value (e.g., "hermes_extraction_started")
+            payload: Event-specific payload dict
+        """
+        if not self._fam_daemon:
+            return
+
+        try:
+            # Add timestamp if not present
+            if "timestamp" not in payload:
+                from datetime import datetime, timezone
+                payload["timestamp"] = datetime.now(timezone.utc).isoformat()
+
+            self._fam_daemon.emit(event_type, payload)
+            logger.debug("[HERMES] Breadcrumb: %s", event_type)
+        except Exception as e:
+            logger.warning("[HERMES] Failed to emit breadcrumb %s: %s", event_type, e)
 
     def _ensure_security_gate(self) -> bool:
         """
@@ -156,6 +199,13 @@ class HermesFoundUpBuilder:
             result = overseer.monitor_openclaw_security(force=True)
 
             self._security_passed = result.get("passed", False)
+
+            # Emit breadcrumb for security gate result
+            self._emit_breadcrumb(FAMEventType.HERMES_SECURITY_GATE.value, {
+                "passed": self._security_passed,
+                "message": result.get("message", ""),
+                "source_module": "security_check",
+            })
 
             if not self._security_passed:
                 logger.error(
@@ -298,6 +348,16 @@ class HermesFoundUpBuilder:
 
         analysis.exfoliation_ready = len(analysis.blockers) == 0
 
+        # Emit breadcrumb for boundary analysis
+        self._emit_breadcrumb(FAMEventType.HERMES_BOUNDARY_ANALYZED.value, {
+            "module_path": module_path,
+            "product_files_count": len(analysis.product_files),
+            "core_imports_count": len(analysis.core_imports),
+            "adapters_needed": analysis.adapters_needed,
+            "blockers": analysis.blockers,
+            "exfoliation_ready": analysis.exfoliation_ready,
+        })
+
         return analysis
 
     def check_exfoliation_gate(self, module_path: str) -> ExfoliationGate:
@@ -390,6 +450,21 @@ class HermesFoundUpBuilder:
             gate.shared_deps_adapter_level,
             gate.claw_can_participate,
         ])
+
+        # Emit breadcrumb for gate check result
+        self._emit_breadcrumb(FAMEventType.HERMES_GATE_CHECKED.value, {
+            "module_path": module_path,
+            "passed": gate.passed,
+            "checks": {
+                "module_boundary_clear": gate.module_boundary_clear,
+                "contracts_explicit": gate.contracts_explicit,
+                "runtime_testable": gate.runtime_testable,
+                "deploy_surface_understood": gate.deploy_surface_understood,
+                "shared_deps_adapter_level": gate.shared_deps_adapter_level,
+                "claw_can_participate": gate.claw_can_participate,
+            },
+            "risk_level": impact_data.get("risk_level") if impact_data else None,
+        })
 
         return gate
 
@@ -585,8 +660,19 @@ class MCPBridgeAdapter:
         """
         logger.info("[HERMES] Starting extraction: %s -> %s", source_module, target_org)
 
+        # Emit extraction started breadcrumb
+        self._emit_breadcrumb(FAMEventType.HERMES_EXTRACTION_STARTED.value, {
+            "source_module": source_module,
+            "target_org": target_org,
+        })
+
         # Security gate
         if not self._ensure_security_gate():
+            self._emit_breadcrumb(FAMEventType.HERMES_EXTRACTION_FAILED.value, {
+                "source_module": source_module,
+                "error": "security_gate_failed",
+                "stage": "security_check",
+            })
             return {
                 "success": False,
                 "error": "security_gate_failed",
@@ -600,6 +686,12 @@ class MCPBridgeAdapter:
         gate = self.check_exfoliation_gate(source_module)
 
         if not gate.passed:
+            self._emit_breadcrumb(FAMEventType.HERMES_EXTRACTION_FAILED.value, {
+                "source_module": source_module,
+                "error": "exfoliation_gate_failed",
+                "stage": "exfoliation_gate",
+                "blockers": analysis.blockers,
+            })
             return {
                 "success": False,
                 "error": "exfoliation_gate_failed",
@@ -638,6 +730,15 @@ class MCPBridgeAdapter:
         # Determine target repo name
         module_name = Path(source_module).name
         target_repo = f"{target_org}/{module_name}"
+
+        # Emit extraction completed breadcrumb
+        self._emit_breadcrumb(FAMEventType.HERMES_EXTRACTION_COMPLETED.value, {
+            "source_module": source_module,
+            "target_repo": target_repo,
+            "product_files_count": len(analysis.product_files),
+            "adapters_generated": len(adapters_result.get("adapters_created", [])),
+            "dry_run": self.dry_run,
+        })
 
         return {
             "success": True,
