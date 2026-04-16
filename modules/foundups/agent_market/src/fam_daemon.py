@@ -98,6 +98,14 @@ class FAMEventType(str, Enum):
     DU_STAKED = "du_staked"                            # User stakes in FoundUp → specific repo access
     DU_UNSTAKED = "du_unstaked"                        # User unstakes → revoke specific repo access
 
+    # Hermes FoundUp Builder (extraction lifecycle)
+    HERMES_EXTRACTION_STARTED = "hermes_extraction_started"    # Extraction initiated
+    HERMES_EXTRACTION_COMPLETED = "hermes_extraction_completed"  # Extraction succeeded
+    HERMES_EXTRACTION_FAILED = "hermes_extraction_failed"      # Extraction failed
+    HERMES_SECURITY_GATE = "hermes_security_gate"              # AI Overseer gate result
+    HERMES_BOUNDARY_ANALYZED = "hermes_boundary_analyzed"      # Module boundary analysis done
+    HERMES_GATE_CHECKED = "hermes_gate_checked"                # Exfoliation gate result
+
     # System
     HEARTBEAT = "heartbeat"
     DAEMON_STARTED = "daemon_started"
@@ -208,6 +216,19 @@ def _generate_dedupe_key(event_type: str, payload: Dict[str, Any]) -> str:
         return f"tide_support_received:{payload.get('foundup_id')}:{payload.get('tick')}"
     elif event_type == FAMEventType.SUSTAINABILITY_REACHED.value:
         return f"sustainability_reached:{payload.get('tick')}"
+    # Hermes FoundUp Builder dedupe keys
+    elif event_type == FAMEventType.HERMES_EXTRACTION_STARTED.value:
+        return f"hermes_extraction_started:{payload.get('source_module')}:{payload.get('timestamp', '')[:19]}"
+    elif event_type == FAMEventType.HERMES_EXTRACTION_COMPLETED.value:
+        return f"hermes_extraction_completed:{payload.get('source_module')}:{payload.get('target_repo')}"
+    elif event_type == FAMEventType.HERMES_EXTRACTION_FAILED.value:
+        return f"hermes_extraction_failed:{payload.get('source_module')}:{payload.get('error', '')[:32]}"
+    elif event_type == FAMEventType.HERMES_SECURITY_GATE.value:
+        return f"hermes_security_gate:{payload.get('source_module')}:{payload.get('passed')}"
+    elif event_type == FAMEventType.HERMES_BOUNDARY_ANALYZED.value:
+        return f"hermes_boundary_analyzed:{payload.get('module_path')}:{payload.get('timestamp', '')[:19]}"
+    elif event_type == FAMEventType.HERMES_GATE_CHECKED.value:
+        return f"hermes_gate_checked:{payload.get('module_path')}:{payload.get('passed')}"
     else:
         # Default: hash the payload
         payload_str = json.dumps(payload, sort_keys=True)
