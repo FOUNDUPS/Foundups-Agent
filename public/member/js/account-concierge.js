@@ -502,8 +502,18 @@
   }
 
   function setDensity(presetId) {
-    currentDensity = presetId;
-    if (window.mallTileField && typeof window.mallTileField.setDensity === 'function') {
+    // Use requestDensity for device policy enforcement
+    if (window.mallTileField && typeof window.mallTileField.requestDensity === 'function') {
+      var result = window.mallTileField.requestDensity(presetId, { source: 'reddog' });
+      if (!result.applied) {
+        console.warn('[RedDog] Density rejected:', result.reason);
+        emitRedDogCommand('density_rejected', { preset: presetId, reason: result.reason });
+        return;
+      }
+      currentDensity = presetId;
+    } else if (window.mallTileField && typeof window.mallTileField.setDensity === 'function') {
+      // Fallback for older API
+      currentDensity = presetId;
       window.mallTileField.setDensity(presetId);
     }
     emitRedDogCommand('set_density', { preset: presetId });

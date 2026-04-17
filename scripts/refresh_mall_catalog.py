@@ -2,15 +2,20 @@
 """
 Refresh Mall Video Catalog - Update channel avatars and video counts.
 
+SAFETY: Dry-run by default. Use --apply to actually write changes.
+
 Usage:
-    python scripts/refresh_mall_catalog.py --info-only  # Avatars + counts (13 units) - RUN ONCE
-    python scripts/refresh_mall_catalog.py --delta      # Only NEW videos since last fetch (~100 units)
-    python scripts/refresh_mall_catalog.py              # 50 latest videos per channel (1300 units)
-    python scripts/refresh_mall_catalog.py --full       # ALL videos (quota heavy!) - RARELY NEEDED
+    python scripts/refresh_mall_catalog.py --info-only          # Preview: avatars + counts (13 units)
+    python scripts/refresh_mall_catalog.py --info-only --apply  # Apply: avatars + counts
+    python scripts/refresh_mall_catalog.py --delta              # Preview: new videos only (~100 units)
+    python scripts/refresh_mall_catalog.py --delta --apply      # Apply: new videos only
+    python scripts/refresh_mall_catalog.py --apply              # Apply: 50 latest per channel (1300 units)
+    python scripts/refresh_mall_catalog.py --full --apply       # Apply: ALL videos (quota heavy!)
 
 Recommended workflow:
-    1. Run --info-only ONCE to get avatars (they don't change)
-    2. Run --delta periodically to get new videos only
+    1. Run --info-only (dry-run) to preview what will change
+    2. Run --info-only --apply to save avatars
+    3. Run --delta --apply periodically to get new videos
 """
 
 import json
@@ -44,14 +49,31 @@ def load_catalog() -> list:
         return json.load(f)
 
 
-def save_catalog(catalog: list) -> None:
-    """Save catalog back to JSON."""
+def save_catalog(catalog: list, dry_run: bool = True) -> None:
+    """Save catalog back to JSON (or preview in dry-run mode)."""
+    if dry_run:
+        logger.info(f"[DRY-RUN] Would save catalog to {CATALOG_PATH}")
+        logger.info(f"[DRY-RUN] Use --apply to actually write changes")
+        return
+
+    # Create backup before writing
+    backup_path = CATALOG_PATH.with_suffix(".json.bak")
+    if CATALOG_PATH.exists():
+        import shutil
+        shutil.copy2(CATALOG_PATH, backup_path)
+        logger.info(f"Backup saved to {backup_path}")
+
     with open(CATALOG_PATH, "w", encoding="utf-8") as f:
         json.dump(catalog, f, indent=2, ensure_ascii=False)
     logger.info(f"Saved catalog to {CATALOG_PATH}")
 
 
-def refresh_catalog(fetch_videos: bool = True, fetch_all: bool = False, delta_only: bool = False) -> None:
+def refresh_catalog(
+    fetch_videos: bool = True,
+    fetch_all: bool = False,
+    delta_only: bool = False,
+    dry_run: bool = True
+) -> None:
     """
     Refresh catalog with channel info and optionally videos.
 
@@ -59,6 +81,7 @@ def refresh_catalog(fetch_videos: bool = True, fetch_all: bool = False, delta_on
         fetch_videos: If True, fetch latest videos for each channel
         fetch_all: If True and fetch_videos, fetch ALL videos (quota heavy)
         delta_only: If True, only fetch videos newer than most recent in catalog
+        dry_run: If True (default), only preview changes without writing
     """
     catalog = load_catalog()
     if not catalog:
@@ -141,8 +164,9 @@ def refresh_catalog(fetch_videos: bool = True, fetch_all: bool = False, delta_on
     logger.info(f"\nUpdated {updated} entries")
 
     # Add refresh timestamp
-    save_catalog(catalog)
-    logger.info(f"Catalog refreshed at {datetime.now().isoformat()}")
+    save_catalog(catalog, dry_run=dry_run)
+    if not dry_run:
+        logger.info(f"Catalog refreshed at {datetime.now().isoformat()}")
 
 
 def main():
@@ -151,24 +175,31 @@ def main():
     parser.add_argument("--full", action="store_true", help="Fetch ALL videos (quota heavy)")
     parser.add_argument("--info-only", action="store_true", help="Only fetch channel info (cheap) - RUN ONCE")
     parser.add_argument("--delta", action="store_true", help="Only fetch NEW videos since last run (efficient)")
+    parser.add_argument("--apply", action="store_true", help="Actually write changes (default is dry-run)")
     args = parser.parse_args()
 
+    dry_run = not args.apply
+    mode_suffix = "" if args.apply else " [DRY-RUN]"
+
     if args.info_only:
-        logger.info("Mode: Info only (avatars + counts) - ~13 quota units")
-        refresh_catalog(fetch_videos=False)
+        logger.info(f"Mode: Info only (avatars + counts) - ~13 quota units{mode_suffix}")
+        refresh_catalog(fetch_videos=False, dry_run=dry_run)
     elif args.delta:
-        logger.info("Mode: Delta (new videos only) - ~1300 quota units max")
-        refresh_catalog(fetch_videos=True, delta_only=True)
+        logger.info(f"Mode: Delta (new videos only) - ~1300 quota units max{mode_suffix}")
+        refresh_catalog(fetch_videos=True, delta_only=True, dry_run=dry_run)
     elif args.full:
-        logger.info("Mode: Full refresh (ALL videos - quota heavy!)")
-        response = input("This will use significant quota. Continue? [y/N] ")
-        if response.lower() == 'y':
-            refresh_catalog(fetch_videos=True, fetch_all=True)
+        logger.info(f"Mode: Full refresh (ALL videos - quota heavy!){mode_suffix}")
+        if dry_run:
+            logger.info("[DRY-RUN] Would fetch all videos. Use --apply to execute.")
         else:
-            logger.info("Aborted")
+            response = input("This will use significant quota. Continue? [y/N] ")
+            if response.lower() == 'y':
+                refresh_catalog(fetch_videos=True, fetch_all=True, dry_run=dry_run)
+            else:
+                logger.info("Aborted")
     else:
-        logger.info("Mode: Standard refresh (50 latest videos per channel)")
-        refresh_catalog(fetch_videos=True, fetch_all=False)
+        logger.info(f"Mode: Standard refresh (50 latest videos per channel){mode_suffix}")
+        refresh_catalog(fetch_videos=True, fetch_all=False, dry_run=dry_run)
 
 
 if __name__ == "__main__":

@@ -646,8 +646,11 @@
       var badgeClass = readiness === 'ready' ? 'ready' : (readiness === 'conditional' ? 'conditional' : '');
 
       // Video-backed: use channel_avatar_url (preferred) or poster_url as background
+      // Track tile type for CSS background-size: avatar uses contain, video uses cover
+      var isAvatarTile = !!item.channel_avatar_url && !item.video_data;
       var posterUrl = item.channel_avatar_url || item.poster_url || '';
       var posterStyle = posterUrl ? 'background-image: url(' + escapeAttr(posterUrl) + ')' : '';
+      var tileType = isAvatarTile ? 'avatar' : 'video';
 
       // Determine if tile has videos (includes expanded video tiles with video_data)
       var hasVideos = (item.videos && item.videos.length) || item.video_count || item.video_data;
@@ -685,7 +688,7 @@
       // Non-video tile class modifier
       var tileClass = 'mall-tile theme-' + theme + (hasVideos ? '' : ' non-video');
 
-      return '<article class="' + tileClass + '" data-index="' + index + '" data-foundup-id="' + escapeAttr(item.foundup_id || item.id || '') + '" tabindex="0" aria-label="' + escapeAttr(item.name || item.title || '') + '" style="' + posterStyle + '">' +
+      return '<article class="' + tileClass + '" data-index="' + index + '" data-foundup-id="' + escapeAttr(item.foundup_id || item.id || '') + '" data-tile-type="' + tileType + '" tabindex="0" aria-label="' + escapeAttr(item.name || item.title || '') + '" style="' + posterStyle + '">' +
         previewContainer +
         '<span class="mall-tile-badge ' + badgeClass + '">' + escapeHtml(readiness.replace('_', ' ')) + '</span>' +
         queueBadge +
@@ -1184,14 +1187,111 @@
 
   // ========== Density Control ==========
 
+  // All valid density presets
+  var ALL_DENSITIES = ['3x4', '3x5', '4x6', '5x8', '6x3', '8x2', '8x5', '10x6', '12x3', '12x8', '15x4'];
+
+  // Density tiers by device class
+  var DENSITY_TIERS = {
+    phone: ['3x4', '3x5'],
+    tablet: ['3x4', '3x5', '4x6', '5x8'],
+    desktop: ALL_DENSITIES
+  };
+
   /**
-   * Set field density preset
-   * @param {string} density - '3x4' | '3x5' | '4x6' | '5x8' | '6x3'
+   * Get device class based on pointer type and viewport
+   * @returns {{ deviceClass: string, shortSide: number, isCoarse: boolean, isLandscape: boolean }}
+   */
+  function getDeviceInfo() {
+    var width = window.innerWidth;
+    var height = window.innerHeight;
+    var isCoarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+    var isLandscape = width > height;
+    var shortSide = Math.min(width, height);
+
+    var deviceClass;
+    if (!isCoarsePointer) {
+      deviceClass = 'desktop';
+    } else if (shortSide < 600) {
+      deviceClass = 'phone';
+    } else {
+      deviceClass = 'tablet';
+    }
+
+    return {
+      deviceClass: deviceClass,
+      shortSide: shortSide,
+      isCoarse: isCoarsePointer,
+      isLandscape: isLandscape,
+      width: width,
+      height: height
+    };
+  }
+
+  /**
+   * Get allowed density presets for current device
+   * @returns {{ allowed: string[], deviceClass: string, reason: string }}
+   */
+  function getDevicePolicy() {
+    var info = getDeviceInfo();
+    var allowed = DENSITY_TIERS[info.deviceClass] || DENSITY_TIERS.phone;
+
+    return {
+      allowed: allowed,
+      deviceClass: info.deviceClass,
+      reason: info.deviceClass === 'phone'
+        ? 'Phone (coarse pointer, short side < 600px)'
+        : info.deviceClass === 'tablet'
+          ? 'Tablet (coarse pointer, short side >= 600px)'
+          : 'Desktop (fine pointer)'
+    };
+  }
+
+  /**
+   * Safe public API for density changes from AI/RedDog
+   * Validates against device policy before applying
+   * @param {string} preset - Requested density preset
+   * @param {{ source?: string }} [options] - Options with source identifier
+   * @returns {{ applied: boolean, preset: string, reason?: string }}
+   */
+  function requestDensity(preset, options) {
+    options = options || {};
+    var source = options.source || 'unknown';
+    var policy = getDevicePolicy();
+
+    if (!ALL_DENSITIES.includes(preset)) {
+      return {
+        applied: false,
+        preset: preset,
+        reason: 'Invalid density preset: ' + preset
+      };
+    }
+
+    if (!policy.allowed.includes(preset)) {
+      return {
+        applied: false,
+        preset: preset,
+        reason: 'Density ' + preset + ' not allowed for ' + policy.deviceClass + '. Allowed: ' + policy.allowed.join(', ')
+      };
+    }
+
+    setDensity(preset, true);
+    return {
+      applied: true,
+      preset: preset,
+      source: source,
+      deviceClass: policy.deviceClass
+    };
+  }
+
+  /**
+   * Set field density preset (internal/low-level)
+   * External callers should use requestDensity() for policy enforcement
+   * @param {string} density - Density preset
    * @param {boolean} [isManual=true] - Whether this is a manual user override
+   * @private
    */
   function setDensity(density, isManual) {
-    var validDensities = ['3x4', '3x5', '4x6', '5x8', '6x3', '8x2', '8x5', '10x6', '12x3', '12x8', '15x4'];
-    if (!validDensities.includes(density)) {
+    if (!ALL_DENSITIES.includes(density)) {
       density = '3x5';
     }
     currentDensity = density;
@@ -1216,31 +1316,27 @@
 
   /**
    * Detect viewport class and return optimal density
-   * Desktop/fine-pointer wide viewports get 6x3
-   * Mobile/tablet/coarse-pointer get appropriate portrait densities
+   * Uses device policy to ensure returned density is always allowed
    * @returns {string} Optimal density preset
    */
   function detectOptimalDensity() {
-    var width = window.innerWidth;
-    var height = window.innerHeight;
-    var isCoarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-    var isLandscape = width > height;
+    var info = getDeviceInfo();
+    var policy = getDevicePolicy();
 
     // Desktop: fine pointer + wide viewport + landscape
-    // Use denser presets for larger screens
-    if (!isCoarsePointer && isLandscape) {
-      if (width >= 2560) return '12x3';  // 4K/ultrawide = maximum density
-      if (width >= 1920) return '10x6';  // Full HD+ = dense wall
-      if (width >= 1440) return '8x5';   // QHD = medium wall
-      if (width >= 1024) return '6x3';   // HD = standard
+    if (info.deviceClass === 'desktop' && info.isLandscape) {
+      if (info.width >= 2560) return '12x3';
+      if (info.width >= 1920) return '10x6';
+      if (info.width >= 1440) return '8x5';
+      if (info.width >= 1024) return '6x3';
     }
 
-    // Tablet landscape: coarse pointer but wide
-    if (isCoarsePointer && width >= 768 && isLandscape) {
+    // Tablet landscape: coarse pointer but wide enough
+    if (info.deviceClass === 'tablet' && info.isLandscape) {
       return '4x6';
     }
 
-    // Default mobile-first
+    // Phone or portrait: safe mobile default
     return '3x5';
   }
 
@@ -1656,7 +1752,9 @@
     setMotionMode: setMotionMode,
     getMotionMode: getMotionMode,
 
-    // Density
+    // Density (use requestDensity for AI/RedDog, setDensity is low-level)
+    requestDensity: requestDensity,
+    getDevicePolicy: getDevicePolicy,
     setDensity: setDensity,
     getDensity: getDensity,
     detectOptimalDensity: detectOptimalDensity,

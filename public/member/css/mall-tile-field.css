@@ -338,10 +338,19 @@
   border-radius: var(--tile-radius, 0.4rem);
   border: 1px solid rgba(255, 255, 255, 0.06);
   background-color: var(--surface);
-  background-size: contain !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   overflow: hidden;
+}
+
+/* Channel avatar tiles: contain to show full logo, cover for video thumbnails */
+.mall-tile[data-tile-type="avatar"] {
+  background-size: contain;
+}
+
+.mall-tile[data-tile-type="video"] {
+  background-size: cover;
 }
 
 /* Loading shimmer while thumbnail loads */

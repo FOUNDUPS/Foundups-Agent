@@ -1,5 +1,43 @@
 # FoundUps Agent - Development Log
 
+## [2026-04-18] p.fMALL Device Policy Hardening
+
+**Change Type**: Security / Hardening
+**By**: 0102
+**WSP References**: WSP 22, WSP 50, WSP 64
+
+### Summary
+
+Added device policy enforcement for density controls and refresh script safety.
+
+### What Changed
+
+- `public/member/js/mall-tile-field.js`:
+  - Added `getDeviceInfo()` and `getDevicePolicy()` for device classification
+  - Added `requestDensity(preset, options)` as safe public API with policy enforcement
+  - Phone (coarse + short side < 600): only 3x4, 3x5 allowed
+  - Tablet (coarse + short side >= 600): up to 4x6, 5x8
+  - Desktop (fine pointer): all densities allowed
+  - Added `data-tile-type` attribute (avatar/video) for CSS targeting
+- `public/member/css/mall-tile-field.css`:
+  - Avatar tiles use `background-size: contain` (show full logo)
+  - Video tiles use `background-size: cover` (fill thumbnail)
+- `public/member/js/account-concierge.js`:
+  - RedDog now uses `requestDensity()` with policy validation
+  - Rejected densities logged and emitted as `density_rejected` event
+- `scripts/refresh_mall_catalog.py`:
+  - Dry-run by default, requires `--apply` to write changes
+  - Creates backup before writing
+- Tests added for all hardening (26 new tests)
+
+### Result
+
+- AI/RedDog cannot force desktop densities on phones
+- Channel logos scale correctly, video thumbnails fill tiles
+- Catalog refresh is safe by default (no accidental mutations)
+
+---
+
 ## [2026-04-17] p.fMALL Tile Field Display Improvements
 
 **Change Type**: Feature / UI
