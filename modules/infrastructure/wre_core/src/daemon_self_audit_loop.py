@@ -83,6 +83,12 @@ class DaemonSelfAuditLoop:
         self.allow_shell_start_cmd = os.getenv(
             "OPENCLAW_SELF_AUDIT_ALLOW_SHELL_START_CMD", "0"
         ).strip() == "1"
+        self.ironclaw_start_retry_count = max(
+            0, int(os.getenv("IRONCLAW_START_RETRY_COUNT", "3"))
+        )
+        self.ironclaw_start_retry_delay_sec = max(
+            0.0, float(os.getenv("IRONCLAW_START_RETRY_DELAY_SEC", "5"))
+        )
         self.enable_telemetry = os.getenv("OPENCLAW_SELF_AUDIT_TELEMETRY", "1").strip() == "1"
         self.escalate_after = int(os.getenv("OPENCLAW_SELF_AUDIT_ESCALATE_AFTER", "3"))
         self.escalation_window_sec = int(
@@ -398,7 +404,7 @@ class DaemonSelfAuditLoop:
             cmd = os.getenv("IRONCLAW_START_CMD", "").strip()
             if not cmd:
                 return False, "IRONCLAW_START_CMD not set"
-            return self._dispatch_start_command(cmd)
+            return self._dispatch_start_command_with_retry(cmd)
         if fix_name == "diagnose_microphone_device":
             return self._diagnose_microphone_device()
         if fix_name == "verify_dae_event_store":
@@ -430,6 +436,50 @@ class DaemonSelfAuditLoop:
             return True, "start_command_dispatched"
         except Exception as exc:
             return False, str(exc)
+
+    def _dispatch_start_command_with_retry(self, cmd: str) -> Tuple[bool, str]:
+        # Dispatch once; daemon start is fire-and-forget (Popen).
+        dispatched, detail = self._dispatch_start_command(cmd)
+        if not dispatched:
+            return False, f"dispatch_failed:{detail}"
+
+        # Dispatch succeeded → fix was attempted. Health polling annotates
+        # the result string but does not flip the "attempted" flag.
+        if self.ironclaw_start_retry_count <= 0:
+            return True, detail
+
+        last_health_detail = "no_health_attempt"
+        for attempt in range(1, self.ironclaw_start_retry_count + 1):
+            time.sleep(self.ironclaw_start_retry_delay_sec)
+            healthy, last_health_detail = self._verify_ironclaw_health()
+            if healthy:
+                return True, f"healthy_after_{attempt}_attempt(s):{detail}"
+        # Dispatch ran but health never came up. "attempted=True"; the
+        # result string omits the dispatch success marker so
+        # _is_successful_fix_result classifies this as a failure.
+        return True, (
+            f"attempted_but_unhealthy_after_{self.ironclaw_start_retry_count}_attempt(s):"
+            f"{last_health_detail}"
+        )
+
+    def _verify_ironclaw_health(self) -> Tuple[bool, str]:
+        base = os.getenv("IRONCLAW_BASE_URL", "http://127.0.0.1:3000").strip().rstrip("/")
+        if not base:
+            return False, "no_base_url"
+        timeout = max(1.0, float(os.getenv("IRONCLAW_TIMEOUT_SEC", "5")))
+        url = f"{base}/health"
+        try:
+            from urllib.request import Request, urlopen
+
+            req = Request(url, method="GET")
+            with urlopen(req, timeout=timeout) as resp:
+                status = int(getattr(resp, "status", 200))
+                if 200 <= status < 300:
+                    return True, f"health_ok:{status}"
+                # 3xx/4xx/5xx: reachable but not reporting healthy.
+                return False, f"health_bad_status:{status}"
+        except Exception as exc:
+            return False, f"health_error:{exc.__class__.__name__}"
 
     def _diagnose_microphone_device(self) -> Tuple[bool, str]:
         report_path = (

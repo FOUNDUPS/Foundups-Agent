@@ -58,6 +58,9 @@ def test_self_audit_policy_fix_dispatches_gateway_start(tmp_path: Path, monkeypa
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "1")
     monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOWED_FIXES", "start_ironclaw_gateway")
     monkeypatch.setenv("IRONCLAW_START_CMD", "echo start")
+    # This test only exercises dispatch; bypass the health-poll retry loop
+    # added by IRONCLAW_START_RETRY_COUNT (covered by a dedicated test).
+    monkeypatch.setenv("IRONCLAW_START_RETRY_COUNT", "0")
 
     loop = DaemonSelfAuditLoop(repo_root=tmp_path)
     with patch("modules.infrastructure.wre_core.src.daemon_self_audit_loop.subprocess.Popen") as mock_popen:
@@ -68,6 +71,69 @@ def test_self_audit_policy_fix_dispatches_gateway_start(tmp_path: Path, monkeypa
     rows = _read_jsonl(loop.task_log_path)
     assert rows[0]["auto_fix_attempted"] is True
     assert rows[0]["auto_fix_result"] == "start_command_dispatched"
+
+
+def test_ironclaw_retry_reports_attempted_but_unhealthy(tmp_path: Path, monkeypatch):
+    """Dispatch succeeds, health polling never does → attempted=True, result flags unhealthy."""
+    logs = tmp_path / "logs"
+    logs.mkdir(parents=True)
+    log_file = logs / "daemon.log"
+    log_file.write_text(
+        "IronClaw runtime is unavailable, health endpoint unavailable\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "logs/**/*.log")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "1")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOWED_FIXES", "start_ironclaw_gateway")
+    monkeypatch.setenv("IRONCLAW_START_CMD", "echo start")
+    monkeypatch.setenv("IRONCLAW_START_RETRY_COUNT", "2")
+    monkeypatch.setenv("IRONCLAW_START_RETRY_DELAY_SEC", "0")
+
+    loop = DaemonSelfAuditLoop(repo_root=tmp_path)
+    with patch("modules.infrastructure.wre_core.src.daemon_self_audit_loop.subprocess.Popen") as mock_popen, \
+         patch.object(DaemonSelfAuditLoop, "_verify_ironclaw_health", return_value=(False, "health_error:URLError")):
+        events = loop.scan_once()
+
+    assert events == 1
+    assert mock_popen.call_count == 1
+    rows = _read_jsonl(loop.task_log_path)
+    # Dispatch ran → attempted=True, even though health never came up.
+    assert rows[0]["auto_fix_attempted"] is True
+    result = rows[0]["auto_fix_result"]
+    assert result.startswith("attempted_but_unhealthy_after_2_attempt(s):")
+    assert "start_command_dispatched" not in result  # classified as failure
+
+
+def test_ironclaw_retry_reports_healthy_when_health_endpoint_responds(tmp_path: Path, monkeypatch):
+    """Dispatch succeeds; health passes on first poll → attempted=True, result contains dispatch marker."""
+    logs = tmp_path / "logs"
+    logs.mkdir(parents=True)
+    log_file = logs / "daemon.log"
+    log_file.write_text(
+        "IronClaw runtime is unavailable, health endpoint unavailable\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_LOG_GLOBS", "logs/**/*.log")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_AUTO_FIX", "1")
+    monkeypatch.setenv("OPENCLAW_SELF_AUDIT_ALLOWED_FIXES", "start_ironclaw_gateway")
+    monkeypatch.setenv("IRONCLAW_START_CMD", "echo start")
+    monkeypatch.setenv("IRONCLAW_START_RETRY_COUNT", "3")
+    monkeypatch.setenv("IRONCLAW_START_RETRY_DELAY_SEC", "0")
+
+    loop = DaemonSelfAuditLoop(repo_root=tmp_path)
+    with patch("modules.infrastructure.wre_core.src.daemon_self_audit_loop.subprocess.Popen") as mock_popen, \
+         patch.object(DaemonSelfAuditLoop, "_verify_ironclaw_health", return_value=(True, "health_ok:200")):
+        events = loop.scan_once()
+
+    assert events == 1
+    assert mock_popen.call_count == 1
+    rows = _read_jsonl(loop.task_log_path)
+    assert rows[0]["auto_fix_attempted"] is True
+    result = rows[0]["auto_fix_result"]
+    assert result.startswith("healthy_after_1_attempt(s):")
+    assert "start_command_dispatched" in result  # classified as success
 
 
 def test_self_audit_verifies_event_store_when_sequence_error_seen(tmp_path: Path, monkeypatch):

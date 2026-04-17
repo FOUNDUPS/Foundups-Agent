@@ -9,6 +9,10 @@ Examples:
   x action post content="foundups: roi -> roc"
   x action read_timeline max_tweets=5
   x action engagement_session duration_minutes=10 max_engagements=3
+  x action like_tweet tweet_id=1234567890
+  x action retweet tweet_id=1234567890
+  x action reply_to_tweet tweet_id=1234567890 reply_text="agreed"
+  x action like_and_reply tweet_id=1234567890 reply_text="agreed"
 """
 
 from __future__ import annotations
@@ -23,6 +27,10 @@ SUPPORTED_ACTIONS = {
     "post",
     "read_timeline",
     "engagement_session",
+    "like_tweet",
+    "retweet",
+    "reply_to_tweet",
+    "like_and_reply",
 }
 
 ACTION_ALIASES = {
@@ -33,6 +41,13 @@ ACTION_ALIASES = {
     "timeline": "read_timeline",
     "engage": "engagement_session",
     "session": "engagement_session",
+    "like": "like_tweet",
+    "heart": "like_tweet",
+    "rt": "retweet",
+    "repost": "retweet",
+    "reply": "reply_to_tweet",
+    "respond": "reply_to_tweet",
+    "like_reply": "like_and_reply",
 }
 
 
@@ -176,6 +191,44 @@ async def execute_x_action(action: str, params: Dict[str, str]) -> Dict[str, Any
                 duration_minutes=duration_minutes,
                 max_engagements=max_engagements,
             )
+            return {"success": bool(result.success), "action": action, "result": _to_jsonable(result)}
+        finally:
+            x.close()
+
+    if action in {"like_tweet", "retweet", "reply_to_tweet", "like_and_reply"}:
+        tweet_id = params.get("tweet_id", params.get("id", "")).strip()
+        if not tweet_id:
+            return {"success": False, "action": action, "error": "missing tweet_id"}
+
+        needs_reply = action in {"reply_to_tweet", "like_and_reply"}
+        reply_text = params.get("reply_text", params.get("text", params.get("content", ""))).strip()
+        if needs_reply and not reply_text:
+            return {"success": False, "action": action, "error": "missing reply_text"}
+
+        if dry_run:
+            preview: Dict[str, Any] = {
+                "success": True,
+                "action": action,
+                "dry_run": True,
+                "profile": profile,
+                "tweet_id": tweet_id,
+            }
+            if needs_reply:
+                preview["reply_preview"] = reply_text[:280]
+            return preview
+
+        from modules.infrastructure.browser_actions.src.x_actions import XActions
+
+        x = XActions(profile=profile, ai_provider=ai_provider)
+        try:
+            if action == "like_tweet":
+                result = await x.like_tweet(tweet_id=tweet_id)
+            elif action == "retweet":
+                result = await x.retweet(tweet_id=tweet_id)
+            elif action == "reply_to_tweet":
+                result = await x.reply_to_tweet(tweet_id=tweet_id, reply_text=reply_text)
+            else:  # like_and_reply
+                result = await x.like_and_reply(tweet_id=tweet_id, reply_text=reply_text)
             return {"success": bool(result.success), "action": action, "result": _to_jsonable(result)}
         finally:
             x.close()
