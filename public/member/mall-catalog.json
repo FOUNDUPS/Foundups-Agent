@@ -44,7 +44,7 @@
     "routing_prefix": "/f/antifafm_001",
     "theme": "antifafm",
     "hero_label": "SIGNAL",
-    "hero_mood": "Signal-first, always on, discoverable inside the shell.",
+    "hero_mood": "Signal-first, always on, discoverable inside the shell."
   },
   {
     "foundup_id": "holoindex_prod_01",

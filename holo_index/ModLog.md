@@ -1,5 +1,78 @@
 # HoloIndex Package ModLog
 
+## [2026-04-17] HoloIndex Connector/Interceptor Response Handshake Fix (Worker CY2)
+
+**Worker**: CY2
+**Slice**: `HOLOINDEX_CONNECTOR_INTERCEPTOR_RESPONSE_HANDSHAKE_FIX`
+**WSP References**: WSP 11, WSP 22, WSP 97
+**Depends On**: CY — `HOLOINDEX_EXTERNAL_BRIDGE_CONTRACT_VERIFICATION_PHASE1`
+**Briefing**: [docs/0102_session_briefings/CY2_HOLOINDEX_CONNECTOR_INTERCEPTOR_RESPONSE_HANDSHAKE_FIX.md](../docs/0102_session_briefings/CY2_HOLOINDEX_CONNECTOR_INTERCEPTOR_RESPONSE_HANDSHAKE_FIX.md)
+
+### Fixed
+
+- `shell-bridge-interceptor.js` — Added `ROUTE_SERVICE_MAP` (`openclaw_search` → `holoindex`). `dispatchRequest` now injects `response.service` before posting to iframe.
+- `connector.js` — `event.data.payload` → `event.data.data`. Was reading wrong field per contract Section 3.1.
+- `EXTERNAL_FOUNDUP_BRIDGE_CONTRACT.md` Section 3.1 — Added `service` field to response shape.
+
+### Added
+
+- 8 new tests in `test_bridge_contract.py` (38 → 46): contract service field, ROUTE_SERVICE_MAP, dispatch injection, connector/interceptor agreement.
+- 2 new tests in `test_shell_bridge_interceptor.py` (42 → 44): service field presence, dispatch injection.
+- 2 new assertions in `shell_bridge_interceptor_vm.mjs`: `service: 'holoindex'` on stub and registered responses.
+
+### Verification
+
+- `pytest holo_index/foundup_adapter/tests/test_bridge_contract.py -q` → **46 passed**.
+- `pytest public/member/tests/test_shell_bridge_interceptor.py -q` → **44 passed**.
+- `pytest public/member/tests/test_route_contract_bridge.py -q` → **45 passed**.
+- `node public/member/tests/shell_bridge_interceptor_vm.mjs` → **all checks passed**.
+- Total: **135 tests, 0 failures, 0 regressions**.
+
+### WSP 97
+
+No readiness promotion. `launch_readiness: discoverable_only` unchanged. Bridge remains stub-only. The handshake fix enables the UI scaffold to display stub responses, not to claim live search capability.
+
+---
+
+## [2026-04-17] HoloIndex External Bridge Contract Verification Phase 1 (Worker CY)
+
+**Worker**: CY
+**Slice**: `HOLOINDEX_EXTERNAL_BRIDGE_CONTRACT_VERIFICATION_PHASE1`
+**WSP References**: WSP 11, WSP 15, WSP 97, WSP 104
+**Briefing**: [docs/0102_session_briefings/CY_HOLOINDEX_EXTERNAL_BRIDGE_CONTRACT_VERIFICATION_PHASE1.md](../docs/0102_session_briefings/CY_HOLOINDEX_EXTERNAL_BRIDGE_CONTRACT_VERIFICATION_PHASE1.md)
+
+### Verified
+
+- All 8 external-FoundUp bundle files are **repo-tracked** (supersedes the BY 2026-04-12 audit, which claimed most were workspace-local).
+- `foundup_manifest.json` aligns with `public/member/mall-catalog.json` on `foundup_id`, `routing_prefix`; `entry_point` resolves to an existing file.
+- Catalog entry for `holoindex_prod_01` has `launch_readiness: discoverable_only`, no `entry_url` — truthful while bridge is stub-only.
+
+### Fixed (contract-truth only)
+
+- `holo_index/foundup_adapter/bridge_stub.py` — `"stub": False → True`. Simulated responses must not overclaim backend connectivity.
+- `public/member/mall-catalog.json` — removed trailing comma (invalid JSON, `json.load()` would fail).
+
+### Added
+
+- `holo_index/foundup_adapter/tests/test_bridge_contract.py` — 38 tests, all PASS. Covers `BridgeStub.sendMessage`, manifest/catalog alignment, connector outbound payload, contract-doc vs interceptor alignment, and repo-tracking of the full bundle.
+
+### Documented, Not Fixed (deferred to CY2)
+
+- `public/f/holoindex_prod_01/js/connector.js:30` filters responses on `event.data.service === 'holoindex'`, but the contract does not promise that field and the shell interceptor never sets it. In a live iframe embed, all responses would silently drop. Scaffold is explicitly labelled "(Stub)"; no live embed exists yet. Fix is a convention decision (add `service` to interceptor OR drop the filter in connector). Tracked as **CY2 — Connector/Interceptor Response Handshake Fix**.
+
+### Verification
+
+- `pytest holo_index/foundup_adapter/tests/test_bridge_contract.py -q` → **38 passed**.
+- `pytest public/member/tests -k "bridge or catalog or route or holoindex" -q` → 111 passed, 2 unrelated pre-existing `devMall` route-bridge failures in `test_localhost_dev_harness.py` (outside CY scope).
+- `json.load()` on `holo_index/foundup_manifest.json` and `public/member/mall-catalog.json` → both valid.
+- `holo_index.py --search "HoloIndex external FoundUp bridge contract shell interceptor manifest catalog" --limit 3` → 6 hits, top hit `public/member/js/shell-bridge-interceptor.js`; lexical-only mode (sentence_transformers unavailable).
+
+### WSP 97
+
+No claim of live backend. Bridge verified as stub-only. No external repo mutation. No GitHub push. Only contract-truth fixes applied.
+
+---
+
 ## [2026-04-13] Rolodex false-positive exclusion and classification
 
 **Worker**: CF2
