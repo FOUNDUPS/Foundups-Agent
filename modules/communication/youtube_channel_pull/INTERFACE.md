@@ -143,7 +143,57 @@ python -m modules.communication.youtube_channel_pull.src.refresh_scheduler [OPTI
 | Delta | `docs/audits/pfmall_youtube_ingest/youtube_channel_pull_delta.json` | New videos for review |
 | Refresh Log | `docs/audits/pfmall_youtube_ingest/refresh_log.json` | Scheduler run history |
 
+### status_summary.py
+
+Read-only status summary generator. Aggregates catalog, delta, refresh log,
+discovery proposals, and the latest discovery review into a single operator
+artifact. Performs no catalog mutation and requires no live API access.
+
+#### `generate_status_summary(repo_root=REPO_ROOT) -> Dict`
+
+Return a status summary dict with fields:
+- `generated_at`, `read_only`
+- `sources`: relative paths to each parsed artifact (or `null` if missing)
+- `catalog`: foundup counts, declared-vs-actual totals, mismatches, per-entry rows
+- `delta`: latest known-channel refresh (generated_at, per-foundup deltas)
+- `refresh_log`: run count + last run, or `{available: False, note: ...}` if missing
+- `proposals`: latest discovery proposals metadata
+- `review`: latest discovery review result (auto-selects most recent `youtube_discovery_review_result_*.json` by sorted order)
+- `blockers`: list of strings
+- `next_actions`: list of strings
+
+#### `render_markdown(summary: Dict) -> str`
+
+Render the summary dict as operator-facing markdown. Safe on fully-missing
+artifact sets (reports absences honestly).
+
+#### `write_status_summary(summary, markdown_path, json_path) -> Dict[str, Path]`
+
+Write markdown and JSON artifacts. Only writes to the provided output paths;
+never mutates source artifacts.
+
+#### CLI
+
+```bash
+python -m modules.communication.youtube_channel_pull.src.status_summary [OPTIONS]
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `--repo-root` | path | inferred | Repo root to scan for artifacts |
+| `--markdown-out` | path | `docs/audits/pfmall_youtube_ingest/pipeline_status_summary.md` | Markdown output |
+| `--json-out` | path | `docs/audits/pfmall_youtube_ingest/pipeline_status_summary.json` | JSON output |
+| `--stdout` | flag | false | Print markdown to stdout instead of writing files |
+
+#### Output Artifacts
+
+| Artifact | Path | Purpose |
+|----------|------|---------|
+| Status Summary (MD) | `docs/audits/pfmall_youtube_ingest/pipeline_status_summary.md` | Operator-facing status view |
+| Status Summary (JSON) | `docs/audits/pfmall_youtube_ingest/pipeline_status_summary.json` | Machine-readable status contract |
+
 ## Dependencies
 
 - `youtube_auth`: For `get_authenticated_service()`
 - `googleapiclient`: YouTube Data API v3
+- `status_summary`: standard library only (json, pathlib, datetime, argparse)

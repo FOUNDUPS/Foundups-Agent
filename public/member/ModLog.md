@@ -1,5 +1,70 @@
 # Member Area Module Change Log
 
+## [2026-04-17] pfMALL YouTube Pipeline Status Summary (Worker CW)
+
+**Who**: 0102 - Worker CW
+**Slice**: `PFMALL_YOUTUBE_PIPELINE_STATUS_SUMMARY_PHASE1`
+**What**: Read-only operator status summary for the pfMALL YouTube pipeline.
+
+**Rationale**: Pipeline state was previously spread across the catalog, delta,
+review, and proposal artifacts. Operators had to manually inspect multiple
+JSON files to know what ran and what still needs review. This slice defines
+the status contract (not a UI) so a later surface can consume it cleanly.
+
+**Files Added**:
+- `modules/communication/youtube_channel_pull/src/status_summary.py` - generator (read-only).
+- `modules/communication/youtube_channel_pull/tests/test_status_summary.py` - 5 focused tests.
+- `docs/audits/pfmall_youtube_ingest/pipeline_status_summary.md` - rendered summary.
+- `docs/audits/pfmall_youtube_ingest/pipeline_status_summary.json` - machine-readable summary.
+
+**Status Contract (fields reported)**:
+| Field | Source | Notes |
+|---|---|---|
+| Catalog foundup count / declared-vs-actual video totals | `mall-video-catalog.json` | Reports mismatches honestly |
+| Latest known-channel refresh timestamp / counts / per-foundup rows | `youtube_channel_pull_delta.json` | Existing vs pulled vs new vs skipped |
+| Refresh scheduler run history | `refresh_log.json` | Missing artifact reported, not faked |
+| Discovery proposals (query, totals, matched/unmatched) | `youtube_discovery_proposals.json` | |
+| Latest discovery review (approved / applied / skipped / rejected) | `youtube_discovery_review_result_*.json` | Latest file auto-selected |
+| Blockers & operator next-action | derived | Grounded only in observed artifacts |
+
+**Current Catalog State (this run)**:
+- FoundUps: 13
+- Total declared videos: 1205 (matches actual `videos[]` length)
+- Active YouTube channels: move2japan (594), undaodu (512), foundups_main (44), antifafm (34), eduit (21)
+
+**Known-Channel Refresh** (latest delta 2026-04-13T07:17:28Z):
+- FoundUps checked: 1 (move2japan)
+- New videos: 0 - all 19 pulled were duplicates
+- No action required on delta
+
+**Discovery**:
+- Proposals artifact (2026-04-13T07:06:16Z): 10 FFCPLN-music proposals, all matched to move2japan by channel_id
+- Latest review (2026-04-13T07:30:00Z): 2 approved/applied, 8 duplicate-skipped - catalog 592 -> 594
+
+**Missing Artifacts (honestly reported)**:
+- `refresh_log.json` - not yet present. Scheduler has not run in logged mode, or has only run with `--no-log`. Summary flags this as a next-action, not a blocker.
+
+**Key Boundary Preserved**:
+- Read-only: no catalog mutation, no scheduler mutation, no live API calls.
+- Missing artifacts reported as missing; no values are fabricated.
+- Status contract defined here is reusable by any later UI/API surface.
+
+**Tests**: 5/5 passing
+- `test_full_artifact_set_parses`
+- `test_missing_refresh_log_is_reported_honestly`
+- `test_all_artifacts_missing_emits_blockers`
+- `test_markdown_render_does_not_raise_for_full_and_empty`
+- `test_write_status_summary_is_read_only_vs_sources`
+
+**HoloIndex**:
+- Command: `python holo_index.py --search "pfmall youtube pipeline status summary refresh delta discovery review artifact" --limit 3`
+- Top hit: `modules/ai_intelligence/pfmall_discovery/README.md` (adjacent module; confirmed no existing summary generator to reuse).
+
+**WSP 15 Applied**: P1 task - operator-facing observability for an active pipeline; low complexity, high deferability cost (manual multi-file inspection every run).
+**WSP 97 Applied**: CoT (evidence retrieved before facts stated), CoR (dialectic sweep chose smallest generator + JSON contract over larger UI surface), missing artifacts reported truthfully instead of inferred.
+
+---
+
 ## [2026-04-13] YouTube Discovery Proposal Review and Apply (Worker CT)
 
 **Who**: 0102 - Worker CT
