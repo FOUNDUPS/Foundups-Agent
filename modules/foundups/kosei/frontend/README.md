@@ -20,11 +20,14 @@ This is the public landing PWA for Kosei AI Systems. It handles:
 | `/kosei/` | Landing page | None |
 | `/kosei/#audit` | Intake form anchor | None |
 | `/kosei/#pricing` | Pricing teaser anchor | None |
-| `/kosei/login` | Auth redirect (future) | None → redirect |
+| `/kosei/app/` | Client workspace (auth gate) | Redirect to sign-in |
 
 **NOT in this surface**:
-- `/kosei/app/*` — Client workspace (separate build)
+- `/kosei/app/*` — Client workspace (separate build, `Client Login` link points here)
 - `/kosei/admin/*` — Operator workspace (separate build)
+
+**Not deployed** (do not link from landing until they exist):
+- `/kosei/login`, `/kosei/pricing`, `/kosei/privacy`, `/kosei/terms`
 
 ## Files
 

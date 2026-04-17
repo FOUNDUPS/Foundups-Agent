@@ -113,7 +113,8 @@ class TestLandingStructure:
         assert re.search(r'href=["\']#pricing["\']', html), "Nav link to #pricing section missing"
 
     def test_nav_login_link(self, html):
-        assert "/kosei/login" in html, "Nav link to /kosei/login missing"
+        """Client Login must point at the real app mount, not a dead /kosei/login route."""
+        assert "/kosei/app/" in html, "Nav link to /kosei/app/ (Client Login) missing"
 
     def test_hero_section_exists(self, html):
         assert "kosei-hero" in html, "Hero section (kosei-hero) not found in index.html"
@@ -487,3 +488,110 @@ class TestBoundaryEnforcement:
         scope = manifest.get("scope", "")
         assert scope == "/kosei/", \
             f"manifest scope must be '/kosei/' to isolate the landing PWA, got '{scope}'"
+
+
+# ================================================================
+# TestTruthfulRoutes — every href must resolve to a real surface (WSP 97)
+# ================================================================
+
+class TestTruthfulRoutes:
+    """No dead /kosei/ subroutes. The only deployed kosei surfaces are
+    the landing (/kosei/) and the app mount (/kosei/app/)."""
+
+    @pytest.fixture(scope="class")
+    def html(self):
+        return INDEX_HTML.read_text(encoding="utf-8")
+
+    def test_no_dead_login_route(self, html):
+        assert "/kosei/login" not in html, \
+            "Dead route /kosei/login must not appear (use /kosei/app/ - the real auth gate)"
+
+    def test_no_dead_pricing_route(self, html):
+        assert "/kosei/pricing" not in html, \
+            "Dead route /kosei/pricing must not appear (pricing is an on-page #pricing anchor)"
+
+    def test_no_dead_privacy_route(self, html):
+        assert "/kosei/privacy" not in html, \
+            "Dead route /kosei/privacy must not appear (no privacy page deployed)"
+
+    def test_no_dead_terms_route(self, html):
+        assert "/kosei/terms" not in html, \
+            "Dead route /kosei/terms must not appear (no terms page deployed)"
+
+    def test_client_login_points_at_app_mount(self, html):
+        """Both nav and footer 'Client Login' must resolve to /kosei/app/."""
+        login_hrefs = re.findall(
+            r'href=["\']([^"\']*)["\'][^>]*data-i18n=["\']nav_login["\']', html
+        )
+        assert login_hrefs, "No href found bound to data-i18n='nav_login'"
+        for href in login_hrefs:
+            assert href == "/kosei/app/", \
+                f"nav_login href must be '/kosei/app/', got '{href}'"
+
+
+# ================================================================
+# TestMojibakeFree — landing sources decode as clean UTF-8 (WSP 97)
+# ================================================================
+
+class TestMojibakeFree:
+    """Every landing file must be UTF-8-clean with no replacement chars or
+    double-encoded sequences. Valid non-ASCII (emoji, em-dash, JP glyphs)
+    is fine; garbled glyphs are not."""
+
+    TARGETS = [INDEX_HTML, MANIFEST_JSON, SW_JS, I18N_JS, INTAKE_JS]
+
+    # Byte sequences that indicate mis-decoded UTF-8 shown as Latin-1.
+    BAD_SEQUENCES = [
+        b"\xef\xbf\xbd",              # U+FFFD replacement char
+        b"\xc3\x82\xc2",              # classic Â... mojibake
+        b"\xc3\x83\xc2",              # double-encoded
+        b"\xc3\xaf\xc2\xbb\xc2\xbf",  # double-encoded BOM
+    ]
+
+    @pytest.mark.parametrize("target", TARGETS, ids=lambda p: p.name)
+    def test_file_is_valid_utf8(self, target):
+        raw = target.read_bytes()
+        try:
+            raw.decode("utf-8", errors="strict")
+        except UnicodeDecodeError as exc:
+            pytest.fail(f"{target} is not valid UTF-8: {exc}")
+
+    @pytest.mark.parametrize("target", TARGETS, ids=lambda p: p.name)
+    def test_file_has_no_mojibake_sequences(self, target):
+        raw = target.read_bytes()
+        for seq in self.BAD_SEQUENCES:
+            assert seq not in raw, \
+                f"{target} contains mojibake byte sequence {seq.hex()}"
+
+
+# ================================================================
+# TestDeployParity — public/kosei/ mirrors the source landing exactly
+# ================================================================
+
+class TestDeployParity:
+    """The Firebase deploy target public/kosei/ must match the module source
+    modules/foundups/kosei/frontend/ byte-for-byte, so what ships is what the
+    module audits."""
+
+    REPO_ROOT = MODULE_ROOT.parent.parent.parent  # modules/foundups/kosei -> repo root
+    DEPLOY_ROOT = REPO_ROOT / "public" / "kosei"
+
+    PAIRS = [
+        ("index.html", "index.html"),
+        ("manifest.json", "manifest.json"),
+        ("sw.js", "sw.js"),
+        ("js/kosei-i18n.js", "js/kosei-i18n.js"),
+        ("js/kosei-intake.js", "js/kosei-intake.js"),
+    ]
+
+    @pytest.mark.parametrize("source_rel,deploy_rel", PAIRS,
+                             ids=[s for s, _ in PAIRS])
+    def test_source_and_deploy_match(self, source_rel, deploy_rel):
+        src = FRONTEND_ROOT / source_rel
+        dst = self.DEPLOY_ROOT / deploy_rel
+        assert src.exists(), f"Source missing: {src}"
+        assert dst.exists(), f"Deploy target missing: {dst}"
+        assert src.read_bytes() == dst.read_bytes(), (
+            f"Deploy target {dst} drifted from source {src}. "
+            "Re-sync public/kosei/ after editing modules/foundups/kosei/frontend/."
+        )
