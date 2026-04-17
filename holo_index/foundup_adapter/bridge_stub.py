@@ -27,7 +27,7 @@ class BridgeStub:
                     }
                 ],
                 "quantum_coherence": 0.95,
-                "stub": False,
+                "stub": True,
                 "source": "python_bridge_stub"
             })
             

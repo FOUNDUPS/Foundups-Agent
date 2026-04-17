@@ -72,6 +72,7 @@ async function run() {
     });
     await new Promise((r) => setImmediate(r));
     assert(resolved && resolved.data && resolved.data.stub === true, 'stub search has stub:true');
+    assert(resolved.service === 'holoindex', 'stub search has service:holoindex');
     assert(
       resolved.data.results[0].content.includes('Stub') || resolved.data.results[0].path.includes('stub'),
       'stub search content/path marks stub'
@@ -134,6 +135,7 @@ async function run() {
     });
     await new Promise((r) => setImmediate(r));
     assert(resolved.status === 'success', 'search success');
+    assert(resolved.service === 'holoindex', 'registered search has service:holoindex');
     assert(resolved.data.results[0].content === 'real hit', 'real search body');
     assert(resolved.data.stub !== true, 'no stub flag when backend omits it');
 

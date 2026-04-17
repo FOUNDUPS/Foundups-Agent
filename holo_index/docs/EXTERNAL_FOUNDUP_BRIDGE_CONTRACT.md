@@ -60,6 +60,7 @@ The Python stub handles the specific intents, converts them into FastMCP calls o
 ```json
 {
   "type": "agent_response",
+  "service": "holoindex",
   "status": "success",
   "data": {
     "results": [
