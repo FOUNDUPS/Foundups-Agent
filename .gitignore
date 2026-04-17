@@ -386,6 +386,9 @@ youtube_foundups/
 modules/platform_integration/antifafm_broadcaster/assets/backgrounds/*.mp4
 # Runtime telemetry (local JSONL; do not version WSP 91 sink output)
 modules/platform_integration/antifafm_broadcaster/telemetry.jsonl
+# Generated caches (screenshots, scraped map data)
+modules/platform_integration/antifafm_broadcaster/skillz/gcc_shipping_tracker/screenshot_cache/
+modules/platform_integration/antifafm_broadcaster/skillz/news_maps/cache/
 campaign_results/
 tools/gitleaks/
 modules/ai_intelligence/pqn_alignment/artifact_results/theory_archive_simulation/
