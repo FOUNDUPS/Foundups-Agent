@@ -114,6 +114,13 @@
     return CONFIG.allowedOrigins.indexOf(origin) !== -1;
   }
 
+  // Route → service identifier for FoundUp iframe response filtering.
+  // Each route maps to the foundup_id that owns it, so connector iframes
+  // can filter responses by `event.data.service === '<their_foundup_id>'`.
+  var ROUTE_SERVICE_MAP = {
+    'openclaw_search': 'holoindex'
+  };
+
   var handlers = {
     openclaw_search: function(payload, callback) {
       var action = payload.action;
@@ -284,6 +291,10 @@
     }
 
     handlers[route](payload, function(response) {
+      // Tag response with service identifier so FoundUp iframes can filter
+      if (ROUTE_SERVICE_MAP[route]) {
+        response.service = ROUTE_SERVICE_MAP[route];
+      }
       log('debug', 'Sending response', response);
       sourceWindow.postMessage(response, origin);
     });

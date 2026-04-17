@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('message', (event) => {
     if (event.data && event.data.type === 'agent_response' && event.data.service === 'holoindex') {
-      resultsPanel.textContent = JSON.stringify(event.data.payload, null, 2);
+      resultsPanel.textContent = JSON.stringify(event.data.data, null, 2);
     }
   });
 });

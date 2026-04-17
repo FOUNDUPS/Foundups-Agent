@@ -185,6 +185,17 @@ class TestResponseFormat:
         js = _read_js()
         assert "quantum_coherence" in js
 
+    def test_response_has_service_field(self):
+        """Responses include service identifier for FoundUp iframe filtering."""
+        js = _read_js()
+        assert "ROUTE_SERVICE_MAP" in js
+        assert "'holoindex'" in js or '"holoindex"' in js
+
+    def test_service_injected_in_dispatch(self):
+        """dispatchRequest injects service from ROUTE_SERVICE_MAP."""
+        js = _read_js()
+        assert "response.service" in js
+
 
 # ---------------------------------------------------------------------------
 # Origin Validation Tests
