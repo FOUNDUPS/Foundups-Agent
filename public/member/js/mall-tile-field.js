@@ -645,14 +645,15 @@
       var readiness = item.launch_readiness || item.status || 'discoverable_only';
       var badgeClass = readiness === 'ready' ? 'ready' : (readiness === 'conditional' ? 'conditional' : '');
 
-      // Video-backed: use poster_url as background
-      var posterStyle = item.poster_url ? 'background-image: url(' + escapeAttr(item.poster_url) + ')' : '';
+      // Video-backed: use channel_avatar_url (preferred) or poster_url as background
+      var posterUrl = item.channel_avatar_url || item.poster_url || '';
+      var posterStyle = posterUrl ? 'background-image: url(' + escapeAttr(posterUrl) + ')' : '';
 
       // Determine if tile has videos (includes expanded video tiles with video_data)
       var hasVideos = (item.videos && item.videos.length) || item.video_count || item.video_data;
 
-      // Queue count (video_count or videos array length) — video tiles only
-      var queueCount = item.video_count || (item.videos ? item.videos.length : 0);
+      // Queue count (true_video_count preferred, then video_count, then videos array length)
+      var queueCount = item.true_video_count || item.video_count || (item.videos ? item.videos.length : 0);
       var queueBadge = queueCount > 0 ? '<span class="mall-tile-queue-count">' + queueCount + ' videos</span>' : '';
 
       // Play indicator — video tiles only
@@ -703,6 +704,25 @@
 
     // Update expanded mode class
     tileField.classList.toggle('expanded-mode', expandedFoundUp !== null);
+
+    // Detect thumbnail load and remove shimmer
+    var tiles = tileField.querySelectorAll('.mall-tile');
+    tiles.forEach(function(tile) {
+      var bgImage = tile.style.backgroundImage;
+      if (bgImage && bgImage !== 'none') {
+        var urlMatch = bgImage.match(/url\(["']?([^"')]+)["']?\)/);
+        if (urlMatch && urlMatch[1]) {
+          var img = new Image();
+          img.onload = function() { tile.classList.add('thumb-loaded'); };
+          img.onerror = function() { tile.classList.add('thumb-loaded'); }; // Stop shimmer on error too
+          img.src = urlMatch[1];
+        } else {
+          tile.classList.add('thumb-loaded');
+        }
+      } else {
+        tile.classList.add('thumb-loaded'); // No image = no shimmer needed
+      }
+    });
   }
 
   /**
@@ -1170,7 +1190,7 @@
    * @param {boolean} [isManual=true] - Whether this is a manual user override
    */
   function setDensity(density, isManual) {
-    var validDensities = ['3x4', '3x5', '4x6', '5x8', '6x3'];
+    var validDensities = ['3x4', '3x5', '4x6', '5x8', '6x3', '8x2', '8x5', '10x6', '12x3', '12x8', '15x4'];
     if (!validDensities.includes(density)) {
       density = '3x5';
     }
@@ -1206,9 +1226,13 @@
     var isCoarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
     var isLandscape = width > height;
 
-    // Desktop: fine pointer + wide viewport (1024px+) + landscape
-    if (!isCoarsePointer && width >= 1024 && isLandscape) {
-      return '6x3';
+    // Desktop: fine pointer + wide viewport + landscape
+    // Use denser presets for larger screens
+    if (!isCoarsePointer && isLandscape) {
+      if (width >= 2560) return '12x3';  // 4K/ultrawide = maximum density
+      if (width >= 1920) return '10x6';  // Full HD+ = dense wall
+      if (width >= 1440) return '8x5';   // QHD = medium wall
+      if (width >= 1024) return '6x3';   // HD = standard
     }
 
     // Tablet landscape: coarse pointer but wide
@@ -1651,7 +1675,22 @@
     getFieldScope: getFieldScope,
     searchByCreator: searchByCreator,
     filterByCategory: filterByCategory,
-    filterByTag: filterByTag
+    filterByTag: filterByTag,
+
+    // Debug helpers
+    debugTiles: function() {
+      var items = expandedFoundUp !== null ? getExpandedVideos() : mallCatalog;
+      console.table(items.map(function(item, i) {
+        return {
+          index: i,
+          foundup_id: item.foundup_id,
+          name: (item.name || item.title || '').substring(0, 30),
+          poster_url: (item.poster_url || '').substring(0, 50)
+        };
+      }));
+      console.log('Total tiles:', items.length, '| Density:', currentDensity, '| Expanded:', expandedFoundUp);
+    },
+    getCatalog: function() { return mallCatalog; }
   };
 
 })();

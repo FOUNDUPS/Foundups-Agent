@@ -18,10 +18,66 @@ from typing import Any, Dict, List, Optional
 logger = logging.getLogger(__name__)
 
 
+def fetch_channel_info(
+    youtube_service,
+    channel_id: str,
+) -> Optional[Dict[str, Any]]:
+    """
+    Fetch channel info including avatar/logo URL.
+
+    Args:
+        youtube_service: Authenticated googleapiclient YouTube service
+        channel_id: YouTube channel ID (e.g., "UC-LSSlOZwpGIRIYihaz8zCw")
+
+    Returns:
+        Dict with: channel_id, title, avatar_url, subscriber_count, video_count
+    """
+    if not youtube_service or not channel_id:
+        return None
+
+    try:
+        request = youtube_service.channels().list(
+            part="snippet,statistics",
+            id=channel_id,
+        )
+        response = request.execute()
+
+        items = response.get("items", [])
+        if not items:
+            return None
+
+        channel = items[0]
+        snippet = channel.get("snippet", {})
+        stats = channel.get("statistics", {})
+        thumbnails = snippet.get("thumbnails", {})
+
+        # Get best avatar (high > medium > default)
+        avatar_url = (
+            thumbnails.get("high", {}).get("url")
+            or thumbnails.get("medium", {}).get("url")
+            or thumbnails.get("default", {}).get("url")
+        )
+
+        return {
+            "channel_id": channel_id,
+            "title": snippet.get("title", ""),
+            "description": snippet.get("description", ""),
+            "avatar_url": avatar_url,
+            "subscriber_count": int(stats.get("subscriberCount", 0)),
+            "video_count": int(stats.get("videoCount", 0)),
+            "custom_url": snippet.get("customUrl", ""),
+        }
+
+    except Exception as e:
+        logger.error(f"[PULL] Error fetching channel info for {channel_id}: {e}")
+        return None
+
+
 def fetch_channel_videos(
     youtube_service,
     channel_id: str,
     max_results: int = 50,
+    fetch_all: bool = False,
 ) -> List[Dict[str, Any]]:
     """
     Fetch latest videos from a YouTube channel via Data API.
@@ -30,6 +86,7 @@ def fetch_channel_videos(
         youtube_service: Authenticated googleapiclient YouTube service
         channel_id: YouTube channel ID (e.g., "UC-LSSlOZwpGIRIYihaz8zCw")
         max_results: Maximum videos to fetch (default 50, max 50 per request)
+        fetch_all: If True, paginate to fetch ALL videos (can be slow/quota-heavy)
 
     Returns:
         List of video dicts with: video_id, title, thumbnail_url, embed_url, published_at
@@ -42,46 +99,63 @@ def fetch_channel_videos(
         return []
 
     videos: List[Dict[str, Any]] = []
+    next_page_token = None
+    total_fetched = 0
 
     try:
-        # Search for videos from this channel (ordered by date, newest first)
-        request = youtube_service.search().list(
-            part="snippet",
-            channelId=channel_id,
-            type="video",
-            order="date",
-            maxResults=min(max_results, 50),
-        )
-        response = request.execute()
-
-        for item in response.get("items", []):
-            video_id = item.get("id", {}).get("videoId")
-            if not video_id:
-                continue
-
-            snippet = item.get("snippet", {})
-            published_at = snippet.get("publishedAt", "")
-
-            # Get best available thumbnail
-            thumbnails = snippet.get("thumbnails", {})
-            thumbnail_url = (
-                thumbnails.get("high", {}).get("url")
-                or thumbnails.get("medium", {}).get("url")
-                or thumbnails.get("default", {}).get("url")
-                or f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg"
+        while True:
+            # Search for videos from this channel (ordered by date, newest first)
+            request = youtube_service.search().list(
+                part="snippet",
+                channelId=channel_id,
+                type="video",
+                order="date",
+                maxResults=50,  # Always fetch max per request
+                pageToken=next_page_token,
             )
+            response = request.execute()
 
-            videos.append({
-                "video_id": video_id,
-                "title": snippet.get("title", ""),
-                "thumbnail_url": thumbnail_url,
-                "embed_url": f"https://www.youtube.com/embed/{video_id}",
-                "source_url": f"https://www.youtube.com/watch?v={video_id}",
-                "published_at": published_at,
-                "channel_id": channel_id,
-            })
+            for item in response.get("items", []):
+                video_id = item.get("id", {}).get("videoId")
+                if not video_id:
+                    continue
 
-        logger.info(f"[PULL] Fetched {len(videos)} videos from channel {channel_id}")
+                snippet = item.get("snippet", {})
+                published_at = snippet.get("publishedAt", "")
+
+                # Get best available thumbnail
+                thumbnails = snippet.get("thumbnails", {})
+                thumbnail_url = (
+                    thumbnails.get("high", {}).get("url")
+                    or thumbnails.get("medium", {}).get("url")
+                    or thumbnails.get("default", {}).get("url")
+                    or f"https://i.ytimg.com/vi/{video_id}/hqdefault.jpg"
+                )
+
+                videos.append({
+                    "video_id": video_id,
+                    "title": snippet.get("title", ""),
+                    "thumbnail_url": thumbnail_url,
+                    "embed_url": f"https://www.youtube.com/embed/{video_id}",
+                    "source_url": f"https://www.youtube.com/watch?v={video_id}",
+                    "published_at": published_at,
+                    "channel_id": channel_id,
+                })
+
+                total_fetched += 1
+                if not fetch_all and total_fetched >= max_results:
+                    break
+
+            # Check if we should continue pagination
+            next_page_token = response.get("nextPageToken")
+            if not fetch_all or not next_page_token:
+                break
+            if not fetch_all and total_fetched >= max_results:
+                break
+
+            logger.info(f"[PULL] Fetched {total_fetched} videos so far, continuing...")
+
+        logger.info(f"[PULL] Fetched {len(videos)} total videos from channel {channel_id}")
 
     except Exception as e:
         logger.error(f"[PULL] API error for channel {channel_id}: {e}")

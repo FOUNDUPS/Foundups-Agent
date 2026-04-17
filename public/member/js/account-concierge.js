@@ -467,10 +467,15 @@
   ];
 
   var DENSITY_PRESETS = [
-    { id: '3x4' },
-    { id: '3x5' },
-    { id: '4x6' },
-    { id: '5x8' }
+    { id: '3x4', label: '3×4' },
+    { id: '3x5', label: '3×5' },
+    { id: '4x6', label: '4×6' },
+    { id: '5x8', label: '5×8' },
+    { id: '6x3', label: '6×3' },
+    { id: '8x2', label: '8w' },
+    { id: '10x6', label: '10' },
+    { id: '12x3', label: '12' },
+    { id: '15x4', label: '15' }
   ];
 
   function emitRedDogCommand(command, detail) {
@@ -568,11 +573,11 @@
     // Density presets
     html += '<div class="reddog-tools-group">';
     html += '<div class="reddog-tools-label">Density</div>';
-    html += '<div class="reddog-tools-row">';
+    html += '<div class="reddog-tools-row reddog-tools-row-wrap">';
     for (var j = 0; j < DENSITY_PRESETS.length; j++) {
       var d = DENSITY_PRESETS[j];
       html += '<button class="reddog-tool-pill reddog-density-pill' + (d.id === currentDensity ? ' active' : '') + '"'
-            + ' data-reddog-density="' + d.id + '" type="button">' + d.id + '</button>';
+            + ' data-reddog-density="' + d.id + '" type="button">' + (d.label || d.id) + '</button>';
     }
     html += '</div></div>';
 

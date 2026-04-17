@@ -23,8 +23,66 @@
 .mall-projection {
   display: flex;
   gap: 0.4rem;
+  padding: 0 0 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* ========== Density Controls ========== */
+
+.mall-density-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
   padding: 0 0 0.75rem;
   flex-wrap: wrap;
+}
+
+.mall-density-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-right: 0.25rem;
+}
+
+.mall-density-btn {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.mall-density-btn:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.mall-density-btn.active {
+  border-color: rgba(141, 113, 255, 0.5);
+  background: rgba(141, 113, 255, 0.15);
+  color: #fff;
+}
+
+.mall-density-slider {
+  width: 80px;
+  height: 4px;
+  margin-left: 0.5rem;
+  accent-color: rgba(141, 113, 255, 0.8);
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .mall-density-controls {
+    display: none; /* Hide on mobile - auto-density is better */
+  }
 }
 
 .mall-projection-chip {
@@ -141,6 +199,7 @@
   display: grid;
   grid-template-columns: repeat(var(--field-columns, 3), 1fr);
   grid-auto-rows: auto;
+  grid-auto-flow: row;
   gap: var(--tile-gap, 0.2rem);
   padding: 0;
   min-height: 100%;
@@ -177,12 +236,86 @@
   --tile-radius: 0.25rem;
   --tile-gap: 0.1rem;
 }
-/* Desktop-optimized: wide landscape with 6 columns, 3 rows */
+/* Desktop-optimized: wide landscape with 6 columns */
 .mall-tile-field[data-density="6x3"] {
   --field-columns: 6;
   --field-rows: 3;
   --tile-radius: 0.5rem;
   --tile-gap: 0.35rem;
+}
+
+.mall-tile-field[data-density="6x3"] .mall-tile {
+  aspect-ratio: 3 / 4;
+}
+
+/* Desktop dense wall presets — shorter aspect ratio for more rows */
+.mall-tile-field[data-density="8x5"] {
+  --field-columns: 8;
+  --field-rows: 5;
+  --tile-radius: 0.35rem;
+  --tile-gap: 0.2rem;
+}
+
+.mall-tile-field[data-density="8x5"] .mall-tile {
+  aspect-ratio: 3 / 4;
+}
+
+.mall-tile-field[data-density="10x6"] {
+  --field-columns: 10;
+  --field-rows: 6;
+  --tile-radius: 0.3rem;
+  --tile-gap: 0.15rem;
+}
+
+.mall-tile-field[data-density="10x6"] .mall-tile {
+  aspect-ratio: 4 / 5;
+}
+
+.mall-tile-field[data-density="12x8"] {
+  --field-columns: 12;
+  --field-rows: 8;
+  --tile-radius: 0.25rem;
+  --tile-gap: 0.1rem;
+}
+
+.mall-tile-field[data-density="12x8"] .mall-tile {
+  aspect-ratio: 1 / 1;
+}
+
+/* Ultra-wide desktop: 12 columns × 3 rows with landscape tiles */
+.mall-tile-field[data-density="12x3"] {
+  --field-columns: 12;
+  --field-rows: 3;
+  --tile-radius: 0.3rem;
+  --tile-gap: 0.2rem;
+}
+
+.mall-tile-field[data-density="12x3"] .mall-tile {
+  aspect-ratio: 4 / 3;
+}
+
+/* Maximum density: 15 columns for large screens */
+.mall-tile-field[data-density="15x4"] {
+  --field-columns: 15;
+  --field-rows: 4;
+  --tile-radius: 0.2rem;
+  --tile-gap: 0.1rem;
+}
+
+.mall-tile-field[data-density="15x4"] .mall-tile {
+  aspect-ratio: 1 / 1;
+}
+
+/* Wide landscape: 8 columns × 2 rows */
+.mall-tile-field[data-density="8x2"] {
+  --field-columns: 8;
+  --field-rows: 2;
+  --tile-radius: 0.4rem;
+  --tile-gap: 0.25rem;
+}
+
+.mall-tile-field[data-density="8x2"] .mall-tile {
+  aspect-ratio: 16 / 9;
 }
 
 @media (min-width: 600px) {
@@ -204,10 +337,44 @@
   aspect-ratio: 9 / 16;
   border-radius: var(--tile-radius, 0.4rem);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  background: var(--surface);
-  background-size: cover;
-  background-position: center;
+  background-color: var(--surface);
+  background-size: contain !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
   overflow: hidden;
+}
+
+/* Loading shimmer while thumbnail loads */
+.mall-tile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.04) 40%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.04) 60%,
+    transparent 80%
+  );
+  background-size: 200% 100%;
+  animation: tile-shimmer 1.5s ease-in-out infinite;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  z-index: 0;
+}
+
+.mall-tile.thumb-loaded::after {
+  opacity: 0;
+}
+
+@keyframes tile-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.mall-tile {
   cursor: pointer;
   /* Snappy transitions for phone feel */
   transition: transform 100ms ease-out, border-color 100ms ease-out, box-shadow 100ms ease-out;
@@ -453,9 +620,13 @@
   border: none;
 }
 
-/* Active preview: show the preview layer */
+/* Active preview: show the preview layer and hide thumbnail background */
 .mall-tile.is-previewing .mall-tile-preview {
   opacity: 1;
+}
+
+.mall-tile.is-previewing {
+  background-image: none !important;
 }
 
 /* Hide play indicator during active preview */

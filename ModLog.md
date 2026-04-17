@@ -1,5 +1,39 @@
 # FoundUps Agent - Development Log
 
+## [2026-04-17] p.fMALL Tile Field Display Improvements
+
+**Change Type**: Feature / UI
+**By**: 0102
+**WSP References**: WSP 22, WSP 50
+
+### Summary
+
+Fixed Mall tile display: channel avatars, proper scaling, video counts, and catalog refresh tooling.
+
+### What Changed
+
+- `public/member/css/mall-tile-field.css`:
+  - Changed `background-size: cover` to `contain` for proper logo scaling
+  - Added `!important` to prevent inline style overrides
+- `public/member/js/mall-tile-field.js`:
+  - Prioritize `channel_avatar_url` over `poster_url` for tile backgrounds
+  - Use `true_video_count` for accurate video counts
+- `modules/communication/youtube_channel_pull/src/channel_puller.py`:
+  - Added `fetch_channel_info()` for avatars and channel stats
+- `scripts/refresh_mall_catalog.py` (NEW):
+  - Quota-efficient catalog refresh (--info-only, --delta, --full modes)
+  - Fetches channel avatars and true video counts
+- `public/member/mall-video-catalog.json`:
+  - Updated with channel_avatar_url and true_video_count for 4 YouTube channels
+
+### Result
+
+- Mall tiles display channel logos that scale with density
+- Accurate video counts (3416, 4208, 1588, 105 vs old 44)
+- Efficient refresh tooling (~13 quota units for info-only mode)
+
+---
+
 ## [2026-04-01] SoftProto Audit Prompt Batch
 
 **Change Type**: Architecture / Coordination
