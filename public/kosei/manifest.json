@@ -1,0 +1,28 @@
+{
+  "id": "/kosei/",
+  "name": "Kosei AI Systems",
+  "short_name": "Kosei",
+  "description": "AI-powered content automation for creators and businesses",
+  "start_url": "/kosei/",
+  "scope": "/kosei/",
+  "display": "standalone",
+  "background_color": "#0a0a12",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/kosei/assets/kosei-icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/kosei/assets/kosei-icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["business", "productivity"]
+}

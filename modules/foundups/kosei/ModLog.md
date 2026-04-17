@@ -1,5 +1,82 @@
 # Kosei AI Systems — ModLog
 
+## 2026-04-17 — Truthful Landing Deploy (Dead Routes + Mojibake Audit)
+
+**Worker**: BX6
+**Slice**: `KOSEI_LANDING_PWA_TRUTHFUL_DEPLOY_PHASE1`
+
+### Scope
+
+Make the public Kosei landing deployable under `public/kosei/` with truthful routes only.
+Source of truth is `modules/foundups/kosei/frontend/`; `public/kosei/` is a byte-identical mirror.
+`public/kosei/app/` (the verified app mount from BX4/BX5) was not touched.
+
+### Findings
+
+- **Mojibake**: NOT present. Both `modules/foundups/kosei/frontend/` and `public/kosei/`
+  decode as strict UTF-8 with zero replacement characters and zero double-encoded Latin-1
+  sequences. The only non-ASCII codepoints are intentional: em-dash (U+2014), four emoji
+  (U+23F1 ⏱, U+1F3AF 🎯, U+1F310 🌐, U+1F441 👁, with U+FE0F variation selectors), and
+  the JA locale block in `kosei-i18n.js`. The brief's "corrupt glyphs" claim did not
+  reproduce — ruled out via byte-level scan rather than visual inspection.
+
+- **Dead routes**: Confirmed. Four hrefs in the landing pointed at paths that do not exist
+  under `public/kosei/` and fall through Firebase's `** → /index.html` catch-all:
+  `/kosei/login`, `/kosei/pricing`, `/kosei/privacy`, `/kosei/terms`.
+
+### Route fixes (truthful)
+
+| Surface | Before | After | Why |
+|---------|--------|-------|-----|
+| Nav "Client Login" (line 47) | `/kosei/login` | `/kosei/app/` | `/kosei/app/` is the real auth gate (BX4 browser-verified: Google sign-in, email/password). No `/kosei/login` is deployed. |
+| Footer "Client Login" (line 233) | `/kosei/login` | `/kosei/app/` | Same reason. |
+| "View Pricing" button (line 215) | `/kosei/pricing` | `#audit` (copy → "Start Free Audit") | No `/kosei/pricing` page is deployed. The `#pricing` section on the landing already carries the pricing teaser; the real CTA is the free audit. |
+| Footer Legal column (lines 236-242) | links to `/kosei/privacy` and `/kosei/terms` | column removed | Neither page is deployed; a link to a nonexistent legal doc is an active claim, not a placeholder. |
+
+i18n keys `footer_legal`, `footer_privacy`, `footer_terms` removed from both EN and JA
+blocks (parity preserved). `pricing_cta` copy retranslated to match the new target
+("Start Free Audit" / "無料診断を開始").
+
+### Files changed
+
+Source:
+- `modules/foundups/kosei/frontend/index.html` — 4 dead-route rewrites, 1 copy change, Legal column removed
+- `modules/foundups/kosei/frontend/js/kosei-i18n.js` — `pricing_cta` copy; `footer_legal/privacy/terms` keys removed in EN and JA
+- `modules/foundups/kosei/frontend/README.md` — Surfaces table now lists `/kosei/app/` and flags the four dead routes as "not deployed, do not link"
+
+Deploy mirror (byte-identical copy):
+- `public/kosei/index.html`
+- `public/kosei/js/kosei-i18n.js`
+
+Tests:
+- `modules/foundups/kosei/tests/test_frontend_landing.py`:
+  - `test_nav_login_link` updated to assert `/kosei/app/` (the real auth surface)
+  - Added `TestTruthfulRoutes` — 5 tests pinning the absence of each dead route and the presence of `/kosei/app/` on every `data-i18n="nav_login"` href
+  - Added `TestMojibakeFree` — 10 parametrized tests asserting each landing file is strict-UTF-8 and free of replacement-char / double-encoded sequences
+  - Added `TestDeployParity` — 5 tests asserting `public/kosei/` matches `modules/foundups/kosei/frontend/` byte-for-byte (catches future drift)
+
+### Verification
+
+- `python -m pytest modules/foundups/kosei/tests/test_frontend_landing.py` → **106 passed**
+- `python -m pytest modules/foundups/kosei/tests/` → **219 passed** (full module suite)
+- `python -m pytest public/member/tests/test_route_contract_bridge.py` → **45 passed** (pfMALL routing untouched)
+- `python -c "import json; json.load(open('modules/foundups/kosei/frontend/manifest.json'))"` → valid in both source and deploy
+- Dead-route audit script: 0 occurrences of `/kosei/login|/kosei/pricing|/kosei/privacy|/kosei/terms` across either tree (excluding the ModLog/test fixtures that quote them as forbidden).
+
+### What did NOT change
+
+- `public/kosei/app/` — out of scope; untouched.
+- `foundup_manifest.json`, `public/member/mall-video-catalog.json`, `launch_readiness` — Kosei remains `ready` with `entry_url=https://foundupscom.web.app/kosei/app/` from BX5.
+- pfMALL shell and route contract — verified still green.
+
+### WSP References
+
+- WSP 97: Truthful metadata — dead routes are claims the deploy cannot back, so they were removed or redirected to surfaces that exist.
+- WSP 72: Module independence — landing fixes stay under `modules/foundups/kosei/frontend/` with `public/kosei/` as a deploy mirror; no cross-module coupling introduced.
+- WSP 22: This entry.
+
+---
+
 ## 2026-04-13 — Restore entry_url After Iframe Verification
 
 **Worker**: BX5
