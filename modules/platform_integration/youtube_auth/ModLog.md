@@ -12,6 +12,32 @@ This log tracks changes specific to the **youtube_auth** module in the **platfor
 
 ## MODLOG ENTRIES
 
+### 2026-04-19 - YT2: Set 1 Reauth Operator Runbook
+
+**By:** 0102 (Worker CW4, Slice YT2)
+**WSP References:** WSP 22 (ModLog), WSP 97 (Truth Signaling)
+
+**Problem:**
+YT1 surfaced credential health via JSON artifact, but no operator documentation existed
+explaining how 012 should interpret the artifact or perform manual reauth when needed.
+
+**Scope:**
+Documentation only. No code changes. No browser OAuth performed by 0102.
+
+**Changes:**
+- **New** `docs/SET1_REAUTH_OPERATOR_RUNBOOK.md`:
+  - Current state detection (read health artifact)
+  - Step-by-step reauth procedure for Set 1
+  - Verification methods (3 approaches)
+  - Troubleshooting section
+  - Credential set reference table
+
+**Artifact References:**
+- Health artifact: `reports/oauth_credential_health.json`
+- Runbook: `docs/SET1_REAUTH_OPERATOR_RUNBOOK.md`
+
+---
+
 ### 2026-04-18 - YT1: invalid_grant visibility + oauth_credential_health.json artifact
 
 **By:** 0102 (Worker YT1)
