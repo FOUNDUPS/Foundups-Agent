@@ -6,6 +6,57 @@
 
 ---
 
+## 2026-04-19 - DJ: Preflight Resolution Dispatch Contract (Phase 1)
+
+**Author**: 0102
+**WSP**: 97 (truthful state distinction), 77 (agent coordination)
+**Phase**: DJ - AI_RESOLUTION_HOOK_CONTRACT_PHASE1
+
+### Summary
+
+Adds a single structured hook (`on_preflight_fail`) that converts log-and-continue
+preflight failures into durable, AI-routable events. Wires DEP-SECURITY and
+WSP-FRAMEWORK emitters in `main.py`. OBS-start emitter deferred to DJ-OBS after
+AF1 read-only AntifaFM readiness audit.
+
+### Files
+
+- `src/preflight_resolution.py` (new) - dispatch contract + event dataclass
+- `tests/test_preflight_resolution.py` (new) - 12 tests, all passing
+- `tests/conftest.py` - allowlist includes new test file
+- `main.py` (monorepo root) - 2 emitter wires (DEP-SECURITY, WSP-FRAMEWORK)
+
+### Truthful state model (WSP 97)
+
+- `detected`   - emitter observed a preflight failure
+- `dispatched` - structured event recorded on disk
+- `proposed`   - AI proposed a remediation (not applied)
+- `escalated`  - event requires 012 review
+- `skipped`    - LLM/PatternMemory unavailable; deterministic event only
+
+### Hard constraints respected
+
+- No auto-remediation, no fix application, no process mutation.
+- AI proposal path wrapped in try/except; LLM-unavailable returns valid skipped event.
+- PatternMemory recall wrapped in try/except; absent memory returns `None`.
+- `alerts/preflight/*.json` per-event artifacts; never overwrites sources.
+- Dispatcher function never raises.
+
+### Deferred scope
+
+- DJ-OBS (AntifaFM `obs_controller.py` emitter) - gated on AF1 audit completion.
+- DJ2 (Chrome 9222 auto-start, VEO deprecation hook, WRE dashboard WARN tier,
+  IRONCLAW SKIP validation) - post-proof expansion.
+
+### Verification
+
+```
+pytest modules/ai_intelligence/ai_overseer/tests/test_preflight_resolution.py -v
+12 passed in 4.18s
+```
+
+---
+
 ## 2026-04-19 - CF3M: m2m_SKILLz.md Semantic Cleanup
 
 **Author**: 0102  

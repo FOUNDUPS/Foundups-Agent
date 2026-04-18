@@ -159,5 +159,175 @@ class TestOBSControllerStartup(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(ok)
 
 
+class TestOBSStartPreflightDispatch(unittest.IsolatedAsyncioTestCase):
+    """DJ-OBS: OBS start-timeout dispatches ai_overseer preflight failure event."""
+
+    def _make_controller_with_inactive_ws(self):
+        controller = OBSController()
+        controller.connected = True
+        controller.ws = _FakeWS(
+            [
+                _FakeStatus(active=False),
+                _FakeStatus(active=False),
+                _FakeStatus(active=False),
+                _FakeStatus(active=False, reconnecting=True, bytes_sent=0, duration=0),
+            ]
+        )
+        return controller
+
+    @patch.dict(
+        os.environ,
+        {
+            "ANTIFAFM_OBS_START_VERIFY_SECONDS": "0.3",
+            "ANTIFAFM_OBS_START_POLL_SECONDS": "0.01",
+        },
+        clear=False,
+    )
+    async def test_obs_start_timeout_dispatches_preflight_fail(self):
+        controller = self._make_controller_with_inactive_ws()
+        with patch(
+            "modules.ai_intelligence.ai_overseer.src.preflight_resolution.on_preflight_fail"
+        ) as mock_dispatch:
+            ok = await controller.start_streaming()
+        self.assertFalse(ok)
+        self.assertTrue(mock_dispatch.called)
+        call_kwargs = mock_dispatch.call_args.kwargs
+        self.assertEqual(call_kwargs["component"], "obs_start")
+        self.assertEqual(call_kwargs["severity"], "critical")
+
+    @patch.dict(
+        os.environ,
+        {
+            "ANTIFAFM_OBS_START_VERIFY_SECONDS": "0.3",
+            "ANTIFAFM_OBS_START_POLL_SECONDS": "0.01",
+        },
+        clear=False,
+    )
+    async def test_obs_start_timeout_payload_has_required_fields(self):
+        controller = self._make_controller_with_inactive_ws()
+        with patch(
+            "modules.ai_intelligence.ai_overseer.src.preflight_resolution.on_preflight_fail"
+        ) as mock_dispatch:
+            await controller.start_streaming()
+        payload = mock_dispatch.call_args.kwargs["payload"]
+        for field in (
+            "error_code",
+            "source_file",
+            "source_function",
+            "verify_timeout_s",
+            "poll_interval_s",
+            "output_bytes",
+            "output_duration_ms",
+            "reconnecting",
+            "likely_cause",
+            "requires_012",
+            "automation_candidate",
+            "safe_autonomous_actions",
+            "unsafe_actions",
+            "remediation",
+        ):
+            self.assertIn(field, payload)
+        self.assertEqual(payload["error_code"], "stream_output_inactive_after_start")
+        self.assertEqual(payload["likely_cause"], "youtube_broadcast_modal_or_binding")
+
+    @patch.dict(
+        os.environ,
+        {
+            "ANTIFAFM_OBS_START_VERIFY_SECONDS": "0.3",
+            "ANTIFAFM_OBS_START_POLL_SECONDS": "0.01",
+        },
+        clear=False,
+    )
+    async def test_obs_start_timeout_requires_012(self):
+        controller = self._make_controller_with_inactive_ws()
+        with patch(
+            "modules.ai_intelligence.ai_overseer.src.preflight_resolution.on_preflight_fail"
+        ) as mock_dispatch:
+            await controller.start_streaming()
+        payload = mock_dispatch.call_args.kwargs["payload"]
+        self.assertIs(payload["requires_012"], True)
+        self.assertIn("click_youtube_studio_modal", payload["unsafe_actions"])
+
+    @patch.dict(
+        os.environ,
+        {
+            "ANTIFAFM_OBS_START_VERIFY_SECONDS": "0.3",
+            "ANTIFAFM_OBS_START_POLL_SECONDS": "0.01",
+        },
+        clear=False,
+    )
+    async def test_obs_start_dispatch_failure_does_not_block_return(self):
+        controller = self._make_controller_with_inactive_ws()
+        with patch(
+            "modules.ai_intelligence.ai_overseer.src.preflight_resolution.on_preflight_fail",
+            side_effect=RuntimeError("simulated dispatcher failure"),
+        ):
+            ok = await controller.start_streaming()
+        self.assertFalse(ok)
+        self.assertEqual(
+            controller.get_last_start_error(),
+            "stream_output_inactive_after_start",
+        )
+
+    @patch.dict(
+        os.environ,
+        {
+            "ANTIFAFM_OBS_START_VERIFY_SECONDS": "0.4",
+            "ANTIFAFM_OBS_START_POLL_SECONDS": "0.01",
+        },
+        clear=False,
+    )
+    async def test_obs_start_success_does_not_dispatch(self):
+        controller = OBSController()
+        controller.connected = True
+        controller.ws = _FakeWS(
+            [
+                _FakeStatus(active=False),
+                _FakeStatus(active=False),
+                _FakeStatus(active=True, bytes_sent=128, duration=2200),
+            ]
+        )
+        with patch(
+            "modules.ai_intelligence.ai_overseer.src.preflight_resolution.on_preflight_fail"
+        ) as mock_dispatch:
+            ok = await controller.start_streaming()
+        self.assertTrue(ok)
+        self.assertFalse(mock_dispatch.called)
+
+    @patch.dict(
+        os.environ,
+        {
+            "ANTIFAFM_OBS_START_VERIFY_SECONDS": "0.3",
+            "ANTIFAFM_OBS_START_POLL_SECONDS": "0.01",
+        },
+        clear=False,
+    )
+    async def test_obs_start_dispatch_import_failure_is_silent(self):
+        import sys
+
+        controller = self._make_controller_with_inactive_ws()
+        original = sys.modules.pop(
+            "modules.ai_intelligence.ai_overseer.src.preflight_resolution", None
+        )
+        sys.modules["modules.ai_intelligence.ai_overseer.src.preflight_resolution"] = None
+        try:
+            ok = await controller.start_streaming()
+        finally:
+            if original is not None:
+                sys.modules[
+                    "modules.ai_intelligence.ai_overseer.src.preflight_resolution"
+                ] = original
+            else:
+                sys.modules.pop(
+                    "modules.ai_intelligence.ai_overseer.src.preflight_resolution",
+                    None,
+                )
+        self.assertFalse(ok)
+        self.assertEqual(
+            controller.get_last_start_error(),
+            "stream_output_inactive_after_start",
+        )
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

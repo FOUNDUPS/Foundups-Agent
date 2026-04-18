@@ -1,5 +1,67 @@
 # antifaFM Broadcaster - ModLog
 
+## V3.3.3 - DJ-OBS preflight failure emitter (2026-04-19)
+
+**Slice**: `DJ-OBS — ANTIFAFM_OBS_PREFLIGHT_FAILURE_EMITTER_PHASE1`
+**Window**: AW2
+**Lane**: DJ
+**Mode**: implementation (diagnostic emitter only)
+**References**: AF1 (CW2, INTERNAL_NOT_READY), AF2 (CW2, DJ-OBS_READY), DJ PR #383 (dispatch contract)
+
+**Context**:
+AF2 specified the OBS start-failure escalation contract. This slice implements
+only the emitter side — wiring `obs_controller.start_streaming()`'s
+inactive-output timeout branch to the DJ dispatch contract in
+`modules/ai_intelligence/ai_overseer/src/preflight_resolution.py`.
+
+**Change**:
+- `src/obs_controller.py::OBSController.start_streaming()`: after the existing
+  logger.error lines at the inactive-output timeout branch (where
+  `self.last_start_error = "stream_output_inactive_after_start"` is set), a
+  best-effort `on_preflight_fail()` call was inserted **before** `return False`.
+- Dispatch is wrapped in `try/except Exception: pass` and cannot block or alter
+  the return path.
+- Payload fields match AF2 schema exactly (error_code, source_file,
+  source_function, verify_timeout_s, poll_interval_s, output_bytes,
+  output_duration_ms, reconnecting, likely_cause, requires_012,
+  automation_candidate, safe_autonomous_actions, unsafe_actions, remediation).
+- All diagnostic values sourced from existing local scope; no new OBS calls.
+
+**Hard constraints (WSP 97 — event emission only)**:
+- No remediation. No retry. No browser automation. No YouTube Studio modal
+  interaction. No credential refresh. No new OBS WebSocket calls.
+- `requires_012=True` and `unsafe_actions` enumerate the modal/browser
+  interventions that must NOT be automated.
+- The dispatched event is diagnostic/proposal only; nothing is applied.
+
+**Tests** (`tests/test_obs_controller_startup.py`, `TestOBSStartPreflightDispatch`):
+| Test | Purpose |
+|---|---|
+| test_obs_start_timeout_dispatches_preflight_fail | asserts dispatcher called with component=obs_start, severity=critical |
+| test_obs_start_timeout_payload_has_required_fields | asserts all AF2 schema fields present |
+| test_obs_start_timeout_requires_012 | asserts requires_012=True, unsafe_actions includes modal click |
+| test_obs_start_dispatch_failure_does_not_block_return | RuntimeError in dispatcher → start_streaming still returns False |
+| test_obs_start_success_does_not_dispatch | healthy start path does not dispatch |
+| test_obs_start_dispatch_import_failure_is_silent | absent preflight_resolution module → return path unchanged |
+
+**Verification**:
+```
+pytest modules/platform_integration/antifafm_broadcaster/tests/test_obs_controller_startup.py -v
+11 passed in 15.64s
+```
+(5 existing startup tests + 6 new DJ-OBS dispatch tests.)
+
+**Dependency**:
+Requires DJ PR #383 (`feat/dj-ai-resolution-hook-contract-phase1`) to be merged
+for the dispatcher to exist at runtime. Until then, the import fails
+silently and the OBS return path is unchanged — verified by
+`test_obs_start_dispatch_import_failure_is_silent`.
+
+**Out of scope**:
+- OBS-side remediation (DJ-OBS-R, later slice if AF3 approves)
+- YouTube broadcast-binding verification (AF2 safe_autonomous_actions → future slice)
+- WRE dashboard alerting on `obs_start` events (DJ2 candidate)
+
 ## V3.3.2 - Discord voice live guild verification (2026-04-09)
 
 **Slice**: `ANTIFAFM_DISCORD_VOICE_LIVE_GUILD_VERIFICATION_PHASE1`
