@@ -2,6 +2,65 @@
 
 ## Chronological Change Log
 
+### [2026-04-18] - SEC7: Security Analysis Assistant (v0.8.4)
+
+**WSP Protocol References**: WSP 77 (Agent Coordination), WSP 97 (Truthful)
+**Impact Analysis**: LLM-assisted proposal generation - NO auto-remediation, NO patch generation
+
+#### Changes Made
+
+- `src/security_analysis_assistant.py` (NEW):
+  - `AnalysisProposal` dataclass - remediation proposal for human review
+  - `SecurityAnalysisAssistant` class - LLM-assisted analysis (optional Qwen/Gemma)
+  - `analyze_finding()` - produces proposals from scan findings + recall context
+  - `write_proposal_artifact()` - explicit file write (disabled by default)
+  - Lazy backend resolution (no LM Studio required for tests)
+
+- `tests/test_security_analysis_assistant.py` (NEW):
+  - 34 tests with mocked LLM backends
+  - LLM unavailable returns `needs_review` (3 tests)
+  - Qwen/Gemma output parsing (6 tests)
+  - `requires_012` preserved from policy (3 tests)
+  - `no_patch_generated: true` invariant (3 tests)
+  - Recall context inclusion (4 tests)
+  - No file writes except explicit (3 tests)
+
+#### Hard Invariants
+
+- `no_patch_generated: true` — always True
+- `requires_012` — preserved from SEC2 policy, never overridden by LLM
+- No code mutation
+- No auto-remediation
+- No MCP/Codex/Claude dependency
+
+#### Proposal Output
+
+```python
+AnalysisProposal(
+    fingerprint="...",
+    finding_id="CVE-2024-001",
+    classification="true_positive|false_positive|needs_review",
+    classification_confidence=0.85,
+    finding_summary="...",
+    risk_explanation="...",
+    remediation_proposal="...",  # Text only, no patch
+    files_likely_affected=["src/api.py"],
+    requires_012=True,
+    no_patch_generated=True,  # Always True
+    analysis_source="qwen+gemma|deterministic",
+    recall_context_included=True,
+)
+```
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_security_analysis_assistant.py -v
+# Result: 34 passed
+```
+
+---
+
 ### [2026-04-18] - SEC6: Security Recall Service (v0.8.3)
 
 **WSP Protocol References**: WSP 60 (Module Memory), WSP 97 (Truthful), WSP 48 (Recursive Self-Improvement)
