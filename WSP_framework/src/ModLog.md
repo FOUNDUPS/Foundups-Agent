@@ -11,6 +11,25 @@
 
 ---
 
+## 2026-04-18 - WSP 50 HoloIndex + WSP 97 Integration
+
+**WSP References**: WSP 22, WSP 50, WSP 97
+
+**Changes Made**:
+- Updated `WSP_50_Pre_Action_Verification_Protocol.md`:
+  - Section 3 (Required Sequence): Added HoloIndex as primary semantic search tool, grep as secondary
+  - Section 4.3 (Bloat Prevention): Replaced generic `codebase_search()`/`file_search()` with HoloIndex + grep
+  - Section 5 (Integration): Added WSP 97 cross-reference for truthful verification claims
+  - Added WSP 97 truthfulness notes to search result handling
+- Synced changes to `WSP_knowledge/src/WSP_50_Pre_Action_Verification_Protocol.md`
+
+**Rationale**:
+- WSP 50 predated HoloIndex and referenced generic/placeholder search tools
+- HoloIndex semantic search finds architecturally similar implementations that grep may miss
+- WSP 97 integration ensures search results are reported truthfully (no fabrication if no results)
+
+---
+
 ## 2026-03-10 - WSP 97 Canonical Compression Clarified (Resolve Execution Plane?)
 
 **WSP References**: WSP 22, WSP 46, WSP 97, WSP 99

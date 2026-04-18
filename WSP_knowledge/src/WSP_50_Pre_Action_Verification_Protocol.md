@@ -30,11 +30,20 @@ Agents MUST verify file existence, paths, and content before taking actions or m
 ## 3. Required Sequence
 
 ```
-1. file_search() or codebase_search()
-2. Verify results match expectations  
-3. read_file() with confirmed path
-4. Process actual content
+1. HoloIndex semantic search (primary):
+   python holo_index.py --search "[task or pattern]"
+   
+2. Pattern search (secondary):
+   grep -r "pattern" modules/
+   
+3. Verify results match expectations  
+
+4. read_file() with confirmed path
+
+5. Process actual content
 ```
+
+**WSP 97 Integration**: All search results and file claims must be truthful and verifiable. If a search returns no results, state that explicitly — do not assume or fabricate.
 
 ## 4. Error Prevention Checklist
 
@@ -165,11 +174,15 @@ Agents MUST verify file existence, paths, and content before taking actions or m
    ```
 
 2. **Search for Existing Functionality**:
+   ```bash
+   # HoloIndex semantic search (primary - finds architecturally similar code)
+   python holo_index.py --search "similar functionality or purpose"
+   
+   # Pattern search (secondary)
+   grep -r "existing implementations" modules/
    ```
-   codebase_search("similar functionality or purpose")
-   file_search("potential duplicate files")
-   grep_search("existing implementations")
-   ```
+   
+   **WSP 97**: Report search results truthfully. If HoloIndex finds similar implementations, evaluate before creating new files.
 
 3. **Validate Necessity**:
    - Is this functionality already tested/implemented?
@@ -238,6 +251,7 @@ When an action proposes deletion, consolidation, or major refactoring that can r
 
 Proceed only when all checks are satisfied and artifacts are linked in the ModLog (WSP 22).
 
+- **WSP 97 (Truthful Claims)**: All verification results must be truthful and browser-verifiable
 - **WSP 54 (ComplianceAgent)**: Monitor for WSP 50 violations
 - **WSP 48 (WRE)**: Incorporate verification in enhancement cycles
 - **WSP 56 (Coherence)**: Prevent cross-state assumption errors

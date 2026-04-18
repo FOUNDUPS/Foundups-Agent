@@ -1,5 +1,20 @@
 # WSP Framework Change Log
 
+## 2026-04-18 - WSP 50 HoloIndex + WSP 97 Integration
+
+**WSP References**: WSP 22, WSP 50, WSP 97
+
+**Changes Made**:
+- Updated `WSP_50_Pre_Action_Verification_Protocol.md`:
+  - Added HoloIndex as primary semantic search tool
+  - Added WSP 97 cross-reference for truthful verification claims
+- Synced from `WSP_framework/src/`
+
+**Rationale**:
+- WSP 50 predated HoloIndex — now canonical semantic search integrated
+
+---
+
 ## 2026-04-11 - Anchored FoundUp Namespace Guardrails in WSP 104
 
 **WSP References**: WSP 104, WSP 98, WSP 103, WSP 22, WSP 97
