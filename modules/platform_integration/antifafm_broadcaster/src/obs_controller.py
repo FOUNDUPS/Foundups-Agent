@@ -387,6 +387,47 @@ class OBSController:
                 "[OBS] Likely waiting on YouTube broadcast setup modal in OBS. "
                 "If visible, click 'Create broadcast and start streaming'."
             )
+
+            try:
+                from modules.ai_intelligence.ai_overseer.src.preflight_resolution import (
+                    on_preflight_fail,
+                )
+
+                on_preflight_fail(
+                    component="obs_start",
+                    severity="critical",
+                    payload={
+                        "error_code": "stream_output_inactive_after_start",
+                        "source_file": "antifafm_broadcaster/src/obs_controller.py",
+                        "source_function": "OBSController.start_streaming",
+                        "verify_timeout_s": verify_timeout_s,
+                        "poll_interval_s": poll_interval_s,
+                        "output_bytes": output_bytes,
+                        "output_duration_ms": output_duration,
+                        "reconnecting": reconnecting,
+                        "likely_cause": "youtube_broadcast_modal_or_binding",
+                        "requires_012": True,
+                        "automation_candidate": True,
+                        "safe_autonomous_actions": [
+                            "verify_broadcast_binding",
+                            "verify_stream_service_rtmp_custom",
+                        ],
+                        "unsafe_actions": [
+                            "click_youtube_studio_modal",
+                            "browser_automation",
+                            "credential_refresh",
+                        ],
+                        "remediation": [
+                            "verify_broadcast_stream_binding",
+                            "verify_obs_stream_service_config",
+                            "escalate_012_modal_intervention",
+                        ],
+                    },
+                    source="antifafm_broadcaster/src/obs_controller.py:start_streaming",
+                )
+            except Exception:
+                pass
+
             return False
 
         except Exception as e:
