@@ -2,6 +2,54 @@
 
 ## Chronological Change Log
 
+### [2026-04-18] - SEC5: Security Pattern Memory (v0.8.2)
+
+**WSP Protocol References**: WSP 60 (Module Memory), WSP 97 (Truthful), WSP 48 (Recursive Self-Improvement)
+**Impact Analysis**: SQLite storage for vulnerability outcomes - observations only, no remediation
+
+#### Changes Made
+
+- `src/security_pattern_memory.py` (NEW):
+  - `SecurityFinding` dataclass with fingerprint, severity, policy decision, tracking fields
+  - `SecurityPatternMemory` class - SQLite storage following existing PatternMemory patterns
+  - `store_finding()` - store/update with times_seen increment
+  - `get_finding_by_fingerprint()` - lookup by deterministic hash
+  - `list_open_findings()` - filter by severity/tool
+  - `list_findings_requiring_012()` - pending 012 review
+  - `summarize_findings()` - aggregate statistics
+  - `store_from_scan_report()` - integrate with SEC3 output
+
+- `tests/test_security_pattern_memory.py` (NEW):
+  - 33 tests covering storage, retrieval, queries, summaries
+  - Repeated finding times_seen increment
+  - Severity/policy field preservation
+  - Missing optional fields handled
+
+#### Schema
+
+```sql
+security_findings (
+    fingerprint TEXT PRIMARY KEY,
+    finding_id TEXT, tool TEXT, target TEXT,
+    package_name TEXT, file_path TEXT, line_number INTEGER,
+    severity TEXT, title TEXT, description TEXT,
+    policy_decision TEXT, requires_012 INTEGER,
+    status TEXT DEFAULT 'open',
+    first_seen TEXT, last_seen TEXT, times_seen INTEGER,
+    source_report_path TEXT,
+    fix_available INTEGER, fix_version TEXT
+)
+```
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_security_pattern_memory.py -v
+# Result: 33 passed
+```
+
+---
+
 ### [2026-04-18] - SEC4: Security Scan Trigger Detector (v0.8.1)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 77 (Agent Coordination), WSP 27 (DAE Architecture)
