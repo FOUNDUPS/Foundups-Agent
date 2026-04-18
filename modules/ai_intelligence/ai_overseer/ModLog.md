@@ -2,7 +2,44 @@
 
 **Module**: `modules/ai_intelligence/ai_overseer/`
 **Status**: Active (Autonomous Code Patching + Daemon Restart + Activity Routing)
-**Version**: 0.10.0
+**Version**: 0.10.1
+
+---
+
+## 2026-04-19 - CF3M: m2m_SKILLz.md Semantic Cleanup
+
+**Author**: 0102  
+**WSP**: 97  
+**Phase**: CF3M — M2M_SKILLZ_FILENAME_CLEANUP_PHASE1
+
+### Analysis
+
+- `src/m2m_SKILLz.md` documents `m2m_compression_sentinel.py` (1557 lines)
+- `src/SKILLz.md` documents `ai_overseer.py` (3584 lines)
+- These are **distinct capabilities**, not duplicates
+- Scanner only recognizes exact `SKILLz.md` filename (one per directory)
+- Two contracts cannot coexist in same directory under current scanner semantics
+
+### Decision (WSP 97)
+
+**Action**: KEEP AS NON-SCANNER-RECOGNIZED DOC
+
+Rationale:
+- Distinct capability documentation (not duplicate)
+- Renaming would collide with existing `ai_overseer` skill
+- Folding would blur two separate contracts
+- Deleting would lose capability understanding
+
+### Changes
+
+- Added `scanner_status: not_recognized` frontmatter field
+- Added scanner note explaining deferred binding
+- No source file changes
+- No scanner logic changes
+
+### Next Required
+
+CF4: File-specific skill binding enhancement (scanner recognizes `*_SKILLz.md` patterns)
 
 ---
 
