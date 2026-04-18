@@ -2,6 +2,44 @@
 
 ## Chronological Change Log
 
+### [2026-04-18] - SEC4: Security Scan Trigger Detector (v0.8.1)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 77 (Agent Coordination), WSP 27 (DAE Architecture)
+**Impact Analysis**: Trigger detection for security scans based on changed files
+
+#### Changes Made
+
+- `src/security_trigger.py` (NEW):
+  - `SecurityTriggerDetector` class - detects security-relevant file changes
+  - Pattern matching for: requirements*.txt, pyproject.toml, package.json, Dockerfile, docker-compose, GitHub workflows, IaC files
+  - Proposes SCA/container/IaC scans based on file type
+  - Default mode: `report_only` (proposals only, no auto-execution)
+  - Truthful distinction: "proposed" vs "executed" vs "skipped"
+
+- `tests/test_security_trigger.py` (NEW):
+  - 26 tests covering all pattern types
+  - Verifies dependency files propose SCA scan
+  - Verifies Dockerfile/container changes propose Trivy scan
+  - Verifies docs-only changes do NOT propose security scan
+  - Verifies policy remains report-only by default
+
+#### Architecture
+
+```
+SEC1 (scanner execution) -> SEC2 (policy routing) -> SEC3 (skill wrapper)
+                                                           ^
+SEC4 (trigger detection) -> proposes SEC3 execution -------+
+```
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_security_trigger.py -v
+# Result: 26 passed
+```
+
+---
+
 ### [2026-04-18] - SEC3: WRE Security Scan Skill (v0.8.0)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 77 (Agent Coordination), WSP 84 (Code Reuse)
