@@ -1,6 +1,35 @@
 # Testing Evolution Log - YouTube Auth
 
-## 🆕 **LATEST UPDATE - WSP COMPLIANCE FOUNDATION ESTABLISHED** [OK]
+## LATEST UPDATE - 2026-04-18 OAuth Credential Health Tests (Worker YT1) [OK]
+
+### Test Run
+```bash
+python -m pytest modules/platform_integration/youtube_auth/tests/test_oauth_credential_health.py -v
+```
+
+### Results
+- **16 passed** in 3.03s
+
+### Test Coverage
+| Class | Tests | Purpose |
+|-------|-------|---------|
+| TestClassifyRefreshError | 4 | invalid_grant -> status mapping |
+| TestBuildSetEntry | 3 | operator_action = exact reauth command |
+| TestComputeEffectiveCapacity | 3 | only healthy sets count toward quota |
+| TestFormatCapacityLog | 2 | dead sets surface action_required |
+| TestWriteHealthReport | 1 | artifact schema and roundtrip |
+| TestEmitCriticalReauth | 1 | CRITICAL log with exact command |
+| TestPreflightWritesArtifact | 2 | end-to-end preflight mocking |
+
+### WSP 97 Coverage
+- `invalid_grant` classified as `token_revoked` or `token_expired_or_revoked`
+- Dead sets surfaced in capacity log (not hidden behind quota_exhausted)
+- Exact operator command in artifact: `python modules/platform_integration/youtube_auth/scripts/authorize_set1.py`
+- No browser OAuth or live Google API calls in tests
+
+---
+
+## **PREVIOUS UPDATE - WSP COMPLIANCE FOUNDATION ESTABLISHED** [OK]
 
 ### **WSP Framework Compliance Achievement**
 - **Current Status**: Tests directory structure created per WSP 49

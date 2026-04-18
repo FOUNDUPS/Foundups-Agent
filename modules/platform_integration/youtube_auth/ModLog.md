@@ -12,6 +12,96 @@ This log tracks changes specific to the **youtube_auth** module in the **platfor
 
 ## MODLOG ENTRIES
 
+### 2026-04-18 - YT1: invalid_grant visibility + oauth_credential_health.json artifact
+
+**By:** 0102 (Worker YT1)
+**WSP References:** WSP 22 (ModLog), WSP 50 (Pre-Action Verification), WSP 97 (Truth Signaling)
+
+**Problem:**
+Set 1 (UnDaoDu/Chrome) refresh token expired ~April 2026. `get_authenticated_service()`
+did log the failure and add the set to `exhausted_sets`, but downstream stream resolver
+/ quota selection logs only said "Set 10 exhausted". Operators could not see that
+effective quota capacity had halved (from 2 sets to 1). No persistent artifact existed
+to make this truthfully observable.
+
+**Scope:**
+Truth signaling only. Does NOT perform OAuth re-auth flow. Set 1 still requires manual
+re-authorization: `python modules/platform_integration/youtube_auth/scripts/authorize_set1.py`.
+
+**Changes:**
+- **New** `src/oauth_health.py`:
+  - Status literals: `healthy`, `token_revoked`, `token_expired_or_revoked`,
+    `refresh_failed`, `credential_set_unconfigured`, `no_refresh_token`, `quota_exhausted`.
+  - `classify_refresh_error(msg)` — only claims `token_revoked` when Google's message
+    literally contains "revoked"; otherwise returns `token_expired_or_revoked` (Google
+    does not reliably distinguish the two).
+  - `build_set_entry`, `compute_effective_capacity`, `write_health_report`,
+    `format_capacity_log`, `emit_critical_reauth`.
+  - Per-set metadata (account label, browser hint) for Set 1 and Set 10.
+- **Modified** `src/youtube_auth.py`:
+  - `get_authenticated_service()`: in the `invalid_grant` branch, call the classifier,
+    emit CRITICAL with the exact reauth command, persist health snapshot.
+  - After resolving rotation targets, emit a truthful one-line capacity log via
+    `format_capacity_log()` — surfaces dead sets alongside quota-exhausted sets.
+  - `preflight_oauth_check()`: classify every set (healthy / unconfigured / no_refresh_token
+    / token_revoked / token_expired_or_revoked / refresh_failed) and persist the artifact
+    before returning.
+  - Warning lines now use `oauth_health.reauth_command_for(idx)` — one source of truth
+    for the reauth command string.
+- **New artifact** `reports/oauth_credential_health.json`:
+  ```json
+  {
+    "generated_at": "...",
+    "credential_sets": {
+      "total_configured": 2, "operational": [10], "dead": [1],
+      "quota_exhausted_today": [], "effective_daily_quota_estimate": 10000
+    },
+    "per_set": [
+      { "set_id": 1, "account_label": "UnDaoDu / Move2Japan", "browser_hint": "Chrome",
+        "status": "token_expired_or_revoked", "reason": "...",
+        "operator_action": "python .../authorize_set1.py", "last_checked": "..." },
+      { "set_id": 10, "status": "healthy", "operator_action": null, ... }
+    ]
+  }
+  ```
+- **New tests** `tests/test_oauth_credential_health.py` (16 tests, all passing, no network):
+  - Classifier: revoked, expired-or-revoked, non-oauth, empty.
+  - `build_set_entry`: healthy has no action; dead carries exact reauth command.
+  - `compute_effective_capacity`: only healthy count toward quota; quota_exhausted is
+    not dead; all-dead yields zero quota.
+  - `format_capacity_log`: dead sets surface `action_required`; quota-only does not.
+  - `write_health_report`: schema fields present; JSON roundtrip intact.
+  - `emit_critical_reauth`: CRITICAL log contains the exact command.
+  - `preflight_oauth_check` end-to-end: simulated invalid_grant on Set 1 while Set 10
+    healthy → artifact reports `dead=[1]`, `operational=[10]`, quota=10000, capacity log
+    says "1/2 sets operational; dead=[1]". Regression guard against the original
+    misleading "only Set 10 exhausted" logging.
+
+**Verification:**
+- `pytest modules/platform_integration/youtube_auth/tests/test_oauth_credential_health.py`
+  → 16 passed.
+- Full youtube_auth suite before my changes: 15 failing, 21 passing (pre-existing).
+  After my changes: 15 failing, 43 passing. Same 15 failures, +22 new passes — zero
+  regressions introduced.
+
+**Out of scope (not done here):**
+- Manual Set 1 browser OAuth — 012 must run `authorize_set1.py` when ready.
+- Stream resolver call sites still log their own messages; the new capacity log is
+  emitted from `get_authenticated_service()` on rotation and from
+  `preflight_oauth_check()` at startup, which is where 012's brief specified truthful
+  logging should land. Stream resolver paths inherit it through those call sites.
+
+**Files Changed:**
+- `modules/platform_integration/youtube_auth/src/oauth_health.py` (new, 219 lines)
+- `modules/platform_integration/youtube_auth/src/youtube_auth.py` (classifier
+  integration + capacity log + persisted artifact)
+- `modules/platform_integration/youtube_auth/tests/test_oauth_credential_health.py`
+  (new, 16 tests, no network)
+- `modules/platform_integration/youtube_auth/reports/oauth_credential_health.json`
+  (new example artifact)
+
+---
+
 ### 2026-01-27 - Fix OAuth Browser Selection in get_authenticated_service()
 
 **By:** 0102
