@@ -2,6 +2,54 @@
 
 ## Chronological Change Log
 
+### [2026-04-18] - SEC6: Security Recall Service (v0.8.3)
+
+**WSP Protocol References**: WSP 60 (Module Memory), WSP 97 (Truthful), WSP 48 (Recursive Self-Improvement)
+**Impact Analysis**: Read-only recall layer for historical vulnerability lookup - NO remediation
+
+#### Changes Made
+
+- `src/security_recall.py` (NEW):
+  - `RecallResult` dataclass - query result with historical context and suggestion
+  - `SecurityRecall` class - read-only recall service over SecurityPatternMemory
+  - `recall_by_fingerprint()` - exact fingerprint lookup
+  - `recall_by_finding_id()` - CVE/rule-id pattern lookup (aggregates all matches)
+  - `recall_by_type()` - filter by tool/category/severity
+  - `get_historical_summary()` - comprehensive timeline and statistics
+  - `_suggest_outcome_from_patterns()` - suggests outcome based on historical majority
+
+- `tests/test_security_recall.py` (NEW):
+  - 33 tests covering all recall methods
+  - Outcome suggestion logic (exact match, majority, mixed)
+  - Historical summary generation
+  - Read-only invariant verification (recall does not mutate)
+
+#### Read-Only Invariants
+
+- Recall does NOT modify findings
+- Recall does NOT increment times_seen
+- Recall does NOT update timestamps
+- Recall does NOT add new findings
+- Future SEC7+ may add Qwen/Gemma analysis (NOT in this phase)
+
+#### Architecture
+
+```
+SEC5 (storage) <---- SEC6 (recall) ----> suggested outcome
+                         ^
+                         |
+            fingerprint/finding_id/type query
+```
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_security_recall.py -v
+# Result: 33 passed
+```
+
+---
+
 ### [2026-04-18] - SEC5: Security Pattern Memory (v0.8.2)
 
 **WSP Protocol References**: WSP 60 (Module Memory), WSP 97 (Truthful), WSP 48 (Recursive Self-Improvement)
