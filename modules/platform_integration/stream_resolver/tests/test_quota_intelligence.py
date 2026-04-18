@@ -235,6 +235,22 @@ class TestQuotaIntelligence(unittest.TestCase):
             self.assertIs(service, self.mock_youtube_service)
             self.assertEqual(cred_set, 2)
 
+    def test_authenticated_service_cache_reuses_credential_set(self):
+        """Credential-specific services should be built once per resolver process."""
+        resolver = StreamResolver(self.mock_youtube_service, use_intelligent_sorting=False)
+
+        with patch('modules.platform_integration.youtube_auth.src.youtube_auth.get_authenticated_service') as mock_auth:
+            mock_auth.return_value = (self.mock_youtube_service, 2)
+
+            first, first_set = resolver._get_cached_authenticated_service(2)
+            second, second_set = resolver._get_cached_authenticated_service(2)
+
+        self.assertIs(first, self.mock_youtube_service)
+        self.assertIs(second, self.mock_youtube_service)
+        self.assertEqual(first_set, 2)
+        self.assertEqual(second_set, 2)
+        mock_auth.assert_called_once_with(token_index=2)
+
 
 class TestStreamTimingIntelligence(unittest.TestCase):
     """Test intelligent stream timing and scheduling"""
