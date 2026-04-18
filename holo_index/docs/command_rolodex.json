@@ -1,10 +1,60 @@
 {
-  "generated_at": "2026-04-13T02:32:21.706120",
-  "total_cli_entrypoints": 680,
-  "wre_connected_count": 29,
-  "registered_skillz_count": 105,
-  "orphan_count": 651,
+  "generated_at": "2026-04-19T08:20:55.296541",
+  "total_cli_entrypoints": 687,
+  "wre_connected_count": 120,
+  "registered_skillz_count": 113,
+  "orphan_count": 567,
   "commands": [
+    {
+      "path": "modules\\ai_intelligence\\ai_overseer\\src\\ai_overseer.py",
+      "module_name": "modules.ai_intelligence.ai_overseer.src.ai_overseer",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\ai_intelligence\\ai_overseer\\src\\SKILLz.md",
+      "line_count": 3584,
+      "category": "ai",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\ai_intelligence\\ai_overseer\\src\\breadcrumb_monitor.py",
+      "module_name": "modules.ai_intelligence.ai_overseer.src.breadcrumb_monitor",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\ai_intelligence\\ai_overseer\\src\\SKILLz.md",
+      "line_count": 372,
+      "category": "ai",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\ai_intelligence\\ai_overseer\\src\\m2m_compression_sentinel.py",
+      "module_name": "modules.ai_intelligence.ai_overseer.src.m2m_compression_sentinel",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\ai_intelligence\\ai_overseer\\src\\m2m_SKILLz.md",
+      "line_count": 1557,
+      "category": "ai",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\ai_intelligence\\ai_overseer\\src\\mcp_integration.py",
+      "module_name": "modules.ai_intelligence.ai_overseer.src.mcp_integration",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\ai_intelligence\\ai_overseer\\src\\SKILLz.md",
+      "line_count": 501,
+      "category": "ai",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\ai_intelligence\\ai_overseer\\src\\pico_claw.py",
+      "module_name": "modules.ai_intelligence.ai_overseer.src.pico_claw",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\ai_intelligence\\ai_overseer\\src\\SKILLz.md",
+      "line_count": 124,
+      "category": "ai",
+      "orphan_class": "connected"
+    },
     {
       "path": "modules\\ai_intelligence\\ai_overseer\\skillz\\agentic_news_ticker\\executor.py",
       "module_name": "modules.ai_intelligence.ai_overseer.skillz.agentic_news_ticker.executor",
@@ -81,7 +131,7 @@
       "has_json_flag": true,
       "wre_connected": true,
       "skillz_md_path": "modules\\ai_intelligence\\ai_overseer\\skillz\\wsp49_interface_gap_scanner\\SKILLz.md",
-      "line_count": 264,
+      "line_count": 269,
       "category": "ai",
       "orphan_class": "connected"
     },
@@ -103,6 +153,116 @@
       "skillz_md_path": "modules\\ai_intelligence\\video_indexer\\skillz\\transcript_ask\\SKILLz.md",
       "line_count": 269,
       "category": "ai",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\communication\\livechat\\src\\auto_moderator_dae.py",
+      "module_name": "modules.communication.livechat.src.auto_moderator_dae",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\communication\\livechat\\src\\SKILLz.md",
+      "line_count": 2633,
+      "category": "communication",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\communication\\livechat\\src\\breadcrumb_telemetry.py",
+      "module_name": "modules.communication.livechat.src.breadcrumb_telemetry",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\communication\\livechat\\src\\SKILLz.md",
+      "line_count": 395,
+      "category": "communication",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\communication\\livechat\\src\\gemini_cli_mcp_integration.py",
+      "module_name": "modules.communication.livechat.src.gemini_cli_mcp_integration",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\communication\\livechat\\src\\SKILLz.md",
+      "line_count": 420,
+      "category": "communication",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\communication\\livechat\\src\\greeting_generator.py",
+      "module_name": "modules.communication.livechat.src.greeting_generator",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\communication\\livechat\\src\\SKILLz.md",
+      "line_count": 535,
+      "category": "communication",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\communication\\livechat\\src\\holiday_awareness.py",
+      "module_name": "modules.communication.livechat.src.holiday_awareness",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\communication\\livechat\\src\\SKILLz.md",
+      "line_count": 371,
+      "category": "communication",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\communication\\livechat\\src\\llm_bypass_engine.py",
+      "module_name": "modules.communication.livechat.src.llm_bypass_engine",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\communication\\livechat\\src\\SKILLz.md",
+      "line_count": 226,
+      "category": "communication",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\communication\\livechat\\src\\mcp_youtube_integration.py",
+      "module_name": "modules.communication.livechat.src.mcp_youtube_integration",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\communication\\livechat\\src\\SKILLz.md",
+      "line_count": 490,
+      "category": "communication",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\communication\\livechat\\src\\rotation_supervisor.py",
+      "module_name": "modules.communication.livechat.src.rotation_supervisor",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\communication\\livechat\\src\\SKILLz.md",
+      "line_count": 764,
+      "category": "communication",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\communication\\livechat\\src\\simple_rotation.py",
+      "module_name": "modules.communication.livechat.src.simple_rotation",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\communication\\livechat\\src\\SKILLz.md",
+      "line_count": 337,
+      "category": "communication",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\communication\\livechat\\src\\stream_trigger.py",
+      "module_name": "modules.communication.livechat.src.stream_trigger",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\communication\\livechat\\src\\SKILLz.md",
+      "line_count": 189,
+      "category": "communication",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\communication\\livechat\\src\\youtube_telemetry_store.py",
+      "module_name": "modules.communication.livechat.src.youtube_telemetry_store",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\communication\\livechat\\src\\SKILLz.md",
+      "line_count": 551,
+      "category": "communication",
       "orphan_class": "connected"
     },
     {
@@ -136,6 +296,96 @@
       "orphan_class": "connected"
     },
     {
+      "path": "modules\\infrastructure\\browser_actions\\src\\action_router.py",
+      "module_name": "modules.infrastructure.browser_actions.src.action_router",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\infrastructure\\browser_actions\\src\\SKILLz.md",
+      "line_count": 1128,
+      "category": "infrastructure",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\infrastructure\\browser_actions\\src\\foundups_actions.py",
+      "module_name": "modules.infrastructure.browser_actions.src.foundups_actions",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\infrastructure\\browser_actions\\src\\SKILLz.md",
+      "line_count": 528,
+      "category": "infrastructure",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\infrastructure\\browser_actions\\src\\linkedin_actions.py",
+      "module_name": "modules.infrastructure.browser_actions.src.linkedin_actions",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\infrastructure\\browser_actions\\src\\SKILLz.md",
+      "line_count": 2827,
+      "category": "infrastructure",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\infrastructure\\browser_actions\\src\\x_actions.py",
+      "module_name": "modules.infrastructure.browser_actions.src.x_actions",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\infrastructure\\browser_actions\\src\\SKILLz.md",
+      "line_count": 656,
+      "category": "infrastructure",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\infrastructure\\browser_actions\\src\\youtube_actions.py",
+      "module_name": "modules.infrastructure.browser_actions.src.youtube_actions",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\infrastructure\\browser_actions\\src\\SKILLz.md",
+      "line_count": 430,
+      "category": "infrastructure",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\infrastructure\\cli\\src\\extension_installer.py",
+      "module_name": "modules.infrastructure.cli.src.extension_installer",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\infrastructure\\cli\\src\\SKILLz.md",
+      "line_count": 483,
+      "category": "infrastructure",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\infrastructure\\cli\\src\\openclaw_chat.py",
+      "module_name": "modules.infrastructure.cli.src.openclaw_chat",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\infrastructure\\cli\\src\\SKILLz.md",
+      "line_count": 218,
+      "category": "infrastructure",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\infrastructure\\cli\\src\\openclaw_voice.py",
+      "module_name": "modules.infrastructure.cli.src.openclaw_voice",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\infrastructure\\cli\\src\\SKILLz.md",
+      "line_count": 1655,
+      "category": "infrastructure",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\infrastructure\\cli\\src\\wsp_explainer_menu.py",
+      "module_name": "modules.infrastructure.cli.src.wsp_explainer_menu",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\infrastructure\\cli\\src\\SKILLz.md",
+      "line_count": 282,
+      "category": "infrastructure",
+      "orphan_class": "connected"
+    },
+    {
       "path": "modules\\infrastructure\\github_orchestrator\\skillz\\github_management\\executor.py",
       "module_name": "modules.infrastructure.github_orchestrator.skillz.github_management.executor",
       "has_json_flag": false,
@@ -153,6 +403,366 @@
       "skillz_md_path": "modules\\infrastructure\\wre_core\\skillz\\qwen_bulk_import_migration\\SKILLz.md",
       "line_count": 375,
       "category": "infrastructure",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\infrastructure\\wre_core\\skillz\\security_scan\\executor.py",
+      "module_name": "modules.infrastructure.wre_core.skillz.security_scan.executor",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\infrastructure\\wre_core\\skillz\\security_scan\\SKILLz.md",
+      "line_count": 546,
+      "category": "infrastructure",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\apply_layout.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.apply_layout",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\SKILLz.md",
+      "line_count": 204,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\click_go_live.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.click_go_live",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\SKILLz.md",
+      "line_count": 150,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\debug_account_switch.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.debug_account_switch",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\SKILLz.md",
+      "line_count": 260,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\diagnose_youtube_create.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.diagnose_youtube_create",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\SKILLz.md",
+      "line_count": 133,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\download_video.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.download_video",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\SKILLz.md",
+      "line_count": 97,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\dump_header.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.dump_header",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\SKILLz.md",
+      "line_count": 167,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\ffcpln_lyrics_library.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.ffcpln_lyrics_library",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\SKILLz.md",
+      "line_count": 785,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\find_create_button.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.find_create_button",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\SKILLz.md",
+      "line_count": 155,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\generate_lrc_files.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.generate_lrc_files",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\SKILLz.md",
+      "line_count": 426,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\go_live_direct.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.go_live_direct",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\SKILLz.md",
+      "line_count": 116,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\launch.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.launch",
+      "has_json_flag": true,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\SKILLz.md",
+      "line_count": 2297,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\setup_suno_extension.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.setup_suno_extension",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\SKILLz.md",
+      "line_count": 388,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\stream_orchestrator.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.stream_orchestrator",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\SKILLz.md",
+      "line_count": 236,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\suno_lrc_downloader.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.suno_lrc_downloader",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\SKILLz.md",
+      "line_count": 579,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\suno_lyrics_extractor.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.suno_lyrics_extractor",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\SKILLz.md",
+      "line_count": 483,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\suno_playlist_scraper.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.suno_playlist_scraper",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\SKILLz.md",
+      "line_count": 533,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\suno_stt_lyrics_extractor.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.suno_stt_lyrics_extractor",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\SKILLz.md",
+      "line_count": 975,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\video_rotator.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.video_rotator",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\SKILLz.md",
+      "line_count": 181,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\antifafm_broadcaster.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.src.antifafm_broadcaster",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\src\\SKILLz.md",
+      "line_count": 643,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\dynamic_metadata_daemon.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.src.dynamic_metadata_daemon",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\src\\SKILLz.md",
+      "line_count": 467,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\ffmpeg_streamer.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.src.ffmpeg_streamer",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\src\\SKILLz.md",
+      "line_count": 758,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\karaoke_overlay.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.src.karaoke_overlay",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\src\\SKILLz.md",
+      "line_count": 560,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\news_orchestrator.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.src.news_orchestrator",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\src\\SKILLz.md",
+      "line_count": 516,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\news_ticker.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.src.news_ticker",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\src\\SKILLz.md",
+      "line_count": 275,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\obs_controller.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.src.obs_controller",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\src\\SKILLz.md",
+      "line_count": 794,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\scheme_manager.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.src.scheme_manager",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\src\\SKILLz.md",
+      "line_count": 646,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\shorts_clipper.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.src.shorts_clipper",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\src\\SKILLz.md",
+      "line_count": 631,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\stream_health_monitor.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.src.stream_health_monitor",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\src\\SKILLz.md",
+      "line_count": 273,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\stream_orchestrator.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.src.stream_orchestrator",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\src\\SKILLz.md",
+      "line_count": 319,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\video_library.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.src.video_library",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\src\\SKILLz.md",
+      "line_count": 637,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\visual_effects.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.src.visual_effects",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\src\\SKILLz.md",
+      "line_count": 377,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\waveform_visualizer.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.src.waveform_visualizer",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\src\\SKILLz.md",
+      "line_count": 388,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\youtube_broadcast_manager.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.src.youtube_broadcast_manager",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\src\\SKILLz.md",
+      "line_count": 681,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\youtube_go_live.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.src.youtube_go_live",
+      "has_json_flag": true,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\src\\SKILLz.md",
+      "line_count": 1931,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\youtube_ingest_resolver.py",
+      "module_name": "modules.platform_integration.antifafm_broadcaster.src.youtube_ingest_resolver",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\src\\SKILLz.md",
+      "line_count": 366,
+      "category": "platform",
       "orphan_class": "connected"
     },
     {
@@ -216,12 +826,42 @@
       "orphan_class": "connected"
     },
     {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\skillz\\visual_layout_validator\\executor.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.skillz.visual_layout_validator.executor",
+      "path": "modules\\platform_integration\\linkedin_agent\\src\\anti_detection_poster.py",
+      "module_name": "modules.platform_integration.linkedin_agent.src.anti_detection_poster",
       "has_json_flag": false,
       "wre_connected": true,
-      "skillz_md_path": "modules\\platform_integration\\antifafm_broadcaster\\skillz\\visual_layout_validator\\SKILLz.md",
-      "line_count": 264,
+      "skillz_md_path": "modules\\platform_integration\\linkedin_agent\\src\\SKILLz.md",
+      "line_count": 1377,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\linkedin_agent\\src\\git_linkedin_bridge.py",
+      "module_name": "modules.platform_integration.linkedin_agent.src.git_linkedin_bridge",
+      "has_json_flag": true,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\linkedin_agent\\src\\SKILLz.md",
+      "line_count": 1769,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\linkedin_agent\\src\\linkedin_agent.py",
+      "module_name": "modules.platform_integration.linkedin_agent.src.linkedin_agent",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\linkedin_agent\\src\\SKILLz.md",
+      "line_count": 452,
+      "category": "platform",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "modules\\platform_integration\\linkedin_agent\\src\\qwen_profile_evaluator.py",
+      "module_name": "modules.platform_integration.linkedin_agent.src.qwen_profile_evaluator",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "modules\\platform_integration\\linkedin_agent\\src\\SKILLz.md",
+      "line_count": 450,
       "category": "platform",
       "orphan_class": "connected"
     },
@@ -276,12 +916,282 @@
       "orphan_class": "connected"
     },
     {
+      "path": "holo_index\\qwen_advisor\\advisor.py",
+      "module_name": "holo_index.qwen_advisor.advisor",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 1668,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\agent_detection.py",
+      "module_name": "holo_index.qwen_advisor.agent_detection",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 459,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\autonomous_holodae.py",
+      "module_name": "holo_index.qwen_advisor.autonomous_holodae",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 559,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\cache.py",
+      "module_name": "holo_index.qwen_advisor.cache",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 65,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\chain_of_thought_logger.py",
+      "module_name": "holo_index.qwen_advisor.chain_of_thought_logger",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 570,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\config.py",
+      "module_name": "holo_index.qwen_advisor.config",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 49,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\gemma_orphan_detector.py",
+      "module_name": "holo_index.qwen_advisor.gemma_orphan_detector",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 424,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\gemma_rag_inference.py",
+      "module_name": "holo_index.qwen_advisor.gemma_rag_inference",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 632,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\holodae_coordinator.py",
+      "module_name": "holo_index.qwen_advisor.holodae_coordinator",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 554,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\intelligent_monitor.py",
+      "module_name": "holo_index.qwen_advisor.intelligent_monitor",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 695,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\issue_mps_evaluator.py",
+      "module_name": "holo_index.qwen_advisor.issue_mps_evaluator",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 277,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\llm_engine.py",
+      "module_name": "holo_index.qwen_advisor.llm_engine",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 275,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\log_analyzer.py",
+      "module_name": "holo_index.qwen_advisor.log_analyzer",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 442,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\log_parser.py",
+      "module_name": "holo_index.qwen_advisor.log_parser",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 373,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\module_doc_linker.py",
+      "module_name": "holo_index.qwen_advisor.module_doc_linker",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 664,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\orphan_batch_analyzer.py",
+      "module_name": "holo_index.qwen_advisor.orphan_batch_analyzer",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 687,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\orphan_validator.py",
+      "module_name": "holo_index.qwen_advisor.orphan_validator",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 469,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\output_formatter.py",
+      "module_name": "holo_index.qwen_advisor.output_formatter",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 279,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\pattern_coach.py",
+      "module_name": "holo_index.qwen_advisor.pattern_coach",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 552,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\pattern_memory.py",
+      "module_name": "holo_index.qwen_advisor.pattern_memory",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 410,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\performance_orchestrator.py",
+      "module_name": "holo_index.qwen_advisor.performance_orchestrator",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 592,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\prompts.py",
+      "module_name": "holo_index.qwen_advisor.prompts",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 54,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\rules_engine.py",
+      "module_name": "holo_index.qwen_advisor.rules_engine",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 863,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\telemetry.py",
+      "module_name": "holo_index.qwen_advisor.telemetry",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 39,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\unicode_fixer.py",
+      "module_name": "holo_index.qwen_advisor.unicode_fixer",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 118,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\vibecoding_assessor.py",
+      "module_name": "holo_index.qwen_advisor.vibecoding_assessor",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 436,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
+      "path": "holo_index\\qwen_advisor\\wsp_master.py",
+      "module_name": "holo_index.qwen_advisor.wsp_master",
+      "has_json_flag": false,
+      "wre_connected": true,
+      "skillz_md_path": "holo_index\\qwen_advisor\\SKILLz.md",
+      "line_count": 457,
+      "category": "holoindex",
+      "orphan_class": "connected"
+    },
+    {
       "path": "holo_index\\skillz\\orphan_capability_scanner\\executor.py",
       "module_name": "holo_index.skillz.orphan_capability_scanner.executor",
       "has_json_flag": true,
       "wre_connected": true,
       "skillz_md_path": "holo_index\\skillz\\orphan_capability_scanner\\SKILLz.md",
-      "line_count": 518,
+      "line_count": 652,
       "category": "holoindex",
       "orphan_class": "connected"
     },
@@ -296,61 +1206,6 @@
       "orphan_class": "connected"
     },
     {
-      "path": "modules\\ai_intelligence\\ai_overseer\\src\\ai_overseer.py",
-      "module_name": "modules.ai_intelligence.ai_overseer.src.ai_overseer",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 3584,
-      "category": "ai",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\infrastructure\\browser_actions\\src\\linkedin_actions.py",
-      "module_name": "modules.infrastructure.browser_actions.src.linkedin_actions",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 2827,
-      "category": "infrastructure",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\communication\\livechat\\src\\auto_moderator_dae.py",
-      "module_name": "modules.communication.livechat.src.auto_moderator_dae",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 2633,
-      "category": "communication",
-      "suggested_trigger": "cadence:continuous",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\launch.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.launch",
-      "has_json_flag": true,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 2297,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\youtube_go_live.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.src.youtube_go_live",
-      "has_json_flag": true,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 1931,
-      "category": "platform",
-      "suggested_trigger": "event:stream_start",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\infrastructure\\wre_core\\wre_master_orchestrator\\src\\wre_master_orchestrator.py",
       "module_name": "modules.infrastructure.wre_core.wre_master_orchestrator.src.wre_master_orchestrator",
       "has_json_flag": false,
@@ -360,50 +1215,6 @@
       "category": "infrastructure",
       "suggested_trigger": "manual",
       "orphan_class": "wre_internal"
-    },
-    {
-      "path": "modules\\platform_integration\\linkedin_agent\\src\\git_linkedin_bridge.py",
-      "module_name": "modules.platform_integration.linkedin_agent.src.git_linkedin_bridge",
-      "has_json_flag": true,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 1769,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "holo_index\\qwen_advisor\\advisor.py",
-      "module_name": "holo_index.qwen_advisor.advisor",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 1668,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\infrastructure\\cli\\src\\openclaw_voice.py",
-      "module_name": "modules.infrastructure.cli.src.openclaw_voice",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 1655,
-      "category": "infrastructure",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\ai_intelligence\\ai_overseer\\src\\m2m_compression_sentinel.py",
-      "module_name": "modules.ai_intelligence.ai_overseer.src.m2m_compression_sentinel",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 1557,
-      "category": "ai",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
     },
     {
       "path": "modules\\infrastructure\\database\\src\\agent_db.py",
@@ -439,15 +1250,15 @@
       "orphan_class": "wre_internal"
     },
     {
-      "path": "modules\\platform_integration\\linkedin_agent\\src\\anti_detection_poster.py",
-      "module_name": "modules.platform_integration.linkedin_agent.src.anti_detection_poster",
+      "path": "modules\\platform_integration\\stream_resolver\\src\\no_quota_stream_checker.py",
+      "module_name": "modules.platform_integration.stream_resolver.src.no_quota_stream_checker",
       "has_json_flag": false,
       "wre_connected": false,
       "skillz_md_path": null,
-      "line_count": 1377,
+      "line_count": 1407,
       "category": "platform",
-      "suggested_trigger": "event:content_ready",
-      "orphan_class": "candidate"
+      "suggested_trigger": "event:stream_start",
+      "orphan_class": "developer_tool"
     },
     {
       "path": "modules\\platform_integration\\acoustic_lab\\src\\web_app.py",
@@ -505,17 +1316,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "modules\\platform_integration\\stream_resolver\\src\\no_quota_stream_checker.py",
-      "module_name": "modules.platform_integration.stream_resolver.src.no_quota_stream_checker",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 1254,
-      "category": "platform",
-      "suggested_trigger": "event:stream_start",
-      "orphan_class": "developer_tool"
-    },
-    {
       "path": "modules\\foundups\\simulator\\economics\\ten_year_projection.py",
       "module_name": "modules.foundups.simulator.economics.ten_year_projection",
       "has_json_flag": false,
@@ -546,17 +1346,6 @@
       "line_count": 1130,
       "category": "platform",
       "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\infrastructure\\browser_actions\\src\\action_router.py",
-      "module_name": "modules.infrastructure.browser_actions.src.action_router",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 1128,
-      "category": "infrastructure",
-      "suggested_trigger": "manual",
       "orphan_class": "candidate"
     },
     {
@@ -648,14 +1437,14 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\suno_stt_lyrics_extractor.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.suno_stt_lyrics_extractor",
+      "path": "modules\\platform_integration\\stream_resolver\\src\\stream_resolver.py",
+      "module_name": "modules.platform_integration.stream_resolver.src.stream_resolver",
       "has_json_flag": false,
       "wre_connected": false,
       "skillz_md_path": null,
-      "line_count": 975,
+      "line_count": 1002,
       "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
+      "suggested_trigger": "event:stream_start",
       "orphan_class": "candidate"
     },
     {
@@ -689,17 +1478,6 @@
       "line_count": 955,
       "category": "ai",
       "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\stream_resolver\\src\\stream_resolver.py",
-      "module_name": "modules.platform_integration.stream_resolver.src.stream_resolver",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 953,
-      "category": "platform",
-      "suggested_trigger": "event:stream_start",
       "orphan_class": "candidate"
     },
     {
@@ -780,15 +1558,15 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "holo_index\\qwen_advisor\\rules_engine.py",
-      "module_name": "holo_index.qwen_advisor.rules_engine",
-      "has_json_flag": false,
+      "path": "modules\\infrastructure\\wre_core\\src\\security_control_hooks.py",
+      "module_name": "modules.infrastructure.wre_core.src.security_control_hooks",
+      "has_json_flag": true,
       "wre_connected": false,
       "skillz_md_path": null,
-      "line_count": 863,
-      "category": "holoindex",
+      "line_count": 864,
+      "category": "infrastructure",
       "suggested_trigger": "manual",
-      "orphan_class": "candidate"
+      "orphan_class": "wre_internal"
     },
     {
       "path": "modules\\infrastructure\\wsp_core\\src\\neural_operating_system.py",
@@ -901,17 +1679,6 @@
       "orphan_class": "wre_internal"
     },
     {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\ffcpln_lyrics_library.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.ffcpln_lyrics_library",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 785,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "holo_index\\feedback_learner.py",
       "module_name": "holo_index.feedback_learner",
       "has_json_flag": false,
@@ -945,17 +1712,6 @@
       "orphan_class": "research"
     },
     {
-      "path": "modules\\communication\\livechat\\src\\rotation_supervisor.py",
-      "module_name": "modules.communication.livechat.src.rotation_supervisor",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 764,
-      "category": "communication",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "tools\\wsp_compliance_guardian.py",
       "module_name": "tools.wsp_compliance_guardian",
       "has_json_flag": false,
@@ -975,17 +1731,6 @@
       "line_count": 758,
       "category": "infrastructure",
       "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\ffmpeg_streamer.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.src.ffmpeg_streamer",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 758,
-      "category": "platform",
-      "suggested_trigger": "event:stream_start",
       "orphan_class": "candidate"
     },
     {
@@ -1009,17 +1754,6 @@
       "category": "infrastructure",
       "suggested_trigger": "manual",
       "orphan_class": "wre_internal"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\obs_controller.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.src.obs_controller",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 753,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
     },
     {
       "path": "tools\\shared\\wsp_compliance_engine.py",
@@ -1143,17 +1877,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "holo_index\\qwen_advisor\\intelligent_monitor.py",
-      "module_name": "holo_index.qwen_advisor.intelligent_monitor",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 695,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "holo_index\\missions\\selenium_run_history.py",
       "module_name": "holo_index.missions.selenium_run_history",
       "has_json_flag": false,
@@ -1162,28 +1885,6 @@
       "line_count": 693,
       "category": "holoindex",
       "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "holo_index\\qwen_advisor\\orphan_batch_analyzer.py",
-      "module_name": "holo_index.qwen_advisor.orphan_batch_analyzer",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 687,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\youtube_broadcast_manager.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.src.youtube_broadcast_manager",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 681,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
       "orphan_class": "candidate"
     },
     {
@@ -1242,17 +1943,6 @@
       "orphan_class": "research"
     },
     {
-      "path": "holo_index\\qwen_advisor\\module_doc_linker.py",
-      "module_name": "holo_index.qwen_advisor.module_doc_linker",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 664,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\ai_intelligence\\social_media_dae\\src\\social_media_dae.py",
       "module_name": "modules.ai_intelligence.social_media_dae.src.social_media_dae",
       "has_json_flag": false,
@@ -1261,17 +1951,6 @@
       "line_count": 659,
       "category": "ai",
       "suggested_trigger": "cadence:continuous",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\infrastructure\\browser_actions\\src\\x_actions.py",
-      "module_name": "modules.infrastructure.browser_actions.src.x_actions",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 656,
-      "category": "infrastructure",
-      "suggested_trigger": "manual",
       "orphan_class": "candidate"
     },
     {
@@ -1286,8 +1965,8 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\scheme_manager.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.src.scheme_manager",
+      "path": "modules\\platform_integration\\youtube_auth\\src\\youtube_auth.py",
+      "module_name": "modules.platform_integration.youtube_auth.src.youtube_auth",
       "has_json_flag": false,
       "wre_connected": false,
       "skillz_md_path": null,
@@ -1308,45 +1987,12 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\antifafm_broadcaster.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.src.antifafm_broadcaster",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 643,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "holo_index\\output_composer.py",
       "module_name": "holo_index.output_composer",
       "has_json_flag": false,
       "wre_connected": false,
       "skillz_md_path": null,
       "line_count": 642,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\video_library.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.src.video_library",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 637,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "holo_index\\qwen_advisor\\gemma_rag_inference.py",
-      "module_name": "holo_index.qwen_advisor.gemma_rag_inference",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 632,
       "category": "holoindex",
       "suggested_trigger": "manual",
       "orphan_class": "candidate"
@@ -1360,17 +2006,6 @@
       "line_count": 632,
       "category": "holoindex",
       "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\shorts_clipper.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.src.shorts_clipper",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 631,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
       "orphan_class": "candidate"
     },
     {
@@ -1407,17 +2042,6 @@
       "orphan_class": "research"
     },
     {
-      "path": "modules\\communication\\youtube_shorts\\src\\veo3_generator.py",
-      "module_name": "modules.communication.youtube_shorts.src.veo3_generator",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 621,
-      "category": "communication",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\communication\\voice_command_ingestion\\scripts\\index_channel.py",
       "module_name": "modules.communication.voice_command_ingestion.scripts.index_channel",
       "has_json_flag": false,
@@ -1451,6 +2075,17 @@
       "orphan_class": "candidate"
     },
     {
+      "path": "modules\\communication\\youtube_shorts\\src\\veo3_generator.py",
+      "module_name": "modules.communication.youtube_shorts.src.veo3_generator",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 600,
+      "category": "communication",
+      "suggested_trigger": "manual",
+      "orphan_class": "candidate"
+    },
+    {
       "path": "modules\\ai_intelligence\\ric_dae\\src\\holodae_gemma_specialization.py",
       "module_name": "modules.ai_intelligence.ric_dae.src.holodae_gemma_specialization",
       "has_json_flag": false,
@@ -1469,17 +2104,6 @@
       "skillz_md_path": null,
       "line_count": 593,
       "category": "ai",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "holo_index\\qwen_advisor\\performance_orchestrator.py",
-      "module_name": "holo_index.qwen_advisor.performance_orchestrator",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 592,
-      "category": "holoindex",
       "suggested_trigger": "manual",
       "orphan_class": "candidate"
     },
@@ -1572,17 +2196,6 @@
       "orphan_class": "research"
     },
     {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\suno_lrc_downloader.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.suno_lrc_downloader",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 579,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\communication\\channel_selector\\src\\channel_selector.py",
       "module_name": "modules.communication.channel_selector.src.channel_selector",
       "has_json_flag": false,
@@ -1601,17 +2214,6 @@
       "skillz_md_path": null,
       "line_count": 572,
       "category": "communication",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "holo_index\\qwen_advisor\\chain_of_thought_logger.py",
-      "module_name": "holo_index.qwen_advisor.chain_of_thought_logger",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 570,
-      "category": "holoindex",
       "suggested_trigger": "manual",
       "orphan_class": "candidate"
     },
@@ -1638,17 +2240,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "modules\\platform_integration\\youtube_auth\\src\\youtube_auth.py",
-      "module_name": "modules.platform_integration.youtube_auth.src.youtube_auth",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 567,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\ai_intelligence\\0102_orchestrator\\src\\personality_engine.py",
       "module_name": "modules.ai_intelligence.0102_orchestrator.src.personality_engine",
       "has_json_flag": false,
@@ -1657,28 +2248,6 @@
       "line_count": 565,
       "category": "ai",
       "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\karaoke_overlay.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.src.karaoke_overlay",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 560,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "holo_index\\qwen_advisor\\autonomous_holodae.py",
-      "module_name": "holo_index.qwen_advisor.autonomous_holodae",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 559,
-      "category": "holoindex",
-      "suggested_trigger": "cadence:continuous",
       "orphan_class": "candidate"
     },
     {
@@ -1691,17 +2260,6 @@
       "category": "infrastructure",
       "suggested_trigger": "manual",
       "orphan_class": "wre_internal"
-    },
-    {
-      "path": "holo_index\\qwen_advisor\\holodae_coordinator.py",
-      "module_name": "holo_index.qwen_advisor.holodae_coordinator",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 554,
-      "category": "holoindex",
-      "suggested_trigger": "cadence:continuous",
-      "orphan_class": "candidate"
     },
     {
       "path": "modules\\infrastructure\\foundups_selenium\\src\\foundups_driver.py",
@@ -1722,28 +2280,6 @@
       "skillz_md_path": null,
       "line_count": 552,
       "category": "ai",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "holo_index\\qwen_advisor\\pattern_coach.py",
-      "module_name": "holo_index.qwen_advisor.pattern_coach",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 552,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\communication\\livechat\\src\\youtube_telemetry_store.py",
-      "module_name": "modules.communication.livechat.src.youtube_telemetry_store",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 551,
-      "category": "communication",
       "suggested_trigger": "manual",
       "orphan_class": "candidate"
     },
@@ -1803,17 +2339,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "modules\\communication\\livechat\\src\\greeting_generator.py",
-      "module_name": "modules.communication.livechat.src.greeting_generator",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 535,
-      "category": "communication",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\ai_intelligence\\pqn_alignment\\scripts\\pqn_streaming_aggregator.py",
       "module_name": "modules.ai_intelligence.pqn_alignment.scripts.pqn_streaming_aggregator",
       "has_json_flag": false,
@@ -1832,28 +2357,6 @@
       "skillz_md_path": null,
       "line_count": 533,
       "category": "communication",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\suno_playlist_scraper.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.suno_playlist_scraper",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 533,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\infrastructure\\browser_actions\\src\\foundups_actions.py",
-      "module_name": "modules.infrastructure.browser_actions.src.foundups_actions",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 528,
-      "category": "infrastructure",
       "suggested_trigger": "manual",
       "orphan_class": "candidate"
     },
@@ -1911,6 +2414,17 @@
       "category": "other",
       "suggested_trigger": "manual",
       "orphan_class": "developer_tool"
+    },
+    {
+      "path": "modules\\communication\\youtube_channel_pull\\src\\status_summary.py",
+      "module_name": "modules.communication.youtube_channel_pull.src.status_summary",
+      "has_json_flag": true,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 525,
+      "category": "communication",
+      "suggested_trigger": "manual",
+      "orphan_class": "candidate"
     },
     {
       "path": "modules\\infrastructure\\mcp_daemon\\src\\mcp_daemon.py",
@@ -1999,17 +2513,6 @@
       "category": "infrastructure",
       "suggested_trigger": "cadence:continuous",
       "orphan_class": "developer_tool"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\news_orchestrator.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.src.news_orchestrator",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 516,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
     },
     {
       "path": "modules\\foundups\\simulator\\economics\\perplexity_comparison.py",
@@ -2133,17 +2636,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "modules\\ai_intelligence\\ai_overseer\\src\\mcp_integration.py",
-      "module_name": "modules.ai_intelligence.ai_overseer.src.mcp_integration",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 501,
-      "category": "ai",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\platform_integration\\social_media_orchestrator\\src\\unified_linkedin_interface.py",
       "module_name": "modules.platform_integration.social_media_orchestrator.src.unified_linkedin_interface",
       "has_json_flag": false,
@@ -2221,17 +2713,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "modules\\communication\\livechat\\src\\mcp_youtube_integration.py",
-      "module_name": "modules.communication.livechat.src.mcp_youtube_integration",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 490,
-      "category": "communication",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\communication\\liberty_alert\\src\\liberty_alert_dae.py",
       "module_name": "modules.communication.liberty_alert.src.liberty_alert_dae",
       "has_json_flag": false,
@@ -2252,28 +2733,6 @@
       "category": "infrastructure",
       "suggested_trigger": "cadence:continuous",
       "orphan_class": "wre_internal"
-    },
-    {
-      "path": "modules\\infrastructure\\cli\\src\\extension_installer.py",
-      "module_name": "modules.infrastructure.cli.src.extension_installer",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 483,
-      "category": "infrastructure",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\suno_lyrics_extractor.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.suno_lyrics_extractor",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 483,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
     },
     {
       "path": "modules\\infrastructure\\wre_core\\skillz\\metrics_ingest_v2.py",
@@ -2419,17 +2878,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "holo_index\\qwen_advisor\\orphan_validator.py",
-      "module_name": "holo_index.qwen_advisor.orphan_validator",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 469,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\development\\cursor_multi_agent_bridge\\src\\api_integration_manager.py",
       "module_name": "modules.development.cursor_multi_agent_bridge.src.api_integration_manager",
       "has_json_flag": false,
@@ -2438,17 +2886,6 @@
       "line_count": 468,
       "category": "other",
       "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\dynamic_metadata_daemon.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.src.dynamic_metadata_daemon",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 467,
-      "category": "platform",
-      "suggested_trigger": "cadence:continuous",
       "orphan_class": "candidate"
     },
     {
@@ -2518,17 +2955,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "holo_index\\qwen_advisor\\agent_detection.py",
-      "module_name": "holo_index.qwen_advisor.agent_detection",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 459,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\platform_integration\\social_media_orchestrator\\src\\autonomous_action_scheduler.py",
       "module_name": "modules.platform_integration.social_media_orchestrator.src.autonomous_action_scheduler",
       "has_json_flag": false,
@@ -2537,17 +2963,6 @@
       "line_count": 457,
       "category": "platform",
       "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "holo_index\\qwen_advisor\\wsp_master.py",
-      "module_name": "holo_index.qwen_advisor.wsp_master",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 457,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
       "orphan_class": "candidate"
     },
     {
@@ -2628,14 +3043,14 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "modules\\platform_integration\\linkedin_agent\\src\\linkedin_agent.py",
-      "module_name": "modules.platform_integration.linkedin_agent.src.linkedin_agent",
+      "path": "holo_index\\core\\holo_index.py",
+      "module_name": "holo_index.core.holo_index",
       "has_json_flag": false,
       "wre_connected": false,
       "skillz_md_path": null,
       "line_count": 452,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
+      "category": "holoindex",
+      "suggested_trigger": "manual",
       "orphan_class": "candidate"
     },
     {
@@ -2647,17 +3062,6 @@
       "line_count": 451,
       "category": "ai",
       "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\linkedin_agent\\src\\qwen_profile_evaluator.py",
-      "module_name": "modules.platform_integration.linkedin_agent.src.qwen_profile_evaluator",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 450,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
       "orphan_class": "candidate"
     },
     {
@@ -2760,17 +3164,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "holo_index\\qwen_advisor\\log_analyzer.py",
-      "module_name": "holo_index.qwen_advisor.log_analyzer",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 442,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\foundups\\simulator\\economics\\ecosystem_revenue.py",
       "module_name": "modules.foundups.simulator.economics.ecosystem_revenue",
       "has_json_flag": false,
@@ -2804,17 +3197,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "holo_index\\core\\holo_index.py",
-      "module_name": "holo_index.core.holo_index",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 439,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\ai_intelligence\\rESP_o1o2\\src\\rESP_patent_integration.py",
       "module_name": "modules.ai_intelligence.rESP_o1o2.src.rESP_patent_integration",
       "has_json_flag": false,
@@ -2822,17 +3204,6 @@
       "skillz_md_path": null,
       "line_count": 436,
       "category": "ai",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "holo_index\\qwen_advisor\\vibecoding_assessor.py",
-      "module_name": "holo_index.qwen_advisor.vibecoding_assessor",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 436,
-      "category": "holoindex",
       "suggested_trigger": "manual",
       "orphan_class": "candidate"
     },
@@ -2867,17 +3238,6 @@
       "line_count": 430,
       "category": "ai",
       "suggested_trigger": "cadence:continuous",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\infrastructure\\browser_actions\\src\\youtube_actions.py",
-      "module_name": "modules.infrastructure.browser_actions.src.youtube_actions",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 430,
-      "category": "infrastructure",
-      "suggested_trigger": "manual",
       "orphan_class": "candidate"
     },
     {
@@ -2969,28 +3329,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\generate_lrc_files.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.generate_lrc_files",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 426,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "holo_index\\qwen_advisor\\gemma_orphan_detector.py",
-      "module_name": "holo_index.qwen_advisor.gemma_orphan_detector",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 424,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\ai_intelligence\\pqn_alignment\\scripts\\pqn_realtime_dashboard.py",
       "module_name": "modules.ai_intelligence.pqn_alignment.scripts.pqn_realtime_dashboard",
       "has_json_flag": false,
@@ -3075,17 +3413,6 @@
       "skillz_md_path": null,
       "line_count": 421,
       "category": "other",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\communication\\livechat\\src\\gemini_cli_mcp_integration.py",
-      "module_name": "modules.communication.livechat.src.gemini_cli_mcp_integration",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 420,
-      "category": "communication",
       "suggested_trigger": "manual",
       "orphan_class": "candidate"
     },
@@ -3176,17 +3503,6 @@
       "category": "other",
       "suggested_trigger": "manual",
       "orphan_class": "candidate"
-    },
-    {
-      "path": "holo_index\\qwen_advisor\\pattern_memory.py",
-      "module_name": "holo_index.qwen_advisor.pattern_memory",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 410,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
-      "orphan_class": "wre_internal"
     },
     {
       "path": "holo_index\\core\\intelligent_subroutine_engine.py",
@@ -3332,17 +3648,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "modules\\communication\\livechat\\src\\breadcrumb_telemetry.py",
-      "module_name": "modules.communication.livechat.src.breadcrumb_telemetry",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 395,
-      "category": "communication",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "tools\\monitors\\auto_stream_monitor_dae.py",
       "module_name": "tools.monitors.auto_stream_monitor_dae",
       "has_json_flag": false,
@@ -3384,28 +3689,6 @@
       "line_count": 390,
       "category": "holoindex",
       "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\setup_suno_extension.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.setup_suno_extension",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 388,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\waveform_visualizer.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.src.waveform_visualizer",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 388,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
       "orphan_class": "candidate"
     },
     {
@@ -3475,17 +3758,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\visual_effects.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.src.visual_effects",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 377,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\platform_integration\\social_media_orchestrator\\src\\unified_x_interface.py",
       "module_name": "modules.platform_integration.social_media_orchestrator.src.unified_x_interface",
       "has_json_flag": false,
@@ -3541,30 +3813,8 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "holo_index\\qwen_advisor\\log_parser.py",
-      "module_name": "holo_index.qwen_advisor.log_parser",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 373,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\ai_intelligence\\0102_orchestrator\\src\\session_controller.py",
       "module_name": "modules.ai_intelligence.0102_orchestrator.src.session_controller",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 372,
-      "category": "ai",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\ai_intelligence\\ai_overseer\\src\\breadcrumb_monitor.py",
-      "module_name": "modules.ai_intelligence.ai_overseer.src.breadcrumb_monitor",
       "has_json_flag": false,
       "wre_connected": false,
       "skillz_md_path": null,
@@ -3604,17 +3854,6 @@
       "line_count": 372,
       "category": "platform",
       "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\communication\\livechat\\src\\holiday_awareness.py",
-      "module_name": "modules.communication.livechat.src.holiday_awareness",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 371,
-      "category": "communication",
-      "suggested_trigger": "manual",
       "orphan_class": "candidate"
     },
     {
@@ -3659,17 +3898,6 @@
       "line_count": 366,
       "category": "infrastructure",
       "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\youtube_ingest_resolver.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.src.youtube_ingest_resolver",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 366,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
       "orphan_class": "candidate"
     },
     {
@@ -3926,17 +4154,6 @@
       "orphan_class": "research"
     },
     {
-      "path": "modules\\communication\\livechat\\src\\simple_rotation.py",
-      "module_name": "modules.communication.livechat.src.simple_rotation",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 337,
-      "category": "communication",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\infrastructure\\dae_infrastructure\\foundups_vision_dae\\scripts\\menu.py",
       "module_name": "modules.infrastructure.dae_infrastructure.foundups_vision_dae.scripts.menu",
       "has_json_flag": false,
@@ -4102,17 +4319,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\stream_orchestrator.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.src.stream_orchestrator",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 319,
-      "category": "platform",
-      "suggested_trigger": "event:stream_start",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "holo_index\\violation_tracker.py",
       "module_name": "holo_index.violation_tracker",
       "has_json_flag": false,
@@ -4187,6 +4393,17 @@
       "line_count": 302,
       "category": "platform",
       "suggested_trigger": "event:platform_trigger",
+      "orphan_class": "candidate"
+    },
+    {
+      "path": "modules\\communication\\youtube_channel_pull\\src\\refresh_scheduler.py",
+      "module_name": "modules.communication.youtube_channel_pull.src.refresh_scheduler",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 301,
+      "category": "communication",
+      "suggested_trigger": "manual",
       "orphan_class": "candidate"
     },
     {
@@ -4287,6 +4504,17 @@
       "category": "other",
       "suggested_trigger": "manual",
       "orphan_class": "research"
+    },
+    {
+      "path": "modules\\infrastructure\\foundups_mcp_bridge\\src\\bridge_server.py",
+      "module_name": "modules.infrastructure.foundups_mcp_bridge.src.bridge_server",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 293,
+      "category": "infrastructure",
+      "suggested_trigger": "manual",
+      "orphan_class": "candidate"
     },
     {
       "path": "tools\\demo_wsp_compliance.py",
@@ -4399,17 +4627,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "modules\\infrastructure\\cli\\src\\wsp_explainer_menu.py",
-      "module_name": "modules.infrastructure.cli.src.wsp_explainer_menu",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 282,
-      "category": "infrastructure",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\ai_intelligence\\0102_orchestrator\\src\\conversation_manager.py",
       "module_name": "modules.ai_intelligence.0102_orchestrator.src.conversation_manager",
       "has_json_flag": false,
@@ -4417,17 +4634,6 @@
       "skillz_md_path": null,
       "line_count": 281,
       "category": "ai",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "holo_index\\qwen_advisor\\output_formatter.py",
-      "module_name": "holo_index.qwen_advisor.output_formatter",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 279,
-      "category": "holoindex",
       "suggested_trigger": "manual",
       "orphan_class": "candidate"
     },
@@ -4441,17 +4647,6 @@
       "category": "infrastructure",
       "suggested_trigger": "manual",
       "orphan_class": "wre_internal"
-    },
-    {
-      "path": "holo_index\\qwen_advisor\\issue_mps_evaluator.py",
-      "module_name": "holo_index.qwen_advisor.issue_mps_evaluator",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 277,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
     },
     {
       "path": "tools\\testing\\mermaid_diagram_validator.py",
@@ -4487,17 +4682,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\news_ticker.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.src.news_ticker",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 275,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "holo_index\\module_health\\dependency_audit.py",
       "module_name": "holo_index.module_health.dependency_audit",
       "has_json_flag": false,
@@ -4507,28 +4691,6 @@
       "category": "holoindex",
       "suggested_trigger": "cadence:daily",
       "orphan_class": "developer_tool"
-    },
-    {
-      "path": "holo_index\\qwen_advisor\\llm_engine.py",
-      "module_name": "holo_index.qwen_advisor.llm_engine",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 275,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\src\\stream_health_monitor.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.src.stream_health_monitor",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 273,
-      "category": "platform",
-      "suggested_trigger": "event:stream_start",
-      "orphan_class": "candidate"
     },
     {
       "path": "holo_index\\core\\circuit_breaker.py",
@@ -4549,6 +4711,17 @@
       "skillz_md_path": null,
       "line_count": 269,
       "category": "holoindex",
+      "suggested_trigger": "manual",
+      "orphan_class": "candidate"
+    },
+    {
+      "path": "modules\\infrastructure\\foundups_mcp_bridge\\src\\webhook_relay.py",
+      "module_name": "modules.infrastructure.foundups_mcp_bridge.src.webhook_relay",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 264,
+      "category": "infrastructure",
       "suggested_trigger": "manual",
       "orphan_class": "candidate"
     },
@@ -4594,17 +4767,6 @@
       "line_count": 263,
       "category": "other",
       "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\debug_account_switch.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.debug_account_switch",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 260,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
       "orphan_class": "candidate"
     },
     {
@@ -4795,17 +4957,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\stream_orchestrator.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.stream_orchestrator",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 236,
-      "category": "platform",
-      "suggested_trigger": "event:stream_start",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\platform_integration\\youtube_auth\\scripts\\auto_refresh_tokens.py",
       "module_name": "modules.platform_integration.youtube_auth.scripts.auto_refresh_tokens",
       "has_json_flag": false,
@@ -4872,17 +5023,6 @@
       "orphan_class": "developer_tool"
     },
     {
-      "path": "modules\\communication\\livechat\\src\\llm_bypass_engine.py",
-      "module_name": "modules.communication.livechat.src.llm_bypass_engine",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 226,
-      "category": "communication",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\infrastructure\\complete_module_loader.py",
       "module_name": "modules.infrastructure.complete_module_loader",
       "has_json_flag": false,
@@ -4912,17 +5052,6 @@
       "skillz_md_path": null,
       "line_count": 222,
       "category": "other",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\infrastructure\\cli\\src\\openclaw_chat.py",
-      "module_name": "modules.infrastructure.cli.src.openclaw_chat",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 218,
-      "category": "infrastructure",
       "suggested_trigger": "manual",
       "orphan_class": "candidate"
     },
@@ -5103,17 +5232,6 @@
       "orphan_class": "research"
     },
     {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\apply_layout.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.apply_layout",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 204,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "tools\\development\\create_module.py",
       "module_name": "tools.development.create_module",
       "has_json_flag": false,
@@ -5257,17 +5375,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "modules\\communication\\livechat\\src\\stream_trigger.py",
-      "module_name": "modules.communication.livechat.src.stream_trigger",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 189,
-      "category": "communication",
-      "suggested_trigger": "event:stream_start",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "tools\\wsp_violation_checker.py",
       "module_name": "tools.wsp_violation_checker",
       "has_json_flag": false,
@@ -5342,17 +5449,6 @@
       "line_count": 181,
       "category": "infrastructure",
       "suggested_trigger": "event:content_ready",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\video_rotator.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.video_rotator",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 181,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
       "orphan_class": "candidate"
     },
     {
@@ -5499,17 +5595,6 @@
       "orphan_class": "developer_tool"
     },
     {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\dump_header.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.dump_header",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 167,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\infrastructure\\wre_core\\src\\dashboard_snapshot_export.py",
       "module_name": "modules.infrastructure.wre_core.src.dashboard_snapshot_export",
       "has_json_flag": false,
@@ -5550,6 +5635,17 @@
       "skillz_md_path": null,
       "line_count": 162,
       "category": "other",
+      "suggested_trigger": "manual",
+      "orphan_class": "candidate"
+    },
+    {
+      "path": "modules\\communication\\youtube_channel_pull\\src\\pull_cli.py",
+      "module_name": "modules.communication.youtube_channel_pull.src.pull_cli",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 161,
+      "category": "communication",
       "suggested_trigger": "manual",
       "orphan_class": "candidate"
     },
@@ -5620,6 +5716,17 @@
       "orphan_class": "candidate"
     },
     {
+      "path": "modules\\ai_intelligence\\pfmall_discovery\\src\\discovery_cli.py",
+      "module_name": "modules.ai_intelligence.pfmall_discovery.src.discovery_cli",
+      "has_json_flag": false,
+      "wre_connected": false,
+      "skillz_md_path": null,
+      "line_count": 156,
+      "category": "ai",
+      "suggested_trigger": "manual",
+      "orphan_class": "candidate"
+    },
+    {
       "path": "modules\\infrastructure\\git_push_dae\\scripts\\post_commit_social_runner.py",
       "module_name": "modules.infrastructure.git_push_dae.scripts.post_commit_social_runner",
       "has_json_flag": false,
@@ -5637,17 +5744,6 @@
       "wre_connected": false,
       "skillz_md_path": null,
       "line_count": 156,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\find_create_button.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.find_create_button",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 155,
       "category": "platform",
       "suggested_trigger": "event:platform_trigger",
       "orphan_class": "candidate"
@@ -5716,17 +5812,6 @@
       "line_count": 150,
       "category": "infrastructure",
       "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\click_go_live.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.click_go_live",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 150,
-      "category": "platform",
-      "suggested_trigger": "event:stream_start",
       "orphan_class": "candidate"
     },
     {
@@ -5840,17 +5925,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\diagnose_youtube_create.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.diagnose_youtube_create",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 133,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\platform_integration\\youtube_proxy\\scripts\\manual_tools\\like_comments_manual.py",
       "module_name": "modules.platform_integration.youtube_proxy.scripts.manual_tools.like_comments_manual",
       "has_json_flag": false,
@@ -5928,17 +6002,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "modules\\ai_intelligence\\ai_overseer\\src\\pico_claw.py",
-      "module_name": "modules.ai_intelligence.ai_overseer.src.pico_claw",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 124,
-      "category": "ai",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "holo_index\\reports\\codeindex_reporter.py",
       "module_name": "holo_index.reports.codeindex_reporter",
       "has_json_flag": false,
@@ -5994,17 +6057,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "holo_index\\qwen_advisor\\unicode_fixer.py",
-      "module_name": "holo_index.qwen_advisor.unicode_fixer",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 118,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\communication\\livechat\\_archive\\experimental_2025_09_19\\stream_end_detector.py",
       "module_name": "modules.communication.livechat._archive.experimental_2025_09_19.stream_end_detector",
       "has_json_flag": false,
@@ -6012,17 +6064,6 @@
       "skillz_md_path": null,
       "line_count": 116,
       "category": "communication",
-      "suggested_trigger": "event:stream_start",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\go_live_direct.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.go_live_direct",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 116,
-      "category": "platform",
       "suggested_trigger": "event:stream_start",
       "orphan_class": "candidate"
     },
@@ -6222,17 +6263,6 @@
       "line_count": 97,
       "category": "infrastructure",
       "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
-      "path": "modules\\platform_integration\\antifafm_broadcaster\\scripts\\download_video.py",
-      "module_name": "modules.platform_integration.antifafm_broadcaster.scripts.download_video",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 97,
-      "category": "platform",
-      "suggested_trigger": "event:platform_trigger",
       "orphan_class": "candidate"
     },
     {
@@ -6478,17 +6508,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "holo_index\\qwen_advisor\\cache.py",
-      "module_name": "holo_index.qwen_advisor.cache",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 65,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "holo_index\\scripts\\verify_phase2.py",
       "module_name": "holo_index.scripts.verify_phase2",
       "has_json_flag": false,
@@ -6610,17 +6629,6 @@
       "orphan_class": "candidate"
     },
     {
-      "path": "holo_index\\qwen_advisor\\prompts.py",
-      "module_name": "holo_index.qwen_advisor.prompts",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 54,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
-      "orphan_class": "candidate"
-    },
-    {
       "path": "modules\\platform_integration\\youtube_proxy\\scripts\\manual_tools\\verify_uploaded_image.py",
       "module_name": "modules.platform_integration.youtube_proxy.scripts.manual_tools.verify_uploaded_image",
       "has_json_flag": false,
@@ -6630,17 +6638,6 @@
       "category": "platform",
       "suggested_trigger": "event:platform_trigger",
       "orphan_class": "developer_tool"
-    },
-    {
-      "path": "holo_index\\qwen_advisor\\config.py",
-      "module_name": "holo_index.qwen_advisor.config",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 49,
-      "category": "holoindex",
-      "suggested_trigger": "manual",
-      "orphan_class": "trivial"
     },
     {
       "path": "modules\\communication\\livechat\\scripts\\run_youtube_clean.py",
@@ -7090,17 +7087,6 @@
       "skillz_md_path": null,
       "line_count": 41,
       "category": "communication",
-      "suggested_trigger": "manual",
-      "orphan_class": "trivial"
-    },
-    {
-      "path": "holo_index\\qwen_advisor\\telemetry.py",
-      "module_name": "holo_index.qwen_advisor.telemetry",
-      "has_json_flag": false,
-      "wre_connected": false,
-      "skillz_md_path": null,
-      "line_count": 39,
-      "category": "holoindex",
       "suggested_trigger": "manual",
       "orphan_class": "trivial"
     },
