@@ -4,6 +4,45 @@
 **Domain**: `communication/`
 **WSP Compliance**: WSP 3, 22, 49, 80, 54
 
+## 2026-04-19 - VEO1: Migrate from deprecated google.generativeai to google.genai
+
+**Author**: 0102  
+**WSP**: 97  
+**Phase**: VEO1 — YOUTUBE_SHORTS_VEO3_GENAI_MIGRATION_PHASE1
+
+### Changes
+
+- `src/veo3_generator.py`: Migrated all `google.generativeai` (deprecated) usage to `google.genai`
+  - Removed `genai_legacy` import and `configure()` call
+  - Replaced `GenerativeModel().generate_content()` with `client.models.generate_content()`
+  - Replaced `types.GenerationConfig` with `types.GenerateContentConfig`
+  - Updated parameter names: `max_output_tokens` → `maxOutputTokens` (new SDK uses camelCase)
+- `tests/test_veo3_migration.py`: Added 6 mocked tests
+  - SDK unavailable handling
+  - Client creation
+  - Text generation API shape
+  - Video generation API shape
+  - No deprecated imports verification
+  - No live API calls meta-test
+
+### Why
+
+`google.generativeai` package deprecated; runtime warning on every import. All functionality migrated to `google.genai` which was already installed (v1.73.0) and used for video generation.
+
+### WSP 97 Truthfulness
+
+- All tests use mocked SDK, no live API calls made
+- VEO3 generation NOT verified live (would cost $3.20+ per clip)
+- Migration tested via mocked unit paths only
+
+### Test Results
+
+```
+6 passed in 0.11s
+```
+
+---
+
 ## 2026-01-22 - Generator Health Check
 
 ### What Changed
