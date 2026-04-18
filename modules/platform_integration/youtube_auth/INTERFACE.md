@@ -69,4 +69,61 @@ except Exception as e:
 
 ## Internal Functions
 The module contains internal helper functions not part of the public interface:
-- `get_credentials_for_index(index)`: Helper function to retrieve credential paths for a specific index 
+- `get_credentials_for_index(index)`: Helper function to retrieve credential paths for a specific index
+
+---
+
+## OAuth Credential Health Reporting (`oauth_health.py`)
+
+WSP 97 truth signaling for credential capacity visibility.
+
+### Status Vocabulary
+| Status | Meaning |
+|--------|---------|
+| `healthy` | Refresh token valid, quota available |
+| `token_revoked` | User revoked grant in Google account UI |
+| `token_expired_or_revoked` | `invalid_grant` but cause not distinguishable |
+| `refresh_failed` | Network or non-auth exception during refresh |
+| `credential_set_unconfigured` | Env or token/secret file missing |
+| `no_refresh_token` | Credential loaded but lacks refresh_token |
+| `quota_exhausted` | Exhausted this cycle, not an auth failure |
+
+### Key Functions
+
+#### `classify_refresh_error(error_msg: str) -> Tuple[str, str]`
+Maps a Google OAuth refresh exception to `(status, reason)`. Only claims `token_revoked` when message explicitly contains "revoked".
+
+#### `write_health_report(per_set, output_path=None) -> Path`
+Persists JSON artifact to `reports/oauth_credential_health.json`:
+```json
+{
+  "generated_at": "<iso8601>",
+  "credential_sets": {
+    "total_configured": 2,
+    "operational": [10],
+    "dead": [1],
+    "quota_exhausted_today": [],
+    "effective_daily_quota_estimate": 10000
+  },
+  "per_set": [
+    {
+      "set_id": 1,
+      "status": "token_expired_or_revoked",
+      "operator_action": "python modules/platform_integration/youtube_auth/scripts/authorize_set1.py",
+      ...
+    }
+  ]
+}
+```
+
+#### `format_capacity_log(capacity) -> str`
+Returns a one-line log message surfacing dead sets and action required.
+
+#### `emit_critical_reauth(set_id, status, reason)`
+Emits CRITICAL log with exact reauth command.
+
+### Operator Visibility
+When Set 1 is dead and Set 10 is healthy:
+- Artifact: `dead=[1]`, `operational=[10]`, `effective_daily_quota_estimate=10000`
+- Log: `"1/2 sets operational; dead=[1]; action_required=python .../authorize_set1.py"`
+- CRITICAL: `"operator must run: python modules/.../authorize_set1.py (use Chrome)"` 

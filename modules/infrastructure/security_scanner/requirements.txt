@@ -1,0 +1,8 @@
+# Security Scanner - Python Dependencies
+#
+# This module uses ONLY stdlib for core functionality.
+# CLI tools (snyk, trivy, semgrep) must be installed separately.
+#
+# Test dependencies:
+pytest>=7.0.0
+pytest-asyncio>=0.23.0

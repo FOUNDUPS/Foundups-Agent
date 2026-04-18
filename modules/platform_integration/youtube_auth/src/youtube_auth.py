@@ -7,6 +7,7 @@ from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 from googleapiclient.errors import HttpError
 from modules.platform_integration.youtube_auth.src.quota_monitor import QuotaMonitor
+from modules.platform_integration.youtube_auth.src import oauth_health
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,40 @@ def get_credentials_for_index(index):
         return None
         
     return client_secrets, token_file
+
+def _persist_health_snapshot(failing_set=None, failing_status=None, failing_reason=None):
+    """
+    Write modules/platform_integration/youtube_auth/reports/oauth_credential_health.json
+    summarizing the current rotation state. Called whenever we classify an
+    invalid_grant or preflight completes so operators see real capacity.
+
+    Healthy sets = configured sets not marked exhausted/dead.
+    The caller may pass a specific failing set to override its status in the
+    snapshot (used when marking a fresh invalid_grant before it appears in
+    exhausted_sets downstream).
+    """
+    from modules.platform_integration.youtube_auth.src.quota_monitor import get_available_credential_sets
+
+    configured = get_available_credential_sets()
+    exhausted = getattr(get_authenticated_service, 'exhausted_sets', set())
+
+    per_set = []
+    for set_id in configured:
+        if set_id == failing_set and failing_status:
+            entry = oauth_health.build_set_entry(set_id, failing_status, failing_reason)
+        elif set_id in exhausted:
+            # exhausted_sets is ambiguous (quota OR auth failure); caller path
+            # supplies classification for auth failures. Default to quota.
+            entry = oauth_health.build_set_entry(set_id, oauth_health.STATUS_QUOTA_EXHAUSTED)
+        else:
+            entry = oauth_health.build_set_entry(set_id, oauth_health.STATUS_HEALTHY)
+        per_set.append(entry)
+
+    try:
+        oauth_health.write_health_report(per_set)
+    except Exception as write_e:
+        logger.warning(f"[OAUTH-HEALTH] Failed to persist health report: {write_e}")
+
 
 def get_authenticated_service(token_index=None):
     """
@@ -94,6 +129,19 @@ def get_authenticated_service(token_index=None):
         
         indices_to_try = available_sets
         logger.info(f"[REFRESH] Auto-rotating through sets: {indices_to_try} (Exhausted: {get_authenticated_service.exhausted_sets})")
+
+        # WSP 97: emit truthful effective-capacity log so operators see that
+        # exhausted / dead sets reduce real quota, not just rotation targets.
+        capacity_snapshot = oauth_health.compute_effective_capacity([
+            oauth_health.build_set_entry(
+                s,
+                oauth_health.STATUS_QUOTA_EXHAUSTED
+                if s in get_authenticated_service.exhausted_sets
+                else oauth_health.STATUS_HEALTHY,
+            )
+            for s in all_sets
+        ])
+        logger.info(f"[OAUTH-HEALTH] {oauth_health.format_capacity_log(capacity_snapshot)}")
     
     for index in indices_to_try:
         logger.info(f"[U+1F511] Attempting authentication with credential set {index}")
@@ -155,22 +203,17 @@ def get_authenticated_service(token_index=None):
                         logger.info(f"[U+1F4C5] New token expires at: {creds.expiry} (valid for ~1 hour)")
                 except Exception as e:
                     error_msg = str(e)
-                    # Better error distinction
+                    status, reason = oauth_health.classify_refresh_error(error_msg)
                     if 'invalid_grant' in error_msg:
-                        if 'Token has been expired or revoked' in error_msg:
-                            # Try to distinguish between expired and revoked
-                            if 'revoked' in error_msg.lower():
-                                logger.error(f"[FORBIDDEN] Token has been REVOKED for set {index} - user action required")
-                                logger.info(f"ℹ️ To fix: Run 'python modules/platform_integration/youtube_auth/scripts/authorize_set{index}.py'")
-                            else:
-                                logger.error(f"⏰ Refresh token EXPIRED for set {index} (tokens last 6 months if unused)")
-                                logger.info(f"ℹ️ To fix: Run 'python modules/platform_integration/youtube_auth/scripts/authorize_set{index}.py'")
-                        else:
-                            logger.error(f"[FAIL] Invalid grant error for set {index}: {error_msg}")
+                        # CRITICAL log with exact reauth command per WSP 97
+                        oauth_health.emit_critical_reauth(index, status, reason)
                         # Mark this set offline for this process to avoid repeated retries during fallback flows
                         get_authenticated_service.exhausted_sets.add(index)
                     else:
                         logger.error(f"[FAIL] Failed to refresh token for set {index}: {e}")
+
+                    # Persist operator-visible health artifact for this failure
+                    _persist_health_snapshot(failing_set=index, failing_status=status, failing_reason=reason)
 
                     # Continue to next credential set instead of trying OAuth flow
                     continue
@@ -445,6 +488,8 @@ def preflight_oauth_check(auto_reauth: bool = False, credential_sets=None) -> di
         'missing': [],
         'reauth_needed': False
     }
+    # Classified per-set entries for the health report (WSP 97)
+    per_set_classified = {}
 
     scopes_str = os.getenv('YOUTUBE_SCOPES', '').strip()
     if not scopes_str:
@@ -459,6 +504,10 @@ def preflight_oauth_check(auto_reauth: bool = False, credential_sets=None) -> di
         creds_data = get_credentials_for_index(index)
         if not creds_data:
             result['missing'].append(index)
+            per_set_classified[index] = oauth_health.build_set_entry(
+                index, oauth_health.STATUS_UNCONFIGURED,
+                "Client secrets or token file path not configured in .env"
+            )
             continue
 
         client_secrets_file, token_file = creds_data
@@ -466,6 +515,10 @@ def preflight_oauth_check(auto_reauth: bool = False, credential_sets=None) -> di
         if not os.path.exists(token_file):
             logger.warning(f"[PREFLIGHT] Token file missing for set {index}")
             result['missing'].append(index)
+            per_set_classified[index] = oauth_health.build_set_entry(
+                index, oauth_health.STATUS_UNCONFIGURED,
+                f"Token file missing at {token_file}"
+            )
             continue
 
         try:
@@ -481,20 +534,34 @@ def preflight_oauth_check(auto_reauth: bool = False, credential_sets=None) -> di
                     f.write(creds.to_json())
                 logger.info(f"[PREFLIGHT] Set {index} refreshed successfully")
                 result['healthy'].append(index)
+                per_set_classified[index] = oauth_health.build_set_entry(
+                    index, oauth_health.STATUS_HEALTHY
+                )
 
             elif creds.valid:
                 logger.info(f"[PREFLIGHT] Set {index} is valid")
                 result['healthy'].append(index)
+                per_set_classified[index] = oauth_health.build_set_entry(
+                    index, oauth_health.STATUS_HEALTHY
+                )
             else:
                 logger.warning(f"[PREFLIGHT] Set {index} invalid (no refresh token)")
                 result['expired'].append(index)
+                per_set_classified[index] = oauth_health.build_set_entry(
+                    index, oauth_health.STATUS_NO_REFRESH_TOKEN,
+                    "Credential loaded but has no refresh_token"
+                )
 
         except Exception as e:
             error_msg = str(e)
             if 'invalid_grant' in error_msg:
-                logger.error(f"[PREFLIGHT] Set {index} has INVALID_GRANT - token expired/revoked")
+                status, reason = oauth_health.classify_refresh_error(error_msg)
+                oauth_health.emit_critical_reauth(index, status, reason)
                 result['expired'].append(index)
                 result['reauth_needed'] = True
+                per_set_classified[index] = oauth_health.build_set_entry(
+                    index, status, reason
+                )
 
                 if auto_reauth:
                     # Determine correct browser based on credential set
@@ -553,6 +620,9 @@ def preflight_oauth_check(auto_reauth: bool = False, credential_sets=None) -> di
             else:
                 logger.error(f"[PREFLIGHT] Set {index} error: {error_msg}")
                 result['expired'].append(index)
+                per_set_classified[index] = oauth_health.build_set_entry(
+                    index, oauth_health.STATUS_REFRESH_FAILED, error_msg[:200]
+                )
 
     # Summary
     if result['healthy']:
@@ -560,8 +630,17 @@ def preflight_oauth_check(auto_reauth: bool = False, credential_sets=None) -> di
     if result['expired']:
         logger.warning(f"[PREFLIGHT] Expired/invalid sets: {result['expired']}")
         for idx in result['expired']:
-            logger.warning(f"  -> Fix set {idx}: python -m modules.platform_integration.youtube_auth.src.youtube_auth --reauth --set {idx}")
+            logger.warning(f"  -> Fix set {idx}: {oauth_health.reauth_command_for(idx)}")
     if result['missing']:
         logger.warning(f"[PREFLIGHT] Missing sets: {result['missing']}")
+
+    # WSP 97: persist operator-visible health artifact + capacity log
+    per_set_list = [per_set_classified[i] for i in sorted(per_set_classified)]
+    try:
+        oauth_health.write_health_report(per_set_list)
+    except Exception as write_e:
+        logger.warning(f"[OAUTH-HEALTH] Failed to persist health report: {write_e}")
+    capacity = oauth_health.compute_effective_capacity(per_set_list)
+    logger.info(f"[OAUTH-HEALTH] {oauth_health.format_capacity_log(capacity)}")
 
     return result
