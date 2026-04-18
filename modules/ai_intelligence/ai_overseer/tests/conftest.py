@@ -24,6 +24,7 @@ _ALLOWLIST = {
     "test_m2m_skill_shim.py",
     "test_ai_overseer_ironclaw_runtime.py",
     "test_wsp49_interface_gap_scanner.py",
+    "test_vulnerability_scan_policy.py",
 }
 
 _HEAVY_TARGETS = [
