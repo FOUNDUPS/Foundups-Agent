@@ -2,6 +2,68 @@
 
 ## Chronological Change Log
 
+### [2026-04-19] - SEC9: Security Stack 0102 Control Hooks (v0.8.6)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 77 (Agent Coordination)
+**Impact Analysis**: 0102 control integration for security stack - NO auto-remediation
+
+#### Changes Made
+
+- `src/security_control_hooks.py` (NEW):
+  - `SecurityStackController` class - main 0102 entrypoint
+  - `SecurityStackStatus` dataclass - durable status artifact
+  - `SecurityAlert` dataclass - 012 escalation artifact
+  - `DryRunResult` dataclass - dry-run execution result
+  - CLI entrypoint for manual invocation
+
+- `tests/test_security_control_hooks.py` (NEW):
+  - 29 tests covering all 5 control hooks
+  - Manual 0102 invocation (5 tests)
+  - Unavailable tools path (3 tests)
+  - Alert artifact generation (4 tests)
+  - Report-only mode (3 tests)
+  - HoloDAE trigger bridge (4 tests)
+  - Status artifact (3 tests)
+  - WRE skill contract (2 tests)
+
+#### Control Hooks
+
+1. **Manual 0102 Invocation** (`run_dry_run()`)
+   - CLI: `python -m modules.infrastructure.wre_core.src.security_control_hooks dry-run`
+   - Does not require 012 except for critical escalation
+
+2. **WRE Skill Contract** (`invoke_sec3_skill()`)
+   - Input: `{"tool": str, "target": str, "mode": str}`
+   - Output: `{"state": "proposed"|"executed"|"unavailable", ...}`
+
+3. **HoloDAE Trigger Bridge** (`bridge_trigger_to_sec3()`)
+   - Transforms SEC4 proposals to SEC3 input contracts
+   - Auto-execution DEFERRED (always report_only)
+
+4. **Status Artifact** (`write_status()`, `read_status()`)
+   - Path: `alerts/security/status.json`
+   - Fields: last_run_at, mode, tools_available, next_operator_action
+
+5. **012 Escalation** (`write_alert()`, `create_alert_from_finding()`)
+   - Path: `alerts/security/alert_<id>_<timestamp>.json`
+   - Triggers: critical severity, secret exposure
+
+#### WSP 97 State Machine
+
+```
+triggered -> proposed -> executed -> escalated -> completed
+                     \-> unavailable
+```
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_security_control_hooks.py -v
+# Result: 29 passed
+```
+
+---
+
 ### [2026-04-18] - SEC8: Security Stack E2E Dry-Run (v0.8.5)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 77 (Agent Coordination)
