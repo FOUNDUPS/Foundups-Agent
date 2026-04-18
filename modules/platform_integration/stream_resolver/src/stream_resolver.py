@@ -181,6 +181,7 @@ class StreamResolver:
         self._quota_tester = QuotaTester() if QuotaTester and use_intelligent_sorting else None
         self._tested_credentials = set()
         self._cache = {}
+        self._api_service_cache = {}
         self._last_stream_check = {}
 
         # QWEN Intelligence - Use existing superior implementation (lazy import to avoid circular dependency)
@@ -333,13 +334,14 @@ class StreamResolver:
                 continue  # Skip already tested in this session
                 
             try:
+                cached_service = self._api_service_cache.get(cred_set)
+                if cached_service is not None:
+                    self.logger.debug("[API] Reusing cached YouTube service for credential set %s", cred_set)
+                    self._tested_credentials.add(cred_set)
+                    return cached_service, cred_set
+
                 self.logger.info(f"Testing credential set {cred_set}...")
-                from modules.platform_integration.youtube_auth.src.youtube_auth import get_authenticated_service
-                
-                service, actual_set = get_authenticated_service(
-                    force_credential_set=cred_set,
-                    skip_validation=False
-                )
+                service, actual_set = self._get_cached_authenticated_service(cred_set)
                 
                 if service:
                     self.logger.info(f"[SUCCESS] Using credential set {cred_set} with available quota")
@@ -353,6 +355,53 @@ class StreamResolver:
         
         self.logger.error("[ERROR] All recommended credentials failed")
         return None, None
+
+    def _normalize_authenticated_service_result(self, auth_result, requested_set=None):
+        """Normalize auth helpers that return either service or tuple variants."""
+        if isinstance(auth_result, tuple):
+            service = auth_result[0] if auth_result else None
+            actual_set = auth_result[1] if len(auth_result) > 1 else requested_set
+        else:
+            service = auth_result
+            actual_set = getattr(service, "_credential_set", requested_set) if service is not None else requested_set
+        return service, actual_set
+
+    def _get_cached_authenticated_service(self, credential_set=None):
+        """Return a cached authenticated service by credential set or auto-rotation."""
+        cache_key = credential_set if credential_set is not None else "auto"
+        cached = self._api_service_cache.get(cache_key)
+        if cached is not None:
+            actual_set = getattr(cached, "_credential_set", credential_set)
+            self.logger.debug("[API] Reusing cached YouTube service for credential set %s", actual_set or cache_key)
+            return cached, actual_set
+
+        from modules.platform_integration.youtube_auth.src.youtube_auth import get_authenticated_service
+
+        if credential_set is None:
+            auth_result = get_authenticated_service()
+        else:
+            auth_result = get_authenticated_service(token_index=credential_set)
+        service, actual_set = self._normalize_authenticated_service_result(auth_result, credential_set)
+
+        if service is not None:
+            actual_key = actual_set if actual_set is not None else getattr(service, "_credential_set", cache_key)
+            try:
+                service._credential_set = actual_key
+            except Exception:
+                pass
+            self._api_service_cache[cache_key] = service
+            self._api_service_cache[actual_key] = service
+            self.logger.info("[API] Cached YouTube service for credential set %s", actual_key)
+        return service, actual_set
+
+    def _invalidate_cached_authenticated_service(self, service=None) -> None:
+        """Drop cached API services after quota/auth failures so rotation can retry."""
+        if service is None:
+            self._api_service_cache.clear()
+            return
+        for key, cached in list(self._api_service_cache.items()):
+            if cached is service:
+                self._api_service_cache.pop(key, None)
     
     def _load_session_cache(self):
         """Load cached session data using SessionUtils from infrastructure."""
@@ -402,15 +451,14 @@ class StreamResolver:
         self.logger.info("="*60)
         
         # Try up to 3 credential sets (auto-rotation built into get_authenticated_service)
-        from modules.platform_integration.youtube_auth.src.youtube_auth import get_authenticated_service
-
         for attempt in range(3):
+            youtube_service = None
             try:
                 # Get fresh credentials via rotation (auto-rotates through available sets)
                 if attempt > 0:
                     self.logger.info(f"[CHAT-ID] Attempt {attempt + 1}: Retrying with credential rotation...")
 
-                youtube_service = get_authenticated_service()
+                youtube_service, _ = self._get_cached_authenticated_service()
                 if not youtube_service:
                     self.logger.warning(f"[CHAT-ID] Attempt {attempt + 1}: No credentials available")
                     continue
@@ -446,6 +494,7 @@ class StreamResolver:
                 error_str = str(e).lower()
                 if 'quota' in error_str or '403' in error_str or 'exceeded' in error_str:
                     self.logger.warning(f"[CHAT-ID] Quota exhausted on attempt {attempt + 1}, rotating...")
+                    self._invalidate_cached_authenticated_service(youtube_service)
                     continue
                 else:
                     self.logger.error(f"[CHAT-ID] Error fetching chat ID: {e}")

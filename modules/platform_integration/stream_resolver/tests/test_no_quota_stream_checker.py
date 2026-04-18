@@ -13,10 +13,7 @@ import time
 import sys
 import os
 
-# Add src directory to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
-
-from no_quota_stream_checker import NoQuotaStreamChecker
+from modules.platform_integration.stream_resolver.src.no_quota_stream_checker import NoQuotaStreamChecker
 
 
 class TestNoQuotaStreamChecker(unittest.TestCase):
@@ -172,7 +169,7 @@ class TestNoQuotaStreamChecker(unittest.TestCase):
         is_limited, _ = self.checker._is_channel_rate_limited(self.test_channel_id)
         self.assertTrue(is_limited)
 
-    @patch('no_quota_stream_checker.LIVE_STATUS_VERIFIER_AVAILABLE', False)
+    @patch('modules.platform_integration.stream_resolver.src.no_quota_stream_checker.LIVE_STATUS_VERIFIER_AVAILABLE', False)
     @patch('requests.Session.get')
     def test_fallback_behavior(self, mock_get):
         """Test fallback behavior when LiveStatusVerifier is unavailable."""
@@ -201,6 +198,79 @@ class TestNoQuotaStreamChecker(unittest.TestCase):
         self.assertIsInstance(result, dict)
         self.assertFalse(result.get('live', True))
 
+    @patch('modules.platform_integration.youtube_auth.src.youtube_auth.get_authenticated_service')
+    def test_api_verification_reuses_cached_service(self, mock_auth):
+        """API verification should not rebuild the YouTube service per video check."""
+        mock_service = MagicMock()
+        mock_service._credential_set = 10
+        mock_service.videos.return_value.list.return_value.execute.return_value = {
+            "items": [
+                {
+                    "snippet": {
+                        "channelId": self.test_channel_id,
+                        "liveBroadcastContent": "none",
+                    },
+                    "liveStreamingDetails": {},
+                }
+            ]
+        }
+        mock_auth.return_value = mock_service
+
+        first = self.checker.check_video_is_live(self.test_video_id, scraping_prefilter=False)
+        second = self.checker.check_video_is_live("abc123def45", scraping_prefilter=False)
+
+        self.assertFalse(first.get("live"))
+        self.assertFalse(second.get("live"))
+        mock_auth.assert_called_once()
+
+    @patch('requests.Session.get')
+    @patch.object(NoQuotaStreamChecker, "_anti_detection_delay")
+    @patch.object(NoQuotaStreamChecker, "check_video_is_live")
+    def test_channel_mismatch_is_recommended_debug_not_warning(self, mock_check_video, mock_delay, mock_get):
+        """Recommended streams from other channels are expected, not warnings."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.url = f"https://www.youtube.com/channel/{self.test_channel_id}/live"
+        mock_response.headers = {}
+        mock_response.text = '"BADGE_STYLE_TYPE_LIVE_NOW" "videoId":"dQw4w9WgXcQ"'
+        mock_get.return_value = mock_response
+        mock_check_video.return_value = {
+            "live": True,
+            "video_id": self.test_video_id,
+            "method": "api",
+            "channel_id": "UCOTHERCHANNEL1234567890",
+        }
+
+        with patch('modules.platform_integration.stream_resolver.src.no_quota_stream_checker.logger.warning') as mock_warning, \
+             patch('modules.platform_integration.stream_resolver.src.no_quota_stream_checker.logger.debug') as mock_debug:
+            result = self.checker.check_channel_for_live(self.test_channel_id)
+
+        self.assertIsInstance(result, dict)
+        self.assertEqual(result.get("status"), "stale_indicator")
+        mock_warning.assert_not_called()
+        self.assertTrue(any("[RECOMMENDED]" in str(call) for call in mock_debug.call_args_list))
+
+    @patch('requests.Session.get')
+    @patch.object(NoQuotaStreamChecker, "_anti_detection_delay")
+    @patch.object(NoQuotaStreamChecker, "check_video_is_live")
+    def test_stale_indicator_returned_when_live_dom_has_no_verified_stream(self, mock_check_video, mock_delay, mock_get):
+        """Live-looking DOM without verified live videos is reported as stale, not live."""
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.url = f"https://www.youtube.com/channel/{self.test_channel_id}/live"
+        mock_response.headers = {}
+        mock_response.text = '"isLiveNow":true "BADGE_STYLE_TYPE_LIVE_NOW" "videoId":"dQw4w9WgXcQ"'
+        mock_get.return_value = mock_response
+        mock_check_video.return_value = {"live": False, "method": "api", "status": "none"}
+
+        result = self.checker.check_channel_for_live(self.test_channel_id)
+
+        self.assertIsInstance(result, dict)
+        self.assertFalse(result.get("live"))
+        self.assertEqual(result.get("status"), "stale_indicator")
+        self.assertEqual(result.get("confidence"), 0.3)
+        self.assertEqual(result.get("source"), "no_quota_live_page")
+
     def test_session_configuration(self):
         """Test that session is properly configured."""
         self.assertIsNotNone(self.checker.session)
@@ -222,6 +292,48 @@ class TestNoQuotaStreamChecker(unittest.TestCase):
 
         # Should be the same object (cached)
         self.assertIs(verifier1, verifier2)
+
+    def test_timeout_env_parsing_invalid_falls_back(self):
+        """Malformed YT_STREAM_REQUEST_TIMEOUT_SEC falls back to 30."""
+        import os
+        old_val = os.environ.get("YT_STREAM_REQUEST_TIMEOUT_SEC")
+        try:
+            os.environ["YT_STREAM_REQUEST_TIMEOUT_SEC"] = "not_a_number"
+            result = NoQuotaStreamChecker._parse_timeout_env()
+            self.assertEqual(result, 30.0)
+        finally:
+            if old_val is None:
+                os.environ.pop("YT_STREAM_REQUEST_TIMEOUT_SEC", None)
+            else:
+                os.environ["YT_STREAM_REQUEST_TIMEOUT_SEC"] = old_val
+
+    def test_timeout_env_parsing_negative_falls_back(self):
+        """Negative YT_STREAM_REQUEST_TIMEOUT_SEC falls back to 30."""
+        import os
+        old_val = os.environ.get("YT_STREAM_REQUEST_TIMEOUT_SEC")
+        try:
+            os.environ["YT_STREAM_REQUEST_TIMEOUT_SEC"] = "-5"
+            result = NoQuotaStreamChecker._parse_timeout_env()
+            self.assertEqual(result, 30.0)
+        finally:
+            if old_val is None:
+                os.environ.pop("YT_STREAM_REQUEST_TIMEOUT_SEC", None)
+            else:
+                os.environ["YT_STREAM_REQUEST_TIMEOUT_SEC"] = old_val
+
+    def test_timeout_env_parsing_clamps_to_max(self):
+        """Excessive YT_STREAM_REQUEST_TIMEOUT_SEC is clamped to 120."""
+        import os
+        old_val = os.environ.get("YT_STREAM_REQUEST_TIMEOUT_SEC")
+        try:
+            os.environ["YT_STREAM_REQUEST_TIMEOUT_SEC"] = "999"
+            result = NoQuotaStreamChecker._parse_timeout_env()
+            self.assertEqual(result, 120.0)
+        finally:
+            if old_val is None:
+                os.environ.pop("YT_STREAM_REQUEST_TIMEOUT_SEC", None)
+            else:
+                os.environ["YT_STREAM_REQUEST_TIMEOUT_SEC"] = old_val
 
 
 class TestNoQuotaStreamCheckerIntegration(unittest.TestCase):

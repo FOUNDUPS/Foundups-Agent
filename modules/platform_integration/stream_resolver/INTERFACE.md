@@ -98,6 +98,66 @@ except QuotaExceededError:
     print("YouTube API quota exceeded")
 ```
 
+## Service Caching (WSP 97 Truth Signal Hardening)
+
+### StreamResolver Service Cache
+The `StreamResolver` class caches authenticated YouTube API services per credential set to avoid rebuilding services on every verification call.
+
+**Methods:**
+- `_get_cached_authenticated_service(credential_set=None)`: Returns cached service or builds and caches a new one
+- `_invalidate_cached_authenticated_service(service=None)`: Drops cached services after quota/auth failures
+
+**Behavior:**
+- First call builds and caches the service
+- Subsequent calls return cached service (DEBUG log: "Reusing cached YouTube service")
+- On quota/auth error, cache is invalidated to allow rotation
+
+### NoQuotaStreamChecker Service Cache
+The `NoQuotaStreamChecker` class also caches its authenticated YouTube service.
+
+**Methods:**
+- `_get_authenticated_youtube_service()`: Returns cached service or builds and caches a new one
+- `_invalidate_youtube_service_cache(service=None)`: Drops cached services after quota/auth failures
+
+## Request Timeout Configuration
+
+**Environment Variable:** `YT_STREAM_REQUEST_TIMEOUT_SEC`
+- **Default:** 30 seconds
+- **Minimum:** 5 seconds (clamped)
+- **Maximum:** 120 seconds (clamped)
+- **Fallback:** Malformed, zero, or negative values fall back to 30
+
+**Parsing:** `NoQuotaStreamChecker._parse_timeout_env()` validates and clamps the value safely.
+
+## Stale Indicator Handling
+
+When live-looking DOM indicators are found but no verified live stream exists, a structured `stale_indicator` result is returned:
+
+```python
+{
+    "live": False,
+    "status": "stale_indicator",
+    "confidence": 0.3,
+    "source": "no_quota_live_page" | "no_quota_streams_page",
+    "channel_id": "...",
+    "channel_name": "...",
+    "indicator_count": N
+}
+```
+
+**Behavior:**
+- `/live` page with stale indicators returns immediately (does not fall through to `/streams`)
+- This is intentional: if `/live` shows stale indicators, `/streams` likely has the same issue
+- Callers can check `result.get("status") == "stale_indicator"` to distinguish from verified non-live
+
+## Channel Mismatch (Recommended Content)
+
+When a video's channel ID doesn't match the target channel, it's treated as expected recommended content:
+- Logged at DEBUG level with `[RECOMMENDED]` prefix
+- Not logged as warning/error
+- Skipped in verification loop
+- Evidence preserved in `source`, `target_channel_id`, `observed_channel_id` fields
+
 ## Dependencies
 - googleapiclient.discovery
 - googleapiclient.errors

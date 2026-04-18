@@ -87,6 +87,8 @@ class NoQuotaStreamChecker:
 
         self.channel_cooldowns = {}
         self.last_rate_limit = None
+        self.request_timeout_sec = self._parse_timeout_env()
+        self._youtube_service_cache = {}
         
         # CAPTCHA defense: Global cooldown mode
         self.captcha_cooldown_until = None
@@ -94,6 +96,31 @@ class NoQuotaStreamChecker:
         self.max_videos_to_check = 3  # Dynamically reduced on CAPTCHA
 
         logger.info("[INFO] NO-QUOTA stream checker initialized")
+
+    @staticmethod
+    def _parse_timeout_env() -> float:
+        """Parse YT_STREAM_REQUEST_TIMEOUT_SEC safely with fallback and clamping."""
+        default = 30.0
+        min_timeout = 5.0
+        max_timeout = 120.0
+        raw = os.getenv("YT_STREAM_REQUEST_TIMEOUT_SEC", "")
+        if not raw:
+            return default
+        try:
+            val = float(raw)
+            if val <= 0:
+                logger.warning("[CONFIG] YT_STREAM_REQUEST_TIMEOUT_SEC=%s is non-positive; using default %.0f", raw, default)
+                return default
+            if val < min_timeout:
+                logger.warning("[CONFIG] YT_STREAM_REQUEST_TIMEOUT_SEC=%.0f below minimum; clamping to %.0f", val, min_timeout)
+                return min_timeout
+            if val > max_timeout:
+                logger.warning("[CONFIG] YT_STREAM_REQUEST_TIMEOUT_SEC=%.0f above maximum; clamping to %.0f", val, max_timeout)
+                return max_timeout
+            return val
+        except ValueError:
+            logger.warning("[CONFIG] YT_STREAM_REQUEST_TIMEOUT_SEC=%s is invalid; using default %.0f", raw, default)
+            return default
 
     def _get_live_verifier(self):
         """Lazy-load LiveStatusVerifier to avoid circular dependency during initialization"""
@@ -138,7 +165,7 @@ class NoQuotaStreamChecker:
 
     @staticmethod
     def _looks_like_captcha(text: str) -> bool:
-        if not text:
+        if not text or not isinstance(text, str):
             return False
         lowered = text.lower()
         return ("google.com/sorry" in lowered) or ("www.google.com/sorry" in lowered)
@@ -166,10 +193,10 @@ class NoQuotaStreamChecker:
         # Increased default delays from 8-15s to 10-18s to reduce CAPTCHA triggers
         base_delay = random.uniform(min_delay, max_delay)
         delay = min(base_delay * max(multiplier, 1.0), 60.0)
-        if _env_truthy("STREAM_VERBOSE_LOGS", "false"):
-            logger.info(f"[RATE-LIMIT] Backoff delay: {delay:.1f}s")
+        if _env_truthy("STREAM_VERBOSE_LOGS", "false") or delay >= 8.0:
+            logger.info(f"[NO-QUOTA] Scrape backoff delay: {delay:.1f}s")
         else:
-            logger.debug(f"[RATE-LIMIT] Backoff delay: {delay:.1f}s")
+            logger.debug(f"[NO-QUOTA] Scrape backoff delay: {delay:.1f}s")
         time.sleep(delay)
 
     def _is_channel_rate_limited(self, channel_id: str):
@@ -246,6 +273,48 @@ class NoQuotaStreamChecker:
                 self.max_videos_to_check = 3  # Fully restore
                 logger.info("[CAPTCHA] Backoff state reset after successful requests")
 
+    def _get_authenticated_youtube_service(self):
+        """Return a cached YouTube service for this checker process."""
+        cached = self._youtube_service_cache.get("auto")
+        if cached is not None:
+            credential_set = getattr(cached, "_credential_set", "auto")
+            logger.debug("[API] Reusing cached YouTube service for credential set %s", credential_set)
+            return cached
+
+        from modules.platform_integration.youtube_auth.src.youtube_auth import get_authenticated_service
+
+        service = get_authenticated_service()
+        if service is not None:
+            credential_set = getattr(service, "_credential_set", "auto")
+            self._youtube_service_cache["auto"] = service
+            self._youtube_service_cache[credential_set] = service
+            logger.info("[API] Cached YouTube service for credential set %s", credential_set)
+        return service
+
+    def _invalidate_youtube_service_cache(self, service=None) -> None:
+        """Drop cached API services after quota/auth failures so rotation can retry."""
+        if service is None:
+            self._youtube_service_cache.clear()
+            return
+
+        for key, cached in list(self._youtube_service_cache.items()):
+            if cached is service:
+                self._youtube_service_cache.pop(key, None)
+
+    @staticmethod
+    def _live_indicator_result(channel_id: str, channel_name: Optional[str], source: str, indicator_count: int) -> Dict[str, Any]:
+        """Truthful result for live-looking DOM state without a verified live stream."""
+        display_name = channel_name or channel_id
+        return {
+            "live": False,
+            "status": "stale_indicator",
+            "confidence": 0.3,
+            "source": source,
+            "channel_id": channel_id,
+            "channel_name": display_name,
+            "indicator_count": indicator_count,
+        }
+
     def check_video_is_live(self, video_id: str, channel_name: str = None, scraping_prefilter: bool = True) -> Dict[str, Any]:
         """
         Efficient hybrid verification: Scraping first, API only for confirmation
@@ -292,7 +361,16 @@ class NoQuotaStreamChecker:
                 headers = self._get_random_headers()
 
                 # Use session to enable retry strategy with exponential backoff
-                response = self.session.get(url, headers=headers, timeout=15)
+                logger.info(
+                    "[NO-QUOTA] Checking video %s... (scraping, timeout=%.0fs)",
+                    video_id,
+                    self.request_timeout_sec,
+                )
+                request_start = time.time()
+                response = self.session.get(url, headers=headers, timeout=self.request_timeout_sec)
+                elapsed = time.time() - request_start
+                if elapsed >= 8.0:
+                    logger.info("[NO-QUOTA] Video scrape completed after %.1fs for %s", elapsed, video_id)
 
                 # Detect CAPTCHA redirect to Google sorry page
                 captcha_hit = False
@@ -380,9 +458,7 @@ class NoQuotaStreamChecker:
 
         try:
             # Direct API call without going through LiveStatusVerifier to avoid circular dependency
-            from modules.platform_integration.youtube_auth.src.youtube_auth import get_authenticated_service
-
-            youtube_service = get_authenticated_service()
+            youtube_service = self._get_authenticated_youtube_service()
             request = youtube_service.videos().list(
                 part="snippet,liveStreamingDetails",
                 id=video_id
@@ -414,6 +490,7 @@ class NoQuotaStreamChecker:
             if any(phrase in error_str for phrase in ['quota', 'limit exceeded', 'daily limit', 'rate limit']):
                 logger.warning(f"[U+26A0] API quota exhausted during verification: {e}")
                 logger.info(f"[QUOTA] Returning rate_limited status to trigger rotation upstream")
+                self._invalidate_youtube_service_cache(locals().get("youtube_service"))
                 return {"live": False, "rate_limited": True, "method": "api", "error": str(e)}
             else:
                 if scraping_indicated_live:
@@ -439,7 +516,16 @@ class NoQuotaStreamChecker:
             headers = self._get_random_headers()
 
             # Use session to enable retry strategy with exponential backoff
-            response = self.session.get(url, headers=headers, timeout=15)
+            logger.info(
+                "[NO-QUOTA] Checking video %s with comprehensive scrape... (timeout=%.0fs)",
+                video_id,
+                self.request_timeout_sec,
+            )
+            request_start = time.time()
+            response = self.session.get(url, headers=headers, timeout=self.request_timeout_sec)
+            elapsed = time.time() - request_start
+            if elapsed >= 8.0:
+                logger.info("[NO-QUOTA] Comprehensive scrape completed after %.1fs for %s", elapsed, video_id)
 
             # Detect CAPTCHA redirect to Google sorry page
             if 'google.com/sorry' in response.url or 'www.google.com/sorry' in response.url:
@@ -824,6 +910,12 @@ class NoQuotaStreamChecker:
                 logger.info("[SEARCH] NO-QUOTA CHANNEL CHECK")
                 logger.info(f"  - Channel ID: {channel_id}")
                 logger.info(f"  - Trying URL: {live_url}")
+                display_name = channel_name or channel_id
+                logger.info(
+                    "[NO-QUOTA] Checking %s... (scraping, timeout=%.0fs)",
+                    display_name,
+                    self.request_timeout_sec,
+                )
 
                 # Anti-detection measures for channel check
                 self._anti_detection_delay()
@@ -831,7 +923,11 @@ class NoQuotaStreamChecker:
 
                 # Use session with retry strategy for better rate limit handling
                 # Important: do NOT follow redirects to watch pages (high CAPTCHA risk).
-                response = self.session.get(live_url, headers=headers, timeout=15, allow_redirects=False)
+                request_start = time.time()
+                response = self.session.get(live_url, headers=headers, timeout=self.request_timeout_sec, allow_redirects=False)
+                elapsed = time.time() - request_start
+                if elapsed >= 8.0:
+                    logger.info("[NO-QUOTA] Channel scrape completed after %.1fs for %s", elapsed, display_name)
 
                 if response.status_code == 429:
                     cooldown = self._register_rate_limit(channel_id, channel_name)
@@ -872,6 +968,17 @@ class NoQuotaStreamChecker:
                     logger.info(f"  - Status Code: {response.status_code}")
                 else:
                     logger.debug(f"[SEARCH] response_url={response.url} status={response.status_code}")
+
+                response_video_id = self._extract_video_id(getattr(response, "url", ""))
+                if response_video_id:
+                    display_name = channel_name or channel_id
+                    logger.info(f"[VIDEO] /live resolved to video for {display_name}: {response_video_id}")
+                    result = self.check_video_is_live(response_video_id, channel_name, scraping_prefilter=False)
+                    if isinstance(result, dict) and result.get("rate_limited"):
+                        return result
+                    if result and result.get("live"):
+                        return result
+                    continue
 
                 # Check if we're on the channel page
                 if response.status_code == 200:
@@ -1007,8 +1114,14 @@ class NoQuotaStreamChecker:
                                     found_cid = result.get('channel_id')
                                     if found_cid and channel_id.startswith('UC') and len(channel_id) == 24:
                                         if found_cid != channel_id:
-                                            logger.warning(f"[MISMATCH] Found live stream but channel ID mismatch: {found_cid} != {channel_id}")
-                                            logger.info(f"[MISMATCH] This is likely a recommended stream from another channel. Skipping.")
+                                            result["source"] = "recommended"
+                                            result["target_channel_id"] = channel_id
+                                            result["observed_channel_id"] = found_cid
+                                            logger.debug(
+                                                "[RECOMMENDED] Live candidate from %s while checking %s; skipping expected recommendation",
+                                                found_cid,
+                                                channel_id,
+                                            )
                                             continue
                                             
                                     logger.info(f"[SUCCESS] Video {video_id} is LIVE!")
@@ -1046,7 +1159,13 @@ class NoQuotaStreamChecker:
 
                             # No videos verified and no CAPTCHA trust possible
                             logger.info(f"[SKIP] Found video IDs but none verified as actually live")
-                            logger.info(f"[INFO] Page had live indicators but videos are not live (stale page?)")
+                            logger.info(f"[STALE] Page had live indicators but no verified live stream")
+                            return self._live_indicator_result(
+                                channel_id,
+                                channel_name,
+                                "no_quota_live_page",
+                                indicator_count,
+                            )
 
             except Exception as e:
                 logger.error(f"Error checking URL {live_url}: {e}")
@@ -1065,7 +1184,17 @@ class NoQuotaStreamChecker:
                 headers = self._get_random_headers()
 
                 # Use session with retry strategy for better rate limit handling
-                response = self.session.get(streams_url, headers=headers, timeout=15, allow_redirects=False)
+                display_name = channel_name or channel_id
+                logger.info(
+                    "[NO-QUOTA] Checking %s streams tab... (scraping, timeout=%.0fs)",
+                    display_name,
+                    self.request_timeout_sec,
+                )
+                request_start = time.time()
+                response = self.session.get(streams_url, headers=headers, timeout=self.request_timeout_sec, allow_redirects=False)
+                elapsed = time.time() - request_start
+                if elapsed >= 8.0:
+                    logger.info("[NO-QUOTA] Streams scrape completed after %.1fs for %s", elapsed, display_name)
 
                 if response.status_code == 429:
                     cooldown = self._register_rate_limit(channel_id, channel_name)
@@ -1152,6 +1281,14 @@ class NoQuotaStreamChecker:
                             logger.info("  - No videos found on streams page")
                         else:
                             logger.debug("[STREAMS] No videos found on streams page")
+                        indicator_count = sum([has_is_live_now, has_live_badge, has_watching, has_live_text])
+                        logger.info("[STALE] Streams tab had live indicators but no video IDs")
+                        return self._live_indicator_result(
+                            channel_id,
+                            channel_name,
+                            "no_quota_streams_page",
+                            indicator_count,
+                        )
 
                     if skip_api and videos_to_check:
                         display_name = channel_name or channel_id
@@ -1199,8 +1336,14 @@ class NoQuotaStreamChecker:
                             found_cid = result.get('channel_id')
                             if found_cid and channel_id.startswith('UC') and len(channel_id) == 24:
                                 if found_cid != channel_id:
-                                    logger.warning(f"[MISMATCH] Found live stream but channel ID mismatch: {found_cid} != {channel_id}")
-                                    logger.info(f"[MISMATCH] This is likely a recommended stream from another channel. Skipping.")
+                                    result["source"] = "recommended"
+                                    result["target_channel_id"] = channel_id
+                                    result["observed_channel_id"] = found_cid
+                                    logger.debug(
+                                        "[RECOMMENDED] Live candidate from %s while checking %s; skipping expected recommendation",
+                                        found_cid,
+                                        channel_id,
+                                    )
                                     continue
                                     
                             # Add channel name to result for better logging
@@ -1224,6 +1367,16 @@ class NoQuotaStreamChecker:
                             "source": "api_failure_trust",
                             "indicator_count": indicator_count,
                         }
+
+                    if videos_to_check:
+                        indicator_count = sum([has_is_live_now, has_live_badge, has_watching, has_live_text])
+                        logger.info("[STALE] Streams tab had live indicators but no verified live stream")
+                        return self._live_indicator_result(
+                            channel_id,
+                            channel_name,
+                            "no_quota_streams_page",
+                            indicator_count,
+                        )
 
             except Exception as e:
                 error_text = str(e)

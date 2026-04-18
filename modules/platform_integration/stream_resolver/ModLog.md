@@ -12,6 +12,55 @@ This log tracks changes specific to the **stream_resolver** module in the **plat
 
 ## MODLOG ENTRIES
 
+### 2026-04-18 - Truth Signal Hardening (Worker SR1)
+
+**By:** 0102 - Worker SR1
+**WSP References:** WSP 97 (Truthful Guarantees), WSP 91 (Observability), WSP 22 (ModLog)
+
+**Problem:** Stream resolver had poor truth signaling:
+- YouTube services rebuilt repeatedly per verification call
+- Channel mismatch logged as warning (but recommended content is expected)
+- Live-looking DOM indicators could be stale
+- Request timeout not configurable
+- Some tests hit real auth/network paths
+
+**Changes:**
+
+1. **Service Caching (StreamResolver + NoQuotaStreamChecker)**
+   - `_get_cached_authenticated_service()` / `_get_authenticated_youtube_service()`
+   - `_invalidate_cached_authenticated_service()` / `_invalidate_youtube_service_cache()`
+   - Cache by credential set, invalidate on quota/auth failure
+
+2. **Timeout Configuration**
+   - Env: `YT_STREAM_REQUEST_TIMEOUT_SEC` (default 30, clamped 5-120)
+   - `_parse_timeout_env()` handles malformed, zero, negative values safely
+
+3. **Stale Indicator Handling**
+   - `_live_indicator_result()` returns structured non-live result
+   - `{live: false, status: "stale_indicator", confidence: 0.3, ...}`
+   - `/live` stale does NOT fall through to `/streams` (intentional: same issue likely)
+
+4. **Channel Mismatch Reclassified**
+   - Recommended streams from other channels logged at DEBUG with `[RECOMMENDED]`
+   - Not warning/error (this is expected behavior)
+   - Evidence preserved in result metadata
+
+5. **Progress Visibility**
+   - Log before channel/video scraping starts with timeout
+   - Log elapsed time for slow requests (>=8s)
+
+**Tests Added:**
+- `test_api_verification_reuses_cached_service`
+- `test_channel_mismatch_is_recommended_debug_not_warning`
+- `test_stale_indicator_returned_when_live_dom_has_no_verified_stream`
+- `test_timeout_env_parsing_invalid_falls_back`
+- `test_timeout_env_parsing_negative_falls_back`
+- `test_timeout_env_parsing_clamps_to_max`
+
+**Test Results:** 36/36 passed (23 no_quota_stream_checker + 13 anti_rate_limit)
+
+---
+
 ### 2026-02-06 - Vision Refactored to Verification-Only (Architecture Fix)
 
 **By:** 0102

@@ -1,6 +1,40 @@
 # Testing Evolution Log - Stream Resolver
 
-## LATEST UPDATE - 2025-12-22 No-API Stream Detection Coverage [OK]
+## LATEST UPDATE - 2026-04-18 Truth Signal Hardening (Worker SR1) [OK]
+
+### Test Run
+```bash
+python -m pytest modules/platform_integration/stream_resolver/tests/test_no_quota_stream_checker.py modules/platform_integration/stream_resolver/tests/test_no_quota_anti_rate_limit.py -v
+```
+
+### Results
+- `test_no_quota_stream_checker.py`: **23 passed** in 69s
+- `test_no_quota_anti_rate_limit.py`: **13 passed** in 10s
+- **Total: 36 passed**
+
+### New Tests Added
+| Test | Purpose |
+|------|---------|
+| `test_api_verification_reuses_cached_service` | Service cache hit on second API call |
+| `test_channel_mismatch_is_recommended_debug_not_warning` | Recommended streams log at DEBUG |
+| `test_stale_indicator_returned_when_live_dom_has_no_verified_stream` | Live DOM without verified stream → stale_indicator |
+| `test_timeout_env_parsing_invalid_falls_back` | Malformed env → default 30 |
+| `test_timeout_env_parsing_negative_falls_back` | Negative env → default 30 |
+| `test_timeout_env_parsing_clamps_to_max` | Excessive env → clamp to 120 |
+
+### Files Updated
+- `test_no_quota_stream_checker.py`: Added 6 new tests, fixed import paths
+- `test_no_quota_anti_rate_limit.py`: Updated mocks to avoid real auth/network
+
+### WSP 97 Coverage
+- Service cache reuse verified (no redundant builds)
+- Timeout parsing safety verified (fallback + clamp)
+- Stale indicator structure verified
+- Channel mismatch log level verified
+
+---
+
+## PREVIOUS UPDATE - 2025-12-22 No-API Stream Detection Coverage [OK]
 
 ### Test Additions
 - Added no-API indicator trust coverage for /live pages.

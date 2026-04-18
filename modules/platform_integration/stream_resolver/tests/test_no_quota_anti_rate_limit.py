@@ -154,16 +154,16 @@ class TestAntiRateLimiting(unittest.TestCase):
         channel_response = Mock()
         channel_response.status_code = 302
         channel_response.url = 'https://www.youtube.com/channel/test_channel_id/live'
-        channel_response.headers = {"Location": "/watch?v=live123"}
+        channel_response.headers = {"Location": "/watch?v=dQw4w9WgXcQ"}
         mock_get.return_value = channel_response
 
         with patch.object(self.checker, '_anti_detection_delay'), patch.object(self.checker, 'check_video_is_live') as mock_check_video:
-            mock_check_video.return_value = {"live": True, "video_id": "live123", "method": "api"}
+            mock_check_video.return_value = {"live": True, "video_id": "dQw4w9WgXcQ", "method": "api"}
             result = self.checker.check_channel_for_live('test_channel_id')
 
         self.assertIsNotNone(result)
         self.assertTrue(result.get("live"))
-        self.assertEqual(result.get("video_id"), "live123")
+        self.assertEqual(result.get("video_id"), "dQw4w9WgXcQ")
         self.assertFalse(mock_get.call_args[1].get("allow_redirects", True))
 
     def test_cookie_persistence(self):
@@ -185,9 +185,9 @@ class TestAntiRateLimiting(unittest.TestCase):
             with patch.object(self.checker, '_anti_detection_delay'):
                 self.checker.check_video_is_live('test_id')
 
-                # Check timeout is 15 seconds
+                # Check timeout matches the explicit channel/video request timeout
                 call_args = mock_get.call_args
-                self.assertEqual(call_args[1]['timeout'], 15)
+                self.assertEqual(call_args[1]['timeout'], self.checker.request_timeout_sec)
 
     @patch('requests.Session.get')
     def test_exponential_backoff_on_errors(self, mock_get):
@@ -217,7 +217,8 @@ class TestLiveStreamDetection(unittest.TestCase):
         self.checker = NoQuotaStreamChecker()
 
     @patch('requests.Session.get')
-    def test_live_stream_detection(self, mock_get):
+    @patch('modules.platform_integration.youtube_auth.src.youtube_auth.get_authenticated_service')
+    def test_live_stream_detection(self, mock_auth, mock_get):
         """Test detection of actually live streams"""
         # Mock response with live indicators
         mock_response = Mock()
@@ -234,7 +235,10 @@ class TestLiveStreamDetection(unittest.TestCase):
                 </script>
             </html>
         '''
+        mock_response.url = 'https://www.youtube.com/watch?v=live_video_id'
+        mock_response.headers = {}
         mock_get.return_value = mock_response
+        mock_auth.side_effect = RuntimeError("auth unavailable in unit test")
 
         with patch.object(self.checker, '_anti_detection_delay'):
             result = self.checker.check_video_is_live('live_video_id')
@@ -271,18 +275,22 @@ class TestIntegration(unittest.TestCase):
     """Integration tests for the complete system"""
 
     @patch('requests.Session.get')
-    def test_full_stream_check_workflow(self, mock_get):
+    @patch('modules.platform_integration.youtube_auth.src.youtube_auth.get_authenticated_service')
+    def test_full_stream_check_workflow(self, mock_auth, mock_get):
         """Test complete workflow from channel to live detection"""
         checker = NoQuotaStreamChecker()
 
         # Mock channel redirects to live video
         channel_response = Mock()
         channel_response.status_code = 200
-        channel_response.url = 'https://www.youtube.com/watch?v=live123'
+        channel_response.url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+        channel_response.headers = {}
 
         # Mock live video response
         video_response = Mock()
         video_response.status_code = 200
+        video_response.url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+        video_response.headers = {}
         video_response.text = '''
             <html>
                 <title>LIVE - Stream - YouTube</title>
@@ -295,6 +303,20 @@ class TestIntegration(unittest.TestCase):
         '''
 
         mock_get.side_effect = [channel_response, video_response]
+        mock_service = MagicMock()
+        mock_service._credential_set = 1
+        mock_service.videos.return_value.list.return_value.execute.return_value = {
+            "items": [
+                {
+                    "snippet": {
+                        "channelId": "test_channel",
+                        "liveBroadcastContent": "live",
+                    },
+                    "liveStreamingDetails": {},
+                }
+            ]
+        }
+        mock_auth.return_value = mock_service
 
         with patch.object(checker, '_anti_detection_delay'):
             result = checker.check_channel_for_live('test_channel')
@@ -302,7 +324,7 @@ class TestIntegration(unittest.TestCase):
             # Should find live stream
             self.assertIsNotNone(result)
             self.assertTrue(result['live'])
-            self.assertEqual(result['video_id'], 'live123')
+            self.assertEqual(result['video_id'], 'dQw4w9WgXcQ')
 
 
 def run_tests():
