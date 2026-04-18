@@ -7,6 +7,52 @@
 
 ## Change Log
 
+### 2026-04-19 - YTR1: YouTube Reply Runtime Hardening Phase 1
+
+**By:** 0102 (CW5)
+**WSP References:** WSP 22 (ModLog), WSP 97 (Truth-First)
+
+**Slice:** YTR1 - YOUTUBE_REPLY_RUNTIME_HARDENING_PHASE1
+
+**Problem:** Runtime issues in comment engagement DAE:
+1. LM Studio auto-selection could choose TTS/audio models (e.g., qwen3-tts) for text generation
+2. TTS control tokens (`<|s_XXXX|>`) accepted as valid LLM output, causing garbage replies
+3. Default topic "politics" caused false MAGA_TROLL classification bias
+4. StaleElementReferenceException crash during long reply typing (1700+ chars)
+
+**Solution:**
+
+1. **P0 - TTS Model Exclusion** (`intelligent_reply_generator.py:1158-1175`):
+   - Exclude models containing: tts, audio, speech, whisper, bark, kokoro, dia
+   - Error if only TTS models available
+   - Respect explicit `LM_STUDIO_MODEL` env var
+
+2. **P0 - TTS Token Rejection** (`intelligent_reply_generator.py:1517-1527`, `2033-2044`):
+   - Reject outputs starting with: `<|s_`, `<|audio`, `<|speech`, `<|tts`
+   - Fall through to next LLM on rejection
+   - Fixed username analysis regex with word boundaries
+
+3. **P1 - Stale Element Recovery** (`reply_executor.py:572-651`):
+   - Catch StaleElementReferenceException around typing loop
+   - Re-find textarea via Shadow DOM (single retry)
+   - Resume from current text position
+   - Structured failure after second stale
+
+4. **P2 - Default Topic Fix** (`comment_content_analyzer.py:442-450`):
+   - Default topic now "general" not "politics"
+   - Added explicit politics keywords: trump, biden, democrat, republican, congress, senate
+
+**Files Changed:**
+- `src/intelligent_reply_generator.py` - TTS exclusion + token rejection
+- `src/comment_content_analyzer.py` - Default topic fix
+- `skillz/tars_like_heart_reply/src/reply_executor.py` - Stale element recovery
+- `tests/test_ytr1_runtime_hardening.py` - 9 tests (all pass)
+
+**Deferred:**
+- MODEL_ROLES registry (YTR2) - env var workaround sufficient
+
+---
+
 ### 2026-02-27 - IMPROVE: Smart OOPS Page Recovery (Detect-Before-Swap)
 
 **By:** 0102
