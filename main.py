@@ -527,6 +527,29 @@ def run_dependency_security_preflight(repo_root: Path) -> bool:
         f"critical={critical} high={high} unknown={unknown} tool_failures={tool_failures}"
     )
 
+    if not passed:
+        try:
+            from modules.ai_intelligence.ai_overseer.src.preflight_resolution import (
+                on_preflight_fail,
+            )
+
+            severity = "critical" if critical > 0 else ("high" if high > 0 else "medium")
+            on_preflight_fail(
+                component="dep_security",
+                severity=severity,
+                payload={
+                    "critical": critical,
+                    "high": high,
+                    "unknown": unknown,
+                    "tool_failures": tool_failures,
+                    "cache_state": cache_state,
+                    "enforced": enforced,
+                },
+                source="main.py:run_dep_security_preflight",
+            )
+        except Exception as exc:
+            logger.debug(f"[DEP-SECURITY] preflight dispatch failed: {exc}")
+
     if not passed and enforced:
         print("[DEP-SECURITY] Startup blocked by OPENCLAW_DEP_SECURITY_PREFLIGHT_ENFORCED=1")
         return False
@@ -872,6 +895,33 @@ def run_wsp_framework_preflight(repo_root: Path, overseer: Any | None = None) ->
         f"drift={drift_count} framework_only={framework_only_count} "
         f"knowledge_only={knowledge_only_count} index_issues={index_issue_count}"
     )
+
+    if canonical_fail:
+        try:
+            from modules.ai_intelligence.ai_overseer.src.preflight_resolution import (
+                on_preflight_fail,
+            )
+
+            severity = (
+                "high" if (drift_count > 0 or framework_only_count > 0 or index_issue_count > 0) else "medium"
+            )
+            on_preflight_fail(
+                component="wsp_framework",
+                severity=severity,
+                payload={
+                    "available": available,
+                    "drift_count": drift_count,
+                    "framework_only_count": framework_only_count,
+                    "knowledge_only_count": knowledge_only_count,
+                    "index_issue_count": index_issue_count,
+                    "cache_state": cache_state,
+                    "enforced": enforced,
+                    "allow_backup_only": allow_backup_only,
+                },
+                source="main.py:run_wsp_framework_preflight",
+            )
+        except Exception as exc:
+            logger.debug(f"[WSP-FRAMEWORK] preflight dispatch failed: {exc}")
 
     if canonical_fail and enforced:
         print("[WSP-FRAMEWORK] Startup blocked by WSP_FRAMEWORK_PREFLIGHT_ENFORCED=1")
