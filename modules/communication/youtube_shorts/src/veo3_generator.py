@@ -21,7 +21,8 @@ from dotenv import load_dotenv
 # Initialize logger FIRST for import debugging
 logger = logging.getLogger(__name__)
 
-# Use newer google.genai SDK for Veo 3 video generation (optional dependency)
+# Use google.genai SDK for both Veo 3 video generation and Gemini text (prompt enhancement)
+# Note: google.generativeai is deprecated - all functionality migrated to google.genai
 _GENAI_IMPORT_ERROR = None
 try:
     import google.genai as genai
@@ -32,16 +33,6 @@ except ImportError as e:
     types = None  # type: ignore
     _GENAI_IMPORT_ERROR = e
     logger.warning("[VEO3-IMPORT] [FAIL] google.genai not available: %s", e)
-
-# Keep generativeai for Gemini text (prompt enhancement)
-_GENAI_LEGACY_IMPORT_ERROR = None
-try:
-    import google.generativeai as genai_legacy
-    logger.info("[VEO3-IMPORT] google.generativeai imported successfully")
-except ImportError as e:
-    genai_legacy = None  # type: ignore
-    _GENAI_LEGACY_IMPORT_ERROR = e
-    logger.warning("[VEO3-IMPORT] google.generativeai not available: %s", e)
 
 
 class Veo3GenerationError(Exception):
@@ -129,18 +120,8 @@ class Veo3Generator:
                 raise ImportError(message) from _GENAI_IMPORT_ERROR
             raise ImportError(message)
 
-        if genai_legacy is None:
-            message = "google.generativeai is not installed. Install with: pip install google-generativeai --upgrade"
-            logger.error("[VEO3-INIT] %s", message)
-            if _GENAI_LEGACY_IMPORT_ERROR is not None:
-                raise ImportError(message) from _GENAI_LEGACY_IMPORT_ERROR
-            raise ImportError(message)
-
-        # Initialize Veo client (new SDK)
+        # Initialize genai client (handles both video and text generation)
         self.client = genai.Client(api_key=api_key)
-
-        # Configure legacy SDK for Gemini text (prompt enhancement)
-        genai_legacy.configure(api_key=api_key)
 
         # Set output directory
         if output_dir is None:
@@ -371,8 +352,6 @@ class Veo3Generator:
             print(f"[Veo3] Stage 1 (Move2Japan): {enhanced_v1[:100]}...")
 
             # Stage 2: Gemini final polish for Veo 3 optimization
-            model = genai_legacy.GenerativeModel('gemini-2.5-flash')  # 2.0-flash retiring Mar 2026; 2.5-flash recommended
-
             polish_prompt = f"""
 Refine this video prompt for Google Veo 3 (keep under 200 words):
 
@@ -390,11 +369,12 @@ Requirements:
 Return ONLY the polished video prompt.
 """
 
-            response = model.generate_content(
-                polish_prompt,
-                generation_config=genai_legacy.types.GenerationConfig(
+            response = self.client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=polish_prompt,
+                config=types.GenerateContentConfig(
                     temperature=0.6,
-                    max_output_tokens=250
+                    maxOutputTokens=250
                 )
             )
 
@@ -415,8 +395,6 @@ Return ONLY the polished video prompt.
     def _basic_enhance(self, simple_topic: str) -> str:
         """Fallback basic enhancement without prompt_enhancer module."""
         try:
-            model = genai_legacy.GenerativeModel('gemini-2.5-flash')  # 2.0-flash retiring Mar 2026; 2.5-flash recommended
-
             enhancement_prompt = f"""
 Create a detailed video generation prompt for Google Veo 3 based on this topic:
 "{simple_topic}"
@@ -432,11 +410,12 @@ The prompt should:
 Return ONLY the video prompt, no explanation.
 """
 
-            response = model.generate_content(
-                enhancement_prompt,
-                generation_config=genai_legacy.types.GenerationConfig(
+            response = self.client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=enhancement_prompt,
+                config=types.GenerateContentConfig(
                     temperature=0.7,
-                    max_output_tokens=200
+                    maxOutputTokens=200
                 )
             )
 
