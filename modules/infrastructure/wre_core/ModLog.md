@@ -2,6 +2,63 @@
 
 ## Chronological Change Log
 
+### [2026-04-18] - SEC8: Security Stack E2E Dry-Run (v0.8.5)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 77 (Agent Coordination)
+**Impact Analysis**: E2E operational proof with synthetic data - NO real vulnerabilities claimed
+
+#### Changes Made
+
+- `tests/test_security_stack_e2e.py` (NEW):
+  - 11 E2E tests proving SEC1-SEC7 stack integration
+  - Synthetic findings (CRITICAL/HIGH/MEDIUM)
+  - Full flow: policy -> store -> recall -> analysis proposal
+  - Report artifact generation
+
+#### E2E Flow Validated
+
+```
+Synthetic Finding (mocked SEC1)
+       |
+       v
+SEC2 Policy Routing (VulnerabilityScanPolicy)
+       |
+       v
+SEC5 Pattern Memory (store_finding)
+       |
+       v
+SEC6 Recall (recall_by_fingerprint)
+       |
+       v
+SEC7 Analysis Proposal (analyze_finding)
+       |
+       v
+Report Artifact (JSON)
+```
+
+#### Test Categories
+
+- TestE2EDryRun: Full stack flows (4 tests)
+- TestE2EReportGeneration: Artifact generation (2 tests)
+- TestE2EInvariants: Critical invariants (4 tests)
+- TestE2ESummary: Comprehensive summary (1 test)
+
+#### Invariants Verified
+
+- `no_patch_generated: true` for all findings
+- CRITICAL always requires 012 gate
+- Policy decision preserved through stack
+- No live scanner invocation (synthetic only)
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_security_stack_e2e.py -v
+# Result: 11 passed
+```
+
+---
+
 ### [2026-04-18] - SEC7: Security Analysis Assistant (v0.8.4)
 
 **WSP Protocol References**: WSP 77 (Agent Coordination), WSP 97 (Truthful)
