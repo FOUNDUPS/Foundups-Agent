@@ -28,8 +28,35 @@ evals: []
 1. **Scans** all `modules/`, `holo_index/`, `automation/`, `tools/` directories
 2. **Finds** Python files with `if __name__ == "__main__"` blocks
 3. **Loads** SKILLz.md registry (all registered skills)
-4. **Cross-references** to identify orphans (CLI without SKILLz.md)
-5. **Generates** SKILLz.md templates for top orphans
+4. **Loads** file-specific `*_SKILLz.md` bindings (CF4)
+5. **Cross-references** to identify orphans (CLI without SKILLz.md)
+6. **Generates** SKILLz.md templates for top orphans
+
+---
+
+## Binding Types (CF4)
+
+The scanner supports two binding mechanisms:
+
+### Directory-Level Binding (original)
+- `SKILLz.md` binds all CLI entrypoints in its directory/subtree
+- Good for cohesive modules where all files share a contract
+
+### File-Specific Binding (CF4)
+- `<name>_SKILLz.md` binds exactly one CLI entrypoint
+- Requires `target_file:` frontmatter field
+- Falls back to filename inference if unambiguous
+- Good for distinct commands sharing a directory
+
+Example file-specific binding:
+```yaml
+---
+name: m2m_compression_sentinel
+target_file: m2m_compression_sentinel.py
+---
+```
+
+**Precedence**: File-specific bindings take precedence over directory-level
 
 ---
 
@@ -64,25 +91,33 @@ python holo_index/skillz/orphan_capability_scanner/executor.py --summary
 
 ```json
 {
-  "scan_timestamp": "2026-03-08T...",
-  "total_cli_entrypoints": 1281,
-  "registered_skills": 179,
-  "orphan_count": 1262,
-  "wre_connected_count": 19,
-  "templates_generated": 10,
-  "scan_duration_ms": 46000,
+  "scan_timestamp": "2026-04-19T...",
+  "total_cli_entrypoints": 687,
+  "registered_skills": 113,
+  "file_specific_bindings": 1,
+  "orphan_count": 567,
+  "wre_connected_count": 120,
+  "templates_generated": 0,
+  "scan_duration_ms": 15000,
+  "file_specific_warnings": [],
   "orphans": [
     {
-      "path": "modules/ai_intelligence/ai_overseer/src/ai_overseer.py",
-      "module_name": "modules.ai_intelligence.ai_overseer.src.ai_overseer",
-      "line_count": 3622,
-      "category": "ai",
+      "path": "modules/infrastructure/wre_core/...",
+      "module_name": "modules.infrastructure.wre_core...",
+      "line_count": 1814,
+      "category": "infrastructure",
       "has_json_flag": false,
-      "suggested_trigger": "manual"
+      "suggested_trigger": "manual",
+      "binding_type": "none"
     }
   ]
 }
 ```
+
+New CF4 fields:
+- `file_specific_bindings`: Count of `*_SKILLz.md` bindings
+- `file_specific_warnings`: Ambiguous/missing target warnings
+- `binding_type`: `"directory"` | `"file_specific"` | `"none"`
 
 ---
 
