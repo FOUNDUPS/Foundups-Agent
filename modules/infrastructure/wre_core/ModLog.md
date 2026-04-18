@@ -2,6 +2,48 @@
 
 ## Chronological Change Log
 
+### [2026-04-18] - SEC3: WRE Security Scan Skill (v0.8.0)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 77 (Agent Coordination), WSP 84 (Code Reuse)
+**Impact Analysis**: WRE skill wrapper for autonomous security scanning via SEC1/SEC2
+
+#### Changes Made
+
+- `skillz/security_scan/executor.py` (NEW):
+  - `SecurityScanExecutor` class - orchestrates SEC1 scanner + SEC2 policy
+  - `SecurityScanReport` dataclass - normalized output with policy decision
+  - Supports snyk, trivy, semgrep, and aggregate "all" scans
+  - Truthful reporting: unavailable tools reported as `tool_available: false`
+  - Lazy-loads SEC1/SEC2 modules (works before PRs merge via mocks)
+  - CLI entry point: `python -m modules.infrastructure.wre_core.skillz.security_scan.executor`
+
+- `skillz/security_scan/SKILLz.md` (NEW):
+  - Skill definition with input/output schemas
+  - Policy routing documentation
+  - CLI usage examples
+
+- `skillz/security_scan/test_executor.py` (NEW):
+  - 15 tests with mocked SEC1/SEC2 dependencies
+  - WSP 97 compliance: truthful unavailable reporting
+  - Policy decision tests: CRITICAL -> GATE_012
+
+#### Architecture
+
+```
+SEC1 (infrastructure/security_scanner) -> subprocess execution
+SEC2 (ai_overseer/vulnerability_scan_policy) -> policy routing
+SEC3 (this skill) -> orchestration wrapper
+```
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/skillz/security_scan/test_executor.py -v
+# Result: 15 passed
+```
+
+---
+
 ### [2026-03-25] - Skill Evolution Continuity Tracking (v0.7.2)
 
 **WSP Protocol References**: WSP 48 (Recursive Self-Improvement), WSP 91 (Observability), WSP 97 (System Execution)
