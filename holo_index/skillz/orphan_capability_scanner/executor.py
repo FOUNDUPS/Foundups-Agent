@@ -17,6 +17,7 @@ import json
 import os
 import re
 import sys
+import yaml
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -41,6 +42,17 @@ class CapabilityInfo:
     suggested_trigger: str = "manual"
     category: str = "unknown"
     orphan_class: str = "unclassified"  # candidate, false_positive, developer_tool, research, wre_internal, trivial
+    binding_type: str = "none"  # none, directory, file_specific
+
+
+@dataclass
+class FileSpecificBinding:
+    """A file-specific SKILLz binding (CF4)."""
+    skillz_path: str
+    target_file: Optional[str]  # Explicit from frontmatter
+    inferred_target: Optional[str]  # Inferred from filename
+    is_bound: bool = False
+    binding_warning: Optional[str] = None
 
 
 @dataclass
@@ -53,6 +65,9 @@ class ScanResult:
     wre_connected: List[CapabilityInfo] = field(default_factory=list)
     templates_generated: int = 0
     scan_duration_ms: float = 0.0
+    # CF4: File-specific binding stats
+    file_specific_bindings: int = 0
+    file_specific_warnings: List[str] = field(default_factory=list)
 
 
 class OrphanCapabilityScanner:
@@ -105,6 +120,9 @@ class OrphanCapabilityScanner:
         self.include_tests = include_tests
         self.capabilities: Dict[str, CapabilityInfo] = {}
         self.skillz_registry: Set[str] = set()
+        # CF4: File-specific bindings (target_file -> FileSpecificBinding)
+        self.file_specific_bindings: Dict[str, FileSpecificBinding] = {}
+        self.file_specific_warnings: List[str] = []
 
     def scan(self) -> ScanResult:
         """
@@ -130,7 +148,11 @@ class OrphanCapabilityScanner:
         print("[SCAN] Phase 2: Loading SKILLz.md registry...")
         self._load_skillz_registry()
         result.registered_skills = len(self.skillz_registry)
-        print(f"[SCAN] Found {result.registered_skills} registered skills")
+        result.file_specific_bindings = len(self.file_specific_bindings)
+        result.file_specific_warnings = self.file_specific_warnings.copy()
+        print(f"[SCAN] Found {result.registered_skills} directory-level skills")
+        if result.file_specific_bindings:
+            print(f"[SCAN] Found {result.file_specific_bindings} file-specific bindings (CF4)")
 
         # Phase 3: Cross-reference and classify
         print("[SCAN] Phase 3: Cross-referencing capabilities...")
@@ -223,7 +245,11 @@ class OrphanCapabilityScanner:
                     print(f"[WARN] Error reading {py_file}: {e}")
 
     def _load_skillz_registry(self):
-        """Load all registered SKILLz.md files."""
+        """Load all registered SKILLz.md files.
+
+        CF4: Also loads file-specific *_SKILLz.md files and parses target_file frontmatter.
+        """
+        # Phase 1: Load directory-level SKILLz.md (existing behavior)
         for skillz_file in self.repo_root.rglob("SKILLz.md"):
             if any(excl in str(skillz_file) for excl in self.EXCLUDE_PATTERNS):
                 continue
@@ -243,16 +269,103 @@ class OrphanCapabilityScanner:
             # Also register the skill directory itself
             self.skillz_registry.add(str(rel_dir))
 
+        # Phase 2 (CF4): Load file-specific *_SKILLz.md files
+        self._load_file_specific_skillz()
+
+    def _load_file_specific_skillz(self):
+        """CF4: Load file-specific SKILLz bindings from *_SKILLz.md files."""
+        # Match pattern: anything_SKILLz.md but NOT exact SKILLz.md
+        # Exclude reports/ directory (contains auto-generated templates)
+        for skillz_file in self.repo_root.rglob("*_SKILLz.md"):
+            if any(excl in str(skillz_file) for excl in self.EXCLUDE_PATTERNS):
+                continue
+            # Exclude reports/ and templates/ directories
+            if "reports" in str(skillz_file) or "templates" in str(skillz_file):
+                continue
+
+            rel_skillz_path = str(skillz_file.relative_to(self.repo_root))
+            skill_dir = skillz_file.parent
+
+            # Parse frontmatter to get target_file
+            target_file = self._parse_target_file_frontmatter(skillz_file)
+
+            # Infer target from filename if not explicit
+            inferred_target = None
+            if not target_file:
+                # e.g., m2m_SKILLz.md -> m2m_*.py
+                prefix = skillz_file.stem.replace("_SKILLz", "")
+                candidates = list(skill_dir.glob(f"{prefix}*.py"))
+                if len(candidates) == 1:
+                    inferred_target = candidates[0].name
+                elif len(candidates) > 1:
+                    self.file_specific_warnings.append(
+                        f"[CF4 WARN] Ambiguous: {rel_skillz_path} matches {len(candidates)} files"
+                    )
+
+            # Determine actual target
+            actual_target = target_file or inferred_target
+
+            if actual_target:
+                target_path = skill_dir / actual_target
+                if target_path.exists():
+                    rel_target = str(target_path.relative_to(self.repo_root))
+                    binding = FileSpecificBinding(
+                        skillz_path=rel_skillz_path,
+                        target_file=target_file,
+                        inferred_target=inferred_target,
+                        is_bound=True,
+                    )
+                    self.file_specific_bindings[rel_target] = binding
+                else:
+                    self.file_specific_warnings.append(
+                        f"[CF4 WARN] Missing target: {rel_skillz_path} -> {actual_target}"
+                    )
+            else:
+                self.file_specific_warnings.append(
+                    f"[CF4 WARN] No target: {rel_skillz_path} (add target_file frontmatter)"
+                )
+
+    def _parse_target_file_frontmatter(self, skillz_file: Path) -> Optional[str]:
+        """Parse target_file from YAML frontmatter."""
+        try:
+            content = skillz_file.read_text(encoding="utf-8", errors="replace")
+            if not content.startswith("---"):
+                return None
+
+            # Extract frontmatter
+            parts = content.split("---", 2)
+            if len(parts) < 3:
+                return None
+
+            frontmatter = yaml.safe_load(parts[1])
+            if frontmatter and isinstance(frontmatter, dict):
+                return frontmatter.get("target_file")
+        except Exception:
+            pass
+        return None
+
     def _cross_reference_skillz(self):
-        """Cross-reference capabilities with SKILLz.md registry."""
+        """Cross-reference capabilities with SKILLz.md registry.
+
+        CF4: File-specific bindings take precedence over directory-level.
+        """
         for path, cap in self.capabilities.items():
-            # Check if this file or its directory has a SKILLz.md
             path_obj = Path(path)
 
-            # Direct match
+            # CF4: Check file-specific binding first (highest precedence)
+            if path in self.file_specific_bindings:
+                binding = self.file_specific_bindings[path]
+                if binding.is_bound:
+                    cap.has_skillz_md = True
+                    cap.skillz_md_path = binding.skillz_path
+                    cap.binding_type = "file_specific"
+                    continue
+
+            # Direct match in registry
             if path in self.skillz_registry:
                 cap.has_skillz_md = True
                 cap.skillz_md_path = str(path_obj.parent / "SKILLz.md")
+                cap.binding_type = "directory"
                 continue
 
             # Check parent directory
@@ -260,6 +373,7 @@ class OrphanCapabilityScanner:
             if parent_dir in self.skillz_registry:
                 cap.has_skillz_md = True
                 cap.skillz_md_path = str(path_obj.parent / "SKILLz.md")
+                cap.binding_type = "directory"
                 continue
 
             # Check for SKILLz.md in same directory
@@ -267,6 +381,7 @@ class OrphanCapabilityScanner:
             if skillz_path.exists():
                 cap.has_skillz_md = True
                 cap.skillz_md_path = str(path_obj.parent / "SKILLz.md")
+                cap.binding_type = "directory"
 
     def _categorize_path(self, rel_path: Path) -> str:
         """Categorize a file based on its path."""
@@ -484,10 +599,12 @@ def main():
             "scan_timestamp": result.scan_timestamp,
             "total_cli_entrypoints": result.total_cli_entrypoints,
             "registered_skills": result.registered_skills,
+            "file_specific_bindings": result.file_specific_bindings,
             "orphan_count": len(result.orphans),
             "wre_connected_count": len(result.wre_connected),
             "templates_generated": result.templates_generated,
             "scan_duration_ms": result.scan_duration_ms,
+            "file_specific_warnings": result.file_specific_warnings,
             "orphans": [asdict(o) for o in result.orphans[:20]],  # Limit JSON output
         }
         print(json.dumps(output, indent=2))
@@ -498,9 +615,26 @@ def main():
         print("=" * 60)
         print(f"Total CLI entrypoints: {result.total_cli_entrypoints}")
         print(f"Registered SKILLz.md:  {result.registered_skills}")
+        if result.file_specific_bindings:
+            print(f"File-specific (CF4):   {result.file_specific_bindings}")
         print(f"Orphans (unconnected): {len(result.orphans)}")
         print(f"WRE-connected:         {len(result.wre_connected)}")
         print(f"Scan time:             {result.scan_duration_ms:.0f}ms")
+
+        # CF4: Show file-specific bindings
+        if result.file_specific_bindings and not args.summary:
+            file_specific_caps = [c for c in result.wre_connected if c.binding_type == "file_specific"]
+            if file_specific_caps:
+                print("\n[FILE-SPECIFIC BINDINGS (CF4)]")
+                for cap in file_specific_caps:
+                    print(f"  {cap.path}")
+                    print(f"      -> {cap.skillz_md_path}")
+
+        # CF4: Show warnings
+        if result.file_specific_warnings and not args.summary:
+            print("\n[CF4 WARNINGS]")
+            for warn in result.file_specific_warnings:
+                print(f"  {warn}")
 
         if result.orphans and not args.summary:
             print("\n[TOP 10 ORPHANS - Largest First]")

@@ -14,10 +14,10 @@ evals: []
 retirement_date: null
 trigger:
   manual
-scanner_status: not_recognized
+target_file: m2m_compression_sentinel.py
 ---
 
-> **Scanner note**: This file documents the `m2m_compression_sentinel.py` capability, but the current Rolodex scanner only recognizes exact `SKILLz.md` filenames. Functional file-level binding is deferred to CF4.
+> **CF4 file-specific binding**: This `*_SKILLz.md` binds exactly `m2m_compression_sentinel.py` via the `target_file` frontmatter field.
 
 # M2M Compression Sentinel
 
