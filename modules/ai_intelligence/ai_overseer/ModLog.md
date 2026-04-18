@@ -2,7 +2,42 @@
 
 **Module**: `modules/ai_intelligence/ai_overseer/`
 **Status**: Active (Autonomous Code Patching + Daemon Restart + Activity Routing)
-**Version**: 0.9.0
+**Version**: 0.10.0
+
+---
+
+## 2026-04-18 - SEC2: Vulnerability Scan Policy Definitions
+
+**Author**: 0102  
+**WSP**: 97, 77, 100  
+**Phase**: SEC2 — VULNERABILITY_SCAN_POLICY_PHASE1
+
+### Changes
+
+- `src/vulnerability_scan_policy.py`: Created policy engine for vulnerability scan findings
+  - `SeverityLevel` enum: CRITICAL, HIGH, MEDIUM, LOW, INFO, UNKNOWN
+  - `EscalationDestination` enum: GATE_012, MODLOG_ONLY, REPORT_ONLY, IGNORE
+  - `FindingType` enum: DEPENDENCY, SAST, SECRET, CONFIG, CONTAINER, LICENSE
+  - `VulnerabilityScanPolicy` class with `get_escalation(severity, finding_type)`
+  - `PolicyConfig` with YAML/env loading
+  - **INVARIANT**: CRITICAL always gates to 012 (hardcoded, no override)
+  - **INVARIANT**: SECRET findings gate to 012 by default
+  - Default mode: REPORT_ONLY (observe + log, never act)
+- `tests/test_vulnerability_scan_policy.py`: 29 tests covering all severity levels, invariants
+- `tests/conftest.py`: Added test file to allowlist
+
+### Integration Path
+
+```
+SEC1 (infrastructure/security_scanner) → subprocess execution, JSON output
+SEC2 (this module) → severity routing, 012 gates
+SEC3+ → Qwen/Gemma analysis, WRE skills
+```
+
+### Why
+
+ADR boundary: AI Overseer owns policy (control plane), infrastructure owns execution.
+Following `fam_security_sentinel.py` pattern for consistency.
 
 ---
 
