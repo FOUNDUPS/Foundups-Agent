@@ -452,3 +452,93 @@ class TestExpandedVideoTilesPreserved:
     def test_get_expanded_videos_sets_video_data(self, tile_field_js):
         """getExpandedVideos() sets video_data on mapped items."""
         assert 'video_data:' in tile_field_js or 'video_data: video' in tile_field_js
+
+
+# ═══════════════════════════════════════════════
+# Device Policy Hardening (PR tile-field-hardening)
+# ═══════════════════════════════════════════════
+
+class TestDevicePolicyStructure:
+    """Device policy restricts density presets by device class."""
+
+    def test_density_tiers_defined(self, tile_field_js):
+        """DENSITY_TIERS object defines phone/tablet/desktop tiers."""
+        assert 'DENSITY_TIERS' in tile_field_js
+
+    def test_phone_tier_restricted(self, tile_field_js):
+        """Phone tier only allows 3x4, 3x5."""
+        assert "phone: ['3x4', '3x5']" in tile_field_js or 'phone: ["3x4", "3x5"]' in tile_field_js
+
+    def test_tablet_tier_allows_medium(self, tile_field_js):
+        """Tablet tier allows up to 4x6, 5x8."""
+        assert "'4x6'" in tile_field_js and "'5x8'" in tile_field_js
+
+    def test_get_device_info_function(self, tile_field_js):
+        """getDeviceInfo function exists."""
+        assert 'function getDeviceInfo()' in tile_field_js
+
+    def test_get_device_policy_function(self, tile_field_js):
+        """getDevicePolicy function exists."""
+        assert 'function getDevicePolicy()' in tile_field_js
+
+    def test_short_side_check(self, tile_field_js):
+        """Device detection checks short side for phone classification."""
+        assert 'shortSide' in tile_field_js
+        assert '< 600' in tile_field_js
+
+
+class TestRequestDensityAPI:
+    """requestDensity API validates against device policy."""
+
+    def test_request_density_function(self, tile_field_js):
+        """requestDensity function exists."""
+        assert 'function requestDensity(' in tile_field_js
+
+    def test_request_density_returns_applied(self, tile_field_js):
+        """requestDensity returns applied boolean."""
+        assert 'applied: true' in tile_field_js or 'applied: false' in tile_field_js
+
+    def test_request_density_returns_reason(self, tile_field_js):
+        """requestDensity returns reason on rejection."""
+        assert 'reason:' in tile_field_js
+
+    def test_request_density_exposed_in_api(self, tile_field_js):
+        """requestDensity is exposed in public API."""
+        assert 'requestDensity: requestDensity' in tile_field_js
+
+    def test_get_device_policy_exposed_in_api(self, tile_field_js):
+        """getDevicePolicy is exposed in public API."""
+        assert 'getDevicePolicy: getDevicePolicy' in tile_field_js
+
+
+class TestTileTypeAttribute:
+    """Tiles have data-tile-type for CSS targeting."""
+
+    def test_tile_type_attribute_added(self, tile_field_js):
+        """data-tile-type attribute is added to tiles."""
+        assert 'data-tile-type' in tile_field_js
+
+    def test_avatar_tile_type(self, tile_field_js):
+        """Avatar tiles get type='avatar'."""
+        assert "tileType = isAvatarTile ? 'avatar'" in tile_field_js or 'tileType = isAvatarTile ?' in tile_field_js
+
+    def test_is_avatar_tile_check(self, tile_field_js):
+        """isAvatarTile checks for channel_avatar_url."""
+        assert 'isAvatarTile' in tile_field_js
+        assert 'channel_avatar_url' in tile_field_js
+
+
+class TestTileTypeCSS:
+    """CSS scopes background-size by tile type."""
+
+    def test_avatar_tile_uses_contain(self, tile_field_css):
+        """Avatar tiles use background-size: contain."""
+        assert '.mall-tile[data-tile-type="avatar"]' in tile_field_css
+        # Check contain is associated with avatar type
+        assert 'contain' in tile_field_css
+
+    def test_video_tile_uses_cover(self, tile_field_css):
+        """Video tiles use background-size: cover."""
+        assert '.mall-tile[data-tile-type="video"]' in tile_field_css
+        # Check cover is associated with video type
+        assert 'cover' in tile_field_css

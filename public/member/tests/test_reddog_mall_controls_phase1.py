@@ -466,3 +466,41 @@ class TestNoRegression:
     def test_css_desktop_query_preserved(self):
         content = CONCIERGE_CSS.read_text(encoding="utf-8")
         assert "min-width: 640px" in content
+
+
+# ═══════════════════════════════════════════════
+# RedDog Density Policy Enforcement (Hardening)
+# ═══════════════════════════════════════════════
+
+class TestRedDogDensityPolicyEnforcement:
+    """RedDog uses requestDensity for device policy enforcement."""
+
+    def test_set_density_uses_request_density(self):
+        """setDensity function uses mallTileField.requestDensity."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "mallTileField.requestDensity" in content
+
+    def test_request_density_source_reddog(self):
+        """requestDensity is called with source: 'reddog'."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "source: 'reddog'" in content or 'source: "reddog"' in content
+
+    def test_density_rejection_handled(self):
+        """Rejected density requests are handled."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "result.applied" in content or "!result.applied" in content
+
+    def test_density_rejection_logged(self):
+        """Rejected density requests are logged."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "Density rejected" in content
+
+    def test_density_rejected_command_emitted(self):
+        """density_rejected command is emitted on rejection."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "density_rejected" in content
+
+    def test_fallback_to_set_density(self):
+        """Falls back to setDensity if requestDensity unavailable."""
+        content = CONCIERGE_JS.read_text(encoding="utf-8")
+        assert "mallTileField.setDensity" in content

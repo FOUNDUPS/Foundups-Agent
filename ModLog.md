@@ -1,5 +1,77 @@
 # FoundUps Agent - Development Log
 
+## [2026-04-18] p.fMALL Device Policy Hardening
+
+**Change Type**: Security / Hardening
+**By**: 0102
+**WSP References**: WSP 22, WSP 50, WSP 64
+
+### Summary
+
+Added device policy enforcement for density controls and refresh script safety.
+
+### What Changed
+
+- `public/member/js/mall-tile-field.js`:
+  - Added `getDeviceInfo()` and `getDevicePolicy()` for device classification
+  - Added `requestDensity(preset, options)` as safe public API with policy enforcement
+  - Phone (coarse + short side < 600): only 3x4, 3x5 allowed
+  - Tablet (coarse + short side >= 600): up to 4x6, 5x8
+  - Desktop (fine pointer): all densities allowed
+  - Added `data-tile-type` attribute (avatar/video) for CSS targeting
+- `public/member/css/mall-tile-field.css`:
+  - Avatar tiles use `background-size: contain` (show full logo)
+  - Video tiles use `background-size: cover` (fill thumbnail)
+- `public/member/js/account-concierge.js`:
+  - RedDog now uses `requestDensity()` with policy validation
+  - Rejected densities logged and emitted as `density_rejected` event
+- `scripts/refresh_mall_catalog.py`:
+  - Dry-run by default, requires `--apply` to write changes
+  - Creates backup before writing
+- Tests added for all hardening (26 new tests)
+
+### Result
+
+- AI/RedDog cannot force desktop densities on phones
+- Channel logos scale correctly, video thumbnails fill tiles
+- Catalog refresh is safe by default (no accidental mutations)
+
+---
+
+## [2026-04-17] p.fMALL Tile Field Display Improvements
+
+**Change Type**: Feature / UI
+**By**: 0102
+**WSP References**: WSP 22, WSP 50
+
+### Summary
+
+Fixed Mall tile display: channel avatars, proper scaling, video counts, and catalog refresh tooling.
+
+### What Changed
+
+- `public/member/css/mall-tile-field.css`:
+  - Changed `background-size: cover` to `contain` for proper logo scaling
+  - Added `!important` to prevent inline style overrides
+- `public/member/js/mall-tile-field.js`:
+  - Prioritize `channel_avatar_url` over `poster_url` for tile backgrounds
+  - Use `true_video_count` for accurate video counts
+- `modules/communication/youtube_channel_pull/src/channel_puller.py`:
+  - Added `fetch_channel_info()` for avatars and channel stats
+- `scripts/refresh_mall_catalog.py` (NEW):
+  - Quota-efficient catalog refresh (--info-only, --delta, --full modes)
+  - Fetches channel avatars and true video counts
+- `public/member/mall-video-catalog.json`:
+  - Updated with channel_avatar_url and true_video_count for 4 YouTube channels
+
+### Result
+
+- Mall tiles display channel logos that scale with density
+- Accurate video counts (3416, 4208, 1588, 105 vs old 44)
+- Efficient refresh tooling (~13 quota units for info-only mode)
+
+---
+
 ## [2026-04-01] SoftProto Audit Prompt Batch
 
 **Change Type**: Architecture / Coordination

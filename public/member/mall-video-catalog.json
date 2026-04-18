@@ -5381,7 +5381,10 @@
     "lifecycle_stage": "active",
     "tier": "F0_DAE",
     "description": "012 documents life in rural Japan — relocation, culture, and political activism through the FFCPLN movement. 573 videos spanning daily life, resistance music, and community building.",
-    "launch_readiness": "discoverable_only"
+    "launch_readiness": "discoverable_only",
+    "channel_avatar_url": "https://yt3.ggpht.com/AoHPQuFo-j-2isTEcEBNrSvzFTUkW59JFmcutvJe9PW4-faopoLNpVki7JfPousHObJNc2m7iw=s800-c-k-c0x00ffffff-no-rj",
+    "true_video_count": 3416,
+    "subscriber_count": 10200
   },
   {
     "foundup_id": "undaodu",
@@ -10031,7 +10034,10 @@
     "lifecycle_stage": "active",
     "tier": "F0_DAE",
     "description": "012 personal channel covering music production, political commentary, and creative experiments. The longest-running content lane in the FoundUPS ecosystem.",
-    "launch_readiness": "discoverable_only"
+    "launch_readiness": "discoverable_only",
+    "channel_avatar_url": "https://yt3.ggpht.com/H1V5ZWWpU2WOAlEUzhYGtYBW77BRW9sgORhjNkltbwYRRilk4oegh0g8TZ96wY0cK5riBl1fIQ=s800-c-k-c0x00ffffff-no-rj",
+    "true_video_count": 4208,
+    "subscriber_count": 3640
   },
   {
     "foundup_id": "foundups_main",
@@ -10467,7 +10473,10 @@
     "lifecycle_stage": "active",
     "tier": "F0_DAE",
     "description": "Official FoundUPS YouTube presence. Product updates, ecosystem explainers, and development milestones.",
-    "launch_readiness": "discoverable_only"
+    "launch_readiness": "discoverable_only",
+    "channel_avatar_url": "https://yt3.ggpht.com/iTgFX0cdfkYbRq7w900ZUg_6aHIYtdgFDDLq9HqCXPtJx564HDjPyzKDSSkCr44KxL6aFJSAtA=s800-c-k-c0x00ffffff-no-rj",
+    "true_video_count": 1588,
+    "subscriber_count": 4500
   },
   {
     "foundup_id": "antifafm",
@@ -10813,7 +10822,10 @@
     "lifecycle_stage": "proto",
     "tier": "F0_DAE",
     "description": "24/7 headless radio broadcaster with visual layers. Bridges Icecast to YouTube Live via FFmpeg. The broadcast stack is real.",
-    "launch_readiness": "discoverable_only"
+    "launch_readiness": "discoverable_only",
+    "channel_avatar_url": "https://yt3.ggpht.com/yOwK3KmYnGNJn1Z8xB5QLVk9wKfcgXR0rWFKJ_-5mvcbZ89Oc06FZDykUXDkWTtfF7XI5_Sjtg=s800-c-k-c0x00ffffff-no-rj",
+    "true_video_count": 105,
+    "subscriber_count": 71
   },
   {
     "foundup_id": "linkedin_012",
