@@ -125,6 +125,12 @@ class TestFoundUpHandoff:
         js = _read("js/mall-planes.js")
         assert "routing_prefix" in js
 
+    def test_open_link_css_class_matches_js(self):
+        """CSS targets .fv-open-link (not stale .fv-detail-link)."""
+        css = _read("css/mall-planes.css")
+        assert ".fv-open-link" in css
+        assert ".fv-detail-link" not in css
+
     def test_no_stale_save_semantics(self):
         """Save/favorite semantics removed from view plane."""
         js = _read("js/mall-planes.js")
