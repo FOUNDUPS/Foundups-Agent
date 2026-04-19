@@ -9,7 +9,7 @@
  *   - invalid / unknown commands rejected with error shape
  *   - pfmall_command routed via postMessage produces pfmall_response
  *   - disallowed origin ignored
- *   - not_implemented layer 2+ commands return error (stable contract surface)
+ *   - contract surface stable (all 7 commands registered)
  *   - emitEvent broadcasts pfmall_event to registered listeners
  *
  * @see test_pfmall_control_dispatcher.py (optional pytest wrapper)
@@ -192,16 +192,23 @@ async function run() {
     assert(res2.status === 'error' && res2.error.code === 'invalid_command', 'null command rejected');
   }
 
-  // 8) Layer 4+ commands return not_implemented (stable contract, not crash).
-  //    set_layout (Layer 2) and play/expand/collapse_tile (Layer 3) are implemented.
+  // 8) All 7 commands in the contract are implemented (Layer 4 complete).
+  //    No command returns `not_implemented` anymore. This test still guards the
+  //    stable contract surface — all commands reject with a structured error
+  //    other than `not_implemented` when prerequisites aren't met.
   {
-    const sb = createSandbox();
+    const sb = createSandbox();  // no tileField, no videoPlayer
     loadDispatcher(sb);
-    const notYet = ['load_videos', 'reset_session'];
-    for (const cmd of notYet) {
+    const commands = ['inspect_state', 'set_layout', 'load_videos', 'play_tile',
+                      'expand_tile', 'collapse_tile', 'reset_session'];
+    for (const cmd of commands) {
       const res = sb.pfmallControlDispatcher.dispatch(cmd, {});
-      assert(res.status === 'error', cmd + ' returns error');
-      assert(res.error.code === 'not_implemented', cmd + ' error code is not_implemented');
+      // Every response must be a well-formed envelope (status + result|error).
+      assert(typeof res.status === 'string', cmd + ' has status');
+      if (res.status === 'error') {
+        assert(res.error && res.error.code !== 'not_implemented',
+               cmd + ' must not be not_implemented (Layer 4 is done)');
+      }
     }
   }
 
@@ -472,12 +479,17 @@ async function run() {
     // unknown command unchanged
     const unk = sb.pfmallControlDispatcher.dispatch('not_a_command', {});
     assert(unk.status === 'error' && unk.error.code === 'unknown_command', 'unknown still error');
-    // Layer 4+ still not_implemented (unchanged)
-    const ni = sb.pfmallControlDispatcher.dispatch('load_videos', {});
-    assert(ni.status === 'error' && ni.error.code === 'not_implemented', 'load_videos still not_implemented');
-    // set_layout is now registered as implemented (not not_implemented)
+    // load_videos is implemented (Layer 4): with no mallTileField it returns
+    // api_unavailable, not not_implemented. (invalid_payload is checked first —
+    // give a valid payload so we exercise the API-check path.)
+    const lv = sb.pfmallControlDispatcher.dispatch('load_videos', {
+      videos: [{ video_id: 'vid_x' }]
+    });
+    assert(lv.status === 'error' && lv.error.code === 'api_unavailable',
+           'load_videos without API -> api_unavailable (not not_implemented)');
+    // set_layout is implemented (Layer 2)
     const impl = sb.pfmallControlDispatcher.dispatch('set_layout', { preset: '3x5' });
-    assert(impl.status === 'ok' && impl.error === undefined, 'set_layout no longer not_implemented');
+    assert(impl.status === 'ok' && impl.error === undefined, 'set_layout still implemented');
   }
 
   // 21) Denial event does not fire on invalid_payload / api_unavailable — only on policy denial.
@@ -900,7 +912,355 @@ async function run() {
     assert(replied.error === undefined, 'no error field on success');
   }
 
-  console.log('pfmall_control_dispatcher_vm.mjs: all checks passed (Layer 1 + Layer 2 + Layer 3)');
+  // ==========================================================================
+  // Layer 4: load_videos / reset_session (session commands)
+  // ==========================================================================
+
+  // makeL4TileField: composable tile field stub with optional session APIs.
+  // session_mode controls how loadSessionVideos responds:
+  //   'accept'    → {applied:true, session_mode:true, video_count:N}
+  //   'refuse'    → {applied:false, reason:'policy'}
+  //   'catalog'   → {applied:true, session_mode:false}  (dispatcher must reject)
+  //   'malformed' → {}  (no applied field; dispatcher must return runtime_failure)
+  //   'throw'     → throws (dispatcher must return runtime_failure)
+  //   'missing'   → no method at all (dispatcher must return api_unavailable)
+  function makeL4TileField(opts) {
+    opts = opts || {};
+    const sessionMode = opts.sessionMode || 'accept';
+    const withResetApi = opts.withResetApi !== false;  // default true
+    const resetCalls = [];
+    const loadCalls = [];
+    const tf = Object.assign({}, makeTileFieldStub({
+      getCatalog: function() { return []; }
+    }));
+    if (sessionMode !== 'missing') {
+      tf.loadSessionVideos = function(videos, options) {
+        loadCalls.push({ count: videos.length, source: (options && options.source) || null });
+        if (sessionMode === 'accept') {
+          return { applied: true, session_mode: true, video_count: videos.length };
+        }
+        if (sessionMode === 'refuse') {
+          return { applied: false, reason: 'test policy refusal' };
+        }
+        if (sessionMode === 'catalog') {
+          return { applied: true, session_mode: false, video_count: videos.length };
+        }
+        if (sessionMode === 'malformed') {
+          return {};
+        }
+        if (sessionMode === 'throw') {
+          throw new Error('simulated runtime failure');
+        }
+        return null;
+      };
+    }
+    if (withResetApi) {
+      tf.resetSession = function(options) {
+        resetCalls.push({ source: (options && options.source) || null });
+        return { applied: true };
+      };
+    }
+    tf._loadCalls = loadCalls;
+    tf._resetCalls = resetCalls;
+    return tf;
+  }
+
+  const L4_VIDEOS = [
+    { video_id: 'sv_1', source_url: 'https://x.test/1' },
+    { video_id: 'sv_2', source_url: 'https://x.test/2' }
+  ];
+
+  // 41) load_videos accepts a valid session list, updates session state, emits state_changed.
+  {
+    const tf = makeL4TileField({ sessionMode: 'accept' });
+    const sb = createSandbox({ tileField: tf });
+    loadDispatcher(sb);
+    const events = [];
+    sb.pfmallControlDispatcher.registerEventListener({ postMessage(msg) { events.push(msg); } }, { origin: '*' });
+
+    const res = sb.pfmallControlDispatcher.dispatch('load_videos', { videos: L4_VIDEOS, source: 'red_dog' });
+    assert(res.status === 'ok', 'load_videos ok');
+    assert(res.result.applied === true, 'applied true');
+    assert(res.result.session_mode === true, 'session_mode confirmed');
+    assert(res.result.video_count === 2, 'video_count echoed');
+    assert(res.result.source === 'red_dog', 'source echoed');
+    assert(tf._loadCalls.length === 1, 'loadSessionVideos called once');
+    assert(tf._loadCalls[0].count === 2, 'API received all videos');
+    assert(tf._loadCalls[0].source === 'red_dog', 'API received source');
+
+    // Session state reflected in inspect_state (dispatcher truth)
+    const ins = sb.pfmallControlDispatcher.dispatch('inspect_state', {});
+    assert(ins.result.session.override_active === true, 'session override now active');
+    assert(ins.result.session.override_video_count === 2, 'inspect reports video count');
+    assert(typeof ins.result.session.override_applied_at === 'string', 'applied_at timestamp set');
+
+    // state_changed event emitted with session_loaded change
+    const sc = events.filter(e => e.event === 'state_changed');
+    assert(sc.length === 1, 'one state_changed event');
+    assert(sc[0].payload.change === 'session_loaded', 'change=session_loaded');
+    assert(sc[0].payload.video_count === 2, 'event has video_count');
+    assert(events.filter(e => e.event === 'video_failed').length === 0, 'no video_failed on success');
+  }
+
+  // 42) load_videos rejects invalid payload with invalid_payload (no state mutation, no event).
+  {
+    const tf = makeL4TileField({ sessionMode: 'accept' });
+    const sb = createSandbox({ tileField: tf });
+    loadDispatcher(sb);
+    const events = [];
+    sb.pfmallControlDispatcher.registerEventListener({ postMessage(msg) { events.push(msg); } }, { origin: '*' });
+
+    const cases = [
+      [{}, 'missing videos'],
+      [{ videos: null }, 'null videos'],
+      [{ videos: [] }, 'empty videos'],
+      [{ videos: 'not-an-array' }, 'non-array videos'],
+      [{ videos: [{ /* no video_id */ }] }, 'item missing video_id'],
+      [{ videos: [{ video_id: '' }] }, 'empty video_id'],
+      [{ videos: [{ video_id: 123 }] }, 'non-string video_id']
+    ];
+    for (const [payload, label] of cases) {
+      const res = sb.pfmallControlDispatcher.dispatch('load_videos', payload);
+      assert(res.status === 'error', label + ' -> error');
+      assert(res.error.code === 'invalid_payload', label + ' -> invalid_payload');
+    }
+    // No runtime call, no event, no session state change on invalid payloads.
+    assert(tf._loadCalls.length === 0, 'loadSessionVideos never called on invalid payloads');
+    assert(events.length === 0, 'no events emitted on invalid_payload');
+    const ins = sb.pfmallControlDispatcher.dispatch('inspect_state', {});
+    assert(ins.result.session.override_active === false, 'session still inactive after invalid_payload');
+  }
+
+  // 43) load_videos returns api_unavailable if required mall API is absent.
+  //     Validates BOTH: no mallTileField at all, and mallTileField missing loadSessionVideos.
+  {
+    // no mallTileField
+    const sb1 = createSandbox();
+    loadDispatcher(sb1);
+    const r1 = sb1.pfmallControlDispatcher.dispatch('load_videos', { videos: L4_VIDEOS });
+    assert(r1.status === 'error', 'no tileField -> error');
+    assert(r1.error.code === 'api_unavailable', 'no tileField -> api_unavailable');
+
+    // tileField without loadSessionVideos
+    const sb2 = createSandbox({ tileField: makeL4TileField({ sessionMode: 'missing' }) });
+    loadDispatcher(sb2);
+    const r2 = sb2.pfmallControlDispatcher.dispatch('load_videos', { videos: L4_VIDEOS });
+    assert(r2.status === 'error', 'partial tileField -> error');
+    assert(r2.error.code === 'api_unavailable', 'partial tileField -> api_unavailable');
+  }
+
+  // 44) load_videos does NOT set dispatcher session override unless API confirms session_mode:true.
+  //     If the API says applied:true but session_mode:false (or missing), dispatcher rejects with
+  //     session_mode_required — this prevents silent canonical-catalog mutation.
+  {
+    const tf = makeL4TileField({ sessionMode: 'catalog' });  // applied:true, session_mode:false
+    const sb = createSandbox({ tileField: tf });
+    loadDispatcher(sb);
+    const events = [];
+    sb.pfmallControlDispatcher.registerEventListener({ postMessage(msg) { events.push(msg); } }, { origin: '*' });
+
+    const res = sb.pfmallControlDispatcher.dispatch('load_videos', { videos: L4_VIDEOS });
+    assert(res.status === 'error', 'non-session mode applied -> error');
+    assert(res.error.code === 'session_mode_required', 'code session_mode_required');
+    assert(tf._loadCalls.length === 1, 'API was called — the refusal is dispatcher-side');
+
+    // dispatcher session state MUST NOT flip to active
+    const ins = sb.pfmallControlDispatcher.dispatch('inspect_state', {});
+    assert(ins.result.session.override_active === false, 'session still inactive after session_mode_required');
+    assert(ins.result.session.override_video_count === 0, 'video_count still 0');
+
+    // Emits video_failed with session_mode_required reason (truth-signal)
+    const failed = events.filter(e => e.event === 'video_failed');
+    assert(failed.length === 1, 'one video_failed event');
+    assert(failed[0].payload.reason === 'session_mode_required', 'failure reason recorded');
+    assert(events.filter(e => e.event === 'state_changed').length === 0, 'no state_changed on session_mode_required');
+  }
+
+  // 45) load_videos with API refusing (applied:false) → load_refused + video_failed.
+  {
+    const tf = makeL4TileField({ sessionMode: 'refuse' });
+    const sb = createSandbox({ tileField: tf });
+    loadDispatcher(sb);
+    const events = [];
+    sb.pfmallControlDispatcher.registerEventListener({ postMessage(msg) { events.push(msg); } }, { origin: '*' });
+
+    const res = sb.pfmallControlDispatcher.dispatch('load_videos', { videos: L4_VIDEOS });
+    assert(res.status === 'error', 'refused load -> error');
+    assert(res.error.code === 'load_refused', 'code load_refused');
+
+    const ins = sb.pfmallControlDispatcher.dispatch('inspect_state', {});
+    assert(ins.result.session.override_active === false, 'session inactive after refusal');
+    assert(events.filter(e => e.event === 'video_failed').length === 1, 'video_failed emitted');
+  }
+
+  // 46) load_videos with malformed / throwing API outcome → runtime_failure.
+  {
+    const sb1 = createSandbox({ tileField: makeL4TileField({ sessionMode: 'malformed' }) });
+    loadDispatcher(sb1);
+    const r1 = sb1.pfmallControlDispatcher.dispatch('load_videos', { videos: L4_VIDEOS });
+    assert(r1.status === 'error', 'malformed outcome -> error');
+    assert(r1.error.code === 'runtime_failure', 'code runtime_failure');
+
+    const sb2 = createSandbox({ tileField: makeL4TileField({ sessionMode: 'throw' }) });
+    loadDispatcher(sb2);
+    const r2 = sb2.pfmallControlDispatcher.dispatch('load_videos', { videos: L4_VIDEOS });
+    assert(r2.status === 'error', 'thrown API -> error');
+    assert(r2.error.code === 'runtime_failure', 'code runtime_failure on throw');
+  }
+
+  // 47) reset_session clears active override and emits session_reset + state_changed.
+  {
+    const tf = makeL4TileField({ sessionMode: 'accept' });
+    const sb = createSandbox({ tileField: tf });
+    loadDispatcher(sb);
+    // precondition: load a session
+    sb.pfmallControlDispatcher.dispatch('load_videos', { videos: L4_VIDEOS, source: 'red_dog' });
+    const ins1 = sb.pfmallControlDispatcher.dispatch('inspect_state', {});
+    assert(ins1.result.session.override_active === true, 'precondition: session active');
+
+    const events = [];
+    sb.pfmallControlDispatcher.registerEventListener({ postMessage(msg) { events.push(msg); } }, { origin: '*' });
+
+    const res = sb.pfmallControlDispatcher.dispatch('reset_session', { source: 'red_dog' });
+    assert(res.status === 'ok', 'reset_session ok');
+    assert(res.result.applied === true, 'applied true');
+    assert(res.result.changed === true, 'changed: true (session was active)');
+    assert(res.result.api_called === true, 'runtime API was called');
+    assert(res.result.api_acknowledged === true, 'runtime acknowledged reset');
+
+    // Session state cleared
+    const ins2 = sb.pfmallControlDispatcher.dispatch('inspect_state', {});
+    assert(ins2.result.session.override_active === false, 'session cleared');
+    assert(ins2.result.session.override_video_count === 0, 'video_count cleared');
+    assert(ins2.result.session.override_applied_at === null, 'applied_at cleared');
+
+    // Runtime API called
+    assert(tf._resetCalls.length === 1, 'mallTileField.resetSession called once');
+    assert(tf._resetCalls[0].source === 'red_dog', 'source passed through');
+
+    // Both session_reset and state_changed fired
+    const sr = events.filter(e => e.event === 'session_reset');
+    const sc = events.filter(e => e.event === 'state_changed');
+    assert(sr.length === 1, 'one session_reset event');
+    assert(sc.length === 1, 'one state_changed event');
+    assert(sc[0].payload.change === 'session_reset', 'change=session_reset');
+  }
+
+  // 48) reset_session when no session active → ok with changed:false, no events.
+  //     (Truthful no-op: we don't emit session_reset if there was no session.)
+  {
+    const tf = makeL4TileField({ sessionMode: 'accept' });
+    const sb = createSandbox({ tileField: tf });
+    loadDispatcher(sb);
+    // precondition: nothing active
+    const ins0 = sb.pfmallControlDispatcher.dispatch('inspect_state', {});
+    assert(ins0.result.session.override_active === false, 'precondition: no session');
+
+    const events = [];
+    sb.pfmallControlDispatcher.registerEventListener({ postMessage(msg) { events.push(msg); } }, { origin: '*' });
+
+    const res = sb.pfmallControlDispatcher.dispatch('reset_session', {});
+    assert(res.status === 'ok', 'no-op reset still ok');
+    assert(res.result.changed === false, 'changed: false (nothing to reset)');
+    assert(events.length === 0, 'no events fired on truthful no-op');
+  }
+
+  // 49) reset_session works even if mallTileField.resetSession is absent
+  //     (dispatcher session state is local — still resettable), reporting
+  //     api_called:false / api_acknowledged:false truthfully.
+  {
+    const tf = makeL4TileField({ sessionMode: 'accept', withResetApi: false });
+    const sb = createSandbox({ tileField: tf });
+    loadDispatcher(sb);
+    // activate a session
+    sb.pfmallControlDispatcher.dispatch('load_videos', { videos: L4_VIDEOS });
+    assert(sb.pfmallControlDispatcher.dispatch('inspect_state', {}).result.session.override_active === true,
+           'precondition: session active');
+
+    const res = sb.pfmallControlDispatcher.dispatch('reset_session', {});
+    assert(res.status === 'ok', 'reset still ok without runtime API');
+    assert(res.result.changed === true, 'changed true');
+    assert(res.result.api_called === false, 'api_called false when API absent');
+    assert(res.result.api_acknowledged === false, 'api_acknowledged false when API absent');
+    assert(sb.pfmallControlDispatcher.dispatch('inspect_state', {}).result.session.override_active === false,
+           'session cleared locally');
+  }
+
+  // 50) postMessage routing for Layer 4 preserves envelope shape and request_id.
+  {
+    const tf = makeL4TileField({ sessionMode: 'accept' });
+    const sb = createSandbox({ tileField: tf });
+    loadDispatcher(sb);
+    let replied;
+    const source = { postMessage(msg) { replied = msg; } };
+    sb._messageHandler({
+      origin: 'http://127.0.0.1:5500',
+      source,
+      data: {
+        type: 'pfmall_command',
+        source: 'red_dog',
+        command: 'load_videos',
+        request_id: 'req-load-1',
+        payload: { videos: L4_VIDEOS, source: 'red_dog' }
+      }
+    });
+    assert(replied && replied.type === 'pfmall_response', 'response envelope');
+    assert(replied.status === 'ok', 'postMessage load_videos ok');
+    assert(replied.request_id === 'req-load-1', 'request_id echoed');
+    assert(replied.result && replied.result.video_count === 2, 'result carries video_count');
+
+    // reset over postMessage
+    let replied2;
+    const source2 = { postMessage(msg) { replied2 = msg; } };
+    sb._messageHandler({
+      origin: 'http://127.0.0.1:5500',
+      source: source2,
+      data: {
+        type: 'pfmall_command',
+        source: 'red_dog',
+        command: 'reset_session',
+        request_id: 'req-reset-1',
+        payload: {}
+      }
+    });
+    assert(replied2 && replied2.status === 'ok', 'reset_session over postMessage ok');
+    assert(replied2.result.changed === true, 'reset reported changed via postMessage');
+  }
+
+  // 51) Layer 1/2/3 regressions still pass after Layer 4 lands.
+  {
+    // Layer 1: inspect_state with no APIs
+    const sb1 = createSandbox();
+    loadDispatcher(sb1);
+    assert(sb1.pfmallControlDispatcher.dispatch('inspect_state', {}).status === 'ok',
+           'Layer 1: inspect_state still ok');
+
+    // Layer 2: set_layout accept on desktop
+    const sb2 = createSandbox({ tileField: makeTileFieldWithPolicy('desktop') });
+    loadDispatcher(sb2);
+    const sl = sb2.pfmallControlDispatcher.dispatch('set_layout', { preset: '6x3', source: 'test' });
+    assert(sl.status === 'ok' && sl.result.applied === true, 'Layer 2: set_layout accept unchanged');
+
+    // Layer 2: set_layout deny on phone
+    const sb3 = createSandbox({ tileField: makeTileFieldWithPolicy('phone') });
+    loadDispatcher(sb3);
+    const sl2 = sb3.pfmallControlDispatcher.dispatch('set_layout', { preset: '6x3' });
+    assert(sl2.status === 'denied', 'Layer 2: set_layout deny unchanged');
+
+    // Layer 3: play_tile + expand_tile + collapse_tile still work
+    const vp = makeL3VideoPlayer();
+    const l3tf = makeL3TileField(L3_CATALOG);
+    const sb4 = createSandbox({ tileField: l3tf, videoPlayer: vp });
+    loadDispatcher(sb4);
+    const pt = sb4.pfmallControlDispatcher.dispatch('play_tile', { foundup_id: 'move2japan' });
+    assert(pt.status === 'ok', 'Layer 3: play_tile unchanged');
+    const et = sb4.pfmallControlDispatcher.dispatch('expand_tile', { foundup_id: 'kosei' });
+    assert(et.status === 'ok', 'Layer 3: expand_tile unchanged');
+    const ct = sb4.pfmallControlDispatcher.dispatch('collapse_tile', { foundup_id: 'kosei' });
+    assert(ct.status === 'ok', 'Layer 3: collapse_tile unchanged');
+  }
+
+  console.log('pfmall_control_dispatcher_vm.mjs: all checks passed (Layer 1 + Layer 2 + Layer 3 + Layer 4)');
 }
 
 run().catch((e) => {

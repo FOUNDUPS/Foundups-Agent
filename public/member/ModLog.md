@@ -1,5 +1,113 @@
 # Member Area Module Change Log
 
+## [2026-04-20] pfMALL Agent Control Dispatcher — Layer 4 (Worker AW3/AG3)
+
+**Who**: 0102 - Worker AW3/AG3
+**Slice**: `PMCTRL1-L4 — PFMALL_AGENT_CONTROL_SESSION_COMMANDS_PHASE1`
+**What**: Session commands `load_videos` and `reset_session`. Completes the
+7-command control surface. All 7 handlers are now wired; no `not_implemented`
+handlers remain in the dispatcher.
+
+**Rationale**: Agents need a structured way to install a temporary (session)
+video list and restore catalog-backed state — without ever mutating the
+canonical catalog. Prior layers covered read (`inspect_state`), layout
+(`set_layout`), and tile drive (`play_tile` / `expand_tile` / `collapse_tile`).
+Layer 4 adds the session switchover, with a strict truth-signal gate so a
+misbehaving runtime cannot silently mutate the catalog through this path.
+
+**Preflight (performed per directive)**:
+- `git fetch origin main` - pulled 3 new commits (LEDGER-RECON1 from AG2).
+- Rebase onto `origin/main` applied cleanly (3 commits replayed, no conflicts).
+- `node public/member/tests/pfmall_control_dispatcher_vm.mjs` on rebased tip:
+  40/40 checks passed (Layer 1 + Layer 2 + Layer 3 green before Layer 4 edits).
+
+**Files Modified**:
+- `public/member/js/pfmall-control-dispatcher.js` - added `cmdLoadVideos`,
+  `cmdResetSession`. All 7 HANDLERS now point to real implementations.
+- `public/member/tests/pfmall_control_dispatcher_vm.mjs` - 11 new checks
+  (tests 41-51). Test 8 reworked (no `not_implemented` commands remain). Test
+  20 reworked to probe `load_videos` `api_unavailable` instead. Total 51
+  checks.
+
+**API Contracts expected on runtime** (dispatcher-side only — runtime methods
+may be added in a later slice; until they exist, the dispatcher returns
+`api_unavailable` for `load_videos`):
+- `window.mallTileField.loadSessionVideos(videos, { source })` →
+  `{ applied: boolean, session_mode: boolean, video_count?: number, reason?: string }`
+- `window.mallTileField.resetSession({ source })` →
+  `{ applied: boolean }` (optional — dispatcher clears its local state regardless)
+
+**`load_videos` truth-signal gates** (all fail-closed):
+- Payload must be `{ videos: Array<{ video_id: string }> }` non-empty; else
+  `invalid_payload`.
+- `mallTileField.loadSessionVideos` must exist; else `api_unavailable`.
+- API outcome must be a proper object with `applied` boolean; else
+  `runtime_failure`.
+- `applied: false` → `load_refused` + `video_failed` event.
+- **`applied: true` but `session_mode: true` NOT confirmed** → `session_mode_required`
+  error. Dispatcher refuses to mark its session override active. This is the
+  hard gate against silent canonical-catalog mutation.
+- Only on confirmed session-mode success does dispatcher call
+  `_setSessionOverride(true, videoCount)` and emit `state_changed` with
+  `change: 'session_loaded'`.
+
+**`reset_session` semantics**:
+- Always returns `status: ok` — dispatcher session flag is local state, so the
+  reset is always possible from the dispatcher's side.
+- Calls `mallTileField.resetSession({ source })` if available; reports whether
+  the runtime API was called and acknowledged (`api_called`, `api_acknowledged`
+  fields) so callers see both sides of the clear.
+- `result.changed` is `true` only when a session was actually active — truthful
+  no-op when there's nothing to reset.
+- Events fire only when `changed: true` (`session_reset` + `state_changed`
+  with `change: 'session_reset'`). A no-op reset is silent on the event channel.
+
+**Error codes introduced in Layer 4**:
+- `invalid_payload` - malformed `load_videos` payload (existing code, reused)
+- `api_unavailable` - required runtime method missing (existing code, reused)
+- `load_refused` - API returned `applied: false`
+- `session_mode_required` - API returned `applied: true` without `session_mode: true`
+- `runtime_failure` - API returned malformed outcome or threw
+
+**Events introduced in Layer 4**:
+- `state_changed` with `change: 'session_loaded'` on `load_videos` success
+- `state_changed` with `change: 'session_reset'` on `reset_session` with `changed: true`
+- `session_reset` on `reset_session` with `changed: true`
+- `video_failed` with `reason` on `load_videos` failure (`load_refused`,
+  `session_mode_required`)
+- No events on `invalid_payload` / `api_unavailable` / `runtime_failure` —
+  those are caller/runtime mistakes, not wall state transitions.
+
+**Tests (VM harness, 11 new — 41-51; total 51)**:
+- load_videos accepts valid session list, sets session override, emits
+  `state_changed` (change=session_loaded), inspect_state reflects truth.
+- load_videos rejects 7 invalid-payload variants (missing, null, empty,
+  non-array, items without video_id / empty / non-string video_id).
+- load_videos returns `api_unavailable` both for no mallTileField and for a
+  mallTileField missing `loadSessionVideos`.
+- load_videos rejects with `session_mode_required` when API returns
+  `applied: true, session_mode: false` (the catalog-mutation guard).
+- load_videos rejects with `load_refused` when API returns `applied: false`.
+- load_videos rejects with `runtime_failure` for malformed outcome or throw.
+- reset_session clears an active session, emits `session_reset` +
+  `state_changed`, inspect_state reflects cleared state.
+- reset_session with no active session returns `ok` with `changed: false`,
+  emits no events (truthful no-op).
+- reset_session still works when mallTileField lacks `resetSession` — reports
+  `api_called: false` / `api_acknowledged: false` truthfully.
+- postMessage routing preserves envelope shape + request_id for both Layer 4
+  commands.
+- Layer 1/2/3 regression sweep — inspect_state, set_layout accept/deny,
+  play_tile, expand_tile, collapse_tile all green.
+
+**Run**: `node public/member/tests/pfmall_control_dispatcher_vm.mjs`
+
+**Contract surface now complete**: all 7 commands implemented. No
+`not_implemented` handlers remain. Layer 5 (INTERFACE.md docs) will finalize
+the agent-facing contract and open the PR. No push / PR until Layer 5.
+
+---
+
 ## [2026-04-20] pfMALL Agent Control Dispatcher — Layer 3 (Worker AW3/AG3)
 
 **Who**: 0102 - Worker AW3/AG3

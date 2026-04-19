@@ -482,8 +482,140 @@
     };
   }
 
-  // Layer 4+ commands — registered but return not_implemented until wired.
-  // Keeping the surface stable lets tests exercise rejection shape early.
+  // Layer 4: load_videos — installs a session-only video override via
+  // window.mallTileField.loadSessionVideos(videos, { source }).
+  //
+  // Truth-signal rules:
+  //   - The canonical catalog (mall-video-catalog.json) MUST NOT be mutated by
+  //     this path. The dispatcher requires the underlying API to confirm
+  //     `session_mode: true` in its outcome — any other response (including
+  //     absence of that field) is rejected with `session_mode_required` so a
+  //     misbehaving runtime cannot silently mutate the catalog through us.
+  //   - Dispatcher's own sessionState is updated only after the API confirms
+  //     the load applied in session mode — we never claim an override that
+  //     the runtime didn't accept.
+  function cmdLoadVideos(payload) {
+    payload = payload || {};
+    var videos = payload.videos;
+    var source = (typeof payload.source === 'string' && payload.source) ? payload.source : 'pfmall_command';
+
+    if (!Array.isArray(videos) || videos.length === 0) {
+      return {
+        status: 'error',
+        error: { code: 'invalid_payload', message: 'load_videos requires payload.videos as a non-empty array' }
+      };
+    }
+    for (var i = 0; i < videos.length; i++) {
+      var v = videos[i];
+      if (!v || typeof v !== 'object' || typeof v.video_id !== 'string' || !v.video_id) {
+        return {
+          status: 'error',
+          error: { code: 'invalid_payload', message: 'videos[' + i + '] must be an object with a non-empty video_id' }
+        };
+      }
+    }
+
+    var tf = (typeof window !== 'undefined') ? window.mallTileField : null;
+    if (!tf || typeof tf.loadSessionVideos !== 'function') {
+      return {
+        status: 'error',
+        error: { code: 'api_unavailable', message: 'mallTileField.loadSessionVideos not available' }
+      };
+    }
+
+    var outcome = safeCall(function() { return tf.loadSessionVideos(videos, { source: source }); });
+
+    if (!outcome || typeof outcome !== 'object' || typeof outcome.applied !== 'boolean') {
+      return {
+        status: 'error',
+        error: { code: 'runtime_failure', message: 'loadSessionVideos returned no valid outcome' }
+      };
+    }
+
+    if (outcome.applied !== true) {
+      emitEvent('video_failed', { reason: outcome.reason || 'load_refused', source: source });
+      return {
+        status: 'error',
+        error: { code: 'load_refused', message: outcome.reason || 'loadSessionVideos refused the session' }
+      };
+    }
+
+    // API must explicitly confirm session mode — otherwise we refuse the claim
+    // and do NOT mark the dispatcher's session state as active.
+    if (outcome.session_mode !== true) {
+      emitEvent('video_failed', { reason: 'session_mode_required', source: source });
+      return {
+        status: 'error',
+        error: {
+          code: 'session_mode_required',
+          message: 'load_videos requires the API to confirm session_mode:true (catalog mutation not permitted)'
+        }
+      };
+    }
+
+    var videoCount = (typeof outcome.video_count === 'number') ? outcome.video_count : videos.length;
+    _setSessionOverride(true, videoCount);
+
+    emitEvent('state_changed', {
+      change: 'session_loaded',
+      video_count: videoCount,
+      source: source
+    });
+    return {
+      status: 'ok',
+      result: {
+        applied: true,
+        session_mode: true,
+        video_count: videoCount,
+        source: source
+      }
+    };
+  }
+
+  // Layer 4: reset_session — clears dispatcher session override and, if
+  // available, asks the runtime to restore catalog-backed state.
+  //
+  // Always returns ok: the dispatcher's session flag is local state so reset
+  // is always possible. `result.changed` tells callers whether the call
+  // actually cleared an active session (truthful no-op when no session active).
+  // `result.api_acknowledged` reports whether the underlying runtime confirmed
+  // the reset — agents can distinguish "dispatcher cleared, runtime unknown"
+  // from "both cleared".
+  function cmdResetSession(payload) {
+    payload = payload || {};
+    var source = (typeof payload.source === 'string' && payload.source) ? payload.source : 'pfmall_command';
+
+    var hadSession = sessionState.overrideActive === true;
+
+    var tf = (typeof window !== 'undefined') ? window.mallTileField : null;
+    var apiOutcome = null;
+    var apiCalled = false;
+    if (tf && typeof tf.resetSession === 'function') {
+      apiCalled = true;
+      apiOutcome = safeCall(function() { return tf.resetSession({ source: source }); });
+    }
+
+    _setSessionOverride(false, 0);
+
+    if (hadSession) {
+      emitEvent('session_reset', { source: source });
+      emitEvent('state_changed', { change: 'session_reset' });
+    }
+
+    return {
+      status: 'ok',
+      result: {
+        applied: true,
+        changed: hadSession,
+        source: source,
+        api_called: apiCalled,
+        api_acknowledged: !!(apiOutcome && apiOutcome.applied === true)
+      }
+    };
+  }
+
+  // Layer 5+ commands — registered but return not_implemented until wired.
+  // (Layer 5 is docs/interface finalization; no new commands planned there.)
   function cmdNotImplemented(command) {
     return {
       status: 'error',
@@ -497,11 +629,11 @@
   var HANDLERS = {
     inspect_state: cmdInspectState,
     set_layout: cmdSetLayout,
-    load_videos: function(p) { return cmdNotImplemented('load_videos'); },
+    load_videos: cmdLoadVideos,
     play_tile: cmdPlayTile,
     expand_tile: cmdExpandTile,
     collapse_tile: cmdCollapseTile,
-    reset_session: function(p) { return cmdNotImplemented('reset_session'); }
+    reset_session: cmdResetSession
   };
 
   function executeCommand(command, payload) {
