@@ -117,7 +117,7 @@ If already landed:
 
 | Slice | Priority | Blocked By | Notes |
 |-------|----------|------------|-------|
-| `fx1_holoindex_truth_restoration` | HIGH | — | sentence_transformers missing; silent lexical fallback + stale orphan dataset. Meta-layer WSP 97 violation. No briefing yet. |
+| `fx1_holoindex_truth_restoration` | HIGH | — | sentence_transformers installed but HoloIndex search timed out/crashed and retrieval mode was not truthfully surfaced; observed PostHog retry noise, WSP00 permission fallback failure, and logger NameError. Meta-layer WSP 97 violation. No briefing yet. |
 | `bh1_branch_hygiene_forensics` | HIGH | — | Commit `fde9d64a4` (DJ-OBS) appears in `origin/main` with no matching PR number in `gh pr list`. Investigate provenance + enforce branch/PR matching. No briefing yet. |
 | `dj2_c_oauth_preflight_dispatch` | HIGH | — | Wire 2 WARN sites in `monitor_youtube` OAuth block. severity=high, payload={auto_reauth, error}. Preserve return behaviour. Touches `main.py`. |
 | `dj2_b_ironclaw_skip_intentionality_assertion` | MEDIUM | DJ2-C | Whitelist known-good backend strings; unrecognised backend → dispatch severity=medium, likely_cause=`unexpected_backend_string_skipped_runtime_probe`. Touches `main.py`. |
