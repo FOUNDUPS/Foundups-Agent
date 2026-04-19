@@ -1,7 +1,7 @@
 # Active Slice Ledger
 
 **Authority**: 0102 architect lane
-**Updated**: 2026-03-31 (ledger_reconciliation_2026_03_31)
+**Updated**: 2026-04-20 (ledger_reconciliation_2026_04_20)
 **Rule**: Every agent reads this first. If repo truth contradicts an entry, update this ledger — not 012.
 
 ---
@@ -98,6 +98,18 @@ If already landed:
 | `pfmall_state_provider_poc` | `6670ae433` | p.fMALL state provider PoC implementation |
 | `holoindex_cli_extraction` | `e3d9fd181` | HoloIndex CLI command structure extracted from monolith |
 | `holoindex_cli_compatibility_hardening` | `c724f574c` + `9db825088` | CLI test compatibility hardened; accidental cli.py re-creation removed |
+| `dj_ai_resolution_hook_contract_phase1` | `1c0ee3f01` (PR #383) | `preflight_resolution.py` + 12 tests + main.py DEP-SECURITY and WSP-FRAMEWORK emitters wired |
+| `dj_obs_antifafm_preflight_emitter_phase1` | `fde9d64a4` | `obs_controller.py` start-timeout dispatch (component=obs_start, severity=critical, 14-field AF2 payload) + 6 tests in `test_obs_controller_startup.py` |
+| `antifafm_af1_af2_readiness_briefings` | PR #388 | AF1 internal readiness audit + AF2 OBS escalation spec persisted |
+| `fca1_ag2_main_dae_ai_overseer_hooks_audit` | `1eb5c08de` (PR #389) | `FCA1_AG2_MAIN_DAE_AI_OVERSEER_HOOKS_AUDIT_PHASE1.md` — 9-preflight matrix, 5 WSP 97 violations, DJ2-A…F sequence |
+| `youtube_auth_oauth_operator_assist_skillz` | `c35186e26` (PR #390) | OAuth operator-assist SKILLz contracts (YT2) |
+| `yt2_set1_reauth_operator_runbook` | `ce2e27d81` (PR #386) | Set 1 reauth operator runbook |
+| `ytr1_video_comments_runtime_hardening` | `95a685e25` (PR #387) | Reply runtime model + Selenium handling hardened |
+| `hermes_de2_gotjunk_extraction_validation` | `d6eb3db59` (PR #385) | DE2 gotjunk extraction validation gate briefing |
+| `hermes_de3_di1_briefings` | `729910d3f` (PR #391) | DE3 boundary cleanup + DI1 decision gate briefings |
+| `gotjunk_cloud_run_autonomous_deploy` | `8851af3ed` (PR #392) | Autonomous Cloud Run deploy workflow |
+| `dj2_a_wre_dashboard_insufficient_data_warn` | `904c3bb2f` (PR #393) | WRE dashboard INSUFFICIENT_DATA now dispatches as WARN (DJ2-A closed) |
+| `pqn_wsp97_prototype_downgrade` | `343848ad5` (PR #394) | Doc-only PQN skills downgraded to prototype per WSP 97 |
 
 ---
 
@@ -105,7 +117,14 @@ If already landed:
 
 | Slice | Priority | Blocked By | Notes |
 |-------|----------|------------|-------|
-| _(none)_ | — | — | — |
+| `fx1_holoindex_truth_restoration` | HIGH | — | sentence_transformers installed but HoloIndex search timed out/crashed and retrieval mode was not truthfully surfaced; observed PostHog retry noise, WSP00 permission fallback failure, and logger NameError. Meta-layer WSP 97 violation. No briefing yet. |
+| `bh1_branch_hygiene_forensics` | HIGH | — | Commit `fde9d64a4` (DJ-OBS) appears in `origin/main` with no matching PR number in `gh pr list`. Investigate provenance + enforce branch/PR matching. No briefing yet. |
+| `dj2_c_oauth_preflight_dispatch` | HIGH | — | Wire 2 WARN sites in `monitor_youtube` OAuth block. severity=high, payload={auto_reauth, error}. Preserve return behaviour. Touches `main.py`. |
+| `dj2_b_ironclaw_skip_intentionality_assertion` | MEDIUM | DJ2-C | Whitelist known-good backend strings; unrecognised backend → dispatch severity=medium, likely_cause=`unexpected_backend_string_skipped_runtime_probe`. Touches `main.py`. |
+| `dj2_d_brain_artifact_missing_dir_event` | LOW | DJ2-C | Dispatch on `preflight=PASS (missing)` with severity=low, automation_candidate=False. Touches `main.py`. |
+| `dj2_e_git_merge_sentinel_import_failure_event` | LOW | DJ2-C | Dispatch on ImportError branch. severity=low. Preserve return behaviour. Touches `main.py`. |
+| `dj2_f_openclaw_security_fail_dispatch` | HIGH | DJ2-C | Mirror DEP-SECURITY wiring at passed=False. severity=high default. Touches `main.py`. |
+| `pmctrl1_pfmall_agent_control_contract` | MEDIUM | — | Local unmerged branch `feat/pmctrl1-pfmall-control-contract`. Commits `e7ad889dd` (Layer 1 dispatcher) + `d6dd7c4c7` (Layer 2 set_layout with device policy denial). Files: `public/member/js/pfmall-control-dispatcher.js`, `public/member/tests/pfmall_control_dispatcher_vm.mjs`, briefing `PMCTRL1_PFMALL_AGENT_CONTROL_CONTRACT_PHASE1.md`. Not yet opened as PR. |
 
 ---
 
@@ -114,6 +133,33 @@ If already landed:
 | Slice | Reason |
 |-------|--------|
 | _(none)_ | — |
+
+---
+
+## Deferred Slices
+
+| Slice | Reason |
+|-------|--------|
+| `de4_hermes_extraction_next_sandbox` | Deferred pending DE2/DE3/DI1 downstream outcomes |
+
+---
+
+## Archive / Reconcile-Needed
+
+| Track | Status | Action | Blocked By |
+|-------|--------|--------|------------|
+| `softproto` | ARCHIVE_RECONCILE_NEEDED | read-only reconciliation only, not implementation | PMCTRL1 contract stabilization |
+
+**SoftProto scope** (2026-04-01 architecture prompts):
+- `docs/0102_session_briefings/SOFTPROTO_{A,B,C,D}_*_PROMPT_2026-04-01.md` (gateway / mall / concierge-reddog / guardrails audits)
+- `docs/0102_session_briefings/SOFTPROTO_SVELTE_SPIKE_PHASE1_PROMPT_2026-04-01.md`
+- `modules/foundups/docs/SOFTPROTO_*_CONTRACT.md` + `SOFTPROTO_FOUNDATION_ARCHITECTURE_2026-04-01.md` + `SOFTPROTO_ROLLOUT_PLAN_2026-04-01.md`
+
+**Architect read**: SoftProto's old concerns (module registry, command paths, validation envelopes, guarded interiors, gestures/overrides, mall/concierge/RedDog audits) overlap with newer active work — PMCTRL1 (pfMALL browser agent control), WRE/SKILLz command surfaces, RedDog/0102 control hooks, Hermes extraction boundary, FoundUp manifest/INTERFACE contracts.
+
+**Not an active implementation lane.** Do not revive as priority wave until reconciled against PMCTRL1 and current WRE contracts.
+
+**Next reconciliation slice (if/when needed)**: `SOFTPROTO-RECON1` — read-only audit; decide which SoftProto contracts are superseded by PMCTRL1/WRE/Hermes and which should be preserved. No code edits.
 
 ---
 
@@ -126,9 +172,16 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 
 ## Next Priority Order
 
-_(awaiting next slice from 012)_
+Serialisation requirement (per FCA1-AG2 audit §9): DJ2-C…F each edit `main.py`; run one PR at a time unless a shared `_emit_preflight_fail()` helper is extracted first.
 
-All previously queued slices are closed. See Closed Slices table for history.
+1. **FX1** — HoloIndex truth restoration (infrastructure truth layer; unblocks reliable slice research)
+2. **BH1** — Branch hygiene forensics (resolve `fde9d64a4` provenance before next main-touching slice)
+3. **DJ2-C** — OAuth preflight dispatch (highest-severity remaining hook gap)
+4. **DJ2-F** — OpenClaw Security fail dispatch
+5. **DJ2-B** — IronClaw skip intentionality assertion
+6. **DJ2-D** — Brain artifact missing-dir event
+7. **DJ2-E** — Git merge sentinel ImportError event
+8. **PMCTRL1** — open PR for local branch once reviewed
 
 ---
 
@@ -136,7 +189,7 @@ All previously queued slices are closed. See Closed Slices table for history.
 
 | PR | Branch | Status | Contents |
 |----|--------|--------|----------|
-| _(none)_ | — | — | — |
+| _(none open)_ | — | — | All recent PRs (#383–#394) merged. Next open PR will be LEDGER-RECON1 followed by FX1/BH1 briefings. |
 
 ---
 
