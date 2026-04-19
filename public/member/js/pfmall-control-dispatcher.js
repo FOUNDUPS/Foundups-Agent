@@ -256,7 +256,233 @@
     };
   }
 
-  // Layer 3+ commands — registered but return not_implemented until wired.
+  // Helper: locate catalog index by foundup_id via mallTileField.getCatalog().
+  // Returns { index, item } or null. Truth-signal: only uses the public catalog
+  // reader; never scans DOM.
+  function findFoundUpByIdViaCatalog(foundupId) {
+    var tf = (typeof window !== 'undefined') ? window.mallTileField : null;
+    if (!tf || typeof tf.getCatalog !== 'function') return null;
+    var catalog = safeCall(function() { return tf.getCatalog(); });
+    if (!catalog || typeof catalog.length !== 'number') return null;
+    for (var i = 0; i < catalog.length; i++) {
+      var item = catalog[i];
+      if (item && item.foundup_id === foundupId) {
+        return { index: i, item: item };
+      }
+    }
+    return null;
+  }
+
+  // Layer 3: play_tile — plays a FoundUp's video queue via mallVideoPlayer.open.
+  // Semantics: returns 'applied' wording (not 'playing') — we only know the API
+  // accepted the command + that isOpen() flipped. Actual playback is runtime.
+  function cmdPlayTile(payload) {
+    payload = payload || {};
+    var foundupId = payload.foundup_id;
+    var requestedVideoId = (typeof payload.video_id === 'string' && payload.video_id) ? payload.video_id : null;
+
+    if (typeof foundupId !== 'string' || !foundupId) {
+      return {
+        status: 'error',
+        error: { code: 'invalid_payload', message: 'play_tile requires payload.foundup_id as non-empty string' }
+      };
+    }
+
+    var vp = (typeof window !== 'undefined') ? window.mallVideoPlayer : null;
+    if (!vp || typeof vp.open !== 'function') {
+      return {
+        status: 'error',
+        error: { code: 'api_unavailable', message: 'mallVideoPlayer.open not available' }
+      };
+    }
+
+    var located = findFoundUpByIdViaCatalog(foundupId);
+    if (!located) {
+      emitEvent('video_failed', { foundup_id: foundupId, reason: 'tile_not_found' });
+      return {
+        status: 'error',
+        error: { code: 'tile_not_found', message: 'No tile with foundup_id=' + foundupId + ' in catalog' }
+      };
+    }
+
+    var videos = (located.item && located.item.videos) || [];
+    if (!videos.length) {
+      emitEvent('video_failed', { foundup_id: foundupId, reason: 'no_videos' });
+      return {
+        status: 'error',
+        error: { code: 'no_videos', message: 'FoundUp has no videos to play' }
+      };
+    }
+
+    var startIndex = 0;
+    if (requestedVideoId) {
+      var resolvedVideoIdx = -1;
+      for (var i = 0; i < videos.length; i++) {
+        if (videos[i] && videos[i].video_id === requestedVideoId) {
+          resolvedVideoIdx = i;
+          break;
+        }
+      }
+      if (resolvedVideoIdx === -1) {
+        emitEvent('video_failed', { foundup_id: foundupId, video_id: requestedVideoId, reason: 'video_id_not_found' });
+        return {
+          status: 'error',
+          error: { code: 'video_id_not_found', message: 'video_id=' + requestedVideoId + ' not in FoundUp queue' }
+        };
+      }
+      startIndex = resolvedVideoIdx;
+    }
+
+    safeCall(function() { return vp.open(foundupId, videos, startIndex); });
+    // open() may return undefined; we trust post-state read, not the call return.
+    var isOpen = safeCall(function() { return typeof vp.isOpen === 'function' ? vp.isOpen() : null; });
+    var currentFoundUpId = safeCall(function() { return typeof vp.getFoundUpId === 'function' ? vp.getFoundUpId() : null; });
+    var currentIndex = safeCall(function() { return typeof vp.getCurrentIndex === 'function' ? vp.getCurrentIndex() : null; });
+
+    if (isOpen !== true || currentFoundUpId !== foundupId) {
+      emitEvent('video_failed', { foundup_id: foundupId, reason: 'open_not_confirmed' });
+      return {
+        status: 'error',
+        error: { code: 'runtime_failure', message: 'mallVideoPlayer.open did not confirm playback state' }
+      };
+    }
+
+    emitEvent('video_loaded', {
+      foundup_id: foundupId,
+      video_id: requestedVideoId,
+      start_index: startIndex,
+      queue_length: videos.length,
+      current_index: currentIndex
+    });
+    return {
+      status: 'ok',
+      result: {
+        applied: true,
+        foundup_id: foundupId,
+        video_id: requestedVideoId,
+        start_index: startIndex,
+        queue_length: videos.length,
+        current_index: currentIndex
+      }
+    };
+  }
+
+  // Layer 3: expand_tile — opens a FoundUp's expanded lane view.
+  function cmdExpandTile(payload) {
+    payload = payload || {};
+    var foundupId = payload.foundup_id;
+
+    if (typeof foundupId !== 'string' || !foundupId) {
+      return {
+        status: 'error',
+        error: { code: 'invalid_payload', message: 'expand_tile requires payload.foundup_id as non-empty string' }
+      };
+    }
+
+    var tf = (typeof window !== 'undefined') ? window.mallTileField : null;
+    if (!tf || typeof tf.expandFoundUp !== 'function') {
+      return {
+        status: 'error',
+        error: { code: 'api_unavailable', message: 'mallTileField.expandFoundUp not available' }
+      };
+    }
+
+    var located = findFoundUpByIdViaCatalog(foundupId);
+    if (!located) {
+      return {
+        status: 'error',
+        error: { code: 'tile_not_found', message: 'No tile with foundup_id=' + foundupId + ' in catalog' }
+      };
+    }
+
+    safeCall(function() { return tf.expandFoundUp(located.index); });
+
+    var expandedIndex = safeCall(function() {
+      return typeof tf.getExpandedIndex === 'function' ? tf.getExpandedIndex() : null;
+    });
+
+    if (expandedIndex !== located.index) {
+      return {
+        status: 'error',
+        error: { code: 'expand_failed', message: 'expandFoundUp did not confirm expanded state for foundup_id=' + foundupId }
+      };
+    }
+
+    emitEvent('state_changed', {
+      change: 'expanded',
+      foundup_id: foundupId,
+      expanded_index: expandedIndex
+    });
+    return {
+      status: 'ok',
+      result: {
+        applied: true,
+        foundup_id: foundupId,
+        expanded_index: expandedIndex
+      }
+    };
+  }
+
+  // Layer 3: collapse_tile — closes the currently expanded FoundUp.
+  // payload.foundup_id is a sanity signal against the prior-expanded index
+  // (the underlying API is global, not per-id). The dispatcher reports whether
+  // the id matched what was previously expanded, for truth-signalling.
+  function cmdCollapseTile(payload) {
+    payload = payload || {};
+    var foundupId = payload.foundup_id;
+
+    if (typeof foundupId !== 'string' || !foundupId) {
+      return {
+        status: 'error',
+        error: { code: 'invalid_payload', message: 'collapse_tile requires payload.foundup_id as non-empty string' }
+      };
+    }
+
+    var tf = (typeof window !== 'undefined') ? window.mallTileField : null;
+    if (!tf || typeof tf.collapseFoundUp !== 'function') {
+      return {
+        status: 'error',
+        error: { code: 'api_unavailable', message: 'mallTileField.collapseFoundUp not available' }
+      };
+    }
+
+    var priorExpanded = safeCall(function() {
+      return typeof tf.getExpandedIndex === 'function' ? tf.getExpandedIndex() : null;
+    });
+    var expectedItem = findFoundUpByIdViaCatalog(foundupId);
+    var foundupIdMatchedPrior = !!(expectedItem && priorExpanded === expectedItem.index);
+
+    safeCall(function() { return tf.collapseFoundUp(); });
+
+    var nowExpanded = safeCall(function() {
+      return typeof tf.getExpandedIndex === 'function' ? tf.getExpandedIndex() : null;
+    });
+
+    if (nowExpanded !== null) {
+      return {
+        status: 'error',
+        error: { code: 'collapse_failed', message: 'collapseFoundUp did not clear expanded state' }
+      };
+    }
+
+    emitEvent('state_changed', {
+      change: 'collapsed',
+      foundup_id: foundupId,
+      foundup_id_matched_prior: foundupIdMatchedPrior,
+      prior_expanded_index: priorExpanded
+    });
+    return {
+      status: 'ok',
+      result: {
+        applied: true,
+        foundup_id: foundupId,
+        foundup_id_matched_prior: foundupIdMatchedPrior,
+        prior_expanded_index: priorExpanded
+      }
+    };
+  }
+
+  // Layer 4+ commands — registered but return not_implemented until wired.
   // Keeping the surface stable lets tests exercise rejection shape early.
   function cmdNotImplemented(command) {
     return {
@@ -272,9 +498,9 @@
     inspect_state: cmdInspectState,
     set_layout: cmdSetLayout,
     load_videos: function(p) { return cmdNotImplemented('load_videos'); },
-    play_tile: function(p) { return cmdNotImplemented('play_tile'); },
-    expand_tile: function(p) { return cmdNotImplemented('expand_tile'); },
-    collapse_tile: function(p) { return cmdNotImplemented('collapse_tile'); },
+    play_tile: cmdPlayTile,
+    expand_tile: cmdExpandTile,
+    collapse_tile: cmdCollapseTile,
     reset_session: function(p) { return cmdNotImplemented('reset_session'); }
   };
 

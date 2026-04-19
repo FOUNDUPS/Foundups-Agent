@@ -192,12 +192,12 @@ async function run() {
     assert(res2.status === 'error' && res2.error.code === 'invalid_command', 'null command rejected');
   }
 
-  // 8) Layer 3+ commands return not_implemented (stable contract, not crash).
-  //    set_layout moved out of this list in Layer 2 — it is now implemented.
+  // 8) Layer 4+ commands return not_implemented (stable contract, not crash).
+  //    set_layout (Layer 2) and play/expand/collapse_tile (Layer 3) are implemented.
   {
     const sb = createSandbox();
     loadDispatcher(sb);
-    const notYet = ['load_videos', 'play_tile', 'expand_tile', 'collapse_tile', 'reset_session'];
+    const notYet = ['load_videos', 'reset_session'];
     for (const cmd of notYet) {
       const res = sb.pfmallControlDispatcher.dispatch(cmd, {});
       assert(res.status === 'error', cmd + ' returns error');
@@ -472,9 +472,9 @@ async function run() {
     // unknown command unchanged
     const unk = sb.pfmallControlDispatcher.dispatch('not_a_command', {});
     assert(unk.status === 'error' && unk.error.code === 'unknown_command', 'unknown still error');
-    // Layer 3+ still not_implemented (unchanged)
-    const ni = sb.pfmallControlDispatcher.dispatch('play_tile', {});
-    assert(ni.status === 'error' && ni.error.code === 'not_implemented', 'play_tile still not_implemented');
+    // Layer 4+ still not_implemented (unchanged)
+    const ni = sb.pfmallControlDispatcher.dispatch('load_videos', {});
+    assert(ni.status === 'error' && ni.error.code === 'not_implemented', 'load_videos still not_implemented');
     // set_layout is now registered as implemented (not not_implemented)
     const impl = sb.pfmallControlDispatcher.dispatch('set_layout', { preset: '3x5' });
     assert(impl.status === 'ok' && impl.error === undefined, 'set_layout no longer not_implemented');
@@ -496,7 +496,411 @@ async function run() {
     assert(denied[0].payload.preset === 'bogus_preset', 'the one denial is the policy one');
   }
 
-  console.log('pfmall_control_dispatcher_vm.mjs: all checks passed (Layer 1 + Layer 2)');
+  // ==========================================================================
+  // Layer 3: play_tile / expand_tile / collapse_tile (direct tile control)
+  // ==========================================================================
+
+  // Shared helpers for Layer 3: tile field + video player stubs with real state.
+
+  function makeL3TileField(catalog) {
+    let expanded = null;
+    const expandCalls = [];
+    const collapseCalls = [];
+    return {
+      _expandCalls: expandCalls,
+      _collapseCalls: collapseCalls,
+      getCatalog: function() { return catalog.slice(); },
+      isExpanded: function() { return expanded !== null; },
+      getExpandedIndex: function() { return expanded; },
+      expandFoundUp: function(idx) {
+        expandCalls.push(idx);
+        const item = catalog[idx];
+        if (!item || !item.videos || !item.videos.length) return;  // mirrors real early return
+        expanded = idx;
+      },
+      collapseFoundUp: function() {
+        collapseCalls.push(true);
+        expanded = null;
+      }
+    };
+  }
+
+  function makeL3VideoPlayer() {
+    let open = false;
+    let fid = null;
+    let idx = -1;
+    let qlen = 0;
+    const openCalls = [];
+    return {
+      _openCalls: openCalls,
+      open: function(foundupId, queue, startIndex) {
+        openCalls.push({ foundupId: foundupId, queueLen: (queue || []).length, startIndex: startIndex });
+        open = true;
+        fid = foundupId;
+        idx = startIndex || 0;
+        qlen = (queue || []).length;
+      },
+      close: function() { open = false; fid = null; idx = -1; qlen = 0; },
+      isOpen: function() { return open; },
+      getFoundUpId: function() { return fid; },
+      getCurrentIndex: function() { return idx; },
+      getQueueLength: function() { return qlen; }
+    };
+  }
+
+  const L3_CATALOG = [
+    {
+      foundup_id: 'move2japan',
+      videos: [
+        { video_id: 'vid_aaa', title: 'A' },
+        { video_id: 'vid_bbb', title: 'B' },
+        { video_id: 'vid_ccc', title: 'C' }
+      ]
+    },
+    {
+      foundup_id: 'kosei',
+      videos: [{ video_id: 'vid_k1', title: 'K1' }]
+    },
+    {
+      foundup_id: 'empty_foundup',
+      videos: []
+    }
+  ];
+
+  // 22) play_tile success path — valid foundup_id, API present -> status ok + video_loaded event.
+  {
+    const vp = makeL3VideoPlayer();
+    const tf = makeL3TileField(L3_CATALOG);
+    const sb = createSandbox({ tileField: tf, videoPlayer: vp });
+    loadDispatcher(sb);
+    const events = [];
+    sb.pfmallControlDispatcher.registerEventListener({ postMessage(msg) { events.push(msg); } }, { origin: '*' });
+
+    const res = sb.pfmallControlDispatcher.dispatch('play_tile', { foundup_id: 'move2japan' });
+    assert(res.status === 'ok', 'play_tile ok');
+    assert(res.result.applied === true, 'applied true (not "playing")');
+    assert(res.result.foundup_id === 'move2japan', 'foundup_id echoed');
+    assert(res.result.video_id === null, 'no specific video requested -> null');
+    assert(res.result.start_index === 0, 'default start_index 0');
+    assert(res.result.queue_length === 3, 'queue_length from catalog');
+    assert(vp._openCalls.length === 1, 'mallVideoPlayer.open called once');
+    assert(vp._openCalls[0].foundupId === 'move2japan', 'open got correct foundup_id');
+    assert(vp._openCalls[0].queueLen === 3, 'open got full queue');
+    assert(vp._openCalls[0].startIndex === 0, 'open got startIndex 0');
+
+    const loaded = events.filter(e => e.event === 'video_loaded');
+    assert(loaded.length === 1, 'one video_loaded event');
+    assert(loaded[0].payload.foundup_id === 'move2japan', 'event foundup_id');
+    assert(loaded[0].payload.start_index === 0, 'event start_index');
+    assert(events.filter(e => e.event === 'video_failed').length === 0, 'no video_failed on success');
+  }
+
+  // 23) play_tile with specific video_id resolves to the correct queue index.
+  {
+    const vp = makeL3VideoPlayer();
+    const sb = createSandbox({ tileField: makeL3TileField(L3_CATALOG), videoPlayer: vp });
+    loadDispatcher(sb);
+
+    const res = sb.pfmallControlDispatcher.dispatch('play_tile', {
+      foundup_id: 'move2japan',
+      video_id: 'vid_ccc'
+    });
+    assert(res.status === 'ok', 'play_tile with video_id -> ok');
+    assert(res.result.start_index === 2, 'vid_ccc resolved to index 2');
+    assert(res.result.video_id === 'vid_ccc', 'video_id echoed');
+    assert(vp._openCalls[0].startIndex === 2, 'open got correct startIndex');
+  }
+
+  // 24) play_tile with missing mallVideoPlayer API -> status error, code api_unavailable.
+  {
+    const sb = createSandbox({ tileField: makeL3TileField(L3_CATALOG) });  // no videoPlayer
+    loadDispatcher(sb);
+    const res = sb.pfmallControlDispatcher.dispatch('play_tile', { foundup_id: 'move2japan' });
+    assert(res.status === 'error', 'missing API -> error (not denied)');
+    assert(res.error.code === 'api_unavailable', 'code api_unavailable');
+  }
+
+  // 25) play_tile with unknown foundup_id -> tile_not_found + video_failed event.
+  {
+    const vp = makeL3VideoPlayer();
+    const sb = createSandbox({ tileField: makeL3TileField(L3_CATALOG), videoPlayer: vp });
+    loadDispatcher(sb);
+    const events = [];
+    sb.pfmallControlDispatcher.registerEventListener({ postMessage(msg) { events.push(msg); } }, { origin: '*' });
+
+    const res = sb.pfmallControlDispatcher.dispatch('play_tile', { foundup_id: 'does_not_exist' });
+    assert(res.status === 'error', 'unknown foundup -> error');
+    assert(res.error.code === 'tile_not_found', 'code tile_not_found');
+    assert(vp._openCalls.length === 0, 'open never called for missing tile');
+
+    const failed = events.filter(e => e.event === 'video_failed');
+    assert(failed.length === 1, 'one video_failed event');
+    assert(failed[0].payload.reason === 'tile_not_found', 'failure reason recorded');
+    assert(events.filter(e => e.event === 'video_loaded').length === 0, 'no video_loaded on failure');
+  }
+
+  // 26) play_tile with unknown video_id within valid foundup -> video_id_not_found error.
+  {
+    const vp = makeL3VideoPlayer();
+    const sb = createSandbox({ tileField: makeL3TileField(L3_CATALOG), videoPlayer: vp });
+    loadDispatcher(sb);
+    const events = [];
+    sb.pfmallControlDispatcher.registerEventListener({ postMessage(msg) { events.push(msg); } }, { origin: '*' });
+
+    const res = sb.pfmallControlDispatcher.dispatch('play_tile', {
+      foundup_id: 'move2japan',
+      video_id: 'vid_NOPE'
+    });
+    assert(res.status === 'error', 'unknown video_id -> error');
+    assert(res.error.code === 'video_id_not_found', 'code video_id_not_found');
+    assert(vp._openCalls.length === 0, 'open not called when video_id missing');
+
+    const failed = events.filter(e => e.event === 'video_failed');
+    assert(failed.length === 1, 'video_failed emitted for video_id_not_found');
+    assert(failed[0].payload.reason === 'video_id_not_found', 'failure reason correct');
+  }
+
+  // 27) play_tile on FoundUp with empty queue -> no_videos error + video_failed event.
+  {
+    const vp = makeL3VideoPlayer();
+    const sb = createSandbox({ tileField: makeL3TileField(L3_CATALOG), videoPlayer: vp });
+    loadDispatcher(sb);
+    const events = [];
+    sb.pfmallControlDispatcher.registerEventListener({ postMessage(msg) { events.push(msg); } }, { origin: '*' });
+
+    const res = sb.pfmallControlDispatcher.dispatch('play_tile', { foundup_id: 'empty_foundup' });
+    assert(res.status === 'error', 'empty queue -> error');
+    assert(res.error.code === 'no_videos', 'code no_videos');
+    assert(vp._openCalls.length === 0, 'open not called when queue empty');
+    assert(events.filter(e => e.event === 'video_failed').length === 1, 'video_failed on empty queue');
+  }
+
+  // 28) play_tile runtime_failure: open() is a no-op -> isOpen() stays false.
+  {
+    const stubVp = {
+      open: function() { /* silently fails to update state */ },
+      isOpen: function() { return false; },
+      getFoundUpId: function() { return null; },
+      getCurrentIndex: function() { return -1; },
+      getQueueLength: function() { return 0; }
+    };
+    const sb = createSandbox({ tileField: makeL3TileField(L3_CATALOG), videoPlayer: stubVp });
+    loadDispatcher(sb);
+    const events = [];
+    sb.pfmallControlDispatcher.registerEventListener({ postMessage(msg) { events.push(msg); } }, { origin: '*' });
+
+    const res = sb.pfmallControlDispatcher.dispatch('play_tile', { foundup_id: 'move2japan' });
+    assert(res.status === 'error', 'open no-op -> error');
+    assert(res.error.code === 'runtime_failure', 'code runtime_failure');
+    assert(events.filter(e => e.event === 'video_failed').length === 1, 'video_failed on runtime_failure');
+    assert(events.filter(e => e.event === 'video_loaded').length === 0, 'no video_loaded when not confirmed');
+  }
+
+  // 29) play_tile missing foundup_id -> invalid_payload error, no event.
+  {
+    const sb = createSandbox({ tileField: makeL3TileField(L3_CATALOG), videoPlayer: makeL3VideoPlayer() });
+    loadDispatcher(sb);
+    const events = [];
+    sb.pfmallControlDispatcher.registerEventListener({ postMessage(msg) { events.push(msg); } }, { origin: '*' });
+
+    const res = sb.pfmallControlDispatcher.dispatch('play_tile', {});
+    assert(res.status === 'error', 'missing foundup_id -> error');
+    assert(res.error.code === 'invalid_payload', 'code invalid_payload');
+    assert(events.length === 0, 'no event fired on invalid_payload (not a failure of playback)');
+  }
+
+  // 30) expand_tile success path -> status ok + state_changed event.
+  {
+    const tf = makeL3TileField(L3_CATALOG);
+    const sb = createSandbox({ tileField: tf });
+    loadDispatcher(sb);
+    const events = [];
+    sb.pfmallControlDispatcher.registerEventListener({ postMessage(msg) { events.push(msg); } }, { origin: '*' });
+
+    const res = sb.pfmallControlDispatcher.dispatch('expand_tile', { foundup_id: 'kosei' });
+    assert(res.status === 'ok', 'expand_tile ok');
+    assert(res.result.applied === true, 'applied true');
+    assert(res.result.foundup_id === 'kosei', 'foundup_id echoed');
+    assert(res.result.expanded_index === 1, 'expanded_index returned (kosei = index 1)');
+    assert(tf._expandCalls.length === 1, 'expandFoundUp called once');
+    assert(tf._expandCalls[0] === 1, 'expand called with correct index');
+    assert(tf.getExpandedIndex() === 1, 'tile field state mutated');
+
+    const sc = events.filter(e => e.event === 'state_changed');
+    assert(sc.length === 1, 'one state_changed event');
+    assert(sc[0].payload.change === 'expanded', 'change=expanded');
+    assert(sc[0].payload.foundup_id === 'kosei', 'event foundup_id');
+    assert(sc[0].payload.expanded_index === 1, 'event expanded_index');
+  }
+
+  // 31) expand_tile with unknown foundup_id -> tile_not_found error.
+  {
+    const tf = makeL3TileField(L3_CATALOG);
+    const sb = createSandbox({ tileField: tf });
+    loadDispatcher(sb);
+    const res = sb.pfmallControlDispatcher.dispatch('expand_tile', { foundup_id: 'ghost' });
+    assert(res.status === 'error', 'unknown -> error');
+    assert(res.error.code === 'tile_not_found', 'code tile_not_found');
+    assert(tf._expandCalls.length === 0, 'expandFoundUp not called');
+  }
+
+  // 32) expand_tile with missing API -> api_unavailable error.
+  {
+    const sb = createSandbox({ tileField: { getCatalog: function() { return L3_CATALOG.slice(); } } });
+    loadDispatcher(sb);
+    const res = sb.pfmallControlDispatcher.dispatch('expand_tile', { foundup_id: 'kosei' });
+    assert(res.status === 'error', 'no expandFoundUp -> error');
+    assert(res.error.code === 'api_unavailable', 'code api_unavailable');
+  }
+
+  // 33) expand_tile where API silently refuses (e.g. empty videos) -> expand_failed.
+  {
+    const tf = makeL3TileField(L3_CATALOG);  // empty_foundup has no videos
+    const sb = createSandbox({ tileField: tf });
+    loadDispatcher(sb);
+    const events = [];
+    sb.pfmallControlDispatcher.registerEventListener({ postMessage(msg) { events.push(msg); } }, { origin: '*' });
+
+    const res = sb.pfmallControlDispatcher.dispatch('expand_tile', { foundup_id: 'empty_foundup' });
+    assert(res.status === 'error', 'silent expand refusal -> error');
+    assert(res.error.code === 'expand_failed', 'code expand_failed (not runtime_failure)');
+    assert(events.filter(e => e.event === 'state_changed').length === 0, 'no state_changed on expand_failed');
+  }
+
+  // 34) collapse_tile success path (tile currently expanded) -> ok + state_changed.
+  {
+    const tf = makeL3TileField(L3_CATALOG);
+    const sb = createSandbox({ tileField: tf });
+    loadDispatcher(sb);
+    // expand first
+    sb.pfmallControlDispatcher.dispatch('expand_tile', { foundup_id: 'move2japan' });
+    assert(tf.getExpandedIndex() === 0, 'precondition: expanded');
+
+    const events = [];
+    sb.pfmallControlDispatcher.registerEventListener({ postMessage(msg) { events.push(msg); } }, { origin: '*' });
+
+    const res = sb.pfmallControlDispatcher.dispatch('collapse_tile', { foundup_id: 'move2japan' });
+    assert(res.status === 'ok', 'collapse ok');
+    assert(res.result.applied === true, 'applied true');
+    assert(res.result.foundup_id === 'move2japan', 'foundup_id echoed');
+    assert(res.result.foundup_id_matched_prior === true, 'matched prior expanded index');
+    assert(res.result.prior_expanded_index === 0, 'reports prior index');
+    assert(tf._collapseCalls.length === 1, 'collapseFoundUp called once');
+    assert(tf.getExpandedIndex() === null, 'state cleared');
+
+    const sc = events.filter(e => e.event === 'state_changed');
+    assert(sc.length === 1, 'one state_changed');
+    assert(sc[0].payload.change === 'collapsed', 'change=collapsed');
+    assert(sc[0].payload.foundup_id === 'move2japan', 'event foundup_id');
+    assert(sc[0].payload.foundup_id_matched_prior === true, 'event reports id match');
+  }
+
+  // 35) collapse_tile when nothing expanded -> ok but foundup_id_matched_prior false.
+  //     Truth-signal: dispatcher doesn't lie about whether the id was actually expanded;
+  //     it still collapses (global API) but reports the mismatch.
+  {
+    const tf = makeL3TileField(L3_CATALOG);
+    const sb = createSandbox({ tileField: tf });
+    loadDispatcher(sb);
+    assert(tf.getExpandedIndex() === null, 'precondition: nothing expanded');
+
+    const res = sb.pfmallControlDispatcher.dispatch('collapse_tile', { foundup_id: 'move2japan' });
+    assert(res.status === 'ok', 'collapse still ok (global API succeeds)');
+    assert(res.result.foundup_id_matched_prior === false, 'not matched (nothing was expanded)');
+    assert(res.result.prior_expanded_index === null, 'prior was null');
+  }
+
+  // 36) collapse_tile with missing API -> api_unavailable error.
+  {
+    const sb = createSandbox({ tileField: { getCatalog: function() { return L3_CATALOG.slice(); } } });
+    loadDispatcher(sb);
+    const res = sb.pfmallControlDispatcher.dispatch('collapse_tile', { foundup_id: 'move2japan' });
+    assert(res.status === 'error', 'no collapseFoundUp -> error');
+    assert(res.error.code === 'api_unavailable', 'code api_unavailable');
+  }
+
+  // 37) collapse_tile runtime_failure: collapse no-op leaves expanded state -> collapse_failed.
+  {
+    const stubTf = {
+      getCatalog: function() { return L3_CATALOG.slice(); },
+      getExpandedIndex: function() { return 0; },  // stays expanded after collapse
+      isExpanded: function() { return true; },
+      collapseFoundUp: function() { /* no-op */ }
+    };
+    const sb = createSandbox({ tileField: stubTf });
+    loadDispatcher(sb);
+    const res = sb.pfmallControlDispatcher.dispatch('collapse_tile', { foundup_id: 'move2japan' });
+    assert(res.status === 'error', 'collapse no-op -> error');
+    assert(res.error.code === 'collapse_failed', 'code collapse_failed');
+  }
+
+  // 38) play/expand/collapse missing or empty foundup_id -> invalid_payload.
+  {
+    const sb = createSandbox({
+      tileField: makeL3TileField(L3_CATALOG),
+      videoPlayer: makeL3VideoPlayer()
+    });
+    loadDispatcher(sb);
+    const cmds = ['play_tile', 'expand_tile', 'collapse_tile'];
+    for (const cmd of cmds) {
+      const r1 = sb.pfmallControlDispatcher.dispatch(cmd, {});
+      assert(r1.status === 'error' && r1.error.code === 'invalid_payload', cmd + ' missing -> invalid_payload');
+      const r2 = sb.pfmallControlDispatcher.dispatch(cmd, { foundup_id: '' });
+      assert(r2.status === 'error' && r2.error.code === 'invalid_payload', cmd + ' empty -> invalid_payload');
+      const r3 = sb.pfmallControlDispatcher.dispatch(cmd, { foundup_id: 123 });
+      assert(r3.status === 'error' && r3.error.code === 'invalid_payload', cmd + ' non-string -> invalid_payload');
+    }
+  }
+
+  // 39) Layer 1/2 regressions still pass after Layer 3 lands.
+  {
+    const tf = makeTileFieldWithPolicy('desktop');
+    const sb = createSandbox({ tileField: tf });
+    loadDispatcher(sb);
+    // inspect_state unchanged
+    const ins = sb.pfmallControlDispatcher.dispatch('inspect_state', {});
+    assert(ins.status === 'ok', 'Layer 1: inspect_state still ok');
+    // set_layout Layer 2 accept path unchanged
+    const sl = sb.pfmallControlDispatcher.dispatch('set_layout', { preset: '6x3', source: 'test' });
+    assert(sl.status === 'ok' && sl.result.applied === true, 'Layer 2: set_layout accept unchanged');
+    // set_layout Layer 2 deny path unchanged
+    const sb2 = createSandbox({ tileField: makeTileFieldWithPolicy('phone') });
+    loadDispatcher(sb2);
+    const sl2 = sb2.pfmallControlDispatcher.dispatch('set_layout', { preset: '6x3' });
+    assert(sl2.status === 'denied', 'Layer 2: set_layout deny unchanged');
+    // Unknown commands still rejected
+    const unk = sb.pfmallControlDispatcher.dispatch('nonsense', {});
+    assert(unk.status === 'error' && unk.error.code === 'unknown_command', 'unknown still rejected');
+  }
+
+  // 40) postMessage routing works for Layer 3 commands with envelope shape preserved.
+  {
+    const vp = makeL3VideoPlayer();
+    const tf = makeL3TileField(L3_CATALOG);
+    const sb = createSandbox({ tileField: tf, videoPlayer: vp });
+    loadDispatcher(sb);
+    let replied;
+    const source = { postMessage(msg) { replied = msg; } };
+    sb._messageHandler({
+      origin: 'http://127.0.0.1:5500',
+      source,
+      data: {
+        type: 'pfmall_command',
+        source: 'red_dog',
+        command: 'play_tile',
+        request_id: 'req-play-1',
+        payload: { foundup_id: 'kosei' }
+      }
+    });
+    assert(replied && replied.type === 'pfmall_response', 'play_tile postMessage response');
+    assert(replied.status === 'ok', 'play_tile via postMessage ok');
+    assert(replied.request_id === 'req-play-1', 'request_id echoed');
+    assert(replied.target === 'red_dog', 'target echoed');
+    assert(replied.result.foundup_id === 'kosei', 'result foundup_id');
+    assert(replied.error === undefined, 'no error field on success');
+  }
+
+  console.log('pfmall_control_dispatcher_vm.mjs: all checks passed (Layer 1 + Layer 2 + Layer 3)');
 }
 
 run().catch((e) => {

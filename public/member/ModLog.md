@@ -1,5 +1,93 @@
 # Member Area Module Change Log
 
+## [2026-04-20] pfMALL Agent Control Dispatcher — Layer 3 (Worker AW3/AG3)
+
+**Who**: 0102 - Worker AW3/AG3
+**Slice**: `PMCTRL1-L3 — PFMALL_CONTROL_PLAY_EXPAND_COLLAPSE_PHASE3`
+**What**: Direct tile control commands wired to existing mallTileField /
+mallVideoPlayer APIs: `play_tile`, `expand_tile`, `collapse_tile`. No new
+runtime APIs introduced; dispatcher composes existing public methods only.
+
+**Rationale**: Layers 1-2 gave agents read access (`inspect_state`) and layout
+control (`set_layout`). Layer 3 lets agents drive individual tiles — play a
+FoundUp's queue, expand/collapse its lane — without touching the DOM or
+catalog. Per the PMCTRL1-L3 directive: "call existing tile/player API only" and
+"do not fabricate playback success".
+
+**Files Modified**:
+- `public/member/js/pfmall-control-dispatcher.js` - added `cmdPlayTile`,
+  `cmdExpandTile`, `cmdCollapseTile`, and the shared `findFoundUpByIdViaCatalog`
+  helper. Handlers registered (Layer 4 commands still `not_implemented`).
+- `public/member/tests/pfmall_control_dispatcher_vm.mjs` - 19 new checks
+  (tests 22-40), total harness now 40 checks.
+
+**API Mapping** (composition only — no new methods added to runtime):
+- `play_tile` → `window.mallVideoPlayer.open(foundup_id, queue, startIndex)`
+- `expand_tile` → `window.mallTileField.expandFoundUp(index)`
+- `collapse_tile` → `window.mallTileField.collapseFoundUp()`
+- foundup_id → index resolved via `window.mallTileField.getCatalog()`
+
+**Truth-signal discipline**:
+- `play_tile`: after calling `open()`, the dispatcher confirms playback state
+  via `isOpen()` and `getFoundUpId()`. Result wording is `applied: true`, not
+  `"playing"` — the underlying API confirms acceptance, not actual playback.
+- `expand_tile`: after calling `expandFoundUp(index)`, the dispatcher confirms
+  via `getExpandedIndex()`. If the state did not change (e.g. FoundUp has no
+  videos → runtime early-returns), returns `expand_failed`.
+- `collapse_tile`: the underlying API is global (no per-id scoping). The
+  dispatcher reports `foundup_id_matched_prior` so callers can tell whether
+  the id they passed was actually what had been expanded.
+
+**Error codes**:
+- `invalid_payload` - missing / non-string / empty `foundup_id`
+- `api_unavailable` - required runtime method missing
+- `tile_not_found` - `foundup_id` not in catalog
+- `video_id_not_found` - explicit `video_id` not in the FoundUp's queue
+- `no_videos` - FoundUp has empty queue
+- `runtime_failure` - API called but post-state does not confirm success
+- `expand_failed` - `getExpandedIndex()` did not match after `expandFoundUp`
+- `collapse_failed` - `getExpandedIndex()` not cleared after `collapseFoundUp`
+
+**Events**:
+- `video_loaded` on `play_tile` success (payload: `foundup_id`, `video_id`,
+  `start_index`, `queue_length`, `current_index`)
+- `video_failed` on `play_tile` failure with a reason string (`tile_not_found`,
+  `no_videos`, `video_id_not_found`, `open_not_confirmed`)
+- `state_changed` with `change: 'expanded'` or `change: 'collapsed'`
+- No event fires on `invalid_payload` — that's a caller mistake, not a
+  playback or state transition.
+
+**Tests (VM harness, 19 new — 22-40; total 40)**:
+- play_tile success with mocked mallVideoPlayer.open
+- play_tile with specific video_id resolves to correct queue index
+- play_tile missing API → `api_unavailable`
+- play_tile unknown foundup → `tile_not_found` + `video_failed`
+- play_tile unknown video_id → `video_id_not_found` + `video_failed`
+- play_tile empty queue → `no_videos` + `video_failed`
+- play_tile open() no-op → `runtime_failure` + `video_failed`
+- play_tile missing foundup_id → `invalid_payload` (no event)
+- expand_tile success → `state_changed` with `change: 'expanded'`
+- expand_tile unknown foundup → `tile_not_found`
+- expand_tile missing API → `api_unavailable`
+- expand_tile silent API refusal → `expand_failed`
+- collapse_tile success (with expanded precondition) → `state_changed`
+- collapse_tile with nothing expanded → ok, `foundup_id_matched_prior: false`
+- collapse_tile missing API → `api_unavailable`
+- collapse_tile no-op → `collapse_failed`
+- invalid payload variants for play/expand/collapse → `invalid_payload`
+- Layer 1/2 regression sweep (inspect_state, set_layout accept, set_layout deny)
+- postMessage routing for play_tile with `request_id` echo
+
+**Run**: `node public/member/tests/pfmall_control_dispatcher_vm.mjs`
+
+**Out of scope (deferred to Layers 4-5)**: `load_videos` (session video
+installation), `reset_session` (session clear), INTERFACE.md documentation,
+floating search UI, native app bridge wiring, RedDog autonomous repair, WSP
+106 HTTP gateway wiring, catalog mutation. Branch stays local until Layer 5;
+no push / PR yet.
+
+---
+
 ## [2026-04-20] pfMALL Agent Control Dispatcher — Layers 1-2 (Worker AW3)
 
 **Who**: 0102 - Worker AW3
