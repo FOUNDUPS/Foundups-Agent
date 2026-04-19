@@ -1,5 +1,19 @@
 # antifaFM Broadcaster - ModLog
 
+## V3.3.4 - AF1/AF2 briefing persistence (2026-04-19)
+
+**Slices**: `AF1_ANTIFAFM_INTERNAL_OPERATIONAL_READINESS_AUDIT_PHASE1`, `AF2_ANTIFAFM_OBS_FAILURE_ESCALATION_SPEC_PHASE1`
+**Window**: CW2
+**Lane**: AF
+**Mode**: documentation only — no code, no tests, no live systems
+
+AF1 read-only audit and AF2 read-only spec were produced in conversation context
+on 2026-04-19 and persisted to `docs/0102_session_briefings/` in this slice.
+AF1 verdict: INTERNAL_NOT_READY. AF2 verdict: DJ-OBS_READY.
+DJ-OBS implementation owned by AW2 (V3.3.3 below).
+
+---
+
 ## V3.3.3 - DJ-OBS preflight failure emitter (2026-04-19)
 
 **Slice**: `DJ-OBS — ANTIFAFM_OBS_PREFLIGHT_FAILURE_EMITTER_PHASE1`
