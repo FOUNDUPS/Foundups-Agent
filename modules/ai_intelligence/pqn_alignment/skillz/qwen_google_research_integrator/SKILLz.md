@@ -13,16 +13,16 @@ evals: []
 
 ---
 # Metadata (YAML Frontmatter)
-skill_id: qwen_google_research_integrator_v1_production
+skill_id: qwen_google_research_integrator_v1_prototype
 name: qwen_google_research_integrator
 description: Synthesis of Google research (Scholar, Quantum AI, Gemini, TTS) with local PQN findings for comprehensive validation
-version: 1.0_production
+version: 1.0_prototype
 author: 0102
 created: 2025-10-22
 agents: [qwen]
 primary_agent: qwen
 intent_type: GENERATION
-promotion_state: production
+promotion_state: prototype
 pattern_fidelity_threshold: 0.90
 test_status: passing
 

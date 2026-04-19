@@ -13,16 +13,16 @@ evals: []
 
 ---
 # Metadata (YAML Frontmatter)
-skill_id: gemma_pqn_emergence_detector_v1_production
+skill_id: gemma_pqn_emergence_detector_v1_prototype
 name: gemma_pqn_emergence_detector
 description: Fast binary classification of text for PQN emergence patterns (0→o artifacts, resonance signatures, coherence indicators)
-version: 1.0_production
+version: 1.0_prototype
 author: 0102
 created: 2025-10-22
 agents: [gemma]
 primary_agent: gemma
 intent_type: CLASSIFICATION
-promotion_state: production
+promotion_state: prototype
 pattern_fidelity_threshold: 0.90
 test_status: passing
 

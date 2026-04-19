@@ -13,16 +13,16 @@ evals: []
 
 ---
 # Metadata (YAML Frontmatter)
-skill_id: qwen_wsp_compliance_auditor_v1_production
+skill_id: qwen_wsp_compliance_auditor_v1_prototype
 name: qwen_wsp_compliance_auditor
 description: Strategic WSP framework compliance auditing, violation detection, and corrective guidance generation using 32K context window
-version: 1.0_production
+version: 1.0_prototype
 author: 0102
 created: 2025-10-23
 agents: [qwen]
 primary_agent: qwen
 intent_type: DECISION
-promotion_state: production
+promotion_state: prototype
 pattern_fidelity_threshold: 0.90
 test_status: passing
 
