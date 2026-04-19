@@ -220,3 +220,40 @@ def test_main_py_wsp_framework_calls_dispatcher():
     assert call_kwargs["component"] == "wsp_framework"
     assert call_kwargs["payload"]["framework_only_count"] == 1
     assert call_kwargs["payload"]["index_issue_count"] == 1
+
+
+def test_main_py_wre_dashboard_insufficient_data_calls_dispatcher():
+    """DJ2-A: WRE dashboard dispatches on INSUFFICIENT_DATA (WSP 97 truth distinction)."""
+    import main
+
+    with patch(
+        "modules.ai_intelligence.ai_overseer.src.preflight_resolution.on_preflight_fail"
+    ) as mock_dispatch:
+        fake_health = {
+            "insufficient_data": True,
+            "total_executions": 3,
+            "min_samples": 25,
+            "healthy": True,
+            "alerts": [],
+        }
+        with patch(
+            "modules.infrastructure.wre_core.src.dashboard_alerts.check_dashboard_health",
+            return_value=fake_health,
+        ):
+            with patch(
+                "modules.infrastructure.wre_core.src.dashboard_alerts.DashboardAlertMonitor"
+            ) as mock_monitor:
+                mock_monitor.return_value.is_in_watch_period.return_value = False
+                with patch.dict("os.environ", {"WRE_DASHBOARD_PREFLIGHT": "1"}, clear=False):
+                    result = main.run_wre_dashboard_preflight(Path("."))
+
+    assert result is True  # Should not block startup
+    assert mock_dispatch.called
+    call_kwargs = mock_dispatch.call_args.kwargs
+    assert call_kwargs["component"] == "wre_dashboard"
+    assert call_kwargs["severity"] == "medium"
+    assert call_kwargs["payload"]["insufficient_data"] is True
+    assert call_kwargs["payload"]["samples"] == 3
+    assert call_kwargs["payload"]["min_samples"] == 25
+    assert call_kwargs["payload"]["likely_cause"] == "cold_start_or_telemetry_drop"
+    assert call_kwargs["payload"]["automation_candidate"] is True

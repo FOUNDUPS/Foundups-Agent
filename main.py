@@ -813,9 +813,29 @@ def run_wre_dashboard_preflight(repo_root: Path) -> bool:
         if insufficient_data:
             watch_label = "WATCH" if in_watch else "STABLE"
             print(
-                f"[WRE-DASHBOARD] preflight=PASS ({watch_label}, INSUFFICIENT_DATA) "
+                f"[WRE-DASHBOARD] preflight=WARN ({watch_label}, INSUFFICIENT_DATA) "
                 f"samples={total_executions}/{min_samples}"
             )
+            # DJ2-A: Dispatch insufficient_data as warning tier (WSP 97 truth distinction)
+            try:
+                from modules.ai_intelligence.ai_overseer.src.preflight_resolution import (
+                    on_preflight_fail,
+                )
+                on_preflight_fail(
+                    component="wre_dashboard",
+                    severity="medium",
+                    payload={
+                        "samples": total_executions,
+                        "min_samples": min_samples,
+                        "insufficient_data": True,
+                        "likely_cause": "cold_start_or_telemetry_drop",
+                        "in_watch": in_watch,
+                        "automation_candidate": True,
+                    },
+                    source="main:run_wre_dashboard_preflight",
+                )
+            except Exception as dispatch_exc:
+                logger.debug(f"[WRE-DASHBOARD] dispatch skipped: {dispatch_exc}")
             return True
 
         alerts = health.get("alerts", []) if isinstance(health.get("alerts"), list) else []
