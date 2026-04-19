@@ -87,28 +87,53 @@ class WSP00ZenStateTracker:
         """Resolve state file path with repo-root semantics."""
         return self._resolve_repo_path(state_file)
 
-    def _ensure_writable_state_file(self, target: Path) -> Path:
-        """Ensure state file is writable; fallback to user profile if needed."""
+    def _ensure_writable_state_file(self, target: Path) -> Optional[Path]:
+        """Ensure state file is writable; fallback to user profile or non-persistent mode.
+
+        FX1-C: Three-tier fallback:
+        1. Primary path (repo-relative)
+        2. User home fallback (~/.foundups-agent/memory/)
+        3. Non-persistent mode (returns None, persistence disabled)
+
+        WSP 97: Never crashes; returns None if no writable path exists.
+        """
+        # Tier 1: Try primary path
         try:
             target.parent.mkdir(parents=True, exist_ok=True)
-            # Probe write access without mutating content.
             with open(target, 'a', encoding='utf-8'):
                 pass
             return target
-        except Exception as e:
+        except (PermissionError, FileNotFoundError, OSError):
+            pass
+
+        # Tier 2: Try user home fallback
+        try:
             fallback = Path.home() / ".foundups-agent" / "memory" / target.name
             fallback.parent.mkdir(parents=True, exist_ok=True)
             with open(fallback, 'a', encoding='utf-8'):
                 pass
             print(
-                f"[WARNING] State file not writable at {target}: {e}. "
+                f"[WARNING] State file not writable at {target}. "
                 f"Using fallback {fallback}"
             )
             return fallback
+        except (PermissionError, FileNotFoundError, OSError):
+            pass
+
+        # Tier 3: Non-persistent mode (read-only environment or restricted sandbox)
+        print(
+            f"[WARNING] WSP00 zen state persistence disabled — "
+            f"no writable path available (tried {target} and user home). "
+            f"Running in non-persistent mode."
+        )
+        return None
 
     def _load_zen_state(self) -> Dict[str, Any]:
-        """Load zen state from persistent storage."""
-        if not self.state_file.exists():
+        """Load zen state from persistent storage.
+
+        FX1-C: Handles None state_file (non-persistent mode).
+        """
+        if self.state_file is None or not self.state_file.exists():
             return self._create_initial_state()
 
         try:
@@ -147,7 +172,12 @@ class WSP00ZenStateTracker:
         }
 
     def _save_zen_state(self):
-        """Save zen state to persistent storage."""
+        """Save zen state to persistent storage.
+
+        FX1-C: No-op if state_file is None (non-persistent mode).
+        """
+        if self.state_file is None:
+            return  # Non-persistent mode: skip save
         try:
             with open(self.state_file, 'w', encoding='utf-8') as f:
                 json.dump(self.zen_state, f, indent=2, ensure_ascii=False)
