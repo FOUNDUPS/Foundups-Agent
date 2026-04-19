@@ -6,15 +6,15 @@ import os
 import sys
 import pytest
 import googleapiclient.errors
-from modules.platform_integration.stream_resolver.src.stream_resolver import (
+from modules.platform_integration.stream_resolver.src import (
     calculate_dynamic_delay,
     mask_sensitive_id,
     check_video_details,
     search_livestreams,
     get_active_livestream_video_id,
     QuotaExceededError,
-    FORCE_DEV_DELAY
 )
+from modules.platform_integration.stream_resolver.src.stream_config import FORCE_DEV_DELAY
 
 class TestCalculateDynamicDelay(unittest.TestCase):
     """Test suite for the calculate_dynamic_delay function."""
@@ -22,21 +22,21 @@ class TestCalculateDynamicDelay(unittest.TestCase):
     def setUp(self):
         # Store original value
         self.original_force_dev_delay = getattr(
-            __import__('modules.platform_integration.stream_resolver.src.stream_resolver', 
-                     fromlist=['FORCE_DEV_DELAY']), 
+            __import__('modules.platform_integration.stream_resolver.src.stream_config',
+                     fromlist=['FORCE_DEV_DELAY']),
             'FORCE_DEV_DELAY'
         )
-        
+
     def tearDown(self):
         # Restore original value
         setattr(
-            __import__('modules.platform_integration.stream_resolver.src.stream_resolver', 
-                     fromlist=['FORCE_DEV_DELAY']), 
+            __import__('modules.platform_integration.stream_resolver.src.stream_config',
+                     fromlist=['FORCE_DEV_DELAY']),
             'FORCE_DEV_DELAY',
             self.original_force_dev_delay
         )
 
-    @patch('modules.platform_integration.stream_resolver.src.stream_resolver.FORCE_DEV_DELAY', False)
+    @patch('modules.platform_integration.stream_resolver.src.stream_config.FORCE_DEV_DELAY', False)
     def test_calculate_dynamic_delay_with_high_activity(self):
         """Test delay calculation with high chat activity."""
 
@@ -46,7 +46,7 @@ class TestCalculateDynamicDelay(unittest.TestCase):
         self.assertGreaterEqual(delay, 5.0)  
         self.assertLessEqual(delay, 7.0)  # With jitter
 
-    @patch('modules.platform_integration.stream_resolver.src.stream_resolver.FORCE_DEV_DELAY', False)
+    @patch('modules.platform_integration.stream_resolver.src.stream_config.FORCE_DEV_DELAY', False)
     def test_calculate_dynamic_delay_with_low_activity(self):
         """Test delay calculation with low chat activity."""
         delay = calculate_dynamic_delay(active_users=5)
@@ -54,21 +54,21 @@ class TestCalculateDynamicDelay(unittest.TestCase):
         self.assertGreaterEqual(delay, 48.0)  
         self.assertLessEqual(delay, 60.0)  # With upper bound
 
-    @patch('modules.platform_integration.stream_resolver.src.stream_resolver.FORCE_DEV_DELAY', False)
+    @patch('modules.platform_integration.stream_resolver.src.stream_config.FORCE_DEV_DELAY', False)
     def test_calculate_dynamic_delay_with_failures(self):
         """Test delay increase with consecutive failures."""
         base_delay = calculate_dynamic_delay(active_users=100)
         increased_delay = calculate_dynamic_delay(active_users=100, consecutive_failures=3)
         self.assertGreater(increased_delay, base_delay)
 
-    @patch('modules.platform_integration.stream_resolver.src.stream_resolver.FORCE_DEV_DELAY', True)
+    @patch('modules.platform_integration.stream_resolver.src.stream_config.FORCE_DEV_DELAY', True)
     def test_calculate_dynamic_delay_dev_mode(self):
         """Test that dev mode forces a 1-second delay."""
         delay = calculate_dynamic_delay(active_users=1000)
         self.assertEqual(delay, 1.0)
 
-    @patch('modules.platform_integration.stream_resolver.src.stream_resolver.FORCE_DEV_DELAY', False)
-    @patch('modules.platform_integration.stream_resolver.src.stream_resolver.random.uniform')
+    @patch('modules.platform_integration.stream_resolver.src.stream_config.FORCE_DEV_DELAY', False)
+    @patch('random.uniform')
     def test_calculate_dynamic_delay_with_previous_delay(self, mock_uniform):
         """Test that previous delay is used for smoothing."""
         mock_uniform.return_value = 0  # No randomness for testing
@@ -78,8 +78,8 @@ class TestCalculateDynamicDelay(unittest.TestCase):
         self.assertGreater(current, 10.0)  # Medium activity base
         self.assertLess(current, 30.0)  # Previous delay
 
-    @patch('modules.platform_integration.stream_resolver.src.stream_resolver.FORCE_DEV_DELAY', False)
-    @patch('modules.platform_integration.stream_resolver.src.stream_resolver.random.uniform')
+    @patch('modules.platform_integration.stream_resolver.src.stream_config.FORCE_DEV_DELAY', False)
+    @patch('random.uniform')
     def test_calculate_dynamic_delay_without_dev_mode(self, mock_uniform):
         """Test calculate_dynamic_delay with FORCE_DEV_DELAY set to False."""
         mock_uniform.return_value = 1.0  # Consistent random value for testing
