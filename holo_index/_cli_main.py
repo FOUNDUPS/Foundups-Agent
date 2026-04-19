@@ -32,6 +32,9 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
+# FX1-A: Module-level logger for exception handlers (lines 1301, 1349, 1362, 1374)
+logger = logging.getLogger(__name__)
+
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent
 if str(project_root) not in sys.path:
@@ -92,6 +95,8 @@ if "--offline" in sys.argv:
     os.environ.setdefault('HOLO_DISABLE_PIP_INSTALL', '1')
     os.environ.setdefault('HF_HUB_OFFLINE', '1')
     os.environ.setdefault('TRANSFORMERS_OFFLINE', '1')
+    # FX1-E: Disable ChromaDB telemetry before import to prevent PostHog network attempts
+    os.environ.setdefault('ANONYMIZED_TELEMETRY', 'false')
     # WSP 97: --offline MUST skip model to prevent import hangs
     os.environ.setdefault('HOLO_SKIP_MODEL', '1')
 
@@ -723,6 +728,8 @@ def main():
         os.environ['HOLO_DISABLE_PIP_INSTALL'] = '1'
         os.environ.setdefault('HF_HUB_OFFLINE', '1')
         os.environ.setdefault('TRANSFORMERS_OFFLINE', '1')
+        # FX1-E: Disable ChromaDB telemetry to prevent PostHog network attempts
+        os.environ.setdefault('ANONYMIZED_TELEMETRY', 'false')
         # WSP 97: --offline mode should ALWAYS use lexical search to prevent hangs
         os.environ.setdefault('HOLO_SKIP_MODEL', '1')
 

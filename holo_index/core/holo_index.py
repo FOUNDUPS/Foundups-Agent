@@ -191,13 +191,18 @@ class HoloIndex:
         offline = os.getenv("HOLO_OFFLINE") == "1"
         model_cached = self._model_cache_present(model_name)
 
+        # FX1-D: Track retrieval mode explicitly (semantic/lexical/failed)
+        self.retrieval_mode = "failed"  # Default until proven otherwise
+
         # Optional fast-start skip to prevent long imports (set HOLO_SKIP_MODEL=1)
         if os.environ.get("HOLO_SKIP_MODEL") == "1":
-            self._log_agent_action("HOLO_SKIP_MODEL=1 -> skipping sentence transformer load", "WARN")
+            self._log_agent_action("HOLO_SKIP_MODEL=1 -> skipping sentence transformer load (lexical mode)", "WARN")
             self.model = None
+            self.retrieval_mode = "lexical"
         elif offline and not model_cached:
-            self._log_agent_action("HOLO_OFFLINE=1 and model cache missing -> skipping model load", "WARN")
+            self._log_agent_action("HOLO_OFFLINE=1 and model cache missing -> skipping model load (lexical mode)", "WARN")
             self.model = None
+            self.retrieval_mode = "lexical"
         else:
             global SentenceTransformer
             if SentenceTransformer is None:
@@ -212,6 +217,7 @@ class HoloIndex:
                 )
                 if SentenceTransformer is None:
                     self._log_agent_action("SentenceTransformer unavailable; falling back to lexical search", "WARN")
+                    self.retrieval_mode = "lexical"
 
             if SentenceTransformer:
                 # WSP 97: Load model with hard timeout
@@ -224,8 +230,12 @@ class HoloIndex:
                 )
                 if self.model is None:
                     self._log_agent_action("Model load failed; falling back to lexical search", "WARN")
+                    self.retrieval_mode = "lexical"
+                else:
+                    self.retrieval_mode = "semantic"
             else:
                 self.model = None
+                self.retrieval_mode = "lexical"
 
         self.need_to: Dict[str, str] = {}
         self.wsp_summary: Dict[str, Dict[str, str]] = {}

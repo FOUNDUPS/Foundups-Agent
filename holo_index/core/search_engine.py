@@ -568,6 +568,8 @@ def execute_search(
                 "symbol_count": len(symbol_results),
                 "timestamp": datetime.now().isoformat(),
                 "cached": False,
+                # FX1-D: Surface retrieval mode in search results
+                "retrieval_mode": getattr(holo, "retrieval_mode", "unknown"),
             },
         }
 
