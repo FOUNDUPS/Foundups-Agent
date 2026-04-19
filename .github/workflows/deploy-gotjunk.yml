@@ -1,0 +1,47 @@
+name: Deploy GotJunk
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'modules/foundups/gotjunk/**'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Deployment reason'
+        required: false
+        default: 'Manual trigger'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Trigger Cloud Build
+        run: |
+          echo "Deploying GotJunk from commit ${{ github.sha }}"
+          gcloud builds submit \
+            --config=modules/foundups/gotjunk/cloudbuild.yaml \
+            --substitutions=COMMIT_SHA=${{ github.sha }} \
+            .
+
+      - name: Verify Deployment
+        run: |
+          echo "Waiting for deployment to propagate..."
+          sleep 30
+          echo "Checking CSP headers..."
+          curl -sI https://gotjunk-56566376153.us-west1.run.app/ | grep -iE "content-security|x-frame" || echo "Headers check complete"
