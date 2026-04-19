@@ -1,5 +1,79 @@
 # Member Area Module Change Log
 
+## [2026-04-20] pfMALL Agent Control Dispatcher — Layer 5 (Worker AW3/AG3)
+
+**Who**: 0102 - Worker AW3/AG3
+**Slice**: `PMCTRL1-L5 — PFMALL_AGENT_CONTROL_CONTRACT_DOCS_PHASE1`
+**What**: Documentation + final verification layer for the pfMALL Agent Control
+Contract (PMCTRL1). No new command handlers, no new runtime behavior. The full
+interface of record is now published in `public/member/INTERFACE.md` under the
+new **"pfMALL Agent Control Contract"** section.
+
+**Rationale**: Layers 1–4 delivered the 7-command surface with event truth
+channel, device policy denial, and the session-mode hard gate. Layer 5 closes
+the contract by (a) publishing the normative interface so the agent side can
+integrate against an authoritative spec, (b) re-verifying the full 51-check
+harness on current tip, and (c) confirming scope boundaries are intact before
+PR. This is the point where the contract becomes citable.
+
+**Preflight (performed per directive)**:
+- `git fetch origin main` — up to date with remote.
+- `git merge-base --is-ancestor origin/main HEAD` — origin/main IS ancestor, no
+  rebase required.
+- `git status --short` — clean.
+- `node public/member/tests/pfmall_control_dispatcher_vm.mjs` — 51/51 checks
+  passed on L4 tip before documentation edits.
+
+**Files Modified**:
+- `public/member/INTERFACE.md` — **primary L5 deliverable**. New
+  **pfMALL Agent Control Contract** section
+  documenting: message envelopes (`pfmall_command` / `pfmall_response` /
+  `pfmall_event`), response status taxonomy (`ok` / `denied` / `error`), all 7
+  commands with their runtime API routes, all 6 reserved events, device policy
+  for `set_layout`, session override truth rules (API-confirmed `session_mode`
+  requirement, no silent canonical catalog mutation, reset idempotency,
+  `api_unavailable` when runtime API is missing), the 0102/agent boundary
+  (non-scope: native-phone hook, RedDog AI integration, floating search,
+  backend, tenant execution, canonical catalog writes), and WSP 97 truth
+  constraint summary. `*Last Updated*` bumped to 2026-04-20.
+- `public/member/ModLog.md` — this entry.
+
+**Dispatcher Minor Correction** (permitted per directive — doc comment /
+exported metadata alignment only):
+- `public/member/js/pfmall-control-dispatcher.js` — removed dead
+  `cmdNotImplemented` helper and its stale "Layer 5+ commands" comment. The
+  helper was never referenced by `HANDLERS` and, after Layer 4, could never
+  fire. Keeping it would have contradicted the published contract ("no
+  `not_implemented` remains for any of the 7 commands"). No handler behavior
+  changed.
+
+**What Was Not Modified (deliberate scope boundary per directive)**:
+- `public/member/tests/pfmall_control_dispatcher_vm.mjs` — no changes. The
+  51-check harness already covers every contract point that was publishable in
+  Layer 5; no documentation pass revealed a missing assertion. (The test file
+  still references the string `not_implemented` inside negative assertions
+  that guard against regression — `res.error.code !== 'not_implemented'` — so
+  those mentions are contract enforcement, not pending work.)
+- No new handlers, no floating search, no RedDog/native hook, no backend
+  calls, no catalog mutation, no DOM selector fallback.
+
+**Final Verification**:
+- `node public/member/tests/pfmall_control_dispatcher_vm.mjs` — 51/51 passed
+  after documentation edits (harness unchanged, re-run for confirmation).
+- `git diff --name-only origin/main...HEAD` scope check:
+  - `docs/0102_session_briefings/PMCTRL1_PFMALL_AGENT_CONTROL_CONTRACT_PHASE1.md`
+  - `public/member/INTERFACE.md`
+  - `public/member/ModLog.md`
+  - `public/member/js/pfmall-control-dispatcher.js`
+  - `public/member/tests/pfmall_control_dispatcher_vm.mjs`
+- Commands implemented: **7/7**. No `not_implemented` sentinels remain.
+- Status taxonomy, event channel, device policy, and session-mode gate all
+  cited in the published contract.
+
+**Verdict**: READY_FOR_PR.
+
+---
+
 ## [2026-04-20] pfMALL Agent Control Dispatcher — Layer 4 (Worker AW3/AG3)
 
 **Who**: 0102 - Worker AW3/AG3

@@ -614,18 +614,6 @@
     };
   }
 
-  // Layer 5+ commands — registered but return not_implemented until wired.
-  // (Layer 5 is docs/interface finalization; no new commands planned there.)
-  function cmdNotImplemented(command) {
-    return {
-      status: 'error',
-      error: {
-        code: 'not_implemented',
-        message: 'Command not yet implemented in current layer: ' + command
-      }
-    };
-  }
-
   var HANDLERS = {
     inspect_state: cmdInspectState,
     set_layout: cmdSetLayout,
