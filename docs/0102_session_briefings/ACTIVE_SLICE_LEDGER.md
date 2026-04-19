@@ -141,7 +141,25 @@ If already landed:
 | Slice | Reason |
 |-------|--------|
 | `de4_hermes_extraction_next_sandbox` | Deferred pending DE2/DE3/DI1 downstream outcomes |
-| `softproto_audit_sweep` | Deferred until FX1 (HoloIndex truth) + ledger reconciliation cycle complete |
+
+---
+
+## Archive / Reconcile-Needed
+
+| Track | Status | Action | Blocked By |
+|-------|--------|--------|------------|
+| `softproto` | ARCHIVE_RECONCILE_NEEDED | read-only reconciliation only, not implementation | PMCTRL1 contract stabilization |
+
+**SoftProto scope** (2026-04-01 architecture prompts):
+- `docs/0102_session_briefings/SOFTPROTO_{A,B,C,D}_*_PROMPT_2026-04-01.md` (gateway / mall / concierge-reddog / guardrails audits)
+- `docs/0102_session_briefings/SOFTPROTO_SVELTE_SPIKE_PHASE1_PROMPT_2026-04-01.md`
+- `modules/foundups/docs/SOFTPROTO_*_CONTRACT.md` + `SOFTPROTO_FOUNDATION_ARCHITECTURE_2026-04-01.md` + `SOFTPROTO_ROLLOUT_PLAN_2026-04-01.md`
+
+**Architect read**: SoftProto's old concerns (module registry, command paths, validation envelopes, guarded interiors, gestures/overrides, mall/concierge/RedDog audits) overlap with newer active work — PMCTRL1 (pfMALL browser agent control), WRE/SKILLz command surfaces, RedDog/0102 control hooks, Hermes extraction boundary, FoundUp manifest/INTERFACE contracts.
+
+**Not an active implementation lane.** Do not revive as priority wave until reconciled against PMCTRL1 and current WRE contracts.
+
+**Next reconciliation slice (if/when needed)**: `SOFTPROTO-RECON1` — read-only audit; decide which SoftProto contracts are superseded by PMCTRL1/WRE/Hermes and which should be preserved. No code edits.
 
 ---
 
