@@ -244,62 +244,125 @@ class TestDefaultTopic:
 
 
 # =============================================================================
-# TEST E: Stale Element Recovery - ReplyExecutor with mocked driver
+# TEST E: Stale Element Recovery - BrowserReplyExecutor production path
 # =============================================================================
 
 class TestStaleElementRecovery:
-    """Test stale element recovery in reply execution."""
+    """
+    Test stale element recovery in BrowserReplyExecutor.execute_reply().
 
-    def test_stale_element_triggers_recovery_attempt(self):
-        """StaleElementReferenceException triggers one recovery attempt."""
+    Note: Full execute_reply() testing requires complex DOM interaction mocking.
+    These tests exercise the production code with mocked Selenium driver,
+    verifying the stale recovery branch is reachable and behaves correctly.
+    """
+
+    @pytest.mark.asyncio
+    async def test_execute_reply_recovers_from_stale_textarea(self):
+        """
+        BrowserReplyExecutor.execute_reply() recovers from StaleElementReferenceException.
+
+        Tests the production code path in reply_executor.py lines 588-639.
+        """
         from selenium.common.exceptions import StaleElementReferenceException
+        from modules.communication.video_comments.skillz.tars_like_heart_reply.src.reply_executor import BrowserReplyExecutor
 
-        # Simulate the recovery logic from reply_executor.py
-        stale_recovered = False
-        call_count = 0
+        # Track execute_script calls to inject stale at the right moment
+        call_log = []
+        typing_call_count = 0
+        stale_raised = False
 
-        def mock_execute_script(*args):
-            nonlocal call_count
-            call_count += 1
-            if call_count == 1:
-                raise StaleElementReferenceException("stale element")
-            return Mock()  # Success on retry
+        def mock_execute_script(script, *args):
+            nonlocal typing_call_count, stale_raised
+            call_log.append(script[:50] if isinstance(script, str) else "non-string")
 
-        mock_driver = Mock()
-        mock_driver.execute_script = mock_execute_script
+            # Detect typing call by script content (contains textContent +=)
+            if isinstance(script, str) and "textContent +=" in script:
+                typing_call_count += 1
+                if typing_call_count == 1 and not stale_raised:
+                    stale_raised = True
+                    raise StaleElementReferenceException("textarea stale during typing")
+                # Subsequent calls succeed
+                return None
 
-        # Simulate production recovery pattern
-        textarea = Mock()
-        try:
-            mock_driver.execute_script("type chunk", textarea, "a")
-        except StaleElementReferenceException:
-            stale_recovered = True
-            textarea = mock_driver.execute_script("find textarea")
+            # Reply button open - return success
+            if isinstance(script, str) and "reply-button" in script.lower():
+                return {"success": True}
 
-        assert stale_recovered is True
-        assert call_count == 2  # Initial fail + recovery
+            # Textarea find - return mock element
+            if isinstance(script, str) and ("contenteditable-textarea" in script or "textarea" in script):
+                return MagicMock()  # Mock textarea element
 
-    def test_double_stale_returns_structured_failure(self):
-        """Second stale failure returns structured failure without crash."""
+            # Submit button - return success
+            if isinstance(script, str) and "submit" in script.lower():
+                return {"success": True}
+
+            # Default - return something truthy
+            return MagicMock()
+
+        mock_driver = MagicMock()
+        mock_driver.execute_script.side_effect = mock_execute_script
+
+        # Create executor with mocked driver
+        selectors = {"comment_thread": "ytcp-comment-thread"}
+        executor = BrowserReplyExecutor(
+            driver=mock_driver,
+            human=None,
+            selectors=selectors,
+            delay_multiplier=0.01  # Fast for testing
+        )
+
+        # Execute reply - should recover from stale and complete
+        # Using short text to minimize async time
+        result = await executor.execute_reply(comment_idx=1, reply_text="Hi")
+
+        # Verify stale was raised and recovery attempted
+        assert stale_raised, "StaleElementReferenceException should have been raised"
+        assert typing_call_count >= 2, f"Should have retried typing after stale, got {typing_call_count} calls"
+
+    @pytest.mark.asyncio
+    async def test_execute_reply_fails_on_double_stale(self):
+        """
+        BrowserReplyExecutor.execute_reply() returns False after second stale failure.
+
+        Tests the production code path in reply_executor.py lines 602-606.
+        """
         from selenium.common.exceptions import StaleElementReferenceException
+        from modules.communication.video_comments.skillz.tars_like_heart_reply.src.reply_executor import BrowserReplyExecutor
 
-        # Track recovery state per production code pattern
-        stale_recovered = False
-        result = None
+        stale_count = 0
 
-        for attempt in range(2):
-            try:
-                raise StaleElementReferenceException("stale")
-            except StaleElementReferenceException:
-                if stale_recovered:
-                    # Already tried once - return structured failure
-                    result = {"success": False, "error": "textarea_stale_after_recovery"}
-                    break
-                stale_recovered = True
+        def mock_execute_script(script, *args):
+            nonlocal stale_count
 
-        assert result is not None
-        assert result["success"] is False
-        assert "stale" in result["error"]
+            # Always raise stale on typing calls
+            if isinstance(script, str) and "textContent +=" in script:
+                stale_count += 1
+                raise StaleElementReferenceException(f"stale #{stale_count}")
+
+            # Textarea find - return mock
+            if isinstance(script, str) and ("contenteditable-textarea" in script or "textarea" in script):
+                return MagicMock()
+
+            # Other calls succeed
+            return MagicMock()
+
+        mock_driver = MagicMock()
+        mock_driver.execute_script.side_effect = mock_execute_script
+
+        selectors = {"comment_thread": "ytcp-comment-thread"}
+        executor = BrowserReplyExecutor(
+            driver=mock_driver,
+            human=None,
+            selectors=selectors,
+            delay_multiplier=0.01
+        )
+
+        # Execute reply - should fail after double stale
+        result = await executor.execute_reply(comment_idx=1, reply_text="X")
+
+        # Verify double stale was hit and method returned False
+        assert result is False, "Should return False after double stale"
+        assert stale_count == 2, f"Should have exactly 2 stale exceptions, got {stale_count}"
 
 
 # =============================================================================
