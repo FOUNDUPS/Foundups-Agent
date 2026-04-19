@@ -257,3 +257,169 @@ def test_main_py_wre_dashboard_insufficient_data_calls_dispatcher():
     assert call_kwargs["payload"]["min_samples"] == 25
     assert call_kwargs["payload"]["likely_cause"] == "cold_start_or_telemetry_drop"
     assert call_kwargs["payload"]["automation_candidate"] is True
+
+
+# === DJ2-C OAuth preflight dispatch tests ===
+
+
+def test_main_py_oauth_no_healthy_tokens_calls_dispatcher():
+    """DJ2-C: OAuth dispatches when no healthy tokens (WSP 97 truth distinction)."""
+    import main
+    import asyncio
+
+    with patch(
+        "modules.ai_intelligence.ai_overseer.src.preflight_resolution.on_preflight_fail"
+    ) as mock_dispatch:
+        fake_oauth_status = {
+            "healthy": [],  # No healthy tokens
+            "reauth_needed": False,  # Set False to skip interactive input prompt
+            "expired": ["set1", "set2"],
+        }
+        with patch(
+            "modules.platform_integration.youtube_auth.src.youtube_auth.preflight_oauth_check",
+            return_value=fake_oauth_status,
+        ):
+            with patch(
+                "modules.communication.livechat.src.auto_moderator_dae.AutoModeratorDAE",
+                side_effect=KeyboardInterrupt,
+            ):
+                with patch("builtins.print"):  # Suppress output
+                    try:
+                        asyncio.run(main.monitor_youtube(disable_lock=True, auto_reauth=True))
+                    except (KeyboardInterrupt, SystemExit):
+                        pass
+
+    assert mock_dispatch.called
+    call_kwargs = mock_dispatch.call_args.kwargs
+    assert call_kwargs["component"] == "oauth_youtube"
+    assert call_kwargs["severity"] == "high"
+    assert call_kwargs["payload"]["warning"] == "no_healthy_oauth_tokens"
+    assert call_kwargs["payload"]["requires_012"] is True
+    assert call_kwargs["payload"]["automation_candidate"] is False
+    assert "safe_autonomous_actions" in call_kwargs["payload"]
+    assert "unsafe_actions" in call_kwargs["payload"]
+
+
+def test_main_py_oauth_import_error_calls_dispatcher():
+    """DJ2-C: OAuth dispatches on ImportError (module unavailable)."""
+    import main
+    import asyncio
+
+    with patch(
+        "modules.ai_intelligence.ai_overseer.src.preflight_resolution.on_preflight_fail"
+    ) as mock_dispatch:
+        with patch(
+            "modules.platform_integration.youtube_auth.src.youtube_auth.preflight_oauth_check",
+            side_effect=ImportError("youtube_auth not installed"),
+        ):
+            with patch(
+                "modules.communication.livechat.src.auto_moderator_dae.AutoModeratorDAE",
+                side_effect=KeyboardInterrupt,
+            ):
+                with patch("builtins.print"):
+                    try:
+                        asyncio.run(main.monitor_youtube(disable_lock=True))
+                    except (KeyboardInterrupt, SystemExit):
+                        pass
+
+    assert mock_dispatch.called
+    call_kwargs = mock_dispatch.call_args.kwargs
+    assert call_kwargs["component"] == "oauth_youtube"
+    assert call_kwargs["severity"] == "medium"
+    assert "import_error" in call_kwargs["payload"]["error"]
+    assert call_kwargs["payload"]["requires_012"] is False
+
+
+def test_main_py_oauth_exception_calls_dispatcher():
+    """DJ2-C: OAuth dispatches on preflight exception (unknown state)."""
+    import main
+    import asyncio
+
+    with patch(
+        "modules.ai_intelligence.ai_overseer.src.preflight_resolution.on_preflight_fail"
+    ) as mock_dispatch:
+        with patch(
+            "modules.platform_integration.youtube_auth.src.youtube_auth.preflight_oauth_check",
+            side_effect=RuntimeError("preflight crashed"),
+        ):
+            with patch(
+                "modules.communication.livechat.src.auto_moderator_dae.AutoModeratorDAE",
+                side_effect=KeyboardInterrupt,
+            ):
+                with patch("builtins.print"):
+                    try:
+                        asyncio.run(main.monitor_youtube(disable_lock=True))
+                    except (KeyboardInterrupt, SystemExit):
+                        pass
+
+    assert mock_dispatch.called
+    call_kwargs = mock_dispatch.call_args.kwargs
+    assert call_kwargs["component"] == "oauth_youtube"
+    assert call_kwargs["severity"] == "high"
+    assert "preflight_exception" in call_kwargs["payload"]["error"]
+    assert call_kwargs["payload"]["requires_012"] is True
+
+
+def test_main_py_oauth_healthy_does_not_dispatch():
+    """DJ2-C: Healthy OAuth path does NOT dispatch (no false positives)."""
+    import main
+    import asyncio
+
+    with patch(
+        "modules.ai_intelligence.ai_overseer.src.preflight_resolution.on_preflight_fail"
+    ) as mock_dispatch:
+        fake_oauth_status = {
+            "healthy": ["set1", "set10"],  # Healthy tokens
+            "reauth_needed": False,
+            "expired": [],
+        }
+        with patch(
+            "modules.platform_integration.youtube_auth.src.youtube_auth.preflight_oauth_check",
+            return_value=fake_oauth_status,
+        ):
+            with patch(
+                "modules.communication.livechat.src.auto_moderator_dae.AutoModeratorDAE",
+                side_effect=KeyboardInterrupt,
+            ):
+                with patch("builtins.print"):
+                    try:
+                        asyncio.run(main.monitor_youtube(disable_lock=True))
+                    except (KeyboardInterrupt, SystemExit):
+                        pass
+
+    # Should NOT have dispatched for healthy OAuth
+    assert not mock_dispatch.called
+
+
+def test_main_py_oauth_dispatcher_exception_does_not_block():
+    """DJ2-C: Dispatcher exception does not block existing return behavior."""
+    import main
+    import asyncio
+
+    def _boom(*args, **kwargs):
+        raise RuntimeError("dispatcher crashed")
+
+    with patch(
+        "modules.ai_intelligence.ai_overseer.src.preflight_resolution.on_preflight_fail",
+        side_effect=_boom,
+    ):
+        fake_oauth_status = {
+            "healthy": [],
+            "reauth_needed": False,  # Set False to skip interactive input prompt
+            "expired": ["set1"],
+        }
+        with patch(
+            "modules.platform_integration.youtube_auth.src.youtube_auth.preflight_oauth_check",
+            return_value=fake_oauth_status,
+        ):
+            with patch(
+                "modules.communication.livechat.src.auto_moderator_dae.AutoModeratorDAE",
+                side_effect=KeyboardInterrupt,
+            ):
+                with patch("builtins.print"):
+                    # Should not raise even though dispatcher crashes
+                    try:
+                        asyncio.run(main.monitor_youtube(disable_lock=True, auto_reauth=True))
+                    except (KeyboardInterrupt, SystemExit):
+                        pass
+    # If we got here without exception, the test passes

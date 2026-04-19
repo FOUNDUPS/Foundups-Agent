@@ -295,10 +295,79 @@ async def monitor_youtube(disable_lock: bool = False, enable_ai_monitoring: bool
                 print(f"[OK] OAuth healthy: sets {oauth_status['healthy']}")
             else:
                 print("[WARN] No healthy OAuth tokens - running in read-only mode")
+                # DJ2-C: Dispatch OAuth no-healthy-tokens warning (WSP 97 truth distinction)
+                try:
+                    from modules.ai_intelligence.ai_overseer.src.preflight_resolution import (
+                        on_preflight_fail,
+                    )
+                    on_preflight_fail(
+                        component="oauth_youtube",
+                        severity="high",
+                        payload={
+                            "warning": "no_healthy_oauth_tokens",
+                            "auto_reauth": auto_reauth,
+                            "reauth_needed": oauth_status.get('reauth_needed', False),
+                            "expired_sets": oauth_status.get('expired', []),
+                            "source_file": "main.py",
+                            "source_function": "monitor_youtube",
+                            "requires_012": True,
+                            "automation_candidate": False,
+                            "safe_autonomous_actions": ["read_oauth_health_artifact", "capacity_report", "identity_verify_if_token_valid"],
+                            "unsafe_actions": ["credential_entry", "google_account_selection", "consent_approval"],
+                            "remediation": ["read_oauth_credential_health", "run_supervised_reauth_if_012_approves", "verify_identity_after_reauth"],
+                        },
+                        source="main:monitor_youtube",
+                    )
+                except Exception as dispatch_exc:
+                    logger.debug(f"[OAUTH] dispatch skipped: {dispatch_exc}")
         except ImportError as e:
             print(f"[WARN] OAuth preflight check unavailable: {e}")
+            # DJ2-C: Dispatch OAuth import failure (may be intentional in minimal deploys)
+            try:
+                from modules.ai_intelligence.ai_overseer.src.preflight_resolution import (
+                    on_preflight_fail,
+                )
+                on_preflight_fail(
+                    component="oauth_youtube",
+                    severity="medium",
+                    payload={
+                        "error": f"import_error: {e}",
+                        "auto_reauth": auto_reauth,
+                        "source_file": "main.py",
+                        "source_function": "monitor_youtube",
+                        "requires_012": False,
+                        "automation_candidate": False,
+                        "likely_cause": "youtube_auth_module_not_installed_or_minimal_deploy",
+                    },
+                    source="main:monitor_youtube",
+                )
+            except Exception:
+                pass  # Best-effort dispatch
         except Exception as e:
             print(f"[WARN] OAuth preflight check failed: {e}")
+            # DJ2-C: Dispatch OAuth preflight failure (unknown state)
+            try:
+                from modules.ai_intelligence.ai_overseer.src.preflight_resolution import (
+                    on_preflight_fail,
+                )
+                on_preflight_fail(
+                    component="oauth_youtube",
+                    severity="high",
+                    payload={
+                        "error": f"preflight_exception: {e}",
+                        "auto_reauth": auto_reauth,
+                        "source_file": "main.py",
+                        "source_function": "monitor_youtube",
+                        "requires_012": True,
+                        "automation_candidate": False,
+                        "safe_autonomous_actions": ["read_oauth_health_artifact", "capacity_report"],
+                        "unsafe_actions": ["credential_entry", "google_account_selection", "consent_approval"],
+                        "remediation": ["read_oauth_credential_health", "diagnose_preflight_failure", "run_supervised_reauth_if_012_approves"],
+                    },
+                    source="main:monitor_youtube",
+                )
+            except Exception:
+                pass  # Best-effort dispatch
 
         from modules.communication.livechat.src.auto_moderator_dae import AutoModeratorDAE
 

@@ -2,7 +2,63 @@
 
 **Module**: `modules/ai_intelligence/ai_overseer/`
 **Status**: Active (Autonomous Code Patching + Daemon Restart + Activity Routing)
-**Version**: 0.10.2
+**Version**: 0.10.3
+
+---
+
+## 2026-04-20 - DJ2-C: OAuth Preflight Dispatch
+
+**Author**: 0102
+**WSP**: 97 (truthful state distinction)
+**Slice**: DJ2-C (second of 6 DJ2 slices from FCA1-AG2 audit)
+
+### Summary
+
+Wires YouTube OAuth preflight WARN paths in `main.py:monitor_youtube()` to dispatch
+via `on_preflight_fail()`. Three dispatch sites:
+1. No healthy OAuth tokens (severity=high, requires_012=true)
+2. ImportError (severity=medium, requires_012=false)
+3. Exception (severity=high, requires_012=true)
+
+### Payload Contract
+
+```json
+{
+  "component": "oauth_youtube",
+  "severity": "high",
+  "warning": "no_healthy_oauth_tokens",
+  "auto_reauth": <bool>,
+  "reauth_needed": <bool>,
+  "expired_sets": [...],
+  "source_file": "main.py",
+  "source_function": "monitor_youtube",
+  "requires_012": true,
+  "automation_candidate": false,
+  "safe_autonomous_actions": ["read_oauth_health_artifact", "capacity_report", "identity_verify_if_token_valid"],
+  "unsafe_actions": ["credential_entry", "google_account_selection", "consent_approval"],
+  "remediation": ["read_oauth_credential_health", "run_supervised_reauth_if_012_approves", "verify_identity_after_reauth"]
+}
+```
+
+### Tests (5 new, 18 total)
+
+- `test_main_py_oauth_no_healthy_tokens_calls_dispatcher`
+- `test_main_py_oauth_import_error_calls_dispatcher`
+- `test_main_py_oauth_exception_calls_dispatcher`
+- `test_main_py_oauth_healthy_does_not_dispatch`
+- `test_main_py_oauth_dispatcher_exception_does_not_block`
+
+### Constraints Respected
+
+- No OAuth browser flow
+- No credential mutation
+- No token inspection
+- No live Google API calls
+- Dispatch is best-effort, never blocks startup
+
+### Next Slice
+
+DJ2-B: IRONCLAW_SKIP_INTENTIONALITY_ASSERTION
 
 ---
 
