@@ -12,6 +12,41 @@ This log tracks changes specific to the **youtube_auth** module in the **platfor
 
 ## MODLOG ENTRIES
 
+### 2026-04-19 - YT-OAUTH-SKILLZ1: OAuth Operator-Assist SKILLz + Script Fixes
+
+**By:** 0102 (Worker CW4, Slice YT-OAUTH-SKILLZ1)
+**WSP References:** WSP 22 (ModLog), WSP 97 (Truth Signaling)
+
+**Problem:**
+1. `authorize_set1.py` told users to use "FoundUps account" but Set 1 should be UnDaoDu
+2. No AI Overseer / Claw / Hermes integration for OAuth health monitoring
+
+**Root Cause:**
+Misleading account guidance in authorize script caused wrong token to be saved.
+Both Set 1 and Set 10 ended up authenticating to the same antifaFM account.
+
+**Changes:**
+- **Fixed** `scripts/authorize_set1.py`:
+  - Now says "UnDaoDu Google account (NOT FoundUps)"
+  - Shows clear set-to-account mapping
+- **Fixed** `scripts/authorize_set10.py`:
+  - Now says "FoundUps Google account (NOT UnDaoDu)"
+  - Consistent guidance with Set 1
+
+**New SKILLz Contracts** (WRE integration):
+- `skillz/oauth_health_check/SKILLz.md` - Read health artifact, classify state (autonomous)
+- `skillz/supervised_reauth/SKILLz.md` - Guide 012 through reauth (requires_012=true)
+- `skillz/identity_verify/SKILLz.md` - Verify set maps to expected channel (autonomous)
+- `skillz/capacity_report/SKILLz.md` - Summarize effective quota capacity (autonomous)
+
+**Supervised Boundary (WSP 97):**
+- No credential inspection by 0102
+- No credential mutation by 0102
+- Browser OAuth requires 012 interaction
+- Claims must be backed by artifacts
+
+---
+
 ### 2026-04-19 - YT2: Set 1 Reauth Operator Runbook
 
 **By:** 0102 (Worker CW4, Slice YT2)
