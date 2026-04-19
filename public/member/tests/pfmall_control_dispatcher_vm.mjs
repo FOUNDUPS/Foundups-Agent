@@ -192,12 +192,13 @@ async function run() {
     assert(res2.status === 'error' && res2.error.code === 'invalid_command', 'null command rejected');
   }
 
-  // 8) Layer 2+ commands return not_implemented (stable contract, not crash).
+  // 8) Layer 3+ commands return not_implemented (stable contract, not crash).
+  //    set_layout moved out of this list in Layer 2 — it is now implemented.
   {
     const sb = createSandbox();
     loadDispatcher(sb);
-    const layer2 = ['set_layout', 'load_videos', 'play_tile', 'expand_tile', 'collapse_tile', 'reset_session'];
-    for (const cmd of layer2) {
+    const notYet = ['load_videos', 'play_tile', 'expand_tile', 'collapse_tile', 'reset_session'];
+    for (const cmd of notYet) {
       const res = sb.pfmallControlDispatcher.dispatch(cmd, {});
       assert(res.status === 'error', cmd + ' returns error');
       assert(res.error.code === 'not_implemented', cmd + ' error code is not_implemented');
@@ -281,7 +282,221 @@ async function run() {
            'CustomEvent dispatched on window');
   }
 
-  console.log('pfmall_control_dispatcher_vm.mjs: all checks passed');
+  // ==========================================================================
+  // Layer 2: set_layout + device policy denial + layout_denied / layout_applied
+  // ==========================================================================
+
+  // L2 test helper: tile field that mirrors mall-tile-field.js requestDensity
+  // contract — phone denies desktop presets, desktop accepts.
+  function makeTileFieldWithPolicy(deviceClass) {
+    const allowedByClass = {
+      phone: ['3x4', '3x5'],
+      tablet: ['3x4', '3x5', '4x6', '5x8'],
+      desktop: ['3x4', '3x5', '4x6', '5x8', '6x3', '8x2', '8x5', '10x6', '12x3', '12x8', '15x4']
+    };
+    const allowed = allowedByClass[deviceClass] || allowedByClass.phone;
+    let currentDensity = allowed[0];
+    const calls = [];
+    return {
+      _calls: calls,
+      getDensity: function() { return currentDensity; },
+      getDevicePolicy: function() {
+        return { allowed: allowed.slice(), deviceClass: deviceClass, reason: deviceClass + ' (test)' };
+      },
+      requestDensity: function(preset, options) {
+        calls.push({ preset: preset, source: (options && options.source) || 'unknown' });
+        if (allowed.indexOf(preset) === -1) {
+          return {
+            applied: false,
+            preset: preset,
+            reason: 'Density ' + preset + ' not allowed for ' + deviceClass + '. Allowed: ' + allowed.join(', ')
+          };
+        }
+        currentDensity = preset;
+        return { applied: true, preset: preset, deviceClass: deviceClass, source: (options && options.source) };
+      }
+    };
+  }
+
+  // 13) set_layout denies a phone requesting a desktop preset and emits layout_denied.
+  {
+    const sb = createSandbox({ tileField: makeTileFieldWithPolicy('phone') });
+    loadDispatcher(sb);
+    const events = [];
+    sb.pfmallControlDispatcher.registerEventListener({ postMessage(msg) { events.push(msg); } }, { origin: '*' });
+
+    const res = sb.pfmallControlDispatcher.dispatch('set_layout', { preset: '6x3', source: 'rogue_agent' });
+    assert(res.status === 'denied', 'phone + 6x3 -> status denied');
+    assert(res.result.applied === false, 'applied false on denial');
+    assert(res.result.preset === '6x3', 'denial echoes requested preset');
+    assert(res.result.device_class === 'phone', 'denial names device class');
+    assert(Array.isArray(res.result.allowed), 'denial lists allowed presets');
+    assert(res.result.allowed.indexOf('6x3') === -1, 'denied preset not in allowed list');
+    assert(typeof res.result.reason === 'string' && res.result.reason.length > 0, 'denial has reason string');
+
+    // layout_denied event emitted with same detail
+    const denied = events.filter(e => e.event === 'layout_denied');
+    assert(denied.length === 1, 'one layout_denied event emitted');
+    assert(denied[0].payload.preset === '6x3', 'event preset matches');
+    assert(denied[0].payload.source === 'rogue_agent', 'event preserves source');
+    assert(denied[0].payload.device_class === 'phone', 'event has device_class');
+    assert(Array.isArray(denied[0].payload.allowed), 'event lists allowed');
+
+    // no layout_applied or state_changed fired on denial
+    assert(events.filter(e => e.event === 'layout_applied').length === 0, 'no layout_applied on denial');
+    assert(events.filter(e => e.event === 'state_changed').length === 0, 'no state_changed on denial');
+  }
+
+  // 14) set_layout applies a desktop preset on a desktop, emits layout_applied + state_changed.
+  {
+    const tf = makeTileFieldWithPolicy('desktop');
+    const sb = createSandbox({ tileField: tf });
+    loadDispatcher(sb);
+    const events = [];
+    sb.pfmallControlDispatcher.registerEventListener({ postMessage(msg) { events.push(msg); } }, { origin: '*' });
+
+    const res = sb.pfmallControlDispatcher.dispatch('set_layout', { preset: '6x3', source: 'red_dog' });
+    assert(res.status === 'ok', 'desktop + 6x3 -> status ok');
+    assert(res.result.applied === true, 'applied true');
+    assert(res.result.preset === '6x3', 'preset echoed');
+    assert(res.result.source === 'red_dog', 'source echoed');
+    assert(res.result.device_class === 'desktop', 'device_class reported');
+
+    // requestDensity was called once with the correct payload
+    assert(tf._calls.length === 1, 'requestDensity called once');
+    assert(tf._calls[0].preset === '6x3', 'requestDensity got preset');
+    assert(tf._calls[0].source === 'red_dog', 'requestDensity got source');
+
+    // Both layout_applied and state_changed emitted on success
+    const applied = events.filter(e => e.event === 'layout_applied');
+    const stateCh = events.filter(e => e.event === 'state_changed');
+    assert(applied.length === 1, 'one layout_applied');
+    assert(applied[0].payload.preset === '6x3', 'applied event preset');
+    assert(applied[0].payload.source === 'red_dog', 'applied event source');
+    assert(applied[0].payload.device_class === 'desktop', 'applied event device_class');
+    assert(stateCh.length === 1, 'one state_changed');
+    assert(stateCh[0].payload.change === 'layout', 'state_changed change=layout');
+    assert(stateCh[0].payload.preset === '6x3', 'state_changed preset');
+
+    // No layout_denied on success
+    assert(events.filter(e => e.event === 'layout_denied').length === 0, 'no layout_denied on success');
+
+    // Underlying state reflects change
+    assert(tf.getDensity() === '6x3', 'density mutated by requestDensity');
+  }
+
+  // 15) set_layout with missing / non-string preset returns invalid_payload error.
+  {
+    const sb = createSandbox({ tileField: makeTileFieldWithPolicy('desktop') });
+    loadDispatcher(sb);
+    const cases = [
+      [{ source: 'x' }, 'missing preset'],
+      [{ preset: '', source: 'x' }, 'empty preset'],
+      [{ preset: null }, 'null preset'],
+      [{ preset: 123 }, 'numeric preset']
+    ];
+    for (const [payload, label] of cases) {
+      const res = sb.pfmallControlDispatcher.dispatch('set_layout', payload);
+      assert(res.status === 'error', label + ' -> error');
+      assert(res.error.code === 'invalid_payload', label + ' -> invalid_payload code');
+    }
+  }
+
+  // 16) set_layout with no mallTileField returns api_unavailable error.
+  {
+    const sb = createSandbox();  // no tileField
+    loadDispatcher(sb);
+    const res = sb.pfmallControlDispatcher.dispatch('set_layout', { preset: '3x5' });
+    assert(res.status === 'error', 'no tileField -> error');
+    assert(res.error.code === 'api_unavailable', 'error code api_unavailable');
+  }
+
+  // 17) set_layout with mallTileField missing requestDensity returns api_unavailable.
+  {
+    const sb = createSandbox({
+      tileField: { getDensity: function() { return '3x5'; } }  // lacks requestDensity
+    });
+    loadDispatcher(sb);
+    const res = sb.pfmallControlDispatcher.dispatch('set_layout', { preset: '3x5' });
+    assert(res.status === 'error', 'partial tileField -> error');
+    assert(res.error.code === 'api_unavailable', 'code api_unavailable for partial API');
+  }
+
+  // 18) set_layout with requestDensity returning malformed outcome -> runtime_failure.
+  {
+    const sb = createSandbox({
+      tileField: {
+        getDevicePolicy: function() { return { allowed: ['3x5'], deviceClass: 'phone', reason: 't' }; },
+        requestDensity: function() { return { /* no applied field */ }; }
+      }
+    });
+    loadDispatcher(sb);
+    const res = sb.pfmallControlDispatcher.dispatch('set_layout', { preset: '3x5' });
+    assert(res.status === 'error', 'malformed outcome -> error');
+    assert(res.error.code === 'runtime_failure', 'code runtime_failure');
+  }
+
+  // 19) set_layout via postMessage routes denial correctly with request_id.
+  {
+    const sb = createSandbox({ tileField: makeTileFieldWithPolicy('phone') });
+    loadDispatcher(sb);
+    let replied;
+    const source = { postMessage(msg) { replied = msg; } };
+    sb._messageHandler({
+      origin: 'http://127.0.0.1:5500',
+      source,
+      data: {
+        type: 'pfmall_command',
+        source: 'native_phone_agent',
+        command: 'set_layout',
+        request_id: 'req-deny-1',
+        payload: { preset: '6x3', source: 'native_phone_agent' }
+      }
+    });
+    assert(replied && replied.type === 'pfmall_response', 'response envelope');
+    assert(replied.status === 'denied', 'postMessage routes denial status');
+    assert(replied.request_id === 'req-deny-1', 'request_id echoed');
+    assert(replied.target === 'native_phone_agent', 'target echoed');
+    assert(replied.result.preset === '6x3', 'result preset');
+    assert(replied.error === undefined, 'denied status has no error field');
+  }
+
+  // 20) Layer 1 contracts still intact after Layer 2 lands.
+  {
+    const sb = createSandbox({ tileField: makeTileFieldWithPolicy('desktop') });
+    loadDispatcher(sb);
+    // inspect_state unchanged
+    const ins = sb.pfmallControlDispatcher.dispatch('inspect_state', {});
+    assert(ins.status === 'ok', 'inspect_state still ok');
+    assert(ins.result.tile_field.device_policy.deviceClass === 'desktop', 'inspect reads desktop policy');
+    // unknown command unchanged
+    const unk = sb.pfmallControlDispatcher.dispatch('not_a_command', {});
+    assert(unk.status === 'error' && unk.error.code === 'unknown_command', 'unknown still error');
+    // Layer 3+ still not_implemented (unchanged)
+    const ni = sb.pfmallControlDispatcher.dispatch('play_tile', {});
+    assert(ni.status === 'error' && ni.error.code === 'not_implemented', 'play_tile still not_implemented');
+    // set_layout is now registered as implemented (not not_implemented)
+    const impl = sb.pfmallControlDispatcher.dispatch('set_layout', { preset: '3x5' });
+    assert(impl.status === 'ok' && impl.error === undefined, 'set_layout no longer not_implemented');
+  }
+
+  // 21) Denial event does not fire on invalid_payload / api_unavailable — only on policy denial.
+  //     (truth-signal: "policy said no" is different from "you sent garbage or there was no runtime").
+  {
+    const sb = createSandbox({ tileField: makeTileFieldWithPolicy('phone') });
+    loadDispatcher(sb);
+    const events = [];
+    sb.pfmallControlDispatcher.registerEventListener({ postMessage(msg) { events.push(msg); } }, { origin: '*' });
+
+    sb.pfmallControlDispatcher.dispatch('set_layout', {});  // invalid payload
+    sb.pfmallControlDispatcher.dispatch('set_layout', { preset: 'bogus_preset' });  // policy denial
+
+    const denied = events.filter(e => e.event === 'layout_denied');
+    assert(denied.length === 1, 'exactly one layout_denied (not fired on invalid_payload)');
+    assert(denied[0].payload.preset === 'bogus_preset', 'the one denial is the policy one');
+  }
+
+  console.log('pfmall_control_dispatcher_vm.mjs: all checks passed (Layer 1 + Layer 2)');
 }
 
 run().catch((e) => {

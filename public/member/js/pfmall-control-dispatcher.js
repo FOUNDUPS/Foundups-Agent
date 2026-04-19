@@ -164,7 +164,99 @@
     };
   }
 
-  // Layer 2+ commands — registered but return not_implemented until wired.
+  // Layer 2: set_layout — delegates density change to mallTileField.requestDensity,
+  // which enforces the existing device policy (phones cannot force desktop presets).
+  // On policy rejection the dispatcher returns status='denied' (distinct from 'error'
+  // so agents can tell "policy said no" from "command was malformed or API absent").
+  function cmdSetLayout(payload) {
+    payload = payload || {};
+    var preset = payload.preset;
+    var source = (typeof payload.source === 'string' && payload.source) ? payload.source : 'pfmall_command';
+
+    if (typeof preset !== 'string' || !preset) {
+      return {
+        status: 'error',
+        error: {
+          code: 'invalid_payload',
+          message: 'set_layout requires payload.preset as a non-empty string'
+        }
+      };
+    }
+
+    var tf = (typeof window !== 'undefined') ? window.mallTileField : null;
+    if (!tf || typeof tf.requestDensity !== 'function') {
+      return {
+        status: 'error',
+        error: {
+          code: 'api_unavailable',
+          message: 'mallTileField.requestDensity not available'
+        }
+      };
+    }
+
+    var outcome = safeCall(function() {
+      return tf.requestDensity(preset, { source: source });
+    });
+
+    if (!outcome || typeof outcome !== 'object' || typeof outcome.applied !== 'boolean') {
+      return {
+        status: 'error',
+        error: {
+          code: 'runtime_failure',
+          message: 'requestDensity returned no valid outcome'
+        }
+      };
+    }
+
+    var policy = safeCall(function() {
+      return typeof tf.getDevicePolicy === 'function' ? tf.getDevicePolicy() : null;
+    });
+    var deviceClass = (outcome.deviceClass !== undefined && outcome.deviceClass !== null)
+      ? outcome.deviceClass
+      : (policy && policy.deviceClass) || null;
+
+    if (outcome.applied === true) {
+      emitEvent('layout_applied', {
+        preset: outcome.preset || preset,
+        source: source,
+        device_class: deviceClass
+      });
+      emitEvent('state_changed', {
+        change: 'layout',
+        preset: outcome.preset || preset
+      });
+      return {
+        status: 'ok',
+        result: {
+          applied: true,
+          preset: outcome.preset || preset,
+          source: source,
+          device_class: deviceClass
+        }
+      };
+    }
+
+    // Policy denial — distinct from 'error' so agents can branch on this cleanly.
+    emitEvent('layout_denied', {
+      preset: preset,
+      source: source,
+      reason: outcome.reason || 'policy_denied',
+      device_class: deviceClass,
+      allowed: (policy && policy.allowed) || null
+    });
+    return {
+      status: 'denied',
+      result: {
+        applied: false,
+        preset: preset,
+        reason: outcome.reason || 'policy_denied',
+        device_class: deviceClass,
+        allowed: (policy && policy.allowed) || null
+      }
+    };
+  }
+
+  // Layer 3+ commands — registered but return not_implemented until wired.
   // Keeping the surface stable lets tests exercise rejection shape early.
   function cmdNotImplemented(command) {
     return {
@@ -178,7 +270,7 @@
 
   var HANDLERS = {
     inspect_state: cmdInspectState,
-    set_layout: function(p) { return cmdNotImplemented('set_layout'); },
+    set_layout: cmdSetLayout,
     load_videos: function(p) { return cmdNotImplemented('load_videos'); },
     play_tile: function(p) { return cmdNotImplemented('play_tile'); },
     expand_tile: function(p) { return cmdNotImplemented('expand_tile'); },

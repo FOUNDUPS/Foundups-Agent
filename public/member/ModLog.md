@@ -1,5 +1,83 @@
 # Member Area Module Change Log
 
+## [2026-04-20] pfMALL Agent Control Dispatcher — Layers 1-2 (Worker AW3)
+
+**Who**: 0102 - Worker AW3
+**Slice**: `PMCTRL1_PFMALL_AGENT_CONTROL_CONTRACT_PHASE1` (Layer 1 + Layer 2)
+**What**: Browser-side command dispatcher for structured agent control of the
+p.fMALL video wall. Agents (0102, RedDog, native phone agent) drive the wall
+through this contract instead of ad hoc DOM/UI driving.
+
+**Rationale**: Prior control surface assumed in-page callers with DOM access.
+Native app and cross-origin agents need a structured command envelope that
+enforces device policy (phones cannot force desktop presets) and separates
+session state from permanent catalog state. WSP 97 truth-signalling: policy
+denials are distinct from malformed/runtime errors.
+
+**Files Added**:
+- `public/member/js/pfmall-control-dispatcher.js` - dispatcher + event framework.
+- `public/member/tests/pfmall_control_dispatcher_vm.mjs` - Node VM harness (21 checks).
+
+**Protocol**:
+- Request: `{ type: 'pfmall_command', source, target, command, request_id, payload }`
+- Response: `{ type: 'pfmall_response', source, target, request_id, status, result|error }`
+- Event: `{ type: 'pfmall_event', source, event, payload, timestamp }`
+- Status values: `ok` (applied), `denied` (policy rejected), `error` (malformed or runtime)
+
+**Layer 1 - `inspect_state` + event framework**:
+- Reads only what underlying APIs expose: `window.mallTileField`,
+  `window.mallPlanes`, `window.mallVideoPlayer`.
+- Missing API reports `null` (truth-signal; no fabrication). Individual missing
+  methods on a present API also report `null`. Thrown readers swallow to `null`
+  for that field only; siblings unaffected.
+- Session override flag (dispatcher-local) keeps session-vs-catalog separation
+  visible even before Layer 4 `load_videos` wires the session path.
+- Reserved events: `layout_denied`, `layout_applied`, `video_loaded`,
+  `video_failed`, `state_changed`, `session_reset`.
+- postMessage routing with origin allowlist; disallowed origins produce no
+  response.
+
+**Layer 2 - `set_layout` + device policy denial**:
+- Delegates to `mallTileField.requestDensity(preset, { source })`, which
+  enforces the existing `DENSITY_TIERS` policy (`phone`/`tablet`/`desktop`).
+- On `applied: true`: returns `status: 'ok'`, emits `layout_applied` and
+  `state_changed` events.
+- On `applied: false`: returns `status: 'denied'` (not `'error'`), emits
+  `layout_denied` with `preset`, `source`, `reason`, `device_class`, `allowed`.
+- Invalid payload: `status: 'error', code: 'invalid_payload'` — no event.
+- Missing API: `status: 'error', code: 'api_unavailable'` — no event.
+- Malformed outcome from underlying API: `status: 'error', code: 'runtime_failure'`.
+- `layout_denied` event fires only on policy denial, never on invalid payload
+  or missing API (truth-signal: "policy said no" ≠ "your command was garbage").
+
+**Layers 3-5 (not in this slice)**: `play_tile`, `expand_tile`, `collapse_tile`,
+`load_videos`, `reset_session`. These are registered handlers returning
+`not_implemented` errors — the contract surface is stable so agents and tests
+can exercise rejection shape before full implementation lands.
+
+**Tests (VM harness, 21 checks)**:
+- Contract surface: all 7 commands registered; known events surfaced.
+- `inspect_state` truthful reads and null-on-missing-API.
+- Unknown command / invalid command shape rejection.
+- postMessage routing with `request_id` echo and origin allowlist.
+- `set_layout` denies phone + `6x3` with `layout_denied` event.
+- `set_layout` applies desktop + `6x3` with `layout_applied` + `state_changed`.
+- `set_layout` invalid payload variants all reject with `invalid_payload`.
+- `set_layout` missing `mallTileField` or missing `requestDensity` rejects with
+  `api_unavailable`.
+- `set_layout` malformed `requestDensity` outcome rejects with `runtime_failure`.
+- postMessage `set_layout` denial routes `status: 'denied'` with correct
+  `request_id`.
+- Layer 1 contracts unaffected after Layer 2 lands.
+
+**Run**: `node public/member/tests/pfmall_control_dispatcher_vm.mjs`
+
+**Out of scope (deferred to later PMCTRL1 layers)**: session video load,
+play/expand/collapse commands, reset session, floating search UI, native phone
+agent bridge wiring, RedDog autonomous repair, WSP 106 HTTP gateway wiring.
+
+---
+
 ## [2026-04-17] pfMALL YouTube Pipeline Status Summary (Worker CW)
 
 **Who**: 0102 - Worker CW
