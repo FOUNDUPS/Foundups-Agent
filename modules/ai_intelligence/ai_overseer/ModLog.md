@@ -2,7 +2,48 @@
 
 **Module**: `modules/ai_intelligence/ai_overseer/`
 **Status**: Active (Autonomous Code Patching + Daemon Restart + Activity Routing)
-**Version**: 0.10.1
+**Version**: 0.10.2
+
+---
+
+## 2026-04-19 - DJ2-A: WRE Dashboard Insufficient Data WARN Tier
+
+**Author**: 0102
+**WSP**: 97 (truthful state distinction)
+**Slice**: DJ2-A (first of 6 DJ2 slices from FCA1-AG2 audit)
+
+### Summary
+
+Fixes WSP 97 truth violation where WRE dashboard preflight reported `PASS (INSUFFICIENT_DATA)`
+when samples < 25. Now reports `WARN` and dispatches to AI Overseer for observability.
+
+### Change
+
+- `main.py:run_wre_dashboard_preflight()` - `preflight=PASS` → `preflight=WARN` on insufficient_data
+- Dispatch via `on_preflight_fail()` with severity=medium, automation_candidate=True
+- Startup NOT blocked (still returns True) - warning tier only
+
+### Payload
+
+```json
+{
+  "component": "wre_dashboard",
+  "severity": "medium",
+  "samples": <int>,
+  "min_samples": 25,
+  "insufficient_data": true,
+  "likely_cause": "cold_start_or_telemetry_drop",
+  "automation_candidate": true
+}
+```
+
+### Test
+
+- `test_main_py_wre_dashboard_insufficient_data_calls_dispatcher` - verifies dispatch
+
+### Next slice
+
+DJ2-C: OAUTH_PREFLIGHT_DISPATCH (wire the two WARN sites in monitor_youtube)
 
 ---
 
