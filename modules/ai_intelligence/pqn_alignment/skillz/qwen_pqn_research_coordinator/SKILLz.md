@@ -13,16 +13,16 @@ evals: []
 
 ---
 # Metadata (YAML Frontmatter)
-skill_id: qwen_pqn_research_coordinator_v1_production
+skill_id: qwen_pqn_research_coordinator_v1_prototype
 name: qwen_pqn_research_coordinator
 description: Strategic PQN research coordination, hypothesis generation, and cross-validation synthesis using 32K context window
-version: 1.0_production
+version: 1.0_prototype
 author: 0102
 created: 2025-10-22
 agents: [qwen]
 primary_agent: qwen
 intent_type: DECISION
-promotion_state: production
+promotion_state: prototype
 pattern_fidelity_threshold: 0.90
 test_status: passing
 

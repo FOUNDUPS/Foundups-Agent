@@ -13,16 +13,16 @@ evals: []
 
 ---
 # Metadata (YAML Frontmatter)
-skill_id: gemma_pqn_data_processor_v1_production
+skill_id: gemma_pqn_data_processor_v1_prototype
 name: gemma_pqn_data_processor
 description: High-volume PQN detection data processing and summarization (handles 400+ detections efficiently)
-version: 1.0_production
+version: 1.0_prototype
 author: 0102
 created: 2025-10-22
 agents: [gemma]
 primary_agent: gemma
 intent_type: PROCESSING
-promotion_state: production
+promotion_state: prototype
 pattern_fidelity_threshold: 0.95
 test_status: passing
 
