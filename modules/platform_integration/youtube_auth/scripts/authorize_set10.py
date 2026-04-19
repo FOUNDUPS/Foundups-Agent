@@ -108,7 +108,9 @@ def main():
             )
         else:
             print(f"   Browser: {'Edge' if browser_name else 'default'}")
-            print("\nIMPORTANT: Use the Google account/channel you actually want on set 10")
+            print("\nIMPORTANT: Use the FoundUps Google account (NOT UnDaoDu)")
+            print("   Set 10 = FoundUps / antifaFM channels")
+            print("   Set 1 = UnDaoDu / Move2Japan channels (use Chrome for Set 1)")
             print("   If Google opens a 400 delegation page, rerun with --manual")
             creds = flow.run_local_server(
                 port=port,
