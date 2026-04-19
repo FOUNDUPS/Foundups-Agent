@@ -13,6 +13,9 @@ import os
 import random
 from typing import Any, Dict, List
 
+# YTR1: Import for stale element recovery
+from selenium.common.exceptions import StaleElementReferenceException
+
 logger = logging.getLogger(__name__)
 
 # ADR-012: Import owned channels list for cross-comment loop prevention
@@ -566,6 +569,9 @@ class BrowserReplyExecutor:
                 char_delay = 0.035  # ~45% faster fallback (was 0.064)
 
             # Type character-by-character with delays (visible human-like typing)
+            # YTR1: Track stale recovery state
+            stale_recovered = False
+
             try:
                 # 0102 interface: burst typing + micro-edits (no fixed cadence signature)
                 burst_mode = (random.random() < 0.55 and self.delay_multiplier >= 1.0)
@@ -578,18 +584,73 @@ class BrowserReplyExecutor:
                         chunk_size = 1
 
                     chunk = reply_text[i:i + chunk_size]
-                    i += chunk_size
 
-                    self.driver.execute_script(
-                        """
-                        const el = arguments[0];
-                        const chunk = arguments[1];
-                        el.textContent += chunk;
-                        el.dispatchEvent(new Event('input', { bubbles: true }));
-                        """,
-                        textarea,
-                        chunk,
-                    )
+                    # YTR1: Wrap execute_script with stale element recovery (single retry)
+                    try:
+                        self.driver.execute_script(
+                            """
+                            const el = arguments[0];
+                            const chunk = arguments[1];
+                            el.textContent += chunk;
+                            el.dispatchEvent(new Event('input', { bubbles: true }));
+                            """,
+                            textarea,
+                            chunk,
+                        )
+                        i += chunk_size  # Only advance on success
+
+                    except StaleElementReferenceException:
+                        if stale_recovered:
+                            # Already tried once - fail
+                            logger.error(f"[REPLY-EXEC] ❌ Textarea stale again at char {i}/{len(reply_text)} - aborting")
+                            return False
+
+                        logger.warning(f"[REPLY-EXEC] ⚠️ Textarea stale at char {i}/{len(reply_text)} - attempting recovery")
+                        stale_recovered = True
+                        await asyncio.sleep(0.3)
+
+                        # Re-find textarea using same Shadow DOM method
+                        textarea = self.driver.execute_script(
+                            """
+                            const threadSelector = arguments[0];
+                            const idx = arguments[1];
+                            const threads = document.querySelectorAll(threadSelector);
+                            if (!threads || threads.length <= idx) return null;
+                            const startNode = threads[idx].shadowRoot || threads[idx];
+
+                            function findInShadow(root, selector) {
+                                if (!root) return null;
+                                const el = root.querySelector(selector);
+                                if (el) return el;
+                                const children = root.querySelectorAll('*');
+                                for (let child of children) {
+                                    if (child.shadowRoot) {
+                                        const found = findInShadow(child.shadowRoot, selector);
+                                        if (found) return found;
+                                    }
+                                }
+                                return null;
+                            }
+
+                            let ta = findInShadow(startNode, '#contenteditable-textarea');
+                            if (!ta) ta = findInShadow(startNode, 'div#contenteditable-textarea');
+                            if (!ta) ta = findInShadow(startNode, 'ytcp-mention-input');
+                            if (!ta) ta = findInShadow(startNode, 'textarea');
+                            return ta;
+                            """,
+                            thread_selector,
+                            comment_idx - 1
+                        )
+
+                        if not textarea:
+                            logger.error(f"[REPLY-EXEC] ❌ Could not re-find textarea after stale")
+                            return False
+
+                        # Check what's already typed and adjust position
+                        current = self.driver.execute_script("return arguments[0].textContent || '';", textarea)
+                        i = len(current)
+                        logger.info(f"[REPLY-EXEC] ✓ Textarea recovered, resuming at char {i}/{len(reply_text)}")
+                        continue  # Retry this iteration
 
                     last = chunk[-1] if chunk else ""
                     if last == ' ':

@@ -74,8 +74,9 @@ def main():
         print("\n[U+1F310] Opening browser for authorization...")
         print(f"   Port: {port}")
         print(f"   Browser: {'Chrome' if browser_name else 'default'}")
-        print("\nIMPORTANT: Use the FoundUps Google account")
-        print("   This gives you access to FoundUps YouTube API quota")
+        print("\nIMPORTANT: Use the UnDaoDu Google account (NOT FoundUps)")
+        print("   Set 1 = UnDaoDu / Move2Japan channels")
+        print("   Set 10 = FoundUps / antifaFM channels (use Edge for Set 10)")
 
         # Run local server on port 8080 for Set 1
         credentials = flow.run_local_server(port=port, browser=browser_name)

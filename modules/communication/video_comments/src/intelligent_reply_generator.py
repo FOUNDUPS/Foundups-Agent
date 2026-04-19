@@ -1155,10 +1155,24 @@ VARIATION GUIDANCE:
                 self.lm_studio_available = True
 
                 if not self.lm_studio_model_id:
-                    preferred = next((mid for mid in model_ids if "qwen" in mid.lower()), None)
+                    # YTR1: Exclude TTS/audio/speech models - they output control tokens, not text
+                    # Patterns: tts, audio, speech, whisper, bark, kokoro, dia
+                    exclude_patterns = ("tts", "audio", "speech", "whisper", "bark", "kokoro", "dia")
+                    text_models = [
+                        mid for mid in model_ids
+                        if not any(pat in mid.lower() for pat in exclude_patterns)
+                    ]
+
+                    if not text_models:
+                        logger.error(f"[REPLY-GEN] ❌ NO TEXT MODELS in LM Studio - only TTS/audio: {model_ids}")
+                        logger.error(f"[REPLY-GEN] Set LM_STUDIO_MODEL env var or load a text model (qwen, gemma)")
+                        self.lm_studio_available = False
+                        return
+
+                    preferred = next((mid for mid in text_models if "qwen" in mid.lower()), None)
                     if not preferred:
-                        preferred = next((mid for mid in model_ids if "gemma" in mid.lower()), None)
-                    self.lm_studio_model_id = preferred or model_ids[0]
+                        preferred = next((mid for mid in text_models if "gemma" in mid.lower()), None)
+                    self.lm_studio_model_id = preferred or text_models[0]
 
                 logger.info(f"[REPLY-GEN] LM Studio available (model={self.lm_studio_model_id})")
             else:
@@ -1497,9 +1511,18 @@ Just output the actual reply text, nothing else."""
                         json_resp = response.json()
                         if "choices" in json_resp and json_resp["choices"]:
                             content = json_resp["choices"][0]["message"]["content"]
-                            self._last_llm_source = 'lm_studio'  # Track for training data
-                            logger.info(f"[LLM-CHAIN] ✅ LM STUDIO SUCCESS: {content[:80]}...")
-                            return content
+
+                            # YTR1: Reject TTS/audio control tokens - wrong model type loaded
+                            tts_token_patterns = ("<|s_", "<|audio", "<|speech", "<|tts")
+                            if content and any(content.strip().startswith(pat) for pat in tts_token_patterns):
+                                logger.error(f"[LLM-CHAIN] ❌ TTS TOKENS DETECTED - wrong model '{self.lm_studio_model_id}'")
+                                logger.error(f"[LLM-CHAIN] Output: {content[:100]}...")
+                                logger.error(f"[LLM-CHAIN] Load a TEXT model (qwen, gemma) or set LM_STUDIO_MODEL")
+                                # Fall through to next LLM - do NOT return this as success
+                            else:
+                                self._last_llm_source = 'lm_studio'  # Track for training data
+                                logger.info(f"[LLM-CHAIN] ✅ LM STUDIO SUCCESS: {content[:80]}...")
+                                return content
                         else:
                             logger.warning(f"[LLM-CHAIN] ❌ LM Studio returned empty choices")
                     else:
@@ -2008,11 +2031,18 @@ Rules:
                 pass
 
         if response:
+            # YTR1: Reject TTS tokens - they contain digits that confuse the regex
+            tts_token_patterns = ("<|s_", "<|audio", "<|speech", "<|tts")
+            if any(response.strip().startswith(pat) for pat in tts_token_patterns):
+                logger.warning(f"[REPLY-GEN] TTS tokens in username analysis - returning safe default")
+                return 0.0
+
             import re
-            match = re.search(r"0\.\d+|1\.0|0|1", response)
+            # YTR1: Use word boundaries to avoid matching digits inside token IDs
+            match = re.search(r"\b(0\.\d+|1\.0|[01])\b", response)
             if match:
-                return float(match.group())
-        
+                return float(match.group(1))
+
         return 0.0
     
     def generate_reply(

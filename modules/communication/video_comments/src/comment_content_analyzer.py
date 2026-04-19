@@ -439,13 +439,16 @@ Answers:"""
                     pass
 
         # Topic extraction
-        topic = "politics"
+        # YTR1: Default to "general" not "politics" - reduces false MAGA_TROLL classification bias
+        topic = "general"
         if 'gaza' in title_lower or 'palestine' in title_lower:
             topic = "Gaza/Palestine"
         elif 'israel' in title_lower:
             topic = "Israel"
         elif 'election' in title_lower or 'vote' in title_lower:
             topic = "elections"
+        elif any(kw in title_lower for kw in ('trump', 'biden', 'democrat', 'republican', 'congress', 'senate')):
+            topic = "politics"
 
         logger.info(f"[VIDEO-CONTEXT] Title: '{video_title[:50]}...'")
         logger.info(f"[VIDEO-CONTEXT]   Stance: {stance}, Topic: {topic}")
