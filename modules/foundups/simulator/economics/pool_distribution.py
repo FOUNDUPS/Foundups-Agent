@@ -106,8 +106,11 @@ class StakerHurdleState(IntEnum):
     - HURDLE_MET: Transition state (10x reached, about to lock)
     - POST_HURDLE_LOCKED: Permanent reduced rate (allocation capped)
 
-    Note: This is SEPARATE from I_i investor hurdle logic in investor_staking.py.
-    BTC stakers have their own hurdle tracking within the Du-pool partition.
+    "Settlement of staker seed contract" = reaching POST_HURDLE_LOCKED state.
+    At 10x cumulative distributions, flow drops to 5.26% of normal permanently.
+
+    CANONICAL: This is the correct staker hurdle model.
+    investor_staking.py I_i bonding curve is FROZEN/EXPLORATORY - do not implement.
     """
     PRE_HURDLE = 0         # <10x cumulative distributions (standard rate)
     HURDLE_MET = 1         # Exactly reached 10x (transition/audit visibility)

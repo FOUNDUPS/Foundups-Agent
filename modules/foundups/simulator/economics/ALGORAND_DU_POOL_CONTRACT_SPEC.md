@@ -22,7 +22,7 @@ This document specifies how the Du pool distribution mechanics map to an Algoran
 - Mainnet genesis closure semantics
 
 **Out of scope:**
-- I_i investor bonding curve (separate lane in `investor_staking.py`)
+- I_i investor bonding curve (`investor_staking.py` - FROZEN/EXPLORATORY, not canonical)
 - Un/Dao pool mechanics (active participation, not passive)
 - Network drip and fund pool mechanics
 - PyTeal implementation (future slice)
@@ -413,7 +413,7 @@ Du pool contract MUST NOT:
   - Share hurdle tracking with investor_staking.py lane
   - Allow cross-contamination of distribution accounting
 
-Du lane and I_i lane are economically and contractually separate.
+Du lane is CANONICAL. I_i bonding curve lane is FROZEN/EXPLORATORY - do not implement.
 ```
 
 ---
