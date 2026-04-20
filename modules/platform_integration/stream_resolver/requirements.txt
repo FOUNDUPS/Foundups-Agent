@@ -8,6 +8,9 @@ google-auth-oauthlib>=1.0.0
 # Environment variables
 python-dotenv>=1.0.0
 
+# Timezone handling (required by stream_config.py)
+pytz>=2023.3
+
 # Standard library dependencies (listed for clarity)
 # time
 # random
