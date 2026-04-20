@@ -69,10 +69,9 @@ class LinkedInCompany:
     EDUIT = "eduit"
 
 
-# Default fallback if env not set
-_DEFAULT_ACCOUNTS: Dict[str, str] = {
-    "foundups": "1263645",
-}
+# Default fallback if env not set (minimal - use LINKEDIN_ACCOUNTS_JSON env var)
+# Format: LINKEDIN_ACCOUNTS_JSON='{"foundups":"1263645","undaodu":"156137799","move2japan":"104834798"}'
+_DEFAULT_ACCOUNTS: Dict[str, str] = {}
 
 # Aliases for fuzzy matching (lowercase -> canonical name)
 ACCOUNT_ALIASES: Dict[str, str] = {
@@ -167,8 +166,9 @@ def get_default_company() -> str:
     if canonical and canonical in accounts:
         return accounts[canonical]
 
-    # Fallback to FOUNDUPS
-    return accounts.get("foundups", "1263645")
+    # No fallback - env var must be set
+    logger.error("[LINKEDIN] LINKEDIN_ACCOUNTS_JSON env var not set or missing accounts")
+    return ""
 
 
 def _resolve_account_name(name: str) -> Optional[str]:
