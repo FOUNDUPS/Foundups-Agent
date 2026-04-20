@@ -52,7 +52,7 @@ def _default_channels() -> List[Dict[str, Any]]:
                 "account_section": 0,
             },
             "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 8, "description_template": "ffcpln"},
-            "social": {"linkedin_company": "move2japan", "x_account": "geozai", "enabled": True},
+            "social": {"linkedin_company": "move2japan", "x_account": "geozai", "enabled": True, "signature": "0102🦞"},
         },
         {
             "key": "undaodu",
@@ -69,7 +69,7 @@ def _default_channels() -> List[Dict[str, Any]]:
                 "account_section": 0,
             },
             "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 8, "description_template": "undaodu"},
-            "social": {"linkedin_company": "undaodu", "x_account": "undaodu", "enabled": True},
+            "social": {"linkedin_company": "undaodu", "x_account": "undaodu", "enabled": True, "signature": "0102🦞012🖐️"},  # wsp01: 012 co-signs
         },
         {
             "key": "foundups",
@@ -86,7 +86,7 @@ def _default_channels() -> List[Dict[str, Any]]:
                 "account_section": 1,
             },
             "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 8, "description_template": "foundups"},
-            "social": {"linkedin_company": "foundups", "x_account": "foundups", "enabled": True},
+            "social": {"linkedin_company": "foundups", "x_account": "foundups", "enabled": True, "signature": "0102🦞"},
         },
         {
             "key": "antifafm",
@@ -103,7 +103,7 @@ def _default_channels() -> List[Dict[str, Any]]:
                 "account_section": 1,
             },
             "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 8, "description_template": "ffcpln"},
-            "social": {"linkedin_company": "foundups", "x_account": "antifafm", "enabled": True},
+            "social": {"linkedin_company": "move2japan", "x_account": "antifafm", "enabled": True, "signature": "0102🦞"},  # wsp01: antifaFM posts to move2japan
         },
     ]
 
@@ -161,6 +161,7 @@ def _normalize_channel(channel: Dict[str, Any]) -> Dict[str, Any]:
         "linkedin_page_id": linkedin_page_id,
         "x_account": str(social.get("x_account", "")),
         "enabled": bool(social.get("enabled", False)),
+        "signature": str(social.get("signature", "0102🦞")),  # default lobster, 012 co-signs on undaodu
     }
 
     return normalized
