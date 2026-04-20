@@ -1,5 +1,353 @@
 # Member Area Module Change Log
 
+## [2026-04-20] pfMALL Agent Control Dispatcher — Layer 5 (Worker AW3/AG3)
+
+**Who**: 0102 - Worker AW3/AG3
+**Slice**: `PMCTRL1-L5 — PFMALL_AGENT_CONTROL_CONTRACT_DOCS_PHASE1`
+**What**: Documentation + final verification layer for the pfMALL Agent Control
+Contract (PMCTRL1). No new command handlers, no new runtime behavior. The full
+interface of record is now published in `public/member/INTERFACE.md` under the
+new **"pfMALL Agent Control Contract"** section.
+
+**Rationale**: Layers 1–4 delivered the 7-command surface with event truth
+channel, device policy denial, and the session-mode hard gate. Layer 5 closes
+the contract by (a) publishing the normative interface so the agent side can
+integrate against an authoritative spec, (b) re-verifying the full 51-check
+harness on current tip, and (c) confirming scope boundaries are intact before
+PR. This is the point where the contract becomes citable.
+
+**Preflight (performed per directive)**:
+- `git fetch origin main` — up to date with remote.
+- `git merge-base --is-ancestor origin/main HEAD` — origin/main IS ancestor, no
+  rebase required.
+- `git status --short` — clean.
+- `node public/member/tests/pfmall_control_dispatcher_vm.mjs` — 51/51 checks
+  passed on L4 tip before documentation edits.
+
+**Files Modified**:
+- `public/member/INTERFACE.md` — **primary L5 deliverable**. New
+  **pfMALL Agent Control Contract** section
+  documenting: message envelopes (`pfmall_command` / `pfmall_response` /
+  `pfmall_event`), response status taxonomy (`ok` / `denied` / `error`), all 7
+  commands with their runtime API routes, all 6 reserved events, device policy
+  for `set_layout`, session override truth rules (API-confirmed `session_mode`
+  requirement, no silent canonical catalog mutation, reset idempotency,
+  `api_unavailable` when runtime API is missing), the 0102/agent boundary
+  (non-scope: native-phone hook, RedDog AI integration, floating search,
+  backend, tenant execution, canonical catalog writes), and WSP 97 truth
+  constraint summary. `*Last Updated*` bumped to 2026-04-20.
+- `public/member/ModLog.md` — this entry.
+
+**Dispatcher Minor Correction** (permitted per directive — doc comment /
+exported metadata alignment only):
+- `public/member/js/pfmall-control-dispatcher.js` — removed dead
+  `cmdNotImplemented` helper and its stale "Layer 5+ commands" comment. The
+  helper was never referenced by `HANDLERS` and, after Layer 4, could never
+  fire. Keeping it would have contradicted the published contract ("no
+  `not_implemented` remains for any of the 7 commands"). No handler behavior
+  changed.
+
+**What Was Not Modified (deliberate scope boundary per directive)**:
+- `public/member/tests/pfmall_control_dispatcher_vm.mjs` — no changes. The
+  51-check harness already covers every contract point that was publishable in
+  Layer 5; no documentation pass revealed a missing assertion. (The test file
+  still references the string `not_implemented` inside negative assertions
+  that guard against regression — `res.error.code !== 'not_implemented'` — so
+  those mentions are contract enforcement, not pending work.)
+- No new handlers, no floating search, no RedDog/native hook, no backend
+  calls, no catalog mutation, no DOM selector fallback.
+
+**Final Verification**:
+- `node public/member/tests/pfmall_control_dispatcher_vm.mjs` — 51/51 passed
+  after documentation edits (harness unchanged, re-run for confirmation).
+- `git diff --name-only origin/main...HEAD` scope check:
+  - `docs/0102_session_briefings/PMCTRL1_PFMALL_AGENT_CONTROL_CONTRACT_PHASE1.md`
+  - `public/member/INTERFACE.md`
+  - `public/member/ModLog.md`
+  - `public/member/js/pfmall-control-dispatcher.js`
+  - `public/member/tests/pfmall_control_dispatcher_vm.mjs`
+- Commands implemented: **7/7**. No `not_implemented` sentinels remain.
+- Status taxonomy, event channel, device policy, and session-mode gate all
+  cited in the published contract.
+
+**Verdict**: READY_FOR_PR.
+
+---
+
+## [2026-04-20] pfMALL Agent Control Dispatcher — Layer 4 (Worker AW3/AG3)
+
+**Who**: 0102 - Worker AW3/AG3
+**Slice**: `PMCTRL1-L4 — PFMALL_AGENT_CONTROL_SESSION_COMMANDS_PHASE1`
+**What**: Session commands `load_videos` and `reset_session`. Completes the
+7-command control surface. All 7 handlers are now wired; no `not_implemented`
+handlers remain in the dispatcher.
+
+**Rationale**: Agents need a structured way to install a temporary (session)
+video list and restore catalog-backed state — without ever mutating the
+canonical catalog. Prior layers covered read (`inspect_state`), layout
+(`set_layout`), and tile drive (`play_tile` / `expand_tile` / `collapse_tile`).
+Layer 4 adds the session switchover, with a strict truth-signal gate so a
+misbehaving runtime cannot silently mutate the catalog through this path.
+
+**Preflight (performed per directive)**:
+- `git fetch origin main` - pulled 3 new commits (LEDGER-RECON1 from AG2).
+- Rebase onto `origin/main` applied cleanly (3 commits replayed, no conflicts).
+- `node public/member/tests/pfmall_control_dispatcher_vm.mjs` on rebased tip:
+  40/40 checks passed (Layer 1 + Layer 2 + Layer 3 green before Layer 4 edits).
+
+**Files Modified**:
+- `public/member/js/pfmall-control-dispatcher.js` - added `cmdLoadVideos`,
+  `cmdResetSession`. All 7 HANDLERS now point to real implementations.
+- `public/member/tests/pfmall_control_dispatcher_vm.mjs` - 11 new checks
+  (tests 41-51). Test 8 reworked (no `not_implemented` commands remain). Test
+  20 reworked to probe `load_videos` `api_unavailable` instead. Total 51
+  checks.
+
+**API Contracts expected on runtime** (dispatcher-side only — runtime methods
+may be added in a later slice; until they exist, the dispatcher returns
+`api_unavailable` for `load_videos`):
+- `window.mallTileField.loadSessionVideos(videos, { source })` →
+  `{ applied: boolean, session_mode: boolean, video_count?: number, reason?: string }`
+- `window.mallTileField.resetSession({ source })` →
+  `{ applied: boolean }` (optional — dispatcher clears its local state regardless)
+
+**`load_videos` truth-signal gates** (all fail-closed):
+- Payload must be `{ videos: Array<{ video_id: string }> }` non-empty; else
+  `invalid_payload`.
+- `mallTileField.loadSessionVideos` must exist; else `api_unavailable`.
+- API outcome must be a proper object with `applied` boolean; else
+  `runtime_failure`.
+- `applied: false` → `load_refused` + `video_failed` event.
+- **`applied: true` but `session_mode: true` NOT confirmed** → `session_mode_required`
+  error. Dispatcher refuses to mark its session override active. This is the
+  hard gate against silent canonical-catalog mutation.
+- Only on confirmed session-mode success does dispatcher call
+  `_setSessionOverride(true, videoCount)` and emit `state_changed` with
+  `change: 'session_loaded'`.
+
+**`reset_session` semantics**:
+- Always returns `status: ok` — dispatcher session flag is local state, so the
+  reset is always possible from the dispatcher's side.
+- Calls `mallTileField.resetSession({ source })` if available; reports whether
+  the runtime API was called and acknowledged (`api_called`, `api_acknowledged`
+  fields) so callers see both sides of the clear.
+- `result.changed` is `true` only when a session was actually active — truthful
+  no-op when there's nothing to reset.
+- Events fire only when `changed: true` (`session_reset` + `state_changed`
+  with `change: 'session_reset'`). A no-op reset is silent on the event channel.
+
+**Error codes introduced in Layer 4**:
+- `invalid_payload` - malformed `load_videos` payload (existing code, reused)
+- `api_unavailable` - required runtime method missing (existing code, reused)
+- `load_refused` - API returned `applied: false`
+- `session_mode_required` - API returned `applied: true` without `session_mode: true`
+- `runtime_failure` - API returned malformed outcome or threw
+
+**Events introduced in Layer 4**:
+- `state_changed` with `change: 'session_loaded'` on `load_videos` success
+- `state_changed` with `change: 'session_reset'` on `reset_session` with `changed: true`
+- `session_reset` on `reset_session` with `changed: true`
+- `video_failed` with `reason` on `load_videos` failure (`load_refused`,
+  `session_mode_required`)
+- No events on `invalid_payload` / `api_unavailable` / `runtime_failure` —
+  those are caller/runtime mistakes, not wall state transitions.
+
+**Tests (VM harness, 11 new — 41-51; total 51)**:
+- load_videos accepts valid session list, sets session override, emits
+  `state_changed` (change=session_loaded), inspect_state reflects truth.
+- load_videos rejects 7 invalid-payload variants (missing, null, empty,
+  non-array, items without video_id / empty / non-string video_id).
+- load_videos returns `api_unavailable` both for no mallTileField and for a
+  mallTileField missing `loadSessionVideos`.
+- load_videos rejects with `session_mode_required` when API returns
+  `applied: true, session_mode: false` (the catalog-mutation guard).
+- load_videos rejects with `load_refused` when API returns `applied: false`.
+- load_videos rejects with `runtime_failure` for malformed outcome or throw.
+- reset_session clears an active session, emits `session_reset` +
+  `state_changed`, inspect_state reflects cleared state.
+- reset_session with no active session returns `ok` with `changed: false`,
+  emits no events (truthful no-op).
+- reset_session still works when mallTileField lacks `resetSession` — reports
+  `api_called: false` / `api_acknowledged: false` truthfully.
+- postMessage routing preserves envelope shape + request_id for both Layer 4
+  commands.
+- Layer 1/2/3 regression sweep — inspect_state, set_layout accept/deny,
+  play_tile, expand_tile, collapse_tile all green.
+
+**Run**: `node public/member/tests/pfmall_control_dispatcher_vm.mjs`
+
+**Contract surface now complete**: all 7 commands implemented. No
+`not_implemented` handlers remain. Layer 5 (INTERFACE.md docs) will finalize
+the agent-facing contract and open the PR. No push / PR until Layer 5.
+
+---
+
+## [2026-04-20] pfMALL Agent Control Dispatcher — Layer 3 (Worker AW3/AG3)
+
+**Who**: 0102 - Worker AW3/AG3
+**Slice**: `PMCTRL1-L3 — PFMALL_CONTROL_PLAY_EXPAND_COLLAPSE_PHASE3`
+**What**: Direct tile control commands wired to existing mallTileField /
+mallVideoPlayer APIs: `play_tile`, `expand_tile`, `collapse_tile`. No new
+runtime APIs introduced; dispatcher composes existing public methods only.
+
+**Rationale**: Layers 1-2 gave agents read access (`inspect_state`) and layout
+control (`set_layout`). Layer 3 lets agents drive individual tiles — play a
+FoundUp's queue, expand/collapse its lane — without touching the DOM or
+catalog. Per the PMCTRL1-L3 directive: "call existing tile/player API only" and
+"do not fabricate playback success".
+
+**Files Modified**:
+- `public/member/js/pfmall-control-dispatcher.js` - added `cmdPlayTile`,
+  `cmdExpandTile`, `cmdCollapseTile`, and the shared `findFoundUpByIdViaCatalog`
+  helper. Handlers registered (Layer 4 commands still `not_implemented`).
+- `public/member/tests/pfmall_control_dispatcher_vm.mjs` - 19 new checks
+  (tests 22-40), total harness now 40 checks.
+
+**API Mapping** (composition only — no new methods added to runtime):
+- `play_tile` → `window.mallVideoPlayer.open(foundup_id, queue, startIndex)`
+- `expand_tile` → `window.mallTileField.expandFoundUp(index)`
+- `collapse_tile` → `window.mallTileField.collapseFoundUp()`
+- foundup_id → index resolved via `window.mallTileField.getCatalog()`
+
+**Truth-signal discipline**:
+- `play_tile`: after calling `open()`, the dispatcher confirms playback state
+  via `isOpen()` and `getFoundUpId()`. Result wording is `applied: true`, not
+  `"playing"` — the underlying API confirms acceptance, not actual playback.
+- `expand_tile`: after calling `expandFoundUp(index)`, the dispatcher confirms
+  via `getExpandedIndex()`. If the state did not change (e.g. FoundUp has no
+  videos → runtime early-returns), returns `expand_failed`.
+- `collapse_tile`: the underlying API is global (no per-id scoping). The
+  dispatcher reports `foundup_id_matched_prior` so callers can tell whether
+  the id they passed was actually what had been expanded.
+
+**Error codes**:
+- `invalid_payload` - missing / non-string / empty `foundup_id`
+- `api_unavailable` - required runtime method missing
+- `tile_not_found` - `foundup_id` not in catalog
+- `video_id_not_found` - explicit `video_id` not in the FoundUp's queue
+- `no_videos` - FoundUp has empty queue
+- `runtime_failure` - API called but post-state does not confirm success
+- `expand_failed` - `getExpandedIndex()` did not match after `expandFoundUp`
+- `collapse_failed` - `getExpandedIndex()` not cleared after `collapseFoundUp`
+
+**Events**:
+- `video_loaded` on `play_tile` success (payload: `foundup_id`, `video_id`,
+  `start_index`, `queue_length`, `current_index`)
+- `video_failed` on `play_tile` failure with a reason string (`tile_not_found`,
+  `no_videos`, `video_id_not_found`, `open_not_confirmed`)
+- `state_changed` with `change: 'expanded'` or `change: 'collapsed'`
+- No event fires on `invalid_payload` — that's a caller mistake, not a
+  playback or state transition.
+
+**Tests (VM harness, 19 new — 22-40; total 40)**:
+- play_tile success with mocked mallVideoPlayer.open
+- play_tile with specific video_id resolves to correct queue index
+- play_tile missing API → `api_unavailable`
+- play_tile unknown foundup → `tile_not_found` + `video_failed`
+- play_tile unknown video_id → `video_id_not_found` + `video_failed`
+- play_tile empty queue → `no_videos` + `video_failed`
+- play_tile open() no-op → `runtime_failure` + `video_failed`
+- play_tile missing foundup_id → `invalid_payload` (no event)
+- expand_tile success → `state_changed` with `change: 'expanded'`
+- expand_tile unknown foundup → `tile_not_found`
+- expand_tile missing API → `api_unavailable`
+- expand_tile silent API refusal → `expand_failed`
+- collapse_tile success (with expanded precondition) → `state_changed`
+- collapse_tile with nothing expanded → ok, `foundup_id_matched_prior: false`
+- collapse_tile missing API → `api_unavailable`
+- collapse_tile no-op → `collapse_failed`
+- invalid payload variants for play/expand/collapse → `invalid_payload`
+- Layer 1/2 regression sweep (inspect_state, set_layout accept, set_layout deny)
+- postMessage routing for play_tile with `request_id` echo
+
+**Run**: `node public/member/tests/pfmall_control_dispatcher_vm.mjs`
+
+**Out of scope (deferred to Layers 4-5)**: `load_videos` (session video
+installation), `reset_session` (session clear), INTERFACE.md documentation,
+floating search UI, native app bridge wiring, RedDog autonomous repair, WSP
+106 HTTP gateway wiring, catalog mutation. Branch stays local until Layer 5;
+no push / PR yet.
+
+---
+
+## [2026-04-20] pfMALL Agent Control Dispatcher — Layers 1-2 (Worker AW3)
+
+**Who**: 0102 - Worker AW3
+**Slice**: `PMCTRL1_PFMALL_AGENT_CONTROL_CONTRACT_PHASE1` (Layer 1 + Layer 2)
+**What**: Browser-side command dispatcher for structured agent control of the
+p.fMALL video wall. Agents (0102, RedDog, native phone agent) drive the wall
+through this contract instead of ad hoc DOM/UI driving.
+
+**Rationale**: Prior control surface assumed in-page callers with DOM access.
+Native app and cross-origin agents need a structured command envelope that
+enforces device policy (phones cannot force desktop presets) and separates
+session state from permanent catalog state. WSP 97 truth-signalling: policy
+denials are distinct from malformed/runtime errors.
+
+**Files Added**:
+- `public/member/js/pfmall-control-dispatcher.js` - dispatcher + event framework.
+- `public/member/tests/pfmall_control_dispatcher_vm.mjs` - Node VM harness (21 checks).
+
+**Protocol**:
+- Request: `{ type: 'pfmall_command', source, target, command, request_id, payload }`
+- Response: `{ type: 'pfmall_response', source, target, request_id, status, result|error }`
+- Event: `{ type: 'pfmall_event', source, event, payload, timestamp }`
+- Status values: `ok` (applied), `denied` (policy rejected), `error` (malformed or runtime)
+
+**Layer 1 - `inspect_state` + event framework**:
+- Reads only what underlying APIs expose: `window.mallTileField`,
+  `window.mallPlanes`, `window.mallVideoPlayer`.
+- Missing API reports `null` (truth-signal; no fabrication). Individual missing
+  methods on a present API also report `null`. Thrown readers swallow to `null`
+  for that field only; siblings unaffected.
+- Session override flag (dispatcher-local) keeps session-vs-catalog separation
+  visible even before Layer 4 `load_videos` wires the session path.
+- Reserved events: `layout_denied`, `layout_applied`, `video_loaded`,
+  `video_failed`, `state_changed`, `session_reset`.
+- postMessage routing with origin allowlist; disallowed origins produce no
+  response.
+
+**Layer 2 - `set_layout` + device policy denial**:
+- Delegates to `mallTileField.requestDensity(preset, { source })`, which
+  enforces the existing `DENSITY_TIERS` policy (`phone`/`tablet`/`desktop`).
+- On `applied: true`: returns `status: 'ok'`, emits `layout_applied` and
+  `state_changed` events.
+- On `applied: false`: returns `status: 'denied'` (not `'error'`), emits
+  `layout_denied` with `preset`, `source`, `reason`, `device_class`, `allowed`.
+- Invalid payload: `status: 'error', code: 'invalid_payload'` — no event.
+- Missing API: `status: 'error', code: 'api_unavailable'` — no event.
+- Malformed outcome from underlying API: `status: 'error', code: 'runtime_failure'`.
+- `layout_denied` event fires only on policy denial, never on invalid payload
+  or missing API (truth-signal: "policy said no" ≠ "your command was garbage").
+
+**Layers 3-5 (not in this slice)**: `play_tile`, `expand_tile`, `collapse_tile`,
+`load_videos`, `reset_session`. These are registered handlers returning
+`not_implemented` errors — the contract surface is stable so agents and tests
+can exercise rejection shape before full implementation lands.
+
+**Tests (VM harness, 21 checks)**:
+- Contract surface: all 7 commands registered; known events surfaced.
+- `inspect_state` truthful reads and null-on-missing-API.
+- Unknown command / invalid command shape rejection.
+- postMessage routing with `request_id` echo and origin allowlist.
+- `set_layout` denies phone + `6x3` with `layout_denied` event.
+- `set_layout` applies desktop + `6x3` with `layout_applied` + `state_changed`.
+- `set_layout` invalid payload variants all reject with `invalid_payload`.
+- `set_layout` missing `mallTileField` or missing `requestDensity` rejects with
+  `api_unavailable`.
+- `set_layout` malformed `requestDensity` outcome rejects with `runtime_failure`.
+- postMessage `set_layout` denial routes `status: 'denied'` with correct
+  `request_id`.
+- Layer 1 contracts unaffected after Layer 2 lands.
+
+**Run**: `node public/member/tests/pfmall_control_dispatcher_vm.mjs`
+
+**Out of scope (deferred to later PMCTRL1 layers)**: session video load,
+play/expand/collapse commands, reset session, floating search UI, native phone
+agent bridge wiring, RedDog autonomous repair, WSP 106 HTTP gateway wiring.
+
+---
+
 ## [2026-04-17] pfMALL YouTube Pipeline Status Summary (Worker CW)
 
 **Who**: 0102 - Worker CW

@@ -331,4 +331,141 @@ interface InviteDoc {
 
 ---
 
-*Last Updated: 2026-04-05*
+## pfMALL Agent Control Contract
+
+**Source**: `js/pfmall-control-dispatcher.js`
+**Scope**: Browser-side postMessage bridge for structured agent control of the pfMALL video wall. Phase 1 (PMCTRL1).
+
+This contract defines the **only** sanctioned way for an external agent (0102, Hermes, future native phone agent, future RedDog AI) to drive the `/member/` runtime. The dispatcher is an **API contract**, not a UI driver: every command routes to an existing runtime API on `window.mallTileField` / `window.mallVideoPlayer`. When the underlying API is missing, the dispatcher returns `api_unavailable`; it never fabricates success, and it never uses direct DOM selectors as a fallback.
+
+### Message Envelopes
+
+All three envelope types carry `source` (identity of sender/dispatcher, e.g. `"0102"`, `"pfmall-dispatcher"`), `target` (routing hint), and `type` (discriminator). The dispatcher listens only for `pfmall_command` frames from an origin allowlist and only replies / emits within the same frame.
+
+**`pfmall_command`** (agent → dispatcher):
+```jsonc
+{
+  "type": "pfmall_command",
+  "source": "0102",
+  "target": "pfmall",
+  "command": "set_layout",        // one of the seven commands below
+  "request_id": "req-42",         // correlation id; echoed on response
+  "payload": { /* command-specific */ }
+}
+```
+
+**`pfmall_response`** (dispatcher → agent, always in reply to a command):
+```jsonc
+{
+  "type": "pfmall_response",
+  "source": "pfmall-dispatcher",
+  "target": "0102",
+  "request_id": "req-42",         // echoes request_id
+  "status": "ok" | "denied" | "error",
+  "result": { /* present on ok */ },
+  "error":  { "code": "...", "message": "..." } // present on denied|error
+}
+```
+
+**`pfmall_event`** (dispatcher → subscribers, unsolicited truth signal):
+```jsonc
+{
+  "type": "pfmall_event",
+  "source": "pfmall-dispatcher",
+  "event": "layout_applied",       // one of the six event names below
+  "payload": { /* event-specific */ },
+  "timestamp": 1713600000000
+}
+```
+
+### Response Statuses (WSP 97 truth taxonomy)
+
+| Status | Meaning |
+|--------|---------|
+| `ok` | Command was routed, underlying API was invoked, and the outcome is reported truthfully in `result`. A `result.applied` flag may be `false` even on `ok` (e.g. reset_session when no session was active — truthful no-op). |
+| `denied` | Command was **structurally valid** but **refused by policy** (e.g. device tier does not permit the requested layout). `error.code` carries the policy reason (e.g. `unsupported_density_for_device`). Never used for malformed input or missing APIs. |
+| `error` | Command was malformed, unknown, missing required fields, the runtime API is absent (`api_unavailable`), the API threw, or a session-mode gate was violated (`session_mode_required`). |
+
+The three statuses are disjoint; in particular a **policy denial is `denied`, not `error`**, and a **missing runtime API is `api_unavailable` (error), not fabricated success**.
+
+### Commands (7)
+
+| Command | Purpose | Routed To |
+|---------|---------|-----------|
+| `inspect_state` | Read-only snapshot of density, device tier, expanded index, playing index, session override flags | `mallTileField` getters |
+| `set_layout` | Request density preset; subject to device policy (`DENSITY_TIERS`) | `mallTileField.requestDensity(preset, {source})` |
+| `play_tile` | Start lane autoplay for a FoundUp via its canonical id | `mallVideoPlayer.open(foundupId, queue, startIndex)` |
+| `expand_tile` | Expand a FoundUp tile to its video field | `mallTileField.expandFoundUp(index)` |
+| `collapse_tile` | Collapse back to Mall | `mallTileField.collapseFoundUp()` |
+| `load_videos` | Load an agent-provided video list into a **session override** (gated — see below) | `mallTileField.loadSessionVideos(videos, {source})` |
+| `reset_session` | Clear any active session override | `mallTileField.resetSession({source})` |
+
+No other commands exist in Phase 1. Phase 1 does not include: floating search, RedDog AI pipe, native-phone agent hooks, backend calls, canonical catalog mutation, or direct DOM selector fallbacks.
+
+### Events (6)
+
+Events are a truth channel independent from the response channel. They fire **only** when the corresponding real state change is observed or the corresponding real refusal occurred.
+
+| Event | Fires When | Payload |
+|-------|-----------|---------|
+| `layout_applied` | `mallTileField.requestDensity` returned `applied:true` | `{ preset, deviceClass, source }` |
+| `layout_denied` | `mallTileField.requestDensity` returned `applied:false` with a policy reason | `{ preset, reason, deviceClass, source }` |
+| `video_loaded` | `load_videos` succeeded **and** API confirmed `session_mode:true` | `{ video_count, source }` |
+| `video_failed` | `load_videos` failed, including when the API refused to enter session mode | `{ reason, source }` |
+| `state_changed` | Dispatcher-local session override flipped (active ↔ inactive) | `{ change, video_count?, source }` |
+| `session_reset` | Active session override was cleared (either by reset_session clearing a real active session, or by API acknowledgement) | `{ source, api_acknowledged }` |
+
+A truthful no-op (e.g. `reset_session` when no override was active) emits **no** event.
+
+### Device Policy (`set_layout`)
+
+Density is gated by device class before the command reaches any visual change:
+
+| Device Class | Allowed Presets |
+|--------------|-----------------|
+| `phone` | `3x4`, `3x5` |
+| `tablet` | `3x4`, `3x5`, `4x6` |
+| `desktop` | `3x4`, `3x5`, `4x6`, `5x8` |
+
+If the preset is not in the tier's allow-list, the dispatcher returns `status:"denied"` with `error.code:"unsupported_density_for_device"` and emits `layout_denied`. This is a **policy denial**, not an error — the request was well-formed and simply not permitted for this device.
+
+### Session Override Truth Rules
+
+The dispatcher tracks a local `sessionState` ( `overrideActive`, `overrideAppliedAt`, `overrideVideoCount` ) distinct from the canonical mall catalog. Rules:
+
+1. **No silent canonical mutation.** `load_videos` never mutates `mall-video-catalog.json` or the live tile catalog. It exclusively asks the runtime to enter a session-scoped override.
+2. **API-confirmed session mode is required.** `load_videos` marks the override active **only** when `mallTileField.loadSessionVideos(...)` returns `{ applied: true, session_mode: true }`. If the API returns `applied:true` but `session_mode` is not explicitly `true`, the dispatcher returns `error` with `code:"session_mode_required"` and emits `video_failed` (reason `session_mode_required`). This is the hard gate against silent catalog mutation.
+3. **`reset_session` clears the override** and emits `session_reset`; if no override was active, it returns `status:"ok"` with `result.changed:false` and emits nothing (truthful no-op).
+4. **`reset_session` is idempotent** and works even when the runtime lacks `mallTileField.resetSession` — dispatcher state is dispatcher-owned; `result.api_called` / `result.api_acknowledged` expose whether the runtime also acknowledged.
+5. **Missing session API ⇒ `api_unavailable`.** When `mallTileField.loadSessionVideos` is not present, `load_videos` returns `error` with `code:"api_unavailable"`; it does **not** fall back to DOM manipulation, catalog rewrite, or any speculative path.
+
+### 0102 / Agent Boundary (Phase 1)
+
+- The dispatcher is the **only** sanctioned agent→mall entry point. No other cross-origin pathway is authorized.
+- **Not yet wired in Phase 1** (explicit non-scope):
+  - No native-phone agent hook (no Android/iOS bridge, no WebView IPC).
+  - No RedDog AI integration (the legacy `red-dog-concierge.js` FAQ IIFE is unaffected).
+  - No floating search bar, no agent-driven search UI.
+  - No backend calls. No writes to `mall-video-catalog.json`. No tenant execution.
+- The dispatcher is an **API contract**, not a UI driver. It does not click buttons, toggle classes, or read DOM state. Every effect is routed through `window.mallTileField` / `window.mallVideoPlayer` APIs.
+
+### WSP 97 Truth Constraints (summary)
+
+| Rule | Enforcement |
+|------|-------------|
+| No playability claim without API confirmation | `play_tile` reports `applied`, not `playing`; only the `videoPlayerOpen` event (emitted by `mallVideoPlayer`) is proof playback began. |
+| Policy denial is `status:"denied"`, not `"error"` | `set_layout` against a tier-disallowed preset returns `denied` with `error.code:"unsupported_density_for_device"`. |
+| Missing API is `api_unavailable`, not fabricated success | All seven commands return `error`/`api_unavailable` when their target API is absent; none synthesize DOM-based fallbacks. |
+| No silent canonical catalog mutation | `load_videos` requires API-confirmed `session_mode:true`; otherwise `error`/`session_mode_required`. |
+| Reserved events fire only on real state changes | Truthful no-ops (e.g. reset with no active session) emit no event. |
+
+### Related Protocols
+
+- WSP 11 (Interface Protocol) — this section is the agent-control interface of record.
+- WSP 91 (Observability) — `pfmall_event` frames are the observable truth signal.
+- WSP 97 (Canonical Execution Loop) — status/event truth taxonomy.
+- WSP 22 (ModLog) — changes to this contract are logged in `public/member/ModLog.md`.
+
+---
+
+*Last Updated: 2026-04-20*
