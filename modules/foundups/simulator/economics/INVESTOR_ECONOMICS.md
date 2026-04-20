@@ -2,11 +2,17 @@
 
 **Version**: 1.0.0
 **Date**: 2026-02-10
-**Status**: Investment Model Complete
+**Status**: FROZEN/EXPLORATORY - NOT CANONICAL
 
-## Executive Summary
+> **WARNING**: This document describes an exploratory I_i bonding curve model
+> that is NOT the canonical staker architecture. Do NOT implement.
+>
+> **Canonical staker model**: `pool_distribution.py` (Du pool stakers)
+> **Decision**: 012 directive 2026-04-20 (AW4 DUPOOL-TRUTH1)
 
-FoundUps offers early investors a unique value proposition:
+## Executive Summary (EXPLORATORY - NOT FOR IMPLEMENTATION)
+
+This exploratory model described an early capital provider mechanism:
 - **Guaranteed Floor**: 10x buyout option at Year 3
 - **Unlimited Ceiling**: 100x-1000x+ if network succeeds
 - **Pool Participation**: 12.16% pre-hurdle, 0.64% after repayment target is met

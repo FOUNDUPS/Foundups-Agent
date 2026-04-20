@@ -41,14 +41,15 @@ Like: Uniswap LP, ETH staking, Curve gauges
 | No promised returns | Market-determined value |
 | Transparent rules | Anyone can verify |
 
-## Two Distinct Concepts
+## Canonical Staker Model
 
 | Concept | Terminology | Model |
 |---------|-------------|-------|
 | Du Pool Stakers | CABR/PoB (distribution ratio) | Protocol participation |
-| I_i Holders | Traditional (returns, multiples) | Bonding curve capital |
 
-**Note**: I_i holders use Bitclout-style bonding curve - separate legal review may be needed.
+**Canonical source**: `modules/foundups/simulator/economics/pool_distribution.py`
+
+**FROZEN/EXPLORATORY**: `investor_staking.py` contains an exploratory I_i bonding curve model that is NOT the canonical staker architecture. Do not implement.
 
 ## Governance Model
 

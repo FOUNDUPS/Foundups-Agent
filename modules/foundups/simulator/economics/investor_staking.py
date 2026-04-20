@@ -1,5 +1,11 @@
 """Investor Staking Module - Bitclout-inspired bonding curve economics.
 
+STATUS: FROZEN/EXPLORATORY - NOT THE CANONICAL STAKER MODEL
+========================================================
+This module is exploratory research code. Do NOT implement.
+Canonical staker model: pool_distribution.py (Du pool stakers)
+Decision: 012 directive 2026-04-20 (AW4 DUPOOL-TRUTH1)
+
 Implements WSP 26 Section 6.9: Early Capital Provider Model.
 
 IMPORTANT DISTINCTION (CABR/PoB Paradigm):
