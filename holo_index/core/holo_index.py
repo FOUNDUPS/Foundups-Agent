@@ -44,8 +44,8 @@ except ImportError as exc:
 SentenceTransformer = None
 
 # Timeout configuration for blocking operations (WSP 97 pre-flight compliance)
-HOLO_MODEL_IMPORT_TIMEOUT = float(os.getenv("HOLO_MODEL_IMPORT_TIMEOUT", "5"))  # 5s default
-HOLO_MODEL_LOAD_TIMEOUT = float(os.getenv("HOLO_MODEL_LOAD_TIMEOUT", "10"))     # 10s default
+HOLO_MODEL_IMPORT_TIMEOUT = float(os.getenv("HOLO_MODEL_IMPORT_TIMEOUT", "20"))  # 20s default (FX2-C: 5s too short for cold imports)
+HOLO_MODEL_LOAD_TIMEOUT = float(os.getenv("HOLO_MODEL_LOAD_TIMEOUT", "30"))     # 30s default (FX2-C: 10s too short for cold model load)
 HOLO_ENCODE_TIMEOUT = float(os.getenv("HOLO_ENCODE_TIMEOUT", "3"))              # 3s default
 HOLO_SEARCH_TIMEOUT = float(os.getenv("HOLO_SEARCH_TIMEOUT", "15"))             # 15s default
 

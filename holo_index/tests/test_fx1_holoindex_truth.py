@@ -159,5 +159,53 @@ class TestFX1C_ZenStatePermissionFallback:
             tracker.state_file = original_state_file
 
 
+class TestFX2C_TimeoutDefaults:
+    """FX2-C: Verify timeout defaults are usable for semantic retrieval."""
+
+    def test_default_import_timeout_is_sufficient(self):
+        """Default HOLO_MODEL_IMPORT_TIMEOUT should be >= 15s for cold imports."""
+        original = os.environ.pop('HOLO_MODEL_IMPORT_TIMEOUT', None)
+        try:
+            for mod in list(sys.modules.keys()):
+                if mod.startswith('holo_index.core'):
+                    del sys.modules[mod]
+            from holo_index.core.holo_index import HOLO_MODEL_IMPORT_TIMEOUT
+            assert HOLO_MODEL_IMPORT_TIMEOUT >= 15, \
+                f"Default import timeout {HOLO_MODEL_IMPORT_TIMEOUT}s is too short (need >= 15s)"
+        finally:
+            if original is not None:
+                os.environ['HOLO_MODEL_IMPORT_TIMEOUT'] = original
+
+    def test_env_override_controls_import_timeout(self):
+        """HOLO_MODEL_IMPORT_TIMEOUT env var should override default."""
+        os.environ['HOLO_MODEL_IMPORT_TIMEOUT'] = '42'
+        try:
+            for mod in list(sys.modules.keys()):
+                if mod.startswith('holo_index.core'):
+                    del sys.modules[mod]
+            from holo_index.core.holo_index import HOLO_MODEL_IMPORT_TIMEOUT
+            assert HOLO_MODEL_IMPORT_TIMEOUT == 42.0, \
+                f"Env override not applied: got {HOLO_MODEL_IMPORT_TIMEOUT}"
+        finally:
+            os.environ.pop('HOLO_MODEL_IMPORT_TIMEOUT', None)
+
+    def test_skip_model_still_produces_lexical(self):
+        """HOLO_SKIP_MODEL=1 should still produce retrieval_mode=lexical."""
+        os.environ['HOLO_SKIP_MODEL'] = '1'
+        os.environ['HOLO_SILENT'] = '1'
+        try:
+            if 'holo_index.core.holo_index' in sys.modules:
+                del sys.modules['holo_index.core.holo_index']
+            from holo_index.core.holo_index import HoloIndex
+            HoloIndex._initialized = False
+            HoloIndex._shared_state = {}
+            holo = HoloIndex(quiet=True)
+            assert holo.retrieval_mode == "lexical", \
+                f"Expected 'lexical' with HOLO_SKIP_MODEL=1, got '{holo.retrieval_mode}'"
+        finally:
+            os.environ.pop('HOLO_SKIP_MODEL', None)
+            os.environ.pop('HOLO_SILENT', None)
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
