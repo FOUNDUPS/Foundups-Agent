@@ -369,11 +369,22 @@ Both modes produce a single typed artifact — the `FoundUpGenesisEnvelope` — 
 | `outcome_statement` | string | documented | What should exist when done. One sentence. |
 | `target_users` | list<string> | documented | Who it serves. |
 | `non_goals` | list<string> | documented | What must NOT happen / what this is not. |
-| `acceptance_criteria` | list<string> | documented → verified | How we know it's done. Each criterion must be testable. |
+| `acceptance_criteria` | list<AcceptanceCriterion> | documented → verified | How we know it's done. See structured shape below. |
 | `proof_of_benefit_definition` | object | documented | WSP 29 CABR mapping: V1 validation gate, V2 verification proof, V3 valuation score. |
 | `success_signal` | string | documented | Observable signal that indicates success at runtime (not just at build time). |
 | `authored_by` | string | documented | 012 identity (for audit). |
 | `authored_at` | ISO8601 | documented | Timestamp. |
+
+**`AcceptanceCriterion` structured shape** (free-text acceptance criteria are rejected; every criterion must be oracle-testable):
+
+| Field | Type | Purpose |
+|---|---|---|
+| `observable` | string | What is directly observed at runtime (artifact, log line, API response, metric). Not an intent. |
+| `method` | string | How it is observed (test case path, API call, log query, CABR event query, manual check with explicit steps). |
+| `oracle` | string | What decides pass/fail (assertion, regex, numeric threshold, schema match, human judge role). |
+| `pass_condition` | string | The exact predicate that must hold. Must be machine-evaluable where possible. |
+
+Free-text acceptance criteria are a WSP 97 violation at schema-validation time (FAM-IDEATION2 rejects them).
 
 #### 8.1.5 Object: `BackpropagationPlan` (Turing mode, 0102-authored)
 
@@ -395,9 +406,10 @@ The `FoundUpGenesisEnvelope` is the single object passed to `LaunchOrchestrator`
 FoundUpGenesisEnvelope:
   # identity
   envelope_id: <ulid>                          # state: executable
+  envelope_schema_version: 1                   # state: documented — adapter negotiation key, independent of WSP version
   foundup_handle: <slug>                       # state: documented
   created_at: <ISO8601>                        # state: executable
-  wsp_version: 27.4                            # state: documented
+  wsp_version: 27.4                            # state: documented — WSP source authority version, not schema version
 
   # content
   outcome_contract: <OutcomeContract>          # state: documented
@@ -449,6 +461,39 @@ A field may advance independently of the envelope-level status. The per-field `w
 
 **WSP 97 violation**: claiming `executable` or `verified` at the envelope level when a constituent field is still `documented` or `scaffold`. Dispatch via `on_preflight_fail` (component=`foundup_genesis`, severity=`high`, requires_012=True).
 
+#### 8.1.7.1 OutcomeContract Decoherence Rule
+
+If `outcome_hash` changes after the `BackpropagationPlan` is generated (i.e. 012 edits the outcome post-plan), the envelope transitions to a terminal pre-execution state:
+
+```
+envelope.WSP_97_truth_status → blocked_outcome_drift
+```
+
+Rules while in `blocked_outcome_drift`:
+
+- No task node may transition from `scaffold` to `executable`.
+- Any in-flight task handles must be cancelled via `adapter.cancel(task_handle)`.
+- `BackpropagationPlan` MUST be regenerated (new `plan_hash`, refreshed `derived_from_outcome_hash`) before the envelope can exit this state.
+- AI Overseer dispatches: `component=foundup_genesis`, `severity=high`, `payload.error_code=outcome_contract_decoherence`, `payload.requires_012=True`, `payload.likely_cause=outcome_edited_after_plan_generation`.
+- Exit condition: regenerated plan whose `derived_from_outcome_hash == current outcome_hash`, validated by AI Overseer → envelope returns to `documented` (if plan is new scaffold) or `scaffold` (if artifacts still stand).
+
+`blocked_outcome_drift` is itself a WSP 97 truth state: it is the only legal way to say "the contract is ambiguous right now." Skipping this state and continuing execution is a WSP 97 violation.
+
+#### 8.1.7.2 WSP 80 Boundary
+
+**Section 8.1 does NOT replace WSP 80 (Cube Orchestration).**
+
+| Concern | WSP 27 §8.1 (this section) | WSP 80 |
+|---|---|---|
+| Entry point | 012 outcome → envelope | Cube assembly from modules |
+| Output | `FoundUpGenesisEnvelope` | Operational Rubik's cube |
+| Scope | Ideation contract | Module orchestration |
+| Timing | Pre-FAM-registration | Post-envelope, during execution |
+
+The `FoundUpGenesisEnvelope` feeds WSP 80 — specifically, `repo_module_target` and `task_graph` become inputs to WSP 80 cube assembly. WSP 80 remains the authority for cube shape, module snapping, and color progression (WSP 15). Genesis Envelope does not define cubes; it commissions them.
+
+If a future slice proposes that Genesis Envelope should subsume WSP 80, it must either supersede WSP 80 explicitly (per WSP_MASTER_INDEX status taxonomy) or be rejected. Parallel orchestration models are a WSP 97 decoherence risk.
+
 #### 8.1.8 Execution Provider Adapter Contract
 
 `execution_provider` maps to an adapter. Each adapter is a thin contract, not a runtime re-implementation.
@@ -481,13 +526,16 @@ Adapters do not invent proofs. They emit proof artifacts referenced by FAM's pro
 
 #### 8.1.10 Minimum Future Slices (downstream, not part of this spec)
 
+Order is truth-first: the AI Overseer drift sentinel (IDEATION3) lands before the orchestrator accept path (IDEATION4) so the first envelope cannot enter the system with an undetected-lie state.
+
 | Slice | Mode | Scope |
 |---|---|---|
-| `FAM-IDEATION2` | implementation | Typed `FoundUpGenesisEnvelope` dataclass + schema validator. |
-| `FAM-IDEATION3` | implementation | `LaunchOrchestrator.accept_envelope(envelope)` → FAM record + initial task graph. |
-| `FAM-IDEATION4` | implementation | Execution provider adapter interface + `internal_wre` reference adapter. |
-| `FAM-IDEATION5` | implementation | AI Overseer hook: WSP 97 field-status-map drift detection → dispatch. |
+| `FAM-IDEATION2` | implementation | Typed `FoundUpGenesisEnvelope` dataclass + schema validator, including DAG validation (cycle detection, missing preconditions, orphan postconditions) and structured `AcceptanceCriterion` enforcement. |
+| `FAM-IDEATION3` | implementation | AI Overseer WSP 97 field-status drift sentinel: detects `wsp_97_field_status_map` inconsistencies vs repo truth, dispatches `component=foundup_genesis`. Includes `outcome_contract_decoherence` detection per §8.1.7.1. **Lands before IDEATION4.** |
+| `FAM-IDEATION4` | implementation | `LaunchOrchestrator.accept_envelope(envelope)` → FAM record + initial task graph. Rejects envelopes the IDEATION3 sentinel flags. |
+| `FAM-IDEATION5` | implementation | Execution provider adapter interface + `internal_wre` reference adapter. |
 | `FAM-IDEATION6` | implementation | Promotion gate evaluator (PoC → Proto → MVP) wired to CABR V1/V2/V3. |
+| `FAM-IDEATION7` | documentation | Worked example envelope using one existing FoundUp (GotJunk, Kosei, or AntifaFM) populated end-to-end. |
 
 Each is a bounded, review-at-a-time slice. None may be stacked before the prior lands.
 
@@ -918,6 +966,7 @@ FoundUp reaches Tier 1 (Sovereign smartDAO)
 | 2.5 | 2026-02-07 | Occam's Layer correction: Simplified Section 12 to placeholder (post-MVP). Agent ranking details deferred. OpenClaw Launch Paradigm retained as core MVP. |
 | 3.0 | 2026-02-07 | Major update: Added OBAI = Open Beneficial AI = 0102 (Section 1.4). Added existing modules as first FoundUps (Section 1.5). Added circular lifecycle from O!F (Section 11.0) — IDEA→PoC→TEAM→Soft-Proto→Proto→MVP→smartDAO→spawns new IDEAS. Added crowdfunding phases. smartDAO = Open Corp at Tier 1. Updated tier table with 21M token counts. Added Section 14: Recursive FoundUp Spawning (FoundUps beget FoundUps). Renumbered future development to Section 15. |
 | 3.1 | 2026-04-20 | Added Section 8.1: FoundUp Ideation / Genesis Contract. Defines `OutcomeContract` (Church mode, 012-authored), `BackpropagationPlan` (Turing mode, 0102-authored), `FoundUpGenesisEnvelope` (handoff object). Adds WSP 97 truth gates `documented → scaffold → executable → verified` with per-field status map. Defines execution provider adapter contract (`internal_wre` / `openclaw_cloud` / `hermes_cloud` / `ironclaw_sidecar` / `external_adapter`). Explicit non-goals: no token mechanics, no cloud integration, no code execution. Slice of record: FAM-IDEATION1. |
+| 3.1.1 | 2026-04-20 | FAM-IDEATION1-R corrections: added `envelope_schema_version` separate from `wsp_version` (adapter negotiation key). Replaced free-text `acceptance_criteria` with structured `AcceptanceCriterion {observable, method, oracle, pass_condition}`. Added §8.1.7.1 OutcomeContract Decoherence Rule (`blocked_outcome_drift` terminal pre-execution state). Added §8.1.7.2 WSP 80 Boundary (Genesis Envelope feeds WSP 80 cube orchestration, does not replace it). Reordered downstream slices: AI Overseer drift sentinel (IDEATION3) lands before orchestrator accept path (IDEATION4). Added IDEATION7 worked-example slice. Synchronized WSP_knowledge/src copy. |
 
 ---
 
