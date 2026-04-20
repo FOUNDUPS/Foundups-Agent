@@ -1,7 +1,7 @@
 # Active Slice Ledger
 
 **Authority**: 0102 architect lane
-**Updated**: 2026-04-20 (ledger_reconciliation_2026_04_20)
+**Updated**: 2026-04-20 (ledger_reconciliation_2026_04_20_fam_ideation_sync)
 **Rule**: Every agent reads this first. If repo truth contradicts an entry, update this ledger — not 012.
 
 ---
@@ -110,6 +110,8 @@ If already landed:
 | `gotjunk_cloud_run_autonomous_deploy` | `8851af3ed` (PR #392) | Autonomous Cloud Run deploy workflow |
 | `dj2_a_wre_dashboard_insufficient_data_warn` | `904c3bb2f` (PR #393) | WRE dashboard INSUFFICIENT_DATA now dispatches as WARN (DJ2-A closed) |
 | `pqn_wsp97_prototype_downgrade` | `343848ad5` (PR #394) | Doc-only PQN skills downgraded to prototype per WSP 97 |
+| `ledger_reconciliation_phase1` | `7bc4499ee` (PR #395) | `ACTIVE_SLICE_LEDGER.md` reconciled from 2026-03-31 to 2026-04-20 repo truth; 13 closed entries added; FX1/BH1/DJ2-C–F/PMCTRL1 queued; SoftProto archived |
+| `fam_ideation1_foundup_outcome_backpropagation_contract_phase1` | `dcc9ddfdd` (PR #403) | WSP 27 §8.1 FoundUp Ideation / Genesis Contract. Defines `OutcomeContract` + structured `AcceptanceCriterion` + `BackpropagationPlan` + `FoundUpGenesisEnvelope`. WSP 97 truth gates (documented→scaffold→executable→verified). `blocked_outcome_drift` decoherence state. WSP 80 boundary. Both WSP 27 copies (framework + knowledge) synchronized. Status: documented-state spec only. |
 
 ---
 
@@ -125,6 +127,8 @@ If already landed:
 | `dj2_e_git_merge_sentinel_import_failure_event` | LOW | DJ2-C | Dispatch on ImportError branch. severity=low. Preserve return behaviour. Touches `main.py`. |
 | `dj2_f_openclaw_security_fail_dispatch` | HIGH | DJ2-C | Mirror DEP-SECURITY wiring at passed=False. severity=high default. Touches `main.py`. |
 | `pmctrl1_pfmall_agent_control_contract` | MEDIUM | — | Local unmerged branch `feat/pmctrl1-pfmall-control-contract`. Commits `e7ad889dd` (Layer 1 dispatcher) + `d6dd7c4c7` (Layer 2 set_layout with device policy denial). Files: `public/member/js/pfmall-control-dispatcher.js`, `public/member/tests/pfmall_control_dispatcher_vm.mjs`, briefing `PMCTRL1_PFMALL_AGENT_CONTROL_CONTRACT_PHASE1.md`. Not yet opened as PR. |
+| `fam_ideation2_envelope_schema_validator` | unassigned | — | Typed `FoundUpGenesisEnvelope` dataclass + schema validator. Includes DAG validation (cycle detection, missing preconditions, orphan postconditions) + structured `AcceptanceCriterion {observable, method, oracle, pass_condition}` enforcement. Specified in WSP 27 §8.1.10 slice 2. No worker assigned. |
+| `fam_ideation3_ai_overseer_truth_sentinel` | unassigned | — | AI Overseer WSP 97 field-status drift sentinel. Detects `wsp_97_field_status_map` inconsistencies vs repo truth + `outcome_contract_decoherence` per WSP 27 §8.1.7.1. Dispatches `component=foundup_genesis`. **Hard ordering constraint**: MUST land before any `LaunchOrchestrator.accept_envelope()` implementation (IDEATION4) so no envelope enters FAM with undetected-lie state. No worker assigned. |
 
 ---
 
@@ -182,6 +186,8 @@ Serialisation requirement (per FCA1-AG2 audit §9): DJ2-C…F each edit `main.py
 6. **DJ2-D** — Brain artifact missing-dir event
 7. **DJ2-E** — Git merge sentinel ImportError event
 8. **PMCTRL1** — open PR for local branch once reviewed
+9. **FAM-IDEATION2** — typed `FoundUpGenesisEnvelope` schema + validator (unassigned)
+10. **FAM-IDEATION3** — AI Overseer WSP 97 drift sentinel (unassigned; hard-gated before IDEATION4)
 
 ---
 
@@ -189,7 +195,7 @@ Serialisation requirement (per FCA1-AG2 audit §9): DJ2-C…F each edit `main.py
 
 | PR | Branch | Status | Contents |
 |----|--------|--------|----------|
-| _(none open)_ | — | — | All recent PRs (#383–#394) merged. Next open PR will be LEDGER-RECON1 followed by FX1/BH1 briefings. |
+| _(none open)_ | — | — | All recent PRs (#383–#403) merged. LEDGER-RECON2 is the next expected PR. FX1/BH1 briefings remain queued. |
 
 ---
 
