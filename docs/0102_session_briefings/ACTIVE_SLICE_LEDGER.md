@@ -1,7 +1,7 @@
 # Active Slice Ledger
 
 **Authority**: 0102 architect lane
-**Updated**: 2026-04-20 (ledger_reconciliation_2026_04_20_fam_ideation_sync)
+**Updated**: 2026-04-21 (LEDGER-RECON3 post-PR-queue-cleanup)
 **Rule**: Every agent reads this first. If repo truth contradicts an entry, update this ledger — not 012.
 
 ---
@@ -112,6 +112,13 @@ If already landed:
 | `pqn_wsp97_prototype_downgrade` | `343848ad5` (PR #394) | Doc-only PQN skills downgraded to prototype per WSP 97 |
 | `ledger_reconciliation_phase1` | `7bc4499ee` (PR #395) | `ACTIVE_SLICE_LEDGER.md` reconciled from 2026-03-31 to 2026-04-20 repo truth; 13 closed entries added; FX1/BH1/DJ2-C–F/PMCTRL1 queued; SoftProto archived |
 | `fam_ideation1_foundup_outcome_backpropagation_contract_phase1` | `dcc9ddfdd` (PR #403) | WSP 27 §8.1 FoundUp Ideation / Genesis Contract. Defines `OutcomeContract` + structured `AcceptanceCriterion` + `BackpropagationPlan` + `FoundUpGenesisEnvelope`. WSP 97 truth gates (documented→scaffold→executable→verified). `blocked_outcome_drift` decoherence state. WSP 80 boundary. Both WSP 27 copies (framework + knowledge) synchronized. Status: documented-state spec only. |
+| `fx1_holoindex_truth_restoration` | `9a89fedeb` (PR #398) | HoloIndex retrieval mode surfaced; offline fallbacks hardened; WSP 97 truth layer restored. |
+| `dj2_c_oauth_preflight_dispatch` | `d0d51e21a` (PR #399) | OAuth preflight WARN paths dispatch to AI Overseer; 2 sites wired in `main.py`. |
+| `bh2_pr_scope_guard` | `d5a392700` (PR #397) | `tools/pr_scope_guard/pr_scope_guard.py` prevents mixed-scope PRs; briefing at `BH2_BRANCH_HYGIENE_SCOPE_GUARD_PHASE1.md`. |
+| `yt_cleanup1_stream_resolver_collection_fix` | `67ffbe8da` (PR #400) | stream_resolver test collection restored (42 collect, 30/42 pass); pytz dep + import fixes; 12 failures deferred to YT-CLEANUP2. |
+| `btc_arch1_architecture_memo` | `53523c88b` (PR #402) | `FOUNDUPS_BTC_RESERVE_TOKEN_ARCHITECTURE.md` strategic memo; Hotel California reserve + I_i bonding curve + UPS backing. |
+| `pmctrl1_pfmall_agent_control_dispatcher` | `108c0a47f` (PR #405) | `pfmall-control-dispatcher.js` Layer 1+2; device policy denial; briefing `PMCTRL1_PFMALL_AGENT_CONTROL_CONTRACT_PHASE1.md`. |
+| `dupool_truth1_du_pool_ii_truth_alignment` | `ede4bd4b6` (PR #406) | Du pool staker model clarified; I_i bonding curve frozen; regulatory-safe terminology alignment. |
 
 ---
 
@@ -119,14 +126,13 @@ If already landed:
 
 | Slice | Priority | Blocked By | Notes |
 |-------|----------|------------|-------|
-| `fx1_holoindex_truth_restoration` | HIGH | — | sentence_transformers installed but HoloIndex search timed out/crashed and retrieval mode was not truthfully surfaced; observed PostHog retry noise, WSP00 permission fallback failure, and logger NameError. Meta-layer WSP 97 violation. No briefing yet. |
 | `bh1_branch_hygiene_forensics` | HIGH | — | Commit `fde9d64a4` (DJ-OBS) appears in `origin/main` with no matching PR number in `gh pr list`. Investigate provenance + enforce branch/PR matching. No briefing yet. |
-| `dj2_c_oauth_preflight_dispatch` | HIGH | — | Wire 2 WARN sites in `monitor_youtube` OAuth block. severity=high, payload={auto_reauth, error}. Preserve return behaviour. Touches `main.py`. |
-| `dj2_b_ironclaw_skip_intentionality_assertion` | MEDIUM | DJ2-C | Whitelist known-good backend strings; unrecognised backend → dispatch severity=medium, likely_cause=`unexpected_backend_string_skipped_runtime_probe`. Touches `main.py`. |
-| `dj2_d_brain_artifact_missing_dir_event` | LOW | DJ2-C | Dispatch on `preflight=PASS (missing)` with severity=low, automation_candidate=False. Touches `main.py`. |
-| `dj2_e_git_merge_sentinel_import_failure_event` | LOW | DJ2-C | Dispatch on ImportError branch. severity=low. Preserve return behaviour. Touches `main.py`. |
-| `dj2_f_openclaw_security_fail_dispatch` | HIGH | DJ2-C | Mirror DEP-SECURITY wiring at passed=False. severity=high default. Touches `main.py`. |
-| `pmctrl1_pfmall_agent_control_contract` | MEDIUM | — | Local unmerged branch `feat/pmctrl1-pfmall-control-contract`. Commits `e7ad889dd` (Layer 1 dispatcher) + `d6dd7c4c7` (Layer 2 set_layout with device policy denial). Files: `public/member/js/pfmall-control-dispatcher.js`, `public/member/tests/pfmall_control_dispatcher_vm.mjs`, briefing `PMCTRL1_PFMALL_AGENT_CONTROL_CONTRACT_PHASE1.md`. Not yet opened as PR. |
+| `dj2_b_ironclaw_skip_intentionality_assertion` | MEDIUM | — | Whitelist known-good backend strings; unrecognised backend → dispatch severity=medium, likely_cause=`unexpected_backend_string_skipped_runtime_probe`. Touches `main.py`. |
+| `dj2_d_brain_artifact_missing_dir_event` | LOW | — | Dispatch on `preflight=PASS (missing)` with severity=low, automation_candidate=False. Touches `main.py`. |
+| `dj2_e_git_merge_sentinel_import_failure_event` | LOW | — | Dispatch on ImportError branch. severity=low. Preserve return behaviour. Touches `main.py`. |
+| `dj2_f_openclaw_security_fail_dispatch` | HIGH | — | Mirror DEP-SECURITY wiring at passed=False. severity=high default. Touches `main.py`. |
+| `yt_cleanup2_stream_resolver_api_contract_rebase` | MEDIUM | — | Remaining 12 test failures in stream_resolver due to old API-contract assertions; needs rebase against current codebase. Deferred from YT-CLEANUP1. |
+| `legal_ii1_bonding_curve_review_packet` | unassigned | — | I_i / Iᵢ bonding curve legal review packet preparation. Regulatory framing, UBA terminology, Du pool staker model. Follows DUPOOL-TRUTH1 freeze. |
 | `fam_ideation2_envelope_schema_validator` | unassigned | — | Typed `FoundUpGenesisEnvelope` dataclass + schema validator. Includes DAG validation (cycle detection, missing preconditions, orphan postconditions) + structured `AcceptanceCriterion {observable, method, oracle, pass_condition}` enforcement. Specified in WSP 27 §8.1.10 slice 2. No worker assigned. |
 | `fam_ideation3_ai_overseer_truth_sentinel` | unassigned | — | AI Overseer WSP 97 field-status drift sentinel. Detects `wsp_97_field_status_map` inconsistencies vs repo truth + `outcome_contract_decoherence` per WSP 27 §8.1.7.1. Dispatches `component=foundup_genesis`. **Hard ordering constraint**: MUST land before any `LaunchOrchestrator.accept_envelope()` implementation (IDEATION4) so no envelope enters FAM with undetected-lie state. No worker assigned. |
 
@@ -176,18 +182,17 @@ If prompted to re-do them, report the commit and redirect to the next open slice
 
 ## Next Priority Order
 
-Serialisation requirement (per FCA1-AG2 audit §9): DJ2-C…F each edit `main.py`; run one PR at a time unless a shared `_emit_preflight_fail()` helper is extracted first.
+Serialisation requirement (per FCA1-AG2 audit §9): DJ2-B…F each edit `main.py`; run one PR at a time unless a shared `_emit_preflight_fail()` helper is extracted first. DJ2-C merged (#399), unblocking the rest.
 
-1. **FX1** — HoloIndex truth restoration (infrastructure truth layer; unblocks reliable slice research)
-2. **BH1** — Branch hygiene forensics (resolve `fde9d64a4` provenance before next main-touching slice)
-3. **DJ2-C** — OAuth preflight dispatch (highest-severity remaining hook gap)
-4. **DJ2-F** — OpenClaw Security fail dispatch
-5. **DJ2-B** — IronClaw skip intentionality assertion
-6. **DJ2-D** — Brain artifact missing-dir event
-7. **DJ2-E** — Git merge sentinel ImportError event
-8. **PMCTRL1** — open PR for local branch once reviewed
-9. **FAM-IDEATION2** — typed `FoundUpGenesisEnvelope` schema + validator (unassigned)
-10. **FAM-IDEATION3** — AI Overseer WSP 97 drift sentinel (unassigned; hard-gated before IDEATION4)
+1. **BH1** — Branch hygiene forensics (resolve `fde9d64a4` provenance before next main-touching slice)
+2. **DJ2-F** — OpenClaw Security fail dispatch (highest-severity remaining hook gap)
+3. **DJ2-B** — IronClaw skip intentionality assertion
+4. **DJ2-D** — Brain artifact missing-dir event
+5. **DJ2-E** — Git merge sentinel ImportError event
+6. **YT-CLEANUP2** — stream_resolver API-contract test rebase (12 remaining failures)
+7. **LEGAL-Ii1** — I_i bonding curve legal review packet (unassigned)
+8. **FAM-IDEATION2** — typed `FoundUpGenesisEnvelope` schema + validator (unassigned)
+9. **FAM-IDEATION3** — AI Overseer WSP 97 drift sentinel (unassigned; hard-gated before IDEATION4)
 
 ---
 
@@ -195,7 +200,7 @@ Serialisation requirement (per FCA1-AG2 audit §9): DJ2-C…F each edit `main.py
 
 | PR | Branch | Status | Contents |
 |----|--------|--------|----------|
-| _(none open)_ | — | — | All recent PRs (#383–#403) merged. LEDGER-RECON2 is the next expected PR. FX1/BH1 briefings remain queued. |
+| _(CLEAR)_ | — | — | All PRs #397–#406 merged. FX1, DJ2-C, BH2, YT-CLEANUP1, BTC-ARCH1, PMCTRL1, DUPOOL-TRUTH1 closed. Next: BH1 forensics or DJ2-F. |
 
 ---
 
