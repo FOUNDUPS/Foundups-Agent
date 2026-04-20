@@ -323,6 +323,174 @@ PHASE_INTERFACE = {
 }
 ```
 
+### 8.1 FoundUp Ideation / Genesis Contract
+
+**Status**: `documented` (WSP 97 truth-state). Spec only. No implementation in this section. Scaffold, executable, and verified states are reached by downstream FAM / WRE / OpenClaw / Hermes / IronClaw work.
+
+**Slice of record**: `FAM-IDEATION1` — FOUNDUP_OUTCOME_BACKPROPAGATION_CONTRACT_PHASE1.
+
+**Cross-references**:
+- [modules/foundups/agent_market/INTERFACE.md](../../modules/foundups/agent_market/INTERFACE.md) — `FoundupRegistryService`, `AgentJoinService`, `TaskPipelineService`, `LaunchOrchestrator`, `FAMDaemon`, `ComputeAccessService` already exist as service surfaces; this section defines the ideation-stage entry envelope that feeds them.
+- [modules/foundups/docs/FOUNDUPS_PAVS_IRONCLAW_AGENT_BUILDER_DIGITAL_TWIN_ROADMAP.md](../../modules/foundups/docs/FOUNDUPS_PAVS_IRONCLAW_AGENT_BUILDER_DIGITAL_TWIN_ROADMAP.md) — frames OpenClaw (ingress/control), WRE (planning), IronClaw (execution sidecar).
+- WSP 97 (truthful state distinction), WSP 106 (FoundUp API Gateway), WSP 103 (Federation), WSP 104 (Route Namespace / Tenant Isolation), WSP 29 (CABR engine), WSP 26 (FoundUPS DAE Tokenization), WSP 80 (Cube Orchestration), WSP 95 (Skills Wardrobe), WSP 46 (WRE).
+
+#### 8.1.1 Rationale (WSP 97)
+
+WSP 27 already names the OpenClaw launch paradigm (§12.2) and the 4-phase outcome-to-PoC cycle (§2). FAM service surfaces already exist. What was not previously spec'd is the explicit **ideation-stage contract** — the machine-usable launch envelope that turns "012 describes the outcome" into an object FAM / WRE / execution adapters can consume without guessing.
+
+This section closes that gap. It is the contract layer. It is not an execution substrate. OpenClaw / Hermes / IronClaw / external cloud providers remain separate execution value-propositions that hook into the contract via adapters.
+
+#### 8.1.2 Two-Mode Launch Model
+
+FoundUp launch combines both modes:
+
+- **Church mode (012 → outcome)**: 012 describes the desired outcome precisely. This produces an **outcome contract**: what should exist, who it serves, what proof counts, what must not happen, what success looks like.
+- **Turing mode (0102 → executable steps)**: 0102 backpropagates from that outcome into executable PoC steps: repo/module creation, FAM registration, task graph, WRE/SKILLz hooks, tests, deployment gates, proof artifacts, and CABR/pAVS accounting.
+
+Both modes produce a single typed artifact — the `FoundUpGenesisEnvelope` — which is the handoff object between ideation and execution.
+
+#### 8.1.3 Flow
+
+```
+012 Outcome Contract
+  → 0102 Backpropagation Plan
+    → FoundUp Genesis Envelope
+      → FAM registration (LaunchOrchestrator + FoundupRegistryService)
+        → WRE task graph (WSP 46)
+          → OpenClaw / Hermes / IronClaw execution adapters
+            → proof / verification / payout / CABR events (WSP 29, WSP 26)
+              → PoC / prototype / MVP promotion gates (WSP 27 §11 tiers)
+```
+
+#### 8.1.4 Object: `OutcomeContract` (Church mode, 012-authored)
+
+| Field | Type | WSP 97 truth-state | Purpose |
+|---|---|---|---|
+| `outcome_statement` | string | documented | What should exist when done. One sentence. |
+| `target_users` | list<string> | documented | Who it serves. |
+| `non_goals` | list<string> | documented | What must NOT happen / what this is not. |
+| `acceptance_criteria` | list<string> | documented → verified | How we know it's done. Each criterion must be testable. |
+| `proof_of_benefit_definition` | object | documented | WSP 29 CABR mapping: V1 validation gate, V2 verification proof, V3 valuation score. |
+| `success_signal` | string | documented | Observable signal that indicates success at runtime (not just at build time). |
+| `authored_by` | string | documented | 012 identity (for audit). |
+| `authored_at` | ISO8601 | documented | Timestamp. |
+
+#### 8.1.5 Object: `BackpropagationPlan` (Turing mode, 0102-authored)
+
+| Field | Type | WSP 97 truth-state | Purpose |
+|---|---|---|---|
+| `initial_artifacts_required` | list<string> | scaffold | Repo dirs, INTERFACE.md, README.md, ModLog.md, tests dir, manifest. |
+| `repo_module_target` | object | scaffold | `{domain, module, path}` per WSP 3 + WSP 49. |
+| `task_graph` | list<Task> | scaffold → executable | DAG of tasks. Each node has `id`, `intent`, `preconditions`, `postconditions`, `required_SKILLz`, `owner_role`, `execution_provider_hint`. |
+| `required_SKILLz` | list<SkillRef> | scaffold | WSP 95 skill references. |
+| `risk_gates` | list<RiskGate> | scaffold | Gates that must pass before promotion. Each carries `severity`, `owner`, `automation_candidate`, `requires_012`. |
+| `execution_provider` | enum | scaffold | One of `internal_wre`, `openclaw_cloud`, `hermes_cloud`, `ironclaw_sidecar`, `external_adapter`. Per-task override allowed in `task_graph`. |
+| `derived_from_outcome_hash` | sha256 | documented | Hash of the `OutcomeContract` this plan backpropagates. Decoherence check: if hash drifts, plan must be regenerated. |
+
+#### 8.1.6 Object: `FoundUpGenesisEnvelope` (the handoff)
+
+The `FoundUpGenesisEnvelope` is the single object passed to `LaunchOrchestrator`. All other FAM services derive from it.
+
+```yaml
+FoundUpGenesisEnvelope:
+  # identity
+  envelope_id: <ulid>                          # state: executable
+  foundup_handle: <slug>                       # state: documented
+  created_at: <ISO8601>                        # state: executable
+  wsp_version: 27.4                            # state: documented
+
+  # content
+  outcome_contract: <OutcomeContract>          # state: documented
+  backpropagation_plan: <BackpropagationPlan>  # state: scaffold
+  initial_artifacts_required: <list>           # state: scaffold (mirror of plan)
+
+  # routing
+  repo_module_target:                          # state: scaffold
+    domain: <WSP-3 domain>
+    module: <slug>
+    path: modules/<domain>/<module>/
+  execution_provider: <enum>                   # state: scaffold
+
+  # graph
+  task_graph: <DAG>                            # state: scaffold → executable per node
+  required_SKILLz: <list<SkillRef>>            # state: scaffold
+
+  # gates
+  risk_gates: <list<RiskGate>>                 # state: scaffold
+  promotion_gates:                             # state: documented
+    - PoC:     "acceptance_criteria partial, CABR V1 gate"
+    - Proto:   "acceptance_criteria full,    CABR V2 proof"
+    - MVP:     "acceptance_criteria + usage, CABR V3 valuation"
+
+  # truth
+  WSP_97_truth_status: documented | scaffold | executable | verified   # snapshot at read time
+  wsp_97_field_status_map: { "<field_path>": "<state>" }               # per-field override
+
+  # provenance
+  outcome_hash: <sha256 of outcome_contract>   # state: executable
+  plan_hash:    <sha256 of backpropagation_plan>
+  parent_envelope_id: <ulid | null>            # state: documented (for FoundUp-spawns-FoundUp per §14)
+
+  # lifecycle
+  FAM_record_id: <ulid | null>                 # state: executable (null until FAM registers)
+  tier: 7                                      # state: documented (Genesis per §11.1)
+```
+
+#### 8.1.7 WSP 97 Truth Gates (per-envelope lifecycle)
+
+| Gate | Condition to advance | Authority |
+|---|---|---|
+| `documented` | All `OutcomeContract` fields present and authored. No code yet. | 012 authors; 0102 validates schema. |
+| `scaffold` | `BackpropagationPlan` generated; repo/module paths allocated; artifacts directory exists. No task has executed. | 0102 produces; AI Overseer validates. |
+| `executable` | At least one task node has run and emitted verifiable output. FAM has a record. WRE has a task graph. | WRE + execution adapter. |
+| `verified` | All acceptance criteria satisfied; CABR V1/V2/V3 events emitted; promotion-gate eligible. | AI Overseer + CABR engine (WSP 29). |
+
+A field may advance independently of the envelope-level status. The per-field `wsp_97_field_status_map` is the truthful view; the envelope-level `WSP_97_truth_status` is the minimum across fields.
+
+**WSP 97 violation**: claiming `executable` or `verified` at the envelope level when a constituent field is still `documented` or `scaffold`. Dispatch via `on_preflight_fail` (component=`foundup_genesis`, severity=`high`, requires_012=True).
+
+#### 8.1.8 Execution Provider Adapter Contract
+
+`execution_provider` maps to an adapter. Each adapter is a thin contract, not a runtime re-implementation.
+
+| Provider enum | Adapter responsibility | Owns execution substrate? |
+|---|---|---|
+| `internal_wre` | In-process WRE task dispatch (WSP 46). | yes (FoundUps native) |
+| `openclaw_cloud` | Submit bounded workload to OpenClaw gateway; return proof envelope. | no (OpenClaw provides) |
+| `hermes_cloud` | Submit bounded workload to Hermes extraction boundary; return proof envelope. | no (Hermes provides) |
+| `ironclaw_sidecar` | Submit bounded workload to IronClaw runtime sidecar. | no (IronClaw provides) |
+| `external_adapter` | Provider-specific shim implementing adapter interface. | no (third-party) |
+
+**Adapter interface (minimum surface)**:
+
+```
+adapter.submit(task, envelope) -> task_handle
+adapter.poll(task_handle) -> {state, proof_artifact | error | progress}
+adapter.cancel(task_handle) -> ack
+adapter.capabilities() -> {task_kinds, safe_actions, unsafe_actions, requires_012}
+```
+
+Adapters do not invent proofs. They emit proof artifacts referenced by FAM's proof ledger; FAM records and CABR valuates.
+
+#### 8.1.9 Scope Boundaries (explicit non-goals for this section)
+
+- **No token mechanics.** UPS/F_i/CABR scoring belongs to WSP 26 / WSP 29.
+- **No cloud integration.** OpenClaw / Hermes / IronClaw cloud substrates are separate slices.
+- **No code execution.** This section is spec only. Implementation of `FoundUpGenesisEnvelope` as a typed object, `LaunchOrchestrator.accept_envelope()`, and adapter interfaces are downstream slices.
+- **No WSP 97 retrofitting of closed FoundUps.** New envelopes only.
+
+#### 8.1.10 Minimum Future Slices (downstream, not part of this spec)
+
+| Slice | Mode | Scope |
+|---|---|---|
+| `FAM-IDEATION2` | implementation | Typed `FoundUpGenesisEnvelope` dataclass + schema validator. |
+| `FAM-IDEATION3` | implementation | `LaunchOrchestrator.accept_envelope(envelope)` → FAM record + initial task graph. |
+| `FAM-IDEATION4` | implementation | Execution provider adapter interface + `internal_wre` reference adapter. |
+| `FAM-IDEATION5` | implementation | AI Overseer hook: WSP 97 field-status-map drift detection → dispatch. |
+| `FAM-IDEATION6` | implementation | Promotion gate evaluator (PoC → Proto → MVP) wired to CABR V1/V2/V3. |
+
+Each is a bounded, review-at-a-time slice. None may be stacked before the prior lands.
+
 ## 9. Universal DAE Applications
 
 ### 9.1 Code Domain DAEs (Current Implementation via WSP 80)
@@ -749,6 +917,7 @@ FoundUp reaches Tier 1 (Sovereign smartDAO)
 | 2.4 | 2026-02-07 | Added Section 12: 0102 Agent Ranking on the FoundUps Platform — XP system with model multipliers (Frontier 3× to Local Small 0.3×), 7 agent ranks (Apprentice→Sovereign), Twin Fidelity scoring (97.5% = true digital twin), FoundUp roles with tier-dependent filling (A/B testing at Tier 5, incumbents at Tier 4+), OpenClaw launch paradigm. Renumbered sunset to 13, future to 14. |
 | 2.5 | 2026-02-07 | Occam's Layer correction: Simplified Section 12 to placeholder (post-MVP). Agent ranking details deferred. OpenClaw Launch Paradigm retained as core MVP. |
 | 3.0 | 2026-02-07 | Major update: Added OBAI = Open Beneficial AI = 0102 (Section 1.4). Added existing modules as first FoundUps (Section 1.5). Added circular lifecycle from O!F (Section 11.0) — IDEA→PoC→TEAM→Soft-Proto→Proto→MVP→smartDAO→spawns new IDEAS. Added crowdfunding phases. smartDAO = Open Corp at Tier 1. Updated tier table with 21M token counts. Added Section 14: Recursive FoundUp Spawning (FoundUps beget FoundUps). Renumbered future development to Section 15. |
+| 3.1 | 2026-04-20 | Added Section 8.1: FoundUp Ideation / Genesis Contract. Defines `OutcomeContract` (Church mode, 012-authored), `BackpropagationPlan` (Turing mode, 0102-authored), `FoundUpGenesisEnvelope` (handoff object). Adds WSP 97 truth gates `documented → scaffold → executable → verified` with per-field status map. Defines execution provider adapter contract (`internal_wre` / `openclaw_cloud` / `hermes_cloud` / `ironclaw_sidecar` / `external_adapter`). Explicit non-goals: no token mechanics, no cloud integration, no code execution. Slice of record: FAM-IDEATION1. |
 
 ---
 
