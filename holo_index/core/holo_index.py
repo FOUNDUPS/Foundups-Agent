@@ -94,6 +94,16 @@ def _load_model(model_class, model_name: str):
     return model_class(model_name)
 
 
+def _turboquant_enabled() -> bool:
+    """Return True when HOLO_USE_TURBOQUANT is set to a truthy value.
+
+    HIA2 Phase 1 opt-in switch. When set, ``HoloIndex.__init__`` attempts
+    the TurboQuant backend before falling through to the existing
+    SentenceTransformer path.
+    """
+    return os.getenv("HOLO_USE_TURBOQUANT", "0").strip().lower() in {"1", "true", "yes", "on"}
+
+
 # Search cache for fast repeated queries (WSP 91 observability)
 try:
     from .search_cache import SearchCache, get_search_cache
@@ -191,51 +201,98 @@ class HoloIndex:
         offline = os.getenv("HOLO_OFFLINE") == "1"
         model_cached = self._model_cache_present(model_name)
 
-        # FX1-D: Track retrieval mode explicitly (semantic/lexical/failed)
+        # FX1-D: Track retrieval mode explicitly (semantic/lexical/failed).
+        # HIA-TAX1 (2026-04-21): retrieval_mode describes *what* retrieval does;
+        # embedding_backend describes *how* the semantic vectors are produced.
+        # These are separate WSP 97 claims — conflating them (e.g. a
+        # retrieval_mode="turboquant" value) overclaims the mode.
+        #
+        #   retrieval_mode    ∈ {semantic, lexical, failed}
+        #   embedding_backend ∈ {sentence_transformers, turboquant, none}
+        #
+        # "none" covers both lexical (no embedder) and failed (nothing loaded).
         self.retrieval_mode = "failed"  # Default until proven otherwise
+        self.embedding_backend = "none"
 
         # Optional fast-start skip to prevent long imports (set HOLO_SKIP_MODEL=1)
         if os.environ.get("HOLO_SKIP_MODEL") == "1":
             self._log_agent_action("HOLO_SKIP_MODEL=1 -> skipping sentence transformer load (lexical mode)", "WARN")
             self.model = None
             self.retrieval_mode = "lexical"
+            self.embedding_backend = "none"
         elif offline and not model_cached:
             self._log_agent_action("HOLO_OFFLINE=1 and model cache missing -> skipping model load (lexical mode)", "WARN")
             self.model = None
             self.retrieval_mode = "lexical"
+            self.embedding_backend = "none"
         else:
-            global SentenceTransformer
-            if SentenceTransformer is None:
-                # WSP 97: Import with hard timeout to prevent indefinite hangs
-                self._log_agent_action(f"Importing SentenceTransformer (timeout={HOLO_MODEL_IMPORT_TIMEOUT}s)...", "MODEL")
-                SentenceTransformer = _run_with_timeout(
-                    _import_sentence_transformers,
-                    timeout_sec=HOLO_MODEL_IMPORT_TIMEOUT,
-                    default=None,
-                    error_msg="SentenceTransformer import timed out",
-                    missing_dep_hint="pip install sentence-transformers (or use HOLO_SKIP_MODEL=1 for lexical-only)"
-                )
-                if SentenceTransformer is None:
-                    self._log_agent_action("SentenceTransformer unavailable; falling back to lexical search", "WARN")
-                    self.retrieval_mode = "lexical"
+            # HIA2 Phase 1 / HIA-TAX1: optional TurboQuant backend (opt-in via
+            # HOLO_USE_TURBOQUANT=1). TurboQuant is a *semantic* backend; when
+            # active, retrieval_mode="semantic" and embedding_backend="turboquant".
+            # Phase 1 scaffold is_available() is False, so this path logs and
+            # falls through to the SentenceTransformer backend.
+            if _turboquant_enabled():
+                try:
+                    from .turboquant_backend import TurboQuantEmbedder
+                    if TurboQuantEmbedder.is_available():
+                        self._log_agent_action(
+                            "HOLO_USE_TURBOQUANT=1 -> loading TurboQuant backend (semantic)",
+                            "MODEL",
+                        )
+                        self.model = TurboQuantEmbedder()
+                        self.retrieval_mode = "semantic"
+                        self.embedding_backend = "turboquant"
+                    else:
+                        self._log_agent_action(
+                            "TurboQuant not yet implemented; falling back to SentenceTransformer",
+                            "WARN",
+                        )
+                except Exception as e:
+                    self._log_agent_action(
+                        f"TurboQuant init failed ({e}); falling back to SentenceTransformer",
+                        "WARN",
+                    )
 
-            if SentenceTransformer:
-                # WSP 97: Load model with hard timeout
-                self._log_agent_action(f"Loading model '{model_name}' (timeout={HOLO_MODEL_LOAD_TIMEOUT}s)...", "MODEL")
-                self.model = _run_with_timeout(
-                    lambda: _load_model(SentenceTransformer, model_name),
-                    timeout_sec=HOLO_MODEL_LOAD_TIMEOUT,
-                    default=None,
-                    error_msg=f"Model '{model_name}' load timed out"
-                )
-                if self.model is None:
-                    self._log_agent_action("Model load failed; falling back to lexical search", "WARN")
-                    self.retrieval_mode = "lexical"
-                else:
-                    self.retrieval_mode = "semantic"
+            if getattr(self, "model", None) is not None and self.embedding_backend == "turboquant":
+                # TurboQuant loaded successfully; skip SentenceTransformer path entirely.
+                pass
             else:
-                self.model = None
-                self.retrieval_mode = "lexical"
+                global SentenceTransformer
+                if SentenceTransformer is None:
+                    # WSP 97: Import with hard timeout to prevent indefinite hangs
+                    self._log_agent_action(f"Importing SentenceTransformer (timeout={HOLO_MODEL_IMPORT_TIMEOUT}s)...", "MODEL")
+                    SentenceTransformer = _run_with_timeout(
+                        _import_sentence_transformers,
+                        timeout_sec=HOLO_MODEL_IMPORT_TIMEOUT,
+                        default=None,
+                        error_msg="SentenceTransformer import timed out",
+                        missing_dep_hint="pip install sentence-transformers (or use HOLO_SKIP_MODEL=1 for lexical-only)"
+                    )
+                    if SentenceTransformer is None:
+                        self._log_agent_action("SentenceTransformer unavailable; falling back to lexical search", "WARN")
+                        self.retrieval_mode = "lexical"
+                        self.embedding_backend = "none"
+
+                if SentenceTransformer:
+                    # WSP 97: Load model with hard timeout
+                    self._log_agent_action(f"Loading model '{model_name}' (timeout={HOLO_MODEL_LOAD_TIMEOUT}s)...", "MODEL")
+                    self.model = _run_with_timeout(
+                        lambda: _load_model(SentenceTransformer, model_name),
+                        timeout_sec=HOLO_MODEL_LOAD_TIMEOUT,
+                        default=None,
+                        error_msg=f"Model '{model_name}' load timed out"
+                    )
+                    if self.model is None:
+                        self._log_agent_action("Model load failed; falling back to lexical search", "WARN")
+                        self.retrieval_mode = "lexical"
+                        self.embedding_backend = "none"
+                    else:
+                        self.retrieval_mode = "semantic"
+                        self.embedding_backend = "sentence_transformers"
+                else:
+                    self.model = None
+                    self.retrieval_mode = "lexical"
+                    self.embedding_backend = "none"
 
         self.need_to: Dict[str, str] = {}
         self.wsp_summary: Dict[str, Dict[str, str]] = {}
