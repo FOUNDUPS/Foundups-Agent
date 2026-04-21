@@ -1,5 +1,49 @@
 # AutoAgent Lab — ModLog
 
+## V0.3.0 — Layer 3: Target Surface IO (2026-04-08)
+
+**Worker**: AJ
+**Slice**: AUTOAGENT_LAB_LAYER3_TARGET_SURFACE_IO_IMPLEMENTATION
+
+### Added
+- `src/target_surface.py` — Skill config read/copy/write
+  - `SkillSurface` dataclass: source_path, workspace_path, skill_id, mutable/immutable fields, body
+  - `load_skill_surface(path)` — Parse production SKILL.md (read-only)
+  - `create_workspace_copy(surface, workspace_root, experiment_id)` — Isolated copy
+  - `write_candidate_surface(surface, updated_mutable_fields)` — Write candidate
+  - `get_candidate_path(surface)` — Deterministic candidate path
+  - `TargetSurfaceError` exception class
+- `tests/test_target_surface.py` — 33 focused tests
+  - Load valid/invalid skills
+  - Mutable/immutable field separation
+  - Workspace copy creation
+  - Candidate write with field updates
+  - Production file never modified
+  - Workspace isolation enforcement
+
+### Mutable Fields (from experiment_config.py)
+- `agents`, `wsp_chain`, `domains`, `tokens_budget`, `prompt`
+
+### Immutable Fields (preserved exactly)
+- `name`, `version`, `description`, `author`, `category`, etc.
+
+### Design Decisions
+- **Production read-only**: Original SKILL.md files never modified
+- **Workspace isolation**: All mutations under `workspace/exp_{hash}/`
+- **Deterministic pathing**: Same source path produces same experiment_id hash
+- **Reuses safety gates**: Uses `validate_workspace_path` from safety_gates.py
+
+### What Is NOT Implemented (Layer 4+)
+- Experiment loop / keep-discard runner
+- Mutation generation
+- Auto-apply to production
+
+### WSP Compliance
+- WSP 15: Read-first (all specs verified before implementation)
+- WSP 97: Internal boundaries (production files read-only)
+
+---
+
 ## V0.2.0 — Layer 2: Deterministic Eval Harness (2026-04-07)
 
 **Worker**: AE
