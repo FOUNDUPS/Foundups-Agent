@@ -3,7 +3,32 @@
 **Status**: Architecture specification (first tranche)
 **Owner**: 0102
 **Slice**: `pfmall_architecture_and_template_contract`
-**WSP References**: WSP 3 (Domains), WSP 49 (Structure)
+**WSP References**: WSP 3 (Domains), WSP 49 (Structure), WSP 97 (Implementation Truth)
+
+---
+
+## WSP 97 Implementation Status
+
+This document defines the **target architecture** for p.fMALL routing. Current implementation (Phase 1) is a video tile field mall with catalog-based discovery. The full shell/iframe/FoundUp isolation model is **Phase 2+**.
+
+| Feature | Status | Evidence |
+|---------|--------|----------|
+| URL structure `/member/*` | `IMPLEMENTED` | `public/member/index.html`, `member-sw.js` |
+| URL structure `/f/{foundup_id}` | `SPECIFIED_NOT_IMPLEMENTED` | Routes to `foundup.html?id=` not `/f/` prefix |
+| Launch catalog (JSON) | `IMPLEMENTED` | `mall-video-catalog.json`, `mall-catalog.json` |
+| Discovery by category | `IMPLEMENTED` | Projection chips in tile field UI |
+| HoloIndex cross-FoundUp search | `SPECIFIED_NOT_IMPLEMENTED` | No HoloIndex integration in mall UI |
+| FoundUp iframe loading | `SPECIFIED_NOT_IMPLEMENTED` | No iframe containers; uses overlay/entry pages |
+| postMessage shell↔FoundUp | `SPECIFIED_NOT_IMPLEMENTED` | PMCTRL1 controls tile field, not FoundUp iframes |
+| Shell history management | `SPECIFIED_NOT_IMPLEMENTED` | Basic browser history only |
+| Deep linking `/f/{id}/path` | `SPECIFIED_NOT_IMPLEMENTED` | No path pass-through |
+| Pre-OPO Angel tier gating | `SPECIFIED_NOT_IMPLEMENTED` | No subscription tier checks |
+| Offline catalog cache | `IMPLEMENTED` | `member-sw.js` stale-while-revalidate |
+| Offline FoundUp bundles | `SPECIFIED_NOT_IMPLEMENTED` | No FoundUp bundle caching |
+
+**Phase 1 reality**: `/member/` tile field mall with PMCTRL1 agent control dispatcher (see `public/member/INTERFACE.md` §pfMALL Agent Control Contract).
+
+**Phase 2 target**: Full shell/iframe architecture per this spec.
 
 ---
 
@@ -292,3 +317,37 @@ When offline:
 | Tier insufficient | `/f/{id}` | Upgrade prompt |
 | FoundUp load error | `/f/{id}` | "Failed to load" + retry |
 | Offline + uncached | `/f/{id}` | "Not available offline" |
+
+---
+
+## 10. Boundary Clarifications
+
+### 10.1 PMCTRL1 vs Shell Router
+
+**PMCTRL1** (`public/member/js/pfmall-control-dispatcher.js`) is the Phase 1 agent control interface for the video tile field. It is **not** the shell router described in this document:
+
+| Concern | PMCTRL1 (Phase 1) | Shell Router (Phase 2+) |
+|---------|-------------------|-------------------------|
+| Scope | Tile field video wall | Full shell/FoundUp isolation |
+| Target | `mallTileField` / `mallVideoPlayer` | FoundUp iframe containers |
+| Routes | None (tile control only) | `/f/{foundup_id}/*` |
+| postMessage | Agent → tile field | Shell ↔ FoundUp bidirectional |
+
+PMCTRL1 and the shell router are **complementary**, not competing. When Phase 2 ships, PMCTRL1 may evolve to agent→shell→FoundUp routing.
+
+### 10.2 HoloIndex Discovery vs Catalog Discovery
+
+- **Catalog discovery** (Phase 1): Static `mall-video-catalog.json` loaded by tile field
+- **HoloIndex discovery** (Phase 2+): Semantic search across FoundUp content via shell search bar
+
+HoloIndex is the **retrieval/memory layer** (WSP 50), not a routing surface. Discovery results link to `/f/{foundup_id}`, which the shell router handles.
+
+### 10.3 Companion Documents
+
+| Document | Covers |
+|----------|--------|
+| `PFMALL_SHELL_CONTRACT.md` | Shell responsibilities, boot sequence, postMessage API |
+| `PFMALL_FOUNDUP_MANIFEST_SCHEMA.md` | Manifest fields, validation, HMAC signing |
+| `PFMALL_DATA_ISOLATION_MODEL.md` | IndexedDB isolation, encryption, sentinel layer |
+| `PFMALL_LAUNCH_CATALOG_TAXONOMY.md` | Categories, launch order, catalog entry schema |
+| `public/member/INTERFACE.md` §PMCTRL1 | Phase 1 agent control contract |
