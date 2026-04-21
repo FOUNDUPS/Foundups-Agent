@@ -1,9 +1,31 @@
 # p.fMALL Data Isolation / Encryption / Sentinel Layer Model
 
-**Status**: Architecture specification (first tranche)
+**Status**: Architecture specification (first tranche) — reconciled 2026-04-21
 **Owner**: 0102
 **Slice**: `pfmall_architecture_and_template_contract`
-**WSP References**: WSP 29 (CABR Engine), WSP 72 (Independence), WSP 97 (Concatenation Gate)
+**Reconciled**: PFMALL-DATA-ISOLATION-RECON (W1, 2026-04-21)
+**WSP References**: WSP 29 (CABR Engine), WSP 72 (Independence), WSP 97 (Truth), WSP 104 (Namespace)
+
+---
+
+## WSP 97 Implementation Status
+
+| Feature | Status | Evidence |
+|---------|--------|----------|
+| IndexedDB namespace `idb_{foundup_id}` | `IMPLEMENTED_IN_TESTS` | `test_namespace_guardrail.py` enforces pattern across manifests and catalog |
+| Namespace uniqueness (routing, data) | `IMPLEMENTED_IN_TESTS` | `test_namespace_guardrail.py` validates globally |
+| iframe origin isolation | `SPECIFIED_NOT_IMPLEMENTED` | Current mall uses overlay pattern, not iframe sandboxing. No iframe creation code in pfmall. |
+| HoloIndex read via shell search API | `PARTIAL` | `shell-bridge-interceptor.js` routes `openclaw_search` with origin checking and registered backend seam |
+| HoloIndex write via agent backend only | `ARCHITECTURAL_CONTRACT` | No direct FoundUp->HoloIndex write path exists; enforcement is by omission |
+| Encryption at rest (AES-GCM) | `SPECIFIED_NOT_IMPLEMENTED` | No Web Crypto code exists. Section 3.4 already acknowledges Phase 2 deferral. |
+| Key derivation (PBKDF2/wallet) | `SPECIFIED_NOT_IMPLEMENTED` | No implementation — wallet connect not built |
+| Sentinel rate limiting | `SPECIFIED_NOT_IMPLEMENTED` | `shell-bridge-interceptor.js` has no rate-limit logic |
+| Sentinel schema validation | `PARTIAL` | `shell-bridge-interceptor.js` checks `data.type === 'agent_request'` and origin; no full schema validation against Section 4.3 spec |
+| Sentinel quarantine protocol | `SPECIFIED_NOT_IMPLEMENTED` | No quarantine logic implemented |
+| Agent data flow via shell | `PARTIAL` | `shell-bridge-interceptor.js` dispatches `agent_request` -> handler -> `agent_response` postMessage |
+| Telemetry isolation | `SPECIFIED_NOT_IMPLEMENTED` | No telemetry collector implemented |
+
+**Phase 1 reality**: IndexedDB namespace guardrails are tested. Shell bridge interceptor provides origin checking and agent request routing. iframe isolation, encryption, full sentinel, and telemetry are Phase 2.
 
 ---
 
@@ -18,10 +40,11 @@ Define how p.fMALL isolates FoundUp data from each other, encrypts data at rest,
 ### 2.1 Isolation Layers
 
 ```
-Layer 1: iframe Origin Isolation
-  - Each FoundUp runs in a sandboxed iframe
-  - Same-origin policy prevents cross-FoundUp DOM/JS access
+Layer 1: iframe Origin Isolation  [SPECIFIED_NOT_IMPLEMENTED]
+  - Each FoundUp is specified to run in a sandboxed iframe
+  - Same-origin policy would prevent cross-FoundUp DOM/JS access
   - No shared global state
+  - NOTE: Current mall uses overlay/tile pattern, not iframe sandboxing
 
 Layer 2: IndexedDB Namespace Isolation
   - Each FoundUp uses namespace: idb_{foundup_id}
@@ -93,9 +116,11 @@ User wallet seed (derived at auth)
 
 ### 3.4 Phase 1 Simplification
 
-Phase 1 may defer client-side encryption and rely on:
-- iframe isolation (prevents cross-FoundUp reads)
-- Server-side encryption for HoloIndex
+> **WSP 97 `SPECIFIED_NOT_IMPLEMENTED`**: No client-side encryption code exists. No Web Crypto API usage. No PBKDF2 key derivation. No wallet-based key management. Sections 3.1-3.3 are architectural specifications for Phase 2.
+
+Phase 1 defers client-side encryption and relies on:
+- Namespace isolation via `idb_{foundup_id}` (tested by `test_namespace_guardrail.py`)
+- Server-side encryption for HoloIndex (if deployed)
 - HTTPS for transport
 
 Full client-side encryption (AES-GCM) is a Phase 2 hardening step.
@@ -104,7 +129,9 @@ Full client-side encryption (AES-GCM) is a Phase 2 hardening step.
 
 ## 4. Sentinel Layer
 
-The sentinel monitors all postMessage traffic between the shell and FoundUps. It runs inside the shell, not inside FoundUps.
+> **WSP 97 `PARTIAL`**: `shell-bridge-interceptor.js` provides origin checking and agent request dispatch. Rate limiting, full schema validation, quarantine protocol, and audit logging described below are `SPECIFIED_NOT_IMPLEMENTED`.
+
+The sentinel is specified to monitor all postMessage traffic between the shell and FoundUps. It runs inside the shell, not inside FoundUps.
 
 ### 4.1 Sentinel Responsibilities
 
@@ -165,7 +192,7 @@ Sentinel events are logged locally (not sent to server unless telemetry enabled)
 {
   "timestamp": "2026-03-28T12:00:00Z",
   "event": "rate_limit_breach",
-  "foundup_id": "a3f8c1d2e4b67890",
+  "foundup_id": "gotjunk_001",
   "details": {
     "messages_per_second": 150,
     "limit": 100,
@@ -226,7 +253,7 @@ Notifications are text-only (no code, no HTML). Max 500 characters. Rate limited
 
 ```json
 {
-  "foundup_id": "a3f8c1d2e4b67890",
+  "foundup_id": "gotjunk_001",
   "event": "agent_request",
   "timestamp": "2026-03-28T12:00:00Z",
   "duration_ms": 450,
