@@ -52,6 +52,31 @@ Score components:
 - `historical_fidelity` (0.3) — From context (PatternMemory adapter future)
 - `historical_quality` (0.3) — From context (PatternMemory adapter future)
 
+## Target Surface IO (Layer 3)
+
+```python
+from modules.infrastructure.autoagent_lab.src.target_surface import (
+    load_skill_surface,
+    create_workspace_copy,
+    write_candidate_surface,
+)
+
+# Load production skill (read-only)
+surface = load_skill_surface("path/to/SKILL.md")
+
+# Create isolated workspace copy
+surface = create_workspace_copy(surface)
+
+# Write candidate with updated mutable fields
+candidate = write_candidate_surface(
+    surface,
+    {"agents": ["haiku"], "tokens_budget": 1000},
+)
+```
+
+Mutable fields: `agents`, `wsp_chain`, `domains`, `tokens_budget`, `prompt`
+Immutable fields: `name`, `version`, `description`, etc. (preserved exactly)
+
 ## What This Does NOT Do
 
 - No production WRE mutation
