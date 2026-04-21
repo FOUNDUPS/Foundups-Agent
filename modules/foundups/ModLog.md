@@ -150,6 +150,37 @@
 
 ---
 
+### 2026-04-22 - p.fMALL Identity Propagation (W2: PFMALL-IDENTITY-PROPAGATION)
+
+**By:** 0102 (W2) — **Slice:** `PFMALL-IDENTITY-PROPAGATION`
+**WSP References:** WSP 97 (Truth)
+
+**Updated** (12 architecture docs — identity statement added to Section 1 Purpose):
+- `PFMALL_SHELL_CONTRACT.md`
+- `PFMALL_FOUNDUP_MANIFEST_SCHEMA.md`
+- `PFMALL_ROUTING_DISCOVERY_MODEL.md`
+- `PFMALL_DATA_ISOLATION_MODEL.md`
+- `PFMALL_VIDEO_MALL_RUNTIME_FOUNDATION_2026-04-02.md`
+- `PFMALL_MALL_NAVIGATION_CONTRACT.md`
+- `PFMALL_STATE_OVERLAY_CONTRACT.md`
+- `PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md`
+- `PFMALL_MEDIA_DELIVERY_CONTRACT.md`
+- `PFMALL_FOUNDUP_ENTRY_AND_STAKE_GATE_CONTRACT.md`
+- `PFMALL_FULLSCREEN_PLAYER_CONTRACT.md`
+- `PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md`
+
+**Updated** (4 code entry points — identity reference added to module docstrings):
+- `modules/foundups/pfmall/__init__.py`
+- `modules/foundups/pfmall/shell_core.py`
+- `public/member/js/shell-bridge-interceptor.js`
+- `public/member/member-sw.js`
+
+**Identity statement**: "p.fMALL is an AI interaction space — a new way of interacting with AI and the world. Video is the default surface, but the paradigm extends to any content type: documents, community, FoundUps. The same interaction model (pinch, zoom, navigate) works everywhere, with AI mediating all engagement."
+
+**Finding**: No pfmall doc previously defined what p.fMALL IS. All docs described plumbing (shell, routing, isolation, taxonomy). Identity was absent from the entire doc suite and codebase. Now concatenated across all 12 architecture docs and 4 key code entry points.
+
+---
+
 ### 2026-04-21 - PFMALL Routing Discovery Model WSP 97 reconciliation
 
 **By:** 0102 (W3) — **Slice:** `PFMALL-ROUTING-RECON`  

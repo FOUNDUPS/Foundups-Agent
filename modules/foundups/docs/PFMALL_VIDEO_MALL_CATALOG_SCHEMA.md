@@ -11,7 +11,9 @@
 
 ## 1. Purpose
 
-This document defines the schema for `mall-video-catalog.json`, the manifest that powers the Video Mall tile field.
+p.fMALL is an **AI interaction space** — a new way of interacting with AI and the world. Video is the default surface, but the paradigm extends to any content type: documents, community, FoundUps. The same interaction model (pinch, zoom, navigate) works everywhere, with AI mediating all engagement. Built for FoundUps first, with hooks into all content. Videos are the catalog layer — they tell each FoundUp's story.
+
+This document defines the schema for `mall-video-catalog.json`, the catalog that powers the Video Mall tile field.
 
 The Video Mall Catalog is **not** the full FoundUp runtime manifest. It is a projection-optimized data structure for:
 

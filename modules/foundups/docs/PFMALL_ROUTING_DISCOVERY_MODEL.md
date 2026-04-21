@@ -34,7 +34,9 @@ This document defines the **target architecture** for p.fMALL routing. Current i
 
 ## 1. Purpose
 
-Define how p.fMALL routes users to FoundUps, how FoundUps are discovered, and how navigation works between the shell and loaded FoundUps.
+p.fMALL is an **AI interaction space** — a new way of interacting with AI and the world. Video is the default surface, but the paradigm extends to any content type: documents, community, FoundUps. The same interaction model (pinch, zoom, navigate) works everywhere, with AI mediating all engagement. Built for FoundUps first, with hooks into all content. Videos are the catalog layer — they tell each FoundUp's story.
+
+This document defines how p.fMALL routes users to FoundUps, how FoundUps are discovered, and how navigation works between the shell and loaded FoundUps.
 
 Companion note:
 - `PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md` clarifies the route/runtime

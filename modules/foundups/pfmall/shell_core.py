@@ -3,6 +3,11 @@
 """
 p.fMALL Shell Core Scaffold
 
+p.fMALL is an AI interaction space for engaging with everything — video,
+documents, community, FoundUps. Video is the default catalog layer; the same
+interaction paradigm (pinch, zoom, navigate) extends to any content type,
+with AI mediating all engagement.
+
 Minimal shell runtime providing manifest discovery, catalog assembly,
 route resolution, and manifest+overlay merge. Non-UI scaffold only.
 
