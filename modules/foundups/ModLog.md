@@ -2,6 +2,38 @@
 
 ## Chronological Change Log
 
+### 2026-04-21 - PFMALL Launch Catalog Taxonomy Reconciliation (W2: PFMALL-LAUNCH-CATALOG-TAXONOMY-RECON)
+
+**By:** 0102 (W2) — **Slice:** `PFMALL-LAUNCH-CATALOG-TAXONOMY-RECON`
+**WSP References:** WSP 97 (Truth), WSP 104 (Namespace), WSP 3 (Domains), WSP 100 (SmartDAO Tiers)
+
+**Updated**:
+- `modules/foundups/docs/PFMALL_LAUNCH_CATALOG_TAXONOMY.md` — Reconciled against `mall-video-catalog.json` truth
+
+**Category drift corrected**:
+- Spec had 5 categories; catalog has 9. Added: `travel`, `music`, `startup`, `thought-leadership`, `ai-education`, `ai-research`
+- `games` and `community` specified but absent from catalog
+
+**Portfolio drift corrected**:
+- Spec listed 6 FoundUps; catalog contains 13
+- Added Kosei (was missing from spec entirely)
+- Corrected antifaFM lifecycle: `incubating` → `proto`
+- Identified 3 spec-only entries absent from catalog: Whack-a-Magot, YouTube Engagement, LinkedIn Agent
+
+**Enum drift corrected** (consistent with PFMALL-MANIFEST-SCHEMA-RECON):
+- `required_subscription_tier`: `angel, ultimate` → `basic, enterprise` (per `subscription_tiers.py`)
+- `foundup_id` format: SHA256 hex → human-readable slug (per actual catalog/manifests)
+
+**Bound vs unbound tenant distinction added**:
+- Only `gotjunk_001` and `kosei` are bound tenants (manifest + route + namespace)
+- Remaining 11 are discoverable-only video tiles
+
+**WSP 97 truth markers applied**: 12 features assessed. Added Implementation Status table.
+
+**Finding**: Catalog taxonomy doc significantly diverged from actual catalog. Original 5-category, 6-FoundUp spec now reflects actual 9-category, 13-entry catalog with bound/unbound tenant hierarchy. No code changes; doc-only reconciliation.
+
+---
+
 ### 2026-04-21 - PFMALL Routing Discovery Model WSP 97 reconciliation
 
 **By:** 0102 (W3) — **Slice:** `PFMALL-ROUTING-RECON`  
