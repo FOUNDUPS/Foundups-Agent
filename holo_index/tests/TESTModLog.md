@@ -1,5 +1,31 @@
 ﻿# HoloIndex Test Suite TESTModLog
 
+## [2026-04-21] W8 — Core Module Test Coverage Phase 1
+**WSP Protocol**: WSP 5 (Testing Standards), WSP 22 (Documentation)
+
+### Summary
+Added 94 tests across 4 new test files for `holo_index/core/` modules:
+- `test_circuit_breaker.py` (23 tests) — circuit breaker pattern tests
+- `test_mps_m_scorer.py` (40 tests) — MPS-M quality scoring tests
+- `test_comment_search.py` (10 tests) — comment search API tests
+- `test_module_scoring_subroutine.py` (21 tests) — module scoring wrapper tests
+
+### Coverage Impact
+| Module | Before | After |
+|--------|--------|-------|
+| circuit_breaker.py | 0% | 98% |
+| mps_m_scorer.py | 0% | 96% |
+| comment_search.py | 0% | 100% |
+| module_scoring_subroutine.py | 16% | 87% |
+
+### Verification
+```bash
+HOLO_SKIP_MODEL=1 python -m pytest holo_index/tests/test_circuit_breaker.py \
+  holo_index/tests/test_mps_m_scorer.py holo_index/tests/test_comment_search.py \
+  holo_index/tests/test_module_scoring_subroutine.py -v --tb=short
+# Result: 94 passed
+```
+
 ## [2026-03-08] MCP Dependency Guard Coverage
 **WSP Protocol**: WSP 5 (Testing Standards), WSP 22 (Documentation), WSP 84 (Enhance Existing)
 
