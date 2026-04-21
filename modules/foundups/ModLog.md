@@ -2,6 +2,32 @@
 
 ## Chronological Change Log
 
+### 2026-04-21 - PFMALL Manifest Schema Reconciliation (W2: PFMALL-MANIFEST-SCHEMA-RECON)
+
+**By:** 0102 (W2) - **Slice:** `PFMALL-MANIFEST-SCHEMA-RECON`
+**WSP References:** WSP 97 (Truth), WSP 104 (Namespace), WSP 49 (Structure)
+
+**Updated**:
+- `modules/foundups/docs/PFMALL_FOUNDUP_MANIFEST_SCHEMA.md` - Reconciled against codebase truth
+
+**Enum drift corrected**:
+- `required_subscription_tier`: `angel, ultimate` -> `basic, enterprise` (per `subscription_tiers.py` TIERS dict)
+- `foundup_id` format: SHA256 hash spec -> human-readable slug (per actual manifests)
+
+**Missing fields added**:
+- `category` (present in gotjunk/kosei manifests, used by catalog export)
+- `launch_readiness` (present in manifests, validated by `shell_core.py`)
+
+**WSP 97 truth markers applied**:
+- `SPECIFIED_NOT_IMPLEMENTED`: HMAC signing, `min_shell_version`, deterministic `foundup_id` generation
+- `IMPLEMENTED_IN_MANIFESTS`: 19 fields confirmed in gotjunk/kosei manifests
+- `IMPLEMENTED_IN_TESTS`: namespace guardrail (WSP 104), shell_core validation
+- `ARCHITECTURAL_CONTRACT`: capabilities gating, agent route gating, length limits
+
+**Shell contract consistency**: Verified against `PFMALL_SHELL_CONTRACT.md` - consistent.
+
+---
+
 ### 2026-04-12 - Matrix A local import runbook (prompts 38214 / 84726 / 55108)
 
 **By:** 0102  

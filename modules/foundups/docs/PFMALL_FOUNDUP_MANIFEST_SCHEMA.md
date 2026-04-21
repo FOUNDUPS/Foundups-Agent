@@ -1,9 +1,10 @@
 # FoundUp Manifest / Template Schema
 
-**Status**: Architecture specification (first tranche)
+**Status**: Architecture specification (first tranche) — reconciled 2026-04-21
 **Owner**: 0102
 **Slice**: `pfmall_architecture_and_template_contract`
-**WSP References**: WSP 49 (Structure), WSP 97 (Concatenation Gate), WSP 29 (CABR Engine)
+**Reconciled**: PFMALL-MANIFEST-SCHEMA-RECON (W2, 2026-04-21)
+**WSP References**: WSP 49 (Structure), WSP 97 (Truth), WSP 29 (CABR Engine), WSP 104 (Namespace)
 
 ---
 
@@ -21,7 +22,7 @@ The **Video Mall Catalog** (`mall-video-catalog.json`) is a separate, simpler sc
 |---------|-------------|-------------------|
 | Purpose | Shell runtime loading | Mall field projection |
 | File | `foundup_manifest.json` | `mall-video-catalog.json` |
-| Signing | HMAC-SHA256 required | Not required |
+| Signing | HMAC-SHA256 specified (`SPECIFIED_NOT_IMPLEMENTED`) | Not required |
 | CABR | V1/V2/V3 contract | Not included |
 | Capabilities | Declared | Not included |
 | Videos | Not included | Primary content |
@@ -36,20 +37,20 @@ The **Video Mall Catalog** (`mall-video-catalog.json`) is a separate, simpler sc
 {
   "$schema": "https://foundups.org/schemas/foundup-manifest/v1.json",
 
-  "foundup_id": "string",
+  "foundup_id": "string (human-readable slug, e.g. 'gotjunk_001')",
   "name": "string",
   "version": "string (semver)",
   "description": "string (max 280 chars)",
   "tagline": "string (max 80 chars)",
 
   "tier": "F0_DAE | F1_OPO | F2_GROWTH | F3_INFRA | F4_MEGA | F5_SYSTEMIC",
-  "lifecycle_stage": "incubating | proto | externalized | federated",
+  "lifecycle_stage": "incubating | proto | externalized | federated  (see Section 2.3)",
 
   "entry_url": "string (relative or absolute URL to FoundUp bundle)",
   "routing_prefix": "/f/{foundup_id}",
   "icon_url": "string (path to icon, min 192x192)",
 
-  "required_subscription_tier": "free | starter | plus | pro | angel | ultimate",
+  "required_subscription_tier": "free | starter | basic | plus | pro | enterprise",
   "is_invite_only": "boolean",
 
   "capabilities": ["string"],
@@ -64,41 +65,61 @@ The **Video Mall Catalog** (`mall-video-catalog.json`) is a separate, simpler sc
     "v3_score_min": "number (0.0 - 1.0)"
   },
 
+  "category": "string (e.g. 'marketplace', 'media')",
+  "launch_readiness": "ready | conditional | discoverable_only",
+
   "min_shell_version": "string (semver)",
   "owner_id": "string",
   "token_symbol": "string",
   "created_at": "string (ISO 8601)",
 
-  "signature": "string (HMAC-SHA256 hex)"
+  "signature": "string (HMAC-SHA256 hex)  [SPECIFIED_NOT_IMPLEMENTED]"
 }
 ```
 
 ### 2.2 Field Definitions
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `foundup_id` | string | YES | Deterministic ID: `sha256(name:owner_id:created_at)[:16]` |
-| `name` | string | YES | Human-readable FoundUp name |
-| `version` | semver | YES | FoundUp version (independent of shell version) |
-| `description` | string (max 280) | YES | Short description for catalog display |
-| `tagline` | string (max 80) | YES | One-line tagline for catalog cards |
-| `tier` | enum | YES | DAO tier per `smartdao_spawning.py` (`DAOTier` enum) |
-| `lifecycle_stage` | enum | YES | Per Exfoliation Protocol stages |
-| `entry_url` | string | YES | URL to load the FoundUp bundle (JS entry point) |
-| `routing_prefix` | string | YES | Always `/f/{foundup_id}` |
-| `icon_url` | string | YES | App icon (min 192x192 for PWA) |
-| `required_subscription_tier` | enum | YES | Minimum tier from `subscription_tiers.py` |
-| `is_invite_only` | boolean | YES | `true` for pre-OPO FoundUps (F0_DAE) |
-| `capabilities` | string[] | YES | Declared capabilities (see Section 3) |
-| `agent_routes` | string[] | YES | OpenClaw routes this FoundUp may invoke |
-| `holo_collections` | string[] | NO | HoloIndex collections this FoundUp reads |
-| `data_namespace` | string | YES | IndexedDB namespace: `idb_{foundup_id}` |
-| `cabr_contract` | object | YES | CABR 3V validation rules |
-| `min_shell_version` | semver | NO | Minimum compatible shell version |
-| `owner_id` | string | YES | FoundUp creator/owner identifier |
-| `token_symbol` | string | YES | Token symbol per `TokenTerms` model |
-| `created_at` | ISO 8601 | YES | Creation timestamp |
-| `signature` | hex string | YES | HMAC-SHA256 of manifest body |
+| Field | Type | Required | Implementation Status | Description |
+|-------|------|----------|----------------------|-------------|
+| `foundup_id` | string | YES | `IMPLEMENTED_IN_MANIFESTS` | Human-readable slug (e.g. `gotjunk_001`, `kosei`). Min 3 chars, validated by `shell_core.py`. |
+| `name` | string | YES | `IMPLEMENTED_IN_MANIFESTS` | Human-readable FoundUp name |
+| `version` | semver | YES | `IMPLEMENTED_IN_MANIFESTS` | FoundUp version (independent of shell version) |
+| `description` | string (max 280) | YES | `IMPLEMENTED_IN_MANIFESTS` | Short description for catalog display |
+| `tagline` | string (max 80) | YES | `IMPLEMENTED_IN_MANIFESTS` | One-line tagline for catalog cards |
+| `tier` | enum | YES | `IMPLEMENTED_IN_MANIFESTS` | DAO tier per `smartdao_spawning.py` (`DAOTier` enum). Validated by `shell_core.py`. |
+| `lifecycle_stage` | enum | YES | `IMPLEMENTED_IN_MANIFESTS` | See Section 2.3 for dual stage sets. Validated by `shell_core.py`. |
+| `entry_url` | string | YES | `IMPLEMENTED_IN_MANIFESTS` | URL to load the FoundUp bundle (JS entry point) |
+| `routing_prefix` | string | YES | `IMPLEMENTED_IN_MANIFESTS` | Always `/f/{foundup_id}`. Validated by `test_namespace_guardrail.py` (WSP 104). |
+| `icon_url` | string | YES | `IMPLEMENTED_IN_MANIFESTS` | App icon (min 192x192 for PWA). May be `null` for incubating FoundUps. |
+| `required_subscription_tier` | enum | YES | `IMPLEMENTED_IN_MANIFESTS` | Minimum tier from `subscription_tiers.py` TIERS dict: `free, starter, basic, plus, pro, enterprise`. Angel tier is a separate class, not in this enum. |
+| `is_invite_only` | boolean | YES | `IMPLEMENTED_IN_MANIFESTS` | `true` for pre-OPO FoundUps (F0_DAE) |
+| `capabilities` | string[] | YES | `IMPLEMENTED_IN_MANIFESTS` | Declared capabilities (see Section 3) |
+| `agent_routes` | string[] | YES | `IMPLEMENTED_IN_MANIFESTS` | OpenClaw routes this FoundUp may invoke |
+| `holo_collections` | string[] | NO | `IMPLEMENTED_IN_MANIFESTS` | HoloIndex collections this FoundUp reads |
+| `data_namespace` | string | YES | `IMPLEMENTED_IN_MANIFESTS` | IndexedDB namespace: `idb_{foundup_id}`. Validated by `test_namespace_guardrail.py`. |
+| `cabr_contract` | object | YES | `IMPLEMENTED_IN_MANIFESTS` | CABR 3V validation rules |
+| `category` | string | NO | `IMPLEMENTED_IN_MANIFESTS` | FoundUp category (e.g. `marketplace`, `media`). Present in actual manifests, used by catalog export. |
+| `launch_readiness` | enum | NO | `IMPLEMENTED_IN_MANIFESTS` | One of: `ready`, `conditional`, `discoverable_only`. Validated by `shell_core.py`. |
+| `min_shell_version` | semver | NO | `SPECIFIED_NOT_IMPLEMENTED` | Minimum compatible shell version. Not present in any current manifest. |
+| `owner_id` | string | YES | `IMPLEMENTED_IN_MANIFESTS` | FoundUp creator/owner identifier |
+| `token_symbol` | string | YES | `IMPLEMENTED_IN_MANIFESTS` | Token symbol per `TokenTerms` model |
+| `created_at` | ISO 8601 | YES | `IMPLEMENTED_IN_MANIFESTS` | Creation timestamp |
+| `signature` | hex string | YES | `SPECIFIED_NOT_IMPLEMENTED` | HMAC-SHA256 of manifest body. All current manifests have `signature: ""`. No enforcement code exists in `shell_core.py`. See Section 6. |
+
+### 2.3 Lifecycle Stage — Dual Stage Sets
+
+> **WSP 97 note**: Two overlapping stage vocabularies exist in the codebase.
+
+| Stage Set | Values | Source | Where Used |
+|-----------|--------|--------|------------|
+| **Exfoliation Protocol** | `incubating`, `proto`, `externalized`, `federated` | Architecture spec, manifest schema | `foundup_manifest.json`, `gotjunk/tests/test_manifest.py` |
+| **Simulator** | `idea`, `poc`, `soft-proto`, `proto`, `mvp`, `launch` | `state_store.py` (FoundUpTile), cube_view | Simulator runtime, SSE server |
+
+`shell_core.py` VALID_STAGES accepts **both sets** (union). The gotjunk manifest test validates only the Exfoliation set. Simulator `state_store.py` uses `PoC / Proto / MVP` (capitalized). The canonical manifest schema uses the Exfoliation set; simulator stages appear only in the state overlay layer.
+
+### 2.4 `foundup_id` Format — Specification vs Implementation
+
+> **WSP 97 `SPECIFIED_NOT_IMPLEMENTED`**: The original plan specified deterministic IDs via `sha256(name:owner_id:created_at)[:16]` (16-char hex). Actual manifests use human-readable slugs (`gotjunk_001`, `kosei`). `shell_core.py` validates minimum 3 characters but does not enforce SHA256 format. The deterministic generation function is not implemented in any code path.
 
 ---
 
@@ -167,7 +188,9 @@ Reference: `WSP_knowledge/src/WSP_29_CABR_Engine.md`
 
 ## 6. Manifest Signing
 
-Manifests are signed using HMAC-SHA256, extending the existing `skill_manifest_guard.py` pattern.
+> **WSP 97 `SPECIFIED_NOT_IMPLEMENTED`**: The signing contract below is an architectural specification. No manifest in the repo has a populated `signature` field (all are `""`). `shell_core.py` does not verify signatures. `skill_manifest_guard.py` exists in `wre_core` for WRE skill manifests but has not been extended to FoundUp manifests. Signing is a prerequisite for production deployment but is not enforced today.
+
+Manifests are specified to be signed using HMAC-SHA256, extending the existing `skill_manifest_guard.py` pattern.
 
 ### 6.1 Signing Process
 
@@ -188,7 +211,7 @@ def sign_manifest(manifest: dict, secret_key: bytes) -> str:
 
 ### 6.2 Verification
 
-The shell verifies manifest signatures at:
+The shell is specified to verify manifest signatures at:
 1. **Catalog load** — reject unsigned or tampered manifests
 2. **FoundUp load** — re-verify before iframe creation
 3. **Agent request** — verify manifest hasn't changed mid-session
@@ -232,37 +255,42 @@ All FoundUp manifests share a base template. FoundUp-specific fields extend it.
 
 ## 8. Example Manifest: gotjunk
 
+The following is the **actual** `modules/foundups/gotjunk/foundup_manifest.json` (as of 2026-04-21):
+
 ```json
 {
   "$schema": "https://foundups.org/schemas/foundup-manifest/v1.json",
-  "foundup_id": "a3f8c1d2e4b67890",
+  "foundup_id": "gotjunk_001",
   "name": "GotJunk",
   "version": "0.3.0",
   "description": "Peer-to-peer marketplace for selling unwanted items. List it, price it, move it.",
   "tagline": "Turn your junk into someone's treasure",
   "tier": "F0_DAE",
   "lifecycle_stage": "proto",
-  "entry_url": "/foundups/gotjunk/bundle.js",
-  "routing_prefix": "/f/a3f8c1d2e4b67890",
-  "icon_url": "/foundups/gotjunk/icon-192.png",
+  "entry_url": "https://gotjunk-56566376153.us-west1.run.app/",
+  "routing_prefix": "/f/gotjunk_001",
+  "icon_url": "frontend/public/icon-192.svg",
   "required_subscription_tier": "free",
   "is_invite_only": true,
   "capabilities": ["search", "agents_basic", "marketplace", "offline"],
   "agent_routes": ["openclaw_query", "openclaw_task"],
-  "holo_collections": ["holo_a3f8c1d2e4b67890_listings"],
-  "data_namespace": "idb_a3f8c1d2e4b67890",
+  "holo_collections": [],
+  "data_namespace": "idb_gotjunk_001",
   "cabr_contract": {
     "v1_gate": "default",
-    "v2_proof": "marketplace_proof",
-    "v3_score_min": 0.6
+    "v2_proof": "default",
+    "v3_score_min": 0.5
   },
-  "min_shell_version": "1.0.0",
   "owner_id": "012",
   "token_symbol": "JUNK",
+  "category": "marketplace",
+  "launch_readiness": "conditional",
   "created_at": "2026-03-01T00:00:00Z",
-  "signature": "a1b2c3d4e5f6..."
+  "signature": ""
 }
 ```
+
+> **Note**: `signature` is empty (`SPECIFIED_NOT_IMPLEMENTED`). `category` and `launch_readiness` are fields present in deployed manifests but were missing from the original schema spec (now added in Section 2.2). `v2_proof` is `"default"` (not `"marketplace_proof"` as the original spec example showed). `holo_collections` is empty (HoloIndex integration not yet wired for gotjunk).
 
 ---
 
@@ -270,21 +298,23 @@ All FoundUp manifests share a base template. FoundUp-specific fields extend it.
 
 The shell validates manifests at load time. Any validation failure blocks the FoundUp from loading.
 
-| Rule | Check |
-|------|-------|
-| Required fields present | All fields marked YES in Section 2.2 |
-| `foundup_id` format | 16-char hex string |
-| `version` format | Valid semver |
-| `tier` value | One of `DAOTier` enum values |
-| `lifecycle_stage` value | One of: incubating, proto, externalized, federated |
-| `required_subscription_tier` value | One of: free, starter, plus, pro, angel, ultimate |
-| `capabilities` values | All entries in capabilities registry (Section 3) |
-| `agent_routes` values | All entries are known OpenClaw routes |
-| `data_namespace` format | Must be `idb_{foundup_id}` |
-| `cabr_contract.v3_score_min` | Number between 0.0 and 1.0 |
-| `signature` valid | HMAC-SHA256 verification passes |
-| `description` length | Max 280 characters |
-| `tagline` length | Max 80 characters |
+| Rule | Check | Implementation Status |
+|------|-------|----------------------|
+| Required fields present | All fields marked YES in Section 2.2 | `IMPLEMENTED_IN_TESTS` (`shell_core.py` validate_manifest) |
+| `foundup_id` format | Min 3 chars, lowercase alphanumeric + underscore | `IMPLEMENTED_IN_TESTS` (`shell_core.py`) |
+| `version` format | Valid semver | `ARCHITECTURAL_CONTRACT` (not validated at runtime) |
+| `tier` value | One of `DAOTier` enum values (F0_DAE through F5_SYSTEMIC) | `IMPLEMENTED_IN_TESTS` (`shell_core.py` VALID_TIERS) |
+| `lifecycle_stage` value | Exfoliation set + simulator set (see Section 2.3) | `IMPLEMENTED_IN_TESTS` (`shell_core.py` VALID_STAGES) |
+| `required_subscription_tier` value | One of: `free, starter, basic, plus, pro, enterprise` | `IMPLEMENTED_IN_MANIFESTS` (matches `subscription_tiers.py` TIERS dict) |
+| `launch_readiness` value | One of: `ready, conditional, discoverable_only` | `IMPLEMENTED_IN_TESTS` (`shell_core.py` VALID_READINESS) |
+| `capabilities` values | All entries in capabilities registry (Section 3) | `ARCHITECTURAL_CONTRACT` (not validated at runtime) |
+| `agent_routes` values | All entries are known OpenClaw routes | `ARCHITECTURAL_CONTRACT` (not validated at runtime) |
+| `data_namespace` format | Must be `idb_{foundup_id}` | `IMPLEMENTED_IN_TESTS` (`test_namespace_guardrail.py`) |
+| `routing_prefix` format | Must be `/f/{foundup_id}` | `IMPLEMENTED_IN_TESTS` (`test_namespace_guardrail.py`, WSP 104) |
+| `cabr_contract.v3_score_min` | Number between 0.0 and 1.0 | `ARCHITECTURAL_CONTRACT` (not validated at runtime) |
+| `signature` valid | HMAC-SHA256 verification passes | `SPECIFIED_NOT_IMPLEMENTED` (see Section 6) |
+| `description` length | Max 280 characters | `ARCHITECTURAL_CONTRACT` (not validated at runtime) |
+| `tagline` length | Max 80 characters | `ARCHITECTURAL_CONTRACT` (not validated at runtime) |
 
 ---
 
@@ -292,7 +322,7 @@ The shell validates manifests at load time. Any validation failure blocks the Fo
 
 ```
 1. AUTHOR: FoundUp developer creates manifest
-2. SIGN: Manifest signed with project secret key
+2. SIGN: Manifest signed with project secret key  [SPECIFIED_NOT_IMPLEMENTED]
 3. REGISTER: Manifest added to catalog.json
 4. VALIDATE: Shell validates at catalog load
 5. LOAD: Shell re-validates before creating iframe
@@ -319,3 +349,20 @@ The manifest is a **static contract** — it declares what a FoundUp is, what it
 | CABR scores (V3 valuation) | State overlay (dynamic) | Per validation cycle |
 
 The simulator (`modules/foundups/simulator/`) may serve as one PoC provider of state overlay data, but it is not the permanent architecture. See `PFMALL_STATE_OVERLAY_CONTRACT.md` for the dynamic state plane contract.
+
+---
+
+## 12. WSP 97 Truth Summary (Reconciliation 2026-04-21)
+
+| Area | Finding | Marker |
+|------|---------|--------|
+| `foundup_id` generation | Spec said SHA256 hash; actual manifests use human-readable slugs | `SPECIFIED_NOT_IMPLEMENTED` |
+| HMAC signing | Spec says required; all manifests have `signature: ""`, no enforcement | `SPECIFIED_NOT_IMPLEMENTED` |
+| `min_shell_version` | Spec says optional; no manifest includes it | `SPECIFIED_NOT_IMPLEMENTED` |
+| `required_subscription_tier` enum | Spec said `angel, ultimate`; code has `basic, enterprise` | **Corrected** in this reconciliation |
+| `category` field | Present in manifests, missing from spec | **Added** in this reconciliation |
+| `launch_readiness` field | Present in manifests + shell_core, missing from spec | **Added** in this reconciliation |
+| `lifecycle_stage` dual sets | Exfoliation + simulator stages coexist in `shell_core.py` | **Documented** in Section 2.3 |
+| `tier` enum | Matches `DAOTier` in `smartdao_spawning.py` | Aligned |
+| Shell contract consistency | `PFMALL_SHELL_CONTRACT.md` consistent with manifest schema | Verified |
+| Namespace guardrail | `test_namespace_guardrail.py` enforces `routing_prefix` and `data_namespace` | `IMPLEMENTED_IN_TESTS` |
