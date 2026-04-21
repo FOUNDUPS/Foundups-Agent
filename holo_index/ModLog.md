@@ -1,5 +1,130 @@
 # HoloIndex Package ModLog
 
+## [2026-04-21] HIA-TAX1 — Retrieval Mode / Embedding Backend Taxonomy Correction (hia_tax1_retrieval_mode_taxonomy_correction)
+
+**Agent**: 0102 (W5)
+**WSP References**: WSP 97 (truth distinction)
+**Status**: COMPLETE
+**Depends On**: HIA2 — TurboQuant Backend Scaffolding Phase 1 (this ModLog, entry below)
+**Architect Decision**: 012 — TurboQuant direction `ACCEPT_WITH_RECLASSIFICATION`. TurboQuant is a semantic backend, not a retrieval mode.
+
+### Context
+
+HIA2 initially wired `self.retrieval_mode = "turboquant"` into the model-load tree. That conflated two distinct WSP 97 claims:
+
+- **retrieval_mode** — *what* retrieval is doing (semantic vector search / lexical text match / failed)
+- **embedding_backend** — *how* semantic vectors are produced (sentence_transformers / turboquant / none)
+
+Calling a quantized MiniLM backend a new "mode" overclaims: retrieval is still semantic; only the embedder changed. HIA-TAX1 splits the two fields before any real quantized backend lands, so future slices (HIA3/W7) can swap embedders without relabeling retrieval behavior.
+
+### Changes
+
+1. **`holo_index/core/holo_index.py`** — introduced `self.embedding_backend` alongside `self.retrieval_mode` in `_load_model`. Both are set explicitly on every branch:
+
+   | Path | retrieval_mode | embedding_backend |
+   |---|---|---|
+   | Init default | `failed` | `none` |
+   | `HOLO_SKIP_MODEL=1` | `lexical` | `none` |
+   | `HOLO_OFFLINE=1` + cache missing | `lexical` | `none` |
+   | TurboQuant loaded | `semantic` | `turboquant` |
+   | ST import timeout | `lexical` | `none` |
+   | ST load timeout / fail | `lexical` | `none` |
+   | ST loaded | `semantic` | `sentence_transformers` |
+   | ST module unavailable | `lexical` | `none` |
+
+   The gate that skipped the ST path when TurboQuant succeeded now reads `self.embedding_backend == "turboquant"` — behaviorally identical, semantically correct.
+
+2. **`holo_index/core/search_engine.py`** — `embedding_backend` added to the `metadata` dict alongside `retrieval_mode` in the success-return payload. Both fields now surface to callers (MCP, CLI, tests).
+
+3. **`holo_index/tests/test_turboquant_wiring.py`** — `TestRetrievalModeBackendTuple` class asserts `(mode, backend)` tuple resolution. Invariant test `test_turboquant_never_labels_itself_as_a_retrieval_mode` guards against regressing to the pre-TAX1 conflation.
+
+### Taxonomy (canonical, WSP 97)
+
+```
+retrieval_mode    ∈ {semantic, lexical, failed}
+embedding_backend ∈ {sentence_transformers, turboquant, none}
+```
+
+Invariants:
+- `retrieval_mode == "semantic"` ⇒ `embedding_backend ∈ {sentence_transformers, turboquant}`
+- `retrieval_mode ∈ {"lexical", "failed"}` ⇒ `embedding_backend == "none"`
+- `"turboquant"` is never a `retrieval_mode` value.
+
+### Test results
+
+- `test_turboquant_backend.py` — 6/6 pass (stub surface, W8-authored coverage suite)
+- `test_turboquant_wiring.py` — 11/11 pass (6 env-flag + 5 tuple-resolution)
+- `test_fx1_holoindex_truth.py` — 11/11 pass — FX1/FX2 regression unaffected
+- Combined run — 28/28 pass
+
+### Scope enforcement
+
+No retrieval behavior changed. No reindex. No new dependencies. TurboQuant scaffold preserved untouched — only its truth-reporting label was corrected.
+
+### Next
+
+`COMMIT_ALL_HIA2+TAX1`. After commit, the next slice per architect is **TQ1 — TurboQuant Backend Decision Phase 1**: read-only benchmark comparing (A) ONNX int8 MiniLM, (B) llama-cpp quantized embeddings, (C) keep sentence_transformers with longer timeout. Implementation slice (HIA3/W7) blocked on TQ1 outcome.
+
+---
+
+## [2026-04-21] HIA2 — TurboQuant Backend Scaffolding Phase 1 (hia2_turboquant_backend_scaffolding_phase1)
+
+**Agent**: 0102 (W5)
+**WSP References**: WSP 97 (truth distinction), WSP 49 (module structure), WSP 72 (block independence)
+**Status**: COMPLETE (scaffold only — no real quantization wired)
+**Depends On**: HIA1 — `docs/audits/HIA1_HOLOINDEX_ARCHITECTURE_AUDIT.md` (2026-04-21)
+
+### Context
+
+HIA1 mapped the HoloIndex architecture and identified `_load_model` + `_get_embedding` as the minimal integration surface for an int8 embedding backend. HIA2 Phase 1 installs the opt-in switch and stub backend so a future slice (after TQ1 decision) can drop in a real quantizer without touching `HoloIndex.__init__` again.
+
+### Changes
+
+1. **Created** `holo_index/core/turboquant_backend.py` (66 lines):
+   - `TurboQuantEmbedder` class (stub). `is_available()` returns `False`; `encode()` raises `NotImplementedError`.
+   - `_turboquant_marker = True` — duck-type sentinel used by boot to tag the backend.
+   - `EMBEDDING_DIM = 384` — pinned to the ChromaDB-stored vector width (B1 from HIA1).
+   - Docstring documents the `encode(text, show_progress_bar=False) -> np.ndarray[float32, 384]` contract.
+
+2. **Modified** `holo_index/core/holo_index.py`:
+   - Added `_turboquant_enabled()` helper: pure env-read of `HOLO_USE_TURBOQUANT`.
+   - Injected TurboQuant branch inside the existing `else:` of the model-load tree (between the `HOLO_OFFLINE` guard and the SentenceTransformer import). When enabled and available, loads `TurboQuantEmbedder`; otherwise logs a warning and falls through to the existing SentenceTransformer path unchanged.
+   - No existing branch was removed or re-ordered. `HOLO_SKIP_MODEL=1`, `HOLO_OFFLINE=1`, and the default semantic path all behave identically to pre-HIA2.
+
+3. **Created** `holo_index/tests/test_turboquant_wiring.py` (11 tests, all passing):
+   - `TestTurboQuantEnvFlag`: 6 cases covering unset / `"0"` / `"1"` / `"true"` / `"YES"` / `"off"`.
+   - `TestRetrievalModeBackendTuple`: (mode, backend) tuple resolution mirroring `__init__` branch logic.
+   - Stub-surface tests (`is_available()`, `encode()` raises, marker, dim) live in the W8-authored `test_turboquant_backend.py`; not duplicated here.
+
+### HIA1 blockers — disposition
+
+| # | Blocker (from HIA1 §4.3) | Status in HIA2 |
+|---|---|---|
+| B1 | 384-dim float32 vector contract | **Addressed** — pinned as `EMBEDDING_DIM = 384` constant |
+| B2 | No backend-selector env var | **Addressed** — `HOLO_USE_TURBOQUANT` + `_turboquant_enabled()` helper |
+| B3 | `HOLO_SEARCH_TIMEOUT` declared but not wired | **Deferred** — out of HIA2 scope |
+| B4 | Singleton `_shared_state` prevents runtime backend swap | **Documented** — turboquant_backend.py docstring explicitly notes the constraint |
+| B5 | `numpy` not explicit in `requirements.txt` | **Deferred** — scaffold does not import numpy directly |
+| B6 | No end-to-end boot test with `HOLO_USE_TURBOQUANT=1` | **Deferred** — needs real backend to test against; HIA3/W7 scope |
+
+### Scope enforcement
+
+No actual quantization implemented. No existing retrieval path modified. `HOLO_USE_TURBOQUANT=0` (default) produces bit-identical behaviour to pre-HIA2. `HOLO_USE_TURBOQUANT=1` logs a warning and falls through to SentenceTransformer.
+
+### Process note — WSP 50 self-violation
+
+I did not run a HoloIndex / grep search for "turboquant" before starting HIA2. Caught by 012. Consequences surfaced during remediation:
+- W6's `docs/research/TQ0_TURBOQUANT_RESEARCH.md` already existed, recommending Option A (`optimum[onnxruntime]` + ONNX int8 export of MiniLM-L6-v2). My initial "Next: WAITING_W6_FOR_BACKEND" claim was false.
+- W8's `test_turboquant_backend.py` test file was authored in parallel (coverage focus). Reconciled: W8's file stays as the stub-surface coverage suite; my `test_turboquant_wiring.py` covers env-flag + mode/backend tuple only.
+
+Corrective protocol for future slices: run `grep -rn <topic>` and `python holo_index.py --search "<topic>"` **before** writing any file, regardless of how the brief frames existing work.
+
+### Next
+
+`PR_READY`. Real backend swap is a separate **HIA3 / W7** slice after **TQ1** decision lands (A/B/C benchmark per architect).
+
+---
+
 ## [2026-04-17] HoloIndex Connector/Interceptor Response Handshake Fix (Worker CY2)
 
 **Worker**: CY2

@@ -568,8 +568,11 @@ def execute_search(
                 "symbol_count": len(symbol_results),
                 "timestamp": datetime.now().isoformat(),
                 "cached": False,
-                # FX1-D: Surface retrieval mode in search results
+                # FX1-D: Surface retrieval mode in search results.
+                # HIA-TAX1: retrieval_mode describes behavior (semantic/lexical/failed);
+                # embedding_backend describes implementation (sentence_transformers/turboquant/none).
                 "retrieval_mode": getattr(holo, "retrieval_mode", "unknown"),
+                "embedding_backend": getattr(holo, "embedding_backend", "unknown"),
             },
         }
 
