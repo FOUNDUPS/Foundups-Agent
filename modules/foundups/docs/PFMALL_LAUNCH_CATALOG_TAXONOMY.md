@@ -15,7 +15,7 @@
 | Catalog file (`mall-video-catalog.json`) | `IMPLEMENTED_IN_CATALOG` | 13 entries in `public/member/mall-video-catalog.json` |
 | Category taxonomy | `PARTIAL` | Spec defined 5 categories; catalog uses 9 (`travel`, `music`, `startup`, `media`, `marketplace`, `science`, `thought-leadership`, `ai-education`, `ai-research`). `games` and `community` specified but not in catalog. |
 | FoundUp portfolio classification | `PARTIAL` | Spec listed 6 FoundUps; catalog contains 13. 3 spec entries (Whack-a-Magot, YouTube Engagement, LinkedIn Agent) absent from catalog. Kosei was missing from spec entirely. |
-| Bound tenant manifests | `IMPLEMENTED_IN_MANIFESTS` | `gotjunk_001` and `kosei` have `foundup_manifest.json` with `routing_prefix` + `data_namespace`. All others are discoverable-only video tiles. |
+| Bound tenant manifests | `IMPLEMENTED_IN_MANIFESTS` | `gotjunk_001` and `kosei` have `foundup_manifest.json` with `routing_prefix` + `data_namespace`. All other FoundUps are discoverable-only (catalog presence, not yet bound). |
 | Namespace guardrail testing | `IMPLEMENTED_IN_TESTS` | `test_namespace_guardrail.py` validates WSP 104 constraints for bound tenants |
 | HMAC manifest signing | `SPECIFIED_NOT_IMPLEMENTED` | All manifests have `signature: ""`. `skill_manifest_guard.py` exists for WRE skills, not extended to FoundUp manifests. |
 | `required_subscription_tier` enum | `SPECIFIED_NOT_IMPLEMENTED` | No `required_subscription_tier` field in actual catalog entries. Spec used `angel, ultimate`; codebase uses `free, starter, basic, plus, pro, enterprise` (per `subscription_tiers.py`). |
@@ -25,13 +25,17 @@
 | Catalog versioning | `SPECIFIED_NOT_IMPLEMENTED` | No version field in `mall-video-catalog.json` |
 | External FoundUp linking | `PARTIAL` | `science_swarm` and `autopost` marked `externalized` in catalog but no `external_url` field exists in catalog schema |
 
-**Phase 1 reality**: `mall-video-catalog.json` is the operational catalog with 13 video-tile entries across 9 categories. Only 2 are bound tenants (gotjunk_001, kosei) with full manifest/route/namespace binding. The remaining 11 are discoverable-only video tiles with no manifest, no route, no iframe loading. Badge rendering, tier gating, HMAC signing, and catalog versioning are Phase 2.
+**Phase 1 reality**: `mall-video-catalog.json` is the operational catalog with 13 FoundUps across 9 categories. All 13 are FoundUps — videos are the catalog layer telling each FoundUp's story. 2 are bound FoundUps (gotjunk_001, kosei) with full manifest/route/namespace binding. The remaining 11 are discoverable-only FoundUps with catalog presence through video tiles, not yet bound as tenants. Badge rendering, tier gating, HMAC signing, and catalog versioning are Phase 2.
 
 ---
 
 ## 1. Purpose
 
-Define the category taxonomy for FoundUps in the p.fMALL launch catalog, classify the initial portfolio, and establish rules for catalog membership.
+p.fMALL is an **AI interaction space** — a new way of interacting with AI and the world. Video is the default surface, but the paradigm extends to any content type: documents, community, FoundUps. The same interaction model (pinch, zoom, navigate) works everywhere, with AI mediating all engagement. Built for FoundUps first, with hooks into all content.
+
+Videos are the **catalog layer** — they tell each FoundUp's story. Every FoundUp in the catalog is a FoundUp, regardless of binding maturity. The distinction is not "FoundUp vs content" but "bound FoundUp vs discoverable-only FoundUp."
+
+This document defines the category taxonomy for FoundUps in the p.fMALL catalog, classifies the current portfolio, and establishes rules for catalog membership and binding maturity progression.
 
 ---
 
@@ -84,9 +88,9 @@ These FoundUps have `foundup_manifest.json`, `routing_prefix`, and `data_namespa
 | **GotJunk** | `gotjunk_001` | marketplace | F0_DAE | proto | conditional | `/f/gotjunk_001` | `idb_gotjunk_001` |
 | **Kosei** | `kosei` | media | F0_DAE | incubating | ready | `/f/kosei` | `idb_kosei` |
 
-### 3.2 Discoverable-Only Video Tiles
+### 3.2 Discoverable-Only FoundUps
 
-These FoundUps appear in the catalog as video tiles but have no manifest, no route binding, and no iframe loading. They are content discovery surfaces only.
+These FoundUps have catalog presence through video tiles (the catalog layer) but have no manifest, no route binding, and no iframe loading yet. Binding is a maturity step — these are valid FoundUps at an earlier stage of the binding lifecycle.
 
 | FoundUp | `foundup_id` | Category | Tier | Lifecycle | Launch Readiness |
 |---------|-------------|----------|------|-----------|-----------------|
@@ -102,15 +106,15 @@ These FoundUps appear in the catalog as video tiles but have no manifest, no rou
 | **Science Swarm** | `science_swarm` | science | F0_DAE | externalized | discoverable_only |
 | **AutoPost** | `autopost` | media | F0_DAE | externalized | discoverable_only |
 
-### 3.3 In Spec But Not in Catalog
+### 3.3 FoundUps Not Yet in Catalog
 
-These FoundUps were listed in the original taxonomy but have no entry in `mall-video-catalog.json`:
+These are FoundUps recognized in the original taxonomy that have not yet entered `mall-video-catalog.json`. They are FoundUps — the catalog entry is a maturity step, not a classification gate.
 
 | FoundUp | Original Category | Original Lifecycle | Status |
 |---------|------------------|--------------------|--------|
-| **Whack-a-Magot** | games | incubating | No catalog entry, no manifest, concept only |
-| **YouTube Engagement** | community | incubating | No catalog entry, no manifest |
-| **LinkedIn Agent** | community | incubating | Possibly subsumed by the 4 LinkedIn-prefixed entries above |
+| **Whack-a-Magot** | games | incubating | FoundUp at concept stage — needs catalog entry to become discoverable |
+| **YouTube Engagement** | community | incubating | FoundUp — needs catalog entry |
+| **LinkedIn Agent** | community | incubating | FoundUp — possibly subsumed by the 4 LinkedIn-prefixed FoundUps above |
 
 ### 3.4 NOT in Catalog (Infrastructure)
 
