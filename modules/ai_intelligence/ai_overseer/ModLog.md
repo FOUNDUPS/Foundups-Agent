@@ -2,7 +2,58 @@
 
 **Module**: `modules/ai_intelligence/ai_overseer/`
 **Status**: Active (Autonomous Code Patching + Daemon Restart + Activity Routing)
-**Version**: 0.10.3
+**Version**: 0.10.4
+
+---
+
+## 2026-04-23 - FAM-IDEATION2: FoundUp Genesis Envelope Schema + Validator
+
+**Author**: 0102
+**WSP**: 97 (Implementation Truth), 104 (Namespace Protocol)
+**Slice**: FAM-IDEATION2 — FOUNDUP_GENESIS_ENVELOPE_SCHEMA_VALIDATOR
+**Window**: W1
+
+### Summary
+
+Created RedDog intake capability for AI Overseer. When 012 requests a new FoundUp,
+0102 invokes `foundup_genesis_intake` to create and validate a FoundUpGenesisEnvelope
+BEFORE any code, scaffold, or manifest is created.
+
+### Files Added
+
+| File | Purpose |
+|------|---------|
+| `src/foundup_genesis/__init__.py` | Package exports |
+| `src/foundup_genesis/envelope.py` | Envelope schema, enums, dataclasses |
+| `src/foundup_genesis/validator.py` | WSP 97 + WSP 104 validation rules |
+| `skillz/foundup_genesis_intake/SKILLz.md` | RedDog skill contract |
+| `tests/test_foundup_genesis_validator.py` | 29 unit tests |
+| `tests/conftest.py` | Added to allowlist |
+
+### Validator Enforcement
+
+- foundup_id format (WSP 104: lowercase, 3-50 chars)
+- foundup_id not reserved (infrastructure, existing)
+- lifecycle_stage: IDEA or INCUBATING only at genesis
+- binding_state: UNBOUND or DISCOVERABLE_ONLY only
+- external_repo_requested: must be False at genesis
+- acceptance_criteria: all four fields required
+- truth_state_map: no IMPLEMENTED claims without evidence (WSP 97)
+
+### Tests
+
+29 tests covering:
+- foundup_id format validation (12 tests)
+- Envelope creation and serialization (4 tests)
+- Validator rules (11 tests)
+- Integration roundtrip (2 tests)
+
+### What This Does NOT Include
+
+- Scaffold creation (separate slice)
+- pfMALL catalog write (separate slice)
+- Hermes/Claw build (separate slice)
+- HoloIndex recall implementation (Phase 2)
 
 ---
 
