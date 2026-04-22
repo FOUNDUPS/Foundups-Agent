@@ -37,6 +37,43 @@ def _tokenize_query(query: str) -> List[str]:
     return [token for token in re.findall(r"[a-z0-9_]+", query.lower()) if token]
 
 
+# ---------------------------------------------------------------------------
+# HIA3 (2026-04-23): backend quality taxonomy (WSP 97 truth distinction).
+#
+# These dicts map embedding_backend -> quality claim. They are surfaced on
+# every search response's metadata so callers can distinguish a
+# default-ready backend (SentenceTransformer fp32) from an experimental
+# opt-in backend (TurboQuant ONNX int8) without re-checking env vars.
+#
+#   backend_quality ∈ {production, experimental, n/a, unknown}
+#   quality_gate    ∈ {default_ready, not_default_ready, n/a, unknown}
+#
+# "n/a" is used when no embedder is loaded (lexical/failed retrieval).
+# ---------------------------------------------------------------------------
+
+_BACKEND_QUALITY: Dict[str, str] = {
+    "sentence_transformers": "production",
+    "turboquant_onnx_int8": "experimental",
+    "none": "n/a",
+}
+
+_QUALITY_GATE: Dict[str, str] = {
+    "sentence_transformers": "default_ready",
+    "turboquant_onnx_int8": "not_default_ready",
+    "none": "n/a",
+}
+
+
+def _backend_quality(backend: str) -> str:
+    """Return the quality claim for *backend*; 'unknown' if not registered."""
+    return _BACKEND_QUALITY.get(backend, "unknown")
+
+
+def _quality_gate(backend: str) -> str:
+    """Return the default-promotion gate for *backend*; 'unknown' if not registered."""
+    return _QUALITY_GATE.get(backend, "unknown")
+
+
 def _is_symbol_query(query: str) -> bool:
     """Heuristic: detect symbol-like queries (identifiers, paths, function calls)."""
     if not query:
@@ -570,9 +607,20 @@ def execute_search(
                 "cached": False,
                 # FX1-D: Surface retrieval mode in search results.
                 # HIA-TAX1: retrieval_mode describes behavior (semantic/lexical/failed);
-                # embedding_backend describes implementation (sentence_transformers/turboquant/none).
+                # embedding_backend describes implementation
+                # (sentence_transformers / turboquant_onnx_int8 / none).
+                # HIA3: backend_quality + quality_gate describe *truth-level*
+                # claims about that backend (WSP 97). TurboQuant is
+                # experimental / not_default_ready until static calibration
+                # closes the 3.65% cosine-drift gap.
                 "retrieval_mode": getattr(holo, "retrieval_mode", "unknown"),
                 "embedding_backend": getattr(holo, "embedding_backend", "unknown"),
+                "backend_quality": _backend_quality(
+                    getattr(holo, "embedding_backend", "unknown")
+                ),
+                "quality_gate": _quality_gate(
+                    getattr(holo, "embedding_backend", "unknown")
+                ),
             },
         }
 

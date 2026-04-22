@@ -1,5 +1,89 @@
 # HoloIndex Package ModLog
 
+## [2026-04-23] HIA3 — TurboQuant ONNX int8 Backend (experimental, opt-in) (hia3_turboquant_onnx_backend)
+
+**Agent**: 0102 (W5)
+**WSP References**: WSP 97 (truth distinction), WSP 49 (module structure), WSP 50 (pre-action verification)
+**Status**: COMPLETE (experimental; not default-ready)
+**Depends On**: HIA-TAX1 (taxonomy — this ModLog, entry below)
+**Architect Decision**: 012 — HIA3 ships the safe backend seam only. Quality work (static calibration + real-corpus A/B) deferred to a separate TQ2-STATIC-CALIBRATION slice.
+**Branch**: `feat/hia3-turboquant-onnx-backend`
+**Worktree**: `O:/tmp/w5_hia3_turboquant_onnx` (isolated — dedicated to HIA3 to avoid the parallel-window collision that reverted the first attempt in the primary worktree).
+
+### Context
+
+HIA2 Phase 1 shipped a `TurboQuantEmbedder` stub whose `is_available()` always returned `False` and whose `encode()` raised `NotImplementedError`. HIA-TAX1 corrected the taxonomy so HIA3 could replace the stub with a real backend without overclaiming (retrieval_mode vs embedding_backend are now separate WSP 97 claims).
+
+The TQ1 benchmark (see `holo_index/scripts/benchmarks/tq1_onnx_int8_bench.py`) measured:
+
+- **Performance**: 5.6x cold start, 6.6x load, 8.8x median single-query, 4.0x smaller artifact on MiniLM-L6-v2 (fp32 → int8).
+- **Quality**: 3.65% mean cosine drift vs fp32 (above the 2% same-model threshold) and 76.7% synthetic top-1 retrieval agreement (~23% flip rate).
+
+Per 012 direction: **performance accepted, quality gated**. Ship the safe backend seam as experimental opt-in; promote to default only after static calibration and real-corpus A/B gating in a later slice.
+
+### Changes
+
+1. **`holo_index/core/turboquant_backend.py`** — stub replaced with a real ONNX Runtime int8 embedder:
+   - Optional-import guards for `onnxruntime` (not added to `holo_index/requirements.txt` as a hard dep) and `transformers` (transitively provided by `sentence-transformers>=2.2.0`).
+   - `HOLO_TURBOQUANT_MODEL_DIR` env var (default `E:/HoloIndex/models/tq1_onnx_int8/`).
+   - Tokenizer probe accepts either `tokenizer.json` (fast) or the `vocab.txt`+`tokenizer_config.json` legacy pair.
+   - `is_available()` classmethod — never raises; returns `False` on any missing precondition.
+   - `_ensure_loaded()` raises `RuntimeError` with actionable messages; HoloIndex catches and falls back.
+   - `encode(text, show_progress_bar=False)` — tokenize → ORT forward → attention-mask-weighted mean pool → L2 normalize → 1-D `float32` length 384.
+   - Module constants surface truth claims: `BACKEND_NAME="turboquant_onnx_int8"`, `BACKEND_QUALITY="experimental"`, `QUALITY_GATE="not_default_ready"`.
+
+2. **`holo_index/core/holo_index.py`** — wiring updated:
+   - `embedding_backend` now uses the canonical `BACKEND_NAME` constant (`"turboquant_onnx_int8"`, previously the placeholder `"turboquant"`).
+   - Inner try/except around `embedder._ensure_loaded()` so load failures drop cleanly to the `SentenceTransformer` fallback.
+   - Downstream branch check uses `embedding_backend.startswith("turboquant")` with isinstance guard.
+   - Taxonomy comment block extended with HIA3 note on the `experimental` / `not_default_ready` surface.
+
+3. **`holo_index/core/search_engine.py`** — quality metadata surfaced on every search response:
+   - `_BACKEND_QUALITY` and `_QUALITY_GATE` dicts map `embedding_backend` → claim.
+   - `_backend_quality()` / `_quality_gate()` helpers.
+   - Payload `metadata` dict gains `backend_quality` and `quality_gate` fields alongside the existing `retrieval_mode` / `embedding_backend`.
+
+4. **`holo_index/tests/test_turboquant_backend.py`** — stub tests replaced with a mocked-contract suite (32 tests, 31 run / 1 skipped):
+   - Module constants, duck-type marker, env-var model-dir resolution.
+   - `_tokenizer_files_present` fast / legacy / negative paths.
+   - `is_available()` seven failure-mode branches (+ defensive OSError handling).
+   - `_ensure_loaded()` five failure-mode branches with actionable `RuntimeError` matches.
+   - `encode()` contract tests with `MagicMock` ORT session + tokenizer: dtype/ndim/length, L2 normalization, `show_progress_bar` kwarg compat, input-name filtering.
+   - Construction is side-effect-free (no model I/O in `__init__`).
+   - Optional real-model smoke test gated behind `HOLO_TURBOQUANT_SMOKE=1` + artifact presence.
+
+### Default Unchanged
+
+`HOLO_USE_TURBOQUANT=0` (the default) keeps HoloIndex on the `SentenceTransformer` path, bit-identical to pre-HIA3 behavior. TurboQuant engages only when:
+
+1. `HOLO_USE_TURBOQUANT=1` is set, **and**
+2. `onnxruntime` is importable, **and**
+3. The model artifacts are present on disk at `HOLO_TURBOQUANT_MODEL_DIR`.
+
+Any failure in this chain logs a warning and falls back to `SentenceTransformer`.
+
+### Quality Caveat (WSP 97)
+
+Callers can distinguish this backend from the fp32 baseline without re-checking env vars by reading the `metadata.backend_quality` / `metadata.quality_gate` fields on every search response. A `backend_quality="experimental"` / `quality_gate="not_default_ready"` result means the retrieval is running on the int8 backend and has measured drift vs fp32; downstream consumers should gate automation and ranking decisions accordingly until the calibration slice closes the gap.
+
+### Out of Scope (Explicitly Deferred)
+
+- Static calibration of the int8 quantization scales (TQ2-STATIC-CALIBRATION slice).
+- Real-corpus A/B gating on the live `navigation_code` / `navigation_wsp` collections.
+- Flipping the default to TurboQuant.
+- Full reindex of ChromaDB collections (dim unchanged at 384, so existing collections remain compatible).
+
+### Validation
+
+- `python -m pytest holo_index/tests/test_turboquant_backend.py -v` → **31 passed, 1 skipped**.
+- `python -m pytest holo_index/tests/test_fx1_holoindex_truth.py -v` → **11 passed** (metadata surface unregressed).
+
+### Forensics / Worktree Note
+
+HIA3 attempt #1 in the primary worktree (`O:/Foundups-Agent`) reverted to HEAD before commit — root cause: parallel-window collision (another window checked out a different branch in the same shared worktree within 32 seconds of HIA3 branch creation; reflog confirms 10+ subsequent branch switches). Remediation: HIA3 reapplied in a dedicated isolated worktree at `O:/tmp/w5_hia3_turboquant_onnx`. Worktree stays intact until the PR is merged.
+
+---
+
 ## [2026-04-21] HIA-TAX1 — Retrieval Mode / Embedding Backend Taxonomy Correction (hia_tax1_retrieval_mode_taxonomy_correction)
 
 **Agent**: 0102 (W5)
