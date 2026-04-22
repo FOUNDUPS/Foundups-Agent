@@ -48,12 +48,22 @@ VALID_STAGES = frozenset({
     "idea", "poc", "soft-proto", "proto", "mvp", "launch",
     # Exfoliation protocol stages (per PFMALL_FOUNDUP_MANIFEST_SCHEMA.md)
     "incubating", "externalized", "federated",
+    # Catalog operational stages (used by mall-video-catalog.json)
+    "active", "staging",
 })
 
 VALID_READINESS = frozenset({
     "ready",              # Frontend exists, tests pass, can be loaded in shell
     "conditional",        # Frontend exists but has known gaps
     "discoverable_only",  # No frontend, catalog info card only
+})
+
+VALID_CATEGORIES = frozenset({
+    # Original spec categories
+    "marketplace", "media", "science", "games", "community",
+    # Catalog-emergent categories (from mall-video-catalog.json)
+    "travel", "music", "startup",
+    "thought-leadership", "ai-education", "ai-research",
 })
 
 SHELL_ROUTES = frozenset({

@@ -2,6 +2,35 @@
 
 ## Chronological Change Log
 
+### 2026-04-23 - Catalog FoundUp Truth Gate (W2: PFMALL-CATALOG-FOUNDUP-TRUTH-GATE)
+
+**By:** 0102 (W2) — **Slice:** `PFMALL-CATALOG-FOUNDUP-TRUTH-GATE`
+**WSP References:** WSP 97 (Truth), WSP 104 (Namespace)
+
+**Added**:
+- `modules/foundups/pfmall/tests/test_catalog_foundup_truth_gate.py` — 25 tests validating every catalog entry as a FoundUp
+
+**Updated**:
+- `modules/foundups/pfmall/shell_core.py`
+  - Added `VALID_CATEGORIES` frozenset (11 categories: 5 original + 6 catalog-emergent)
+  - Added `active`, `staging` to `VALID_STAGES` (used by catalog, were missing)
+
+**Validation gate enforces**:
+- Every catalog entry has foundup_id, category, lifecycle_stage, launch_readiness, tier
+- All enum values match canonical frozensets in shell_core.py
+- Bound tenants (routing_prefix + data_namespace) must have matching manifests
+- Discoverable-only FoundUps pass without manifests
+- No partial binding (route without namespace or vice versa)
+- Regression guards: no SHA256 IDs, no angel/ultimate tiers, minimum 13 entries
+
+**Category enum drift fixed**:
+- shell_core.py had no VALID_CATEGORIES — created with all 11 valid categories
+- `active` and `staging` lifecycle stages added to VALID_STAGES (catalog uses them, validation rejected them)
+
+**Tests**: 25/25 passed. Existing tests unaffected (82/83 shell_core pass, 1 pre-existing entry_url failure; 23/23 namespace guardrail pass).
+
+---
+
 ### 2026-04-21 - PFMALL Launch Catalog Taxonomy Reconciliation (W2: PFMALL-LAUNCH-CATALOG-TAXONOMY-RECON)
 
 **By:** 0102 (W2) — **Slice:** `PFMALL-LAUNCH-CATALOG-TAXONOMY-RECON`
