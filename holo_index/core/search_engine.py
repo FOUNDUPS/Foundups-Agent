@@ -55,12 +55,17 @@ _BACKEND_QUALITY: Dict[str, str] = {
     "sentence_transformers": "production",
     "turboquant_onnx_int8": "experimental",
     "none": "n/a",
+    # TQ3: when per-collection routing is active, the top-level backend
+    # is "routed" — a mixed claim. Callers needing per-collection truth
+    # read ``collection_backend_map`` on the same metadata block.
+    "routed": "mixed",
 }
 
 _QUALITY_GATE: Dict[str, str] = {
     "sentence_transformers": "default_ready",
     "turboquant_onnx_int8": "not_default_ready",
     "none": "n/a",
+    "routed": "mixed",
 }
 
 
@@ -223,7 +228,25 @@ def _search_collection(
     except Exception:
         return []
 
-    model = getattr(holo, "model", None)
+    # TQ3: select the embedder routed for this specific collection. The
+    # resolver honors ``holo.routing_active`` and the available embedders,
+    # so a missing int8 backend degrades truthfully to fp32 (never silent).
+    from .backend_routing import resolve_backend_for_collection
+
+    embedders = getattr(holo, "embedders", None) or None
+    collection_name = getattr(collection, "name", "") or ""
+    routing_active = bool(getattr(holo, "routing_active", False))
+    backend_key = resolve_backend_for_collection(
+        collection_name,
+        routing_active=routing_active,
+        available_backends=embedders,
+    )
+    model = None
+    if embedders is not None:
+        model = embedders.get(backend_key)
+    if model is None:
+        # Fallback to the legacy single-model attribute (tests monkeypatch it).
+        model = getattr(holo, "model", None)
     if model is None:
         holo._log_agent_action("Embedding model not available - using offline lexical scan", "WARN")
         return _lexical_search_collection(holo, collection, query, limit, kind, doc_type_filter)
@@ -620,6 +643,15 @@ def execute_search(
                 ),
                 "quality_gate": _quality_gate(
                     getattr(holo, "embedding_backend", "unknown")
+                ),
+                # TQ3: per-collection routing truth (WSP 97). When
+                # routing_active=True, embedding_backend="routed" and the
+                # per-collection claim lives in collection_backend_map.
+                # When inactive, the map still reports the single backend
+                # used for every collection (never overclaims).
+                "routing_active": bool(getattr(holo, "routing_active", False)),
+                "collection_backend_map": dict(
+                    getattr(holo, "collection_backend_map", {}) or {}
                 ),
             },
         }

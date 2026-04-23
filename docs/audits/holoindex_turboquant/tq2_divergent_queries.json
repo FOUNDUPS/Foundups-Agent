@@ -1,0 +1,85 @@
+{
+  "n_divergent": 4,
+  "divergent": [
+    {
+      "collection": "navigation_vocabulary",
+      "query": "sentence transformer model load timeout",
+      "fp32_top1": "vocab_1_28",
+      "int8_top1": "vocab_1_10",
+      "fp32_top5": [
+        "vocab_1_28",
+        "vocab_1_10",
+        "vocab_1_27",
+        "vocab_1_16",
+        "vocab_1_7"
+      ],
+      "int8_top5": [
+        "vocab_1_10",
+        "vocab_1_28",
+        "vocab_1_7",
+        "vocab_1_9",
+        "vocab_1_8"
+      ]
+    },
+    {
+      "collection": "navigation_vocabulary",
+      "query": "embedding_backend search metadata",
+      "fp32_top1": "vocab_1_24",
+      "int8_top1": "vocab_1_23",
+      "fp32_top5": [
+        "vocab_1_24",
+        "vocab_1_23",
+        "vocab_1_4",
+        "vocab_1_3",
+        "vocab_1_6"
+      ],
+      "int8_top5": [
+        "vocab_1_23",
+        "vocab_1_24",
+        "vocab_1_4",
+        "vocab_1_3",
+        "vocab_1_7"
+      ]
+    },
+    {
+      "collection": "navigation_vocabulary",
+      "query": "antifaFM broadcaster 24/7 headless launch",
+      "fp32_top1": "vocab_1_13",
+      "int8_top1": "vocab_1_7",
+      "fp32_top5": [
+        "vocab_1_13",
+        "vocab_1_10",
+        "vocab_1_7",
+        "vocab_1_1",
+        "vocab_1_2"
+      ],
+      "int8_top5": [
+        "vocab_1_7",
+        "vocab_1_10",
+        "vocab_1_13",
+        "vocab_1_9",
+        "vocab_1_2"
+      ]
+    },
+    {
+      "collection": "navigation_vocabulary",
+      "query": "YouTube stream resolver livestream detection",
+      "fp32_top1": "vocab_1_13",
+      "int8_top1": "vocab_1_4",
+      "fp32_top5": [
+        "vocab_1_13",
+        "vocab_1_4",
+        "vocab_1_10",
+        "vocab_1_2",
+        "vocab_1_14"
+      ],
+      "int8_top5": [
+        "vocab_1_4",
+        "vocab_1_10",
+        "vocab_1_13",
+        "vocab_1_14",
+        "vocab_1_2"
+      ]
+    }
+  ]
+}

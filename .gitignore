@@ -326,6 +326,8 @@ docs/audits/*
 !docs/audits/autoagent_wre/**
 !docs/audits/pfmall_youtube_ingest/
 !docs/audits/pfmall_youtube_ingest/**
+!docs/audits/holoindex_turboquant/
+!docs/audits/holoindex_turboquant/**
 docs/sessions/
 
 # WSP agentic awakening runtime state (changes every session)
