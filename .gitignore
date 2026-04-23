@@ -118,6 +118,17 @@ reports/analysis/*.md
 reports/testing/*.log
 reports/testing/*.json
 reports/analysis/*.json
+alerts/
+modules/infrastructure/reports/
+
+# Generated benchmark data (scripts tracked, vectors not)
+holo_index/scripts/benchmarks/*.json
+
+# YouTube API capability snapshots (timestamped test artifacts)
+modules/platform_integration/youtube_auth/tests/*_api_capabilities_*.json
+
+# Firebase local development artifacts
+public/__/
 
 # Memory and user data
 memory/
@@ -313,6 +324,8 @@ docs/audits/*
 !docs/audits/science_swarm_external_foundup/**
 !docs/audits/autoagent_wre/
 !docs/audits/autoagent_wre/**
+!docs/audits/pfmall_youtube_ingest/
+!docs/audits/pfmall_youtube_ingest/**
 docs/sessions/
 
 # WSP agentic awakening runtime state (changes every session)

@@ -1,0 +1,16 @@
+# BX7 — Kosei deploy parity (KOSEI_DEPLOY_PARITY_LINE_ENDING_NORMALIZE_PHASE1)
+#
+# Source (modules/foundups/kosei/frontend/**) is mirrored verbatim to the
+# Firebase deploy surface (public/kosei/**). The TestDeployParity suite
+# enforces byte identity between the two trees.
+#
+# On Windows checkouts with core.autocrlf=true, git was converting LF→CRLF
+# for files under public/kosei/ while leaving modules/foundups/kosei/frontend/
+# at LF, breaking byte parity at runtime even though the in-git blobs are
+# identical. Pinning both subtrees to text/eol=lf makes the working tree
+# match the stored bytes on every platform.
+#
+# Scope intentionally narrow: only the two Kosei mirror trees. No
+# repo-wide normalization policy is being introduced here.
+modules/foundups/kosei/frontend/** text eol=lf
+public/kosei/**                    text eol=lf

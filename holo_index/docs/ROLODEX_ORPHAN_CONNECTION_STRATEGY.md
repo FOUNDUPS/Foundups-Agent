@@ -191,6 +191,8 @@ Add an `orphan_class` field to rolodex entries: `candidate`, `false_positive`, `
 
 ### `CF3 — TOP_10_DAEMON_SKILLZ_GENERATION_PHASE1` (Next)
 
+**Worker Prompt**: [`modules/foundups/mobile_worker_skills/WORKER_CF3_PROMPT.md`](../../modules/foundups/mobile_worker_skills/WORKER_CF3_PROMPT.md)
+
 **Scope**: Generate SKILLz.md wrappers for the 10 priority candidates from Section 5:
 1. `antifafm_broadcaster/scripts/launch.py`
 2. `antifafm_broadcaster/src/youtube_go_live.py`

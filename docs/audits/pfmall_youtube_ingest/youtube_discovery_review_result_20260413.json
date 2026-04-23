@@ -1,0 +1,46 @@
+{
+  "reviewed_at": "2026-04-13T07:30:00Z",
+  "reviewer": "0102-worker-ct",
+  "proposal_artifact": "youtube_discovery_proposals.json",
+  "proposal_generated_at": "2026-04-13T07:06:16Z",
+  "query": "FFCPLN music",
+  "total_proposals": 10,
+  "review_summary": {
+    "approved": 2,
+    "skipped_duplicate": 8,
+    "skipped_ambiguous": 0,
+    "skipped_low_confidence": 0,
+    "rejected": 0
+  },
+  "applied": [
+    {
+      "video_id": "pP804fq9ttE",
+      "title": "ICE Cruelty Exposed! FFCPLN Music",
+      "matched_foundup_id": "move2japan",
+      "match_reason": "channel_id_match",
+      "confidence": 1.0
+    },
+    {
+      "video_id": "ZJqB_jeaPCQ",
+      "title": "FFCPLN Exposes MAGA - 160 Songs",
+      "matched_foundup_id": "move2japan",
+      "match_reason": "channel_id_match",
+      "confidence": 1.0
+    }
+  ],
+  "skipped": [
+    {"video_id": "yyWHM9dz2-s", "reason": "duplicate"},
+    {"video_id": "vDfsovAVI2s", "reason": "duplicate"},
+    {"video_id": "ldW3en__28M", "reason": "duplicate"},
+    {"video_id": "uEHuAn6QqkM", "reason": "duplicate"},
+    {"video_id": "GcHKzjcOq0c", "reason": "duplicate"},
+    {"video_id": "v0uoeU2C9dw", "reason": "duplicate"},
+    {"video_id": "4pROjDTn3VU", "reason": "duplicate"},
+    {"video_id": "XPaXak_XLYc", "reason": "duplicate"}
+  ],
+  "catalog_update": {
+    "target_foundup": "move2japan",
+    "video_count_before": 592,
+    "video_count_after": 594
+  }
+}
