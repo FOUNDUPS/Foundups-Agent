@@ -83,7 +83,15 @@ def resolve_backend_for_collection(
     returned value reflects the actual backend used (fp32 fallback), so
     downstream metadata surfaces the truth.
     """
+    # Even with routing inactive, we must honor available_backends — if only
+    # int8 loaded (degraded mode), return int8 truthfully instead of claiming
+    # fp32 (WSP 97: never lie about the backend that will actually encode).
     if not routing_active:
+        if available_backends is not None and DEFAULT_BACKEND not in available_backends:
+            # Degraded mode: fp32 unavailable. Return whatever IS loaded.
+            for key in (BACKEND_TURBOQUANT,):
+                if key in available_backends:
+                    return key
         return DEFAULT_BACKEND
     requested = COLLECTION_BACKEND_ROUTING.get(collection_name, DEFAULT_BACKEND)
     if available_backends is not None and requested not in available_backends:

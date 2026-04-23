@@ -82,6 +82,33 @@ class TestResolveBackendForCollection(unittest.TestCase):
                 msg=f"inactive routing must always return fp32 (got mismatch for {name})",
             )
 
+    def test_inactive_routing_int8_only_returns_int8(self):
+        """WSP 97 truth-surface: degraded int8-only mode must report int8, not fp32."""
+        only_tq = {BACKEND_TURBOQUANT: _Sentinel()}
+        for name in COLLECTION_BACKEND_ROUTING:
+            self.assertEqual(
+                resolve_backend_for_collection(
+                    name, routing_active=False, available_backends=only_tq
+                ),
+                BACKEND_TURBOQUANT,
+                msg=f"inactive routing with only int8 must return int8 for {name}",
+            )
+
+    def test_inactive_routing_both_backends_returns_fp32(self):
+        """When routing is inactive but both backends are loaded, fp32 (default) wins."""
+        both = {
+            BACKEND_SENTENCE_TRANSFORMERS: _Sentinel(),
+            BACKEND_TURBOQUANT: _Sentinel(),
+        }
+        for name in COLLECTION_BACKEND_ROUTING:
+            self.assertEqual(
+                resolve_backend_for_collection(
+                    name, routing_active=False, available_backends=both
+                ),
+                BACKEND_SENTENCE_TRANSFORMERS,
+                msg=f"inactive routing with both backends must return fp32 for {name}",
+            )
+
     def test_active_routing_sends_int8_lane_to_turboquant(self):
         both = {
             BACKEND_SENTENCE_TRANSFORMERS: _Sentinel(),
@@ -202,6 +229,22 @@ class TestBuildCollectionBackendMap(unittest.TestCase):
             names, routing_active=True, available_backends=only_fp32,
         )
         self.assertEqual(set(result.values()), {BACKEND_SENTENCE_TRANSFORMERS})
+
+    def test_inactive_routing_int8_only_map_is_all_int8(self):
+        """WSP 97 truth-surface: degraded int8-only with inactive routing must report int8."""
+        names = [
+            "navigation_code", "navigation_wsp", "navigation_tests",
+            "navigation_skills", "navigation_symbols", "navigation_vocabulary",
+        ]
+        only_tq = {BACKEND_TURBOQUANT: _Sentinel()}
+        result = build_collection_backend_map(
+            names, routing_active=False, available_backends=only_tq,
+        )
+        self.assertEqual(
+            set(result.values()),
+            {BACKEND_TURBOQUANT},
+            msg="inactive routing with only int8 must truthfully report int8 for all collections",
+        )
 
 
 if __name__ == "__main__":
