@@ -1,5 +1,5 @@
 {
-  "n_divergent": 8,
+  "n_divergent": 7,
   "divergent": [
     {
       "collection": "navigation_code",
@@ -89,84 +89,63 @@
       "collection": "navigation_wsp",
       "routed_backend": "turboquant_onnx_int8",
       "query": "WSP 97 truth distinction protocol",
-      "fp32_top1": "wsp_202",
-      "routed_top1": "wsp_108",
+      "fp32_top1": "wsp_213",
+      "routed_top1": "wsp_107",
       "fp32_top5": [
-        "wsp_202",
-        "wsp_247",
-        "wsp_108",
+        "wsp_213",
+        "wsp_107",
         "wsp_47",
-        "wsp_2460"
+        "wsp_2356",
+        "wsp_3063"
       ],
       "routed_top5": [
-        "wsp_108",
-        "wsp_202",
-        "wsp_247",
+        "wsp_107",
+        "wsp_213",
         "wsp_16",
-        "wsp_47"
+        "wsp_47",
+        "wsp_58"
       ]
     },
     {
       "collection": "navigation_wsp",
       "routed_backend": "turboquant_onnx_int8",
       "query": "WSP 22 ModLog update requirements",
-      "fp32_top1": "wsp_2703",
-      "routed_top1": "wsp_2991",
+      "fp32_top1": "wsp_2598",
+      "routed_top1": "wsp_2885",
       "fp32_top5": [
-        "wsp_2703",
-        "wsp_2991",
-        "wsp_665",
-        "wsp_789",
-        "wsp_953"
+        "wsp_2598",
+        "wsp_2885",
+        "wsp_562",
+        "wsp_686",
+        "wsp_850"
       ],
       "routed_top5": [
-        "wsp_2991",
-        "wsp_665",
-        "wsp_789",
-        "wsp_953",
-        "wsp_2703"
+        "wsp_2885",
+        "wsp_562",
+        "wsp_686",
+        "wsp_850",
+        "wsp_2598"
       ]
     },
     {
       "collection": "navigation_wsp",
       "routed_backend": "turboquant_onnx_int8",
       "query": "how does 0102 recall patterns from 0201",
-      "fp32_top1": "wsp_2961",
+      "fp32_top1": "wsp_2855",
       "routed_top1": "wsp_13",
       "fp32_top5": [
-        "wsp_2961",
-        "wsp_3263",
+        "wsp_2855",
+        "wsp_3157",
         "wsp_13",
-        "wsp_658",
-        "wsp_253"
+        "wsp_555",
+        "wsp_219"
       ],
       "routed_top5": [
         "wsp_13",
-        "wsp_3263",
-        "wsp_2533",
-        "wsp_253",
-        "wsp_2961"
-      ]
-    },
-    {
-      "collection": "navigation_wsp",
-      "routed_backend": "turboquant_onnx_int8",
-      "query": "token budget for DAE pattern memory",
-      "fp32_top1": "wsp_138",
-      "routed_top1": "wsp_600",
-      "fp32_top5": [
-        "wsp_138",
-        "wsp_600",
-        "wsp_131",
-        "wsp_132",
-        "wsp_2898"
-      ],
-      "routed_top5": [
-        "wsp_600",
-        "wsp_138",
-        "wsp_132",
-        "wsp_131",
-        "wsp_2898"
+        "wsp_3157",
+        "wsp_2428",
+        "wsp_219",
+        "wsp_2855"
       ]
     }
   ]

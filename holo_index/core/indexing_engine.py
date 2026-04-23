@@ -374,6 +374,11 @@ def index_wsp_entries(holo: "HoloIndex", paths: Optional[List[Path]] = None) -> 
                 if 'node_modules' not in str(f)
                 and 'CHANGELOG' not in f.name.upper()
                 and 'package-lock' not in f.name.lower()
+                # CFZ3: Corpus hygiene - exclude hidden/backup/archive paths
+                and not any(part.startswith('.') for part in f.parts)
+                and '_backup' not in str(f).lower()
+                and '/archive/' not in str(f).lower()
+                and '\\archive\\' not in str(f).lower()
             ]
             files.extend(filtered_files)
     if not files:

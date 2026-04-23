@@ -114,7 +114,7 @@ assert len(TQ2_QUERIES) == 30
 # Sentinels are queries whose fp32 top-1 is semantically unambiguous.
 # Any int8 divergence on these = blocker.
 SENTINEL_QUERIES: list[str] = [
-    "WSP 97 truth distinction protocol",
+    "WSP 97 System Execution Prompting Protocol",  # CFZ3: canonical title
     "WSP 87 size limits for modules",
     "AgentPermissionManager.request_permission",
     "modules/ai_intelligence/agent_permissions",

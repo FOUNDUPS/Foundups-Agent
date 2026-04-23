@@ -1,64 +1,324 @@
 {
-  "n_divergent": 4,
+  "n_divergent": 17,
   "divergent": [
+    {
+      "collection": "navigation_code",
+      "query": "pfMALL data isolation model",
+      "fp32_top1": "code_295",
+      "int8_top1": "code_108",
+      "fp32_top5": [
+        "code_295",
+        "code_80",
+        "code_189",
+        "code_184",
+        "code_108"
+      ],
+      "int8_top5": [
+        "code_108",
+        "code_184",
+        "code_295",
+        "code_178",
+        "code_155"
+      ]
+    },
+    {
+      "collection": "navigation_code",
+      "query": "ai overseer role detection",
+      "fp32_top1": "code_85",
+      "int8_top1": "code_86",
+      "fp32_top5": [
+        "code_85",
+        "code_86",
+        "code_87",
+        "code_67",
+        "code_65"
+      ],
+      "int8_top5": [
+        "code_86",
+        "code_85",
+        "code_87",
+        "code_67",
+        "code_65"
+      ]
+    },
+    {
+      "collection": "navigation_code",
+      "query": "embedding_backend search metadata",
+      "fp32_top1": "code_238",
+      "int8_top1": "code_224",
+      "fp32_top5": [
+        "code_238",
+        "code_137",
+        "code_224",
+        "code_194",
+        "code_234"
+      ],
+      "int8_top5": [
+        "code_224",
+        "code_238",
+        "code_137",
+        "code_234",
+        "code_194"
+      ]
+    },
+    {
+      "collection": "navigation_code",
+      "query": "token budget for DAE pattern memory",
+      "fp32_top1": "code_102",
+      "int8_top1": "code_108",
+      "fp32_top5": [
+        "code_102",
+        "code_108",
+        "code_113",
+        "code_130",
+        "code_115"
+      ],
+      "int8_top5": [
+        "code_108",
+        "code_102",
+        "code_115",
+        "code_113",
+        "code_130"
+      ]
+    },
+    {
+      "collection": "navigation_wsp",
+      "query": "WSP 97 truth distinction protocol",
+      "fp32_top1": "wsp_213",
+      "int8_top1": "wsp_107",
+      "fp32_top5": [
+        "wsp_213",
+        "wsp_107",
+        "wsp_47",
+        "wsp_2356",
+        "wsp_3063"
+      ],
+      "int8_top5": [
+        "wsp_107",
+        "wsp_213",
+        "wsp_16",
+        "wsp_47",
+        "wsp_58"
+      ]
+    },
+    {
+      "collection": "navigation_wsp",
+      "query": "WSP 22 ModLog update requirements",
+      "fp32_top1": "wsp_2598",
+      "int8_top1": "wsp_2885",
+      "fp32_top5": [
+        "wsp_2598",
+        "wsp_2885",
+        "wsp_562",
+        "wsp_686",
+        "wsp_850"
+      ],
+      "int8_top5": [
+        "wsp_2885",
+        "wsp_562",
+        "wsp_686",
+        "wsp_850",
+        "wsp_2598"
+      ]
+    },
+    {
+      "collection": "navigation_wsp",
+      "query": "how does 0102 recall patterns from 0201",
+      "fp32_top1": "wsp_2855",
+      "int8_top1": "wsp_13",
+      "fp32_top5": [
+        "wsp_2855",
+        "wsp_3157",
+        "wsp_13",
+        "wsp_555",
+        "wsp_219"
+      ],
+      "int8_top5": [
+        "wsp_13",
+        "wsp_3157",
+        "wsp_2428",
+        "wsp_219",
+        "wsp_2855"
+      ]
+    },
+    {
+      "collection": "navigation_vocabulary",
+      "query": "skill registry loader orchestration",
+      "fp32_top1": "vocab_2_62",
+      "int8_top1": "vocab_1_7",
+      "fp32_top5": [
+        "vocab_2_62",
+        "vocab_1_7",
+        "vocab_1_0",
+        "vocab_2_55",
+        "vocab_1_9"
+      ],
+      "int8_top5": [
+        "vocab_1_7",
+        "vocab_2_62",
+        "vocab_2_55",
+        "vocab_1_0",
+        "vocab_1_9"
+      ]
+    },
+    {
+      "collection": "navigation_vocabulary",
+      "query": "ai_overseer M2M compression sentinel",
+      "fp32_top1": "vocab_1_44",
+      "int8_top1": "vocab_1_3",
+      "fp32_top5": [
+        "vocab_1_44",
+        "vocab_1_3",
+        "vocab_2_58",
+        "vocab_2_59",
+        "vocab_1_4"
+      ],
+      "int8_top5": [
+        "vocab_1_3",
+        "vocab_2_58",
+        "vocab_1_44",
+        "vocab_1_4",
+        "vocab_2_59"
+      ]
+    },
+    {
+      "collection": "navigation_vocabulary",
+      "query": "HOLO_SKIP_MODEL offline bootstrap",
+      "fp32_top1": "vocab_1_13",
+      "int8_top1": "vocab_2_68",
+      "fp32_top5": [
+        "vocab_1_13",
+        "vocab_2_68",
+        "vocab_1_42",
+        "vocab_1_12",
+        "vocab_2_67"
+      ],
+      "int8_top5": [
+        "vocab_2_68",
+        "vocab_1_13",
+        "vocab_2_67",
+        "vocab_1_12",
+        "vocab_2_55"
+      ]
+    },
+    {
+      "collection": "navigation_vocabulary",
+      "query": "HoloIndex retrieval_mode lexical fallback",
+      "fp32_top1": "vocab_1_43",
+      "int8_top1": "vocab_1_13",
+      "fp32_top5": [
+        "vocab_1_43",
+        "vocab_1_13",
+        "vocab_2_68",
+        "vocab_1_42",
+        "vocab_2_81"
+      ],
+      "int8_top5": [
+        "vocab_1_13",
+        "vocab_2_68",
+        "vocab_1_43",
+        "vocab_1_42",
+        "vocab_1_54"
+      ]
+    },
+    {
+      "collection": "navigation_vocabulary",
+      "query": "ChromaDB persistent client vector collections",
+      "fp32_top1": "vocab_1_4",
+      "int8_top1": "vocab_2_59",
+      "fp32_top5": [
+        "vocab_1_4",
+        "vocab_2_59",
+        "vocab_1_47",
+        "vocab_1_28",
+        "vocab_2_83"
+      ],
+      "int8_top5": [
+        "vocab_2_59",
+        "vocab_1_4",
+        "vocab_1_47",
+        "vocab_1_5",
+        "vocab_2_60"
+      ]
+    },
     {
       "collection": "navigation_vocabulary",
       "query": "sentence transformer model load timeout",
-      "fp32_top1": "vocab_1_28",
-      "int8_top1": "vocab_1_10",
+      "fp32_top1": "vocab_1_52",
+      "int8_top1": "vocab_1_37",
       "fp32_top5": [
-        "vocab_1_28",
-        "vocab_1_10",
-        "vocab_1_27",
-        "vocab_1_16",
-        "vocab_1_7"
+        "vocab_1_52",
+        "vocab_1_41",
+        "vocab_1_37",
+        "vocab_1_39",
+        "vocab_1_38"
       ],
       "int8_top5": [
+        "vocab_1_37",
         "vocab_1_10",
-        "vocab_1_28",
-        "vocab_1_7",
-        "vocab_1_9",
-        "vocab_1_8"
+        "vocab_2_65",
+        "vocab_1_41",
+        "vocab_1_52"
+      ]
+    },
+    {
+      "collection": "navigation_vocabulary",
+      "query": "HOLO_USE_TURBOQUANT environment switch",
+      "fp32_top1": "vocab_1_13",
+      "int8_top1": "vocab_2_68",
+      "fp32_top5": [
+        "vocab_1_13",
+        "vocab_2_68",
+        "vocab_1_43",
+        "vocab_1_42",
+        "vocab_1_48"
+      ],
+      "int8_top5": [
+        "vocab_2_68",
+        "vocab_1_13",
+        "vocab_1_43",
+        "vocab_1_42",
+        "vocab_1_12"
       ]
     },
     {
       "collection": "navigation_vocabulary",
       "query": "embedding_backend search metadata",
-      "fp32_top1": "vocab_1_24",
+      "fp32_top1": "vocab_1_31",
       "int8_top1": "vocab_1_23",
       "fp32_top5": [
+        "vocab_1_31",
+        "vocab_2_79",
         "vocab_1_24",
         "vocab_1_23",
-        "vocab_1_4",
-        "vocab_1_3",
-        "vocab_1_6"
+        "vocab_1_30"
       ],
       "int8_top5": [
         "vocab_1_23",
+        "vocab_1_30",
+        "vocab_2_78",
         "vocab_1_24",
-        "vocab_1_4",
-        "vocab_1_3",
-        "vocab_1_7"
+        "vocab_1_31"
       ]
     },
     {
       "collection": "navigation_vocabulary",
       "query": "antifaFM broadcaster 24/7 headless launch",
       "fp32_top1": "vocab_1_13",
-      "int8_top1": "vocab_1_7",
+      "int8_top1": "vocab_2_62",
       "fp32_top5": [
         "vocab_1_13",
+        "vocab_2_68",
+        "vocab_2_65",
         "vocab_1_10",
-        "vocab_1_7",
-        "vocab_1_1",
-        "vocab_1_2"
+        "vocab_1_7"
       ],
       "int8_top5": [
+        "vocab_2_62",
         "vocab_1_7",
         "vocab_1_10",
-        "vocab_1_13",
-        "vocab_1_9",
-        "vocab_1_2"
+        "vocab_2_65",
+        "vocab_1_13"
       ]
     },
     {
@@ -68,17 +328,17 @@
       "int8_top1": "vocab_1_4",
       "fp32_top5": [
         "vocab_1_13",
+        "vocab_2_68",
         "vocab_1_4",
-        "vocab_1_10",
-        "vocab_1_2",
-        "vocab_1_14"
+        "vocab_2_59",
+        "vocab_2_65"
       ],
       "int8_top5": [
         "vocab_1_4",
+        "vocab_2_59",
+        "vocab_2_65",
         "vocab_1_10",
-        "vocab_1_13",
-        "vocab_1_14",
-        "vocab_1_2"
+        "vocab_1_13"
       ]
     }
   ]
