@@ -1,5 +1,5 @@
 {
-  "n_divergent": 7,
+  "n_divergent": 8,
   "divergent": [
     {
       "collection": "navigation_code",
@@ -89,19 +89,19 @@
       "collection": "navigation_wsp",
       "routed_backend": "turboquant_onnx_int8",
       "query": "WSP 97 truth distinction protocol",
-      "fp32_top1": "wsp_201",
+      "fp32_top1": "wsp_202",
       "routed_top1": "wsp_108",
       "fp32_top5": [
-        "wsp_201",
-        "wsp_245",
+        "wsp_202",
+        "wsp_247",
         "wsp_108",
         "wsp_47",
-        "wsp_1003"
+        "wsp_2460"
       ],
       "routed_top5": [
         "wsp_108",
-        "wsp_201",
-        "wsp_245",
+        "wsp_202",
+        "wsp_247",
         "wsp_16",
         "wsp_47"
       ]
@@ -109,22 +109,43 @@
     {
       "collection": "navigation_wsp",
       "routed_backend": "turboquant_onnx_int8",
+      "query": "WSP 22 ModLog update requirements",
+      "fp32_top1": "wsp_2703",
+      "routed_top1": "wsp_2991",
+      "fp32_top5": [
+        "wsp_2703",
+        "wsp_2991",
+        "wsp_665",
+        "wsp_789",
+        "wsp_953"
+      ],
+      "routed_top5": [
+        "wsp_2991",
+        "wsp_665",
+        "wsp_789",
+        "wsp_953",
+        "wsp_2703"
+      ]
+    },
+    {
+      "collection": "navigation_wsp",
+      "routed_backend": "turboquant_onnx_int8",
       "query": "how does 0102 recall patterns from 0201",
-      "fp32_top1": "wsp_1469",
+      "fp32_top1": "wsp_2961",
       "routed_top1": "wsp_13",
       "fp32_top5": [
-        "wsp_1469",
-        "wsp_1753",
+        "wsp_2961",
+        "wsp_3263",
         "wsp_13",
-        "wsp_555",
-        "wsp_251"
+        "wsp_658",
+        "wsp_253"
       ],
       "routed_top5": [
         "wsp_13",
-        "wsp_1753",
-        "wsp_1075",
-        "wsp_251",
-        "wsp_1469"
+        "wsp_3263",
+        "wsp_2533",
+        "wsp_253",
+        "wsp_2961"
       ]
     },
     {
@@ -132,20 +153,20 @@
       "routed_backend": "turboquant_onnx_int8",
       "query": "token budget for DAE pattern memory",
       "fp32_top1": "wsp_138",
-      "routed_top1": "wsp_497",
+      "routed_top1": "wsp_600",
       "fp32_top5": [
         "wsp_138",
-        "wsp_497",
+        "wsp_600",
         "wsp_131",
         "wsp_132",
-        "wsp_1414"
+        "wsp_2898"
       ],
       "routed_top5": [
-        "wsp_497",
+        "wsp_600",
         "wsp_138",
         "wsp_132",
         "wsp_131",
-        "wsp_1626"
+        "wsp_2898"
       ]
     }
   ]

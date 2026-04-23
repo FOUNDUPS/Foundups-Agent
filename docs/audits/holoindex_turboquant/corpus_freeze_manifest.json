@@ -1,7 +1,7 @@
 {
   "vector_path": "E:\\HoloIndex\\vectors",
-  "created_at_utc": "2026-04-23T12:50:33.347298+00:00",
-  "git_sha": "85dc42baf217",
+  "created_at_utc": "2026-04-23T21:54:58.736101+00:00",
+  "git_sha": "c62ea6e972bf",
   "collections": {
     "navigation_code": {
       "count": 296,
@@ -10,10 +10,10 @@
       "metadatas_sha256": "8fd30286e762116c629092f042df678c48eebe476f7e217a8beb93d8423a0725"
     },
     "navigation_wsp": {
-      "count": 3450,
-      "ids_sha256": "f047ed7fd144411500f5255cc41eef2843c23bc07b05d1af0554aaa376f102f0",
-      "documents_sha256": "6d9104875b7c10f01a5a4a8bb69f5077d43b36a0882c629f7e68766bae2e00a8",
-      "metadatas_sha256": "db7d693f9c1b8633b3c71a9160854c295b488c5b184939cb085bfbb41473a54f"
+      "count": 3451,
+      "ids_sha256": "606b47aa15c4e95f00d87670f09ace65bae6e4ef1551d3c98475d3508dd9f2c3",
+      "documents_sha256": "f83fbae0f1cd2c7022408b5fa93a1942221d92306616863ad2b9f1670675f763",
+      "metadatas_sha256": "0aaefbae523ee5579352c18483bc89e77ed0e7c89e1ec388ea17e9cd8d9b659c"
     },
     "navigation_tests": {
       "count": 0,
@@ -40,5 +40,5 @@
       "metadatas_sha256": "a71d5e9cd379b5924496ad64dc2804e92c6dfec271b4eb022b26a2cc2d6f23ef"
     }
   },
-  "total_documents": 23835
+  "total_documents": 23836
 }
