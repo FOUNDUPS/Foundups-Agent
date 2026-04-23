@@ -1,5 +1,61 @@
 # ModLog - moltbot_bridge
 
+## 2026-04-23: FoundUp Job Contract — Canonical Orchestration Contract (WSP 11/77/91/97)
+
+**Author**: 0102 (Worker W2)
+**WSP**: 11 (Interface), 50 (Pre-Action), 77 (Agent Coordination), 91 (Observability), 97 (Truth)
+**Slice**: `OC2_FOUNDUP_JOB_CONTRACT_PHASE1`
+
+### Summary
+
+Created canonical job contract for OpenClaw ↔ Hermes handoff. This contract defines:
+- Job identity (job_id, tenant_id, foundup_id, intent_id)
+- Lifecycle states (QUEUED → RUNNING → BLOCKED | FAILED | SUCCEEDED)
+- State transition validation with explicit guards
+- PolicyFlags for tracking gate passes (security, permission, exfoliation, wsp_preflight)
+- WSP 97 audit fields (evidence_refs, status_reason_code, status_reason_human)
+- Idempotency key generation for replay guards
+
+### Files Added
+
+| File | Purpose |
+|------|---------|
+| `src/foundup_job_contract.py` | Contract schema + lifecycle model |
+| `tests/test_foundup_job_contract.py` | 49 tests covering creation, transitions, serialization |
+
+### Key Components
+
+**JobStatus Enum**:
+- `QUEUED` → `RUNNING` → `SUCCEEDED` (happy path)
+- `RUNNING` → `BLOCKED` → `RUNNING` (resume)
+- `RUNNING` → `FAILED` (error) / `BLOCKED` → `FAILED` (timeout)
+
+**StatusReasonCode Categories**:
+- `OK_*` (success), `BLOCKED_*` (blocking), `FAIL_*` (failures)
+
+**PolicyFlags**:
+- `security_gate_checked/passed`, `permission_gate_checked/passed`
+- `exfoliation_gate_checked/passed`, `wsp_preflight_checked/passed`
+- `dry_run_mode`
+
+**Factory Functions**:
+- `generate_job_id(action)` → `j_{action}_{timestamp}_{random}`
+- `generate_idempotency_key(tenant, foundup, action, payload)` → sha256[:16]
+- `create_job(tenant_id, action, ...)` → FoundUpJob in QUEUED state
+
+### Test Results
+
+- `test_foundup_job_contract.py`: 49/49 passed
+- `test_openclaw_dae.py`: 103/104 passed (1 pre-existing flaky test unrelated to changes)
+
+### Integration Points
+
+- **OpenClaw**: Creates FoundUpJob when FOUNDUP intent detected
+- **Hermes**: Receives FoundUpJob, transitions through lifecycle
+- **FAM**: Links via intent_id correlation to Task/Proof/Verification models
+
+---
+
 ## 2026-04-09: Discord Operator Surface Verification (WSP 15/97)
 
 **Author**: 0102 (Worker AW)
