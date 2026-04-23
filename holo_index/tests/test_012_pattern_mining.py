@@ -1,24 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import sys
-import io
-
 """
-# === UTF-8 ENFORCEMENT (WSP 90) ===
-# Prevent UnicodeEncodeError on Windows systems
-# Only apply when running as main script, not during import
-if __name__ == '__main__' and sys.platform.startswith('win'):
-    try:
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
-    except (OSError, ValueError):
-        # Ignore if stdout/stderr already wrapped or closed
-        pass
-# === END UTF-8 ENFORCEMENT ===
-
 Test 012.txt Pattern Mining via MCP
 Verifies that HoloIndex MCP can extract and verify code patterns from conversations
 WSP Compliance: WSP 93 (CodeIndex Surgical Intelligence)
+
+Note: Requires foundups_mcp_p1 package. Tests are skipped if not available.
 """
 
 import asyncio
@@ -26,10 +13,20 @@ import json
 from pathlib import Path
 import sys
 
+import pytest
+
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from foundups_mcp_p1.servers.holo_index.server import HoloIndexMCPServer
+# Try to import MCP server - skip tests if not available
+try:
+    from foundups_mcp_p1.servers.holo_index.server import HoloIndexMCPServer
+    MCP_AVAILABLE = True
+except ImportError:
+    HoloIndexMCPServer = None  # type: ignore
+    MCP_AVAILABLE = False
+
+pytestmark = pytest.mark.skipif(not MCP_AVAILABLE, reason="foundups_mcp_p1 not installed")
 
 
 async def test_pattern_mining():

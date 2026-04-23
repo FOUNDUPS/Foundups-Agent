@@ -1,34 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import sys
-import io
-
 """
-# === UTF-8 ENFORCEMENT (WSP 90) ===
-# Prevent UnicodeEncodeError on Windows systems
-# Only apply when running as main script, not during import
-if __name__ == '__main__' and sys.platform.startswith('win'):
-    try:
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
-    except (OSError, ValueError):
-        # Ignore if stdout/stderr already wrapped or closed
-        pass
-# === END UTF-8 ENFORCEMENT ===
-
 Test Pattern Memory - ChromaDB Integration
 Verifies pattern storage, retrieval, and checkpoint management
 WSP Compliance: WSP 93 (CodeIndex), WSP 46 (WRE Pattern)
+
+Note: UTF-8 enforcement removed from module level to fix pytest capture teardown error.
+The sys.stdout/stderr wrapping at import time conflicts with pytest's capture mechanism.
 """
 
 import sys
 from pathlib import Path
 import logging
-import io
-
-# Fix Windows console encoding
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
