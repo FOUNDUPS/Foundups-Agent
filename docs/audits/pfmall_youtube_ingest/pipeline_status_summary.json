@@ -1,0 +1,206 @@
+{
+  "generated_at": "2026-04-23T10:07:48.359261+00:00",
+  "generator": "status_summary.generate_status_summary",
+  "read_only": true,
+  "sources": {
+    "catalog": "public\\member\\mall-video-catalog.json",
+    "delta": "docs\\audits\\pfmall_youtube_ingest\\youtube_channel_pull_delta.json",
+    "refresh_log": "docs\\audits\\pfmall_youtube_ingest\\refresh_log.json",
+    "proposals": "docs\\audits\\pfmall_youtube_ingest\\youtube_discovery_proposals.json",
+    "latest_review": "docs\\audits\\pfmall_youtube_ingest\\youtube_discovery_review_result_20260413.json"
+  },
+  "catalog": {
+    "available": true,
+    "foundup_count": 13,
+    "total_declared_videos": 1205,
+    "total_actual_videos": 1205,
+    "count_mismatches": [],
+    "entries": [
+      {
+        "foundup_id": "move2japan",
+        "title": "Move to Japan",
+        "source_type": "youtube_channel",
+        "source_id": "UC-LSSlOZwpGIRIYihaz8zCw",
+        "declared_video_count": 594,
+        "actual_video_count": 594
+      },
+      {
+        "foundup_id": "undaodu",
+        "title": "UnDaoDu",
+        "source_type": "youtube_channel",
+        "source_id": "UCfHM9Fw9HD-NwiS0seD_oIA",
+        "declared_video_count": 512,
+        "actual_video_count": 512
+      },
+      {
+        "foundup_id": "foundups_main",
+        "title": "FoundUps",
+        "source_type": "youtube_channel",
+        "source_id": "UCSNTUXjAgpd4sgWYP0xoJgw",
+        "declared_video_count": 44,
+        "actual_video_count": 44
+      },
+      {
+        "foundup_id": "antifafm",
+        "title": "antifaFM",
+        "source_type": "youtube_channel",
+        "source_id": "UCVSmg5aOhP4tnQ9KFUg97qA",
+        "declared_video_count": 34,
+        "actual_video_count": 34
+      },
+      {
+        "foundup_id": "linkedin_012",
+        "title": "012 LinkedIn",
+        "source_type": "linkedin_profile",
+        "source_id": "urn:li:person:openstartup",
+        "declared_video_count": 0,
+        "actual_video_count": 0
+      },
+      {
+        "foundup_id": "linkedin_esingularity",
+        "title": "eSingularity",
+        "source_type": "linkedin_profile",
+        "source_id": "2199715",
+        "declared_video_count": 0,
+        "actual_video_count": 0
+      },
+      {
+        "foundup_id": "linkedin_tsingularity",
+        "title": "tSingularity",
+        "source_type": "linkedin_profile",
+        "source_id": "65471449",
+        "declared_video_count": 0,
+        "actual_video_count": 0
+      },
+      {
+        "foundup_id": "linkedin_foundups",
+        "title": "FoundUps LinkedIn",
+        "source_type": "linkedin_profile",
+        "source_id": "1263645",
+        "declared_video_count": 0,
+        "actual_video_count": 0
+      },
+      {
+        "foundup_id": "eduit",
+        "title": "EDUIT",
+        "source_type": "derived",
+        "source_id": "UCfHM9Fw9HD-NwiS0seD_oIA",
+        "declared_video_count": 21,
+        "actual_video_count": 21
+      },
+      {
+        "foundup_id": "science_swarm",
+        "title": "Science Swarm Hub",
+        "source_type": "github_repo",
+        "source_id": "FOUNDUPS/science-swarm-hub",
+        "declared_video_count": 0,
+        "actual_video_count": 0
+      },
+      {
+        "foundup_id": "autopost",
+        "title": "AutoPost",
+        "source_type": "external_app",
+        "source_id": "FOUNDUPS/autopost",
+        "declared_video_count": 0,
+        "actual_video_count": 0
+      },
+      {
+        "foundup_id": "kosei",
+        "title": "Kosei AI Systems",
+        "source_type": "internal_service",
+        "source_id": "modules/foundups/kosei",
+        "declared_video_count": 0,
+        "actual_video_count": 0
+      },
+      {
+        "foundup_id": "gotjunk_001",
+        "title": "GotJunk",
+        "source_type": "internal_app",
+        "source_id": "",
+        "declared_video_count": 0,
+        "actual_video_count": 0
+      }
+    ]
+  },
+  "delta": {
+    "available": true,
+    "generated_at": "2026-04-23T10:07:36.787082Z",
+    "foundups_checked": 4,
+    "total_new_videos": 89,
+    "total_skipped": 16,
+    "per_foundup": [
+      {
+        "foundup_id": "move2japan",
+        "existing_count": 594,
+        "pulled_count": 14,
+        "new_count": 14,
+        "skipped_count": 0
+      },
+      {
+        "foundup_id": "undaodu",
+        "existing_count": 512,
+        "pulled_count": 0,
+        "new_count": 0,
+        "skipped_count": 0
+      },
+      {
+        "foundup_id": "foundups_main",
+        "existing_count": 44,
+        "pulled_count": 41,
+        "new_count": 40,
+        "skipped_count": 1
+      },
+      {
+        "foundup_id": "antifafm",
+        "existing_count": 34,
+        "pulled_count": 50,
+        "new_count": 35,
+        "skipped_count": 15
+      }
+    ]
+  },
+  "refresh_log": {
+    "available": true,
+    "run_count": 1,
+    "last_run": {
+      "triggered_at": "2026-04-23T10:07:23.143120Z",
+      "trigger_mode": "manual",
+      "success": true,
+      "foundups_checked": 4,
+      "new_videos_found": 89,
+      "error": null
+    }
+  },
+  "proposals": {
+    "available": true,
+    "generated_at": "2026-04-13T07:06:16.628268Z",
+    "query": "FFCPLN music",
+    "search_type": "video",
+    "total_proposals": 10,
+    "matched_to_foundup": 10,
+    "unmatched": 0,
+    "catalog_targets": 4
+  },
+  "review": {
+    "available": true,
+    "source_file": "youtube_discovery_review_result_20260413.json",
+    "reviewed_at": "2026-04-13T07:30:00Z",
+    "reviewer": "0102-worker-ct",
+    "proposal_artifact": "youtube_discovery_proposals.json",
+    "total_proposals": 10,
+    "approved": 2,
+    "skipped_duplicate": 8,
+    "skipped_ambiguous": 0,
+    "skipped_low_confidence": 0,
+    "rejected": 0,
+    "catalog_update": {
+      "target_foundup": "move2japan",
+      "video_count_before": 592,
+      "video_count_after": 594
+    }
+  },
+  "blockers": [],
+  "next_actions": [
+    "Review 89 new known-channel candidate(s) in youtube_channel_pull_delta.json and apply if relevant."
+  ]
+}

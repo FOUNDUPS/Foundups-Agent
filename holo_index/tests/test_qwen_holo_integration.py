@@ -1,25 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Test Qwen → HoloIndex Integration (P0 Fix Verification)
+Test Qwen -> HoloIndex Integration (P0 Fix Verification)
 ========================================================
 
 Tests that AutonomousRefactoringOrchestrator can now use HoloAdapter
-for semantic search, enabling the Deep Think → HoloIndex → Occam's Razor chain.
+for semantic search, enabling the Deep Think -> HoloIndex -> Occam's Razor chain.
 
 WSP Compliance: WSP 77 (Agent Coordination), WSP 50 (Pre-Action Verification)
-"""
 
-# === UTF-8 ENFORCEMENT (WSP 90) ===
-import sys
-import io
-if sys.platform.startswith('win'):
-    try:
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
-    except (OSError, ValueError):
-        pass
-# === END UTF-8 ENFORCEMENT ===
+Note: UTF-8 enforcement removed from module level to fix pytest capture teardown error.
+The sys.stdout/stderr wrapping at import time conflicts with pytest's capture mechanism.
+"""
 
 from pathlib import Path
 

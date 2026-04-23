@@ -1,0 +1,868 @@
+{
+  "generated_at": "2026-04-23T10:07:36.787082Z",
+  "summary": {
+    "foundups_checked": 4,
+    "total_new_videos": 89,
+    "total_skipped": 16
+  },
+  "deltas": [
+    {
+      "foundup_id": "move2japan",
+      "existing_count": 594,
+      "pulled_count": 14,
+      "new_count": 14,
+      "skipped_count": 0,
+      "new_videos": [
+        {
+          "video_id": "1xMxoOKPfUc",
+          "title": "Unmasking #epsteinfiles Origin 1973-1986",
+          "thumbnail_url": "https://i.ytimg.com/vi/1xMxoOKPfUc/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/1xMxoOKPfUc",
+          "source_url": "https://www.youtube.com/watch?v=1xMxoOKPfUc",
+          "published_at": "2026-04-23T05:44:52Z",
+          "channel_id": "UC-LSSlOZwpGIRIYihaz8zCw"
+        },
+        {
+          "video_id": "1Dkkc_A2EpM",
+          "title": "Unmasking the #Epsteinfiles 1986 to 1991 #Trump best Brose era",
+          "thumbnail_url": "https://i.ytimg.com/vi/1Dkkc_A2EpM/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/1Dkkc_A2EpM",
+          "source_url": "https://www.youtube.com/watch?v=1Dkkc_A2EpM",
+          "published_at": "2026-04-22T23:23:35Z",
+          "channel_id": "UC-LSSlOZwpGIRIYihaz8zCw"
+        },
+        {
+          "video_id": "a7iAqUT5Kro",
+          "title": "#epsteinfiles Origin Story - #AIPAC to #IranWar",
+          "thumbnail_url": "https://i.ytimg.com/vi/a7iAqUT5Kro/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/a7iAqUT5Kro",
+          "source_url": "https://www.youtube.com/watch?v=a7iAqUT5Kro",
+          "published_at": "2026-04-22T19:44:08Z",
+          "channel_id": "UC-LSSlOZwpGIRIYihaz8zCw"
+        },
+        {
+          "video_id": "epX0WrfIbUo",
+          "title": "#FFCPLN #MAGA love song playlist see description! Must listen! Share.",
+          "thumbnail_url": "https://i.ytimg.com/vi/epX0WrfIbUo/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/epX0WrfIbUo",
+          "source_url": "https://www.youtube.com/watch?v=epX0WrfIbUo",
+          "published_at": "2026-04-22T19:42:10Z",
+          "channel_id": "UC-LSSlOZwpGIRIYihaz8zCw"
+        },
+        {
+          "video_id": "mZnWEVkr4I8",
+          "title": "understanding the #Epsteinfiles how they are responsible for #MAGA #Iranwar",
+          "thumbnail_url": "https://i.ytimg.com/vi/mZnWEVkr4I8/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/mZnWEVkr4I8",
+          "source_url": "https://www.youtube.com/watch?v=mZnWEVkr4I8",
+          "published_at": "2026-04-22T12:16:03Z",
+          "channel_id": "UC-LSSlOZwpGIRIYihaz8zCw"
+        },
+        {
+          "video_id": "GYpYDGkpHLY",
+          "title": "#FFCPLN #MAGA love 200m global crude deficit that lands this week. Pump #gasprices ⛽️ prices sore.",
+          "thumbnail_url": "https://i.ytimg.com/vi/GYpYDGkpHLY/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/GYpYDGkpHLY",
+          "source_url": "https://www.youtube.com/watch?v=GYpYDGkpHLY",
+          "published_at": "2026-04-22T10:51:19Z",
+          "channel_id": "UC-LSSlOZwpGIRIYihaz8zCw"
+        },
+        {
+          "video_id": "vwYQ4JFdcic",
+          "title": "Unmasking #epsteinfiles 86-90 The Underworld Play. #Trump KGB connection. The Bros😎",
+          "thumbnail_url": "https://i.ytimg.com/vi/vwYQ4JFdcic/hqdefault_live.jpg",
+          "embed_url": "https://www.youtube.com/embed/vwYQ4JFdcic",
+          "source_url": "https://www.youtube.com/watch?v=vwYQ4JFdcic",
+          "published_at": "2026-04-22T08:30:48Z",
+          "channel_id": "UC-LSSlOZwpGIRIYihaz8zCw"
+        },
+        {
+          "video_id": "l5uF2NYKnJ0",
+          "title": "#AI is going to wreck global markets 2027 #Satoshi #ransomware #Bitcoin",
+          "thumbnail_url": "https://i.ytimg.com/vi/l5uF2NYKnJ0/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/l5uF2NYKnJ0",
+          "source_url": "https://www.youtube.com/watch?v=l5uF2NYKnJ0",
+          "published_at": "2026-04-22T02:13:43Z",
+          "channel_id": "UC-LSSlOZwpGIRIYihaz8zCw"
+        },
+        {
+          "video_id": "l9y5BcMYeyo",
+          "title": "#SatoshiAttacks — 1% greatest fear 2027? Read distribution of wealth by super AI intelligence.￼",
+          "thumbnail_url": "https://i.ytimg.com/vi/l9y5BcMYeyo/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/l9y5BcMYeyo",
+          "source_url": "https://www.youtube.com/watch?v=l9y5BcMYeyo",
+          "published_at": "2026-04-21T23:58:37Z",
+          "channel_id": "UC-LSSlOZwpGIRIYihaz8zCw"
+        },
+        {
+          "video_id": "DerYiz_32Ss",
+          "title": "#FFCPLN #MAGA love song playlist see description! Must listen! Share.",
+          "thumbnail_url": "https://i.ytimg.com/vi/DerYiz_32Ss/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/DerYiz_32Ss",
+          "source_url": "https://www.youtube.com/watch?v=DerYiz_32Ss",
+          "published_at": "2026-04-21T19:00:29Z",
+          "channel_id": "UC-LSSlOZwpGIRIYihaz8zCw"
+        },
+        {
+          "video_id": "9lAmZtZUoxQ",
+          "title": "#FFCPLN #MAGA love song playlist see description! Must listen! Share.",
+          "thumbnail_url": "https://i.ytimg.com/vi/9lAmZtZUoxQ/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/9lAmZtZUoxQ",
+          "source_url": "https://www.youtube.com/watch?v=9lAmZtZUoxQ",
+          "published_at": "2026-04-21T15:32:57Z",
+          "channel_id": "UC-LSSlOZwpGIRIYihaz8zCw"
+        },
+        {
+          "video_id": "YbS191Sv3F4",
+          "title": "#FFCPLN #MAGA love song playlist see description! Must listen! Share.",
+          "thumbnail_url": "https://i.ytimg.com/vi/YbS191Sv3F4/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/YbS191Sv3F4",
+          "source_url": "https://www.youtube.com/watch?v=YbS191Sv3F4",
+          "published_at": "2026-04-21T11:39:52Z",
+          "channel_id": "UC-LSSlOZwpGIRIYihaz8zCw"
+        },
+        {
+          "video_id": "xonZubQ4gH0",
+          "title": "Super AI will attack one percent 2027 using bitcoin ransom? #SatoshiAttacks",
+          "thumbnail_url": "https://i.ytimg.com/vi/xonZubQ4gH0/hqdefault_live.jpg",
+          "embed_url": "https://www.youtube.com/embed/xonZubQ4gH0",
+          "source_url": "https://www.youtube.com/watch?v=xonZubQ4gH0",
+          "published_at": "2026-04-21T07:44:24Z",
+          "channel_id": "UC-LSSlOZwpGIRIYihaz8zCw"
+        },
+        {
+          "video_id": "EhdI6n4W2jk",
+          "title": "Imagine powerful AI agents holding 1% wealth hostage? #Bitcoin ransomware 2027 ￼ epidemic",
+          "thumbnail_url": "https://i.ytimg.com/vi/EhdI6n4W2jk/hqdefault_live.jpg",
+          "embed_url": "https://www.youtube.com/embed/EhdI6n4W2jk",
+          "source_url": "https://www.youtube.com/watch?v=EhdI6n4W2jk",
+          "published_at": "2026-04-21T03:39:26Z",
+          "channel_id": "UC-LSSlOZwpGIRIYihaz8zCw"
+        }
+      ],
+      "skipped_ids": []
+    },
+    {
+      "foundup_id": "undaodu",
+      "existing_count": 512,
+      "pulled_count": 0,
+      "new_count": 0,
+      "skipped_count": 0,
+      "new_videos": [],
+      "skipped_ids": []
+    },
+    {
+      "foundup_id": "foundups_main",
+      "existing_count": 44,
+      "pulled_count": 41,
+      "new_count": 40,
+      "skipped_count": 1,
+      "new_videos": [
+        {
+          "video_id": "n3lZtB2C6qg",
+          "title": "UnDaoDu talks about his journey to eSingularity",
+          "thumbnail_url": "https://i.ytimg.com/vi/n3lZtB2C6qg/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/n3lZtB2C6qg",
+          "source_url": "https://www.youtube.com/watch?v=n3lZtB2C6qg",
+          "published_at": "2023-04-19T18:00:30Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "1uQvUz8JAkA",
+          "title": "April 18, 2023 Sunrise 🌄 in the heartland of Zen 🇯🇵- see description",
+          "thumbnail_url": "https://i.ytimg.com/vi/1uQvUz8JAkA/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/1uQvUz8JAkA",
+          "source_url": "https://www.youtube.com/watch?v=1uQvUz8JAkA",
+          "published_at": "2023-04-17T21:45:53Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "Q0eumsJRwac",
+          "title": "In Japan you have to put your name on your trash! - see description",
+          "thumbnail_url": "https://i.ytimg.com/vi/Q0eumsJRwac/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/Q0eumsJRwac",
+          "source_url": "https://www.youtube.com/watch?v=Q0eumsJRwac",
+          "published_at": "2023-04-17T21:42:20Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "BG9m0R_Gylw",
+          "title": "Sustainable Japanese Agriculture funded by local government",
+          "thumbnail_url": "https://i.ytimg.com/vi/BG9m0R_Gylw/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/BG9m0R_Gylw",
+          "source_url": "https://www.youtube.com/watch?v=BG9m0R_Gylw",
+          "published_at": "2023-04-10T23:00:06Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "tzF91-j3UYQ",
+          "title": "What I love about Japan.",
+          "thumbnail_url": "https://i.ytimg.com/vi/tzF91-j3UYQ/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/tzF91-j3UYQ",
+          "source_url": "https://www.youtube.com/watch?v=tzF91-j3UYQ",
+          "published_at": "2022-11-26T15:00:40Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "FgDcfcQQ1Wk",
+          "title": "Wow found a cold beer in a forgotten cooler bag!",
+          "thumbnail_url": "https://i.ytimg.com/vi/FgDcfcQQ1Wk/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/FgDcfcQQ1Wk",
+          "source_url": "https://www.youtube.com/watch?v=FgDcfcQQ1Wk",
+          "published_at": "2022-11-25T07:10:40Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "u25amlF8Q3M",
+          "title": "Understanding the problem",
+          "thumbnail_url": "https://i.ytimg.com/vi/u25amlF8Q3M/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/u25amlF8Q3M",
+          "source_url": "https://www.youtube.com/watch?v=u25amlF8Q3M",
+          "published_at": "2022-01-14T09:32:00Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "qaQmLIosJx8",
+          "title": "SmartDAO or SeedDAO — they change everything",
+          "thumbnail_url": "https://i.ytimg.com/vi/qaQmLIosJx8/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/qaQmLIosJx8",
+          "source_url": "https://www.youtube.com/watch?v=qaQmLIosJx8",
+          "published_at": "2021-04-23T22:39:04Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "gDSG36IKrng",
+          "title": "BitcloutEffect is happening — bitcoin reaches all time high",
+          "thumbnail_url": "https://i.ytimg.com/vi/gDSG36IKrng/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/gDSG36IKrng",
+          "source_url": "https://www.youtube.com/watch?v=gDSG36IKrng",
+          "published_at": "2021-04-15T06:36:45Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "q6lwhPB3w_U",
+          "title": "Grant filming Kogata Hornets for &#39;Killer Hornets&#39; Shoot #OpenMedia",
+          "thumbnail_url": "https://i.ytimg.com/vi/q6lwhPB3w_U/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/q6lwhPB3w_U",
+          "source_url": "https://www.youtube.com/watch?v=q6lwhPB3w_U",
+          "published_at": "2017-07-10T01:46:54Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "QfEYjXFnbK8",
+          "title": "Hamazushi Sushi Japan #OpenMedia Clip - turntable",
+          "thumbnail_url": "https://i.ytimg.com/vi/QfEYjXFnbK8/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/QfEYjXFnbK8",
+          "source_url": "https://www.youtube.com/watch?v=QfEYjXFnbK8",
+          "published_at": "2017-07-10T00:58:08Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "yclkJiUE6Go",
+          "title": "Kiro Suzumebachi - arguing with Marius #OpenMedia",
+          "thumbnail_url": "https://i.ytimg.com/vi/yclkJiUE6Go/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/yclkJiUE6Go",
+          "source_url": "https://www.youtube.com/watch?v=yclkJiUE6Go",
+          "published_at": "2017-07-10T00:24:25Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "u3BcUQR9QBE",
+          "title": "Crowds shot Ehime Shikoku Japan #OpenMedia Clip",
+          "thumbnail_url": "https://i.ytimg.com/vi/u3BcUQR9QBE/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/u3BcUQR9QBE",
+          "source_url": "https://www.youtube.com/watch?v=u3BcUQR9QBE",
+          "published_at": "2017-07-09T23:04:34Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "6u_4HBjnJ4g",
+          "title": "Crowds shot Ehime Shikoku Japan #OpenMedia Clip",
+          "thumbnail_url": "https://i.ytimg.com/vi/6u_4HBjnJ4g/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/6u_4HBjnJ4g",
+          "source_url": "https://www.youtube.com/watch?v=6u_4HBjnJ4g",
+          "published_at": "2017-07-09T23:01:26Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "uEdAKh1MgNY",
+          "title": "Making Yogurt #OpenMedia clip",
+          "thumbnail_url": "https://i.ytimg.com/vi/uEdAKh1MgNY/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/uEdAKh1MgNY",
+          "source_url": "https://www.youtube.com/watch?v=uEdAKh1MgNY",
+          "published_at": "2017-07-09T21:59:23Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "Gg53IwTzMoc",
+          "title": "Making Yogurt is Easy! #OpenMedia Clip",
+          "thumbnail_url": "https://i.ytimg.com/vi/Gg53IwTzMoc/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/Gg53IwTzMoc",
+          "source_url": "https://www.youtube.com/watch?v=Gg53IwTzMoc",
+          "published_at": "2017-07-09T21:52:13Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "UQ6FRewTp8M",
+          "title": "#OpenMedia - Cooking with Mike Trout",
+          "thumbnail_url": "https://i.ytimg.com/vi/UQ6FRewTp8M/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/UQ6FRewTp8M",
+          "source_url": "https://www.youtube.com/watch?v=UQ6FRewTp8M",
+          "published_at": "2017-07-09T21:06:45Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "4J1-paVQxmQ",
+          "title": "#OpenMedia Driving Slow Motion, Japan",
+          "thumbnail_url": "https://i.ytimg.com/vi/4J1-paVQxmQ/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/4J1-paVQxmQ",
+          "source_url": "https://www.youtube.com/watch?v=4J1-paVQxmQ",
+          "published_at": "2017-07-09T20:51:29Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "xymAa2nvBLE",
+          "title": "The Three Teachers of Kōbō Daishi - 88 Temple Pilgrimage",
+          "thumbnail_url": "https://i.ytimg.com/vi/xymAa2nvBLE/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/xymAa2nvBLE",
+          "source_url": "https://www.youtube.com/watch?v=xymAa2nvBLE",
+          "published_at": "2017-07-09T19:57:51Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "vzfZtZcBt64",
+          "title": "#Shanghai. Loosing it. What started out as a horrid experience turned out ok",
+          "thumbnail_url": "https://i.ytimg.com/vi/vzfZtZcBt64/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/vzfZtZcBt64",
+          "source_url": "https://www.youtube.com/watch?v=vzfZtZcBt64",
+          "published_at": "2017-07-09T19:54:07Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "u9Bj2FwymSQ",
+          "title": "Japanese village Slow Motion #OpenMedia Footage Fukui Japan",
+          "thumbnail_url": "https://i.ytimg.com/vi/u9Bj2FwymSQ/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/u9Bj2FwymSQ",
+          "source_url": "https://www.youtube.com/watch?v=u9Bj2FwymSQ",
+          "published_at": "2017-06-25T02:33:25Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "lmnUO54ej_Y",
+          "title": "Foundups #OpenMedia Footage Shikoku Japan",
+          "thumbnail_url": "https://i.ytimg.com/vi/lmnUO54ej_Y/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/lmnUO54ej_Y",
+          "source_url": "https://www.youtube.com/watch?v=lmnUO54ej_Y",
+          "published_at": "2017-06-24T21:53:46Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "6J4c7xH33lA",
+          "title": "Foundups #OpenMedia Footage Shikoku Japan",
+          "thumbnail_url": "https://i.ytimg.com/vi/6J4c7xH33lA/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/6J4c7xH33lA",
+          "source_url": "https://www.youtube.com/watch?v=6J4c7xH33lA",
+          "published_at": "2017-06-24T17:05:15Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "eiK2TjuGyjc",
+          "title": "88 Temple Pilgrimage Foundups #OpenMedia Footage Shikoku Japan",
+          "thumbnail_url": "https://i.ytimg.com/vi/eiK2TjuGyjc/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/eiK2TjuGyjc",
+          "source_url": "https://www.youtube.com/watch?v=eiK2TjuGyjc",
+          "published_at": "2017-06-24T14:52:47Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "v5GV5tsjGfU",
+          "title": "Foundups.com: Trout explaining why bee collapse is happening.",
+          "thumbnail_url": "https://i.ytimg.com/vi/v5GV5tsjGfU/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/v5GV5tsjGfU",
+          "source_url": "https://www.youtube.com/watch?v=v5GV5tsjGfU",
+          "published_at": "2015-12-11T04:44:03Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "wXGPtM7UmDI",
+          "title": "foundups.com fukui dinosaur museum 4k aerial view part 2",
+          "thumbnail_url": "https://i.ytimg.com/vi/wXGPtM7UmDI/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/wXGPtM7UmDI",
+          "source_url": "https://www.youtube.com/watch?v=wXGPtM7UmDI",
+          "published_at": "2015-11-25T17:08:26Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "Y3qTULIm5fo",
+          "title": "Is death final? #iq2us debate response.",
+          "thumbnail_url": "https://i.ytimg.com/vi/Y3qTULIm5fo/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/Y3qTULIm5fo",
+          "source_url": "https://www.youtube.com/watch?v=Y3qTULIm5fo",
+          "published_at": "2015-10-04T15:21:35Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "ml4tgYFOn6Q",
+          "title": "FOUNDUPS.COM: turning your compose heap into a herb garden.",
+          "thumbnail_url": "https://i.ytimg.com/vi/ml4tgYFOn6Q/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/ml4tgYFOn6Q",
+          "source_url": "https://www.youtube.com/watch?v=ml4tgYFOn6Q",
+          "published_at": "2014-12-19T17:37:48Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "SD72S_jq6To",
+          "title": "$5m raised on #kickstarter! - Now let&#39;s end climate change with foundups®",
+          "thumbnail_url": "https://i.ytimg.com/vi/SD72S_jq6To/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/SD72S_jq6To",
+          "source_url": "https://www.youtube.com/watch?v=SD72S_jq6To",
+          "published_at": "2014-07-14T05:05:56Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "n4LUB9Htr9E",
+          "title": "FOUNDUPS®COM: My Salad Garden™ foundup® update - July 2012 - Seed collecting",
+          "thumbnail_url": "https://i.ytimg.com/vi/n4LUB9Htr9E/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/n4LUB9Htr9E",
+          "source_url": "https://www.youtube.com/watch?v=n4LUB9Htr9E",
+          "published_at": "2014-07-05T05:36:26Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "ba0rW6vX9YM",
+          "title": "FOUNDUPS.COM: Visiting a Japanese mountain fish farm — see description",
+          "thumbnail_url": "https://i.ytimg.com/vi/ba0rW6vX9YM/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/ba0rW6vX9YM",
+          "source_url": "https://www.youtube.com/watch?v=ba0rW6vX9YM",
+          "published_at": "2014-07-05T03:06:25Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "Xn22rieSlJ0",
+          "title": "100K Beekeeping Intiatives Worldwide - Changing the world. One beehive at a time!",
+          "thumbnail_url": "https://i.ytimg.com/vi/Xn22rieSlJ0/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/Xn22rieSlJ0",
+          "source_url": "https://www.youtube.com/watch?v=Xn22rieSlJ0",
+          "published_at": "2012-03-14T06:38:51Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "uLiHkysNmFY",
+          "title": "Foundups.TV: Did the SEC Kill Profounder? The first American micro-seed crowdfunding startup dies",
+          "thumbnail_url": "https://i.ytimg.com/vi/uLiHkysNmFY/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/uLiHkysNmFY",
+          "source_url": "https://www.youtube.com/watch?v=uLiHkysNmFY",
+          "published_at": "2012-02-18T02:22:22Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "pI0PPx2XZzg",
+          "title": "Trout in 2012 describing the The Blockchain in January 2012",
+          "thumbnail_url": "https://i.ytimg.com/vi/pI0PPx2XZzg/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/pI0PPx2XZzg",
+          "source_url": "https://www.youtube.com/watch?v=pI0PPx2XZzg",
+          "published_at": "2012-01-16T06:53:34Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "6MX4XL_z79A",
+          "title": "Foundups.TV: Switching back to the old @YouTube uploader - new one = #FAIL",
+          "thumbnail_url": "https://i.ytimg.com/vi/6MX4XL_z79A/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/6MX4XL_z79A",
+          "source_url": "https://www.youtube.com/watch?v=6MX4XL_z79A",
+          "published_at": "2011-11-01T08:10:45Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "KDqpyY3aLhU",
+          "title": "Foundup Fix: @Youtube #Dev: Making it easier to get to your #YouTube #Playlist Channel #Video View",
+          "thumbnail_url": "https://i.ytimg.com/vi/KDqpyY3aLhU/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/KDqpyY3aLhU",
+          "source_url": "https://www.youtube.com/watch?v=KDqpyY3aLhU",
+          "published_at": "2011-10-27T02:22:27Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "pdKDnQbsBBI",
+          "title": "Foundup Fix: @Facebook photo #upload #bug... fix your crappy code! #Fail",
+          "thumbnail_url": "https://i.ytimg.com/vi/pdKDnQbsBBI/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/pdKDnQbsBBI",
+          "source_url": "https://www.youtube.com/watch?v=pdKDnQbsBBI",
+          "published_at": "2011-10-22T09:21:13Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "xjU-HY7_Zl4",
+          "title": "O!F talk: What&#39;s a Startup?  Part 1 of 3",
+          "thumbnail_url": "https://i.ytimg.com/vi/xjU-HY7_Zl4/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/xjU-HY7_Zl4",
+          "source_url": "https://www.youtube.com/watch?v=xjU-HY7_Zl4",
+          "published_at": "2011-09-30T02:51:58Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "EeySvCw-sOk",
+          "title": "Foundup Fix: @StartupAmerica review... My SuccessKit Review",
+          "thumbnail_url": "https://i.ytimg.com/vi/EeySvCw-sOk/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/EeySvCw-sOk",
+          "source_url": "https://www.youtube.com/watch?v=EeySvCw-sOk",
+          "published_at": "2011-09-28T04:13:30Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        },
+        {
+          "video_id": "gpbEHbrhLCQ",
+          "title": "#GrowVC  demands removal of #Angellist GrowVC comparison videos.",
+          "thumbnail_url": "https://i.ytimg.com/vi/gpbEHbrhLCQ/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/gpbEHbrhLCQ",
+          "source_url": "https://www.youtube.com/watch?v=gpbEHbrhLCQ",
+          "published_at": "2011-08-30T18:22:53Z",
+          "channel_id": "UCSNTUXjAgpd4sgWYP0xoJgw"
+        }
+      ],
+      "skipped_ids": [
+        "va5j4vN-N5U"
+      ]
+    },
+    {
+      "foundup_id": "antifafm",
+      "existing_count": 34,
+      "pulled_count": 50,
+      "new_count": 35,
+      "skipped_count": 15,
+      "new_videos": [
+        {
+          "video_id": "UXLQjLGhtVE",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/UXLQjLGhtVE/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/UXLQjLGhtVE",
+          "source_url": "https://www.youtube.com/watch?v=UXLQjLGhtVE",
+          "published_at": "2026-04-20T07:50:58Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "7dnHTZ7C1Tk",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/7dnHTZ7C1Tk/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/7dnHTZ7C1Tk",
+          "source_url": "https://www.youtube.com/watch?v=7dnHTZ7C1Tk",
+          "published_at": "2026-04-19T10:33:34Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "Xo5T1MhYfRM",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/Xo5T1MhYfRM/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/Xo5T1MhYfRM",
+          "source_url": "https://www.youtube.com/watch?v=Xo5T1MhYfRM",
+          "published_at": "2026-04-13T06:51:41Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "KIZyTkGs8Oo",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/KIZyTkGs8Oo/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/KIZyTkGs8Oo",
+          "source_url": "https://www.youtube.com/watch?v=KIZyTkGs8Oo",
+          "published_at": "2026-04-09T11:47:41Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "NU2Pky6GHz0",
+          "title": "🔥 #FFCPLN: The Playlist #MAGA Fears!",
+          "thumbnail_url": "https://i.ytimg.com/vi/NU2Pky6GHz0/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/NU2Pky6GHz0",
+          "source_url": "https://www.youtube.com/watch?v=NU2Pky6GHz0",
+          "published_at": "2026-04-05T15:30:12Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "0aaCvCZEP3o",
+          "title": "❌ #FFCPLN Anti-Fascist Music Exposing #MAGA ❌",
+          "thumbnail_url": "https://i.ytimg.com/vi/0aaCvCZEP3o/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/0aaCvCZEP3o",
+          "source_url": "https://www.youtube.com/watch?v=0aaCvCZEP3o",
+          "published_at": "2026-04-05T11:30:02Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "Yte1eeOZ3yw",
+          "title": "👀 #FFCPLN #MAGA Exposed! Subscribe! 👀",
+          "thumbnail_url": "https://i.ytimg.com/vi/Yte1eeOZ3yw/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/Yte1eeOZ3yw",
+          "source_url": "https://www.youtube.com/watch?v=Yte1eeOZ3yw",
+          "published_at": "2026-04-05T08:45:01Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "wFLjFi7Ss2g",
+          "title": "⚠️ This Song DESTROYS #MAGA! #FFCPLN",
+          "thumbnail_url": "https://i.ytimg.com/vi/wFLjFi7Ss2g/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/wFLjFi7Ss2g",
+          "source_url": "https://www.youtube.com/watch?v=wFLjFi7Ss2g",
+          "published_at": "2026-04-05T06:15:07Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "WvZywnHJldk",
+          "title": "🎵 #FFCPLN: The Playlist #MAGA Fears!",
+          "thumbnail_url": "https://i.ytimg.com/vi/WvZywnHJldk/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/WvZywnHJldk",
+          "source_url": "https://www.youtube.com/watch?v=WvZywnHJldk",
+          "published_at": "2026-04-05T02:45:02Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "5Fjj0JDX2-A",
+          "title": "⚠️ #FFCPLN Anti-Fascist Music Exposing #MAGA 💀",
+          "thumbnail_url": "https://i.ytimg.com/vi/5Fjj0JDX2-A/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/5Fjj0JDX2-A",
+          "source_url": "https://www.youtube.com/watch?v=5Fjj0JDX2-A",
+          "published_at": "2026-04-04T23:30:02Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "9U6hyyrhCPo",
+          "title": "💀 #ICE Cruelty Exposed! #FFCPLN Music ⚠️",
+          "thumbnail_url": "https://i.ytimg.com/vi/9U6hyyrhCPo/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/9U6hyyrhCPo",
+          "source_url": "https://www.youtube.com/watch?v=9U6hyyrhCPo",
+          "published_at": "2026-04-04T21:00:08Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "d7087xpT7_I",
+          "title": "🚨 Resist #ICE #ICEout #StopICE #FFCPLN 🔥",
+          "thumbnail_url": "https://i.ytimg.com/vi/d7087xpT7_I/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/d7087xpT7_I",
+          "source_url": "https://www.youtube.com/watch?v=d7087xpT7_I",
+          "published_at": "2026-04-04T18:15:03Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "ioTJ7DcSD28",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/ioTJ7DcSD28/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/ioTJ7DcSD28",
+          "source_url": "https://www.youtube.com/watch?v=ioTJ7DcSD28",
+          "published_at": "2026-04-04T17:17:23Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "f5iONDYcM2o",
+          "title": "💀 VIRAL: #FFCPLN Anti-MAGA Anthem! Link in Desc",
+          "thumbnail_url": "https://i.ytimg.com/vi/f5iONDYcM2o/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/f5iONDYcM2o",
+          "source_url": "https://www.youtube.com/watch?v=f5iONDYcM2o",
+          "published_at": "2026-04-04T15:01:05Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "9RdwNJkywdw",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/9RdwNJkywdw/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/9RdwNJkywdw",
+          "source_url": "https://www.youtube.com/watch?v=9RdwNJkywdw",
+          "published_at": "2026-04-03T23:19:28Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "fH0ToWYMiTw",
+          "title": "#FFCPLN Rubio",
+          "thumbnail_url": "https://i.ytimg.com/vi/fH0ToWYMiTw/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/fH0ToWYMiTw",
+          "source_url": "https://www.youtube.com/watch?v=fH0ToWYMiTw",
+          "published_at": "2026-04-03T18:00:42Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "1m4N7KCogBM",
+          "title": "#f_Israel #FFCPLN SICKOs ❤️ #iranian people",
+          "thumbnail_url": "https://i.ytimg.com/vi/1m4N7KCogBM/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/1m4N7KCogBM",
+          "source_url": "https://www.youtube.com/watch?v=1m4N7KCogBM",
+          "published_at": "2026-04-02T16:00:06Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "f0lAZf-tkwI",
+          "title": "#iranwar the MOVIE - official soundtrack 0102 Sinéad O’Connor Album",
+          "thumbnail_url": "https://i.ytimg.com/vi/f0lAZf-tkwI/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/f0lAZf-tkwI",
+          "source_url": "https://www.youtube.com/watch?v=f0lAZf-tkwI",
+          "published_at": "2026-04-02T06:26:01Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "e_SlBFsAInE",
+          "title": "#Trump #epsteinfiles #1 #PedoPotUS #FFCPLN #AntifaFM",
+          "thumbnail_url": "https://i.ytimg.com/vi/e_SlBFsAInE/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/e_SlBFsAInE",
+          "source_url": "https://www.youtube.com/watch?v=e_SlBFsAInE",
+          "published_at": "2026-04-02T06:19:34Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "FesUpPjshDI",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/FesUpPjshDI/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/FesUpPjshDI",
+          "source_url": "https://www.youtube.com/watch?v=FesUpPjshDI",
+          "published_at": "2026-04-02T03:40:27Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "GYPa0Mm0rik",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/GYPa0Mm0rik/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/GYPa0Mm0rik",
+          "source_url": "https://www.youtube.com/watch?v=GYPa0Mm0rik",
+          "published_at": "2026-03-30T09:06:47Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "Vg2zB1L3zFw",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/Vg2zB1L3zFw/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/Vg2zB1L3zFw",
+          "source_url": "https://www.youtube.com/watch?v=Vg2zB1L3zFw",
+          "published_at": "2026-03-30T05:46:09Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "kUtbDPm8-KY",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/kUtbDPm8-KY/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/kUtbDPm8-KY",
+          "source_url": "https://www.youtube.com/watch?v=kUtbDPm8-KY",
+          "published_at": "2026-03-24T05:00:48Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "EsJ7SeI3tjs",
+          "title": "24/7 #Us-Israeli #Live: #Trump #Iran #AntifaFM Music - 03/23 #StopICE #music",
+          "thumbnail_url": "https://i.ytimg.com/vi/EsJ7SeI3tjs/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/EsJ7SeI3tjs",
+          "source_url": "https://www.youtube.com/watch?v=EsJ7SeI3tjs",
+          "published_at": "2026-03-23T04:39:48Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "Q_ao0aD93t4",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/Q_ao0aD93t4/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/Q_ao0aD93t4",
+          "source_url": "https://www.youtube.com/watch?v=Q_ao0aD93t4",
+          "published_at": "2026-03-22T15:52:55Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "DuGSKKMoCKw",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/DuGSKKMoCKw/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/DuGSKKMoCKw",
+          "source_url": "https://www.youtube.com/watch?v=DuGSKKMoCKw",
+          "published_at": "2026-03-20T20:39:10Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "pctApCBoWKE",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/pctApCBoWKE/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/pctApCBoWKE",
+          "source_url": "https://www.youtube.com/watch?v=pctApCBoWKE",
+          "published_at": "2026-03-19T12:32:36Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "JCY2W_-PJ_Q",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/JCY2W_-PJ_Q/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/JCY2W_-PJ_Q",
+          "source_url": "https://www.youtube.com/watch?v=JCY2W_-PJ_Q",
+          "published_at": "2026-03-19T01:33:08Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "D9_Gy3lO8pA",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/D9_Gy3lO8pA/hqdefault_live.jpg",
+          "embed_url": "https://www.youtube.com/embed/D9_Gy3lO8pA",
+          "source_url": "https://www.youtube.com/watch?v=D9_Gy3lO8pA",
+          "published_at": "2026-03-18T23:10:55Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "Fb9O19Cfbu0",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/Fb9O19Cfbu0/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/Fb9O19Cfbu0",
+          "source_url": "https://www.youtube.com/watch?v=Fb9O19Cfbu0",
+          "published_at": "2026-03-18T02:47:58Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "S33Jj0W0v8U",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/S33Jj0W0v8U/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/S33Jj0W0v8U",
+          "source_url": "https://www.youtube.com/watch?v=S33Jj0W0v8U",
+          "published_at": "2026-03-16T03:30:08Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "ZyUP8IMNN3M",
+          "title": "24/7 #Us-Israeli #Live: #Trump #Iran #AntifaFM Music - 03/15 #StopICE #music",
+          "thumbnail_url": "https://i.ytimg.com/vi/ZyUP8IMNN3M/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/ZyUP8IMNN3M",
+          "source_url": "https://www.youtube.com/watch?v=ZyUP8IMNN3M",
+          "published_at": "2026-03-15T05:51:26Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "ZAiVw-wP8yg",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/ZAiVw-wP8yg/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/ZAiVw-wP8yg",
+          "source_url": "https://www.youtube.com/watch?v=ZAiVw-wP8yg",
+          "published_at": "2026-03-14T13:39:46Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "tGtw5odmsk0",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/tGtw5odmsk0/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/tGtw5odmsk0",
+          "source_url": "https://www.youtube.com/watch?v=tGtw5odmsk0",
+          "published_at": "2026-03-13T17:10:19Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        },
+        {
+          "video_id": "xjuJ4mJo5_Q",
+          "title": "AntifaFM -- 24/7 Rage Against the Machine #IRAN #Trump war #WW3 #FFCPLN #MAGA #LIVE",
+          "thumbnail_url": "https://i.ytimg.com/vi/xjuJ4mJo5_Q/hqdefault.jpg",
+          "embed_url": "https://www.youtube.com/embed/xjuJ4mJo5_Q",
+          "source_url": "https://www.youtube.com/watch?v=xjuJ4mJo5_Q",
+          "published_at": "2026-03-13T15:27:03Z",
+          "channel_id": "UCVSmg5aOhP4tnQ9KFUg97qA"
+        }
+      ],
+      "skipped_ids": [
+        "_FF3J3V3Mrg",
+        "jF3SH8SWcH0",
+        "rbHv4X_RDWM",
+        "tYZj3A_ODlM",
+        "la7DRm8gFWs",
+        "-6_ffsm9bG8",
+        "xMKVDyw3eW0",
+        "Q14wc0YXKkY",
+        "eo0wPAON1Zg",
+        "gAaunOHbIoc",
+        "533z1Fy7KAs",
+        "i1L5HxeSFxs",
+        "mefpx8i_9GE",
+        "vbz5n_OnLkM",
+        "H7dN1nwJdQw"
+      ]
+    }
+  ]
+}
