@@ -1,0 +1,13 @@
+{
+  "runs": [
+    {
+      "success": true,
+      "foundups_checked": 4,
+      "new_videos_found": 89,
+      "delta_path": "O:\\Foundups-Agent\\docs\\audits\\pfmall_youtube_ingest\\youtube_channel_pull_delta.json",
+      "error": null,
+      "triggered_at": "2026-04-23T10:07:23.143120Z",
+      "trigger_mode": "manual"
+    }
+  ]
+}
