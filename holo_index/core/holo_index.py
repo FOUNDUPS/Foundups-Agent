@@ -208,9 +208,16 @@ class HoloIndex:
         # retrieval_mode="turboquant" value) overclaims the mode.
         #
         #   retrieval_mode    ∈ {semantic, lexical, failed}
-        #   embedding_backend ∈ {sentence_transformers, turboquant, none}
+        #   embedding_backend ∈ {sentence_transformers, turboquant_onnx_int8, none, unknown}
         #
         # "none" covers both lexical (no embedder) and failed (nothing loaded).
+        # HIA3 (2026-04-23): TurboQuant became a real backend (ORT int8).
+        # Its canonical label is "turboquant_onnx_int8" (see
+        # holo_index.core.turboquant_backend.BACKEND_NAME). HIA3 is an
+        # experimental opt-in — TQ1 benchmark measured 3.65% cosine drift
+        # and 76.7% top-1 agreement; static calibration is required before
+        # default promotion. search_engine.py surfaces this via
+        # backend_quality="experimental" and quality_gate="not_default_ready".
         self.retrieval_mode = "failed"  # Default until proven otherwise
         self.embedding_backend = "none"
 
@@ -226,25 +233,43 @@ class HoloIndex:
             self.retrieval_mode = "lexical"
             self.embedding_backend = "none"
         else:
-            # HIA2 Phase 1 / HIA-TAX1: optional TurboQuant backend (opt-in via
+            # HIA3 / HIA-TAX1: optional TurboQuant ONNX int8 backend (opt-in via
             # HOLO_USE_TURBOQUANT=1). TurboQuant is a *semantic* backend; when
-            # active, retrieval_mode="semantic" and embedding_backend="turboquant".
-            # Phase 1 scaffold is_available() is False, so this path logs and
-            # falls through to the SentenceTransformer backend.
+            # active, retrieval_mode="semantic" and
+            # embedding_backend="turboquant_onnx_int8". Experimental — TQ1
+            # measured 3.65% cosine drift vs fp32 and 76.7% top-1 agreement.
+            # search_engine.py surfaces backend_quality="experimental" and
+            # quality_gate="not_default_ready" on the response metadata.
+            # On any failure (dep missing, artifact missing, load error), we
+            # fall through to the SentenceTransformer backend without raising.
             if _turboquant_enabled():
                 try:
-                    from .turboquant_backend import TurboQuantEmbedder
+                    from .turboquant_backend import (
+                        TurboQuantEmbedder,
+                        BACKEND_NAME as _TQ_BACKEND_NAME,
+                    )
                     if TurboQuantEmbedder.is_available():
                         self._log_agent_action(
-                            "HOLO_USE_TURBOQUANT=1 -> loading TurboQuant backend (semantic)",
+                            "HOLO_USE_TURBOQUANT=1 -> loading TurboQuant backend "
+                            "(semantic, experimental, not_default_ready)",
                             "MODEL",
                         )
-                        self.model = TurboQuantEmbedder()
-                        self.retrieval_mode = "semantic"
-                        self.embedding_backend = "turboquant"
+                        try:
+                            embedder = TurboQuantEmbedder()
+                            embedder._ensure_loaded()
+                            self.model = embedder
+                            self.retrieval_mode = "semantic"
+                            self.embedding_backend = _TQ_BACKEND_NAME
+                        except Exception as load_err:
+                            self._log_agent_action(
+                                f"TurboQuant load failed ({load_err}); "
+                                "falling back to SentenceTransformer",
+                                "WARN",
+                            )
                     else:
                         self._log_agent_action(
-                            "TurboQuant not yet implemented; falling back to SentenceTransformer",
+                            "TurboQuant not available (dep/artifacts missing); "
+                            "falling back to SentenceTransformer",
                             "WARN",
                         )
                 except Exception as e:
@@ -253,7 +278,11 @@ class HoloIndex:
                         "WARN",
                     )
 
-            if getattr(self, "model", None) is not None and self.embedding_backend == "turboquant":
+            if (
+                getattr(self, "model", None) is not None
+                and isinstance(self.embedding_backend, str)
+                and self.embedding_backend.startswith("turboquant")
+            ):
                 # TurboQuant loaded successfully; skip SentenceTransformer path entirely.
                 pass
             else:
