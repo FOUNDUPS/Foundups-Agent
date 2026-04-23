@@ -1,5 +1,57 @@
 # HoloIndex Package ModLog
 
+## [2026-04-23] CFZ1 — Corpus Freeze Mechanism Phase 1 (cfz1_corpus_freeze)
+
+**Agent**: 0102 (Worker CY)
+**WSP References**: WSP 15 (scope control), WSP 97 (truth distinction), WSP 50 (pre-action verification), WSP 22 (ModLog)
+**Status**: COMPLETE
+**Decision**: Corpus freeze mechanism operational; TQ2/TQ3 now gated by preflight verification
+**Branch**: `feat/cfz1-corpus-freeze-mechanism`
+
+### Context
+
+TQ3 audit revealed corpus drift between TQ2 and TQ3 runs (`navigation_wsp`: 3,446 → 1,916 docs),
+making gate metrics incomparable. CFZ1 implements a deterministic freeze + preflight mechanism
+to block TQ audits unless the audited corpus is unchanged from baseline.
+
+### Changes
+
+1. **`holo_index/scripts/benchmarks/tq_corpus_freeze.py`** (new) — Corpus freeze utility with
+   `snapshot` and `verify` commands. Creates deterministic per-collection fingerprints using
+   SHA256 hashes of sorted IDs, documents, and metadata. Exports `preflight_check()` for
+   TQ2/TQ3 integration.
+
+2. **`docs/audits/holoindex_turboquant/corpus_freeze_manifest.json`** (new) — Frozen manifest
+   with 23,835 total documents across 6 collections. Includes git SHA and UTC timestamp.
+
+3. **`holo_index/scripts/benchmarks/tq2_real_corpus_audit.py`** — Added `preflight_check()`
+   call before audit metrics computation. Aborts with exit code 1 on corpus drift.
+
+4. **`holo_index/scripts/benchmarks/tq3_routed_corpus_audit.py`** — Same preflight wiring.
+
+5. **`holo_index/tests/test_tq_corpus_freeze.py`** (new) — 15 tests covering hash determinism,
+   manifest structure, drift detection, and preflight behavior.
+
+6. **`docs/audits/holoindex_turboquant/CFZ1_CORPUS_FREEZE_REPORT.md`** (new) — Full operator
+   documentation with exact pass/fail outputs and command reference.
+
+### Frozen Collection Counts
+
+| Collection | Documents |
+|------------|----------:|
+| navigation_code | 296 |
+| navigation_wsp | 3,450 |
+| navigation_tests | 0 |
+| navigation_skills | 59 |
+| navigation_symbols | 20,000 |
+| navigation_vocabulary | 30 |
+
+### Emergency Override
+
+`TQ_CORPUS_ALLOW_DRIFT=1` skips preflight verification (emergency use only).
+
+---
+
 ## [2026-04-23] TQ3 — Per-Collection Backend Routing Phase 1 (tq3_per_collection_routing)
 
 **Agent**: 0102 (Worker CX)

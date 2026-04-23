@@ -202,10 +202,21 @@ def _stage_int8_with_tokenizer() -> Path:
 
 
 # ---------------------------------------------------------------------------
+# Corpus freeze preflight (CFZ1)
+# ---------------------------------------------------------------------------
+CORPUS_MANIFEST = Path(__file__).parent.parent.parent.parent / "docs/audits/holoindex_turboquant/corpus_freeze_manifest.json"
+
+
+# ---------------------------------------------------------------------------
 # Main audit
 # ---------------------------------------------------------------------------
 
 def main() -> int:
+    # CFZ1: Enforce corpus stability before audit
+    from holo_index.scripts.benchmarks.tq_corpus_freeze import preflight_check
+    print("[TQ2] preflight — corpus freeze verification")
+    preflight_check(CORPUS_MANIFEST)
+
     print("[TQ2] preflight — staging int8 + tokenizer")
     staging = _stage_int8_with_tokenizer()
     os.environ["HOLO_TURBOQUANT_MODEL_DIR"] = str(staging)

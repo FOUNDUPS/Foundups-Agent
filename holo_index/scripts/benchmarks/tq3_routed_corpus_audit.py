@@ -79,8 +79,16 @@ from holo_index.core.backend_routing import (
     resolve_backend_for_collection,
 )
 
+# CFZ1: Corpus freeze manifest path
+CORPUS_MANIFEST = Path(__file__).parent.parent.parent.parent / "docs/audits/holoindex_turboquant/corpus_freeze_manifest.json"
+
 
 def main() -> int:
+    # CFZ1: Enforce corpus stability before audit
+    from holo_index.scripts.benchmarks.tq_corpus_freeze import preflight_check
+    print("[TQ3] preflight - corpus freeze verification")
+    preflight_check(CORPUS_MANIFEST)
+
     print("[TQ3] preflight - staging int8 + tokenizer")
     staging = _stage_int8_with_tokenizer()
     os.environ["HOLO_TURBOQUANT_MODEL_DIR"] = str(staging)
