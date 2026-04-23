@@ -5,7 +5,8 @@
 **ADR:** [`docs/adr/ADR_FOUNDUPS_MOBILE_WORKER_SKILL_SYSTEM.md`](../../../docs/adr/ADR_FOUNDUPS_MOBILE_WORKER_SKILL_SYSTEM.md)  
 **Builder rules:** [`../docs/WSP_SKILL_BUILDER.md`](../docs/WSP_SKILL_BUILDER.md)  
 **Device proof (Gallery):** [`DEVICE_EDGE_GALLERY_VALIDATION.md`](DEVICE_EDGE_GALLERY_VALIDATION.md) — **raw GitHub ≠ Gallery**; use this for on-device checklist.  
-**Matrix A (local import only):** [`MATRIX_A_LOCAL_IMPORT_RUN.md`](MATRIX_A_LOCAL_IMPORT_RUN.md) — smoke → parser + exact test string `55108`.
+**Matrix A (local import only):** [`MATRIX_A_LOCAL_IMPORT_RUN.md`](MATRIX_A_LOCAL_IMPORT_RUN.md) — smoke → parser + exact test string `55108`.  
+**Report Template:** [`DEVICE_GALLERY_REPORT_TEMPLATE.md`](DEVICE_GALLERY_REPORT_TEMPLATE.md) — 012 fills during on-device testing (WSP 97: SPECIFIED_NOT_IMPLEMENTED until executed).
 
 ## Skills
 
