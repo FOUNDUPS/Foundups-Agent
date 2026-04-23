@@ -1,5 +1,108 @@
 # HoloIndex Package ModLog
 
+## [2026-04-23] TQ3 — Per-Collection Backend Routing Phase 1 (tq3_per_collection_routing)
+
+**Agent**: 0102 (Worker CX)
+**WSP References**: WSP 15 (priority), WSP 97 (truth distinction), WSP 50 (pre-action verification)
+**Status**: INFRASTRUCTURE COMPLETE; policy-promotion HOLD
+**Decision**: `HOLD_ROUTING` (see `docs/audits/holoindex_turboquant/TQ3_PER_COLLECTION_ROUTING.md`)
+**Branch**: `research/tq3-per-collection-routing`
+**Worktree**: `O:/tmp/w_tq3_routing`
+
+### Context
+
+TQ2 (`HOLD_INT8`) proved the int8 backend retrieval-equivalent on every
+navigation collection except `navigation_vocabulary` (30 docs, top-5
+43.3%). TQ3 ships the per-collection routing surface so int8 can serve
+the four equivalent collections while fp32 continues to serve
+vocabulary — without touching the global default or requiring a
+reindex.
+
+### Changes
+
+1. **`holo_index/core/backend_routing.py`** (new) — canonical policy
+   module. `COLLECTION_BACKEND_ROUTING` maps code/wsp/skills/symbols →
+   int8 and vocabulary → fp32. `resolve_backend_for_collection()`
+   honors a `routing_active` flag plus an `available_backends` dict so
+   missing backends degrade truthfully (never silently).
+   `build_collection_backend_map()` emits the full map for search
+   metadata.
+
+2. **`holo_index/core/holo_index.py`** — `__init__` now loads **both**
+   fp32 and int8 when `HOLO_USE_TURBOQUANT=1`. New instance attrs:
+   `self.embedders` (backend_key → embedder), `self.routing_active`
+   (bool; requires both backends loaded), `self.collection_backend_map`
+   (collection → backend_key actually used). `self.model` stays the
+   primary (fp32 preferred) so legacy `_get_embedding` indexing
+   continues to write fp32 vectors — no reindex. When routing is
+   active, `embedding_backend="routed"` (WSP 97 — no single-backend
+   overclaim on mixed behavior).
+
+3. **`holo_index/core/search_engine.py`** — `_search_collection` picks
+   the embedder per-collection via `resolve_backend_for_collection`,
+   falls back to `holo.model` if `embedders` absent (test-mock
+   compatibility). `execute_search` metadata gains
+   `routing_active: bool` and `collection_backend_map: dict`, and the
+   quality-taxonomy dicts gain `"routed" → "mixed"` entries.
+
+4. **`holo_index/tests/test_backend_routing.py`** (new) — 14 focused
+   tests covering the policy map, resolver semantics, and degraded-load
+   fallbacks. No `HoloIndex` instantiation, no Chroma, no model load.
+
+5. **`holo_index/scripts/benchmarks/tq3_routed_corpus_audit.py`** (new)
+   — TQ2 overlay that audits routed-mode retrieval vs pure fp32 on the
+   live corpus using the identical frozen query set and sentinels.
+
+### Test Run
+
+56 focused tests passing, 1 skipped (real-model smoke test, by design):
+
+```
+holo_index/tests/test_backend_routing.py          14 passed
+holo_index/tests/test_turboquant_wiring.py        11 passed
+holo_index/tests/test_turboquant_backend.py       31 passed, 1 skipped
+```
+
+### TQ3 Gate Run (2026-04-23)
+
+```
+overall top-1 = 95.3%  (gate ≥ 90%  -> PASS)
+overall top-5 = 72.7%  (gate ≥ 95%  -> FAIL)
+sentinels     = 5/6    (gate = 6/6  -> FAIL)
+decision      = HOLD_ROUTING
+```
+
+Root cause (WSP 97): Chroma corpus drift between TQ2 and TQ3 runs.
+`navigation_wsp` dropped from 3,446 → 1,916 docs; TQ2's 100%/100%
+result on code/wsp no longer reproduces under the current corpus
+state. `navigation_skills` (59 docs) and `navigation_symbols` (20,000
+docs) remain at 100%/100%. Vocabulary is trivially 100% under routing
+(same backend as baseline).
+
+### What TQ3 Changes in Production
+
+Nothing today. Global default stays `HOLO_USE_TURBOQUANT=0` (pure
+fp32). When an operator sets `HOLO_USE_TURBOQUANT=1`, both backends
+load and routing activates — but `backend_quality="mixed"` and
+`quality_gate="mixed"` keep the experimental surface honest. The
+decision artifact lists the concrete blockers (stable corpus +
+re-pass TQ2 + re-pass TQ3) required for default-promotion.
+
+### Files
+
+```
+holo_index/core/backend_routing.py          (new)
+holo_index/core/holo_index.py               (modified)
+holo_index/core/search_engine.py            (modified)
+holo_index/tests/test_backend_routing.py    (new)
+holo_index/scripts/benchmarks/tq3_routed_corpus_audit.py   (new)
+docs/audits/holoindex_turboquant/TQ3_PER_COLLECTION_ROUTING.md   (new)
+docs/audits/holoindex_turboquant/tq3_metrics.json                (new)
+docs/audits/holoindex_turboquant/tq3_divergent_queries.json      (new)
+```
+
+---
+
 ## [2026-04-23] HIA3 — TurboQuant ONNX int8 Backend (experimental, opt-in) (hia3_turboquant_onnx_backend)
 
 **Agent**: 0102 (W5)

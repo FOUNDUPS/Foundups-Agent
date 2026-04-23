@@ -201,48 +201,74 @@ class HoloIndex:
         offline = os.getenv("HOLO_OFFLINE") == "1"
         model_cached = self._model_cache_present(model_name)
 
-        # FX1-D: Track retrieval mode explicitly (semantic/lexical/failed).
-        # HIA-TAX1 (2026-04-21): retrieval_mode describes *what* retrieval does;
-        # embedding_backend describes *how* the semantic vectors are produced.
-        # These are separate WSP 97 claims — conflating them (e.g. a
-        # retrieval_mode="turboquant" value) overclaims the mode.
-        #
-        #   retrieval_mode    ∈ {semantic, lexical, failed}
-        #   embedding_backend ∈ {sentence_transformers, turboquant_onnx_int8, none, unknown}
-        #
-        # "none" covers both lexical (no embedder) and failed (nothing loaded).
-        # HIA3 (2026-04-23): TurboQuant became a real backend (ORT int8).
-        # Its canonical label is "turboquant_onnx_int8" (see
-        # holo_index.core.turboquant_backend.BACKEND_NAME). HIA3 is an
-        # experimental opt-in — TQ1 benchmark measured 3.65% cosine drift
-        # and 76.7% top-1 agreement; static calibration is required before
-        # default promotion. search_engine.py surfaces this via
-        # backend_quality="experimental" and quality_gate="not_default_ready".
-        self.retrieval_mode = "failed"  # Default until proven otherwise
+        # FX1-D / HIA-TAX1: retrieval_mode vs embedding_backend taxonomy
+        # (semantic/lexical/failed) x (sentence_transformers/turboquant_onnx_int8/none).
+        # HIA3 introduced the real int8 backend; TQ3 (2026-04-23) adds
+        # per-collection routing so int8 serves only the collections TQ2 proved
+        # equivalent, while fp32 stays authoritative everywhere else.
+        self.retrieval_mode = "failed"
         self.embedding_backend = "none"
 
-        # Optional fast-start skip to prevent long imports (set HOLO_SKIP_MODEL=1)
+        # TQ3: per-collection routing state.
+        #   embedders              : backend_key -> loaded embedder instance
+        #   routing_active         : True only when HOLO_USE_TURBOQUANT=1 AND
+        #                            both backends loaded cleanly (so every
+        #                            collection can be served by its routed
+        #                            choice without silent degradation).
+        #   collection_backend_map : collection_name -> backend_key actually
+        #                            used (truth for search_engine metadata).
+        # When routing is inactive, the map falls back to the loaded primary
+        # (fp32 when available) so callers still see truthful per-collection
+        # backend attribution.
+        from .backend_routing import (
+            build_collection_backend_map,
+            BACKEND_SENTENCE_TRANSFORMERS as _ROUTE_ST,
+            BACKEND_TURBOQUANT as _ROUTE_TQ,
+        )
+        self.embedders: Dict[str, Any] = {}
+        self.routing_active: bool = False
+        self.collection_backend_map: Dict[str, str] = {}
+
+        tq_requested = _turboquant_enabled()
+        st_loaded = False
+        tq_loaded = False
+
         if os.environ.get("HOLO_SKIP_MODEL") == "1":
-            self._log_agent_action("HOLO_SKIP_MODEL=1 -> skipping sentence transformer load (lexical mode)", "WARN")
-            self.model = None
-            self.retrieval_mode = "lexical"
-            self.embedding_backend = "none"
+            self._log_agent_action("HOLO_SKIP_MODEL=1 -> skipping model load (lexical mode)", "WARN")
         elif offline and not model_cached:
             self._log_agent_action("HOLO_OFFLINE=1 and model cache missing -> skipping model load (lexical mode)", "WARN")
-            self.model = None
-            self.retrieval_mode = "lexical"
-            self.embedding_backend = "none"
         else:
-            # HIA3 / HIA-TAX1: optional TurboQuant ONNX int8 backend (opt-in via
-            # HOLO_USE_TURBOQUANT=1). TurboQuant is a *semantic* backend; when
-            # active, retrieval_mode="semantic" and
-            # embedding_backend="turboquant_onnx_int8". Experimental — TQ1
-            # measured 3.65% cosine drift vs fp32 and 76.7% top-1 agreement.
-            # search_engine.py surfaces backend_quality="experimental" and
-            # quality_gate="not_default_ready" on the response metadata.
-            # On any failure (dep missing, artifact missing, load error), we
-            # fall through to the SentenceTransformer backend without raising.
-            if _turboquant_enabled():
+            # Always try fp32 first: it built every live Chroma row and is the
+            # authoritative baseline. Routing only degrades from here.
+            global SentenceTransformer
+            if SentenceTransformer is None:
+                self._log_agent_action(f"Importing SentenceTransformer (timeout={HOLO_MODEL_IMPORT_TIMEOUT}s)...", "MODEL")
+                SentenceTransformer = _run_with_timeout(
+                    _import_sentence_transformers,
+                    timeout_sec=HOLO_MODEL_IMPORT_TIMEOUT,
+                    default=None,
+                    error_msg="SentenceTransformer import timed out",
+                    missing_dep_hint="pip install sentence-transformers (or use HOLO_SKIP_MODEL=1 for lexical-only)",
+                )
+
+            if SentenceTransformer:
+                self._log_agent_action(f"Loading fp32 model '{model_name}' (timeout={HOLO_MODEL_LOAD_TIMEOUT}s)...", "MODEL")
+                st_model = _run_with_timeout(
+                    lambda: _load_model(SentenceTransformer, model_name),
+                    timeout_sec=HOLO_MODEL_LOAD_TIMEOUT,
+                    default=None,
+                    error_msg=f"Model '{model_name}' load timed out",
+                )
+                if st_model is not None:
+                    self.embedders[_ROUTE_ST] = st_model
+                    st_loaded = True
+                else:
+                    self._log_agent_action("fp32 model load failed", "WARN")
+            else:
+                self._log_agent_action("SentenceTransformer unavailable", "WARN")
+
+            # Optionally load TurboQuant int8 alongside fp32 (TQ3 routing).
+            if tq_requested:
                 try:
                     from .turboquant_backend import (
                         TurboQuantEmbedder,
@@ -250,78 +276,71 @@ class HoloIndex:
                     )
                     if TurboQuantEmbedder.is_available():
                         self._log_agent_action(
-                            "HOLO_USE_TURBOQUANT=1 -> loading TurboQuant backend "
-                            "(semantic, experimental, not_default_ready)",
+                            "HOLO_USE_TURBOQUANT=1 -> loading int8 backend alongside fp32 (TQ3 routing)",
                             "MODEL",
                         )
                         try:
-                            embedder = TurboQuantEmbedder()
-                            embedder._ensure_loaded()
-                            self.model = embedder
-                            self.retrieval_mode = "semantic"
-                            self.embedding_backend = _TQ_BACKEND_NAME
+                            tq_embedder = TurboQuantEmbedder()
+                            tq_embedder._ensure_loaded()
+                            self.embedders[_TQ_BACKEND_NAME] = tq_embedder
+                            tq_loaded = True
                         except Exception as load_err:
                             self._log_agent_action(
                                 f"TurboQuant load failed ({load_err}); "
-                                "falling back to SentenceTransformer",
+                                "routing disabled (fp32 only)",
                                 "WARN",
                             )
                     else:
                         self._log_agent_action(
                             "TurboQuant not available (dep/artifacts missing); "
-                            "falling back to SentenceTransformer",
+                            "routing disabled (fp32 only)",
                             "WARN",
                         )
                 except Exception as e:
                     self._log_agent_action(
-                        f"TurboQuant init failed ({e}); falling back to SentenceTransformer",
+                        f"TurboQuant init failed ({e}); routing disabled (fp32 only)",
                         "WARN",
                     )
 
-            if (
-                getattr(self, "model", None) is not None
-                and isinstance(self.embedding_backend, str)
-                and self.embedding_backend.startswith("turboquant")
-            ):
-                # TurboQuant loaded successfully; skip SentenceTransformer path entirely.
-                pass
-            else:
-                global SentenceTransformer
-                if SentenceTransformer is None:
-                    # WSP 97: Import with hard timeout to prevent indefinite hangs
-                    self._log_agent_action(f"Importing SentenceTransformer (timeout={HOLO_MODEL_IMPORT_TIMEOUT}s)...", "MODEL")
-                    SentenceTransformer = _run_with_timeout(
-                        _import_sentence_transformers,
-                        timeout_sec=HOLO_MODEL_IMPORT_TIMEOUT,
-                        default=None,
-                        error_msg="SentenceTransformer import timed out",
-                        missing_dep_hint="pip install sentence-transformers (or use HOLO_SKIP_MODEL=1 for lexical-only)"
-                    )
-                    if SentenceTransformer is None:
-                        self._log_agent_action("SentenceTransformer unavailable; falling back to lexical search", "WARN")
-                        self.retrieval_mode = "lexical"
-                        self.embedding_backend = "none"
+        # Resolve primary embedder and top-level taxonomy from what loaded.
+        if st_loaded:
+            self.model = self.embedders[_ROUTE_ST]
+        elif tq_loaded:
+            # Degraded: only int8 loaded. Routing cannot be active.
+            self.model = self.embedders[_ROUTE_TQ]
+        else:
+            self.model = None
 
-                if SentenceTransformer:
-                    # WSP 97: Load model with hard timeout
-                    self._log_agent_action(f"Loading model '{model_name}' (timeout={HOLO_MODEL_LOAD_TIMEOUT}s)...", "MODEL")
-                    self.model = _run_with_timeout(
-                        lambda: _load_model(SentenceTransformer, model_name),
-                        timeout_sec=HOLO_MODEL_LOAD_TIMEOUT,
-                        default=None,
-                        error_msg=f"Model '{model_name}' load timed out"
-                    )
-                    if self.model is None:
-                        self._log_agent_action("Model load failed; falling back to lexical search", "WARN")
-                        self.retrieval_mode = "lexical"
-                        self.embedding_backend = "none"
-                    else:
-                        self.retrieval_mode = "semantic"
-                        self.embedding_backend = "sentence_transformers"
-                else:
-                    self.model = None
-                    self.retrieval_mode = "lexical"
-                    self.embedding_backend = "none"
+        # Routing requires opt-in AND both backends healthy.
+        self.routing_active = bool(tq_requested and st_loaded and tq_loaded)
+
+        if self.model is not None:
+            self.retrieval_mode = "semantic"
+            if self.routing_active:
+                # Mixed mode: WSP 97 forbids overclaiming a single backend name.
+                self.embedding_backend = "routed"
+            elif tq_loaded and not st_loaded:
+                self.embedding_backend = _ROUTE_TQ
+            else:
+                self.embedding_backend = _ROUTE_ST
+        else:
+            self.retrieval_mode = "lexical"
+            self.embedding_backend = "none"
+
+        # Per-collection backend attribution (always populated for truth).
+        _collection_names = [
+            "navigation_code",
+            "navigation_wsp",
+            "navigation_tests",
+            "navigation_skills",
+            "navigation_symbols",
+            "navigation_vocabulary",
+        ]
+        self.collection_backend_map = build_collection_backend_map(
+            _collection_names,
+            routing_active=self.routing_active,
+            available_backends=self.embedders or None,
+        )
 
         self.need_to: Dict[str, str] = {}
         self.wsp_summary: Dict[str, Dict[str, str]] = {}

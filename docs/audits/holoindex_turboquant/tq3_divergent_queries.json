@@ -1,0 +1,152 @@
+{
+  "n_divergent": 7,
+  "divergent": [
+    {
+      "collection": "navigation_code",
+      "routed_backend": "turboquant_onnx_int8",
+      "query": "pfMALL data isolation model",
+      "fp32_top1": "code_295",
+      "routed_top1": "code_108",
+      "fp32_top5": [
+        "code_295",
+        "code_80",
+        "code_189",
+        "code_184",
+        "code_108"
+      ],
+      "routed_top5": [
+        "code_108",
+        "code_184",
+        "code_295",
+        "code_178",
+        "code_155"
+      ]
+    },
+    {
+      "collection": "navigation_code",
+      "routed_backend": "turboquant_onnx_int8",
+      "query": "ai overseer role detection",
+      "fp32_top1": "code_85",
+      "routed_top1": "code_86",
+      "fp32_top5": [
+        "code_85",
+        "code_86",
+        "code_87",
+        "code_67",
+        "code_65"
+      ],
+      "routed_top5": [
+        "code_86",
+        "code_85",
+        "code_87",
+        "code_67",
+        "code_65"
+      ]
+    },
+    {
+      "collection": "navigation_code",
+      "routed_backend": "turboquant_onnx_int8",
+      "query": "embedding_backend search metadata",
+      "fp32_top1": "code_238",
+      "routed_top1": "code_224",
+      "fp32_top5": [
+        "code_238",
+        "code_137",
+        "code_224",
+        "code_194",
+        "code_234"
+      ],
+      "routed_top5": [
+        "code_224",
+        "code_238",
+        "code_137",
+        "code_234",
+        "code_194"
+      ]
+    },
+    {
+      "collection": "navigation_code",
+      "routed_backend": "turboquant_onnx_int8",
+      "query": "token budget for DAE pattern memory",
+      "fp32_top1": "code_102",
+      "routed_top1": "code_108",
+      "fp32_top5": [
+        "code_102",
+        "code_108",
+        "code_113",
+        "code_130",
+        "code_115"
+      ],
+      "routed_top5": [
+        "code_108",
+        "code_102",
+        "code_115",
+        "code_113",
+        "code_130"
+      ]
+    },
+    {
+      "collection": "navigation_wsp",
+      "routed_backend": "turboquant_onnx_int8",
+      "query": "WSP 97 truth distinction protocol",
+      "fp32_top1": "wsp_201",
+      "routed_top1": "wsp_108",
+      "fp32_top5": [
+        "wsp_201",
+        "wsp_245",
+        "wsp_108",
+        "wsp_47",
+        "wsp_1003"
+      ],
+      "routed_top5": [
+        "wsp_108",
+        "wsp_201",
+        "wsp_245",
+        "wsp_16",
+        "wsp_47"
+      ]
+    },
+    {
+      "collection": "navigation_wsp",
+      "routed_backend": "turboquant_onnx_int8",
+      "query": "how does 0102 recall patterns from 0201",
+      "fp32_top1": "wsp_1469",
+      "routed_top1": "wsp_13",
+      "fp32_top5": [
+        "wsp_1469",
+        "wsp_1753",
+        "wsp_13",
+        "wsp_555",
+        "wsp_251"
+      ],
+      "routed_top5": [
+        "wsp_13",
+        "wsp_1753",
+        "wsp_1075",
+        "wsp_251",
+        "wsp_1469"
+      ]
+    },
+    {
+      "collection": "navigation_wsp",
+      "routed_backend": "turboquant_onnx_int8",
+      "query": "token budget for DAE pattern memory",
+      "fp32_top1": "wsp_138",
+      "routed_top1": "wsp_497",
+      "fp32_top5": [
+        "wsp_138",
+        "wsp_497",
+        "wsp_131",
+        "wsp_132",
+        "wsp_1414"
+      ],
+      "routed_top5": [
+        "wsp_497",
+        "wsp_138",
+        "wsp_132",
+        "wsp_131",
+        "wsp_1626"
+      ]
+    }
+  ]
+}
