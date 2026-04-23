@@ -2,6 +2,29 @@
 
 ## Chronological Change Log
 
+### 2026-04-21 - RedDog Catalog Classification Gate Spec (W2: REDDOG-CATALOG-CLASSIFICATION-GATE)
+
+**By:** 0102 (W2) — **Slice:** `REDDOG-CATALOG-CLASSIFICATION-GATE`
+**WSP References:** WSP 97 (Truth), WSP 104 (Namespace), WSP 29 (CABR Engine)
+
+**Added**:
+- `docs/0102_session_briefings/REDDOG_CATALOG_CLASSIFICATION_GATE_PHASE1.md` — Architecture + schema spec
+
+**Defines**:
+- `RedDogCatalogClassification` schema (candidate_type, confidence, wsp97_state, evidence, conflicts, recommended_action)
+- 6 decision rules (R1–R6) for classifying raw discoveries as FoundUp candidates
+- Classification pipeline: signal intake → catalog lookup → marker detection → classification → enum validation → truth state → downstream routing
+- FAM event types for classification lifecycle (created, proposed, accepted, rejected, escalated)
+- Catalog validator boundary: RedDog classifies/proposes, validator accepts/rejects, only validator writes to catalog
+- Integration with PR #421 truth gate (classifications must pass all 25 truth gate tests)
+- 3-phase implementation roadmap (REDDOG-CATALOG1/2/3)
+
+**RedDog role boundary**: classify / question / propose — NOT declare / register / promote. Advisory until FAM or catalog validator accepts.
+
+**No implementation code written. No catalog or manifest modifications.**
+
+---
+
 ### 2026-04-23 - Catalog FoundUp Truth Gate (W2: PFMALL-CATALOG-FOUNDUP-TRUTH-GATE)
 
 **By:** 0102 (W2) — **Slice:** `PFMALL-CATALOG-FOUNDUP-TRUTH-GATE`
