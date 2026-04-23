@@ -1,0 +1,42 @@
+{
+  "name": "voteballots",
+  "version": "0.1.0",
+  "description": "AI-native political transparency FoundUp - funding trace and attack detection",
+  "foundup_id": "voteballots",
+  "status": "design",
+  "domain": "foundups",
+  "wsp_compliance": ["WSP_91", "WSP_97", "WSP_104"],
+  "ai_hooks": [
+    "speech-to-text",
+    "entity-resolution",
+    "ad-ingestion",
+    "finance-record",
+    "web-investigation",
+    "source-verification",
+    "contradiction-detector",
+    "confidence-scoring",
+    "attack-detection",
+    "funding-trace",
+    "report-generation",
+    "challenge-correction",
+    "model-routing"
+  ],
+  "dependencies": {
+    "external_apis": [
+      "FEC API",
+      "State campaign finance databases",
+      "Meta Ad Library API",
+      "Google Political Ads API"
+    ],
+    "internal": [
+      "modules/infrastructure/shared_utilities",
+      "modules/ai_intelligence/pqn_alignment"
+    ]
+  },
+  "routing": {
+    "prefix": "/f/voteballots",
+    "landing": "/f/voteballots",
+    "app_mount": "/f/voteballots/app"
+  },
+  "data_namespace": "idb_voteballots"
+}

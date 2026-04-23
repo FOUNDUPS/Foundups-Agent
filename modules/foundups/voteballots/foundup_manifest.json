@@ -1,0 +1,32 @@
+{
+  "$schema": "https://foundups.org/schemas/foundup-manifest/v1.json",
+  "foundup_id": "voteballots",
+  "name": "Vote/Ballots",
+  "version": "0.1.0",
+  "description": "AI-native political transparency application. Exposes campaign funding sources, dark money trails, and attack ad origins with explicit evidence labeling.",
+  "tagline": "Follow the money. Know your candidates.",
+  "tier": "F0_DAE",
+  "lifecycle_stage": "incubating",
+  "entry_url": "",
+  "routing_prefix": "/f/voteballots",
+  "icon_url": null,
+  "required_subscription_tier": "free",
+  "is_invite_only": true,
+  "capabilities": ["search", "agents_basic"],
+  "agent_routes": ["openclaw_query"],
+  "holo_collections": [],
+  "data_namespace": "idb_voteballots",
+  "cabr_contract": {
+    "v1_gate": "default",
+    "v2_proof": "default",
+    "v3_score_min": 0.5
+  },
+  "owner_id": "012",
+  "token_symbol": "VOTE",
+  "category": "civic",
+  "launch_readiness": "discoverable_only",
+  "created_at": "2026-04-22T00:00:00Z",
+  "signature": "",
+  "_wsp97_implementation_state": "SPECIFIED_NOT_IMPLEMENTED",
+  "_wsp97_note": "Architecture and AI hooks spec complete. No runnable implementation. See docs/VOTEBALLOTS_AI_HOOKS_ARCHITECTURE.md"
+}
