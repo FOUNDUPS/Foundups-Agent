@@ -1,5 +1,47 @@
 # HoloIndex Package ModLog
 
+## [2026-04-24] CFZ4 — WSP Collection Separation Phase 1 (cfz4_collection_separation)
+
+**Agent**: 0102 (Worker CFZ4)
+**WSP References**: WSP 15 (scope control), WSP 97 (truth distinction), WSP 50 (pre-action verification)
+**Status**: COMPLETE
+**Decision**: Semantic drift fixed; navigation_wsp now contains only true WSP protocols
+
+### Context
+
+`navigation_wsp` was polluted with 83.2% non-WSP content (module docs, papers, etc.).
+All documents received `wsp_` ID prefix regardless of content type, violating WSP 97 truthful naming.
+
+### Changes
+
+1. **`holo_index/core/indexing_engine.py`** — Modified `index_wsp_entries()` to only index
+   `WSP_framework/src/WSP_*.md`. Added `index_docs_entries()` and `index_knowledge_entries()`.
+
+2. **`holo_index/core/holo_index.py`** — Added `navigation_docs` and `navigation_knowledge`
+   collections to the collection registry.
+
+3. **`holo_index/core/search_engine.py`** — Extended search to include `docs_hits` and
+   `knowledge_hits` in results. Added collection searches for new collections.
+
+4. **`holo_index/tests/test_cfz4_collection_separation.py`** (new) — 12 tests covering
+   path routing, ID prefix correctness, and search compatibility.
+
+5. **`docs/audits/holoindex_turboquant/CFZ4_WSP_COLLECTION_SEPARATION_REPORT.md`** (new)
+
+### Collection Counts After Separation
+
+| Collection | Documents | ID Prefix |
+|------------|----------:|-----------|
+| navigation_wsp | 117 | wsp_ |
+| navigation_docs | 3,120 | doc_ |
+| navigation_knowledge | 47 | paper_ |
+
+### TQ4 Recommendation
+
+TQ2/TQ3 audits need re-baseline on new collection structure.
+
+---
+
 ## [2026-04-23] CFZ1 — Corpus Freeze Mechanism Phase 1 (cfz1_corpus_freeze)
 
 **Agent**: 0102 (Worker CY)

@@ -193,6 +193,9 @@ class HoloIndex:
         self.test_collection = self._ensure_collection("navigation_tests")
         self.skill_collection = self._ensure_collection("navigation_skills")
         self.symbol_collection = self._ensure_collection("navigation_symbols")
+        # CFZ4: New collections for semantic separation
+        self.docs_collection = self._ensure_collection("navigation_docs")
+        self.knowledge_collection = self._ensure_collection("navigation_knowledge")
 
         self._log_agent_action("Loading sentence transformer (cached on SSD)...", "MODEL")
         os.environ['SENTENCE_TRANSFORMERS_HOME'] = str(self.models_path)
@@ -328,6 +331,7 @@ class HoloIndex:
             self.embedding_backend = "none"
 
         # Per-collection backend attribution (always populated for truth).
+        # CFZ4: Added navigation_docs and navigation_knowledge for semantic separation
         _collection_names = [
             "navigation_code",
             "navigation_wsp",
@@ -335,6 +339,8 @@ class HoloIndex:
             "navigation_skills",
             "navigation_symbols",
             "navigation_vocabulary",
+            "navigation_docs",       # CFZ4: module/root docs (doc_ prefix)
+            "navigation_knowledge",  # CFZ4: papers/research (paper_ prefix)
         ]
         self.collection_backend_map = build_collection_backend_map(
             _collection_names,

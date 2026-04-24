@@ -554,6 +554,9 @@ def execute_search(
         test_hits: List[Dict[str, Any]] = []
         skill_hits: List[Dict[str, Any]] = []
         symbol_results: List[Dict[str, Any]] = []
+        # CFZ4: New hit categories for separated collections
+        docs_hits: List[Dict[str, Any]] = []
+        knowledge_hits: List[Dict[str, Any]] = []
 
         symbol_query = _is_symbol_query(query)
         force_symbol_scan = os.getenv("HOLO_FORCE_SYMBOL_SCAN", "0").lower() in {"1", "true", "yes", "on"}
@@ -565,6 +568,9 @@ def execute_search(
         wsp_collection = getattr(holo, "wsp_collection", None)
         test_collection = getattr(holo, "test_collection", None)
         skill_collection = getattr(holo, "skill_collection", None)
+        # CFZ4: New collections
+        docs_collection = getattr(holo, "docs_collection", None)
+        knowledge_collection = getattr(holo, "knowledge_collection", None)
 
         # Search code index
         if doc_type_filter in ["code", "all"] and code_collection is not None:
@@ -590,6 +596,20 @@ def execute_search(
             except Exception:
                 skill_hits = []
 
+        # CFZ4: Search Docs index (module/root docs)
+        if doc_type_filter in ["docs", "all"] and docs_collection is not None:
+            try:
+                docs_hits = _search_collection(holo, docs_collection, query, limit, kind="docs")
+            except Exception:
+                docs_hits = []
+
+        # CFZ4: Search Knowledge index (papers/research)
+        if doc_type_filter in ["knowledge", "all"] and knowledge_collection is not None:
+            try:
+                knowledge_hits = _search_collection(holo, knowledge_collection, query, limit, kind="knowledge")
+            except Exception:
+                knowledge_hits = []
+
         # Symbol-query fallback: lexical + rg for exact identifiers/paths
         if symbol_query:
             if doc_type_filter in ["code", "all"] and code_collection is not None:
@@ -606,7 +626,8 @@ def execute_search(
 
         holo._log_agent_action(
             f"Search complete: {len(code_hits)} code, {len(wsp_hits)} WSP, "
-            f"{len(test_hits)} Tests, {len(skill_hits)} Skillz"
+            f"{len(test_hits)} Tests, {len(skill_hits)} Skillz, "
+            f"{len(docs_hits)} Docs, {len(knowledge_hits)} Knowledge"
         )
 
         payload: Dict[str, Any] = {
@@ -619,6 +640,11 @@ def execute_search(
             "skills": skill_hits,
             "skill_hits": skill_hits,
             "symbol_hits": symbol_results,
+            # CFZ4: New hit categories for separated collections
+            "docs_hits": docs_hits,
+            "knowledge_hits": knowledge_hits,
+            "docs": docs_hits,
+            "knowledge": knowledge_hits,
             "metadata": {
                 "query": query,
                 "code_count": len(code_hits),
@@ -626,6 +652,8 @@ def execute_search(
                 "test_count": len(test_hits),
                 "skill_count": len(skill_hits),
                 "symbol_count": len(symbol_results),
+                "docs_count": len(docs_hits),
+                "knowledge_count": len(knowledge_hits),
                 "timestamp": datetime.now().isoformat(),
                 "cached": False,
                 # FX1-D: Surface retrieval mode in search results.
@@ -668,5 +696,9 @@ def execute_search(
             "wsp_hits": [],
             "code": [],
             "wsps": [],
+            "docs_hits": [],
+            "knowledge_hits": [],
+            "docs": [],
+            "knowledge": [],
             "metadata": {"error": str(e)},
         }
