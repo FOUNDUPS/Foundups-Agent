@@ -17,8 +17,8 @@
     "navigation_vocabulary"
   ],
   "routing_policy": {
-    "navigation_code": "turboquant_onnx_int8",
-    "navigation_wsp": "turboquant_onnx_int8",
+    "navigation_code": "sentence_transformers",
+    "navigation_wsp": "sentence_transformers",
     "navigation_tests": "sentence_transformers",
     "navigation_skills": "turboquant_onnx_int8",
     "navigation_symbols": "turboquant_onnx_int8",
@@ -32,13 +32,13 @@
     "sentinel_top1_required": "all"
   },
   "overall": {
-    "top1_agreement_pct": 93.33333333333333,
-    "top5_set_agreement_pct": 76.66666666666667,
+    "top1_agreement_pct": 100.0,
+    "top5_set_agreement_pct": 100.0,
     "sentinels_pass": true,
     "sentinel_results": [
       {
         "collection": "navigation_code",
-        "routed_backend": "turboquant_onnx_int8",
+        "routed_backend": "sentence_transformers",
         "query": "HOLO_USE_TURBOQUANT environment switch",
         "fp32_top1": "code_152",
         "routed_top1": "code_152",
@@ -46,7 +46,7 @@
       },
       {
         "collection": "navigation_code",
-        "routed_backend": "turboquant_onnx_int8",
+        "routed_backend": "sentence_transformers",
         "query": "modules/ai_intelligence/agent_permissions",
         "fp32_top1": "code_65",
         "routed_top1": "code_65",
@@ -54,7 +54,7 @@
       },
       {
         "collection": "navigation_code",
-        "routed_backend": "turboquant_onnx_int8",
+        "routed_backend": "sentence_transformers",
         "query": "AgentPermissionManager.request_permission",
         "fp32_top1": "code_65",
         "routed_top1": "code_65",
@@ -62,7 +62,7 @@
       },
       {
         "collection": "navigation_code",
-        "routed_backend": "turboquant_onnx_int8",
+        "routed_backend": "sentence_transformers",
         "query": "modules/platform_integration/youtube_auth",
         "fp32_top1": "code_170",
         "routed_top1": "code_170",
@@ -70,7 +70,7 @@
       },
       {
         "collection": "navigation_wsp",
-        "routed_backend": "turboquant_onnx_int8",
+        "routed_backend": "sentence_transformers",
         "query": "WSP 87 size limits for modules",
         "fp32_top1": "wsp_67",
         "routed_top1": "wsp_67",
@@ -89,45 +89,45 @@
   "per_collection": {
     "navigation_code": {
       "doc_count": 296,
-      "routed_backend": "turboquant_onnx_int8",
+      "routed_backend": "sentence_transformers",
       "queries": 30,
-      "top1_agreement_pct": 86.66666666666667,
-      "top5_set_agreement_pct": 46.666666666666664,
+      "top1_agreement_pct": 100.0,
+      "top5_set_agreement_pct": 100.0,
       "jaccard_mean": {
-        "k=1": 0.8666666666666667,
-        "k=3": 0.78,
-        "k=5": 0.8142857142857143,
-        "k=10": 0.7801087801087802
+        "k=1": 1.0,
+        "k=3": 1.0,
+        "k=5": 1.0,
+        "k=10": 1.0
       },
       "jaccard_min": {
-        "k=1": 0.0,
-        "k=3": 0.2,
-        "k=5": 0.42857142857142855,
-        "k=10": 0.5384615384615384
+        "k=1": 1.0,
+        "k=3": 1.0,
+        "k=5": 1.0,
+        "k=10": 1.0
       },
-      "kendall_tau_mean": 0.7180952380952381,
-      "kendall_tau_min": 0.14285714285714285
+      "kendall_tau_mean": 1.0,
+      "kendall_tau_min": 1.0
     },
     "navigation_wsp": {
       "doc_count": 117,
-      "routed_backend": "turboquant_onnx_int8",
+      "routed_backend": "sentence_transformers",
       "queries": 30,
-      "top1_agreement_pct": 80.0,
-      "top5_set_agreement_pct": 36.666666666666664,
+      "top1_agreement_pct": 100.0,
+      "top5_set_agreement_pct": 100.0,
       "jaccard_mean": {
-        "k=1": 0.8,
-        "k=3": 0.6966666666666667,
-        "k=5": 0.7333333333333333,
-        "k=10": 0.7588966588966589
+        "k=1": 1.0,
+        "k=3": 1.0,
+        "k=5": 1.0,
+        "k=10": 1.0
       },
       "jaccard_min": {
-        "k=1": 0.0,
-        "k=3": 0.2,
-        "k=5": 0.42857142857142855,
-        "k=10": 0.5384615384615384
+        "k=1": 1.0,
+        "k=3": 1.0,
+        "k=5": 1.0,
+        "k=10": 1.0
       },
-      "kendall_tau_mean": 0.6584126984126984,
-      "kendall_tau_min": 0.2222222222222222
+      "kendall_tau_mean": 1.0,
+      "kendall_tau_min": 1.0
     },
     "navigation_skills": {
       "doc_count": 59,
@@ -194,21 +194,19 @@
     }
   },
   "latency_ms": {
-    "fp32_encode_p50": 12.40025000879541,
-    "fp32_encode_p95": 53.197689983062446,
-    "routed_encode_p50": 2.862850029487163,
-    "routed_encode_p95": 13.444485032232468,
-    "fp32_query_p50": 2.125650004018098,
-    "fp32_query_p95": 3.1974600045941766,
-    "routed_query_p50": 1.8548499792814255,
-    "routed_query_p95": 2.682409976841881
+    "fp32_encode_p50": 9.271300048567355,
+    "fp32_encode_p95": 13.003485032822931,
+    "routed_encode_p50": 7.621850003488362,
+    "routed_encode_p95": 10.934564942726862,
+    "fp32_query_p50": 1.8721500528044999,
+    "fp32_query_p95": 2.3066449852194633,
+    "routed_query_p50": 1.5590499970130622,
+    "routed_query_p95": 2.108434977708384
   },
   "cold_load_sec": {
-    "fp32_sentence_transformer": 11.660237099975348,
-    "int8_turboquant_embedder": 0.22899309999775141
+    "fp32_sentence_transformer": 11.090453600045294,
+    "int8_turboquant_embedder": 0.1779145000036806
   },
-  "decision": "HOLD_ROUTING",
-  "blockers": [
-    "overall top-5 set-agreement 76.7% < 95.0%"
-  ]
+  "decision": "PROMOTE_ROUTING",
+  "blockers": []
 }
