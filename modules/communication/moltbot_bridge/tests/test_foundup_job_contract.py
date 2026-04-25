@@ -597,6 +597,59 @@ class TestStatusReasonCodes:
 
 
 # ---------------------------------------------------------------------------
+# Test: Compute Metering
+# ---------------------------------------------------------------------------
+
+
+class TestComputeMetering:
+    """Tests for compute metering fields."""
+
+    def test_default_compute_fields(self):
+        """Job has correct default compute values."""
+        job = create_job(tenant_id="t", requested_action="a")
+        assert job.compute_tier == "freemium"
+        assert job.compute_budget is None
+        assert job.compute_used == 0
+        assert job.model_preference == "auto"
+
+    def test_compute_fields_roundtrip(self):
+        """Compute fields survive serialization roundtrip."""
+        job = create_job(tenant_id="t", requested_action="a")
+        job.compute_tier = "basic"
+        job.compute_budget = 1000
+        job.compute_used = 250
+        job.model_preference = "free"
+
+        data = job.to_dict()
+        restored = FoundUpJob.from_dict(data)
+
+        assert restored.compute_tier == "basic"
+        assert restored.compute_budget == 1000
+        assert restored.compute_used == 250
+        assert restored.model_preference == "free"
+
+    def test_blocked_compute_exhausted_code_exists(self):
+        """BLOCKED_COMPUTE_EXHAUSTED reason code exists."""
+        assert StatusReasonCode.BLOCKED_COMPUTE_EXHAUSTED
+
+    def test_compute_exhausted_blocks_job(self):
+        """Job can be blocked due to compute exhaustion."""
+        job = create_job(tenant_id="t", requested_action="build")
+        job.compute_budget = 100
+        job.compute_used = 100
+
+        job.start(worker_id="hermes")
+        result = job.block(
+            reason_code=StatusReasonCode.BLOCKED_COMPUTE_EXHAUSTED,
+            reason_human="Compute budget exhausted, waiting for top-up",
+        )
+
+        assert result is True
+        assert job.status == JobStatus.BLOCKED
+        assert job.status_reason_code == StatusReasonCode.BLOCKED_COMPUTE_EXHAUSTED
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 

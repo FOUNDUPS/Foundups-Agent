@@ -124,6 +124,7 @@ class StatusReasonCode(str, Enum):
     BLOCKED_AWAITING_APPROVAL = "BLOCKED_AWAITING_APPROVAL"
     BLOCKED_RATE_LIMITED = "BLOCKED_RATE_LIMITED"
     BLOCKED_EXTERNAL_SERVICE = "BLOCKED_EXTERNAL_SERVICE"
+    BLOCKED_COMPUTE_EXHAUSTED = "BLOCKED_COMPUTE_EXHAUSTED"
 
     # Failed - Security
     FAIL_SECURITY_GATE = "FAIL_SECURITY_GATE"
@@ -290,6 +291,25 @@ class FoundUpJob:
     """
     Action-specific payload. Structure depends on requested_action.
     OpenClaw and Hermes agree on payload schema per action.
+    """
+
+    # === Compute Metering ===
+    compute_tier: str = "freemium"
+    """Compute tier: freemium | basic | enterprise. Determines model routing."""
+
+    compute_budget: Optional[int] = None
+    """Allocated compute units for this job. None = unlimited (enterprise)."""
+
+    compute_used: int = 0
+    """Compute units consumed so far."""
+
+    model_preference: str = "auto"
+    """
+    Model routing preference:
+      auto     = RedDog picks based on tier/complexity
+      free     = OpenRouter free models only (gemma, llama, etc.)
+      standard = Paid models (sonnet, gpt-4o-mini)
+      premium  = High-end (opus, gpt-4o)
     """
 
     # === Internal ===
@@ -488,6 +508,10 @@ class FoundUpJob:
             "evidence_refs": self.evidence_refs,
             "policy_flags": self.policy_flags.to_dict(),
             "payload": self.payload,
+            "compute_tier": self.compute_tier,
+            "compute_budget": self.compute_budget,
+            "compute_used": self.compute_used,
+            "model_preference": self.model_preference,
             "_transition_history": self._transition_history,
         }
 
@@ -519,6 +543,10 @@ class FoundUpJob:
             evidence_refs=data.get("evidence_refs", []),
             policy_flags=PolicyFlags.from_dict(data.get("policy_flags", {})),
             payload=data.get("payload", {}),
+            compute_tier=data.get("compute_tier", "freemium"),
+            compute_budget=data.get("compute_budget"),
+            compute_used=data.get("compute_used", 0),
+            model_preference=data.get("model_preference", "auto"),
         )
 
         # Restore timestamps
