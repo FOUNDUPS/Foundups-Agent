@@ -1,5 +1,36 @@
 # ModLog - moltbot_bridge
 
+## 2026-04-25: OpenClaw Explicit FoundUp Build Job Creation (WSP 11/50/77/91/97)
+
+**Author**: 0102 (Worker W1 + architect seam cleanup)
+**WSP**: 11 (Interface), 50 (Pre-Action), 77 (Agent Coordination), 91 (Observability), 97 (Truth)
+**Slice**: `OC1_PHASE2_OPENCLAW_FOUNDUP_JOB_CREATION_WIRING`
+
+### Summary
+
+Extended the OpenClaw FOUNDUP orchestrator so explicit build approval creates a typed `FoundUpJob` in `QUEUED` state while advisory/catalog FoundUp queries still pass through the FAM adapter. This is the OpenClaw-side handoff only; Hermes/WRE execution remains pending.
+
+### Files Changed
+
+| File | Purpose |
+|------|---------|
+| `src/openclaw_foundup_orchestrator.py` | Detect explicit build phrases and queue typed `FoundUpJob` objects |
+| `tests/test_openclaw_foundup_routing.py` | Added explicit job-creation, advisory passthrough, and WSP 97 no-overclaim tests |
+
+### WSP 97 Boundary
+
+- Does not claim genesis validation is globally enforced.
+- Does not claim Hermes executed the job.
+- Leaves all policy gate pass flags false until checked by later execution slices.
+- Uses canonical requested actions: `build_foundup`, `extract_foundup`, `validate_foundup`, `queue_foundup_job`.
+
+### Validation
+
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_foundup_routing.py -q`
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_foundup_job_contract.py -q`
+
+---
+
 ## 2026-04-23: FoundUp Job Contract — Canonical Orchestration Contract (WSP 11/77/91/97)
 
 **Author**: 0102 (Worker W2)

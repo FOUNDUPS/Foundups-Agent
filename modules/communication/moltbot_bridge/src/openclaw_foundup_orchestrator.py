@@ -21,12 +21,112 @@ Worker: W3
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
+from .foundup_job_contract import FoundUpJob, create_job
+
 logger = logging.getLogger("openclaw_foundup_orchestrator")
+
+
+# ---------------------------------------------------------------------------
+# Phase 2: Explicit Build Intent Detection
+# ---------------------------------------------------------------------------
+
+_FOUNDUP_JOB_QUEUE: List[FoundUpJob] = []
+"""In-memory job queue for testing. Production will use persistent queue."""
+
+_FOUNDUP_BUILD_WORDS = (
+    "start build",
+    "start building",
+    "build foundup",
+    "build this foundup",
+    "create foundup job",
+    "queue foundup job",
+    "hermes build",
+    "openclaw build",
+    "extract foundup",
+    "exfoliate foundup",
+    "validate foundup",
+)
+"""Trigger phrases for explicit build intent detection."""
+
+_FOUNDUP_ID_STOPWORDS = frozenset({
+    "a", "an", "the", "this", "that",
+    "foundup", "foundups", "build", "building",
+    "job", "hermes", "openclaw", "yes",
+})
+"""Words to filter when extracting foundup_id from message."""
+
+
+def _is_explicit_build_intent(message: str) -> bool:
+    """
+    Detect explicit build intent from message.
+
+    Returns True only for narrow set of trigger phrases.
+    Advisory queries like "what is foundup" return False.
+    """
+    msg_lower = message.lower().strip()
+    return any(phrase in msg_lower for phrase in _FOUNDUP_BUILD_WORDS)
+
+
+def _extract_foundup_id(message: str) -> Optional[str]:
+    """
+    Extract foundup_id from build message.
+
+    Examples:
+        "start build gotjunk" -> "gotjunk"
+        "build foundup social_twin" -> "social_twin"
+        "hermes build" -> None (no foundup specified)
+    """
+    msg_lower = message.lower().strip()
+
+    # Remove trigger phrases to find remainder
+    remainder = msg_lower
+    for phrase in _FOUNDUP_BUILD_WORDS:
+        remainder = remainder.replace(phrase, " ")
+
+    # Extract first non-stopword token
+    tokens = [t for t in remainder.split() if t not in _FOUNDUP_ID_STOPWORDS]
+
+    if tokens:
+        # Normalize: allow alphanumeric and underscore
+        candidate = re.sub(r"[^a-z0-9_]", "", tokens[0])
+        if candidate:
+            return candidate
+    return None
+
+
+def _extract_action(message: str) -> str:
+    """
+    Extract requested action from build message.
+
+    Maps trigger phrases to canonical action names.
+    """
+    msg_lower = message.lower().strip()
+
+    if "extract" in msg_lower or "exfoliate" in msg_lower:
+        return "extract_foundup"
+    if "validate" in msg_lower:
+        return "validate_foundup"
+    if "build" in msg_lower or "hermes" in msg_lower or "openclaw" in msg_lower:
+        return "build_foundup"
+    if "queue" in msg_lower or "create" in msg_lower:
+        return "queue_foundup_job"
+    return "build_foundup"  # Default
+
+
+def get_job_queue() -> List[FoundUpJob]:
+    """Return the in-memory job queue (for testing)."""
+    return _FOUNDUP_JOB_QUEUE
+
+
+def clear_job_queue() -> None:
+    """Clear the in-memory job queue (for testing)."""
+    _FOUNDUP_JOB_QUEUE.clear()
 
 
 # -----------------------------------------------------------------------------
@@ -574,20 +674,27 @@ def dispatch_foundup(dae: Any, intent: Any) -> str:
     """
     Dispatch FOUNDUP intent through orchestrator entrypoint.
 
-    Phase 1: Routes all intents to FAM adapter with safe fallback.
-    Phase 2+ will add genesis validation gate before FAM handoff.
+    Phase 2: Detects explicit build intent and creates typed FoundUpJob.
+    Advisory/catalog queries still route to FAM passthrough.
 
     WSP 97 Note: This dispatch does NOT claim genesis validation is enforced.
-    Genesis gate (OC3) is available but not mandatory in Phase 1.
+    Genesis gate (OC3) is available but not mandatory until Phase 3.
 
     Args:
         dae: OpenClawDAE instance
         intent: Classified OpenClawIntent
 
     Returns:
-        Response string from FAM adapter or fallback message
+        Response string from FAM adapter or job creation confirmation
     """
-    route_decision = {"route": "fam_adapter", "reason": "phase1_passthrough"}
+    raw_message = intent.raw_message
+
+    # Phase 2: Check for explicit build intent
+    if _is_explicit_build_intent(raw_message):
+        return _handle_build_intent(intent)
+
+    # Phase 1 preserved: Advisory/catalog queries route to FAM
+    route_decision = {"route": "fam_adapter", "reason": "advisory_passthrough"}
 
     logger.info(
         "[OPENCLAW-FOUNDUP-ORCH] dispatch | route=%s reason=%s sender=%s",
@@ -596,11 +703,10 @@ def dispatch_foundup(dae: Any, intent: Any) -> str:
         intent.sender,
     )
 
-    # Phase 1: Direct FAM handoff with preserved fallback behavior
     try:
         from .fam_adapter import handle_fam_intent
 
-        response = handle_fam_intent(intent.raw_message, intent.sender)
+        response = handle_fam_intent(raw_message, intent.sender)
         logger.info(
             "[OPENCLAW-FOUNDUP-ORCH] fam_complete | route=%s len=%d",
             route_decision["route"],
@@ -616,3 +722,73 @@ def dispatch_foundup(dae: Any, intent: Any) -> str:
     except Exception as exc:
         logger.error("[OPENCLAW-FOUNDUP-ORCH] fam_error | error=%s", exc)
         return f"FAM error: {exc}"
+
+
+def _handle_build_intent(intent: Any) -> str:
+    """
+    Handle explicit build intent by creating a FoundUpJob.
+
+    Creates job in QUEUED state. Does NOT execute - Hermes handles execution.
+
+    WSP 97 Truth Fields:
+        - policy_flags are NOT set to passed (no gates checked yet)
+        - status_reason reflects creation, not execution
+        - evidence_refs are empty (nothing proven yet)
+
+    Args:
+        intent: Classified OpenClawIntent with build message
+
+    Returns:
+        Job creation confirmation with job_id and status
+    """
+    raw_message = intent.raw_message
+    sender = intent.sender
+    session_key = getattr(intent, "session_key", None)
+    channel = getattr(intent, "channel", "unknown")
+
+    # Extract action and foundup_id
+    requested_action = _extract_action(raw_message)
+    foundup_id = _extract_foundup_id(raw_message)
+
+    # Build payload
+    payload = {
+        "raw_message": raw_message,
+        "channel": channel,
+        "source": "openclaw_foundup_orchestrator",
+    }
+
+    # Create job
+    job = create_job(
+        tenant_id=sender,
+        requested_action=requested_action,
+        foundup_id=foundup_id,
+        intent_id=session_key,
+        payload=payload,
+        generate_idempotency=True,
+    )
+    job.status_reason_human = (
+        "FoundUpJob queued by OpenClaw explicit build intent; "
+        "Hermes/WRE execution not started."
+    )
+
+    # Add to queue
+    _FOUNDUP_JOB_QUEUE.append(job)
+
+    logger.info(
+        "[OPENCLAW-FOUNDUP-ORCH] job_created | job_id=%s action=%s foundup=%s sender=%s",
+        job.job_id,
+        requested_action,
+        foundup_id or "(none)",
+        sender,
+    )
+
+    # Build response
+    foundup_str = foundup_id if foundup_id else "(none specified)"
+    return (
+        f"FoundUpJob created:\n"
+        f"  job_id: {job.job_id}\n"
+        f"  status: {job.status.value}\n"
+        f"  requested_action: {requested_action}\n"
+        f"  foundup_id: {foundup_str}\n"
+        f"  next: Hermes/WRE pending"
+    )

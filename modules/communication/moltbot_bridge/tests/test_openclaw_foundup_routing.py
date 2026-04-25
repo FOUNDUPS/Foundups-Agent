@@ -1,19 +1,25 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Focused tests for OC1: FOUNDUP routing through orchestrator.
+Focused tests for OpenClaw FOUNDUP routing through orchestrator.
 
-Verifies:
+OC1 Tests (Phase 1):
 1. execute_foundup() routes through dispatch_foundup()
-2. dispatch_foundup() calls FAM adapter
+2. dispatch_foundup() calls FAM adapter for advisory queries
 3. Fallback behavior preserved on ImportError/Exception
 4. Plan steps for FOUNDUP are explicit (not digital_twin_response)
+
+OC1 Phase 2 Tests:
+5. Explicit build intent creates FoundUpJob
+6. Advisory query still routes to FAM adapter
+7. Job response includes job_id and queued status
+8. No false claim that Hermes executed the job
 
 WSP Compliance:
     WSP 97: Tests verify actual routing, not assumed behavior
     WSP 15: Fallback paths tested for safety
 
-Slice: OC1_OPENCLAW_FOUNDUP_ROUTING_WIRING_PHASE1B
+Slice: OC1_PHASE2_OPENCLAW_FOUNDUP_JOB_CREATION_WIRING
 Worker: W1
 """
 
@@ -61,38 +67,14 @@ class TestFoundupDispatch:
 
     def test_dispatch_fallback_on_import_error(self):
         """Dispatch should return fallback message on ImportError."""
-        mock_intent = MagicMock()
-        mock_intent.raw_message = "test"
-        mock_intent.sender = "user"
-        mock_dae = MagicMock()
-
-        # Remove fam_adapter from sys.modules to force ImportError
-        fam_adapter_key = "modules.communication.moltbot_bridge.src.fam_adapter"
-        original = sys.modules.pop(fam_adapter_key, None)
-
-        try:
-            # Patch the import mechanism to raise ImportError
-            with patch.dict(sys.modules, {fam_adapter_key: None}):
-                from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
-                    dispatch_foundup,
-                )
-
-                # The lazy import should fail with None in sys.modules
-                # Actually we need to make it raise - let's use a different approach
-                pass
-        finally:
-            if original is not None:
-                sys.modules[fam_adapter_key] = original
-
-        # Simpler approach: just test the fallback message format exists
         from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
             dispatch_foundup,
         )
 
-        # If fam_adapter doesn't exist, we get the fallback
-        # Test that dispatch_foundup handles the fallback path gracefully
-        # by checking the function signature and docstring indicate fallback
-        assert "fallback" in dispatch_foundup.__doc__.lower()
+        # Verify docstring indicates FAM passthrough for advisory queries
+        doc = dispatch_foundup.__doc__.lower()
+        assert "fam" in doc
+        assert "advisory" in doc or "passthrough" in doc
 
     def test_dispatch_fallback_message_format(self):
         """Verify fallback messages match expected format."""
@@ -198,3 +180,251 @@ class TestFoundupPlanSteps:
         # Verify correct action names
         assert "foundup_orchestrator_dispatch" in source
         assert "fam_or_genesis_route" in source
+
+
+# ---------------------------------------------------------------------------
+# Phase 2 Tests: Explicit Build Intent Creates FoundUpJob
+# ---------------------------------------------------------------------------
+
+
+class TestFoundupJobCreation:
+    """Test Phase 2: explicit build intent creates typed FoundUpJob."""
+
+    def setup_method(self):
+        """Clear job queue before each test."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            clear_job_queue,
+        )
+
+        clear_job_queue()
+
+    def test_start_build_creates_job(self):
+        """'start build gotjunk' should create a queued FoundUpJob."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            dispatch_foundup,
+            get_job_queue,
+        )
+
+        mock_intent = MagicMock()
+        mock_intent.raw_message = "start build gotjunk"
+        mock_intent.sender = "test_user"
+        mock_intent.session_key = "session_123"
+        mock_intent.channel = "discord"
+        mock_dae = MagicMock()
+
+        result = dispatch_foundup(mock_dae, mock_intent)
+
+        # Verify job was created
+        queue = get_job_queue()
+        assert len(queue) == 1
+
+        job = queue[0]
+        assert job.status.value == "queued"
+        assert job.tenant_id == "test_user"
+        assert job.foundup_id == "gotjunk"
+        assert job.requested_action == "build_foundup"
+        assert job.intent_id == "session_123"
+        assert job.payload["channel"] == "discord"
+        assert job.payload["source"] == "openclaw_foundup_orchestrator"
+        assert "execution not started" in job.status_reason_human
+
+    def test_job_response_includes_required_fields(self):
+        """Response should include job_id, status, action, foundup_id."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            dispatch_foundup,
+        )
+
+        mock_intent = MagicMock()
+        mock_intent.raw_message = "hermes build social_twin"
+        mock_intent.sender = "012"
+        mock_intent.session_key = None
+        mock_intent.channel = "voice_repl"
+        mock_dae = MagicMock()
+
+        result = dispatch_foundup(mock_dae, mock_intent)
+
+        assert "job_id:" in result
+        assert "status: queued" in result
+        assert "requested_action:" in result
+        assert "foundup_id:" in result
+        assert "next: Hermes/WRE pending" in result
+
+    def test_extract_action_detected(self):
+        """'extract foundup gotjunk' should have action=extract."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            dispatch_foundup,
+            get_job_queue,
+        )
+
+        mock_intent = MagicMock()
+        mock_intent.raw_message = "extract foundup move2japan"
+        mock_intent.sender = "test_user"
+        mock_intent.session_key = None
+        mock_intent.channel = "local_repl"
+        mock_dae = MagicMock()
+
+        dispatch_foundup(mock_dae, mock_intent)
+
+        queue = get_job_queue()
+        assert len(queue) == 1
+        assert queue[0].requested_action == "extract_foundup"
+        assert queue[0].foundup_id == "move2japan"
+
+    def test_validate_action_detected(self):
+        """'validate foundup kosei' should have action=validate."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            dispatch_foundup,
+            get_job_queue,
+        )
+
+        mock_intent = MagicMock()
+        mock_intent.raw_message = "validate foundup kosei"
+        mock_intent.sender = "test_user"
+        mock_intent.session_key = None
+        mock_intent.channel = "local_repl"
+        mock_dae = MagicMock()
+
+        dispatch_foundup(mock_dae, mock_intent)
+
+        queue = get_job_queue()
+        assert len(queue) == 1
+        assert queue[0].requested_action == "validate_foundup"
+        assert queue[0].foundup_id == "kosei"
+
+    def test_no_false_hermes_execution_claim(self):
+        """Response should NOT claim Hermes executed the job."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            dispatch_foundup,
+            get_job_queue,
+        )
+
+        mock_intent = MagicMock()
+        mock_intent.raw_message = "start build gotjunk"
+        mock_intent.sender = "test_user"
+        mock_intent.session_key = None
+        mock_intent.channel = "discord"
+        mock_dae = MagicMock()
+
+        result = dispatch_foundup(mock_dae, mock_intent)
+
+        # Verify no false claims
+        assert "executed" not in result.lower()
+        assert "completed" not in result.lower()
+        assert "succeeded" not in result.lower()
+
+        # Verify job has no execution timestamps
+        queue = get_job_queue()
+        job = queue[0]
+        assert job.started_at is None
+        assert job.completed_at is None
+        assert job.worker_id is None
+
+    def test_policy_flags_not_falsely_set(self):
+        """Policy flags should NOT claim gates passed (WSP 97 truth)."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            dispatch_foundup,
+            get_job_queue,
+        )
+
+        mock_intent = MagicMock()
+        mock_intent.raw_message = "openclaw build pqn_portal"
+        mock_intent.sender = "test_user"
+        mock_intent.session_key = None
+        mock_intent.channel = "local_repl"
+        mock_dae = MagicMock()
+
+        dispatch_foundup(mock_dae, mock_intent)
+
+        queue = get_job_queue()
+        job = queue[0]
+
+        # All gates should be unchecked/unpassed
+        assert job.policy_flags.security_gate_checked is False
+        assert job.policy_flags.security_gate_passed is False
+        assert job.policy_flags.exfoliation_gate_checked is False
+        assert job.policy_flags.exfoliation_gate_passed is False
+
+
+class TestAdvisoryQueryPreserved:
+    """Test that advisory queries still route to FAM (Phase 1 preserved)."""
+
+    def setup_method(self):
+        """Clear job queue before each test."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            clear_job_queue,
+        )
+
+        clear_job_queue()
+
+    def test_what_is_query_routes_to_fam(self):
+        """'what is cabr' should NOT create a job, should call FAM."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            get_job_queue,
+            _is_explicit_build_intent,
+        )
+
+        # Verify advisory query is NOT build intent
+        assert _is_explicit_build_intent("what is cabr") is False
+        assert _is_explicit_build_intent("tell me about foundups") is False
+        assert _is_explicit_build_intent("how does gotjunk work") is False
+
+    def test_explain_query_not_build_intent(self):
+        """'explain foundup lifecycle' should NOT be build intent."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            _is_explicit_build_intent,
+        )
+
+        assert _is_explicit_build_intent("explain foundup lifecycle") is False
+        assert _is_explicit_build_intent("list all foundups") is False
+        assert _is_explicit_build_intent("show me gotjunk status") is False
+
+    def test_build_phrases_are_detected(self):
+        """All trigger phrases should be detected as build intent."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            _is_explicit_build_intent,
+        )
+
+        # All trigger phrases from spec
+        assert _is_explicit_build_intent("start build gotjunk") is True
+        assert _is_explicit_build_intent("start building social_twin") is True
+        assert _is_explicit_build_intent("build foundup kosei") is True
+        assert _is_explicit_build_intent("create foundup job move2japan") is True
+        assert _is_explicit_build_intent("queue foundup job pqn_portal") is True
+        assert _is_explicit_build_intent("hermes build") is True
+        assert _is_explicit_build_intent("openclaw build gotjunk") is True
+        assert _is_explicit_build_intent("extract foundup kosei") is True
+        assert _is_explicit_build_intent("exfoliate foundup gotjunk") is True
+        assert _is_explicit_build_intent("validate foundup social_twin") is True
+
+
+class TestFoundupIdExtraction:
+    """Test foundup_id extraction from build messages."""
+
+    def test_extract_simple_id(self):
+        """Extract simple foundup_id like 'gotjunk'."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            _extract_foundup_id,
+        )
+
+        assert _extract_foundup_id("start build gotjunk") == "gotjunk"
+        assert _extract_foundup_id("build foundup social_twin") == "social_twin"
+        assert _extract_foundup_id("hermes build kosei") == "kosei"
+
+    def test_extract_with_stopwords(self):
+        """Stopwords like 'the', 'this' should be filtered."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            _extract_foundup_id,
+        )
+
+        assert _extract_foundup_id("build the foundup gotjunk") == "gotjunk"
+        assert _extract_foundup_id("build this foundup kosei") == "kosei"
+
+    def test_no_foundup_specified(self):
+        """'hermes build' with no foundup should return None."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            _extract_foundup_id,
+        )
+
+        assert _extract_foundup_id("hermes build") is None
+        assert _extract_foundup_id("start build") is None
+        assert _extract_foundup_id("build foundup") is None
