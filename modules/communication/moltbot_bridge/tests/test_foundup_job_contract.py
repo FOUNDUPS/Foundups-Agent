@@ -650,6 +650,127 @@ class TestComputeMetering:
 
 
 # ---------------------------------------------------------------------------
+# Test: Canonical Action Validation
+# ---------------------------------------------------------------------------
+
+
+class TestCanonicalActions:
+    """Tests for canonical requested_action validation."""
+
+    def test_canonical_actions_frozenset_exists(self):
+        """CANONICAL_ACTIONS frozenset exists and is immutable."""
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            CANONICAL_ACTIONS,
+        )
+        assert isinstance(CANONICAL_ACTIONS, frozenset)
+        assert len(CANONICAL_ACTIONS) == 4
+
+    def test_build_foundup_is_canonical(self):
+        """build_foundup is a canonical action."""
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            is_supported_action,
+        )
+        assert is_supported_action("build_foundup") is True
+
+    def test_extract_foundup_is_canonical(self):
+        """extract_foundup is a canonical action."""
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            is_supported_action,
+        )
+        assert is_supported_action("extract_foundup") is True
+
+    def test_validate_foundup_is_canonical(self):
+        """validate_foundup is a canonical action."""
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            is_supported_action,
+        )
+        assert is_supported_action("validate_foundup") is True
+
+    def test_queue_foundup_job_is_canonical(self):
+        """queue_foundup_job is a canonical action."""
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            is_supported_action,
+        )
+        assert is_supported_action("queue_foundup_job") is True
+
+    def test_short_build_is_rejected(self):
+        """Short form 'build' is NOT a canonical action."""
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            is_supported_action,
+        )
+        assert is_supported_action("build") is False
+
+    def test_short_extract_is_rejected(self):
+        """Short form 'extract' is NOT a canonical action."""
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            is_supported_action,
+        )
+        assert is_supported_action("extract") is False
+
+    def test_short_validate_is_rejected(self):
+        """Short form 'validate' is NOT a canonical action."""
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            is_supported_action,
+        )
+        assert is_supported_action("validate") is False
+
+    def test_short_queue_is_rejected(self):
+        """Short form 'queue' is NOT a canonical action."""
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            is_supported_action,
+        )
+        assert is_supported_action("queue") is False
+
+    def test_unsupported_action_is_rejected(self):
+        """Arbitrary unsupported action is rejected."""
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            is_supported_action,
+        )
+        assert is_supported_action("launch_rocket") is False
+        assert is_supported_action("") is False
+        assert is_supported_action("BUILD_FOUNDUP") is False  # Case-sensitive
+
+    def test_fail_unsupported_action_code_exists(self):
+        """FAIL_UNSUPPORTED_ACTION reason code exists."""
+        assert StatusReasonCode.FAIL_UNSUPPORTED_ACTION
+
+    def test_job_can_fail_with_unsupported_action(self):
+        """Job can be failed with FAIL_UNSUPPORTED_ACTION reason."""
+        job = create_job(
+            tenant_id="t",
+            requested_action="invalid_action",  # Intentionally invalid
+        )
+        job.start(worker_id="w")
+        result = job.fail(
+            reason_code=StatusReasonCode.FAIL_UNSUPPORTED_ACTION,
+            reason_human="Action 'invalid_action' is not supported",
+        )
+        assert result is True
+        assert job.status == JobStatus.FAILED
+        assert job.status_reason_code == StatusReasonCode.FAIL_UNSUPPORTED_ACTION
+
+    def test_wsp97_fields_preserved_after_action_failure(self):
+        """WSP 97 audit fields are preserved when job fails due to unsupported action."""
+        job = create_job(
+            tenant_id="tenant_012",
+            requested_action="bad_action",
+            foundup_id="test_foundup",
+        )
+        job.start(worker_id="hermes")
+        job.fail(
+            reason_code=StatusReasonCode.FAIL_UNSUPPORTED_ACTION,
+            reason_human="Unsupported action: bad_action",
+            evidence_refs=["audit/action_validation.log"],
+        )
+
+        # WSP 97 fields must be preserved
+        assert job.status_reason_code == StatusReasonCode.FAIL_UNSUPPORTED_ACTION
+        assert "bad_action" in job.status_reason_human
+        assert "audit/action_validation.log" in job.evidence_refs
+        assert len(job._transition_history) == 2  # start + fail
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 

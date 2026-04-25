@@ -45,6 +45,39 @@ def utc_iso(dt: Optional[datetime]) -> Optional[str]:
 
 
 # ---------------------------------------------------------------------------
+# Canonical Requested Actions (Single Source of Truth)
+# ---------------------------------------------------------------------------
+
+# Canonical action values for FoundUpJob.requested_action
+# All workers (W1/W4/W5/W6) MUST use these exact strings.
+# Short forms (build, extract, validate, queue) are NOT supported.
+CANONICAL_ACTIONS: frozenset[str] = frozenset({
+    "build_foundup",      # W4: Hermes builds FoundUp from spec
+    "extract_foundup",    # W4: Hermes extracts FoundUp to external repo
+    "validate_foundup",   # W4: Hermes validates FoundUp manifest/gates
+    "queue_foundup_job",  # W5: WRE queues job for later execution
+})
+
+
+def is_supported_action(action: str) -> bool:
+    """
+    Check if action is a canonical supported action.
+
+    Args:
+        action: The requested_action string to validate
+
+    Returns:
+        True if action is in CANONICAL_ACTIONS, False otherwise
+
+    Usage by workers:
+        from foundup_job_contract import is_supported_action, CANONICAL_ACTIONS
+        if not is_supported_action(job.requested_action):
+            job.fail(FAIL_UNSUPPORTED_ACTION, f"Unknown action: {job.requested_action}")
+    """
+    return action in CANONICAL_ACTIONS
+
+
+# ---------------------------------------------------------------------------
 # Lifecycle States
 # ---------------------------------------------------------------------------
 
@@ -143,6 +176,9 @@ class StatusReasonCode(str, Enum):
     # Failed - State
     FAIL_INVALID_TRANSITION = "FAIL_INVALID_TRANSITION"
     FAIL_ALREADY_TERMINAL = "FAIL_ALREADY_TERMINAL"
+
+    # Failed - Action
+    FAIL_UNSUPPORTED_ACTION = "FAIL_UNSUPPORTED_ACTION"
 
     # Unknown
     UNKNOWN = "UNKNOWN"
