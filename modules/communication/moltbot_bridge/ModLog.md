@@ -1,5 +1,80 @@
 # ModLog - moltbot_bridge
 
+## 2026-04-23: pAVS Verification Seam Placeholder (WSP 11/91/97)
+
+**Author**: 0102 (Worker W7)
+**WSP**: 11 (Interface), 91 (Observability), 97 (Truth)
+**Slice**: `OC7_PAVS_PROOF_OF_COMPUTE_VERIFICATION_PLACEHOLDER_PHASE1`
+
+### Summary
+
+Created pAVS verification seam placeholder that accepts ProofOfComputeReceipt and returns truthful verification decisions without claiming full pAVS/CABR/PoB implementation. This seam sits between W6 (receipt creation) and future W10 (CABR scoring).
+
+### Files Added
+
+| File | Purpose |
+|------|---------|
+| `src/pavs_verification_seam.py` | Verification seam with decision mapping |
+| `tests/test_pavs_verification_seam.py` | 24 focused tests |
+
+### Key Components
+
+**PAVSDecision Enum**:
+- `ACCEPTED_FOR_REVIEW` — receipt has evidence, accepted for review
+- `BLOCKED_MISSING_EVIDENCE` — receipt claims PENDING_PAVS but no evidence
+- `NOT_REQUIRED` — dry-run receipt, no verification needed
+- `BLOCKED_UPSTREAM` — upstream job was BLOCKED
+- `FAILED_INPUT` — upstream job FAILED
+- `REJECTED_MISSING_IDENTITY` — missing receipt_id, job_id, or tenant_id
+
+**PAVSVerificationResult Dataclass**:
+- Identity: verification_id, receipt_id, job_id, tenant_id
+- Decision: decision, reason_code, reason_human
+- Evidence: evidence_refs, evidence_count
+- Truth flags: cabr_ready=False, payout_ready=False, verification_complete=False
+
+**Functions**:
+- `verify_receipt(receipt)` → PAVSVerificationResult
+- `verify_receipts(list)` → list[PAVSVerificationResult]
+- `generate_verification_id(receipt_id)` → `pv_{suffix}_{timestamp}_{random}`
+
+### Status Mapping
+
+| VerificationStatus | Evidence | PAVSDecision |
+|-------------------|----------|--------------|
+| PENDING_PAVS | present | ACCEPTED_FOR_REVIEW |
+| PENDING_PAVS | absent | BLOCKED_MISSING_EVIDENCE |
+| NOT_REQUIRED | any | NOT_REQUIRED |
+| BLOCKED | any | BLOCKED_UPSTREAM |
+| FAILED_INPUT | any | FAILED_INPUT |
+
+### WSP 97 Boundary
+
+**DOES**:
+- Accept ProofOfComputeReceipt or dict
+- Validate identity fields (receipt_id, job_id, tenant_id)
+- Map verification_status to pAVS decision
+- Track evidence presence for decision logic
+
+**DOES NOT**:
+- Issue tokens or UPS
+- Run CABR consensus
+- Complete verification (only accepts for review)
+- Mark cabr_ready or payout_ready as True
+
+### Test Results
+
+- `test_pavs_verification_seam.py`: 24/24 passed
+- `test_proof_of_compute_receipt.py`: 26/26 passed
+- `test_foundup_job_contract.py`: 66/66 passed
+
+### Integration Notes
+
+- W6 (receipt): `verify_receipt(receipt)` after creating receipt
+- W10 (CABR): Consume results where `decision=ACCEPTED_FOR_REVIEW`
+
+---
+
 ## 2026-04-26: Proof-of-Compute Receipt Contract (WSP 11/91/97)
 
 **Author**: 0102 (Worker W6)
