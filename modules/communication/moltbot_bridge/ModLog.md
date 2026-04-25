@@ -1,5 +1,82 @@
 # ModLog - moltbot_bridge
 
+## 2026-04-26: Proof-of-Compute Receipt Contract (WSP 11/91/97)
+
+**Author**: 0102 (Worker W6)
+**WSP**: 11 (Interface), 91 (Observability), 97 (Truth)
+**Slice**: `OC6_FAM_PROOF_OF_COMPUTE_RECEIPT_PHASE1`
+
+### Summary
+
+Created Proof-of-Compute receipt contract for recording terminal FoundUpJob execution as evidence without claiming token payout, CABR consensus, or pAVS verification is complete. Receipts are created only from terminal job states (SUCCEEDED, BLOCKED, FAILED) and preserve job identity, compute evidence, and truthful status fields.
+
+### Files Added
+
+| File | Purpose |
+|------|---------|
+| `src/proof_of_compute_receipt.py` | Receipt contract schema + factory functions |
+| `tests/test_proof_of_compute_receipt.py` | 26 focused tests for receipt generation |
+
+### Key Components
+
+**VerificationStatus Enum**:
+- `PENDING_PAVS` — SUCCEEDED job awaiting pAVS verification
+- `NOT_REQUIRED` — dry-run job, no real compute
+- `BLOCKED` — job was blocked, evidence recorded
+- `FAILED_INPUT` — job failed, failure evidence recorded
+
+**PayoutStatus/CABRStatus**:
+- Always `NOT_EVALUATED` / `NOT_SUBMITTED` (no payout/consensus engine exists)
+
+**ProofOfComputeReceipt Dataclass**:
+- Identity: receipt_id, job_id, tenant_id, foundup_id, intent_id
+- Evidence: compute_used, compute_summary, evidence_refs
+- Status: verification_status, payout_status, cabr_status
+- Audit: created_at, job_created_at, job_completed_at
+
+**Factory Functions**:
+- `create_receipt_from_job(job)` → ReceiptResult from terminal FoundUpJob
+- `create_receipt(...)` → ReceiptResult convenience factory
+- `generate_receipt_id(job_id)` → `rcpt_{suffix}_{timestamp}_{random}`
+
+### WSP 97 Boundary
+
+**DOES**:
+- Accept terminal job states (SUCCEEDED, BLOCKED, FAILED)
+- Preserve job identity and evidence references
+- Set truthful verification_status based on job outcome
+- Preserve `dry_run: true` context when NOT_REQUIRED is returned
+
+**DOES NOT**:
+- Issue tokens or UPS
+- Allocate rewards or write to wallet
+- Run CABR consensus or pAVS verification
+- Accept non-terminal states (rejects QUEUED/RUNNING with truthful error)
+
+### Status Mapping
+
+| JobStatus | VerificationStatus |
+|-----------|-------------------|
+| SUCCEEDED | PENDING_PAVS |
+| SUCCEEDED + dry_run | NOT_REQUIRED |
+| BLOCKED | BLOCKED |
+| FAILED | FAILED_INPUT |
+| QUEUED/RUNNING | REJECTED |
+
+### Test Results
+
+- `test_proof_of_compute_receipt.py`: 26/26 passed
+- `test_foundup_job_contract.py`: 53/53 passed
+
+### Integration Notes
+
+- W4 (Hermes): Call `create_receipt_from_job()` after terminal state
+- W5 (WRE Router): Call `create_receipt()` if job not materialized
+- W7 (pAVS): Consume receipts with `verification_status=PENDING_PAVS`
+- W10 (CABR): Consume receipts with `cabr_status=NOT_SUBMITTED`
+
+---
+
 ## 2026-04-25: OpenClaw Explicit FoundUp Build Job Creation (WSP 11/50/77/91/97)
 
 **Author**: 0102 (Worker W1 + architect seam cleanup)
