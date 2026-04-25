@@ -668,17 +668,30 @@ async def execute_automation(dae: Any, intent: Any) -> str:
 
 
 def execute_foundup(dae: Any, intent: Any) -> str:
-    """Route FOUNDUP intent to FAM Adapter."""
-    try:
-        from .fam_adapter import handle_fam_intent
+    """Route FOUNDUP intent through orchestrator entrypoint.
 
-        return handle_fam_intent(intent.raw_message, intent.sender)
+    Phase 1 (OC1): Orchestrator dispatches to FAM with safe fallback.
+    Phase 2+: Will add genesis validation gate before FAM handoff.
+    """
+    try:
+        from .openclaw_foundup_orchestrator import dispatch_foundup
+
+        return dispatch_foundup(dae, intent)
     except ImportError as exc:
-        logger.warning("[OPENCLAW-DAE] FAM Adapter not available: %s", exc)
-        return (
-            "FoundUps Agent Market not available. "
-            "Check that fam_adapter.py exists."
+        # Fallback: orchestrator unavailable, try direct FAM
+        logger.warning(
+            "[OPENCLAW-DAE] Orchestrator unavailable, trying direct FAM: %s", exc
         )
+        try:
+            from .fam_adapter import handle_fam_intent
+
+            return handle_fam_intent(intent.raw_message, intent.sender)
+        except ImportError as fam_exc:
+            logger.warning("[OPENCLAW-DAE] FAM Adapter not available: %s", fam_exc)
+            return (
+                "FoundUps Agent Market not available. "
+                "Check that fam_adapter.py exists."
+            )
     except Exception as exc:
         logger.error("[OPENCLAW-DAE] FAM execution error: %s", exc)
         return f"FAM error: {exc}"

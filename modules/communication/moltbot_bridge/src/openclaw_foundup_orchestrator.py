@@ -563,3 +563,56 @@ def validate_genesis_before_execution(
     Use this as the primary entry point for gate checks.
     """
     return get_orchestrator().validate_genesis_envelope(envelope_data, actor_id)
+
+
+# -----------------------------------------------------------------------------
+# Runtime Dispatch Entrypoint (OC1 Wiring)
+# -----------------------------------------------------------------------------
+
+
+def dispatch_foundup(dae: Any, intent: Any) -> str:
+    """
+    Dispatch FOUNDUP intent through orchestrator entrypoint.
+
+    Phase 1: Routes all intents to FAM adapter with safe fallback.
+    Phase 2+ will add genesis validation gate before FAM handoff.
+
+    WSP 97 Note: This dispatch does NOT claim genesis validation is enforced.
+    Genesis gate (OC3) is available but not mandatory in Phase 1.
+
+    Args:
+        dae: OpenClawDAE instance
+        intent: Classified OpenClawIntent
+
+    Returns:
+        Response string from FAM adapter or fallback message
+    """
+    route_decision = {"route": "fam_adapter", "reason": "phase1_passthrough"}
+
+    logger.info(
+        "[OPENCLAW-FOUNDUP-ORCH] dispatch | route=%s reason=%s sender=%s",
+        route_decision["route"],
+        route_decision["reason"],
+        intent.sender,
+    )
+
+    # Phase 1: Direct FAM handoff with preserved fallback behavior
+    try:
+        from .fam_adapter import handle_fam_intent
+
+        response = handle_fam_intent(intent.raw_message, intent.sender)
+        logger.info(
+            "[OPENCLAW-FOUNDUP-ORCH] fam_complete | route=%s len=%d",
+            route_decision["route"],
+            len(response) if response else 0,
+        )
+        return response
+    except ImportError as exc:
+        logger.warning("[OPENCLAW-FOUNDUP-ORCH] fam_unavailable | error=%s", exc)
+        return (
+            "FoundUps Agent Market not available. "
+            "Check that fam_adapter.py exists."
+        )
+    except Exception as exc:
+        logger.error("[OPENCLAW-FOUNDUP-ORCH] fam_error | error=%s", exc)
+        return f"FAM error: {exc}"
