@@ -2,7 +2,25 @@
 
 ## Test Strategy
 
-Tests focus on agent lifecycle state transitions per the 01(02) → 0102 → 01/02 state machine.
+Tests cover two surfaces:
+
+- Hermes FoundUp Builder dry-run and boundary gates.
+- Planned agent lifecycle state transitions per the 01(02) -> 0102 -> 01/02 state machine.
+
+## Implemented Test Coverage
+
+### Hermes FoundUp Builder
+
+`test_hermes_foundup_builder.py` verifies:
+
+- Builder initialization when optional FAM dependencies are unavailable.
+- Boundary analysis shape and blocker reporting.
+- Exfoliation gate checks for contracts, tests, deploy surface, adapter-level dependencies, and Claw participation.
+- Deploy surface evidence from `firebase.json`, `app/index.html`, `frontend/index.html`, or `foundup_manifest.json` with `entry_url` and `launch_readiness=ready`.
+- Deterministic manifest signing.
+- Adapter generation in dry-run mode without writing files.
+- `extract_foundup()` dry-run success and failure paths.
+- Read-only assertions against real GotJunk and Kosei modules.
 
 ## Planned Test Coverage
 
@@ -73,6 +91,9 @@ def test_idle_events_windowed():
 # From project root
 python -m pytest modules/foundups/agent/tests/ -v
 
+# Focused Hermes builder check
+python -m pytest modules/foundups/agent/tests/test_hermes_foundup_builder.py -q
+
 # With coverage
 python -m pytest modules/foundups/agent/tests/ --cov=modules.foundups.agent
 ```
@@ -93,5 +114,6 @@ def agent_lifecycle_service(mock_daemon):
 
 ## Status
 
-- Tests: Planned (Phase 1)
+- Hermes builder tests: Implemented
+- Agent lifecycle tests: Planned (Phase 1)
 - Coverage Target: 80%

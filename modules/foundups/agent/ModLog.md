@@ -70,6 +70,31 @@
 
 ---
 
+## 2026-04-25 - Hermes Deploy Surface Detector Alignment
+
+**Author**: 0102
+**WSP References**: WSP 34, WSP 50, WSP 60, WSP 83, WSP 97
+
+### Fixed
+
+- Added `HermesFoundUpBuilder._detect_deploy_surface()` so the exfoliation gate accepts existing verified deploy evidence:
+  - direct deploy config (`Dockerfile`, `cloudbuild.yaml`, `firebase.json`, `deployment/`)
+  - `app/index.html`
+  - `frontend/index.html`
+  - `foundup_manifest.json` with `entry_url` and `launch_readiness=ready`
+
+### Validation
+
+- `python -m pytest modules/foundups/agent/tests/test_hermes_foundup_builder.py -q`
+- Result: 18 passed.
+
+### Memory
+
+- Updated `tests/README.md` with implemented Hermes builder coverage.
+- Added `tests/TestModLog.md` for WSP 34/WSP 60 test memory.
+
+---
+
 ## 2026-04-16 - Hermes Agent Integration (v0.4.0)
 
 **Author**: 0102
