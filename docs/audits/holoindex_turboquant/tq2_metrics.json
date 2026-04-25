@@ -3,7 +3,7 @@
   "chroma_path": "E:/HoloIndex/vectors",
   "collection_counts": {
     "navigation_code": 296,
-    "navigation_wsp": 3322,
+    "navigation_wsp": 117,
     "navigation_tests": 0,
     "navigation_skills": 59,
     "navigation_symbols": 20000,
@@ -24,17 +24,10 @@
     "sentinel_top1_required": "all"
   },
   "overall": {
-    "top1_agreement_pct": 88.66666666666667,
-    "top5_set_agreement_pct": 63.333333333333336,
-    "sentinels_pass": false,
+    "top1_agreement_pct": 86.66666666666667,
+    "top5_set_agreement_pct": 65.33333333333333,
+    "sentinels_pass": true,
     "sentinel_results": [
-      {
-        "collection": "navigation_code",
-        "query": "WSP 87 size limits for modules",
-        "fp32_top1": "code_106",
-        "int8_top1": "code_106",
-        "top1_agree": true
-      },
       {
         "collection": "navigation_code",
         "query": "HOLO_USE_TURBOQUANT environment switch",
@@ -66,92 +59,8 @@
       {
         "collection": "navigation_wsp",
         "query": "WSP 87 size limits for modules",
-        "fp32_top1": "wsp_2599",
-        "int8_top1": "wsp_2599",
-        "top1_agree": true
-      },
-      {
-        "collection": "navigation_wsp",
-        "query": "HOLO_USE_TURBOQUANT environment switch",
-        "fp32_top1": "wsp_489",
-        "int8_top1": "wsp_489",
-        "top1_agree": true
-      },
-      {
-        "collection": "navigation_wsp",
-        "query": "modules/ai_intelligence/agent_permissions",
-        "fp32_top1": "wsp_567",
-        "int8_top1": "wsp_567",
-        "top1_agree": true
-      },
-      {
-        "collection": "navigation_wsp",
-        "query": "AgentPermissionManager.request_permission",
-        "fp32_top1": "wsp_567",
-        "int8_top1": "wsp_567",
-        "top1_agree": true
-      },
-      {
-        "collection": "navigation_wsp",
-        "query": "modules/platform_integration/youtube_auth",
-        "fp32_top1": "wsp_3295",
-        "int8_top1": "wsp_3295",
-        "top1_agree": true
-      },
-      {
-        "collection": "navigation_skills",
-        "query": "WSP 87 size limits for modules",
-        "fp32_top1": "skill_6",
-        "int8_top1": "skill_6",
-        "top1_agree": true
-      },
-      {
-        "collection": "navigation_skills",
-        "query": "HOLO_USE_TURBOQUANT environment switch",
-        "fp32_top1": "skill_6",
-        "int8_top1": "skill_6",
-        "top1_agree": true
-      },
-      {
-        "collection": "navigation_skills",
-        "query": "modules/ai_intelligence/agent_permissions",
-        "fp32_top1": "skill_6",
-        "int8_top1": "skill_6",
-        "top1_agree": true
-      },
-      {
-        "collection": "navigation_skills",
-        "query": "AgentPermissionManager.request_permission",
-        "fp32_top1": "skill_6",
-        "int8_top1": "skill_6",
-        "top1_agree": true
-      },
-      {
-        "collection": "navigation_skills",
-        "query": "modules/platform_integration/youtube_auth",
-        "fp32_top1": "skill_6",
-        "int8_top1": "skill_6",
-        "top1_agree": true
-      },
-      {
-        "collection": "navigation_symbols",
-        "query": "WSP 87 size limits for modules",
-        "fp32_top1": "sym_10365",
-        "int8_top1": "sym_10365",
-        "top1_agree": true
-      },
-      {
-        "collection": "navigation_symbols",
-        "query": "HOLO_USE_TURBOQUANT environment switch",
-        "fp32_top1": "sym_10365",
-        "int8_top1": "sym_10365",
-        "top1_agree": true
-      },
-      {
-        "collection": "navigation_symbols",
-        "query": "modules/ai_intelligence/agent_permissions",
-        "fp32_top1": "sym_10365",
-        "int8_top1": "sym_10365",
+        "fp32_top1": "wsp_67",
+        "int8_top1": "wsp_67",
         "top1_agree": true
       },
       {
@@ -159,48 +68,6 @@
         "query": "AgentPermissionManager.request_permission",
         "fp32_top1": "sym_10365",
         "int8_top1": "sym_10365",
-        "top1_agree": true
-      },
-      {
-        "collection": "navigation_symbols",
-        "query": "modules/platform_integration/youtube_auth",
-        "fp32_top1": "sym_10365",
-        "int8_top1": "sym_10365",
-        "top1_agree": true
-      },
-      {
-        "collection": "navigation_vocabulary",
-        "query": "WSP 87 size limits for modules",
-        "fp32_top1": "vocab_1_39",
-        "int8_top1": "vocab_1_39",
-        "top1_agree": true
-      },
-      {
-        "collection": "navigation_vocabulary",
-        "query": "HOLO_USE_TURBOQUANT environment switch",
-        "fp32_top1": "vocab_1_13",
-        "int8_top1": "vocab_2_68",
-        "top1_agree": false
-      },
-      {
-        "collection": "navigation_vocabulary",
-        "query": "modules/ai_intelligence/agent_permissions",
-        "fp32_top1": "vocab_1_7",
-        "int8_top1": "vocab_1_7",
-        "top1_agree": true
-      },
-      {
-        "collection": "navigation_vocabulary",
-        "query": "AgentPermissionManager.request_permission",
-        "fp32_top1": "vocab_1_7",
-        "int8_top1": "vocab_1_7",
-        "top1_agree": true
-      },
-      {
-        "collection": "navigation_vocabulary",
-        "query": "modules/platform_integration/youtube_auth",
-        "fp32_top1": "vocab_1_7",
-        "int8_top1": "vocab_1_7",
         "top1_agree": true
       }
     ]
@@ -227,24 +94,24 @@
       "kendall_tau_min": 0.14285714285714285
     },
     "navigation_wsp": {
-      "doc_count": 3322,
+      "doc_count": 117,
       "queries": 30,
-      "top1_agreement_pct": 90.0,
-      "top5_set_agreement_pct": 26.666666666666668,
+      "top1_agreement_pct": 80.0,
+      "top5_set_agreement_pct": 36.666666666666664,
       "jaccard_mean": {
-        "k=1": 0.9,
-        "k=3": 0.74,
-        "k=5": 0.7099206349206348,
-        "k=10": 0.6893328893328894
+        "k=1": 0.8,
+        "k=3": 0.6966666666666667,
+        "k=5": 0.7333333333333333,
+        "k=10": 0.7588966588966589
       },
       "jaccard_min": {
         "k=1": 0.0,
         "k=3": 0.2,
-        "k=5": 0.25,
-        "k=10": 0.3333333333333333
+        "k=5": 0.42857142857142855,
+        "k=10": 0.5384615384615384
       },
-      "kendall_tau_mean": 0.6810052910052911,
-      "kendall_tau_min": 0.2
+      "kendall_tau_mean": 0.6584126984126984,
+      "kendall_tau_min": 0.2222222222222222
     },
     "navigation_skills": {
       "doc_count": 59,
@@ -308,23 +175,22 @@
     }
   },
   "latency_ms": {
-    "fp32_encode_p50": 10.86899999063462,
-    "fp32_encode_p95": 18.254770006751635,
-    "int8_encode_p50": 2.50840000808239,
-    "int8_encode_p95": 3.678470023442058,
-    "fp32_query_p50": 2.0187500049360096,
-    "fp32_query_p95": 2.5823199655860654,
-    "int8_query_p50": 1.6638499801047146,
-    "int8_query_p95": 2.2035900037735696
+    "fp32_encode_p50": 14.500199991744012,
+    "fp32_encode_p95": 45.98363996483383,
+    "int8_encode_p50": 2.7594499988481402,
+    "int8_encode_p95": 4.6674399869516465,
+    "fp32_query_p50": 1.9958499469794333,
+    "fp32_query_p95": 2.6043600286357096,
+    "int8_query_p50": 1.6961999936029315,
+    "int8_query_p95": 2.848975005326791
   },
   "cold_load_sec": {
-    "fp32_sentence_transformer": 11.039138399995863,
-    "int8_turboquant_embedder": 0.1941697000293061
+    "fp32_sentence_transformer": 11.652336500003003,
+    "int8_turboquant_embedder": 0.8244105000048876
   },
   "decision": "HOLD_INT8",
   "blockers": [
-    "overall top-1 agreement 88.7% < 90.0%",
-    "overall top-5 set-agreement 63.3% < 95.0%",
-    "1 sentinel query regressions"
+    "overall top-1 agreement 86.7% < 90.0%",
+    "overall top-5 set-agreement 65.3% < 95.0%"
   ]
 }

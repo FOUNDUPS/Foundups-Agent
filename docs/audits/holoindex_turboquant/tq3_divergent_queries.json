@@ -1,5 +1,5 @@
 {
-  "n_divergent": 7,
+  "n_divergent": 10,
   "divergent": [
     {
       "collection": "navigation_code",
@@ -88,64 +88,127 @@
     {
       "collection": "navigation_wsp",
       "routed_backend": "turboquant_onnx_int8",
-      "query": "WSP 97 truth distinction protocol",
-      "fp32_top1": "wsp_213",
-      "routed_top1": "wsp_107",
+      "query": "orphan capability scanner",
+      "fp32_top1": "wsp_15",
+      "routed_top1": "wsp_100",
       "fp32_top5": [
-        "wsp_213",
-        "wsp_107",
-        "wsp_47",
-        "wsp_2356",
-        "wsp_3063"
+        "wsp_15",
+        "wsp_100",
+        "wsp_95",
+        "wsp_13",
+        "wsp_78"
       ],
       "routed_top5": [
-        "wsp_107",
-        "wsp_213",
+        "wsp_100",
+        "wsp_15",
+        "wsp_95",
+        "wsp_13",
+        "wsp_78"
+      ]
+    },
+    {
+      "collection": "navigation_wsp",
+      "routed_backend": "turboquant_onnx_int8",
+      "query": "pfMALL data isolation model",
+      "fp32_top1": "wsp_100",
+      "routed_top1": "wsp_71",
+      "fp32_top5": [
+        "wsp_100",
+        "wsp_29",
+        "wsp_78",
+        "wsp_71",
+        "wsp_60"
+      ],
+      "routed_top5": [
+        "wsp_71",
+        "wsp_100",
+        "wsp_60",
+        "wsp_43",
+        "wsp_29"
+      ]
+    },
+    {
+      "collection": "navigation_wsp",
+      "routed_backend": "turboquant_onnx_int8",
+      "query": "sentence transformer model load timeout",
+      "fp32_top1": "wsp_99",
+      "routed_top1": "wsp_20",
+      "fp32_top5": [
+        "wsp_99",
+        "wsp_20",
+        "wsp_34",
+        "wsp_56",
+        "wsp_98"
+      ],
+      "routed_top5": [
+        "wsp_20",
+        "wsp_99",
+        "wsp_55",
+        "wsp_34",
+        "wsp_98"
+      ]
+    },
+    {
+      "collection": "navigation_wsp",
+      "routed_backend": "turboquant_onnx_int8",
+      "query": "AgentPermissionManager.request_permission",
+      "fp32_top1": "wsp_38",
+      "routed_top1": "wsp_58",
+      "fp32_top5": [
+        "wsp_38",
+        "wsp_83",
+        "wsp_58",
+        "wsp_80",
+        "wsp_103"
+      ],
+      "routed_top5": [
+        "wsp_58",
+        "wsp_83",
+        "wsp_38",
+        "wsp_80",
+        "wsp_103"
+      ]
+    },
+    {
+      "collection": "navigation_wsp",
+      "routed_backend": "turboquant_onnx_int8",
+      "query": "autonomous_refactoring.py WSP 77",
+      "fp32_top1": "wsp_59",
+      "routed_top1": "wsp_38",
+      "fp32_top5": [
+        "wsp_59",
+        "wsp_38",
+        "wsp_80",
+        "wsp_37",
+        "wsp_32"
+      ],
+      "routed_top5": [
+        "wsp_38",
+        "wsp_59",
+        "wsp_32",
+        "wsp_80",
+        "wsp_112"
+      ]
+    },
+    {
+      "collection": "navigation_wsp",
+      "routed_backend": "turboquant_onnx_int8",
+      "query": "token budget for DAE pattern memory",
+      "fp32_top1": "wsp_88",
+      "routed_top1": "wsp_27",
+      "fp32_top5": [
+        "wsp_88",
+        "wsp_27",
         "wsp_16",
-        "wsp_47",
-        "wsp_58"
-      ]
-    },
-    {
-      "collection": "navigation_wsp",
-      "routed_backend": "turboquant_onnx_int8",
-      "query": "WSP 22 ModLog update requirements",
-      "fp32_top1": "wsp_2598",
-      "routed_top1": "wsp_2885",
-      "fp32_top5": [
-        "wsp_2598",
-        "wsp_2885",
-        "wsp_562",
-        "wsp_686",
-        "wsp_850"
+        "wsp_28",
+        "wsp_65"
       ],
       "routed_top5": [
-        "wsp_2885",
-        "wsp_562",
-        "wsp_686",
-        "wsp_850",
-        "wsp_2598"
-      ]
-    },
-    {
-      "collection": "navigation_wsp",
-      "routed_backend": "turboquant_onnx_int8",
-      "query": "how does 0102 recall patterns from 0201",
-      "fp32_top1": "wsp_2855",
-      "routed_top1": "wsp_13",
-      "fp32_top5": [
-        "wsp_2855",
-        "wsp_3157",
-        "wsp_13",
-        "wsp_555",
-        "wsp_219"
-      ],
-      "routed_top5": [
-        "wsp_13",
-        "wsp_3157",
-        "wsp_2428",
-        "wsp_219",
-        "wsp_2855"
+        "wsp_27",
+        "wsp_16",
+        "wsp_88",
+        "wsp_65",
+        "wsp_28"
       ]
     }
   ]

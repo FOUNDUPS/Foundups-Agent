@@ -66,6 +66,7 @@ from typing import Any
 # measurement tool between slices).
 from holo_index.scripts.benchmarks.tq2_real_corpus_audit import (
     CHROMA_PATH,
+    SENTINEL_COLLECTION_MAP,  # W3: collection-aware sentinel routing
     SENTINEL_QUERIES,
     TQ2_QUERIES,
     _jaccard,
@@ -211,15 +212,18 @@ def main() -> int:
                     "routed_top5": ids_routed[:5],
                 })
 
+            # W3: Only record sentinel if this collection is a valid target for this query
             if q in SENTINEL_QUERIES:
-                sentinel_results.append({
-                    "collection": col_name,
-                    "routed_backend": routed_backend_key,
-                    "query": q,
-                    "fp32_top1": ids_fp32[0] if ids_fp32 else None,
-                    "routed_top1": ids_routed[0] if ids_routed else None,
-                    "top1_agree": bool(ids_fp32 and ids_routed and ids_fp32[0] == ids_routed[0]),
-                })
+                target_collections = SENTINEL_COLLECTION_MAP.get(q, [])
+                if col_name in target_collections:
+                    sentinel_results.append({
+                        "collection": col_name,
+                        "routed_backend": routed_backend_key,
+                        "query": q,
+                        "fp32_top1": ids_fp32[0] if ids_fp32 else None,
+                        "routed_top1": ids_routed[0] if ids_routed else None,
+                        "top1_agree": bool(ids_fp32 and ids_routed and ids_fp32[0] == ids_routed[0]),
+                    })
 
         n = len(TQ2_QUERIES)
         per_collection[col_name] = {

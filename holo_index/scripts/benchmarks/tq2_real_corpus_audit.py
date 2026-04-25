@@ -113,6 +113,10 @@ assert len(TQ2_QUERIES) == 30
 
 # Sentinels are queries whose fp32 top-1 is semantically unambiguous.
 # Any int8 divergence on these = blocker.
+#
+# W3/CFZ4: Collection-aware sentinel routing. Each sentinel targets
+# a specific collection type to avoid testing protocol queries against
+# code collections or vice versa.
 SENTINEL_QUERIES: list[str] = [
     "WSP 97 System Execution Prompting Protocol",  # CFZ3: canonical title
     "WSP 87 size limits for modules",
@@ -121,6 +125,21 @@ SENTINEL_QUERIES: list[str] = [
     "modules/platform_integration/youtube_auth",
     "HOLO_USE_TURBOQUANT environment switch",
 ]
+
+# W3: Map sentinels to their semantically correct target collections.
+# Only test a sentinel against collections where it makes sense.
+SENTINEL_COLLECTION_MAP: dict[str, list[str]] = {
+    # WSP protocol queries -> navigation_wsp only
+    "WSP 97 System Execution Prompting Protocol": ["navigation_wsp"],
+    "WSP 87 size limits for modules": ["navigation_wsp"],
+    # Code symbol queries -> navigation_code, navigation_symbols
+    "AgentPermissionManager.request_permission": ["navigation_code", "navigation_symbols"],
+    # Module path queries -> navigation_code, navigation_docs
+    "modules/ai_intelligence/agent_permissions": ["navigation_code", "navigation_docs"],
+    "modules/platform_integration/youtube_auth": ["navigation_code", "navigation_docs"],
+    # Config/env queries -> navigation_code (where env vars are defined)
+    "HOLO_USE_TURBOQUANT environment switch": ["navigation_code"],
+}
 
 CHROMA_PATH = "E:/HoloIndex/vectors"
 HF_SNAPSHOT_DIR = (
@@ -322,14 +341,17 @@ def main() -> int:
                     "int8_top5": ids_int8[:5],
                 })
 
+            # W3: Only record sentinel if this collection is a valid target for this query
             if q in SENTINEL_QUERIES:
-                sentinel_results.append({
-                    "collection": col_name,
-                    "query": q,
-                    "fp32_top1": ids_fp32[0] if ids_fp32 else None,
-                    "int8_top1": ids_int8[0] if ids_int8 else None,
-                    "top1_agree": bool(ids_fp32 and ids_int8 and ids_fp32[0] == ids_int8[0]),
-                })
+                target_collections = SENTINEL_COLLECTION_MAP.get(q, [])
+                if col_name in target_collections:
+                    sentinel_results.append({
+                        "collection": col_name,
+                        "query": q,
+                        "fp32_top1": ids_fp32[0] if ids_fp32 else None,
+                        "int8_top1": ids_int8[0] if ids_int8 else None,
+                        "top1_agree": bool(ids_fp32 and ids_int8 and ids_fp32[0] == ids_int8[0]),
+                    })
 
         n = len(TQ2_QUERIES)
         per_collection[col_name] = {
