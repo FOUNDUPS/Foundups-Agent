@@ -29,6 +29,12 @@
 
   var isOpen = false;
 
+  // ---- verification alerts (skeleton) ----
+  // In-memory storage only. No backend connection.
+  // WSP 97: RedDog may notify/summarize/open panels. RedDog may NOT judge/deny/finalize.
+  var verificationAlerts = {};
+  var verificationAlertCount = 0;
+
   // ---- swipe tracking ----
   var touchStartY = 0;
   var touchCurrentY = 0;
@@ -1644,6 +1650,90 @@
           }).catch(function () {});
         });
       });
+    },
+
+    // ---- verification alert skeleton (PFM9) ----
+    // WSP 97 truth boundary: RedDog may notify/summarize/open panels.
+    // RedDog may NOT judge/deny/finalize protected decisions.
+
+    /**
+     * Display a verification alert in RedDog plane.
+     * @param {Object} alert - RedDogVerificationAlert object
+     * @param {string} alert.alert_id - Unique alert identifier
+     * @param {string} alert.event_id - VerificationGapEvent.event_id
+     * @param {string} alert.foundup_id - Which FoundUp this relates to
+     * @param {string} alert.summary - Human-readable summary
+     * @param {string} alert.action_required - "human_review" | "acknowledge" | "info_only"
+     * @param {string} [alert.panel_to_open] - "verification_wall" | "task_detail" | "evidence"
+     * @param {string} alert.created_at - ISO 8601 timestamp
+     * @returns {boolean} true if alert stored, false if invalid
+     */
+    showVerificationAlert: function (alert) {
+      if (!alert || typeof alert !== 'object') return false;
+      if (!alert.alert_id || typeof alert.alert_id !== 'string') return false;
+
+      // Store alert (in-memory only - no backend)
+      verificationAlerts[alert.alert_id] = {
+        alert_id: alert.alert_id,
+        event_id: alert.event_id || '',
+        foundup_id: alert.foundup_id || '',
+        summary: alert.summary || '',
+        action_required: alert.action_required || 'info_only',
+        panel_to_open: alert.panel_to_open || null,
+        created_at: alert.created_at || new Date().toISOString(),
+        displayed_at: new Date().toISOString()
+      };
+      verificationAlertCount++;
+
+      // Emit event for UI renderers (future phase)
+      document.dispatchEvent(new CustomEvent('reddog:alert_stored', {
+        detail: { alert_id: alert.alert_id, count: verificationAlertCount }
+      }));
+
+      return true;
+    },
+
+    /**
+     * Dismiss a verification alert by ID.
+     * @param {string} alertId - The alert_id to dismiss
+     * @returns {boolean} true if dismissed, false if not found
+     */
+    dismissVerificationAlert: function (alertId) {
+      if (!alertId || typeof alertId !== 'string') return false;
+      if (!verificationAlerts[alertId]) return false;
+
+      delete verificationAlerts[alertId];
+      verificationAlertCount = Math.max(0, verificationAlertCount - 1);
+
+      // Emit event for UI renderers (future phase)
+      document.dispatchEvent(new CustomEvent('reddog:alert_dismissed', {
+        detail: { alert_id: alertId, count: verificationAlertCount }
+      }));
+
+      return true;
+    },
+
+    /**
+     * Get current verification alert count.
+     * @returns {number} Number of active alerts
+     */
+    getVerificationAlertCount: function () {
+      return verificationAlertCount;
+    },
+
+    /**
+     * Get all active verification alerts.
+     * @returns {Object} Map of alert_id -> alert object
+     */
+    getVerificationAlerts: function () {
+      // Return shallow copy to prevent external mutation
+      var copy = {};
+      for (var k in verificationAlerts) {
+        if (verificationAlerts.hasOwnProperty(k)) {
+          copy[k] = verificationAlerts[k];
+        }
+      }
+      return copy;
     }
   };
 
@@ -1652,6 +1742,15 @@
 
   // Backward compat alias (will be removed in future)
   window.accountConcierge = api;
+
+  // ---- verification alert event listener (PFM9) ----
+  // WSP 97: AI agents dispatch 'reddog:verification_alert' to surface anomalies.
+  // RedDog stores and displays; RedDog does NOT judge or finalize.
+  document.addEventListener('reddog:verification_alert', function (e) {
+    if (e.detail && typeof e.detail === 'object') {
+      api.showVerificationAlert(e.detail);
+    }
+  });
 
   // ---- escape helper ----
   function esc(s) {
