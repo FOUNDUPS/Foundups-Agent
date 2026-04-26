@@ -384,6 +384,9 @@ scripts/wsl_*.sh
 WSP_agentic/agentic_journals/awakening/0102_state_v2.json
 WSP_agentic/agentic_journals/awakening/awareness_log.md
 
+# WSP agentic .runtime/ directories (default untracked output for awakening scripts)
+WSP_agentic/agentic_journals/*/.runtime/
+
 # Data directories (runtime scraped/generated data)
 data/
 !modules/platform_integration/linkedin_agent/data/
