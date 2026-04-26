@@ -91,10 +91,12 @@ class YouTubeProxy:
     - infrastructure/ (agent management)
     """
     
-    def __init__(self, logger: Optional[logging.Logger] = None, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, logger: Optional[logging.Logger] = None, config: Optional[Dict[str, Any]] = None, credentials: Optional[Any] = None):
         """Initialize with dependency injection support"""
         self.logger = logger or self._create_default_logger()
         self.config = config or {}
+        self.credentials = credentials
+        self.service = None
         
         # Core state
         self.status = ProxyStatus()
@@ -167,6 +169,126 @@ class YouTubeProxy:
         self.agent_manager = MockComponent("AgentManager", self.logger)
         
         self.logger.info("[TOOL] Mock components initialized for standalone mode")
+
+    def find_active_livestream(self, channel_id: str) -> Optional[Tuple[str, str]]:
+        """
+        Find active livestream for a channel.
+        WSP 48: Self-healing authentication with automatic token refresh.
+        
+        Returns:
+            Tuple of (video_id, chat_id) if found, None otherwise
+        """
+        try:
+            # Import stream resolver functions
+            from modules.platform_integration.stream_resolver.src.stream_resolver import (
+                get_active_livestream_video_id_enhanced,
+                get_authenticated_service_with_fallback
+            )
+            
+            # WSP 48: Self-healing - Try to get authenticated service
+            self.logger.info("[INFO] Attempting to find active livestream...")
+            
+            # First try with provided credentials
+            if self.credentials:
+                # Use existing credentials
+                from googleapiclient.discovery import build
+                self.service = build('youtube', 'v3', credentials=self.credentials)
+            else:
+                # WSP 48: Self-heal by getting new authentication
+                self.logger.info("[INFO] No credentials provided, attempting self-healing auth...")
+                auth_result = get_authenticated_service_with_fallback()
+                
+                if auth_result:
+                    self.service, self.credentials, credential_set = auth_result
+                    self.logger.info(f"[OK] Self-healed authentication with {credential_set}")
+                else:
+                    # Try to refresh tokens automatically
+                    self.logger.warning("[WARN] Authentication failed, attempting token refresh...")
+                    if self._auto_refresh_tokens():
+                        # Retry authentication
+                        auth_result = get_authenticated_service_with_fallback()
+                        if auth_result:
+                            self.service, self.credentials, credential_set = auth_result
+                            self.logger.info(f"[OK] Authentication successful after token refresh")
+                        else:
+                            self.logger.error("[ERROR] Authentication failed even after token refresh")
+                            return None
+                    else:
+                        self.logger.error("[ERROR] Could not refresh tokens")
+                        return None
+            
+            # Now use stream resolver to find livestream
+            if self.service:
+                result = get_active_livestream_video_id_enhanced(self.service, channel_id)
+                if result:
+                    video_id, chat_id = result
+                    self.logger.info(f"[OK] Found active livestream: {video_id[:8]}...")
+                    return result
+                else:
+                    self.logger.info("[INFO] No active livestream found")
+                    return None
+            else:
+                self.logger.error("[ERROR] No YouTube service available")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"[ERROR] Failed to find livestream: {e}")
+            return None
+    
+    def _auto_refresh_tokens(self) -> bool:
+        """
+        WSP 48: Automatic token refresh for self-healing
+        """
+        try:
+            import os
+            import json
+            from google.oauth2.credentials import Credentials
+            from google.auth.transport.requests import Request
+            
+            CREDENTIALS_DIR = "credentials"
+            TOKEN_FILES = ["oauth_token.json", "oauth_token2.json", "oauth_token3.json", "oauth_token4.json"]
+            SCOPES = [
+                "https://www.googleapis.com/auth/youtube.force-ssl",
+                "https://www.googleapis.com/auth/youtube.readonly"
+            ]
+            
+            refreshed_any = False
+            
+            for token_file in TOKEN_FILES:
+                token_path = os.path.join(CREDENTIALS_DIR, token_file)
+                
+                if os.path.exists(token_path):
+                    try:
+                        with open(token_path, 'r', encoding="utf-8") as f:
+                            creds_data = json.load(f)
+                        
+                        creds = Credentials.from_authorized_user_info(creds_data, SCOPES)
+                        
+                        if creds and creds.refresh_token:
+                            try:
+                                creds.refresh(Request())
+                                
+                                # Save refreshed token
+                                with open(token_path, 'w', encoding="utf-8") as f:
+                                    f.write(creds.to_json())
+                                
+                                self.logger.info(f"[OK] Auto-refreshed token: {token_file}")
+                                refreshed_any = True
+                                break  # One successful refresh is enough
+                                
+                            except Exception as refresh_error:
+                                if 'invalid_grant' in str(refresh_error):
+                                    self.logger.warning(f"[WARN] Token {token_file} expired, needs reauth")
+                                else:
+                                    self.logger.error(f"[ERROR] Failed to refresh {token_file}: {refresh_error}")
+                    except Exception as e:
+                        self.logger.error(f"[ERROR] Could not load {token_file}: {e}")
+            
+            return refreshed_any
+            
+        except Exception as e:
+            self.logger.error(f"[ERROR] Auto-refresh failed: {e}")
+            return False
 
     async def connect_to_active_stream(self) -> Optional[StreamInfo]:
         """
@@ -330,7 +452,7 @@ def create_youtube_proxy(credentials: Optional[Any] = None, config: Optional[Dic
     Returns:
         YouTubeProxy: Configured proxy instance
     """
-    return YouTubeProxy(config=config)
+    return YouTubeProxy(config=config, credentials=credentials)
 
 if __name__ == "__main__":
     """Standalone execution entry point"""
