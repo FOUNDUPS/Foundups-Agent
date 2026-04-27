@@ -799,3 +799,140 @@ Bottom line:
 The video Mall is real.  
 The first real customizable room is not next.  
 Next is true AI-driven field repopulation.
+
+---
+
+## 14. pfMALL PoC User Loop (2026-04-27)
+
+The complete PoC loop describes how 012 moves through the pfMALL ecosystem
+from passive browsing to active FoundUp creation and compute assignment.
+
+### 14.1 Loop Diagram
+
+```text
+Open pfMALL
+    |
+    v
+Browse FoundUp grid/videos     <-- Intelligent Grid Loading (priority)
+    |
+    v
+Interact with FoundUp card/video
+    |
+    +---> Watch / Save / Share (passive engagement)
+    |
+    v
+Ask RedDog                     <-- AI interaction entry
+    |
+    +---> "What is this FoundUp?"
+    +---> "Show me similar"
+    +---> "How do I contribute?"
+    |
+    v
+Join / Follow / Engage         <-- Stake gate (future)
+    |
+    v
+Point compute at FoundUp       <-- Compute assignment
+    |
+    v
+Launch / Build FoundUp         <-- Builder mode
+    |
+    v
+FoundUpJob created             <-- Job contract generated
+    |
+    v
+WRE / Hermes / OpenClaw execute
+    |
+    v
+FAM / pAVS records proof/verification
+```
+
+### 14.2 Intelligent Grid Loading (Priority)
+
+**Product priority**: pfMALL intelligent grid/content loading.
+
+Do not frame intelligent media work as an AntifaFM/Radio-first product.
+Radio/FM may be a later low-risk stream-buffer test substrate.
+
+The grid loading priority means:
+
+| Priority | Focus | Notes |
+|----------|-------|-------|
+| P0 | Mall tile field population | Video-backed FoundUp tiles |
+| P0 | Poster/thumbnail delivery | Media pipeline for grid |
+| P1 | AI-controlled field reprojection | RedDog category/creator/geo projection |
+| P1 | Lazy/intelligent video loading | Load media on demand, not all at once |
+| P2 | Stream buffer test | Radio/FM substrate for later experimentation |
+
+Rule: Build the grid first. Video playback and streaming are secondary.
+
+### 14.3 FoundUp Build Flow Integration
+
+When 012 initiates a new FoundUp through RedDog, the system creates a FoundUpJob
+that flows through the backend execution pipeline.
+
+```text
+RedDog "Build a FoundUp for X"
+    |
+    v
+pfMALL shell creates build intent
+    |
+    v
+OpenClaw receives intent           <-- Gateway
+    |
+    v
+OpenClaw creates FoundUpJob        <-- Job contract (foundup_job_contract.py)
+    |   - job_id
+    |   - tenant_id
+    |   - foundup_id
+    |   - requested_action: "build_foundup"
+    |   - status: QUEUED
+    |
+    v
+WRE routes job to Hermes           <-- foundup_job_router.py
+    |
+    v
+Hermes executes build              <-- hermes_foundup_job_executor.py
+    |   - validates gates
+    |   - builds manifest
+    |   - updates status: RUNNING -> SUCCEEDED|FAILED
+    |
+    v
+ProofOfComputeReceipt created      <-- proof_of_compute_receipt.py
+    |
+    v
+pAVS verification seam             <-- pavs_verification_seam.py
+    |   - PAVSVerificationResult
+    |   - cabr_ready = False (no consensus yet)
+    |   - payout_ready = False (no payout engine yet)
+    |
+    v
+FAM records milestone              <-- fam_daemon.py (future)
+```
+
+### 14.4 PoC Loop Status
+
+| Stage | Status | Implementation |
+|-------|--------|----------------|
+| Browse grid/videos | RUNTIME | mall-tile-field.js, mall-video-catalog.json |
+| Interact card/video | RUNTIME | gesture-engine.js, tap/double-tap/pinch |
+| Ask RedDog | RUNTIME | account-concierge.js, search wiring |
+| Join/Follow/Engage | STUB | Stake gate not wired |
+| Point compute | STUB | Compute assignment UI not built |
+| Launch/Build FoundUp | PARTIAL | OpenClaw intent flow exists |
+| FoundUpJob created | RUNTIME | foundup_job_contract.py |
+| WRE/Hermes execute | RUNTIME | foundup_job_router.py, hermes_foundup_job_executor.py |
+| FAM/pAVS proof | RUNTIME | proof_of_compute_receipt.py, pavs_verification_seam.py |
+
+### 14.5 Next PoC Milestones
+
+| Milestone | Priority | Dependency |
+|-----------|----------|------------|
+| Intelligent grid loading optimization | P0 | None |
+| RedDog field reprojection by category | P1 | Grid loading |
+| Compute assignment UI in RedDog plane | P1 | Grid loading |
+| Stake gate integration | P2 | Wallet/subscription layer |
+| Living FoundUp Core interior | P2 | Build flow complete |
+
+---
+
+*Updated 2026-04-27: Added pfMALL PoC User Loop and build flow integration.*
