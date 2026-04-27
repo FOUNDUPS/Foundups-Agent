@@ -76,6 +76,164 @@
   var laneVideoIndex = 0;              // Current position in lane's videos[] queue
   var laneAutoplayEnabled = true;      // Whether to auto-advance on video end
 
+  // ========== Intelligent Grid Loading (PFM11B) ==========
+  // WSP 97 TRUTH BOUNDARIES:
+  //   - Viewport-aware loading only
+  //   - No content trust filtering in this slice
+  //   - No verification claims (verified/safe/authentic are reserved)
+  //   - No adaptive network/device routing claims
+
+  // Load policy configuration (matches ContentLoadPolicy schema)
+  var loadPolicy = {
+    viewportMarginPx: 200,         // Extra margin around viewport for pre-loading
+    loadBatchSize: 6,              // Number of tiles to load per batch
+    debounceMs: 100,               // Debounce time for scroll events
+    thumbnailInitialQuality: 'low',  // Start with low-quality thumbnails
+    thumbnailUpgradeQuality: 'high', // Upgrade to high-quality when visible
+    enableViewportLazyLoad: true   // Enable IntersectionObserver-based loading
+  };
+
+  // Tile load state tracking: index -> state
+  // States: 'pending' | 'visible' | 'loading' | 'loaded' | 'failed' | 'placeholder'
+  var tileLoadStates = {};
+
+  // IntersectionObserver for viewport detection
+  var tileObserver = null;
+
+  /**
+   * Initialize IntersectionObserver for viewport-aware tile loading.
+   * Fallback to eager loading if IntersectionObserver is unavailable.
+   */
+  function initTileObserver() {
+    if (!loadPolicy.enableViewportLazyLoad) return;
+
+    // Fallback for browsers without IntersectionObserver
+    if (typeof IntersectionObserver === 'undefined') {
+      console.warn('[mall-tile-field] IntersectionObserver unavailable, using eager load');
+      markAllTilesLoaded();
+      return;
+    }
+
+    // Clean up previous observer
+    if (tileObserver) {
+      tileObserver.disconnect();
+      tileObserver = null;
+    }
+
+    tileObserver = new IntersectionObserver(handleTileIntersection, {
+      root: tileFieldWrapper || null,
+      rootMargin: loadPolicy.viewportMarginPx + 'px',
+      threshold: 0.01  // Trigger when any part enters viewport
+    });
+
+    // Observe all tiles
+    var tiles = tileField ? tileField.querySelectorAll('.mall-tile') : [];
+    tiles.forEach(function(tile, index) {
+      tile.dataset.tileIndex = index;
+      tileLoadStates[index] = 'pending';
+      tileObserver.observe(tile);
+    });
+  }
+
+  /**
+   * Handle IntersectionObserver entries for tile visibility.
+   * @param {IntersectionObserverEntry[]} entries
+   */
+  function handleTileIntersection(entries) {
+    entries.forEach(function(entry) {
+      var tile = entry.target;
+      var index = parseInt(tile.dataset.tileIndex, 10);
+      if (isNaN(index)) return;
+
+      if (entry.isIntersecting) {
+        // Tile entered viewport
+        var currentState = tileLoadStates[index];
+        if (currentState === 'pending') {
+          tileLoadStates[index] = 'visible';
+          // Trigger load (upgrade thumbnail, etc.)
+          loadTileContent(index, tile);
+        }
+      }
+      // Note: We don't downgrade state when leaving viewport
+    });
+  }
+
+  /**
+   * Load content for a single tile.
+   * @param {number} index - Tile index
+   * @param {HTMLElement} tile - Tile DOM element
+   */
+  function loadTileContent(index, tile) {
+    if (tileLoadStates[index] === 'loaded' || tileLoadStates[index] === 'loading') {
+      return;
+    }
+    tileLoadStates[index] = 'loading';
+
+    // Tile content loading is handled by existing renderTiles logic
+    // This hook is for future thumbnail quality upgrade
+    // For now, mark as loaded since tiles are pre-rendered
+    tileLoadStates[index] = 'loaded';
+  }
+
+  /**
+   * Mark all tiles as loaded (fallback for no IntersectionObserver).
+   */
+  function markAllTilesLoaded() {
+    var tiles = tileField ? tileField.querySelectorAll('.mall-tile') : [];
+    tiles.forEach(function(tile, index) {
+      tile.dataset.tileIndex = index;
+      tileLoadStates[index] = 'loaded';
+    });
+  }
+
+  /**
+   * Get load state for a single tile.
+   * @param {number} index - Tile index
+   * @returns {string|null} Load state or null if not tracked
+   */
+  function getTileLoadState(index) {
+    return tileLoadStates.hasOwnProperty(index) ? tileLoadStates[index] : null;
+  }
+
+  /**
+   * Get all tile load states.
+   * @returns {Object} Map of index -> state
+   */
+  function getTileLoadStates() {
+    // Return shallow copy to prevent external mutation
+    var copy = {};
+    for (var k in tileLoadStates) {
+      if (tileLoadStates.hasOwnProperty(k)) {
+        copy[k] = tileLoadStates[k];
+      }
+    }
+    return copy;
+  }
+
+  /**
+   * Get current load policy configuration.
+   * @returns {Object} Load policy object
+   */
+  function getLoadPolicy() {
+    // Return shallow copy
+    return {
+      viewportMarginPx: loadPolicy.viewportMarginPx,
+      loadBatchSize: loadPolicy.loadBatchSize,
+      debounceMs: loadPolicy.debounceMs,
+      thumbnailInitialQuality: loadPolicy.thumbnailInitialQuality,
+      thumbnailUpgradeQuality: loadPolicy.thumbnailUpgradeQuality,
+      enableViewportLazyLoad: loadPolicy.enableViewportLazyLoad
+    };
+  }
+
+  /**
+   * Check if IntersectionObserver is being used.
+   * @returns {boolean} True if observer is active
+   */
+  function isViewportLoadingActive() {
+    return tileObserver !== null;
+  }
+
   // ========== YouTube IFrame API Helpers ==========
 
   function ensureYouTubeAPI() {
@@ -524,6 +682,9 @@
     renderTiles();
     bindInteractions();
     bindProjectionChips();
+
+    // Initialize viewport-aware grid loading (PFM11B)
+    initTileObserver();
   }
 
   /**
@@ -1774,6 +1935,12 @@
     searchByCreator: searchByCreator,
     filterByCategory: filterByCategory,
     filterByTag: filterByTag,
+
+    // Intelligent Grid Loading (PFM11B)
+    getTileLoadState: getTileLoadState,
+    getTileLoadStates: getTileLoadStates,
+    getLoadPolicy: getLoadPolicy,
+    isViewportLoadingActive: isViewportLoadingActive,
 
     // Debug helpers
     debugTiles: function() {
