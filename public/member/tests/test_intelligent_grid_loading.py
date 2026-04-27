@@ -106,16 +106,17 @@ class TestContentTrustSignalAllowedLabels:
     """Verify allowed labels are safe for automated display."""
 
     def test_content_trust_signal_allowed_labels(self):
-        """ALLOWED_LABELS contains safe display labels."""
+        """ALLOWED_LABELS contains safe advisory labels only."""
         allowed = ContentTrustSignal.ALLOWED_LABELS
 
         # Set exists and is non-empty
         assert allowed is not None
         assert len(allowed) > 0
 
-        # Expected safe labels are present
+        # Expected advisory-safe labels are present
         expected_safe = {
-            "verified",
+            "unverified",
+            "verification_pending",
             "pending_review",
             "new_submission",
             "popular",
@@ -123,17 +124,75 @@ class TestContentTrustSignalAllowedLabels:
         }
         assert expected_safe.issubset(allowed)
 
+        # WSP 97: "verified" must NOT be in ALLOWED_LABELS (overclaims pAVS)
+        assert "verified" not in allowed, (
+            "WSP 97 violation: 'verified' implies pAVS/CABR verification that does not exist"
+        )
+
     def test_allowed_labels_do_not_overlap_blocked(self):
         """Allowed and blocked labels must not overlap."""
         overlap = ContentTrustSignal.ALLOWED_LABELS & ContentTrustSignal.BLOCKED_LABELS
         assert overlap == set(), f"Labels cannot be both allowed and blocked: {overlap}"
 
+    def test_allowed_labels_do_not_overlap_reserved(self):
+        """Allowed labels must not overlap with reserved verification labels."""
+        overlap = ContentTrustSignal.ALLOWED_LABELS & ContentTrustSignal.RESERVED_VERIFICATION_LABELS
+        assert overlap == set(), f"Labels cannot be both allowed and reserved: {overlap}"
+
     def test_is_allowed_method(self):
         """is_allowed() correctly identifies safe labels."""
-        assert ContentTrustSignal.is_allowed("verified") is True
+        # Advisory labels are allowed
+        assert ContentTrustSignal.is_allowed("unverified") is True
+        assert ContentTrustSignal.is_allowed("verification_pending") is True
         assert ContentTrustSignal.is_allowed("trending") is True
+
+        # WSP 97: "verified" is NOT allowed (requires pAVS backing)
+        assert ContentTrustSignal.is_allowed("verified") is False
+
+        # Blocked labels are not allowed
         assert ContentTrustSignal.is_allowed("fraud") is False
         assert ContentTrustSignal.is_allowed("scam") is False
+
+
+class TestReservedVerificationLabels:
+    """Verify reserved verification labels require pAVS/CABR backing."""
+
+    def test_reserved_verification_labels_exist(self):
+        """RESERVED_VERIFICATION_LABELS set exists."""
+        reserved = ContentTrustSignal.RESERVED_VERIFICATION_LABELS
+        assert reserved is not None
+        assert len(reserved) > 0
+
+    def test_verified_is_reserved(self):
+        """'verified' is in RESERVED_VERIFICATION_LABELS, not ALLOWED_LABELS."""
+        assert "verified" in ContentTrustSignal.RESERVED_VERIFICATION_LABELS
+        assert "verified" not in ContentTrustSignal.ALLOWED_LABELS
+
+    def test_is_reserved_verification_method(self):
+        """is_reserved_verification() correctly identifies reserved labels."""
+        assert ContentTrustSignal.is_reserved_verification("verified") is True
+        assert ContentTrustSignal.is_reserved_verification("safe") is True
+        assert ContentTrustSignal.is_reserved_verification("authentic") is True
+
+        # Advisory labels are not reserved
+        assert ContentTrustSignal.is_reserved_verification("unverified") is False
+        assert ContentTrustSignal.is_reserved_verification("trending") is False
+
+    def test_wsp97_verified_requires_pavs_backing(self):
+        """WSP 97: 'verified' label cannot be displayed without pAVS verification."""
+        # This test documents the truth boundary:
+        # - "verified" implies pAVS/CABR verification occurred
+        # - pAVS verification is NOT implemented (cabr_ready=False, payout_ready=False)
+        # - Therefore, "verified" CANNOT be used as an automated label
+
+        # Prove the label is blocked from automated display
+        assert ContentTrustSignal.is_allowed("verified") is False
+
+        # Prove the label is reserved for future pAVS implementation
+        assert ContentTrustSignal.is_reserved_verification("verified") is True
+
+        # Document: when pAVS is implemented, this label path opens via:
+        # PAVSVerificationResult.verification_complete == True (currently always False)
 
 
 class TestContentTrustSignalBlockedLabels:
@@ -167,9 +226,13 @@ class TestContentTrustSignalBlockedLabels:
         assert ContentTrustSignal.is_blocked("confirmed_fraud") is True
         assert ContentTrustSignal.is_blocked("potential_scam") is True
 
-        # Safe labels are not blocked
-        assert ContentTrustSignal.is_blocked("verified") is False
+        # Advisory labels are not blocked (they are allowed)
+        assert ContentTrustSignal.is_blocked("unverified") is False
         assert ContentTrustSignal.is_blocked("trending") is False
+
+        # "verified" is not blocked (not an accusation/punishment)
+        # BUT it is reserved (requires pAVS backing) - see TestReservedVerificationLabels
+        assert ContentTrustSignal.is_blocked("verified") is False
 
     def test_blocked_labels_require_human_review(self):
         """All blocked labels map to VerificationGapGuard protected classes."""
@@ -278,11 +341,11 @@ class TestTileLoadContextInterface:
 
     def test_tile_load_context_blocked_label_detection(self):
         """TileLoadContext.has_blocked_label() detects blocked labels."""
-        # Context with safe labels
+        # Context with safe advisory labels
         safe_ctx = TileLoadContext(
             tile_id="tile-001",
             foundup_id="foundup-001",
-            trust_labels=["verified", "trending"],
+            trust_labels=["unverified", "trending"],
         )
         assert safe_ctx.has_blocked_label() is False
 
@@ -290,7 +353,7 @@ class TestTileLoadContextInterface:
         blocked_ctx = TileLoadContext(
             tile_id="tile-002",
             foundup_id="foundup-002",
-            trust_labels=["verified", "fraud"],
+            trust_labels=["unverified", "fraud"],
         )
         assert blocked_ctx.has_blocked_label() is True
 
@@ -300,14 +363,14 @@ class TestTileLoadContextInterface:
             tile_id="tile-001",
             foundup_id="foundup-001",
             state=TileLoadState.LOADED,
-            trust_labels=["verified"],
+            trust_labels=["unverified"],
         )
         d = ctx.to_dict()
 
         assert d["tileId"] == "tile-001"
         assert d["foundupId"] == "foundup-001"
         assert d["state"] == "loaded"
-        assert d["trustLabels"] == ["verified"]
+        assert d["trustLabels"] == ["unverified"]
         assert d["hasBlockedLabel"] is False
 
 

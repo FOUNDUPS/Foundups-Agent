@@ -80,22 +80,46 @@ class ContentTrustSignal:
     ALLOWED_LABELS: Safe to display in UI without human review.
     BLOCKED_LABELS: Protected decision classes that cannot appear in UI
                     without human review (aligned with VerificationGapGuard).
+    RESERVED_VERIFICATION_LABELS: Labels that require pAVS/CABR backing.
+                    These CANNOT be used until verification pipeline exists.
 
     WSP 97: UI must NEVER display BLOCKED_LABELS as automated decisions.
+    WSP 97: UI must NEVER display RESERVED_VERIFICATION_LABELS without pAVS backing.
     """
 
-    # Labels safe for automated display
+    # Labels safe for automated display — advisory only, no finality claims
     ALLOWED_LABELS: frozenset[str] = frozenset({
-        "verified",
+        # Advisory/informational
+        "unverified",
+        "verification_pending",
+        "verification_unavailable",
+        "review_recommended",
         "pending_review",
         "community_flagged",
         "new_submission",
+        "source_mismatch",
+        "low_trust_signal",
+        "metadata_incomplete",
+        # Engagement signals (no verification claim)
         "popular",
         "trending",
         "featured",
         "recommended",
         "recently_updated",
         "staff_pick",
+    })
+
+    # Labels reserved for pAVS/CABR-backed verification — NOT ALLOWED until implemented
+    # WSP 97: These labels imply verification finality that does not yet exist
+    RESERVED_VERIFICATION_LABELS: frozenset[str] = frozenset({
+        "verified",
+        "pAVS_verified",
+        "cabr_verified",
+        "human_verified",
+        "safe",
+        "authentic",
+        "trusted",
+        "confirmed_legitimate",
     })
 
     # Protected decision class labels - NEVER display as automated
@@ -125,7 +149,20 @@ class ContentTrustSignal:
     @classmethod
     def is_allowed(cls, label: str) -> bool:
         """Check if a label is safe for automated display."""
-        return label.lower() in cls.ALLOWED_LABELS
+        normalized = label.lower()
+        # Must be in ALLOWED_LABELS and NOT in reserved or blocked
+        if normalized not in cls.ALLOWED_LABELS:
+            return False
+        if normalized in cls.RESERVED_VERIFICATION_LABELS:
+            return False
+        if cls.is_blocked(normalized):
+            return False
+        return True
+
+    @classmethod
+    def is_reserved_verification(cls, label: str) -> bool:
+        """Check if a label requires pAVS/CABR verification backing."""
+        return label.lower() in cls.RESERVED_VERIFICATION_LABELS
 
     @classmethod
     def is_blocked(cls, label: str) -> bool:
