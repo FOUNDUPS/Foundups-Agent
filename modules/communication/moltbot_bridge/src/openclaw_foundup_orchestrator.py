@@ -790,5 +790,5 @@ def _handle_build_intent(intent: Any) -> str:
         f"  status: {job.status.value}\n"
         f"  requested_action: {requested_action}\n"
         f"  foundup_id: {foundup_str}\n"
-        f"  next: Hermes/WRE pending"
+        f"  next: FoundUpJobConsumer can drain queued jobs"
     )
