@@ -177,6 +177,7 @@ class IntentCategory(Enum):
     FOUNDUP = "foundup"             # FoundUp launch and management
     RESEARCH = "research"           # PQN detection, Duism, Oracle teaching
     TRAINING = "training"           # Corpus training: status, start, progress
+    IMPROVEMENT = "improvement"     # Codebase self-improvement: WSP violations, repairs
 
 
 class AutonomyTier(Enum):
@@ -599,6 +600,12 @@ class OpenClawDAE:
             "training status", "start training", "is training due",
             "training progress", "pattern memory", "batch training",
         ],
+        IntentCategory.IMPROVEMENT: [
+            "fix violation", "wsp violation", "repair module", "remediate",
+            "fix drift", "codebase improvement", "duplicate module",
+            "stale test", "run fmas repair", "self improvement",
+            "fix wsp", "code hygiene", "module cleanup", "fmas scan",
+        ],
     }
 
     # Domain routing map: intent category -> target domain/DAE
@@ -614,6 +621,7 @@ class OpenClawDAE:
         IntentCategory.FOUNDUP: "fam_adapter",
         IntentCategory.RESEARCH: "pqn_research_adapter",
         IntentCategory.TRAINING: "training_controller",
+        IntentCategory.IMPROVEMENT: "improvement_router",
     }
 
     # Runtime profiles (OpenClaw/IronClaw/ZeroClaw) and aliases.
