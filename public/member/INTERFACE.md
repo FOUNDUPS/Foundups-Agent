@@ -101,6 +101,33 @@ The primary public API for the unified Red Dog plane. All concierge interactions
 | `setIdentity(clerkUser, userData)` | Set identity block |
 | `setFoundUps(foundupDocs)` | Set FoundUps grid |
 | `setInvites(inviteDocs)` | Set invites drawer |
+| **Verification Alerts (PFM9)** | |
+| `showVerificationAlert(alert)` | Store and display a VerificationGapGuard alert (in-memory only) |
+| `dismissVerificationAlert(alertId)` | Dismiss an alert by ID |
+| `getVerificationAlertCount()` | Get count of active alerts |
+| `getVerificationAlerts()` | Get all active alerts (shallow copy) |
+
+**Verification Alert Schema** (`RedDogVerificationAlert`):
+```typescript
+interface RedDogVerificationAlert {
+  alert_id: string;              // Unique alert identifier
+  event_id: string;              // VerificationGapEvent.event_id
+  foundup_id: string;            // Which FoundUp this relates to
+  summary: string;               // Human-readable summary
+  action_required: "human_review" | "acknowledge" | "info_only";
+  panel_to_open?: "verification_wall" | "task_detail" | "evidence";
+  created_at: string;            // ISO 8601 timestamp
+}
+```
+
+**Verification Alert Events**:
+| Event | Payload |
+|-------|---------|
+| `reddog:verification_alert` | `RedDogVerificationAlert` — dispatched by AI agents to surface anomalies |
+| `reddog:alert_stored` | `{ alert_id, count }` — emitted after alert stored |
+| `reddog:alert_dismissed` | `{ alert_id, count }` — emitted after alert dismissed |
+
+**WSP 97 Truth Boundary**: RedDog may notify, summarize, and open panels for human review. RedDog may NOT judge, deny rewards, publish accusations, or finalize protected decisions.
 
 **Backward Compatibility**: `window.accountConcierge` is an alias for `window.redDog` (will be removed).
 
