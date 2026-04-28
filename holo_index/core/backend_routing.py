@@ -28,26 +28,35 @@ from typing import Dict, Optional
 BACKEND_SENTENCE_TRANSFORMERS = "sentence_transformers"
 BACKEND_TURBOQUANT = "turboquant_onnx_int8"
 
-# Per-collection routing policy (TQ3 Phase 1).
+# Per-collection routing policy (TQ4 Phase 1 — conservative correction).
 #
-# Every entry here MUST have TQ-series evidence supporting the choice. Today:
-#   * code / wsp / skills / symbols  -> int8 (TQ2 measured 100% top-1 +
-#                                              100% top-5 + Jaccard 1.0 +
-#                                              Kendall tau 1.0 across
-#                                              23,801 docs total).
-#   * vocabulary                     -> fp32 (TQ2 measured 86.7% top-1 and
-#                                              43.3% top-5 on 30 docs;
-#                                              blocker for int8 promotion).
+# W3/TQ4: CFZ4 separated navigation_wsp (now 117 true WSP protocols) from
+# module docs. Post-separation TQ audits show int8 quality degradation on
+# the smaller, protocol-only corpus. Conservative policy: only route int8
+# for collections that passed both top-1 >= 90% AND top-5 >= 95% gates.
 #
-# ``navigation_tests`` is intentionally omitted because TQ2 could not
-# audit it (empty collection at audit time). It therefore falls through
-# to the safe default via :func:`resolve_backend_for_collection`.
+# Current gate results (TQ2/TQ3 on frozen CFZ4 corpus):
+#   * navigation_symbols (20,000 docs): int8 OK — route to int8
+#   * navigation_skills (59 docs): int8 OK — route to int8
+#   * navigation_code (296 docs): int8 86.7% top-1, 65.3% top-5 — FAIL, stay fp32
+#   * navigation_wsp (117 docs): int8 below gates — FAIL, stay fp32
+#   * navigation_vocabulary (85 docs): int8 failed TQ2 — stay fp32
+#   * navigation_tests (0 docs): unaudited — default fp32
+#   * navigation_docs (3,120 docs): NEW, unaudited — default fp32
+#   * navigation_knowledge (47 docs): NEW, unaudited — default fp32
+#
+# Only collections with explicit gate-passing evidence may use int8.
 COLLECTION_BACKEND_ROUTING: Dict[str, str] = {
-    "navigation_code": BACKEND_TURBOQUANT,
-    "navigation_wsp": BACKEND_TURBOQUANT,
-    "navigation_skills": BACKEND_TURBOQUANT,
+    # Gate-passing collections -> int8
     "navigation_symbols": BACKEND_TURBOQUANT,
+    "navigation_skills": BACKEND_TURBOQUANT,
+    # Gate-failing collections -> explicit fp32 (overrides any future default change)
+    "navigation_code": BACKEND_SENTENCE_TRANSFORMERS,
+    "navigation_wsp": BACKEND_SENTENCE_TRANSFORMERS,
     "navigation_vocabulary": BACKEND_SENTENCE_TRANSFORMERS,
+    "navigation_tests": BACKEND_SENTENCE_TRANSFORMERS,
+    "navigation_docs": BACKEND_SENTENCE_TRANSFORMERS,
+    "navigation_knowledge": BACKEND_SENTENCE_TRANSFORMERS,
 }
 
 # Default backend for collections not explicitly listed above. Stays on

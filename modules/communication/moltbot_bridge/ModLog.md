@@ -1,5 +1,244 @@
 # ModLog - moltbot_bridge
 
+## 2026-04-23: pAVS Verification Seam Placeholder (WSP 11/91/97)
+
+**Author**: 0102 (Worker W7)
+**WSP**: 11 (Interface), 91 (Observability), 97 (Truth)
+**Slice**: `OC7_PAVS_PROOF_OF_COMPUTE_VERIFICATION_PLACEHOLDER_PHASE1`
+
+### Summary
+
+Created pAVS verification seam placeholder that accepts ProofOfComputeReceipt and returns truthful verification decisions without claiming full pAVS/CABR/PoB implementation. This seam sits between W6 (receipt creation) and future W10 (CABR scoring).
+
+### Files Added
+
+| File | Purpose |
+|------|---------|
+| `src/pavs_verification_seam.py` | Verification seam with decision mapping |
+| `tests/test_pavs_verification_seam.py` | 24 focused tests |
+
+### Key Components
+
+**PAVSDecision Enum**:
+- `ACCEPTED_FOR_REVIEW` — receipt has evidence, accepted for review
+- `BLOCKED_MISSING_EVIDENCE` — receipt claims PENDING_PAVS but no evidence
+- `NOT_REQUIRED` — dry-run receipt, no verification needed
+- `BLOCKED_UPSTREAM` — upstream job was BLOCKED
+- `FAILED_INPUT` — upstream job FAILED
+- `REJECTED_MISSING_IDENTITY` — missing receipt_id, job_id, or tenant_id
+
+**PAVSVerificationResult Dataclass**:
+- Identity: verification_id, receipt_id, job_id, tenant_id
+- Decision: decision, reason_code, reason_human
+- Evidence: evidence_refs, evidence_count
+- Truth flags: cabr_ready=False, payout_ready=False, verification_complete=False
+
+**Functions**:
+- `verify_receipt(receipt)` → PAVSVerificationResult
+- `verify_receipts(list)` → list[PAVSVerificationResult]
+- `generate_verification_id(receipt_id)` → `pv_{suffix}_{timestamp}_{random}`
+
+### Status Mapping
+
+| VerificationStatus | Evidence | PAVSDecision |
+|-------------------|----------|--------------|
+| PENDING_PAVS | present | ACCEPTED_FOR_REVIEW |
+| PENDING_PAVS | absent | BLOCKED_MISSING_EVIDENCE |
+| NOT_REQUIRED | any | NOT_REQUIRED |
+| BLOCKED | any | BLOCKED_UPSTREAM |
+| FAILED_INPUT | any | FAILED_INPUT |
+
+### WSP 97 Boundary
+
+**DOES**:
+- Accept ProofOfComputeReceipt or dict
+- Validate identity fields (receipt_id, job_id, tenant_id)
+- Map verification_status to pAVS decision
+- Track evidence presence for decision logic
+
+**DOES NOT**:
+- Issue tokens or UPS
+- Run CABR consensus
+- Complete verification (only accepts for review)
+- Mark cabr_ready or payout_ready as True
+
+### Test Results
+
+- `test_pavs_verification_seam.py`: 24/24 passed
+- `test_proof_of_compute_receipt.py`: 26/26 passed
+- `test_foundup_job_contract.py`: 66/66 passed
+
+### Integration Notes
+
+- W6 (receipt): `verify_receipt(receipt)` after creating receipt
+- W10 (CABR): Consume results where `decision=ACCEPTED_FOR_REVIEW`
+
+---
+
+## 2026-04-26: Proof-of-Compute Receipt Contract (WSP 11/91/97)
+
+**Author**: 0102 (Worker W6)
+**WSP**: 11 (Interface), 91 (Observability), 97 (Truth)
+**Slice**: `OC6_FAM_PROOF_OF_COMPUTE_RECEIPT_PHASE1`
+
+### Summary
+
+Created Proof-of-Compute receipt contract for recording terminal FoundUpJob execution as evidence without claiming token payout, CABR consensus, or pAVS verification is complete. Receipts are created only from terminal job states (SUCCEEDED, BLOCKED, FAILED) and preserve job identity, compute evidence, and truthful status fields.
+
+### Files Added
+
+| File | Purpose |
+|------|---------|
+| `src/proof_of_compute_receipt.py` | Receipt contract schema + factory functions |
+| `tests/test_proof_of_compute_receipt.py` | 26 focused tests for receipt generation |
+
+### Key Components
+
+**VerificationStatus Enum**:
+- `PENDING_PAVS` — SUCCEEDED job awaiting pAVS verification
+- `NOT_REQUIRED` — dry-run job, no real compute
+- `BLOCKED` — job was blocked, evidence recorded
+- `FAILED_INPUT` — job failed, failure evidence recorded
+
+**PayoutStatus/CABRStatus**:
+- Always `NOT_EVALUATED` / `NOT_SUBMITTED` (no payout/consensus engine exists)
+
+**ProofOfComputeReceipt Dataclass**:
+- Identity: receipt_id, job_id, tenant_id, foundup_id, intent_id
+- Evidence: compute_used, compute_summary, evidence_refs
+- Status: verification_status, payout_status, cabr_status
+- Audit: created_at, job_created_at, job_completed_at
+
+**Factory Functions**:
+- `create_receipt_from_job(job)` → ReceiptResult from terminal FoundUpJob
+- `create_receipt(...)` → ReceiptResult convenience factory
+- `generate_receipt_id(job_id)` → `rcpt_{suffix}_{timestamp}_{random}`
+
+### WSP 97 Boundary
+
+**DOES**:
+- Accept terminal job states (SUCCEEDED, BLOCKED, FAILED)
+- Preserve job identity and evidence references
+- Set truthful verification_status based on job outcome
+- Preserve `dry_run: true` context when NOT_REQUIRED is returned
+
+**DOES NOT**:
+- Issue tokens or UPS
+- Allocate rewards or write to wallet
+- Run CABR consensus or pAVS verification
+- Accept non-terminal states (rejects QUEUED/RUNNING with truthful error)
+
+### Status Mapping
+
+| JobStatus | VerificationStatus |
+|-----------|-------------------|
+| SUCCEEDED | PENDING_PAVS |
+| SUCCEEDED + dry_run | NOT_REQUIRED |
+| BLOCKED | BLOCKED |
+| FAILED | FAILED_INPUT |
+| QUEUED/RUNNING | REJECTED |
+
+### Test Results
+
+- `test_proof_of_compute_receipt.py`: 26/26 passed
+- `test_foundup_job_contract.py`: 53/53 passed
+
+### Integration Notes
+
+- W4 (Hermes): Call `create_receipt_from_job()` after terminal state
+- W5 (WRE Router): Call `create_receipt()` if job not materialized
+- W7 (pAVS): Consume receipts with `verification_status=PENDING_PAVS`
+- W10 (CABR): Consume receipts with `cabr_status=NOT_SUBMITTED`
+
+---
+
+## 2026-04-25: OpenClaw Explicit FoundUp Build Job Creation (WSP 11/50/77/91/97)
+
+**Author**: 0102 (Worker W1 + architect seam cleanup)
+**WSP**: 11 (Interface), 50 (Pre-Action), 77 (Agent Coordination), 91 (Observability), 97 (Truth)
+**Slice**: `OC1_PHASE2_OPENCLAW_FOUNDUP_JOB_CREATION_WIRING`
+
+### Summary
+
+Extended the OpenClaw FOUNDUP orchestrator so explicit build approval creates a typed `FoundUpJob` in `QUEUED` state while advisory/catalog FoundUp queries still pass through the FAM adapter. This is the OpenClaw-side handoff only; Hermes/WRE execution remains pending.
+
+### Files Changed
+
+| File | Purpose |
+|------|---------|
+| `src/openclaw_foundup_orchestrator.py` | Detect explicit build phrases and queue typed `FoundUpJob` objects |
+| `tests/test_openclaw_foundup_routing.py` | Added explicit job-creation, advisory passthrough, and WSP 97 no-overclaim tests |
+
+### WSP 97 Boundary
+
+- Does not claim genesis validation is globally enforced.
+- Does not claim Hermes executed the job.
+- Leaves all policy gate pass flags false until checked by later execution slices.
+- Uses canonical requested actions: `build_foundup`, `extract_foundup`, `validate_foundup`, `queue_foundup_job`.
+
+### Validation
+
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_foundup_routing.py -q`
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_foundup_job_contract.py -q`
+
+---
+
+## 2026-04-23: FoundUp Job Contract — Canonical Orchestration Contract (WSP 11/77/91/97)
+
+**Author**: 0102 (Worker W2)
+**WSP**: 11 (Interface), 50 (Pre-Action), 77 (Agent Coordination), 91 (Observability), 97 (Truth)
+**Slice**: `OC2_FOUNDUP_JOB_CONTRACT_PHASE1`
+
+### Summary
+
+Created canonical job contract for OpenClaw ↔ Hermes handoff. This contract defines:
+- Job identity (job_id, tenant_id, foundup_id, intent_id)
+- Lifecycle states (QUEUED → RUNNING → BLOCKED | FAILED | SUCCEEDED)
+- State transition validation with explicit guards
+- PolicyFlags for tracking gate passes (security, permission, exfoliation, wsp_preflight)
+- WSP 97 audit fields (evidence_refs, status_reason_code, status_reason_human)
+- Idempotency key generation for replay guards
+
+### Files Added
+
+| File | Purpose |
+|------|---------|
+| `src/foundup_job_contract.py` | Contract schema + lifecycle model |
+| `tests/test_foundup_job_contract.py` | 49 tests covering creation, transitions, serialization |
+
+### Key Components
+
+**JobStatus Enum**:
+- `QUEUED` → `RUNNING` → `SUCCEEDED` (happy path)
+- `RUNNING` → `BLOCKED` → `RUNNING` (resume)
+- `RUNNING` → `FAILED` (error) / `BLOCKED` → `FAILED` (timeout)
+
+**StatusReasonCode Categories**:
+- `OK_*` (success), `BLOCKED_*` (blocking), `FAIL_*` (failures)
+
+**PolicyFlags**:
+- `security_gate_checked/passed`, `permission_gate_checked/passed`
+- `exfoliation_gate_checked/passed`, `wsp_preflight_checked/passed`
+- `dry_run_mode`
+
+**Factory Functions**:
+- `generate_job_id(action)` → `j_{action}_{timestamp}_{random}`
+- `generate_idempotency_key(tenant, foundup, action, payload)` → sha256[:16]
+- `create_job(tenant_id, action, ...)` → FoundUpJob in QUEUED state
+
+### Test Results
+
+- `test_foundup_job_contract.py`: 49/49 passed
+- `test_openclaw_dae.py`: 103/104 passed (1 pre-existing flaky test unrelated to changes)
+
+### Integration Points
+
+- **OpenClaw**: Creates FoundUpJob when FOUNDUP intent detected
+- **Hermes**: Receives FoundUpJob, transitions through lifecycle
+- **FAM**: Links via intent_id correlation to Task/Proof/Verification models
+
+---
+
 ## 2026-04-09: Discord Operator Surface Verification (WSP 15/97)
 
 **Author**: 0102 (Worker AW)

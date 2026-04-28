@@ -1,5 +1,45 @@
 # Agent Module ModLog
 
+## 2026-04-26 - Hermes FoundUpJob Executor (v0.6.0)
+
+**Author**: 0102 (W4)
+**Slice**: OC4_HERMES_FOUNDUP_JOB_EXECUTION_ADAPTER_PHASE1
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 91, WSP 97
+
+### Added
+
+- **hermes_foundup_job_executor.py** - FoundUpJob execution adapter for Hermes
+  - `execute_foundup_job()` - Main entry point accepting `FoundUpJob`
+  - `HermesJobExecutionResult` - Result container with job, hermes_result, error
+  - Supports actions: `build_foundup`, `extract_foundup`, `validate_foundup`
+
+### Status Mapping (WSP 97 Truthful)
+
+| Hermes Result | JobStatus | StatusReasonCode |
+|---------------|-----------|------------------|
+| `success: True, dry_run: True` | SUCCEEDED | OK_DRY_RUN_PASSED |
+| `success: True, dry_run: False` | SUCCEEDED | OK_COMPLETED |
+| `error: "security_gate_failed"` | BLOCKED | BLOCKED_AWAITING_APPROVAL |
+| `error: "exfoliation_gate_failed"` | BLOCKED | FAIL_EXFOLIATION_GATE |
+| Module not found | FAILED | FAIL_VALIDATION_ERROR |
+| Exception | FAILED | FAIL_EXECUTION_ERROR |
+
+### Scope Boundary
+
+**DOES**: Job validation, Hermes invocation, status mapping, evidence_refs, dry_run truth
+**DOES NOT**: FAM events, CABR/PoB, WRE queueing, autonomous build claims
+
+### Tests
+
+- `test_hermes_foundup_job_executor.py` - 22 tests covering:
+  - Pre-validation (terminal, running, unsupported action, missing path)
+  - Status mapping (success, security blocked, exfoliation blocked, exception)
+  - Action dispatch (extract, validate, build)
+  - Evidence and payload augmentation
+  - Worker identity
+
+---
+
 ## 2026-04-16 - FAM Daemon Breadcrumb System (v0.5.1)
 
 **Author**: 0102
@@ -67,6 +107,31 @@
 ```
 
 012 gives intent, 0102 translates to execution with MCP perception, Hermes builds.
+
+---
+
+## 2026-04-25 - Hermes Deploy Surface Detector Alignment
+
+**Author**: 0102
+**WSP References**: WSP 34, WSP 50, WSP 60, WSP 83, WSP 97
+
+### Fixed
+
+- Added `HermesFoundUpBuilder._detect_deploy_surface()` so the exfoliation gate accepts existing verified deploy evidence:
+  - direct deploy config (`Dockerfile`, `cloudbuild.yaml`, `firebase.json`, `deployment/`)
+  - `app/index.html`
+  - `frontend/index.html`
+  - `foundup_manifest.json` with `entry_url` and `launch_readiness=ready`
+
+### Validation
+
+- `python -m pytest modules/foundups/agent/tests/test_hermes_foundup_builder.py -q`
+- Result: 18 passed.
+
+### Memory
+
+- Updated `tests/README.md` with implemented Hermes builder coverage.
+- Added `tests/TestModLog.md` for WSP 34/WSP 60 test memory.
 
 ---
 

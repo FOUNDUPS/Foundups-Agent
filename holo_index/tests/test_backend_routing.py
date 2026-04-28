@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""TQ3 backend-routing unit tests.
+"""TQ4 backend-routing unit tests.
 
 Covers ``holo_index.core.backend_routing`` — the policy module that decides,
 per collection, whether a query is served by fp32 SentenceTransformer or int8
@@ -13,10 +13,10 @@ contract they lock in:
   * Every routed choice must be in ``available_backends`` (when supplied);
     otherwise the resolver falls through to whatever IS loaded — never
     silently returns a backend that cannot encode.
-  * ``navigation_vocabulary`` stays fp32 (TQ2 gate blocker).
-  * ``navigation_code / wsp / skills / symbols`` go int8 when routing is on.
-  * Unlisted collections (e.g. ``navigation_tests``) default to fp32 — the
-    corpus-building baseline.
+  * W3/TQ4: Conservative routing — only collections that passed both gates
+    (top-1 >= 90%, top-5 >= 95%) may use int8:
+    - ``navigation_symbols`` and ``navigation_skills`` -> int8 (gate-passing)
+    - All others -> fp32 (gate-failing or unaudited)
 """
 from __future__ import annotations
 
@@ -39,7 +39,8 @@ class _Sentinel:
 class TestRoutingPolicyMap(unittest.TestCase):
     """The static policy table is the artifact TQ2 evidence supports."""
 
-    def test_int8_lane_is_code_wsp_skills_symbols(self):
+    def test_int8_lane_is_symbols_and_skills_only(self):
+        """W3/TQ4: Only gate-passing collections may use int8."""
         int8_lane = {
             name
             for name, backend in COLLECTION_BACKEND_ROUTING.items()
@@ -48,23 +49,35 @@ class TestRoutingPolicyMap(unittest.TestCase):
         self.assertEqual(
             int8_lane,
             {
-                "navigation_code",
-                "navigation_wsp",
                 "navigation_skills",
                 "navigation_symbols",
             },
         )
 
     def test_vocabulary_is_fp32(self):
-        """TQ2 gate blocker — 43.3% top-5 agreement on 30 docs."""
+        """TQ2 gate blocker — failed top-5 agreement."""
         self.assertEqual(
             COLLECTION_BACKEND_ROUTING["navigation_vocabulary"],
             BACKEND_SENTENCE_TRANSFORMERS,
         )
 
-    def test_navigation_tests_intentionally_omitted(self):
-        """TQ2 could not audit navigation_tests (empty at audit time)."""
-        self.assertNotIn("navigation_tests", COLLECTION_BACKEND_ROUTING)
+    def test_code_and_wsp_are_fp32(self):
+        """W3/TQ4: code and wsp failed gates after CFZ4 separation."""
+        self.assertEqual(
+            COLLECTION_BACKEND_ROUTING["navigation_code"],
+            BACKEND_SENTENCE_TRANSFORMERS,
+        )
+        self.assertEqual(
+            COLLECTION_BACKEND_ROUTING["navigation_wsp"],
+            BACKEND_SENTENCE_TRANSFORMERS,
+        )
+
+    def test_navigation_tests_is_fp32(self):
+        """TQ4: navigation_tests explicitly set to fp32 (unaudited)."""
+        self.assertEqual(
+            COLLECTION_BACKEND_ROUTING["navigation_tests"],
+            BACKEND_SENTENCE_TRANSFORMERS,
+        )
 
     def test_default_backend_is_fp32(self):
         """Default must be the backend that built every live Chroma row."""
@@ -110,18 +123,34 @@ class TestResolveBackendForCollection(unittest.TestCase):
             )
 
     def test_active_routing_sends_int8_lane_to_turboquant(self):
+        """W3/TQ4: Only gate-passing collections route to int8."""
         both = {
             BACKEND_SENTENCE_TRANSFORMERS: _Sentinel(),
             BACKEND_TURBOQUANT: _Sentinel(),
         }
-        for name in ("navigation_code", "navigation_wsp",
-                     "navigation_skills", "navigation_symbols"):
+        # Only skills and symbols passed gates
+        for name in ("navigation_skills", "navigation_symbols"):
             self.assertEqual(
                 resolve_backend_for_collection(
                     name, routing_active=True, available_backends=both,
                 ),
                 BACKEND_TURBOQUANT,
                 msg=f"{name} must route to int8 under active routing",
+            )
+
+    def test_active_routing_keeps_code_and_wsp_on_fp32(self):
+        """W3/TQ4: code and wsp failed gates, stay on fp32."""
+        both = {
+            BACKEND_SENTENCE_TRANSFORMERS: _Sentinel(),
+            BACKEND_TURBOQUANT: _Sentinel(),
+        }
+        for name in ("navigation_code", "navigation_wsp"):
+            self.assertEqual(
+                resolve_backend_for_collection(
+                    name, routing_active=True, available_backends=both,
+                ),
+                BACKEND_SENTENCE_TRANSFORMERS,
+                msg=f"{name} must stay on fp32 (gate-failing)",
             )
 
     def test_active_routing_keeps_vocabulary_on_fp32(self):
@@ -181,9 +210,17 @@ class TestResolveBackendForCollection(unittest.TestCase):
     def test_no_available_backends_trusts_policy(self):
         """When the caller does not pass a backends dict (e.g. policy-only
         inspection) the resolver trusts the static policy map."""
+        # navigation_code is fp32 under TQ4 conservative policy
         self.assertEqual(
             resolve_backend_for_collection(
                 "navigation_code", routing_active=True,
+            ),
+            BACKEND_SENTENCE_TRANSFORMERS,
+        )
+        # navigation_symbols is int8 (gate-passing)
+        self.assertEqual(
+            resolve_backend_for_collection(
+                "navigation_symbols", routing_active=True,
             ),
             BACKEND_TURBOQUANT,
         )
@@ -202,6 +239,7 @@ class TestBuildCollectionBackendMap(unittest.TestCase):
         self.assertEqual(set(result.keys()), set(names))
 
     def test_active_routing_mixed_map(self):
+        """W3/TQ4: Only gate-passing collections (skills, symbols) route to int8."""
         names = [
             "navigation_code", "navigation_wsp", "navigation_tests",
             "navigation_skills", "navigation_symbols", "navigation_vocabulary",
@@ -213,13 +251,14 @@ class TestBuildCollectionBackendMap(unittest.TestCase):
         result = build_collection_backend_map(
             names, routing_active=True, available_backends=both,
         )
-        self.assertEqual(result["navigation_code"], BACKEND_TURBOQUANT)
-        self.assertEqual(result["navigation_wsp"], BACKEND_TURBOQUANT)
+        # Gate-failing collections stay on fp32
+        self.assertEqual(result["navigation_code"], BACKEND_SENTENCE_TRANSFORMERS)
+        self.assertEqual(result["navigation_wsp"], BACKEND_SENTENCE_TRANSFORMERS)
+        self.assertEqual(result["navigation_vocabulary"], BACKEND_SENTENCE_TRANSFORMERS)
+        self.assertEqual(result["navigation_tests"], BACKEND_SENTENCE_TRANSFORMERS)
+        # Gate-passing collections route to int8
         self.assertEqual(result["navigation_skills"], BACKEND_TURBOQUANT)
         self.assertEqual(result["navigation_symbols"], BACKEND_TURBOQUANT)
-        self.assertEqual(result["navigation_vocabulary"], BACKEND_SENTENCE_TRANSFORMERS)
-        # navigation_tests is not in the routing policy -> default fp32.
-        self.assertEqual(result["navigation_tests"], BACKEND_SENTENCE_TRANSFORMERS)
 
     def test_degraded_only_fp32_map_is_all_fp32(self):
         """If int8 failed to load, every collection must truthfully show fp32."""

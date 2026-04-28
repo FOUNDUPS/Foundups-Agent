@@ -358,24 +358,27 @@ def index_symbol_entries(holo: "HoloIndex", roots: Optional[List[Path]] = None) 
         holo._log_agent_action("Symbol index empty - no entries added", "WARN")
 
 
-def index_wsp_entries(holo: "HoloIndex", paths: Optional[List[Path]] = None) -> None:
-    """Index WSP protocol documents into ChromaDB."""
-    from ..utils.helpers import DEFAULT_WSP_PATHS
+def index_wsp_entries(holo: "HoloIndex") -> None:
+    """Index WSP protocol documents into ChromaDB.
 
-    paths = paths or DEFAULT_WSP_PATHS
-    files: List[Path] = []
-    for base in paths:
-        if base.exists():
-            all_doc_files = sorted(
-                list(base.rglob("*.md")) + list(base.rglob("*.yaml"))
-            )
-            filtered_files = [
-                f for f in all_doc_files
-                if 'node_modules' not in str(f)
-                and 'CHANGELOG' not in f.name.upper()
-                and 'package-lock' not in f.name.lower()
-            ]
-            files.extend(filtered_files)
+    CFZ4: ONLY indexes true WSP protocols from WSP_framework/src/WSP_*.md.
+    Module docs, papers, and other content go to separate collections.
+    """
+    # CFZ4: WSP protocols ONLY from WSP_framework/src
+    wsp_src_path = holo.project_root / "WSP_framework" / "src"
+
+    if not wsp_src_path.exists():
+        holo._log_agent_action(f"WSP source path not found: {wsp_src_path}", "WARN")
+        return
+
+    # Only WSP_*.md files are true protocols
+    all_wsp_files = sorted(wsp_src_path.glob("WSP_*.md"))
+    files = [
+        f for f in all_wsp_files
+        if not any(part.startswith('.') for part in f.parts)
+        and '_backup' not in str(f).lower()
+    ]
+
     if not files:
         holo._log_agent_action("No WSP documents found to index", "WARN")
         return
@@ -437,6 +440,139 @@ def index_wsp_entries(holo: "HoloIndex", paths: Optional[List[Path]] = None) -> 
         holo._log_agent_action("WSP index refreshed and summary cache saved", "OK")
     else:
         holo._log_agent_action("No WSP entries were indexed (empty content)", "WARN")
+
+
+def index_docs_entries(holo: "HoloIndex") -> None:
+    """CFZ4: Index module/root docs into navigation_docs collection.
+
+    Content: modules/**, docs/**, holo_index/docs/**, WSP_framework/docs/**
+    ID prefix: doc_
+    """
+    doc_paths = [
+        holo.project_root / "modules",
+        holo.project_root / "docs",
+        holo.project_root / "holo_index" / "docs",
+        holo.project_root / "WSP_framework" / "docs",
+    ]
+
+    files: List[Path] = []
+    for base in doc_paths:
+        if base.exists():
+            all_doc_files = sorted(list(base.rglob("*.md")))
+            filtered_files = [
+                f for f in all_doc_files
+                if 'node_modules' not in str(f)
+                and 'CHANGELOG' not in f.name.upper()
+                and 'package-lock' not in f.name.lower()
+                and not any(part.startswith('.') for part in f.parts)
+                and '_backup' not in str(f).lower()
+                and '/archive/' not in str(f).lower()
+                and '\\archive\\' not in str(f).lower()
+            ]
+            files.extend(filtered_files)
+
+    if not files:
+        holo._log_agent_action("No docs found to index", "WARN")
+        return
+
+    holo._log_agent_action(f"Indexing {len(files)} docs into navigation_docs...", "INDEX")
+    holo.docs_collection = holo._reset_collection("navigation_docs")
+
+    ids, embeddings, documents, metadatas = [], [], [], []
+
+    for idx, file_path in enumerate(files, start=1):
+        raw_head = file_path.read_bytes()[:2]
+        if raw_head == b'\xff\xfe':
+            text = file_path.read_bytes().decode('utf-16-le', errors='ignore').lstrip('\ufeff')
+        else:
+            text = file_path.read_text(encoding='utf-8', errors='ignore')
+        lines = [line.strip() for line in text.splitlines() if line.strip()]
+        if not lines:
+            continue
+
+        title = lines[0].lstrip('# ')
+        summary = ' '.join(lines[1:6])[:400]
+        doc_type = _classify_document_type(file_path, title, lines)
+        doc_payload = f"{title}\n{summary}"
+
+        ids.append(f"doc_{idx}")
+        embeddings.append(holo._get_embedding(doc_payload))
+        documents.append(doc_payload)
+        metadatas.append({
+            "title": title,
+            "path": str(file_path),
+            "summary": summary,
+            "type": doc_type,
+            "priority": _calculate_document_priority(doc_type, file_path),
+        })
+
+    if embeddings:
+        holo.docs_collection.add(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
+        holo._log_agent_action(f"Docs index refreshed: {len(ids)} entries", "OK")
+    else:
+        holo._log_agent_action("No docs entries were indexed", "WARN")
+
+
+def index_knowledge_entries(holo: "HoloIndex") -> None:
+    """CFZ4: Index papers/research into navigation_knowledge collection.
+
+    Content: WSP_knowledge/docs/Papers/**
+    ID prefix: paper_
+    """
+    knowledge_path = holo.project_root / "WSP_knowledge" / "docs" / "Papers"
+
+    if not knowledge_path.exists():
+        holo._log_agent_action(f"Knowledge path not found: {knowledge_path}", "WARN")
+        return
+
+    all_files = sorted(knowledge_path.rglob("*.md"))
+    files = [
+        f for f in all_files
+        if not any(part.startswith('.') for part in f.parts)
+        and '_backup' not in str(f).lower()
+        and '/archive/' not in str(f).lower()
+        and '\\archive\\' not in str(f).lower()
+    ]
+
+    if not files:
+        holo._log_agent_action("No knowledge files found to index", "WARN")
+        return
+
+    holo._log_agent_action(f"Indexing {len(files)} papers into navigation_knowledge...", "INDEX")
+    holo.knowledge_collection = holo._reset_collection("navigation_knowledge")
+
+    ids, embeddings, documents, metadatas = [], [], [], []
+
+    for idx, file_path in enumerate(files, start=1):
+        raw_head = file_path.read_bytes()[:2]
+        if raw_head == b'\xff\xfe':
+            text = file_path.read_bytes().decode('utf-16-le', errors='ignore').lstrip('\ufeff')
+        else:
+            text = file_path.read_text(encoding='utf-8', errors='ignore')
+        lines = [line.strip() for line in text.splitlines() if line.strip()]
+        if not lines:
+            continue
+
+        title = lines[0].lstrip('# ')
+        summary = ' '.join(lines[1:6])[:400]
+        doc_payload = f"{title}\n{summary}"
+
+        ids.append(f"paper_{idx}")
+        embeddings.append(holo._get_embedding(doc_payload))
+        documents.append(doc_payload)
+        metadatas.append({
+            "title": title,
+            "path": str(file_path),
+            "summary": summary,
+            "type": "paper",
+            "priority": 6,
+        })
+
+    if embeddings:
+        holo.knowledge_collection.add(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
+        holo._log_agent_action(f"Knowledge index refreshed: {len(ids)} papers", "OK")
+    else:
+        holo._log_agent_action("No knowledge entries were indexed", "WARN")
 
 
 def index_test_registry(holo: "HoloIndex") -> None:

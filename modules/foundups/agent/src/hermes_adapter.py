@@ -360,6 +360,38 @@ class HermesFoundUpBuilder:
 
         return analysis
 
+    def _detect_deploy_surface(self, full_path: Path) -> bool:
+        """Return True when a FoundUp module has verified launch evidence."""
+        deploy_indicators = [
+            full_path / "Dockerfile",
+            full_path / "cloudbuild.yaml",
+            full_path / "firebase.json",
+            full_path / "deployment",
+        ]
+        if any(ind.exists() for ind in deploy_indicators):
+            return True
+
+        web_entry_points = [
+            full_path / "app" / "index.html",
+            full_path / "frontend" / "index.html",
+        ]
+        if any(entry.exists() for entry in web_entry_points):
+            return True
+
+        manifest_path = full_path / "foundup_manifest.json"
+        if not manifest_path.exists():
+            return False
+
+        try:
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            logger.warning("[HERMES] Deploy manifest unreadable: %s", exc)
+            return False
+
+        entry_url = manifest.get("entry_url")
+        launch_readiness = str(manifest.get("launch_readiness", "")).lower()
+        return bool(entry_url) and launch_readiness == "ready"
+
     def check_exfoliation_gate(self, module_path: str) -> ExfoliationGate:
         """
         Run exfoliation readiness gate per FOUNDUP_EXFOLIATION_PROTOCOL.md.
@@ -422,13 +454,7 @@ class HermesFoundUpBuilder:
         gate.runtime_testable = has_tests
 
         # 4. Deploy surface is understood
-        deploy_indicators = [
-            full_path / "Dockerfile",
-            full_path / "cloudbuild.yaml",
-            full_path / "firebase.json",
-            full_path / "deployment",
-        ]
-        gate.deploy_surface_understood = any(ind.exists() for ind in deploy_indicators)
+        gate.deploy_surface_understood = self._detect_deploy_surface(full_path)
 
         # 5. Shared dependencies are adapter-level
         gate.shared_deps_adapter_level = len(analysis.adapters_needed) <= 5

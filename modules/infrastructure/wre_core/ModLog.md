@@ -2,6 +2,57 @@
 
 ## Chronological Change Log
 
+### [2026-04-25] - W5/OC5: FoundUpJob Routing Envelope Phase 1 (v0.8.7)
+
+**WSP Protocol References**: WSP 11 (Interface), WSP 50 (Pre-Action), WSP 77 (Agent Coordination), WSP 97 (Truthful)
+**Impact Analysis**: WRE routing seam for FoundUpJob - validates identity, determines target backend, returns typed envelope (NO execution)
+
+#### Changes Made
+
+- `src/foundup_job_router.py` (NEW):
+  - `RouteStatus` enum: ROUTED, QUEUED, BLOCKED, UNSUPPORTED, FAILED
+  - `TargetBackend` enum: HERMES_BUILDER, HERMES_VALIDATOR, OPENCLAW_QUEUE, FAM_TRACKER, NONE
+  - `RouteReasonCode` enum: OK_ROUTED, OK_QUEUED, BLOCKED_* codes, UNSUPPORTED_ACTION, FAIL_* codes
+  - `RouteEnvelope` dataclass: typed routing decision with job identity, backend, status, reason, policy summary
+  - `route_foundup_job(job)`: validates identity, checks terminal status, enforces policy gates, routes to backend
+  - `get_action_route_map()`: inspection helper for documentation
+
+- `tests/test_foundup_job_router.py` (NEW):
+  - 17 tests covering all routing scenarios
+  - Hermes routing (build/extract -> BUILDER, validate -> VALIDATOR)
+  - Queue routing (queue_foundup_job -> QUEUED status)
+  - Unsupported action handling
+  - Terminal job blocking (SUCCEEDED, FAILED)
+  - Missing identity blocking (job_id, tenant_id)
+  - Policy gate blocking (security_gate_checked but not passed)
+  - Envelope serialization
+
+#### Action -> Backend Mapping
+
+| Action | Target Backend |
+|--------|---------------|
+| build_foundup | HERMES_BUILDER |
+| extract_foundup | HERMES_BUILDER |
+| validate_foundup | HERMES_VALIDATOR |
+| queue_foundup_job | OPENCLAW_QUEUE |
+
+#### Architecture
+
+```
+OpenClaw -> FoundUpJob -> WRE Router -> RouteEnvelope -> Hermes/FAM (later)
+```
+
+Phase 1: Routing seam only. Execution deferred to W6 (Hermes adapter).
+
+#### Verification
+
+```bash
+PYTHONPATH=. python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_router.py -v
+# 17 passed
+```
+
+---
+
 ### [2026-04-19] - SEC9: Security Stack 0102 Control Hooks (v0.8.6)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 77 (Agent Coordination)
