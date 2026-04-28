@@ -403,6 +403,12 @@ def plan_execution(dae: Any, intent: Any, tier: Any) -> Any:
             {"action": "fam_or_genesis_route"},
         ]
         est_tokens = 100
+    elif intent.category == dae.IntentCategory.IMPROVEMENT:
+        steps = [
+            {"action": "improvement_classify", "input": intent.extracted_task},
+            {"action": "improvement_route_stub"},
+        ]
+        est_tokens = 80
     else:
         steps = [{"action": "digital_twin_response", "context": intent.raw_message}]
         est_tokens = 60

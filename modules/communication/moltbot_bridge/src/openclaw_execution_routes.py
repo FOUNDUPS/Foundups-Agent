@@ -47,6 +47,8 @@ async def execute_plan(dae: Any, plan: Any) -> str:
         return execute_research(dae, intent)
     if route == "training_controller":
         return execute_training(dae, intent)
+    if route == "improvement_router":
+        return execute_improvement(dae, intent)
 
     social_control = await dae._try_conversation_social_control(intent)
     if social_control:
@@ -860,7 +862,58 @@ def _start_training_batch() -> str:
         return f"**Training Batch: ERROR**\n\nCould not start: {exc}"
 
 
-def _try_memory_query(dae: Any, raw_message: str) -> Optional[str]:
+def execute_improvement(dae: Any, intent: Any) -> str:
+    """Route IMPROVEMENT intent (codebase self-improvement requests).
+
+    WSP 97 Truth Boundary:
+      - Classifies the improvement request
+      - Returns advisory acknowledgment
+      - Does NOT execute autonomous repairs (not implemented)
+      - Does NOT claim repair capability exists
+
+    Supported improvement types (classification only):
+      - WSP violations (fix violation, fix wsp, wsp violation)
+      - Module repairs (repair module, duplicate module, module cleanup)
+      - Test hygiene (stale test)
+      - Code drift (fix drift, codebase improvement)
+      - FMAS scans (run fmas repair, fmas scan)
+    """
+    msg_lower = (intent.raw_message or "").lower().strip()
+
+    # Classify improvement sub-type for routing hints
+    # Order matters: check specific keywords before generic ones
+    improvement_type = "general"
+    if "fmas" in msg_lower:
+        improvement_type = "fmas_scan"
+    elif "drift" in msg_lower:
+        improvement_type = "drift_correction"
+    elif "wsp" in msg_lower or "violation" in msg_lower:
+        improvement_type = "wsp_violation"
+    elif "test" in msg_lower or "stale" in msg_lower:
+        improvement_type = "test_hygiene"
+    elif "repair" in msg_lower or "module" in msg_lower or "cleanup" in msg_lower:
+        improvement_type = "module_repair"
+
+    logger.info(
+        "[OPENCLAW-DAE] [IMPROVEMENT] Intent recognized: type=%s task=%s sender=%s",
+        improvement_type,
+        (intent.extracted_task or "")[:50],
+        intent.sender,
+    )
+
+    # WSP 97: Truthful advisory response - no repair execution claims
+    return (
+        f"**Improvement Intent Recognized**\n\n"
+        f"- **Type**: `{improvement_type}`\n"
+        f"- **Request**: {intent.extracted_task or intent.raw_message}\n\n"
+        f"**Status**: Classified but not executed.\n\n"
+        f"Autonomous codebase repair is not yet implemented. "
+        f"This intent was recognized and logged for future FMAS integration.\n\n"
+        f"_WSP 97: AI surfaces improvement needs. Humans decide execution._"
+    )
+
+
+
     """
     Detect and handle deterministic memory queries.
 
