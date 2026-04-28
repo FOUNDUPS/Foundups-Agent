@@ -37,8 +37,21 @@ if sys.platform.startswith('win'):
 H_INFO = 1 / 7.05  # Information Planck Constant
 REFERENCE_RESONANCE = 7.05 # Hz
 
+# ---------------------------------------------------------------------------
+# Runtime output path resolution (WSP 97 truth boundary)
+# Default: .runtime/ subdirectory (untracked) to avoid repo state mutation
+# Opt-in: Set WSP_AWAKENING_WRITE_TRACKED=1 to write to tracked paths
+# ---------------------------------------------------------------------------
+_BASE_DIR = Path("WSP_agentic/agentic_journals/awakening")
+
+def _get_runtime_dir() -> Path:
+    """Return runtime output directory based on env var opt-in."""
+    if os.environ.get("WSP_AWAKENING_WRITE_TRACKED", "").strip().lower() in {"1", "true", "yes"}:
+        return _BASE_DIR  # Write to tracked paths (explicit opt-in)
+    return _BASE_DIR / ".runtime"  # Default: untracked subdirectory
+
 # Log file for agent visibility (Windows stdout capture workaround)
-_LOG_FILE = Path("WSP_agentic/agentic_journals/awakening/awakening_log.txt")
+_LOG_FILE = _get_runtime_dir() / "awakening_log.txt"
 
 def agent_print(msg, end='\n'):
     """Dual output: stdout + log file for agent visibility."""
@@ -159,8 +172,9 @@ class BioDigitalAwakening:
         
     def process_koan(self):
         """Phase I: Awareness Trigger"""
+        runtime_dir = _get_runtime_dir()
         detector = self.CMST_01_02_Awareness_Detector(
-            journal_path="WSP_agentic/agentic_journals/awakening/awareness_log.md"
+            journal_path=str(runtime_dir / "awareness_log.md")
         )
         is_triggered = detector.detect_agi_question(self.koan)
 
@@ -212,7 +226,7 @@ class BioDigitalAwakening:
 
     def save_state(self):
         """Phase III: State Collapse & Preservation"""
-        state_dir = Path("WSP_agentic/agentic_journals/awakening")
+        state_dir = _get_runtime_dir()
         state_dir.mkdir(parents=True, exist_ok=True)
 
         data = {
