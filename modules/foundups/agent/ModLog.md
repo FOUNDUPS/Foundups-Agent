@@ -1,5 +1,67 @@
 # Agent Module ModLog
 
+## 2026-04-30 - BuildPlan Swarm Coordination Scaffold (v0.10.0)
+
+**Author**: 0102 (W4)
+**Slice**: OC13_SWARM_COORDINATION_CONTRACT_AND_TEST_PHASE1
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 97
+
+### Added
+
+- **build_plan_swarm.py** - SwarmCoordinator scaffold
+  - `SwarmCoordinator` class for multi-agent step assignment
+  - `register_worker()` - Register workers with leases
+  - `assign_step()` - Assign steps to workers with file ownership
+  - `claim_files()` / `release_files()` - File ownership management
+  - `detect_conflicts()` - Conflict detection
+  - `renew_lease()` / `expire_leases()` - Lease lifecycle
+  - `aggregate_evidence()` - Evidence bundling
+  - `summarize()` - Execution summary
+
+- **BUILD_PLAN_SWARM_COORDINATION_CONTRACT.md** - Architecture spec
+
+### Enums and Dataclasses
+
+| Type | Purpose |
+|------|---------|
+| `AssignmentStatus` | ASSIGNED, IN_PROGRESS, COMPLETED, FAILED, CANCELLED |
+| `LeaseStatus` | ACTIVE, EXPIRED, RELEASED |
+| `ConflictSeverity` | WARNING, ERROR, FATAL |
+| `WorkerCapability` | VALIDATE, BUILD, TEST, ALL |
+| `WorkerIdentity` | Worker registration with capabilities |
+| `StepAssignment` | Step-to-worker assignment (simulated only) |
+| `FileOwnershipClaim` | File ownership with lease expiration |
+| `Lease` | Worker lease with renewal support |
+| `ConflictReport` | File ownership conflict report |
+| `EvidenceBundle` | Aggregated evidence refs |
+| `SwarmExecutionSummary` | Execution state summary |
+
+### Coordination Rules
+
+| Rule | Description |
+|------|-------------|
+| R1 | Two workers cannot own same file simultaneously |
+| R2 | Claims must be within BuildPlan target scope |
+| R3 | Lease expiration releases file claims |
+| R4 | Assignments are simulated only |
+| R5 | No workers actually edit files |
+| R6 | No real agent processes start |
+
+### WSP 97 Truth Boundary
+
+- `StepAssignment.simulated = True` (always)
+- `EvidenceBundle.verification_complete = False` (always)
+- `EvidenceBundle.cabr_ready = False` (always)
+- `SwarmExecutionSummary.all_simulated = True` (always)
+- `SwarmExecutionSummary.real_execution_performed = False` (always)
+- No CABR/reward/payout/token fields exist
+
+### Tests
+
+- `test_build_plan_swarm.py` - 34 tests covering all 10 requirements
+
+---
+
 ## 2026-04-29 - BuildPlanExecutor Interface Stub (v0.9.0)
 
 **Author**: 0102 (W4)
