@@ -55,6 +55,66 @@ ExecutionReceipt enforces these fields as False always:
 
 ---
 
+## Swarm Coordination (OC13)
+
+### SwarmCoordinator
+
+```python
+# modules/foundups/agent/src/build_plan_swarm.py
+class SwarmCoordinator:
+    """Multi-agent step assignment and file ownership coordination."""
+    
+    def register_worker(self, worker: WorkerIdentity) -> None: ...
+    def assign_step(self, step: BuildStep, worker_id: str, owned_files: list[str]) -> StepAssignment: ...
+    def claim_files(self, worker_id: str, files: list[str], step_id: str) -> list[FileOwnershipClaim]: ...
+    def release_files(self, worker_id: str, files: list[str]) -> None: ...
+    def detect_conflicts(self) -> list[ConflictReport]: ...
+    def renew_lease(self, lease_id: str) -> Lease: ...
+    def expire_leases(self, now: datetime) -> list[str]: ...
+    def aggregate_evidence(self) -> EvidenceBundle: ...
+    def summarize(self) -> SwarmExecutionSummary: ...
+```
+
+### Coordination Dataclasses
+
+```python
+WorkerIdentity      # Worker ID, type, capabilities, lease
+StepAssignment      # Step-to-worker assignment (simulated=True always)
+FileOwnershipClaim  # File ownership with expiration
+Lease               # Worker lease with renewal
+ConflictReport      # File ownership conflict
+EvidenceBundle      # Aggregated evidence refs
+SwarmExecutionSummary  # Execution state summary
+```
+
+### Coordination Enums
+
+```python
+AssignmentStatus     # ASSIGNED | IN_PROGRESS | COMPLETED | FAILED | CANCELLED
+LeaseStatus          # ACTIVE | EXPIRED | RELEASED
+ConflictSeverity     # WARNING | ERROR | FATAL
+WorkerCapability     # VALIDATE | BUILD | TEST | ALL
+```
+
+### Coordination Rules
+
+| Rule | Description |
+|------|-------------|
+| R1 | Two workers cannot own same file simultaneously |
+| R2 | Claims must be within BuildPlan target scope |
+| R3 | Lease expiration releases file claims |
+| R4 | Assignments are simulated only |
+
+### Swarm WSP 97 Truth Fields
+
+- `StepAssignment.simulated = True` (always)
+- `EvidenceBundle.verification_complete = False` (always)
+- `EvidenceBundle.cabr_ready = False` (always)
+- `SwarmExecutionSummary.all_simulated = True` (always)
+- `SwarmExecutionSummary.real_execution_performed = False` (always)
+
+---
+
 ## Event Schemas
 
 ### agent_joins

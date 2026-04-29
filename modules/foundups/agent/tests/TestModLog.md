@@ -1,5 +1,53 @@
 # Agent Module TestModLog
 
+## 2026-04-30 - BuildPlan Swarm Coordination Scaffold Tests
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_build_plan_swarm.py -q
+```
+
+**Result**: PASS
+
+**Summary**: 34 passed in 0.67s.
+
+**Coverage**:
+1. Register multiple workers
+2. Assign different steps to different workers
+3. Block duplicate file claims
+4. Allow release then re-claim
+5. Expire lease releases claim
+6. Reject out-of-scope file claim
+7. Aggregate evidence from multiple assignments
+8. Summary reports simulated-only execution
+9. No real_execution_performed can become true
+10. VoteBallot BuildPlan can be split into multiple simulated assignments
+
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 97.
+
+---
+
+## 2026-04-30 - Full Agent Module Test Suite (OC13)
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_build_plan_swarm.py modules/foundups/agent/tests/test_build_plan_executor.py modules/foundups/agent/tests/test_build_plan_generator.py -q
+```
+
+**Result**: PASS
+
+**Summary**: 119 passed.
+
+**Notes**:
+- All swarm coordination tests (34) passing
+- All executor tests (39 - from OC12) still passing  
+- All generator tests (20 - from OC9) still passing
+- No regressions
+
+---
+
 ## 2026-04-29 - BuildPlanExecutor Interface Stub Tests
 
 **Command**:
