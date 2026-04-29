@@ -1,5 +1,51 @@
 # Agent Module TestModLog
 
+## 2026-04-30 - BuildPlan Swarm WRE Queue Tests
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_build_plan_swarm_queue.py -v
+```
+
+**Result**: PASS
+
+**Summary**: 20 passed in 2.42s.
+
+**Coverage**:
+1. Create queue entry from StepAssignment
+2. Dequeue matching worker capability succeeds
+3. Dequeue mismatched worker capability is blocked
+4. Heartbeat renews lease
+5. Completion report marks entry complete with evidence
+6. Expired entry can be requeued
+7. Simulated completion cannot set real_execution_performed=True
+8. Queue entry has no CABR/reward/payout/token fields
+9. VoteBallot swarm assignment can be enqueued and dequeued by simulated worker
+
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 97.
+
+---
+
+## 2026-04-30 - Full Agent Module Test Suite (OC15)
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_build_plan_swarm_queue.py modules/foundups/agent/tests/test_build_plan_swarm.py -q
+```
+
+**Result**: PASS
+
+**Summary**: 54 passed.
+
+**Notes**:
+- All queue tests (20) passing
+- All swarm coordination tests (34) still passing
+- No regressions
+
+---
+
 ## 2026-04-30 - BuildPlan Swarm Coordination Scaffold Tests
 
 **Command**:
