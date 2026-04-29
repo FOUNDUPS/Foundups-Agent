@@ -90,6 +90,20 @@ from modules.communication.moltbot_bridge.src.pavs_verification_seam import (
     verify_receipt,
 )
 
+# BuildPlan (OC10 integration)
+from modules.foundups.agent.src.build_plan import (
+    BuildMode,
+    BuildPlan,
+    BuildPlanStatus,
+    BuildStepAction,
+    GateType,
+    StepStatus,
+)
+from modules.foundups.agent.src.build_plan_generator import (
+    create_build_plan_from_job,
+    can_generate_build_plan,
+)
+
 
 # ---------------------------------------------------------------------------
 # VoteBallot Constants (from foundup_manifest.json)
@@ -582,6 +596,222 @@ class TestVoteBallotBuildPoCEvidence:
         assert any(kw in reason_lower for kw in gate_keywords), (
             f"status_reason_human should explain gate failure: {job.status_reason_human}"
         )
+
+
+# ---------------------------------------------------------------------------
+# Test: BuildPlan Integration (OC10)
+# ---------------------------------------------------------------------------
+
+
+class TestVoteBallotBuildPlanGeneration:
+    """
+    Verify BuildPlan generation integration with VoteBallot PoC.
+
+    OC10: Integration tests proving job->plan->receipt correlation.
+    These tests do NOT execute BuildPlan steps.
+    """
+
+    def test_voteballot_job_generates_build_plan(
+        self, voteballot_build_job: FoundUpJob
+    ) -> None:
+        """
+        VoteBallot job generates BuildPlan with matching identity.
+
+        Proves:
+          - create_build_plan_from_job() succeeds
+          - Plan identity inherits from job
+          - Plan is in DRY_RUN mode
+        """
+        job = voteballot_build_job
+
+        # Generate plan
+        plan = create_build_plan_from_job(job)
+
+        # Identity matches
+        assert plan.foundup_id == job.foundup_id
+        assert plan.tenant_id == job.tenant_id
+        assert plan.intent_id == job.intent_id
+        assert plan.source_job_id == job.job_id
+        assert plan.requested_action == job.requested_action
+
+        # Plan is DRY_RUN
+        assert plan.mode == BuildMode.DRY_RUN
+        assert plan.dry_run is True
+        assert plan.status == BuildPlanStatus.DRAFT
+
+    @patch("modules.foundups.agent.src.hermes_adapter.HermesFoundUpBuilder")
+    def test_voteballot_plan_serializes_with_receipt_context(
+        self,
+        mock_builder_class: MagicMock,
+        voteballot_build_job: FoundUpJob,
+        mock_hermes_success: Dict[str, Any],
+    ) -> None:
+        """
+        BuildPlan serializes alongside receipt with job_id correlation.
+
+        Proves:
+          - plan.to_dict() produces serializable output
+          - plan.source_job_id correlates with receipt.job_id
+        """
+        # Generate plan
+        plan = create_build_plan_from_job(voteballot_build_job)
+
+        # Execute job to create terminal state
+        mock_builder = MagicMock()
+        mock_builder.dry_run = True
+        mock_builder.extract_foundup.return_value = mock_hermes_success
+        mock_builder_class.return_value = mock_builder
+
+        result = execute_foundup_job(voteballot_build_job, force_dry_run=True)
+        terminal_job = result.job
+
+        # Create receipt
+        receipt_result = create_receipt_from_job(terminal_job)
+        receipt = receipt_result.receipt
+
+        # Serialize plan
+        plan_dict = plan.to_dict()
+
+        # Correlation: plan.source_job_id == receipt.job_id
+        assert plan.source_job_id == receipt.job_id
+        assert plan_dict["source_job_id"] == receipt.job_id
+
+        # Both reference same foundup
+        assert plan.foundup_id == receipt.foundup_id
+
+    @patch("modules.foundups.agent.src.hermes_adapter.HermesFoundUpBuilder")
+    def test_voteballot_plan_evidence_can_reference_receipt(
+        self,
+        mock_builder_class: MagicMock,
+        voteballot_build_job: FoundUpJob,
+        mock_hermes_success: Dict[str, Any],
+    ) -> None:
+        """
+        BuildPlan evidence_refs could correlate with receipt.
+
+        Proves:
+          - Plan can add evidence_refs
+          - Receipt has evidence_refs from job
+          - WSP 97: No verification_complete claims
+        """
+        # Generate plan
+        plan = create_build_plan_from_job(voteballot_build_job)
+
+        # Execute job
+        mock_builder = MagicMock()
+        mock_builder.dry_run = True
+        mock_builder.extract_foundup.return_value = mock_hermes_success
+        mock_builder_class.return_value = mock_builder
+
+        result = execute_foundup_job(voteballot_build_job, force_dry_run=True)
+
+        # Create receipt
+        receipt_result = create_receipt_from_job(result.job)
+        receipt = receipt_result.receipt
+
+        # Receipt has evidence
+        assert len(receipt.evidence_refs) > 0
+
+        # Plan can reference receipt evidence (manual correlation)
+        # In production, plan.evidence_refs would be populated during execution
+        # For this PoC, we just verify the correlation is possible
+        assert plan.source_job_id == receipt.job_id
+
+        # WSP 97: Neither claims verification_complete
+        # dry-run -> NOT_REQUIRED (no verification claim)
+        assert receipt.verification_status == VerificationStatus.NOT_REQUIRED
+        pavs_result = verify_receipt(receipt)
+        assert pavs_result.verification_complete is False
+
+    @patch("modules.foundups.agent.src.hermes_adapter.HermesFoundUpBuilder")
+    def test_full_dry_run_pipeline_includes_build_plan(
+        self,
+        mock_builder_class: MagicMock,
+        voteballot_build_job: FoundUpJob,
+        mock_hermes_success: Dict[str, Any],
+    ) -> None:
+        """
+        Full dry-run pipeline: Job -> BuildPlan -> Route -> Execute -> Receipt -> pAVS.
+
+        Proves:
+          - Plan is generated before execution
+          - Plan is DRY_RUN and not real-build allowed
+          - pAVS does not claim final verification
+        """
+        job = voteballot_build_job
+
+        # Step 1: Generate BuildPlan
+        plan = create_build_plan_from_job(job)
+        assert plan.mode == BuildMode.DRY_RUN
+        assert plan.is_real_build_allowed() is False
+
+        # Step 2: Route
+        envelope = route_foundup_job(job)
+        assert envelope.route_status == RouteStatus.ROUTED
+        assert envelope.target_backend == TargetBackend.HERMES_BUILDER
+
+        # Step 3: Execute (mocked)
+        mock_builder = MagicMock()
+        mock_builder.dry_run = True
+        mock_builder.extract_foundup.return_value = mock_hermes_success
+        mock_builder_class.return_value = mock_builder
+
+        result = execute_foundup_job(job, force_dry_run=True)
+        assert result.job.status == JobStatus.SUCCEEDED
+        assert result.job.policy_flags.dry_run_mode is True
+
+        # Step 4: Receipt
+        receipt_result = create_receipt_from_job(result.job)
+        assert receipt_result.success is True
+        receipt = receipt_result.receipt
+
+        # Step 5: pAVS
+        pavs_result = verify_receipt(receipt)
+
+        # Assertions
+        assert pavs_result.decision == PAVSDecision.NOT_REQUIRED
+        assert pavs_result.cabr_ready is False
+        assert pavs_result.payout_ready is False
+        assert pavs_result.verification_complete is False
+
+        # Plan correlation
+        assert plan.source_job_id == receipt.job_id
+
+    def test_build_plan_steps_are_not_executed(
+        self, voteballot_build_job: FoundUpJob
+    ) -> None:
+        """
+        BuildPlan is generated but steps are NOT executed.
+
+        Proves:
+          - Plan has steps populated
+          - All steps remain in PENDING status
+          - No step has started_at or completed_at
+          - This PoC generates plans, does not execute them
+        """
+        # Generate plan
+        plan = create_build_plan_from_job(voteballot_build_job)
+
+        # Plan has steps
+        assert len(plan.steps) > 0
+
+        # All steps are PENDING (not executed)
+        for step in plan.steps:
+            assert step.status == StepStatus.PENDING, (
+                f"Step {step.step_id} should be PENDING, not {step.status.value}"
+            )
+            assert step.started_at is None, (
+                f"Step {step.step_id} should not have started_at set"
+            )
+            assert step.completed_at is None, (
+                f"Step {step.step_id} should not have completed_at set"
+            )
+
+        # Verify step actions exist but are not executed
+        actions = [step.action for step in plan.steps]
+        assert BuildStepAction.VALIDATE_GENESIS in actions
+        assert BuildStepAction.RUN_TESTS in actions
+        assert BuildStepAction.SUBMIT_RECEIPT in actions
 
 
 if __name__ == "__main__":
