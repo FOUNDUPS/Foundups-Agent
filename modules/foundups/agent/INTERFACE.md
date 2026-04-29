@@ -1,6 +1,59 @@
 # Agent Module Interface
 
-Public API and schema contracts for agent lifecycle management.
+Public API and schema contracts for agent lifecycle management, BuildPlan generation, and controlled execution.
+
+## BuildPlan Pipeline (OC8/OC9/OC12)
+
+### Core Dataclasses
+
+```python
+# modules/foundups/agent/src/build_plan.py
+BuildPlan        # Multi-step orchestration contract
+BuildTarget      # Target paths and scope
+BuildStep        # Step definition with action enum
+BuildGate        # Gate checkpoints (genesis, dry_run, human_approval)
+BuildEvidence    # Evidence reference with verification status
+```
+
+### BuildPlan Generator
+
+```python
+# modules/foundups/agent/src/build_plan_generator.py
+def create_build_plan_from_job(job: FoundUpJob) -> BuildPlan:
+    """Generate BuildPlan from FoundUpJob. Always produces dry_run=True plans."""
+
+def can_generate_build_plan(job: FoundUpJob) -> bool:
+    """Check if job can generate a BuildPlan."""
+```
+
+### BuildPlan Executor (Interface Stub)
+
+```python
+# modules/foundups/agent/src/build_plan_executor.py
+class BuildPlanExecutor:
+    """Controlled step execution. Real execution NOT implemented."""
+    
+    def __init__(self, dry_run: bool = True): ...
+    def validate_plan(self, plan: BuildPlan) -> ValidationResult: ...
+    def evaluate_gate(self, plan: BuildPlan, gate_type: GateType) -> GateEvaluationResult: ...
+    def simulate_step(self, plan: BuildPlan, step: BuildStep) -> StepExecutionResult: ...
+    def execute_step(self, plan: BuildPlan, step: BuildStep) -> StepExecutionResult: ...
+    def create_execution_receipt(self, plan: BuildPlan, results: List[StepExecutionResult]) -> ExecutionReceipt: ...
+
+# Execution Result Types
+StepExecutionStatus  # SUCCEEDED | FAILED | BLOCKED | SKIPPED | SIMULATED
+ExecutionReceipt     # Terminal receipt with WSP 97 truth fields
+```
+
+### WSP 97 Truth Fields
+
+ExecutionReceipt enforces these fields as False always:
+- `verification_complete = False`
+- `cabr_ready = False`
+- `payout_ready = False`
+- `real_execution_performed = False`
+
+---
 
 ## Event Schemas
 

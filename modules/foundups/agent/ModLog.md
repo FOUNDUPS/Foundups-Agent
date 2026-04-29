@@ -1,5 +1,109 @@
 # Agent Module ModLog
 
+## 2026-04-29 - BuildPlanExecutor Interface Stub (v0.9.0)
+
+**Author**: 0102 (W4)
+**Slice**: OC12_BUILD_PLAN_EXECUTOR_INTERFACE_STUB_PHASE1
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 97
+
+### Added
+
+- **build_plan_executor.py** - BuildPlanExecutor interface stub
+  - `BuildPlanExecutor` class with dry_run=True default
+  - `validate_plan()` - Plan validation with gate checks
+  - `evaluate_gate()` - Gate evaluation (genesis, dry_run, human_approval)
+  - `simulate_step()` - Step simulation returning SIMULATED status
+  - `execute_step()` - Delegates to simulation; real execution returns BLOCKED
+  - `create_execution_receipt()` - Creates receipt with WSP 97 truth fields
+
+### Enums and Dataclasses
+
+| Type | Purpose |
+|------|---------|
+| `StepExecutionStatus` | SUCCEEDED, FAILED, BLOCKED, SKIPPED, SIMULATED |
+| `ExecutionMode` | DRY_RUN, REAL |
+| `ExecutionBlockReason` | Block reasons (REAL_EXECUTION_NOT_IMPLEMENTED, etc.) |
+| `StepExecutionResult` | Step execution outcome with evidence |
+| `GateEvaluationResult` | Gate evaluation outcome |
+| `ExecutionReceipt` | Terminal receipt with WSP 97 truth fields |
+
+### WSP 97 Truth Boundary
+
+- `verification_complete = False` (always)
+- `cabr_ready = False` (always)
+- `payout_ready = False` (always)
+- `real_execution_performed = False` (stub)
+- No CABR/reward/payout/token fields exist
+
+### Tests
+
+- `test_build_plan_executor.py` - 39 tests covering all 9 requirements
+
+---
+
+## 2026-04-29 - BuildPlan Generator (v0.8.0)
+
+**Author**: 0102 (W4)
+**Slice**: OC9_BUILD_PLAN_GENERATOR_PHASE1
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 97
+
+### Added
+
+- **build_plan_generator.py** - BuildPlan generation from FoundUpJob
+  - `create_build_plan_from_job()` - Main entry point
+  - `validate_job_for_build_plan()` - Pre-validation
+  - `infer_build_scope()` - Scope inference from action
+  - `build_target_from_job()` - Target construction
+  - `KNOWN_FOUNDUP_PATHS` - Path inference for known FoundUps
+
+### Scope Inference
+
+| Action | Inferred Scope |
+|--------|----------------|
+| `validate_foundup` | GENESIS_ONLY |
+| `build_foundup` | FULL_BUILD |
+| `extract_foundup` | FULL_BUILD |
+
+### Tests
+
+- `test_build_plan_generator.py` - 20 tests
+
+---
+
+## 2026-04-29 - BuildPlan Dataclass (v0.7.0)
+
+**Author**: 0102 (W4)
+**Slice**: OC8_BUILD_PLAN_DATACLASS_PHASE1
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 97
+
+### Added
+
+- **build_plan.py** - BuildPlan typed interface
+  - `BuildPlan` - Multi-step orchestration contract
+  - `BuildTarget` - Target paths and scope
+  - `BuildStep` - Step definition with action enum
+  - `BuildGate` - Gate checkpoints
+  - `BuildEvidence` - Evidence with verification status
+  - `create_standard_build_steps()` - Standard step factory
+
+### Enums
+
+| Enum | Values |
+|------|--------|
+| `BuildPlanStatus` | DRAFT, READY, IN_PROGRESS, COMPLETED, FAILED, CANCELLED |
+| `BuildMode` | DRY_RUN, REAL, PARTIAL |
+| `BuildScope` | GENESIS_ONLY, FULL_BUILD, INCREMENTAL |
+| `BuildStepAction` | VALIDATE_*, CREATE_*, UPDATE_*, RUN_TESTS, etc. |
+| `GateType` | genesis_gate, dry_run_gate, test_gate, human_approval_gate |
+
+### WSP 97 Truth Boundary
+
+- `is_real_build_allowed()` checks all gates before real execution
+- `dry_run=True` default enforced
+- No CABR/payout/reward/token fields
+
+---
+
 ## 2026-04-26 - Hermes FoundUpJob Executor (v0.6.0)
 
 **Author**: 0102 (W4)
