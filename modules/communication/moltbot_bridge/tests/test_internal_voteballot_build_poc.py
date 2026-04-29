@@ -104,6 +104,26 @@ from modules.foundups.agent.src.build_plan_generator import (
     can_generate_build_plan,
 )
 
+# Swarm Coordination (OC14 integration)
+from modules.foundups.agent.src.build_plan_swarm import (
+    AssignmentStatus,
+    ConflictSeverity,
+    EvidenceBundle,
+    LeaseStatus,
+    StepAssignment,
+    SwarmCoordinator,
+    SwarmExecutionSummary,
+    WorkerIdentity,
+    create_swarm_coordinator,
+)
+
+# BuildPlan Executor (OC12 integration)
+from modules.foundups.agent.src.build_plan_executor import (
+    BuildPlanExecutor,
+    ExecutionReceipt,
+    StepExecutionStatus,
+)
+
 
 # ---------------------------------------------------------------------------
 # VoteBallot Constants (from foundup_manifest.json)
@@ -812,6 +832,319 @@ class TestVoteBallotBuildPlanGeneration:
         assert BuildStepAction.VALIDATE_GENESIS in actions
         assert BuildStepAction.RUN_TESTS in actions
         assert BuildStepAction.SUBMIT_RECEIPT in actions
+
+
+# ---------------------------------------------------------------------------
+# Test: Swarm Coordination Integration (OC14)
+# ---------------------------------------------------------------------------
+
+
+class TestVoteBallotSwarmCoordination:
+    """
+    Verify SwarmCoordinator integration with VoteBallot PoC.
+
+    OC14: Integration tests proving multi-worker swarm can coordinate
+    on a VoteBallot BuildPlan safely. All execution is simulated.
+    """
+
+    def test_voteballot_build_plan_can_be_split_across_workers(
+        self, voteballot_build_job: FoundUpJob
+    ) -> None:
+        """
+        VoteBallot BuildPlan can be split across multiple simulated workers.
+
+        Proves:
+          - SwarmCoordinator creates from VoteBallot plan
+          - Multiple workers can register
+          - Different steps assigned to different workers
+          - All assignments are simulated
+        """
+        job = voteballot_build_job
+
+        # Generate BuildPlan
+        plan = create_build_plan_from_job(job)
+        assert plan.foundup_id == VOTEBALLOTS_FOUNDUP_ID
+
+        # Create swarm coordinator
+        coordinator = create_swarm_coordinator(plan)
+
+        # Register 3 workers
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="oc_voteballot_001",
+            worker_type="openclaw",
+            capabilities=["validate"],
+        ))
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="hermes_voteballot_001",
+            worker_type="hermes",
+            capabilities=["build"],
+        ))
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="claude_voteballot_001",
+            worker_type="0102",
+            capabilities=["all"],
+        ))
+
+        assert len(coordinator.list_workers()) == 3
+
+        # Assign different steps to different workers
+        if len(plan.steps) >= 2:
+            assignment_1 = coordinator.assign_step(
+                plan.steps[0],
+                "oc_voteballot_001",
+                [f"{VOTEBALLOTS_MODULE_PATH}/README.md"],
+            )
+            assignment_2 = coordinator.assign_step(
+                plan.steps[1],
+                "hermes_voteballot_001",
+                [f"{VOTEBALLOTS_MODULE_PATH}/INTERFACE.md"],
+            )
+
+            # Both assignments are simulated
+            assert assignment_1.simulated is True
+            assert assignment_2.simulated is True
+            assert assignment_1.worker_id == "oc_voteballot_001"
+            assert assignment_2.worker_id == "hermes_voteballot_001"
+
+    def test_swarm_blocks_duplicate_file_claims(
+        self, voteballot_build_job: FoundUpJob
+    ) -> None:
+        """
+        Swarm blocks duplicate file claims in VoteBallot context.
+
+        Proves:
+          - Worker A claims a VoteBallot target file
+          - Worker B tries same file
+          - Conflict is reported or claim is blocked
+        """
+        job = voteballot_build_job
+        plan = create_build_plan_from_job(job)
+        coordinator = create_swarm_coordinator(plan)
+
+        # Register two workers
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="worker_a_vb",
+            worker_type="openclaw",
+            capabilities=["validate"],
+        ))
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="worker_b_vb",
+            worker_type="hermes",
+            capabilities=["build"],
+        ))
+
+        # Worker A claims a file
+        coordinator.claim_files(
+            "worker_a_vb",
+            [f"{VOTEBALLOTS_MODULE_PATH}/README.md"],
+            plan.steps[0].step_id,
+        )
+
+        # Worker B tries same file - should be blocked
+        with pytest.raises(ValueError, match="already claimed"):
+            coordinator.claim_files(
+                "worker_b_vb",
+                [f"{VOTEBALLOTS_MODULE_PATH}/README.md"],
+                plan.steps[1].step_id if len(plan.steps) > 1 else plan.steps[0].step_id,
+            )
+
+    def test_swarm_releases_and_reclaims_voteballot_files(
+        self, voteballot_build_job: FoundUpJob
+    ) -> None:
+        """
+        Swarm allows release then reclaim of VoteBallot files.
+
+        Proves:
+          - Worker A claims then releases
+          - Worker B can claim after release
+        """
+        job = voteballot_build_job
+        plan = create_build_plan_from_job(job)
+        coordinator = create_swarm_coordinator(plan)
+
+        # Register two workers
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="worker_claim_vb",
+            worker_type="openclaw",
+            capabilities=["validate"],
+        ))
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="worker_reclaim_vb",
+            worker_type="hermes",
+            capabilities=["build"],
+        ))
+
+        target_file = f"{VOTEBALLOTS_MODULE_PATH}/README.md"
+
+        # Worker A claims and releases
+        coordinator.claim_files(
+            "worker_claim_vb",
+            [target_file],
+            plan.steps[0].step_id,
+        )
+        coordinator.release_files("worker_claim_vb", [target_file])
+
+        # Worker B can now claim
+        claims = coordinator.claim_files(
+            "worker_reclaim_vb",
+            [target_file],
+            plan.steps[0].step_id,
+        )
+
+        assert len(claims) == 1
+        assert claims[0].worker_id == "worker_reclaim_vb"
+
+    def test_swarm_evidence_aggregates_without_final_verification(
+        self, voteballot_build_job: FoundUpJob
+    ) -> None:
+        """
+        Swarm aggregates evidence without claiming final verification.
+
+        Proves:
+          - Add evidence refs from multiple simulated assignments
+          - Aggregate evidence
+          - verification_complete=False, cabr_ready=False always
+        """
+        job = voteballot_build_job
+        plan = create_build_plan_from_job(job)
+        coordinator = create_swarm_coordinator(plan)
+
+        # Register workers
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="evidence_worker_1",
+            worker_type="openclaw",
+            capabilities=["validate"],
+        ))
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="evidence_worker_2",
+            worker_type="hermes",
+            capabilities=["build"],
+        ))
+
+        # Create and complete assignments with evidence
+        if len(plan.steps) >= 2:
+            assign_1 = coordinator.assign_step(
+                plan.steps[0],
+                "evidence_worker_1",
+                [f"{VOTEBALLOTS_MODULE_PATH}/README.md"],
+            )
+            assign_2 = coordinator.assign_step(
+                plan.steps[1],
+                "evidence_worker_2",
+                [f"{VOTEBALLOTS_MODULE_PATH}/INTERFACE.md"],
+            )
+
+            # Complete with evidence
+            coordinator.complete_assignment(
+                assign_1.assignment_id,
+                [f"evidence/voteballot/{plan.steps[0].step_id}/ref1"],
+            )
+            coordinator.complete_assignment(
+                assign_2.assignment_id,
+                [
+                    f"evidence/voteballot/{plan.steps[1].step_id}/ref1",
+                    f"evidence/voteballot/{plan.steps[1].step_id}/ref2",
+                ],
+            )
+
+            # Aggregate evidence
+            bundle: EvidenceBundle = coordinator.aggregate_evidence()
+
+            assert bundle.total_assignments == 2
+            assert bundle.completed_assignments == 2
+            assert len(bundle.evidence_refs) == 3
+
+            # WSP 97: No final verification claims
+            assert bundle.verification_complete is False
+            assert bundle.cabr_ready is False
+
+    def test_full_voteballot_swarm_poc_stays_simulated(
+        self, voteballot_build_job: FoundUpJob
+    ) -> None:
+        """
+        Full VoteBallot swarm PoC stays simulated throughout.
+
+        Proves:
+          - Job -> BuildPlan -> Swarm assignments -> Executor simulate -> Summary
+          - real_execution_performed=False
+          - No worker process starts
+          - No BuildStep real execution occurs
+        """
+        job = voteballot_build_job
+
+        # Step 1: Generate BuildPlan
+        plan = create_build_plan_from_job(job)
+        assert plan.dry_run is True
+        assert plan.mode == BuildMode.DRY_RUN
+
+        # Step 2: Create swarm
+        coordinator = create_swarm_coordinator(plan)
+
+        # Step 3: Register workers
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="swarm_worker_001",
+            worker_type="openclaw",
+            capabilities=["validate", "build"],
+        ))
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="swarm_worker_002",
+            worker_type="hermes",
+            capabilities=["test"],
+        ))
+
+        # Step 4: Assign all steps and complete with simulation
+        executor = BuildPlanExecutor(dry_run=True)
+        all_evidence_refs = []
+
+        for i, step in enumerate(plan.steps):
+            worker_id = "swarm_worker_001" if i % 2 == 0 else "swarm_worker_002"
+            file_suffix = f"file_{i}.md"
+
+            assignment = coordinator.assign_step(
+                step,
+                worker_id,
+                [f"{VOTEBALLOTS_MODULE_PATH}/{file_suffix}"],
+            )
+
+            # Simulate step execution
+            result = executor.simulate_step(plan, step)
+            assert result.status == StepExecutionStatus.SIMULATED
+            assert result.simulated is True
+
+            # Complete assignment
+            coordinator.complete_assignment(
+                assignment.assignment_id,
+                result.evidence_refs,
+            )
+            all_evidence_refs.extend(result.evidence_refs)
+
+        # Step 5: Get summary
+        summary: SwarmExecutionSummary = coordinator.summarize()
+
+        # WSP 97 Truth Assertions
+        assert summary.all_simulated is True
+        assert summary.real_execution_performed is False
+        assert summary.build_complete is True  # All assignments completed
+
+        # No worker process actually started
+        assert summary.total_workers == 2
+        assert summary.completed_assignments == len(plan.steps)
+        assert summary.failed_assignments == 0
+
+        # Evidence bundle also confirms no verification
+        bundle = coordinator.aggregate_evidence()
+        assert bundle.verification_complete is False
+        assert bundle.cabr_ready is False
+
+        # Create execution receipt
+        step_results = [executor.simulate_step(plan, step) for step in plan.steps]
+        receipt: ExecutionReceipt = executor.create_execution_receipt(plan, step_results)
+
+        # Receipt confirms no real execution
+        assert receipt.verification_complete is False
+        assert receipt.cabr_ready is False
+        assert receipt.payout_ready is False
+        assert receipt.real_execution_performed is False
 
 
 if __name__ == "__main__":
