@@ -1,5 +1,50 @@
 # Agent Module TestModLog
 
+## 2026-04-30 - Swarm Dispatch Integration Tests
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_swarm_dispatch_integration.py -q
+```
+
+**Result**: PASS
+
+**Summary**: 12 passed in 0.89s.
+
+**Coverage**:
+1. dispatch_next dequeues matching queue entry and dispatches simulated assignment
+2. dispatch_next returns blocked/no-match for wrong capability
+3. complete_dispatched_assignment records evidence in queue and dispatcher
+4. run_simulated_cycle performs dequeue -> dispatch -> complete
+5. multiple workers can process different assignments without file conflicts
+6. summary reports all_simulated=True and real_execution_performed=False
+7. VoteBallot swarm queue can run one simulated dispatch cycle
+
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 97.
+
+---
+
+## 2026-04-30 - Full Agent Module Test Suite (OC18)
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_swarm_dispatch_integration.py modules/foundups/agent/tests/test_worker_assignment_protocol.py modules/foundups/agent/tests/test_build_plan_swarm_queue.py -q
+```
+
+**Result**: PASS
+
+**Summary**: 57 passed.
+
+**Notes**:
+- All dispatch integration tests (12) passing
+- All worker assignment protocol tests (25) still passing
+- All queue tests (20) still passing
+- No regressions
+
+---
+
 ## 2026-04-30 - Worker Assignment Protocol Tests
 
 **Command**:

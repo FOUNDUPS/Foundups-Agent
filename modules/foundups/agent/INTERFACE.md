@@ -227,6 +227,45 @@ WorkerTrustLevel         # UNTRUSTED | VERIFIED | TRUSTED | SYSTEM
 
 ---
 
+## Swarm Dispatch Integration (OC18)
+
+### SwarmDispatchCoordinator
+
+```python
+# modules/foundups/agent/src/swarm_dispatch_integration.py
+class SwarmDispatchCoordinator:
+    """Coordinates between SwarmWorkerQueue and AssignmentDispatcher."""
+    
+    def __init__(self, queue: SwarmWorkerQueue, dispatcher: AssignmentDispatcher): ...
+    def dispatch_next(self, worker_id: str) -> DispatchCycleResult: ...
+    def complete_dispatched_assignment(self, worker_id: str, entry_id: str, evidence_refs: list[str]) -> DispatchCycleResult: ...
+    def run_simulated_cycle(self, worker_id: str, evidence_refs: list[str] | None) -> DispatchCycleResult: ...
+    def summarize(self) -> QueueDispatchSummary: ...
+```
+
+### Integration Dataclasses
+
+```python
+DispatchCycleResult     # Result of dispatch cycle (simulated)
+QueueDispatchSummary    # Queue/dispatcher state summary
+```
+
+### Integration Enums
+
+```python
+DispatchCycleStatus     # SUCCESS | NO_QUEUED_ENTRIES | NO_CAPABILITY_MATCH | ...
+```
+
+### Integration WSP 97 Truth Fields
+
+- `DispatchCycleResult.simulated = True` (always)
+- `DispatchCycleResult.real_process_started = False` (always)
+- `QueueDispatchSummary.all_simulated = True` (always)
+- `QueueDispatchSummary.real_execution_performed = False` (always)
+- No CABR/reward/payout/token fields
+
+---
+
 ## Event Schemas
 
 ### agent_joins
