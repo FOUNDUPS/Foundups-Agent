@@ -9,6 +9,20 @@ Tests cover two surfaces:
 
 ## Implemented Test Coverage
 
+### Worker Assignment Protocol
+
+`test_worker_assignment_protocol.py` verifies:
+
+1. register_worker creates tracked worker process
+2. register_worker records runtime type and capabilities
+3. dispatch_assignment returns simulated/not-implemented status
+4. dispatch_assignment does not start process
+5. heartbeat updates worker last_seen
+6. completion event records evidence_refs
+7. deregistration changes status
+8. no CABR/reward/payout/token fields exist
+9. all WSP_97 truth fields remain false/simulated
+
 ### Swarm WRE Queue
 
 `test_build_plan_swarm_queue.py` verifies:
