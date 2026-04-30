@@ -115,6 +115,70 @@ WorkerCapability     # VALIDATE | BUILD | TEST | ALL
 
 ---
 
+## Swarm WRE Queue (OC15)
+
+### SwarmWorkerQueue
+
+```python
+# modules/foundups/agent/src/build_plan_swarm_queue.py
+class SwarmWorkerQueue:
+    """Queue for swarm worker assignment dispatch."""
+    
+    def enqueue_assignment(self, assignment: StepAssignment, priority: QueuePriority, step_action: BuildStepAction) -> QueueAssignmentResult: ...
+    def dequeue_for_worker(self, request: WorkerDequeueRequest) -> WorkerDequeueResult: ...
+    def heartbeat(self, worker_id: str, entry_id: str) -> WorkerHeartbeat: ...
+    def complete_assignment(self, report: AssignmentCompletionReport) -> QueueAssignmentResult: ...
+    def expire_entries(self, now: datetime) -> list[str]: ...
+    def list_entries(self, status: QueueEntryStatus) -> list[SwarmWorkerQueueEntry]: ...
+```
+
+### Queue Dataclasses
+
+```python
+SwarmWorkerQueueEntry  # Queue entry with status, lease, evidence
+WorkerDequeueRequest   # Worker request with capabilities
+WorkerDequeueResult    # Dequeue result with assigned entries
+WorkerHeartbeat        # Heartbeat response with lease renewal
+AssignmentCompletionReport  # Completion report with evidence
+QueueAssignmentResult  # Operation result
+```
+
+### Queue Enums
+
+```python
+QueuePriority     # CRITICAL | HIGH | NORMAL | LOW
+QueueEntryStatus  # QUEUED | PROCESSING | COMPLETED | FAILED | EXPIRED
+DequeueDecision   # ASSIGNED | NO_MATCH | QUEUE_EMPTY | BLOCKED
+CompletionStatus  # SUCCEEDED | FAILED | SKIPPED
+```
+
+### Capability Matching
+
+| Step Action | Required Capability |
+|-------------|---------------------|
+| VALIDATE_* | validate |
+| CREATE_*, UPDATE_* | build |
+| RUN_TESTS | test |
+
+### Queue Lifecycle
+
+```
+Enqueue → QUEUED → Dequeue → PROCESSING → Complete → COMPLETED
+                       ↓ (lease expired)
+                    Requeue → QUEUED (if retriable)
+                       ↓
+                    EXPIRED (if max retries)
+```
+
+### Queue WSP 97 Truth Fields
+
+- `SwarmWorkerQueueEntry.simulated = True` (always)
+- `AssignmentCompletionReport.simulated = True` (always)
+- No `real_execution_performed` field exists
+- No CABR/reward/payout/token fields
+
+---
+
 ## Event Schemas
 
 ### agent_joins

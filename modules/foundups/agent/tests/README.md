@@ -9,6 +9,35 @@ Tests cover two surfaces:
 
 ## Implemented Test Coverage
 
+### Swarm WRE Queue
+
+`test_build_plan_swarm_queue.py` verifies:
+
+1. Create queue entry from StepAssignment
+2. Dequeue matching worker capability succeeds
+3. Dequeue mismatched worker capability is blocked
+4. Heartbeat renews lease
+5. Completion report marks entry complete with evidence
+6. Expired entry can be requeued
+7. Simulated completion cannot set real_execution_performed=True
+8. Queue entry has no CABR/reward/payout/token fields
+9. VoteBallot swarm assignment can be enqueued and dequeued by simulated worker
+
+### Swarm Coordination
+
+`test_build_plan_swarm.py` verifies:
+
+1. Register multiple workers
+2. Assign different steps to different workers
+3. Block duplicate file claims
+4. Allow release then re-claim
+5. Expire lease releases claim
+6. Reject out-of-scope file claim
+7. Aggregate evidence from multiple assignments
+8. Summary reports simulated-only execution
+9. No real_execution_performed field can become true
+10. VoteBallot BuildPlan can be split into multiple simulated assignments
+
 ### Hermes FoundUp Builder
 
 `test_hermes_foundup_builder.py` verifies:

@@ -1,5 +1,63 @@
 # Agent Module ModLog
 
+## 2026-04-30 - BuildPlan Swarm WRE Queue Contract (v0.11.0)
+
+**Author**: 0102 (W4)
+**Slice**: OC15_SWARM_WORKER_ASSIGNMENT_WRE_QUEUE_CONTRACT_PHASE1
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 97
+
+### Added
+
+- **build_plan_swarm_queue.py** - SwarmWorkerQueue scaffold
+  - `SwarmWorkerQueue` class for worker assignment dispatch
+  - `enqueue_assignment()` - Enqueue StepAssignment for worker pickup
+  - `dequeue_for_worker()` - Capability-aware dequeue
+  - `heartbeat()` - Lease renewal
+  - `complete_assignment()` - Completion with evidence
+  - `expire_entries()` - Expiration and requeue
+
+- **BUILD_PLAN_SWARM_WRE_QUEUE_CONTRACT.md** - Architecture spec
+
+### Enums and Dataclasses
+
+| Type | Purpose |
+|------|---------|
+| `QueuePriority` | CRITICAL, HIGH, NORMAL, LOW |
+| `QueueEntryStatus` | QUEUED, PROCESSING, COMPLETED, FAILED, EXPIRED |
+| `DequeueDecision` | ASSIGNED, NO_MATCH, QUEUE_EMPTY, BLOCKED |
+| `CompletionStatus` | SUCCEEDED, FAILED, SKIPPED |
+| `SwarmWorkerQueueEntry` | Queue entry with lease and evidence |
+| `WorkerDequeueRequest` | Worker request with capabilities |
+| `WorkerDequeueResult` | Dequeue result with assigned entries |
+| `WorkerHeartbeat` | Heartbeat response |
+| `AssignmentCompletionReport` | Completion report |
+| `QueueAssignmentResult` | Operation result |
+
+### Queue Rules
+
+| Rule | Description |
+|------|-------------|
+| R1 | Dequeue is capability-aware |
+| R2 | Dequeue creates/renews a lease |
+| R3 | Expired entries requeue if retries remain |
+| R4 | Completion reports simulated completion only |
+| R5 | No real worker process is started |
+| R6 | No files are edited |
+| R7 | No CABR/payout/reward fields exist |
+
+### WSP 97 Truth Boundary
+
+- `SwarmWorkerQueueEntry.simulated = True` (always)
+- `AssignmentCompletionReport.simulated = True` (always)
+- `real_execution_performed` does not exist (cannot become True)
+- No CABR/reward/payout/token fields exist
+
+### Tests
+
+- `test_build_plan_swarm_queue.py` - 20 tests covering all 9 requirements
+
+---
+
 ## 2026-04-30 - BuildPlan Swarm Coordination Scaffold (v0.10.0)
 
 **Author**: 0102 (W4)
