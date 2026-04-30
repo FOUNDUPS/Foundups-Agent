@@ -1,5 +1,38 @@
 # Agent Module TestModLog
 
+## 2026-05-01 - Worker Queue Observability Tests (OC20)
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_worker_queue_observability.py -q
+```
+
+**Result**: PASS
+
+**Summary**: 28 passed in 1.04s.
+
+**Coverage**:
+1. emit_event stores append-only event
+2. emit_heartbeat creates heartbeat event with consecutive tracking
+3. emit_lease_expired creates lease expiry signal
+4. worker availability/unavailability events are recorded
+5. snapshot_queue_health reports queued/processing/completed/expired counts
+6. get_events filters by worker_id
+7. event fields preserve evidence_refs
+8. all observability is in-memory only
+9. no real worker/process fields imply execution
+10. no CABR/reward/payout/token fields exist
+
+**Notes**:
+- Implements WSP 91 (DAEMON Observability Protocol) Pillar 1 (Logs) and partial Pillar 3 (Metrics)
+- All 32 agent queue tests still passing (no regressions)
+- All 33 VoteBallot PoC tests still passing (no regressions)
+
+**WSP References**: WSP 11, WSP 50, WSP 91, WSP 97.
+
+---
+
 ## 2026-04-30 - Full VoteBallot Dispatch PoC Integration (OC19)
 
 **Command**:

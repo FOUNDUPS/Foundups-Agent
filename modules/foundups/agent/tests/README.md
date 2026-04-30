@@ -9,6 +9,21 @@ Tests cover two surfaces:
 
 ## Implemented Test Coverage
 
+### Worker Queue Observability
+
+`test_worker_queue_observability.py` verifies:
+
+1. emit_event stores append-only event
+2. emit_heartbeat creates heartbeat event with consecutive tracking
+3. emit_lease_expired creates lease expiry signal
+4. worker availability/unavailability events are recorded
+5. snapshot_queue_health reports queued/processing/completed/expired counts
+6. get_events filters by worker_id
+7. event fields preserve evidence_refs
+8. all observability is in-memory only
+9. no real worker/process fields imply execution
+10. no CABR/reward/payout/token fields exist
+
 ### Swarm Dispatch Integration
 
 `test_swarm_dispatch_integration.py` verifies:

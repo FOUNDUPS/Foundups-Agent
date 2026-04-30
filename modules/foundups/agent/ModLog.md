@@ -1,5 +1,58 @@
 # Agent Module ModLog
 
+## 2026-05-01 - Worker Queue Observability Scaffold (v0.14.0)
+
+**Author**: 0102 (W4)
+**Slice**: OC20_WRE_WORKER_QUEUE_OBSERVABILITY_EVENTS_PHASE1
+**WSP References**: WSP 11, WSP 50, WSP 91, WSP 97
+
+### Added
+
+- **worker_queue_observability.py** - WorkerQueueObservability
+  - `WorkerQueueObservability` class for queue telemetry
+  - `emit_event()` - Emit observability event (append-only)
+  - `emit_heartbeat()` - Emit heartbeat with consecutive tracking
+  - `emit_lease_expired()` - Emit lease expiry signal
+  - `emit_worker_available()` - Emit worker availability event
+  - `emit_worker_unavailable()` - Emit worker unavailability event
+  - `snapshot_queue_health()` - Queue health snapshot with counts
+
+### Enums and Dataclasses
+
+| Type | Purpose |
+|------|---------|
+| `WorkerQueueEventType` | HEARTBEAT, LEASE_EXPIRED, WORKER_AVAILABLE, etc. |
+| `WorkerAvailabilityStatus` | AVAILABLE, BUSY, OFFLINE, TERMINATED |
+| `QueueHealthStatus` | HEALTHY, DEGRADED, UNHEALTHY |
+| `WorkerQueueEvent` | Base event with timestamp, worker_id, entry_id, evidence_refs |
+| `WorkerHeartbeatSnapshot` | Heartbeat state with consecutive count |
+| `LeaseExpirySignal` | Lease expiration details |
+| `WorkerAvailabilitySnapshot` | Worker availability state |
+| `QueueHealthSnapshot` | Queue health with entry counts |
+
+### WSP 91 Three Pillars
+
+| Pillar | Implementation |
+|--------|----------------|
+| Logs | emit_* methods create discrete events with timestamps |
+| Traces | Not implemented (Phase 2) |
+| Metrics | snapshot_* methods for aggregated state |
+
+### WSP 97 Truth Boundary
+
+- Events are in-memory only (Phase 1)
+- Events are append-only
+- No real_execution_performed field exists
+- No CABR/reward/payout/token fields exist
+- No external telemetry sink yet
+- No RedDog/pfMALL event emission yet
+
+### Tests
+
+- `test_worker_queue_observability.py` - 28 tests covering all 10 requirements
+
+---
+
 ## 2026-04-30 - Swarm Dispatch Integration (v0.13.0)
 
 **Author**: 0102 (W4)
