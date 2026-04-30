@@ -179,6 +179,54 @@ Enqueue → QUEUED → Dequeue → PROCESSING → Complete → COMPLETED
 
 ---
 
+## Worker Assignment Protocol (OC17)
+
+### AssignmentDispatcher
+
+```python
+# modules/foundups/agent/src/worker_assignment_protocol.py
+class AssignmentDispatcher:
+    """Dispatches SwarmWorkerQueue assignments to worker processes."""
+    
+    def register_worker(self, registration: WorkerRegistration) -> WorkerProcess: ...
+    def deregister_worker(self, worker_id: str) -> WorkerDeregistration: ...
+    def dispatch_assignment(self, request: AssignmentDispatchRequest) -> AssignmentDispatchResult: ...
+    def receive_heartbeat(self, event: WorkerHeartbeatEvent) -> WorkerProcess: ...
+    def receive_completion(self, event: WorkerCompletionEvent) -> AssignmentDispatchResult: ...
+    def list_workers(self, status: WorkerProcessStatus | None) -> list[WorkerProcess]: ...
+```
+
+### Protocol Dataclasses
+
+```python
+WorkerProcess           # Registered worker with status, capabilities
+WorkerRegistration      # Worker registration request
+WorkerDeregistration    # Deregistration result
+AssignmentDispatchRequest   # Dispatch request with step details
+AssignmentDispatchResult    # Dispatch result (simulated)
+WorkerHeartbeatEvent    # Heartbeat from worker
+WorkerCompletionEvent   # Completion report with evidence
+```
+
+### Protocol Enums
+
+```python
+WorkerProcessStatus      # IDLE | ASSIGNED | PROCESSING | FAILED | TERMINATED
+WorkerRuntimeType        # OPENCLAW | HERMES | CLAUDE_0102 | QWEN | GEMMA | GENERIC
+AssignmentDispatchStatus # SIMULATED_DISPATCH | SPECIFIED_NOT_IMPLEMENTED | WORKER_NOT_FOUND | ...
+WorkerTrustLevel         # UNTRUSTED | VERIFIED | TRUSTED | SYSTEM
+```
+
+### Protocol WSP 97 Truth Fields
+
+- `WorkerProcess.simulated = True` (always)
+- `AssignmentDispatchResult.simulated = True` (always)
+- `AssignmentDispatchResult.real_process_started = False` (always)
+- `WorkerCompletionEvent.simulated = True` (always)
+- No CABR/reward/payout/token fields
+
+---
+
 ## Event Schemas
 
 ### agent_joins

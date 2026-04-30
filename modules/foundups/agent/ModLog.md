@@ -1,5 +1,65 @@
 # Agent Module ModLog
 
+## 2026-04-30 - Real Worker Assignment Protocol Scaffold (v0.12.0)
+
+**Author**: 0102 (W4)
+**Slice**: OC17_REAL_WORKER_ASSIGNMENT_PROTOCOL_DESIGN_PHASE1
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 97
+
+### Added
+
+- **worker_assignment_protocol.py** - AssignmentDispatcher scaffold
+  - `AssignmentDispatcher` class for worker dispatch
+  - `register_worker()` - Register worker with capabilities
+  - `deregister_worker()` - Release worker and assignments
+  - `dispatch_assignment()` - Simulated dispatch (no real process)
+  - `receive_heartbeat()` - Update worker last_seen
+  - `receive_completion()` - Record evidence from completion
+
+- **REAL_WORKER_ASSIGNMENT_PROTOCOL.md** - Architecture spec
+
+### Enums and Dataclasses
+
+| Type | Purpose |
+|------|---------|
+| `WorkerProcessStatus` | IDLE, ASSIGNED, PROCESSING, FAILED, TERMINATED |
+| `WorkerRuntimeType` | OPENCLAW, HERMES, CLAUDE_0102, QWEN, GEMMA, GENERIC |
+| `AssignmentDispatchStatus` | SIMULATED_DISPATCH, SPECIFIED_NOT_IMPLEMENTED, etc. |
+| `WorkerTrustLevel` | UNTRUSTED, VERIFIED, TRUSTED, SYSTEM |
+| `WorkerProcess` | Registered worker with status, capabilities |
+| `WorkerRegistration` | Worker registration request |
+| `WorkerDeregistration` | Deregistration result |
+| `AssignmentDispatchRequest` | Dispatch request with step details |
+| `AssignmentDispatchResult` | Dispatch result (simulated) |
+| `WorkerHeartbeatEvent` | Heartbeat from worker |
+| `WorkerCompletionEvent` | Completion report with evidence |
+
+### Protocol Rules
+
+| Rule | Description |
+|------|-------------|
+| R1 | Dispatch is simulated only |
+| R2 | No real processes are started |
+| R3 | No Claude/OpenClaw/Hermes invocation |
+| R4 | Identity verification is simulated |
+| R5 | Completion can carry evidence_refs |
+| R6 | No CABR/payout/reward fields exist |
+
+### WSP 97 Truth Boundary
+
+- `WorkerProcess.simulated = True` (always)
+- `AssignmentDispatchResult.simulated = True` (always)
+- `AssignmentDispatchResult.real_process_started = False` (always)
+- `WorkerCompletionEvent.simulated = True` (always)
+- `real_execution_performed` does not exist
+- No CABR/reward/payout/token fields exist
+
+### Tests
+
+- `test_worker_assignment_protocol.py` - 25 tests covering all 9 requirements
+
+---
+
 ## 2026-04-30 - BuildPlan Swarm WRE Queue Contract (v0.11.0)
 
 **Author**: 0102 (W4)

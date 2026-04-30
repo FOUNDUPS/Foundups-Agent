@@ -1,5 +1,51 @@
 # Agent Module TestModLog
 
+## 2026-04-30 - Worker Assignment Protocol Tests
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_worker_assignment_protocol.py -q
+```
+
+**Result**: PASS
+
+**Summary**: 25 passed in 0.26s.
+
+**Coverage**:
+1. register_worker creates tracked worker process
+2. register_worker records runtime type and capabilities
+3. dispatch_assignment returns simulated/not-implemented status
+4. dispatch_assignment does not start process
+5. heartbeat updates worker last_seen
+6. completion event records evidence_refs
+7. deregistration changes status
+8. no CABR/reward/payout/token fields exist
+9. all WSP_97 truth fields remain false/simulated
+
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 97.
+
+---
+
+## 2026-04-30 - Full Agent Module Test Suite (OC17)
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_worker_assignment_protocol.py modules/foundups/agent/tests/test_build_plan_swarm_queue.py -q
+```
+
+**Result**: PASS
+
+**Summary**: 45 passed.
+
+**Notes**:
+- All worker assignment protocol tests (25) passing
+- All queue tests (20) still passing
+- No regressions
+
+---
+
 ## 2026-04-30 - BuildPlan Swarm WRE Queue Tests
 
 **Command**:
