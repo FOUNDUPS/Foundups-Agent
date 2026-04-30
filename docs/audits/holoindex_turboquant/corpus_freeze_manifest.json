@@ -1,19 +1,19 @@
 {
   "vector_path": "E:\\HoloIndex\\vectors",
-  "created_at_utc": "2026-04-23T22:14:51.554246+00:00",
-  "git_sha": "0526d93e1765",
+  "created_at_utc": "2026-04-30T22:09:49.239471+00:00",
+  "git_sha": "4bf59321a7cf",
   "collections": {
     "navigation_code": {
       "count": 296,
       "ids_sha256": "f688b8468ebfd4d7b6da94be8b85a051047ad06cc6987b1a47f7fe31aab1bb09",
       "documents_sha256": "d55331ec379a4dfb0dcd84787e31437895beb4cf2dac2049b25ba0ba74fe88ce",
-      "metadatas_sha256": "8fd30286e762116c629092f042df678c48eebe476f7e217a8beb93d8423a0725"
+      "metadatas_sha256": "1756ae26321344d063ee7c4c48b28e9f8273c56e195c11d78a0c1035e855bca7"
     },
     "navigation_wsp": {
-      "count": 3322,
-      "ids_sha256": "4c5ed4982fd92ecc5238443add46247d74e8b002492e1ce655cf4bb1c7856bce",
-      "documents_sha256": "5caaf062120f635511ecb338d4ee74d25ad73e6b1e2aa438b617872525fc3af3",
-      "metadatas_sha256": "6ba05c55e1e649fe0e7d3b905e8b89400d5453428f686dc8a3772b4db51bbe7c"
+      "count": 117,
+      "ids_sha256": "3453d463ca5e77fecccb5f11f338448ae4a95fcf885d6a571d5841c6227b900d",
+      "documents_sha256": "30c8dc98239fd4c795ed394386179bab24549cc8536b2821e3a79eaff582dfcf",
+      "metadatas_sha256": "2238e0cc8f324c3203862d8a98e8173fe3991d7d4a5c09db083019ee482a28f0"
     },
     "navigation_tests": {
       "count": 0,
@@ -40,5 +40,5 @@
       "metadatas_sha256": "063c0e0fd614fe997ea00978a5d3e1a2029144bb0e136bc0069f69fa694dd744"
     }
   },
-  "total_documents": 23762
+  "total_documents": 20557
 }
