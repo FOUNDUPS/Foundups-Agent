@@ -266,6 +266,59 @@ DispatchCycleStatus     # SUCCESS | NO_QUEUED_ENTRIES | NO_CAPABILITY_MATCH | ..
 
 ---
 
+## Worker Queue Observability (OC20)
+
+### WorkerQueueObservability
+
+```python
+# modules/foundups/agent/src/worker_queue_observability.py
+class WorkerQueueObservability:
+    """Observability system for SwarmWorkerQueue telemetry."""
+    
+    def emit_event(self, event: WorkerQueueEvent) -> WorkerQueueEvent: ...
+    def emit_heartbeat(self, worker_id: str, entry_id: str | None) -> WorkerQueueEvent: ...
+    def emit_lease_expired(self, entry_id: str, worker_id: str, reason: str) -> WorkerQueueEvent: ...
+    def emit_worker_available(self, worker_id: str, capabilities: list[str]) -> WorkerQueueEvent: ...
+    def emit_worker_unavailable(self, worker_id: str, reason: str) -> WorkerQueueEvent: ...
+    def snapshot_queue_health(self, queue: SwarmWorkerQueue) -> QueueHealthSnapshot: ...
+    def get_events(self, worker_id: str | None) -> list[WorkerQueueEvent]: ...
+```
+
+### Observability Dataclasses
+
+```python
+WorkerQueueEvent        # Base event with timestamp, worker_id, entry_id, evidence_refs
+WorkerHeartbeatSnapshot # Heartbeat state with consecutive count
+LeaseExpirySignal       # Lease expiration details
+WorkerAvailabilitySnapshot  # Worker availability state
+QueueHealthSnapshot     # Queue health with entry counts
+```
+
+### Observability Enums
+
+```python
+WorkerQueueEventType    # HEARTBEAT | LEASE_EXPIRED | WORKER_AVAILABLE | ...
+WorkerAvailabilityStatus # AVAILABLE | BUSY | OFFLINE | TERMINATED
+QueueHealthStatus       # HEALTHY | DEGRADED | UNHEALTHY
+```
+
+### WSP 91 Compliance
+
+| Pillar | Implementation |
+|--------|----------------|
+| Logs | emit_* methods create discrete events |
+| Traces | Not implemented (Phase 2) |
+| Metrics | snapshot_* methods for aggregated state |
+
+### Observability WSP 97 Truth Fields
+
+- Events are in-memory only (Phase 1)
+- Events are append-only
+- No real_execution_performed field exists
+- No CABR/reward/payout/token fields
+
+---
+
 ## Event Schemas
 
 ### agent_joins
