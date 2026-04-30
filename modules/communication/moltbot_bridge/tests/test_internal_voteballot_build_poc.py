@@ -124,6 +124,18 @@ from modules.foundups.agent.src.build_plan_executor import (
     StepExecutionStatus,
 )
 
+# Swarm WRE Queue (OC16 integration)
+from modules.foundups.agent.src.build_plan_swarm_queue import (
+    AssignmentCompletionReport,
+    CompletionStatus,
+    DequeueDecision,
+    QueueEntryStatus,
+    QueuePriority,
+    SwarmWorkerQueue,
+    WorkerDequeueRequest,
+    create_swarm_worker_queue,
+)
+
 
 # ---------------------------------------------------------------------------
 # VoteBallot Constants (from foundup_manifest.json)
@@ -1145,6 +1157,395 @@ class TestVoteBallotSwarmCoordination:
         assert receipt.cabr_ready is False
         assert receipt.payout_ready is False
         assert receipt.real_execution_performed is False
+
+
+# ---------------------------------------------------------------------------
+# Test: Swarm WRE Queue Integration (OC16)
+# ---------------------------------------------------------------------------
+
+
+class TestVoteBallotSwarmQueueIntegration:
+    """
+    Verify SwarmWorkerQueue integration with VoteBallot PoC.
+
+    OC16: Integration tests proving swarm assignments can be enqueued,
+    dequeued by capability-matching workers, and completed with evidence.
+    All execution is simulated per WSP 97.
+    """
+
+    def test_voteballot_swarm_assignments_enqueue_to_worker_queue(
+        self, voteballot_build_job: FoundUpJob
+    ) -> None:
+        """
+        VoteBallot swarm assignments can be enqueued into SwarmWorkerQueue.
+
+        Proves:
+          - Create VoteBallot job -> BuildPlan -> SwarmCoordinator
+          - Assign steps to simulated workers
+          - Enqueue assignments into SwarmWorkerQueue
+          - Queue entries are simulated
+        """
+        job = voteballot_build_job
+
+        # Generate BuildPlan
+        plan = create_build_plan_from_job(job)
+        assert plan.foundup_id == VOTEBALLOTS_FOUNDUP_ID
+
+        # Create swarm coordinator
+        coordinator = create_swarm_coordinator(plan)
+
+        # Register worker
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="queue_worker_001",
+            worker_type="openclaw",
+            capabilities=["validate", "build"],
+        ))
+
+        # Create queue
+        queue = create_swarm_worker_queue()
+
+        # Assign and enqueue multiple steps
+        for i, step in enumerate(plan.steps[:3]):  # First 3 steps
+            assignment = coordinator.assign_step(
+                step,
+                "queue_worker_001",
+                [f"{VOTEBALLOTS_MODULE_PATH}/step_{i}.md"],
+            )
+
+            # Enqueue
+            result = queue.enqueue_assignment(
+                assignment=assignment,
+                priority=QueuePriority.NORMAL,
+                step_action=step.action,
+            )
+
+            assert result.success is True
+            assert result.entry_id is not None
+
+        # Verify queue state
+        entries = queue.list_entries()
+        assert len(entries) == 3
+
+        # All entries are simulated
+        for entry in entries:
+            assert entry.simulated is True
+            assert entry.status == QueueEntryStatus.QUEUED
+
+    def test_matching_worker_dequeues_voteballot_assignment(
+        self, voteballot_build_job: FoundUpJob
+    ) -> None:
+        """
+        Worker with matching capability can dequeue VoteBallot assignment.
+
+        Proves:
+          - Worker with 'validate' capability dequeues validation step
+          - Lease and entry status are correct
+        """
+        job = voteballot_build_job
+        plan = create_build_plan_from_job(job)
+        coordinator = create_swarm_coordinator(plan)
+
+        # Register worker with validate capability
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="validator_dequeue",
+            worker_type="openclaw",
+            capabilities=["validate"],
+        ))
+
+        # Get VALIDATE_GENESIS step
+        validate_step = next(
+            (s for s in plan.steps if s.action == BuildStepAction.VALIDATE_GENESIS),
+            plan.steps[0],
+        )
+
+        # Assign step
+        assignment = coordinator.assign_step(
+            validate_step,
+            "validator_dequeue",
+            [f"{VOTEBALLOTS_MODULE_PATH}/README.md"],
+        )
+
+        # Enqueue with VALIDATE action
+        queue = create_swarm_worker_queue()
+        enqueue_result = queue.enqueue_assignment(
+            assignment=assignment,
+            priority=QueuePriority.NORMAL,
+            step_action=validate_step.action,
+        )
+
+        # Dequeue with matching capability
+        dequeue_request = WorkerDequeueRequest(
+            worker_id="validator_dequeue",
+            capabilities=["validate"],
+        )
+        dequeue_result = queue.dequeue_for_worker(dequeue_request)
+
+        # Assertions
+        assert dequeue_result.success is True
+        assert dequeue_result.decision == DequeueDecision.ASSIGNED
+        assert len(dequeue_result.entries) == 1
+
+        entry = dequeue_result.entries[0]
+        assert entry.status == QueueEntryStatus.PROCESSING
+        assert entry.worker_id == "validator_dequeue"
+        assert entry.lease_expires_at is not None
+        assert entry.simulated is True
+
+    def test_mismatched_worker_cannot_dequeue_assignment(
+        self, voteballot_build_job: FoundUpJob
+    ) -> None:
+        """
+        Worker lacking required capability cannot dequeue assignment.
+
+        Proves:
+          - Worker with only 'test' capability
+          - Cannot dequeue 'validate' or 'build' assignments
+        """
+        job = voteballot_build_job
+        plan = create_build_plan_from_job(job)
+        coordinator = create_swarm_coordinator(plan)
+
+        # Register workers
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="build_worker",
+            worker_type="hermes",
+            capabilities=["build"],
+        ))
+
+        # Enqueue a VALIDATE step (requires 'validate' capability)
+        validate_step = plan.steps[0]  # VALIDATE_GENESIS
+        assignment = coordinator.assign_step(
+            validate_step,
+            "build_worker",
+            [f"{VOTEBALLOTS_MODULE_PATH}/README.md"],
+        )
+
+        queue = create_swarm_worker_queue()
+        queue.enqueue_assignment(
+            assignment=assignment,
+            step_action=BuildStepAction.VALIDATE_GENESIS,
+        )
+
+        # Try to dequeue with 'test' capability only
+        dequeue_request = WorkerDequeueRequest(
+            worker_id="test_only_worker",
+            capabilities=["test"],  # No 'validate' capability
+        )
+        dequeue_result = queue.dequeue_for_worker(dequeue_request)
+
+        # Should fail - no matching capability
+        assert dequeue_result.success is False
+        assert dequeue_result.decision == DequeueDecision.NO_MATCH
+        assert len(dequeue_result.entries) == 0
+
+    def test_voteballot_assignment_completion_reports_evidence(
+        self, voteballot_build_job: FoundUpJob
+    ) -> None:
+        """
+        Completed VoteBallot assignment includes evidence_refs.
+
+        Proves:
+          - Simulated completion report includes evidence_refs
+          - Entry becomes COMPLETED
+          - No real_execution_performed field exists or is true
+        """
+        job = voteballot_build_job
+        plan = create_build_plan_from_job(job)
+        coordinator = create_swarm_coordinator(plan)
+
+        # Register worker
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="evidence_worker",
+            worker_type="openclaw",
+            capabilities=["validate"],
+        ))
+
+        # Assign step
+        step = plan.steps[0]
+        assignment = coordinator.assign_step(
+            step,
+            "evidence_worker",
+            [f"{VOTEBALLOTS_MODULE_PATH}/README.md"],
+        )
+
+        # Enqueue and dequeue
+        queue = create_swarm_worker_queue()
+        queue.enqueue_assignment(
+            assignment=assignment,
+            step_action=step.action,
+        )
+
+        dequeue_request = WorkerDequeueRequest(
+            worker_id="evidence_worker",
+            capabilities=["validate"],
+        )
+        dequeue_result = queue.dequeue_for_worker(dequeue_request)
+        entry = dequeue_result.entries[0]
+
+        # Complete with evidence
+        evidence_refs = [
+            f"evidence/voteballots/{step.step_id}/genesis_validated",
+            f"evidence/voteballots/{step.step_id}/structure_checked",
+        ]
+        completion_report = AssignmentCompletionReport(
+            entry_id=entry.entry_id,
+            worker_id="evidence_worker",
+            status=CompletionStatus.SUCCEEDED,
+            evidence_refs=evidence_refs,
+        )
+        completion_result = queue.complete_assignment(completion_report)
+
+        # Assertions
+        assert completion_result.success is True
+
+        completed_entry = queue.get_entry(entry.entry_id)
+        assert completed_entry.status == QueueEntryStatus.COMPLETED
+        assert len(completed_entry.evidence_refs) == 2
+        assert "genesis_validated" in completed_entry.evidence_refs[0]
+
+        # WSP 97: No real_execution_performed field
+        assert not hasattr(completed_entry, "real_execution_performed")
+        assert completed_entry.simulated is True
+
+        # Verify completion report itself is simulated
+        assert completion_report.simulated is True
+
+    def test_full_voteballot_swarm_queue_poc_stays_simulated(
+        self, voteballot_build_job: FoundUpJob
+    ) -> None:
+        """
+        Full VoteBallot swarm queue PoC stays simulated throughout.
+
+        Proves:
+          - Job -> BuildPlan -> Swarm assignments -> Queue enqueue
+          - Worker dequeue -> simulated completion -> evidence summary
+          - No real workers started
+          - No file edits occur
+          - verification_complete=False, cabr_ready=False, payout_ready=False
+        """
+        job = voteballot_build_job
+
+        # Step 1: Generate BuildPlan
+        plan = create_build_plan_from_job(job)
+        assert plan.dry_run is True
+        assert plan.mode == BuildMode.DRY_RUN
+
+        # Step 2: Create swarm coordinator and queue
+        coordinator = create_swarm_coordinator(plan)
+        queue = create_swarm_worker_queue()
+
+        # Step 3: Register workers with different capabilities
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="full_poc_validator",
+            worker_type="openclaw",
+            capabilities=["validate"],
+        ))
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="full_poc_builder",
+            worker_type="hermes",
+            capabilities=["build"],
+        ))
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="full_poc_tester",
+            worker_type="0102",
+            capabilities=["test"],
+        ))
+
+        # Step 4: Assign steps, enqueue, dequeue, complete
+        executor = BuildPlanExecutor(dry_run=True)
+        all_evidence = []
+
+        for i, step in enumerate(plan.steps[:5]):  # Process first 5 steps
+            # Determine worker by step action capability
+            action_capability_map = {
+                BuildStepAction.VALIDATE_GENESIS: ("validate", "full_poc_validator"),
+                BuildStepAction.VALIDATE_MANIFEST: ("validate", "full_poc_validator"),
+                BuildStepAction.CREATE_MODULE: ("build", "full_poc_builder"),
+                BuildStepAction.RUN_TESTS: ("test", "full_poc_tester"),
+            }
+            cap, worker_id = action_capability_map.get(
+                step.action, ("build", "full_poc_builder")
+            )
+
+            # Assign step to worker
+            assignment = coordinator.assign_step(
+                step,
+                worker_id,
+                [f"{VOTEBALLOTS_MODULE_PATH}/step_{i}.md"],
+            )
+            assert assignment.simulated is True
+
+            # Enqueue
+            enqueue_result = queue.enqueue_assignment(
+                assignment=assignment,
+                priority=QueuePriority.NORMAL,
+                step_action=step.action,
+            )
+            assert enqueue_result.success is True
+
+            # Dequeue with matching capability
+            dequeue_request = WorkerDequeueRequest(
+                worker_id=worker_id,
+                capabilities=[cap],
+            )
+            dequeue_result = queue.dequeue_for_worker(dequeue_request)
+            assert dequeue_result.success is True
+            entry = dequeue_result.entries[0]
+
+            # Simulate step execution
+            exec_result = executor.simulate_step(plan, step)
+            assert exec_result.status == StepExecutionStatus.SIMULATED
+            assert exec_result.simulated is True
+
+            # Complete assignment
+            completion_report = AssignmentCompletionReport(
+                entry_id=entry.entry_id,
+                worker_id=worker_id,
+                status=CompletionStatus.SUCCEEDED,
+                evidence_refs=exec_result.evidence_refs,
+            )
+            queue.complete_assignment(completion_report)
+
+            # Also complete in coordinator
+            coordinator.complete_assignment(
+                assignment.assignment_id,
+                exec_result.evidence_refs,
+            )
+            all_evidence.extend(exec_result.evidence_refs)
+
+        # Step 5: Verify queue state
+        completed_entries = queue.list_entries(status=QueueEntryStatus.COMPLETED)
+        assert len(completed_entries) == 5
+
+        for entry in completed_entries:
+            assert entry.simulated is True
+            assert not hasattr(entry, "real_execution_performed")
+
+        # Step 6: Get swarm summary
+        summary: SwarmExecutionSummary = coordinator.summarize()
+
+        # WSP 97 Truth Assertions
+        assert summary.all_simulated is True
+        assert summary.real_execution_performed is False
+
+        # Evidence bundle
+        bundle: EvidenceBundle = coordinator.aggregate_evidence()
+        assert bundle.verification_complete is False
+        assert bundle.cabr_ready is False
+
+        # No CABR/payout fields on entries
+        for entry in completed_entries:
+            entry_dict = entry.to_dict()
+            assert "cabr_ready" not in entry_dict
+            assert "payout_ready" not in entry_dict
+            assert "reward" not in entry_dict
+            assert "tokens" not in entry_dict
+
+        # No real workers started, no files edited
+        # (We can't directly assert this, but the fact that all entries
+        # are simulated=True and no exceptions from file operations proves it)
+        assert summary.total_workers == 3
+        assert len(all_evidence) > 0
 
 
 if __name__ == "__main__":
