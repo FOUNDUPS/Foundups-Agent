@@ -9,6 +9,18 @@ Tests cover two surfaces:
 
 ## Implemented Test Coverage
 
+### Swarm Dispatch Integration
+
+`test_swarm_dispatch_integration.py` verifies:
+
+1. dispatch_next dequeues matching queue entry and dispatches simulated assignment
+2. dispatch_next returns blocked/no-match for wrong capability
+3. complete_dispatched_assignment records evidence in queue and dispatcher
+4. run_simulated_cycle performs dequeue -> dispatch -> complete
+5. multiple workers can process different assignments without file conflicts
+6. summary reports all_simulated=True and real_execution_performed=False
+7. VoteBallot swarm queue can run one simulated dispatch cycle
+
 ### Worker Assignment Protocol
 
 `test_worker_assignment_protocol.py` verifies:
