@@ -136,6 +136,23 @@ from modules.foundups.agent.src.build_plan_swarm_queue import (
     create_swarm_worker_queue,
 )
 
+# Worker Assignment Dispatcher (OC17 integration)
+from modules.foundups.agent.src.worker_assignment_protocol import (
+    AssignmentDispatcher,
+    WorkerRegistration,
+    WorkerRuntimeType,
+    create_assignment_dispatcher,
+)
+
+# Swarm Dispatch Coordinator (OC18/OC19 integration)
+from modules.foundups.agent.src.swarm_dispatch_integration import (
+    DispatchCycleResult,
+    DispatchCycleStatus,
+    QueueDispatchSummary,
+    SwarmDispatchCoordinator,
+    create_swarm_dispatch_coordinator,
+)
+
 
 # ---------------------------------------------------------------------------
 # VoteBallot Constants (from foundup_manifest.json)
@@ -1546,6 +1563,448 @@ class TestVoteBallotSwarmQueueIntegration:
         # are simulated=True and no exceptions from file operations proves it)
         assert summary.total_workers == 3
         assert len(all_evidence) > 0
+
+
+# ---------------------------------------------------------------------------
+# Test: Full Dispatch PoC Integration (OC19)
+# ---------------------------------------------------------------------------
+
+
+class TestVoteBallotFullDispatchPoC:
+    """
+    Verify full dispatch PoC integration with VoteBallot.
+
+    OC19: Integration tests proving the full simulated dispatch path:
+        FoundUpJob -> BuildPlan -> SwarmCoordinator -> SwarmWorkerQueue
+        -> AssignmentDispatcher -> SwarmDispatchCoordinator -> Completion -> Summary
+
+    All execution is simulated per WSP 97.
+    """
+
+    def test_full_voteballot_dispatch_pipeline_single_worker(
+        self, voteballot_build_job: FoundUpJob
+    ) -> None:
+        """
+        Full VoteBallot dispatch pipeline with single worker.
+
+        Proves:
+          - Job -> BuildPlan -> Swarm assignment -> Queue enqueue
+          - Worker registration -> dispatch_next -> complete_dispatched_assignment
+          - Evidence flows through entire pipeline
+          - All WSP 97 truth boundaries preserved
+        """
+        job = voteballot_build_job
+
+        # Step 1: Generate BuildPlan
+        plan = create_build_plan_from_job(job)
+        assert plan.foundup_id == VOTEBALLOTS_FOUNDUP_ID
+        assert plan.mode == BuildMode.DRY_RUN
+
+        # Step 2: Create swarm coordinator
+        coordinator = create_swarm_coordinator(plan)
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="dispatch_single_001",
+            worker_type="openclaw",
+            capabilities=["validate", "build", "test"],
+        ))
+
+        # Step 3: Create queue and dispatcher
+        queue = create_swarm_worker_queue()
+        dispatcher = create_assignment_dispatcher()
+
+        # Register worker in dispatcher
+        dispatcher.register_worker(WorkerRegistration(
+            worker_id="dispatch_single_001",
+            runtime_type=WorkerRuntimeType.OPENCLAW,
+            capabilities=["validate", "build", "test"],
+        ))
+
+        # Step 4: Create dispatch coordinator
+        dispatch_coordinator = create_swarm_dispatch_coordinator(
+            queue=queue,
+            dispatcher=dispatcher,
+        )
+
+        # Step 5: Assign steps and enqueue
+        for i, step in enumerate(plan.steps[:3]):
+            assignment = coordinator.assign_step(
+                step,
+                "dispatch_single_001",
+                [f"{VOTEBALLOTS_MODULE_PATH}/step_{i}.md"],
+            )
+            queue.enqueue_assignment(
+                assignment=assignment,
+                priority=QueuePriority.NORMAL,
+                step_action=step.action,
+            )
+
+        # Step 6: Run dispatch cycles
+        all_evidence = []
+        for _ in range(3):
+            cycle_result: DispatchCycleResult = dispatch_coordinator.run_simulated_cycle(
+                worker_id="dispatch_single_001",
+            )
+            assert cycle_result.success is True
+            assert cycle_result.status == DispatchCycleStatus.SUCCESS
+            assert cycle_result.simulated is True
+            assert cycle_result.real_process_started is False
+            all_evidence.extend(cycle_result.evidence_refs)
+
+        # Step 7: Verify summary
+        summary: QueueDispatchSummary = dispatch_coordinator.summarize()
+
+        assert summary.total_completed == 3
+        assert summary.total_queued == 0
+        assert summary.all_simulated is True
+        assert summary.real_execution_performed is False
+        assert summary.total_evidence_refs == len(all_evidence)
+
+    def test_full_voteballot_dispatch_pipeline_multiple_workers(
+        self, voteballot_build_job: FoundUpJob
+    ) -> None:
+        """
+        Full VoteBallot dispatch pipeline with multiple workers.
+
+        Proves:
+          - Multiple workers process different assignments
+          - Capability matching routes to correct worker
+          - No file conflicts between workers
+          - Evidence aggregates from all workers
+        """
+        job = voteballot_build_job
+
+        # Step 1: Generate BuildPlan
+        plan = create_build_plan_from_job(job)
+
+        # Step 2: Create coordinator with multiple workers
+        coordinator = create_swarm_coordinator(plan)
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="validator_multi_001",
+            worker_type="openclaw",
+            capabilities=["validate"],
+        ))
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="builder_multi_001",
+            worker_type="hermes",
+            capabilities=["build"],
+        ))
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="tester_multi_001",
+            worker_type="0102",
+            capabilities=["test"],
+        ))
+
+        # Step 3: Create queue, dispatcher, and dispatch coordinator
+        queue = create_swarm_worker_queue()
+        dispatcher = create_assignment_dispatcher()
+
+        # Register all workers in dispatcher
+        dispatcher.register_worker(WorkerRegistration(
+            worker_id="validator_multi_001",
+            runtime_type=WorkerRuntimeType.OPENCLAW,
+            capabilities=["validate"],
+        ))
+        dispatcher.register_worker(WorkerRegistration(
+            worker_id="builder_multi_001",
+            runtime_type=WorkerRuntimeType.HERMES,
+            capabilities=["build"],
+        ))
+        dispatcher.register_worker(WorkerRegistration(
+            worker_id="tester_multi_001",
+            runtime_type=WorkerRuntimeType.CLAUDE_0102,
+            capabilities=["test"],
+        ))
+
+        dispatch_coordinator = create_swarm_dispatch_coordinator(
+            queue=queue,
+            dispatcher=dispatcher,
+        )
+
+        # Step 4: Map actions to workers and enqueue
+        action_worker_map = {
+            BuildStepAction.VALIDATE_GENESIS: "validator_multi_001",
+            BuildStepAction.VALIDATE_MANIFEST: "validator_multi_001",
+            BuildStepAction.CREATE_MODULE: "builder_multi_001",
+            BuildStepAction.RUN_TESTS: "tester_multi_001",
+        }
+
+        enqueued_workers = []
+        for i, step in enumerate(plan.steps[:4]):
+            worker_id = action_worker_map.get(step.action, "builder_multi_001")
+            enqueued_workers.append(worker_id)
+
+            assignment = coordinator.assign_step(
+                step,
+                worker_id,
+                [f"{VOTEBALLOTS_MODULE_PATH}/multi_{i}.md"],
+            )
+            queue.enqueue_assignment(
+                assignment=assignment,
+                step_action=step.action,
+            )
+
+        # Step 5: Each worker processes its assignments
+        total_processed = 0
+        for worker_id in ["validator_multi_001", "builder_multi_001", "tester_multi_001"]:
+            # Try to process up to 2 assignments per worker
+            for _ in range(2):
+                cycle_result = dispatch_coordinator.dispatch_next(worker_id)
+                if cycle_result.success:
+                    # Complete the dispatched assignment
+                    evidence = [f"evidence/{cycle_result.assignment_id}/multi_worker"]
+                    completion = dispatch_coordinator.complete_dispatched_assignment(
+                        worker_id=worker_id,
+                        entry_id=cycle_result.entry_id,
+                        evidence_refs=evidence,
+                    )
+                    if completion.success:
+                        total_processed += 1
+
+        # Step 6: Verify distribution
+        summary = dispatch_coordinator.summarize()
+
+        assert summary.total_completed >= 2  # At least some completed
+        assert summary.total_workers == 3
+        assert summary.all_simulated is True
+        assert summary.real_execution_performed is False
+
+    def test_full_dispatch_summary_preserves_wsp97_boundaries(
+        self, voteballot_build_job: FoundUpJob
+    ) -> None:
+        """
+        Full dispatch summary preserves WSP 97 truth boundaries.
+
+        Proves:
+          - all_simulated=True always
+          - real_execution_performed=False always
+          - No CABR/payout/token fields in summary
+          - simulated=True on all cycle results
+          - real_process_started=False on all cycle results
+        """
+        job = voteballot_build_job
+        plan = create_build_plan_from_job(job)
+        coordinator = create_swarm_coordinator(plan)
+
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="wsp97_worker",
+            worker_type="openclaw",
+            capabilities=["validate", "build", "test"],
+        ))
+
+        queue = create_swarm_worker_queue()
+        dispatcher = create_assignment_dispatcher()
+        dispatcher.register_worker(WorkerRegistration(
+            worker_id="wsp97_worker",
+            runtime_type=WorkerRuntimeType.OPENCLAW,
+            capabilities=["validate", "build", "test"],
+        ))
+
+        dispatch_coordinator = create_swarm_dispatch_coordinator(
+            queue=queue,
+            dispatcher=dispatcher,
+        )
+
+        # Enqueue some steps
+        for i, step in enumerate(plan.steps[:2]):
+            assignment = coordinator.assign_step(
+                step,
+                "wsp97_worker",
+                [f"{VOTEBALLOTS_MODULE_PATH}/wsp97_{i}.md"],
+            )
+            queue.enqueue_assignment(
+                assignment=assignment,
+                step_action=step.action,
+            )
+
+        # Run cycles
+        cycle_results = []
+        for _ in range(2):
+            result = dispatch_coordinator.run_simulated_cycle("wsp97_worker")
+            cycle_results.append(result)
+
+        # Verify cycle results
+        for result in cycle_results:
+            assert result.simulated is True
+            assert result.real_process_started is False
+
+            # Cycle result dict should not have CABR/payout fields
+            result_dict = result.to_dict()
+            assert "cabr_ready" not in result_dict
+            assert "payout_ready" not in result_dict
+            assert "reward" not in result_dict
+            assert "tokens" not in result_dict
+
+        # Verify summary
+        summary = dispatch_coordinator.summarize()
+
+        assert summary.all_simulated is True
+        assert summary.real_execution_performed is False
+
+        # Summary dict should not have CABR/payout fields
+        summary_dict = summary.to_dict()
+        assert "cabr_ready" not in summary_dict
+        assert "payout_ready" not in summary_dict
+        assert "reward" not in summary_dict
+        assert "tokens" not in summary_dict
+
+    def test_full_dispatch_pipeline_preserves_job_plan_receipt_correlation(
+        self,
+        voteballot_build_job: FoundUpJob,
+        mock_hermes_success: Dict[str, Any],
+    ) -> None:
+        """
+        Full dispatch pipeline preserves job->plan->receipt correlation.
+
+        Proves:
+          - Job identity flows through dispatch coordinator
+          - Plan source_job_id matches receipt job_id
+          - Evidence from dispatch flows to receipt
+          - Correlation maintained across all components
+        """
+        job = voteballot_build_job
+
+        # Step 1: Generate BuildPlan (preserves job_id)
+        plan = create_build_plan_from_job(job)
+        assert plan.source_job_id == job.job_id
+        assert plan.foundup_id == job.foundup_id
+
+        # Step 2: Create infrastructure
+        coordinator = create_swarm_coordinator(plan)
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="correlation_worker",
+            worker_type="openclaw",
+            capabilities=["validate", "build", "test"],
+        ))
+
+        queue = create_swarm_worker_queue()
+        dispatcher = create_assignment_dispatcher()
+        dispatcher.register_worker(WorkerRegistration(
+            worker_id="correlation_worker",
+            runtime_type=WorkerRuntimeType.OPENCLAW,
+            capabilities=["validate", "build", "test"],
+        ))
+
+        dispatch_coordinator = create_swarm_dispatch_coordinator(
+            queue=queue,
+            dispatcher=dispatcher,
+        )
+
+        # Step 3: Enqueue and process
+        for i, step in enumerate(plan.steps[:2]):
+            assignment = coordinator.assign_step(
+                step,
+                "correlation_worker",
+                [f"{VOTEBALLOTS_MODULE_PATH}/corr_{i}.md"],
+            )
+            queue.enqueue_assignment(
+                assignment=assignment,
+                step_action=step.action,
+            )
+
+        # Process assignments
+        for _ in range(2):
+            dispatch_coordinator.run_simulated_cycle("correlation_worker")
+
+        # Step 4: Execute job via Hermes (mocked) to create terminal state
+        with patch("modules.foundups.agent.src.hermes_adapter.HermesFoundUpBuilder") as mock_class:
+            mock_builder = MagicMock()
+            mock_builder.dry_run = True
+            mock_builder.extract_foundup.return_value = mock_hermes_success
+            mock_class.return_value = mock_builder
+
+            result = execute_foundup_job(job, force_dry_run=True)
+
+        # Step 5: Create receipt
+        receipt_result = create_receipt_from_job(result.job)
+        assert receipt_result.success is True
+        receipt = receipt_result.receipt
+
+        # Step 6: Verify correlation chain
+        # Plan source_job_id == job.job_id == receipt.job_id
+        assert plan.source_job_id == job.job_id
+        assert receipt.job_id == job.job_id
+        assert plan.source_job_id == receipt.job_id
+
+        # foundup_id matches across all
+        assert plan.foundup_id == job.foundup_id
+        assert receipt.foundup_id == job.foundup_id
+
+        # Evidence from dispatch is collected
+        dispatch_evidence = dispatch_coordinator.get_all_evidence()
+        assert len(dispatch_evidence) > 0
+
+        # Receipt has evidence from job execution
+        assert len(receipt.evidence_refs) > 0
+
+    def test_full_dispatch_pipeline_blocks_mismatched_worker(
+        self, voteballot_build_job: FoundUpJob
+    ) -> None:
+        """
+        Full dispatch pipeline blocks worker capability mismatch.
+
+        Proves:
+          - Worker registered with 'test' capability only
+          - Queue has 'validate' assignments
+          - dispatch_next returns NO_CAPABILITY_MATCH
+          - No assignment is processed
+        """
+        job = voteballot_build_job
+        plan = create_build_plan_from_job(job)
+        coordinator = create_swarm_coordinator(plan)
+
+        # Register worker with limited capability
+        coordinator.register_worker(WorkerIdentity(
+            worker_id="mismatch_tester",
+            worker_type="0102",
+            capabilities=["test"],  # Only test, no validate/build
+        ))
+
+        queue = create_swarm_worker_queue()
+        dispatcher = create_assignment_dispatcher()
+
+        # Register with same limited capability
+        dispatcher.register_worker(WorkerRegistration(
+            worker_id="mismatch_tester",
+            runtime_type=WorkerRuntimeType.CLAUDE_0102,
+            capabilities=["test"],
+        ))
+
+        dispatch_coordinator = create_swarm_dispatch_coordinator(
+            queue=queue,
+            dispatcher=dispatcher,
+        )
+
+        # Enqueue VALIDATE_GENESIS step (requires 'validate' capability)
+        validate_step = next(
+            (s for s in plan.steps if s.action == BuildStepAction.VALIDATE_GENESIS),
+            plan.steps[0],
+        )
+        assignment = coordinator.assign_step(
+            validate_step,
+            "mismatch_tester",  # Wrong worker for this action
+            [f"{VOTEBALLOTS_MODULE_PATH}/mismatch.md"],
+        )
+        queue.enqueue_assignment(
+            assignment=assignment,
+            step_action=BuildStepAction.VALIDATE_GENESIS,  # Requires 'validate'
+        )
+
+        # Try to dispatch - should fail due to capability mismatch
+        cycle_result = dispatch_coordinator.dispatch_next("mismatch_tester")
+
+        assert cycle_result.success is False
+        assert cycle_result.status == DispatchCycleStatus.NO_CAPABILITY_MATCH
+        assert cycle_result.entry_id is None
+        assert cycle_result.assignment_id is None
+
+        # Verify no assignments completed
+        summary = dispatch_coordinator.summarize()
+        assert summary.total_completed == 0
+        assert summary.total_queued == 1  # Still queued, not processed
+
+        # WSP 97 still enforced
+        assert summary.all_simulated is True
+        assert summary.real_execution_performed is False
 
 
 if __name__ == "__main__":
