@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-WRE FoundUpJob Consumer — Phase 1A Consumer Seam
+WRE FoundUpJob Consumer — Phase 1B Consumer Seam with Receipt Binding
 
 Drains FoundUpJobs through the WRE routing pipeline without making
 OpenClaw call Hermes directly. All dispatch goes through RouteEnvelope.
@@ -8,9 +8,13 @@ OpenClaw call Hermes directly. All dispatch goes through RouteEnvelope.
 Architecture:
   OpenClaw -> FoundUpJob (QUEUED) -> WRE Router -> RouteEnvelope
            -> This Consumer -> Hermes Executor (if routed)
-           -> Terminal Job -> Receipt Emitter
+           -> Terminal Job -> Receipt Emitter -> pAVS Verification
+           -> ConsumerResult (contains entire closed-loop evidence)
 
-This is Phase 1A: synchronous drain only, no daemon loop.
+Phase 1B Enhancement:
+  - ConsumerResult now carries receipt emission and pAVS verification
+  - One ConsumerResult contains the complete closed-loop evidence chain
+  - No need for callers to manually call receipt/pAVS APIs
 
 WSP Compliance:
   WSP 11  : Interface contract (typed dispatch)
@@ -21,6 +25,7 @@ WSP Compliance:
 NAVIGATION:
   -> Uses: foundup_job_router.py (route_foundup_job, RouteEnvelope)
   -> Uses: hermes_foundup_job_executor.py (execute_foundup_job)
+  -> Uses: receipt_emitter.py (emit_receipt_for_terminal_job)
   -> Uses: openclaw_foundup_orchestrator.py (get_job_queue, clear_job_queue)
   -> Called by: WRE gateway, manual drain commands
 """
@@ -30,7 +35,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, Iterable, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional
 
 from .foundup_job_router import (
     RouteEnvelope,
@@ -38,6 +43,11 @@ from .foundup_job_router import (
     TargetBackend,
     route_foundup_job,
 )
+
+if TYPE_CHECKING:
+    from modules.communication.moltbot_bridge.src.receipt_emitter import (
+        ReceiptEmissionResult,
+    )
 
 logger = logging.getLogger("wre_foundup_job_consumer")
 
@@ -57,8 +67,19 @@ class ConsumerResult:
     """
     Result container for a single job consumption.
 
-    Wraps the HermesJobExecutionResult (if dispatched) or records
-    why the job was not dispatched.
+    Phase 1B: Contains the complete closed-loop evidence chain:
+      - Routing decision (envelope)
+      - Hermes execution result (if dispatched)
+      - Receipt emission result (if terminal)
+      - pAVS verification result (via emission result)
+
+    One ConsumerResult contains everything needed to audit the
+    entire dry-run closed loop without manual API calls.
+
+    WSP 97 Truth Boundaries:
+      - receipt_emission.verification.verification_complete = False
+      - receipt_emission.verification.cabr_ready = False
+      - receipt_emission.verification.payout_ready = False
     """
 
     job_id: str
@@ -82,19 +103,77 @@ class ConsumerResult:
     envelope: Optional[RouteEnvelope] = None
     """RouteEnvelope from routing decision."""
 
+    receipt_emission: Optional["ReceiptEmissionResult"] = None
+    """
+    Receipt emission result (if job reached terminal state).
+
+    Contains:
+      - receipt: ProofOfComputeReceipt with evidence_refs
+      - verification: PAVSVerificationResult with truth fields
+
+    None if job did not reach terminal state or was not dispatched.
+    """
+
     consumed_at: datetime = field(default_factory=_utc_now)
     """Timestamp when consumption completed."""
 
     def to_dict(self) -> Dict[str, Any]:
         """Serialize to dict for logging/JSON."""
-        return {
+        result = {
             "job_id": self.job_id,
             "dispatched": self.dispatched,
             "route_status": self.route_status.value,
             "target_backend": self.target_backend.value,
             "reason": self.reason,
             "consumed_at": self.consumed_at.isoformat(),
+            "receipt_emitted": self.receipt_emission is not None and self.receipt_emission.success,
         }
+        # Include pAVS truth fields if available
+        if self.receipt_emission and self.receipt_emission.verification:
+            v = self.receipt_emission.verification
+            result["verification_complete"] = v.verification_complete
+            result["cabr_ready"] = v.cabr_ready
+            result["payout_ready"] = v.payout_ready
+        return result
+
+    @property
+    def is_terminal(self) -> bool:
+        """True if job reached terminal state."""
+        if self.hermes_result is None:
+            return False
+        job = getattr(self.hermes_result, "job", None)
+        if job is None:
+            return False
+        status = getattr(job, "status", None)
+        if status is None:
+            return False
+        return status.value in ("succeeded", "failed", "blocked")
+
+    @property
+    def has_receipt(self) -> bool:
+        """True if receipt was emitted."""
+        return self.receipt_emission is not None and self.receipt_emission.success
+
+    @property
+    def verification_complete(self) -> bool:
+        """WSP 97: Always False - never claim final verification."""
+        if self.receipt_emission and self.receipt_emission.verification:
+            return self.receipt_emission.verification.verification_complete
+        return False
+
+    @property
+    def cabr_ready(self) -> bool:
+        """WSP 97: Always False - no CABR consensus exists."""
+        if self.receipt_emission and self.receipt_emission.verification:
+            return self.receipt_emission.verification.cabr_ready
+        return False
+
+    @property
+    def payout_ready(self) -> bool:
+        """WSP 97: Always False - no payout engine exists."""
+        if self.receipt_emission and self.receipt_emission.verification:
+            return self.receipt_emission.verification.payout_ready
+        return False
 
 
 # ---------------------------------------------------------------------------
@@ -219,16 +298,25 @@ class FoundUpJobConsumer:
             )
 
             dispatched = True
+            job_status = hermes_result.job.status.value
             reason = (
                 f"Dispatched to {envelope.target_backend.value}; "
-                f"job_status={hermes_result.job.status.value}"
+                f"job_status={job_status}"
             )
 
             logger.info(
                 "[CONSUMER] Job %s completed: status=%s",
                 job_id,
-                hermes_result.job.status.value,
+                job_status,
             )
+
+            # Phase 1B: Emit receipt if job is terminal
+            receipt_emission = self._emit_receipt_if_terminal(hermes_result.job, job_id)
+            if receipt_emission:
+                if receipt_emission.success:
+                    reason += f"; receipt={receipt_emission.receipt.receipt_id}"
+                else:
+                    reason += f"; receipt_error={receipt_emission.error}"
 
             return ConsumerResult(
                 job_id=job_id,
@@ -238,6 +326,7 @@ class FoundUpJobConsumer:
                 reason=reason,
                 hermes_result=hermes_result,
                 envelope=envelope,
+                receipt_emission=receipt_emission,
             )
 
         except ImportError as e:
@@ -261,6 +350,71 @@ class FoundUpJobConsumer:
                 reason=f"Hermes dispatch exception: {e}",
                 envelope=envelope,
             )
+
+    def _emit_receipt_if_terminal(
+        self, job: Any, job_id: str
+    ) -> Optional["ReceiptEmissionResult"]:
+        """
+        Emit receipt and run pAVS verification if job is terminal.
+
+        Args:
+            job: The FoundUpJob after Hermes execution.
+            job_id: Job identifier for logging.
+
+        Returns:
+            ReceiptEmissionResult if job is terminal, None otherwise.
+
+        WSP 97 truth:
+            - Only terminal jobs emit receipts
+            - verification_complete=False always
+            - cabr_ready=False always
+            - payout_ready=False always
+        """
+        # Check if job is terminal
+        status = getattr(job, "status", None)
+        if status is None:
+            return None
+
+        status_value = status.value if hasattr(status, "value") else str(status)
+        if status_value.lower() not in ("succeeded", "failed", "blocked"):
+            logger.debug("[CONSUMER] Job %s not terminal (%s), skipping receipt", job_id, status_value)
+            return None
+
+        # Import receipt emitter
+        try:
+            from modules.communication.moltbot_bridge.src.receipt_emitter import (
+                emit_receipt_for_terminal_job,
+                ReceiptEmissionResult,
+            )
+        except ImportError as e:
+            logger.error("[CONSUMER] Receipt emitter not available: %s", e)
+            # Return a failure result without importing the class
+            return None
+
+        # Emit receipt (includes pAVS verification)
+        try:
+            emission_result = emit_receipt_for_terminal_job(job)
+
+            if emission_result.success:
+                logger.info(
+                    "[CONSUMER] Receipt emitted for job %s: receipt=%s decision=%s",
+                    job_id,
+                    emission_result.receipt.receipt_id,
+                    emission_result.verification.decision.value if emission_result.verification else "N/A",
+                )
+            else:
+                logger.warning(
+                    "[CONSUMER] Receipt emission failed for job %s: %s",
+                    job_id,
+                    emission_result.error,
+                )
+
+            return emission_result
+
+        except Exception as e:
+            logger.exception("[CONSUMER] Receipt emission exception for job %s: %s", job_id, e)
+            # Return None rather than constructing a partial result
+            return None
 
     def drain_jobs(self, jobs: Iterable[Any]) -> List[ConsumerResult]:
         """

@@ -96,12 +96,15 @@ def _is_terminal_job(job: Any) -> bool:
         # Import here to avoid circular deps
         from modules.communication.moltbot_bridge.src.foundup_job_contract import (
             is_terminal_status,
+            JobStatus,
         )
 
         status = getattr(job, "status", None)
         if status is None:
             return False
-        return is_terminal_status(status)
+        # is_terminal_status only includes SUCCEEDED/FAILED
+        # BLOCKED is also terminal for receipt emission purposes
+        return is_terminal_status(status) or status == JobStatus.BLOCKED
     except ImportError:
         # Fallback: check by status value
         status = getattr(job, "status", None)

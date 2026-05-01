@@ -539,3 +539,324 @@ class TestGetConsumer:
         """get_consumer with dry_run=False."""
         consumer = get_consumer(dry_run=False)
         assert consumer.dry_run is False
+
+
+# ---------------------------------------------------------------------------
+# Test: Phase 1B Receipt/pAVS Binding in ConsumerResult
+# ---------------------------------------------------------------------------
+
+
+class TestConsumerResultReceiptBinding:
+    """
+    Test Phase 1B: ConsumerResult carries receipt and pAVS evidence.
+
+    Proves:
+      - One ConsumerResult contains complete closed-loop evidence
+      - No need to manually call receipt/pAVS APIs
+      - WSP 97 truth fields preserved
+    """
+
+    @patch("modules.infrastructure.wre_core.src.foundup_job_consumer.route_foundup_job")
+    @patch("modules.foundups.agent.src.hermes_adapter.HermesFoundUpBuilder")
+    def test_terminal_job_emits_receipt_in_consumer_result(
+        self, mock_builder_class, mock_route
+    ):
+        """
+        Terminal job includes receipt_emission in ConsumerResult.
+
+        Proves:
+          - ConsumerResult.receipt_emission is populated
+          - No manual create_receipt_from_job() or verify_receipt() calls
+          - Receipt contains job correlation
+        """
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            create_job,
+        )
+
+        # Setup routing
+        mock_envelope = MagicMock()
+        mock_envelope.route_status = RouteStatus.ROUTED
+        mock_envelope.target_backend = TargetBackend.HERMES_BUILDER
+        mock_envelope.reason_human = "Routed to hermes_builder"
+        mock_envelope.job_id = "job_terminal_receipt"
+        mock_route.return_value = mock_envelope
+
+        # Setup Hermes success result
+        mock_builder = MagicMock()
+        mock_builder.dry_run = True
+        mock_builder.extract_foundup.return_value = {
+            "success": True,
+            "source_module": "modules/foundups/test_module",
+            "target_repo": "FOUNDUPS/test_module",
+            "exfoliation_gate": {"passed": True, "checks": {}},
+            "dry_run": True,
+        }
+        mock_builder_class.return_value = mock_builder
+
+        # Create job with proper payload
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="test_module",
+            payload={"module_path": "modules/foundups/test_module"},
+        )
+
+        consumer = FoundUpJobConsumer(dry_run=True)
+        result = consumer.consume_one(job)
+
+        # Verify dispatch succeeded
+        assert result.dispatched is True
+        assert result.is_terminal is True
+
+        # Verify receipt is bound in ConsumerResult
+        assert result.receipt_emission is not None
+        assert result.receipt_emission.success is True
+        assert result.has_receipt is True
+
+        # Verify receipt correlates to job
+        receipt = result.receipt_emission.receipt
+        assert receipt is not None
+        assert receipt.job_id == job.job_id
+        assert receipt.tenant_id == job.tenant_id
+
+        # Verify pAVS verification is included
+        verification = result.receipt_emission.verification
+        assert verification is not None
+        assert verification.job_id == job.job_id
+
+    @patch("modules.infrastructure.wre_core.src.foundup_job_consumer.route_foundup_job")
+    @patch("modules.foundups.agent.src.hermes_adapter.HermesFoundUpBuilder")
+    def test_consumer_result_contains_wsp97_truth_fields(
+        self, mock_builder_class, mock_route
+    ):
+        """
+        ConsumerResult exposes WSP 97 truth fields.
+
+        Proves:
+          - verification_complete=False
+          - cabr_ready=False
+          - payout_ready=False
+        """
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            create_job,
+        )
+
+        mock_envelope = MagicMock()
+        mock_envelope.route_status = RouteStatus.ROUTED
+        mock_envelope.target_backend = TargetBackend.HERMES_BUILDER
+        mock_envelope.reason_human = "Routed"
+        mock_envelope.job_id = "job_wsp97"
+        mock_route.return_value = mock_envelope
+
+        mock_builder = MagicMock()
+        mock_builder.dry_run = True
+        mock_builder.extract_foundup.return_value = {
+            "success": True,
+            "source_module": "modules/foundups/wsp97_test",
+            "exfoliation_gate": {"passed": True, "checks": {}},
+            "dry_run": True,
+        }
+        mock_builder_class.return_value = mock_builder
+
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            payload={"module_path": "modules/foundups/wsp97_test"},
+        )
+
+        consumer = FoundUpJobConsumer(dry_run=True)
+        result = consumer.consume_one(job)
+
+        # WSP 97 truth fields via ConsumerResult properties
+        assert result.verification_complete is False
+        assert result.cabr_ready is False
+        assert result.payout_ready is False
+
+        # WSP 97 truth fields in to_dict()
+        result_dict = result.to_dict()
+        assert result_dict["verification_complete"] is False
+        assert result_dict["cabr_ready"] is False
+        assert result_dict["payout_ready"] is False
+        assert result_dict["receipt_emitted"] is True
+
+    @patch("modules.infrastructure.wre_core.src.foundup_job_consumer.route_foundup_job")
+    def test_non_terminal_job_no_receipt_emission(self, mock_route):
+        """
+        Non-terminal job does not emit receipt.
+
+        Proves:
+          - Blocked route -> no Hermes dispatch -> no receipt
+          - ConsumerResult.receipt_emission is None
+        """
+        mock_envelope = MagicMock()
+        mock_envelope.route_status = RouteStatus.BLOCKED
+        mock_envelope.target_backend = TargetBackend.NONE
+        mock_envelope.reason_human = "Blocked by security gate"
+        mock_envelope.job_id = "job_blocked_no_receipt"
+        mock_route.return_value = mock_envelope
+
+        job = MockFoundUpJob(
+            job_id="job_blocked_no_receipt",
+            tenant_id="tenant_test",
+            requested_action="build_foundup",
+        )
+
+        consumer = FoundUpJobConsumer(dry_run=True)
+        result = consumer.consume_one(job)
+
+        # Not dispatched, no receipt
+        assert result.dispatched is False
+        assert result.receipt_emission is None
+        assert result.has_receipt is False
+        assert result.is_terminal is False
+
+    @patch("modules.infrastructure.wre_core.src.foundup_job_consumer.route_foundup_job")
+    @patch("modules.foundups.agent.src.hermes_adapter.HermesFoundUpBuilder")
+    def test_closed_loop_dry_run_proof_single_result(
+        self, mock_builder_class, mock_route
+    ):
+        """
+        One ConsumerResult proves closed-loop dry-run execution.
+
+        Proves:
+          - Route -> Hermes -> Receipt -> pAVS all in one result
+          - Test body does NOT manually call create_receipt_from_job()
+          - Test body does NOT manually call verify_receipt()
+          - All evidence accessible from ConsumerResult
+        """
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            create_job,
+        )
+
+        # Setup full pipeline
+        mock_envelope = MagicMock()
+        mock_envelope.route_status = RouteStatus.ROUTED
+        mock_envelope.target_backend = TargetBackend.HERMES_BUILDER
+        mock_envelope.reason_human = "Routed to hermes_builder"
+        mock_envelope.job_id = "job_closed_loop"
+        mock_route.return_value = mock_envelope
+
+        mock_builder = MagicMock()
+        mock_builder.dry_run = True
+        mock_builder.extract_foundup.return_value = {
+            "success": True,
+            "source_module": "modules/foundups/closed_loop_test",
+            "target_repo": "FOUNDUPS/closed_loop_test",
+            "exfoliation_gate": {"passed": True, "checks": {}},
+            "adapters": {"adapters_created": ["adapter.py"]},
+            "dry_run": True,
+        }
+        mock_builder_class.return_value = mock_builder
+
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="closed_loop_test",
+            payload={"module_path": "modules/foundups/closed_loop_test"},
+        )
+
+        consumer = FoundUpJobConsumer(dry_run=True)
+        result = consumer.consume_one(job)
+
+        # === Closed-loop evidence in ONE ConsumerResult ===
+
+        # 1. Route evidence
+        assert result.route_status == RouteStatus.ROUTED
+        assert result.target_backend == TargetBackend.HERMES_BUILDER
+        assert result.envelope is not None
+
+        # 2. Hermes evidence
+        assert result.dispatched is True
+        assert result.hermes_result is not None
+        assert result.hermes_result.job.status.value == "succeeded"
+        assert result.hermes_result.job.policy_flags.dry_run_mode is True
+
+        # 3. Receipt evidence (NOT manually calling create_receipt_from_job)
+        assert result.has_receipt is True
+        assert result.receipt_emission.success is True
+        receipt = result.receipt_emission.receipt
+        assert receipt.job_id == job.job_id
+        assert receipt.foundup_id == "closed_loop_test"
+        assert len(receipt.evidence_refs) > 0
+
+        # 4. pAVS evidence (NOT manually calling verify_receipt)
+        verification = result.receipt_emission.verification
+        assert verification is not None
+        assert verification.receipt_id == receipt.receipt_id
+        assert verification.job_id == job.job_id
+
+        # 5. WSP 97 truth boundaries
+        assert result.verification_complete is False
+        assert result.cabr_ready is False
+        assert result.payout_ready is False
+
+    @patch("modules.infrastructure.wre_core.src.foundup_job_consumer.route_foundup_job")
+    @patch("modules.foundups.agent.src.hermes_adapter.HermesFoundUpBuilder")
+    def test_blocked_hermes_result_still_emits_receipt(
+        self, mock_builder_class, mock_route
+    ):
+        """
+        Blocked Hermes result (terminal) still emits receipt.
+
+        Proves:
+          - BLOCKED job is terminal
+          - Receipt is emitted with BLOCKED status
+          - pAVS decision is BLOCKED_UPSTREAM
+        """
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            create_job,
+        )
+        from modules.communication.moltbot_bridge.src.pavs_verification_seam import (
+            PAVSDecision,
+        )
+        from modules.communication.moltbot_bridge.src.proof_of_compute_receipt import (
+            VerificationStatus,
+        )
+
+        mock_envelope = MagicMock()
+        mock_envelope.route_status = RouteStatus.ROUTED
+        mock_envelope.target_backend = TargetBackend.HERMES_BUILDER
+        mock_envelope.reason_human = "Routed"
+        mock_envelope.job_id = "job_hermes_blocked"
+        mock_route.return_value = mock_envelope
+
+        mock_builder = MagicMock()
+        mock_builder.dry_run = True
+        mock_builder.extract_foundup.return_value = {
+            "success": False,
+            "error": "exfoliation_gate_failed",
+            "source_module": "modules/foundups/blocked_test",
+            "exfoliation_gate": {
+                "passed": False,
+                "checks": {"contracts_explicit": False},
+            },
+            "dry_run": True,
+        }
+        mock_builder_class.return_value = mock_builder
+
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            payload={"module_path": "modules/foundups/blocked_test"},
+        )
+
+        consumer = FoundUpJobConsumer(dry_run=True)
+        result = consumer.consume_one(job)
+
+        # BLOCKED is terminal
+        assert result.is_terminal is True
+        assert result.hermes_result.job.status.value == "blocked"
+
+        # Receipt emitted for blocked job
+        assert result.has_receipt is True
+        receipt = result.receipt_emission.receipt
+        assert receipt.verification_status == VerificationStatus.BLOCKED
+
+        # pAVS reflects blocked upstream
+        verification = result.receipt_emission.verification
+        assert verification.decision == PAVSDecision.BLOCKED_UPSTREAM
+
+        # WSP 97 still enforced
+        assert result.verification_complete is False
+        assert result.cabr_ready is False
+        assert result.payout_ready is False
