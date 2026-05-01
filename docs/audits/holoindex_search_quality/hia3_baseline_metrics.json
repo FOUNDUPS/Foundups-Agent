@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-05-01T03:33:11.160285Z",
+  "generated_at_utc": "2026-05-01T04:13:05.915766Z",
   "holo_use_turboquant": "0",
   "holo_emit_confidence": "1",
   "corpus_doc_count": 20413,
@@ -10,13 +10,13 @@
     "top_1_pass_rate": 0.5455,
     "top_5_pass_count": 6,
     "top_5_pass_rate": 0.5455,
-    "confidence_min": 0.55,
-    "confidence_avg": 0.7569,
+    "confidence_min": 0.5268,
+    "confidence_avg": 0.8153,
     "confidence_max": 1.0,
-    "latency_min_ms": 78,
-    "latency_p50_ms": 85,
-    "latency_p95_ms": 372,
-    "latency_max_ms": 372
+    "latency_min_ms": 83,
+    "latency_p50_ms": 95,
+    "latency_p95_ms": 406,
+    "latency_max_ms": 406
   },
   "query_results": [
     {
@@ -26,14 +26,14 @@
       "evidence_rule": {
         "path_contains": "youtube_channel_registry"
       },
-      "top_1_path": "modules\\infrastructure\\shared_utilities\\youtube_channel_registry.py",
+      "top_1_path": "O:\\Foundups-Agent\\modules\\infrastructure\\shared_utilities\\youtube_channel_registry.py",
       "top_1_title": null,
       "top_1_type": "symbol",
-      "top_1_similarity": "50.0%",
-      "top_1_confidence": 0.8500000149011617,
+      "top_1_similarity": "64.8%",
+      "top_1_confidence": 0.9981861992399124,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 372,
+      "latency_ms": 406,
       "error": null
     },
     {
@@ -43,14 +43,14 @@
       "evidence_rule": {
         "path_contains": "demurrage"
       },
-      "top_1_path": "modules\\foundups\\simulator\\economics\\demurrage.py",
+      "top_1_path": "O:\\Foundups-Agent\\modules\\foundups\\simulator\\economics\\demurrage.py",
       "top_1_title": null,
       "top_1_type": "symbol",
-      "top_1_similarity": "50.0%",
-      "top_1_confidence": 0.8500000149011617,
+      "top_1_similarity": "51.6%",
+      "top_1_confidence": 0.8659627158461345,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 81,
+      "latency_ms": 89,
       "error": null
     },
     {
@@ -60,14 +60,14 @@
       "evidence_rule": {
         "path_contains": "selenium"
       },
-      "top_1_path": "modules\\infrastructure\\browser_actions\\src\\linkedin_actions.py",
+      "top_1_path": "O:\\Foundups-Agent\\modules\\infrastructure\\foundups_selenium\\src\\undetected_browser.py",
       "top_1_title": null,
       "top_1_type": "symbol",
-      "top_1_similarity": "50.0%",
-      "top_1_confidence": 0.65,
-      "top_1_passes": false,
-      "top_5_passes": false,
-      "latency_ms": 87,
+      "top_1_similarity": "59.6%",
+      "top_1_confidence": 0.845680281770153,
+      "top_1_passes": true,
+      "top_5_passes": true,
+      "latency_ms": 95,
       "error": null
     },
     {
@@ -84,7 +84,7 @@
       "top_1_confidence": 1.0,
       "top_1_passes": false,
       "top_5_passes": false,
-      "latency_ms": 84,
+      "latency_ms": 83,
       "error": null
     },
     {
@@ -101,7 +101,7 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 78,
+      "latency_ms": 92,
       "error": null
     },
     {
@@ -118,7 +118,7 @@
       "top_1_confidence": 0.9661010363122635,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 97,
+      "latency_ms": 95,
       "error": null
     },
     {
@@ -128,14 +128,14 @@
       "evidence_rule": {
         "path_contains": "search"
       },
-      "top_1_path": "modules\\foundups\\simulator\\economics\\demurrage.py",
+      "top_1_path": "O:\\Foundups-Agent\\modules\\communication\\moltbot_bridge\\tests\\test_openclaw_execution_bundle.py",
       "top_1_title": null,
       "top_1_type": "symbol",
-      "top_1_similarity": "50.0%",
-      "top_1_confidence": 0.5500000149011617,
+      "top_1_similarity": "50.3%",
+      "top_1_confidence": 0.5534987112885768,
       "top_1_passes": false,
       "top_5_passes": false,
-      "latency_ms": 132,
+      "latency_ms": 146,
       "error": null
     },
     {
@@ -145,14 +145,14 @@
       "evidence_rule": {
         "path_contains": "holo_index"
       },
-      "top_1_path": "modules\\foundups\\simulator\\economics\\demurrage.py",
+      "top_1_path": "O:\\Foundups-Agent\\modules\\infrastructure\\wre_core\\wre_master_orchestrator\\src\\plugins\\holoindex_plugin.py",
       "top_1_title": null,
       "top_1_type": "symbol",
-      "top_1_similarity": "50.0%",
-      "top_1_confidence": 0.5500000298023242,
+      "top_1_similarity": "59.8%",
+      "top_1_confidence": 0.7481583505887989,
       "top_1_passes": false,
       "top_5_passes": false,
-      "latency_ms": 85,
+      "latency_ms": 112,
       "error": null
     },
     {
@@ -162,14 +162,14 @@
       "evidence_rule": {
         "path_contains": "foundup_job"
       },
-      "top_1_path": "modules\\foundups\\simulator\\economics\\demurrage.py",
+      "top_1_path": "O:\\Foundups-Agent\\modules\\infrastructure\\wre_core\\src\\foundup_job_router.py",
       "top_1_title": null,
       "top_1_type": "symbol",
-      "top_1_similarity": "50.0%",
-      "top_1_confidence": 0.55,
-      "top_1_passes": false,
-      "top_5_passes": false,
-      "latency_ms": 125,
+      "top_1_similarity": "64.0%",
+      "top_1_confidence": 0.7900913216225764,
+      "top_1_passes": true,
+      "top_5_passes": true,
+      "latency_ms": 175,
       "error": null
     },
     {
@@ -179,14 +179,14 @@
       "evidence_rule": {
         "type_equals": "skillz"
       },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\wsp49_interface_gap_scanner\\SKILLz.md",
+      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\agent_work_batcher\\executor.py",
       "top_1_title": null,
-      "top_1_type": "skillz",
-      "top_1_similarity": "50.0%",
-      "top_1_confidence": 0.6799999999999999,
-      "top_1_passes": true,
-      "top_5_passes": true,
-      "latency_ms": 85,
+      "top_1_type": "symbol",
+      "top_1_similarity": "52.4%",
+      "top_1_confidence": 0.6739858239251652,
+      "top_1_passes": false,
+      "top_5_passes": false,
+      "latency_ms": 90,
       "error": null
     },
     {
@@ -196,14 +196,14 @@
       "evidence_rule": {
         "type_equals": "skillz"
       },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\wsp49_interface_gap_scanner\\SKILLz.md",
+      "top_1_path": "O:\\Foundups-Agent\\modules\\foundups\\pfmall\\tests\\test_verification_gap_guard.py",
       "top_1_title": null,
-      "top_1_type": "skillz",
-      "top_1_similarity": "50.0%",
-      "top_1_confidence": 0.6800000447034875,
-      "top_1_passes": true,
-      "top_5_passes": true,
-      "latency_ms": 80,
+      "top_1_type": "symbol",
+      "top_1_similarity": "47.7%",
+      "top_1_confidence": 0.5267975893115049,
+      "top_1_passes": false,
+      "top_5_passes": false,
+      "latency_ms": 185,
       "error": null
     }
   ]
