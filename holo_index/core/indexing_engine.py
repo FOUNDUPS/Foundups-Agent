@@ -262,15 +262,26 @@ def index_code_entries(holo: "HoloIndex") -> None:
 
 
 def index_symbol_entries(holo: "HoloIndex", roots: Optional[List[Path]] = None) -> None:
-    """Index Python symbols (functions/classes) for semantic discovery."""
+    """Index Python symbols (functions/classes) for semantic discovery.
+
+    HIA6A: Critical infrastructure paths are listed first to ensure they're
+    indexed before the 20,000 entry limit is hit. Order matters because
+    modules/ alone has 2350+ files with many symbols.
+    """
     env_roots = os.getenv("HOLO_SYMBOL_ROOTS")
     if env_roots:
         roots = [holo.project_root / Path(r.strip()) for r in env_roots.split(";") if r.strip()]
     else:
+        # HIA6A: Priority ordering ensures critical files are indexed first:
+        # - holo_index/core: search_engine.py (core search infrastructure)
+        # - wre_core/src: foundup_job_router.py (job routing)
+        # - Then bulk directories fill remaining slots
         roots = roots or [
-            holo.project_root / "modules",
-            holo.project_root / "scripts",
-            holo.project_root / "holo_index",
+            holo.project_root / "holo_index" / "core",                      # P1: search infrastructure
+            holo.project_root / "modules" / "infrastructure" / "wre_core" / "src",  # P1: job routing
+            holo.project_root / "modules",                                  # P2: bulk modules
+            holo.project_root / "scripts",                                  # P3: scripts
+            holo.project_root / "holo_index",                               # P3: remaining holo_index
         ]
 
     max_files = int(os.getenv("HOLO_SYMBOL_MAX_FILES", "5000"))

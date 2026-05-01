@@ -1,5 +1,58 @@
 # HoloIndex Package ModLog
 
+## [2026-05-01] HIA6A — Core Indexing Gap Fix (hia6a_holoindex_core_indexing_gap)
+
+**Agent**: 0102 (Worker W2)
+**WSP References**: WSP 97 (truth distinction), WSP 50 (pre-action verification), WSP 22 (ModLog)
+**Status**: COMPLETE
+**Decision**: Priority-ordered roots for critical infrastructure indexing
+
+### Context
+
+HIA5 identified that `search engine query execution` sentinel query failed because
+`search_engine.py` was not indexed. Root cause: `modules/` (2350 files) filled the
+20,000 entry limit before `holo_index/` was processed.
+
+### Root Cause
+
+```python
+# Original order - modules fills all 20K slots
+roots = [modules, scripts, holo_index]  # holo_index never reached
+```
+
+### Solution
+
+Priority-ordered roots ensure critical files are indexed first:
+
+```python
+roots = [
+    holo_index/core,           # P1: search_engine.py
+    wre_core/src,              # P1: foundup_job_router.py
+    modules,                   # P2: bulk modules
+    scripts,                   # P3: scripts
+    holo_index,                # P3: remaining holo_index
+]
+```
+
+### Results
+
+| Metric | Before (HIA4B) | After (HIA6A) | Improvement |
+|--------|----------------|---------------|-------------|
+| Top-1 Pass Rate | 81.8% (9/11) | 90.9% (10/11) | +9.1% |
+| Top-5 Pass Rate | 90.9% (10/11) | 100.0% (11/11) | +9.1% |
+
+### Files
+
+- `holo_index/core/indexing_engine.py` — Priority-ordered roots
+- `docs/audits/holoindex_search_quality/HIA6A_INDEXING_GAP_FIX_REPORT.md` (new)
+- `docs/audits/holoindex_search_quality/hia3_baseline_metrics.json` — Updated metrics
+
+### Remaining Issue
+
+"HoloIndex semantic code navigation" still FAIL top-1, PASS top-5 (semantic gap, not indexing).
+
+---
+
 ## [2026-05-01] HIA5 — BM25 Hybrid Retrieval Gate (hia5_bm25_hybrid_gate)
 
 **Agent**: 0102 (Worker W2)
