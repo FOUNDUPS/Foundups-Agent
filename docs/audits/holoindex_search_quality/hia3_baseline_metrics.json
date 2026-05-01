@@ -1,22 +1,22 @@
 {
-  "generated_at_utc": "2026-05-01T08:54:29.757655Z",
+  "generated_at_utc": "2026-05-01T12:14:12.582575Z",
   "holo_use_turboquant": "0",
   "holo_emit_confidence": "1",
   "corpus_doc_count": 20413,
   "sentinel_query_count": 11,
   "aggregate": {
     "total_queries": 11,
-    "top_1_pass_count": 10,
-    "top_1_pass_rate": 0.9091,
+    "top_1_pass_count": 11,
+    "top_1_pass_rate": 1.0,
     "top_5_pass_count": 11,
     "top_5_pass_rate": 1.0,
     "confidence_min": 0.68,
-    "confidence_avg": 0.8488,
+    "confidence_avg": 0.8518,
     "confidence_max": 1.0,
-    "latency_min_ms": 83,
-    "latency_p50_ms": 94,
-    "latency_p95_ms": 434,
-    "latency_max_ms": 434
+    "latency_min_ms": 78,
+    "latency_p50_ms": 90,
+    "latency_p95_ms": 382,
+    "latency_max_ms": 382
   },
   "query_results": [
     {
@@ -33,7 +33,7 @@
       "top_1_confidence": 0.9981861992399124,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 434,
+      "latency_ms": 382,
       "error": null
     },
     {
@@ -50,7 +50,7 @@
       "top_1_confidence": 0.8659627158461345,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 91,
+      "latency_ms": 86,
       "error": null
     },
     {
@@ -67,7 +67,7 @@
       "top_1_confidence": 0.845680281770153,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 83,
+      "latency_ms": 86,
       "error": null
     },
     {
@@ -84,7 +84,7 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 87,
+      "latency_ms": 78,
       "error": null
     },
     {
@@ -101,7 +101,7 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 89,
+      "latency_ms": 90,
       "error": null
     },
     {
@@ -118,7 +118,7 @@
       "top_1_confidence": 0.9661010363122635,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 94,
+      "latency_ms": 93,
       "error": null
     },
     {
@@ -135,7 +135,7 @@
       "top_1_confidence": 0.7663490526361794,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 88,
+      "latency_ms": 91,
       "error": null
     },
     {
@@ -145,14 +145,14 @@
       "evidence_rule": {
         "path_contains": "holo"
       },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_gateway\\src\\openclaw_codebase_agent.py",
+      "top_1_path": "O:\\Foundups-Agent\\holo_index\\core\\holo_index.py",
       "top_1_title": null,
       "top_1_type": "symbol",
-      "top_1_similarity": "59.4%",
-      "top_1_confidence": 0.7444157174573011,
-      "top_1_passes": false,
+      "top_1_similarity": "62.7%",
+      "top_1_confidence": 0.7770940305244378,
+      "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 103,
+      "latency_ms": 83,
       "error": null
     },
     {
@@ -169,7 +169,7 @@
       "top_1_confidence": 0.7900913216225764,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 152,
+      "latency_ms": 120,
       "error": null
     },
     {
@@ -179,14 +179,14 @@
       "evidence_rule": {
         "type_equals": "skillz"
       },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\agentic_news_ticker\\SKILLz.md",
+      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\antifafm_dj\\SKILLz.md",
       "top_1_title": null,
       "top_1_type": "skillz",
       "top_1_similarity": "50.0%",
       "top_1_confidence": 0.6799999999999999,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 102,
+      "latency_ms": 97,
       "error": null
     },
     {
@@ -196,14 +196,14 @@
       "evidence_rule": {
         "type_equals": "skillz"
       },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\agentic_news_ticker\\SKILLz.md",
+      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\antifafm_dj\\SKILLz.md",
       "top_1_title": null,
       "top_1_type": "skillz",
       "top_1_similarity": "50.0%",
       "top_1_confidence": 0.6800000447034875,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 96,
+      "latency_ms": 82,
       "error": null
     }
   ]

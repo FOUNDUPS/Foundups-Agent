@@ -113,6 +113,14 @@ def _extract_wsp_numbers(text: str) -> List[str]:
     return [m.lstrip("0") or "0" for m in matches]  # Normalize: '00' -> '0', '97' -> '97'
 
 
+def _normalize_for_match(text: str) -> str:
+    """Normalize text for fuzzy matching: lowercase, remove underscores.
+
+    HIA6B: Enables 'holoindex' to match 'holo_index' paths.
+    """
+    return text.lower().replace("_", "")
+
+
 def _wsp_number_match_boost(query: str, path: str, title: str) -> float:
     """Return keyword boost if query WSP number matches path/title WSP number.
 
@@ -364,12 +372,18 @@ def _search_collection(
         test_id = (meta.get("test_id") or "").lower()
         capabilities = (meta.get("capabilities") or "").lower()
 
+        # HIA6B: Normalized path for fuzzy matching (holoindex ≈ holo_index)
+        path_normalized = _normalize_for_match(path)
+
         for token in set(ql.split()):
             if not token:
                 continue
             if token in title:
                 keyword_score += 2.0
             if token in path:
+                keyword_score += 1.0
+            elif _normalize_for_match(token) in path_normalized:
+                # HIA6B: Fuzzy path match (underscore-normalized)
                 keyword_score += 1.0
             if token in summary:
                 keyword_score += 0.5
@@ -465,11 +479,16 @@ def _lexical_search_collection(
             description = (meta.get("description") or "").lower()
             need = (meta.get("need") or "").lower()
             doc_text = (doc or "").lower()
+            # HIA6B: Normalized path for fuzzy matching
+            path_normalized = _normalize_for_match(path)
 
             for token in tokens:
                 if token in title:
                     keyword_score += 2.0
                 if token in path:
+                    keyword_score += 1.0
+                elif _normalize_for_match(token) in path_normalized:
+                    # HIA6B: Fuzzy path match (underscore-normalized)
                     keyword_score += 1.0
                 if token in summary:
                     keyword_score += 0.5

@@ -1,5 +1,53 @@
 # HoloIndex Package ModLog
 
+## [2026-05-01] HIA6B — Path Title Boost Tuning (hia6b_path_title_boost_tuning)
+
+**Agent**: 0102 (Worker W2)
+**WSP References**: WSP 97 (truth distinction), WSP 50 (pre-action verification), WSP 22 (ModLog)
+**Status**: COMPLETE
+**Decision**: Normalized underscore matching for fuzzy path boost
+
+### Context
+
+HIA6A achieved 90.9% top-1, 100% top-5. Remaining failure: "HoloIndex semantic code
+navigation" returned `openclaw_codebase_agent.py` instead of `holo_index.py`.
+
+### Root Cause
+
+Query token "holoindex" (no underscore) didn't match path "holo_index" (with underscore).
+Despite `holo_index.py` having higher semantic similarity (62.7%), it received no keyword
+boost, allowing `openclaw_codebase_agent.py` (59.4% + "code" match) to win.
+
+### Solution
+
+Added `_normalize_for_match()` helper: removes underscores for fuzzy path matching.
+
+```python
+def _normalize_for_match(text):
+    return text.lower().replace("_", "")
+```
+
+Applied with equal boost (+1.0) alongside exact path matching.
+
+### Results
+
+| Metric | Before (HIA6A) | After (HIA6B) | Improvement |
+|--------|----------------|---------------|-------------|
+| Top-1 Pass Rate | 90.9% (10/11) | 100.0% (11/11) | +9.1% |
+| Top-5 Pass Rate | 100.0% (11/11) | 100.0% (11/11) | No change |
+
+### Files
+
+- `holo_index/core/search_engine.py` — Added `_normalize_for_match()` and fuzzy path boost
+- `docs/audits/holoindex_search_quality/HIA6B_PATH_TITLE_BOOST_TUNING_REPORT.md` (new)
+- `docs/audits/holoindex_search_quality/hia3_baseline_metrics.json` — Updated to 100%
+
+### HIA Series Complete
+
+100% top-1 and top-5 pass rates achieved. No further deterministic tuning needed.
+
+---
+
 ## [2026-05-01] HIA6A — Core Indexing Gap Fix (hia6a_holoindex_core_indexing_gap)
 
 **Agent**: 0102 (Worker W2)
