@@ -95,6 +95,47 @@ def _is_symbol_query(query: str) -> bool:
 
 
 # ---------------------------------------------------------------------------
+# HIA4B: WSP number extraction for exact matching
+# ---------------------------------------------------------------------------
+
+_WSP_NUMBER_PATTERN = re.compile(
+    r"\bWSP[\s_\-]?(\d+)(?:\b|_)",  # Match WSP 97, WSP_97, WSP-97, WSP_97_xxx
+    re.IGNORECASE
+)
+
+
+def _extract_wsp_numbers(text: str) -> List[str]:
+    """Extract WSP numbers from text (e.g., 'WSP 97', 'WSP_97', 'WSP-97').
+
+    Returns list of normalized WSP numbers like ['97', '00'].
+    """
+    matches = _WSP_NUMBER_PATTERN.findall(text)
+    return [m.lstrip("0") or "0" for m in matches]  # Normalize: '00' -> '0', '97' -> '97'
+
+
+def _wsp_number_match_boost(query: str, path: str, title: str) -> float:
+    """Return keyword boost if query WSP number matches path/title WSP number.
+
+    HIA4B: Boosts exact WSP number matches to fix WSP 97 finding WSP 94.
+    """
+    query_wsps = _extract_wsp_numbers(query)
+    if not query_wsps:
+        return 0.0
+
+    # Check path and title for WSP numbers
+    path_wsps = _extract_wsp_numbers(path)
+    title_wsps = _extract_wsp_numbers(title)
+    all_target_wsps = set(path_wsps + title_wsps)
+
+    # Strong boost for exact match
+    for qwsp in query_wsps:
+        if qwsp in all_target_wsps:
+            return 5.0  # Strong boost for exact WSP number match
+
+    return 0.0
+
+
+# ---------------------------------------------------------------------------
 # HIA2: Confidence scoring (pure heuristic, no LLM)
 # ---------------------------------------------------------------------------
 
@@ -339,6 +380,9 @@ def _search_collection(
             if token in capabilities:
                 keyword_score += 1.5
 
+        # HIA4B: WSP number exact match boost
+        keyword_score += _wsp_number_match_boost(query, path, title)
+
         if doc_type_filter != "all" and not doc_type.startswith(doc_type_filter):
             continue
 
@@ -441,6 +485,9 @@ def _lexical_search_collection(
                     keyword_score += 1.5
                 if token in description:
                     keyword_score += 0.5
+
+            # HIA4B: WSP number exact match boost
+            keyword_score += _wsp_number_match_boost(query, path, title)
 
             if keyword_score <= 0:
                 continue
