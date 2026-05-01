@@ -1,22 +1,22 @@
 {
-  "generated_at_utc": "2026-05-01T04:13:05.915766Z",
+  "generated_at_utc": "2026-05-01T07:12:40.415227Z",
   "holo_use_turboquant": "0",
   "holo_emit_confidence": "1",
   "corpus_doc_count": 20413,
   "sentinel_query_count": 11,
   "aggregate": {
     "total_queries": 11,
-    "top_1_pass_count": 6,
-    "top_1_pass_rate": 0.5455,
-    "top_5_pass_count": 6,
-    "top_5_pass_rate": 0.5455,
-    "confidence_min": 0.5268,
-    "confidence_avg": 0.8153,
+    "top_1_pass_count": 9,
+    "top_1_pass_rate": 0.8182,
+    "top_5_pass_count": 10,
+    "top_5_pass_rate": 0.9091,
+    "confidence_min": 0.543,
+    "confidence_avg": 0.8285,
     "confidence_max": 1.0,
-    "latency_min_ms": 83,
-    "latency_p50_ms": 95,
-    "latency_p95_ms": 406,
-    "latency_max_ms": 406
+    "latency_min_ms": 79,
+    "latency_p50_ms": 94,
+    "latency_p95_ms": 398,
+    "latency_max_ms": 398
   },
   "query_results": [
     {
@@ -33,7 +33,7 @@
       "top_1_confidence": 0.9981861992399124,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 406,
+      "latency_ms": 398,
       "error": null
     },
     {
@@ -50,7 +50,7 @@
       "top_1_confidence": 0.8659627158461345,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 89,
+      "latency_ms": 92,
       "error": null
     },
     {
@@ -67,24 +67,24 @@
       "top_1_confidence": 0.845680281770153,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 95,
+      "latency_ms": 97,
       "error": null
     },
     {
-      "query": "WSP 97 truth distinction protocol",
+      "query": "WSP 97 system execution prompting",
       "category": "wsp",
       "description": "Find WSP 97 system execution protocol",
       "evidence_rule": {
         "path_contains": "WSP_97"
       },
-      "top_1_path": "O:\\Foundups-Agent\\WSP_framework\\src\\WSP_94_Agent_Coordination_Protocol.md",
-      "top_1_title": "WSP 94: Agent Coordination Protocol [DEPRECATED - REDIRECT]",
+      "top_1_path": "O:\\Foundups-Agent\\WSP_framework\\src\\WSP_97_System_Execution_Prompting_Protocol.md",
+      "top_1_title": "WSP 97: System Execution Prompting Protocol",
       "top_1_type": "wsp_protocol",
-      "top_1_similarity": "50.8%",
+      "top_1_similarity": "74.9%",
       "top_1_confidence": 1.0,
-      "top_1_passes": false,
-      "top_5_passes": false,
-      "latency_ms": 83,
+      "top_1_passes": true,
+      "top_5_passes": true,
+      "latency_ms": 86,
       "error": null
     },
     {
@@ -101,7 +101,7 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 92,
+      "latency_ms": 79,
       "error": null
     },
     {
@@ -118,41 +118,41 @@
       "top_1_confidence": 0.9661010363122635,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 95,
+      "latency_ms": 99,
       "error": null
     },
     {
-      "query": "execute_search function",
+      "query": "search engine query execution",
       "category": "symbol",
-      "description": "Find the execute_search function",
+      "description": "Find search engine module (known gap: search_engine.py not indexed)",
       "evidence_rule": {
         "path_contains": "search"
-      },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\communication\\moltbot_bridge\\tests\\test_openclaw_execution_bundle.py",
-      "top_1_title": null,
-      "top_1_type": "symbol",
-      "top_1_similarity": "50.3%",
-      "top_1_confidence": 0.5534987112885768,
-      "top_1_passes": false,
-      "top_5_passes": false,
-      "latency_ms": 146,
-      "error": null
-    },
-    {
-      "query": "HoloIndex class initialization",
-      "category": "symbol",
-      "description": "Find HoloIndex class",
-      "evidence_rule": {
-        "path_contains": "holo_index"
       },
       "top_1_path": "O:\\Foundups-Agent\\modules\\infrastructure\\wre_core\\wre_master_orchestrator\\src\\plugins\\holoindex_plugin.py",
       "top_1_title": null,
       "top_1_type": "symbol",
-      "top_1_similarity": "59.8%",
-      "top_1_confidence": 0.7481583505887989,
+      "top_1_similarity": "49.3%",
+      "top_1_confidence": 0.5430251808406716,
       "top_1_passes": false,
       "top_5_passes": false,
-      "latency_ms": 112,
+      "latency_ms": 95,
+      "error": null
+    },
+    {
+      "query": "HoloIndex semantic code navigation",
+      "category": "symbol",
+      "description": "Find HoloIndex class",
+      "evidence_rule": {
+        "path_contains": "holo"
+      },
+      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_gateway\\src\\openclaw_codebase_agent.py",
+      "top_1_title": null,
+      "top_1_type": "symbol",
+      "top_1_similarity": "59.4%",
+      "top_1_confidence": 0.7444157174573011,
+      "top_1_passes": false,
+      "top_5_passes": true,
+      "latency_ms": 87,
       "error": null
     },
     {
@@ -169,7 +169,7 @@
       "top_1_confidence": 0.7900913216225764,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 175,
+      "latency_ms": 130,
       "error": null
     },
     {
@@ -179,14 +179,14 @@
       "evidence_rule": {
         "type_equals": "skillz"
       },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\agent_work_batcher\\executor.py",
+      "top_1_path": "O:\\Foundups-Agent\\modules\\platform_integration\\antifafm_broadcaster\\skillz\\boot_layer_rotator\\SKILLz.md",
       "top_1_title": null,
-      "top_1_type": "symbol",
-      "top_1_similarity": "52.4%",
-      "top_1_confidence": 0.6739858239251652,
-      "top_1_passes": false,
-      "top_5_passes": false,
-      "latency_ms": 90,
+      "top_1_type": "skillz",
+      "top_1_similarity": "50.0%",
+      "top_1_confidence": 0.6799999999999999,
+      "top_1_passes": true,
+      "top_5_passes": true,
+      "latency_ms": 89,
       "error": null
     },
     {
@@ -196,14 +196,14 @@
       "evidence_rule": {
         "type_equals": "skillz"
       },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\foundups\\pfmall\\tests\\test_verification_gap_guard.py",
+      "top_1_path": "O:\\Foundups-Agent\\modules\\platform_integration\\antifafm_broadcaster\\skillz\\boot_layer_rotator\\SKILLz.md",
       "top_1_title": null,
-      "top_1_type": "symbol",
-      "top_1_similarity": "47.7%",
-      "top_1_confidence": 0.5267975893115049,
-      "top_1_passes": false,
-      "top_5_passes": false,
-      "latency_ms": 185,
+      "top_1_type": "skillz",
+      "top_1_similarity": "50.0%",
+      "top_1_confidence": 0.6800000447034875,
+      "top_1_passes": true,
+      "top_5_passes": true,
+      "latency_ms": 94,
       "error": null
     }
   ]
