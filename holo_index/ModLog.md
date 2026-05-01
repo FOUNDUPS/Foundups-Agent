@@ -1,5 +1,42 @@
 # HoloIndex Package ModLog
 
+## [2026-05-01] HIA4A — Index Freshness Audit (hia4a_index_refresh)
+
+**Agent**: 0102 (Worker W2)
+**WSP References**: WSP 97 (truth distinction), WSP 50 (pre-action verification), WSP 22 (ModLog)
+**Status**: COMPLETE
+**Decision**: Index freshness is NOT the root cause of HIA3 failures
+
+### Context
+
+HIA3 baseline showed 54.5% pass rate with 5 failures. Before implementing ranking fixes,
+HIA4A audits whether the index reflects current codebase state.
+
+### Key Findings
+
+1. **Selenium files ARE indexed**: 19 paths with "selenium" exist in symbol_collection.
+   The failure is ranking, not indexing.
+
+2. **Bug found**: `index_wsp_entries()` signature mismatch causes `--index-all` to
+   partially fail. Not blocking for HIA4A but should be fixed separately.
+
+3. **WSP direct queries work**: "WSP 97" finds WSP 97. The baseline sentinel query
+   "WSP 97 truth distinction protocol" describes the wrong topic (WSP 97 is
+   "System Execution Prompting Protocol").
+
+4. **demurrage.py noise**: All code results show constant 50.0% similarity.
+   This is a scoring/embedding issue, not an indexing issue.
+
+### Recommendation
+
+HIA4 ranking fixes should proceed. Index freshness is NOT the problem.
+
+### Files
+
+- `docs/audits/holoindex_search_quality/HIA4A_INDEX_REFRESH_REPORT.md` (new)
+
+---
+
 ## [2026-05-01] HIA3 + HIA3B — Search Quality Baseline Measurement (hia3_search_quality_baseline)
 
 **Agent**: 0102 (Worker W10, Worker W2)
