@@ -1,5 +1,56 @@
 # HoloIndex Package ModLog
 
+## [2026-05-01] HIA5 — BM25 Hybrid Retrieval Gate (hia5_bm25_hybrid_gate)
+
+**Agent**: 0102 (Worker W2)
+**WSP References**: WSP 97 (truth distinction), WSP 50 (pre-action verification), WSP 22 (ModLog)
+**Status**: COMPLETE
+**Decision**: DEFER_BM25 + RECOMMEND_ALTERNATIVE
+
+### Context
+
+After HIA4B improved baseline to 81.8% top-1 / 90.9% top-5, this gate audit evaluates
+whether BM25 hybrid retrieval is justified for the 2 remaining failures.
+
+### Key Findings
+
+1. **Query 1 ("search engine query execution")**: FAIL (top-1 and top-5)
+   - Root cause: `search_engine.py` NOT indexed in symbol collection
+   - BM25 impact: NONE (cannot find unindexed documents)
+   - Fix: Indexing gap, not retrieval algorithm
+
+2. **Query 2 ("HoloIndex semantic code navigation")**: FAIL top-1, PASS top-5
+   - Root cause: Semantic similarity gap outweighs keyword boost
+   - BM25 analysis: Would help (IDF weights "holoindex" higher)
+   - BUT: Simpler alternatives exist (increase path boost, exact name matching)
+
+### BM25 Dependency Assessment
+
+- **rank-bm25**: Inactive maintenance, no updates in 12+ months
+- **bm25s**: Active alternative, but still adds dependency
+- **ChromaDB built-in**: Requires fastembed dependency
+
+### Decision Rationale
+
+1. Query 1 is indexing-shaped (BM25 cannot help)
+2. Query 2 has simpler fixes (path boost tuning)
+3. Current 81.8% top-1 / 90.9% top-5 is acceptable
+4. Adding unmaintained dependency introduces risk
+5. BM25 requires token index maintenance, parameter tuning
+
+### Recommended Next Steps
+
+1. **HIA6A (P1)**: Index `holo_index/core/` in symbol collection → fixes Query 1
+2. **HIA6B (P2)**: Increase path/title boost from 1.0 to 2.5 → likely fixes Query 2
+3. **HIA7 (P3)**: Gemma reranking for ambiguous results → guarantees Query 2
+
+### Files
+
+- `holo_index/tests/spike_bm25_analysis.py` (new) — Analysis spike, test-only
+- `docs/audits/holoindex_search_quality/HIA5_BM25_HYBRID_GATE.md` (new) — Decision report
+
+---
+
 ## [2026-05-01] HIA4B — Search Ranking P0 Fixes (hia4b_search_ranking_p0_fixes)
 
 **Agent**: 0102 (Worker W2)
