@@ -2,10 +2,21 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import re
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
+
+# ImprovementJob contract imports (OC_IMP3)
+from modules.infrastructure.wre_core.src.improvement_job_contract import (
+    ImprovementJob,
+    ImprovementRiskLevel,
+    ImprovementScope,
+    ImprovementType,
+    WSP15Priority,
+    create_improvement_job,
+)
 
 from .openclaw_memory_queries import (
     normalize_time_qualifier,
@@ -862,53 +873,226 @@ def _start_training_batch() -> str:
         return f"**Training Batch: ERROR**\n\nCould not start: {exc}"
 
 
+# ---------------------------------------------------------------------------
+# ImprovementJob Inspection Hook (OC_IMP3)
+# ---------------------------------------------------------------------------
+# Module-level storage for test inspection ONLY.
+# Not a production queue - just allows tests to verify job creation.
+_LAST_IMPROVEMENT_JOB: Optional[ImprovementJob] = None
+
+
+def get_last_improvement_job() -> Optional[ImprovementJob]:
+    """Return the last created ImprovementJob for test inspection.
+
+    WSP 97: This is a test hook only. Not a production queue.
+    """
+    return _LAST_IMPROVEMENT_JOB
+
+
+def clear_improvement_job_hook() -> None:
+    """Clear the inspection hook. For test cleanup."""
+    global _LAST_IMPROVEMENT_JOB
+    _LAST_IMPROVEMENT_JOB = None
+
+
+# ---------------------------------------------------------------------------
+# Improvement Type Classification
+# ---------------------------------------------------------------------------
+
+# Map string improvement types to ImprovementType enum
+_IMPROVEMENT_TYPE_MAP: Dict[str, ImprovementType] = {
+    "fmas_scan": ImprovementType.FMAS_SCAN,
+    "drift_correction": ImprovementType.DRIFT_CORRECTION,
+    "wsp_violation": ImprovementType.WSP_VIOLATION,
+    "test_hygiene": ImprovementType.TEST_HYGIENE,
+    "module_repair": ImprovementType.MODULE_REPAIR,
+    "orphan_connection": ImprovementType.ORPHAN_CONNECTION,
+    "doc_ledger_hygiene": ImprovementType.DOC_LEDGER_HYGIENE,
+    "general": ImprovementType.FMAS_SCAN,  # Default fallback
+}
+
+
+def _classify_improvement_type(msg_lower: str) -> str:
+    """Classify improvement sub-type from message text.
+
+    Returns string key for _IMPROVEMENT_TYPE_MAP.
+
+    Order matters: check specific keywords before generic ones.
+    Priority: fmas > drift > wsp > doc artifacts > test > orphan > module > doc.
+    Doc artifacts (modlog/readme/roadmap) must come before "test" and "module".
+    """
+    if "fmas" in msg_lower:
+        return "fmas_scan"
+    elif "drift" in msg_lower:
+        return "drift_correction"
+    elif "wsp" in msg_lower or "violation" in msg_lower:
+        return "wsp_violation"
+    # Doc artifacts (modlog/readme/roadmap) must come BEFORE "test" and "module"
+    # "update modlog for test module" is doc_ledger_hygiene, not test_hygiene
+    elif "modlog" in msg_lower or "readme" in msg_lower or "roadmap" in msg_lower:
+        return "doc_ledger_hygiene"
+    elif "test" in msg_lower or "stale" in msg_lower:
+        return "test_hygiene"
+    elif "orphan" in msg_lower:
+        return "orphan_connection"
+    elif "repair" in msg_lower or "module" in msg_lower or "cleanup" in msg_lower:
+        return "module_repair"
+    elif "doc" in msg_lower:
+        return "doc_ledger_hygiene"
+    return "general"
+
+
+def _extract_module_path(message: str) -> str:
+    """Extract module path from improvement message if present.
+
+    Looks for patterns like:
+      - modules/domain/module_name
+      - in holo_index
+      - in wre_core
+    """
+    # Try to find explicit module path
+    module_match = re.search(
+        r"(?:modules/[a-z_]+/[a-z_]+|in\s+([a-z_]+))",
+        message.lower(),
+    )
+    if module_match:
+        if module_match.group(0).startswith("modules/"):
+            return module_match.group(0)
+        elif module_match.group(1):
+            # "in module_name" -> try to construct path
+            module_name = module_match.group(1)
+            # Common module locations
+            for domain in ["infrastructure", "communication", "ai_intelligence", "foundups"]:
+                return f"modules/{domain}/{module_name}"
+    return ""
+
+
+def _extract_wsp_refs(message: str) -> List[str]:
+    """Extract WSP references from improvement message."""
+    wsp_refs = []
+    # Match patterns like "WSP 49", "wsp49", "WSP-49"
+    wsp_matches = re.findall(r"wsp[-_\s]?(\d+)", message.lower())
+    for num in wsp_matches:
+        wsp_refs.append(f"WSP {num}")
+    return wsp_refs
+
+
+def _derive_risk_level(improvement_type_str: str, msg_lower: str) -> ImprovementRiskLevel:
+    """Derive risk level from improvement type and message content."""
+    # Security-related keywords -> HIGH
+    if any(kw in msg_lower for kw in ["security", "secret", "credential", "vulnerability"]):
+        return ImprovementRiskLevel.HIGH
+
+    # Documentation-only changes -> LOW
+    if improvement_type_str in ("doc_ledger_hygiene",):
+        return ImprovementRiskLevel.LOW
+
+    # Test hygiene with "stale" -> LOW (just updating tests)
+    if improvement_type_str == "test_hygiene" and "stale" in msg_lower:
+        return ImprovementRiskLevel.LOW
+
+    # Default to MEDIUM for most repairs
+    return ImprovementRiskLevel.MEDIUM
+
+
+def _generate_finding_id(message: str, sender: str) -> str:
+    """Generate deterministic finding ID from message content."""
+    hash_input = f"improvement:{sender}:{message}"
+    return f"imp_intent_{hashlib.sha256(hash_input.encode()).hexdigest()[:12]}"
+
+
 def execute_improvement(dae: Any, intent: Any) -> str:
     """Route IMPROVEMENT intent (codebase self-improvement requests).
 
+    Creates an ImprovementJob with dry_run=True and returns advisory.
+
     WSP 97 Truth Boundary:
       - Classifies the improvement request
-      - Returns advisory acknowledgment
-      - Does NOT execute autonomous repairs (not implemented)
+      - Creates ImprovementJob (dry_run=True, not executed)
+      - Returns advisory with job_id
+      - Does NOT execute autonomous repairs
+      - Does NOT queue for worker dispatch
       - Does NOT claim repair capability exists
 
-    Supported improvement types (classification only):
+    Supported improvement types:
       - WSP violations (fix violation, fix wsp, wsp violation)
       - Module repairs (repair module, duplicate module, module cleanup)
       - Test hygiene (stale test)
       - Code drift (fix drift, codebase improvement)
       - FMAS scans (run fmas repair, fmas scan)
+      - Orphan connections (orphan capability)
+      - Documentation hygiene (modlog, readme)
     """
-    msg_lower = (intent.raw_message or "").lower().strip()
+    global _LAST_IMPROVEMENT_JOB
 
-    # Classify improvement sub-type for routing hints
-    # Order matters: check specific keywords before generic ones
-    improvement_type = "general"
-    if "fmas" in msg_lower:
-        improvement_type = "fmas_scan"
-    elif "drift" in msg_lower:
-        improvement_type = "drift_correction"
-    elif "wsp" in msg_lower or "violation" in msg_lower:
-        improvement_type = "wsp_violation"
-    elif "test" in msg_lower or "stale" in msg_lower:
-        improvement_type = "test_hygiene"
-    elif "repair" in msg_lower or "module" in msg_lower or "cleanup" in msg_lower:
-        improvement_type = "module_repair"
+    msg = intent.raw_message or ""
+    msg_lower = msg.lower().strip()
+    sender = getattr(intent, "sender", "unknown")
+
+    # Classify improvement sub-type
+    improvement_type_str = _classify_improvement_type(msg_lower)
+    improvement_type_enum = _IMPROVEMENT_TYPE_MAP.get(
+        improvement_type_str, ImprovementType.FMAS_SCAN
+    )
+
+    # Extract scope information from message
+    module_path = _extract_module_path(msg)
+    wsp_refs = _extract_wsp_refs(msg)
+
+    # Build scope
+    scope = ImprovementScope(
+        module_path=module_path,
+        wsp_refs=wsp_refs,
+    )
+
+    # Derive risk level
+    risk_level = _derive_risk_level(improvement_type_str, msg_lower)
+
+    # Generate finding ID
+    finding_id = _generate_finding_id(msg, sender)
+
+    # Create ImprovementJob (always dry_run=True)
+    job = create_improvement_job(
+        finding_id=finding_id,
+        improvement_type=improvement_type_enum,
+        scope=scope,
+        risk_level=risk_level,
+        requested_by=sender,
+        payload={
+            "raw_message": msg,
+            "extracted_task": getattr(intent, "extracted_task", ""),
+            "source": "openclaw_improvement_intent",
+        },
+    )
+
+    # Store for test inspection (NOT a production queue)
+    _LAST_IMPROVEMENT_JOB = job
 
     logger.info(
-        "[OPENCLAW-DAE] [IMPROVEMENT] Intent recognized: type=%s task=%s sender=%s",
-        improvement_type,
-        (intent.extracted_task or "")[:50],
-        intent.sender,
+        "[OPENCLAW-DAE] [IMPROVEMENT] ImprovementJob created: "
+        "job_id=%s type=%s risk=%s dry_run=%s sender=%s",
+        job.job_id,
+        improvement_type_enum.value,
+        risk_level.value,
+        job.dry_run,
+        sender,
     )
 
     # WSP 97: Truthful advisory response - no repair execution claims
     return (
         f"**Improvement Intent Recognized**\n\n"
-        f"- **Type**: `{improvement_type}`\n"
+        f"- **Type**: `{improvement_type_str}`\n"
         f"- **Request**: {intent.extracted_task or intent.raw_message}\n\n"
-        f"**Status**: Classified but not executed.\n\n"
-        f"Autonomous codebase repair is not yet implemented. "
-        f"This intent was recognized and logged for future FMAS integration.\n\n"
+        f"**ImprovementJob Created**\n\n"
+        f"- **Job ID**: `{job.job_id}`\n"
+        f"- **Improvement Type**: `{improvement_type_enum.value}`\n"
+        f"- **Risk Level**: `{risk_level.value}`\n"
+        f"- **Dry Run**: `True`\n"
+        f"- **Status**: `{job.status.value}` (created, not executed)\n\n"
+        f"**WSP 97 Truth Boundary**\n\n"
+        f"This job was created but NOT executed. Autonomous codebase repair "
+        f"and worker dispatch are not implemented in this slice. "
+        f"The job exists for future FMAS integration.\n\n"
         f"_WSP 97: AI surfaces improvement needs. Humans decide execution._"
     )
 
