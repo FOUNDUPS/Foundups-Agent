@@ -1,22 +1,22 @@
 {
-  "generated_at_utc": "2026-05-01T03:24:24.520532Z",
+  "generated_at_utc": "2026-05-01T03:33:11.160285Z",
   "holo_use_turboquant": "0",
   "holo_emit_confidence": "1",
   "corpus_doc_count": 20413,
   "sentinel_query_count": 11,
   "aggregate": {
     "total_queries": 11,
-    "top_1_pass_count": 1,
-    "top_1_pass_rate": 0.0909,
-    "top_5_pass_count": 1,
-    "top_5_pass_rate": 0.0909,
-    "confidence_min": 0.85,
-    "confidence_avg": 0.85,
-    "confidence_max": 0.85,
-    "latency_min_ms": 43,
-    "latency_p50_ms": 52,
-    "latency_p95_ms": 432,
-    "latency_max_ms": 432
+    "top_1_pass_count": 6,
+    "top_1_pass_rate": 0.5455,
+    "top_5_pass_count": 6,
+    "top_5_pass_rate": 0.5455,
+    "confidence_min": 0.55,
+    "confidence_avg": 0.7569,
+    "confidence_max": 1.0,
+    "latency_min_ms": 78,
+    "latency_p50_ms": 85,
+    "latency_p95_ms": 372,
+    "latency_max_ms": 372
   },
   "query_results": [
     {
@@ -33,7 +33,7 @@
       "top_1_confidence": 0.8500000149011617,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 432,
+      "latency_ms": 372,
       "error": null
     },
     {
@@ -43,14 +43,14 @@
       "evidence_rule": {
         "path_contains": "demurrage"
       },
-      "top_1_path": null,
+      "top_1_path": "modules\\foundups\\simulator\\economics\\demurrage.py",
       "top_1_title": null,
-      "top_1_type": null,
-      "top_1_similarity": null,
-      "top_1_confidence": null,
-      "top_1_passes": false,
-      "top_5_passes": false,
-      "latency_ms": 172,
+      "top_1_type": "symbol",
+      "top_1_similarity": "50.0%",
+      "top_1_confidence": 0.8500000149011617,
+      "top_1_passes": true,
+      "top_5_passes": true,
+      "latency_ms": 81,
       "error": null
     },
     {
@@ -60,14 +60,14 @@
       "evidence_rule": {
         "path_contains": "selenium"
       },
-      "top_1_path": null,
+      "top_1_path": "modules\\infrastructure\\browser_actions\\src\\linkedin_actions.py",
       "top_1_title": null,
-      "top_1_type": null,
-      "top_1_similarity": null,
-      "top_1_confidence": null,
+      "top_1_type": "symbol",
+      "top_1_similarity": "50.0%",
+      "top_1_confidence": 0.65,
       "top_1_passes": false,
       "top_5_passes": false,
-      "latency_ms": 49,
+      "latency_ms": 87,
       "error": null
     },
     {
@@ -75,16 +75,16 @@
       "category": "wsp",
       "description": "Find WSP 97 system execution protocol",
       "evidence_rule": {
-        "title_contains": "WSP 97"
+        "path_contains": "WSP_97"
       },
-      "top_1_path": null,
-      "top_1_title": null,
-      "top_1_type": null,
-      "top_1_similarity": null,
-      "top_1_confidence": null,
+      "top_1_path": "O:\\Foundups-Agent\\WSP_framework\\src\\WSP_94_Agent_Coordination_Protocol.md",
+      "top_1_title": "WSP 94: Agent Coordination Protocol [DEPRECATED - REDIRECT]",
+      "top_1_type": "wsp_protocol",
+      "top_1_similarity": "50.8%",
+      "top_1_confidence": 1.0,
       "top_1_passes": false,
       "top_5_passes": false,
-      "latency_ms": 59,
+      "latency_ms": 84,
       "error": null
     },
     {
@@ -92,16 +92,16 @@
       "category": "wsp",
       "description": "Find WSP 00 zen state protocol",
       "evidence_rule": {
-        "title_contains": "WSP 00"
+        "path_contains": "WSP_00"
       },
-      "top_1_path": null,
-      "top_1_title": null,
-      "top_1_type": null,
-      "top_1_similarity": null,
-      "top_1_confidence": null,
-      "top_1_passes": false,
-      "top_5_passes": false,
-      "latency_ms": 53,
+      "top_1_path": "O:\\Foundups-Agent\\WSP_framework\\src\\WSP_00_Zen_State_Attainment_Protocol.md",
+      "top_1_title": "WSP_00: Zen State Attainment Protocol - Absolute Foundation",
+      "top_1_type": "wsp_protocol",
+      "top_1_similarity": "57.1%",
+      "top_1_confidence": 1.0,
+      "top_1_passes": true,
+      "top_5_passes": true,
+      "latency_ms": 78,
       "error": null
     },
     {
@@ -111,14 +111,14 @@
       "evidence_rule": {
         "path_contains": "WSP"
       },
-      "top_1_path": null,
-      "top_1_title": null,
-      "top_1_type": null,
-      "top_1_similarity": null,
-      "top_1_confidence": null,
-      "top_1_passes": false,
-      "top_5_passes": false,
-      "latency_ms": 52,
+      "top_1_path": "O:\\Foundups-Agent\\WSP_framework\\src\\WSP_3_Enterprise_Domain_Organization.md",
+      "top_1_title": "WSP 3: Enterprise Domain Organization",
+      "top_1_type": "wsp_protocol",
+      "top_1_similarity": "56.6%",
+      "top_1_confidence": 0.9661010363122635,
+      "top_1_passes": true,
+      "top_5_passes": true,
+      "latency_ms": 97,
       "error": null
     },
     {
@@ -128,14 +128,14 @@
       "evidence_rule": {
         "path_contains": "search"
       },
-      "top_1_path": null,
+      "top_1_path": "modules\\foundups\\simulator\\economics\\demurrage.py",
       "top_1_title": null,
-      "top_1_type": null,
-      "top_1_similarity": null,
-      "top_1_confidence": null,
+      "top_1_type": "symbol",
+      "top_1_similarity": "50.0%",
+      "top_1_confidence": 0.5500000149011617,
       "top_1_passes": false,
       "top_5_passes": false,
-      "latency_ms": 62,
+      "latency_ms": 132,
       "error": null
     },
     {
@@ -145,14 +145,14 @@
       "evidence_rule": {
         "path_contains": "holo_index"
       },
-      "top_1_path": null,
+      "top_1_path": "modules\\foundups\\simulator\\economics\\demurrage.py",
       "top_1_title": null,
-      "top_1_type": null,
-      "top_1_similarity": null,
-      "top_1_confidence": null,
+      "top_1_type": "symbol",
+      "top_1_similarity": "50.0%",
+      "top_1_confidence": 0.5500000298023242,
       "top_1_passes": false,
       "top_5_passes": false,
-      "latency_ms": 48,
+      "latency_ms": 85,
       "error": null
     },
     {
@@ -162,14 +162,14 @@
       "evidence_rule": {
         "path_contains": "foundup_job"
       },
-      "top_1_path": null,
+      "top_1_path": "modules\\foundups\\simulator\\economics\\demurrage.py",
       "top_1_title": null,
-      "top_1_type": null,
-      "top_1_similarity": null,
-      "top_1_confidence": null,
+      "top_1_type": "symbol",
+      "top_1_similarity": "50.0%",
+      "top_1_confidence": 0.55,
       "top_1_passes": false,
       "top_5_passes": false,
-      "latency_ms": 45,
+      "latency_ms": 125,
       "error": null
     },
     {
@@ -179,14 +179,14 @@
       "evidence_rule": {
         "type_equals": "skillz"
       },
-      "top_1_path": null,
+      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\wsp49_interface_gap_scanner\\SKILLz.md",
       "top_1_title": null,
-      "top_1_type": null,
-      "top_1_similarity": null,
-      "top_1_confidence": null,
-      "top_1_passes": false,
-      "top_5_passes": false,
-      "latency_ms": 43,
+      "top_1_type": "skillz",
+      "top_1_similarity": "50.0%",
+      "top_1_confidence": 0.6799999999999999,
+      "top_1_passes": true,
+      "top_5_passes": true,
+      "latency_ms": 85,
       "error": null
     },
     {
@@ -196,14 +196,14 @@
       "evidence_rule": {
         "type_equals": "skillz"
       },
-      "top_1_path": null,
+      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\wsp49_interface_gap_scanner\\SKILLz.md",
       "top_1_title": null,
-      "top_1_type": null,
-      "top_1_similarity": null,
-      "top_1_confidence": null,
-      "top_1_passes": false,
-      "top_5_passes": false,
-      "latency_ms": 52,
+      "top_1_type": "skillz",
+      "top_1_similarity": "50.0%",
+      "top_1_confidence": 0.6800000447034875,
+      "top_1_passes": true,
+      "top_5_passes": true,
+      "latency_ms": 80,
       "error": null
     }
   ]

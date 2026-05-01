@@ -1,49 +1,59 @@
 # HoloIndex Package ModLog
 
-## [2026-05-01] HIA3 — Search Quality Baseline Measurement (hia3_search_quality_baseline)
+## [2026-05-01] HIA3 + HIA3B — Search Quality Baseline Measurement (hia3_search_quality_baseline)
 
-**Agent**: 0102 (Worker W10)
+**Agent**: 0102 (Worker W10, Worker W2)
 **WSP References**: WSP 97 (truth distinction), WSP 50 (pre-action verification), WSP 22 (ModLog)
 **Status**: COMPLETE
-**Decision**: Baseline captured at 9.1% pass rate; truthful measurement before any RAG enhancements
+**Decision**: Baseline captured at 54.5% pass rate after HIA3B harness fix
 
 ### Context
 
 HIA1 audit identified agentic RAG upgrade path (BM25, Gemma reranking, corrective RAG).
 Before implementing any changes, HIA3 establishes a truthful search quality baseline.
 
+### HIA3B Diagnostic (same session)
+
+Initial baseline showed 9.1% pass rate due to harness bug: `all_hits = code + wsps + skills`
+always prioritized code results, causing WSP/skill queries to fail when any code result existed.
+
+**Fix**: Category-aware hit selection routes queries to their primary category:
+- WSP queries check `results["wsps"]` first
+- Skill queries check `results["skills"]` first
+- Code/symbol queries check `results["code"]` first
+
 ### Changes
 
 1. **`holo_index/tests/test_search_quality_baseline.py`** (new) — 11 sentinel queries with
-   evidence rules covering code/wsp/symbol/skill categories. No LLM imports.
+   category-aware evidence rules. No LLM imports.
 
 2. **`docs/audits/holoindex_search_quality/hia3_baseline_metrics.json`** (new) — Raw metrics
-   showing 9.1% top-1/top-5 pass rate, 52ms p50 latency.
+   showing 54.5% top-1/top-5 pass rate, 91ms p50 latency.
 
 3. **`docs/audits/holoindex_search_quality/HIA3_SEARCH_QUALITY_BASELINE.md`** (new) —
-   Analysis report documenting low result yield finding.
+   Analysis report with HIA3B diagnostic findings.
 
 ### Key Findings
 
 | Metric | Value |
 |--------|-------|
-| Top-1 Pass Rate | 9.1% (1/11) |
-| Top-5 Pass Rate | 9.1% (1/11) |
-| Zero-Result Queries | 10/11 |
+| Top-1 Pass Rate | 54.5% (6/11) |
+| Top-5 Pass Rate | 54.5% (6/11) |
+| Passing Queries | 6/11 |
+| Failing Queries | 5/11 |
 | Corpus Size | 20,413 docs |
 
-### Root Cause
+### Root Cause of Failures (5/11)
 
-10/11 queries return zero results. Likely causes:
-- Similarity threshold too high
-- Embedding vocabulary mismatch (natural language vs technical docs)
-- Collection routing gaps
+1. **Symbol collection noise**: `demurrage.py` over-indexed, appears as top-1 for unrelated queries
+2. **Semantic mismatch**: WSP 97 query finds WSP 94 (embedding similarity ignores numbers)
+3. **Missing coverage**: selenium modules not in indexed corpus
 
 ### Next Steps (HIA4+)
 
-1. Lower similarity threshold
-2. Add BM25 hybrid for keyword matching
-3. Gemma reranker for result quality
+1. Symbol collection deduplication
+2. BM25 hybrid for WSP number matching
+3. Verify selenium module indexing
 4. Query expansion for technical terms
 
 ---

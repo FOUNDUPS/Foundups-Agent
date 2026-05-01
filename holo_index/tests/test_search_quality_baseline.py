@@ -49,13 +49,13 @@ SENTINEL_QUERIES: List[SentinelQuery] = [
     SentinelQuery(
         query="WSP 97 truth distinction protocol",
         category="wsp",
-        evidence_rule={"title_contains": "WSP 97"},
+        evidence_rule={"path_contains": "WSP_97"},  # path match more reliable than title
         description="Find WSP 97 system execution protocol",
     ),
     SentinelQuery(
         query="WSP 00 zen state attainment",
         category="wsp",
-        evidence_rule={"title_contains": "WSP 00"},
+        evidence_rule={"path_contains": "WSP_00"},  # path match more reliable than title
         description="Find WSP 00 zen state protocol",
     ),
     SentinelQuery(
@@ -137,9 +137,21 @@ def run_sentinel_query(holo, sentinel: SentinelQuery) -> QueryResult:
     try:
         results = holo.search(sentinel.query, limit=5)
         latency_ms = int((time.perf_counter() - start) * 1000)
-        all_hits = results.get("code", []) + results.get("wsps", []) + results.get("skills", [])
-        top_1 = all_hits[0] if all_hits else None
-        top_5 = all_hits[:5]
+        # HIA3B: Category-aware hit selection. WSP queries check wsps, skill queries
+        # check skills, code/symbol queries check code. Avoids false negatives where
+        # code results overshadow category-specific matches.
+        category_map = {
+            "code": results.get("code", []),
+            "symbol": results.get("code", []),  # symbols merged into code
+            "wsp": results.get("wsps", []),
+            "skill": results.get("skills", []),
+        }
+        primary_hits = category_map.get(sentinel.category, [])
+        # Fallback: if primary category empty, check all
+        if not primary_hits:
+            primary_hits = results.get("code", []) + results.get("wsps", []) + results.get("skills", [])
+        top_1 = primary_hits[0] if primary_hits else None
+        top_5 = primary_hits[:5]
         top_1_passes = _check_evidence_rule(top_1, sentinel.evidence_rule) if top_1 else False
         top_5_passes = any(_check_evidence_rule(r, sentinel.evidence_rule) for r in top_5)
         return QueryResult(
