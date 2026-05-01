@@ -1,0 +1,210 @@
+{
+  "generated_at_utc": "2026-05-01T03:24:24.520532Z",
+  "holo_use_turboquant": "0",
+  "holo_emit_confidence": "1",
+  "corpus_doc_count": 20413,
+  "sentinel_query_count": 11,
+  "aggregate": {
+    "total_queries": 11,
+    "top_1_pass_count": 1,
+    "top_1_pass_rate": 0.0909,
+    "top_5_pass_count": 1,
+    "top_5_pass_rate": 0.0909,
+    "confidence_min": 0.85,
+    "confidence_avg": 0.85,
+    "confidence_max": 0.85,
+    "latency_min_ms": 43,
+    "latency_p50_ms": 52,
+    "latency_p95_ms": 432,
+    "latency_max_ms": 432
+  },
+  "query_results": [
+    {
+      "query": "YouTube channel registry",
+      "category": "code",
+      "description": "Find the YouTube channel registry module",
+      "evidence_rule": {
+        "path_contains": "youtube_channel_registry"
+      },
+      "top_1_path": "modules\\infrastructure\\shared_utilities\\youtube_channel_registry.py",
+      "top_1_title": null,
+      "top_1_type": "symbol",
+      "top_1_similarity": "50.0%",
+      "top_1_confidence": 0.8500000149011617,
+      "top_1_passes": true,
+      "top_5_passes": true,
+      "latency_ms": 432,
+      "error": null
+    },
+    {
+      "query": "demurrage economics simulator",
+      "category": "code",
+      "description": "Find the demurrage economics module",
+      "evidence_rule": {
+        "path_contains": "demurrage"
+      },
+      "top_1_path": null,
+      "top_1_title": null,
+      "top_1_type": null,
+      "top_1_similarity": null,
+      "top_1_confidence": null,
+      "top_1_passes": false,
+      "top_5_passes": false,
+      "latency_ms": 172,
+      "error": null
+    },
+    {
+      "query": "browser automation selenium",
+      "category": "code",
+      "description": "Find Selenium browser automation code",
+      "evidence_rule": {
+        "path_contains": "selenium"
+      },
+      "top_1_path": null,
+      "top_1_title": null,
+      "top_1_type": null,
+      "top_1_similarity": null,
+      "top_1_confidence": null,
+      "top_1_passes": false,
+      "top_5_passes": false,
+      "latency_ms": 49,
+      "error": null
+    },
+    {
+      "query": "WSP 97 truth distinction protocol",
+      "category": "wsp",
+      "description": "Find WSP 97 system execution protocol",
+      "evidence_rule": {
+        "title_contains": "WSP 97"
+      },
+      "top_1_path": null,
+      "top_1_title": null,
+      "top_1_type": null,
+      "top_1_similarity": null,
+      "top_1_confidence": null,
+      "top_1_passes": false,
+      "top_5_passes": false,
+      "latency_ms": 59,
+      "error": null
+    },
+    {
+      "query": "WSP 00 zen state attainment",
+      "category": "wsp",
+      "description": "Find WSP 00 zen state protocol",
+      "evidence_rule": {
+        "title_contains": "WSP 00"
+      },
+      "top_1_path": null,
+      "top_1_title": null,
+      "top_1_type": null,
+      "top_1_similarity": null,
+      "top_1_confidence": null,
+      "top_1_passes": false,
+      "top_5_passes": false,
+      "latency_ms": 53,
+      "error": null
+    },
+    {
+      "query": "module organization domains",
+      "category": "wsp",
+      "description": "Find module organization WSP",
+      "evidence_rule": {
+        "path_contains": "WSP"
+      },
+      "top_1_path": null,
+      "top_1_title": null,
+      "top_1_type": null,
+      "top_1_similarity": null,
+      "top_1_confidence": null,
+      "top_1_passes": false,
+      "top_5_passes": false,
+      "latency_ms": 52,
+      "error": null
+    },
+    {
+      "query": "execute_search function",
+      "category": "symbol",
+      "description": "Find the execute_search function",
+      "evidence_rule": {
+        "path_contains": "search"
+      },
+      "top_1_path": null,
+      "top_1_title": null,
+      "top_1_type": null,
+      "top_1_similarity": null,
+      "top_1_confidence": null,
+      "top_1_passes": false,
+      "top_5_passes": false,
+      "latency_ms": 62,
+      "error": null
+    },
+    {
+      "query": "HoloIndex class initialization",
+      "category": "symbol",
+      "description": "Find HoloIndex class",
+      "evidence_rule": {
+        "path_contains": "holo_index"
+      },
+      "top_1_path": null,
+      "top_1_title": null,
+      "top_1_type": null,
+      "top_1_similarity": null,
+      "top_1_confidence": null,
+      "top_1_passes": false,
+      "top_5_passes": false,
+      "latency_ms": 48,
+      "error": null
+    },
+    {
+      "query": "route_foundup_job router",
+      "category": "symbol",
+      "description": "Find the FoundUpJob router",
+      "evidence_rule": {
+        "path_contains": "foundup_job"
+      },
+      "top_1_path": null,
+      "top_1_title": null,
+      "top_1_type": null,
+      "top_1_similarity": null,
+      "top_1_confidence": null,
+      "top_1_passes": false,
+      "top_5_passes": false,
+      "latency_ms": 45,
+      "error": null
+    },
+    {
+      "query": "commit git workflow skill",
+      "category": "skill",
+      "description": "Find commit-related skill",
+      "evidence_rule": {
+        "type_equals": "skillz"
+      },
+      "top_1_path": null,
+      "top_1_title": null,
+      "top_1_type": null,
+      "top_1_similarity": null,
+      "top_1_confidence": null,
+      "top_1_passes": false,
+      "top_5_passes": false,
+      "latency_ms": 43,
+      "error": null
+    },
+    {
+      "query": "review pull request skill",
+      "category": "skill",
+      "description": "Find PR review skill",
+      "evidence_rule": {
+        "type_equals": "skillz"
+      },
+      "top_1_path": null,
+      "top_1_title": null,
+      "top_1_type": null,
+      "top_1_similarity": null,
+      "top_1_confidence": null,
+      "top_1_passes": false,
+      "top_5_passes": false,
+      "latency_ms": 52,
+      "error": null
+    }
+  ]
+}

@@ -1,5 +1,53 @@
 # HoloIndex Package ModLog
 
+## [2026-05-01] HIA3 — Search Quality Baseline Measurement (hia3_search_quality_baseline)
+
+**Agent**: 0102 (Worker W10)
+**WSP References**: WSP 97 (truth distinction), WSP 50 (pre-action verification), WSP 22 (ModLog)
+**Status**: COMPLETE
+**Decision**: Baseline captured at 9.1% pass rate; truthful measurement before any RAG enhancements
+
+### Context
+
+HIA1 audit identified agentic RAG upgrade path (BM25, Gemma reranking, corrective RAG).
+Before implementing any changes, HIA3 establishes a truthful search quality baseline.
+
+### Changes
+
+1. **`holo_index/tests/test_search_quality_baseline.py`** (new) — 11 sentinel queries with
+   evidence rules covering code/wsp/symbol/skill categories. No LLM imports.
+
+2. **`docs/audits/holoindex_search_quality/hia3_baseline_metrics.json`** (new) — Raw metrics
+   showing 9.1% top-1/top-5 pass rate, 52ms p50 latency.
+
+3. **`docs/audits/holoindex_search_quality/HIA3_SEARCH_QUALITY_BASELINE.md`** (new) —
+   Analysis report documenting low result yield finding.
+
+### Key Findings
+
+| Metric | Value |
+|--------|-------|
+| Top-1 Pass Rate | 9.1% (1/11) |
+| Top-5 Pass Rate | 9.1% (1/11) |
+| Zero-Result Queries | 10/11 |
+| Corpus Size | 20,413 docs |
+
+### Root Cause
+
+10/11 queries return zero results. Likely causes:
+- Similarity threshold too high
+- Embedding vocabulary mismatch (natural language vs technical docs)
+- Collection routing gaps
+
+### Next Steps (HIA4+)
+
+1. Lower similarity threshold
+2. Add BM25 hybrid for keyword matching
+3. Gemma reranker for result quality
+4. Query expansion for technical terms
+
+---
+
 ## [2026-04-24] CFZ4 — WSP Collection Separation Phase 1 (cfz4_collection_separation)
 
 **Agent**: 0102 (Worker CFZ4)
