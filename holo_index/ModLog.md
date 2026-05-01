@@ -1,5 +1,48 @@
 # HoloIndex Package ModLog
 
+## [2026-05-02] HIA7B — Priority Root Indexing Gap Fix (hia7b_priority_root_fix)
+
+**Agent**: 0102 (Worker W2)
+**WSP References**: WSP 97 (truth distinction), WSP 50 (pre-action verification), WSP 22 (ModLog)
+**Status**: COMPLETE
+**Gate Result**: NOT PASSED (top-1 84.2% < 85%, top-5 92.1% < 95%)
+
+### Context
+
+HIA7 revealed 3 indexing gaps where target files were not indexed. Added priority
+roots to ensure these files are indexed before the 20K limit is reached.
+
+### Changes
+
+Added 3 priority roots to `indexing_engine.py`:
+- `holo_index/qwen_advisor/` (orphan analyzers)
+- `modules/development/ide_foundups/src/` (wre_bridge.py)
+- `modules/foundups/agent/src/` (build_plan.py)
+
+### Results
+
+| Metric | HIA7 (Before) | HIA7B (After) | Delta |
+|--------|---------------|---------------|-------|
+| Top-1 Pass Rate | 86.8% | 84.2% | -2.6% |
+| Top-5 Pass Rate | 92.1% | 92.1% | 0.0% |
+
+**Indexing gap: FIXED** - All target files now discoverable via direct queries.
+**Semantic drift: REMAINS** - General queries still rank wrong files higher due to
+keyword overlap ("integration" → integrate_with_wre.py, "hermes" → hermes_adapter.py).
+
+### Key Insight
+
+The remaining failures are not indexing issues but semantic ranking issues.
+Recommend proceeding to HIA8 (LLM reranking) to address semantic drift.
+
+### Files
+
+- `holo_index/core/indexing_engine.py` — Added 3 priority roots
+- `docs/audits/holoindex_search_quality/HIA7B_PRIORITY_ROOT_INDEXING_FIX_REPORT.md` (new)
+- `docs/audits/holoindex_search_quality/hia3_baseline_metrics.json` — Updated
+
+---
+
 ## [2026-05-01] HIA7 — Sentinel Query Expansion (hia7_sentinel_expansion_gate)
 
 **Agent**: 0102 (Worker W2)

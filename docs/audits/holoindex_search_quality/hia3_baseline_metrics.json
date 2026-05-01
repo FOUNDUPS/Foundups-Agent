@@ -1,22 +1,22 @@
 {
-  "generated_at_utc": "2026-05-01T13:51:54.006701Z",
+  "generated_at_utc": "2026-05-01T23:32:37.602718Z",
   "holo_use_turboquant": "0",
   "holo_emit_confidence": "1",
   "corpus_doc_count": 20413,
   "sentinel_query_count": 38,
   "aggregate": {
     "total_queries": 38,
-    "top_1_pass_count": 33,
-    "top_1_pass_rate": 0.8684,
+    "top_1_pass_count": 32,
+    "top_1_pass_rate": 0.8421,
     "top_5_pass_count": 35,
     "top_5_pass_rate": 0.9211,
     "confidence_min": 0.655,
-    "confidence_avg": 0.8845,
+    "confidence_avg": 0.8786,
     "confidence_max": 1.0,
-    "latency_min_ms": 82,
-    "latency_p50_ms": 102,
-    "latency_p95_ms": 155,
-    "latency_max_ms": 414
+    "latency_min_ms": 79,
+    "latency_p50_ms": 91,
+    "latency_p95_ms": 141,
+    "latency_max_ms": 495
   },
   "query_results": [
     {
@@ -33,7 +33,7 @@
       "top_1_confidence": 0.7663490526361794,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 414,
+      "latency_ms": 495,
       "error": null
     },
     {
@@ -50,7 +50,7 @@
       "top_1_confidence": 0.7770940305244378,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 100,
+      "latency_ms": 104,
       "error": null
     },
     {
@@ -67,7 +67,7 @@
       "top_1_confidence": 0.7851966968481987,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 128,
+      "latency_ms": 98,
       "error": null
     },
     {
@@ -84,7 +84,7 @@
       "top_1_confidence": 0.728173514128496,
       "top_1_passes": false,
       "top_5_passes": true,
-      "latency_ms": 137,
+      "latency_ms": 106,
       "error": null
     },
     {
@@ -101,7 +101,7 @@
       "top_1_confidence": 0.8289897182247203,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 95,
+      "latency_ms": 101,
       "error": null
     },
     {
@@ -118,7 +118,7 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 95,
+      "latency_ms": 91,
       "error": null
     },
     {
@@ -152,7 +152,7 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 95,
+      "latency_ms": 97,
       "error": null
     },
     {
@@ -169,7 +169,7 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 117,
+      "latency_ms": 91,
       "error": null
     },
     {
@@ -186,7 +186,7 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 118,
+      "latency_ms": 92,
       "error": null
     },
     {
@@ -203,7 +203,7 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 114,
+      "latency_ms": 91,
       "error": null
     },
     {
@@ -220,7 +220,7 @@
       "top_1_confidence": 0.9191263915507275,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 119,
+      "latency_ms": 105,
       "error": null
     },
     {
@@ -237,7 +237,7 @@
       "top_1_confidence": 0.9704019725548232,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 109,
+      "latency_ms": 127,
       "error": null
     },
     {
@@ -254,7 +254,7 @@
       "top_1_confidence": 0.7900913216225764,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 155,
+      "latency_ms": 141,
       "error": null
     },
     {
@@ -271,7 +271,7 @@
       "top_1_confidence": 0.8581582473518456,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 117,
+      "latency_ms": 89,
       "error": null
     },
     {
@@ -288,7 +288,7 @@
       "top_1_confidence": 0.9119717346963487,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 110,
+      "latency_ms": 86,
       "error": null
     },
     {
@@ -298,14 +298,14 @@
       "evidence_rule": {
         "path_contains": "wre_master_orchestrator"
       },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\infrastructure\\wre_core\\wre_master_orchestrator\\src\\wre_master_orchestrator.py",
+      "top_1_path": "O:\\Foundups-Agent\\holo_index\\qwen_advisor\\performance_orchestrator.py",
       "top_1_title": null,
       "top_1_type": "symbol",
-      "top_1_similarity": "56.9%",
-      "top_1_confidence": 0.9191301949041437,
-      "top_1_passes": true,
-      "top_5_passes": true,
-      "latency_ms": 107,
+      "top_1_similarity": "54.4%",
+      "top_1_confidence": 0.6942394085374256,
+      "top_1_passes": false,
+      "top_5_passes": false,
+      "latency_ms": 89,
       "error": null
     },
     {
@@ -322,7 +322,7 @@
       "top_1_confidence": 0.9820283762282334,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 100,
+      "latency_ms": 79,
       "error": null
     },
     {
@@ -339,7 +339,7 @@
       "top_1_confidence": 0.9497865435186601,
       "top_1_passes": false,
       "top_5_passes": false,
-      "latency_ms": 114,
+      "latency_ms": 80,
       "error": null
     },
     {
@@ -356,7 +356,7 @@
       "top_1_confidence": 0.8404882046598658,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 115,
+      "latency_ms": 82,
       "error": null
     },
     {
@@ -373,7 +373,7 @@
       "top_1_confidence": 0.6550419102325375,
       "top_1_passes": false,
       "top_5_passes": false,
-      "latency_ms": 102,
+      "latency_ms": 98,
       "error": null
     },
     {
@@ -390,7 +390,7 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 125,
+      "latency_ms": 81,
       "error": null
     },
     {
@@ -407,7 +407,7 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 123,
+      "latency_ms": 93,
       "error": null
     },
     {
@@ -424,7 +424,7 @@
       "top_1_confidence": 0.8796568835519014,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 101,
+      "latency_ms": 87,
       "error": null
     },
     {
@@ -441,7 +441,7 @@
       "top_1_confidence": 0.7653613297766888,
       "top_1_passes": false,
       "top_5_passes": true,
-      "latency_ms": 103,
+      "latency_ms": 89,
       "error": null
     },
     {
@@ -458,7 +458,7 @@
       "top_1_confidence": 0.8083764464477199,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 104,
+      "latency_ms": 82,
       "error": null
     },
     {
@@ -475,7 +475,7 @@
       "top_1_confidence": 0.9981861992399124,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 88,
+      "latency_ms": 87,
       "error": null
     },
     {
@@ -492,7 +492,7 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 87,
+      "latency_ms": 98,
       "error": null
     },
     {
@@ -509,7 +509,7 @@
       "top_1_confidence": 0.9420379142169739,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 95,
+      "latency_ms": 94,
       "error": null
     },
     {
@@ -519,14 +519,14 @@
       "evidence_rule": {
         "type_equals": "skillz"
       },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\video_indexer\\skillz\\transcript_ask\\SKILLz.md",
+      "top_1_path": "O:\\Foundups-Agent\\modules\\communication\\livechat\\skillz\\gemma_telemetry_retention_detector\\SKILLz.md",
       "top_1_title": null,
       "top_1_type": "skillz",
       "top_1_similarity": "50.0%",
       "top_1_confidence": 0.6799999999999999,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 86,
+      "latency_ms": 84,
       "error": null
     },
     {
@@ -536,14 +536,14 @@
       "evidence_rule": {
         "type_equals": "skillz"
       },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\video_indexer\\skillz\\transcript_ask\\SKILLz.md",
+      "top_1_path": "O:\\Foundups-Agent\\modules\\communication\\livechat\\skillz\\gemma_telemetry_retention_detector\\SKILLz.md",
       "top_1_title": null,
       "top_1_type": "skillz",
       "top_1_similarity": "50.0%",
       "top_1_confidence": 0.6800000447034875,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 82,
+      "latency_ms": 89,
       "error": null
     },
     {
@@ -559,8 +559,8 @@
       "top_1_similarity": "53.1%",
       "top_1_confidence": 0.681414332627324,
       "top_1_passes": false,
-      "top_5_passes": false,
-      "latency_ms": 100,
+      "top_5_passes": true,
+      "latency_ms": 93,
       "error": null
     },
     {
@@ -577,7 +577,7 @@
       "top_1_confidence": 0.8659627158461345,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 91,
+      "latency_ms": 89,
       "error": null
     },
     {
@@ -594,7 +594,7 @@
       "top_1_confidence": 0.845680281770153,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 87,
+      "latency_ms": 83,
       "error": null
     },
     {
@@ -611,7 +611,7 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 89,
+      "latency_ms": 86,
       "error": null
     },
     {
@@ -628,7 +628,7 @@
       "top_1_confidence": 0.7832634911351688,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 94,
+      "latency_ms": 84,
       "error": null
     },
     {
@@ -645,7 +645,7 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 95,
+      "latency_ms": 107,
       "error": null
     },
     {
@@ -662,7 +662,7 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 97,
+      "latency_ms": 131,
       "error": null
     }
   ]
