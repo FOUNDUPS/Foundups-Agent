@@ -94,6 +94,33 @@ def _is_symbol_query(query: str) -> bool:
     return False
 
 
+# ---------------------------------------------------------------------------
+# HIA2: Confidence scoring (pure heuristic, no LLM)
+# ---------------------------------------------------------------------------
+
+_TYPE_BOOST: Dict[str, float] = {
+    "code": 0.1,
+    "wsp": 0.1,
+    "skillz": 0.08,
+    "test": 0.05,
+    "symbol": 0.05,
+    "docs": 0.03,
+    "knowledge": 0.03,
+}
+
+
+def _emit_confidence() -> bool:
+    """Return True when HOLO_EMIT_CONFIDENCE=1 is set."""
+    return os.getenv("HOLO_EMIT_CONFIDENCE", "0").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _compute_confidence(similarity: float, keyword_score: float, result_type: str) -> float:
+    """Compute heuristic confidence score (0.0-1.0) without LLM."""
+    keyword_bonus = keyword_score / 10.0
+    type_boost = _TYPE_BOOST.get(result_type, 0.0)
+    return max(0.0, min(1.0, similarity + keyword_bonus + type_boost))
+
+
 def _merge_hits(
     primary: List[Dict[str, Any]],
     secondary: List[Dict[str, Any]],
@@ -451,21 +478,30 @@ def _format_hit(
     keyword_score: float,
     priority: int,
 ) -> Dict[str, Any]:
-    """Build a single search hit dict with ``_sort_key`` for ranking."""
+    """Build a single search hit dict with ``_sort_key`` for ranking.
+
+    HIA2: Optionally includes ``confidence`` when HOLO_EMIT_CONFIDENCE=1.
+    """
     sim_str = f"{similarity * 100:.1f}%"
+    emit_conf = _emit_confidence()
 
     if kind == "code":
-        return {
+        result_type = meta.get("type", "code")
+        result = {
             "need": meta.get("need"),
             "location": doc,
             "similarity": sim_str,
             "cube": meta.get("cube"),
-            "type": meta.get("type", "other"),
+            "type": result_type,
             "priority": priority,
             "_sort_key": (0.5 * priority + 0.3 * similarity + 0.2 * keyword_score, similarity, priority),
         }
+        if emit_conf:
+            result["confidence"] = _compute_confidence(similarity, keyword_score, result_type)
+        return result
+
     if kind == "test":
-        return {
+        result = {
             "test_id": meta.get("test_id"),
             "path": meta.get("path"),
             "description": meta.get("description"),
@@ -475,8 +511,12 @@ def _format_hit(
             "priority": priority,
             "_sort_key": (0.5 * priority + 0.3 * similarity + 0.2 * keyword_score, similarity, priority),
         }
+        if emit_conf:
+            result["confidence"] = _compute_confidence(similarity, keyword_score, "test")
+        return result
+
     if kind == "skill":
-        return {
+        result = {
             "skill_name": meta.get("skill_name"),
             "description": meta.get("description"),
             "primary_agent": meta.get("primary_agent"),
@@ -488,18 +528,26 @@ def _format_hit(
             "priority": priority,
             "_sort_key": (0.6 * priority + 0.3 * similarity + 0.1 * keyword_score, similarity, priority),
         }
+        if emit_conf:
+            result["confidence"] = _compute_confidence(similarity, keyword_score, "skillz")
+        return result
+
     # WSP / default
-    return {
+    result_type = meta.get("type", "wsp")
+    result = {
         "wsp": meta.get("wsp"),
         "title": meta.get("title"),
         "summary": meta.get("summary"),
         "path": meta.get("path"),
         "similarity": sim_str,
         "cube": meta.get("cube"),
-        "type": meta.get("type", "other"),
+        "type": result_type,
         "priority": priority,
         "_sort_key": (0.5 * priority + 0.3 * similarity + 0.2 * keyword_score, similarity, priority),
     }
+    if emit_conf:
+        result["confidence"] = _compute_confidence(similarity, keyword_score, result_type)
+    return result
 
 
 # ---------------------------------------------------------------------------
