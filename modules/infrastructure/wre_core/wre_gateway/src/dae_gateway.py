@@ -45,6 +45,20 @@ from modules.infrastructure.wre_core.recursive_improvement.src.learning import (
 )
 from modules.infrastructure.wre_core.recursive_improvement.src.core import PatternType
 
+# WSP 97: FoundUpJob envelope validation
+try:
+    from modules.infrastructure.wre_core.src.foundup_job_router import (
+        detect_envelope_type,
+        validate_foundup_job_envelope,
+        EnvelopeType,
+        EnvelopeValidationResult,
+    )
+    FOUNDUP_JOB_VALIDATION_AVAILABLE = True
+except ImportError:
+    FOUNDUP_JOB_VALIDATION_AVAILABLE = False
+    EnvelopeType = None
+    EnvelopeValidationResult = None
+
 logger = logging.getLogger(__name__)
 
 
@@ -152,10 +166,22 @@ class DAEGateway:
         # WSP 50: Pre-action verification
         if not self._verify_envelope(envelope):
             self.metrics["violations_prevented"] += 1
-            return {
-                "error": "WSP 50 violation: Invalid envelope structure",
-                "required": ["objective", "context", "wsp_protocols"]
-            }
+            validation_result = self.get_last_validation_result()
+            if validation_result:
+                # WSP 97: Return detailed FoundUpJob validation failure
+                return {
+                    "error": f"WSP 97 violation: FoundUpJob envelope validation failed",
+                    "validation_code": validation_result.get("validation_code"),
+                    "missing_fields": validation_result.get("missing_fields", []),
+                    "validation_message": validation_result.get("validation_message"),
+                    "envelope_type": validation_result.get("envelope_type"),
+                }
+            else:
+                # Generic DAE envelope failure
+                return {
+                    "error": "WSP 50 violation: Invalid envelope structure",
+                    "required": ["objective", "context", "wsp_protocols"]
+                }
         
         # Check if core DAE
         if dae_name.lower() in self.core_daes:
@@ -299,24 +325,65 @@ class DAEGateway:
     def _verify_envelope(self, envelope: Dict) -> bool:
         """
         WSP 50: Pre-action verification.
-        
+
         Validates envelope has required structure.
+        Uses strict validation for FoundUpJob envelopes (WSP 97).
+        Uses permissive validation for generic DAE envelopes.
         """
+        # WSP 97: Use FoundUpJob validation if available and envelope looks like a FoundUpJob
+        if FOUNDUP_JOB_VALIDATION_AVAILABLE:
+            envelope_type = detect_envelope_type(envelope)
+
+            if envelope_type == EnvelopeType.FOUNDUP_JOB:
+                # Strict FoundUpJob validation
+                validation_result = validate_foundup_job_envelope(envelope)
+
+                if not validation_result.valid:
+                    logger.warning(
+                        f"WSP 97: FoundUpJob envelope validation failed: "
+                        f"{validation_result.validation_code.value} - "
+                        f"missing fields: {validation_result.missing_fields}"
+                    )
+                    # Store validation result for route_to_dae to access
+                    self._last_validation_result = validation_result
+                    return False
+
+                # Store successful validation for dry_run_defaulted info
+                self._last_validation_result = validation_result
+                if validation_result.dry_run_defaulted:
+                    logger.info(
+                        "[WSP97] FoundUpJob envelope dry_run_mode defaulted to True"
+                    )
+                return True
+
+        # Generic DAE envelope: permissive validation
         required = ["objective"]
         recommended = ["context", "wsp_protocols", "token_budget"]
-        
+
         # Check required fields
         for field in required:
             if field not in envelope:
                 logger.warning(f"WSP 50: Missing required field '{field}'")
                 return False
-        
+
         # Warn about recommended fields
         for field in recommended:
             if field not in envelope:
                 logger.info(f"WSP 50: Recommended field '{field}' not provided")
-        
+
         return True
+
+    def get_last_validation_result(self) -> Optional[Dict[str, Any]]:
+        """
+        Get the last envelope validation result (for FoundUpJob envelopes).
+
+        Returns:
+            Dict with validation details or None if not available
+        """
+        result = getattr(self, "_last_validation_result", None)
+        if result and hasattr(result, "to_dict"):
+            return result.to_dict()
+        return None
     
     def _select_sub_agent(self, dae_name: str, envelope: Dict) -> str:
         """
