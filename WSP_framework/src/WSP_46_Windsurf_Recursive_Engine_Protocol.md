@@ -147,6 +147,83 @@ Operational ownership is intentionally split:
 
 WRE should not duplicate AI Overseer policy governance. AI Overseer should not duplicate WRE execution scheduling.
 
+### 2.8 WSP 97 Truth Boundaries (2026-05-02 Alignment)
+
+WRE validation and orchestration operates under explicit WSP 97 truth boundaries. These boundaries clarify what the system proves versus what remains future work.
+
+**What WRE Proves Now (Structural Validation)**:
+- FoundUpJob envelope identity validation (job_id, foundup_id, tenant_id, requested_action)
+- Policy flags validation (dry_run_mode, security_gate, permission_gate)
+- Evidence refs shape validation (list of strings/dicts with path/id/ref)
+- Compute budget validation (type, non-negative, budget exhaustion)
+- Model routing policy validation (tier/preference compatibility)
+- Route envelope generation (target_backend, route_status, reason_code)
+
+**What Remains Dry-Run**:
+- All job execution defaults to `dry_run_mode=True` unless explicit live gates pass
+- ConsumerResult evidence proves routing and validation, not execution completion
+- Receipt emission and pAVS verification return `verification_complete=False`
+
+**What Is Policy Validation Only (No Claims)**:
+- Compute budget validation does not prove metering accuracy
+- Model routing policy validation does not select or invoke models
+- Live mode gate validation does not execute the job
+- `cabr_ready=False` and `payout_ready=False` always at validation time
+
+**What Is Future Work**:
+- Daemon lifecycle (long-running worker processes)
+- Live execution (non-dry-run job dispatch with actual Hermes execution)
+- Real autonomous workers (background processes without human orchestration)
+- CABR/reward/payout claims (require V2/V3 verification pipeline)
+- Token billing and metering (requires resource tracking implementation)
+
+Reference: `foundup_job_router.py`, `foundup_job_consumer.py`, `receipt_emitter.py`
+
+### 2.9 FoundUpJob Control Plane (2026-05-02)
+
+The WRE includes a FoundUpJob control plane for OpenClaw intent ingress and dry-run proof generation.
+
+**Runtime Entrypoints**:
+- `python modules/infrastructure/wre_core/run_wre.py drain` - Drain OpenClaw FoundUpJob queue (dry-run)
+- `python main.py` - System ingress with preflight gates (routes to WRE for job operations)
+
+**OpenClaw Intent Ingress**:
+- `openclaw_intent_planner.py` - Resolves intent to action plan with route
+- `openclaw_execution_routes.py` - Dispatches resolved plans to appropriate backends
+- `openclaw_foundup_orchestrator.py` - Job queue management and FoundUpJob lifecycle
+
+**WRE Core Validation/Router/Consumer**:
+- `foundup_job_router.py` - Envelope validation and RouteEnvelope generation
+- `foundup_job_consumer.py` - Drains queue through routing pipeline with receipt binding
+- `dae_gateway.py` - Routes envelopes to DAEs with WSP 97 validation
+
+**Dry-Run Proof Path**:
+```
+OpenClaw Intent -> FoundUpJob (QUEUED) -> WRE Router -> RouteEnvelope
+               -> Consumer -> Hermes Executor (if routed)
+               -> Terminal Job -> Receipt Emitter -> pAVS Verification
+               -> ConsumerResult (complete closed-loop evidence)
+```
+
+**Truth Invariant**: ConsumerResult contains complete audit trail but `verification_complete=False`, `cabr_ready=False`, `payout_ready=False` per WSP 97.
+
+### 2.10 Multi-Agent Clarification (2026-05-02)
+
+The "multi-agent coordination" described in Section 1 refers to DAE/plugin/tool orchestration within the WRE runtime, not to autonomous background worker processes.
+
+**Current State**:
+- DAEs are pattern-based orchestrators, not autonomous processes
+- Agents (ComplianceAgent, LoremasterAgent, etc.) are sub-components within DAE cubes
+- Skill execution is synchronous within WRE orchestration loop
+- No background daemon lifecycle implemented
+
+**Terminology**:
+- "Autonomous agent" = DAE cube with pattern memory and sub-agent tools
+- "Multi-agent coordination" = WRE routing operations to appropriate DAE cubes
+- "Plugin" = Skill registered with WREMasterOrchestrator
+
+When actual autonomous worker processes are implemented, this section will be updated with process lifecycle, supervision, and IPC details.
+
 ## 3. Orchestrated Agents & Utilities
 
 1. The WRE orchestrates a suite of specialized internal agents and utilities to carry out its directives. These components are essential for maintaining the health, coherence, and evolution of the system.
@@ -181,13 +258,13 @@ The WRE follows a recursive loop:
 
 2.  **Goal Ingestion**: The engine ingests a goal from a specified source (e.g., `ROADMAP.md`), a process managed according to **WSP 46**.
 
-3.  **Task Decomposition & Prioritization**: The WRE analyzes the goal and consults the **WSP 5: Module Prioritization Scoring (MPS) System** to select the appropriate module and action.
+3.  **Task Decomposition & Prioritization**: The WRE analyzes the goal and consults the **WSP 15: Module Prioritization Scoring (MPS) System** to select the appropriate module and action.
 
 4.  **Coherence Check**: Before execution, the WRE performs a mandatory self-check against the **WSP 17: rESP SELF CHECK Protocol**. This ensures the agent's core cognitive functions are stable and aligned before interacting with the codebase. If the check fails, execution is aborted.
 
 5.  **Autonomous Execution**: The WRE executes the module according to the lifecycle defined in **WSP 35: Module Execution Automation**. This includes contractual understanding, execution, and error handling via **WSP 45**.
 
-6.  **State Assessment & Chronicle**: Upon task completion, the engine assesses the new state of the system and the `ChroniclerAgent` records the outcome as defined in **WSP 51**.
+6.  **State Assessment & Chronicle**: Upon task completion, the engine assesses the new state and records outcomes via DAE-orchestrated ModLog updates as defined in **WSP 22** (Documentation & Registry DAE manages chronicle persistence).
 
 7.  **Recursion/Termination**: Based on the assessment, the WRE will either select the next task in the sequence or terminate if the goal is achieved or has failed.
 
