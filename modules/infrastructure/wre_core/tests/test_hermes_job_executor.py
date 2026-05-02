@@ -1091,5 +1091,198 @@ class TestCheckpointWSP97(unittest.TestCase):
         self.assertFalse(result.payout_ready)
 
 
+# ---------------------------------------------------------------------------
+# Evidence Collection Tests (HERMES_EVIDENCE_COLLECTION_PHASE1)
+# ---------------------------------------------------------------------------
+
+
+class TestEvidenceCollection(unittest.TestCase):
+    """Test evidence file collection."""
+
+    def setUp(self):
+        """Create temp directory for evidence tests."""
+        import tempfile
+        self.temp_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        """Clean up temp directory."""
+        import shutil
+        shutil.rmtree(self.temp_dir, ignore_errors=True)
+
+    def test_evidence_directory_created(self):
+        """Evidence directory is created during execution."""
+        with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
+            executor = HermesJobExecutor(workspace_root=self.temp_dir)
+            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            result = executor.execute(job)
+
+            # Evidence directory should exist
+            expected_dir = os.path.join(self.temp_dir, ".hermes_evidence", job.job_id)
+            self.assertTrue(os.path.isdir(expected_dir))
+
+    def test_evidence_metadata_json_written(self):
+        """metadata.json is written to evidence directory."""
+        import json
+
+        with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
+            executor = HermesJobExecutor(workspace_root=self.temp_dir)
+            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            result = executor.execute(job)
+
+            metadata_path = os.path.join(
+                self.temp_dir, ".hermes_evidence", job.job_id, "metadata.json"
+            )
+            self.assertTrue(os.path.isfile(metadata_path))
+
+            with open(metadata_path, "r") as f:
+                metadata = json.load(f)
+
+            self.assertIsInstance(metadata, dict)
+
+    def test_evidence_metadata_contains_job_fields(self):
+        """metadata.json contains required job fields."""
+        import json
+
+        with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
+            executor = HermesJobExecutor(workspace_root=self.temp_dir)
+            job = create_job(
+                tenant_id="tenant_abc",
+                requested_action="validate_foundup",
+                foundup_id="gotjunk",
+                intent_id="intent_xyz",
+            )
+            result = executor.execute(job)
+
+            metadata_path = os.path.join(
+                self.temp_dir, ".hermes_evidence", job.job_id, "metadata.json"
+            )
+            with open(metadata_path, "r") as f:
+                metadata = json.load(f)
+
+            self.assertEqual(metadata["job_id"], job.job_id)
+            self.assertEqual(metadata["foundup_id"], "gotjunk")
+            self.assertEqual(metadata["tenant_id"], "tenant_abc")
+            self.assertEqual(metadata["requested_action"], "validate_foundup")
+            self.assertEqual(metadata["intent_id"], "intent_xyz")
+            self.assertIn("workspace_binding", metadata)
+            self.assertIn("started_at", metadata)
+            self.assertIn("completed_at", metadata)
+            self.assertIn("dry_run", metadata)
+            self.assertEqual(metadata["execution_status"], "SIMULATED")
+
+    def test_evidence_checkpoint_json_written(self):
+        """checkpoint.json is written to evidence directory."""
+        import json
+
+        with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
+            executor = HermesJobExecutor(workspace_root=self.temp_dir)
+            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            result = executor.execute(job)
+
+            checkpoint_path = os.path.join(
+                self.temp_dir, ".hermes_evidence", job.job_id, "checkpoint.json"
+            )
+            self.assertTrue(os.path.isfile(checkpoint_path))
+
+            with open(checkpoint_path, "r") as f:
+                checkpoint = json.load(f)
+
+            self.assertIsInstance(checkpoint, dict)
+
+    def test_evidence_checkpoint_contains_state(self):
+        """checkpoint.json contains checkpoint state fields."""
+        import json
+
+        with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
+            executor = HermesJobExecutor(workspace_root=self.temp_dir)
+            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            result = executor.execute(job)
+
+            checkpoint_path = os.path.join(
+                self.temp_dir, ".hermes_evidence", job.job_id, "checkpoint.json"
+            )
+            with open(checkpoint_path, "r") as f:
+                checkpoint = json.load(f)
+
+            self.assertEqual(checkpoint["state"], "SIMULATED")
+            self.assertIn("result", checkpoint)
+            self.assertIn("blocker", checkpoint)
+            self.assertIn("next_action", checkpoint)
+            self.assertIn("files_changed", checkpoint)
+            self.assertIn("commands_run", checkpoint)
+            self.assertIn("exit_reason", checkpoint)
+
+    def test_evidence_path_in_result(self):
+        """evidence_path is set in result."""
+        with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
+            executor = HermesJobExecutor(workspace_root=self.temp_dir)
+            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            result = executor.execute(job)
+
+            self.assertIsNotNone(result.evidence_path)
+            expected_path = os.path.join(self.temp_dir, ".hermes_evidence", job.job_id)
+            self.assertEqual(result.evidence_path, expected_path)
+
+    def test_evidence_write_failure_does_not_fail_job(self):
+        """Evidence write failure does not fail job execution."""
+        with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
+            executor = HermesJobExecutor(workspace_root=self.temp_dir)
+            job = create_job(tenant_id="t1", requested_action="build_foundup")
+
+            # Mock os.makedirs to raise an exception
+            with patch("os.makedirs", side_effect=PermissionError("Access denied")):
+                # Should not raise - evidence failure is silent
+                result = executor.execute(job)
+
+            # Job still completes
+            self.assertEqual(result.status, HermesExecutionStatus.SIMULATED)
+            # But evidence_path is None (write failed)
+            self.assertIsNone(result.evidence_path)
+
+    def test_evidence_not_written_when_validation_fails(self):
+        """Evidence is NOT written when job validation fails."""
+        with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
+            executor = HermesJobExecutor(workspace_root=self.temp_dir)
+
+            # Create invalid job (missing job_id)
+            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            job.job_id = ""
+
+            result = executor.execute(job)
+
+            # Result is blocked
+            self.assertEqual(result.status, HermesExecutionStatus.BLOCKED_INVALID_JOB)
+
+            # No evidence directory created (no valid job_id to use)
+            evidence_base = os.path.join(self.temp_dir, ".hermes_evidence")
+            if os.path.exists(evidence_base):
+                # Should be empty or not exist
+                self.assertEqual(os.listdir(evidence_base), [])
+
+
+class TestEvidencePathField(unittest.TestCase):
+    """Test evidence_path field in HermesDelegationResult."""
+
+    def test_evidence_path_default_none(self):
+        """evidence_path defaults to None."""
+        result = HermesDelegationResult(
+            status=HermesExecutionStatus.SIMULATED,
+            status_reason="Test",
+        )
+        self.assertIsNone(result.evidence_path)
+
+    def test_to_dict_includes_evidence_path(self):
+        """to_dict includes evidence_path."""
+        result = HermesDelegationResult(
+            status=HermesExecutionStatus.SIMULATED,
+            status_reason="Test",
+            evidence_path="/path/to/.hermes_evidence/j_123",
+        )
+        d = result.to_dict()
+
+        self.assertIn("evidence_path", d)
+        self.assertEqual(d["evidence_path"], "/path/to/.hermes_evidence/j_123")
+
+
 if __name__ == "__main__":
     unittest.main()

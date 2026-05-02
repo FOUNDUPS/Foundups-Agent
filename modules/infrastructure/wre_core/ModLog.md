@@ -2,6 +2,54 @@
 
 ## Chronological Change Log
 
+### [2026-05-03] - HERMES_EVIDENCE_COLLECTION_PHASE1 (v0.8.18)
+
+**WSP Protocol References**: WSP 11 (Interface), WSP 97 (Truthful)
+**Impact Analysis**: Add evidence file collection for auditable job artifacts
+
+#### Changes Made
+
+- `src/hermes_job_executor.py`:
+  - Added `evidence_path: Optional[str]` to `HermesDelegationResult`
+  - Added `_write_evidence()` method to `HermesJobExecutor`:
+    - Creates `.hermes_evidence/{job_id}/` directory
+    - Writes `metadata.json` with job identity, workspace binding, timing
+    - Writes `checkpoint.json` with checkpoint state and execution details
+    - Returns evidence path or None on error (silent failure)
+  - Integrated evidence collection into `execute()` for all valid job paths
+  - Evidence NOT written for validation failures (no valid job to document)
+  - Added `json` to top-level imports
+
+- `tests/test_hermes_job_executor.py`:
+  - 10 new tests (94 total) for evidence collection
+  - TestEvidenceCollection: directory creation, metadata/checkpoint JSON
+  - TestEvidencePathField: default value, to_dict serialization
+
+#### Evidence Directory Structure
+
+```
+.hermes_evidence/{job_id}/
+├── metadata.json    # Job identity, workspace binding, timing
+└── checkpoint.json  # Checkpoint state, files_changed, commands_run
+```
+
+#### WSP 97 Truth Boundaries
+
+- Evidence files are observability artifacts ONLY
+- They prove job was processed through WRE, not that real work occurred
+- `real_execution_performed` = False (always in Phase 1)
+- `verification_complete` = False (evidence is NOT verification)
+- Evidence enables future CABR verification to have artifacts to score
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.py -v
+# 94 passed
+```
+
+---
+
 ### [2026-05-03] - HERMES_CHECKPOINT_PROTOCOL_PHASE1 (v0.8.17)
 
 **WSP Protocol References**: WSP 11 (Interface), WSP 97 (Truthful)
