@@ -493,3 +493,48 @@ def get_consumer(dry_run: bool = True) -> FoundUpJobConsumer:
         Configured FoundUpJobConsumer.
     """
     return FoundUpJobConsumer(dry_run=dry_run)
+
+
+def drain_openclaw_queue_dry_run(clear: bool = True) -> Dict[str, Any]:
+    """
+    Drain the OpenClaw FoundUpJob queue once in dry-run mode.
+
+    Convenience function that:
+      1. Creates a FoundUpJobConsumer(dry_run=True)
+      2. Drains the OpenClaw queue once
+      3. Returns structured evidence for each job
+
+    Args:
+        clear: If True, clear the queue after draining. Default True.
+
+    Returns:
+        Dict containing:
+          - job_count: Number of jobs drained
+          - results: List of ConsumerResult.to_dict() for each job
+          - dry_run: True (always)
+          - summary: Aggregated stats (dispatched, receipts, terminals)
+
+    WSP 97 truth boundaries:
+      - dry_run=True always
+      - verification_complete=False always
+      - cabr_ready=False always
+      - payout_ready=False always
+    """
+    consumer = FoundUpJobConsumer(dry_run=True)
+    results = consumer.drain_openclaw_queue_once(clear=clear)
+
+    # Aggregate stats (Phase 1A - no receipt binding yet)
+    dispatched_count = sum(1 for r in results if r.dispatched)
+
+    return {
+        "job_count": len(results),
+        "results": [r.to_dict() for r in results],
+        "dry_run": True,
+        "queue_cleared": clear,
+        "summary": {
+            "dispatched": dispatched_count,
+            "verification_complete": False,
+            "cabr_ready": False,
+            "payout_ready": False,
+        },
+    }

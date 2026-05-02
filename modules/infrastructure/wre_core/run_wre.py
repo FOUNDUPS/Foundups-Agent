@@ -430,10 +430,20 @@ async def cmd_platform(args):
     result = await orchestrator.create_platform_integration(args.platform)
     print(json.dumps(result, indent=2))
 
+async def cmd_drain(args):
+    """Drain OpenClaw FoundUpJob queue once (dry-run)."""
+    from modules.infrastructure.wre_core.src.foundup_job_consumer import (
+        drain_openclaw_queue_dry_run,
+    )
+
+    summary = drain_openclaw_queue_dry_run(clear=not args.no_clear)
+    print(json.dumps(summary, indent=2, default=str))
+
+
 async def cmd_mlestar(args):
     """Test MLE-STAR DAE for WSP 77 operations"""
     orchestrator = WREOrchestrator()
-    
+
     if args.operation == "pob":
         # Test Proof-of-Benefit verification
         receipt = {
@@ -508,9 +518,14 @@ def main():
     platform_parser = subparsers.add_parser("platform", help="Create platform integration")
     platform_parser.add_argument("platform", help="Platform name (e.g., YouTube, LinkedIn)")
     
+    # Drain command for FoundUpJob queue (dry-run closed-loop)
+    drain_parser = subparsers.add_parser("drain", help="Drain OpenClaw FoundUpJob queue (dry-run)")
+    drain_parser.add_argument("--no-clear", action="store_true",
+                              help="Do not clear queue after draining")
+
     # MLE-STAR command for WSP 77
     mlestar_parser = subparsers.add_parser("mlestar", help="MLE-STAR DAE operations (WSP 77)")
-    mlestar_parser.add_argument("operation", choices=["pob", "cabr", "capabilities"], 
+    mlestar_parser.add_argument("operation", choices=["pob", "cabr", "capabilities"],
                                 help="Operation type")
     mlestar_parser.add_argument("--job-id", help="Job ID for PoB receipt")
     mlestar_parser.add_argument("--energy", type=float, help="Energy in kWh")
@@ -534,7 +549,8 @@ def main():
         "status": cmd_status,
         "interactive": cmd_interactive,
         "platform": cmd_platform,
-        "mlestar": cmd_mlestar
+        "drain": cmd_drain,
+        "mlestar": cmd_mlestar,
     }
     
     if args.command in commands:

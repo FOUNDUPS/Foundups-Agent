@@ -2,6 +2,57 @@
 
 ## Chronological Change Log
 
+### [2026-05-02] - WRE_CLOSED_LOOP_DRY_RUN_COMMAND_PHASE1 (v0.8.8)
+
+**WSP Protocol References**: WSP 11 (Interface), WSP 97 (Truthful)
+**Impact Analysis**: Adds supported dry-run command/callable entrypoint to drain FoundUpJob queue
+
+#### Changes Made
+
+- `src/foundup_job_consumer.py`:
+  - Added `drain_openclaw_queue_dry_run(clear=True)` convenience function
+  - Returns structured evidence dict: job_count, results, dry_run, queue_cleared, summary
+  - WSP 97 truth boundaries: verification_complete=False, cabr_ready=False, payout_ready=False
+
+- `run_wre.py`:
+  - Added `cmd_drain(args)` async handler
+  - Added `drain` subparser with `--no-clear` flag
+  - Registered in command dispatch dict
+
+- `tests/test_foundup_job_consumer.py`:
+  - Added `TestDrainOpenClawQueueDryRun` class (4 tests)
+  - Tests: structured evidence, WSP 97 truth fields, empty queue, no-clear flag
+
+#### Usage
+
+```bash
+# Drain queue (clears after)
+python run_wre.py drain
+
+# Drain queue (keep jobs in queue)
+python run_wre.py drain --no-clear
+```
+
+#### Callable Entrypoint
+
+```python
+from modules.infrastructure.wre_core.src.foundup_job_consumer import (
+    drain_openclaw_queue_dry_run,
+)
+
+summary = drain_openclaw_queue_dry_run(clear=True)
+# Returns: {"job_count": N, "results": [...], "dry_run": True, "summary": {...}}
+```
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_consumer.py -v
+# 20 passed
+```
+
+---
+
 ### [2026-04-25] - W5/OC5: FoundUpJob Routing Envelope Phase 1 (v0.8.7)
 
 **WSP Protocol References**: WSP 11 (Interface), WSP 50 (Pre-Action), WSP 77 (Agent Coordination), WSP 97 (Truthful)
