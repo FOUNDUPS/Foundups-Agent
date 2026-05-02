@@ -1,5 +1,22 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-02: FoundUpJob envelope validation tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_envelope_validation.py -v`
+- Status: PASS
+- Result: `20 passed`
+- Notes:
+  - Added `TestGenericDAEEnvelope` (3 tests) - generic envelope permissive validation
+  - Added `TestFoundUpJobMissingJobId` (2 tests) - job_id required validation
+  - Added `TestFoundUpJobMissingFoundupId` (2 tests) - foundup_id required validation
+  - Added `TestFoundUpJobDryRunDefault` (3 tests) - dry_run defaulting to True
+  - Added `TestValidDryRunFoundUpJob` (2 tests) - valid envelope passes
+  - Added `TestFailureMessagesIdentifyFields` (4 tests) - explicit failure messages
+  - Added `TestEnvelopeTypeDetection` (4 tests) - envelope classification
+  - Full suite: 426 passed (excluding production_gates)
+
+---
+
 ## 2026-05-02: Success clearing proof for retention semantics
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_consumer.py -q`

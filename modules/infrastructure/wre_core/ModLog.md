@@ -2,6 +2,62 @@
 
 ## Chronological Change Log
 
+### [2026-05-02] - WRE_ENVELOPE_VALIDATION_FOUNDUPJOB_PHASE1 (v0.8.10)
+
+**WSP Protocol References**: WSP 11 (Interface), WSP 50 (Pre-Action Verification), WSP 97 (Truthful)
+**Impact Analysis**: Distinguish FoundUpJob envelopes from generic DAE envelopes; enforce strict validation
+
+#### Changes Made
+
+- `src/foundup_job_router.py`:
+  - Added `EnvelopeType` enum (GENERIC_DAE, FOUNDUP_JOB)
+  - Added `EnvelopeValidationCode` enum with validation reason codes
+  - Added `EnvelopeValidationResult` dataclass for typed validation results
+  - Added `detect_envelope_type()` function to classify envelopes
+  - Added `validate_foundup_job_envelope()` function for strict FoundUpJob validation
+  - Required fields for FoundUpJob: job_id, foundup_id, tenant_id, requested_action
+  - WSP 97 safety: dry_run_mode defaults to True when missing
+
+- `wre_gateway/src/dae_gateway.py`:
+  - Updated `_verify_envelope()` to use strict validation for FoundUpJob envelopes
+  - Added `get_last_validation_result()` for accessing validation details
+  - Updated `route_to_dae()` to return detailed validation failures
+  - Import seam with fallback when validation unavailable
+
+- `tests/test_foundup_job_envelope_validation.py` (NEW):
+  - 20 tests for envelope validation behavior
+  - Tests generic DAE envelope permissive validation
+  - Tests FoundUpJob strict validation (missing fields rejected)
+  - Tests dry_run defaulting behavior
+  - Tests failure messages identify missing fields
+  - Tests envelope type detection
+
+#### Validation Rules
+
+| Envelope Type | Required Fields | Validation |
+|---------------|-----------------|------------|
+| GENERIC_DAE | objective | Permissive |
+| FOUNDUP_JOB | job_id, foundup_id, tenant_id, requested_action | Strict |
+
+#### WSP 97 Truth Boundaries
+
+- Missing policy_flags → dry_run_mode defaulted to True (logged)
+- Missing FoundUpJob fields → explicit rejection with missing_fields list
+- Generic DAE envelopes → permissive (objective only required)
+- Validation results serializable for API/logging
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_envelope_validation.py -v
+# 20 passed
+
+python -m pytest modules/infrastructure/wre_core/tests -q --ignore=modules/infrastructure/wre_core/tests/test_production_gates.py
+# 426 passed
+```
+
+---
+
 ### [2026-05-02] - WRE_QUEUE_RETENTION_SEMANTICS_PHASE1 (v0.8.9)
 
 **WSP Protocol References**: WSP 11 (Interface), WSP 97 (Truthful - no silent failures)

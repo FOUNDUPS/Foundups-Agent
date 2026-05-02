@@ -120,6 +120,237 @@ class RouteReasonCode(str, Enum):
 
 
 # ---------------------------------------------------------------------------
+# Envelope Validation (WSP 97: Distinguish FoundUpJob from generic DAE)
+# ---------------------------------------------------------------------------
+
+
+class EnvelopeType(str, Enum):
+    """
+    Envelope type classification.
+
+    GENERIC_DAE    : Standard DAE envelope (objective-only minimum)
+    FOUNDUP_JOB    : FoundUpJob execution envelope (strict validation)
+    """
+
+    GENERIC_DAE = "generic_dae"
+    FOUNDUP_JOB = "foundup_job"
+
+
+class EnvelopeValidationCode(str, Enum):
+    """
+    Envelope validation reason codes.
+    """
+
+    # Valid
+    VALID = "VALID"
+    VALID_DRY_RUN_DEFAULTED = "VALID_DRY_RUN_DEFAULTED"
+
+    # Invalid - Missing Fields
+    MISSING_JOB_ID = "MISSING_JOB_ID"
+    MISSING_FOUNDUP_ID = "MISSING_FOUNDUP_ID"
+    MISSING_TENANT_ID = "MISSING_TENANT_ID"
+    MISSING_ACTION = "MISSING_ACTION"
+    MISSING_POLICY_FLAGS = "MISSING_POLICY_FLAGS"
+
+    # Invalid - Policy
+    DRY_RUN_NOT_SET = "DRY_RUN_NOT_SET"
+
+
+@dataclass
+class EnvelopeValidationResult:
+    """
+    Result of FoundUpJob envelope validation.
+
+    WSP 97 Truth: Returns explicit validation status with missing field list.
+    """
+
+    valid: bool
+    """Whether envelope passes validation."""
+
+    envelope_type: EnvelopeType
+    """Detected envelope type."""
+
+    validation_code: EnvelopeValidationCode
+    """Machine-readable validation result."""
+
+    missing_fields: List[str] = field(default_factory=list)
+    """List of missing required fields."""
+
+    validation_message: str = ""
+    """Human-readable validation explanation."""
+
+    dry_run_defaulted: bool = False
+    """True if dry_run was defaulted to True (WSP 97 safety default)."""
+
+    policy_flags_snapshot: Dict[str, bool] = field(default_factory=dict)
+    """Policy flags at validation time (if present)."""
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialize for logging/API response."""
+        return {
+            "valid": self.valid,
+            "envelope_type": self.envelope_type.value,
+            "validation_code": self.validation_code.value,
+            "missing_fields": self.missing_fields,
+            "validation_message": self.validation_message,
+            "dry_run_defaulted": self.dry_run_defaulted,
+            "policy_flags_snapshot": self.policy_flags_snapshot,
+        }
+
+
+def detect_envelope_type(envelope: Dict[str, Any]) -> EnvelopeType:
+    """
+    Detect whether envelope is a FoundUpJob or generic DAE envelope.
+
+    FoundUpJob indicators:
+      - has job_id field
+      - has requested_action in CANONICAL_ACTIONS
+      - has foundup_id field
+      - has tenant_id field
+
+    Args:
+        envelope: Dict envelope to classify
+
+    Returns:
+        EnvelopeType.FOUNDUP_JOB if FoundUpJob indicators present,
+        EnvelopeType.GENERIC_DAE otherwise
+    """
+    # FoundUpJob indicators
+    foundup_job_fields = {"job_id", "foundup_id", "tenant_id", "requested_action"}
+
+    # Check for FoundUpJob signature
+    present_fields = set(envelope.keys()) & foundup_job_fields
+    if len(present_fields) >= 2:  # At least 2 FoundUpJob fields = FoundUpJob envelope
+        return EnvelopeType.FOUNDUP_JOB
+
+    # Check for canonical actions
+    action = envelope.get("requested_action", "")
+    if action and action in {
+        "build_foundup",
+        "extract_foundup",
+        "validate_foundup",
+        "queue_foundup_job",
+    }:
+        return EnvelopeType.FOUNDUP_JOB
+
+    return EnvelopeType.GENERIC_DAE
+
+
+def validate_foundup_job_envelope(envelope: Dict[str, Any]) -> EnvelopeValidationResult:
+    """
+    Validate envelope for FoundUpJob execution.
+
+    WSP 97 Truth Boundaries:
+      - Requires: job_id, foundup_id, tenant_id, requested_action
+      - Requires: policy_flags with dry_run_mode (defaults to True if missing)
+      - Returns explicit validation failure with missing field list
+
+    Args:
+        envelope: Dict containing FoundUpJob envelope fields
+
+    Returns:
+        EnvelopeValidationResult with validation status and details
+    """
+    envelope_type = detect_envelope_type(envelope)
+
+    # If this is a generic DAE envelope, use permissive validation
+    if envelope_type == EnvelopeType.GENERIC_DAE:
+        if "objective" in envelope:
+            return EnvelopeValidationResult(
+                valid=True,
+                envelope_type=EnvelopeType.GENERIC_DAE,
+                validation_code=EnvelopeValidationCode.VALID,
+                validation_message="Generic DAE envelope validated (objective present)",
+            )
+        else:
+            return EnvelopeValidationResult(
+                valid=False,
+                envelope_type=EnvelopeType.GENERIC_DAE,
+                validation_code=EnvelopeValidationCode.MISSING_ACTION,
+                missing_fields=["objective"],
+                validation_message="Generic DAE envelope requires 'objective' field",
+            )
+
+    # FoundUpJob envelope: strict validation
+    missing_fields = []
+
+    # Required identity fields
+    if not envelope.get("job_id"):
+        missing_fields.append("job_id")
+
+    if not envelope.get("foundup_id"):
+        missing_fields.append("foundup_id")
+
+    if not envelope.get("tenant_id"):
+        missing_fields.append("tenant_id")
+
+    if not envelope.get("requested_action"):
+        missing_fields.append("requested_action")
+
+    # Early return if identity fields missing
+    if missing_fields:
+        # Determine primary missing field for code
+        if "job_id" in missing_fields:
+            code = EnvelopeValidationCode.MISSING_JOB_ID
+        elif "foundup_id" in missing_fields:
+            code = EnvelopeValidationCode.MISSING_FOUNDUP_ID
+        elif "tenant_id" in missing_fields:
+            code = EnvelopeValidationCode.MISSING_TENANT_ID
+        else:
+            code = EnvelopeValidationCode.MISSING_ACTION
+
+        return EnvelopeValidationResult(
+            valid=False,
+            envelope_type=EnvelopeType.FOUNDUP_JOB,
+            validation_code=code,
+            missing_fields=missing_fields,
+            validation_message=f"FoundUpJob envelope missing required fields: {missing_fields}",
+        )
+
+    # Policy flags / dry_run validation
+    policy_flags = envelope.get("policy_flags")
+    policy_snapshot: Dict[str, bool] = {}
+    dry_run_defaulted = False
+
+    if policy_flags is None:
+        # WSP 97: Default dry_run to True for safety
+        dry_run_defaulted = True
+        policy_snapshot = {"dry_run_mode": True}
+        logger.info(
+            "[WSP97] FoundUpJob envelope missing policy_flags - dry_run_mode defaulted to True"
+        )
+    elif isinstance(policy_flags, dict):
+        policy_snapshot = policy_flags
+        if "dry_run_mode" not in policy_flags:
+            dry_run_defaulted = True
+            policy_snapshot["dry_run_mode"] = True
+            logger.info(
+                "[WSP97] FoundUpJob envelope missing dry_run_mode - defaulted to True"
+            )
+    elif hasattr(policy_flags, "to_dict"):
+        policy_snapshot = policy_flags.to_dict()
+        if not policy_snapshot.get("dry_run_mode"):
+            dry_run_defaulted = True
+            policy_snapshot["dry_run_mode"] = True
+
+    # Valid FoundUpJob envelope
+    validation_code = (
+        EnvelopeValidationCode.VALID_DRY_RUN_DEFAULTED
+        if dry_run_defaulted
+        else EnvelopeValidationCode.VALID
+    )
+
+    return EnvelopeValidationResult(
+        valid=True,
+        envelope_type=EnvelopeType.FOUNDUP_JOB,
+        validation_code=validation_code,
+        validation_message="FoundUpJob envelope validated successfully",
+        dry_run_defaulted=dry_run_defaulted,
+        policy_flags_snapshot=policy_snapshot,
+    )
+
+
+# ---------------------------------------------------------------------------
 # Route Envelope
 # ---------------------------------------------------------------------------
 
