@@ -1,5 +1,59 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-02: Hermes workspace binding contract tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.py -v`
+- Status: PASS
+- Result: `64 passed`
+- Notes:
+  - Added `TestWorkspaceBindingDataclass` (1 test) - WorkspaceBinding.to_dict() serialization
+  - Added `TestWorkspaceBindingPathValidation` (5 tests) - is_path_allowed() logic
+  - Added `TestBlockedPathsConstant` (5 tests) - BLOCKED_PATHS frozenset contents
+  - Added `TestBuildAllowedPaths` (5 tests) - action-to-path template mapping
+  - Added `TestGetEvidenceOutputPath` (2 tests) - evidence path derivation
+  - Added `TestWorkspaceHintInRequest` (4 tests) - workspace_hint in HermesDelegationRequest
+  - Added `TestAllowedPathsInRequest` (2 tests) - allowed_paths population
+  - Added `TestBlockedPathsInRequest` (2 tests) - blocked_paths population
+  - Added `TestWorkspaceRootDetection` (3 tests) - workspace_root auto-detection
+  - Added `TestNoRealExecutionWithWorkspaceBinding` (2 tests) - WSP 97 truth with binding
+- WSP 97 Coverage (extended):
+  - workspace_binding field exists in request
+  - Path constraints defined but NOT enforced (Phase 1)
+  - Evidence output path derived from job_id
+  - No real execution even with workspace binding
+- Test Fixes:
+  - Fixed glob `**` pattern matching using PurePath.match()
+  - Fixed Windows path compatibility for env var detection
+
+---
+
+## 2026-05-02: Hermes job executor adapter tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.py -v`
+- Status: PASS
+- Result: `33 passed`
+- Notes:
+  - Added `TestFeatureFlag` (5 tests) - HERMES_DELEGATE_ENABLED env var behavior
+  - Added `TestHermesDelegationRequest` (3 tests) - request dataclass serialization
+  - Added `TestHermesDelegationResult` (3 tests) - result dataclass with WSP 97 fields
+  - Added `TestFoundUpJobMapping` (5 tests) - FoundUpJob -> HermesDelegationRequest mapping
+  - Added `TestExecutorDryRunDefault` (2 tests) - dry_run=True default behavior
+  - Added `TestExecutorFeatureFlagDisabled` (3 tests) - SIMULATED when flag=0
+  - Added `TestExecutorDryRunMode` (1 test) - SIMULATED when dry_run=True
+  - Added `TestExecutorImportFailure` (1 test) - BLOCKED_IMPORT_UNAVAILABLE on error
+  - Added `TestExecutorRealDelegationBlocked` (2 tests) - BLOCKED in Phase 1
+  - Added `TestExecutorJobValidation` (4 tests) - job validation errors
+  - Added `TestNoQueueConsumption` (2 tests) - no job state mutation
+  - Added `TestSingletonExecutor` (2 tests) - singleton and convenience function
+- WSP 97 Coverage:
+  - real_execution_performed=False verified
+  - verification_complete=False verified
+  - cabr_ready=False verified
+  - payout_ready=False verified
+  - No CABR/token/payout/reward fields exist
+
+---
+
 ## 2026-05-02: Model routing policy validation tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_envelope_validation.py -q`
