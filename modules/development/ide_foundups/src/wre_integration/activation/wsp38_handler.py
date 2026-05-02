@@ -14,14 +14,30 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 from pathlib import Path
 
+# WSP 97 Truth: wre_log fallback for when tools.wre is unavailable
+def _wre_log_fallback(message: str, level: str = "INFO") -> None:
+    """Fallback wre_log that uses standard logging."""
+    logger = logging.getLogger("wre_wsp38_fallback")
+    log_level = getattr(logging, level.upper(), logging.INFO)
+    logger.log(log_level, f"[WSP38] {message}")
+
+
+try:
+    # WSP 97: wre_log canonical location is tools.wre.tools.logging_utils
+    from tools.wre.tools.logging_utils import wre_log
+except (ImportError, FileNotFoundError, OSError):
+    # WSP 97: Truthful fallback - catches import errors and filesystem side-effects
+    wre_log = _wre_log_fallback
+
 try:
     # WRE Agent Activation Integration
     from modules.infrastructure.agent_activation.src.agent_activation import AgentActivationModule
-    from modules.wre_core.src.components.orchestrator import wre_log
     WRE_ACTIVATION_AVAILABLE = True
 except ImportError as e:
-    logging.warning(f"WRE activation system not available: {e}")
+    # WSP 97: Truthful logging of import failure
+    logging.warning(f"[WRE-IDE] WSP38 activation import failed: {e}")
     WRE_ACTIVATION_AVAILABLE = False
+    AgentActivationModule = None
 
 class IDEAgentActivationStage:
     """WSP 38 activation stages for IDE agents"""
