@@ -28,12 +28,219 @@ class SentinelQuery:
 
 
 SENTINEL_QUERIES: List[SentinelQuery] = [
+    # ==========================================================================
+    # HIA7: Expanded sentinel set (30+ queries across 10 categories)
+    # ==========================================================================
+
+    # --- Category 1: HoloIndex Core (5 queries) ---
+    SentinelQuery(
+        query="search engine query execution",
+        category="symbol",
+        evidence_rule={"path_contains": "search_engine"},
+        description="Find search engine module",
+    ),
+    SentinelQuery(
+        query="HoloIndex semantic code navigation",
+        category="symbol",
+        evidence_rule={"path_contains": "holo"},
+        description="Find HoloIndex class",
+    ),
+    SentinelQuery(
+        query="indexing engine symbol extraction",
+        category="symbol",
+        evidence_rule={"path_contains": "indexing_engine"},
+        description="Find indexing engine for symbol extraction",
+    ),
+    SentinelQuery(
+        query="backend routing turboquant embedding",
+        category="symbol",
+        evidence_rule={"path_contains": "backend_routing"},
+        description="Find TurboQuant backend routing logic",
+    ),
+    SentinelQuery(
+        query="search cache retrieval optimization",
+        category="symbol",
+        evidence_rule={"path_contains": "search_cache"},
+        description="Find search cache implementation",
+    ),
+
+    # --- Category 2: WSP Protocols (6 queries) ---
+    SentinelQuery(
+        query="WSP 97 system execution prompting",
+        category="wsp",
+        evidence_rule={"path_contains": "WSP_97"},
+        description="Find WSP 97 system execution protocol",
+    ),
+    SentinelQuery(
+        query="WSP 00 zen state attainment",
+        category="wsp",
+        evidence_rule={"path_contains": "WSP_00"},
+        description="Find WSP 00 zen state protocol",
+    ),
+    SentinelQuery(
+        query="WSP 11 WRE standard command",
+        category="wsp",
+        evidence_rule={"path_contains": "WSP_11"},
+        description="Find WSP 11 WRE command protocol",
+    ),
+    SentinelQuery(
+        query="WSP 22 ModLog documentation updates",
+        category="wsp",
+        evidence_rule={"path_contains": "WSP_22"},
+        description="Find WSP 22 ModLog protocol",
+    ),
+    SentinelQuery(
+        query="WSP 50 pre-action verification",
+        category="wsp",
+        evidence_rule={"path_contains": "WSP_50"},
+        description="Find WSP 50 verification protocol",
+    ),
+    SentinelQuery(
+        query="WSP 72 block independence isolation",
+        category="wsp",
+        evidence_rule={"path_contains": "WSP_72"},
+        description="Find WSP 72 independence protocol",
+    ),
+
+    # --- Category 3: OpenClaw / FoundUpJob (5 queries) ---
+    SentinelQuery(
+        query="openclaw intent planner routing",
+        category="symbol",
+        evidence_rule={"path_contains": "openclaw_intent"},
+        description="Find OpenClaw intent planner",
+    ),
+    SentinelQuery(
+        query="openclaw codebase agent navigation",
+        category="symbol",
+        evidence_rule={"path_contains": "openclaw_codebase"},
+        description="Find OpenClaw codebase agent",
+    ),
+    SentinelQuery(
+        query="route_foundup_job router",
+        category="symbol",
+        evidence_rule={"path_contains": "foundup_job"},
+        description="Find the FoundUpJob router",
+    ),
+    SentinelQuery(
+        query="foundup job contract lifecycle",
+        category="symbol",
+        evidence_rule={"path_contains": "foundup_job_contract"},
+        description="Find FoundUp job contract model",
+    ),
+    SentinelQuery(
+        query="openclaw action ledger persistence",
+        category="symbol",
+        evidence_rule={"path_contains": "openclaw_action_ledger"},
+        description="Find OpenClaw action ledger",
+    ),
+
+    # --- Category 4: WRE Queue/Worker (4 queries) ---
+    SentinelQuery(
+        query="WRE master orchestrator coordination",
+        category="symbol",
+        evidence_rule={"path_contains": "wre_master_orchestrator"},
+        description="Find WRE master orchestrator",
+    ),
+    SentinelQuery(
+        query="WRE skills loader registry",
+        category="symbol",
+        evidence_rule={"path_contains": "wre_skills_loader"},
+        description="Find WRE skills loader",
+    ),
+    SentinelQuery(
+        query="WRE bridge integration cursor",
+        category="symbol",
+        evidence_rule={"path_contains": "wre_bridge"},
+        description="Find WRE bridge integration",
+    ),
+    SentinelQuery(
+        query="pattern memory skill outcomes",
+        category="symbol",
+        evidence_rule={"path_contains": "pattern_memory"},
+        description="Find pattern memory for skill outcomes",
+    ),
+
+    # --- Category 5: BuildPlan / Swarm (3 queries) ---
+    SentinelQuery(
+        query="build plan generator hermes",
+        category="symbol",
+        evidence_rule={"path_contains": "build_plan"},
+        description="Find build plan generator",
+    ),
+    SentinelQuery(
+        query="swarm dispatch queue integration",
+        category="symbol",
+        evidence_rule={"path_contains": "swarm"},
+        description="Find swarm dispatch integration",
+    ),
+    SentinelQuery(
+        query="hermes foundup job executor",
+        category="symbol",
+        evidence_rule={"path_contains": "hermes_foundup"},
+        description="Find Hermes FoundUp job executor",
+    ),
+
+    # --- Category 6: pfMALL (3 queries) ---
+    SentinelQuery(
+        query="pfmall discovery youtube matching",
+        category="symbol",
+        evidence_rule={"path_contains": "pfmall_discovery"},
+        description="Find pfMALL discovery module",
+    ),
+    SentinelQuery(
+        query="pfmall catalog verification",
+        category="symbol",
+        evidence_rule={"path_contains": "pfmall_catalog"},
+        description="Find pfMALL catalog",
+    ),
+    SentinelQuery(
+        query="pfmall shell core grid loading",
+        category="symbol",
+        evidence_rule={"path_contains": "pfmall"},
+        description="Find pfMALL shell core",
+    ),
+
+    # --- Category 7: YouTube / Video (3 queries) ---
     SentinelQuery(
         query="YouTube channel registry",
         category="code",
         evidence_rule={"path_contains": "youtube_channel_registry"},
         description="Find the YouTube channel registry module",
     ),
+    SentinelQuery(
+        query="youtube transcript scraper video indexer",
+        category="symbol",
+        evidence_rule={"path_contains": "youtube_transcript"},
+        description="Find YouTube transcript scraper",
+    ),
+    SentinelQuery(
+        query="video comment engagement automation",
+        category="symbol",
+        evidence_rule={"path_contains": "video_comment"},
+        description="Find video comment engagement module",
+    ),
+
+    # --- Category 8: Skills / Scanner (3 queries) ---
+    SentinelQuery(
+        query="commit git workflow skill",
+        category="skill",
+        evidence_rule={"type_equals": "skillz"},
+        description="Find commit-related skill",
+    ),
+    SentinelQuery(
+        query="review pull request skill",
+        category="skill",
+        evidence_rule={"type_equals": "skillz"},
+        description="Find PR review skill",
+    ),
+    SentinelQuery(
+        query="orphan capability scanner detection",
+        category="symbol",
+        evidence_rule={"path_contains": "orphan"},
+        description="Find orphan capability scanner",
+    ),
+
+    # --- Category 9: Code / Symbol general (4 queries) ---
     SentinelQuery(
         query="demurrage economics simulator",
         category="code",
@@ -47,52 +254,30 @@ SENTINEL_QUERIES: List[SentinelQuery] = [
         description="Find Selenium browser automation code",
     ),
     SentinelQuery(
-        query="WSP 97 system execution prompting",  # HIA4B: Match actual WSP 97 topic
-        category="wsp",
-        evidence_rule={"path_contains": "WSP_97"},
-        description="Find WSP 97 system execution protocol",
+        query="agent permission manager confidence",
+        category="symbol",
+        evidence_rule={"path_contains": "agent_permission"},
+        description="Find agent permission manager",
     ),
     SentinelQuery(
-        query="WSP 00 zen state attainment",
-        category="wsp",
-        evidence_rule={"path_contains": "WSP_00"},  # path match more reliable than title
-        description="Find WSP 00 zen state protocol",
+        query="FAM daemon persistence jsonl",
+        category="symbol",
+        evidence_rule={"path_contains": "fam_daemon"},
+        description="Find FAM daemon persistence layer",
     ),
+
+    # --- Category 10: Docs / Knowledge (2 queries) ---
     SentinelQuery(
-        query="module organization domains",
+        query="module organization enterprise domains",
         category="wsp",
         evidence_rule={"path_contains": "WSP"},
         description="Find module organization WSP",
     ),
     SentinelQuery(
-        query="search engine query execution",  # HIA4B: Known indexing gap
+        query="gemma intent classifier binary",
         category="symbol",
-        evidence_rule={"path_contains": "search"},
-        description="Find search engine module (known gap: search_engine.py not indexed)",
-    ),
-    SentinelQuery(
-        query="HoloIndex semantic code navigation",  # HIA4B: More semantically aligned
-        category="symbol",
-        evidence_rule={"path_contains": "holo"},  # Relaxed: holo_index or holoindex
-        description="Find HoloIndex class",
-    ),
-    SentinelQuery(
-        query="route_foundup_job router",
-        category="symbol",
-        evidence_rule={"path_contains": "foundup_job"},
-        description="Find the FoundUpJob router",
-    ),
-    SentinelQuery(
-        query="commit git workflow skill",
-        category="skill",
-        evidence_rule={"type_equals": "skillz"},
-        description="Find commit-related skill",
-    ),
-    SentinelQuery(
-        query="review pull request skill",
-        category="skill",
-        evidence_rule={"type_equals": "skillz"},
-        description="Find PR review skill",
+        evidence_rule={"path_contains": "gemma_intent"},
+        description="Find Gemma intent classifier",
     ),
 ]
 

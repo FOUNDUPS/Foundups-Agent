@@ -1,5 +1,90 @@
 # HoloIndex Package ModLog
 
+## [2026-05-02] HIA7B — Priority Root Indexing Gap Fix (hia7b_priority_root_fix)
+
+**Agent**: 0102 (Worker W2)
+**WSP References**: WSP 97 (truth distinction), WSP 50 (pre-action verification), WSP 22 (ModLog)
+**Status**: COMPLETE - NOT PROMOTED
+**Decision**: Path A - Code reverted, audit preserved
+
+### Context
+
+Investigated adding priority roots to fix indexing gaps identified in HIA7. The change
+improved direct file discoverability but caused a regression in sentinel query pass rates.
+
+### Experiment Results
+
+| Metric | HIA7 (Before) | HIA7B (After) | Delta |
+|--------|---------------|---------------|-------|
+| Top-1 Pass Rate | 86.8% | 84.2% | **-2.6%** |
+| Top-5 Pass Rate | 92.1% | 92.1% | 0.0% |
+
+**Outcome**: Top-1 REGRESSED. Gate NOT passed in either case.
+
+### Decision Rationale
+
+1. Top-1 regressed from 86.8% to 84.2% (not an improvement)
+2. Gate not passed before or after (top-5 92.1% < 95%)
+3. WSP 97: Cannot claim improvement when metrics regressed
+4. Direct discoverability benefit not part of sentinel gate criteria
+
+### Action Taken
+
+- `indexing_engine.py`: Reverted to HIA7 state (no code change)
+- `hia3_baseline_metrics.json`: Restored to HIA7 state (86.8%/92.1%)
+- Report updated to document experiment and decision
+
+### Files
+
+- `docs/audits/holoindex_search_quality/HIA7B_PRIORITY_ROOT_INDEXING_FIX_REPORT.md` — Audit only
+- No code changes promoted
+
+---
+
+## [2026-05-01] HIA7 — Sentinel Query Expansion (hia7_sentinel_expansion_gate)
+
+**Agent**: 0102 (Worker W2)
+**WSP References**: WSP 97 (truth distinction), WSP 50 (pre-action verification), WSP 22 (ModLog)
+**Status**: COMPLETE
+**Gate Result**: NOT PASSED (top-5 92.1% < 95% threshold)
+
+### Context
+
+After HIA6B achieved 100% pass rates on 11 sentinel queries, expanded the test set
+to 38 queries across 10 categories to validate quality before adding LLM reranking.
+
+### Expanded Baseline Results
+
+| Metric | HIA6B (11 queries) | HIA7 (38 queries) | Delta |
+|--------|-------------------|-------------------|-------|
+| Top-1 Pass Rate | 100.0% | 86.8% (33/38) | -13.2% |
+| Top-5 Pass Rate | 100.0% | 92.1% (35/38) | -7.9% |
+
+### Failure Root Causes
+
+| Root Cause | Count | Examples |
+|------------|-------|----------|
+| Indexing gap | 3 | wre_bridge.py, build_plan.py, orphan*.py not indexed |
+| Semantic drift | 2 | "hermes" boosts hermes_adapter.py over build_plan.py |
+
+### Gate Evaluation
+
+- Top-1 >= 85%: 86.8% PASS
+- Top-5 >= 95%: 92.1% FAIL
+
+### Recommendation
+
+Fix indexing gaps (HIA7B) by adding missing directories to priority roots, then
+re-evaluate gate before proceeding to HIA8 (LLM reranking).
+
+### Files
+
+- `holo_index/tests/test_search_quality_baseline.py` — Expanded from 11 to 38 queries
+- `docs/audits/holoindex_search_quality/HIA7_SENTINEL_EXPANSION_REPORT.md` (new)
+- `docs/audits/holoindex_search_quality/hia3_baseline_metrics.json` — Updated with 38-query baseline
+
+---
+
 ## [2026-05-01] HIA6B — Path Title Boost Tuning (hia6b_path_title_boost_tuning)
 
 **Agent**: 0102 (Worker W2)
