@@ -208,12 +208,15 @@ class TestFoundUpJobDryRunDefault:
             "requested_action": "extract_foundup",
             "policy_flags": {
                 "dry_run_mode": False,  # Explicit live mode
+                "human_approval": True,  # Required for live mode
             },
+            "evidence_refs": ["manifest.json"],  # Required for live mode
         }
 
         result = validate_foundup_job_envelope(envelope)
 
         assert result.valid is True
+        assert result.is_live_mode is True
         # Note: dry_run_defaulted logic checks if dry_run_mode is missing or falsy
         # When explicitly set to False, we still default to True for safety per WSP 97
         # This is the safety-first approach
@@ -689,7 +692,10 @@ class TestEvidenceRefsWSP97TruthFields:
             "foundup_id": "kosei",
             "tenant_id": "tenant_quinn",
             "requested_action": "validate_foundup",
-            "policy_flags": {"dry_run_mode": False},
+            "policy_flags": {
+                "dry_run_mode": False,
+                "human_approval": True,  # Required for live mode
+            },
             "evidence_refs": ["manifest.json", "proof_abc123"],
         }
 
@@ -776,6 +782,373 @@ class TestGenericDAEEvidenceBehavior:
 
         assert result.valid is True
         assert result.envelope_type == EnvelopeType.GENERIC_DAE
+
+
+# ---------------------------------------------------------------------------
+# Test: Live Mode Policy Gates (WRE_LIVE_MODE_EVIDENCE_POLICY_GATE_PHASE1)
+# ---------------------------------------------------------------------------
+
+
+class TestDryRunWithPendingEvidenceStillPasses:
+    """Test dry-run envelope with pending evidence still passes."""
+
+    def test_dry_run_with_no_evidence_passes_as_pending(self):
+        """Dry-run envelope without evidence passes with pending status."""
+        envelope = {
+            "job_id": "job_live_001",
+            "foundup_id": "gotjunk",
+            "tenant_id": "tenant_alice",
+            "requested_action": "build_foundup",
+            "policy_flags": {"dry_run_mode": True},
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.evidence_pending is True
+        assert result.is_live_mode is False
+
+    def test_dry_run_defaulted_with_no_evidence_passes(self):
+        """Envelope with no policy_flags defaults to dry-run and passes."""
+        envelope = {
+            "job_id": "job_live_002",
+            "foundup_id": "kosei",
+            "tenant_id": "tenant_bob",
+            "requested_action": "validate_foundup",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.dry_run_defaulted is True
+        assert result.evidence_pending is True
+        assert result.is_live_mode is False
+
+
+class TestLiveModeWithoutApprovalFails:
+    """Test live-mode envelope without approval fails."""
+
+    def test_live_mode_without_human_approval_fails(self):
+        """Live mode without human_approval or permission_gate_passed fails."""
+        envelope = {
+            "job_id": "job_live_003",
+            "foundup_id": "move2japan",
+            "tenant_id": "tenant_carol",
+            "requested_action": "extract_foundup",
+            "policy_flags": {
+                "dry_run_mode": False,  # Explicit live mode
+                "human_approval": False,
+                "permission_gate_passed": False,
+            },
+            "evidence_refs": ["manifest.json"],
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.LIVE_MODE_REQUIRES_HUMAN_APPROVAL
+        assert result.is_live_mode is True
+        assert "human_approval" in result.missing_live_gates
+
+    def test_live_mode_without_any_approval_flag_fails(self):
+        """Live mode with no approval flags at all fails."""
+        envelope = {
+            "job_id": "job_live_004",
+            "foundup_id": "social_twin",
+            "tenant_id": "tenant_dave",
+            "requested_action": "build_foundup",
+            "policy_flags": {
+                "dry_run_mode": False,
+            },
+            "evidence_refs": ["evidence.json"],
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.LIVE_MODE_REQUIRES_HUMAN_APPROVAL
+        assert "human_approval" in result.missing_live_gates
+
+
+class TestLiveModeWithoutEvidenceFails:
+    """Test live-mode envelope without evidence fails."""
+
+    def test_live_mode_with_empty_evidence_fails(self):
+        """Live mode with empty evidence_refs fails."""
+        envelope = {
+            "job_id": "job_live_005",
+            "foundup_id": "pqn_portal",
+            "tenant_id": "tenant_eve",
+            "requested_action": "validate_foundup",
+            "policy_flags": {
+                "dry_run_mode": False,
+                "human_approval": True,
+            },
+            "evidence_refs": [],
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.LIVE_MODE_REQUIRES_EVIDENCE
+        assert "evidence_refs" in result.missing_live_gates
+
+    def test_live_mode_with_no_evidence_field_fails(self):
+        """Live mode without evidence_refs field fails."""
+        envelope = {
+            "job_id": "job_live_006",
+            "foundup_id": "gotjunk",
+            "tenant_id": "tenant_frank",
+            "requested_action": "build_foundup",
+            "policy_flags": {
+                "dry_run_mode": False,
+                "human_approval": True,
+            },
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.LIVE_MODE_REQUIRES_EVIDENCE
+        assert "evidence_refs" in result.missing_live_gates
+
+
+class TestLiveModeWithMalformedEvidenceFails:
+    """Test live-mode envelope with malformed evidence fails."""
+
+    def test_live_mode_with_invalid_evidence_type_fails(self):
+        """Live mode with wrong evidence_refs type fails."""
+        envelope = {
+            "job_id": "job_live_007",
+            "foundup_id": "kosei",
+            "tenant_id": "tenant_grace",
+            "requested_action": "validate_foundup",
+            "policy_flags": {
+                "dry_run_mode": False,
+                "human_approval": True,
+            },
+            "evidence_refs": "not_a_list",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.INVALID_EVIDENCE_REFS_TYPE
+
+    def test_live_mode_with_empty_string_evidence_fails(self):
+        """Live mode with empty string in evidence fails."""
+        envelope = {
+            "job_id": "job_live_008",
+            "foundup_id": "move2japan",
+            "tenant_id": "tenant_hank",
+            "requested_action": "extract_foundup",
+            "policy_flags": {
+                "dry_run_mode": False,
+                "human_approval": True,
+            },
+            "evidence_refs": ["valid.json", "", "also_valid.json"],
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.INVALID_EVIDENCE_REF_ENTRY
+
+
+class TestLiveModeWithApprovalAndEvidenceNoVerification:
+    """Test live-mode envelope with approval and evidence does not claim verification."""
+
+    def test_live_mode_valid_does_not_set_verification_complete(self):
+        """Valid live mode envelope does NOT set verification_complete."""
+        envelope = {
+            "job_id": "job_live_009",
+            "foundup_id": "social_twin",
+            "tenant_id": "tenant_ivan",
+            "requested_action": "build_foundup",
+            "policy_flags": {
+                "dry_run_mode": False,
+                "human_approval": True,
+            },
+            "evidence_refs": ["manifest.json", "proof.json"],
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.is_live_mode is True
+        assert result.live_mode_gates_passed is True
+        assert result.verification_complete is False  # WSP 97
+
+    def test_live_mode_valid_does_not_set_cabr_ready(self):
+        """Valid live mode envelope does NOT set cabr_ready."""
+        envelope = {
+            "job_id": "job_live_010",
+            "foundup_id": "pqn_portal",
+            "tenant_id": "tenant_judy",
+            "requested_action": "validate_foundup",
+            "policy_flags": {
+                "dry_run_mode": False,
+                "permission_gate_passed": True,  # Alternative approval
+            },
+            "evidence_refs": ["cabr_evidence.json"],
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.cabr_ready is False  # WSP 97
+
+    def test_live_mode_valid_does_not_set_payout_ready(self):
+        """Valid live mode envelope does NOT set payout_ready."""
+        envelope = {
+            "job_id": "job_live_011",
+            "foundup_id": "gotjunk",
+            "tenant_id": "tenant_kevin",
+            "requested_action": "extract_foundup",
+            "policy_flags": {
+                "dry_run_mode": False,
+                "human_approval": True,
+                "security_gate_checked": True,
+                "security_gate_passed": True,
+            },
+            "evidence_refs": ["payout_ready_evidence.json"],
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.payout_ready is False  # WSP 97
+
+
+class TestLiveModeSecurityGate:
+    """Test live mode security gate validation."""
+
+    def test_live_mode_security_gate_checked_but_not_passed_fails(self):
+        """Live mode with security_gate_checked=True but security_gate_passed=False fails."""
+        envelope = {
+            "job_id": "job_live_012",
+            "foundup_id": "kosei",
+            "tenant_id": "tenant_larry",
+            "requested_action": "build_foundup",
+            "policy_flags": {
+                "dry_run_mode": False,
+                "human_approval": True,
+                "security_gate_checked": True,
+                "security_gate_passed": False,
+            },
+            "evidence_refs": ["manifest.json"],
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.LIVE_MODE_REQUIRES_SECURITY_GATE
+        assert "security_gate_passed" in result.missing_live_gates
+
+    def test_live_mode_security_gate_not_checked_passes(self):
+        """Live mode without security_gate_checked passes (gate not required if not checked)."""
+        envelope = {
+            "job_id": "job_live_013",
+            "foundup_id": "move2japan",
+            "tenant_id": "tenant_mary",
+            "requested_action": "validate_foundup",
+            "policy_flags": {
+                "dry_run_mode": False,
+                "human_approval": True,
+                "security_gate_checked": False,  # Not checked, so not required
+            },
+            "evidence_refs": ["evidence.json"],
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.live_mode_gates_passed is True
+
+
+class TestLiveModeValidationErrorDetails:
+    """Test validation error includes explicit reason and missing gates."""
+
+    def test_missing_gates_list_in_result(self):
+        """Validation result includes missing_live_gates list."""
+        envelope = {
+            "job_id": "job_live_014",
+            "foundup_id": "social_twin",
+            "tenant_id": "tenant_nancy",
+            "requested_action": "build_foundup",
+            "policy_flags": {
+                "dry_run_mode": False,
+                # Missing: human_approval, evidence
+            },
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert len(result.missing_live_gates) >= 1
+        assert "human_approval" in result.missing_live_gates
+
+    def test_multiple_missing_gates_all_listed(self):
+        """Multiple missing gates are all listed."""
+        envelope = {
+            "job_id": "job_live_015",
+            "foundup_id": "pqn_portal",
+            "tenant_id": "tenant_oscar",
+            "requested_action": "extract_foundup",
+            "policy_flags": {
+                "dry_run_mode": False,
+                "security_gate_checked": True,
+                "security_gate_passed": False,
+                # Missing: human_approval, security_gate_passed, evidence
+            },
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert "human_approval" in result.missing_live_gates
+        assert "security_gate_passed" in result.missing_live_gates
+        assert "evidence_refs" in result.missing_live_gates
+
+    def test_validation_message_mentions_missing_gates(self):
+        """Validation message mentions the missing gates."""
+        envelope = {
+            "job_id": "job_live_016",
+            "foundup_id": "gotjunk",
+            "tenant_id": "tenant_paul",
+            "requested_action": "validate_foundup",
+            "policy_flags": {
+                "dry_run_mode": False,
+            },
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert "human_approval" in result.validation_message or "gates" in result.validation_message
+
+    def test_live_mode_fields_in_serialized_result(self):
+        """Live mode fields appear in to_dict() output."""
+        envelope = {
+            "job_id": "job_live_017",
+            "foundup_id": "kosei",
+            "tenant_id": "tenant_quinn",
+            "requested_action": "build_foundup",
+            "policy_flags": {
+                "dry_run_mode": False,
+                "human_approval": True,
+            },
+            "evidence_refs": ["complete_evidence.json"],
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+        result_dict = result.to_dict()
+
+        assert "is_live_mode" in result_dict
+        assert "live_mode_gates_passed" in result_dict
+        assert "missing_live_gates" in result_dict
+        assert result_dict["is_live_mode"] is True
+        assert result_dict["live_mode_gates_passed"] is True
 
 
 if __name__ == "__main__":

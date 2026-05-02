@@ -160,6 +160,12 @@ class EnvelopeValidationCode(str, Enum):
     INVALID_EVIDENCE_REFS_TYPE = "INVALID_EVIDENCE_REFS_TYPE"
     INVALID_EVIDENCE_REF_ENTRY = "INVALID_EVIDENCE_REF_ENTRY"
 
+    # Invalid - Live Mode Policy Gates
+    LIVE_MODE_NOT_ENABLED = "LIVE_MODE_NOT_ENABLED"
+    LIVE_MODE_REQUIRES_HUMAN_APPROVAL = "LIVE_MODE_REQUIRES_HUMAN_APPROVAL"
+    LIVE_MODE_REQUIRES_EVIDENCE = "LIVE_MODE_REQUIRES_EVIDENCE"
+    LIVE_MODE_REQUIRES_SECURITY_GATE = "LIVE_MODE_REQUIRES_SECURITY_GATE"
+
 
 @dataclass
 class EnvelopeValidationResult:
@@ -201,6 +207,16 @@ class EnvelopeValidationResult:
     evidence_pending: bool = False
     """True if evidence is pending (empty in dry-run mode)."""
 
+    # === Live Mode Policy Gates ===
+    is_live_mode: bool = False
+    """True if dry_run_mode=False (explicit live execution requested)."""
+
+    live_mode_gates_passed: bool = False
+    """True if all required live mode gates passed."""
+
+    missing_live_gates: List[str] = field(default_factory=list)
+    """List of missing live mode policy gates."""
+
     # === WSP 97 Truth Fields (ALWAYS False at validation time) ===
     verification_complete: bool = False
     """WSP 97: Always False. Evidence presence does NOT imply verification."""
@@ -224,6 +240,10 @@ class EnvelopeValidationResult:
             "evidence_refs_validated": self.evidence_refs_validated,
             "evidence_refs_count": self.evidence_refs_count,
             "evidence_pending": self.evidence_pending,
+            # Live mode gates
+            "is_live_mode": self.is_live_mode,
+            "live_mode_gates_passed": self.live_mode_gates_passed,
+            "missing_live_gates": self.missing_live_gates,
             # WSP 97 Truth: Always False at validation time
             "verification_complete": self.verification_complete,
             "cabr_ready": self.cabr_ready,
@@ -366,10 +386,13 @@ def validate_foundup_job_envelope(envelope: Dict[str, Any]) -> EnvelopeValidatio
             dry_run_defaulted = True
             policy_snapshot["dry_run_mode"] = True
 
+    # Determine if this is live mode (explicit dry_run_mode=False)
+    is_live_mode = policy_snapshot.get("dry_run_mode") is False and not dry_run_defaulted
+
     # Evidence refs validation (WSP 97: validate shape, not verification)
     evidence_result = _validate_evidence_refs(
         envelope.get("evidence_refs"),
-        is_dry_run=policy_snapshot.get("dry_run_mode", True),
+        is_dry_run=not is_live_mode,  # Dry-run if not explicitly live mode
     )
 
     if not evidence_result["valid"]:
@@ -384,11 +407,38 @@ def validate_foundup_job_envelope(envelope: Dict[str, Any]) -> EnvelopeValidatio
             evidence_refs_validated=False,
             evidence_refs_count=evidence_result.get("count", 0),
             evidence_pending=False,
+            is_live_mode=is_live_mode,
         )
 
-    # Valid FoundUpJob envelope
     evidence_pending = evidence_result.get("pending", False)
+    evidence_count = evidence_result.get("count", 0)
 
+    # Live mode policy gate validation
+    if is_live_mode:
+        live_gate_result = _validate_live_mode_gates(
+            policy_snapshot=policy_snapshot,
+            evidence_count=evidence_count,
+            evidence_pending=evidence_pending,
+        )
+
+        if not live_gate_result["valid"]:
+            return EnvelopeValidationResult(
+                valid=False,
+                envelope_type=EnvelopeType.FOUNDUP_JOB,
+                validation_code=live_gate_result["code"],
+                missing_fields=[],
+                validation_message=live_gate_result["message"],
+                dry_run_defaulted=dry_run_defaulted,
+                policy_flags_snapshot=policy_snapshot,
+                evidence_refs_validated=True,
+                evidence_refs_count=evidence_count,
+                evidence_pending=evidence_pending,
+                is_live_mode=True,
+                live_mode_gates_passed=False,
+                missing_live_gates=live_gate_result.get("missing_gates", []),
+            )
+
+    # Valid FoundUpJob envelope
     # Determine validation code
     if evidence_pending:
         validation_code = EnvelopeValidationCode.VALID_EVIDENCE_PENDING
@@ -405,13 +455,93 @@ def validate_foundup_job_envelope(envelope: Dict[str, Any]) -> EnvelopeValidatio
         dry_run_defaulted=dry_run_defaulted,
         policy_flags_snapshot=policy_snapshot,
         evidence_refs_validated=True,
-        evidence_refs_count=evidence_result.get("count", 0),
+        evidence_refs_count=evidence_count,
         evidence_pending=evidence_pending,
+        is_live_mode=is_live_mode,
+        live_mode_gates_passed=is_live_mode,  # True only if live mode and passed gates
         # WSP 97 Truth: Always False at validation time
         verification_complete=False,
         cabr_ready=False,
         payout_ready=False,
     )
+
+
+def _validate_live_mode_gates(
+    policy_snapshot: Dict[str, bool],
+    evidence_count: int,
+    evidence_pending: bool,
+) -> Dict[str, Any]:
+    """
+    Validate live mode policy gates for FoundUpJob execution.
+
+    Live mode (dry_run_mode=False) requires explicit approval and evidence
+    before any non-dry-run execution can proceed.
+
+    WSP 97 Truth Boundaries:
+      - Live mode gates do NOT imply verification_complete=True
+      - Live mode gates do NOT enable CABR or payout claims
+      - This is validation only - no actual execution occurs
+
+    Required gates for Phase 1:
+      - human_approval=True OR permission_gate_passed=True
+      - security_gate_passed=True (if security_gate_checked=True)
+      - Non-empty evidence_refs (evidence_pending=False)
+
+    Args:
+        policy_snapshot: Policy flags at validation time
+        evidence_count: Number of evidence refs in envelope
+        evidence_pending: Whether evidence is pending
+
+    Returns:
+        Dict with: valid, code, message, missing_gates
+    """
+    missing_gates: List[str] = []
+
+    # Gate 1: Human approval OR permission gate passed
+    human_approval = policy_snapshot.get("human_approval", False)
+    permission_gate_passed = policy_snapshot.get("permission_gate_passed", False)
+
+    if not human_approval and not permission_gate_passed:
+        missing_gates.append("human_approval")
+
+    # Gate 2: Security gate (if checked, must pass)
+    security_gate_checked = policy_snapshot.get("security_gate_checked", False)
+    security_gate_passed = policy_snapshot.get("security_gate_passed", False)
+
+    if security_gate_checked and not security_gate_passed:
+        missing_gates.append("security_gate_passed")
+
+    # Gate 3: Evidence must be present (not pending)
+    if evidence_pending or evidence_count == 0:
+        missing_gates.append("evidence_refs")
+
+    # Determine result
+    if missing_gates:
+        # Determine primary failure code
+        if "human_approval" in missing_gates:
+            code = EnvelopeValidationCode.LIVE_MODE_REQUIRES_HUMAN_APPROVAL
+        elif "security_gate_passed" in missing_gates:
+            code = EnvelopeValidationCode.LIVE_MODE_REQUIRES_SECURITY_GATE
+        elif "evidence_refs" in missing_gates:
+            code = EnvelopeValidationCode.LIVE_MODE_REQUIRES_EVIDENCE
+        else:
+            code = EnvelopeValidationCode.LIVE_MODE_NOT_ENABLED
+
+        return {
+            "valid": False,
+            "code": code,
+            "message": f"Live mode requires gates: {missing_gates}",
+            "missing_gates": missing_gates,
+        }
+
+    # All gates passed
+    logger.info("[WSP97] Live mode gates passed - validation only, no execution")
+    return {
+        "valid": True,
+        "code": EnvelopeValidationCode.VALID,
+        "message": "Live mode gates passed (validation only)",
+        "missing_gates": [],
+    }
 
 
 def _validate_evidence_refs(
