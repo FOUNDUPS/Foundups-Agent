@@ -52,6 +52,52 @@ if TYPE_CHECKING:
 logger = logging.getLogger("wre_foundup_job_consumer")
 
 
+# ---------------------------------------------------------------------------
+# Drain Result with Retention Metadata
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class DrainResult:
+    """
+    Result of draining the FoundUpJob queue with retention semantics.
+
+    WSP 97 truth:
+      - Only successful terminal jobs with receipts are cleared
+      - Failed/incomplete jobs are retained with explicit reasons
+      - No silent dropping of failures
+    """
+
+    results: List["ConsumerResult"]
+    """All ConsumerResults from the drain operation."""
+
+    cleared_job_ids: List[str]
+    """Job IDs that were cleared (successful terminal with receipt)."""
+
+    retained_job_ids: List[str]
+    """Job IDs that were retained (failed/incomplete)."""
+
+    retention_reasons: Dict[str, str]
+    """Map of retained job_id -> retention reason."""
+
+    cleared_count: int = 0
+    """Number of jobs cleared."""
+
+    retained_count: int = 0
+    """Number of jobs retained."""
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialize to dict for logging/JSON."""
+        return {
+            "results": [r.to_dict() for r in self.results],
+            "cleared_job_ids": self.cleared_job_ids,
+            "retained_job_ids": self.retained_job_ids,
+            "retention_reasons": self.retention_reasons,
+            "cleared_count": self.cleared_count,
+            "retained_count": self.retained_count,
+        }
+
+
 def _utc_now() -> datetime:
     """Return current UTC timestamp."""
     return datetime.now(timezone.utc)
@@ -153,6 +199,44 @@ class ConsumerResult:
     def has_receipt(self) -> bool:
         """True if receipt was emitted."""
         return self.receipt_emission is not None and self.receipt_emission.success
+
+    @property
+    def should_clear(self) -> bool:
+        """
+        True if job completed successfully and should be cleared from queue.
+
+        Criteria for clearing (all must be true):
+          - Dispatched to Hermes
+          - Reached terminal state (succeeded/failed/blocked)
+          - Receipt emitted successfully
+
+        Jobs that fail routing, Hermes dispatch, or receipt emission
+        are retained for retry or manual inspection.
+        """
+        return self.dispatched and self.is_terminal and self.has_receipt
+
+    @property
+    def retention_reason(self) -> Optional[str]:
+        """
+        Why this job should be retained (not cleared).
+
+        Returns None if job should be cleared.
+        """
+        if self.should_clear:
+            return None
+        if not self.dispatched:
+            if self.route_status == RouteStatus.FAILED:
+                return "routing_failed"
+            if self.route_status == RouteStatus.BLOCKED:
+                return "routing_blocked"
+            if self.route_status == RouteStatus.UNSUPPORTED:
+                return "action_unsupported"
+            return "not_dispatched"
+        if not self.is_terminal:
+            return "not_terminal"
+        if not self.has_receipt:
+            return "receipt_emission_failed"
+        return "unknown"
 
     @property
     def verification_complete(self) -> bool:
@@ -436,45 +520,115 @@ class FoundUpJobConsumer:
         """
         Drain the OpenClaw FoundUpJob queue once.
 
-        Imports the queue from openclaw_foundup_orchestrator, processes all
-        jobs, and optionally clears the queue after successful processing.
-
         Args:
-            clear: If True, clear the queue after draining. Default True.
+            clear: If True, clear successful jobs after draining. Default True.
+                   Uses retention-aware clearing: only clears jobs that
+                   completed successfully with receipt emission.
 
         Returns:
             List of ConsumerResult for each job in the queue.
 
         Note:
             This is a synchronous operation. No daemon loop.
+            Failed/incomplete jobs are retained in the queue.
+        """
+        drain_result = self.drain_openclaw_queue_with_retention(clear=clear)
+        return drain_result.results
+
+    def drain_openclaw_queue_with_retention(self, clear: bool = True) -> DrainResult:
+        """
+        Drain the OpenClaw FoundUpJob queue with retention semantics.
+
+        Only clears jobs that:
+          - Were dispatched to Hermes
+          - Reached terminal state (succeeded/failed/blocked)
+          - Had receipt emitted successfully
+
+        Jobs that fail routing, Hermes dispatch, or receipt emission
+        are retained in the queue for retry or manual inspection.
+
+        Args:
+            clear: If True, clear successful jobs. Default True.
+                   Failed jobs are always retained.
+
+        Returns:
+            DrainResult with full retention metadata.
+
+        WSP 97 truth:
+          - No silent dropping of failures
+          - Explicit retention reasons for each retained job
         """
         try:
             from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
                 get_job_queue,
-                clear_job_queue,
+                remove_jobs_by_id,
             )
         except ImportError as e:
             logger.error("[CONSUMER] OpenClaw orchestrator not available: %s", e)
-            return []
+            return DrainResult(
+                results=[],
+                cleared_job_ids=[],
+                retained_job_ids=[],
+                retention_reasons={},
+                cleared_count=0,
+                retained_count=0,
+            )
 
         queue = get_job_queue()
         job_count = len(queue)
 
         if job_count == 0:
             logger.info("[CONSUMER] Queue empty, nothing to drain")
-            return []
+            return DrainResult(
+                results=[],
+                cleared_job_ids=[],
+                retained_job_ids=[],
+                retention_reasons={},
+                cleared_count=0,
+                retained_count=0,
+            )
 
         logger.info("[CONSUMER] Draining %d job(s) from OpenClaw queue", job_count)
 
         # Drain all jobs
         results = self.drain_jobs(queue)
 
-        # Clear queue only after successful drain (if requested)
-        if clear:
-            clear_job_queue()
-            logger.info("[CONSUMER] Cleared OpenClaw queue after drain")
+        # Classify results for retention
+        cleared_job_ids: List[str] = []
+        retained_job_ids: List[str] = []
+        retention_reasons: Dict[str, str] = {}
 
-        return results
+        for result in results:
+            if result.should_clear:
+                cleared_job_ids.append(result.job_id)
+            else:
+                retained_job_ids.append(result.job_id)
+                retention_reasons[result.job_id] = result.retention_reason or "unknown"
+
+        # Remove only successful jobs if clear=True
+        if clear and cleared_job_ids:
+            removed = remove_jobs_by_id(cleared_job_ids)
+            logger.info(
+                "[CONSUMER] Cleared %d successful job(s); %d retained",
+                removed,
+                len(retained_job_ids),
+            )
+
+        if retained_job_ids:
+            logger.warning(
+                "[CONSUMER] Retained %d job(s) in queue: %s",
+                len(retained_job_ids),
+                {jid: retention_reasons[jid] for jid in retained_job_ids},
+            )
+
+        return DrainResult(
+            results=results,
+            cleared_job_ids=cleared_job_ids,
+            retained_job_ids=retained_job_ids,
+            retention_reasons=retention_reasons,
+            cleared_count=len(cleared_job_ids),
+            retained_count=len(retained_job_ids),
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -501,38 +655,51 @@ def drain_openclaw_queue_dry_run(clear: bool = True) -> Dict[str, Any]:
 
     Convenience function that:
       1. Creates a FoundUpJobConsumer(dry_run=True)
-      2. Drains the OpenClaw queue once
-      3. Returns structured evidence for each job
+      2. Drains the OpenClaw queue with retention semantics
+      3. Returns structured evidence including retention metadata
 
     Args:
-        clear: If True, clear the queue after draining. Default True.
+        clear: If True, clear successful jobs after draining. Default True.
+               Failed jobs are always retained.
 
     Returns:
         Dict containing:
           - job_count: Number of jobs drained
           - results: List of ConsumerResult.to_dict() for each job
           - dry_run: True (always)
-          - summary: Aggregated stats (dispatched, receipts, terminals)
+          - cleared_job_ids: Jobs that were cleared
+          - retained_job_ids: Jobs that were retained
+          - retention_reasons: Map of retained job_id -> reason
+          - summary: Aggregated stats
 
     WSP 97 truth boundaries:
       - dry_run=True always
       - verification_complete=False always
       - cabr_ready=False always
       - payout_ready=False always
+      - No silent dropping of failures
     """
     consumer = FoundUpJobConsumer(dry_run=True)
-    results = consumer.drain_openclaw_queue_once(clear=clear)
+    drain_result = consumer.drain_openclaw_queue_with_retention(clear=clear)
 
-    # Aggregate stats (Phase 1A - no receipt binding yet)
-    dispatched_count = sum(1 for r in results if r.dispatched)
+    # Aggregate stats
+    dispatched_count = sum(1 for r in drain_result.results if r.dispatched)
+    receipt_count = sum(1 for r in drain_result.results if r.has_receipt)
+    terminal_count = sum(1 for r in drain_result.results if r.is_terminal)
 
     return {
-        "job_count": len(results),
-        "results": [r.to_dict() for r in results],
+        "job_count": len(drain_result.results),
+        "results": [r.to_dict() for r in drain_result.results],
         "dry_run": True,
-        "queue_cleared": clear,
+        "cleared_job_ids": drain_result.cleared_job_ids,
+        "retained_job_ids": drain_result.retained_job_ids,
+        "retention_reasons": drain_result.retention_reasons,
+        "cleared_count": drain_result.cleared_count,
+        "retained_count": drain_result.retained_count,
         "summary": {
             "dispatched": dispatched_count,
+            "receipts_emitted": receipt_count,
+            "terminal_jobs": terminal_count,
             "verification_complete": False,
             "cabr_ready": False,
             "payout_ready": False,

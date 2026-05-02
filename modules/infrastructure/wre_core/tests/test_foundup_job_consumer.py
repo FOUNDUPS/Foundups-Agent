@@ -362,19 +362,19 @@ class TestDrainJobs:
 
 
 class TestDrainOpenClawQueue:
-    """Test drain_openclaw_queue_once behavior."""
+    """Test drain_openclaw_queue_once behavior with retention semantics."""
 
     @patch(
-        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.clear_job_queue"
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.remove_jobs_by_id"
     )
     @patch(
         "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.get_job_queue"
     )
     @patch("modules.infrastructure.wre_core.src.foundup_job_consumer.route_foundup_job")
-    def test_drain_clears_queue_after_success(
-        self, mock_route, mock_get_queue, mock_clear_queue
+    def test_drain_retains_blocked_jobs(
+        self, mock_route, mock_get_queue, mock_remove
     ):
-        """drain_openclaw_queue_once clears queue after successful drain."""
+        """Blocked jobs are retained, not cleared (retention semantics)."""
         mock_envelope = MagicMock()
         mock_envelope.route_status = RouteStatus.BLOCKED
         mock_envelope.target_backend = TargetBackend.NONE
@@ -398,20 +398,22 @@ class TestDrainOpenClawQueue:
         consumer = FoundUpJobConsumer(dry_run=True)
         results = consumer.drain_openclaw_queue_once(clear=True)
 
+        # Jobs were processed
         assert len(results) == 2
-        mock_clear_queue.assert_called_once()
+        # But blocked jobs should not be removed (retained)
+        mock_remove.assert_not_called()
 
     @patch(
-        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.clear_job_queue"
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.remove_jobs_by_id"
     )
     @patch(
         "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.get_job_queue"
     )
     @patch("modules.infrastructure.wre_core.src.foundup_job_consumer.route_foundup_job")
     def test_drain_does_not_clear_if_clear_false(
-        self, mock_route, mock_get_queue, mock_clear_queue
+        self, mock_route, mock_get_queue, mock_remove
     ):
-        """drain_openclaw_queue_once with clear=False does not clear queue."""
+        """drain_openclaw_queue_once with clear=False does not remove jobs."""
         mock_envelope = MagicMock()
         mock_envelope.route_status = RouteStatus.BLOCKED
         mock_envelope.target_backend = TargetBackend.NONE
@@ -431,7 +433,7 @@ class TestDrainOpenClawQueue:
         results = consumer.drain_openclaw_queue_once(clear=False)
 
         assert len(results) == 1
-        mock_clear_queue.assert_not_called()
+        mock_remove.assert_not_called()
 
     @patch(
         "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.get_job_queue"
@@ -444,6 +446,210 @@ class TestDrainOpenClawQueue:
         results = consumer.drain_openclaw_queue_once()
 
         assert results == []
+
+
+# ---------------------------------------------------------------------------
+# Test: Retention Semantics
+# ---------------------------------------------------------------------------
+
+
+class TestRetentionSemantics:
+    """Test retention-aware drain behavior."""
+
+    @patch(
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.remove_jobs_by_id"
+    )
+    @patch(
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.get_job_queue"
+    )
+    @patch("modules.infrastructure.wre_core.src.foundup_job_consumer.route_foundup_job")
+    def test_routing_failure_retained(self, mock_route, mock_get_queue, mock_remove):
+        """Jobs with routing failure are retained with reason."""
+        mock_envelope = MagicMock()
+        mock_envelope.route_status = RouteStatus.FAILED
+        mock_envelope.target_backend = TargetBackend.NONE
+        mock_envelope.reason_human = "Routing failed"
+        mock_envelope.job_id = "job_fail"
+        mock_route.return_value = mock_envelope
+
+        mock_get_queue.return_value = [
+            MockFoundUpJob(
+                job_id="job_fail",
+                tenant_id="tenant_test",
+                requested_action="build_foundup",
+            ),
+        ]
+
+        consumer = FoundUpJobConsumer(dry_run=True)
+        drain_result = consumer.drain_openclaw_queue_with_retention(clear=True)
+
+        assert drain_result.retained_count == 1
+        assert drain_result.cleared_count == 0
+        assert "job_fail" in drain_result.retained_job_ids
+        assert drain_result.retention_reasons["job_fail"] == "routing_failed"
+        mock_remove.assert_not_called()
+
+    @patch(
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.remove_jobs_by_id"
+    )
+    @patch(
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.get_job_queue"
+    )
+    @patch("modules.infrastructure.wre_core.src.foundup_job_consumer.route_foundup_job")
+    def test_routing_blocked_retained(self, mock_route, mock_get_queue, mock_remove):
+        """Jobs blocked by security gate are retained."""
+        mock_envelope = MagicMock()
+        mock_envelope.route_status = RouteStatus.BLOCKED
+        mock_envelope.target_backend = TargetBackend.NONE
+        mock_envelope.reason_human = "Security gate failed"
+        mock_envelope.job_id = "job_blocked"
+        mock_route.return_value = mock_envelope
+
+        mock_get_queue.return_value = [
+            MockFoundUpJob(
+                job_id="job_blocked",
+                tenant_id="tenant_test",
+                requested_action="build_foundup",
+            ),
+        ]
+
+        consumer = FoundUpJobConsumer(dry_run=True)
+        drain_result = consumer.drain_openclaw_queue_with_retention(clear=True)
+
+        assert drain_result.retained_count == 1
+        assert drain_result.retention_reasons["job_blocked"] == "routing_blocked"
+
+    @patch(
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.get_job_queue"
+    )
+    def test_empty_queue_no_retained_consumed(self, mock_get_queue):
+        """Empty queue returns no retained or consumed jobs."""
+        mock_get_queue.return_value = []
+
+        consumer = FoundUpJobConsumer(dry_run=True)
+        drain_result = consumer.drain_openclaw_queue_with_retention(clear=True)
+
+        assert drain_result.cleared_count == 0
+        assert drain_result.retained_count == 0
+        assert drain_result.cleared_job_ids == []
+        assert drain_result.retained_job_ids == []
+        assert drain_result.retention_reasons == {}
+
+    def test_consumer_result_should_clear_properties(self):
+        """ConsumerResult has should_clear and retention_reason properties."""
+        # Blocked route - should retain
+        blocked_result = ConsumerResult(
+            job_id="blocked_job",
+            dispatched=False,
+            route_status=RouteStatus.BLOCKED,
+            target_backend=TargetBackend.NONE,
+            reason="Blocked",
+        )
+        assert blocked_result.should_clear is False
+        assert blocked_result.retention_reason == "routing_blocked"
+
+        # Failed route - should retain
+        failed_result = ConsumerResult(
+            job_id="failed_job",
+            dispatched=False,
+            route_status=RouteStatus.FAILED,
+            target_backend=TargetBackend.NONE,
+            reason="Failed",
+        )
+        assert failed_result.should_clear is False
+        assert failed_result.retention_reason == "routing_failed"
+
+        # Unsupported action - should retain
+        unsupported_result = ConsumerResult(
+            job_id="unsupported_job",
+            dispatched=False,
+            route_status=RouteStatus.UNSUPPORTED,
+            target_backend=TargetBackend.NONE,
+            reason="Unsupported",
+        )
+        assert unsupported_result.should_clear is False
+        assert unsupported_result.retention_reason == "action_unsupported"
+
+    @patch(
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.remove_jobs_by_id"
+    )
+    @patch(
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.get_job_queue"
+    )
+    @patch("modules.infrastructure.wre_core.src.foundup_job_consumer.route_foundup_job")
+    @patch("modules.foundups.agent.src.hermes_adapter.HermesFoundUpBuilder")
+    def test_successful_terminal_job_cleared(
+        self, mock_builder_class, mock_route, mock_get_queue, mock_remove
+    ):
+        """
+        Successful terminal dry-run job is cleared from queue.
+
+        Proves:
+          - Terminal + receipt success -> job_id in cleared_job_ids
+          - Not in retained_job_ids
+          - cleared_count == 1, retained_count == 0
+          - WSP 97 fields remain false
+        """
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            create_job,
+        )
+
+        # Setup routing to HERMES_BUILDER
+        mock_envelope = MagicMock()
+        mock_envelope.route_status = RouteStatus.ROUTED
+        mock_envelope.target_backend = TargetBackend.HERMES_BUILDER
+        mock_envelope.reason_human = "Routed to hermes_builder"
+        mock_envelope.job_id = "job_success_clear"
+        mock_route.return_value = mock_envelope
+
+        # Setup Hermes to return successful terminal result
+        mock_builder = MagicMock()
+        mock_builder.dry_run = True
+        mock_builder.extract_foundup.return_value = {
+            "success": True,
+            "source_module": "modules/foundups/success_test",
+            "target_repo": "FOUNDUPS/success_test",
+            "exfoliation_gate": {"passed": True, "checks": {}},
+            "dry_run": True,
+        }
+        mock_builder_class.return_value = mock_builder
+
+        # Create real job with proper payload
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="success_test",
+            payload={"module_path": "modules/foundups/success_test"},
+        )
+        # Override job_id to match envelope
+        job.job_id = "job_success_clear"
+
+        mock_get_queue.return_value = [job]
+        mock_remove.return_value = 1  # 1 job removed
+
+        consumer = FoundUpJobConsumer(dry_run=True)
+        drain_result = consumer.drain_openclaw_queue_with_retention(clear=True)
+
+        # Assert job is cleared, not retained
+        assert drain_result.cleared_count == 1
+        assert drain_result.retained_count == 0
+        assert "job_success_clear" in drain_result.cleared_job_ids
+        assert "job_success_clear" not in drain_result.retained_job_ids
+        assert drain_result.retention_reasons == {}
+
+        # Assert remove_jobs_by_id was called with the successful job
+        mock_remove.assert_called_once_with(["job_success_clear"])
+
+        # Assert WSP 97 truth fields in summary (via dry_run helper)
+        result = drain_result.results[0]
+        assert result.verification_complete is False
+        assert result.cabr_ready is False
+        assert result.payout_ready is False
+
+        # Verify it was actually terminal with receipt
+        assert result.is_terminal is True
+        assert result.has_receipt is True
+        assert result.should_clear is True
 
 
 # ---------------------------------------------------------------------------
@@ -869,19 +1075,19 @@ class TestConsumerResultReceiptBinding:
 
 
 class TestDrainOpenClawQueueDryRun:
-    """Test drain_openclaw_queue_dry_run convenience function."""
+    """Test drain_openclaw_queue_dry_run convenience function with retention."""
 
     @patch(
-        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.clear_job_queue"
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.remove_jobs_by_id"
     )
     @patch(
         "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.get_job_queue"
     )
     @patch("modules.infrastructure.wre_core.src.foundup_job_consumer.route_foundup_job")
-    def test_drain_dry_run_returns_structured_evidence(
-        self, mock_route, mock_get_queue, mock_clear_queue
+    def test_drain_dry_run_returns_retention_metadata(
+        self, mock_route, mock_get_queue, mock_remove
     ):
-        """drain_openclaw_queue_dry_run returns structured evidence dict."""
+        """drain_openclaw_queue_dry_run returns retention metadata."""
         mock_envelope = MagicMock()
         mock_envelope.route_status = RouteStatus.BLOCKED
         mock_envelope.target_backend = TargetBackend.NONE
@@ -904,28 +1110,35 @@ class TestDrainOpenClawQueueDryRun:
 
         summary = drain_openclaw_queue_dry_run(clear=True)
 
-        # Verify structure
+        # Verify structure with retention fields
         assert "job_count" in summary
         assert "results" in summary
         assert "dry_run" in summary
-        assert "queue_cleared" in summary
+        assert "cleared_job_ids" in summary
+        assert "retained_job_ids" in summary
+        assert "retention_reasons" in summary
+        assert "cleared_count" in summary
+        assert "retained_count" in summary
         assert "summary" in summary
 
-        # Verify values
+        # Verify values - blocked jobs are retained
         assert summary["job_count"] == 2
         assert summary["dry_run"] is True
-        assert summary["queue_cleared"] is True
         assert len(summary["results"]) == 2
+        assert summary["retained_count"] == 2
+        assert summary["cleared_count"] == 0
+        assert "job_dry1" in summary["retained_job_ids"]
+        assert "job_dry2" in summary["retained_job_ids"]
 
     @patch(
-        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.clear_job_queue"
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.remove_jobs_by_id"
     )
     @patch(
         "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.get_job_queue"
     )
     @patch("modules.infrastructure.wre_core.src.foundup_job_consumer.route_foundup_job")
     def test_drain_dry_run_wsp97_truth_fields(
-        self, mock_route, mock_get_queue, mock_clear_queue
+        self, mock_route, mock_get_queue, mock_remove
     ):
         """drain_openclaw_queue_dry_run enforces WSP 97 truth boundaries."""
         mock_envelope = MagicMock()
@@ -954,7 +1167,7 @@ class TestDrainOpenClawQueueDryRun:
         "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.get_job_queue"
     )
     def test_drain_dry_run_empty_queue(self, mock_get_queue):
-        """drain_openclaw_queue_dry_run with empty queue returns empty results."""
+        """drain_openclaw_queue_dry_run with empty queue returns no retained/consumed."""
         mock_get_queue.return_value = []
 
         summary = drain_openclaw_queue_dry_run()
@@ -962,19 +1175,24 @@ class TestDrainOpenClawQueueDryRun:
         assert summary["job_count"] == 0
         assert summary["results"] == []
         assert summary["dry_run"] is True
+        assert summary["cleared_count"] == 0
+        assert summary["retained_count"] == 0
+        assert summary["cleared_job_ids"] == []
+        assert summary["retained_job_ids"] == []
+        assert summary["retention_reasons"] == {}
         assert summary["summary"]["dispatched"] == 0
 
     @patch(
-        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.clear_job_queue"
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.remove_jobs_by_id"
     )
     @patch(
         "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.get_job_queue"
     )
     @patch("modules.infrastructure.wre_core.src.foundup_job_consumer.route_foundup_job")
-    def test_drain_dry_run_no_clear_flag(
-        self, mock_route, mock_get_queue, mock_clear_queue
+    def test_drain_dry_run_includes_retention_reasons(
+        self, mock_route, mock_get_queue, mock_remove
     ):
-        """drain_openclaw_queue_dry_run with clear=False does not clear."""
+        """drain_openclaw_queue_dry_run includes retention reasons for each job."""
         mock_envelope = MagicMock()
         mock_envelope.route_status = RouteStatus.BLOCKED
         mock_envelope.target_backend = TargetBackend.NONE
@@ -990,7 +1208,11 @@ class TestDrainOpenClawQueueDryRun:
             ),
         ]
 
-        summary = drain_openclaw_queue_dry_run(clear=False)
+        summary = drain_openclaw_queue_dry_run(clear=True)
 
-        assert summary["queue_cleared"] is False
-        mock_clear_queue.assert_not_called()
+        # Blocked job should have retention reason
+        assert summary["retained_count"] == 1
+        assert "job_nc1" in summary["retention_reasons"]
+        assert summary["retention_reasons"]["job_nc1"] == "routing_blocked"
+        # No jobs removed since all were blocked
+        mock_remove.assert_not_called()

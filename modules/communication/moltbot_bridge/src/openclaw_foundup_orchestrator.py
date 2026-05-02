@@ -129,6 +129,27 @@ def clear_job_queue() -> None:
     _FOUNDUP_JOB_QUEUE.clear()
 
 
+def remove_jobs_by_id(job_ids: List[str]) -> int:
+    """
+    Remove specific jobs from the queue by job_id.
+
+    Args:
+        job_ids: List of job_id values to remove.
+
+    Returns:
+        Number of jobs removed.
+
+    WSP 97: Only removes explicitly specified jobs; retains others.
+    """
+    global _FOUNDUP_JOB_QUEUE
+    original_count = len(_FOUNDUP_JOB_QUEUE)
+    job_id_set = set(job_ids)
+    _FOUNDUP_JOB_QUEUE = [j for j in _FOUNDUP_JOB_QUEUE if j.job_id not in job_id_set]
+    removed = original_count - len(_FOUNDUP_JOB_QUEUE)
+    logger.info("[ORCHESTRATOR] Removed %d job(s) from queue; %d retained", removed, len(_FOUNDUP_JOB_QUEUE))
+    return removed
+
+
 # -----------------------------------------------------------------------------
 # Failure Reason Codes (WSP 97 explicit)
 # -----------------------------------------------------------------------------
