@@ -166,6 +166,16 @@ class EnvelopeValidationCode(str, Enum):
     LIVE_MODE_REQUIRES_EVIDENCE = "LIVE_MODE_REQUIRES_EVIDENCE"
     LIVE_MODE_REQUIRES_SECURITY_GATE = "LIVE_MODE_REQUIRES_SECURITY_GATE"
 
+    # Invalid - Compute Budget
+    INVALID_COMPUTE_BUDGET_TYPE = "INVALID_COMPUTE_BUDGET_TYPE"
+    INVALID_COMPUTE_BUDGET_NEGATIVE = "INVALID_COMPUTE_BUDGET_NEGATIVE"
+    INVALID_COMPUTE_USED_TYPE = "INVALID_COMPUTE_USED_TYPE"
+    INVALID_COMPUTE_USED_NEGATIVE = "INVALID_COMPUTE_USED_NEGATIVE"
+    COMPUTE_USED_EXCEEDS_BUDGET = "COMPUTE_USED_EXCEEDS_BUDGET"
+    LIVE_MODE_REQUIRES_COMPUTE_BUDGET = "LIVE_MODE_REQUIRES_COMPUTE_BUDGET"
+    INVALID_COMPUTE_TIER = "INVALID_COMPUTE_TIER"
+    INVALID_MODEL_PREFERENCE = "INVALID_MODEL_PREFERENCE"
+
 
 @dataclass
 class EnvelopeValidationResult:
@@ -217,6 +227,22 @@ class EnvelopeValidationResult:
     missing_live_gates: List[str] = field(default_factory=list)
     """List of missing live mode policy gates."""
 
+    # === Compute Budget Validation ===
+    compute_budget_validated: bool = False
+    """True if compute budget fields passed validation."""
+
+    compute_budget_value: Optional[int] = None
+    """Compute budget from envelope (None = unlimited/not set)."""
+
+    compute_used_value: int = 0
+    """Compute used from envelope."""
+
+    compute_tier_value: str = ""
+    """Compute tier from envelope."""
+
+    model_preference_value: str = ""
+    """Model preference from envelope."""
+
     # === WSP 97 Truth Fields (ALWAYS False at validation time) ===
     verification_complete: bool = False
     """WSP 97: Always False. Evidence presence does NOT imply verification."""
@@ -244,6 +270,12 @@ class EnvelopeValidationResult:
             "is_live_mode": self.is_live_mode,
             "live_mode_gates_passed": self.live_mode_gates_passed,
             "missing_live_gates": self.missing_live_gates,
+            # Compute budget
+            "compute_budget_validated": self.compute_budget_validated,
+            "compute_budget_value": self.compute_budget_value,
+            "compute_used_value": self.compute_used_value,
+            "compute_tier_value": self.compute_tier_value,
+            "model_preference_value": self.model_preference_value,
             # WSP 97 Truth: Always False at validation time
             "verification_complete": self.verification_complete,
             "cabr_ready": self.cabr_ready,
@@ -438,6 +470,30 @@ def validate_foundup_job_envelope(envelope: Dict[str, Any]) -> EnvelopeValidatio
                 missing_live_gates=live_gate_result.get("missing_gates", []),
             )
 
+    # Compute budget validation (WSP 97: structural only, no metering claims)
+    compute_result = _validate_compute_budget(envelope, is_live_mode=is_live_mode)
+
+    if not compute_result["valid"]:
+        return EnvelopeValidationResult(
+            valid=False,
+            envelope_type=EnvelopeType.FOUNDUP_JOB,
+            validation_code=compute_result["code"],
+            missing_fields=[],
+            validation_message=compute_result["message"],
+            dry_run_defaulted=dry_run_defaulted,
+            policy_flags_snapshot=policy_snapshot,
+            evidence_refs_validated=True,
+            evidence_refs_count=evidence_count,
+            evidence_pending=evidence_pending,
+            is_live_mode=is_live_mode,
+            live_mode_gates_passed=is_live_mode,
+            compute_budget_validated=False,
+            compute_budget_value=compute_result.get("budget"),
+            compute_used_value=compute_result.get("used", 0),
+            compute_tier_value=compute_result.get("tier", ""),
+            model_preference_value=compute_result.get("model_preference", ""),
+        )
+
     # Valid FoundUpJob envelope
     # Determine validation code
     if evidence_pending:
@@ -459,6 +515,12 @@ def validate_foundup_job_envelope(envelope: Dict[str, Any]) -> EnvelopeValidatio
         evidence_pending=evidence_pending,
         is_live_mode=is_live_mode,
         live_mode_gates_passed=is_live_mode,  # True only if live mode and passed gates
+        # Compute budget (WSP 97: structural validation, no metering claims)
+        compute_budget_validated=True,
+        compute_budget_value=compute_result.get("budget"),
+        compute_used_value=compute_result.get("used", 0),
+        compute_tier_value=compute_result.get("tier", "freemium"),
+        model_preference_value=compute_result.get("model_preference", "auto"),
         # WSP 97 Truth: Always False at validation time
         verification_complete=False,
         cabr_ready=False,
@@ -656,6 +718,171 @@ def _validate_evidence_refs(
         "message": f"Evidence refs validated ({len(evidence_refs)} entries)",
         "count": len(evidence_refs),
         "pending": False,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Compute Budget Validation (WSP 97: Structural validation only)
+# ---------------------------------------------------------------------------
+
+# Allowed compute tiers (from FoundUpJob contract)
+ALLOWED_COMPUTE_TIERS: frozenset[str] = frozenset({
+    "freemium",
+    "basic",
+    "enterprise",
+})
+
+# Allowed model preferences (from FoundUpJob contract)
+ALLOWED_MODEL_PREFERENCES: frozenset[str] = frozenset({
+    "auto",
+    "free",
+    "standard",
+    "premium",
+})
+
+
+def _validate_compute_budget(
+    envelope: Dict[str, Any],
+    is_live_mode: bool = False,
+) -> Dict[str, Any]:
+    """
+    Validate compute budget fields for FoundUpJob envelope.
+
+    WSP 97 Truth Boundaries:
+      - Compute validation proves structural correctness only
+      - Does NOT verify actual metering accuracy
+      - Does NOT prove resource consumption tracking
+      - Does NOT enable billing claims
+
+    Validates:
+      - compute_budget: Optional[int] (None or non-negative integer)
+      - compute_used: int (non-negative integer)
+      - compute_tier: str (must be in ALLOWED_COMPUTE_TIERS)
+      - model_preference: str (must be in ALLOWED_MODEL_PREFERENCES)
+      - compute_used <= compute_budget (when budget is set)
+      - live mode requires explicit compute_budget
+
+    Args:
+        envelope: FoundUpJob envelope dict
+        is_live_mode: Whether dry_run_mode=False (live execution)
+
+    Returns:
+        Dict with: valid, code, message, budget, used, tier, model_preference
+    """
+    # Extract fields with defaults matching FoundUpJob contract
+    compute_budget = envelope.get("compute_budget")  # None = unlimited
+    compute_used = envelope.get("compute_used", 0)
+    compute_tier = envelope.get("compute_tier", "freemium")
+    model_preference = envelope.get("model_preference", "auto")
+
+    # === compute_budget type validation ===
+    # Contract: Optional[int] - None or int only (no floats)
+    if compute_budget is not None:
+        if not isinstance(compute_budget, int) or isinstance(compute_budget, bool):
+            return {
+                "valid": False,
+                "code": EnvelopeValidationCode.INVALID_COMPUTE_BUDGET_TYPE,
+                "message": f"compute_budget must be int or None, got {type(compute_budget).__name__}",
+                "budget": None,
+                "used": compute_used if isinstance(compute_used, int) else 0,
+                "tier": compute_tier,
+                "model_preference": model_preference,
+            }
+
+        # Non-negative check
+        if compute_budget < 0:
+            return {
+                "valid": False,
+                "code": EnvelopeValidationCode.INVALID_COMPUTE_BUDGET_NEGATIVE,
+                "message": f"compute_budget must be non-negative, got {compute_budget}",
+                "budget": compute_budget,
+                "used": compute_used if isinstance(compute_used, int) else 0,
+                "tier": compute_tier,
+                "model_preference": model_preference,
+            }
+
+    # === compute_used type validation ===
+    # Contract: int only (no floats)
+    if not isinstance(compute_used, int) or isinstance(compute_used, bool):
+        return {
+            "valid": False,
+            "code": EnvelopeValidationCode.INVALID_COMPUTE_USED_TYPE,
+            "message": f"compute_used must be int, got {type(compute_used).__name__}",
+            "budget": compute_budget,
+            "used": 0,
+            "tier": compute_tier,
+            "model_preference": model_preference,
+        }
+
+    # Non-negative check
+    if compute_used < 0:
+        return {
+            "valid": False,
+            "code": EnvelopeValidationCode.INVALID_COMPUTE_USED_NEGATIVE,
+            "message": f"compute_used must be non-negative, got {compute_used}",
+            "budget": compute_budget,
+            "used": compute_used,
+            "tier": compute_tier,
+            "model_preference": model_preference,
+        }
+
+    # === Budget exhaustion check ===
+    if compute_budget is not None and compute_used > compute_budget:
+        return {
+            "valid": False,
+            "code": EnvelopeValidationCode.COMPUTE_USED_EXCEEDS_BUDGET,
+            "message": f"compute_used ({compute_used}) exceeds compute_budget ({compute_budget})",
+            "budget": compute_budget,
+            "used": compute_used,
+            "tier": compute_tier,
+            "model_preference": model_preference,
+        }
+
+    # === Live mode requires explicit budget ===
+    if is_live_mode and compute_budget is None:
+        return {
+            "valid": False,
+            "code": EnvelopeValidationCode.LIVE_MODE_REQUIRES_COMPUTE_BUDGET,
+            "message": "Live mode requires explicit compute_budget",
+            "budget": None,
+            "used": compute_used,
+            "tier": compute_tier,
+            "model_preference": model_preference,
+        }
+
+    # === compute_tier validation ===
+    if compute_tier not in ALLOWED_COMPUTE_TIERS:
+        return {
+            "valid": False,
+            "code": EnvelopeValidationCode.INVALID_COMPUTE_TIER,
+            "message": f"compute_tier must be one of {sorted(ALLOWED_COMPUTE_TIERS)}, got '{compute_tier}'",
+            "budget": compute_budget,
+            "used": compute_used,
+            "tier": compute_tier,
+            "model_preference": model_preference,
+        }
+
+    # === model_preference validation ===
+    if model_preference not in ALLOWED_MODEL_PREFERENCES:
+        return {
+            "valid": False,
+            "code": EnvelopeValidationCode.INVALID_MODEL_PREFERENCE,
+            "message": f"model_preference must be one of {sorted(ALLOWED_MODEL_PREFERENCES)}, got '{model_preference}'",
+            "budget": compute_budget,
+            "used": compute_used,
+            "tier": compute_tier,
+            "model_preference": model_preference,
+        }
+
+    # All checks passed
+    return {
+        "valid": True,
+        "code": EnvelopeValidationCode.VALID,
+        "message": "Compute budget validated",
+        "budget": compute_budget,
+        "used": compute_used,
+        "tier": compute_tier,
+        "model_preference": model_preference,
     }
 
 

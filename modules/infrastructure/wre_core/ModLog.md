@@ -2,6 +2,44 @@
 
 ## Chronological Change Log
 
+### [2026-05-02] - WRE_COMPUTE_BUDGET_VALIDATION_PHASE1 (v0.8.13)
+
+**WSP Protocol References**: WSP 11 (Interface), WSP 97 (Truthful - structural validation only)
+**Impact Analysis**: Add compute budget policy validation for FoundUpJob envelopes
+
+#### Changes Made
+
+- `src/foundup_job_router.py`:
+  - Added `EnvelopeValidationCode` values for compute validation errors
+  - Added `EnvelopeValidationResult` fields: compute_budget_validated, compute_tier, model_preference
+  - Added `_validate_compute_budget()` helper function
+  - Validates: compute_budget/compute_used types, non-negative values, budget limits
+  - Validates: compute_tier (freemium|basic|enterprise), model_preference (auto|free|standard|premium)
+  - Live mode requires explicit compute_budget
+
+- `tests/test_foundup_job_envelope_validation.py`:
+  - Added 34 new tests for compute budget validation
+  - Covers type validation, negative values, budget overflow, tier/preference validation
+
+#### WSP 97 Truth Boundaries
+
+- Structural validation only - does not verify actual metering accuracy
+- Does not prove resource consumption tracking
+- Does not enable billing claims
+- verification_complete=False, cabr_ready=False, payout_ready=False
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_envelope_validation.py -q
+# 93 passed
+
+python -m pytest modules/infrastructure/wre_core/tests -q --ignore=modules/infrastructure/wre_core/tests/test_production_gates.py
+# 499 passed
+```
+
+---
+
 ### [2026-05-02] - WRE_LIVE_MODE_EVIDENCE_POLICY_GATE_PHASE1 (v0.8.12)
 
 **WSP Protocol References**: WSP 11 (Interface), WSP 97 (Truthful - live mode blocked without gates)
