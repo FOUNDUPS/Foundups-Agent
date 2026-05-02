@@ -29,12 +29,14 @@ Slice: HERMES_JOB_EXECUTOR_ADAPTER_PHASE1
 
 from __future__ import annotations
 
+import fnmatch
 import logging
 import os
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from pathlib import Path
+from typing import Any, Dict, FrozenSet, List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from modules.communication.moltbot_bridge.src.foundup_job_contract import (
@@ -61,6 +63,185 @@ def is_hermes_delegation_enabled() -> bool:
     """Check if Hermes delegation is enabled via environment flag."""
     value = os.environ.get(_HERMES_DELEGATE_ENABLED_KEY, "0")
     return value.strip().lower() in ("1", "true", "yes")
+
+
+# ---------------------------------------------------------------------------
+# Workspace Binding Contract
+# ---------------------------------------------------------------------------
+
+# Security-hardcoded blocked paths (never accessible)
+BLOCKED_PATHS: FrozenSet[str] = frozenset([
+    ".env",
+    ".env.*",
+    "**/.env",
+    "**/.env.*",
+    "*.pem",
+    "*.key",
+    "**/secrets/",
+    "**/credentials/",
+    ".git/config",
+    ".git/credentials",
+    "**/__pycache__/",
+    "vendor/",
+    ".hermes/",
+    "node_modules/",
+    ".venv/",
+    "venv/",
+])
+
+# Action-to-allowed-paths mapping
+# {action: [path_templates]} where {foundup_id} and {job_id} are placeholders
+ACTION_ALLOWED_PATHS: Dict[str, List[str]] = {
+    "build_foundup": [
+        "modules/foundups/{foundup_id}/",
+        ".hermes_evidence/{job_id}/",
+    ],
+    "extract_foundup": [
+        "modules/foundups/{foundup_id}/",
+        ".hermes_evidence/{job_id}/",
+    ],
+    "validate_foundup": [
+        "modules/foundups/{foundup_id}/",
+        ".hermes_evidence/{job_id}/",
+    ],
+    "queue_foundup_job": [
+        ".hermes_evidence/{job_id}/",
+    ],
+}
+
+# Default allowed paths when action not in map or foundup_id is None
+DEFAULT_ALLOWED_PATHS: List[str] = [
+    ".hermes_evidence/{job_id}/",
+]
+
+
+@dataclass
+class WorkspaceBinding:
+    """
+    Workspace context for Hermes delegation sandbox.
+
+    Defines the filesystem boundaries within which Hermes subagents
+    may operate. All paths are relative to workspace_root unless
+    otherwise specified.
+
+    Attributes:
+        workspace_root: Absolute path to FoundUps-Agent repository root
+        workspace_hint: Relative path hint for Hermes (e.g., "modules/foundups/gotjunk")
+        allowed_paths: Paths Hermes may read/write (relative to workspace_root)
+        blocked_paths: Paths Hermes must NOT access (glob patterns)
+        evidence_output_path: Absolute path for job evidence output
+        retention_on_failure: Retention mode ("preserve", "cleanup", "archive")
+    """
+
+    workspace_root: str
+    workspace_hint: Optional[str] = None
+    allowed_paths: List[str] = field(default_factory=list)
+    blocked_paths: List[str] = field(default_factory=list)
+    evidence_output_path: str = ""
+    retention_on_failure: str = "preserve"
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialize to dict for logging/audit."""
+        return {
+            "workspace_root": self.workspace_root,
+            "workspace_hint": self.workspace_hint,
+            "allowed_paths": self.allowed_paths,
+            "blocked_paths": self.blocked_paths,
+            "evidence_output_path": self.evidence_output_path,
+            "retention_on_failure": self.retention_on_failure,
+        }
+
+    def is_path_allowed(self, path: str) -> bool:
+        """
+        Check if a path is allowed by this binding.
+
+        Args:
+            path: Path to check (relative to workspace_root)
+
+        Returns:
+            True if path is within allowed_paths and not in blocked_paths
+        """
+        from pathlib import PurePosixPath
+
+        # Normalize path to forward slashes for consistent matching
+        normalized = os.path.normpath(path).replace("\\", "/")
+        path_obj = PurePosixPath(normalized)
+
+        # Check blocked patterns first (deny takes precedence)
+        for pattern in self.blocked_paths:
+            # Use PurePath.match() which supports ** for recursive matching
+            if path_obj.match(pattern):
+                return False
+            # Also check fnmatch for simple patterns without **
+            if "**" not in pattern and fnmatch.fnmatch(normalized, pattern):
+                return False
+            # Check if path starts with blocked directory
+            pattern_clean = pattern.rstrip("/*").replace("**/", "")
+            if pattern_clean and (
+                normalized.startswith(pattern_clean + "/")
+                or normalized == pattern_clean
+                or ("/" + pattern_clean + "/") in ("/" + normalized + "/")
+            ):
+                return False
+
+        # Check allowed paths
+        for allowed in self.allowed_paths:
+            allowed_clean = allowed.rstrip("/")
+            if normalized.startswith(allowed_clean + "/") or normalized == allowed_clean:
+                return True
+
+        return False
+
+
+def get_evidence_output_path(workspace_root: str, job_id: str) -> str:
+    """
+    Generate evidence output path for a job.
+
+    Args:
+        workspace_root: Root directory of workspace
+        job_id: Job identifier
+
+    Returns:
+        Absolute path to evidence output directory
+    """
+    return os.path.join(workspace_root, ".hermes_evidence", job_id)
+
+
+def build_allowed_paths(
+    action: str,
+    foundup_id: Optional[str],
+    job_id: str,
+) -> List[str]:
+    """
+    Build allowed paths list based on action and job context.
+
+    Args:
+        action: Requested action (e.g., "build_foundup")
+        foundup_id: Target FoundUp ID (may be None)
+        job_id: Job identifier
+
+    Returns:
+        List of allowed path patterns with placeholders resolved
+    """
+    # Get template paths for action
+    templates = ACTION_ALLOWED_PATHS.get(action, DEFAULT_ALLOWED_PATHS)
+
+    # If no foundup_id, use restricted default
+    if not foundup_id:
+        templates = DEFAULT_ALLOWED_PATHS
+
+    # Resolve placeholders
+    resolved = []
+    for template in templates:
+        path = template.replace("{job_id}", job_id)
+        if foundup_id:
+            path = path.replace("{foundup_id}", foundup_id)
+        elif "{foundup_id}" in path:
+            # Skip paths requiring foundup_id when not available
+            continue
+        resolved.append(path)
+
+    return resolved
 
 
 # ---------------------------------------------------------------------------
@@ -113,6 +294,7 @@ class HermesDelegationRequest:
         requested_action: Original action requested
         policy_snapshot: Frozen policy_flags at request time
         dry_run: If True, Hermes should not execute terminal/file tools
+        workspace_binding: Workspace context and path constraints
     """
 
     # Core delegation params
@@ -133,6 +315,9 @@ class HermesDelegationRequest:
     # Execution control
     dry_run: bool = True
 
+    # Workspace binding (Phase 1 contract addition)
+    workspace_binding: Optional[WorkspaceBinding] = None
+
     # Metadata
     created_at: datetime = field(default_factory=_utc_now)
 
@@ -149,6 +334,7 @@ class HermesDelegationRequest:
             "requested_action": self.requested_action,
             "policy_snapshot": self.policy_snapshot,
             "dry_run": self.dry_run,
+            "workspace_binding": self.workspace_binding.to_dict() if self.workspace_binding else None,
             "created_at": self.created_at.isoformat(),
         }
 
@@ -257,6 +443,7 @@ class HermesJobExecutor:
         dry_run: bool = True,
         max_iterations: int = 50,
         default_toolsets: Optional[List[str]] = None,
+        workspace_root: Optional[str] = None,
     ):
         """
         Initialize executor.
@@ -265,13 +452,31 @@ class HermesJobExecutor:
             dry_run: If True (default), never call real delegate_task
             max_iterations: Default iteration limit for Hermes
             default_toolsets: Default toolsets (empty by default for safety)
+            workspace_root: Root directory for workspace binding (auto-detected if None)
         """
         self.dry_run = dry_run
         self.max_iterations = max_iterations
         self.default_toolsets = default_toolsets or []
+        self.workspace_root = workspace_root or self._detect_workspace_root()
         self._delegate_task_fn = None
         self._import_attempted = False
         self._import_error: Optional[str] = None
+
+    def _detect_workspace_root(self) -> str:
+        """
+        Detect workspace root from environment or current directory.
+
+        Priority:
+          1. FOUNDUPS_WORKSPACE_ROOT env var
+          2. Current working directory
+
+        Returns:
+            Absolute path to workspace root
+        """
+        env_root = os.environ.get("FOUNDUPS_WORKSPACE_ROOT")
+        if env_root:
+            return os.path.abspath(env_root)
+        return os.getcwd()
 
     def _lazy_import_delegate_task(self) -> bool:
         """
@@ -332,6 +537,9 @@ class HermesJobExecutor:
         # Snapshot policy flags
         policy_snapshot = job.policy_flags.to_dict() if job.policy_flags else {}
 
+        # Build workspace binding
+        workspace_binding = self._build_workspace_binding(job)
+
         return HermesDelegationRequest(
             goal=goal,
             context=context,
@@ -343,6 +551,47 @@ class HermesJobExecutor:
             requested_action=job.requested_action,
             policy_snapshot=policy_snapshot,
             dry_run=self.dry_run,
+            workspace_binding=workspace_binding,
+        )
+
+    def _build_workspace_binding(self, job: "FoundUpJob") -> WorkspaceBinding:
+        """
+        Build WorkspaceBinding from job context.
+
+        Derives workspace hint, allowed/blocked paths, and evidence output
+        path from job identity fields.
+
+        Args:
+            job: Source FoundUpJob
+
+        Returns:
+            WorkspaceBinding with path constraints
+        """
+        # Derive workspace hint from foundup_id
+        workspace_hint = None
+        if job.foundup_id:
+            workspace_hint = f"modules/foundups/{job.foundup_id}"
+
+        # Build allowed paths based on action and foundup_id
+        allowed_paths = build_allowed_paths(
+            action=job.requested_action,
+            foundup_id=job.foundup_id,
+            job_id=job.job_id,
+        )
+
+        # Evidence output path
+        evidence_output_path = get_evidence_output_path(
+            workspace_root=self.workspace_root,
+            job_id=job.job_id,
+        )
+
+        return WorkspaceBinding(
+            workspace_root=self.workspace_root,
+            workspace_hint=workspace_hint,
+            allowed_paths=allowed_paths,
+            blocked_paths=list(BLOCKED_PATHS),
+            evidence_output_path=evidence_output_path,
+            retention_on_failure="preserve",
         )
 
     def _build_goal(self, job: "FoundUpJob") -> str:
@@ -525,6 +774,7 @@ _executor_singleton: Optional[HermesJobExecutor] = None
 def get_executor(
     dry_run: bool = True,
     max_iterations: int = 50,
+    workspace_root: Optional[str] = None,
 ) -> HermesJobExecutor:
     """Get or create singleton HermesJobExecutor."""
     global _executor_singleton
@@ -532,6 +782,7 @@ def get_executor(
         _executor_singleton = HermesJobExecutor(
             dry_run=dry_run,
             max_iterations=max_iterations,
+            workspace_root=workspace_root,
         )
     return _executor_singleton
 

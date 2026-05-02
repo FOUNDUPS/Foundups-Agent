@@ -1,5 +1,32 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-02: Hermes workspace binding contract tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.py -v`
+- Status: PASS
+- Result: `64 passed`
+- Notes:
+  - Added `TestWorkspaceBindingDataclass` (1 test) - WorkspaceBinding.to_dict() serialization
+  - Added `TestWorkspaceBindingPathValidation` (5 tests) - is_path_allowed() logic
+  - Added `TestBlockedPathsConstant` (5 tests) - BLOCKED_PATHS frozenset contents
+  - Added `TestBuildAllowedPaths` (5 tests) - action-to-path template mapping
+  - Added `TestGetEvidenceOutputPath` (2 tests) - evidence path derivation
+  - Added `TestWorkspaceHintInRequest` (4 tests) - workspace_hint in HermesDelegationRequest
+  - Added `TestAllowedPathsInRequest` (2 tests) - allowed_paths population
+  - Added `TestBlockedPathsInRequest` (2 tests) - blocked_paths population
+  - Added `TestWorkspaceRootDetection` (3 tests) - workspace_root auto-detection
+  - Added `TestNoRealExecutionWithWorkspaceBinding` (2 tests) - WSP 97 truth with binding
+- WSP 97 Coverage (extended):
+  - workspace_binding field exists in request
+  - Path constraints defined but NOT enforced (Phase 1)
+  - Evidence output path derived from job_id
+  - No real execution even with workspace binding
+- Test Fixes:
+  - Fixed glob `**` pattern matching using PurePath.match()
+  - Fixed Windows path compatibility for env var detection
+
+---
+
 ## 2026-05-02: Hermes job executor adapter tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.py -v`

@@ -2,6 +2,61 @@
 
 ## Chronological Change Log
 
+### [2026-05-02] - HERMES_WORKSPACE_BINDING_CONTRACT_PHASE1 (v0.8.16)
+
+**WSP Protocol References**: WSP 11 (Interface), WSP 50 (Pre-Action), WSP 97 (Truthful)
+**Impact Analysis**: Define workspace binding contract for Hermes delegation sandbox
+
+#### Changes Made
+
+- `src/hermes_job_executor.py`:
+  - `WorkspaceBinding` dataclass - sandbox context for Hermes subagents
+  - `BLOCKED_PATHS` frozenset - security-hardcoded patterns (immutable)
+  - `ACTION_ALLOWED_PATHS` dict - action-to-path template mapping
+  - `build_allowed_paths()` - generate allowed paths from job context
+  - `get_evidence_output_path()` - derive evidence path from job_id
+  - `_build_workspace_binding()` method on HermesJobExecutor
+  - Added `workspace_binding` field to HermesDelegationRequest
+  - Path validation with `PurePath.match()` for `**` glob support
+
+- `tests/test_hermes_job_executor.py`:
+  - 31 new tests (64 total) for workspace binding
+  - TestWorkspaceBindingDataclass, TestWorkspaceBindingPathValidation
+  - TestBlockedPathsConstant, TestBuildAllowedPaths, TestGetEvidenceOutputPath
+  - TestWorkspaceHintInRequest, TestAllowedPathsInRequest, TestBlockedPathsInRequest
+  - TestWorkspaceRootDetection, TestNoRealExecutionWithWorkspaceBinding
+
+- `docs/audits/hermes_swarm/HERMES_WORKSPACE_BINDING_CONTRACT.md` (NEW, gitignored):
+  - Contract specification document defining all fields and behaviors
+  - Path constraint rules, evidence output structure, retention modes
+
+#### WorkspaceBinding Fields
+
+| Field | Type | Purpose |
+|-------|------|---------|
+| workspace_root | str | Absolute path to repo root |
+| workspace_hint | Optional[str] | Relative path for Hermes (e.g., "modules/foundups/gotjunk") |
+| allowed_paths | List[str] | Paths Hermes may read/write |
+| blocked_paths | List[str] | Paths Hermes must NOT access |
+| evidence_output_path | str | `.hermes_evidence/{job_id}/` |
+| retention_on_failure | str | "preserve" (default), "cleanup", "archive" |
+
+#### WSP 97 Truth Boundaries
+
+- `workspace_binding_enforced`: False (enforcement is Phase 2)
+- `path_constraints_validated`: False (validation is Phase 2)
+- `evidence_collected`: False (collection is Phase 2)
+- Contract is structural definition only, not enforcement
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.py -v
+# 64 passed
+```
+
+---
+
 ### [2026-05-02] - HERMES_JOB_EXECUTOR_ADAPTER_PHASE1 (v0.8.15)
 
 **WSP Protocol References**: WSP 11 (Interface), WSP 50 (Pre-Action), WSP 97 (Truthful)

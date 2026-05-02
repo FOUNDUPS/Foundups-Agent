@@ -33,6 +33,11 @@ from hermes_job_executor import (
     HermesDelegationResult,
     HermesExecutionStatus,
     HermesJobExecutor,
+    WorkspaceBinding,
+    BLOCKED_PATHS,
+    ACTION_ALLOWED_PATHS,
+    build_allowed_paths,
+    get_evidence_output_path,
     is_hermes_delegation_enabled,
     get_executor,
     execute_foundup_job,
@@ -492,6 +497,382 @@ class TestSingletonExecutor(unittest.TestCase):
             result = execute_foundup_job(job)
 
             self.assertEqual(result.status, HermesExecutionStatus.SIMULATED)
+
+
+# ---------------------------------------------------------------------------
+# Workspace Binding Tests (HERMES_WORKSPACE_BINDING_CONTRACT_PHASE1)
+# ---------------------------------------------------------------------------
+
+
+class TestWorkspaceBindingDataclass(unittest.TestCase):
+    """Test WorkspaceBinding dataclass."""
+
+    def test_to_dict_serializes_all_fields(self):
+        """WorkspaceBinding.to_dict includes all fields."""
+        binding = WorkspaceBinding(
+            workspace_root="/path/to/repo",
+            workspace_hint="modules/foundups/gotjunk",
+            allowed_paths=["modules/foundups/gotjunk/", ".hermes_evidence/j_123/"],
+            blocked_paths=[".env", "*.pem"],
+            evidence_output_path="/path/to/repo/.hermes_evidence/j_123",
+            retention_on_failure="preserve",
+        )
+        d = binding.to_dict()
+
+        self.assertEqual(d["workspace_root"], "/path/to/repo")
+        self.assertEqual(d["workspace_hint"], "modules/foundups/gotjunk")
+        self.assertEqual(d["allowed_paths"], ["modules/foundups/gotjunk/", ".hermes_evidence/j_123/"])
+        self.assertIn(".env", d["blocked_paths"])
+        self.assertEqual(d["evidence_output_path"], "/path/to/repo/.hermes_evidence/j_123")
+        self.assertEqual(d["retention_on_failure"], "preserve")
+
+
+class TestWorkspaceBindingPathValidation(unittest.TestCase):
+    """Test WorkspaceBinding.is_path_allowed method."""
+
+    def test_allowed_path_within_scope(self):
+        """Path within allowed_paths is allowed."""
+        binding = WorkspaceBinding(
+            workspace_root="/repo",
+            allowed_paths=["modules/foundups/gotjunk/"],
+            blocked_paths=list(BLOCKED_PATHS),
+        )
+
+        self.assertTrue(binding.is_path_allowed("modules/foundups/gotjunk/src/main.py"))
+        self.assertTrue(binding.is_path_allowed("modules/foundups/gotjunk/README.md"))
+
+    def test_path_outside_allowed_rejected(self):
+        """Path outside allowed_paths is rejected."""
+        binding = WorkspaceBinding(
+            workspace_root="/repo",
+            allowed_paths=["modules/foundups/gotjunk/"],
+            blocked_paths=list(BLOCKED_PATHS),
+        )
+
+        self.assertFalse(binding.is_path_allowed("modules/foundups/social_twin/src/main.py"))
+        self.assertFalse(binding.is_path_allowed("holo_index/core/indexing.py"))
+
+    def test_blocked_path_rejected(self):
+        """Path matching blocked_paths is rejected even if in allowed_paths."""
+        binding = WorkspaceBinding(
+            workspace_root="/repo",
+            allowed_paths=["modules/foundups/gotjunk/"],
+            blocked_paths=[".env", "*.pem", "**/secrets/"],
+        )
+
+        # These should be rejected due to blocked patterns
+        self.assertFalse(binding.is_path_allowed(".env"))
+        self.assertFalse(binding.is_path_allowed("cert.pem"))
+        self.assertFalse(binding.is_path_allowed("modules/foundups/gotjunk/secrets/api.json"))
+
+    def test_env_patterns_blocked(self):
+        """All .env patterns are blocked."""
+        binding = WorkspaceBinding(
+            workspace_root="/repo",
+            allowed_paths=["./"],  # Allow everything...
+            blocked_paths=list(BLOCKED_PATHS),  # ...except blocked
+        )
+
+        self.assertFalse(binding.is_path_allowed(".env"))
+        self.assertFalse(binding.is_path_allowed(".env.local"))
+        self.assertFalse(binding.is_path_allowed(".env.production"))
+
+    def test_vendor_path_blocked(self):
+        """vendor/ is always blocked (Hermes cannot modify itself)."""
+        binding = WorkspaceBinding(
+            workspace_root="/repo",
+            allowed_paths=["./"],
+            blocked_paths=list(BLOCKED_PATHS),
+        )
+
+        self.assertFalse(binding.is_path_allowed("vendor/hermes-agent/tools/delegate.py"))
+
+
+class TestBlockedPathsConstant(unittest.TestCase):
+    """Test BLOCKED_PATHS security constant."""
+
+    def test_blocked_paths_includes_env(self):
+        """.env patterns in BLOCKED_PATHS."""
+        self.assertIn(".env", BLOCKED_PATHS)
+        self.assertIn(".env.*", BLOCKED_PATHS)
+
+    def test_blocked_paths_includes_secrets(self):
+        """secrets/ and credentials/ in BLOCKED_PATHS."""
+        self.assertIn("**/secrets/", BLOCKED_PATHS)
+        self.assertIn("**/credentials/", BLOCKED_PATHS)
+
+    def test_blocked_paths_includes_vendor(self):
+        """vendor/ in BLOCKED_PATHS."""
+        self.assertIn("vendor/", BLOCKED_PATHS)
+
+    def test_blocked_paths_includes_keys(self):
+        """Key file patterns in BLOCKED_PATHS."""
+        self.assertIn("*.pem", BLOCKED_PATHS)
+        self.assertIn("*.key", BLOCKED_PATHS)
+
+    def test_blocked_paths_is_frozenset(self):
+        """BLOCKED_PATHS is immutable."""
+        self.assertIsInstance(BLOCKED_PATHS, frozenset)
+
+
+class TestBuildAllowedPaths(unittest.TestCase):
+    """Test build_allowed_paths function."""
+
+    def test_build_foundup_includes_foundup_path(self):
+        """build_foundup action includes modules/foundups/{foundup_id}/."""
+        paths = build_allowed_paths(
+            action="build_foundup",
+            foundup_id="gotjunk",
+            job_id="j_123",
+        )
+
+        self.assertIn("modules/foundups/gotjunk/", paths)
+        self.assertIn(".hermes_evidence/j_123/", paths)
+
+    def test_validate_foundup_includes_foundup_path(self):
+        """validate_foundup action includes foundup path."""
+        paths = build_allowed_paths(
+            action="validate_foundup",
+            foundup_id="social_twin",
+            job_id="j_456",
+        )
+
+        self.assertIn("modules/foundups/social_twin/", paths)
+
+    def test_queue_job_only_evidence_path(self):
+        """queue_foundup_job action only includes evidence path."""
+        paths = build_allowed_paths(
+            action="queue_foundup_job",
+            foundup_id="any",
+            job_id="j_789",
+        )
+
+        self.assertEqual(paths, [".hermes_evidence/j_789/"])
+
+    def test_no_foundup_id_uses_default(self):
+        """No foundup_id falls back to evidence-only paths."""
+        paths = build_allowed_paths(
+            action="build_foundup",
+            foundup_id=None,
+            job_id="j_abc",
+        )
+
+        self.assertEqual(paths, [".hermes_evidence/j_abc/"])
+
+    def test_unknown_action_uses_default(self):
+        """Unknown action uses default paths."""
+        paths = build_allowed_paths(
+            action="unknown_action",
+            foundup_id="test",
+            job_id="j_def",
+        )
+
+        self.assertEqual(paths, [".hermes_evidence/j_def/"])
+
+
+class TestGetEvidenceOutputPath(unittest.TestCase):
+    """Test get_evidence_output_path function."""
+
+    def test_includes_job_id(self):
+        """Evidence path includes job_id."""
+        path = get_evidence_output_path(
+            workspace_root="/path/to/repo",
+            job_id="j_build_123",
+        )
+
+        self.assertIn("j_build_123", path)
+        self.assertIn(".hermes_evidence", path)
+
+    def test_absolute_path(self):
+        """Evidence path is absolute (starts with workspace_root)."""
+        path = get_evidence_output_path(
+            workspace_root="/path/to/repo",
+            job_id="j_test",
+        )
+
+        self.assertTrue(path.startswith("/path/to/repo"))
+
+
+class TestWorkspaceHintInRequest(unittest.TestCase):
+    """Test workspace_hint is included in HermesDelegationRequest."""
+
+    def test_workspace_binding_field_exists(self):
+        """HermesDelegationRequest has workspace_binding field."""
+        request = HermesDelegationRequest(goal="test", context="ctx")
+        self.assertTrue(hasattr(request, "workspace_binding"))
+
+    def test_request_includes_workspace_binding(self):
+        """build_delegation_request includes workspace_binding."""
+        executor = HermesJobExecutor(workspace_root="/test/repo")
+        job = create_job(
+            tenant_id="t1",
+            requested_action="build_foundup",
+            foundup_id="gotjunk",
+        )
+
+        request = executor.build_delegation_request(job)
+
+        self.assertIsNotNone(request.workspace_binding)
+        self.assertEqual(request.workspace_binding.workspace_root, "/test/repo")
+
+    def test_workspace_hint_derived_from_foundup_id(self):
+        """workspace_hint is derived from foundup_id."""
+        executor = HermesJobExecutor(workspace_root="/test/repo")
+        job = create_job(
+            tenant_id="t1",
+            requested_action="build_foundup",
+            foundup_id="social_twin",
+        )
+
+        request = executor.build_delegation_request(job)
+
+        self.assertEqual(
+            request.workspace_binding.workspace_hint,
+            "modules/foundups/social_twin",
+        )
+
+    def test_workspace_hint_none_when_no_foundup_id(self):
+        """workspace_hint is None when foundup_id is None."""
+        executor = HermesJobExecutor(workspace_root="/test/repo")
+        job = create_job(
+            tenant_id="t1",
+            requested_action="queue_foundup_job",
+        )
+
+        request = executor.build_delegation_request(job)
+
+        self.assertIsNone(request.workspace_binding.workspace_hint)
+
+
+class TestAllowedPathsInRequest(unittest.TestCase):
+    """Test allowed_paths are constrained in request."""
+
+    def test_allowed_paths_includes_foundup_path(self):
+        """Request allowed_paths includes foundup module path."""
+        executor = HermesJobExecutor(workspace_root="/test/repo")
+        job = create_job(
+            tenant_id="t1",
+            requested_action="build_foundup",
+            foundup_id="gotjunk",
+        )
+
+        request = executor.build_delegation_request(job)
+
+        self.assertIn("modules/foundups/gotjunk/", request.workspace_binding.allowed_paths)
+
+    def test_allowed_paths_includes_evidence_path(self):
+        """Request allowed_paths includes evidence output path."""
+        executor = HermesJobExecutor(workspace_root="/test/repo")
+        job = create_job(
+            tenant_id="t1",
+            requested_action="build_foundup",
+            foundup_id="gotjunk",
+        )
+
+        request = executor.build_delegation_request(job)
+
+        # Evidence path includes job_id
+        evidence_paths = [p for p in request.workspace_binding.allowed_paths if ".hermes_evidence" in p]
+        self.assertEqual(len(evidence_paths), 1)
+        self.assertIn(job.job_id, evidence_paths[0])
+
+
+class TestBlockedPathsInRequest(unittest.TestCase):
+    """Test blocked_paths are honored in request."""
+
+    def test_blocked_paths_populated(self):
+        """Request blocked_paths includes security patterns."""
+        executor = HermesJobExecutor(workspace_root="/test/repo")
+        job = create_job(
+            tenant_id="t1",
+            requested_action="build_foundup",
+            foundup_id="gotjunk",
+        )
+
+        request = executor.build_delegation_request(job)
+
+        self.assertIn(".env", request.workspace_binding.blocked_paths)
+        self.assertIn("vendor/", request.workspace_binding.blocked_paths)
+
+    def test_blocked_paths_is_list(self):
+        """blocked_paths is a list (not frozenset) for JSON serialization."""
+        executor = HermesJobExecutor(workspace_root="/test/repo")
+        job = create_job(
+            tenant_id="t1",
+            requested_action="build_foundup",
+            foundup_id="gotjunk",
+        )
+
+        request = executor.build_delegation_request(job)
+
+        self.assertIsInstance(request.workspace_binding.blocked_paths, list)
+
+
+class TestWorkspaceRootDetection(unittest.TestCase):
+    """Test workspace_root auto-detection."""
+
+    def test_uses_env_var_if_set(self):
+        """Executor uses FOUNDUPS_WORKSPACE_ROOT env var."""
+        # Use os.path.abspath to get expected path (handles Windows drive letter)
+        expected = os.path.abspath("/custom/path")
+        with patch.dict(os.environ, {"FOUNDUPS_WORKSPACE_ROOT": "/custom/path"}):
+            executor = HermesJobExecutor()
+            self.assertEqual(executor.workspace_root, expected)
+
+    def test_falls_back_to_cwd(self):
+        """Executor falls back to cwd if env var not set."""
+        with patch.dict(os.environ, {}, clear=True):
+            os.environ.pop("FOUNDUPS_WORKSPACE_ROOT", None)
+            with patch("os.getcwd", return_value="/fallback/cwd"):
+                executor = HermesJobExecutor()
+                self.assertEqual(executor.workspace_root, "/fallback/cwd")
+
+    def test_explicit_workspace_root_overrides(self):
+        """Explicit workspace_root parameter overrides detection."""
+        with patch.dict(os.environ, {"FOUNDUPS_WORKSPACE_ROOT": "/env/path"}):
+            executor = HermesJobExecutor(workspace_root="/explicit/path")
+            self.assertEqual(executor.workspace_root, "/explicit/path")
+
+
+class TestNoRealExecutionWithWorkspaceBinding(unittest.TestCase):
+    """Test no real execution occurs with workspace binding."""
+
+    def test_wsp97_fields_false_with_workspace_binding(self):
+        """WSP 97 fields remain False even with workspace binding."""
+        with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
+            executor = HermesJobExecutor(workspace_root="/test/repo")
+            job = create_job(
+                tenant_id="t1",
+                requested_action="build_foundup",
+                foundup_id="gotjunk",
+            )
+
+            result = executor.execute(job)
+
+            # Workspace binding should be present in request
+            self.assertIsNotNone(result.request.workspace_binding)
+
+            # But no real execution
+            self.assertFalse(result.real_execution_performed)
+            self.assertFalse(result.verification_complete)
+            self.assertFalse(result.cabr_ready)
+            self.assertFalse(result.payout_ready)
+
+    def test_request_to_dict_includes_workspace_binding(self):
+        """Request.to_dict serializes workspace_binding."""
+        executor = HermesJobExecutor(workspace_root="/test/repo")
+        job = create_job(
+            tenant_id="t1",
+            requested_action="build_foundup",
+            foundup_id="gotjunk",
+        )
+
+        request = executor.build_delegation_request(job)
+        d = request.to_dict()
+
+        self.assertIn("workspace_binding", d)
+        self.assertIsNotNone(d["workspace_binding"])
+        self.assertEqual(d["workspace_binding"]["workspace_root"], "/test/repo")
 
 
 if __name__ == "__main__":
