@@ -1,5 +1,18 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-02: Success clearing proof for retention semantics
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_consumer.py -q`
+- Status: PASS
+- Result: `30 passed`
+- Notes:
+  - Added `test_successful_terminal_job_cleared` to TestRetentionSemantics
+  - Proves terminal + receipt success -> job cleared from queue
+  - Asserts job_id in cleared_job_ids, not in retained_job_ids
+  - Confirms WSP 97 truth fields remain false
+
+---
+
 ## 2026-05-02: Queue retention semantics + retention-aware drain
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_consumer.py -v`

@@ -570,6 +570,87 @@ class TestRetentionSemantics:
         assert unsupported_result.should_clear is False
         assert unsupported_result.retention_reason == "action_unsupported"
 
+    @patch(
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.remove_jobs_by_id"
+    )
+    @patch(
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.get_job_queue"
+    )
+    @patch("modules.infrastructure.wre_core.src.foundup_job_consumer.route_foundup_job")
+    @patch("modules.foundups.agent.src.hermes_adapter.HermesFoundUpBuilder")
+    def test_successful_terminal_job_cleared(
+        self, mock_builder_class, mock_route, mock_get_queue, mock_remove
+    ):
+        """
+        Successful terminal dry-run job is cleared from queue.
+
+        Proves:
+          - Terminal + receipt success -> job_id in cleared_job_ids
+          - Not in retained_job_ids
+          - cleared_count == 1, retained_count == 0
+          - WSP 97 fields remain false
+        """
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            create_job,
+        )
+
+        # Setup routing to HERMES_BUILDER
+        mock_envelope = MagicMock()
+        mock_envelope.route_status = RouteStatus.ROUTED
+        mock_envelope.target_backend = TargetBackend.HERMES_BUILDER
+        mock_envelope.reason_human = "Routed to hermes_builder"
+        mock_envelope.job_id = "job_success_clear"
+        mock_route.return_value = mock_envelope
+
+        # Setup Hermes to return successful terminal result
+        mock_builder = MagicMock()
+        mock_builder.dry_run = True
+        mock_builder.extract_foundup.return_value = {
+            "success": True,
+            "source_module": "modules/foundups/success_test",
+            "target_repo": "FOUNDUPS/success_test",
+            "exfoliation_gate": {"passed": True, "checks": {}},
+            "dry_run": True,
+        }
+        mock_builder_class.return_value = mock_builder
+
+        # Create real job with proper payload
+        job = create_job(
+            tenant_id="012",
+            requested_action="build_foundup",
+            foundup_id="success_test",
+            payload={"module_path": "modules/foundups/success_test"},
+        )
+        # Override job_id to match envelope
+        job.job_id = "job_success_clear"
+
+        mock_get_queue.return_value = [job]
+        mock_remove.return_value = 1  # 1 job removed
+
+        consumer = FoundUpJobConsumer(dry_run=True)
+        drain_result = consumer.drain_openclaw_queue_with_retention(clear=True)
+
+        # Assert job is cleared, not retained
+        assert drain_result.cleared_count == 1
+        assert drain_result.retained_count == 0
+        assert "job_success_clear" in drain_result.cleared_job_ids
+        assert "job_success_clear" not in drain_result.retained_job_ids
+        assert drain_result.retention_reasons == {}
+
+        # Assert remove_jobs_by_id was called with the successful job
+        mock_remove.assert_called_once_with(["job_success_clear"])
+
+        # Assert WSP 97 truth fields in summary (via dry_run helper)
+        result = drain_result.results[0]
+        assert result.verification_complete is False
+        assert result.cabr_ready is False
+        assert result.payout_ready is False
+
+        # Verify it was actually terminal with receipt
+        assert result.is_terminal is True
+        assert result.has_receipt is True
+        assert result.should_clear is True
+
 
 # ---------------------------------------------------------------------------
 # Test: Receipt emitter rejects non-terminal jobs
