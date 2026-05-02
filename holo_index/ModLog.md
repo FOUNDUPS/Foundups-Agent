@@ -4,42 +4,40 @@
 
 **Agent**: 0102 (Worker W2)
 **WSP References**: WSP 97 (truth distinction), WSP 50 (pre-action verification), WSP 22 (ModLog)
-**Status**: COMPLETE
-**Gate Result**: NOT PASSED (top-1 84.2% < 85%, top-5 92.1% < 95%)
+**Status**: COMPLETE - NOT PROMOTED
+**Decision**: Path A - Code reverted, audit preserved
 
 ### Context
 
-HIA7 revealed 3 indexing gaps where target files were not indexed. Added priority
-roots to ensure these files are indexed before the 20K limit is reached.
+Investigated adding priority roots to fix indexing gaps identified in HIA7. The change
+improved direct file discoverability but caused a regression in sentinel query pass rates.
 
-### Changes
-
-Added 3 priority roots to `indexing_engine.py`:
-- `holo_index/qwen_advisor/` (orphan analyzers)
-- `modules/development/ide_foundups/src/` (wre_bridge.py)
-- `modules/foundups/agent/src/` (build_plan.py)
-
-### Results
+### Experiment Results
 
 | Metric | HIA7 (Before) | HIA7B (After) | Delta |
 |--------|---------------|---------------|-------|
-| Top-1 Pass Rate | 86.8% | 84.2% | -2.6% |
+| Top-1 Pass Rate | 86.8% | 84.2% | **-2.6%** |
 | Top-5 Pass Rate | 92.1% | 92.1% | 0.0% |
 
-**Indexing gap: FIXED** - All target files now discoverable via direct queries.
-**Semantic drift: REMAINS** - General queries still rank wrong files higher due to
-keyword overlap ("integration" → integrate_with_wre.py, "hermes" → hermes_adapter.py).
+**Outcome**: Top-1 REGRESSED. Gate NOT passed in either case.
 
-### Key Insight
+### Decision Rationale
 
-The remaining failures are not indexing issues but semantic ranking issues.
-Recommend proceeding to HIA8 (LLM reranking) to address semantic drift.
+1. Top-1 regressed from 86.8% to 84.2% (not an improvement)
+2. Gate not passed before or after (top-5 92.1% < 95%)
+3. WSP 97: Cannot claim improvement when metrics regressed
+4. Direct discoverability benefit not part of sentinel gate criteria
+
+### Action Taken
+
+- `indexing_engine.py`: Reverted to HIA7 state (no code change)
+- `hia3_baseline_metrics.json`: Restored to HIA7 state (86.8%/92.1%)
+- Report updated to document experiment and decision
 
 ### Files
 
-- `holo_index/core/indexing_engine.py` — Added 3 priority roots
-- `docs/audits/holoindex_search_quality/HIA7B_PRIORITY_ROOT_INDEXING_FIX_REPORT.md` (new)
-- `docs/audits/holoindex_search_quality/hia3_baseline_metrics.json` — Updated
+- `docs/audits/holoindex_search_quality/HIA7B_PRIORITY_ROOT_INDEXING_FIX_REPORT.md` — Audit only
+- No code changes promoted
 
 ---
 

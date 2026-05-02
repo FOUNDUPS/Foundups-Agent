@@ -272,20 +272,13 @@ def index_symbol_entries(holo: "HoloIndex", roots: Optional[List[Path]] = None) 
     if env_roots:
         roots = [holo.project_root / Path(r.strip()) for r in env_roots.split(";") if r.strip()]
     else:
-        # HIA6A/HIA7B: Priority ordering ensures critical files are indexed first:
+        # HIA6A: Priority ordering ensures critical files are indexed first:
         # - holo_index/core: search_engine.py (core search infrastructure)
         # - wre_core/src: foundup_job_router.py (job routing)
-        # - HIA7B additions for expanded sentinel coverage:
-        #   - ide_foundups/src: wre_bridge.py
-        #   - foundups/agent/src: build_plan*.py
-        #   - holo_index/qwen_advisor: orphan*.py analyzers
         # - Then bulk directories fill remaining slots
         roots = roots or [
             holo.project_root / "holo_index" / "core",                      # P1: search infrastructure
             holo.project_root / "modules" / "infrastructure" / "wre_core" / "src",  # P1: job routing
-            holo.project_root / "holo_index" / "qwen_advisor",              # P1: HIA7B orphan analyzers
-            holo.project_root / "modules" / "development" / "ide_foundups" / "src",  # P1: HIA7B wre_bridge
-            holo.project_root / "modules" / "foundups" / "agent" / "src",   # P1: HIA7B build_plan
             holo.project_root / "modules",                                  # P2: bulk modules
             holo.project_root / "scripts",                                  # P3: scripts
             holo.project_root / "holo_index",                               # P3: remaining holo_index

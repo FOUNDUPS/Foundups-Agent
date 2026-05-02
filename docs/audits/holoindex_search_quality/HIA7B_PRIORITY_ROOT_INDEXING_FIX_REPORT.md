@@ -1,151 +1,99 @@
 # HIA7B: Priority Root Indexing Gap Fix Report
 
 **Date**: 2026-05-02
-**Status**: COMPLETE
+**Status**: COMPLETE - NOT PROMOTED
 **Branch**: feat/hia7-sentinel-expansion-gate
+**Decision**: Path A - Code reverted, audit preserved
 
 ## Summary
 
-Added priority indexing roots to ensure target files are indexed. Files are now
-indexed and discoverable, but semantic drift causes ranking issues that require
-separate tuning (HIA8).
+Investigated adding priority indexing roots to fix indexing gaps identified in HIA7.
+The change improved direct file discoverability but caused a regression in sentinel
+query pass rates. **Code reverted. Change not promoted.**
 
-## Changes Made
+## Experiment
 
-Added 3 priority roots to `indexing_engine.py`:
+### Hypothesis
 
-```python
-roots = roots or [
-    holo.project_root / "holo_index" / "core",                      # P1: existing
-    holo.project_root / "modules" / "infrastructure" / "wre_core" / "src",  # P1: existing
-    holo.project_root / "holo_index" / "qwen_advisor",              # P1: HIA7B NEW
-    holo.project_root / "modules" / "development" / "ide_foundups" / "src",  # P1: HIA7B NEW
-    holo.project_root / "modules" / "foundups" / "agent" / "src",   # P1: HIA7B NEW
-    holo.project_root / "modules",                                  # P2: bulk
-    # ...
-]
-```
+Adding priority roots for missing files would improve sentinel query pass rates:
+- `holo_index/qwen_advisor/` (orphan analyzers)
+- `modules/development/ide_foundups/src/` (wre_bridge.py)
+- `modules/foundups/agent/src/` (build_plan.py)
 
-## Indexing Verification
-
-All target files are now indexed and discoverable:
-
-| Target File | Direct Query | Top-1 Result | Similarity |
-|-------------|--------------|--------------|------------|
-| wre_bridge.py | "wre_bridge" | wre_bridge.py | 57.2% |
-| build_plan.py | "build_plan" | build_plan.py | 55.9% |
-| orphan_batch_analyzer.py | "orphan batch analyzer" | orphan_batch_analyzer.py | 66.4% |
-
-**Indexing gap: FIXED**
-
-## Baseline Results
+### Results
 
 | Metric | HIA7 (Before) | HIA7B (After) | Delta |
 |--------|---------------|---------------|-------|
-| Top-1 Pass Rate | 86.8% (33/38) | 84.2% (32/38) | -2.6% |
+| Top-1 Pass Rate | 86.8% (33/38) | 84.2% (32/38) | **-2.6%** |
 | Top-5 Pass Rate | 92.1% (35/38) | 92.1% (35/38) | 0.0% |
 
-Note: Top-1 decreased by 1 query due to index rebalancing affecting "WRE master orchestrator"
-query (performance_orchestrator.py now ranked higher than wre_master_orchestrator.py).
+**Outcome**: Top-1 REGRESSED. Gate NOT passed in either case.
 
-## Failure Analysis (Post-Fix)
+### Direct Query Verification
 
-### Top-1 Failures (6 queries)
+Target files became discoverable via direct queries:
 
-| Query | Got | Expected | Root Cause |
-|-------|-----|----------|------------|
-| backend routing turboquant embedding | turboquant_backend.py | backend_routing | Semantic drift |
-| WRE master orchestrator coordination | performance_orchestrator.py | wre_master_orchestrator | Semantic drift (new) |
-| WRE bridge integration cursor | integrate_with_wre.py | wre_bridge | Semantic drift: "integration" boosts wrong file |
-| build plan generator hermes | hermes_adapter.py | build_plan | Semantic drift: "hermes" boosts wrong file |
-| pfmall catalog verification | test file | pfmall_catalog | Test file ranked higher |
-| orphan capability scanner detection | security_scanner.py | orphan | Semantic drift: "scanner" boosts wrong file |
+| Target File | Direct Query | Rank | Similarity |
+|-------------|--------------|------|------------|
+| wre_bridge.py | "wre_bridge" | #1 | 57.2% |
+| build_plan.py | "build_plan" | #1 | 55.9% |
+| orphan_batch_analyzer.py | "orphan batch analyzer" | #1 | 66.4% |
 
-### Top-5 Failures (3 queries)
+However, sentinel queries use natural language and continue to exhibit semantic drift.
 
-| Query | Root Cause |
-|-------|------------|
-| WRE master orchestrator coordination | File exists but semantic drift |
-| WRE bridge integration cursor | File exists but semantic drift |
-| build plan generator hermes | File exists but semantic drift |
+## Decision: Path A - Revert
 
-### Root Cause Distribution
+### Rationale
 
-| Root Cause | HIA7 Count | HIA7B Count | Status |
-|------------|------------|-------------|--------|
-| Indexing gap | 3 | 0 | **FIXED** |
-| Semantic drift | 2 | 6 | **Increased** (more visible now) |
+1. **Regression**: Top-1 pass rate decreased from 86.8% to 84.2%
+2. **Gate not passed**: Neither before (86.8%/92.1%) nor after (84.2%/92.1%) met the
+   gate criteria (top-1 >= 85%, top-5 >= 95%)
+3. **WSP 97 compliance**: Cannot claim improvement when metrics regressed
+4. **Direct discoverability not in gate**: The benefit (files findable via direct
+   queries) is not part of the sentinel gate criteria
 
-## Key Insight
+### Action Taken
 
-The indexing fix was successful: target files are now indexed and appear in top-5
-results for direct queries. However, the sentinel queries use natural language
-that causes semantic drift:
+- `indexing_engine.py`: Reverted to HIA7 state (no priority root additions)
+- `hia3_baseline_metrics.json`: Restored to HIA7 state (86.8%/92.1%)
+- This report: Updated to document experiment and decision
 
+## Root Cause Analysis
+
+The priority root change caused index rebalancing that affected unrelated queries:
+- "WRE master orchestrator coordination" regressed (new failure)
+- Adding more P1 roots shifted which files appeared in the 20K symbol limit
+
+The remaining failures are **semantic drift**, not indexing gaps:
 - Query "WRE bridge integration cursor" → "integration" matches integrate_with_wre.py better
 - Query "build plan generator hermes" → "hermes" matches hermes_adapter.py better
 - Query "orphan capability scanner detection" → "scanner" matches security_scanner.py better
 
-This is **not an indexing problem** but a **semantic ranking problem** that requires:
-1. Query-specific keyword boosting, or
-2. LLM-based reranking (HIA8), or
-3. Adjusting evidence rules to accept semantic equivalents
+## Final State
 
-## Gate Evaluation
+| Metric | Value | Gate Requirement | Status |
+|--------|-------|------------------|--------|
+| Top-1 Pass Rate | 86.8% (33/38) | >= 85% | PASS |
+| Top-5 Pass Rate | 92.1% (35/38) | >= 95% | FAIL |
 
-**Gate Criteria**: Top-5 >= 95% AND Top-1 >= 85%
-
-| Metric | Required | Actual | Status |
-|--------|----------|--------|--------|
-| Top-1 Pass Rate | >= 85% | 84.2% | **FAIL** |
-| Top-5 Pass Rate | >= 95% | 92.1% | **FAIL** |
-
-**Gate Result**: NOT PASSED
-
-## Files Changed
-
-1. `holo_index/core/indexing_engine.py`:
-   - Added 3 priority roots for HIA7B sentinel coverage
-
-2. `docs/audits/holoindex_search_quality/hia3_baseline_metrics.json`:
-   - Regenerated with 38-query baseline after re-indexing
-
-3. `docs/audits/holoindex_search_quality/HIA7B_PRIORITY_ROOT_INDEXING_FIX_REPORT.md`:
-   - This report
+**Code**: Unchanged from HIA7 (no priority root additions)
+**Baseline**: 86.8% top-1, 92.1% top-5 (38 queries)
 
 ## Recommendations
 
-### Option A: Proceed to HIA8 (LLM Reranking)
+### Optional: HIA8 (LLM Reranking)
 
-Accept that deterministic ranking has limits. Use Gemma/LLM to rerank top-10
-results based on intent matching. This is the recommended path per the HIA series.
+If top-5 >= 95% is required, consider LLM reranking for semantic drift correction.
+This is not mandatory; current 92.1% may be acceptable baseline.
 
-### Option B: Keyword Boosting Tuning
+### Not Recommended
 
-Add query-specific keyword detection to boost exact file name matches:
-- Query contains "wre_bridge" → boost files with "wre_bridge" in path
-- Query contains "build_plan" → boost files with "build_plan" in path
-
-This is deterministic but requires maintaining keyword mappings.
-
-### Option C: Evidence Rule Relaxation
-
-Accept semantic equivalents in evidence rules:
-- "wre_bridge" OR "integrate_with_wre" (same module)
-- "build_plan" OR "hermes" (same domain)
-
-Not recommended: weakens quality signal.
-
-## Next Steps
-
-1. **HIA8**: Evaluate LLM reranking for semantic drift correction
-2. Consider whether 84.2%/92.1% is acceptable baseline before LLM layer
-3. If LLM reranking is deferred, tune keyword boosting for high-value queries
+- Do not add priority roots without regression testing
+- Do not claim indexing fixes improve quality without sentinel verification
 
 ## WSP 97 Compliance
 
-Results reported truthfully:
-- Indexing gap fixed (verified with direct queries)
-- Semantic drift identified as separate root cause
-- Gate not passed, documented why
-- No overclaiming - improvements are incremental
+- No "gate passed" claim (gate not passed)
+- No "quality improved" claim (top-1 regressed)
+- Experiment documented truthfully
+- Decision rationale transparent
