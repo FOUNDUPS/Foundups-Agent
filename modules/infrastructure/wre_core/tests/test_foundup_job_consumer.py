@@ -28,6 +28,7 @@ from modules.infrastructure.wre_core.src.foundup_job_consumer import (
     FoundUpJobConsumer,
     ConsumerResult,
     get_consumer,
+    drain_openclaw_queue_dry_run,
 )
 from modules.infrastructure.wre_core.src.foundup_job_router import (
     RouteStatus,
@@ -860,3 +861,136 @@ class TestConsumerResultReceiptBinding:
         assert result.verification_complete is False
         assert result.cabr_ready is False
         assert result.payout_ready is False
+
+
+# ---------------------------------------------------------------------------
+# Test: drain_openclaw_queue_dry_run convenience function
+# ---------------------------------------------------------------------------
+
+
+class TestDrainOpenClawQueueDryRun:
+    """Test drain_openclaw_queue_dry_run convenience function."""
+
+    @patch(
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.clear_job_queue"
+    )
+    @patch(
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.get_job_queue"
+    )
+    @patch("modules.infrastructure.wre_core.src.foundup_job_consumer.route_foundup_job")
+    def test_drain_dry_run_returns_structured_evidence(
+        self, mock_route, mock_get_queue, mock_clear_queue
+    ):
+        """drain_openclaw_queue_dry_run returns structured evidence dict."""
+        mock_envelope = MagicMock()
+        mock_envelope.route_status = RouteStatus.BLOCKED
+        mock_envelope.target_backend = TargetBackend.NONE
+        mock_envelope.reason_human = "Blocked"
+        mock_envelope.job_id = "job_dry"
+        mock_route.return_value = mock_envelope
+
+        mock_get_queue.return_value = [
+            MockFoundUpJob(
+                job_id="job_dry1",
+                tenant_id="tenant_test",
+                requested_action="build_foundup",
+            ),
+            MockFoundUpJob(
+                job_id="job_dry2",
+                tenant_id="tenant_test",
+                requested_action="validate_foundup",
+            ),
+        ]
+
+        summary = drain_openclaw_queue_dry_run(clear=True)
+
+        # Verify structure
+        assert "job_count" in summary
+        assert "results" in summary
+        assert "dry_run" in summary
+        assert "queue_cleared" in summary
+        assert "summary" in summary
+
+        # Verify values
+        assert summary["job_count"] == 2
+        assert summary["dry_run"] is True
+        assert summary["queue_cleared"] is True
+        assert len(summary["results"]) == 2
+
+    @patch(
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.clear_job_queue"
+    )
+    @patch(
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.get_job_queue"
+    )
+    @patch("modules.infrastructure.wre_core.src.foundup_job_consumer.route_foundup_job")
+    def test_drain_dry_run_wsp97_truth_fields(
+        self, mock_route, mock_get_queue, mock_clear_queue
+    ):
+        """drain_openclaw_queue_dry_run enforces WSP 97 truth boundaries."""
+        mock_envelope = MagicMock()
+        mock_envelope.route_status = RouteStatus.BLOCKED
+        mock_envelope.target_backend = TargetBackend.NONE
+        mock_envelope.reason_human = "Blocked"
+        mock_envelope.job_id = "job_truth"
+        mock_route.return_value = mock_envelope
+
+        mock_get_queue.return_value = [
+            MockFoundUpJob(
+                job_id="job_truth1",
+                tenant_id="tenant_test",
+                requested_action="build_foundup",
+            ),
+        ]
+
+        summary = drain_openclaw_queue_dry_run()
+
+        # WSP 97 truth boundaries in summary
+        assert summary["summary"]["verification_complete"] is False
+        assert summary["summary"]["cabr_ready"] is False
+        assert summary["summary"]["payout_ready"] is False
+
+    @patch(
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.get_job_queue"
+    )
+    def test_drain_dry_run_empty_queue(self, mock_get_queue):
+        """drain_openclaw_queue_dry_run with empty queue returns empty results."""
+        mock_get_queue.return_value = []
+
+        summary = drain_openclaw_queue_dry_run()
+
+        assert summary["job_count"] == 0
+        assert summary["results"] == []
+        assert summary["dry_run"] is True
+        assert summary["summary"]["dispatched"] == 0
+
+    @patch(
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.clear_job_queue"
+    )
+    @patch(
+        "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.get_job_queue"
+    )
+    @patch("modules.infrastructure.wre_core.src.foundup_job_consumer.route_foundup_job")
+    def test_drain_dry_run_no_clear_flag(
+        self, mock_route, mock_get_queue, mock_clear_queue
+    ):
+        """drain_openclaw_queue_dry_run with clear=False does not clear."""
+        mock_envelope = MagicMock()
+        mock_envelope.route_status = RouteStatus.BLOCKED
+        mock_envelope.target_backend = TargetBackend.NONE
+        mock_envelope.reason_human = "Blocked"
+        mock_envelope.job_id = "job_nc"
+        mock_route.return_value = mock_envelope
+
+        mock_get_queue.return_value = [
+            MockFoundUpJob(
+                job_id="job_nc1",
+                tenant_id="tenant_test",
+                requested_action="build_foundup",
+            ),
+        ]
+
+        summary = drain_openclaw_queue_dry_run(clear=False)
+
+        assert summary["queue_cleared"] is False
+        mock_clear_queue.assert_not_called()

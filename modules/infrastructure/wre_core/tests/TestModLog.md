@@ -1,5 +1,17 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-02: drain_openclaw_queue_dry_run convenience function + CLI command
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_consumer.py -v`
+- Status: PASS
+- Result: `20 passed`
+- Notes:
+  - Added `TestDrainOpenClawQueueDryRun` class with 4 tests
+  - Tests structured evidence dict, WSP 97 truth fields, empty queue, --no-clear flag
+  - CLI: `python run_wre.py drain [--no-clear]`
+
+---
+
 ## 2026-03-08: Brain artifact extractor incremental refresh + training signal validation
 
 - Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; pytest -q modules/infrastructure/wre_core/tests/test_extract_brain_artifacts.py`
