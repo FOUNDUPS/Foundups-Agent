@@ -2,6 +2,63 @@
 
 ## Chronological Change Log
 
+### [2026-05-02] - WRE_QUEUE_RETENTION_SEMANTICS_PHASE1 (v0.8.9)
+
+**WSP Protocol References**: WSP 11 (Interface), WSP 97 (Truthful - no silent failures)
+**Impact Analysis**: Harden queue draining with retention-aware clearing
+
+#### Changes Made
+
+- `src/foundup_job_consumer.py`:
+  - Added `DrainResult` dataclass for retention metadata
+  - Added `ConsumerResult.should_clear` property - True only for terminal successful jobs with receipts
+  - Added `ConsumerResult.retention_reason` property - explicit reason for retained jobs
+  - Added `drain_openclaw_queue_with_retention()` method - selective job removal
+  - Updated `drain_openclaw_queue_once()` to use retention semantics
+  - Updated `drain_openclaw_queue_dry_run()` to return retention metadata
+
+- `modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py`:
+  - Added `remove_jobs_by_id()` function for selective queue removal
+
+- `tests/test_foundup_job_consumer.py`:
+  - Added `TestRetentionSemantics` class (4 tests)
+  - Updated existing tests for retention-aware behavior
+
+#### Retention Semantics
+
+| Condition | Action | Reason Code |
+|-----------|--------|-------------|
+| Terminal + receipt success | Clear | - |
+| Routing FAILED | Retain | `routing_failed` |
+| Routing BLOCKED | Retain | `routing_blocked` |
+| Action UNSUPPORTED | Retain | `action_unsupported` |
+| Not dispatched | Retain | `not_dispatched` |
+| Not terminal | Retain | `not_terminal` |
+| Receipt emission failed | Retain | `receipt_emission_failed` |
+
+#### Example Output
+
+```json
+{
+  "job_count": 3,
+  "cleared_job_ids": ["job_success"],
+  "retained_job_ids": ["job_fail1", "job_fail2"],
+  "retention_reasons": {"job_fail1": "routing_failed", "job_fail2": "routing_blocked"},
+  "cleared_count": 1,
+  "retained_count": 2,
+  "summary": {"verification_complete": false, "cabr_ready": false, "payout_ready": false}
+}
+```
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_consumer.py -q
+# 29 passed
+```
+
+---
+
 ### [2026-05-02] - WRE_CLOSED_LOOP_DRY_RUN_COMMAND_PHASE1 (v0.8.8)
 
 **WSP Protocol References**: WSP 11 (Interface), WSP 97 (Truthful)

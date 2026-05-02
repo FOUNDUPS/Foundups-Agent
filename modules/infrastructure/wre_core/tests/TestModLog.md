@@ -1,5 +1,18 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-02: Queue retention semantics + retention-aware drain
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_consumer.py -v`
+- Status: PASS
+- Result: `29 passed`
+- Notes:
+  - Added `TestRetentionSemantics` class with 4 tests
+  - Tests routing_failure, routing_blocked, empty queue, should_clear properties
+  - Updated TestDrainOpenClawQueue for retention-aware behavior
+  - Updated TestDrainOpenClawQueueDryRun for retention metadata output
+
+---
+
 ## 2026-05-02: drain_openclaw_queue_dry_run convenience function + CLI command
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_consumer.py -v`
