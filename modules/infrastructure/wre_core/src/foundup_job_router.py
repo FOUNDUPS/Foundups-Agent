@@ -144,6 +144,7 @@ class EnvelopeValidationCode(str, Enum):
     # Valid
     VALID = "VALID"
     VALID_DRY_RUN_DEFAULTED = "VALID_DRY_RUN_DEFAULTED"
+    VALID_EVIDENCE_PENDING = "VALID_EVIDENCE_PENDING"
 
     # Invalid - Missing Fields
     MISSING_JOB_ID = "MISSING_JOB_ID"
@@ -155,6 +156,10 @@ class EnvelopeValidationCode(str, Enum):
     # Invalid - Policy
     DRY_RUN_NOT_SET = "DRY_RUN_NOT_SET"
 
+    # Invalid - Evidence
+    INVALID_EVIDENCE_REFS_TYPE = "INVALID_EVIDENCE_REFS_TYPE"
+    INVALID_EVIDENCE_REF_ENTRY = "INVALID_EVIDENCE_REF_ENTRY"
+
 
 @dataclass
 class EnvelopeValidationResult:
@@ -162,6 +167,7 @@ class EnvelopeValidationResult:
     Result of FoundUpJob envelope validation.
 
     WSP 97 Truth: Returns explicit validation status with missing field list.
+    Evidence validation does NOT imply verification_complete, cabr_ready, or payout_ready.
     """
 
     valid: bool
@@ -185,6 +191,26 @@ class EnvelopeValidationResult:
     policy_flags_snapshot: Dict[str, bool] = field(default_factory=dict)
     """Policy flags at validation time (if present)."""
 
+    # === Evidence Validation (WSP 97 Truth) ===
+    evidence_refs_validated: bool = False
+    """True if evidence_refs passed validation."""
+
+    evidence_refs_count: int = 0
+    """Number of evidence refs in envelope."""
+
+    evidence_pending: bool = False
+    """True if evidence is pending (empty in dry-run mode)."""
+
+    # === WSP 97 Truth Fields (ALWAYS False at validation time) ===
+    verification_complete: bool = False
+    """WSP 97: Always False. Evidence presence does NOT imply verification."""
+
+    cabr_ready: bool = False
+    """WSP 97: Always False. Evidence does NOT enable CABR claims."""
+
+    payout_ready: bool = False
+    """WSP 97: Always False. Evidence does NOT enable payout claims."""
+
     def to_dict(self) -> Dict[str, Any]:
         """Serialize for logging/API response."""
         return {
@@ -195,6 +221,13 @@ class EnvelopeValidationResult:
             "validation_message": self.validation_message,
             "dry_run_defaulted": self.dry_run_defaulted,
             "policy_flags_snapshot": self.policy_flags_snapshot,
+            "evidence_refs_validated": self.evidence_refs_validated,
+            "evidence_refs_count": self.evidence_refs_count,
+            "evidence_pending": self.evidence_pending,
+            # WSP 97 Truth: Always False at validation time
+            "verification_complete": self.verification_complete,
+            "cabr_ready": self.cabr_ready,
+            "payout_ready": self.payout_ready,
         }
 
 
@@ -333,12 +366,36 @@ def validate_foundup_job_envelope(envelope: Dict[str, Any]) -> EnvelopeValidatio
             dry_run_defaulted = True
             policy_snapshot["dry_run_mode"] = True
 
-    # Valid FoundUpJob envelope
-    validation_code = (
-        EnvelopeValidationCode.VALID_DRY_RUN_DEFAULTED
-        if dry_run_defaulted
-        else EnvelopeValidationCode.VALID
+    # Evidence refs validation (WSP 97: validate shape, not verification)
+    evidence_result = _validate_evidence_refs(
+        envelope.get("evidence_refs"),
+        is_dry_run=policy_snapshot.get("dry_run_mode", True),
     )
+
+    if not evidence_result["valid"]:
+        return EnvelopeValidationResult(
+            valid=False,
+            envelope_type=EnvelopeType.FOUNDUP_JOB,
+            validation_code=evidence_result["code"],
+            missing_fields=[],
+            validation_message=evidence_result["message"],
+            dry_run_defaulted=dry_run_defaulted,
+            policy_flags_snapshot=policy_snapshot,
+            evidence_refs_validated=False,
+            evidence_refs_count=evidence_result.get("count", 0),
+            evidence_pending=False,
+        )
+
+    # Valid FoundUpJob envelope
+    evidence_pending = evidence_result.get("pending", False)
+
+    # Determine validation code
+    if evidence_pending:
+        validation_code = EnvelopeValidationCode.VALID_EVIDENCE_PENDING
+    elif dry_run_defaulted:
+        validation_code = EnvelopeValidationCode.VALID_DRY_RUN_DEFAULTED
+    else:
+        validation_code = EnvelopeValidationCode.VALID
 
     return EnvelopeValidationResult(
         valid=True,
@@ -347,7 +404,129 @@ def validate_foundup_job_envelope(envelope: Dict[str, Any]) -> EnvelopeValidatio
         validation_message="FoundUpJob envelope validated successfully",
         dry_run_defaulted=dry_run_defaulted,
         policy_flags_snapshot=policy_snapshot,
+        evidence_refs_validated=True,
+        evidence_refs_count=evidence_result.get("count", 0),
+        evidence_pending=evidence_pending,
+        # WSP 97 Truth: Always False at validation time
+        verification_complete=False,
+        cabr_ready=False,
+        payout_ready=False,
     )
+
+
+def _validate_evidence_refs(
+    evidence_refs: Any,
+    is_dry_run: bool = True,
+) -> Dict[str, Any]:
+    """
+    Validate evidence_refs shape for FoundUpJob envelope.
+
+    WSP 97 Truth Boundaries:
+      - Evidence validation proves traceability shape only
+      - Evidence does NOT imply verification_complete=True
+      - Evidence does NOT enable CABR or payout claims
+      - Empty evidence_refs accepted in dry-run mode (pending)
+
+    Args:
+        evidence_refs: Evidence refs from envelope (may be None, list, or invalid)
+        is_dry_run: Whether dry_run_mode is True (allows empty evidence)
+
+    Returns:
+        Dict with: valid, code, message, count, pending
+    """
+    # No evidence_refs field: allowed (pending if dry-run)
+    if evidence_refs is None:
+        if is_dry_run:
+            return {
+                "valid": True,
+                "code": EnvelopeValidationCode.VALID_EVIDENCE_PENDING,
+                "message": "Evidence refs pending (dry-run mode)",
+                "count": 0,
+                "pending": True,
+            }
+        else:
+            # Live mode without evidence: still valid but flagged
+            logger.warning(
+                "[WSP97] FoundUpJob envelope has no evidence_refs in live mode"
+            )
+            return {
+                "valid": True,
+                "code": EnvelopeValidationCode.VALID,
+                "message": "Evidence refs not provided (live mode)",
+                "count": 0,
+                "pending": False,
+            }
+
+    # Must be a list
+    if not isinstance(evidence_refs, list):
+        return {
+            "valid": False,
+            "code": EnvelopeValidationCode.INVALID_EVIDENCE_REFS_TYPE,
+            "message": f"evidence_refs must be a list, got {type(evidence_refs).__name__}",
+            "count": 0,
+            "pending": False,
+        }
+
+    # Empty list: allowed in dry-run mode
+    if len(evidence_refs) == 0:
+        if is_dry_run:
+            return {
+                "valid": True,
+                "code": EnvelopeValidationCode.VALID_EVIDENCE_PENDING,
+                "message": "Evidence refs empty (dry-run mode, pending)",
+                "count": 0,
+                "pending": True,
+            }
+        else:
+            # Live mode with empty list: still valid
+            return {
+                "valid": True,
+                "code": EnvelopeValidationCode.VALID,
+                "message": "Evidence refs empty (live mode)",
+                "count": 0,
+                "pending": False,
+            }
+
+    # Validate each entry
+    for idx, ref in enumerate(evidence_refs):
+        if isinstance(ref, str):
+            # String refs must be non-empty
+            if not ref.strip():
+                return {
+                    "valid": False,
+                    "code": EnvelopeValidationCode.INVALID_EVIDENCE_REF_ENTRY,
+                    "message": f"evidence_refs[{idx}] is empty string",
+                    "count": len(evidence_refs),
+                    "pending": False,
+                }
+        elif isinstance(ref, dict):
+            # Dict refs must have at least 'path' or 'id' field
+            if not ref.get("path") and not ref.get("id") and not ref.get("ref"):
+                return {
+                    "valid": False,
+                    "code": EnvelopeValidationCode.INVALID_EVIDENCE_REF_ENTRY,
+                    "message": f"evidence_refs[{idx}] dict missing 'path', 'id', or 'ref' field",
+                    "count": len(evidence_refs),
+                    "pending": False,
+                }
+        else:
+            # Invalid type
+            return {
+                "valid": False,
+                "code": EnvelopeValidationCode.INVALID_EVIDENCE_REF_ENTRY,
+                "message": f"evidence_refs[{idx}] must be string or dict, got {type(ref).__name__}",
+                "count": len(evidence_refs),
+                "pending": False,
+            }
+
+    # All entries valid
+    return {
+        "valid": True,
+        "code": EnvelopeValidationCode.VALID,
+        "message": f"Evidence refs validated ({len(evidence_refs)} entries)",
+        "count": len(evidence_refs),
+        "pending": False,
+    }
 
 
 # ---------------------------------------------------------------------------

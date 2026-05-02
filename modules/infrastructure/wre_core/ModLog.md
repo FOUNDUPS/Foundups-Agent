@@ -2,6 +2,65 @@
 
 ## Chronological Change Log
 
+### [2026-05-02] - WRE_EVIDENCE_REFS_VALIDATION_PHASE1 (v0.8.11)
+
+**WSP Protocol References**: WSP 11 (Interface), WSP 97 (Truthful - evidence traceability only)
+**Impact Analysis**: Add evidence reference validation for FoundUpJob execution envelopes
+
+#### Changes Made
+
+- `src/foundup_job_router.py`:
+  - Added `EnvelopeValidationCode.VALID_EVIDENCE_PENDING` for dry-run pending state
+  - Added `EnvelopeValidationCode.INVALID_EVIDENCE_REFS_TYPE` for wrong type
+  - Added `EnvelopeValidationCode.INVALID_EVIDENCE_REF_ENTRY` for malformed entries
+  - Added `EnvelopeValidationResult` fields: evidence_refs_validated, evidence_refs_count, evidence_pending
+  - Added WSP 97 truth fields: verification_complete=False, cabr_ready=False, payout_ready=False (always False)
+  - Added `_validate_evidence_refs()` helper function
+  - Updated `validate_foundup_job_envelope()` to validate evidence shape
+
+- `tests/test_foundup_job_envelope_validation.py`:
+  - Added 22 new tests for evidence validation
+  - TestEvidenceRefsListOfStrings (2 tests)
+  - TestEvidenceRefsEmptyWithDryRun (3 tests)
+  - TestEvidenceRefsWrongType (3 tests)
+  - TestEvidenceRefsEmptyString (2 tests)
+  - TestEvidenceRefsMalformedDict (6 tests)
+  - TestEvidenceRefsWSP97TruthFields (4 tests)
+  - TestGenericDAEEvidenceBehavior (2 tests)
+
+#### Evidence Validation Rules
+
+| Condition | Result | Code |
+|-----------|--------|------|
+| List of non-empty strings | Valid | VALID |
+| Empty list in dry-run | Valid (pending) | VALID_EVIDENCE_PENDING |
+| No evidence_refs in dry-run | Valid (pending) | VALID_EVIDENCE_PENDING |
+| Dict with path/id/ref field | Valid | VALID |
+| Not a list | Invalid | INVALID_EVIDENCE_REFS_TYPE |
+| Empty string in list | Invalid | INVALID_EVIDENCE_REF_ENTRY |
+| Dict without path/id/ref | Invalid | INVALID_EVIDENCE_REF_ENTRY |
+| Non-string/dict in list | Invalid | INVALID_EVIDENCE_REF_ENTRY |
+
+#### WSP 97 Truth Boundaries
+
+- `verification_complete`: Always False (evidence proves traceability only)
+- `cabr_ready`: Always False (evidence does NOT enable CABR claims)
+- `payout_ready`: Always False (evidence does NOT enable payout claims)
+- `evidence_refs_validated`: True if evidence shape is valid
+- `evidence_pending`: True if dry-run mode with no/empty evidence
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_envelope_validation.py -q
+# 42 passed
+
+python -m pytest modules/infrastructure/wre_core/tests -q --ignore=modules/infrastructure/wre_core/tests/test_production_gates.py
+# 448 passed
+```
+
+---
+
 ### [2026-05-02] - WRE_ENVELOPE_VALIDATION_FOUNDUPJOB_PHASE1 (v0.8.10)
 
 **WSP Protocol References**: WSP 11 (Interface), WSP 50 (Pre-Action Verification), WSP 97 (Truthful)
