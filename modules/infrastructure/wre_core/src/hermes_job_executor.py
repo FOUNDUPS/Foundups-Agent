@@ -359,6 +359,14 @@ class HermesDelegationResult:
         duration_seconds: Wall clock time
         api_calls: Number of Hermes API calls (0 if simulated)
 
+        Checkpoint Protocol Fields (Hermes swarm format):
+        checkpoint_state: DONE|BLOCKED|NEEDS_INPUT|HANDOFF|SIMULATED
+        checkpoint_result: Summary of work completed (if any)
+        checkpoint_blocker: Description of blocker (if BLOCKED)
+        checkpoint_next_action: Suggested next step
+        files_changed: List of files modified during execution
+        commands_run: List of commands executed
+
         WSP 97 Truth Fields:
         real_execution_performed: True ONLY if delegate_task was called
         verification_complete: Always False (no CABR verification yet)
@@ -380,6 +388,14 @@ class HermesDelegationResult:
     duration_seconds: float = 0.0
     api_calls: int = 0
 
+    # Checkpoint Protocol Fields (Hermes swarm format)
+    checkpoint_state: str = "SIMULATED"
+    checkpoint_result: Optional[str] = None
+    checkpoint_blocker: Optional[str] = None
+    checkpoint_next_action: Optional[str] = None
+    files_changed: List[str] = field(default_factory=list)
+    commands_run: List[str] = field(default_factory=list)
+
     # WSP 97 Truth Fields - NEVER set to True in this adapter
     real_execution_performed: bool = False
     verification_complete: bool = False
@@ -399,6 +415,14 @@ class HermesDelegationResult:
             "delegate_response": self.delegate_response,
             "duration_seconds": self.duration_seconds,
             "api_calls": self.api_calls,
+            # Checkpoint Protocol Fields
+            "checkpoint_state": self.checkpoint_state,
+            "checkpoint_result": self.checkpoint_result,
+            "checkpoint_blocker": self.checkpoint_blocker,
+            "checkpoint_next_action": self.checkpoint_next_action,
+            "files_changed": self.files_changed,
+            "commands_run": self.commands_run,
+            # WSP 97 Truth Fields
             "real_execution_performed": self.real_execution_performed,
             "verification_complete": self.verification_complete,
             "cabr_ready": self.cabr_ready,

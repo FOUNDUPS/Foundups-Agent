@@ -2,6 +2,47 @@
 
 ## Chronological Change Log
 
+### [2026-05-03] - HERMES_CHECKPOINT_PROTOCOL_PHASE1 (v0.8.17)
+
+**WSP Protocol References**: WSP 11 (Interface), WSP 97 (Truthful)
+**Impact Analysis**: Add checkpoint protocol fields for structured Hermes swarm evidence
+
+#### Changes Made
+
+- `src/hermes_job_executor.py`:
+  - Added checkpoint protocol fields to `HermesDelegationResult`:
+    - `checkpoint_state`: DONE|BLOCKED|NEEDS_INPUT|HANDOFF|SIMULATED (default: SIMULATED)
+    - `checkpoint_result`: Summary of work completed (Optional[str])
+    - `checkpoint_blocker`: Description of blocker if BLOCKED (Optional[str])
+    - `checkpoint_next_action`: Suggested next step (Optional[str])
+    - `files_changed`: List of files modified (List[str])
+    - `commands_run`: List of commands executed (List[str])
+  - Updated `to_dict()` to serialize all checkpoint fields
+
+- `tests/test_hermes_job_executor.py`:
+  - 20 new tests (84 total) for checkpoint protocol
+  - TestCheckpointProtocolFields: default values
+  - TestCheckpointInResult: to_dict serialization
+  - TestCheckpointStateSimulated: dry_run behavior
+  - TestCheckpointWSP97: truth field isolation
+
+#### WSP 97 Truth Boundaries
+
+- `checkpoint_state` = "SIMULATED" when dry_run=True or flag disabled
+- `real_execution_performed` = False (always in Phase 1)
+- `verification_complete` = False (checkpoint fields do NOT imply verification)
+- `cabr_ready` = False
+- `payout_ready` = False
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.py -v
+# 84 passed
+```
+
+---
+
 ### [2026-05-02] - HERMES_WORKSPACE_BINDING_CONTRACT_PHASE1 (v0.8.16)
 
 **WSP Protocol References**: WSP 11 (Interface), WSP 50 (Pre-Action), WSP 97 (Truthful)

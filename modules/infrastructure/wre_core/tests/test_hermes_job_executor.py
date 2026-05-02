@@ -875,5 +875,221 @@ class TestNoRealExecutionWithWorkspaceBinding(unittest.TestCase):
         self.assertEqual(d["workspace_binding"]["workspace_root"], "/test/repo")
 
 
+# ---------------------------------------------------------------------------
+# Checkpoint Protocol Tests (HERMES_CHECKPOINT_PROTOCOL_PHASE1)
+# ---------------------------------------------------------------------------
+
+
+class TestCheckpointProtocolFields(unittest.TestCase):
+    """Test checkpoint protocol fields exist with defaults."""
+
+    def test_checkpoint_state_default_simulated(self):
+        """checkpoint_state defaults to SIMULATED."""
+        result = HermesDelegationResult(
+            status=HermesExecutionStatus.SIMULATED,
+            status_reason="Test",
+        )
+        self.assertEqual(result.checkpoint_state, "SIMULATED")
+
+    def test_checkpoint_result_default_none(self):
+        """checkpoint_result defaults to None."""
+        result = HermesDelegationResult(
+            status=HermesExecutionStatus.SIMULATED,
+            status_reason="Test",
+        )
+        self.assertIsNone(result.checkpoint_result)
+
+    def test_checkpoint_blocker_default_none(self):
+        """checkpoint_blocker defaults to None."""
+        result = HermesDelegationResult(
+            status=HermesExecutionStatus.SIMULATED,
+            status_reason="Test",
+        )
+        self.assertIsNone(result.checkpoint_blocker)
+
+    def test_checkpoint_next_action_default_none(self):
+        """checkpoint_next_action defaults to None."""
+        result = HermesDelegationResult(
+            status=HermesExecutionStatus.SIMULATED,
+            status_reason="Test",
+        )
+        self.assertIsNone(result.checkpoint_next_action)
+
+    def test_files_changed_default_empty_list(self):
+        """files_changed defaults to empty list."""
+        result = HermesDelegationResult(
+            status=HermesExecutionStatus.SIMULATED,
+            status_reason="Test",
+        )
+        self.assertEqual(result.files_changed, [])
+
+    def test_commands_run_default_empty_list(self):
+        """commands_run defaults to empty list."""
+        result = HermesDelegationResult(
+            status=HermesExecutionStatus.SIMULATED,
+            status_reason="Test",
+        )
+        self.assertEqual(result.commands_run, [])
+
+
+class TestCheckpointInResult(unittest.TestCase):
+    """Test to_dict() includes all checkpoint fields."""
+
+    def test_to_dict_includes_checkpoint_state(self):
+        """to_dict includes checkpoint_state."""
+        result = HermesDelegationResult(
+            status=HermesExecutionStatus.SIMULATED,
+            status_reason="Test",
+        )
+        d = result.to_dict()
+        self.assertIn("checkpoint_state", d)
+        self.assertEqual(d["checkpoint_state"], "SIMULATED")
+
+    def test_to_dict_includes_checkpoint_result(self):
+        """to_dict includes checkpoint_result."""
+        result = HermesDelegationResult(
+            status=HermesExecutionStatus.SIMULATED,
+            status_reason="Test",
+            checkpoint_result="Work completed successfully",
+        )
+        d = result.to_dict()
+        self.assertIn("checkpoint_result", d)
+        self.assertEqual(d["checkpoint_result"], "Work completed successfully")
+
+    def test_to_dict_includes_checkpoint_blocker(self):
+        """to_dict includes checkpoint_blocker."""
+        result = HermesDelegationResult(
+            status=HermesExecutionStatus.BLOCKED_FEATURE_DISABLED,
+            status_reason="Test",
+            checkpoint_state="BLOCKED",
+            checkpoint_blocker="Feature flag disabled",
+        )
+        d = result.to_dict()
+        self.assertIn("checkpoint_blocker", d)
+        self.assertEqual(d["checkpoint_blocker"], "Feature flag disabled")
+
+    def test_to_dict_includes_checkpoint_next_action(self):
+        """to_dict includes checkpoint_next_action."""
+        result = HermesDelegationResult(
+            status=HermesExecutionStatus.SIMULATED,
+            status_reason="Test",
+            checkpoint_next_action="Enable HERMES_DELEGATE_ENABLED=1",
+        )
+        d = result.to_dict()
+        self.assertIn("checkpoint_next_action", d)
+        self.assertEqual(d["checkpoint_next_action"], "Enable HERMES_DELEGATE_ENABLED=1")
+
+    def test_to_dict_includes_files_changed(self):
+        """to_dict includes files_changed."""
+        result = HermesDelegationResult(
+            status=HermesExecutionStatus.SIMULATED,
+            status_reason="Test",
+            files_changed=["src/main.py", "tests/test_main.py"],
+        )
+        d = result.to_dict()
+        self.assertIn("files_changed", d)
+        self.assertEqual(d["files_changed"], ["src/main.py", "tests/test_main.py"])
+
+    def test_to_dict_includes_commands_run(self):
+        """to_dict includes commands_run."""
+        result = HermesDelegationResult(
+            status=HermesExecutionStatus.SIMULATED,
+            status_reason="Test",
+            commands_run=["git status", "pytest -v"],
+        )
+        d = result.to_dict()
+        self.assertIn("commands_run", d)
+        self.assertEqual(d["commands_run"], ["git status", "pytest -v"])
+
+
+class TestCheckpointStateSimulated(unittest.TestCase):
+    """Test dry_run=True yields SIMULATED checkpoint state."""
+
+    def test_dry_run_true_checkpoint_simulated(self):
+        """dry_run=True produces checkpoint_state=SIMULATED."""
+        with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
+            executor = HermesJobExecutor(dry_run=True)
+            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            result = executor.execute(job)
+
+            self.assertEqual(result.checkpoint_state, "SIMULATED")
+
+    def test_feature_disabled_checkpoint_simulated(self):
+        """Feature disabled produces checkpoint_state=SIMULATED."""
+        with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
+            executor = HermesJobExecutor()
+            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            result = executor.execute(job)
+
+            self.assertEqual(result.checkpoint_state, "SIMULATED")
+
+    def test_checkpoint_files_changed_empty_in_simulation(self):
+        """files_changed is empty in simulation mode."""
+        with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
+            executor = HermesJobExecutor()
+            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            result = executor.execute(job)
+
+            self.assertEqual(result.files_changed, [])
+
+    def test_checkpoint_commands_run_empty_in_simulation(self):
+        """commands_run is empty in simulation mode."""
+        with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
+            executor = HermesJobExecutor()
+            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            result = executor.execute(job)
+
+            self.assertEqual(result.commands_run, [])
+
+
+class TestCheckpointWSP97(unittest.TestCase):
+    """Test WSP 97 truth fields remain false with checkpoint fields."""
+
+    def test_checkpoint_does_not_enable_real_execution(self):
+        """Checkpoint fields do not imply real_execution_performed=True."""
+        result = HermesDelegationResult(
+            status=HermesExecutionStatus.SIMULATED,
+            status_reason="Test",
+            checkpoint_state="DONE",  # Even if DONE...
+            checkpoint_result="Work completed",
+            files_changed=["file.py"],
+            commands_run=["pytest"],
+        )
+
+        # ...real_execution_performed still False
+        self.assertFalse(result.real_execution_performed)
+
+    def test_checkpoint_does_not_enable_verification(self):
+        """Checkpoint fields do not imply verification_complete=True."""
+        result = HermesDelegationResult(
+            status=HermesExecutionStatus.SIMULATED,
+            status_reason="Test",
+            checkpoint_state="DONE",
+            checkpoint_result="All tests passed",
+        )
+
+        self.assertFalse(result.verification_complete)
+
+    def test_checkpoint_does_not_enable_cabr(self):
+        """Checkpoint fields do not imply cabr_ready=True."""
+        result = HermesDelegationResult(
+            status=HermesExecutionStatus.SIMULATED,
+            status_reason="Test",
+            checkpoint_state="DONE",
+        )
+
+        self.assertFalse(result.cabr_ready)
+
+    def test_checkpoint_does_not_enable_payout(self):
+        """Checkpoint fields do not imply payout_ready=True."""
+        result = HermesDelegationResult(
+            status=HermesExecutionStatus.SIMULATED,
+            status_reason="Test",
+            checkpoint_state="DONE",
+        )
+
+        self.assertFalse(result.payout_ready)
+
+
 if __name__ == "__main__":
     unittest.main()

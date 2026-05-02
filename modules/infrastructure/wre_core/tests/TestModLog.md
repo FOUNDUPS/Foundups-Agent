@@ -1,5 +1,23 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-03: Hermes checkpoint protocol tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.py -v`
+- Status: PASS
+- Result: `84 passed`
+- Notes:
+  - Added `TestCheckpointProtocolFields` (6 tests) - checkpoint field defaults
+  - Added `TestCheckpointInResult` (6 tests) - to_dict checkpoint serialization
+  - Added `TestCheckpointStateSimulated` (4 tests) - dry_run checkpoint behavior
+  - Added `TestCheckpointWSP97` (4 tests) - truth field isolation with checkpoint
+- WSP 97 Coverage:
+  - checkpoint_state="SIMULATED" when dry_run or flag disabled
+  - checkpoint fields do NOT imply real_execution_performed
+  - checkpoint fields do NOT imply verification_complete
+  - Checkpoint protocol is structural, not proof of execution
+
+---
+
 ## 2026-05-02: Hermes workspace binding contract tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.py -v`
