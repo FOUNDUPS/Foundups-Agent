@@ -1,5 +1,23 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-02: Evidence refs validation tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_envelope_validation.py -q`
+- Status: PASS
+- Result: `42 passed`
+- Notes:
+  - Added `TestEvidenceRefsListOfStrings` (2 tests) - list of strings passes
+  - Added `TestEvidenceRefsEmptyWithDryRun` (3 tests) - empty evidence in dry-run pending
+  - Added `TestEvidenceRefsWrongType` (3 tests) - wrong type fails
+  - Added `TestEvidenceRefsEmptyString` (2 tests) - empty string fails
+  - Added `TestEvidenceRefsMalformedDict` (6 tests) - dict validation
+  - Added `TestEvidenceRefsWSP97TruthFields` (4 tests) - verification/cabr/payout always False
+  - Added `TestGenericDAEEvidenceBehavior` (2 tests) - generic DAE ignores evidence
+  - Updated existing tests for evidence_pending validation code
+  - Full suite: 448 passed (excluding production_gates)
+
+---
+
 ## 2026-05-02: FoundUpJob envelope validation tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_envelope_validation.py -v`
