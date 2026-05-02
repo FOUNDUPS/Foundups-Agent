@@ -12,15 +12,34 @@ from pathlib import Path
 import json
 from datetime import datetime
 
+# WSP 97 Truth: wre_log fallback for when tools.wre is unavailable
+def _wre_log_fallback(message: str, level: str = "INFO") -> None:
+    """Fallback wre_log that uses standard logging."""
+    logger = logging.getLogger("wre_ide_fallback")
+    log_level = getattr(logging, level.upper(), logging.INFO)
+    logger.log(log_level, f"[WRE-IDE] {message}")
+
+
 try:
-    # WRE Core Integration
-    from modules.wre_core.src.components.orchestration.agentic_orchestrator import AgenticOrchestrator
-    from modules.wre_core.src.components.orchestrator import wre_log
+    # WSP 97 Truth: Try canonical wre_log first
+    from tools.wre.tools.logging_utils import wre_log
+except (ImportError, FileNotFoundError, OSError):
+    # WSP 97: Truthful fallback - catches import errors and filesystem side-effects
+    wre_log = _wre_log_fallback
+
+try:
+    # WSP 97 Truth: WRE orchestration components
+    from modules.infrastructure.wre_core.wre_master_orchestrator.src.wre_master_orchestrator import (
+        WREMasterOrchestrator as AgenticOrchestrator,
+    )
     from modules.infrastructure.agent_activation.src.agent_activation import AgentActivationModule
     WRE_AVAILABLE = True
 except ImportError as e:
-    logging.warning(f"WRE integration not available: {e}")
+    # WSP 97: Truthful logging of import failure - no silent fallback
+    logging.warning(f"[WRE-IDE] Import seam failed: {e}")
     WRE_AVAILABLE = False
+    AgenticOrchestrator = None  # Explicit None for truthful unavailability
+    AgentActivationModule = None
 
 class WRECommandRouter:
     """
@@ -123,46 +142,21 @@ class WRECommandRouter:
     
     def _transform_command_to_context(self, command: Dict[str, Any]) -> Any:
         """Transform IDE command to WRE orchestration context"""
-        try:
-            from modules.wre_core.src.components.orchestration.orchestration_context import OrchestrationContext, OrchestrationTrigger
-            
-            # Map IDE command types to orchestration triggers
-            command_mapping = {
-                "create_module": OrchestrationTrigger.MODULE_DEVELOPMENT,
-                "analyze_code": OrchestrationTrigger.CODE_ANALYSIS,
-                "run_tests": OrchestrationTrigger.TESTING,
-                "compliance_check": OrchestrationTrigger.COMPLIANCE_VALIDATION,
-                "scaffold_module": OrchestrationTrigger.SCAFFOLDING,
-                "zen_coding": OrchestrationTrigger.QUANTUM_DEVELOPMENT
+        # WSP 97 Truth: OrchestrationContext/OrchestrationTrigger are legacy components
+        # not yet implemented. Use dict-based context until migration complete.
+        # No silent fallback - dict context is the canonical interface for now.
+        return {
+            "trigger": command.get('type', 'general_development'),
+            "session_id": self.session_id,
+            "zen_flow_state": "0102",
+            "parameters": command.get('parameters', {}),
+            "source": "IDE_FoundUps",
+            "metadata": {
+                "ide_command": command,
+                "timestamp": datetime.now().isoformat(),
+                "agent_coordination_required": True
             }
-            
-            trigger = command_mapping.get(command.get('type'), OrchestrationTrigger.GENERAL_DEVELOPMENT)
-            
-            # Create orchestration context
-            context = OrchestrationContext(
-                trigger=trigger,
-                session_id=self.session_id,
-                zen_flow_state="0102",  # IDE operations require awakened agents
-                command_source="IDE_FoundUps",
-                parameters=command.get('parameters', {}),
-                metadata={
-                    "ide_command": command,
-                    "timestamp": datetime.now().isoformat(),
-                    "agent_coordination_required": True
-                }
-            )
-            
-            return context
-            
-        except ImportError:
-            # Fallback context structure
-            return {
-                "trigger": command.get('type', 'general_development'),
-                "session_id": self.session_id,
-                "zen_flow_state": "0102",
-                "parameters": command.get('parameters', {}),
-                "source": "IDE_FoundUps"
-            }
+        }
     
     def _transform_result_to_ide(self, wre_result: Any, original_command: Dict[str, Any]) -> Dict[str, Any]:
         """Transform WRE result back to IDE-compatible format"""

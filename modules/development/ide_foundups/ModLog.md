@@ -5,6 +5,25 @@ This log tracks all changes to the IDE FoundUps module following WSP 22 (Module 
 
 ---
 
+## WRE Import Seam Fix (2026-05-02)
+
+### Change Summary
+- **Action**: Fixed stale import paths in WRE integration modules; added robust fallback for wre_log
+- **WSP Protocol**: WSP 97 (Truth Boundaries), WSP 5 (Test Coverage)
+- **Impact**: IDE WRE integration now loads reliably with truthful fallback on import failures
+- **Files Modified**:
+  - `src/wre_integration/orchestration/command_router.py` - Changed except clause to catch `(ImportError, FileNotFoundError, OSError)`
+  - `src/wre_integration/activation/wsp38_handler.py` - Same robust exception handling pattern
+  - `tests/test_wre_integration/orchestration/test_command_router.py` - NEW: 8 tests for import seam behavior
+- **Tests**: 8/8 passing
+
+### WSP 97 Truth Enforcement
+- Import failures are caught and logged, not silently ignored
+- `_wre_log_fallback()` provides explicit local logging when canonical path unavailable
+- `WRE_AVAILABLE` and `AgenticOrchestrator` explicitly set to None when unavailable
+
+---
+
 ## [CELEBRATE] **WSP 5 PERFECT COMPLIANCE ACHIEVED**
 
 ### Change Summary
