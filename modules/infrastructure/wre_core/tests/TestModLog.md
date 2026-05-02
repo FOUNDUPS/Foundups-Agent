@@ -1,5 +1,23 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-02: Live mode policy gate tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_envelope_validation.py -q`
+- Status: PASS
+- Result: `59 passed`
+- Notes:
+  - Added `TestDryRunWithPendingEvidenceStillPasses` (2 tests) - dry-run behavior unchanged
+  - Added `TestLiveModeWithoutApprovalFails` (2 tests) - human_approval required
+  - Added `TestLiveModeWithoutEvidenceFails` (2 tests) - evidence required in live mode
+  - Added `TestLiveModeWithMalformedEvidenceFails` (2 tests) - evidence must be valid
+  - Added `TestLiveModeWithApprovalAndEvidenceNoVerification` (3 tests) - WSP 97 truth
+  - Added `TestLiveModeSecurityGate` (2 tests) - security gate validation
+  - Added `TestLiveModeValidationErrorDetails` (4 tests) - error details include missing gates
+  - Updated 2 existing tests to include live mode approval
+  - Full suite: 465 passed (excluding production_gates)
+
+---
+
 ## 2026-05-02: Evidence refs validation tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_envelope_validation.py -q`

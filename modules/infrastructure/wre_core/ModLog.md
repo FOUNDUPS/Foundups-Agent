@@ -2,6 +2,65 @@
 
 ## Chronological Change Log
 
+### [2026-05-02] - WRE_LIVE_MODE_EVIDENCE_POLICY_GATE_PHASE1 (v0.8.12)
+
+**WSP Protocol References**: WSP 11 (Interface), WSP 97 (Truthful - live mode blocked without gates)
+**Impact Analysis**: Block non-dry-run FoundUpJob envelopes unless strict policy gates present
+
+#### Changes Made
+
+- `src/foundup_job_router.py`:
+  - Added `EnvelopeValidationCode` values:
+    - `LIVE_MODE_NOT_ENABLED`
+    - `LIVE_MODE_REQUIRES_HUMAN_APPROVAL`
+    - `LIVE_MODE_REQUIRES_EVIDENCE`
+    - `LIVE_MODE_REQUIRES_SECURITY_GATE`
+  - Added `EnvelopeValidationResult` fields:
+    - `is_live_mode`: True if explicit dry_run_mode=False
+    - `live_mode_gates_passed`: True if all required gates passed
+    - `missing_live_gates`: List of missing policy gates
+  - Added `_validate_live_mode_gates()` function
+  - Updated `validate_foundup_job_envelope()` to apply live mode gates
+
+- `tests/test_foundup_job_envelope_validation.py`:
+  - Added 17 new tests for live mode policy gates
+  - TestDryRunWithPendingEvidenceStillPasses (2 tests)
+  - TestLiveModeWithoutApprovalFails (2 tests)
+  - TestLiveModeWithoutEvidenceFails (2 tests)
+  - TestLiveModeWithMalformedEvidenceFails (2 tests)
+  - TestLiveModeWithApprovalAndEvidenceNoVerification (3 tests)
+  - TestLiveModeSecurityGate (2 tests)
+  - TestLiveModeValidationErrorDetails (4 tests)
+  - Updated 2 existing tests for live mode approval
+
+#### Live Mode Policy Gates (Phase 1)
+
+| Gate | Requirement | Validation Code if Missing |
+|------|-------------|----------------------------|
+| human_approval OR permission_gate_passed | True | LIVE_MODE_REQUIRES_HUMAN_APPROVAL |
+| security_gate_passed (if security_gate_checked) | True | LIVE_MODE_REQUIRES_SECURITY_GATE |
+| evidence_refs | Non-empty, not pending | LIVE_MODE_REQUIRES_EVIDENCE |
+
+#### WSP 97 Truth Boundaries
+
+- Live mode gates do NOT imply `verification_complete=True`
+- Live mode gates do NOT enable CABR claims (`cabr_ready=False`)
+- Live mode gates do NOT enable payout claims (`payout_ready=False`)
+- This is validation only - no actual execution path created
+- Dry-run behavior unchanged (evidence_pending allowed)
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_envelope_validation.py -q
+# 59 passed
+
+python -m pytest modules/infrastructure/wre_core/tests -q --ignore=modules/infrastructure/wre_core/tests/test_production_gates.py
+# 465 passed
+```
+
+---
+
 ### [2026-05-02] - WRE_EVIDENCE_REFS_VALIDATION_PHASE1 (v0.8.11)
 
 **WSP Protocol References**: WSP 11 (Interface), WSP 97 (Truthful - evidence traceability only)
