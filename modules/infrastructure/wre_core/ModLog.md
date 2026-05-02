@@ -2,6 +2,52 @@
 
 ## Chronological Change Log
 
+### [2026-05-02] - WRE_MODEL_ROUTING_POLICY_VALIDATION_PHASE1 (v0.8.14)
+
+**WSP Protocol References**: WSP 11 (Interface), WSP 97 (Truthful - policy validation only)
+**Impact Analysis**: Validate tier/preference compatibility for FoundUpJob model routing
+
+#### Changes Made
+
+- `src/foundup_job_router.py`:
+  - Added `EnvelopeValidationCode.MODEL_PREFERENCE_NOT_ALLOWED_FOR_TIER`
+  - Added `TIER_ALLOWED_PREFERENCES` map:
+    - freemium: auto, free only
+    - basic: auto, free, standard
+    - enterprise: auto, free, standard, premium
+  - Added `EnvelopeValidationResult` fields: model_routing_policy_validated, model_routing_policy_reason
+  - Added tier/preference compatibility check in `_validate_compute_budget()`
+
+- `tests/test_foundup_job_envelope_validation.py`:
+  - Added 18 new tests for model routing policy validation
+  - Updated 2 existing tests to use compatible tiers
+
+#### Policy Rules
+
+| Tier | Allowed Preferences |
+|------|---------------------|
+| freemium | auto, free |
+| basic | auto, free, standard |
+| enterprise | auto, free, standard, premium |
+
+#### WSP 97 Truth Boundaries
+
+- Policy validation is structural only - no model selected
+- No inference executed, no compute consumed
+- verification_complete=False, cabr_ready=False, payout_ready=False
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_envelope_validation.py -q
+# 111 passed
+
+python -m pytest modules/infrastructure/wre_core/tests -q --ignore=modules/infrastructure/wre_core/tests/test_production_gates.py
+# 517 passed
+```
+
+---
+
 ### [2026-05-02] - WRE_COMPUTE_BUDGET_VALIDATION_PHASE1 (v0.8.13)
 
 **WSP Protocol References**: WSP 11 (Interface), WSP 97 (Truthful - structural validation only)

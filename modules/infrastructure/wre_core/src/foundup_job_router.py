@@ -176,6 +176,9 @@ class EnvelopeValidationCode(str, Enum):
     INVALID_COMPUTE_TIER = "INVALID_COMPUTE_TIER"
     INVALID_MODEL_PREFERENCE = "INVALID_MODEL_PREFERENCE"
 
+    # Invalid - Model Routing Policy
+    MODEL_PREFERENCE_NOT_ALLOWED_FOR_TIER = "MODEL_PREFERENCE_NOT_ALLOWED_FOR_TIER"
+
 
 @dataclass
 class EnvelopeValidationResult:
@@ -243,6 +246,13 @@ class EnvelopeValidationResult:
     model_preference_value: str = ""
     """Model preference from envelope."""
 
+    # === Model Routing Policy Validation ===
+    model_routing_policy_validated: bool = False
+    """True if tier/preference compatibility passed validation."""
+
+    model_routing_policy_reason: str = ""
+    """Explanation of routing policy validation result."""
+
     # === WSP 97 Truth Fields (ALWAYS False at validation time) ===
     verification_complete: bool = False
     """WSP 97: Always False. Evidence presence does NOT imply verification."""
@@ -276,6 +286,9 @@ class EnvelopeValidationResult:
             "compute_used_value": self.compute_used_value,
             "compute_tier_value": self.compute_tier_value,
             "model_preference_value": self.model_preference_value,
+            # Model routing policy
+            "model_routing_policy_validated": self.model_routing_policy_validated,
+            "model_routing_policy_reason": self.model_routing_policy_reason,
             # WSP 97 Truth: Always False at validation time
             "verification_complete": self.verification_complete,
             "cabr_ready": self.cabr_ready,
@@ -492,6 +505,8 @@ def validate_foundup_job_envelope(envelope: Dict[str, Any]) -> EnvelopeValidatio
             compute_used_value=compute_result.get("used", 0),
             compute_tier_value=compute_result.get("tier", ""),
             model_preference_value=compute_result.get("model_preference", ""),
+            model_routing_policy_validated=compute_result.get("routing_policy_validated", False),
+            model_routing_policy_reason=compute_result.get("routing_policy_reason", ""),
         )
 
     # Valid FoundUpJob envelope
@@ -521,6 +536,9 @@ def validate_foundup_job_envelope(envelope: Dict[str, Any]) -> EnvelopeValidatio
         compute_used_value=compute_result.get("used", 0),
         compute_tier_value=compute_result.get("tier", "freemium"),
         model_preference_value=compute_result.get("model_preference", "auto"),
+        # Model routing policy (WSP 97: policy validation, no model selected)
+        model_routing_policy_validated=compute_result.get("routing_policy_validated", True),
+        model_routing_policy_reason=compute_result.get("routing_policy_reason", ""),
         # WSP 97 Truth: Always False at validation time
         verification_complete=False,
         cabr_ready=False,
@@ -740,6 +758,17 @@ ALLOWED_MODEL_PREFERENCES: frozenset[str] = frozenset({
     "premium",
 })
 
+# Tier -> allowed model preferences (conservative routing policy)
+# - auto is always allowed (runtime selects based on tier)
+# - freemium: free models only (no paid inference)
+# - basic: free + standard models
+# - enterprise: all models including premium
+TIER_ALLOWED_PREFERENCES: Dict[str, frozenset[str]] = {
+    "freemium": frozenset({"auto", "free"}),
+    "basic": frozenset({"auto", "free", "standard"}),
+    "enterprise": frozenset({"auto", "free", "standard", "premium"}),
+}
+
 
 def _validate_compute_budget(
     envelope: Dict[str, Any],
@@ -872,9 +901,27 @@ def _validate_compute_budget(
             "used": compute_used,
             "tier": compute_tier,
             "model_preference": model_preference,
+            "routing_policy_validated": False,
+            "routing_policy_reason": "model_preference validation failed",
+        }
+
+    # === Tier/preference compatibility check ===
+    allowed_for_tier = TIER_ALLOWED_PREFERENCES.get(compute_tier, frozenset())
+    if model_preference not in allowed_for_tier:
+        return {
+            "valid": False,
+            "code": EnvelopeValidationCode.MODEL_PREFERENCE_NOT_ALLOWED_FOR_TIER,
+            "message": f"model_preference '{model_preference}' not allowed for compute_tier '{compute_tier}' (allowed: {sorted(allowed_for_tier)})",
+            "budget": compute_budget,
+            "used": compute_used,
+            "tier": compute_tier,
+            "model_preference": model_preference,
+            "routing_policy_validated": False,
+            "routing_policy_reason": f"tier '{compute_tier}' does not allow preference '{model_preference}'",
         }
 
     # All checks passed
+    routing_reason = f"tier '{compute_tier}' allows preference '{model_preference}'"
     return {
         "valid": True,
         "code": EnvelopeValidationCode.VALID,
@@ -883,6 +930,8 @@ def _validate_compute_budget(
         "used": compute_used,
         "tier": compute_tier,
         "model_preference": model_preference,
+        "routing_policy_validated": True,
+        "routing_policy_reason": routing_reason,
     }
 
 
