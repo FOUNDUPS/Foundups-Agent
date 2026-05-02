@@ -2,6 +2,55 @@
 
 ## Chronological Change Log
 
+### [2026-05-02] - HERMES_JOB_EXECUTOR_ADAPTER_PHASE1 (v0.8.15)
+
+**WSP Protocol References**: WSP 11 (Interface), WSP 50 (Pre-Action), WSP 97 (Truthful)
+**Impact Analysis**: Add Hermes FoundUpJob executor adapter seam (no real execution)
+
+#### Changes Made
+
+- `src/hermes_job_executor.py` (NEW):
+  - `HermesJobExecutor` class - adapter mapping FoundUpJob to Hermes delegate_task contract
+  - `HermesDelegationRequest` dataclass - outbound request to Hermes
+  - `HermesDelegationResult` dataclass - result with WSP 97 truth fields
+  - `HermesExecutionStatus` enum - status codes including SIMULATED, BLOCKED_*
+  - Feature flag: `HERMES_DELEGATE_ENABLED=0` (default disabled)
+  - Lazy import of `vendor.hermes_agent.tools.delegate_tool`
+  - dry_run=True default (no real terminal/file execution)
+
+- `tests/test_hermes_job_executor.py` (NEW):
+  - 33 tests covering feature flag, mapping, validation, WSP 97 compliance
+  - Verifies no CABR/token/payout/reward fields exist
+  - Verifies no queue consumption occurs
+
+#### Feature Flag Behavior
+
+| Flag | dry_run | Status |
+|------|---------|--------|
+| 0 (default) | any | SIMULATED |
+| 1 | True | SIMULATED |
+| 1 | False | BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED |
+
+#### WSP 97 Truth Boundaries
+
+- `real_execution_performed`: Always False in Phase 1
+- `verification_complete`: Always False (no CABR verification)
+- `cabr_ready`: Always False (no CABR pipeline)
+- `payout_ready`: Always False (no payout pipeline)
+- Adapter is seam-only; does not consume jobs or mutate state
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.py -v
+# 33 passed
+
+python -m pytest modules/infrastructure/wre_core/tests -q --ignore=modules/infrastructure/wre_core/tests/test_production_gates.py
+# 550 passed (517 existing + 33 new)
+```
+
+---
+
 ### [2026-05-02] - WRE_MODEL_ROUTING_POLICY_VALIDATION_PHASE1 (v0.8.14)
 
 **WSP Protocol References**: WSP 11 (Interface), WSP 97 (Truthful - policy validation only)
