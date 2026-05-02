@@ -1,5 +1,26 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-02: Compute budget validation tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_envelope_validation.py -q`
+- Status: PASS
+- Result: `93 passed`
+- Notes:
+  - Added `TestComputeBudgetTypeValidation` (5 tests) - int/None valid, float/str/bool fail
+  - Added `TestComputeBudgetNegativeValidation` (3 tests) - 0 and positive pass, negative fails
+  - Added `TestComputeUsedTypeValidation` (4 tests) - int valid, float/str/bool fail
+  - Added `TestComputeUsedNegativeValidation` (3 tests) - 0 and positive pass, negative fails
+  - Added `TestComputeUsedExceedsBudget` (4 tests) - used <= budget or None budget
+  - Added `TestLiveModeRequiresComputeBudget` (3 tests) - live mode needs explicit budget
+  - Added `TestComputeTierValidation` (4 tests) - freemium/basic/enterprise only
+  - Added `TestModelPreferenceValidation` (5 tests) - auto/free/standard/premium only
+  - Added `TestComputeBudgetWSP97Truth` (2 tests) - no metering accuracy claims
+  - Added `TestGenericDAEComputeIgnored` (1 test) - generic DAE skips compute validation
+  - Updated 7 existing live mode tests to include compute_budget
+  - Full suite: 499 passed (excluding production_gates)
+
+---
+
 ## 2026-05-02: Live mode policy gate tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_envelope_validation.py -q`

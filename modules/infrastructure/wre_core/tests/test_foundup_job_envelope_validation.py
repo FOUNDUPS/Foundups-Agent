@@ -211,6 +211,7 @@ class TestFoundUpJobDryRunDefault:
                 "human_approval": True,  # Required for live mode
             },
             "evidence_refs": ["manifest.json"],  # Required for live mode
+            "compute_budget": 5000,  # Required for live mode
         }
 
         result = validate_foundup_job_envelope(envelope)
@@ -697,6 +698,7 @@ class TestEvidenceRefsWSP97TruthFields:
                 "human_approval": True,  # Required for live mode
             },
             "evidence_refs": ["manifest.json", "proof_abc123"],
+            "compute_budget": 5000,  # Required for live mode
         }
 
         result = validate_foundup_job_envelope(envelope)
@@ -970,6 +972,7 @@ class TestLiveModeWithApprovalAndEvidenceNoVerification:
                 "human_approval": True,
             },
             "evidence_refs": ["manifest.json", "proof.json"],
+            "compute_budget": 5000,  # Required for live mode
         }
 
         result = validate_foundup_job_envelope(envelope)
@@ -991,6 +994,7 @@ class TestLiveModeWithApprovalAndEvidenceNoVerification:
                 "permission_gate_passed": True,  # Alternative approval
             },
             "evidence_refs": ["cabr_evidence.json"],
+            "compute_budget": 5000,  # Required for live mode
         }
 
         result = validate_foundup_job_envelope(envelope)
@@ -1012,6 +1016,7 @@ class TestLiveModeWithApprovalAndEvidenceNoVerification:
                 "security_gate_passed": True,
             },
             "evidence_refs": ["payout_ready_evidence.json"],
+            "compute_budget": 5000,  # Required for live mode
         }
 
         result = validate_foundup_job_envelope(envelope)
@@ -1058,6 +1063,7 @@ class TestLiveModeSecurityGate:
                 "security_gate_checked": False,  # Not checked, so not required
             },
             "evidence_refs": ["evidence.json"],
+            "compute_budget": 5000,  # Required for live mode
         }
 
         result = validate_foundup_job_envelope(envelope)
@@ -1139,6 +1145,7 @@ class TestLiveModeValidationErrorDetails:
                 "human_approval": True,
             },
             "evidence_refs": ["complete_evidence.json"],
+            "compute_budget": 5000,  # Required for live mode
         }
 
         result = validate_foundup_job_envelope(envelope)
@@ -1149,6 +1156,604 @@ class TestLiveModeValidationErrorDetails:
         assert "missing_live_gates" in result_dict
         assert result_dict["is_live_mode"] is True
         assert result_dict["live_mode_gates_passed"] is True
+
+
+# ---------------------------------------------------------------------------
+# Test: Compute Budget Validation (WRE_COMPUTE_BUDGET_VALIDATION_PHASE1)
+# ---------------------------------------------------------------------------
+
+
+class TestComputeBudgetTypeValidation:
+    """Test compute_budget type validation (int only per contract)."""
+
+    def test_compute_budget_none_is_valid(self):
+        """compute_budget=None (unlimited) is valid."""
+        envelope = {
+            "job_id": "job_budget_001",
+            "foundup_id": "gotjunk",
+            "tenant_id": "tenant_alice",
+            "requested_action": "build_foundup",
+            "compute_budget": None,
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.compute_budget_validated is True
+        assert result.compute_budget_value is None
+
+    def test_compute_budget_int_is_valid(self):
+        """compute_budget as int is valid."""
+        envelope = {
+            "job_id": "job_budget_002",
+            "foundup_id": "kosei",
+            "tenant_id": "tenant_bob",
+            "requested_action": "validate_foundup",
+            "compute_budget": 1000,
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.compute_budget_validated is True
+        assert result.compute_budget_value == 1000
+
+    def test_compute_budget_float_fails(self):
+        """compute_budget as float fails (contract is int only)."""
+        envelope = {
+            "job_id": "job_budget_003",
+            "foundup_id": "move2japan",
+            "tenant_id": "tenant_carol",
+            "requested_action": "extract_foundup",
+            "compute_budget": 100.5,
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.INVALID_COMPUTE_BUDGET_TYPE
+        assert "int" in result.validation_message
+
+    def test_compute_budget_string_fails(self):
+        """compute_budget as string fails."""
+        envelope = {
+            "job_id": "job_budget_004",
+            "foundup_id": "social_twin",
+            "tenant_id": "tenant_dave",
+            "requested_action": "build_foundup",
+            "compute_budget": "1000",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.INVALID_COMPUTE_BUDGET_TYPE
+
+    def test_compute_budget_bool_fails(self):
+        """compute_budget as bool fails (bool is subclass of int in Python)."""
+        envelope = {
+            "job_id": "job_budget_005",
+            "foundup_id": "pqn_portal",
+            "tenant_id": "tenant_eve",
+            "requested_action": "validate_foundup",
+            "compute_budget": True,  # bool is subclass of int, must be rejected
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.INVALID_COMPUTE_BUDGET_TYPE
+
+
+class TestComputeBudgetNegativeValidation:
+    """Test compute_budget non-negative validation."""
+
+    def test_compute_budget_zero_is_valid(self):
+        """compute_budget=0 is valid (exhausted but not negative)."""
+        envelope = {
+            "job_id": "job_budget_006",
+            "foundup_id": "gotjunk",
+            "tenant_id": "tenant_frank",
+            "requested_action": "build_foundup",
+            "compute_budget": 0,
+            "compute_used": 0,
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.compute_budget_value == 0
+
+    def test_compute_budget_positive_is_valid(self):
+        """compute_budget > 0 is valid."""
+        envelope = {
+            "job_id": "job_budget_007",
+            "foundup_id": "kosei",
+            "tenant_id": "tenant_grace",
+            "requested_action": "validate_foundup",
+            "compute_budget": 5000,
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.compute_budget_value == 5000
+
+    def test_compute_budget_negative_fails(self):
+        """compute_budget < 0 fails."""
+        envelope = {
+            "job_id": "job_budget_008",
+            "foundup_id": "move2japan",
+            "tenant_id": "tenant_hank",
+            "requested_action": "extract_foundup",
+            "compute_budget": -100,
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.INVALID_COMPUTE_BUDGET_NEGATIVE
+        assert "non-negative" in result.validation_message
+
+
+class TestComputeUsedTypeValidation:
+    """Test compute_used type validation (int only per contract)."""
+
+    def test_compute_used_int_is_valid(self):
+        """compute_used as int is valid."""
+        envelope = {
+            "job_id": "job_budget_009",
+            "foundup_id": "social_twin",
+            "tenant_id": "tenant_ivan",
+            "requested_action": "build_foundup",
+            "compute_used": 500,
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.compute_used_value == 500
+
+    def test_compute_used_float_fails(self):
+        """compute_used as float fails."""
+        envelope = {
+            "job_id": "job_budget_010",
+            "foundup_id": "pqn_portal",
+            "tenant_id": "tenant_judy",
+            "requested_action": "validate_foundup",
+            "compute_used": 100.5,
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.INVALID_COMPUTE_USED_TYPE
+
+    def test_compute_used_string_fails(self):
+        """compute_used as string fails."""
+        envelope = {
+            "job_id": "job_budget_011",
+            "foundup_id": "gotjunk",
+            "tenant_id": "tenant_kevin",
+            "requested_action": "extract_foundup",
+            "compute_used": "500",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.INVALID_COMPUTE_USED_TYPE
+
+    def test_compute_used_bool_fails(self):
+        """compute_used as bool fails."""
+        envelope = {
+            "job_id": "job_budget_012",
+            "foundup_id": "kosei",
+            "tenant_id": "tenant_larry",
+            "requested_action": "build_foundup",
+            "compute_used": False,
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.INVALID_COMPUTE_USED_TYPE
+
+
+class TestComputeUsedNegativeValidation:
+    """Test compute_used non-negative validation."""
+
+    def test_compute_used_zero_is_valid(self):
+        """compute_used=0 is valid."""
+        envelope = {
+            "job_id": "job_budget_013",
+            "foundup_id": "move2japan",
+            "tenant_id": "tenant_mary",
+            "requested_action": "validate_foundup",
+            "compute_used": 0,
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.compute_used_value == 0
+
+    def test_compute_used_positive_is_valid(self):
+        """compute_used > 0 is valid."""
+        envelope = {
+            "job_id": "job_budget_014",
+            "foundup_id": "social_twin",
+            "tenant_id": "tenant_nancy",
+            "requested_action": "build_foundup",
+            "compute_used": 250,
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.compute_used_value == 250
+
+    def test_compute_used_negative_fails(self):
+        """compute_used < 0 fails."""
+        envelope = {
+            "job_id": "job_budget_015",
+            "foundup_id": "pqn_portal",
+            "tenant_id": "tenant_oscar",
+            "requested_action": "extract_foundup",
+            "compute_used": -50,
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.INVALID_COMPUTE_USED_NEGATIVE
+
+
+class TestComputeUsedExceedsBudget:
+    """Test compute_used cannot exceed compute_budget."""
+
+    def test_compute_used_less_than_budget_passes(self):
+        """compute_used < compute_budget passes."""
+        envelope = {
+            "job_id": "job_budget_016",
+            "foundup_id": "gotjunk",
+            "tenant_id": "tenant_paul",
+            "requested_action": "build_foundup",
+            "compute_budget": 1000,
+            "compute_used": 500,
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.compute_budget_value == 1000
+        assert result.compute_used_value == 500
+
+    def test_compute_used_equals_budget_passes(self):
+        """compute_used == compute_budget passes (fully consumed)."""
+        envelope = {
+            "job_id": "job_budget_017",
+            "foundup_id": "kosei",
+            "tenant_id": "tenant_quinn",
+            "requested_action": "validate_foundup",
+            "compute_budget": 1000,
+            "compute_used": 1000,
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.compute_used_value == result.compute_budget_value
+
+    def test_compute_used_exceeds_budget_fails(self):
+        """compute_used > compute_budget fails."""
+        envelope = {
+            "job_id": "job_budget_018",
+            "foundup_id": "move2japan",
+            "tenant_id": "tenant_rachel",
+            "requested_action": "extract_foundup",
+            "compute_budget": 1000,
+            "compute_used": 1001,
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.COMPUTE_USED_EXCEEDS_BUDGET
+        assert "exceeds" in result.validation_message
+
+    def test_compute_used_with_none_budget_passes(self):
+        """compute_used with compute_budget=None passes (unlimited)."""
+        envelope = {
+            "job_id": "job_budget_019",
+            "foundup_id": "social_twin",
+            "tenant_id": "tenant_steve",
+            "requested_action": "build_foundup",
+            "compute_budget": None,
+            "compute_used": 999999,
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.compute_budget_value is None
+        assert result.compute_used_value == 999999
+
+
+class TestLiveModeRequiresComputeBudget:
+    """Test live mode requires explicit compute_budget."""
+
+    def test_live_mode_with_budget_passes(self):
+        """Live mode with explicit compute_budget passes."""
+        envelope = {
+            "job_id": "job_budget_020",
+            "foundup_id": "pqn_portal",
+            "tenant_id": "tenant_tina",
+            "requested_action": "validate_foundup",
+            "policy_flags": {
+                "dry_run_mode": False,
+                "human_approval": True,
+            },
+            "evidence_refs": ["manifest.json"],
+            "compute_budget": 5000,
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.is_live_mode is True
+        assert result.compute_budget_value == 5000
+
+    def test_live_mode_without_budget_fails(self):
+        """Live mode without compute_budget fails."""
+        envelope = {
+            "job_id": "job_budget_021",
+            "foundup_id": "gotjunk",
+            "tenant_id": "tenant_uma",
+            "requested_action": "build_foundup",
+            "policy_flags": {
+                "dry_run_mode": False,
+                "human_approval": True,
+            },
+            "evidence_refs": ["evidence.json"],
+            "compute_budget": None,
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.LIVE_MODE_REQUIRES_COMPUTE_BUDGET
+        assert result.is_live_mode is True
+
+    def test_dry_run_without_budget_passes(self):
+        """Dry-run mode without compute_budget passes (allowed for dry-run)."""
+        envelope = {
+            "job_id": "job_budget_022",
+            "foundup_id": "kosei",
+            "tenant_id": "tenant_victor",
+            "requested_action": "validate_foundup",
+            "policy_flags": {"dry_run_mode": True},
+            "compute_budget": None,
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.is_live_mode is False
+        assert result.compute_budget_value is None
+
+
+class TestComputeTierValidation:
+    """Test compute_tier validation against allowed values."""
+
+    def test_compute_tier_freemium_passes(self):
+        """compute_tier='freemium' passes."""
+        envelope = {
+            "job_id": "job_budget_023",
+            "foundup_id": "move2japan",
+            "tenant_id": "tenant_wendy",
+            "requested_action": "extract_foundup",
+            "compute_tier": "freemium",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.compute_tier_value == "freemium"
+
+    def test_compute_tier_basic_passes(self):
+        """compute_tier='basic' passes."""
+        envelope = {
+            "job_id": "job_budget_024",
+            "foundup_id": "social_twin",
+            "tenant_id": "tenant_xander",
+            "requested_action": "build_foundup",
+            "compute_tier": "basic",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.compute_tier_value == "basic"
+
+    def test_compute_tier_enterprise_passes(self):
+        """compute_tier='enterprise' passes."""
+        envelope = {
+            "job_id": "job_budget_025",
+            "foundup_id": "pqn_portal",
+            "tenant_id": "tenant_yolanda",
+            "requested_action": "validate_foundup",
+            "compute_tier": "enterprise",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.compute_tier_value == "enterprise"
+
+    def test_compute_tier_unknown_fails(self):
+        """compute_tier with unknown value fails."""
+        envelope = {
+            "job_id": "job_budget_026",
+            "foundup_id": "gotjunk",
+            "tenant_id": "tenant_zach",
+            "requested_action": "build_foundup",
+            "compute_tier": "premium_plus",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.INVALID_COMPUTE_TIER
+        assert "premium_plus" in result.validation_message
+
+
+class TestModelPreferenceValidation:
+    """Test model_preference validation against allowed values."""
+
+    def test_model_preference_auto_passes(self):
+        """model_preference='auto' passes."""
+        envelope = {
+            "job_id": "job_budget_027",
+            "foundup_id": "kosei",
+            "tenant_id": "tenant_amy",
+            "requested_action": "validate_foundup",
+            "model_preference": "auto",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.model_preference_value == "auto"
+
+    def test_model_preference_free_passes(self):
+        """model_preference='free' passes."""
+        envelope = {
+            "job_id": "job_budget_028",
+            "foundup_id": "move2japan",
+            "tenant_id": "tenant_bill",
+            "requested_action": "extract_foundup",
+            "model_preference": "free",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.model_preference_value == "free"
+
+    def test_model_preference_standard_passes(self):
+        """model_preference='standard' passes."""
+        envelope = {
+            "job_id": "job_budget_029",
+            "foundup_id": "social_twin",
+            "tenant_id": "tenant_cara",
+            "requested_action": "build_foundup",
+            "model_preference": "standard",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.model_preference_value == "standard"
+
+    def test_model_preference_premium_passes(self):
+        """model_preference='premium' passes."""
+        envelope = {
+            "job_id": "job_budget_030",
+            "foundup_id": "pqn_portal",
+            "tenant_id": "tenant_dan",
+            "requested_action": "validate_foundup",
+            "model_preference": "premium",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.model_preference_value == "premium"
+
+    def test_model_preference_unknown_fails(self):
+        """model_preference with unknown value fails."""
+        envelope = {
+            "job_id": "job_budget_031",
+            "foundup_id": "gotjunk",
+            "tenant_id": "tenant_emma",
+            "requested_action": "build_foundup",
+            "model_preference": "opus",  # Not in allowed list
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.INVALID_MODEL_PREFERENCE
+        assert "opus" in result.validation_message
+
+
+class TestComputeBudgetWSP97Truth:
+    """Test compute budget validation does not claim metering accuracy."""
+
+    def test_compute_validation_does_not_claim_verification(self):
+        """Compute validation does NOT set verification_complete=True."""
+        envelope = {
+            "job_id": "job_budget_032",
+            "foundup_id": "kosei",
+            "tenant_id": "tenant_frank",
+            "requested_action": "validate_foundup",
+            "compute_budget": 5000,
+            "compute_used": 1000,
+            "compute_tier": "enterprise",
+            "model_preference": "premium",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.compute_budget_validated is True
+        # WSP 97: Compute validation is structural only
+        assert result.verification_complete is False
+        assert result.cabr_ready is False
+        assert result.payout_ready is False
+
+    def test_compute_fields_in_serialized_result(self):
+        """Compute budget fields appear in to_dict() output."""
+        envelope = {
+            "job_id": "job_budget_033",
+            "foundup_id": "move2japan",
+            "tenant_id": "tenant_gina",
+            "requested_action": "extract_foundup",
+            "compute_budget": 2000,
+            "compute_used": 500,
+            "compute_tier": "basic",
+            "model_preference": "free",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+        result_dict = result.to_dict()
+
+        assert "compute_budget_validated" in result_dict
+        assert "compute_budget_value" in result_dict
+        assert "compute_used_value" in result_dict
+        assert "compute_tier_value" in result_dict
+        assert "model_preference_value" in result_dict
+        assert result_dict["compute_budget_validated"] is True
+        assert result_dict["compute_budget_value"] == 2000
+        assert result_dict["compute_used_value"] == 500
+
+
+class TestGenericDAEComputeIgnored:
+    """Test generic DAE envelope ignores compute fields."""
+
+    def test_generic_dae_ignores_compute_budget(self):
+        """Generic DAE envelope does not validate compute_budget."""
+        envelope = {
+            "objective": "Do something generic",
+            "compute_budget": "invalid_string",  # Would fail for FoundUpJob
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.envelope_type == EnvelopeType.GENERIC_DAE
+        assert result.compute_budget_validated is False
 
 
 if __name__ == "__main__":
