@@ -1,5 +1,25 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-02: Model routing policy validation tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_envelope_validation.py -q`
+- Status: PASS
+- Result: `111 passed`
+- Notes:
+  - Added `TestFreemiumTierModelRouting` (4 tests) - freemium allows auto/free only
+  - Added `TestBasicTierModelRouting` (4 tests) - basic allows auto/free/standard
+  - Added `TestEnterpriseTierModelRouting` (4 tests) - enterprise allows all
+  - Added `TestAutoPreferenceAllTiers` (3 tests) - auto valid for all tiers
+  - Added `TestModelRoutingPolicyWSP97Truth` (2 tests) - policy validation is structural
+  - Added `TestGenericDAERoutingPolicyIgnored` (1 test) - generic DAE skips routing
+  - Updated 2 existing model preference tests to include compatible tiers
+  - Added EnvelopeValidationCode.MODEL_PREFERENCE_NOT_ALLOWED_FOR_TIER
+  - Added TIER_ALLOWED_PREFERENCES map in foundup_job_router.py
+  - Added model_routing_policy_validated/model_routing_policy_reason fields
+  - Full suite: 517 passed (excluding production_gates)
+
+---
+
 ## 2026-05-02: Compute budget validation tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_envelope_validation.py -q`

@@ -1642,12 +1642,13 @@ class TestModelPreferenceValidation:
         assert result.model_preference_value == "free"
 
     def test_model_preference_standard_passes(self):
-        """model_preference='standard' passes."""
+        """model_preference='standard' passes (with compatible tier)."""
         envelope = {
             "job_id": "job_budget_029",
             "foundup_id": "social_twin",
             "tenant_id": "tenant_cara",
             "requested_action": "build_foundup",
+            "compute_tier": "basic",  # basic tier allows standard
             "model_preference": "standard",
         }
 
@@ -1657,12 +1658,13 @@ class TestModelPreferenceValidation:
         assert result.model_preference_value == "standard"
 
     def test_model_preference_premium_passes(self):
-        """model_preference='premium' passes."""
+        """model_preference='premium' passes (with compatible tier)."""
         envelope = {
             "job_id": "job_budget_030",
             "foundup_id": "pqn_portal",
             "tenant_id": "tenant_dan",
             "requested_action": "validate_foundup",
+            "compute_tier": "enterprise",  # enterprise tier allows premium
             "model_preference": "premium",
         }
 
@@ -1754,6 +1756,342 @@ class TestGenericDAEComputeIgnored:
         assert result.valid is True
         assert result.envelope_type == EnvelopeType.GENERIC_DAE
         assert result.compute_budget_validated is False
+
+
+# ---------------------------------------------------------------------------
+# Test: Model Routing Policy Validation (WRE_MODEL_ROUTING_POLICY_VALIDATION_PHASE1)
+# ---------------------------------------------------------------------------
+
+
+class TestFreemiumTierModelRouting:
+    """Test freemium tier model preference restrictions."""
+
+    def test_freemium_with_free_passes(self):
+        """freemium tier with free preference passes."""
+        envelope = {
+            "job_id": "job_policy_001",
+            "foundup_id": "gotjunk",
+            "tenant_id": "tenant_alice",
+            "requested_action": "build_foundup",
+            "compute_tier": "freemium",
+            "model_preference": "free",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.model_routing_policy_validated is True
+        assert "freemium" in result.model_routing_policy_reason
+        assert "free" in result.model_routing_policy_reason
+
+    def test_freemium_with_auto_passes(self):
+        """freemium tier with auto preference passes (auto always allowed)."""
+        envelope = {
+            "job_id": "job_policy_002",
+            "foundup_id": "kosei",
+            "tenant_id": "tenant_bob",
+            "requested_action": "validate_foundup",
+            "compute_tier": "freemium",
+            "model_preference": "auto",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.model_routing_policy_validated is True
+
+    def test_freemium_with_standard_fails(self):
+        """freemium tier with standard preference fails."""
+        envelope = {
+            "job_id": "job_policy_003",
+            "foundup_id": "move2japan",
+            "tenant_id": "tenant_carol",
+            "requested_action": "extract_foundup",
+            "compute_tier": "freemium",
+            "model_preference": "standard",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.MODEL_PREFERENCE_NOT_ALLOWED_FOR_TIER
+        assert "standard" in result.validation_message
+        assert "freemium" in result.validation_message
+        assert result.model_routing_policy_validated is False
+
+    def test_freemium_with_premium_fails(self):
+        """freemium tier with premium preference fails."""
+        envelope = {
+            "job_id": "job_policy_004",
+            "foundup_id": "social_twin",
+            "tenant_id": "tenant_dave",
+            "requested_action": "build_foundup",
+            "compute_tier": "freemium",
+            "model_preference": "premium",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.MODEL_PREFERENCE_NOT_ALLOWED_FOR_TIER
+        assert "premium" in result.validation_message
+        assert result.model_routing_policy_validated is False
+
+
+class TestBasicTierModelRouting:
+    """Test basic tier model preference restrictions."""
+
+    def test_basic_with_free_passes(self):
+        """basic tier with free preference passes."""
+        envelope = {
+            "job_id": "job_policy_005",
+            "foundup_id": "pqn_portal",
+            "tenant_id": "tenant_eve",
+            "requested_action": "validate_foundup",
+            "compute_tier": "basic",
+            "model_preference": "free",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.model_routing_policy_validated is True
+
+    def test_basic_with_standard_passes(self):
+        """basic tier with standard preference passes."""
+        envelope = {
+            "job_id": "job_policy_006",
+            "foundup_id": "gotjunk",
+            "tenant_id": "tenant_frank",
+            "requested_action": "build_foundup",
+            "compute_tier": "basic",
+            "model_preference": "standard",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.model_routing_policy_validated is True
+        assert "basic" in result.model_routing_policy_reason
+        assert "standard" in result.model_routing_policy_reason
+
+    def test_basic_with_auto_passes(self):
+        """basic tier with auto preference passes."""
+        envelope = {
+            "job_id": "job_policy_007",
+            "foundup_id": "kosei",
+            "tenant_id": "tenant_grace",
+            "requested_action": "extract_foundup",
+            "compute_tier": "basic",
+            "model_preference": "auto",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.model_routing_policy_validated is True
+
+    def test_basic_with_premium_fails(self):
+        """basic tier with premium preference fails."""
+        envelope = {
+            "job_id": "job_policy_008",
+            "foundup_id": "move2japan",
+            "tenant_id": "tenant_hank",
+            "requested_action": "validate_foundup",
+            "compute_tier": "basic",
+            "model_preference": "premium",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is False
+        assert result.validation_code == EnvelopeValidationCode.MODEL_PREFERENCE_NOT_ALLOWED_FOR_TIER
+        assert "premium" in result.validation_message
+        assert "basic" in result.validation_message
+        assert result.model_routing_policy_validated is False
+
+
+class TestEnterpriseTierModelRouting:
+    """Test enterprise tier allows all model preferences."""
+
+    def test_enterprise_with_free_passes(self):
+        """enterprise tier with free preference passes."""
+        envelope = {
+            "job_id": "job_policy_009",
+            "foundup_id": "social_twin",
+            "tenant_id": "tenant_ivan",
+            "requested_action": "build_foundup",
+            "compute_tier": "enterprise",
+            "model_preference": "free",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.model_routing_policy_validated is True
+
+    def test_enterprise_with_standard_passes(self):
+        """enterprise tier with standard preference passes."""
+        envelope = {
+            "job_id": "job_policy_010",
+            "foundup_id": "pqn_portal",
+            "tenant_id": "tenant_judy",
+            "requested_action": "validate_foundup",
+            "compute_tier": "enterprise",
+            "model_preference": "standard",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.model_routing_policy_validated is True
+
+    def test_enterprise_with_premium_passes(self):
+        """enterprise tier with premium preference passes."""
+        envelope = {
+            "job_id": "job_policy_011",
+            "foundup_id": "gotjunk",
+            "tenant_id": "tenant_kevin",
+            "requested_action": "extract_foundup",
+            "compute_tier": "enterprise",
+            "model_preference": "premium",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.model_routing_policy_validated is True
+        assert "enterprise" in result.model_routing_policy_reason
+        assert "premium" in result.model_routing_policy_reason
+
+    def test_enterprise_with_auto_passes(self):
+        """enterprise tier with auto preference passes."""
+        envelope = {
+            "job_id": "job_policy_012",
+            "foundup_id": "kosei",
+            "tenant_id": "tenant_larry",
+            "requested_action": "build_foundup",
+            "compute_tier": "enterprise",
+            "model_preference": "auto",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.model_routing_policy_validated is True
+
+
+class TestAutoPreferenceAllTiers:
+    """Test auto preference is valid for all tiers."""
+
+    def test_auto_with_freemium_passes(self):
+        """auto preference with freemium tier passes."""
+        envelope = {
+            "job_id": "job_policy_013",
+            "foundup_id": "move2japan",
+            "tenant_id": "tenant_mary",
+            "requested_action": "validate_foundup",
+            "compute_tier": "freemium",
+            "model_preference": "auto",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.model_routing_policy_validated is True
+
+    def test_auto_with_basic_passes(self):
+        """auto preference with basic tier passes."""
+        envelope = {
+            "job_id": "job_policy_014",
+            "foundup_id": "social_twin",
+            "tenant_id": "tenant_nancy",
+            "requested_action": "extract_foundup",
+            "compute_tier": "basic",
+            "model_preference": "auto",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.model_routing_policy_validated is True
+
+    def test_auto_with_enterprise_passes(self):
+        """auto preference with enterprise tier passes."""
+        envelope = {
+            "job_id": "job_policy_015",
+            "foundup_id": "pqn_portal",
+            "tenant_id": "tenant_oscar",
+            "requested_action": "build_foundup",
+            "compute_tier": "enterprise",
+            "model_preference": "auto",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.model_routing_policy_validated is True
+
+
+class TestModelRoutingPolicyWSP97Truth:
+    """Test model routing policy validation does not claim execution."""
+
+    def test_routing_policy_does_not_claim_verification(self):
+        """Policy validation does NOT set verification_complete=True."""
+        envelope = {
+            "job_id": "job_policy_016",
+            "foundup_id": "gotjunk",
+            "tenant_id": "tenant_paul",
+            "requested_action": "validate_foundup",
+            "compute_tier": "enterprise",
+            "model_preference": "premium",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.model_routing_policy_validated is True
+        # WSP 97: Policy validation is structural only
+        assert result.verification_complete is False
+        assert result.cabr_ready is False
+        assert result.payout_ready is False
+
+    def test_routing_policy_fields_in_serialized_result(self):
+        """Model routing policy fields appear in to_dict() output."""
+        envelope = {
+            "job_id": "job_policy_017",
+            "foundup_id": "kosei",
+            "tenant_id": "tenant_quinn",
+            "requested_action": "build_foundup",
+            "compute_tier": "basic",
+            "model_preference": "standard",
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+        result_dict = result.to_dict()
+
+        assert "model_routing_policy_validated" in result_dict
+        assert "model_routing_policy_reason" in result_dict
+        assert result_dict["model_routing_policy_validated"] is True
+        assert "basic" in result_dict["model_routing_policy_reason"]
+
+
+class TestGenericDAERoutingPolicyIgnored:
+    """Test generic DAE envelope ignores routing policy."""
+
+    def test_generic_dae_ignores_routing_policy(self):
+        """Generic DAE envelope does not validate tier/preference compatibility."""
+        envelope = {
+            "objective": "Do something generic",
+            "compute_tier": "freemium",
+            "model_preference": "premium",  # Would fail for FoundUpJob
+        }
+
+        result = validate_foundup_job_envelope(envelope)
+
+        assert result.valid is True
+        assert result.envelope_type == EnvelopeType.GENERIC_DAE
+        assert result.model_routing_policy_validated is False
 
 
 if __name__ == "__main__":
