@@ -1,5 +1,49 @@
 # HoloIndex Package ModLog
 
+## [2026-05-03] HOLOINDEX_CLI_DOCS_DISPLAY_FIX_PHASE1 — CLI Docs/Knowledge Display
+
+**Agent**: 0102 W1
+**WSP References**: WSP 22 (ModLog), WSP 50 (Pre-Action), WSP 97 (Truth)
+**Status**: COMPLETE
+
+### Summary
+
+Fixed HoloIndex CLI output to display [DOCS] and [KNOWLEDGE] search hits alongside [CODE] and [WSP].
+
+### Root Cause
+
+Three separate rendering paths needed updating:
+1. `_render_fast_search_summary()` in `_cli_main.py` - fast search mode
+2. `display_results()` and `render_prioritized_output()` in `agentic_output_throttler.py` - throttled mode
+3. `orchestrate_holoindex_request()` in `qwen_orchestrator.py` - QwenOrchestrator mode
+
+### Changes
+
+| File | Change |
+|------|--------|
+| `_cli_main.py` | Added docs_hits/knowledge_hits rendering in `_render_fast_search_summary()` |
+| `output/agentic_output_throttler.py` | Added docs/knowledge counts in summary, display sections in `display_results()` |
+| `qwen_advisor/orchestration/qwen_orchestrator.py` | Added [DOCS] and [KNOWLEDGE] to search results output |
+| `tests/test_cli_docs_display.py` | 7 tests for docs/knowledge rendering |
+
+### Verification
+
+```bash
+python holo_index.py --search "WRE Gateway Adapter" --ssd E:/HoloIndex
+# Output now shows:
+#   [DOCS] docs/architecture/WRE_GATEWAY_ADAPTER_DESIGN.md
+#   [KNOWLEDGE] WSP_knowledge/docs/Papers/...
+```
+
+### WSP 97 Compliance
+
+- No indexing behavior changed
+- No search ranking changed
+- No TurboQuant defaults changed
+- Display-only fix
+
+---
+
 ## [2026-05-03] HOLOINDEX_INDEX_REFRESH_REPAIR_PHASE1 — Docs Index Repair
 
 **Agent**: 0102
