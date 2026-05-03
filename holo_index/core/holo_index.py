@@ -496,6 +496,16 @@ class HoloIndex:
         from .indexing_engine import index_wsp_entries as _idx_wsp
         _idx_wsp(self, paths)
 
+    def index_docs_entries(self) -> None:
+        """CFZ4: Index module/root docs into navigation_docs collection."""
+        from .indexing_engine import index_docs_entries as _idx_docs
+        _idx_docs(self)
+
+    def index_knowledge_entries(self) -> None:
+        """CFZ4: Index papers/research into navigation_knowledge collection."""
+        from .indexing_engine import index_knowledge_entries as _idx_knowledge
+        _idx_knowledge(self)
+
     def index_test_registry(self) -> None:
         """WSP 98: Ingest the WSP Test Registry into ChromaDB for semantic search."""
         from .indexing_engine import index_test_registry as _idx_test

@@ -596,6 +596,8 @@ def main():
     parser.add_argument('--reindex-skillz', dest='index_skills', action='store_true', help='Alias for --index-skillz')
     parser.add_argument('--index-cli', dest='index_cli', action='store_true', help='Index CLI entrypoints → AGENT_CLI_CATALOG.md (command rolodex)')
     parser.add_argument('--wsp-path', type=str, nargs='*', help='Custom WSP paths to index')
+    parser.add_argument('--index-docs', action='store_true', help='Index module/root docs into navigation_docs (CFZ4)')
+    parser.add_argument('--index-knowledge', action='store_true', help='Index papers/research into navigation_knowledge (CFZ4)')
     parser.add_argument('--code-index', action='store_true', help='Enable full code index mode: function indexing + inefficiency analysis + detailed mermaid diagrams')
     parser.add_argument('--dae-cubes', action='store_true', help='Enable DAE cube mapping')
     parser.add_argument('--function-index', action='store_true', help='Enable function-level indexing')
@@ -943,6 +945,24 @@ def main():
         except Exception as e:
             print(f"[WARN] Failed to record WSP index refresh: {e}")
 
+        indexing_awarded = True
+    
+    # CFZ4: Index module/root docs
+    index_docs = getattr(args, 'index_docs', False) or args.index_all
+    if index_docs:
+        start_time = time.time()
+        holo.index_docs_entries()
+        duration = time.time() - start_time
+        safe_print(f"[DOCS] Indexed module/root docs in {duration:.2f}s")
+        indexing_awarded = True
+    
+    # CFZ4: Index papers/research
+    index_knowledge = getattr(args, 'index_knowledge', False) or args.index_all
+    if index_knowledge:
+        start_time = time.time()
+        holo.index_knowledge_entries()
+        duration = time.time() - start_time
+        safe_print(f"[KNOWLEDGE] Indexed papers/research in {duration:.2f}s")
         indexing_awarded = True
     
     # Index SKILLz for agent discovery (Qwen/Gemma/UITars)
