@@ -1,5 +1,97 @@
 # HoloIndex Package ModLog
 
+## [2026-05-04] HIA9_CORPUS_BASELINE_RESTORATION — Critical Embedding Fix
+
+**Agent**: 0102
+**WSP References**: WSP 22 (ModLog), WSP 50 (Pre-Action), WSP 97 (Truth Boundaries)
+**Status**: COMPLETE - PARTIAL RESTORATION
+
+### Summary
+
+Investigated HIA8A benchmark regression (60.5% vs expected 86.8%). Discovered **ALL-ZERO embeddings** in
+`navigation_code`, `navigation_wsp`, `navigation_skills` collections. Re-indexed all affected collections.
+
+### Root Cause
+
+ChromaDB collections had corrupted embeddings (all-zero vectors):
+- `navigation_code`: 296 entries with `[0, 0, 0, ...]` embeddings
+- `navigation_wsp`: 117 entries with `[0, 0, 0, ...]` embeddings
+- `navigation_skills`: 59 entries with `[0, 0, 0, ...]` embeddings
+
+Zero embeddings cause `distance=1.0` for all results, making semantic search return random order.
+
+### Recovery Actions
+
+| Collection | Action | Result |
+|------------|--------|--------|
+| navigation_code | `--index-code --ssd E:/HoloIndex` | norm=1.0 restored |
+| navigation_wsp | `--index-wsp --ssd E:/HoloIndex` | norm=1.0 restored |
+| navigation_skills | `index_skillz_entries()` | norm=1.0 restored |
+| navigation_symbols | `index_symbol_entries()` | 20,000 entries indexed |
+
+### Baseline Metrics
+
+| Metric | Before | After | HIA7 Expected |
+|--------|--------|-------|---------------|
+| Top-1 | 52.6% | 73.7% | 86.8% |
+| Top-5 | 57.9% | 84.2% | 92.1% |
+
++21.1% Top-1 recovery. Remaining gap due to indexing limits and semantic drift per HIA7 analysis.
+
+### Files
+
+| File | Change |
+|------|--------|
+| `docs/audits/holoindex_search_quality/HIA9_CORPUS_BASELINE_RESTORATION.md` | NEW - full report |
+| `docs/audits/holoindex_search_quality/hia3_baseline_metrics.json` | REGENERATED |
+
+### HIA8A Impact
+
+Reranker can now be evaluated against 73.7%/84.2% baseline instead of broken 52.6%/57.9%.
+
+---
+
+## [2026-04-26] HOLOINDEX_WSP_GUARDIAN_ASCII_WARNING_AUDIT — Read-Only Audit
+
+**Agent**: 0102 W5
+**WSP References**: WSP 22 (ModLog), WSP 50 (Pre-Action), WSP 90 (UTF-8), WSP 97 (Prompting)
+**Status**: AUDIT COMPLETE - NO CHANGES TO RUNTIME
+
+### Summary
+
+Investigated warning: `[WSP-GUARDIAN] ASCII violations found: 42, remediated: 0`
+
+### Findings
+
+- **Warning Source**: `holo_index/qwen_advisor/orchestration/src/wsp_documentation_guardian.py:206`
+- **Count Reproduced**: 42 WSP_framework markdown files
+- **Classification**: 100% intentional Unicode (box drawing, arrows, math subscripts)
+- **Mojibake/Corruption**: 0 files
+- **WSP 90 Verdict**: COMPLIANT - WSP 90 governs Python entry points, not markdown
+- **WSP 97 Verdict**: COMPLIANT - No ASCII requirements
+
+### Character Breakdown
+
+| Category | Count | Status |
+|----------|-------|--------|
+| Box Drawing (U+2500-257F) | 4517 | INTENTIONAL |
+| Arrows (U+2190-21FF) | 421 | INTENTIONAL |
+| Math Symbols | 493 | INTENTIONAL |
+| Emojis | 61 | INTENTIONAL (per WSP 90 Rule 3) |
+
+### Recommendation
+
+**GUARDIAN_PATCH** - The warning is too noisy. Guardian should:
+1. Add allowlist for known-good Unicode ranges
+2. Only warn on suspicious patterns (replacement chars, private use area)
+3. Demote warning severity to INFO for documentation files
+
+### Audit Document
+
+`docs/audits/holoindex_ascii_guardian/ASCII_WARNING_AUDIT.md`
+
+---
+
 ## [2026-05-03] HOLOINDEX_CLI_DOCS_DISPLAY_FIX_PHASE1 — CLI Docs/Knowledge Display
 
 **Agent**: 0102 W1

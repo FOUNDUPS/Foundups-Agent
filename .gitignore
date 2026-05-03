@@ -334,6 +334,10 @@ docs/audits/*
 !docs/audits/holoindex_turboquant/**
 !docs/audits/hermes_swarm/
 !docs/audits/hermes_swarm/**
+!docs/audits/holoindex_ascii_guardian/
+!docs/audits/holoindex_ascii_guardian/**
+!docs/audits/holoindex_search_quality/
+!docs/audits/holoindex_search_quality/**
 docs/sessions/
 
 # WSP agentic awakening runtime state (changes every session)
