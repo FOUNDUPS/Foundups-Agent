@@ -1,5 +1,65 @@
 # HoloIndex Package ModLog
 
+## [2026-05-03] HIA8 — Agentic RAG Gate Evaluation (docs/hia8-agentic-rag-gate)
+
+**Agent**: 0102 (Worker W1)
+**WSP References**: WSP 00 (Zen State), WSP 15 (Priority), WSP 50 (Pre-Action), WSP 97 (Truth)
+**Status**: AUDIT/GATE - NO IMPLEMENTATION
+**Decision**: Recommend HIA8A Gemma Reranker Spike
+
+### Summary
+
+Evaluated whether HoloIndex should move from deterministic retrieval to agentic RAG.
+Audited current state, documented baseline evidence, scored 8 agentic RAG options.
+
+### Key Findings
+
+| Finding | Status |
+|---------|--------|
+| LLM in search hot path | NO (clean) |
+| Current top-1 | 86.8% (33/38) |
+| Current top-5 | 92.1% (35/38) |
+| Failure root causes | Semantic drift (40%), Indexing gap (40%), Ranking (20%) |
+| Gemma/Qwen available | YES (not in hot path) |
+| TurboQuant default | OFF (unchanged) |
+
+### WSP 15 Priority Matrix
+
+| Option | MPS Score | Recommendation |
+|--------|-----------|----------------|
+| A: Gemma Reranker | 3.00 | **P1 (Next)** |
+| D: Confidence Retry | 2.85 | P2 |
+| B: Corrective Retry | 2.85 | P3 |
+| F: HyDE | 2.90 | P3 |
+
+### Gate Criteria for Future Implementation
+
+- Top-1 >= 86.8% (no regression)
+- Top-5 >= 92.1% OR rationale
+- p95 latency <= 200ms
+- HOLO_USE_TURBOQUANT default unchanged
+- Feature flag defaults OFF
+- No Gemma/Qwen import in hot path unless flag enabled
+
+### WSP 97 Compliance
+
+- No LLM hot-path change in this slice
+- No claims of improved accuracy unless benchmarked
+- No automatic task creation
+- No TurboQuant default change
+- No dependency added
+
+### Files
+
+- `docs/audits/holoindex_search_quality/HIA8_AGENTIC_RAG_GATE.md` — Gate evaluation report
+- No code changes
+
+### Next Prompt
+
+`HIA8A_GEMMA_RERANKER_SPIKE_BEHIND_FLAG_PHASE1` — Implement Gemma reranker behind flag
+
+---
+
 ## [2026-05-02] HIA7B — Priority Root Indexing Gap Fix (hia7b_priority_root_fix)
 
 **Agent**: 0102 (Worker W2)
