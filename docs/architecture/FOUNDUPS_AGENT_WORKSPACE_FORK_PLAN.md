@@ -12,6 +12,8 @@
 **FoundUps Agent Workspace** is an **external compatible system** designed to provide autonomous swarm execution capabilities for FoundUps. It is:
 
 - **Forked from**: [outsourc-e/hermes-workspace](https://github.com/outsourc-e/hermes-workspace) (external repository)
+- **Verified SHA**: `6485d2002f6a5c615fa000b2d8f0945d7dadc738` (2026-05-02)
+- **Audit Reference**: [HERMES_WORKSPACE_EXTERNAL_REPO_AUDIT.md](../audits/hermes_swarm/HERMES_WORKSPACE_EXTERNAL_REPO_AUDIT.md)
 - **NOT embedded** in FoundUps Core
 - **NOT a submodule** of this repository
 - **NOT vendored** into this codebase
