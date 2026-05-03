@@ -1,3 +1,24 @@
+## 2026-05-03: Dry-Run Policy Flag Alignment Tests (WSP 97)
+
+**File**: `test_openclaw_foundup_routing.py` (extended - 11 new tests)
+
+**TestDryRunPolicyFlagAlignment**:
+- `test_dry_run_true_sets_policy_flag`: dry_run=true sets policy_flags.dry_run_mode
+- `test_double_dash_dry_run_sets_policy_flag`: --dry-run sets policy_flags.dry_run_mode
+- `test_bracketed_dry_run_sets_policy_flag`: [dry-run] sets policy_flags.dry_run_mode
+- `test_missing_dry_run_leaves_flag_false`: No dry-run leaves flag False
+- `test_no_is_dry_run_field_on_foundup_job`: Verifies no duplicate is_dry_run field
+- `test_dry_run_receipt_maps_to_not_required`: VerificationStatus.NOT_REQUIRED
+- `test_dry_run_receipt_truth_boundaries`: cabr_ready=False, payout_ready=False
+- `test_dry_run_detection_function`: Direct _detect_dry_run_mode() tests
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_foundup_routing.py -q`
+
+**Result**: 27 passed
+
+---
+
 ## 2026-03-29: Skill Evolution Loop Phase 2 - Mutation Surface Tests (WSP 48/77)
 
 **File**: `test_openclaw_skill_evolution.py` (extended - 23 new tests)

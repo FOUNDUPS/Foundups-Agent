@@ -247,7 +247,8 @@ class TestFoundupJobCreation:
         assert "status: queued" in result
         assert "requested_action:" in result
         assert "foundup_id:" in result
-        assert "next: Hermes/WRE pending" in result
+        assert "dry_run_mode:" in result
+        assert "next: FoundUpJobConsumer can drain queued jobs" in result
 
     def test_extract_action_detected(self):
         """'extract foundup gotjunk' should have action=extract."""
@@ -428,3 +429,227 @@ class TestFoundupIdExtraction:
         assert _extract_foundup_id("hermes build") is None
         assert _extract_foundup_id("start build") is None
         assert _extract_foundup_id("build foundup") is None
+
+
+# ---------------------------------------------------------------------------
+# Dry-Run Policy Flag Alignment Tests (OpenClaw 2026.5.2)
+# ---------------------------------------------------------------------------
+
+
+class TestDryRunPolicyFlagAlignment:
+    """
+    Test dry-run intent propagation into FoundUpJob.policy_flags.dry_run_mode.
+
+    WSP 97 compliance:
+        - dry_run_mode=True does NOT mean verification_complete
+        - dry_run receipt maps to VerificationStatus.NOT_REQUIRED
+        - cabr_ready remains False
+        - payout_ready remains False
+
+    Slice: OPENCLAW_DRY_RUN_POLICY_FLAG_ALIGNMENT_PHASE1
+    """
+
+    def setup_method(self):
+        """Clear job queue before each test."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            clear_job_queue,
+        )
+        clear_job_queue()
+
+    def test_dry_run_true_sets_policy_flag(self):
+        """'build gotjunk dry_run=true' should set policy_flags.dry_run_mode=True."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            dispatch_foundup,
+            get_job_queue,
+        )
+
+        mock_intent = MagicMock()
+        mock_intent.raw_message = "build foundup gotjunk dry_run=true"
+        mock_intent.sender = "test_user"
+        mock_intent.session_key = "session_dry1"
+        mock_intent.channel = "discord"
+        mock_dae = MagicMock()
+
+        result = dispatch_foundup(mock_dae, mock_intent)
+
+        queue = get_job_queue()
+        assert len(queue) == 1
+        job = queue[0]
+        assert job.policy_flags.dry_run_mode is True
+        assert job.foundup_id == "gotjunk"
+        assert "dry_run_mode: True" in result
+        assert "[DRY-RUN]" in result
+
+    def test_double_dash_dry_run_sets_policy_flag(self):
+        """'hermes build kosei --dry-run' should set policy_flags.dry_run_mode=True."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            dispatch_foundup,
+            get_job_queue,
+        )
+
+        mock_intent = MagicMock()
+        mock_intent.raw_message = "hermes build kosei --dry-run"
+        mock_intent.sender = "012"
+        mock_intent.session_key = None
+        mock_intent.channel = "local_repl"
+        mock_dae = MagicMock()
+
+        result = dispatch_foundup(mock_dae, mock_intent)
+
+        queue = get_job_queue()
+        assert len(queue) == 1
+        job = queue[0]
+        assert job.policy_flags.dry_run_mode is True
+        assert job.foundup_id == "kosei"
+        assert "[DRY-RUN]" in result
+
+    def test_bracketed_dry_run_sets_policy_flag(self):
+        """'start build social_twin [dry-run]' should set dry_run_mode=True."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            dispatch_foundup,
+            get_job_queue,
+        )
+
+        mock_intent = MagicMock()
+        mock_intent.raw_message = "start build social_twin [dry-run]"
+        mock_intent.sender = "test_user"
+        mock_intent.session_key = None
+        mock_intent.channel = "voice"
+        mock_dae = MagicMock()
+
+        dispatch_foundup(mock_dae, mock_intent)
+
+        queue = get_job_queue()
+        assert len(queue) == 1
+        assert queue[0].policy_flags.dry_run_mode is True
+        assert queue[0].foundup_id == "social_twin"
+
+    def test_missing_dry_run_leaves_flag_false(self):
+        """Normal build without dry-run should have dry_run_mode=False."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            dispatch_foundup,
+            get_job_queue,
+        )
+
+        mock_intent = MagicMock()
+        mock_intent.raw_message = "build foundup gotjunk"
+        mock_intent.sender = "test_user"
+        mock_intent.session_key = None
+        mock_intent.channel = "discord"
+        mock_dae = MagicMock()
+
+        result = dispatch_foundup(mock_dae, mock_intent)
+
+        queue = get_job_queue()
+        assert len(queue) == 1
+        job = queue[0]
+        assert job.policy_flags.dry_run_mode is False
+        assert "[DRY-RUN]" not in result
+        assert "dry_run_mode: False" in result
+
+    def test_no_is_dry_run_field_on_foundup_job(self):
+        """Verify FoundUpJob does NOT have is_dry_run field (WSP 97)."""
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            FoundUpJob,
+        )
+
+        # Canonical field is policy_flags.dry_run_mode, NOT is_dry_run
+        assert not hasattr(FoundUpJob, "is_dry_run")
+
+        # Verify policy_flags.dry_run_mode exists
+        job = FoundUpJob(job_id="test_j", tenant_id="test_t")
+        assert hasattr(job.policy_flags, "dry_run_mode")
+        assert job.policy_flags.dry_run_mode is False  # Default
+
+    def test_dry_run_receipt_maps_to_not_required(self):
+        """Dry-run job receipt should have verification_status=NOT_REQUIRED."""
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            FoundUpJob,
+            JobStatus,
+            StatusReasonCode,
+            PolicyFlags,
+        )
+        from modules.communication.moltbot_bridge.src.proof_of_compute_receipt import (
+            create_receipt_from_job,
+            VerificationStatus,
+        )
+
+        # Create a dry-run job that succeeded
+        job = FoundUpJob(
+            job_id="j_test_dry_123",
+            tenant_id="test_tenant",
+            foundup_id="test_foundup",
+            requested_action="build_foundup",
+            status=JobStatus.SUCCEEDED,
+            status_reason_code=StatusReasonCode.OK_DRY_RUN_PASSED,
+            policy_flags=PolicyFlags(dry_run_mode=True),
+        )
+
+        result = create_receipt_from_job(job)
+
+        assert result.success is True
+        assert result.receipt is not None
+        assert result.receipt.verification_status == VerificationStatus.NOT_REQUIRED
+
+    def test_dry_run_receipt_truth_boundaries(self):
+        """Dry-run receipt must have cabr_ready=False, payout_ready=False (WSP 97)."""
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            FoundUpJob,
+            JobStatus,
+            StatusReasonCode,
+            PolicyFlags,
+        )
+        from modules.communication.moltbot_bridge.src.proof_of_compute_receipt import (
+            create_receipt_from_job,
+            PayoutStatus,
+            CABRStatus,
+        )
+
+        job = FoundUpJob(
+            job_id="j_test_dry_456",
+            tenant_id="test_tenant",
+            foundup_id="test_foundup",
+            requested_action="validate_foundup",
+            status=JobStatus.SUCCEEDED,
+            status_reason_code=StatusReasonCode.OK_DRY_RUN_PASSED,
+            policy_flags=PolicyFlags(dry_run_mode=True),
+        )
+
+        result = create_receipt_from_job(job)
+
+        assert result.success is True
+        receipt = result.receipt
+
+        # WSP 97 truth boundaries
+        assert receipt.payout_status == PayoutStatus.NOT_EVALUATED
+        assert receipt.cabr_status == CABRStatus.NOT_SUBMITTED
+
+    def test_dry_run_detection_function(self):
+        """Test _detect_dry_run_mode function directly."""
+        from modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator import (
+            _detect_dry_run_mode,
+        )
+
+        # CLI flag patterns
+        assert _detect_dry_run_mode("build gotjunk --dry-run") is True
+        assert _detect_dry_run_mode("hermes build --dry_run kosei") is True
+        assert _detect_dry_run_mode("extract foundup --dryrun test") is True
+
+        # Parameter patterns
+        assert _detect_dry_run_mode("build foundup gotjunk dry_run=true") is True
+        assert _detect_dry_run_mode("validate dry-run=1 kosei") is True
+        assert _detect_dry_run_mode("start build dryrun=true gotjunk") is True
+
+        # Bracketed patterns
+        assert _detect_dry_run_mode("build foundup [dry-run] gotjunk") is True
+        assert _detect_dry_run_mode("hermes [dryrun] build") is True
+
+        # No dry-run
+        assert _detect_dry_run_mode("build foundup gotjunk") is False
+        assert _detect_dry_run_mode("hermes build kosei") is False
+
+        # Payload dry_run
+        assert _detect_dry_run_mode("build gotjunk", {"dry_run": True}) is True
+        assert _detect_dry_run_mode("build gotjunk", {"dry_run": "true"}) is True
+        assert _detect_dry_run_mode("build gotjunk", {"dryRun": 1}) is True
+        assert _detect_dry_run_mode("build gotjunk", {"dry_run": False}) is False

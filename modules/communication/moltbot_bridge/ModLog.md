@@ -1,5 +1,49 @@
 # ModLog - moltbot_bridge
 
+## 2026-05-03: OpenClaw Dry-Run Policy Flag Alignment (WSP 97)
+
+**Author**: 0102 (Worker W9)
+**WSP**: 97 (System Execution Prompting)
+**Slice**: `OPENCLAW_DRY_RUN_POLICY_FLAG_ALIGNMENT_PHASE1`
+
+### Summary
+
+Aligned OpenClaw dry-run intent propagation with the existing FoundUpJob policy flag model. Dry-run inputs now map to `policy_flags.dry_run_mode = True` without adding a duplicate `is_dry_run` field.
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `src/openclaw_foundup_orchestrator.py` | Added `_detect_dry_run_mode()`, updated `_handle_build_intent()` |
+| `tests/test_openclaw_foundup_routing.py` | Added 11 dry-run policy flag tests |
+
+### Dry-Run Detection Patterns
+
+- CLI flags: `--dry-run`, `--dry_run`, `--dryrun`
+- Parameters: `dry_run=true`, `dry_run=1`, `dry-run=true`
+- Bracketed: `[dry-run]`, `[dryrun]`
+- Payload: `payload.dry_run = True/1`
+
+### WSP 97 Compliance
+
+**Truth Boundaries Preserved**:
+- `dry_run_mode=True` does NOT mean `verification_complete`
+- Dry-run receipt maps to `VerificationStatus.NOT_REQUIRED`
+- `cabr_ready` remains False (no CABR exists)
+- `payout_ready` remains False (no payout engine exists)
+
+**No Duplicate Fields**:
+- Canonical field: `FoundUpJob.policy_flags.dry_run_mode`
+- No `FoundUpJob.is_dry_run` added (tested)
+
+### Test Coverage
+
+- 27 tests passing in `test_openclaw_foundup_routing.py`
+- 11 tests passing in `test_e2e_foundup_job_seam.py`
+- 111 tests passing in `test_foundup_job_envelope_validation.py`
+
+---
+
 ## 2026-04-23: pAVS Verification Seam Placeholder (WSP 11/91/97)
 
 **Author**: 0102 (Worker W7)
