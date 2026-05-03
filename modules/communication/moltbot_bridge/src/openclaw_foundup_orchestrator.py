@@ -58,8 +58,71 @@ _FOUNDUP_ID_STOPWORDS = frozenset({
     "a", "an", "the", "this", "that",
     "foundup", "foundups", "build", "building",
     "job", "hermes", "openclaw", "yes",
+    "dry", "run", "dryrun",  # dry-run tokens filtered from foundup_id
 })
 """Words to filter when extracting foundup_id from message."""
+
+
+# ---------------------------------------------------------------------------
+# Dry-Run Detection (OpenClaw 2026.5.2 policy flag alignment)
+# ---------------------------------------------------------------------------
+
+_DRY_RUN_PATTERNS = (
+    "--dry-run",
+    "--dry_run",
+    "--dryrun",
+    "dry_run=true",
+    "dry_run=1",
+    "dry-run=true",
+    "dry-run=1",
+    "dryrun=true",
+    "dryrun=1",
+    "[dry-run]",
+    "[dryrun]",
+)
+"""
+Patterns indicating dry-run mode for FoundUpJob creation.
+
+Maps to policy_flags.dry_run_mode = True per WSP 97.
+Aligned with OpenClaw 2026.5.2 --dry-run flag semantics.
+"""
+
+
+def _detect_dry_run_mode(message: str, payload: dict | None = None) -> bool:
+    """
+    Detect dry-run intent from message or payload.
+
+    Supported patterns:
+      - --dry-run, --dry_run, --dryrun (CLI flag style)
+      - dry_run=true, dry_run=1 (parameter style)
+      - dry-run=true, dry-run=1 (hyphenated parameter)
+      - [dry-run], [dryrun] (bracketed marker)
+      - payload.dry_run = True/true/1 (if present)
+
+    Args:
+        message: Raw message text to scan
+        payload: Optional payload dict to check
+
+    Returns:
+        True if dry-run mode detected, False otherwise
+
+    WSP 97: This detection does NOT mean execution happened.
+            It only sets policy_flags.dry_run_mode for downstream consumers.
+    """
+    msg_lower = message.lower()
+
+    # Check message patterns
+    for pattern in _DRY_RUN_PATTERNS:
+        if pattern in msg_lower:
+            return True
+
+    # Check payload if provided
+    if payload:
+        dry_run_val = payload.get("dry_run") or payload.get("dryRun") or payload.get("dryrun")
+        if dry_run_val in (True, "true", "True", "1", 1):
+            return True
+
+    return False
 
 
 def _is_explicit_build_intent(message: str) -> bool:
@@ -753,8 +816,14 @@ def _handle_build_intent(intent: Any) -> str:
 
     WSP 97 Truth Fields:
         - policy_flags are NOT set to passed (no gates checked yet)
+        - policy_flags.dry_run_mode set if dry-run detected in message/payload
         - status_reason reflects creation, not execution
         - evidence_refs are empty (nothing proven yet)
+
+    Dry-Run Detection (OpenClaw 2026.5.2 alignment):
+        - --dry-run, dry_run=true, [dry-run] patterns in message
+        - payload.dry_run = True/1 if present
+        - Maps to policy_flags.dry_run_mode = True
 
     Args:
         intent: Classified OpenClawIntent with build message
@@ -778,6 +847,9 @@ def _handle_build_intent(intent: Any) -> str:
         "source": "openclaw_foundup_orchestrator",
     }
 
+    # Detect dry-run mode from message or payload
+    is_dry_run = _detect_dry_run_mode(raw_message, payload)
+
     # Create job
     job = create_job(
         tenant_id=sender,
@@ -787,6 +859,11 @@ def _handle_build_intent(intent: Any) -> str:
         payload=payload,
         generate_idempotency=True,
     )
+
+    # Set dry_run_mode policy flag if detected
+    if is_dry_run:
+        job.policy_flags.dry_run_mode = True
+
     job.status_reason_human = (
         "FoundUpJob queued by OpenClaw explicit build intent; "
         "Hermes/WRE execution not started."
@@ -805,11 +882,13 @@ def _handle_build_intent(intent: Any) -> str:
 
     # Build response
     foundup_str = foundup_id if foundup_id else "(none specified)"
+    dry_run_str = " [DRY-RUN]" if job.policy_flags.dry_run_mode else ""
     return (
-        f"FoundUpJob created:\n"
+        f"FoundUpJob created{dry_run_str}:\n"
         f"  job_id: {job.job_id}\n"
         f"  status: {job.status.value}\n"
         f"  requested_action: {requested_action}\n"
         f"  foundup_id: {foundup_str}\n"
+        f"  dry_run_mode: {job.policy_flags.dry_run_mode}\n"
         f"  next: FoundUpJobConsumer can drain queued jobs"
     )
