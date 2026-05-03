@@ -190,6 +190,24 @@ Complementary FoundUps runtime rule:
 - **Next**: Enhanced cross-platform coordination protocols
 - **Location**: `modules/infrastructure/wre_core/`
 
+#### **[BOT] WRE Hermes Executor Lane** [U+1F6A7] **DRY-RUN OPERATIONAL**
+- **Adapter seam**: Landed (PR #478) — HermesJobExecutor maps FoundUpJob to delegate_task contract
+- **Workspace binding**: Landed (PR #478) — Path constraints, evidence output path, blocked paths
+- **Checkpoint protocol**: Landed (PR #479) — STATE/RESULT/BLOCKER/NEXT_ACTION fields in result
+- **Evidence collection**: Landed (PR #479) — metadata.json + checkpoint.json in `.hermes_evidence/{job_id}/`
+- **Live delegation**: BLOCKED — `HERMES_DELEGATE_ENABLED=0` default, real execution not implemented
+- **Next priority**: `WRE_HERMES_EXECUTOR_CONSUMER_BINDING_DRY_RUN_PHASE1` — Wire executor into FoundUpJobConsumer drain loop
+- **WSP 97**: All truth fields remain false (real_execution_performed, verification_complete, cabr_ready, payout_ready)
+- **Location**: `modules/infrastructure/wre_core/src/hermes_job_executor.py`
+
+#### **[U+1F310] FoundUps Agent Workspace** [TARGET] **PLANNED EXTERNAL SYSTEM**
+- **Status**: Fork/adaptation plan complete — based on `outsourc-e/hermes-workspace`
+- **Positioning**: External compatible system, not FoundUps core
+- **Integration surface**: WSP task packets, WRE gateway APIs, OpenClaw intents, receipts, pAVS truth fields
+- **What it provides**: Swarm UI, Kanban board, tmux workers, checkpoint routing, lifecycle management
+- **What FoundUps provides**: WSP governance, FoundUpJob queue, CABR verification, evidence collection
+- **Plan location**: `docs/audits/hermes_swarm/FOUNDUPS_AGENT_WORKSPACE_FORK_PLAN.md`
+
 ### **[U+1F4E1] Auto Meeting Orchestration Ecosystem** [OK] **COMPLETE**
 
 #### **Strategic Decomposition Achievement** [OK] **PHASE 1 COMPLETE**
