@@ -208,7 +208,8 @@ Complementary FoundUps runtime rule:
 - **What it provides**: Swarm UI, Kanban board, tmux workers, autonomous execution runtime
 - **What FoundUps provides**: WSP governance, FoundUpJob queue, CABR verification, policy gates
 - **Plan location**: `docs/architecture/FOUNDUPS_AGENT_WORKSPACE_FORK_PLAN.md`
-- **WSP 15 Priority**: P0 (docs) complete, P1 (gateway design) next
+- **Gateway contract**: `docs/architecture/WRE_GATEWAY_ADAPTER_DESIGN.md`
+- **WSP 15 Priority**: P0 (fork plan) complete, P1 (gateway design) complete, P2 (external repo inspection) next
 - **WSP 97 Truth**: No live delegation enabled, evidence is observability only
 
 ### **[U+1F4E1] Auto Meeting Orchestration Ecosystem** [OK] **COMPLETE**
