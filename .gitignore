@@ -7,6 +7,10 @@
 .consciousness_migration_backup/
 .consciousness_migration_log.json
 
+# Hermes evidence artifacts (test/dry-run outputs)
+.hermes_evidence/
+**/.hermes_evidence/
+
 # WSP 3: Module artifacts should stay in modules/
 # Firebase rules belong in modules/foundups/gotjunk/firestore.rules
 /firestore.rules

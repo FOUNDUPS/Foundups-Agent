@@ -1,5 +1,26 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-03: WRE Hermes executor consumer binding tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_consumer.py -v`
+- Status: PASS
+- Result: `30 passed`
+- Notes:
+  - Refactored `TestHermesDispatch` (3 tests) - mocks WRE executor path
+  - Renamed `TestConsumerResultReceiptBinding` → `TestConsumerResultCheckpointBinding`
+  - Added checkpoint/evidence field assertions to dispatch tests
+  - Added `test_wre_dry_run_job_retained_with_evidence` - retention semantics
+  - Updated `test_closed_loop_dry_run_proof_single_result` for checkpoint evidence
+  - Updated `test_blocked_wre_result_has_checkpoint_evidence` for blocked checkpoint
+- WSP 97 Coverage (Phase 1C):
+  - ConsumerResult.checkpoint_state from WRE executor
+  - ConsumerResult.evidence_path from WRE executor
+  - ConsumerResult.real_execution_performed=False always
+  - No receipt emission for dry-run (evidence in checkpoint files)
+  - to_dict() always includes WSP 97 truth fields
+
+---
+
 ## 2026-05-03: Hermes checkpoint protocol tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.py -v`

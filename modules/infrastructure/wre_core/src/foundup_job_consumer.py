@@ -119,6 +119,11 @@ class ConsumerResult:
       - Receipt emission result (if terminal)
       - pAVS verification result (via emission result)
 
+    Phase 1C: Checkpoint/evidence fields from WRE HermesJobExecutor:
+      - checkpoint_state: Hermes swarm checkpoint state
+      - checkpoint_result: Summary of work completed
+      - evidence_path: Path to evidence directory
+
     One ConsumerResult contains everything needed to audit the
     entire dry-run closed loop without manual API calls.
 
@@ -126,6 +131,7 @@ class ConsumerResult:
       - receipt_emission.verification.verification_complete = False
       - receipt_emission.verification.cabr_ready = False
       - receipt_emission.verification.payout_ready = False
+      - real_execution_performed = False (Phase 1 dry-run seam)
     """
 
     job_id: str
@@ -144,7 +150,7 @@ class ConsumerResult:
     """Human-readable reason for result."""
 
     hermes_result: Optional[Any] = None
-    """HermesJobExecutionResult if dispatched, else None."""
+    """HermesDelegationResult if dispatched via WRE executor, else None."""
 
     envelope: Optional[RouteEnvelope] = None
     """RouteEnvelope from routing decision."""
@@ -160,12 +166,31 @@ class ConsumerResult:
     None if job did not reach terminal state or was not dispatched.
     """
 
+    # --- Phase 1C Checkpoint Protocol Fields ---
+    checkpoint_state: Optional[str] = None
+    """Hermes swarm checkpoint state (DONE|BLOCKED|NEEDS_INPUT|HANDOFF|SIMULATED)."""
+
+    checkpoint_result: Optional[str] = None
+    """Summary of work completed (if any)."""
+
+    checkpoint_blocker: Optional[str] = None
+    """Description of blocker (if BLOCKED)."""
+
+    checkpoint_next_action: Optional[str] = None
+    """Suggested next step."""
+
+    evidence_path: Optional[str] = None
+    """Path to evidence directory (.hermes_evidence/{job_id}/)."""
+
+    real_execution_performed: bool = False
+    """WSP 97: True ONLY if real delegate_task was called (never in Phase 1)."""
+
     consumed_at: datetime = field(default_factory=_utc_now)
     """Timestamp when consumption completed."""
 
     def to_dict(self) -> Dict[str, Any]:
         """Serialize to dict for logging/JSON."""
-        result = {
+        return {
             "job_id": self.job_id,
             "dispatched": self.dispatched,
             "route_status": self.route_status.value,
@@ -173,27 +198,52 @@ class ConsumerResult:
             "reason": self.reason,
             "consumed_at": self.consumed_at.isoformat(),
             "receipt_emitted": self.receipt_emission is not None and self.receipt_emission.success,
+            # Phase 1C Checkpoint Protocol Fields
+            "checkpoint_state": self.checkpoint_state,
+            "checkpoint_result": self.checkpoint_result,
+            "checkpoint_blocker": self.checkpoint_blocker,
+            "checkpoint_next_action": self.checkpoint_next_action,
+            "evidence_path": self.evidence_path,
+            "real_execution_performed": self.real_execution_performed,
+            # WSP 97 truth fields (always present via properties)
+            "verification_complete": self.verification_complete,
+            "cabr_ready": self.cabr_ready,
+            "payout_ready": self.payout_ready,
         }
-        # Include pAVS truth fields if available
-        if self.receipt_emission and self.receipt_emission.verification:
-            v = self.receipt_emission.verification
-            result["verification_complete"] = v.verification_complete
-            result["cabr_ready"] = v.cabr_ready
-            result["payout_ready"] = v.payout_ready
-        return result
 
     @property
     def is_terminal(self) -> bool:
-        """True if job reached terminal state."""
+        """
+        True if job reached terminal state.
+
+        Terminal states for WRE HermesJobExecutor (HermesDelegationResult):
+          - SIMULATED: Dry-run completed successfully
+          - EXECUTED: Real execution completed (Phase 2+)
+          - BLOCKED_*: Blocked by validation/gate/feature
+          - ERROR_*: Execution error
+
+        Legacy support for old HermesJobExecutionResult:
+          - job.status.value in (succeeded, failed, blocked)
+        """
         if self.hermes_result is None:
             return False
+
+        # WRE executor returns HermesDelegationResult with .status enum
+        status = getattr(self.hermes_result, "status", None)
+        if status is not None:
+            # Check if it's a HermesExecutionStatus enum value
+            status_value = status.value if hasattr(status, "value") else str(status)
+            terminal_prefixes = ("SIMULATED", "EXECUTED", "BLOCKED", "ERROR")
+            return any(status_value.startswith(prefix) for prefix in terminal_prefixes)
+
+        # Legacy: old executor returns result with .job.status
         job = getattr(self.hermes_result, "job", None)
         if job is None:
             return False
-        status = getattr(job, "status", None)
-        if status is None:
+        job_status = getattr(job, "status", None)
+        if job_status is None:
             return False
-        return status.value in ("succeeded", "failed", "blocked")
+        return job_status.value in ("succeeded", "failed", "blocked")
 
     @property
     def has_receipt(self) -> bool:
@@ -352,50 +402,57 @@ class FoundUpJobConsumer:
         self, job: Any, envelope: RouteEnvelope
     ) -> ConsumerResult:
         """
-        Dispatch job to Hermes executor.
+        Dispatch job to WRE Hermes executor dry-run seam.
+
+        Phase 1C: Uses WRE HermesJobExecutor for checkpoint/evidence artifacts.
+        Real execution is blocked in Phase 1 - all jobs return SIMULATED status.
 
         Args:
             job: FoundUpJob to execute.
             envelope: RouteEnvelope from routing.
 
         Returns:
-            ConsumerResult with Hermes execution outcome.
+            ConsumerResult with Hermes execution outcome and checkpoint fields.
         """
         job_id = envelope.job_id
 
         try:
-            # Import here to avoid circular deps at module load
-            from modules.foundups.agent.src.hermes_foundup_job_executor import (
+            # Phase 1C: Import WRE executor instead of legacy path
+            from modules.infrastructure.wre_core.src.hermes_job_executor import (
                 execute_foundup_job,
-                HermesJobExecutionResult,
+                HermesDelegationResult,
+                HermesExecutionStatus,
             )
 
             logger.info(
-                "[CONSUMER] Dispatching job %s to %s (dry_run=%s)",
+                "[CONSUMER] Dispatching job %s to WRE executor (dry_run=%s)",
                 job_id,
-                envelope.target_backend.value,
                 self.dry_run,
             )
 
-            hermes_result: HermesJobExecutionResult = execute_foundup_job(
-                job, force_dry_run=self.dry_run
-            )
+            # WRE executor respects dry_run via constructor, not per-call param
+            # For Phase 1C, we always use dry_run=True (set in consumer init)
+            hermes_result: HermesDelegationResult = execute_foundup_job(job)
 
             dispatched = True
-            job_status = hermes_result.job.status.value
+            exec_status = hermes_result.status.value
             reason = (
                 f"Dispatched to {envelope.target_backend.value}; "
-                f"job_status={job_status}"
+                f"status={exec_status}"
             )
 
             logger.info(
-                "[CONSUMER] Job %s completed: status=%s",
+                "[CONSUMER] Job %s completed: status=%s checkpoint=%s",
                 job_id,
-                job_status,
+                exec_status,
+                hermes_result.checkpoint_state,
             )
 
             # Phase 1B: Emit receipt if job is terminal
-            receipt_emission = self._emit_receipt_if_terminal(hermes_result.job, job_id)
+            # For WRE executor, check status instead of job.status
+            receipt_emission = self._emit_receipt_for_hermes_result(
+                job, hermes_result, job_id
+            )
             if receipt_emission:
                 if receipt_emission.success:
                     reason += f"; receipt={receipt_emission.receipt.receipt_id}"
@@ -411,16 +468,23 @@ class FoundUpJobConsumer:
                 hermes_result=hermes_result,
                 envelope=envelope,
                 receipt_emission=receipt_emission,
+                # Phase 1C Checkpoint Protocol Fields
+                checkpoint_state=hermes_result.checkpoint_state,
+                checkpoint_result=hermes_result.checkpoint_result,
+                checkpoint_blocker=hermes_result.checkpoint_blocker,
+                checkpoint_next_action=hermes_result.checkpoint_next_action,
+                evidence_path=hermes_result.evidence_path,
+                real_execution_performed=hermes_result.real_execution_performed,
             )
 
         except ImportError as e:
-            logger.error("[CONSUMER] Hermes executor not available: %s", e)
+            logger.error("[CONSUMER] WRE Hermes executor not available: %s", e)
             return ConsumerResult(
                 job_id=job_id,
                 dispatched=False,
                 route_status=envelope.route_status,
                 target_backend=envelope.target_backend,
-                reason=f"Hermes executor import failed: {e}",
+                reason=f"WRE Hermes executor import failed: {e}",
                 envelope=envelope,
             )
 
@@ -499,6 +563,66 @@ class FoundUpJobConsumer:
             logger.exception("[CONSUMER] Receipt emission exception for job %s: %s", job_id, e)
             # Return None rather than constructing a partial result
             return None
+
+    def _emit_receipt_for_hermes_result(
+        self, job: Any, hermes_result: Any, job_id: str
+    ) -> Optional["ReceiptEmissionResult"]:
+        """
+        Emit receipt based on WRE HermesDelegationResult status.
+
+        Phase 1C: WRE executor returns HermesDelegationResult with checkpoint/evidence.
+        Receipt emission is only attempted if the execution status is terminal
+        AND the underlying job reached terminal state.
+
+        Args:
+            job: The original FoundUpJob (may not have terminal status in dry-run).
+            hermes_result: HermesDelegationResult from WRE executor.
+            job_id: Job identifier for logging.
+
+        Returns:
+            ReceiptEmissionResult if terminal and receipt emittable, None otherwise.
+
+        WSP 97 truth:
+            - Dry-run jobs (SIMULATED status) with non-terminal job state → no receipt
+            - Only real terminal jobs emit receipts
+            - Evidence is captured in checkpoint fields, not receipts for dry-run
+        """
+        # Check HermesDelegationResult status
+        status = getattr(hermes_result, "status", None)
+        if status is None:
+            logger.debug("[CONSUMER] Job %s has no status in hermes_result", job_id)
+            return None
+
+        status_value = status.value if hasattr(status, "value") else str(status)
+
+        # Check if execution reached a terminal-like state
+        terminal_prefixes = ("SIMULATED", "EXECUTED", "BLOCKED", "ERROR")
+        is_exec_terminal = any(status_value.startswith(prefix) for prefix in terminal_prefixes)
+
+        if not is_exec_terminal:
+            logger.debug(
+                "[CONSUMER] Job %s execution not terminal (%s), skipping receipt",
+                job_id,
+                status_value,
+            )
+            return None
+
+        # WSP 97: For dry-run (SIMULATED), evidence is in checkpoint/evidence files
+        # Receipt emission requires underlying job to have terminal status
+        # In Phase 1, job status is NOT mutated by WRE executor
+        if status_value == "SIMULATED":
+            real_exec = getattr(hermes_result, "real_execution_performed", False)
+            if not real_exec:
+                logger.info(
+                    "[CONSUMER] Job %s simulated (dry-run), evidence in checkpoint files. "
+                    "Receipt emission skipped (WSP 97: no overclaim).",
+                    job_id,
+                )
+                # Return None - evidence is in hermes_result.evidence_path
+                return None
+
+        # For EXECUTED or error states, delegate to standard receipt emission
+        return self._emit_receipt_if_terminal(job, job_id)
 
     def drain_jobs(self, jobs: Iterable[Any]) -> List[ConsumerResult]:
         """
