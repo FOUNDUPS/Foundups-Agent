@@ -369,21 +369,32 @@ def index_symbol_entries(holo: "HoloIndex", roots: Optional[List[Path]] = None) 
         holo._log_agent_action("Symbol index empty - no entries added", "WARN")
 
 
-def index_wsp_entries(holo: "HoloIndex") -> None:
+def index_wsp_entries(holo: "HoloIndex", paths: Optional[List[Path]] = None) -> None:
     """Index WSP protocol documents into ChromaDB.
 
-    CFZ4: ONLY indexes true WSP protocols from WSP_framework/src/WSP_*.md.
+    CFZ4: ONLY indexes true WSP protocols (WSP_*.md files).
     Module docs, papers, and other content go to separate collections.
+
+    Args:
+        holo: HoloIndex instance
+        paths: Optional list of paths to search for WSP_*.md files.
+               If None, defaults to WSP_framework/src.
+               WSP purity enforced: Only WSP_*.md files are indexed regardless of paths.
     """
-    # CFZ4: WSP protocols ONLY from WSP_framework/src
-    wsp_src_path = holo.project_root / "WSP_framework" / "src"
+    # CFZ4: WSP protocols from specified paths or default to WSP_framework/src
+    if paths is None:
+        wsp_roots = [holo.project_root / "WSP_framework" / "src"]
+    else:
+        wsp_roots = [Path(p) if not isinstance(p, Path) else p for p in paths]
 
-    if not wsp_src_path.exists():
-        holo._log_agent_action(f"WSP source path not found: {wsp_src_path}", "WARN")
-        return
-
-    # Only WSP_*.md files are true protocols
-    all_wsp_files = sorted(wsp_src_path.glob("WSP_*.md"))
+    # Collect WSP_*.md files from all roots
+    all_wsp_files: List[Path] = []
+    for wsp_root in wsp_roots:
+        if not wsp_root.exists():
+            holo._log_agent_action(f"WSP path not found: {wsp_root}", "WARN")
+            continue
+        # CFZ4 purity: Only WSP_*.md files, even from custom paths
+        all_wsp_files.extend(sorted(wsp_root.glob("WSP_*.md")))
     files = [
         f for f in all_wsp_files
         if not any(part.startswith('.') for part in f.parts)

@@ -1,5 +1,46 @@
 # HoloIndex Package ModLog
 
+## [2026-05-03] HOLOINDEX_INDEX_REFRESH_REPAIR_PHASE1 — Docs Index Repair
+
+**Agent**: 0102
+**WSP References**: WSP 22 (ModLog), WSP 50 (Pre-Action), CFZ4 (Collection Separation)
+**Status**: COMPLETE
+
+### Summary
+
+Repaired HoloIndex indexing so post-merge docs (README.md, INTERFACE.md) can be indexed and discovered. Fixed TypeError in `index_wsp_entries`, exposed `index_docs_entries`/`index_knowledge_entries` methods, added `--index-docs`/`--index-knowledge` CLI flags.
+
+### Changes
+
+| File | Change |
+|------|--------|
+| `core/indexing_engine.py` | Added `paths: Optional[List[Path]] = None` parameter to `index_wsp_entries` for custom path indexing while enforcing WSP purity (only WSP_*.md files indexed) |
+| `core/holo_index.py` | Exposed `index_docs_entries()` and `index_knowledge_entries()` wrapper methods |
+| `_cli_main.py` | Added `--index-docs` and `--index-knowledge` CLI flags, handlers integrate with `--index-all` |
+| `tests/test_index_refresh_repair.py` | 12 tests covering signature, WSP purity, HoloIndex exposure, CLI flags, no destructive actions |
+
+### CFZ4 Collection Separation
+
+- `navigation_wsp`: WSP protocols only (WSP_*.md)
+- `navigation_docs`: Module/root docs (README.md, INTERFACE.md, ModLog.md)
+- `navigation_knowledge`: Papers/research (WSP_knowledge/docs/Papers/**)
+
+### Verification
+
+```bash
+python holo_index.py --index-docs    # 81.79s - indexed module/root docs
+python holo_index.py --index-knowledge  # 1.45s - indexed papers/research
+python holo_index.py --search "WRE Gateway Adapter"  # Returns relevant results
+```
+
+### Safety Constraints Met
+
+- NO deletion of E:/HoloIndex, vector stores, or ChromaDB directories
+- `_reset_collection()` uses ChromaDB API (`delete_collection`/`get_or_create_collection`)
+- No `shutil.rmtree` on E:/HoloIndex paths
+
+---
+
 ## [2026-05-03] HIA8 — Agentic RAG Gate Evaluation (docs/hia8-agentic-rag-gate)
 
 **Agent**: 0102 (Worker W1)
