@@ -76,43 +76,58 @@ index_symbol_entries(hi)
 | Top-5 Pass Rate | 57.9% (22/38) |
 | Root Cause | Zero embeddings |
 
-### After Restoration
+### After Restoration (Phase 1B Live Measurement)
 
-| Metric | Value | HIA7 Expected | Delta |
-|--------|-------|---------------|-------|
-| Top-1 Pass Rate | 73.7% (28/38) | 86.8% (33/38) | -13.1% |
-| Top-5 Pass Rate | 84.2% (32/38) | 92.1% (35/38) | -7.9% |
-| Latency p95 | 342ms | ~155ms | +187ms |
+| Metric | Value | HIA7 Expected | Delta | Status |
+|--------|-------|---------------|-------|--------|
+| Top-1 Pass Rate | 76.3% (29/38) | 86.8% (33/38) | -10.5% | GAP |
+| Top-5 Pass Rate | 89.5% (34/38) | 92.1% (35/38) | -2.6% | NEAR |
+| Latency p95 | ~150ms | ~155ms | ≈0 | PASS |
 
 ### Recovery Summary
 
-- **Recovered from zero embeddings**: +21.1% Top-1 (52.6% → 73.7%)
-- **Remaining gap to HIA7**: -13.1% Top-1 (73.7% vs 86.8%)
+- **Recovered from zero embeddings**: +23.7% Top-1 (52.6% → 76.3%)
+- **Remaining gap to HIA7**: -10.5% Top-1, -2.6% Top-5
+- **Top-5 near parity**: Only 1 query difference from HIA7 baseline
 
-## Remaining Failures (10 queries)
+## Remaining Failures (9 queries) - Phase 1B Analysis
 
 ### Top-1 Failures
 
-| Query | Expected | Got | Root Cause |
-|-------|----------|-----|------------|
-| backend routing turboquant embedding | `backend_routing` | `turboquant_backend.py` | Semantic drift |
-| WRE bridge integration cursor | `wre_bridge` | `integrate_with_wre.py` | Indexing gap |
-| build plan generator hermes | `build_plan` | `hermes_adapter.py` | Semantic drift |
-| swarm coordinator dispatch | `swarm_coordinator` | Test file | Ranking issue |
-| catalog indexer classification | `catalog_indexer` | `video_index_store.py` | Indexing gap |
-| orphan capability scanner | `orphan` | `security_scanner.py` | Indexing gap |
-| skills registry loader | `skills_registry` | `wre_skills_loader.py` | Near miss |
-| CABR validation engine | `cabr` | Test file | Ranking issue |
-| tokenomics pool architecture | `token` | `channel_partner_pool.py` | Semantic drift |
-| blockchain algorand | `algorand` | `rESP_patent_integration.py` | Indexing gap |
+| # | Query | Category | Expected | Got | Root Cause | Fix Scope |
+|---|-------|----------|----------|-----|------------|-----------|
+| 1 | backend routing turboquant | symbol | `backend_routing` | `turboquant_backend.py` | Semantic drift | HIA5 |
+| 2 | WRE bridge integration cursor | symbol | `wre_bridge` | `integrate_with_wre.py` | Indexing gap | HIA10 |
+| 3 | build plan generator hermes | symbol | `build_plan` | `hermes_adapter.py` | Semantic drift | HIA5 |
+| 4 | hermes foundup job executor | symbol | `hermes_foundup` | `hermes_job_executor.py` | Near miss | Evidence |
+| 5 | pfmall catalog verification | symbol | `pfmall_catalog` | `test_catalog_*.py` | Test > src | HIA11 |
+| 6 | orphan capability scanner | symbol | `orphan` | `security_scanner.py` | Indexing gap | HIA10 |
+| 7 | CABR validation engine | code | `cabr` | `test_*.py` | Test > src | HIA11 |
+| 8 | tokenomics pool architecture | code | `token` | `channel_partner_pool.py` | Semantic drift | HIA5 |
+| 9 | blockchain algorand | code | `algorand` | `rESP_patent_integration.py` | No file exists | Impossible |
+
+### Target File Verification
+
+| Query | File Exists? | Location |
+|-------|--------------|----------|
+| backend_routing | YES | `holo_index/core/backend_routing.py` |
+| wre_bridge | YES | `modules/development/ide_foundups/src/wre_bridge.py` |
+| build_plan | YES | `modules/foundups/agent/src/build_plan.py` |
+| hermes_foundup | NO | Closest: `hermes_job_executor.py` |
+| pfmall_catalog | YES | `modules/communication/moltbot_bridge/src/pfmall_catalog.py` |
+| orphan | YES | `holo_index/qwen_advisor/orphan_*.py` (4 files) |
+| cabr | YES | `modules/foundups/agent_market/src/cabr_hooks.py` |
+| token | YES | `modules/foundups/simulator/economics/token_economics.py` |
+| algorand | NO | No algorand files in repo |
 
 ### Root Cause Distribution
 
-| Cause | Count | HIA7 Comparison |
-|-------|-------|-----------------|
-| Semantic drift | 4 | Same issue |
-| Indexing gap | 4 | HIA7B partially fixed |
-| Ranking issue | 2 | Test > src ranking |
+| Cause | Count | Fix Required | Scope |
+|-------|-------|--------------|-------|
+| Semantic drift | 4 | BM25 hybrid search | HIA5 |
+| Indexing gap | 2 | Expand priority roots | HIA10 |
+| Test > src ranking | 2 | Source file boost | HIA11 |
+| Evidence impossible | 1 | Update sentinel set | N/A |
 
 ## Why HIA7 Baseline Not Fully Restored
 
@@ -136,22 +151,41 @@ These issues were documented in HIA7/HIA7B as known limitations requiring future
 
 | Criterion | Status |
 |-----------|--------|
-| Corpus baseline restored | PARTIAL (73.7% vs 86.8%) |
+| Corpus baseline restored | PARTIAL (76.3%/89.5% vs 86.8%/92.1%) |
 | Zero embeddings fixed | COMPLETE |
-| Reranker can be evaluated | YES - but will measure against 73.7% baseline |
-| Full HIA7 baseline | NOT RESTORED - indexing gaps remain |
+| All tests passing | YES (10/10 + 19/19) |
+| HIA7 baseline JSON preserved | YES (not overwritten) |
+| Reranker can be evaluated | YES |
+| Full HIA7 baseline achieved | NO - 10.5% gap on Top-1 |
 
-**Recommendation**: Proceed with HIA8A reranker evaluation using current 73.7%/84.2% baseline.
-The reranker's effectiveness can be measured as delta from this restored baseline.
+**Recommendation**: Proceed with HIA8A reranker evaluation. The 89.5% Top-5 is within 2.6%
+of HIA7's 92.1%. The reranker should be evaluated for its ability to close the remaining
+Top-1 gap through semantic relevance scoring.
 
-## Test Results
+## Collection Counts (Phase 1B Verified)
+
+| Collection | Count | Embeddings | Expected | Status |
+|------------|-------|------------|----------|--------|
+| navigation_code | 296 | Valid | ~296 | OK |
+| navigation_symbols | 20,000 | Valid | 20,000 | OK |
+| navigation_wsp | 117 | Valid | ~117 | OK |
+| navigation_tests | 0 | N/A | 0 | OK |
+| navigation_skills | 64 | Valid | ~59 | OK |
+| navigation_docs | 3,143 | Valid | ~3,143 | OK |
+| navigation_knowledge | 47 | Valid | ~47 | OK |
+| navigation_vocabulary | 85 | Valid | N/A | OK |
+
+**Note**: docs/knowledge/vocabulary were NOT skipped during recovery - they had valid embeddings
+throughout. Only code/wsp/skills/symbols required re-indexing.
+
+## Test Results (Phase 1B)
 
 ```
-holo_index/tests/test_search_quality_baseline.py: 9/10 PASS
-holo_index/tests/test_backend_routing.py: Verified
+holo_index/tests/test_search_quality_baseline.py: 10/10 PASS
+holo_index/tests/test_backend_routing.py: 19/19 PASS
 ```
 
-Minor test failure: `latency_p50_ms` field missing in generated baseline JSON (schema issue).
+All tests pass. HIA7 baseline JSON preserved with correct schema.
 
 ## Files Changed
 

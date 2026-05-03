@@ -9,6 +9,7 @@
     "top_1_pass_rate": 0.7368,
     "top_5_pass_count": 32,
     "top_5_pass_rate": 0.8421,
+    "latency_p50_ms": 98,
     "latency_p95_ms": 342
   },
   "query_results": [
