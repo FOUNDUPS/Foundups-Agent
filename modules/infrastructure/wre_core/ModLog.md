@@ -2,6 +2,71 @@
 
 ## Chronological Change Log
 
+### [2026-05-03] - WRE_HERMES_EXECUTOR_CONSUMER_BINDING_DRY_RUN_PHASE1 (v0.8.19)
+
+**WSP Protocol References**: WSP 11 (Interface), WSP 97 (Truthful)
+**Impact Analysis**: Bind FoundUpJobConsumer to WRE HermesJobExecutor dry-run seam
+
+#### Changes Made
+
+- `src/foundup_job_consumer.py`:
+  - Added Phase 1C checkpoint/evidence fields to `ConsumerResult`:
+    - `checkpoint_state: Optional[str]` - Hermes swarm checkpoint state
+    - `checkpoint_result: Optional[str]` - Summary of work completed
+    - `checkpoint_blocker: Optional[str]` - Description of blocker (if BLOCKED)
+    - `checkpoint_next_action: Optional[str]` - Suggested next step
+    - `evidence_path: Optional[str]` - Path to evidence directory
+    - `real_execution_performed: bool` - WSP 97 truth (always False in Phase 1)
+  - Updated `to_dict()` to always include WSP 97 truth fields
+  - Updated `is_terminal` property to handle `HermesDelegationResult.status` enum
+  - Updated `_dispatch_to_hermes()` to:
+    - Import from WRE executor: `modules.infrastructure.wre_core.src.hermes_job_executor`
+    - Call `execute_foundup_job(job)` without `force_dry_run` param
+    - Populate checkpoint/evidence fields in ConsumerResult
+  - Added `_emit_receipt_for_hermes_result()` method:
+    - Skips receipt emission for dry-run (SIMULATED status)
+    - Evidence captured in checkpoint files, not receipts for Phase 1
+    - WSP 97: No overclaim for simulated jobs
+
+- `tests/test_foundup_job_consumer.py`:
+  - Updated all mock paths from old adapter to WRE executor
+  - Refactored `TestHermesDispatch` tests for WRE executor interface
+  - Renamed `TestConsumerResultReceiptBinding` → `TestConsumerResultCheckpointBinding`
+  - Updated tests to verify checkpoint/evidence fields instead of receipt
+  - 30 tests passing
+
+#### Consumer-Executor Binding Contract
+
+```
+FoundUpJobConsumer.consume_one(job)
+  → route_foundup_job(job) → RouteEnvelope
+  → _dispatch_to_hermes(job, envelope)
+      → WRE execute_foundup_job(job) → HermesDelegationResult
+      → ConsumerResult with checkpoint_state, evidence_path
+```
+
+#### WSP 97 Truth Boundaries (Phase 1C)
+
+- `real_execution_performed` = False (WRE dry-run seam only)
+- `checkpoint_state` = "SIMULATED" (no real Hermes delegation)
+- `evidence_path` = populated (observability artifact, not proof)
+- `receipt_emission` = None (no receipt for dry-run jobs)
+- `verification_complete` = False (always)
+- `cabr_ready` = False (always)
+- `payout_ready` = False (always)
+
+#### Verification
+
+```bash
+python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_consumer.py -v
+# 30 passed
+
+python -m pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.py -v
+# 94 passed
+```
+
+---
+
 ### [2026-05-03] - HERMES_EVIDENCE_COLLECTION_PHASE1 (v0.8.18)
 
 **WSP Protocol References**: WSP 11 (Interface), WSP 97 (Truthful)
