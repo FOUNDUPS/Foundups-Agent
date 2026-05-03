@@ -285,6 +285,10 @@ class ConsumerResult:
         if not self.is_terminal:
             return "not_terminal"
         if not self.has_receipt:
+            # WSP 97 truth: distinguish intentional skip from actual failure
+            # Dry-run (SIMULATED) intentionally skips receipt emission
+            if self.checkpoint_state == "SIMULATED" and not self.real_execution_performed:
+                return "dry_run_evidence_only"
             return "receipt_emission_failed"
         return "unknown"
 
@@ -583,7 +587,7 @@ class FoundUpJobConsumer:
             ReceiptEmissionResult if terminal and receipt emittable, None otherwise.
 
         WSP 97 truth:
-            - Dry-run jobs (SIMULATED status) with non-terminal job state → no receipt
+            - Dry-run jobs (SIMULATED status) with non-terminal job state -> no receipt
             - Only real terminal jobs emit receipts
             - Evidence is captured in checkpoint fields, not receipts for dry-run
         """

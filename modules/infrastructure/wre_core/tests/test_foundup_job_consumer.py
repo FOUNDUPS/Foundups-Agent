@@ -593,6 +593,55 @@ class TestRetentionSemantics:
         assert unsupported_result.should_clear is False
         assert unsupported_result.retention_reason == "action_unsupported"
 
+    def test_dry_run_simulated_retention_reason(self):
+        """
+        Dry-run SIMULATED result has truthful retention_reason.
+
+        WSP 97 proves:
+          - SIMULATED is terminal-like (is_terminal=True)
+          - receipt_emission is None (intentionally skipped)
+          - has_receipt is False
+          - should_clear is False (no receipt)
+          - retention_reason == "dry_run_evidence_only" (NOT "receipt_emission_failed")
+          - evidence_path is populated
+          - real_execution_performed is False
+        """
+        # Create ConsumerResult mimicking WRE executor dry-run output
+        simulated_result = ConsumerResult(
+            job_id="job_simulated",
+            dispatched=True,
+            route_status=RouteStatus.ROUTED,
+            target_backend=TargetBackend.HERMES_BUILDER,
+            reason="Dispatched to HERMES_BUILDER; status=SIMULATED",
+            # No receipt_emission (intentionally skipped for dry-run)
+            receipt_emission=None,
+            # Phase 1C checkpoint fields from WRE executor
+            checkpoint_state="SIMULATED",
+            checkpoint_result="Dry-run validation complete",
+            checkpoint_blocker=None,
+            checkpoint_next_action=None,
+            evidence_path=".hermes_evidence/job_simulated",
+            real_execution_performed=False,
+        )
+
+        # Mock hermes_result with SIMULATED status for is_terminal check
+        mock_hermes_result = MagicMock()
+        mock_hermes_result.status.value = "SIMULATED"
+        simulated_result.hermes_result = mock_hermes_result
+
+        # Verify all WSP 97 truth boundaries
+        assert simulated_result.is_terminal is True
+        assert simulated_result.receipt_emission is None
+        assert simulated_result.has_receipt is False
+        assert simulated_result.should_clear is False
+        assert simulated_result.retention_reason == "dry_run_evidence_only"
+        assert simulated_result.evidence_path == ".hermes_evidence/job_simulated"
+        assert simulated_result.real_execution_performed is False
+
+        # Verify checkpoint fields populated
+        assert simulated_result.checkpoint_state == "SIMULATED"
+        assert simulated_result.checkpoint_result == "Dry-run validation complete"
+
     @patch(
         "modules.communication.moltbot_bridge.src.openclaw_foundup_orchestrator.remove_jobs_by_id"
     )
