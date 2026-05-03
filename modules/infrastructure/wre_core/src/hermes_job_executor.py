@@ -30,6 +30,7 @@ Slice: HERMES_JOB_EXECUTOR_ADAPTER_PHASE1
 from __future__ import annotations
 
 import fnmatch
+import json
 import logging
 import os
 from dataclasses import dataclass, field
@@ -359,6 +360,17 @@ class HermesDelegationResult:
         duration_seconds: Wall clock time
         api_calls: Number of Hermes API calls (0 if simulated)
 
+        Checkpoint Protocol Fields (Hermes swarm format):
+        checkpoint_state: DONE|BLOCKED|NEEDS_INPUT|HANDOFF|SIMULATED
+        checkpoint_result: Summary of work completed (if any)
+        checkpoint_blocker: Description of blocker (if BLOCKED)
+        checkpoint_next_action: Suggested next step
+        files_changed: List of files modified during execution
+        commands_run: List of commands executed
+
+        Evidence Collection Fields:
+        evidence_path: Path to evidence directory (.hermes_evidence/{job_id}/)
+
         WSP 97 Truth Fields:
         real_execution_performed: True ONLY if delegate_task was called
         verification_complete: Always False (no CABR verification yet)
@@ -380,6 +392,17 @@ class HermesDelegationResult:
     duration_seconds: float = 0.0
     api_calls: int = 0
 
+    # Checkpoint Protocol Fields (Hermes swarm format)
+    checkpoint_state: str = "SIMULATED"
+    checkpoint_result: Optional[str] = None
+    checkpoint_blocker: Optional[str] = None
+    checkpoint_next_action: Optional[str] = None
+    files_changed: List[str] = field(default_factory=list)
+    commands_run: List[str] = field(default_factory=list)
+
+    # Evidence Collection Fields
+    evidence_path: Optional[str] = None
+
     # WSP 97 Truth Fields - NEVER set to True in this adapter
     real_execution_performed: bool = False
     verification_complete: bool = False
@@ -399,6 +422,16 @@ class HermesDelegationResult:
             "delegate_response": self.delegate_response,
             "duration_seconds": self.duration_seconds,
             "api_calls": self.api_calls,
+            # Checkpoint Protocol Fields
+            "checkpoint_state": self.checkpoint_state,
+            "checkpoint_result": self.checkpoint_result,
+            "checkpoint_blocker": self.checkpoint_blocker,
+            "checkpoint_next_action": self.checkpoint_next_action,
+            "files_changed": self.files_changed,
+            "commands_run": self.commands_run,
+            # Evidence Collection Fields
+            "evidence_path": self.evidence_path,
+            # WSP 97 Truth Fields
             "real_execution_performed": self.real_execution_performed,
             "verification_complete": self.verification_complete,
             "cabr_ready": self.cabr_ready,
@@ -676,7 +709,7 @@ class HermesJobExecutor:
                 "[HERMES-EXEC] Feature disabled, simulating job %s",
                 job.job_id,
             )
-            return HermesDelegationResult(
+            result = HermesDelegationResult(
                 status=HermesExecutionStatus.SIMULATED,
                 status_reason=(
                     f"Hermes delegation disabled ({_HERMES_DELEGATE_ENABLED_KEY}=0). "
@@ -689,6 +722,8 @@ class HermesJobExecutor:
                 cabr_ready=False,
                 payout_ready=False,
             )
+            result.evidence_path = self._write_evidence(job, request, result)
+            return result
 
         # Step 4: Feature enabled - check dry_run
         if self.dry_run:
@@ -696,7 +731,7 @@ class HermesJobExecutor:
                 "[HERMES-EXEC] dry_run=True, simulating job %s",
                 job.job_id,
             )
-            return HermesDelegationResult(
+            result = HermesDelegationResult(
                 status=HermesExecutionStatus.SIMULATED,
                 status_reason=(
                     f"dry_run=True, job {job.job_id} simulated. "
@@ -709,10 +744,12 @@ class HermesJobExecutor:
                 cabr_ready=False,
                 payout_ready=False,
             )
+            result.evidence_path = self._write_evidence(job, request, result)
+            return result
 
         # Step 5: Check import availability
         if not self._lazy_import_delegate_task():
-            return HermesDelegationResult(
+            result = HermesDelegationResult(
                 status=HermesExecutionStatus.BLOCKED_IMPORT_UNAVAILABLE,
                 status_reason=(
                     f"Cannot import Hermes delegate_task: {self._import_error}. "
@@ -722,13 +759,15 @@ class HermesJobExecutor:
                 duration_seconds=time.monotonic() - start_time,
                 real_execution_performed=False,
             )
+            result.evidence_path = self._write_evidence(job, request, result)
+            return result
 
         # Step 6: Real execution blocked in Phase 1
         logger.warning(
             "[HERMES-EXEC] Real delegation NOT IMPLEMENTED, blocking job %s",
             job.job_id,
         )
-        return HermesDelegationResult(
+        result = HermesDelegationResult(
             status=HermesExecutionStatus.BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED,
             status_reason=(
                 f"Real Hermes delegation not implemented in Phase 1. "
@@ -741,6 +780,8 @@ class HermesJobExecutor:
             cabr_ready=False,
             payout_ready=False,
         )
+        result.evidence_path = self._write_evidence(job, request, result)
+        return result
 
     def _validate_job(self, job: "FoundUpJob") -> Optional[str]:
         """
@@ -762,6 +803,87 @@ class HermesJobExecutor:
             return "Job missing requested_action"
 
         return None
+
+    def _write_evidence(
+        self,
+        job: "FoundUpJob",
+        request: HermesDelegationRequest,
+        result: HermesDelegationResult,
+    ) -> Optional[str]:
+        """
+        Write evidence files for job execution.
+
+        Creates .hermes_evidence/{job_id}/ directory with:
+          - metadata.json: Job identity, workspace binding, timing
+          - checkpoint.json: Checkpoint state and execution details
+
+        Evidence files are observability artifacts only (WSP 97).
+        They prove the job was processed, not that real work occurred.
+
+        Args:
+            job: Source FoundUpJob
+            request: HermesDelegationRequest that was built
+            result: HermesDelegationResult with execution outcome
+
+        Returns:
+            Absolute path to evidence directory, or None on error
+        """
+        try:
+            # Get evidence output path from workspace binding
+            evidence_dir = request.workspace_binding.evidence_output_path
+
+            # Create evidence directory
+            os.makedirs(evidence_dir, exist_ok=True)
+
+            # Build metadata.json contents
+            metadata = {
+                "job_id": job.job_id,
+                "foundup_id": job.foundup_id,
+                "tenant_id": job.tenant_id,
+                "requested_action": job.requested_action,
+                "intent_id": job.intent_id,
+                "workspace_binding": request.workspace_binding.to_dict(),
+                "started_at": request.created_at.isoformat(),
+                "completed_at": result.completed_at.isoformat(),
+                "dry_run": request.dry_run,
+                "execution_status": result.status.value,
+            }
+
+            # Write metadata.json
+            metadata_path = os.path.join(evidence_dir, "metadata.json")
+            with open(metadata_path, "w", encoding="utf-8") as f:
+                json.dump(metadata, f, indent=2, default=str)
+
+            # Build checkpoint.json contents
+            checkpoint = {
+                "state": result.checkpoint_state,
+                "result": result.checkpoint_result,
+                "blocker": result.checkpoint_blocker,
+                "next_action": result.checkpoint_next_action,
+                "files_changed": result.files_changed,
+                "commands_run": result.commands_run,
+                "exit_reason": result.status_reason,
+            }
+
+            # Write checkpoint.json
+            checkpoint_path = os.path.join(evidence_dir, "checkpoint.json")
+            with open(checkpoint_path, "w", encoding="utf-8") as f:
+                json.dump(checkpoint, f, indent=2, default=str)
+
+            logger.info(
+                "[HERMES-EXEC] Evidence written to %s",
+                evidence_dir,
+            )
+            return evidence_dir
+
+        except Exception as exc:
+            # Evidence failure must not fail job (WSP 97 observability)
+            logger.warning(
+                "[HERMES-EXEC] Failed to write evidence for job %s: %s",
+                job.job_id,
+                exc,
+            )
+            return None
 
 
 # ---------------------------------------------------------------------------
