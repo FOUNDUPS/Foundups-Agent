@@ -34,6 +34,70 @@ WSP_DOC_CONFIG = {
 }
 
 
+# Allowed Unicode ranges for documentation (intentional, not corruption)
+# Per WSP 90: emojis and Unicode are allowed in docs with proper UTF-8 encoding
+# Patch 2026-04-26: Distinguish intentional Unicode from mojibake per audit
+ALLOWED_UNICODE_RANGES = [
+    (0x00A0, 0x00FF),   # Latin-1 Supplement (accents, symbols)
+    (0x0370, 0x03FF),   # Greek and Coptic (phi, rho, Omega for math/science)
+    (0x2000, 0x206F),   # General Punctuation (dashes, spaces)
+    (0x2070, 0x209F),   # Superscripts and Subscripts (math notation)
+    (0x20A0, 0x20CF),   # Currency Symbols (Bitcoin, Euro, etc.)
+    (0x20D0, 0x20FF),   # Combining Diacritical Marks for Symbols (keycap emojis)
+    (0x2100, 0x214F),   # Letterlike Symbols
+    (0x2150, 0x218F),   # Number Forms (Roman numerals, fractions)
+    (0x2190, 0x21FF),   # Arrows
+    (0x2200, 0x22FF),   # Mathematical Operators
+    (0x2300, 0x23FF),   # Miscellaneous Technical
+    (0x2500, 0x257F),   # Box Drawing (ASCII diagrams)
+    (0x2580, 0x259F),   # Block Elements
+    (0x25A0, 0x25FF),   # Geometric Shapes
+    (0x2600, 0x26FF),   # Miscellaneous Symbols
+    (0x2700, 0x27BF),   # Dingbats
+    (0x27C0, 0x27EF),   # Miscellaneous Mathematical Symbols-A (angle brackets)
+    (0x27F0, 0x27FF),   # Supplemental Arrows-A (long arrows)
+    (0x2B00, 0x2BFF),   # Miscellaneous Symbols and Arrows
+    (0x3000, 0x303F),   # CJK Symbols and Punctuation
+    (0xFE00, 0xFE0F),   # Variation Selectors (emoji modifiers)
+    (0xFEFF, 0xFEFF),   # Zero Width No-Break Space (BOM - harmless)
+    (0x1F300, 0x1F9FF), # Emojis (Misc Symbols, Emoticons, etc.)
+]
+
+# Suspicious Unicode patterns (likely mojibake or corruption)
+SUSPICIOUS_UNICODE = [
+    0xFFFD,             # Replacement character (encoding error marker)
+]
+
+
+def is_allowed_unicode(char: str) -> bool:
+    """Check if a Unicode character is in allowed documentation ranges."""
+    code = ord(char)
+    if code <= 127:
+        return True  # ASCII is always allowed
+    for start, end in ALLOWED_UNICODE_RANGES:
+        if start <= code <= end:
+            return True
+    return False
+
+
+def is_suspicious_unicode(char: str) -> bool:
+    """Check if a Unicode character is suspicious (likely corruption)."""
+    code = ord(char)
+    # Replacement character
+    if code == 0xFFFD:
+        return True
+    # Control characters (except common whitespace)
+    if code < 32 and code not in (9, 10, 13):  # tab, LF, CR
+        return True
+    # Private Use Area
+    if 0xE000 <= code <= 0xF8FF:
+        return True
+    # Known mojibake patterns
+    if code in SUSPICIOUS_UNICODE:
+        return True
+    return False
+
+
 class WSPDocumentationGuardian:
     """
     WSP Documentation Guardian for compliance monitoring and remediation.
@@ -145,8 +209,11 @@ class WSPDocumentationGuardian:
             compliance_rate = wsp_compliant_modules / total_modules
             lines.append(f"[WSP-GUARDIAN][STATUS] WSP compliance: {wsp_compliant_modules}/{total_modules} modules ({compliance_rate:.1%})")
 
-        # ASCII compliance check with conditional remediation
-        ascii_violations = []
+        # Unicode compliance check - distinguish intentional from suspicious
+        # Per audit 2026-04-26: 42 files had intentional Unicode (box drawing, arrows, math)
+        # Only flag suspicious patterns (mojibake, replacement chars, control chars)
+        suspicious_findings = []
+        intentional_unicode_files = []
         ascii_remediated = []
 
         for file_path in wsp_related_files + wsp_framework_docs:
@@ -154,9 +221,25 @@ class WSPDocumentationGuardian:
                 with open(file_path, 'r', encoding='utf-8') as f:
                     content = f.read()
 
-                if any(ord(c) > 127 for c in content):
-                    rel_path = self._relative_path(file_path)
-                    ascii_violations.append(rel_path)
+                # Classify non-ASCII characters
+                suspicious_chars = []
+                intentional_chars = []
+                for c in content:
+                    if ord(c) > 127:
+                        if is_suspicious_unicode(c):
+                            suspicious_chars.append(c)
+                        elif not is_allowed_unicode(c):
+                            # Unknown Unicode - not in allowed list, not known suspicious
+                            # Treat as potentially suspicious for review
+                            suspicious_chars.append(c)
+                        else:
+                            intentional_chars.append(c)
+
+                rel_path = self._relative_path(file_path)
+
+                # Track files with suspicious Unicode (actual violations)
+                if suspicious_chars:
+                    suspicious_findings.append((rel_path, len(suspicious_chars), suspicious_chars[:3]))
 
                     # Conditionally remediate based on mode
                     if remediation_mode:
@@ -178,22 +261,27 @@ class WSPDocumentationGuardian:
                                 f.write(sanitized_content)
 
                             ascii_remediated.append(rel_path)
-                            remediation_actions.append(f"Auto-sanitized ASCII violations in {rel_path}")
-                            self.logger.info(f"[WSP-GUARDIAN] Auto-sanitized ASCII in {rel_path}")
+                            remediation_actions.append(f"Auto-sanitized suspicious Unicode in {rel_path}")
+                            self.logger.info(f"[WSP-GUARDIAN] Auto-sanitized suspicious Unicode in {rel_path}")
+
+                # Track files with intentional Unicode (info only, not violations)
+                elif intentional_chars:
+                    intentional_unicode_files.append((rel_path, len(intentional_chars)))
 
             except Exception as e:
-                self.logger.warning(f"[WSP-GUARDIAN] Error checking ASCII in {file_path}: {e}")
+                self.logger.warning(f"[WSP-GUARDIAN] Error checking Unicode in {file_path}: {e}")
                 continue
 
-        # Report ASCII status (always show violations, only show fixes if in remediation mode)
-        if ascii_violations:
-            violation_count = len(ascii_violations)
+        # Report Unicode status - only warn on suspicious findings
+        if suspicious_findings:
+            finding_count = len(suspicious_findings)
             if remediation_mode:
                 remediated_count = len(ascii_remediated)
-                lines.append(f"[WSP-GUARDIAN][ASCII] {violation_count} files had violations, {remediated_count} auto-remediated")
+                lines.append(f"[WSP-GUARDIAN][UNICODE] {finding_count} files had suspicious Unicode, {remediated_count} auto-remediated")
             else:
-                lines.append(f"[WSP-GUARDIAN][ASCII-WARNING] {violation_count} files have non-ASCII characters (use --fix-ascii to remediate)")
-                lines.append(f"[WSP-GUARDIAN][ASCII-VIOLATION] Non-ASCII chars in: {', '.join(ascii_violations[:3])}")
+                lines.append(f"[WSP-GUARDIAN][UNICODE-WARNING] {finding_count} files have suspicious Unicode (use --fix-ascii to remediate)")
+                sample_files = [f[0] for f in suspicious_findings[:3]]
+                lines.append(f"[WSP-GUARDIAN][UNICODE-SUSPICIOUS] Suspicious chars in: {', '.join(sample_files)}")
 
         # Execute remediation pipeline only if we actually made changes
         if remediation_actions and remediation_mode:
@@ -202,8 +290,12 @@ class WSPDocumentationGuardian:
         # Log all WSP compliance checks for continuous learning
         self.logger.info(f"[WSP-GUARDIAN] Checked {len(wsp_related_files)} WSP files, {len(wsp_framework_docs)} framework docs")
         self.logger.info(f"[WSP-GUARDIAN] Compliance rate: {wsp_compliant_modules}/{total_modules}")
-        if ascii_violations:
-            self.logger.warning(f"[WSP-GUARDIAN] ASCII violations found: {len(ascii_violations)}, remediated: {len(ascii_remediated)}")
+        # Only log intentional Unicode at INFO level (not WARNING)
+        if intentional_unicode_files:
+            self.logger.info(f"[WSP-GUARDIAN] Intentional Unicode in {len(intentional_unicode_files)} files (box drawing, arrows, math - allowed per WSP 90)")
+        # Only warn on suspicious findings
+        if suspicious_findings:
+            self.logger.warning(f"[WSP-GUARDIAN] Suspicious Unicode found: {len(suspicious_findings)} files, remediated: {len(ascii_remediated)}")
 
         return lines if lines else ["[WSP-GUARDIAN][OK] All WSP documentation compliant and up-to-date"]
 
