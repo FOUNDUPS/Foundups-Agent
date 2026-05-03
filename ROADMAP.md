@@ -200,13 +200,16 @@ Complementary FoundUps runtime rule:
 - **WSP 97**: All truth fields remain false (real_execution_performed, verification_complete, cabr_ready, payout_ready)
 - **Location**: `modules/infrastructure/wre_core/src/hermes_job_executor.py`
 
-#### **[U+1F310] FoundUps Agent Workspace** [TARGET] **PLANNED EXTERNAL SYSTEM**
-- **Status**: Fork/adaptation plan complete — based on `outsourc-e/hermes-workspace`
-- **Positioning**: External compatible system, not FoundUps core
-- **Integration surface**: WSP task packets, WRE gateway APIs, OpenClaw intents, receipts, pAVS truth fields
-- **What it provides**: Swarm UI, Kanban board, tmux workers, checkpoint routing, lifecycle management
-- **What FoundUps provides**: WSP governance, FoundUpJob queue, CABR verification, evidence collection
-- **Plan location**: `docs/audits/hermes_swarm/FOUNDUPS_AGENT_WORKSPACE_FORK_PLAN.md`
+#### **[GLOBE] FoundUps Agent Workspace** [TARGET] **PLANNED EXTERNAL SYSTEM**
+- **Status**: Fork/adaptation plan documented (v1.0.0)
+- **Source**: Fork from `outsourc-e/hermes-workspace` (external, NOT cloned/vendored)
+- **Positioning**: External compatible system, not FoundUps Core
+- **Integration surface**: WSP task packets, WRE gateway APIs, checkpoint/evidence artifacts
+- **What it provides**: Swarm UI, Kanban board, tmux workers, autonomous execution runtime
+- **What FoundUps provides**: WSP governance, FoundUpJob queue, CABR verification, policy gates
+- **Plan location**: `docs/architecture/FOUNDUPS_AGENT_WORKSPACE_FORK_PLAN.md`
+- **WSP 15 Priority**: P0 (docs) complete, P1 (gateway design) next
+- **WSP 97 Truth**: No live delegation enabled, evidence is observability only
 
 ### **[U+1F4E1] Auto Meeting Orchestration Ecosystem** [OK] **COMPLETE**
 
