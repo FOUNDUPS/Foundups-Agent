@@ -258,9 +258,11 @@ def _render_fast_search_summary(results: Dict[str, Any], limit: int = 5) -> None
     """Compact fast-mode output compatible with existing CLI usage."""
     code_hits = results.get("code", []) or []
     wsp_hits = results.get("wsps", []) or []
-    total_hits = len(code_hits) + len(wsp_hits)
+    docs_hits = results.get("docs", []) or []
+    knowledge_hits = results.get("knowledge", []) or []
+    total_hits = len(code_hits) + len(wsp_hits) + len(docs_hits) + len(knowledge_hits)
 
-    safe_print(f"[OK] Analysis complete: {total_hits} hits (code={len(code_hits)}, wsp={len(wsp_hits)}), no critical issues found")
+    safe_print(f"[OK] Analysis complete: {total_hits} hits (code={len(code_hits)}, wsp={len(wsp_hits)}, docs={len(docs_hits)}, knowledge={len(knowledge_hits)}), no critical issues found")
     safe_print("[RESULTS] Top matches")
 
     shown = 0
@@ -275,6 +277,20 @@ def _render_fast_search_summary(results: Dict[str, Any], limit: int = 5) -> None
         title = hit.get("title") or "unknown"
         path = hit.get("path") or "unknown"
         safe_print(f"  [WSP] {path if path != 'unknown' else title}")
+        shown += 1
+        if shown >= limit:
+            return
+
+    for hit in docs_hits:
+        path = hit.get("path") or hit.get("title") or "unknown"
+        safe_print(f"  [DOCS] {path}")
+        shown += 1
+        if shown >= limit:
+            return
+
+    for hit in knowledge_hits:
+        path = hit.get("path") or hit.get("title") or "unknown"
+        safe_print(f"  [KNOWLEDGE] {path}")
         shown += 1
         if shown >= limit:
             return

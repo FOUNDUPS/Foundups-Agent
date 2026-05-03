@@ -482,7 +482,9 @@ class QwenOrchestrator:
             if search_results:
                 code_hits = search_results.get('code', []) or []
                 wsp_hits = search_results.get('wsps', []) or []
-                if code_hits or wsp_hits:
+                docs_hits = search_results.get('docs', []) or []
+                knowledge_hits = search_results.get('knowledge', []) or []
+                if code_hits or wsp_hits or docs_hits or knowledge_hits:
                     result_lines = ["[RESULTS] Top matches"]
                     for item in code_hits[:3]:
                         path = item.get('path') or item.get('id') or item.get('title') or 'unknown'
@@ -490,6 +492,12 @@ class QwenOrchestrator:
                     for item in wsp_hits[:3]:
                         path = item.get('path') or item.get('id') or item.get('title') or 'unknown'
                         result_lines.append(f"  [WSP] {path}")
+                    for item in docs_hits[:3]:
+                        path = item.get('path') or item.get('id') or item.get('title') or 'unknown'
+                        result_lines.append(f"  [DOCS] {path}")
+                    for item in knowledge_hits[:2]:
+                        path = item.get('path') or item.get('id') or item.get('title') or 'unknown'
+                        result_lines.append(f"  [KNOWLEDGE] {path}")
                     concise_summary = concise_summary.rstrip() + "\n" + "\n".join(result_lines)
 
             return concise_summary

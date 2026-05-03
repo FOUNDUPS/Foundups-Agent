@@ -855,6 +855,8 @@ class AgenticOutputThrottler:
         """Display search results using the throttler's prioritized output system."""
         code_hits = result.get('code', [])
         wsp_hits = result.get('wsps', [])
+        docs_hits = result.get('docs', [])
+        knowledge_hits = result.get('knowledge', [])
         warnings = result.get('warnings', [])
         reminders = result.get('reminders', [])
 
@@ -904,6 +906,28 @@ class AgenticOutputThrottler:
                 self.add_section('guidance', "[WSP] No module-specific WSP guidance found", priority=4, tags=['wsp', 'empty'])
         else:
             self.add_section('guidance', "[WSP] No relevant WSP protocols found", priority=4, tags=['wsp', 'empty'])
+
+        # Docs results - module/root documentation
+        if docs_hits:
+            docs_content = "[DOCS] Documentation:"
+            for idx, hit in enumerate(docs_hits[:5], start=1):
+                path = hit.get('path', 'unknown')
+                title = hit.get('title', '')
+                docs_content += f"\n  {idx}. {path}"
+                if title:
+                    docs_content += f" - {title}"
+            self.add_section('docs', docs_content, priority=2, tags=['docs', 'documentation'])
+
+        # Knowledge results - papers/research
+        if knowledge_hits:
+            knowledge_content = "[KNOWLEDGE] Research/Papers:"
+            for idx, hit in enumerate(knowledge_hits[:3], start=1):
+                path = hit.get('path', 'unknown')
+                title = hit.get('title', '')
+                knowledge_content += f"\n  {idx}. {path}"
+                if title:
+                    knowledge_content += f" - {title}"
+            self.add_section('knowledge', knowledge_content, priority=3, tags=['knowledge', 'research'])
 
         # Warnings - critical priority
         if warnings:
@@ -1123,10 +1147,12 @@ class AgenticOutputThrottler:
             if hasattr(self, "_search_results") and self._search_results:
                 code_count = len(self._search_results.get('code', []) or [])
                 wsp_count = len(self._search_results.get('wsps', []) or [])
-                total_hits = code_count + wsp_count
+                docs_count = len(self._search_results.get('docs', []) or [])
+                knowledge_count = len(self._search_results.get('knowledge', []) or [])
+                total_hits = code_count + wsp_count + docs_count + knowledge_count
                 if total_hits > 0:
                     summary_parts.append(
-                        f"[OK] Analysis complete: {total_hits} hits (code={code_count}, wsp={wsp_count}), no critical issues found"
+                        f"[OK] Analysis complete: {total_hits} hits (code={code_count}, wsp={wsp_count}, docs={docs_count}, knowledge={knowledge_count}), no critical issues found"
                     )
                 else:
                     summary_parts.append(f"[OK] Analysis complete: {total_files} files checked, no critical issues found")
