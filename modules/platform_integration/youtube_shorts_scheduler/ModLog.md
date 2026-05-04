@@ -1,5 +1,46 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-05-04 - OC21: Agentic Content-Channel Verification Gate
+
+**By:** 0102 (Worker AW3)
+**WSP References:** WSP 22 (ModLog), WSP 97 (Truth Signaling), WSP 77 (Agent Coordination)
+
+### Problem
+
+Scheduler was not agentic - blindly scheduled videos without verifying content matches channel:
+- UnDaoDu (mindfulness) could schedule FFCPLN music content
+- No re-indexing when classification conflicts with channel
+- Index stale data was trusted without verification
+
+### Solution
+
+**Agentic Content-Channel Gate** in `scheduler.py`:
+1. Before scheduling, classify video by title
+2. If FFCPLN classification on non-FFCPLN channel (undaodu, foundups):
+   - Delete stale index
+   - Re-index with Gemini (reads actual video content)
+   - Re-classify with fresh transcript
+   - If STILL FFCPLN: skip (content truly doesn't belong)
+   - If NOT FFCPLN: proceed (title was misleading, content is fine)
+
+### Key Insight
+
+The problem wasn't "wrong channel upload" but **lack of verification**. The indexer wasn't checking if content matches channel - it assumed content type from channel name alone. Now the system:
+- READs actual video content via Gemini
+- VERIFIES content-channel fit
+- RE-INDEXES when mismatch detected
+
+### Files Changed
+- `src/scheduler.py`: 
+  - Added `classify_content` import
+  - Added content-channel gate with re-index logic (~50 lines)
+
+### Dependencies
+- `skillz/gemma_content_type_classifier/executor.py` - pure regex classification (no AI model)
+- `index_weave.ensure_index_json(mode="gemini")` - Gemini API re-indexing
+
+---
+
 ## 2026-03-30 - YouTube Domain Agent Phase 3 (G4 Schedule Reconciliation)
 
 **By:** 0102

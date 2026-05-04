@@ -12,6 +12,37 @@ This log tracks changes specific to the **youtube_auth** module in the **platfor
 
 ## MODLOG ENTRIES
 
+### 2026-05-01 - OC21: WSP 97 Truth Violation + Operations KeyError Fix
+
+**By:** 0102 (Worker AW3)
+**WSP References:** WSP 22 (ModLog), WSP 97 (Truth Signaling)
+
+**Problem:**
+1. youtube_auth.py logged "[OK] Authenticated" after OAuth failure (WSP 97 violation)
+2. quota_monitor.py threw `KeyError: 'operations'` for old quota data
+
+**Root Cause Analysis:**
+1. **Truth Violation**: After all OAuth sets failed, code logged `[OK] No-auth YouTube service created` which falsely implies success when auth actually failed. WSP 97 requires no false success claims.
+2. **KeyError**: `_normalize_usage_data()` didn't migrate old `quota_usage.json` entries that lack the `'operations'` key (added in later version).
+
+**Changes:**
+- **Fixed** `src/youtube_auth.py`:
+  - Changed `[OK] No-auth YouTube service created` to `[FALLBACK] No-auth YouTube service created - Limited to public read-only operations (OAuth FAILED)`
+  - Now clearly signals this is a degraded fallback, not a success
+- **Fixed** `src/quota_monitor.py`:
+  - Added migration loop in `_normalize_usage_data()` to add `'operations': {}` to existing set entries
+  - Old quota data now loads without KeyError
+
+**Verification:**
+```python
+# Migration test
+old_data = {'sets': {'1': {'used': 500}}, 'last_reset': '...'}
+normalized = monitor._normalize_usage_data(old_data)
+assert 'operations' in normalized['sets']['1']  # PASS
+```
+
+---
+
 ### 2026-04-19 - YT-OAUTH-SKILLZ1: OAuth Operator-Assist SKILLz + Script Fixes
 
 **By:** 0102 (Worker CW4, Slice YT-OAUTH-SKILLZ1)

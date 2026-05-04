@@ -10,6 +10,39 @@ This log tracks changes specific to the **livechat** module in the **communicati
 
 ---
 
+## 2026-05-01 - OC21: WSP 97 Auth Truth Signaling Fix
+
+**By:** 0102 (Worker AW3)
+**WSP References:** WSP 22 (ModLog), WSP 97 (Truth Signaling)
+
+### Problem
+
+`auto_moderator_dae.py` logged `[OK] Authenticated with credential set Unknown` after OAuth failure - a WSP 97 truth violation. The log falsely claimed authentication succeeded when it actually fell back to no-auth mode.
+
+### Root Cause
+
+`get_authenticated_service()` returns a no-auth fallback service when OAuth fails. This service is truthy (non-None) but lacks `_credential_set` attribute, defaulting to "Unknown". The code logged "[OK] Authenticated" regardless.
+
+### Solution
+
+Added truth check before logging success:
+```python
+self.credential_set = getattr(service, '_credential_set', None)
+if self.credential_set and self.credential_set != "Unknown":
+    logger.info(f"[OK] Authenticated with credential set {self.credential_set}")
+else:
+    logger.warning(f"[FALLBACK] Using no-auth service (OAuth failed) - read-only operations only")
+```
+
+### Files Changed
+- `src/auto_moderator_dae.py`: Fixed auth logging to distinguish success vs fallback
+
+### Related Fixes
+- `youtube_auth/src/youtube_auth.py`: Changed `[OK]` to `[FALLBACK]` for no-auth service creation
+- `youtube_auth/src/quota_monitor.py`: Fixed `KeyError: 'operations'` migration
+
+---
+
 ## 2026-03-30 - YouTube Domain Agent Phase 3 (G6 Escalation)
 
 **By:** 0102

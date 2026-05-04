@@ -106,6 +106,12 @@ class QuotaMonitor:
             data['sets'] = {}
         if not data.get('last_reset'):
             data['last_reset'] = datetime.now().isoformat()
+
+        # Migrate old set entries without 'operations' key (WSP 97 fix)
+        for set_key, set_data in data['sets'].items():
+            if isinstance(set_data, dict) and 'operations' not in set_data:
+                set_data['operations'] = {}
+
         return data
     
     def _save_usage_data(self):

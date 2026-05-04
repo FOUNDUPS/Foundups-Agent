@@ -867,8 +867,12 @@ class AutoModeratorDAE:
                 service = get_authenticated_service(token_index=token_index) if token_index else get_authenticated_service()
                 if service:
                     self.service = create_monitored_service(service)
-                    self.credential_set = getattr(service, '_credential_set', "Unknown")
-                    logger.info(f"[OK] Authenticated with credential set {self.credential_set}")
+                    self.credential_set = getattr(service, '_credential_set', None)
+                    # WSP 97: Truth signaling - distinguish real auth from fallback
+                    if self.credential_set and self.credential_set != "Unknown":
+                        logger.info(f"[OK] Authenticated with credential set {self.credential_set}")
+                    else:
+                        logger.warning(f"[FALLBACK] Using no-auth service (OAuth failed) - read-only operations only")
 
                     # Now try to get the chat_id with authenticated service
                     if not live_chat_id:
