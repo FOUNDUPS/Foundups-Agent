@@ -1,6 +1,6 @@
 # Trade FoundUp - Roadmap
 
-**Version**: 0.1.0  
+**Version**: 0.2.0  
 **Status**: Incubating  
 **Last Updated**: 2026-05-04
 
@@ -20,8 +20,12 @@
 | Define truth fields | DONE | WSP 97 compliant |
 | Create manifest tests | DONE | Validates namespace |
 | Create contract tests | DONE | Validates serialization |
+| Create adapter abstraction layer | DONE | AdapterRegistry, protocols |
+| Create event normalization layer | DONE | Constructors, validators |
+| Create simulation guard module | DONE | SimulationGuard context manager |
+| Create adapter/event/guard tests | DONE | 115+ new tests |
 
-**Next Slice**: `TRADE_FOUNDUP_ADAPTER_CONTRACTS_PHASE2`
+**Next Slice**: `TRADE_FOUNDUP_BITQUERY_ADAPTER_PHASE1`
 
 ---
 

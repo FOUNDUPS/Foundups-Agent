@@ -345,6 +345,156 @@ from modules.foundups.trade.src.contracts import (
 )
 ```
 
+**Adapters module (v0.2.0):**
+
+```python
+from modules.foundups.trade.src.adapters import (
+    # Capability enum
+    AdapterCapability,
+    
+    # Health/rate limit tracking
+    AdapterHealth,
+    AdapterRateLimit,
+    AdapterErrorCode,
+    AdapterError,
+    AdapterResult,
+    
+    # Protocols
+    MarketAdapter,
+    LaunchpadAdapter,
+    
+    # Registry
+    AdapterRegistry,
+    get_adapter_registry,
+    reset_adapter_registry,
+)
+```
+
+**Events module (v0.2.0):**
+
+```python
+from modules.foundups.trade.src.events import (
+    # ID generation
+    generate_event_id,
+    generate_deterministic_event_id,
+    
+    # Event constructors
+    create_market_event,
+    create_price_update_event,
+    create_token_event,
+    create_token_created_event,
+    create_wallet_event,
+    create_buy_event,
+    create_sell_event,
+    create_social_event,
+    create_risk_event,
+    create_honeypot_detection_event,
+    create_rug_risk_event,
+    
+    # Validation
+    validate_event,
+    ValidationResult,
+    
+    # Utilities
+    hash_wallet_address,
+)
+```
+
+**Guards module (v0.2.0):**
+
+```python
+from modules.foundups.trade.src.guards import (
+    # Exceptions
+    NoMoneyModeViolation,
+    WalletSigningViolation,
+    OrderPlacementViolation,
+    ExecutionGuardViolation,
+    
+    # Assertions
+    assert_no_money_mode,
+    assert_no_wallet_signing,
+    assert_no_order_placement,
+    assert_no_real_trades,
+    
+    # Policy validation
+    validate_execution_guard_policy,
+    validate_truth_fields,
+    
+    # Context manager
+    SimulationGuard,
+    create_phase0_guard,
+    is_phase0_compliant,
+)
+```
+
+---
+
+## 10. Adapter Protocol
+
+Adapters must implement these protocols:
+
+### 10.1 MarketAdapter Protocol
+
+```python
+@runtime_checkable
+class MarketAdapter(Protocol):
+    @property
+    def adapter_id(self) -> str: ...
+    
+    @property
+    def spec(self) -> MarketAdapterSpec: ...
+    
+    def get_capabilities(self) -> List[AdapterCapability]: ...
+    def get_health(self) -> AdapterHealth: ...
+    
+    async def fetch_market_data(self, symbol: str, **kwargs) -> AdapterResult: ...
+    async def fetch_token_events(self, token_address: str, **kwargs) -> AdapterResult: ...
+    async def fetch_wallet_events(self, wallet_address: str, **kwargs) -> AdapterResult: ...
+```
+
+### 10.2 LaunchpadAdapter Protocol
+
+```python
+@runtime_checkable
+class LaunchpadAdapter(Protocol):
+    @property
+    def adapter_id(self) -> str: ...
+    
+    @property
+    def spec(self) -> LaunchpadAdapterSpec: ...
+    
+    def get_capabilities(self) -> List[AdapterCapability]: ...
+    def get_health(self) -> AdapterHealth: ...
+    
+    async def fetch_recent_launches(self, limit: int = 100, **kwargs) -> AdapterResult: ...
+    async def fetch_bonding_curve(self, token_address: str, **kwargs) -> AdapterResult: ...
+    async def fetch_top_traders(self, token_address: str, **kwargs) -> AdapterResult: ...
+    async def fetch_holder_distribution(self, token_address: str, **kwargs) -> AdapterResult: ...
+```
+
+---
+
+## 11. SimulationGuard Usage
+
+```python
+from modules.foundups.trade.src.guards import create_phase0_guard
+
+# Create Phase 0 compliant guard
+guard = create_phase0_guard()
+
+# Use as context manager
+with guard:
+    # All operations verified as simulation-only
+    guard.assert_simulation_only("my_operation")
+    
+    # Check blocked operations
+    blocked = guard.get_blocked_operations()
+    # ['real_trade', 'wallet_sign', 'private_key_access', ...]
+    
+    # Attempting blocked operation raises
+    guard.assert_operation_allowed("real_trade")  # Raises UnsupportedOperationError
+```
+
 ---
 
 *All schemas serialize to dict/JSON via `.to_dict()` method.*

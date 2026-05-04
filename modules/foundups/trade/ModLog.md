@@ -73,6 +73,57 @@ python -m pytest modules/foundups/tests/test_namespace_guardrail.py -q
 
 ---
 
+### [2026-05-04] - TRADE_FOUNDUP_ADAPTER_CONTRACTS_PHASE2 (v0.2.0)
+
+**WSP Protocol References**: WSP 97 (Truth), WSP 11 (Interface)  
+**Impact Analysis**: Adapter abstraction, event normalization, simulation guards
+
+#### Changes Made
+
+- Created `src/adapters.py` — Adapter abstraction layer:
+  - `AdapterCapability` enum (12 capabilities)
+  - `AdapterHealth` dataclass (health monitoring)
+  - `AdapterRateLimit` dataclass (rate limit management with backoff)
+  - `AdapterErrorCode` enum and `AdapterError` dataclass
+  - `AdapterResult` wrapper with is_simulation=True default
+  - `MarketAdapter` and `LaunchpadAdapter` protocols
+  - `AdapterRegistry` class with singleton pattern
+
+- Created `src/events.py` — Event normalization layer:
+  - Event ID generators (random and deterministic)
+  - Market event constructors (price_update, volume_spike, liquidity_change)
+  - Token event constructors (token_created, migration)
+  - Wallet event constructors (buy, sell) with hash_wallet_address()
+  - Social event constructors (mention, sentiment_shift)
+  - Risk event constructors (honeypot_detection, rug_risk)
+  - Validators for all 5 event types
+
+- Created `src/guards.py` — Simulation enforcement layer:
+  - Custom exceptions (NoMoneyModeViolation, WalletSigningViolation, etc.)
+  - Assertion functions (assert_no_money_mode, assert_no_wallet_signing, etc.)
+  - `validate_execution_guard_policy()` and `validate_truth_fields()`
+  - `SimulationGuard` context manager
+  - `create_phase0_guard()` convenience function
+
+- Updated `__init__.py` with 60+ new exports (v0.2.0)
+
+#### Test Files Added
+
+| Test File | Focus |
+|-----------|-------|
+| `test_adapter_contracts.py` | Registry, health, rate limits |
+| `test_event_normalization.py` | Constructors, validators |
+| `test_execution_guards.py` | Assertions, SimulationGuard |
+
+#### Verification
+
+```bash
+python -m pytest modules/foundups/trade/tests -q
+# Expected: 170+ passed
+```
+
+---
+
 ## Future Entries
 
-Next slice: `TRADE_FOUNDUP_ADAPTER_CONTRACTS_PHASE2`
+Next slice: `TRADE_FOUNDUP_BITQUERY_ADAPTER_PHASE1`
