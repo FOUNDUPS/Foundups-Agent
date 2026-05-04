@@ -1,22 +1,28 @@
 {
-  "generated_at_utc": "2026-05-03T23:03:37.869786Z",
+  "generated_at_utc": "2026-05-04T00:43:23.919473Z",
   "holo_use_turboquant": "0",
   "holo_emit_confidence": "1",
-  "sentinel_query_count": 38,
+  "corpus_doc_count": 20413,
+  "sentinel_query_count": 39,
   "aggregate": {
-    "total_queries": 38,
-    "top_1_pass_count": 28,
-    "top_1_pass_rate": 0.7368,
-    "top_5_pass_count": 32,
-    "top_5_pass_rate": 0.8421,
-    "latency_p50_ms": 98,
-    "latency_p95_ms": 342
+    "total_queries": 39,
+    "top_1_pass_count": 32,
+    "top_1_pass_rate": 0.8205,
+    "top_5_pass_count": 36,
+    "top_5_pass_rate": 0.9231,
+    "confidence_min": 0.6052,
+    "confidence_avg": 0.8903,
+    "confidence_max": 1.0,
+    "latency_min_ms": 77,
+    "latency_p50_ms": 93,
+    "latency_p95_ms": 236,
+    "latency_max_ms": 409
   },
   "query_results": [
     {
       "query": "search engine query execution",
       "category": "symbol",
-      "description": "Find search engine",
+      "description": "Find search engine module",
       "evidence_rule": {
         "path_contains": "search_engine"
       },
@@ -27,13 +33,13 @@
       "top_1_confidence": 0.7663490526361794,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 367,
+      "latency_ms": 409,
       "error": null
     },
     {
       "query": "HoloIndex semantic code navigation",
       "category": "symbol",
-      "description": "Find HoloIndex",
+      "description": "Find HoloIndex class",
       "evidence_rule": {
         "path_contains": "holo"
       },
@@ -44,13 +50,13 @@
       "top_1_confidence": 0.7770940305244378,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 92,
+      "latency_ms": 90,
       "error": null
     },
     {
       "query": "indexing engine symbol extraction",
       "category": "symbol",
-      "description": "Find indexing engine",
+      "description": "Find indexing engine for symbol extraction",
       "evidence_rule": {
         "path_contains": "indexing_engine"
       },
@@ -61,13 +67,13 @@
       "top_1_confidence": 0.7851966968481987,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 86,
+      "latency_ms": 112,
       "error": null
     },
     {
       "query": "backend routing turboquant embedding",
       "category": "symbol",
-      "description": "Find backend routing",
+      "description": "Find TurboQuant backend routing logic",
       "evidence_rule": {
         "path_contains": "backend_routing"
       },
@@ -78,13 +84,13 @@
       "top_1_confidence": 0.728173514128496,
       "top_1_passes": false,
       "top_5_passes": true,
-      "latency_ms": 106,
+      "latency_ms": 111,
       "error": null
     },
     {
       "query": "search cache retrieval optimization",
       "category": "symbol",
-      "description": "Find search cache",
+      "description": "Find search cache implementation",
       "evidence_rule": {
         "path_contains": "search_cache"
       },
@@ -95,13 +101,13 @@
       "top_1_confidence": 0.8289897182247203,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 90,
+      "latency_ms": 97,
       "error": null
     },
     {
       "query": "WSP 97 system execution prompting",
       "category": "wsp",
-      "description": "Find WSP 97",
+      "description": "Find WSP 97 system execution protocol",
       "evidence_rule": {
         "path_contains": "WSP_97"
       },
@@ -112,13 +118,13 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 86,
+      "latency_ms": 87,
       "error": null
     },
     {
       "query": "WSP 00 zen state attainment",
       "category": "wsp",
-      "description": "Find WSP 00",
+      "description": "Find WSP 00 zen state protocol",
       "evidence_rule": {
         "path_contains": "WSP_00"
       },
@@ -129,13 +135,13 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 86,
+      "latency_ms": 85,
       "error": null
     },
     {
       "query": "WSP 11 WRE standard command",
       "category": "wsp",
-      "description": "Find WSP 11",
+      "description": "Find WSP 11 WRE command protocol",
       "evidence_rule": {
         "path_contains": "WSP_11"
       },
@@ -146,13 +152,13 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 99,
+      "latency_ms": 93,
       "error": null
     },
     {
       "query": "WSP 22 ModLog documentation updates",
       "category": "wsp",
-      "description": "Find WSP 22",
+      "description": "Find WSP 22 ModLog protocol",
       "evidence_rule": {
         "path_contains": "WSP_22"
       },
@@ -163,13 +169,13 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 342,
+      "latency_ms": 222,
       "error": null
     },
     {
       "query": "WSP 50 pre-action verification",
       "category": "wsp",
-      "description": "Find WSP 50",
+      "description": "Find WSP 50 verification protocol",
       "evidence_rule": {
         "path_contains": "WSP_50"
       },
@@ -180,13 +186,13 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 155,
+      "latency_ms": 80,
       "error": null
     },
     {
       "query": "WSP 72 block independence isolation",
       "category": "wsp",
-      "description": "Find WSP 72",
+      "description": "Find WSP 72 independence protocol",
       "evidence_rule": {
         "path_contains": "WSP_72"
       },
@@ -197,13 +203,13 @@
       "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 119,
+      "latency_ms": 84,
       "error": null
     },
     {
       "query": "openclaw intent planner routing",
       "category": "symbol",
-      "description": "Find intent planner",
+      "description": "Find OpenClaw intent planner",
       "evidence_rule": {
         "path_contains": "openclaw_intent"
       },
@@ -214,13 +220,13 @@
       "top_1_confidence": 0.9191263915507275,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 100,
+      "latency_ms": 92,
       "error": null
     },
     {
       "query": "openclaw codebase agent navigation",
       "category": "symbol",
-      "description": "Find codebase agent",
+      "description": "Find OpenClaw codebase agent",
       "evidence_rule": {
         "path_contains": "openclaw_codebase"
       },
@@ -231,13 +237,13 @@
       "top_1_confidence": 0.9704019725548232,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 93,
+      "latency_ms": 99,
       "error": null
     },
     {
       "query": "route_foundup_job router",
       "category": "symbol",
-      "description": "Find FoundUp job",
+      "description": "Find the FoundUpJob router",
       "evidence_rule": {
         "path_contains": "foundup_job"
       },
@@ -248,13 +254,13 @@
       "top_1_confidence": 0.7920638115267512,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 136,
+      "latency_ms": 133,
       "error": null
     },
     {
       "query": "foundup job contract lifecycle",
       "category": "symbol",
-      "description": "Find job contract",
+      "description": "Find FoundUp job contract model",
       "evidence_rule": {
         "path_contains": "foundup_job_contract"
       },
@@ -265,13 +271,13 @@
       "top_1_confidence": 0.8581582473518456,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 110,
+      "latency_ms": 82,
       "error": null
     },
     {
       "query": "openclaw action ledger persistence",
       "category": "symbol",
-      "description": "Find action ledger",
+      "description": "Find OpenClaw action ledger",
       "evidence_rule": {
         "path_contains": "openclaw_action_ledger"
       },
@@ -282,13 +288,13 @@
       "top_1_confidence": 0.9119717346963487,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 105,
+      "latency_ms": 183,
       "error": null
     },
     {
       "query": "WRE master orchestrator coordination",
       "category": "symbol",
-      "description": "Find WRE orchestrator",
+      "description": "Find WRE master orchestrator",
       "evidence_rule": {
         "path_contains": "wre_master_orchestrator"
       },
@@ -299,13 +305,13 @@
       "top_1_confidence": 0.9191301949041437,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 107,
+      "latency_ms": 236,
       "error": null
     },
     {
       "query": "WRE skills loader registry",
       "category": "symbol",
-      "description": "Find skills loader",
+      "description": "Find WRE skills loader",
       "evidence_rule": {
         "path_contains": "wre_skills_loader"
       },
@@ -316,13 +322,13 @@
       "top_1_confidence": 0.9820283762282334,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 93,
+      "latency_ms": 99,
       "error": null
     },
     {
       "query": "WRE bridge integration cursor",
       "category": "symbol",
-      "description": "Find WRE bridge",
+      "description": "Find WRE bridge integration",
       "evidence_rule": {
         "path_contains": "wre_bridge"
       },
@@ -333,13 +339,13 @@
       "top_1_confidence": 0.9497865435186601,
       "top_1_passes": false,
       "top_5_passes": false,
-      "latency_ms": 95,
+      "latency_ms": 111,
       "error": null
     },
     {
       "query": "pattern memory skill outcomes",
       "category": "symbol",
-      "description": "Find pattern memory",
+      "description": "Find pattern memory for skill outcomes",
       "evidence_rule": {
         "path_contains": "pattern_memory"
       },
@@ -350,13 +356,13 @@
       "top_1_confidence": 0.8404882046598658,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 96,
+      "latency_ms": 117,
       "error": null
     },
     {
       "query": "build plan generator hermes",
       "category": "symbol",
-      "description": "Find build plan",
+      "description": "Find build plan generator",
       "evidence_rule": {
         "path_contains": "build_plan"
       },
@@ -367,100 +373,100 @@
       "top_1_confidence": 0.6550419102325375,
       "top_1_passes": false,
       "top_5_passes": false,
-      "latency_ms": 99,
+      "latency_ms": 103,
       "error": null
     },
     {
-      "query": "swarm coordinator dispatch",
+      "query": "swarm dispatch queue integration",
       "category": "symbol",
-      "description": "Find swarm coordinator",
+      "description": "Find swarm dispatch integration",
       "evidence_rule": {
-        "path_contains": "swarm_coordinator"
+        "path_contains": "swarm"
       },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\foundups\\agent\\tests\\test_swarm_dispatch_integration.py",
+      "top_1_path": "O:\\Foundups-Agent\\modules\\foundups\\agent\\src\\swarm_dispatch_integration.py",
       "top_1_title": null,
       "top_1_type": "symbol",
-      "top_1_similarity": "61.9%",
-      "top_1_confidence": 0.8686647235846618,
-      "top_1_passes": false,
-      "top_5_passes": false,
-      "latency_ms": 89,
-      "error": null
-    },
-    {
-      "query": "hermes adapter integration",
-      "category": "symbol",
-      "description": "Find hermes adapter",
-      "evidence_rule": {
-        "path_contains": "hermes"
-      },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\foundups\\agent\\src\\hermes_adapter.py",
-      "top_1_title": null,
-      "top_1_type": "symbol",
-      "top_1_similarity": "62.4%",
-      "top_1_confidence": 0.8743985863324606,
+      "top_1_similarity": "67.2%",
+      "top_1_confidence": 1.0,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 204,
+      "latency_ms": 77,
+      "error": null
+    },
+    {
+      "query": "hermes foundup job executor",
+      "category": "symbol",
+      "description": "Find Hermes FoundUp job executor",
+      "evidence_rule": {
+        "path_contains": "hermes_foundup"
+      },
+      "top_1_path": "O:\\Foundups-Agent\\modules\\infrastructure\\wre_core\\src\\hermes_job_executor.py",
+      "top_1_title": null,
+      "top_1_type": "symbol",
+      "top_1_similarity": "78.9%",
+      "top_1_confidence": 1.0,
+      "top_1_passes": false,
+      "top_5_passes": true,
+      "latency_ms": 88,
+      "error": null
+    },
+    {
+      "query": "pfmall discovery youtube matching",
+      "category": "symbol",
+      "description": "Find pfMALL discovery module",
+      "evidence_rule": {
+        "path_contains": "pfmall_discovery"
+      },
+      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\pfmall_discovery\\src\\youtube_discovery.py",
+      "top_1_title": null,
+      "top_1_type": "symbol",
+      "top_1_similarity": "53.0%",
+      "top_1_confidence": 0.8796568835519014,
+      "top_1_passes": true,
+      "top_5_passes": true,
+      "latency_ms": 91,
       "error": null
     },
     {
       "query": "pfmall catalog verification",
       "category": "symbol",
-      "description": "Find pfmall catalog",
+      "description": "Find pfMALL catalog",
       "evidence_rule": {
-        "path_contains": "pfmall"
+        "path_contains": "pfmall_catalog"
       },
       "top_1_path": "O:\\Foundups-Agent\\modules\\foundups\\pfmall\\tests\\test_catalog_foundup_truth_gate.py",
       "top_1_title": null,
       "top_1_type": "symbol",
       "top_1_similarity": "51.5%",
       "top_1_confidence": 0.7653613297766888,
-      "top_1_passes": true,
-      "top_5_passes": true,
-      "latency_ms": 103,
-      "error": null
-    },
-    {
-      "query": "catalog indexer classification",
-      "category": "symbol",
-      "description": "Find catalog indexer",
-      "evidence_rule": {
-        "path_contains": "catalog_indexer"
-      },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\video_indexer\\src\\video_index_store.py",
-      "top_1_title": null,
-      "top_1_type": "symbol",
-      "top_1_similarity": "47.7%",
-      "top_1_confidence": 0.6273719992561094,
       "top_1_passes": false,
-      "top_5_passes": false,
-      "latency_ms": 106,
+      "top_5_passes": true,
+      "latency_ms": 100,
       "error": null
     },
     {
-      "query": "antifafm broadcaster headless",
+      "query": "pfmall shell core grid loading",
       "category": "symbol",
-      "description": "Find antifafm broadcaster",
+      "description": "Find pfMALL shell core",
       "evidence_rule": {
-        "path_contains": "antifafm"
+        "path_contains": "pfmall"
       },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\platform_integration\\antifafm_broadcaster\\main.py",
+      "top_1_path": "O:\\Foundups-Agent\\modules\\foundups\\pfmall\\shell_core.py",
       "top_1_title": null,
       "top_1_type": "symbol",
-      "top_1_similarity": "49.6%",
-      "top_1_confidence": 0.7463891020310418,
+      "top_1_similarity": "45.8%",
+      "top_1_confidence": 0.8083764464477199,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 97,
+      "latency_ms": 98,
       "error": null
     },
     {
       "query": "YouTube channel registry",
       "category": "code",
-      "description": "Find channel registry",
+      "description": "Find the YouTube channel registry module",
       "evidence_rule": {
-        "path_contains": "youtube_channel"
+        "path_contains": "youtube_channel_registry"
       },
       "top_1_path": "O:\\Foundups-Agent\\modules\\infrastructure\\shared_utilities\\youtube_channel_registry.py",
       "top_1_title": null,
@@ -469,47 +475,81 @@
       "top_1_confidence": 0.9981861992399124,
       "top_1_passes": true,
       "top_5_passes": true,
+      "latency_ms": 78,
+      "error": null
+    },
+    {
+      "query": "youtube transcript scraper video indexer",
+      "category": "symbol",
+      "description": "Find YouTube transcript scraper",
+      "evidence_rule": {
+        "path_contains": "youtube_transcript"
+      },
+      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\video_indexer\\src\\youtube_transcript_scraper.py",
+      "top_1_title": null,
+      "top_1_type": "symbol",
+      "top_1_similarity": "72.9%",
+      "top_1_confidence": 1.0,
+      "top_1_passes": true,
+      "top_5_passes": true,
+      "latency_ms": 88,
+      "error": null
+    },
+    {
+      "query": "video comment engagement automation",
+      "category": "symbol",
+      "description": "Find video comment engagement module",
+      "evidence_rule": {
+        "path_contains": "video_comment"
+      },
+      "top_1_path": "O:\\Foundups-Agent\\modules\\communication\\video_comments\\skillz\\qwen_studio_engage\\autonomous_engagement.py",
+      "top_1_title": null,
+      "top_1_type": "symbol",
+      "top_1_similarity": "59.2%",
+      "top_1_confidence": 0.9420379142169739,
+      "top_1_passes": true,
+      "top_5_passes": true,
+      "latency_ms": 98,
+      "error": null
+    },
+    {
+      "query": "commit git workflow skill",
+      "category": "skill",
+      "description": "Find commit-related skill",
+      "evidence_rule": {
+        "type_equals": "skillz"
+      },
+      "top_1_path": "O:\\Foundups-Agent\\modules\\infrastructure\\git_push_dae\\skillz\\qwen_gitpush\\SKILLz.md",
+      "top_1_title": null,
+      "top_1_type": "skillz",
+      "top_1_similarity": "58.2%",
+      "top_1_confidence": 0.8623876064014394,
+      "top_1_passes": true,
+      "top_5_passes": true,
       "latency_ms": 90,
       "error": null
     },
     {
-      "query": "comment engagement DAE",
-      "category": "code",
-      "description": "Find comment DAE",
+      "query": "review pull request skill",
+      "category": "skill",
+      "description": "Find PR review skill",
       "evidence_rule": {
-        "path_contains": "comment_engagement"
+        "type_equals": "skillz"
       },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\communication\\video_comments\\skillz\\tars_like_heart_reply\\comment_engagement_dae.py",
+      "top_1_path": "O:\\Foundups-Agent\\modules\\infrastructure\\git_push_dae\\skillz\\qwen_gitpush\\SKILLz.md",
       "top_1_title": null,
-      "top_1_type": "symbol",
-      "top_1_similarity": "51.4%",
-      "top_1_confidence": 0.8643923608827566,
+      "top_1_type": "skillz",
+      "top_1_similarity": "42.5%",
+      "top_1_confidence": 0.6051664696503167,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 89,
-      "error": null
-    },
-    {
-      "query": "video content analyzer",
-      "category": "code",
-      "description": "Find video analyzer",
-      "evidence_rule": {
-        "path_contains": "video"
-      },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\video_indexer\\src\\gemini_video_analyzer.py",
-      "top_1_title": null,
-      "top_1_type": "symbol",
-      "top_1_similarity": "58.4%",
-      "top_1_confidence": 0.8337869451790161,
-      "top_1_passes": true,
-      "top_5_passes": true,
-      "latency_ms": 94,
+      "latency_ms": 95,
       "error": null
     },
     {
       "query": "orphan capability scanner detection",
       "category": "symbol",
-      "description": "Find orphan scanner",
+      "description": "Find orphan capability scanner",
       "evidence_rule": {
         "path_contains": "orphan"
       },
@@ -520,47 +560,13 @@
       "top_1_confidence": 0.681414332627324,
       "top_1_passes": false,
       "top_5_passes": false,
-      "latency_ms": 90,
-      "error": null
-    },
-    {
-      "query": "skills registry loader",
-      "category": "code",
-      "description": "Find skills registry",
-      "evidence_rule": {
-        "path_contains": "skills_registry"
-      },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\infrastructure\\wre_core\\skillz\\wre_skills_loader.py",
-      "top_1_title": null,
-      "top_1_type": "symbol",
-      "top_1_similarity": "60.3%",
-      "top_1_confidence": 0.8525598894151449,
-      "top_1_passes": false,
-      "top_5_passes": true,
-      "latency_ms": 91,
-      "error": null
-    },
-    {
-      "query": "permission manager agent",
-      "category": "code",
-      "description": "Find permission manager",
-      "evidence_rule": {
-        "path_contains": "permission"
-      },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\agent_permissions\\src\\agent_permission_manager.py",
-      "top_1_title": null,
-      "top_1_type": "symbol",
-      "top_1_similarity": "61.2%",
-      "top_1_confidence": 0.9615020461199353,
-      "top_1_passes": true,
-      "top_5_passes": true,
-      "latency_ms": 98,
+      "latency_ms": 87,
       "error": null
     },
     {
       "query": "demurrage economics simulator",
       "category": "code",
-      "description": "Find demurrage",
+      "description": "Find the demurrage economics module",
       "evidence_rule": {
         "path_contains": "demurrage"
       },
@@ -571,13 +577,13 @@
       "top_1_confidence": 0.8659627158461345,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 99,
+      "latency_ms": 94,
       "error": null
     },
     {
       "query": "browser automation selenium",
       "category": "code",
-      "description": "Find selenium",
+      "description": "Find Selenium browser automation code",
       "evidence_rule": {
         "path_contains": "selenium"
       },
@@ -588,75 +594,92 @@
       "top_1_confidence": 0.845680281770153,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 102,
+      "latency_ms": 90,
       "error": null
     },
     {
-      "query": "CABR validation engine",
-      "category": "code",
-      "description": "Find CABR",
+      "query": "agent permission manager confidence",
+      "category": "symbol",
+      "description": "Find agent permission manager",
       "evidence_rule": {
-        "path_contains": "cabr"
+        "path_contains": "agent_permission"
       },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\infrastructure\\wre_core\\tests\\test_foundup_job_envelope_validation.py",
+      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\agent_permissions\\src\\agent_permission_manager.py",
       "top_1_title": null,
       "top_1_type": "symbol",
-      "top_1_similarity": "49.4%",
-      "top_1_confidence": 0.643602143024212,
-      "top_1_passes": false,
+      "top_1_similarity": "67.9%",
+      "top_1_confidence": 1.0,
+      "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 162,
+      "latency_ms": 87,
       "error": null
     },
     {
-      "query": "FAM daemon event ledger",
-      "category": "code",
-      "description": "Find FAM daemon",
+      "query": "FAM daemon persistence jsonl",
+      "category": "symbol",
+      "description": "Find FAM daemon persistence layer",
       "evidence_rule": {
         "path_contains": "fam_daemon"
       },
       "top_1_path": "O:\\Foundups-Agent\\modules\\foundups\\agent_market\\src\\fam_daemon.py",
       "top_1_title": null,
       "top_1_type": "symbol",
-      "top_1_similarity": "62.3%",
-      "top_1_confidence": 0.8728368004086013,
+      "top_1_similarity": "53.3%",
+      "top_1_confidence": 0.7832634911351688,
       "top_1_passes": true,
       "top_5_passes": true,
-      "latency_ms": 96,
+      "latency_ms": 91,
       "error": null
     },
     {
-      "query": "tokenomics pool architecture",
-      "category": "code",
-      "description": "Find tokenomics",
+      "query": "module organization enterprise domains",
+      "category": "wsp",
+      "description": "Find module organization WSP",
       "evidence_rule": {
-        "path_contains": "token"
+        "path_contains": "WSP"
       },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\foundups\\simulator\\economics\\channel_partner_pool.py",
-      "top_1_title": null,
-      "top_1_type": "symbol",
-      "top_1_similarity": "46.5%",
-      "top_1_confidence": 0.6150614892243063,
-      "top_1_passes": false,
+      "top_1_path": "O:\\Foundups-Agent\\WSP_framework\\src\\WSP_3_Enterprise_Domain_Organization.md",
+      "top_1_title": "WSP 3: Enterprise Domain Organization",
+      "top_1_type": "wsp_protocol",
+      "top_1_similarity": "54.5%",
+      "top_1_confidence": 1.0,
+      "top_1_passes": true,
       "top_5_passes": true,
       "latency_ms": 85,
       "error": null
     },
     {
-      "query": "blockchain algorand integration",
-      "category": "code",
-      "description": "Find algorand",
+      "query": "gemma intent classifier binary",
+      "category": "symbol",
+      "description": "Find Gemma intent classifier",
       "evidence_rule": {
-        "path_contains": "algorand"
+        "path_contains": "gemma_intent"
       },
-      "top_1_path": "O:\\Foundups-Agent\\modules\\ai_intelligence\\rESP_o1o2\\src\\rESP_patent_integration.py",
+      "top_1_path": "O:\\Foundups-Agent\\modules\\communication\\moltbot_bridge\\src\\gemma_intent_classifier.py",
       "top_1_title": null,
       "top_1_type": "symbol",
-      "top_1_similarity": "43.6%",
-      "top_1_confidence": 0.5861544592391258,
+      "top_1_similarity": "65.8%",
+      "top_1_confidence": 1.0,
+      "top_1_passes": true,
+      "top_5_passes": true,
+      "latency_ms": 85,
+      "error": null
+    },
+    {
+      "query": "algorand blockchain DU pool contract",
+      "category": "docs",
+      "description": "Find Algorand L2 blockchain spec",
+      "evidence_rule": {
+        "path_contains": "ALGORAND"
+      },
+      "top_1_path": "O:\\Foundups-Agent\\modules\\platform_integration\\utilities\\blockchain_integration\\README.md",
+      "top_1_title": "Blockchain Module - Web3 Integration System",
+      "top_1_type": "module_readme",
+      "top_1_similarity": "42.1%",
+      "top_1_confidence": 1.0,
       "top_1_passes": false,
-      "top_5_passes": false,
-      "latency_ms": 91,
+      "top_5_passes": true,
+      "latency_ms": 108,
       "error": null
     }
   ]
