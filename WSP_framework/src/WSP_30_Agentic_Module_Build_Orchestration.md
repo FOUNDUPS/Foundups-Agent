@@ -122,7 +122,7 @@ This protocol defines the intelligent orchestration process where 0102 analyzes 
 - **WSP_6**: Comprehensive test audit protocols
 - **WSP_9**: LLME scoring and stage progression
 - **WSP_22**: ModLog management during builds
-- **WSP_35**: [Removed - no canonical WSP 35 in framework; see WSP 20 for language standard and WSP 35 references should be validated via Master Index]
+- **WSP_35**: HoloIndex Qwen Advisor Execution Plan (build intelligence via semantic search)
 - **WSP_37**: Scoring system for roadmap generation
 - **WSP_46**: WRE orchestration protocols
 - **WSP_47**: Module violation tracking

@@ -260,9 +260,9 @@ The WRE follows a recursive loop:
 
 3.  **Task Decomposition & Prioritization**: The WRE analyzes the goal and consults the **WSP 15: Module Prioritization Scoring (MPS) System** to select the appropriate module and action.
 
-4.  **Coherence Check**: Before execution, the WRE performs a mandatory self-check against the **WSP 17: rESP SELF CHECK Protocol**. This ensures the agent's core cognitive functions are stable and aligned before interacting with the codebase. If the check fails, execution is aborted.
+4.  **Coherence Check**: Before execution, the WRE performs a mandatory self-check against the **WSP 17: Pattern Registry Protocol** (ensuring architectural pattern integrity). This ensures the agent's core cognitive functions are stable and aligned before interacting with the codebase. If the check fails, execution is aborted.
 
-5.  **Autonomous Execution**: The WRE executes the module according to the lifecycle defined in **WSP 35: Module Execution Automation**. This includes contractual understanding, execution, and error handling via **WSP 45**.
+5.  **Autonomous Execution**: The WRE executes the module according to the lifecycle defined in **WSP 35: HoloIndex Qwen Advisor Execution Plan**. This includes contractual understanding, execution, and error handling via **WSP 45**.
 
 6.  **State Assessment & Chronicle**: Upon task completion, the engine assesses the new state and records outcomes via DAE-orchestrated ModLog updates as defined in **WSP 22** (Documentation & Registry DAE manages chronicle persistence).
 

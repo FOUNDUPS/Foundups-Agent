@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-WSP 103 establishes standards for command-line interfaces (CLIs) across the Foundups ecosystem. It explicitly defines the "Typeball Architecture," converting OpenClaw operations and UI-TARS vision predictions into standardized, per-site CLIs for Digital Twin execution on behalf of 012.
+WSP 105 establishes standards for command-line interfaces (CLIs) across the Foundups ecosystem. It explicitly defines the "Typeball Architecture," converting OpenClaw operations and UI-TARS vision predictions into standardized, per-site CLIs for Digital Twin execution on behalf of 012.
 
 **Key Principle**: Every site capability must be compiled into deterministic CLI endpoints (a "Typeball"), treating the DOM purely as an execution substrate.
 

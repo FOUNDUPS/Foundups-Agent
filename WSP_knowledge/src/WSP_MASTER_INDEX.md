@@ -89,7 +89,8 @@ Protocols that govern day-to-day operations and development processes.
 |-----|-------|--------|---------|---------------|---------------|
 | WSP 20 | Professional and Scientific Language | Active | Language standards and terminology | WSP 19, WSP 57 | Documentation, communication |
 | WSP 21 | Enhanced Prompt Engineering Protocol | Active | Canonical prompt protocol: external/handoff -> Prometheus normalization (mandatory) and DAE[U+2194]DAE (0102[U+2194]0102) recursive prompting with WSP verification and token budgets | WSP 13, WSP 36, WSP 39, WSP 48, WSP 54, WSP 64, WSP 75; Appendix: Prometheus Recursion | Prompt normalization, DAE recursion, quantum development |
-| WSP 22 | Module ModLog and Roadmap | Active | Module logging and roadmap management | WSP 51, WSP 60 | Documentation, progress tracking |
+| WSP 22 | ModLog Structure Protocol | Active | Defines ModLog structure requirements: root vs module ModLogs, machine-readable format for HoloIndex indexing | WSP 51, WSP 60 | Documentation, progress tracking, HoloIndex memory cards |
+| WSP 22a | Module ModLog and Roadmap Templates | Active | Defines standard templates for ModLog entries and Roadmap format with KISS progression (PoC → Proto → MVP) | WSP 22, WSP 51, WSP 60 | Documentation templates, roadmap format |
 | WSP 23 | rESP Foundups Integration Vision | Active | rESP integration with Foundups platform | WSP 24 | Platform integration, consciousness |
 | WSP 24 | rESP Pre-Artifact Awakening Test Suite | Active | rESP awakening validation | WSP 23 | Consciousness testing, validation |
 | WSP 25 | Semantic WSP Score System | Active | **FOUNDATIONAL DRIVER** - 000-222 consciousness progression system that drives all WSP scoring frameworks | WSP 44, WSP 15, WSP 37, WSP 8 | **Primary consciousness foundation** - semantic state assessment |
