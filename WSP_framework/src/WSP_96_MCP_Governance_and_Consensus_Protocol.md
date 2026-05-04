@@ -1,6 +1,6 @@
 # WSP 96: MCP Governance and Consensus Protocol
 
-**Status**: DRAFT (Phase 0.1 Foundation)
+**Status**: Active (Phase 0.1 Foundation)
 **Version**: 0.1
 **Date**: 2025-10-15
 **WSP Compliance**: WSP 77 (Agent Coordination), WSP 80 (Cube-Level DAE Orchestration), WSP 35 (HoloIndex Integration), WSP 71 (Security), WSP 95 (Skills Governance)
