@@ -349,7 +349,8 @@ def get_authenticated_service(token_index=None):
             cache_discovery=False,
         )
         if youtube_service:
-            logger.warning("[OK] No-auth YouTube service created - Limited to public read-only operations")
+            # WSP 97: No false success claims - this is a FALLBACK, not a success
+            logger.warning("[FALLBACK] No-auth YouTube service created - Limited to public read-only operations (OAuth FAILED)")
             return youtube_service
     except Exception as e:
         logger.error(f"[FAIL] Failed to create no-auth service: {e}")

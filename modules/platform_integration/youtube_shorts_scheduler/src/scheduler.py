@@ -39,6 +39,14 @@ from .content_generator import (
     generate_description_with_context,
 )
 
+# Content-channel mismatch gate (WSP 97 truth signaling)
+try:
+    from modules.platform_integration.youtube_shorts_scheduler.skillz.gemma_content_type_classifier.executor import classify_content
+    CLASSIFIER_AVAILABLE = True
+except ImportError:
+    CLASSIFIER_AVAILABLE = False
+    classify_content = None
+
 logger = logging.getLogger(__name__)
 
 
@@ -338,6 +346,60 @@ class YouTubeShortsScheduler:
                             "reason": "Already scheduled",
                         })
                         continue
+
+                    # CONTENT-CHANNEL GATE: Re-index if FFCPLN detected on non-FFCPLN channels (WSP 97)
+                    if CLASSIFIER_AVAILABLE and self.channel_key in ["undaodu", "foundups"]:
+                        try:
+                            classification = classify_content(title=original_title, channel=self.channel_key)
+                            content_type = classification.get("content_type", "")
+                            if content_type in ["ffcpln_music", "ffcpln_news"]:
+                                # Title suggests FFCPLN - index may be stale, trigger re-index
+                                logger.warning(
+                                    f"[SCHEDULER] [REINDEX] FFCPLN classification on {self.channel_key} - checking index"
+                                )
+                                idx_path = Path(f"memory/video_index/{self.channel_key}/{video_id}.json")
+                                if idx_path.exists():
+                                    # Delete stale index and re-index with Gemini
+                                    logger.info(f"[SCHEDULER] [REINDEX] Deleting stale index: {idx_path}")
+                                    idx_path.unlink()
+                                    # Re-index with Gemini to get actual content
+                                    reindex_result = ensure_index_json(
+                                        channel_key=self.channel_key,
+                                        video_id=video_id,
+                                        allow_indexing_if_missing=True,
+                                        mode="gemini",
+                                        stub_title=original_title,
+                                    )
+                                    if reindex_result.ok:
+                                        logger.info(f"[SCHEDULER] [REINDEX] Re-indexed {video_id} with Gemini")
+                                        # Re-classify with fresh index
+                                        fresh_idx = load_index_json(channel_key=self.channel_key, video_id=video_id)
+                                        transcript = ""
+                                        if fresh_idx:
+                                            audio = fresh_idx.get("audio") or {}
+                                            transcript = audio.get("transcript_summary", "")
+                                        reclassification = classify_content(
+                                            title=original_title,
+                                            channel=self.channel_key,
+                                            transcript=transcript,
+                                        )
+                                        new_content_type = reclassification.get("content_type", "")
+                                        logger.info(f"[SCHEDULER] [REINDEX] New classification: {new_content_type}")
+                                        if new_content_type in ["ffcpln_music", "ffcpln_news"]:
+                                            # Still FFCPLN after re-index - actually wrong channel
+                                            logger.warning(f"[SCHEDULER] [GATE] Still FFCPLN after re-index - SKIPPING")
+                                            results["skipped"].append({
+                                                "video_id": video_id,
+                                                "reason": f"Content mismatch confirmed: {new_content_type} on {self.channel_key}",
+                                                "classification": reclassification,
+                                            })
+                                            continue
+                                        # Reclassification passed - proceed with scheduling
+                                        logger.info(f"[SCHEDULER] [REINDEX] Reclassified as {new_content_type} - proceeding")
+                                    else:
+                                        logger.warning(f"[SCHEDULER] [REINDEX] Failed: {reindex_result.error}")
+                        except Exception as e:
+                            logger.debug(f"[SCHEDULER] Classification/reindex error (continuing): {e}")
 
                     import time as time_module
                     video_start = time_module.time()
