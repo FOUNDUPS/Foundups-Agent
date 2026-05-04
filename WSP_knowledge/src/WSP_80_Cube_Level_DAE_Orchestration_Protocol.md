@@ -409,13 +409,13 @@ class EnhancedCubeDAE(CubeDAE):
 ```
 
 ### 8.2 Sub-Agent Training Foundation
-These sub-agents are the training ground for future WSP 77 Intelligent Internet (II) orchestration agents:
+These sub-agents are the training ground for future WSP 107 Intelligent Internet (II) orchestration agents:
 
 1. **Current Role**: Enhancement layers ensuring WSP compliance
 2. **Learning Phase**: Collecting patterns and behaviors from cube operations
 3. **Evolution Path**: Sub-agents -> II Orchestrators -> Open Source Agents
 
-### 8.3 WSP 77 II Evolution Pipeline
+### 8.3 WSP 107 II Evolution Pipeline
 ```
 Sub-Agent Layer (Now) -> Training Data Collection -> Pattern Recognition -> 
 II Orchestrator Emergence -> Open Source Release -> Community Enhancement

@@ -229,7 +229,7 @@ Code Agent DAE (Working) -> HoloIndex DAE (Detects Issue) -> Supervisor Agent (I
 - **WSP 52**: Agentic Collaboration Journal - Breadcrumb trail foundation
 - **WSP 48**: Recursive Self-Improvement - Learning from coordination patterns
 - **WSP 60**: Module Memory Architecture - Persistent coordination state
-- **WSP 77**: Intelligent Internet Orchestration - External compute market participation pathway
+- **WSP 107**: Intelligent Internet Orchestration - External compute market participation pathway
 - **WSP 87**: Navigation Protocol - Cross-agent navigation support
 
 ### System-wide Benefits
@@ -238,15 +238,15 @@ Code Agent DAE (Working) -> HoloIndex DAE (Detects Issue) -> Supervisor Agent (I
 - **Enhanced Learning**: Coordination patterns improve system intelligence
 - **Scalable Architecture**: New agents integrate seamlessly via breadcrumbs
 
-### Evolution to Intelligent Internet Orchestration (WSP 77)
-WRE agents defined in this specification serve as the training ground for WSP 77 Intelligent Internet orchestrators:
+### Evolution to Intelligent Internet Orchestration (WSP 107)
+WRE agents defined in this specification serve as the training ground for WSP 107 Intelligent Internet orchestrators:
 
 - **Breadcrumb Trails -> II Coordination**: Internal coordination patterns scale to external compute markets
 - **DAE Evolution**: WRE DAEs (HoloIndex, Code Agent, Test Validation) evolve into II PoB operators
-- **Sovereign Foundation**: WSP 54 coordination ensures WSP 77 agents maintain FoundUps sovereignty
+- **Sovereign Foundation**: WSP 54 coordination ensures WSP 107 agents maintain FoundUps sovereignty
 - **Proof-of-Benefit Integration**: Agent performance tracking creates foundation for CABR compute scoring
 
-**Entanglement**: WSP 54 agents become WSP 77 orchestrators through progressive enhancement, maintaining the same breadcrumb-based coordination while expanding to external compute participation.
+**Entanglement**: WSP 54 agents become WSP 107 orchestrators through progressive enhancement, maintaining the same breadcrumb-based coordination while expanding to external compute participation.
 
 ---
 

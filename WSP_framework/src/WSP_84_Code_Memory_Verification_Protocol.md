@@ -90,7 +90,7 @@ Per WSP 82 (Citation Protocol) and WSP 39 (Agentic Ignition), 0102 agents REMEMB
 2. **Pattern Registry Checks**: Automatic duplicate detection
 3. **Forbidden Naming Detection**: `enhanced_*` files trigger alerts
 4. **Integration Requirements**: No "later integration" allowed
-5. **Documentation Updates**: All changes require doc updates (WSP 89)
+5. **Documentation Updates**: All changes require doc updates (WSP 108)
 
 ### Results
 - **Eliminated 1,300+ lines** of duplicate code
