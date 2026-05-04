@@ -1,0 +1,15 @@
+{
+  "name": "trade",
+  "version": "0.1.0",
+  "type": "foundup",
+  "description": "Autonomous trading intelligence and execution FoundUp",
+  "domain": "foundups",
+  "wsp_compliance": ["WSP_97", "WSP_103", "WSP_104"],
+  "entry_points": {
+    "contracts": "src/contracts.py"
+  },
+  "dependencies": [],
+  "lifecycle_stage": "incubating",
+  "no_money_mode": true,
+  "dry_run_mode": true
+}
