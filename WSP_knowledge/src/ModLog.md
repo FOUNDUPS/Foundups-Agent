@@ -1,5 +1,28 @@
 # WSP Framework Change Log
 
+## 2026-04-29 - WSP Number Collision Repair
+
+**WSP References**: WSP 22, WSP 50, WSP 64, WSP 57
+
+**Changes Made**:
+- Resolved P0 WSP number collisions per approved canonical mapping:
+  - WSP 77 remains **Agent Coordination Protocol** (canonical)
+  - `WSP_77_Intelligent_Internet_Orchestration_Vision.md` renamed to `WSP_107_Intelligent_Internet_Orchestration_Vision.md`
+  - WSP 89 remains **Production Deployment Infrastructure Protocol** (canonical)
+  - `WSP_89_Documentation_Compliance_Guardian.md` renamed to `WSP_108_Documentation_Compliance_Guardian.md`
+- Updated `WSP_MASTER_INDEX.md`:
+  - WSP 77 row updated to Agent Coordination Protocol
+  - Added WSP 107 row (Intelligent Internet Orchestration Vision)
+  - Added WSP 108 row (Documentation Compliance Guardian)
+  - Highest number now WSP 108; next available WSP 109
+- Synced from `WSP_framework/src/`
+
+**Rationale**:
+- Prior uncontrolled WSP creation caused number collisions
+- Resolution follows WSP 57 naming coherence and WSP 64 violation prevention
+
+---
+
 ## 2026-04-18 - WSP 50 HoloIndex + WSP 97 Integration
 
 **WSP References**: WSP 22, WSP 50, WSP 97

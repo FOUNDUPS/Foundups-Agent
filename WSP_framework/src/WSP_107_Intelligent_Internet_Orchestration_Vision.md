@@ -1,4 +1,4 @@
-# WSP 77: Intelligent Internet Orchestration Vision
+# WSP 107: Intelligent Internet Orchestration Vision
 
 - Status: Active
 - Purpose: Align the Intelligent Internet (II) with the FoundUps CABR/UPS economy while preserving sovereignty. Provide an optional pathway to incorporate compute-benefit signals into CABR without changing core tokenomics.
