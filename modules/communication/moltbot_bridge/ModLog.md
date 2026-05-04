@@ -1,5 +1,41 @@
 # ModLog - moltbot_bridge
 
+## 2026-05-04: Restore Memory Query Route Wrapper (WSP 50)
+
+**Author**: 0102 (Worker W7)
+**WSP**: 50 (Pre-Action Verification)
+**Slice**: `OPENCLAW_MEMORY_QUERY_IMPORT_FIX_PHASE1`
+
+### Summary
+
+Fixed main-branch import error where `_try_memory_query` was called but not defined. The function body existed as orphaned code after memory query extraction in commit `387d4a735`. Added missing function definition to restore the memory query route.
+
+### Root Cause
+
+Commit `387d4a735` "extract memory queries to owned module (Phase 1)" left orphaned code:
+- Function body existed (lines 917-1003) with docstring and pattern matching
+- `def _try_memory_query(dae, raw_message):` line was missing
+- Tests imported `_try_memory_query` from `openclaw_execution_routes.py`
+- Result: `ImportError: cannot import name '_try_memory_query'`
+
+### Fix
+
+Added single line: `def _try_memory_query(dae: Any, raw_message: str) -> Optional[str]:`
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `src/openclaw_execution_routes.py` | Added missing function definition (1 line) |
+
+### Test Results
+
+- `test_openclaw_memory_queries.py`: 20 passed
+- `test_openclaw_foundup_routing.py`: 27 passed
+- `test_e2e_foundup_job_seam.py`: 11 passed
+
+---
+
 ## 2026-05-03: OpenClaw Dry-Run Policy Flag Alignment (WSP 97)
 
 **Author**: 0102 (Worker W9)

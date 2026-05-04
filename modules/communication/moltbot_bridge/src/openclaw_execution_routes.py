@@ -913,7 +913,7 @@ def execute_improvement(dae: Any, intent: Any) -> str:
     )
 
 
-
+def _try_memory_query(dae: Any, raw_message: str) -> Optional[str]:
     """
     Detect and handle deterministic memory queries.
 
