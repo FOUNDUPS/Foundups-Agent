@@ -1,5 +1,41 @@
 # HoloIndex Package ModLog
 
+## [2026-05-04] W6_DEGRADED_MODE_WSP_DOC_RETRIEVAL_AUDIT — Offline Fallback Verified
+
+**Agent**: 0102 (W6)
+**WSP References**: WSP 50 (Pre-Action), WSP 90 (Observability), WSP 97 (Truth Boundaries)
+**Status**: COMPLETE - NO_ACTION (issue already fixed)
+
+### Summary
+
+Audited degraded/offline mode retrieval for WSP backbone documents. Issue was already fixed in `9a89fedeb` (FX1 series).
+
+### Findings
+
+| Mode | WSP 97 Query | Code | WSP | Docs | Knowledge |
+|------|--------------|------|-----|------|-----------|
+| Semantic | WSP 97 system execution prompting audit | 5 | 5 | 5 | 5 |
+| Offline | WSP 97 system execution prompting audit | 5 | 5 | 5 | 5 |
+
+Offline mode correctly searches all collections via `_lexical_search_collection()`.
+
+### Root Cause
+
+Fixed in `9a89fedeb`: "harden offline fallbacks" ensured lexical search iterates all collections.
+
+### Risk Assessment
+
+- **WSP_50**: LOW — Offline fallback correctly searches WSP backbone
+- **WSP_97**: COMPLIANT — Search results truthfully report retrieval mode
+
+### Files
+
+| File | Change |
+|------|--------|
+| `docs/audits/holoindex_search_quality/DEGRADED_MODE_WSP_DOC_RETRIEVAL_AUDIT.md` | NEW |
+
+---
+
 ## [2026-05-04] HIA9_CORPUS_BASELINE_RESTORATION — Critical Embedding Fix
 
 **Agent**: 0102
