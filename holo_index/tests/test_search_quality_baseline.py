@@ -266,7 +266,7 @@ SENTINEL_QUERIES: List[SentinelQuery] = [
         description="Find FAM daemon persistence layer",
     ),
 
-    # --- Category 10: Docs / Knowledge (2 queries) ---
+    # --- Category 10: Docs / Knowledge (3 queries) ---
     SentinelQuery(
         query="module organization enterprise domains",
         category="wsp",
@@ -278,6 +278,13 @@ SENTINEL_QUERIES: List[SentinelQuery] = [
         category="symbol",
         evidence_rule={"path_contains": "gemma_intent"},
         description="Find Gemma intent classifier",
+    ),
+    # HIA10B: Algorand L2 blockchain docs sentinel
+    SentinelQuery(
+        query="algorand blockchain DU pool contract",
+        category="docs",
+        evidence_rule={"path_contains": "ALGORAND"},
+        description="Find Algorand L2 blockchain spec",
     ),
 ]
 
@@ -330,11 +337,12 @@ def run_sentinel_query(holo, sentinel: SentinelQuery) -> QueryResult:
             "symbol": results.get("code", []),  # symbols merged into code
             "wsp": results.get("wsps", []),
             "skill": results.get("skills", []),
+            "docs": results.get("docs", []),  # HIA10B: docs-only sentinels
         }
         primary_hits = category_map.get(sentinel.category, [])
         # Fallback: if primary category empty, check all
         if not primary_hits:
-            primary_hits = results.get("code", []) + results.get("wsps", []) + results.get("skills", [])
+            primary_hits = results.get("code", []) + results.get("wsps", []) + results.get("skills", []) + results.get("docs", [])
         top_1 = primary_hits[0] if primary_hits else None
         top_5 = primary_hits[:5]
         top_1_passes = _check_evidence_rule(top_1, sentinel.evidence_rule) if top_1 else False
@@ -444,7 +452,8 @@ class TestSentinelQuerySet:
 
     def test_all_categories_covered(self):
         categories = {s.category for s in SENTINEL_QUERIES}
-        assert {"code", "wsp", "symbol", "skill"} <= categories
+        # HIA10B: Added docs category for documentation-only sentinels
+        assert {"code", "wsp", "symbol", "skill", "docs"} <= categories
 
 
 class TestBaselineMetricsValues:

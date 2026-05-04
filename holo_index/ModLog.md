@@ -1,5 +1,58 @@
 # HoloIndex Package ModLog
 
+## [2026-05-04] HIA10B_SENTINEL_EXPECTATION_CLEANUP — Baseline Sync
+
+**Agent**: 0102 W1
+**WSP References**: WSP 22 (ModLog), WSP 50 (Pre-Action), WSP 97 (Truth Boundaries)
+**Status**: COMPLETE
+
+### Summary
+
+Cleaned invalid sentinel expectations and synchronized baseline JSON with test file sentinels.
+
+### Changes
+
+| Before | After | Reason |
+|--------|-------|--------|
+| `swarm coordinator dispatch` + `swarm_coordinator` | `swarm dispatch queue integration` + `swarm` | swarm_coordinator.py doesn't exist |
+| `catalog indexer classification` + `catalog_indexer` | Removed (already gone in test file) | catalog_indexer.py doesn't exist |
+| `blockchain algorand integration` (code) | `algorand blockchain DU pool contract` (docs) | No algorand.py; spec file is docs |
+
+### Sentinel Set Updates
+
+- Added `docs` category to category_map for documentation-only sentinels
+- Added algorand docs sentinel targeting `ALGORAND_DU_POOL_CONTRACT_SPEC.md`
+- Updated fallback to include docs in combined search
+- Total sentinels: 38 → 39 (added algorand docs)
+
+### Baseline Metrics
+
+| Metric | Before (stale JSON) | After (regenerated) |
+|--------|---------------------|---------------------|
+| Top-1 | 73.7% (28/38) | 82.0% (32/39) |
+| Top-5 | 84.2% (32/38) | 92.3% (36/39) |
+
+### Remaining Failures (7)
+
+| Query | Category | Root Cause |
+|-------|----------|------------|
+| backend routing turboquant | symbol | Semantic drift |
+| WRE bridge integration cursor | symbol | Semantic drift |
+| build plan generator hermes | symbol | Semantic drift |
+| hermes foundup job executor | symbol | File not indexed |
+| pfmall catalog verification | symbol | Semantic drift |
+| orphan capability scanner | symbol | True indexing gap (P3 not indexed) |
+| algorand blockchain DU pool | docs | Top-5 only (rank 4) |
+
+### Files
+
+| File | Change |
+|------|--------|
+| `holo_index/tests/test_search_quality_baseline.py` | Added docs category + algorand sentinel |
+| `docs/audits/holoindex_search_quality/hia3_baseline_metrics.json` | REGENERATED |
+
+---
+
 ## [2026-05-04] W6_DEGRADED_MODE_WSP_DOC_RETRIEVAL_AUDIT — Offline Fallback Verified
 
 **Agent**: 0102 (W6)
