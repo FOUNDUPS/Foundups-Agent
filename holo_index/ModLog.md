@@ -1,5 +1,58 @@
 # HoloIndex Package ModLog
 
+## [2026-05-05] HIA_AGENTIC_RAG_LIVE_COLLECTION_HEALTH_PHASE2 — Collection Health CLI
+
+**Agent**: 0102 (W1)
+**WSP References**: WSP 87 (Size Limits), WSP 97 (Truth Boundaries)
+**Status**: COMPLETE - PASS (Ready with minor degradation)
+
+### Summary
+
+Added collection health inspection to verify Agentic RAG readiness before federation or TurboQuant work.
+
+### Live Collection Counts (E:/HoloIndex)
+
+| Collection | Count | Status |
+|------------|-------|--------|
+| navigation_code | 296 | HEALTHY |
+| navigation_wsp | 116 | HEALTHY |
+| navigation_symbols | 20,000 | HEALTHY |
+| navigation_docs | 3,143 | HEALTHY |
+| navigation_knowledge | 47 | HEALTHY |
+| navigation_tests | 0 | EMPTY |
+| navigation_skills | 64 | HEALTHY |
+
+**Agentic RAG Ready**: YES (all required collections healthy)
+**Degraded**: YES (navigation_tests empty - optional)
+
+### Files Added
+
+| File | Purpose |
+|------|---------|
+| `holo_index/core/collection_health.py` | Collection health helper |
+| `holo_index/tests/test_collection_health.py` | 18 tests |
+| `docs/audits/holoindex_search_quality/HIA_AGENTIC_RAG_LIVE_COLLECTION_HEALTH.md` | Live audit |
+
+### CLI Flags Added
+
+```bash
+python holo_index.py --collection-health --ssd E:/HoloIndex       # Human-readable
+python holo_index.py --collection-health-json --ssd E:/HoloIndex  # JSON
+```
+
+### Test Results
+
+- `test_collection_health.py`: 18/18 passed
+- `test_agentic_rag_baseline_gate.py`: 24/24 passed
+- `test_search_quality_baseline.py`: 10/10 passed
+- `git diff --check`: clean
+
+### Next Slice
+
+HIA_AGENTIC_RAG_SENTINEL_SUFFICIENCY_PHASE3
+
+---
+
 ## [2026-05-05] HIA_AGENTIC_RAG_BASELINE_GATE_PHASE1 — Verdict Helper Added
 
 **Agent**: 0102 (W1)
