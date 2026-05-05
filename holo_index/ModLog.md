@@ -1,5 +1,106 @@
 # HoloIndex Package ModLog
 
+## [2026-05-05] HIA_AGENTIC_RAG_BASELINE_GATE_PHASE1 — Verdict Helper Added
+
+**Agent**: 0102 (W1)
+**WSP References**: WSP 87 (Size Limits), WSP 97 (Truth Boundaries)
+**Status**: COMPLETE - PASS
+
+### Summary
+
+Added Agentic RAG verdict helper to classify retrieval results into actionable verdicts:
+- SUFFICIENT: 0102 can act on retrieval evidence
+- DEGRADED: Retrieval incomplete but not blocking
+- UNSAFE_TO_ACT: Retrieval failed or wrong bucket
+
+### WSP 97 Truth Boundaries Enforced
+
+| Rule | Enforcement |
+|------|-------------|
+| WSP-intent with zero WSP hits | Cannot be SUFFICIENT |
+| Empty all buckets | UNSAFE_TO_ACT |
+| Backend error | UNSAFE_TO_ACT |
+| Code-only for WSP query | DEGRADED |
+| Intent-bucket alignment | Required for SUFFICIENT |
+
+### Files Added
+
+| File | Purpose |
+|------|---------|
+| `holo_index/core/agentic_rag_verdict.py` | Verdict helper (RetrievalVerdict, classify_retrieval_evidence) |
+| `holo_index/tests/test_agentic_rag_baseline_gate.py` | 24 tests for verdict logic |
+
+### Test Results
+
+- `test_agentic_rag_baseline_gate.py`: 24/24 passed
+- `test_search_quality_baseline.py`: 10/10 passed
+- No whitespace issues (git diff --check clean)
+
+### Preflight Results
+
+HoloIndex retrieval functional - all 4 preflight searches returned balanced results:
+- code=8, wsp=8, docs=8, knowledge=8
+
+### What This Does NOT Do
+
+- Does NOT modify search hot path
+- Does NOT add LLM to retrieval
+- Does NOT promote TurboQuant
+- Does NOT build federation
+- Uses mock payloads for tests (WSP 97: stated explicitly)
+
+### Next Slice
+
+HIA_AGENTIC_RAG_LIVE_COLLECTION_HEALTH_PHASE2
+
+---
+
+## [2026-05-05] W1_HOLOINDEX_EXTERNAL_PACKAGE_VERIFICATION — Standalone Verified
+
+**Agent**: 0102 (W1)
+**WSP References**: WSP 97 (Truth Boundaries), WSP 103 (FoundUp Federation), WSP 104 (Namespace Isolation)
+**Status**: COMPLETE - PASS
+
+### Summary
+
+Verified FOUNDUPS/holoindex external package installs and works standalone from GitHub without Foundups-Agent dependencies.
+
+### Verification Results
+
+| Phase | Status | Notes |
+|-------|--------|-------|
+| pip install | PASS | `git+https://github.com/FOUNDUPS/holoindex.git` |
+| import | PASS | `from holoindex import HoloIndex` |
+| version | PASS | 0.1.0 |
+| init | PASS | Degraded mode without model cache |
+| pytest | PASS | 2/2 tests passed, 1 skipped |
+
+### Fixes Pushed to FOUNDUPS/holoindex
+
+| Commit | Fix |
+|--------|-----|
+| `02393c3` | Added `introspection.py` (missing module) |
+| `a53a5c8` | Added `backend_routing.py`, fixed import paths (`holo_index` → `core`) |
+
+### Files Fixed in External Repo
+
+| File | Change |
+|------|--------|
+| `src/holoindex/introspection.py` | Added (copied from core/introspection_engine.py) |
+| `src/holoindex/backend_routing.py` | Added (copied from core/backend_routing.py) |
+| `src/holoindex/search.py` | Fixed imports: `holoindex.holo_index` → `holoindex.core` |
+| `src/holoindex/indexing.py` | Fixed imports: `holoindex.holo_index` → `holoindex.core` |
+
+### Audit Report
+
+Full audit documented: `docs/audits/holoindex_scaling/FOUNDUP_REGISTRY_HOLOINDEX_SCALING_AUDIT_20260505.md`
+
+### Next Slice
+
+W2_HOLOINDEX_GOTJUNK_INTEGRATION_PHASE1 — Install holoindex in first external FoundUp
+
+---
+
 ## [2026-05-04] HIA10B_SENTINEL_EXPECTATION_CLEANUP — Baseline Sync
 
 **Agent**: 0102 W1
