@@ -1,5 +1,62 @@
 # HoloIndex Package ModLog
 
+## [2026-05-06] HIA_AGENTIC_RAG_DOCS_KNOWLEDGE_RECALL_PHASE4 — Recall Quality Tests
+
+**Agent**: 0102 (W1)
+**WSP References**: WSP 87 (Size Limits), WSP 97 (Truth Boundaries)
+**Status**: COMPLETE - PASS (with documented degraded cases)
+
+### Summary
+
+Added docs/knowledge recall quality tests. Proves expected documents appear in retrieval results at appropriate positions.
+
+### Recall Results
+
+| Bucket | Total | Pass | Status |
+|--------|-------|------|--------|
+| WSP | 2 | 2 | 100% |
+| Docs | 3 | 1 | 33% (2 degraded) |
+| Knowledge | 1 | 1 | 100% |
+
+### Passing Sentinels (TOP-1)
+
+- WSP 97 System Execution Prompting Protocol
+- WSP 61 Theoretical Physics Foundation
+- FOUNDUPS BTC Reserve Token Architecture
+- rESP Cross Linguistic Quantum Signatures
+
+### Degraded Cases (Index Staleness)
+
+| Query | Expected File | Issue |
+|-------|---------------|-------|
+| HIA live collection health | HIA_AGENTIC_RAG_LIVE_COLLECTION_HEALTH.md | Not in top 8 |
+| Degraded mode audit | DEGRADED_MODE_WSP_DOC_RETRIEVAL_AUDIT.md | Not in top 8 |
+
+**Cause**: Files created 2026-05-04/05 - not yet indexed.
+
+### Natural Language Gap
+
+- Explicit: "WSP 97 System Execution Prompting Protocol" -> TOP-1
+- Natural: "WSP 97 retrieve evidence before stating facts" -> NOT in top 8
+
+### Files Added
+
+| File | Purpose |
+|------|---------|
+| `holo_index/tests/test_agentic_rag_docs_knowledge_recall.py` | 8 recall quality tests |
+| `docs/audits/holoindex_search_quality/HIA_AGENTIC_RAG_DOCS_KNOWLEDGE_RECALL.md` | Audit doc |
+
+### Test Results
+
+- `test_agentic_rag_docs_knowledge_recall.py`: 6 passed, 2 xfailed
+- All other test suites: passing
+
+### Next Slice
+
+HIA_AGENTIC_RAG_RANKING_QUALITY_PHASE5
+
+---
+
 ## [2026-05-06] HIA_AGENTIC_RAG_SENTINEL_SUFFICIENCY_PHASE3 — Live Verdict Tests
 
 **Agent**: 0102 (W1)
