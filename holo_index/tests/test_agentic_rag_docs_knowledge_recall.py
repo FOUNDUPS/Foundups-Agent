@@ -310,43 +310,35 @@ class TestDocsRecallQuality:
     def test_collection_health_audit_recall(self):
         """Collection health query should return HIA audit doc in top 8.
 
-        NOTE: This may be DEGRADED based on preflight observation.
-        If it fails, document in audit report but consider if recall
-        improvement is needed.
+        After docs re-index (Phase 4B), this file is discoverable at TOP-1.
         """
         holo = _get_live_holo()
         sentinel = DOCS_RECALL_SENTINELS[1]  # HIA collection health
 
         result = _run_recall_sentinel(holo, sentinel)
 
-        # This sentinel is known to potentially fail - doc for audit
-        if not result.found:
-            pytest.xfail(
-                f"DEGRADED: HIA collection health audit doc not in top {sentinel.top_n}. "
-                f"Top paths: {result.top_paths}. "
-                f"This is a recall gap to document."
-            )
+        assert result.found, (
+            f"HIA collection health doc not found in top {sentinel.top_n} docs. "
+            f"Top paths: {result.top_paths}. "
+            f"Ensure docs index is fresh: python holo_index.py --index-docs --ssd E:/HoloIndex"
+        )
 
     @SKIP_LIVE
     def test_degraded_mode_audit_recall(self):
         """Degraded mode query should return degraded mode audit doc in top 8.
 
-        NOTE: This may be DEGRADED based on preflight observation.
-        If it fails, document in audit report but consider if recall
-        improvement is needed.
+        After docs re-index (Phase 4B), this file is discoverable at TOP-1.
         """
         holo = _get_live_holo()
         sentinel = DOCS_RECALL_SENTINELS[2]  # Degraded mode audit
 
         result = _run_recall_sentinel(holo, sentinel)
 
-        # This sentinel is known to potentially fail - doc for audit
-        if not result.found:
-            pytest.xfail(
-                f"DEGRADED: Degraded mode audit doc not in top {sentinel.top_n}. "
-                f"Top paths: {result.top_paths}. "
-                f"This is a recall gap to document."
-            )
+        assert result.found, (
+            f"Degraded mode audit doc not found in top {sentinel.top_n} docs. "
+            f"Top paths: {result.top_paths}. "
+            f"Ensure docs index is fresh: python holo_index.py --index-docs --ssd E:/HoloIndex"
+        )
 
 
 # =============================================================================

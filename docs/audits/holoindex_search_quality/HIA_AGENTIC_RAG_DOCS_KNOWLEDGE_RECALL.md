@@ -1,8 +1,8 @@
 # HIA_AGENTIC_RAG_DOCS_KNOWLEDGE_RECALL_PHASE4
 
 **Date**: 2026-05-06
-**Slice**: HIA_AGENTIC_RAG_DOCS_KNOWLEDGE_RECALL_PHASE4
-**Status**: COMPLETE - PASS (with documented degraded cases)
+**Slice**: HIA_AGENTIC_RAG_DOCS_KNOWLEDGE_RECALL_PHASE4 + PHASE4B (recall repair)
+**Status**: COMPLETE - PASS
 **Author**: 0102 W1
 
 ---
@@ -18,20 +18,20 @@ Prove docs/knowledge recall quality, not just bucket availability. Verify that e
 **Test Run**: 2026-05-06
 **Index**: E:/HoloIndex
 
-### Aggregate Metrics
+### Aggregate Metrics (After Phase 4B Re-index)
 
 | Metric | Value |
 |--------|-------|
 | Total Sentinels | 6 |
-| PASS | 4 (66.7%) |
-| FAIL (Degraded) | 2 (33.3%) |
+| PASS | 6 (100%) |
+| FAIL (Degraded) | 0 (0%) |
 
 ### By Bucket
 
 | Bucket | Total | Pass |
 |--------|-------|------|
 | WSP | 2 | 2 (100%) |
-| Docs | 3 | 1 (33.3%) |
+| Docs | 3 | 3 (100%) |
 | Knowledge | 1 | 1 (100%) |
 
 ---
@@ -45,13 +45,13 @@ Prove docs/knowledge recall quality, not just bucket availability. Verify that e
 | WSP 97 System Execution Prompting Protocol | WSP_97_System_Execution_Prompting_Protocol.md | TOP-1 | PASS |
 | rESP quantum entanglement theoretical foundation WSP 61 | WSP_61_Theoretical_Physics_Foundation_Protocol.md | TOP-1 | PASS |
 
-### Docs Recall (Mixed)
+### Docs Recall (PASS after re-index)
 
-| Query | Expected | Position | Verdict |
-|-------|----------|----------|---------|
-| FOUNDUPS BTC reserve token architecture | FOUNDUPS_BTC_RESERVE_TOKEN_ARCHITECTURE.md | TOP-1 | PASS |
-| HIA Agentic RAG live collection health audit | HIA_AGENTIC_RAG_LIVE_COLLECTION_HEALTH.md | NOT in top 8 | DEGRADED |
-| HoloIndex degraded mode WSP doc retrieval audit | DEGRADED_MODE_WSP_DOC_RETRIEVAL_AUDIT.md | NOT in top 8 | DEGRADED |
+| Query | Expected | Before Re-index | After Re-index | Verdict |
+|-------|----------|-----------------|----------------|---------|
+| FOUNDUPS BTC reserve token architecture | FOUNDUPS_BTC_RESERVE_TOKEN_ARCHITECTURE.md | TOP-1 | TOP-1 | PASS |
+| HIA Agentic RAG live collection health audit | HIA_AGENTIC_RAG_LIVE_COLLECTION_HEALTH.md | NOT in top 8 | TOP-1 | PASS (repaired) |
+| HoloIndex degraded mode WSP doc retrieval audit | DEGRADED_MODE_WSP_DOC_RETRIEVAL_AUDIT.md | NOT in top 8 | TOP-1 | PASS (repaired) |
 
 ### Knowledge Recall (PASS)
 
@@ -61,33 +61,25 @@ Prove docs/knowledge recall quality, not just bucket availability. Verify that e
 
 ---
 
-## Degraded Cases Analysis
+## Degraded Cases Analysis (Phase 4B: REPAIRED)
 
 ### Case 1: HIA_AGENTIC_RAG_LIVE_COLLECTION_HEALTH.md
 
 **Query**: "HIA Agentic RAG live collection health audit"
-**Expected**: `docs/audits/holoindex_search_quality/HIA_AGENTIC_RAG_LIVE_COLLECTION_HEALTH.md`
-**Observed Top 5 Docs**:
-1. HIA8_AGENTIC_RAG_GATE.md
-2. HIA4A_INDEX_REFRESH_REPORT.md
-3. HIA1_HOLOINDEX_ARCHITECTURE_AUDIT.md
-4. HOLO_CLI_FIRST_PRINCIPLES_AUDIT.md
-5. HOLO_COMPREHENSIVE_AUDIT_20251130.md
-
-**Diagnosis**: File exists but not indexed recently. Created 2026-05-05 - may need re-indexing.
+**Before Re-index**: NOT in top 8 (index stale)
+**After Re-index**: **TOP-1** in docs
+**Fix**: `python holo_index.py --index-docs --ssd E:/HoloIndex`
 
 ### Case 2: DEGRADED_MODE_WSP_DOC_RETRIEVAL_AUDIT.md
 
 **Query**: "HoloIndex degraded mode WSP doc retrieval audit"
-**Expected**: `docs/audits/holoindex_search_quality/DEGRADED_MODE_WSP_DOC_RETRIEVAL_AUDIT.md`
-**Observed Top 5 Docs**:
-1. DOCS_AUDIT_CATEGORIZATION.md
-2. CURRENT_STATE_AUDIT.md
-3. HIA1_HOLOINDEX_ARCHITECTURE_AUDIT.md
-4. HIA4A_INDEX_REFRESH_REPORT.md
-5. HOLO_COMPREHENSIVE_AUDIT_20251130.md
+**Before Re-index**: NOT in top 8 (index stale)
+**After Re-index**: **TOP-1** in docs
+**Fix**: `python holo_index.py --index-docs --ssd E:/HoloIndex`
 
-**Diagnosis**: File exists but not indexed recently. Created 2026-05-04 - may need re-indexing.
+### Root Cause
+
+Both files were created 2026-05-04/05 after the last docs index build. Re-indexing docs collection resolved the recall gap immediately.
 
 ---
 
@@ -110,7 +102,7 @@ Prove docs/knowledge recall quality, not just bucket availability. Verify that e
 
 | File | Purpose |
 |------|---------|
-| `holo_index/tests/test_agentic_rag_docs_knowledge_recall.py` | 8 recall quality tests |
+| `holo_index/tests/test_agentic_rag_docs_knowledge_recall.py` | 8 recall quality tests (xfails removed after repair) |
 | `docs/audits/holoindex_search_quality/HIA_AGENTIC_RAG_DOCS_KNOWLEDGE_RECALL.md` | This audit |
 
 ---
@@ -119,7 +111,7 @@ Prove docs/knowledge recall quality, not just bucket availability. Verify that e
 
 | Test Suite | Result |
 |------------|--------|
-| test_agentic_rag_docs_knowledge_recall.py | 6 passed, 2 xfailed |
+| test_agentic_rag_docs_knowledge_recall.py | 8 passed (after Phase 4B repair) |
 | test_agentic_rag_sentinel_sufficiency.py | 11 passed |
 | test_collection_health.py | 18 passed |
 | test_agentic_rag_baseline_gate.py | 24 passed |
@@ -173,13 +165,13 @@ Status: PASS
 
 ## Agentic RAG Docs/Knowledge Verdict
 
-**PASS with degraded cases** - Core recall quality proven:
+**PASS** - Recall quality proven after Phase 4B repair:
 
 1. WSP protocols recalled at TOP-1 with explicit queries
 2. Critical architecture docs recalled at TOP-1
 3. Knowledge papers recalled at TOP-1
-4. Two recent HIA audit docs not in top 8 (index staleness, not ranking failure)
-5. Natural language recall gap documented for future improvement
+4. HIA audit docs recalled at TOP-1 after docs re-index
+5. Natural language WSP recall gap documented for future improvement
 
 ---
 
