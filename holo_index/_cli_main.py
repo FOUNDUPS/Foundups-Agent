@@ -678,6 +678,10 @@ def main():
     parser.add_argument('--monitor-work', action='store_true', help='Monitor work completion for auto-publish (ai_intelligence/work_completion_publisher)')
     parser.add_argument('--organize-docs', action='store_true', help='Allow DocDAE to reorganize docs during auto-refresh')
 
+    # Agentic RAG collection health (HIA_AGENTIC_RAG_LIVE_COLLECTION_HEALTH_PHASE2)
+    parser.add_argument('--collection-health', action='store_true', help='Inspect collection health for Agentic RAG readiness')
+    parser.add_argument('--collection-health-json', action='store_true', help='Output collection health as JSON')
+
     args = parser.parse_args()
 
     # --- Bundle JSON (extracted to holo_index/cli/commands/bundle_json.py) ---
@@ -1509,6 +1513,19 @@ def main():
     if args.benchmark:
         holo.benchmark_ssd()
 
+    # --- Collection Health (HIA_AGENTIC_RAG_LIVE_COLLECTION_HEALTH_PHASE2) ---
+    if args.collection_health or args.collection_health_json:
+        from holo_index.core.collection_health import (
+            inspect_holoindex_collection_health,
+            format_health_report,
+        )
+        report = inspect_holoindex_collection_health(holo)
+        if args.collection_health_json:
+            safe_print(report.to_json())
+        else:
+            safe_print(format_health_report(report))
+        return
+
     # --- HoloDAE features (extracted to holo_index/cli/commands/holodae.py) ---
     from holo_index.cli.commands.holodae import handle_holodae_features
     if handle_holodae_features(args, safe_print, project_root):
@@ -1516,7 +1533,8 @@ def main():
 
     if not any([index_code, index_wsp, args.search, args.benchmark, args.start_holodae, args.stop_holodae, args.holodae_status, args.link_modules,
                 args.pattern_coach, args.module_analysis, args.health_check, args.performance_metrics, args.system_check, args.slow_mode,
-                args.pattern_memory, args.mcp_hooks, args.mcp_log, args.thought_log, args.monitor_work, args.memory_feedback]):
+                args.pattern_memory, args.mcp_hooks, args.mcp_log, args.thought_log, args.monitor_work, args.memory_feedback,
+                args.collection_health, args.collection_health_json]):
         safe_print("\n[USAGE] Usage:")
         safe_print("  python holo_index.py --index-all             # Index NAVIGATION + WSP")
         safe_print("  python holo_index.py --index-code            # Index NAVIGATION only")
