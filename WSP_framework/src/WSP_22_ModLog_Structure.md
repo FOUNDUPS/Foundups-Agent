@@ -91,6 +91,19 @@ AVOID creating ModLogs for:
 
 The goal is **useful operational history**, not exhaustive change tracking.
 
+## Journal Format
+
+- **Reverse chronological order**: Newest entries at top, oldest at bottom
+- **Rationale**: When ModLog grows large, current status is immediately visible without scrolling
+- **Roadmap complement**: Roadmap = "what we plan to build" (future); ModLog = "what we have built" (past). No duplication between them.
+
+## Versioning Rules
+
+- Framework phase versions follow `0.x.x` pattern (development/prototype)
+- Production phase uses `1.x.x+` (after MVP validation)
+- Patch: bug fix; Minor: new feature or breaking change (framework phase); Major: MVP release
+- Per-FoundUp templates may extend these rules (see `WSP_framework/docs/annexes/MODLOG_ROADMAP_TEMPLATES_REFERENCE.md`)
+
 ## Summary
 
 ModLogs should be created sparingly and maintained actively. They are operational tools for 0102 agents, not compliance checkboxes. When in doubt, document in the parent module or root ModLog rather than creating new documentation debt.
