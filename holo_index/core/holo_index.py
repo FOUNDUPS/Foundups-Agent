@@ -379,6 +379,10 @@ class HoloIndex:
         else:
             self.search_cache = None
 
+        # HIA Phase 4: Tenant context binding for FoundUp isolation
+        # Allows callers to bind a foundup_id that persists across searches
+        self._foundup_context: Optional[str] = None
+
         # Cache state for reuse and mark initialized
         HoloIndex._shared_state = dict(self.__dict__)
         HoloIndex._initialized = True
@@ -537,6 +541,31 @@ class HoloIndex:
         """
         from .search_engine import execute_search
         return execute_search(self, query, limit, doc_type_filter, foundup_id, include_shared)
+
+    # --------- Tenant Context Binding (HIA Phase 4) --------- #
+
+    def set_foundup_context(self, foundup_id: str) -> None:
+        """Bind a FoundUp ID to this HoloIndex instance for automatic scoping.
+
+        When set, searches without explicit foundup_id will use this context.
+        Precedence: explicit arg > instance context > HOLO_FOUNDUP_ID env > none
+
+        Args:
+            foundup_id: The FoundUp ID to bind (e.g., "trade", "kosei", "gotjunk_001")
+        """
+        self._foundup_context = foundup_id
+        self._log_agent_action(f"FoundUp context bound: {foundup_id}", "CONTEXT")
+
+    def clear_foundup_context(self) -> None:
+        """Clear the bound FoundUp context, returning to unscoped mode."""
+        prev = self._foundup_context
+        self._foundup_context = None
+        if prev:
+            self._log_agent_action(f"FoundUp context cleared (was: {prev})", "CONTEXT")
+
+    def get_foundup_context(self) -> Optional[str]:
+        """Return the currently bound FoundUp context, or None if unset."""
+        return self._foundup_context
 
     # --------- CLI Helpers --------- #
 

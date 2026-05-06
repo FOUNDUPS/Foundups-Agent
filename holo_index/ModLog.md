@@ -1,5 +1,61 @@
 # HoloIndex Package ModLog
 
+## [2026-05-06] HIA_TENANT_CONTEXT_BINDING_PHASE4
+
+**Agent**: 0102 (W1)
+**WSP References**: WSP 97, WSP 87, WSP 15, WSP 104
+**Status**: COMPLETE
+
+### Summary
+
+Added automatic FoundUp scope resolution with explicit precedence. When
+`foundup_id` is omitted from search calls, the system now resolves scope
+from instance context or environment. This enables default-capable isolation
+without requiring explicit parameters at every call site.
+
+### Precedence (highest to lowest)
+
+1. **explicit**: Caller-provided `foundup_id` argument
+2. **context**: Instance-bound via `set_foundup_context()`
+3. **env**: `HOLO_FOUNDUP_ID` environment variable
+4. **none**: Legacy global behavior (no filtering)
+
+### Changes
+
+- `holo_index.py`: Added `_foundup_context` instance var, `set_foundup_context()`,
+  `clear_foundup_context()`, `get_foundup_context()` methods
+- `search_engine.py`: Added `_resolve_foundup_scope()` helper; updated
+  `execute_search()` to use resolved scope; added `effective_foundup_id` and
+  `scope_source` to metadata
+- `test_tenant_context_binding.py`: 17 unit tests (NEW)
+
+### API Added
+
+```python
+# Context binding (persists across searches)
+holo.set_foundup_context("trade")   # Bind scope
+holo.get_foundup_context()          # Returns "trade"
+holo.clear_foundup_context()        # Reset to None
+
+# Environment fallback
+HOLO_FOUNDUP_ID=kosei python script.py
+```
+
+### Metadata Fields Added
+
+```python
+result["metadata"]["effective_foundup_id"]  # Resolved scope (may differ from arg)
+result["metadata"]["scope_source"]          # "explicit" | "context" | "env" | "none"
+```
+
+### Test Results
+
+- New: 17/17 pass (test_tenant_context_binding.py)
+- Regression query filtering: 19/19 pass
+- Regression metadata tagging: 22/22 pass
+
+---
+
 ## [2026-05-06] HIA_FEDERATION_QUERY_FILTERING_PHASE3
 
 **Agent**: 0102 (W1)
