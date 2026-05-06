@@ -1,5 +1,42 @@
 # HoloIndex Package ModLog
 
+## [2026-05-06] HIA_AGENTIC_RAG_RANKING_QUALITY_PHASE6
+
+**Agent**: 0102 (W1)
+**WSP References**: WSP 87, WSP 97
+**Status**: COMPLETE - AUDIT ONLY
+
+### Summary
+
+Measured ranking quality across 27 sentinels after Phases 1-5.
+93% recall (25/27), 85% top-1 (23/27). Zero test-over-source inversions.
+Both failures are indexing gaps (files created after last code index build).
+Gemma reranking NOT justified — all failures fixable by `--index-code`.
+
+### Ranking Metrics
+
+| Metric | Value |
+|--------|-------|
+| Total sentinels | 27 |
+| Found (any position) | 25 (93%) |
+| Top-1 | 23 (85%) |
+| Failures | 2 (indexing gaps) |
+| Test-over-source inversions | 0 |
+
+### Failed Sentinels (Indexing Gaps)
+
+| File | Query | Root Cause |
+|------|-------|-----------|
+| agentic_rag_verdict.py | "agentic rag verdict classification" | Added PR #503, not in code index |
+| collection_health.py | "collection health inspection" | Added PR #504, not in code index |
+
+### Changes
+
+- `HIA_AGENTIC_RAG_RANKING_QUALITY_PHASE6.md`: Ranking quality audit (NEW)
+- No code changes in this slice
+
+---
+
 ## [2026-05-06] HIA_AGENTIC_RAG_WSP97_ALIAS_RECALL_PHASE5
 
 **Agent**: 0102 (W1)
