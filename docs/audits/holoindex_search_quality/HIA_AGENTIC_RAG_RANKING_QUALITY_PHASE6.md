@@ -19,6 +19,8 @@ needed.
 
 ## Aggregate Metrics
 
+### Before Index Refresh (Phase 6 Audit)
+
 | Metric | Value |
 |--------|-------|
 | Total sentinels tested | 27 |
@@ -28,20 +30,46 @@ needed.
 | Failures | 2 (7%) |
 | Test-over-source inversions | 0 |
 
+### After Index Refresh (Phase 7)
+
+| Metric | Value |
+|--------|-------|
+| Total sentinels tested | 27 |
+| Found (any position) | **27/27 (100%)** |
+| Top-1 | **25/27 (93%)** |
+| Top-5 | **27/27 (100%)** |
+| Failures | **0 (0%)** |
+| Test-over-source inversions | 0 |
+
+**Reindex command**: `python holo_index.py --index-symbols --ssd E:/HoloIndex`
+
+**Root cause**: `--index-code` only indexes NAVIGATION.py entries into `navigation_code`.
+The two files (`agentic_rag_verdict.py`, `collection_health.py`) live in `holo_index/core/`
+which is indexed via the **symbol index** (`navigation_symbols`), not the code collection.
+The symbol index was stale (20K entries, all from `modules/`). Re-running `--index-symbols`
+reprioritized `holo_index/core` as P1, indexing 186 symbols including both target files.
+
 ---
 
 ## Position Distribution
 
+### Before Index Refresh
+
 ```
 pos-1:  23  #######################
 pos-2:   2  ##
-pos-3:   0
-pos-4:   0
-pos-5:   0
 NOT FOUND: 2  XX
 ```
 
-85% of sentinels land at TOP-1. No results beyond position 2.
+### After Index Refresh
+
+```
+pos-1:  25  #########################
+pos-2:   2  ##
+NOT FOUND: 0
+```
+
+93% of sentinels land at TOP-1. No results beyond position 2. Zero failures.
 
 ---
 
@@ -100,63 +128,66 @@ NOT FOUND: 2  XX
 | WSP 77 agent coordination | WSP_77 | wsps | 1 | PASS |
 | build plan swarm orchestration | build_plan | code | 1 | PASS |
 
-### Phase 6: Source-vs-Test Probes (1/3 PASS, 2 FAIL)
+### Phase 6: Source-vs-Test Probes (3/3 PASS after Phase 7 refresh)
 
-| Query | Expected | Bucket | Position | Verdict |
-|-------|----------|--------|----------|---------|
-| search engine keyword scoring | search_engine.py | code | 1 | PASS |
-| agentic rag verdict classification | agentic_rag_verdict | code | -1 | **FAIL** |
-| collection health inspection | collection_health | code | -1 | **FAIL** |
+| Query | Expected | Bucket | Before Refresh | After Refresh | Verdict |
+|-------|----------|--------|----------------|---------------|---------|
+| search engine keyword scoring | search_engine.py | code | 1 | 1 | PASS |
+| agentic rag verdict classification | agentic_rag_verdict | code | NOT FOUND | **1** | **PASS (repaired)** |
+| collection health inspection | collection_health | code | NOT FOUND | **1** | **PASS (repaired)** |
 
 ---
 
-## Failure Classification
+## Failure Classification (Pre-Refresh)
 
-### Failure 1: `agentic_rag_verdict.py`
+### Failure 1: `agentic_rag_verdict.py` (REPAIRED in Phase 7)
 
-| Field | Value |
-|-------|-------|
-| Query | "agentic rag verdict classification" |
-| Expected | `agentic_rag_verdict` in code bucket |
-| Got top-1 | `modules/foundups/kosei/src/contracts.py` |
-| File exists | YES (`holo_index/core/agentic_rag_verdict.py`) |
-| In code index | **NO** |
-| Added in | PR #503 (Phase 1 baseline gate) |
-| Classification | **INDEXING GAP** |
+| Field | Before Refresh | After Refresh |
+|-------|----------------|---------------|
+| Query | "agentic rag verdict classification" | same |
+| Expected | `agentic_rag_verdict` in code bucket | same |
+| Got top-1 | `modules/foundups/kosei/src/contracts.py` | **`holo_index/core/agentic_rag_verdict.py`** |
+| In symbol index | NO | **YES (7 symbols)** |
+| Classification | INDEXING GAP | **REPAIRED** |
 
-### Failure 2: `collection_health.py`
+### Failure 2: `collection_health.py` (REPAIRED in Phase 7)
 
-| Field | Value |
-|-------|-------|
-| Query | "collection health inspection" |
-| Expected | `collection_health` in code bucket |
-| Got top-1 | `holo_index/qwen_advisor/qwen_health_monitor/health_reporter.py` |
-| File exists | YES (`holo_index/core/collection_health.py`) |
-| In code index | **NO** |
-| Added in | PR #504 (Phase 2 collection health CLI) |
-| Classification | **INDEXING GAP** |
+| Field | Before Refresh | After Refresh |
+|-------|----------------|---------------|
+| Query | "collection health inspection" | same |
+| Expected | `collection_health` in code bucket | same |
+| Got top-1 | `health_reporter.py` | **`holo_index/core/collection_health.py`** |
+| In symbol index | NO | **YES (9 symbols)** |
+| Classification | INDEXING GAP | **REPAIRED** |
 
 ### Root Cause
 
-Both files were created during HIA Phases 1-2 (PRs #503-504) **after the
-last code index build**. The code collection (296 entries) does not include
-them. This is identical to the Phase 4B docs recall gap.
+Both files live in `holo_index/core/` which is indexed via the **symbol index**
+(`navigation_symbols`), not the code collection (`navigation_code`). The code
+collection only indexes NAVIGATION.py entries (296 entries). The symbol index
+was stale — all 20,000 slots consumed by `modules/` before `holo_index/core`
+(P1 priority root) was reached.
 
-### Fix
+### Fix Applied (Phase 7)
 
 ```bash
-python holo_index.py --index-code --ssd E:/HoloIndex
+python holo_index.py --index-symbols --ssd E:/HoloIndex
 ```
 
-This is a one-command fix. No code changes required.
+Re-running `--index-symbols` rebuilt the symbol index with correct P1 priority
+ordering. `holo_index/core` (186 symbols) was indexed first, then `modules/`
+filled the remaining ~19,814 slots.
+
+Note: `--index-code` alone does NOT fix this — it only refreshes NAVIGATION.py
+entries. The symbol index requires `--index-symbols` explicitly.
 
 ---
 
-## Failure Classification Summary
+## Failure Classification Summary (Post-Refresh)
 
 | Classification | Count | Examples |
 |---------------|-------|---------|
-| Indexing gap | 2 | agentic_rag_verdict.py, collection_health.py |
+| Indexing gap | 0 | (both repaired) |
 | Invalid sentinel | 0 | - |
 | Source-over-test | 0 | - |
 | Semantic drift | 0 | - |
@@ -234,7 +265,7 @@ well-scoped queries.
 | Ranking inversions (wrong doc outranks right doc) | 0 |
 | Source-vs-test inversions | 0 |
 | Natural-language recall gaps | 0 (fixed by alias registry) |
-| Remaining failures | 2 (indexing gaps, fixed by re-indexing) |
+| Remaining failures | 0 (both repaired by symbol index refresh) |
 
 ### When Would Gemma Reranking Be Justified?
 
@@ -254,9 +285,10 @@ Gemma reranking would be justified if:
 
 ### Recommendation
 
-Defer Gemma reranking. The current ranking quality (93% recall, 85% top-1)
-is driven by two simple indexing gaps. After a code index refresh, projected
-quality is 100% recall and 93%+ top-1 across all 27 sentinels.
+Defer Gemma reranking. After the Phase 7 symbol index refresh, ranking quality
+is 100% recall (27/27) and 93% top-1 (25/27). All failures were indexing gaps,
+now repaired. No semantic ranking problem exists that would benefit from LLM
+reranking.
 
 ---
 
@@ -282,32 +314,50 @@ quality is 100% recall and 93%+ top-1 across all 27 sentinels.
 
 ---
 
-## Next Action
+## Phase 7: Index Refresh Results (2026-05-06)
 
-### Immediate: Code Index Refresh
+### Command
 
 ```bash
-python holo_index.py --index-code --ssd E:/HoloIndex
+python holo_index.py --index-symbols --ssd E:/HoloIndex
 ```
 
-Then re-run Phase 6 probes to confirm 27/27 pass.
+Note: `--index-code` only refreshes NAVIGATION.py entries (navigation_code).
+The two target files are in `holo_index/core/` which is served by the
+**symbol index** (navigation_symbols). `--index-symbols` was required.
 
-### If 100% After Refresh: HIA Agentic RAG Complete
+### Before/After
 
-The HIA Agentic RAG pipeline is complete when:
+| File | Before Refresh | After Refresh |
+|------|----------------|---------------|
+| agentic_rag_verdict.py | NOT in symbol index | **7 symbols indexed, TOP-1** |
+| collection_health.py | NOT in symbol index | **9 symbols indexed, TOP-1** |
+| Symbol collection total | 20,000 (all modules/) | 20,000 (186 holo_index/core + modules/) |
 
-1. Baseline gate (Phase 1) - DONE
-2. Collection health (Phase 2) - DONE
-3. Sentinel sufficiency (Phase 3) - DONE
-4. Docs/knowledge recall (Phase 4/4B) - DONE
-5. WSP_97 alias recall (Phase 5) - DONE
-6. Ranking quality audit (Phase 6) - DONE (this slice)
-7. Index refresh for 2 remaining gaps - PENDING (one command)
+### Final Pass Rate
 
-### If Failures Persist After Refresh: Phase 7
+| Metric | Phase 6 (pre) | Phase 7 (post) |
+|--------|---------------|----------------|
+| Recall | 25/27 (93%) | **27/27 (100%)** |
+| Top-1 | 23/27 (85%) | **25/27 (93%)** |
+| Failures | 2 | **0** |
 
-Create targeted sentinel tests for the newly indexed files and
-investigate any remaining ranking anomalies.
+---
+
+## HIA Agentic RAG Pipeline Status
+
+| Phase | Status |
+|-------|--------|
+| Phase 1: Baseline gate | DONE (PR #503) |
+| Phase 2: Collection health | DONE (PR #504) |
+| Phase 3: Sentinel sufficiency | DONE (PR #505) |
+| Phase 4/4B: Docs/knowledge recall | DONE (PR #506) |
+| Phase 5: WSP_97 alias recall | DONE (PR #507) |
+| Phase 6: Ranking quality audit | DONE (this slice) |
+| Phase 7: Index refresh | DONE (this slice) |
+
+**Pipeline verdict: COMPLETE.** 27/27 sentinels pass, 93% TOP-1, zero
+failures, Gemma reranking not justified.
 
 ### Long-term: WSP Alias Registry Expansion
 

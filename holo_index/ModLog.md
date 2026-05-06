@@ -1,5 +1,36 @@
 # HoloIndex Package ModLog
 
+## [2026-05-06] HIA_AGENTIC_RAG_INDEX_REFRESH_PHASE7
+
+**Agent**: 0102 (W1)
+**WSP References**: WSP 87, WSP 97
+**Status**: COMPLETE - PASS
+
+### Summary
+
+Refreshed symbol index to close 2 remaining indexing gaps from Phase 6.
+Both `agentic_rag_verdict.py` and `collection_health.py` now discoverable at TOP-1.
+Final: 27/27 sentinels pass (100% recall, 93% top-1). Gemma reranking remains unjustified.
+
+### Key Finding
+
+`--index-code` only refreshes NAVIGATION.py entries (`navigation_code` collection).
+Files in `holo_index/core/` are served by the **symbol index** (`navigation_symbols`).
+Must use `--index-symbols` to refresh those entries.
+
+### Before/After
+
+| File | Before | After |
+|------|--------|-------|
+| agentic_rag_verdict.py | NOT indexed | TOP-1 (7 symbols) |
+| collection_health.py | NOT indexed | TOP-1 (9 symbols) |
+
+### Changes
+
+- Updated `HIA_AGENTIC_RAG_RANKING_QUALITY_PHASE6.md` with Phase 7 results
+
+---
+
 ## [2026-05-06] HIA_AGENTIC_RAG_RANKING_QUALITY_PHASE6
 
 **Agent**: 0102 (W1)
