@@ -1,5 +1,40 @@
 # HoloIndex Package ModLog
 
+## [2026-05-06] HIA_AGENTIC_RAG_WSP97_ALIAS_RECALL_PHASE5
+
+**Agent**: 0102 (W1)
+**WSP References**: WSP 87, WSP 97
+**Status**: COMPLETE - PASS
+
+### Summary
+
+Fixed natural-language WSP_97 recall gap. Added deterministic alias registry
+mapping 16 operational phrases to WSP_97. No Gemma/LLM required.
+
+### Root Cause
+
+WSP_97 at vector position 94/116 for natural-language queries — never in
+top-N vector results. Added alias-driven injection: when query matches a
+registered phrase, the target WSP doc is fetched from the collection and
+spliced into the candidate pool before keyword scoring.
+
+### Recall Before/After
+
+| Query | Before | After |
+|-------|--------|-------|
+| "retrieve evidence before stating facts" | NOT in top 8 | TOP-1 |
+| "function agentically apply CoT CoR" | NOT in top 8 | TOP-1 |
+| "hard think dialectic sweep first principles" | NOT in top 8 | TOP-1 |
+| "agentic activation protocol execution" | NOT in top 8 | TOP-1 |
+
+### Changes
+
+- `search_engine.py`: Added `_WSP_ALIAS_REGISTRY`, `_resolve_alias_wsp_numbers()`, `_wsp_alias_match_boost()`, alias injection block
+- `test_agentic_rag_wsp97_alias_recall.py`: 14 tests (8 alias recall, 1 explicit, 1 combined, 4 no-LLM guards)
+- `HIA_AGENTIC_RAG_WSP97_ALIAS_RECALL.md`: Phase 5 audit
+
+---
+
 ## [2026-05-06] HIA_AGENTIC_RAG_DOCS_RECALL_BRANCH_RECOVERY_AND_REPAIR_PHASE4B
 
 **Agent**: 0102 (W1)
