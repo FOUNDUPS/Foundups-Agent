@@ -1,5 +1,35 @@
 # HoloIndex Package ModLog
 
+## [2026-05-06] HIA_FEDERATION_FOUNDUP_IDENTITY_COVERAGE_AUDIT_PHASE2B
+
+**Agent**: 0102 (W1)
+**WSP References**: WSP 97, WSP 103, WSP 104, WSP 15
+**Status**: COMPLETE - AUDIT ONLY
+
+### Summary
+
+Audited FoundUp identity coverage for federation query filtering readiness.
+Found 4 directories with manifests (trade, kosei, gotjunk, voteballots),
+5 FoundUp directories without manifests (move2japan needs one), 1 ID mismatch
+(pqn_swarm_hub dir vs science_swarm catalog ID), and 2 correctly externalized
+FoundUps (AutoPost, Science Swarm Hub).
+
+### Key Findings
+
+- 4/17 directories have `foundup_manifest.json`
+- `move2japan` active in catalog (573 videos) but no manifest
+- `pqn_swarm_hub/` directory vs `science_swarm` catalog ID mismatch
+- `antifafm` module under `platform_integration/`, not `foundups/`
+- AutoPost and Science Swarm Hub correctly blocked as external
+- Phase 3 filtering CAN proceed (fallback handles gaps)
+
+### Changes
+
+- `HIA_FEDERATION_FOUNDUP_IDENTITY_COVERAGE_AUDIT.md`: Audit document (NEW)
+- No code changes in this slice
+
+---
+
 ## [2026-05-06] HIA_FEDERATION_METADATA_TAGGING_PHASE2
 
 **Agent**: 0102 (W1)
