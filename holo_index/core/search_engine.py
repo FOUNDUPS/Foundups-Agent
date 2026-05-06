@@ -144,6 +144,90 @@ def _wsp_number_match_boost(query: str, path: str, title: str) -> float:
 
 
 # ---------------------------------------------------------------------------
+# HIA5: WSP alias registry for natural-language recall
+# ---------------------------------------------------------------------------
+
+# Maps natural-language operational phrases to WSP numbers.
+# When a query matches an alias phrase, the corresponding WSP number
+# gets the same boost as if the user had typed "WSP <number>" explicitly.
+# No LLM required. Deterministic pattern matching.
+
+_WSP_ALIAS_REGISTRY: Dict[str, List[str]] = {
+    "97": [
+        "retrieve evidence before stating facts",
+        "function agentically",
+        "apply cot cor",
+        "apply cot/cor",
+        "chain of thought chain of reasoning",
+        "hard think",
+        "dialectic sweep",
+        "first principles then execute",
+        "first principles execute",
+        "holoindex research build follow wsp",
+        "holoindex research hard think",
+        "retrieve wsp retrieve evidence",
+        "micro pass macro pass",
+        "agentic activation protocol",
+        "execution activation protocol",
+        "cot cor verification gates",
+    ],
+}
+
+
+def _resolve_alias_wsp_numbers(query: str) -> List[str]:
+    """Return WSP numbers whose aliases match the query.
+
+    HIA5: Pure lookup — no LLM, no embeddings.  Returns e.g. ["97"]
+    when the query contains "retrieve evidence before stating facts".
+    """
+    ql = query.lower()
+    matched_wsps: List[str] = []
+
+    for wsp_num, aliases in _WSP_ALIAS_REGISTRY.items():
+        for alias in aliases:
+            if alias in ql:
+                matched_wsps.append(wsp_num)
+                break
+
+            alias_tokens = set(alias.split())
+            query_tokens = set(ql.split())
+            overlap = alias_tokens & query_tokens
+            if len(alias_tokens) >= 3 and len(overlap) >= 3:
+                matched_wsps.append(wsp_num)
+                break
+            elif len(alias_tokens) == 2 and len(overlap) == 2:
+                matched_wsps.append(wsp_num)
+                break
+
+    return matched_wsps
+
+
+def _wsp_alias_match_boost(query: str, path: str, title: str) -> float:
+    """Return boost if query matches a known WSP alias phrase.
+
+    HIA5: Bridges the recall gap between natural-language operational
+    phrases and their canonical WSP protocol documents.
+
+    Only fires when:
+    - The query matches a registered alias phrase
+    - The target path/title contains the corresponding WSP number
+    """
+    matched_wsps = _resolve_alias_wsp_numbers(query)
+    if not matched_wsps:
+        return 0.0
+
+    path_wsps = _extract_wsp_numbers(path)
+    title_wsps = _extract_wsp_numbers(title)
+    target_wsps = set(path_wsps + title_wsps)
+
+    for wsp_num in matched_wsps:
+        if wsp_num in target_wsps:
+            return 5.0
+
+    return 0.0
+
+
+# ---------------------------------------------------------------------------
 # HIA2: Confidence scoring (pure heuristic, no LLM)
 # ---------------------------------------------------------------------------
 
@@ -344,6 +428,37 @@ def _search_collection(
     metas = results.get("metadatas", [[]])[0]
     dists = results.get("distances", [[]])[0]
 
+    # HIA5: Inject alias-matched WSP docs that vector search missed.
+    # WSP_97 sits at vector position 94/116 for natural-language queries,
+    # so it never appears in the top-N vector results.  When the query
+    # matches a registered alias phrase we fetch the target WSP directly
+    # from the collection and splice it into the candidate pool.
+    if kind == "wsp":
+        alias_wsps = _resolve_alias_wsp_numbers(query)
+        if alias_wsps:
+            existing_paths = {(m.get("path") or "").lower() for m in metas}
+            try:
+                all_data = collection.get(include=["documents", "metadatas"])
+                all_docs_list = all_data.get("documents", [])
+                all_metas_list = all_data.get("metadatas", [])
+                alias_set = set(alias_wsps)
+                for j, ameta in enumerate(all_metas_list):
+                    apath = (ameta.get("path") or "").lower()
+                    if apath in existing_paths:
+                        continue
+                    atitle = (ameta.get("title") or "").lower()
+                    target_wsps = set(
+                        _extract_wsp_numbers(apath)
+                        + _extract_wsp_numbers(atitle)
+                    )
+                    if alias_set & target_wsps:
+                        docs.append(all_docs_list[j])
+                        metas.append(ameta)
+                        dists.append(1.5)  # Neutral; keyword boost ranks
+                        existing_paths.add(apath)
+            except Exception:
+                pass  # Collection read failed — degrade silently
+
     doc_count = len(docs)
     if doc_count == 0:
         return []
@@ -396,6 +511,8 @@ def _search_collection(
 
         # HIA4B: WSP number exact match boost
         keyword_score += _wsp_number_match_boost(query, path, title)
+        # HIA5: WSP alias phrase match boost
+        keyword_score += _wsp_alias_match_boost(query, path, title)
 
         if doc_type_filter != "all" and not doc_type.startswith(doc_type_filter):
             continue
@@ -507,6 +624,8 @@ def _lexical_search_collection(
 
             # HIA4B: WSP number exact match boost
             keyword_score += _wsp_number_match_boost(query, path, title)
+            # HIA5: WSP alias phrase match boost
+            keyword_score += _wsp_alias_match_boost(query, path, title)
 
             if keyword_score <= 0:
                 continue
