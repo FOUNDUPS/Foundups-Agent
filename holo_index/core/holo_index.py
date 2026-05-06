@@ -518,14 +518,25 @@ class HoloIndex:
 
     # --------- Search --------- #
 
-    def search(self, query: str, limit: int = 10, doc_type_filter: str = "all") -> Dict[str, Any]:
+    def search(
+        self,
+        query: str,
+        limit: int = 10,
+        doc_type_filter: str = "all",
+        foundup_id: Optional[str] = None,
+        include_shared: bool = True,
+    ) -> Dict[str, Any]:
         """Search across all indexed collections.
 
         Delegates to search_engine.execute_search() — the search surface
         was extracted from this class for WSP 87 size compliance.
+
+        Args:
+            foundup_id: If set, filter results to this FoundUp's documents.
+            include_shared: If True and foundup_id is set, also include 'core' docs.
         """
         from .search_engine import execute_search
-        return execute_search(self, query, limit, doc_type_filter)
+        return execute_search(self, query, limit, doc_type_filter, foundup_id, include_shared)
 
     # --------- CLI Helpers --------- #
 

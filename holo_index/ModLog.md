@@ -1,5 +1,55 @@
 # HoloIndex Package ModLog
 
+## [2026-05-06] HIA_FEDERATION_QUERY_FILTERING_PHASE3
+
+**Agent**: 0102 (W1)
+**WSP References**: WSP 97, WSP 87, WSP 15
+**Status**: COMPLETE
+
+### Summary
+
+Added FoundUp-scoped query filtering to HoloIndex search API. When `foundup_id`
+is provided, results are restricted to that FoundUp's documents. When 
+`include_shared=True` (default), shared `core` documents are also included.
+Backward compatible: existing callers work unchanged.
+
+### Changes
+
+- `search_engine.py`: Added `_build_foundup_where_filter()` helper; extended
+  `_search_collection()`, `_lexical_search_collection()`, `execute_search()` 
+  with `foundup_id: Optional[str]` and `include_shared: bool` params
+- `holo_index.py`: Added `foundup_id` and `include_shared` params to 
+  `HoloIndex.search()` passthrough
+- `test_federation_query_filtering.py`: 19 unit tests (NEW)
+
+### API Signature Changes
+
+```python
+# Before
+def execute_search(holo, query, limit=10, doc_type_filter="all")
+def HoloIndex.search(query, limit=10, doc_type_filter="all")
+
+# After (backward compatible)
+def execute_search(holo, query, limit=10, doc_type_filter="all", 
+                   foundup_id=None, include_shared=True)
+def HoloIndex.search(query, limit=10, doc_type_filter="all",
+                     foundup_id=None, include_shared=True)
+```
+
+### Filter Logic
+
+- `foundup_id=None` → No filtering (all documents)
+- `foundup_id="trade", include_shared=False` → `where={"foundup_id": "trade"}`
+- `foundup_id="trade", include_shared=True` → `where={"$or": [{"foundup_id": "trade"}, {"foundup_id": "core"}]}`
+
+### Test Results
+
+- New: 19/19 pass (test_federation_query_filtering.py)
+- Regression metadata: 22/22 pass (test_federation_metadata_tagging.py)
+- Regression routing: 19/19 pass (test_backend_routing.py)
+
+---
+
 ## [2026-05-06] HIA_FEDERATION_FOUNDUP_IDENTITY_COVERAGE_AUDIT_PHASE2B
 
 **Agent**: 0102 (W1)

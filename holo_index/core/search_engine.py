@@ -202,6 +202,35 @@ def _resolve_alias_wsp_numbers(query: str) -> List[str]:
     return matched_wsps
 
 
+# ---------------------------------------------------------------------------
+# HIA Phase 3: FoundUp-scoped query filtering
+# ---------------------------------------------------------------------------
+
+
+def _build_foundup_where_filter(
+    foundup_id: Optional[str],
+    include_shared: bool,
+) -> Optional[Dict[str, Any]]:
+    """Build ChromaDB where filter for FoundUp-scoped queries.
+
+    Args:
+        foundup_id: If set, filter to this FoundUp's documents.
+        include_shared: If True and foundup_id is set, also include 'core' docs.
+
+    Returns:
+        ChromaDB where clause dict, or None for no filtering.
+    """
+    if foundup_id is None:
+        return None
+
+    if include_shared:
+        # Include both the specified FoundUp and core/shared content
+        return {"$or": [{"foundup_id": foundup_id}, {"foundup_id": "core"}]}
+    else:
+        # Strict: only the specified FoundUp
+        return {"foundup_id": foundup_id}
+
+
 def _wsp_alias_match_boost(query: str, path: str, title: str) -> float:
     """Return boost if query matches a known WSP alias phrase.
 
@@ -374,10 +403,16 @@ def _search_collection(
     limit: int,
     kind: str,
     doc_type_filter: str = "all",
+    foundup_id: Optional[str] = None,
+    include_shared: bool = True,
 ) -> List[Dict[str, Any]]:
     """Search a ChromaDB *collection* using vector embeddings with hybrid keyword scoring.
 
     Falls back to lexical search when the embedding model is unavailable.
+
+    Args:
+        foundup_id: If set, filter results to this FoundUp's documents.
+        include_shared: If True and foundup_id is set, also include 'core' docs.
     """
     if collection is None:
         return []
@@ -409,7 +444,7 @@ def _search_collection(
         model = getattr(holo, "model", None)
     if model is None:
         holo._log_agent_action("Embedding model not available - using offline lexical scan", "WARN")
-        return _lexical_search_collection(holo, collection, query, limit, kind, doc_type_filter)
+        return _lexical_search_collection(holo, collection, query, limit, kind, doc_type_filter, foundup_id, include_shared)
 
     # WSP 97: Encode with timeout to prevent indefinite hangs
     embedding = _run_with_timeout(
@@ -420,9 +455,11 @@ def _search_collection(
     )
     if embedding is None:
         holo._log_agent_action("Encoding timed out - falling back to lexical search", "WARN")
-        return _lexical_search_collection(holo, collection, query, limit, kind, doc_type_filter)
+        return _lexical_search_collection(holo, collection, query, limit, kind, doc_type_filter, foundup_id, include_shared)
 
-    results = collection.query(query_embeddings=[embedding], n_results=limit)
+    # HIA Phase 3: Apply FoundUp-scoped filter if specified
+    where_filter = _build_foundup_where_filter(foundup_id, include_shared)
+    results = collection.query(query_embeddings=[embedding], n_results=limit, where=where_filter)
 
     docs = results.get("documents", [[]])[0]
     metas = results.get("metadatas", [[]])[0]
@@ -541,8 +578,15 @@ def _lexical_search_collection(
     limit: int,
     kind: str,
     doc_type_filter: str = "all",
+    foundup_id: Optional[str] = None,
+    include_shared: bool = True,
 ) -> List[Dict[str, Any]]:
-    """Keyword-based search used when embedding model is unavailable."""
+    """Keyword-based search used when embedding model is unavailable.
+
+    Args:
+        foundup_id: If set, filter results to this FoundUp's documents.
+        include_shared: If True and foundup_id is set, also include 'core' docs.
+    """
     tokens = _tokenize_query(query)
     if not tokens:
         return []
@@ -585,6 +629,16 @@ def _lexical_search_collection(
 
             if doc_type_filter != "all" and doc_type != doc_type_filter:
                 continue
+
+            # HIA Phase 3: FoundUp-scoped filtering
+            if foundup_id is not None:
+                meta_foundup = meta.get("foundup_id", "core")
+                if include_shared:
+                    if meta_foundup != foundup_id and meta_foundup != "core":
+                        continue
+                else:
+                    if meta_foundup != foundup_id:
+                        continue
 
             keyword_score = 0.0
             title = (meta.get("title") or "").lower()
@@ -766,10 +820,16 @@ def execute_search(
     query: str,
     limit: int = 10,
     doc_type_filter: str = "all",
+    foundup_id: Optional[str] = None,
+    include_shared: bool = True,
 ) -> Dict[str, Any]:
     """Run a full HoloIndex search and return the canonical result payload.
 
     This is the extracted core of ``HoloIndex.search()``.
+
+    Args:
+        foundup_id: If set, filter results to this FoundUp's documents.
+        include_shared: If True and foundup_id is set, also include 'core' docs.
     """
     try:
         # Fast path: check cache first (WSP 91 performance optimization)
@@ -807,53 +867,53 @@ def execute_search(
 
         # Search code index
         if doc_type_filter in ["code", "all"] and code_collection is not None:
-            code_results = _search_collection(holo, code_collection, query, limit, kind="code")
+            code_results = _search_collection(holo, code_collection, query, limit, kind="code", foundup_id=foundup_id, include_shared=include_shared)
             code_hits = holo._enhance_code_results_with_previews(code_results)
             if should_scan_symbols and symbol_collection is not None:
-                symbol_results = _search_collection(holo, symbol_collection, query, limit, kind="symbol")
+                symbol_results = _search_collection(holo, symbol_collection, query, limit, kind="symbol", foundup_id=foundup_id, include_shared=include_shared)
             if symbol_results:
                 code_hits = _merge_hits(symbol_results, code_hits, limit)
 
         # Search WSP index
         if doc_type_filter not in ["code", "test"] and wsp_collection is not None:
-            wsp_hits = _search_collection(holo, wsp_collection, query, limit, kind="wsp", doc_type_filter=doc_type_filter)
+            wsp_hits = _search_collection(holo, wsp_collection, query, limit, kind="wsp", doc_type_filter=doc_type_filter, foundup_id=foundup_id, include_shared=include_shared)
 
         # Search Test index
         if doc_type_filter in ["test", "all"] and test_collection is not None:
-            test_hits = _search_collection(holo, test_collection, query, limit, kind="test", doc_type_filter=doc_type_filter)
+            test_hits = _search_collection(holo, test_collection, query, limit, kind="test", doc_type_filter=doc_type_filter, foundup_id=foundup_id, include_shared=include_shared)
 
         # Search Skillz index
         if doc_type_filter == "all" and skill_collection is not None:
             try:
-                skill_hits = _search_collection(holo, skill_collection, query, limit, kind="skill")
+                skill_hits = _search_collection(holo, skill_collection, query, limit, kind="skill", foundup_id=foundup_id, include_shared=include_shared)
             except Exception:
                 skill_hits = []
 
         # CFZ4: Search Docs index (module/root docs)
         if doc_type_filter in ["docs", "all"] and docs_collection is not None:
             try:
-                docs_hits = _search_collection(holo, docs_collection, query, limit, kind="docs")
+                docs_hits = _search_collection(holo, docs_collection, query, limit, kind="docs", foundup_id=foundup_id, include_shared=include_shared)
             except Exception:
                 docs_hits = []
 
         # CFZ4: Search Knowledge index (papers/research)
         if doc_type_filter in ["knowledge", "all"] and knowledge_collection is not None:
             try:
-                knowledge_hits = _search_collection(holo, knowledge_collection, query, limit, kind="knowledge")
+                knowledge_hits = _search_collection(holo, knowledge_collection, query, limit, kind="knowledge", foundup_id=foundup_id, include_shared=include_shared)
             except Exception:
                 knowledge_hits = []
 
         # Symbol-query fallback: lexical + rg for exact identifiers/paths
         if symbol_query:
             if doc_type_filter in ["code", "all"] and code_collection is not None:
-                lexical_code = _lexical_search_collection(holo, code_collection, query, limit, kind="code")
+                lexical_code = _lexical_search_collection(holo, code_collection, query, limit, kind="code", foundup_id=foundup_id, include_shared=include_shared)
                 if lexical_code:
                     code_hits = _merge_hits(code_hits, lexical_code, limit)
                 rg_hits = _rg_symbol_search(holo.project_root, query, limit)
                 if rg_hits:
                     code_hits = _merge_hits(rg_hits, code_hits, limit)
             if doc_type_filter in ["all"] and not wsp_hits and wsp_collection is not None:
-                lexical_wsp = _lexical_search_collection(holo, wsp_collection, query, limit, kind="wsp", doc_type_filter=doc_type_filter)
+                lexical_wsp = _lexical_search_collection(holo, wsp_collection, query, limit, kind="wsp", doc_type_filter=doc_type_filter, foundup_id=foundup_id, include_shared=include_shared)
                 if lexical_wsp:
                     wsp_hits = _merge_hits(wsp_hits, lexical_wsp, limit)
 
@@ -914,6 +974,9 @@ def execute_search(
                 "collection_backend_map": dict(
                     getattr(holo, "collection_backend_map", {}) or {}
                 ),
+                # HIA Phase 3: FoundUp-scoped filtering params
+                "foundup_id": foundup_id,
+                "include_shared": include_shared,
             },
         }
 
