@@ -1,5 +1,34 @@
 # HoloIndex Package ModLog
 
+## [2026-05-06] HIA_FEDERATION_METADATA_TAGGING_PHASE2
+
+**Agent**: 0102 (W1)
+**WSP References**: WSP 97, WSP 103, WSP 104, WSP 15
+**Status**: COMPLETE
+
+### Summary
+
+Added `foundup_id` federation metadata to all 7 HoloIndex indexing functions.
+Every indexed document is now tagged with its FoundUp identity (from
+`foundup_manifest.json`) or `"core"` for platform files. Phase 2 of the
+federation sequence: metadata only, no query filtering.
+
+### Changes
+
+- `indexing_engine.py`: Added `resolve_foundup_metadata()` helper with manifest
+  caching; wired `foundup_id`, `tenant_id`, `source_scope`, `external_repo` into
+  all index_* functions (code, symbols, WSP, docs, knowledge, tests, skills)
+- `test_federation_metadata_tagging.py`: 22 unit tests (all passing)
+- `HIA_FEDERATION_METADATA_TAGGING.md`: Audit document (NEW)
+
+### Test Results
+
+- New: 22/22 pass
+- Regression: 47/47 pass (baseline + collection health + backend routing)
+- Full reindex required for metadata to appear in ChromaDB
+
+---
+
 ## [2026-05-06] HIA_FEDERATION_READINESS_AUDIT_PHASE1
 
 **Agent**: 0102 (W1)

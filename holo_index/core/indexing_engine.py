@@ -28,6 +28,73 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# Federation metadata helpers (HIA Federation Phase 2)
+# ---------------------------------------------------------------------------
+
+# Cache manifest reads to avoid re-reading per file during bulk indexing
+_FOUNDUP_MANIFEST_CACHE: Dict[str, Dict[str, Any]] = {}
+
+
+def _read_foundup_id_from_manifest(manifest_path: Path, fallback_name: str) -> str:
+    """Read foundup_id from a foundup_manifest.json, caching results."""
+    cache_key = str(manifest_path)
+    if cache_key in _FOUNDUP_MANIFEST_CACHE:
+        return _FOUNDUP_MANIFEST_CACHE[cache_key].get("foundup_id", fallback_name)
+
+    try:
+        if manifest_path.exists():
+            data = json.loads(manifest_path.read_text(encoding="utf-8"))
+            _FOUNDUP_MANIFEST_CACHE[cache_key] = data
+            return data.get("foundup_id", fallback_name)
+    except Exception:
+        pass
+
+    _FOUNDUP_MANIFEST_CACHE[cache_key] = {"foundup_id": fallback_name}
+    return fallback_name
+
+
+def resolve_foundup_metadata(path: Path, project_root: Optional[Path] = None) -> Dict[str, Any]:
+    """Resolve federation metadata for a file path.
+
+    Determines which FoundUp a file belongs to based on its path.
+    Files under ``modules/foundups/{name}/`` are tagged with the
+    ``foundup_id`` from that FoundUp's ``foundup_manifest.json``.
+    All other files are tagged as ``"core"``.
+
+    Returns:
+        dict with keys: foundup_id, tenant_id, source_scope, external_repo
+    """
+    path_str = str(path).replace("\\", "/")
+
+    match = re.search(r"modules/foundups/([^/]+)", path_str)
+    if match:
+        foundup_dir_name = match.group(1)
+        if project_root:
+            manifest_path = (
+                project_root / "modules" / "foundups" / foundup_dir_name / "foundup_manifest.json"
+            )
+        else:
+            idx = path_str.find("modules/foundups/")
+            base = path_str[:idx]
+            manifest_path = Path(base) / "modules" / "foundups" / foundup_dir_name / "foundup_manifest.json"
+
+        foundup_id = _read_foundup_id_from_manifest(manifest_path, foundup_dir_name)
+
+        return {
+            "foundup_id": foundup_id,
+            "tenant_id": "core",
+            "source_scope": "internal_foundup",
+            "external_repo": False,
+        }
+
+    return {
+        "foundup_id": "core",
+        "tenant_id": "core",
+        "source_scope": "core",
+        "external_repo": False,
+    }
+
 
 # ---------------------------------------------------------------------------
 # Stateless helpers (no holo parameter needed)
@@ -221,10 +288,15 @@ def index_code_entries(holo: "HoloIndex") -> None:
         embeddings.append(holo._get_embedding(need))
         documents.append(location)
         cube = holo._infer_cube_tag(need, location)
+        fed = resolve_foundup_metadata(holo.project_root / location, holo.project_root)
         meta: Dict[str, Any] = {
             "need": need,
             "type": "code",
             "source": "NAVIGATION.py",
+            "foundup_id": fed["foundup_id"],
+            "tenant_id": fed["tenant_id"],
+            "source_scope": fed["source_scope"],
+            "external_repo": fed["external_repo"],
         }
         if cube:
             meta["cube"] = cube
@@ -237,6 +309,9 @@ def index_code_entries(holo: "HoloIndex") -> None:
         embeddings.append(holo._get_embedding(web_asset["payload"]))
         documents.append(web_asset["location"])
         cube = holo._infer_cube_tag(web_asset["need"], web_asset["location"], web_asset["summary"])
+        web_fed = resolve_foundup_metadata(
+            holo.project_root / web_asset["location"], holo.project_root
+        )
         meta = {
             "need": web_asset["need"],
             "type": "web_asset",
@@ -245,6 +320,10 @@ def index_code_entries(holo: "HoloIndex") -> None:
             "summary": web_asset["summary"],
             "keywords": web_asset["keywords"],
             "priority": 4,
+            "foundup_id": web_fed["foundup_id"],
+            "tenant_id": web_fed["tenant_id"],
+            "source_scope": web_fed["source_scope"],
+            "external_repo": web_fed["external_repo"],
         }
         if cube:
             meta["cube"] = cube
@@ -333,6 +412,7 @@ def index_symbol_entries(holo: "HoloIndex", roots: Optional[List[Path]] = None) 
                     line_no = getattr(node, "lineno", None)
                     doc_text = f"{symbol}\n{doc}\n{path}:{line_no or 1}"
 
+                    sym_fed = resolve_foundup_metadata(path, holo.project_root)
                     ids.append(f"sym_{len(ids)+1}")
                     embeddings.append(holo._get_embedding(doc_text))
                     documents.append(doc_text)
@@ -341,6 +421,10 @@ def index_symbol_entries(holo: "HoloIndex", roots: Optional[List[Path]] = None) 
                         "path": str(path),
                         "line": int(line_no) if line_no else 1,
                         "type": "symbol",
+                        "foundup_id": sym_fed["foundup_id"],
+                        "tenant_id": sym_fed["tenant_id"],
+                        "source_scope": sym_fed["source_scope"],
+                        "external_repo": sym_fed["external_repo"],
                     })
 
                     entry_count += 1
@@ -433,6 +517,7 @@ def index_wsp_entries(holo: "HoloIndex", paths: Optional[List[Path]] = None) -> 
         embeddings.append(holo._get_embedding(doc_payload))
         documents.append(doc_payload)
         cube = holo._infer_cube_tag(title, summary, str(file_path))
+        wsp_fed = resolve_foundup_metadata(file_path, holo.project_root)
         metadata: Dict[str, Any] = {
             "wsp": wsp_id,
             "title": title,
@@ -440,6 +525,10 @@ def index_wsp_entries(holo: "HoloIndex", paths: Optional[List[Path]] = None) -> 
             "summary": summary,
             "type": doc_type,
             "priority": _calculate_document_priority(doc_type, file_path),
+            "foundup_id": wsp_fed["foundup_id"],
+            "tenant_id": wsp_fed["tenant_id"],
+            "source_scope": wsp_fed["source_scope"],
+            "external_repo": wsp_fed["external_repo"],
         }
         if cube:
             metadata["cube"] = cube
@@ -517,6 +606,7 @@ def index_docs_entries(holo: "HoloIndex") -> None:
         doc_type = _classify_document_type(file_path, title, lines)
         doc_payload = f"{title}\n{summary}"
 
+        doc_fed = resolve_foundup_metadata(file_path, holo.project_root)
         ids.append(f"doc_{idx}")
         embeddings.append(holo._get_embedding(doc_payload))
         documents.append(doc_payload)
@@ -526,6 +616,10 @@ def index_docs_entries(holo: "HoloIndex") -> None:
             "summary": summary,
             "type": doc_type,
             "priority": _calculate_document_priority(doc_type, file_path),
+            "foundup_id": doc_fed["foundup_id"],
+            "tenant_id": doc_fed["tenant_id"],
+            "source_scope": doc_fed["source_scope"],
+            "external_repo": doc_fed["external_repo"],
         })
 
     if embeddings:
@@ -579,6 +673,7 @@ def index_knowledge_entries(holo: "HoloIndex") -> None:
         summary = ' '.join(lines[1:6])[:400]
         doc_payload = f"{title}\n{summary}"
 
+        know_fed = resolve_foundup_metadata(file_path, holo.project_root)
         ids.append(f"paper_{idx}")
         embeddings.append(holo._get_embedding(doc_payload))
         documents.append(doc_payload)
@@ -588,6 +683,10 @@ def index_knowledge_entries(holo: "HoloIndex") -> None:
             "summary": summary,
             "type": "paper",
             "priority": 6,
+            "foundup_id": know_fed["foundup_id"],
+            "tenant_id": know_fed["tenant_id"],
+            "source_scope": know_fed["source_scope"],
+            "external_repo": know_fed["external_repo"],
         })
 
     if embeddings:
@@ -633,6 +732,8 @@ def index_test_registry(holo: "HoloIndex") -> None:
         embeddings.append(holo._get_embedding(doc_payload))
         documents.append(doc_payload)
 
+        test_path = Path(path) if Path(path).is_absolute() else holo.project_root / path
+        test_fed = resolve_foundup_metadata(test_path, holo.project_root)
         metadatas.append({
             "test_id": test_id,
             "path": path,
@@ -640,6 +741,10 @@ def index_test_registry(holo: "HoloIndex") -> None:
             "capabilities": capabilities,
             "type": "test",
             "priority": 8,
+            "foundup_id": test_fed["foundup_id"],
+            "tenant_id": test_fed["tenant_id"],
+            "source_scope": test_fed["source_scope"],
+            "external_repo": test_fed["external_repo"],
         })
 
     if embeddings:
@@ -713,6 +818,7 @@ def index_skillz_entries(holo: "HoloIndex") -> None:
                 f"Description: {description}\n"
                 f"{summary}"
             )
+            skill_fed = resolve_foundup_metadata(file_path, holo.project_root)
             metadata: Dict[str, Any] = {
                 "skill_name": name,
                 "description": description[:500],
@@ -723,6 +829,10 @@ def index_skillz_entries(holo: "HoloIndex") -> None:
                 "path": str(file_path),
                 "type": "skillz",
                 "priority": 9,
+                "foundup_id": skill_fed["foundup_id"],
+                "tenant_id": skill_fed["tenant_id"],
+                "source_scope": skill_fed["source_scope"],
+                "external_repo": skill_fed["external_repo"],
             }
 
             embedding = holo._get_embedding(doc_payload)
