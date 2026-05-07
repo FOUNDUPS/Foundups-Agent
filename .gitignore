@@ -338,6 +338,8 @@ docs/audits/*
 !docs/audits/holoindex_ascii_guardian/**
 !docs/audits/holoindex_search_quality/
 !docs/audits/holoindex_search_quality/**
+!docs/audits/openclaw_hermes/
+!docs/audits/openclaw_hermes/**
 docs/sessions/
 
 # WSP agentic awakening runtime state (changes every session)
