@@ -82,6 +82,8 @@ def holo_search(
     query: str,
     scope: str = "all",
     top_k: int = 10,
+    foundup_id: Optional[str] = None,
+    include_shared: bool = True,
 ) -> Dict[str, Any]:
     """
     Semantic search across the repository.
@@ -91,6 +93,8 @@ def holo_search(
         query: Search query
         scope: Search scope ("all", "code", "wsp", "test", "skill")
         top_k: Maximum results to return
+        foundup_id: Optional FoundUp ID to scope results (HIA Phase 5)
+        include_shared: If True and foundup_id set, include 'core' docs (default True)
 
     Returns:
         MCPResponse with search results
@@ -104,8 +108,14 @@ def holo_search(
 
     if holo:
         try:
-            # Use real HoloIndex search
-            results = holo.search(query, limit=top_k, doc_type_filter=scope)
+            # Use real HoloIndex search with optional FoundUp scoping (HIA Phase 5)
+            results = holo.search(
+                query,
+                limit=top_k,
+                doc_type_filter=scope,
+                foundup_id=foundup_id,
+                include_shared=include_shared,
+            )
 
             hits = []
             # Combine all hit types
@@ -192,6 +202,10 @@ def holo_search(
             "hits": hits[:top_k],
             "hit_count": len(hits[:top_k]),
             "fallback_note": "Using ripgrep text search (HoloIndex unavailable)",
+            # HIA Phase 5: Echo scope params even in fallback (scope not applied)
+            "foundup_id": foundup_id,
+            "include_shared": include_shared,
+            "scope_applied": False,  # Fallback does not support scoping
         },
         source=source,
         confidence=confidence,

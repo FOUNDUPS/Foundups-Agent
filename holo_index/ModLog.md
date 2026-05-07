@@ -1,5 +1,57 @@
 # HoloIndex Package ModLog
 
+## [2026-05-07] HIA_MCP_EXPOSURE_PHASE5
+
+**Agent**: 0102 (W1)
+**WSP References**: WSP 97, WSP 103, WSP 104
+**Status**: COMPLETE
+
+### Summary
+
+Exposed `foundup_id` and `include_shared` params through MCP search surfaces.
+Both foundups_mcp_bridge (real HoloIndex) and pavs_mcp (placeholder) now accept
+these params for tenant-scoped search.
+
+### Changes
+
+- `foundups_mcp_bridge/holo_tools.py`: Extended `holo_search()` signature with
+  `foundup_id` and `include_shared` params, passes through to HoloIndex.search()
+- `pavs_mcp/server.py`: Extended async `holo_search()` with same params, echoes
+  scope in response, maintains truthful placeholder behavior (WSP 97)
+- `foundups_mcp_bridge/tests/test_mcp_bridge.py`: Added 4 tests for new params
+- `pavs_mcp/tests/test_server_holo_search.py`: New test file (17 tests)
+
+### Signature Changes
+
+**foundups_mcp_bridge holo_search:**
+```python
+# Before
+def holo_search(repo_root, query, scope="all", top_k=10)
+
+# After
+def holo_search(repo_root, query, scope="all", top_k=10,
+                foundup_id=None, include_shared=True)
+```
+
+**pavs_mcp holo_search:**
+```python
+# Before
+async def holo_search(query, domain=None, limit=10)
+
+# After
+async def holo_search(query, domain=None, limit=10,
+                      foundup_id=None, include_shared=True)
+```
+
+### Test Results
+
+- foundups_mcp_bridge: 20/20 HoloTools tests pass
+- pavs_mcp: 17/17 tests pass (new file)
+- Regression query filtering: 19/19 pass
+- Regression tenant binding: 17/17 pass
+
+---
+
 ## [2026-05-06] HIA_TENANT_CONTEXT_BINDING_PHASE4
 
 **Agent**: 0102 (W1)

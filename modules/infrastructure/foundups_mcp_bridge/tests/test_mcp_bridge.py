@@ -518,6 +518,54 @@ class TestHoloTools:
         assert result["status"] == "ok"
         assert "confidence" in result["meta"]
 
+    def test_holo_search_with_foundup_id(self, bridge):
+        """holo_search accepts foundup_id param (HIA Phase 5)."""
+        result = bridge.call_tool(
+            "holo_search",
+            query="test",
+            scope="all",
+            top_k=5,
+            foundup_id="trade",
+        )
+        assert result["status"] == "ok"
+        # Metadata should contain scope info
+        metadata = result["data"].get("metadata", {})
+        if metadata:  # HoloIndex available
+            assert "effective_foundup_id" in metadata or "foundup_id" in metadata
+
+    def test_holo_search_with_include_shared_false(self, bridge):
+        """holo_search accepts include_shared=False (HIA Phase 5)."""
+        result = bridge.call_tool(
+            "holo_search",
+            query="test",
+            scope="code",
+            top_k=5,
+            foundup_id="kosei",
+            include_shared=False,
+        )
+        assert result["status"] == "ok"
+        # Verify query succeeded (scope applied or not depends on HoloIndex availability)
+        assert "hits" in result["data"]
+
+    def test_holo_search_fallback_echoes_scope(self, bridge):
+        """holo_search fallback echoes scope params even when not applied."""
+        # This test verifies the fallback path includes scope info
+        result = bridge.call_tool(
+            "holo_search",
+            query="xyznonexistent123pattern",
+            scope="all",
+            top_k=3,
+            foundup_id="test_foundup",
+            include_shared=True,
+        )
+        assert result["status"] == "ok"
+        # Either HoloIndex metadata or fallback fields should exist
+        data = result["data"]
+        if "fallback_note" in data:
+            # Fallback path - should echo scope params
+            assert data.get("foundup_id") == "test_foundup"
+            assert data.get("include_shared") is True
+
     def test_holo_related_basic(self, bridge):
         """holo_related returns related modules."""
         result = bridge.call_tool("holo_related", target="ai_overseer", relation_type="all", limit=5)

@@ -244,23 +244,33 @@ class PAVSMCPServer:
         self,
         query: str,
         domain: Optional[str] = None,
-        limit: int = 10
+        limit: int = 10,
+        foundup_id: Optional[str] = None,
+        include_shared: bool = True,
     ) -> dict[str, Any]:
         """
         Semantic search via HoloIndex.
+
+        HIA Phase 5: Accepts foundup_id/include_shared for tenant scoping.
+        NOTE: This is a placeholder - not connected to live HoloIndex.
 
         Args:
             query: Natural language query
             domain: Optional domain filter
             limit: Max results
+            foundup_id: Optional FoundUp ID to scope results
+            include_shared: If True and foundup_id set, include 'core' docs
 
         Returns:
-            List of matching code/doc entries
+            List of matching code/doc entries (placeholder data)
         """
         # TODO: Connect to HoloIndex
         # from holo_index import search
 
-        logger.info(f"HoloIndex search: {query} (domain={domain})")
+        scope_info = f", foundup_id={foundup_id}" if foundup_id else ""
+        logger.info(f"HoloIndex search: {query} (domain={domain}{scope_info})")
+
+        # WSP 97: Truthful placeholder - explicitly state not live
         return {
             "matches": [
                 {
@@ -269,7 +279,16 @@ class PAVSMCPServer:
                     "content": "def example_function():",
                     "score": 0.95
                 }
-            ]
+            ],
+            # HIA Phase 5: Echo scope inputs for contract compliance
+            "scope": {
+                "foundup_id": foundup_id,
+                "include_shared": include_shared,
+                "domain": domain,
+            },
+            # WSP 97: Explicit truthfulness about implementation status
+            "_placeholder": True,
+            "_note": "Placeholder data - not connected to live HoloIndex. Scope params accepted but not applied.",
         }
 
     async def foundup_register(
