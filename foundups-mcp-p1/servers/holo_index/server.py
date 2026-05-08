@@ -3,6 +3,7 @@ import asyncio
 import sys
 import os
 from pathlib import Path
+from typing import Optional
 
 # Add Foundups paths
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../'))
@@ -73,6 +74,66 @@ class HoloIndexMCPServer:
                 "total_results": 0,
                 "bell_state_alignment": False
             }
+
+    # ========================================================================
+    # S62: Canonical WSP 96 Annex A holo_search adapter (in-class wrapper)
+    # ========================================================================
+    #
+    # `semantic_code_search` (above) is preserved for back-compat with clients
+    # pinned to its legacy flat shape. The canonical Annex A.2/A.3 logic lives
+    # in `canonical_search.py` (no FastMCP dependency, fully unit-testable).
+    # The class method below is a thin wrapper for callers that already hold
+    # a `HoloIndexMCPServer` instance. The MCP-tool registration happens at
+    # module level in `holo_search()` (see end of file).
+    # ========================================================================
+
+    S1_SURFACE_ID = "S1"
+    """Surface tag per WSP 96 Annex A.1 — emitted in every meta block."""
+
+    ANNEX_A_LIMIT_MAX = 50
+    """Annex A.2: hard upper bound on `limit`."""
+
+    ANNEX_A_LIMIT_DEFAULT = 10
+    """Annex A.2: default `limit` when none supplied."""
+
+    ANNEX_A_FALLBACK_RELEVANCE_CAP = 0.6
+    """Annex A.3: lexical fallback caps relevance at 0.6."""
+
+    async def holo_search(
+        self,
+        query: str = "",
+        limit: int = 10,
+        doc_type_filter: str = "all",
+        foundup_id: Optional[str] = None,
+        include_shared: bool = True,
+    ) -> dict:
+        """Canonical WSP 96 Annex A.2/A.3 holo_search (S1 — external MCP adapter).
+
+        Returns the canonical envelope rather than the legacy
+        `semantic_code_search` flat shape. Same HoloIndex backend; only the
+        adapter differs.
+
+        Annex A.2 request fields (all canonical):
+          - query: required, non-empty
+          - limit: 1..50, default 10 (clamped with truthful warning)
+          - doc_type_filter: enum (all|code|wsp|test|skill|docs|knowledge)
+          - foundup_id: federation tenant scope (echoed; not yet enforced)
+          - include_shared: federation share flag (only meaningful with foundup_id)
+
+        Returns Annex A.3 envelope. Thin wrapper delegating to the standalone
+        adapter in `canonical_search.py` so the core logic is unit-testable
+        without a FastMCP server.
+        """
+        from .canonical_search import canonical_holo_search
+
+        return await canonical_holo_search(
+            self.holo_index,
+            query=query,
+            limit=limit,
+            doc_type_filter=doc_type_filter,
+            foundup_id=foundup_id,
+            include_shared=include_shared,
+        )
 
     @app.tool()
     async def wsp_protocol_lookup(self, protocol_number: str) -> dict:
