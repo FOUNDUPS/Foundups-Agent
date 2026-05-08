@@ -34,6 +34,23 @@ From main.py menu:
 - **Auto-Start**: Yes
 - **Status Tracking**: Real-time PID monitoring
 
+## All-Surface Discovery (MCPA5)
+
+Beyond the runnable FastMCP servers under `foundups-mcp-p1/servers/`, the
+manager surfaces the complete `holo_search` triad anchored in WSP 96 Annex A:
+
+| ID | Surface | Runnable | Status | holo_search |
+|----|---------|----------|--------|-------------|
+| **S1** | `foundups-mcp-p1/servers/holo_index/` | yes | `RUNTIME_LIVE` | real |
+| **S2** | `modules/infrastructure/foundups_mcp_bridge/` | no | `RUNTIME_INTERNAL_ONLY` | real_with_fallback |
+| **S3** | `modules/infrastructure/pavs_mcp/` | no | `PLACEHOLDER_STUB` | placeholder |
+| `AUX:*` | other FastMCP servers (codeindex, wsp_governance, ...) | yes | `RUNTIME_LIVE` | none |
+
+S2 and S3 are reported but never auto-started: S2 has no MCP wire transport
+(Python class + CLI only); S3 does not bind a port (`start()` is a sleep loop)
+and its tools return hardcoded data. Use `MCPServerManager.report_all_surfaces()`
+or `discover_all_surfaces()` to access the truthful list programmatically.
+
 ## WSP Compliance
 
 - **WSP 3**: Infrastructure domain (server management)

@@ -17,6 +17,88 @@ First-principles MCP server manager providing auto-discovery, status tracking, a
 
 ## Recent Changes
 
+### V003 - MCPA5: All-Surface Discovery Expansion (Truthful S1/S2/S3 Reporting)
+
+**Type**: Discovery expansion (no lifecycle change)
+**Date**: 2026-05-08
+**Author**: 0102 (Worker W1)
+**WSP**: 97 (Truth Boundaries), 96 (MCP Governance — Annex A)
+**Slice**: `MCPA5_MCP_MANAGER_DISCOVERY_EXPANSION_PHASE1`
+
+#### Why
+
+Per MCPA1 audit (`docs/audits/mcp_system/MCPA1_MCP_SURFACE_AUTHORITY_AUDIT.md`),
+the prior `_discover_mcp_servers` only scanned `foundups-mcp-p1/servers/`,
+omitting two of the three `holo_search`-capable surfaces:
+
+- S2: `modules/infrastructure/foundups_mcp_bridge/` (internal Python bridge)
+- S3: `modules/infrastructure/pavs_mcp/` (placeholder stub)
+
+WSP 96 Annex A.5 C7 requires every production-ready MCP surface to register
+in the manager's discovery output. This slice closes the omission gap.
+
+#### Changes
+
+- `src/mcp_manager.py`:
+  - Added `KnownSurface` frozen dataclass with the 9 truth fields specified
+    by the slice (`surface_id`, `surface_kind`, `name`, `path`, `runnable`,
+    `implementation_status`, `holo_search_support`, `authority_role`, `notes`).
+  - Added module-level constants `S2_FOUNDUPS_MCP_BRIDGE`, `S3_PAVS_MCP`,
+    `KNOWN_NON_RUNNABLE_SURFACES`.
+  - Added `MCPServerManager.discover_all_surfaces()` — merges discovered
+    runnable servers (S1 + AUX:*) with the known non-runnable triad (S2, S3).
+  - Added `MCPServerManager.format_surface_report()` — renders the truthful
+    table with column auto-sizing.
+  - Added `MCPServerManager.report_all_surfaces()` — prints + returns the list.
+  - Wired the surface report into `show_mcp_services_menu()` so operators see
+    the S1/S2/S3 truth at the top of the gateway report.
+
+- `tests/__init__.py` (NEW), `tests/test_surface_discovery.py` (NEW):
+  - 20 focused tests covering: constant truth fields, discovery without any
+    runnable servers (S2/S3 still appear), full triad with `holo_index`,
+    auxiliary servers tagged AUX:*, no auto-start, format report content,
+    runtime safety (no subprocess/psutil calls), lifecycle preservation.
+
+- `README.md`, `INTERFACE.md`: updated to document the all-surface API and
+  the S1/S2/S3 truth table.
+
+#### Behavior boundaries (what did NOT change)
+
+- Existing runnable-server lifecycle methods (`start_server`, `stop_server`,
+  `get_server_status`, `get_available_tools`) untouched.
+- `self.servers` dict shape unchanged — S2/S3 are listed separately, never
+  added to `self.servers`, so the manager cannot accidentally try to start them.
+- No S1/S2/S3 source-code changes outside this module.
+- No auth/transport rewrites.
+
+#### Tests
+
+```
+PYTHONPATH=. python -m pytest \
+  modules/infrastructure/mcp_manager/tests/test_surface_discovery.py -q
+-> 20 passed
+```
+
+Live runtime-safe discovery against the real repo:
+
+```
+PYTHONPATH=. python -c "from modules.infrastructure.mcp_manager.src.mcp_manager \
+  import MCPServerManager; MCPServerManager().report_all_surfaces()"
+-> 12 surfaces visible (10 runnable, 2 non-runnable)
+   S1=holo_index, S2=foundups_mcp_bridge, S3=pavs_mcp + 9 AUX:*
+```
+
+#### Tracked follow-ups
+
+- MCPA1 Slice 4 — once S3 returns `not_implemented`, no flag change here is
+  needed; the `holo_search_support` value remains `placeholder`.
+- MCPA1 Slice 6 — when federation auth lands, S3's `implementation_status`
+  upgrades from `PLACEHOLDER_STUB` to `RUNTIME_INTERNAL_ONLY` or `RUNTIME_LIVE`,
+  and `authority_role` from `no_authority` to a real role. The `KnownSurface`
+  descriptor in this module is the single edit point.
+
+
+
 ### V001 - Initial MCP Manager Implementation (Occam's Razor PoC)
 **Type**: New Module
 **Date**: 2025-10-18

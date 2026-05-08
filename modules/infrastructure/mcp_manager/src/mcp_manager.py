@@ -16,6 +16,7 @@ import asyncio
 import time
 import json
 import io
+from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
 import threading
@@ -83,6 +84,118 @@ if sys.platform.startswith('win'):
 logger = logging.getLogger(__name__)
 
 
+# =============================================================================
+# MCP Surface Discovery Model (MCPA5 — anchored to WSP 96 Annex A)
+# =============================================================================
+#
+# This module historically discovered only S1-class runnable MCP servers under
+# `foundups-mcp-p1/servers/`. Per MCPA1 audit and WSP 96 Annex A, the manager
+# must also expose:
+#
+#   - S2: `modules/infrastructure/foundups_mcp_bridge` (internal Python bridge)
+#   - S3: `modules/infrastructure/pavs_mcp` (placeholder stub)
+#
+# These are NOT runnable servers in the foundups-mcp-p1 sense (S2 has no MCP
+# transport; S3 does not bind a port). They are reported with truthful flags so
+# operators see all `holo_search`-capable surfaces without overclaiming runtime
+# capability. Runnable lifecycle methods are unchanged for S1-class servers.
+# =============================================================================
+
+
+@dataclass(frozen=True)
+class KnownSurface:
+    """Truthful descriptor for an MCP-related surface (MCPA5 / WSP 96 Annex A).
+
+    Carries the conformance fields required by WSP 96 Annex A.5 so any consumer
+    of the manager's discovery output can distinguish runnable servers from
+    internal bridges from placeholder stubs without inspecting runtime state.
+    """
+
+    surface_id: str
+    """Stable identifier per MCPA1 audit (e.g. "S1", "S2", "S3")."""
+
+    surface_kind: str
+    """High-level kind: external_mcp_server | internal_python_bridge | placeholder_stub | auxiliary_mcp_server."""
+
+    name: str
+    """Human-readable name used in reports/menus."""
+
+    path: str
+    """Repository-relative path to the surface's primary entrypoint."""
+
+    runnable: bool
+    """True if this surface is a process that can be started/stopped via the manager."""
+
+    implementation_status: str
+    """RUNTIME_LIVE | RUNTIME_INTERNAL_ONLY | PLACEHOLDER_STUB | UNKNOWN (mirrors WSP 96 Annex A.1 truth-status)."""
+
+    holo_search_support: str
+    """real | real_with_fallback | placeholder | none."""
+
+    authority_role: str
+    """canonical_external_adapter | canonical_internal_adapter | no_authority | auxiliary."""
+
+    notes: str = ""
+    """Short truthful note (deferred work, caveats)."""
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialize to dict for JSON/log output. Frozen dataclass safe."""
+        return asdict(self)
+
+
+# ---------------------------------------------------------------------------
+# Authoritative non-runnable surfaces (S2, S3)
+#
+# S1 (holo_index MCP server) is discovered dynamically via the existing
+# `_discover_mcp_servers` scan and enriched with metadata at report time.
+# S2 and S3 are NOT runnable as managed processes — they are listed here so the
+# gateway report stops omitting them.
+# ---------------------------------------------------------------------------
+
+S1_SURFACE_NAME = "holo_index"
+"""Name under which S1 appears in `_discover_mcp_servers` output."""
+
+S2_FOUNDUPS_MCP_BRIDGE = KnownSurface(
+    surface_id="S2",
+    surface_kind="internal_python_bridge",
+    name="foundups_mcp_bridge",
+    path="modules/infrastructure/foundups_mcp_bridge/src/holo_tools.py",
+    runnable=False,
+    implementation_status="RUNTIME_INTERNAL_ONLY",
+    holo_search_support="real_with_fallback",
+    authority_role="canonical_internal_adapter",
+    notes=(
+        "Real backend via lazy holo_index.core.holo_index.HoloIndex. "
+        "ripgrep fallback when HoloIndex unavailable. No MCP wire transport — "
+        "Python class + CLI only. Auth is unenforced (MCPA1 R5)."
+    ),
+)
+"""S2 surface descriptor — canonical internal Python adapter for holo_search."""
+
+S3_PAVS_MCP = KnownSurface(
+    surface_id="S3",
+    surface_kind="placeholder_stub",
+    name="pavs_mcp",
+    path="modules/infrastructure/pavs_mcp/src/server.py",
+    runnable=False,
+    implementation_status="PLACEHOLDER_STUB",
+    holo_search_support="placeholder",
+    authority_role="no_authority",
+    notes=(
+        "Tool bodies return hardcoded data; start() does not bind a port; "
+        "auth is TODO. NOT canonical owner of holo_search (WSP 96 Annex A.1). "
+        "Tracked remediation: MCPA1 Slice 4, Slice 6."
+    ),
+)
+"""S3 surface descriptor — placeholder stub. NOT canonical for any capability."""
+
+KNOWN_NON_RUNNABLE_SURFACES: Tuple[KnownSurface, ...] = (
+    S2_FOUNDUPS_MCP_BRIDGE,
+    S3_PAVS_MCP,
+)
+"""Surfaces that must always appear in the gateway report regardless of runtime state."""
+
+
 class MCPServerManager:
     """
     Enhanced MCP Services Gateway - Comprehensive server management and testing platform.
@@ -136,6 +249,144 @@ class MCPServerManager:
                     servers[server_dir.name] = server_py
 
         return servers
+
+    # =========================================================================
+    # MCPA5: All-surface discovery (S1 + S2 + S3 truthful merge)
+    # =========================================================================
+
+    def discover_all_surfaces(self) -> List[KnownSurface]:
+        """Return the canonical list of all MCP-related surfaces.
+
+        Merges:
+          1. Runnable servers discovered under `foundups-mcp-p1/servers/` (S1
+             when name == "holo_index", auxiliary otherwise).
+          2. Known non-runnable surfaces (S2, S3) per WSP 96 Annex A.1.
+
+        Truth boundaries (WSP 97):
+          - This method does NOT start any servers.
+          - `runnable=False` surfaces never auto-start.
+          - `implementation_status` reflects the audit-anchored state, not
+            runtime liveness — runtime liveness is reported separately by
+            `get_server_status` for runnable surfaces.
+
+        Returns:
+            List of KnownSurface descriptors. Order: runnable first (S1 + any
+            auxiliary servers), then known non-runnable surfaces (S2, S3).
+        """
+        surfaces: List[KnownSurface] = []
+
+        for server_name, server_path in self.servers.items():
+            try:
+                rel_path = server_path.relative_to(self.repo_root).as_posix()
+            except ValueError:
+                rel_path = str(server_path)
+
+            if server_name == S1_SURFACE_NAME:
+                surfaces.append(
+                    KnownSurface(
+                        surface_id="S1",
+                        surface_kind="external_mcp_server",
+                        name=server_name,
+                        path=rel_path,
+                        runnable=True,
+                        implementation_status="RUNTIME_LIVE",
+                        holo_search_support="real",
+                        authority_role="canonical_external_adapter",
+                        notes=(
+                            "FastMCP transport (stdio/sse). Real backend via "
+                            "holo_index.core.holo_index.HoloIndex. Canonical "
+                            "external owner of holo_search (WSP 96 Annex A.1)."
+                        ),
+                    )
+                )
+            else:
+                # Other discovered S1-class servers (codeindex, wsp_governance,
+                # youtube_dae_gemma, unicode_cleanup, secrets_mcp, etc.).
+                # They are runnable but not part of the holo_search authority
+                # triad. Reported as auxiliary so operators see them honestly.
+                surfaces.append(
+                    KnownSurface(
+                        surface_id=f"AUX:{server_name}",
+                        surface_kind="auxiliary_mcp_server",
+                        name=server_name,
+                        path=rel_path,
+                        runnable=True,
+                        implementation_status="RUNTIME_LIVE",
+                        holo_search_support="none",
+                        authority_role="auxiliary",
+                        notes="Auxiliary FastMCP server (not in S1/S2/S3 triad).",
+                    )
+                )
+
+        # Append known non-runnable surfaces (S2, S3) — always present.
+        surfaces.extend(KNOWN_NON_RUNNABLE_SURFACES)
+
+        return surfaces
+
+    def format_surface_report(
+        self,
+        surfaces: Optional[List[KnownSurface]] = None,
+    ) -> str:
+        """Render a truthful operator-facing report of all MCP surfaces.
+
+        Args:
+            surfaces: Optional pre-computed list; if None, calls
+                `discover_all_surfaces()`.
+
+        Returns:
+            Multi-line string suitable for stdout / logs. Each surface row
+            shows surface_id, name, runnable, implementation_status, and
+            holo_search_support so operators can see the truth at a glance.
+        """
+        if surfaces is None:
+            surfaces = self.discover_all_surfaces()
+
+        # Column widths sized to fit the longest expected AUX:* surface_id.
+        id_w = max(10, max((len(s.surface_id) for s in surfaces), default=10) + 2)
+        name_w = max(28, max((len(s.name) for s in surfaces), default=28) + 2)
+
+        total_w = id_w + name_w + 10 + 24 + 22 + 4  # +4 for column gaps
+        lines: List[str] = []
+        lines.append("=" * total_w)
+        lines.append("[MCP] All MCP Surfaces (MCPA5 / WSP 96 Annex A)")
+        lines.append("-" * total_w)
+        lines.append(
+            f"{'ID':<{id_w}} {'NAME':<{name_w}} {'RUNNABLE':<10} "
+            f"{'STATUS':<24} {'HOLO_SEARCH':<22}"
+        )
+        lines.append("-" * total_w)
+        for s in surfaces:
+            lines.append(
+                f"{s.surface_id:<{id_w}} {s.name:<{name_w}} "
+                f"{('yes' if s.runnable else 'no'):<10} "
+                f"{s.implementation_status:<24} {s.holo_search_support:<22}"
+            )
+        lines.append("-" * total_w)
+        lines.append(
+            f"Total surfaces: {len(surfaces)} "
+            f"(runnable: {sum(1 for s in surfaces if s.runnable)}, "
+            f"non-runnable: {sum(1 for s in surfaces if not s.runnable)})"
+        )
+        lines.append(
+            "Authority anchor: WSP_framework/src/WSP_96_MCP_Governance_and_Consensus_Protocol.md (Annex A)"
+        )
+        lines.append("=" * 88)
+        return "\n".join(lines)
+
+    def report_all_surfaces(self) -> List[KnownSurface]:
+        """Print and return the canonical surface list (truth-flagged).
+
+        Safe to call without starting any server. Designed for the gateway
+        menu's status path and for `python -m ... --report-surfaces` style
+        introspection.
+
+        Returns:
+            The list passed through `discover_all_surfaces()` (so callers can
+            chain into JSON output, tests, or further analysis).
+        """
+        surfaces = self.discover_all_surfaces()
+        print(self.format_surface_report(surfaces))
+        return surfaces
 
     def get_server_status(self, server_name: str) -> Tuple[bool, Optional[int]]:
         """
@@ -402,6 +653,11 @@ class MCPServerManager:
         print("       WSP 77 Agent Coordination | Real-time Monitoring & Testing")
         print("       💰 Token Cost: $0 (Local Services) | 🤖 AI Enhancement Available")
         print("="*80)
+
+        # MCPA5: surface the full S1/S2/S3 truth before per-server status.
+        # This makes non-runnable surfaces (foundups_mcp_bridge, pavs_mcp)
+        # visible to operators without affecting runnable lifecycle.
+        print(self.format_surface_report())
 
         # Overall system status
         running_count = sum(1 for s in self.servers.keys() if self.get_server_status(s)[0])
