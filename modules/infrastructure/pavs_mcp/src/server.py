@@ -301,34 +301,109 @@ class PAVSMCPServer:
 
     async def holo_search(
         self,
-        query: str,
+        query: str = "",
+        limit: int = 10,
+        doc_type_filter: str = "all",
+        foundup_id: Optional[str] = None,
+        include_shared: bool = True,
+        # Back-compat alias (deprecated; superseded by `doc_type_filter`).
         domain: Optional[str] = None,
-        limit: int = 10
     ) -> dict[str, Any]:
-        """
-        Semantic search via HoloIndex.
+        """Canonical holo_search per WSP 96 Annex A.3 — `not_implemented` envelope.
+
+        S3 is a PLACEHOLDER_STUB and per WSP 96 Annex A.1 has `no_authority`
+        for `holo_search`. Until federation auth/scope lands (MCPA1 Slice 6),
+        this surface MUST emit the canonical `not_implemented` response
+        rather than fabricated matches or relevance scores.
 
         Args:
-            query: Natural language query
-            domain: Optional domain filter
-            limit: Max results
+            query: Natural-language query. Echoed in `data.query`. Not searched.
+            limit: Bounded 1..50 per Annex A.2. Echoed in `data.metadata.warnings`.
+                   Ignored at this surface (no real backend).
+            doc_type_filter: Annex A.2 enum. Echoed in `data.doc_type_filter`.
+            foundup_id: Federation tenant scope. Echoed in `data.foundup_id`.
+            include_shared: Federation share flag. Only meaningful when
+                            `foundup_id` is set; otherwise null in echo.
+            domain: DEPRECATED alias for `doc_type_filter` for legacy callers.
 
         Returns:
-            List of matching code/doc entries
+            Canonical Annex A.3 not_implemented envelope:
+              - status: "not_implemented"
+              - data: request echo + empty hits[] + truthful metadata
+              - error: NOT_IMPLEMENTED with delegate_to hint
+              - meta: truth flags + tool/surface identifiers
         """
-        # TODO: Connect to HoloIndex
-        # from holo_index import search
+        # Resolve legacy `domain` alias to canonical `doc_type_filter`.
+        # If `doc_type_filter` is left at its default "all" AND `domain` is
+        # provided, treat `domain` as the legacy alias; otherwise canonical
+        # `doc_type_filter` wins. (Plain `or` would not fall through "all".)
+        if doc_type_filter == "all" and domain is not None:
+            effective_filter = domain
+        else:
+            effective_filter = doc_type_filter or "all"
 
-        logger.info(f"HoloIndex search: {query} (domain={domain})")
+        # Bound limit per Annex A.2 (1..50). Surfaced in metadata warnings —
+        # not silently clamped, per WSP 97 truthful-degradation rule.
+        try:
+            requested_limit = int(limit) if limit is not None else 10
+        except (TypeError, ValueError):
+            requested_limit = 10
+        bounded_limit = max(1, min(requested_limit, 50))
+
+        warnings: list[str] = [
+            "S3 is a placeholder; no backend search performed.",
+        ]
+        if requested_limit != bounded_limit:
+            warnings.append(
+                f"limit clamped to Annex A.2 range (1..50): "
+                f"requested={requested_limit}, applied={bounded_limit}"
+            )
+        if domain is not None and doc_type_filter == "all":
+            warnings.append(
+                "Legacy 'domain' parameter accepted as alias for "
+                "'doc_type_filter'; please migrate to canonical name."
+            )
+
+        logger.info(
+            "S3 holo_search not_implemented: query=%r filter=%r foundup=%r",
+            query[:50] if query else "",
+            effective_filter,
+            foundup_id,
+        )
+
         return {
-            "matches": [
-                {
-                    "file": "modules/foundups/agent_market/src/example.py",
-                    "line": 42,
-                    "content": "def example_function():",
-                    "score": 0.95
-                }
-            ]
+            "status": "not_implemented",
+            "data": {
+                "query": query,
+                "doc_type_filter": effective_filter,
+                "foundup_id": foundup_id,
+                # Annex A.2: include_shared is only meaningful with foundup_id.
+                # Echo it as None when foundup_id is null to avoid implying
+                # a scope decision was made.
+                "include_shared": include_shared if foundup_id is not None else None,
+                "hits": [],
+                "hit_count": 0,
+                "metadata": {
+                    "retrieval_mode": "none",
+                    "engine_version": "placeholder_stub",
+                    "collections_searched": [],
+                    "warnings": warnings,
+                },
+            },
+            "error": {
+                "code": "NOT_IMPLEMENTED",
+                "message": (
+                    "Surface S3 (pavs_mcp) does not implement holo_search. "
+                    "Use S2 (foundups_mcp_bridge) for internal callers or "
+                    "S1 (foundups-mcp-p1/holo_index) for external MCP clients."
+                ),
+                "delegate_to": "S2",
+            },
+            "meta": {
+                **_truth_meta(),
+                "tool": "holo_search",
+                "surface": "S3",
+            },
         }
 
     async def foundup_register(

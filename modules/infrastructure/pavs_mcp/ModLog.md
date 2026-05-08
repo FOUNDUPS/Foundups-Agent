@@ -1,5 +1,89 @@
 # pAVS MCP Server - ModLog
 
+## 2026-05-08 - MCPA1_SLICE_4: S3 holo_search → canonical not_implemented envelope
+
+**Author**: 0102 (Worker W1)
+**WSP**: 97 (Truth Boundaries), 96 (MCP Governance — Annex A.3)
+**Slice**: `MCPA1_SLICE_4_S3_NOT_IMPLEMENTED_ENVELOPE_PHASE1`
+**Closes (MCPA6 audit drift)**: D20, D21, D22, D23, D24 (request fields), D25 (canonical shape)
+
+### Why
+
+Per MCPA6 conformance audit (`docs/audits/mcp_system/MCPA6_MCP_CONFORMANCE_AUDIT.md`),
+S3's `holo_search` was returning a flat `{matches: [...]}` payload with a
+fabricated similarity score (`0.95`) and a fake file path. WSP 96 Annex A.3
+mandates that placeholder surfaces emit a canonical `not_implemented` envelope
+rather than fabricated data. MCPA4 added the truth-flag wrapper but the tool
+body itself still synthesized fake matches.
+
+### Changes
+
+- `src/server.py`:
+  - Replaced `holo_search` tool body with the canonical Annex A.3
+    `not_implemented` envelope.
+  - Signature now accepts the five canonical request fields:
+    `query`, `limit`, `doc_type_filter`, `foundup_id`, `include_shared`.
+  - Legacy `domain` parameter retained as deprecated alias for
+    `doc_type_filter` (back-compat for callers from before this slice);
+    surfaces a warning naming the canonical field.
+  - `limit` is bounded 1..50 per Annex A.2 with truthful warning when clamped.
+  - Returns `{status, data, error, meta}` with:
+    - `status = "not_implemented"`
+    - `data` echoes the request (query, doc_type_filter, foundup_id) and
+      contains empty `hits[]` (hit_count = 0); `metadata.retrieval_mode = "none"`
+      so no caller can confuse this with a semantic search.
+    - `error` carries `code = "NOT_IMPLEMENTED"`, a message naming this surface
+      and the canonical owners (S1, S2), and `delegate_to = "S2"`.
+    - `meta` merges `_truth_meta()` (MCPA4 truth flags) with `tool` and
+      `surface = "S3"` per Annex A.3.
+
+- `tests/test_server_holo_search.py`:
+  - Updated `test_holo_search_payload_remains_visible` →
+    `test_holo_search_payload_uses_canonical_envelope`. The legacy assertion
+    `assert "matches" in result["result"]` is replaced by canonical envelope
+    assertions and an explicit ban on the `matches` key.
+  - Added `TestNotImplementedEnvelope` class with 21 focused tests covering
+    status field, no-fabrication invariants (no relevance/score/distance keys
+    anywhere; no legacy `example.py` markers), error block (code, delegate_to,
+    canonical-owner naming), data block (query/doc_type_filter/foundup_id echo,
+    include_shared null when foundup_id absent, retrieval_mode = "none"),
+    meta block (surface = "S3", tool, truth flag), all canonical request
+    fields accepted, limit bound enforcement, garbage-limit fallback,
+    legacy `domain` alias still accepted with warning, canonical wins over
+    alias, and dispatch-path wrapping (handle_tool_call) preserves both
+    inner canonical envelope and outer truth meta.
+
+### Behavior boundaries (what did NOT change)
+
+- No real auth implementation (still TODO; MCPA1 Slice 6 lane).
+- No WebSocket transport (start() still does not bind a port).
+- No real backend integration (no HoloIndex call, no engine wiring).
+- S1 and S2 untouched.
+- MCP Manager untouched.
+- `_truth_meta()` semantics preserved — meta layer carries MCPA4 truth flags.
+- Other tool bodies (`cabr_validate`, `gemma_classify`, `qwen_plan`, etc.)
+  unchanged — Slice 4 scope is `holo_search` only per WSP 96 Annex A authority.
+
+### Tests
+
+```
+PYTHONPATH=. python -m pytest \
+  modules/infrastructure/pavs_mcp/tests/test_server_holo_search.py -q
+-> 43 passed (22 pre-existing MCPA4 tests + 21 new MCPA1-Slice-4 tests)
+```
+
+### Tracked follow-ups
+
+- MCPA1 Slice 6 (`MCP_FEDERATION_AUTH_AND_SCOPE_PHASE1`) — once federation
+  auth lands, S3's `holo_search` either delegates to S2/S1 with verified
+  tenant scope or stops returning `not_implemented`. The truth meta and
+  envelope shape established in this slice will continue to apply.
+- MCPA6 audit Slice 6.3 (`S2_ANNEX_A_RENAME_AND_META_PHASE1`) — S2's
+  request-field naming (`scope` → `doc_type_filter`, `top_k` → `limit`)
+  is the next conformance step on the bridge side.
+
+---
+
 ## 2026-05-08 - PAVS_HONESTY_PHASE1 (MCPA4) — Truth flag and placeholder labeling
 
 **Author**: 0102 (Worker W1)
