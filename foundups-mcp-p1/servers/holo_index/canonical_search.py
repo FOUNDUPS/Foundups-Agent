@@ -54,6 +54,35 @@ ANNEX_A_FALLBACK_RELEVANCE_CAP = 0.6
 """Annex A.3: lexical fallback caps relevance at 0.6."""
 
 
+# ----- S64: cross-surface federation-scope warning template (S1 / S2 parity) -----
+
+FEDERATION_SCOPE_WARNING_TEMPLATE = (
+    "foundup_id received; tenant scoping not yet enforced at {surface} "
+    "(deferred to MCPA1 Slice 6 / federation auth)."
+)
+"""Canonical truthful warning when ``foundup_id`` is supplied but not enforced.
+
+Per S64 (`S1_S2_FOUNDUP_SCOPE_REQUEST_PARITY_PHASE1`), both S1 and S2 emit
+exactly this string with their own surface tag substituted, so contract
+consumers (tests, gateways, dashboards) can match a single template. The
+substitution token MUST remain ``{surface}`` so that grep on either module
+finds the same identifier — drift in either surface is a parity violation.
+The S2 mirror lives in
+``modules/infrastructure/foundups_mcp_bridge/src/holo_tools.py``; both
+copies MUST stay byte-identical and the pair is covered by parity tests
+on both sides.
+"""
+
+
+def federation_scope_warning(surface: str) -> str:
+    """Format the canonical federation-scope warning for ``surface``.
+
+    Returns the string a surface MUST emit when ``foundup_id`` is supplied
+    but tenant scoping is not enforced (deferred to MCPA1 Slice 6).
+    """
+    return FEDERATION_SCOPE_WARNING_TEMPLATE.format(surface=surface)
+
+
 # ============================================================================
 # Helpers
 # ============================================================================
@@ -320,12 +349,10 @@ async def canonical_holo_search(
             f"requested={requested_limit}, applied={bounded_limit}."
         )
 
-    # Federation honesty (Slice 6 deferred)
+    # Federation honesty (Slice 6 deferred). S64: use the shared template so
+    # S1/S2 parity is enforced by code, not by copy-paste hygiene.
     if foundup_id is not None:
-        warnings.append(
-            "foundup_id received; tenant scoping not yet enforced at S1 "
-            "(deferred to MCPA1 Slice 6 / federation auth)."
-        )
+        warnings.append(federation_scope_warning(S1_SURFACE_ID))
 
     # Empty-query rejection (Annex A.2 + WSP 97)
     if not query or not query.strip():

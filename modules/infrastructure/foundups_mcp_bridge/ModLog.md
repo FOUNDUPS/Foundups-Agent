@@ -1,5 +1,59 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-05-08 - S64: S1 / S2 federation-scope request parity
+
+**Author**: 0102 (Worker W1)
+**WSP**: 97 (Truth Boundaries), 96 (MCP Governance — Annex A.2)
+**Slice**: `S64_S1_S2_FOUNDUP_SCOPE_REQUEST_PARITY_PHASE1`
+**Closes (MCPA6 audit drift)**: D7, D8, D14, D15 (cross-surface parity portion); D19 fully
+
+### Why
+
+S63 added `foundup_id` / `include_shared` to S2, and S62 did the same for S1.
+Both surfaces emitted truthful "tenant scoping not yet enforced" warnings,
+but the warning text was duplicated as separate string literals. Per WSP 97,
+contract consumers should be able to match a single canonical phrase rather
+than two near-identical strings that could drift over time. This slice
+extracts the warning into a shared template constant on each side and adds
+parity tests that fail if either side drifts.
+
+### Changes (S2 side)
+
+- `src/holo_tools.py`:
+  - Added `FEDERATION_SCOPE_WARNING_TEMPLATE` constant (byte-identical to
+    the S1 mirror in `foundups-mcp-p1/servers/holo_index/canonical_search.py`).
+  - Added `federation_scope_warning(surface)` formatter.
+  - `holo_search` now emits `federation_scope_warning(S2_SURFACE_ID)` instead
+    of an inline string literal.
+
+- `tests/test_mcp_bridge.py`:
+  - Added `TestS64FederationScopeParity` class (8 tests): S2 template token
+    presence, canonical phrasing fragments, `federation_scope_warning("S2")`
+    shape, no-foundup-id-echoes-null pair (with and without explicit
+    `include_shared`), with-foundup-id echo + warning emission, byte-for-byte
+    template match in the runtime warning, and a cross-surface parity test
+    that imports S1's template and asserts byte equality.
+
+### Behavior boundaries (what did NOT change)
+
+- No federation auth implementation (still deferred to MCPA1 Slice 6).
+- Envelope shape from S63 unchanged.
+- The runtime warning text is byte-identical to what S63 emitted — only
+  the source of the string changed (template constant instead of inline
+  literal).
+- S3 (pavs_mcp) and MCP Manager untouched.
+
+### Tests
+
+```
+PYTHONPATH=. python -m pytest \
+  modules/infrastructure/foundups_mcp_bridge/tests/test_mcp_bridge.py \
+  -k "holo_search or AnnexAConformance or FederationScopeParity" -q
+-> 34 passed (26 from S63 + 8 new S64 parity tests)
+```
+
+---
+
 ## 2026-05-08 - S63: S2 holo_search → WSP 96 Annex A request/meta conformance
 
 **Author**: 0102 (Worker W1)

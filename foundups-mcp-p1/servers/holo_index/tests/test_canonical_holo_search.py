@@ -34,11 +34,13 @@ from canonical_search import (  # noqa: E402  (sys.path manipulation above)
     ANNEX_A_FALLBACK_RELEVANCE_CAP,
     ANNEX_A_LIMIT_DEFAULT,
     ANNEX_A_LIMIT_MAX,
+    FEDERATION_SCOPE_WARNING_TEMPLATE,
     S1_SURFACE_ID,
     build_error_envelope,
     build_ok_envelope,
     canonical_holo_search,
     distance_to_similarity,
+    federation_scope_warning,
 )
 
 
@@ -556,3 +558,100 @@ class TestDirectInvocationExample:
         assert result["meta"]["surface"] == "S1"
         assert result["meta"]["tool"] == "holo_search"
         assert result["meta"]["source"] == "holoindex"
+
+
+# ---------------------------------------------------------------------------
+# S64: S1 / S2 federation-scope request parity
+# ---------------------------------------------------------------------------
+
+
+class TestS64FederationScopeParity:
+    """S64: request-level parity for ``foundup_id`` / ``include_shared``.
+
+    Verifies the S1 side of the contract:
+      - shared template constant is intact and contains ``{surface}`` token
+      - ``federation_scope_warning(S1)`` produces the expected text
+      - request without ``foundup_id`` echoes ``foundup_id=None``,
+        ``include_shared=None``
+      - request with ``foundup_id`` echoes both, plus the canonical warning
+      - the actual warning emitted by ``canonical_holo_search`` matches
+        ``federation_scope_warning(S1)`` byte-for-byte
+      - cross-surface check: S2's template byte-equals S1's template
+    """
+
+    def test_template_has_surface_token(self):
+        assert "{surface}" in FEDERATION_SCOPE_WARNING_TEMPLATE
+
+    def test_template_carries_canonical_phrasing(self):
+        for phrase in (
+            "foundup_id received",
+            "tenant scoping not yet enforced",
+            "MCPA1 Slice 6",
+        ):
+            assert phrase in FEDERATION_SCOPE_WARNING_TEMPLATE
+
+    def test_federation_scope_warning_for_s1(self):
+        warn = federation_scope_warning("S1")
+        assert "at S1" in warn
+        assert "MCPA1 Slice 6" in warn
+        assert "{surface}" not in warn
+
+    def test_no_foundup_id_echoes_null_pair(self, stub_backend):
+        """Without ``foundup_id``, both echoes are null (parity invariant)."""
+        result = _run(canonical_holo_search(stub_backend, query="x"))
+        assert result["data"]["foundup_id"] is None
+        assert result["data"]["include_shared"] is None
+        warnings = result["data"]["metadata"]["warnings"]
+        assert not any("tenant scoping" in w for w in warnings)
+
+    def test_no_foundup_id_with_explicit_include_shared_still_null(
+        self, stub_backend
+    ):
+        """Even when caller passes ``include_shared=False``, the echo is
+        ``None`` if no ``foundup_id`` was supplied (Annex A.2 semantics
+        — the flag is only meaningful with tenant scope)."""
+        result = _run(
+            canonical_holo_search(stub_backend, query="x", include_shared=False)
+        )
+        assert result["data"]["foundup_id"] is None
+        assert result["data"]["include_shared"] is None
+
+    def test_with_foundup_id_echoes_both_and_warns(self, stub_backend):
+        result = _run(
+            canonical_holo_search(
+                stub_backend, query="x", foundup_id="gotjunk", include_shared=False
+            )
+        )
+        assert result["data"]["foundup_id"] == "gotjunk"
+        assert result["data"]["include_shared"] is False
+        warnings = result["data"]["metadata"]["warnings"]
+        assert federation_scope_warning("S1") in warnings
+
+    def test_emitted_warning_matches_template_byte_for_byte(self, stub_backend):
+        """The runtime-emitted warning MUST equal ``federation_scope_warning(S1)``
+        verbatim — protects against drift if a future edit adds a stray space
+        or punctuation difference."""
+        result = _run(
+            canonical_holo_search(stub_backend, query="x", foundup_id="kosei")
+        )
+        warnings = result["data"]["metadata"]["warnings"]
+        scope_warnings = [w for w in warnings if "foundup_id received" in w]
+        assert len(scope_warnings) == 1
+        assert scope_warnings[0] == federation_scope_warning("S1")
+
+    def test_s2_template_matches_s1_template(self):
+        """Cross-surface parity: S1's template MUST match S2's template
+        byte-for-byte (modulo `{surface}` substitution). Drift in either
+        module flags here.
+        """
+        try:
+            from modules.infrastructure.foundups_mcp_bridge.src.holo_tools import (
+                FEDERATION_SCOPE_WARNING_TEMPLATE as s2_template,
+            )
+        except Exception:
+            pytest.skip("S2 holo_tools not importable in this environment")
+
+        assert s2_template == FEDERATION_SCOPE_WARNING_TEMPLATE, (
+            "S1 and S2 federation-scope warning templates have drifted; "
+            "they MUST be byte-identical per S64 parity contract."
+        )

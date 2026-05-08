@@ -2,6 +2,62 @@
 
 **Purpose**: MCP server workspace for 0102 tool access in Claude Code
 
+## 2026-05-08 - S64: S1 / S2 federation-scope request parity
+
+**Author**: 0102 (Worker W1)
+**WSP**: 97 (Truth Boundaries), 96 (MCP Governance — Annex A.2)
+**Slice**: `S64_S1_S2_FOUNDUP_SCOPE_REQUEST_PARITY_PHASE1`
+**Closes (MCPA6 audit drift)**: D7, D8, D14, D15 (cross-surface parity portion); D19 fully
+
+### Why
+
+S62 added `foundup_id` / `include_shared` to S1 and S63 added them to S2.
+Both surfaces emitted near-identical truthful warnings, but the warning
+text was duplicated as separate string literals in two modules. A future
+edit on either side could drift the wording without breaking either
+surface's tests, leaving contract consumers (gateway dashboards, audit
+checkers, regex-matchers) silently chasing two phrasings. This slice
+introduces a shared template constant on each side and a parity test
+suite that fails if the templates ever diverge.
+
+### Changes (S1 side)
+
+- `servers/holo_index/canonical_search.py`:
+  - Added `FEDERATION_SCOPE_WARNING_TEMPLATE` constant — the canonical
+    truthful warning template with `{surface}` substitution token.
+  - Added `federation_scope_warning(surface)` formatter.
+  - `canonical_holo_search` now emits
+    `federation_scope_warning(S1_SURFACE_ID)` instead of an inline
+    string literal.
+
+- `servers/holo_index/tests/test_canonical_holo_search.py`:
+  - Added `TestS64FederationScopeParity` class (8 tests): template
+    token presence, canonical phrasing fragments,
+    `federation_scope_warning("S1")` shape, no-foundup-id-echoes-null
+    pair (with and without explicit `include_shared`), with-foundup-id
+    echo + warning emission, byte-for-byte template match in the
+    runtime warning, and a cross-surface parity test that imports S2's
+    template and asserts byte equality.
+
+### Behavior boundaries (what did NOT change)
+
+- No federation auth implementation (still deferred to MCPA1 Slice 6).
+- Legacy `semantic_code_search` tool untouched.
+- Envelope shape from S62 unchanged.
+- The runtime warning text is byte-identical to what S62 emitted —
+  only the source of the string changed (template constant instead of
+  inline literal).
+
+### Tests
+
+```
+PYTHONPATH=. python -m pytest \
+  foundups-mcp-p1/servers/holo_index/tests/test_canonical_holo_search.py -q
+-> 54 passed (46 from S62 + 8 new S64 parity tests)
+```
+
+---
+
 ## 2026-05-08 - S62: S1 holo_search → WSP 96 Annex A canonical envelope adapter
 
 **Author**: 0102 (Worker W1)
