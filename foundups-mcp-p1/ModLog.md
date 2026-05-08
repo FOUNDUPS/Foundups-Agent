@@ -2,6 +2,96 @@
 
 **Purpose**: MCP server workspace for 0102 tool access in Claude Code
 
+## 2026-05-08 - S62: S1 holo_search → WSP 96 Annex A canonical envelope adapter
+
+**Author**: 0102 (Worker W1)
+**WSP**: 97 (Truth Boundaries), 96 (MCP Governance — Annex A.2/A.3)
+**Slice**: `S62_S1_ANNEX_A_ENVELOPE_ADAPTER_PHASE1`
+**Closes (MCPA6 audit drift)**: D1, D2, D3, D4, D5, D6, D7, D8, D9, D10, D11
+
+### Why
+
+Per MCPA6 conformance audit, S1 (`servers/holo_index/server.py`) was the
+worst-conformant of the three `holo_search` surfaces — failing 13 of 16
+Annex A checks. Its tool was named `semantic_code_search`, returned a flat
+shape with `code_results`/`wsp_results` split, used raw ChromaDB distance
+as relevance, lacked the canonical envelope and federation request fields,
+and emitted decoration fields (`quantum_coherence`, `bell_state_alignment`)
+not in the canonical contract. This slice adds a canonical adapter
+without removing the legacy tool — back-compat clients continue to work.
+
+### Changes
+
+- `servers/holo_index/canonical_search.py` (NEW):
+  - `S1_SURFACE_ID`, `ANNEX_A_LIMIT_MAX`, `ANNEX_A_LIMIT_DEFAULT`,
+    `ANNEX_A_FALLBACK_RELEVANCE_CAP` constants.
+  - `distance_to_similarity(d)` — applies Annex A.3 formula uniformly:
+    `relevance = 1/(1+d)` for non-negative numeric distance; returns
+    None for invalid/negative input (callers MUST omit the field).
+  - `build_ok_envelope(...)` and `build_error_envelope(...)` — produce
+    the WSP 96 Annex A.3 canonical shapes.
+  - `_unify_hits(results, limit)` — flattens code/wsp/test/skill/docs/
+    knowledge hit lists into a single `hits[]` array with `type`
+    discriminator. Hits without a usable relevance signal omit the
+    field (no fabrication).
+  - `canonical_holo_search(holo_index, ...)` — async standalone function
+    that handles request validation (Annex A.2 limit clamp, empty-query
+    rejection with `EMPTY_QUERY` code, foundup_id scope warning),
+    invokes the backend, and builds the canonical Annex A.3 envelope.
+  - Module is fully decoupled from FastMCP so it is unit-testable and
+    future-proof against FastMCP API changes.
+
+- `servers/holo_index/server.py`:
+  - Added imports for `Optional` (used by the in-class wrapper signature).
+  - Added in-class `holo_search` method on `HoloIndexMCPServer` that
+    delegates to `canonical_holo_search()` from `canonical_search.py`.
+  - Added module-level constants `S1_SURFACE_ID`, `ANNEX_A_LIMIT_MAX`,
+    `ANNEX_A_LIMIT_DEFAULT`, `ANNEX_A_FALLBACK_RELEVANCE_CAP` (mirroring
+    the canonical module for callers that hold a server instance).
+  - The legacy `semantic_code_search` tool with `@app.tool()` decoration
+    is UNTOUCHED — back-compat clients pinned to its flat-shape response
+    continue to work.
+
+- `servers/holo_index/tests/__init__.py` (NEW, empty).
+- `servers/holo_index/tests/test_canonical_holo_search.py` (NEW): 46
+  focused tests covering the Annex A.2 request fields, A.3 envelope
+  shape, unified hit shape, relevance transform (formula uniform; no
+  raw distance leak; relevance omitted when not computable), empty-query
+  rejection, backend error handling, module constants, envelope builders,
+  and a direct-invocation example showing full canonical request →
+  canonical response.
+
+### Behavior boundaries (what did NOT change)
+
+- Legacy `semantic_code_search` tool kept as-is.
+- `wsp_protocol_lookup`, `cross_reference_search`,
+  `mine_012_conversations_for_patterns` etc. all untouched.
+- No FastMCP version bump, no transport changes.
+- No federation auth implementation — `foundup_id` is accepted and
+  echoed but tenant scoping is NOT enforced. Truthful warning surfaces
+  this honestly; enforcement deferred to MCPA1 Slice 6.
+- No HoloIndex core architecture changes.
+
+### Tests
+
+```
+PYTHONPATH=. python -m pytest \
+  foundups-mcp-p1/servers/holo_index/tests/test_canonical_holo_search.py -q
+-> 46 passed
+```
+
+### Tracked follow-ups
+
+- MCPA1 Slice 6 (`MCP_FEDERATION_AUTH_AND_SCOPE_PHASE1`) — actually
+  enforce `foundup_id` tenant scoping on S1.
+- Eventually: register the new `holo_search` tool with FastMCP. The
+  current FastMCP API rejects `@app.tool()` on instance methods that
+  bind `self`; the legacy `semantic_code_search` works only in older
+  FastMCP versions. The canonical adapter is ready; only the wire-level
+  registration is pending the FastMCP path forward.
+
+---
+
 ## 2026-01-04 - Web Search MCP Server
 
 **Problem**: 0102 needed web search capability for pattern recall from 0201 nonlocal space
