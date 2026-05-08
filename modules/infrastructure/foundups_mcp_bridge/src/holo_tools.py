@@ -28,7 +28,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from .response_schema import ok_response, error_response
+from .response_schema import MCPResponse, ok_response, error_response
 
 logger = logging.getLogger(__name__)
 
@@ -77,39 +77,159 @@ def _get_holoindex(repo_root: Path):
 # =============================================================================
 
 
+# =============================================================================
+# Canonical Annex A constants (S63: WSP 96 Annex A.2/A.3 conformance)
+# =============================================================================
+
+S2_SURFACE_ID = "S2"
+"""Surface tag per WSP 96 Annex A.1 — emitted in every meta block."""
+
+ANNEX_A_LIMIT_MAX = 50
+"""Annex A.2: hard upper bound on `limit` to prevent denial-by-pagination."""
+
+ANNEX_A_LIMIT_DEFAULT = 10
+"""Annex A.2: default `limit` when none supplied."""
+
+ANNEX_A_FALLBACK_RELEVANCE_CAP = 0.6
+"""Annex A.3: surfaces using lexical fallback MUST cap relevance at 0.6."""
+
+
+def _build_s2_error_envelope(
+    *,
+    code: str,
+    message: str,
+    details: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Build a WSP 96 Annex A.3 canonical error envelope for S2 holo_search.
+
+    The generic `error_response()` returns `error` as a flat string. Annex A.3
+    requires `error: {code, message, details?}` for `holo_search` so clients
+    can branch on the machine-readable code (e.g. EMPTY_QUERY) rather than
+    string-matching the message. This helper produces only the holo_search
+    error shape — other tools continue to use `error_response()` unchanged.
+    """
+    error_obj: Dict[str, Any] = {"code": code, "message": message}
+    if details is not None:
+        error_obj["details"] = details
+    return MCPResponse(
+        status="error",
+        error=error_obj,
+        meta={"tool": "holo_search", "surface": S2_SURFACE_ID},
+    ).to_dict()
+
+
 def holo_search(
     repo_root: Path,
     query: str,
-    scope: str = "all",
-    top_k: int = 10,
+    *,
+    # Canonical Annex A.2 request fields (preferred names)
+    limit: Optional[int] = None,
+    doc_type_filter: Optional[str] = None,
+    foundup_id: Optional[str] = None,
+    include_shared: bool = True,
+    # Back-compat aliases (deprecated; canonical names win if both supplied)
+    scope: Optional[str] = None,
+    top_k: Optional[int] = None,
 ) -> Dict[str, Any]:
-    """
-    Semantic search across the repository.
+    """Semantic search across the repository (S2 — canonical internal adapter).
+
+    Conforms to WSP 96 Annex A.2 (request schema) and Annex A.3 (response
+    envelope). Federation auth/scope (`foundup_id`, `include_shared`) is
+    accepted but NOT enforced at this surface — enforcement lands in
+    MCPA1 Slice 6. `data.metadata.warnings` truthfully reports this gap.
 
     Args:
-        repo_root: Repository root path
-        query: Search query
-        scope: Search scope ("all", "code", "wsp", "test", "skill")
-        top_k: Maximum results to return
+        repo_root: Repository root path.
+        query: Natural-language search query (required, non-empty).
+        limit: Annex A.2 canonical name. Default 10, range 1..50.
+        doc_type_filter: Annex A.2 canonical name. Enum: all|code|wsp|test|
+            skill|docs|knowledge.
+        foundup_id: Federation tenant scope (echoed; not yet enforced).
+        include_shared: Federation share flag (only meaningful when
+            `foundup_id` is set; otherwise echoed as None).
+        scope: Legacy alias for `doc_type_filter` (back-compat). If
+            `doc_type_filter` is also passed, the canonical name wins.
+        top_k: Legacy alias for `limit` (back-compat). If `limit` is also
+            passed, the canonical name wins.
 
     Returns:
-        MCPResponse with search results
+        WSP 96 Annex A.3 canonical envelope:
+        - `status`: "ok" | "error"
+        - `data`: {query, doc_type_filter, scope (alias), foundup_id,
+                   include_shared, hits[], hit_count, metadata}
+        - `meta`: {timestamp, source, tool, surface, confidence, ...}
+        - `error` (when status="error"): {code, message, details?}
     """
-    if not query or not query.strip():
-        return error_response("Query cannot be empty")
+    # ----- Resolve canonical inputs (canonical wins over aliases) -----
+    warnings: List[str] = []
 
+    if limit is not None:
+        effective_limit_raw = limit
+    elif top_k is not None:
+        effective_limit_raw = top_k
+        warnings.append(
+            "Legacy 'top_k' parameter accepted as alias for canonical 'limit'; "
+            "please migrate per WSP 96 Annex A.2."
+        )
+    else:
+        effective_limit_raw = ANNEX_A_LIMIT_DEFAULT
+
+    if doc_type_filter is not None:
+        effective_filter = doc_type_filter
+    elif scope is not None:
+        effective_filter = scope
+        warnings.append(
+            "Legacy 'scope' parameter accepted as alias for canonical "
+            "'doc_type_filter'; please migrate per WSP 96 Annex A.2."
+        )
+    else:
+        effective_filter = "all"
+
+    # Annex A.2: clamp limit to [1..50]; surface clamping truthfully.
+    try:
+        bounded_limit = int(effective_limit_raw) if effective_limit_raw is not None else ANNEX_A_LIMIT_DEFAULT
+    except (TypeError, ValueError):
+        bounded_limit = ANNEX_A_LIMIT_DEFAULT
+        warnings.append(
+            f"Invalid limit value {effective_limit_raw!r}; defaulted to "
+            f"{ANNEX_A_LIMIT_DEFAULT} per WSP 96 Annex A.2."
+        )
+    clamped_limit = max(1, min(bounded_limit, ANNEX_A_LIMIT_MAX))
+    if clamped_limit != bounded_limit:
+        warnings.append(
+            f"limit clamped to Annex A.2 range (1..{ANNEX_A_LIMIT_MAX}): "
+            f"requested={bounded_limit}, applied={clamped_limit}."
+        )
+
+    # Federation scope honesty (not yet enforced — MCPA1 Slice 6).
+    if foundup_id is not None:
+        warnings.append(
+            "foundup_id received; tenant scoping not yet enforced at S2 "
+            "(deferred to MCPA1 Slice 6 / federation auth)."
+        )
+
+    # ----- Empty-query rejection (Annex A.2 + WSP 97 truth boundary) -----
+    if not query or not query.strip():
+        return _build_s2_error_envelope(
+            code="EMPTY_QUERY",
+            message=(
+                "Query cannot be empty. WSP 96 Annex A.2 requires a "
+                "non-empty `query` field."
+            ),
+        )
+
+    # ----- Real backend path -----
     holo = _get_holoindex(repo_root)
     source = "holoindex"
     confidence = 0.8
+    retrieval_mode = "semantic"
 
     if holo:
         try:
-            # Use real HoloIndex search
-            results = holo.search(query, limit=top_k, doc_type_filter=scope)
+            results = holo.search(query, limit=clamped_limit, doc_type_filter=effective_filter)
 
-            hits = []
-            # Combine all hit types
-            for hit in results.get("code_hits", [])[:top_k]:
+            hits: List[Dict[str, Any]] = []
+            for hit in results.get("code_hits", [])[:clamped_limit]:
                 hits.append({
                     "type": "code",
                     "path": hit.get("path") or hit.get("location"),
@@ -117,8 +237,7 @@ def holo_search(
                     "preview": hit.get("preview", "")[:200],
                     "need": hit.get("need", ""),
                 })
-
-            for hit in results.get("wsp_hits", [])[:top_k]:
+            for hit in results.get("wsp_hits", [])[:clamped_limit]:
                 hits.append({
                     "type": "wsp",
                     "path": hit.get("path"),
@@ -126,15 +245,13 @@ def holo_search(
                     "summary": hit.get("summary", "")[:200],
                     "relevance": _parse_similarity(hit.get("similarity", "0%")),
                 })
-
-            for hit in results.get("test_hits", [])[:top_k]:
+            for hit in results.get("test_hits", [])[:clamped_limit]:
                 hits.append({
                     "type": "test",
                     "path": hit.get("path"),
                     "relevance": _parse_similarity(hit.get("similarity", "0%")),
                 })
-
-            for hit in results.get("skill_hits", [])[:top_k]:
+            for hit in results.get("skill_hits", [])[:clamped_limit]:
                 hits.append({
                     "type": "skill",
                     "path": hit.get("path"),
@@ -142,60 +259,122 @@ def holo_search(
                     "relevance": _parse_similarity(hit.get("similarity", "0%")),
                 })
 
-            # Sort by relevance and limit
             hits.sort(key=lambda x: x.get("relevance", 0), reverse=True)
-            hits = hits[:top_k]
+            hits = hits[:clamped_limit]
 
-            return ok_response(
-                {
-                    "query": query,
-                    "scope": scope,
-                    "hits": hits,
-                    "hit_count": len(hits),
-                    "metadata": results.get("metadata", {}),
-                },
+            return _build_s2_ok_envelope(
+                query=query,
+                effective_filter=effective_filter,
+                foundup_id=foundup_id,
+                include_shared=include_shared,
+                hits=hits,
+                engine_metadata=results.get("metadata", {}),
+                retrieval_mode=retrieval_mode,
                 source=source,
                 confidence=confidence,
-                tool="holo_search",
+                warnings=warnings,
             )
 
         except Exception as e:
             logger.warning(f"[MCP] HoloIndex search failed, using fallback: {e}")
+            warnings.append(
+                f"HoloIndex backend error; using lexical fallback: {e}"
+            )
             source = "fallback"
             confidence = 0.5
+            retrieval_mode = "lexical"
+    else:
+        warnings.append("HoloIndex unavailable; using lexical fallback.")
+        source = "fallback"
+        confidence = 0.4
+        retrieval_mode = "lexical"
 
-    # Fallback: use ripgrep search
-    source = "fallback"
-    confidence = 0.4
-
+    # ----- Fallback path (ripgrep) -----
     from .repo_tools import search_repo
-    fallback_result = search_repo(repo_root, query=query, path=".", top_k=top_k)
+    fallback_result = search_repo(repo_root, query=query, path=".", top_k=clamped_limit)
 
     if fallback_result.get("status") != "ok":
-        return fallback_result
+        return _build_s2_error_envelope(
+            code="BACKEND_UNAVAILABLE",
+            message=(
+                "Both HoloIndex and ripgrep fallback failed; cannot serve "
+                "holo_search on S2 right now."
+            ),
+            details={"fallback_error": fallback_result.get("error", "unknown")},
+        )
 
-    # Convert fallback results to holo format
-    hits = []
+    # Convert fallback results to canonical hit shape.
+    # Annex A.3: surfaces using lexical fallback MUST cap relevance at 0.6
+    # to truthfully signal weaker confidence (WSP 97).
+    fallback_hits: List[Dict[str, Any]] = []
     for match in fallback_result["data"].get("matches", []):
-        hits.append({
+        fallback_hits.append({
             "type": "code",
             "path": match.get("file"),
-            "relevance": 0.5,  # No semantic score in fallback
             "preview": match.get("line", "")[:200],
             "line_num": match.get("line_num"),
+            "relevance": ANNEX_A_FALLBACK_RELEVANCE_CAP,
         })
+    fallback_hits = fallback_hits[:clamped_limit]
+
+    return _build_s2_ok_envelope(
+        query=query,
+        effective_filter=effective_filter,
+        foundup_id=foundup_id,
+        include_shared=include_shared,
+        hits=fallback_hits,
+        engine_metadata={"engine_version": "ripgrep_fallback"},
+        retrieval_mode=retrieval_mode,
+        source=source,
+        confidence=confidence,
+        warnings=warnings,
+    )
+
+
+def _build_s2_ok_envelope(
+    *,
+    query: str,
+    effective_filter: str,
+    foundup_id: Optional[str],
+    include_shared: bool,
+    hits: List[Dict[str, Any]],
+    engine_metadata: Dict[str, Any],
+    retrieval_mode: str,
+    source: str,
+    confidence: float,
+    warnings: List[str],
+) -> Dict[str, Any]:
+    """Build the WSP 96 Annex A.3 canonical ok envelope for S2 holo_search."""
+    metadata: Dict[str, Any] = {
+        "retrieval_mode": retrieval_mode,
+        "engine_version": engine_metadata.get("engine_version", "holoindex"),
+        "collections_searched": engine_metadata.get("collections_searched", []),
+        "warnings": warnings,
+    }
+    # Pass through any extra engine metadata fields without overriding canonical keys.
+    for k, v in engine_metadata.items():
+        if k not in metadata:
+            metadata[k] = v
+
+    data: Dict[str, Any] = {
+        "query": query,
+        "doc_type_filter": effective_filter,
+        # Back-compat alias: legacy callers reading `data.scope` keep working.
+        "scope": effective_filter,
+        "foundup_id": foundup_id,
+        # Annex A.2: include_shared only meaningful when foundup_id is set.
+        "include_shared": include_shared if foundup_id is not None else None,
+        "hits": hits,
+        "hit_count": len(hits),
+        "metadata": metadata,
+    }
 
     return ok_response(
-        {
-            "query": query,
-            "scope": scope,
-            "hits": hits[:top_k],
-            "hit_count": len(hits[:top_k]),
-            "fallback_note": "Using ripgrep text search (HoloIndex unavailable)",
-        },
+        data,
         source=source,
         confidence=confidence,
         tool="holo_search",
+        surface=S2_SURFACE_ID,
     )
 
 

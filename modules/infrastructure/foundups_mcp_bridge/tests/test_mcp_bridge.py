@@ -501,10 +501,16 @@ class TestHoloTools:
         assert result["data"]["query"] == "WSP protocol"
 
     def test_holo_search_empty_query_error(self, bridge):
-        """holo_search rejects empty query."""
+        """holo_search rejects empty query with canonical Annex A.3 error envelope."""
         result = bridge.call_tool("holo_search", query="", scope="all", top_k=5)
         assert result["status"] == "error"
-        assert "empty" in result["error"].lower()
+        # WSP 96 Annex A.3: error is a dict with code/message, not a flat string.
+        assert isinstance(result["error"], dict)
+        assert result["error"]["code"] == "EMPTY_QUERY"
+        assert "empty" in result["error"]["message"].lower()
+        # meta.surface must identify S2 even on error path.
+        assert result["meta"]["surface"] == "S2"
+        assert result["meta"]["tool"] == "holo_search"
 
     def test_holo_search_scoped(self, bridge):
         """holo_search respects scope filter."""
@@ -930,3 +936,256 @@ class TestErrorHandling:
         result = bridge.call_tool("get_repo_tree", invalid_param="test")
         assert result["status"] == "error"
         assert "invalid" in result["error"].lower() or "unexpected" in result["error"].lower()
+
+
+# ==================== S63: S2 holo_search Annex A Conformance ====================
+
+
+class TestS2HoloSearchAnnexAConformance:
+    """S63 (MCPA6 follow-up): verify S2 holo_search conforms to WSP 96 Annex A.
+
+    Closes MCPA6 drift IDs:
+      - D12: `scope` -> `doc_type_filter` (with alias)
+      - D13: `top_k` -> `limit` (with alias)
+      - D14: `foundup_id` request field accepted and echoed
+      - D15: `include_shared` request field accepted and echoed
+      - D16: empty-query error includes canonical `error.code = "EMPTY_QUERY"`
+      - D17: lexical fallback caps relevance at 0.6 (Annex A.3 policy)
+      - D18: meta.surface = "S2" present on every response
+    """
+
+    # ----- Canonical request fields accepted -----
+
+    def test_canonical_doc_type_filter_accepted(self, bridge):
+        """`doc_type_filter` works as the canonical name for scope."""
+        result = bridge.call_tool(
+            "holo_search", query="WSP", doc_type_filter="wsp", limit=3
+        )
+        assert result["status"] == "ok"
+        assert result["data"]["doc_type_filter"] == "wsp"
+        # Back-compat alias `scope` mirrors the same value
+        assert result["data"]["scope"] == "wsp"
+
+    def test_canonical_limit_accepted(self, bridge):
+        """`limit` works as the canonical name for top_k."""
+        result = bridge.call_tool("holo_search", query="WSP", limit=3)
+        assert result["status"] == "ok"
+        # hits should not exceed the canonical limit
+        assert result["data"]["hit_count"] <= 3
+
+    def test_foundup_id_accepted_and_echoed(self, bridge):
+        result = bridge.call_tool(
+            "holo_search", query="WSP", foundup_id="gotjunk", limit=3
+        )
+        assert result["status"] == "ok"
+        assert result["data"]["foundup_id"] == "gotjunk"
+
+    def test_include_shared_with_foundup_id_echoed(self, bridge):
+        """include_shared echoes the request value when foundup_id is set."""
+        result = bridge.call_tool(
+            "holo_search",
+            query="WSP",
+            foundup_id="kosei",
+            include_shared=False,
+            limit=3,
+        )
+        assert result["status"] == "ok"
+        assert result["data"]["include_shared"] is False
+
+    def test_include_shared_null_when_no_foundup_id(self, bridge):
+        """include_shared echoes None when foundup_id is absent (Annex A.2)."""
+        result = bridge.call_tool(
+            "holo_search", query="WSP", include_shared=False, limit=3
+        )
+        assert result["status"] == "ok"
+        assert result["data"]["include_shared"] is None
+
+    # ----- Back-compat aliases still work -----
+
+    def test_legacy_scope_alias_accepted(self, bridge):
+        """Legacy `scope` keyword still works (back-compat)."""
+        result = bridge.call_tool("holo_search", query="WSP", scope="wsp", top_k=3)
+        assert result["status"] == "ok"
+        assert result["data"]["doc_type_filter"] == "wsp"
+
+    def test_legacy_top_k_alias_accepted(self, bridge):
+        """Legacy `top_k` keyword still works (back-compat)."""
+        result = bridge.call_tool("holo_search", query="WSP", top_k=3)
+        assert result["status"] == "ok"
+        assert result["data"]["hit_count"] <= 3
+
+    def test_alias_warnings_surfaced(self, bridge):
+        """Using legacy names triggers a truthful warning per WSP 97."""
+        result = bridge.call_tool(
+            "holo_search", query="WSP", scope="wsp", top_k=3
+        )
+        warnings = result["data"]["metadata"]["warnings"]
+        assert any("scope" in w for w in warnings), (
+            "expected a warning naming legacy 'scope' alias"
+        )
+        assert any("top_k" in w for w in warnings), (
+            "expected a warning naming legacy 'top_k' alias"
+        )
+
+    def test_canonical_wins_over_alias_for_filter(self, bridge):
+        """When both doc_type_filter and scope are passed, canonical wins."""
+        result = bridge.call_tool(
+            "holo_search",
+            query="WSP",
+            doc_type_filter="wsp",
+            scope="code",
+            limit=3,
+        )
+        assert result["data"]["doc_type_filter"] == "wsp"
+
+    def test_canonical_wins_over_alias_for_limit(self, bridge):
+        """When both limit and top_k are passed, canonical wins."""
+        result = bridge.call_tool(
+            "holo_search", query="WSP", limit=2, top_k=10
+        )
+        assert result["data"]["hit_count"] <= 2
+
+    # ----- Annex A.2 limit bounds -----
+
+    def test_limit_clamped_above_50(self, bridge):
+        """limit > 50 is clamped per Annex A.2; warning surfaces the clamp."""
+        result = bridge.call_tool("holo_search", query="WSP", limit=999)
+        warnings = result["data"]["metadata"]["warnings"]
+        assert any(
+            "clamp" in w.lower() and "50" in w for w in warnings
+        ), f"expected clamp warning naming 50; got {warnings}"
+
+    def test_limit_clamped_below_1(self, bridge):
+        """limit < 1 is clamped per Annex A.2."""
+        result = bridge.call_tool("holo_search", query="WSP", limit=0)
+        warnings = result["data"]["metadata"]["warnings"]
+        assert any("clamp" in w.lower() for w in warnings)
+
+    # ----- meta block (Annex A.3) -----
+
+    def test_meta_surface_is_s2(self, bridge):
+        """Every response carries meta.surface = 'S2'."""
+        result = bridge.call_tool("holo_search", query="WSP", limit=3)
+        assert result["meta"]["surface"] == "S2"
+
+    def test_meta_tool_is_holo_search(self, bridge):
+        result = bridge.call_tool("holo_search", query="WSP", limit=3)
+        assert result["meta"]["tool"] == "holo_search"
+
+    def test_meta_source_truthful(self, bridge):
+        """meta.source MUST be 'holoindex' or 'fallback' — never overclaimed."""
+        result = bridge.call_tool("holo_search", query="WSP", limit=3)
+        assert result["meta"]["source"] in ("holoindex", "fallback")
+
+    # ----- data.metadata block (Annex A.3) -----
+
+    def test_data_metadata_has_canonical_keys(self, bridge):
+        """data.metadata MUST include retrieval_mode + warnings (canonical)."""
+        result = bridge.call_tool("holo_search", query="WSP", limit=3)
+        meta = result["data"]["metadata"]
+        assert "retrieval_mode" in meta
+        assert "warnings" in meta
+        assert isinstance(meta["warnings"], list)
+
+    def test_data_metadata_retrieval_mode_truthful(self, bridge):
+        """retrieval_mode value must be one of the Annex A.3 enum strings."""
+        result = bridge.call_tool("holo_search", query="WSP", limit=3)
+        mode = result["data"]["metadata"]["retrieval_mode"]
+        assert mode in ("semantic", "lexical", "fallback", "none")
+
+    # ----- Empty query error envelope (Annex A.3) -----
+
+    def test_empty_query_error_has_canonical_code(self, bridge):
+        result = bridge.call_tool("holo_search", query="")
+        assert result["status"] == "error"
+        assert isinstance(result["error"], dict)
+        assert result["error"]["code"] == "EMPTY_QUERY"
+        assert "message" in result["error"]
+        assert result["meta"]["surface"] == "S2"
+
+    def test_whitespace_query_rejected_with_empty_query_code(self, bridge):
+        """Whitespace-only queries are also rejected as EMPTY_QUERY."""
+        result = bridge.call_tool("holo_search", query="   \t\n  ")
+        assert result["status"] == "error"
+        assert result["error"]["code"] == "EMPTY_QUERY"
+
+    # ----- Federation field warnings (truthful per WSP 97) -----
+
+    def test_foundup_id_surfaces_unenforced_warning(self, bridge):
+        """Passing foundup_id surfaces a truthful 'not yet enforced' warning."""
+        result = bridge.call_tool(
+            "holo_search", query="WSP", foundup_id="gotjunk", limit=3
+        )
+        warnings = result["data"]["metadata"]["warnings"]
+        assert any(
+            "foundup_id" in w and "not yet enforced" in w for w in warnings
+        ), f"expected unenforced-tenant warning; got {warnings}"
+
+    # ----- Fallback relevance cap (Annex A.3 lexical-fallback rule) -----
+
+    def test_fallback_relevance_capped_at_06(self, bridge, monkeypatch):
+        """When falling back to ripgrep, hit relevance MUST be capped at 0.6.
+
+        Forces the fallback path by stubbing the HoloIndex factory. The
+        fallback may either find hits (cap applies) OR fail to find any
+        (canonical BACKEND_UNAVAILABLE error). Both branches are honored
+        truthfully — the slice's invariant is that the cap is never exceeded
+        when hits ARE returned, never that the fallback always returns hits.
+        """
+        from modules.infrastructure.foundups_mcp_bridge.src import holo_tools
+
+        monkeypatch.setattr(holo_tools, "_get_holoindex", lambda _root: None)
+
+        result = bridge.call_tool("holo_search", query="WSP", limit=5)
+
+        if result["status"] == "ok":
+            # Cap MUST apply to any returned hit
+            for hit in result["data"]["hits"]:
+                assert hit.get("relevance", 0) <= 0.6, (
+                    "Annex A.3: lexical fallback hits MUST cap relevance at 0.6"
+                )
+            # And retrieval_mode must truthfully name the fallback path
+            assert result["data"]["metadata"]["retrieval_mode"] in (
+                "lexical",
+                "fallback",
+            )
+        else:
+            # When ripgrep also fails, S2 emits the canonical BACKEND_UNAVAILABLE
+            # error envelope rather than fake hits.
+            assert isinstance(result["error"], dict)
+            assert result["error"]["code"] == "BACKEND_UNAVAILABLE"
+            assert result["meta"]["surface"] == "S2"
+
+    # ----- Direct invocation (the slice spec requires one direct example) -----
+
+    def test_direct_holo_tools_invocation_canonical_envelope(self):
+        """Direct call to holo_tools.holo_search bypasses the bridge wrapper
+        and proves the envelope conforms even without bridge dispatch."""
+        from pathlib import Path
+        from modules.infrastructure.foundups_mcp_bridge.src.holo_tools import (
+            holo_search,
+        )
+
+        repo_root = Path(__file__).resolve().parents[4]
+        result = holo_search(
+            repo_root,
+            query="WSP",
+            limit=3,
+            doc_type_filter="all",
+            foundup_id=None,
+            include_shared=True,
+        )
+
+        # Canonical envelope shape
+        assert result["status"] == "ok"
+        assert "data" in result
+        assert "meta" in result
+        assert result["data"]["query"] == "WSP"
+        assert result["data"]["doc_type_filter"] == "all"
+        assert result["data"]["foundup_id"] is None
+        assert result["data"]["include_shared"] is None  # null without foundup_id
+        assert "hits" in result["data"]
+        assert "hit_count" in result["data"]
+        assert "metadata" in result["data"]
+        assert result["meta"]["surface"] == "S2"
+        assert result["meta"]["tool"] == "holo_search"
