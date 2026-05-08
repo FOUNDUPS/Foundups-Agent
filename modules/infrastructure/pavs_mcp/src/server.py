@@ -4,6 +4,13 @@ pAVS MCP Server Implementation
 WSP 103: FoundUp Federation Protocol
 Exposes CABR, Gemma, Qwen, FAM, Pattern Memory, HoloIndex to federated FoundUps.
 
+Truth boundary (WSP 97, MCPA4):
+    This module is a PLACEHOLDER_STUB. Every tool body returns hardcoded
+    values; the start() coroutine does not bind a port; auth is a TODO.
+    All tool responses embed `meta.implementation_status = "placeholder_stub"`
+    so any client checking the canonical envelope (WSP 96 Annex A.5 C3) can
+    detect the placeholder state without trusting the data.
+
 Usage:
     python -m modules.infrastructure.pavs_mcp.src.server
 """
@@ -12,10 +19,62 @@ import asyncio
 import json
 import logging
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Any, Optional
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# Truth Boundary Constants (WSP 97 / MCPA4)
+# =============================================================================
+
+IMPLEMENTATION_STATUS = "placeholder_stub"
+"""Truth flag embedded in every tool response.
+
+Conforming clients MUST treat any response carrying this flag as fake/test
+data and refuse to use it for production decisions. See WSP 96 Annex A.5 C3.
+"""
+
+PLACEHOLDER_BANNER = (
+    "==============================================================\n"
+    " pAVS MCP Server - PLACEHOLDER_STUB\n"
+    "--------------------------------------------------------------\n"
+    "  implementation_status : placeholder_stub\n"
+    "  auth_enforcement      : NONE (api_key parameter is ignored)\n"
+    "  tool_data             : HARDCODED / FAKE\n"
+    "  server_transport      : NONE (start() does not bind a port)\n"
+    "  canonical owner of holo_search : NOT THIS SURFACE\n"
+    "                                   (see WSP 96 Annex A.1)\n"
+    "\n"
+    "  DO NOT USE FOR REAL TENANTS OR PRODUCTION TRAFFIC.\n"
+    "  Tracked remediation: MCPA1 Slice 4, Slice 6.\n"
+    "=============================================================="
+)
+"""Operator-facing startup warning. Printed and logged on server start."""
+
+
+def _truth_meta() -> dict[str, Any]:
+    """Build the canonical truth-meta block embedded in every tool response.
+
+    Returns a fresh dict (not a shared reference) so individual tool callers
+    can safely mutate it without leaking state across calls.
+    """
+    return {
+        "implementation_status": IMPLEMENTATION_STATUS,
+        "real_backend": False,
+        "data_source": "hardcoded_placeholder",
+        "auth_enforced": False,
+        "canonical_owner": False,
+        "warning": (
+            "This response is from a PLACEHOLDER_STUB surface. "
+            "Data is hardcoded, not fetched from any backend. "
+            "Do not use for production decisions."
+        ),
+        "wsp_reference": "WSP 96 Annex A (holo_search canonical contract)",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+    }
 
 
 @dataclass
@@ -321,42 +380,72 @@ class PAVSMCPServer:
         Args:
             tool_name: Name of tool to invoke
             arguments: Tool arguments
-            api_key: Caller's API key (for auth)
+            api_key: Caller's API key (currently IGNORED — auth is a TODO)
 
         Returns:
-            Tool result or error
+            Tool result or error. All responses embed the truth-meta block
+            (`meta.implementation_status = "placeholder_stub"`) per WSP 97
+            so clients can detect the placeholder state regardless of payload.
         """
-        # TODO: Implement proper auth
+        # TODO: Implement proper auth (tracked: MCPA1 Slice 6)
 
         if tool_name not in self._tools:
             return {
                 "error": {
                     "code": "UNKNOWN_TOOL",
-                    "message": f"Tool '{tool_name}' not found"
-                }
+                    "message": f"Tool '{tool_name}' not found",
+                    "tool": tool_name,
+                },
+                "meta": _truth_meta(),
             }
 
         try:
             tool_func = self._tools[tool_name]
             result = await tool_func(**arguments)
-            return {"result": result}
+            return {
+                "result": result,
+                "meta": {
+                    **_truth_meta(),
+                    "tool": tool_name,
+                },
+            }
         except Exception as e:
             logger.exception(f"Tool {tool_name} failed")
             return {
                 "error": {
                     "code": "INTERNAL_ERROR",
-                    "message": str(e)
-                }
+                    "message": str(e),
+                    "tool": tool_name,
+                },
+                "meta": _truth_meta(),
             }
 
     async def start(self):
-        """Start the MCP server."""
-        logger.info(f"Starting pAVS MCP Server on {self.host}:{self.port}")
-        # TODO: Implement actual WebSocket server
-        # For now, this is a placeholder that can be used for testing
+        """Start the MCP server.
 
-        print(f"pAVS MCP Server ready on {self.host}:{self.port}")
-        print(f"Tools available: {list(self._tools.keys())}")
+        WSP 97 / MCPA4: prints an explicit PLACEHOLDER banner on startup so
+        operators cannot mistake this for a production server. The body of
+        this method does NOT bind a port — it sleeps. Real transport is
+        deferred to MCPA1 Slice 4.
+        """
+        # WSP 97: emit the placeholder banner before anything else.
+        for line in PLACEHOLDER_BANNER.splitlines():
+            logger.warning(line)
+        print(PLACEHOLDER_BANNER)
+
+        logger.info(
+            "Starting pAVS MCP Server on %s:%s (PLACEHOLDER — does not bind)",
+            self.host,
+            self.port,
+        )
+        # TODO: Implement actual WebSocket server (tracked: MCPA1 Slice 4)
+        # For now, this is a placeholder that can be used for testing only.
+
+        print(
+            f"pAVS MCP Server [PLACEHOLDER_STUB] would listen on "
+            f"{self.host}:{self.port} — but this build does not bind."
+        )
+        print(f"Tools available (all return hardcoded data): {list(self._tools.keys())}")
 
         # Keep running
         while True:
