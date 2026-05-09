@@ -344,6 +344,8 @@ docs/audits/*
 !docs/audits/mcp_system/**
 !docs/audits/external_protocols/
 !docs/audits/external_protocols/**
+!docs/audits/security/
+!docs/audits/security/**
 docs/sessions/
 
 # WSP agentic awakening runtime state (changes every session)
