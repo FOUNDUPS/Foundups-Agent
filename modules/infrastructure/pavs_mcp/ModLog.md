@@ -1,5 +1,107 @@
 # pAVS MCP Server - ModLog
 
+## 2026-05-09 - MCPA8 Correction: Stdlib Transport (No External Deps)
+
+**Author**: 0102 (Worker W1)
+**WSP**: 97 (Truth Boundaries)
+**Slice**: `MCPA8_TRANSPORT_DEPENDENCY_CORRECTION_PHASE1`
+
+### Why
+
+Initial MCPA8 implementation used FastAPI/uvicorn which are not declared dependencies
+for this module. This caused import failures in clean environments without those packages.
+
+### Changes
+
+- `src/server.py`:
+  - Replaced FastAPI/uvicorn/pydantic imports with Python stdlib
+  - Added `PAVSHTTPRequestHandler` class using `http.server.BaseHTTPRequestHandler`
+  - Rewrote `start()`, `stop()`, `start_sync()`, `stop_sync()` to use `HTTPServer`
+  - Removed `_setup_routes()`, `app` property, `ToolCallRequest` class
+  - Same endpoint contract: GET /status, GET /tools, POST /tool, POST /tool/{name}
+
+- `tests/test_transport.py`:
+  - Replaced FastAPI TestClient with stdlib `urllib.request`
+  - Added `_get_free_port()` helper for test isolation
+  - Tests now start actual server in background thread
+  - 12 transport tests all passing
+
+- `README.md`:
+  - Updated transport description to mention stdlib, no external dependencies
+
+### Result
+
+Module importable and tests pass without FastAPI/uvicorn installed.
+
+---
+
+## 2026-05-09 - MCPA8: Real Local Transport (HTTP_JSON)
+
+**Author**: 0102 (Worker W1)
+**WSP**: 97 (Truth Boundaries), 96 (MCP Governance)
+**Slice**: `MCPA8_PAVS_REAL_TRANSPORT_PHASE1`
+**Closes (MCPA7B audit)**: H2 (real transport)
+
+### Why
+
+Per MCPA7B re-audit, S3's `start()` was a sleep-loop placeholder — no port binding,
+no client connections possible. This slice implements real local HTTP JSON transport
+so external clients can connect to pAVS MCP for federation.
+
+### Changes
+
+- `src/server.py`:
+  - Added FastAPI/uvicorn imports and `ToolCallRequest` Pydantic model.
+  - Added `_setup_routes()` method with four HTTP endpoints:
+    - `GET /status` — health check and server status
+    - `GET /tools` — list available tools
+    - `POST /tool` — main tool call endpoint (dispatches to `handle_tool_call`)
+    - `POST /tool/{name}` — alternative endpoint with tool name in path
+  - Added `app` property exposing FastAPI instance for TestClient usage.
+  - Rewrote `start()` to use uvicorn.Server instead of sleep loop.
+  - Added `stop()` for graceful async shutdown.
+  - Added `start_sync()` / `stop_sync()` for thread-based testing.
+  - Updated `PLACEHOLDER_BANNER`:
+    - Title: `REAL_TRANSPORT + PLACEHOLDER_BACKENDS`
+    - `server_transport: HTTP_JSON (local, real binding)`
+    - `implementation_status: placeholder_stub (backends only)`
+  - Updated docstring to reflect real transport status.
+
+- `tests/test_transport.py` (NEW):
+  - 14 focused transport tests using FastAPI TestClient:
+    - `TestTransportEndpoints`: status and tools endpoints
+    - `TestToolCallViaTransport`: tool call dispatch, auth, errors
+    - `TestTransportErrorHandling`: invalid JSON, missing fields
+    - `TestAuthThroughTransport`: auth errors pass through transport
+    - `TestServerAppProperty`: app property and routes
+
+- `tests/test_server_holo_search.py`:
+  - Updated banner test to expect `REAL_TRANSPORT`, `HTTP_JSON`, etc.
+
+- `README.md`:
+  - Updated status from `PLACEHOLDER_STUB` to `REAL_TRANSPORT + PLACEHOLDER_BACKENDS`
+  - Added HTTP Transport Endpoints section with endpoint contract
+
+### Behavior boundaries (what did NOT change)
+
+- Tool bodies still return hardcoded/fake data — backends not connected
+- No key rotation/revocation API
+- S1 and S2 untouched
+- Registry persistence behavior unchanged
+
+### Tests
+
+```
+PYTHONPATH=. python -m pytest modules/infrastructure/pavs_mcp/tests/ -q
+-> 88 passed (74 existing + 14 new transport tests)
+```
+
+### Tracked follow-ups
+
+- MCPA9+ — Real backend connections, key rotation/revocation API
+
+---
+
 ## 2026-05-09 - MCPA7: Registry Persistence (LOCAL_JSON)
 
 **Author**: 0102 (Worker W1)

@@ -1,20 +1,19 @@
 # pAVS MCP Server
 
-> ## ⚠️ STATUS: `PLACEHOLDER_STUB` with `BASIC_AUTH_ENFORCEMENT` + `LOCAL_JSON` persistence
+> ## ⚠️ STATUS: `REAL_TRANSPORT` + `PLACEHOLDER_BACKENDS`
 >
-> **DO NOT USE FOR REAL TENANTS OR PRODUCTION TRAFFIC.**
+> **Transport is REAL. Backends are PLACEHOLDERS. DO NOT USE FOR PRODUCTION TRAFFIC.**
 >
-> - **Implementation status**: `PLACEHOLDER_STUB`
+> - **Server transport**: `HTTP_JSON` (MCPA8) — `start()` binds a real local port via Python stdlib `http.server`. Clients can connect via `POST /tool` with JSON body. No external dependencies.
 > - **Auth enforcement**: `BASIC_AUTH_ENFORCEMENT` (MCPA1 Slice 6) — `handle_tool_call` validates `api_key` for protected tools; rejects missing/unknown keys; rejects cross-tenant `foundup_id` attempts. `foundup_register` remains unauthenticated (bootstrap-only).
 > - **Registry persistence**: `LOCAL_JSON` (MCPA1 Slice 7) — registrations survive restart; stored in `~/.pavs_mcp/registrations.json` (override via `PAVS_REGISTRY_PATH` env var). Atomic writes, graceful handling of corrupt files.
 > - **Tool data**: `TOOLS RETURN HARDCODED/FAKE DATA` — every `cabr_validate`, `gemma_classify`, `qwen_plan`, `fam_emit`, `pattern_recall`, `pattern_store`, `holo_search`, `foundup_register` body returns hardcoded values; `# TODO: Connect to actual <X>` markers in code.
-> - **Server transport**: `NOT PRODUCTION READY` — `start()` does not bind a port; the body is `await asyncio.sleep(60)` in a loop.
 > - **Canonical contract**: see WSP 96 Annex A (`holo_search` contract). Per Annex A.1, S3 has **NO authority** over `holo_search`; the placeholder implementation is retained only for surface-shape preservation.
-> - **Tracked remediation**: MCPA1 Slice 8+ (real transport, real backends).
+> - **Tracked remediation**: MCPA9+ (real backends, key rotation).
 
 **Location**: `modules/infrastructure/pavs_mcp/`
 **WSP Compliance**: WSP 103 (FoundUp Federation), WSP 96 (MCP Governance), WSP 49 (Module Structure)
-**Status**: `PLACEHOLDER_STUB` — see banner above
+**Status**: `REAL_TRANSPORT + PLACEHOLDER_BACKENDS` — see banner above
 
 ## Purpose
 
@@ -58,9 +57,31 @@ Foundup/Move2Japan --MCP---+         +-> CABR Engine
 ### Server Side (Infrastructure)
 
 ```bash
-# Start pAVS MCP Server
+# Start pAVS MCP Server (binds to http://0.0.0.0:8765)
 python -m modules.infrastructure.pavs_mcp.src.server
 ```
+
+### HTTP Transport Endpoints (MCPA8)
+
+The server exposes these HTTP JSON endpoints:
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/status` | GET | Health check and server status |
+| `/tools` | GET | List available tools |
+| `/tool` | POST | Execute tool call (main endpoint) |
+| `/tool/{name}` | POST | Execute tool by path |
+
+**POST /tool** request body:
+```json
+{
+  "tool_name": "holo_search",
+  "arguments": {"query": "test", "limit": 10},
+  "api_key": "fp_xxxxxxxxxxxx"
+}
+```
+
+**Response**: Exact `handle_tool_call` envelope with `result` or `error` and `meta`.
 
 ### Client Side (FoundUp)
 
