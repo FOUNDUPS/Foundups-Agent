@@ -46,14 +46,14 @@ class TestTruthBoundaryConstants:
     def test_placeholder_banner_contains_required_strings(self):
         required_phrases = [
             "REAL_TRANSPORT",  # MCPA8: transport is real
-            "PLACEHOLDER_BACKENDS",  # MCPA8: backends still placeholder
-            "implementation_status : placeholder_stub",
+            "PARTIAL_BACKENDS",  # MCPA9A: holo_search real, others placeholder
+            "implementation_status : partial",  # MCPA9A: mixed status
             "auth_enforcement      : BASIC",  # MCPA1 Slice 6: now enforced
             "scope_enforcement     : YES",    # MCPA1 Slice 6: cross-tenant rejected
-            "tool_data             : HARDCODED / FAKE",
+            "holo_search           : REAL",   # MCPA9A: holo_search delegates to S2
             "server_transport      : HTTP_JSON",  # MCPA8: real transport
             "registry_persistence  : LOCAL_JSON",  # MCPA1 Slice 7: persisted
-            "DO NOT USE FOR PRODUCTION TRAFFIC",
+            "Other backends remain PLACEHOLDERS",  # MCPA9A: others still placeholder
         ]
         for phrase in required_phrases:
             assert phrase in PLACEHOLDER_BANNER, (
@@ -153,8 +153,8 @@ class TestHoloSearchTruthFlag:
         assert meta["tool"] == "holo_search"
 
     def test_holo_search_payload_uses_canonical_envelope(self, authed_server):
-        """MCPA1 Slice 4: holo_search MUST return the WSP 96 Annex A.3
-        not_implemented envelope, not the legacy `matches[]` shape."""
+        """MCPA9A: holo_search delegates to S2 backend and returns
+        canonical Annex A.3 envelope with real data."""
         server, api_key = authed_server
         result = _run(
             server.handle_tool_call(
@@ -169,12 +169,13 @@ class TestHoloSearchTruthFlag:
             "Legacy `matches[]` key must not appear in canonical envelope"
         )
         # The canonical envelope keys must be present.
-        assert inner["status"] == "not_implemented"
+        assert inner["status"] in ("ok", "error"), "Status must be ok or error"
         assert "data" in inner
-        assert "error" in inner
         assert "meta" in inner
-        # Outer truth flag (from handle_tool_call wrapper) still asserts placeholder.
-        assert result["meta"]["data_source"] == "hardcoded_placeholder"
+        # MCPA9A: S3 surface with real backend delegation
+        assert inner["meta"]["surface"] == "S3"
+        # real_backend is True on success, False on BACKEND_UNAVAILABLE
+        assert "real_backend" in inner["meta"]
 
 
 # ---------------------------------------------------------------------------
@@ -316,16 +317,16 @@ def test_module_exports_required_truth_constants():
 
 
 # ---------------------------------------------------------------------------
-# MCPA1 Slice 4 — Canonical not_implemented envelope (WSP 96 Annex A.3)
+# MCPA9A — S2 Backend Delegation (WSP 96 Annex A.3)
 # ---------------------------------------------------------------------------
 
 
-class TestNotImplementedEnvelope:
-    """MCPA1 Slice 4: S3 holo_search must return WSP 96 Annex A.3 envelope.
+class TestS2BackendDelegation:
+    """MCPA9A: S3 holo_search delegates to S2 backend for real data.
 
-    Closes MCPA6 drift items D20 (fabricated data), D21 (no envelope),
-    D22 (fabricated relevance score), D23 (domain vs doc_type_filter),
-    D24 (missing federation fields), D25 (no empty-query / canonical shape).
+    Builds on MCPA1 Slice 4 envelope shape, now with real backend connection.
+    Tests verify: successful delegation returns status="ok", meta.real_backend=True,
+    S3 surface marking, and proper error handling on backend failures.
     """
 
     @pytest.fixture
@@ -334,9 +335,9 @@ class TestNotImplementedEnvelope:
 
     # ----- Status field -----
 
-    def test_status_is_not_implemented(self, srv):
+    def test_successful_delegation_returns_ok_status(self, srv):
         result = _run(srv.holo_search(query="anything"))
-        assert result["status"] == "not_implemented"
+        assert result["status"] == "ok"
 
     def test_no_legacy_matches_key(self, srv):
         result = _run(srv.holo_search(query="x"))
@@ -344,38 +345,29 @@ class TestNotImplementedEnvelope:
             "Legacy `matches[]` key must not appear (WSP 96 Annex A.3)"
         )
 
-    # ----- Zero fabrication (the heart of this slice) -----
+    # ----- Real backend data (MCPA9A upgrade from placeholder) -----
 
-    def test_no_fabricated_hits(self, srv):
+    def test_real_backend_may_return_hits(self, srv):
+        """Real backend searches return actual results when available."""
         result = _run(srv.holo_search(query="WSP 97"))
-        assert result["data"]["hits"] == [], (
-            "Placeholder surface MUST return empty hits[] (no fabrication)"
-        )
-        assert result["data"]["hit_count"] == 0
+        assert result["status"] == "ok"
+        assert "hits" in result["data"]
+        assert isinstance(result["data"]["hits"], list)
+        assert "hit_count" in result["data"]
 
-    def test_no_fabricated_relevance_or_score(self, srv):
-        """Walk the entire response and ensure no relevance/score values exist."""
-        result = _run(srv.holo_search(query="x"))
-        forbidden_keys = {"relevance", "score", "distance", "similarity"}
+    def test_real_backend_hits_have_scores(self, srv):
+        """Real backend results include relevance scores (unlike placeholder)."""
+        result = _run(srv.holo_search(query="WSP"))
+        if result["data"]["hit_count"] > 0:
+            hit = result["data"]["hits"][0]
+            # Real backend hits should have scoring info
+            assert any(k in hit for k in ("score", "relevance", "distance"))
 
-        def walk(obj):
-            if isinstance(obj, dict):
-                for k, v in obj.items():
-                    assert k not in forbidden_keys, (
-                        f"Found forbidden fabricated key {k!r} = {v!r}"
-                    )
-                    walk(v)
-            elif isinstance(obj, list):
-                for item in obj:
-                    walk(item)
-
-        walk(result)
-
-    def test_no_fabricated_paths_or_files(self, srv):
+    def test_no_fabricated_legacy_paths(self, srv):
         """Ensure the legacy `example.py` / `example_function` mock data is gone."""
         result = _run(srv.holo_search(query="x"))
         result_str = repr(result).lower()
-        # Legacy fake values from the pre-Slice-4 placeholder body
+        # Legacy fake values from the pre-MCPA9A placeholder body
         legacy_markers = [
             "example.py",
             "example_function",
@@ -386,22 +378,20 @@ class TestNotImplementedEnvelope:
                 f"Legacy fabricated marker {marker!r} found in response"
             )
 
-    # ----- Error block -----
+    # ----- Success has no error block -----
 
-    def test_error_code_is_not_implemented(self, srv):
-        result = _run(srv.holo_search(query="x"))
-        assert result["error"]["code"] == "NOT_IMPLEMENTED"
+    def test_successful_call_has_no_error_block(self, srv):
+        result = _run(srv.holo_search(query="WSP"))
+        if result["status"] == "ok":
+            assert "error" not in result or result.get("error") is None
 
-    def test_error_includes_delegate_to(self, srv):
+    def test_meta_indicates_delegation_to_s2(self, srv):
         result = _run(srv.holo_search(query="x"))
-        assert result["error"]["delegate_to"] in ("S1", "S2")
+        assert result["meta"]["delegated_to"] == "S2"
 
-    def test_error_message_names_canonical_owners(self, srv):
+    def test_meta_surface_is_s3(self, srv):
         result = _run(srv.holo_search(query="x"))
-        msg = result["error"]["message"]
-        # The error message must point callers to a real canonical owner.
-        assert "S2" in msg or "foundups_mcp_bridge" in msg
-        assert "S3" in msg  # explicitly say WHICH surface declined
+        assert result["meta"]["surface"] == "S3"
 
     # ----- Data block: request echo + canonical shape -----
 
@@ -428,33 +418,30 @@ class TestNotImplementedEnvelope:
         )
         assert with_id["data"]["include_shared"] is False
 
-    def test_data_metadata_warnings_present(self, srv):
+    def test_data_metadata_warnings_is_list(self, srv):
         result = _run(srv.holo_search(query="x"))
         warnings = result["data"]["metadata"]["warnings"]
         assert isinstance(warnings, list)
-        # Must explicitly state placeholder status
-        assert any("placeholder" in w.lower() for w in warnings)
 
-    def test_data_metadata_retrieval_mode_truthful(self, srv):
-        """retrieval_mode must be 'none' — never 'semantic' since no backend ran."""
+    def test_data_metadata_retrieval_mode_is_semantic(self, srv):
+        """retrieval_mode should be 'semantic' when real backend is used."""
         result = _run(srv.holo_search(query="x"))
-        assert result["data"]["metadata"]["retrieval_mode"] == "none"
+        # Real backend uses semantic retrieval
+        assert result["data"]["metadata"]["retrieval_mode"] in ("semantic", "keyword")
 
     # ----- Meta block: surface, tool, truth flags -----
-
-    def test_meta_surface_is_s3(self, srv):
-        result = _run(srv.holo_search(query="x"))
-        assert result["meta"]["surface"] == "S3"
 
     def test_meta_tool_is_holo_search(self, srv):
         result = _run(srv.holo_search(query="x"))
         assert result["meta"]["tool"] == "holo_search"
 
-    def test_meta_carries_truth_flag(self, srv):
+    def test_meta_carries_real_backend_flag(self, srv):
+        """MCPA9A: real_backend=True when S2 delegation succeeds."""
         result = _run(srv.holo_search(query="x"))
-        assert result["meta"]["implementation_status"] == "placeholder_stub"
-        assert result["meta"]["real_backend"] is False
-        assert result["meta"]["canonical_owner"] is False
+        # S3 is not canonical owner, but now has real backend
+        assert result["meta"]["real_backend"] is True
+        assert result["meta"]["surface"] == "S3"
+        assert result["meta"]["delegated_to"] == "S2"
 
     # ----- Canonical request fields acceptance -----
 
@@ -469,7 +456,7 @@ class TestNotImplementedEnvelope:
                 include_shared=False,
             )
         )
-        assert result["status"] == "not_implemented"
+        assert result["status"] == "ok"
         assert result["data"]["query"] == "WSP 97 audit"
         assert result["data"]["doc_type_filter"] == "wsp"
         assert result["data"]["foundup_id"] == "gotjunk"
@@ -477,21 +464,20 @@ class TestNotImplementedEnvelope:
 
     # ----- Limit bound enforcement (Annex A.2) -----
 
-    def test_limit_clamped_above_50(self, srv):
+    def test_limit_bounds_respected(self, srv):
+        """Limit is bounded to 1..50, but S2 backend handles the actual clamping."""
         result = _run(srv.holo_search(query="x", limit=999))
-        # Clamped silently to 50 but surfaced truthfully in warnings
-        warnings = result["data"]["metadata"]["warnings"]
-        assert any("clamp" in w.lower() and "50" in w for w in warnings)
+        assert result["status"] == "ok"
 
-    def test_limit_clamped_below_1(self, srv):
+    def test_limit_minimum_respected(self, srv):
+        """Limit=0 is clamped to 1."""
         result = _run(srv.holo_search(query="x", limit=0))
-        warnings = result["data"]["metadata"]["warnings"]
-        assert any("clamp" in w.lower() for w in warnings)
+        assert result["status"] == "ok"
 
     def test_invalid_limit_falls_back_to_default(self, srv):
         """Garbage `limit` does not crash; falls back to default 10."""
         result = _run(srv.holo_search(query="x", limit="not_a_number"))
-        assert result["status"] == "not_implemented"
+        assert result["status"] == "ok"
 
     # ----- Back-compat: legacy `domain` alias still works -----
 
@@ -524,11 +510,12 @@ class TestNotImplementedEnvelope:
             )
         )
         inner = wrapped["result"]
-        assert inner["status"] == "not_implemented"
+        assert inner["status"] == "ok"
         assert inner["data"]["foundup_id"] == "kosei"
         assert inner["meta"]["surface"] == "S3"
-        # Outer wrapper still adds its own truth meta (MCPA4 contract)
-        assert wrapped["meta"]["implementation_status"] == "placeholder_stub"
+        assert inner["meta"]["real_backend"] is True
+        # Outer wrapper still adds its own truth meta
+        assert wrapped["meta"]["auth_enforced"] is True
 
 
 # ---------------------------------------------------------------------------

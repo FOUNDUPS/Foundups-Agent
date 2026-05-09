@@ -1,15 +1,16 @@
 # pAVS MCP Server
 
-> ## ⚠️ STATUS: `REAL_TRANSPORT` + `PLACEHOLDER_BACKENDS`
+> ## ⚠️ STATUS: `REAL_TRANSPORT` + `PARTIAL_BACKENDS`
 >
-> **Transport is REAL. Backends are PLACEHOLDERS. DO NOT USE FOR PRODUCTION TRAFFIC.**
+> **Transport is REAL. holo_search is REAL. Other backends are PLACEHOLDERS.**
 >
 > - **Server transport**: `HTTP_JSON` (MCPA8) — `start()` binds a real local port via Python stdlib `http.server`. Clients can connect via `POST /tool` with JSON body. No external dependencies.
 > - **Auth enforcement**: `BASIC_AUTH_ENFORCEMENT` (MCPA1 Slice 6) — `handle_tool_call` validates `api_key` for protected tools; rejects missing/unknown keys; rejects cross-tenant `foundup_id` attempts. `foundup_register` remains unauthenticated (bootstrap-only).
 > - **Registry persistence**: `LOCAL_JSON` (MCPA1 Slice 7) — registrations survive restart; stored in `~/.pavs_mcp/registrations.json` (override via `PAVS_REGISTRY_PATH` env var). Atomic writes, graceful handling of corrupt files.
-> - **Tool data**: `TOOLS RETURN HARDCODED/FAKE DATA` — every `cabr_validate`, `gemma_classify`, `qwen_plan`, `fam_emit`, `pattern_recall`, `pattern_store`, `holo_search`, `foundup_register` body returns hardcoded values; `# TODO: Connect to actual <X>` markers in code.
-> - **Canonical contract**: see WSP 96 Annex A (`holo_search` contract). Per Annex A.1, S3 has **NO authority** over `holo_search`; the placeholder implementation is retained only for surface-shape preservation.
-> - **Tracked remediation**: MCPA9+ (real backends, key rotation).
+> - **holo_search**: `REAL BACKEND` (MCPA9A) — S3 delegates to S2/HoloIndex for real semantic search. Returns `meta.real_backend=true`, `meta.delegated_to="S2"`.
+> - **Other tools**: `HARDCODED/FAKE DATA` — `cabr_validate`, `gemma_classify`, `qwen_plan`, `fam_emit`, `pattern_recall`, `pattern_store` return hardcoded values; `# TODO: Connect to actual <X>` markers in code.
+> - **Canonical contract**: see WSP 96 Annex A (`holo_search` contract). S3 is not canonical owner but now provides real backend via S2 delegation.
+> - **Tracked remediation**: MCPA10+ (remaining backends, key rotation).
 
 **Location**: `modules/infrastructure/pavs_mcp/`
 **WSP Compliance**: WSP 103 (FoundUp Federation), WSP 96 (MCP Governance), WSP 49 (Module Structure)
@@ -49,8 +50,8 @@ Foundup/Move2Japan --MCP---+         +-> CABR Engine
 | `fam_emit` | Event tracking | foundup_id, event_type, payload | event_id | **NO** — computes hash, no FAM emit |
 | `pattern_recall` | Recall successful patterns | skill, min_fidelity | patterns[] | **NO** — hardcoded `ptn_001` |
 | `pattern_store` | Store execution outcome | skill, outcome | pattern_id | **NO** — computes hash, no persist |
-| `holo_search` | Semantic code/doc search | query, domain | matches[] | **NO** — hardcoded match (NOT canonical owner; see WSP 96 Annex A.1) |
-| `foundup_register` | Register FoundUp for access | foundup_id, repo_url | api_key, endpoint | Stub — generates api_key but never persists or checks it |
+| `holo_search` | Semantic code/doc search | query, doc_type_filter | hits[], hit_count | **YES** — delegates to S2/HoloIndex (MCPA9A) |
+| `foundup_register` | Register FoundUp for access | foundup_id, repo_url | api_key, endpoint | Stub — generates api_key, persists to JSON |
 
 ## Quick Start
 

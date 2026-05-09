@@ -1,5 +1,46 @@
 # pAVS MCP Server - ModLog
 
+## 2026-05-09 - MCPA9A: S3 holo_search Backend Connection
+
+**Author**: 0102 (Worker W1)
+**WSP**: 96 (MCP Governance), 97 (Truth Boundaries)
+**Slice**: `MCPA9A_S3_HOLO_SEARCH_BACKEND_CONNECTION_PHASE1`
+**Closes (MCPA8B audit)**: H4 (partial — holo_search now real)
+
+### Why
+
+Per MCPA8B re-audit, all tool backends were placeholders returning hardcoded data.
+This slice connects S3 `holo_search` to the real S2/HoloIndex backend, making it
+the first tool with a real backend connection.
+
+### Changes
+
+- `src/server.py`:
+  - Added `_REPO_ROOT` constant for HoloIndex location
+  - Added `_call_s2_holo_search()` adapter function at lines 49-86
+  - Rewrote `holo_search()` method to delegate to S2 backend
+  - Returns `meta.surface="S3"`, `meta.real_backend=True`, `meta.delegated_to="S2"`
+  - Returns `BACKEND_UNAVAILABLE` error if S2 fails
+  - Updated `PLACEHOLDER_BANNER` to `REAL_TRANSPORT + PARTIAL_BACKENDS`
+
+- `tests/test_server_holo_search.py`:
+  - Renamed `TestNotImplementedEnvelope` to `TestS2BackendDelegation`
+  - Updated assertions: `status="ok"`, `real_backend=True`, no error on success
+  - Added tests for `delegated_to`, `surface`, real hits
+  - Updated banner test for new status strings
+
+- `README.md`:
+  - Updated status to `REAL_TRANSPORT + PARTIAL_BACKENDS`
+  - Updated tool table: `holo_search` now shows **YES** for real backend
+
+### Result
+
+S3 `holo_search` returns real semantic search results from HoloIndex.
+Other tools (CABR, Gemma, Qwen, etc.) remain placeholders.
+85/85 tests passing.
+
+---
+
 ## 2026-05-09 - MCPA8 Correction: Stdlib Transport (No External Deps)
 
 **Author**: 0102 (Worker W1)
