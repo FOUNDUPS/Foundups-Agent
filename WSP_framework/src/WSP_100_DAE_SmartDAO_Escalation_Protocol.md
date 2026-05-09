@@ -484,6 +484,127 @@ SPAWN_THRESHOLDS = {
 - F_i is venture-specific participation, not equity
 - Closed-loop prevents regulatory arbitrage
 
+## 10. Optional External Milestone Attestation
+
+### 10.1 Purpose
+
+External attestation systems may optionally verify DAE → SmartDAO milestone transitions for regulatory compliance, cross-DAO trust, or audit trail purposes. External attestation is **evidence only** — it does not control promotion, compute ROC, or determine tier status.
+
+### 10.2 Canonical Boundary
+
+| Dimension | Owner | External Role |
+|-----------|-------|---------------|
+| **ROC computation** | FoundUps (internal) | NONE — external systems may not compute ROC |
+| **CABR scoring** | FoundUps (WSP 29) | NONE — external systems may not compute CABR |
+| **DAE → SmartDAO logic** | FoundUps (this WSP) | NONE — external systems may not control tier progression |
+| **UPS/F_i tokenomics** | FoundUps (WSP 26) | NONE — external systems may not control economics |
+| **Milestone attestation** | External (optional) | ALLOWED — may attest/timestamp/verify milestone outcomes |
+
+**Core Rule**: FoundUps remains source of truth for ROC, CABR, and DAE progression. External attestation is supplementary evidence.
+
+### 10.3 Attestable Milestone Classes
+
+External systems may attest the following milestone types:
+
+| Milestone Class | Description | Internal Source |
+|-----------------|-------------|-----------------|
+| `poc_complete` | Proof of concept validated | WSP 27 lifecycle |
+| `prototype_complete` | Functional prototype achieved | WSP 27 lifecycle |
+| `mvp_complete` | Minimum viable product launched | WSP 27 lifecycle |
+| `cabr_threshold_reached` | CABR score crossed defined threshold | WSP 29 |
+| `pob_threshold_reached` | Proof-of-benefit score achieved | WSP 29 |
+| `governance_readiness` | Agent count and structure ready for tier | This WSP (Section 3) |
+| `treasury_readiness` | Treasury UPS crossed tier threshold | This WSP (Section 3) |
+| `tier_escalation` | F_n → F_n+1 transition completed | This WSP (Section 3) |
+| `wsp_audit_passed` | WSP compliance audit completed | WSP Framework |
+| `modlog_snapshot` | ModLog state at milestone | WSP 22 |
+
+### 10.4 Attestation Payload Schema
+
+External attestation providers MUST use the following payload structure:
+
+```python
+@dataclass
+class MilestoneAttestationPayload:
+    # Identity
+    foundup_id: str                  # FoundUp identifier
+    milestone_id: str                # Unique milestone identifier
+    milestone_type: str              # From Section 10.3 classes
+    
+    # Internal State Hashes (computed by FoundUps, attested externally)
+    roc_snapshot_hash: bytes32       # SHA-256 of ROC state at milestone
+    cabr_snapshot_hash: bytes32      # SHA-256 of CABR state at milestone
+    modlog_snapshot_hash: bytes32    # SHA-256 of ModLog at milestone
+    
+    # WSP References
+    source_wsp_refs: List[str]       # WSP identifiers governing milestone
+    
+    # Evidence
+    evidence_refs: List[str]         # IPFS/Arweave/external references
+    
+    # Attestation Metadata
+    attestation_provider: str        # Provider identifier (vendor-neutral)
+    attestation_timestamp: int       # Unix timestamp of attestation
+    attestation_tx_or_receipt: str   # On-chain transaction or receipt ID
+    
+    # Optionality Flag
+    optional: bool = True            # MUST be True — attestation is never required
+```
+
+### 10.5 Prohibited Behavior
+
+External attestation providers MUST NOT:
+
+| Prohibited Action | Reason |
+|-------------------|--------|
+| Compute ROC | ROC is internal FoundUps computation |
+| Compute CABR | CABR is internal FoundUps computation (WSP 29) |
+| Control tier promotion | Promotion logic is internal to this WSP |
+| Become required dependency | FoundUps must operate without external attestation |
+| Override WSP gates | Investor/vendor quality does not bypass WSP compliance |
+| Store FoundUp private state | Only hashes cross the boundary |
+| Determine governance authority | Governance is internal to FoundUps |
+
+### 10.6 Kill Switch / Bypass Rule
+
+**Mandatory**: FoundUps MUST operate normally if external attestation is unavailable.
+
+```python
+class AttestationPolicy:
+    """External attestation availability policy."""
+    
+    ATTESTATION_REQUIRED = False  # MUST remain False
+    
+    def can_promote(self, foundup: FoundUp, external_attestation: Optional[Attestation]) -> bool:
+        """Promotion decision is internal — attestation is optional evidence."""
+        # Internal WSP evidence is sufficient for promotion
+        internal_ready = self.check_internal_wsp_gates(foundup)
+        
+        # External attestation is optional enhancement, not gate
+        if external_attestation:
+            self.record_attestation_evidence(external_attestation)
+        
+        return internal_ready  # Promotion proceeds from internal evidence alone
+```
+
+**Governance Override**: If a specific FoundUp governance policy explicitly requires external attestation for certain milestone types, that policy applies only to that FoundUp and MUST include a bypass mechanism for attestation provider unavailability.
+
+### 10.7 External Protocol Evidence
+
+The following external protocols have been evaluated for milestone attestation compatibility:
+
+| Protocol | Audit Reference | Verdict | Notes |
+|----------|-----------------|---------|-------|
+| Ritual Chain | `docs/audits/external_protocols/ritual/RITUAL_ROC_MILESTONE_ATTESTATION_AUDIT.md` | `FIT_AS_OPTIONAL_ATTESTATION_LAYER` | TEE-based verification; testnet only as of 2026-05-09 |
+
+**Important**: Listing in this table does NOT constitute:
+- Partnership or endorsement
+- Mandatory dependency
+- Canonical integration
+- Vendor preference
+
+Protocols are listed as **researched examples** for architecture planning. Actual integration requires separate implementation slices with WSP compliance review.
+
 ---
 
 **Version History:**
@@ -491,6 +612,7 @@ SPAWN_THRESHOLDS = {
 |---------|------|---------|
 | 1.0 | 2026-02-15 | Initial specification from 012 vision document |
 | 1.1 | 2026-02-17 | Added math implementation (smartdao_spawning.py), tier thresholds, spawning fund mechanics |
+| 1.2 | 2026-05-09 | Added Section 10: Optional External Milestone Attestation (vendor-neutral annex) |
 
 **WSP Compliance:**
 - WSP 22: ModLog documentation required
