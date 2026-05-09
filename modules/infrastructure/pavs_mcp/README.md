@@ -1,15 +1,15 @@
 # pAVS MCP Server
 
-> ## ⚠️ STATUS: `PLACEHOLDER_STUB`
+> ## ⚠️ STATUS: `PLACEHOLDER_STUB` with `BASIC_AUTH_ENFORCEMENT`
 >
 > **DO NOT USE FOR REAL TENANTS OR PRODUCTION TRAFFIC.**
 >
 > - **Implementation status**: `PLACEHOLDER_STUB`
-> - **Auth enforcement**: `NO_AUTH_ENFORCEMENT` — `handle_tool_call` accepts `api_key` parameter but never validates it (`src/server.py:329` is a `# TODO`).
+> - **Auth enforcement**: `BASIC_AUTH_ENFORCEMENT` (MCPA1 Slice 6) — `handle_tool_call` validates `api_key` for protected tools; rejects missing/unknown keys; rejects cross-tenant `foundup_id` attempts. `foundup_register` remains unauthenticated (bootstrap-only). Registry is **in-memory only** (lost on restart).
 > - **Tool data**: `TOOLS RETURN HARDCODED/FAKE DATA` — every `cabr_validate`, `gemma_classify`, `qwen_plan`, `fam_emit`, `pattern_recall`, `pattern_store`, `holo_search`, `foundup_register` body returns hardcoded values; `# TODO: Connect to actual <X>` markers in code.
-> - **Server transport**: `NOT PRODUCTION READY` — `start()` does not bind a port; the body is `await asyncio.sleep(60)` in a loop (`src/server.py:354, 362`).
-> - **Canonical contract**: see WSP 96 Annex A (`holo_search` contract). Per Annex A.1, S3 has **NO authority** over `holo_search` until the federation auth/scope work is complete; the placeholder implementation is retained only for surface-shape preservation.
-> - **Tracked remediation**: MCPA1 Slice 4 (`MCP_HOLO_SEARCH_DELEGATION_PHASE1`) and Slice 6 (`MCP_FEDERATION_AUTH_AND_SCOPE_PHASE1`).
+> - **Server transport**: `NOT PRODUCTION READY` — `start()` does not bind a port; the body is `await asyncio.sleep(60)` in a loop.
+> - **Canonical contract**: see WSP 96 Annex A (`holo_search` contract). Per Annex A.1, S3 has **NO authority** over `holo_search`; the placeholder implementation is retained only for surface-shape preservation.
+> - **Tracked remediation**: MCPA1 Slice 7+ (persistent registry, real transport, real backends).
 
 **Location**: `modules/infrastructure/pavs_mcp/`
 **WSP Compliance**: WSP 103 (FoundUp Federation), WSP 96 (MCP Governance), WSP 49 (Module Structure)

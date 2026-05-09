@@ -42,12 +42,12 @@ class TestTruthBoundaryConstants:
         required_phrases = [
             "PLACEHOLDER_STUB",
             "implementation_status : placeholder_stub",
-            "auth_enforcement      : NONE",
+            "auth_enforcement      : BASIC",  # MCPA1 Slice 6: now enforced
+            "scope_enforcement     : YES",    # MCPA1 Slice 6: cross-tenant rejected
             "tool_data             : HARDCODED / FAKE",
             "server_transport      : NONE",
+            "registry_persistence  : NONE",   # MCPA1 Slice 6: in-memory only
             "DO NOT USE FOR REAL TENANTS",
-            "Slice 4",
-            "Slice 6",
         ]
         for phrase in required_phrases:
             assert phrase in PLACEHOLDER_BANNER, (
@@ -96,20 +96,43 @@ def _run(coro):
     return asyncio.get_event_loop().run_until_complete(coro)
 
 
+def _register_and_get_key(server, foundup_id="test_foundup"):
+    """Helper to register a FoundUp and return the api_key."""
+    result = _run(server.handle_tool_call(
+        "foundup_register",
+        {
+            "foundup_id": foundup_id,
+            "repo_url": f"https://github.com/test/{foundup_id}",
+            "owner_pubkey": "ed25519_test_pubkey",
+        },
+    ))
+    return result["result"]["api_key"]
+
+
 @pytest.fixture
 def server():
     """Fresh PAVSMCPServer instance per test."""
     return PAVSMCPServer()
 
 
+@pytest.fixture
+def authed_server():
+    """PAVSMCPServer with a registered FoundUp, returns (server, api_key)."""
+    srv = PAVSMCPServer()
+    api_key = _register_and_get_key(srv, "test_foundup")
+    return srv, api_key
+
+
 class TestHoloSearchTruthFlag:
     """holo_search responses must carry the placeholder_stub truth flag."""
 
-    def test_holo_search_response_carries_truth_meta(self, server):
+    def test_holo_search_response_carries_truth_meta(self, authed_server):
+        server, api_key = authed_server
         result = _run(
             server.handle_tool_call(
                 "holo_search",
                 {"query": "WSP 97 audit", "limit": 5},
+                api_key=api_key,
             )
         )
 
@@ -123,13 +146,15 @@ class TestHoloSearchTruthFlag:
         assert meta["canonical_owner"] is False
         assert meta["tool"] == "holo_search"
 
-    def test_holo_search_payload_uses_canonical_envelope(self, server):
+    def test_holo_search_payload_uses_canonical_envelope(self, authed_server):
         """MCPA1 Slice 4: holo_search MUST return the WSP 96 Annex A.3
         not_implemented envelope, not the legacy `matches[]` shape."""
+        server, api_key = authed_server
         result = _run(
             server.handle_tool_call(
                 "holo_search",
                 {"query": "anything"},
+                api_key=api_key,
             )
         )
         inner = result["result"]
@@ -152,21 +177,25 @@ class TestHoloSearchTruthFlag:
 
 
 @pytest.mark.parametrize(
-    "tool_name,arguments",
+    "tool_name,arguments,is_bootstrap",
     [
-        ("cabr_validate", {"content": "x", "context": {}}),
-        ("gemma_classify", {"text": "x", "categories": ["a", "b"]}),
-        ("qwen_plan", {"objective": "x", "constraints": {}}),
-        ("fam_emit", {"foundup_id": "x", "event_type": "test", "payload": {}}),
-        ("pattern_recall", {"skill": "x", "min_fidelity": 0.5}),
-        ("pattern_store", {"skill": "x", "outcome": {}}),
-        ("holo_search", {"query": "x"}),
-        ("foundup_register", {"foundup_id": "x", "repo_url": "y", "owner_pubkey": "z"}),
+        ("cabr_validate", {"content": "x", "context": {}}, False),
+        ("gemma_classify", {"text": "x", "categories": ["a", "b"]}, False),
+        ("qwen_plan", {"objective": "x", "constraints": {}}, False),
+        ("fam_emit", {"foundup_id": "test_foundup", "event_type": "test", "payload": {}}, False),
+        ("pattern_recall", {"skill": "x", "min_fidelity": 0.5}, False),
+        ("pattern_store", {"skill": "x", "outcome": {}}, False),
+        ("holo_search", {"query": "x"}, False),
+        ("foundup_register", {"foundup_id": "new_x", "repo_url": "y", "owner_pubkey": "z"}, True),
     ],
 )
-def test_every_tool_response_carries_truth_flag(tool_name, arguments):
+def test_every_tool_response_carries_truth_flag(tool_name, arguments, is_bootstrap):
     server = PAVSMCPServer()
-    result = _run(server.handle_tool_call(tool_name, arguments))
+    # MCPA1 Slice 6: Protected tools need auth; bootstrap tools do not
+    api_key = None
+    if not is_bootstrap:
+        api_key = _register_and_get_key(server, "test_foundup")
+    result = _run(server.handle_tool_call(tool_name, arguments, api_key=api_key))
 
     assert "meta" in result, f"{tool_name}: response missing 'meta' block"
     assert result["meta"]["implementation_status"] == "placeholder_stub", (
@@ -197,18 +226,19 @@ class TestErrorPathHonesty:
         assert "meta" in result
         assert result["meta"]["implementation_status"] == "placeholder_stub"
 
-    def test_internal_error_response_carries_truth_meta(self, server):
+    def test_internal_error_response_carries_truth_meta(self, authed_server):
         """Force a tool to raise so we hit the INTERNAL_ERROR branch."""
+        server, api_key = authed_server
 
         async def boom(**_kwargs):
             raise RuntimeError("simulated failure")
 
         # Replace one tool with a raising stub. Safe to mutate directly: the
-        # `server` fixture builds a fresh PAVSMCPServer per test, so this does
+        # fixture builds a fresh PAVSMCPServer per test, so this does
         # not leak across cases.
         server._tools["holo_search"] = boom
 
-        result = _run(server.handle_tool_call("holo_search", {"query": "x"}))
+        result = _run(server.handle_tool_call("holo_search", {"query": "x"}, api_key=api_key))
 
         assert "error" in result
         assert result["error"]["code"] == "INTERNAL_ERROR"
@@ -224,28 +254,47 @@ class TestErrorPathHonesty:
 
 
 class TestAuthHonesty:
-    """The api_key parameter must be accepted (back-compat) but explicitly
-    surfaced as not-enforced via meta.auth_enforced=False."""
+    """MCPA1 Slice 6: Auth is now enforced. Tests verify enforcement behavior."""
 
-    def test_api_key_is_ignored_but_meta_says_so(self, server):
-        result_with_key = _run(
+    def test_unregistered_api_key_rejected(self, server):
+        """Unregistered api_key is rejected with UNKNOWN_API_KEY."""
+        result = _run(
             server.handle_tool_call(
                 "holo_search",
                 {"query": "x"},
                 api_key="fp_definitely_not_registered",
             )
         )
-        result_without_key = _run(
+
+        # Auth is enforced — unregistered key rejected
+        assert "error" in result
+        assert result["error"]["code"] == "UNKNOWN_API_KEY"
+        assert result["meta"]["auth_enforced"] is True
+
+    def test_registered_api_key_accepted(self, authed_server):
+        """Registered api_key allows the call."""
+        server, api_key = authed_server
+        result = _run(
+            server.handle_tool_call(
+                "holo_search",
+                {"query": "x"},
+                api_key=api_key,
+            )
+        )
+
+        # Auth enforced and passed
+        assert "result" in result
+        assert result["meta"]["auth_enforced"] is True
+
+    def test_missing_api_key_rejected(self, server):
+        """Missing api_key rejected with MISSING_API_KEY."""
+        result = _run(
             server.handle_tool_call("holo_search", {"query": "x"})
         )
 
-        # Both succeed identically — proving auth is NOT enforced
-        assert "result" in result_with_key
-        assert "result" in result_without_key
-
-        # And both meta blocks declare auth_enforced=False truthfully
-        assert result_with_key["meta"]["auth_enforced"] is False
-        assert result_without_key["meta"]["auth_enforced"] is False
+        assert "error" in result
+        assert result["error"]["code"] == "MISSING_API_KEY"
+        assert result["meta"]["auth_enforced"] is True
 
 
 # ---------------------------------------------------------------------------
@@ -459,10 +508,13 @@ class TestNotImplementedEnvelope:
 
     def test_via_handle_tool_call_inner_envelope_canonical(self, srv):
         """Through the dispatch path, the canonical envelope is intact under .result."""
+        # MCPA1 Slice 6: Need to register with matching foundup_id
+        api_key = _register_and_get_key(srv, "kosei")
         wrapped = _run(
             srv.handle_tool_call(
                 "holo_search",
                 {"query": "x", "foundup_id": "kosei"},
+                api_key=api_key,
             )
         )
         inner = wrapped["result"]
@@ -471,3 +523,262 @@ class TestNotImplementedEnvelope:
         assert inner["meta"]["surface"] == "S3"
         # Outer wrapper still adds its own truth meta (MCPA4 contract)
         assert wrapped["meta"]["implementation_status"] == "placeholder_stub"
+
+
+# ---------------------------------------------------------------------------
+# MCPA1 Slice 6 — Federation Auth/Scope Enforcement
+# ---------------------------------------------------------------------------
+
+
+class TestFederationAuth:
+    """MCPA1 Slice 6: API key validation and scope enforcement tests."""
+
+    @pytest.fixture
+    def srv(self):
+        return PAVSMCPServer()
+
+    def _register_foundup(self, srv, foundup_id="test_foundup"):
+        """Helper to register a FoundUp and return the api_key."""
+        result = _run(srv.handle_tool_call(
+            "foundup_register",
+            {
+                "foundup_id": foundup_id,
+                "repo_url": f"https://github.com/test/{foundup_id}",
+                "owner_pubkey": "ed25519_test_pubkey_placeholder",
+            },
+        ))
+        assert "result" in result
+        return result["result"]["api_key"]
+
+    # ----- Bootstrap tool (foundup_register) remains unauthenticated -----
+
+    def test_foundup_register_accepts_no_api_key(self, srv):
+        """foundup_register is a bootstrap tool — no auth required."""
+        result = _run(srv.handle_tool_call(
+            "foundup_register",
+            {
+                "foundup_id": "new_foundup",
+                "repo_url": "https://github.com/test/new",
+                "owner_pubkey": "pubkey123",
+            },
+            api_key=None,
+        ))
+        assert "result" in result
+        assert "api_key" in result["result"]
+        # meta.auth_enforced should be False for bootstrap tools
+        assert result["meta"]["auth_enforced"] is False
+
+    # ----- Protected tools reject missing API key -----
+
+    def test_protected_tool_rejects_missing_api_key(self, srv):
+        """Protected tools require api_key."""
+        result = _run(srv.handle_tool_call(
+            "holo_search",
+            {"query": "test"},
+            api_key=None,
+        ))
+        assert "error" in result
+        assert result["error"]["code"] == "MISSING_API_KEY"
+        assert result["meta"]["auth_enforced"] is True
+
+    def test_cabr_validate_rejects_missing_api_key(self, srv):
+        """cabr_validate is protected."""
+        result = _run(srv.handle_tool_call(
+            "cabr_validate",
+            {"content": "test"},
+            api_key=None,
+        ))
+        assert "error" in result
+        assert result["error"]["code"] == "MISSING_API_KEY"
+
+    # ----- Protected tools reject unknown API key -----
+
+    def test_protected_tool_rejects_unknown_api_key(self, srv):
+        """Unknown api_key is rejected."""
+        result = _run(srv.handle_tool_call(
+            "holo_search",
+            {"query": "test"},
+            api_key="fp_definitely_not_registered_key",
+        ))
+        assert "error" in result
+        assert result["error"]["code"] == "UNKNOWN_API_KEY"
+        assert result["meta"]["auth_enforced"] is True
+
+    # ----- Registered API key is accepted -----
+
+    def test_registered_api_key_accepted(self, srv):
+        """Valid registered api_key allows tool call."""
+        api_key = self._register_foundup(srv, "my_foundup")
+
+        result = _run(srv.handle_tool_call(
+            "holo_search",
+            {"query": "test"},
+            api_key=api_key,
+        ))
+        assert "result" in result
+        assert result["meta"]["auth_enforced"] is True
+        assert result["meta"]["registered_foundup_id"] == "my_foundup"
+
+    # ----- Cross-tenant foundup_id rejected -----
+
+    def test_cross_tenant_foundup_id_rejected(self, srv):
+        """Requesting a different foundup_id than registered is rejected."""
+        api_key = self._register_foundup(srv, "foundup_a")
+
+        result = _run(srv.handle_tool_call(
+            "holo_search",
+            {"query": "test", "foundup_id": "foundup_b"},
+            api_key=api_key,
+        ))
+        assert "error" in result
+        assert result["error"]["code"] == "CROSS_TENANT_VIOLATION"
+        assert result["error"]["registered_foundup_id"] == "foundup_a"
+        assert result["error"]["requested_foundup_id"] == "foundup_b"
+        assert result["meta"]["auth_enforced"] is True
+
+    def test_fam_emit_cross_tenant_rejected(self, srv):
+        """fam_emit with wrong foundup_id is rejected."""
+        api_key = self._register_foundup(srv, "foundup_x")
+
+        result = _run(srv.handle_tool_call(
+            "fam_emit",
+            {
+                "foundup_id": "foundup_y",
+                "event_type": "test",
+                "payload": {},
+            },
+            api_key=api_key,
+        ))
+        assert "error" in result
+        assert result["error"]["code"] == "CROSS_TENANT_VIOLATION"
+
+    # ----- Matching foundup_id is accepted -----
+
+    def test_matching_foundup_id_accepted(self, srv):
+        """Own foundup_id in request is accepted."""
+        api_key = self._register_foundup(srv, "my_foundup")
+
+        result = _run(srv.handle_tool_call(
+            "holo_search",
+            {"query": "test", "foundup_id": "my_foundup"},
+            api_key=api_key,
+        ))
+        assert "result" in result
+        assert result["meta"]["registered_foundup_id"] == "my_foundup"
+
+    def test_fam_emit_matching_foundup_id_accepted(self, srv):
+        """fam_emit with matching foundup_id succeeds."""
+        api_key = self._register_foundup(srv, "my_foundup")
+
+        result = _run(srv.handle_tool_call(
+            "fam_emit",
+            {
+                "foundup_id": "my_foundup",
+                "event_type": "test",
+                "payload": {"key": "value"},
+            },
+            api_key=api_key,
+        ))
+        assert "result" in result
+        assert "event_id" in result["result"]
+
+    # ----- No foundup_id argument is OK (uses caller identity) -----
+
+    def test_no_foundup_id_argument_ok(self, srv):
+        """Tools without foundup_id argument still work."""
+        api_key = self._register_foundup(srv, "my_foundup")
+
+        result = _run(srv.handle_tool_call(
+            "gemma_classify",
+            {"text": "test text", "categories": ["a", "b"]},
+            api_key=api_key,
+        ))
+        assert "result" in result
+        assert result["meta"]["auth_enforced"] is True
+
+    # ----- Meta flags are truthful -----
+
+    def test_meta_auth_enforced_true_for_protected_tools(self, srv):
+        """Protected tools set auth_enforced=True."""
+        api_key = self._register_foundup(srv, "test")
+
+        result = _run(srv.handle_tool_call(
+            "pattern_recall",
+            {"skill": "test_skill"},
+            api_key=api_key,
+        ))
+        assert result["meta"]["auth_enforced"] is True
+
+    def test_meta_auth_enforced_false_for_bootstrap_tools(self, srv):
+        """Bootstrap tools set auth_enforced=False."""
+        result = _run(srv.handle_tool_call(
+            "foundup_register",
+            {
+                "foundup_id": "new",
+                "repo_url": "https://test",
+                "owner_pubkey": "key",
+            },
+        ))
+        assert result["meta"]["auth_enforced"] is False
+
+    def test_meta_registered_foundup_id_present_on_success(self, srv):
+        """Successful auth includes registered_foundup_id in meta."""
+        api_key = self._register_foundup(srv, "tracked_foundup")
+
+        result = _run(srv.handle_tool_call(
+            "qwen_plan",
+            {"objective": "test"},
+            api_key=api_key,
+        ))
+        assert result["meta"]["registered_foundup_id"] == "tracked_foundup"
+
+    # ----- Registration creates proper bindings -----
+
+    def test_registration_creates_api_key_binding(self, srv):
+        """foundup_register creates api_key -> foundup_id mapping."""
+        result = _run(srv.handle_tool_call(
+            "foundup_register",
+            {
+                "foundup_id": "bound_foundup",
+                "repo_url": "https://test",
+                "owner_pubkey": "key",
+            },
+        ))
+        api_key = result["result"]["api_key"]
+
+        # Verify internal state
+        assert srv._api_key_to_foundup[api_key] == "bound_foundup"
+        assert "bound_foundup" in srv.registrations
+        assert srv.registrations["bound_foundup"].api_key == api_key
+
+    def test_registration_stores_owner_pubkey(self, srv):
+        """Registration stores owner_pubkey for future verification."""
+        result = _run(srv.handle_tool_call(
+            "foundup_register",
+            {
+                "foundup_id": "keyed_foundup",
+                "repo_url": "https://test",
+                "owner_pubkey": "ed25519_test_key_abc123",
+            },
+        ))
+
+        assert srv.registrations["keyed_foundup"].owner_pubkey == "ed25519_test_key_abc123"
+
+    # ----- All protected tools enforce auth -----
+
+    @pytest.mark.parametrize("tool_name,arguments", [
+        ("cabr_validate", {"content": "x"}),
+        ("gemma_classify", {"text": "x", "categories": ["a"]}),
+        ("qwen_plan", {"objective": "x"}),
+        ("fam_emit", {"foundup_id": "x", "event_type": "t", "payload": {}}),
+        ("pattern_recall", {"skill": "x"}),
+        ("pattern_store", {"skill": "x", "outcome": {}}),
+        ("holo_search", {"query": "x"}),
+    ])
+    def test_all_protected_tools_reject_missing_api_key(self, tool_name, arguments):
+        """Every non-bootstrap tool rejects calls without api_key."""
+        srv = PAVSMCPServer()
+        result = _run(srv.handle_tool_call(tool_name, arguments, api_key=None))
+
+        assert "error" in result, f"{tool_name} should reject missing api_key"
+        assert result["error"]["code"] == "MISSING_API_KEY"
