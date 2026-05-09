@@ -1,5 +1,79 @@
 # pAVS MCP Server - ModLog
 
+## 2026-05-09 - MCPA7: Registry Persistence (LOCAL_JSON)
+
+**Author**: 0102 (Worker W1)
+**WSP**: 97 (Truth Boundaries), 96 (MCP Governance)
+**Slice**: `MCPA7_PAVS_REGISTRY_PERSISTENCE_PHASE1`
+**Closes (MCPA6C audit)**: H1 (persistent registry) — partial (JSON, not SQLite)
+
+### Why
+
+Per MCPA6C re-audit, S3's registry was in-memory only — FoundUp registrations
+and API key bindings were lost on restart. This slice implements durable local
+persistence so auth enforcement survives restarts without requiring external
+infrastructure.
+
+### Changes
+
+- `src/server.py`:
+  - Added `RegistryStore` class with JSON-based persistence:
+    - `_load()`: Loads from disk on init; handles corrupt files gracefully
+    - `_save()`: Atomic writes (temp file + rename pattern)
+    - `register()`: Persists new registrations; handles re-registration
+    - Properties: `registrations`, `api_key_to_foundup`, `load_error`
+  - Added persistence constants:
+    - `DEFAULT_REGISTRY_DIR = Path.home() / ".pavs_mcp"`
+    - `REGISTRY_FILENAME = "registrations.json"`
+    - `REGISTRY_PATH_ENV_VAR = "PAVS_REGISTRY_PATH"` (override for testing)
+  - Added `to_dict()` and `from_dict()` to `FoundUpRegistration` dataclass
+  - Updated `PAVSMCPServer.__init__`:
+    - Added optional `registry_path` parameter for testing
+    - Creates `RegistryStore` instead of raw dicts
+    - Added property accessors for backwards compatibility
+  - Updated `foundup_register()` to use `RegistryStore.register()`
+  - Updated `PLACEHOLDER_BANNER`: `registry_persistence: LOCAL_JSON`
+
+- `tests/test_server_holo_search.py`:
+  - Added `TestRegistryPersistence` class with 7 focused tests:
+    - `test_registration_persists_to_file`
+    - `test_registration_survives_restart`
+    - `test_corrupt_registry_starts_empty`
+    - `test_missing_registry_starts_empty`
+    - `test_env_var_override`
+    - `test_reregistration_replaces_existing`
+    - `test_atomic_write_creates_parent_dirs`
+  - Updated banner test to expect `LOCAL_JSON` instead of `NONE`
+  - Added imports: `json`, `tempfile`, `Path`, `RegistryStore`, `FoundUpRegistration`
+
+- `README.md`:
+  - Updated status to include `LOCAL_JSON` persistence
+  - Added registry path and env var documentation
+  - Updated tracked remediation to Slice 8+
+
+### Behavior boundaries (what did NOT change)
+
+- No WebSocket transport — `start()` still does not bind a port
+- Tool bodies still return hardcoded/fake data — backends not connected
+- No key rotation/revocation API
+- S1 and S2 untouched
+
+### Tests
+
+```
+PYTHONPATH=. python -m pytest modules/infrastructure/pavs_mcp/tests/test_server_holo_search.py -q
+-> 74 passed (67 existing + 7 new persistence tests)
+```
+
+### Tracked follow-ups
+
+- MCPA1 Slice 8+ — Real transport (WebSocket/SSE), real backend connections,
+  key rotation/revocation API
+- Consider SQLite upgrade if concurrent access becomes a concern (current JSON
+  approach is sufficient for single-server deployment)
+
+---
+
 ## 2026-05-09 - MCPA1_SLICE_6: Federation Auth/Scope Enforcement (Phase 1)
 
 **Author**: 0102 (Worker W1)
@@ -76,8 +150,8 @@ PYTHONPATH=. python -m pytest modules/infrastructure/mcp_manager/tests/test_surf
 
 ### Tracked follow-ups
 
-- MCPA1 Slice 7+ — Persistent registry (SQLite), real transport (WebSocket/SSE),
-  real backend connections.
+- ~~MCPA1 Slice 7 — Persistent registry~~ ✅ Done (LOCAL_JSON, see above)
+- MCPA1 Slice 8+ — Real transport (WebSocket/SSE), real backend connections
 
 ---
 

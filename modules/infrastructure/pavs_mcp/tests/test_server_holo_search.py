@@ -15,14 +15,19 @@ These tests do NOT require any live transport or backend.
 from __future__ import annotations
 
 import asyncio
+import json
+import tempfile
+from pathlib import Path
 
 import pytest
 
 from modules.infrastructure.pavs_mcp.src import server as pavs_server
 from modules.infrastructure.pavs_mcp.src.server import (
+    FoundUpRegistration,
     IMPLEMENTATION_STATUS,
     PAVSMCPServer,
     PLACEHOLDER_BANNER,
+    RegistryStore,
     _truth_meta,
 )
 
@@ -46,7 +51,7 @@ class TestTruthBoundaryConstants:
             "scope_enforcement     : YES",    # MCPA1 Slice 6: cross-tenant rejected
             "tool_data             : HARDCODED / FAKE",
             "server_transport      : NONE",
-            "registry_persistence  : NONE",   # MCPA1 Slice 6: in-memory only
+            "registry_persistence  : LOCAL_JSON",  # MCPA1 Slice 7: persisted
             "DO NOT USE FOR REAL TENANTS",
         ]
         for phrase in required_phrases:
@@ -782,3 +787,151 @@ class TestFederationAuth:
 
         assert "error" in result, f"{tool_name} should reject missing api_key"
         assert result["error"]["code"] == "MISSING_API_KEY"
+
+
+# ---------------------------------------------------------------------------
+# MCPA7: Registry Persistence Tests
+# ---------------------------------------------------------------------------
+
+
+class TestRegistryPersistence:
+    """Tests for durable JSON-based registry persistence (MCPA7)."""
+
+    def test_registration_persists_to_file(self, tmp_path):
+        """Registrations are written to disk on register."""
+        registry_path = tmp_path / "registrations.json"
+        srv = PAVSMCPServer(registry_path=registry_path)
+
+        _run(srv.handle_tool_call(
+            "foundup_register",
+            {
+                "foundup_id": "persisted_foundup",
+                "repo_url": "https://github.com/test/repo",
+                "owner_pubkey": "ed25519_test_key",
+            },
+        ))
+
+        assert registry_path.exists()
+        data = json.loads(registry_path.read_text())
+        assert "registrations" in data
+        assert "persisted_foundup" in data["registrations"]
+        assert data["registrations"]["persisted_foundup"]["repo_url"] == "https://github.com/test/repo"
+
+    def test_registration_survives_restart(self, tmp_path):
+        """Registrations survive server restart (new server instance)."""
+        registry_path = tmp_path / "registrations.json"
+
+        # First server instance: register a FoundUp
+        srv1 = PAVSMCPServer(registry_path=registry_path)
+        result1 = _run(srv1.handle_tool_call(
+            "foundup_register",
+            {
+                "foundup_id": "survivor_foundup",
+                "repo_url": "https://github.com/test/survivor",
+                "owner_pubkey": "key123",
+            },
+        ))
+        api_key = result1["result"]["api_key"]
+
+        # Second server instance: should load the registration
+        srv2 = PAVSMCPServer(registry_path=registry_path)
+        assert "survivor_foundup" in srv2.registrations
+        assert srv2._api_key_to_foundup[api_key] == "survivor_foundup"
+
+        # Tool call should work with the persisted API key
+        result2 = _run(srv2.handle_tool_call(
+            "holo_search",
+            {"query": "test"},
+            api_key=api_key,
+        ))
+        assert "result" in result2
+        assert result2["meta"]["registered_foundup_id"] == "survivor_foundup"
+
+    def test_corrupt_registry_starts_empty(self, tmp_path):
+        """Corrupt registry file is handled gracefully (start empty)."""
+        registry_path = tmp_path / "registrations.json"
+        registry_path.write_text("not valid json {{{")
+
+        srv = PAVSMCPServer(registry_path=registry_path)
+
+        assert len(srv.registrations) == 0
+        assert srv._registry_store.load_error is not None
+        assert "JSON decode error" in srv._registry_store.load_error
+
+    def test_missing_registry_starts_empty(self, tmp_path):
+        """Missing registry file starts empty (no error)."""
+        registry_path = tmp_path / "nonexistent" / "registrations.json"
+
+        srv = PAVSMCPServer(registry_path=registry_path)
+
+        assert len(srv.registrations) == 0
+        assert srv._registry_store.load_error is None
+
+    def test_env_var_override(self, tmp_path, monkeypatch):
+        """PAVS_REGISTRY_PATH env var overrides default path."""
+        custom_path = tmp_path / "custom_registry.json"
+        monkeypatch.setenv("PAVS_REGISTRY_PATH", str(custom_path))
+
+        # Create server without explicit path (should use env var)
+        store = RegistryStore()
+        store.register(FoundUpRegistration(
+            foundup_id="env_foundup",
+            repo_url="https://test",
+            api_key="fp_test_key",
+            owner_pubkey="key",
+        ))
+
+        assert custom_path.exists()
+        data = json.loads(custom_path.read_text())
+        assert "env_foundup" in data["registrations"]
+
+    def test_reregistration_replaces_existing(self, tmp_path):
+        """Re-registering same foundup_id replaces the old registration."""
+        registry_path = tmp_path / "registrations.json"
+        srv = PAVSMCPServer(registry_path=registry_path)
+
+        # First registration
+        result1 = _run(srv.handle_tool_call(
+            "foundup_register",
+            {
+                "foundup_id": "reregister_test",
+                "repo_url": "https://github.com/test/v1",
+                "owner_pubkey": "key1",
+            },
+        ))
+        api_key_1 = result1["result"]["api_key"]
+
+        # Second registration (same foundup_id)
+        result2 = _run(srv.handle_tool_call(
+            "foundup_register",
+            {
+                "foundup_id": "reregister_test",
+                "repo_url": "https://github.com/test/v2",
+                "owner_pubkey": "key2",
+            },
+        ))
+        api_key_2 = result2["result"]["api_key"]
+
+        # Old API key should no longer work
+        assert api_key_1 not in srv._api_key_to_foundup
+
+        # New API key should work
+        assert srv._api_key_to_foundup[api_key_2] == "reregister_test"
+        assert srv.registrations["reregister_test"].repo_url == "https://github.com/test/v2"
+
+    def test_atomic_write_creates_parent_dirs(self, tmp_path):
+        """Registry store creates parent directories if they don't exist."""
+        registry_path = tmp_path / "nested" / "deep" / "registrations.json"
+        srv = PAVSMCPServer(registry_path=registry_path)
+
+        _run(srv.handle_tool_call(
+            "foundup_register",
+            {
+                "foundup_id": "nested_foundup",
+                "repo_url": "https://test",
+                "owner_pubkey": "key",
+            },
+        ))
+
+        assert registry_path.exists()
+        assert registry_path.parent.exists()

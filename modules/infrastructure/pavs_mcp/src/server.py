@@ -18,12 +18,39 @@ Usage:
 import asyncio
 import json
 import logging
-from dataclasses import dataclass
+import os
+from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from typing import Any, Optional
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# Registry Persistence (MCPA7 — Durable FoundUp Registration)
+# =============================================================================
+
+DEFAULT_REGISTRY_DIR = Path.home() / ".pavs_mcp"
+"""Default directory for registry storage. User-local, not in repo."""
+
+REGISTRY_FILENAME = "registrations.json"
+"""Registry file name within the registry directory."""
+
+REGISTRY_PATH_ENV_VAR = "PAVS_REGISTRY_PATH"
+"""Environment variable to override the registry file path."""
+
+
+def _get_registry_path() -> Path:
+    """Get the registry file path, respecting env var override.
+
+    Returns:
+        Path to the registry JSON file.
+    """
+    env_path = os.environ.get(REGISTRY_PATH_ENV_VAR)
+    if env_path:
+        return Path(env_path)
+    return DEFAULT_REGISTRY_DIR / REGISTRY_FILENAME
 
 
 # =============================================================================
@@ -39,19 +66,19 @@ data and refuse to use it for production decisions. See WSP 96 Annex A.5 C3.
 
 PLACEHOLDER_BANNER = (
     "==============================================================\n"
-    " pAVS MCP Server - PLACEHOLDER_STUB + BASIC_AUTH\n"
+    " pAVS MCP Server - PLACEHOLDER_STUB + BASIC_AUTH + LOCAL_PERSIST\n"
     "--------------------------------------------------------------\n"
     "  implementation_status : placeholder_stub\n"
-    "  auth_enforcement      : BASIC (api_key validated, in-memory)\n"
+    "  auth_enforcement      : BASIC (api_key validated)\n"
     "  scope_enforcement     : YES (cross-tenant foundup_id rejected)\n"
+    "  registry_persistence  : LOCAL_JSON (survives restart)\n"
     "  tool_data             : HARDCODED / FAKE\n"
     "  server_transport      : NONE (start() does not bind a port)\n"
-    "  registry_persistence  : NONE (lost on restart)\n"
     "  canonical owner of holo_search : NOT THIS SURFACE\n"
     "                                   (see WSP 96 Annex A.1)\n"
     "\n"
     "  DO NOT USE FOR REAL TENANTS OR PRODUCTION TRAFFIC.\n"
-    "  Tracked remediation: MCPA1 Slice 7+ (persist, transport).\n"
+    "  Tracked remediation: MCPA1 Slice 8+ (transport, backends).\n"
     "=============================================================="
 )
 """Operator-facing startup warning. Printed and logged on server start."""
@@ -98,6 +125,143 @@ class FoundUpRegistration:
         if not self.registered_at:
             self.registered_at = datetime.now(timezone.utc).isoformat()
 
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize to dict for JSON persistence."""
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "FoundUpRegistration":
+        """Deserialize from dict."""
+        return cls(**data)
+
+
+class RegistryStore:
+    """Durable JSON-based registry store for FoundUp registrations.
+
+    MCPA7: Provides local persistence so API key ownership survives restart.
+    Uses a simple JSON file (human-readable, debuggable).
+
+    Behavior:
+        - Creates directory and file if they don't exist.
+        - Loads existing registrations on init.
+        - Writes atomically (write to temp, rename) to avoid corruption.
+        - Handles corrupt files by logging warning and starting empty.
+        - Duplicate foundup_id replaces existing registration (re-registration).
+    """
+
+    def __init__(self, registry_path: Optional[Path] = None):
+        """Initialize the registry store.
+
+        Args:
+            registry_path: Path to registry JSON file. If None, uses default
+                           or env var override.
+        """
+        self.path = registry_path or _get_registry_path()
+        self._registrations: dict[str, FoundUpRegistration] = {}
+        self._api_key_to_foundup: dict[str, str] = {}
+        self._load_error: Optional[str] = None
+        self._load()
+
+    def _load(self) -> None:
+        """Load registrations from disk."""
+        if not self.path.exists():
+            logger.info(f"Registry file does not exist: {self.path} (starting empty)")
+            return
+
+        try:
+            with open(self.path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            if not isinstance(data, dict) or "registrations" not in data:
+                self._load_error = "Invalid registry format: missing 'registrations' key"
+                logger.warning(f"Corrupt registry file: {self._load_error}")
+                return
+
+            for foundup_id, reg_data in data["registrations"].items():
+                try:
+                    reg = FoundUpRegistration.from_dict(reg_data)
+                    self._registrations[foundup_id] = reg
+                    self._api_key_to_foundup[reg.api_key] = foundup_id
+                except (TypeError, KeyError) as e:
+                    logger.warning(f"Skipping invalid registration {foundup_id}: {e}")
+
+            logger.info(f"Loaded {len(self._registrations)} registrations from {self.path}")
+
+        except json.JSONDecodeError as e:
+            self._load_error = f"JSON decode error: {e}"
+            logger.warning(f"Corrupt registry file: {self._load_error}")
+        except OSError as e:
+            self._load_error = f"File read error: {e}"
+            logger.warning(f"Cannot read registry file: {self._load_error}")
+
+    def _save(self) -> None:
+        """Save registrations to disk atomically."""
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+
+        data = {
+            "version": 1,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "registrations": {
+                fid: reg.to_dict() for fid, reg in self._registrations.items()
+            },
+        }
+
+        # Write to temp file then rename (atomic on POSIX, mostly atomic on Windows)
+        temp_path = self.path.with_suffix(".tmp")
+        try:
+            with open(temp_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
+            temp_path.replace(self.path)
+            logger.debug(f"Saved {len(self._registrations)} registrations to {self.path}")
+        except OSError as e:
+            logger.error(f"Failed to save registry: {e}")
+            raise
+
+    def register(self, registration: FoundUpRegistration) -> bool:
+        """Register a FoundUp, persisting to disk.
+
+        Args:
+            registration: The registration to add.
+
+        Returns:
+            True if this was a new registration, False if it replaced an existing one.
+        """
+        is_new = registration.foundup_id not in self._registrations
+
+        # Remove old API key mapping if replacing
+        if not is_new:
+            old_reg = self._registrations[registration.foundup_id]
+            if old_reg.api_key in self._api_key_to_foundup:
+                del self._api_key_to_foundup[old_reg.api_key]
+
+        self._registrations[registration.foundup_id] = registration
+        self._api_key_to_foundup[registration.api_key] = registration.foundup_id
+        self._save()
+        return is_new
+
+    def get_by_foundup_id(self, foundup_id: str) -> Optional[FoundUpRegistration]:
+        """Get registration by FoundUp ID."""
+        return self._registrations.get(foundup_id)
+
+    def get_foundup_id_by_api_key(self, api_key: str) -> Optional[str]:
+        """Get FoundUp ID by API key."""
+        return self._api_key_to_foundup.get(api_key)
+
+    @property
+    def registrations(self) -> dict[str, FoundUpRegistration]:
+        """Get all registrations (read-only view)."""
+        return self._registrations
+
+    @property
+    def api_key_to_foundup(self) -> dict[str, str]:
+        """Get API key to FoundUp ID mapping (read-only view)."""
+        return self._api_key_to_foundup
+
+    @property
+    def load_error(self) -> Optional[str]:
+        """Get load error message if registry was corrupt/unreadable."""
+        return self._load_error
+
 
 # =============================================================================
 # Auth Error Codes (MCPA1 Slice 6 — Federation Auth/Scope)
@@ -132,13 +296,27 @@ class PAVSMCPServer:
     - foundup_register: Register FoundUp for access
     """
 
-    def __init__(self, host: str = "0.0.0.0", port: int = 8765):
+    def __init__(
+        self,
+        host: str = "0.0.0.0",
+        port: int = 8765,
+        registry_path: Optional[Path] = None
+    ):
         self.host = host
         self.port = port
-        self.registrations: dict[str, FoundUpRegistration] = {}
-        # MCPA1 Slice 6: Reverse lookup for api_key -> foundup_id ownership
-        self._api_key_to_foundup: dict[str, str] = {}
+        # MCPA7: Durable registry store (persists to JSON file)
+        self._registry_store = RegistryStore(registry_path)
         self._tools = self._register_tools()
+
+    @property
+    def registrations(self) -> dict[str, FoundUpRegistration]:
+        """Access registrations dict (delegates to RegistryStore)."""
+        return self._registry_store.registrations
+
+    @property
+    def _api_key_to_foundup(self) -> dict[str, str]:
+        """Access API key mapping (delegates to RegistryStore)."""
+        return self._registry_store.api_key_to_foundup
 
     def _register_tools(self) -> dict[str, callable]:
         """Register all MCP tools."""
@@ -461,7 +639,7 @@ class PAVSMCPServer:
 
         api_key = f"fp_{secrets.token_hex(16)}"
 
-        self.registrations[foundup_id] = FoundUpRegistration(
+        registration = FoundUpRegistration(
             foundup_id=foundup_id,
             repo_url=repo_url,
             api_key=api_key,
@@ -469,10 +647,12 @@ class PAVSMCPServer:
             tier="free",
         )
 
-        # MCPA1 Slice 6: Build reverse lookup (api_key -> foundup_id)
-        self._api_key_to_foundup[api_key] = foundup_id
-
-        logger.info(f"FoundUp registered: {foundup_id} ({repo_url})")
+        # MCPA7: Persist registration to durable storage
+        is_new = self._registry_store.register(registration)
+        logger.info(
+            f"FoundUp {'registered' if is_new else 're-registered'}: "
+            f"{foundup_id} ({repo_url})"
+        )
         return {
             "api_key": api_key,
             "endpoint": f"wss://{self.host}:{self.port}/mcp",
