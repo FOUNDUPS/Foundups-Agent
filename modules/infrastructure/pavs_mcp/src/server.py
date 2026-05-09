@@ -146,6 +146,131 @@ def _call_fam_emit(
 
 
 # =============================================================================
+# Pattern Memory Backend Adapter (MCPA9C — Real PatternMemory Connection)
+# =============================================================================
+
+# Pattern memory backend availability flag
+_PATTERN_MEMORY_AVAILABLE: Optional[bool] = None
+
+
+def _call_pattern_recall(
+    skill_name: str,
+    min_fidelity: float = 0.90,
+    limit: int = 10,
+) -> list[dict]:
+    """Call PatternMemory recall_successful_patterns and return patterns.
+
+    Imports PatternMemory lazily to avoid circular import issues.
+    Uses singleton pattern (PatternMemory() with no args reuses shared instance).
+
+    Args:
+        skill_name: Skill to recall patterns for
+        min_fidelity: Minimum pattern fidelity threshold (0.0-1.0)
+        limit: Max patterns to return
+
+    Returns:
+        List of pattern dicts with execution records.
+
+    Raises:
+        RuntimeError: If PatternMemory backend is unavailable or fails.
+    """
+    global _PATTERN_MEMORY_AVAILABLE
+
+    try:
+        from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory
+
+        # Singleton: calling PatternMemory() with no args reuses shared instance
+        memory = PatternMemory()
+        patterns = memory.recall_successful_patterns(
+            skill_name=skill_name,
+            min_fidelity=min_fidelity,
+            limit=limit,
+        )
+        _PATTERN_MEMORY_AVAILABLE = True
+        return patterns
+
+    except ImportError as e:
+        _PATTERN_MEMORY_AVAILABLE = False
+        raise RuntimeError(f"PatternMemory backend import failed: {e}") from e
+    except Exception as e:
+        raise RuntimeError(f"PatternMemory backend call failed: {e}") from e
+
+
+def _call_pattern_store(
+    execution_id: str,
+    skill_name: str,
+    agent: str,
+    timestamp: str,
+    input_context: str,
+    output_result: str,
+    success: bool,
+    pattern_fidelity: float,
+    outcome_quality: float,
+    execution_time_ms: int,
+    step_count: int,
+    failed_at_step: Optional[int] = None,
+    notes: Optional[str] = None,
+) -> None:
+    """Call PatternMemory store_outcome to persist execution outcome.
+
+    Imports PatternMemory and SkillOutcome lazily to avoid circular imports.
+    Uses singleton pattern (PatternMemory() with no args reuses shared instance).
+
+    Args:
+        execution_id: Unique execution identifier
+        skill_name: Skill that was executed
+        agent: Agent that executed (qwen, gemma, etc.)
+        timestamp: ISO format timestamp
+        input_context: JSON string of input context
+        output_result: JSON string of output result
+        success: Whether execution succeeded
+        pattern_fidelity: Fidelity score 0.0-1.0
+        outcome_quality: Quality score 0.0-1.0
+        execution_time_ms: Execution time in milliseconds
+        step_count: Number of steps in execution
+        failed_at_step: Step that failed (if any)
+        notes: Optional notes
+
+    Raises:
+        RuntimeError: If PatternMemory backend is unavailable or fails.
+    """
+    global _PATTERN_MEMORY_AVAILABLE
+
+    try:
+        from modules.infrastructure.wre_core.src.pattern_memory import (
+            PatternMemory,
+            SkillOutcome,
+        )
+
+        outcome = SkillOutcome(
+            execution_id=execution_id,
+            skill_name=skill_name,
+            agent=agent,
+            timestamp=timestamp,
+            input_context=input_context,
+            output_result=output_result,
+            success=success,
+            pattern_fidelity=pattern_fidelity,
+            outcome_quality=outcome_quality,
+            execution_time_ms=execution_time_ms,
+            step_count=step_count,
+            failed_at_step=failed_at_step,
+            notes=notes,
+        )
+
+        # Singleton: calling PatternMemory() with no args reuses shared instance
+        memory = PatternMemory()
+        memory.store_outcome(outcome)
+        _PATTERN_MEMORY_AVAILABLE = True
+
+    except ImportError as e:
+        _PATTERN_MEMORY_AVAILABLE = False
+        raise RuntimeError(f"PatternMemory backend import failed: {e}") from e
+    except Exception as e:
+        raise RuntimeError(f"PatternMemory backend call failed: {e}") from e
+
+
+# =============================================================================
 # Registry Persistence (MCPA7 — Durable FoundUp Registration)
 # =============================================================================
 
@@ -186,17 +311,19 @@ PLACEHOLDER_BANNER = (
     "==============================================================\n"
     " pAVS MCP Server - REAL_TRANSPORT + PARTIAL_BACKENDS\n"
     "--------------------------------------------------------------\n"
-    "  implementation_status : partial (holo_search, fam_emit real)\n"
+    "  implementation_status : partial (4/8 tools have real backends)\n"
     "  auth_enforcement      : BASIC (api_key validated)\n"
     "  scope_enforcement     : YES (cross-tenant foundup_id rejected)\n"
     "  registry_persistence  : LOCAL_JSON (survives restart)\n"
     "  server_transport      : HTTP_JSON (local, real binding)\n"
     "  holo_search           : REAL (delegates to S2/HoloIndex)\n"
     "  fam_emit              : REAL (delegates to FAM DAEmon)\n"
-    "  other tools           : HARDCODED / FAKE (CABR, Gemma, Qwen, etc)\n"
+    "  pattern_recall        : REAL (delegates to PatternMemory)\n"
+    "  pattern_store         : REAL (delegates to PatternMemory)\n"
+    "  other tools           : HARDCODED / FAKE (CABR, Gemma, Qwen)\n"
     "\n"
-    "  Transport is REAL. holo_search + fam_emit are REAL.\n"
-    "  Other backends remain PLACEHOLDERS.\n"
+    "  Transport is REAL. 4 tools have real backends.\n"
+    "  CABR/Gemma/Qwen remain PLACEHOLDERS.\n"
     "  Tracked remediation: MCPA10+ (remaining backends).\n"
     "=============================================================="
 )
@@ -734,62 +861,229 @@ class PAVSMCPServer:
     async def pattern_recall(
         self,
         skill: str,
-        min_fidelity: float = 0.7
+        min_fidelity: float = 0.7,
+        limit: int = 10,
     ) -> dict[str, Any]:
-        """
-        Recall successful patterns from Pattern Memory.
+        """Recall successful patterns from Pattern Memory — delegates to real backend.
+
+        MCPA9C: S3 now delegates to the real PatternMemory backend.
+        Auth/scope enforcement happens in handle_tool_call before this method.
 
         Args:
             skill: Skill/action type to recall
-            min_fidelity: Minimum success rate
+            min_fidelity: Minimum pattern fidelity threshold (0.0-1.0)
+            limit: Maximum patterns to return (default 10)
 
         Returns:
-            List of successful patterns
+            Canonical envelope with:
+              - status: "ok" | "error"
+              - data: skill, min_fidelity, patterns[], count
+              - meta: real_backend=true when PatternMemory is called successfully
         """
-        # TODO: Connect to Pattern Memory
-        # from modules.infrastructure.wre_core.src.pattern_memory import get_pattern_memory
+        logger.info(
+            "S3 pattern_recall delegating to PatternMemory: skill=%r min_fidelity=%r limit=%r",
+            skill,
+            min_fidelity,
+            limit,
+        )
 
-        logger.info(f"Pattern recall: {skill} (min_fidelity={min_fidelity})")
-        return {
-            "patterns": [
-                {
-                    "pattern_id": "ptn_001",
+        try:
+            patterns = _call_pattern_recall(
+                skill_name=skill,
+                min_fidelity=min_fidelity,
+                limit=limit,
+            )
+
+            return {
+                "status": "ok",
+                "data": {
                     "skill": skill,
-                    "input_context": {"example": "input"},
-                    "successful_output": {"example": "output"},
-                    "fidelity": 0.92,
-                    "uses": 15
-                }
-            ]
-        }
+                    "min_fidelity": min_fidelity,
+                    "patterns": patterns,
+                    "count": len(patterns),
+                },
+                "meta": {
+                    "tool": "pattern_recall",
+                    "surface": "S3",
+                    "real_backend": True,
+                    "delegated_to": "PATTERN_MEMORY",
+                    "generated_at": datetime.now(timezone.utc).isoformat(),
+                },
+            }
+
+        except Exception as e:
+            logger.error(f"S3 pattern_recall backend error: {e}")
+
+            return {
+                "status": "error",
+                "data": {
+                    "skill": skill,
+                    "min_fidelity": min_fidelity,
+                    "patterns": [],
+                    "count": 0,
+                },
+                "error": {
+                    "code": "BACKEND_UNAVAILABLE",
+                    "message": f"PatternMemory backend unavailable: {e}",
+                },
+                "meta": {
+                    **_truth_meta(),
+                    "tool": "pattern_recall",
+                    "surface": "S3",
+                    "real_backend": False,
+                },
+            }
 
     async def pattern_store(
         self,
         skill: str,
-        outcome: dict
+        outcome: dict,
     ) -> dict[str, Any]:
-        """
-        Store execution outcome for learning.
+        """Store execution outcome in Pattern Memory — delegates to real backend.
+
+        MCPA9C: S3 now delegates to the real PatternMemory backend.
+        Auth/scope enforcement happens in handle_tool_call before this method.
+
+        The outcome dict must contain SkillOutcome-compatible fields:
+            - execution_id: str (required)
+            - agent: str (required, e.g., "qwen", "gemma")
+            - timestamp: str (ISO format, defaults to now)
+            - input_context: str | dict (JSON string or dict)
+            - output_result: str | dict (JSON string or dict)
+            - success: bool (required)
+            - pattern_fidelity: float (required, 0.0-1.0)
+            - outcome_quality: float (default 0.0)
+            - execution_time_ms: int (default 0)
+            - step_count: int (default 1)
+            - failed_at_step: int | None (optional)
+            - notes: str | None (optional)
 
         Args:
             skill: Skill that was executed
-            outcome: Success/failure + context
+            outcome: SkillOutcome-compatible dict
 
         Returns:
-            pattern_id, updated_fidelity
+            Canonical envelope with:
+              - status: "ok" | "error"
+              - data: skill, execution_id, stored confirmation
+              - meta: real_backend=true when PatternMemory accepts the outcome
         """
-        # TODO: Connect to Pattern Memory
+        logger.info(
+            "S3 pattern_store delegating to PatternMemory: skill=%r execution_id=%r",
+            skill,
+            outcome.get("execution_id"),
+        )
 
-        import hashlib
-        pattern_id = hashlib.sha256(
-            f"{skill}:{json.dumps(outcome)}".encode()
-        ).hexdigest()[:12]
+        try:
+            # Validate required fields
+            execution_id = outcome.get("execution_id")
+            if not execution_id:
+                raise ValueError("outcome.execution_id is required")
 
-        logger.info(f"Pattern store: {skill}")
-        return {
-            "pattern_id": f"ptn_{pattern_id}",
-            "updated_fidelity": 0.85
-        }
+            agent = outcome.get("agent")
+            if not agent:
+                raise ValueError("outcome.agent is required")
+
+            success = outcome.get("success")
+            if success is None:
+                raise ValueError("outcome.success is required")
+
+            pattern_fidelity = outcome.get("pattern_fidelity")
+            if pattern_fidelity is None:
+                raise ValueError("outcome.pattern_fidelity is required")
+
+            # Normalize context fields to JSON strings
+            input_context = outcome.get("input_context", "{}")
+            if isinstance(input_context, dict):
+                input_context = json.dumps(input_context)
+
+            output_result = outcome.get("output_result", "{}")
+            if isinstance(output_result, dict):
+                output_result = json.dumps(output_result)
+
+            # Provide defaults for optional fields
+            timestamp = outcome.get("timestamp", datetime.now(timezone.utc).isoformat())
+            outcome_quality = outcome.get("outcome_quality", 0.0)
+            execution_time_ms = outcome.get("execution_time_ms", 0)
+            step_count = outcome.get("step_count", 1)
+            failed_at_step = outcome.get("failed_at_step")
+            notes = outcome.get("notes")
+
+            # Delegate to PatternMemory backend
+            _call_pattern_store(
+                execution_id=execution_id,
+                skill_name=skill,
+                agent=agent,
+                timestamp=timestamp,
+                input_context=input_context,
+                output_result=output_result,
+                success=bool(success),
+                pattern_fidelity=float(pattern_fidelity),
+                outcome_quality=float(outcome_quality),
+                execution_time_ms=int(execution_time_ms),
+                step_count=int(step_count),
+                failed_at_step=failed_at_step,
+                notes=notes,
+            )
+
+            return {
+                "status": "ok",
+                "data": {
+                    "skill": skill,
+                    "execution_id": execution_id,
+                    "stored": True,
+                    "pattern_fidelity": pattern_fidelity,
+                },
+                "meta": {
+                    "tool": "pattern_store",
+                    "surface": "S3",
+                    "real_backend": True,
+                    "delegated_to": "PATTERN_MEMORY",
+                    "generated_at": datetime.now(timezone.utc).isoformat(),
+                },
+            }
+
+        except ValueError as e:
+            logger.warning(f"S3 pattern_store validation error: {e}")
+
+            return {
+                "status": "error",
+                "data": {
+                    "skill": skill,
+                    "stored": False,
+                },
+                "error": {
+                    "code": "INVALID_OUTCOME",
+                    "message": str(e),
+                },
+                "meta": {
+                    **_truth_meta(),
+                    "tool": "pattern_store",
+                    "surface": "S3",
+                    "real_backend": False,
+                },
+            }
+
+        except Exception as e:
+            logger.error(f"S3 pattern_store backend error: {e}")
+
+            return {
+                "status": "error",
+                "data": {
+                    "skill": skill,
+                    "stored": False,
+                },
+                "error": {
+                    "code": "BACKEND_UNAVAILABLE",
+                    "message": f"PatternMemory backend unavailable: {e}",
+                },
+                "meta": {
+                    **_truth_meta(),
+                    "tool": "pattern_store",
+                    "surface": "S3",
+                    "real_backend": False,
+                },
+            }
 
     async def holo_search(
         self,

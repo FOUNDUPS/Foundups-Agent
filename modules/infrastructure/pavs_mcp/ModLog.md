@@ -1,5 +1,68 @@
 # pAVS MCP Server - ModLog
 
+## 2026-05-09 - MCPA9C: S3 Pattern Memory Backend Connection
+
+**Author**: 0102 (Worker W1)
+**WSP**: 96 (MCP Governance), 97 (Truth Boundaries)
+**Slice**: `MCPA9C_PATTERN_MEMORY_BACKEND_CONNECTION_PHASE1`
+**Closes (MCPA9B audit)**: H4e (pattern_recall + pattern_store now real)
+
+### Why
+
+Per MCPA9B re-audit, `pattern_recall` and `pattern_store` were identified as
+high-priority backend connection targets (WSP 15 score: 13, lowest = highest priority).
+`PatternMemory` has direct callable seams:
+- `recall_successful_patterns(skill_name, min_fidelity, limit) -> List[Dict]`
+- `store_outcome(SkillOutcome) -> None`
+
+Uses singleton pattern (PatternMemory() with no args reuses shared instance).
+
+### Changes
+
+- `src/server.py`:
+  - Added `_PATTERN_MEMORY_AVAILABLE` flag
+  - Added `_call_pattern_recall()` adapter function
+  - Added `_call_pattern_store()` adapter function constructing SkillOutcome
+  - Rewrote `pattern_recall()` to delegate to PatternMemory backend
+  - Rewrote `pattern_store()` to delegate to PatternMemory backend
+  - Returns `meta.surface="S3"`, `meta.real_backend=True`, `meta.delegated_to="PATTERN_MEMORY"`
+  - Returns `BACKEND_UNAVAILABLE` error if PatternMemory fails
+  - Returns `INVALID_OUTCOME` error for missing required fields
+  - Updated `PLACEHOLDER_BANNER` to show 4/8 tools with real backends
+
+- `tests/test_server_holo_search.py`:
+  - Added `TestPatternMemoryBackendDelegation` class (25 tests)
+  - Tests pattern_recall and pattern_store backend delegation
+  - Tests validation errors, optional field defaults, round-trip
+  - Updated banner test for `pattern_recall : REAL`, `pattern_store : REAL`
+  - Updated parametrized test for real backend distinction
+
+- `tests/test_transport.py`:
+  - Added `TestPatternMemoryViaTransport` class (4 tests)
+  - Tests pattern_recall and pattern_store via HTTP transport
+  - Fixed timeout issue by using pattern_recall (fast) instead of holo_search (slow S2)
+
+- `README.md`:
+  - Updated status: 4/8 tools have real backends
+  - Updated tool table: `pattern_recall`, `pattern_store` now **YES**
+
+### Callable Seams Used
+
+- `modules/infrastructure/wre_core/src/pattern_memory.py`:
+  - `PatternMemory()` singleton (line 75-112)
+  - `recall_successful_patterns()` (line 485)
+  - `store_outcome()` (line 331)
+  - `SkillOutcome` dataclass (line 35-53)
+
+### Result
+
+S3 `pattern_recall` and `pattern_store` delegate to PatternMemory SQLite.
+4/8 tools now have real backends: holo_search, fam_emit, pattern_recall, pattern_store.
+3 tools remain placeholders: cabr_validate, gemma_classify, qwen_plan.
+108/108 tests passing.
+
+---
+
 ## 2026-05-09 - MCPA9B: S3 fam_emit Backend Connection
 
 **Author**: 0102 (Worker W1)

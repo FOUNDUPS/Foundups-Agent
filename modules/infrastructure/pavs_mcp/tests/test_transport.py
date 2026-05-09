@@ -153,9 +153,10 @@ class TestToolCallViaTransport:
         api_key = reg_data["result"]["api_key"]
 
         # Now call protected tool with the key
+        # Use pattern_recall (fast SQLite) instead of holo_search (slow S2 backend)
         status, data = _post(f"{base_url}/tool", {
-            "tool_name": "holo_search",
-            "arguments": {"query": "test"},
+            "tool_name": "pattern_recall",
+            "arguments": {"skill": "test_skill", "min_fidelity": 0.5},
             "api_key": api_key,
         })
         assert status == 200
@@ -263,6 +264,124 @@ class TestFamEmitViaTransport:
         assert inner["meta"]["real_backend"] is True
         assert inner["meta"]["delegated_to"] == "FAM_DAEMON"
         assert inner["data"]["persisted"] is True
+
+
+class TestPatternMemoryViaTransport:
+    """MCPA9C: Test pattern memory tools through HTTP transport."""
+
+    def test_pattern_recall_via_transport(self, base_url):
+        """POST /tool pattern_recall works with real backend."""
+        import uuid
+        # Register to get API key
+        _, reg_data = _post(f"{base_url}/tool", {
+            "tool_name": "foundup_register",
+            "arguments": {
+                "foundup_id": f"transport_test_{uuid.uuid4().hex[:8]}",
+                "repo_url": "https://github.com/test/repo",
+                "owner_pubkey": "key",
+            },
+        })
+        api_key = reg_data["result"]["api_key"]
+
+        # Call pattern_recall
+        status, data = _post(f"{base_url}/tool", {
+            "tool_name": "pattern_recall",
+            "arguments": {"skill": "test_skill", "min_fidelity": 0.7},
+            "api_key": api_key,
+        })
+        assert status == 200
+        assert "result" in data
+        inner = data["result"]
+        assert inner["status"] == "ok"
+        assert inner["meta"]["real_backend"] is True
+        assert inner["meta"]["delegated_to"] == "PATTERN_MEMORY"
+
+    def test_pattern_store_via_transport(self, base_url):
+        """POST /tool pattern_store works with real backend."""
+        import uuid
+        # Register to get API key
+        _, reg_data = _post(f"{base_url}/tool", {
+            "tool_name": "foundup_register",
+            "arguments": {
+                "foundup_id": f"transport_test_{uuid.uuid4().hex[:8]}",
+                "repo_url": "https://github.com/test/repo",
+                "owner_pubkey": "key",
+            },
+        })
+        api_key = reg_data["result"]["api_key"]
+
+        # Call pattern_store
+        status, data = _post(f"{base_url}/tool", {
+            "tool_name": "pattern_store",
+            "arguments": {
+                "skill": "test_skill",
+                "outcome": {
+                    "execution_id": f"exec_{uuid.uuid4()}",
+                    "agent": "test_agent",
+                    "success": True,
+                    "pattern_fidelity": 0.9,
+                },
+            },
+            "api_key": api_key,
+        })
+        assert status == 200
+        assert "result" in data
+        inner = data["result"]
+        assert inner["status"] == "ok"
+        assert inner["data"]["stored"] is True
+        assert inner["meta"]["real_backend"] is True
+        assert inner["meta"]["delegated_to"] == "PATTERN_MEMORY"
+
+    def test_pattern_recall_by_path(self, base_url):
+        """POST /tool/pattern_recall works."""
+        import uuid
+        # Register to get API key
+        _, reg_data = _post(f"{base_url}/tool", {
+            "tool_name": "foundup_register",
+            "arguments": {
+                "foundup_id": f"path_test_{uuid.uuid4().hex[:8]}",
+                "repo_url": "https://github.com/test/repo",
+                "owner_pubkey": "key",
+            },
+        })
+        api_key = reg_data["result"]["api_key"]
+
+        # Call via path
+        status, data = _post(f"{base_url}/tool/pattern_recall", {
+            "arguments": {"skill": "path_test_skill"},
+            "api_key": api_key,
+        })
+        assert status == 200
+        assert "result" in data
+
+    def test_pattern_store_requires_valid_outcome(self, base_url):
+        """POST /tool pattern_store validates outcome fields."""
+        import uuid
+        # Register to get API key
+        _, reg_data = _post(f"{base_url}/tool", {
+            "tool_name": "foundup_register",
+            "arguments": {
+                "foundup_id": f"validation_test_{uuid.uuid4().hex[:8]}",
+                "repo_url": "https://github.com/test/repo",
+                "owner_pubkey": "key",
+            },
+        })
+        api_key = reg_data["result"]["api_key"]
+
+        # Missing required fields
+        status, data = _post(f"{base_url}/tool", {
+            "tool_name": "pattern_store",
+            "arguments": {
+                "skill": "test_skill",
+                "outcome": {},  # Missing execution_id, agent, etc.
+            },
+            "api_key": api_key,
+        })
+        assert status == 200
+        assert "result" in data
+        inner = data["result"]
+        assert inner["status"] == "error"
+        assert inner["error"]["code"] == "INVALID_OUTCOME"
 
 
 class TestServerLifecycle:
