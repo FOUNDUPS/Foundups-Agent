@@ -182,12 +182,13 @@ S3_PAVS_MCP = KnownSurface(
     holo_search_support="placeholder",
     authority_role="no_authority",
     notes=(
-        "Tool bodies return hardcoded data; start() does not bind a port; "
-        "auth is TODO. NOT canonical owner of holo_search (WSP 96 Annex A.1). "
-        "Tracked remediation: MCPA1 Slice 4, Slice 6."
+        "MCPA1 Slice 6: api_key validation + cross-tenant scope enforcement "
+        "(in-memory registry). Tool bodies still return hardcoded data; "
+        "start() does not bind a port. NOT canonical owner of holo_search. "
+        "Tracked remediation: MCPA1 Slice 7+ (persist, transport, backends)."
     ),
 )
-"""S3 surface descriptor — placeholder stub. NOT canonical for any capability."""
+"""S3 surface descriptor — placeholder stub with basic auth. NOT canonical for any capability."""
 
 KNOWN_NON_RUNNABLE_SURFACES: Tuple[KnownSurface, ...] = (
     S2_FOUNDUPS_MCP_BRIDGE,

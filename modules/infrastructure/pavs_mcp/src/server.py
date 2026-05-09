@@ -39,17 +39,19 @@ data and refuse to use it for production decisions. See WSP 96 Annex A.5 C3.
 
 PLACEHOLDER_BANNER = (
     "==============================================================\n"
-    " pAVS MCP Server - PLACEHOLDER_STUB\n"
+    " pAVS MCP Server - PLACEHOLDER_STUB + BASIC_AUTH\n"
     "--------------------------------------------------------------\n"
     "  implementation_status : placeholder_stub\n"
-    "  auth_enforcement      : NONE (api_key parameter is ignored)\n"
+    "  auth_enforcement      : BASIC (api_key validated, in-memory)\n"
+    "  scope_enforcement     : YES (cross-tenant foundup_id rejected)\n"
     "  tool_data             : HARDCODED / FAKE\n"
     "  server_transport      : NONE (start() does not bind a port)\n"
+    "  registry_persistence  : NONE (lost on restart)\n"
     "  canonical owner of holo_search : NOT THIS SURFACE\n"
     "                                   (see WSP 96 Annex A.1)\n"
     "\n"
     "  DO NOT USE FOR REAL TENANTS OR PRODUCTION TRAFFIC.\n"
-    "  Tracked remediation: MCPA1 Slice 4, Slice 6.\n"
+    "  Tracked remediation: MCPA1 Slice 7+ (persist, transport).\n"
     "=============================================================="
 )
 """Operator-facing startup warning. Printed and logged on server start."""
@@ -79,11 +81,40 @@ def _truth_meta() -> dict[str, Any]:
 
 @dataclass
 class FoundUpRegistration:
-    """Registered FoundUp for pAVS access."""
+    """Registered FoundUp for pAVS access.
+
+    MCPA1 Slice 6: This dataclass now anchors the api_key -> foundup_id
+    ownership binding. The `owner_pubkey` field is stored for future
+    cryptographic verification but not yet enforced.
+    """
     foundup_id: str
     repo_url: str
     api_key: str
+    owner_pubkey: str
     tier: str = "free"
+    registered_at: str = ""
+
+    def __post_init__(self):
+        if not self.registered_at:
+            self.registered_at = datetime.now(timezone.utc).isoformat()
+
+
+# =============================================================================
+# Auth Error Codes (MCPA1 Slice 6 — Federation Auth/Scope)
+# =============================================================================
+
+AUTH_ERROR_MISSING_API_KEY = "MISSING_API_KEY"
+"""Returned when a protected tool is called without an api_key."""
+
+AUTH_ERROR_UNKNOWN_API_KEY = "UNKNOWN_API_KEY"
+"""Returned when the api_key does not match any registered FoundUp."""
+
+AUTH_ERROR_CROSS_TENANT = "CROSS_TENANT_VIOLATION"
+"""Returned when foundup_id argument does not match the registered identity."""
+
+# Protected tools: all tools EXCEPT foundup_register (bootstrap-only)
+BOOTSTRAP_TOOLS = frozenset({"foundup_register"})
+"""Tools that may be called without auth — bootstrap registration only."""
 
 
 class PAVSMCPServer:
@@ -105,6 +136,8 @@ class PAVSMCPServer:
         self.host = host
         self.port = port
         self.registrations: dict[str, FoundUpRegistration] = {}
+        # MCPA1 Slice 6: Reverse lookup for api_key -> foundup_id ownership
+        self._api_key_to_foundup: dict[str, str] = {}
         self._tools = self._register_tools()
 
     def _register_tools(self) -> dict[str, callable]:
@@ -432,8 +465,12 @@ class PAVSMCPServer:
             foundup_id=foundup_id,
             repo_url=repo_url,
             api_key=api_key,
-            tier="free"
+            owner_pubkey=owner_pubkey,
+            tier="free",
         )
+
+        # MCPA1 Slice 6: Build reverse lookup (api_key -> foundup_id)
+        self._api_key_to_foundup[api_key] = foundup_id
 
         logger.info(f"FoundUp registered: {foundup_id} ({repo_url})")
         return {
@@ -443,6 +480,82 @@ class PAVSMCPServer:
             "tier": "free"
         }
 
+    def _build_auth_meta(self, auth_enforced: bool, registered_foundup_id: Optional[str] = None) -> dict[str, Any]:
+        """Build meta block with auth enforcement status.
+
+        MCPA1 Slice 6: Truthfully reports whether auth ran and the registered
+        identity when applicable. Merges with base _truth_meta().
+        """
+        meta = _truth_meta()
+        meta["auth_enforced"] = auth_enforced
+        if registered_foundup_id is not None:
+            meta["registered_foundup_id"] = registered_foundup_id
+        return meta
+
+    def _validate_api_key(self, api_key: Optional[str]) -> tuple[bool, Optional[str], Optional[dict]]:
+        """Validate API key and return (valid, foundup_id, error_response).
+
+        Returns:
+            - (True, foundup_id, None) if valid
+            - (False, None, error_dict) if invalid
+        """
+        if api_key is None:
+            return (False, None, {
+                "error": {
+                    "code": AUTH_ERROR_MISSING_API_KEY,
+                    "message": "API key required. Use foundup_register to obtain one.",
+                },
+                "meta": self._build_auth_meta(auth_enforced=True),
+            })
+
+        foundup_id = self._api_key_to_foundup.get(api_key)
+        if foundup_id is None:
+            return (False, None, {
+                "error": {
+                    "code": AUTH_ERROR_UNKNOWN_API_KEY,
+                    "message": "API key not recognized. Verify key or re-register.",
+                },
+                "meta": self._build_auth_meta(auth_enforced=True),
+            })
+
+        return (True, foundup_id, None)
+
+    def _validate_scope(
+        self,
+        registered_foundup_id: str,
+        requested_foundup_id: Optional[str],
+    ) -> Optional[dict]:
+        """Validate that requested foundup_id matches registered identity.
+
+        MCPA1 Slice 6: Cross-tenant violation check.
+
+        Returns:
+            None if scope is valid, error_dict if cross-tenant violation.
+        """
+        if requested_foundup_id is None:
+            # No scope requested — OK (uses caller's registered identity)
+            return None
+
+        if requested_foundup_id != registered_foundup_id:
+            return {
+                "error": {
+                    "code": AUTH_ERROR_CROSS_TENANT,
+                    "message": (
+                        f"Cross-tenant access denied. "
+                        f"Registered as '{registered_foundup_id}', "
+                        f"but requested scope for '{requested_foundup_id}'."
+                    ),
+                    "registered_foundup_id": registered_foundup_id,
+                    "requested_foundup_id": requested_foundup_id,
+                },
+                "meta": self._build_auth_meta(
+                    auth_enforced=True,
+                    registered_foundup_id=registered_foundup_id,
+                ),
+            }
+
+        return None
+
     async def handle_tool_call(
         self,
         tool_name: str,
@@ -450,20 +563,25 @@ class PAVSMCPServer:
         api_key: Optional[str] = None
     ) -> dict[str, Any]:
         """
-        Handle incoming MCP tool call.
+        Handle incoming MCP tool call with federation auth/scope enforcement.
+
+        MCPA1 Slice 6 implementation:
+        - Bootstrap tools (foundup_register) may be called without auth
+        - All other tools require a valid, registered API key
+        - Tools accepting foundup_id reject cross-tenant attempts
 
         Args:
             tool_name: Name of tool to invoke
             arguments: Tool arguments
-            api_key: Caller's API key (currently IGNORED — auth is a TODO)
+            api_key: Caller's API key (ENFORCED for protected tools)
 
         Returns:
             Tool result or error. All responses embed the truth-meta block
             (`meta.implementation_status = "placeholder_stub"`) per WSP 97
             so clients can detect the placeholder state regardless of payload.
+            `meta.auth_enforced` is True when auth validation ran.
         """
-        # TODO: Implement proper auth (tracked: MCPA1 Slice 6)
-
+        # Unknown tool check (before auth, so we don't leak registered state)
         if tool_name not in self._tools:
             return {
                 "error": {
@@ -474,13 +592,35 @@ class PAVSMCPServer:
                 "meta": _truth_meta(),
             }
 
+        # MCPA1 Slice 6: Auth enforcement for protected tools
+        registered_foundup_id: Optional[str] = None
+
+        if tool_name not in BOOTSTRAP_TOOLS:
+            # Protected tool — require valid API key
+            valid, validated_foundup_id, error_response = self._validate_api_key(api_key)
+            if not valid:
+                assert error_response is not None  # Type narrowing
+                return error_response
+
+            assert validated_foundup_id is not None  # Type narrowing: valid=True implies foundup_id
+            registered_foundup_id = validated_foundup_id
+
+            # Scope enforcement: check foundup_id argument if present
+            requested_foundup_id = arguments.get("foundup_id")
+            scope_error = self._validate_scope(registered_foundup_id, requested_foundup_id)
+            if scope_error is not None:
+                return scope_error
+
         try:
             tool_func = self._tools[tool_name]
             result = await tool_func(**arguments)
             return {
                 "result": result,
                 "meta": {
-                    **_truth_meta(),
+                    **self._build_auth_meta(
+                        auth_enforced=(tool_name not in BOOTSTRAP_TOOLS),
+                        registered_foundup_id=registered_foundup_id,
+                    ),
                     "tool": tool_name,
                 },
             }
@@ -492,7 +632,10 @@ class PAVSMCPServer:
                     "message": str(e),
                     "tool": tool_name,
                 },
-                "meta": _truth_meta(),
+                "meta": self._build_auth_meta(
+                    auth_enforced=(tool_name not in BOOTSTRAP_TOOLS),
+                    registered_foundup_id=registered_foundup_id,
+                ),
             }
 
     async def start(self):

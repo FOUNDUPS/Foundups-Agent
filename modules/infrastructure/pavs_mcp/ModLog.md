@@ -1,5 +1,86 @@
 # pAVS MCP Server - ModLog
 
+## 2026-05-09 - MCPA1_SLICE_6: Federation Auth/Scope Enforcement (Phase 1)
+
+**Author**: 0102 (Worker W1)
+**WSP**: 97 (Truth Boundaries), 96 (MCP Governance — Annex A)
+**Slice**: `MCPA1_SLICE_6_S3_FEDERATION_AUTH_AND_SCOPE_PHASE1`
+**Closes (MCPA1 audit)**: R1 (auth TODO), D24 (cross-tenant enforcement)
+
+### Why
+
+Per MCPA1 audit and MCPA6B re-audit, S3's `handle_tool_call` accepted `api_key`
+but never validated it. Any caller could pass any `foundup_id` to tools like
+`fam_emit` without ownership verification. This slice implements minimum viable
+federation auth/scope enforcement.
+
+### Changes
+
+- `src/server.py`:
+  - `FoundUpRegistration` extended with `owner_pubkey` and `registered_at` fields.
+  - Added `_api_key_to_foundup: dict[str, str]` reverse lookup in `__init__`.
+  - Added auth error codes: `MISSING_API_KEY`, `UNKNOWN_API_KEY`, `CROSS_TENANT_VIOLATION`.
+  - Added `BOOTSTRAP_TOOLS = {"foundup_register"}` — tools that remain unauthenticated.
+  - Added `_build_auth_meta()` helper for truthful `auth_enforced` flag.
+  - Added `_validate_api_key()` — returns (valid, foundup_id, error_response).
+  - Added `_validate_scope()` — rejects cross-tenant `foundup_id` attempts.
+  - Rewrote `handle_tool_call()`:
+    - Bootstrap tools (`foundup_register`) bypass auth.
+    - Protected tools require valid registered API key.
+    - `foundup_id` arguments validated against registered identity.
+    - `meta.auth_enforced=True` when auth actually ran.
+    - `meta.registered_foundup_id` echoed on successful auth.
+  - Updated `foundup_register` to populate `_api_key_to_foundup` mapping.
+  - Updated `PLACEHOLDER_BANNER` to declare `BASIC` auth enforcement.
+
+- `tests/test_server_holo_search.py`:
+  - Added `_register_and_get_key()` helper for auth tests.
+  - Added `authed_server` fixture for tests requiring auth.
+  - Updated 13 existing tests to pass API key where required.
+  - Added `TestFederationAuth` class with 20 focused tests:
+    - Bootstrap tool remains unauthenticated
+    - Missing API key rejected
+    - Unknown API key rejected
+    - Registered API key accepted
+    - Cross-tenant `foundup_id` rejected
+    - Matching `foundup_id` accepted
+    - No `foundup_id` argument OK
+    - Meta flags truthful
+    - Registration creates proper bindings
+    - All protected tools enforce auth (parametrized)
+
+- `README.md`:
+  - Updated status from `NO_AUTH_ENFORCEMENT` to `BASIC_AUTH_ENFORCEMENT`.
+  - Added `scope_enforcement` and `registry_persistence` status notes.
+
+- `mcp_manager.py`:
+  - Updated S3 descriptor notes to reflect MCPA1 Slice 6 completion.
+
+### Behavior boundaries (what did NOT change)
+
+- Registry is **in-memory only** — lost on restart. Persistent registry deferred.
+- No WebSocket transport — `start()` still does not bind a port.
+- Tool bodies still return hardcoded/fake data — backends not connected.
+- S1 and S2 untouched.
+- `foundup_register` remains unauthenticated (bootstrap-only pattern).
+
+### Tests
+
+```
+PYTHONPATH=. python -m pytest modules/infrastructure/pavs_mcp/tests/test_server_holo_search.py -q
+-> 67 passed
+
+PYTHONPATH=. python -m pytest modules/infrastructure/mcp_manager/tests/test_surface_discovery.py -q
+-> 20 passed
+```
+
+### Tracked follow-ups
+
+- MCPA1 Slice 7+ — Persistent registry (SQLite), real transport (WebSocket/SSE),
+  real backend connections.
+
+---
+
 ## 2026-05-08 - MCPA1_SLICE_4: S3 holo_search → canonical not_implemented envelope
 
 **Author**: 0102 (Worker W1)
