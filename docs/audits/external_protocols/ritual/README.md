@@ -20,6 +20,7 @@ This audit lane evaluates Ritual (decentralized AI execution substrate) for pote
 | [RITUAL_FOUNDUPS_ARCHITECTURE_FIT.md](RITUAL_FOUNDUPS_ARCHITECTURE_FIT.md) | W3 | Role boundaries, WSP alignment, overlap matrix |
 | [RITUAL_INFERENCE_ECONOMICS_AND_VERIFICATION.md](RITUAL_INFERENCE_ECONOMICS_AND_VERIFICATION.md) | W4 | Cost/latency tradeoffs, verification methods |
 | [RITUAL_FOUNDUPS_STRATEGIC_SYNTHESIS.md](RITUAL_FOUNDUPS_STRATEGIC_SYNTHESIS.md) | W5 | Final synthesis, verdict, next actions |
+| [RITUAL_ROC_MILESTONE_ATTESTATION_AUDIT.md](RITUAL_ROC_MILESTONE_ATTESTATION_AUDIT.md) | W2 | ROC milestone attestation, DAE-to-DAO certification fit |
 
 ---
 
@@ -43,6 +44,7 @@ This audit lane evaluates Ritual (decentralized AI execution substrate) for pote
 |----------|---------|
 | **Architecture Fit** | `FIT_AS_OPTIONAL_ADAPTER` — not core, not rejected |
 | **Economics Fit** | `SELECTIVE_USE_ONLY` — batch only, not interactive |
+| **ROC Attestation Fit** | `FIT_AS_OPTIONAL_ATTESTATION_LAYER` — milestone verification, not computation |
 | **Strategic Verdict** | `WATCH_AND_OPTIONAL_ADAPTER` |
 
 ---
