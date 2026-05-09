@@ -45,14 +45,15 @@ class TestTruthBoundaryConstants:
 
     def test_placeholder_banner_contains_required_strings(self):
         required_phrases = [
-            "PLACEHOLDER_STUB",
+            "REAL_TRANSPORT",  # MCPA8: transport is real
+            "PLACEHOLDER_BACKENDS",  # MCPA8: backends still placeholder
             "implementation_status : placeholder_stub",
             "auth_enforcement      : BASIC",  # MCPA1 Slice 6: now enforced
             "scope_enforcement     : YES",    # MCPA1 Slice 6: cross-tenant rejected
             "tool_data             : HARDCODED / FAKE",
-            "server_transport      : NONE",
+            "server_transport      : HTTP_JSON",  # MCPA8: real transport
             "registry_persistence  : LOCAL_JSON",  # MCPA1 Slice 7: persisted
-            "DO NOT USE FOR REAL TENANTS",
+            "DO NOT USE FOR PRODUCTION TRAFFIC",
         ]
         for phrase in required_phrases:
             assert phrase in PLACEHOLDER_BANNER, (

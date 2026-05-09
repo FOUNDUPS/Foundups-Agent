@@ -4,23 +4,30 @@ pAVS MCP Server Implementation
 WSP 103: FoundUp Federation Protocol
 Exposes CABR, Gemma, Qwen, FAM, Pattern Memory, HoloIndex to federated FoundUps.
 
-Truth boundary (WSP 97, MCPA4):
-    This module is a PLACEHOLDER_STUB. Every tool body returns hardcoded
-    values; the start() coroutine does not bind a port; auth is a TODO.
+Truth boundary (WSP 97, MCPA8):
+    This module is a PLACEHOLDER_STUB for backend data. Every tool body returns
+    hardcoded values. However, the transport layer is REAL — start() binds a
+    local HTTP port via Python stdlib http.server and accepts JSON tool calls.
+
     All tool responses embed `meta.implementation_status = "placeholder_stub"`
     so any client checking the canonical envelope (WSP 96 Annex A.5 C3) can
     detect the placeholder state without trusting the data.
 
 Usage:
     python -m modules.infrastructure.pavs_mcp.src.server
+
+    # Server binds to http://localhost:8765 by default
+    # POST /tool with JSON body: {"tool_name": "...", "arguments": {...}, "api_key": "..."}
 """
 
 import asyncio
 import json
 import logging
 import os
+import threading
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from typing import Any, Optional
 from pathlib import Path
 
@@ -66,19 +73,20 @@ data and refuse to use it for production decisions. See WSP 96 Annex A.5 C3.
 
 PLACEHOLDER_BANNER = (
     "==============================================================\n"
-    " pAVS MCP Server - PLACEHOLDER_STUB + BASIC_AUTH + LOCAL_PERSIST\n"
+    " pAVS MCP Server - REAL_TRANSPORT + PLACEHOLDER_BACKENDS\n"
     "--------------------------------------------------------------\n"
-    "  implementation_status : placeholder_stub\n"
+    "  implementation_status : placeholder_stub (backends only)\n"
     "  auth_enforcement      : BASIC (api_key validated)\n"
     "  scope_enforcement     : YES (cross-tenant foundup_id rejected)\n"
     "  registry_persistence  : LOCAL_JSON (survives restart)\n"
     "  tool_data             : HARDCODED / FAKE\n"
-    "  server_transport      : NONE (start() does not bind a port)\n"
+    "  server_transport      : HTTP_JSON (local, real binding)\n"
     "  canonical owner of holo_search : NOT THIS SURFACE\n"
     "                                   (see WSP 96 Annex A.1)\n"
     "\n"
-    "  DO NOT USE FOR REAL TENANTS OR PRODUCTION TRAFFIC.\n"
-    "  Tracked remediation: MCPA1 Slice 8+ (transport, backends).\n"
+    "  Transport is REAL. Backends are PLACEHOLDERS.\n"
+    "  DO NOT USE FOR PRODUCTION TRAFFIC.\n"
+    "  Tracked remediation: MCPA9+ (real backends).\n"
     "=============================================================="
 )
 """Operator-facing startup warning. Printed and logged on server start."""
@@ -281,6 +289,120 @@ BOOTSTRAP_TOOLS = frozenset({"foundup_register"})
 """Tools that may be called without auth — bootstrap registration only."""
 
 
+# =============================================================================
+# HTTP Transport (MCPA8 — Real Local Transport via stdlib)
+# =============================================================================
+
+
+class PAVSHTTPRequestHandler(BaseHTTPRequestHandler):
+    """HTTP request handler for pAVS MCP Server.
+
+    Uses Python stdlib http.server — no external dependencies.
+    Routes:
+        GET  /status       -> server status
+        GET  /tools        -> list tools
+        POST /tool         -> execute tool call
+        POST /tool/{name}  -> execute tool by path
+    """
+
+    # Set by PAVSMCPServer when creating the handler
+    server_instance: Optional["PAVSMCPServer"] = None
+
+    def log_message(self, format, *args):
+        """Suppress default logging (use our logger instead)."""
+        logger.debug(f"HTTP: {format % args}")
+
+    def _send_json_response(self, data: dict, status: int = 200) -> None:
+        """Send a JSON response."""
+        body = json.dumps(data).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def _read_json_body(self) -> Optional[dict]:
+        """Read and parse JSON request body."""
+        content_length = int(self.headers.get("Content-Length", 0))
+        if content_length == 0:
+            return {}
+        try:
+            body = self.rfile.read(content_length)
+            return json.loads(body.decode("utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError) as e:
+            logger.warning(f"Invalid JSON body: {e}")
+            return None
+
+    def do_GET(self) -> None:
+        """Handle GET requests."""
+        if self.server_instance is None:
+            self._send_json_response({"error": "Server not initialized"}, 500)
+            return
+
+        if self.path == "/status":
+            self._send_json_response({
+                "status": "running",
+                "implementation_status": IMPLEMENTATION_STATUS,
+                "transport": "HTTP_JSON",
+                "tools": list(self.server_instance._tools.keys()),
+                "registrations_count": len(self.server_instance.registrations),
+            })
+        elif self.path == "/tools":
+            self._send_json_response({
+                "tools": list(self.server_instance._tools.keys())
+            })
+        else:
+            self._send_json_response({"error": "Not found"}, 404)
+
+    def do_POST(self) -> None:
+        """Handle POST requests."""
+        if self.server_instance is None:
+            self._send_json_response({"error": "Server not initialized"}, 500)
+            return
+
+        body = self._read_json_body()
+        if body is None:
+            self._send_json_response({
+                "error": {"code": "INVALID_JSON", "message": "Invalid JSON body"}
+            }, 400)
+            return
+
+        # Route: POST /tool
+        if self.path == "/tool":
+            tool_name = body.get("tool_name")
+            if not tool_name:
+                self._send_json_response({
+                    "error": {"code": "MISSING_FIELD", "message": "tool_name required"}
+                }, 400)
+                return
+            arguments = body.get("arguments", {})
+            api_key = body.get("api_key")
+
+        # Route: POST /tool/{name}
+        elif self.path.startswith("/tool/"):
+            tool_name = self.path[6:]  # Strip "/tool/"
+            arguments = body.get("arguments", {})
+            api_key = body.get("api_key")
+
+        else:
+            self._send_json_response({"error": "Not found"}, 404)
+            return
+
+        # Execute tool call synchronously (wrap async)
+        loop = asyncio.new_event_loop()
+        try:
+            result = loop.run_until_complete(
+                self.server_instance.handle_tool_call(
+                    tool_name=tool_name,
+                    arguments=arguments,
+                    api_key=api_key,
+                )
+            )
+            self._send_json_response(result)
+        finally:
+            loop.close()
+
+
 class PAVSMCPServer:
     """
     pAVS MCP Server exposing infrastructure to federated FoundUps.
@@ -307,6 +429,10 @@ class PAVSMCPServer:
         # MCPA7: Durable registry store (persists to JSON file)
         self._registry_store = RegistryStore(registry_path)
         self._tools = self._register_tools()
+
+        # MCPA8: Real HTTP transport via stdlib
+        self._http_server: Optional[HTTPServer] = None
+        self._server_thread: Optional[threading.Thread] = None
 
     @property
     def registrations(self) -> dict[str, FoundUpRegistration]:
@@ -818,36 +944,74 @@ class PAVSMCPServer:
                 ),
             }
 
-    async def start(self):
-        """Start the MCP server.
+    def _create_handler_class(self):
+        """Create a request handler class bound to this server instance."""
+        server_instance = self
 
-        WSP 97 / MCPA4: prints an explicit PLACEHOLDER banner on startup so
-        operators cannot mistake this for a production server. The body of
-        this method does NOT bind a port — it sleeps. Real transport is
-        deferred to MCPA1 Slice 4.
+        class BoundHandler(PAVSHTTPRequestHandler):
+            pass
+
+        BoundHandler.server_instance = server_instance
+        return BoundHandler
+
+    async def start(self):
+        """Start the MCP server with real HTTP transport (MCPA8).
+
+        WSP 97: prints an explicit banner on startup. Transport is REAL
+        (binds a local port), but backends remain PLACEHOLDER (hardcoded data).
         """
-        # WSP 97: emit the placeholder banner before anything else.
+        # WSP 97: emit the banner before anything else.
         for line in PLACEHOLDER_BANNER.splitlines():
             logger.warning(line)
         print(PLACEHOLDER_BANNER)
 
         logger.info(
-            "Starting pAVS MCP Server on %s:%s (PLACEHOLDER — does not bind)",
+            "Starting pAVS MCP Server on http://%s:%s (REAL transport, PLACEHOLDER backends)",
             self.host,
             self.port,
         )
-        # TODO: Implement actual WebSocket server (tracked: MCPA1 Slice 4)
-        # For now, this is a placeholder that can be used for testing only.
-
-        print(
-            f"pAVS MCP Server [PLACEHOLDER_STUB] would listen on "
-            f"{self.host}:{self.port} — but this build does not bind."
-        )
+        print(f"pAVS MCP Server binding to http://{self.host}:{self.port}")
         print(f"Tools available (all return hardcoded data): {list(self._tools.keys())}")
+        print("Endpoints: GET /status, GET /tools, POST /tool, POST /tool/{name}")
 
-        # Keep running
-        while True:
-            await asyncio.sleep(60)
+        # Create and start HTTP server
+        handler_class = self._create_handler_class()
+        self._http_server = HTTPServer((self.host, self.port), handler_class)
+
+        # Run in executor to allow async context
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, self._http_server.serve_forever)
+
+    async def stop(self):
+        """Stop the server gracefully (for tests)."""
+        if self._http_server is not None:
+            self._http_server.shutdown()
+            logger.info("pAVS MCP Server shutdown requested")
+
+    def start_sync(self, timeout: Optional[float] = None):
+        """Start server synchronously in a background thread (for tests).
+
+        Returns when server is ready to accept connections.
+        """
+        ready_event = threading.Event()
+
+        def run_server():
+            handler_class = self._create_handler_class()
+            self._http_server = HTTPServer((self.host, self.port), handler_class)
+            ready_event.set()
+            self._http_server.serve_forever()
+
+        self._server_thread = threading.Thread(target=run_server, daemon=True)
+        self._server_thread.start()
+
+        # Wait for server to be ready
+        if not ready_event.wait(timeout=timeout or 5.0):
+            raise RuntimeError("Server failed to start within timeout")
+
+    def stop_sync(self):
+        """Stop server started with start_sync()."""
+        if self._http_server is not None:
+            self._http_server.shutdown()
 
 
 async def main():
