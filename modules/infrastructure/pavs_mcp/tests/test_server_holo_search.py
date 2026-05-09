@@ -47,14 +47,16 @@ class TestTruthBoundaryConstants:
         required_phrases = [
             "REAL_TRANSPORT",  # MCPA8: transport is real
             "PARTIAL_BACKENDS",  # MCPA9A+: some real, others placeholder
-            "implementation_status : partial",  # MCPA9A+: mixed status
+            "implementation_status : partial",  # MCPA9C: 4/8 tools have real backends
             "auth_enforcement      : BASIC",  # MCPA1 Slice 6: now enforced
             "scope_enforcement     : YES",    # MCPA1 Slice 6: cross-tenant rejected
             "holo_search           : REAL",   # MCPA9A: holo_search delegates to S2
             "fam_emit              : REAL",   # MCPA9B: fam_emit delegates to FAM
+            "pattern_recall        : REAL",   # MCPA9C: pattern_recall delegates to PatternMemory
+            "pattern_store         : REAL",   # MCPA9C: pattern_store delegates to PatternMemory
             "server_transport      : HTTP_JSON",  # MCPA8: real transport
             "registry_persistence  : LOCAL_JSON",  # MCPA1 Slice 7: persisted
-            "Other backends remain PLACEHOLDERS",  # others still placeholder
+            "CABR/Gemma/Qwen remain PLACEHOLDERS",  # remaining placeholders
         ]
         for phrase in required_phrases:
             assert phrase in PLACEHOLDER_BANNER, (
@@ -185,33 +187,52 @@ class TestHoloSearchTruthFlag:
 
 
 @pytest.mark.parametrize(
-    "tool_name,arguments,is_bootstrap",
+    "tool_name,arguments,is_bootstrap,has_real_backend",
     [
-        ("cabr_validate", {"content": "x", "context": {}}, False),
-        ("gemma_classify", {"text": "x", "categories": ["a", "b"]}, False),
-        ("qwen_plan", {"objective": "x", "constraints": {}}, False),
-        ("fam_emit", {"foundup_id": "test_foundup", "event_type": "test", "payload": {}}, False),
-        ("pattern_recall", {"skill": "x", "min_fidelity": 0.5}, False),
-        ("pattern_store", {"skill": "x", "outcome": {}}, False),
-        ("holo_search", {"query": "x"}, False),
-        ("foundup_register", {"foundup_id": "new_x", "repo_url": "y", "owner_pubkey": "z"}, True),
+        ("cabr_validate", {"content": "x", "context": {}}, False, False),
+        ("gemma_classify", {"text": "x", "categories": ["a", "b"]}, False, False),
+        ("qwen_plan", {"objective": "x", "constraints": {}}, False, False),
+        ("fam_emit", {"foundup_id": "test_foundup", "event_type": "test", "payload": {}}, False, True),
+        ("pattern_recall", {"skill": "x", "min_fidelity": 0.5}, False, True),
+        ("pattern_store", {"skill": "x", "outcome": {"execution_id": "test_exec", "agent": "test", "success": True, "pattern_fidelity": 0.9}}, False, True),
+        ("holo_search", {"query": "x"}, False, True),
+        ("foundup_register", {"foundup_id": "new_x", "repo_url": "y", "owner_pubkey": "z"}, True, False),
     ],
 )
-def test_every_tool_response_carries_truth_flag(tool_name, arguments, is_bootstrap):
+def test_every_tool_response_carries_truth_flag(tool_name, arguments, is_bootstrap, has_real_backend):
+    import uuid
     server = PAVSMCPServer()
     # MCPA1 Slice 6: Protected tools need auth; bootstrap tools do not
     api_key = None
     if not is_bootstrap:
         api_key = _register_and_get_key(server, "test_foundup")
+        # Add unique test_run_id for fam_emit to avoid dedupe rejection
+        if tool_name == "fam_emit":
+            arguments = dict(arguments)
+            arguments["payload"] = {"test_run_id": str(uuid.uuid4())}
+        # Add unique execution_id for pattern_store
+        if tool_name == "pattern_store":
+            arguments = dict(arguments)
+            arguments["outcome"] = dict(arguments["outcome"])
+            arguments["outcome"]["execution_id"] = f"test_exec_{uuid.uuid4()}"
+
     result = _run(server.handle_tool_call(tool_name, arguments, api_key=api_key))
 
     assert "meta" in result, f"{tool_name}: response missing 'meta' block"
     assert result["meta"]["implementation_status"] == "placeholder_stub", (
         f"{tool_name}: meta.implementation_status must be placeholder_stub"
     )
-    assert result["meta"]["real_backend"] is False, (
-        f"{tool_name}: meta.real_backend must be False"
-    )
+    # Tools with real backends return real_backend=True in their inner result
+    if has_real_backend and "result" in result:
+        inner = result["result"]
+        if isinstance(inner, dict) and "meta" in inner:
+            assert inner["meta"]["real_backend"] is True, (
+                f"{tool_name}: inner meta.real_backend must be True for real backends"
+            )
+    else:
+        assert result["meta"]["real_backend"] is False, (
+            f"{tool_name}: meta.real_backend must be False for placeholder tools"
+        )
     assert result["meta"]["tool"] == tool_name, (
         f"{tool_name}: meta.tool must echo tool name"
     )
@@ -935,3 +956,295 @@ class TestRegistryPersistence:
 
         assert registry_path.exists()
         assert registry_path.parent.exists()
+
+
+# ---------------------------------------------------------------------------
+# MCPA9C — PatternMemory Backend Delegation
+# ---------------------------------------------------------------------------
+
+
+class TestPatternMemoryBackendDelegation:
+    """MCPA9C: pattern_recall and pattern_store delegate to PatternMemory backend.
+
+    Tests verify: successful delegation returns status="ok", meta.real_backend=True,
+    S3 surface marking, delegated_to="PATTERN_MEMORY", and proper error handling.
+    """
+
+    @pytest.fixture
+    def srv(self):
+        return PAVSMCPServer()
+
+    @pytest.fixture
+    def authed_srv(self):
+        """Server with a registered FoundUp."""
+        srv = PAVSMCPServer()
+        api_key = _register_and_get_key(srv, "test_foundup")
+        return srv, api_key
+
+    # ----- pattern_recall tests -----
+
+    def test_pattern_recall_returns_ok_status(self, srv):
+        """pattern_recall returns status=ok on success."""
+        result = _run(srv.pattern_recall(skill="test_skill"))
+        assert result["status"] == "ok"
+
+    def test_pattern_recall_meta_real_backend_true(self, srv):
+        """pattern_recall indicates real backend connection."""
+        result = _run(srv.pattern_recall(skill="test_skill"))
+        assert result["meta"]["real_backend"] is True
+        assert result["meta"]["delegated_to"] == "PATTERN_MEMORY"
+        assert result["meta"]["surface"] == "S3"
+
+    def test_pattern_recall_data_contains_skill(self, srv):
+        """pattern_recall echoes the skill parameter."""
+        result = _run(srv.pattern_recall(skill="my_skill", min_fidelity=0.8))
+        assert result["data"]["skill"] == "my_skill"
+        assert result["data"]["min_fidelity"] == 0.8
+
+    def test_pattern_recall_data_contains_patterns_list(self, srv):
+        """pattern_recall returns patterns as a list."""
+        result = _run(srv.pattern_recall(skill="any_skill"))
+        assert "patterns" in result["data"]
+        assert isinstance(result["data"]["patterns"], list)
+        assert "count" in result["data"]
+        assert result["data"]["count"] == len(result["data"]["patterns"])
+
+    def test_pattern_recall_via_handle_tool_call(self, authed_srv):
+        """pattern_recall works through handle_tool_call dispatch."""
+        srv, api_key = authed_srv
+        wrapped = _run(srv.handle_tool_call(
+            "pattern_recall",
+            {"skill": "test_skill", "min_fidelity": 0.7},
+            api_key=api_key,
+        ))
+        assert "result" in wrapped
+        inner = wrapped["result"]
+        assert inner["status"] == "ok"
+        assert inner["meta"]["real_backend"] is True
+        assert inner["meta"]["delegated_to"] == "PATTERN_MEMORY"
+        assert wrapped["meta"]["auth_enforced"] is True
+
+    def test_pattern_recall_requires_auth(self, srv):
+        """pattern_recall is a protected tool."""
+        result = _run(srv.handle_tool_call(
+            "pattern_recall",
+            {"skill": "test_skill"},
+            api_key=None,
+        ))
+        assert "error" in result
+        assert result["error"]["code"] == "MISSING_API_KEY"
+
+    # ----- pattern_store tests -----
+
+    def test_pattern_store_returns_ok_status(self, srv):
+        """pattern_store returns status=ok on success."""
+        import uuid
+        result = _run(srv.pattern_store(
+            skill="test_skill",
+            outcome={
+                "execution_id": f"exec_{uuid.uuid4()}",
+                "agent": "qwen",
+                "success": True,
+                "pattern_fidelity": 0.95,
+            },
+        ))
+        assert result["status"] == "ok"
+
+    def test_pattern_store_meta_real_backend_true(self, srv):
+        """pattern_store indicates real backend connection."""
+        import uuid
+        result = _run(srv.pattern_store(
+            skill="test_skill",
+            outcome={
+                "execution_id": f"exec_{uuid.uuid4()}",
+                "agent": "gemma",
+                "success": True,
+                "pattern_fidelity": 0.88,
+            },
+        ))
+        assert result["meta"]["real_backend"] is True
+        assert result["meta"]["delegated_to"] == "PATTERN_MEMORY"
+        assert result["meta"]["surface"] == "S3"
+
+    def test_pattern_store_data_confirms_storage(self, srv):
+        """pattern_store confirms storage in data block."""
+        import uuid
+        exec_id = f"exec_{uuid.uuid4()}"
+        result = _run(srv.pattern_store(
+            skill="stored_skill",
+            outcome={
+                "execution_id": exec_id,
+                "agent": "qwen",
+                "success": True,
+                "pattern_fidelity": 0.92,
+            },
+        ))
+        assert result["data"]["skill"] == "stored_skill"
+        assert result["data"]["execution_id"] == exec_id
+        assert result["data"]["stored"] is True
+        assert result["data"]["pattern_fidelity"] == 0.92
+
+    def test_pattern_store_via_handle_tool_call(self, authed_srv):
+        """pattern_store works through handle_tool_call dispatch."""
+        import uuid
+        srv, api_key = authed_srv
+        wrapped = _run(srv.handle_tool_call(
+            "pattern_store",
+            {
+                "skill": "test_skill",
+                "outcome": {
+                    "execution_id": f"exec_{uuid.uuid4()}",
+                    "agent": "test_agent",
+                    "success": True,
+                    "pattern_fidelity": 0.85,
+                },
+            },
+            api_key=api_key,
+        ))
+        assert "result" in wrapped
+        inner = wrapped["result"]
+        assert inner["status"] == "ok"
+        assert inner["meta"]["real_backend"] is True
+        assert inner["meta"]["delegated_to"] == "PATTERN_MEMORY"
+        assert wrapped["meta"]["auth_enforced"] is True
+
+    def test_pattern_store_requires_auth(self, srv):
+        """pattern_store is a protected tool."""
+        result = _run(srv.handle_tool_call(
+            "pattern_store",
+            {"skill": "test_skill", "outcome": {}},
+            api_key=None,
+        ))
+        assert "error" in result
+        assert result["error"]["code"] == "MISSING_API_KEY"
+
+    # ----- Validation error tests -----
+
+    def test_pattern_store_rejects_missing_execution_id(self, srv):
+        """pattern_store requires execution_id in outcome."""
+        result = _run(srv.pattern_store(
+            skill="test_skill",
+            outcome={
+                "agent": "test",
+                "success": True,
+                "pattern_fidelity": 0.9,
+            },
+        ))
+        assert result["status"] == "error"
+        assert result["error"]["code"] == "INVALID_OUTCOME"
+        assert "execution_id" in result["error"]["message"]
+        assert result["meta"]["real_backend"] is False
+
+    def test_pattern_store_rejects_missing_agent(self, srv):
+        """pattern_store requires agent in outcome."""
+        import uuid
+        result = _run(srv.pattern_store(
+            skill="test_skill",
+            outcome={
+                "execution_id": f"exec_{uuid.uuid4()}",
+                "success": True,
+                "pattern_fidelity": 0.9,
+            },
+        ))
+        assert result["status"] == "error"
+        assert result["error"]["code"] == "INVALID_OUTCOME"
+        assert "agent" in result["error"]["message"]
+
+    def test_pattern_store_rejects_missing_success(self, srv):
+        """pattern_store requires success in outcome."""
+        import uuid
+        result = _run(srv.pattern_store(
+            skill="test_skill",
+            outcome={
+                "execution_id": f"exec_{uuid.uuid4()}",
+                "agent": "test",
+                "pattern_fidelity": 0.9,
+            },
+        ))
+        assert result["status"] == "error"
+        assert result["error"]["code"] == "INVALID_OUTCOME"
+        assert "success" in result["error"]["message"]
+
+    def test_pattern_store_rejects_missing_fidelity(self, srv):
+        """pattern_store requires pattern_fidelity in outcome."""
+        import uuid
+        result = _run(srv.pattern_store(
+            skill="test_skill",
+            outcome={
+                "execution_id": f"exec_{uuid.uuid4()}",
+                "agent": "test",
+                "success": True,
+            },
+        ))
+        assert result["status"] == "error"
+        assert result["error"]["code"] == "INVALID_OUTCOME"
+        assert "pattern_fidelity" in result["error"]["message"]
+
+    # ----- Optional fields have defaults -----
+
+    def test_pattern_store_optional_fields_have_defaults(self, srv):
+        """pattern_store provides defaults for optional fields."""
+        import uuid
+        result = _run(srv.pattern_store(
+            skill="minimal_skill",
+            outcome={
+                "execution_id": f"exec_{uuid.uuid4()}",
+                "agent": "test",
+                "success": True,
+                "pattern_fidelity": 0.9,
+                # No input_context, output_result, timestamp, etc.
+            },
+        ))
+        assert result["status"] == "ok"
+        assert result["data"]["stored"] is True
+
+    def test_pattern_store_accepts_dict_input_context(self, srv):
+        """pattern_store accepts dict for input_context (auto-serialized)."""
+        import uuid
+        result = _run(srv.pattern_store(
+            skill="dict_context_skill",
+            outcome={
+                "execution_id": f"exec_{uuid.uuid4()}",
+                "agent": "test",
+                "success": True,
+                "pattern_fidelity": 0.9,
+                "input_context": {"key": "value", "nested": {"a": 1}},
+            },
+        ))
+        assert result["status"] == "ok"
+
+    # ----- Round-trip test: store then recall -----
+
+    def test_pattern_store_then_recall_round_trip(self, srv):
+        """Stored patterns can be recalled."""
+        import uuid
+        skill_name = f"roundtrip_skill_{uuid.uuid4().hex[:8]}"
+        exec_id = f"exec_{uuid.uuid4()}"
+
+        # Store a successful pattern
+        store_result = _run(srv.pattern_store(
+            skill=skill_name,
+            outcome={
+                "execution_id": exec_id,
+                "agent": "qwen",
+                "success": True,
+                "pattern_fidelity": 0.95,
+                "outcome_quality": 0.9,
+                "execution_time_ms": 100,
+                "step_count": 3,
+            },
+        ))
+        assert store_result["status"] == "ok"
+
+        # Recall patterns for that skill
+        recall_result = _run(srv.pattern_recall(
+            skill=skill_name,
+            min_fidelity=0.9,
+        ))
+        assert recall_result["status"] == "ok"
+        patterns = recall_result["data"]["patterns"]
+
+        # Should find the pattern we just stored
+        matching = [p for p in patterns if p.get("execution_id") == exec_id]
+        assert len(matching) == 1
+        assert matching[0]["pattern_fidelity"] >= 0.95
