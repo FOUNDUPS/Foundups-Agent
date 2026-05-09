@@ -87,6 +87,65 @@ def _call_s2_holo_search(
 
 
 # =============================================================================
+# FAM Backend Adapter (MCPA9B — Real FAM DAEmon Connection)
+# =============================================================================
+
+# FAM backend availability flag
+_FAM_BACKEND_AVAILABLE: Optional[bool] = None
+
+
+def _call_fam_emit(
+    foundup_id: str,
+    event_type: str,
+    payload: dict[str, Any],
+    actor_id: str = "pAVS_MCP",
+) -> dict[str, Any]:
+    """Call FAM DAEmon emit() and return the result.
+
+    Imports FAM daemon lazily to avoid circular import issues.
+
+    Args:
+        foundup_id: FoundUp emitting the event
+        event_type: Event type string
+        payload: Event payload dict
+        actor_id: Actor performing the action (default: pAVS_MCP)
+
+    Returns:
+        Dict with event_id, success, timestamp, and persistence info.
+
+    Raises:
+        RuntimeError: If FAM backend is unavailable or fails.
+    """
+    global _FAM_BACKEND_AVAILABLE
+
+    try:
+        from modules.foundups.agent_market.src.fam_daemon import get_fam_daemon
+
+        daemon = get_fam_daemon(auto_start=False)
+        success, message = daemon.emit(
+            event_type=event_type,
+            payload=payload,
+            actor_id=actor_id,
+            foundup_id=foundup_id,
+        )
+        _FAM_BACKEND_AVAILABLE = True
+
+        if not success:
+            raise RuntimeError(f"FAM emit failed: {message}")
+
+        return {
+            "success": success,
+            "message": message,
+        }
+
+    except ImportError as e:
+        _FAM_BACKEND_AVAILABLE = False
+        raise RuntimeError(f"FAM backend import failed: {e}") from e
+    except Exception as e:
+        raise RuntimeError(f"FAM backend call failed: {e}") from e
+
+
+# =============================================================================
 # Registry Persistence (MCPA7 — Durable FoundUp Registration)
 # =============================================================================
 
@@ -127,15 +186,16 @@ PLACEHOLDER_BANNER = (
     "==============================================================\n"
     " pAVS MCP Server - REAL_TRANSPORT + PARTIAL_BACKENDS\n"
     "--------------------------------------------------------------\n"
-    "  implementation_status : partial (holo_search real, others stub)\n"
+    "  implementation_status : partial (holo_search, fam_emit real)\n"
     "  auth_enforcement      : BASIC (api_key validated)\n"
     "  scope_enforcement     : YES (cross-tenant foundup_id rejected)\n"
     "  registry_persistence  : LOCAL_JSON (survives restart)\n"
     "  server_transport      : HTTP_JSON (local, real binding)\n"
     "  holo_search           : REAL (delegates to S2/HoloIndex)\n"
+    "  fam_emit              : REAL (delegates to FAM DAEmon)\n"
     "  other tools           : HARDCODED / FAKE (CABR, Gemma, Qwen, etc)\n"
     "\n"
-    "  Transport is REAL. holo_search is REAL.\n"
+    "  Transport is REAL. holo_search + fam_emit are REAL.\n"
     "  Other backends remain PLACEHOLDERS.\n"
     "  Tracked remediation: MCPA10+ (remaining backends).\n"
     "=============================================================="
@@ -599,33 +659,77 @@ class PAVSMCPServer:
         event_type: str,
         payload: dict
     ) -> dict[str, Any]:
-        """
-        Emit event to FAM DAEmon for tracking.
+        """Emit event to FAM DAEmon for tracking — delegates to real backend.
+
+        MCPA9B: S3 now delegates to the real FAM DAEmon via adapter.
+        Auth/scope enforcement happens in handle_tool_call before this method.
 
         Args:
-            foundup_id: Which FoundUp is emitting
+            foundup_id: Which FoundUp is emitting (already validated by caller)
             event_type: Event category
             payload: Event-specific data
 
         Returns:
-            event_id, timestamp
+            Canonical envelope with:
+              - status: "ok" | "error"
+              - data: event details + persistence confirmation
+              - meta: real_backend=true when FAM accepts the event
         """
-        # TODO: Connect to FAM DAEmon
-        # from modules.foundups.agent_market.src.fam_daemon import get_fam_daemon
+        logger.info(
+            "S3 fam_emit delegating to FAM backend: foundup=%r event_type=%r",
+            foundup_id,
+            event_type,
+        )
 
-        import hashlib
-        from datetime import datetime
+        try:
+            # Delegate to FAM backend
+            fam_result = _call_fam_emit(
+                foundup_id=foundup_id,
+                event_type=event_type,
+                payload=payload,
+                actor_id="pAVS_MCP",
+            )
 
-        event_id = hashlib.sha256(
-            f"{foundup_id}:{event_type}:{json.dumps(payload)}:{datetime.utcnow().isoformat()}".encode()
-        ).hexdigest()[:16]
+            return {
+                "status": "ok",
+                "data": {
+                    "foundup_id": foundup_id,
+                    "event_type": event_type,
+                    "payload": payload,
+                    "persisted": fam_result["success"],
+                    "message": fam_result["message"],
+                },
+                "meta": {
+                    "tool": "fam_emit",
+                    "surface": "S3",
+                    "real_backend": True,
+                    "delegated_to": "FAM_DAEMON",
+                    "generated_at": datetime.now(timezone.utc).isoformat(),
+                },
+            }
 
-        logger.info(f"FAM emit: {foundup_id} -> {event_type}")
-        return {
-            "event_id": event_id,
-            "timestamp": datetime.utcnow().isoformat(),
-            "persisted": True
-        }
+        except Exception as e:
+            logger.error(f"S3 fam_emit backend error: {e}")
+
+            return {
+                "status": "error",
+                "data": {
+                    "foundup_id": foundup_id,
+                    "event_type": event_type,
+                    "payload": payload,
+                    "persisted": False,
+                },
+                "error": {
+                    "code": "BACKEND_UNAVAILABLE",
+                    "message": f"FAM backend unavailable: {e}",
+                },
+                "meta": {
+                    **_truth_meta(),
+                    "tool": "fam_emit",
+                    "surface": "S3",
+                    "real_backend": False,
+                },
+            }
 
     async def pattern_recall(
         self,

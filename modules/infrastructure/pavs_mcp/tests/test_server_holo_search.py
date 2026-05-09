@@ -46,14 +46,15 @@ class TestTruthBoundaryConstants:
     def test_placeholder_banner_contains_required_strings(self):
         required_phrases = [
             "REAL_TRANSPORT",  # MCPA8: transport is real
-            "PARTIAL_BACKENDS",  # MCPA9A: holo_search real, others placeholder
-            "implementation_status : partial",  # MCPA9A: mixed status
+            "PARTIAL_BACKENDS",  # MCPA9A+: some real, others placeholder
+            "implementation_status : partial",  # MCPA9A+: mixed status
             "auth_enforcement      : BASIC",  # MCPA1 Slice 6: now enforced
             "scope_enforcement     : YES",    # MCPA1 Slice 6: cross-tenant rejected
             "holo_search           : REAL",   # MCPA9A: holo_search delegates to S2
+            "fam_emit              : REAL",   # MCPA9B: fam_emit delegates to FAM
             "server_transport      : HTTP_JSON",  # MCPA8: real transport
             "registry_persistence  : LOCAL_JSON",  # MCPA1 Slice 7: persisted
-            "Other backends remain PLACEHOLDERS",  # MCPA9A: others still placeholder
+            "Other backends remain PLACEHOLDERS",  # others still placeholder
         ]
         for phrase in required_phrases:
             assert phrase in PLACEHOLDER_BANNER, (
@@ -660,20 +661,31 @@ class TestFederationAuth:
         assert result["meta"]["registered_foundup_id"] == "my_foundup"
 
     def test_fam_emit_matching_foundup_id_accepted(self, srv):
-        """fam_emit with matching foundup_id succeeds."""
+        """MCPA9B: fam_emit with matching foundup_id delegates to FAM backend."""
+        import uuid
         api_key = self._register_foundup(srv, "my_foundup")
+
+        # Use unique payload to avoid FAM dedupe rejection
+        unique_payload = {"key": "value", "test_run_id": str(uuid.uuid4())}
 
         result = _run(srv.handle_tool_call(
             "fam_emit",
             {
                 "foundup_id": "my_foundup",
                 "event_type": "test",
-                "payload": {"key": "value"},
+                "payload": unique_payload,
             },
             api_key=api_key,
         ))
         assert "result" in result
-        assert "event_id" in result["result"]
+        inner = result["result"]
+        # MCPA9B: Real FAM backend envelope
+        assert inner["status"] == "ok"
+        assert inner["data"]["foundup_id"] == "my_foundup"
+        assert inner["data"]["event_type"] == "test"
+        assert inner["data"]["persisted"] is True
+        assert inner["meta"]["real_backend"] is True
+        assert inner["meta"]["delegated_to"] == "FAM_DAEMON"
 
     # ----- No foundup_id argument is OK (uses caller identity) -----
 

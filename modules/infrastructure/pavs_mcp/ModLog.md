@@ -1,5 +1,50 @@
 # pAVS MCP Server - ModLog
 
+## 2026-05-09 - MCPA9B: S3 fam_emit Backend Connection
+
+**Author**: 0102 (Worker W1)
+**WSP**: 96 (MCP Governance), 97 (Truth Boundaries)
+**Slice**: `MCPA9B_FAM_EMIT_BACKEND_CONNECTION_PHASE1`
+**Closes (MCPA9A audit)**: H4d (fam_emit now real)
+
+### Why
+
+Per MCPA9A re-audit, `fam_emit` was identified as a high-priority backend connection
+target because `fam_daemon.py` has a working `emit()` method with JSONL+SQLite
+dual-write. This slice connects S3 `fam_emit` to the real FAM DAEmon backend.
+
+### Changes
+
+- `src/server.py`:
+  - Added `_FAM_BACKEND_AVAILABLE` flag
+  - Added `_call_fam_emit()` adapter function importing `get_fam_daemon()`
+  - Rewrote `fam_emit()` method to delegate to FAM DAEmon
+  - Returns `meta.surface="S3"`, `meta.real_backend=True`, `meta.delegated_to="FAM_DAEMON"`
+  - Returns `BACKEND_UNAVAILABLE` error if FAM backend fails
+  - Updated `PLACEHOLDER_BANNER` to include `fam_emit : REAL`
+
+- `tests/test_server_holo_search.py`:
+  - Updated `test_fam_emit_matching_foundup_id_accepted` for real backend envelope
+  - Added unique payload (uuid) to avoid FAM dedupe rejection
+  - Updated banner test to require `fam_emit : REAL`
+
+- `tests/test_transport.py`:
+  - Added `TestFamEmitViaTransport` class
+  - Tests fam_emit backend delegation via HTTP POST /tool
+
+- `README.md`:
+  - Updated status to include fam_emit as REAL
+  - Updated tool table: `fam_emit` now shows **YES** for real backend
+
+### Result
+
+S3 `fam_emit` persists events to FAM DAEmon JSONL+SQLite.
+`holo_search` and `fam_emit` are now real backends.
+Other tools (CABR, Gemma, Qwen, pattern_*) remain placeholders.
+86/86 tests passing.
+
+---
+
 ## 2026-05-09 - MCPA9A: S3 holo_search Backend Connection
 
 **Author**: 0102 (Worker W1)
