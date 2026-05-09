@@ -2,7 +2,7 @@
 
 > ## ⚠️ STATUS: `REAL_TRANSPORT` + `PARTIAL_BACKENDS`
 >
-> **Transport is REAL. 4/8 tools have real backends. CABR/Gemma/Qwen are PLACEHOLDERS.**
+> **Transport is REAL. 5/8 tools have real backends. CABR/Qwen are PLACEHOLDERS.**
 >
 > - **Server transport**: `HTTP_JSON` (MCPA8) — `start()` binds a real local port via Python stdlib `http.server`. Clients can connect via `POST /tool` with JSON body. No external dependencies.
 > - **Auth enforcement**: `BASIC_AUTH_ENFORCEMENT` (MCPA1 Slice 6) — `handle_tool_call` validates `api_key` for protected tools; rejects missing/unknown keys; rejects cross-tenant `foundup_id` attempts. `foundup_register` remains unauthenticated (bootstrap-only).
@@ -11,9 +11,10 @@
 > - **fam_emit**: `REAL BACKEND` (MCPA9B) — S3 delegates to FAM DAEmon for event persistence. Returns `meta.real_backend=true`, `meta.delegated_to="FAM_DAEMON"`.
 > - **pattern_recall**: `REAL BACKEND` (MCPA9C) — S3 delegates to PatternMemory for skill pattern recall. Returns `meta.real_backend=true`, `meta.delegated_to="PATTERN_MEMORY"`.
 > - **pattern_store**: `REAL BACKEND` (MCPA9C) — S3 delegates to PatternMemory for skill outcome storage. Returns `meta.real_backend=true`, `meta.delegated_to="PATTERN_MEMORY"`.
-> - **Other tools**: `HARDCODED/FAKE DATA` — `cabr_validate`, `gemma_classify`, `qwen_plan` return hardcoded values; `# TODO: Connect to actual <X>` markers in code.
+> - **gemma_classify**: `REAL BACKEND` (MCPA9D) — S3 delegates to GemmaRAGInference for text classification. Returns `meta.real_backend=true`, `meta.delegated_to="GEMMA"`.
+> - **Other tools**: `HARDCODED/FAKE DATA` — `cabr_validate`, `qwen_plan` return hardcoded values; `# TODO: Connect to actual <X>` markers in code.
 > - **Canonical contract**: see WSP 96 Annex A (`holo_search` contract). S3 is not canonical owner but provides real backend via delegation.
-> - **Tracked remediation**: MCPA10+ (remaining backends: CABR, Gemma, Qwen).
+> - **Tracked remediation**: MCPA10+ (remaining backends: CABR, Qwen).
 
 **Location**: `modules/infrastructure/pavs_mcp/`
 **WSP Compliance**: WSP 103 (FoundUp Federation), WSP 96 (MCP Governance), WSP 49 (Module Structure)
@@ -48,7 +49,7 @@ Foundup/Move2Japan --MCP---+         +-> CABR Engine
 | Tool | Purpose | Input | Output | Real backend? |
 |------|---------|-------|--------|---------------|
 | `cabr_validate` | V1/V2/V3 content validation | content, context | score, passed, feedback | **NO** — hardcoded `score=0.85` |
-| `gemma_classify` | Binary/multi-class classification | text, categories | classification, confidence | **NO** — hardcoded `confidence=0.92` |
+| `gemma_classify` | Binary/multi-class classification | text, categories | classification, confidence | **YES** — delegates to GemmaRAGInference (MCPA9D) |
 | `qwen_plan` | Strategic planning | objective, constraints | plan, reasoning | **NO** — hardcoded 3-step plan |
 | `fam_emit` | Event tracking | foundup_id, event_type, payload | status, persisted | **YES** — delegates to FAM DAEmon (MCPA9B) |
 | `pattern_recall` | Recall successful patterns | skill, min_fidelity, limit | patterns[], count | **YES** — delegates to PatternMemory (MCPA9C) |

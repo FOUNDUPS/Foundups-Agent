@@ -1,5 +1,61 @@
 # pAVS MCP Server - ModLog
 
+## 2026-05-09 - MCPA9D: S3 Gemma Classify Backend Connection
+
+**Author**: 0102 (Worker W1)
+**WSP**: 96 (MCP Governance), 97 (Truth Boundaries)
+**Slice**: `MCPA9D_GEMMA_CLASSIFY_BACKEND_CONNECTION_PHASE1`
+**Closes (MCPA9C audit)**: H5b (gemma_classify now real)
+
+### Why
+
+Per MCPA9C re-audit, `gemma_classify` was identified as highest priority backend
+(WSP 15 score: 13). `GemmaRAGInference._gemma_inference()` provides a direct
+callable seam for text classification via llama_cpp.
+
+### Changes
+
+- `src/server.py`:
+  - Added `_GEMMA_BACKEND_AVAILABLE` flag
+  - Added `_get_gemma_engine()` lazy singleton
+  - Added `_call_gemma_classify()` adapter with prompt engineering
+  - Rewrote `gemma_classify()` method to delegate to Gemma backend
+  - Returns `meta.surface="S3"`, `meta.real_backend=True`, `meta.delegated_to="GEMMA"`
+  - Returns `BACKEND_UNAVAILABLE` if Gemma model fails
+  - Returns `INVALID_INPUT` for empty text or categories
+  - Updated `PLACEHOLDER_BANNER` to show 5/8 tools with real backends
+
+- `tests/test_server_holo_search.py`:
+  - Added `TestGemmaBackendDelegation` class (11 tests)
+  - Tests classification, validation, binary/multi-class
+  - Updated banner test for `gemma_classify : REAL`
+  - Updated parametrized test for Gemma real backend
+
+- `tests/test_transport.py`:
+  - Added `TestGemmaViaTransport` class (3 tests)
+  - Tests gemma_classify via HTTP POST /tool
+
+- `README.md`:
+  - Updated status: 5/8 tools have real backends
+  - Updated tool table: `gemma_classify` now **YES**
+
+### Callable Seam Used
+
+- `holo_index/qwen_advisor/gemma_rag_inference.py`:
+  - `GemmaRAGInference` class (line 97)
+  - `_gemma_inference(prompt)` method (line 351)
+  - Uses llama_cpp with lazy loading
+  - Model: gemma-3-270m via `resolve_triage_model_path()`
+
+### Result
+
+S3 `gemma_classify` delegates to GemmaRAGInference for real classification.
+5/8 tools now have real backends: holo_search, fam_emit, pattern_recall, pattern_store, gemma_classify.
+2 tools remain placeholders: cabr_validate, qwen_plan.
+122/122 tests passing.
+
+---
+
 ## 2026-05-09 - MCPA9C: S3 Pattern Memory Backend Connection
 
 **Author**: 0102 (Worker W1)

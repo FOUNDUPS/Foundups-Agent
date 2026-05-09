@@ -384,6 +384,86 @@ class TestPatternMemoryViaTransport:
         assert inner["error"]["code"] == "INVALID_OUTCOME"
 
 
+class TestGemmaViaTransport:
+    """MCPA9D: Test gemma_classify through HTTP transport."""
+
+    def test_gemma_classify_via_transport(self, base_url):
+        """POST /tool gemma_classify works with real backend."""
+        import uuid
+        # Register to get API key
+        _, reg_data = _post(f"{base_url}/tool", {
+            "tool_name": "foundup_register",
+            "arguments": {
+                "foundup_id": f"gemma_test_{uuid.uuid4().hex[:8]}",
+                "repo_url": "https://github.com/test/repo",
+                "owner_pubkey": "key",
+            },
+        })
+        api_key = reg_data["result"]["api_key"]
+
+        # Call gemma_classify
+        status, data = _post(f"{base_url}/tool", {
+            "tool_name": "gemma_classify",
+            "arguments": {"text": "Test message", "categories": ["pos", "neg"]},
+            "api_key": api_key,
+        })
+        assert status == 200
+        assert "result" in data
+        inner = data["result"]
+        assert inner["status"] == "ok"
+        assert inner["meta"]["real_backend"] is True
+        assert inner["meta"]["delegated_to"] == "GEMMA"
+        assert "classification" in inner["data"]
+
+    def test_gemma_classify_by_path(self, base_url):
+        """POST /tool/gemma_classify works."""
+        import uuid
+        # Register to get API key
+        _, reg_data = _post(f"{base_url}/tool", {
+            "tool_name": "foundup_register",
+            "arguments": {
+                "foundup_id": f"gemma_path_test_{uuid.uuid4().hex[:8]}",
+                "repo_url": "https://github.com/test/repo",
+                "owner_pubkey": "key",
+            },
+        })
+        api_key = reg_data["result"]["api_key"]
+
+        # Call via path
+        status, data = _post(f"{base_url}/tool/gemma_classify", {
+            "arguments": {"text": "Path test", "categories": ["a", "b"]},
+            "api_key": api_key,
+        })
+        assert status == 200
+        assert "result" in data
+
+    def test_gemma_classify_validates_input(self, base_url):
+        """POST /tool gemma_classify validates input."""
+        import uuid
+        # Register to get API key
+        _, reg_data = _post(f"{base_url}/tool", {
+            "tool_name": "foundup_register",
+            "arguments": {
+                "foundup_id": f"gemma_valid_test_{uuid.uuid4().hex[:8]}",
+                "repo_url": "https://github.com/test/repo",
+                "owner_pubkey": "key",
+            },
+        })
+        api_key = reg_data["result"]["api_key"]
+
+        # Empty text should fail
+        status, data = _post(f"{base_url}/tool", {
+            "tool_name": "gemma_classify",
+            "arguments": {"text": "", "categories": ["a", "b"]},
+            "api_key": api_key,
+        })
+        assert status == 200
+        assert "result" in data
+        inner = data["result"]
+        assert inner["status"] == "error"
+        assert inner["error"]["code"] == "INVALID_INPUT"
+
+
 class TestServerLifecycle:
     """Test server start/stop lifecycle."""
 

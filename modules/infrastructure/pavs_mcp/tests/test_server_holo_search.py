@@ -47,16 +47,17 @@ class TestTruthBoundaryConstants:
         required_phrases = [
             "REAL_TRANSPORT",  # MCPA8: transport is real
             "PARTIAL_BACKENDS",  # MCPA9A+: some real, others placeholder
-            "implementation_status : partial",  # MCPA9C: 4/8 tools have real backends
+            "implementation_status : partial",  # MCPA9D: 5/8 tools have real backends
             "auth_enforcement      : BASIC",  # MCPA1 Slice 6: now enforced
             "scope_enforcement     : YES",    # MCPA1 Slice 6: cross-tenant rejected
             "holo_search           : REAL",   # MCPA9A: holo_search delegates to S2
             "fam_emit              : REAL",   # MCPA9B: fam_emit delegates to FAM
             "pattern_recall        : REAL",   # MCPA9C: pattern_recall delegates to PatternMemory
             "pattern_store         : REAL",   # MCPA9C: pattern_store delegates to PatternMemory
+            "gemma_classify        : REAL",   # MCPA9D: gemma_classify delegates to Gemma
             "server_transport      : HTTP_JSON",  # MCPA8: real transport
             "registry_persistence  : LOCAL_JSON",  # MCPA1 Slice 7: persisted
-            "CABR/Gemma/Qwen remain PLACEHOLDERS",  # remaining placeholders
+            "CABR/Qwen remain PLACEHOLDERS",  # remaining placeholders
         ]
         for phrase in required_phrases:
             assert phrase in PLACEHOLDER_BANNER, (
@@ -190,7 +191,7 @@ class TestHoloSearchTruthFlag:
     "tool_name,arguments,is_bootstrap,has_real_backend",
     [
         ("cabr_validate", {"content": "x", "context": {}}, False, False),
-        ("gemma_classify", {"text": "x", "categories": ["a", "b"]}, False, False),
+        ("gemma_classify", {"text": "x", "categories": ["a", "b"]}, False, True),
         ("qwen_plan", {"objective": "x", "constraints": {}}, False, False),
         ("fam_emit", {"foundup_id": "test_foundup", "event_type": "test", "payload": {}}, False, True),
         ("pattern_recall", {"skill": "x", "min_fidelity": 0.5}, False, True),
@@ -1248,3 +1249,149 @@ class TestPatternMemoryBackendDelegation:
         matching = [p for p in patterns if p.get("execution_id") == exec_id]
         assert len(matching) == 1
         assert matching[0]["pattern_fidelity"] >= 0.95
+
+
+# ---------------------------------------------------------------------------
+# MCPA9D — Gemma Backend Delegation
+# ---------------------------------------------------------------------------
+
+
+class TestGemmaBackendDelegation:
+    """MCPA9D: gemma_classify delegates to Gemma backend.
+
+    Tests verify: successful delegation returns status="ok", meta.real_backend=True,
+    S3 surface marking, delegated_to="GEMMA", and proper error handling.
+    """
+
+    @pytest.fixture
+    def srv(self):
+        return PAVSMCPServer()
+
+    @pytest.fixture
+    def authed_srv(self):
+        """Server with a registered FoundUp."""
+        srv = PAVSMCPServer()
+        api_key = _register_and_get_key(srv, "test_foundup")
+        return srv, api_key
+
+    # ----- gemma_classify success tests -----
+
+    def test_gemma_classify_returns_ok_status(self, srv):
+        """gemma_classify returns status=ok on success."""
+        result = _run(srv.gemma_classify(
+            text="This is a test message",
+            categories=["positive", "negative"],
+        ))
+        assert result["status"] == "ok"
+
+    def test_gemma_classify_meta_real_backend_true(self, srv):
+        """gemma_classify indicates real backend connection."""
+        result = _run(srv.gemma_classify(
+            text="Test classification text",
+            categories=["cat_a", "cat_b"],
+        ))
+        assert result["meta"]["real_backend"] is True
+        assert result["meta"]["delegated_to"] == "GEMMA"
+        assert result["meta"]["surface"] == "S3"
+
+    def test_gemma_classify_data_contains_classification(self, srv):
+        """gemma_classify returns classification in data block."""
+        result = _run(srv.gemma_classify(
+            text="Classify this text",
+            categories=["alpha", "beta", "gamma"],
+        ))
+        assert "classification" in result["data"]
+        assert result["data"]["classification"] in ["alpha", "beta", "gamma"]
+        assert "confidence" in result["data"]
+        assert 0.0 <= result["data"]["confidence"] <= 1.0
+
+    def test_gemma_classify_data_contains_all_scores(self, srv):
+        """gemma_classify returns all_scores for each category."""
+        categories = ["pos", "neg", "neutral"]
+        result = _run(srv.gemma_classify(
+            text="Some text to classify",
+            categories=categories,
+        ))
+        assert "all_scores" in result["data"]
+        for cat in categories:
+            assert cat in result["data"]["all_scores"]
+
+    def test_gemma_classify_data_contains_model_info(self, srv):
+        """gemma_classify returns model identifier."""
+        result = _run(srv.gemma_classify(
+            text="Test",
+            categories=["a", "b"],
+        ))
+        assert "model" in result["data"]
+        assert "gemma" in result["data"]["model"].lower()
+
+    def test_gemma_classify_via_handle_tool_call(self, authed_srv):
+        """gemma_classify works through handle_tool_call dispatch."""
+        srv, api_key = authed_srv
+        wrapped = _run(srv.handle_tool_call(
+            "gemma_classify",
+            {"text": "Classify me", "categories": ["x", "y"]},
+            api_key=api_key,
+        ))
+        assert "result" in wrapped
+        inner = wrapped["result"]
+        assert inner["status"] == "ok"
+        assert inner["meta"]["real_backend"] is True
+        assert inner["meta"]["delegated_to"] == "GEMMA"
+        assert wrapped["meta"]["auth_enforced"] is True
+
+    def test_gemma_classify_requires_auth(self, srv):
+        """gemma_classify is a protected tool."""
+        result = _run(srv.handle_tool_call(
+            "gemma_classify",
+            {"text": "test", "categories": ["a", "b"]},
+            api_key=None,
+        ))
+        assert "error" in result
+        assert result["error"]["code"] == "MISSING_API_KEY"
+
+    # ----- Validation error tests -----
+
+    def test_gemma_classify_rejects_empty_text(self, srv):
+        """gemma_classify requires non-empty text."""
+        result = _run(srv.gemma_classify(
+            text="",
+            categories=["a", "b"],
+        ))
+        assert result["status"] == "error"
+        assert result["error"]["code"] == "INVALID_INPUT"
+        assert "text" in result["error"]["message"]
+        assert result["meta"]["real_backend"] is False
+
+    def test_gemma_classify_rejects_empty_categories(self, srv):
+        """gemma_classify requires non-empty categories list."""
+        result = _run(srv.gemma_classify(
+            text="Some text",
+            categories=[],
+        ))
+        assert result["status"] == "error"
+        assert result["error"]["code"] == "INVALID_INPUT"
+        assert "categories" in result["error"]["message"]
+        assert result["meta"]["real_backend"] is False
+
+    # ----- Binary classification test -----
+
+    def test_gemma_classify_binary_classification(self, srv):
+        """gemma_classify handles binary yes/no classification."""
+        result = _run(srv.gemma_classify(
+            text="I love this product!",
+            categories=["positive", "negative"],
+        ))
+        assert result["status"] == "ok"
+        assert result["data"]["classification"] in ["positive", "negative"]
+
+    # ----- Multi-class classification test -----
+
+    def test_gemma_classify_multiclass_classification(self, srv):
+        """gemma_classify handles multi-class classification."""
+        result = _run(srv.gemma_classify(
+            text="The weather is nice today",
+            categories=["sports", "weather", "politics", "technology"],
+        ))
+        assert result["status"] == "ok"
+        assert result["data"]["classification"] in ["sports", "weather", "politics", "technology"]

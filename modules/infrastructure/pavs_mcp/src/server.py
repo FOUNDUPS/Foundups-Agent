@@ -271,6 +271,101 @@ def _call_pattern_store(
 
 
 # =============================================================================
+# Gemma Backend Adapter (MCPA9D — Real Gemma Classification)
+# =============================================================================
+
+# Gemma backend availability flag
+_GEMMA_BACKEND_AVAILABLE: Optional[bool] = None
+
+# Lazy-initialized GemmaRAGInference instance
+_GEMMA_ENGINE: Optional[Any] = None
+
+
+def _get_gemma_engine() -> Any:
+    """Get or create the singleton GemmaRAGInference instance.
+
+    Uses lazy initialization to avoid model loading on import.
+    """
+    global _GEMMA_ENGINE
+
+    if _GEMMA_ENGINE is not None:
+        return _GEMMA_ENGINE
+
+    from holo_index.qwen_advisor.gemma_rag_inference import GemmaRAGInference
+
+    _GEMMA_ENGINE = GemmaRAGInference()
+    return _GEMMA_ENGINE
+
+
+def _call_gemma_classify(
+    text: str,
+    categories: list[str],
+) -> dict[str, Any]:
+    """Call Gemma backend for text classification.
+
+    Imports GemmaRAGInference lazily and uses _gemma_inference for
+    binary/multi-class classification via prompt engineering.
+
+    Args:
+        text: Text to classify
+        categories: List of category labels
+
+    Returns:
+        Dict with classification, confidence, model info.
+
+    Raises:
+        RuntimeError: If Gemma backend is unavailable or fails.
+    """
+    global _GEMMA_BACKEND_AVAILABLE
+
+    try:
+        engine = _get_gemma_engine()
+
+        # Build classification prompt
+        categories_str = ", ".join(categories)
+        prompt = f"""Classify the following text into exactly ONE of these categories: {categories_str}
+
+Text: {text}
+
+Reply with ONLY the category name, nothing else.
+
+Category:"""
+
+        # Call Gemma inference
+        result = engine._gemma_inference(prompt)
+
+        if result["confidence"] == 0.0 and "unavailable" in result["response"].lower():
+            _GEMMA_BACKEND_AVAILABLE = False
+            raise RuntimeError("Gemma model unavailable")
+
+        _GEMMA_BACKEND_AVAILABLE = True
+
+        # Parse classification from response
+        response_text = result["response"].strip()
+
+        # Find best matching category
+        classification = categories[0] if categories else "unknown"
+        for cat in categories:
+            if cat.lower() in response_text.lower():
+                classification = cat
+                break
+
+        return {
+            "classification": classification,
+            "confidence": result["confidence"],
+            "latency_ms": result["latency_ms"],
+            "model": "gemma-3-270m",
+            "raw_response": response_text,
+        }
+
+    except ImportError as e:
+        _GEMMA_BACKEND_AVAILABLE = False
+        raise RuntimeError(f"Gemma backend import failed: {e}") from e
+    except Exception as e:
+        raise RuntimeError(f"Gemma backend call failed: {e}") from e
+
+
+# =============================================================================
 # Registry Persistence (MCPA7 — Durable FoundUp Registration)
 # =============================================================================
 
@@ -311,7 +406,7 @@ PLACEHOLDER_BANNER = (
     "==============================================================\n"
     " pAVS MCP Server - REAL_TRANSPORT + PARTIAL_BACKENDS\n"
     "--------------------------------------------------------------\n"
-    "  implementation_status : partial (4/8 tools have real backends)\n"
+    "  implementation_status : partial (5/8 tools have real backends)\n"
     "  auth_enforcement      : BASIC (api_key validated)\n"
     "  scope_enforcement     : YES (cross-tenant foundup_id rejected)\n"
     "  registry_persistence  : LOCAL_JSON (survives restart)\n"
@@ -320,10 +415,11 @@ PLACEHOLDER_BANNER = (
     "  fam_emit              : REAL (delegates to FAM DAEmon)\n"
     "  pattern_recall        : REAL (delegates to PatternMemory)\n"
     "  pattern_store         : REAL (delegates to PatternMemory)\n"
-    "  other tools           : HARDCODED / FAKE (CABR, Gemma, Qwen)\n"
+    "  gemma_classify        : REAL (delegates to Gemma/llama_cpp)\n"
+    "  other tools           : HARDCODED / FAKE (CABR, Qwen)\n"
     "\n"
-    "  Transport is REAL. 4 tools have real backends.\n"
-    "  CABR/Gemma/Qwen remain PLACEHOLDERS.\n"
+    "  Transport is REAL. 5 tools have real backends.\n"
+    "  CABR/Qwen remain PLACEHOLDERS.\n"
     "  Tracked remediation: MCPA10+ (remaining backends).\n"
     "=============================================================="
 )
@@ -727,27 +823,119 @@ class PAVSMCPServer:
     async def gemma_classify(
         self,
         text: str,
-        categories: list[str]
+        categories: list[str],
     ) -> dict[str, Any]:
-        """
-        Binary/multi-class classification via Gemma.
+        """Classify text using Gemma backend — delegates to real backend.
+
+        MCPA9D: S3 now delegates to the real Gemma backend via GemmaRAGInference.
+        Auth/scope enforcement happens in handle_tool_call before this method.
 
         Args:
             text: Text to classify
             categories: Available category labels
 
         Returns:
-            classification, confidence, all_scores
+            Canonical envelope with:
+              - status: "ok" | "error"
+              - data: classification, confidence, model info
+              - meta: real_backend=true when Gemma is called successfully
         """
-        # TODO: Connect to Gemma engine
-        # from holo_index.gemma_engine import classify
+        logger.info(
+            "S3 gemma_classify delegating to Gemma backend: text=%r categories=%r",
+            text[:50] if text else "",
+            categories,
+        )
 
-        logger.info(f"Gemma classify: {text[:50]}... into {categories}")
-        return {
-            "classification": categories[0] if categories else "unknown",
-            "confidence": 0.92,
-            "all_scores": {cat: 1.0 / len(categories) for cat in categories}
-        }
+        # Validate inputs
+        if not text:
+            return {
+                "status": "error",
+                "data": {"classification": None, "text_length": 0},
+                "error": {
+                    "code": "INVALID_INPUT",
+                    "message": "text is required and must be non-empty",
+                },
+                "meta": {
+                    **_truth_meta(),
+                    "tool": "gemma_classify",
+                    "surface": "S3",
+                    "real_backend": False,
+                },
+            }
+
+        if not categories or len(categories) == 0:
+            return {
+                "status": "error",
+                "data": {"classification": None},
+                "error": {
+                    "code": "INVALID_INPUT",
+                    "message": "categories must be a non-empty list",
+                },
+                "meta": {
+                    **_truth_meta(),
+                    "tool": "gemma_classify",
+                    "surface": "S3",
+                    "real_backend": False,
+                },
+            }
+
+        try:
+            result = _call_gemma_classify(
+                text=text,
+                categories=categories,
+            )
+
+            # Build all_scores from classification result
+            all_scores = {}
+            for cat in categories:
+                if cat == result["classification"]:
+                    all_scores[cat] = result["confidence"]
+                else:
+                    # Distribute remaining probability
+                    remaining = (1.0 - result["confidence"]) / max(1, len(categories) - 1)
+                    all_scores[cat] = remaining
+
+            return {
+                "status": "ok",
+                "data": {
+                    "text_length": len(text),
+                    "categories": categories,
+                    "classification": result["classification"],
+                    "confidence": result["confidence"],
+                    "all_scores": all_scores,
+                    "model": result["model"],
+                    "latency_ms": result["latency_ms"],
+                },
+                "meta": {
+                    "tool": "gemma_classify",
+                    "surface": "S3",
+                    "real_backend": True,
+                    "delegated_to": "GEMMA",
+                    "generated_at": datetime.now(timezone.utc).isoformat(),
+                },
+            }
+
+        except Exception as e:
+            logger.error(f"S3 gemma_classify backend error: {e}")
+
+            return {
+                "status": "error",
+                "data": {
+                    "text_length": len(text) if text else 0,
+                    "categories": categories,
+                    "classification": None,
+                },
+                "error": {
+                    "code": "BACKEND_UNAVAILABLE",
+                    "message": f"Gemma backend unavailable: {e}",
+                },
+                "meta": {
+                    **_truth_meta(),
+                    "tool": "gemma_classify",
+                    "surface": "S3",
+                    "real_backend": False,
+                },
+            }
 
     async def qwen_plan(
         self,
