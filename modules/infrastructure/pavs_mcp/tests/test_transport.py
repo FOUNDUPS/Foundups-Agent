@@ -227,6 +227,44 @@ class TestAuthThroughTransport:
         assert data["error"]["code"] == "CROSS_TENANT_VIOLATION"
 
 
+class TestFamEmitViaTransport:
+    """MCPA9B: Test fam_emit backend delegation via HTTP transport."""
+
+    def test_fam_emit_via_transport_delegates_to_backend(self, base_url):
+        """POST /tool with fam_emit delegates to FAM DAEmon backend."""
+        import uuid
+
+        # First register to get an API key
+        _, reg_data = _post(f"{base_url}/tool", {
+            "tool_name": "foundup_register",
+            "arguments": {
+                "foundup_id": "transport_test_foundup",
+                "repo_url": "https://github.com/test/repo",
+                "owner_pubkey": "key",
+            },
+        })
+        api_key = reg_data["result"]["api_key"]
+
+        # Now call fam_emit with unique payload
+        status, data = _post(f"{base_url}/tool", {
+            "tool_name": "fam_emit",
+            "arguments": {
+                "foundup_id": "transport_test_foundup",
+                "event_type": "test_event",
+                "payload": {"test_id": str(uuid.uuid4())},
+            },
+            "api_key": api_key,
+        })
+
+        assert status == 200
+        assert "result" in data
+        inner = data["result"]
+        assert inner["status"] == "ok"
+        assert inner["meta"]["real_backend"] is True
+        assert inner["meta"]["delegated_to"] == "FAM_DAEMON"
+        assert inner["data"]["persisted"] is True
+
+
 class TestServerLifecycle:
     """Test server start/stop lifecycle."""
 

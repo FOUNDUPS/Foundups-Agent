@@ -2,13 +2,14 @@
 
 > ## ⚠️ STATUS: `REAL_TRANSPORT` + `PARTIAL_BACKENDS`
 >
-> **Transport is REAL. holo_search is REAL. Other backends are PLACEHOLDERS.**
+> **Transport is REAL. holo_search + fam_emit are REAL. Other backends are PLACEHOLDERS.**
 >
 > - **Server transport**: `HTTP_JSON` (MCPA8) — `start()` binds a real local port via Python stdlib `http.server`. Clients can connect via `POST /tool` with JSON body. No external dependencies.
 > - **Auth enforcement**: `BASIC_AUTH_ENFORCEMENT` (MCPA1 Slice 6) — `handle_tool_call` validates `api_key` for protected tools; rejects missing/unknown keys; rejects cross-tenant `foundup_id` attempts. `foundup_register` remains unauthenticated (bootstrap-only).
 > - **Registry persistence**: `LOCAL_JSON` (MCPA1 Slice 7) — registrations survive restart; stored in `~/.pavs_mcp/registrations.json` (override via `PAVS_REGISTRY_PATH` env var). Atomic writes, graceful handling of corrupt files.
 > - **holo_search**: `REAL BACKEND` (MCPA9A) — S3 delegates to S2/HoloIndex for real semantic search. Returns `meta.real_backend=true`, `meta.delegated_to="S2"`.
-> - **Other tools**: `HARDCODED/FAKE DATA` — `cabr_validate`, `gemma_classify`, `qwen_plan`, `fam_emit`, `pattern_recall`, `pattern_store` return hardcoded values; `# TODO: Connect to actual <X>` markers in code.
+> - **fam_emit**: `REAL BACKEND` (MCPA9B) — S3 delegates to FAM DAEmon for event persistence. Returns `meta.real_backend=true`, `meta.delegated_to="FAM_DAEMON"`.
+> - **Other tools**: `HARDCODED/FAKE DATA` — `cabr_validate`, `gemma_classify`, `qwen_plan`, `pattern_recall`, `pattern_store` return hardcoded values; `# TODO: Connect to actual <X>` markers in code.
 > - **Canonical contract**: see WSP 96 Annex A (`holo_search` contract). S3 is not canonical owner but now provides real backend via S2 delegation.
 > - **Tracked remediation**: MCPA10+ (remaining backends, key rotation).
 
@@ -47,7 +48,7 @@ Foundup/Move2Japan --MCP---+         +-> CABR Engine
 | `cabr_validate` | V1/V2/V3 content validation | content, context | score, passed, feedback | **NO** — hardcoded `score=0.85` |
 | `gemma_classify` | Binary/multi-class classification | text, categories | classification, confidence | **NO** — hardcoded `confidence=0.92` |
 | `qwen_plan` | Strategic planning | objective, constraints | plan, reasoning | **NO** — hardcoded 3-step plan |
-| `fam_emit` | Event tracking | foundup_id, event_type, payload | event_id | **NO** — computes hash, no FAM emit |
+| `fam_emit` | Event tracking | foundup_id, event_type, payload | status, persisted | **YES** — delegates to FAM DAEmon (MCPA9B) |
 | `pattern_recall` | Recall successful patterns | skill, min_fidelity | patterns[] | **NO** — hardcoded `ptn_001` |
 | `pattern_store` | Store execution outcome | skill, outcome | pattern_id | **NO** — computes hash, no persist |
 | `holo_search` | Semantic code/doc search | query, doc_type_filter | hits[], hit_count | **YES** — delegates to S2/HoloIndex (MCPA9A) |
