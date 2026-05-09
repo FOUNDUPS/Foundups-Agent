@@ -342,6 +342,8 @@ docs/audits/*
 !docs/audits/openclaw_hermes/**
 !docs/audits/mcp_system/
 !docs/audits/mcp_system/**
+!docs/audits/external_protocols/
+!docs/audits/external_protocols/**
 docs/sessions/
 
 # WSP agentic awakening runtime state (changes every session)
