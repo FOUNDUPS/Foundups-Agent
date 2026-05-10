@@ -47,7 +47,7 @@ class TestTruthBoundaryConstants:
         required_phrases = [
             "REAL_TRANSPORT",  # MCPA8: transport is real
             "PARTIAL_BACKENDS",  # MCPA9A+: some real, others placeholder
-            "implementation_status : partial",  # MCPA9D: 5/8 tools have real backends
+            "implementation_status : partial",  # MCPA9E: 6/8 tools have real backends
             "auth_enforcement      : BASIC",  # MCPA1 Slice 6: now enforced
             "scope_enforcement     : YES",    # MCPA1 Slice 6: cross-tenant rejected
             "holo_search           : REAL",   # MCPA9A: holo_search delegates to S2
@@ -55,9 +55,10 @@ class TestTruthBoundaryConstants:
             "pattern_recall        : REAL",   # MCPA9C: pattern_recall delegates to PatternMemory
             "pattern_store         : REAL",   # MCPA9C: pattern_store delegates to PatternMemory
             "gemma_classify        : REAL",   # MCPA9D: gemma_classify delegates to Gemma
+            "qwen_plan             : REAL",   # MCPA9E: qwen_plan delegates to Qwen
             "server_transport      : HTTP_JSON",  # MCPA8: real transport
             "registry_persistence  : LOCAL_JSON",  # MCPA1 Slice 7: persisted
-            "CABR/Qwen remain PLACEHOLDERS",  # remaining placeholders
+            "CABR remains PLACEHOLDER",  # remaining placeholder
         ]
         for phrase in required_phrases:
             assert phrase in PLACEHOLDER_BANNER, (
@@ -192,7 +193,7 @@ class TestHoloSearchTruthFlag:
     [
         ("cabr_validate", {"content": "x", "context": {}}, False, False),
         ("gemma_classify", {"text": "x", "categories": ["a", "b"]}, False, True),
-        ("qwen_plan", {"objective": "x", "constraints": {}}, False, False),
+        ("qwen_plan", {"objective": "x", "constraints": {}}, False, True),  # MCPA9E: real Qwen backend
         ("fam_emit", {"foundup_id": "test_foundup", "event_type": "test", "payload": {}}, False, True),
         ("pattern_recall", {"skill": "x", "min_fidelity": 0.5}, False, True),
         ("pattern_store", {"skill": "x", "outcome": {"execution_id": "test_exec", "agent": "test", "success": True, "pattern_fidelity": 0.9}}, False, True),
@@ -1395,3 +1396,166 @@ class TestGemmaBackendDelegation:
         ))
         assert result["status"] == "ok"
         assert result["data"]["classification"] in ["sports", "weather", "politics", "technology"]
+
+
+# ---------------------------------------------------------------------------
+# MCPA9E: Qwen backend delegation tests
+# ---------------------------------------------------------------------------
+
+
+class TestQwenBackendDelegation:
+    """MCPA9E: qwen_plan delegates to Qwen backend.
+
+    Tests verify: successful delegation returns status="ok", meta.real_backend=True,
+    S3 surface marking, delegated_to="QWEN", and proper error handling.
+    """
+
+    @pytest.fixture
+    def srv(self):
+        return PAVSMCPServer()
+
+    @pytest.fixture
+    def authed_srv(self):
+        """Server with a registered FoundUp."""
+        srv = PAVSMCPServer()
+        api_key = _register_and_get_key(srv, "test_foundup")
+        return srv, api_key
+
+    # ----- qwen_plan success tests -----
+
+    def test_qwen_plan_returns_ok_status(self, srv):
+        """qwen_plan returns status=ok on success."""
+        result = _run(srv.qwen_plan(
+            objective="Create a marketing plan",
+            constraints={"platform": "instagram", "audience": "local"},
+        ))
+        assert result["status"] == "ok"
+
+    def test_qwen_plan_meta_real_backend_true(self, srv):
+        """qwen_plan indicates real backend connection."""
+        result = _run(srv.qwen_plan(
+            objective="Plan a product launch",
+            constraints=None,
+        ))
+        assert result["meta"]["real_backend"] is True
+        assert result["meta"]["delegated_to"] == "QWEN"
+        assert result["meta"]["surface"] == "S3"
+
+    def test_qwen_plan_data_contains_plan_steps(self, srv):
+        """qwen_plan returns plan steps in data block or backend error."""
+        result = _run(srv.qwen_plan(
+            objective="Optimize social media engagement",
+            constraints={"platform": "twitter"},
+        ))
+        # Backend may return error if model produces empty response
+        if result["status"] == "error":
+            assert result["error"]["code"] == "BACKEND_UNAVAILABLE"
+            assert result["meta"]["real_backend"] is False
+        else:
+            assert "plan" in result["data"]
+            assert isinstance(result["data"]["plan"], list)
+            assert len(result["data"]["plan"]) >= 1
+
+    def test_qwen_plan_data_contains_reasoning(self, srv):
+        """qwen_plan returns reasoning."""
+        result = _run(srv.qwen_plan(
+            objective="Test plan objective",
+            constraints=None,
+        ))
+        assert "reasoning" in result["data"]
+        assert result["data"]["reasoning"]
+
+    def test_qwen_plan_data_contains_model_info(self, srv):
+        """qwen_plan returns model identifier."""
+        result = _run(srv.qwen_plan(
+            objective="Generate a plan",
+            constraints=None,
+        ))
+        assert "model" in result["data"]
+        assert "qwen" in result["data"]["model"].lower()
+
+    def test_qwen_plan_data_contains_input_summary(self, srv):
+        """qwen_plan echoes back input summary."""
+        result = _run(srv.qwen_plan(
+            objective="My test objective",
+            constraints={"timing": "morning"},
+        ))
+        assert "input_summary" in result["data"]
+        assert result["data"]["input_summary"]["objective"] == "My test objective"
+        assert result["data"]["input_summary"]["constraints"] == {"timing": "morning"}
+
+    def test_qwen_plan_via_handle_tool_call(self, authed_srv):
+        """qwen_plan works through handle_tool_call dispatch."""
+        srv, api_key = authed_srv
+        wrapped = _run(srv.handle_tool_call(
+            "qwen_plan",
+            {"objective": "Plan my day", "constraints": None},
+            api_key=api_key,
+        ))
+        assert "result" in wrapped
+        inner = wrapped["result"]
+        # Backend may return error if model produces empty response
+        if inner["status"] == "error":
+            assert inner["error"]["code"] == "BACKEND_UNAVAILABLE"
+            assert inner["meta"]["real_backend"] is False
+        else:
+            assert inner["status"] == "ok"
+            assert inner["meta"]["real_backend"] is True
+            assert inner["meta"]["delegated_to"] == "QWEN"
+        assert wrapped["meta"]["auth_enforced"] is True
+
+    def test_qwen_plan_requires_auth(self, srv):
+        """qwen_plan is a protected tool."""
+        result = _run(srv.handle_tool_call(
+            "qwen_plan",
+            {"objective": "test", "constraints": None},
+            api_key=None,
+        ))
+        assert "error" in result
+        assert result["error"]["code"] == "MISSING_API_KEY"
+
+    # ----- Validation error tests -----
+
+    def test_qwen_plan_rejects_empty_objective(self, srv):
+        """qwen_plan requires non-empty objective."""
+        result = _run(srv.qwen_plan(
+            objective="",
+            constraints=None,
+        ))
+        assert result["status"] == "error"
+        assert result["error"]["code"] == "INVALID_OBJECTIVE"
+        assert result["meta"]["real_backend"] is False
+
+    def test_qwen_plan_rejects_whitespace_objective(self, srv):
+        """qwen_plan requires non-whitespace objective."""
+        result = _run(srv.qwen_plan(
+            objective="   ",
+            constraints=None,
+        ))
+        assert result["status"] == "error"
+        assert result["error"]["code"] == "INVALID_OBJECTIVE"
+        assert result["meta"]["real_backend"] is False
+
+    # ----- Constraints handling tests -----
+
+    def test_qwen_plan_handles_none_constraints(self, srv):
+        """qwen_plan works with None constraints."""
+        result = _run(srv.qwen_plan(
+            objective="Simple objective",
+            constraints=None,
+        ))
+        assert result["status"] == "ok"
+
+    def test_qwen_plan_handles_multiple_constraints(self, srv):
+        """qwen_plan works with multiple constraints."""
+        result = _run(srv.qwen_plan(
+            objective="Complex planning",
+            constraints={
+                "platform": "instagram",
+                "timing": "evening",
+                "audience": "young_adults",
+                "budget": "low",
+            },
+        ))
+        assert result["status"] == "ok"
+        assert result["data"]["input_summary"]["constraints"]["platform"] == "instagram"

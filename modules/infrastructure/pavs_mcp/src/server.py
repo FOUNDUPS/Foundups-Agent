@@ -366,6 +366,133 @@ Category:"""
 
 
 # =============================================================================
+# Qwen Backend Adapter (MCPA9E — Real Qwen Planning)
+# =============================================================================
+
+# Qwen backend availability flag
+_QWEN_BACKEND_AVAILABLE: Optional[bool] = None
+
+# Lazy-initialized QwenInferenceEngine instance
+_QWEN_ENGINE: Optional[Any] = None
+
+
+def _get_qwen_engine() -> Any:
+    """Get or create the singleton QwenInferenceEngine instance.
+
+    Uses lazy initialization to avoid model loading on import.
+    Resolves model path via shared_utilities.local_model_selection.
+    """
+    global _QWEN_ENGINE
+
+    if _QWEN_ENGINE is not None:
+        return _QWEN_ENGINE
+
+    from modules.infrastructure.shared_utilities.local_model_selection import (
+        resolve_code_model_path,
+    )
+    from holo_index.qwen_advisor.llm_engine import QwenInferenceEngine
+
+    model_path = resolve_code_model_path()
+    _QWEN_ENGINE = QwenInferenceEngine(
+        model_path=model_path,
+        max_tokens=512,
+        temperature=0.3,
+        context_length=2048,
+    )
+    return _QWEN_ENGINE
+
+
+def _call_qwen_plan(
+    objective: str,
+    constraints: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
+    """Call Qwen backend for strategic planning.
+
+    Imports QwenInferenceEngine lazily and uses generate_response for
+    plan generation via prompt engineering.
+
+    Args:
+        objective: What to achieve
+        constraints: Optional constraints dict (platform, timing, etc.)
+
+    Returns:
+        Dict with plan steps, reasoning, model info.
+
+    Raises:
+        RuntimeError: If Qwen backend is unavailable or fails.
+    """
+    global _QWEN_BACKEND_AVAILABLE
+
+    try:
+        engine = _get_qwen_engine()
+
+        # Build planning prompt
+        constraints_str = ""
+        if constraints:
+            constraints_str = "\n".join(f"- {k}: {v}" for k, v in constraints.items())
+            constraints_str = f"\n\nConstraints:\n{constraints_str}"
+
+        prompt = f"""You are a strategic planning assistant. Create a step-by-step plan.
+
+Objective: {objective}{constraints_str}
+
+Provide a concise 3-5 step plan. Format each step as:
+Step N: [Action] - [Rationale]
+
+Plan:"""
+
+        # Call Qwen inference
+        response = engine.generate_response(prompt, max_tokens=400)
+
+        if response.startswith("Error:"):
+            _QWEN_BACKEND_AVAILABLE = False
+            raise RuntimeError(f"Qwen model unavailable: {response}")
+
+        _QWEN_BACKEND_AVAILABLE = True
+
+        # Parse steps from response
+        import re
+        steps = []
+        step_pattern = re.compile(r"Step\s*(\d+)[:\.]?\s*(.+?)(?:\s*[-–]\s*(.+))?$", re.IGNORECASE)
+
+        for line in response.strip().split("\n"):
+            line = line.strip()
+            if not line:
+                continue
+            match = step_pattern.match(line)
+            if match:
+                step_num = int(match.group(1))
+                action = match.group(2).strip()
+                rationale = match.group(3).strip() if match.group(3) else ""
+                steps.append({
+                    "step": step_num,
+                    "action": action,
+                    "rationale": rationale,
+                })
+
+        # Fallback if parsing failed but got content
+        if not steps and response.strip():
+            steps = [{"step": 1, "action": response.strip()[:200], "rationale": "Generated plan"}]
+
+        # Handle empty response
+        if not steps:
+            raise RuntimeError("Qwen returned empty plan response")
+
+        return {
+            "plan": steps,
+            "reasoning": f"Strategic plan for: {objective}",
+            "model": "qwen-coder",
+            "raw_response": response,
+        }
+
+    except ImportError as e:
+        _QWEN_BACKEND_AVAILABLE = False
+        raise RuntimeError(f"Qwen backend import failed: {e}") from e
+    except Exception as e:
+        raise RuntimeError(f"Qwen backend call failed: {e}") from e
+
+
+# =============================================================================
 # Registry Persistence (MCPA7 — Durable FoundUp Registration)
 # =============================================================================
 
@@ -406,7 +533,7 @@ PLACEHOLDER_BANNER = (
     "==============================================================\n"
     " pAVS MCP Server - REAL_TRANSPORT + PARTIAL_BACKENDS\n"
     "--------------------------------------------------------------\n"
-    "  implementation_status : partial (5/8 tools have real backends)\n"
+    "  implementation_status : partial (6/8 tools have real backends)\n"
     "  auth_enforcement      : BASIC (api_key validated)\n"
     "  scope_enforcement     : YES (cross-tenant foundup_id rejected)\n"
     "  registry_persistence  : LOCAL_JSON (survives restart)\n"
@@ -416,10 +543,11 @@ PLACEHOLDER_BANNER = (
     "  pattern_recall        : REAL (delegates to PatternMemory)\n"
     "  pattern_store         : REAL (delegates to PatternMemory)\n"
     "  gemma_classify        : REAL (delegates to Gemma/llama_cpp)\n"
-    "  other tools           : HARDCODED / FAKE (CABR, Qwen)\n"
+    "  qwen_plan             : REAL (delegates to Qwen/llama_cpp)\n"
+    "  other tools           : HARDCODED / FAKE (CABR)\n"
     "\n"
-    "  Transport is REAL. 5 tools have real backends.\n"
-    "  CABR/Qwen remain PLACEHOLDERS.\n"
+    "  Transport is REAL. 6 tools have real backends.\n"
+    "  CABR remains PLACEHOLDER.\n"
     "  Tracked remediation: MCPA10+ (remaining backends).\n"
     "=============================================================="
 )
@@ -942,31 +1070,86 @@ class PAVSMCPServer:
         objective: str,
         constraints: Optional[dict] = None
     ) -> dict[str, Any]:
-        """
-        Strategic planning via Qwen.
+        """Strategic planning via Qwen — delegates to real backend.
+
+        MCPA9E: S3 now delegates to the real Qwen backend via adapter.
+        Auth/scope enforcement happens in handle_tool_call before this method.
 
         Args:
             objective: What to achieve
             constraints: Time, platform, audience limits
 
         Returns:
-            plan, reasoning, alternatives
+            Canonical envelope with:
+              - status: "ok" | "error"
+              - data: plan steps, reasoning, model info
+              - meta: real_backend=true when Qwen generates the plan
         """
-        # TODO: Connect to Qwen advisor
-        # from holo_index.qwen_advisor import plan_strategy
+        if not objective or not objective.strip():
+            return {
+                "status": "error",
+                "error": {
+                    "code": "INVALID_OBJECTIVE",
+                    "message": "objective parameter is required and cannot be empty",
+                },
+                "meta": {
+                    **_truth_meta(),
+                    "tool": "qwen_plan",
+                    "surface": "S3",
+                    "real_backend": False,
+                },
+            }
 
-        logger.info(f"Qwen plan: {objective}")
-        return {
-            "plan": [
-                {"step": 1, "action": "Analyze content", "rationale": "Understand context"},
-                {"step": 2, "action": "Optimize timing", "rationale": "Maximize reach"},
-                {"step": 3, "action": "Execute post", "rationale": "Deliver content"}
-            ],
-            "reasoning": f"Strategic plan for: {objective}",
-            "alternatives": ["Alternative A", "Alternative B"],
-            "recommended_platform": constraints.get("platform", "instagram") if constraints else "instagram",
-            "optimal_time": "2026-03-15T18:00:00Z"
-        }
+        logger.info(
+            "S3 qwen_plan delegating to Qwen backend: objective=%r constraints=%r",
+            objective[:50] + "..." if len(objective) > 50 else objective,
+            constraints,
+        )
+
+        try:
+            # Delegate to Qwen backend
+            qwen_result = _call_qwen_plan(
+                objective=objective,
+                constraints=constraints,
+            )
+
+            return {
+                "status": "ok",
+                "data": {
+                    "plan": qwen_result["plan"],
+                    "reasoning": qwen_result["reasoning"],
+                    "model": qwen_result.get("model", "qwen-coder"),
+                    "input_summary": {
+                        "objective": objective[:100] + "..." if len(objective) > 100 else objective,
+                        "constraints": constraints,
+                    },
+                },
+                "meta": {
+                    **_truth_meta(),
+                    "tool": "qwen_plan",
+                    "surface": "S3",
+                    "real_backend": True,
+                    "delegated_to": "QWEN",
+                    "data_source": "qwen_inference_engine",
+                    "warning": None,
+                },
+            }
+
+        except RuntimeError as e:
+            logger.warning("Qwen backend unavailable: %s", e)
+            return {
+                "status": "error",
+                "error": {
+                    "code": "BACKEND_UNAVAILABLE",
+                    "message": f"Qwen backend unavailable: {e}",
+                },
+                "meta": {
+                    **_truth_meta(),
+                    "tool": "qwen_plan",
+                    "surface": "S3",
+                    "real_backend": False,
+                },
+            }
 
     async def fam_emit(
         self,

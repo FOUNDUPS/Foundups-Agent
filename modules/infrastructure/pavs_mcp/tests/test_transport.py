@@ -464,6 +464,86 @@ class TestGemmaViaTransport:
         assert inner["error"]["code"] == "INVALID_INPUT"
 
 
+class TestQwenViaTransport:
+    """MCPA9E: Test qwen_plan through HTTP transport."""
+
+    def test_qwen_plan_via_transport(self, base_url):
+        """POST /tool qwen_plan works with real backend."""
+        import uuid
+        # Register to get API key
+        _, reg_data = _post(f"{base_url}/tool", {
+            "tool_name": "foundup_register",
+            "arguments": {
+                "foundup_id": f"qwen_test_{uuid.uuid4().hex[:8]}",
+                "repo_url": "https://github.com/test/repo",
+                "owner_pubkey": "key",
+            },
+        })
+        api_key = reg_data["result"]["api_key"]
+
+        # Call qwen_plan
+        status, data = _post(f"{base_url}/tool", {
+            "tool_name": "qwen_plan",
+            "arguments": {"objective": "Test planning objective", "constraints": None},
+            "api_key": api_key,
+        })
+        assert status == 200
+        assert "result" in data
+        inner = data["result"]
+        assert inner["status"] == "ok"
+        assert inner["meta"]["real_backend"] is True
+        assert inner["meta"]["delegated_to"] == "QWEN"
+        assert "plan" in inner["data"]
+
+    def test_qwen_plan_by_path(self, base_url):
+        """POST /tool/qwen_plan works."""
+        import uuid
+        # Register to get API key
+        _, reg_data = _post(f"{base_url}/tool", {
+            "tool_name": "foundup_register",
+            "arguments": {
+                "foundup_id": f"qwen_path_test_{uuid.uuid4().hex[:8]}",
+                "repo_url": "https://github.com/test/repo",
+                "owner_pubkey": "key",
+            },
+        })
+        api_key = reg_data["result"]["api_key"]
+
+        # Call via path
+        status, data = _post(f"{base_url}/tool/qwen_plan", {
+            "arguments": {"objective": "Path test objective", "constraints": {}},
+            "api_key": api_key,
+        })
+        assert status == 200
+        assert "result" in data
+
+    def test_qwen_plan_validates_input(self, base_url):
+        """POST /tool qwen_plan validates input."""
+        import uuid
+        # Register to get API key
+        _, reg_data = _post(f"{base_url}/tool", {
+            "tool_name": "foundup_register",
+            "arguments": {
+                "foundup_id": f"qwen_valid_test_{uuid.uuid4().hex[:8]}",
+                "repo_url": "https://github.com/test/repo",
+                "owner_pubkey": "key",
+            },
+        })
+        api_key = reg_data["result"]["api_key"]
+
+        # Empty objective should fail
+        status, data = _post(f"{base_url}/tool", {
+            "tool_name": "qwen_plan",
+            "arguments": {"objective": "", "constraints": None},
+            "api_key": api_key,
+        })
+        assert status == 200
+        assert "result" in data
+        inner = data["result"]
+        assert inner["status"] == "error"
+        assert inner["error"]["code"] == "INVALID_OBJECTIVE"
+
+
 class TestServerLifecycle:
     """Test server start/stop lifecycle."""
 

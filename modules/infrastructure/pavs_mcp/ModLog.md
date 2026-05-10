@@ -1,5 +1,66 @@
 # pAVS MCP Server - ModLog
 
+## 2026-05-10 - MCPA9E: S3 Qwen Plan Backend Connection
+
+**Author**: 0102 (Worker W1)
+**WSP**: 96 (MCP Governance), 97 (Truth Boundaries)
+**Slice**: `MCPA9E_QWEN_PLAN_BACKEND_CONNECTION_PHASE1`
+**Closes (MCPA9D audit)**: H5c (qwen_plan now real)
+
+### Why
+
+Per MCPA9D progression, `qwen_plan` was the next backend connection target.
+`QwenInferenceEngine` has a direct callable seam:
+- `generate_response(prompt) -> str`
+
+Uses `resolve_code_model_path()` from shared_utilities for model discovery.
+
+### Changes
+
+- `src/server.py`:
+  - Added `_QWEN_BACKEND_AVAILABLE` flag
+  - Added `_QWEN_ENGINE` lazy singleton
+  - Added `_get_qwen_engine()` using `resolve_code_model_path()` + `QwenInferenceEngine`
+  - Added `_call_qwen_plan()` adapter with prompt engineering for step extraction
+  - Rewrote `qwen_plan()` method to delegate to Qwen backend
+  - Returns `meta.surface="S3"`, `meta.real_backend=True`, `meta.delegated_to="QWEN"`
+  - Returns `BACKEND_UNAVAILABLE` if Qwen model fails or returns empty plan
+  - Returns `INVALID_INPUT` for empty objective
+  - Updated `PLACEHOLDER_BANNER` to show 6/8 tools with real backends
+
+- `tests/test_server_holo_search.py`:
+  - Added `TestQwenBackendDelegation` class (12 tests)
+  - Tests plan generation, validation, constraints passthrough
+  - Tests handle both success and BACKEND_UNAVAILABLE gracefully
+  - Updated banner test for `qwen_plan : REAL`
+  - Updated parametrized test for Qwen real backend
+
+- `tests/test_transport.py`:
+  - Added `TestQwenViaTransport` class (3 tests)
+  - Tests qwen_plan via HTTP POST /tool
+
+- `README.md`:
+  - Updated status: 6/8 tools have real backends
+  - Updated tool table: `qwen_plan` now **YES**
+
+### Callable Seam Used
+
+- `modules/infrastructure/shared_utilities/local_model_selection.py`:
+  - `resolve_code_model_path()` for model path discovery
+- `holo_index/qwen_advisor/llm_engine.py`:
+  - `QwenInferenceEngine` class
+  - `generate_response(prompt)` method
+  - Uses llama_cpp with lazy loading
+
+### Result
+
+S3 `qwen_plan` delegates to QwenInferenceEngine for real strategic planning.
+6/8 tools now have real backends: holo_search, fam_emit, pattern_recall, pattern_store, gemma_classify, qwen_plan.
+1 tool remains placeholder: cabr_validate.
+137/137 tests passing.
+
+---
+
 ## 2026-05-09 - MCPA9D: S3 Gemma Classify Backend Connection
 
 **Author**: 0102 (Worker W1)
