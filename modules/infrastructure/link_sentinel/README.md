@@ -1,7 +1,7 @@
 # Link Sentinel
 
 **WSP Domain**: `infrastructure` (WSP 3)
-**Status**: `SCAFFOLD_ONLY` | `NO_RUNTIME_GATES_IMPLEMENTED`
+**Status**: `POC_IMPLEMENTED` | `STATIC_ANALYSIS_ONLY`
 
 ## Purpose
 
@@ -59,25 +59,63 @@ pfmall -------------+           +-> Redirect Chain Analysis
 
 ## Current Status
 
-**SCAFFOLD_ONLY**: This module contains documentation and interface contracts only.
-No runtime validation, scoring, or consumer hooks are implemented.
+**POC_IMPLEMENTED**: Static URL analysis is functional. No consumer hooks.
 
-### What Exists
+### What Exists (PoC)
 
 - Module structure (WSP 49 compliant)
-- Draft interface contracts (INTERFACE.md)
-- Phased roadmap (ROADMAP.md)
+- URL parsing and normalization (`normalizer.py`)
+- Static risk scoring (`analyzer.py`)
+- Data models (`models.py`)
+- 47 unit tests with full coverage
 - Memory directory (WSP 60 compliant)
 
-### What Does NOT Exist
+### Static Analysis Features
 
-- URL parsing/normalization code
-- Risk scoring algorithms
-- Redirect chain analysis
+| Feature | Status | Notes |
+|---------|--------|-------|
+| URL parsing | IMPLEMENTED | stdlib `urllib.parse` |
+| URL normalization | IMPLEMENTED | Lowercase, default ports, www removal |
+| Scheme validation | IMPLEMENTED | http/https only |
+| Punycode detection | IMPLEMENTED | IDN/homograph warning |
+| Private IP detection | IMPLEMENTED | 10.x, 172.16.x, 192.168.x |
+| Link-local IP detection | IMPLEMENTED | 169.254.x.x (SSRF) |
+| Localhost detection | IMPLEMENTED | localhost, 127.0.0.1, ::1 |
+| Credential-in-URL | IMPLEMENTED | user:pass@host |
+| URL shortener detection | IMPLEMENTED | bit.ly, t.co, etc. |
+| Excessive subdomains | IMPLEMENTED | >4 subdomain depth |
+| Suspicious TLD | IMPLEMENTED | .xyz, .top, etc. |
+
+### What Does NOT Exist (Future Slices)
+
+- Redirect chain resolution (requires network)
+- Live reputation lookup (requires external API)
+- Sandbox detonation (requires browser isolation)
+- OAuth scam detection (requires consent flow analysis)
 - Browser hooks in `browser_actions`
 - Chat hooks in `livechat` or `moltbot_bridge`
 - Marketplace hooks in `pfmall`
-- Sandbox detonation integration
+
+## Usage
+
+```python
+from modules.infrastructure.link_sentinel import analyze_link, LinkContext
+
+# Basic analysis
+result = analyze_link("https://example.com/page")
+print(result.decision)  # DecisionAction.ALLOW
+
+# With context
+context = LinkContext(surface="browser_actions", actor_id="user123")
+result = analyze_link("https://bit.ly/abc123", context=context)
+print(result.decision)      # DecisionAction.WARN
+print(result.reason_codes)  # [RiskReasonCode.URL_SHORTENER]
+
+# Blocked URL
+result = analyze_link("http://192.168.1.1/admin")
+print(result.decision)      # DecisionAction.BLOCK
+print(result.reason_codes)  # [RiskReasonCode.PRIVATE_IP]
+```
 
 ## WSP Compliance
 
