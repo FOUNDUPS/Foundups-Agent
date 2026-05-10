@@ -1,5 +1,28 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-10: HXA10 Controlled scaffold generation tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa4_real_hermes_object_dryrun.py -v`
+- Status: PASS
+- Result: `17 passed`
+- Notes:
+  - Added `TestHXA10ControlledScaffoldGeneration` class (3 tests):
+    - `test_voteballots_controlled_scaffold_generation_safe_dryrun_writes_temp_artifacts` - HXA10 proof
+    - `test_scaffold_files_contain_generation_metadata` - metadata verification
+    - `test_validate_foundup_does_not_create_scaffold` - validate does NOT create scaffold
+  - HXA10 proves VoteBallots build_foundup generates actual scaffold files in temp workspace
+  - Generated files: README.md, manifest.preview.json, interface.preview.md, implementation_plan.md
+  - All files marked as DRY-RUN PREVIEW / NOT PRODUCTION CODE
+- WSP 97 Coverage (HXA10):
+  - controlled_scaffold_generated=True (files written to temp)
+  - real_execution_performed=False (not production)
+  - repo_created=False (no GitHub operations)
+  - live_delegate_called=False (no delegate_task invocation)
+  - production_source_modified=False (temp only)
+- Slice: HXA10_VOTEBALLOTS_CONTROLLED_SCAFFOLD_GENERATION_PHASE1
+
+---
+
 ## 2026-05-10: HXA9 PoC artifact bundle generation tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa4_real_hermes_object_dryrun.py -v`
