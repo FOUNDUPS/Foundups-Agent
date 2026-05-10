@@ -1,0 +1,7 @@
+# Link Sentinel - Dependencies
+# Status: SCAFFOLD_ONLY - no runtime dependencies yet
+#
+# Future dependencies (Phase 1+):
+# - idna>=3.0        # Punycode handling
+# - tldextract>=3.0  # TLD extraction
+# - httpx>=0.24      # Async HTTP for redirect resolution
