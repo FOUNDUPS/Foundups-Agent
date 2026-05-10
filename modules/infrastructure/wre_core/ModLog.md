@@ -2,6 +2,64 @@
 
 ## Chronological Change Log
 
+### [2026-05-10] - HXA12_GOTJUNK_SECOND_PROOF_SAFE_DRYRUN_PHASE1 (v0.8.23)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority)
+**Impact Analysis**: Second FoundUp proof - validates factory generalizes beyond VoteBallots
+
+#### Changes Made
+
+- `tests/test_hxa12_gotjunk_second_proof_dryrun.py` (NEW - 390 lines):
+  - `TestGotJunkBuildIntentDetection` (3 tests) - OpenClaw intent parsing
+  - `TestGotJunkDryRunJobCreation` (1 test) - FoundUpJob creation
+  - `TestHXA12GotJunkSecondProofSafeDryRun` (3 tests):
+    - `test_gotjunk_second_proof_safe_dryrun_reaches_hermes_and_generates_preview` (key HXA12 proof)
+    - `test_gotjunk_consumer_path_reaches_real_executor`
+    - `test_gotjunk_direct_job_reaches_hermes`
+  - `TestGotJunkVoteBallotsParity` (2 tests) - same treatment verification
+
+#### HXA12 Proof: GotJunk Second FoundUp
+
+```
+012 "start build gotjunk_001 --dry-run"
+  → OpenClaw dispatch_foundup() creates FoundUpJob
+  → foundup_id=gotjunk_001, requested_action=build_foundup
+  → Real HermesJobExecutor.execute() reached (not mocked)
+  → Status: SIMULATED (dry_run=True enforced)
+  → Evidence files generated:
+    - poc_artifact_bundle.json (identifies gotjunk_001)
+    - controlled_scaffold.json (identifies gotjunk_001)
+    - gotjunk_001_poc/*.md (scaffold preview files)
+  → WSP 97 truth: same as VoteBallots
+```
+
+#### Factory Generalization Proven
+
+| Target | Slice | Proof Level |
+|--------|-------|-------------|
+| VoteBallots | HXA3/HXA4/HXA9/HXA10 | First FoundUp proof |
+| GotJunk | HXA12 | Second FoundUp proof (generalizes factory) |
+
+#### WSP 97 Truth Boundaries
+
+- GotJunk target: foundup_id=gotjunk_001
+- dry_run=True enforced throughout
+- real_execution_performed=False
+- repo_created=False
+- live_delegate_called=False
+- production_source_modified=False
+- Same evidence artifacts as VoteBallots (parity proven)
+
+#### Test Results
+
+```
+test_hxa12_gotjunk_second_proof_dryrun.py: 9 passed in 0.70s
+test_hxa4_real_hermes_object_dryrun.py: 17 passed in 0.74s
+test_openclaw_voteballots_dryrun_proof.py: 7 passed in 0.60s
+```
+
+---
+
 ### [2026-05-10] - HXA10_VOTEBALLOTS_CONTROLLED_SCAFFOLD_GENERATION_PHASE1 (v0.8.22)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority)
