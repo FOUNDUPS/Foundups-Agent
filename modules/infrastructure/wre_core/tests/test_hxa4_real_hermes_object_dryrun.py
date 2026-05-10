@@ -641,3 +641,220 @@ class TestHXA9PocArtifactBundleGeneration:
         assert not os.path.isfile(bundle_path), (
             "poc_artifact_bundle.json should NOT be created for validate_foundup"
         )
+
+
+# ---------------------------------------------------------------------------
+# Test: HXA10 Controlled Scaffold Generation
+# ---------------------------------------------------------------------------
+
+
+class TestHXA10ControlledScaffoldGeneration:
+    """
+    HXA10 Proof Test: VoteBallots controlled scaffold generation in safe dry-run.
+
+    Proves that build_foundup action generates actual scaffold files
+    in the temp/evidence workspace, not production source.
+
+    Progression:
+      HXA9: Plan only (poc_artifact_bundle.json)
+      HXA10: Actual scaffold files (voteballots_poc/*.md, *.json)
+
+    Slice: HXA10_VOTEBALLOTS_CONTROLLED_SCAFFOLD_GENERATION_PHASE1
+    """
+
+    def setup_method(self):
+        """Clear queue and setup temp evidence directory."""
+        clear_job_queue()
+        self.evidence_root = tempfile.mkdtemp(prefix="hxa10_scaffold_")
+
+    def teardown_method(self):
+        """Clear queue and cleanup."""
+        clear_job_queue()
+        if hasattr(self, "evidence_root") and os.path.exists(self.evidence_root):
+            shutil.rmtree(self.evidence_root, ignore_errors=True)
+
+    def test_voteballots_controlled_scaffold_generation_safe_dryrun_writes_temp_artifacts(
+        self,
+    ):
+        """
+        HXA10: VoteBallots build_foundup writes scaffold files to temp workspace.
+
+        Proves:
+          1. VoteBallots target is processed
+          2. dry_run=True enforced
+          3. Scaffold files created in temp/evidence workspace
+          4. Generated files include VoteBallots identity
+          5. Generated files are marked dry-run / preview
+          6. No production VoteBallots source files changed
+          7. real_execution_performed=False
+          8. repo_created=False
+          9. live_delegate_called=False
+
+        WSP 97 Boundaries:
+          - controlled_scaffold_generated=True (files written to temp)
+          - production_source_modified=False
+          - This is controlled dry-run scaffold, not production
+        """
+        # Step 1: Create VoteBallots build job
+        intent = MockIntent(VOTEBALLOTS_BUILD_MESSAGE, sender="012")
+        mock_dae = MagicMock()
+        dispatch_foundup(mock_dae, intent)
+
+        queue = get_job_queue()
+        assert len(queue) == 1
+        job = queue[0]
+
+        # Verify VoteBallots target
+        assert job.foundup_id == VOTEBALLOTS_FOUNDUP_ID
+        assert job.requested_action == "build_foundup"
+
+        # Step 2: Execute via REAL executor (not mocked)
+        executor = HermesJobExecutor(
+            dry_run=True,
+            workspace_root=self.evidence_root,
+        )
+        result = executor.execute(job)
+
+        # Step 3: Verify dry_run enforced (SIMULATED status)
+        assert result.status == HermesExecutionStatus.SIMULATED
+        assert result.request.dry_run is True
+
+        # Step 4: Verify evidence directory exists
+        assert result.evidence_path is not None
+        assert os.path.isdir(result.evidence_path)
+
+        # Step 5: Verify controlled_scaffold.json exists
+        scaffold_meta_path = os.path.join(
+            result.evidence_path, "controlled_scaffold.json"
+        )
+        assert os.path.isfile(scaffold_meta_path), (
+            f"controlled_scaffold.json not created at {scaffold_meta_path}"
+        )
+
+        # Step 6: Load and verify scaffold metadata
+        with open(scaffold_meta_path, "r") as f:
+            scaffold_meta = json.load(f)
+
+        # HXA10 Required Assertions:
+        assert scaffold_meta["controlled_scaffold_generated"] is True
+        assert scaffold_meta["real_execution_performed"] is False
+        assert scaffold_meta["repo_created"] is False
+        assert scaffold_meta["live_delegate_called"] is False
+        assert scaffold_meta["production_source_modified"] is False
+        assert scaffold_meta["dry_run"] is True
+        assert scaffold_meta["foundup_id"] == VOTEBALLOTS_FOUNDUP_ID
+
+        # Step 7: Verify scaffold directory exists
+        scaffold_dir = scaffold_meta["scaffold_dir"]
+        assert os.path.isdir(scaffold_dir), (
+            f"Scaffold directory not created at {scaffold_dir}"
+        )
+
+        # Step 8: Verify generated files exist
+        expected_files = [
+            f"{VOTEBALLOTS_FOUNDUP_ID}_poc/README.md",
+            f"{VOTEBALLOTS_FOUNDUP_ID}_poc/manifest.preview.json",
+            f"{VOTEBALLOTS_FOUNDUP_ID}_poc/interface.preview.md",
+            f"{VOTEBALLOTS_FOUNDUP_ID}_poc/implementation_plan.md",
+        ]
+        for expected_file in expected_files:
+            full_path = os.path.join(result.evidence_path, expected_file)
+            assert os.path.isfile(full_path), (
+                f"Expected scaffold file not created: {expected_file}"
+            )
+
+        # Step 9: Verify files are marked as dry-run/preview
+        readme_path = os.path.join(scaffold_dir, "README.md")
+        with open(readme_path, "r") as f:
+            readme_content = f.read()
+        assert "DRY-RUN PREVIEW" in readme_content
+        assert "NOT PRODUCTION CODE" in readme_content
+        assert VOTEBALLOTS_FOUNDUP_ID in readme_content
+
+        # Step 10: Verify manifest.preview.json contains VoteBallots identity
+        manifest_path = os.path.join(scaffold_dir, "manifest.preview.json")
+        with open(manifest_path, "r") as f:
+            manifest = json.load(f)
+        assert manifest["foundup_id"] == VOTEBALLOTS_FOUNDUP_ID
+        assert manifest["dry_run"] is True
+        assert manifest["production_ready"] is False
+        assert "_preview_warning" in manifest
+
+        # Step 11: Verify no production VoteBallots source files exist in temp
+        # (Production would be at modules/foundups/voteballots/src/)
+        production_path = os.path.join(
+            self.evidence_root, "modules", "foundups", VOTEBALLOTS_FOUNDUP_ID, "src"
+        )
+        assert not os.path.exists(production_path), (
+            "Production source path should NOT exist in temp workspace"
+        )
+
+    def test_scaffold_files_contain_generation_metadata(self):
+        """Scaffold files contain correct generation metadata."""
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            FoundUpJob,
+        )
+
+        job = FoundUpJob(
+            job_id="hxa10_metadata_test_001",
+            tenant_id="012",
+            foundup_id=VOTEBALLOTS_FOUNDUP_ID,
+            requested_action="build_foundup",
+        )
+
+        executor = HermesJobExecutor(
+            dry_run=True,
+            workspace_root=self.evidence_root,
+        )
+        result = executor.execute(job)
+
+        # Load scaffold metadata
+        scaffold_meta_path = os.path.join(
+            result.evidence_path, "controlled_scaffold.json"
+        )
+        with open(scaffold_meta_path, "r") as f:
+            scaffold_meta = json.load(f)
+
+        # Verify generation metadata
+        assert scaffold_meta["generator_slice"] == "HXA10_CONTROLLED_SCAFFOLD_GENERATION"
+        assert scaffold_meta["generator_version"] == "0.2.0"
+        assert "generated_at" in scaffold_meta
+        assert scaffold_meta["generated_file_count"] == 4
+
+    def test_validate_foundup_does_not_create_scaffold(self):
+        """validate_foundup action does NOT create scaffold files."""
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            FoundUpJob,
+        )
+
+        job = FoundUpJob(
+            job_id="hxa10_validate_test_001",
+            tenant_id="012",
+            foundup_id=VOTEBALLOTS_FOUNDUP_ID,
+            requested_action="validate_foundup",
+        )
+
+        executor = HermesJobExecutor(
+            dry_run=True,
+            workspace_root=self.evidence_root,
+        )
+        result = executor.execute(job)
+
+        # Verify evidence exists
+        assert result.evidence_path is not None
+
+        # Verify controlled_scaffold.json NOT created for validate
+        scaffold_meta_path = os.path.join(
+            result.evidence_path, "controlled_scaffold.json"
+        )
+        assert not os.path.isfile(scaffold_meta_path), (
+            "controlled_scaffold.json should NOT be created for validate_foundup"
+        )
+
+        # Verify no scaffold directory
+        scaffold_dir = os.path.join(
+            result.evidence_path, f"{VOTEBALLOTS_FOUNDUP_ID}_poc"
+        )
+        assert not os.path.isdir(scaffold_dir), (
+            "Scaffold directory should NOT be created for validate_foundup"
+        )

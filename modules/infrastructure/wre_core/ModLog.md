@@ -2,6 +2,83 @@
 
 ## Chronological Change Log
 
+### [2026-05-10] - HXA10_VOTEBALLOTS_CONTROLLED_SCAFFOLD_GENERATION_PHASE1 (v0.8.22)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority)
+**Impact Analysis**: Controlled scaffold file generation in temp/evidence workspace
+
+#### Changes Made
+
+- `src/hermes_job_executor.py`:
+  - Added `_generate_controlled_scaffold()` method (lines 873-1056):
+    - Generates actual scaffold files in evidence workspace
+    - Creates `{foundup_id}_poc/` directory with preview artifacts
+    - All files marked as DRY-RUN PREVIEW
+    - WSP 97 truth: controlled_scaffold_generated=True, production_source_modified=False
+  - Updated `_write_evidence()` to call `_generate_controlled_scaffold()` and write `controlled_scaffold.json`
+
+- `tests/test_hxa4_real_hermes_object_dryrun.py`:
+  - Added `TestHXA10ControlledScaffoldGeneration` class (3 tests):
+    - `test_voteballots_controlled_scaffold_generation_safe_dryrun_writes_temp_artifacts` - HXA10 proof
+    - `test_scaffold_files_contain_generation_metadata` - metadata verification
+    - `test_validate_foundup_does_not_create_scaffold` - validate does NOT create scaffold
+
+#### HXA10 Proof: Controlled Scaffold Generation
+
+```
+build_foundup VoteBallots (dry_run=True)
+  → HermesJobExecutor.execute() SIMULATED
+  → _generate_controlled_scaffold() creates actual files
+  → Evidence workspace: {job_id}/voteballots_poc/
+  → Files created (all marked DRY-RUN PREVIEW):
+    - README.md
+    - manifest.preview.json
+    - interface.preview.md
+    - implementation_plan.md
+  → controlled_scaffold.json written
+  → WSP 97 truth: controlled_scaffold_generated=True
+```
+
+#### Progression from HXA9
+
+| Slice | Output | Location | Production Impact |
+|-------|--------|----------|-------------------|
+| HXA9 | Plan only (JSON) | poc_artifact_bundle.json | None |
+| HXA10 | Actual scaffold files | {foundup_id}_poc/*.md | None (temp only) |
+
+#### Generated Scaffold Files
+
+```
+.hermes_evidence/{job_id}/
+├── metadata.json
+├── checkpoint.json
+├── poc_artifact_bundle.json (HXA9)
+├── controlled_scaffold.json (HXA10)
+└── voteballots_poc/
+    ├── README.md
+    ├── manifest.preview.json
+    ├── interface.preview.md
+    └── implementation_plan.md
+```
+
+#### WSP 97 Truth Boundaries
+
+- controlled_scaffold_generated=True (files written to temp)
+- real_execution_performed=False (not production)
+- repo_created=False (no GitHub operations)
+- live_delegate_called=False (no delegate_task invocation)
+- production_source_modified=False (temp only)
+- dry_run=True enforced
+
+#### Test Results
+
+```
+17 passed in 0.77s (11 HXA4 + 3 HXA9 + 3 HXA10)
+7 passed in 0.58s (OpenClaw VoteBallots)
+```
+
+---
+
 ### [2026-05-10] - HXA9_VOTEBALLOTS_POC_GENERATION_SAFE_DRYRUN_PHASE1 (v0.8.21)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority)
