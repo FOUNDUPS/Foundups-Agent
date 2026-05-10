@@ -2,6 +2,57 @@
 
 ## Chronological Change Log
 
+### [2026-05-10] - HXA3_OPENCLAW_HERMES_VOTEBALLOTS_DRYRUN_PROOF_PHASE1 (v0.8.20)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority)
+**Impact Analysis**: First executable trunk proof - VoteBallots idea→PoC dry-run
+
+#### Changes Made
+
+- `tests/test_openclaw_voteballots_dryrun_proof.py` (NEW):
+  - 7 focused tests proving OpenClaw → WRE → Hermes trunk path
+  - Test classes:
+    - `TestVoteBallotsBuildIntentDetection` - 3 tests for intent parsing
+    - `TestVoteBallotsDryRunJobCreation` - 1 test for job creation
+    - `TestVoteBallotsDryRunPipelineProof` - 2 tests for full pipeline
+    - `TestVoteBallotsBuildRouting` - 1 test for router verification
+  - Key test: `test_openclaw_voteballots_foundup_build_dryrun_reaches_hermes`
+    - Proves: OpenClaw dispatch → FoundUpJob → queue → consumer → Hermes (mocked)
+    - Asserts: dry_run=True, real_execution_performed=False
+    - Asserts: No live repo creation, no payout claims
+
+#### Trunk Proof Verified
+
+```
+012 "start build voteballots --dry-run"
+  → dispatch_foundup() creates FoundUpJob
+  → _FOUNDUP_JOB_QUEUE receives job
+  → FoundUpJobConsumer.drain_openclaw_queue_once()
+  → route_foundup_job() → HERMES_BUILDER
+  → execute_foundup_job() (mocked, returns SIMULATED)
+  → ConsumerResult with checkpoint_state="SIMULATED"
+  → real_execution_performed=False
+```
+
+#### WSP 97 Truth Boundaries
+
+- dry_run=True enforced throughout
+- real_execution_performed=False (Hermes executor mocked)
+- No GitHub repo created (mocked)
+- No live extraction performed (mocked)
+- verification_complete=False, cabr_ready=False, payout_ready=False
+
+#### Test Results
+
+```
+7 passed in 0.68s
+```
+
+Worker-Lane: W1
+Slice: HXA3_OPENCLAW_HERMES_VOTEBALLOTS_DRYRUN_PROOF_PHASE1
+
+---
+
 ### [2026-05-03] - WRE_HERMES_EXECUTOR_CONSUMER_BINDING_DRY_RUN_PHASE1 (v0.8.19)
 
 **WSP Protocol References**: WSP 11 (Interface), WSP 97 (Truthful)
