@@ -804,6 +804,73 @@ class HermesJobExecutor:
 
         return None
 
+    def _generate_poc_artifact_plan(
+        self,
+        job: "FoundUpJob",
+        request: HermesDelegationRequest,
+    ) -> Dict[str, Any]:
+        """
+        Generate deterministic PoC artifact plan for build_foundup action.
+
+        This is a dry-run plan showing what artifacts WOULD be generated
+        if live delegation was enabled. No actual files are created
+        in production source - only the plan is written to evidence.
+
+        WSP 97: This is observability, not execution proof.
+          - poc_generation=True indicates plan was generated
+          - real_execution_performed=False (no actual file creation)
+          - repo_created=False (no GitHub operations)
+          - live_delegate_called=False (no delegate_task invocation)
+
+        Args:
+            job: Source FoundUpJob
+            request: HermesDelegationRequest
+
+        Returns:
+            Dict containing the PoC artifact plan
+        """
+        foundup_id = job.foundup_id or "unknown"
+
+        # Deterministic plan based on action
+        if job.requested_action == "build_foundup":
+            planned_artifacts = [
+                f"modules/foundups/{foundup_id}/src/__init__.py",
+                f"modules/foundups/{foundup_id}/src/{foundup_id}_core.py",
+                f"modules/foundups/{foundup_id}/src/{foundup_id}_api.py",
+                f"modules/foundups/{foundup_id}/tests/test_{foundup_id}_core.py",
+            ]
+            plan_description = f"Build PoC scaffold for FoundUp '{foundup_id}'"
+        elif job.requested_action == "extract_foundup":
+            planned_artifacts = [
+                f"external-repos/{foundup_id}/README.md",
+                f"external-repos/{foundup_id}/requirements.txt",
+                f"external-repos/{foundup_id}/src/",
+            ]
+            plan_description = f"Extract FoundUp '{foundup_id}' to external repo"
+        else:
+            planned_artifacts = []
+            plan_description = f"Execute action '{job.requested_action}'"
+
+        return {
+            "poc_generation": True,
+            "foundup_id": foundup_id,
+            "requested_action": job.requested_action,
+            "plan_description": plan_description,
+            "planned_artifacts": planned_artifacts,
+            "planned_artifact_count": len(planned_artifacts),
+            # WSP 97 truth fields
+            "real_execution_performed": False,
+            "repo_created": False,
+            "live_delegate_called": False,
+            "artifacts_written_to_source": False,
+            # Execution mode
+            "dry_run": request.dry_run,
+            "hermes_delegate_enabled": is_hermes_delegation_enabled(),
+            # Generation metadata
+            "generated_at": _utc_now().isoformat(),
+            "generator_version": "0.1.0",
+        }
+
     def _write_evidence(
         self,
         job: "FoundUpJob",
@@ -816,6 +883,7 @@ class HermesJobExecutor:
         Creates .hermes_evidence/{job_id}/ directory with:
           - metadata.json: Job identity, workspace binding, timing
           - checkpoint.json: Checkpoint state and execution details
+          - poc_artifact_bundle.json: PoC artifact plan (for build_foundup)
 
         Evidence files are observability artifacts only (WSP 97).
         They prove the job was processed, not that real work occurred.
@@ -869,6 +937,17 @@ class HermesJobExecutor:
             checkpoint_path = os.path.join(evidence_dir, "checkpoint.json")
             with open(checkpoint_path, "w", encoding="utf-8") as f:
                 json.dump(checkpoint, f, indent=2, default=str)
+
+            # Generate and write poc_artifact_bundle.json for build_foundup actions
+            if job.requested_action in ("build_foundup", "extract_foundup"):
+                poc_plan = self._generate_poc_artifact_plan(job, request)
+                poc_bundle_path = os.path.join(evidence_dir, "poc_artifact_bundle.json")
+                with open(poc_bundle_path, "w", encoding="utf-8") as f:
+                    json.dump(poc_plan, f, indent=2, default=str)
+                logger.info(
+                    "[HERMES-EXEC] PoC artifact bundle written to %s",
+                    poc_bundle_path,
+                )
 
             logger.info(
                 "[HERMES-EXEC] Evidence written to %s",

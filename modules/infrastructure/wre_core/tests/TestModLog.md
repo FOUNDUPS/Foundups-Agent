@@ -1,5 +1,27 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-10: HXA9 PoC artifact bundle generation tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa4_real_hermes_object_dryrun.py -v`
+- Status: PASS
+- Result: `14 passed`
+- Notes:
+  - Added `TestHXA9PocArtifactBundleGeneration` class (3 tests):
+    - `test_voteballots_poc_generation_safe_dryrun_creates_artifact_bundle` - HXA9 proof
+    - `test_extract_foundup_creates_artifact_bundle` - extract action creates bundle
+    - `test_validate_foundup_does_not_create_artifact_bundle` - validate does NOT create bundle
+  - HXA9 proves VoteBallots build_foundup generates `poc_artifact_bundle.json`
+  - Bundle contains deterministic artifact plan (NOT actual files)
+- WSP 97 Coverage (HXA9):
+  - poc_generation=True (plan generated)
+  - real_execution_performed=False (no actual file creation)
+  - repo_created=False (no GitHub operations)
+  - live_delegate_called=False (no delegate_task invocation)
+  - artifacts_written_to_source=False (plan only, not execution)
+- Slice: HXA9_VOTEBALLOTS_POC_GENERATION_SAFE_DRYRUN_PHASE1
+
+---
+
 ## 2026-05-03: WRE Hermes executor consumer binding tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_foundup_job_consumer.py -v`

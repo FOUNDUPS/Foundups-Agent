@@ -455,3 +455,189 @@ class TestWSP97TruthTableVerification:
         # Evidence written (observability, not execution proof)
         assert result.evidence_path is not None, "evidence_path"
         assert os.path.isdir(result.evidence_path), "evidence directory exists"
+
+
+# ---------------------------------------------------------------------------
+# Test: HXA9 PoC Artifact Bundle Generation
+# ---------------------------------------------------------------------------
+
+
+class TestHXA9PocArtifactBundleGeneration:
+    """
+    HXA9 Proof Test: VoteBallots PoC artifact bundle generation in safe dry-run.
+
+    Proves that build_foundup action generates poc_artifact_bundle.json
+    with correct WSP 97 truth fields.
+
+    Slice: HXA9_VOTEBALLOTS_POC_GENERATION_SAFE_DRYRUN_PHASE1
+    """
+
+    def setup_method(self):
+        """Clear queue and setup temp evidence directory."""
+        clear_job_queue()
+        self.evidence_root = tempfile.mkdtemp(prefix="hxa9_poc_bundle_")
+
+    def teardown_method(self):
+        """Clear queue and cleanup."""
+        clear_job_queue()
+        if hasattr(self, "evidence_root") and os.path.exists(self.evidence_root):
+            shutil.rmtree(self.evidence_root, ignore_errors=True)
+
+    def test_voteballots_poc_generation_safe_dryrun_creates_artifact_bundle(self):
+        """
+        HXA9: VoteBallots build_foundup creates poc_artifact_bundle.json.
+
+        Proves:
+          1. build_foundup action reaches real HermesJobExecutor
+          2. poc_artifact_bundle.json is written to evidence directory
+          3. Bundle contains poc_generation=True
+          4. Bundle contains real_execution_performed=False
+          5. Bundle contains repo_created=False
+          6. Bundle contains live_delegate_called=False
+          7. Bundle contains planned_artifacts list for voteballots
+
+        WSP 97 Boundaries:
+          - This is observability (PoC plan), not execution proof
+          - No actual files are written to modules/foundups/voteballots/src/
+          - No GitHub operations performed
+          - No delegate_task called
+        """
+        # Step 1: Create VoteBallots build job via OpenClaw
+        intent = MockIntent(VOTEBALLOTS_BUILD_MESSAGE, sender="012")
+        mock_dae = MagicMock()
+        dispatch_foundup(mock_dae, intent)
+
+        queue = get_job_queue()
+        assert len(queue) == 1
+        job = queue[0]
+        assert job.foundup_id == VOTEBALLOTS_FOUNDUP_ID
+        assert job.requested_action == "build_foundup"
+
+        # Step 2: Execute via REAL executor (not mocked)
+        executor = HermesJobExecutor(
+            dry_run=True,
+            workspace_root=self.evidence_root,
+        )
+        result = executor.execute(job)
+
+        # Step 3: Verify SIMULATED status (safe dry-run)
+        assert result.status == HermesExecutionStatus.SIMULATED, (
+            f"Expected SIMULATED, got {result.status.value}"
+        )
+
+        # Step 4: Verify evidence directory exists
+        assert result.evidence_path is not None
+        assert os.path.isdir(result.evidence_path), "Evidence directory not created"
+
+        # Step 5: Verify poc_artifact_bundle.json exists
+        bundle_path = os.path.join(result.evidence_path, "poc_artifact_bundle.json")
+        assert os.path.isfile(bundle_path), (
+            f"poc_artifact_bundle.json not created at {bundle_path}"
+        )
+
+        # Step 6: Load and verify bundle contents
+        with open(bundle_path, "r") as f:
+            bundle = json.load(f)
+
+        # HXA9 Required Assertions:
+        assert bundle["poc_generation"] is True, (
+            "poc_generation must be True"
+        )
+        assert bundle["real_execution_performed"] is False, (
+            "real_execution_performed must be False"
+        )
+        assert bundle["repo_created"] is False, (
+            "repo_created must be False"
+        )
+        assert bundle["live_delegate_called"] is False, (
+            "live_delegate_called must be False"
+        )
+
+        # Step 7: Verify planned artifacts reference voteballots
+        assert bundle["foundup_id"] == VOTEBALLOTS_FOUNDUP_ID
+        assert bundle["requested_action"] == "build_foundup"
+        assert len(bundle["planned_artifacts"]) > 0, (
+            "planned_artifacts should not be empty"
+        )
+        assert any(
+            VOTEBALLOTS_FOUNDUP_ID in artifact
+            for artifact in bundle["planned_artifacts"]
+        ), "Planned artifacts should reference voteballots"
+
+        # Step 8: Verify planned artifact paths are valid
+        expected_paths = [
+            f"modules/foundups/{VOTEBALLOTS_FOUNDUP_ID}/src/__init__.py",
+            f"modules/foundups/{VOTEBALLOTS_FOUNDUP_ID}/src/{VOTEBALLOTS_FOUNDUP_ID}_core.py",
+            f"modules/foundups/{VOTEBALLOTS_FOUNDUP_ID}/src/{VOTEBALLOTS_FOUNDUP_ID}_api.py",
+        ]
+        for expected in expected_paths:
+            assert expected in bundle["planned_artifacts"], (
+                f"Expected {expected} in planned_artifacts"
+            )
+
+        # Step 9: Verify WSP 97 truth - artifacts NOT written to source
+        assert bundle["artifacts_written_to_source"] is False
+
+    def test_extract_foundup_creates_artifact_bundle(self):
+        """extract_foundup action also creates poc_artifact_bundle.json."""
+        # Create extract job manually (not via OpenClaw intent parsing)
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            FoundUpJob,
+        )
+
+        job = FoundUpJob(
+            job_id="hxa9_extract_test_001",
+            tenant_id="012",
+            foundup_id=VOTEBALLOTS_FOUNDUP_ID,
+            requested_action="extract_foundup",
+        )
+
+        # Execute via real executor
+        executor = HermesJobExecutor(
+            dry_run=True,
+            workspace_root=self.evidence_root,
+        )
+        result = executor.execute(job)
+
+        # Verify bundle created
+        assert result.evidence_path is not None
+        bundle_path = os.path.join(result.evidence_path, "poc_artifact_bundle.json")
+        assert os.path.isfile(bundle_path)
+
+        with open(bundle_path, "r") as f:
+            bundle = json.load(f)
+
+        # Verify HXA9 truth fields
+        assert bundle["poc_generation"] is True
+        assert bundle["real_execution_performed"] is False
+        assert bundle["repo_created"] is False
+        assert bundle["live_delegate_called"] is False
+        assert "external-repos" in bundle["planned_artifacts"][0]
+
+    def test_validate_foundup_does_not_create_artifact_bundle(self):
+        """validate_foundup action does NOT create poc_artifact_bundle.json."""
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            FoundUpJob,
+        )
+
+        job = FoundUpJob(
+            job_id="hxa9_validate_test_001",
+            tenant_id="012",
+            foundup_id=VOTEBALLOTS_FOUNDUP_ID,
+            requested_action="validate_foundup",
+        )
+
+        executor = HermesJobExecutor(
+            dry_run=True,
+            workspace_root=self.evidence_root,
+        )
+        result = executor.execute(job)
+
+        # Verify evidence exists
+        assert result.evidence_path is not None
+
+        # Verify poc_artifact_bundle.json NOT created for validate
+        bundle_path = os.path.join(result.evidence_path, "poc_artifact_bundle.json")
+        assert not os.path.isfile(bundle_path), (
+            "poc_artifact_bundle.json should NOT be created for validate_foundup"
+        )

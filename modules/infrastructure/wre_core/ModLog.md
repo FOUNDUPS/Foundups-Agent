@@ -2,6 +2,72 @@
 
 ## Chronological Change Log
 
+### [2026-05-10] - HXA9_VOTEBALLOTS_POC_GENERATION_SAFE_DRYRUN_PHASE1 (v0.8.21)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority)
+**Impact Analysis**: PoC artifact bundle generation - deterministic plan in evidence
+
+#### Changes Made
+
+- `src/hermes_job_executor.py`:
+  - Added `_generate_poc_artifact_plan()` method (lines 807-872):
+    - Generates deterministic PoC artifact plan for build_foundup/extract_foundup
+    - Returns plan dict with planned_artifacts list
+    - WSP 97 truth fields: poc_generation=True, real_execution_performed=False
+  - Updated `_write_evidence()` to write `poc_artifact_bundle.json` for build/extract actions
+
+- `tests/test_hxa4_real_hermes_object_dryrun.py`:
+  - Added `TestHXA9PocArtifactBundleGeneration` class (3 tests):
+    - `test_voteballots_poc_generation_safe_dryrun_creates_artifact_bundle` - HXA9 proof
+    - `test_extract_foundup_creates_artifact_bundle` - extract action creates bundle
+    - `test_validate_foundup_does_not_create_artifact_bundle` - validate does NOT create bundle
+
+#### HXA9 Proof: PoC Artifact Bundle
+
+```
+build_foundup VoteBallots (dry_run=True)
+  → HermesJobExecutor.execute() SIMULATED
+  → _generate_poc_artifact_plan() creates deterministic plan
+  → _write_evidence() writes poc_artifact_bundle.json
+  → Bundle contains planned artifacts list (NOT actual files)
+  → WSP 97 truth: poc_generation=True, real_execution_performed=False
+```
+
+#### Bundle Contents (VoteBallots build_foundup)
+
+```json
+{
+  "poc_generation": true,
+  "foundup_id": "voteballots",
+  "planned_artifacts": [
+    "modules/foundups/voteballots/src/__init__.py",
+    "modules/foundups/voteballots/src/voteballots_core.py",
+    "modules/foundups/voteballots/src/voteballots_api.py",
+    "modules/foundups/voteballots/tests/test_voteballots_core.py"
+  ],
+  "real_execution_performed": false,
+  "repo_created": false,
+  "live_delegate_called": false,
+  "artifacts_written_to_source": false
+}
+```
+
+#### WSP 97 Truth Boundaries
+
+- poc_generation=True (plan generated)
+- real_execution_performed=False (no actual file creation)
+- repo_created=False (no GitHub operations)
+- live_delegate_called=False (no delegate_task invocation)
+- artifacts_written_to_source=False (plan only)
+
+#### Test Results
+
+```
+14 passed in 0.69s (11 HXA4 + 3 HXA9)
+```
+
+---
+
 ### [2026-05-10] - HXA3_OPENCLAW_HERMES_VOTEBALLOTS_DRYRUN_PROOF_PHASE1 (v0.8.20)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority)
