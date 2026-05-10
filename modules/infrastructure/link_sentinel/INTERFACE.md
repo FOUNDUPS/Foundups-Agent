@@ -1,8 +1,8 @@
 # Link Sentinel - Interface Contracts
 
-**Status**: `DRAFT` | `NOT_IMPLEMENTED`
+**Status**: `POC_IMPLEMENTED` | `STATIC_ANALYSIS_ONLY`
 
-All contracts below are proposed designs. No runtime implementation exists.
+Core contracts are implemented. Consumer hooks are NOT implemented.
 
 ---
 
@@ -17,7 +17,7 @@ Context provided by consumer surfaces when requesting URL validation.
 class LinkContext:
     """Input context for link validation request.
     
-    STATUS: DRAFT - NOT IMPLEMENTED
+    STATUS: IMPLEMENTED (src/models.py)
     """
     # URL Information
     raw_url: str                    # Original URL as received
@@ -46,7 +46,7 @@ Decision returned by Link Sentinel after validation.
 class LinkDecision:
     """Output decision from link validation.
     
-    STATUS: DRAFT - NOT IMPLEMENTED
+    STATUS: IMPLEMENTED (src/models.py)
     """
     # Decision
     decision: DecisionAction        # ALLOW, BLOCK, WARN, SANDBOX
@@ -70,7 +70,7 @@ Enumeration of risk detection reasons.
 class RiskReasonCode(Enum):
     """Risk reason codes for link decisions.
     
-    STATUS: DRAFT - NOT IMPLEMENTED
+    STATUS: IMPLEMENTED (src/models.py)
     """
     # URL Structure
     PUNYCODE_HOMOGRAPH = "punycode_homograph"       # Unicode lookalike attack
@@ -111,7 +111,7 @@ Actions Link Sentinel can recommend.
 class DecisionAction(Enum):
     """Link decision actions.
     
-    STATUS: DRAFT - NOT IMPLEMENTED
+    STATUS: IMPLEMENTED (src/models.py)
     """
     ALLOW = "allow"         # URL is safe, proceed
     BLOCK = "block"         # URL is dangerous, reject
@@ -123,80 +123,67 @@ class DecisionAction(Enum):
 
 ## Service Contracts
 
-### LinkSentinel (Main Service)
+### analyze_link (Main API)
 
-Primary validation service interface.
+Primary validation function.
 
 ```python
-class LinkSentinel:
-    """URL safety validation service.
+def analyze_link(
+    raw_url: str,
+    context: Optional[LinkContext] = None
+) -> LinkDecision:
+    """Analyze a URL and return a decision.
     
-    STATUS: DRAFT - NOT IMPLEMENTED
+    STATUS: IMPLEMENTED (src/analyzer.py)
+    
+    Static analysis only - no network calls, no redirect resolution,
+    no reputation lookup, no sandbox detonation.
+    
+    Args:
+        raw_url: The URL to analyze
+        context: Optional context about the actor/surface
+        
+    Returns:
+        LinkDecision with risk assessment
     """
+```
+
+### normalize_url (Helper)
+
+URL normalization function.
+
+```python
+def normalize_url(raw_url: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    """Normalize URL to canonical form.
     
-    async def validate(self, context: LinkContext) -> LinkDecision:
-        """Validate a URL and return a decision.
-        
-        Args:
-            context: LinkContext with URL and actor information
-            
-        Returns:
-            LinkDecision with risk assessment and recommended action
-        """
-        raise NotImplementedError("SCAFFOLD_ONLY - no implementation")
+    STATUS: IMPLEMENTED (src/normalizer.py)
     
-    async def validate_batch(
-        self, 
-        contexts: List[LinkContext]
-    ) -> List[LinkDecision]:
-        """Validate multiple URLs in batch.
-        
-        Args:
-            contexts: List of LinkContext objects
-            
-        Returns:
-            List of LinkDecision objects (same order as input)
-        """
-        raise NotImplementedError("SCAFFOLD_ONLY - no implementation")
+    - Lowercase scheme and host
+    - Remove default ports
+    - Remove www. prefix
+    - Sort query parameters
+    - Handle missing scheme (default https)
     
-    def normalize_url(self, raw_url: str) -> str:
-        """Normalize URL to canonical form.
-        
-        - Lowercase scheme and host
-        - Remove default ports
-        - Decode percent-encoding where safe
-        - Sort query parameters
-        - Remove tracking parameters
-        
-        Args:
-            raw_url: Original URL string
-            
-        Returns:
-            Normalized URL string
-        """
-        raise NotImplementedError("SCAFFOLD_ONLY - no implementation")
+    Returns:
+        Tuple of (normalized_url, error_message, scheme)
+    """
 ```
 
 ---
 
-## Consumer Integration (Draft)
+## Consumer Integration (Future - NOT IMPLEMENTED)
 
-### browser_actions Hook
+### browser_actions Hook (Future)
 
 ```python
-# DRAFT - NOT IMPLEMENTED
+# FUTURE - NOT IMPLEMENTED
 # modules/infrastructure/browser_actions/src/foundups_actions.py
 
 async def navigate(url: str) -> ActionResult:
     """Navigate to URL with Link Sentinel validation."""
-    from modules.infrastructure.link_sentinel import LinkSentinel
+    from modules.infrastructure.link_sentinel import analyze_link, LinkContext
     
-    sentinel = LinkSentinel()
-    decision = await sentinel.validate(LinkContext(
-        raw_url=url,
-        surface="browser_actions",
-        correlation_id=str(uuid4())
-    ))
+    decision = analyze_link(url, LinkContext(surface="browser_actions"))
     
     if decision.decision == DecisionAction.BLOCK:
         return ActionResult(success=False, error=f"Blocked: {decision.reason_codes}")
@@ -204,23 +191,21 @@ async def navigate(url: str) -> ActionResult:
     # Proceed with navigation...
 ```
 
-### livechat Hook
+### livechat Hook (Future)
 
 ```python
-# DRAFT - NOT IMPLEMENTED
+# FUTURE - NOT IMPLEMENTED
 # modules/communication/livechat/src/message_processor.py
 
 async def process_message(message: str) -> ProcessedMessage:
     """Process chat message with link validation."""
-    from modules.infrastructure.link_sentinel import LinkSentinel
+    from modules.infrastructure.link_sentinel import analyze_link, LinkContext
     
     urls = extract_urls(message)
     for url in urls:
-        decision = await sentinel.validate(LinkContext(
-            raw_url=url,
+        decision = analyze_link(url, LinkContext(
             surface="livechat",
-            actor_id=message.author_id,
-            correlation_id=message.id
+            actor_id=message.author_id
         ))
         
         if decision.decision == DecisionAction.BLOCK:
@@ -249,3 +234,4 @@ FAMEventType.LINK_SANDBOXED
 | Version | Date | Status | Notes |
 |---------|------|--------|-------|
 | 0.1.0 | 2026-05-10 | DRAFT | Initial scaffold, contracts defined |
+| 0.2.0 | 2026-05-10 | POC | Static analyzer implemented, 47 tests |
