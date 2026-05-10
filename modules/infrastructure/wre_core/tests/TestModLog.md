@@ -1,5 +1,31 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-10: HXA12 GotJunk second proof safe dry-run tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa12_gotjunk_second_proof_dryrun.py -v`
+- Status: PASS
+- Result: `9 passed`
+- Notes:
+  - NEW file: `test_hxa12_gotjunk_second_proof_dryrun.py` (390 lines)
+  - Test classes:
+    - `TestGotJunkBuildIntentDetection` (3 tests) - intent parsing for gotjunk_001
+    - `TestGotJunkDryRunJobCreation` (1 test) - job creation via OpenClaw
+    - `TestHXA12GotJunkSecondProofSafeDryRun` (3 tests) - main HXA12 proof
+    - `TestGotJunkVoteBallotsParity` (2 tests) - verifies same treatment as VoteBallots
+  - Key test: `test_gotjunk_second_proof_safe_dryrun_reaches_hermes_and_generates_preview`
+  - Proves factory generalizes beyond VoteBallots to second FoundUp
+- WSP 97 Coverage (HXA12):
+  - GotJunk target: foundup_id=gotjunk_001
+  - dry_run=True enforced
+  - real_execution_performed=False
+  - repo_created=False
+  - live_delegate_called=False
+  - production_source_modified=False
+  - Same evidence artifacts as VoteBallots (parity verified)
+- Slice: HXA12_GOTJUNK_SECOND_PROOF_SAFE_DRYRUN_PHASE1
+
+---
+
 ## 2026-05-10: HXA10 Controlled scaffold generation tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa4_real_hermes_object_dryrun.py -v`
