@@ -2,6 +2,92 @@
 
 ## Chronological Change Log
 
+### [2026-05-12] - HXA14_CONTROLLED_LIVE_HERMES_DELEGATION_HARNESS_PHASE1 (v0.8.24)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority)
+**Impact Analysis**: Controlled live delegation harness for test-only explicit opt-in
+
+#### Changes Made
+
+- `src/hermes_job_executor.py`:
+  - Added `CONTROLLED_HARNESS_EXECUTED` to `HermesExecutionStatus` enum
+  - Added HXA14 truth fields to `HermesDelegationResult`:
+    - `controlled_delegate_invoked`
+    - `live_external_delegate_called`
+    - `repo_created`
+    - `production_source_modified`
+    - `external_federation_ready`
+    - `production_ready`
+  - Added `controlled_harness` parameter to `HermesJobExecutor.__init__()`
+  - Added `_execute_controlled_delegate()` method for test harness execution
+  - Updated `execute()` to check `controlled_harness` flag before feature flag
+
+- `tests/test_hxa14_controlled_live_hermes_harness.py` (NEW - 520 lines):
+  - 22 tests covering all harness requirements:
+    - Default state (harness disabled)
+    - Explicit opt-in required
+    - Safety boundary enforcement
+    - Controlled delegate behavior
+    - VoteBallots/GotJunk through harness
+    - No GitHub API calls
+    - No production source modification
+    - WSP 97 truth table enforcement
+
+#### HXA14 Harness Design
+
+```
+Controlled Harness Invocation:
+  executor = HermesJobExecutor(controlled_harness=True)
+  result = executor.execute(job)
+  → status = CONTROLLED_HARNESS_EXECUTED
+  → controlled_delegate_invoked = True
+  → live_external_delegate_called = False
+  → All safety boundaries enforced
+
+Normal Execution (harness disabled):
+  executor = HermesJobExecutor()  # controlled_harness=False default
+  result = executor.execute(job)
+  → status = SIMULATED (or BLOCKED)
+  → controlled_delegate_invoked = False
+```
+
+#### HXA14 Truth Fields Added
+
+| Field | Description |
+|-------|-------------|
+| `controlled_delegate_invoked` | True if harness delegate was called |
+| `live_external_delegate_called` | True ONLY if real external delegate_task called |
+| `repo_created` | True ONLY if GitHub repo was created |
+| `production_source_modified` | True ONLY if modules/foundups/*/src was modified |
+| `external_federation_ready` | True ONLY if ready for p.fMALL/pAVS |
+| `production_ready` | True ONLY if FoundUp is production-ready |
+
+#### WSP 97 Truth Table (Controlled Harness)
+
+| Field | Value | Meaning |
+|-------|-------|---------|
+| `status` | CONTROLLED_HARNESS_EXECUTED | Harness completed |
+| `controlled_delegate_invoked` | True | Harness delegate was called |
+| `live_external_delegate_called` | False | No real external delegate |
+| `real_execution_performed` | False | No production execution |
+| `repo_created` | False | No GitHub operations |
+| `production_source_modified` | False | Evidence only |
+| `verification_complete` | False | No CABR verification |
+| `cabr_ready` | False | No payout pipeline |
+| `payout_ready` | False | No token operations |
+| `external_federation_ready` | False | Not ready for federation |
+| `production_ready` | False | Not production-ready |
+
+#### Test Results
+
+```
+test_hxa14_controlled_live_hermes_harness.py: 22 passed in 1.01s
+test_hxa4_real_hermes_object_dryrun.py: 17 passed in 0.73s
+test_hxa12_gotjunk_second_proof_dryrun.py: 9 passed in 0.71s
+```
+
+---
+
 ### [2026-05-10] - HXA12_GOTJUNK_SECOND_PROOF_SAFE_DRYRUN_PHASE1 (v0.8.23)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority)

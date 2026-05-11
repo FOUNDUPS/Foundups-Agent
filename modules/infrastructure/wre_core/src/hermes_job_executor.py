@@ -259,6 +259,9 @@ class HermesExecutionStatus(str, Enum):
     # Simulation (dry_run=True or feature flag disabled)
     SIMULATED = "SIMULATED"
 
+    # Controlled Harness (HXA14+) - explicit test-only delegation
+    CONTROLLED_HARNESS_EXECUTED = "CONTROLLED_HARNESS_EXECUTED"
+
     # Blocked states
     BLOCKED_FEATURE_DISABLED = "BLOCKED_FEATURE_DISABLED"
     BLOCKED_IMPORT_UNAVAILABLE = "BLOCKED_IMPORT_UNAVAILABLE"
@@ -409,6 +412,14 @@ class HermesDelegationResult:
     cabr_ready: bool = False
     payout_ready: bool = False
 
+    # HXA14 Controlled Harness Truth Fields
+    controlled_delegate_invoked: bool = False
+    live_external_delegate_called: bool = False
+    repo_created: bool = False
+    production_source_modified: bool = False
+    external_federation_ready: bool = False
+    production_ready: bool = False
+
     # Metadata
     completed_at: datetime = field(default_factory=_utc_now)
     executor_version: str = "0.1.0"
@@ -436,6 +447,13 @@ class HermesDelegationResult:
             "verification_complete": self.verification_complete,
             "cabr_ready": self.cabr_ready,
             "payout_ready": self.payout_ready,
+            # HXA14 Controlled Harness Truth Fields
+            "controlled_delegate_invoked": self.controlled_delegate_invoked,
+            "live_external_delegate_called": self.live_external_delegate_called,
+            "repo_created": self.repo_created,
+            "production_source_modified": self.production_source_modified,
+            "external_federation_ready": self.external_federation_ready,
+            "production_ready": self.production_ready,
             "completed_at": self.completed_at.isoformat(),
             "executor_version": self.executor_version,
         }
@@ -477,6 +495,7 @@ class HermesJobExecutor:
         max_iterations: int = 50,
         default_toolsets: Optional[List[str]] = None,
         workspace_root: Optional[str] = None,
+        controlled_harness: bool = False,
     ):
         """
         Initialize executor.
@@ -486,12 +505,17 @@ class HermesJobExecutor:
             max_iterations: Default iteration limit for Hermes
             default_toolsets: Default toolsets (empty by default for safety)
             workspace_root: Root directory for workspace binding (auto-detected if None)
+            controlled_harness: If True, use controlled delegate instead of real/blocked.
+                               This is an explicit test-only mode (HXA14).
+                               MUST be explicitly set; default is False.
         """
         self.dry_run = dry_run
         self.max_iterations = max_iterations
         self.default_toolsets = default_toolsets or []
         self.workspace_root = workspace_root or self._detect_workspace_root()
+        self.controlled_harness = controlled_harness
         self._delegate_task_fn = None
+        self._controlled_delegate_fn = None
         self._import_attempted = False
         self._import_error: Optional[str] = None
 
@@ -543,6 +567,64 @@ class HermesJobExecutor:
                 exc,
             )
             return False
+
+    def _execute_controlled_delegate(
+        self,
+        job: "FoundUpJob",
+        request: HermesDelegationRequest,
+    ) -> Dict[str, Any]:
+        """
+        Execute controlled delegate for test harness.
+
+        This is NOT a real Hermes delegate_task call. It simulates delegation
+        behavior for testing purposes while maintaining all safety boundaries.
+
+        HXA14 Controlled Harness Semantics:
+          - Explicitly invoked only when controlled_harness=True
+          - Does NOT call live external delegate_task
+          - Does NOT create GitHub repositories
+          - Does NOT modify production FoundUp source
+          - DOES write evidence artifacts to temp workspace
+          - Returns truthful controlled_delegate_invoked=True
+
+        Args:
+            job: FoundUpJob being processed
+            request: HermesDelegationRequest built from job
+
+        Returns:
+            Simulated delegate response with controlled execution markers
+        """
+        logger.info(
+            "[HERMES-EXEC] Executing controlled delegate for job %s (harness mode)",
+            job.job_id,
+        )
+
+        foundup_id = job.foundup_id or "unknown"
+
+        # Simulate delegate execution - deterministic, no external calls
+        simulated_files_changed = [
+            f".hermes_evidence/{job.job_id}/controlled_delegate_output.json",
+            f".hermes_evidence/{job.job_id}/{foundup_id}_poc/README.md",
+            f".hermes_evidence/{job.job_id}/{foundup_id}_poc/manifest.preview.json",
+        ]
+
+        return {
+            "status": "CONTROLLED_HARNESS_COMPLETE",
+            "message": (
+                f"Controlled delegate executed for {foundup_id}. "
+                "This is a test harness execution, not live delegation."
+            ),
+            "files_changed": simulated_files_changed,
+            "commands_run": [],
+            "iterations": 1,
+            "controlled_harness": True,
+            "live_delegate_called": False,
+            "repo_created": False,
+            "production_source_modified": False,
+            "job_id": job.job_id,
+            "foundup_id": foundup_id,
+            "executed_at": _utc_now().isoformat(),
+        }
 
     def build_delegation_request(
         self,
@@ -677,9 +759,10 @@ class HermesJobExecutor:
         Decision tree:
           1. Validate job structure
           2. Build delegation request
-          3. Check feature flag
-          4. If disabled or dry_run: return SIMULATED
-          5. If enabled and not dry_run: return BLOCKED (Phase 2)
+          3. If controlled_harness: execute controlled delegate (HXA14)
+          4. Check feature flag
+          5. If disabled or dry_run: return SIMULATED
+          6. If enabled and not dry_run: return BLOCKED (Phase 2)
 
         Args:
             job: FoundUpJob to execute
@@ -703,7 +786,44 @@ class HermesJobExecutor:
         # Step 2: Build request
         request = self.build_delegation_request(job)
 
-        # Step 3: Check feature flag
+        # Step 3: HXA14 Controlled Harness - explicit test-only path
+        if self.controlled_harness:
+            logger.info(
+                "[HERMES-EXEC] Controlled harness enabled, executing controlled delegate for job %s",
+                job.job_id,
+            )
+            # Execute controlled delegate (no live external calls)
+            delegate_response = self._execute_controlled_delegate(job, request)
+
+            result = HermesDelegationResult(
+                status=HermesExecutionStatus.CONTROLLED_HARNESS_EXECUTED,
+                status_reason=(
+                    f"Controlled harness executed for job {job.job_id}. "
+                    "This is a test harness execution - no live external delegate called."
+                ),
+                request=request,
+                delegate_response=delegate_response,
+                duration_seconds=time.monotonic() - start_time,
+                checkpoint_state="CONTROLLED_HARNESS_COMPLETE",
+                checkpoint_result=f"Controlled delegate completed for {job.foundup_id or 'unknown'}",
+                files_changed=delegate_response.get("files_changed", []),
+                # WSP 97 Truth Fields
+                real_execution_performed=False,  # No REAL execution
+                verification_complete=False,
+                cabr_ready=False,
+                payout_ready=False,
+                # HXA14 Controlled Harness Truth Fields
+                controlled_delegate_invoked=True,
+                live_external_delegate_called=False,
+                repo_created=False,
+                production_source_modified=False,
+                external_federation_ready=False,
+                production_ready=False,
+            )
+            result.evidence_path = self._write_evidence(job, request, result)
+            return result
+
+        # Step 4: Check feature flag
         if not is_hermes_delegation_enabled():
             logger.info(
                 "[HERMES-EXEC] Feature disabled, simulating job %s",
