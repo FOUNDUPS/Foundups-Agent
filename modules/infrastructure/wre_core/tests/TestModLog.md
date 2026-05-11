@@ -1,5 +1,49 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-12: HXA18 Hermes runtime fixture safe harness tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa18_hermes_runtime_fixture_safe_harness.py -v`
+- Status: PASS
+- Result: `35 passed`
+- Notes:
+  - NEW file: `test_hxa18_hermes_runtime_fixture_safe_harness.py` (620 lines)
+  - Test-only fixture objects (no production code modified):
+    - `FakeHermesParentAgent`: Satisfies parent_agent interface
+    - `FakeToolsetRegistry`: Satisfies toolsets interface (read-only)
+    - `RedactedCredentials`: Satisfies credentials interface (redacted)
+    - `InMemoryTerminalSessions`: Satisfies terminal_sessions interface
+    - `FakeDelegateAdapter`: Records calls without real delegation
+    - `HermesRuntimeFixture`: Bundles all fixtures
+  - Test classes:
+    - `TestRuntimeFixtureSuppliesParentAgent` (5 tests)
+    - `TestRuntimeFixtureSuppliesToolsets` (4 tests)
+    - `TestRuntimeFixtureUsesRedactedCredentialsOnly` (6 tests)
+    - `TestRuntimeFixtureUsesInMemoryTerminalSessions` (4 tests)
+    - `TestSafeDelegateAdapterInvoked` (3 tests)
+    - `TestLiveExternalDelegateCalledFalse` (2 tests)
+    - `TestRepoCreatedFalse` (2 tests)
+    - `TestProductionSourceModifiedFalse` (2 tests)
+    - `TestNoNetworkOrRealCredentials` (2 tests)
+    - `TestEvidenceOrCheckpointTruthFieldsPreserved` (2 tests)
+    - `TestHXA18CompleteFixtureHarness` (2 tests)
+    - `TestHXA18VerdictDocumentation` (1 test)
+  - Key test: `test_complete_fixture_harness_satisfies_runtime_surface`
+  - Verdict: `RUNTIME_FIXTURE_HARNESS_SATISFIES_MISSING_SURFACE`
+- WSP 97 Coverage (HXA18):
+  - real_delegate_adapter_invoked=True (for local fake adapter only)
+  - live_external_delegate_called=False (no real external delegation)
+  - repo_created=False (no GitHub)
+  - production_source_modified=False
+  - external_federation_initiated=False
+  - production_readiness_claimed=False
+  - real_execution_performed=False (test fixtures only)
+  - verification_complete=False
+  - cabr_ready=False
+  - payout_ready=False
+- Slice: HXA18_HERMES_RUNTIME_FIXTURE_SAFE_HARNESS_PHASE1
+
+---
+
 ## 2026-05-10: HXA16 Real Hermes delegate adapter safe harness tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa16_real_hermes_delegate_adapter_safe_harness.py -v`
