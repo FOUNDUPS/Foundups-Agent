@@ -1,5 +1,33 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-12: HXA14 Controlled live Hermes delegation harness tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa14_controlled_live_hermes_harness.py -v`
+- Status: PASS
+- Result: `22 passed`
+- Notes:
+  - NEW file: `test_hxa14_controlled_live_hermes_harness.py` (520 lines)
+  - Test classes:
+    - `TestHarnessDisabledByDefault` (3 tests) - harness off by default
+    - `TestHarnessRequiresExplicitOptIn` (3 tests) - explicit controlled_harness=True required
+    - `TestHarnessSafetyBoundaries` (6 tests) - all safety gates enforced
+    - `TestControlledDelegateBehavior` (3 tests) - controlled delegate semantics
+    - `TestVoteBallotsThroughHarness` (1 test) - VoteBallots safe execution
+    - `TestGotJunkThroughHarness` (1 test) - GotJunk safe execution
+    - `TestNoGitHubAPICalls` (1 test) - no GitHub API calls
+    - `TestNoProductionSourceModification` (2 tests) - no production source writes
+    - `TestWSP97TruthTableEnforcement` (2 tests) - complete truth table
+- New HXA14 Truth Fields:
+  - controlled_delegate_invoked=True (harness invoked)
+  - live_external_delegate_called=False (no real external delegate)
+  - repo_created=False (no GitHub)
+  - production_source_modified=False
+  - external_federation_ready=False
+  - production_ready=False
+- Slice: HXA14_CONTROLLED_LIVE_HERMES_DELEGATION_HARNESS_PHASE1
+
+---
+
 ## 2026-05-10: HXA12 GotJunk second proof safe dry-run tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa12_gotjunk_second_proof_dryrun.py -v`
