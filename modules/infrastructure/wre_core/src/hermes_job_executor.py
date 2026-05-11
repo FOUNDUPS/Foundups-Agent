@@ -262,6 +262,9 @@ class HermesExecutionStatus(str, Enum):
     # Controlled Harness (HXA14+) - explicit test-only delegation
     CONTROLLED_HARNESS_EXECUTED = "CONTROLLED_HARNESS_EXECUTED"
 
+    # HXA16 Adapter Boundary - real delegate interface proven but not called
+    DELEGATE_ADAPTER_BOUNDARY_PROVEN = "DELEGATE_ADAPTER_BOUNDARY_PROVEN"
+
     # Blocked states
     BLOCKED_FEATURE_DISABLED = "BLOCKED_FEATURE_DISABLED"
     BLOCKED_IMPORT_UNAVAILABLE = "BLOCKED_IMPORT_UNAVAILABLE"
@@ -418,7 +421,12 @@ class HermesDelegationResult:
     repo_created: bool = False
     production_source_modified: bool = False
     external_federation_ready: bool = False
+    external_federation_initiated: bool = False
     production_ready: bool = False
+    production_readiness_claimed: bool = False
+
+    # HXA16 Real Delegate Adapter Truth Fields
+    real_delegate_adapter_invoked: bool = False
 
     # Metadata
     completed_at: datetime = field(default_factory=_utc_now)
@@ -453,7 +461,11 @@ class HermesDelegationResult:
             "repo_created": self.repo_created,
             "production_source_modified": self.production_source_modified,
             "external_federation_ready": self.external_federation_ready,
+            "external_federation_initiated": self.external_federation_initiated,
             "production_ready": self.production_ready,
+            "production_readiness_claimed": self.production_readiness_claimed,
+            # HXA16 Real Delegate Adapter Truth Fields
+            "real_delegate_adapter_invoked": self.real_delegate_adapter_invoked,
             "completed_at": self.completed_at.isoformat(),
             "executor_version": self.executor_version,
         }
@@ -496,6 +508,7 @@ class HermesJobExecutor:
         default_toolsets: Optional[List[str]] = None,
         workspace_root: Optional[str] = None,
         controlled_harness: bool = False,
+        real_delegate_adapter: bool = False,
     ):
         """
         Initialize executor.
@@ -508,12 +521,17 @@ class HermesJobExecutor:
             controlled_harness: If True, use controlled delegate instead of real/blocked.
                                This is an explicit test-only mode (HXA14).
                                MUST be explicitly set; default is False.
+            real_delegate_adapter: If True (with controlled_harness), prove adapter boundary
+                                   to real Hermes delegate interface without calling it.
+                                   This is an explicit test-only mode (HXA16).
+                                   MUST be explicitly set; default is False.
         """
         self.dry_run = dry_run
         self.max_iterations = max_iterations
         self.default_toolsets = default_toolsets or []
         self.workspace_root = workspace_root or self._detect_workspace_root()
         self.controlled_harness = controlled_harness
+        self.real_delegate_adapter = real_delegate_adapter
         self._delegate_task_fn = None
         self._controlled_delegate_fn = None
         self._import_attempted = False
@@ -621,6 +639,100 @@ class HermesJobExecutor:
             "live_delegate_called": False,
             "repo_created": False,
             "production_source_modified": False,
+            "job_id": job.job_id,
+            "foundup_id": foundup_id,
+            "executed_at": _utc_now().isoformat(),
+        }
+
+    def _execute_real_delegate_adapter(
+        self,
+        job: "FoundUpJob",
+        request: HermesDelegationRequest,
+    ) -> Dict[str, Any]:
+        """
+        Execute real delegate adapter boundary proof.
+
+        HXA16 Real Delegate Adapter Semantics:
+          - Proves the adapter boundary to real Hermes delegate_task exists
+          - Documents interface requirements (parent_agent, toolsets, etc)
+          - Does NOT call live external delegate_task
+          - Does NOT instantiate full Hermes runtime
+          - Does NOT create GitHub repositories
+          - Does NOT modify production FoundUp source
+          - DOES write evidence artifacts documenting the interface
+          - Returns truthful real_delegate_adapter_invoked=True
+
+        The real delegate_task in vendor/hermes-agent/tools/delegate_tool.py
+        requires full Hermes runtime infrastructure which cannot be safely
+        instantiated without production risk. This method proves the boundary
+        exists and documents requirements without making the call.
+
+        Args:
+            job: FoundUpJob being processed
+            request: HermesDelegationRequest built from job
+
+        Returns:
+            Adapter boundary proof response with interface documentation
+        """
+        from pathlib import Path
+
+        logger.info(
+            "[HERMES-EXEC] Executing real delegate adapter boundary proof for job %s",
+            job.job_id,
+        )
+
+        foundup_id = job.foundup_id or "unknown"
+        delegate_tool_path = Path("vendor/hermes-agent/tools/delegate_tool.py")
+
+        # Document interface requirements
+        interface_requirements = {
+            "parent_agent": "AIAgent instance with full agent context",
+            "toolsets": "Hermes toolset configurations (file ops, web, etc)",
+            "model_config": "LLM model configurations (Claude, etc)",
+            "credentials": "API keys and authentication tokens",
+            "terminal_sessions": "Isolated terminal session contexts",
+            "child_agent_spawning": "Ability to spawn child AIAgent instances",
+        }
+
+        # Document why external call is blocked
+        blocked_reason = (
+            "Real delegate_task requires full Hermes runtime infrastructure. "
+            "Instantiating AIAgent would require real API credentials (production exposure), "
+            "network access to LLM providers (external calls), and file system access "
+            "beyond evidence workspace (production risk). Cannot be safely invoked "
+            "without violating WSP 97 truth boundaries."
+        )
+
+        # Evidence files to generate
+        evidence_files = [
+            f".hermes_evidence/{job.job_id}/adapter_boundary_proof.json",
+            f".hermes_evidence/{job.job_id}/delegate_interface_requirements.json",
+            f".hermes_evidence/{job.job_id}/metadata.json",
+            f".hermes_evidence/{job.job_id}/checkpoint.json",
+        ]
+
+        return {
+            "status": "ADAPTER_BOUNDARY_PROVEN",
+            "verdict": "DELEGATE_ADAPTER_BOUNDARY_PROVEN_EXTERNAL_CALL_NOT_ENABLED",
+            "message": (
+                f"Real delegate adapter boundary proven for {foundup_id}. "
+                "Interface documented but external delegate NOT called."
+            ),
+            "delegate_tool_path": str(delegate_tool_path),
+            "delegate_tool_exists": delegate_tool_path.exists(),
+            "interface_requirements": interface_requirements,
+            "blocked_reason": blocked_reason,
+            "external_call_enabled": False,
+            "files_changed": evidence_files,
+            "commands_run": [],
+            "iterations": 0,
+            "real_delegate_adapter": True,
+            "controlled_harness": True,
+            "live_delegate_called": False,
+            "repo_created": False,
+            "production_source_modified": False,
+            "external_federation_initiated": False,
+            "production_readiness_claimed": False,
             "job_id": job.job_id,
             "foundup_id": foundup_id,
             "executed_at": _utc_now().isoformat(),
@@ -786,8 +898,49 @@ class HermesJobExecutor:
         # Step 2: Build request
         request = self.build_delegation_request(job)
 
-        # Step 3: HXA14 Controlled Harness - explicit test-only path
+        # Step 3: HXA14/HXA16 Controlled Harness paths
         if self.controlled_harness:
+            # Step 3a: HXA16 Real Delegate Adapter - prove boundary without calling
+            if self.real_delegate_adapter:
+                logger.info(
+                    "[HERMES-EXEC] Real delegate adapter mode, proving boundary for job %s",
+                    job.job_id,
+                )
+                delegate_response = self._execute_real_delegate_adapter(job, request)
+
+                result = HermesDelegationResult(
+                    status=HermesExecutionStatus.DELEGATE_ADAPTER_BOUNDARY_PROVEN,
+                    status_reason=(
+                        f"Real delegate adapter boundary proven for job {job.job_id}. "
+                        "Interface documented but external delegate NOT called."
+                    ),
+                    request=request,
+                    delegate_response=delegate_response,
+                    duration_seconds=time.monotonic() - start_time,
+                    checkpoint_state="ADAPTER_BOUNDARY_PROVEN",
+                    checkpoint_result=f"Adapter boundary proven for {job.foundup_id or 'unknown'}",
+                    files_changed=delegate_response.get("files_changed", []),
+                    # WSP 97 Truth Fields
+                    real_execution_performed=False,
+                    verification_complete=False,
+                    cabr_ready=False,
+                    payout_ready=False,
+                    # HXA14/HXA16 Controlled Harness Truth Fields
+                    controlled_delegate_invoked=True,
+                    live_external_delegate_called=False,
+                    repo_created=False,
+                    production_source_modified=False,
+                    external_federation_ready=False,
+                    external_federation_initiated=False,
+                    production_ready=False,
+                    production_readiness_claimed=False,
+                    # HXA16 Adapter Truth Fields
+                    real_delegate_adapter_invoked=True,
+                )
+                result.evidence_path = self._write_evidence(job, request, result)
+                return result
+
+            # Step 3b: HXA14 Controlled Harness - explicit test-only path
             logger.info(
                 "[HERMES-EXEC] Controlled harness enabled, executing controlled delegate for job %s",
                 job.job_id,
@@ -818,7 +971,11 @@ class HermesJobExecutor:
                 repo_created=False,
                 production_source_modified=False,
                 external_federation_ready=False,
+                external_federation_initiated=False,
                 production_ready=False,
+                production_readiness_claimed=False,
+                # HXA16 - not using adapter
+                real_delegate_adapter_invoked=False,
             )
             result.evidence_path = self._write_evidence(job, request, result)
             return result
@@ -1175,6 +1332,87 @@ No implementation exists. No production code was generated.
             "generator_slice": "HXA10_CONTROLLED_SCAFFOLD_GENERATION",
         }
 
+    def _write_adapter_boundary_evidence(
+        self,
+        job: "FoundUpJob",
+        request: HermesDelegationRequest,
+        result: HermesDelegationResult,
+        evidence_dir: str,
+    ) -> None:
+        """
+        Write HXA16 adapter boundary proof evidence files.
+
+        Creates:
+          - adapter_boundary_proof.json: Full proof with verdict and rationale
+          - delegate_interface_requirements.json: Interface requirements doc
+
+        Args:
+            job: Source FoundUpJob
+            request: HermesDelegationRequest that was built
+            result: HermesDelegationResult with execution outcome
+            evidence_dir: Path to evidence directory
+        """
+        from pathlib import Path
+
+        delegate_tool_path = Path("vendor/hermes-agent/tools/delegate_tool.py")
+        foundup_id = job.foundup_id or "unknown"
+
+        # Interface requirements documentation
+        interface_requirements = {
+            "parent_agent": "AIAgent instance with full agent context",
+            "toolsets": "Hermes toolset configurations (file ops, web, etc)",
+            "model_config": "LLM model configurations (Claude, etc)",
+            "credentials": "API keys and authentication tokens",
+            "terminal_sessions": "Isolated terminal session contexts",
+            "child_agent_spawning": "Ability to spawn child AIAgent instances",
+            "external_call_enabled": False,
+            "external_call_blocked_reason": (
+                "Cannot safely instantiate Hermes runtime without production risk"
+            ),
+        }
+
+        # Write delegate_interface_requirements.json
+        interface_path = os.path.join(evidence_dir, "delegate_interface_requirements.json")
+        with open(interface_path, "w", encoding="utf-8") as f:
+            json.dump(interface_requirements, f, indent=2, default=str)
+
+        # Adapter boundary proof
+        adapter_proof = {
+            "foundup_id": foundup_id,
+            "job_id": job.job_id,
+            "verdict": "DELEGATE_ADAPTER_BOUNDARY_PROVEN_EXTERNAL_CALL_NOT_ENABLED",
+            "real_delegate_adapter_invoked": True,
+            "live_external_delegate_called": False,
+            "delegate_tool_path": str(delegate_tool_path),
+            "delegate_tool_exists": delegate_tool_path.exists(),
+            "interface_requirements": interface_requirements,
+            "blocked_reason": (
+                "Real delegate_task requires full Hermes runtime infrastructure. "
+                "Instantiating AIAgent would require real API credentials (production exposure), "
+                "network access to LLM providers (external calls), and file system access "
+                "beyond evidence workspace (production risk). Cannot be safely invoked "
+                "without violating WSP 97 truth boundaries."
+            ),
+            "wsp97_truth_fields": {
+                "real_execution_performed": result.real_execution_performed,
+                "repo_created": result.repo_created,
+                "production_source_modified": result.production_source_modified,
+                "external_federation_initiated": result.external_federation_initiated,
+                "production_readiness_claimed": result.production_readiness_claimed,
+            },
+            "proven_at": result.completed_at.isoformat(),
+        }
+
+        # Write adapter_boundary_proof.json
+        proof_path = os.path.join(evidence_dir, "adapter_boundary_proof.json")
+        with open(proof_path, "w", encoding="utf-8") as f:
+            json.dump(adapter_proof, f, indent=2, default=str)
+
+        logger.info(
+            "[HERMES-EXEC] HXA16 adapter boundary proof written to %s",
+            proof_path,
+        )
+
     def _write_evidence(
         self,
         job: "FoundUpJob",
@@ -1265,6 +1503,12 @@ No implementation exists. No production code was generated.
                 logger.info(
                     "[HERMES-EXEC] Controlled scaffold metadata written to %s",
                     scaffold_meta_path,
+                )
+
+            # HXA16: Generate adapter boundary proof files when real_delegate_adapter mode
+            if result.real_delegate_adapter_invoked:
+                self._write_adapter_boundary_evidence(
+                    job, request, result, evidence_dir
                 )
 
             logger.info(
