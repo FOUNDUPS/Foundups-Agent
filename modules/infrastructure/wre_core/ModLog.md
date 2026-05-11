@@ -2,6 +2,60 @@
 
 ## Chronological Change Log
 
+### [2026-05-10] - HXA16_REAL_HERMES_DELEGATE_ADAPTER_SAFE_HARNESS_PHASE1 (v0.8.25)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority)
+**Impact Analysis**: Real delegate adapter boundary proven without external call
+
+#### Changes Made
+
+- `src/hermes_job_executor.py`:
+  - Added `DELEGATE_ADAPTER_BOUNDARY_PROVEN` to `HermesExecutionStatus` enum
+  - Added HXA16 truth fields to `HermesDelegationResult`:
+    - `real_delegate_adapter_invoked`
+    - `external_federation_initiated`
+    - `production_readiness_claimed`
+  - Added `real_delegate_adapter` parameter to `HermesJobExecutor.__init__()`
+  - Added `_execute_real_delegate_adapter()` method for adapter boundary proof
+  - Added `_write_adapter_boundary_evidence()` method for evidence generation
+  - Updated `execute()` to handle `real_delegate_adapter` mode within controlled harness
+
+- `tests/test_hxa16_real_hermes_delegate_adapter_safe_harness.py` (NEW - 340 lines):
+  - 14 tests covering adapter boundary requirements:
+    - Real delegate interface exists (delegate_tool.py)
+    - Interface requirements documented (parent_agent, toolsets, etc.)
+    - Adapter boundary proven via controlled harness
+    - External call not enabled (requires full Hermes runtime)
+    - Evidence files generated
+
+#### HXA16 Verdict
+
+```
+Verdict: DELEGATE_ADAPTER_BOUNDARY_PROVEN_EXTERNAL_CALL_NOT_ENABLED
+
+Rationale:
+- vendor/hermes-agent/tools/delegate_tool.py EXISTS
+- delegate_task() requires parent_agent (AIAgent instance)
+- AIAgent requires full Hermes runtime infrastructure
+- Cannot safely instantiate without production risk
+- Adapter boundary CAN be proven without external call
+```
+
+#### HXA16 Truth Fields Added
+
+| Field | Description |
+|-------|-------------|
+| `real_delegate_adapter_invoked` | True if adapter boundary was reached |
+| `external_federation_initiated` | True ONLY if external federation started |
+| `production_readiness_claimed` | True ONLY if production readiness asserted |
+
+#### Evidence Files Generated
+
+- `adapter_boundary_proof.json`: verdict, rationale, interface documentation
+- `delegate_interface_requirements.json`: parent_agent, toolsets, credentials, etc.
+
+---
+
 ### [2026-05-12] - HXA14_CONTROLLED_LIVE_HERMES_DELEGATION_HARNESS_PHASE1 (v0.8.24)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority)

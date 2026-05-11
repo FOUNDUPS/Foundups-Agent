@@ -1,5 +1,36 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-10: HXA16 Real Hermes delegate adapter safe harness tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa16_real_hermes_delegate_adapter_safe_harness.py -v`
+- Status: PASS
+- Result: `14 passed`
+- Notes:
+  - NEW file: `test_hxa16_real_hermes_delegate_adapter_safe_harness.py` (340 lines)
+  - Test classes:
+    - `TestHermesRealDelegateInterfaceExists` (4 tests) - delegate_tool.py exists
+    - `TestHermesDelegateInterfaceRequirements` (2 tests) - interface requirements documented
+    - `TestHXA16AdapterBoundaryProof` (3 tests) - adapter boundary proven
+    - `TestRealDelegateAdapterDisabledByDefault` (2 tests) - explicit opt-in required
+    - `TestHXA16VerdictDocumentation` (1 test) - verdict documented
+    - `TestHXA16EvidenceGeneration` (2 tests) - evidence files generated
+  - Key test: `test_adapter_boundary_proven_via_controlled_harness`
+  - Verdict: `DELEGATE_ADAPTER_BOUNDARY_PROVEN_EXTERNAL_CALL_NOT_ENABLED`
+- WSP 97 Coverage (HXA16):
+  - real_delegate_adapter_invoked=True (boundary proven)
+  - live_external_delegate_called=False (not enabled - requires full Hermes runtime)
+  - controlled_delegate_invoked=True (controlled harness path)
+  - repo_created=False
+  - production_source_modified=False
+  - external_federation_initiated=False
+  - production_readiness_claimed=False
+- Evidence Files:
+  - adapter_boundary_proof.json: verdict, rationale, interface documentation
+  - delegate_interface_requirements.json: parent_agent, toolsets, etc.
+- Slice: HXA16_REAL_HERMES_DELEGATE_ADAPTER_SAFE_HARNESS_PHASE1
+
+---
+
 ## 2026-05-12: HXA14 Controlled live Hermes delegation harness tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa14_controlled_live_hermes_harness.py -v`
