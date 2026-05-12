@@ -82,6 +82,27 @@ class MockIntent:
         self.channel = "test_channel"
 
 
+def set_d3_capability_token_gates(job):
+    """
+    Set D3 capability token gates on a job for testing.
+
+    HXA28: build_foundup and extract_foundup are now D3 actions that require
+    capability tokens. For tests that need to reach SIMULATED status (not
+    BLOCKED_BY_DESTRUCTIVE_ACTION_GUARD), set all four capability token gates
+    AND the security gate.
+
+    This simulates a valid capability token being present with security gate passed.
+    """
+    # Capability token gates
+    job.policy_flags.capability_token_checked = True
+    job.policy_flags.capability_token_present = True
+    job.policy_flags.capability_token_validated = True
+    job.policy_flags.capability_token_scope_authorized = True
+    # Security gate (also required for D3)
+    job.policy_flags.security_gate_checked = True
+    job.policy_flags.security_gate_passed = True
+
+
 # ---------------------------------------------------------------------------
 # Test: GotJunk Build Intent Detection
 # ---------------------------------------------------------------------------
@@ -200,6 +221,9 @@ class TestHXA12GotJunkSecondProofSafeDryRun:
         )
         assert job.requested_action == "build_foundup"
 
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
+
         # Step 4: Execute via REAL Hermes executor (not mocked)
         executor = HermesJobExecutor(
             dry_run=True,
@@ -285,6 +309,9 @@ class TestHXA12GotJunkSecondProofSafeDryRun:
         queue = get_job_queue()
         job = queue[0]
 
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
+
         # Use real consumer (not mocked)
         consumer = FoundUpJobConsumer(dry_run=True)
         result = consumer.consume_one(job)
@@ -303,6 +330,9 @@ class TestHXA12GotJunkSecondProofSafeDryRun:
             foundup_id=GOTJUNK_FOUNDUP_ID,
             requested_action="build_foundup",
         )
+
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
 
         executor = HermesJobExecutor(
             dry_run=True,
@@ -350,6 +380,9 @@ class TestGotJunkVoteBallotsParity:
             requested_action="build_foundup",
         )
 
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
+
         executor = HermesJobExecutor(
             dry_run=True,
             workspace_root=self.evidence_root,
@@ -387,6 +420,9 @@ class TestGotJunkVoteBallotsParity:
             foundup_id=GOTJUNK_FOUNDUP_ID,
             requested_action="build_foundup",
         )
+
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
 
         executor = HermesJobExecutor(
             dry_run=True,

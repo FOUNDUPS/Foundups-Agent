@@ -280,7 +280,8 @@ class TestExecutorFeatureFlagDisabled(unittest.TestCase):
     def test_returns_simulated_when_disabled(self):
         """Execute returns SIMULATED when HERMES_DELEGATE_ENABLED=0."""
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            # HXA28: Use validate_foundup (D0) which doesn't require tokens
+            job = create_job(tenant_id="t1", requested_action="validate_foundup")
             executor = HermesJobExecutor()
             result = executor.execute(job)
 
@@ -295,7 +296,8 @@ class TestExecutorFeatureFlagDisabled(unittest.TestCase):
             # Verify import was not attempted
             self.assertFalse(executor._import_attempted)
 
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            # HXA28: Use validate_foundup (D0) which doesn't require tokens
+            job = create_job(tenant_id="t1", requested_action="validate_foundup")
             result = executor.execute(job)
 
             # Import should still not be attempted (fast path)
@@ -305,7 +307,8 @@ class TestExecutorFeatureFlagDisabled(unittest.TestCase):
     def test_wsp97_fields_false_when_disabled(self):
         """WSP 97 truth fields remain False when disabled."""
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            # HXA28: Use validate_foundup (D0) which doesn't require tokens
+            job = create_job(tenant_id="t1", requested_action="validate_foundup")
             executor = HermesJobExecutor()
             result = executor.execute(job)
 
@@ -321,7 +324,8 @@ class TestExecutorDryRunMode(unittest.TestCase):
     def test_returns_simulated_when_dry_run(self):
         """Execute returns SIMULATED when dry_run=True even if flag enabled."""
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "1"}):
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            # HXA28: Use validate_foundup (D0) which doesn't require tokens
+            job = create_job(tenant_id="t1", requested_action="validate_foundup")
             executor = HermesJobExecutor(dry_run=True)  # Explicit dry_run
             result = executor.execute(job)
 
@@ -525,7 +529,8 @@ class TestNoQueueConsumption(unittest.TestCase):
     def test_execute_does_not_modify_job_status(self):
         """Execute does NOT transition job status."""
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            # HXA28: Use validate_foundup (D0) which doesn't require tokens
+            job = create_job(tenant_id="t1", requested_action="validate_foundup")
             original_status = job.status
 
             executor = HermesJobExecutor()
@@ -538,7 +543,8 @@ class TestNoQueueConsumption(unittest.TestCase):
     def test_execute_does_not_call_job_start(self):
         """Execute does NOT call job.start()."""
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            # HXA28: Use validate_foundup (D0) which doesn't require tokens
+            job = create_job(tenant_id="t1", requested_action="validate_foundup")
 
             with patch.object(job, "start") as mock_start:
                 executor = HermesJobExecutor()
@@ -568,7 +574,8 @@ class TestSingletonExecutor(unittest.TestCase):
         hermes_job_executor._executor_singleton = None
 
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            # HXA28: Use validate_foundup (D0) which doesn't require tokens
+            job = create_job(tenant_id="t1", requested_action="validate_foundup")
             result = execute_foundup_job(job)
 
             self.assertEqual(result.status, HermesExecutionStatus.SIMULATED)
@@ -1084,7 +1091,8 @@ class TestCheckpointStateSimulated(unittest.TestCase):
         """dry_run=True produces checkpoint_state=SIMULATED."""
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
             executor = HermesJobExecutor(dry_run=True)
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            # HXA28: Use validate_foundup (D0) which doesn't require tokens
+            job = create_job(tenant_id="t1", requested_action="validate_foundup")
             result = executor.execute(job)
 
             self.assertEqual(result.checkpoint_state, "SIMULATED")
@@ -1093,7 +1101,8 @@ class TestCheckpointStateSimulated(unittest.TestCase):
         """Feature disabled produces checkpoint_state=SIMULATED."""
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
             executor = HermesJobExecutor()
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            # HXA28: Use validate_foundup (D0) which doesn't require tokens
+            job = create_job(tenant_id="t1", requested_action="validate_foundup")
             result = executor.execute(job)
 
             self.assertEqual(result.checkpoint_state, "SIMULATED")
@@ -1102,7 +1111,8 @@ class TestCheckpointStateSimulated(unittest.TestCase):
         """files_changed is empty in simulation mode."""
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
             executor = HermesJobExecutor()
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            # HXA28: Use validate_foundup (D0) which doesn't require tokens
+            job = create_job(tenant_id="t1", requested_action="validate_foundup")
             result = executor.execute(job)
 
             self.assertEqual(result.files_changed, [])
@@ -1111,7 +1121,8 @@ class TestCheckpointStateSimulated(unittest.TestCase):
         """commands_run is empty in simulation mode."""
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
             executor = HermesJobExecutor()
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            # HXA28: Use validate_foundup (D0) which doesn't require tokens
+            job = create_job(tenant_id="t1", requested_action="validate_foundup")
             result = executor.execute(job)
 
             self.assertEqual(result.commands_run, [])
@@ -1188,7 +1199,7 @@ class TestEvidenceCollection(unittest.TestCase):
         """Evidence directory is created during execution."""
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
             executor = HermesJobExecutor(workspace_root=self.temp_dir)
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            job = create_job(tenant_id="t1", requested_action="validate_foundup")
             result = executor.execute(job)
 
             # Evidence directory should exist
@@ -1201,7 +1212,7 @@ class TestEvidenceCollection(unittest.TestCase):
 
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
             executor = HermesJobExecutor(workspace_root=self.temp_dir)
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            job = create_job(tenant_id="t1", requested_action="validate_foundup")
             result = executor.execute(job)
 
             metadata_path = os.path.join(
@@ -1251,7 +1262,7 @@ class TestEvidenceCollection(unittest.TestCase):
 
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
             executor = HermesJobExecutor(workspace_root=self.temp_dir)
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            job = create_job(tenant_id="t1", requested_action="validate_foundup")
             result = executor.execute(job)
 
             checkpoint_path = os.path.join(
@@ -1270,7 +1281,7 @@ class TestEvidenceCollection(unittest.TestCase):
 
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
             executor = HermesJobExecutor(workspace_root=self.temp_dir)
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            job = create_job(tenant_id="t1", requested_action="validate_foundup")
             result = executor.execute(job)
 
             checkpoint_path = os.path.join(
@@ -1291,7 +1302,7 @@ class TestEvidenceCollection(unittest.TestCase):
         """evidence_path is set in result."""
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
             executor = HermesJobExecutor(workspace_root=self.temp_dir)
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            job = create_job(tenant_id="t1", requested_action="validate_foundup")
             result = executor.execute(job)
 
             self.assertIsNotNone(result.evidence_path)
@@ -1302,7 +1313,7 @@ class TestEvidenceCollection(unittest.TestCase):
         """Evidence write failure does not fail job execution."""
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
             executor = HermesJobExecutor(workspace_root=self.temp_dir)
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            job = create_job(tenant_id="t1", requested_action="validate_foundup")
 
             # Mock os.makedirs to raise an exception
             with patch("os.makedirs", side_effect=PermissionError("Access denied")):
@@ -1320,7 +1331,7 @@ class TestEvidenceCollection(unittest.TestCase):
             executor = HermesJobExecutor(workspace_root=self.temp_dir)
 
             # Create invalid job (missing job_id)
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
+            job = create_job(tenant_id="t1", requested_action="validate_foundup")
             job.job_id = ""
 
             result = executor.execute(job)

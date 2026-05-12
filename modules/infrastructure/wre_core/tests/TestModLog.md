@@ -1,5 +1,78 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-12: HXA28 D3 Native Classification tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa28_d3_native_classification.py -v`
+- Status: PASS
+- Result: `132 passed`
+- Notes:
+  - NEW file: `test_hxa28_d3_native_classification.py` (600+ lines)
+  - Tests deterministic, explicit D0-D6 classification:
+    - `TestD0ObserveValidateClassification` (16 tests) - D0 prefix matching
+    - `TestD1ReadFetchClassification` (12 tests) - D1 prefix matching
+    - `TestD2SimulatePlanClassification` (10 tests) - D2 prefix matching
+    - `TestD3SandboxWriteClassification` (10 tests) - D3 exact match + token gates
+    - `TestD4RepoGitOperationsBlocked` (24 tests) - D4 blocking + no downgrade
+    - `TestD5ExternalAPIMutationsBlocked` (18 tests) - D5 blocking + no downgrade
+    - `TestD6IrreversibleDeleteBlocked` (20 tests) - D6 blocking + no downgrade
+    - `TestAmbiguousActionsFailClosed` (10 tests) - Unknown action handling
+    - `TestTokenDoesNotDowngradeClassification` (3 tests) - Token immutability
+    - `TestInvalidTokenStillBlocks` (1 test) - Invalid token rejection
+    - `TestWSP97TruthFieldsRemainFalse` (4 tests) - Truth field invariants
+    - `TestClassificationDeterminism` (3 tests) - Case/whitespace handling
+    - `TestHXA28VerdictDocumentation` (1 test) - Verdict constant
+  - Key test: `test_hxa28_verdict_d3_native_classification_defined`
+  - Verdict: `D3_NATIVE_CLASSIFICATION_DEFINED`
+- Classification behaviors tested:
+  - D0 (observe_*, validate_*, check_*, read_*, get_*, list_*) - always allowed
+  - D1 (fetch_*, load_*, retrieve_*, search_*) - always allowed
+  - D2 (simulate_*, plan_*, preview_*, analyze_*) - allowed in dry_run
+  - D3 (build_foundup, extract_foundup, write_evidence) - requires capability tokens
+  - D4 (create_repo, git_push, git_commit, modify_source) - BLOCKED Phase 1
+  - D5 (send_*, email_*, webhook_*, deploy_*) - BLOCKED Phase 1
+  - D6 (delete_*, purge_*, credential_*, payout_*) - BLOCKED always
+- Fail-closed behavior tested:
+  - Unknown actions return D6_IRREVERSIBLE
+  - Empty action blocked as BLOCKED_INVALID_JOB
+  - Ambiguous patterns fail to D6
+- Token immutability tested:
+  - Valid token does NOT downgrade D4 to D3
+  - Valid token does NOT downgrade D5 to D3
+  - Valid token does NOT downgrade D6 to D3
+- WSP 97 Coverage (HXA28):
+  - real_execution_performed=False (all classes)
+  - verification_complete=False (all classes)
+  - cabr_ready=False (all classes)
+  - payout_ready=False (all classes)
+- Slice: HXA28_D3_NATIVE_CLASSIFICATION_PHASE1
+
+---
+
+## 2026-05-12: test_hxa23_hermes_guard_integration.py updates
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa23_hermes_guard_integration.py -v`
+- Status: PASS
+- Result: `34 passed`
+- Notes:
+  - Updated expectations for build_foundup (now D3, was D2)
+  - Changed test_extract_action_classified_as_d2 to use simulate_build
+  - Changed test_build_action_classified_as_d2 to test_build_action_classified_as_d3
+
+---
+
+## 2026-05-12: test_hermes_job_executor.py updates
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.py -v`
+- Status: PASS
+- Result: `94 passed`
+- Notes:
+  - Changed build_foundup to validate_foundup in TestEvidenceCollection
+  - Changed build_foundup to validate_foundup in TestNoQueueConsumption
+  - Changed build_foundup to validate_foundup in TestCheckpointStateSimulated
+  - Reason: build_foundup is now D3 (requires tokens), validate_foundup is D0 (no tokens)
+
+---
+
 ## 2026-05-12: HXA27 Hermes token validation integration tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa27_hermes_token_validation_integration.py -v`

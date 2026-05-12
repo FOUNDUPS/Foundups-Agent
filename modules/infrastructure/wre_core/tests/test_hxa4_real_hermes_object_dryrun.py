@@ -80,6 +80,27 @@ class MockIntent:
         self.channel = "test_channel"
 
 
+def set_d3_capability_token_gates(job):
+    """
+    Set D3 capability token gates on a job for testing.
+
+    HXA28: build_foundup and extract_foundup are now D3 actions that require
+    capability tokens. For tests that need to reach SIMULATED status (not
+    BLOCKED_BY_DESTRUCTIVE_ACTION_GUARD), set all four capability token gates
+    AND the security gate.
+
+    This simulates a valid capability token being present with security gate passed.
+    """
+    # Capability token gates
+    job.policy_flags.capability_token_checked = True
+    job.policy_flags.capability_token_present = True
+    job.policy_flags.capability_token_validated = True
+    job.policy_flags.capability_token_scope_authorized = True
+    # Security gate (also required for D3)
+    job.policy_flags.security_gate_checked = True
+    job.policy_flags.security_gate_passed = True
+
+
 # ---------------------------------------------------------------------------
 # Test: Environment Safety Gate
 # ---------------------------------------------------------------------------
@@ -178,6 +199,9 @@ class TestVoteBallotsDryRunReachesRealExecutor:
         job = queue[0]
         assert job.foundup_id == VOTEBALLOTS_FOUNDUP_ID
 
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
+
         # Step 2: Create REAL executor (NOT mocked)
         executor = HermesJobExecutor(
             dry_run=True,
@@ -242,6 +266,9 @@ class TestVoteBallotsDryRunReachesRealExecutor:
         queue = get_job_queue()
         assert len(queue) == 1
         job = queue[0]
+
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
 
         # Create real consumer (will use real executor via import)
         consumer = FoundUpJobConsumer(dry_run=True)
@@ -381,6 +408,8 @@ class TestNoLiveDelegateTaskCalls:
 
         queue = get_job_queue()
         job = queue[0]
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
         result = executor.execute(job)
 
         # Verify status reason mentions disabled/simulated
@@ -434,6 +463,8 @@ class TestWSP97TruthTableVerification:
 
         queue = get_job_queue()
         job = queue[0]
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
 
         # Execute via real executor
         executor = HermesJobExecutor(
@@ -513,6 +544,9 @@ class TestHXA9PocArtifactBundleGeneration:
         assert job.foundup_id == VOTEBALLOTS_FOUNDUP_ID
         assert job.requested_action == "build_foundup"
 
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
+
         # Step 2: Execute via REAL executor (not mocked)
         executor = HermesJobExecutor(
             dry_run=True,
@@ -591,6 +625,9 @@ class TestHXA9PocArtifactBundleGeneration:
             foundup_id=VOTEBALLOTS_FOUNDUP_ID,
             requested_action="extract_foundup",
         )
+
+        # HXA28: Set D3 capability token gates for extract_foundup action
+        set_d3_capability_token_gates(job)
 
         # Execute via real executor
         executor = HermesJobExecutor(
@@ -708,6 +745,9 @@ class TestHXA10ControlledScaffoldGeneration:
         assert job.foundup_id == VOTEBALLOTS_FOUNDUP_ID
         assert job.requested_action == "build_foundup"
 
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
+
         # Step 2: Execute via REAL executor (not mocked)
         executor = HermesJobExecutor(
             dry_run=True,
@@ -801,6 +841,9 @@ class TestHXA10ControlledScaffoldGeneration:
             foundup_id=VOTEBALLOTS_FOUNDUP_ID,
             requested_action="build_foundup",
         )
+
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
 
         executor = HermesJobExecutor(
             dry_run=True,
