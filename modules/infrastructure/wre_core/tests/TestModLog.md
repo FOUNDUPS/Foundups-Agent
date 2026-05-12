@@ -1,5 +1,56 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-12: HXA21 Capability token infrastructure tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa21_capability_token_infrastructure.py -v`
+- Status: PASS
+- Result: `42 passed`
+- Notes:
+  - NEW file: `test_hxa21_capability_token_infrastructure.py` (800+ lines)
+  - Test-only capability token infrastructure (no production code modified):
+    - `CapabilityToken`: Token model with all required fields
+    - `TokenValidationReasonCode`: Enum of validation failure reasons (15 codes)
+    - `TokenValidationResult`: Validation result with all failure details
+    - `FakeTokenIssuer`: Test fixture that issues fake tokens (no real secrets)
+    - `FakeTokenValidator`: Test fixture with in-memory nonce registry
+    - `WSP97TruthTracker`: Truth field tracker for validation
+  - Test classes:
+    - `TestCapabilityTokenModel` (11 tests)
+    - `TestTokenValidationResult` (2 tests)
+    - `TestFakeTokenIssuer` (2 tests)
+    - `TestFakeTokenValidator` (15 tests)
+    - `TestTokenRedaction` (2 tests)
+    - `TestWSP97TruthFieldsPreserved` (10 tests)
+    - `TestHXA21CompleteCapabilityToken` (2 tests)
+    - `TestHXA21VerdictDocumentation` (1 test)
+  - Key test: `test_complete_token_validation_flow`
+  - Verdict: `CAPABILITY_TOKEN_INFRASTRUCTURE_DEFINED`
+- WSP 97 Coverage (HXA21):
+  - repo_created=False (no GitHub operations)
+  - production_source_modified=False (no source modifications)
+  - network_called=False (no network calls)
+  - live_external_delegate_called=False
+  - external_federation_initiated=False
+  - verification_complete=False
+  - cabr_ready=False
+  - payout_ready=False
+- Validation failure modes tested (12 total):
+  - MISSING_TOKEN
+  - MISSING_SIGNATURE
+  - SIGNATURE_NOT_VERIFIED
+  - TOKEN_EXPIRED
+  - WRONG_AUDIENCE
+  - REPLAY_DETECTED
+  - ACTION_NOT_ALLOWED
+  - SCOPE_NOT_ALLOWED
+  - PATH_OUTSIDE_ALLOWED_ROOTS
+  - PATH_IN_BLOCKED_LIST
+  - DRY_RUN_ONLY_BLOCKS_LIVE
+  - VALID_DRY_RUN_ONLY (success case)
+- Slice: HXA21_CAPABILITY_TOKEN_INFRASTRUCTURE_PHASE1
+
+---
+
 ## 2026-05-12: HXA20 Production source modification gate tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa20_production_source_gate.py -v`

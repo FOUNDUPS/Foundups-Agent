@@ -2,6 +2,92 @@
 
 ## Chronological Change Log
 
+### [2026-05-12] - HXA21_CAPABILITY_TOKEN_INFRASTRUCTURE_PHASE1 (v0.8.29)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)
+**Impact Analysis**: Safe local capability token model and validation for future gates
+
+#### Changes Made
+
+- `tests/test_hxa21_capability_token_infrastructure.py` (NEW - 800+ lines):
+  - 42 tests covering capability token model and validation contract
+  - No production code modified - test-only token infrastructure
+  - Test-local definitions for:
+    - `CapabilityToken`: Token model with all required fields
+    - `TokenValidationReasonCode`: Enum of validation failure reasons (15 codes)
+    - `TokenValidationResult`: Validation result with all failure details
+    - `FakeTokenIssuer`: Test fixture that issues fake tokens (no real secrets)
+    - `FakeTokenValidator`: Test fixture with in-memory nonce registry
+    - `WSP97TruthTracker`: Truth field tracker for validation
+
+#### HXA21 Verdict
+
+```
+Verdict: CAPABILITY_TOKEN_INFRASTRUCTURE_DEFINED
+
+HXA19 verdict was: REPO_CREATION_APPROVAL_GATE_DEFINED
+HXA20 verdict was: PRODUCTION_SOURCE_GATE_DEFINED
+
+HXA21 proves:
+1. CapabilityToken model defines all required fields
+2. TokenValidationResult defines all validation outputs
+3. FakeTokenIssuer creates test tokens (no real secrets)
+4. FakeTokenValidator validates all gates (fail-closed)
+5. In-memory nonce registry prevents replay
+6. Token redaction works for security logging
+7. All WSP 97 truth fields remain False
+```
+
+#### HXA21 Token Model Fields
+
+| Field | Type | Default | Purpose |
+|-------|------|---------|---------|
+| `token_id` | str | - | Unique token identifier |
+| `issuer` | str | - | Token issuer identity |
+| `subject` | str | - | Token subject |
+| `audience` | str | - | Intended audience |
+| `scopes` | List[str] | [] | Granted scopes |
+| `allowed_actions` | List[str] | [] | Allowed actions |
+| `allowed_paths` | List[str] | [] | Allowed path roots |
+| `blocked_paths` | List[str] | [] | Blocked paths |
+| `dry_run_only` | bool | True | Safe default |
+| `issued_at` | datetime | now() | Issuance timestamp |
+| `expires_at` | Optional[datetime] | None | Expiration timestamp |
+| `nonce` | str | random | Replay protection |
+| `signature_present` | bool | False | Signature exists |
+| `signature_verified` | bool | False | Signature verified |
+
+#### HXA21 Validation Failure Modes (Fail-Closed)
+
+| Condition | Reason Code | Test Status |
+|-----------|-------------|-------------|
+| Missing token | `MISSING_TOKEN` | PASS |
+| Missing signature | `MISSING_SIGNATURE` | PASS |
+| Unverified signature | `SIGNATURE_NOT_VERIFIED` | PASS |
+| Expired token | `TOKEN_EXPIRED` | PASS |
+| Wrong audience | `WRONG_AUDIENCE` | PASS |
+| Replayed nonce | `REPLAY_DETECTED` | PASS |
+| Action not allowed | `ACTION_NOT_ALLOWED` | PASS |
+| Scope not allowed | `SCOPE_NOT_ALLOWED` | PASS |
+| Path outside allowed | `PATH_OUTSIDE_ALLOWED_ROOTS` | PASS |
+| Blocked path | `PATH_IN_BLOCKED_LIST` | PASS |
+| Dry-run blocks live | `DRY_RUN_ONLY_BLOCKS_LIVE` | PASS |
+
+#### HXA21 WSP 97 Truth Fields (All False)
+
+| Field | Value | Reason |
+|-------|-------|--------|
+| `repo_created` | False | No GitHub operations |
+| `production_source_modified` | False | No source modifications |
+| `network_called` | False | No network calls |
+| `live_external_delegate_called` | False | No external delegation |
+| `external_federation_initiated` | False | No federation |
+| `verification_complete` | False | No CABR verification |
+| `cabr_ready` | False | No CABR pipeline |
+| `payout_ready` | False | No payout pipeline |
+
+---
+
 ### [2026-05-12] - HXA20_PRODUCTION_SOURCE_GATE_PHASE1 (v0.8.28)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)
