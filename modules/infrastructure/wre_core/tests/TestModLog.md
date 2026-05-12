@@ -1,5 +1,48 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-12: HXA27 Hermes token validation integration tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa27_hermes_token_validation_integration.py -v`
+- Status: PASS
+- Result: `30 passed`
+- Notes:
+  - NEW file: `test_hxa27_hermes_token_validation_integration.py` (500+ lines)
+  - Tests token validation integration into HermesJobExecutor:
+    - `TestTokenValidatorInjection` (3 tests) - Validator injection
+    - `TestTokenExtraction` (6 tests) - Token extraction from payload
+    - `TestTokenValidationIntegration` (5 tests) - Validation in execute flow
+    - `TestGuardAfterTokenValidation` (2 tests) - Guard eval after token
+    - `TestWSP97TruthFields` (3 tests) - Truth field enforcement
+    - `TestResultSerialization` (2 tests) - Result serialization
+    - `TestNonceReplayProtection` (1 test) - Replay prevention
+    - `TestD3D4D6Behavior` (2 tests) - D4-D6 still blocked
+    - `TestHXA27VerdictDocumentation` (3 tests) - Verdict documentation
+    - `TestModuleImports` (3 tests) - Import verification
+  - Key test: `test_hxa27_verdict_hermes_token_validation_integration_defined`
+  - Verdict: `HERMES_TOKEN_VALIDATION_INTEGRATION_DEFINED`
+- Integration behaviors tested:
+  - Token validator injectable into executor
+  - Token extraction from dict and instance
+  - Invalid token blocks execution (guard NOT evaluated)
+  - Valid token allows proceeding (guard evaluated)
+  - No token = no validation (PolicyFlags control guard)
+  - Nonce replay blocked on second use
+- Token failure behaviors tested:
+  - TOKEN_EXPIRED
+  - WRONG_AUDIENCE
+  - ACTION_NOT_ALLOWED
+  - REPLAY_DETECTED
+- WSP 97 Coverage (HXA27):
+  - token_validation_performed field added
+  - token_validation_result field added
+  - real_execution_performed=False
+  - verification_complete=False
+  - cabr_ready=False
+  - payout_ready=False
+- Slice: HXA27_HERMES_TOKEN_VALIDATION_INTEGRATION_PHASE1
+
+---
+
 ## 2026-05-12: HXA26 Token validation service tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa26_token_validation_service.py -v`

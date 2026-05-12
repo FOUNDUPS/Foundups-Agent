@@ -2,6 +2,89 @@
 
 ## Chronological Change Log
 
+### [2026-05-12] - HXA27_HERMES_TOKEN_VALIDATION_INTEGRATION_PHASE1 (v0.8.35)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)
+**Impact Analysis**: Token validation integrated into HermesJobExecutor execute() flow
+
+#### Changes Made
+
+- `src/hermes_job_executor.py` (MODIFIED - ~200 lines):
+  - Added imports for CapabilityToken, LocalCapabilityTokenValidator, TokenValidationResult
+  - Added `BLOCKED_BY_TOKEN_VALIDATION` status to HermesExecutionStatus
+  - Added `token_validation_performed` and `token_validation_result` fields to HermesDelegationResult
+  - Added `token_validator` parameter to HermesJobExecutor constructor
+  - Added `_extract_capability_token()` method for token extraction from payload
+  - Added `_validate_token_if_present()` method for token validation
+  - Added `_build_token_blocked_result()` method for blocked result construction
+  - Updated `execute()` to call token validation at step 2.3 (before guard at step 2.5)
+  - Updated all result constructions to include token validation fields
+
+- `tests/test_hxa27_hermes_token_validation_integration.py` (NEW - 500+ lines):
+  - 30 tests covering token validation integration
+  - TestTokenValidatorInjection (3 tests)
+  - TestTokenExtraction (6 tests)
+  - TestTokenValidationIntegration (5 tests)
+  - TestGuardAfterTokenValidation (2 tests)
+  - TestWSP97TruthFields (3 tests)
+  - TestResultSerialization (2 tests)
+  - TestNonceReplayProtection (1 test)
+  - TestD3D4D6Behavior (2 tests)
+  - TestHXA27VerdictDocumentation (3 tests)
+  - TestModuleImports (3 tests)
+
+- `docs/audits/openclaw_hermes/HXA27_HERMES_TOKEN_VALIDATION_INTEGRATION.md` (NEW):
+  - Full audit document with WSP 97 truth table
+  - Integration architecture documented
+  - Token failure behavior documented
+  - D3/D4-D6 behavior documented
+
+#### HXA27 Verdict
+
+```
+Verdict: HERMES_TOKEN_VALIDATION_INTEGRATION_DEFINED
+
+HXA26 verdict was: TOKEN_VALIDATION_SERVICE_DEFINED
+
+HXA27 proves:
+1. Token validator is injectable into HermesJobExecutor constructor
+2. Default validator used when none injected
+3. Token extraction works from job payload (dict or instance)
+4. Token validation performed before guard evaluation (step 2.3)
+5. Invalid token blocks execution immediately (BLOCKED_BY_TOKEN_VALIDATION)
+6. Valid token allows execution to proceed
+7. No token in payload = no token validation performed
+8. Nonce replay protection prevents token reuse
+9. All WSP 97 truth fields remain False
+10. Result includes token_validation_performed and token_validation_result
+```
+
+#### Token Validation Flow
+
+```
+execute(job):
+  Step 1: Validate job structure
+  Step 2: Build delegation request
+  Step 2.3 [HXA27]: Validate capability token if present
+    - If token present and invalid -> BLOCKED_BY_TOKEN_VALIDATION (guard NOT evaluated)
+    - If token present and valid -> proceed (token_validation_result set)
+    - If no token -> proceed (token_validation_performed = False)
+  Step 2.5 [HXA23]: Evaluate destructive action guard
+    - If blocked -> BLOCKED_BY_DESTRUCTIVE_ACTION_GUARD
+    - If allowed -> proceed
+  Steps 3-7: ... existing flow ...
+```
+
+#### What HXA27 Does NOT Prove
+
+- Real JWT/OAuth token validation (Phase 1 is fake verification)
+- External token service integration (local validator only)
+- Production token issuance (test infrastructure only)
+- Live operation authorization (Phase 1 is dry-run only)
+- Token revocation (not implemented)
+
+---
+
 ### [2026-05-12] - HXA26_TOKEN_VALIDATION_SERVICE_PHASE1 (v0.8.34)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)

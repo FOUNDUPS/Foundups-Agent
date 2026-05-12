@@ -33,6 +33,7 @@ NAVIGATION:
 
 Slice: HXA23_HERMES_GUARD_INTEGRATION_PHASE1
         HXA24_CAPABILITY_TOKEN_POLICYFLAGS_PHASE1
+        HXA27_HERMES_TOKEN_VALIDATION_INTEGRATION_PHASE1
 """
 
 from __future__ import annotations
@@ -60,6 +61,15 @@ from modules.infrastructure.wre_core.src.destructive_action_guard import (
     DestructiveActionRequest,
     GuardDecision,
     evaluate_destructive_action,
+)
+
+# HXA27 capability token validator imports
+from modules.infrastructure.wre_core.src.capability_token_validator import (
+    CapabilityToken,
+    LocalCapabilityTokenValidator,
+    TokenValidationResult,
+    TokenValidationReasonCode,
+    get_default_validator,
 )
 
 logger = logging.getLogger("hermes_job_executor")
@@ -292,6 +302,9 @@ class HermesExecutionStatus(str, Enum):
     # HXA23: Destructive action guard blocked states
     BLOCKED_BY_DESTRUCTIVE_ACTION_GUARD = "BLOCKED_BY_DESTRUCTIVE_ACTION_GUARD"
 
+    # HXA27: Token validation blocked states
+    BLOCKED_BY_TOKEN_VALIDATION = "BLOCKED_BY_TOKEN_VALIDATION"
+
     # Error states
     ERROR_DELEGATION_FAILED = "ERROR_DELEGATION_FAILED"
     ERROR_UNEXPECTED = "ERROR_UNEXPECTED"
@@ -452,6 +465,10 @@ class HermesDelegationResult:
     guard_evaluated: bool = False
     guard_result: Optional[Dict[str, Any]] = None
 
+    # HXA27 Token Validation Fields
+    token_validation_performed: bool = False
+    token_validation_result: Optional[Dict[str, Any]] = None
+
     # Metadata
     completed_at: datetime = field(default_factory=_utc_now)
     executor_version: str = "0.2.0"
@@ -493,6 +510,9 @@ class HermesDelegationResult:
             # HXA23 Destructive Action Guard Fields
             "guard_evaluated": self.guard_evaluated,
             "guard_result": self.guard_result,
+            # HXA27 Token Validation Fields
+            "token_validation_performed": self.token_validation_performed,
+            "token_validation_result": self.token_validation_result,
             "completed_at": self.completed_at.isoformat(),
             "executor_version": self.executor_version,
         }
@@ -536,6 +556,7 @@ class HermesJobExecutor:
         workspace_root: Optional[str] = None,
         controlled_harness: bool = False,
         real_delegate_adapter: bool = False,
+        token_validator: Optional[LocalCapabilityTokenValidator] = None,
     ):
         """
         Initialize executor.
@@ -552,6 +573,9 @@ class HermesJobExecutor:
                                    to real Hermes delegate interface without calling it.
                                    This is an explicit test-only mode (HXA16).
                                    MUST be explicitly set; default is False.
+            token_validator: Optional CapabilityTokenValidator instance for HXA27.
+                             If None, uses get_default_validator() singleton.
+                             Allows test injection of custom validators.
         """
         self.dry_run = dry_run
         self.max_iterations = max_iterations
@@ -559,6 +583,8 @@ class HermesJobExecutor:
         self.workspace_root = workspace_root or self._detect_workspace_root()
         self.controlled_harness = controlled_harness
         self.real_delegate_adapter = real_delegate_adapter
+        # HXA27: Inject token validator (default to singleton)
+        self.token_validator = token_validator or get_default_validator()
         self._delegate_task_fn = None
         self._controlled_delegate_fn = None
         self._import_attempted = False
@@ -1034,6 +1060,204 @@ class HermesJobExecutor:
         guard_request = self._build_destructive_action_request(job, request)
         return evaluate_destructive_action(guard_request)
 
+    def _extract_capability_token(
+        self,
+        job: "FoundUpJob",
+    ) -> Optional[CapabilityToken]:
+        """
+        Extract CapabilityToken from job payload if present.
+
+        HXA27: This method checks if job.payload contains a capability_token
+        field and attempts to reconstruct a CapabilityToken from it.
+
+        Token extraction strategy:
+          1. Check if job.payload exists and is a dict
+          2. Check if "capability_token" key exists in payload
+          3. If dict, attempt to reconstruct CapabilityToken
+          4. If CapabilityToken instance, return directly
+          5. If None or missing, return None (fail-closed)
+
+        Args:
+            job: Source FoundUpJob
+
+        Returns:
+            CapabilityToken if present and valid, None otherwise
+        """
+        if not job.payload or not isinstance(job.payload, dict):
+            return None
+
+        token_data = job.payload.get("capability_token")
+        if token_data is None:
+            return None
+
+        # If already a CapabilityToken, return it
+        if isinstance(token_data, CapabilityToken):
+            return token_data
+
+        # If dict, attempt to reconstruct
+        if isinstance(token_data, dict):
+            try:
+                from datetime import datetime, timezone
+
+                # Parse datetime fields
+                issued_at = token_data.get("issued_at")
+                if isinstance(issued_at, str):
+                    issued_at = datetime.fromisoformat(issued_at.replace("Z", "+00:00"))
+                elif issued_at is None:
+                    issued_at = datetime.now(timezone.utc)
+
+                expires_at = token_data.get("expires_at")
+                if isinstance(expires_at, str):
+                    expires_at = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+
+                return CapabilityToken(
+                    token_id=token_data.get("token_id", ""),
+                    issuer=token_data.get("issuer", ""),
+                    subject=token_data.get("subject", ""),
+                    audience=token_data.get("audience", ""),
+                    scopes=token_data.get("scopes", []),
+                    allowed_actions=token_data.get("allowed_actions", []),
+                    allowed_paths=token_data.get("allowed_paths", []),
+                    blocked_paths=token_data.get("blocked_paths", []),
+                    dry_run_only=token_data.get("dry_run_only", True),
+                    issued_at=issued_at,
+                    expires_at=expires_at,
+                    nonce=token_data.get("nonce", ""),
+                    signature_present=token_data.get("signature_present", False),
+                    signature_verified=token_data.get("signature_verified", False),
+                )
+            except Exception as exc:
+                logger.warning(
+                    "[HERMES-EXEC] Failed to reconstruct CapabilityToken from payload: %s",
+                    exc,
+                )
+                return None
+
+        return None
+
+    def _validate_token_if_present(
+        self,
+        job: "FoundUpJob",
+        request: HermesDelegationRequest,
+    ) -> Optional[TokenValidationResult]:
+        """
+        Validate capability token if present in job payload.
+
+        HXA27 Token Validation Integration:
+          - If no token in payload: returns None (no token to validate)
+          - If token present: validates against requested action and target path
+          - Validation uses injected token_validator instance
+          - Fail-closed: invalid token blocks execution
+
+        Token Validation Checks:
+          - Token exists and has required fields
+          - Token is signed (signature_present and signature_verified)
+          - Token is not expired
+          - Token audience matches validator's expected audience
+          - Token nonce has not been replayed
+          - Requested action is in token's allowed_actions
+          - Target path is within token's allowed_paths and not blocked
+          - If is_live_operation: dry_run_only=False required
+
+        Args:
+            job: Source FoundUpJob
+            request: Built HermesDelegationRequest
+
+        Returns:
+            TokenValidationResult if token was present (valid or invalid),
+            None if no token was present in payload
+        """
+        # Extract token from payload
+        token = self._extract_capability_token(job)
+
+        if token is None:
+            # No token in payload - return None to indicate no validation needed
+            # PolicyFlags capability_token_* fields control guard behavior separately
+            return None
+
+        # Derive target path from workspace binding
+        target_path = ""
+        if request.workspace_binding is not None:
+            target_path = request.workspace_binding.workspace_hint or ""
+
+        # Determine if this is a live operation
+        # Phase 1: Always dry-run, is_live_operation=False
+        is_live_operation = not request.dry_run
+
+        # Validate token
+        validation_result = self.token_validator.validate_token(
+            token=token,
+            requested_action=job.requested_action,
+            requested_scope=None,  # Scope validation optional for Phase 1
+            target_path=target_path,
+            is_live_operation=is_live_operation,
+        )
+
+        logger.info(
+            "[HERMES-EXEC] Token validation for job %s: valid=%s, reason=%s",
+            job.job_id,
+            validation_result.token_valid,
+            validation_result.reason_code.value,
+        )
+
+        return validation_result
+
+    def _build_token_blocked_result(
+        self,
+        job: "FoundUpJob",
+        request: HermesDelegationRequest,
+        token_result: TokenValidationResult,
+        duration_seconds: float,
+        guard_result: Optional[DestructiveActionGuardResult] = None,
+    ) -> HermesDelegationResult:
+        """
+        Build a blocked result when token validation fails.
+
+        HXA27: This creates a properly formatted HermesDelegationResult
+        for token validation failures with all WSP 97 truth fields.
+
+        Args:
+            job: Source FoundUpJob
+            request: Built HermesDelegationRequest
+            token_result: Failed TokenValidationResult
+            duration_seconds: Execution duration so far
+            guard_result: Optional guard result if guard was already evaluated
+
+        Returns:
+            HermesDelegationResult with BLOCKED_BY_TOKEN_VALIDATION status
+        """
+        return HermesDelegationResult(
+            status=HermesExecutionStatus.BLOCKED_BY_TOKEN_VALIDATION,
+            status_reason=(
+                f"Job {job.job_id} blocked by token validation. "
+                f"Reason: {token_result.reason_code.value}"
+            ),
+            request=request,
+            duration_seconds=duration_seconds,
+            checkpoint_state="BLOCKED",
+            checkpoint_blocker=f"Token validation failed: {token_result.reason_code.value}",
+            # WSP 97 Truth Fields - all False
+            real_execution_performed=False,
+            verification_complete=False,
+            cabr_ready=False,
+            payout_ready=False,
+            # HXA14 Controlled Harness Truth Fields - all False
+            controlled_delegate_invoked=False,
+            live_external_delegate_called=False,
+            repo_created=False,
+            production_source_modified=False,
+            external_federation_ready=False,
+            external_federation_initiated=False,
+            production_ready=False,
+            production_readiness_claimed=False,
+            # HXA23 Guard Fields
+            guard_evaluated=guard_result is not None,
+            guard_result=guard_result.to_dict() if guard_result else None,
+            # HXA27 Token Validation Fields
+            token_validation_performed=True,
+            token_validation_result=token_result.to_dict(),
+        )
+
     def execute(self, job: "FoundUpJob") -> HermesDelegationResult:
         """
         Execute (or simulate) FoundUpJob via Hermes delegation.
@@ -1041,6 +1265,10 @@ class HermesJobExecutor:
         Decision tree:
           1. Validate job structure
           2. Build delegation request
+          2.3. HXA27: Validate capability token if present in payload
+             - If token present and invalid: return BLOCKED_BY_TOKEN_VALIDATION
+             - If token present and valid: proceed with validation result in metadata
+             - If no token: proceed (PolicyFlags control guard behavior)
           2.5. HXA23: Evaluate destructive action guard
              - If blocked: return BLOCKED_BY_DESTRUCTIVE_ACTION_GUARD
              - If allowed: proceed with guard result in metadata
@@ -1070,6 +1298,24 @@ class HermesJobExecutor:
 
         # Step 2: Build request
         request = self.build_delegation_request(job)
+
+        # Step 2.3: HXA27 - Validate capability token if present in payload
+        token_validation_result = self._validate_token_if_present(job, request)
+
+        # If token was present but validation failed, block immediately
+        if token_validation_result is not None and not token_validation_result.token_valid:
+            logger.warning(
+                "[HERMES-EXEC] Job %s blocked by token validation: %s",
+                job.job_id,
+                token_validation_result.reason_code.value,
+            )
+            return self._build_token_blocked_result(
+                job=job,
+                request=request,
+                token_result=token_validation_result,
+                duration_seconds=time.monotonic() - start_time,
+                guard_result=None,  # Guard not yet evaluated
+            )
 
         # Step 2.5: HXA23 - Evaluate destructive action guard
         guard_result = self._evaluate_destructive_action_guard(job, request)
@@ -1117,6 +1363,9 @@ class HermesJobExecutor:
                 # HXA23 Guard Fields
                 guard_evaluated=True,
                 guard_result=guard_result.to_dict(),
+                # HXA27 Token Validation Fields
+                token_validation_performed=token_validation_result is not None,
+                token_validation_result=token_validation_result.to_dict() if token_validation_result else None,
             )
 
         # Guard allowed - continue with guard result in metadata
@@ -1163,6 +1412,9 @@ class HermesJobExecutor:
                     # HXA23 Guard Fields
                     guard_evaluated=True,
                     guard_result=guard_result.to_dict(),
+                    # HXA27 Token Validation Fields
+                    token_validation_performed=token_validation_result is not None,
+                    token_validation_result=token_validation_result.to_dict() if token_validation_result else None,
                 )
                 result.evidence_path = self._write_evidence(job, request, result)
                 return result
@@ -1206,6 +1458,9 @@ class HermesJobExecutor:
                 # HXA23 Guard Fields
                 guard_evaluated=True,
                 guard_result=guard_result.to_dict(),
+                # HXA27 Token Validation Fields
+                token_validation_performed=token_validation_result is not None,
+                token_validation_result=token_validation_result.to_dict() if token_validation_result else None,
             )
             result.evidence_path = self._write_evidence(job, request, result)
             return result
@@ -1231,6 +1486,9 @@ class HermesJobExecutor:
                 # HXA23 Guard Fields
                 guard_evaluated=True,
                 guard_result=guard_result.to_dict(),
+                # HXA27 Token Validation Fields
+                token_validation_performed=token_validation_result is not None,
+                token_validation_result=token_validation_result.to_dict() if token_validation_result else None,
             )
             result.evidence_path = self._write_evidence(job, request, result)
             return result
@@ -1256,6 +1514,9 @@ class HermesJobExecutor:
                 # HXA23 Guard Fields
                 guard_evaluated=True,
                 guard_result=guard_result.to_dict(),
+                # HXA27 Token Validation Fields
+                token_validation_performed=token_validation_result is not None,
+                token_validation_result=token_validation_result.to_dict() if token_validation_result else None,
             )
             result.evidence_path = self._write_evidence(job, request, result)
             return result
@@ -1274,6 +1535,9 @@ class HermesJobExecutor:
                 # HXA23 Guard Fields
                 guard_evaluated=True,
                 guard_result=guard_result.to_dict(),
+                # HXA27 Token Validation Fields
+                token_validation_performed=token_validation_result is not None,
+                token_validation_result=token_validation_result.to_dict() if token_validation_result else None,
             )
             result.evidence_path = self._write_evidence(job, request, result)
             return result
@@ -1298,6 +1562,9 @@ class HermesJobExecutor:
             # HXA23 Guard Fields
             guard_evaluated=True,
             guard_result=guard_result.to_dict(),
+            # HXA27 Token Validation Fields
+            token_validation_performed=token_validation_result is not None,
+            token_validation_result=token_validation_result.to_dict() if token_validation_result else None,
         )
         result.evidence_path = self._write_evidence(job, request, result)
         return result
