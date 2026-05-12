@@ -1,5 +1,58 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-12: HXA25 D3 sandbox execution tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa25_d3_sandbox_execution.py -v`
+- Status: PASS
+- Result: `24 passed`
+- Notes:
+  - NEW file: `test_hxa25_d3_sandbox_execution.py` (600+ lines)
+  - Tests D3 sandbox dry-run execution with evidence when all gates pass:
+    - `TestD3SandboxBlockedByDefault` (1 test)
+    - `TestD3SandboxBlockedWithoutCapabilityTokenFlags` (1 test)
+    - `TestD3SandboxBlockedIfNotValidated` (1 test)
+    - `TestD3SandboxBlockedIfScopeNotAuthorized` (1 test)
+    - `TestD3SandboxBlockedWithoutWorkspaceBinding` (1 test)
+    - `TestD3SandboxBlockedWithoutPathConstraints` (1 test)
+    - `TestD3SandboxAllowedAsDryRunWhenAllGatesTrue` (2 tests)
+    - `TestAllowedD3WritesEvidenceOnly` (2 tests)
+    - `TestAllowedD3DoesNotCallLiveDelegate` (2 tests)
+    - `TestAllowedD3DoesNotCreateRepo` (1 test)
+    - `TestAllowedD3DoesNotModifyProductionSource` (1 test)
+    - `TestAllowedD3DoesNotSetRealExecutionPerformed` (1 test)
+    - `TestD4D5D6BlockedEvenWithAllGatesTrue` (3 tests)
+    - `TestBlockedResultKeepsTruthFieldsFalse` (2 tests)
+    - `TestGuardResultContainsCorrectFields` (1 test)
+    - `TestD3ClassificationWithCapabilityTokens` (2 tests)
+    - `TestHXA25VerdictDocumentation` (1 test)
+  - Key test: `test_hxa25_verdict_d3_sandbox_execution_defined`
+  - Verdict: `D3_SANDBOX_EXECUTION_DEFINED`
+- D3 allow conditions tested:
+  - All four capability token flags True
+  - security_gate_passed True
+  - workspace_binding_enforced True
+  - path_constraints_validated True
+  - dry_run_mode True
+- When allowed:
+  - Evidence written to `.hermes_evidence/`
+  - No live delegate called
+  - No repo created
+  - No production source modified
+  - Status: SIMULATED
+- WSP 97 Coverage (HXA25):
+  - live_execution_allowed=False
+  - live_external_delegate_called=False
+  - repo_created=False
+  - production_source_modified=False
+  - external_federation_initiated=False
+  - real_execution_performed=False
+  - verification_complete=False
+  - cabr_ready=False
+  - payout_ready=False
+- Slice: HXA25_D3_SANDBOX_EXECUTION_PHASE1
+
+---
+
 ## 2026-05-12: HXA24 Capability token policyflags tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa24_capability_token_policyflags.py -v`

@@ -2,6 +2,75 @@
 
 ## Chronological Change Log
 
+### [2026-05-12] - HXA25_D3_SANDBOX_EXECUTION_PHASE1 (v0.8.33)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)
+**Impact Analysis**: D3 sandbox dry-run execution proven functional with evidence when all gates pass
+
+#### Changes Made
+
+- `tests/test_hxa25_d3_sandbox_execution.py` (NEW - 600+ lines):
+  - 24 tests covering D3 sandbox execution behaviors
+  - Tests D3 blocked by default (missing gates)
+  - Tests D3 blocked without capability token flags
+  - Tests D3 blocked if token not validated
+  - Tests D3 blocked if scope not authorized
+  - Tests D3 blocked without workspace binding
+  - Tests D3 blocked without path constraints
+  - Tests D3 allowed as dry-run when all gates true
+  - Tests allowed D3 writes evidence only
+  - Tests allowed D3 does not call live delegate
+  - Tests allowed D3 does not create repo
+  - Tests allowed D3 does not modify production source
+  - Tests D4/D5/D6 blocked even with all gates
+  - Tests blocked result keeps truth fields false
+
+- `docs/audits/openclaw_hermes/HXA25_D3_SANDBOX_EXECUTION.md` (NEW):
+  - Full audit document with WSP 97 truth table
+  - D3 allow conditions documented
+  - Evidence behavior documented
+
+#### HXA25 Verdict
+
+```
+Verdict: D3_SANDBOX_EXECUTION_DEFINED
+
+HXA24 verdict was: CAPABILITY_TOKEN_POLICYFLAGS_DEFINED
+
+HXA25 proves:
+1. D3 sandbox blocked by default (no capability token flags)
+2. D3 sandbox blocked without capability token flags
+3. D3 sandbox blocked if token checked/present but not validated
+4. D3 sandbox blocked if token scope not authorized
+5. D3 sandbox blocked without workspace binding
+6. D3 sandbox blocked without path constraints
+7. D3 sandbox allowed as dry-run when all gates true
+8. Allowed D3 writes evidence/checkpoint only
+9. Allowed D3 does not call live external delegate
+10. Allowed D3 does not create repo
+11. Allowed D3 does not modify production source
+12. Allowed D3 does not set real_execution_performed True
+13. D4/D5/D6 blocked even with all gates true
+14. Blocked result keeps truth fields false
+15. All WSP 97 truth fields remain False
+```
+
+#### D3 Allow Conditions
+
+D3 sandbox dry-run is allowed when ALL of:
+- capability_token_checked = True
+- capability_token_present = True
+- capability_token_validated = True
+- capability_token_scope_authorized = True
+- security_gate_passed = True
+- workspace_binding_enforced = True
+- path_constraints_validated = True
+- dry_run_mode = True
+
+When allowed: Status=SIMULATED, Evidence written to `.hermes_evidence/`, No live execution.
+
+---
+
 ### [2026-05-12] - HXA24_CAPABILITY_TOKEN_POLICYFLAGS_PHASE1 (v0.8.32)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)
