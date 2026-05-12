@@ -1,3 +1,28 @@
+## 2026-05-12: HXA24 Capability Token PolicyFlags Tests (WSP 97)
+
+**File**: `test_foundup_job_contract.py` (extended - 8 new tests)
+
+**TestPolicyFlags** (extended):
+- `test_capability_token_fields_exist`: Verifies all 4 fields exist
+- `test_capability_token_fields_to_dict`: to_dict includes all 4 fields
+- `test_capability_token_fields_from_dict`: from_dict restores all 4 fields
+- `test_capability_token_roundtrip`: Roundtrip preserves values
+- Updated `test_default_all_false`: Includes capability token defaults
+- Updated `test_from_dict_missing_fields_default_false`: Includes capability token backward compat
+
+**New Fields Tested**:
+- `capability_token_checked` (default False)
+- `capability_token_present` (default False)
+- `capability_token_validated` (default False)
+- `capability_token_scope_authorized` (default False)
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_foundup_job_contract.py -q`
+
+**Result**: 70 passed (was 62)
+
+---
+
 ## 2026-05-03: Dry-Run Policy Flag Alignment Tests (WSP 97)
 
 **File**: `test_openclaw_foundup_routing.py` (extended - 11 new tests)

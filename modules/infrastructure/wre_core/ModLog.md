@@ -2,6 +2,70 @@
 
 ## Chronological Change Log
 
+### [2026-05-12] - HXA24_CAPABILITY_TOKEN_POLICYFLAGS_PHASE1 (v0.8.32)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)
+**Impact Analysis**: Capability token policy flags added to PolicyFlags; HermesJobExecutor reads them
+
+#### Changes Made
+
+- `src/hermes_job_executor.py` (MODIFIED - ~25 lines):
+  - Updated `_build_destructive_action_request()` to read capability token flags from PolicyFlags
+  - Conservative logic: `capability_token_present` for guard requires ALL four flags True:
+    - `policy_flags.capability_token_checked`
+    - `policy_flags.capability_token_present`
+    - `policy_flags.capability_token_validated`
+    - `policy_flags.capability_token_scope_authorized`
+  - Updated action_id prefix from `hxa23_` to `hxa24_`
+  - Updated docstring to document HXA24 gate field mappings
+
+- `tests/test_hxa24_capability_token_policyflags.py` (NEW - 500+ lines):
+  - 31 tests covering capability token policy flag behaviors
+  - Tests default flags block D3
+  - Tests partial flags block D3
+  - Tests all four True allows D3 sandbox dry-run
+  - Tests D4/D5/D6 still blocked with tokens
+  - Tests WSP 97 truth fields preserved
+  - Tests guard request construction
+
+#### HXA24 Verdict
+
+```
+Verdict: CAPABILITY_TOKEN_POLICYFLAGS_DEFINED
+
+HXA23 verdict was: HERMES_GUARD_INTEGRATION_DEFINED
+
+HXA24 proves:
+1. PolicyFlags has capability_token_checked (default False)
+2. PolicyFlags has capability_token_present (default False)
+3. PolicyFlags has capability_token_validated (default False)
+4. PolicyFlags has capability_token_scope_authorized (default False)
+5. to_dict() includes all four fields
+6. from_dict() restores all four fields (backward compat)
+7. Guard reads capability token flags from PolicyFlags
+8. Default flags block D3 (capability_token_present=False for guard)
+9. Partial flags block D3 (any missing flag = False for guard)
+10. All four True allows D3 sandbox dry-run
+11. D4/D5/D6 still blocked even with all tokens
+12. All WSP 97 truth fields remain False
+```
+
+#### HXA24 Capability Token Logic
+
+For guard to receive `capability_token_present=True`, ALL four must be True:
+```python
+capability_token_present_for_guard = (
+    policy_flags.capability_token_checked
+    and policy_flags.capability_token_present
+    and policy_flags.capability_token_validated
+    and policy_flags.capability_token_scope_authorized
+)
+```
+
+This conservative interpretation ensures D3+ operations remain blocked unless all token gates pass.
+
+---
+
 ### [2026-05-12] - HXA23_HERMES_GUARD_INTEGRATION_PHASE1 (v0.8.31)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)
