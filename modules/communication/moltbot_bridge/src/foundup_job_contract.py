@@ -196,6 +196,16 @@ class PolicyFlags:
 
     All flags default to False (not checked/not passed).
     Set to True after gate passes.
+
+    HXA24: Capability token policy flags added.
+    These fields track whether a capability token was checked, present,
+    validated, and scope-authorized. All default to False (safe).
+
+    For D3+ operations, all four capability token flags must be True:
+      - capability_token_checked: Token check was performed
+      - capability_token_present: A token was provided
+      - capability_token_validated: Token signature/expiry validated
+      - capability_token_scope_authorized: Token scope covers the action
     """
 
     security_gate_checked: bool = False
@@ -212,6 +222,19 @@ class PolicyFlags:
 
     dry_run_mode: bool = False
 
+    # HXA24: Capability token policy flags
+    capability_token_checked: bool = False
+    """Whether a capability token check was performed."""
+
+    capability_token_present: bool = False
+    """Whether a capability token was provided in the request."""
+
+    capability_token_validated: bool = False
+    """Whether the token signature and expiry were validated."""
+
+    capability_token_scope_authorized: bool = False
+    """Whether the token scope covers the requested action."""
+
     def to_dict(self) -> Dict[str, bool]:
         """Serialize to dict."""
         return {
@@ -224,6 +247,11 @@ class PolicyFlags:
             "wsp_preflight_checked": self.wsp_preflight_checked,
             "wsp_preflight_passed": self.wsp_preflight_passed,
             "dry_run_mode": self.dry_run_mode,
+            # HXA24: Capability token policy flags
+            "capability_token_checked": self.capability_token_checked,
+            "capability_token_present": self.capability_token_present,
+            "capability_token_validated": self.capability_token_validated,
+            "capability_token_scope_authorized": self.capability_token_scope_authorized,
         }
 
     @classmethod
@@ -239,6 +267,11 @@ class PolicyFlags:
             wsp_preflight_checked=bool(data.get("wsp_preflight_checked", False)),
             wsp_preflight_passed=bool(data.get("wsp_preflight_passed", False)),
             dry_run_mode=bool(data.get("dry_run_mode", False)),
+            # HXA24: Capability token policy flags (backward compatible)
+            capability_token_checked=bool(data.get("capability_token_checked", False)),
+            capability_token_present=bool(data.get("capability_token_present", False)),
+            capability_token_validated=bool(data.get("capability_token_validated", False)),
+            capability_token_scope_authorized=bool(data.get("capability_token_scope_authorized", False)),
         )
 
 

@@ -518,6 +518,11 @@ class TestPolicyFlags:
         assert flags.wsp_preflight_checked is False
         assert flags.wsp_preflight_passed is False
         assert flags.dry_run_mode is False
+        # HXA24: Capability token fields
+        assert flags.capability_token_checked is False
+        assert flags.capability_token_present is False
+        assert flags.capability_token_validated is False
+        assert flags.capability_token_scope_authorized is False
 
     def test_to_dict_roundtrip(self):
         """PolicyFlags survives to_dict/from_dict roundtrip."""
@@ -544,6 +549,11 @@ class TestPolicyFlags:
         flags = PolicyFlags.from_dict(data)
         assert flags.security_gate_checked is True
         assert flags.permission_gate_checked is False  # Not in data
+        # HXA24: Capability token fields should default to False
+        assert flags.capability_token_checked is False
+        assert flags.capability_token_present is False
+        assert flags.capability_token_validated is False
+        assert flags.capability_token_scope_authorized is False
 
     def test_policy_flags_in_job_roundtrip(self):
         """PolicyFlags survive job serialization."""
@@ -559,6 +569,62 @@ class TestPolicyFlags:
         assert restored.policy_flags.security_gate_passed is True
         assert restored.policy_flags.dry_run_mode is True
         assert restored.policy_flags.permission_gate_checked is False
+
+    # HXA24: Capability Token PolicyFlags Tests
+
+    def test_capability_token_fields_exist(self):
+        """PolicyFlags has capability token fields (HXA24)."""
+        flags = PolicyFlags()
+        assert hasattr(flags, "capability_token_checked")
+        assert hasattr(flags, "capability_token_present")
+        assert hasattr(flags, "capability_token_validated")
+        assert hasattr(flags, "capability_token_scope_authorized")
+
+    def test_capability_token_fields_to_dict(self):
+        """Capability token fields included in to_dict() (HXA24)."""
+        flags = PolicyFlags(
+            capability_token_checked=True,
+            capability_token_present=True,
+            capability_token_validated=True,
+            capability_token_scope_authorized=True,
+        )
+        data = flags.to_dict()
+
+        assert data["capability_token_checked"] is True
+        assert data["capability_token_present"] is True
+        assert data["capability_token_validated"] is True
+        assert data["capability_token_scope_authorized"] is True
+
+    def test_capability_token_fields_from_dict(self):
+        """Capability token fields restored from dict (HXA24)."""
+        data = {
+            "capability_token_checked": True,
+            "capability_token_present": True,
+            "capability_token_validated": True,
+            "capability_token_scope_authorized": True,
+        }
+        flags = PolicyFlags.from_dict(data)
+
+        assert flags.capability_token_checked is True
+        assert flags.capability_token_present is True
+        assert flags.capability_token_validated is True
+        assert flags.capability_token_scope_authorized is True
+
+    def test_capability_token_roundtrip(self):
+        """Capability token fields survive roundtrip (HXA24)."""
+        original = PolicyFlags(
+            capability_token_checked=True,
+            capability_token_present=True,
+            capability_token_validated=True,
+            capability_token_scope_authorized=True,
+        )
+        data = original.to_dict()
+        restored = PolicyFlags.from_dict(data)
+
+        assert restored.capability_token_checked == original.capability_token_checked
+        assert restored.capability_token_present == original.capability_token_present
+        assert restored.capability_token_validated == original.capability_token_validated
+        assert restored.capability_token_scope_authorized == original.capability_token_scope_authorized
 
 
 # ---------------------------------------------------------------------------

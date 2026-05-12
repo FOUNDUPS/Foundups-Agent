@@ -1,5 +1,42 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-12: HXA24 Capability token policyflags tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa24_capability_token_policyflags.py -v`
+- Status: PASS
+- Result: `31 passed`
+- Notes:
+  - NEW file: `test_hxa24_capability_token_policyflags.py` (500+ lines)
+  - Tests capability token policy flags in PolicyFlags and guard integration:
+    - `TestPolicyFlagsCapabilityTokenFields` (5 tests)
+    - `TestPolicyFlagsSerialization` (4 tests)
+    - `TestJobSerializationWithCapabilityToken` (2 tests)
+    - `TestDefaultPolicyFlagsBlockD3` (1 test)
+    - `TestPartialCapabilityTokenFlagsBlockD3` (3 tests)
+    - `TestAllFourTrueAllowsD3SandboxDryRun` (2 tests)
+    - `TestD4D5D6StillBlockedEvenWithToken` (3 tests)
+    - `TestWSP97TruthFieldsPreserved` (7 tests)
+    - `TestGuardRequestConstruction` (3 tests)
+    - `TestHXA24VerdictDocumentation` (1 test)
+  - Key test: `test_all_four_true_with_security_gate_allows_d3`
+  - Verdict: `CAPABILITY_TOKEN_POLICYFLAGS_DEFINED`
+- Capability token logic tested:
+  - Default flags (all False) block D3
+  - Partial flags (some False) block D3
+  - All four True + security gate allows D3 dry-run
+  - D4/D5/D6 blocked regardless of token flags
+- WSP 97 Coverage (HXA24):
+  - live_execution_allowed=False
+  - repo_created=False
+  - production_source_modified=False
+  - real_execution_performed=False
+  - verification_complete=False
+  - cabr_ready=False
+  - payout_ready=False
+- Slice: HXA24_CAPABILITY_TOKEN_POLICYFLAGS_PHASE1
+
+---
+
 ## 2026-05-12: HXA23 Hermes guard integration tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa23_hermes_guard_integration.py -v`

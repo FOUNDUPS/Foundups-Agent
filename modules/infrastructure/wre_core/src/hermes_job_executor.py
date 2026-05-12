@@ -32,6 +32,7 @@ NAVIGATION:
   -> Called by: Future FoundUpJobConsumer integration
 
 Slice: HXA23_HERMES_GUARD_INTEGRATION_PHASE1
+        HXA24_CAPABILITY_TOKEN_POLICYFLAGS_PHASE1
 """
 
 from __future__ import annotations
@@ -938,13 +939,25 @@ class HermesJobExecutor:
         Build DestructiveActionRequest from job and delegation request.
 
         HXA23: This maps job fields to the destructive action guard contract.
+        HXA24: Updated to read capability token policy flags.
 
-        Gate field mappings (HXA23):
+        Gate field mappings (HXA24):
           - human_approval: False (not yet implemented in PolicyFlags)
-          - capability_token_present: False (not yet implemented in PolicyFlags)
+          - capability_token_present: True ONLY if all four capability token
+            flags are True (checked AND present AND validated AND scope_authorized)
           - security_gate_passed: From PolicyFlags.security_gate_passed
           - workspace_binding_enforced: True if workspace_binding exists
           - path_constraints_validated: True if allowed_paths not empty
+
+        Conservative logic for capability_token_present:
+          All four conditions must be met:
+            1. capability_token_checked = True
+            2. capability_token_present = True
+            3. capability_token_validated = True
+            4. capability_token_scope_authorized = True
+
+        If any condition is False, capability_token_present for guard = False.
+        This ensures D3+ operations remain blocked unless all token gates pass.
 
         Args:
             job: Source FoundUpJob
@@ -971,15 +984,27 @@ class HermesJobExecutor:
         if request.workspace_binding is not None:
             path_constraints_validated = len(request.workspace_binding.allowed_paths) > 0
 
+        # HXA24: Capability token present for guard requires ALL four flags True
+        # Conservative interpretation: any missing/false flag means token not valid for guard
+        capability_token_present_for_guard = False
+        if policy_flags is not None:
+            capability_token_present_for_guard = (
+                policy_flags.capability_token_checked
+                and policy_flags.capability_token_present
+                and policy_flags.capability_token_validated
+                and policy_flags.capability_token_scope_authorized
+            )
+
         return DestructiveActionRequest(
-            action_id=f"hxa23_{secrets.token_hex(4)}",
+            action_id=f"hxa24_{secrets.token_hex(4)}",
             action_type=job.requested_action or "unknown",
             target_path=target_path,
             requested_class=action_class,
             dry_run_mode=request.dry_run,
-            # Human approval and capability token not yet in PolicyFlags - default False
+            # Human approval not yet in PolicyFlags - default False
             human_approval=False,
-            capability_token_present=False,
+            # HXA24: capability_token_present derived from PolicyFlags
+            capability_token_present=capability_token_present_for_guard,
             # Security gate from PolicyFlags
             security_gate_passed=policy_flags.security_gate_passed if policy_flags else False,
             workspace_binding_enforced=workspace_binding_enforced,

@@ -1,5 +1,45 @@
 # ModLog - moltbot_bridge
 
+## 2026-05-12: HXA24 Capability Token PolicyFlags (WSP 97)
+
+**Author**: 0102 (Worker HXA24)
+**WSP**: 97 (System Execution Prompting)
+**Slice**: `HXA24_CAPABILITY_TOKEN_POLICYFLAGS_PHASE1`
+
+### Summary
+
+Added capability token policy flags to PolicyFlags dataclass to support D3+ gate control in the destructive action guard. These fields track whether a capability token was checked, present, validated, and scope-authorized.
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `src/foundup_job_contract.py` | Added 4 capability token fields to PolicyFlags |
+| `tests/test_foundup_job_contract.py` | Added 8 tests for capability token fields |
+
+### New PolicyFlags Fields
+
+| Field | Default | Purpose |
+|-------|---------|---------|
+| `capability_token_checked` | False | Token check was performed |
+| `capability_token_present` | False | Token was provided |
+| `capability_token_validated` | False | Token signature/expiry valid |
+| `capability_token_scope_authorized` | False | Token scope covers action |
+
+### WSP 97 Compliance
+
+- All fields default to False (safe)
+- Backward compatible (missing fields default False)
+- No real tokens issued or validated
+- No external calls
+- Conservative interpretation in guard
+
+### Test Results
+
+- `test_foundup_job_contract.py`: 70 passed (8 new tests)
+
+---
+
 ## 2026-05-04: Restore Memory Query Route Wrapper (WSP 50)
 
 **Author**: 0102 (Worker W7)
