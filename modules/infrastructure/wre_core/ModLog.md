@@ -2,6 +2,72 @@
 
 ## Chronological Change Log
 
+### [2026-05-12] - HXA26_TOKEN_VALIDATION_SERVICE_PHASE1 (v0.8.34)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)
+**Impact Analysis**: Production-ready capability token validation service module created
+
+#### Changes Made
+
+- `src/capability_token_validator.py` (NEW - 500+ lines):
+  - TokenValidationReasonCode enum with all validation failure codes
+  - CapabilityToken dataclass (from HXA21 test file)
+  - TokenValidationResult dataclass with WSP 97 truth fields
+  - ICapabilityTokenValidator protocol (interface for future implementations)
+  - LocalCapabilityTokenValidator class with 12 validation gates
+  - LocalCapabilityTokenIssuer class for test infrastructure
+  - get_default_validator() singleton accessor
+  - reset_default_validator() for testing
+
+- `tests/test_hxa26_token_validation_service.py` (NEW - 500+ lines):
+  - 52 tests covering token validation service
+  - TestCapabilityTokenModel (11 tests)
+  - TestTokenRedaction (2 tests)
+  - TestTokenValidationResult (3 tests)
+  - TestLocalCapabilityTokenValidator (15 tests)
+  - TestValidatorNonceRegistry (3 tests)
+  - TestLocalCapabilityTokenIssuer (3 tests)
+  - TestDefaultValidator (3 tests)
+  - TestWSP97TruthBoundaries (4 tests)
+  - TestValidatorIntegration (2 tests)
+  - TestHXA26Verdict (1 test)
+  - TestModuleImports (5 tests)
+
+- `docs/audits/openclaw_hermes/HXA26_TOKEN_VALIDATION_SERVICE.md` (NEW):
+  - Full audit document with WSP 97 truth table
+  - Module structure documented
+  - 12 validation gates documented
+  - Integration path documented
+
+#### HXA26 Verdict
+
+```
+Verdict: TOKEN_VALIDATION_SERVICE_DEFINED
+
+HXA25 verdict was: D3_SANDBOX_EXECUTION_DEFINED
+
+HXA26 proves:
+1. CapabilityToken model in production code
+2. TokenValidationResult in production code
+3. ICapabilityTokenValidator protocol for injection
+4. LocalCapabilityTokenValidator with 12 validation gates
+5. LocalCapabilityTokenIssuer for test infrastructure
+6. Nonce registry prevents replay attacks
+7. Token redaction protects security logging
+8. All WSP 97 truth fields remain False
+9. Module can be imported by production code
+```
+
+#### What HXA26 Does NOT Prove
+
+- Real JWT/OAuth implementation (Phase 1 is fake verification)
+- Real signing key management (no real keys)
+- External token service integration (local only)
+- Production token issuance (test infrastructure only)
+- HermesJobExecutor integration (future slice)
+
+---
+
 ### [2026-05-12] - HXA25_D3_SANDBOX_EXECUTION_PHASE1 (v0.8.33)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)

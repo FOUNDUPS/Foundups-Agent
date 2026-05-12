@@ -1,5 +1,47 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-12: HXA26 Token validation service tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa26_token_validation_service.py -v`
+- Status: PASS
+- Result: `52 passed`
+- Notes:
+  - NEW file: `test_hxa26_token_validation_service.py` (500+ lines)
+  - Tests production-ready capability token validation service:
+    - `TestCapabilityTokenModel` (11 tests) - Token model fields
+    - `TestTokenRedaction` (2 tests) - Security logging
+    - `TestTokenValidationResult` (3 tests) - Result model
+    - `TestLocalCapabilityTokenValidator` (15 tests) - All 12 validation gates
+    - `TestValidatorNonceRegistry` (3 tests) - Replay prevention
+    - `TestLocalCapabilityTokenIssuer` (3 tests) - Test token issuance
+    - `TestDefaultValidator` (3 tests) - Singleton accessor
+    - `TestWSP97TruthBoundaries` (4 tests) - Truth field enforcement
+    - `TestValidatorIntegration` (2 tests) - End-to-end flows
+    - `TestHXA26Verdict` (1 test) - Verdict documentation
+    - `TestModuleImports` (5 tests) - Import verification
+  - Key test: `test_hxa26_verdict_documented`
+  - Verdict: `TOKEN_VALIDATION_SERVICE_DEFINED`
+- Validation gates tested (12 total):
+  - Missing token
+  - Missing signature
+  - Unverified signature
+  - Token expired
+  - Token not yet valid
+  - Wrong audience
+  - Wrong issuer
+  - Nonce missing/replayed
+  - Action not allowed
+  - Scope not allowed
+  - Path blocked/outside roots
+  - Dry-run blocks live
+- WSP 97 Coverage (HXA26):
+  - verification_complete=False
+  - cabr_ready=False
+  - payout_ready=False
+- Slice: HXA26_TOKEN_VALIDATION_SERVICE_PHASE1
+
+---
+
 ## 2026-05-12: HXA25 D3 sandbox execution tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa25_d3_sandbox_execution.py -v`
