@@ -79,6 +79,27 @@ class MockIntent:
         self.channel = "test_channel"
 
 
+def set_d3_capability_token_gates(job):
+    """
+    Set D3 capability token gates on a job for testing.
+
+    HXA28: build_foundup and extract_foundup are now D3 actions that require
+    capability tokens. For tests that need to reach SIMULATED status (not
+    BLOCKED_BY_DESTRUCTIVE_ACTION_GUARD), set all four capability token gates
+    AND the security gate.
+
+    This simulates a valid capability token being present with security gate passed.
+    """
+    # Capability token gates
+    job.policy_flags.capability_token_checked = True
+    job.policy_flags.capability_token_present = True
+    job.policy_flags.capability_token_validated = True
+    job.policy_flags.capability_token_scope_authorized = True
+    # Security gate (also required for D3)
+    job.policy_flags.security_gate_checked = True
+    job.policy_flags.security_gate_passed = True
+
+
 # ---------------------------------------------------------------------------
 # Test: Harness Default State
 # ---------------------------------------------------------------------------
@@ -105,6 +126,9 @@ class TestHarnessDisabledByDefault:
             foundup_id=VOTEBALLOTS_FOUNDUP_ID,
             requested_action="build_foundup",
         )
+
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
 
         executor = HermesJobExecutor()  # defaults: dry_run=True, controlled_harness=False
         result = executor.execute(job)
@@ -139,6 +163,9 @@ class TestHarnessRequiresExplicitOptIn:
             requested_action="build_foundup",
         )
 
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
+
         executor = HermesJobExecutor(
             dry_run=True,
             controlled_harness=False,
@@ -158,6 +185,9 @@ class TestHarnessRequiresExplicitOptIn:
             requested_action="build_foundup",
         )
 
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
+
         executor = HermesJobExecutor(
             dry_run=False,  # Even with dry_run=False, harness is safe
             controlled_harness=True,
@@ -176,6 +206,9 @@ class TestHarnessRequiresExplicitOptIn:
             foundup_id=VOTEBALLOTS_FOUNDUP_ID,
             requested_action="build_foundup",
         )
+
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
 
         # Verify feature flag is disabled
         assert is_hermes_delegation_enabled() is False
@@ -216,6 +249,9 @@ class TestHarnessSafetyBoundaries:
             requested_action="build_foundup",
         )
 
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
+
         executor = HermesJobExecutor(
             controlled_harness=True,
             workspace_root=self.evidence_root,
@@ -233,6 +269,9 @@ class TestHarnessSafetyBoundaries:
             requested_action="build_foundup",
         )
 
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
+
         executor = HermesJobExecutor(
             controlled_harness=True,
             workspace_root=self.evidence_root,
@@ -249,6 +288,9 @@ class TestHarnessSafetyBoundaries:
             foundup_id=VOTEBALLOTS_FOUNDUP_ID,
             requested_action="build_foundup",
         )
+
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
 
         executor = HermesJobExecutor(
             controlled_harness=True,
@@ -273,6 +315,9 @@ class TestHarnessSafetyBoundaries:
             requested_action="build_foundup",
         )
 
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
+
         executor = HermesJobExecutor(
             controlled_harness=True,
             workspace_root=self.evidence_root,
@@ -290,6 +335,9 @@ class TestHarnessSafetyBoundaries:
             requested_action="build_foundup",
         )
 
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
+
         executor = HermesJobExecutor(
             controlled_harness=True,
             workspace_root=self.evidence_root,
@@ -306,6 +354,9 @@ class TestHarnessSafetyBoundaries:
             foundup_id=VOTEBALLOTS_FOUNDUP_ID,
             requested_action="build_foundup",
         )
+
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
 
         executor = HermesJobExecutor(
             controlled_harness=True,
@@ -342,6 +393,9 @@ class TestControlledDelegateBehavior:
             requested_action="build_foundup",
         )
 
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
+
         executor = HermesJobExecutor(
             controlled_harness=True,
             workspace_root=self.evidence_root,
@@ -361,6 +415,9 @@ class TestControlledDelegateBehavior:
             requested_action="build_foundup",
         )
 
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
+
         executor = HermesJobExecutor(
             controlled_harness=True,
             workspace_root=self.evidence_root,
@@ -377,6 +434,9 @@ class TestControlledDelegateBehavior:
             foundup_id=VOTEBALLOTS_FOUNDUP_ID,
             requested_action="build_foundup",
         )
+
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
 
         executor = HermesJobExecutor(
             controlled_harness=False,
@@ -415,6 +475,9 @@ class TestVoteBallotsThroughHarness:
             foundup_id=VOTEBALLOTS_FOUNDUP_ID,
             requested_action="build_foundup",
         )
+
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
 
         executor = HermesJobExecutor(
             controlled_harness=True,
@@ -463,6 +526,9 @@ class TestGotJunkThroughHarness:
             requested_action="build_foundup",
         )
 
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
+
         executor = HermesJobExecutor(
             controlled_harness=True,
             workspace_root=self.evidence_root,
@@ -509,6 +575,9 @@ class TestNoGitHubAPICalls:
             requested_action="build_foundup",
         )
 
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
+
         executor = HermesJobExecutor(
             controlled_harness=True,
             workspace_root=self.evidence_root,
@@ -545,6 +614,9 @@ class TestNoProductionSourceModification:
             requested_action="build_foundup",
         )
 
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
+
         executor = HermesJobExecutor(
             controlled_harness=True,
             workspace_root=self.evidence_root,
@@ -566,6 +638,9 @@ class TestNoProductionSourceModification:
             foundup_id=GOTJUNK_FOUNDUP_ID,
             requested_action="build_foundup",
         )
+
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
 
         executor = HermesJobExecutor(
             controlled_harness=True,
@@ -619,6 +694,9 @@ class TestWSP97TruthTableEnforcement:
             requested_action="build_foundup",
         )
 
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
+
         executor = HermesJobExecutor(
             controlled_harness=True,
             workspace_root=self.evidence_root,
@@ -646,6 +724,9 @@ class TestWSP97TruthTableEnforcement:
             foundup_id=VOTEBALLOTS_FOUNDUP_ID,
             requested_action="build_foundup",
         )
+
+        # HXA28: Set D3 capability token gates for build_foundup action
+        set_d3_capability_token_gates(job)
 
         executor = HermesJobExecutor(
             controlled_harness=True,

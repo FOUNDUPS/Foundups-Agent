@@ -2,6 +2,69 @@
 
 ## Chronological Change Log
 
+### [2026-05-12] - HXA28_D3_NATIVE_CLASSIFICATION_PHASE1 (v0.8.36)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)
+**Impact Analysis**: Native classification hardened for deterministic, explicit D0-D6 hierarchy
+
+#### Changes Made
+
+- `src/hermes_job_executor.py` (MODIFIED - ~80 lines):
+  - Enhanced `_classify_destructive_action()` from ~20 to ~100 lines
+  - Added explicit prefix-based classification for D0/D1/D2/D5/D6
+  - Added exact-match sets for D3 sandbox actions and D4 repo/git actions
+  - Unknown/ambiguous actions now fail-closed to D6_IRREVERSIBLE
+  - Valid tokens do NOT downgrade D4/D5/D6 classification (immutable)
+
+- `tests/test_hxa28_d3_native_classification.py` (NEW - 600+ lines):
+  - 132 tests covering all classification scenarios
+  - TestD0ObserveValidateClassification (16 tests)
+  - TestD1ReadFetchClassification (12 tests)
+  - TestD2SimulatePlanClassification (10 tests)
+  - TestD3SandboxWriteClassification (10 tests)
+  - TestD4RepoGitOperationsBlocked (24 tests)
+  - TestD5ExternalAPIMutationsBlocked (18 tests)
+  - TestD6IrreversibleDeleteBlocked (20 tests)
+  - TestAmbiguousActionsFailClosed (10 tests)
+  - TestTokenDoesNotDowngradeClassification (3 tests)
+  - TestWSP97TruthFieldsRemainFalse (4 tests)
+  - TestClassificationDeterminism (3 tests)
+
+- `tests/test_hxa23_hermes_guard_integration.py` (MODIFIED):
+  - Updated build_foundup expectation from D2 to D3
+  - Changed test_extract_action_classified_as_d2 to use simulate_build
+
+- `tests/test_hermes_job_executor.py` (MODIFIED - 15 lines):
+  - Changed build_foundup to validate_foundup where guard is not mocked
+  - TestEvidenceCollection uses D0 actions now
+  - TestNoQueueConsumption uses D0 actions now
+
+- `docs/audits/openclaw_hermes/HXA28_D3_NATIVE_CLASSIFICATION.md` (NEW):
+  - Full audit document with classification hierarchy
+  - Fail-closed design documented
+  - Token immutability documented
+  - 260 tests passing
+
+#### HXA28 Verdict
+
+```
+Verdict: D3_NATIVE_CLASSIFICATION_DEFINED
+
+HXA27 verdict was: HERMES_TOKEN_VALIDATION_INTEGRATION_DEFINED
+
+HXA28 proves:
+1. D0/D1/D2 observe/read/simulate allowed in dry_run mode
+2. D3 sandbox writes gated by capability token gates
+3. D4/D5/D6 unconditionally blocked in Phase 1
+4. Unknown/ambiguous actions fail-closed to D6
+5. Valid tokens do NOT downgrade D4/D5/D6 classification
+6. Classification is deterministic and explicit (prefix-based)
+7. All WSP 97 truth fields remain False
+8. 260 tests passing across all guard/classification test files
+```
+
+---
+
 ### [2026-05-12] - HXA27_HERMES_TOKEN_VALIDATION_INTEGRATION_PHASE1 (v0.8.35)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)

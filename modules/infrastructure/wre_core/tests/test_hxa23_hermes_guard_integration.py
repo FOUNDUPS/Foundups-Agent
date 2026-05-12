@@ -188,12 +188,12 @@ class TestD0D1D2D3AllowedAsDryRunOnly:
             assert result.guard_result["destructive_class"] == "D0_OBSERVE"
             assert result.guard_result["allowed"] is True
 
-    def test_extract_action_classified_as_d2(self, temp_workspace):
-        """extract_foundup action should be classified as D2."""
+    def test_simulate_action_classified_as_d2(self, temp_workspace):
+        """simulate_build action should be classified as D2."""
         executor = HermesJobExecutor(workspace_root=temp_workspace, dry_run=True)
         job = create_job(
             tenant_id="t1",
-            requested_action="extract_foundup",
+            requested_action="simulate_build",
             foundup_id="test",
         )
 
@@ -203,8 +203,8 @@ class TestD0D1D2D3AllowedAsDryRunOnly:
             assert result.guard_result["destructive_class"] == "D2_SIMULATE"
             assert result.guard_result["allowed"] is True
 
-    def test_build_action_classified_as_d2(self, temp_workspace):
-        """build_foundup action should be classified as D2 in Phase 1."""
+    def test_build_action_classified_as_d3(self, temp_workspace):
+        """build_foundup action should be classified as D3 (HXA28)."""
         executor = HermesJobExecutor(workspace_root=temp_workspace, dry_run=True)
         job = create_job(
             tenant_id="t1",
@@ -212,13 +212,14 @@ class TestD0D1D2D3AllowedAsDryRunOnly:
             foundup_id="test",
         )
 
-        # In Phase 1, build_* is classified as D2_SIMULATE because
-        # D3 requires capability tokens not yet in PolicyFlags.
+        # HXA28: build_foundup is now D3_WRITE_SANDBOX
+        # Without capability tokens, it will be blocked by guard
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
             result = executor.execute(job)
 
-            assert result.guard_result["destructive_class"] == "D2_SIMULATE"
-            assert result.guard_result["allowed"] is True
+            assert result.guard_result["destructive_class"] == "D3_WRITE_SANDBOX"
+            # D3 requires capability token gates - blocked without them
+            assert result.guard_result["allowed"] is False
 
     def test_d0_d1_d2_allowed_continues_to_simulated(self, temp_workspace):
         """D0/D1/D2 allowed should continue to SIMULATED status."""

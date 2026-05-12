@@ -925,18 +925,42 @@ class HermesJobExecutor:
         """
         Classify job action into destructive action class (D0-D6).
 
-        HXA23 Phase 1 classification rules:
-          - validate_*, queue_*: D0_OBSERVE (read-only observation)
-          - extract_*, build_*: D2_SIMULATE (dry-run simulation)
-          - Unknown actions: D2_SIMULATE (conservative default for dry-run)
+        HXA28 Native Classification Rules (deterministic and explicit):
 
-        Note: In Phase 1, all actions are classified as D0-D2 because:
-          - D3 requires capability_token_present which is not yet in PolicyFlags
-          - D4/D5/D6 are blocked regardless
-          - All operations are dry-run only
+        D0_OBSERVE (read-only observation):
+          - validate_*, queue_*, check_*, status_*, observe_*, read_*
+          - get_*, list_*, inspect_*, describe_*, info_*
 
-        Future phases will enable D3 classification when capability tokens
-        are implemented in PolicyFlags.
+        D1_READ (read operations):
+          - fetch_*, load_*, retrieve_*, lookup_*, search_*
+
+        D2_SIMULATE (dry-run simulation):
+          - simulate_*, plan_*, dry_run_*, preview_*, analyze_*
+          - estimate_*, calculate_*, compare_*, diff_*
+
+        D3_WRITE_SANDBOX (sandbox-local writes):
+          - Evidence/checkpoint writes when path is .hermes_evidence/ scoped
+          - Requires all capability token gates to pass (checked by guard)
+          - build_foundup, extract_foundup when target is evidence-scoped
+
+        D4_WRITE_REPO (repo/git operations - BLOCKED Phase 1):
+          - create_repo, create_repository, init_repo
+          - git_push, git_commit, git_tag, git_release, git_merge
+          - branch_create, branch_delete
+          - production source modification actions
+
+        D5_EXTERNAL_SIDE_EFFECT (external API mutations - BLOCKED Phase 1):
+          - send_*, email_*, notify_*, broadcast_*, publish_*, post_*
+          - webhook_*, api_call_*, invoke_*, trigger_external_*
+          - deploy_*, release_*, promote_*, rollout_*
+
+        D6_IRREVERSIBLE (dangerous/destructive - BLOCKED Phase 1):
+          - delete_*, remove_*, purge_*, wipe_*, destroy_*, revoke_*
+          - credential_*, token_*, key_*, secret_* (mutation)
+          - payout_*, transfer_*, finalize_*, irreversible_*
+
+        Fail-Closed Rule:
+          - Unknown/ambiguous actions -> D6_IRREVERSIBLE (blocked by guard)
 
         Args:
             job: Source FoundUpJob
@@ -945,16 +969,107 @@ class HermesJobExecutor:
         Returns:
             DestructiveActionClass for the job
         """
-        action = job.requested_action or ""
+        action = (job.requested_action or "").lower().strip()
 
-        # D0: Validation and queue operations (read-only)
-        if action.startswith("validate_") or action.startswith("queue_"):
+        if not action:
+            # Empty action is ambiguous -> fail-closed to D6
+            return DestructiveActionClass.D6_IRREVERSIBLE
+
+        # =====================================================================
+        # D0_OBSERVE: Read-only observations (dry-run allowed)
+        # =====================================================================
+        d0_prefixes = (
+            "validate_", "queue_", "check_", "status_", "observe_", "read_",
+            "get_", "list_", "inspect_", "describe_", "info_",
+        )
+        if action.startswith(d0_prefixes):
             return DestructiveActionClass.D0_OBSERVE
 
-        # D2: All other operations are dry-run simulation in Phase 1
-        # This includes build_*, extract_*, and unknown actions
-        # because D3 requires capability tokens not yet in PolicyFlags
-        return DestructiveActionClass.D2_SIMULATE
+        # =====================================================================
+        # D1_READ: Read operations (dry-run allowed)
+        # =====================================================================
+        d1_prefixes = (
+            "fetch_", "load_", "retrieve_", "lookup_", "search_",
+        )
+        if action.startswith(d1_prefixes):
+            return DestructiveActionClass.D1_READ
+
+        # =====================================================================
+        # D2_SIMULATE: Dry-run simulation (dry-run allowed)
+        # =====================================================================
+        d2_prefixes = (
+            "simulate_", "plan_", "dry_run_", "preview_", "analyze_",
+            "estimate_", "calculate_", "compare_", "diff_",
+        )
+        if action.startswith(d2_prefixes):
+            return DestructiveActionClass.D2_SIMULATE
+
+        # =====================================================================
+        # D6_IRREVERSIBLE: Delete/destroy/credential actions (BLOCKED)
+        # Check BEFORE D4/D5 to ensure destructive actions always blocked
+        # =====================================================================
+        d6_prefixes = (
+            "delete_", "remove_", "purge_", "wipe_", "destroy_", "revoke_",
+            "credential_", "token_", "key_", "secret_",
+            "payout_", "transfer_", "finalize_", "irreversible_",
+        )
+        if action.startswith(d6_prefixes):
+            return DestructiveActionClass.D6_IRREVERSIBLE
+
+        # =====================================================================
+        # D5_EXTERNAL_SIDE_EFFECT: External API mutations (BLOCKED)
+        # =====================================================================
+        d5_prefixes = (
+            "send_", "email_", "notify_", "broadcast_", "publish_", "post_",
+            "webhook_", "api_call_", "invoke_", "trigger_external_",
+            "deploy_", "release_", "promote_", "rollout_",
+        )
+        if action.startswith(d5_prefixes):
+            return DestructiveActionClass.D5_EXTERNAL_SIDE_EFFECT
+
+        # =====================================================================
+        # D4_WRITE_REPO: Repo/git operations (BLOCKED)
+        # =====================================================================
+        d4_actions = {
+            "create_repo", "create_repository", "init_repo", "fork_repo",
+            "git_push", "git_commit", "git_tag", "git_release", "git_merge",
+            "branch_create", "branch_delete", "pr_create", "pr_merge",
+            "modify_source", "edit_source", "write_source", "patch_source",
+        }
+        if action in d4_actions:
+            return DestructiveActionClass.D4_WRITE_REPO
+
+        # D4: Additional prefix patterns for repo/production operations
+        d4_prefixes = (
+            "git_", "repo_", "branch_", "pr_", "merge_",
+            "production_", "source_edit_", "source_modify_", "source_write_",
+        )
+        if action.startswith(d4_prefixes):
+            return DestructiveActionClass.D4_WRITE_REPO
+
+        # =====================================================================
+        # D3_WRITE_SANDBOX: Sandbox-local writes (requires all gates)
+        # build_foundup and extract_foundup are D3 when evidence-scoped
+        # =====================================================================
+        d3_actions = {
+            "build_foundup", "extract_foundup",
+            "write_evidence", "write_checkpoint", "save_evidence",
+        }
+        if action in d3_actions:
+            return DestructiveActionClass.D3_WRITE_SANDBOX
+
+        # D3: Additional evidence-scoped operations
+        d3_prefixes = (
+            "evidence_", "checkpoint_", "sandbox_write_",
+        )
+        if action.startswith(d3_prefixes):
+            return DestructiveActionClass.D3_WRITE_SANDBOX
+
+        # =====================================================================
+        # FAIL-CLOSED: Unknown/ambiguous actions -> D6 (blocked by guard)
+        # This ensures unknown actions are never allowed to execute
+        # =====================================================================
+        return DestructiveActionClass.D6_IRREVERSIBLE
 
     def _build_destructive_action_request(
         self,
