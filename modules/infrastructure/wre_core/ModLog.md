@@ -2,6 +2,89 @@
 
 ## Chronological Change Log
 
+### [2026-05-12] - HXA20_PRODUCTION_SOURCE_GATE_PHASE1 (v0.8.28)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)
+**Impact Analysis**: Safe fail-closed gate contract for future production source modification paths
+
+#### Changes Made
+
+- `tests/test_hxa20_production_source_gate.py` (NEW - 650+ lines):
+  - 32 tests covering production source modification gate contract
+  - No production code modified - test-only approval model
+  - Test-local definitions for:
+    - `ProductionSourceGate`: Gate model with all required fields
+    - `ProductionSourceBlockReason`: Enum of blocking reasons (10 conditions)
+    - `ProductionSourceGateResult`: Enum of gate results (BLOCKED, SIMULATED_ONLY)
+    - `DestructiveClass`: D0-D6 destructive action classification
+    - `FakePatchAdapter`: Test fixture that never modifies production source
+    - `FakePatchAdapterResult`: Result type with WSP 97 fields
+
+#### HXA20 Verdict
+
+```
+Verdict: PRODUCTION_SOURCE_GATE_DEFINED
+
+HXA19 verdict was: REPO_CREATION_APPROVAL_GATE_DEFINED
+
+HXA20 proves:
+1. ProductionSourceGate model defines all required fields
+2. All blocking conditions are implemented (fail-closed)
+3. Dry-run simulation path works correctly
+4. FakePatchAdapter never modifies production source
+5. All WSP 97 truth fields remain False
+6. Gate can be evaluated without modifying production
+```
+
+#### HXA20 Gate Model Fields
+
+| Field | Type | Default | Purpose |
+|-------|------|---------|---------|
+| `source_modification_requested` | bool | False | Request flag |
+| `target_path` | str | "" | Target file path |
+| `operation` | str | "" | File operation |
+| `human_approval` | bool | False | Human approval gate |
+| `approval_id` | Optional[str] | None | Approval correlation ID |
+| `capability_token_present` | bool | False | Token gate |
+| `security_gate_passed` | bool | False | Security gate |
+| `destructive_class` | DestructiveClass | D0_OBSERVE | Action classification |
+| `dry_run_mode` | bool | True | Safe default |
+| `workspace_binding_enforced` | bool | False | Workspace binding gate |
+| `path_constraints_validated` | bool | False | Path constraint gate |
+| `allowed_roots` | List[str] | [] | Allowed path roots |
+| `blocked_paths` | List[str] | [] | Blocked path patterns |
+
+#### HXA20 Block Conditions Tested
+
+| Condition | Block Reason | Test Status |
+|-----------|--------------|-------------|
+| Missing human approval | `MISSING_HUMAN_APPROVAL` | PASS |
+| Missing capability token | `MISSING_CAPABILITY_TOKEN` | PASS |
+| Security gate not passed | `SECURITY_GATE_NOT_PASSED` | PASS |
+| Target path outside allowed roots | `TARGET_PATH_OUTSIDE_ALLOWED_ROOTS` | PASS |
+| Target path in blocked paths | `TARGET_PATH_IN_BLOCKED_PATHS` | PASS |
+| Workspace binding not enforced | `WORKSPACE_BINDING_NOT_ENFORCED` | PASS |
+| Path constraints not validated | `PATH_CONSTRAINTS_NOT_VALIDATED` | PASS |
+| Unsupported operation | `UNSUPPORTED_OPERATION` | PASS |
+| Destructive class above threshold | `DESTRUCTIVE_CLASS_ABOVE_THRESHOLD` | PASS |
+| Dry-run mode active | `SIMULATED_ONLY` | PASS |
+
+#### HXA20 WSP 97 Truth Fields (All False)
+
+| Field | Value | Reason |
+|-------|-------|--------|
+| `production_source_modified` | False | No file modifications |
+| `file_written` | False | No file writes |
+| `network_called` | False | No network calls |
+| `repo_created` | False | No GitHub operations |
+| `live_external_delegate_called` | False | No external delegation |
+| `external_federation_initiated` | False | No federation |
+| `verification_complete` | False | No CABR verification |
+| `cabr_ready` | False | No CABR pipeline |
+| `payout_ready` | False | No payout pipeline |
+
+---
+
 ### [2026-05-12] - HXA19_REPO_CREATION_APPROVAL_GATE_PHASE1 (v0.8.27)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)

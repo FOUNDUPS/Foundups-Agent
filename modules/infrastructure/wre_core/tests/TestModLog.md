@@ -1,5 +1,58 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-12: HXA20 Production source modification gate tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa20_production_source_gate.py -v`
+- Status: PASS
+- Result: `32 passed`
+- Notes:
+  - NEW file: `test_hxa20_production_source_gate.py` (650+ lines)
+  - Test-only approval gate contract (no production code modified):
+    - `ProductionSourceGate`: Gate model with all required fields
+    - `ProductionSourceBlockReason`: Enum of blocking reasons (10 conditions)
+    - `ProductionSourceGateResult`: Enum of gate results (BLOCKED, SIMULATED_ONLY)
+    - `DestructiveClass`: D0-D6 destructive action classification
+    - `FakePatchAdapter`: Test fixture that never modifies production source
+    - `FakePatchAdapterResult`: Result type with WSP 97 fields
+  - Test classes:
+    - `TestProductionSourceGateModel` (3 tests)
+    - `TestProductionSourceGateBlocking` (9 tests)
+    - `TestProductionSourceDryRunSimulation` (2 tests)
+    - `TestFakePatchAdapter` (6 tests)
+    - `TestNoWritesOutsideTmpDir` (1 test)
+    - `TestWSP97TruthFieldsPreserved` (5 tests)
+    - `TestLiveExternalDelegateCalledFalse` (1 test)
+    - `TestVerificationCompleteCABRPayoutFalse` (1 test)
+    - `TestExternalFederationInitiatedFalse` (1 test)
+    - `TestHXA20CompleteSourceGate` (2 tests)
+    - `TestHXA20VerdictDocumentation` (1 test)
+  - Key test: `test_complete_source_gate_contract`
+  - Verdict: `PRODUCTION_SOURCE_GATE_DEFINED`
+- WSP 97 Coverage (HXA20):
+  - production_source_modified=False (no file modifications)
+  - file_written=False (no file writes)
+  - network_called=False (no network calls)
+  - repo_created=False (no GitHub operations)
+  - live_external_delegate_called=False
+  - external_federation_initiated=False
+  - verification_complete=False
+  - cabr_ready=False
+  - payout_ready=False
+- Block conditions tested (10 total):
+  - MISSING_HUMAN_APPROVAL
+  - MISSING_CAPABILITY_TOKEN
+  - SECURITY_GATE_NOT_PASSED
+  - TARGET_PATH_OUTSIDE_ALLOWED_ROOTS
+  - TARGET_PATH_IN_BLOCKED_PATHS
+  - WORKSPACE_BINDING_NOT_ENFORCED
+  - PATH_CONSTRAINTS_NOT_VALIDATED
+  - UNSUPPORTED_OPERATION
+  - DESTRUCTIVE_CLASS_ABOVE_THRESHOLD
+  - DRY_RUN_MODE_ACTIVE (returns SIMULATED_ONLY)
+- Slice: HXA20_PRODUCTION_SOURCE_GATE_PHASE1
+
+---
+
 ## 2026-05-12: HXA19 Repo creation approval gate tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa19_repo_creation_approval_gate.py -v`
