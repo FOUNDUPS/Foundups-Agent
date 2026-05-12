@@ -1,5 +1,46 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-12: HXA23 Hermes guard integration tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa23_hermes_guard_integration.py -v`
+- Status: PASS
+- Result: `34 passed`
+- Notes:
+  - NEW file: `test_hxa23_hermes_guard_integration.py` (800+ lines)
+  - Integration tests for HXA22 guard into HermesJobExecutor:
+    - `TestHermesCallsDestructiveGuard` (4 tests)
+    - `TestD0D1D2D3AllowedAsDryRunOnly` (5 tests)
+    - `TestD4RepoWriteBlocked` (2 tests)
+    - `TestD5ExternalSideEffectBlocked` (2 tests)
+    - `TestD6IrreversibleBlocked` (1 test)
+    - `TestBlockedGuardDoesNotWriteFiles` (3 tests)
+    - `TestWSP97TruthFieldsPreserved` (8 tests)
+    - `TestEvidenceCheckpointFieldsPreserved` (2 tests)
+    - `TestD3MissingGatesBlocked` (2 tests)
+    - `TestGuardIntegrationFlow` (2 tests)
+    - `TestExistingDryRunBehaviorPreserved` (2 tests)
+    - `TestHXA23VerdictDocumentation` (1 test)
+  - Key test: `test_complete_guard_integration_flow`
+  - Verdict: `HERMES_GUARD_INTEGRATION_DEFINED`
+- WSP 97 Coverage (HXA23):
+  - live_external_delegate_called=False
+  - repo_created=False
+  - production_source_modified=False
+  - external_federation_initiated=False
+  - real_execution_performed=False
+  - verification_complete=False
+  - cabr_ready=False
+  - payout_ready=False
+- Integration behaviors tested:
+  - Guard evaluated before delegation paths
+  - D0/D1/D2 allowed as dry-run
+  - D4/D5/D6 blocked by guard
+  - Blocked guard does not call delegate adapter
+  - Existing dry-run behavior preserved
+- Slice: HXA23_HERMES_GUARD_INTEGRATION_PHASE1
+
+---
+
 ## 2026-05-12: HXA22 Destructive action guard runtime tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa22_destructive_action_guard_runtime.py -v`

@@ -2,6 +2,81 @@
 
 ## Chronological Change Log
 
+### [2026-05-12] - HXA23_HERMES_GUARD_INTEGRATION_PHASE1 (v0.8.31)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)
+**Impact Analysis**: Integration of HXA22 destructive action guard into HermesJobExecutor as safe no-op validation seam
+
+#### Changes Made
+
+- `src/hermes_job_executor.py` (MODIFIED - ~150 lines added):
+  - Imported `DestructiveActionClass`, `DestructiveActionGuardResult`, `DestructiveActionRequest`, `evaluate_destructive_action` from destructive_action_guard
+  - Added `BLOCKED_BY_DESTRUCTIVE_ACTION_GUARD` to `HermesExecutionStatus` enum
+  - Added `guard_evaluated` and `guard_result` fields to `HermesDelegationResult`
+  - Added `_classify_destructive_action()` method - classifies job actions to D0-D2 in Phase 1
+  - Added `_build_destructive_action_request()` method - builds guard request from job
+  - Added `_evaluate_destructive_action_guard()` method - calls guard evaluation
+  - Modified `execute()` method to evaluate guard before delegation paths
+  - Guard blocks D4/D5/D6 actions; allows D0/D1/D2 to continue to SIMULATED
+
+- `tests/test_hxa23_hermes_guard_integration.py` (NEW - 800+ lines):
+  - 34 tests covering guard integration behaviors
+  - Tests D0/D1/D2 allowed as dry-run
+  - Tests D4/D5/D6 blocked by guard
+  - Tests WSP 97 truth fields preserved
+  - Tests existing dry-run behavior preserved
+
+- `tests/test_hermes_job_executor.py` (MODIFIED - 3 tests updated):
+  - Updated tests to mock guard for non-dry-run paths
+  - Tests now bypass guard to test downstream blocking behavior
+
+#### HXA23 Verdict
+
+```
+Verdict: HERMES_GUARD_INTEGRATION_DEFINED
+
+HXA22 verdict was: DESTRUCTIVE_ACTION_GUARD_RUNTIME_DEFINED
+
+HXA23 proves:
+1. HermesJobExecutor integrates DestructiveActionGuard
+2. Guard is evaluated before delegation paths
+3. Guard result is stored in HermesDelegationResult
+4. D0/D1/D2 allowed as dry-run only (D3 deferred - requires capability tokens)
+5. D4 repo write blocked by guard
+6. D5 external side effect blocked by guard
+7. D6 irreversible blocked by guard
+8. Blocked guard does not call delegate adapter
+9. All WSP 97 truth fields remain False
+10. Existing dry-run behavior preserved
+```
+
+#### HXA23 Action Classification (Phase 1)
+
+| Action Pattern | Class | Phase 1 Behavior |
+|----------------|-------|------------------|
+| `validate_*` | D0_OBSERVE | Allowed (dry-run) |
+| `queue_*` | D0_OBSERVE | Allowed (dry-run) |
+| `build_*` | D2_SIMULATE | Allowed (dry-run) |
+| `extract_*` | D2_SIMULATE | Allowed (dry-run) |
+| Other | D2_SIMULATE | Allowed (dry-run) |
+
+Note: D3 classification deferred - requires capability_token_present in PolicyFlags.
+
+#### HXA23 WSP 97 Truth Fields (All False)
+
+| Field | Value | Reason |
+|-------|-------|--------|
+| `live_external_delegate_called` | False | No external delegation |
+| `repo_created` | False | No GitHub operations |
+| `production_source_modified` | False | No source modifications |
+| `external_federation_initiated` | False | No federation |
+| `real_execution_performed` | False | Phase 1: no live execution |
+| `verification_complete` | False | No CABR verification |
+| `cabr_ready` | False | No CABR pipeline |
+| `payout_ready` | False | No payout pipeline |
+
+---
+
 ### [2026-05-12] - HXA22_DESTRUCTIVE_ACTION_GUARD_RUNTIME_PHASE1 (v0.8.30)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)
