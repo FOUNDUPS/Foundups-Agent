@@ -2,6 +2,72 @@
 
 ## Chronological Change Log
 
+### [2026-05-12] - HXA22_DESTRUCTIVE_ACTION_GUARD_RUNTIME_PHASE1 (v0.8.30)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)
+**Impact Analysis**: Minimal runtime guard seam for destructive actions; test-only, fail-closed
+
+#### Changes Made
+
+- `src/destructive_action_guard.py` (NEW - 450+ lines):
+  - `DestructiveActionClass`: Enum defining D0-D6 action classes
+  - `GuardDecision`: Enum for guard decisions (ALLOW_DRY_RUN, BLOCKED, REQUIRES_APPROVAL)
+  - `GuardBlockReasonCode`: Enum for block reason codes (15 codes)
+  - `DestructiveActionRequest`: Request dataclass capturing all gate requirements
+  - `DestructiveActionGuardResult`: Result dataclass with all WSP 97 truth fields
+  - `DestructiveActionGuard`: Fail-closed evaluator for destructive actions
+  - Convenience functions: `get_destructive_action_guard()`, `evaluate_destructive_action()`
+
+- `tests/test_hxa22_destructive_action_guard_runtime.py` (NEW - 700+ lines):
+  - 40 tests covering all fail-closed behaviors
+  - No live execution enabled - all WSP 97 truth fields remain False
+
+#### HXA22 Verdict
+
+```
+Verdict: DESTRUCTIVE_ACTION_GUARD_RUNTIME_DEFINED
+
+HXA19 verdict was: REPO_CREATION_APPROVAL_GATE_DEFINED
+HXA20 verdict was: PRODUCTION_SOURCE_GATE_DEFINED
+HXA21 verdict was: CAPABILITY_TOKEN_INFRASTRUCTURE_DEFINED
+
+HXA22 proves:
+1. DestructiveActionClass enum defines D0-D6 classes
+2. DestructiveActionRequest captures all gate requirements
+3. DestructiveActionGuardResult captures all WSP 97 truth fields
+4. DestructiveActionGuard implements fail-closed evaluation
+5. D0/D1/D2 allowed only in dry-run mode
+6. D3 requires workspace_binding, path_validation, capability_token, security_gate
+7. D4/D5/D6 blocked in Phase 1
+8. All WSP 97 truth fields remain False always
+```
+
+#### HXA22 Fail-Closed Rules
+
+| Action Class | Phase 1 Behavior | Required Gates |
+|--------------|------------------|----------------|
+| D0_OBSERVE | Allowed (dry-run only) | dry_run_mode=True |
+| D1_READ | Allowed (dry-run only) | dry_run_mode=True |
+| D2_SIMULATE | Allowed (dry-run only) | dry_run_mode=True |
+| D3_WRITE_SANDBOX | Allowed when all gates pass | workspace_binding, path_validation, capability_token, security_gate |
+| D4_WRITE_REPO | BLOCKED | - |
+| D5_EXTERNAL_SIDE_EFFECT | BLOCKED | - |
+| D6_IRREVERSIBLE | BLOCKED | - |
+
+#### HXA22 WSP 97 Truth Fields (All False)
+
+| Field | Value | Reason |
+|-------|-------|--------|
+| `live_execution_allowed` | False | Phase 1: no live execution |
+| `repo_created` | False | No GitHub operations |
+| `production_source_modified` | False | No source modifications |
+| `external_federation_initiated` | False | No federation |
+| `verification_complete` | False | No CABR verification |
+| `cabr_ready` | False | No CABR pipeline |
+| `payout_ready` | False | No payout pipeline |
+
+---
+
 ### [2026-05-12] - HXA21_CAPABILITY_TOKEN_INFRASTRUCTURE_PHASE1 (v0.8.29)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)

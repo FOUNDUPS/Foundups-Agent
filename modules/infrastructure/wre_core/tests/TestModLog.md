@@ -1,5 +1,62 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-12: HXA22 Destructive action guard runtime tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa22_destructive_action_guard_runtime.py -v`
+- Status: PASS
+- Result: `40 passed`
+- Notes:
+  - NEW file: `test_hxa22_destructive_action_guard_runtime.py` (700+ lines)
+  - NEW file: `src/destructive_action_guard.py` (450+ lines) - production code
+  - Fail-closed destructive action guard with D0-D6 classification:
+    - `DestructiveActionClass`: D0_OBSERVE through D6_IRREVERSIBLE
+    - `DestructiveActionRequest`: Request model with all gate requirements
+    - `DestructiveActionGuardResult`: Result with WSP 97 truth fields
+    - `DestructiveActionGuard`: Fail-closed evaluator
+  - Test classes:
+    - `TestDestructiveActionClassEnum` (3 tests)
+    - `TestDestructiveActionRequest` (3 tests)
+    - `TestDestructiveActionGuardResult` (2 tests)
+    - `TestD0ObserveDryRunAllowed` (1 test)
+    - `TestD1ReadDryRunAllowed` (1 test)
+    - `TestD2SimulateAllowed` (1 test)
+    - `TestD3SandboxWriteGates` (5 tests)
+    - `TestD4RepoWriteBlocked` (1 test)
+    - `TestD5ExternalSideEffectBlocked` (1 test)
+    - `TestD6IrreversibleBlocked` (1 test)
+    - `TestLiveExecutionAlwaysFalse` (2 tests)
+    - `TestRepoCreatedAlwaysFalse` (2 tests)
+    - `TestProductionSourceModifiedAlwaysFalse` (2 tests)
+    - `TestExternalFederationInitiatedAlwaysFalse` (2 tests)
+    - `TestVerificationCompleteAlwaysFalse` (2 tests)
+    - `TestCABRReadyAlwaysFalse` (2 tests)
+    - `TestPayoutReadyAlwaysFalse` (2 tests)
+    - `TestConvenienceFunctions` (2 tests)
+    - `TestWSP97TruthFieldsPreserved` (2 tests)
+    - `TestHXA22CompleteGuardFlow` (2 tests)
+    - `TestHXA22VerdictDocumentation` (1 test)
+  - Key test: `test_complete_guard_evaluation_flow`
+  - Verdict: `DESTRUCTIVE_ACTION_GUARD_RUNTIME_DEFINED`
+- WSP 97 Coverage (HXA22):
+  - live_execution_allowed=False (Phase 1 blocks live execution)
+  - repo_created=False (no GitHub operations)
+  - production_source_modified=False (no source modifications)
+  - external_federation_initiated=False
+  - verification_complete=False
+  - cabr_ready=False
+  - payout_ready=False
+- Fail-closed rules tested (7 blocking scenarios):
+  - D3 without workspace_binding -> MISSING_WORKSPACE_BINDING
+  - D3 without path_validation -> MISSING_PATH_VALIDATION
+  - D3 without capability_token -> MISSING_CAPABILITY_TOKEN
+  - D3 without security_gate -> MISSING_SECURITY_GATE
+  - D4 repo write -> BLOCKED_D4_REPO_WRITE_PHASE1
+  - D5 external side effect -> BLOCKED_D5_EXTERNAL_PHASE1
+  - D6 irreversible -> BLOCKED_D6_IRREVERSIBLE_PHASE1
+- Slice: HXA22_DESTRUCTIVE_ACTION_GUARD_RUNTIME_PHASE1
+
+---
+
 ## 2026-05-12: HXA21 Capability token infrastructure tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa21_capability_token_infrastructure.py -v`
