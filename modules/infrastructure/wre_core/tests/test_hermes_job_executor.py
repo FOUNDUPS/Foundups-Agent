@@ -333,31 +333,67 @@ class TestExecutorImportFailure(unittest.TestCase):
     """Test executor behavior when Hermes import fails."""
 
     def test_returns_blocked_on_import_failure(self):
-        """Execute returns BLOCKED_IMPORT_UNAVAILABLE on import error."""
+        """Execute returns BLOCKED_IMPORT_UNAVAILABLE on import error.
+
+        Note: HXA23 guard must be bypassed to test import failure path,
+        since guard blocks dry_run=False actions in Phase 1.
+        """
+        from destructive_action_guard import (
+            DestructiveActionGuardResult,
+            DestructiveActionClass,
+            GuardDecision,
+            GuardBlockReasonCode,
+        )
+
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "1"}):
             executor = HermesJobExecutor(dry_run=False)
 
-            # Simulate import failure
+            # HXA23: Mock guard to allow action through to test import failure
+            mock_guard_result = DestructiveActionGuardResult(
+                allowed=True,
+                decision=GuardDecision.ALLOW_DRY_RUN,
+                reason_code=GuardBlockReasonCode.OK_DRY_RUN,
+                destructive_class=DestructiveActionClass.D2_SIMULATE,
+                dry_run_only=False,  # Allow non-dry-run for this test
+            )
+
             with patch.object(
                 executor,
-                "_lazy_import_delegate_task",
-                return_value=False,
+                "_evaluate_destructive_action_guard",
+                return_value=mock_guard_result,
             ):
-                executor._import_error = "No module named 'vendor.hermes_agent'"
+                # Simulate import failure
+                with patch.object(
+                    executor,
+                    "_lazy_import_delegate_task",
+                    return_value=False,
+                ):
+                    executor._import_error = "No module named 'vendor.hermes_agent'"
 
-                job = create_job(tenant_id="t1", requested_action="build_foundup")
-                result = executor.execute(job)
+                    job = create_job(tenant_id="t1", requested_action="build_foundup")
+                    result = executor.execute(job)
 
-                self.assertEqual(result.status, HermesExecutionStatus.BLOCKED_IMPORT_UNAVAILABLE)
-                self.assertIn("Cannot import", result.status_reason)
-                self.assertFalse(result.real_execution_performed)
+                    self.assertEqual(result.status, HermesExecutionStatus.BLOCKED_IMPORT_UNAVAILABLE)
+                    self.assertIn("Cannot import", result.status_reason)
+                    self.assertFalse(result.real_execution_performed)
 
 
 class TestExecutorRealDelegationBlocked(unittest.TestCase):
     """Test executor blocks real delegation in Phase 1."""
 
     def test_returns_blocked_when_enabled_not_dry_run(self):
-        """Execute returns BLOCKED when enabled and dry_run=False."""
+        """Execute returns BLOCKED when enabled and dry_run=False.
+
+        Note: HXA23 guard must be bypassed to test real delegation blocking,
+        since guard blocks dry_run=False actions in Phase 1.
+        """
+        from destructive_action_guard import (
+            DestructiveActionGuardResult,
+            DestructiveActionClass,
+            GuardDecision,
+            GuardBlockReasonCode,
+        )
+
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "1"}):
             executor = HermesJobExecutor(dry_run=False)
 
@@ -365,18 +401,43 @@ class TestExecutorRealDelegationBlocked(unittest.TestCase):
             executor._import_attempted = True
             executor._delegate_task_fn = MagicMock()
 
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
-            result = executor.execute(job)
-
-            self.assertEqual(
-                result.status,
-                HermesExecutionStatus.BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED,
+            # HXA23: Mock guard to allow action through to test real delegation blocking
+            mock_guard_result = DestructiveActionGuardResult(
+                allowed=True,
+                decision=GuardDecision.ALLOW_DRY_RUN,
+                reason_code=GuardBlockReasonCode.OK_DRY_RUN,
+                destructive_class=DestructiveActionClass.D2_SIMULATE,
+                dry_run_only=False,  # Allow non-dry-run for this test
             )
-            self.assertIn("not implemented", result.status_reason.lower())
-            self.assertFalse(result.real_execution_performed)
+
+            with patch.object(
+                executor,
+                "_evaluate_destructive_action_guard",
+                return_value=mock_guard_result,
+            ):
+                job = create_job(tenant_id="t1", requested_action="build_foundup")
+                result = executor.execute(job)
+
+                self.assertEqual(
+                    result.status,
+                    HermesExecutionStatus.BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED,
+                )
+                self.assertIn("not implemented", result.status_reason.lower())
+                self.assertFalse(result.real_execution_performed)
 
     def test_delegate_task_not_actually_called(self):
-        """delegate_task function is NOT called even when import succeeds."""
+        """delegate_task function is NOT called even when import succeeds.
+
+        Note: HXA23 guard must be bypassed to test delegation blocking,
+        since guard blocks dry_run=False actions in Phase 1.
+        """
+        from destructive_action_guard import (
+            DestructiveActionGuardResult,
+            DestructiveActionClass,
+            GuardDecision,
+            GuardBlockReasonCode,
+        )
+
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "1"}):
             executor = HermesJobExecutor(dry_run=False)
 
@@ -384,15 +445,29 @@ class TestExecutorRealDelegationBlocked(unittest.TestCase):
             executor._import_attempted = True
             executor._delegate_task_fn = mock_delegate
 
-            job = create_job(tenant_id="t1", requested_action="build_foundup")
-            result = executor.execute(job)
-
-            # Verify delegate_task was NOT called
-            mock_delegate.assert_not_called()
-            self.assertEqual(
-                result.status,
-                HermesExecutionStatus.BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED,
+            # HXA23: Mock guard to allow action through to test delegation blocking
+            mock_guard_result = DestructiveActionGuardResult(
+                allowed=True,
+                decision=GuardDecision.ALLOW_DRY_RUN,
+                reason_code=GuardBlockReasonCode.OK_DRY_RUN,
+                destructive_class=DestructiveActionClass.D2_SIMULATE,
+                dry_run_only=False,  # Allow non-dry-run for this test
             )
+
+            with patch.object(
+                executor,
+                "_evaluate_destructive_action_guard",
+                return_value=mock_guard_result,
+            ):
+                job = create_job(tenant_id="t1", requested_action="build_foundup")
+                result = executor.execute(job)
+
+                # Verify delegate_task was NOT called
+                mock_delegate.assert_not_called()
+                self.assertEqual(
+                    result.status,
+                    HermesExecutionStatus.BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED,
+                )
 
 
 class TestExecutorJobValidation(unittest.TestCase):

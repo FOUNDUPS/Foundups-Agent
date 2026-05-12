@@ -8,11 +8,17 @@ Does NOT consume jobs or execute real subagents by default.
 
 Architecture:
   FoundUpJob (queued) → HermesJobExecutor → HermesDelegationRequest → [dry_run result]
+                                         ↘ DestructiveActionGuard → [blocked if D4+]
                                                                     ↘ [real execution blocked]
 
 Feature Flag:
   HERMES_DELEGATE_ENABLED=0 (default): Simulation only, no real delegate_task calls
   HERMES_DELEGATE_ENABLED=1: Blocked with explicit message (Phase 2 implementation)
+
+HXA23 Integration:
+  Before any delegation path, the destructive action guard is evaluated.
+  D4/D5/D6 actions are blocked by the guard.
+  D0-D3 dry-run actions are allowed to proceed to existing dry-run behavior.
 
 WSP Compliance:
   WSP 11  : Interface contract (typed request/result)
@@ -21,10 +27,11 @@ WSP Compliance:
 
 NAVIGATION:
   -> Uses: modules/communication/moltbot_bridge/src/foundup_job_contract.py (FoundUpJob)
+  -> Uses: modules/infrastructure/wre_core/src/destructive_action_guard.py (HXA22)
   -> Imports: vendor/hermes-agent/tools/delegate_tool.py (lazy, when enabled)
   -> Called by: Future FoundUpJobConsumer integration
 
-Slice: HERMES_JOB_EXECUTOR_ADAPTER_PHASE1
+Slice: HXA23_HERMES_GUARD_INTEGRATION_PHASE1
 """
 
 from __future__ import annotations
@@ -44,6 +51,15 @@ if TYPE_CHECKING:
         FoundUpJob,
         PolicyFlags,
     )
+
+# HXA22 destructive action guard imports
+from modules.infrastructure.wre_core.src.destructive_action_guard import (
+    DestructiveActionClass,
+    DestructiveActionGuardResult,
+    DestructiveActionRequest,
+    GuardDecision,
+    evaluate_destructive_action,
+)
 
 logger = logging.getLogger("hermes_job_executor")
 
@@ -272,6 +288,9 @@ class HermesExecutionStatus(str, Enum):
     BLOCKED_INVALID_JOB = "BLOCKED_INVALID_JOB"
     BLOCKED_UNSUPPORTED_ACTION = "BLOCKED_UNSUPPORTED_ACTION"
 
+    # HXA23: Destructive action guard blocked states
+    BLOCKED_BY_DESTRUCTIVE_ACTION_GUARD = "BLOCKED_BY_DESTRUCTIVE_ACTION_GUARD"
+
     # Error states
     ERROR_DELEGATION_FAILED = "ERROR_DELEGATION_FAILED"
     ERROR_UNEXPECTED = "ERROR_UNEXPECTED"
@@ -428,9 +447,13 @@ class HermesDelegationResult:
     # HXA16 Real Delegate Adapter Truth Fields
     real_delegate_adapter_invoked: bool = False
 
+    # HXA23 Destructive Action Guard Fields
+    guard_evaluated: bool = False
+    guard_result: Optional[Dict[str, Any]] = None
+
     # Metadata
     completed_at: datetime = field(default_factory=_utc_now)
-    executor_version: str = "0.1.0"
+    executor_version: str = "0.2.0"
 
     def to_dict(self) -> Dict[str, Any]:
         """Serialize to dict for logging/audit."""
@@ -466,6 +489,9 @@ class HermesDelegationResult:
             "production_readiness_claimed": self.production_readiness_claimed,
             # HXA16 Real Delegate Adapter Truth Fields
             "real_delegate_adapter_invoked": self.real_delegate_adapter_invoked,
+            # HXA23 Destructive Action Guard Fields
+            "guard_evaluated": self.guard_evaluated,
+            "guard_result": self.guard_result,
             "completed_at": self.completed_at.isoformat(),
             "executor_version": self.executor_version,
         }
@@ -864,6 +890,125 @@ class HermesJobExecutor:
 
         return "\n".join(context_parts)
 
+    def _classify_destructive_action(
+        self,
+        job: "FoundUpJob",
+        request: HermesDelegationRequest,
+    ) -> DestructiveActionClass:
+        """
+        Classify job action into destructive action class (D0-D6).
+
+        HXA23 Phase 1 classification rules:
+          - validate_*, queue_*: D0_OBSERVE (read-only observation)
+          - extract_*, build_*: D2_SIMULATE (dry-run simulation)
+          - Unknown actions: D2_SIMULATE (conservative default for dry-run)
+
+        Note: In Phase 1, all actions are classified as D0-D2 because:
+          - D3 requires capability_token_present which is not yet in PolicyFlags
+          - D4/D5/D6 are blocked regardless
+          - All operations are dry-run only
+
+        Future phases will enable D3 classification when capability tokens
+        are implemented in PolicyFlags.
+
+        Args:
+            job: Source FoundUpJob
+            request: Built HermesDelegationRequest
+
+        Returns:
+            DestructiveActionClass for the job
+        """
+        action = job.requested_action or ""
+
+        # D0: Validation and queue operations (read-only)
+        if action.startswith("validate_") or action.startswith("queue_"):
+            return DestructiveActionClass.D0_OBSERVE
+
+        # D2: All other operations are dry-run simulation in Phase 1
+        # This includes build_*, extract_*, and unknown actions
+        # because D3 requires capability tokens not yet in PolicyFlags
+        return DestructiveActionClass.D2_SIMULATE
+
+    def _build_destructive_action_request(
+        self,
+        job: "FoundUpJob",
+        request: HermesDelegationRequest,
+    ) -> DestructiveActionRequest:
+        """
+        Build DestructiveActionRequest from job and delegation request.
+
+        HXA23: This maps job fields to the destructive action guard contract.
+
+        Gate field mappings (HXA23):
+          - human_approval: False (not yet implemented in PolicyFlags)
+          - capability_token_present: False (not yet implemented in PolicyFlags)
+          - security_gate_passed: From PolicyFlags.security_gate_passed
+          - workspace_binding_enforced: True if workspace_binding exists
+          - path_constraints_validated: True if allowed_paths not empty
+
+        Args:
+            job: Source FoundUpJob
+            request: Built HermesDelegationRequest
+
+        Returns:
+            DestructiveActionRequest ready for guard evaluation
+        """
+        import secrets
+
+        action_class = self._classify_destructive_action(job, request)
+
+        # Derive gate fields from job policy_flags and request
+        policy_flags = job.policy_flags if job.policy_flags else None
+
+        # Extract target path safely
+        target_path = ""
+        if request.workspace_binding is not None:
+            target_path = request.workspace_binding.workspace_hint or ""
+
+        # Check workspace binding constraints
+        workspace_binding_enforced = request.workspace_binding is not None
+        path_constraints_validated = False
+        if request.workspace_binding is not None:
+            path_constraints_validated = len(request.workspace_binding.allowed_paths) > 0
+
+        return DestructiveActionRequest(
+            action_id=f"hxa23_{secrets.token_hex(4)}",
+            action_type=job.requested_action or "unknown",
+            target_path=target_path,
+            requested_class=action_class,
+            dry_run_mode=request.dry_run,
+            # Human approval and capability token not yet in PolicyFlags - default False
+            human_approval=False,
+            capability_token_present=False,
+            # Security gate from PolicyFlags
+            security_gate_passed=policy_flags.security_gate_passed if policy_flags else False,
+            workspace_binding_enforced=workspace_binding_enforced,
+            path_constraints_validated=path_constraints_validated,
+            requester_id=job.tenant_id,
+            job_id=job.job_id,
+        )
+
+    def _evaluate_destructive_action_guard(
+        self,
+        job: "FoundUpJob",
+        request: HermesDelegationRequest,
+    ) -> DestructiveActionGuardResult:
+        """
+        Evaluate destructive action guard for the job.
+
+        HXA23: This is the integration point between HermesJobExecutor
+        and the HXA22 DestructiveActionGuard.
+
+        Args:
+            job: Source FoundUpJob
+            request: Built HermesDelegationRequest
+
+        Returns:
+            DestructiveActionGuardResult from guard evaluation
+        """
+        guard_request = self._build_destructive_action_request(job, request)
+        return evaluate_destructive_action(guard_request)
+
     def execute(self, job: "FoundUpJob") -> HermesDelegationResult:
         """
         Execute (or simulate) FoundUpJob via Hermes delegation.
@@ -871,6 +1016,9 @@ class HermesJobExecutor:
         Decision tree:
           1. Validate job structure
           2. Build delegation request
+          2.5. HXA23: Evaluate destructive action guard
+             - If blocked: return BLOCKED_BY_DESTRUCTIVE_ACTION_GUARD
+             - If allowed: proceed with guard result in metadata
           3. If controlled_harness: execute controlled delegate (HXA14)
           4. Check feature flag
           5. If disabled or dry_run: return SIMULATED
@@ -897,6 +1045,57 @@ class HermesJobExecutor:
 
         # Step 2: Build request
         request = self.build_delegation_request(job)
+
+        # Step 2.5: HXA23 - Evaluate destructive action guard
+        guard_result = self._evaluate_destructive_action_guard(job, request)
+        logger.info(
+            "[HERMES-EXEC] Guard evaluation for job %s: allowed=%s, decision=%s, class=%s",
+            job.job_id,
+            guard_result.allowed,
+            guard_result.decision.value,
+            guard_result.destructive_class.value,
+        )
+
+        # If guard blocks, return immediately with blocked result
+        if not guard_result.allowed:
+            logger.warning(
+                "[HERMES-EXEC] Job %s blocked by destructive action guard: %s",
+                job.job_id,
+                guard_result.reason_human,
+            )
+            return HermesDelegationResult(
+                status=HermesExecutionStatus.BLOCKED_BY_DESTRUCTIVE_ACTION_GUARD,
+                status_reason=(
+                    f"Job {job.job_id} blocked by destructive action guard. "
+                    f"Reason: {guard_result.reason_human} "
+                    f"(class={guard_result.destructive_class.value}, "
+                    f"code={guard_result.reason_code.value})"
+                ),
+                request=request,
+                duration_seconds=time.monotonic() - start_time,
+                checkpoint_state="BLOCKED",
+                checkpoint_blocker=guard_result.reason_human,
+                # WSP 97 Truth Fields - all False
+                real_execution_performed=False,
+                verification_complete=False,
+                cabr_ready=False,
+                payout_ready=False,
+                # HXA14 Controlled Harness Truth Fields - all False
+                controlled_delegate_invoked=False,
+                live_external_delegate_called=False,
+                repo_created=False,
+                production_source_modified=False,
+                external_federation_ready=False,
+                external_federation_initiated=False,
+                production_ready=False,
+                production_readiness_claimed=False,
+                # HXA23 Guard Fields
+                guard_evaluated=True,
+                guard_result=guard_result.to_dict(),
+            )
+
+        # Guard allowed - continue with guard result in metadata
+        # (D0-D3 dry-run only in Phase 1)
 
         # Step 3: HXA14/HXA16 Controlled Harness paths
         if self.controlled_harness:
@@ -936,6 +1135,9 @@ class HermesJobExecutor:
                     production_readiness_claimed=False,
                     # HXA16 Adapter Truth Fields
                     real_delegate_adapter_invoked=True,
+                    # HXA23 Guard Fields
+                    guard_evaluated=True,
+                    guard_result=guard_result.to_dict(),
                 )
                 result.evidence_path = self._write_evidence(job, request, result)
                 return result
@@ -976,6 +1178,9 @@ class HermesJobExecutor:
                 production_readiness_claimed=False,
                 # HXA16 - not using adapter
                 real_delegate_adapter_invoked=False,
+                # HXA23 Guard Fields
+                guard_evaluated=True,
+                guard_result=guard_result.to_dict(),
             )
             result.evidence_path = self._write_evidence(job, request, result)
             return result
@@ -998,11 +1203,14 @@ class HermesJobExecutor:
                 verification_complete=False,
                 cabr_ready=False,
                 payout_ready=False,
+                # HXA23 Guard Fields
+                guard_evaluated=True,
+                guard_result=guard_result.to_dict(),
             )
             result.evidence_path = self._write_evidence(job, request, result)
             return result
 
-        # Step 4: Feature enabled - check dry_run
+        # Step 5: Feature enabled - check dry_run
         if self.dry_run:
             logger.info(
                 "[HERMES-EXEC] dry_run=True, simulating job %s",
@@ -1020,11 +1228,14 @@ class HermesJobExecutor:
                 verification_complete=False,
                 cabr_ready=False,
                 payout_ready=False,
+                # HXA23 Guard Fields
+                guard_evaluated=True,
+                guard_result=guard_result.to_dict(),
             )
             result.evidence_path = self._write_evidence(job, request, result)
             return result
 
-        # Step 5: Check import availability
+        # Step 6: Check import availability
         if not self._lazy_import_delegate_task():
             result = HermesDelegationResult(
                 status=HermesExecutionStatus.BLOCKED_IMPORT_UNAVAILABLE,
@@ -1035,11 +1246,14 @@ class HermesJobExecutor:
                 request=request,
                 duration_seconds=time.monotonic() - start_time,
                 real_execution_performed=False,
+                # HXA23 Guard Fields
+                guard_evaluated=True,
+                guard_result=guard_result.to_dict(),
             )
             result.evidence_path = self._write_evidence(job, request, result)
             return result
 
-        # Step 6: Real execution blocked in Phase 1
+        # Step 7: Real execution blocked in Phase 1
         logger.warning(
             "[HERMES-EXEC] Real delegation NOT IMPLEMENTED, blocking job %s",
             job.job_id,
@@ -1056,6 +1270,9 @@ class HermesJobExecutor:
             verification_complete=False,
             cabr_ready=False,
             payout_ready=False,
+            # HXA23 Guard Fields
+            guard_evaluated=True,
+            guard_result=guard_result.to_dict(),
         )
         result.evidence_path = self._write_evidence(job, request, result)
         return result
