@@ -1,5 +1,47 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-12: HXA29 Token Scope Validation tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa29_token_scope_validation.py -v`
+- Status: PASS
+- Result: `54 passed`
+- Notes:
+  - NEW file: `test_hxa29_token_scope_validation.py` (700+ lines)
+  - Tests token scope validation against action classes:
+    - `TestScopeConstantsExist` (6 tests) - Constants defined correctly
+    - `TestD3SandboxScopeAuthorizesD3Only` (3 tests) - D3 scope authorization
+    - `TestD3ScopeDoesNotAuthorizeD4` (4 tests) - D3 blocked for D4
+    - `TestD3ScopeDoesNotAuthorizeD5` (4 tests) - D3 blocked for D5
+    - `TestD3ScopeDoesNotAuthorizeD6` (4 tests) - D3 blocked for D6
+    - `TestD4D5D6ScopesDefinedButBlocked` (3 tests) - Scopes validate, guard blocks
+    - `TestMissingScopeFailsClosed` (2 tests) - Missing scope blocked
+    - `TestUnknownScopeFailsClosed` (2 tests) - Unknown scope blocked
+    - `TestMixedScopesObeyActionClass` (2 tests) - Multiple scopes respect class
+    - `TestBlockedPathOverridesAllowedScope` (1 test) - Path blocks override scope
+    - `TestPathTraversalBlocked` (2 tests) - Traversal attempts blocked
+    - `TestDryRunOnlyBlocksLiveExecution` (2 tests) - dry_run_only enforced
+    - `TestWSP97TruthFieldsAlwaysFalse` (4 tests) - Truth field invariants
+    - `TestValidateScopeForActionClass` (14 tests) - Parametrized validation
+    - `TestHXA29VerdictDocumentation` (1 test) - Verdict constant
+  - Key test: `test_hxa29_verdict_token_scope_validation_defined`
+  - Verdict: `TOKEN_SCOPE_VALIDATION_DEFINED`
+- Scope validation behaviors tested:
+  - D3 scopes (d3:sandbox, d3:evidence, d3:dry-run) authorize D3_WRITE_SANDBOX only
+  - D3 scopes do NOT authorize D4_WRITE_REPO
+  - D3 scopes do NOT authorize D5_EXTERNAL_SIDE_EFFECT
+  - D3 scopes do NOT authorize D6_IRREVERSIBLE
+  - D4/D5/D6 scopes defined but guard still blocks in Phase 1
+  - Unknown scopes fail closed (return False)
+  - Missing scopes fail closed (validation fails)
+- WSP 97 Coverage (HXA29):
+  - live_external_delegate_called=False (all scenarios)
+  - verification_complete=False (all scenarios)
+  - cabr_ready=False (all scenarios)
+  - payout_ready=False (all scenarios)
+- Slice: HXA29_TOKEN_SCOPE_VALIDATION_PHASE1
+
+---
+
 ## 2026-05-12: HXA28 D3 Native Classification tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa28_d3_native_classification.py -v`

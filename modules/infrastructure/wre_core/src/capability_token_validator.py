@@ -701,3 +701,81 @@ def reset_default_validator() -> None:
     """
     global _default_validator
     _default_validator = None
+
+
+# ===========================================================================
+# SECTION 8: Action Class Scope Mappings (HXA29)
+# ===========================================================================
+
+
+# Map action classes to their authorized scopes
+# D3 scopes authorize ONLY D3 actions (sandbox/evidence/dry-run)
+# D4 scopes authorize D4 actions (repo/source/git) but blocked by guard
+# D5 scopes authorize D5 actions (external/api) but blocked by guard
+# D6 scopes authorize D6 actions (delete/irreversible) but blocked by guard
+ACTION_CLASS_SCOPES: Dict[str, List[str]] = {
+    "D0_OBSERVE": ["d0:observe", "d0:read", "d0:status"],
+    "D1_READ": ["d1:read", "d1:fetch", "d1:load"],
+    "D2_SIMULATE": ["d2:simulate", "d2:plan", "d2:preview"],
+    "D3_WRITE_SANDBOX": ["d3:sandbox", "d3:evidence", "d3:dry-run"],
+    "D4_WRITE_REPO": ["d4:repo", "d4:source", "d4:git"],
+    "D5_EXTERNAL_SIDE_EFFECT": ["d5:external", "d5:api", "d5:webhook"],
+    "D6_IRREVERSIBLE": ["d6:delete", "d6:irreversible", "d6:payout"],
+}
+
+
+# Reverse mapping: scope -> action class
+SCOPE_TO_ACTION_CLASS: Dict[str, str] = {}
+for action_class, scopes in ACTION_CLASS_SCOPES.items():
+    for scope in scopes:
+        SCOPE_TO_ACTION_CLASS[scope] = action_class
+
+
+def validate_scope_for_action_class(
+    scope: str,
+    action_class: Any,  # DestructiveActionClass from destructive_action_guard
+) -> bool:
+    """
+    Validate that a scope authorizes a specific action class.
+
+    HXA29 Scope Validation Rules:
+      - D3 scopes (d3:sandbox, d3:evidence, d3:dry-run) authorize ONLY D3 actions
+      - D3 scopes do NOT authorize D4/D5/D6 actions
+      - D4 scopes authorize D4 actions (but guard still blocks in Phase 1)
+      - D5 scopes authorize D5 actions (but guard still blocks in Phase 1)
+      - D6 scopes authorize D6 actions (but guard still blocks in Phase 1)
+      - Unknown scopes fail closed (return False)
+
+    Key Principle: Scope authorization is separate from guard policy.
+    Even if scope authorizes action, guard may still block in Phase 1.
+
+    Args:
+        scope: The scope string to validate (e.g., "d3:sandbox")
+        action_class: The DestructiveActionClass being requested
+
+    Returns:
+        True if scope authorizes the action class, False otherwise
+
+    Example:
+        >>> validate_scope_for_action_class("d3:sandbox", DestructiveActionClass.D3_WRITE_SANDBOX)
+        True
+        >>> validate_scope_for_action_class("d3:sandbox", DestructiveActionClass.D4_WRITE_REPO)
+        False
+    """
+    # Fail-closed: unknown scope does not authorize any action
+    if scope not in SCOPE_TO_ACTION_CLASS:
+        return False
+
+    # Get the action class that this scope authorizes
+    authorized_class = SCOPE_TO_ACTION_CLASS[scope]
+
+    # Get the requested action class name
+    # Handle both enum and string
+    if hasattr(action_class, "value"):
+        requested_class = action_class.value
+    else:
+        requested_class = str(action_class)
+
+    # Scope only authorizes its own action class
+    # D3 scopes do NOT authorize D4/D5/D6
+    return authorized_class == requested_class
