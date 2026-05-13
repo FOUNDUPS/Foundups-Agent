@@ -1,3 +1,31 @@
+## 2026-05-13: CABR Consensus Reporting Tests (WSP 97)
+
+**File**: `test_cabr_consensus_reporting.py` (NEW - 48 tests)
+
+**Test Classes**:
+- `TestEmptyStoreReport`: Empty store produces valid report with zero counts
+- `TestMixedDecisionReport`: Mixed decisions counted correctly
+- `TestDecisionFilterReport`: Filter by decision type works
+- `TestReasonCodeCounts`: Reason codes counted and sorted
+- `TestTruthBoundarySummaryAllFalse`: All False = no anomaly
+- `TestTruthBoundaryAnomalyFlagged`: True value = anomaly flagged
+- `TestDeterministicJsonExport`: JSON is deterministic and valid
+- `TestReportDoesNotMutateStore`: Store unchanged after report
+- `TestNoPayoutReadinessInferred`: High acceptance != payout ready
+- `TestNoDAOActivationInferred`: High quorum != DAO activation
+- `TestNoDefaultDbPath`: Functions require explicit store
+- `TestTmpPathOnly`: tmp_path usage verification
+- `TestQuorumMetricsSummary`: Quorum metrics calculated correctly
+- `TestSummarizeRecordsPureFunction`: Pure function behavior
+- `TestDataclassSerialization`: Dataclasses serialize correctly
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_cabr_consensus_reporting.py -q`
+
+**Result**: 48 passed
+
+---
+
 ## 2026-05-13: CABR Consensus Finalizer Persistence Tests (WSP 97)
 
 **File**: `test_cabr_consensus_finalizer_persistence.py` (NEW - 26 tests)
