@@ -1,3 +1,30 @@
+## 2026-05-13: CABR Consensus Store Tests (WSP 97)
+
+**File**: `test_cabr_consensus_store.py` (NEW - 35 tests)
+
+**Test Classes**:
+- `TestSchemaInitializes`: Schema creation, idempotency, version tracking
+- `TestSaveAndGetRecord`: Basic CRUD, field preservation
+- `TestDuplicateRecordIdHandling`: Idempotent duplicate rejection
+- `TestListRecordsDeterministic`: Pagination, limit, offset
+- `TestDecisionFilter`: Filter by decision value
+- `TestTruthFieldsRemainFalse`: WSP 97 truth field preservation after persistence
+- `TestNoPayoutActivation`: No payout/DAO fields become true
+- `TestInvalidDbPathFailsClosed`: Invalid path handling
+- `TestMissingCorruptedSchemaHandled`: Schema not initialized errors
+- `TestRecordExists`: Existence check without retrieval
+- `TestRoundTripPreservesRecordHash`: Hash integrity on save/get
+- `TestValidationErrors`: Missing required field handling
+- `TestContextManager`: Context manager usage
+- `TestNoDbFileCommittedToRepo`: tmp_path usage verification
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_cabr_consensus_store.py -q`
+
+**Result**: 35 passed
+
+---
+
 ## 2026-05-13: CABR Consensus Finalization Tests (WSP 29/97)
 
 **File**: `test_cabr_consensus_finalizer.py` (NEW - 48 tests)

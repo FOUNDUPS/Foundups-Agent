@@ -1,5 +1,75 @@
 # ModLog - moltbot_bridge
 
+## 2026-05-13: CABR Consensus Store Phase 2 - SQLite Audit Trail (WSP 97)
+
+**Author**: 0102 (Worker W1)
+**WSP**: 97 (System Execution Prompting), 91 (Observability)
+**Slice**: `CABR_CONSENSUS_FINALIZATION_PHASE2_SQLITE_AUDIT_TRAIL`
+
+### Summary
+
+Implemented local SQLite persistence for CABRConsensusRecord audit trails. This is Phase 2 of the CABR consensus finalization work, enabling historical analysis and audit capabilities while maintaining all Phase 1 truth boundaries.
+
+### WSP 97 Critical Constraint
+
+Persistence is evidence storage only. It does NOT mean:
+- `verification_complete=True`
+- `cabr_ready=True`
+- `payout_ready=True`
+- Payout approval
+- DAO activation
+- Token issuance
+- External settlement
+- Automatic state progression
+
+### Files Created
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `src/cabr_consensus_store.py` | ~550 | SQLite persistence layer |
+| `tests/test_cabr_consensus_store.py` | ~500 | Test coverage (35 tests) |
+| `docs/audits/consensus/CABR_CONSENSUS_FINALIZATION_PHASE2_SQLITE_AUDIT_TRAIL.md` | ~300 | Audit documentation |
+
+### API Surface
+
+```python
+class CABRConsensusStore:
+    def __init__(self, db_path: Union[str, Path]): ...
+    def initialize_schema(self) -> CABRConsensusStoreResult: ...
+    def save_record(self, record: Dict) -> CABRConsensusStoreResult: ...
+    def get_record(self, record_id: str) -> CABRConsensusStoreResult: ...
+    def record_exists(self, record_id: str) -> bool: ...
+    def list_records(limit, decision_filter, offset) -> CABRConsensusStoreResult: ...
+
+class CABRConsensusStoreResultStatus(str, Enum):
+    SUCCESS, ALREADY_EXISTS, NOT_FOUND, SCHEMA_ERROR, WRITE_ERROR, READ_ERROR, VALIDATION_ERROR
+
+class CABRConsensusStoreError(Exception): ...
+```
+
+### Storage Rules
+
+1. Python stdlib sqlite3 only (no external dependencies)
+2. Immutable append-only rows keyed by deterministic record_id/hash
+3. Duplicate record_id returns ALREADY_EXISTS (idempotent)
+4. Truth fields stored exactly as input (all False in Phase 1)
+5. No automatic state progression
+6. Caller-provided DB path (tests use tmp_path)
+7. Fail closed on schema/write errors
+
+### Test Results
+
+- `test_cabr_consensus_store.py`: 35 passed
+- `test_cabr_consensus_finalizer.py`: 48 passed (no regression)
+- `test_quorum_verification_engine.py`: 41 passed (no regression)
+- `test_cabr_scoring_engine.py`: 42 passed (no regression)
+
+### Recommended Next Slice
+
+`CABR_CONSENSUS_FINALIZATION_PHASE3` - Integration with consensus finalizer to automatically persist records after finalization.
+
+---
+
 ## 2026-05-13: CABR Consensus Finalization Phase 1 (WSP 29/97)
 
 **Author**: 0102 (Worker W1)
