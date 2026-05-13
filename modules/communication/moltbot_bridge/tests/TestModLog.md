@@ -1,3 +1,31 @@
+## 2026-05-13: CABR Store Export Tests (WSP 97)
+
+**File**: `test_cabr_store_export.py` (NEW - 65 tests)
+
+**Test Classes**:
+- `TestNoStoreProvidedFailsClosed`: Store required, raises ValueError
+- `TestProvidedEmptyStoreExportsDeterministic`: Valid JSON/Markdown, sorted keys
+- `TestStoreWithPersistedRecordsExportsDeterministic`: Correct counts, correlations
+- `TestIncludeTogglesWork`: JSON only, Markdown only, both, neither
+- `TestInvalidTimeRangeFailsClosed`: ValueError for start > end
+- `TestMissingReceiptsProduceGaps`: Gap reporting for missing data
+- `TestRequiredWsp97LabelsPresent`: All 6 labels in result/JSON/Markdown
+- `TestNoFilesystemWrites`: No files created, returns strings
+- `TestNoDefaultDbPath`: Store parameter required, no db_path
+- `TestNoPayoutReadinessInferred`: payout_ready=False, no payout fields
+- `TestNoDAOActivationInferred`: cabr_ready=False, no DAO fields
+- `TestNoCABRReadinessInferred`: verification_complete=False
+- `TestTruthAnomalyPropagation`: Anomalies flagged from pavs/score/quorum
+- `TestRequestDataclass`: Request validation
+- `TestResultDataclass`: Result serialization, WSP 97 fields
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_cabr_store_export.py -q`
+
+**Result**: 65 passed
+
+---
+
 ## 2026-05-13: CABR Lifecycle Report Export Tests (WSP 97)
 
 **File**: `test_cabr_lifecycle_report_export.py` (NEW - 67 tests)

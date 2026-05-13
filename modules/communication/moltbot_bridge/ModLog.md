@@ -1,5 +1,96 @@
 # ModLog - moltbot_bridge
 
+## 2026-05-13: CABR Consensus Finalization Phase 9 - Store-Export Integration (WSP 97)
+
+**Author**: 0102 (Worker W1)
+**WSP**: 97 (System Execution Prompting), 91 (Observability)
+**Slice**: `CABR_CONSENSUS_FINALIZATION_PHASE9_STORE_EXPORT_INTEGRATION`
+
+### Summary
+
+Added caller-driven store-to-export integration helper that composes:
+- CABRConsensusStore (Phase 2) - SQLite persistence
+- Lifecycle Query (Phase 7) - store query with correlation
+- Lifecycle Report Export (Phase 8) - unified JSON/Markdown export
+
+### WSP 97 Critical Constraint
+
+Store-export integration is observability only. It must NOT mean:
+- Automatic state progression
+- verification_complete=True
+- cabr_ready=True
+- payout_ready=True
+- Payout approval
+- DAO activation
+- Token issuance
+- Final consensus readiness
+- External settlement
+
+### Files Created
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `src/cabr_store_export.py` | ~400 | Store-export orchestration helper |
+| `tests/test_cabr_store_export.py` | ~650 | Test coverage (65 tests) |
+| `docs/audits/consensus/CABR_CONSENSUS_FINALIZATION_PHASE9_STORE_EXPORT_INTEGRATION.md` | ~180 | Audit documentation |
+
+### New API Surface
+
+```python
+@dataclass
+class CABRStoreExportRequest:
+    store: Any  # MUST be provided by caller
+    receipts: Optional[List[Dict]]
+    pavs_results: Optional[List[Dict]]
+    score_results: Optional[List[Dict]]
+    quorum_results: Optional[List[Dict]]
+    start: Optional[datetime]
+    end: Optional[datetime]
+    limit: Optional[int]
+    include_markdown: bool = True
+    include_json: bool = True
+
+@dataclass
+class CABRStoreExportResult:
+    success: bool
+    error_message: Optional[str]
+    persisted_record_count: int
+    total_correlations: int
+    total_gaps: int
+    has_anomalies: bool
+    anomaly_count: int
+    json_export: Optional[str]
+    markdown_export: Optional[str]
+    wsp97_labels: List[str]
+    truth_boundary: Dict[str, bool]
+
+def build_store_export(store, receipts=None, ...) -> CABRStoreExportResult
+def build_store_export_json(store, ...) -> str
+def build_store_export_markdown(store, ...) -> str
+```
+
+### Behavior
+
+- Caller MUST provide store object (no default DB path)
+- No filesystem writes (returns strings only)
+- Composes existing lifecycle query and report export APIs
+- Returns JSON/Markdown strings only
+- Preserves all required WSP 97 labels
+- Invalid query params fail closed (raises ValueError)
+- Missing supplemental data reported as gaps, not inferred
+- Truth-boundary anomalies flagged, not corrected
+- No payout/DAO/final consensus readiness inferred
+
+### Test Results
+
+- `test_cabr_store_export.py`: 65 passed
+- Regression tests:
+  - `test_cabr_lifecycle_report_export.py`: 67 passed
+  - `test_cabr_lifecycle_query.py`: 45 passed
+  - `test_cabr_consensus_store.py`: 35 passed
+
+---
+
 ## 2026-05-13: CABR Consensus Finalization Phase 8 - Lifecycle Report Export Integration (WSP 97)
 
 **Author**: 0102 (Worker W1)
