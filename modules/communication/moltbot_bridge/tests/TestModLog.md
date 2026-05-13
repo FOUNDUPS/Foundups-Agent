@@ -1,3 +1,33 @@
+## 2026-05-13: CABR Lifecycle Query Tests (WSP 97)
+
+**File**: `test_cabr_lifecycle_query.py` (NEW - 45 tests)
+
+**Test Classes**:
+- `TestEmptyStoreQuery`: Empty store returns empty result, gap summary
+- `TestStoreWithPersistedRecordsQuery`: Query returns all, creates correlations
+- `TestTimeRangeQuery`: Start/end/both filtering, filter preserved in result
+- `TestInvalidTimeRangeFailsClosed`: ValueError for start > end
+- `TestLimitAppliedDeterministically`: Exact count, after time filter
+- `TestPersistedRecordsCorrelateWithSuppliedReceipts`: Full pipeline correlation
+- `TestMissingSuppliedReceiptDataProducesGaps`: Gap reporting for missing data
+- `TestLifecycleGapSummaryFromStore`: Gap summary function, to_dict
+- `TestTruthBoundaryAnomaliesPropagated`: True values flagged
+- `TestJsonExportDeterministic`: Sorted keys, ISO dates, WSP 97 note
+- `TestNoStoreMutation`: No records added/modified by query
+- `TestNoPayoutReadinessInferred`: No payout fields in result
+- `TestNoDAOActivationInferred`: No DAO fields in result
+- `TestNoDefaultDbPath`: Store parameter required
+- `TestUsesTmpPathOnly`: All tests use TemporaryDirectory
+- `TestFilterDataclass`: Filter validation and serialization
+- `TestResultDataclass`: Result serialization, WSP 97 note
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_cabr_lifecycle_query.py -q`
+
+**Result**: 45 passed
+
+---
+
 ## 2026-05-13: CABR Lifecycle Correlation Tests (WSP 97)
 
 **File**: `test_cabr_lifecycle_correlation.py` (NEW - 43 tests)

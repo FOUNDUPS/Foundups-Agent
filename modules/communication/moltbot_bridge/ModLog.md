@@ -1,5 +1,81 @@
 # ModLog - moltbot_bridge
 
+## 2026-05-13: CABR Consensus Finalization Phase 7 - Lifecycle Query Integration (WSP 97)
+
+**Author**: 0102 (Worker W1)
+**WSP**: 97 (System Execution Prompting), 91 (Observability)
+**Slice**: `CABR_CONSENSUS_FINALIZATION_PHASE7_LIFECYCLE_QUERY_INTEGRATION`
+
+### Summary
+
+Integrated lifecycle correlation (Phase 6) with CABRConsensusStore queries for
+end-to-end read-only tracing of CABR consensus pipeline stages.
+
+### WSP 97 Critical Constraint
+
+Lifecycle query integration is observability only. It does NOT mean:
+- Automatic state progression
+- `verification_complete=True`
+- `cabr_ready=True`
+- `payout_ready=True`
+- Payout approval
+- DAO activation
+- Token issuance
+- External settlement
+
+### Files Created
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `src/cabr_lifecycle_query.py` | ~350 | Lifecycle query integration module |
+| `tests/test_cabr_lifecycle_query.py` | ~750 | Test coverage (45 tests) |
+| `docs/audits/consensus/CABR_CONSENSUS_FINALIZATION_PHASE7_LIFECYCLE_QUERY_INTEGRATION.md` | ~150 | Audit documentation |
+
+### New API Surface
+
+```python
+@dataclass
+class CABRLifecycleQueryFilter:
+    start_time: Optional[datetime]
+    end_time: Optional[datetime]
+    limit: Optional[int]
+    decision_filter: Optional[str]
+    def validate() -> bool
+    def to_dict() -> Dict
+
+@dataclass
+class CABRLifecycleQueryResult:
+    query_filter: Optional[CABRLifecycleQueryFilter]
+    persisted_record_count: int
+    correlation_result: Optional[CABRLifecycleCorrelationResult]
+    gap_summary: Optional[CABRLifecycleGapSummary]
+    generated_at: datetime
+    wsp97_compliance_note: str
+
+def query_lifecycle_from_store(store, receipts, pavs_results, score_results, 
+                                quorum_results, start, end, limit) -> CABRLifecycleQueryResult
+def query_lifecycle_gaps_from_store(...) -> CABRLifecycleGapSummary
+def export_lifecycle_query_json(result, indent) -> str
+```
+
+### Behavior
+
+- Read-only queries over CABRConsensusStore
+- Apply optional time range and limit deterministically
+- Correlate persisted records with supplied receipt/pAVS/score/quorum data
+- Report missing supplemental data as gaps, not inferred
+- Invalid time range fails closed (raises ValueError)
+- Truth boundary anomalies propagated from Phase 6
+- JSON export is deterministic with sorted keys
+- No store mutation, no filesystem writes, no network calls
+
+### Test Results
+
+- `test_cabr_lifecycle_query.py`: 45 passed
+- Regression tests: 169 total (43+35+46+45), 0 failures
+
+---
+
 ## 2026-05-13: CABR Consensus Finalization Phase 6 - Receipt Lifecycle Correlation (WSP 97)
 
 **Author**: 0102 (Worker W1)
