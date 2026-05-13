@@ -1,5 +1,101 @@
 # ModLog - moltbot_bridge
 
+## 2026-05-13: CABR Consensus Finalization Phase 8 - Lifecycle Report Export Integration (WSP 97)
+
+**Author**: 0102 (Worker W1)
+**WSP**: 97 (System Execution Prompting), 91 (Observability)
+**Slice**: `CABR_CONSENSUS_FINALIZATION_PHASE8_LIFECYCLE_REPORT_EXPORT_INTEGRATION`
+
+### Summary
+
+Added unified report export that combines CABR lifecycle query output with
+consensus reporting summaries into formatted JSON and Markdown outputs.
+
+### WSP 97 Critical Constraint
+
+Export is observability only. Every exported report MUST explicitly state:
+- REVIEW_ONLY
+- OBSERVABILITY_ONLY
+- verification_complete=False
+- cabr_ready=False
+- payout_ready=False
+- NOT_CABR_READY
+- NOT_PAYOUT_READY
+- NO_DAO_ACTIVATION
+- NO_EXTERNAL_ATTESTATION_REQUIRED
+
+It must NOT mean:
+- Automatic state progression
+- Payout approval
+- DAO activation
+- Token issuance
+- Final consensus readiness
+- External settlement
+
+### Files Created
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `src/cabr_lifecycle_report_export.py` | ~450 | Unified export module |
+| `tests/test_cabr_lifecycle_report_export.py` | ~650 | Test coverage (67 tests) |
+| `docs/audits/consensus/CABR_CONSENSUS_FINALIZATION_PHASE8_LIFECYCLE_REPORT_EXPORT_INTEGRATION.md` | ~170 | Audit documentation |
+
+### New API Surface
+
+```python
+class CABRExportFormat(Enum):
+    JSON = "json"
+    MARKDOWN = "markdown"
+
+@dataclass
+class CABRExportMetadata:
+    export_format: CABRExportFormat
+    generated_at: datetime
+    export_version: str
+    wsp97_labels_present: bool
+    truth_fields_false: bool
+
+@dataclass
+class CABRLifecycleReportExport:
+    metadata: CABRExportMetadata
+    lifecycle_query_summary: Optional[Dict]
+    gap_summary: Optional[Dict]
+    consensus_report_summary: Optional[Dict]
+    truth_boundary: Dict[str, bool]
+    wsp97_labels: List[str]
+    has_anomalies: bool
+    anomaly_count: int
+    anomaly_details: List[str]
+
+def build_lifecycle_report_export(lifecycle_query_result, consensus_report) -> CABRLifecycleReportExport
+def export_lifecycle_report_json(export, indent) -> str
+def export_lifecycle_report_markdown(export) -> str
+```
+
+### Behavior
+
+- Pure functions (no side effects, no filesystem writes)
+- Deterministic JSON output (sorted keys for reproducibility)
+- Deterministic Markdown output (consistent structure)
+- Includes lifecycle query summary
+- Includes gap summary
+- Includes consensus report summary (optional)
+- Includes truth-boundary section with explicit false fields
+- Includes explicit review-only labels
+- Flags anomalies but does not correct them
+- No payout readiness inferred
+- No DAO activation inferred
+- No CABR readiness inferred
+- No default DB path
+- Caller handles file output if desired
+
+### Test Results
+
+- `test_cabr_lifecycle_report_export.py`: 67 passed
+- Regression tests: 136 total (45+48+43), 0 failures
+
+---
+
 ## 2026-05-13: CABR Consensus Finalization Phase 7 - Lifecycle Query Integration (WSP 97)
 
 **Author**: 0102 (Worker W1)

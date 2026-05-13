@@ -1,3 +1,31 @@
+## 2026-05-13: CABR Lifecycle Report Export Tests (WSP 97)
+
+**File**: `test_cabr_lifecycle_report_export.py` (NEW - 67 tests)
+
+**Test Classes**:
+- `TestJsonExportDeterministic`: Valid JSON, sorted keys, reproducibility
+- `TestMarkdownExportDeterministic`: Headers, sections, tables
+- `TestRequiredWsp97LabelsPresent`: All 6 labels in export, JSON, Markdown
+- `TestFalseTruthFieldsPresent`: All 3 truth fields False
+- `TestLifecycleQuerySummaryIncluded`: Summary population, items by stage
+- `TestGapSummaryIncluded`: Gap counts, gaps by stage
+- `TestConsensusReportSummaryOptional`: Optional inclusion, decision counts
+- `TestAnomalyFlagsIncluded`: Anomaly detection, details
+- `TestNoPayoutReadinessInferred`: payout_ready=False, no payout fields
+- `TestNoDAOActivationInferred`: cabr_ready=False, no DAO fields
+- `TestNoCABRReadinessInferred`: verification_complete=False
+- `TestPureFunctionNoFilesystemWrites`: Pure functions, no file I/O
+- `TestNoDefaultDbPath`: No db_path parameter
+- `TestDataclassSerialization`: Dataclass to_dict()
+- `TestCombinedExport`: Both summaries, valid output
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_cabr_lifecycle_report_export.py -q`
+
+**Result**: 67 passed
+
+---
+
 ## 2026-05-13: CABR Lifecycle Query Tests (WSP 97)
 
 **File**: `test_cabr_lifecycle_query.py` (NEW - 45 tests)
