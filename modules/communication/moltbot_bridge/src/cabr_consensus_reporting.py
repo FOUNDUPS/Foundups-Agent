@@ -682,3 +682,413 @@ def get_records_by_decision(
     """
     report = generate_consensus_report(store, limit=limit, decision_filter=decision)
     return report.records
+
+
+# ---------------------------------------------------------------------------
+# Phase 5: Time-Range Query Filtering
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class CABRTimeRangeFilter:
+    """
+    Filter for time-bounded consensus record queries.
+
+    WSP 97: Time filtering is observability only. It does NOT mean:
+      - verification_complete=True
+      - cabr_ready=True
+      - payout_ready=True
+      - Payout approval
+      - DAO activation
+
+    Usage:
+        filter = CABRTimeRangeFilter(
+            start_time=datetime(2026, 1, 1, tzinfo=timezone.utc),
+            end_time=datetime(2026, 12, 31, tzinfo=timezone.utc),
+            limit=100
+        )
+        records = query_consensus_records_by_time(store, filter)
+    """
+
+    start_time: Optional[datetime] = None
+    """Start of time range (inclusive). None for no lower bound."""
+
+    end_time: Optional[datetime] = None
+    """End of time range (inclusive). None for no upper bound."""
+
+    limit: Optional[int] = None
+    """Maximum records to return. None for no limit."""
+
+    def validate(self) -> bool:
+        """
+        Return True if filter is valid (start <= end if both set).
+
+        Returns:
+            True if filter constraints are valid.
+        """
+        if self.start_time and self.end_time:
+            return self.start_time <= self.end_time
+        return True
+
+
+def query_consensus_records_by_time(
+    store: CABRConsensusStoreType,
+    time_filter: Optional[CABRTimeRangeFilter] = None
+) -> List[Dict[str, Any]]:
+    """
+    Query consensus records with optional time-range filtering.
+
+    This function reads records from the store and applies time-based
+    filtering. It does NOT mutate any records.
+
+    WSP 97 Critical:
+      This query is for OBSERVABILITY ONLY. It does NOT mean:
+        - verification_complete=True
+        - cabr_ready=True
+        - payout_ready=True
+        - Payout approval
+        - DAO activation
+        - Token issuance
+        - Automatic state progression
+
+    Args:
+        store: CABRConsensusStore instance (caller must provide, no default).
+        time_filter: Optional time range and limit constraints.
+
+    Returns:
+        List of matching records, sorted by finalized_at descending.
+
+    Raises:
+        ValueError: If time_filter is invalid (start > end).
+    """
+    # Validate time filter
+    if time_filter is not None and not time_filter.validate():
+        raise ValueError(
+            f"Invalid time filter: start_time ({time_filter.start_time}) "
+            f"must be <= end_time ({time_filter.end_time})"
+        )
+
+    # Get all records from store (we'll filter in-memory)
+    # Use a high limit to get all records for filtering
+    list_result = store.list_records(limit=100000, offset=0)
+
+    if list_result.status.value not in ("success",):
+        logger.warning(
+            "[CABR-REPORT] Store read returned status=%s: %s",
+            list_result.status.value,
+            list_result.message,
+        )
+        return []
+
+    records = list_result.records or []
+
+    # Apply time filtering
+    if time_filter is not None:
+        filtered_records = []
+        for record in records:
+            finalized_at_str = record.get("finalized_at")
+            if not finalized_at_str:
+                continue
+
+            # Parse finalized_at timestamp
+            try:
+                # Handle both ISO formats with and without timezone
+                if finalized_at_str.endswith("Z"):
+                    finalized_at_str = finalized_at_str[:-1] + "+00:00"
+                finalized_at = datetime.fromisoformat(finalized_at_str)
+            except (ValueError, TypeError):
+                logger.warning(
+                    "[CABR-REPORT] Could not parse finalized_at: %s",
+                    finalized_at_str,
+                )
+                continue
+
+            # Apply start_time filter
+            if time_filter.start_time is not None:
+                if finalized_at < time_filter.start_time:
+                    continue
+
+            # Apply end_time filter
+            if time_filter.end_time is not None:
+                if finalized_at > time_filter.end_time:
+                    continue
+
+            filtered_records.append(record)
+
+        records = filtered_records
+
+    # Sort by finalized_at descending (most recent first)
+    def _sort_key(r: Dict[str, Any]) -> str:
+        return r.get("finalized_at", "") or ""
+
+    records.sort(key=_sort_key, reverse=True)
+
+    # Apply limit
+    if time_filter is not None and time_filter.limit is not None:
+        records = records[: time_filter.limit]
+
+    return records
+
+
+# ---------------------------------------------------------------------------
+# Phase 5: Receipt Correlation
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class CABRReceiptCorrelation:
+    """
+    Correlation between a consensus record and its source receipt.
+
+    WSP 97: Receipt correlation is observability only. It does NOT mean:
+      - verification_complete=True
+      - cabr_ready=True
+      - payout_ready=True
+      - Payout approval
+      - DAO activation
+    """
+
+    record_id: str
+    """The consensus record ID."""
+
+    receipt_id: Optional[str]
+    """The source receipt ID. None if no matching receipt found."""
+
+    matched: bool
+    """True if receipt_id was found in the receipts dictionary."""
+
+    decision: str
+    """The consensus decision value."""
+
+    finalized_at: datetime
+    """When the consensus record was finalized."""
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialize to dict."""
+        return {
+            "record_id": self.record_id,
+            "receipt_id": self.receipt_id,
+            "matched": self.matched,
+            "decision": self.decision,
+            "finalized_at": _utc_iso(self.finalized_at),
+        }
+
+
+def correlate_consensus_records_to_receipts(
+    records: List[Dict[str, Any]],
+    receipts: Dict[str, Any]
+) -> List[CABRReceiptCorrelation]:
+    """
+    Correlate consensus records to their source receipts.
+
+    This is a pure function that takes a list of record dicts and a receipt
+    dictionary, and produces correlation results. It does NOT mutate inputs.
+
+    WSP 97 Critical:
+      Receipt correlation is for OBSERVABILITY ONLY. It does NOT mean:
+        - verification_complete=True
+        - cabr_ready=True
+        - payout_ready=True
+        - Payout approval
+        - DAO activation
+
+    Args:
+        records: Consensus records to correlate.
+        receipts: Dictionary mapping receipt_id to receipt data.
+
+    Returns:
+        List of correlations, one per record, in same order as input.
+    """
+    correlations = []
+
+    for record in records:
+        record_id = record.get("record_id", "unknown")
+        receipt_id = record.get("receipt_id")
+        decision = record.get("decision", "unknown")
+        finalized_at_str = record.get("finalized_at")
+
+        # Parse finalized_at
+        finalized_at = _utc_now()  # Default to now if not parseable
+        if finalized_at_str:
+            try:
+                if finalized_at_str.endswith("Z"):
+                    finalized_at_str = finalized_at_str[:-1] + "+00:00"
+                finalized_at = datetime.fromisoformat(finalized_at_str)
+            except (ValueError, TypeError):
+                pass
+
+        # Check if receipt exists in receipts dict
+        matched = receipt_id is not None and receipt_id in receipts
+
+        correlation = CABRReceiptCorrelation(
+            record_id=record_id,
+            receipt_id=receipt_id,
+            matched=matched,
+            decision=decision,
+            finalized_at=finalized_at,
+        )
+        correlations.append(correlation)
+
+    return correlations
+
+
+# ---------------------------------------------------------------------------
+# Phase 5: Receipt Correlation Report
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class CABRReceiptCorrelationReport:
+    """
+    Report on receipt correlation with time filtering.
+
+    WSP 97 Critical:
+      This report is for OBSERVABILITY ONLY. It does NOT mean:
+        - verification_complete=True
+        - cabr_ready=True
+        - payout_ready=True
+        - Payout approval
+        - DAO activation
+        - Token issuance
+        - External settlement
+        - Automatic state progression
+    """
+
+    time_filter: Optional[CABRTimeRangeFilter]
+    """Time filter applied, if any."""
+
+    total_records: int
+    """Total number of records in report."""
+
+    matched_records: int
+    """Number of records with matching receipts."""
+
+    unmatched_records: int
+    """Number of records without matching receipts."""
+
+    correlations: List[CABRReceiptCorrelation]
+    """List of individual correlations."""
+
+    generated_at: datetime = field(default_factory=_utc_now)
+    """When this report was generated."""
+
+    wsp97_compliance_note: str = (
+        "WSP 97: This report is observability only. "
+        "No payout, DAO activation, or state progression is implied."
+    )
+    """WSP 97 compliance reminder embedded in report."""
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialize to dict."""
+        time_filter_dict = None
+        if self.time_filter is not None:
+            time_filter_dict = {
+                "start_time": _utc_iso(self.time_filter.start_time),
+                "end_time": _utc_iso(self.time_filter.end_time),
+                "limit": self.time_filter.limit,
+            }
+
+        return {
+            "time_filter": time_filter_dict,
+            "total_records": self.total_records,
+            "matched_records": self.matched_records,
+            "unmatched_records": self.unmatched_records,
+            "correlations": [c.to_dict() for c in self.correlations],
+            "generated_at": _utc_iso(self.generated_at),
+            "wsp97_compliance_note": self.wsp97_compliance_note,
+        }
+
+
+def generate_receipt_correlation_report(
+    store: CABRConsensusStoreType,
+    receipts: Dict[str, Any],
+    time_filter: Optional[CABRTimeRangeFilter] = None
+) -> CABRReceiptCorrelationReport:
+    """
+    Generate a receipt correlation report with optional time filtering.
+
+    This function reads records from the store, applies time filtering,
+    and correlates them to receipts. It does NOT mutate any records.
+
+    WSP 97 Critical:
+      This report is for OBSERVABILITY ONLY. It does NOT mean:
+        - verification_complete=True
+        - cabr_ready=True
+        - payout_ready=True
+        - Payout approval
+        - DAO activation
+        - Token issuance
+        - Automatic state progression
+
+    Args:
+        store: CABRConsensusStore instance (caller must provide, no default).
+        receipts: Dictionary mapping receipt_id to receipt data.
+        time_filter: Optional time range constraints.
+
+    Returns:
+        Report containing correlations and summary statistics.
+
+    Raises:
+        ValueError: If time_filter is invalid (start > end).
+    """
+    # Query records with time filtering
+    records = query_consensus_records_by_time(store, time_filter)
+
+    # Correlate records to receipts
+    correlations = correlate_consensus_records_to_receipts(records, receipts)
+
+    # Calculate statistics
+    matched_records = sum(1 for c in correlations if c.matched)
+    unmatched_records = len(correlations) - matched_records
+
+    report = CABRReceiptCorrelationReport(
+        time_filter=time_filter,
+        total_records=len(correlations),
+        matched_records=matched_records,
+        unmatched_records=unmatched_records,
+        correlations=correlations,
+    )
+
+    logger.info(
+        "[CABR-REPORT] Generated receipt correlation report: "
+        "%d total, %d matched, %d unmatched",
+        report.total_records,
+        report.matched_records,
+        report.unmatched_records,
+    )
+
+    return report
+
+
+def export_receipt_correlation_report_json(
+    report: CABRReceiptCorrelationReport,
+    indent: int = 2,
+) -> str:
+    """
+    Export receipt correlation report as JSON string.
+
+    This is a pure function that produces a JSON string from a report.
+    It does NOT write to filesystem (caller handles file output if needed).
+
+    WSP 97: The JSON output includes the WSP 97 compliance note. Presence
+    of correlations in the JSON does NOT indicate payout readiness or DAO activation.
+
+    Args:
+        report: CABRReceiptCorrelationReport to export.
+        indent: JSON indentation level (default 2 for readability).
+
+    Returns:
+        Deterministic JSON string (sorted keys for reproducibility).
+    """
+    report_dict = report.to_dict()
+
+    # Ensure deterministic output with sorted keys
+    json_output = json.dumps(
+        report_dict,
+        indent=indent,
+        sort_keys=True,
+        ensure_ascii=False,
+        default=str,  # Handle datetime and other non-serializable types
+    )
+
+    return json_output

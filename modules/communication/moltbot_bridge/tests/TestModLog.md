@@ -1,3 +1,24 @@
+## 2026-05-13: CABR Consensus Time Range and Correlation Tests (WSP 97)
+
+**File**: `test_cabr_consensus_reporting_time_correlation.py` (NEW - 46 tests)
+
+**Test Classes**:
+- `TestTimeFilterValidation`: Valid/invalid time ranges, edge cases
+- `TestTimeRangeQueries`: Start/end/both/limit filtering, sorting, empty store
+- `TestReceiptCorrelation`: Matched/unmatched/partial correlation, empty inputs
+- `TestCorrelationReports`: Statistics accuracy, time filtering integration
+- `TestJsonExport`: Deterministic output, datetime serialization
+- `TestDataclassSerialization`: All new dataclasses serialize correctly
+- `TestWSP97TruthBoundaries`: All truth fields remain False
+- `TestStoreRequirements`: Functions require explicit store
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_cabr_consensus_reporting_time_correlation.py -q`
+
+**Result**: 46 passed
+
+---
+
 ## 2026-05-13: CABR Consensus Reporting Tests (WSP 97)
 
 **File**: `test_cabr_consensus_reporting.py` (NEW - 48 tests)
