@@ -280,10 +280,12 @@ class TestD3ScopeDoesNotAuthorizeD4:
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
             result = executor.execute(job)
 
-            # D4 should be blocked by guard regardless of token
-            assert result.guard_evaluated is True
-            assert result.guard_result["destructive_class"] == "D4_WRITE_REPO"
-            assert result.guard_result["allowed"] is False
+            # HXA30: D3 token + D4 action fails at token validation BEFORE guard
+            assert result.status.value == "BLOCKED_BY_TOKEN_VALIDATION"
+            assert result.guard_evaluated is False
+            assert result.token_validation_result is not None
+            assert result.token_validation_result["reason_code"] == "SCOPE_DOES_NOT_AUTHORIZE_ACTION_CLASS"
+            assert result.token_validation_result.get("scope_action_class_mismatch") is True
 
 
 class TestD3ScopeDoesNotAuthorizeD5:
@@ -344,10 +346,12 @@ class TestD3ScopeDoesNotAuthorizeD5:
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
             result = executor.execute(job)
 
-            # D5 should be blocked by guard regardless of token
-            assert result.guard_evaluated is True
-            assert result.guard_result["destructive_class"] == "D5_EXTERNAL_SIDE_EFFECT"
-            assert result.guard_result["allowed"] is False
+            # HXA30: D3 token + D5 action fails at token validation BEFORE guard
+            assert result.status.value == "BLOCKED_BY_TOKEN_VALIDATION"
+            assert result.guard_evaluated is False
+            assert result.token_validation_result is not None
+            assert result.token_validation_result["reason_code"] == "SCOPE_DOES_NOT_AUTHORIZE_ACTION_CLASS"
+            assert result.token_validation_result.get("scope_action_class_mismatch") is True
 
 
 class TestD3ScopeDoesNotAuthorizeD6:
@@ -408,10 +412,12 @@ class TestD3ScopeDoesNotAuthorizeD6:
         with patch.dict(os.environ, {"HERMES_DELEGATE_ENABLED": "0"}):
             result = executor.execute(job)
 
-            # D6 should be blocked by guard regardless of token
-            assert result.guard_evaluated is True
-            assert result.guard_result["destructive_class"] == "D6_IRREVERSIBLE"
-            assert result.guard_result["allowed"] is False
+            # HXA30: D3 token + D6 action fails at token validation BEFORE guard
+            assert result.status.value == "BLOCKED_BY_TOKEN_VALIDATION"
+            assert result.guard_evaluated is False
+            assert result.token_validation_result is not None
+            assert result.token_validation_result["reason_code"] == "SCOPE_DOES_NOT_AUTHORIZE_ACTION_CLASS"
+            assert result.token_validation_result.get("scope_action_class_mismatch") is True
 
 
 # ===========================================================================
