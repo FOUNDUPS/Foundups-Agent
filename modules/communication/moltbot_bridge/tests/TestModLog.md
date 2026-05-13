@@ -1,3 +1,40 @@
+## 2026-05-13: Quorum Verification Enforcement Tests (WSP 29/97)
+
+**File**: `test_quorum_verification_engine.py` (NEW - 41 tests)
+
+**Test Classes**:
+- `TestZeroAttestationsQuorumNotMet`: Zero attestations handling
+- `TestOneOrTwoAttestationsQuorumNotMet`: Below min_validators (1-2)
+- `TestThreeUniqueAttestationsQuorumMet`: Quorum met with 3+ verifiers
+- `TestDuplicateVerifierIDsRejected`: Duplicate verifier rejection
+- `TestMissingVerifierIDRejected`: Missing verifier_id rejection
+- `TestInvalidSignatureUnsupported`: Phase 1 signature handling
+- `TestConsensusScoreBelowThresholdRejected`: Score < 0.382
+- `TestConsensusScoreAtThresholdAccepted`: Score >= 0.382
+- `TestConsensusScoreAboveThresholdAccepted`: Score > 0.382
+- `TestConflictingAttestationsHandledDeterministically`: Mixed votes
+- `TestBatchEvaluationDeterministic`: Batch ordering preservation
+- `TestNoExternalSystemsRequired`: Pure local computation
+- `TestNoPayoutTriggered`: payout_ready=False
+- `TestNoDAOActivation`: cabr_ready=False
+- `TestWSP97TruthFieldsRemainFalse`: All truth fields False
+- `TestMissingIdentityRejects`: Identity validation
+- `TestQuorumIdGeneration`: ID format/uniqueness
+- `TestResultSerialization`: to_dict/from_dict roundtrip
+- `TestMinValidatorsConfiguration`: Custom quorum threshold
+- `TestConsensusThresholdConfiguration`: Custom consensus threshold
+- `TestDryRunMode`: Dry-run behavior
+- `TestInputBuilders`: build_quorum_input_from_cabr_result
+- `TestAttestationSerialization`: VerifierAttestation serialization
+- `TestValidAttestationStatus`: VALID as implicit APPROVE
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_quorum_verification_engine.py -q`
+
+**Result**: 41 passed
+
+---
+
 ## 2026-05-13: CABR Runtime Scoring Engine Tests (WSP 29/97)
 
 **File**: `test_cabr_scoring_engine.py` (NEW - 42 tests)
