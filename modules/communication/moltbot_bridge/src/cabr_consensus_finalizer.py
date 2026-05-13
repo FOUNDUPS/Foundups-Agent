@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-CABR Consensus Finalizer Phase 1 -- Deterministic Review Decision Record
+CABR Consensus Finalizer Phase 1/3 -- Deterministic Review Decision Record
 
 Combines CABRScoreResult and QuorumVerificationResult into a consensus record
 for internal review. This is a REVIEW-ONLY seam that does NOT:
@@ -25,6 +25,7 @@ WSP 97 TRUTH BOUNDARIES:
       * verification_complete=False
       * cabr_ready=False
       * payout_ready=False
+    - (Phase 3) Optionally persist record to caller-provided CABRConsensusStore
 
   X DOES NOT:
     - Issue tokens or UPS
@@ -36,6 +37,15 @@ WSP 97 TRUTH BOUNDARIES:
     - Run cryptographic verification
     - Claim consensus is final
     - Mutate pAVS/proof receipt runtime
+    - (Phase 3) Use any default DB path
+    - (Phase 3) Auto-create store without explicit caller provision
+
+Phase 3 Auto-Persist Rules (WSP 97):
+  - store=None: Identical behavior to Phase 1 (no filesystem writes)
+  - store provided: Save resulting CABRConsensusRecord after finalization
+  - Store failures: Fail closed or return explicit persistence error
+  - Persisted truth fields: Always False (no state progression)
+  - Duplicate handling: Idempotent (ALREADY_EXISTS is success for caller)
 
 Architecture:
   W6 (receipt) -> ProofOfComputeReceipt
@@ -43,6 +53,8 @@ Architecture:
   W1 (CABR)    -> CABRScoreResult (scoring decision)
   W1 (quorum)  -> QuorumVerificationResult (quorum enforcement)
   W1 (this)    -> CABRConsensusRecord (combined review decision)
+  W1 (Phase 2) -> CABRConsensusStore (optional persistence)
+  W1 (Phase 3) -> Auto-persist integration (this file)
 
 WSP Compliance:
   WSP 11  : Interface contract (explicit, typed)
@@ -50,7 +62,7 @@ WSP Compliance:
   WSP 97  : System Execution Prompting (truth boundaries)
   WSP 91  : Observability (timestamps, audit fields)
 
-Slice: CABR_CONSENSUS_FINALIZATION_PHASE1
+Slice: CABR_CONSENSUS_FINALIZATION_PHASE1 + PHASE3_AUTO_PERSIST_INTEGRATION
 Worker: W1
 """
 
@@ -640,6 +652,58 @@ def _evaluate_pending_quorum(
 
 
 # ---------------------------------------------------------------------------
+# Phase 3: Persistence Result Dataclass
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class CABRConsensusFinalizeResult:
+    """
+    Result from finalize_cabr_consensus with optional persistence.
+
+    WSP 97: persistence_success=True does NOT mean:
+      - verification_complete=True
+      - cabr_ready=True
+      - payout_ready=True
+      - Payout approval
+      - DAO activation
+      - State progression
+
+    It only means the review-only record was stored for audit trail.
+    """
+
+    record: CABRConsensusRecord
+    """The finalized consensus record."""
+
+    persistence_attempted: bool = False
+    """True if a store was provided and persistence was attempted."""
+
+    persistence_success: bool = False
+    """True if record was successfully persisted (or already existed)."""
+
+    persistence_status: Optional[str] = None
+    """Status from store operation: 'success', 'already_exists', or error status."""
+
+    persistence_error: Optional[str] = None
+    """Error message if persistence failed."""
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Serialize to dict."""
+        return {
+            "record": self.record.to_dict(),
+            "persistence_attempted": self.persistence_attempted,
+            "persistence_success": self.persistence_success,
+            "persistence_status": self.persistence_status,
+            "persistence_error": self.persistence_error,
+        }
+
+
+# Forward reference for type hints (avoid circular import)
+# CABRConsensusStore is imported at runtime only when used
+CABRConsensusStoreType = Any  # Will be CABRConsensusStore when provided
+
+
+# ---------------------------------------------------------------------------
 # Public API: Finalize Consensus
 # ---------------------------------------------------------------------------
 
@@ -647,6 +711,7 @@ def _evaluate_pending_quorum(
 def finalize_cabr_consensus(
     consensus_input: CABRConsensusInput,
     include_input_snapshot: bool = False,
+    store: Optional[CABRConsensusStoreType] = None,
 ) -> CABRConsensusRecord:
     """
     Finalize CABR consensus from scoring and quorum results.
@@ -665,17 +730,190 @@ def finalize_cabr_consensus(
       7. Scoring pending quorum or quorum not met -> PENDING_QUORUM
       8. Scoring accepted + quorum accepted -> ACCEPTED_FOR_REVIEW
 
+    Phase 3 Persistence (optional):
+      - If store is None: Identical to Phase 1 (no filesystem writes)
+      - If store is provided: Persist record after finalization
+      - Duplicate record_id: Idempotent (ALREADY_EXISTS counts as success)
+      - Store failure: Logged but does not block record return
+
     Args:
         consensus_input: CABRConsensusInput with score_result and quorum_result
         include_input_snapshot: If True, include input dict in record
+        store: Optional CABRConsensusStore for persistence. If None, no DB writes.
 
     Returns:
         CABRConsensusRecord with deterministic decision and WSP 97 truth fields
 
-    WSP 97 Truth Fields (always False in Phase 1):
+    WSP 97 Truth Fields (always False):
         verification_complete = False
         cabr_ready = False
         payout_ready = False
+
+    Note:
+        For explicit persistence status, use finalize_cabr_consensus_with_result()
+        which returns CABRConsensusFinalizeResult with persistence details.
+    """
+    # Delegate to internal helper for core finalization logic
+    record = _finalize_cabr_consensus_internal(consensus_input, include_input_snapshot)
+
+    # Phase 3: Optional persistence
+    if store is not None:
+        _persist_record(store, record)
+
+    return record
+
+
+def _persist_record(store: CABRConsensusStoreType, record: CABRConsensusRecord) -> None:
+    """
+    Persist record to store with logging.
+
+    Internal helper for Phase 3 auto-persist. Failures are logged but do not
+    raise exceptions - the consensus record is still returned to caller.
+
+    WSP 97: Persistence does NOT mean state progression.
+    """
+    try:
+        result = store.save_record(record.to_dict())
+        if result.status.value == "success":
+            logger.info(
+                "[CABR-CONSENSUS] Persisted record %s to store",
+                record.record_id,
+            )
+        elif result.status.value == "already_exists":
+            logger.debug(
+                "[CABR-CONSENSUS] Record %s already exists in store (idempotent)",
+                record.record_id,
+            )
+        else:
+            logger.warning(
+                "[CABR-CONSENSUS] Persistence returned status=%s for record %s: %s",
+                result.status.value,
+                record.record_id,
+                result.message,
+            )
+    except Exception as e:
+        logger.error(
+            "[CABR-CONSENSUS] Failed to persist record %s: %s",
+            record.record_id,
+            str(e),
+        )
+
+
+# ---------------------------------------------------------------------------
+# Public API: Finalize With Explicit Persistence Result
+# ---------------------------------------------------------------------------
+
+
+def finalize_cabr_consensus_with_result(
+    consensus_input: CABRConsensusInput,
+    include_input_snapshot: bool = False,
+    store: Optional[CABRConsensusStoreType] = None,
+) -> CABRConsensusFinalizeResult:
+    """
+    Finalize CABR consensus with explicit persistence status.
+
+    Same as finalize_cabr_consensus() but returns CABRConsensusFinalizeResult
+    which includes detailed persistence status for callers that need to verify
+    storage succeeded.
+
+    WSP 97 Critical:
+      persistence_success=True does NOT mean:
+        - verification_complete=True
+        - cabr_ready=True
+        - payout_ready=True
+        - Payout approval
+        - DAO activation
+        - State progression
+
+      It only means the review-only record was stored for audit trail.
+
+    Args:
+        consensus_input: CABRConsensusInput with score_result and quorum_result
+        include_input_snapshot: If True, include input dict in record
+        store: Optional CABRConsensusStore for persistence. If None, no DB writes.
+
+    Returns:
+        CABRConsensusFinalizeResult with record and persistence status
+
+    Store Failure Behavior (fail-closed):
+        If store is provided and persistence fails, the result will have:
+          - persistence_attempted=True
+          - persistence_success=False
+          - persistence_error=<error message>
+
+        The record is still returned (consensus finalization succeeded).
+        Caller must check persistence_success if storage is required.
+    """
+    # Finalize without persistence first (we'll handle persistence explicitly)
+    record = _finalize_cabr_consensus_internal(consensus_input, include_input_snapshot)
+
+    # Build result with persistence handling
+    if store is None:
+        return CABRConsensusFinalizeResult(
+            record=record,
+            persistence_attempted=False,
+            persistence_success=False,
+            persistence_status=None,
+            persistence_error=None,
+        )
+
+    # Attempt persistence
+    try:
+        save_result = store.save_record(record.to_dict())
+        status_value = save_result.status.value
+
+        if status_value in ("success", "already_exists"):
+            logger.info(
+                "[CABR-CONSENSUS] Persisted record %s (status=%s)",
+                record.record_id,
+                status_value,
+            )
+            return CABRConsensusFinalizeResult(
+                record=record,
+                persistence_attempted=True,
+                persistence_success=True,
+                persistence_status=status_value,
+                persistence_error=None,
+            )
+        else:
+            logger.warning(
+                "[CABR-CONSENSUS] Persistence failed for %s: status=%s, message=%s",
+                record.record_id,
+                status_value,
+                save_result.message,
+            )
+            return CABRConsensusFinalizeResult(
+                record=record,
+                persistence_attempted=True,
+                persistence_success=False,
+                persistence_status=status_value,
+                persistence_error=save_result.message,
+            )
+
+    except Exception as e:
+        logger.error(
+            "[CABR-CONSENSUS] Persistence exception for %s: %s",
+            record.record_id,
+            str(e),
+        )
+        return CABRConsensusFinalizeResult(
+            record=record,
+            persistence_attempted=True,
+            persistence_success=False,
+            persistence_status="exception",
+            persistence_error=str(e),
+        )
+
+
+def _finalize_cabr_consensus_internal(
+    consensus_input: CABRConsensusInput,
+    include_input_snapshot: bool = False,
+) -> CABRConsensusRecord:
+    """
+    Internal finalization without persistence.
+
+    This is the core Phase 1 logic extracted for reuse by both the
+    simple API and the explicit result API.
     """
     # Extract identity
     receipt_id, job_id, tenant_id = _extract_identity(consensus_input)
@@ -742,7 +980,6 @@ def finalize_cabr_consensus(
             decision=CABRConsensusDecision.NOT_FINALIZED,
             reason_code=CABRConsensusReasonCode.MISSING_SCORE_RESULT,
             reason_human="CABRScoreResult missing. Cannot finalize without scoring decision.",
-            # Extract quorum metrics if available
             quorum_met=quorum_result.get("quorum_met", False) if quorum_result else False,
             threshold_met=quorum_result.get("threshold_met", False) if quorum_result else False,
             unique_verifiers=quorum_result.get("unique_verifiers", 0) if quorum_result else 0,
@@ -759,7 +996,6 @@ def finalize_cabr_consensus(
             decision=CABRConsensusDecision.PENDING_QUORUM,
             reason_code=CABRConsensusReasonCode.MISSING_QUORUM_RESULT,
             reason_human="QuorumVerificationResult missing. Pending quorum evaluation.",
-            # Extract score metrics
             evidence_present=score_result.get("evidence_present", False),
             evidence_count=score_result.get("evidence_count", 0),
             is_dry_run=score_result.get("is_dry_run", False),
@@ -779,7 +1015,6 @@ def finalize_cabr_consensus(
             decision=decision,
             reason_code=reason_code,
             reason_human=reason_human,
-            # Extract metrics
             quorum_met=quorum_result.get("quorum_met", False),
             threshold_met=quorum_result.get("threshold_met", False),
             unique_verifiers=quorum_result.get("unique_verifiers", 0),
@@ -870,7 +1105,7 @@ def finalize_cabr_consensus(
     is_dry_run = score_result.get("is_dry_run", False) or quorum_result.get("is_dry_run", False)
 
     if is_dry_run:
-        reason_code = CABRConsensusReasonCode.OK_SCORE_ACCEPTED_DRY_RUN
+        final_reason_code = CABRConsensusReasonCode.OK_SCORE_ACCEPTED_DRY_RUN
         reason_human = (
             f"Dry-run consensus accepted for review. "
             f"{score_result.get('evidence_count', 0)} evidence ref(s), "
@@ -878,7 +1113,7 @@ def finalize_cabr_consensus(
             "WSP 97: cabr_ready=False, payout_ready=False."
         )
     else:
-        reason_code = CABRConsensusReasonCode.OK_SCORE_ACCEPTED_QUORUM_MET
+        final_reason_code = CABRConsensusReasonCode.OK_SCORE_ACCEPTED_QUORUM_MET
         reason_human = (
             f"Consensus accepted for review. "
             f"Scoring: {score_decision}, Quorum: {quorum_decision}. "
@@ -890,13 +1125,13 @@ def finalize_cabr_consensus(
     logger.info(
         "[CABR-CONSENSUS] Finalized receipt %s -> ACCEPTED_FOR_REVIEW, reason=%s",
         receipt_id,
-        reason_code.value,
+        final_reason_code.value,
     )
 
     record = CABRConsensusRecord(
         **base_fields,
         decision=CABRConsensusDecision.ACCEPTED_FOR_REVIEW,
-        reason_code=reason_code,
+        reason_code=final_reason_code,
         reason_human=reason_human,
         quorum_met=quorum_result.get("quorum_met", False),
         threshold_met=quorum_result.get("threshold_met", False),
@@ -921,6 +1156,7 @@ def finalize_cabr_consensus(
 
 def finalize_cabr_consensus_batch(
     inputs: List[CABRConsensusInput],
+    store: Optional[CABRConsensusStoreType] = None,
 ) -> List[CABRConsensusRecord]:
     """
     Finalize multiple consensus inputs in batch.
@@ -928,10 +1164,41 @@ def finalize_cabr_consensus_batch(
     Deterministic: Results are in same order as inputs.
     No network calls, no state mutation.
 
+    Phase 3 Persistence:
+      - If store is None: Identical to Phase 1 (no filesystem writes)
+      - If store is provided: Persist all records after finalization
+      - Duplicate record_id: Idempotent per record
+      - Store failures: Logged per record, batch continues
+
     Args:
         inputs: List of CABRConsensusInput to finalize
+        store: Optional CABRConsensusStore for persistence. If None, no DB writes.
 
     Returns:
         List of CABRConsensusRecord in same order as inputs
     """
-    return [finalize_cabr_consensus(inp) for inp in inputs]
+    return [finalize_cabr_consensus(inp, store=store) for inp in inputs]
+
+
+def finalize_cabr_consensus_batch_with_results(
+    inputs: List[CABRConsensusInput],
+    store: Optional[CABRConsensusStoreType] = None,
+) -> List[CABRConsensusFinalizeResult]:
+    """
+    Finalize multiple consensus inputs in batch with explicit persistence status.
+
+    Deterministic: Results are in same order as inputs.
+    Each result includes persistence status for its record.
+
+    WSP 97 Critical:
+      persistence_success=True does NOT mean state progression.
+      It only means the review-only record was stored for audit trail.
+
+    Args:
+        inputs: List of CABRConsensusInput to finalize
+        store: Optional CABRConsensusStore for persistence. If None, no DB writes.
+
+    Returns:
+        List of CABRConsensusFinalizeResult in same order as inputs
+    """
+    return [finalize_cabr_consensus_with_result(inp, store=store) for inp in inputs]
