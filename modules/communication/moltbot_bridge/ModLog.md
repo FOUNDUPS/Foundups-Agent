@@ -1,5 +1,98 @@
 # ModLog - moltbot_bridge
 
+## 2026-05-13: CABR Consensus Finalization Phase 5 - Time Range and Receipt Correlation (WSP 97)
+
+**Author**: 0102 (Worker W1)
+**WSP**: 97 (System Execution Prompting), 91 (Observability)
+**Slice**: `CABR_CONSENSUS_FINALIZATION_PHASE5_TIME_RANGE_RECEIPT_CORRELATION`
+
+### Summary
+
+Implemented time-range query helpers and receipt correlation for the CABR consensus reporting layer. This builds on Phase 4 to enable filtered audits and cross-referencing consensus records to original CABR receipts.
+
+### WSP 97 Critical Constraint
+
+Time-range queries and receipt correlation are read-only observability tools. They do NOT mean:
+- Automatic state progression
+- `verification_complete=True`
+- `cabr_ready=True`
+- `payout_ready=True`
+- Payout approval
+- DAO activation
+- Token issuance
+- External settlement
+
+### Files Modified/Created
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `src/cabr_consensus_reporting.py` | +~200 | Time-range and correlation functions |
+| `tests/test_cabr_consensus_reporting_time_correlation.py` | ~800 (NEW) | Test coverage (46 tests) |
+| `docs/audits/consensus/CABR_CONSENSUS_FINALIZATION_PHASE5_TIME_RANGE_RECEIPT_CORRELATION.md` | ~150 (NEW) | Audit documentation |
+
+### New API Surface
+
+```python
+# Time Range Filter
+@dataclass
+class CABRTimeRangeFilter:
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    limit: Optional[int] = None
+    def validate(self) -> bool: ...
+
+# Time Range Query
+def query_consensus_records_by_time(
+    store: CABRConsensusStore,
+    time_filter: Optional[CABRTimeRangeFilter] = None
+) -> List[CABRConsensusRecord]
+
+# Receipt Correlation
+@dataclass
+class CABRReceiptCorrelation:
+    record_id: str
+    receipt_id: Optional[str]
+    matched: bool
+    decision: str
+    finalized_at: datetime
+
+def correlate_consensus_records_to_receipts(
+    records: List[CABRConsensusRecord],
+    receipts: Dict[str, Any]
+) -> List[CABRReceiptCorrelation]
+
+# Correlation Report
+@dataclass
+class CABRReceiptCorrelationReport:
+    time_filter: Optional[CABRTimeRangeFilter]
+    total_records: int
+    matched_records: int
+    unmatched_records: int
+    correlations: List[CABRReceiptCorrelation]
+    generated_at: datetime
+
+def generate_receipt_correlation_report(
+    store: CABRConsensusStore,
+    receipts: Dict[str, Any],
+    time_filter: Optional[CABRTimeRangeFilter] = None
+) -> CABRReceiptCorrelationReport
+
+def export_receipt_correlation_report_json(
+    report: CABRReceiptCorrelationReport
+) -> str
+```
+
+### Test Results
+
+- `test_cabr_consensus_reporting_time_correlation.py`: 46 passed (NEW)
+- `test_cabr_consensus_reporting.py`: 48 passed (no regression)
+- `test_cabr_consensus_store.py`: 35 passed (no regression)
+- `test_cabr_consensus_finalizer_persistence.py`: 26 passed (no regression)
+
+**Total**: 245 consensus pipeline tests, 0 failures
+
+---
+
 ## 2026-05-13: CABR Consensus Finalization Phase 4 - Aggregation and Reporting (WSP 97)
 
 **Author**: 0102 (Worker W1)
