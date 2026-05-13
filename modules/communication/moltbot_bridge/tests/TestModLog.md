@@ -1,3 +1,27 @@
+## 2026-05-13: CABR Consensus Finalizer Persistence Tests (WSP 97)
+
+**File**: `test_cabr_consensus_finalizer_persistence.py` (NEW - 26 tests)
+
+**Test Classes**:
+- `TestStoreNoneProducesNoDbFile`: store=None behavior, no DB file, persistence_attempted=False
+- `TestProvidedStoreSavesAcceptedRecord`: Accepted record persistence, success status
+- `TestProvidedStoreSavesRejectedPendingRecords`: REJECTED/PENDING/NOT_FINALIZED all persisted
+- `TestDuplicateFinalizationIdempotent`: Duplicate record_id returns ALREADY_EXISTS
+- `TestStoreFailureReturnsExplicitFailure`: Schema not init fails, record still returned
+- `TestBatchFinalizationPersistsAllRecords`: Batch persistence, order preserved
+- `TestPersistedTruthFieldsRemainFalse`: WSP 97 truth fields always False
+- `TestNoPayoutDaoStateProgression`: No payout/DAO fields, cabr_ready stays False
+- `TestNoDefaultDbPathUsed`: No implicit store creation
+- `TestTmpPathOnly`: tmp_path usage verification
+- `TestFinalizeResultSerialization`: to_dict() includes all fields
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_cabr_consensus_finalizer_persistence.py -q`
+
+**Result**: 26 passed
+
+---
+
 ## 2026-05-13: CABR Consensus Store Tests (WSP 97)
 
 **File**: `test_cabr_consensus_store.py` (NEW - 35 tests)

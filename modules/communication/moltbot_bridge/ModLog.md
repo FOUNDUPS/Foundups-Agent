@@ -1,5 +1,88 @@
 # ModLog - moltbot_bridge
 
+## 2026-05-13: CABR Consensus Finalization Phase 3 - Auto-Persist Integration (WSP 97)
+
+**Author**: 0102 (Worker W1)
+**WSP**: 97 (System Execution Prompting), 91 (Observability)
+**Slice**: `CABR_CONSENSUS_FINALIZATION_PHASE3_AUTO_PERSIST_INTEGRATION`
+
+### Summary
+
+Integrated optional caller-provided persistence into CABR consensus finalization. When a CABRConsensusStore is provided, the consensus record is automatically persisted after finalization. This completes the Phase 1-3 consensus pipeline: scoring -> quorum -> finalization -> storage.
+
+### WSP 97 Critical Constraint
+
+Auto-persist means storing the review-only CABRConsensusRecord when an explicit store is provided. It does NOT mean:
+- Automatic state progression
+- `verification_complete=True`
+- `cabr_ready=True`
+- `payout_ready=True`
+- Payout approval
+- DAO activation
+- External settlement
+- Default DB path (caller must provide explicitly)
+
+### Files Changed
+
+| File | Change | Purpose |
+|------|--------|---------|
+| `src/cabr_consensus_finalizer.py` | Extended | Added optional `store` parameter to finalize functions |
+| `tests/test_cabr_consensus_finalizer_persistence.py` | New | 26 tests for persistence integration |
+| `docs/audits/consensus/CABR_CONSENSUS_FINALIZATION_PHASE3_AUTO_PERSIST_INTEGRATION.md` | New | Audit documentation |
+
+### New API Surface
+
+```python
+# Extended APIs with optional store parameter
+def finalize_cabr_consensus(
+    consensus_input: CABRConsensusInput,
+    include_input_snapshot: bool = False,
+    store: Optional[CABRConsensusStore] = None,  # NEW
+) -> CABRConsensusRecord
+
+def finalize_cabr_consensus_batch(
+    inputs: List[CABRConsensusInput],
+    store: Optional[CABRConsensusStore] = None,  # NEW
+) -> List[CABRConsensusRecord]
+
+# New explicit result APIs
+@dataclass
+class CABRConsensusFinalizeResult:
+    record: CABRConsensusRecord
+    persistence_attempted: bool
+    persistence_success: bool
+    persistence_status: Optional[str]
+    persistence_error: Optional[str]
+
+def finalize_cabr_consensus_with_result(...) -> CABRConsensusFinalizeResult
+def finalize_cabr_consensus_batch_with_results(...) -> List[CABRConsensusFinalizeResult]
+```
+
+### Persistence Behavior
+
+| Condition | Simple API | With Result API |
+|-----------|------------|-----------------|
+| `store=None` | No writes (Phase 1 behavior) | `persistence_attempted=False` |
+| Store provided, success | Record persisted, logged | `persistence_success=True` |
+| Store provided, duplicate | Logged as idempotent | `persistence_status='already_exists'` |
+| Store failure | Logged, record returned | `persistence_success=False`, error message |
+
+### Test Results
+
+- `test_cabr_consensus_finalizer_persistence.py`: 26 passed
+- `test_cabr_consensus_finalizer.py`: 48 passed (no regression)
+- `test_cabr_consensus_store.py`: 35 passed (no regression)
+- `test_quorum_verification_engine.py`: 41 passed (no regression)
+- `test_cabr_scoring_engine.py`: 42 passed (no regression)
+
+**Total**: 192 tests, 0 failures
+
+### Recommended Next Slice
+
+`CABR_CONSENSUS_FINALIZATION_PHASE4` - Consensus record aggregation and reporting tools for audit trail analysis.
+
+---
+
 ## 2026-05-13: CABR Consensus Store Phase 2 - SQLite Audit Trail (WSP 97)
 
 **Author**: 0102 (Worker W1)
