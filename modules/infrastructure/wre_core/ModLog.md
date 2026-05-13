@@ -2,6 +2,71 @@
 
 ## Chronological Change Log
 
+### [2026-05-12] - HXA29_TOKEN_SCOPE_VALIDATION_PHASE1 (v0.8.37)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)
+**Impact Analysis**: Token scope validation against Hermes destructive-action classes
+
+#### Changes Made
+
+- `src/capability_token_validator.py` (MODIFIED - ~80 lines):
+  - Added `ACTION_CLASS_SCOPES` constant mapping action classes to authorized scopes
+  - Added `SCOPE_TO_ACTION_CLASS` reverse mapping for scope lookup
+  - Added `validate_scope_for_action_class()` function for scope-to-class validation
+  - D3 scopes (d3:sandbox, d3:evidence, d3:dry-run) authorize ONLY D3 actions
+  - D3 scopes do NOT authorize D4/D5/D6 actions (fail-closed)
+  - D4/D5/D6 scopes defined but blocked by guard policy
+  - Unknown scopes fail closed (return False)
+
+- `tests/test_hxa29_token_scope_validation.py` (NEW - 700+ lines):
+  - 54 tests covering scope validation
+  - TestScopeConstantsExist (6 tests)
+  - TestD3SandboxScopeAuthorizesD3Only (3 tests)
+  - TestD3ScopeDoesNotAuthorizeD4 (4 tests)
+  - TestD3ScopeDoesNotAuthorizeD5 (4 tests)
+  - TestD3ScopeDoesNotAuthorizeD6 (4 tests)
+  - TestD4D5D6ScopesDefinedButBlocked (3 tests)
+  - TestMissingScopeFailsClosed (2 tests)
+  - TestUnknownScopeFailsClosed (2 tests)
+  - TestMixedScopesObeyActionClass (2 tests)
+  - TestBlockedPathOverridesAllowedScope (1 test)
+  - TestPathTraversalBlocked (2 tests)
+  - TestDryRunOnlyBlocksLiveExecution (2 tests)
+  - TestWSP97TruthFieldsAlwaysFalse (4 tests)
+  - TestValidateScopeForActionClass (14 tests)
+  - TestHXA29VerdictDocumentation (1 test)
+
+- `docs/audits/openclaw_hermes/HXA29_TOKEN_SCOPE_VALIDATION.md` (NEW):
+  - Full audit document with scope mapping tables
+  - Fail-closed design documented
+  - Defense in depth documented
+  - 54 tests passing
+
+#### HXA29 Verdict
+
+```
+Verdict: TOKEN_SCOPE_VALIDATION_DEFINED
+
+HXA28 verdict was: D3_NATIVE_CLASSIFICATION_DEFINED
+
+HXA29 proves:
+1. D3 sandbox scopes authorize ONLY D3 dry-run/sandbox actions
+2. D3 scopes do NOT authorize D4 repo creation
+3. D3 scopes do NOT authorize D5 external side effects
+4. D3 scopes do NOT authorize D6 irreversible actions
+5. D4/D5/D6 scopes defined but blocked by guard policy
+6. Missing scope fails closed
+7. Unknown scope fails closed
+8. Mixed scopes still obey action class restrictions
+9. Blocked path overrides allowed scope
+10. Path traversal is blocked
+11. dry_run_only token blocks live execution
+12. All WSP 97 truth fields remain False
+13. 362 tests passing across all token/guard test files
+```
+
+---
+
 ### [2026-05-12] - HXA28_D3_NATIVE_CLASSIFICATION_PHASE1 (v0.8.36)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)
