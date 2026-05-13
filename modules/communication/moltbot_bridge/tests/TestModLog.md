@@ -1,3 +1,33 @@
+## 2026-05-13: CABR Consensus Finalization Tests (WSP 29/97)
+
+**File**: `test_cabr_consensus_finalizer.py` (NEW - 48 tests)
+
+**Test Classes**:
+- `TestMissingScoreResultFailsClosed`: Missing score -> NOT_FINALIZED
+- `TestMissingQuorumResultPendingQuorum`: Missing quorum -> PENDING_QUORUM
+- `TestScoringRejectRejects`: All scoring rejection types -> REJECTED
+- `TestQuorumNotMetPendingQuorum`: Zero/insufficient verifiers -> PENDING_QUORUM
+- `TestScoringAcceptedQuorumAcceptedAcceptedForReview`: Both passed -> ACCEPTED_FOR_REVIEW
+- `TestTruthBoundaryViolationBlocks`: All 6 truth boundary violations -> BLOCKED
+- `TestDeterministicRecordHashStable`: Same inputs -> same hash
+- `TestBatchFinalizationDeterministic`: Batch ordering preservation
+- `TestNoPayoutStatusChanges`: payout_ready=False, no payout fields
+- `TestNoDAOActivation`: cabr_ready=False
+- `TestNoExternalDependency`: Pure local computation
+- `TestWSP97TruthFieldsAlwaysFalse`: All truth fields always False
+- `TestQuorumRejection`: Quorum rejection types
+- `TestRecordIdGeneration`: ID format/uniqueness
+- `TestResultSerialization`: to_dict/from_dict roundtrip
+- `TestIdentityExtraction`: Identity from explicit/nested fields
+- `TestInputSnapshot`: Optional snapshot inclusion
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_cabr_consensus_finalizer.py -q`
+
+**Result**: 48 passed
+
+---
+
 ## 2026-05-13: Quorum Verification Enforcement Tests (WSP 29/97)
 
 **File**: `test_quorum_verification_engine.py` (NEW - 41 tests)
