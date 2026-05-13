@@ -1,5 +1,70 @@
 # ModLog - moltbot_bridge
 
+## 2026-05-13: CABR Runtime Scoring Engine Phase 1 (WSP 29/97)
+
+**Author**: 0102 (Worker W1)
+**WSP**: 29 (CABR Engine Framework), 97 (System Execution Prompting)
+**Slice**: `CABR_RUNTIME_SCORING_ENGINE_PHASE1`
+
+### Summary
+
+Implemented the first deterministic CABR runtime scoring seam for internal sovereign consensus. This addresses the critical gap identified in PR #574 (WSP_CONSENSUS_INFRASTRUCTURE_AUDIT): "No runtime CABR scoring engine exists."
+
+### Scope Constraints
+
+- Deterministic scoring only
+- No payouts, DAO activation, external attestation, network calls, secrets, or token issuance
+- WSP 97 truth boundaries enforced: verification_complete=False, cabr_ready=False, payout_ready=False
+
+### Files Created
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `src/cabr_scoring_engine.py` | ~750 | Core CABR scoring engine |
+| `tests/test_cabr_scoring_engine.py` | ~560 | Test coverage (42 tests) |
+| `docs/audits/consensus/CABR_RUNTIME_SCORING_ENGINE_PHASE1.md` | ~350 | Audit documentation |
+
+### API Surface
+
+```python
+# Enums
+CABRScoreDecision: NOT_EVALUATED, ACCEPTED_FOR_REVIEW, ACCEPTED_FOR_REVIEW_PENDING_QUORUM,
+                   REJECTED_INSUFFICIENT_EVIDENCE, REJECTED_TRUTH_BOUNDARY,
+                   REJECTED_QUORUM_NOT_MET, REJECTED_DUPLICATE_VERIFIERS,
+                   REJECTED_PAVS_FAILED, REJECTED_MISSING_IDENTITY
+
+CABRScoreReason: OK_EVIDENCE_PRESENT_QUORUM_MET, OK_EVIDENCE_PRESENT_DRY_RUN,
+                 OK_EVIDENCE_PRESENT_PENDING_QUORUM, REJECTED_* codes
+
+# Core Functions
+score_cabr_receipt(score_input, min_validators=3) -> CABRScoreResult
+score_cabr_batch(inputs, min_validators=3) -> List[CABRScoreResult]
+score_from_receipt(receipt, verifier_ids) -> CABRScoreResult
+score_from_pavs_result(result, verifier_ids) -> CABRScoreResult
+```
+
+### Quorum Behavior
+
+| Verifiers | Unique | Decision |
+|-----------|--------|----------|
+| 0 | 0 | ACCEPTED_FOR_REVIEW_PENDING_QUORUM |
+| 2 | 2 | ACCEPTED_FOR_REVIEW_PENDING_QUORUM |
+| 3+ | 3+ | ACCEPTED_FOR_REVIEW (quorum_met=True) |
+| N | <N (duplicates) | REJECTED_DUPLICATE_VERIFIERS |
+
+### Test Results
+
+- `test_cabr_scoring_engine.py`: 42 passed
+- `test_pavs_verification_seam.py`: 24 passed
+- `test_proof_of_compute_receipt.py`: 26 passed
+- `test_hermes_job_executor.py`: 94 passed
+
+### Recommended Next Slice
+
+`QUORUM_VERIFICATION_ENFORCEMENT_PHASE1` - Implement verifier attestation recording and quorum threshold enforcement before state transition.
+
+---
+
 ## 2026-05-12: HXA24 Capability Token PolicyFlags (WSP 97)
 
 **Author**: 0102 (Worker HXA24)
