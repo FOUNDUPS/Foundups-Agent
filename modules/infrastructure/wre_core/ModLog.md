@@ -2,6 +2,56 @@
 
 ## Chronological Change Log
 
+### [2026-05-13] - HXA30_SCOPE_TO_ACTION_CLASS_HERMES_INTEGRATION_PHASE1 (v0.8.38)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)
+**Impact Analysis**: Scope-to-action-class validation integrated into HermesJobExecutor
+
+#### Changes Made
+
+- `src/hermes_job_executor.py` (MODIFIED - ~40 lines):
+  - Step 2.2: Classifies action into D0-D6 BEFORE token validation
+  - `_validate_token_if_present()`: New `action_class` parameter
+  - Passes action_class to token validator for scope authorization
+  - Updated decision tree documentation
+
+- `src/capability_token_validator.py` (MODIFIED - ~50 lines):
+  - `validate_token()`: New `action_class` parameter
+  - Gate 13: Validates token scopes authorize classified action class
+  - `SCOPE_DOES_NOT_AUTHORIZE_ACTION_CLASS` reason code
+  - `TokenValidationResult`: New fields `scope_action_class_mismatch`, `requested_action_class`
+
+- `tests/test_hxa30_scope_to_action_class_integration.py` (NEW - 400+ lines):
+  - 24 tests covering scope-to-action-class integration
+  - D3 token + D3/D4/D5/D6 action behavior
+  - Token-vs-guard decision ordering
+  - Defense-in-depth verification
+
+- `tests/test_hxa27_hermes_token_validation_integration.py` (MODIFIED):
+  - Updated `valid_token` fixture with `scopes=["d3:sandbox"]`
+  - Updated `test_same_token_blocked_on_replay` with D3 scope
+  - Updated `test_d4_blocked_even_with_valid_token` with D4 scope
+
+- `tests/test_hxa29_token_scope_validation.py` (MODIFIED):
+  - Updated test expectations for HXA30 behavior (token blocks before guard)
+
+#### HXA30 Verdict
+
+```
+Verdict: SCOPE_TO_ACTION_CLASS_HERMES_INTEGRATION_DEFINED
+
+HXA29 verdict was: TOKEN_SCOPE_VALIDATION_DEFINED
+HXA30 proves:
+  1. Action classified BEFORE token validation (Step 2.2)
+  2. Token scopes validated against action class (Gate 13)
+  3. D3 token + D4/D5/D6 action → BLOCKED_BY_TOKEN_VALIDATION
+  4. D4/D5/D6 scoped tokens pass validation but guard still blocks
+  5. Defense-in-depth: scope layer + guard layer
+  6. 335 tests passing (24 HXA30 + 54 HXA29 + 132 HXA28 + 31 HXA27 + 94 executor)
+```
+
+---
+
 ### [2026-05-12] - HXA29_TOKEN_SCOPE_VALIDATION_PHASE1 (v0.8.37)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)

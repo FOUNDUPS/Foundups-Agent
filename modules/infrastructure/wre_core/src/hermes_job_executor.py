@@ -34,6 +34,7 @@ NAVIGATION:
 Slice: HXA23_HERMES_GUARD_INTEGRATION_PHASE1
         HXA24_CAPABILITY_TOKEN_POLICYFLAGS_PHASE1
         HXA27_HERMES_TOKEN_VALIDATION_INTEGRATION_PHASE1
+        HXA30_SCOPE_TO_ACTION_CLASS_HERMES_INTEGRATION_PHASE1
 """
 
 from __future__ import annotations
@@ -1254,6 +1255,7 @@ class HermesJobExecutor:
         self,
         job: "FoundUpJob",
         request: HermesDelegationRequest,
+        action_class: Optional[DestructiveActionClass] = None,
     ) -> Optional[TokenValidationResult]:
         """
         Validate capability token if present in job payload.
@@ -1264,6 +1266,11 @@ class HermesJobExecutor:
           - Validation uses injected token_validator instance
           - Fail-closed: invalid token blocks execution
 
+        HXA30 Scope-to-Action-Class Integration:
+          - If action_class is provided, validates token scopes authorize the class
+          - D3 scoped tokens fail validation for D4/D5/D6 classified actions
+          - This check happens BEFORE guard evaluation
+
         Token Validation Checks:
           - Token exists and has required fields
           - Token is signed (signature_present and signature_verified)
@@ -1273,10 +1280,12 @@ class HermesJobExecutor:
           - Requested action is in token's allowed_actions
           - Target path is within token's allowed_paths and not blocked
           - If is_live_operation: dry_run_only=False required
+          - HXA30: Token scopes must authorize the classified action class
 
         Args:
             job: Source FoundUpJob
             request: Built HermesDelegationRequest
+            action_class: DestructiveActionClass for scope validation (HXA30)
 
         Returns:
             TokenValidationResult if token was present (valid or invalid),
@@ -1299,20 +1308,22 @@ class HermesJobExecutor:
         # Phase 1: Always dry-run, is_live_operation=False
         is_live_operation = not request.dry_run
 
-        # Validate token
+        # Validate token with action_class for HXA30 scope-to-action-class validation
         validation_result = self.token_validator.validate_token(
             token=token,
             requested_action=job.requested_action,
             requested_scope=None,  # Scope validation optional for Phase 1
             target_path=target_path,
             is_live_operation=is_live_operation,
+            action_class=action_class,  # HXA30: Pass action class for scope validation
         )
 
         logger.info(
-            "[HERMES-EXEC] Token validation for job %s: valid=%s, reason=%s",
+            "[HERMES-EXEC] Token validation for job %s: valid=%s, reason=%s, action_class=%s",
             job.job_id,
             validation_result.token_valid,
             validation_result.reason_code.value,
+            action_class.value if action_class else "none",
         )
 
         return validation_result
@@ -1380,8 +1391,12 @@ class HermesJobExecutor:
         Decision tree:
           1. Validate job structure
           2. Build delegation request
-          2.3. HXA27: Validate capability token if present in payload
+          2.2. HXA30: Classify action before token validation
+             - Classifies requested_action into D0-D6
+             - This is used for scope-to-action-class validation
+          2.3. HXA27+HXA30: Validate capability token if present in payload
              - If token present and invalid: return BLOCKED_BY_TOKEN_VALIDATION
+             - HXA30: If token scopes don't authorize action class: BLOCKED_BY_TOKEN_VALIDATION
              - If token present and valid: proceed with validation result in metadata
              - If no token: proceed (PolicyFlags control guard behavior)
           2.5. HXA23: Evaluate destructive action guard
@@ -1414,8 +1429,19 @@ class HermesJobExecutor:
         # Step 2: Build request
         request = self.build_delegation_request(job)
 
-        # Step 2.3: HXA27 - Validate capability token if present in payload
-        token_validation_result = self._validate_token_if_present(job, request)
+        # Step 2.2: HXA30 - Classify action BEFORE token validation
+        # This enables scope-to-action-class validation in token validation
+        action_class = self._classify_destructive_action(job, request)
+        logger.info(
+            "[HERMES-EXEC] Action classification for job %s: %s",
+            job.job_id,
+            action_class.value,
+        )
+
+        # Step 2.3: HXA27+HXA30 - Validate capability token with action class
+        token_validation_result = self._validate_token_if_present(
+            job, request, action_class=action_class
+        )
 
         # If token was present but validation failed, block immediately
         if token_validation_result is not None and not token_validation_result.token_valid:

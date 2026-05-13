@@ -1,5 +1,35 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-13: HXA30 Scope-to-Action-Class Hermes Integration tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa30_scope_to_action_class_integration.py -v`
+- Status: PASS
+- Result: `24 passed`
+- Notes:
+  - NEW file: `test_hxa30_scope_to_action_class_integration.py` (400+ lines)
+  - Tests scope-to-action-class integration in HermesJobExecutor:
+    - `TestActionClassPassedToTokenValidation` - Action class flows to validator
+    - `TestD3TokenD3Action` - D3 token + D3 action passes, reaches SIMULATED
+    - `TestD3TokenD4Action` - D3 token + D4 action blocked at token validation
+    - `TestD3TokenD5Action` - D3 token + D5 action blocked at token validation
+    - `TestD3TokenD6Action` - D3 token + D6 action blocked at token validation
+    - `TestD4ScopeTokenD4Action` - D4 scope passes validation, guard still blocks
+    - `TestD5ScopeTokenD5Action` - D5 scope passes validation, guard still blocks
+    - `TestD6ScopeTokenD6Action` - D6 scope passes validation, guard still blocks
+    - `TestInvalidTokenStillBlocks` - Token validation before scope check
+    - `TestNoTokenFollowsExistingBehavior` - No token = PolicyFlags control
+    - `TestValidTokenDoesNotEnableLiveDelegate` - Live delegation remains disabled
+    - `TestWSP97TruthFields` - All truth fields remain False
+  - Key integration: Action classified at Step 2.2, passed to Step 2.3
+  - Verdict: `SCOPE_TO_ACTION_CLASS_HERMES_INTEGRATION_DEFINED`
+- Updated files:
+  - `test_hxa27_hermes_token_validation_integration.py`: Added proper scopes to fixtures
+  - `test_hxa29_token_scope_validation.py`: Updated expectations for HXA30 behavior
+- Regression: 335 tests passing (HXA27-30 + executor)
+- Slice: HXA30_SCOPE_TO_ACTION_CLASS_HERMES_INTEGRATION_PHASE1
+
+---
+
 ## 2026-05-12: HXA29 Token Scope Validation tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa29_token_scope_validation.py -v`

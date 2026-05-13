@@ -81,6 +81,9 @@ class TokenValidationReasonCode(str, Enum):
     # Invalid - Execution Mode
     DRY_RUN_ONLY_BLOCKS_LIVE = "DRY_RUN_ONLY_BLOCKS_LIVE"
 
+    # Invalid - Action Class Scope Mismatch (HXA30)
+    SCOPE_DOES_NOT_AUTHORIZE_ACTION_CLASS = "SCOPE_DOES_NOT_AUTHORIZE_ACTION_CLASS"
+
 
 # ===========================================================================
 # SECTION 2: Capability Token Model
@@ -297,6 +300,13 @@ class TokenValidationResult:
     dry_run_only_blocked_live: bool = False
     """True if dry_run_only token tried to authorize live operation."""
 
+    # === Action Class Scope Mismatch (HXA30) ===
+    scope_action_class_mismatch: bool = False
+    """True if token scopes do not authorize the classified action class."""
+
+    requested_action_class: Optional[str] = None
+    """The action class that was classified for the request (e.g., D3_WRITE_SANDBOX)."""
+
     # === WSP 97 Truth Fields (ALWAYS False at validation time) ===
     verification_complete: bool = False
     """WSP 97: Always False. Token validation does NOT imply verification."""
@@ -319,6 +329,9 @@ class TokenValidationResult:
             "action_allowed": self.action_allowed,
             "path_allowed": self.path_allowed,
             "dry_run_only_blocked_live": self.dry_run_only_blocked_live,
+            # HXA30 Action Class Scope Mismatch
+            "scope_action_class_mismatch": self.scope_action_class_mismatch,
+            "requested_action_class": self.requested_action_class,
             # WSP 97 Truth: Always False at validation time
             "verification_complete": self.verification_complete,
             "cabr_ready": self.cabr_ready,
@@ -348,6 +361,7 @@ class ICapabilityTokenValidator(Protocol):
         requested_scope: Optional[str] = None,
         target_path: Optional[str] = None,
         is_live_operation: bool = False,
+        action_class: Optional[Any] = None,
     ) -> TokenValidationResult:
         """Validate a capability token for a requested operation."""
         ...
@@ -418,6 +432,7 @@ class LocalCapabilityTokenValidator:
         requested_scope: Optional[str] = None,
         target_path: Optional[str] = None,
         is_live_operation: bool = False,
+        action_class: Optional[Any] = None,
     ) -> TokenValidationResult:
         """
         Validate a capability token for a requested operation.
@@ -434,6 +449,7 @@ class LocalCapabilityTokenValidator:
           - Target path outside allowed_paths -> invalid
           - Target path in blocked_paths -> invalid
           - dry_run_only token cannot authorize live operation
+          - HXA30: Token scopes must authorize the classified action class
 
         Args:
             token: CapabilityToken to validate (None = missing token)
@@ -441,6 +457,7 @@ class LocalCapabilityTokenValidator:
             requested_scope: Scope to check (optional)
             target_path: Path to authorize (optional)
             is_live_operation: If True, dry_run_only tokens are rejected
+            action_class: DestructiveActionClass to validate scopes against (HXA30)
 
         Returns:
             TokenValidationResult with validation status and details
@@ -573,6 +590,31 @@ class LocalCapabilityTokenValidator:
                 reason_code=TokenValidationReasonCode.DRY_RUN_ONLY_BLOCKS_LIVE,
                 dry_run_only_blocked_live=True,
             )
+
+        # Gate 13 (HXA30): Scope must authorize action class
+        # If action_class is provided, verify token scopes authorize it
+        if action_class is not None:
+            # Get the action class name string
+            if hasattr(action_class, "value"):
+                action_class_name = action_class.value
+            else:
+                action_class_name = str(action_class)
+
+            # Check if any token scope authorizes this action class
+            scope_authorizes_class = False
+            for scope in token.scopes:
+                if validate_scope_for_action_class(scope, action_class):
+                    scope_authorizes_class = True
+                    break
+
+            if not scope_authorizes_class:
+                return TokenValidationResult(
+                    token_valid=False,
+                    reason_code=TokenValidationReasonCode.SCOPE_DOES_NOT_AUTHORIZE_ACTION_CLASS,
+                    scope_action_class_mismatch=True,
+                    requested_action_class=action_class_name,
+                    denied_scopes=list(token.scopes),
+                )
 
         # All gates passed - register nonce to prevent replay
         self.used_nonces.add(token.nonce)

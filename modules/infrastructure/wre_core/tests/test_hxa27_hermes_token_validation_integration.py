@@ -118,10 +118,11 @@ def executor(temp_workspace, token_validator) -> HermesJobExecutor:
 @pytest.fixture
 def valid_token(token_issuer) -> CapabilityToken:
     """Create a valid capability token for testing."""
+    # HXA30: build_foundup is D3_WRITE_SANDBOX, requires d3:sandbox scope
     return token_issuer.issue_token(
         subject="agent_hxa27",
         audience="wre-local",
-        scopes=["source:dry-run"],
+        scopes=["d3:sandbox"],  # HXA30: scope authorizes D3 action class
         allowed_actions=["build_foundup", "validate_foundup"],
         allowed_paths=["modules/foundups"],
         blocked_paths=[".env", "secrets"],
@@ -491,6 +492,7 @@ class TestNonceReplayProtection:
         token = token_issuer.issue_token(
             subject="agent_test",
             audience="wre-local",
+            scopes=["d3:sandbox"],  # HXA30: scope authorizes D3 action class
             allowed_actions=["build_foundup"],
             allowed_paths=["modules/foundups"],  # Required to pass path validation
             validity_duration=timedelta(hours=1),
@@ -568,6 +570,7 @@ class TestD3D4D6Behavior:
         token = token_issuer.issue_token(
             subject="agent_test",
             audience="wre-local",
+            scopes=["d4:repo"],  # HXA30: scope authorizes D4 action class
             allowed_actions=["create_repo"],  # D4 action
             allowed_paths=["modules/foundups"],  # Required to pass path validation
             validity_duration=timedelta(hours=1),
