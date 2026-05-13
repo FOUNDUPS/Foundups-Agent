@@ -1,5 +1,81 @@
 # ModLog - moltbot_bridge
 
+## 2026-05-13: CABR Consensus Finalization Phase 6 - Receipt Lifecycle Correlation (WSP 97)
+
+**Author**: 0102 (Worker W1)
+**WSP**: 97 (System Execution Prompting), 91 (Observability)
+**Slice**: `CABR_CONSENSUS_FINALIZATION_PHASE6_RECEIPT_LIFECYCLE_CORRELATION`
+
+### Summary
+
+Implemented read-only lifecycle correlation across all 7 CABR consensus pipeline stages:
+- RECEIPT_CREATED (ProofOfComputeReceipt)
+- PAVS_EVALUATED (PAVSVerificationResult)
+- CABR_SCORED (CABRScoreResult)
+- QUORUM_EVALUATED (QuorumVerificationResult)
+- CONSENSUS_FINALIZED (CABRConsensusRecord)
+- PERSISTED (stored record)
+- REPORTED (report record)
+
+### WSP 97 Critical Constraint
+
+Lifecycle correlation is observability only. It does NOT mean:
+- Automatic state progression
+- `verification_complete=True`
+- `cabr_ready=True`
+- `payout_ready=True`
+- Payout approval
+- DAO activation
+- Token issuance
+- External settlement
+
+### Files Created
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `src/cabr_lifecycle_correlation.py` | ~650 | Lifecycle correlation module |
+| `tests/test_cabr_lifecycle_correlation.py` | ~700 | Test coverage (43 tests) |
+| `docs/audits/consensus/CABR_CONSENSUS_FINALIZATION_PHASE6_RECEIPT_LIFECYCLE_CORRELATION.md` | ~200 | Audit documentation |
+
+### New API Surface
+
+```python
+class CABRLifecycleStage(str, Enum):
+    RECEIPT_CREATED, PAVS_EVALUATED, CABR_SCORED,
+    QUORUM_EVALUATED, CONSENSUS_FINALIZED, PERSISTED, REPORTED
+
+@dataclass
+class CABRLifecycleItem: ...      # Item at a stage
+@dataclass
+class CABRLifecycleGap: ...       # Gap between stages
+@dataclass
+class CABRLifecycleCorrelation: ...  # Single item's lifecycle
+@dataclass
+class CABRLifecycleCorrelationResult: ...  # Full result
+@dataclass
+class CABRLifecycleGapSummary: ...   # Gap statistics
+
+def correlate_cabr_lifecycle(...) -> CABRLifecycleCorrelationResult
+def summarize_lifecycle_gaps(result) -> CABRLifecycleGapSummary
+def export_lifecycle_correlation_json(result, indent) -> str
+```
+
+### Behavior
+
+- Correlates by receipt_id > job_id > record_hash (priority order)
+- Reports downstream gaps from highest present stage
+- Handles duplicates deterministically (first wins)
+- Flags truth boundary anomalies (any True field)
+- JSON export is deterministic with sorted keys
+- No store mutation, no filesystem writes, no network calls
+
+### Test Results
+
+- `test_cabr_lifecycle_correlation.py`: 43 passed
+- All regression tests: 318 total, 0 failures
+
+---
+
 ## 2026-05-13: CABR Consensus Finalization Phase 5 - Time Range and Receipt Correlation (WSP 97)
 
 **Author**: 0102 (Worker W1)
