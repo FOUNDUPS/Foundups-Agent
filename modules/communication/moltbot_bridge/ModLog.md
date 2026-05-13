@@ -1,5 +1,102 @@
 # ModLog - moltbot_bridge
 
+## 2026-05-13: CABR Consensus Finalization Phase 4 - Aggregation and Reporting (WSP 97)
+
+**Author**: 0102 (Worker W1)
+**WSP**: 97 (System Execution Prompting), 91 (Observability)
+**Slice**: `CABR_CONSENSUS_FINALIZATION_PHASE4_AGGREGATION_REPORTING`
+
+### Summary
+
+Implemented read-only aggregation and reporting tools for persisted CABRConsensusRecord audit trails. This is Phase 4 of the CABR consensus finalization work, enabling observability and analysis of consensus decisions while maintaining all truth boundaries.
+
+### WSP 97 Critical Constraint
+
+Reporting is observability only. It does NOT mean:
+- Automatic state progression
+- `verification_complete=True`
+- `cabr_ready=True`
+- `payout_ready=True`
+- Payout approval
+- DAO activation
+- Token issuance
+- External settlement
+- Payout readiness inference (high acceptance != payout ready)
+- DAO activation inference (high quorum != DAO activation)
+
+### Files Created
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `src/cabr_consensus_reporting.py` | ~530 | Read-only aggregation and reporting |
+| `tests/test_cabr_consensus_reporting.py` | ~650 | Test coverage (48 tests) |
+| `docs/audits/consensus/CABR_CONSENSUS_FINALIZATION_PHASE4_AGGREGATION_REPORTING.md` | ~250 | Audit documentation |
+
+### New API Surface
+
+```python
+# Report Generation
+def generate_consensus_report(
+    store: CABRConsensusStore,
+    limit: Optional[int] = None,
+    decision_filter: Optional[str] = None,
+) -> CABRConsensusReport
+
+# Pure Summarization (no store required)
+def summarize_consensus_records(
+    records: List[Dict[str, Any]]
+) -> CABRConsensusReportSummary
+
+# JSON Export (pure string output)
+def export_consensus_report_json(
+    report: CABRConsensusReport,
+    indent: int = 2,
+) -> str
+
+# Convenience Functions
+def count_decisions(store, limit=None) -> CABRDecisionCounts
+def check_truth_boundary_anomalies(store, limit=None) -> CABRTruthBoundarySummary
+def get_records_by_decision(store, decision, limit=None) -> List[Dict]
+
+# Report Dataclasses
+@dataclass
+class CABRConsensusReport:
+    records: List[Dict[str, Any]]
+    summary: CABRConsensusReportSummary
+    generated_at: datetime
+    wsp97_compliance_note: str  # Embedded compliance reminder
+
+@dataclass
+class CABRTruthBoundarySummary:
+    has_anomaly: bool  # True if any truth field is unexpectedly True
+    anomaly_record_ids: List[str]  # Records with anomalies
+```
+
+### Reporting Behavior
+
+| Feature | Behavior |
+|---------|----------|
+| Read-only | No store mutations |
+| Deterministic | Sorted keys, sorted anomaly IDs |
+| Truth boundary detection | Flags any True value as anomaly |
+| WSP 97 note | Embedded in report and JSON output |
+| No inference | High counts != payout/DAO readiness |
+
+### Test Results
+
+- `test_cabr_consensus_reporting.py`: 48 passed
+- `test_cabr_consensus_finalizer_persistence.py`: 26 passed (no regression)
+- `test_cabr_consensus_finalizer.py`: 48 passed (no regression)
+- `test_cabr_consensus_store.py`: 35 passed (no regression)
+
+**Total**: 157 consensus pipeline tests, 0 failures
+
+### Recommended Next Slice
+
+`CABR_CONSENSUS_FINALIZATION_PHASE5` - Time-range queries and receipt correlation lookup.
+
+---
+
 ## 2026-05-13: CABR Consensus Finalization Phase 3 - Auto-Persist Integration (WSP 97)
 
 **Author**: 0102 (Worker W1)
