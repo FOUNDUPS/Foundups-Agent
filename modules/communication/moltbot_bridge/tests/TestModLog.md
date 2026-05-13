@@ -1,3 +1,36 @@
+## 2026-05-13: CABR Runtime Scoring Engine Tests (WSP 29/97)
+
+**File**: `test_cabr_scoring_engine.py` (NEW - 42 tests)
+
+**Test Classes**:
+- `TestMissingEvidenceRejects`: Empty/None evidence_refs rejection
+- `TestDryRunAcceptedForReviewOnly`: Dry-run/simulated execution scoring
+- `TestVerificationCompleteNeverTrue`: WSP 97 truth field enforcement
+- `TestCABRReadyAlwaysFalse`: cabr_ready=False preservation
+- `TestPayoutReadyAlwaysFalse`: payout_ready=False preservation
+- `TestQuorumBelowThreeFails`: Verifier count below min_validators
+- `TestThreeVerifiersQuorumEligible`: Quorum met with 3+ verifiers
+- `TestDuplicateVerifiersDoNotCount`: Duplicate verifier ID rejection
+- `TestFailedPAVSResultRejects`: pAVS failure state propagation
+- `TestTruthBoundaryViolationRejects`: Input claiming completion rejected
+- `TestBatchScoringDeterministic`: Batch ordering preservation
+- `TestNoNetworkCalls`: Pure local computation
+- `TestNoTokenIssuance`: No token-related output fields
+- `TestWSP97TruthFieldsRemainFalse`: All acceptance states have False truth fields
+- `TestMissingIdentityRejects`: Identity field validation
+- `TestScoreIdGeneration`: Score ID format/uniqueness
+- `TestResultSerialization`: to_dict/from_dict roundtrip
+- `TestConvenienceFunctions`: score_from_receipt, score_from_pavs_result
+- `TestMinValidatorsConfiguration`: Custom quorum threshold
+- `TestInputBuilders`: build_score_input_from_receipt/pavs_result
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_cabr_scoring_engine.py -q`
+
+**Result**: 42 passed
+
+---
+
 ## 2026-05-12: HXA24 Capability Token PolicyFlags Tests (WSP 97)
 
 **File**: `test_foundup_job_contract.py` (extended - 8 new tests)
