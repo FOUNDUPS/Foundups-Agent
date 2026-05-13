@@ -1,3 +1,36 @@
+## 2026-05-13: CABR Lifecycle Correlation Tests (WSP 97)
+
+**File**: `test_cabr_lifecycle_correlation.py` (NEW - 43 tests)
+
+**Test Classes**:
+- `TestLifecycleStageEnum`: Stage ordering and completeness
+- `TestReceiptOnlyDownstreamGaps`: Receipt only -> 6 downstream gaps
+- `TestReceiptPlusPayvsGaps`: Receipt + pAVS -> remaining gaps
+- `TestFullLifecycleCorrelation`: All 7 stages -> no gaps
+- `TestCorrelationByReceiptId`: Primary correlation key
+- `TestCorrelationByJobIdFallback`: Fallback when no receipt_id
+- `TestCorrelationByRecordHash`: Record hash in consensus records
+- `TestDuplicateRecordsDeterministic`: First item wins
+- `TestMissingStageReportedNotInferred`: Gaps reported, not failure
+- `TestTruthBoundaryAnomalyFlagged`: True values flagged
+- `TestDeterministicJsonExport`: Sorted keys, ISO dates
+- `TestNoStoreMutation`: Pure function, no side effects
+- `TestNoPayoutReadinessInferred`: No payout fields in result
+- `TestNoDAOActivationInferred`: No DAO fields in result
+- `TestNoDefaultDbPath`: No store/db_path parameter
+- `TestGapSummary`: Gap summary statistics
+- `TestLifecycleItem`: Item serialization
+- `TestLifecycleGap`: Gap serialization
+- `TestMultipleReceiptsDifferentLifecycles`: Mixed states
+- `TestCorrelationSorting`: Deterministic ordering
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_cabr_lifecycle_correlation.py -q`
+
+**Result**: 43 passed
+
+---
+
 ## 2026-05-13: CABR Consensus Time Range and Correlation Tests (WSP 97)
 
 **File**: `test_cabr_consensus_reporting_time_correlation.py` (NEW - 46 tests)
