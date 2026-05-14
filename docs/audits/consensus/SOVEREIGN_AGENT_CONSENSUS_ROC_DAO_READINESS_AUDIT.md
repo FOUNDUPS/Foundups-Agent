@@ -16,9 +16,11 @@
 | Worker | Slice | Status | Key Finding |
 |--------|-------|--------|-------------|
 | W3 | HXA/Hermes Safety | COMPLETE | Factory trunk safe at dry-run level (HXA3/HXA4/HXA8) |
-| W5 | CABR Synthesis | COMPLETE | Phase 10 merged — pipeline composer operational |
+| W5 | CABR Synthesis | INLINE | Phase 10 merged — synthesized from merged Phase 1-10 code/docs (no separate W5 report received) |
 | W6 | ROC/DAE/DAO Readiness | COMPLETE | Payout guards strong; ROC state machine absent |
-| W7 | Daemon/Runtime Hooks | IMPLICIT | FAMDaemon operational; CABR hooks exist |
+| W7 | Daemon/Runtime Hooks | COMPLETE | Dangerous hooks classified; WSP gates recommended |
+
+**Note**: CABR finalization synthesis was performed inside this W9 synthesis from merged Phase 1-10 code/docs; no separate W5 report was available.
 
 ### 1.2 Documents Examined
 
@@ -28,8 +30,10 @@
 | `CABR_CONSENSUS_FINALIZATION_PHASE10_*.md` | 150+ | Pipeline integration |
 | `QUORUM_VERIFICATION_ENFORCEMENT_PHASE1.md` | 300+ | Quorum engine |
 | `CABR_RUNTIME_SCORING_ENGINE_PHASE1.md` | 300+ | CABR scoring |
-| `HXA8_OPENCLAW_HERMES_FACTORY_SYNTHESIS.md` | 350+ | Hermes safety proof |
-| `SACRDA_ROC_DAE_DAO_READINESS_AUDIT.md` | 350 | ROC/DAO state analysis |
+| `HXA8_OPENCLAW_HERMES_FACTORY_SYNTHESIS.md` | 350+ | Hermes safety proof (W3) |
+| `SACRDA_HXA_HERMES_EXECUTION_SAFETY_AUDIT.md` | 200+ | W3 HXA/Hermes safety |
+| `SACRDA_ROC_DAE_DAO_READINESS_AUDIT.md` | 350 | W6 ROC/DAO state analysis |
+| `SACRDA_DAEMON_RUNTIME_HOOK_AUDIT.md` | 200+ | W7 Daemon/hook classification |
 | `RITUAL_ROC_MILESTONE_ATTESTATION_AUDIT.md` | 200+ | External attestation fit |
 
 ### 1.3 Test Execution
@@ -385,7 +389,7 @@ KILL SWITCH: External layer can be bypassed without breaking FoundUps
 |------|-------|---------|------------|
 | 1 | ~~Merge Phase 10~~ | Pipeline composer | **DONE** (PR #588) |
 | 2 | `ROC_STATE_MACHINE_AUDIT_PHASE1` | Define ROC states | Nothing |
-| 3 | `DAEMON_RUNTIME_HOOK_REQUIREMENTS_AUDIT` | Hook gap analysis | ROC spec |
+| 3 | `WSP_GATES_FOR_DANGEROUS_HOOKS` | WSP gates for payout/DAO/token hooks | ROC spec |
 | 4 | `DAE_DAO_STATE_MODEL_DOCS_ONLY` | Document transition model | ROC spec |
 | 5 | `EXTERNAL_ATTESTATION_ADAPTER_RESEARCH` | Ritual integration spec | Sovereign path defined |
 
@@ -395,7 +399,7 @@ Per mission framing, the default sequence is:
 
 1. ✅ **Merge Phase 10** — DONE (PR #588 merged)
 2. ⏳ **ROC_STATE_MACHINE_AUDIT_PHASE1** — NEXT
-3. ⏳ **Daemon/runtime hook requirements audit**
+3. ⏳ **WSP gates for dangerous hooks** — Pending (W7 audit complete)
 4. ⏳ **DAE → DAO state model docs only**
 5. ⏳ **External attestation adapter research only after sovereign path defined**
 
