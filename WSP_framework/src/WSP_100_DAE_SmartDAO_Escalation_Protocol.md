@@ -875,6 +875,175 @@ Per Section 10 of this WSP, external attestation systems MAY attest ROC state tr
 
 ---
 
+## 12. ROC_CANDIDATE Derivation Annex (Specification Only)
+
+### 12.1 Purpose and Scope
+
+This annex defines how ROC_CANDIDATE status may be derived from existing CABR Phase 10 pipeline outputs. The derivation is **specification-only** and does NOT imply runtime implementation.
+
+**CRITICAL WSP 97 LABELS (ALL APPLY):**
+
+| Label | Status | Meaning |
+|-------|--------|---------|
+| `DOCS_ONLY` | ENFORCED | This is specification documentation, not runtime code |
+| `ROC_CANDIDATE_ONLY` | ENFORCED | State is ROC_CANDIDATE, not any downstream state |
+| `NOT_ROC_VALIDATED` | ENFORCED | ROC ratio has not been computed or validated |
+| `NOT_CABR_READY` | ENFORCED | External verification has not been performed |
+| `NOT_PAYOUT_READY` | ENFORCED | Payout engine has not approved |
+| `NO_DAO_ACTIVATION` | ENFORCED | DAO governance is not activated |
+| `NO_RUNTIME_DERIVATION` | ENFORCED | No runtime derivation is implemented |
+
+### 12.2 ROC_CANDIDATE Definition
+
+```
+ROC_CANDIDATE:
+  A consensus record that has successfully passed through the CABR Phase 10
+  pipeline with all required evidence and quorum criteria met.
+  
+  This state represents "accepted for review" status and does NOT imply:
+    - ROC_VALIDATED (ROC ratio computed and passing)
+    - CABR_READY (external verification completed)
+    - PAYOUT_READY (payout engine approval)
+    - DAE_MATURE (DAE maturity thresholds met)
+    - DAO_READY (DAO governance activated)
+    - DAO_ACTIVATED (smart contracts deployed)
+    - Token issuance
+    - External attestation dependency
+```
+
+### 12.3 Derivation Criteria
+
+ROC_CANDIDATE derivation requires ALL of the following conditions:
+
+| Criterion | Source Field | Required Value | Classification |
+|-----------|--------------|----------------|----------------|
+| Decision | `CABRConsensusRecord.decision` | `ACCEPTED_FOR_REVIEW` | MANDATORY |
+| Quorum Met | `CABRConsensusRecord.quorum_met` | `True` | MANDATORY |
+| Threshold Met | `CABRConsensusRecord.threshold_met` | `True` | MANDATORY |
+| Evidence Present | `CABRConsensusRecord.evidence_present` | `True` | MANDATORY |
+| Verification Complete | `CABRConsensusRecord.verification_complete` | `False` | MANDATORY (truth boundary) |
+| CABR Ready | `CABRConsensusRecord.cabr_ready` | `False` | MANDATORY (truth boundary) |
+| Payout Ready | `CABRConsensusRecord.payout_ready` | `False` | MANDATORY (truth boundary) |
+
+### 12.4 Derivation Logic (Specification Only)
+
+```python
+# SPECIFICATION ONLY - NOT FOR RUNTIME IMPLEMENTATION
+def is_roc_candidate(record: CABRConsensusRecord) -> bool:
+    """
+    Determine if a consensus record qualifies as ROC_CANDIDATE.
+    
+    WSP 97 Critical:
+      ROC_CANDIDATE status is REVIEW_ONLY. It does NOT imply:
+        - verification_complete=True
+        - cabr_ready=True
+        - payout_ready=True
+        - Any downstream state progression
+    
+    Returns:
+        True if record meets all ROC_CANDIDATE criteria.
+    """
+    # Required condition 1: Decision must be ACCEPTED_FOR_REVIEW
+    if record.decision != CABRConsensusDecision.ACCEPTED_FOR_REVIEW:
+        return False
+    
+    # Required condition 2: Quorum must be met
+    if not record.quorum_met:
+        return False
+    
+    # Required condition 3: Threshold must be met
+    if not record.threshold_met:
+        return False
+    
+    # Required condition 4: Evidence must be present
+    if not record.evidence_present:
+        return False
+    
+    # Required condition 5: Truth fields must all be False
+    if record.verification_complete or record.cabr_ready or record.payout_ready:
+        return False  # Truth boundary violation
+    
+    # All conditions met - qualifies as ROC_CANDIDATE
+    return True
+```
+
+### 12.5 Required Evidence Inputs
+
+#### 12.5.1 Mandatory Evidence
+
+| Input | Source | Purpose |
+|-------|--------|---------|
+| `receipt_id` | CABRConsensusRecord | Unique identification |
+| `job_id` | CABRConsensusRecord | Source correlation |
+| `tenant_id` | CABRConsensusRecord | Actor scope |
+| `evidence_present` | CABRConsensusRecord | Evidence verification (must be True) |
+| `evidence_count` | CABRConsensusRecord | Minimum 1 evidence reference |
+
+#### 12.5.2 Evidence Completeness Check (Specification Only)
+
+```python
+# SPECIFICATION ONLY - NOT FOR RUNTIME IMPLEMENTATION
+def has_complete_evidence(record: CABRConsensusRecord) -> bool:
+    """Check if record has complete evidence for ROC_CANDIDATE."""
+    return (
+        record.receipt_id and
+        record.job_id and
+        record.tenant_id and
+        record.evidence_present and
+        record.evidence_count >= 1
+    )
+```
+
+### 12.6 Blocking Conditions
+
+ROC_CANDIDATE derivation MUST be blocked if any of the following conditions exist:
+
+| Condition | Reason | Priority |
+|-----------|--------|----------|
+| `verification_complete == True` | Truth boundary violation | P0 (highest) |
+| `cabr_ready == True` | Truth boundary violation | P0 |
+| `payout_ready == True` | Truth boundary violation | P0 |
+| `decision != ACCEPTED_FOR_REVIEW` | Not accepted for review | P1 |
+| `quorum_met == False` | Insufficient verifiers | P1 |
+| `threshold_met == False` | Consensus score too low | P1 |
+| `evidence_present == False` | No evidence provided | P1 |
+| Missing `receipt_id` | Incomplete identity | P2 |
+| Missing `job_id` | Incomplete identity | P2 |
+| Missing `tenant_id` | Incomplete identity | P2 |
+
+### 12.7 Inherited Thresholds
+
+ROC_CANDIDATE inherits thresholds from CABR Phase 10 pipeline:
+
+| Threshold | Value | Source | Purpose |
+|-----------|-------|--------|---------|
+| `min_validators` | 3 | WSP 29, cabr_scoring_engine.py | Quorum requirement |
+| `consensus_threshold` | 0.382 | WSP 29, quorum_verification_engine.py | Consensus score threshold |
+
+**No additional thresholds required** for ROC_CANDIDATE derivation. The existing CABR pipeline thresholds are sufficient.
+
+### 12.8 Integration with Section 11
+
+ROC_CANDIDATE is the first REVIEW_ONLY state in the ROC state machine defined in Section 11:
+
+| State Progression | Classification | Derivation Source |
+|-------------------|----------------|-------------------|
+| CONSENSUS_RECORDED | CURRENTLY_SAFE | Phase 10 pipeline |
+| **ROC_CANDIDATE** | **REVIEW_ONLY** | **This annex (Section 12)** |
+| ROC_VALIDATED | REVIEW_ONLY | Simulator ROC formula |
+| CABR_READY | FUTURE_BLOCKED | Not implementable |
+
+The transition `CONSENSUS_RECORDED -> ROC_CANDIDATE` is the first derivable transition from the Phase 10 pipeline that produces a REVIEW_ONLY state suitable for observability metrics.
+
+### 12.9 Audit Reference
+
+This annex is based on the detailed audit documented in:
+- `docs/audits/consensus/ROC_CANDIDATE_DERIVATION_AUDIT_PHASE1.md`
+
+The audit verified that all required CABR inputs are available from the Phase 10 pipeline for ROC_CANDIDATE derivation.
+
+---
+
 **Version History:**
 | Version | Date | Changes |
 |---------|------|---------|
@@ -882,9 +1051,10 @@ Per Section 10 of this WSP, external attestation systems MAY attest ROC state tr
 | 1.1 | 2026-02-17 | Added math implementation (smartdao_spawning.py), tier thresholds, spawning fund mechanics |
 | 1.2 | 2026-05-09 | Added Section 10: Optional External Milestone Attestation (vendor-neutral annex) |
 | 1.3 | 2026-05-14 | Added Section 11: ROC State Machine Annex (docs-only per WSP 97) |
+| 1.4 | 2026-05-14 | Added Section 12: ROC_CANDIDATE Derivation Annex (docs-only per WSP 97) |
 
 **WSP Compliance:**
 - WSP 22: ModLog documentation required
 - WSP 49: Module structure standards
 - WSP 57: Naming coherence (DAE, SmartDAO terminology)
-- WSP 97: Truth boundaries enforced (Section 11)
+- WSP 97: Truth boundaries enforced (Sections 11, 12)
