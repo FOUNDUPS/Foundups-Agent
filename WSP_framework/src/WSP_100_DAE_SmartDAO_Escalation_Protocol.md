@@ -607,14 +607,284 @@ Protocols are listed as **researched examples** for architecture planning. Actua
 
 ---
 
+## 11. ROC State Machine Annex (Specification Only)
+
+### 11.1 Purpose and Critical WSP 97 Constraints
+
+This annex defines the ROC (Readiness-Oriented Consensus) state machine specification for documentation and architecture planning purposes ONLY.
+
+**CRITICAL WSP 97 LABELS (ALL APPLY):**
+
+| Label | Status | Meaning |
+|-------|--------|---------|
+| `DOCS_ONLY` | ENFORCED | This is specification documentation, not runtime code |
+| `REVIEW_ONLY` | ENFORCED | States represent observation status, not execution authority |
+| `NOT_CABR_READY` | ENFORCED | `cabr_ready` remains `False` in all runtime systems |
+| `NOT_PAYOUT_READY` | ENFORCED | `payout_ready` remains `False` in all runtime systems |
+| `NO_DAO_ACTIVATION` | ENFORCED | `dao_activated` remains `False` / absent in runtime |
+| `NO_EXTERNAL_ATTESTATION_REQUIRED` | ENFORCED | FoundUps operates without external chain dependency |
+| `NO_RUNTIME_STATE_MACHINE` | ENFORCED | No automatic state progression implemented |
+
+**PROHIBITED ACTIONS (WSP 97 Stop Conditions):**
+
+- No token issuance triggered by state transitions
+- No external protocol dependency created
+- No automatic economic state mutation
+- No payout execution paths
+- No CABR_READY flag enablement
+- No verification_complete flag enablement
+
+### 11.2 ROCState Enum Specification
+
+```python
+# SPECIFICATION ONLY - NOT FOR RUNTIME IMPLEMENTATION
+# This enum defines the conceptual states for documentation purposes
+
+class ROCState(str, Enum):
+    """
+    Readiness-Oriented Consensus state machine specification.
+    
+    WSP 97 Critical: States represent OBSERVATION status, NOT execution authority.
+    Reaching any state does NOT imply:
+      - verification_complete=True
+      - cabr_ready=True
+      - payout_ready=True
+      - DAO activation
+      - Token issuance
+      - External attestation dependency
+      - Automatic economic state mutation
+    """
+    
+    # --- CURRENTLY_SAFE STATES (Observable in Phase 10 Pipeline) ---
+    RECEIPT_OBSERVED = "receipt_observed"
+    """ProofOfComputeReceipt created and observable. CURRENTLY_SAFE."""
+    
+    PAVS_REVIEWED = "pavs_reviewed"
+    """pAVS verification completed, decision rendered. CURRENTLY_SAFE."""
+    
+    CABR_SCORED = "cabr_scored"
+    """CABR scoring engine produced score. CURRENTLY_SAFE."""
+    
+    QUORUM_REVIEWED = "quorum_reviewed"
+    """Quorum verification completed. CURRENTLY_SAFE."""
+    
+    CONSENSUS_RECORDED = "consensus_recorded"
+    """CABRConsensusRecord finalized. CURRENTLY_SAFE."""
+    
+    # --- REVIEW_ONLY STATES (Derivable but Not Gate Triggers) ---
+    ROC_CANDIDATE = "roc_candidate"
+    """
+    Receipt qualifies for ROC calculation based on:
+      - consensus_recorded = True
+      - quorum_met = True
+      - threshold_met = True
+    REVIEW_ONLY - Does NOT imply readiness.
+    """
+    
+    ROC_VALIDATED = "roc_validated"
+    """
+    ROC ratio computed and passes threshold (ROC > 0).
+    REVIEW_ONLY - Observability metric, NOT gate trigger.
+    """
+    
+    # --- FUTURE_BLOCKED STATES (Cannot Implement Without Prerequisites) ---
+    CABR_READY = "cabr_ready"
+    """
+    FUTURE_BLOCKED - Requires:
+      - External cryptographic verification (Phase 2+)
+      - Validator network (not single-process)
+      - WSP gate defining transition rules
+    """
+    
+    PAYOUT_READY = "payout_ready"
+    """
+    FUTURE_BLOCKED - Requires:
+      - CABR_READY = True (blocked)
+      - Payout engine implementation
+      - DAO governance approval
+      - Token contract integration
+    """
+    
+    DAE_MATURE = "dae_mature"
+    """
+    FUTURE_BLOCKED - Requires:
+      - DAE maturity model definition
+      - Maturity threshold parameters
+      - WSP governing maturity criteria
+    """
+    
+    DAO_CANDIDATE = "dao_candidate"
+    """
+    FUTURE_BLOCKED - Requires:
+      - DAE_MATURE = True (blocked)
+      - DAO tier threshold evaluation
+      - Adoption curve integration
+    """
+    
+    DAO_READY = "dao_ready"
+    """
+    FUTURE_BLOCKED - Requires:
+      - DAO_CANDIDATE = True (blocked)
+      - Governance layer formalization
+      - Treasury autonomy activation
+    """
+    
+    DAO_ACTIVATED = "dao_activated"
+    """
+    FUTURE_BLOCKED - Requires:
+      - DAO_READY = True (blocked)
+      - Smart contract deployment
+      - External chain integration
+      - Full governance handover
+    """
+```
+
+### 11.3 State Classification Matrix
+
+| State | Classification | Current Evidence | Implication |
+|-------|----------------|------------------|-------------|
+| `RECEIPT_OBSERVED` | CURRENTLY_SAFE | Phase 10 pipeline provides | Observable now |
+| `PAVS_REVIEWED` | CURRENTLY_SAFE | Phase 10 pipeline provides | Observable now |
+| `CABR_SCORED` | CURRENTLY_SAFE | Phase 10 pipeline provides | Observable now |
+| `QUORUM_REVIEWED` | CURRENTLY_SAFE | Phase 10 pipeline provides | Observable now |
+| `CONSENSUS_RECORDED` | CURRENTLY_SAFE | Phase 10 pipeline provides | Observable now |
+| `ROC_CANDIDATE` | REVIEW_ONLY | Derivable from consensus | Can derive, cannot trigger |
+| `ROC_VALIDATED` | REVIEW_ONLY | Simulator computes ROC | Can compute, cannot trigger |
+| `CABR_READY` | FUTURE_BLOCKED | External verification absent | BLOCKED |
+| `PAYOUT_READY` | FUTURE_BLOCKED | CABR_READY dependency | BLOCKED |
+| `DAE_MATURE` | FUTURE_BLOCKED | Maturity model absent | BLOCKED |
+| `DAO_CANDIDATE` | FUTURE_BLOCKED | DAE_MATURE dependency | BLOCKED |
+| `DAO_READY` | FUTURE_BLOCKED | DAO_CANDIDATE dependency | BLOCKED |
+| `DAO_ACTIVATED` | FUTURE_BLOCKED | DAO_READY dependency | BLOCKED |
+
+**Classification Definitions:**
+
+- **CURRENTLY_SAFE**: State can be observed using existing Phase 10 infrastructure
+- **REVIEW_ONLY**: State can be derived/computed for observability; does not trigger execution
+- **FUTURE_BLOCKED**: State cannot be implemented until prerequisites exist
+- **UNSAFE_WITHOUT_WSP**: State requires explicit WSP gate definition before implementation
+- **ABSENT**: State definition or implementation does not exist in codebase
+
+### 11.4 Transition Rules (Documentation Only)
+
+#### 11.4.1 Safe Transitions (Phase 10 Already Implements)
+
+| From | To | Trigger | Guard | Risk |
+|------|-----|---------|-------|------|
+| (none) | RECEIPT_OBSERVED | ProofOfComputeReceipt created | receipt_id present | LOW |
+| RECEIPT_OBSERVED | PAVS_REVIEWED | pAVS verification complete | decision rendered | LOW |
+| PAVS_REVIEWED | CABR_SCORED | CABR scoring complete | score_id assigned | LOW |
+| CABR_SCORED | QUORUM_REVIEWED | Quorum evaluation complete | quorum_id assigned | LOW |
+| QUORUM_REVIEWED | CONSENSUS_RECORDED | Consensus finalization complete | record_id assigned | LOW |
+
+#### 11.4.2 Review-Only Transitions (Observability Only)
+
+| From | To | Trigger | Guard | Risk |
+|------|-----|---------|-------|------|
+| CONSENSUS_RECORDED | ROC_CANDIDATE | Consensus meets criteria | quorum_met=True AND threshold_met=True | MEDIUM |
+| ROC_CANDIDATE | ROC_VALIDATED | ROC ratio computed | roc_ratio > 0 (from simulator) | MEDIUM |
+
+#### 11.4.3 Blocked Transitions (Future Work - NOT IMPLEMENTABLE NOW)
+
+| From | To | Prerequisites | Gate Definition |
+|------|-----|---------------|-----------------|
+| ROC_VALIDATED | CABR_READY | External verification, validator network | BLOCKED_UNTIL_PHASE2 |
+| CABR_READY | PAYOUT_READY | Payout engine, DAO approval, token contract | BLOCKED_UNTIL_DAO |
+| PAYOUT_READY | DAE_MATURE | Maturity model definition | BLOCKED_UNTIL_MATURITY_MODEL |
+| DAE_MATURE | DAO_CANDIDATE | DAO tier evaluation, adoption curve | BLOCKED_UNTIL_DAE_MATURE |
+| DAO_CANDIDATE | DAO_READY | Governance formalization, treasury autonomy | BLOCKED_UNTIL_DAO_CANDIDATE |
+| DAO_READY | DAO_ACTIVATED | Smart contracts, external chain, governance handover | BLOCKED_UNTIL_CONTRACTS |
+
+### 11.5 Required Evidence Inputs
+
+| Transition | Required Evidence | Source | Available? |
+|------------|-------------------|--------|------------|
+| -> RECEIPT_OBSERVED | ProofOfComputeReceipt | cabr_hooks.py | YES |
+| -> PAVS_REVIEWED | PAVSVerificationResult | pavs_verification_seam.py | YES |
+| -> CABR_SCORED | CABRScoreResult | cabr_scoring_engine.py | YES |
+| -> QUORUM_REVIEWED | QuorumVerificationResult | quorum_verification_engine.py | YES |
+| -> CONSENSUS_RECORDED | CABRConsensusRecord | cabr_consensus_finalizer.py | YES |
+| -> ROC_CANDIDATE | Consensus record with quorum_met | cabr_consensus_pipeline.py | YES |
+| -> ROC_VALIDATED | ROC ratio computation | unified_sustainability.py | YES (simulator) |
+| -> CABR_READY | External cryptographic proof | NOT IMPLEMENTED | NO |
+| -> PAYOUT_READY | Payout engine approval | NOT IMPLEMENTED | NO |
+| -> DAE_MATURE | Maturity evaluation | NOT IMPLEMENTED | NO |
+| -> DAO_CANDIDATE | DAO tier check | smartdao_spawning.py (simulator only) | NO (not runtime) |
+| -> DAO_READY | Governance check | NOT IMPLEMENTED | NO |
+| -> DAO_ACTIVATED | Contract deployment | NOT IMPLEMENTED | NO |
+
+### 11.6 Required Gates for Future Implementation
+
+| Gate | Purpose | WSP Required | Status |
+|------|---------|--------------|--------|
+| `CABR_VERIFICATION_GATE` | External cryptographic verification | NEW WSP needed | NOT DEFINED |
+| `PAYOUT_APPROVAL_GATE` | Multi-party payout authorization | NEW WSP needed | NOT DEFINED |
+| `MATURITY_THRESHOLD_GATE` | DAE maturity criteria | WSP 100 enhancement | NOT DEFINED |
+| `DAO_EMERGENCE_GATE` | DAO transition authorization | WSP 100 enhancement | NOT DEFINED |
+| `GOVERNANCE_HANDOVER_GATE` | Full governance transfer | NEW WSP needed | NOT DEFINED |
+| `CONTRACT_DEPLOYMENT_GATE` | Smart contract activation | NEW WSP needed | NOT DEFINED |
+
+### 11.7 Stop Conditions and Enforcement
+
+**What MUST NOT Happen (WSP 97 Enforcement):**
+
+| Condition | Current Status | Guard Mechanism |
+|-----------|----------------|-----------------|
+| `verification_complete=True` set | BLOCKED | 15+ test assertions enforce False |
+| `cabr_ready=True` set | BLOCKED | 15+ test assertions enforce False |
+| `payout_ready=True` set | BLOCKED | 15+ test assertions enforce False |
+| `dao_activated` field present | BLOCKED | Export tests assert field absence |
+| Live payout execution | NOT IMPLEMENTED | No payout engine exists |
+| Token issuance | NOT IMPLEMENTED | No token contract exists |
+| External attestation dependency | RESEARCH ONLY | Section 10 defines as optional |
+| Automatic economic state mutation | NOT IMPLEMENTED | All truth fields locked to False |
+
+### 11.8 External Attestation Optional Boundary
+
+Per Section 10 of this WSP, external attestation systems MAY attest ROC state transitions for optional audit trail purposes. However:
+
+| Dimension | Owner | External Role |
+|-----------|-------|---------------|
+| ROC state computation | FoundUps (internal) | NONE - external systems may not compute ROC states |
+| ROC state transitions | FoundUps (this annex) | NONE - external systems may not control transitions |
+| State attestation | External (optional) | ALLOWED - may attest/timestamp state outcomes |
+
+**Core Rule**: FoundUps remains source of truth for all ROC state transitions. External attestation is supplementary evidence, never a gate.
+
+### 11.9 Integration with Existing Systems
+
+| System | Integration Point | Status |
+|--------|------------------|--------|
+| CABR Pipeline (Phase 10) | Provides CURRENTLY_SAFE state evidence | OPERATIONAL |
+| Quorum Engine | Provides quorum_met evidence | OPERATIONAL |
+| ROC Formula (Simulator) | Provides roc_ratio computation | SIMULATOR ONLY |
+| DAO Tier Model (Simulator) | Provides tier threshold reference | SIMULATOR ONLY |
+| FAMDaemon | Provides audit trail | OPERATIONAL |
+| Payout Engine | Not implemented | BLOCKED |
+| Smart Contracts | Not implemented | BLOCKED |
+
+### 11.10 Recommended Next Work
+
+| Priority | Slice | Purpose | Blocked By |
+|----------|-------|---------|------------|
+| P1 | `ROC_CANDIDATE_DERIVATION_IMPL` | Derive ROC_CANDIDATE from consensus records | Nothing |
+| P1 | `ROC_RATIO_PIPELINE_CONNECTOR` | Connect simulator ROC to pipeline | Nothing |
+| P2 | `DAE_MATURITY_MODEL_SPEC` | Define maturity criteria | ROC_CANDIDATE |
+| P2 | `WSP_GATES_FOR_DANGEROUS_HOOKS` | WSP gates for payout/DAO/token hooks | ROC spec |
+| P3 | `DAO_RUNTIME_ENFORCEMENT_SPEC` | Move simulator to runtime | DAE maturity |
+
+---
+
 **Version History:**
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0 | 2026-02-15 | Initial specification from 012 vision document |
 | 1.1 | 2026-02-17 | Added math implementation (smartdao_spawning.py), tier thresholds, spawning fund mechanics |
 | 1.2 | 2026-05-09 | Added Section 10: Optional External Milestone Attestation (vendor-neutral annex) |
+| 1.3 | 2026-05-14 | Added Section 11: ROC State Machine Annex (docs-only per WSP 97) |
 
 **WSP Compliance:**
 - WSP 22: ModLog documentation required
 - WSP 49: Module structure standards
 - WSP 57: Naming coherence (DAE, SmartDAO terminology)
+- WSP 97: Truth boundaries enforced (Section 11)
