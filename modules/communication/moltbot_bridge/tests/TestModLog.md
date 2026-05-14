@@ -1,3 +1,32 @@
+## 2026-05-13: CABR Consensus Pipeline Tests (WSP 97)
+
+**File**: `test_cabr_consensus_pipeline.py` (NEW - 35 tests)
+
+**Test Classes**:
+- `TestMinimalReceiptPipeline`: Minimal receipt returns review-only result
+- `TestMissingEvidenceFailsClosed`: Empty/None evidence fails at scoring
+- `TestPAVSRejectBlocksPath`: pAVS rejection blocks downstream stages
+- `TestQuorumNotMetReturnsPending`: Zero/insufficient attestations returns pending
+- `TestQuorumMetReturnsAcceptedForReview`: Full quorum returns accepted-for-review
+- `TestOptionalStorePersistence`: Store persistence when provided
+- `TestNoStoreNoWrites`: No store means no persistence attempt
+- `TestExportDeterministic`: JSON/Markdown exports deterministic
+- `TestWSP97LabelsPresent`: All required labels present
+- `TestNoPayoutReadinessInferred`: payout_ready=False always
+- `TestNoDAOActivationInferred`: cabr_ready=False always
+- `TestNoCABRReadinessInferred`: verification_complete=False always
+- `TestStageFailureExplicit`: Failures explicit, downstream stages blocked
+- `TestBatchPipelineDeterministic`: Multiple receipts in deterministic order
+- `TestLifecycleExportIntegration`: Export generated when requested
+- `TestPreComputedResultsSkipStages`: Pre-computed results skip stages
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_cabr_consensus_pipeline.py -q`
+
+**Result**: 35 passed
+
+---
+
 ## 2026-05-13: CABR Store Export Tests (WSP 97)
 
 **File**: `test_cabr_store_export.py` (NEW - 65 tests)
