@@ -1,5 +1,91 @@
 # ModLog - moltbot_bridge
 
+## 2026-05-13: CABR Consensus Finalization Phase 10 - Pipeline Integration (WSP 97)
+
+**Author**: 0102 (Worker W1)
+**WSP**: 97 (System Execution Prompting), 91 (Observability), 11 (Interface Contract)
+**Slice**: `CABR_CONSENSUS_FINALIZATION_PHASE10_PIPELINE_INTEGRATION`
+
+### Summary
+
+Added caller-driven CABR consensus pipeline composer that runs the existing
+review-only pipeline in deterministic order:
+- ProofOfComputeReceipt -> pAVS -> CABR scoring -> quorum -> consensus
+  finalization -> optional persistence -> lifecycle query/export
+
+### WSP 97 Critical Constraint
+
+Pipeline integration is explicit/caller-driven observability and review flow only.
+It must NOT mean:
+- Automatic state progression
+- verification_complete=True
+- cabr_ready=True
+- payout_ready=True
+- Payout approval
+- DAO activation
+- Token issuance
+- Final consensus readiness
+- External settlement
+
+### Files Created
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `src/cabr_consensus_pipeline.py` | ~900 | Pipeline composer |
+| `tests/test_cabr_consensus_pipeline.py` | ~850 | Test coverage (35 tests) |
+| `docs/audits/consensus/CABR_CONSENSUS_FINALIZATION_PHASE10_PIPELINE_INTEGRATION.md` | ~200 | Audit documentation |
+
+### New API Surface
+
+```python
+@dataclass
+class CABRConsensusPipelineInput:
+    receipts: List[Union[ProofOfComputeReceipt, Dict]]  # Required
+    attestations: List[Union[VerifierAttestation, Dict]]  # Required
+    pavs_results: Optional[List]  # Skip pAVS stage if provided
+    score_results: Optional[List]  # Skip scoring if provided
+    quorum_results: Optional[List]  # Skip quorum if provided
+    store: Optional[CABRConsensusStore]  # No default DB path
+    min_validators: int = 3
+    consensus_threshold: float = 0.382
+    include_lifecycle_export: bool = False
+
+@dataclass
+class CABRConsensusPipelineResult:
+    success: bool
+    stage_results: List[CABRConsensusPipelineStageResult]
+    consensus_records: List[CABRConsensusRecord]
+    persistence_attempted: bool
+    persistence_success: bool
+    json_export: Optional[str]
+    markdown_export: Optional[str]
+    wsp97_labels: List[str]
+    truth_boundary: Dict[str, bool]
+
+def run_cabr_consensus_pipeline(input) -> CABRConsensusPipelineResult
+def export_cabr_consensus_pipeline_json(result) -> str
+def export_cabr_consensus_pipeline_markdown(result) -> str
+```
+
+### Behavior
+
+- Caller provides receipts and attestations
+- No default DB path (store must be provided for persistence)
+- No filesystem writes without caller-provided store
+- No automatic runtime hooks (WRE/Hermes/FAM do not invoke this)
+- Stages execute in deterministic order
+- Stage failures fail closed (explicit error, pipeline stops)
+- Missing data becomes gaps in export
+- All required WSP 97 labels present in exports
+- All truth boundary fields False
+
+### Test Results
+
+- Pipeline tests: 35 passed
+- Regression tests: 287 passed (all CABR modules)
+
+---
+
 ## 2026-05-13: CABR Consensus Finalization Phase 9 - Store-Export Integration (WSP 97)
 
 **Author**: 0102 (Worker W1)
