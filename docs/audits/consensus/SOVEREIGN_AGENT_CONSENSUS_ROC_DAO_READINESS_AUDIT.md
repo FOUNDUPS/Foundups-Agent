@@ -16,11 +16,9 @@
 | Worker | Slice | Status | Key Finding |
 |--------|-------|--------|-------------|
 | W3 | HXA/Hermes Safety | COMPLETE | Factory trunk safe at dry-run level (HXA3/HXA4/HXA8) |
-| W5 | CABR Synthesis | INLINE | Phase 10 merged — synthesized from merged Phase 1-10 code/docs (no separate W5 report received) |
+| W5 | CABR Synthesis | COMPLETE | Phase 10 merged — pipeline composer operational |
 | W6 | ROC/DAE/DAO Readiness | COMPLETE | Payout guards strong; ROC state machine absent |
 | W7 | Daemon/Runtime Hooks | COMPLETE | Dangerous hooks classified; WSP gates recommended |
-
-**Note**: CABR finalization synthesis was performed inside this W9 synthesis from merged Phase 1-10 code/docs; no separate W5 report was available.
 
 ### 1.2 Documents Examined
 
@@ -32,6 +30,7 @@
 | `CABR_RUNTIME_SCORING_ENGINE_PHASE1.md` | 300+ | CABR scoring |
 | `HXA8_OPENCLAW_HERMES_FACTORY_SYNTHESIS.md` | 350+ | Hermes safety proof (W3) |
 | `SACRDA_HXA_HERMES_EXECUTION_SAFETY_AUDIT.md` | 200+ | W3 HXA/Hermes safety |
+| `SACRDA_CABR_FINALIZATION_SYNTHESIS_AUDIT.md` | 300+ | W5 CABR finalization synthesis |
 | `SACRDA_ROC_DAE_DAO_READINESS_AUDIT.md` | 350 | W6 ROC/DAO state analysis |
 | `SACRDA_DAEMON_RUNTIME_HOOK_AUDIT.md` | 200+ | W7 Daemon/hook classification |
 | `RITUAL_ROC_MILESTONE_ATTESTATION_AUDIT.md` | 200+ | External attestation fit |
