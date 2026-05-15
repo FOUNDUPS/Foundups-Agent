@@ -767,6 +767,71 @@ Deliverables:
 
 ---
 
+## 13. Approval Boundary Correction
+
+### 13.1 Current Safety Placeholder
+
+Autonomous approval is not yet implemented. Future implementation remains blocked until a sovereign consensus approval gate is specified.
+
+### 13.2 Target Architecture
+
+Approval is granted by internal sovereign agent consensus, not mandatory manual 012 approval.
+
+### 13.3 Next Required Audit
+
+**SOVEREIGN_CONSENSUS_APPROVAL_GATE_AUDIT_PHASE1**
+
+Purpose: Specify the consensus protocol by which 0102 agents collectively approve ROC_CANDIDATE progression without requiring external 012 intervention.
+
+### 13.4 Boundary Constraints
+
+| Constraint | Status | Meaning |
+|------------|--------|---------|
+| Approval does NOT imply ROC_VALIDATED | ENFORCED | ROC ratio computation is a separate gate |
+| Approval does NOT imply CABR_READY | ENFORCED | External verification not implied |
+| Approval does NOT imply PAYOUT_READY | ENFORCED | Payout engine approval is separate |
+| Approval does NOT imply DAE_MATURE | ENFORCED | DAE maturity thresholds not evaluated |
+| Approval does NOT imply DAO_READY | ENFORCED | DAO governance prerequisites not implied |
+| Approval does NOT imply DAO_ACTIVATED | ENFORCED | DAO activation is a separate gate |
+| External attestation remains optional | ENFORCED | Internal consensus is primary |
+| No runtime progression until gates exist | ENFORCED | Safety-first design |
+
+### 13.5 WSP 97 Labels (Preserved)
+
+All 10 required labels remain in force:
+
+1. **OBSERVABILITY_ONLY** - Metric is for monitoring only
+2. **REVIEW_ONLY** - States are observation status, not execution authority
+3. **ROC_CANDIDATE_ONLY** - State is ROC_CANDIDATE, not any downstream state
+4. **NOT_ROC_VALIDATED** - ROC ratio has not been computed
+5. **NOT_CABR_READY** - External verification has not been performed
+6. **NOT_PAYOUT_READY** - Payout engine has not approved
+7. **NO_DAE_MATURITY** - DAE maturity not evaluated
+8. **NO_DAO_ACTIVATION** - DAO governance not activated
+9. **NO_RUNTIME_PROGRESSION** - No automatic state progression
+10. **NO_DAEMON_TRIGGER** - No daemon actions triggered
+
+### 13.6 Safety Guarantees
+
+```yaml
+CURRENT_STATE:
+  autonomous_approval: NOT_IMPLEMENTED
+  manual_012_approval: OPTIONAL (not mandatory gate)
+  progression_blocked: TRUE (until consensus gate specified)
+
+TARGET_STATE:
+  autonomous_approval: SOVEREIGN_CONSENSUS
+  manual_012_approval: OPTIONAL (observation, not gate)
+  progression_blocked: FALSE (after consensus gate implemented)
+
+TRANSITION_REQUIRES:
+  - SOVEREIGN_CONSENSUS_APPROVAL_GATE_AUDIT_PHASE1 complete
+  - Consensus protocol specified
+  - Safety verification passed
+```
+
+---
+
 ## WSP 97 Verdict
 
 ### Audit Claims
