@@ -1,5 +1,55 @@
 # ModLog - moltbot_bridge
 
+## 2026-05-13: ROC_CANDIDATE Observability Metric (WSP 97)
+
+**Author**: 0102 (Worker W1)
+**WSP**: 97 (System Execution Prompting), 91 (Observability), 29 (CABR Engine)
+**Slice**: `ROC_CANDIDATE_OBSERVABILITY_METRIC_IMPL_PHASE1`
+
+### Summary
+
+Added pure-function observability-only metric for counting ROC_CANDIDATE records
+derived from CABR consensus pipeline output. Enables 012 to observe "distance to
+DAO readiness" without state mutation.
+
+### WSP 97 Critical Constraint
+
+ROC_CANDIDATE metric is observability-only. It MUST NOT mean:
+- Automatic promotion to ROC
+- verification_complete=True / cabr_ready=True / payout_ready=True
+- Token issuance / DAO activation / Governance rights
+
+### ROC_CANDIDATE Criteria
+
+Record qualifies when ALL conditions met:
+1. `decision == ACCEPTED_FOR_REVIEW`
+2. `quorum_met == True`
+3. `threshold_met == True`
+4. `evidence_present == True`
+
+### Files Created
+
+| File | Lines | Purpose |
+|------|-------|---------|
+| `src/roc_candidate_metrics.py` | ~575 | Pure function metric counter |
+| `tests/test_roc_candidate_metrics.py` | ~606 | Test coverage (57 tests) |
+| `docs/audits/consensus/ROC_CANDIDATE_OBSERVABILITY_METRIC_IMPL_PHASE1.md` | ~120 | Audit documentation |
+
+### New API Surface
+
+```python
+def count_roc_candidates(input: ROCCandidateMetricInput) -> ROCCandidateMetricSnapshot
+def export_roc_candidate_metric_json(snapshot) -> str
+def export_roc_candidate_metric_markdown(snapshot) -> str
+```
+
+### Test Results
+
+- ROC candidate metric tests: 57 passed
+- CABR pipeline regression: 80 passed
+
+---
+
 ## 2026-05-13: CABR Consensus Finalization Phase 10 - Pipeline Integration (WSP 97)
 
 **Author**: 0102 (Worker W1)
