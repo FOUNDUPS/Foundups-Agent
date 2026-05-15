@@ -224,7 +224,7 @@ class FrictionScore:
 | Friction Detection | DAE-local (per FoundUp) | Detect repetitive patterns within FoundUp scope |
 | Improvement Proposal | DAE-local with WRE routing | Generate and route proposals |
 | 012 Visible Suggestion | SoftProto (UI layer) | Present proposals to 012 |
-| Approval Gate | Sovereign 012 (future) | 012 explicitly approves changes |
+| Approval Gate | Sovereign internal agent consensus (future) | Consensus gate explicitly approves changes |
 
 ### 5.2 Boundary Rules
 
@@ -244,7 +244,7 @@ class FrictionScore:
   -> WRE proposal routing (route)
   -> simulation/sandbox review (validate)
   -> 012-visible suggestion (present)
-  -> future sovereign approval gate (approve/reject)
+  -> future sovereign internal agent consensus approval gate (approve/reject)
   -> optional implementation (execute)
 ```
 
@@ -270,7 +270,7 @@ class FrictionScore:
 | `ImprovementCandidate` | Dataclass for improvement proposals | 012_interaction_trace |
 | `ImprovementRouter` | Route proposals through WRE | wre_gateway extension |
 | `SuggestionPresenter` | UI component for suggestions | SoftProto |
-| `SovereignApprovalGate` | 012 approval interface | Future FoundUp sovereign layer |
+| `SovereignConsensusGate` | Internal agent consensus approval interface | Future FoundUp sovereign layer |
 
 ---
 
@@ -287,7 +287,7 @@ class FrictionScore:
 2. Friction Scoring Algorithm
 3. Proposal Generation Criteria
 4. Routing to SoftProto Suggestion Layer
-5. Sovereign Approval Gate (Future Work)
+5. Sovereign Internal Agent Consensus Gate (Future Work)
 
 ### 8.2 Safety Labels for Annex
 
@@ -296,7 +296,7 @@ class FrictionScore:
 | `SPEC_ONLY` | Annex is specification, not implementation |
 | `OBSERVABILITY_FOCUSED` | Primary purpose is observation, not action |
 | `PROPOSAL_ONLY` | Output is proposals, not automatic changes |
-| `012_APPROVAL_REQUIRED` | All changes require explicit 012 approval |
+| `CONSENSUS_APPROVAL_REQUIRED` | All changes require sovereign internal agent consensus approval |
 | `NO_AUTOMATIC_MUTATION` | System cannot mutate UI or workflow without approval |
 
 ---
@@ -325,11 +325,42 @@ class FrictionScore:
 
 ---
 
-## 10. Next Safe Slice
+## 10. Approval Boundary Correction
+
+**Correction Applied**: 2026-05-14 (per W9 patch instruction)
+
+### 10.1 Role Definitions
+
+| Actor | Role | Scope |
+|-------|------|-------|
+| 012 | Behavioral feedback source, intent source, adoption actor | Provides feedback, may choose whether to adopt a proposed version/profile |
+| 0102/DAE | Observer, summarizer, proposer | Observes patterns, summarizes friction, generates proposals |
+| Builder Agents | Version constructors | May construct future version proposals from aggregated patterns |
+
+### 10.2 Future Approval Architecture
+
+- **Approval authority**: Governed by sovereign internal agent consensus
+- **External attestation**: Optional only, never required
+- **No implied escalation**: No proposal implies ROC approval, CABR_READY, PAYOUT_READY, DAO activation, or runtime mutation
+- **012 feedback loop**: 012 interaction data informs proposals, but 012 does NOT approve autonomous runtime changes
+
+### 10.3 Boundary Rules
+
+1. **012** is feedback source - NOT runtime approval authority
+2. **0102/DAE** proposes - does NOT self-approve
+3. **Builder agents** construct - do NOT deploy without consensus
+4. **Sovereign internal agent consensus** is the approval gate for future autonomous changes
+5. **External attestation** is optional augmentation, never a requirement
+
+---
+
+## 11. Next Safe Slice
+
+### 11.1 WSP 15 Recommendation
 
 ### 10.1 WSP 15 Recommendation
 
-**Next Slice ID**: `012_INTERACTION_TRACE_SPEC_PHASE2`
+**Next Slice ID**: `012_INTERACTION_TRACE_SCHEMA_SPEC_PHASE2`
 
 **Scope**:
 1. Define `InteractionTrace` dataclass specification
@@ -342,7 +373,7 @@ class FrictionScore:
 
 **Blocks**: Any implementation of 012 interaction observation
 
-### 10.2 Slice Safety Labels
+### 11.2 Slice Safety Labels
 
 | Label | Status |
 |-------|--------|
@@ -351,16 +382,28 @@ class FrictionScore:
 | NO_TELEMETRY_COLLECTION | REQUIRED until 012 approves spec |
 | REVIEW_ONLY | REQUIRED |
 
-### 10.3 Slice Deliverables
+### 11.3 Slice Deliverables
 
 1. `modules/infrastructure/wre_core/012_interaction_trace/INTERFACE.md` - Interface specification
 2. `modules/infrastructure/wre_core/012_interaction_trace/README.md` - Module purpose
 3. `WSP_framework/docs/annexes/WSP_48_012_FEEDBACK_LOOP_ANNEX.md` - WSP annex
 4. Audit update: `012_FEEDBACK_LOOP_RECURSIVE_IMPROVEMENT_AUDIT_PHASE2.md`
 
+### 11.4 Shared Follow-Up Slice
+
+**Slice ID**: `WSP_48_012_RECURSIVE_IMPROVEMENT_ANNEX_PHASE1`
+
+**Purpose**: Create WSP 48 annex documenting 012 recursive improvement boundary corrections.
+
+**Scope**:
+1. Document approval boundary correction (sovereign internal agent consensus)
+2. Document 012 feedback role (source, not approver)
+3. Document builder agent role (constructor, not deployer)
+4. Cross-reference with WSP 100 escalation boundaries
+
 ---
 
-## Test Result
+## 13. Test Result
 
 ```
 python -m pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.py -q
@@ -369,7 +412,7 @@ python -m pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.
 
 ---
 
-## WSP 97 Verdict
+## 14. WSP 97 Verdict
 
 | Dimension | Status | Evidence |
 |-----------|--------|----------|
@@ -383,7 +426,7 @@ python -m pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.
 
 ---
 
-## Summary
+## 15. Summary
 
 ### Core Hypothesis Evaluation
 
@@ -404,7 +447,7 @@ python -m pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.
 | DAE-local orchestration | YES | WSP 80 operational |
 | Proposal routing | PARTIAL | DAE Gateway routes, needs 012-specific extension |
 | UI suggestion layer | NO | SoftProto has commands, no suggestion component |
-| 012 approval gate | NO | Future work |
+| Sovereign consensus gate | NO | Future work (internal agent consensus, not 012 approval) |
 
 ### Recommended Priority
 
@@ -412,7 +455,7 @@ python -m pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.
 2. **P1**: Define friction scoring algorithm specification
 3. **P2**: Define WRE proposal routing extension
 4. **P2**: Define SoftProto suggestion component contract
-5. **P3**: Define sovereign approval gate (requires DAO maturity)
+5. **P3**: Define sovereign internal agent consensus gate (requires DAO maturity)
 
 ---
 
