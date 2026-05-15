@@ -1,3 +1,26 @@
+## 2026-05-13: ROC_CANDIDATE Observability Metric Tests (WSP 97)
+
+**File**: `test_roc_candidate_metrics.py` (NEW - 57 tests)
+
+**Test Classes**:
+- `TestCountROCCandidates`: Empty input, candidate counting, criteria breakdown
+- `TestCriteriaEnforcement`: decision/quorum/threshold/evidence validation
+- `TestAnomalyDetection`: Truth boundary violations flagged
+- `TestWSP97Labels`: All 6 required labels present
+- `TestForbiddenConsumers`: Consumer list documented
+- `TestTruthBoundaries`: All 3 truth fields False
+- `TestExportJSON`: Deterministic output, sorted keys
+- `TestExportMarkdown`: Section headers, candidate ratio
+- `TestPureFunctionBehavior`: No side effects, no DB access
+- `TestTenantFiltering`: Optional tenant_id filter
+
+**Run**:
+- `python -m pytest modules/communication/moltbot_bridge/tests/test_roc_candidate_metrics.py -q`
+
+**Result**: 57 passed
+
+---
+
 ## 2026-05-13: CABR Consensus Pipeline Tests (WSP 97)
 
 **File**: `test_cabr_consensus_pipeline.py` (NEW - 35 tests)
