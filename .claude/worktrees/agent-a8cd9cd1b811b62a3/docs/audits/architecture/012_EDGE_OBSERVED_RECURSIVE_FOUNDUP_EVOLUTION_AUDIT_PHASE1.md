@@ -164,7 +164,7 @@
 -> WRE/architect DAE reviews improvement opportunity
 -> builder agents create version/profile proposal
 -> simulation/sandbox review
--> sovereign consensus approval gate
+-> sovereign internal agent consensus approval gate
 -> 012 shifts to better FoundUp version
 ```
 
@@ -565,7 +565,36 @@ class ImprovementProposalQueue:
 
 ---
 
-## 15. Safety Boundary Labels
+## 15. Approval Boundary Correction
+
+**Correction Applied**: 2026-05-14 (per W9 patch instruction)
+
+### 15.1 Role Definitions
+
+| Actor | Role | Scope |
+|-------|------|-------|
+| 012 | Behavioral feedback source, intent source, adoption actor | Provides feedback, may choose whether to adopt a proposed version/profile |
+| 0102/DAE | Observer, summarizer, proposer | Observes patterns, summarizes friction, generates proposals |
+| Builder Agents | Version constructors | May construct future version proposals from aggregated patterns |
+
+### 15.2 Future Approval Architecture
+
+- **Approval authority**: Governed by sovereign internal agent consensus
+- **External attestation**: Optional only, never required
+- **No implied escalation**: No proposal implies ROC approval, CABR_READY, PAYOUT_READY, DAO activation, or runtime mutation
+- **012 feedback loop**: 012 interaction data informs proposals, but 012 does NOT approve autonomous runtime changes
+
+### 15.3 Boundary Rules
+
+1. **012** is feedback source - NOT runtime approval authority
+2. **0102/DAE** proposes - does NOT self-approve
+3. **Builder agents** construct - do NOT deploy without consensus
+4. **Sovereign internal agent consensus** is the approval gate for future autonomous changes
+5. **External attestation** is optional augmentation, never a requirement
+
+---
+
+## 16. Safety Boundary Labels
 
 ### Applied Labels
 
@@ -582,15 +611,15 @@ class ImprovementProposalQueue:
 | `NO_DAO_ACTIVATION` | Cannot trigger DAO state change | EdgeObserver |
 | `NO_PAYOUT_READY` | Cannot mark payout ready | EdgeObserver |
 | `NO_EXTERNAL_ATTESTATION_REQUIRED` | Not claiming external verification | This audit |
-| `CALLER_DRIVEN_ONLY` | 012 must initiate version switch | VersionSwitch |
+| `CALLER_DRIVEN_ONLY` | 012 may choose to adopt proposed version | VersionSwitch |
 | `CONSENT_REQUIRED` | Requires explicit 012 consent | All observation |
 | `PRIVACY_PRESERVING_SUMMARY_ONLY` | Only summaries transmitted | PatternSummary |
 
 ---
 
-## 16. Next Safe Slice
+## 17. Next Safe Slice
 
-### Recommended: `012_EDGE_OBSERVER_SCHEMA_SPEC_PHASE2`
+### 17.1 Recommended: `012_EDGE_OBSERVER_SCHEMA_SPEC_PHASE2`
 
 **Scope**:
 1. Define `PatternSummary` schema (JSON Schema)
@@ -609,7 +638,7 @@ class ImprovementProposalQueue:
 - `NO_IMPLEMENTATION`
 - `REVIEW_REQUIRED`
 
-### Alternative Slices
+### 17.2 Alternative Slices
 
 | Slice | Description | Risk |
 |-------|-------------|------|
@@ -617,9 +646,21 @@ class ImprovementProposalQueue:
 | `FOUNDUP_VERSION_MANAGER_SPEC_PHASE2` | Multi-version manifest spec | LOW |
 | `CONSENT_EXTENSION_SPEC_PHASE2` | Consent engine extension spec | LOW |
 
+### 17.3 Shared Follow-Up Slice
+
+**Slice ID**: `WSP_48_012_RECURSIVE_IMPROVEMENT_ANNEX_PHASE1`
+
+**Purpose**: Create WSP 48 annex documenting 012 recursive improvement boundary corrections.
+
+**Scope**:
+1. Document approval boundary correction (sovereign internal agent consensus)
+2. Document 012 feedback role (source, not approver)
+3. Document builder agent role (constructor, not deployer)
+4. Cross-reference with WSP 100 escalation boundaries
+
 ---
 
-## Audit Summary
+## 18. Audit Summary
 
 ### Key Findings
 
