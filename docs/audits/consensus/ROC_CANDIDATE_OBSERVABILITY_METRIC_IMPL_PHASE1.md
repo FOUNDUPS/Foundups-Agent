@@ -122,7 +122,7 @@ test_cabr_lifecycle_query.py: 45 passed (regression)
 
 ## WSP 15 Next-Slice Recommendation
 
-**Slice**: `ROC_CANDIDATE_METRIC_DASHBOARD_PHASE2`
-**Scope**: CLI/API endpoint to invoke metric on demand
+**Slice**: `ROC_CANDIDATE_METRIC_EXPORT_CLI_AUDIT_PHASE2`
+**Scope**: CLI wrapper to invoke metric and export to stdout (smaller surface than dashboard/API)
 **Dependency**: This phase (metric counter exists)
-**Gate**: 012 approval required before dashboard implementation
+**Gate**: 012 approval required before CLI implementation

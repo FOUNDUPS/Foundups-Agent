@@ -325,6 +325,21 @@ class TestWSP97Labels:
         result = count_roc_candidates([])
         assert "NO_DAEMON_TRIGGER" in result.wsp97_labels
 
+    def test_no_dae_maturity_label_present(self):
+        """NO_DAE_MATURITY label must be present."""
+        result = count_roc_candidates([])
+        assert "NO_DAE_MATURITY" in result.wsp97_labels
+
+    def test_no_dao_activation_label_present(self):
+        """NO_DAO_ACTIVATION label must be present."""
+        result = count_roc_candidates([])
+        assert "NO_DAO_ACTIVATION" in result.wsp97_labels
+
+    def test_no_runtime_progression_label_present(self):
+        """NO_RUNTIME_PROGRESSION label must be present."""
+        result = count_roc_candidates([])
+        assert "NO_RUNTIME_PROGRESSION" in result.wsp97_labels
+
 
 class TestForbiddenConsumers:
     """Test forbidden consumers are documented."""
@@ -417,14 +432,28 @@ class TestJSONExport:
         assert data1 == data2
 
     def test_export_json_contains_wsp97_labels(self):
-        """JSON export should contain WSP 97 labels."""
+        """JSON export should contain all 10 exact WSP 97 / ROC_CANDIDATE labels."""
         records = [_make_candidate_record()]
         result = count_roc_candidates(records)
         export = export_roc_candidate_metric_json(result)
         data = json.loads(export)
 
         assert "wsp97_labels" in data
-        assert "OBSERVABILITY_ONLY" in data["wsp97_labels"]
+        # All 10 exact labels required by WSP 100 / ROC_CANDIDATE audit
+        required_labels = [
+            "OBSERVABILITY_ONLY",
+            "REVIEW_ONLY",
+            "ROC_CANDIDATE_ONLY",
+            "NOT_ROC_VALIDATED",
+            "NOT_CABR_READY",
+            "NOT_PAYOUT_READY",
+            "NO_DAE_MATURITY",
+            "NO_DAO_ACTIVATION",
+            "NO_RUNTIME_PROGRESSION",
+            "NO_DAEMON_TRIGGER",
+        ]
+        for label in required_labels:
+            assert label in data["wsp97_labels"], f"Missing label: {label}"
 
     def test_export_json_contains_forbidden_consumers(self):
         """JSON export should contain forbidden consumers."""
@@ -460,11 +489,25 @@ class TestMarkdownExport:
         assert "OBSERVABILITY ONLY" in export
 
     def test_export_markdown_contains_wsp97_labels(self):
-        """Markdown export should contain WSP 97 labels section."""
+        """Markdown export should contain all 10 exact WSP 97 labels."""
         result = count_roc_candidates([])
         export = export_roc_candidate_metric_markdown(result)
         assert "WSP 97 Labels" in export
-        assert "OBSERVABILITY_ONLY" in export
+        # All 10 exact labels required by WSP 100 / ROC_CANDIDATE audit
+        required_labels = [
+            "OBSERVABILITY_ONLY",
+            "REVIEW_ONLY",
+            "ROC_CANDIDATE_ONLY",
+            "NOT_ROC_VALIDATED",
+            "NOT_CABR_READY",
+            "NOT_PAYOUT_READY",
+            "NO_DAE_MATURITY",
+            "NO_DAO_ACTIVATION",
+            "NO_RUNTIME_PROGRESSION",
+            "NO_DAEMON_TRIGGER",
+        ]
+        for label in required_labels:
+            assert label in export, f"Missing label in Markdown: {label}"
 
     def test_export_markdown_contains_forbidden_consumers(self):
         """Markdown export should contain forbidden consumers section."""
