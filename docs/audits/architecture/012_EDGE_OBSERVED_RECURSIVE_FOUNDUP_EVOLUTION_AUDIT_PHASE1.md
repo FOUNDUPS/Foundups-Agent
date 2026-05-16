@@ -648,15 +648,21 @@ class ImprovementProposalQueue:
 
 ### 17.3 Shared Follow-Up Slice
 
-**Slice ID**: `WSP_48_012_RECURSIVE_IMPROVEMENT_ANNEX_PHASE1`
+**Slice ID**: `012_RECURSIVE_IMPROVEMENT_WSP48_ANNEX_PHASE1`
 
-**Purpose**: Create WSP 48 annex documenting 012 recursive improvement boundary corrections.
+**Target File**: `WSP_framework/src/WSP_48_Recursive_Self_Improvement_Protocol.md` (existing canonical WSP)
+
+**Purpose**: Add annex to existing WSP 48 documenting 012 recursive improvement boundary corrections.
 
 **Scope**:
-1. Document approval boundary correction (sovereign internal agent consensus)
-2. Document 012 feedback role (source, not approver)
-3. Document builder agent role (constructor, not deployer)
-4. Cross-reference with WSP 100 escalation boundaries
+1. 012 feedback source role (source, not approver)
+2. Browser/edge observer boundary
+3. DAE pattern memory integration
+4. WRE proposal routing
+5. Sovereign internal agent consensus approval gate
+6. No automatic mutation rule
+7. No ROC/CABR/PAYOUT/DAO implication
+8. Cross-reference with WSP 100 escalation boundaries
 
 ---
 
