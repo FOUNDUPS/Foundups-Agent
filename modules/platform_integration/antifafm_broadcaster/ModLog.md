@@ -1,5 +1,48 @@
 # antifaFM Broadcaster - ModLog
 
+## V3.4.1 - Metadata Editor Browser Port Fix (2026-05-17)
+
+**Slice**: `ANTIFAFM_METADATA_EDITOR_BROWSER_PORT_FIX`
+**Branch**: `fix/antifafm-metadata-editor-browser-port`
+**Worker**: W1
+**WSP Lock**: WSP_00, WSP_50, WSP_97, WSP_22
+
+**Context**: Post-PR #606 audit found that metadata editor skills hardcoded Chrome debug port `9222`, while antifaFM commonly uses Edge on port `9223`. This caused metadata DOM fallback to fail when the antifaFM browser was available but on Edge.
+
+**Changes**:
+
+1. **Updated `skillz/manage_metadata_editor/executor.py`**:
+   - Replaced `CHROME_DEBUG_PORT = 9222` with env-resolved `ANTIFAFM_BROWSER_PORT`
+   - Env precedence: `ANTIFAFM_BROWSER_PORT` > `FOUNDUPS_EDGE_PORT` > `EDGE_DEBUG_PORT` > `9223`
+   - Renamed `_connect_to_chrome()` to `_connect_to_browser()`
+   - Updated error messages to report actual port and browser type
+
+2. **Updated `skillz/stream_metadata_editor/executor.py`**:
+   - Same changes as manage_metadata_editor
+   - Error messages now report actual browser type and port
+
+**Port Resolution Policy**:
+```
+Default: Edge port 9223 (matches youtube_go_live.py pattern)
+Override: Set ANTIFAFM_BROWSER_PORT=9222 for Chrome
+Fallback chain: ANTIFAFM_BROWSER_PORT > FOUNDUPS_EDGE_PORT > EDGE_DEBUG_PORT > 9223
+```
+
+**Backward Compatibility**:
+- Chrome users can set `ANTIFAFM_BROWSER_PORT=9222`
+- Existing `FOUNDUPS_EDGE_PORT` and `EDGE_DEBUG_PORT` env vars respected
+
+**Files Modified**:
+- `skillz/manage_metadata_editor/executor.py`
+- `skillz/stream_metadata_editor/executor.py`
+- `ModLog.md` - This entry
+
+**WSP Compliance**:
+- WSP 97: Error messages truthfully report actual port/browser
+- WSP 50: Consistent with youtube_go_live.py pattern
+
+---
+
 ## V3.4.0 - Preflight Relocation (2026-05-16)
 
 **Slice**: `ANTIFAFM_PREFLIGHT_RELOCATION_IMPL_PHASE1`

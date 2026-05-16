@@ -8,6 +8,7 @@ WSP 84: Code Reuse (youtube_go_live patterns)
 
 import asyncio
 import logging
+import os
 from typing import Optional
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -19,7 +20,17 @@ import time
 
 logger = logging.getLogger(__name__)
 
-CHROME_DEBUG_PORT = 9222
+# Browser debug port for antifaFM metadata editing
+# antifaFM uses Edge (port 9223) per youtube_channel_registry.py
+# Chrome (9222) = Move2Japan/UnDaoDu, Edge (9223) = FoundUps/antifaFM
+# Env precedence: ANTIFAFM_BROWSER_PORT > FOUNDUPS_EDGE_PORT > EDGE_DEBUG_PORT > 9223
+ANTIFAFM_BROWSER_PORT = int(os.getenv(
+    "ANTIFAFM_BROWSER_PORT",
+    os.getenv("FOUNDUPS_EDGE_PORT", os.getenv("EDGE_DEBUG_PORT", "9223"))
+))
+# Browser type for error messages
+ANTIFAFM_BROWSER_TYPE = os.getenv("ANTIFAFM_BROWSER_TYPE", "Edge")
+
 ANTIFAFM_CHANNEL_ID = "UCVSmg5aOhP4tnQ9KFUg97qA"
 LIVE_DASHBOARD_URL = f"https://studio.youtube.com/channel/{ANTIFAFM_CHANNEL_ID}/livestreaming/stream"
 
@@ -50,20 +61,24 @@ def _port_open(port: int, timeout: float = 2) -> bool:
         return False
 
 
-def _connect_to_chrome():
-    """Connect to existing Chrome via debug port."""
-    if not _port_open(CHROME_DEBUG_PORT):
-        logger.error(f"Chrome not running on port {CHROME_DEBUG_PORT}")
+def _connect_to_browser():
+    """Connect to existing browser via debug port.
+
+    Uses ANTIFAFM_BROWSER_PORT (default: 9223 for Edge).
+    Set ANTIFAFM_BROWSER_PORT=9222 to use Chrome instead.
+    """
+    if not _port_open(ANTIFAFM_BROWSER_PORT):
+        logger.error(f"{ANTIFAFM_BROWSER_TYPE} not running on port {ANTIFAFM_BROWSER_PORT}")
         return None
 
     opts = Options()
-    opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{CHROME_DEBUG_PORT}")
+    opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{ANTIFAFM_BROWSER_PORT}")
 
     try:
         driver = webdriver.Chrome(options=opts)
         return driver
     except Exception as e:
-        logger.error(f"Failed to connect to Chrome: {e}")
+        logger.error(f"Failed to connect to {ANTIFAFM_BROWSER_TYPE} on port {ANTIFAFM_BROWSER_PORT}: {e}")
         return None
 
 
@@ -85,10 +100,10 @@ async def edit_stream_metadata(
     """
     result = {"success": False, "error": None, "changes": []}
 
-    # Connect to Chrome
-    driver = _connect_to_chrome()
+    # Connect to browser (Edge port 9223 by default, Chrome 9222 via ANTIFAFM_BROWSER_PORT)
+    driver = _connect_to_browser()
     if not driver:
-        result["error"] = "Could not connect to Chrome on debug port 9222"
+        result["error"] = f"Could not connect to {ANTIFAFM_BROWSER_TYPE} on debug port {ANTIFAFM_BROWSER_PORT}"
         return result
 
     try:
@@ -209,9 +224,9 @@ async def set_customization_options(
     """
     result = {"success": False, "error": None, "changes": []}
 
-    driver = _connect_to_chrome()
+    driver = _connect_to_browser()
     if not driver:
-        result["error"] = "Could not connect to Chrome"
+        result["error"] = f"Could not connect to {ANTIFAFM_BROWSER_TYPE} on port {ANTIFAFM_BROWSER_PORT}"
         return result
 
     try:
