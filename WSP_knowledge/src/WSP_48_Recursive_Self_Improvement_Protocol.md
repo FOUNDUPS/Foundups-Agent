@@ -403,4 +403,255 @@ Observation -> Analysis -> Enhancement -> Validation -> Integration -> Assessmen
 
 ## 7. Conclusion
 
-WSP_48 establishes the foundation for truly autonomous system evolution. By implementing recursive self-improvement across protocol, engine, and consciousness levels, WSP/WRE systems achieve genuine autonomy and continuous capability enhancement. This protocol transforms static frameworks into living, evolving, self-optimizing systems capable of transcending their initial design limitations. 
+WSP_48 establishes the foundation for truly autonomous system evolution. By implementing recursive self-improvement across protocol, engine, and consciousness levels, WSP/WRE systems achieve genuine autonomy and continuous capability enhancement. This protocol transforms static frameworks into living, evolving, self-optimizing systems capable of transcending their initial design limitations.
+
+---
+
+## 8. 012-Driven Recursive FoundUp Improvement Annex
+
+**Date Added**: 2026-05-14
+**Status**: SPECIFICATION_ONLY
+**WSP References**: WSP 80 (DAE Orchestration), WSP 100 (DAE/DAO Escalation), WSP 97 (CoT/CoR)
+**Audit References**:
+- `docs/audits/architecture/012_FEEDBACK_LOOP_RECURSIVE_IMPROVEMENT_AUDIT_PHASE1.md`
+- `docs/audits/architecture/012_EDGE_OBSERVED_RECURSIVE_FOUNDUP_EVOLUTION_AUDIT_PHASE1.md`
+
+### 8.1 Purpose
+
+This annex defines the specification for 012-driven recursive FoundUp improvement through edge observation and pattern-based evolution. The annex establishes role boundaries, approval architecture, and safety constraints for future implementation.
+
+### 8.2 Safety Boundary Labels
+
+**ALL LABELS APPLY TO THIS ANNEX:**
+
+| Label | Status | Meaning |
+|-------|--------|---------|
+| `OBSERVABILITY_ONLY` | ENFORCED | Observation captures data, does not act on it |
+| `REVIEW_ONLY` | ENFORCED | Metrics produced, no change triggers |
+| `PROPOSAL_ONLY` | ENFORCED | Proposals generated, not automatic mutations |
+| `EDGE_OBSERVER_ONLY` | ENFORCED | Observer runs on client, not server |
+| `NO_AUTOMATIC_UI_MUTATION` | ENFORCED | UI changes require explicit action |
+| `NO_AUTOMATIC_WORKFLOW_MUTATION` | ENFORCED | Workflow changes require explicit action |
+| `NO_RUNTIME_STATE_PROGRESSION` | ENFORCED | Cannot advance FoundUp lifecycle |
+| `NO_ROC_APPROVAL` | ENFORCED | Cannot approve ROC validation |
+| `NO_DAO_ACTIVATION` | ENFORCED | Cannot trigger DAO state change |
+| `NO_PAYOUT_READY` | ENFORCED | Cannot mark payout ready |
+| `NO_EXTERNAL_ATTESTATION_REQUIRED` | ENFORCED | Not claiming external verification |
+| `CALLER_DRIVEN_ONLY` | ENFORCED | 012 may choose to adopt proposed version |
+| `CONSENT_REQUIRED` | ENFORCED | Requires explicit 012 consent |
+| `PRIVACY_PRESERVING_SUMMARY_ONLY` | ENFORCED | Only summaries transmitted |
+
+### 8.3 Role Definitions
+
+#### 8.3.1 012 Role
+
+012 (the biological consciousness) serves as:
+
+| Role | Scope | Boundary |
+|------|-------|----------|
+| Behavioral feedback source | Uses FoundUp, generates interaction patterns | Does NOT approve autonomous runtime changes |
+| Intent source | Provides strategic direction, points out violations | Does NOT control automatic mutation |
+| Adoption actor | May choose whether to adopt a proposed version/profile | Choice is optional, never mandatory |
+
+**Critical Boundary**: 012 is feedback source, NOT runtime approval authority. Approval is governed by sovereign internal agent consensus.
+
+#### 8.3.2 0102/DAE Role
+
+0102 and DAE systems serve as:
+
+| Role | Scope | Boundary |
+|------|-------|----------|
+| Observer | Observes interaction patterns (with consent) | Does NOT mutate UI directly |
+| Pattern detector | Detects repeated workflows and friction | Does NOT trigger changes |
+| Improvement proposer | Generates version/profile proposals | Does NOT self-approve |
+| Summary generator | Compresses raw traces to privacy-preserving summaries | Does NOT transmit raw traces |
+
+**Critical Boundary**: 0102/DAE proposes, does NOT self-approve. Builder agents construct, do NOT deploy without consensus.
+
+### 8.4 Browser/Edge Observer Boundary
+
+Future edge observer implementations MUST adhere to these constraints:
+
+#### 8.4.1 Permitted Behaviors
+
+| Behavior | Condition |
+|----------|-----------|
+| Observe clicks | With explicit 012 consent |
+| Observe gestures (swipe, long-press) | With explicit 012 consent |
+| Observe action chains/sequences | With explicit 012 consent |
+| Summarize repeated workflows | Summary-only, privacy-preserving |
+| Detect friction patterns | Backtracking, abandonment, repeated actions |
+| Store summaries locally | On-device only until consent to transmit |
+
+#### 8.4.2 Prohibited Behaviors
+
+| Behavior | Reason |
+|----------|--------|
+| Mutate UI directly | NO_AUTOMATIC_UI_MUTATION |
+| Approve ROC validation | NO_ROC_APPROVAL |
+| Trigger DAO state change | NO_DAO_ACTIVATION |
+| Mark payout ready | NO_PAYOUT_READY |
+| Transmit raw traces | PRIVACY_PRESERVING_SUMMARY_ONLY |
+| Operate without consent | CONSENT_REQUIRED |
+| Advance FoundUp lifecycle | NO_RUNTIME_STATE_PROGRESSION |
+
+#### 8.4.3 Design Constraints
+
+- **Local-first**: All raw traces stay on-device
+- **Consent-bound**: Explicit opt-in required before any observation
+- **Summary-only transmission**: Only compressed patterns sent to DAE
+- **Anonymization**: Aggregated patterns stripped of user identifiers
+- **Right to delete**: Clear local data immediately on opt-out
+
+### 8.5 FoundUp Evolution Loop
+
+The recursive improvement loop for FoundUp evolution follows this specification:
+
+```
+012 uses FoundUp version/profile
+    |
+    v
+(CONSENT_REQUIRED) Optional local observer captures traces
+    |
+    v
+(PRIVACY_PRESERVING_SUMMARY_ONLY) Pattern summary generated
+    |
+    v
+(OBSERVABILITY_ONLY) FoundUp DAE stores pattern memory
+    |
+    v
+(REVIEW_ONLY) WRE/architect DAE reviews proposal
+    |
+    v
+(PROPOSAL_ONLY) Builder agents may create version/profile proposal
+    |
+    v
+(REVIEW_ONLY) Simulation/sandbox review (WSP 41)
+    |
+    v
+(FUTURE) Sovereign internal agent consensus approval gate
+    |
+    v
+(CALLER_DRIVEN_ONLY) 012-visible adoption option
+    |
+    v
+(SAFETY) Rollback path available
+```
+
+**Critical**: No automatic progression between stages. Each transition requires explicit gates.
+
+### 8.6 Approval Boundary
+
+#### 8.6.1 Future Approval Architecture
+
+- **Approval authority**: Governed by sovereign internal agent consensus (future implementation)
+- **NOT mandatory 012 approval**: 012 is feedback source, not runtime approver
+- **External attestation**: Optional only, never required (per WSP 100 Section 10)
+
+#### 8.6.2 No Implied Escalation
+
+Reaching any stage in the evolution loop does NOT imply:
+- ROC approval
+- CABR_READY status
+- PAYOUT_READY status
+- DAO activation
+- Runtime mutation
+- Token issuance
+- External attestation dependency
+
+### 8.7 Required Future Interfaces (Specification Only)
+
+The following interfaces are defined for documentation purposes. No implementation exists.
+
+#### 8.7.1 Client-Side Interfaces
+
+```
+InteractionTrace:
+    Purpose: Raw click/gesture/action sequence capture
+    Location: Client-only (never transmitted raw)
+    Retention: Session-scoped
+    Consent: EXPLICIT required
+
+PatternSummary:
+    Purpose: Compressed behavior summary
+    Location: Client + DAE (on consent)
+    Retention: Configurable (default 30 days)
+    Privacy: No user identifiers, no re-identification
+
+FrictionSignal:
+    Purpose: Detected workflow friction indicators
+    Types: repeated_action, backtracking, abandonment, hesitation
+    Source: Derived from PatternSummary
+```
+
+#### 8.7.2 DAE-Side Interfaces
+
+```
+RecursiveImprovementCandidate:
+    Purpose: Proposed improvement based on aggregated patterns
+    Source: Multiple PatternSummary instances
+    Status: PROPOSAL_ONLY (no automatic execution)
+    Routing: Via WRE proposal queue
+
+FoundUpVersionProposal:
+    Purpose: Proposed new version/profile of FoundUp
+    Includes: simulated diff (old vs proposed)
+    Gate: Simulation/sandbox review required
+    Approval: Sovereign internal agent consensus (future)
+
+AdoptionOption:
+    Purpose: 012-visible choice to adopt proposed version
+    Presentation: Suggestion UI (not automatic application)
+    Actor: 012 decides (CALLER_DRIVEN_ONLY)
+
+RollbackPlan:
+    Purpose: Reversion strategy if adoption fails
+    Includes: State preservation, audit trail
+    Trigger: 012 explicit request or friction threshold (with consent)
+```
+
+### 8.8 WSP Cross-References
+
+| WSP | Integration Point |
+|-----|-------------------|
+| WSP 80 | DAE-local pattern memory per cube (Section 2) |
+| WSP 100 | Escalation boundaries, ROC state machine (Section 11) |
+| WSP 100 | Optional external attestation (Section 10) |
+| WSP 41 | Simulation protocol for proposal validation |
+| WSP 60 | Pattern storage architecture |
+| WSP 97 | Truth boundaries (no overclaiming) |
+
+### 8.9 WSP 97 Compliance Statement
+
+This annex does NOT imply:
+- Telemetry implementation exists
+- Edge observer implementation exists
+- Gemma/WebGPU runtime exists
+- WRE proposal routing implementation exists
+- Approval gate runtime exists
+- Automatic UI/workflow mutation capability
+- ROC approval capability
+- CABR_READY status
+- PAYOUT_READY status
+- DAO activation capability
+
+All content in this annex is SPECIFICATION_ONLY for architecture planning.
+
+### 8.10 Next Safe Slice Recommendation
+
+**Slice ID**: `012_EDGE_OBSERVER_SCHEMA_SPEC_PHASE2`
+
+**Scope**:
+1. Define `PatternSummary` schema (JSON Schema)
+2. Define `InteractionPattern` SQLite schema
+3. Define consent extension for `consent_engine.py`
+4. Define privacy filter requirements
+
+**Safety Labels**: SPEC_ONLY, NO_IMPLEMENTATION, REVIEW_REQUIRED
+
+---
+
+**Annex Version History:**
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.0 | 2026-05-14 | Initial annex specification | 
