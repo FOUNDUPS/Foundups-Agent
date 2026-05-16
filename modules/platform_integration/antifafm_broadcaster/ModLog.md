@@ -1,5 +1,51 @@
 # antifaFM Broadcaster - ModLog
 
+## V3.4.0 - Preflight Relocation (2026-05-16)
+
+**Slice**: `ANTIFAFM_PREFLIGHT_RELOCATION_IMPL_PHASE1`
+**Branch**: `feat/antifafm-preflight-relocation`
+**Worker**: W1
+**WSP Lock**: WSP_00, WSP_50, WSP_97, WSP_22
+
+**Context**: Per `ANTIFAFM_PREFLIGHT_RELOCATION_AUDIT_20260516`, the `ANTIFAFM_AUTO_START` block in `main.py` caused OBS/streaming side effects at application startup. These should be deferred to explicit user action via YouTube DAE menu.
+
+**Changes**:
+
+1. **Created `src/preflight.py`** (~200 lines):
+   - `AntifaFMPreflightResult` dataclass for status
+   - `run_preflight()` - side-effect-free readiness checks
+   - `format_preflight_status()` - human-readable output
+   - `preflight_check_for_menu()` - convenience for CLI integration
+   - Checks: OBS WebSocket reachability, YouTube API config, FFmpeg, stream config, broadcaster state
+
+2. **Disabled auto-start in `main.py`**:
+   - Changed default from `ANTIFAFM_AUTO_START=1` to `ANTIFAFM_AUTO_START=0`
+   - Added comment referencing audit document
+   - Legacy behavior available via `ANTIFAFM_AUTO_START=1`
+
+3. **Added preflight to YouTube DAE menu**:
+   - Option 1 (Live Chat Monitor): Shows informational preflight status before `monitor_youtube()`
+   - Option 10 (antifaFM Broadcaster): Shows strict preflight with continue/abort prompt
+
+**Target Behavior Achieved**:
+- NO antifaFM/OBS side effects at `main.py` startup (default)
+- Preflight checks show status in YouTube DAE menu
+- Explicit action required to start broadcaster
+
+**Files Modified**:
+- `main.py` - Disabled auto-start default
+- `modules/infrastructure/cli/src/youtube_menu.py` - Added preflight integration
+- `modules/platform_integration/antifafm_broadcaster/src/preflight.py` - NEW
+- `modules/platform_integration/antifafm_broadcaster/INTERFACE.md` - Added preflight API
+- `modules/platform_integration/antifafm_broadcaster/ModLog.md` - This entry
+
+**WSP Compliance**:
+- WSP 97: Truth boundaries (no false side-effect claims)
+- WSP 50: Pre-action verification (preflight checks before action)
+- WSP 22: ModLog updated
+
+---
+
 ## V3.3.4 - AF1/AF2 briefing persistence (2026-04-19)
 
 **Slices**: `AF1_ANTIFAFM_INTERNAL_OPERATIONAL_READINESS_AUDIT_PHASE1`, `AF2_ANTIFAFM_OBS_FAILURE_ESCALATION_SPEC_PHASE1`

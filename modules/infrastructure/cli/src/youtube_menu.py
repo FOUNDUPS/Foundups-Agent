@@ -34,6 +34,17 @@ from modules.communication.headless_video_orchestrator.src.oss_adapters import (
     ExternalToolError,
 )
 
+# antifaFM preflight (ANTIFAFM_PREFLIGHT_RELOCATION_AUDIT_20260516)
+try:
+    from modules.platform_integration.antifafm_broadcaster.src.preflight import (
+        preflight_check_for_menu,
+        run_preflight,
+        format_preflight_status,
+    )
+    PREFLIGHT_AVAILABLE = True
+except ImportError:
+    PREFLIGHT_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 
@@ -169,6 +180,19 @@ def handle_youtube_menu(
         # 1.1 Live Chat Monitor DAE - Direct launch with 012 profile (ADR-013)
         print("\n[DAE] Live Chat Monitor - 012 Operational Profile")
         print("=" * 60)
+
+        # === PREFLIGHT CHECK (ANTIFAFM_PREFLIGHT_RELOCATION_AUDIT_20260516) ===
+        # Informational: shows antifaFM/OBS status before starting monitor
+        if PREFLIGHT_AVAILABLE:
+            ready, status_msg = preflight_check_for_menu(
+                require_obs=False,  # Non-strict: OBS is optional for monitor
+                require_youtube=False,
+            )
+            print("\n" + status_msg)
+            print("=" * 60)
+            if not ready:
+                print("[INFO] Monitor will start. For antifaFM streaming, use option 10.")
+            print()
 
         env_overrides = {
             "YT_ENGAGEMENT_TEMPO": "012",
@@ -734,6 +758,22 @@ def _handle_antifafm_broadcaster_menu() -> None:
     print("Streams antifaFM.com radio to YouTube Live via FFmpeg")
     print("Icecast -> FFmpeg -> RTMP -> YouTube Live")
     print("=" * 60)
+
+    # === PREFLIGHT CHECK (ANTIFAFM_PREFLIGHT_RELOCATION_AUDIT_20260516) ===
+    # Show OBS/YouTube readiness before broadcaster menu
+    if PREFLIGHT_AVAILABLE:
+        ready, status_msg = preflight_check_for_menu(
+            require_obs=True,  # Strict: OBS required for broadcaster
+            require_youtube=True,
+        )
+        print("\n" + status_msg)
+        print("=" * 60)
+        if not ready:
+            print("[WARN] Not all components ready. Broadcasting may fail.")
+            proceed = input("Continue anyway? [Y/n]: ").strip().lower()
+            if proceed == 'n':
+                return
+        print()
 
     try:
         from modules.platform_integration.antifafm_broadcaster.src import AntifaFMBroadcaster

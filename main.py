@@ -1251,11 +1251,13 @@ def main():
 
     bootstrap_runtime_dae_launches()
 
-    # Auto-start antifaFM broadcaster (default ON, disable with ANTIFAFM_AUTO_START=0)
+    # Auto-start antifaFM broadcaster (default OFF per ANTIFAFM_PREFLIGHT_RELOCATION_AUDIT_20260516)
+    # Enable with ANTIFAFM_AUTO_START=1 for legacy behavior.
+    # Preferred: Use YouTube DAE menu option 1 (preflight) or option 10 (broadcaster control).
     # NOTE: Uses OBS mode by default - OBS handles streaming, script handles chat/schemas
     # Stream runs while main.py is running. Exit menu = stream stops.
     antifafm_auto_started = False
-    if os.getenv("ANTIFAFM_AUTO_START", "1") == "1":
+    if os.getenv("ANTIFAFM_AUTO_START", "0") == "1":
         # Launch OBS first (like LM Studio auto-launches for YT DAE)
         from modules.infrastructure.dependency_launcher.src.dae_dependencies import launch_obs, is_obs_running
 
