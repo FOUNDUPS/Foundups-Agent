@@ -18,6 +18,7 @@ WSP 103: CLI Interface Standard
 import asyncio
 import argparse
 import logging
+import os
 import socket
 import time
 from typing import Optional, Dict, Any, List
@@ -32,7 +33,17 @@ from selenium.webdriver.support import expected_conditions as EC
 
 logger = logging.getLogger(__name__)
 
-CHROME_DEBUG_PORT = 9222
+# Browser debug port for antifaFM metadata editing
+# antifaFM uses Edge (port 9223) per youtube_channel_registry.py
+# Chrome (9222) = Move2Japan/UnDaoDu, Edge (9223) = FoundUps/antifaFM
+# Env precedence: ANTIFAFM_BROWSER_PORT > FOUNDUPS_EDGE_PORT > EDGE_DEBUG_PORT > 9223
+ANTIFAFM_BROWSER_PORT = int(os.getenv(
+    "ANTIFAFM_BROWSER_PORT",
+    os.getenv("FOUNDUPS_EDGE_PORT", os.getenv("EDGE_DEBUG_PORT", "9223"))
+))
+# Browser type for error messages
+ANTIFAFM_BROWSER_TYPE = os.getenv("ANTIFAFM_BROWSER_TYPE", "Edge")
+
 ANTIFAFM_CHANNEL_ID = "UCVSmg5aOhP4tnQ9KFUg97qA"
 MANAGE_URL = f"https://studio.youtube.com/channel/{ANTIFAFM_CHANNEL_ID}/livestreaming/manage"
 
@@ -49,20 +60,24 @@ def _port_open(port: int, timeout: float = 2) -> bool:
         return False
 
 
-def _connect_to_chrome():
-    """Connect to existing Chrome via debug port."""
-    if not _port_open(CHROME_DEBUG_PORT):
-        logger.error(f"Chrome not running on port {CHROME_DEBUG_PORT}")
+def _connect_to_browser():
+    """Connect to existing browser via debug port.
+
+    Uses ANTIFAFM_BROWSER_PORT (default: 9223 for Edge).
+    Set ANTIFAFM_BROWSER_PORT=9222 to use Chrome instead.
+    """
+    if not _port_open(ANTIFAFM_BROWSER_PORT):
+        logger.error(f"{ANTIFAFM_BROWSER_TYPE} not running on port {ANTIFAFM_BROWSER_PORT}")
         return None
 
     opts = Options()
-    opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{CHROME_DEBUG_PORT}")
+    opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{ANTIFAFM_BROWSER_PORT}")
 
     try:
         driver = webdriver.Chrome(options=opts)
         return driver
     except Exception as e:
-        logger.error(f"Failed to connect to Chrome: {e}")
+        logger.error(f"Failed to connect to {ANTIFAFM_BROWSER_TYPE} on port {ANTIFAFM_BROWSER_PORT}: {e}")
         return None
 
 
@@ -73,7 +88,7 @@ async def list_broadcasts(limit: int = 10) -> List[Dict[str, Any]]:
     Returns:
         List of broadcast info dicts
     """
-    driver = _connect_to_chrome()
+    driver = _connect_to_browser()
     if not driver:
         return []
 
@@ -151,9 +166,9 @@ async def edit_broadcast_metadata(
         result["error"] = "Must provide title or description"
         return result
 
-    driver = _connect_to_chrome()
+    driver = _connect_to_browser()
     if not driver:
-        result["error"] = "Could not connect to Chrome on debug port 9222"
+        result["error"] = f"Could not connect to {ANTIFAFM_BROWSER_TYPE} on debug port {ANTIFAFM_BROWSER_PORT}"
         return result
 
     try:
@@ -325,9 +340,9 @@ async def get_shareable_link(video_index: int = 0) -> Dict[str, Any]:
     """
     result = {"success": False, "error": None, "link": None}
 
-    driver = _connect_to_chrome()
+    driver = _connect_to_browser()
     if not driver:
-        result["error"] = "Could not connect to Chrome on debug port 9222"
+        result["error"] = f"Could not connect to {ANTIFAFM_BROWSER_TYPE} on debug port {ANTIFAFM_BROWSER_PORT}"
         return result
 
     try:
