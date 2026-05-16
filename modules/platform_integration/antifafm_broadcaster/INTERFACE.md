@@ -2,6 +2,48 @@
 
 ## Public API
 
+### Preflight Module (NEW - V3.4.0)
+
+Side-effect-free readiness checks for antifaFM/OBS components.
+
+```python
+from modules.platform_integration.antifafm_broadcaster.src.preflight import (
+    run_preflight,
+    format_preflight_status,
+    preflight_check_for_menu,
+    AntifaFMPreflightResult,
+)
+
+# Full preflight check (side-effect-free)
+result = run_preflight(
+    obs_host="localhost",
+    obs_port=4455,
+    require_obs=True,      # Fail if OBS not reachable
+    require_youtube=True,  # Fail if YouTube not configured
+)
+
+# Check result
+result.ready              # bool: all checks passed
+result.obs_available      # bool: OBS WebSocket reachable
+result.youtube_api_configured  # bool: API keys/secrets found
+result.ffmpeg_available   # bool: ffmpeg in PATH
+result.broadcaster_running  # bool: already running
+result.errors             # list: blocking issues
+result.warnings           # list: non-blocking issues
+
+# Format for display
+print(format_preflight_status(result))
+
+# Convenience for menu integration
+ready, status_msg = preflight_check_for_menu(require_obs=False)
+```
+
+**Contract**: `run_preflight()` has NO SIDE EFFECTS:
+- Does NOT start OBS
+- Does NOT spawn FFmpeg processes  
+- Does NOT create YouTube broadcasts
+- Does NOT connect to WebSocket (only TCP probe)
+
 ### AntifaFMBroadcaster
 
 Main DAE class for streaming radio to YouTube Live.
