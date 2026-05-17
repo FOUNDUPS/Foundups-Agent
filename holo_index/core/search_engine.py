@@ -103,6 +103,12 @@ _WSP_NUMBER_PATTERN = re.compile(
     re.IGNORECASE
 )
 
+# HXA Audit Fix: Slice ID pattern for HXA, FX, CFZ
+_SLICE_ID_PATTERN = re.compile(
+    r"\b(HXA\d+|FX\d+|CFZ\d+)\b",  # Match HXA22, FX1, CFZ4, etc.
+    re.IGNORECASE
+)
+
 
 def _extract_wsp_numbers(text: str) -> List[str]:
     """Extract WSP numbers from text (e.g., 'WSP 97', 'WSP_97', 'WSP-97').
@@ -111,6 +117,39 @@ def _extract_wsp_numbers(text: str) -> List[str]:
     """
     matches = _WSP_NUMBER_PATTERN.findall(text)
     return [m.lstrip("0") or "0" for m in matches]  # Normalize: '00' -> '0', '97' -> '97'
+
+
+def _extract_slice_ids(text: str) -> List[str]:
+    """HXA Audit Fix: Extract slice IDs from text (e.g., 'HXA22', 'FX1', 'CFZ4').
+
+    Returns list of normalized slice IDs like ['HXA22', 'CFZ4'].
+    """
+    matches = _SLICE_ID_PATTERN.findall(text)
+    return [m.upper() for m in matches]
+
+
+def _slice_id_match_boost(query: str, path: str, title: str, meta_slice_id: str = "") -> float:
+    """HXA Audit Fix: Return keyword boost if query slice ID matches path/title/metadata.
+
+    Boosts exact slice ID matches (HXA22, FX1, CFZ4) to fix retrieval gaps.
+    """
+    query_slices = _extract_slice_ids(query)
+    if not query_slices:
+        return 0.0
+
+    # Check path, title, and metadata slice_id
+    path_slices = _extract_slice_ids(path)
+    title_slices = _extract_slice_ids(title)
+    all_target_slices = set(path_slices + title_slices)
+    if meta_slice_id:
+        all_target_slices.add(meta_slice_id.upper())
+
+    # Strong boost for exact match
+    for qslice in query_slices:
+        if qslice in all_target_slices:
+            return 5.0  # Strong boost for exact slice ID match
+
+    return 0.0
 
 
 def _normalize_for_match(text: str) -> str:
@@ -513,6 +552,9 @@ def _search_collection(
         keyword_score += _wsp_number_match_boost(query, path, title)
         # HIA5: WSP alias phrase match boost
         keyword_score += _wsp_alias_match_boost(query, path, title)
+        # HXA Audit Fix: Slice ID exact match boost
+        meta_slice_id = meta.get("slice_id", "")
+        keyword_score += _slice_id_match_boost(query, path, title, meta_slice_id)
 
         if doc_type_filter != "all" and not doc_type.startswith(doc_type_filter):
             continue
@@ -626,6 +668,9 @@ def _lexical_search_collection(
             keyword_score += _wsp_number_match_boost(query, path, title)
             # HIA5: WSP alias phrase match boost
             keyword_score += _wsp_alias_match_boost(query, path, title)
+            # HXA Audit Fix: Slice ID exact match boost
+            meta_slice_id = meta.get("slice_id", "")
+            keyword_score += _slice_id_match_boost(query, path, title, meta_slice_id)
 
             if keyword_score <= 0:
                 continue
@@ -715,6 +760,25 @@ def _format_hit(
         }
         if emit_conf:
             result["confidence"] = _compute_confidence(similarity, keyword_score, "skillz")
+        return result
+
+    # HXA Audit Fix: Explicit docs/knowledge handlers to ensure path is always populated
+    if kind in ("docs", "knowledge"):
+        # Ensure path is never None - fallback to document content or title
+        path_value = meta.get("path") or meta.get("title", "")
+        result_type = meta.get("type", kind)
+        result = {
+            "title": meta.get("title"),
+            "summary": meta.get("summary"),
+            "path": path_value,
+            "slice_id": meta.get("slice_id"),  # HXA Audit Fix: Include slice_id
+            "similarity": sim_str,
+            "type": result_type,
+            "priority": priority,
+            "_sort_key": (0.5 * priority + 0.3 * similarity + 0.2 * keyword_score, similarity, priority),
+        }
+        if emit_conf:
+            result["confidence"] = _compute_confidence(similarity, keyword_score, result_type)
         return result
 
     # WSP / default
