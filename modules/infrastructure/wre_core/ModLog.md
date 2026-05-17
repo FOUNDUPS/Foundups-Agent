@@ -2,6 +2,68 @@
 
 ## Chronological Change Log
 
+### [2026-05-15] - DESTRUCTIVE_ACTION_GUARD_EDGE_CASE_TEST_IMPL_PHASE1 (v0.8.39)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 50 (Pre-Action), WSP 5 (Coverage)
+**Impact Analysis**: Edge case test coverage for destructive action guard path validation
+
+#### Changes Made
+
+- `tests/test_destructive_action_guard_edge_cases.py` (NEW - 626 lines):
+  - 12 test classes covering edge cases from PR #613 audit
+  - TestDirectoryTraversalBlocked: `../` normalization (3 tests)
+  - TestMixedSeparatorHandling: `/` vs `\` normalization (2 tests)
+  - TestSymlinkTraversal: Symlink traversal detection (2 tests, xfail - P0 gap)
+  - TestWindowsUNCPaths: UNC path blocking (4 tests)
+  - TestControlCharactersInPaths: Null/newline/CR/tab handling (4 tests, xfail - P1 gap)
+  - TestWindowsDriveCaseNormalization: Drive case sensitivity (2 tests, 1 xfail)
+  - TestD3SandboxBoundary: Gate validation for D3 (4 tests)
+  - TestWSP97TruthBoundaries: Truth field invariants (4 tests)
+  - TestBlockedPathOverride: Blocked paths override allowed (3 tests)
+  - TestEmptyAndNullInputs: Edge case inputs (3 tests)
+  - TestGuardIntegrationWithPathValidation: Path validation + guard flow (2 tests)
+
+#### Gaps Documented via xfail
+
+```
+P0 (Critical):
+- Symlink traversal: os.path.normpath does NOT resolve symlinks
+  → Fix in PATH_CANONICALIZATION_IMPL_PHASE1 (use os.path.realpath)
+
+P1 (High):
+- Control characters: No explicit blocking for \x00, \n, \r
+  → Fix in CONTROL_CHAR_VALIDATION_IMPL_PHASE1
+- Windows drive case: c:\path vs C:\path may bypass path checks
+  → Fix in WINDOWS_DRIVE_NORMALIZATION_IMPL_PHASE1
+```
+
+#### Test Results
+
+```
+26 passed, 2 skipped, 5 xfailed in 0.36s
+Regression: test_hxa22, test_hxa23, test_hxa30 - all passing
+```
+
+#### HXA31 Verdict
+
+```
+Verdict: DESTRUCTIVE_ACTION_GUARD_EDGE_CASE_TESTS_DEFINED
+
+PR #613 audit findings now have test coverage:
+  1. Directory traversal (../) - TESTED, PASSING
+  2. Mixed separators (/, \) - TESTED, PASSING  
+  3. Symlink traversal - TESTED, XFAIL (gap documented)
+  4. UNC paths (\\server\share) - TESTED, PASSING
+  5. Control characters - TESTED, XFAIL (gap documented)
+  6. Windows drive case - TESTED, XFAIL (gap documented)
+  7. D3 gate validation - TESTED, PASSING
+  8. WSP 97 truth boundaries - TESTED, PASSING
+  9. Blocked path overrides - TESTED, PASSING
+  10. Empty/null inputs - TESTED, PASSING
+```
+
+---
+
 ### [2026-05-13] - HXA30_SCOPE_TO_ACTION_CLASS_HERMES_INTEGRATION_PHASE1 (v0.8.38)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority), WSP 50 (Pre-Action)

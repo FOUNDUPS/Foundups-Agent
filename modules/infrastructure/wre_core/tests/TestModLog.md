@@ -1,5 +1,39 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-15: HXA31 Destructive Action Guard Edge Case tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_destructive_action_guard_edge_cases.py -v`
+- Status: PASS (with expected xfails)
+- Result: `26 passed, 2 skipped, 5 xfailed`
+- Notes:
+  - NEW file: `test_destructive_action_guard_edge_cases.py` (626 lines)
+  - Tests edge cases from PR #613 audit (DESTRUCTIVE_ACTION_GUARD_EDGE_CASE_EXPANSION_AUDIT_PHASE1):
+    - `TestDirectoryTraversalBlocked` (3 tests) - `../` traversal normalized and blocked
+    - `TestMixedSeparatorHandling` (2 tests) - `/` and `\` normalized correctly
+    - `TestSymlinkTraversal` (2 tests) - Symlink detection (xfail - P0 gap)
+    - `TestWindowsUNCPaths` (4 tests) - UNC paths, device paths blocked
+    - `TestControlCharactersInPaths` (4 tests) - Null/newline/CR/tab (xfail - P1 gap)
+    - `TestWindowsDriveCaseNormalization` (2 tests) - Drive case sensitivity (1 xfail)
+    - `TestD3SandboxBoundary` (4 tests) - Gate validation for D3 sandbox writes
+    - `TestWSP97TruthBoundaries` (4 tests) - Truth field invariants preserved
+    - `TestBlockedPathOverride` (3 tests) - Blocked paths override allowed paths
+    - `TestEmptyAndNullInputs` (3 tests) - Edge case input handling
+    - `TestGuardIntegrationWithPathValidation` (2 tests) - Guard + path validation flow
+  - Key test patterns:
+    - `pytest.mark.xfail` for documenting known gaps with fix slices
+    - Parametrized tests for systematic coverage
+    - Helper functions for consistent request creation
+  - Gaps documented (xfail):
+    - P0: Symlink traversal (os.path.normpath does not resolve symlinks)
+    - P1: Control characters (no explicit blocking for \x00, \n, \r)
+    - P1: Windows drive case (c:\ vs C:\ may bypass checks)
+  - Skipped tests: Symlink tests on Windows require admin privileges
+  - Verdict: `DESTRUCTIVE_ACTION_GUARD_EDGE_CASE_TESTS_DEFINED`
+- Regression: test_hxa22 (40 passed), test_hxa23 (36 passed), test_hxa30 (24 passed)
+- Slice: DESTRUCTIVE_ACTION_GUARD_EDGE_CASE_TEST_IMPL_PHASE1
+
+---
+
 ## 2026-05-13: HXA30 Scope-to-Action-Class Hermes Integration tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_hxa30_scope_to_action_class_integration.py -v`
