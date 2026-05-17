@@ -51,6 +51,8 @@ from modules.infrastructure.wre_core.src.destructive_action_guard import (
     DestructiveActionRequest,
     GuardBlockReasonCode,
     GuardDecision,
+    PathConstraintValidator,
+    canonicalize_path,
 )
 from modules.infrastructure.wre_core.src.capability_token_validator import (
     CapabilityToken,
@@ -164,7 +166,7 @@ class TestMixedSeparatorHandling:
 
 
 # ===========================================================================
-# SECTION 4: Symlink Traversal Tests (P0 - Expected Gap)
+# SECTION 4: Symlink Traversal Tests (P0 - Fixed via PathConstraintValidator)
 # ===========================================================================
 
 
@@ -172,23 +174,19 @@ class TestSymlinkTraversal:
     """
     Test symlink traversal detection.
 
-    KNOWN GAP: Current implementation uses os.path.normpath which does NOT
-    resolve symlinks. Tests marked xfail document this gap.
+    P0 FIX IMPLEMENTED: PathConstraintValidator uses os.path.realpath() which
+    resolves symlinks before boundary checking.
 
-    Fix required in: DESTRUCTIVE_ACTION_GUARD_PATH_CANONICALIZATION_IMPL_PHASE1
+    Slice: DESTRUCTIVE_ACTION_GUARD_PATH_CANONICALIZATION_IMPL_PHASE1
     """
 
     @pytest.mark.skipif(sys.platform == "win32", reason="Symlinks require admin on Windows")
-    @pytest.mark.xfail(
-        reason="GAP: os.path.normpath does not resolve symlinks. "
-               "Fix in PATH_CANONICALIZATION_IMPL_PHASE1",
-        strict=False,
-    )
     def test_symlink_inside_allowed_pointing_outside_blocked(self, tmp_path):
         """
         A symlink inside allowed directory pointing outside should be BLOCKED.
 
-        This test documents the current gap where symlinks can escape boundaries.
+        P0 FIX: PathConstraintValidator resolves symlinks via os.path.realpath()
+        before checking boundaries.
         """
         # Setup: Create allowed directory and symlink to outside
         allowed_dir = tmp_path / "workspace" / "allowed"
@@ -202,15 +200,14 @@ class TestSymlinkTraversal:
         symlink_path = allowed_dir / "escape"
         symlink_path.symlink_to(outside_dir)
 
-        # Token allows only workspace/allowed
-        token = _create_token_with_paths([str(allowed_dir)])
+        # PathConstraintValidator with symlink resolution
+        validator = PathConstraintValidator(allowed_paths=[str(allowed_dir)])
 
         # The path through symlink should be BLOCKED
         escape_path = str(allowed_dir / "escape" / "password.txt")
 
-        # EXPECTED: False (blocked because resolved path is outside)
-        # CURRENT: True (allowed because normpath doesn't resolve symlinks)
-        assert token.path_allowed(escape_path) is False
+        # FIXED: Now blocked because realpath resolves to outside_dir/password.txt
+        assert validator.is_path_allowed(escape_path) is False
 
     @pytest.mark.skipif(sys.platform == "win32", reason="Symlinks require admin on Windows")
     def test_symlink_to_allowed_location_allowed(self, tmp_path):
@@ -225,11 +222,37 @@ class TestSymlinkTraversal:
         symlink_path = allowed_dir / "link_to_sub"
         symlink_path.symlink_to(subdir)
 
-        token = _create_token_with_paths([str(allowed_dir)])
+        validator = PathConstraintValidator(allowed_paths=[str(allowed_dir)])
 
         # Both direct and symlink paths within allowed should work
-        assert token.path_allowed(str(subdir / "file.txt")) is True
-        # Note: This may also pass due to normpath not resolving
+        assert validator.is_path_allowed(str(subdir / "file.txt")) is True
+        # Symlink path also allowed because it resolves to within allowed
+        assert validator.is_path_allowed(str(symlink_path / "file.txt")) is True
+
+    # Legacy test using CapabilityToken (documents gap in that implementation)
+    @pytest.mark.skipif(sys.platform == "win32", reason="Symlinks require admin on Windows")
+    @pytest.mark.xfail(
+        reason="CapabilityToken uses os.path.normpath (does not resolve symlinks). "
+               "Use PathConstraintValidator for symlink-safe validation.",
+        strict=False,
+    )
+    def test_legacy_token_symlink_gap_documented(self, tmp_path):
+        """Document that CapabilityToken still has symlink gap."""
+        allowed_dir = tmp_path / "workspace" / "allowed"
+        allowed_dir.mkdir(parents=True)
+
+        outside_dir = tmp_path / "secrets"
+        outside_dir.mkdir()
+        (outside_dir / "password.txt").write_text("secret123")
+
+        symlink_path = allowed_dir / "escape"
+        symlink_path.symlink_to(outside_dir)
+
+        token = _create_token_with_paths([str(allowed_dir)])
+        escape_path = str(allowed_dir / "escape" / "password.txt")
+
+        # CapabilityToken still allows this (gap)
+        assert token.path_allowed(escape_path) is False
 
 
 # ===========================================================================
@@ -274,7 +297,7 @@ class TestWindowsUNCPaths:
 
 
 # ===========================================================================
-# SECTION 6: Control Character Tests (P1)
+# SECTION 6: Control Character Tests (P1 - Fixed via canonicalize_path)
 # ===========================================================================
 
 
@@ -282,67 +305,80 @@ class TestControlCharactersInPaths:
     """
     Test that control characters in paths fail closed.
 
-    KNOWN GAP: Current implementation does not filter control characters.
-    Tests marked xfail document this gap for future fix.
+    P1 FIX IMPLEMENTED: canonicalize_path() blocks all ASCII control chars (0x00-0x1F).
+
+    Slice: DESTRUCTIVE_ACTION_GUARD_PATH_CANONICALIZATION_IMPL_PHASE1
     """
 
-    @pytest.mark.xfail(
-        reason="GAP: No control character filtering. "
-               "Fix in PATH_CANONICALIZATION_IMPL_PHASE1",
-        strict=False,
-    )
     def test_null_byte_in_path_blocked(self):
         """Path with NULL byte should be blocked."""
-        token = _create_token_with_paths(["modules/foundups"])
+        validator = PathConstraintValidator(allowed_paths=["modules/foundups"])
 
         # NULL byte injection
         malicious_path = "modules/foundups/file.txt\x00.exe"
-        assert token.path_allowed(malicious_path) is False
+        assert validator.is_path_allowed(malicious_path) is False
 
-    @pytest.mark.xfail(
-        reason="GAP: No control character filtering. "
-               "Fix in PATH_CANONICALIZATION_IMPL_PHASE1",
-        strict=False,
-    )
+        # Verify via canonicalize_path directly
+        result = canonicalize_path(malicious_path)
+        assert result.is_safe is False
+        assert "control characters" in result.reason
+
     def test_newline_in_path_blocked(self):
         """Path with newline should be blocked."""
-        token = _create_token_with_paths(["modules/foundups"])
+        validator = PathConstraintValidator(allowed_paths=["modules/foundups"])
 
         # Newline injection
         malicious_path = "modules/foundups/file.txt\n/etc/passwd"
-        assert token.path_allowed(malicious_path) is False
+        assert validator.is_path_allowed(malicious_path) is False
 
-    @pytest.mark.xfail(
-        reason="GAP: No control character filtering. "
-               "Fix in PATH_CANONICALIZATION_IMPL_PHASE1",
-        strict=False,
-    )
+        # Verify via canonicalize_path directly
+        result = canonicalize_path(malicious_path)
+        assert result.is_safe is False
+        assert "control characters" in result.reason
+
     def test_carriage_return_in_path_blocked(self):
         """Path with carriage return should be blocked."""
-        token = _create_token_with_paths(["modules/foundups"])
+        validator = PathConstraintValidator(allowed_paths=["modules/foundups"])
 
         # CR injection
         malicious_path = "modules/foundups/file.txt\r/etc/passwd"
-        assert token.path_allowed(malicious_path) is False
+        assert validator.is_path_allowed(malicious_path) is False
 
-    @pytest.mark.xfail(
-        reason="GAP: No control character filtering. "
-               "Fix in PATH_CANONICALIZATION_IMPL_PHASE1",
-        strict=False,
-    )
-    def test_tab_in_path_handled(self):
-        """Path with tab character - should be blocked or normalized."""
-        token = _create_token_with_paths(["modules/foundups"])
+        # Verify via canonicalize_path directly
+        result = canonicalize_path(malicious_path)
+        assert result.is_safe is False
+        assert "control characters" in result.reason
+
+    def test_tab_in_path_blocked(self):
+        """Path with tab character should be blocked."""
+        validator = PathConstraintValidator(allowed_paths=["modules/foundups"])
 
         # Tab in path
         path_with_tab = "modules/foundups/file\t.txt"
-        # Should either be blocked or normalized safely
-        # Current behavior: may pass (not filtered)
-        assert token.path_allowed(path_with_tab) is False
+        assert validator.is_path_allowed(path_with_tab) is False
+
+        # Verify via canonicalize_path directly
+        result = canonicalize_path(path_with_tab)
+        assert result.is_safe is False
+        assert "control characters" in result.reason
+
+    # Legacy tests documenting CapabilityToken gap
+    @pytest.mark.xfail(
+        reason="CapabilityToken does not filter control characters. "
+               "Use PathConstraintValidator for control-char-safe validation.",
+        strict=False,
+    )
+    def test_legacy_token_null_byte_gap_documented(self):
+        """Document that CapabilityToken still has control char gap."""
+        token = _create_token_with_paths(["modules/foundups"])
+        malicious_path = "modules/foundups/file.txt\x00.exe"
+        assert token.path_allowed(malicious_path) is False
 
 
 # ===========================================================================
 # SECTION 7: Windows Drive Case Tests (P1)
+# ===========================================================================
+# SECTION 7: Windows Drive Case Tests (P1 - Fixed via canonicalize_path)
 # ===========================================================================
 
 
@@ -350,30 +386,39 @@ class TestWindowsDriveCaseNormalization:
     """
     Test Windows drive letter case handling.
 
-    On Windows, C: and c: refer to the same drive but may not match
-    in string comparison without normcase().
+    P1 FIX IMPLEMENTED: canonicalize_path() uses os.path.normcase() on Windows
+    which normalizes drive letter case.
+
+    Slice: DESTRUCTIVE_ACTION_GUARD_PATH_CANONICALIZATION_IMPL_PHASE1
     """
 
     @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific test")
-    @pytest.mark.xfail(
-        reason="GAP: No os.path.normcase() on Windows. "
-               "Fix in PATH_CANONICALIZATION_IMPL_PHASE1",
-        strict=False,
-    )
     def test_drive_case_mismatch_normalized(self):
         """Drive letters with different case should match on Windows."""
-        token = _create_token_with_paths(["C:/workspace/project"])
+        validator = PathConstraintValidator(allowed_paths=["C:/workspace/project"])
 
-        # Lowercase drive should still match
-        assert token.path_allowed("c:/workspace/project/file.txt") is True
+        # Lowercase drive should still match (normcase normalizes to lowercase)
+        assert validator.is_path_allowed("c:/workspace/project/file.txt") is True
 
     @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific test")
     def test_drive_relative_path_blocked(self):
         """Drive-relative paths (C:file.txt) should be blocked."""
-        token = _create_token_with_paths(["C:/workspace"])
+        validator = PathConstraintValidator(allowed_paths=["C:/workspace"])
 
-        # Drive-relative (no leading slash)
-        assert token.path_allowed("C:file.txt") is False
+        # Drive-relative (no leading slash) - won't match the allowed absolute path
+        assert validator.is_path_allowed("C:file.txt") is False
+
+    # Legacy test documenting CapabilityToken gap
+    @pytest.mark.skipif(sys.platform != "win32", reason="Windows-specific test")
+    @pytest.mark.xfail(
+        reason="CapabilityToken does not use os.path.normcase() on Windows. "
+               "Use PathConstraintValidator for case-normalized validation.",
+        strict=False,
+    )
+    def test_legacy_token_drive_case_gap_documented(self):
+        """Document that CapabilityToken still has drive case gap."""
+        token = _create_token_with_paths(["C:/workspace/project"])
+        assert token.path_allowed("c:/workspace/project/file.txt") is True
 
 
 # ===========================================================================

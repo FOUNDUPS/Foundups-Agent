@@ -41,8 +41,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 import logging
+import os
+import re
+import sys
 
 logger = logging.getLogger("wre_destructive_action_guard")
 
@@ -667,3 +670,254 @@ def evaluate_destructive_action(
     WSP 97: This does NOT perform the action. It only evaluates permission.
     """
     return get_destructive_action_guard().evaluate(request)
+
+
+# ===========================================================================
+# SECTION 7: Path Canonicalization Utilities (P0 Symlink Fix)
+# ===========================================================================
+
+
+# Control character pattern: ASCII 0x00-0x1F except tab (0x09), newline (0x0A), CR (0x0D)
+# We block ALL control chars including tab/newline/CR for path safety
+_CONTROL_CHAR_PATTERN = re.compile(r'[\x00-\x1f]')
+
+
+@dataclass
+class PathCanonicalizeResult:
+    """Result of path canonicalization."""
+
+    is_safe: bool
+    """Whether the path is safe (no control chars, resolvable)."""
+
+    canonical_path: str
+    """The canonicalized path (empty if not safe)."""
+
+    original_path: str
+    """The original input path."""
+
+    reason: str
+    """Human-readable reason if not safe, empty otherwise."""
+
+    resolved_symlinks: bool
+    """Whether symlinks were resolved."""
+
+
+def canonicalize_path(path: str) -> PathCanonicalizeResult:
+    """
+    Canonicalize a path with full symlink resolution.
+
+    This function:
+    1. Checks for control characters (BLOCKED)
+    2. Checks for UNC paths on Windows (BLOCKED)
+    3. Resolves symlinks via os.path.realpath()
+    4. Normalizes separators
+    5. Applies case normalization on Windows
+
+    Args:
+        path: The path to canonicalize
+
+    Returns:
+        PathCanonicalizeResult with safety status and canonical path
+
+    WSP 97: This is a validation utility. No filesystem modification.
+    """
+    if not path or not path.strip():
+        return PathCanonicalizeResult(
+            is_safe=False,
+            canonical_path="",
+            original_path=path,
+            reason="Empty or whitespace-only path",
+            resolved_symlinks=False,
+        )
+
+    # Check for control characters (P1 fix)
+    if _CONTROL_CHAR_PATTERN.search(path):
+        return PathCanonicalizeResult(
+            is_safe=False,
+            canonical_path="",
+            original_path=path,
+            reason="Path contains control characters",
+            resolved_symlinks=False,
+        )
+
+    # Check for UNC paths (P1 fix)
+    if path.startswith("\\\\") or path.startswith("//"):
+        return PathCanonicalizeResult(
+            is_safe=False,
+            canonical_path="",
+            original_path=path,
+            reason="UNC paths are blocked",
+            resolved_symlinks=False,
+        )
+
+    # Check for Windows device paths
+    if path.startswith("\\\\.\\"):
+        return PathCanonicalizeResult(
+            is_safe=False,
+            canonical_path="",
+            original_path=path,
+            reason="Windows device paths are blocked",
+            resolved_symlinks=False,
+        )
+
+    # Check for Windows long path prefix
+    if path.startswith("\\\\?\\"):
+        return PathCanonicalizeResult(
+            is_safe=False,
+            canonical_path="",
+            original_path=path,
+            reason="Windows long path prefix blocked",
+            resolved_symlinks=False,
+        )
+
+    try:
+        # First normalize to handle .. components
+        normalized = os.path.normpath(path)
+
+        # Apply case normalization on Windows (P1 fix)
+        if sys.platform == "win32":
+            normalized = os.path.normcase(normalized)
+
+        # Resolve symlinks (P0 fix) - this is the critical security fix
+        # os.path.realpath resolves all symlinks to get the actual path
+        resolved = os.path.realpath(normalized)
+
+        # Apply case normalization again after resolution on Windows
+        if sys.platform == "win32":
+            resolved = os.path.normcase(resolved)
+
+        # Normalize separators to forward slash for consistent comparison
+        canonical = resolved.replace("\\", "/")
+
+        return PathCanonicalizeResult(
+            is_safe=True,
+            canonical_path=canonical,
+            original_path=path,
+            reason="",
+            resolved_symlinks=(normalized != resolved),
+        )
+
+    except OSError as e:
+        # Fail-closed on any resolution error
+        return PathCanonicalizeResult(
+            is_safe=False,
+            canonical_path="",
+            original_path=path,
+            reason=f"Path resolution failed: {e}",
+            resolved_symlinks=False,
+        )
+
+
+class PathConstraintValidator:
+    """
+    Path constraint validator with full symlink resolution.
+
+    This class provides path validation that:
+    1. Canonicalizes paths (resolves symlinks, normalizes)
+    2. Checks against allowed roots (after canonicalization)
+    3. Checks against blocked paths (after canonicalization)
+
+    Key Principle: FAIL-CLOSED
+    - Unknown/unresolvable paths are blocked
+    - Symlinks are resolved before boundary checking
+    - Control characters are blocked
+
+    WSP 97: This is a validation utility. No filesystem modification.
+
+    Slice: DESTRUCTIVE_ACTION_GUARD_PATH_CANONICALIZATION_IMPL_PHASE1
+    """
+
+    def __init__(
+        self,
+        allowed_paths: List[str],
+        blocked_paths: Optional[List[str]] = None,
+    ):
+        """
+        Initialize validator with allowed and blocked paths.
+
+        Args:
+            allowed_paths: List of allowed root paths
+            blocked_paths: Optional list of blocked paths (override allowed)
+        """
+        self.allowed_paths = allowed_paths or []
+        self.blocked_paths = blocked_paths or []
+
+        # Pre-canonicalize allowed/blocked for comparison
+        self._canonical_allowed: List[str] = []
+        self._canonical_blocked: List[str] = []
+
+        for ap in self.allowed_paths:
+            result = canonicalize_path(ap)
+            if result.is_safe:
+                self._canonical_allowed.append(result.canonical_path)
+
+        for bp in self.blocked_paths:
+            result = canonicalize_path(bp)
+            if result.is_safe:
+                self._canonical_blocked.append(result.canonical_path)
+
+    def is_path_allowed(self, target_path: str) -> bool:
+        """
+        Check if a path is allowed after full canonicalization.
+
+        This method:
+        1. Canonicalizes the target path (resolves symlinks)
+        2. Checks against blocked paths first (override)
+        3. Checks against allowed paths
+
+        Args:
+            target_path: The path to check
+
+        Returns:
+            True if path is allowed, False otherwise (fail-closed)
+        """
+        # Canonicalize target path
+        result = canonicalize_path(target_path)
+
+        if not result.is_safe:
+            # Fail-closed: unsafe paths are blocked
+            return False
+
+        canonical = result.canonical_path
+
+        # Check blocked paths first (override)
+        for blocked in self._canonical_blocked:
+            if canonical == blocked or canonical.startswith(blocked + "/"):
+                return False
+
+        # Check allowed paths
+        for allowed in self._canonical_allowed:
+            if canonical == allowed or canonical.startswith(allowed + "/"):
+                return True
+
+        # Fail-closed: not in any allowed path
+        return False
+
+    def validate_path(self, target_path: str) -> Tuple[bool, str]:
+        """
+        Validate a path with detailed reason.
+
+        Args:
+            target_path: The path to validate
+
+        Returns:
+            Tuple of (is_allowed, reason)
+        """
+        result = canonicalize_path(target_path)
+
+        if not result.is_safe:
+            return False, f"Path canonicalization failed: {result.reason}"
+
+        canonical = result.canonical_path
+
+        # Check blocked paths first
+        for blocked in self._canonical_blocked:
+            if canonical == blocked or canonical.startswith(blocked + "/"):
+                return False, f"Path is in blocked list: {blocked}"
+
+        # Check allowed paths
+        for allowed in self._canonical_allowed:
+            if canonical == allowed or canonical.startswith(allowed + "/"):
+                return True, f"Path allowed under: {allowed}"
+
+        return False, "Path not in any allowed root (fail-closed)"
