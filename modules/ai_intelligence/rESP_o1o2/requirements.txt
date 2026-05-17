@@ -74,7 +74,7 @@ seaborn>=0.12.0
 
 # Configuration and logging
 pyyaml>=6.0
-python-dotenv>=1.0.0
+python-dotenv==1.2.2  # CVE-2026-28684 fix
 structlog>=23.1.0
 
 # Testing framework

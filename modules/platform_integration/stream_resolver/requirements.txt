@@ -6,7 +6,7 @@ google-auth>=2.16.0
 google-auth-oauthlib>=1.0.0
 
 # Environment variables
-python-dotenv>=1.0.0
+python-dotenv==1.2.2  # CVE-2026-28684 fix
 
 # Timezone handling (required by stream_config.py)
 pytz>=2023.3
