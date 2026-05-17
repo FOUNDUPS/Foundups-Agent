@@ -31,6 +31,12 @@ ANTIFAFM_BROWSER_PORT = int(os.getenv(
 # Browser type for error messages
 ANTIFAFM_BROWSER_TYPE = os.getenv("ANTIFAFM_BROWSER_TYPE", "Edge")
 
+# Auto-launch browser fallback (default OFF for conservative behavior)
+# Set ANTIFAFM_METADATA_AUTO_LAUNCH_BROWSER=1 to enable
+ANTIFAFM_METADATA_AUTO_LAUNCH_BROWSER = os.getenv(
+    "ANTIFAFM_METADATA_AUTO_LAUNCH_BROWSER", "0"
+) == "1"
+
 ANTIFAFM_CHANNEL_ID = "UCVSmg5aOhP4tnQ9KFUg97qA"
 LIVE_DASHBOARD_URL = f"https://studio.youtube.com/channel/{ANTIFAFM_CHANNEL_ID}/livestreaming/stream"
 
@@ -61,15 +67,63 @@ def _port_open(port: int, timeout: float = 2) -> bool:
         return False
 
 
+def _try_auto_launch_browser() -> tuple[bool, str]:
+    """Attempt to auto-launch the configured browser if enabled.
+
+    Only called when port check fails AND ANTIFAFM_METADATA_AUTO_LAUNCH_BROWSER=1.
+
+    Returns:
+        (success, message)
+    """
+    if not ANTIFAFM_METADATA_AUTO_LAUNCH_BROWSER:
+        return False, "Auto-launch disabled (set ANTIFAFM_METADATA_AUTO_LAUNCH_BROWSER=1 to enable)"
+
+    try:
+        from modules.infrastructure.dependency_launcher.src.dae_dependencies import (
+            launch_edge,
+            launch_chrome,
+        )
+
+        # Determine which launcher to use based on configured port
+        if ANTIFAFM_BROWSER_PORT == 9222:
+            logger.info("[AUTOLAUNCH] Launching Chrome on port 9222...")
+            return launch_chrome()
+        else:
+            # Default to Edge for 9223 or any other port
+            logger.info(f"[AUTOLAUNCH] Launching Edge on port {ANTIFAFM_BROWSER_PORT}...")
+            return launch_edge()
+
+    except ImportError as e:
+        return False, f"Auto-launch unavailable: {e}"
+    except Exception as e:
+        return False, f"Auto-launch failed: {e}"
+
+
 def _connect_to_browser():
     """Connect to existing browser via debug port.
 
     Uses ANTIFAFM_BROWSER_PORT (default: 9223 for Edge).
     Set ANTIFAFM_BROWSER_PORT=9222 to use Chrome instead.
+
+    If port is not open and ANTIFAFM_METADATA_AUTO_LAUNCH_BROWSER=1,
+    attempts to launch the browser automatically.
     """
     if not _port_open(ANTIFAFM_BROWSER_PORT):
-        logger.error(f"{ANTIFAFM_BROWSER_TYPE} not running on port {ANTIFAFM_BROWSER_PORT}")
-        return None
+        # Port not open - try auto-launch if enabled
+        if ANTIFAFM_METADATA_AUTO_LAUNCH_BROWSER:
+            logger.info(f"{ANTIFAFM_BROWSER_TYPE} not running on port {ANTIFAFM_BROWSER_PORT}, attempting auto-launch...")
+            ok, msg = _try_auto_launch_browser()
+            if ok:
+                logger.info(f"[AUTOLAUNCH] {msg}")
+            else:
+                logger.error(f"[AUTOLAUNCH] {msg}")
+                return None
+        else:
+            logger.error(
+                f"{ANTIFAFM_BROWSER_TYPE} not running on port {ANTIFAFM_BROWSER_PORT}. "
+                f"Start browser manually or set ANTIFAFM_METADATA_AUTO_LAUNCH_BROWSER=1"
+            )
+            return None
 
     opts = Options()
     opts.add_experimental_option("debuggerAddress", f"127.0.0.1:{ANTIFAFM_BROWSER_PORT}")
