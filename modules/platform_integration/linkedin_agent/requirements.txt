@@ -5,7 +5,7 @@
 requests>=2.28.0
 
 # Environment variable management
-python-dotenv>=0.19.0
+python-dotenv==1.2.2  # CVE-2026-28684 fix
 
 # Async support
 asyncio

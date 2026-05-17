@@ -17,4 +17,4 @@ pillow>=10.0.0  # For thumbnail generation
 asyncio  # Built-in, listed for documentation
 
 # Environment management
-python-dotenv>=1.0.0  # Already installed
+python-dotenv==1.2.2  # CVE-2026-28684 fix

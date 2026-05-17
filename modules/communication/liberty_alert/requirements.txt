@@ -6,7 +6,7 @@ aiohttp>=3.8.0
 aiortc>=1.5.0  # WebRTC for Python
 cryptography>=41.0.0
 geopy>=2.3.0
-python-dotenv>=1.0.0
+python-dotenv==1.2.2  # CVE-2026-28684 fix
 
 # Voice synthesis
 edge-tts>=6.1.0  # Free edge TTS (Microsoft)

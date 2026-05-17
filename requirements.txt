@@ -1,7 +1,7 @@
 google-api-python-client>=2.0.0
 google-auth-oauthlib>=0.4.1
 google-auth>=1.0.0
-python-dotenv>=0.15.0
+python-dotenv==1.2.2  # CVE-2026-28684 fix
 requests>=2.25.0 # Often a dependency, good to specify
 # Add AI/Blockchain specific libraries later, e.g.:
 # openai
