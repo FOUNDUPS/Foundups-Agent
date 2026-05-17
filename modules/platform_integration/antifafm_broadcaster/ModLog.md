@@ -1,5 +1,55 @@
 # antifaFM Broadcaster - ModLog
 
+## V3.4.2 - Metadata Editor Browser Auto-Launch (2026-05-17)
+
+**Slice**: `ANTIFAFM_METADATA_BROWSER_AUTOLAUNCH_PHASE1`
+**Branch**: `feat/antifafm-metadata-browser-autolaunch`
+**Worker**: W1
+**WSP Lock**: WSP_00, WSP_50, WSP_97, WSP_22
+
+**Context**: Follow-up to V3.4.1. Metadata editors now correctly check the right port, but still require the browser to already be running. This adds optional auto-launch capability using existing `dae_dependencies.py` launchers.
+
+**Changes**:
+
+1. **Added auto-launch fallback to both metadata editors**:
+   - `skillz/manage_metadata_editor/executor.py`
+   - `skillz/stream_metadata_editor/executor.py`
+
+2. **New env gate**:
+   - `ANTIFAFM_METADATA_AUTO_LAUNCH_BROWSER=0|1`
+   - Default: `0` (OFF) - conservative, preserves existing behavior
+
+3. **Auto-launch behavior** (when enabled):
+   - Port check fails -> attempt browser launch
+   - Port 9222 -> calls `launch_chrome()`
+   - Port 9223 (or other) -> calls `launch_edge()`
+   - Uses existing `dae_dependencies.py` launchers
+
+4. **Added tests**:
+   - `tests/test_metadata_editor_autolaunch.py`
+   - Tests: env gate default, port precedence, launcher selection
+
+**Runtime Contract**:
+- Never auto-launch during import (only at function execution)
+- Only attempt launch when port check fails
+- Report exactly what happened in logs
+
+**Manual Boundary** (unchanged):
+- Browser profile/login may still require prior 012 setup
+- YouTube account switching not automated
+
+**Files Modified**:
+- `skillz/manage_metadata_editor/executor.py`
+- `skillz/stream_metadata_editor/executor.py`
+- `tests/test_metadata_editor_autolaunch.py` - NEW
+- `ModLog.md` - This entry
+
+**WSP Compliance**:
+- WSP 97: Truthful reporting of launch status
+- WSP 50: Pre-action verification before attempting launch
+
+---
+
 ## V3.4.1 - Metadata Editor Browser Port Fix (2026-05-17)
 
 **Slice**: `ANTIFAFM_METADATA_EDITOR_BROWSER_PORT_FIX`
