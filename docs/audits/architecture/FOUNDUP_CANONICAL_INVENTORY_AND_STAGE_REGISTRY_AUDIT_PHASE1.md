@@ -2,64 +2,144 @@
 
 **Slice**: `FCISRA-W9`
 **Worker**: W9 (audit/spec)
-**Date**: 2026-05-14
+**Date**: 2026-05-18
+**Patch**: 012 Correction Patch Applied
 **WSP References**: WSP 3 (Domain Organization), WSP 49 (Module Structure), WSP 97 (Truth Boundaries), WSP 104 (Namespace)
+
+---
+
+## WSP 97 Constraints
+
+```yaml
+DOCS_ONLY: true
+INVENTORY_CORRECTION_ONLY: true
+NO_REGISTRY_IMPLEMENTATION: true
+NO_MANIFEST_CREATION: true
+NO_MODULE_DELETION: true
+NO_TOKEN_ASSIGNMENT: true
+NO_RUNTIME_CHANGE: true
+NO_CABR_READY: true
+NO_PAYOUT_READY: true
+NO_DAO_ACTIVATION: true
+```
 
 ---
 
 ## 1. Executive Summary
 
-This audit inventories **all existing FoundUps** across the Foundups-Agent codebase and external repos, classifies their implementation stage, and defines a **canonical stage registry schema** that must exist before VOTE-specific or any FoundUp-specific gate work proceeds.
+This audit inventories **all existing FoundUps and platform components** across the Foundups-Agent codebase and external repos, classifies their implementation stage, and defines a **typed registry schema** that must exist before VOTE-specific or any FoundUp-specific gate work proceeds.
 
-**Finding**: The ecosystem has **14+ identified FoundUp entities** at varying implementation stages, but only **4 have canonical manifests** (`foundup_manifest.json`). The rest operate without manifest contracts, creating inconsistent shell loading, CABR integration, and observability gaps.
+**Finding**: The ecosystem has multiple entity types at varying implementation stages. A **typed registry** (not flat FoundUp list) is required to preserve distinctions between FoundUps, platform layers, infrastructure, tools, and external repos.
 
----
-
-## 2. Canonical Inventory
-
-### 2.1 FoundUps with Manifests (4)
-
-| FoundUp ID | Name | Tier | Lifecycle Stage | Entry URL | Manifest Location |
-|------------|------|------|-----------------|-----------|-------------------|
-| `gotjunk_001` | GotJunk | F0_DAE | proto | https://gotjunk-56566376153.us-west1.run.app/ | `modules/foundups/gotjunk/foundup_manifest.json` |
-| `kosei` | Kosei AI Systems | F0_DAE | incubating | https://foundupscom.web.app/kosei/app/ | `modules/foundups/kosei/foundup_manifest.json` |
-| `voteballots` | Vote/Ballots | F0_DAE | incubating | (empty) | `modules/foundups/voteballots/foundup_manifest.json` |
-| `trade` | Trade | F0_DAE | incubating | (null) | `modules/foundups/trade/foundup_manifest.json` |
-
-**Observations**:
-- All 4 are F0_DAE tier (pre-OPO)
-- All 4 have `is_invite_only: true`
-- Only `gotjunk_001` and `kosei` have entry URLs
-- `voteballots` has explicit `_wsp97_implementation_state: SPECIFIED_NOT_IMPLEMENTED`
-- All use default CABR contracts (`v3_score_min: 0.5`)
-
-### 2.2 FoundUps without Manifests (10+)
-
-| Location | Name | Description | Implementation Status | Missing Manifest |
-|----------|------|-------------|----------------------|------------------|
-| `modules/foundups/pfmall/` | p.fMALL | Video Mall shell | `IMPLEMENTED` (shell_core.py, api.py) | YES |
-| `modules/foundups/move2japan/` | Move2Japan | Agent-driven relocation | `SPECIFIED` (README, base camps) | YES |
-| `modules/foundups/social_twin/` | Social Twin | LinkedIn automation | `SPECIFIED` (architecture doc) | YES |
-| `modules/foundups/pqn_portal/` | PQN Portal | PQN demo portal | `PARTIALLY_IMPLEMENTED` (frontend, docs) | YES |
-| `modules/foundups/pqn_swarm_hub/` | PQN Swarm Hub | Science coordination | `SPECIFIED` (migration manifest) | YES |
-| `modules/foundups/geoze/` | Geoze | Geo-based FoundUp | `SKELETON` (src/, tests/ dirs only) | YES |
-| `modules/foundups/agent/` | FoundUp Agent | Core agent builder | `IMPLEMENTED` (hermes_foundup_builder.py) | YES |
-| `modules/foundups/agent_market/` | Agent Market (FAM) | CABR/FAM daemon | `IMPLEMENTED` (fam_daemon.py, cabr_hooks.py) | YES |
-| `modules/foundups/ecosystem_animation/` | Ecosystem Animation | Visualization | `IMPLEMENTED` (animation tools) | YES |
-| `modules/foundups/simulator/` | Simulator | Economic simulation | `IMPLEMENTED` (mesa_model.py) | YES |
-
-### 2.3 External FoundUp Repos
-
-| Repo | Name | Description | Manifest Status |
-|------|------|-------------|-----------------|
-| `O:/repos/AutoPost/` | AutoPost | AI camera-to-post | NO manifest (metadata.json only) |
-| `O:/repos/science-swarm-hub/` | Science Swarm Hub | Research coordination | NO manifest (standalone PyPI package) |
+**Confirmed Manifest-Bearing FoundUps**: 5 (gotjunk_001, kosei, voteballots, trade, magadoom_001)
 
 ---
 
-## 3. Lifecycle Stage Classification
+## 2. 012 Correction Notes
 
-### 3.1 Manifest Schema Stages (per PFMALL_FOUNDUP_MANIFEST_SCHEMA.md)
+**CTO Decision**: Central registry YES, but **typed registry**. Not everything in `modules/foundups` is the same class of thing. The registry must preserve distinctions instead of forcing everything into "FoundUp."
+
+### 2.1 pfmall Correction
+
+- **pfmall / p.fMALL is PLATFORM LAYER**, not a FoundUp.
+- It is the shell/funnel/RedDog interaction surface.
+- Gemma PWA → WRE data path belongs here.
+- Needs registry representation only if registry supports platform layers.
+- **Do not treat as normal FoundUp.**
+
+### 2.2 agent_market Correction
+
+- **agent_market / FAM is PLATFORM/INFRA**, not a separate FoundUp.
+- It is part of pfmall/CABR/FAM daemon infrastructure.
+- **Do not list as FoundUp.**
+
+### 2.3 move2japan Correction
+
+- **DO NOT DELETE.**
+- It is a YT monitor / live-stream access solution for FoundUps.
+- Has real stakeholder/access code (`m2j_stakeholder_db.py`, base camp model).
+- Requires full WSP_97 audit before any repurpose/deprecation.
+- **Status: INVESTIGATE** (not questionable/delete).
+
+### 2.4 social_twin Clarification
+
+- **NOT a FoundUp.**
+- It is a cross-FoundUp reporting / OpenClaw-Hermes layer.
+- Should push to LinkedIn on milestones.
+- Built but not utilized.
+- **Needs integration into OpenClaw/Hermes reporting pipeline.**
+
+### 2.5 simulator Clarification
+
+- **Tool/economic engine**, not a FoundUp.
+- Possible future FoundUp only after dedicated audit.
+
+### 2.6 ecosystem_animation Clarification
+
+- **Visualization/tool**, not a FoundUp.
+- foundups.com landing animation.
+- Gated service candidate only after dedicated audit.
+- **Vision**: Per-FoundUp unique animations, realtime coding viz, 012 watches agents build.
+
+### 2.7 Token Policy
+
+- **Do not invent token symbols during inventory audit.**
+- Unknown tokens are marked `TOKEN_DEFERRED`.
+- Token assignment requires separate WSP_97/WSP_15 slice.
+
+---
+
+## 3. Canonical Inventory
+
+### 3.1 FoundUps with Manifests (5)
+
+| FoundUp ID | Name | Token | Tier | Lifecycle Stage | Manifest Location |
+|------------|------|-------|------|-----------------|-------------------|
+| `gotjunk_001` | GotJunk | JUNK | F0_DAE | proto | `modules/foundups/gotjunk/foundup_manifest.json` |
+| `kosei` | Kosei AI Systems | KOSEI | F0_DAE | incubating | `modules/foundups/kosei/foundup_manifest.json` |
+| `voteballots` | Vote/Ballots | VOTE | F0_DAE | incubating | `modules/foundups/voteballots/foundup_manifest.json` |
+| `trade` | Trade.foundups | TRADE | F0_DAE | incubating | `modules/foundups/trade/foundup_manifest.json` |
+| `magadoom_001` | MAGADOOM | DOOM | F0_DAE | incubating | `modules/gamification/whack_a_magat/foundup_manifest.json` |
+
+**Note**: MAGADOOM is Whack-a-Maga / YT gamification moderators. Located in `modules/gamification/` domain per WSP 3.
+
+### 3.2 FoundUps without Manifests
+
+| Location | Name | Token | Status | Notes |
+|----------|------|-------|--------|-------|
+| `modules/foundups/pqn_portal/` | PQN Portal | TOKEN_DEFERRED | PARTIALLY_IMPLEMENTED | = Science Swarm public face. Needs drift audit. |
+| `modules/foundups/geoze/` | Geoze | TOKEN_DEFERRED | SKELETON | Not started. Not developed yet. |
+| `O:/repos/AutoPost/` | AutoPost | TOKEN_DEFERRED | POC_EXISTS | External FoundUp with web presence. Needs completion. |
+
+### 3.3 Platform Layer (NOT FoundUps)
+
+| Location | Name | Type | Status | Notes |
+|----------|------|------|--------|-------|
+| `modules/foundups/pfmall/` | p.fMALL | PLATFORM | IMPLEMENTED | Shell/funnel/RedDog surface. Gemma PWA → WRE. |
+| `modules/foundups/agent_market/` | FAM | INFRA | IMPLEMENTED | CABR/FAM daemon. Part of pfmall platform. |
+
+### 3.4 Layers and Tools (NOT FoundUps)
+
+| Location | Name | Type | Status | Notes |
+|----------|------|------|--------|-------|
+| `modules/foundups/social_twin/` | Social Twin | LAYER | BUILT_NOT_USED | Cross-FoundUp reporting. OpenClaw/Hermes pipeline. |
+| `modules/foundups/simulator/` | Simulator | TOOL | IMPLEMENTED | Economic engine. Possible future FoundUp after audit. |
+| `modules/foundups/ecosystem_animation/` | Ecosystem Animation | TOOL | IMPLEMENTED | Visualization. Gated service candidate after audit. |
+| `modules/foundups/agent/` | FoundUp Agent | INFRA | IMPLEMENTED | Core agent builder (hermes_foundup_builder.py). |
+
+### 3.5 Requires Investigation
+
+| Location | Name | Type | Status | Notes |
+|----------|------|------|--------|-------|
+| `modules/foundups/move2japan/` | Move2Japan | INVESTIGATE | IMPLEMENTED | YT monitor / live-stream access. Has real code. DO NOT DELETE. Needs WSP_97 audit. |
+| `modules/foundups/pqn_swarm_hub/` | PQN Swarm Hub | INVESTIGATE | SPECIFIED | Internal proxy for external repo. Check drift vs pqn_portal. |
+| `O:/repos/science-swarm-hub/` | Science Swarm Hub | EXTERNAL | STANDALONE | PyPI package. Check concatenation with pqn_portal. |
+
+---
+
+## 4. Lifecycle Stage Classification
+
+### 4.1 Manifest Schema Stages (per PFMALL_FOUNDUP_MANIFEST_SCHEMA.md)
 
 | Stage | Definition | Shell Behavior |
 |-------|------------|----------------|
@@ -68,7 +148,7 @@ This audit inventories **all existing FoundUps** across the Foundups-Agent codeb
 | `externalized` | Public access, no federation | Shell loads for all authenticated users |
 | `federated` | Cross-pAVS federation enabled | Full CABR/ROC integration |
 
-### 3.2 Simulator Stages (per state_store.py)
+### 4.2 Simulator Stages (per state_store.py)
 
 | Stage | Definition |
 |-------|------------|
@@ -78,7 +158,7 @@ This audit inventories **all existing FoundUps** across the Foundups-Agent codeb
 
 **INCONSISTENCY DETECTED**: Manifest schema uses `incubating/proto/externalized/federated`, simulator uses `PoC/Proto/MVP`. These must be reconciled.
 
-### 3.3 Implementation Status Tags (per WSP 97)
+### 4.3 Implementation Status Tags (per WSP 97)
 
 | Tag | Definition |
 |-----|------------|
@@ -95,80 +175,85 @@ This audit inventories **all existing FoundUps** across the Foundups-Agent codeb
 
 ---
 
-## 4. Stage Registry Schema Specification
+## 5. Typed Registry Schema Specification
 
-### 4.1 Proposed Canonical Schema
+### 5.1 Registry Entity Types
+
+The registry must support these distinct types:
+
+| Type | Description | Example |
+|------|-------------|---------|
+| `foundup` | Full FoundUp with token, CABR contract, shell loading | gotjunk_001, voteballots |
+| `platform` | Shell/funnel/interaction surface | pfmall |
+| `infra` | Infrastructure/daemon services | agent_market (FAM) |
+| `layer` | Cross-FoundUp capability layer | social_twin |
+| `tool` | Modular utility/engine | simulator, ecosystem_animation |
+| `external` | External repo FoundUp | AutoPost, science-swarm-hub |
+| `candidate` | Skeleton/not-started | geoze |
+| `investigate` | Requires audit before classification | move2japan |
+
+### 5.2 Proposed Typed Schema
 
 ```json
 {
-  "$schema": "https://foundups.org/schemas/foundup-registry/v1.json",
-  "registry_version": "1.0.0",
+  "$schema": "https://foundups.org/schemas/foundup-registry/v2.json",
+  "registry_version": "2.0.0",
   "last_updated": "ISO 8601 timestamp",
   
-  "foundups": [
+  "entities": [
     {
-      "foundup_id": "string (slug)",
+      "entity_id": "string (slug)",
       "name": "string",
-      "tier": "F0_DAE | F1_OPO | F2_GROWTH | F3_INFRA | F4_MEGA | F5_SYSTEMIC",
+      "entity_type": "foundup | platform | infra | layer | tool | external | candidate | investigate",
       
-      "lifecycle_stage": "incubating | proto | externalized | federated",
-      "implementation_status": "SPECIFIED | IMPLEMENTED | TESTED | RUNTIME_ENFORCED | ...",
+      "tier": "F0_DAE | F1_OPO | ... | null (if not foundup)",
+      "token_symbol": "string | TOKEN_DEFERRED | null",
+      
+      "lifecycle_stage": "incubating | proto | externalized | federated | null",
+      "implementation_status": "SPECIFIED | IMPLEMENTED | TESTED | ...",
       
       "manifest_path": "string | null",
-      "entry_url": "string | null",
-      "routing_prefix": "/f/{foundup_id}",
-      
-      "category": "string",
-      "owner_id": "string",
+      "location": "string (module path or external repo)",
       
       "cabr_ready": false,
       "roc_eligible": false,
       
+      "_012_notes": "string | null",
       "_audit_date": "ISO 8601",
       "_auditor": "W9 | W10 | ..."
     }
   ],
   
-  "stage_definitions": {
-    "incubating": { "shell_load": false, "public_access": false, "cabr_gate": false },
-    "proto": { "shell_load": true, "public_access": false, "cabr_gate": false },
-    "externalized": { "shell_load": true, "public_access": true, "cabr_gate": true },
-    "federated": { "shell_load": true, "public_access": true, "cabr_gate": true, "cross_pavs": true }
-  },
-  
-  "tier_thresholds": {
-    "F0_DAE": { "treasury_usd": 0, "backing_sats_per_token": 0 },
-    "F1_OPO": { "treasury_usd": 100000, "backing_sats_per_token": 4.76 },
-    "F2_GROWTH": { "treasury_usd": 1000000, "backing_sats_per_token": 47.6 },
-    "F3_INFRA": { "treasury_usd": 10000000, "backing_sats_per_token": 476 },
-    "F4_MEGA": { "treasury_usd": 100000000, "backing_sats_per_token": 4762 },
-    "F5_SYSTEMIC": { "treasury_usd": 1000000000, "backing_sats_per_token": 47619 }
+  "type_definitions": {
+    "foundup": { "requires_manifest": true, "requires_token": true, "cabr_eligible": true },
+    "platform": { "requires_manifest": false, "requires_token": false, "cabr_eligible": false },
+    "infra": { "requires_manifest": false, "requires_token": false, "cabr_eligible": false },
+    "layer": { "requires_manifest": false, "requires_token": false, "cabr_eligible": false },
+    "tool": { "requires_manifest": false, "requires_token": false, "cabr_eligible": false },
+    "external": { "requires_manifest": true, "requires_token": true, "cabr_eligible": true },
+    "candidate": { "requires_manifest": false, "requires_token": false, "cabr_eligible": false },
+    "investigate": { "requires_manifest": false, "requires_token": false, "cabr_eligible": false }
   }
 }
 ```
 
-### 4.2 Registry File Location
+### 5.3 Registry File Location
 
 **Canonical path**: `modules/foundups/foundup_registry.json`
 
-**Secondary indices**:
-- `modules/foundups/pfmall/shell_core.py` - Runtime loader validation
-- `modules/foundups/simulator/state_store.py` - Simulation state
-
 ---
 
-## 5. Gap Analysis
+## 6. Gap Analysis
 
-### 5.1 Missing Manifests (Critical)
+### 6.1 Missing Manifests (FoundUps only)
 
-| FoundUp | Priority | Rationale |
-|---------|----------|-----------|
-| `pfmall` | P0 | Shell itself needs manifest for self-reference |
-| `pqn_portal` | P1 | Near-PoC, needs shell loading contract |
-| `move2japan` | P1 | Architecture complete, needs manifest |
-| `social_twin` | P2 | Spec complete, manifest enables discovery |
+| FoundUp | Token | Priority | Rationale |
+|---------|-------|----------|-----------|
+| `pqn_portal` | TOKEN_DEFERRED | P1 | Near-PoC, needs shell loading contract |
+| `autopost` | TOKEN_DEFERRED | P1 | External FoundUp with PoC web presence |
+| `geoze` | TOKEN_DEFERRED | P3 | Skeleton, defer until development starts |
 
-### 5.2 Stage Inconsistency (High)
+### 6.2 Stage Inconsistency (High)
 
 The dual stage systems (`incubating/proto/externalized/federated` vs `PoC/Proto/MVP`) create confusion:
 - Which is authoritative for shell loading?
@@ -176,40 +261,12 @@ The dual stage systems (`incubating/proto/externalized/federated` vs `PoC/Proto/
 
 **Recommendation**: Define mapping table and single source of truth.
 
-### 5.3 CABR Integration Gap (High)
+### 6.3 Drift Risks
 
-Only manifested FoundUps have CABR contracts. Non-manifested FoundUps cannot participate in:
-- V1 gate validation
-- V2 proof verification
-- V3 scoring/pipe size calculation
-- ROC candidate derivation
-
-### 5.4 External Repo Integration (Medium)
-
-`AutoPost` and `science-swarm-hub` operate outside the manifest system. They need:
-- Either local `foundup_manifest.json` in their repos
-- Or proxy entries in the central registry
-
----
-
-## 6. Reconciliation Requirements
-
-### 6.1 Stage Mapping Table
-
-| Manifest Stage | Simulator Stage | Shell Load | CABR Gate | Public |
-|----------------|-----------------|------------|-----------|--------|
-| `incubating` | - | NO | NO | NO |
-| `proto` | `PoC`/`Proto` | YES (invite) | NO | NO |
-| `externalized` | `MVP` | YES | YES | YES |
-| `federated` | - | YES | YES | YES |
-
-### 6.2 Required Actions Before VOTE Gate Work
-
-1. **Create central registry** (`modules/foundups/foundup_registry.json`)
-2. **Generate missing manifests** for pfmall, pqn_portal, move2japan
-3. **Add implementation_status field** to existing manifests
-4. **Document stage mapping** in PFMALL_FOUNDUP_MANIFEST_SCHEMA.md
-5. **Update shell_core.py** to validate against central registry
+| Entity A | Entity B | Risk | Audit Required |
+|----------|----------|------|----------------|
+| `pqn_portal` | `science-swarm-hub` | Naming/scope drift | PQN_PORTAL_SCIENCE_SWARM_DRIFT_AUDIT_PHASE1 |
+| `pqn_swarm_hub` | `science-swarm-hub` | Internal vs external sync | Same audit |
 
 ---
 
@@ -219,30 +276,59 @@ Only manifested FoundUps have CABR contracts. Non-manifested FoundUps cannot par
 slice_id: FCISRA-W9
 worker: W9
 status: STAGED_FOR_W10
+worktree: .claude/worktrees/FCISRA-W9
 branch: docs/foundup-canonical-inventory-audit-phase1
 files_staged:
   - docs/audits/architecture/FOUNDUP_CANONICAL_INVENTORY_AND_STAGE_REGISTRY_AUDIT_PHASE1.md
-commit_message: |
-  docs(architecture): audit FoundUp canonical inventory and stage registry
   
-  - Inventory 14+ FoundUps across codebase and external repos
-  - Identify 4 manifested vs 10+ non-manifested gap
-  - Define canonical stage registry schema
-  - Classify lifecycle stage inconsistency (manifest vs simulator)
-  - Specify reconciliation requirements before VOTE gate work
-  
-  WSP: 3, 49, 97, 104
-  Slice: FCISRA-W9
-  Worker-Lane: W9 (audit/spec)
-pr_title: "docs(architecture): FoundUp canonical inventory and stage registry audit (Phase 1)"
-next_slice_recommendation: |
-  FOUNDUP_REGISTRY_BOOTSTRAP_PHASE1 - Create central registry JSON
-  and generate manifests for pfmall, pqn_portal, move2japan
+wsp97_verdict:
+  DOCS_ONLY: PASS
+  INVENTORY_CORRECTION_ONLY: PASS
+  NO_REGISTRY_IMPLEMENTATION: PASS
+  NO_MANIFEST_CREATION: PASS
+  NO_MODULE_DELETION: PASS
+  NO_TOKEN_ASSIGNMENT: PASS (all unknowns marked TOKEN_DEFERRED)
+  NO_RUNTIME_CHANGE: PASS
+  NO_CABR_READY: PASS
+  NO_PAYOUT_READY: PASS
+  NO_DAO_ACTIVATION: PASS
+
+corrections_applied:
+  - pfmall reclassified as PLATFORM (not FoundUp)
+  - agent_market reclassified as INFRA (part of pfmall)
+  - Confirmed 5 manifest-bearing FoundUps (added magadoom_001)
+  - move2japan marked INVESTIGATE (not delete/questionable)
+  - social_twin marked LAYER (not FoundUp)
+  - simulator marked TOOL (not FoundUp)
+  - ecosystem_animation marked TOOL (not FoundUp)
+  - All unknown tokens marked TOKEN_DEFERRED
+  - Registry schema updated to typed registry (v2)
+
+pr_title: "docs(architecture): FoundUp canonical inventory with 012 corrections (Phase 1)"
 ```
 
 ---
 
-## 8. Cross-References
+## 8. Next Slice Recommendations
+
+### 8.1 Primary
+
+**FOUNDUP_CANONICAL_REGISTRY_SCHEMA_PHASE1**
+- Define typed registry JSON schema
+- Support all entity types (foundup, platform, infra, layer, tool, external, candidate, investigate)
+- Do not collapse all modules into FoundUps
+
+### 8.2 Secondary
+
+| Slice | Purpose |
+|-------|---------|
+| `MOVE2JAPAN_FOUNDUP_ROLE_AUDIT_PHASE1` | Audit move2japan purpose, determine if FoundUp or tool |
+| `PQN_PORTAL_SCIENCE_SWARM_DRIFT_AUDIT_PHASE1` | Check pqn_portal vs science-swarm-hub naming/scope drift |
+| `AUTOPOST_EXTERNAL_FOUNDUP_COMPLETION_AUDIT_PHASE1` | Audit AutoPost PoC, define token, create manifest |
+
+---
+
+## 9. Cross-References
 
 - [PFMALL_FOUNDUP_MANIFEST_SCHEMA.md](../../foundups/docs/PFMALL_FOUNDUP_MANIFEST_SCHEMA.md) - Manifest field definitions
 - [FOUNDUP_PUBLIC_POC_FUNNEL_AND_VOTE_CONCATENATION_AUDIT_PHASE1.md](FOUNDUP_PUBLIC_POC_FUNNEL_AND_VOTE_CONCATENATION_AUDIT_PHASE1.md) - Public PoC funnel pattern
@@ -251,4 +337,4 @@ next_slice_recommendation: |
 
 ---
 
-**W9 Status**: Audit complete. Staged for W10 push/PR/merge.
+**W9 Status**: 012 correction patch applied. Staged for W10 push/PR/merge.
