@@ -111,6 +111,29 @@ def _extract_wsp_id(filename: str, title: str) -> str:
     return title.split()[0] if title else "WSP"
 
 
+# HXA Audit Fix: Extract slice IDs (HXA, FX, CFZ patterns) from filenames
+_SLICE_ID_PATTERN = re.compile(r"(HXA\d+|FX\d+|CFZ\d+)", re.IGNORECASE)
+
+
+def _extract_slice_id(filename: str, title: str) -> Optional[str]:
+    """Extract slice ID (HXA, FX, CFZ patterns) from filename or title.
+
+    Examples:
+        HXA22_DESTRUCTIVE_ACTION_GUARD_RUNTIME.md -> HXA22
+        test_hxa30_scope_to_action_class.py -> HXA30
+        CFZ4_COLLECTION_SEPARATION.md -> CFZ4
+    """
+    # Check filename first
+    match = _SLICE_ID_PATTERN.search(filename)
+    if match:
+        return match.group(1).upper()
+    # Check title
+    match = _SLICE_ID_PATTERN.search(title)
+    if match:
+        return match.group(1).upper()
+    return None
+
+
 def _classify_document_type(file_path: Path, title: str, lines: List[str]) -> str:
     """Classify document type based on filename, path, and content patterns.
 
@@ -146,7 +169,11 @@ def _classify_document_type(file_path: Path, title: str, lines: List[str]) -> st
 
 
 def _calculate_document_priority(doc_type: str, file_path: Path) -> int:
-    """Calculate document priority for search ranking (1-10, higher = more important)."""
+    """Calculate document priority for search ranking (1-10, higher = more important).
+
+    HXA Audit Fix: Boost audit paths (docs/audits/openclaw_hermes, etc.) for
+    better slice ID retrieval.
+    """
     priority_map = {
         "wsp_protocol": 10,
         "interface": 9,
@@ -161,8 +188,18 @@ def _calculate_document_priority(doc_type: str, file_path: Path) -> int:
 
     base_priority = priority_map.get(doc_type, 2)
 
-    path_str = str(file_path).lower()
-    if 'wsp_framework' in path_str:
+    path_str = str(file_path).lower().replace("\\", "/")
+
+    # HXA Audit Fix: Boost audit paths
+    if "/audits/openclaw_hermes/" in path_str:
+        base_priority = max(base_priority, 9)  # HXA series high priority
+    elif "/audits/holoindex/" in path_str:
+        base_priority = max(base_priority, 9)
+    elif "/audits/security/" in path_str:
+        base_priority = max(base_priority, 8)
+    elif "/audits/" in path_str:
+        base_priority = max(base_priority, 7)
+    elif 'wsp_framework' in path_str:
         base_priority += 1
     elif 'modules/' in path_str and 'platform_integration' in path_str:
         base_priority += 1
@@ -558,6 +595,9 @@ def index_docs_entries(holo: "HoloIndex") -> None:
 
     Content: modules/**, docs/**, holo_index/docs/**, WSP_framework/docs/**
     ID prefix: doc_
+
+    HXA Audit Fix: Excludes .claude/worktrees to prevent duplicate indexing,
+    extracts slice_id metadata for HXA/FX/CFZ patterns.
     """
     doc_paths = [
         holo.project_root / "modules",
@@ -579,6 +619,9 @@ def index_docs_entries(holo: "HoloIndex") -> None:
                 and '_backup' not in str(f).lower()
                 and '/archive/' not in str(f).lower()
                 and '\\archive\\' not in str(f).lower()
+                # HXA Audit Fix: Exclude worktrees to prevent duplicates
+                and '.claude/worktrees' not in str(f).replace("\\", "/").lower()
+                and '.worktrees' not in str(f).replace("\\", "/").lower()
             ]
             files.extend(filtered_files)
 
@@ -607,10 +650,13 @@ def index_docs_entries(holo: "HoloIndex") -> None:
         doc_payload = f"{title}\n{summary}"
 
         doc_fed = resolve_foundup_metadata(file_path, holo.project_root)
+        # HXA Audit Fix: Extract slice_id for HXA/FX/CFZ patterns
+        slice_id = _extract_slice_id(file_path.name, title)
+
         ids.append(f"doc_{idx}")
         embeddings.append(holo._get_embedding(doc_payload))
         documents.append(doc_payload)
-        metadatas.append({
+        metadata_entry: Dict[str, Any] = {
             "title": title,
             "path": str(file_path),
             "summary": summary,
@@ -620,7 +666,11 @@ def index_docs_entries(holo: "HoloIndex") -> None:
             "tenant_id": doc_fed["tenant_id"],
             "source_scope": doc_fed["source_scope"],
             "external_repo": doc_fed["external_repo"],
-        })
+        }
+        # HXA Audit Fix: Add slice_id to metadata if present
+        if slice_id:
+            metadata_entry["slice_id"] = slice_id
+        metadatas.append(metadata_entry)
 
     if embeddings:
         holo.docs_collection.add(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
