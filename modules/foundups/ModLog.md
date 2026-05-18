@@ -2,6 +2,36 @@
 
 ## Chronological Change Log
 
+### 2026-05-18 - FoundUp Canonical Registry Population (W6: FOUNDUP_CANONICAL_REGISTRY_POPULATION_PHASE1)
+
+**By:** 0102 (W6 coordinator) — **Slice:** `FOUNDUP_CANONICAL_REGISTRY_POPULATION_PHASE1`
+**WSP References:** WSP 97 (Truth), WSP 87 (HoloIndex), WSP 15 (Doc Standards), WSP 50 (Pre-Action)
+
+**Created**:
+- `modules/foundups/foundup_registry.json` — Production registry with 14 evidence-backed entities
+- `docs/audits/architecture/FOUNDUP_CANONICAL_REGISTRY_POPULATION_PHASE1.md` — Population audit
+
+**Modified**:
+- `modules/foundups/tests/test_foundup_registry_schema.py` — Added 8 production validation tests (30 total)
+
+**Entities populated (14)**:
+- **Manifest-bearing FoundUps (6)**: gotjunk_001, kosei, voteballots, trade, magadoom_001, antifafm_001
+- **Platform/Infra (4)**: pfmall, agent_market, simulator, social_twin
+- **External FoundUps (2)**: autopost, science_swarm_hub
+- **Access Service (1)**: move2japan
+- **Skeleton Candidate (1)**: pqn_portal
+
+**Token status distribution**:
+- EXISTS: 6 (JUNK, KOSEI, VOTE, TRADE, DOOM, ANTI)
+- TOKEN_DEFERRED: 4
+- NOT_APPLICABLE: 4
+
+**Tests**: 30/30 passed (8 new production validation tests)
+
+**No manifests created. No tokens invented. No runtime changes.**
+
+---
+
 ### 2026-05-18 - FoundUp Canonical Registry Schema (W6: FOUNDUP_CANONICAL_REGISTRY_SCHEMA_PHASE1)
 
 **By:** 0102 (W6 coordinator) — **Slice:** `FOUNDUP_CANONICAL_REGISTRY_SCHEMA_PHASE1`
