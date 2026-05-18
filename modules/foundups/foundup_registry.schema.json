@@ -1,0 +1,295 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://foundups.org/schemas/foundup-registry/v1.0.0",
+  "title": "FoundUp Canonical Registry Schema",
+  "description": "Typed registry for FoundUps and related entities. Hermes/OpenClaw build contract.",
+  "type": "object",
+  "required": ["schema_version", "last_updated", "entities"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Registry schema version"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of last registry update"
+    },
+    "entities": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/RegistryEntry" },
+      "description": "Array of registry entries"
+    }
+  },
+  "$defs": {
+    "EntityType": {
+      "type": "string",
+      "enum": [
+        "foundup",
+        "platform_layer",
+        "infra_service",
+        "tool_simulator",
+        "external_foundup",
+        "skeleton_candidate",
+        "access_service"
+      ],
+      "description": "Entity classification type"
+    },
+    "ImplementationStatus": {
+      "type": "string",
+      "enum": [
+        "SPECIFIED",
+        "IMPLEMENTED",
+        "TESTED",
+        "RUNTIME_ENFORCED",
+        "DOC_ONLY",
+        "SIMULATOR_ONLY",
+        "REVIEW_ONLY",
+        "GATED_NOT_ENABLED",
+        "DEPRECATED",
+        "UNKNOWN"
+      ],
+      "description": "Implementation maturity status"
+    },
+    "TokenStatus": {
+      "type": "string",
+      "enum": [
+        "EXISTS",
+        "TOKEN_DEFERRED",
+        "NOT_APPLICABLE",
+        "UNKNOWN"
+      ],
+      "description": "Token assignment status"
+    },
+    "PublicSurfaceStatus": {
+      "type": "string",
+      "enum": [
+        "hidden",
+        "discoverable",
+        "listed",
+        "promoted"
+      ],
+      "description": "Visibility in pfMALL/catalog"
+    },
+    "LifecycleStage": {
+      "type": "string",
+      "enum": [
+        "incubating",
+        "proto",
+        "externalized",
+        "federated"
+      ],
+      "description": "Manifest lifecycle stage (exfoliation protocol)"
+    },
+    "PocStatus": {
+      "type": "string",
+      "enum": [
+        "idea",
+        "poc",
+        "soft-proto",
+        "proto",
+        "mvp",
+        "launch",
+        "not_applicable"
+      ],
+      "description": "PoC/prototype progression status"
+    },
+    "ManifestStatus": {
+      "type": "string",
+      "enum": [
+        "exists",
+        "missing",
+        "partial",
+        "external",
+        "not_applicable"
+      ],
+      "description": "Manifest file status"
+    },
+    "HermesOpenClawBuildStatus": {
+      "type": "string",
+      "enum": [
+        "none",
+        "scaffold",
+        "wired",
+        "operational"
+      ],
+      "description": "Hermes/OpenClaw integration readiness"
+    },
+    "Tier": {
+      "type": "string",
+      "enum": [
+        "F0_DAE",
+        "F1_OPO",
+        "F2_GROWTH",
+        "F3_INFRA",
+        "F4_MEGA",
+        "F5_SYSTEMIC"
+      ],
+      "description": "FoundUp tier classification"
+    },
+    "RegistryEntry": {
+      "type": "object",
+      "required": [
+        "foundup_id",
+        "display_name",
+        "entity_type",
+        "module_path",
+        "implementation_status",
+        "token_status"
+      ],
+      "properties": {
+        "foundup_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$",
+          "description": "Canonical identifier (lowercase, underscores, digits)"
+        },
+        "display_name": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Human-readable display name"
+        },
+        "entity_type": {
+          "$ref": "#/$defs/EntityType"
+        },
+        "module_path": {
+          "type": ["string", "null"],
+          "description": "Path relative to repo root, or null for external"
+        },
+        "stage": {
+          "oneOf": [
+            { "$ref": "#/$defs/LifecycleStage" },
+            { "type": "null" }
+          ],
+          "description": "Manifest lifecycle stage (null for non-FoundUp entity types)"
+        },
+        "tier": {
+          "oneOf": [
+            { "$ref": "#/$defs/Tier" },
+            { "type": "null" }
+          ],
+          "description": "Tier classification (null if not applicable)"
+        },
+        "implementation_status": {
+          "$ref": "#/$defs/ImplementationStatus"
+        },
+        "public_surface_status": {
+          "$ref": "#/$defs/PublicSurfaceStatus",
+          "default": "hidden"
+        },
+        "poc_status": {
+          "$ref": "#/$defs/PocStatus",
+          "default": "not_applicable"
+        },
+        "prototype_gate_status": {
+          "type": "string",
+          "enum": ["pending", "passed", "failed", "not_applicable"],
+          "default": "not_applicable",
+          "description": "Prototype gate verification status"
+        },
+        "manifest_status": {
+          "$ref": "#/$defs/ManifestStatus",
+          "default": "not_applicable"
+        },
+        "manifest_path": {
+          "type": ["string", "null"],
+          "description": "Path to foundup_manifest.json if exists"
+        },
+        "hermes_openclaw_build_status": {
+          "$ref": "#/$defs/HermesOpenClawBuildStatus",
+          "default": "none"
+        },
+        "token_status": {
+          "$ref": "#/$defs/TokenStatus"
+        },
+        "token_symbol": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Z]+$",
+          "description": "Token symbol if EXISTS, null otherwise"
+        },
+        "evidence_docs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of audit/spec documents supporting this entry"
+        },
+        "next_slice": {
+          "type": ["string", "null"],
+          "description": "Recommended next implementation slice"
+        },
+        "public_url_or_route": {
+          "type": ["string", "null"],
+          "description": "Public URL or pfMALL route if applicable"
+        },
+        "owner_dae": {
+          "type": ["string", "null"],
+          "description": "Owning DAE identifier"
+        },
+        "mall_entry_status": {
+          "type": "string",
+          "enum": ["listed", "discoverable_only", "not_listed", "not_applicable"],
+          "default": "not_applicable",
+          "description": "pfMALL catalog entry status"
+        },
+        "auth_provider": {
+          "type": ["string", "null"],
+          "description": "Authentication provider if applicable"
+        },
+        "invite_required": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether invite is required for access"
+        },
+        "subscription_tier_required": {
+          "type": ["string", "null"],
+          "description": "Required subscription tier for access"
+        },
+        "notes": {
+          "type": ["string", "null"],
+          "description": "012 notes or audit findings"
+        },
+        "related_external_repo": {
+          "type": ["string", "null"],
+          "description": "External repository URL if applicable"
+        },
+        "audit_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Date of last audit verification"
+        },
+        "auditor": {
+          "type": "string",
+          "description": "Worker ID who performed audit"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "token_status": { "const": "EXISTS" } }
+          },
+          "then": {
+            "required": ["token_symbol"],
+            "properties": {
+              "token_symbol": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "entity_type": { "const": "foundup" } }
+          },
+          "then": {
+            "required": ["tier", "stage"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "entity_type": { "const": "external_foundup" } }
+          },
+          "then": {
+            "required": ["related_external_repo"]
+          }
+        }
+      ]
+    }
+  }
+}

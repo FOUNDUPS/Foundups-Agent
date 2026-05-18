@@ -2,6 +2,40 @@
 
 ## Chronological Change Log
 
+### 2026-05-18 - FoundUp Canonical Registry Schema (W6: FOUNDUP_CANONICAL_REGISTRY_SCHEMA_PHASE1)
+
+**By:** 0102 (W6 coordinator) — **Slice:** `FOUNDUP_CANONICAL_REGISTRY_SCHEMA_PHASE1`
+**WSP References:** WSP 97 (Truth), WSP 87 (HoloIndex), WSP 15 (Doc Standards), WSP 50 (Pre-Action)
+
+**Created**:
+- `modules/foundups/foundup_registry.schema.json` — JSON Schema v1.0.0 for typed registry
+- `modules/foundups/foundup_registry.example.json` — Example registry with 6 evidence-backed entries
+- `modules/foundups/tests/test_foundup_registry_schema.py` — 22 validation tests
+- `docs/audits/architecture/FOUNDUP_CANONICAL_REGISTRY_SCHEMA_PHASE1.md` — Implementation audit
+
+**Schema defines**:
+- 7 entity types: foundup, platform_layer, infra_service, tool_simulator, external_foundup, skeleton_candidate, access_service
+- 10 implementation statuses: SPECIFIED, IMPLEMENTED, TESTED, RUNTIME_ENFORCED, DOC_ONLY, etc.
+- 4 token statuses: EXISTS, TOKEN_DEFERRED, NOT_APPLICABLE, UNKNOWN
+- 4 public surface statuses: hidden, discoverable, listed, promoted
+- Conditional validation: foundup requires tier/stage, external requires repo, EXISTS requires symbol
+
+**Example entries**:
+- gotjunk_001 (foundup, JUNK token)
+- voteballots (skeleton_candidate, VOTE token)
+- pfmall (platform_layer, NOT_APPLICABLE)
+- move2japan (access_service, TOKEN_DEFERRED)
+- autopost (external_foundup, TOKEN_DEFERRED)
+- pqn_portal (skeleton_candidate, TOKEN_DEFERRED)
+
+**Tests**: 22/22 passed
+
+**Hermes/OpenClaw build contract**: Registry provides entity discovery, build eligibility, manifest binding, stage gating, and token validation for job creation and capability token issuance.
+
+**No manifests created. No tokens assigned. No runtime changes.**
+
+---
+
 ### 2026-04-21 - RedDog Catalog Classification Gate Spec (W2: REDDOG-CATALOG-CLASSIFICATION-GATE)
 
 **By:** 0102 (W2) — **Slice:** `REDDOG-CATALOG-CLASSIFICATION-GATE`
