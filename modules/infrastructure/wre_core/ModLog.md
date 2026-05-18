@@ -2,6 +2,45 @@
 
 ## Chronological Change Log
 
+### [2026-05-18] - DESTRUCTIVE_ACTION_GUARD_PATH_CANONICALIZATION_IMPL_PHASE1 (v0.8.40)
+
+**WSP Protocol References**: WSP 97 (Truthful), WSP 50 (Pre-Action), WSP 5 (Coverage)
+**Impact Analysis**: P0 symlink traversal fix, P1 control character/Windows case fixes
+
+#### Changes Made
+
+- `src/destructive_action_guard.py` (EXTENDED):
+  - Added Section 7: Path Canonicalization Utilities
+  - `PathCanonicalizeResult` dataclass for canonicalization results
+  - `canonicalize_path()` function with:
+    - Control character filtering (ASCII 0x00-0x1F)
+    - UNC path blocking (`\\\\`, `//`, `\\\\.\\`, `\\\\?\\`)
+    - Symlink resolution via `os.path.realpath()`
+    - Windows case normalization via `os.path.normcase()`
+  - `PathConstraintValidator` class for symlink-safe path validation
+
+- `tests/test_destructive_action_guard_edge_cases.py` (MODIFIED):
+  - Updated tests to use new `PathConstraintValidator`
+  - Converted 6 xfails to PASS (symlink, control chars, Windows case)
+  - Added legacy gap documentation tests (xfail) for CapabilityToken
+
+#### xfail Changes
+
+| Test | Before | After |
+|------|--------|-------|
+| `test_null_byte_in_path_blocked` | xfail | PASS |
+| `test_newline_in_path_blocked` | xfail | PASS |
+| `test_carriage_return_in_path_blocked` | xfail | PASS |
+| `test_tab_in_path_blocked` | xfail | PASS |
+| `test_drive_case_mismatch_normalized` | xfail | PASS |
+| `test_symlink_inside_allowed_pointing_outside_blocked` | xfail | PASS* |
+
+*Symlink test now uses PathConstraintValidator; legacy CapabilityToken gap documented via new xfail.
+
+#### WSP 97 Compliance
+
+All truth fields remain False: `live_execution_allowed`, `repo_created`, `production_source_modified`, `verification_complete`, `cabr_ready`, `payout_ready`.
+
 ### [2026-05-15] - DESTRUCTIVE_ACTION_GUARD_EDGE_CASE_TEST_IMPL_PHASE1 (v0.8.39)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 50 (Pre-Action), WSP 5 (Coverage)
