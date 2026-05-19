@@ -68,6 +68,19 @@ Populate the canonical registry data file with all evidence-backed FoundUp entri
 |------------|-------------|-------|
 | pqn_portal | skeleton_candidate | SCAFFOLD status. Frontend exists but not deployed. |
 
+## Boundary: Registry vs pFMALL Catalogs
+
+The canonical FoundUp registry (`foundup_registry.json`) does **not** replace:
+- `catalog.json` (pFMALL Launch Catalog per PFMALL_SHELL_CONTRACT.md)
+- `mall-video-catalog.json` (Video Mall catalog per PFMALL_VIDEO_MALL_CATALOG_SCHEMA.md)
+- pFMALL runtime manifests or routing catalogs
+
+**Separation of concerns**:
+- **Canonical registry**: "What exists, what class is it, what stage is it in, what can builders touch?" (Hermes/OpenClaw build contract)
+- **pFMALL catalogs**: "What does the Mall show/route/render?" (Runtime display/routing)
+
+The registry may later validate or generate projections for pFMALL catalogs, but Phase 1 is inventory/build-contract only. Note that `pfmall` itself is classified as `entity_type: platform_layer` with `manifest_status: not_applicable` — it is the container, not a FoundUp.
+
 ## WSP 97 Compliance
 
 ### Truth Boundary Constraints
