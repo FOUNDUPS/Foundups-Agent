@@ -145,7 +145,7 @@ test_results:
   
 entities_populated: 14
   foundup: 4
-  skeleton_candidate: 2
+  skeleton_candidate: 3
   platform_layer: 1
   infra_service: 2
   tool_simulator: 1
