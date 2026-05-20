@@ -10,7 +10,9 @@
 
 ## 1. Purpose
 
-Define the entry flow from Mall discovery through gated FoundUp interior access.
+p.fMALL is an **AI interaction space** — a new way of interacting with AI and the world. Video is the default surface, but the paradigm extends to any content type: documents, community, FoundUps. The same interaction model (pinch, zoom, navigate) works everywhere, with AI mediating all engagement. Built for FoundUps first, with hooks into all content. Videos are the catalog layer — they tell each FoundUp's story.
+
+This document defines the entry flow from Mall discovery through gated FoundUp interior access.
 
 This contract specifies:
 - Entry gestures from the Mall

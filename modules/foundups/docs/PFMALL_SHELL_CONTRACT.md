@@ -9,7 +9,11 @@
 
 ## 1. Purpose
 
-p.fMALL is a PWA shell/gateway that hosts, discovers, and routes into multiple FoundUps. The shell is a **thin platform layer** — it provides discovery, navigation, auth, and shared services. It does NOT own FoundUp business logic, data, or UI.
+p.fMALL is an **AI interaction space** — a new way of interacting with AI and the world. Video is the default surface, but the paradigm extends to any content type: documents, community, FoundUps. The same interaction model (pinch, zoom, navigate) works everywhere, with AI mediating all engagement. Built for FoundUps first, with hooks into all content. Videos are the catalog layer — they tell each FoundUp's story.
+
+The shell is p.fMALL's **thin platform layer** — it provides discovery, navigation, auth, and shared services. It does NOT own FoundUp business logic, data, or UI.
+
+**Registry Boundary**: Canonical FoundUp identity is registry-backed; pFMALL catalogs render and route FoundUps but do not replace the canonical FoundUp registry. See `docs/audits/architecture/FOUNDUP_CANONICAL_REGISTRY_POPULATION_PHASE1.md` for boundary definition.
 
 ---
 

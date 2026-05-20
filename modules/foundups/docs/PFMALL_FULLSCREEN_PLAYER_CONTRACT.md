@@ -9,7 +9,9 @@
 
 ## 1. Purpose
 
-Define the fullscreen video player and queue rail contract for the admitted p.fMALL.
+p.fMALL is an **AI interaction space** — a new way of interacting with AI and the world. Video is the default surface, but the paradigm extends to any content type: documents, community, FoundUps. The same interaction model (pinch, zoom, navigate) works everywhere, with AI mediating all engagement. Built for FoundUps first, with hooks into all content. Videos are the catalog layer — they tell each FoundUp's story.
+
+This document defines the fullscreen video player and queue rail contract for the admitted p.fMALL.
 
 The fullscreen player is a dedicated video viewing layer that:
 - Displays one video at a time from a FoundUp-constrained queue

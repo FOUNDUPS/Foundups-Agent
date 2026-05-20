@@ -9,6 +9,8 @@
 
 ## 1. Purpose
 
+p.fMALL is an **AI interaction space** — a new way of interacting with AI and the world. Video is the default surface, but the paradigm extends to any content type: documents, community, FoundUps. The same interaction model (pinch, zoom, navigate) works everywhere, with AI mediating all engagement. Built for FoundUps first, with hooks into all content. Videos are the catalog layer — they tell each FoundUp's story.
+
 The state overlay is the **dynamic layer** that augments `foundup_manifest.json` with live lifecycle, health, economics, and activity data. The manifest is static identity; the overlay is live condition.
 
 ### 1.1 Why the Manifest is Insufficient

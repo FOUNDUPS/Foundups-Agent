@@ -10,6 +10,8 @@
 
 ## 1. Purpose
 
+p.fMALL is an **AI interaction space** — a new way of interacting with AI and the world. Video is the default surface, but the paradigm extends to any content type: documents, community, FoundUps. The same interaction model (pinch, zoom, navigate) works everywhere, with AI mediating all engagement. Built for FoundUps first, with hooks into all content. Videos are the catalog layer — they tell each FoundUp's story.
+
 Every FoundUp that runs inside p.fMALL declares itself through a `foundup_manifest.json`. This manifest is the contract between a FoundUp and the shell. It tells the shell what the FoundUp needs, what it provides, and how to load it.
 
 ### 1.1 Relationship to Video Mall Catalog

@@ -1,6 +1,11 @@
 /**
  * Shell Bridge Interceptor
  *
+ * p.fMALL is an AI interaction space for engaging with everything — video,
+ * documents, community, FoundUps. Video is the default catalog layer; the same
+ * interaction paradigm (pinch, zoom, navigate) extends to any content type,
+ * with AI mediating all engagement.
+ *
  * p.fMALL shell-side postMessage listener for external FoundUp iframes.
  * Intercepts `agent_request` events and dispatches to backend, then
  * posts `agent_response` back to the origin iframe.
