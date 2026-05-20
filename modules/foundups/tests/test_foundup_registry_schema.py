@@ -29,6 +29,7 @@ except ImportError:
 
 SCHEMA_PATH = Path(__file__).parent.parent / "foundup_registry.schema.json"
 EXAMPLE_PATH = Path(__file__).parent.parent / "foundup_registry.example.json"
+REGISTRY_PATH = Path(__file__).parent.parent / "foundup_registry.json"
 
 
 @pytest.fixture
@@ -42,6 +43,13 @@ def schema():
 def example_registry():
     """Load the example registry."""
     with open(EXAMPLE_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+@pytest.fixture
+def production_registry():
+    """Load the production registry."""
+    with open(REGISTRY_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -372,6 +380,63 @@ class TestFoundupRequiresTierAndStage:
         }
         errors = list(validator.iter_errors(valid_foundup))
         assert len(errors) == 0
+
+
+@pytest.mark.skipif(not JSONSCHEMA_AVAILABLE, reason="jsonschema not installed")
+class TestProductionRegistryValidation:
+    """Test production registry validates against schema."""
+
+    def test_production_file_exists(self):
+        """Production registry file exists."""
+        assert REGISTRY_PATH.exists(), f"Registry not found at {REGISTRY_PATH}"
+
+    def test_production_validates_against_schema(self, validator, production_registry):
+        """All production registry entries validate against schema."""
+        errors = list(validator.iter_errors(production_registry))
+        if errors:
+            error_messages = [f"{e.json_path}: {e.message}" for e in errors]
+            pytest.fail(f"Validation errors:\n" + "\n".join(error_messages))
+
+    def test_production_has_expected_entity_count(self, production_registry):
+        """Production registry has expected number of entities."""
+        assert len(production_registry["entities"]) >= 10, (
+            "Expected at least 10 entities from manifests and audits"
+        )
+
+    def test_production_entity_ids_unique(self, production_registry):
+        """All entity IDs in production registry are unique."""
+        ids = [e["foundup_id"] for e in production_registry["entities"]]
+        assert len(ids) == len(set(ids)), "Duplicate foundup_id found"
+
+    def test_production_has_manifest_foundups(self, production_registry):
+        """Production registry includes manifest-bearing FoundUps."""
+        ids = {e["foundup_id"] for e in production_registry["entities"]}
+        expected_manifest_ids = {"gotjunk_001", "kosei", "voteballots", "trade"}
+        for expected in expected_manifest_ids:
+            assert expected in ids, f"Missing manifest FoundUp: {expected}"
+
+    def test_production_external_foundups_have_repos(self, production_registry):
+        """External FoundUps have related_external_repo populated."""
+        for entity in production_registry["entities"]:
+            if entity.get("entity_type") == "external_foundup":
+                assert entity.get("related_external_repo"), (
+                    f"{entity['foundup_id']} is external but missing repo"
+                )
+
+    def test_production_foundups_have_tier_and_stage(self, production_registry):
+        """FoundUp entities have tier and stage."""
+        for entity in production_registry["entities"]:
+            if entity.get("entity_type") == "foundup":
+                assert entity.get("tier"), f"{entity['foundup_id']} missing tier"
+                assert entity.get("stage"), f"{entity['foundup_id']} missing stage"
+
+    def test_production_token_exists_has_symbol(self, production_registry):
+        """Entries with token_status EXISTS have token_symbol."""
+        for entity in production_registry["entities"]:
+            if entity.get("token_status") == "EXISTS":
+                assert entity.get("token_symbol"), (
+                    f"{entity['foundup_id']} has EXISTS but no token_symbol"
+                )
 
 
 class TestNoInventedTokens:
