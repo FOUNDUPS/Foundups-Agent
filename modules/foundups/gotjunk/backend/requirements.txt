@@ -1,4 +1,4 @@
-fastapi==0.104.1
+fastapi==0.122.0  # CVE-2024-24762 fix (pulls starlette>=0.40.0, fixes CVE-2024-47874/CVE-2025-54121/CVE-2025-62727)
 uvicorn[standard]==0.24.0
-python-multipart==0.0.6
+python-multipart==0.0.29  # CVE-2026-42561 fix
 pydantic==2.5.0
