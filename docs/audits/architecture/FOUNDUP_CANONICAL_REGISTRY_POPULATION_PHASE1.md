@@ -29,7 +29,7 @@ Populate the canonical registry data file with all evidence-backed FoundUp entri
 
 ## Registry Entries Created (14)
 
-### Manifest-Bearing FoundUps (6)
+### Manifest-Bearing Entities (6)
 
 | foundup_id | entity_type | token_status | token_symbol | impl_status |
 |------------|-------------|--------------|--------------|-------------|
