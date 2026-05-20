@@ -2,6 +2,36 @@
 
 ## Chronological Change Log
 
+### 2026-05-21 - FoundUp Registry Read-Only Loader (W6: FOUNDUP_REGISTRY_READONLY_LOADER_PHASE1)
+
+**By:** 0102 (W6) — **Slice:** `FOUNDUP_REGISTRY_READONLY_LOADER_PHASE1`
+**WSP References:** WSP 97 (Truth), WSP 96 (MCP Governance), WSP 87 (HoloIndex), WSP 15 (Doc Standards)
+
+**Created**:
+- `modules/foundups/src/foundup_registry_loader.py` — Read-only loader for MCP scope validation
+- `modules/foundups/tests/test_foundup_registry_loader.py` — 28 tests covering all loader functionality
+- `docs/audits/architecture/FOUNDUP_REGISTRY_READONLY_LOADER_PHASE1.md` — Implementation audit
+
+**API exposed**:
+- `load_registry(path?)` — Load and return registry dict
+- `list_foundup_ids(path?)` — Return all known IDs as tuple
+- `is_valid_foundup_id(id, path?)` — Validate ID exists and matches pattern
+- `get_module_path(id, path?)` — Get module path for ID
+- `get_entity_type(id, path?)` — Get entity type for ID
+- `FoundUpRegistryLoader` — Class-based loader for custom paths
+
+**Behavior**:
+- Read-only file access (WSP 97: NO_REGISTRY_MUTATION)
+- Fail-closed on malformed/missing registry
+- Pattern validation: `^[a-z0-9_]+$`
+- Unknown IDs return False/None
+
+**Tests**: 28/28 passed + 30 schema tests = 58 total
+
+**No MCP route changes. No HoloIndex mutation. No pFMALL catalog changes.**
+
+---
+
 ### 2026-05-18 - FoundUp Canonical Registry Population (W6: FOUNDUP_CANONICAL_REGISTRY_POPULATION_PHASE1)
 
 **By:** 0102 (W6 coordinator) — **Slice:** `FOUNDUP_CANONICAL_REGISTRY_POPULATION_PHASE1`
