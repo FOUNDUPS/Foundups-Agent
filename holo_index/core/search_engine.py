@@ -37,6 +37,52 @@ def _tokenize_query(query: str) -> List[str]:
     return [token for token in re.findall(r"[a-z0-9_]+", query.lower()) if token]
 
 
+# Slice-priority label → numeric weight (used when metadata stores P0/P1/.../P4 strings
+# instead of a numeric priority_num field). Mirrors WSP 15 priority ordering, scaled to the
+# 1-5 range that _format_hit's _sort_key expects.
+_PRIORITY_LABEL_WEIGHTS: Dict[str, float] = {
+    "P0": 5.0,
+    "P1": 4.0,
+    "P2": 3.0,
+    "P3": 2.0,
+    "P4": 1.0,
+}
+
+
+def _coerce_priority(meta: Dict[str, Any], default: float = 1.0) -> float:
+    """Return a numeric priority for *meta* suitable for arithmetic scoring.
+
+    Resolution order:
+      1. `priority_num` (work-ledger metadata always writes a numeric here).
+      2. `priority` interpreted as int/float.
+      3. `priority` interpreted as a P0..P4 label via `_PRIORITY_LABEL_WEIGHTS`.
+      4. *default*.
+
+    Never raises. Guards against the historical bug where work-ledger entries
+    stored `priority="P3"` (string) and downstream scoring did `0.5 * priority`
+    → TypeError, which was silently swallowed and erased work-ledger hits from
+    the search payload.
+    """
+    raw_num = meta.get("priority_num")
+    if isinstance(raw_num, (int, float)) and not isinstance(raw_num, bool):
+        return float(raw_num)
+
+    raw = meta.get("priority", default)
+    if isinstance(raw, (int, float)) and not isinstance(raw, bool):
+        return float(raw)
+
+    if isinstance(raw, str):
+        label = raw.strip().upper()
+        if label in _PRIORITY_LABEL_WEIGHTS:
+            return _PRIORITY_LABEL_WEIGHTS[label]
+        try:
+            return float(label)
+        except (TypeError, ValueError):
+            pass
+
+    return float(default)
+
+
 # ---------------------------------------------------------------------------
 # HIA3 (2026-04-23): backend quality taxonomy (WSP 97 truth distinction).
 #
@@ -683,7 +729,7 @@ def _search_collection(
         if similarity < min_similarity:
             continue
         doc_type = meta.get("type", "other")
-        priority = meta.get("priority", 1)
+        priority = _coerce_priority(meta)
 
         keyword_score = 0.0
         ql = query.lower()
@@ -1089,7 +1135,16 @@ def execute_search(
         if doc_type_filter in ["work_ledger", "all"] and work_ledger_collection is not None:
             try:
                 work_ledger_hits = _search_collection(holo, work_ledger_collection, query, limit, kind="work_ledger")
-            except Exception:
+            except Exception as exc:
+                # Log instead of silently erasing hits — silent failures here cost W6/W10 an
+                # entire reindex cycle before the bug was detected. See
+                # FOUNDUPS_WORK_LEDGER_SEARCH_RETRIEVAL_PRIORITY_HOTFIX_PHASE1.
+                logger.warning(
+                    "Work-ledger search failed (%s): %s. Falling back to empty hits — normal search continues.",
+                    type(exc).__name__,
+                    exc,
+                    exc_info=True,
+                )
                 work_ledger_hits = []
 
         # Symbol-query fallback: lexical + rg for exact identifiers/paths
