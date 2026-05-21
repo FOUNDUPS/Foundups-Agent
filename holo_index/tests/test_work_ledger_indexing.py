@@ -843,3 +843,162 @@ class TestCLIFlagParsing:
         assert "--index-skillz" in output
         assert "--index-cli" in output
         assert "--index-all" in output
+
+
+class TestPriorityCoercion:
+    """_coerce_priority — FOUNDUPS_WORK_LEDGER_SEARCH_RETRIEVAL_PRIORITY_HOTFIX_PHASE1."""
+
+    def test_priority_num_wins_over_string_priority(self):
+        """priority_num takes precedence — work-ledger indexer writes both fields."""
+        from holo_index.core.search_engine import _coerce_priority
+        # Work-ledger indexer writes priority="P3" AND priority_num=10
+        assert _coerce_priority({"priority_num": 10, "priority": "P3"}) == 10.0
+
+    def test_numeric_priority_returned_unchanged(self):
+        """Standard collections (code/wsp/docs) pass numeric priority through."""
+        from holo_index.core.search_engine import _coerce_priority
+        assert _coerce_priority({"priority": 7}) == 7.0
+        assert _coerce_priority({"priority": 2.5}) == 2.5
+
+    def test_p_label_coerced_to_weight(self):
+        """P0..P4 string labels coerce to numeric weights."""
+        from holo_index.core.search_engine import _coerce_priority
+        assert _coerce_priority({"priority": "P0"}) == 5.0
+        assert _coerce_priority({"priority": "P1"}) == 4.0
+        assert _coerce_priority({"priority": "P2"}) == 3.0
+        assert _coerce_priority({"priority": "P3"}) == 2.0
+        assert _coerce_priority({"priority": "P4"}) == 1.0
+
+    def test_p_label_case_and_whitespace_tolerated(self):
+        """Defensive coercion handles lowercase/whitespace variants."""
+        from holo_index.core.search_engine import _coerce_priority
+        assert _coerce_priority({"priority": "p3"}) == 2.0
+        assert _coerce_priority({"priority": " P1 "}) == 4.0
+
+    def test_unknown_label_falls_back_to_default(self):
+        """Invalid label does not crash; returns default."""
+        from holo_index.core.search_engine import _coerce_priority
+        assert _coerce_priority({"priority": "URGENT"}) == 1.0
+        assert _coerce_priority({"priority": "URGENT"}, default=7.0) == 7.0
+
+    def test_numeric_string_parsed(self):
+        """String containing numeric value is parsed."""
+        from holo_index.core.search_engine import _coerce_priority
+        assert _coerce_priority({"priority": "3"}) == 3.0
+        assert _coerce_priority({"priority": "10.5"}) == 10.5
+
+    def test_missing_metadata_returns_default(self):
+        """Empty metadata returns default."""
+        from holo_index.core.search_engine import _coerce_priority
+        assert _coerce_priority({}) == 1.0
+        assert _coerce_priority({}, default=2.5) == 2.5
+
+    def test_bool_priority_rejected_falls_through(self):
+        """Booleans (which subclass int in Python) should fall through to default."""
+        from holo_index.core.search_engine import _coerce_priority
+        # bool subclasses int in Python; ensure we don't propagate True/False as 1.0/0.0
+        assert _coerce_priority({"priority": True}) == 1.0
+        assert _coerce_priority({"priority": False}) == 1.0
+
+
+class TestFormatHitWithStringPriority:
+    """Search path with work-ledger string priority — regression for the silent TypeError."""
+
+    def test_search_collection_does_not_crash_with_string_priority(self):
+        """Full _search_collection path no longer raises on priority=\"P3\"."""
+        from holo_index.core.search_engine import _search_collection
+
+        holo = MagicMock()
+        holo.search_cache = None
+        holo.model = None
+
+        collection = MagicMock()
+        collection.query.return_value = {
+            "documents": [["Work Slice: TEST_SLICE\nTitle: Test"]],
+            "metadatas": [[{
+                "type": "work_ledger_slice",
+                "slice_id": "TEST_SLICE",
+                "title": "Test Slice",
+                "path": "/tmp/work_ledger.example.json",
+                "priority": "P3",       # historical poison
+                "priority_num": 10,     # numeric companion field
+                "pr_number": 642,
+                "owner_worker": "W9",
+                "status": "MERGED",
+                "branch": "",
+                "related_foundup_id": "",
+                "summary": "",
+                "keywords": "",
+            }]],
+            "distances": [[0.4]],
+        }
+        collection.get.return_value = {"documents": [], "metadatas": [], "ids": []}
+
+        hits = _search_collection(holo, collection, "TEST_SLICE", limit=5, kind="work_ledger")
+        assert isinstance(hits, list)
+        assert len(hits) == 1
+        # _sort_key is stripped before return; verify result payload is intact and
+        # priority was coerced from "P3" string to numeric (via priority_num=10)
+        assert hits[0].get("title") == "Test Slice"
+        assert hits[0].get("type") == "work_ledger_slice"
+        assert hits[0].get("priority") == 10.0  # coerced from priority_num, not "P3"
+
+
+class TestExecuteSearchWorkLedgerLogging:
+    """execute_search work-ledger block no longer silently swallows exceptions."""
+
+    def test_work_ledger_exception_is_logged_and_search_continues(self, caplog):
+        """If work-ledger _search_collection raises, log a warning AND let other hits return."""
+        import logging
+        from holo_index.core.search_engine import execute_search
+
+        holo = MagicMock()
+        holo.search_cache = None
+        holo.model = None
+        holo.code_collection = None
+        holo.symbol_collection = None
+        holo.wsp_collection = None
+        holo.test_collection = None
+        holo.skill_collection = None
+        holo.docs_collection = None
+        holo.knowledge_collection = None
+
+        boom_collection = MagicMock()
+        boom_collection.query.side_effect = TypeError("can't multiply sequence by non-int of type 'float'")
+        boom_collection.get.return_value = {"documents": [], "metadatas": [], "ids": []}
+        holo.work_ledger_collection = boom_collection
+
+        with caplog.at_level(logging.WARNING, logger="holo_index.core.search_engine"):
+            result = execute_search(holo, "test_query", limit=5, doc_type_filter="work_ledger")
+
+        assert isinstance(result, dict)
+        assert result.get("work_ledger_hits") == []
+
+        warning_messages = [r.getMessage() for r in caplog.records if r.levelno >= logging.WARNING]
+        assert any("Work-ledger search failed" in m for m in warning_messages), \
+            f"Expected warning containing 'Work-ledger search failed', got: {warning_messages}"
+
+    def test_work_ledger_collection_none_does_not_log_warning(self, caplog):
+        """If collection is None (uninitialized), no warning — that's normal pre-reindex state."""
+        import logging
+        from holo_index.core.search_engine import execute_search
+
+        holo = MagicMock()
+        holo.search_cache = None
+        holo.model = None
+        holo.code_collection = None
+        holo.symbol_collection = None
+        holo.wsp_collection = None
+        holo.test_collection = None
+        holo.skill_collection = None
+        holo.docs_collection = None
+        holo.knowledge_collection = None
+        holo.work_ledger_collection = None
+
+        with caplog.at_level(logging.WARNING, logger="holo_index.core.search_engine"):
+            result = execute_search(holo, "test_query", limit=5, doc_type_filter="all")
+
+        warning_messages = [r.getMessage() for r in caplog.records if r.levelno >= logging.WARNING]
+        assert not any("Work-ledger search failed" in m for m in warning_messages), \
+            "Should not warn when work_ledger_collection is None"
+        assert result.get("work_ledger_hits") == []
