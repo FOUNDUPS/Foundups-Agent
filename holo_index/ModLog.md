@@ -1,5 +1,49 @@
 # HoloIndex Package ModLog
 
+## [2026-05-21] HOLOINDEX_FOUNDUP_CATALOG_AND_ROUTE_BINDING_PHASE1
+
+**Agent**: 0102 (Worker H)
+**WSP References**: WSP 97, WSP 103, WSP 104, WSP 15
+**Status**: COMPLETE
+
+### Summary
+
+Reserves canonical route metadata for `holoindex_prod_01` inside the production catalog and preserves local testing continuity.
+1. Appended `holoindex_prod_01` into `public/member/mall-video-catalog.json` as an incubating `discoverable_only` external/public FoundUp surface under the INFRA tier.
+2. Implemented dynamic `?devMall=1` query parameter preservation in `public/f/index.html` back buttons, so localhost dev harness remains active when returning to the mall.
+
+HoloIndex has a dual identity boundary. Internally, HoloIndex is Foundups retrieval/memory infrastructure used by 0102, WRE, OpenClaw, MCP, and workers. Externally, HoloIndex may also have a public FoundUp surface discoverable through p.fMALL. This slice registers the external/public discovery surface only; it does not reclassify the internal HoloIndex core, does not mutate the canonical registry, and does not enable backend/core access.
+
+### Changes
+
+- `public/member/mall-video-catalog.json`: Registered `holoindex_prod_01`
+- `public/f/index.html`: Restored `devMall` query param forwarding for back navigation
+- `public/member/ModLog.md`: Documented changes in member area
+- `holo_index/ModLog.md`: Documented changes in HoloIndex module
+- `modules/foundups/holoindex_prod_01/foundup_manifest.json`: External/public FoundUp surface manifest (discovery surface registration only; does not reclassify the internal HoloIndex core, does not mutate the canonical registry, and does not enable backend/core access)
+
+### Test Results
+
+- All 23 namespace guardrail tests passing.
+- All 117 tests passing (100% success rate on `test_localhost_dev_harness.py`, `test_route_contract_bridge.py`, `test_shell_bridge_interceptor.py`).
+- Standalone VM checks passed.
+
+**WSP_97 Labels** (all YES):
+- PFMALL_CATALOG_ROUTE_BINDING_ONLY
+- DUAL_IDENTITY_BOUNDARY_ENFORCED
+- NO_INTERNAL_INFRA_RECLASSIFICATION
+- NO_EXTERNAL_FOUNDUP_BACKEND_ENABLEMENT
+- NO_REGISTRY_MUTATION
+- NO_RUNTIME_BACKEND_ENABLEMENT
+- NO_HOLOINDEX_CORE_MUTATION
+- NO_SECRET_ACCESS
+- NO_AUTH_CHANGE
+- NO_CABR_READY
+- NO_PAYOUT_READY
+- NO_DAO_ACTIVATION
+
+---
+
 ## [2026-05-06] HIA_FEDERATION_METADATA_TAGGING_PHASE2
 
 **Agent**: 0102 (W1)

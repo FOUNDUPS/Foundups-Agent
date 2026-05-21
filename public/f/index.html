@@ -683,6 +683,12 @@
     var MALL_CATALOG_URL = '/member/mall-video-catalog.json';
     var MALL_HOME = '/member/';
 
+    // Preserve devMall param for localhost harness continuity
+    var searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get('devMall') === '1') {
+      MALL_HOME += MALL_HOME.includes('?') ? '&devMall=1' : '?devMall=1';
+    }
+
     // Source-type-aware CTA config
     var SOURCE_TYPE_CTA = {
       github_repo:      { label: 'View Repo',    icon: '\u2197', urlField: 'external_url' },

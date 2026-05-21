@@ -1,5 +1,43 @@
 # Member Area Module Change Log
 
+## [2026-05-21] HOLOINDEX_FOUNDUP_CATALOG_AND_ROUTE_BINDING_PHASE1
+
+**Who**: 0102 - Worker H
+**Slice**: `BW — HOLOINDEX_FOUNDUP_CATALOG_AND_ROUTE_BINDING_PHASE1`
+**What**: Register holoindex_prod_01 inside public/member/mall-video-catalog.json so that it becomes part of the main discoverable catalog tier in the shell, and implement devMall query parameter preservation in public/f/index.html to ensure localhost-only dev harness continuity.
+
+**Rationale**: 
+Reserves the canonical route metadata and registers the external/public HoloIndex FoundUp surface inside the main catalog (mall-video-catalog.json), and implements local query param preservation for ?devMall=1 so that return/back buttons preserve localhost testing modes.
+
+HoloIndex has a dual identity boundary. Internally, HoloIndex is Foundups retrieval/memory infrastructure used by 0102, WRE, OpenClaw, MCP, and workers. Externally, HoloIndex may also have a public FoundUp surface discoverable through p.fMALL. This slice registers the external/public discovery surface only; it does not reclassify the internal HoloIndex core, does not mutate the canonical registry, and does not enable backend/core access.
+
+**Files Modified**:
+- `public/member/mall-video-catalog.json` — Appended holoindex_prod_01 as discoverable_only.
+- `public/f/index.html` — Added dynamic query parameter parsing to preserve ?devMall=1 on the MALL_HOME path.
+- `public/member/ModLog.md` — Added this ModLog entry.
+- `modules/foundups/holoindex_prod_01/foundup_manifest.json` — Added external/public FoundUp surface manifest to fulfill WSP 104 guardrails for the discovery surface only; does not reclassify the internal HoloIndex core, does not mutate the canonical registry, and does not enable backend/core access.
+
+**Verification**:
+- `pytest modules/foundups/tests/test_namespace_guardrail.py` — Passed.
+- `pytest public/member/tests/test_localhost_dev_harness.py public/member/tests/test_route_contract_bridge.py public/member/tests/test_shell_bridge_interceptor.py` — All 117 tests passing (100% success).
+- `node public/member/tests/shell_bridge_interceptor_vm.mjs` — All VM checks passed.
+
+**WSP_97 Labels** (all YES):
+- PFMALL_CATALOG_ROUTE_BINDING_ONLY
+- DUAL_IDENTITY_BOUNDARY_ENFORCED
+- NO_INTERNAL_INFRA_RECLASSIFICATION
+- NO_EXTERNAL_FOUNDUP_BACKEND_ENABLEMENT
+- NO_REGISTRY_MUTATION
+- NO_RUNTIME_BACKEND_ENABLEMENT
+- NO_HOLOINDEX_CORE_MUTATION
+- NO_SECRET_ACCESS
+- NO_AUTH_CHANGE
+- NO_CABR_READY
+- NO_PAYOUT_READY
+- NO_DAO_ACTIVATION
+
+---
+
 ## [2026-04-20] pfMALL Agent Control Dispatcher — Layer 5 (Worker AW3/AG3)
 
 **Who**: 0102 - Worker AW3/AG3

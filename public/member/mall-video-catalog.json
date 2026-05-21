@@ -11359,5 +11359,46 @@
     "poster_url": "/media/posters/gotjunk.jpg",
     "video_count": 0,
     "videos": []
+  },
+  {
+    "foundup_id": "holoindex_prod_01",
+    "title": "HoloIndex",
+    "creator": "012",
+    "creator_id": "012",
+    "creator_display": "012",
+    "entity": "HoloIndex System",
+    "source_type": "internal_service",
+    "source_id": "holo_index",
+    "source_handle": "holoindex",
+    "external_url": "https://foundups.com/holoindex",
+    "category": "infrastructure",
+    "tags": [
+      "012-lane",
+      "infrastructure",
+      "search",
+      "holoindex",
+      "knowledge",
+      "retrieval"
+    ],
+    "topic_family": "infrastructure",
+    "geo": "Global",
+    "status": "active",
+    "display_order": 13,
+    "related_lanes": [
+      "foundups_main"
+    ],
+    "tagline": "System Knowledge Retrieval",
+    "description": "Enterprise-grade artifact and memory retrieval system for the p.fMALL shell.",
+    "tier": "INFRA",
+    "lifecycle_stage": "incubating",
+    "launch_readiness": "discoverable_only",
+    "routing_prefix": "/f/holoindex_prod_01",
+    "data_namespace": "idb_holoindex_prod_01",
+    "token_symbol": "HOLO",
+    "poster_url": "/media/posters/holoindex.jpg",
+    "video_count": 0,
+    "videos": [],
+    "entry_url": "",
+    "entry_copy": "HoloIndex is discoverable but remains in explicit stub mode until the backend relay clears."
   }
 ]
