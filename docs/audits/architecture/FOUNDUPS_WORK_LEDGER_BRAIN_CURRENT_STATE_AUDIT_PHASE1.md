@@ -14,12 +14,16 @@
 | Label | Status |
 |-------|--------|
 | DOCS_ONLY | YES |
-| AUDIT_ONLY | YES |
+| AUDIT_PATCH_ONLY | YES |
 | NO_DB_IMPLEMENTATION | YES |
 | NO_RUNTIME_CHANGE | YES |
 | NO_SECRET_ACCESS | YES |
 | NO_PR_MUTATION | YES |
 | NO_REGISTRY_MUTATION | YES |
+| NO_AGENTDB_MUTATION | YES |
+| NO_HOLOINDEX_MUTATION | YES |
+| NO_SCHEMA_CREATION | YES |
+| NO_WORK_QUEUE_MUTATION | YES |
 | NO_CABR_READY | YES |
 | NO_PAYOUT_READY | YES |
 | NO_DAO_ACTIVATION | YES |
@@ -132,6 +136,54 @@ Defines:
 - Priority levels, lease model, expiration
 
 **Gap**: Contract only — no implementation connecting to work ledger.
+
+### 2.6 Existing Brain / Memory Continuity Artifacts
+
+**Key Finding**: Partial Brain already exists, but not as a unified work-ledger control plane.
+
+The following artifacts provide Brain-like functionality distributed across the codebase:
+
+| Artifact | Location | Purpose |
+|----------|----------|---------|
+| ACTIVE_SLICE_LEDGER.md | `docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md` | Manual work ledger (96 closed slices, 8 open) |
+| BACKUP_UNIQUE_WORK_LEDGER | `docs/0102_session_briefings/BACKUP_UNIQUE_WORK_LEDGER_PHASE1.md` | Preserves unique unmerged branch work |
+| Brain Analysis | `modules/infrastructure/wre_core/docs/BRAIN_ARTIFACTS_AS_MEMORY_ANALYSIS_20260307.md` | Brain-as-memory architecture analysis |
+| Continuation Prompt | `modules/infrastructure/wre_core/docs/BRAIN_ARTIFACTS_CONTINUATION_PROMPT_20260307.md` | Session continuity prompt templates |
+| Brain Extractor | `modules/infrastructure/wre_core/scripts/extract_brain_artifacts.py` | Extracts reasoning traces from sessions |
+| Brain Index | `WSP_knowledge/reasoning_traces/brain_artifact_index.json` | Indexed brain artifacts |
+| Brain Summary | `WSP_knowledge/reasoning_traces/brain_artifact_summary.md` | Human-readable brain artifact summary |
+| Memory Preflight | `modules/infrastructure/wre_core/recursive_improvement/src/memory_preflight.py` | WRE memory preflight guard |
+| Self Research Refresh | `modules/infrastructure/idle_automation/src/self_research_refresh.py` | WSP 15-ranked autonomous task queue |
+| OpenClaw Memory Queries | `modules/communication/moltbot_bridge/src/openclaw_memory_queries.py` | AgentDB breadcrumb lookup |
+| Memory Nudge Engine | `modules/communication/moltbot_bridge/src/memory_nudge_engine.py` | Memory-based context injection |
+
+### 2.7 What Brain Already Does
+
+The existing Brain artifact system provides:
+
+1. **Reasoning Trace Capture**: `extract_brain_artifacts.py` extracts decision traces from 0102 sessions
+2. **Artifact Indexing**: `brain_artifact_index.json` indexes traces into WSP_knowledge
+3. **Session Continuity**: Markdown session briefings + ACTIVE_SLICE_LEDGER maintain cross-session state
+4. **AgentDB Breadcrumb Lookup**: `openclaw_memory_queries.py` queries prior task states
+5. **Autonomous Task Candidates**: `self_research_refresh.py` generates WSP 15-ranked task queues
+6. **WRE Memory Preflight**: `memory_preflight.py` gates execution on memory consistency
+7. **Context Injection**: `memory_nudge_engine.py` injects relevant memory into prompts
+
+### 2.8 What Brain Does Not Yet Do
+
+The following capabilities are **missing** from the current Brain implementation:
+
+| Gap | Description |
+|-----|-------------|
+| Unified Work Ledger | No single machine-readable master ledger connecting all sources |
+| Schema Validation | No `work_ledger.schema.json` for typed entries |
+| PR/Branch Ingestion | No automated ingestion from GitHub PRs, branches, W10 merge reports |
+| Single Source of Truth | No connection between ACTIVE_SLICE_LEDGER, AgentDB tasks, FoundUp registry `next_slice`, HoloIndex, W10 PR queue |
+| Freshness Enforcement | No staleness detection or freshness guarantees |
+| Lifecycle State Machine | No formalized `open/in_progress/blocked/merged/deferred/archived` state transitions |
+| Owner/Lane Model | No authoritative assignment of W1-W10 worker lanes |
+| Worker Packet Schema | No standardized handoff format between workers |
+| Dependency DAG | No computable dependency graph between slices |
 
 ---
 
@@ -442,35 +494,85 @@ Current WSP 15 scores modules. Adapt for slices:
 
 ## 13. Recommended First Implementation Slice
 
-### 13.1 Slice Definition
+### 13.1 Architecture Unification Requirement
 
-**Slice ID**: `FOUNDUPS_WORK_LEDGER_SCHEMA_PHASE1`
+**Critical**: The next slice (`FOUNDUPS_WORK_LEDGER_SCHEMA_PHASE1`) must NOT invent from scratch.
+
+It MUST unify the existing Brain artifacts:
+- `ACTIVE_SLICE_LEDGER.md` — manual work ledger
+- `BACKUP_UNIQUE_WORK_LEDGER_PHASE1.md` — backup branch work
+- `brain_artifact_index.json` — reasoning trace index
+- AgentDB breadcrumb/task queue state — `openclaw_memory_queries.py`
+- FoundUp registry `next_slice` fields — `foundup_registry.json`
+- W10 PR/merge reports — implicit in ledger updates
+
+### 13.2 WSP Ownership Recommendation
+
+| WSP | Coverage | Recommendation |
+|-----|----------|----------------|
+| WSP 15 | Priority scoring | Adapt for slice prioritization |
+| WSP 22 | ModLog / change history | Already governs per-module changes |
+| WSP 60 | Memory architecture | Governs memory storage patterns |
+| WSP 70 | System status reporting | Can report ledger state |
+| **NEW/AMEND** | Work-ledger lifecycle | Needed for slice state machine + worker handoff packets |
+
+### 13.3 Slice Definition
+
+**Primary Slice ID**: `FOUNDUPS_WORK_LEDGER_SCHEMA_PHASE1`
 **Priority**: P1
 **Domain**: infrastructure
 **Owner**: Unassigned
 **Dependencies**: This audit (PHASE1)
 
-### 13.2 Scope
+**Secondary Slices** (follow-on):
+| Slice ID | Purpose |
+|----------|---------|
+| `FOUNDUPS_WORK_LEDGER_HOLOINDEX_INDEXING_SPEC_PHASE1` | Enable HoloIndex to index work ledger |
+| `FOUNDUPS_WORK_LEDGER_AGENTDB_SYNC_AUDIT_PHASE1` | Audit AgentDB breadcrumb sync |
+| `FOUNDUPS_WORK_LEDGER_W10_INGESTION_SPEC_PHASE1` | Automate W10 merge report ingestion |
 
-| Deliverable | Description |
-|-------------|-------------|
-| `work_ledger.schema.json` | JSON Schema for work ledger entries |
-| `WORK_LEDGER.md` | Enhanced human-readable ledger (evolved from ACTIVE_SLICE_LEDGER.md) |
-| Migration script | Convert current ACTIVE_SLICE_LEDGER.md entries to schema |
+### 13.4 Proposed Next-Slice Fields (Full Schema)
 
-### 13.3 WSP 97 Labels for Next Slice
+| Field | Type | Description |
+|-------|------|-------------|
+| `slice_id` | string | Unique identifier (e.g., `DJ2_F_OPENCLAW_SECURITY_FAIL_DISPATCH`) |
+| `title` | string | Human-readable title |
+| `lane` | string | Worker lane assignment (A-G, or W1-W10) |
+| `priority` | enum | P0-P4 per WSP 15 |
+| `owner_worker` | string | Worker ID or null |
+| `status` | enum | `open` / `in_progress` / `blocked` / `merged` / `deferred` / `archived` |
+| `source` | string | Origin of slice (audit, PR, task, etc.) |
+| `branch` | string | Git branch name |
+| `worktree` | string | Worktree path (if applicable) |
+| `pr_number` | int | GitHub PR number or null |
+| `base_commit` | string | Base commit hash |
+| `head_commit` | string | Head commit hash |
+| `merge_commit` | string | Merge commit hash (when merged) |
+| `related_foundup_id` | string | FoundUp entity ID (if applicable) |
+| `related_wsp` | array[string] | Governing WSPs |
+| `blocked_by` | array[string] | Slice IDs that block this |
+| `supersedes` | string | Slice ID this replaces |
+| `superseded_by` | string | Slice ID that replaced this |
+| `next_slice` | string | Recommended follow-on slice |
+| `evidence_docs` | array[string] | Audit/briefing doc paths |
+| `holoindex_queries` | array[string] | HoloIndex queries used |
+| `wsp_97_labels` | array[string] | WSP 97 truth boundary labels |
+| `last_verified_at` | datetime | Last verification against main |
+
+### 13.5 WSP 97 Labels for Next Slice
 
 - SCHEMA_ONLY
 - NO_RUNTIME_CHANGE
 - NO_DB_IMPLEMENTATION (Phase 1)
 - MIGRATION_DRY_RUN_ONLY
 
-### 13.4 Acceptance Criteria
+### 13.6 Acceptance Criteria
 
 1. Schema validates all current ACTIVE_SLICE_LEDGER.md entries
-2. Human-readable ledger preserves current functionality
-3. HoloIndex can index the new format
-4. No breaking changes to existing workflows
+2. Schema accommodates Brain artifact index entries
+3. Human-readable ledger preserves current functionality
+4. HoloIndex can index the new format
+5. No breaking changes to existing workflows
 
 ---
 
@@ -480,15 +582,20 @@ Current WSP 15 scores modules. Adapt for slices:
 |-------|--------|
 | HoloIndex queries executed | VERIFIED |
 | Existing artifacts inventoried | VERIFIED |
+| Brain artifacts documented | VERIFIED (2.6, 2.7, 2.8) |
 | WSP coverage mapped | VERIFIED |
 | Gaps identified | VERIFIED |
 | Schema proposed | DOCUMENTED (not implemented) |
 | Integration contracts defined | DOCUMENTED (not implemented) |
 | Implementation performed | NO — DOCS_ONLY |
-| Database created | NO — AUDIT_ONLY |
+| Database created | NO — AUDIT_PATCH_ONLY |
 | Runtime modified | NO |
 | PRs mutated | NO |
 | Registry mutated | NO |
+| AgentDB mutated | NO |
+| HoloIndex mutated | NO |
+| Schema created | NO |
+| Work queue mutated | NO |
 
 ---
 
@@ -496,33 +603,50 @@ Current WSP 15 scores modules. Adapt for slices:
 
 ### 15.1 Key Findings
 
-1. **ACTIVE_SLICE_LEDGER.md exists** and serves as the current Brain/work ledger
-2. **No machine-readable format** — manual Markdown only
-3. **No WSP governs work ledger** — gap in framework
-4. **FoundUp registry has `next_slice`** but poorly integrated
-5. **Worker queue contracts exist** but are scaffold only
+1. **Partial Brain exists**, but not as a unified work-ledger control plane
+2. **ACTIVE_SLICE_LEDGER.md** serves as manual work ledger (96 closed, 8 open slices)
+3. **Brain artifact extractor/index/summary** already exist in `wre_core` and `WSP_knowledge`
+4. **WRE memory preflight** already guards execution on memory consistency
+5. **AgentDB/OpenClaw breadcrumb paths** already support task state lookup
+6. **Autonomous task queue** already creates WSP 15-ranked candidates
+7. **No unified machine-readable format** — multiple partial systems not connected
+8. **No WSP governs work ledger lifecycle** — gap in framework
+9. **FoundUp registry has `next_slice`** but poorly integrated with ledger
+10. **Worker queue contracts exist** but are scaffold only
 
 ### 15.2 Recommendation
 
 Proceed with `FOUNDUPS_WORK_LEDGER_SCHEMA_PHASE1`:
+- **Unify** existing Brain artifacts (do NOT invent from scratch)
 - Formalize ACTIVE_SLICE_LEDGER.md into typed schema
+- Accommodate `brain_artifact_index.json` entries
+- Connect FoundUp registry `next_slice` fields
 - Create JSON representation
 - Enable HoloIndex indexing of work state
 - Defer SQLite until JSON is validated
+
+**Secondary slices**:
+- `FOUNDUPS_WORK_LEDGER_HOLOINDEX_INDEXING_SPEC_PHASE1`
+- `FOUNDUPS_WORK_LEDGER_AGENTDB_SYNC_AUDIT_PHASE1`
+- `FOUNDUPS_WORK_LEDGER_W10_INGESTION_SPEC_PHASE1`
 
 ### 15.3 W10 Readiness
 
 | Gate | Status |
 |------|--------|
 | Audit complete | YES |
+| Brain artifacts documented | YES |
 | Evidence documented | YES |
 | Schema proposed | YES |
+| Unification guidance provided | YES |
 | Implementation scope bounded | YES |
 | Ready for next slice | YES |
 
 ---
 
 ## Appendix A: File Evidence
+
+### A.1 Work Ledger Files
 
 | File | Purpose | Lines Read |
 |------|---------|------------|
@@ -533,6 +657,25 @@ Proceed with `FOUNDUPS_WORK_LEDGER_SCHEMA_PHASE1`:
 | `modules/foundups/src/foundup_registry_loader.py` | Read-only loader | 80 |
 | `modules/foundups/agent/src/worker_queue_observability.py` | Queue events | 100 |
 | `modules/foundups/docs/BUILD_PLAN_SWARM_WRE_QUEUE_CONTRACT.md` | Queue contract | 100 |
+
+### A.2 Brain Artifact Files (Patch Addition)
+
+| File | Purpose | Status |
+|------|---------|--------|
+| `modules/infrastructure/wre_core/docs/BRAIN_ARTIFACTS_AS_MEMORY_ANALYSIS_20260307.md` | Brain architecture analysis | EXISTS |
+| `modules/infrastructure/wre_core/docs/BRAIN_ARTIFACTS_CONTINUATION_PROMPT_20260307.md` | Session continuity prompts | EXISTS |
+| `modules/infrastructure/wre_core/scripts/extract_brain_artifacts.py` | Brain trace extractor | EXISTS |
+| `WSP_knowledge/reasoning_traces/brain_artifact_index.json` | Indexed brain artifacts | EXISTS |
+| `WSP_knowledge/reasoning_traces/brain_artifact_summary.md` | Brain artifact summary | EXISTS |
+| `modules/infrastructure/wre_core/recursive_improvement/src/memory_preflight.py` | WRE memory preflight guard | EXISTS |
+| `modules/infrastructure/idle_automation/src/self_research_refresh.py` | WSP 15-ranked task queue | EXISTS |
+| `modules/communication/moltbot_bridge/src/openclaw_memory_queries.py` | AgentDB breadcrumb lookup | EXISTS |
+| `modules/communication/moltbot_bridge/src/memory_nudge_engine.py` | Memory context injection | EXISTS |
+
+### A.3 WSP Files
+
+| File | Purpose | Lines Read |
+|------|---------|------------|
 | `WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md` | Priority scoring | Full |
 | `WSP_framework/src/WSP_22_ModLog_Structure.md` | ModLog protocol | Full |
 | `WSP_framework/src/WSP_60_Module_Memory_Architecture.md` | Memory architecture | Full |
@@ -542,8 +685,26 @@ Proceed with `FOUNDUPS_WORK_LEDGER_SCHEMA_PHASE1`:
 
 ---
 
+## Appendix B: HoloIndex Assessment
+
+### B.1 Queries Executed
+
+| Query | Hits | Quality |
+|-------|------|---------|
+| `Brain artifacts as system memory ACTIVE_SLICE_LEDGER work ledger 0102 session continuity` | 32 | EXCELLENT — found brain artifacts, memory_preflight, self_research_refresh |
+| `AgentDB breadcrumbs autonomous task queue OpenClaw memory continuity work ledger` | 32 | EXCELLENT — found openclaw_memory_queries, memory_nudge_engine |
+| `WSP 70 system status reporting WSP 15 work queue ModLog active slice ledger` | 32 | GOOD — found WSP refs, flagged missing ModLogs |
+
+### B.2 Fallback rg Required
+
+**NO** — HoloIndex semantic search returned all required artifacts.
+
+---
+
 **Audit Complete**: 2026-05-18
+**Audit Patched**: 2026-05-18 (Brain artifact sections added)
 **Auditor**: W9
-**WSP 97 Verdict**: PASS — docs/audit only, no mutations
-**WSP 15 Next Slice**: FOUNDUPS_WORK_LEDGER_SCHEMA_PHASE1
-**W10 Readiness**: APPROVED for next phase
+**WSP 97 Verdict**: PASS — docs/audit patch only, no mutations
+**WSP 15 Primary**: FOUNDUPS_WORK_LEDGER_SCHEMA_PHASE1
+**WSP 15 Secondary**: FOUNDUPS_WORK_LEDGER_HOLOINDEX_INDEXING_SPEC_PHASE1, FOUNDUPS_WORK_LEDGER_AGENTDB_SYNC_AUDIT_PHASE1, FOUNDUPS_WORK_LEDGER_W10_INGESTION_SPEC_PHASE1
+**W10 Readiness**: APPROVED for PR
