@@ -1,5 +1,31 @@
 # HoloIndex Package ModLog
 
+## [2026-05-21] HOLOINDEX_FOUNDUP_CATALOG_AND_ROUTE_BINDING_PHASE1
+
+**Agent**: 0102 (Worker H)
+**WSP References**: WSP 97, WSP 103, WSP 104, WSP 15
+**Status**: COMPLETE
+
+### Summary
+
+Reserves canonical route metadata for `holoindex_prod_01` inside the production catalog and preserves local testing continuity.
+1. Appended `holoindex_prod_01` into `public/member/mall-video-catalog.json` as an incubating `discoverable_only` FoundUp under the INFRA tier.
+2. Implemented dynamic `?devMall=1` query parameter preservation in `public/f/index.html` back buttons, so localhost dev harness remains active when returning to the mall.
+
+### Changes
+
+- `public/member/mall-video-catalog.json`: Registered `holoindex_prod_01`
+- `public/f/index.html`: Restored `devMall` query param forwarding for back navigation
+- `public/member/ModLog.md`: Documented changes in member area
+- `holo_index/ModLog.md`: Documented changes in HoloIndex module
+
+### Test Results
+
+- All 117 tests passing (100% success rate on `test_localhost_dev_harness.py`, `test_route_contract_bridge.py`, `test_shell_bridge_interceptor.py`).
+- Standalone VM checks passed.
+
+---
+
 ## [2026-05-06] HIA_FEDERATION_METADATA_TAGGING_PHASE2
 
 **Agent**: 0102 (W1)
