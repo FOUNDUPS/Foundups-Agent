@@ -15,18 +15,26 @@ HoloIndex has a dual identity boundary. Internally, HoloIndex is Foundups retrie
 - `public/member/mall-video-catalog.json` — Appended holoindex_prod_01 as discoverable_only.
 - `public/f/index.html` — Added dynamic query parameter parsing to preserve ?devMall=1 on the MALL_HOME path.
 - `public/member/ModLog.md` — Added this ModLog entry.
-- `modules/foundups/holoindex_prod_01/foundup_manifest.json` — Added infrastructure service manifest to fulfill WSP 104 guardrails.
+- `modules/foundups/holoindex_prod_01/foundup_manifest.json` — Added external/public FoundUp surface manifest to fulfill WSP 104 guardrails for the discovery surface only; does not reclassify the internal HoloIndex core, does not mutate the canonical registry, and does not enable backend/core access.
 
 **Verification**:
 - `pytest modules/foundups/tests/test_namespace_guardrail.py` — Passed.
 - `pytest public/member/tests/test_localhost_dev_harness.py public/member/tests/test_route_contract_bridge.py public/member/tests/test_shell_bridge_interceptor.py` — All 117 tests passing (100% success).
 - `node public/member/tests/shell_bridge_interceptor_vm.mjs` — All VM checks passed.
 
-**WSP_97 Labels**:
+**WSP_97 Labels** (all YES):
+- PFMALL_CATALOG_ROUTE_BINDING_ONLY
 - DUAL_IDENTITY_BOUNDARY_ENFORCED
 - NO_INTERNAL_INFRA_RECLASSIFICATION
 - NO_EXTERNAL_FOUNDUP_BACKEND_ENABLEMENT
 - NO_REGISTRY_MUTATION
+- NO_RUNTIME_BACKEND_ENABLEMENT
+- NO_HOLOINDEX_CORE_MUTATION
+- NO_SECRET_ACCESS
+- NO_AUTH_CHANGE
+- NO_CABR_READY
+- NO_PAYOUT_READY
+- NO_DAO_ACTIVATION
 
 ---
 

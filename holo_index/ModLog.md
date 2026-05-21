@@ -20,7 +20,7 @@ HoloIndex has a dual identity boundary. Internally, HoloIndex is Foundups retrie
 - `public/f/index.html`: Restored `devMall` query param forwarding for back navigation
 - `public/member/ModLog.md`: Documented changes in member area
 - `holo_index/ModLog.md`: Documented changes in HoloIndex module
-- `modules/foundups/holoindex_prod_01/foundup_manifest.json`: Bounded infrastructure service manifest
+- `modules/foundups/holoindex_prod_01/foundup_manifest.json`: External/public FoundUp surface manifest (discovery surface registration only; does not reclassify the internal HoloIndex core, does not mutate the canonical registry, and does not enable backend/core access)
 
 ### Test Results
 
@@ -28,11 +28,19 @@ HoloIndex has a dual identity boundary. Internally, HoloIndex is Foundups retrie
 - All 117 tests passing (100% success rate on `test_localhost_dev_harness.py`, `test_route_contract_bridge.py`, `test_shell_bridge_interceptor.py`).
 - Standalone VM checks passed.
 
-**WSP_97 Labels**:
+**WSP_97 Labels** (all YES):
+- PFMALL_CATALOG_ROUTE_BINDING_ONLY
 - DUAL_IDENTITY_BOUNDARY_ENFORCED
 - NO_INTERNAL_INFRA_RECLASSIFICATION
 - NO_EXTERNAL_FOUNDUP_BACKEND_ENABLEMENT
 - NO_REGISTRY_MUTATION
+- NO_RUNTIME_BACKEND_ENABLEMENT
+- NO_HOLOINDEX_CORE_MUTATION
+- NO_SECRET_ACCESS
+- NO_AUTH_CHANGE
+- NO_CABR_READY
+- NO_PAYOUT_READY
+- NO_DAO_ACTIVATION
 
 ---
 
