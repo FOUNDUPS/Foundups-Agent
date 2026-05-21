@@ -72,6 +72,26 @@
       ],
       "description": "Visibility in pfMALL/catalog"
     },
+    "PortfolioStatus": {
+      "type": "string",
+      "enum": [
+        "not_portfolio",
+        "portfolio_candidate",
+        "portfolio_ready",
+        "portfolio_featured"
+      ],
+      "description": "foundups.com public portfolio display status"
+    },
+    "PocLandingStatus": {
+      "type": "string",
+      "enum": [
+        "none",
+        "placeholder",
+        "functional",
+        "polished"
+      ],
+      "description": "PoC landing page implementation status"
+    },
     "LifecycleStage": {
       "type": "string",
       "enum": [
@@ -211,6 +231,66 @@
           "type": "array",
           "items": { "type": "string" },
           "description": "List of audit/spec documents supporting this entry"
+        },
+        "portfolio_status": {
+          "$ref": "#/$defs/PortfolioStatus",
+          "default": "not_portfolio"
+        },
+        "poc_landing_status": {
+          "$ref": "#/$defs/PocLandingStatus",
+          "default": "none"
+        },
+        "website_url": {
+          "type": ["string", "null"],
+          "format": "uri",
+          "description": "Public website URL if applicable"
+        },
+        "poc_url": {
+          "type": ["string", "null"],
+          "format": "uri",
+          "description": "PoC/demo URL if applicable"
+        },
+        "app_url": {
+          "type": ["string", "null"],
+          "format": "uri",
+          "description": "Production app URL (e.g., /f/{id}/app or external)"
+        },
+        "github_url": {
+          "type": ["string", "null"],
+          "format": "uri",
+          "description": "Public GitHub repository URL if applicable"
+        },
+        "docs_url": {
+          "type": ["string", "null"],
+          "format": "uri",
+          "description": "Public documentation URL if applicable"
+        },
+        "screenshot_url": {
+          "type": ["string", "null"],
+          "format": "uri",
+          "description": "Screenshot/hero image URL for portfolio display"
+        },
+        "public_summary": {
+          "type": ["string", "null"],
+          "maxLength": 280,
+          "description": "Public-facing summary for portfolio display (280 char max)"
+        },
+        "portfolio_priority": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Display priority in portfolio (1=highest, null=unranked)"
+        },
+        "portfolio_ready": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether entry meets portfolio display criteria"
+        },
+        "portfolio_evidence_docs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Evidence docs supporting portfolio readiness"
         },
         "next_slice": {
           "type": ["string", "null"],
