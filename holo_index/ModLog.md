@@ -9,8 +9,10 @@
 ### Summary
 
 Reserves canonical route metadata for `holoindex_prod_01` inside the production catalog and preserves local testing continuity.
-1. Appended `holoindex_prod_01` into `public/member/mall-video-catalog.json` as an incubating `discoverable_only` infrastructure service entry under the INFRA tier.
+1. Appended `holoindex_prod_01` into `public/member/mall-video-catalog.json` as an incubating `discoverable_only` external/public FoundUp surface under the INFRA tier.
 2. Implemented dynamic `?devMall=1` query parameter preservation in `public/f/index.html` back buttons, so localhost dev harness remains active when returning to the mall.
+
+HoloIndex has a dual identity boundary. Internally, HoloIndex is Foundups retrieval/memory infrastructure used by 0102, WRE, OpenClaw, MCP, and workers. Externally, HoloIndex may also have a public FoundUp surface discoverable through p.fMALL. This slice registers the external/public discovery surface only; it does not reclassify the internal HoloIndex core, does not mutate the canonical registry, and does not enable backend/core access.
 
 ### Changes
 
@@ -25,6 +27,12 @@ Reserves canonical route metadata for `holoindex_prod_01` inside the production 
 - All 23 namespace guardrail tests passing.
 - All 117 tests passing (100% success rate on `test_localhost_dev_harness.py`, `test_route_contract_bridge.py`, `test_shell_bridge_interceptor.py`).
 - Standalone VM checks passed.
+
+**WSP_97 Labels**:
+- DUAL_IDENTITY_BOUNDARY_ENFORCED
+- NO_INTERNAL_INFRA_RECLASSIFICATION
+- NO_EXTERNAL_FOUNDUP_BACKEND_ENABLEMENT
+- NO_REGISTRY_MUTATION
 
 ---
 

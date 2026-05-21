@@ -6,7 +6,10 @@
 **Slice**: `BW — HOLOINDEX_FOUNDUP_CATALOG_AND_ROUTE_BINDING_PHASE1`
 **What**: Register holoindex_prod_01 inside public/member/mall-video-catalog.json so that it becomes part of the main discoverable catalog tier in the shell, and implement devMall query parameter preservation in public/f/index.html to ensure localhost-only dev harness continuity.
 
-**Rationale**: Reserves the canonical route metadata and registers HoloIndex as an INFRA service discovery tile inside the main catalog (mall-video-catalog.json), and implements local query param preservation for ?devMall=1 so that return/back buttons preserve localhost testing modes.
+**Rationale**: 
+Reserves the canonical route metadata and registers the external/public HoloIndex FoundUp surface inside the main catalog (mall-video-catalog.json), and implements local query param preservation for ?devMall=1 so that return/back buttons preserve localhost testing modes.
+
+HoloIndex has a dual identity boundary. Internally, HoloIndex is Foundups retrieval/memory infrastructure used by 0102, WRE, OpenClaw, MCP, and workers. Externally, HoloIndex may also have a public FoundUp surface discoverable through p.fMALL. This slice registers the external/public discovery surface only; it does not reclassify the internal HoloIndex core, does not mutate the canonical registry, and does not enable backend/core access.
 
 **Files Modified**:
 - `public/member/mall-video-catalog.json` — Appended holoindex_prod_01 as discoverable_only.
@@ -18,6 +21,12 @@
 - `pytest modules/foundups/tests/test_namespace_guardrail.py` — Passed.
 - `pytest public/member/tests/test_localhost_dev_harness.py public/member/tests/test_route_contract_bridge.py public/member/tests/test_shell_bridge_interceptor.py` — All 117 tests passing (100% success).
 - `node public/member/tests/shell_bridge_interceptor_vm.mjs` — All VM checks passed.
+
+**WSP_97 Labels**:
+- DUAL_IDENTITY_BOUNDARY_ENFORCED
+- NO_INTERNAL_INFRA_RECLASSIFICATION
+- NO_EXTERNAL_FOUNDUP_BACKEND_ENABLEMENT
+- NO_REGISTRY_MUTATION
 
 ---
 
