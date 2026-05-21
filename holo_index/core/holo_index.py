@@ -196,6 +196,8 @@ class HoloIndex:
         # CFZ4: New collections for semantic separation
         self.docs_collection = self._ensure_collection("navigation_docs")
         self.knowledge_collection = self._ensure_collection("navigation_knowledge")
+        # Work Ledger: Slice tracking for WSP 15/60/70 work state queries
+        self.work_ledger_collection = self._ensure_collection("navigation_work_ledger")
 
         self._log_agent_action("Loading sentence transformer (cached on SSD)...", "MODEL")
         os.environ['SENTENCE_TRANSFORMERS_HOME'] = str(self.models_path)
@@ -341,6 +343,7 @@ class HoloIndex:
             "navigation_vocabulary",
             "navigation_docs",       # CFZ4: module/root docs (doc_ prefix)
             "navigation_knowledge",  # CFZ4: papers/research (paper_ prefix)
+            "navigation_work_ledger",  # Work Ledger: slice tracking
         ]
         self.collection_backend_map = build_collection_backend_map(
             _collection_names,
@@ -515,6 +518,11 @@ class HoloIndex:
         """WSP 95: Index SKILLz files for agent discovery."""
         from .indexing_engine import index_skillz_entries as _idx_skillz
         _idx_skillz(self)
+
+    def index_work_ledger_entries(self) -> None:
+        """WSP 15/60/70: Index work ledger slices for slice tracking queries."""
+        from .indexing_engine import index_work_ledger_entries as _idx_wl
+        _idx_wl(self)
 
     # --------- Search --------- #
 
