@@ -20,6 +20,7 @@ import json
 import logging
 import os
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
@@ -911,3 +912,173 @@ def index_skillz_entries(holo: "HoloIndex") -> None:
         holo._log_agent_action(f"SKILLz index refreshed: {len(embeddings)} skills indexed", "OK")
     else:
         holo._log_agent_action("No SKILLz entries were indexed", "WARN")
+
+
+# ---------------------------------------------------------------------------
+# Work Ledger Indexing (FOUNDUPS_WORK_LEDGER_HOLOINDEX_IMPLEMENTATION_PHASE1)
+# ---------------------------------------------------------------------------
+
+def _calculate_freshness(last_verified_at: str | None) -> float:
+    """Calculate freshness score from last_verified_at timestamp.
+
+    Returns 1.0 for today, decays to 0.5 at 14 days, 0.1 at 30 days.
+    """
+    if not last_verified_at:
+        return 0.5
+
+    try:
+        verified = datetime.fromisoformat(last_verified_at.replace("Z", "+00:00"))
+        age_days = (datetime.now(timezone.utc) - verified).days
+
+        if age_days <= 1:
+            return 1.0
+        elif age_days <= 7:
+            return 0.9
+        elif age_days <= 14:
+            return 0.7
+        elif age_days <= 30:
+            return 0.5
+        else:
+            return max(0.1, 0.5 - (age_days - 30) * 0.01)
+    except Exception:
+        return 0.5
+
+
+# Status ranking weights for work ledger queries
+WORK_LEDGER_STATUS_RANKING = {
+    "IN_PROGRESS": 1.0,
+    "STAGED_FOR_W10": 0.95,
+    "PR_OPEN": 0.9,
+    "ASSIGNED": 0.8,
+    "PROPOSED": 0.7,
+    "BLOCKED": 0.5,
+    "PARKED": 0.4,
+    "MERGED": 0.3,
+    "CLOSED": 0.3,
+    "SUPERSEDED": 0.1,
+    "ABANDONED": 0.05,
+}
+
+
+def index_work_ledger_entries(holo: "HoloIndex") -> None:
+    """Index work ledger slices for semantic search.
+
+    Spec: FOUNDUPS_WORK_LEDGER_HOLOINDEX_INDEXING_SPEC_PHASE1
+    Source: docs/0102_session_briefings/work_ledger.example.json
+
+    Extracts each slice entry as a searchable document with metadata fields:
+    - slice_id, title, lane, priority, status, owner_worker
+    - source, branch, pr_number, related_foundup_id
+    - related_wsp_joined, blocked_by_joined, next_slice
+    - last_verified_at, freshness_score, status_rank
+    """
+    ledger_path = holo.project_root / "docs" / "0102_session_briefings" / "work_ledger.example.json"
+
+    if not ledger_path.exists():
+        holo._log_agent_action("work_ledger.example.json not found", "WARN")
+        return
+
+    try:
+        ledger_data = json.loads(ledger_path.read_text(encoding="utf-8"))
+    except Exception as e:
+        holo._log_agent_action(f"Failed to load work ledger: {e}", "ERROR")
+        return
+
+    slices = ledger_data.get("slices", [])
+    if not slices:
+        holo._log_agent_action("Work ledger has no slices", "WARN")
+        return
+
+    holo._log_agent_action(f"Indexing {len(slices)} work ledger slices...", "INDEX")
+    holo.work_ledger_collection = holo._reset_collection("navigation_work_ledger")
+
+    ids: List[str] = []
+    embeddings: List[List[float]] = []
+    documents: List[str] = []
+    metadatas: List[Dict[str, Any]] = []
+
+    for idx, slice_entry in enumerate(slices, start=1):
+        slice_id = slice_entry.get("slice_id", f"unknown_{idx}")
+        title = slice_entry.get("title", "")
+        lane = slice_entry.get("lane")
+        priority = slice_entry.get("priority", "P3")
+        status = slice_entry.get("status", "PROPOSED")
+        owner_worker = slice_entry.get("owner_worker")
+        source = slice_entry.get("source", "manual")
+        branch = slice_entry.get("branch")
+        pr_number = slice_entry.get("pr_number")
+        related_foundup_id = slice_entry.get("related_foundup_id")
+        related_wsp = slice_entry.get("related_wsp", [])
+        blocked_by = slice_entry.get("blocked_by", [])
+        next_slice = slice_entry.get("next_slice")
+        last_verified_at = slice_entry.get("last_verified_at")
+        evidence_docs = slice_entry.get("evidence_docs", [])
+        wsp_97_labels = slice_entry.get("wsp_97_labels", [])
+
+        related_wsp_joined = "|".join(related_wsp) if related_wsp else ""
+        blocked_by_joined = "|".join(blocked_by) if blocked_by else ""
+        evidence_docs_joined = "|".join(evidence_docs) if evidence_docs else ""
+        wsp_labels_joined = "|".join(wsp_97_labels) if wsp_97_labels else ""
+
+        freshness_score = _calculate_freshness(last_verified_at)
+        status_rank = WORK_LEDGER_STATUS_RANKING.get(status, 0.5)
+
+        doc_payload = (
+            f"Work Slice: {slice_id}\n"
+            f"Title: {title}\n"
+            f"Status: {status}\n"
+            f"Priority: {priority}\n"
+            f"Owner: {owner_worker or 'unassigned'}\n"
+            f"Lane: {lane or 'unassigned'}\n"
+            f"Branch: {branch or 'none'}\n"
+            f"PR: {pr_number or 'none'}\n"
+            f"Related FoundUp: {related_foundup_id or 'none'}\n"
+            f"Related WSPs: {related_wsp_joined or 'none'}\n"
+            f"Blocked by: {blocked_by_joined or 'none'}\n"
+            f"Next slice: {next_slice or 'none'}\n"
+        )
+
+        metadata: Dict[str, Any] = {
+            "slice_id": slice_id,
+            "title": title,
+            "lane": lane or "",
+            "priority": priority,
+            "status": status,
+            "owner_worker": owner_worker or "",
+            "source": source,
+            "branch": branch or "",
+            "pr_number": pr_number if pr_number is not None else -1,
+            "related_foundup_id": related_foundup_id or "",
+            "related_wsp_joined": related_wsp_joined,
+            "blocked_by_joined": blocked_by_joined,
+            "next_slice": next_slice or "",
+            "evidence_docs_joined": evidence_docs_joined,
+            "wsp_labels_joined": wsp_labels_joined,
+            "last_verified_at": last_verified_at or "",
+            "freshness_score": freshness_score,
+            "status_rank": status_rank,
+            "type": "work_ledger_slice",
+            "priority_num": 10,
+            "path": str(ledger_path),
+        }
+
+        embedding = holo._get_embedding(doc_payload)
+        ids.append(f"slice_{idx}")
+        embeddings.append(embedding)
+        documents.append(doc_payload)
+        metadatas.append(metadata)
+
+    if embeddings:
+        if not (len(ids) == len(embeddings) == len(documents) == len(metadatas)):
+            holo._log_agent_action(
+                f"Work ledger index length mismatch (ids={len(ids)}, embeddings={len(embeddings)}, "
+                f"documents={len(documents)}, metadatas={len(metadatas)}). Aborting.",
+                "ERROR",
+            )
+            return
+        holo.work_ledger_collection.add(
+            ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas
+        )
+        holo._log_agent_action(f"Work ledger index refreshed: {len(embeddings)} slices indexed", "OK")
+    else:
+        holo._log_agent_action("No work ledger entries were indexed", "WARN")

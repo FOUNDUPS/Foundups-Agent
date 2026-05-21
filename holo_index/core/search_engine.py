@@ -160,6 +160,174 @@ def _normalize_for_match(text: str) -> str:
     return text.lower().replace("_", "")
 
 
+# ---------------------------------------------------------------------------
+# Work Ledger Boost Functions (FOUNDUPS_WORK_LEDGER_HOLOINDEX_IMPLEMENTATION_PHASE1)
+# ---------------------------------------------------------------------------
+
+_PR_NUMBER_PATTERN = re.compile(r"\bPR[\s#]?(\d+)\b", re.IGNORECASE)
+_WORKER_PATTERN = re.compile(r"\b(W\d+|0102-[A-G])\b", re.IGNORECASE)
+_STATUS_PATTERN = re.compile(
+    r"\b(IN_PROGRESS|STAGED_FOR_W10|PR_OPEN|ASSIGNED|PROPOSED|BLOCKED|PARKED|MERGED|CLOSED|SUPERSEDED|ABANDONED)\b",
+    re.IGNORECASE
+)
+
+
+def _extract_pr_numbers(text: str) -> List[str]:
+    """Extract PR numbers from text (e.g., 'PR 642', 'PR#642', 'PR642')."""
+    matches = _PR_NUMBER_PATTERN.findall(text)
+    return matches
+
+
+def _extract_workers(text: str) -> List[str]:
+    """Extract worker IDs from text (e.g., 'W9', 'W10', '0102-A')."""
+    matches = _WORKER_PATTERN.findall(text)
+    return [m.upper() for m in matches]
+
+
+def _extract_statuses(text: str) -> List[str]:
+    """Extract work ledger statuses from text."""
+    matches = _STATUS_PATTERN.findall(text)
+    return [m.upper() for m in matches]
+
+
+def _pr_number_match_boost(query: str, meta_pr_number: int) -> float:
+    """Return 2.5x boost if query PR number matches metadata pr_number.
+
+    Spec: FOUNDUPS_WORK_LEDGER_HOLOINDEX_INDEXING_SPEC_PHASE1 Section 3.4
+    """
+    if meta_pr_number <= 0:
+        return 0.0
+
+    query_prs = _extract_pr_numbers(query)
+    for pr_str in query_prs:
+        if int(pr_str) == meta_pr_number:
+            return 2.5
+
+    return 0.0
+
+
+def _owner_worker_match_boost(query: str, meta_owner_worker: str) -> float:
+    """Return 2.0x boost if query worker ID matches metadata owner_worker.
+
+    Spec: FOUNDUPS_WORK_LEDGER_HOLOINDEX_INDEXING_SPEC_PHASE1 Section 3.4
+    """
+    if not meta_owner_worker:
+        return 0.0
+
+    query_workers = _extract_workers(query)
+    meta_worker_normalized = meta_owner_worker.upper()
+
+    for worker in query_workers:
+        if worker == meta_worker_normalized:
+            return 2.0
+
+    return 0.0
+
+
+def _branch_match_boost(query: str, meta_branch: str) -> float:
+    """Return 2.0x boost if query branch name matches metadata branch.
+
+    Spec: FOUNDUPS_WORK_LEDGER_HOLOINDEX_INDEXING_SPEC_PHASE1 Section 3.4
+    """
+    if not meta_branch:
+        return 0.0
+
+    query_lower = query.lower()
+    branch_lower = meta_branch.lower()
+
+    if branch_lower in query_lower or query_lower in branch_lower:
+        return 2.0
+
+    branch_tokens = set(branch_lower.replace("/", "-").replace("_", "-").split("-"))
+    query_tokens = set(query_lower.split())
+    if len(branch_tokens & query_tokens) >= 2:
+        return 1.5
+
+    return 0.0
+
+
+def _status_match_boost(query: str, meta_status: str) -> float:
+    """Return 1.5x boost if query status matches metadata status.
+
+    Spec: FOUNDUPS_WORK_LEDGER_HOLOINDEX_INDEXING_SPEC_PHASE1 Section 3.4
+    """
+    if not meta_status:
+        return 0.0
+
+    query_statuses = _extract_statuses(query)
+    meta_status_normalized = meta_status.upper()
+
+    for status in query_statuses:
+        if status == meta_status_normalized:
+            return 1.5
+
+    query_lower = query.lower()
+    if "open" in query_lower and meta_status_normalized in ("IN_PROGRESS", "PR_OPEN", "PROPOSED", "ASSIGNED", "STAGED_FOR_W10"):
+        return 1.0
+    if "blocked" in query_lower and meta_status_normalized == "BLOCKED":
+        return 1.5
+    if "merged" in query_lower and meta_status_normalized == "MERGED":
+        return 1.5
+
+    return 0.0
+
+
+def _related_foundup_match_boost(query: str, meta_related_foundup_id: str) -> float:
+    """Return 2.0x boost if query contains the related foundup ID.
+
+    Spec: FOUNDUPS_WORK_LEDGER_HOLOINDEX_INDEXING_SPEC_PHASE1 Section 3.4
+    """
+    if not meta_related_foundup_id:
+        return 0.0
+
+    query_lower = query.lower()
+    foundup_lower = meta_related_foundup_id.lower()
+
+    # Exact match in query
+    if foundup_lower in query_lower:
+        return 2.0
+
+    # Match base name without suffix (e.g., "gotjunk" matches "gotjunk_001")
+    foundup_base = foundup_lower.split("_")[0] if "_" in foundup_lower else foundup_lower
+    if foundup_base and foundup_base in query_lower:
+        return 2.0
+
+    return 0.0
+
+
+def _work_ledger_combined_boost(
+    query: str,
+    meta: Dict[str, Any],
+) -> float:
+    """Apply all work ledger boosts and return combined score.
+
+    This is called for work_ledger_slice type entries.
+    """
+    total = 0.0
+
+    pr_number = meta.get("pr_number", -1)
+    if isinstance(pr_number, int):
+        total += _pr_number_match_boost(query, pr_number)
+
+    owner_worker = meta.get("owner_worker", "")
+    if owner_worker:
+        total += _owner_worker_match_boost(query, owner_worker)
+
+    branch = meta.get("branch", "")
+    if branch:
+        total += _branch_match_boost(query, branch)
+
+    status = meta.get("status", "")
+    if status:
+        total += _status_match_boost(query, status)
+
+    related_foundup_id = meta.get("related_foundup_id", "")
+    if related_foundup_id:
+        total += _related_foundup_match_boost(query, related_foundup_id)
+
+    return total
+
+
 def _wsp_number_match_boost(query: str, path: str, title: str) -> float:
     """Return keyword boost if query WSP number matches path/title WSP number.
 
@@ -555,6 +723,9 @@ def _search_collection(
         # HXA Audit Fix: Slice ID exact match boost
         meta_slice_id = meta.get("slice_id", "")
         keyword_score += _slice_id_match_boost(query, path, title, meta_slice_id)
+        # Work Ledger boost: PR, worker, branch, status, foundup_id
+        if doc_type == "work_ledger_slice":
+            keyword_score += _work_ledger_combined_boost(query, meta)
 
         if doc_type_filter != "all" and not doc_type.startswith(doc_type_filter):
             continue
@@ -671,6 +842,9 @@ def _lexical_search_collection(
             # HXA Audit Fix: Slice ID exact match boost
             meta_slice_id = meta.get("slice_id", "")
             keyword_score += _slice_id_match_boost(query, path, title, meta_slice_id)
+            # Work Ledger boost: PR, worker, branch, status, foundup_id
+            if doc_type == "work_ledger_slice":
+                keyword_score += _work_ledger_combined_boost(query, meta)
 
             if keyword_score <= 0:
                 continue
