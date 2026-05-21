@@ -1,0 +1,201 @@
+{
+  "schema_version": "1.0.0",
+  "last_updated": "2026-05-21T12:00:00Z",
+  "ledger_authority": "0102 architect lane",
+  "slices": [
+    {
+      "slice_id": "FOUNDUPS_WORK_LEDGER_SCHEMA_PHASE1",
+      "title": "Work Ledger JSON Schema Definition",
+      "lane": "W9",
+      "priority": "P1",
+      "wsp15_score": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 3,
+        "impact": 4,
+        "total": 13
+      },
+      "owner_worker": "W9",
+      "status": "IN_PROGRESS",
+      "source": "audit",
+      "branch": "docs/foundups-work-ledger-schema-phase1",
+      "worktree": null,
+      "pr_number": null,
+      "base_commit": "a763a15a1",
+      "head_commit": null,
+      "merge_commit": null,
+      "related_foundup_id": null,
+      "related_wsp": ["WSP 15", "WSP 22", "WSP 60", "WSP 70", "WSP 97"],
+      "blocked_by": [],
+      "supersedes": null,
+      "superseded_by": null,
+      "next_slice": "FOUNDUPS_WORK_LEDGER_HOLOINDEX_INDEXING_SPEC_PHASE1",
+      "evidence_docs": [
+        "docs/audits/architecture/FOUNDUPS_WORK_LEDGER_BRAIN_CURRENT_STATE_AUDIT_PHASE1.md"
+      ],
+      "holoindex_queries": [
+        "work ledger Brain active slice ledger schema WSP 15 WSP 60 WSP 70",
+        "FoundUps work ledger AgentDB branch PR slice status worker packet",
+        "ACTIVE_SLICE_LEDGER backup unique work ledger brain artifact index"
+      ],
+      "wsp_97_labels": [
+        "WORK_LEDGER_SCHEMA_ONLY",
+        "NO_RUNTIME_CHANGE",
+        "NO_AGENTDB_MUTATION",
+        "NO_HOLOINDEX_MUTATION",
+        "NO_REGISTRY_MUTATION"
+      ],
+      "created_at": "2026-05-21T10:00:00Z",
+      "updated_at": "2026-05-21T12:00:00Z",
+      "last_verified_at": "2026-05-21T12:00:00Z"
+    },
+    {
+      "slice_id": "FOUNDUPS_WORK_LEDGER_BRAIN_EXISTING_ARTIFACTS_PATCH_PHASE1",
+      "title": "Patch Brain Existing Artifacts into Work Ledger Audit",
+      "lane": "W9",
+      "priority": "P1",
+      "wsp15_score": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 14
+      },
+      "owner_worker": "W9",
+      "status": "MERGED",
+      "source": "audit",
+      "branch": "docs/foundups-work-ledger-brain-existing-artifacts-patch-phase1",
+      "worktree": ".claude/worktrees/FWLBA-W9",
+      "pr_number": 642,
+      "base_commit": "becaad544",
+      "head_commit": "98d294c17",
+      "merge_commit": "a763a15a1",
+      "related_foundup_id": null,
+      "related_wsp": ["WSP 15", "WSP 22", "WSP 50", "WSP 87", "WSP 97"],
+      "blocked_by": [],
+      "supersedes": null,
+      "superseded_by": null,
+      "next_slice": "FOUNDUPS_WORK_LEDGER_SCHEMA_PHASE1",
+      "evidence_docs": [
+        "docs/audits/architecture/FOUNDUPS_WORK_LEDGER_BRAIN_CURRENT_STATE_AUDIT_PHASE1.md"
+      ],
+      "holoindex_queries": [
+        "Brain artifacts as system memory ACTIVE_SLICE_LEDGER work ledger 0102 session continuity",
+        "AgentDB breadcrumbs autonomous task queue OpenClaw memory continuity work ledger"
+      ],
+      "wsp_97_labels": [
+        "DOCS_ONLY",
+        "AUDIT_PATCH_ONLY",
+        "NO_DB_IMPLEMENTATION",
+        "NO_RUNTIME_CHANGE"
+      ],
+      "created_at": "2026-05-21T09:00:00Z",
+      "updated_at": "2026-05-21T11:30:00Z",
+      "last_verified_at": "2026-05-21T11:30:00Z"
+    },
+    {
+      "slice_id": "DJ2_F_OPENCLAW_SECURITY_FAIL_DISPATCH",
+      "title": "OpenClaw Security Fail Dispatch to AI Overseer",
+      "lane": null,
+      "priority": "P0",
+      "wsp15_score": {
+        "complexity": 2,
+        "importance": 5,
+        "deferability": 5,
+        "impact": 4,
+        "total": 16
+      },
+      "owner_worker": null,
+      "status": "PROPOSED",
+      "source": "audit",
+      "branch": null,
+      "worktree": null,
+      "pr_number": null,
+      "base_commit": null,
+      "head_commit": null,
+      "merge_commit": null,
+      "related_foundup_id": null,
+      "related_wsp": ["WSP 97"],
+      "blocked_by": [],
+      "supersedes": null,
+      "superseded_by": null,
+      "next_slice": null,
+      "evidence_docs": [
+        "docs/audits/dj_preflight/FCA1_AG2_MAIN_DAE_AI_OVERSEER_HOOKS_AUDIT_PHASE1.md"
+      ],
+      "holoindex_queries": [],
+      "wsp_97_labels": [],
+      "created_at": "2026-04-15T00:00:00Z",
+      "updated_at": null,
+      "last_verified_at": null
+    },
+    {
+      "slice_id": "DUPOOL_TRUTH1_DU_POOL_II_TRUTH_ALIGNMENT",
+      "title": "Du Pool Staker Model Truth Alignment",
+      "lane": null,
+      "priority": "P1",
+      "wsp15_score": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 3,
+        "impact": 4,
+        "total": 14
+      },
+      "owner_worker": null,
+      "status": "MERGED",
+      "source": "manual",
+      "branch": null,
+      "worktree": null,
+      "pr_number": 406,
+      "base_commit": null,
+      "head_commit": null,
+      "merge_commit": "ede4bd4b6",
+      "related_foundup_id": null,
+      "related_wsp": ["WSP 97"],
+      "blocked_by": [],
+      "supersedes": null,
+      "superseded_by": null,
+      "next_slice": "LEGAL_II1_BONDING_CURVE_REVIEW_PACKET",
+      "evidence_docs": [],
+      "holoindex_queries": [],
+      "wsp_97_labels": [],
+      "created_at": "2026-04-20T00:00:00Z",
+      "updated_at": "2026-04-21T00:00:00Z",
+      "last_verified_at": "2026-04-21T00:00:00Z"
+    },
+    {
+      "slice_id": "LEGAL_II1_BONDING_CURVE_REVIEW_PACKET",
+      "title": "I_i Bonding Curve Legal Review Packet",
+      "lane": null,
+      "priority": "P2",
+      "wsp15_score": {
+        "complexity": 4,
+        "importance": 3,
+        "deferability": 2,
+        "impact": 3,
+        "total": 12
+      },
+      "owner_worker": null,
+      "status": "PROPOSED",
+      "source": "manual",
+      "branch": null,
+      "worktree": null,
+      "pr_number": null,
+      "base_commit": null,
+      "head_commit": null,
+      "merge_commit": null,
+      "related_foundup_id": null,
+      "related_wsp": [],
+      "blocked_by": ["DUPOOL_TRUTH1_DU_POOL_II_TRUTH_ALIGNMENT"],
+      "supersedes": null,
+      "superseded_by": null,
+      "next_slice": null,
+      "evidence_docs": [],
+      "holoindex_queries": [],
+      "wsp_97_labels": [],
+      "created_at": "2026-04-21T00:00:00Z",
+      "updated_at": null,
+      "last_verified_at": null
+    }
+  ]
+}

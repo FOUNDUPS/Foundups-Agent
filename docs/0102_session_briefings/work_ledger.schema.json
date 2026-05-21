@@ -1,0 +1,230 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://foundups.org/schemas/work-ledger/v1.0.0",
+  "title": "FoundUps Work Ledger Schema",
+  "description": "Typed machine-readable work ledger unifying ACTIVE_SLICE_LEDGER, Brain artifacts, and FoundUp registry next_slice fields. Source-of-truth candidate, not yet authoritative runtime state.",
+  "type": "object",
+  "required": ["schema_version", "last_updated", "slices"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Work ledger schema version"
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of last ledger update"
+    },
+    "ledger_authority": {
+      "type": "string",
+      "description": "Lane or role with authority over this ledger",
+      "default": "0102 architect lane"
+    },
+    "slices": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/SliceEntry" },
+      "description": "Array of work slice entries"
+    }
+  },
+  "$defs": {
+    "SliceStatus": {
+      "type": "string",
+      "enum": [
+        "PROPOSED",
+        "ASSIGNED",
+        "IN_PROGRESS",
+        "STAGED_FOR_W10",
+        "PR_OPEN",
+        "MERGED",
+        "BLOCKED",
+        "PARKED",
+        "SUPERSEDED",
+        "CLOSED",
+        "ABANDONED"
+      ],
+      "description": "Work slice lifecycle status"
+    },
+    "Priority": {
+      "type": "string",
+      "enum": ["P0", "P1", "P2", "P3", "P4"],
+      "description": "WSP 15 priority classification"
+    },
+    "WSP15Score": {
+      "type": "object",
+      "description": "WSP 15 Module Prioritization Scoring breakdown",
+      "properties": {
+        "complexity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "description": "Implementation difficulty (1=trivial, 5=complex)"
+        },
+        "importance": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "description": "System criticality / blocking factor"
+        },
+        "deferability": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "description": "Urgency (1=can wait, 5=must do now)"
+        },
+        "impact": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "description": "Value delivered when merged"
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 4,
+          "maximum": 20,
+          "description": "Sum of dimension scores"
+        }
+      },
+      "required": ["total"]
+    },
+    "SliceSource": {
+      "type": "string",
+      "enum": [
+        "audit",
+        "pr_review",
+        "task_queue",
+        "brain_artifact",
+        "foundup_registry",
+        "manual",
+        "w10_report",
+        "agentdb_breadcrumb",
+        "holoindex_discovery"
+      ],
+      "description": "Origin of the slice"
+    },
+    "SliceEntry": {
+      "type": "object",
+      "required": ["slice_id", "title", "status", "created_at"],
+      "properties": {
+        "slice_id": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_]+$",
+          "description": "Unique identifier (e.g., DJ2_F_OPENCLAW_SECURITY_FAIL_DISPATCH)",
+          "examples": ["DJ2_F_OPENCLAW_SECURITY_FAIL_DISPATCH", "FOUNDUPS_WORK_LEDGER_SCHEMA_PHASE1"]
+        },
+        "title": {
+          "type": "string",
+          "description": "Human-readable title"
+        },
+        "lane": {
+          "type": ["string", "null"],
+          "description": "Worker lane assignment (A-G, or W1-W10)",
+          "examples": ["A", "W9", "W10"]
+        },
+        "priority": {
+          "$ref": "#/$defs/Priority"
+        },
+        "wsp15_score": {
+          "$ref": "#/$defs/WSP15Score"
+        },
+        "owner_worker": {
+          "type": ["string", "null"],
+          "description": "Worker ID or null if unassigned",
+          "examples": ["W9", "0102-A", null]
+        },
+        "status": {
+          "$ref": "#/$defs/SliceStatus"
+        },
+        "source": {
+          "$ref": "#/$defs/SliceSource"
+        },
+        "branch": {
+          "type": ["string", "null"],
+          "description": "Git branch name"
+        },
+        "worktree": {
+          "type": ["string", "null"],
+          "description": "Worktree path (if applicable)",
+          "examples": [".claude/worktrees/FWLBA-W9"]
+        },
+        "pr_number": {
+          "type": ["integer", "null"],
+          "description": "GitHub PR number or null"
+        },
+        "base_commit": {
+          "type": ["string", "null"],
+          "pattern": "^[a-f0-9]{7,40}$",
+          "description": "Base commit hash"
+        },
+        "head_commit": {
+          "type": ["string", "null"],
+          "pattern": "^[a-f0-9]{7,40}$",
+          "description": "Head commit hash"
+        },
+        "merge_commit": {
+          "type": ["string", "null"],
+          "pattern": "^[a-f0-9]{7,40}$",
+          "description": "Merge commit hash (when merged)"
+        },
+        "related_foundup_id": {
+          "type": ["string", "null"],
+          "description": "FoundUp entity ID from registry (if applicable)"
+        },
+        "related_wsp": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Governing WSPs",
+          "examples": [["WSP 15", "WSP 97"]]
+        },
+        "blocked_by": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Slice IDs that block this"
+        },
+        "supersedes": {
+          "type": ["string", "null"],
+          "description": "Slice ID this replaces"
+        },
+        "superseded_by": {
+          "type": ["string", "null"],
+          "description": "Slice ID that replaced this"
+        },
+        "next_slice": {
+          "type": ["string", "null"],
+          "description": "Recommended follow-on slice"
+        },
+        "evidence_docs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Audit/briefing doc paths"
+        },
+        "holoindex_queries": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "HoloIndex queries used"
+        },
+        "wsp_97_labels": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "WSP 97 truth boundary labels",
+          "examples": [["DOCS_ONLY", "NO_RUNTIME_CHANGE"]]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When slice was created"
+        },
+        "updated_at": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "Last modification time"
+        },
+        "last_verified_at": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "Last verification against main"
+        }
+      }
+    }
+  }
+}
