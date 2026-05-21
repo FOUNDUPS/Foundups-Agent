@@ -1028,6 +1028,8 @@ def execute_search(
         # CFZ4: New hit categories for separated collections
         docs_hits: List[Dict[str, Any]] = []
         knowledge_hits: List[Dict[str, Any]] = []
+        # Work Ledger: slice tracking hits
+        work_ledger_hits: List[Dict[str, Any]] = []
 
         symbol_query = _is_symbol_query(query)
         force_symbol_scan = os.getenv("HOLO_FORCE_SYMBOL_SCAN", "0").lower() in {"1", "true", "yes", "on"}
@@ -1042,6 +1044,8 @@ def execute_search(
         # CFZ4: New collections
         docs_collection = getattr(holo, "docs_collection", None)
         knowledge_collection = getattr(holo, "knowledge_collection", None)
+        # Work Ledger collection
+        work_ledger_collection = getattr(holo, "work_ledger_collection", None)
 
         # Search code index
         if doc_type_filter in ["code", "all"] and code_collection is not None:
@@ -1081,6 +1085,13 @@ def execute_search(
             except Exception:
                 knowledge_hits = []
 
+        # Work Ledger: Search slice tracking index (WSP 15/60/70)
+        if doc_type_filter in ["work_ledger", "all"] and work_ledger_collection is not None:
+            try:
+                work_ledger_hits = _search_collection(holo, work_ledger_collection, query, limit, kind="work_ledger")
+            except Exception:
+                work_ledger_hits = []
+
         # Symbol-query fallback: lexical + rg for exact identifiers/paths
         if symbol_query:
             if doc_type_filter in ["code", "all"] and code_collection is not None:
@@ -1098,7 +1109,8 @@ def execute_search(
         holo._log_agent_action(
             f"Search complete: {len(code_hits)} code, {len(wsp_hits)} WSP, "
             f"{len(test_hits)} Tests, {len(skill_hits)} Skillz, "
-            f"{len(docs_hits)} Docs, {len(knowledge_hits)} Knowledge"
+            f"{len(docs_hits)} Docs, {len(knowledge_hits)} Knowledge, "
+            f"{len(work_ledger_hits)} WorkLedger"
         )
 
         payload: Dict[str, Any] = {
@@ -1116,6 +1128,9 @@ def execute_search(
             "knowledge_hits": knowledge_hits,
             "docs": docs_hits,
             "knowledge": knowledge_hits,
+            # Work Ledger: slice tracking hits
+            "work_ledger_hits": work_ledger_hits,
+            "work_ledger": work_ledger_hits,
             "metadata": {
                 "query": query,
                 "code_count": len(code_hits),
@@ -1125,6 +1140,7 @@ def execute_search(
                 "symbol_count": len(symbol_results),
                 "docs_count": len(docs_hits),
                 "knowledge_count": len(knowledge_hits),
+                "work_ledger_count": len(work_ledger_hits),
                 "timestamp": datetime.now().isoformat(),
                 "cached": False,
                 # FX1-D: Surface retrieval mode in search results.
@@ -1171,5 +1187,7 @@ def execute_search(
             "knowledge_hits": [],
             "docs": [],
             "knowledge": [],
+            "work_ledger_hits": [],
+            "work_ledger": [],
             "metadata": {"error": str(e)},
         }

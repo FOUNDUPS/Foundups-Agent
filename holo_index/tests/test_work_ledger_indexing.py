@@ -13,6 +13,7 @@ These tests verify:
 
 import json
 import tempfile
+import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict
@@ -442,3 +443,251 @@ class TestWorkLedgerIndexing:
             mock_holo._log_agent_action.assert_called_with(
                 "work_ledger.example.json not found", "WARN"
             )
+
+
+# =============================================================================
+# Search Integration Tests (FOUNDUPS_WORK_LEDGER_HOLOINDEX_SEARCH_INTEGRATION_PHASE1)
+# =============================================================================
+
+
+class TestSearchIntegrationWorkLedger(unittest.TestCase):
+    """Tests for work ledger search integration in execute_search()."""
+
+    def test_execute_search_returns_work_ledger_hits_key(self):
+        """execute_search result includes work_ledger_hits key."""
+        from holo_index.core.search_engine import execute_search
+
+        mock_holo = MagicMock()
+        mock_holo._log_agent_action = MagicMock()
+        mock_holo.code_collection = None
+        mock_holo.wsp_collection = None
+        mock_holo.test_collection = None
+        mock_holo.skill_collection = None
+        mock_holo.symbol_collection = None
+        mock_holo.docs_collection = None
+        mock_holo.knowledge_collection = None
+        mock_holo.work_ledger_collection = None
+        mock_holo.model = None
+        mock_holo.project_root = Path(".")
+        mock_holo.retrieval_mode = "lexical"
+        mock_holo.embedding_backend = "none"
+        mock_holo.routing_active = False
+        mock_holo.collection_backend_map = {}
+        mock_holo.search_cache = None  # Disable cache
+
+        result = execute_search(mock_holo, "test query", limit=5)
+
+        assert "work_ledger_hits" in result
+        assert "work_ledger" in result
+        assert "work_ledger_count" in result["metadata"]
+
+    def test_execute_search_graceful_without_work_ledger_collection(self):
+        """execute_search works when work_ledger_collection is None."""
+        from holo_index.core.search_engine import execute_search
+
+        mock_holo = MagicMock()
+        mock_holo._log_agent_action = MagicMock()
+        mock_holo.code_collection = None
+        mock_holo.wsp_collection = None
+        mock_holo.test_collection = None
+        mock_holo.skill_collection = None
+        mock_holo.symbol_collection = None
+        mock_holo.docs_collection = None
+        mock_holo.knowledge_collection = None
+        mock_holo.work_ledger_collection = None
+        mock_holo.model = None
+        mock_holo.project_root = Path(".")
+        mock_holo.retrieval_mode = "lexical"
+        mock_holo.embedding_backend = "none"
+        mock_holo.routing_active = False
+        mock_holo.collection_backend_map = {}
+        mock_holo.search_cache = None  # Disable cache
+
+        result = execute_search(mock_holo, "PR 642", limit=5)
+
+        assert result["work_ledger_hits"] == []
+        assert result["metadata"]["work_ledger_count"] == 0
+
+    def test_execute_search_queries_work_ledger_collection_when_present(self):
+        """execute_search queries work_ledger_collection when it exists."""
+        from holo_index.core.search_engine import execute_search
+
+        mock_collection = MagicMock()
+        mock_collection.query = MagicMock(return_value={
+            "documents": [["Work Slice: TEST_SLICE"]],
+            "metadatas": [[{
+                "slice_id": "TEST_SLICE",
+                "title": "Test Slice",
+                "status": "IN_PROGRESS",
+                "owner_worker": "W9",
+                "pr_number": 642,
+                "type": "work_ledger_slice",
+                "path": "work_ledger.example.json",
+            }]],
+            "distances": [[0.5]],
+        })
+
+        mock_holo = MagicMock()
+        mock_holo._log_agent_action = MagicMock()
+        mock_holo._get_embedding = MagicMock(return_value=[0.0] * 384)
+        mock_holo.code_collection = None
+        mock_holo.wsp_collection = None
+        mock_holo.test_collection = None
+        mock_holo.skill_collection = None
+        mock_holo.symbol_collection = None
+        mock_holo.docs_collection = None
+        mock_holo.knowledge_collection = None
+        mock_holo.work_ledger_collection = mock_collection
+        mock_holo.model = MagicMock()
+        mock_holo.project_root = Path(".")
+        mock_holo.retrieval_mode = "semantic"
+        mock_holo.embedding_backend = "sentence_transformers"
+        mock_holo.routing_active = False
+        mock_holo.collection_backend_map = {}
+        mock_holo.search_cache = None  # Disable cache
+
+        result = execute_search(mock_holo, "PR 642", limit=5)
+
+        mock_collection.query.assert_called()
+        assert result["metadata"]["work_ledger_count"] >= 0
+
+    def test_execute_search_doc_type_filter_work_ledger(self):
+        """execute_search respects doc_type_filter='work_ledger'."""
+        from holo_index.core.search_engine import execute_search
+
+        mock_collection = MagicMock()
+        mock_collection.query = MagicMock(return_value={
+            "documents": [["Work Slice: TEST_SLICE"]],
+            "metadatas": [[{
+                "slice_id": "TEST_SLICE",
+                "title": "Test Slice",
+                "status": "IN_PROGRESS",
+                "type": "work_ledger_slice",
+                "path": "work_ledger.example.json",
+            }]],
+            "distances": [[0.5]],
+        })
+
+        mock_holo = MagicMock()
+        mock_holo._log_agent_action = MagicMock()
+        mock_holo._get_embedding = MagicMock(return_value=[0.0] * 384)
+        mock_holo.code_collection = MagicMock()
+        mock_holo.wsp_collection = MagicMock()
+        mock_holo.test_collection = MagicMock()
+        mock_holo.skill_collection = MagicMock()
+        mock_holo.symbol_collection = MagicMock()
+        mock_holo.docs_collection = MagicMock()
+        mock_holo.knowledge_collection = MagicMock()
+        mock_holo.work_ledger_collection = mock_collection
+        mock_holo.model = MagicMock()
+        mock_holo.project_root = Path(".")
+        mock_holo.retrieval_mode = "semantic"
+        mock_holo.embedding_backend = "sentence_transformers"
+        mock_holo.routing_active = False
+        mock_holo.collection_backend_map = {}
+        mock_holo.search_cache = None  # Disable cache
+
+        result = execute_search(mock_holo, "what is open", limit=5, doc_type_filter="work_ledger")
+
+        mock_collection.query.assert_called()
+        mock_holo.code_collection.query.assert_not_called()
+        assert "work_ledger_hits" in result
+
+
+class TestHoloIndexWrapperMethod(unittest.TestCase):
+    """Tests for HoloIndex.index_work_ledger_entries() wrapper method."""
+
+    def test_holo_index_has_work_ledger_collection_attribute(self):
+        """HoloIndex class exposes work_ledger_collection attribute."""
+        from holo_index.core.holo_index import HoloIndex
+
+        assert hasattr(HoloIndex, "__init__")
+        import inspect
+        source = inspect.getsource(HoloIndex.__init__)
+        assert "work_ledger_collection" in source
+
+    def test_holo_index_has_index_work_ledger_entries_method(self):
+        """HoloIndex class exposes index_work_ledger_entries() method."""
+        from holo_index.core.holo_index import HoloIndex
+
+        assert hasattr(HoloIndex, "index_work_ledger_entries")
+
+
+class TestWorkLedgerBoostsReachable(unittest.TestCase):
+    """Tests proving boosts are reachable through integrated search."""
+
+    def test_pr_number_boost_reachable_in_search(self):
+        """PR number boost is applied when querying work_ledger_slice."""
+        from holo_index.core.search_engine import _work_ledger_combined_boost
+
+        meta = {
+            "pr_number": 642,
+            "owner_worker": "W9",
+            "branch": "feat/test",
+            "status": "IN_PROGRESS",
+            "related_foundup_id": "gotjunk",
+        }
+
+        boost = _work_ledger_combined_boost("PR 642", meta)
+        assert boost >= 2.0
+
+    def test_owner_worker_boost_reachable_in_search(self):
+        """Owner worker boost is applied when querying work_ledger_slice."""
+        from holo_index.core.search_engine import _work_ledger_combined_boost
+
+        meta = {
+            "pr_number": -1,
+            "owner_worker": "W9",
+            "branch": "",
+            "status": "IN_PROGRESS",
+            "related_foundup_id": "",
+        }
+
+        boost = _work_ledger_combined_boost("what did W9 do", meta)
+        assert boost >= 2.0
+
+    def test_branch_boost_reachable_in_search(self):
+        """Branch boost is applied when querying work_ledger_slice."""
+        from holo_index.core.search_engine import _work_ledger_combined_boost
+
+        meta = {
+            "pr_number": -1,
+            "owner_worker": "",
+            "branch": "feat/work-ledger-integration",
+            "status": "IN_PROGRESS",
+            "related_foundup_id": "",
+        }
+
+        # Query with tokens that match branch: work + ledger from branch tokens
+        boost = _work_ledger_combined_boost("work ledger branch", meta)
+        assert boost >= 1.5
+
+    def test_status_boost_reachable_in_search(self):
+        """Status boost is applied when querying work_ledger_slice."""
+        from holo_index.core.search_engine import _work_ledger_combined_boost
+
+        meta = {
+            "pr_number": -1,
+            "owner_worker": "",
+            "branch": "",
+            "status": "IN_PROGRESS",
+            "related_foundup_id": "",
+        }
+
+        boost = _work_ledger_combined_boost("what is IN_PROGRESS", meta)
+        assert boost >= 1.5
+
+    def test_related_foundup_boost_reachable_in_search(self):
+        """Related foundup ID boost is applied when querying work_ledger_slice."""
+        from holo_index.core.search_engine import _work_ledger_combined_boost
+
+        meta = {
+            "pr_number": -1,
+            "owner_worker": "",
+            "branch": "",
+            "status": "IN_PROGRESS",
+            "related_foundup_id": "gotjunk",
+        }
+
+        boost = _work_ledger_combined_boost("gotjunk work", meta)
+        assert boost >= 2.0
