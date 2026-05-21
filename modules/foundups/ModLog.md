@@ -2,6 +2,39 @@
 
 ## Chronological Change Log
 
+### 2026-05-21 - Public Portfolio Status Schema (W9: FOUNDUPS_PUBLIC_PORTFOLIO_STATUS_SCHEMA_PHASE1)
+
+**By:** 0102 (W9) — **Slice:** `FOUNDUPS_PUBLIC_PORTFOLIO_STATUS_SCHEMA_PHASE1`
+**WSP References:** WSP 97 (Truth), WSP 104 (Route Namespace), WSP 102 (Web Design), WSP 15 (Doc Standards)
+
+**Modified**:
+- `modules/foundups/foundup_registry.schema.json` — Added portfolio display field definitions
+- `modules/foundups/foundup_registry.example.json` — Updated all 6 entities with portfolio fields
+- `modules/foundups/foundup_registry.json` — Updated all 14 entities with portfolio fields
+
+**Created**:
+- `modules/foundups/tests/test_foundup_registry_schema.py` — 15 portfolio schema tests
+- `docs/audits/architecture/FOUNDUPS_PUBLIC_PORTFOLIO_STATUS_SCHEMA_PHASE1.md` — Schema audit
+
+**New Schema Fields (12)**:
+- `portfolio_status`: not_portfolio | portfolio_candidate | portfolio_ready | portfolio_featured
+- `poc_landing_status`: none | placeholder | functional | polished
+- `website_url`, `poc_url`, `app_url`, `github_url`, `docs_url`, `screenshot_url`: URL fields (nullable)
+- `public_summary`: 280 char max for portfolio display
+- `portfolio_priority`: 1-100 display order (nullable)
+- `portfolio_ready`: boolean flag for display eligibility
+- `portfolio_evidence_docs`: evidence doc paths array
+
+**Portfolio Candidates (2)**:
+- gotjunk_001: portfolio_candidate, poc_landing_status=functional
+- kosei: portfolio_candidate, poc_landing_status=functional
+
+**Tests**: 15/15 passed
+
+**No runtime changes. No route creation. No pFMALL catalog mutation. Schema only.**
+
+---
+
 ### 2026-05-21 - FoundUp Registry Read-Only Loader (W6: FOUNDUP_REGISTRY_READONLY_LOADER_PHASE1)
 
 **By:** 0102 (W6) — **Slice:** `FOUNDUP_REGISTRY_READONLY_LOADER_PHASE1`

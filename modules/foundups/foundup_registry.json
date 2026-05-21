@@ -1,7 +1,7 @@
 {
   "$schema": "./foundup_registry.schema.json",
   "schema_version": "1.0.0",
-  "last_updated": "2026-05-18T23:00:00Z",
+  "last_updated": "2026-05-21T14:00:00Z",
   "entities": [
     {
       "foundup_id": "gotjunk_001",
@@ -29,7 +29,21 @@
       "invite_required": true,
       "notes": "Cloud Run deployment via GitHub Actions. Launch readiness: conditional. Version 0.3.0.",
       "audit_date": "2026-05-18",
-      "auditor": "W6"
+      "auditor": "W6",
+      "portfolio_status": "portfolio_candidate",
+      "poc_landing_status": "functional",
+      "website_url": null,
+      "poc_url": "https://gotjunk-56566376153.us-west1.run.app/",
+      "app_url": null,
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": "AI-powered junk removal coordination platform. Upload photos, get quotes, schedule pickups.",
+      "portfolio_priority": 1,
+      "portfolio_ready": false,
+      "portfolio_evidence_docs": [
+        "docs/audits/architecture/PUBLIC_FOUNDUP_POC_LANDING_AND_PFMALL_INTERACTION_AUDIT_PHASE1.md"
+      ]
     },
     {
       "foundup_id": "kosei",
@@ -57,7 +71,21 @@
       "invite_required": true,
       "notes": "Firebase Hosting deployment. Launch readiness: ready. AI content automation for businesses.",
       "audit_date": "2026-05-18",
-      "auditor": "W6"
+      "auditor": "W6",
+      "portfolio_status": "portfolio_candidate",
+      "poc_landing_status": "functional",
+      "website_url": null,
+      "poc_url": "https://foundupscom.web.app/kosei/app/",
+      "app_url": "https://foundupscom.web.app/kosei/app/",
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": "AI content automation for businesses. Generate, schedule, and optimize social media content.",
+      "portfolio_priority": 2,
+      "portfolio_ready": false,
+      "portfolio_evidence_docs": [
+        "docs/audits/architecture/PUBLIC_FOUNDUP_POC_LANDING_AND_PFMALL_INTERACTION_AUDIT_PHASE1.md"
+      ]
     },
     {
       "foundup_id": "voteballots",
@@ -85,7 +113,19 @@
       "invite_required": true,
       "notes": "SPECIFIED_NOT_IMPLEMENTED per manifest. Architecture and AI hooks spec complete. No runnable implementation.",
       "audit_date": "2026-05-18",
-      "auditor": "W6"
+      "auditor": "W6",
+      "portfolio_status": "not_portfolio",
+      "poc_landing_status": "none",
+      "website_url": null,
+      "poc_url": null,
+      "app_url": null,
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": null,
+      "portfolio_priority": null,
+      "portfolio_ready": false,
+      "portfolio_evidence_docs": []
     },
     {
       "foundup_id": "trade",
@@ -113,7 +153,19 @@
       "invite_required": true,
       "notes": "Autonomous trading intelligence. Market-adapter driven, chain-agnostic. Design phase.",
       "audit_date": "2026-05-18",
-      "auditor": "W6"
+      "auditor": "W6",
+      "portfolio_status": "not_portfolio",
+      "poc_landing_status": "none",
+      "website_url": null,
+      "poc_url": null,
+      "app_url": null,
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": null,
+      "portfolio_priority": null,
+      "portfolio_ready": false,
+      "portfolio_evidence_docs": []
     },
     {
       "foundup_id": "magadoom_001",
@@ -141,7 +193,19 @@
       "invite_required": true,
       "notes": "Gamified moderation engine. Quake-style fragging XP from YouTube live chat timeouts. Category: games.",
       "audit_date": "2026-05-18",
-      "auditor": "W6"
+      "auditor": "W6",
+      "portfolio_status": "not_portfolio",
+      "poc_landing_status": "none",
+      "website_url": null,
+      "poc_url": null,
+      "app_url": null,
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": null,
+      "portfolio_priority": null,
+      "portfolio_ready": false,
+      "portfolio_evidence_docs": []
     },
     {
       "foundup_id": "antifafm_001",
@@ -169,7 +233,19 @@
       "invite_required": true,
       "notes": "24/7 headless radio broadcaster. Bridges Icecast to YouTube Live via FFmpeg. Version 3.2.9. Category: media.",
       "audit_date": "2026-05-18",
-      "auditor": "W6"
+      "auditor": "W6",
+      "portfolio_status": "not_portfolio",
+      "poc_landing_status": "none",
+      "website_url": null,
+      "poc_url": null,
+      "app_url": null,
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": null,
+      "portfolio_priority": null,
+      "portfolio_ready": false,
+      "portfolio_evidence_docs": []
     },
     {
       "foundup_id": "pfmall",
@@ -196,7 +272,19 @@
       "invite_required": false,
       "notes": "Shell/funnel/RedDog interaction surface. Platform layer, not a FoundUp. Gemma PWA -> WRE data path.",
       "audit_date": "2026-05-18",
-      "auditor": "W6"
+      "auditor": "W6",
+      "portfolio_status": "not_portfolio",
+      "poc_landing_status": "none",
+      "website_url": null,
+      "poc_url": null,
+      "app_url": null,
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": null,
+      "portfolio_priority": null,
+      "portfolio_ready": false,
+      "portfolio_evidence_docs": []
     },
     {
       "foundup_id": "agent_market",
@@ -223,7 +311,19 @@
       "invite_required": false,
       "notes": "CABR/FAM daemon infrastructure. Part of pfmall platform layer. Not a FoundUp.",
       "audit_date": "2026-05-18",
-      "auditor": "W6"
+      "auditor": "W6",
+      "portfolio_status": "not_portfolio",
+      "poc_landing_status": "none",
+      "website_url": null,
+      "poc_url": null,
+      "app_url": null,
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": null,
+      "portfolio_priority": null,
+      "portfolio_ready": false,
+      "portfolio_evidence_docs": []
     },
     {
       "foundup_id": "move2japan",
@@ -251,7 +351,19 @@
       "invite_required": false,
       "notes": "ACCESS_SERVICE: YouTube monitor + stakeholder funnel. BC0 state machine implemented. DO NOT DELETE. 1500+ lines of code.",
       "audit_date": "2026-05-18",
-      "auditor": "W6"
+      "auditor": "W6",
+      "portfolio_status": "not_portfolio",
+      "poc_landing_status": "none",
+      "website_url": null,
+      "poc_url": null,
+      "app_url": null,
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": null,
+      "portfolio_priority": null,
+      "portfolio_ready": false,
+      "portfolio_evidence_docs": []
     },
     {
       "foundup_id": "simulator",
@@ -278,7 +390,19 @@
       "invite_required": false,
       "notes": "Economic simulation engine (mesa_model.py). Tool, not a FoundUp. Possible future FoundUp after dedicated audit.",
       "audit_date": "2026-05-18",
-      "auditor": "W6"
+      "auditor": "W6",
+      "portfolio_status": "not_portfolio",
+      "poc_landing_status": "none",
+      "website_url": null,
+      "poc_url": null,
+      "app_url": null,
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": null,
+      "portfolio_priority": null,
+      "portfolio_ready": false,
+      "portfolio_evidence_docs": []
     },
     {
       "foundup_id": "social_twin",
@@ -306,7 +430,19 @@
       "invite_required": false,
       "notes": "Cross-FoundUp reporting layer. OpenClaw/Hermes pipeline integration. Built but not utilized.",
       "audit_date": "2026-05-18",
-      "auditor": "W6"
+      "auditor": "W6",
+      "portfolio_status": "not_portfolio",
+      "poc_landing_status": "none",
+      "website_url": null,
+      "poc_url": null,
+      "app_url": null,
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": null,
+      "portfolio_priority": null,
+      "portfolio_ready": false,
+      "portfolio_evidence_docs": []
     },
     {
       "foundup_id": "autopost",
@@ -334,7 +470,19 @@
       "notes": "External FoundUp in O:/repos/AutoPost/. PoC 35% complete. Platform connectors are mock stubs.",
       "related_external_repo": "https://github.com/FOUNDUPS/autopost.git",
       "audit_date": "2026-05-18",
-      "auditor": "W6"
+      "auditor": "W6",
+      "portfolio_status": "not_portfolio",
+      "poc_landing_status": "placeholder",
+      "website_url": null,
+      "poc_url": "https://ai.studio/apps/a53b5519-3cb4-40f0-a999-fcf0fa381023",
+      "app_url": null,
+      "github_url": "https://github.com/FOUNDUPS/autopost.git",
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": null,
+      "portfolio_priority": null,
+      "portfolio_ready": false,
+      "portfolio_evidence_docs": []
     },
     {
       "foundup_id": "pqn_portal",
@@ -362,7 +510,19 @@
       "invite_required": true,
       "notes": "SCAFFOLD status. Core logic is placeholder (TODO comments). Frontend exists but not deployed. Not the public face of science-swarm-hub.",
       "audit_date": "2026-05-18",
-      "auditor": "W6"
+      "auditor": "W6",
+      "portfolio_status": "not_portfolio",
+      "poc_landing_status": "none",
+      "website_url": null,
+      "poc_url": null,
+      "app_url": null,
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": null,
+      "portfolio_priority": null,
+      "portfolio_ready": false,
+      "portfolio_evidence_docs": []
     },
     {
       "foundup_id": "science_swarm_hub",
@@ -390,7 +550,19 @@
       "notes": "Externalized work registry backend (v0.12.0). Monorepo stub delegates to installed package. 108 tests passing.",
       "related_external_repo": "https://github.com/FOUNDUPS/science-swarm-hub",
       "audit_date": "2026-05-18",
-      "auditor": "W6"
+      "auditor": "W6",
+      "portfolio_status": "not_portfolio",
+      "poc_landing_status": "none",
+      "website_url": null,
+      "poc_url": null,
+      "app_url": null,
+      "github_url": "https://github.com/FOUNDUPS/science-swarm-hub",
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": null,
+      "portfolio_priority": null,
+      "portfolio_ready": false,
+      "portfolio_evidence_docs": []
     }
   ]
 }
