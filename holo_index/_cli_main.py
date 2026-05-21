@@ -577,6 +577,42 @@ def _generate_cli_rolodex_sqlite(scan_result, db_path: Path) -> None:
     conn.close()
 
 
+def _run_work_ledger_indexing(holo, args) -> bool:
+    """Targeted reindex of navigation_work_ledger collection.
+
+    Slice: FOUNDUPS_WORK_LEDGER_TARGETED_REINDEX_CLI_PHASE1
+    Opt-in only — not cascaded by --index-all to preserve safe-targeted scope.
+
+    Returns True if indexing was attempted and successful, False otherwise
+    (flag not set, source missing, or wrapper raised).
+    """
+    if not getattr(args, 'index_work_ledger', False):
+        return False
+
+    start_time = time.time()
+    ledger_path = holo.project_root / "docs" / "0102_session_briefings" / "work_ledger.example.json"
+
+    safe_print(f"[WORK-LEDGER] Source: {ledger_path}")
+    safe_print("[WORK-LEDGER] Collection: navigation_work_ledger")
+
+    if not ledger_path.exists():
+        safe_print("[WORK-LEDGER] Status: SKIPPED - source file missing (fail-closed)")
+        return False
+
+    try:
+        holo.index_work_ledger_entries()
+        collection = getattr(holo, "work_ledger_collection", None)
+        count = collection.count() if collection is not None else 0
+        duration = time.time() - start_time
+        safe_print(f"[WORK-LEDGER] Entries indexed: {count}")
+        safe_print(f"[WORK-LEDGER] Status: SUCCESS ({duration:.2f}s)")
+        return True
+    except Exception as exc:
+        duration = time.time() - start_time
+        safe_print(f"[WORK-LEDGER] Status: FAILURE ({duration:.2f}s) - {exc}")
+        return False
+
+
 def main():
     """Main CLI entry point for HoloIndex."""
     parser = argparse.ArgumentParser(
@@ -611,6 +647,9 @@ def main():
     parser.add_argument('--reindex-skills', dest='index_skills', action='store_true', help='Alias for --index-skillz (WRE automation)')
     parser.add_argument('--reindex-skillz', dest='index_skills', action='store_true', help='Alias for --index-skillz')
     parser.add_argument('--index-cli', dest='index_cli', action='store_true', help='Index CLI entrypoints → AGENT_CLI_CATALOG.md (command rolodex)')
+    parser.add_argument('--index-work-ledger', dest='index_work_ledger', action='store_true', help='Index work ledger slices into navigation_work_ledger (targeted, opt-in)')
+    parser.add_argument('--reindex-work-ledger', dest='index_work_ledger', action='store_true', help='Alias for --index-work-ledger')
+    parser.add_argument('--reindex-ledger', dest='index_work_ledger', action='store_true', help='Alias for --index-work-ledger')
     parser.add_argument('--wsp-path', type=str, nargs='*', help='Custom WSP paths to index')
     parser.add_argument('--index-docs', action='store_true', help='Index module/root docs into navigation_docs (CFZ4)')
     parser.add_argument('--index-knowledge', action='store_true', help='Index papers/research into navigation_knowledge (CFZ4)')
@@ -1023,6 +1062,10 @@ def main():
             safe_print(f"[CLI] Skipped - orphan_capability_scanner not available: {e}")
         except Exception as e:
             safe_print(f"[CLI] Error indexing CLI entrypoints: {e}")
+
+    # Targeted work-ledger reindex (FOUNDUPS_WORK_LEDGER_TARGETED_REINDEX_CLI_PHASE1)
+    if _run_work_ledger_indexing(holo, args):
+        indexing_awarded = True
 
     if indexing_awarded:
         _write_index_state("manual_index")

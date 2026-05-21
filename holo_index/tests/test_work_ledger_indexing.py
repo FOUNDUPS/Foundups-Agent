@@ -691,3 +691,155 @@ class TestWorkLedgerBoostsReachable(unittest.TestCase):
 
         boost = _work_ledger_combined_boost("gotjunk work", meta)
         assert boost >= 2.0
+
+
+class TestCLITargetedReindex:
+    """Targeted reindex CLI dispatch — FOUNDUPS_WORK_LEDGER_TARGETED_REINDEX_CLI_PHASE1."""
+
+    def _make_args(self, **overrides):
+        import argparse
+        ns = argparse.Namespace(index_work_ledger=False)
+        for k, v in overrides.items():
+            setattr(ns, k, v)
+        return ns
+
+    def _make_holo(self, project_root: Path):
+        holo = MagicMock()
+        holo.project_root = project_root
+        holo.work_ledger_collection = MagicMock()
+        holo.work_ledger_collection.count.return_value = 0
+        return holo
+
+    def test_helper_returns_false_when_flag_unset(self, tmp_path):
+        """Dispatch helper is a no-op when --index-work-ledger flag is False."""
+        from holo_index._cli_main import _run_work_ledger_indexing
+        holo = self._make_holo(project_root=tmp_path)
+        result = _run_work_ledger_indexing(holo, self._make_args(index_work_ledger=False))
+        assert result is False
+        holo.index_work_ledger_entries.assert_not_called()
+
+    def test_helper_returns_false_when_flag_missing(self, tmp_path):
+        """Dispatch helper is a no-op when args has no index_work_ledger attribute."""
+        import argparse
+        from holo_index._cli_main import _run_work_ledger_indexing
+        holo = self._make_holo(project_root=tmp_path)
+        ns = argparse.Namespace()  # no attribute at all
+        result = _run_work_ledger_indexing(holo, ns)
+        assert result is False
+        holo.index_work_ledger_entries.assert_not_called()
+
+    def test_helper_fail_closed_when_source_missing(self, tmp_path, capsys):
+        """Dispatch helper fails gracefully when work_ledger.example.json is missing."""
+        from holo_index._cli_main import _run_work_ledger_indexing
+        holo = self._make_holo(project_root=tmp_path)
+        result = _run_work_ledger_indexing(holo, self._make_args(index_work_ledger=True))
+        assert result is False
+        holo.index_work_ledger_entries.assert_not_called()
+        captured = capsys.readouterr()
+        assert "[WORK-LEDGER]" in captured.out
+        assert "SKIPPED" in captured.out
+        assert "source file missing" in captured.out
+        assert "navigation_work_ledger" in captured.out
+
+    def test_helper_invokes_wrapper_when_source_exists(self, tmp_path, capsys):
+        """Dispatch helper invokes index_work_ledger_entries() when source is present."""
+        from holo_index._cli_main import _run_work_ledger_indexing
+
+        ledger_dir = tmp_path / "docs" / "0102_session_briefings"
+        ledger_dir.mkdir(parents=True)
+        (ledger_dir / "work_ledger.example.json").write_text('{"slices": []}', encoding="utf-8")
+
+        holo = self._make_holo(project_root=tmp_path)
+        holo.work_ledger_collection.count.return_value = 7
+
+        result = _run_work_ledger_indexing(holo, self._make_args(index_work_ledger=True))
+        assert result is True
+        holo.index_work_ledger_entries.assert_called_once_with()
+
+        captured = capsys.readouterr()
+        assert "[WORK-LEDGER] Entries indexed: 7" in captured.out
+        assert "SUCCESS" in captured.out
+
+    def test_helper_handles_wrapper_exception_gracefully(self, tmp_path, capsys):
+        """Dispatch helper does not crash if index_work_ledger_entries() raises."""
+        from holo_index._cli_main import _run_work_ledger_indexing
+
+        ledger_dir = tmp_path / "docs" / "0102_session_briefings"
+        ledger_dir.mkdir(parents=True)
+        (ledger_dir / "work_ledger.example.json").write_text('{"slices": []}', encoding="utf-8")
+
+        holo = self._make_holo(project_root=tmp_path)
+        holo.index_work_ledger_entries.side_effect = RuntimeError("indexer boom")
+
+        result = _run_work_ledger_indexing(holo, self._make_args(index_work_ledger=True))
+        assert result is False
+        captured = capsys.readouterr()
+        assert "FAILURE" in captured.out
+        assert "indexer boom" in captured.out
+
+    def test_helper_does_not_invoke_other_index_methods(self, tmp_path):
+        """Targeted reindex only touches work-ledger — not code/wsp/docs/knowledge/symbols."""
+        from holo_index._cli_main import _run_work_ledger_indexing
+
+        ledger_dir = tmp_path / "docs" / "0102_session_briefings"
+        ledger_dir.mkdir(parents=True)
+        (ledger_dir / "work_ledger.example.json").write_text('{"slices": []}', encoding="utf-8")
+
+        holo = self._make_holo(project_root=tmp_path)
+
+        _run_work_ledger_indexing(holo, self._make_args(index_work_ledger=True))
+
+        holo.index_code_entries.assert_not_called()
+        holo.index_wsp_entries.assert_not_called()
+        holo.index_docs_entries.assert_not_called()
+        holo.index_knowledge_entries.assert_not_called()
+        holo.index_symbol_entries.assert_not_called()
+        holo.index_skillz_entries.assert_not_called()
+
+
+class TestCLIFlagParsing:
+    """CLI parser accepts targeted reindex flags — FOUNDUPS_WORK_LEDGER_TARGETED_REINDEX_CLI_PHASE1."""
+
+    def _run_help(self):
+        import os
+        import subprocess
+        import sys
+        repo_root = Path(__file__).resolve().parent.parent.parent
+        env = os.environ.copy()
+        env["PYTHONIOENCODING"] = "utf-8"
+        result = subprocess.run(
+            [sys.executable, "holo_index.py", "--help"],
+            capture_output=True,
+            timeout=60,
+            cwd=str(repo_root),
+            env=env,
+        )
+        stdout = result.stdout.decode("utf-8", errors="replace")
+        stderr = result.stderr.decode("utf-8", errors="replace")
+        return stdout + stderr
+
+    def test_help_advertises_index_work_ledger_flag(self):
+        """--help output lists --index-work-ledger."""
+        output = self._run_help()
+        assert "--index-work-ledger" in output
+
+    def test_help_advertises_reindex_work_ledger_alias(self):
+        """--help output lists --reindex-work-ledger alias."""
+        output = self._run_help()
+        assert "--reindex-work-ledger" in output
+
+    def test_help_advertises_reindex_ledger_alias(self):
+        """--help output lists --reindex-ledger alias."""
+        output = self._run_help()
+        assert "--reindex-ledger" in output
+
+    def test_existing_index_flags_still_advertised(self):
+        """Pre-existing index flags remain in --help (no regression)."""
+        output = self._run_help()
+        assert "--index-code" in output
+        assert "--index-wsp" in output
+        assert "--index-docs" in output
+        assert "--index-knowledge" in output
+        assert "--index-skillz" in output
+        assert "--index-cli" in output
+        assert "--index-all" in output
