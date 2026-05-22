@@ -84,7 +84,8 @@ All contract, guardrail, and namespace isolation suites executed successfully:
 | `test_namespace_guardrail.py` | 23 / 23 | **PASS** |
 | `test_localhost_dev_harness.py` | 28 / 28 | **PASS** |
 | `test_route_contract_bridge.py` | 45 / 45 | **PASS** |
-| `test_shell_bridge_interceptor.py` | 75 / 75 | **PASS** |
+| `test_shell_bridge_interceptor.py` | 44 / 44 | **PASS** |
+| **Selected suites total** | **186 / 186** | **PASS** |
 | `shell_bridge_interceptor_vm.mjs` | All VM checks | **PASS** |
 
 ### Automated commands run
