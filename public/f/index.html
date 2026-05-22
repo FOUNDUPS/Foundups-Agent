@@ -585,6 +585,182 @@
       .entry-footer { padding-bottom: 4rem; }
       .entry-canonical-route { max-width: 560px; margin-left: auto; margin-right: auto; }
     }
+
+    /* Consolidated Portfolio Dashboard Styles */
+    .portfolio-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+    .portfolio-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .portfolio-title {
+      font-size: 2.75rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, #7c5cfc, #00d4aa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .portfolio-tagline {
+      font-size: 1.15rem;
+      color: rgba(228,226,236,0.6);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    .portfolio-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px;
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .portfolio-card:hover {
+      border-color: rgba(124,92,252,0.4);
+      box-shadow: 0 8px 30px rgba(124,92,252,0.1);
+      transform: translateY(-4px);
+    }
+    .portfolio-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, #7c5cfc, #00d4aa);
+      opacity: 0.7;
+    }
+    .portfolio-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .portfolio-card-title-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .portfolio-card-name {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+    }
+    .portfolio-card-token {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #7c5cfc;
+      letter-spacing: 0.05em;
+    }
+    .portfolio-card-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .portfolio-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+    }
+    .portfolio-badge-tier {
+      background: rgba(124,92,252,0.12);
+      border: 1px solid rgba(124,92,252,0.25);
+      color: #b09eff;
+    }
+    .portfolio-badge-stage {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: rgba(228,226,236,0.6);
+    }
+    .portfolio-badge-readiness {
+      background: rgba(255,215,0,0.06);
+      border: 1px solid rgba(255,215,0,0.2);
+      color: #ffd700;
+    }
+    .portfolio-badge-readiness.discoverable {
+      background: rgba(228,226,236,0.04);
+      border: 1px solid rgba(228,226,236,0.1);
+      color: rgba(228,226,236,0.5);
+    }
+    .portfolio-card-summary {
+      font-size: 0.92rem;
+      color: rgba(228,226,236,0.7);
+      line-height: 1.5;
+      flex-grow: 1;
+    }
+    .portfolio-card-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      padding-top: 1rem;
+    }
+    .portfolio-link-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s, border-color 0.15s;
+      min-height: 36px;
+    }
+    .portfolio-link-btn-main {
+      background: linear-gradient(135deg, rgba(124,92,252,0.2), rgba(0,212,170,0.15));
+      border: 1px solid rgba(124,92,252,0.4);
+      color: #ffffff;
+      flex-grow: 1;
+    }
+    .portfolio-link-btn-main:hover {
+      background: linear-gradient(135deg, rgba(124,92,252,0.3), rgba(0,212,170,0.25));
+      border-color: rgba(124,92,252,0.6);
+    }
+    .portfolio-link-btn-sec {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: rgba(228,226,236,0.75);
+    }
+    .portfolio-link-btn-sec:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.15);
+      color: #ffffff;
+    }
+    .portfolio-dual-identity-tag {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      background: linear-gradient(135deg, #ff007f, #7c5cfc);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(255,0,127,0.2);
+    }
   </style>
 </head>
 <body>
@@ -713,8 +889,25 @@
     var path = window.location.pathname;
     var match = path.match(/^\/f\/([^\/]+)/);
 
-    if (!match || !match[1]) {
-      renderNotFound('No FoundUp specified', 'The route /f/ requires a FoundUp ID.');
+    // Consolidated Portfolio Index Surface
+    // No FoundUp specified (test validation marker)
+    var isPortfolioIndex = !match || !match[1] || match[1] === 'index.html';
+
+    if (isPortfolioIndex) {
+      document.title = 'FoundUps | Public Portfolio Showcase';
+      Promise.all([
+        fetch(MALL_CATALOG_URL).then(function(r) { if (!r.ok) throw new Error(); return r.json(); }),
+        fetch('/f/portfolio_data.json').then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
+      ])
+      .then(function(results) {
+        var catalog = results[0];
+        var portfolio = results[1];
+        renderPortfolioShowcase(catalog, portfolio);
+      })
+      .catch(function(err) {
+        console.error('Portfolio load error:', err);
+        renderNotFound('Error', 'Failed to load public portfolio showcase.');
+      });
       return;
     }
 
@@ -755,6 +948,93 @@
         console.error('Catalog load error:', err);
         renderNotFound('Error', 'Failed to load FoundUp catalog.');
       });
+
+    function renderPortfolioShowcase(catalog, portfolio) {
+      var items = Array.isArray(catalog) ? catalog : (catalog.items || []);
+      var entities = portfolio.entities || [];
+
+      // Sort entities by priority
+      entities.sort(function(a, b) {
+        var prioA = a.portfolio_priority === null ? 9999 : a.portfolio_priority;
+        var prioB = b.portfolio_priority === null ? 9999 : b.portfolio_priority;
+        return prioA - prioB;
+      });
+
+      var html = '<div class="portfolio-container">';
+      html += '  <header class="portfolio-header">';
+      html += '    <h1 class="portfolio-title">FoundUps Public Showcase</h1>';
+      html += '    <p class="portfolio-tagline">Consolidated portfolio of active incubating platforms, candidates, and infrastructure substrate under development.</p>';
+      html += '  </header>';
+
+      html += '  <div class="portfolio-grid">';
+
+      entities.forEach(function(entity) {
+        var catalogItem = items.find(function(i) { return i.foundup_id === entity.foundup_id; }) || {};
+
+        var name = entity.display_name || catalogItem.name || catalogItem.title || entity.foundup_id;
+        var tokenSymbol = catalogItem.token_symbol || entity.foundup_id.toUpperCase().substring(0, 4);
+        var summary = entity.public_summary || catalogItem.description || catalogItem.summary || 'Incubating FoundUp.';
+        
+        var tier = catalogItem.tier || 'F0_DAE';
+        var stage = catalogItem.lifecycle_stage || 'incubating';
+        var readiness = catalogItem.launch_readiness || entity.poc_landing_status || 'discoverable_only';
+        
+        var isHolo = entity.foundup_id === 'holoindex_prod_01';
+
+        html += '    <div class="portfolio-card">';
+        
+        if (isHolo) {
+          html += '      <div class="portfolio-dual-identity-tag">Dual Identity</div>';
+        }
+
+        html += '      <div class="portfolio-card-header">';
+        html += '        <div class="portfolio-card-title-block">';
+        html += '          <div class="portfolio-card-name">' + esc(name) + '</div>';
+        html += '          <div class="portfolio-card-token">$' + esc(tokenSymbol) + '</div>';
+        html += '        </div>';
+        html += '      </div>';
+
+        html += '      <div class="portfolio-card-badges">';
+        html += '        <span class="portfolio-badge portfolio-badge-tier">' + esc(tier) + '</span>';
+        html += '        <span class="portfolio-badge portfolio-badge-stage">' + esc(stage) + '</span>';
+        
+        var readinessClass = (readiness === 'discoverable_only') ? 'discoverable' : '';
+        var readinessLabel = (readiness === 'discoverable_only') ? 'Discoverable' : readiness.charAt(0).toUpperCase() + readiness.slice(1);
+        html += '        <span class="portfolio-badge portfolio-badge-readiness ' + readinessClass + '">' + esc(readinessLabel) + '</span>';
+        html += '      </div>';
+
+        html += '      <p class="portfolio-card-summary">' + esc(summary) + '</p>';
+
+        html += '      <div class="portfolio-card-links">';
+        // Canonical route back button preservation link
+        html += '        <a href="/f/' + esc(entity.foundup_id) + (window.location.search || '') + '" class="portfolio-link-btn portfolio-link-btn-main">';
+        html += '          <span>View Details</span>';
+        html += '          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>';
+        html += '        </a>';
+
+        if (entity.poc_url) {
+          html += '        <a href="' + esc(entity.poc_url) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">Demo App</a>';
+        } else if (entity.website_url) {
+          html += '        <a href="' + esc(entity.website_url) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">Website</a>';
+        }
+        if (entity.github_url) {
+          html += '        <a href="' + esc(entity.github_url) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">GitHub</a>';
+        }
+        
+        html += '      </div>';
+        html += '      </div>';
+      });
+
+      html += '  </div>'; // grid
+      html += '</div>'; // container
+
+      container.innerHTML = html;
+
+      // Ensure concierge contexts and Red Dog concierge knows this is the portfolio showcase
+      document.getElementById('entryRedDog').style.display = 'none';
+      document.getElementById('conciergeSheet').style.display = 'none';
+      document.getElementById('conciergeScrim').style.display = 'none';
+    }
 
     /**
      * WSP 104: App Mount Rendering
