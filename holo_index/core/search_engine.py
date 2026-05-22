@@ -155,6 +155,15 @@ _SLICE_ID_PATTERN = re.compile(
     re.IGNORECASE
 )
 
+# Audit Spec Slice ID Fix: Long-form audit/spec slice IDs ending in _PHASE<digits>
+# Examples:
+#   FOUNDUPS_PORTFOLIO_DATA_VALIDATOR_PHASE1
+#   FOUNDUPS_AGENT_REDTEAM_HARNESS_PROVENANCE_CHECK_PHASE1
+#   HOLOINDEX_PUBLIC_FOUNDUP_CONNECTIVE_TRUST_SURFACE_DOCS_PHASE1
+_AUDIT_SPEC_SLICE_ID_PATTERN = re.compile(
+    r"\b([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*_PHASE\d+)\b"
+)
+
 
 def _extract_wsp_numbers(text: str) -> List[str]:
     """Extract WSP numbers from text (e.g., 'WSP 97', 'WSP_97', 'WSP-97').
@@ -166,12 +175,24 @@ def _extract_wsp_numbers(text: str) -> List[str]:
 
 
 def _extract_slice_ids(text: str) -> List[str]:
-    """HXA Audit Fix: Extract slice IDs from text (e.g., 'HXA22', 'FX1', 'CFZ4').
+    """Extract slice IDs from text.
 
-    Returns list of normalized slice IDs like ['HXA22', 'CFZ4'].
+    Supports two slice ID formats:
+    1. Short form: HXA, FX, CFZ patterns (e.g., 'HXA22', 'FX1', 'CFZ4')
+    2. Long form: Audit/spec IDs ending in _PHASE<digits>
+       (e.g., 'FOUNDUPS_PORTFOLIO_DATA_VALIDATOR_PHASE1')
+
+    Returns list of normalized slice IDs like ['HXA22', 'CFZ4', 'FOUNDUPS_PORTFOLIO_DATA_VALIDATOR_PHASE1'].
     """
-    matches = _SLICE_ID_PATTERN.findall(text)
-    return [m.upper() for m in matches]
+    # Extract short-form slice IDs (HXA/FX/CFZ)
+    short_matches = _SLICE_ID_PATTERN.findall(text)
+    short_ids = [m.upper() for m in short_matches]
+
+    # Extract long-form audit/spec slice IDs
+    long_matches = _AUDIT_SPEC_SLICE_ID_PATTERN.findall(text)
+    # Long-form IDs are already uppercase in the pattern match
+
+    return short_ids + long_matches
 
 
 def _slice_id_match_boost(query: str, path: str, title: str, meta_slice_id: str = "") -> float:

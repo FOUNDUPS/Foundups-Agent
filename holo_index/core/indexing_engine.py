@@ -115,23 +115,54 @@ def _extract_wsp_id(filename: str, title: str) -> str:
 # HXA Audit Fix: Extract slice IDs (HXA, FX, CFZ patterns) from filenames
 _SLICE_ID_PATTERN = re.compile(r"(HXA\d+|FX\d+|CFZ\d+)", re.IGNORECASE)
 
+# Audit Spec Slice ID Fix: Extract long-form audit/spec slice IDs
+# Pattern: Uppercase words with underscores ending in _PHASE followed by digits
+# Examples:
+#   FOUNDUPS_PORTFOLIO_DATA_VALIDATOR_PHASE1
+#   FOUNDUPS_AGENT_REDTEAM_HARNESS_PROVENANCE_CHECK_PHASE1
+#   HOLOINDEX_PUBLIC_FOUNDUP_CONNECTIVE_TRUST_SURFACE_DOCS_PHASE1
+_AUDIT_SPEC_SLICE_ID_PATTERN = re.compile(
+    r"\b([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*_PHASE\d+)\b"
+)
+
 
 def _extract_slice_id(filename: str, title: str) -> Optional[str]:
-    """Extract slice ID (HXA, FX, CFZ patterns) from filename or title.
+    """Extract slice ID from filename or title.
+
+    Supports two slice ID formats:
+    1. Short form: HXA, FX, CFZ patterns (e.g., HXA22, FX1, CFZ4)
+    2. Long form: Audit/spec IDs ending in _PHASE<digits>
+       (e.g., FOUNDUPS_PORTFOLIO_DATA_VALIDATOR_PHASE1)
 
     Examples:
         HXA22_DESTRUCTIVE_ACTION_GUARD_RUNTIME.md -> HXA22
         test_hxa30_scope_to_action_class.py -> HXA30
         CFZ4_COLLECTION_SEPARATION.md -> CFZ4
+        FOUNDUPS_PORTFOLIO_DATA_VALIDATOR_PHASE1.md -> FOUNDUPS_PORTFOLIO_DATA_VALIDATOR_PHASE1
+        HOLOINDEX_AUDIT_SPEC_SLICE_ID_INDEXING_FIX_PHASE1.md -> HOLOINDEX_AUDIT_SPEC_SLICE_ID_INDEXING_FIX_PHASE1
     """
-    # Check filename first
+    # Check filename for short-form slice IDs first (HXA/FX/CFZ)
     match = _SLICE_ID_PATTERN.search(filename)
     if match:
         return match.group(1).upper()
-    # Check title
+
+    # Check filename for long-form audit/spec slice IDs
+    # Extract stem (filename without extension) for cleaner matching
+    stem = Path(filename).stem if "." in filename else filename
+    match = _AUDIT_SPEC_SLICE_ID_PATTERN.search(stem)
+    if match:
+        return match.group(1)
+
+    # Check title for short-form slice IDs
     match = _SLICE_ID_PATTERN.search(title)
     if match:
         return match.group(1).upper()
+
+    # Check title for long-form audit/spec slice IDs
+    match = _AUDIT_SPEC_SLICE_ID_PATTERN.search(title)
+    if match:
+        return match.group(1)
+
     return None
 
 
