@@ -15,7 +15,8 @@
 | PUBLIC_PORTFOLIO_DISPLAY_ONLY | YES |
 | NO_CARD_BEHAVIOR_CHANGE | YES |
 | NO_PINCH_ZOOM_CHANGE | YES |
-| NO_ROUTE_SEMANTICS_CHANGE | YES |
+| ROOT_PORTFOLIO_ROUTE_ONLY | YES |
+| NO_FOUNDUP_DETAIL_ROUTE_SEMANTICS_CHANGE | YES |
 | NO_AUTH_CHANGE | YES |
 | NO_BACKEND_CHANGE | YES |
 | NO_HOLOINDEX_CORE_MUTATION | YES |
@@ -48,8 +49,8 @@ HoloIndex successfully mapped all key target pathways. Direct file inspection on
 
 This slice implements the consolidated **Public Portfolio Showcase** at `/f/` (using `/f/index.html`) using existing catalog and registry mapping fields, without affecting p.fMALL card swipe gestures or video autoplay.
 
-### 2.1 Static Mirror Asset
-* Created [`public/f/portfolio_data.json`](file:///o:/Foundups-Agent/public/f/portfolio_data.json) to mirror the canonical portfolio status metrics from the canonical registry.
+### 2.1 Bounded Static Portfolio Projection
+* Created [`public/f/portfolio_data.json`](file:///o:/Foundups-Agent/public/f/portfolio_data.json) which is a bounded static portfolio projection from canonical registry fields plus p.fMALL catalog/manifest evidence. It is not the canonical source of truth.
 * Avoids runtime backend routing requirements, maintaining static PWA loading speeds.
 
 ### 2.2 Route & Presentation Interceptor
@@ -79,7 +80,7 @@ All contract, guardrail, and namespace isolation suites executed successfully:
 
 | Test File / Suite | Passed | Status |
 |-------------------|--------|--------|
-| `test_foundup_registry_schema.py` | 15 / 15 | **PASS** |
+| `test_foundup_registry_schema.py` | 46 / 46 | **PASS** |
 | `test_namespace_guardrail.py` | 23 / 23 | **PASS** |
 | `test_localhost_dev_harness.py` | 28 / 28 | **PASS** |
 | `test_route_contract_bridge.py` | 45 / 45 | **PASS** |

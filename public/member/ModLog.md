@@ -10,7 +10,7 @@
 Implements an additive consolidated portfolio dashboard in `/f/index.html` to showcase FoundUp readiness and maturity metrics (e.g. GotJunk, Kosei AI, and HoloIndex). It preserves HoloIndex's dual-identity boundary by displaying its dual role as internal infrastructure and external discovery surface with appropriate WSP 97 framing.
 
 **Files Modified**:
-- `public/f/portfolio_data.json` [NEW] — Mirrors canonical portfolio status registry entries for web consumption.
+- `public/f/portfolio_data.json` [NEW] — Bounded static portfolio projection from canonical registry fields plus p.fMALL catalog/manifest evidence.
 - `public/f/index.html` — Updated route parser to handle `/f/` index path, fetch portfolio data, and render the premium glassmorphic showcase cards with backlinks and parameters preservation.
 - `public/member/ModLog.md` — Added this ModLog entry.
 
@@ -25,7 +25,8 @@ Implements an additive consolidated portfolio dashboard in `/f/index.html` to sh
 - PUBLIC_PORTFOLIO_DISPLAY_ONLY
 - NO_CARD_BEHAVIOR_CHANGE
 - NO_PINCH_ZOOM_CHANGE
-- NO_ROUTE_SEMANTICS_CHANGE
+- ROOT_PORTFOLIO_ROUTE_ONLY
+- NO_FOUNDUP_DETAIL_ROUTE_SEMANTICS_CHANGE
 - NO_AUTH_CHANGE
 - NO_BACKEND_CHANGE
 - NO_HOLOINDEX_CORE_MUTATION
