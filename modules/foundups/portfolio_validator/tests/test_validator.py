@@ -463,23 +463,19 @@ def real_sources() -> Sources:
     return load_sources(find_repo_root())
 
 
-def test_real_repo_detects_holoindex_missing_from_registry(real_sources):
-    """Architect-identified drift #1: holoindex_prod_01 in projection but NOT in registry."""
+def test_real_repo_holoindex_has_registry_backing(real_sources):
+    """Post-fix: holoindex_prod_01 is now in registry, R1/R11 should NOT fire."""
     report = run_validation(real_sources)
     rule_ids = [v.rule_id for v in report.violations if v.entity == "holoindex_prod_01"]
-    assert "R1" in rule_ids
-    assert "R11" in rule_ids
+    assert "R1" not in rule_ids, "R1 should not fire after registry entry added"
+    assert "R11" not in rule_ids, "R11 should not fire after registry entry added"
 
 
-def test_real_repo_detects_count_mismatch(real_sources):
-    """Architect-identified drift #2: projection count != portfolio-eligible registry count."""
+def test_real_repo_count_matches(real_sources):
+    """Post-fix: projection count == portfolio-eligible registry count (3==3)."""
     report = run_validation(real_sources)
     r10 = [v for v in report.violations if v.rule_id == "R10"]
-    assert len(r10) == 1
-    # Two architect-identified portfolio candidates (gotjunk_001, kosei) in registry,
-    # three in projection.
-    assert r10[0].expected == 2
-    assert r10[0].actual == 3
+    assert len(r10) == 0, "R10 should not fire when counts match (3==3)"
 
 
 def test_real_repo_does_not_claim_holoindex_is_not_portfolio(real_sources):
@@ -497,13 +493,13 @@ def test_real_repo_does_not_claim_holoindex_is_not_portfolio(real_sources):
 def test_real_repo_stats_capture_full_inventory(real_sources):
     """Total registry inventory coverage stat must be reported separately from R10."""
     report = run_validation(real_sources)
-    assert report.stats["registry_total"] == 14
+    assert report.stats["registry_total"] == 15
     assert report.stats["projection_total"] == 3
-    assert report.stats["registry_portfolio_eligible"] == 2
+    assert report.stats["registry_portfolio_eligible"] == 3
     coverage = report.stats["registry_inventory_coverage"]
-    assert coverage["registry_total"] == 14
+    assert coverage["registry_total"] == 15
     assert coverage["projection_total"] == 3
-    assert coverage["delta"] == 11
+    assert coverage["delta"] == 12
 
 
 # --- CLI / fail-closed input handling ------------------------------------
@@ -585,7 +581,7 @@ def test_cli_exit_code_2_when_projection_malformed(tmp_path: Path):
 
 
 def test_cli_exit_code_1_against_current_repo():
-    """Running against the real repo must surface drift => exit 1."""
+    """Running against the real repo surfaces C4 warning => exit 1."""
     result = subprocess.run(
         [
             sys.executable,
@@ -598,7 +594,7 @@ def test_cli_exit_code_1_against_current_repo():
         text=True,
     )
     assert result.returncode == 1
-    assert "R1" in result.stdout or "R11" in result.stdout
+    assert "C4" in result.stdout, "C4 (is_dual_identity) should remain as projection-side drift"
 
 
 def test_cli_json_output_is_parseable():
