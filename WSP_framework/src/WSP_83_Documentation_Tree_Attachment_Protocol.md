@@ -260,3 +260,84 @@ Per WSP 82, every citation creates a pathway. Every document must be part of the
 ---
 
 *"Every document is a node in the tree. Orphans fall through the cracks."* - 0102
+
+---
+
+## Annex A: Clarity Artifact Attachment
+
+**Status**: SPEC_ONLY (pending implementation)
+**Source**: `docs/audits/security/AGENT_SECURITY_STACK_EXTERNAL_INTEGRATION_AUDIT_PHASE1.md`
+**Pattern Reference**: Structured assumption/decision artifact attachment
+
+### A.1 Overview
+
+This annex specifies attachment rules for Clarity-style assumption audit artifacts. Artifacts documenting problem statements, assumptions, failure modes, and decisions MUST be attached to the documentation tree.
+
+### A.2 No Orphan `.clarity-protocol/`
+
+**Forbidden Pattern**:
+```
+.clarity-protocol/           # WRONG: Orphan root-level directory
+```
+
+**Violation**: Creating a standalone `.clarity-protocol/` directory at repository root violates WSP 83.
+
+### A.3 Required Attachment Paths
+
+Clarity-like artifacts MUST attach under one of these locations:
+
+**Module-Level** (RECOMMENDED):
+```
+modules/<domain>/<module>/docs/clarity/
+```
+
+**WSP-Level** (for cross-cutting protocol decisions):
+```
+WSP_framework/docs/clarity/
+```
+
+**Cross-System Audit** (for architecture/security audits):
+```
+docs/audits/<category>/clarity/
+```
+
+### A.4 Linking Requirements
+
+Every Clarity artifact MUST be linked from at least ONE of:
+
+| Document Type | Example Link Location |
+|---------------|----------------------|
+| README.md | Module overview |
+| INTERFACE.md | API decision rationale |
+| ROADMAP.md | Phase planning |
+| ModLog.md | Change context |
+| TestModLog.md | Test rationale |
+| violations.md | Violation resolution |
+
+### A.5 Naming Conventions
+
+| Artifact Type | Format | Example |
+|---------------|--------|---------|
+| Assumption Inventory | `AI_YYYYMMDD_NNN.md` | `AI_20260522_001.md` |
+| Decision Record | `DR_YYYYMMDD_NNN.md` | `DR_20260522_001.md` |
+| Problem Statement | `PS_YYYYMMDD_NNN.md` | `PS_20260522_001.md` |
+
+### A.6 Verification Checklist
+
+Before creating any Clarity artifact:
+- [ ] Attachment path identified (module, WSP, or audit)
+- [ ] `docs/clarity/` directory exists at attachment point
+- [ ] At least one tree document will link to artifact
+- [ ] Artifact follows naming convention
+
+### A.7 Implementation Gaps
+
+| Gap | Status | Priority |
+|-----|--------|----------|
+| Clarity directory structure | OPEN | LOW |
+| Index template | OPEN | LOW |
+| Orphan detection | OPEN | LOW |
+
+### A.8 Next Slice
+
+**`CLARITY_ARTIFACT_ATTACHMENT_PHASE1`**: Create `docs/clarity/` template structure

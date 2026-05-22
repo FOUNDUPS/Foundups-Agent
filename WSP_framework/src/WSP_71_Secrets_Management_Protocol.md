@@ -336,4 +336,90 @@ local_vault_config:
 
 ## 9. Conclusion
 
-WSP 71 establishes the foundation for secure secrets management across the autonomous WSP/WRE development ecosystem. By implementing centralized secrets management, comprehensive audit trails, and integration with agent permission systems, this protocol ensures that sensitive information is protected while enabling efficient autonomous development operations. The protocol transforms ad-hoc secrets handling into a systematic, secure, and auditable process that scales with the autonomous development ecosystem. 
+WSP 71 establishes the foundation for secure secrets management across the autonomous WSP/WRE development ecosystem. By implementing centralized secrets management, comprehensive audit trails, and integration with agent permission systems, this protocol ensures that sensitive information is protected while enabling efficient autonomous development operations. The protocol transforms ad-hoc secrets handling into a systematic, secure, and auditable process that scales with the autonomous development ecosystem.
+
+---
+
+## Annex A: MCP Runtime Credential Access
+
+**Status**: SPEC_ONLY (pending implementation)
+**Source**: `docs/audits/security/AGENT_SECURITY_STACK_EXTERNAL_INTEGRATION_AUDIT_PHASE1.md`
+**Pattern Reference**: Vault-backed MCP credential resolution (1Password Environments MCP / Runlayer pattern)
+
+### A.1 Overview
+
+This annex specifies runtime-only credential resolution at the MCP gateway layer. Credentials are resolved just-in-time from a vault backend and never stored in prompts, model context, logs, repository, or terminal output.
+
+### A.2 Vault-Backed Secret References
+
+**Reference Pattern**: `op://vault/item/field`
+
+| Component | Description | Example |
+|-----------|-------------|---------|
+| `vault` | Vault or namespace identifier | `foundups-secrets` |
+| `item` | Secret item name | `youtube-api-key` |
+| `field` | Specific field within item | `credential` |
+
+**Storage Rule**: Only the reference string is stored in code, configuration, or prompts. The actual secret value MUST NEVER be stored anywhere except the vault backend.
+
+### A.3 Runtime-Only Resolution
+
+**Resolution Architecture**:
+```
+Agent Request -> MCP Gateway -> [SCANNER] Detect op:// references -> [RESOLVER] Vault SDK -> [INJECT] Replace reference -> [CLEAR] Memory cleanup
+```
+
+**Critical Constraints**:
+- Resolution occurs ONLY at runtime, ONLY at MCP gateway
+- Resolved values exist in memory ONLY for request duration
+- No disk caching, no database storage, no prompt embedding
+
+### A.4 Secrets Forbidden Surfaces
+
+| Surface | Secret Allowed |
+|---------|----------------|
+| Prompts | NEVER |
+| Model context | NEVER |
+| Logs | NEVER |
+| Terminal output | NEVER |
+| Repository (git) | NEVER |
+| AgentDB | NEVER |
+| HoloIndex | NEVER |
+
+### A.5 Just-In-Time Access
+
+**Session-Bounded Access Rules**:
+- Credentials resolved per-request, not cached across requests
+- TTL (time-to-live) enforced: maximum credential lifetime per session
+- Memory cleared before response returns to agent
+
+### A.6 Audit Logging Without Secret Values
+
+**Hash-Based Audit Trail**:
+- Log reference (`op://...`), NEVER the resolved value
+- Log SHA-256 hash for rotation detection
+- Log requesting agent identity and TTL applied
+
+### A.7 Fail-Closed Behavior
+
+| Failure | Behavior |
+|---------|----------|
+| Vault unreachable | BLOCK request |
+| Reference malformed | BLOCK request |
+| TTL expired | BLOCK request |
+| Permission denied | BLOCK request |
+
+**Fail-Closed Principle**: If ANY step fails, the entire credential access MUST fail. No fallback to cached/stale credentials.
+
+### A.8 Implementation Gaps
+
+| Gap | Status | Priority |
+|-----|--------|----------|
+| op:// reference scanner | OPEN | HIGH |
+| Vault SDK integration | OPEN | HIGH |
+| Hash-based audit trail | OPEN | MEDIUM |
+| TTL enforcement | OPEN | MEDIUM |
+
+### A.9 Next Slice
+
+**`SECRETS_MCP_VAULT_RESOLVER_PHASE1`**: Implement op:// resolver with vault backend integration 
