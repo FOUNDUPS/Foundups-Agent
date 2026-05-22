@@ -1,5 +1,55 @@
 # HoloIndex Package ModLog
 
+## [2026-05-22] HOLOINDEX_AUDIT_SPEC_SLICE_ID_INDEXING_FIX_PHASE1
+
+**Agent**: 0102 (W1)
+**WSP References**: WSP 97, WSP 87, WSP 50, WSP 22
+**Status**: COMPLETE
+
+### Summary
+
+Extended slice ID extraction and search boost to handle long-form audit/spec slice IDs
+ending in `_PHASE<digits>`. Previously only HXA/FX/CFZ patterns were matched, causing
+audit/spec docs to fail exact slice ID retrieval.
+
+### Problem
+
+HoloIndex consistently failed to surface audit/spec docs when queried by exact slice ID.
+Example: `FOUNDUPS_PORTFOLIO_DATA_VALIDATOR_PHASE1` returned no hits for the actual spec doc.
+Evidence from PRs #657, #663, #667, #668, #672, #673, #674.
+
+### Changes
+
+- `holo_index/core/indexing_engine.py`:
+  - Added `_AUDIT_SPEC_SLICE_ID_PATTERN` for long-form IDs
+  - Extended `_extract_slice_id()` to check both short-form (HXA/FX/CFZ) and long-form patterns
+- `holo_index/core/search_engine.py`:
+  - Added `_AUDIT_SPEC_SLICE_ID_PATTERN`
+  - Extended `_extract_slice_ids()` to return both pattern types
+- `holo_index/tests/test_audit_spec_slice_id_indexing.py`: NEW — 28 tests
+
+### Slice ID Pattern
+
+```regex
+\b([A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*_PHASE\d+)\b
+```
+
+Matches: `FOUNDUPS_PORTFOLIO_DATA_VALIDATOR_PHASE1`, `HOLOINDEX_AUDIT_FIX_PHASE12`
+
+### Test Results
+
+- 28 new tests passed
+- 22 HXA retrieval tests passed (no regression)
+- 75 work ledger tests passed (no regression)
+- 10 search quality baseline tests passed (no regression)
+- 12 CFZ4 collection separation tests passed (no regression)
+
+### Reindex Required
+
+Live search remains stale until operator runs `python holo_index.py --index-docs`.
+
+---
+
 ## [2026-05-21] HOLOINDEX_FOUNDUP_CATALOG_AND_ROUTE_BINDING_PHASE1
 
 **Agent**: 0102 (Worker H)
