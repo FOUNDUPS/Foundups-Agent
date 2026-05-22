@@ -896,7 +896,7 @@ def _lexical_search_collection(
                 continue
 
             similarity = min(1.0, keyword_score / max(1.0, len(tokens) * 2.5))
-            priority = meta.get("priority", 1)
+            priority = _coerce_priority(meta)
 
             result = _format_hit(kind, meta, doc, similarity, keyword_score, priority)
             raw_results.append(result)
