@@ -1,0 +1,49 @@
+{
+  "entities": [
+    {
+      "foundup_id": "gotjunk_001",
+      "display_name": "GotJunk",
+      "portfolio_status": "portfolio_candidate",
+      "poc_landing_status": "functional",
+      "website_url": null,
+      "poc_url": "https://gotjunk-56566376153.us-west1.run.app/",
+      "app_url": null,
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": "AI-powered junk removal coordination platform. Upload photos, get quotes, schedule pickups.",
+      "portfolio_priority": 1,
+      "portfolio_ready": false
+    },
+    {
+      "foundup_id": "kosei",
+      "display_name": "Kosei AI Systems",
+      "portfolio_status": "portfolio_candidate",
+      "poc_landing_status": "functional",
+      "website_url": null,
+      "poc_url": "https://foundupscom.web.app/kosei/app/",
+      "app_url": "https://foundupscom.web.app/kosei/app/",
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": "AI content automation for businesses. Generate, schedule, and optimize social media content.",
+      "portfolio_priority": 2,
+      "portfolio_ready": false
+    },
+    {
+      "foundup_id": "holoindex_prod_01",
+      "display_name": "HoloIndex",
+      "portfolio_status": "portfolio_candidate",
+      "poc_landing_status": "polished",
+      "website_url": "https://foundups.com/holoindex",
+      "poc_url": null,
+      "app_url": null,
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": "HoloIndex has a dual identity boundary. Internally, HoloIndex is Foundups retrieval/memory infrastructure used by 0102, WRE, OpenClaw, MCP, and workers. Externally, HoloIndex may also have a public FoundUp surface discoverable through p.fMALL.",
+      "portfolio_priority": 3,
+      "portfolio_ready": false
+    }
+  ]
+}

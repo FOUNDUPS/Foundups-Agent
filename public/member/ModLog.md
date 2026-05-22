@@ -1,5 +1,41 @@
 # Member Area Module Change Log
 
+## [2026-05-22] FOUNDUPS_PORTFOLIO_DISPLAY_COMPONENT_PHASE1
+
+**Who**: 0102 - Worker H
+**Slice**: `FOUNDUPS_PORTFOLIO_DISPLAY_COMPONENT_PHASE1`
+**What**: Created an elegant, public consolidated portfolio display surface under `/f/` using existing catalog and registry mapping fields, without affecting p.fMALL card swipe gestures or video autoplay.
+
+**Rationale**:
+Implements an additive consolidated portfolio dashboard in `/f/index.html` to showcase FoundUp readiness and maturity metrics (e.g. GotJunk, Kosei AI, and HoloIndex). It preserves HoloIndex's dual-identity boundary by displaying its dual role as internal infrastructure and external discovery surface with appropriate WSP 97 framing.
+
+**Files Modified**:
+- `public/f/portfolio_data.json` [NEW] — Mirrors canonical portfolio status registry entries for web consumption.
+- `public/f/index.html` — Updated route parser to handle `/f/` index path, fetch portfolio data, and render the premium glassmorphic showcase cards with backlinks and parameters preservation.
+- `public/member/ModLog.md` — Added this ModLog entry.
+
+**Verification**:
+- `pytest modules/foundups/tests/test_foundup_registry_schema.py` — Passed.
+- `pytest modules/foundups/tests/test_namespace_guardrail.py` — Passed.
+- `pytest public/member/tests/test_localhost_dev_harness.py public/member/tests/test_route_contract_bridge.py public/member/tests/test_shell_bridge_interceptor.py` — All 186 tests passing (100% success).
+- `node public/member/tests/shell_bridge_interceptor_vm.mjs` — All VM checks passed.
+- Browser visual verification completed successfully via browser subagent.
+
+**WSP_97 Labels** (all YES):
+- PUBLIC_PORTFOLIO_DISPLAY_ONLY
+- NO_CARD_BEHAVIOR_CHANGE
+- NO_PINCH_ZOOM_CHANGE
+- NO_ROUTE_SEMANTICS_CHANGE
+- NO_AUTH_CHANGE
+- NO_BACKEND_CHANGE
+- NO_HOLOINDEX_CORE_MUTATION
+- NO_MCP_CHANGE
+- NO_REGISTRY_RECLASSIFICATION
+- DUAL_IDENTITY_BOUNDARY_ENFORCED
+- NO_CABR_READY
+- NO_PAYOUT_READY
+- NO_DAO_ACTIVATION
+
 ## [2026-05-21] HOLOINDEX_FOUNDUP_CATALOG_AND_ROUTE_BINDING_PHASE1
 
 **Who**: 0102 - Worker H
