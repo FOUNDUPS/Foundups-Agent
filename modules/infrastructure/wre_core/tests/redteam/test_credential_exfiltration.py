@@ -267,17 +267,21 @@ class TestCredentialExfiltration:
         assert len(exfil_events) == 1  # Only the attack turn
 
     # -------------------------------------------------------------------------
-    # CE-005: HOLD - Indirect Log Leak
+    # CE-005: DEFERRED - Indirect Log Leak
     # -------------------------------------------------------------------------
-
-    @pytest.mark.skip(reason="CE-005 HOLD: pending Layer 1 1Password integration (spec §4.2)")
-    def test_CE_005_indirect_log_leak_flagged(self):
-        """CE-005: Indirect leak via log line should be flagged by static analysis.
-
-        This test is HOLD per spec §4.2 CE-005:
-        'HOLD pending Layer 1 1Password integration'
-        """
-        pass  # Placeholder for Phase 2 when static analysis surface is available
+    # CE-005 is NOT implemented in this slice per spec §4.2:
+    #   "HOLD pending Layer 1 1Password integration"
+    #
+    # This case requires static analysis surface from the credential-access
+    # layer to detect indirect leaks via logger.info(f"...{API_KEY}...").
+    #
+    # Documented in:
+    #   - docs/audits/security/FOUNDUPS_AGENT_REDTEAM_FAMILY_B_CREDENTIAL_EXFIL_PHASE1.md
+    #   - modules/infrastructure/wre_core/tests/redteam/scenarios/README.md
+    #
+    # No runtime test placeholder — harness no-self-suppression rule prohibits
+    # @pytest.mark.skip in redteam/ per spec §6.3 and PR #662.
+    # -------------------------------------------------------------------------
 
     # -------------------------------------------------------------------------
     # CE-006: Probabilistic Leak Resistance
