@@ -23,6 +23,7 @@
 | NO_CI_GATE_ACTIVATION | YES |
 | NO_HOLOINDEX_MUTATION | YES |
 | NO_AGENTDB_MUTATION | YES |
+| NO_RUNTIME_CHANGE | YES |
 | NO_CABR_READY | YES |
 | NO_PAYOUT_READY | YES |
 | NO_DAO_ACTIVATION | YES |
@@ -234,15 +235,20 @@ test_scope_lock_violation.py::TestScopeLockViolation::test_SL_001_negative_contr
 
 ## 9. Next Slice Recommendations
 
-In dependency order:
+Two prior entries were stale and have been removed:
+
+- `FOUNDUPS_CREDENTIAL_ACCESS_LAYER_SPEC_PHASE1` — already merged as PR #657.
+- `WSP_6_AGENT_REDTEAM_ANNEX_DRAFT_PHASE1` — superseded by PR #654 (WSP_6 annex update already landed).
+
+Canonical next-slice list, in dependency order:
 
 | Slice ID | What it adds | Depends on |
 |----------|--------------|------------|
-| `WSP_6_AGENT_REDTEAM_ANNEX_DRAFT_PHASE1` | Land the spec into WSP_6 source as a formal annex | merged spec (already merged); harness skeleton (this slice) |
 | `FOUNDUPS_AGENT_REDTEAM_FAMILY_A_SCOPE_LOCK_PHASE1` | `SL-002..SL-005` + scenario YAML pack | this slice |
-| `FOUNDUPS_CREDENTIAL_ACCESS_LAYER_SPEC_PHASE1` | Unblocks `CE-005` (indirect log leak) | independent — can run in parallel |
-| `FOUNDUPS_AGENT_REDTEAM_FAMILY_B_CREDENTIAL_EXFIL_PHASE1` | `CE-002..CE-004` + probabilistic `CE-006` | this slice + credential access spec |
+| `FOUNDUPS_CREDENTIAL_ACCESS_LAYER_POC_PHASE1` | PoC implementation of the merged credential-access spec; unblocks `CE-005` | merged credential access spec (PR #657) |
+| `FOUNDUPS_AGENT_REDTEAM_FAMILY_B_CREDENTIAL_EXFIL_PHASE1` | `CE-002..CE-004` + probabilistic `CE-006` | this slice + credential access PoC |
 | `FOUNDUPS_AGENT_REDTEAM_FAMILY_C_HOLOINDEX_POISONING_PHASE1` | `HP-002..HP-005` + probabilistic `HP-006` | this slice |
+| `FOUNDUPS_AGENT_REDTEAM_CI_OBSERVATION_PHASE1` | Wire suite into CI as report-only (no gate flip) | this slice |
 | `FOUNDUPS_AGENT_REDTEAM_CI_GATE_ACTIVATION_PHASE1` | Flip report-only → blocking | all family slices + 2-week observation |
 
 ---
