@@ -760,7 +760,7 @@ class TestSignalNormalization:
         """get_active_risks uses valid severity levels."""
         result = bridge.call_tool("get_active_risks", limit=10)
         assert result["status"] == "ok"
-        valid_severities = {"low", "medium", "high", "critical"}
+        valid_severities = {"low", "medium", "high", "critical", "warning"}
         for risk in result["data"].get("risks", []):
             assert risk["severity"] in valid_severities
 
@@ -974,11 +974,12 @@ class TestS2HoloSearchAnnexAConformance:
         assert result["data"]["hit_count"] <= 3
 
     def test_foundup_id_accepted_and_echoed(self, bridge):
+        # Uses valid registry ID (gotjunk_001) per MCP_FOUNDUP_SCOPE_S2_VALIDATION_IMPL_PHASE1
         result = bridge.call_tool(
-            "holo_search", query="WSP", foundup_id="gotjunk", limit=3
+            "holo_search", query="WSP", foundup_id="gotjunk_001", limit=3
         )
         assert result["status"] == "ok"
-        assert result["data"]["foundup_id"] == "gotjunk"
+        assert result["data"]["foundup_id"] == "gotjunk_001"
 
     def test_include_shared_with_foundup_id_echoed(self, bridge):
         """include_shared echoes the request value when foundup_id is set."""
@@ -1111,15 +1112,19 @@ class TestS2HoloSearchAnnexAConformance:
 
     # ----- Federation field warnings (truthful per WSP 97) -----
 
-    def test_foundup_id_surfaces_unenforced_warning(self, bridge):
-        """Passing foundup_id surfaces a truthful 'not yet enforced' warning."""
+    def test_foundup_id_surfaces_validation_warning(self, bridge):
+        """Passing valid foundup_id surfaces Phase 2 deferral warning.
+
+        Post MCP_FOUNDUP_SCOPE_S2_VALIDATION_IMPL_PHASE1: IDs are validated
+        against registry (fail-closed), and warning notes filtering deferred.
+        """
         result = bridge.call_tool(
-            "holo_search", query="WSP", foundup_id="gotjunk", limit=3
+            "holo_search", query="WSP", foundup_id="gotjunk_001", limit=3
         )
         warnings = result["data"]["metadata"]["warnings"]
         assert any(
-            "foundup_id" in w and "not yet enforced" in w for w in warnings
-        ), f"expected unenforced-tenant warning; got {warnings}"
+            "validated against registry" in w and "Phase 2" in w for w in warnings
+        ), f"expected validation/Phase 2 warning; got {warnings}"
 
     # ----- Fallback relevance cap (Annex A.3 lexical-fallback rule) -----
 
@@ -1253,35 +1258,40 @@ class TestS64FederationScopeParity:
         assert result["data"]["include_shared"] is None
 
     def test_with_foundup_id_echoes_both_and_warns(self, bridge):
-        from modules.infrastructure.foundups_mcp_bridge.src.holo_tools import (
-            federation_scope_warning,
-        )
+        """With valid foundup_id, echoes both fields and emits validation warning.
+
+        Post MCP_FOUNDUP_SCOPE_S2_VALIDATION_IMPL_PHASE1: Uses validated ID
+        and checks for Phase 2 deferral warning instead of old federation warning.
+        """
         result = bridge.call_tool(
             "holo_search",
             query="WSP",
-            foundup_id="gotjunk",
+            foundup_id="gotjunk_001",
             include_shared=False,
             limit=3,
         )
-        assert result["data"]["foundup_id"] == "gotjunk"
+        assert result["data"]["foundup_id"] == "gotjunk_001"
         assert result["data"]["include_shared"] is False
         warnings = result["data"]["metadata"]["warnings"]
-        assert federation_scope_warning("S2") in warnings
+        assert any("validated against registry" in w for w in warnings)
 
-    def test_emitted_warning_matches_template_byte_for_byte(self, bridge):
-        """The runtime-emitted warning MUST equal ``federation_scope_warning(S2)``
-        verbatim — protects against drift if a future edit changes spacing
-        or punctuation."""
-        from modules.infrastructure.foundups_mcp_bridge.src.holo_tools import (
-            federation_scope_warning,
+    def test_emitted_warning_matches_validation_template(self, bridge):
+        """The runtime-emitted warning MUST match the Phase 2 deferral text.
+
+        Post MCP_FOUNDUP_SCOPE_S2_VALIDATION_IMPL_PHASE1: Validated IDs emit
+        a canonical warning about result filtering being deferred to Phase 2.
+        """
+        expected_warning = (
+            "foundup_id validated against registry; "
+            "result filtering deferred to Phase 2."
         )
         result = bridge.call_tool(
             "holo_search", query="WSP", foundup_id="kosei", limit=3
         )
         warnings = result["data"]["metadata"]["warnings"]
-        scope_warnings = [w for w in warnings if "foundup_id received" in w]
-        assert len(scope_warnings) == 1
-        assert scope_warnings[0] == federation_scope_warning("S2")
+        validation_warnings = [w for w in warnings if "validated against registry" in w]
+        assert len(validation_warnings) == 1
+        assert validation_warnings[0] == expected_warning
 
     def test_s1_template_matches_s2_template(self):
         """Cross-surface parity: S1's template MUST match S2's template
