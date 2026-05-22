@@ -580,8 +580,8 @@ def test_cli_exit_code_2_when_projection_malformed(tmp_path: Path):
     assert result.returncode == 2
 
 
-def test_cli_exit_code_1_against_current_repo():
-    """Running against the real repo surfaces C4 warning => exit 1."""
+def test_cli_exit_code_0_against_current_repo():
+    """Running against the real repo passes clean => exit 0."""
     result = subprocess.run(
         [
             sys.executable,
@@ -593,8 +593,8 @@ def test_cli_exit_code_1_against_current_repo():
         capture_output=True,
         text=True,
     )
-    assert result.returncode == 1
-    assert "C4" in result.stdout, "C4 (is_dual_identity) should remain as projection-side drift"
+    assert result.returncode == 0
+    assert "OK - no drift detected" in result.stdout
 
 
 def test_cli_json_output_is_parseable():

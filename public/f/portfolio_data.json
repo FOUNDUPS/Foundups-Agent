@@ -43,7 +43,8 @@
       "screenshot_url": null,
       "public_summary": "HoloIndex has a dual identity boundary. Internally, HoloIndex is Foundups retrieval/memory infrastructure used by 0102, WRE, OpenClaw, MCP, and workers. Externally, HoloIndex may also have a public FoundUp surface discoverable through p.fMALL.",
       "portfolio_priority": 3,
-      "portfolio_ready": false
+      "portfolio_ready": false,
+      "is_dual_identity": true
     }
   ]
 }
