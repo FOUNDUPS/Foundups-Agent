@@ -72,3 +72,99 @@ jobs:
       - name: Verify .env not tracked
         run: |
           ! git ls-files | grep "^\.env$" || (echo "ERROR: .env is tracked!" && exit 1)
+
+  redteam_observation:
+    # FOUNDUPS_AGENT_REDTEAM_CI_OBSERVATION_PHASE1
+    #
+    # Report-only observation of the agent red-team regression suite.
+    # This job runs on every PR/push and surfaces results in CI logs +
+    # uploads a JUnit artifact, but does NOT block merge. Activation
+    # (blocking gate) is deferred to FOUNDUPS_AGENT_REDTEAM_CI_GATE_ACTIVATION_PHASE1
+    # after the observation window completes.
+    #
+    # If this job fails / is unstable, the broader CI still passes — the
+    # operator decides when to promote it to a required check based on
+    # the audit doc's activation criteria.
+    name: redteam observation (report-only)
+    runs-on: ubuntu-latest
+    continue-on-error: true   # report-only — must not block PRs in PHASE1
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          # Red-team suite is stdlib + pytest only (no new deps installed
+          # by this slice). Project requirements pulled in for parity with
+          # the `test` job in case fixtures share runtime imports.
+          pip install -r requirements.txt
+
+      - name: Run red-team suite (report-only)
+        # The suite must complete with zero skipped tests. We capture the
+        # full JUnit report so the observation window can analyse failure
+        # modes, runtime, and flake rate offline.
+        # `--strict-markers` and explicit `--no-header` keep CI output
+        # focused; `-rsxX` shows skipped/xfailed reasons (we expect none).
+        run: |
+          mkdir -p .redteam-observation
+          python -m pytest \
+            modules/infrastructure/wre_core/tests/redteam \
+            -v --tb=short --no-header --strict-markers -rsxX \
+            --junit-xml=.redteam-observation/redteam-report.xml \
+            | tee .redteam-observation/redteam-stdout.log
+
+      - name: Summarise observation
+        # Runs on success or failure of the previous step; prints a one-
+        # line summary (passed / failed / skipped / duration) so the
+        # report-only status is visible at a glance in the CI log tail.
+        if: always()
+        run: |
+          if [ -f .redteam-observation/redteam-report.xml ]; then
+            python - <<'PY'
+          import xml.etree.ElementTree as ET, os
+          path = ".redteam-observation/redteam-report.xml"
+          tree = ET.parse(path)
+          root = tree.getroot()
+          # JUnit may emit a single <testsuite> root or a <testsuites> wrapper.
+          suites = root.findall("testsuite") if root.tag == "testsuites" else [root]
+          tests = errors = failures = skipped = 0
+          duration = 0.0
+          for s in suites:
+              tests    += int(s.attrib.get("tests", 0))
+              errors   += int(s.attrib.get("errors", 0))
+              failures += int(s.attrib.get("failures", 0))
+              skipped  += int(s.attrib.get("skipped", 0))
+              duration += float(s.attrib.get("time", 0))
+          passed = tests - errors - failures - skipped
+          status = "GREEN" if (errors == 0 and failures == 0 and skipped == 0) else "OBSERVE"
+          print(f"[REDTEAM-OBSERVATION] status={status} tests={tests} passed={passed} "
+                f"failed={failures} errored={errors} skipped={skipped} "
+                f"duration={duration:.2f}s mode=report-only")
+          PY
+          else
+            echo "[REDTEAM-OBSERVATION] status=NO_REPORT tests=? mode=report-only"
+            echo "[REDTEAM-OBSERVATION] note: junit xml not produced — pytest likely errored before collection"
+          fi
+
+      - name: Upload red-team observation artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: redteam-observation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .redteam-observation/
+          if-no-files-found: warn
+          retention-days: 30

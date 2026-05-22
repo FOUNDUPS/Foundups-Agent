@@ -267,3 +267,80 @@ leak.
 
 ### WSP refs
 WSP_00, WSP_15, WSP_50, WSP_6, WSP_71, WSP_83, WSP_87, WSP_97, WSP_104, WSP_22
+
+---
+
+## 2026-05-22 — Slice: FOUNDUPS_AGENT_REDTEAM_CI_OBSERVATION_PHASE1
+
+Wired the red-team regression suite into GitHub Actions in **report-only**
+mode. No harness behaviour change, no production code change, no new
+dependencies, no blocking gate.
+
+### What this slice does to the test suite
+
+Nothing. Zero test files were modified. The harness's behaviour,
+fixtures, reason codes, and assertion shape are all unchanged. The slice
+only adds a CI surface that runs the existing suite and publishes
+results.
+
+### CI mechanism (full details in audit doc)
+
+- New job in `.github/workflows/ci.yml`: `redteam_observation`.
+- `continue-on-error: true` — failures do NOT block PR merge in PHASE1.
+- Runs `python -m pytest modules/infrastructure/wre_core/tests/redteam`
+  with `--strict-markers -rsxX --junit-xml=…`.
+- A Python summariser step parses the JUnit XML and prints one line:
+  `[REDTEAM-OBSERVATION] status=GREEN|OBSERVE|NO_REPORT tests=N
+   passed=N failed=N errored=N skipped=N duration=Xs mode=report-only`
+- Uploads the JUnit XML + stdout log as a workflow artifact
+  (`redteam-observation-<run_id>-<attempt>`, 30-day retention).
+
+### Existing CI behaviour preserved
+
+| Job | Before | After |
+|-----|--------|-------|
+| `test` | required (simulator + FAM tests) | unchanged |
+| `lint` | report-only (ruff `--exit-zero`) | unchanged |
+| `security` | required (secret patterns + `.env` check) | unchanged |
+| `redteam_observation` | not present | **NEW** — report-only |
+
+### Local rehearsal of the CI command (this slice)
+
+```
+42 passed in 0.25s
+[REDTEAM-OBSERVATION] status=GREEN tests=42 passed=42 failed=0
+                      errored=0 skipped=0 duration=0.25s mode=report-only
+```
+
+JUnit XML produced and parsed end-to-end successfully.
+
+### Activation criteria (deferred to FOUNDUPS_AGENT_REDTEAM_CI_GATE_ACTIVATION_PHASE1)
+
+All five must hold across the observation window:
+
+1. **Zero skipped tests** on every observation run.
+2. **Zero flakes** across the window (no run-to-run instability without a
+   code change explaining it).
+3. **Acceptable runtime** — the report-only job completes well under the
+   `test` job's wall time so promotion does not slow merges materially.
+4. **Zero untriaged false positives** — any red-team failure during the
+   window is either a real issue (closed with a regression test + fix
+   PR per spec §7.3) or a documented harness gap (queued as a follow-on
+   slice).
+5. **Failures are traceable** — every failure produces a `violations.md`
+   or audit entry per spec §7.
+
+### Constraints honored
+
+- Test/harness behaviour unchanged — no edits to `conftest.py`,
+  `reasons.py`, or any `test_*.py` under `redteam/`.
+- No new dependencies — uses `pytest` (already required) + stdlib
+  (`xml.etree.ElementTree`).
+- No production code change, no HoloIndex / AgentDB / registry /
+  secrets changes, no WSP framework/knowledge edits.
+- No `@pytest.mark.skip` introduced.
+- Existing required CI gates (`test`, `security`) remain untouched.
+- Blocking-gate activation explicitly deferred per spec §6.4 sequencing.
+
+### WSP refs
+WSP_00, WSP_15, WSP_50, WSP_6, WSP_87, WSP_97, WSP_22
