@@ -36,6 +36,10 @@ logger = logging.getLogger(__name__)
 _HOLOINDEX_AVAILABLE = None
 _HOLOINDEX_INSTANCE = None
 
+# FoundUp Registry loader (lazy, singleton)
+_REGISTRY_LOADER = None
+_REGISTRY_LOAD_ERROR: Optional[Exception] = None
+
 
 def _get_holoindex(repo_root: Path):
     """Get or create HoloIndex instance."""
@@ -70,6 +74,55 @@ def _get_holoindex(repo_root: Path):
         logger.warning(f"[MCP] HoloIndex not available: {e}")
         _HOLOINDEX_AVAILABLE = False
         return None
+
+
+def _get_registry_loader():
+    """Get or create FoundUp registry loader (lazy singleton).
+
+    Returns:
+        Tuple of (loader, error). If loader is None, error explains why.
+        Per WSP 97 fail-closed: callers MUST check error before proceeding.
+    """
+    global _REGISTRY_LOADER, _REGISTRY_LOAD_ERROR
+
+    if _REGISTRY_LOADER is not None:
+        return _REGISTRY_LOADER, None
+
+    if _REGISTRY_LOAD_ERROR is not None:
+        return None, _REGISTRY_LOAD_ERROR
+
+    try:
+        import sys
+        from pathlib import Path as PathLib
+
+        loader_path = PathLib(__file__).resolve().parent.parent.parent.parent.parent / "modules" / "foundups" / "src" / "foundup_registry_loader.py"
+
+        if not loader_path.exists():
+            err = FileNotFoundError(f"Registry loader not found: {loader_path}")
+            _REGISTRY_LOAD_ERROR = err
+            logger.warning(f"[MCP] FoundUp registry loader not available: {err}")
+            return None, err
+
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("foundup_registry_loader", loader_path)
+        if spec is None or spec.loader is None:
+            err = ImportError(f"Could not load spec from {loader_path}")
+            _REGISTRY_LOAD_ERROR = err
+            logger.warning(f"[MCP] FoundUp registry loader import failed: {err}")
+            return None, err
+
+        module = importlib.util.module_from_spec(spec)
+        sys.modules["foundup_registry_loader"] = module
+        spec.loader.exec_module(module)
+
+        _REGISTRY_LOADER = module.FoundUpRegistryLoader()
+        logger.info("[MCP] FoundUp registry loader initialized successfully")
+        return _REGISTRY_LOADER, None
+
+    except Exception as e:
+        _REGISTRY_LOAD_ERROR = e
+        logger.warning(f"[MCP] FoundUp registry loader failed: {e}")
+        return None, e
 
 
 # =============================================================================
@@ -143,6 +196,54 @@ def _build_s2_error_envelope(
         error=error_obj,
         meta={"tool": "holo_search", "surface": S2_SURFACE_ID},
     ).to_dict()
+
+
+def _build_s2_validation_error_envelope(
+    *,
+    code: str,
+    message: str,
+    details: Optional[Dict[str, Any]] = None,
+    query: str = "",
+    doc_type_filter: str = "all",
+    foundup_id: Optional[str] = None,
+    include_shared: Optional[bool] = None,
+) -> Dict[str, Any]:
+    """Build fail-closed validation error with full data context (WSP 97).
+
+    Per MCP_FOUNDUP_SCOPE_S2_INTEGRATION_SPEC_PHASE1 section 7, validation
+    errors include the data envelope with empty hits so consumers see
+    the query context that triggered the rejection.
+    """
+    error_obj: Dict[str, Any] = {"code": code, "message": message}
+    if details is not None:
+        error_obj["details"] = details
+
+    data: Dict[str, Any] = {
+        "query": query,
+        "doc_type_filter": doc_type_filter,
+        "foundup_id": foundup_id,
+        "include_shared": include_shared,
+        "hits": [],
+        "hit_count": 0,
+        "metadata": {
+            "retrieval_mode": "none",
+            "engine_version": "validation_rejected",
+            "warnings": [],
+        },
+    }
+
+    return {
+        "status": "error",
+        "error": error_obj,
+        "data": data,
+        "meta": {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "source": "validation",
+            "tool": "holo_search",
+            "surface": S2_SURFACE_ID,
+            "confidence": 0.0,
+        },
+    }
 
 
 def holo_search(
@@ -228,12 +329,6 @@ def holo_search(
             f"requested={bounded_limit}, applied={clamped_limit}."
         )
 
-    # Federation scope honesty (not yet enforced — MCPA1 Slice 6). S64:
-    # use the shared template so S1/S2 parity is enforced by code, not by
-    # copy-paste hygiene.
-    if foundup_id is not None:
-        warnings.append(federation_scope_warning(S2_SURFACE_ID))
-
     # ----- Empty-query rejection (Annex A.2 + WSP 97 truth boundary) -----
     if not query or not query.strip():
         return _build_s2_error_envelope(
@@ -242,6 +337,46 @@ def holo_search(
                 "Query cannot be empty. WSP 96 Annex A.2 requires a "
                 "non-empty `query` field."
             ),
+        )
+
+    # ----- Fail-closed foundup_id validation (WSP 97 + WSP 104) -----
+    # Phase 1: validate existence only; filtering deferred to Phase 2.
+    if foundup_id is not None:
+        loader, load_error = _get_registry_loader()
+
+        if load_error is not None:
+            return _build_s2_validation_error_envelope(
+                code="REGISTRY_UNAVAILABLE",
+                message="FoundUp registry could not be loaded. Scope validation requires registry access.",
+                details={
+                    "exception_type": type(load_error).__name__,
+                    "exception_message": str(load_error),
+                },
+                query=query,
+                doc_type_filter=effective_filter,
+                foundup_id=foundup_id,
+                include_shared=include_shared if foundup_id else None,
+            )
+
+        if not loader.is_valid_foundup_id(foundup_id):
+            import re
+            pattern_valid = bool(re.match(r"^[a-z0-9_]+$", foundup_id)) if isinstance(foundup_id, str) else False
+            return _build_s2_validation_error_envelope(
+                code="INVALID_FOUNDUP_ID",
+                message=f"Unknown foundup_id: '{foundup_id}'. Valid IDs must be registered in foundup_registry.json.",
+                details={
+                    "provided_id": foundup_id,
+                    "pattern_valid": pattern_valid,
+                    "registry_checked": True,
+                },
+                query=query,
+                doc_type_filter=effective_filter,
+                foundup_id=foundup_id,
+                include_shared=include_shared if foundup_id else None,
+            )
+
+        warnings.append(
+            "foundup_id validated against registry; result filtering deferred to Phase 2."
         )
 
     # ----- Real backend path -----
