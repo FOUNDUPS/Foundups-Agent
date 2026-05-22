@@ -82,7 +82,7 @@ HoloIndex operates with two distinct identities that MUST remain separated:
 - Worker agents (Qwen, Gemma, etc.)
 
 **Protected Assets**:
-- ChromaDB vector collections (`E:/HoloIndex/chroma_db/`)
+- Internal ChromaDB vector collections (path not disclosed publicly)
 - Code/WSP/docs/knowledge index embeddings
 - Work ledger slice tracking (`navigation_work_ledger` collection)
 - Pattern memory (`refactoring_patterns.json`)
@@ -191,7 +191,7 @@ Per `holo_index/docs/EXTERNAL_FOUNDUP_BRIDGE_CONTRACT.md`:
 
 | Asset | Rule |
 |-------|------|
-| `E:/HoloIndex/chroma_db/` | Path never in public docs |
+| Internal ChromaDB collection paths | Path never disclosed publicly |
 | `holo_index/core/*.py` | Module internals never described publicly |
 | `sentence_transformers` model | Model name/path never public |
 | Work ledger entries | Individual slice content never public |
