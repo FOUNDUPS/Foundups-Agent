@@ -1,7 +1,7 @@
 {
   "$schema": "./foundup_registry.schema.json",
   "schema_version": "1.0.0",
-  "last_updated": "2026-05-21T14:00:00Z",
+  "last_updated": "2026-05-22T22:00:00Z",
   "entities": [
     {
       "foundup_id": "gotjunk_001",
@@ -563,6 +563,49 @@
       "portfolio_priority": null,
       "portfolio_ready": false,
       "portfolio_evidence_docs": []
+    },
+    {
+      "foundup_id": "holoindex_prod_01",
+      "display_name": "HoloIndex",
+      "entity_type": "infra_service",
+      "module_path": "modules/foundups/holoindex_prod_01",
+      "stage": "incubating",
+      "tier": "F3_INFRA",
+      "implementation_status": "IMPLEMENTED",
+      "public_surface_status": "listed",
+      "poc_status": "poc",
+      "prototype_gate_status": "passed",
+      "manifest_status": "exists",
+      "manifest_path": "modules/foundups/holoindex_prod_01/foundup_manifest.json",
+      "hermes_openclaw_build_status": "wired",
+      "token_status": "TOKEN_DEFERRED",
+      "token_symbol": null,
+      "evidence_docs": [
+        "docs/audits/architecture/HOLOINDEX_PUBLIC_FOUNDUP_CONNECTIVE_TRUST_SURFACE_DOCS_PHASE1.md",
+        "docs/audits/architecture/PORTFOLIO_DATA_VALIDATOR_PHASE1.md",
+        "docs/audits/architecture/HOLOINDEX_PROD_01_REGISTRY_ENTRY_PHASE1.md"
+      ],
+      "next_slice": null,
+      "public_url_or_route": "/f/holoindex_prod_01",
+      "mall_entry_status": "discoverable_only",
+      "invite_required": false,
+      "notes": "DUAL IDENTITY BOUNDARY: Internal HoloIndex remains protected FoundUps retrieval/memory/work-ledger infrastructure. External HoloIndex is the public p.fMALL-discoverable FoundUp/connective trust surface. This registry entry does not expose internal backend/core/index access.",
+      "audit_date": "2026-05-22",
+      "auditor": "W6",
+      "portfolio_status": "portfolio_candidate",
+      "poc_landing_status": "polished",
+      "website_url": "https://foundups.com/holoindex",
+      "poc_url": "https://foundups.com/holoindex",
+      "app_url": null,
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": "Enterprise-grade semantic retrieval and memory system. Internal infrastructure with public p.fMALL-discoverable surface.",
+      "portfolio_priority": 3,
+      "portfolio_ready": false,
+      "portfolio_evidence_docs": [
+        "docs/audits/architecture/HOLOINDEX_PUBLIC_FOUNDUP_CONNECTIVE_TRUST_SURFACE_DOCS_PHASE1.md"
+      ]
     }
   ]
 }
