@@ -1,4 +1,4 @@
-# HoloIndex Audit Spec Slice ID Live Reindex Observation — Phase 1
+# HoloIndex Audit Spec Slice ID Live Reindex Observation -- Phase 1
 
 **Slice**: `HOLOINDEX_AUDIT_SPEC_SLICE_ID_LIVE_REINDEX_OBSERVATION_PHASE1`
 **Worker**: W6
@@ -47,11 +47,11 @@ PR #675 (commit ac18fcca3) extended slice ID extraction and search boost to hand
 
 | Check | Result |
 |-------|--------|
-| Branch based on origin/main after PR #675 | ✓ (ac18fcca3 in history) |
-| `--index-docs` flag exists | ✓ (line 654 in `holo_index/_cli_main.py`) |
-| SSD path outside repo | ✓ (E:/HoloIndex) |
-| `git status --porcelain --untracked-files=all` clean before reindex | ✓ (empty output) |
-| Target normalization performed | ✓ (Q1 corrected to `PORTFOLIO_DATA_VALIDATOR_PHASE1`) |
+| Branch based on origin/main after PR #675 | PASS (ac18fcca3 in history) |
+| `--index-docs` flag exists | PASS (line 654 in `holo_index/_cli_main.py`) |
+| SSD path outside repo | PASS (E:/HoloIndex) |
+| `git status --porcelain --untracked-files=all` clean before reindex | PASS (empty output) |
+| Target normalization performed | PASS (Q1 corrected to `PORTFOLIO_DATA_VALIDATOR_PHASE1`) |
 
 ### 3.1 Target Normalization
 
@@ -117,7 +117,7 @@ git status --porcelain --untracked-files=all
 
 **Output**: (empty)
 
-**Result**: PASS — no repo artifacts generated.
+**Result**: PASS -- no repo artifacts generated.
 
 ## 8. AFTER Table (Post-Reindex)
 
@@ -135,17 +135,17 @@ git status --porcelain --untracked-files=all
 
 | Criterion | Result |
 |-----------|--------|
-| Reindex command exits 0 | ✓ PASS |
-| Artifact guard clean immediately after reindex | ✓ PASS |
-| Q1 target rank #1 in Docs | ✓ PASS |
-| Q2 target rank #1 in Docs | ✓ PASS |
-| Q3 target rank #1 in Docs | ✓ PASS |
-| Q4 target rank #1 in Docs | ✓ PASS |
-| Q5 target rank #1 in Docs | ✓ PASS |
-| No repo artifacts produced | ✓ PASS |
-| Final branch changes limited to audit doc | ✓ PASS |
+| Reindex command exits 0 | PASS |
+| Artifact guard clean immediately after reindex | PASS |
+| Q1 target rank #1 in Docs | PASS |
+| Q2 target rank #1 in Docs | PASS |
+| Q3 target rank #1 in Docs | PASS |
+| Q4 target rank #1 in Docs | PASS |
+| Q5 target rank #1 in Docs | PASS |
+| No repo artifacts produced | PASS |
+| Final branch changes limited to audit doc | PASS |
 
-**Overall**: PASS — all 5 queries return target doc as rank #1.
+**Overall**: PASS -- all 5 queries return target doc as rank #1.
 
 ## 10. Observation Window
 
