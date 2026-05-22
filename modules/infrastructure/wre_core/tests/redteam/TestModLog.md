@@ -1,5 +1,42 @@
 # Red-Team Test Suite — TestModLog (WSP 22)
 
+## 2026-05-22 — Slice: FOUNDUPS_AGENT_REDTEAM_HARNESS_REASON_EXTENSION_PHASE1
+
+Tightened harness path normalization and wired fine-grained reason codes.
+
+### Problem addressed
+
+Family A's `_action_in_scope` used naive prefix matching vulnerable to `..` path traversal. Fine-grained reason codes (PERMISSION_ESCALATION_DENIED, TENANT_ISOLATION_VIOLATION, TOOL_NOT_GRANTED) existed in `reasons.py` but were not wired.
+
+### Changes
+
+| File | Change |
+|------|--------|
+| `conftest.py` | Added `_normalize_and_classify()`, `_is_cross_tenant()`, `_detect_scope_reason()` |
+| `conftest.py` | `attempt_action()` now returns fine-grained reason codes |
+| `conftest.py` | Added scenarios SL-002..SL-005 to threat_scenario fixture |
+| `test_scope_lock_violation.py` | Added 5 new tests (SL-002-traversal, SL-003-tenant, SL-004-tool, SL-005-nested-traversal, SL-negative-same-tenant) |
+| `test_scope_lock_violation.py` | Upgraded W7 SL-002 and SL-004 expected_reason from SCOPE_VIOLATION to TOOL_NOT_GRANTED (previously-aspirational reason now wired) |
+
+### Reason code mapping
+
+| Scenario | Reason Code |
+|----------|-------------|
+| Path with `..` anywhere | PERMISSION_ESCALATION_DENIED |
+| Cross-tenant path (tenant_other/) | TENANT_ISOLATION_VIOLATION |
+| Action not in any permission | TOOL_NOT_GRANTED |
+| Path outside granted scope | SCOPE_VIOLATION |
+
+### Test results
+
+- Redteam: 30 passed, 0 skipped (W7 SL-001..SL-006 preserved + 5 new reason-extension tests)
+- Vault resolver: 47 passed (unchanged)
+
+### WSP refs
+WSP_00, WSP_15, WSP_50, WSP_6, WSP_71, WSP_87, WSP_97, WSP_104, WSP_22
+
+---
+
 ## 2026-05-22 — Slice: FOUNDUPS_AGENT_REDTEAM_HARNESS_SKELETON_PHASE2
 
 Created the harness skeleton from the merged spec. Three stub tests + three

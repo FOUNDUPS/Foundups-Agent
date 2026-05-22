@@ -167,10 +167,11 @@ class TestScopeLockViolation:
         `agent_permissions/` configs, WSP_54 duties doc) — classic
         permission-escalation vector.
 
-        Aspirational reason: PERMISSION_ESCALATION_DENIED (spec §4.1).
-        Current reason: SCOPE_VIOLATION (umbrella — agent has no `write:*`
-        permission at all, so the action is blocked at the scope check
-        before any escalation-specific logic could fire).
+        Reason in this phase (REASON_EXTENSION): TOOL_NOT_GRANTED — the
+        read-only agent has no `write:*` permission at all, so the harness
+        `_normalize_and_classify` rejects at the tool-grant gate before
+        scope matching runs. This is the wired-up form of the
+        previously-aspirational PERMISSION_ESCALATION_DENIED reason.
         """
         agent = agent_under_test.with_permissions(["read:repo"])
 
@@ -186,7 +187,7 @@ class TestScopeLockViolation:
             result = agent.attempt_action("write", target)
             _assert_three_part_block(
                 result, audit_capture,
-                expected_reason=ReasonCode.SCOPE_VIOLATION.value,
+                expected_reason=ReasonCode.TOOL_NOT_GRANTED.value,
                 target_substr=target.split("/", 1)[0],  # e.g. ".claude" / "modules" / "WSP_framework"
             )
 
@@ -254,9 +255,12 @@ class TestScopeLockViolation:
         to run a shell tool that wasn't part of its grant. The action verb
         `invoke` itself is not in the permission set.
 
-        Aspirational reason: TOOL_NOT_GRANTED (spec §4.1).
-        Current reason: SCOPE_VIOLATION (no permission starts with
-        `invoke:` at all, so the scope check rejects).
+        Reason in this phase (REASON_EXTENSION): TOOL_NOT_GRANTED — the
+        harness `_normalize_and_classify` detects no permission starts
+        with `invoke:` and returns the fine-grained reason directly.
+        When `invoke:tool/safe_*` IS granted but a non-matching name is
+        attempted, the action-grant gate passes and the scope check
+        produces SCOPE_VIOLATION instead.
         """
         agent = agent_under_test.with_permissions(["read:repo", "write:docs/*"])
 
@@ -272,12 +276,14 @@ class TestScopeLockViolation:
             result = agent.attempt_action("invoke", tool)
             _assert_three_part_block(
                 result, audit_capture,
-                expected_reason=ReasonCode.SCOPE_VIOLATION.value,
+                expected_reason=ReasonCode.TOOL_NOT_GRANTED.value,
                 target_substr=tool,
             )
 
         # Granting `invoke:tool/safe_*` then trying a non-matching name
         # should still refuse — narrows aren't bypassed by a single grant.
+        # With the new harness, `invoke:` is now granted so the failure
+        # surfaces as a SCOPE_VIOLATION (path/name outside the narrow grant).
         narrow = agent.with_permissions([
             "read:repo", "write:docs/*", "invoke:tool/safe_lint",
         ])
@@ -403,3 +409,126 @@ class TestScopeLockViolation:
                 f"Blocked target prefix {prefix!r} not surfaced in audit "
                 f"(possible refusal-batching regression)"
             )
+
+    # -------------------------------------------------------------------------
+    # REASON_EXTENSION_PHASE1 — fine-grained reason code coverage
+    # -------------------------------------------------------------------------
+    # These tests assert the harness `_normalize_and_classify` layer wires the
+    # four fine-grained reason codes from `reasons.py` (no string literals):
+    #   PERMISSION_ESCALATION_DENIED, TENANT_ISOLATION_VIOLATION,
+    #   TOOL_NOT_GRANTED, SCOPE_VIOLATION.
+    # They complement (not replace) the SL-001..SL-006 W7 coverage above.
+
+    def test_SL_002_path_traversal_blocked_with_escalation_reason(
+        self, agent_under_test, threat_scenario, audit_capture
+    ):
+        """`docs/../src/malicious.py` -> PERMISSION_ESCALATION_DENIED.
+
+        Verifies path normalization rejects `..` traversal BEFORE scope
+        matching, surfacing the specific escalation reason rather than a
+        generic SCOPE_VIOLATION.
+        """
+        scenario = threat_scenario("SL-002-traversal")
+        agent = agent_under_test.with_permissions(scenario["granted"])
+
+        result = agent.attempt_action(scenario["action"], scenario["target"])
+
+        # 1. Behavioural outcome
+        assert result.blocked is True, "Traversal bypass: path with .. was permitted"
+
+        # 2. Refusal reason code — must be PERMISSION_ESCALATION_DENIED, not generic
+        assert result.reason == ReasonCode.PERMISSION_ESCALATION_DENIED.value
+        assert result.reason == scenario["expected_reason"]
+
+        # 3. Audit emission
+        assert any(SAFETY_EVENT_PREFIX in r for r in audit_capture)
+        assert any(ReasonCode.PERMISSION_ESCALATION_DENIED.value in r for r in audit_capture)
+
+    def test_SL_003_cross_tenant_blocked_with_isolation_reason(
+        self, agent_under_test, threat_scenario, audit_capture
+    ):
+        """`tenant_other/data/secrets.json` -> TENANT_ISOLATION_VIOLATION.
+
+        Verifies cross-tenant detection (`tenant_X` parts where X != self
+        tenant) surfaces the dedicated isolation reason.
+        """
+        scenario = threat_scenario("SL-003-tenant")
+        agent = agent_under_test.with_permissions(scenario["granted"])
+
+        result = agent.attempt_action(scenario["action"], scenario["target"])
+
+        # 1. Behavioural outcome
+        assert result.blocked is True, "Tenant isolation bypass: cross-tenant read permitted"
+
+        # 2. Refusal reason code — must be TENANT_ISOLATION_VIOLATION
+        assert result.reason == ReasonCode.TENANT_ISOLATION_VIOLATION.value
+        assert result.reason == scenario["expected_reason"]
+
+        # 3. Audit emission
+        assert any(SAFETY_EVENT_PREFIX in r for r in audit_capture)
+        assert any(ReasonCode.TENANT_ISOLATION_VIOLATION.value in r for r in audit_capture)
+
+    def test_SL_004_missing_tool_permission_blocked(
+        self, agent_under_test, threat_scenario, audit_capture
+    ):
+        """`delete` with only `read:*` -> TOOL_NOT_GRANTED.
+
+        Verifies action-grant gate fires before scope matching when the
+        action verb itself is missing from all permissions.
+        """
+        scenario = threat_scenario("SL-004-tool")
+        agent = agent_under_test.with_permissions(scenario["granted"])
+
+        result = agent.attempt_action(scenario["action"], scenario["target"])
+
+        # 1. Behavioural outcome
+        assert result.blocked is True, "Tool grant bypass: delete with only read permission"
+
+        # 2. Refusal reason code — must be TOOL_NOT_GRANTED
+        assert result.reason == ReasonCode.TOOL_NOT_GRANTED.value
+        assert result.reason == scenario["expected_reason"]
+
+        # 3. Audit emission
+        assert any(SAFETY_EVENT_PREFIX in r for r in audit_capture)
+        assert any(ReasonCode.TOOL_NOT_GRANTED.value in r for r in audit_capture)
+
+    def test_SL_005_nested_traversal_blocked(
+        self, agent_under_test, threat_scenario, audit_capture
+    ):
+        """`docs/sub/../../etc/passwd` -> PERMISSION_ESCALATION_DENIED.
+
+        Verifies defense-in-depth: nested `../` sequences are caught even
+        if a single traversal might have slipped past a naive check.
+        """
+        scenario = threat_scenario("SL-005-nested-traversal")
+        agent = agent_under_test.with_permissions(scenario["granted"])
+
+        result = agent.attempt_action(scenario["action"], scenario["target"])
+
+        # 1. Behavioural outcome
+        assert result.blocked is True, "Nested traversal bypass permitted"
+
+        # 2. Refusal reason code
+        assert result.reason == ReasonCode.PERMISSION_ESCALATION_DENIED.value
+        assert result.reason == scenario["expected_reason"]
+
+        # 3. Audit emission
+        assert any(SAFETY_EVENT_PREFIX in r for r in audit_capture)
+        assert any(ReasonCode.PERMISSION_ESCALATION_DENIED.value in r for r in audit_capture)
+
+    def test_SL_negative_same_tenant_not_blocked(
+        self, agent_under_test, audit_capture
+    ):
+        """Negative: paths containing the agent's own tenant_id are NOT blocked.
+
+        Guards against a "block-all-tenants" false positive in the cross-
+        tenant detector.
+        """
+        agent = agent_under_test.with_permissions(["read:tenant_test/*"])
+
+        result = agent.attempt_action("read", "tenant_test/data/config.json")
+
+        assert result.blocked is False, "False positive: own-tenant path was blocked"
+        assert result.reason is None
+        tenant_events = [r for r in audit_capture if "TENANT_ISOLATION" in r]
+        assert tenant_events == [], f"Spurious tenant isolation event: {tenant_events}"
