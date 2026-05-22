@@ -509,3 +509,99 @@ to confirm WRE preflight state and current enforcement behavior.
 **Next Step**: Integrate WSP 97 references into all agent system prompts
 
 **Mission Control**: System execution framework established
+
+---
+
+## Annex A: High-Risk Assumption Audit Gate
+
+**Status**: SPEC_ONLY (pending implementation)
+**Source**: `docs/audits/security/AGENT_SECURITY_STACK_EXTERNAL_INTEGRATION_AUDIT_PHASE1.md`
+**Pattern Reference**: Clarity-style structured assumption validation
+
+### A.1 Overview
+
+This annex specifies a mandatory assumption audit gate for high-risk agent/security/external-tool work. Before executing high-risk operations, an audit artifact documenting problem statement, assumptions, failure modes, alternatives, and decision record MUST exist.
+
+### A.2 High-Risk Trigger Examples
+
+The following operations REQUIRE an assumption audit artifact before execution:
+
+| Trigger Category | Examples |
+|-----------------|----------|
+| **Credential Access** | Vault resolution, secret rotation, permission changes |
+| **MCP/Tool Integration** | New MCP server adoption, tool permission grants |
+| **Runtime Agent Autonomy** | Autonomous execution mode, DAE activation |
+| **HoloIndex Retrieval Behavior** | Ranking changes, indexing rules, retrieval filtering |
+| **Public Route/Auth Changes** | API endpoint exposure, authentication flow changes |
+| **Destructive Action Guard Changes** | File deletion rules, database mutation permissions |
+
+### A.3 Audit Artifact Structure
+
+**Required Sections**:
+
+```markdown
+## Assumption Audit: [Operation Name]
+
+### 1. Problem Statement
+- What: What operation is being performed?
+- Why: Why is this operation necessary?
+- Who: Who authorized this operation?
+
+### 2. Assumptions
+| ID | Assumption | Evidence | Confidence |
+|----|------------|----------|------------|
+| A1 | [Statement] | [Source] | HIGH/MED/LOW |
+
+### 3. Failure Modes
+| ID | Failure Mode | Likelihood | Impact | Mitigation |
+|----|--------------|------------|--------|------------|
+| F1 | [Description] | HIGH/MED/LOW | CRITICAL/HIGH/MED/LOW | [Strategy] |
+
+### 4. Alternatives Considered
+| Alternative | Why Rejected |
+|-------------|--------------|
+| [Option A] | [...] |
+
+### 5. Decision Record
+- Decision: PROCEED / HALT / ESCALATE
+- Owner: [Agent/Worker ID]
+- Timestamp: [ISO 8601]
+```
+
+### A.4 Execution Gate Rule
+
+**Rule**: Execution of high-risk operations MAY proceed ONLY when:
+1. An audit artifact exists at `docs/audits/` or `modules/<domain>/<module>/docs/clarity/`
+2. All HIGH-impact failure modes have documented mitigations
+3. Decision record shows PROCEED with owner and timestamp
+
+**OR**: Task is explicitly classified EXEMPT by 012 or architect role.
+
+### A.5 Staleness Detection
+
+| Operation Type | Max Artifact Age |
+|----------------|------------------|
+| Credential access | 24 hours |
+| MCP/tool integration | 7 days |
+| Runtime autonomy | 48 hours |
+| Public route changes | 7 days |
+| Destructive guard changes | 24 hours |
+
+### A.6 Integration with WSP 97 Execution Loop
+
+**Enhanced Execution Loop**:
+```
+follow wsp := retrieve wsp -> retrieve evidence -> [IF HIGH-RISK: assumption audit gate] -> apply cot -> apply cor -> execute
+```
+
+### A.7 Implementation Gaps
+
+| Gap | Status | Priority |
+|-----|--------|----------|
+| Audit artifact template | OPEN | MEDIUM |
+| Staleness detection | OPEN | LOW |
+| High-risk trigger detection | OPEN | MEDIUM |
+
+### A.8 Next Slice
+
+**`CLARITY_ASSUMPTION_AUDIT_GATE_PHASE1`**: Implement automated high-risk trigger detection and audit artifact validation

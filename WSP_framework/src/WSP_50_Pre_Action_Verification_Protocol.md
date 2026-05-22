@@ -798,3 +798,112 @@ Total: ~1-2 seconds (15x faster)
 **Expected ROI**: 200-600x speed improvement + 90% error reduction + proactive bloat prevention
 
 ---
+
+## Annex A: External Agent Tool Adoption Preflight
+
+**Status**: SPEC_ONLY (pending implementation)
+**Source**: `docs/audits/security/AGENT_SECURITY_STACK_EXTERNAL_INTEGRATION_AUDIT_PHASE1.md`
+**Pattern Reference**: Pre-adoption verification for external agent tools
+
+### A.1 Overview
+
+This annex specifies mandatory verification steps BEFORE adopting any external agent tool (MCP server, SDK, framework, API client). HoloIndex search is REQUIRED first to check for existing repo equivalents.
+
+### A.2 Preflight Checklist
+
+Before adopting ANY external agent tool, verify ALL of the following:
+
+#### A.2.1 Repo Equivalent Exists?
+
+**REQUIRED FIRST**: Run HoloIndex search before external adoption.
+
+```bash
+python holo_index.py --search "[tool purpose] existing implementation" --limit 10
+```
+
+| Finding | Action |
+|---------|--------|
+| Repo already has capability | Use existing, do not adopt external |
+| Partial capability exists | Evaluate extension vs. adoption |
+| No existing capability | Proceed with preflight |
+
+#### A.2.2 WSP Owner?
+
+| Question | Required Answer |
+|----------|-----------------|
+| Which WSP governs this domain? | [Document WSP number] |
+| Does WSP allow external tools? | YES to proceed |
+
+#### A.2.3 Credential Implications?
+
+| Question | Risk Level |
+|----------|------------|
+| Does tool require credentials? | HIGH if YES |
+| Are credentials stored locally? | CRITICAL if YES |
+| Does tool transmit externally? | CRITICAL if YES |
+| Does tool follow WSP 71 vault pattern? | HIGH if NO |
+
+**Block Adoption If**: Tool stores credentials locally or logs values.
+
+#### A.2.4 Runtime Implications?
+
+| Question | Risk Level |
+|----------|------------|
+| Does tool run autonomously? | HIGH if YES |
+| Does tool execute arbitrary code? | CRITICAL if YES |
+| Is tool sandboxed? | HIGH if NO |
+
+#### A.2.5 Dependency Risk?
+
+| Question | Risk Level |
+|----------|------------|
+| Transitive dependencies > 50? | HIGH |
+| Any known CVEs? | CRITICAL if unpatched |
+| Last maintained > 12 months ago? | HIGH |
+| License compatible? | CRITICAL if NO |
+
+#### A.2.6 Docs Attachment Path?
+
+| Question | Required Answer |
+|----------|-----------------|
+| Where will tool docs attach? | `modules/<domain>/<module>/docs/` |
+| Will INTERFACE.md document it? | YES (required) |
+| Will ModLog track adoption? | YES (required) |
+
+#### A.2.7 Tests/Red-Team Gate?
+
+| Question | Required Answer |
+|----------|-----------------|
+| Will adoption include red-team tests? | YES for security tools |
+| Test coverage target? | 90% minimum |
+
+### A.3 HoloIndex Requirement
+
+**MANDATORY**: Before ANY external tool adoption:
+
+```bash
+python holo_index.py --search "[capability] existing implementation" --limit 10
+```
+
+**Violation**: Adopting external tools without HoloIndex search violates WSP 50 and WSP 87.
+
+### A.4 Blocking Conditions
+
+**BLOCK Adoption If**:
+- HoloIndex search not performed
+- CRITICAL risk in any category
+- License incompatible
+- No docs attachment path identified
+- Security tool without red-team test plan
+
+### A.5 Implementation Gaps
+
+| Gap | Status | Priority |
+|-----|--------|----------|
+| Preflight checklist automation | OPEN | MEDIUM |
+| Adoption record template | OPEN | LOW |
+| HoloIndex search enforcement | OPEN | MEDIUM |
+
+### A.6 Next Slice
+
+**`EXTERNAL_TOOL_PREFLIGHT_AUTOMATION_PHASE1`**: Implement automated preflight verification
