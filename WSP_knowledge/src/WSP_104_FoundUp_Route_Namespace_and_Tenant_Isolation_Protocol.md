@@ -405,4 +405,43 @@ If a proposed change breaks that chain, it violates WSP 104.
 
 ---
 
+## 15. Public Portfolio Route Contract Closeout (Post-PR #655)
+
+### 15.1 Portfolio Showcase Route
+
+After PR #655, the `/f/` route family is complete:
+
+| Route | Purpose | Implementation |
+|-------|---------|----------------|
+| `/f/` | Public FoundUp portfolio showcase / directory | `public/f/index.html` (index mode) |
+| `/f/{foundup_id}` | Individual FoundUp landing/about/trust/detail | `public/f/index.html` (detail mode) |
+| `/f/{foundup_id}/app` | Tenant app runtime root | Iframe mount |
+
+### 15.2 Behavioral Contract (LOCKED)
+
+| Behavior | Contract |
+|----------|----------|
+| Card tap in Mall | Preview/video autoplay (non-destructive) |
+| Visit/Enter FoundUp | Additive navigation to `/f/{foundup_id}` |
+| Launch App | Navigation to `/f/{foundup_id}/app` |
+| Direct-entry | Opt-in/configurable per FoundUp |
+| Back to p.fMALL | Preserves context |
+
+### 15.3 Identity vs Authorization
+
+- `foundup_id` is a **public identifier** for routing and discovery
+- `foundup_id` is **not authorization** -- gated actions must check auth/capability/role independently
+- No root route sprawl -- FoundUps scale by registry, not root pages
+
+### 15.4 Layer Separation
+
+| Layer | Purpose |
+|-------|---------|
+| Public PoC | Discoverable showcase (`/f/`, `/f/{id}`) |
+| Member prototype | Auth-gated member features (`/member/`) |
+| App runtime | Tenant product (`/f/{id}/app`) |
+| Governance | Reserved |
+
+---
+
 *WSP 104: FoundUps scale by namespace discipline, not by root sprawl.*
