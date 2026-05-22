@@ -259,3 +259,35 @@ Entry pipe = route navigation
 ```
 
 Do not collapse these roles into one repo-level assumption.
+
+---
+
+## 11. Canonical Route Truth Summary (Post-PR #655)
+
+### 11.1 Route Family Definitions
+
+| Route | Purpose | Owner |
+|-------|---------|-------|
+| `/f/` | Public FoundUp portfolio showcase / directory | Shell |
+| `/f/{foundup_id}` | Individual FoundUp public landing/about/trust/detail surface | FoundUp (within shell) |
+| `/f/{foundup_id}/app` | Tenant app runtime root | FoundUp |
+
+### 11.2 Behavioral Contract
+
+| Behavior | Contract |
+|----------|----------|
+| Card tap | Preview/video autoplay (stay in Mall context) |
+| Visit/Enter FoundUp | Additive navigation to `/f/{foundup_id}` |
+| Launch App | Navigation to `/f/{foundup_id}/app` |
+| Back to p.fMALL | Preserves context |
+
+### 11.3 Key Rules
+
+- `foundup_id` is a public identifier, not authorization
+- Gated actions must check auth/capability/role independently
+- No root route sprawl (scale by registry, not root pages)
+- Public PoC, member prototype, app runtime, and governance layers remain distinct
+
+### 11.4 Reference
+
+See `WSP_framework/src/WSP_104_FoundUp_Route_Namespace_and_Tenant_Isolation_Protocol.md` Section 15 for full contract specification.
