@@ -904,6 +904,39 @@ class TestPriorityCoercion:
 class TestFormatHitWithStringPriority:
     """Search path with work-ledger string priority — regression for the silent TypeError."""
 
+    def test_lexical_search_does_not_crash_with_string_priority(self):
+        """Lexical fallback path handles priority=\"P3\" via _coerce_priority."""
+        from holo_index.core.search_engine import _lexical_search_collection
+
+        holo = MagicMock()
+        holo.search_cache = None
+        holo.model = None
+
+        collection = MagicMock()
+        collection.count.return_value = 1  # one document in collection
+        collection.get.return_value = {
+            "ids": ["wl_test_001"],
+            "documents": ["Work Slice: TEST_SLICE\nPriority: P3\nTitle: Test Lexical"],
+            "metadatas": [{
+                "type": "work_ledger_slice",
+                "slice_id": "TEST_SLICE",
+                "title": "Test Lexical Slice",
+                "path": "/tmp/work_ledger.example.json",
+                "priority": "P3",       # string priority that crashed lexical fallback
+                "pr_number": 999,
+                "owner_worker": "W1",
+                "status": "IN_PROGRESS",
+            }],
+        }
+
+        # This would crash with TypeError before the fix (line 899 in search_engine.py)
+        hits = _lexical_search_collection(holo, collection, "TEST_SLICE", limit=5, kind="work_ledger")
+        assert isinstance(hits, list)
+        assert len(hits) == 1
+        assert hits[0].get("title") == "Test Lexical Slice"
+        # Priority coerced from "P3" (label) to 2.0 (weight) via PRIORITY_MAP
+        assert hits[0].get("priority") == 2.0
+
     def test_search_collection_does_not_crash_with_string_priority(self):
         """Full _search_collection path no longer raises on priority=\"P3\"."""
         from holo_index.core.search_engine import _search_collection
