@@ -12,8 +12,8 @@
 
 ## WSP 97 Truth Boundary Checklist
 
-| Label | Status |
-|-------|--------|
+| Truth Boundary Checklist Item | Status |
+|-------------------------------|--------|
 | HOLOINDEX_DOCS_REINDEX_OBSERVATION_ONLY | YES |
 | OPERATOR_GATED_INDEX_DOCS_AUTHORIZED_FOR_THIS_SLICE | YES (single `--index-docs` execution, exit 0, 15.6 s) |
 | NO_CODE_CHANGE | YES |
