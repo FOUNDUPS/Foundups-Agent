@@ -166,6 +166,52 @@ python -m pytest modules/foundups/trade/tests/ -q
 
 ---
 
+### [2026-05-23] - TRADE_DUE_DILIGENCE_SCHEMA_PHASE1 (v0.5.0)
+
+**WSP Protocol References**: WSP 97 (Truth), WSP 104 (Namespace)
+**Spec**: TRADE_PUMPFUN_DUE_DILIGENCE_SCORING_SPEC_PHASE1 (PR #683)
+
+#### Tests Added
+
+**test_due_diligence_contracts.py** — Due diligence contracts (43 tests):
+- TestForbiddenImports: no forbidden network/exchange imports
+- TestForbiddenFields: no api_key, secret, signer, wallet_private_key, order_id, endpoint, exchange_client
+- TestDecisionBand: all 4 bands defined, no band authorizes real trading
+- TestEntityHistoryReport: valid construction, confidence bounds, negative values rejected, serialization
+- TestWalletAuditReport: valid construction, holding_percent bounds, risk_contribution bounds
+- TestSocialPresenceReport: valid construction, score/evidence bounds
+- TestInfluencerRiskReport: valid construction, risk_score bounds
+- TestLaunchpadTokenCandidate: valid construction, bonding_curve bounds, defaults
+- TestTradeDueDiligenceScore: valid construction, all 10 component bounds, calculate_total_score
+- TestDecisionBandDetermination: each band reachable, high rug/issuer risk forces reject, low confidence forces observe
+- TestNoRealTradingAuthorization: all 4 bands verified
+- TestSerialization: all contracts JSON serializable, deterministic output
+- TestMissingEvidenceConfidence: zero/partial confidence impact
+
+#### Spec-to-Contract Mapping
+
+| Spec Section | Contract |
+|--------------|----------|
+| 5.5 EntityHistoryReport | EntityHistoryReport |
+| 6.4 WalletAuditReport | WalletAuditReport |
+| 5.2/5.3 X/Telegram | SocialPresenceReport |
+| 5.4 Influencer/KOL | InfluencerRiskReport |
+| 4.3 LaunchDiscoveryEvent | LaunchpadTokenCandidate |
+| 8.1/8.2 Score components | TradeDueDiligenceScore |
+| 8.3 Decision bands | DecisionBand enum |
+
+#### Test Verification
+
+```bash
+python -m pytest modules/foundups/trade/tests/test_due_diligence_contracts.py -q
+# Expected: 43 passed
+
+python -m pytest modules/foundups/trade/tests/ -q
+# Expected: 292 passed (249 existing + 43 new)
+```
+
+---
+
 ## Future Entries
 
-Next slice: `TRADE_ADAPTER_FIXTURE_LOADER_PHASE1` (optional)
+Next slice: `TRADE_DUE_DILIGENCE_SCORING_ENGINE_PHASE1`
