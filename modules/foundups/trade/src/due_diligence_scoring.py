@@ -41,10 +41,6 @@ from contracts import (
 )
 
 
-def _utc_now() -> datetime:
-    return datetime.now(timezone.utc)
-
-
 def _clamp(value: float, min_val: float = 0.0, max_val: float = 100.0) -> float:
     """Clamp value to range [min_val, max_val]."""
     return max(min_val, min(max_val, value))
@@ -55,16 +51,19 @@ def _clamp(value: float, min_val: float = 0.0, max_val: float = 100.0) -> float:
 # ---------------------------------------------------------------------------
 
 
-def score_launch_timing(candidate: LaunchpadTokenCandidate) -> float:
+def score_launch_timing(candidate: LaunchpadTokenCandidate, evaluation_time: datetime) -> float:
     """Score launch timing (0-100).
 
     Fresh launches (< 5 min) score higher.
     Older launches lose points progressively.
 
+    Args:
+        candidate: Token candidate with timestamp
+        evaluation_time: Timezone-aware datetime for evaluation (must have tzinfo)
+
     Spec Section 8.1: launch_timing weight = 0.10
     """
-    now = _utc_now()
-    age_seconds = (now - candidate.timestamp).total_seconds()
+    age_seconds = (evaluation_time - candidate.timestamp).total_seconds()
 
     if age_seconds < 0:
         age_seconds = 0
@@ -420,6 +419,8 @@ class DueDiligenceScoringEngine:
     def score(
         self,
         candidate: LaunchpadTokenCandidate,
+        *,
+        evaluation_time: datetime,
         issuer_report: Optional[EntityHistoryReport] = None,
         wallet_reports: Optional[List[WalletAuditReport]] = None,
         social_report: Optional[SocialPresenceReport] = None,
@@ -429,6 +430,8 @@ class DueDiligenceScoringEngine:
 
         Args:
             candidate: Token candidate from launchpad discovery
+            evaluation_time: Timezone-aware datetime for evaluation.
+                Must have tzinfo set. Non-UTC timezones are normalized to UTC.
             issuer_report: Optional issuer/creator history
             wallet_reports: Optional list of wallet audit reports
             social_report: Optional social presence analysis
@@ -436,10 +439,21 @@ class DueDiligenceScoringEngine:
 
         Returns:
             TradeDueDiligenceScore with all components filled
+
+        Raises:
+            ValueError: If evaluation_time is naive (no tzinfo)
         """
+        if evaluation_time.tzinfo is None:
+            raise ValueError(
+                "evaluation_time must be timezone-aware (use datetime with tzinfo). "
+                "Naive datetimes are rejected to ensure deterministic scoring."
+            )
+
+        evaluation_time = evaluation_time.astimezone(timezone.utc)
+
         wallet_reports = wallet_reports or []
 
-        launch_timing = score_launch_timing(candidate)
+        launch_timing = score_launch_timing(candidate, evaluation_time)
         issuer_history = score_issuer_history(issuer_report)
         social_authenticity = score_social_authenticity(social_report)
         telegram_quality = score_telegram_quality(social_report)

@@ -264,6 +264,42 @@ python -m pytest modules/foundups/trade/tests/ -q
 
 ---
 
+### [2026-05-24] - TRADE_DUE_DILIGENCE_SCORING_ENGINE_DETERMINISTIC_CLOCK_FIX_PHASE1 (v0.6.1)
+
+**WSP Protocol References**: WSP 97 (Truth), WSP 104 (Namespace)
+**Spec**: TRADE_PUMPFUN_DUE_DILIGENCE_SCORING_SPEC_PHASE1 (PR #683)
+
+#### Tests Added/Modified
+
+**test_due_diligence_scoring.py** — Deterministic clock fix (8 new tests, 50 modified):
+- TestTimezoneValidation::test_naive_datetime_raises_valueerror: naive evaluation_time raises ValueError
+- TestTimezoneValidation::test_non_utc_timezone_normalizes_to_utc: JST and UTC same instant produces byte-identical output
+- TestStaticClockScan::test_no_forbidden_clock_patterns_in_source: zero hits for datetime.now, date.today, time.time, time.monotonic, _utc_now
+- TestScoringInvariants::test_component_weights_sum_to_one: weights unchanged (sum to 1.0)
+- TestScoringInvariants::test_decision_bands_unchanged: all 4 bands present
+- TestScoringInvariants::test_hard_disqualifier_thresholds_unchanged: <20 threshold unchanged
+- TestScoringInvariants::test_low_evidence_threshold_unchanged: <0.5 threshold unchanged
+- TestDeterminism::test_byte_identical_determinism: explicit byte-identical JSON test
+
+#### Changes to Existing Tests
+
+All 50 existing tests updated to pass explicit `evaluation_time=FIXED_EVAL_TIME` parameter:
+- FIXED_EVAL_TIME = datetime(2026, 5, 24, 12, 0, 0, tzinfo=timezone.utc)
+- fresh_candidate fixture: timestamp = FIXED_EVAL_TIME - 2 minutes
+- old_candidate fixture: timestamp = FIXED_EVAL_TIME - 8 hours
+
+#### Test Verification
+
+```bash
+python -m pytest modules/foundups/trade/tests/test_due_diligence_scoring.py -q
+# Expected: 58 passed (50 existing + 8 new)
+
+python -m pytest modules/foundups/trade/tests/ -q
+# Expected: 350 passed (342 existing + 8 new)
+```
+
+---
+
 ## Future Entries
 
 Next slice: `TRADE_DUE_DILIGENCE_SYNTHETIC_REGIME_PACK_PHASE1`

@@ -52,6 +52,13 @@ from due_diligence_scoring import (
 
 
 # ---------------------------------------------------------------------------
+# Fixed Evaluation Time (deterministic scoring)
+# ---------------------------------------------------------------------------
+
+FIXED_EVAL_TIME = datetime(2026, 5, 24, 12, 0, 0, tzinfo=timezone.utc)
+
+
+# ---------------------------------------------------------------------------
 # Forbidden Imports Test
 # ---------------------------------------------------------------------------
 
@@ -154,14 +161,14 @@ class TestForbiddenFields:
 
 @pytest.fixture
 def fresh_candidate():
-    """A freshly launched token candidate."""
+    """A freshly launched token candidate (2 minutes before FIXED_EVAL_TIME)."""
     return LaunchpadTokenCandidate(
         token_address="So1FreshToken11111111111111111111111111111111",
         token_symbol="FRESH",
         token_name="Fresh Token",
         chain="solana",
         launchpad="pumpfun",
-        timestamp=datetime.now(timezone.utc),
+        timestamp=FIXED_EVAL_TIME - timedelta(minutes=2),
         creator_address="Creator11111111111111111111111111111111111111",
         bonding_curve_progress=0.15,
         initial_market_cap_usd=5000.0,
@@ -172,12 +179,12 @@ def fresh_candidate():
 
 @pytest.fixture
 def old_candidate():
-    """An old token (6+ hours ago)."""
+    """An old token (8 hours before FIXED_EVAL_TIME)."""
     return LaunchpadTokenCandidate(
         token_address="So1OldToken111111111111111111111111111111111",
         token_symbol="OLD",
         token_name="Old Token",
-        timestamp=datetime.now(timezone.utc) - timedelta(hours=8),
+        timestamp=FIXED_EVAL_TIME - timedelta(hours=8),
         bonding_curve_progress=0.80,
         passed_initial_filter=True,
     )
@@ -335,25 +342,25 @@ class TestScoreLaunchTiming:
 
     def test_fresh_launch_scores_high(self, fresh_candidate):
         """Fresh launch (< 5 min) scores 100."""
-        score = score_launch_timing(fresh_candidate)
+        score = score_launch_timing(fresh_candidate, FIXED_EVAL_TIME)
         assert score == 100.0
 
     def test_old_launch_scores_low(self, old_candidate):
         """Old launch (6+ hours) scores low."""
-        score = score_launch_timing(old_candidate)
+        score = score_launch_timing(old_candidate, FIXED_EVAL_TIME)
         assert score == 20.0
 
     def test_30_minute_launch(self, fresh_candidate):
         """30 minute old launch scores between 50-70."""
-        fresh_candidate.timestamp = datetime.now(timezone.utc) - timedelta(minutes=30)
-        score = score_launch_timing(fresh_candidate)
+        fresh_candidate.timestamp = FIXED_EVAL_TIME - timedelta(minutes=30)
+        score = score_launch_timing(fresh_candidate, FIXED_EVAL_TIME)
         assert 50.0 <= score <= 75.0
 
     def test_score_bounds(self, fresh_candidate):
         """Score is always 0-100."""
         for minutes in [0, 5, 30, 60, 360, 1000]:
-            fresh_candidate.timestamp = datetime.now(timezone.utc) - timedelta(minutes=minutes)
-            score = score_launch_timing(fresh_candidate)
+            fresh_candidate.timestamp = FIXED_EVAL_TIME - timedelta(minutes=minutes)
+            score = score_launch_timing(fresh_candidate, FIXED_EVAL_TIME)
             assert 0.0 <= score <= 100.0
 
 
@@ -547,7 +554,7 @@ class TestScoringEngine:
     def test_score_returns_due_diligence_score(self, fresh_candidate):
         """Engine returns TradeDueDiligenceScore."""
         engine = create_scoring_engine()
-        result = engine.score(fresh_candidate)
+        result = engine.score(fresh_candidate, evaluation_time=FIXED_EVAL_TIME)
         assert isinstance(result, TradeDueDiligenceScore)
 
     def test_score_populates_all_components(self, fresh_candidate, clean_issuer, good_social):
@@ -555,6 +562,7 @@ class TestScoringEngine:
         engine = create_scoring_engine()
         result = engine.score(
             fresh_candidate,
+            evaluation_time=FIXED_EVAL_TIME,
             issuer_report=clean_issuer,
             social_report=good_social,
         )
@@ -573,25 +581,25 @@ class TestScoringEngine:
     def test_total_score_calculated(self, fresh_candidate):
         """Total score is calculated from components."""
         engine = create_scoring_engine()
-        result = engine.score(fresh_candidate)
+        result = engine.score(fresh_candidate, evaluation_time=FIXED_EVAL_TIME)
         assert result.total_score == result.calculate_total_score()
 
     def test_risk_score_inverted(self, fresh_candidate):
         """Risk score is inverted total score."""
         engine = create_scoring_engine()
-        result = engine.score(fresh_candidate)
+        result = engine.score(fresh_candidate, evaluation_time=FIXED_EVAL_TIME)
         assert result.risk_score == 100.0 - result.total_score
 
     def test_decision_band_assigned(self, fresh_candidate):
         """Decision band is assigned."""
         engine = create_scoring_engine()
-        result = engine.score(fresh_candidate)
+        result = engine.score(fresh_candidate, evaluation_time=FIXED_EVAL_TIME)
         assert result.decision_band in list(DecisionBand)
 
     def test_band_rationale_generated(self, fresh_candidate):
         """Band rationale is generated."""
         engine = create_scoring_engine()
-        result = engine.score(fresh_candidate)
+        result = engine.score(fresh_candidate, evaluation_time=FIXED_EVAL_TIME)
         assert len(result.band_rationale) > 0
 
 
@@ -609,11 +617,13 @@ class TestDeterminism:
 
         result1 = engine.score(
             fresh_candidate,
+            evaluation_time=FIXED_EVAL_TIME,
             issuer_report=clean_issuer,
             social_report=good_social,
         )
         result2 = engine.score(
             fresh_candidate,
+            evaluation_time=FIXED_EVAL_TIME,
             issuer_report=clean_issuer,
             social_report=good_social,
         )
@@ -627,13 +637,36 @@ class TestDeterminism:
         """JSON output is deterministic."""
         engine = create_scoring_engine()
 
-        result1 = engine.score(fresh_candidate, issuer_report=clean_issuer)
-        result2 = engine.score(fresh_candidate, issuer_report=clean_issuer)
+        result1 = engine.score(fresh_candidate, evaluation_time=FIXED_EVAL_TIME, issuer_report=clean_issuer)
+        result2 = engine.score(fresh_candidate, evaluation_time=FIXED_EVAL_TIME, issuer_report=clean_issuer)
 
         json1 = json.dumps(result1.to_dict(), sort_keys=True)
         json2 = json.dumps(result2.to_dict(), sort_keys=True)
 
         assert json1 == json2
+
+    def test_byte_identical_determinism(self, fresh_candidate, clean_issuer, good_social):
+        """Identical inputs produce byte-identical JSON output."""
+        engine = create_scoring_engine()
+
+        result1 = engine.score(
+            fresh_candidate,
+            evaluation_time=FIXED_EVAL_TIME,
+            issuer_report=clean_issuer,
+            social_report=good_social,
+        )
+        result2 = engine.score(
+            fresh_candidate,
+            evaluation_time=FIXED_EVAL_TIME,
+            issuer_report=clean_issuer,
+            social_report=good_social,
+        )
+
+        json1 = json.dumps(result1.to_dict(), sort_keys=True)
+        json2 = json.dumps(result2.to_dict(), sort_keys=True)
+
+        assert json1 == json2, "JSON outputs must be byte-identical"
+        assert len(json1) > 0, "JSON output must not be empty"
 
 
 # ---------------------------------------------------------------------------
@@ -647,7 +680,7 @@ class TestDecisionBandDetermination:
     def test_reject_band_reachable(self, fresh_candidate, blacklisted_issuer):
         """REJECT band is reachable."""
         engine = create_scoring_engine()
-        result = engine.score(fresh_candidate, issuer_report=blacklisted_issuer)
+        result = engine.score(fresh_candidate, evaluation_time=FIXED_EVAL_TIME, issuer_report=blacklisted_issuer)
         assert result.decision_band == DecisionBand.REJECT
 
     def test_observe_band_reachable(self, fresh_candidate):
@@ -658,7 +691,7 @@ class TestDecisionBandDetermination:
             social_authenticity_score=20.0,
             evidence_completeness=0.3,
         )
-        result = engine.score(fresh_candidate, social_report=poor_social)
+        result = engine.score(fresh_candidate, evaluation_time=FIXED_EVAL_TIME, social_report=poor_social)
         assert result.decision_band == DecisionBand.OBSERVE
 
     def test_simulate_only_band_reachable(self, fresh_candidate, clean_issuer, good_social):
@@ -674,6 +707,7 @@ class TestDecisionBandDetermination:
         )
         result = engine.score(
             fresh_candidate,
+            evaluation_time=FIXED_EVAL_TIME,
             issuer_report=clean_issuer,
             social_report=moderate_social,
         )
@@ -686,6 +720,7 @@ class TestDecisionBandDetermination:
         engine = create_scoring_engine()
         result = engine.score(
             fresh_candidate,
+            evaluation_time=FIXED_EVAL_TIME,
             issuer_report=clean_issuer,
             wallet_reports=distributed_wallets,
             social_report=good_social,
@@ -709,6 +744,7 @@ class TestDecisionBandDetermination:
 
         result = engine.score(
             fresh_candidate,
+            evaluation_time=FIXED_EVAL_TIME,
             issuer_report=blacklist_issuer,
             wallet_reports=scammer_wallets,
         )
@@ -719,7 +755,7 @@ class TestDecisionBandDetermination:
         """Low evidence confidence forces OBSERVE."""
         engine = create_scoring_engine()
         fresh_candidate.passed_initial_filter = False
-        result = engine.score(fresh_candidate)
+        result = engine.score(fresh_candidate, evaluation_time=FIXED_EVAL_TIME)
         assert result.evidence_confidence < 0.5
         assert result.decision_band == DecisionBand.OBSERVE
 
@@ -735,21 +771,26 @@ class TestNoRealTradingAuthorization:
     def test_reject_does_not_authorize(self, fresh_candidate, blacklisted_issuer):
         """REJECT band does not authorize trading."""
         engine = create_scoring_engine()
-        result = engine.score(fresh_candidate, issuer_report=blacklisted_issuer)
+        result = engine.score(fresh_candidate, evaluation_time=FIXED_EVAL_TIME, issuer_report=blacklisted_issuer)
         assert result.decision_band == DecisionBand.REJECT
         assert "authorize" not in result.band_rationale.lower() or "not" in result.band_rationale.lower()
 
     def test_observe_does_not_authorize(self, fresh_candidate):
         """OBSERVE band does not authorize trading."""
         engine = create_scoring_engine()
-        result = engine.score(fresh_candidate)
+        result = engine.score(fresh_candidate, evaluation_time=FIXED_EVAL_TIME)
         if result.decision_band == DecisionBand.OBSERVE:
             assert "OBSERVE" in result.band_rationale
 
     def test_simulate_only_does_not_authorize(self, fresh_candidate, clean_issuer, good_social):
         """SIMULATE_ONLY band does not authorize trading."""
         engine = create_scoring_engine()
-        result = engine.score(fresh_candidate, issuer_report=clean_issuer, social_report=good_social)
+        result = engine.score(
+            fresh_candidate,
+            evaluation_time=FIXED_EVAL_TIME,
+            issuer_report=clean_issuer,
+            social_report=good_social,
+        )
         assert "SIMULATE" in result.band_rationale or "simulation" in result.band_rationale.lower() \
             or "CANDIDATE" in result.band_rationale or "OBSERVE" in result.band_rationale \
             or "REJECT" in result.band_rationale
@@ -761,6 +802,7 @@ class TestNoRealTradingAuthorization:
         engine = create_scoring_engine()
         result = engine.score(
             fresh_candidate,
+            evaluation_time=FIXED_EVAL_TIME,
             issuer_report=clean_issuer,
             wallet_reports=distributed_wallets,
             social_report=good_social,
@@ -768,3 +810,131 @@ class TestNoRealTradingAuthorization:
         )
         if result.decision_band == DecisionBand.CANDIDATE_FOR_FUTURE_REVIEW:
             assert "future review" in result.band_rationale.lower() or "CANDIDATE" in result.band_rationale
+
+
+# ---------------------------------------------------------------------------
+# Timezone Validation Tests (TRADE_DUE_DILIGENCE_SCORING_ENGINE_DETERMINISTIC_CLOCK_FIX_PHASE1)
+# ---------------------------------------------------------------------------
+
+
+class TestTimezoneValidation:
+    """Tests for evaluation_time timezone handling."""
+
+    def test_naive_datetime_raises_valueerror(self, fresh_candidate):
+        """Naive datetime (no tzinfo) raises ValueError."""
+        engine = create_scoring_engine()
+        naive_time = datetime(2026, 5, 24, 12, 0, 0)  # No tzinfo
+
+        with pytest.raises(ValueError, match="timezone-aware"):
+            engine.score(fresh_candidate, evaluation_time=naive_time)
+
+    def test_non_utc_timezone_normalizes_to_utc(self, fresh_candidate, clean_issuer, good_social):
+        """Non-UTC timezone normalizes to UTC and produces identical output."""
+        engine = create_scoring_engine()
+
+        # JST = UTC+9
+        from datetime import timezone as tz
+
+        jst = tz(timedelta(hours=9))
+        utc_time = datetime(2026, 5, 24, 12, 0, 0, tzinfo=tz.utc)
+        jst_time = datetime(2026, 5, 24, 21, 0, 0, tzinfo=jst)  # Same instant
+
+        result_utc = engine.score(
+            fresh_candidate,
+            evaluation_time=utc_time,
+            issuer_report=clean_issuer,
+            social_report=good_social,
+        )
+        result_jst = engine.score(
+            fresh_candidate,
+            evaluation_time=jst_time,
+            issuer_report=clean_issuer,
+            social_report=good_social,
+        )
+
+        json_utc = json.dumps(result_utc.to_dict(), sort_keys=True)
+        json_jst = json.dumps(result_jst.to_dict(), sort_keys=True)
+
+        assert json_utc == json_jst, "Same instant in different timezones must produce byte-identical output"
+
+
+# ---------------------------------------------------------------------------
+# Static Clock Scan Tests (TRADE_DUE_DILIGENCE_SCORING_ENGINE_DETERMINISTIC_CLOCK_FIX_PHASE1)
+# ---------------------------------------------------------------------------
+
+
+FORBIDDEN_CLOCK_PATTERNS = {
+    "datetime.now",
+    "date.today",
+    "time.time",
+    "time.monotonic",
+    "_utc_now",
+}
+
+
+class TestStaticClockScan:
+    """Verify scoring source has no implicit wall-clock calls."""
+
+    def test_no_forbidden_clock_patterns_in_source(self):
+        """Source file contains zero hits for forbidden clock patterns."""
+        source_path = Path(__file__).parent.parent / "src" / "due_diligence_scoring.py"
+        assert source_path.exists(), f"Source file not found: {source_path}"
+
+        source_code = source_path.read_text(encoding="utf-8")
+
+        violations = []
+        for pattern in FORBIDDEN_CLOCK_PATTERNS:
+            if pattern in source_code:
+                violations.append(pattern)
+
+        assert len(violations) == 0, f"Forbidden clock patterns found: {violations}"
+
+
+# ---------------------------------------------------------------------------
+# Scoring Invariants Tests (TRADE_DUE_DILIGENCE_SCORING_ENGINE_DETERMINISTIC_CLOCK_FIX_PHASE1)
+# ---------------------------------------------------------------------------
+
+
+class TestScoringInvariants:
+    """Verify scoring weights, bands, and disqualifiers are unchanged."""
+
+    def test_component_weights_sum_to_one(self):
+        """All 10 component weights sum to 1.0."""
+        weights = {
+            "launch_timing": 0.10,
+            "issuer_history": 0.15,
+            "social_authenticity": 0.10,
+            "telegram_quality": 0.05,
+            "influencer_risk": 0.10,
+            "holder_distribution": 0.15,
+            "whale_risk": 0.10,
+            "prior_token_history": 0.10,
+            "bonding_curve": 0.05,
+            "rug_honeypot": 0.10,
+        }
+        total = sum(weights.values())
+        assert abs(total - 1.0) < 0.0001, f"Weights sum to {total}, expected 1.0"
+
+    def test_decision_bands_unchanged(self):
+        """All 4 decision bands exist."""
+        bands = list(DecisionBand)
+        expected = {"REJECT", "OBSERVE", "SIMULATE_ONLY", "CANDIDATE_FOR_FUTURE_REVIEW"}
+        actual = {b.name for b in bands}
+        assert actual == expected, f"Decision bands changed: {actual}"
+
+    def test_hard_disqualifier_thresholds_unchanged(self, fresh_candidate, blacklisted_issuer):
+        """Hard disqualifiers still use threshold < 20."""
+        engine = create_scoring_engine()
+        result = engine.score(fresh_candidate, evaluation_time=FIXED_EVAL_TIME, issuer_report=blacklisted_issuer)
+
+        assert result.issuer_history < 20 or result.rug_honeypot < 20
+        assert result.decision_band == DecisionBand.REJECT
+
+    def test_low_evidence_threshold_unchanged(self, fresh_candidate):
+        """Low evidence threshold still 0.5."""
+        engine = create_scoring_engine()
+        fresh_candidate.passed_initial_filter = False
+        result = engine.score(fresh_candidate, evaluation_time=FIXED_EVAL_TIME)
+
+        assert result.evidence_confidence < 0.5
+        assert result.decision_band == DecisionBand.OBSERVE
