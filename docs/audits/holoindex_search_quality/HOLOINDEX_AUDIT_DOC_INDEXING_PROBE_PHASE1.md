@@ -168,37 +168,68 @@ All three targets are ABSENT from the collection despite existing on disk.
 
 All three target documents have classification **A (NOT_INDEXED)**. They exist on disk but are not present in the `navigation_docs` Chroma collection.
 
+### Critical Contradiction with PR #688
+
+PR #688 (HOLOINDEX_DOCS_REINDEX_OBSERVATION_PHASE1) ran `python holo_index.py --index-docs` with:
+- Exit code: **0**
+- Duration: **15.596 s**
+- stdout marker: `[POINTS] Session Summary: +5 Refreshed indexes`
+- Target files: **EXISTED** in the worktree at time of reindex (verified via `git ls-tree`)
+
+Yet targets were STILL ABSENT in the AFTER snapshot. This means **`--index-docs` reported success but did NOT index these files**.
+
 ### Evidence
 
-1. **File creation dates**: All three targets were created after May 22-23, 2026
-2. **Index staleness**: The `navigation_docs` collection was last populated before these files were added
-3. **Prior reindex**: PR #688 ran `--index-docs` but this was before the TRADE audit docs were merged
+| Check | Expected | Actual | Status |
+|-------|----------|--------|--------|
+| Files on disk in `docs/audits/architecture/` | — | 42 | EXISTS |
+| Files in collection for that path | 42 | 33 | **9 MISSING** |
+| Target T1 in collection | YES | NO | **FAIL** |
+| Target T2 in collection | YES | NO | **FAIL** |
+| Target T3 in collection | YES | NO | **FAIL** |
+| File discovery simulation finds targets | — | YES | **DISCOVERY OK** |
 
-### Timeline
+### Hypothesis Space
 
-| Date | Event |
-|------|-------|
-| May 21 | `navigation_docs` last indexed (3309 docs) |
-| May 23 | TRADE_PUMPFUN_DUE_DILIGENCE_SCORING_SPEC_PHASE1.md created (PR #683) |
-| May 23 | TRADE_ADAPTER_INTEGRATION_PHASE1.md created (PR #682) |
-| May 23 | HOLOINDEX_FOUNDUP_QUERY_ALIAS_AND_TARGETED_VERDICT_PHASE1.md created (PR #684) |
-| May 24 | This probe runs — targets NOT in index |
+| Hypothesis | Evidence |
+|------------|----------|
+| 1. Stale index (files added after reindex) | RULED OUT — files existed before #688 ran |
+| 2. Worktree didn't have files | RULED OUT — `git ls-tree` confirms files present at base commit |
+| 3. `project_root` mismatch in worktree | POSSIBLE — worktree path may affect resolution |
+| 4. Embedding model failure | POSSIBLE — silent fallback could cause partial index |
+| 5. `collection.add` failed silently | POSSIBLE — 3309 docs but 9 architecture docs missing |
+| 6. Probe bug | RULED OUT — direct Chroma query confirms absence |
+
+### Collection Discrepancy
+
+```
+docs/audits/architecture/ on disk:  42 files
+docs/audits/architecture/ in index: 33 files
+Gap:                                 9 files (all recent)
+```
 
 ---
 
 ## 7. Implication for Next Slice
 
-Based on the classification result (**A** for all targets), the smallest fix is:
+### DO NOT Simply Rerun `--index-docs`
 
-### Recommended Next Slice
+PR #688 already ran `--index-docs` with exit 0 and targets remained absent. Blindly rerunning will likely produce the same result.
 
-**A → INDEXING_SOURCE_PATH_POLICY_FIX**
+### Recommended Investigation Path
 
-However, since the documents simply aren't indexed (not a policy issue), the actual fix is:
+1. **Verify Chroma path consistency**: Confirm worktree and main repo both use `E:/HoloIndex/vectors`
+2. **Check `project_root` resolution**: Run `--index-docs` from main repo (not worktree) and compare file discovery
+3. **Inspect indexing logs**: Add verbose logging to `index_docs_entries()` to trace file count
+4. **Check embedding model state**: If model fails to load, indexing may silently skip files
 
-**Run `python holo_index.py --index-docs` after ensuring target docs are on main branch.**
+### Next Slice Classification
 
-If the issue is that `--index-docs` was run but somehow excluded these files, then the next slice should investigate the indexing filter logic in `indexing_engine.py:index_docs_entries()`.
+Based on the evidence, this is NOT a simple "stale index" issue. The recommended next slice is:
+
+**HOLOINDEX_INDEX_DOCS_CONSISTENCY_AUDIT_PHASE1**
+
+Purpose: Investigate why `--index-docs` reports success but misses files.
 
 ### Alternative Diagnoses Ruled Out
 
@@ -292,9 +323,12 @@ M docs/audits/holoindex_search_quality/HOLOINDEX_AUDIT_DOC_INDEXING_PROBE_PHASE1
   },
   "collection_name": "navigation_docs",
   "collection_stats": {
-    "total_documents": 3309
+    "total_documents": 3309,
+    "docs_audits_architecture_on_disk": 42,
+    "docs_audits_architecture_in_index": 33,
+    "gap": 9
   },
-  "next_slice_recommendation": "A_INDEXING_SOURCE_PATH_POLICY_FIX",
+  "next_slice_recommendation": "HOLOINDEX_INDEX_DOCS_CONSISTENCY_AUDIT_PHASE1",
   "probe_version": "1.0.0",
   "slice": "HOLOINDEX_AUDIT_DOC_INDEXING_PROBE_PHASE1"
 }
@@ -306,9 +340,17 @@ M docs/audits/holoindex_search_quality/HOLOINDEX_AUDIT_DOC_INDEXING_PROBE_PHASE1
 
 | Recommendation | Description |
 |----------------|-------------|
-| `A_INDEXING_SOURCE_PATH_POLICY_FIX` | Operator runs `--index-docs` on current main to add missing docs, OR investigate why recent docs aren't indexed |
+| `HOLOINDEX_INDEX_DOCS_CONSISTENCY_AUDIT_PHASE1` | Investigate why `--index-docs` reports success but misses files |
 
-The fix may be as simple as running `python holo_index.py --index-docs` after ensuring all target docs are merged to main. If that still fails, the indexing filter logic needs investigation.
+**DO NOT** simply rerun `--index-docs`. PR #688 already did that and targets remained absent.
+
+### Investigation checklist for next slice
+
+1. Run `--index-docs` from **main repo** (not worktree) with verbose logging
+2. Compare `project_root` resolution between worktree and main repo
+3. Verify file discovery count matches expected (~3300+)
+4. Check embedding model load status during indexing
+5. Trace `collection.add()` to confirm all files are actually added
 
 ---
 
