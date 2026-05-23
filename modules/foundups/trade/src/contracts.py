@@ -693,3 +693,473 @@ DEFAULT_EXECUTION_GUARD = ExecutionGuardPolicy()
 
 # Default truth fields for Phase 0
 DEFAULT_TRUTH_FIELDS = TruthFields()
+
+
+# ---------------------------------------------------------------------------
+# Due Diligence Schema (TRADE_DUE_DILIGENCE_SCHEMA_PHASE1)
+#
+# Spec: TRADE_PUMPFUN_DUE_DILIGENCE_SCORING_SPEC_PHASE1 (PR #683)
+#
+# Pure data structures for pump.fun due-diligence scoring.
+# No network calls, no wallet access, no order placement.
+# ---------------------------------------------------------------------------
+
+
+class DecisionBand(str, Enum):
+    """Decision band from due-diligence scoring.
+
+    No band authorizes real trading. All bands are simulation/observation only.
+
+    Spec Section 8.3:
+    - reject: Do not proceed (score < 30 or critical risk)
+    - observe: Monitor only (score 30-50 or low evidence)
+    - simulate_only: Paper trade simulation (score 50-70)
+    - candidate_for_future_review: Flag for advanced analysis (score > 70)
+    """
+
+    REJECT = "reject"
+    OBSERVE = "observe"
+    SIMULATE_ONLY = "simulate_only"
+    CANDIDATE_FOR_FUTURE_REVIEW = "candidate_for_future_review"
+
+
+class RiskClassification(str, Enum):
+    """Entity risk classification."""
+
+    CLEAN = "clean"
+    SUSPICIOUS = "suspicious"
+    FLAGGED = "flagged"
+    BLACKLISTED = "blacklisted"
+
+
+class EntityType(str, Enum):
+    """Entity type for history tracking."""
+
+    ISSUER = "issuer"
+    INFLUENCER = "influencer"
+    WHALE = "whale"
+    BOT = "bot"
+    RETAIL = "retail"
+
+
+class WalletClassification(str, Enum):
+    """Wallet entity classification."""
+
+    RETAIL = "retail"
+    WHALE = "whale"
+    INSIDER = "insider"
+    BOT = "bot"
+    SCAMMER = "scammer"
+    UNKNOWN = "unknown"
+
+
+@dataclass
+class EntityHistoryReport:
+    """Issuer/influencer history report.
+
+    Spec Section 5.5: EntityHistoryReport schema.
+    Tracks prior token launches, rug pulls, and risk signals.
+    """
+
+    entity_id: str  # Hashed wallet or social handle (privacy-preserving)
+    entity_type: EntityType
+    timestamp: datetime = field(default_factory=_utc_now)
+
+    # Prior activity
+    prior_token_launches: int = 0
+    prior_rug_pulls: int = 0
+    prior_successful_launches: int = 0
+    average_token_lifespan_hours: float = 0.0
+    average_holder_loss_percent: float = 0.0
+
+    # Associations
+    known_associations: List[str] = field(default_factory=list)  # Other flagged entities
+    first_seen_timestamp: Optional[datetime] = None
+
+    # Classification
+    risk_classification: RiskClassification = RiskClassification.CLEAN
+    confidence: float = 0.0  # 0.0 - 1.0
+
+    def __post_init__(self):
+        """Validate fields."""
+        if not 0.0 <= self.confidence <= 1.0:
+            raise ValueError(f"confidence must be 0.0-1.0, got {self.confidence}")
+        if self.prior_rug_pulls < 0:
+            raise ValueError(f"prior_rug_pulls cannot be negative: {self.prior_rug_pulls}")
+        if self.prior_token_launches < 0:
+            raise ValueError(f"prior_token_launches cannot be negative: {self.prior_token_launches}")
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "entity_id": self.entity_id,
+            "entity_type": self.entity_type.value,
+            "timestamp": self.timestamp.isoformat(),
+            "prior_token_launches": self.prior_token_launches,
+            "prior_rug_pulls": self.prior_rug_pulls,
+            "prior_successful_launches": self.prior_successful_launches,
+            "average_token_lifespan_hours": self.average_token_lifespan_hours,
+            "average_holder_loss_percent": self.average_holder_loss_percent,
+            "known_associations": self.known_associations,
+            "first_seen_timestamp": self.first_seen_timestamp.isoformat() if self.first_seen_timestamp else None,
+            "risk_classification": self.risk_classification.value,
+            "confidence": self.confidence,
+        }
+
+
+@dataclass
+class WalletAuditReport:
+    """Wallet audit report for holder analysis.
+
+    Spec Section 6.4: WalletAuditReport schema.
+    Privacy-preserving wallet analysis for holder distribution and risk.
+    """
+
+    wallet_hash: str  # Privacy-preserving hash, not raw address
+    token_address: str
+    timestamp: datetime = field(default_factory=_utc_now)
+
+    # Holding data
+    holding_percent: float = 0.0  # 0.0 - 100.0
+    acquisition_timestamp: Optional[datetime] = None
+    acquisition_price_usd: float = 0.0
+    current_value_usd: float = 0.0
+    unrealized_pnl_percent: float = 0.0
+
+    # Historical behavior
+    prior_tokens_held: int = 0
+    prior_rugs_held: int = 0
+    prior_dumps_executed: int = 0
+
+    # Classification
+    entity_classification: WalletClassification = WalletClassification.UNKNOWN
+    risk_contribution: float = 0.0  # 0.0 - 1.0, contribution to token risk
+
+    def __post_init__(self):
+        """Validate fields."""
+        if not 0.0 <= self.holding_percent <= 100.0:
+            raise ValueError(f"holding_percent must be 0.0-100.0, got {self.holding_percent}")
+        if not 0.0 <= self.risk_contribution <= 1.0:
+            raise ValueError(f"risk_contribution must be 0.0-1.0, got {self.risk_contribution}")
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "wallet_hash": self.wallet_hash,
+            "token_address": self.token_address,
+            "timestamp": self.timestamp.isoformat(),
+            "holding_percent": self.holding_percent,
+            "acquisition_timestamp": self.acquisition_timestamp.isoformat() if self.acquisition_timestamp else None,
+            "acquisition_price_usd": self.acquisition_price_usd,
+            "current_value_usd": self.current_value_usd,
+            "unrealized_pnl_percent": self.unrealized_pnl_percent,
+            "prior_tokens_held": self.prior_tokens_held,
+            "prior_rugs_held": self.prior_rugs_held,
+            "prior_dumps_executed": self.prior_dumps_executed,
+            "entity_classification": self.entity_classification.value,
+            "risk_contribution": self.risk_contribution,
+        }
+
+
+@dataclass
+class SocialPresenceReport:
+    """Social presence analysis report.
+
+    Spec Section 5.2/5.3: X and Telegram analysis.
+    Tracks social authenticity signals without storing PII.
+    """
+
+    token_address: str
+    timestamp: datetime = field(default_factory=_utc_now)
+
+    # X (Twitter) signals
+    x_account_exists: bool = False
+    x_account_age_days: int = 0
+    x_follower_count: int = 0
+    x_follower_bot_percent: float = 0.0  # 0.0 - 100.0
+    x_engagement_authenticity: float = 0.0  # 0.0 - 1.0
+    x_prior_token_mentions: int = 0
+
+    # Telegram signals
+    telegram_exists: bool = False
+    telegram_member_count: int = 0
+    telegram_bot_percent: float = 0.0  # 0.0 - 100.0
+    telegram_admin_active: bool = False
+    telegram_spam_ratio: float = 0.0  # 0.0 - 1.0
+
+    # Aggregate scores
+    social_authenticity_score: float = 0.0  # 0.0 - 100.0
+    evidence_completeness: float = 0.0  # 0.0 - 1.0
+
+    def __post_init__(self):
+        """Validate fields."""
+        if not 0.0 <= self.social_authenticity_score <= 100.0:
+            raise ValueError(f"social_authenticity_score must be 0.0-100.0, got {self.social_authenticity_score}")
+        if not 0.0 <= self.evidence_completeness <= 1.0:
+            raise ValueError(f"evidence_completeness must be 0.0-1.0, got {self.evidence_completeness}")
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "token_address": self.token_address,
+            "timestamp": self.timestamp.isoformat(),
+            "x_account_exists": self.x_account_exists,
+            "x_account_age_days": self.x_account_age_days,
+            "x_follower_count": self.x_follower_count,
+            "x_follower_bot_percent": self.x_follower_bot_percent,
+            "x_engagement_authenticity": self.x_engagement_authenticity,
+            "x_prior_token_mentions": self.x_prior_token_mentions,
+            "telegram_exists": self.telegram_exists,
+            "telegram_member_count": self.telegram_member_count,
+            "telegram_bot_percent": self.telegram_bot_percent,
+            "telegram_admin_active": self.telegram_admin_active,
+            "telegram_spam_ratio": self.telegram_spam_ratio,
+            "social_authenticity_score": self.social_authenticity_score,
+            "evidence_completeness": self.evidence_completeness,
+        }
+
+
+@dataclass
+class InfluencerRiskReport:
+    """Influencer/KOL risk analysis report.
+
+    Spec Section 5.4: Influencer/KOL detection.
+    Tracks pump coordination and prior rug associations.
+    """
+
+    token_address: str
+    timestamp: datetime = field(default_factory=_utc_now)
+
+    # Detection signals
+    known_pumper_wallets_detected: int = 0
+    coordinated_buy_timing_detected: bool = False
+    influencer_mentions_count: int = 0
+    multiple_influencers_same_token: bool = False
+
+    # Historical risk
+    influencers_with_prior_rugs: int = 0
+    total_influencers_detected: int = 0
+
+    # Risk scores
+    influencer_risk_score: float = 0.0  # 0.0 - 100.0, higher = more risk
+    coordination_risk_score: float = 0.0  # 0.0 - 100.0
+    evidence_completeness: float = 0.0  # 0.0 - 1.0
+
+    def __post_init__(self):
+        """Validate fields."""
+        if not 0.0 <= self.influencer_risk_score <= 100.0:
+            raise ValueError(f"influencer_risk_score must be 0.0-100.0, got {self.influencer_risk_score}")
+        if not 0.0 <= self.coordination_risk_score <= 100.0:
+            raise ValueError(f"coordination_risk_score must be 0.0-100.0, got {self.coordination_risk_score}")
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "token_address": self.token_address,
+            "timestamp": self.timestamp.isoformat(),
+            "known_pumper_wallets_detected": self.known_pumper_wallets_detected,
+            "coordinated_buy_timing_detected": self.coordinated_buy_timing_detected,
+            "influencer_mentions_count": self.influencer_mentions_count,
+            "multiple_influencers_same_token": self.multiple_influencers_same_token,
+            "influencers_with_prior_rugs": self.influencers_with_prior_rugs,
+            "total_influencers_detected": self.total_influencers_detected,
+            "influencer_risk_score": self.influencer_risk_score,
+            "coordination_risk_score": self.coordination_risk_score,
+            "evidence_completeness": self.evidence_completeness,
+        }
+
+
+@dataclass
+class LaunchpadTokenCandidate:
+    """Launchpad token candidate for due diligence.
+
+    Spec Section 4.3: LaunchDiscoveryEvent equivalent.
+    Represents a token discovered from a launchpad feed.
+    """
+
+    token_address: str
+    token_symbol: str
+    token_name: str
+    chain: str = "solana"
+    launchpad: str = "pumpfun"
+    timestamp: datetime = field(default_factory=_utc_now)
+
+    # Creator
+    creator_address: str = ""
+
+    # Launch metrics
+    bonding_curve_progress: float = 0.0  # 0.0 - 1.0
+    initial_market_cap_usd: float = 0.0
+    transaction_count: int = 0
+
+    # Filter status
+    passed_initial_filter: bool = False
+    filter_rejection_reasons: List[str] = field(default_factory=list)
+
+    # Discovery source
+    discovery_source: str = "simulation"  # "bitquery", "rpc", "websocket", "simulation"
+
+    def __post_init__(self):
+        """Validate fields."""
+        if not 0.0 <= self.bonding_curve_progress <= 1.0:
+            raise ValueError(f"bonding_curve_progress must be 0.0-1.0, got {self.bonding_curve_progress}")
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "token_address": self.token_address,
+            "token_symbol": self.token_symbol,
+            "token_name": self.token_name,
+            "chain": self.chain,
+            "launchpad": self.launchpad,
+            "timestamp": self.timestamp.isoformat(),
+            "creator_address": self.creator_address,
+            "bonding_curve_progress": self.bonding_curve_progress,
+            "initial_market_cap_usd": self.initial_market_cap_usd,
+            "transaction_count": self.transaction_count,
+            "passed_initial_filter": self.passed_initial_filter,
+            "filter_rejection_reasons": self.filter_rejection_reasons,
+            "discovery_source": self.discovery_source,
+        }
+
+
+@dataclass
+class TradeDueDiligenceScore:
+    """Trade due-diligence score with 10 components.
+
+    Spec Section 8.1/8.2: TradeDueDiligenceScore schema.
+    WSP_15-style scoring for pump.fun tokens.
+
+    Component scores: 0-100 (higher = better/safer)
+    No decision band authorizes real trading.
+    """
+
+    token_address: str
+    timestamp: datetime = field(default_factory=_utc_now)
+
+    # 10 component scores (0-100, higher = better)
+    launch_timing: float = 0.0  # Fresh launch advantage
+    issuer_history: float = 0.0  # Clean issuer history
+    social_authenticity: float = 0.0  # Real community signals
+    telegram_quality: float = 0.0  # Active, non-bot TG
+    influencer_risk: float = 0.0  # Low pump-and-dump risk (inverted)
+    holder_distribution: float = 0.0  # Distributed holdings
+    whale_risk: float = 0.0  # Low whale manipulation (inverted)
+    prior_token_history: float = 0.0  # Issuer track record
+    bonding_curve: float = 0.0  # Healthy curve progression
+    rug_honeypot: float = 0.0  # Low exit risk (inverted)
+
+    # Aggregates
+    total_score: float = 0.0  # Weighted sum (0-100)
+    risk_score: float = 0.0  # Inverted (0-100, higher = more risk)
+    evidence_confidence: float = 0.0  # Data completeness (0.0-1.0)
+
+    # Decision
+    decision_band: DecisionBand = DecisionBand.REJECT
+    band_rationale: str = ""
+
+    # Component weights (spec Section 8.1)
+    _WEIGHTS: Dict[str, float] = field(default_factory=lambda: {
+        "launch_timing": 0.10,
+        "issuer_history": 0.15,
+        "social_authenticity": 0.10,
+        "telegram_quality": 0.05,
+        "influencer_risk": 0.10,
+        "holder_distribution": 0.15,
+        "whale_risk": 0.10,
+        "prior_token_history": 0.10,
+        "bonding_curve": 0.05,
+        "rug_honeypot": 0.10,
+    }, repr=False)
+
+    def __post_init__(self):
+        """Validate all component scores are 0-100."""
+        components = [
+            ("launch_timing", self.launch_timing),
+            ("issuer_history", self.issuer_history),
+            ("social_authenticity", self.social_authenticity),
+            ("telegram_quality", self.telegram_quality),
+            ("influencer_risk", self.influencer_risk),
+            ("holder_distribution", self.holder_distribution),
+            ("whale_risk", self.whale_risk),
+            ("prior_token_history", self.prior_token_history),
+            ("bonding_curve", self.bonding_curve),
+            ("rug_honeypot", self.rug_honeypot),
+            ("total_score", self.total_score),
+            ("risk_score", self.risk_score),
+        ]
+        for name, value in components:
+            if not 0.0 <= value <= 100.0:
+                raise ValueError(f"{name} must be 0.0-100.0, got {value}")
+
+        if not 0.0 <= self.evidence_confidence <= 1.0:
+            raise ValueError(f"evidence_confidence must be 0.0-1.0, got {self.evidence_confidence}")
+
+    def calculate_total_score(self) -> float:
+        """Calculate weighted total score from components."""
+        return (
+            self.launch_timing * self._WEIGHTS["launch_timing"] +
+            self.issuer_history * self._WEIGHTS["issuer_history"] +
+            self.social_authenticity * self._WEIGHTS["social_authenticity"] +
+            self.telegram_quality * self._WEIGHTS["telegram_quality"] +
+            self.influencer_risk * self._WEIGHTS["influencer_risk"] +
+            self.holder_distribution * self._WEIGHTS["holder_distribution"] +
+            self.whale_risk * self._WEIGHTS["whale_risk"] +
+            self.prior_token_history * self._WEIGHTS["prior_token_history"] +
+            self.bonding_curve * self._WEIGHTS["bonding_curve"] +
+            self.rug_honeypot * self._WEIGHTS["rug_honeypot"]
+        )
+
+    def determine_decision_band(self) -> DecisionBand:
+        """Determine decision band from score and risk flags.
+
+        Spec Section 8.4: Decision rules.
+        No band authorizes real trading.
+        """
+        # Hard disqualifiers
+        if self.rug_honeypot < 20:
+            return DecisionBand.REJECT
+        if self.issuer_history < 20:
+            return DecisionBand.REJECT
+        if self.evidence_confidence < 0.5:
+            return DecisionBand.OBSERVE
+
+        # Band determination by total score
+        if self.total_score < 30:
+            return DecisionBand.REJECT
+        elif self.total_score < 50:
+            return DecisionBand.OBSERVE
+        elif self.total_score < 70:
+            return DecisionBand.SIMULATE_ONLY
+        else:
+            return DecisionBand.CANDIDATE_FOR_FUTURE_REVIEW
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "token_address": self.token_address,
+            "timestamp": self.timestamp.isoformat(),
+            "launch_timing": self.launch_timing,
+            "issuer_history": self.issuer_history,
+            "social_authenticity": self.social_authenticity,
+            "telegram_quality": self.telegram_quality,
+            "influencer_risk": self.influencer_risk,
+            "holder_distribution": self.holder_distribution,
+            "whale_risk": self.whale_risk,
+            "prior_token_history": self.prior_token_history,
+            "bonding_curve": self.bonding_curve,
+            "rug_honeypot": self.rug_honeypot,
+            "total_score": self.total_score,
+            "risk_score": self.risk_score,
+            "evidence_confidence": self.evidence_confidence,
+            "decision_band": self.decision_band.value,
+            "band_rationale": self.band_rationale,
+        }
+
+
+def assert_no_real_trading_authorized(band: DecisionBand) -> None:
+    """Assert that no decision band authorizes real trading.
+
+    This is a runtime check to enforce the spec requirement:
+    'No band authorizes real trading.'
+    """
+    # All bands are simulation/observation only
+    authorized_for_real_trading = False
+    assert not authorized_for_real_trading, (
+        f"Decision band '{band.value}' does not authorize real trading. "
+        "Trade FoundUp Phase 0 is simulation-only."
+    )
