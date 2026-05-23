@@ -8,7 +8,7 @@
 
 ---
 
-## WSP 97 Truth Boundary Checklist
+## WSP_97 Truth Boundary Checklist
 
 | Label | Status |
 |-------|--------|
@@ -81,6 +81,8 @@
 - Alias expansion: `X` <-> `twitter`, `issuer` <-> `creator`
 - Module/path boost when query includes known FoundUp name
 - Stronger exact-file scoring for module paths
+
+**Note**: This assessment records the pre-PR #684 retrieval state. PR #684 subsequently added Trade query alias expansion and target-aware verdict logic to address this gap.
 
 ---
 
