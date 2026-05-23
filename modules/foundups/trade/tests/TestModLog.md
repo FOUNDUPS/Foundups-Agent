@@ -85,6 +85,45 @@ python -m pytest modules/foundups/trade/tests -q
 
 ---
 
+### [2026-05-23] - TRADE_POC_SIMULATION_HARNESS_PHASE1 (v0.3.0)
+
+**WSP Protocol References**: WSP 97 (Truth), WSP 104 (Namespace)
+
+#### Tests Added
+
+**test_simulation_harness.py** — Deterministic PoC simulation (35+ tests):
+- TestForbiddenImports: no forbidden network/exchange imports in source
+- TestDeterminism: same seed identical JSON, no wall-clock timestamps, no UUIDs
+- TestSyntheticBar: serialization, OHLC bounds
+- TestSimulationState: equity calculation, unrealized PnL
+- TestTradeLedger: fill accumulation, realized PnL
+- TestSimpleSMAStrategy: hold behavior, buy signals
+- TestSimulationHarness: run returns summary, seed 42 no violations, truth boundary
+- TestInvariants: cash non-negative, no NaN/Infinity, ledger reconciliation, equity reconciliation
+- TestCLI: --simulate exits 0, JSON parseable, deterministic rerun, error handling
+- TestNoNetworkNoOrderPlacement: SimulationGuard active, truth boundary enforced
+
+#### CLI Verification
+
+```bash
+python -m modules.foundups.trade --simulate --seed 42 --json
+# Expected: exit 0, invariant_violations=0
+
+python -m modules.foundups.trade --simulate --seed 42 --json > /tmp/run1.json
+python -m modules.foundups.trade --simulate --seed 42 --json > /tmp/run2.json
+diff /tmp/run1.json /tmp/run2.json
+# Expected: no diff (byte-identical)
+```
+
+#### Test Verification
+
+```bash
+python -m pytest modules/foundups/trade/tests/test_simulation_harness.py -q
+# Expected: 35+ passed
+```
+
+---
+
 ## Future Entries
 
-Next slice: `TRADE_FOUNDUP_BITQUERY_ADAPTER_PHASE1`
+Next slice: `TRADE_POC_SIMULATION_EVIDENCE_REVIEW_PHASE1`
