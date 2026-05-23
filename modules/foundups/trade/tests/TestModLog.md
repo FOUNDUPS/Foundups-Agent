@@ -212,6 +212,58 @@ python -m pytest modules/foundups/trade/tests/ -q
 
 ---
 
+### [2026-05-24] - TRADE_DUE_DILIGENCE_SCORING_ENGINE_PHASE1 (v0.6.0)
+
+**WSP Protocol References**: WSP 97 (Truth), WSP 104 (Namespace)
+**Spec**: TRADE_PUMPFUN_DUE_DILIGENCE_SCORING_SPEC_PHASE1 (PR #683)
+
+#### Tests Added
+
+**test_due_diligence_scoring.py** — Deterministic scoring engine (50 tests):
+- TestForbiddenImports: no forbidden network/exchange imports in source
+- TestForbiddenFields: no api_key/secret/signer fields
+- TestScoreLaunchTiming: fresh vs old launch, bounds checking
+- TestScoreIssuerHistory: clean, risky, blacklisted, none cases
+- TestScoreSocialAuthenticity: good vs none social reports
+- TestScoreTelegramQuality: active vs absent Telegram
+- TestScoreInfluencerRisk: low vs high influencer risk
+- TestScoreHolderDistribution: distributed vs concentrated holdings
+- TestScoreWhaleRisk: no whales vs whale-dominated
+- TestScoreBondingCurve: optimal, early, late curve positions
+- TestScoreRugHoneypot: clean, risky, blacklisted, scammer cases
+- TestEvidenceConfidence: full vs no evidence
+- TestScoringEngine: engine creation, scoring, all components populated
+- TestDeterminism: same inputs same output, JSON deterministic
+- TestDecisionBandDetermination: all 4 bands reachable, hard disqualifiers
+- TestNoRealTradingAuthorization: all bands verified
+
+#### Component Scorer Coverage
+
+| Scorer | Test Cases |
+|--------|------------|
+| score_launch_timing | fresh, old, 30min, bounds |
+| score_issuer_history | clean, risky, blacklisted, none |
+| score_social_authenticity | good, none |
+| score_telegram_quality | good, none |
+| score_influencer_risk | low, high |
+| score_holder_distribution | distributed, concentrated, none |
+| score_whale_risk | no whales, whale-dominated |
+| score_bonding_curve | optimal, early, late |
+| score_rug_honeypot | clean, risky, blacklisted, scammer |
+| calculate_evidence_confidence | full, none |
+
+#### Test Verification
+
+```bash
+python -m pytest modules/foundups/trade/tests/test_due_diligence_scoring.py -q
+# Expected: 50 passed
+
+python -m pytest modules/foundups/trade/tests/ -q
+# Expected: 342 passed (292 existing + 50 new)
+```
+
+---
+
 ## Future Entries
 
-Next slice: `TRADE_DUE_DILIGENCE_SCORING_ENGINE_PHASE1`
+Next slice: `TRADE_DUE_DILIGENCE_SYNTHETIC_REGIME_PACK_PHASE1`
