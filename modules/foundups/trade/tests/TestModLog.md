@@ -124,6 +124,48 @@ python -m pytest modules/foundups/trade/tests/test_simulation_harness.py -q
 
 ---
 
+### [2026-05-23] - TRADE_ADAPTER_INTEGRATION_PHASE1 (v0.4.0)
+
+**WSP Protocol References**: WSP 97 (Truth), WSP 104 (Namespace)
+
+#### Tests Added
+
+**test_simulation_data_adapter.py** — Simulation-only data adapter (21 tests):
+- TestForbiddenImports: no forbidden network/exchange imports in source AST
+- TestForbiddenFields: no forbidden fields (api_key, wallet, etc.) with allowed exceptions (network_capable, live_capable, wallet_capable when hardcoded False)
+- TestSimulatedDataAdapter: default/custom initialization, iter_bars count, get_bars, bar type, sequential indices
+- TestDeterministicEquivalence: adapter bars match harness bars exactly, determinism across 5 seeds, same seed produces identical bars
+- TestDescribe: returns dict, contains required fields, capability flags all False, source reflects fixture_path
+- TestReset: reset regenerates same bars
+- TestFactoryFunctions: create_simulated_adapter, create_default_adapter
+- TestProtocolCompliance: DataAdapterProtocol methods present
+
+#### Determinism Proof
+
+```bash
+# Baseline SHA256 (before adapter):
+python -m modules.foundups.trade --simulate --seed 42 --json | sha256sum
+# d800eb45bd1bb49048ff1b9cabcc4da237f21b735ba4cb571e9e40c682527a89
+
+# After adapter integration:
+python -m modules.foundups.trade --simulate --seed 42 --json | sha256sum
+# d800eb45bd1bb49048ff1b9cabcc4da237f21b735ba4cb571e9e40c682527a89
+
+# Result: byte-identical (adapter adds capability without changing simulation output)
+```
+
+#### Test Verification
+
+```bash
+python -m pytest modules/foundups/trade/tests/test_simulation_data_adapter.py -q
+# Expected: 21 passed
+
+python -m pytest modules/foundups/trade/tests/ -q
+# Expected: 249 passed (228 existing + 21 new)
+```
+
+---
+
 ## Future Entries
 
-Next slice: `TRADE_POC_SIMULATION_EVIDENCE_REVIEW_PHASE1`
+Next slice: `TRADE_ADAPTER_FIXTURE_LOADER_PHASE1` (optional)
