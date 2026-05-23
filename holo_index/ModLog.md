@@ -1,5 +1,58 @@
 # HoloIndex Package ModLog
 
+## [2026-05-23] HOLOINDEX_FOUNDUP_QUERY_ALIAS_AND_TARGETED_VERDICT_PHASE1
+
+**Agent**: 0102
+**WSP References**: WSP 97, WSP 87, WSP 50, WSP 22
+**Status**: COMPLETE
+
+### Summary
+
+Fixed HoloIndex retrieval gap where natural Trade analyst language queries failed to surface
+Trade module documentation. Added search-time alias expansion and target-aware verdict logic.
+
+### Problem
+
+Queries using analyst language (pump.fun, memecoin, issuer, X account, rug pull) did not
+surface Trade docs because Trade uses different terminology (pumpfun, meme-coin,
+creator_address, twitter, rug_pull_score). The agentic RAG verdict was too shallow and
+did not require Trade evidence for Trade-intent queries.
+
+### Changes
+
+- `holo_index/core/search_engine.py`:
+  - Added `_TRADE_ALIAS_GROUPS` for analyst-to-Trade terminology mapping
+  - Added `_TRADE_INTENT_KEYWORDS` for Trade intent detection
+  - Added `_trade_path_boost()` for Trade module path boosting (8.0 for target docs)
+  - Added `_trade_alias_keyword_boost()` for alias expansion in content matching
+- `holo_index/core/agentic_rag_verdict.py`:
+  - Added `QueryIntent.TRADE` intent type
+  - Added `_TRADE_INTENT_KEYWORDS` for intent detection
+  - Added `_has_trade_module_evidence()` for target-aware verdict
+  - Added Trade-specific verdict rules requiring Trade module evidence
+
+### Alias Mappings
+
+| Analyst Term | Trade Terms |
+|--------------|-------------|
+| pump.fun | pumpfun, pump fun, pump_fun |
+| memecoin | meme-coin, meme coin, meme_coin |
+| issuer | creator, creator_address, token_creator |
+| rug pull | rug_pull_score, soft-rug, honeypot |
+| twitter/X | socialevent, social_event |
+| large trades | top traders, walletevent, holder_distribution |
+
+### Test Results
+
+- 36 new tests passed (test_trade_query_alias_retrieval.py)
+- 135 regression tests passed (audit spec, HXA, work ledger, search quality)
+
+### No Reindex Required
+
+This fix uses search-time expansion and boosting — no live reindex needed.
+
+---
+
 ## [2026-05-22] HOLOINDEX_AUDIT_SPEC_SLICE_ID_INDEXING_FIX_PHASE1
 
 **Agent**: 0102 (W1)
