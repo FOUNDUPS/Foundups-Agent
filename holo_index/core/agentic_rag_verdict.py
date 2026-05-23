@@ -54,6 +54,9 @@ class QueryIntent(Enum):
     SKILL = "skill"
     """Query seeks skillz definition."""
 
+    TRADE = "trade"
+    """Query seeks Trade FoundUp module information (pump.fun, memecoin, etc.)."""
+
     GENERAL = "general"
     """General query — any hits acceptable."""
 
@@ -90,12 +93,33 @@ class RetrievalEvidenceSummary:
         )
 
 
+# Trade FoundUp intent keywords
+# HOLOINDEX_FOUNDUP_QUERY_ALIAS_AND_TARGETED_VERDICT_PHASE1
+_TRADE_INTENT_KEYWORDS = [
+    "trade", "trading",
+    "pump.fun", "pumpfun", "pump fun",
+    "memecoin", "meme-coin", "meme coin",
+    "issuer", "creator", "token_creator",
+    "rug pull", "rugpull", "honeypot", "soft-rug",
+    "launchpad", "bonding curve",
+    "whale", "top traders", "holder distribution",
+    "x account", "telegram",
+    "influencer", "promoter",
+    "wallet audit", "due diligence",
+]
+
+
 def classify_query_intent(query: str) -> QueryIntent:
     """Classify query intent based on keywords.
 
     Simple heuristic classification. Can be enhanced with Gemma later.
     """
     query_lower = query.lower()
+
+    # Trade FoundUp intent detection (check first - specific module)
+    # HOLOINDEX_FOUNDUP_QUERY_ALIAS_AND_TARGETED_VERDICT_PHASE1
+    if any(kw in query_lower for kw in _TRADE_INTENT_KEYWORDS):
+        return QueryIntent.TRADE
 
     # WSP intent detection
     if any(kw in query_lower for kw in ["wsp", "protocol", "compliance"]):
@@ -287,10 +311,68 @@ def classify_retrieval_evidence(
             summary.verdict = RetrievalVerdict.SUFFICIENT
         return summary
 
+    # Trade FoundUp intent — must have Trade module evidence
+    # HOLOINDEX_FOUNDUP_QUERY_ALIAS_AND_TARGETED_VERDICT_PHASE1
+    if query_intent == QueryIntent.TRADE:
+        # Check if any hits are from Trade module
+        trade_evidence = _has_trade_module_evidence(payload)
+        if trade_evidence:
+            summary.reason = f"Trade intent satisfied: Trade module evidence found"
+            summary.verdict = RetrievalVerdict.SUFFICIENT
+        elif docs_count > 0 or code_count > 0:
+            # Has hits but none from Trade module
+            summary.degraded = True
+            summary.reason = "Trade intent but no Trade module evidence in results — retrieval may miss relevant docs"
+            summary.verdict = RetrievalVerdict.DEGRADED
+        else:
+            # No relevant hits at all
+            summary.reason = "Trade intent with no Trade module evidence"
+            summary.verdict = RetrievalVerdict.UNSAFE_TO_ACT
+        return summary
+
     # General intent — any hits are acceptable
     summary.reason = f"General query: {summary.total_hits} total hits"
     summary.verdict = RetrievalVerdict.SUFFICIENT
     return summary
+
+
+# Trade module target paths for evidence checking
+# HOLOINDEX_FOUNDUP_QUERY_ALIAS_AND_TARGETED_VERDICT_PHASE1
+_TRADE_TARGET_PATHS = [
+    "modules/foundups/trade/readme.md",
+    "modules/foundups/trade/interface.md",
+    "modules/foundups/trade/roadmap.md",
+    "modules/foundups/trade/src/contracts.py",
+    "modules/foundups/trade/src/adapters.py",
+    "modules/foundups/trade/src/guards.py",
+    "modules/foundups/trade/",
+]
+
+
+def _has_trade_module_evidence(payload: Dict[str, Any]) -> bool:
+    """Check if retrieval results contain Trade module evidence.
+
+    HOLOINDEX_FOUNDUP_QUERY_ALIAS_AND_TARGETED_VERDICT_PHASE1:
+    Trade intent queries are not sufficient unless Trade docs/code appear
+    in the results. This prevents false positives where unrelated hits
+    satisfy generic thresholds.
+    """
+    # Check all hit types
+    hit_lists = [
+        payload.get("code_hits", []),
+        payload.get("docs_hits", []),
+        payload.get("wsp_hits", []),
+        payload.get("knowledge_hits", []),
+    ]
+
+    for hits in hit_lists:
+        for hit in hits:
+            path = (hit.get("path") or hit.get("location") or "").lower().replace("\\", "/")
+            for target in _TRADE_TARGET_PATHS:
+                if target in path:
+                    return True
+
+    return False
 
 
 def format_verdict_for_agent(summary: RetrievalEvidenceSummary) -> str:

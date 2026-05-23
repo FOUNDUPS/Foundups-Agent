@@ -502,6 +502,140 @@ def _wsp_alias_match_boost(query: str, path: str, title: str) -> float:
 
 
 # ---------------------------------------------------------------------------
+# HIA6: Trade/FoundUp analyst language alias registry
+# HOLOINDEX_FOUNDUP_QUERY_ALIAS_AND_TARGETED_VERDICT_PHASE1
+# ---------------------------------------------------------------------------
+
+# Maps natural analyst language to Trade module terminology.
+# When a query uses analyst terms like "pump.fun" or "rug pull", expands
+# to include the actual terminology used in Trade contracts/docs.
+# No LLM required. Deterministic pattern matching.
+
+_TRADE_ALIAS_GROUPS: Dict[str, List[str]] = {
+    # Platform aliases
+    "pump.fun": ["pumpfun", "pump fun", "pump_fun"],
+    "pumpfun": ["pump.fun", "pump fun", "pump_fun"],
+    # Token type aliases
+    "memecoin": ["meme-coin", "meme coin", "meme_coin"],
+    "meme-coin": ["memecoin", "meme coin", "meme_coin"],
+    "meme coin": ["memecoin", "meme-coin", "meme_coin"],
+    # Creator/issuer aliases
+    "issuer": ["creator", "creator_address", "token_creator"],
+    "creator": ["issuer", "creator_address", "token_creator"],
+    # Social platform aliases
+    "x account": ["twitter", "socialevent", "social_event"],
+    "twitter": ["x account", "socialevent", "social_event"],
+    "telegram": ["socialevent", "social_event", "tg"],
+    # Risk/fraud aliases
+    "rug pull": ["rug_pull_score", "soft-rug", "honeypot", "rugpull", "rug_pull"],
+    "rug_pull": ["rug pull", "rug_pull_score", "soft-rug", "honeypot"],
+    "rugpull": ["rug pull", "rug_pull_score", "soft-rug", "honeypot"],
+    "honeypot": ["rug pull", "rug_pull_score", "honeypot_detection"],
+    # Trading activity aliases
+    "large trades": ["top traders", "walletevent", "wallet_event", "holder distribution"],
+    "top traders": ["large trades", "walletevent", "wallet_event", "holder_distribution"],
+    "whale": ["top traders", "large trades", "holder_distribution"],
+    # Social influence aliases
+    "influencer": ["social", "engagement", "promoter", "socialevent"],
+    "promoter": ["influencer", "social", "engagement"],
+}
+
+# Trade-specific keywords that indicate Trade intent
+_TRADE_INTENT_KEYWORDS: List[str] = [
+    "trade", "trading", "pump.fun", "pumpfun", "pump fun",
+    "memecoin", "meme-coin", "meme coin",
+    "issuer", "creator", "token_creator",
+    "rug pull", "rugpull", "honeypot", "soft-rug",
+    "launchpad", "bonding curve",
+    "whale", "top traders", "holder distribution",
+    "x account", "twitter", "telegram",
+    "influencer", "promoter",
+    "wallet audit", "due diligence",
+]
+
+# Trade module paths that MUST appear for Trade intent queries
+_TRADE_TARGET_PATHS: List[str] = [
+    "modules/foundups/trade/readme.md",
+    "modules/foundups/trade/interface.md",
+    "modules/foundups/trade/roadmap.md",
+    "modules/foundups/trade/src/contracts.py",
+    "modules/foundups/trade/src/adapters.py",
+    "modules/foundups/trade/src/guards.py",
+]
+
+
+def _is_trade_intent_query(query: str) -> bool:
+    """Detect if query has Trade/FoundUp intent based on keywords."""
+    ql = query.lower()
+    for kw in _TRADE_INTENT_KEYWORDS:
+        if kw in ql:
+            return True
+    return False
+
+
+def _expand_trade_aliases(query: str) -> List[str]:
+    """Expand Trade analyst language to include all aliases.
+
+    Returns list of additional search terms to consider.
+    """
+    ql = query.lower()
+    expansions: List[str] = []
+
+    for term, aliases in _TRADE_ALIAS_GROUPS.items():
+        if term in ql:
+            for alias in aliases:
+                if alias not in ql:
+                    expansions.append(alias)
+
+    return expansions
+
+
+def _trade_path_boost(query: str, path: str) -> float:
+    """Return boost if Trade intent query targets Trade module path.
+
+    HOLOINDEX_FOUNDUP_QUERY_ALIAS_AND_TARGETED_VERDICT_PHASE1:
+    When query has Trade intent, boost Trade module paths significantly.
+    """
+    if not _is_trade_intent_query(query):
+        return 0.0
+
+    path_lower = path.lower().replace("\\", "/")
+
+    # Strong boost for Trade module paths
+    if "modules/foundups/trade/" in path_lower:
+        # Extra boost for core documentation
+        for target in _TRADE_TARGET_PATHS:
+            if target in path_lower:
+                return 8.0  # Very strong boost for Trade target docs
+        return 5.0  # Strong boost for any Trade module file
+
+    return 0.0
+
+
+def _trade_alias_keyword_boost(query: str, path: str, title: str, content: str = "") -> float:
+    """Return boost if expanded Trade aliases match document content.
+
+    HOLOINDEX_FOUNDUP_QUERY_ALIAS_AND_TARGETED_VERDICT_PHASE1:
+    Bridges analyst language to Trade module terminology.
+    """
+    if not _is_trade_intent_query(query):
+        return 0.0
+
+    expansions = _expand_trade_aliases(query)
+    if not expansions:
+        return 0.0
+
+    boost = 0.0
+    combined = (path + " " + title + " " + content).lower()
+
+    for alias in expansions:
+        if alias in combined:
+            boost += 1.5  # Boost for each matched alias
+
+    return min(boost, 6.0)  # Cap at 6.0
+
+
+# ---------------------------------------------------------------------------
 # HIA2: Confidence scoring (pure heuristic, no LLM)
 # ---------------------------------------------------------------------------
 
@@ -793,6 +927,9 @@ def _search_collection(
         # Work Ledger boost: PR, worker, branch, status, foundup_id
         if doc_type == "work_ledger_slice":
             keyword_score += _work_ledger_combined_boost(query, meta)
+        # HIA6: Trade/FoundUp alias and path boost
+        keyword_score += _trade_path_boost(query, path)
+        keyword_score += _trade_alias_keyword_boost(query, path, title, doc or "")
 
         if doc_type_filter != "all" and not doc_type.startswith(doc_type_filter):
             continue
@@ -912,6 +1049,9 @@ def _lexical_search_collection(
             # Work Ledger boost: PR, worker, branch, status, foundup_id
             if doc_type == "work_ledger_slice":
                 keyword_score += _work_ledger_combined_boost(query, meta)
+            # HIA6: Trade/FoundUp alias and path boost
+            keyword_score += _trade_path_boost(query, path)
+            keyword_score += _trade_alias_keyword_boost(query, path, title, doc_text)
 
             if keyword_score <= 0:
                 continue
