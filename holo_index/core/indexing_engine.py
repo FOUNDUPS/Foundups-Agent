@@ -401,14 +401,25 @@ def _collect_web_asset_entries(holo: "HoloIndex") -> List[Dict[str, str]]:
 # Index orchestrators
 # ---------------------------------------------------------------------------
 
-def index_code_entries(holo: "HoloIndex") -> None:
-    """Index NAVIGATION code entries and web assets into ChromaDB."""
+def index_code_entries(holo: "HoloIndex") -> IndexResult:
+    """Index NAVIGATION code entries and web assets into ChromaDB.
+
+    HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PARITY_PHASE1: Returns IndexResult
+    for CLI observability parity with index_docs_entries().
+    """
+    collection_name = "navigation_code"
     nav_entries = list(holo.need_to.items())
     web_assets = _collect_web_asset_entries(holo)
+    discovered_count = len(nav_entries) + len(web_assets)
 
     if not nav_entries and not web_assets:
         holo._log_agent_action("No code or web entries to index", "WARN")
-        return
+        return IndexResult(
+            discovered_count=0,
+            indexed_count=0,
+            collection_name=collection_name,
+            warning="No code or web entries to index — discovery returned zero items"
+        )
 
     holo._log_agent_action(f"Indexing {len(nav_entries)} code navigation entries...", "INDEX")
     if web_assets:
@@ -462,6 +473,7 @@ def index_code_entries(holo: "HoloIndex") -> None:
             meta["cube"] = cube
         metadatas.append(meta)
 
+    indexed_count = len(ids)
     holo.code_collection.add(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
     holo._log_agent_action("Code index refreshed on SSD", "OK")
 
@@ -472,14 +484,24 @@ def index_code_entries(holo: "HoloIndex") -> None:
         except Exception as exc:
             holo._log_agent_action(f"Symbol index skipped: {exc}", "WARN")
 
+    return IndexResult(
+        discovered_count=discovered_count,
+        indexed_count=indexed_count,
+        collection_name=collection_name,
+    )
 
-def index_symbol_entries(holo: "HoloIndex", roots: Optional[List[Path]] = None) -> None:
+
+def index_symbol_entries(holo: "HoloIndex", roots: Optional[List[Path]] = None) -> IndexResult:
     """Index Python symbols (functions/classes) for semantic discovery.
 
     HIA6A: Critical infrastructure paths are listed first to ensure they're
     indexed before the 20,000 entry limit is hit. Order matters because
     modules/ alone has 2350+ files with many symbols.
+
+    HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PARITY_PHASE1: Returns IndexResult
+    for CLI observability parity with index_docs_entries().
     """
+    collection_name = "navigation_symbols"
     env_roots = os.getenv("HOLO_SYMBOL_ROOTS")
     if env_roots:
         roots = [holo.project_root / Path(r.strip()) for r in env_roots.split(";") if r.strip()]
@@ -582,11 +604,22 @@ def index_symbol_entries(holo: "HoloIndex", roots: Optional[List[Path]] = None) 
                 metadatas=metadatas[start:end],
             )
         holo._log_agent_action(f"Symbol index refreshed: {entry_count} entries", "OK")
+        return IndexResult(
+            discovered_count=file_count,
+            indexed_count=entry_count,
+            collection_name=collection_name,
+        )
     else:
         holo._log_agent_action("Symbol index empty - no entries added", "WARN")
+        return IndexResult(
+            discovered_count=file_count,
+            indexed_count=0,
+            collection_name=collection_name,
+            warning="Symbol index empty — no entries added"
+        )
 
 
-def index_wsp_entries(holo: "HoloIndex", paths: Optional[List[Path]] = None) -> None:
+def index_wsp_entries(holo: "HoloIndex", paths: Optional[List[Path]] = None) -> IndexResult:
     """Index WSP protocol documents into ChromaDB.
 
     CFZ4: ONLY indexes true WSP protocols (WSP_*.md files).
@@ -597,7 +630,12 @@ def index_wsp_entries(holo: "HoloIndex", paths: Optional[List[Path]] = None) -> 
         paths: Optional list of paths to search for WSP_*.md files.
                If None, defaults to WSP_framework/src.
                WSP purity enforced: Only WSP_*.md files are indexed regardless of paths.
+
+    Returns:
+        IndexResult with discovered_count, indexed_count, collection_name,
+        and optional warning message.
     """
+    collection_name = "navigation_wsp"
     # CFZ4: WSP protocols from specified paths or default to WSP_framework/src
     if paths is None:
         wsp_roots = [holo.project_root / "WSP_framework" / "src"]
@@ -618,9 +656,16 @@ def index_wsp_entries(holo: "HoloIndex", paths: Optional[List[Path]] = None) -> 
         and '_backup' not in str(f).lower()
     ]
 
+    discovered_count = len(files)
+
     if not files:
         holo._log_agent_action("No WSP documents found to index", "WARN")
-        return
+        return IndexResult(
+            discovered_count=0,
+            indexed_count=0,
+            collection_name=collection_name,
+            warning="No WSP documents found to index"
+        )
 
     holo._log_agent_action(f"Indexing {len(files)} WSP documents...", "INDEX")
     holo.wsp_collection = holo._reset_collection("navigation_wsp")
@@ -672,6 +717,8 @@ def index_wsp_entries(holo: "HoloIndex", paths: Optional[List[Path]] = None) -> 
             "summary": summary,
         }
 
+    indexed_count = len(ids)
+
     if embeddings:
         if os.getenv("HOLO_VERBOSE", "").lower() in {"1", "true", "yes"}:
             holo._log_agent_action(
@@ -682,8 +729,19 @@ def index_wsp_entries(holo: "HoloIndex", paths: Optional[List[Path]] = None) -> 
         holo.wsp_summary = summary_cache
         holo.wsp_summary_file.write_text(json.dumps(holo.wsp_summary, indent=2), encoding='utf-8')
         holo._log_agent_action("WSP index refreshed and summary cache saved", "OK")
+        return IndexResult(
+            discovered_count=discovered_count,
+            indexed_count=indexed_count,
+            collection_name=collection_name,
+        )
     else:
         holo._log_agent_action("No WSP entries were indexed (empty content)", "WARN")
+        return IndexResult(
+            discovered_count=discovered_count,
+            indexed_count=0,
+            collection_name=collection_name,
+            warning="No WSP entries were indexed — all discovered files had empty content"
+        )
 
 
 def index_docs_entries(holo: "HoloIndex") -> IndexResult:
@@ -805,17 +863,27 @@ def index_docs_entries(holo: "HoloIndex") -> IndexResult:
         )
 
 
-def index_knowledge_entries(holo: "HoloIndex") -> None:
+def index_knowledge_entries(holo: "HoloIndex") -> IndexResult:
     """CFZ4: Index papers/research into navigation_knowledge collection.
 
     Content: WSP_knowledge/docs/Papers/**
     ID prefix: paper_
+
+    Returns:
+        IndexResult with discovered_count, indexed_count, collection_name,
+        and optional warning message.
     """
+    collection_name = "navigation_knowledge"
     knowledge_path = holo.project_root / "WSP_knowledge" / "docs" / "Papers"
 
     if not knowledge_path.exists():
         holo._log_agent_action(f"Knowledge path not found: {knowledge_path}", "WARN")
-        return
+        return IndexResult(
+            discovered_count=0,
+            indexed_count=0,
+            collection_name=collection_name,
+            warning=f"Knowledge path not found: {knowledge_path}"
+        )
 
     all_files = sorted(knowledge_path.rglob("*.md"))
     files = [
@@ -826,9 +894,16 @@ def index_knowledge_entries(holo: "HoloIndex") -> None:
         and '\\archive\\' not in str(f).lower()
     ]
 
+    discovered_count = len(files)
+
     if not files:
         holo._log_agent_action("No knowledge files found to index", "WARN")
-        return
+        return IndexResult(
+            discovered_count=0,
+            indexed_count=0,
+            collection_name=collection_name,
+            warning="No knowledge files found to index"
+        )
 
     holo._log_agent_action(f"Indexing {len(files)} papers into navigation_knowledge...", "INDEX")
     holo.knowledge_collection = holo._reset_collection("navigation_knowledge")
@@ -865,11 +940,24 @@ def index_knowledge_entries(holo: "HoloIndex") -> None:
             "external_repo": know_fed["external_repo"],
         })
 
+    indexed_count = len(ids)
+
     if embeddings:
         holo.knowledge_collection.add(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
         holo._log_agent_action(f"Knowledge index refreshed: {len(ids)} papers", "OK")
+        return IndexResult(
+            discovered_count=discovered_count,
+            indexed_count=indexed_count,
+            collection_name=collection_name,
+        )
     else:
         holo._log_agent_action("No knowledge entries were indexed", "WARN")
+        return IndexResult(
+            discovered_count=discovered_count,
+            indexed_count=0,
+            collection_name=collection_name,
+            warning="No knowledge entries were indexed — all discovered files had empty content"
+        )
 
 
 def index_test_registry(holo: "HoloIndex") -> None:
@@ -930,11 +1018,17 @@ def index_test_registry(holo: "HoloIndex") -> None:
         holo._log_agent_action("No test entries indexed", "WARN")
 
 
-def index_skillz_entries(holo: "HoloIndex") -> None:
-    """WSP 95: Index SKILLz files for agent discovery."""
+def index_skillz_entries(holo: "HoloIndex") -> IndexResult:
+    """WSP 95: Index SKILLz files for agent discovery.
+
+    Returns:
+        IndexResult with discovered_count, indexed_count, collection_name,
+        and optional warning message.
+    """
     import glob
     import yaml
 
+    collection_name = "navigation_skills"
     skillz_patterns = [
         str(holo.project_root / "modules" / "**" / "skills" / "*" / "SKILLz.md"),
         str(holo.project_root / "modules" / "**" / "skillz" / "*" / "SKILLz.md"),
@@ -949,9 +1043,16 @@ def index_skillz_entries(holo: "HoloIndex") -> None:
         found = glob.glob(pattern, recursive=True)
         files.extend(Path(f) for f in found)
 
+    discovered_count = len(files)
+
     if not files:
         holo._log_agent_action("No SKILLz files found to index", "WARN")
-        return
+        return IndexResult(
+            discovered_count=0,
+            indexed_count=0,
+            collection_name=collection_name,
+            warning="No SKILLz files found to index"
+        )
 
     holo._log_agent_action(f"Indexing {len(files)} SKILLz files...", "INDEX")
     holo.skill_collection = holo._reset_collection("navigation_skills")
@@ -1021,6 +1122,8 @@ def index_skillz_entries(holo: "HoloIndex") -> None:
             holo._log_agent_action(f"Failed to parse SKILLz {file_path}: {e}", "WARN")
             continue
 
+    indexed_count = len(ids)
+
     if embeddings:
         if not (len(ids) == len(embeddings) == len(documents) == len(metadatas)):
             holo._log_agent_action(
@@ -1032,11 +1135,27 @@ def index_skillz_entries(holo: "HoloIndex") -> None:
                 ),
                 "ERROR",
             )
-            return
+            return IndexResult(
+                discovered_count=discovered_count,
+                indexed_count=0,
+                collection_name=collection_name,
+                warning="SKILLz index length mismatch — aborting collection add"
+            )
         holo.skill_collection.add(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
         holo._log_agent_action(f"SKILLz index refreshed: {len(embeddings)} skills indexed", "OK")
+        return IndexResult(
+            discovered_count=discovered_count,
+            indexed_count=indexed_count,
+            collection_name=collection_name,
+        )
     else:
         holo._log_agent_action("No SKILLz entries were indexed", "WARN")
+        return IndexResult(
+            discovered_count=discovered_count,
+            indexed_count=0,
+            collection_name=collection_name,
+            warning="No SKILLz entries were indexed — all discovered files had empty or invalid content"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -1085,7 +1204,7 @@ WORK_LEDGER_STATUS_RANKING = {
 }
 
 
-def index_work_ledger_entries(holo: "HoloIndex") -> None:
+def index_work_ledger_entries(holo: "HoloIndex") -> IndexResult:
     """Index work ledger slices for semantic search.
 
     Spec: FOUNDUPS_WORK_LEDGER_HOLOINDEX_INDEXING_SPEC_PHASE1
@@ -1096,23 +1215,45 @@ def index_work_ledger_entries(holo: "HoloIndex") -> None:
     - source, branch, pr_number, related_foundup_id
     - related_wsp_joined, blocked_by_joined, next_slice
     - last_verified_at, freshness_score, status_rank
+
+    Returns:
+        IndexResult with discovered_count, indexed_count, collection_name,
+        and optional warning message.
     """
+    collection_name = "navigation_work_ledger"
     ledger_path = holo.project_root / "docs" / "0102_session_briefings" / "work_ledger.example.json"
 
     if not ledger_path.exists():
         holo._log_agent_action("work_ledger.example.json not found", "WARN")
-        return
+        return IndexResult(
+            discovered_count=0,
+            indexed_count=0,
+            collection_name=collection_name,
+            warning="work_ledger.example.json not found"
+        )
 
     try:
         ledger_data = json.loads(ledger_path.read_text(encoding="utf-8"))
     except Exception as e:
         holo._log_agent_action(f"Failed to load work ledger: {e}", "ERROR")
-        return
+        return IndexResult(
+            discovered_count=0,
+            indexed_count=0,
+            collection_name=collection_name,
+            warning=f"Failed to load work ledger: {e}"
+        )
 
     slices = ledger_data.get("slices", [])
+    discovered_count = len(slices)
+
     if not slices:
         holo._log_agent_action("Work ledger has no slices", "WARN")
-        return
+        return IndexResult(
+            discovered_count=0,
+            indexed_count=0,
+            collection_name=collection_name,
+            warning="Work ledger has no slices"
+        )
 
     holo._log_agent_action(f"Indexing {len(slices)} work ledger slices...", "INDEX")
     holo.work_ledger_collection = holo._reset_collection("navigation_work_ledger")
@@ -1193,6 +1334,8 @@ def index_work_ledger_entries(holo: "HoloIndex") -> None:
         documents.append(doc_payload)
         metadatas.append(metadata)
 
+    indexed_count = len(ids)
+
     if embeddings:
         if not (len(ids) == len(embeddings) == len(documents) == len(metadatas)):
             holo._log_agent_action(
@@ -1200,10 +1343,26 @@ def index_work_ledger_entries(holo: "HoloIndex") -> None:
                 f"documents={len(documents)}, metadatas={len(metadatas)}). Aborting.",
                 "ERROR",
             )
-            return
+            return IndexResult(
+                discovered_count=discovered_count,
+                indexed_count=0,
+                collection_name=collection_name,
+                warning="Work ledger index length mismatch — aborting collection add"
+            )
         holo.work_ledger_collection.add(
             ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas
         )
         holo._log_agent_action(f"Work ledger index refreshed: {len(embeddings)} slices indexed", "OK")
+        return IndexResult(
+            discovered_count=discovered_count,
+            indexed_count=indexed_count,
+            collection_name=collection_name,
+        )
     else:
         holo._log_agent_action("No work ledger entries were indexed", "WARN")
+        return IndexResult(
+            discovered_count=discovered_count,
+            indexed_count=0,
+            collection_name=collection_name,
+            warning="No work ledger entries were indexed"
+        )
