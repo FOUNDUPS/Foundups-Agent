@@ -96,10 +96,12 @@ REQUIRED_COLLECTIONS = {
 }
 
 OPTIONAL_COLLECTIONS = {
-    "navigation_docs": False,       # Optional but recommended
-    "navigation_knowledge": False,  # Optional but recommended
-    "navigation_tests": False,      # Optional
-    "navigation_skills": False,     # Optional
+    "navigation_docs": False,         # Optional but recommended
+    "navigation_knowledge": False,    # Optional but recommended
+    "navigation_tests": False,        # Optional
+    "navigation_skills": False,       # Optional
+    "navigation_work_ledger": False,  # Optional - slice tracking (WSP 15/60/70)
+    "navigation_vocabulary": False,   # Optional - terminology index
 }
 
 ALL_EXPECTED_COLLECTIONS = {**REQUIRED_COLLECTIONS, **OPTIONAL_COLLECTIONS}
@@ -119,6 +121,7 @@ def _get_collection_count(holo: "HoloIndex", collection_name: str) -> tuple[int,
         collection = None
 
         # Map collection names to attributes
+        # Note: navigation_vocabulary has no class attribute; uses client fallback
         attr_map = {
             "navigation_code": "code_collection",
             "navigation_wsp": "wsp_collection",
@@ -127,6 +130,7 @@ def _get_collection_count(holo: "HoloIndex", collection_name: str) -> tuple[int,
             "navigation_symbols": "symbol_collection",
             "navigation_docs": "docs_collection",
             "navigation_knowledge": "knowledge_collection",
+            "navigation_work_ledger": "work_ledger_collection",
         }
 
         attr_name = attr_map.get(collection_name)
