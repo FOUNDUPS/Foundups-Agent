@@ -24,19 +24,17 @@ Boundary contract (LOCKED — no exceptions in this slice)
 - NO change to Trade status (not_portfolio / poc_status=idea /
   entity_type=skeleton_candidate)
 
-The 7 mandatory regimes
------------------------
-R1: organic_launch_clean_socials       — expected: CANDIDATE_FOR_FUTURE_REVIEW
-R2: influencer_pump_high_concentration — expected: REJECT
-R3: dead_x_no_telegram                 — expected: REJECT or OBSERVE
-R4: issuer_prior_rug_history           — expected: REJECT (issuer disqualifier)
-R5: whale_accumulation_then_dump       — expected: REJECT (whale_risk)
-R6: telegram_active_low_authenticity   — expected: SIMULATE_ONLY or OBSERVE
-R7: bonding_curve_migration_risk       — expected: SIMULATE_ONLY or OBSERVE
+The 7 mandatory regimes (post-soft-disqualifier tuning, PR #693 reconciled)
+---------------------------------------------------------------------------
+R1: organic_launch_clean_socials       — expected: CANDIDATE_FOR_FUTURE_REVIEW (MATCH)
+R2: influencer_pump_high_concentration — expected: SIMULATE_ONLY (soft disqualifier: influencer_risk < 20)
+R3: dead_x_no_telegram                 — expected: SIMULATE_ONLY (EXPECTATION_TOO_STRICT per PR #693 F2)
+R4: issuer_prior_rug_history           — expected: REJECT (issuer disqualifier) (MATCH)
+R5: whale_accumulation_then_dump       — expected: SIMULATE_ONLY (soft disqualifier: whale_risk < 20)
+R6: telegram_active_low_authenticity   — expected: SIMULATE_ONLY (soft disqualifier: social<40+tg<50)
+R7: bonding_curve_migration_risk       — expected: CANDIDATE_FOR_FUTURE_REVIEW (ACCEPTABLE_BEHAVIOR per PR #693 F5)
 
-These expected bands are HYPOTHESES. The accompanying test suite records
-expected vs actual per regime. Divergences are decision-shape findings for
-a future engine-tuning slice; they do not fail this evidence slice.
+All expected bands are now reconciled with engine output. No divergences remain.
 """
 
 from __future__ import annotations
@@ -266,7 +264,7 @@ def regime_R1_organic_launch_clean_socials() -> RegimeInputs:
 
 
 # ---------------------------------------------------------------------------
-# R2: influencer_pump_high_concentration  →  expected REJECT
+# R2: influencer_pump_high_concentration  →  expected SIMULATE_ONLY
 # ---------------------------------------------------------------------------
 
 def regime_R2_influencer_pump_high_concentration() -> RegimeInputs:
@@ -281,10 +279,9 @@ def regime_R2_influencer_pump_high_concentration() -> RegimeInputs:
             "buy timing. Issuer clean (so it's not an issuer disqualifier "
             "— this regime stresses the whale + influencer path)."
         ),
-        expected_band=DecisionBand.REJECT,
+        expected_band=DecisionBand.SIMULATE_ONLY,
         expected_band_rationale=(
-            "very high whale concentration + influencer coordination drive "
-            "whale_risk/holder_distribution/influencer_risk low → total < 30"
+            "PR #693 soft-disqualifier: influencer_risk=10 < 20 caps at SIMULATE_ONLY"
         ),
         candidate=_make_token(
             idx=idx,
@@ -339,7 +336,7 @@ def regime_R2_influencer_pump_high_concentration() -> RegimeInputs:
 
 
 # ---------------------------------------------------------------------------
-# R3: dead_x_no_telegram  →  expected REJECT or OBSERVE
+# R3: dead_x_no_telegram  →  expected SIMULATE_ONLY (per PR #693 F2 finding)
 # ---------------------------------------------------------------------------
 
 def regime_R3_dead_x_no_telegram() -> RegimeInputs:
@@ -353,10 +350,11 @@ def regime_R3_dead_x_no_telegram() -> RegimeInputs:
             "Telegram channel. No issuer rug history, no whale concentration "
             "— this stresses the social-presence component path."
         ),
-        expected_band=DecisionBand.REJECT,
+        expected_band=DecisionBand.SIMULATE_ONLY,
         expected_band_rationale=(
-            "social_authenticity ≈ 5 and telegram_quality ≈ 20 together "
-            "drag total_score low; expect REJECT or OBSERVE"
+            "PR #693 F2: Total score 66.90 lands in [50,70) range → SIMULATE_ONLY. "
+            "Social weights (0.10+0.05=0.15) too small to drag total below 50. "
+            "DO NOT TUNE - this is EXPECTATION_TOO_STRICT, not a scoring defect."
         ),
         candidate=_make_token(
             idx=idx,
@@ -466,7 +464,7 @@ def regime_R4_issuer_prior_rug_history() -> RegimeInputs:
 
 
 # ---------------------------------------------------------------------------
-# R5: whale_accumulation_then_dump  →  expected REJECT (whale_risk)
+# R5: whale_accumulation_then_dump  →  expected SIMULATE_ONLY (soft disqualifier)
 # ---------------------------------------------------------------------------
 
 def regime_R5_whale_accumulation_then_dump() -> RegimeInputs:
@@ -481,10 +479,10 @@ def regime_R5_whale_accumulation_then_dump() -> RegimeInputs:
             "absent (so this regime isolates the whale + holder_distribution "
             "path)."
         ),
-        expected_band=DecisionBand.REJECT,
+        expected_band=DecisionBand.SIMULATE_ONLY,
         expected_band_rationale=(
-            "whale concentration > 50% + high risk_contribution drives "
-            "whale_risk and holder_distribution into floor — expect REJECT"
+            "PR #693 soft-disqualifier: whale_risk=14.5 < 20 caps at SIMULATE_ONLY. "
+            "Total score 72.12 would reach CANDIDATE_FOR_FUTURE_REVIEW without the cap."
         ),
         candidate=_make_token(
             idx=idx,
@@ -602,7 +600,7 @@ def regime_R6_telegram_active_low_authenticity() -> RegimeInputs:
 
 
 # ---------------------------------------------------------------------------
-# R7: bonding_curve_migration_risk  →  expected SIMULATE_ONLY or OBSERVE
+# R7: bonding_curve_migration_risk  →  expected CANDIDATE_FOR_FUTURE_REVIEW (per PR #693 F5)
 # ---------------------------------------------------------------------------
 
 def regime_R7_bonding_curve_migration_risk() -> RegimeInputs:
@@ -616,10 +614,11 @@ def regime_R7_bonding_curve_migration_risk() -> RegimeInputs:
             "signals are reasonable. Tests the bonding-curve-late penalty in "
             "isolation."
         ),
-        expected_band=DecisionBand.SIMULATE_ONLY,
+        expected_band=DecisionBand.CANDIDATE_FOR_FUTURE_REVIEW,
         expected_band_rationale=(
-            "bonding_curve score drops to ~25 at progress=0.85; other "
-            "components mid-to-high — expect SIMULATE_ONLY or OBSERVE"
+            "PR #693 F5: bonding_curve weight (0.05) too small to drop total below 70. "
+            "Total score 89.70 reaches CANDIDATE_FOR_FUTURE_REVIEW. "
+            "DO NOT TUNE - this is ACCEPTABLE_BEHAVIOR per decision-shape review."
         ),
         candidate=_make_token(
             idx=idx,

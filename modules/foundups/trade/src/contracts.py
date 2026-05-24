@@ -1110,8 +1110,14 @@ class TradeDueDiligenceScore:
 
         Spec Section 8.4: Decision rules.
         No band authorizes real trading.
+
+        Soft disqualifiers (PR #696 TRADE_DUE_DILIGENCE_SOFT_DISQUALIFIER_PHASE1):
+        - whale_risk < 20: cap at SIMULATE_ONLY (R5 whale accumulation risk)
+        - influencer_risk < 20: cap at SIMULATE_ONLY (R2 pump coordination risk)
+        - social_authenticity < 40 AND telegram_quality < 50: cap at SIMULATE_ONLY
+          (R6 low-authenticity social signals)
         """
-        # Hard disqualifiers
+        # Hard disqualifiers (unchanged)
         if self.rug_honeypot < 20:
             return DecisionBand.REJECT
         if self.issuer_history < 20:
@@ -1127,6 +1133,21 @@ class TradeDueDiligenceScore:
         elif self.total_score < 70:
             return DecisionBand.SIMULATE_ONLY
         else:
+            # Soft disqualifiers: cap CANDIDATE_FOR_FUTURE_REVIEW at SIMULATE_ONLY
+            # when certain risk signals are present (PR #696 soft-disqualifier tuning)
+
+            # R5: whale_risk < 20 indicates whale accumulation with dump risk
+            if self.whale_risk < 20:
+                return DecisionBand.SIMULATE_ONLY
+
+            # R2: influencer_risk < 20 indicates coordinated pump risk
+            if self.influencer_risk < 20:
+                return DecisionBand.SIMULATE_ONLY
+
+            # R6: low social authenticity combined with low telegram quality
+            if self.social_authenticity < 40 and self.telegram_quality < 50:
+                return DecisionBand.SIMULATE_ONLY
+
             return DecisionBand.CANDIDATE_FOR_FUTURE_REVIEW
 
     def to_dict(self) -> Dict[str, Any]:

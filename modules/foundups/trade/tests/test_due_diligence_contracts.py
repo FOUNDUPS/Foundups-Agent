@@ -536,11 +536,20 @@ class TestDecisionBandDetermination:
         assert score.determine_decision_band() == DecisionBand.SIMULATE_ONLY
 
     def test_score_over_70_is_candidate(self):
-        """total_score > 70 is CANDIDATE_FOR_FUTURE_REVIEW."""
+        """total_score > 70 is CANDIDATE_FOR_FUTURE_REVIEW.
+
+        Note: Must set whale_risk, influencer_risk, social_authenticity, and
+        telegram_quality above soft-disqualifier thresholds to isolate the
+        total_score band logic (PR #696 soft-disqualifier tuning).
+        """
         score = TradeDueDiligenceScore(
             token_address="test",
             issuer_history=80.0,
             rug_honeypot=80.0,
+            whale_risk=80.0,  # Above soft-disqualifier threshold (20)
+            influencer_risk=80.0,  # Above soft-disqualifier threshold (20)
+            social_authenticity=80.0,  # Above soft-disqualifier threshold (40)
+            telegram_quality=80.0,  # Above soft-disqualifier threshold (50)
             total_score=75.0,
             evidence_confidence=0.9,
         )
@@ -635,11 +644,20 @@ class TestMissingEvidenceConfidence:
         assert score.determine_decision_band() == DecisionBand.OBSERVE
 
     def test_partial_confidence_allows_higher_bands(self):
-        """Confidence >= 0.5 allows higher bands."""
+        """Confidence >= 0.5 allows higher bands.
+
+        Note: Must set whale_risk, influencer_risk, social_authenticity, and
+        telegram_quality above soft-disqualifier thresholds to isolate the
+        confidence logic (PR #696 soft-disqualifier tuning).
+        """
         score = TradeDueDiligenceScore(
             token_address="test",
             issuer_history=80.0,
             rug_honeypot=80.0,
+            whale_risk=80.0,  # Above soft-disqualifier threshold (20)
+            influencer_risk=80.0,  # Above soft-disqualifier threshold (20)
+            social_authenticity=80.0,  # Above soft-disqualifier threshold (40)
+            telegram_quality=80.0,  # Above soft-disqualifier threshold (50)
             total_score=75.0,
             evidence_confidence=0.6,
         )
