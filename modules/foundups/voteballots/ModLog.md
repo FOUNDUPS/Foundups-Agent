@@ -2,6 +2,64 @@
 
 ---
 
+## 2026-05-22 — FEC Adapter Implementation (PoC Phase 1, Slice 1)
+
+**Author**: W6 (0102)
+**Slice**: VOTE_POC_FEC_ADAPTER_PHASE1
+**Branch**: `feat/vote-poc-fec-adapter-phase1`
+**WSP Compliance**: WSP 00, WSP 15, WSP 50, WSP 64, WSP 83, WSP 87, WSP 97, WSP 104
+
+### Created
+
+- `src/fec_adapter.py` — Deterministic, mockable FEC API adapter boundary (786 lines)
+- `tests/test_fec_adapter.py` — Unit tests for adapter (46 tests)
+
+### FEC Adapter Features
+
+| Feature | Description |
+|---------|-------------|
+| Mock Mode (default) | Offline, no API key required |
+| Fixture Data | Built-in candidates (AOC, Biden, Sanders) |
+| Error Simulation | Rate limit, unavailable, network errors |
+| WSP 97 Confidence | All records have `verified_fact` confidence |
+| Source Provenance | `FECSource` on all records |
+| Ambiguity Handling | `disambiguation_required` flag with message |
+
+### Data Types
+
+- `FECError` / `FECErrorType` — Structured error handling
+- `ConfidenceLevel` — WSP 97 confidence enum
+- `CandidateRecord`, `CommitteeRecord`, `ContributionRecord` — FEC data structures
+- `FundingSummary` — Aggregated funding data
+- `*SearchResult` / `*SummaryResult` — Result wrappers
+
+### Safety Boundaries
+
+- NO_LIVE_API_REQUIRED_FOR_TESTS
+- NO_API_KEY_REQUIRED_FOR_TESTS
+- NO_HALLUCINATED_CANDIDATE_OR_FUNDING_CLAIMS
+- NO_PERSUASION_FIELDS
+- NO_TARGETING_FIELDS
+
+### Test Coverage
+
+- 46 tests, all passing
+- Covers: adapter creation, candidate search, ambiguity, committees, contributions, funding summary, error simulation, data types, WSP 97 compliance, political safety
+
+### Updated
+
+- `src/__init__.py` — Added FEC adapter exports, updated status to "poc"
+
+### Audit Document
+
+- `docs/audits/architecture/VOTE_POC_FEC_ADAPTER_PHASE1.md`
+
+### Next Slice
+
+- VOTE_POC_ENTITY_RESOLUTION_PHASE1 — Candidate name resolution
+
+---
+
 ## 2026-04-23 — pfMALL Catalog Registration
 
 **Author**: 0102  
