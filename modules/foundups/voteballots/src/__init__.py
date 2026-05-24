@@ -27,7 +27,7 @@ Political Safety Boundaries:
 - HUMAN_REVIEW_FOR_HIGH_RISK_CLAIMS
 """
 
-__version__ = "0.4.0"  # Updated for Confidence Scoring Integration (Phase 1, Slice 4)
+__version__ = "0.5.0"  # Updated for Quick Answer Generation (Phase 1, Slice 5)
 __status__ = "poc"  # Phase 1 PoC implementation
 
 # FEC Adapter exports
@@ -107,6 +107,19 @@ from .confidence_scoring import (
     get_human_review_claims,
 )
 
+# Quick Answer exports (Slice 5)
+from .quick_answer import (
+    # Data types
+    QuickAnswer,
+    AnswerFormat,
+    # Core generation function
+    generate_quick_answer,
+    # Convenience functions
+    generate_shell_answer,
+    generate_markdown_answer,
+    is_answer_ready_for_display,
+)
+
 __all__ = [
     # Error types
     "FECError",
@@ -159,4 +172,11 @@ __all__ = [
     "get_verified_facts",
     "get_unknown_claims",
     "get_human_review_claims",
+    # Quick Answer (Slice 5)
+    "QuickAnswer",
+    "AnswerFormat",
+    "generate_quick_answer",
+    "generate_shell_answer",
+    "generate_markdown_answer",
+    "is_answer_ready_for_display",
 ]
