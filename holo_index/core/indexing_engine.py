@@ -20,6 +20,7 @@ import json
 import logging
 import os
 import re
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
@@ -28,6 +29,37 @@ if TYPE_CHECKING:
     from .holo_index import HoloIndex
 
 logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# IndexResult dataclass (HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PHASE1)
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class IndexResult:
+    """Result of an indexing operation for observability.
+
+    Attributes:
+        discovered_count: Number of files discovered by glob/discovery phase
+        indexed_count: Number of documents actually inserted into Chroma
+        collection_name: Name of the target Chroma collection
+        warning: Optional warning message (e.g., zero discovered)
+    """
+    discovered_count: int
+    indexed_count: int
+    collection_name: str
+    warning: Optional[str] = None
+
+    @property
+    def is_empty(self) -> bool:
+        """True if zero documents were discovered or indexed."""
+        return self.discovered_count == 0 or self.indexed_count == 0
+
+    @property
+    def success(self) -> bool:
+        """True if at least one document was indexed."""
+        return self.indexed_count > 0
 
 # ---------------------------------------------------------------------------
 # Federation metadata helpers (HIA Federation Phase 2)
@@ -654,7 +686,7 @@ def index_wsp_entries(holo: "HoloIndex", paths: Optional[List[Path]] = None) -> 
         holo._log_agent_action("No WSP entries were indexed (empty content)", "WARN")
 
 
-def index_docs_entries(holo: "HoloIndex") -> None:
+def index_docs_entries(holo: "HoloIndex") -> IndexResult:
     """CFZ4: Index module/root docs into navigation_docs collection.
 
     Content: modules/**, docs/**, holo_index/docs/**, WSP_framework/docs/**
@@ -662,7 +694,16 @@ def index_docs_entries(holo: "HoloIndex") -> None:
 
     HXA Audit Fix: Excludes .claude/worktrees to prevent duplicate indexing,
     extracts slice_id metadata for HXA/FX/CFZ patterns.
+
+    HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PHASE1: Now returns IndexResult
+    with discovered_count and indexed_count for CLI observability. Enables
+    the CLI to detect zero-doc scenarios and avoid awarding spurious rewards.
+
+    Returns:
+        IndexResult with discovered_count, indexed_count, collection_name,
+        and optional warning message.
     """
+    collection_name = "navigation_docs"
     doc_paths = [
         holo.project_root / "modules",
         holo.project_root / "docs",
@@ -690,9 +731,16 @@ def index_docs_entries(holo: "HoloIndex") -> None:
             ]
             files.extend(filtered_files)
 
+    discovered_count = len(files)
+
     if not files:
         holo._log_agent_action("No docs found to index", "WARN")
-        return
+        return IndexResult(
+            discovered_count=0,
+            indexed_count=0,
+            collection_name=collection_name,
+            warning="No docs found to index \u2014 discovery returned zero files"
+        )
 
     holo._log_agent_action(f"Indexing {len(files)} docs into navigation_docs...", "INDEX")
     holo.docs_collection = holo._reset_collection("navigation_docs")
@@ -737,11 +785,24 @@ def index_docs_entries(holo: "HoloIndex") -> None:
             metadata_entry["slice_id"] = slice_id
         metadatas.append(metadata_entry)
 
+    indexed_count = len(ids)
+
     if embeddings:
         holo.docs_collection.add(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
         holo._log_agent_action(f"Docs index refreshed: {len(ids)} entries", "OK")
+        return IndexResult(
+            discovered_count=discovered_count,
+            indexed_count=indexed_count,
+            collection_name=collection_name,
+        )
     else:
         holo._log_agent_action("No docs entries were indexed", "WARN")
+        return IndexResult(
+            discovered_count=discovered_count,
+            indexed_count=0,
+            collection_name=collection_name,
+            warning="No docs entries were indexed \u2014 all discovered files had empty content"
+        )
 
 
 def index_knowledge_entries(holo: "HoloIndex") -> None:
