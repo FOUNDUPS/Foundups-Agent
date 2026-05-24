@@ -98,6 +98,38 @@ def resolve_foundup_metadata(path: Path, project_root: Optional[Path] = None) ->
 
 
 # ---------------------------------------------------------------------------
+# Worktree safety helpers (HOLOINDEX_INDEXER_PROJECT_ROOT_WORKTREE_SAFETY_PHASE1)
+# ---------------------------------------------------------------------------
+
+
+def _has_dotfile_in_relative_path(file_path: Path, base: Path) -> bool:
+    """Check if any component of the relative path starts with a dot.
+
+    This replaces the absolute-path dot-prefix check to fix worktree safety:
+    when project_root is under .claude/worktrees/, the absolute path contains
+    .claude as a component, which would incorrectly reject ALL files.
+
+    By checking only the path relative to the discovery base, we skip dotfiles
+    INSIDE the docs tree (e.g., .draft/, .DS_Store) while accepting files
+    whose absolute path happens to traverse a dot-prefixed parent directory.
+
+    Args:
+        file_path: Absolute path to the file
+        base: Discovery base directory (e.g., project_root / "docs")
+
+    Returns:
+        True if any relative path component starts with '.', False otherwise.
+        Also returns True if file_path is not under base (fail-closed).
+    """
+    try:
+        relative_parts = file_path.relative_to(base).parts
+        return any(part.startswith('.') for part in relative_parts)
+    except ValueError:
+        # file_path is not under base — reject (fail-closed)
+        return True
+
+
+# ---------------------------------------------------------------------------
 # Stateless helpers (no holo parameter needed)
 # ---------------------------------------------------------------------------
 
@@ -647,13 +679,14 @@ def index_docs_entries(holo: "HoloIndex") -> None:
                 if 'node_modules' not in str(f)
                 and 'CHANGELOG' not in f.name.upper()
                 and 'package-lock' not in f.name.lower()
-                and not any(part.startswith('.') for part in f.parts)
+                # Worktree safety fix: Check dot-prefix relative to base, not absolute path.
+                # This prevents rejecting all files when project_root is under .claude/worktrees/.
+                and not _has_dotfile_in_relative_path(f, base)
                 and '_backup' not in str(f).lower()
                 and '/archive/' not in str(f).lower()
                 and '\\archive\\' not in str(f).lower()
-                # HXA Audit Fix: Exclude worktrees to prevent duplicates
-                and '.claude/worktrees' not in str(f).replace("\\", "/").lower()
-                and '.worktrees' not in str(f).replace("\\", "/").lower()
+                # Note: The .claude/worktrees clauses previously here are now redundant
+                # because the relative-path check ignores parent directories above base.
             ]
             files.extend(filtered_files)
 
