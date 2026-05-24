@@ -499,10 +499,14 @@ class HoloIndex:
         from .indexing_engine import index_wsp_entries as _idx_wsp
         _idx_wsp(self, paths)
 
-    def index_docs_entries(self) -> None:
-        """CFZ4: Index module/root docs into navigation_docs collection."""
+    def index_docs_entries(self):
+        """CFZ4: Index module/root docs into navigation_docs collection.
+
+        HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PHASE1: Returns IndexResult
+        for CLI observability (discovered_count, indexed_count, warning).
+        """
         from .indexing_engine import index_docs_entries as _idx_docs
-        _idx_docs(self)
+        return _idx_docs(self)
 
     def index_knowledge_entries(self) -> None:
         """CFZ4: Index papers/research into navigation_knowledge collection."""
