@@ -2,6 +2,129 @@
 
 ---
 
+## 2026-05-22 — Confidence Scoring Integration (PoC Phase 1, Slice 4)
+
+**Author**: W6 (0102)
+**Slice**: VOTE_POC_CONFIDENCE_SCORING_INTEGRATION_PHASE1
+**Branch**: `feat/vote-poc-confidence-scoring-integration-phase1`
+**WSP Compliance**: WSP 00, WSP 15, WSP 50, WSP 64, WSP 83, WSP 87, WSP 97, WSP 104, WSP 22
+
+### Created
+
+- `src/confidence_scoring.py` — WSP 97 confidence scoring for funding summaries (480 lines)
+- `tests/test_confidence_scoring_integration.py` — Integration tests (37 tests)
+
+### Confidence Scoring Features
+
+| Feature | Description |
+|---------|-------------|
+| WSP 97 Confidence Labels | VERIFIED_FACT, HIGH_CONFIDENCE_INFERENCE, LOW_CONFIDENCE_INFERENCE, UNKNOWN |
+| Human Review Triggers | Foreign funding, criminal accusation, low confidence + high impact, contradictions |
+| Source Reference Preservation | All FECSource references preserved through scoring |
+| Trail Termination Preservation | All markers preserved, create UNKNOWN claims |
+| Fail-Closed Error Propagation | Funding summary errors propagate to scoring result |
+
+### Confidence Rule Matrix
+
+| Condition | Label |
+|-----------|-------|
+| Direct FEC filing/source reference present | VERIFIED_FACT |
+| Multiple corroborating official sources | HIGH_CONFIDENCE_INFERENCE |
+| Single weak/non-official source | LOW_CONFIDENCE_INFERENCE |
+| Missing source OR trail termination | UNKNOWN |
+
+### Human Review Triggers
+
+- `FOREIGN_FUNDING_ALLEGATION` — Any foreign keyword triggers review
+- `CRIMINAL_ACCUSATION` — Any criminal keyword triggers review
+- `LOW_CONFIDENCE_HIGH_IMPACT` — Low confidence + amount > $100K
+- `SOURCE_CONTRADICTION` — Contradicting information
+- `DARK_MONEY_LARGE_AMOUNT` — 501(c)(4) exceeding $500K
+- `TRAIL_TERMINATION_SIGNIFICANT` — Significant evidence gap
+
+### Data Types
+
+- `ConfidenceLabel` — WSP 97 confidence enum
+- `HumanReviewTrigger` — Human review trigger enum
+- `ConfidenceScoringStatus` — Scoring status enum
+- `ConfidenceScoredClaim` — Individual claim with confidence
+- `ConfidenceScoredFundingSource` — Source with confidence label
+- `ConfidenceScoredFundingSummary` — Complete scored summary
+
+### Public API
+
+- `score_funding_summary_confidence(summary)` — Core scoring function
+- `get_verified_facts(scored_summary)` — Extract verified facts
+- `get_unknown_claims(scored_summary)` — Extract unknown claims
+- `get_human_review_claims(scored_summary)` — Extract claims needing review
+
+### Safety Boundaries
+
+- NO_QUICK_ANSWER_GENERATION (structured data only)
+- NO_FOREIGN_FUNDING_CLAIM_GENERATED (only flags for review)
+- NO_DARK_MONEY_AS_VERIFIED_FACT
+- NO_CANDIDATE_RECOMMENDATION
+- NO_TARGETED_PERSUASION
+- HUMAN_REVIEW_FOR_HIGH_RISK_CLAIMS
+- SOURCE_REFERENCES_PRESERVED
+- TRAIL_TERMINATION_MARKERS_PRESERVED
+
+### Test Coverage
+
+- 37 new tests, all passing
+- Total: 195 tests (46 FEC adapter + 70 entity resolution + 42 funding summary + 37 confidence scoring)
+- Covers: verified fact rules, source absent rules, trail termination, no dark money as fact, no foreign claim generated, human review triggers, source preservation, order preservation, error propagation, no prose, no persuasion, convenience functions, edge cases, full pipeline
+
+### Updated
+
+- `src/__init__.py` — Added confidence scoring exports, version bump to 0.4.0
+
+### Audit Document
+
+- `docs/audits/architecture/VOTE_POC_CONFIDENCE_SCORING_INTEGRATION_PHASE1.md`
+
+### Carry-Forward Contract for Slice 5
+
+```python
+from modules.foundups.voteballots.src import (
+    # From Slice 1 (FEC Adapter)
+    get_mock_adapter,
+    CandidateRecord,
+    FECErrorType,
+    ConfidenceLevel,
+    FECSource,
+    # From Slice 2 (Entity Resolution)
+    EntityResolutionRequest,
+    EntityResolutionResult,
+    EntityResolutionStatus,
+    resolve_candidate_entity,
+    # From Slice 3 (Funding Summary)
+    FundingSummaryRequest,
+    FundingSummaryResult,
+    FundingSummaryStatus,
+    FundingSourceSummary,
+    TrailTerminationMarker,
+    summarize_candidate_funding,
+    # From Slice 4 (Confidence Scoring)
+    ConfidenceLabel,
+    HumanReviewTrigger,
+    ConfidenceScoringStatus,
+    ConfidenceScoredClaim,
+    ConfidenceScoredFundingSource,
+    ConfidenceScoredFundingSummary,
+    score_funding_summary_confidence,
+    get_verified_facts,
+    get_unknown_claims,
+    get_human_review_claims,
+)
+```
+
+### Next Slice
+
+- VOTE_POC_QUICK_ANSWER_GENERATION_PHASE1 — Generate prose quick answers from scored summaries
+
+---
+
 ## 2026-05-22 — Funding Summary Implementation (PoC Phase 1, Slice 3)
 
 **Author**: W6 (0102)

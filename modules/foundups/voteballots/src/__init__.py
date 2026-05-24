@@ -27,7 +27,7 @@ Political Safety Boundaries:
 - HUMAN_REVIEW_FOR_HIGH_RISK_CLAIMS
 """
 
-__version__ = "0.3.0"  # Updated for Funding Summary (Phase 1, Slice 3)
+__version__ = "0.4.0"  # Updated for Confidence Scoring Integration (Phase 1, Slice 4)
 __status__ = "poc"  # Phase 1 PoC implementation
 
 # FEC Adapter exports
@@ -89,6 +89,24 @@ from .funding_summary import (
     summarize_by_name,
 )
 
+# Confidence Scoring exports (Slice 4)
+from .confidence_scoring import (
+    # Enums
+    ConfidenceLabel,
+    HumanReviewTrigger,
+    ConfidenceScoringStatus,
+    # Data types
+    ConfidenceScoredClaim,
+    ConfidenceScoredFundingSource,
+    ConfidenceScoredFundingSummary,
+    # Core scoring function
+    score_funding_summary_confidence,
+    # Convenience functions
+    get_verified_facts,
+    get_unknown_claims,
+    get_human_review_claims,
+)
+
 __all__ = [
     # Error types
     "FECError",
@@ -130,4 +148,15 @@ __all__ = [
     "summarize_candidate_funding",
     "summarize_by_candidate_id",
     "summarize_by_name",
+    # Confidence Scoring (Slice 4)
+    "ConfidenceLabel",
+    "HumanReviewTrigger",
+    "ConfidenceScoringStatus",
+    "ConfidenceScoredClaim",
+    "ConfidenceScoredFundingSource",
+    "ConfidenceScoredFundingSummary",
+    "score_funding_summary_confidence",
+    "get_verified_facts",
+    "get_unknown_claims",
+    "get_human_review_claims",
 ]
