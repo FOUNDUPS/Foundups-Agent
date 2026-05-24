@@ -30,15 +30,47 @@ from typing import Any, Dict, List, Optional
 from datetime import datetime
 
 # Dependency bootstrap for this module
+# HOLOINDEX_AUTO_PIP_OPT_IN_PHASE1: Auto-install is now EXPLICIT OPT-IN only.
+# Default behavior is fail-closed (no network call, no pip install).
+# Set HOLO_ALLOW_PIP_INSTALL=1 to enable auto-install.
+def _is_pip_install_allowed() -> bool:
+    """Check if pip auto-install is explicitly allowed.
+
+    Returns True only if HOLO_ALLOW_PIP_INSTALL is set to a truthy value
+    ("1", "true", "yes" case-insensitive) AND neither HOLO_DISABLE_PIP_INSTALL
+    nor HOLO_OFFLINE is set (preserves existing opt-out semantics).
+    """
+    # Existing opt-out guards (preserved for compatibility)
+    if os.getenv("HOLO_DISABLE_PIP_INSTALL") == "1":
+        return False
+    if os.getenv("HOLO_OFFLINE") == "1":
+        return False
+    # Explicit opt-in required
+    allow_val = os.getenv("HOLO_ALLOW_PIP_INSTALL", "").strip().lower()
+    return allow_val in ("1", "true", "yes")
+
 try:
     import chromadb
 except ImportError as exc:
-    if os.getenv("HOLO_DISABLE_PIP_INSTALL") == "1" or os.getenv("HOLO_OFFLINE") == "1":
-        raise ImportError("chromadb is required but auto-install is disabled (HOLO_OFFLINE/HOLO_DISABLE_PIP_INSTALL).") from exc
-    print("Installing required dependencies...")
-    import subprocess
-    subprocess.check_call([__import__('sys').executable, "-m", "pip", "install", "chromadb"])
-    import chromadb
+    if _is_pip_install_allowed():
+        # Explicit opt-in: auto-install chromadb
+        print("[HOLO] HOLO_ALLOW_PIP_INSTALL=1: Installing chromadb via pip...")
+        import subprocess
+        subprocess.check_call([__import__('sys').executable, "-m", "pip", "install", "chromadb"])
+        import chromadb
+    else:
+        # Fail-closed: no network call, actionable error message
+        raise ImportError(
+            "chromadb is required but not installed.\n"
+            "\n"
+            "To install manually (recommended):\n"
+            "    pip install chromadb\n"
+            "\n"
+            "To enable auto-install (network-capable, not recommended):\n"
+            "    Set HOLO_ALLOW_PIP_INSTALL=1\n"
+            "\n"
+            "HoloIndex requires chromadb for vector storage. Install it and retry."
+        ) from exc
 
 # Lazy load sentence_transformers to prevent crash on import
 SentenceTransformer = None
