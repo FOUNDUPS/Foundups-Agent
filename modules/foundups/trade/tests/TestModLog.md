@@ -300,6 +300,68 @@ python -m pytest modules/foundups/trade/tests/ -q
 
 ---
 
+### [2026-05-24] - TRADE_DUE_DILIGENCE_SYNTHETIC_REGIME_PACK_PHASE1
+
+**Worker**: W6
+**Branch**: `feat/trade-due-diligence-synthetic-regime-pack-phase1`
+**Scope**: test/fixture only — no engine, no contracts, no `src/` mutation.
+
+#### Cases added (42 new tests)
+
+| Test | Coverage |
+|------|----------|
+| `test_regime_fixture_has_no_forbidden_imports` | Fixture file does not import any networking / exchange SDK from the slice forbidden list. |
+| `test_regime_fixture_has_no_forbidden_fields` | Fixture file does not reference any wallet/order/key field name. |
+| `test_regime_test_file_has_no_forbidden_imports` | This test file itself does not import any forbidden module. |
+| `test_registry_has_all_seven_mandatory_regimes` | All 7 mandatory regime IDs (R1..R7) are present. |
+| `test_registry_regime_ids_are_unique` | No duplicate `regime_id` across the registry. |
+| `test_regime_score_is_well_formed[R*]` ×7 | Engine output is structurally valid (10 components in [0,100], aggregates consistent). |
+| `test_regime_band_is_valid[R*]` ×7 | `decision_band` is a valid `DecisionBand` enum value. |
+| `test_regime_no_band_authorizes_real_trading[R*]` ×7 | `assert_no_real_trading_authorized(band)` passes silently — Phase 0 boundary intact. |
+| `test_regime_scoring_is_deterministic[R*]` ×7 | Same regime scored twice in one test → bit-equal components + identical deterministic hash. |
+| `test_regime_hard_disqualifiers_consistent_with_band[R*]` ×7 | If any documented hard disqualifier triggers, band must be REJECT or OBSERVE. |
+| `test_expected_vs_actual_table_is_complete_for_all_regimes` | Full evidence schema complete for every regime; pack-level determinism across two back-to-back full passes. |
+| `test_fixture_file_does_not_touch_engine_internals` | Fixture file does not reference `_WEIGHTS` / `__setattr__` / `_missing_` engine-mutation surfaces. |
+
+#### Constraints honored
+
+- NO modification of `modules/foundups/trade/src/**` (engine, contracts, harness).
+- NO modification of existing trade tests.
+- NO new external dependencies (stdlib + pytest only).
+- NO forbidden imports (requests/urllib/httpx/ccxt/web3/exchange SDKs/etc.).
+- NO forbidden fields (`api_key`/`secret`/`wallet_private_key`/`order_id`/etc.).
+- NO registry/catalog/projection/manifest/CI/dependency edits.
+- NO `@pytest.mark.skip` used anywhere in the new files.
+- All fixtures synthetic deterministic Python literals.
+- Trade status unchanged (still Phase 0 / not_portfolio / poc_status=idea / entity_type=skeleton_candidate).
+
+#### Test policy (per operator's patched W6 prompt)
+
+Per-regime tests fail on: nondeterministic output, invalid `DecisionBand`, malformed score, missing component, forbidden import/field, boundary violation, real-trading authorization claim.
+
+Per-regime tests do **NOT** fail on `expected_band != actual_band`. Divergence is recorded in the per-regime result row (`band_match=False`) and routed to a future targeted engine-tuning slice via the audit doc.
+
+#### Decision-shape findings (recorded, NOT slice failures)
+
+5 of 7 regimes show `expected_band != actual_band`. Pattern: only hard disqualifiers (`rug_honeypot<20`, `issuer_history<20`, `evidence_confidence<0.5`) reliably move the band below `CANDIDATE_FOR_FUTURE_REVIEW` once other components are reasonable. Full per-regime breakdown in:
+
+`docs/audits/architecture/TRADE_DUE_DILIGENCE_SYNTHETIC_REGIME_PACK_PHASE1.md`
+
+#### Test results
+
+```bash
+python -m pytest modules/foundups/trade/tests/test_due_diligence_regimes.py
+# 42 passed in 0.16s
+
+python -m pytest modules/foundups/trade/tests/
+# 384 passed in 1.91s   (342 existing + 42 new, 0 skipped)
+```
+
+#### WSP refs
+
+WSP_00, WSP_15, WSP_50, WSP_64, WSP_83, WSP_87, WSP_97, WSP_104, WSP_22
+---
+
 ## Future Entries
 
-Next slice: `TRADE_DUE_DILIGENCE_SYNTHETIC_REGIME_PACK_PHASE1`
+Next slice: targeted engine-tuning slice to address the 5 expected-vs-actual divergences identified by this evidence pack (see audit doc §10).
