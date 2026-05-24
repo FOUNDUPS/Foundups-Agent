@@ -386,7 +386,143 @@ This audit is read-only because:
 
 ---
 
-## M. Recommendations (Out of Scope)
+## M. Files Changed
+
+```text
+docs/audits/holoindex_search_quality/HOLOINDEX_CODEINDEX_RETRIEVAL_SYSTEM_AUDIT_PHASE1.md
+```
+
+No diagnostic scripts created. All evidence gathered via Read tool and CLI probes.
+
+---
+
+## N. CLI Surface Map — Audited Flags
+
+| Flag | Audited | Evidence Location |
+|------|---------|-------------------|
+| `--search` | YES | Section D.1 (line 622) |
+| `--index-code` | YES | Section D.1 (line 641) |
+| `--index-wsp` | YES | Section D.1 (line 642) |
+| `--index-docs` | YES | Section D.1 (line 654), Section P |
+| `--index-knowledge` | YES | Section D.1 (line 655) |
+| `--index-symbols` | YES | Section D.1 (line 643) |
+| `--index-skillz` | YES | Section D.1 (line 645) |
+| `--index-work-ledger` | YES | Section D.1 (line 650) |
+| `--index-all` | YES | Section D.1 (line 640) |
+| `--code-index` | YES | Section D.1 (line 656) |
+| `--function-index` | YES | Section D.1 (line 658) |
+| `--code-index-report` | YES | Section D.1 (line 659) |
+| `--offline` | YES | Section D.1 (line 663) |
+| `--fast-search` | YES | Section D.1 (line 664) |
+| `--collection-health-json` | YES | Section C (probe executed) |
+
+**Coverage**: 15/15 flags audited.
+
+---
+
+## O. Subprocess Classification Table
+
+| Location | Call Type | Purpose | Network-Capable | Auto-Install |
+|----------|-----------|---------|-----------------|--------------|
+| `core/holo_index.py:40` | `subprocess.check_call` | pip install chromadb | YES | YES (guarded by HOLO_OFFLINE) |
+| `core/search_engine.py:717` | `subprocess.run` | ripgrep symbol fallback | NO | NO |
+| `core/video_search.py:293` | `subprocess.run` | ffprobe video metadata | NO | NO |
+| `monitoring/root_violation_monitor/src/root_violation_monitor.py:425` | `subprocess.run` | git mv for violation fix | NO | NO |
+| `qwen_advisor/orchestration/autonomous_refactoring.py:989` | `subprocess.run` | rollback strategy | NO | NO |
+| `qwen_advisor/orchestration/autonomous_refactoring.py:1010` | `subprocess.run` | git mv for refactoring | NO | NO |
+| `qwen_advisor/gemma_orphan_detector.py:207` | `subprocess.run` | ripgrep orphan scan | NO | NO |
+| `wre_integration/skill_executor.py:140` | `subprocess.run` | git status check | NO | NO |
+| `cli/commands/compliance.py:84` | `subprocess.run` | ripgrep compliance check | NO | NO |
+| `training/comprehensive_training_corpus.py:310` | `subprocess.run` | git log for corpus | NO | NO |
+| `training/comprehensive_training_corpus.py:344` | `subprocess.run` | git log renames | NO | NO |
+| `scripts/benchmarks/tq1_baseline_bench.py:33` | `subprocess.run` | Python benchmark | NO | NO |
+| `scripts/benchmarks/tq_corpus_freeze.py:56` | `subprocess.run` | git rev-parse | NO | NO |
+| `tests/*` (7 files) | `subprocess.run` | Test harness execution | NO | NO |
+
+**Network-Capable**: 1 (chromadb auto-install, guarded)
+**Auto-Install Paths**: 1 (chromadb, guarded by `HOLO_OFFLINE` and `HOLO_DISABLE_PIP_INSTALL`)
+
+---
+
+## P. IndexResult Observability Gap Analysis
+
+### P.1 Current State
+
+`IndexResult` contract exists **only for `--index-docs`**:
+
+| Indexer | Returns IndexResult | Discovered/Indexed/Warning |
+|---------|---------------------|---------------------------|
+| `index_docs_entries()` | YES | YES |
+| `index_code_entries()` | NO | NO |
+| `index_wsp_entries()` | NO | NO |
+| `index_symbol_entries()` | NO | NO |
+| `index_skillz_entries()` | NO | NO |
+| `index_knowledge_entries()` | NO | NO |
+| `index_work_ledger_entries()` | NO (returns bool) | Partial |
+
+### P.2 Gap Assessment
+
+**Uneven observability**: Only `--index-docs` has zero-doc detection. Other indexers silently succeed/fail without discovered/indexed metrics.
+
+**Risk**: Operator cannot distinguish "0 files discovered" from "100 files discovered, 0 indexed" for code/WSP/symbols.
+
+---
+
+## Q. Defect Queue — Named Follow-On Slices
+
+### Q.1 HOLOINDEX_INDEXER_RESULT_CONTRACT_UNIFICATION_PHASE1
+
+**Problem**: `IndexResult` exists only for `index_docs_entries()`. Other indexers lack observable contracts.
+
+**Scope**: Extend `IndexResult`-style return values to:
+- `index_code_entries()`
+- `index_wsp_entries()`
+- `index_symbol_entries()`
+- `index_skillz_entries()`
+- `index_knowledge_entries()`
+- `index_work_ledger_entries()`
+
+**Priority**: P2 (observability gap, not functional regression)
+
+### Q.2 HOLOINDEX_SUBPROCESS_BOUNDARY_AUDIT_FIX_PHASE1
+
+**Problem**: `core/holo_index.py:40` auto-installs chromadb via `subprocess.check_call` unless guarded by env vars.
+
+**Scope**: Audit whether auto-install path is reachable outside explicit operator intent. If so, remove or require explicit opt-in.
+
+**Priority**: P3 (guarded by HOLO_OFFLINE/HOLO_DISABLE_PIP_INSTALL, low risk)
+
+### Q.3 HOLOINDEX_GREP_GLOB_TRUTH_BOUNDARY_DOC_PHASE1
+
+**Problem**: Verify no docs overclaim "replacement" instead of "semantic complement."
+
+**Scope**: Audit README.md, INTERFACE.md, docstrings for overclaims. Fix language if needed.
+
+**Priority**: P3 (documentation accuracy)
+
+### Q.4 HOLOINDEX_NAVIGATION_TESTS_POPULATION_PHASE1
+
+**Problem**: `navigation_tests` collection is empty (0 entries).
+
+**Scope**: Implement test file indexing or document why the collection exists but is unpopulated.
+
+**Priority**: P3 (retrieval gap for test discovery)
+
+---
+
+## R. Canonical Findings Summary
+
+```text
+HoloIndex is a real semantic retrieval system.
+It does not replace grep/glob for exact text.
+It complements grep/glob and should be documented that way.
+Agentic RAG readiness is true for core collections.
+System-level observability is uneven unless every indexer has IndexResult-style contracts.
+```
+
+---
+
+## S. Recommendations (Out of Scope)
 
 These are NOT implemented in this slice but noted for future consideration:
 
