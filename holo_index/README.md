@@ -154,13 +154,16 @@ When 0102 runs a search, HoloDAE executes current features (health checks, vibec
 | `HOLO_WEB_INDEX_MAX_CHARS` | `5000` | Max normalized content chars embedded per web file. |
 
 ### [MEMORY] Retrieval Contract (0102 System)
-HoloIndex is the memory retrieval system. It must be self-maintaining and semantic-first.
+HoloIndex is the semantic memory retrieval system. It must be self-maintaining and semantic-first.
+
+**Tool boundary (truth-recorded by PR #704 audit)**: HoloIndex **complements** `grep`/`glob` — it does not replace them. Use `grep`/`rg` and `glob` as the authoritative tools for exact-text, exact-symbol, and known-path lookups. Use HoloIndex for semantic / intent / role / WSP-alias discovery where the literal token is not known. The two paradigms are different retrieval modes; both remain in the 0102 toolkit.
 
 Principles:
-- **Semantic first**: meaning-based discovery is the default path.
+- **Semantic first**: meaning-based discovery is the default path here.
 - **Symbol-aware**: function/class signatures + docstrings are searchable.
 - **NAVIGATION is minimal**: entry points only, not every new function.
-- **rg is a safety net**: exact-match fallback, not the primary path.
+- **Complements grep/glob**: semantic/intent queries land here; `grep`/`rg` remain authoritative for exact-text and exact-symbol lookups; `glob` remains authoritative for known-path queries.
+- **rg is a safety net**: an internal exact-match fallback inside HoloIndex (via `_rg_symbol_search`), not the primary path of HoloIndex itself.
 - **Index once, search forever**: use symbol indexing to keep memory fresh.
 
 Symbol indexing (module-scoped):

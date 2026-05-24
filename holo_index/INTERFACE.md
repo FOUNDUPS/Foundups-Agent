@@ -6,6 +6,17 @@ For exhaustive machine-level semantics, use:
 - `holo_index/docs/HOLO_INDEX_MACHINE_LANGUAGE_SPEC_0102.md`
 - `holo_index/docs/HOLO_INDEX_MACHINE_LANGUAGE_SPEC_0102.json`
 
+### Tool boundary (truth-recorded by PR #704)
+HoloIndex is a **semantic retrieval system**. It **complements** `grep`/`glob`; it does not replace them. Choose the right tool for the query:
+
+| Query shape | Use | Why |
+|------------|-----|-----|
+| Exact text / exact symbol (`pendingClassificationItem`) | `grep` / `rg` | Deterministic, fast, authoritative for literal matches |
+| Known file path or glob (`modules/foundups/trade/**`) | `glob` / shell | Deterministic, path-native |
+| Semantic / intent / role / WSP-alias / slice-ID (`"Trade pump.fun rug pull due diligence"`, `"WSP 97"`) | HoloIndex `--search` | Vector + keyword-boost recall over the indexed corpus |
+
+HoloIndex has an internal ripgrep fallback (`_rg_symbol_search` inside `search_engine.py`) for in-search symbol probes, but that is an implementation detail of HoloIndex — it is not a substitute for invoking `grep`/`rg` directly when the user already knows the literal token.
+
 Source-of-truth policy:
 - Authoritative machine contract: `holo_index/docs/HOLO_INDEX_MACHINE_LANGUAGE_SPEC_0102.json`
 - Human-facing interface contract: this file
