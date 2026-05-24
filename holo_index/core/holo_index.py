@@ -512,24 +512,37 @@ class HoloIndex:
         return [0.0] * 384
 
     # --------- Indexing --------- #
+    # HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PARITY_PHASE1: All indexers
+    # now return IndexResult for CLI observability parity.
 
-    def index_code_entries(self) -> None:
+    def index_code_entries(self):
+        """Index NAVIGATION code entries and web assets into ChromaDB.
+
+        Returns IndexResult with discovered_count, indexed_count, and warning.
+        """
         from .indexing_engine import index_code_entries as _idx_code
-        _idx_code(self)
+        return _idx_code(self)
 
     def _collect_web_asset_entries(self) -> List[Dict[str, str]]:
         """Collect HTML/JS/CSS assets so UI artifacts are semantically retrievable."""
         from .indexing_engine import _collect_web_asset_entries as _cwa
         return _cwa(self)
 
-    def index_symbol_entries(self, roots: Optional[List[Path]] = None) -> None:
-        """Index Python symbols (functions/classes) for semantic discovery."""
-        from .indexing_engine import index_symbol_entries as _idx_sym
-        _idx_sym(self, roots)
+    def index_symbol_entries(self, roots: Optional[List[Path]] = None):
+        """Index Python symbols (functions/classes) for semantic discovery.
 
-    def index_wsp_entries(self, paths: Optional[List[Path]] = None) -> None:
+        Returns IndexResult with discovered_count (files), indexed_count (symbols).
+        """
+        from .indexing_engine import index_symbol_entries as _idx_sym
+        return _idx_sym(self, roots)
+
+    def index_wsp_entries(self, paths: Optional[List[Path]] = None):
+        """Index WSP protocol documents into ChromaDB.
+
+        Returns IndexResult with discovered_count, indexed_count, and warning.
+        """
         from .indexing_engine import index_wsp_entries as _idx_wsp
-        _idx_wsp(self, paths)
+        return _idx_wsp(self, paths)
 
     def index_docs_entries(self):
         """CFZ4: Index module/root docs into navigation_docs collection.
@@ -540,25 +553,34 @@ class HoloIndex:
         from .indexing_engine import index_docs_entries as _idx_docs
         return _idx_docs(self)
 
-    def index_knowledge_entries(self) -> None:
-        """CFZ4: Index papers/research into navigation_knowledge collection."""
+    def index_knowledge_entries(self):
+        """CFZ4: Index papers/research into navigation_knowledge collection.
+
+        Returns IndexResult with discovered_count, indexed_count, and warning.
+        """
         from .indexing_engine import index_knowledge_entries as _idx_knowledge
-        _idx_knowledge(self)
+        return _idx_knowledge(self)
 
     def index_test_registry(self) -> None:
         """WSP 98: Ingest the WSP Test Registry into ChromaDB for semantic search."""
         from .indexing_engine import index_test_registry as _idx_test
         _idx_test(self)
 
-    def index_skillz_entries(self) -> None:
-        """WSP 95: Index SKILLz files for agent discovery."""
-        from .indexing_engine import index_skillz_entries as _idx_skillz
-        _idx_skillz(self)
+    def index_skillz_entries(self):
+        """WSP 95: Index SKILLz files for agent discovery.
 
-    def index_work_ledger_entries(self) -> None:
-        """WSP 15/60/70: Index work ledger slices for slice tracking queries."""
+        Returns IndexResult with discovered_count, indexed_count, and warning.
+        """
+        from .indexing_engine import index_skillz_entries as _idx_skillz
+        return _idx_skillz(self)
+
+    def index_work_ledger_entries(self):
+        """WSP 15/60/70: Index work ledger slices for slice tracking queries.
+
+        Returns IndexResult with discovered_count, indexed_count, and warning.
+        """
         from .indexing_engine import index_work_ledger_entries as _idx_wl
-        _idx_wl(self)
+        return _idx_wl(self)
 
     # --------- Search --------- #
 

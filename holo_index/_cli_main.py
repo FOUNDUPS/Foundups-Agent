@@ -581,10 +581,11 @@ def _run_work_ledger_indexing(holo, args) -> bool:
     """Targeted reindex of navigation_work_ledger collection.
 
     Slice: FOUNDUPS_WORK_LEDGER_TARGETED_REINDEX_CLI_PHASE1
+    HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PARITY_PHASE1: Check IndexResult
     Opt-in only — not cascaded by --index-all to preserve safe-targeted scope.
 
     Returns True if indexing was attempted and successful, False otherwise
-    (flag not set, source missing, or wrapper raised).
+    (flag not set, source missing, zero entries, or wrapper raised).
     """
     if not getattr(args, 'index_work_ledger', False):
         return False
@@ -600,11 +601,17 @@ def _run_work_ledger_indexing(holo, args) -> bool:
         return False
 
     try:
-        holo.index_work_ledger_entries()
-        collection = getattr(holo, "work_ledger_collection", None)
-        count = collection.count() if collection is not None else 0
+        ledger_result = holo.index_work_ledger_entries()
         duration = time.time() - start_time
-        safe_print(f"[WORK-LEDGER] Entries indexed: {count}")
+
+        if ledger_result is not None and ledger_result.is_empty:
+            safe_print(f"[WORK-LEDGER] WARNING: {ledger_result.warning or 'Zero slices indexed'}")
+            safe_print(f"[WORK-LEDGER] discovered={ledger_result.discovered_count}, indexed={ledger_result.indexed_count}")
+            safe_print(f"[WORK-LEDGER] Status: EMPTY ({duration:.2f}s)")
+            return False
+
+        indexed_count = ledger_result.indexed_count if ledger_result else 0
+        safe_print(f"[WORK-LEDGER] Entries indexed: {indexed_count}")
         safe_print(f"[WORK-LEDGER] Status: SUCCESS ({duration:.2f}s)")
         return True
     except Exception as exc:
@@ -949,18 +956,24 @@ def main():
     indexing_awarded = False
     if index_code:
         start_time = time.time()
-        holo.index_code_entries()
+        code_result = holo.index_code_entries()
         duration = time.time() - start_time
 
-        # Record index refresh in database
-        try:
-            from modules.infrastructure.database.src.agent_db import AgentDB
-            db = AgentDB()
-            db.record_index_refresh("code", duration, holo.get_code_entry_count())
-        except Exception as e:
-            print(f"[WARN] Failed to record index refresh: {e}")
+        # HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PARITY_PHASE1: Check IndexResult
+        if code_result is not None and code_result.is_empty:
+            safe_print(f"[CODE] WARNING: {code_result.warning or 'Zero code entries indexed'} ({duration:.2f}s)")
+            safe_print(f"[CODE] discovered={code_result.discovered_count}, indexed={code_result.indexed_count}")
+            # indexing_awarded intentionally NOT set to True
+        else:
+            # Record index refresh in database
+            try:
+                from modules.infrastructure.database.src.agent_db import AgentDB
+                db = AgentDB()
+                db.record_index_refresh("code", duration, holo.get_code_entry_count())
+            except Exception as e:
+                print(f"[WARN] Failed to record index refresh: {e}")
 
-        indexing_awarded = True
+            indexing_awarded = True
         # Auto symbol indexing to keep memory self-maintaining (can disable with HOLO_SYMBOL_AUTO=0)
         auto_symbols = os.getenv("HOLO_SYMBOL_AUTO", "1").lower() in {"1", "true", "yes", "on"}
         if index_symbols or auto_symbols:
@@ -979,32 +992,46 @@ def main():
                 else:
                     symbol_roots = [Path("modules")]
             start_time = time.time()
-            holo.index_symbol_entries(roots=symbol_roots)
+            symbol_result = holo.index_symbol_entries(roots=symbol_roots)
             duration = time.time() - start_time
-            safe_print(f"[SYMBOLS] Indexed symbols in {duration:.2f}s")
-            indexing_awarded = True
+            if symbol_result is not None and symbol_result.is_empty:
+                safe_print(f"[SYMBOLS] WARNING: {symbol_result.warning or 'Zero symbols indexed'} ({duration:.2f}s)")
+            else:
+                indexed_count = symbol_result.indexed_count if symbol_result else 0
+                safe_print(f"[SYMBOLS] Indexed {indexed_count} symbols in {duration:.2f}s")
+                indexing_awarded = True
     if index_symbols and not index_code:
         start_time = time.time()
         roots = [Path(r) for r in args.symbol_roots] if args.symbol_roots else None
-        holo.index_symbol_entries(roots=roots)
+        symbol_result = holo.index_symbol_entries(roots=roots)
         duration = time.time() - start_time
-        safe_print(f"[SYMBOLS] Indexed symbols in {duration:.2f}s")
-        indexing_awarded = True
+        if symbol_result is not None and symbol_result.is_empty:
+            safe_print(f"[SYMBOLS] WARNING: {symbol_result.warning or 'Zero symbols indexed'} ({duration:.2f}s)")
+        else:
+            indexed_count = symbol_result.indexed_count if symbol_result else 0
+            safe_print(f"[SYMBOLS] Indexed {indexed_count} symbols in {duration:.2f}s")
+            indexing_awarded = True
     if index_wsp:
         start_time = time.time()
         wsp_dirs = [Path(p) for p in args.wsp_path] if args.wsp_path else None
-        holo.index_wsp_entries(paths=wsp_dirs)
+        wsp_result = holo.index_wsp_entries(paths=wsp_dirs)
         duration = time.time() - start_time
 
-        # Record WSP index refresh in database
-        try:
-            from modules.infrastructure.database.src.agent_db import AgentDB
-            db = AgentDB()
-            db.record_index_refresh("wsp", duration, holo.get_wsp_entry_count())
-        except Exception as e:
-            print(f"[WARN] Failed to record WSP index refresh: {e}")
+        # HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PARITY_PHASE1: Check IndexResult
+        if wsp_result is not None and wsp_result.is_empty:
+            safe_print(f"[WSP] WARNING: {wsp_result.warning or 'Zero WSP entries indexed'} ({duration:.2f}s)")
+            safe_print(f"[WSP] discovered={wsp_result.discovered_count}, indexed={wsp_result.indexed_count}")
+            # indexing_awarded intentionally NOT set to True
+        else:
+            # Record WSP index refresh in database
+            try:
+                from modules.infrastructure.database.src.agent_db import AgentDB
+                db = AgentDB()
+                db.record_index_refresh("wsp", duration, holo.get_wsp_entry_count())
+            except Exception as e:
+                print(f"[WARN] Failed to record WSP index refresh: {e}")
 
-        indexing_awarded = True
+            indexing_awarded = True
     
     # CFZ4: Index module/root docs
     # HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PHASE1: Check IndexResult
@@ -1025,22 +1052,32 @@ def main():
             indexing_awarded = True
     
     # CFZ4: Index papers/research
+    # HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PARITY_PHASE1: Check IndexResult
     index_knowledge = getattr(args, 'index_knowledge', False) or args.index_all
     if index_knowledge:
         start_time = time.time()
-        holo.index_knowledge_entries()
+        knowledge_result = holo.index_knowledge_entries()
         duration = time.time() - start_time
-        safe_print(f"[KNOWLEDGE] Indexed papers/research in {duration:.2f}s")
-        indexing_awarded = True
-    
+        if knowledge_result is not None and knowledge_result.is_empty:
+            safe_print(f"[KNOWLEDGE] WARNING: {knowledge_result.warning or 'Zero knowledge entries indexed'} ({duration:.2f}s)")
+        else:
+            indexed_count = knowledge_result.indexed_count if knowledge_result else 0
+            safe_print(f"[KNOWLEDGE] Indexed {indexed_count} papers/research in {duration:.2f}s")
+            indexing_awarded = True
+
     # Index SKILLz for agent discovery (Qwen/Gemma/UITars)
+    # HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PARITY_PHASE1: Check IndexResult
     index_skills = args.index_skills or args.index_all
     if index_skills:
         start_time = time.time()
-        holo.index_skillz_entries()
+        skills_result = holo.index_skillz_entries()
         duration = time.time() - start_time
-        safe_print(f"[SKILLS] Indexed SKILLz in {duration:.2f}s")
-        indexing_awarded = True
+        if skills_result is not None and skills_result.is_empty:
+            safe_print(f"[SKILLS] WARNING: {skills_result.warning or 'Zero skills indexed'} ({duration:.2f}s)")
+        else:
+            indexed_count = skills_result.indexed_count if skills_result else 0
+            safe_print(f"[SKILLS] Indexed {indexed_count} SKILLz in {duration:.2f}s")
+            indexing_awarded = True
 
     # Index CLI entrypoints → AGENT_CLI_CATALOG.md (command rolodex)
     index_cli = getattr(args, 'index_cli', False) or args.index_all
