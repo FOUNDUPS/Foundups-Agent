@@ -27,8 +27,8 @@ Political Safety Boundaries:
 - HUMAN_REVIEW_FOR_HIGH_RISK_CLAIMS
 """
 
-__version__ = "0.2.0"  # Updated for Entity Resolution (Phase 1, Slice 2)
-__status__ = "poc"  # Updated from "design" for Phase 1 implementation
+__version__ = "0.3.0"  # Updated for Funding Summary (Phase 1, Slice 3)
+__status__ = "poc"  # Phase 1 PoC implementation
 
 # FEC Adapter exports
 from .fec_adapter import (
@@ -72,6 +72,23 @@ from .entity_resolution import (
     resolve_by_id,
 )
 
+# Funding Summary exports (Slice 3)
+from .funding_summary import (
+    # Status enum
+    FundingSummaryStatus,
+    # Trail termination markers
+    TrailTerminationMarker,
+    # Request/Response types
+    FundingSummaryRequest,
+    FundingSummaryResult,
+    FundingSourceSummary,
+    # Core summary function
+    summarize_candidate_funding,
+    # Convenience functions
+    summarize_by_candidate_id,
+    summarize_by_name,
+)
+
 __all__ = [
     # Error types
     "FECError",
@@ -104,4 +121,13 @@ __all__ = [
     "resolve_candidate_entity",
     "resolve_by_name",
     "resolve_by_id",
+    # Funding Summary (Slice 3)
+    "FundingSummaryStatus",
+    "TrailTerminationMarker",
+    "FundingSummaryRequest",
+    "FundingSummaryResult",
+    "FundingSourceSummary",
+    "summarize_candidate_funding",
+    "summarize_by_candidate_id",
+    "summarize_by_name",
 ]
