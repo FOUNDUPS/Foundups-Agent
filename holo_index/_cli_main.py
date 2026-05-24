@@ -1007,13 +1007,22 @@ def main():
         indexing_awarded = True
     
     # CFZ4: Index module/root docs
+    # HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PHASE1: Check IndexResult
+    # to avoid awarding reward when zero docs are discovered/indexed.
     index_docs = getattr(args, 'index_docs', False) or args.index_all
     if index_docs:
         start_time = time.time()
-        holo.index_docs_entries()
+        docs_result = holo.index_docs_entries()
         duration = time.time() - start_time
-        safe_print(f"[DOCS] Indexed module/root docs in {duration:.2f}s")
-        indexing_awarded = True
+        if docs_result is not None and docs_result.is_empty:
+            # Zero docs discovered or indexed — emit warning, DO NOT award reward
+            safe_print(f"[DOCS] WARNING: {docs_result.warning or 'Zero docs indexed'} ({duration:.2f}s)")
+            safe_print(f"[DOCS] discovered={docs_result.discovered_count}, indexed={docs_result.indexed_count}")
+            # indexing_awarded intentionally NOT set to True
+        else:
+            indexed_count = docs_result.indexed_count if docs_result else 0
+            safe_print(f"[DOCS] Indexed {indexed_count} module/root docs in {duration:.2f}s")
+            indexing_awarded = True
     
     # CFZ4: Index papers/research
     index_knowledge = getattr(args, 'index_knowledge', False) or args.index_all

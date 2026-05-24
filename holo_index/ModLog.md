@@ -1,5 +1,55 @@
 # HoloIndex Package ModLog
 
+## [2026-05-24] HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PHASE1
+
+**Agent**: 0102
+**WSP References**: WSP 97, WSP 87, WSP 50, WSP 22
+**Status**: COMPLETE
+
+### Summary
+
+Fixed the observability gap where `--index-docs` would silently report success and award
+reward points even when zero docs were discovered or indexed.
+
+### Problem (from PR #690)
+
+The CLI awarded `+5 Refreshed indexes` on flag completion regardless of inserted count.
+When zero files were indexed (e.g., worktree scenario pre-PR #692), the user saw no
+warning and the exit code was 0.
+
+### Changes
+
+- `holo_index/core/indexing_engine.py`:
+  - Added `IndexResult` dataclass with `discovered_count`, `indexed_count`, `warning`
+  - Changed `index_docs_entries()` to return `IndexResult` instead of `None`
+  - Zero-discovery path returns `IndexResult` with warning message
+- `holo_index/core/holo_index.py`:
+  - Updated facade `index_docs_entries()` to forward return value
+- `holo_index/_cli_main.py`:
+  - Check `IndexResult.is_empty` before awarding reward
+  - Emit explicit WARNING when zero docs discovered/indexed
+  - Show discovered/indexed counts for debugging
+
+### Behavior Change
+
+| Scenario | Before | After |
+|----------|--------|-------|
+| Zero docs discovered | Success + reward | WARNING + no reward |
+| Zero docs indexed | Success + reward | WARNING + no reward |
+| Normal indexing | Success + reward | Success + reward (unchanged) |
+
+### Test Results
+
+- 12 new tests passed (test_indexer_zero_docs_observability.py)
+- 29 regression tests passed (worktree safety, CFZ4, search quality)
+
+### Exit Code Decision
+
+Warning-only behavior (exit code 0 preserved) to maintain CLI contract. Future slice
+could add `--strict-indexing` flag for nonzero exit on zero docs.
+
+---
+
 ## [2026-05-23] HOLOINDEX_FOUNDUP_QUERY_ALIAS_AND_TARGETED_VERDICT_PHASE1
 
 **Agent**: 0102
