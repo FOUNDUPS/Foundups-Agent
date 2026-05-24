@@ -27,7 +27,7 @@ Political Safety Boundaries:
 - HUMAN_REVIEW_FOR_HIGH_RISK_CLAIMS
 """
 
-__version__ = "0.5.0"  # Updated for Quick Answer Generation (Phase 1, Slice 5)
+__version__ = "0.6.0"  # Updated for Shell Integration (Phase 1, Slice 6)
 __status__ = "poc"  # Phase 1 PoC implementation
 
 # FEC Adapter exports
@@ -120,6 +120,26 @@ from .quick_answer import (
     is_answer_ready_for_display,
 )
 
+# Shell Integration exports (Slice 6)
+from .shell_integration import (
+    # Constants
+    FOUNDUP_ID,
+    ROUTE_NAMESPACE,
+    APP_MOUNT,
+    # Status enum
+    ShellPayloadStatus,
+    # Data types
+    VoteShellPayload,
+    PayloadValidationResult,
+    # Core functions
+    build_vote_shell_payload,
+    validate_vote_shell_payload,
+    # Convenience functions
+    build_ready_payload,
+    is_payload_ready,
+    get_payload_summary,
+)
+
 __all__ = [
     # Error types
     "FECError",
@@ -179,4 +199,16 @@ __all__ = [
     "generate_shell_answer",
     "generate_markdown_answer",
     "is_answer_ready_for_display",
+    # Shell Integration (Slice 6)
+    "FOUNDUP_ID",
+    "ROUTE_NAMESPACE",
+    "APP_MOUNT",
+    "ShellPayloadStatus",
+    "VoteShellPayload",
+    "PayloadValidationResult",
+    "build_vote_shell_payload",
+    "validate_vote_shell_payload",
+    "build_ready_payload",
+    "is_payload_ready",
+    "get_payload_summary",
 ]

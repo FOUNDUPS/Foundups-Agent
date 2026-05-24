@@ -2,6 +2,110 @@
 
 ---
 
+## 2026-05-25 — Shell Integration (PoC Phase 1, Slice 6)
+
+**Author**: W6 (0102)
+**Slice**: VOTE_POC_SHELL_INTEGRATION_PHASE1
+**Branch**: `feat/vote-poc-shell-integration-phase1`
+**WSP Compliance**: WSP 00, WSP 15, WSP 50, WSP 64, WSP 83, WSP 87, WSP 97, WSP 104, WSP 22
+
+### Created
+
+- `src/shell_integration.py` — Local shell payload contract (320 lines)
+- `tests/test_shell_integration.py` — Unit tests for shell integration (62 tests)
+
+### Shell Payload Features
+
+| Feature | Description |
+|---------|-------------|
+| LOCAL_SHELL_PAYLOAD_ONLY | Defines payload structure, not shell behavior |
+| NO_PUBLIC_LAUNCH | No route activation or public surface changes |
+| NO_MANIFEST_MUTATION | foundup_manifest.json unchanged |
+| NO_LLM_CALL | Pure data transformation |
+| NO_NEW_FACTS | Only repackages existing QuickAnswer data |
+
+### Shell Payload Contract
+
+| Field | Value | Source |
+|-------|-------|--------|
+| foundup_id | "voteballots" | foundup_manifest.json (readonly) |
+| route_namespace | "/f/voteballots" | WSP 104 (readonly) |
+| app_mount | "/f/voteballots/app" | Convention (not activated) |
+| answer_format | AnswerFormat enum | From QuickAnswer |
+| lines | List[str] | Preserved exactly from QuickAnswer |
+| confidence_label | ConfidenceLabel | Preserved from QuickAnswer |
+| source_trace_id | str | Preserved from QuickAnswer |
+| trail_termination_markers | List[str] | Preserved from QuickAnswer |
+| human_review_required | bool | Preserved from QuickAnswer |
+| human_review_triggers | List[HumanReviewTrigger] | Preserved from QuickAnswer |
+| display_ready | bool | From is_answer_ready_for_display() |
+| truncated | bool | Preserved from QuickAnswer |
+| warnings | List[str] | Generated from answer state |
+
+### Data Types
+
+- `ShellPayloadStatus` — Build operation status enum
+- `VoteShellPayload` — Shell payload dataclass with all fields
+- `PayloadValidationResult` — Validation result with errors/warnings
+
+### Public API
+
+- `build_vote_shell_payload(answer, format)` — Core payload builder
+- `validate_vote_shell_payload(payload)` — Validate payload completeness
+- `build_ready_payload(answer)` — Convenience for shell display format
+- `is_payload_ready(payload)` — Check if ready for display
+- `get_payload_summary(payload)` — Brief status summary
+
+### Safety Boundaries
+
+- LOCAL_SHELL_PAYLOAD_ONLY (data contract, not shell behavior)
+- NO_PUBLIC_LAUNCH
+- NO_ROUTE_ACTIVATION
+- NO_MANIFEST_MUTATION
+- NO_REGISTRY_MUTATION
+- NO_CATALOG_MUTATION
+- NO_PROJECTION_MUTATION
+- NO_PFMALL_SHELL_BEHAVIOR_CHANGE
+- NO_LLM_CALL
+- NO_NEW_FACTS
+- ANSWER_LINES_PRESERVED
+- CONFIDENCE_LABELS_PRESERVED
+- SOURCE_TRACE_PRESERVED
+- TRAIL_TERMINATION_MARKERS_PRESERVED
+- HUMAN_REVIEW_TRIGGER_PRESERVED
+- NO_CANDIDATE_RECOMMENDATION
+- NO_TARGETED_PERSUASION
+- NO_MICROTARGETING
+
+### Test Coverage
+
+- 62 new tests, all passing
+- Total: 303 tests (46 FEC + 70 entity + 42 funding + 37 confidence + 46 quick + 62 shell)
+- Covers: ready payload, not-ready payload, foundup_id, route_namespace, app_mount, line preservation, confidence preservation, source trace, trail termination, human review, validation, no public launch, no manifest mutation, no LLM/network, no political safety violations, full pipeline, chain completion
+
+### Updated
+
+- `src/__init__.py` — Added shell integration exports, version bump to 0.6.0
+
+### Audit Document
+
+- `docs/audits/architecture/VOTE_POC_SHELL_INTEGRATION_PHASE1.md`
+
+### Chain Completion Summary
+
+| Slice | PR | Status |
+|-------|-----|--------|
+| Slice 1: FEC Adapter | #707 | MERGED |
+| Slice 2: Entity Resolution | #709 | MERGED |
+| Slice 3: Funding Summary | #710 | MERGED |
+| Slice 4: Confidence Scoring | #712 | MERGED |
+| Slice 5: Quick Answer | #713 | MERGED |
+| Slice 6: Shell Integration | This slice | COMPLETE |
+
+**Vote PoC Chain: 6/6 slices complete**
+
+---
+
 ## 2026-05-22 — Quick Answer Generation (PoC Phase 1, Slice 5)
 
 **Author**: W6 (0102)
