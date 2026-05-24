@@ -27,7 +27,7 @@ Political Safety Boundaries:
 - HUMAN_REVIEW_FOR_HIGH_RISK_CLAIMS
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"  # Updated for Entity Resolution (Phase 1, Slice 2)
 __status__ = "poc"  # Updated from "design" for Phase 1 implementation
 
 # FEC Adapter exports
@@ -57,6 +57,21 @@ from .fec_adapter import (
     get_mock_adapter,
 )
 
+# Entity Resolution exports (Slice 2)
+from .entity_resolution import (
+    # Status enum
+    EntityResolutionStatus,
+    # Request/Response types
+    EntityResolutionRequest,
+    EntityResolutionResult,
+    EntityResolutionCandidate,
+    # Core resolution function
+    resolve_candidate_entity,
+    # Convenience functions
+    resolve_by_name,
+    resolve_by_id,
+)
+
 __all__ = [
     # Error types
     "FECError",
@@ -81,4 +96,12 @@ __all__ = [
     # Factory functions
     "create_fec_adapter",
     "get_mock_adapter",
+    # Entity Resolution (Slice 2)
+    "EntityResolutionStatus",
+    "EntityResolutionRequest",
+    "EntityResolutionResult",
+    "EntityResolutionCandidate",
+    "resolve_candidate_entity",
+    "resolve_by_name",
+    "resolve_by_id",
 ]

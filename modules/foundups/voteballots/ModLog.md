@@ -2,6 +2,96 @@
 
 ---
 
+## 2026-05-22 — Entity Resolution Implementation (PoC Phase 1, Slice 2)
+
+**Author**: W6 (0102)
+**Slice**: VOTE_POC_ENTITY_RESOLUTION_PHASE1
+**Branch**: `feat/vote-poc-entity-resolution-phase1`
+**WSP Compliance**: WSP 00, WSP 15, WSP 50, WSP 64, WSP 83, WSP 87, WSP 97, WSP 104, WSP 22
+
+### Created
+
+- `src/entity_resolution.py` — Deterministic candidate entity resolution (280 lines)
+- `tests/test_entity_resolution.py` — Unit tests for entity resolution (70 tests)
+
+### Entity Resolution Features
+
+| Feature | Description |
+|---------|-------------|
+| Deterministic Resolution | Consistent ordering and scoring |
+| Ambiguity Preservation | MULTIPLE_MATCHES returns all, never guesses |
+| No Hallucination | Only returns candidates from adapter |
+| Hint Support | State, office, party, cycle hints for disambiguation |
+| Confidence Scoring | Resolution quality scoring (0.0-1.0) |
+| Error Propagation | ADAPTER_ERROR, INVALID_QUERY statuses |
+
+### Resolution Status Enum
+
+- `EXACT_ONE_MATCH` — Single candidate resolved
+- `MULTIPLE_MATCHES` — Disambiguation required
+- `NO_MATCH` — No candidates found (not hallucinated)
+- `ADAPTER_ERROR` — FEC adapter error
+- `INVALID_QUERY` — Invalid request parameters
+
+### Data Types
+
+- `EntityResolutionRequest` — Query with optional hints
+- `EntityResolutionResult` — Resolution outcome
+- `EntityResolutionCandidate` — Candidate with match score/reason
+- `EntityResolutionStatus` — Status enum
+
+### Public API
+
+- `resolve_candidate_entity(request, adapter)` — Core resolution function
+- `resolve_by_name(name, adapter, state?, office?)` — Convenience function
+- `resolve_by_id(candidate_id, adapter)` — Direct ID lookup
+
+### Safety Boundaries
+
+- NO_HALLUCINATED_CANDIDATE_IDS
+- AMBIGUITY_PRESERVED_NOT_GUESSED
+- NO_FUNDING_SUMMARY_IN_THIS_SLICE
+- NO_CONTRIBUTION_AGGREGATION
+- NO_PERSUASION_LANGUAGE
+
+### Test Coverage
+
+- 70 new tests, all passing
+- Total: 116 tests (46 FEC adapter + 70 entity resolution)
+- Covers: request validation, exact match, disambiguation, no match, adapter errors, confidence scoring, ordering, convenience functions, political safety
+
+### Updated
+
+- `src/__init__.py` — Added entity resolution exports, version bump to 0.2.0
+
+### Audit Document
+
+- `docs/audits/architecture/VOTE_POC_ENTITY_RESOLUTION_PHASE1.md`
+
+### Carry-Forward Contract for Slice 3
+
+```python
+from modules.foundups.voteballots.src import (
+    # From Slice 1 (FEC Adapter)
+    get_mock_adapter,
+    CandidateSearchResult,
+    CandidateRecord,
+    FECErrorType,
+    # From Slice 2 (Entity Resolution)
+    EntityResolutionRequest,
+    EntityResolutionResult,
+    EntityResolutionStatus,
+    EntityResolutionCandidate,
+    resolve_candidate_entity,
+)
+```
+
+### Next Slice
+
+- VOTE_POC_FUNDING_SUMMARY_PHASE1 — Funding source aggregation
+
+---
+
 ## 2026-05-22 — FEC Adapter Implementation (PoC Phase 1, Slice 1)
 
 **Author**: W6 (0102)
