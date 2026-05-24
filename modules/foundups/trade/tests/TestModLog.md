@@ -442,6 +442,108 @@ WSP_00, WSP_15, WSP_50, WSP_64, WSP_83, WSP_87, WSP_97, WSP_104, WSP_22
 
 ---
 
+---
+
+### [2026-05-24] - TRADE_HARNESS_INTEGRATION_WITH_SCORING_PHASE1
+
+**WSP Protocol References**: WSP 97 (Truth), WSP 104 (Namespace), WSP 22 (ModLog)
+
+#### Tests Added
+
+**test_scoring_integration.py** — Harness/scoring integration (26 tests):
+
+- TestDeterminism: baseline hash unchanged (5 tests)
+  - test_baseline_hash_unchanged_with_gate_disabled
+  - test_baseline_length_unchanged
+  - test_synthetic_candidate_is_deterministic
+  - test_synthetic_reports_are_deterministic
+  - test_gate_results_are_deterministic
+
+- TestGateBehavior: gate passthrough and evaluation (5 tests)
+  - test_disabled_gate_is_passthrough
+  - test_sell_intent_passes_through
+  - test_hold_intent_passes_through
+  - test_buy_intent_is_evaluated
+  - test_convenience_function_with_none_gate
+
+- TestBandActionMapping: band → action verification (4 tests)
+  - test_allowed_bands_set
+  - test_blocked_bands_set
+  - test_all_bands_covered
+  - test_no_overlap
+
+- TestGateResults: result recording and summary (4 tests)
+  - test_gate_records_results
+  - test_gate_summary_empty
+  - test_gate_reset
+  - test_result_to_dict
+
+- TestSyntheticCandidate: candidate derivation (3 tests)
+  - test_candidate_has_required_fields
+  - test_different_seeds_produce_different_candidates
+  - test_different_bars_produce_different_candidates
+
+- TestForbiddenImports: static scan (2 tests)
+  - test_scoring_integration_has_no_forbidden_imports
+  - test_all_src_files_have_no_forbidden_imports
+
+- TestForbiddenFields: static scan (2 tests)
+  - test_scoring_integration_has_no_forbidden_fields
+  - test_all_src_files_have_no_forbidden_fields
+
+- TestIntegration: end-to-end (1 test)
+  - test_gate_can_filter_buys_across_simulation
+
+#### Files Added
+
+- `src/scoring_integration.py` — Integration layer (Option A)
+- `tests/test_scoring_integration.py` — 26 tests
+
+#### Key Design Decisions
+
+- **Option A chosen**: Separate `scoring_integration.py` module
+  - Rationale: Isolates scoring-gate behavior from core harness, reduces regression risk
+- **Default-off**: Gate disabled by default, opt-in via `ScoringGate(enabled=True)`
+- **Per-bar hook**: Gate evaluates at each bar before intent execution
+- **Synthetic derivation**: Deterministic (bar, seed) → LaunchpadTokenCandidate mapping
+- **BUY-only gating**: SELL/HOLD intents pass through ungated
+
+#### Band → Action Mapping
+
+| Band | Action | Intent Outcome |
+|------|--------|----------------|
+| REJECT | BLOCK | BUY → HOLD |
+| OBSERVE | OBSERVE | BUY → HOLD (with audit note) |
+| SIMULATE_ONLY | ALLOW | BUY proceeds |
+| CANDIDATE_FOR_FUTURE_REVIEW | ALLOW | BUY proceeds |
+
+#### Constraints Honored
+
+- NO scoring engine mutation (due_diligence_scoring.py unchanged)
+- NO contracts mutation (contracts.py unchanged)
+- NO fixture mutation (due_diligence_regimes.py unchanged)
+- NO weight/band/disqualifier change (does not trigger #700 R1-R5)
+- Default behavior byte-identical (baseline hash unchanged)
+- Forbidden imports: 0 hits
+- Forbidden fields: 0 hits
+- Trade status unchanged (not_portfolio / poc_status=idea / skeleton_candidate)
+
+#### Test Results
+
+```bash
+python -m pytest modules/foundups/trade/tests/test_scoring_integration.py -v
+# 26 passed
+
+python -m pytest modules/foundups/trade/tests/ -q
+# 431 passed (405 existing + 26 new, 0 skipped)
+```
+
+#### WSP refs
+
+WSP_00, WSP_15, WSP_50, WSP_64, WSP_83, WSP_87, WSP_97, WSP_104, WSP_22
+
+---
+
 ## Future Entries
 
-Next slice: TRADE_DUE_DILIGENCE_POST_TUNING_REGIME_OBSERVATION_PHASE1
+Next slice: TRADE_HARNESS_INTEGRATION_REGIME_REPLAY_PHASE1 or TRADE_HARNESS_INTEGRATION_OBSERVATION_SNAPSHOT_PHASE1
