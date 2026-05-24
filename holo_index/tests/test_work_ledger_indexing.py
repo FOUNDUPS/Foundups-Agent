@@ -744,13 +744,21 @@ class TestCLITargetedReindex:
     def test_helper_invokes_wrapper_when_source_exists(self, tmp_path, capsys):
         """Dispatch helper invokes index_work_ledger_entries() when source is present."""
         from holo_index._cli_main import _run_work_ledger_indexing
+        from holo_index.core.indexing_engine import IndexResult
 
         ledger_dir = tmp_path / "docs" / "0102_session_briefings"
         ledger_dir.mkdir(parents=True)
         (ledger_dir / "work_ledger.example.json").write_text('{"slices": []}', encoding="utf-8")
 
         holo = self._make_holo(project_root=tmp_path)
-        holo.work_ledger_collection.count.return_value = 7
+        # HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PARITY_PHASE1 repair:
+        # CLI now expects IndexResult, not MagicMock
+        holo.index_work_ledger_entries.return_value = IndexResult(
+            discovered_count=7,
+            indexed_count=7,
+            collection_name="navigation_work_ledger",
+            warning=None,
+        )
 
         result = _run_work_ledger_indexing(holo, self._make_args(index_work_ledger=True))
         assert result is True
