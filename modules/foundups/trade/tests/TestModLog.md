@@ -360,8 +360,88 @@ python -m pytest modules/foundups/trade/tests/
 #### WSP refs
 
 WSP_00, WSP_15, WSP_50, WSP_64, WSP_83, WSP_87, WSP_97, WSP_104, WSP_22
+
+---
+
+### [2026-05-22] - TRADE_DUE_DILIGENCE_SOFT_DISQUALIFIER_PHASE1 (v0.6.2)
+
+**Worker**: W8 (Repair: W6)
+**Branch**: `feat/trade-due-diligence-soft-disqualifier-phase1`
+**Scope**: Soft disqualifier tuning for R2, R5, R6 per PR #693 decision-shape review.
+
+#### Soft Disqualifier Rules Implemented
+
+| Regime | Trigger Condition | Cap Band | Reason |
+|--------|-------------------|----------|--------|
+| R2 | influencer_risk < 20 | SIMULATE_ONLY | Coordinated pump risk |
+| R5 | whale_risk < 20 | SIMULATE_ONLY | Whale accumulation dump risk |
+| R6 | social_authenticity < 40 AND telegram_quality < 50 | SIMULATE_ONLY | Low-authenticity social signals |
+
+#### NOT TUNED (per PR #693 decision-shape review)
+
+- R3 (dead_x_no_telegram): No soft disqualifier - EXPECTATION_TOO_STRICT (fixture expected_band updated to match engine)
+- R7 (bonding_curve_migration_risk): No soft disqualifier - ACCEPTABLE_BEHAVIOR (fixture expected_band updated to match engine)
+
+#### Tests Added (13 new tests)
+
+**test_due_diligence_scoring.py** — Soft disqualifier tests:
+| Test | Coverage |
+|------|----------|
+| `test_whale_risk_soft_disqualifier_caps_at_simulate_only` | whale_risk < 20 caps CANDIDATE at SIMULATE_ONLY |
+| `test_influencer_risk_soft_disqualifier_caps_at_simulate_only` | influencer_risk < 20 caps CANDIDATE at SIMULATE_ONLY |
+| `test_social_telegram_soft_disqualifier_caps_at_simulate_only` | social+telegram combo caps at SIMULATE_ONLY |
+| `test_social_only_does_not_trigger_soft_disqualifier` | social alone does NOT trigger |
+| `test_telegram_only_does_not_trigger_soft_disqualifier` | telegram alone does NOT trigger |
+| `test_soft_disqualifiers_do_not_affect_simulate_only_band` | Lower bands unchanged |
+| `test_soft_disqualifiers_do_not_affect_observe_band` | OBSERVE unchanged |
+| `test_soft_disqualifiers_do_not_affect_reject_band` | REJECT unchanged |
+| `test_hard_disqualifier_takes_priority_over_soft` | Hard > soft priority |
+| `test_all_components_high_allows_candidate` | Clean path to CANDIDATE |
+| `test_bonding_curve_low_does_not_trigger_soft_disqualifier` | R7 unchanged proof |
+| `test_social_authenticity_very_low_alone_does_not_trigger` | R3 unchanged proof |
+| `test_weights_unchanged_for_r3_r7_components` | Weights unchanged proof |
+
+**test_due_diligence_contracts.py** — Updated 2 existing tests:
+- `test_score_over_70_is_candidate`: Added component values to clear soft disqualifiers
+- `test_partial_confidence_allows_higher_bands`: Added component values to clear soft disqualifiers
+
+#### Constraints honored
+
+- NO weight change (all 10 weights unchanged)
+- NO hard disqualifier threshold change (<20 unchanged)
+- NO schema/contract mutation (only `determine_decision_band()` logic)
+- NO fixture input mutation (only expected-band assertions in 2 existing tests)
+- NO R3 tuning
+- NO R7 tuning
+- NO registry/catalog/manifest/projection/CI/dependency edits
+- Deterministic scoring preserved
+- Trade status unchanged (not_portfolio / poc_status=idea / entity_type=skeleton_candidate)
+
+#### Test results
+
+```bash
+python -m pytest modules/foundups/trade/tests/test_due_diligence_scoring.py
+# 71 passed (58 existing + 13 new)
+
+python -m pytest modules/foundups/trade/tests/
+# 405 passed (392 existing + 13 new, 0 skipped)
+```
+
+#### Repair (2026-05-22 W6)
+
+- Rebased onto origin/main post-#697 (1b7f6f2e3)
+- Updated fixture expected_band values for R2, R3, R5, R7 per PR #693 reconciliation
+- Updated audit doc citation from #696 (incorrect) to #693 (correct decision-shape review)
+- Band-match rate: 7/7 (all MATCH post-repair)
+- Path A chosen: R3/R7 expected_band updated to match engine output
+- Zero skipped tests in full trade suite
+
+#### WSP refs
+
+WSP_00, WSP_15, WSP_50, WSP_64, WSP_83, WSP_87, WSP_97, WSP_104, WSP_22
+
 ---
 
 ## Future Entries
 
-Next slice: targeted engine-tuning slice to address the 5 expected-vs-actual divergences identified by this evidence pack (see audit doc §10).
+Next slice: TRADE_DUE_DILIGENCE_POST_TUNING_REGIME_OBSERVATION_PHASE1

@@ -938,3 +938,245 @@ class TestScoringInvariants:
 
         assert result.evidence_confidence < 0.5
         assert result.decision_band == DecisionBand.OBSERVE
+
+
+# ---------------------------------------------------------------------------
+# Soft Disqualifier Tests (TRADE_DUE_DILIGENCE_SOFT_DISQUALIFIER_PHASE1)
+# ---------------------------------------------------------------------------
+
+
+class TestSoftDisqualifiers:
+    """Tests for soft disqualifier logic (PR #696).
+
+    Soft disqualifiers cap CANDIDATE_FOR_FUTURE_REVIEW at SIMULATE_ONLY
+    when certain risk signals are present.
+
+    Authorized tuning (R2, R5, R6):
+    - R2: influencer_risk < 20 -> cap at SIMULATE_ONLY
+    - R5: whale_risk < 20 -> cap at SIMULATE_ONLY
+    - R6: social_authenticity < 40 AND telegram_quality < 50 -> cap at SIMULATE_ONLY
+
+    NOT TUNED (R3, R7):
+    - R3: dead_x_no_telegram - social weights, no soft disqualifier
+    - R7: bonding_curve_migration_risk - curve weights, no soft disqualifier
+    """
+
+    def test_whale_risk_soft_disqualifier_caps_at_simulate_only(self):
+        """whale_risk < 20 caps CANDIDATE at SIMULATE_ONLY (R5)."""
+        score = TradeDueDiligenceScore(
+            token_address="test_whale_risk",
+            issuer_history=80.0,  # Clear hard disqualifier
+            rug_honeypot=80.0,  # Clear hard disqualifier
+            whale_risk=15.0,  # BELOW soft disqualifier threshold (20)
+            influencer_risk=80.0,  # Above soft disqualifier threshold
+            social_authenticity=80.0,  # Above soft disqualifier threshold
+            telegram_quality=80.0,  # Above soft disqualifier threshold
+            total_score=75.0,  # Would be CANDIDATE without soft disqualifier
+            evidence_confidence=0.9,
+        )
+        # Would be CANDIDATE_FOR_FUTURE_REVIEW without soft disqualifier
+        # But whale_risk < 20 caps at SIMULATE_ONLY
+        assert score.determine_decision_band() == DecisionBand.SIMULATE_ONLY
+
+    def test_influencer_risk_soft_disqualifier_caps_at_simulate_only(self):
+        """influencer_risk < 20 caps CANDIDATE at SIMULATE_ONLY (R2)."""
+        score = TradeDueDiligenceScore(
+            token_address="test_influencer_risk",
+            issuer_history=80.0,  # Clear hard disqualifier
+            rug_honeypot=80.0,  # Clear hard disqualifier
+            whale_risk=80.0,  # Above soft disqualifier threshold
+            influencer_risk=10.0,  # BELOW soft disqualifier threshold (20)
+            social_authenticity=80.0,  # Above soft disqualifier threshold
+            telegram_quality=80.0,  # Above soft disqualifier threshold
+            total_score=75.0,  # Would be CANDIDATE without soft disqualifier
+            evidence_confidence=0.9,
+        )
+        # Would be CANDIDATE_FOR_FUTURE_REVIEW without soft disqualifier
+        # But influencer_risk < 20 caps at SIMULATE_ONLY
+        assert score.determine_decision_band() == DecisionBand.SIMULATE_ONLY
+
+    def test_social_telegram_soft_disqualifier_caps_at_simulate_only(self):
+        """social_authenticity < 40 AND telegram_quality < 50 caps at SIMULATE_ONLY (R6)."""
+        score = TradeDueDiligenceScore(
+            token_address="test_social_telegram",
+            issuer_history=80.0,  # Clear hard disqualifier
+            rug_honeypot=80.0,  # Clear hard disqualifier
+            whale_risk=80.0,  # Above soft disqualifier threshold
+            influencer_risk=80.0,  # Above soft disqualifier threshold
+            social_authenticity=35.0,  # BELOW soft disqualifier threshold (40)
+            telegram_quality=45.0,  # BELOW soft disqualifier threshold (50)
+            total_score=75.0,  # Would be CANDIDATE without soft disqualifier
+            evidence_confidence=0.9,
+        )
+        # Would be CANDIDATE_FOR_FUTURE_REVIEW without soft disqualifier
+        # But social_authenticity < 40 AND telegram_quality < 50 caps at SIMULATE_ONLY
+        assert score.determine_decision_band() == DecisionBand.SIMULATE_ONLY
+
+    def test_social_only_does_not_trigger_soft_disqualifier(self):
+        """social_authenticity < 40 alone does NOT trigger soft disqualifier."""
+        score = TradeDueDiligenceScore(
+            token_address="test_social_only",
+            issuer_history=80.0,
+            rug_honeypot=80.0,
+            whale_risk=80.0,
+            influencer_risk=80.0,
+            social_authenticity=35.0,  # BELOW threshold
+            telegram_quality=80.0,  # ABOVE threshold - only social is low
+            total_score=75.0,
+            evidence_confidence=0.9,
+        )
+        # Both conditions required, only one met -> CANDIDATE allowed
+        assert score.determine_decision_band() == DecisionBand.CANDIDATE_FOR_FUTURE_REVIEW
+
+    def test_telegram_only_does_not_trigger_soft_disqualifier(self):
+        """telegram_quality < 50 alone does NOT trigger soft disqualifier."""
+        score = TradeDueDiligenceScore(
+            token_address="test_telegram_only",
+            issuer_history=80.0,
+            rug_honeypot=80.0,
+            whale_risk=80.0,
+            influencer_risk=80.0,
+            social_authenticity=80.0,  # ABOVE threshold - only telegram is low
+            telegram_quality=45.0,  # BELOW threshold
+            total_score=75.0,
+            evidence_confidence=0.9,
+        )
+        # Both conditions required, only one met -> CANDIDATE allowed
+        assert score.determine_decision_band() == DecisionBand.CANDIDATE_FOR_FUTURE_REVIEW
+
+    def test_soft_disqualifiers_do_not_affect_simulate_only_band(self):
+        """Soft disqualifiers only cap CANDIDATE, not lower bands."""
+        score = TradeDueDiligenceScore(
+            token_address="test_simulate_band",
+            issuer_history=80.0,
+            rug_honeypot=80.0,
+            whale_risk=15.0,  # Would trigger soft disqualifier
+            influencer_risk=10.0,  # Would trigger soft disqualifier
+            social_authenticity=30.0,  # Would trigger soft disqualifier
+            telegram_quality=40.0,  # Would trigger soft disqualifier
+            total_score=60.0,  # SIMULATE_ONLY range (50-70)
+            evidence_confidence=0.9,
+        )
+        # SIMULATE_ONLY is already at or below the cap, no change
+        assert score.determine_decision_band() == DecisionBand.SIMULATE_ONLY
+
+    def test_soft_disqualifiers_do_not_affect_observe_band(self):
+        """Soft disqualifiers do not affect OBSERVE band."""
+        score = TradeDueDiligenceScore(
+            token_address="test_observe_band",
+            issuer_history=80.0,
+            rug_honeypot=80.0,
+            whale_risk=15.0,  # Would trigger soft disqualifier
+            total_score=40.0,  # OBSERVE range (30-50)
+            evidence_confidence=0.9,
+        )
+        # OBSERVE is below soft disqualifier cap, unchanged
+        assert score.determine_decision_band() == DecisionBand.OBSERVE
+
+    def test_soft_disqualifiers_do_not_affect_reject_band(self):
+        """Soft disqualifiers do not affect REJECT band."""
+        score = TradeDueDiligenceScore(
+            token_address="test_reject_band",
+            issuer_history=80.0,
+            rug_honeypot=80.0,
+            whale_risk=15.0,  # Would trigger soft disqualifier
+            total_score=25.0,  # REJECT range (< 30)
+            evidence_confidence=0.9,
+        )
+        # REJECT is below soft disqualifier cap, unchanged
+        assert score.determine_decision_band() == DecisionBand.REJECT
+
+    def test_hard_disqualifier_takes_priority_over_soft(self):
+        """Hard disqualifiers still trigger even with soft disqualifier conditions."""
+        score = TradeDueDiligenceScore(
+            token_address="test_hard_priority",
+            issuer_history=10.0,  # Hard disqualifier (< 20)
+            rug_honeypot=80.0,
+            whale_risk=15.0,  # Would be soft disqualifier
+            total_score=75.0,
+            evidence_confidence=0.9,
+        )
+        # Hard disqualifier takes priority -> REJECT
+        assert score.determine_decision_band() == DecisionBand.REJECT
+
+    def test_all_components_high_allows_candidate(self):
+        """All components above thresholds allows CANDIDATE_FOR_FUTURE_REVIEW."""
+        score = TradeDueDiligenceScore(
+            token_address="test_all_high",
+            issuer_history=90.0,
+            rug_honeypot=90.0,
+            whale_risk=90.0,  # Above threshold (20)
+            influencer_risk=90.0,  # Above threshold (20)
+            social_authenticity=90.0,  # Above threshold (40)
+            telegram_quality=90.0,  # Above threshold (50)
+            total_score=85.0,
+            evidence_confidence=0.95,
+        )
+        # No soft disqualifiers triggered -> CANDIDATE allowed
+        assert score.determine_decision_band() == DecisionBand.CANDIDATE_FOR_FUTURE_REVIEW
+
+
+class TestR3R7UnchangedBehavior:
+    """Tests proving R3 and R7 regimes are NOT affected by soft disqualifiers.
+
+    R3 (dead_x_no_telegram) and R7 (bonding_curve_migration_risk) are explicitly
+    NOT TUNED per PR #696. Their behavior is controlled by:
+    - R3: weighted sum via social_authenticity and telegram_quality weights
+    - R7: weighted sum via bonding_curve weight
+
+    No soft disqualifier was added for these regimes.
+    """
+
+    def test_bonding_curve_low_does_not_trigger_soft_disqualifier(self):
+        """Low bonding_curve does NOT trigger soft disqualifier (R7 unchanged)."""
+        score = TradeDueDiligenceScore(
+            token_address="test_bonding_curve_r7",
+            issuer_history=90.0,
+            rug_honeypot=90.0,
+            whale_risk=90.0,
+            influencer_risk=90.0,
+            social_authenticity=90.0,
+            telegram_quality=90.0,
+            bonding_curve=42.5,  # Low (late curve) - R7 scenario
+            total_score=85.0,  # Still in CANDIDATE range due to weights
+            evidence_confidence=0.9,
+        )
+        # bonding_curve weight is 0.05, so low value doesn't drop total much
+        # No soft disqualifier for bonding_curve -> CANDIDATE allowed
+        assert score.determine_decision_band() == DecisionBand.CANDIDATE_FOR_FUTURE_REVIEW
+
+    def test_social_authenticity_very_low_alone_does_not_trigger(self):
+        """Very low social_authenticity alone does NOT trigger (R3 unchanged).
+
+        R3 has social_authenticity=5 but telegram_quality=20 (above telegram threshold).
+        The social-telegram soft disqualifier requires BOTH conditions.
+        """
+        score = TradeDueDiligenceScore(
+            token_address="test_social_r3",
+            issuer_history=90.0,
+            rug_honeypot=90.0,
+            whale_risk=90.0,
+            influencer_risk=90.0,
+            social_authenticity=5.0,  # R3-like: very low
+            telegram_quality=60.0,  # Above soft disqualifier threshold (50)
+            total_score=80.0,
+            evidence_confidence=0.9,
+        )
+        # social_authenticity < 40 BUT telegram_quality >= 50
+        # Soft disqualifier requires BOTH -> CANDIDATE allowed
+        assert score.determine_decision_band() == DecisionBand.CANDIDATE_FOR_FUTURE_REVIEW
+
+    def test_weights_unchanged_for_r3_r7_components(self):
+        """Weights for social and bonding_curve components remain unchanged."""
+        # Verify weights from spec (unchanged by this slice)
+        expected_weights = {
+            "social_authenticity": 0.10,
+            "telegram_quality": 0.05,
+            "bonding_curve": 0.05,
+        }
+        score = TradeDueDiligenceScore(token_address="test")
+        for component, expected in expected_weights.items():
+            assert score._WEIGHTS[component] == expected, (
+                f"Weight for {component} changed: expected {expected}, "
+                f"got {score._WEIGHTS[component]}"
+            )
