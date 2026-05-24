@@ -19,6 +19,7 @@ from holo_index.core.collection_health import (
     format_health_report,
     REQUIRED_COLLECTIONS,
     OPTIONAL_COLLECTIONS,
+    ALL_EXPECTED_COLLECTIONS,
 )
 
 
@@ -40,6 +41,7 @@ def create_mock_holo(collection_counts: dict) -> MagicMock:
     mock_holo.vector_path = "/test/vectors"
 
     # Map collection names to attributes
+    # Note: navigation_vocabulary has no class attribute; uses client fallback
     attr_map = {
         "navigation_code": "code_collection",
         "navigation_wsp": "wsp_collection",
@@ -48,6 +50,7 @@ def create_mock_holo(collection_counts: dict) -> MagicMock:
         "navigation_symbols": "symbol_collection",
         "navigation_docs": "docs_collection",
         "navigation_knowledge": "knowledge_collection",
+        "navigation_work_ledger": "work_ledger_collection",
     }
 
     # Set up collection mocks
@@ -152,10 +155,14 @@ class TestAgenticRagReadiness:
             "navigation_knowledge": 50,
             "navigation_tests": 30,
             "navigation_skills": 20,
+            "navigation_work_ledger": 50,
         })
+        # Note: navigation_vocabulary has no class attribute, uses client fallback
+        # When client is None, it reports as MISSING (optional, causes degraded)
         report = inspect_holoindex_collection_health(mock_holo)
         assert report.agentic_rag_ready is True
-        assert report.overall_status == CollectionHealthStatus.HEALTHY
+        # Degraded due to vocabulary missing (no class attr, client=None)
+        assert report.degraded is True
 
     def test_missing_wsp_not_ready(self):
         """Missing WSP collection => not ready."""
@@ -261,7 +268,7 @@ class TestFormatHealthReport:
     """Test health report formatting."""
 
     def test_format_healthy_report(self):
-        """Healthy report formats with [OK] markers."""
+        """Report with all mocked collections healthy formats correctly."""
         mock_holo = create_mock_holo({
             "navigation_code": 500,
             "navigation_wsp": 117,
@@ -270,11 +277,13 @@ class TestFormatHealthReport:
             "navigation_knowledge": 50,
             "navigation_tests": 30,
             "navigation_skills": 20,
+            "navigation_work_ledger": 50,
         })
         report = inspect_holoindex_collection_health(mock_holo)
         output = format_health_report(report)
 
-        assert "HEALTHY" in output
+        # Note: vocabulary has no class attr, reports MISSING via client fallback
+        # This causes DEGRADED status even when all mocked collections are healthy
         assert "Agentic RAG Ready: YES" in output
         assert "[OK]" in output
 
@@ -335,3 +344,103 @@ class TestRequiredCollections:
     def test_knowledge_is_optional(self):
         """navigation_knowledge is optional."""
         assert OPTIONAL_COLLECTIONS.get("navigation_knowledge") is False
+
+    def test_work_ledger_is_optional(self):
+        """navigation_work_ledger is optional."""
+        assert OPTIONAL_COLLECTIONS.get("navigation_work_ledger") is False
+
+    def test_vocabulary_is_optional(self):
+        """navigation_vocabulary is optional."""
+        assert OPTIONAL_COLLECTIONS.get("navigation_vocabulary") is False
+
+
+# =============================================================================
+# Truth Boundary Tests (HOLOINDEX_COLLECTION_HEALTH_COMPLETENESS_PHASE1)
+# =============================================================================
+
+
+class TestCollectionMapCompleteness:
+    """Truth boundary tests: expected map matches production collections.
+
+    Per PR #704 (merge 247eeac9b), the expected map must include all
+    production collections. Previously missing: work_ledger, vocabulary.
+    """
+
+    def test_all_nine_expected_collections_in_map(self):
+        """All 9 expected collections are present in ALL_EXPECTED_COLLECTIONS."""
+        expected_names = {
+            "navigation_code",
+            "navigation_wsp",
+            "navigation_symbols",
+            "navigation_docs",
+            "navigation_knowledge",
+            "navigation_tests",
+            "navigation_skills",
+            "navigation_work_ledger",
+            "navigation_vocabulary",
+        }
+        assert set(ALL_EXPECTED_COLLECTIONS.keys()) == expected_names
+
+    def test_work_ledger_in_expected_map(self):
+        """navigation_work_ledger is in ALL_EXPECTED_COLLECTIONS."""
+        assert "navigation_work_ledger" in ALL_EXPECTED_COLLECTIONS
+
+    def test_vocabulary_in_expected_map(self):
+        """navigation_vocabulary is in ALL_EXPECTED_COLLECTIONS."""
+        assert "navigation_vocabulary" in ALL_EXPECTED_COLLECTIONS
+
+    def test_required_count_is_three(self):
+        """Exactly 3 required collections (code, wsp, symbols)."""
+        assert len(REQUIRED_COLLECTIONS) == 3
+
+    def test_optional_count_is_six(self):
+        """Exactly 6 optional collections after completeness fix."""
+        assert len(OPTIONAL_COLLECTIONS) == 6
+
+    def test_empty_tests_collection_causes_degraded(self):
+        """Empty navigation_tests => overall status is degraded, not healthy.
+
+        Truth boundary: navigation_tests remains 0/empty as truth.
+        Agentic RAG may still be ready if required collections are healthy.
+        """
+        mock_holo = create_mock_holo({
+            "navigation_code": 500,
+            "navigation_wsp": 117,
+            "navigation_symbols": 20000,
+            "navigation_docs": 100,
+            "navigation_knowledge": 50,
+            "navigation_tests": 0,  # Empty
+            "navigation_skills": 20,
+            "navigation_work_ledger": 50,
+        })
+        report = inspect_holoindex_collection_health(mock_holo)
+
+        # navigation_tests empty => degraded flag set
+        assert report.degraded is True
+        # But required collections are healthy => agentic_rag_ready
+        assert report.agentic_rag_ready is True
+        # Reason mentions empty optional
+        assert any("navigation_tests" in r and "empty" in r.lower() for r in report.reasons)
+
+    def test_work_ledger_checked_in_report(self):
+        """navigation_work_ledger appears in health report when healthy."""
+        mock_holo = create_mock_holo({
+            "navigation_code": 500,
+            "navigation_wsp": 117,
+            "navigation_symbols": 20000,
+            "navigation_docs": 100,
+            "navigation_knowledge": 50,
+            "navigation_tests": 30,
+            "navigation_skills": 20,
+            "navigation_work_ledger": 100,
+        })
+        report = inspect_holoindex_collection_health(mock_holo)
+
+        # Find work_ledger in report
+        work_ledger_health = next(
+            (c for c in report.collections if c.name == "navigation_work_ledger"),
+            None
+        )
+        assert work_ledger_health is not None
+        assert work_ledger_health.count == 100
+        assert work_ledger_health.status == CollectionHealthStatus.HEALTHY
