@@ -1,6 +1,6 @@
 # WSP 109: FoundUp Onboarding Intake Protocol
 
-**Version**: 1.0.0  
+**Version**: 1.1.0  
 **Status**: Draft  
 **Created**: 2026-05-25  
 **Author**: 0102  
@@ -92,19 +92,26 @@ The intake conversation follows this pattern:
 
 ```
 012 spoken idea
-    ↓
+    |
+    v
 RedDog / 0102 intake conversation
-    ↓
+    |
+    v
 WSP 109 architect packet
-    ↓
+    |
+    v
 WRE orchestration layer
-    ↓
+    |
+    v
 Architect routes work
-    ↓
+    |
+    v
 Specialized workers execute
-    ↓
+    |
+    v
 Results return to architect / WRE
-    ↓
+    |
+    v
 PoC / Prototype / MVP progression
 ```
 
@@ -120,10 +127,11 @@ During intake, RedDog/0102 must:
 
 ## Required Output Packet
 
-WSP 109 produces seven structured artifacts:
+WSP 109 produces eight structured artifacts:
 
 | Artifact | Purpose | Required |
 |----------|---------|----------|
+| `INTAKE_SOURCE.md` | Captures origin and provenance of intake | YES |
 | `OUTCOME.md` | What success looks like for the user | YES |
 | `SOLUTION.md` | How the FoundUp solves the problem | YES |
 | `PAIN.md` | What pain point drives adoption | YES |
@@ -134,9 +142,58 @@ WSP 109 produces seven structured artifacts:
 
 These are NOT final build instructions. They are WRE-ready intake artifacts.
 
+### Packet Output Order
+
+Intake may discover pain first, but the packet must output in FoundUp architect order:
+
+```
+OUTCOME -> SOLUTION -> PAIN -> POC_SCOPE -> PROTOTYPE_GATE -> SKILLS_MAP -> FOUNDUP_MANIFEST_DRAFT
+```
+
+Rationale:
+- 012 may speak from pain
+- Architect needs outcome first
+- Build path follows solution
+- Adoption pressure follows pain
+- PoC boundary prevents prototype creep
+
 ---
 
 ## Contract Definitions
+
+### INTAKE_SOURCE.md Contract
+
+```markdown
+# {FoundUp Name} - Intake Source
+
+## Source Type
+{spoken_012 | pasted_prompt | external_0102_discussion | prior_session_summary}
+
+## Raw Input Summary
+{Brief summary of original input - what 012 said or what was pasted}
+
+## Inferred FoundUp Name
+{Name derived from intake conversation}
+
+## Proposed FoundUp ID
+{lowercase_underscore format}
+
+## Assumptions
+- {Assumption 1}
+- {Assumption 2}
+
+## Unresolved Questions
+- {Question 1}
+- {Question 2}
+
+## Duplicate Discovery Status
+{NEW_FOUNDUP | EXISTING_FOUNDUP_UPDATE | POSSIBLE_DUPLICATE | LEGITIMATE_FORK | DERIVATIVE_FOUNDUP | EXTERNAL_FOUNDUP_REFERENCE}
+
+## Provenance Note
+{Any relevant context about source - session ID, conversation reference, etc.}
+```
+
+Core rule: A new 0102 session must be able to onboard a FoundUp from an external prior discussion without requiring full chat history.
 
 ### OUTCOME.md Contract
 
@@ -305,6 +362,43 @@ Is this a consumer-facing venture?
 
 ---
 
+## Duplicate Discovery Preflight
+
+WSP 109 requires checking for existing FoundUps before creating intake artifacts.
+
+### Required Searches
+
+| Source | Path | Purpose |
+|--------|------|---------|
+| HoloIndex | semantic search | Find similar concepts |
+| Registry | `modules/foundups/foundup_registry.json` | Check existing entries |
+| Modules | `modules/foundups/**` | Check existing scaffolds |
+| Mall Catalog | `public/member/mall-catalog.json` | Check published FoundUps |
+| Video Catalog | `public/member/mall-video-catalog.json` | Check video entries |
+| Portfolio | `public/f/portfolio_data.json` | Check portfolio entries |
+| External Repos | known references | Check external FoundUps |
+
+### Discovery Classification
+
+| Classification | Meaning | Action |
+|----------------|---------|--------|
+| NEW_FOUNDUP | No existing match | Proceed with intake |
+| EXISTING_FOUNDUP_UPDATE | Same FoundUp, new features | Route to update slice |
+| POSSIBLE_DUPLICATE | May repeat existing FoundUp | Flag for architect review |
+| LEGITIMATE_FORK | Intentional derivative | Proceed with lineage fields |
+| DERIVATIVE_FOUNDUP | Narrower audience/vertical | Proceed with parent reference |
+| EXTERNAL_FOUNDUP_REFERENCE | Points to external repo | Use external_foundup type |
+
+### Discovery Questions
+
+1. Is this the same FoundUp?
+2. Is this an update to an existing FoundUp?
+3. Is this a legitimate fork?
+4. Is this an external FoundUp reference?
+5. Is this a derivative that needs lineage recorded?
+
+---
+
 ## Addendum A — WSP 109 WRE Orchestration Binding
 
 ### Purpose
@@ -331,19 +425,26 @@ WSP 109 must not duplicate or replace WRE.
 
 ```
 012 spoken idea
-    ↓
+    |
+    v
 RedDog / 0102 intake conversation
-    ↓
+    |
+    v
 WSP 109 architect packet
-    ↓
+    |
+    v
 WRE orchestration layer
-    ↓
+    |
+    v
 Architect routes work
-    ↓
+    |
+    v
 Specialized workers execute, research, evaluate, test, document, and refine
-    ↓
+    |
+    v
 Results return to architect / WRE
-    ↓
+    |
+    v
 PoC / prototype / MVP progression
 ```
 
@@ -351,6 +452,7 @@ PoC / prototype / MVP progression
 
 WSP 109 outputs the structured packet:
 
+- INTAKE_SOURCE.md
 - OUTCOME.md
 - SOLUTION.md
 - PAIN.md
@@ -378,16 +480,6 @@ After receiving the WSP 109 packet, WRE may route to:
 - marketplace / FoundUp Mall worker
 
 The exact routing is determined by existing WRE logic, existing WSPs, and architect judgment.
-
-### Qwen3 Endurance Note
-
-The Qwen3 35-hour run validates the FoundUps development framework's ability to sustain long-running recursive agent work.
-
-This is a milestone signal for WRE viability.
-
-It does not mean WSP 109 should absorb orchestration logic.
-
-It means WSP 109 should hand off cleanly into WRE because the recursive engine has demonstrated operational endurance.
 
 ### Boundary Statement
 
@@ -514,6 +606,130 @@ WSP 109 references these candidates but does not require specific skill files.
 
 These are recommendations, not created by this WSP.
 
+### SKILLz vs External Skills Terminology
+
+| Term | Definition |
+|------|------------|
+| SKILLz | FoundUps/WRE wardrobe capabilities governed by WSP 95 |
+| skills | External agent/plugin/tool capabilities (lowercase) |
+
+WSP 109 may list candidate SKILLz and note external execution needs.
+WSP 109 creates neither.
+
+---
+
+## Addendum E — New-Session Execution Validation
+
+### Purpose
+
+WSP 109 must be executable by a fresh 0102 from protocol text alone.
+
+### Acceptance Test
+
+Given only:
+- WSP 109 (this document)
+- One raw FoundUp idea
+
+The worker must:
+- Produce all required intake artifacts (8 files)
+- Preserve intake-only boundary
+- Avoid code changes
+- Avoid registry/catalog/public route/token/DNS mutation
+- Separate PoC from prototype
+- Create a WRE-ready handoff
+- Produce a packet an architect can route
+
+### Worker Compatibility Probe
+
+Future slice: `WSP_109_WORKER_COMPATIBILITY_PROBE_PHASE1`
+
+Purpose: Test whether OpenClaw, Hermes, Qwen-class workers, and 0102 can follow WSP 109 in dry-run mode.
+
+WSP 109 does NOT claim those workers are proven compatible yet.
+
+---
+
+## Addendum F — Duplicate vs Fork Boundary
+
+### Core Rule
+
+A FoundUp may be a fork. Duplicate discovery must not automatically block onboarding.
+
+### Discovery Classifications
+
+| Classification | Definition |
+|----------------|------------|
+| POSSIBLE_DUPLICATE | Appears to repeat existing FoundUp without new audience, outcome, domain, fork lineage, or differentiated execution path |
+| LEGITIMATE_FORK | Intentionally derives from existing FoundUp with declared fork reason, lineage parent, and differentiated direction |
+| DERIVATIVE_FOUNDUP | Derived from parent with narrower audience, vertical, region, creator, channel, token/community, or execution model |
+
+### Fork Rules
+
+- Duplicates are blocked or routed to update
+- Forks are allowed when lineage and differentiation are explicit
+- A fork must not mutate the parent FoundUp
+- A fork must not inherit token, registry, route, catalog, or governance state unless a downstream WSP-gated slice explicitly authorizes it
+
+### Fork Types
+
+- audience_fork
+- geography_fork
+- creator_fork
+- product_fork
+- media_fork
+- community_fork
+- protocol_fork
+- access_service_fork
+
+### Required Fork Fields in FOUNDUP_MANIFEST_DRAFT.md
+
+When applicable:
+- parent_foundup_id
+- fork_type
+- fork_reason
+- differentiation_summary
+- lineage_notes
+- shared_assets
+- independent_assets
+- governance_boundary
+- token_boundary
+
+---
+
+## Addendum G — Skillz Placement Boundary
+
+### Placement Status
+
+WSP 109 does not create SKILLz.
+WSP 109 may list candidate onboarding SKILLz in SKILLS_MAP.md.
+Actual SKILLz creation and placement are governed by WSP 95.
+
+### Current Repo Evidence
+
+- No canonical `modules/foundups/skillz/` directory exists yet
+- Existing SKILLz are module-local or system-local
+- WSP 95 supports both `skillz/` and `skills/` discovery paths
+- WSP 95 says skills belong with the module they serve
+
+### Placement Rule
+
+`modules/foundups/skillz/onboarding/` is a **candidate placement only**.
+
+It must not be treated as canonical until a WSP 95 placement review slice confirms it.
+
+### Future Slice
+
+`FOUNDUP_ONBOARDING_SKILLZ_WARDROBE_DISCOVERY_PHASE1`
+
+Purpose: Research existing SKILLz placement patterns, inspect WSP 95, identify whether onboarding SKILLz belong under:
+- `modules/foundups/skillz/onboarding/`
+- `modules/ai_intelligence/ai_overseer/skillz/`
+- `modules/infrastructure/wre_core/skillz/`
+- `.claude/skills/..._prototype`
+- another WSP 95-compliant wardrobe path
+
+Output: Placement recommendation only, or prototype SKILLz only if explicitly authorized.
+
 ---
 
 ## WSP Dependency Map
@@ -561,6 +777,75 @@ WSP 109 enforces these truth boundaries:
 | NO_CABR_READY | YES |
 | NO_PAYOUT_READY | YES |
 | NO_DAO_ACTIVATION | YES |
+| ASCII_SAFE_CANONICAL_TEXT | YES |
+| QWEN3_ENDURANCE_NOISE_REMOVED | YES |
+| NEW_SESSION_BOOTSTRAP_SUPPORTED | YES |
+| INTAKE_SOURCE_CAPTURED | YES |
+| EXTERNAL_0102_DISCUSSION_INTAKE_SUPPORTED | YES |
+| PACKET_OUTPUT_ORDER_DEFINED | YES |
+| DUPLICATE_DISCOVERY_PREFLIGHT_REQUIRED | YES |
+| WORKER_COMPATIBILITY_MARKED_UNPROVEN_PENDING_PROBE | YES |
+| EVALUATION_RUBRIC_DEFINED | YES |
+| EXAMPLE_FIXTURE_INCLUDED | YES |
+| SKILLZ_VS_EXTERNAL_SKILLS_BOUNDARY_DEFINED | YES |
+| FOUNDUP_FORKS_ALLOWED_WITH_LINEAGE | YES |
+| DUPLICATE_NOT_EQUAL_FORK | YES |
+| FORK_LINEAGE_FIELDS_DEFINED | YES |
+| PARENT_FOUNDUP_NOT_MUTATED_BY_FORK | YES |
+| TOKEN_BOUNDARY_NOT_INHERITED_BY_DEFAULT | YES |
+| SKILLZ_PLACEMENT_MARKED_UNPROVEN | YES |
+| WSP_95_PLACEMENT_REVIEW_REQUIRED | YES |
+
+---
+
+## Evaluation Rubric
+
+WSP 109 intake quality is evaluated on:
+
+| Criterion | Description |
+|-----------|-------------|
+| Artifact Completeness | All 8 required artifacts present |
+| Intake-Source Clarity | Source type, assumptions, and provenance clear |
+| Duplicate-Discovery Quality | Proper search performed, classification justified |
+| Outcome/Solution/Pain Ordering | Architect-order preserved in output |
+| PoC/Prototype Separation | PoC scope bounded, prototype gate defined |
+| Boundary Discipline | No code/registry/catalog/token/DNS mutation |
+| WRE Handoff Clarity | Packet is routable without follow-up questions |
+| No Implementation Creep | Intake only, no build artifacts |
+| FoundUp Naming Quality | ID follows convention, name is descriptive |
+| Manifest Draft Completeness | All required fields populated |
+
+### Pass Rule
+
+- All required artifacts present
+- Zero hard-boundary violations
+- No code/registry/catalog/token/DNS mutation
+- Architect can route without asking for missing basics
+
+---
+
+## Example Fixture
+
+### Shield FoundUp Intake (Reference)
+
+**Raw Idea**: "Shield - free PoC builds trust before commitment"
+
+**Expected Artifacts**:
+
+| Artifact | Status |
+|----------|--------|
+| INTAKE_SOURCE.md | source_type: spoken_012, duplicate_status: NEW_FOUNDUP |
+| OUTCOME.md | User gets free PoC code to validate trust |
+| SOLUTION.md | Free PoC development service |
+| PAIN.md | Buyers distrust untested vendors |
+| POC_SCOPE.md | One free PoC per client |
+| PROTOTYPE_GATE.md | PoC accepted -> paid engagement |
+| SKILLS_MAP.md | Candidate: shield_poc_evaluator |
+| FOUNDUP_MANIFEST_DRAFT.md | entity_type: foundup, tier: F0_DAE |
+
+**Reference**: PR #717 (merged), `modules/foundups/shield/`
+
+This fixture proves WSP 109 is self-contained.
 
 ---
 
@@ -568,7 +853,7 @@ WSP 109 enforces these truth boundaries:
 
 When WSP 109 completes, validate:
 
-- [ ] All seven output contracts produced
+- [ ] All eight output contracts produced
 - [ ] Entity type classified
 - [ ] Trust wedge defined (POC_SCOPE.md)
 - [ ] Pain point articulated (PAIN.md)
@@ -611,3 +896,4 @@ Resolution:
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0.0 | 2026-05-25 | 0102 | Initial WSP creation. Promoted from module-level protocol. |
+| 1.1.0 | 2026-05-25 | 0102 | Pass 3 hardening: Added INTAKE_SOURCE.md, duplicate discovery preflight, fork lineage, evaluation rubric, example fixture. Removed Qwen3 noise. Fixed glyphs to ASCII. Added Addendums E/F/G. |
