@@ -148,21 +148,22 @@ Architect = routing authority
 
 ```
 012 spoken idea
-    ↓
+    |
+    v
 RedDog / 0102 intake conversation
-    ↓
+    |
+    v
 WSP 109 architect packet
-    ↓
+    |
+    v
 WRE orchestration layer
-    ↓
+    |
+    v
 Architect routes work
-    ↓
+    |
+    v
 Specialized workers execute
 ```
-
-### Qwen3 Endurance Note
-
-The Qwen3 35-hour run validates the FoundUps development framework's ability to sustain long-running recursive agent work. This is a milestone signal for WRE viability.
 
 ---
 
@@ -228,11 +229,12 @@ Both master indexes now show:
 
 | File | Action |
 |------|--------|
-| `WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md` | CREATED |
-| `WSP_knowledge/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md` | CREATED (mirror) |
+| `WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md` | CREATED (v1.1.0) |
+| `WSP_knowledge/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md` | MIRROR SYNC |
 | `WSP_framework/src/WSP_MASTER_INDEX.md` | UPDATED |
 | `WSP_knowledge/src/WSP_MASTER_INDEX.md` | UPDATED |
 | `docs/audits/architecture/WSP_109_FOUNDUP_ONBOARDING_INTAKE_PROTOCOL_PHASE1.md` | CREATED |
+| `docs/audits/architecture/WSP_109_EXAMPLE_FIXTURES_PHASE1.md` | CREATED |
 
 ---
 
@@ -241,13 +243,16 @@ Both master indexes now show:
 | Metric | Value |
 |--------|-------|
 | Branch | `docs/wsp-109-foundup-onboarding-intake-protocol-phase1` |
-| Files created | 3 |
+| Files created | 4 |
 | Files updated | 2 |
-| WSP_97 checklist | 25/25 YES |
-| Mirror sync | VALIDATED |
+| Total PR diff | 6 files |
+| WSP_97 checklist | 47/47 YES |
+| Mirror sync | VALIDATED (byte-identical) |
 | Number collision | RESOLVED |
 | WRE binding | DOCUMENTED |
 | SKILLz boundary | DOCUMENTED |
+| Fork lineage | DOCUMENTED |
+| Slice scope | AUTHORED/VALIDATED (not operationally proven) |
 
 ---
 

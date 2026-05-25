@@ -281,7 +281,7 @@ Core rule: A new 0102 session must be able to onboard a FoundUp from an external
 ```markdown
 # {FoundUp Name} - Prototype Gate
 
-## POC → Prototype Criteria
+## POC -> Prototype Criteria
 - [ ] {Criterion 1}
 - [ ] {Criterion 2}
 - [ ] {Criterion 3}
@@ -347,17 +347,17 @@ FOUNDUP_{ID}_SKILLZ_WARDROBE_PHASE1
 Is this a consumer-facing venture?
 ├─ YES: Does it have its own token economics?
 │   ├─ YES: Does source live in monorepo?
-│   │   ├─ YES → entity_type: foundup
-│   │   └─ NO  → entity_type: external_foundup
+│   │   ├─ YES -> entity_type: foundup
+│   │   └─ NO  -> entity_type: external_foundup
 │   └─ NO: Is it planned to have tokens?
-│       ├─ YES (future) → entity_type: skeleton_candidate
-│       └─ NO (never) → entity_type: access_service
+│       ├─ YES (future) -> entity_type: skeleton_candidate
+│       └─ NO (never) -> entity_type: access_service
 └─ NO: Is it infrastructure?
     ├─ YES: Does it serve multiple FoundUps?
-    │   ├─ YES → entity_type: infra_service
-    │   └─ NO  → entity_type: platform_layer
+    │   ├─ YES -> entity_type: infra_service
+    │   └─ NO  -> entity_type: platform_layer
     └─ NO: Is it a development tool?
-        └─ YES → entity_type: tool_simulator
+        └─ YES -> entity_type: tool_simulator
 ```
 
 ---
