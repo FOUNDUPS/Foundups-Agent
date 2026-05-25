@@ -3,9 +3,30 @@
 **Version**: 1.0.0  
 **Status**: Draft  
 **Created**: 2026-05-25  
-**Author**: W9  
-**Supersedes**: `modules/foundups/docs/FOUNDUP_ONBOARDING_PROTOCOL_PHASE1.md` (module-level)  
+**Author**: 0102  
 **Predecessor**: PR #717 (Shield onboarding validation)  
+**Generalizes**: `modules/foundups/docs/FOUNDUP_ONBOARDING_PROTOCOL_PHASE1.md` (module-level evidence)  
+
+---
+
+## Audience
+
+**Primary**: 0102 agents, RedDog intake agent, architect agent, WRE routing surfaces.
+
+**012 Role**: 012 is the idea source, not the protocol operator.
+
+**Core Statement**: 012 speaks the idea; 0102 executes WSP 109 intake.
+
+---
+
+## Canonical Authority
+
+| Location | Authority |
+|----------|-----------|
+| `WSP_framework/src/` | **CANONICAL** — source of truth |
+| `WSP_knowledge/src/` | **MIRROR** — synchronized backup copy |
+
+The mirror exists because prior 0102 activity has deleted or corrupted framework files. The mirror improves recovery, auditability, and drift detection. Framework is canonical; knowledge is backup.
 
 ---
 
@@ -18,7 +39,7 @@ It does NOT replace WRE.
 It does NOT hard-code worker topology.  
 It prepares the handoff.
 
-When 012 says "add this FoundUp, follow WSP 109", it provides the scope to add it to the codebase monorepo following WSPs.
+When 012 says "add this FoundUp, follow WSP 109", 0102/RedDog executes this protocol to add it to the codebase monorepo following WSPs.
 
 ---
 
@@ -456,6 +477,8 @@ WSP 109 creates `SKILLS_MAP.md` which lists candidate skillz.
 
 WSP 95 (WRE SKILLz Wardrobe Protocol) governs actual skill creation/promotion.
 
+**Key invariant**: Skillz may evolve without changing WSP 109.
+
 ### Boundary
 
 | Activity | Protocol |
@@ -464,6 +487,16 @@ WSP 95 (WRE SKILLz Wardrobe Protocol) governs actual skill creation/promotion.
 | Create skill files | WSP 95 |
 | Promote skills to wardrobe | WSP 95 |
 | Skill execution | WRE |
+
+### Proposed Wardrobe Location
+
+Candidate onboarding skillz SHOULD live under:
+
+```
+modules/foundups/skillz/onboarding/
+```
+
+This is a proposed WSP 95 wardrobe location, not a fixed implementation dependency. WSP 95 placement review may route them elsewhere.
 
 ### Candidate SKILLz for Onboarding
 
@@ -476,6 +509,8 @@ Future slice `FOUNDUP_ONBOARDING_SKILLZ_WARDROBE_PHASE1` may create:
 - `foundup_manifest_draft_generator`
 - `foundup_duplicate_discovery_holoindex`
 - `foundup_catalog_readiness_evaluator`
+
+WSP 109 references these candidates but does not require specific skill files.
 
 These are recommendations, not created by this WSP.
 
@@ -500,17 +535,32 @@ These are recommendations, not created by this WSP.
 
 WSP 109 enforces these truth boundaries:
 
-| Boundary | Status |
-|----------|--------|
-| Does not write code | ENFORCED |
-| Does not update registry | ENFORCED |
-| Does not configure DNS | ENFORCED |
-| Does not create tokens | ENFORCED |
-| Does not create public routes | ENFORCED |
-| Hands off to architect/WRE | ENFORCED |
-| Does not replace WRE | ENFORCED |
-| Does not hard-code worker topology | ENFORCED |
-| Does not create SKILLz | ENFORCED |
+| Truth Boundary Checklist Item | Status |
+|-------------------------------|--------|
+| WSP_109_INTAKE_ONLY | YES |
+| FRAMEWORK_CANONICAL | YES |
+| KNOWLEDGE_MIRROR_BACKUP_ONLY | YES |
+| MIRROR_EXISTS_FOR_RECOVERY_AND_DRIFT_DETECTION | YES |
+| WRITTEN_FOR_0102_AGENT_EXECUTION | YES |
+| 012_IS_IDEA_SOURCE_NOT_OPERATOR | YES |
+| DOES_NOT_REPLACE_WRE | YES |
+| ARCHITECT_REMAINS_ROUTING_AUTHORITY | YES |
+| WSP_95_SKILLZ_BOUNDARY_PRESERVED | YES |
+| DOES_NOT_CREATE_SKILLZ | YES |
+| CITES_717_AS_PREDECESSOR | YES |
+| PROMPT_SECURITY_GATE_DEFERRED_TO_SKILLZ | YES |
+| NO_RUNTIME_CODE_MUTATION | YES |
+| NO_REGISTRY_MUTATION | YES |
+| NO_CATALOG_MUTATION | YES |
+| NO_MANIFEST_MUTATION | YES |
+| NO_PUBLIC_ROUTE_ACTIVATION | YES |
+| NO_DNS_CHANGE | YES |
+| NO_TOKEN_ASSIGNMENT | YES |
+| NO_WALLET | YES |
+| NO_CHAIN_ACTIVATION | YES |
+| NO_CABR_READY | YES |
+| NO_PAYOUT_READY | YES |
+| NO_DAO_ACTIVATION | YES |
 
 ---
 
@@ -532,13 +582,13 @@ When WSP 109 completes, validate:
 
 ## Predecessor Evidence
 
-This WSP was promoted from module-level protocol after validation:
+PR #717 provided the Shield-specific onboarding precedent. WSP 109 generalizes and canonizes the reusable intake protocol. Shield module docs remain valid as module-level application evidence.
 
-| Evidence | Reference |
-|----------|-----------|
-| Module protocol | `modules/foundups/docs/FOUNDUP_ONBOARDING_PROTOCOL_PHASE1.md` |
-| Shield validation | PR #717 |
-| Shield audit | `docs/audits/architecture/SHIELD_FOUNDUP_ONBOARDING_AND_CATALOG_SEED_PHASE1.md` |
+| Evidence | Reference | Status |
+|----------|-----------|--------|
+| Module protocol | `modules/foundups/docs/FOUNDUP_ONBOARDING_PROTOCOL_PHASE1.md` | Valid (module-level evidence) |
+| Shield validation | PR #717 | Merged (precedent) |
+| Shield audit | `docs/audits/architecture/SHIELD_FOUNDUP_ONBOARDING_AND_CATALOG_SEED_PHASE1.md` | Valid (application evidence) |
 
 ---
 
@@ -560,4 +610,4 @@ Resolution:
 
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
-| 1.0.0 | 2026-05-25 | W9 | Initial WSP creation. Promoted from module-level protocol. |
+| 1.0.0 | 2026-05-25 | 0102 | Initial WSP creation. Promoted from module-level protocol. |
