@@ -639,6 +639,16 @@ The worker must:
 - Create a WRE-ready handoff
 - Produce a packet an architect can route
 
+### Slice Scope Statement
+
+WSP 109 is complete as a **documentation/intake protocol slice**.
+
+The protocol is **authored and structurally validated** in this slice.
+
+Fresh-worker execution validation is deferred to a downstream slice:
+
+`WSP_109_FRESH_WORKER_EXECUTION_VALIDATION_PHASE1`
+
 ### Worker Compatibility Probe
 
 Future slice: `WSP_109_WORKER_COMPATIBILITY_PROBE_PHASE1`
@@ -795,6 +805,8 @@ WSP 109 enforces these truth boundaries:
 | TOKEN_BOUNDARY_NOT_INHERITED_BY_DEFAULT | YES |
 | SKILLZ_PLACEMENT_MARKED_UNPROVEN | YES |
 | WSP_95_PLACEMENT_REVIEW_REQUIRED | YES |
+| FRESH_WORKER_EXECUTION_DEFERRED_TO_DOWNSTREAM_SLICE | YES |
+| PROTOCOL_AUTHORED_AND_STRUCTURALLY_VALIDATED | YES |
 
 ---
 
