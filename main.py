@@ -128,6 +128,15 @@ logging.basicConfig(
     ]
 )
 
+try:
+    from modules.platform_integration.antifafm_broadcaster.src.obs_logging_guard import (
+        install_obs_logging_guard,
+    )
+
+    install_obs_logging_guard()
+except Exception:
+    pass
+
 # Suppress noisy warnings from optional dependencies during startup
 import warnings
 

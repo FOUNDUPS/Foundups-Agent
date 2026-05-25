@@ -28,6 +28,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
+from modules.platform_integration.antifafm_broadcaster.src.obs_logging_guard import (
+    create_obs_req_client,
+)
+
 logger = logging.getLogger(__name__)
 
 # Screenshot cache directory (012 behavior - fetch once, display cached)
@@ -438,7 +442,7 @@ async def update_obs_browser_source(url: str, fallback_on_fail: bool = True) -> 
         port = int(os.getenv("OBS_WEBSOCKET_PORT", 4455))
         password = os.getenv("OBS_WEBSOCKET_PASSWORD", "")
 
-        client = obs.ReqClient(host=host, port=port, password=password)
+        client = create_obs_req_client(obs, host=host, port=port, password=password)
 
         # Browser source name (env var or default to existing)
         source_name = os.getenv("OBS_BROWSER_SOURCE", "antifaFM Website")

@@ -30,6 +30,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from modules.platform_integration.antifafm_broadcaster.src.obs_logging_guard import (
+    create_obs_req_client,
+)
+
 logger = logging.getLogger(__name__)
 
 # Cache directories
@@ -298,7 +302,7 @@ async def update_obs_image_source(source_name: str, image_path: Path) -> Dict[st
         port = int(os.getenv("OBS_WEBSOCKET_PORT", 4455))
         password = os.getenv("OBS_WEBSOCKET_PASSWORD", "")
 
-        client = obs.ReqClient(host=host, port=port, password=password)
+        client = create_obs_req_client(obs, host=host, port=port, password=password)
         client.set_input_settings(
             name=source_name,
             settings={"file": str(image_path.absolute())},

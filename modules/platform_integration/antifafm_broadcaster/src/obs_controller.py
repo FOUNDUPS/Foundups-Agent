@@ -28,11 +28,17 @@ import os
 import time
 from typing import Optional, Dict, Any, Tuple
 
+from modules.platform_integration.antifafm_broadcaster.src.obs_logging_guard import (
+    create_obs_req_client,
+    install_obs_logging_guard,
+)
+
 logger = logging.getLogger(__name__)
 
 # Use obsws-python (v5 protocol for OBS 28+)
 OBS_CLIENT = None
 try:
+    install_obs_logging_guard()
     import obsws_python as obs
     OBS_CLIENT = "obsws_python"
 except ImportError:
@@ -66,7 +72,12 @@ class OBSController:
             return False
 
         try:
-            self.ws = obs.ReqClient(host=self.host, port=self.port, password=self.password)
+            self.ws = create_obs_req_client(
+                obs,
+                host=self.host,
+                port=self.port,
+                password=self.password,
+            )
             self.connected = True
             logger.info(f"[OBS] Connected to OBS on {self.host}:{self.port}")
             return True
