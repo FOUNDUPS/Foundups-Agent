@@ -503,15 +503,15 @@ Existing WSPs = governing law
 
 ---
 
-## Addendum B — AutoPost/Sleeve Reuse Boundary
+## Addendum B — Pattern Reuse Boundary
 
 ### Pattern Reuse
 
 WSP 109 acknowledges that certain FoundUp patterns may be reused:
 
-- **AutoPost sleeve pattern** - External repo + internal registry representation
-- **Shield trust wedge pattern** - Free POC builds trust before commitment
-- **GotJunk prototype pattern** - Cloud Run deployment model
+- **External sleeve pattern** - External repo + internal registry representation
+- **Trust wedge pattern** - Free PoC builds trust before commitment
+- **Cloud deployment pattern** - Managed service deployment model
 
 ### Reuse Rules
 
@@ -520,11 +520,11 @@ WSP 109 acknowledges that certain FoundUp patterns may be reused:
 3. External FoundUps (`entity_type: external_foundup`) have `module_path: null`
 4. Internal FoundUps must have monorepo module scaffold
 
-### AutoPost Boundary
+### External FoundUp Boundary
 
-- AutoPost source lives in `O:/repos/AutoPost/` (external)
-- AutoPost has registry entry with `module_path: null`
-- New FoundUps may reference AutoPost pattern but not copy its PWA code
+- External FoundUp source lives outside monorepo
+- External FoundUp has registry entry with `module_path: null`
+- New FoundUps may reference external patterns but not copy source code
 
 ---
 
@@ -838,26 +838,26 @@ WSP 109 intake quality is evaluated on:
 
 ## Example Fixture
 
-### Shield FoundUp Intake (Reference)
+### Generic FoundUp Intake Template
 
-**Raw Idea**: "Shield - free PoC builds trust before commitment"
+**Raw Idea**: "{012 spoken idea describing problem and solution}"
 
 **Expected Artifacts**:
 
 | Artifact | Status |
 |----------|--------|
-| INTAKE_SOURCE.md | source_type: spoken_012, duplicate_status: NEW_FOUNDUP |
-| OUTCOME.md | User gets free PoC code to validate trust |
-| SOLUTION.md | Free PoC development service |
-| PAIN.md | Buyers distrust untested vendors |
-| POC_SCOPE.md | One free PoC per client |
-| PROTOTYPE_GATE.md | PoC accepted -> paid engagement |
-| SKILLS_MAP.md | Candidate: shield_poc_evaluator |
-| FOUNDUP_MANIFEST_DRAFT.md | entity_type: foundup, tier: F0_DAE |
+| INTAKE_SOURCE.md | source_type: {type}, duplicate_status: {classification} |
+| OUTCOME.md | {User outcome when FoundUp succeeds} |
+| SOLUTION.md | {How the FoundUp solves the problem} |
+| PAIN.md | {Pain point driving adoption} |
+| POC_SCOPE.md | {Minimum viable proof-of-concept} |
+| PROTOTYPE_GATE.md | {Criteria to advance from PoC to prototype} |
+| SKILLS_MAP.md | Candidate: {foundup_id}_skill_1, {foundup_id}_skill_2 |
+| FOUNDUP_MANIFEST_DRAFT.md | entity_type: {type}, tier: {tier} |
 
-**Reference**: PR #717 (merged), `modules/foundups/shield/`
+**Concrete Examples**: See `docs/audits/architecture/WSP_109_EXAMPLE_FIXTURES_PHASE1.md`
 
-This fixture proves WSP 109 is self-contained.
+This template proves WSP 109 is self-contained and protocol-generic.
 
 ---
 
