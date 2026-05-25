@@ -191,6 +191,7 @@ Advanced protocols for complex system behaviors and architectural concerns.
 | WSP 106 | FoundUp API Gateway Protocol | Active | External API Gateway for FoundUp onboarding, token deployment, marketplace listing, agent compute enrollment. Wraps FAM service contracts as REST/gRPC endpoints with Ed25519 auth. Bakery → FoundUp journey | WSP 29, WSP 39, WSP 77, WSP 100, WSP 103, WSP 104 | API Gateway, onboarding, token, pFMALL, compute, CABR, Hermes |
 | WSP 107 | Intelligent Internet Orchestration Vision | Active | Protocol-level vision aligning optional II proof-of-benefit with CABR/UPS while preserving sovereignty; defines optional compute term, 0102 roles, and guardrails | WSP 26, WSP 27, WSP 29, WSP 32, WSP 58, WSP 73, WSP 80 | II integration framing, CABR optional compute, governance alignment |
 | WSP 108 | Documentation Compliance Guardian Protocol | Active | Ensures all agents maintain current, accurate documentation as part of operational workflow; defines pre-action verification, documentation update requirements, compliance guardian system, and violation consequences | WSP 22, WSP 32, WSP 49, WSP 83 | Documentation compliance, guardian system, pre-action verification, documentation currency |
+| WSP 109 | FoundUp Onboarding Intake Protocol | Draft | Converts raw 012 ideas into architect-ready FoundUp intake packets; defines OUTCOME/SOLUTION/PAIN/POC_SCOPE/PROTOTYPE_GATE/SKILLS_MAP/MANIFEST_DRAFT contracts; hands off to WRE for orchestration | WSP 95, WSP 97, WSP 104, WSP 106, WSP 108 | FoundUp intake, onboarding, WRE handoff, intake packet, RedDog |
 
 ### PLATFORM INTEGRATION MODULES (Non-WSP Components)
 For platform/module catalogs, see `WSP_framework/src/MODULE_MASTER.md`.
@@ -258,10 +259,10 @@ See WSP 48 (Recursive Self-Improvement) and WSP 70 (System Status Reporting) for
 
 ## [U+1F4CA] WSP STATUS SUMMARY
 
- - **Total Numbered Slots Tracked**: 109 (WSP 00-108)
- - **Highest Assigned Number**: WSP 108
- - **Recently Added**: WSP 105 (CLI Standard), WSP 106 (API Gateway), WSP 107 (Intelligent Internet Vision), WSP 108 (Documentation Compliance Guardian)
- - **Next Available Number**: WSP 109
+ - **Total Numbered Slots Tracked**: 110 (WSP 00-109)
+ - **Highest Assigned Number**: WSP 109
+ - **Recently Added**: WSP 106 (API Gateway), WSP 107 (Intelligent Internet Vision), WSP 108 (Documentation Compliance Guardian), WSP 109 (FoundUp Onboarding Intake)
+ - **Next Available Number**: WSP 110
  - **Status Mix**: Active/deprecated/superseded/historical protocols are explicitly marked per-row in the catalog table above
  - **Layers**: Entry 00; Foundation 1-19; Operational 20-39; Advanced 40-59; Memory/Knowledge 60-99
 
