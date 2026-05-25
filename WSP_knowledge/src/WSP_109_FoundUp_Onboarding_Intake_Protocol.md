@@ -23,8 +23,8 @@
 
 | Location | Authority |
 |----------|-----------|
-| `WSP_framework/src/` | **CANONICAL** — source of truth |
-| `WSP_knowledge/src/` | **MIRROR** — synchronized backup copy |
+| `WSP_framework/src/` | **CANONICAL**  -  source of truth |
+| `WSP_knowledge/src/` | **MIRROR**  -  synchronized backup copy |
 
 The mirror exists because prior 0102 activity has deleted or corrupted framework files. The mirror improves recovery, auditability, and drift detection. Framework is canonical; knowledge is backup.
 
@@ -345,19 +345,19 @@ FOUNDUP_{ID}_SKILLZ_WARDROBE_PHASE1
 
 ```
 Is this a consumer-facing venture?
-├─ YES: Does it have its own token economics?
-│   ├─ YES: Does source live in monorepo?
-│   │   ├─ YES -> entity_type: foundup
-│   │   └─ NO  -> entity_type: external_foundup
-│   └─ NO: Is it planned to have tokens?
-│       ├─ YES (future) -> entity_type: skeleton_candidate
-│       └─ NO (never) -> entity_type: access_service
-└─ NO: Is it infrastructure?
-    ├─ YES: Does it serve multiple FoundUps?
-    │   ├─ YES -> entity_type: infra_service
-    │   └─ NO  -> entity_type: platform_layer
-    └─ NO: Is it a development tool?
-        └─ YES -> entity_type: tool_simulator
++-- YES: Does it have its own token economics?
+|   +-- YES: Does source live in monorepo?
+|   |   +-- YES -> entity_type: foundup
+|   |   +-- NO  -> entity_type: external_foundup
+|   +-- NO: Is it planned to have tokens?
+|       +-- YES (future) -> entity_type: skeleton_candidate
+|       +-- NO (never) -> entity_type: access_service
++-- NO: Is it infrastructure?
+    +-- YES: Does it serve multiple FoundUps?
+    |   +-- YES -> entity_type: infra_service
+    |   +-- NO  -> entity_type: platform_layer
+    +-- NO: Is it a development tool?
+        +-- YES -> entity_type: tool_simulator
 ```
 
 ---
@@ -399,7 +399,7 @@ WSP 109 requires checking for existing FoundUps before creating intake artifacts
 
 ---
 
-## Addendum A — WSP 109 WRE Orchestration Binding
+## Addendum A  -  WSP 109 WRE Orchestration Binding
 
 ### Purpose
 
@@ -503,7 +503,7 @@ Existing WSPs = governing law
 
 ---
 
-## Addendum B — Pattern Reuse Boundary
+## Addendum B  -  Pattern Reuse Boundary
 
 ### Pattern Reuse
 
@@ -528,7 +528,7 @@ WSP 109 acknowledges that certain FoundUp patterns may be reused:
 
 ---
 
-## Addendum C — FoundUp Mall / Exchange Read-Model Boundary
+## Addendum C  -  FoundUp Mall / Exchange Read-Model Boundary
 
 ### Catalog Updates
 
@@ -561,7 +561,7 @@ WSP 109 does not interact with:
 
 ---
 
-## Addendum D — WSP 95 SKILLz Boundary
+## Addendum D  -  WSP 95 SKILLz Boundary
 
 ### Skills Map vs Skills Creation
 
@@ -618,7 +618,7 @@ WSP 109 creates neither.
 
 ---
 
-## Addendum E — New-Session Execution Validation
+## Addendum E  -  New-Session Execution Validation
 
 ### Purpose
 
@@ -659,7 +659,7 @@ WSP 109 does NOT claim those workers are proven compatible yet.
 
 ---
 
-## Addendum F — Duplicate vs Fork Boundary
+## Addendum F  -  Duplicate vs Fork Boundary
 
 ### Core Rule
 
@@ -706,7 +706,7 @@ When applicable:
 
 ---
 
-## Addendum G — Skillz Placement Boundary
+## Addendum G  -  Skillz Placement Boundary
 
 ### Placement Status
 
