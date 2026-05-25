@@ -1,7 +1,7 @@
 {
   "$schema": "./foundup_registry.schema.json",
   "schema_version": "1.0.0",
-  "last_updated": "2026-05-22T22:00:00Z",
+  "last_updated": "2026-05-25T12:00:00Z",
   "entities": [
     {
       "foundup_id": "gotjunk_001",
@@ -606,6 +606,45 @@
       "portfolio_evidence_docs": [
         "docs/audits/architecture/HOLOINDEX_PUBLIC_FOUNDUP_CONNECTIVE_TRUST_SURFACE_DOCS_PHASE1.md"
       ]
+    },
+    {
+      "foundup_id": "shield",
+      "display_name": "Shield",
+      "entity_type": "foundup",
+      "module_path": "modules/foundups/shield",
+      "stage": "incubating",
+      "tier": "F0_DAE",
+      "implementation_status": "SPECIFIED",
+      "public_surface_status": "hidden",
+      "poc_status": "idea",
+      "prototype_gate_status": "pending",
+      "manifest_status": "exists",
+      "manifest_path": "modules/foundups/shield/foundup_manifest.json",
+      "hermes_openclaw_build_status": "none",
+      "token_status": "TOKEN_DEFERRED",
+      "token_symbol": null,
+      "evidence_docs": [
+        "docs/audits/architecture/SHIELD_FOUNDUP_ONBOARDING_AND_CATALOG_SEED_PHASE1.md"
+      ],
+      "next_slice": "SHIELD_AUTOCASE_POC_PHASE1",
+      "public_url_or_route": null,
+      "mall_entry_status": "not_listed",
+      "invite_required": true,
+      "notes": "Consumer defense FoundUp. Free trust wedge POC. Proposed future host: shield.foundups.com (not configured). SPECIFIED_NOT_IMPLEMENTED.",
+      "audit_date": "2026-05-25",
+      "auditor": "W9",
+      "portfolio_status": "not_portfolio",
+      "poc_landing_status": "none",
+      "website_url": null,
+      "poc_url": null,
+      "app_url": null,
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": null,
+      "portfolio_priority": null,
+      "portfolio_ready": false,
+      "portfolio_evidence_docs": []
     }
   ]
 }
