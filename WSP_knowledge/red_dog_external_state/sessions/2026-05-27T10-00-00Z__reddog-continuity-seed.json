@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0.0",
+  "record_type": "reddog_session_closeout",
+  "session_id": "2026-05-27__reddog-continuity-seed",
+  "source": "reddog_session",
+  "captured_at": "2026-05-27T10:00:00Z",
+  "lane": "architect",
+  "work_summary": "Seed session establishing curated continuity channel. Work moved from Antigravity to Cursor/ChatGPT/RedDog on 2026-05-25T08:43:51. This file captures the PR chain and decisions that the stale Antigravity brain artifacts missed. Key completed work: Vote PoC chain (PRs #707-#715 closed), Shield GitHub onboarding (#717), WSP 109 hardening (#718), OBS secret logging fix (#720), AntifaFM startup boundary fix (#721), IndexResult observability parity (#708), vulnerability intake gate work, worktree artifact cleanup decision (#723 OPEN). The Antigravity extractor continues unchanged at modules/infrastructure/wre_core/scripts/extract_brain_artifacts.py; this channel is a parallel curated import path.",
+  "pr_refs": [707, 708, 709, 710, 711, 712, 713, 714, 715, 717, 718, 720, 721, 723],
+  "slice_refs": [
+    "VOTE_POC_CHAIN_CLOSED",
+    "SHIELD_GITHUB_ONBOARDING",
+    "WSP_109_HARDENING",
+    "OBS_WEBSOCKET_SECRET_LOGGING_FIX_PHASE1",
+    "MAIN_MENU_ANTIFAFM_STARTUP_BOUNDARY_FIX_PHASE1",
+    "HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PARITY_PHASE1",
+    "WORKTREE_AUTONOMOUS_ARTIFACT_CLEANUP_DECISION_PHASE1",
+    "REDDOG_SESSION_CONTINUITY_CAPTURE_PHASE1"
+  ],
+  "decisions": [
+    "JSON schema format chosen over YAML - Python stdlib support, deterministic validation",
+    "Curated summaries only - no raw transcripts stored",
+    "Parallel channel design - does not modify Antigravity extractor",
+    "Manual import workflow - no browser scraping or automated capture",
+    "012/0102 reference discipline - do not use 'user' in docs",
+    "PR #723 coordination: this PR opens first, merge order before #723 cleanup"
+  ],
+  "carry_forward": [
+    "CURSOR_SESSION_ARTIFACT_ADAPTER_PHASE1",
+    "REASONING_TRACES_SOURCE_AGNOSTIC_REFACTOR_PHASE1",
+    "REDDOG_SESSION_VALIDATOR_HARDENING_PHASE2"
+  ],
+  "redaction_notes": "No secrets in this seed file. Work summary curated from public PR titles and slice IDs only.",
+  "main_head_sha": "84314016",
+  "gaps": [
+    "Raw Antigravity brain artifacts remain local/private - not committed to repo",
+    "Cursor session artifacts not yet captured - deferred to future adapter slice",
+    "HoloIndex T1 ranking draft remains separate/untracked"
+  ]
+}

@@ -2,6 +2,46 @@
 
 ## Chronological Change Log
 
+### [2026-05-27] - REDDOG_SESSION_CONTINUITY_CAPTURE_PHASE1 (v0.8.41)
+
+**WSP Protocol References**: WSP 60 (Module Memory), WSP 87 (Code Navigation), WSP 22 (ModLog)
+**Impact Analysis**: Adds curated session continuity capture for external AI tools
+
+#### Changes Made
+
+- `scripts/validate_session_closeout.py` (NEW - 130 lines):
+  - Read-only validator for session closeout JSON files
+  - Required field validation (session_id, source, captured_at, lane, work_summary)
+  - work_summary length check (max 2000 chars)
+  - Secret pattern detection (API keys, OAuth tokens, env vars)
+  - Raw transcript marker rejection
+  - Exit 0 on valid, non-zero on failure
+
+- `tests/test_validate_session_closeout.py` (NEW - 180 lines):
+  - 21 tests covering validator behavior
+  - TestRequiredFields: 4 tests for field validation
+  - TestSourceValidation: 3 tests for source enum
+  - TestWorkSummaryLength: 3 tests for length limits
+  - TestSecretDetection: 5 tests for secret patterns
+  - TestRawTranscriptDetection: 4 tests for transcript markers
+  - TestFullFileValidation: 6 tests for end-to-end validation
+
+#### WSP_knowledge Additions
+
+- `WSP_knowledge/red_dog_external_state/` directory structure
+- `WSP_knowledge/red_dog_external_state/README.md` - Human index
+- `WSP_knowledge/red_dog_external_state/SCHEMA.md` - JSON schema spec
+- `WSP_knowledge/red_dog_external_state/sessions/` - Session files
+
+#### Coordination
+
+- Coordinates with PR #723 (WORKTREE_AUTONOMOUS_ARTIFACT_CLEANUP_DECISION_PHASE1)
+- This slice provides curated replacement before raw artifacts untracked
+
+#### WSP 97 Compliance
+
+All truth fields remain False. No network calls, no .env reads, no live execution.
+
 ### [2026-05-18] - DESTRUCTIVE_ACTION_GUARD_PATH_CANONICALIZATION_IMPL_PHASE1 (v0.8.40)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 50 (Pre-Action), WSP 5 (Coverage)

@@ -1,0 +1,85 @@
+# RedDog External State - Session Continuity Capture
+
+**Slice**: `REDDOG_SESSION_CONTINUITY_CAPTURE_PHASE1`
+
+This directory provides a curated, manually-imported continuity channel for work
+happening in RedDog, ChatGPT, Cursor, and other external AI tools that the
+Antigravity brain extractor does not watch.
+
+## Purpose
+
+The existing brain artifact extractor at
+`modules/infrastructure/wre_core/scripts/extract_brain_artifacts.py`
+hardcodes its source to `C:\Users\user\.gemini\antigravity\brain`.
+
+Since work moved to Cursor/ChatGPT/RedDog lanes on 2026-05-25, the
+`WSP_knowledge/reasoning_traces/brain_artifact_*` files have been stale.
+This channel captures that work without coupling to the Antigravity extractor.
+
+## What This Is
+
+- **Curated summaries** of completed session work
+- **PR chain tracking** across external tools
+- **Decision records** for architectural choices
+- **Carry-forward queues** for next-slice planning
+
+## What This Is NOT
+
+- Raw chat transcripts
+- Browser scraping or automated capture
+- Cursor app database reading
+- A replacement for the Antigravity extractor
+
+## Hard Rules (Non-Negotiable)
+
+Session files MUST NOT contain:
+
+- API keys (`AIza*`, `sk-*`, `hf_*`, `ghp_*`, `gho_*`, `github_pat_*`)
+- OAuth tokens, refresh tokens, JWTs
+- `.env` key=value pairs
+- Database connection strings with credentials
+- Personal email addresses (except committer's)
+- Stream keys, OBS passwords, YouTube API keys
+- Raw assistant/user transcripts (curated summaries only)
+
+## Operator Workflow
+
+1. At session end, create a JSON file following [SCHEMA.md](SCHEMA.md)
+2. Save under `sessions/<captured_at>__<session_id>.json`
+3. Run the validator:
+   ```bash
+   python modules/infrastructure/wre_core/scripts/validate_session_closeout.py \
+     WSP_knowledge/red_dog_external_state/sessions/<your-file>.json
+   ```
+4. Validator exits 0 = safe to commit
+5. Validator exits non-zero = fix issues before committing
+
+## Directory Structure
+
+```
+WSP_knowledge/red_dog_external_state/
+  README.md          # This file (human index)
+  SCHEMA.md          # Field-by-field contract
+  sessions/
+    <captured_at>__<session_id>.json
+```
+
+## Future Adapters (Not Built Here)
+
+Reserved sibling directories for future source-specific adapters:
+
+- `WSP_knowledge/cursor_external_state/` (gated by separate discovery)
+- `WSP_knowledge/external_state_common/` (shared schema if multi-source)
+
+## Related
+
+- [SCHEMA.md](SCHEMA.md) - Session closeout schema specification
+- `modules/infrastructure/wre_core/scripts/validate_session_closeout.py` - Validator
+- `modules/infrastructure/wre_core/scripts/extract_brain_artifacts.py` - Antigravity extractor (unchanged)
+- PR #723: `WORKTREE_AUTONOMOUS_ARTIFACT_CLEANUP_DECISION_PHASE1` (coordination)
+
+## WSP Chain
+
+- WSP 60 (Module Memory)
+- WSP 87 (Code Navigation)
+- WSP 22 (ModLog)

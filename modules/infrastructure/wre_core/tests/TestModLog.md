@@ -1,5 +1,31 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-27: REDDOG_SESSION_CONTINUITY_CAPTURE_PHASE1 Validator tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_validate_session_closeout.py -v`
+- Status: PASS
+- Result: `21 passed`
+- Notes:
+  - NEW file: `test_validate_session_closeout.py` (180 lines)
+  - Tests session closeout validator for schema and secret safety:
+    - `TestRequiredFields` (4 tests) - Required field validation
+    - `TestSourceValidation` (3 tests) - Source enum validation
+    - `TestWorkSummaryLength` (3 tests) - Max 2000 char limit
+    - `TestSecretDetection` (5 tests) - API key/token rejection
+    - `TestRawTranscriptDetection` (4 tests) - Transcript marker rejection
+    - `TestFullFileValidation` (6 tests) - End-to-end file validation
+  - Key patterns tested:
+    - OpenAI keys (`sk-*`)
+    - Google API keys (`AIza*`)
+    - GitHub PATs (`github_pat_*`)
+    - Env secret patterns (`*_SECRET=*`)
+    - Role-based transcript markers (`"role": "assistant"`)
+  - No network calls, no .env reads, synthetic data only
+  - Verdict: `SESSION_CLOSEOUT_VALIDATOR_TESTS_DEFINED`
+- Slice: REDDOG_SESSION_CONTINUITY_CAPTURE_PHASE1
+
+---
+
 ## 2026-05-15: HXA31 Destructive Action Guard Edge Case tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_destructive_action_guard_edge_cases.py -v`
