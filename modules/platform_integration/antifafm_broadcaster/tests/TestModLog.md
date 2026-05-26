@@ -4,12 +4,50 @@
 
 | Test File | Status | Last Run | Purpose |
 |-----------|--------|----------|---------|
+| `test_main_menu_startup_boundary.py` | NEW | 2026-05-26 | Main menu startup boundary enforcement (12 tests) |
 | `test_boot_layer_rotator.py` | NEW | 2026-03-22 | Boot layer schema rotation tests (16 tests) |
 | `test_gcc_shipping_tracker.py` | NEW | 2026-03-22 | GCC shipping tracker + screenshot mode (22 tests) |
 | `test_obs_controller_startup.py` | PASS | 2026-03-06 | OBS start verification (no false-positive stream started) |
 | `test_suno_stt_extractor.py` | PASS | 2026-03-05 | Suno STT lyrics extraction pipeline tests |
 | `test_go_live_steps.py` | PASS | 2026-02-28 | Step-by-step Go Live debugging + DOM verification |
 | `test_discord_voice_broadcaster_integration.py` | PASS | 2026-04-09 | Discord voice lane boot/runtime wiring (+ invalid snowflake env case; 6 tests) |
+
+---
+
+## 2026-05-26: Main Menu Startup Boundary Tests (Worker W6)
+
+**Slice**: `MAIN_MENU_ANTIFAFM_STARTUP_BOUNDARY_FIX_PHASE1`
+
+**Test File**: `test_main_menu_startup_boundary.py` (NEW)
+
+**Tests Added** (12 tests, all PASS):
+| Test | What it covers |
+|------|----------------|
+| `test_main_py_does_not_execute_on_antifafm_auto_start_env` | No ANTIFAFM_AUTO_START execution gate in main.py |
+| `test_main_py_does_not_import_obs_controller_at_module_level_for_autostart` | No OBSController auto-start pattern |
+| `test_main_py_does_not_start_metadata_daemon_at_startup` | No init_dynamic_metadata() at startup |
+| `test_main_py_does_not_start_boot_rotator_at_startup` | No rotator_thread.start() at startup |
+| `test_main_py_documents_boundary_fix` | main.py documents the slice ID |
+| `test_youtube_menu_has_broadcaster_handler` | Explicit launch handler exists |
+| `test_preflight_module_exists` | Preflight functions exist |
+| `test_obs_logging_guard_module_exists` | OBS logging guard module exists |
+| `test_main_py_installs_logging_guard_early` | Guard installed before line 200 |
+| `test_obs_controller_module_imports_guard` | OBSController imports guard |
+| `test_env_example_documents_auto_start_deprecation` | .env.example marks deprecated |
+| `test_no_real_secrets_in_test_file` | No real secrets in test code |
+
+**What Tests Verify** (code pattern checks, no runtime imports):
+- main.py code patterns removed (auto-start block deleted)
+- Explicit launch paths preserved (youtube_menu.py, preflight.py)
+- PR #720 OBS logging guard preserved
+- .env.example documents deprecation
+
+**Run Command**:
+```bash
+pytest modules/platform_integration/antifafm_broadcaster/tests/test_main_menu_startup_boundary.py -v
+```
+
+**Result**: 12 passed in 0.12s
 
 ---
 

@@ -1,5 +1,82 @@
 # antifaFM Broadcaster - ModLog
 
+## V3.5.0 - Main Menu Startup Boundary Fix (2026-05-26)
+
+**Slice**: `MAIN_MENU_ANTIFAFM_STARTUP_BOUNDARY_FIX_PHASE1`
+**Branch**: `feat/main-menu-antifafm-startup-boundary-fix-phase1`
+**Worker**: W6
+**WSP Lock**: WSP_00, WSP_15, WSP_50, WSP_64, WSP_87, WSP_97, WSP_22
+
+**Context**: Follow-up to PR #720 (OBS_WEBSOCKET_SECRET_LOGGING_FIX_PHASE1) and ANTIFAFM_PREFLIGHT_RELOCATION_AUDIT_20260516. The legacy `ANTIFAFM_AUTO_START` block in `main.py` caused OBS/streaming/metadata/rotator side effects at application startup before any user action. This violated the lightweight startup principle.
+
+**Changes**:
+
+1. **Removed ANTIFAFM_AUTO_START execution block from main.py**:
+   - Deleted ~225 lines of auto-start code (OBS launch, broadcast setup, metadata daemon, boot rotator)
+   - The `ANTIFAFM_AUTO_START` env var is now ignored at menu boot
+   - Added documentation comment explaining the removal
+
+2. **Updated .env.example**:
+   - Marked `ANTIFAFM_AUTO_START` as DEPRECATED
+   - Changed default from `1` to `0`
+   - Added pointer to explicit launch paths
+
+3. **Preserved explicit launch paths**:
+   - YouTube DAE menu option 1 (preflight) - unchanged
+   - YouTube DAE menu option 10 (broadcaster control) - unchanged
+   - `_handle_antifafm_broadcaster_menu()` in youtube_menu.py - unchanged
+
+4. **Preserved PR #720 OBS logging guard**:
+   - `install_obs_logging_guard()` still called early in main.py (line 136)
+   - Guard installed before any OBS client construction
+
+5. **Removed unused import**:
+   - `import asyncio` no longer needed in main.py after block removal
+
+6. **Added tests**:
+   - `tests/test_main_menu_startup_boundary.py` - 12 tests
+   - Verifies code patterns are removed from main.py
+   - Verifies explicit launch paths exist
+   - Verifies OBS logging guard preserved
+   - Verifies .env.example documents deprecation
+
+**Pre-State Boundary** (before this fix):
+| Component | Raw `python main.py` with ANTIFAFM_AUTO_START=1 |
+|-----------|------------------------------------------------|
+| OBS Launch | YES - launch_obs() called |
+| OBS Streaming | YES - OBSController.start_streaming() called |
+| YouTube Broadcast | YES - YouTubeBroadcastManager.create_live_broadcast() called |
+| Metadata Daemon | YES - DynamicMetadataDaemon started |
+| Boot Layer Rotator | YES - rotation_daemon() thread started |
+| Menu Display | After all above |
+
+**Post-State Boundary** (after this fix):
+| Component | Raw `python main.py` (any ANTIFAFM_AUTO_START value) |
+|-----------|-----------------------------------------------------|
+| OBS Launch | NO |
+| OBS Streaming | NO |
+| YouTube Broadcast | NO |
+| Metadata Daemon | NO |
+| Boot Layer Rotator | NO |
+| Menu Display | Immediately after env/logging preflight |
+
+**Explicit Launch Preserved**:
+- YouTube DAE menu option 1 → preflight_check_for_menu()
+- YouTube DAE menu option 10 → _handle_antifafm_broadcaster_menu()
+
+**Files Modified**:
+- `main.py` - Removed auto-start block, removed asyncio import
+- `.env.example` - Marked ANTIFAFM_AUTO_START deprecated
+- `tests/test_main_menu_startup_boundary.py` - NEW
+
+**WSP Compliance**:
+- WSP 97: Truthful boundary enforcement
+- WSP 50: Pre-action verification preserved
+- WSP 87: No side effects at module import
+- WSP 64: Security boundary hardening
+
+---
+
 ## V3.4.2 - Metadata Editor Browser Auto-Launch (2026-05-17)
 
 **Slice**: `ANTIFAFM_METADATA_BROWSER_AUTOLAUNCH_PHASE1`
