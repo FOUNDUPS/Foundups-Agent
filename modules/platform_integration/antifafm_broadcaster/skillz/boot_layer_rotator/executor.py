@@ -25,11 +25,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Callable
 
+from modules.platform_integration.antifafm_broadcaster.src.obs_logging_guard import (
+    create_obs_req_client,
+    install_obs_logging_guard,
+)
+
 logger = logging.getLogger(__name__)
 
-# Suppress obsws_python password logging (security)
-logging.getLogger("obsws_python.baseclient").setLevel(logging.WARNING)
-logging.getLogger("obsws_python.reqs").setLevel(logging.WARNING)
+install_obs_logging_guard()
 
 # Telemetry path for event logging
 TELEMETRY_DIR = Path(__file__).parent.parent.parent / "telemetry"
@@ -210,7 +213,12 @@ def _get_obs_client():
         port = int(os.getenv("OBS_WEBSOCKET_PORT", 4455))
         password = os.getenv("OBS_WEBSOCKET_PASSWORD", "")
 
-        _obs_client = obs.ReqClient(host=host, port=port, password=password)
+        _obs_client = create_obs_req_client(
+            obs,
+            host=host,
+            port=port,
+            password=password,
+        )
         logger.info(f"[ROTATOR] OBS WebSocket connected to {host}:{port}")
         return _obs_client
 

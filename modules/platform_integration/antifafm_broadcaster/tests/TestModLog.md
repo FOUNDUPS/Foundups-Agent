@@ -288,6 +288,12 @@ dropdown_verified = verify_dropdown_appeared(driver, timeout=5)
 
 ## Planned Tests
 
+### `test_obs_logging_guard.py`
+- Verifies synthetic OBS WebSocket passwords are redacted from formatted log records.
+- Verifies `obsws_python` logger levels are raised above INFO.
+- Verifies guarded OBS client construction redacts constructor-time third-party logs.
+- Uses synthetic secrets only; does not read `.env`, connect to OBS, or run network calls.
+
 ### `test_ffmpeg_stream.py` (TODO)
 - Test FFmpeg command generation
 - Test RTMP connection to YouTube

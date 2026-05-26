@@ -1665,4 +1665,30 @@ modules/platform_integration/antifafm_broadcaster/
 
 ---
 
+## V1.3.7 - OBS WebSocket Secret Logging Guard (2026-05-26)
+
+**Context**: Runtime logs showed OBS WebSocket connection records could include
+the configured password in plaintext through third-party `obsws_python` logging.
+
+**Changes**:
+- Added `src/obs_logging_guard.py`
+  - redacts OBS WebSocket passwords, authentication values, and stream keys from
+    emitted log records
+  - raises known `obsws_python` loggers above INFO before client construction
+  - provides a guarded `create_obs_req_client()` helper
+- Updated OBS client construction paths that read `OBS_WEBSOCKET_PASSWORD`
+  - `src/obs_controller.py`
+  - `skillz/boot_layer_rotator/executor.py`
+  - `skillz/news_maps/executor.py`
+  - `skillz/gcc_shipping_tracker/executor.py`
+- Installed the guard after root logging setup in repository `main.py`.
+
+**Impact**:
+- Future OBS WebSocket connection logs redact secrets before console or file
+  handlers emit them.
+- Existing logs that already captured secrets still require operational rotation
+  and cleanup outside this code change.
+
+---
+
 *ModLog format per WSP 22*
