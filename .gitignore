@@ -440,3 +440,12 @@ modules/ai_intelligence/pqn_alignment/artifact_results/theory_archive_simulation
 
 # LinkedIn scraped articles (private content)
 modules/platform_integration/linkedin_agent/src/content/articles/
+
+# Brain artifacts (012 ADHD tracking - write-only local state, not for versioning)
+WSP_knowledge/reasoning_traces/brain_artifact*
+
+# WRE daemon runtime state (self-audit tasks, ephemeral)
+modules/infrastructure/wre_core/reports/
+
+# AntifaFM telemetry (runtime event streams)
+modules/platform_integration/antifafm_broadcaster/telemetry/
