@@ -58,8 +58,13 @@ Session files MUST NOT contain:
 
 ```
 WSP_knowledge/red_dog_external_state/
-  README.md          # This file (human index)
-  SCHEMA.md          # Field-by-field contract
+  README.md                      # This file (human index)
+  SCHEMA.md                      # Field-by-field contract
+  BOOTSTRAP.md                   # Boot card with strict read-order
+  MEMORY_BOUNDARY.md             # What CAN and MUST NOT be remembered
+  CURRENT_CONTEXT.md             # Active lanes, HEAD, worker roles
+  WORK_TO_WORK_LINEAGE.md        # Recent PR/slice chain
+  ACTIVE_RESEARCH_THREADS.md     # Open threads with next-action slices
   sessions/
     <captured_at>__<session_id>.json
 ```
@@ -73,10 +78,16 @@ Reserved sibling directories for future source-specific adapters:
 
 ## Related
 
+- [BOOTSTRAP.md](BOOTSTRAP.md) - Boot card with strict read-order (referenced by WSP_00)
 - [SCHEMA.md](SCHEMA.md) - Session closeout schema specification
+- [MEMORY_BOUNDARY.md](MEMORY_BOUNDARY.md) - Curated vs forbidden memory boundary
+- [CURRENT_CONTEXT.md](CURRENT_CONTEXT.md) - Active session state snapshot
+- [WORK_TO_WORK_LINEAGE.md](WORK_TO_WORK_LINEAGE.md) - PR/slice chain
+- [ACTIVE_RESEARCH_THREADS.md](ACTIVE_RESEARCH_THREADS.md) - Open research threads
 - `modules/infrastructure/wre_core/scripts/validate_session_closeout.py` - Validator
 - `modules/infrastructure/wre_core/scripts/extract_brain_artifacts.py` - Antigravity extractor (unchanged)
 - PR #723: `WORKTREE_AUTONOMOUS_ARTIFACT_CLEANUP_DECISION_PHASE1` (coordination)
+- PR #724: `REDDOG_SESSION_CONTINUITY_CAPTURE_PHASE1` (storage layer)
 
 ## WSP Chain
 

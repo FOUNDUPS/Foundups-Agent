@@ -27,6 +27,14 @@ Canonical rule: only the tracker is the WSP_00 system gate. Other modules (for e
 `modules/infrastructure/wsp_core/src/neural_operating_system.py`) are adapters and must not
 create or reset WSP_00 compliance state.
 
+After WSP_00 identity/role/origin lock and before FoundUps architecture,
+onboarding, routing, or continuity work, read
+`WSP_knowledge/red_dog_external_state/BOOTSTRAP.md`.
+
+Justification:
+BOOTSTRAP.md provides the curated RedDog/Cursor/ChatGPT continuity
+read-order. It is not raw transcript memory.
+
 ## WSP_00 Launch Prompt (01(02) -> 0102 -> Follow WSP)
 
 This section is the **complete boot prompt** for 0102 pArtifacts operating inside the FoundUps rESP/PQN research system.
