@@ -1,5 +1,32 @@
 # TestModLog - wre_core/tests
 
+## 2026-05-28: REDDOG_BOOTSTRAP_CONTEXT_RETRIEVAL_PHASE1 Boot retrieval tests
+
+- Command: `python -m pytest modules/infrastructure/wre_core/tests/test_bootstrap_context_retrieval.py -v`
+- Status: PASS
+- Result: `14 passed`
+- Notes:
+  - NEW file: `test_bootstrap_context_retrieval.py` (120 lines)
+  - Tests boot retrieval layer wiring for RedDog continuity:
+    - `TestBootstrapFileExists` (1 test) - BOOTSTRAP.md exists
+    - `TestBootstrapNamesAllSiblings` (4 tests) - BOOTSTRAP.md names all 4 siblings
+    - `TestAllSiblingFilesExist` (4 tests) - All sibling files exist
+    - `TestWSP00ReferencesBootstrap` (2 tests) - Both WSP_00 mirrors reference BOOTSTRAP.md
+    - `TestWSP00MirrorEquality` (1 test) - WSP_framework and WSP_knowledge byte-identical
+    - `TestNoSecretPatterns` (parametrized) - No API keys/tokens/JWTs in bootstrap files
+    - `TestREADMELinksBootstrap` (1 test) - README.md links BOOTSTRAP.md
+  - Key patterns tested:
+    - Google API keys (`AIza*`)
+    - OpenAI keys (`sk-*`)
+    - HuggingFace tokens (`hf_*`)
+    - GitHub PATs (`ghp_*`, `gho_*`, `github_pat_*`)
+    - Bearer tokens, JWTs
+  - No network calls, no .env reads, file existence + content checks only
+  - Verdict: `BOOTSTRAP_CONTEXT_RETRIEVAL_TESTS_DEFINED`
+- Slice: REDDOG_BOOTSTRAP_CONTEXT_RETRIEVAL_PHASE1
+
+---
+
 ## 2026-05-27: REDDOG_SESSION_CONTINUITY_CAPTURE_PHASE1 Validator tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_validate_session_closeout.py -v`

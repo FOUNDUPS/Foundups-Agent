@@ -2,6 +2,47 @@
 
 ## Chronological Change Log
 
+### [2026-05-28] - REDDOG_BOOTSTRAP_CONTEXT_RETRIEVAL_PHASE1 (v0.8.42)
+
+**WSP Protocol References**: WSP 00 (Zen State), WSP 60 (Module Memory), WSP 22 (ModLog)
+**Impact Analysis**: Adds boot retrieval layer for RedDog session continuity
+
+#### Changes Made
+
+- `tests/test_bootstrap_context_retrieval.py` (NEW - 120 lines):
+  - Validates boot retrieval layer wiring
+  - TestBootstrapFileExists: BOOTSTRAP.md existence
+  - TestBootstrapNamesAllSiblings: All 4 siblings referenced
+  - TestAllSiblingFilesExist: Sibling file existence
+  - TestWSP00ReferencesBootstrap: WSP_00 references BOOTSTRAP.md
+  - TestWSP00MirrorEquality: Framework/Knowledge mirrors byte-identical
+  - TestNoSecretPatterns: Secret pattern scan (API keys, tokens, JWTs)
+  - TestREADMELinksBootstrap: README.md links BOOTSTRAP.md
+
+#### WSP_knowledge Additions
+
+- `WSP_knowledge/red_dog_external_state/BOOTSTRAP.md` - Boot card with strict read-order
+- `WSP_knowledge/red_dog_external_state/MEMORY_BOUNDARY.md` - Curated vs forbidden boundary
+- `WSP_knowledge/red_dog_external_state/CURRENT_CONTEXT.md` - Active lanes, HEAD, worker roles
+- `WSP_knowledge/red_dog_external_state/WORK_TO_WORK_LINEAGE.md` - PR/slice chain
+- `WSP_knowledge/red_dog_external_state/ACTIVE_RESEARCH_THREADS.md` - Open threads with next-action slices
+
+#### WSP_00 Amendment
+
+- Added BOOTSTRAP.md reference in Session Bootstrap Contract section
+- Amendment applied to both WSP_framework/src and WSP_knowledge/src mirrors
+- Mirrors verified byte-identical
+
+#### Coordination
+
+- Predecessor: PR #724 (REDDOG_SESSION_CONTINUITY_CAPTURE_PHASE1) - storage layer
+- Follow-on: REDDOG_BOOTSTRAP_LIVE_UPDATE_PHASE2 (deferred)
+
+#### WSP 97 Compliance
+
+All truth fields remain False. No network calls, no .env reads, no live execution.
+Seeded files only (not live auto-update).
+
 ### [2026-05-27] - REDDOG_SESSION_CONTINUITY_CAPTURE_PHASE1 (v0.8.41)
 
 **WSP Protocol References**: WSP 60 (Module Memory), WSP 87 (Code Navigation), WSP 22 (ModLog)
