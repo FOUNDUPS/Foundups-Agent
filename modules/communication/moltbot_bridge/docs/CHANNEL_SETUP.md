@@ -151,7 +151,7 @@ openclaw start
 ```json
 {
   "agent": {
-    "model": "anthropic/claude-opus-4-5"
+    "model": "ollama/qwen2.5-coder:7b"
   },
   "agents": {
     "defaults": {
