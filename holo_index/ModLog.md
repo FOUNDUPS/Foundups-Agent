@@ -1,5 +1,82 @@
 # HoloIndex Package ModLog
 
+## [2026-05-30] HOLOINDEX_T1_RANKING_QUALITY_PHASE1 (W6 resume)
+
+**Agent**: W6 (0102)
+**WSP References**: WSP 50, WSP 87, WSP 97, WSP 22
+**Status**: COMPLETE
+**Decision**: RESUME_AND_REPAIR (stale W7 slice from 2026-05-24)
+**Base**: `3dc26e6f9` (post-PR #730)
+
+### Summary
+
+Tiered `_slice_id_match_boost` in `holo_index/core/search_engine.py` so
+docs whose `meta_slice_id` exactly matches a query slice-ID literal
+outrank sibling docs that only benefit from the Trade module path/alias
+keyword cascade. T2 audit doc lifted from CLI [DOCS] rank 2 to rank 1
+on its exact slice-ID query; T1 and T3 unchanged at rank 1.
+
+### Root Cause
+
+Pre-fix `_slice_id_match_boost` returned a flat 5.0 on any slice-ID
+match (path, title, or metadata). `_trade_path_boost.cap (8.0) +
+_trade_alias_keyword_boost.cap (6.0) = 14.0` could exceed the flat
+slice-ID boost, letting `modules/foundups/trade/INTERFACE.md` outrank
+the `TRADE_ADAPTER_INTEGRATION_PHASE1` audit doc on its own slice-ID
+query. The defect persisted across PR #728 and PR #730 because neither
+touched the ranking math.
+
+### Changes
+
+- `holo_index/core/search_engine.py`:
+  - Added module-private constants `_SLICE_ID_METADATA_PRECEDENCE_BOOST
+    = 20.0` (tier 1) and `_SLICE_ID_PATH_OR_TITLE_BOOST = 5.0` (tier 2).
+  - Rewrote `_slice_id_match_boost` body: metadata-exact match returns
+    tier 1; path/title-only match returns tier 2; otherwise 0.0.
+  - Function signature, lexical-fallback path, and cosine search path
+    unchanged.
+- `holo_index/tests/test_t1_ranking_quality.py` (NEW, 15 tests).
+- `holo_index/tests/test_audit_spec_slice_id_indexing.py`: 4
+  assertion-only updates -- metadata-match assertions now reference
+  `_SLICE_ID_METADATA_PRECEDENCE_BOOST`; path/title-only assertions
+  reference `_SLICE_ID_PATH_OR_TITLE_BOOST`.
+- `holo_index/tests/test_hxa_retrieval_fix.py`: 2 assertion-only
+  updates -- HXA22 / CFZ4 metadata-match assertions reference
+  `_SLICE_ID_METADATA_PRECEDENCE_BOOST`.
+- `docs/audits/holoindex_search_quality/HOLOINDEX_T1_RANKING_QUALITY_PHASE1.md`
+  (REWRITE): repaired mojibake -> ASCII, canonical WSP_97 header (20
+  rows), lineage updated to post-#730, decision recorded as
+  RESUME_AND_REPAIR.
+
+### Tests
+
+```
+python -m pytest holo_index/tests/test_t1_ranking_quality.py \
+                 holo_index/tests/test_hxa_retrieval_fix.py \
+                 holo_index/tests/test_audit_spec_slice_id_indexing.py -q
+65 passed in 2.64s
+```
+
+CLI verification on post-#730 baseline:
+
+| Query | Pre-fix [DOCS] rank-1 | Post-fix [DOCS] rank-1 |
+|-------|-----------------------|------------------------|
+| `TRADE_ADAPTER_INTEGRATION_PHASE1` | `modules/foundups/trade/INTERFACE.md` | `docs/audits/architecture/TRADE_ADAPTER_INTEGRATION_PHASE1.md` |
+| `TRADE_PUMPFUN_DUE_DILIGENCE_SCORING_SPEC_PHASE1` | T1 audit (unchanged) | T1 audit |
+| `HOLOINDEX_FOUNDUP_QUERY_ALIAS_AND_TARGETED_VERDICT_PHASE1` | T3 audit (unchanged) | T3 audit |
+
+### Hard Constraints (all upheld)
+
+NO_LIVE_CHROMA_MUTATION, NO_REINDEX, NO_DOCS_INDEX_MUTATION,
+NO_TIMEOUT_DEFAULT_CHANGE, NO_KNOWLEDGE_CHUNKING_CHANGE,
+NO_SEARCH_ALGORITHM_REWRITE, NO_TRADE_SPECIFIC_SPECIAL_CASE,
+NO_PATH_SPECIFIC_SPECIAL_CASE, NO_WSP_MUTATION, NO_DEPENDENCY_CHANGE,
+NO_CI_CHANGE, NO_PUBLIC_SURFACE_MUTATION.
+
+WSP_97 checklist: PASS 20/20.
+
+---
+
 ## [2026-05-30] HOLOINDEX_COLD_MODEL_TIMEOUT_BOUNDARY_PHASE1
 
 **Agent**: W6 (0102)
