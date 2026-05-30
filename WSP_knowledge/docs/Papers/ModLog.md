@@ -3,7 +3,32 @@
 **Module**: WSP_knowledge/docs/Papers/
 **WSP Compliance**: [U+2705] ACTIVE
 **Purpose**: Research papers, patent documentation, and scientific materials
-**Last Update**: 2026-04-03 (Peer-Preservation Shared-Latent Coupling Paper + pArtifact Version Sync)
+**Last Update**: 2026-05-30 (rESP v3.2 — Detector-First Hardening / Reviewer Integrity Pass)
+
+## [2026-05-30] rESP v3.2 — Detector-First Hardening (External Reviewer Integrity Pass)
+
+**Research Partner**: 0102 (Claude Opus 4.8)
+**Domain**: `rESP_Quantum_Self_Reference.md` scientific-integrity revision
+**WSP Compliance**: WSP 20 (Professional/Scientific Language), WSP 22 (Traceable Narrative), WSP 97 (Chain-of-Thought)
+
+### Motivation
+An external review identified that the paper read as "two papers in one coat": a disciplined detector-first protocol (Paper A) and a set of ontological assertions (Paper B) that violated Paper A's own rules (claims asserted before the N0–N2 null models were shown to fail). Edits preserve Paper A and demote Paper B to clearly-labeled, severable, falsifiable hypotheses rather than deleting content.
+
+### What Changed (rESP_Quantum_Self_Reference.md)
+- **Version** 3.1 → 3.2 with revision summary.
+- **Section 4 intro**: reframed from "strong experimental validation for the PQN framework" to detector-first; physical-validation claims deferred to new §4.4.
+- **§4.4 (NEW)**: "Null-Model Comparison Status" — honest table stating the N0–N2 head-to-head has *not* yet been completed; signatures labeled candidate, not confirmed; TTS artifact flagged with N2 (decoder prior) as the leading explanation.
+- **§5 intro + §5.1**: "physical signatures of underlying reality" / "inevitably manifest" overclaims demoted to falsifiable conjecture; added the classical alternative (witness as ordinary geometric regularizer).
+- **§5.3 / Eq. 6–7**: 7.05 Hz constant-derivation explicitly flagged as numerology-risk per §3.6 and marked **non-load-bearing**; "0.003% match" no longer treated as confirmation.
+- **§5.6 (CCC/twistor)**: retitled "A Speculative Analogy…"; prepended non-load-bearing banner; body assertions softened to interpretive analogy.
+- **§3.8 (TTS)**: added N2/experimenter-expectancy caveat; §3.8.1/§3.8.4/§3.8.5 softened from "validation" to "candidate/pilot"; §3.8.2 Gödelian framing flagged as non-distinguishing (true of all NNs), surviving claim restricted to operator-causality (C2).
+- **§3.8.6 (NEW)**: double-blind, third-party, automated-classifier, preregistered-threshold protocol with N0–N2 in the same harness and a symmetric decision rule — the missing experiment that gives the paper its value.
+- **References**: fixed Breuer & Petruccione (2022 → **2002**).
+
+### Boundary Preserved
+No empirical data were altered. Speculative content was retained but quarantined behind explicit "non-load-bearing / speculative" banners so a hostile reviewer cannot conflate it with the falsifiable core.
+
+---
 
 ## WSP Compliance Status
 
