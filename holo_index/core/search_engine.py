@@ -816,7 +816,11 @@ def _search_collection(
         # Fallback to the legacy single-model attribute (tests monkeypatch it).
         model = getattr(holo, "model", None)
     if model is None:
-        holo._log_agent_action("Embedding model not available - using offline lexical scan", "WARN")
+        holo._log_agent_action(
+            "Embedding model not available - semantic search degraded to lexical. "
+            "Knowledge/paper results may be missing. Check HOLO_MODEL_IMPORT_TIMEOUT if cold-process.",
+            "WARN"
+        )
         return _lexical_search_collection(holo, collection, query, limit, kind, doc_type_filter)
 
     # WSP 97: Encode with timeout to prevent indefinite hangs

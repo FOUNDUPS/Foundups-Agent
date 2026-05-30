@@ -1,5 +1,54 @@
 # HoloIndex Package ModLog
 
+## [2026-05-30] HOLOINDEX_COLD_MODEL_TIMEOUT_BOUNDARY_PHASE1
+
+**Agent**: W6 (0102)
+**WSP References**: WSP 97
+**Status**: COMPLETE
+
+### Summary
+
+Raised SentenceTransformer timeout defaults to prevent false "not found" results
+when semantic model fails to load in time on cold process.
+
+### Root Cause
+
+After #728 (full-body chunking), knowledge content was correctly indexed but
+fresh-process search could still fail because:
+- `HOLO_MODEL_IMPORT_TIMEOUT=20` (too short for cold import)
+- `HOLO_MODEL_LOAD_TIMEOUT=30` (too short for cold model load)
+
+When timeout occurred, HoloIndex fell back to lexical search silently,
+causing 0102 to incorrectly conclude "content not found" when the semantic
+engine simply didn't load.
+
+### Changes
+
+- `holo_index/core/holo_index.py`:
+  - `HOLO_MODEL_IMPORT_TIMEOUT`: 20 → 120 seconds
+  - `HOLO_MODEL_LOAD_TIMEOUT`: 30 → 120 seconds
+  - Improved timeout warning message to indicate semantic search unavailable
+- `holo_index/core/search_engine.py`:
+  - Enhanced degraded-mode warning to mention knowledge/paper results may be missing
+- `holo_index/tests/test_fx1_holoindex_truth.py`:
+  - Updated `test_default_import_timeout_is_sufficient` to assert >= 60s
+  - Added `test_default_load_timeout_is_sufficient` to assert >= 60s
+
+### Behavior Change
+
+| Scenario | Before | After |
+|----------|--------|-------|
+| Cold-process import | 20s timeout | 120s timeout |
+| Cold-process model load | 30s timeout | 120s timeout |
+| Timeout warning | Generic | Specific: "Semantic search will be unavailable" |
+| Search degradation warning | Generic | Specific: "Knowledge/paper results may be missing" |
+
+### Test Results
+
+- 4 timeout tests passing (TestFX2C_TimeoutDefaults)
+
+---
+
 ## [2026-05-30] HOLOINDEX_KNOWLEDGE_FULL_BODY_CHUNKING_PHASE1
 
 **Agent**: W6 (0102)
