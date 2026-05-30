@@ -863,11 +863,65 @@ def index_docs_entries(holo: "HoloIndex") -> IndexResult:
         )
 
 
+def _chunk_markdown_by_headings(
+    text: str,
+    max_chunk_chars: int = 1200,
+    overlap_chars: int = 100,
+) -> List[Dict[str, str]]:
+    """Split markdown text into chunks by headings, with fallback sub-splitting.
+
+    Returns list of dicts with keys: 'section' (heading text), 'content' (chunk text).
+    Handles tables, code fences, and mermaid blocks as raw text.
+    """
+    lines = text.splitlines(keepends=True)
+    heading_pattern = re.compile(r'^(#{1,6})\s+(.+)$')
+    chunks: List[Dict[str, str]] = []
+    current_section = "Introduction"
+    current_content: List[str] = []
+
+    def flush_section(section: str, content_lines: List[str]) -> None:
+        content = ''.join(content_lines).strip()
+        if not content:
+            return
+        if len(content) <= max_chunk_chars:
+            chunks.append({'section': section, 'content': content})
+        else:
+            start = 0
+            sub_idx = 0
+            while start < len(content):
+                end = min(start + max_chunk_chars, len(content))
+                if end < len(content) and content[end] not in ' \n':
+                    space_pos = content.rfind(' ', start, end)
+                    if space_pos > start:
+                        end = space_pos
+                chunk_text = content[start:end].strip()
+                if chunk_text:
+                    sub_section = f"{section} (part {sub_idx + 1})" if sub_idx > 0 else section
+                    chunks.append({'section': sub_section, 'content': chunk_text})
+                    sub_idx += 1
+                start = max(end - overlap_chars, end) if overlap_chars and end < len(content) else end
+
+    for line in lines:
+        match = heading_pattern.match(line.strip())
+        if match:
+            flush_section(current_section, current_content)
+            current_section = match.group(2).strip()
+            current_content = []
+        else:
+            current_content.append(line)
+
+    flush_section(current_section, current_content)
+    return chunks
+
+
 def index_knowledge_entries(holo: "HoloIndex") -> IndexResult:
     """CFZ4: Index papers/research into navigation_knowledge collection.
 
     Content: WSP_knowledge/docs/Papers/**
-    ID prefix: paper_
+    ID prefix: paper_ (summary), paper_{idx}_chunk_{m} (body chunks)
+
+    Full-body chunking: Each paper gets a summary record plus heading-based
+    chunks so deep sections (e.g., rESP §4.4) are retrievable.
 
     Returns:
         IndexResult with discovered_count, indexed_count, collection_name,
@@ -909,6 +963,7 @@ def index_knowledge_entries(holo: "HoloIndex") -> IndexResult:
     holo.knowledge_collection = holo._reset_collection("navigation_knowledge")
 
     ids, embeddings, documents, metadatas = [], [], [], []
+    batch_size = 100
 
     for idx, file_path in enumerate(files, start=1):
         raw_head = file_path.read_bytes()[:2]
@@ -925,26 +980,58 @@ def index_knowledge_entries(holo: "HoloIndex") -> IndexResult:
         doc_payload = f"{title}\n{summary}"
 
         know_fed = resolve_foundup_metadata(file_path, holo.project_root)
-        ids.append(f"paper_{idx}")
-        embeddings.append(holo._get_embedding(doc_payload))
-        documents.append(doc_payload)
-        metadatas.append({
+        base_meta = {
             "title": title,
             "path": str(file_path),
-            "summary": summary,
             "type": "paper",
             "priority": 6,
             "foundup_id": know_fed["foundup_id"],
             "tenant_id": know_fed["tenant_id"],
             "source_scope": know_fed["source_scope"],
             "external_repo": know_fed["external_repo"],
+        }
+
+        ids.append(f"paper_{idx}")
+        embeddings.append(holo._get_embedding(doc_payload))
+        documents.append(doc_payload)
+        metadatas.append({
+            **base_meta,
+            "summary": summary,
+            "record_kind": "paper_summary",
+            "section": "",
+            "section_title": "",
         })
+
+        chunks = _chunk_markdown_by_headings(text)
+        for chunk_idx, chunk in enumerate(chunks):
+            chunk_id = f"paper_{idx}_chunk_{chunk_idx}"
+            chunk_payload = f"{title}\n[{chunk['section']}]\n{chunk['content']}"
+            ids.append(chunk_id)
+            embeddings.append(holo._get_embedding(chunk_payload))
+            documents.append(chunk_payload)
+            metadatas.append({
+                **base_meta,
+                "record_kind": "paper_chunk",
+                "section": chunk["section"],
+                "section_title": chunk["section"],
+            })
 
     indexed_count = len(ids)
 
     if embeddings:
-        holo.knowledge_collection.add(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
-        holo._log_agent_action(f"Knowledge index refreshed: {len(ids)} papers", "OK")
+        for i in range(0, len(ids), batch_size):
+            batch_ids = ids[i:i + batch_size]
+            batch_emb = embeddings[i:i + batch_size]
+            batch_docs = documents[i:i + batch_size]
+            batch_meta = metadatas[i:i + batch_size]
+            holo.knowledge_collection.add(
+                ids=batch_ids, embeddings=batch_emb,
+                documents=batch_docs, metadatas=batch_meta
+            )
+        holo._log_agent_action(
+            f"Knowledge index refreshed: {discovered_count} papers, {indexed_count} records (summaries + chunks)",
+            "OK"
+        )
         return IndexResult(
             discovered_count=discovered_count,
             indexed_count=indexed_count,

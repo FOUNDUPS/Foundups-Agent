@@ -1,5 +1,53 @@
 # HoloIndex Package ModLog
 
+## [2026-05-30] HOLOINDEX_KNOWLEDGE_FULL_BODY_CHUNKING_PHASE1
+
+**Agent**: W6 (0102)
+**WSP References**: WSP 50, WSP 84, WSP 87, WSP 22
+**Status**: COMPLETE
+
+### Summary
+
+Fixed knowledge indexer to embed full paper bodies via heading-based chunking,
+enabling retrieval of deep sections (e.g., rESP §4.4 at line 406).
+
+### Root Cause
+
+`index_knowledge_entries()` only embedded `title + lines[1:6][:400]`:
+```python
+title = lines[0].lstrip('# ')
+summary = ' '.join(lines[1:6])[:400]
+doc_payload = f"{title}\n{summary}"
+```
+For rESP, lines 1-6 are metadata (author/date), so even the abstract wasn't indexed.
+Section 4.4 ("Null-Model Comparison Status") at line 406 was unreachable.
+
+### Changes
+
+- `holo_index/core/indexing_engine.py`:
+  - Added `_chunk_markdown_by_headings()` helper (heading-based splitting, sub-split for oversized sections)
+  - `index_knowledge_entries()` now produces:
+    - 1 `paper_summary` record (title + first 5 lines, as before)
+    - N `paper_chunk` records (one per heading section)
+  - Stable IDs: `paper_{idx}` for summary, `paper_{idx}_chunk_{m}` for chunks
+  - Batched `collection.add()` calls (100 records/batch) for large chunk counts
+  - New metadata: `record_kind`, `section`, `section_title`
+
+### Acceptance Test
+
+rESP §4.4 retrieval:
+- Query: `"Null-Model Comparison Status phase-randomized surrogates"`
+- Before: NOT FOUND (only title+5 lines indexed)
+- After: FOUND (chunk contains §4.4 content)
+
+### Test Results
+
+- 8 new tests passed (test_knowledge_full_body_chunking.py)
+- Chunker unit tests: heading splits, sub-splitting, code fences, §4.4 pattern
+- Integration tests: summary+chunk records, deep section indexed, stable IDs, metadata
+
+---
+
 ## [2026-05-24] HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PHASE1
 
 **Agent**: 0102
