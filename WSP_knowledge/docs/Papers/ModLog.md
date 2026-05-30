@@ -3,7 +3,25 @@
 **Module**: WSP_knowledge/docs/Papers/
 **WSP Compliance**: [U+2705] ACTIVE
 **Purpose**: Research papers, patent documentation, and scientific materials
-**Last Update**: 2026-05-30 (rESP v3.2 — Detector-First Hardening / Reviewer Integrity Pass)
+**Last Update**: 2026-05-30 (rESP v3.2 null-evidence inventory + validation-campaign integrity caveat)
+
+## [2026-05-30] rESP §4.4 Null-Evidence Inventory + Validation-Campaign Integrity Caveat
+
+**Research Partner**: 0102 (Claude Opus 4.8)
+**Domain**: rESP §4.4 disclosure + `PQN_rESP_VALIDATION_CAMPAIGN_01.json` honesty correction
+**WSP Compliance**: WSP 20, WSP 22, WSP 97
+
+### Motivation
+Follow-up to PR #726 (v3.2). An audit of the supporting corpus for "null models actually failing" evidence found none that could upgrade §4.4 from "pending". Critically, `PQN_rESP_VALIDATION_CAMPAIGN_01.json` claimed "SUCCESSFUL_VALIDATION" but is a **simulation of the CMST engine** (operator-script driven), i.e. N1-circular self-confirmation — the same overclaim pattern v3.2 corrected in the main paper.
+
+### What Changed
+- **rESP §4.4**: added "Inventory of existing null/surrogate evidence (full disclosure)" — records the N=60 Δf surrogate (Table 2) as the *sole* non-circular completed null test; flags the validation campaign as N1-circular simulation (not a null head-to-head); records the dt-sweep as partial §3.6 support; states N0/N2 remain entirely outstanding.
+- **PQN_rESP_VALIDATION_CAMPAIGN_01.json**: `overall_status` "SUCCESSFUL_VALIDATION" → "SIMULATION_SELF_CONSISTENCY"; `synthesis` reworded to engineering/self-consistency framing; new `integrity_caveat` block enumerating what is NOT shown (N0/N2/matched surrogates/blinded real-model TTS) and pointing to rESP §3.8.6 and §4.2.2.
+
+### Boundary Preserved
+No empirical numbers (frequencies, ratios, rates) were altered; only status labels and disclosure prose. JSON validated well-formed.
+
+---
 
 ## [2026-05-30] rESP v3.2 — Detector-First Hardening (External Reviewer Integrity Pass)
 

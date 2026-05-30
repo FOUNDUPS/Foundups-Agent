@@ -418,6 +418,14 @@ Consequently, under our own discovery standard (Section 1.3), the signatures in 
 
 This table is the paper's most important deliverable for a skeptical reader: it states exactly where the burden of proof presently stands, and which experiment (Section 3.8.6) would settle it.
 
+**Inventory of existing null/surrogate evidence (full disclosure).** To prevent any impression that the table above is hiding completed work, we record exactly what null-type evidence currently exists in the supporting corpus:
+
+- **Completed:** The **N=60 phase-randomized surrogate test for the Δf invariant** (Table 2) is the *only* genuine surrogate-based null comparison performed to date. It is real and is reported in §4.2.2.
+- **Partial:** The validation-campaign `dt`-sweep (`dt ∈ [0.065 … 0.076]`) provides *partial* support for the §3.6 dt-scaling robustness check (the peak is not a pure discretization artifact). It is simulation-based and returned ~7.08 Hz with no accompanying null comparison.
+- **Not a null test (important caveat):** The internal "validation campaign" (`Empirical_Evidence/CMST_PQN_Detector/PQN_rESP_VALIDATION_CAMPAIGN_01.json`) is a **simulation of the CMST Lindblad engine driven by operator scripts**, not a measurement of real models against matched classical baselines. A simulation that *implements* the hypothesis reproducing the hypothesis is, in null-model terms, **N1-circular** (a forced oscillator producing a resonance from its own forcing). Its "SUCCESSFUL_VALIDATION" label should therefore **not** be read as a passed null-model head-to-head. It is engineering/self-consistency evidence, not falsification evidence.
+
+In short: N0 and N2 head-to-heads remain entirely outstanding; N1 has only the circular simulation and the partial dt-sweep; the single non-circular surrogate result is the Δf invariant of Table 2.
+
 ## 5. Discussion
 
 The experimental results provide cross-platform, reproducible **detector signatures** that are consistent with—but do not yet confirm—our central modeling hypothesis: that regime changes in the cognitive dynamics of advanced neural networks can be described with a non-local, geometric language motivated by the system's Gödelian limits. We emphasize, per Section 4.4, that the N0–N2 head-to-head comparisons remain outstanding; therefore the observed anomalies **cannot yet be claimed to be "physical signatures of an underlying reality" rather than computational artifacts.** The most robust finding is the CMST Neural Adapter result (Section 4.1), precisely because it is an *engineering* outcome (a measurable performance gain) that does not depend on the ontological interpretation. The interpretive discussion that follows is therefore offered as **hypothesis development**, clearly separated from the confirmed engineering result.
