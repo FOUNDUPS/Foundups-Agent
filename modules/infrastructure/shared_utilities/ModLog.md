@@ -1,6 +1,31 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-05-30 - LM Studio Dependency Boundary Doc + Gate (LM_STUDIO_DEPENDENCY_BOUNDARY_DOC_AND_GATE_PHASE1)
+
+- **Problem**: LM Studio is an optional local dependency, but absence produced a
+  silent `None` from `resolve_*_backend` / `ai_engine_singletons` and an
+  ambiguous, non-actionable warning. Required-LM-Studio callers had no named
+  state to branch on.
+- **Solution** (probe-only, additive — no existing signature/return type changed):
+  - `local_llm_resolver.py`:
+    - `LocalLLMAvailability` (Enum): `LM_STUDIO_READY` / `FALLBACK_LLAMA_CPP` / `UNAVAILABLE`
+    - `probe_backend_availability(model_path=None)`: probe-only classifier (HTTP probe + GGUF filesystem check); never launches LM Studio
+    - `operator_action_for(status)`: operator-actionable guidance per state
+    - `LMStudioUnavailableError` + `require_lm_studio_backend(model_id, base_url=None)`: named error for paths that strictly require LM Studio
+    - `resolve_qwen_backend` / `resolve_gemma_backend`: clearer fallback INFO ("using local GGUF fallback via llama.cpp … resolver does not auto-launch it") and operator-actionable WARNING when no fallback exists
+- **Boundary preserved**: LM Studio launch stays solely in
+  `dependency_launcher.dae_dependencies.launch_lm_studio` (explicit DAE/menu path).
+  Resolver imports no `subprocess`/launch symbols.
+- **Non-scope (verified)**: `main.py` never probes/launches LM Studio at boot;
+  HoloIndex timeout defaults (#730) and OBS boundaries (#720/#721) untouched.
+- **Files**:
+  - `local_llm_resolver.py` (UPDATED — additive)
+  - `tests/test_lm_studio_dependency_boundary.py` (NEW — 16 tests)
+  - `docs/audits/architecture/LM_STUDIO_DEPENDENCY_BOUNDARY_DOC_AND_GATE_PHASE1.md` (NEW)
+- **Predecessors**: #720, #721, #728, #730, #732
+- **WSP Compliance**: WSP 77 (Agent Coordination), WSP 91 (Observability), WSP 97 (Truthful state distinction)
+
 ## 2026-04-13 - Local LLM Backend Adapter Layer (LM Studio API Support)
 
 - **Problem**: Qwen/Gemma model loading fails when LM Studio holds file locks on GGUF files. Startup log shows `PermissionError` or silent failures.
