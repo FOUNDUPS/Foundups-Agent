@@ -1,6 +1,24 @@
 # TestModLog
 
 ====================================================================
+## 2026-05-30 - LM Studio Dependency Boundary Gate Coverage
+- Command:
+  - `python -m pytest modules/infrastructure/shared_utilities/tests/test_lm_studio_dependency_boundary.py modules/infrastructure/shared_utilities/tests/test_local_llm_backends.py -v`
+- Status: PASS
+- Result: `33 passed in 0.76s` (16 new + 17 existing regression-guard)
+- Scope (new file `test_lm_studio_dependency_boundary.py`):
+  - TestProbeAvailabilityState: named probe-only states (3 tests)
+  - TestFallbackMessageClarity: clear fallback INFO + operator action (3 tests)
+  - TestRequiredPathNamedError: `LMStudioUnavailableError` w/ operator action (3 tests)
+  - TestHappyPathPreserved: LM Studio + llama.cpp fallback unchanged (2 tests)
+  - TestResolverProbesOnly: no subprocess / no launch symbols (3 tests)
+  - TestDaeLaunchBoundaryIntact: launch still lives in dependency_launcher (2 tests)
+- Constraints proven: NO_AUTO_LAUNCH_LM_STUDIO, LOCAL_LLM_RESOLVER_PROBES_ONLY,
+  NO_LIVE_LM_STUDIO_IN_TESTS, NO_NETWORK_CALL_IN_TESTS (all probes mocked)
+- WSP References: WSP 77 (Agent Coordination), WSP 91 (Observability), WSP 97 (Truthful state distinction)
+====================================================================
+
+====================================================================
 ## 2026-04-13 - Local LLM Backend Adapter Layer Coverage
 - Command:
   - `python -m pytest modules/infrastructure/shared_utilities/tests/test_local_llm_backends.py -v`
