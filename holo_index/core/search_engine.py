@@ -195,26 +195,50 @@ def _extract_slice_ids(text: str) -> List[str]:
     return short_ids + long_matches
 
 
-def _slice_id_match_boost(query: str, path: str, title: str, meta_slice_id: str = "") -> float:
-    """HXA Audit Fix: Return keyword boost if query slice ID matches path/title/metadata.
+# Tier-1 boost when an exact ``meta_slice_id`` match is observed. Must
+# strictly exceed the maximum sum of all non-slice-id keyword boosts
+# (currently _trade_path_boost cap 8.0 + _trade_alias_keyword_boost cap
+# 6.0 = 14.0) so a doc carrying proper slice_id metadata cannot be
+# outranked by a sibling that benefits from the module path/alias
+# cascade. A future cap increase will fail the precedence invariant test.
+_SLICE_ID_METADATA_PRECEDENCE_BOOST = 20.0
 
-    Boosts exact slice ID matches (HXA22, FX1, CFZ4) to fix retrieval gaps.
+# Tier-2 fallback for docs that match the query slice ID only via path
+# or title (no slice_id metadata). Preserves prior behavior for docs that
+# have not been re-indexed under the HXA metadata fix.
+_SLICE_ID_PATH_OR_TITLE_BOOST = 5.0
+
+
+def _slice_id_match_boost(query: str, path: str, title: str, meta_slice_id: str = "") -> float:
+    """Return tiered slice-ID keyword boost.
+
+    - Tier 1 (metadata precedence): if the query contains a literal
+      slice-ID token and the doc's ``meta_slice_id`` exactly equals that
+      token, return ``_SLICE_ID_METADATA_PRECEDENCE_BOOST``.
+    - Tier 2 (path/title fallback): if the same query slice-ID literal
+      appears in the doc path or title (no metadata match), return
+      ``_SLICE_ID_PATH_OR_TITLE_BOOST``.
+    - Otherwise 0.0 — including any query that carries no slice-ID
+      literal, so analyst-language queries are not affected by this rule.
     """
     query_slices = _extract_slice_ids(query)
     if not query_slices:
         return 0.0
 
-    # Check path, title, and metadata slice_id
+    # Tier 1: exact metadata slice_id match wins over path/title hits.
+    if meta_slice_id:
+        meta_upper = meta_slice_id.upper()
+        for qslice in query_slices:
+            if qslice == meta_upper:
+                return _SLICE_ID_METADATA_PRECEDENCE_BOOST
+
+    # Tier 2: path or title slice-ID hit.
     path_slices = _extract_slice_ids(path)
     title_slices = _extract_slice_ids(title)
-    all_target_slices = set(path_slices + title_slices)
-    if meta_slice_id:
-        all_target_slices.add(meta_slice_id.upper())
-
-    # Strong boost for exact match
+    path_or_title = set(path_slices + title_slices)
     for qslice in query_slices:
-        if qslice in all_target_slices:
-            return 5.0  # Strong boost for exact slice ID match
+        if qslice in path_or_title:
+            return _SLICE_ID_PATH_OR_TITLE_BOOST
 
     return 0.0
 

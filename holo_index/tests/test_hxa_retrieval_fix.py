@@ -67,8 +67,11 @@ class TestSliceIdBoost:
     """Test slice ID boost in search ranking."""
 
     def test_slice_id_match_boost_hxa(self):
-        """HXA22 query boosts HXA22 path."""
-        from holo_index.core.search_engine import _slice_id_match_boost
+        """HXA22 query boosts HXA22 doc via metadata (tier 1)."""
+        from holo_index.core.search_engine import (
+            _SLICE_ID_METADATA_PRECEDENCE_BOOST,
+            _slice_id_match_boost,
+        )
 
         boost = _slice_id_match_boost(
             query="HXA22 destructive action guard",
@@ -76,11 +79,14 @@ class TestSliceIdBoost:
             title="HXA22 - Destructive Action Guard Runtime",
             meta_slice_id="HXA22",
         )
-        assert boost == 5.0
+        assert boost == _SLICE_ID_METADATA_PRECEDENCE_BOOST
 
     def test_slice_id_match_boost_cfz(self):
-        """CFZ4 query boosts CFZ4 path."""
-        from holo_index.core.search_engine import _slice_id_match_boost
+        """CFZ4 query boosts CFZ4 doc via metadata (tier 1)."""
+        from holo_index.core.search_engine import (
+            _SLICE_ID_METADATA_PRECEDENCE_BOOST,
+            _slice_id_match_boost,
+        )
 
         boost = _slice_id_match_boost(
             query="CFZ4 collection separation",
@@ -88,7 +94,7 @@ class TestSliceIdBoost:
             title="CFZ4 - Collection Separation",
             meta_slice_id="CFZ4",
         )
-        assert boost == 5.0
+        assert boost == _SLICE_ID_METADATA_PRECEDENCE_BOOST
 
     def test_no_boost_for_different_slice(self):
         """No boost when query slice differs from path slice."""

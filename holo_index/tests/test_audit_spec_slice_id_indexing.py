@@ -166,8 +166,11 @@ class TestAuditSpecSliceIdBoost:
     """Test slice ID boost for audit spec IDs in search ranking."""
 
     def test_audit_spec_match_boost(self):
-        """Audit spec ID query boosts matching doc."""
-        from holo_index.core.search_engine import _slice_id_match_boost
+        """Audit spec ID query boosts matching doc via meta_slice_id (tier 1)."""
+        from holo_index.core.search_engine import (
+            _SLICE_ID_METADATA_PRECEDENCE_BOOST,
+            _slice_id_match_boost,
+        )
 
         boost = _slice_id_match_boost(
             query="FOUNDUPS_PORTFOLIO_DATA_VALIDATOR_PHASE1",
@@ -175,11 +178,14 @@ class TestAuditSpecSliceIdBoost:
             title="Portfolio Data Validator Phase 1",
             meta_slice_id="FOUNDUPS_PORTFOLIO_DATA_VALIDATOR_PHASE1",
         )
-        assert boost == 5.0
+        assert boost == _SLICE_ID_METADATA_PRECEDENCE_BOOST
 
     def test_audit_spec_match_via_path(self):
-        """Boost applied when slice ID is in path even if not in meta."""
-        from holo_index.core.search_engine import _slice_id_match_boost
+        """Boost applied when slice ID is in path even if not in meta (tier 2)."""
+        from holo_index.core.search_engine import (
+            _SLICE_ID_PATH_OR_TITLE_BOOST,
+            _slice_id_match_boost,
+        )
 
         boost = _slice_id_match_boost(
             query="FOUNDUPS_PORTFOLIO_DATA_VALIDATOR_PHASE1",
@@ -187,11 +193,14 @@ class TestAuditSpecSliceIdBoost:
             title="Some Title",
             meta_slice_id="",  # No metadata slice_id
         )
-        assert boost == 5.0
+        assert boost == _SLICE_ID_PATH_OR_TITLE_BOOST
 
     def test_audit_spec_match_via_title(self):
-        """Boost applied when slice ID is in title."""
-        from holo_index.core.search_engine import _slice_id_match_boost
+        """Boost applied when slice ID is in title (tier 2)."""
+        from holo_index.core.search_engine import (
+            _SLICE_ID_PATH_OR_TITLE_BOOST,
+            _slice_id_match_boost,
+        )
 
         boost = _slice_id_match_boost(
             query="PORTFOLIO_DATA_VALIDATOR_PHASE1",
@@ -199,11 +208,14 @@ class TestAuditSpecSliceIdBoost:
             title="PORTFOLIO_DATA_VALIDATOR_PHASE1 - Audit Report",
             meta_slice_id="",
         )
-        assert boost == 5.0
+        assert boost == _SLICE_ID_PATH_OR_TITLE_BOOST
 
     def test_audit_spec_match_via_metadata(self):
-        """Boost applied when slice ID is only in metadata."""
-        from holo_index.core.search_engine import _slice_id_match_boost
+        """Boost applied when slice ID is only in metadata (tier 1)."""
+        from holo_index.core.search_engine import (
+            _SLICE_ID_METADATA_PRECEDENCE_BOOST,
+            _slice_id_match_boost,
+        )
 
         boost = _slice_id_match_boost(
             query="FOUNDUPS_PORTFOLIO_DATA_VALIDATOR_PHASE1",
@@ -211,7 +223,7 @@ class TestAuditSpecSliceIdBoost:
             title="Generic Audit",
             meta_slice_id="FOUNDUPS_PORTFOLIO_DATA_VALIDATOR_PHASE1",
         )
-        assert boost == 5.0
+        assert boost == _SLICE_ID_METADATA_PRECEDENCE_BOOST
 
     def test_no_boost_for_different_audit_spec(self):
         """No boost when query audit spec differs from target."""
@@ -238,8 +250,11 @@ class TestAuditSpecSliceIdBoost:
         assert boost == 0.0
 
     def test_hxa_boost_still_works(self):
-        """HXA boost still works (no regression)."""
-        from holo_index.core.search_engine import _slice_id_match_boost
+        """HXA boost still works (tier 1 via metadata)."""
+        from holo_index.core.search_engine import (
+            _SLICE_ID_METADATA_PRECEDENCE_BOOST,
+            _slice_id_match_boost,
+        )
 
         boost = _slice_id_match_boost(
             query="HXA22 destructive action guard",
@@ -247,7 +262,7 @@ class TestAuditSpecSliceIdBoost:
             title="HXA22 - Destructive Action Guard Runtime",
             meta_slice_id="HXA22",
         )
-        assert boost == 5.0
+        assert boost == _SLICE_ID_METADATA_PRECEDENCE_BOOST
 
 
 class TestSyntheticIndexAndSearch:
@@ -281,12 +296,17 @@ class TestSyntheticIndexAndSearch:
             assert slice_id == expected_slice_id, f"Failed for {filename}"
 
     def test_synthetic_search_ranking_prefers_exact_slice_match(self):
-        """Synthetic proof: exact slice ID match gets 5.0 boost over semantic-similar docs."""
-        from holo_index.core.search_engine import _slice_id_match_boost
+        """Synthetic proof: exact metadata slice ID match gets tier-1 boost
+        over semantic-similar distractor docs (which match no query slice).
+        """
+        from holo_index.core.search_engine import (
+            _SLICE_ID_METADATA_PRECEDENCE_BOOST,
+            _slice_id_match_boost,
+        )
 
         query = "FOUNDUPS_PORTFOLIO_DATA_VALIDATOR_PHASE1"
 
-        # Target doc: exact slice ID match
+        # Target doc: exact metadata slice ID match
         target_boost = _slice_id_match_boost(
             query=query,
             path="docs/audits/architecture/FOUNDUPS_PORTFOLIO_DATA_VALIDATOR_PHASE1.md",
@@ -316,8 +336,8 @@ class TestSyntheticIndexAndSearch:
             ),
         ]
 
-        # Target gets 5.0 boost, distractors get 0.0
-        assert target_boost == 5.0
+        # Target gets tier-1 boost, distractors get 0.0
+        assert target_boost == _SLICE_ID_METADATA_PRECEDENCE_BOOST
         for distractor_boost in distractor_boosts:
             assert distractor_boost == 0.0
 
