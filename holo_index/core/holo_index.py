@@ -76,10 +76,13 @@ except ImportError as exc:
 SentenceTransformer = None
 
 # Timeout configuration for blocking operations (WSP 97 pre-flight compliance)
-HOLO_MODEL_IMPORT_TIMEOUT = float(os.getenv("HOLO_MODEL_IMPORT_TIMEOUT", "20"))  # 20s default (FX2-C: 5s too short for cold imports)
-HOLO_MODEL_LOAD_TIMEOUT = float(os.getenv("HOLO_MODEL_LOAD_TIMEOUT", "30"))     # 30s default (FX2-C: 10s too short for cold model load)
-HOLO_ENCODE_TIMEOUT = float(os.getenv("HOLO_ENCODE_TIMEOUT", "3"))              # 3s default
-HOLO_SEARCH_TIMEOUT = float(os.getenv("HOLO_SEARCH_TIMEOUT", "15"))             # 15s default
+# FX2-C / HOLOINDEX_COLD_MODEL_TIMEOUT_BOUNDARY_PHASE1: Cold-process SentenceTransformer
+# import/load can exceed 60s on some hardware. Defaults raised to 120s to prevent
+# false "not found" results when semantic engine simply didn't load in time.
+HOLO_MODEL_IMPORT_TIMEOUT = float(os.getenv("HOLO_MODEL_IMPORT_TIMEOUT", "120"))  # 120s default (cold import)
+HOLO_MODEL_LOAD_TIMEOUT = float(os.getenv("HOLO_MODEL_LOAD_TIMEOUT", "120"))      # 120s default (cold model load)
+HOLO_ENCODE_TIMEOUT = float(os.getenv("HOLO_ENCODE_TIMEOUT", "3"))                # 3s default (per-query)
+HOLO_SEARCH_TIMEOUT = float(os.getenv("HOLO_SEARCH_TIMEOUT", "15"))               # 15s default
 
 
 def _run_with_timeout(func, timeout_sec: float, default=None, error_msg: str = "Operation timed out",
@@ -103,7 +106,11 @@ def _run_with_timeout(func, timeout_sec: float, default=None, error_msg: str = "
         try:
             return future.result(timeout=timeout_sec)
         except FuturesTimeoutError:
-            logger.warning(f"{error_msg} (>{timeout_sec}s). Try HOLO_SKIP_MODEL=1 or HOLO_OFFLINE=1")
+            logger.warning(
+                f"{error_msg} (>{timeout_sec}s). "
+                f"Semantic search will be unavailable. "
+                f"Raise HOLO_MODEL_IMPORT_TIMEOUT/HOLO_MODEL_LOAD_TIMEOUT or rerun after model warmup."
+            )
             return default
         except (ImportError, ModuleNotFoundError) as e:
             # Missing dependency - distinct from timeout
