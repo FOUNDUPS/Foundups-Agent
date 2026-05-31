@@ -265,7 +265,7 @@ outputs:
 | Category | Meaning | Action |
 |----------|---------|--------|
 | **SAFE_READ_ONLY** | No file mutation; reads and analysis only | Proceed immediately |
-| **SAFE_DOCS_ONLY** | Only docs/audit files written; no code/test/config mutation | Proceed with docs-only constraints |
+| **SAFE_DOCS_ONLY** | Only docs/audit files written **on a governance-open surface**; no code/test/config mutation | Proceed with docs-only constraints |
 | **REQUIRES_REOPEN_CRITERION** | Touches closed governance surface; explicit criterion citation required | Defer until architect issues re-open packet citing specific criterion |
 | **REQUIRES_IMPLEMENTATION_APPROVAL** | Implementation work that passes governance but needs explicit architect approval | Defer until architect approval |
 | **BLOCKED** | No valid path exists; violates hard constraints or depends on blocked work | Reject; do not attempt |
@@ -281,7 +281,11 @@ Is any code file mutated?
 |   |   +-- NO:
 |   |   |   Is any doc file created/mutated?
 |   |   |   +-- NO -> SAFE_READ_ONLY
-|   |   |   +-- YES -> SAFE_DOCS_ONLY
+|   |   |   +-- YES:
+|   |   |       Is the doc on a governance-closed surface?
+|   |   |       (e.g. a closed FoundUp's ROADMAP.md / governance doc)
+|   |   |       +-- NO -> SAFE_DOCS_ONLY
+|   |   |       +-- YES -> REQUIRES_REOPEN_CRITERION (must cite criterion)
 |   |   +-- YES -> REQUIRES_IMPLEMENTATION_APPROVAL
 |   +-- YES -> Check governance closure
 +-- YES:
@@ -296,6 +300,8 @@ Is any code file mutated?
             +-- NO -> BLOCKED
 ```
 
+**Closure-before-docs rule:** A doc edit is *not* automatically `SAFE_DOCS_ONLY`. Per #735 Section 6.2 (H1), mutating a governance-closed FoundUp's `ROADMAP.md` is `REQUIRES_REOPEN_CRITERION`, because #715 prohibits Vote docs mutation without a re-open packet. The tree therefore tests governance closure *before* admitting a doc edit to `SAFE_DOCS_ONLY`. Without this check, a closed-surface ROADMAP edit would wrongly auto-pass — the exact hole this gate must prevent.
+
 ### 7.3 Gate Enforcement Points
 
 | Checkpoint | Gate | Blocker If Fails |
@@ -309,30 +315,34 @@ Is any code file mutated?
 
 ## 8. Vote V1-V8 Mapping to Generic Governance Categories
 
-The Vote PoC V1-V8 re-open criteria map to the generic gate as follows:
+Per #715 Section 7, **all** V1-V8 are re-open criteria, each with a named required architect packet (`#715: "Any future Vote work must cite one of these criteria and create a new architect packet"`). None of them is a terminal block — every Vote criterion maps to `REQUIRES_REOPEN_CRITERION` with a defined `reopen_path`. Criterion names and packets below are quoted faithfully from #715 Section 7.
 
-| Vote Criterion | Generic Category | Triggered By |
-|----------------|------------------|--------------|
-| V1: Live FEC API activation | REQUIRES_REOPEN_CRITERION | Network calls to external API |
-| V2: Public route or entry_url activation | REQUIRES_REOPEN_CRITERION | Route handlers, entry_url change |
-| V3: Registry/entity promotion | REQUIRES_REOPEN_CRITERION | Registry/catalog changes |
-| V4: Persuasion/recommendation/targeting | BLOCKED | Political safety violation (no re-open path) |
-| V5: Confidence rule change | REQUIRES_REOPEN_CRITERION | Algorithm mutation |
-| V6: LLM/new facts in answers | REQUIRES_REOPEN_CRITERION | LLM integration, prose expansion |
-| V7: CABR/payout/DAO claim | BLOCKED | Governance activation (systemic risk) |
-| V8: Shell contract change | REQUIRES_REOPEN_CRITERION | Integration contract mutation |
+| Vote Criterion (#715 verbatim) | Generic Category | Re-Open Path (#715 packet) |
+|--------------------------------|------------------|----------------------------|
+| V1: Live FEC API activation | REQUIRES_REOPEN_CRITERION | `VOTE_POC_LIVE_FEC_BOUNDARY_PHASE1` |
+| V2: Public route or entry_url activation | REQUIRES_REOPEN_CRITERION | `VOTE_POC_PUBLIC_ROUTE_ACTIVATION_PHASE1` |
+| V3: Registry/entity promotion | REQUIRES_REOPEN_CRITERION | `VOTE_POC_REGISTRY_PROMOTION_PHASE1` |
+| V4: Persuasion/recommendation/targeting language | REQUIRES_REOPEN_CRITERION | `VOTE_POC_POLITICAL_SAFETY_REVIEW_PHASE1` |
+| V5: Confidence rule or human-review trigger change | REQUIRES_REOPEN_CRITERION | `VOTE_POC_CONFIDENCE_RULE_REVIEW_PHASE2` |
+| V6: Quick-answer new facts, LLM, or prose expansion | REQUIRES_REOPEN_CRITERION | `VOTE_POC_ANSWER_GENERATION_BOUNDARY_PHASE2` |
+| V7: Manifest/catalog/projection/CABR/payout/DAO claim | REQUIRES_REOPEN_CRITERION | `VOTE_POC_GOVERNANCE_BOUNDARY_PHASE1` |
+| V8: Shell payload contract or namespace change | REQUIRES_REOPEN_CRITERION | `VOTE_POC_SHELL_CONTRACT_PHASE2` |
+
+**Concrete file bindings (from #735 Section 5):** V5 binds to `confidence_scoring.py` mutation; V8 binds to `shell_integration.py` mutation. The generic categories above abstract these for cross-FoundUp reuse; the concrete bindings remain authoritative for the Vote surface itself.
+
+**Re-open vs BLOCKED (correction):** A Vote criterion is never `BLOCKED`. `BLOCKED` (Section 7.1) is reserved for proposals with *no* valid criterion path. Because every V1-V8 entry names a packet, the correct classification for all of them is `REQUIRES_REOPEN_CRITERION` — defer pending an architect-issued re-open packet, not reject. (See §16.3 Post-Verification Corrections.)
 
 ### 8.1 Generalization to Other FoundUps
 
-Any governance-closed FoundUp can define its own Vn criteria following this pattern:
+Any governance-closed FoundUp can define its own Vn criteria following this pattern. `BLOCKED` applies only when a proposed change can cite no valid criterion at all (e.g. a hard-constraint violation); a named criterion always implies a `reopen_path`:
 
 ```yaml
 criteria_template:
   id: "V{n}"
   name: "{descriptive_name}"
   triggers_on: "{file_pattern or action_type}"
-  classification: REQUIRES_REOPEN_CRITERION | BLOCKED
-  reopen_path: "{required_packet_name}" | null
+  classification: REQUIRES_REOPEN_CRITERION   # BLOCKED only if no criterion can apply
+  reopen_path: "{required_packet_name}"        # null only for genuine BLOCKED
 ```
 
 ---
@@ -365,19 +375,20 @@ Workers MUST execute sequentially when:
            +--------+--------+
                     |
                     v
-           +--------+--------+
+           +--------+---------+
            | governance_worker|
+           +--------+---------+
+                    |
+                    v
+           +--------+--------+
+           |implementation_  |
+           |planner          |
            +--------+--------+
                     |
-         +----------+----------+
-         |                     |
-         v                     v
-+--------+--------+   +--------+--------+
-|implementation_  |   | critic_worker   |
-|planner          |   | (parallel)      |
-+--------+--------+   +--------+--------+
-         |                     |
-         +----------+----------+
+                    v
+           +--------+--------+
+           | critic_worker   |   <- requires implementation_plan (Contract 6.4)
+           +--------+--------+
                     |
                     v
            +--------+--------+
@@ -390,7 +401,9 @@ Workers MUST execute sequentially when:
            +-----------------+
 ```
 
-**Note**: implementation_planner and critic_worker CAN execute in parallel if critic operates on governance output directly. However, critic operating on implementation plan requires sequential execution.
+**Note (sequencing rationale):** `critic_worker` Contract 6.4 declares `implementation_plan` and `dag` as **required** inputs (from `implementation_planner`). By Section 9.2 rule 1 (output dependency), this forces `critic_worker` to run **sequentially after** `implementation_planner` — it cannot be parallel with it. The canonical DAG above is therefore linear through the plan→critic edge.
+
+**Optional early-critique variant:** If a deployment wants to parallelize, it may split the critic into (a) a lightweight *governance pre-critique* that consumes only `governance_worker` output (and so MAY run parallel with `implementation_planner`), and (b) the full `critic_worker` that consumes the plan (sequential). The single `critic_worker` contract as specified in Section 6.4 is the sequential form; the parallel split is a future optimization, not the canonical contract.
 
 ---
 
@@ -448,6 +461,8 @@ Workers MUST execute sequentially when:
 | **DAG node validity assumed** | Planner builds DAG without governance check | HIGH | HIGH | governance_worker MUST run before implementation_planner |
 | **Confabulation in retrieval** | discovery_worker invents file paths | MEDIUM | MEDIUM | All paths must be verified via glob/read; no assumed paths |
 | **Criterion stretching** | Worker cites loosely-applicable criterion to bypass block | MEDIUM | HIGH | Architect must approve re-open citations; worker cannot self-approve |
+
+**Structure:** Rows 1-7 are the **baseline orchestration failure modes** (the canonical governance scenarios: overclaim, stale context, hidden mutation, docs-only laundering, governance bypass, circular approval, parallel-branch racing). Rows 8-10 (**DAG node validity assumed**, **Confabulation in retrieval**, **Criterion stretching**) are **critic-augmented** modes surfaced during adversarial review — supplementary, not part of the baseline 7.
 
 ### 11.2 Mitigation Implementation Priority
 
@@ -579,17 +594,29 @@ Rationale:
 
 ### 16.2 Internal Review Verdict
 
-**READY**
+**READY** (post-verification; see §16.3).
 
 Analysis demonstrates:
 - Opus 4.8 probe precedent extracted and generalized
 - 6 canonical worker roles defined with contracts
 - 5-category pre-implementation gate specified
-- Vote V1-V8 mapped to generic model
-- 10 failure modes identified with mitigations
+- Vote V1-V8 mapped to generic model (faithful to #715 — all re-openable)
+- 10 failure modes identified with mitigations (7 baseline + 3 critic-augmented)
 - 6 reusable templates proposed
 - 6 candidate SKILLz identified
 - Safest next slice recommended
+
+### 16.3 Post-Verification Corrections
+
+This analysis was put through an adversarial verification pass (4 independent dimension auditors + confirmation agents) before merge. The following defects were found and corrected in-place; the audit doc is the slice deliverable, so correcting it is within the READ_ONLY_ANALYSIS scope (single file, no Vote/code/WSP mutation).
+
+| # | Severity | Defect | Correction |
+|---|----------|--------|------------|
+| 1 | BLOCKER | §8 classified V4 and V7 as `BLOCKED (no re-open path)`, contradicting #715 §7 which defines all V1-V8 as re-open criteria with named packets | Reclassified all V1-V8 to `REQUIRES_REOPEN_CRITERION`; added faithful `reopen_path` column quoting the #715 packet names |
+| 2 | MAJOR | §7.2 gate routed a governance-closed `ROADMAP.md` doc-edit to `SAFE_DOCS_ONLY`, but #735 §6.2 (H1) classifies that as `REQUIRES_REOPEN_CRITERION` | Added a governance-closure check before the docs branch; tightened the `SAFE_DOCS_ONLY` definition to "governance-open surface" |
+| 3 | MAJOR | §9.3 DAG showed `critic_worker` parallel to `implementation_planner`, but critic Contract 6.4 requires `implementation_plan` as input (self-contradiction) | Redrew the DAG linear (planner → critic); documented the sequencing rationale and an optional parallel-split variant |
+| 4 | MINOR | §8 V7 trigger silently narrowed (dropped `manifest/catalog/projection`); V5/V8 lost concrete file bindings | Restored verbatim #715 criterion text; added the #735 `confidence_scoring.py` / `shell_integration.py` bindings |
+| 5 | PARTIAL | §18.3 / §18.5 answered reusability and "what next" as bare re-lists | Rewrote §18.3 (contract-vs-instantiation, ranked by reuse value) and §18.5 (single recommended first artifact + dependency-ordered SKILLz tie-break) |
 
 ---
 
@@ -652,13 +679,20 @@ Opus 4.8 correctly:
 
 ### 18.3 What worker roles are reusable?
 
-6 roles defined in Section 5:
-1. discovery_worker
-2. governance_worker
-3. implementation_planner
-4. critic_worker
-5. audit_worker
-6. W10_gate_worker
+The distinction is **contract vs instantiation** (cross-ref Section 10.2: "Worker contracts | YES | reusable"). All 6 role *contracts* (Section 6) are reusable across any governance-closed FoundUp; the per-slice *instantiations* (the specific files, criteria, and findings a worker produces) are NOT reusable and stay in the current slice's audit doc.
+
+Ranked by cross-slice reuse value:
+
+| Role | Contract reusable? | Reuse value | Why |
+|------|--------------------|-------------|-----|
+| governance_worker | YES | HIGHEST | Gate logic + V1-Vn mapping generalizes to every closed surface |
+| critic_worker | YES | HIGH | Failure-mode catalog is FoundUp-agnostic |
+| W10_gate_worker | YES | HIGH | Merge-gate evidence rules are universal |
+| discovery_worker | YES | MEDIUM | Query set is slice-specific; retrieval-eval structure reuses |
+| audit_worker | YES | MEDIUM | Doc skeleton reuses; content is per-slice |
+| implementation_planner | YES | MEDIUM | DAG shape reuses; node set is per-slice |
+
+Slice-specific (NOT reusable): the concrete governance_snapshot, the chosen queries, and the audit findings of any single run.
 
 ### 18.4 What pre-implementation gate prevents governance violations?
 
@@ -673,8 +707,18 @@ Enforcement at 4 checkpoints: pre-dispatch, post-plan, pre-commit, pre-merge.
 
 ### 18.5 What templates or SKILLz should be created next?
 
-**Templates** (Section 12): 6 templates proposed
-**SKILLz** (Section 13): 6 candidates proposed
+**Single recommended first artifact** (consistent with Section 15.3): extract the **`pre_implementation_gate_template`** (Section 12, gate decision tree) first. It is the highest-leverage, lowest-risk artifact — `SAFE_DOCS_ONLY`, it encodes the governance check every other worker depends on, and the BLOCKER/MAJOR corrections in this slice (§16.3) prove the gate is the load-bearing component. The `worker_contract_template` follows second.
+
+**SKILLz priority order** (breaking the 4-way P1 tie by dependency order — each worker can only be prototyped once the artifacts it consumes exist):
+
+1. `orchestration_governance_classifier` (P1) — gate logic; every other worker depends on its classifications
+2. `orchestration_w10_gate` (P1) — merge-time enforcement; guards all output
+3. `orchestration_critic` (P1) — adversarial check; depends on a plan to critique
+4. `orchestration_discovery` (P1) — retrieval; useful standalone but lowest blocking-risk
+5. `orchestration_dag_planner` (P2)
+6. `orchestration_audit_generator` (P2)
+
+**Templates** (Section 12): 6 proposed. **SKILLz** (Section 13): 6 candidates. Both deferred to WSP 95 / template-extraction slices (no creation in this slice).
 
 ### 18.6 What is the next safest implementation-adjacent slice?
 
