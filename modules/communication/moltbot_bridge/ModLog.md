@@ -1,5 +1,35 @@
 # ModLog - moltbot_bridge
 
+## 2026-06-01: WSP 109 Onboarding Characterization Tests (W6)
+
+**Author**: 0102 (Worker-Lane W6)
+**WSP**: 97 (Truth Boundary), 109 (FoundUp Onboarding Intake)
+**Slice**: `OPENCLAW_WSP109_ONBOARDING_DRYRUN_TEST_PHASE1`
+**Predecessor**: #737 OPUS_4_8_OPENCLAW_INTERNAL_MODEL_PROBE_PHASE1
+
+### Summary
+
+Characterization-only test slice capturing CURRENT OpenClaw behaviour around WSP 109
+onboarding and FOUNDUP routing as executable evidence. **No fixes.** The #737 gaps are
+locked as strict xfail remediation contracts.
+
+### Files
+- NEW `tests/test_openclaw_wsp109_onboarding_dryrun.py` (11 tests: 7 PASS, 4 strict xfail)
+- NEW `docs/audits/architecture/OPENCLAW_WSP109_ONBOARDING_DRYRUN_TEST_PHASE1.md`
+
+### Current behaviour locked
+- WSP 109 `onboard` is not an intake/build trigger → FAM passthrough, no genesis gate
+- `dispatch_foundup` never invokes `validate_genesis_envelope`
+- `create foundup X` (FAM passthrough) vs `create foundup job` (queue dry-run) **diverge**
+- `validate_and_remember` self-approves; no W10 handoff
+- Protected-path edit remains fail-closed **BLOCKED** (PASS, preserved from #737 S5)
+
+### Constraints
+No production/source code change. 4 strict xfails cite #737 + remediation slice
+`OPENCLAW_WSP109_GENESIS_GATE_REMEDIATION_PHASE1`. WSP_97 Truth Boundary: 26/26 YES.
+
+---
+
 ## 2026-05-13: ROC_CANDIDATE Observability Metric (WSP 97)
 
 **Author**: 0102 (Worker W1)

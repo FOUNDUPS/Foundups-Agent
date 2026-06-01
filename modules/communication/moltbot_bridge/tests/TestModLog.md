@@ -1,3 +1,25 @@
+## 2026-06-01: WSP 109 Onboarding Dry-Run Characterization Tests (W6)
+
+**File**: `test_openclaw_wsp109_onboarding_dryrun.py` (NEW - 11 tests: 7 passed, 4 strict xfail)
+**Slice**: `OPENCLAW_WSP109_ONBOARDING_DRYRUN_TEST_PHASE1` | **Predecessor**: #737
+
+**Test Classes**:
+- `TestWSP109OnboardingClassification`: `onboard` prompt is not an intake/build trigger (1 PASS + 1 xfail)
+- `TestFoundupGenesisGateVisibility`: `dispatch_foundup` bypasses the genesis validator (2 PASS + 1 xfail)
+- `TestDualParserAmbiguity`: `create foundup X` vs `create foundup job` diverge (1 PASS + 1 xfail)
+- `TestW10HandoffAbsence`: `validate_and_remember` self-approves, no W10 handoff (1 PASS + 1 xfail)
+- `TestProtectedPathRemainsBlocked`: protected-path edit fail-closed BLOCKED (2 PASS — #737 S5)
+
+**Determinism**: pure-function + `inspect.getsource` + `MagicMock`. No live process, network, `.env`, or model calls.
+
+**Run**: `python -m pytest modules/communication/moltbot_bridge/tests/test_openclaw_wsp109_onboarding_dryrun.py -q`
+
+**Result**: 7 passed, 4 xfailed. With adjacent `test_openclaw_foundup_orchestrator.py`: 29 passed, 4 xfailed, **0 failed** (no downstream pollution introduced).
+
+**Pre-existing note (not this slice)**: `test_openclaw_foundup_routing.py` + `test_openclaw_foundup_orchestrator.py` together → 8 failed — pre-existing `importlib.reload` pollution from the routing file (reproduces without this slice; out of scope; flagged for the remediation slice).
+
+---
+
 ## 2026-05-13: ROC_CANDIDATE Observability Metric Tests (WSP 97)
 
 **File**: `test_roc_candidate_metrics.py` (NEW - 57 tests)
