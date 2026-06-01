@@ -44,6 +44,7 @@ _FOUNDUP_BUILD_WORDS = (
     "start building",
     "build foundup",
     "build this foundup",
+    "create foundup",
     "create foundup job",
     "queue foundup job",
     "hermes build",
@@ -134,6 +135,50 @@ def _is_explicit_build_intent(message: str) -> bool:
     """
     msg_lower = message.lower().strip()
     return any(phrase in msg_lower for phrase in _FOUNDUP_BUILD_WORDS)
+
+
+_FOUNDUP_LAUNCH_ONBOARD_PHRASES = (
+    "onboard",
+    "launch foundup",
+    "launch this foundup",
+    "go live",
+)
+"""Phrases that trigger the WSP 109 genesis gate before any FAM launch.
+
+These would otherwise reach a real ``fam_adapter.launch_foundup`` via FAM
+passthrough and so MUST pass genesis validation first. Build/queue phrases
+(``_FOUNDUP_BUILD_WORDS``) are handled separately as safe dry-run queue intents
+that do not launch.
+"""
+
+
+def _is_foundup_launch_or_onboard_intent(message: str) -> bool:
+    """Detect WSP 109 onboarding / FoundUp launch intents.
+
+    Returns True for prompts that would otherwise reach a real FAM launch via
+    passthrough (e.g. "launch foundup Shield with token SHLD", "Follow WSP 109 and
+    onboard a FoundUp called Shield"). Such intents are routed through the genesis
+    gate by ``dispatch_foundup`` rather than launched directly.
+    """
+    msg_lower = message.lower().strip()
+    return any(phrase in msg_lower for phrase in _FOUNDUP_LAUNCH_ONBOARD_PHRASES)
+
+
+def _extract_envelope_data(intent: Any) -> Dict[str, Any]:
+    """Extract a genesis envelope dict from an intent, if present.
+
+    Chat/voice prompts do NOT carry a structured FoundUpGenesisEnvelope; a future
+    WSP 109 intake packet would populate ``intent.payload['genesis_envelope']``.
+    Returns ``{}`` when no structured envelope exists, which the genesis gate treats
+    as ``NO_ENVELOPE`` (NOT_READY). Defensive against mock intents: only a real
+    ``dict`` payload/envelope is honoured.
+    """
+    payload = getattr(intent, "payload", None)
+    if isinstance(payload, dict):
+        envelope = payload.get("genesis_envelope")
+        if isinstance(envelope, dict):
+            return envelope
+    return {}
 
 
 def _extract_foundup_id(message: str) -> Optional[str]:
@@ -754,30 +799,88 @@ def validate_genesis_before_execution(
 # -----------------------------------------------------------------------------
 
 
+def _genesis_gate_handoff(intent: Any, gate_result: GenesisGateResult) -> str:
+    """Return a NOT_READY W10 handoff for an ungated launch/onboard intent.
+
+    The genesis gate blocked execution (no valid envelope). Rather than launching,
+    OpenClaw returns a structured W10 NOT_READY packet to 012 with the required next
+    action: create a WSP 109 genesis intake packet. This does NOT launch, mutate, or
+    self-approve, and never reaches ``fam_adapter.launch_foundup``.
+    """
+    from .openclaw_result_memory import build_w10_handoff
+
+    remediation = get_orchestrator()._suggest_remediation(gate_result)
+    handoff = build_w10_handoff(
+        status="NOT_READY",
+        reason=f"genesis_gate_blocked: {gate_result.reason.value}",
+        required_wsp="WSP_109",
+        required_artifacts=["FoundUpGenesisEnvelope (WSP 109 intake packet)"],
+        suggested_next_slice="OPENCLAW_WSP109_GENESIS_GATE_REMEDIATION_PHASE1",
+        blocked_execution=True,
+    )
+    logger.info(
+        "[OPENCLAW-FOUNDUP-ORCH] genesis_gate_handoff | status=%s reason=%s sender=%s",
+        handoff["status"],
+        gate_result.reason.value,
+        getattr(intent, "sender", "unknown"),
+    )
+    steps = "\n".join(f"  - {s}" for s in remediation)
+    return (
+        "FoundUp launch/onboarding is NOT_READY (WSP 109 genesis gate).\n"
+        f"  status: {handoff['status']}\n"
+        f"  reason: {gate_result.reason.value}\n"
+        f"  required_wsp: {handoff['required_wsp']}\n"
+        f"  blocked_execution: {handoff['blocked_execution']}\n"
+        "  required next action: create a WSP 109 FoundUp genesis intake packet, "
+        "then retry.\n"
+        f"{steps}"
+    )
+
+
 def dispatch_foundup(dae: Any, intent: Any) -> str:
     """
     Dispatch FOUNDUP intent through orchestrator entrypoint.
 
     Phase 2: Detects explicit build intent and creates typed FoundUpJob.
-    Advisory/catalog queries still route to FAM passthrough.
+    Launch/onboard intents pass through the WSP 109 genesis gate before any FAM
+    launch. Advisory/catalog queries still route to FAM passthrough.
 
-    WSP 97 Note: This dispatch does NOT claim genesis validation is enforced.
-    Genesis gate (OC3) is available but not mandatory until Phase 3.
+    WSP 109 enforcement (#737 S1 / 9.1#1 remediation): onboarding and launch
+    intents must pass ``validate_genesis_envelope`` before reaching
+    ``fam_adapter.launch_foundup``. A chat prompt carries no genesis envelope, so
+    the gate returns NOT_READY and dispatch emits a W10 handoff instead of
+    launching.
 
     Args:
         dae: OpenClawDAE instance
         intent: Classified OpenClawIntent
 
     Returns:
-        Response string from FAM adapter or job creation confirmation
+        Response string: job creation confirmation, NOT_READY genesis handoff, or
+        FAM advisory response.
     """
     raw_message = intent.raw_message
 
-    # Phase 2: Check for explicit build intent
+    # Phase 2: explicit build/create/queue intents -> typed FoundUpJob (QUEUED,
+    # dry-run; no launch). Safe intake path; never calls fam_adapter.launch_foundup.
     if _is_explicit_build_intent(raw_message):
         return _handle_build_intent(intent)
 
-    # Phase 1 preserved: Advisory/catalog queries route to FAM
+    # WSP 109 genesis gate: onboarding / launch intents must pass genesis envelope
+    # validation BEFORE any FAM launch handoff (#737 S1 / 9.1#1). With no envelope in
+    # a chat prompt, validate_genesis_envelope returns NO_ENVELOPE -> NOT_READY W10
+    # handoff. Closes the FOUNDUP permission/genesis bypass.
+    if _is_foundup_launch_or_onboard_intent(raw_message):
+        gate_result = get_orchestrator().validate_genesis_envelope(
+            _extract_envelope_data(intent),
+            actor_id=getattr(intent, "sender", "openclaw"),
+        )
+        if not gate_result.allowed:
+            return _genesis_gate_handoff(intent, gate_result)
+        # Envelope valid -> proceed through the gated build/launch path.
+        return _handle_build_intent(intent)
+
+    # Phase 1 preserved: Advisory/catalog queries route to FAM (no mutation).
     route_decision = {"route": "fam_adapter", "reason": "advisory_passthrough"}
 
     logger.info(

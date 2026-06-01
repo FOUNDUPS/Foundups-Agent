@@ -1,3 +1,25 @@
+## 2026-06-01: WSP 109 Genesis Gate Remediation Tests (W6)
+
+**File**: `test_openclaw_wsp109_onboarding_dryrun.py` (REWRITTEN - 10 tests, 0 xfail)
+**Slice**: `OPENCLAW_WSP109_GENESIS_GATE_REMEDIATION_PHASE1` | **Predecessors**: #737, #738
+
+The 4 strict-xfail contracts from #738 are CONVERTED to passing assertions (gaps fixed):
+- `TestWSP109OnboardingGated`: onboard recognised + dispatch returns NOT_READY handoff (no FAM call)
+- `TestFoundupGenesisGate`: `validate_genesis_envelope` wired into dispatch; `launch foundup` gated (not passthrough)
+- `TestDualParserConverged`: `create foundup X` == `create foundup job` (both → dry-run queue, no launch)
+- `TestW10Handoff`: `validate_and_remember` emits W10 handoff; `build_w10_handoff` packet shape + status normalisation
+- `TestProtectedPathRemainsBlocked`: unchanged (2 PASS, #737 S5)
+
+**Hygiene**: `test_openclaw_foundup_routing.py` reload pollution removed.
+
+**Determinism**: pure-function + `inspect.getsource` + MagicMock; `validate_genesis_envelope({})` short-circuits before validator load. No live process/network/.env/model.
+
+**Run**: `pytest test_openclaw_wsp109_onboarding_dryrun.py test_openclaw_foundup_routing.py test_openclaw_foundup_orchestrator.py -q`
+
+**Result**: **59 passed, 0 failed, 0 xfail** (adjacent combined run was `8 failed` pre-fix). 4 pre-existing dae/runtime failures verified on clean main (stashed) — out of scope.
+
+---
+
 ## 2026-06-01: WSP 109 Onboarding Dry-Run Characterization Tests (W6)
 
 **File**: `test_openclaw_wsp109_onboarding_dryrun.py` (NEW - 11 tests: 7 passed, 4 strict xfail)

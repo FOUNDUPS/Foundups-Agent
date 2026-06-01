@@ -42,20 +42,18 @@ class TestFoundupDispatch:
         mock_fam_adapter = MagicMock()
         mock_fam_adapter.handle_fam_intent = MagicMock(return_value="CABR response")
 
+        from modules.communication.moltbot_bridge.src import (
+            openclaw_foundup_orchestrator,
+        )
+
+        # dispatch_foundup imports fam_adapter at call-time, so patching sys.modules
+        # is sufficient. NO importlib.reload: reloading the orchestrator under a
+        # mocked fam_adapter pollutes the module for downstream tests (the
+        # pre-existing cross-file pollution flagged in PR #738 audit s6).
         with patch.dict(
             sys.modules,
             {"modules.communication.moltbot_bridge.src.fam_adapter": mock_fam_adapter},
         ):
-            # Force reimport to pick up the mocked module
-            from modules.communication.moltbot_bridge.src import (
-                openclaw_foundup_orchestrator,
-            )
-
-            # Clear module cache to force fresh import in dispatch
-            import importlib
-
-            importlib.reload(openclaw_foundup_orchestrator)
-
             result = openclaw_foundup_orchestrator.dispatch_foundup(
                 mock_dae, mock_intent
             )

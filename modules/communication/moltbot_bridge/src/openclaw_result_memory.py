@@ -6,9 +6,37 @@ import json
 import logging
 import uuid
 from datetime import datetime
-from typing import Any, List
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger("openclaw_dae")
+
+
+def build_w10_handoff(
+    status: str,
+    reason: str,
+    required_wsp: str = "WSP_109",
+    required_artifacts: Optional[List[str]] = None,
+    suggested_next_slice: Optional[str] = None,
+    blocked_execution: bool = True,
+) -> Dict[str, Any]:
+    """Build a structured W10 READY/NOT_READY handoff packet.
+
+    Replaces validate-and-remember self-approval for implementation-bound work.
+    A NOT_READY packet means execution is blocked pending the named artifacts; it
+    does NOT claim W10 approval automatically. ``status`` is normalised to
+    'READY' or 'NOT_READY'.
+    """
+    if status not in ("READY", "NOT_READY"):
+        status = "NOT_READY"
+    return {
+        "kind": "w10_handoff",
+        "status": status,
+        "reason": reason,
+        "required_wsp": required_wsp,
+        "required_artifacts": list(required_artifacts or []),
+        "suggested_next_slice": suggested_next_slice,
+        "blocked_execution": bool(blocked_execution),
+    }
 
 
 def validate_and_remember(
@@ -93,6 +121,31 @@ def validate_and_remember(
         wsp_violations=wsp_violations,
         learning_stored=learning_stored,
     )
+
+    # WSP 109 / W10: implementation-bound FOUNDUP outcomes must NOT self-approve.
+    # Attach a W10 READY/NOT_READY handoff packet instead of an auto-success flag.
+    # success above only reflects "a valid response was produced", never launch
+    # approval; the handoff carries the real gate verdict for downstream W10.
+    category_value = getattr(getattr(plan.intent, "category", None), "value", "")
+    if category_value == "foundup":
+        w10 = build_w10_handoff(
+            status="NOT_READY",
+            reason="FOUNDUP work requires a WSP 109 genesis handoff, not self-approval",
+            required_wsp="WSP_109",
+            required_artifacts=["FoundUpGenesisEnvelope"],
+            suggested_next_slice="OPENCLAW_WSP109_GENESIS_GATE_REMEDIATION_PHASE1",
+            blocked_execution=True,
+        )
+        try:
+            setattr(result, "w10_handoff", w10)
+        except Exception:
+            pass
+        logger.info(
+            "[OPENCLAW-DAE] W10 handoff emitted: status=%s blocked_execution=%s "
+            "(no self-approval for FOUNDUP)",
+            w10["status"],
+            w10["blocked_execution"],
+        )
 
     logger.info(
         "[OPENCLAW-DAE] Result: success=%s fidelity=%.2f time=%dms violations=%d "
