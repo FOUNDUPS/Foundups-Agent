@@ -1,5 +1,42 @@
 # ModLog - moltbot_bridge
 
+## 2026-06-01: WSP 109 Genesis Gate Remediation (W6)
+
+**Author**: 0102 (Worker-Lane W6)
+**WSP**: 97 (Truth Boundary), 109 (FoundUp Onboarding Intake), 84 (Code Reuse)
+**Slice**: `OPENCLAW_WSP109_GENESIS_GATE_REMEDIATION_PHASE1`
+**Predecessors**: #737 (probe), #738 (characterization xfails)
+
+### Summary
+
+Closes the #737/#738 WSP 109 onboarding governance gaps by **patching OpenClaw's existing
+dispatch** — no second orchestration layer. Reuses the existing
+`OpenClawFoundUpOrchestrator.validate_genesis_envelope` gate (WSP 84).
+
+### Changes
+- `src/openclaw_foundup_orchestrator.py`: genesis gate wired into `dispatch_foundup`;
+  `_is_foundup_launch_or_onboard_intent` + `_extract_envelope_data` + `_genesis_gate_handoff`;
+  bare `create foundup` added to `_FOUNDUP_BUILD_WORDS` (parser convergence).
+- `src/openclaw_result_memory.py`: `build_w10_handoff` + W10 NOT_READY handoff for FOUNDUP
+  outcomes (replaces self-approval).
+- `tests/test_openclaw_wsp109_onboarding_dryrun.py`: 4 strict xfails → passing assertions
+  + behavioural tests (10 passed, 0 xfail).
+- `tests/test_openclaw_foundup_routing.py`: removed harmful `importlib.reload`
+  (pre-existing cross-file pollution fixed).
+
+### Behaviour
+- `launch foundup ...` / `onboard ... foundup` → genesis gate → **NOT_READY** W10 handoff
+  (no FAM launch). Closes the FOUNDUP permission/genesis bypass.
+- `create foundup X` and `create foundup job for X` converge on the safe dry-run queue.
+- FOUNDUP outcomes carry a W10 handoff instead of self-approving.
+
+### Tests
+59 passed across the 3 foundup test files (adjacent routing+orchestrator was `8 failed`
+pre-fix → now 0). 4 pre-existing dae/runtime failures verified on clean main (stashed) —
+out of scope. WSP_97 Truth Boundary: 24/24 YES.
+
+---
+
 ## 2026-06-01: WSP 109 Onboarding Characterization Tests (W6)
 
 **Author**: 0102 (Worker-Lane W6)
