@@ -215,6 +215,54 @@ Declared count: **18 / 18 YES** (rows below = 18).
 
 ---
 
+## Addendum — PolicyFlags Write-Back Seam Found During Adversarial Review
+
+This audit remains valid for HXA26/HXA27 stranded-work disposition, but adversarial review
+(an independent multi-agent re-audit) found a mainline seam **not covered by the original
+primitive matrix (§5)**: inbound `policy_flags` are deserialized from the job payload and read
+by the `hermes_job_executor` security/destructive-action gates, while the capability-token
+validator verdict is **not written back** before those gates read the flags.
+
+**Verified on `origin/main` @ `e8715387d`:**
+- The destructive-action guard's token gate reads four flags **read-only** —
+  `policy_flags.capability_token_checked / present / validated / scope_authorized`
+  (`hermes_job_executor.py:1134-1137`); these are the *only* references, and there are
+  **zero `policy_flags.capability_token_* =` write-backs** anywhere in the executor.
+- `security_gate_passed` is likewise taken from the inbound flags (`:1090`).
+- `PolicyFlags` fields default `False` and are populated from untrusted job data via `from_dict`
+  (`foundup_job_contract.py:226-235`, `:271-274`, job deserialized at `:613`).
+- `_validate_token_if_present` (`:1254`) performs validation but does **not** write its
+  `TokenValidationResult` into `job.policy_flags`.
+- **Consequence:** a tokenless job arriving with `capability_token_*` + `security_gate_passed`
+  pre-set `True` clears the guard's token gate with **no validation ever running**.
+
+**Bounded impact (also verified):** D4/D5/D6 are unconditionally blocked in Phase 1, and
+`workspace_binding` / `path_constraints` are server-built (`:838`, `:1124-1127`), so the seam is
+scoped to **D3_WRITE_SANDBOX**. End-to-end exploitability depends on the job-ingestion trust
+boundary, which this audit did **not** trace.
+
+**Effect on disposition:** This does **not** invalidate the removal disposition for the four
+stranded worktrees (§9). It **does** mean the `a7eb1c4` validator→`policy_flags` write-back is
+not irrelevant — it is the pattern that remediates this seam. Reclassify that write-back as
+**`SALVAGE_PATTERN_TO_FOLLOWUP`**: a pattern to re-implement on main's current HXA30 base, **not**
+production code to preserve from the worktree (whose draft is stale and likely production-unreachable).
+
+**Follow-up slice:** `HXA_POLICYFLAGS_WRITEBACK_ENFORCEMENT_AUDIT_PHASE1`
+
+Required question:
+> Can any untrusted or semi-trusted job ingress pre-set `policy_flags.capability_token_*` or
+> `security_gate_passed` such that D3_WRITE_SANDBOX clears without live validation?
+
+Expected remediation shape if confirmed:
+> Zero inbound token/security flags before validation, run the validator, write the validator
+> verdict into `policy_flags`, then allow the destructive/security gates to read only
+> server-authored flags.
+
+*This addendum records a verified caveat surfaced after the original disposition; it does not
+expand #744 into remediation (no code). Engineering only — no 012 ruling requested.*
+
+---
+
 *Authored by 0102 (Worker-Lane W6) under WSP_00 zen state and WSP_97 Truth Boundary discipline.
 Read-only comparison of four stranded HXA26/HXA27 worktrees against `origin/main` @ e8715387d.
 All four are REMOVE_CANDIDATE_SECURITY_CLEAR; one DI fail-closed SignatureVerifier primitive is
