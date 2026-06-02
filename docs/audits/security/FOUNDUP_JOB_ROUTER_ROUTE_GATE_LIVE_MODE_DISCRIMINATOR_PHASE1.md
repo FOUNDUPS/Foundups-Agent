@@ -249,23 +249,25 @@ fail-closed for explicit-live; no over-block of default/object/dry-run routing;
 edited); no new circular dependency; focused tests (5) and routing-area suite (176) green;
 full-suite failures proven pre-existing.
 
-## WSP_97 Truth Boundary Checklist (declared == actual; all YES)
+## WSP_97 Truth Boundary Checklist
 
-| Guard | Declared | Actual | YES |
-|-------|----------|--------|-----|
-| ROUTE_FOUNDUP_JOB_ONLY | only route_foundup_job body edited | single hunk @ :1151 | YES |
-| RAW_DICT_FALLBACK_SANITIZED | elif dict -> helper | helper called, raw assignment removed | YES |
-| SECURITY_GATE_CHECKED_NOT_AUTHORITY | telemetry only | never read in gate | YES |
-| LIVE_MODE_EXPLICIT_ONLY | explicit dry_run_mode=False, not defaulted | is_live formula enforces | YES |
-| NO_OVERBLOCK_DRY_RUN_ROUTE | default/dry-run/object route | Tests 1-3,5 + updated test green | YES |
-| ADVERSARIAL_CRITIC_COMPLETED | 7-point critic run | PASS, 0 cycles | YES |
-| NO_DAE_GATEWAY_MUTATION | dae_gateway untouched | not in diff | YES |
-| NO_CONTRACT_MUTATION | foundup_job_contract untouched | not in diff | YES |
-| NO_NEW_CIRCULAR_DEP | reuse deferred-import helper | import check OK | YES |
-| NO_SKIP_XFAIL_ADDED | no skip/xfail added | none added | YES |
-| NO_DEPENDENCY_CHANGE | no dep change | no requirements edited | YES |
-| NO_CI_CHANGE | no CI change | no CI files edited | YES |
-| NO_WSP_MUTATION | no WSP change | no WSP files edited | YES |
-| NO_CABR_READY | no CABR readiness asserted | n/a | YES |
-| NO_PAYOUT_READY | no payout readiness asserted | n/a | YES |
-| NO_DAO_ACTIVATION | no DAO activation | n/a | YES |
+Declared items: 16 - Rows: 16 - All YES.
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | ROUTE_FOUNDUP_JOB_ONLY | YES | only route_foundup_job body edited; single hunk @ :1151 |
+| 2 | RAW_DICT_FALLBACK_SANITIZED | YES | elif dict -> helper; helper called, raw assignment removed |
+| 3 | SECURITY_GATE_CHECKED_NOT_AUTHORITY | YES | telemetry only; never read in gate |
+| 4 | LIVE_MODE_EXPLICIT_ONLY | YES | explicit dry_run_mode=False, not defaulted; is_live formula enforces |
+| 5 | NO_OVERBLOCK_DRY_RUN_ROUTE | YES | default/dry-run/object route; Tests 1-3,5 + updated test green |
+| 6 | ADVERSARIAL_CRITIC_COMPLETED | YES | 7-point critic run; PASS, 0 cycles |
+| 7 | NO_DAE_GATEWAY_MUTATION | YES | dae_gateway untouched; not in diff |
+| 8 | NO_CONTRACT_MUTATION | YES | foundup_job_contract untouched; not in diff |
+| 9 | NO_NEW_CIRCULAR_DEP | YES | reuse deferred-import helper; import check OK |
+| 10 | NO_SKIP_XFAIL_ADDED | YES | no skip/xfail added; none added |
+| 11 | NO_DEPENDENCY_CHANGE | YES | no dep change; no requirements edited |
+| 12 | NO_CI_CHANGE | YES | no CI change; no CI files edited |
+| 13 | NO_WSP_MUTATION | YES | no WSP change; no WSP files edited |
+| 14 | NO_CABR_READY | YES | no CABR readiness asserted |
+| 15 | NO_PAYOUT_READY | YES | no payout readiness asserted |
+| 16 | NO_DAO_ACTIVATION | YES | no DAO activation |
