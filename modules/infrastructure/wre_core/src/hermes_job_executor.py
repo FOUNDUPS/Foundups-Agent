@@ -1155,6 +1155,60 @@ class HermesJobExecutor:
             job_id=job.job_id,
         )
 
+    def _writeback_token_verdict(
+        self,
+        job: "FoundUpJob",
+        token_validation_result: Optional[TokenValidationResult],
+    ) -> None:
+        """
+        Write the SERVER-AUTHORED token validation verdict into job.policy_flags.
+
+        HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1 (#746):
+        PolicyFlags.from_dict forces all capability_token_* flags to False on
+        deserialization (untrusted input). This method is the POSITIVE CONTROL:
+        it writes the real runtime validator verdict back onto the job BEFORE
+        the destructive-action guard reads it, so the guard sees server-authored
+        truth, never attacker-supplied flags.
+
+        Field sources (read from the real TokenValidationResult):
+          - capability_token_checked: True. execute() always runs token
+            validation, so a check was always performed.
+          - capability_token_present: a token was present in the payload iff the
+            validator returned a (non-None) result.
+          - capability_token_validated: the validator marked the token valid.
+          - capability_token_scope_authorized: the token is valid AND its scopes
+            authorize the classified action class (token_valid already implies
+            no scope/action-class mismatch; ``not scope_action_class_mismatch``
+            is a defensive belt-and-suspenders against future result shapes).
+
+        NOTE: security_gate_* is intentionally NOT written here. There is no
+        security-gate evaluator in this executor (the only writer of
+        security_gate_* is the separate
+        modules/foundups/agent/.../hermes_foundup_job_executor.py). Leaving it at
+        the server-default False keeps D3 blocked for valid tokens. Wiring a real
+        security-gate verdict is out of scope (future).
+
+        Args:
+            job: Source FoundUpJob (policy_flags mutated in place).
+            token_validation_result: Result from _validate_token_if_present
+                (None when no token was present in the payload).
+        """
+        if job.policy_flags is None:
+            return
+
+        result = token_validation_result
+        token_present = result is not None
+        token_valid = bool(token_present and result.token_valid)
+        scope_authorized = bool(
+            token_valid and not result.scope_action_class_mismatch
+        )
+
+        # A check is always performed: execute() always runs validation.
+        job.policy_flags.capability_token_checked = True
+        job.policy_flags.capability_token_present = token_present
+        job.policy_flags.capability_token_validated = token_valid
+        job.policy_flags.capability_token_scope_authorized = scope_authorized
+
     def _evaluate_destructive_action_guard(
         self,
         job: "FoundUpJob",
@@ -1457,6 +1511,14 @@ class HermesJobExecutor:
                 duration_seconds=time.monotonic() - start_time,
                 guard_result=None,  # Guard not yet evaluated
             )
+
+        # Step 2.4: HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1 (#746)
+        # Write the SERVER-AUTHORED token validation verdict into
+        # job.policy_flags BEFORE the guard reads it. PolicyFlags.from_dict
+        # zeroed all capability_token_* on (untrusted) deserialization; this is
+        # the positive control that re-establishes server authority from the
+        # real runtime validator result. MUST run before guard evaluation.
+        self._writeback_token_verdict(job, token_validation_result)
 
         # Step 2.5: HXA23 - Evaluate destructive action guard
         guard_result = self._evaluate_destructive_action_guard(job, request)

@@ -1,5 +1,39 @@
 # TestModLog - wre_core/tests
 
+## 2026-06-02: HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1 (W6)
+
+**Slice**: `HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1` | **Predecessors**: #746, #744, HXA24/27/30
+
+**New** `test_hxa_policyflags_writeback_remediation.py` (13 tests):
+- `TestWriteBackReflectsVerdict`: valid / no-token / invalid-token write-back of `capability_token_*`.
+- `TestBypassClosed`: payload pre-set `capability_token_*=True` + no token → STILL BLOCKED at D3;
+  write-back demotes forged object flags before guard.
+- `TestBoundaryUnchanged`: D4/D5/D6 blocked even with valid token (parametrized); D3 dry-run only;
+  write-back never fabricates `security_gate_passed`.
+- `TestWriteBackHelperSemantics`: direct unit coverage of `_writeback_token_verdict` mapping.
+
+**Updated existing suites to the NEW correct semantics** (each justified in audit §9):
+- `test_hxa24…`: 3 from_dict round-trip tests now assert sanitization (forced False); 2 D3 "all gates"
+  tests now supply a REAL token in payload (forging flags no longer works).
+- `test_hxa25…` / `test_hxa28…`: `_create_*_with_all_gates` helpers attach a REAL broad-scope token
+  (D3 passes guard; D4/D5/D6 validate token but guard-blocked by class).
+- `test_hxa4/12/14/16…`: `set_d3_capability_token_gates` attaches a REAL D3 token (`dry_run_only=False`
+  so it validates in both dry/live executor modes); imports the issuer via the FULL package path so
+  `CapabilityToken` class identity matches the executor's `isinstance` check.
+
+**Determinism**: `HERMES_DELEGATE_ENABLED=0` (scoped `patch.dict`); fake tokens via
+`LocalCapabilityTokenIssuer`; no live process/network/.env/model.
+
+**Run**: `pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.py
+test_hxa_policyflags_writeback_remediation.py test_hxa24_capability_token_policyflags.py
+test_hxa25_d3_sandbox_execution.py test_hxa28_d3_native_classification.py
+test_hxa4_real_hermes_object_dryrun.py test_hxa12_gotjunk_second_proof_dryrun.py
+test_hxa14_controlled_live_hermes_harness.py test_hxa16_real_hermes_delegate_adapter_safe_harness.py -q`
+
+**Result**: full `wre_core/tests/` = **1383 passed, 3 skipped, 2 xfailed**; 5 deselected are pre-existing
+worktree-environmental failures (skills-discovery repo-name; vendored `delegate_tool.py` absent),
+verified unrelated to this slice on the clean tree.
+
 ## 2026-05-28: REDDOG_BOOTSTRAP_CONTEXT_RETRIEVAL_PHASE1 Boot retrieval tests
 
 - Command: `python -m pytest modules/infrastructure/wre_core/tests/test_bootstrap_context_retrieval.py -v`

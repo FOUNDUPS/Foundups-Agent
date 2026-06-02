@@ -1,3 +1,27 @@
+## 2026-06-02: PolicyFlags Deserialization Sanitization Tests (W6)
+
+**File**: `test_foundup_job_contract.py` (UPDATED + new class)
+**Slice**: `HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1` | **Predecessors**: #746, #744, HXA24/27/30
+
+`PolicyFlags.from_dict` now forces server-authored gate/token flags False (untrusted input). Existing
+round-trip tests that asserted from_dict PRESERVES True gate/token flags are updated to the NEW correct
+semantics (each justified in the audit Test Scenario Matrix):
+- `test_to_dict_roundtrip` → `test_from_dict_sanitizes_server_authored_flags`
+- `test_from_dict_missing_fields_default_false` (now asserts `security_gate_checked is False`)
+- `test_policy_flags_in_job_roundtrip` → `…_sanitizes_gates`
+- `test_capability_token_fields_from_dict` → `…_sanitized`
+- `test_capability_token_roundtrip` → `…_sanitized_on_roundtrip`
+
+**New** `TestPolicyFlagsDeserializationSanitization` (positive control): malicious-all-True → all-False;
+`dry_run_mode` preserved (true/false/missing); FoundUpJob.from_dict + __post_init__ chokepoint coverage;
+`create_job()` all-False at birth; direct constructor still allows server-authored True.
+
+**Determinism**: pure dataclass (de)serialization; no process/network/.env/model.
+
+**Result**: **78 passed**.
+
+---
+
 ## 2026-06-01: WSP 109 Genesis Gate Remediation Tests (W6)
 
 **File**: `test_openclaw_wsp109_onboarding_dryrun.py` (REWRITTEN - 10 tests, 0 xfail)

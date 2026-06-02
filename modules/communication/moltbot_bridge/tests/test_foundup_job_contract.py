@@ -524,8 +524,14 @@ class TestPolicyFlags:
         assert flags.capability_token_validated is False
         assert flags.capability_token_scope_authorized is False
 
-    def test_to_dict_roundtrip(self):
-        """PolicyFlags survives to_dict/from_dict roundtrip."""
+    def test_from_dict_sanitizes_server_authored_flags(self):
+        """from_dict FORCES server-authored gate flags to False (#746).
+
+        HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1: deserialized gate/token
+        state is UNTRUSTED. Even if a (possibly malicious) payload carries True
+        for security/permission gate flags, from_dict zeroes them. Only
+        dry_run_mode is preserved (operator-authored).
+        """
         flags = PolicyFlags(
             security_gate_checked=True,
             security_gate_passed=True,
@@ -536,18 +542,24 @@ class TestPolicyFlags:
         data = flags.to_dict()
         restored = PolicyFlags.from_dict(data)
 
-        assert restored.security_gate_checked is True
-        assert restored.security_gate_passed is True
-        assert restored.permission_gate_checked is True
+        # Server-authored gate flags forced False regardless of inbound True
+        assert restored.security_gate_checked is False
+        assert restored.security_gate_passed is False
+        assert restored.permission_gate_checked is False
         assert restored.permission_gate_passed is False
-        assert restored.exfoliation_gate_checked is False  # Default
+        assert restored.exfoliation_gate_checked is False
+        # Operator-authored flag preserved
         assert restored.dry_run_mode is True
 
     def test_from_dict_missing_fields_default_false(self):
-        """Missing fields in dict default to False."""
+        """Missing fields default to False; present gate flags forced False (#746).
+
+        Inbound security_gate_checked=True is IGNORED (server-authored,
+        untrusted) and sanitized to False.
+        """
         data = {"security_gate_checked": True}
         flags = PolicyFlags.from_dict(data)
-        assert flags.security_gate_checked is True
+        assert flags.security_gate_checked is False  # Sanitized: forced False
         assert flags.permission_gate_checked is False  # Not in data
         # HXA24: Capability token fields should default to False
         assert flags.capability_token_checked is False
@@ -555,8 +567,13 @@ class TestPolicyFlags:
         assert flags.capability_token_validated is False
         assert flags.capability_token_scope_authorized is False
 
-    def test_policy_flags_in_job_roundtrip(self):
-        """PolicyFlags survive job serialization."""
+    def test_policy_flags_in_job_roundtrip_sanitizes_gates(self):
+        """Job from_dict sanitizes server-authored gate flags (#746).
+
+        Even when a serialized job carries True security gate flags, the
+        untrusted FoundUpJob.from_dict path forces them False; only the
+        operator-authored dry_run_mode survives.
+        """
         job = create_job(tenant_id="t", requested_action="a")
         job.policy_flags.security_gate_checked = True
         job.policy_flags.security_gate_passed = True
@@ -565,10 +582,12 @@ class TestPolicyFlags:
         data = job.to_dict()
         restored = FoundUpJob.from_dict(data)
 
-        assert restored.policy_flags.security_gate_checked is True
-        assert restored.policy_flags.security_gate_passed is True
-        assert restored.policy_flags.dry_run_mode is True
+        # Server-authored gate flags sanitized to False on deserialization
+        assert restored.policy_flags.security_gate_checked is False
+        assert restored.policy_flags.security_gate_passed is False
         assert restored.policy_flags.permission_gate_checked is False
+        # Operator-authored flag preserved
+        assert restored.policy_flags.dry_run_mode is True
 
     # HXA24: Capability Token PolicyFlags Tests
 
@@ -595,8 +614,14 @@ class TestPolicyFlags:
         assert data["capability_token_validated"] is True
         assert data["capability_token_scope_authorized"] is True
 
-    def test_capability_token_fields_from_dict(self):
-        """Capability token fields restored from dict (HXA24)."""
+    def test_capability_token_fields_from_dict_sanitized(self):
+        """from_dict FORCES capability token fields to False (#746).
+
+        Capability token flags are server-authored and must never be trusted
+        from deserialized data. A malicious payload presenting all four as True
+        is sanitized to all-False; server authority comes from executor
+        write-back.
+        """
         data = {
             "capability_token_checked": True,
             "capability_token_present": True,
@@ -605,13 +630,17 @@ class TestPolicyFlags:
         }
         flags = PolicyFlags.from_dict(data)
 
-        assert flags.capability_token_checked is True
-        assert flags.capability_token_present is True
-        assert flags.capability_token_validated is True
-        assert flags.capability_token_scope_authorized is True
+        assert flags.capability_token_checked is False
+        assert flags.capability_token_present is False
+        assert flags.capability_token_validated is False
+        assert flags.capability_token_scope_authorized is False
 
-    def test_capability_token_roundtrip(self):
-        """Capability token fields survive roundtrip (HXA24)."""
+    def test_capability_token_fields_sanitized_on_roundtrip(self):
+        """Capability token fields forced False through from_dict (#746).
+
+        Even though to_dict faithfully serializes True flags (server-authored
+        object state), the untrusted from_dict path zeroes them.
+        """
         original = PolicyFlags(
             capability_token_checked=True,
             capability_token_present=True,
@@ -619,12 +648,120 @@ class TestPolicyFlags:
             capability_token_scope_authorized=True,
         )
         data = original.to_dict()
-        restored = PolicyFlags.from_dict(data)
+        # to_dict preserves the server-authored object state
+        assert data["capability_token_checked"] is True
+        assert data["capability_token_scope_authorized"] is True
 
-        assert restored.capability_token_checked == original.capability_token_checked
-        assert restored.capability_token_present == original.capability_token_present
-        assert restored.capability_token_validated == original.capability_token_validated
-        assert restored.capability_token_scope_authorized == original.capability_token_scope_authorized
+        restored = PolicyFlags.from_dict(data)
+        # from_dict sanitizes: untrusted deserialization cannot grant tokens
+        assert restored.capability_token_checked is False
+        assert restored.capability_token_present is False
+        assert restored.capability_token_validated is False
+        assert restored.capability_token_scope_authorized is False
+
+
+# ---------------------------------------------------------------------------
+# Test: PolicyFlags Deserialization Sanitization (#746)
+# HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1
+# ---------------------------------------------------------------------------
+
+
+# Every server-authored gate/token flag that from_dict MUST force False.
+_SANITIZED_FLAG_NAMES = [
+    "security_gate_checked",
+    "security_gate_passed",
+    "permission_gate_checked",
+    "permission_gate_passed",
+    "exfoliation_gate_checked",
+    "exfoliation_gate_passed",
+    "wsp_preflight_checked",
+    "wsp_preflight_passed",
+    "capability_token_checked",
+    "capability_token_present",
+    "capability_token_validated",
+    "capability_token_scope_authorized",
+]
+
+
+class TestPolicyFlagsDeserializationSanitization:
+    """#746: deserialized gate/token state is UNTRUSTED and forced False."""
+
+    def test_malicious_inbound_all_true_forced_false(self):
+        """A payload presenting EVERY gate/token flag True is fully sanitized."""
+        malicious = {name: True for name in _SANITIZED_FLAG_NAMES}
+        malicious["dry_run_mode"] = True  # operator-authored, must survive
+
+        flags = PolicyFlags.from_dict(malicious)
+
+        for name in _SANITIZED_FLAG_NAMES:
+            assert getattr(flags, name) is False, (
+                f"{name} must be forced False on untrusted deserialization"
+            )
+        # dry_run_mode is the only inbound flag preserved
+        assert flags.dry_run_mode is True
+
+    def test_dry_run_mode_preserved_true(self):
+        """dry_run_mode=True is preserved (safe/sandbox direction)."""
+        flags = PolicyFlags.from_dict({"dry_run_mode": True})
+        assert flags.dry_run_mode is True
+
+    def test_dry_run_mode_preserved_false(self):
+        """dry_run_mode=False is preserved verbatim."""
+        flags = PolicyFlags.from_dict({"dry_run_mode": False})
+        assert flags.dry_run_mode is False
+
+    def test_dry_run_mode_defaults_false_when_missing(self):
+        """dry_run_mode defaults False when absent from inbound data."""
+        flags = PolicyFlags.from_dict({})
+        assert flags.dry_run_mode is False
+
+    def test_foundupjob_from_dict_sanitizes_malicious_payload(self):
+        """FoundUpJob.from_dict routes through the same sanitization chokepoint."""
+        malicious_flags = {name: True for name in _SANITIZED_FLAG_NAMES}
+        malicious_flags["dry_run_mode"] = True
+        data = {
+            "job_id": "j_attack_001",
+            "tenant_id": "attacker",
+            "requested_action": "create_repo",
+            "policy_flags": malicious_flags,
+        }
+        job = FoundUpJob.from_dict(data)
+
+        for name in _SANITIZED_FLAG_NAMES:
+            assert getattr(job.policy_flags, name) is False
+        assert job.policy_flags.dry_run_mode is True
+
+    def test_post_init_dict_policy_flags_sanitized(self):
+        """__post_init__ coerces a dict of malicious flags through from_dict."""
+        malicious_flags = {name: True for name in _SANITIZED_FLAG_NAMES}
+        job = FoundUpJob(
+            job_id="j_attack_002",
+            tenant_id="attacker",
+            requested_action="delete_permanently",
+            policy_flags=malicious_flags,  # dict -> coerced in __post_init__
+        )
+        for name in _SANITIZED_FLAG_NAMES:
+            assert getattr(job.policy_flags, name) is False
+
+    def test_create_job_yields_all_false_gate_flags(self):
+        """create_job() yields all-False gate/token flags at birth (unchanged)."""
+        job = create_job(tenant_id="t", requested_action="build_foundup")
+        for name in _SANITIZED_FLAG_NAMES:
+            assert getattr(job.policy_flags, name) is False
+        assert job.policy_flags.dry_run_mode is False
+
+    def test_direct_constructor_still_allows_server_authored_true(self):
+        """Direct PolicyFlags(...) constructor is UNCHANGED (server authority).
+
+        Only the untrusted from_dict path is locked down; server code can still
+        author True flags by direct object construction/assignment.
+        """
+        flags = PolicyFlags(
+            security_gate_passed=True,
+            capability_token_validated=True,
+        )
+        assert flags.security_gate_passed is True
+        assert flags.capability_token_validated is True
 
 
 # ---------------------------------------------------------------------------
