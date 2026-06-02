@@ -31,6 +31,17 @@
 - **Blocker**: This slice establishes seeded-only protocol
 - **Next slice**: `REDDOG_BOOTSTRAP_LIVE_UPDATE_PHASE2`
 
+### Hermes Agent Runtime (WSL/Docker)
+
+- **Status**: Bootstrapped + bounded; live delegation BLOCKED pending audits
+- **Captured by**: `HERMES_WSL_DOCKER_BOOTSTRAP_CAPTURE_PHASE1` (session `2026-06-02T12-00-00Z__hermes-wsl-docker-bootstrap.json`)
+- **State**: Hermes 0.15.1 in WSL Ubuntu, Docker terminal backend confirmed; OpenClaw import / Nous Portal login / messaging-gateway intentionally not enabled
+- **Blocker**: WRE→`delegate_task` binding is RUNTIME_DEPENDENCY_MISSING + IMPORT_PATH_DRIFT (PR #745)
+- **Next slices**:
+  - `HERMES_NOUS_AGENT_DELEGATE_BINDING_AUDIT_PHASE1` (done — PR #745) → follow-on `HERMES_AGENT_RUNTIME_INSTALL_AND_PATH_AUDIT_PHASE1`
+  - `HERMES_OPENCLAW_IMPORT_PREVIEW_AUDIT_PHASE1` (not yet dispatched)
+  - `HERMES_POLICY_AND_TOOL_PERMISSION_AUDIT_PHASE1` (not yet dispatched)
+
 ## Closed Threads (Recent)
 
 | Thread | Resolution | PR |

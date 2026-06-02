@@ -8,12 +8,19 @@
 
 | Lane | Role | Status | Current Slice |
 |------|------|--------|---------------|
-| W9 | worker | active | REDDOG_BOOTSTRAP_CONTEXT_RETRIEVAL_PHASE1 |
+| W9 | architect | active | HERMES_WSL_DOCKER_BOOTSTRAP_CAPTURE_PHASE1 |
 
 ## Main Branch State
 
-- **HEAD**: 118be8533 (PR #724 merged)
-- **Last merged**: REDDOG_SESSION_CONTINUITY_CAPTURE_PHASE1
+- **HEAD**: d602d874b (PR #746 merged)
+- **Last merged**: HXA PolicyFlags write-back enforcement audit (decision-only)
+
+## Hermes Runtime State (2026-06-02)
+
+- **Hermes Agent**: installed in WSL Ubuntu, version 0.15.1 (install path `/home/undaodu/.hermes`).
+- **Terminal backend**: Docker; Docker Desktop WSL integration confirmed (`docker run --rm hello-world` passed). `hermes doctor` reports docker daemon + terminal/file tools available. `ripgrep` installed in WSL.
+- **NOT enabled**: OpenClaw import (preview cancelled), Nous Portal login (cancelled), messaging/gateway (unconfigured). FoundUps repo source unchanged.
+- **WRE binding**: `HermesJobExecutor` → vendored `delegate_task` is RUNTIME_DEPENDENCY_MISSING with IMPORT_PATH_DRIFT; real delegation stays `BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED` (see PR #745, session `2026-06-02T12-00-00Z__hermes-wsl-docker-bootstrap.json`).
 
 ## Worker Coordination
 
