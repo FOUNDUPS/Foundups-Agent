@@ -30,7 +30,7 @@ import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger("wre_foundup_job_router")
 
@@ -334,6 +334,52 @@ def detect_envelope_type(envelope: Dict[str, Any]) -> EnvelopeType:
     return EnvelopeType.GENERIC_DAE
 
 
+def _sanitize_untrusted_policy_flags_dict(
+    policy_flags: Dict[str, Any],
+) -> Tuple[Dict[str, bool], bool]:
+    """Sanitize a raw, untrusted envelope ``policy_flags`` dict at the router boundary.
+
+    SECURITY (FOUNDUP_JOB_ROUTER_POLICYFLAGS_BOUNDARY_SANITIZATION, #752):
+    A raw ``policy_flags`` dict arriving on an inbound envelope is UNTRUSTED.
+    A malicious or stale caller can self-assert any gate/token flag (e.g.
+    ``security_gate_passed=True``) by carrying ``True`` in the dict. This is the
+    untrusted-envelope trust boundary: every server-authored gate/token flag
+    (all of ``_SERVER_AUTHORED_FLAGS`` — security_gate_*, permission_gate_*,
+    exfoliation_gate_*, wsp_preflight_*, capability_token_*) is FORCED to False
+    here regardless of inbound data. Server authority for those flags comes
+    EXCLUSIVELY from a server-authored ``PolicyFlags`` object snapshot (the
+    ``hasattr(policy_flags, "to_dict")`` branch), never from a raw dict.
+
+    Only ``dry_run_mode`` survives from inbound data: it is operator-authored and
+    ``True`` is the safe/sandbox direction. ``PolicyFlags.from_dict`` yields
+    ``dry_run_mode=False`` when the key is absent, which would mis-classify a
+    missing flag as LIVE; this function restores the router's safe default so an
+    absent ``dry_run_mode`` is treated as dry-run (True), NOT live.
+
+    Args:
+        policy_flags: Raw untrusted dict from the inbound envelope.
+
+    Returns:
+        Tuple of (sanitized_policy_snapshot, dry_run_defaulted) where the snapshot
+        has all server-authored gate/token flags forced False and a safe
+        ``dry_run_mode`` default applied when the inbound dict omitted it.
+    """
+    # Deferred import to avoid a circular dependency (router <-> contract); matches
+    # the existing deferred-import pattern used elsewhere in this module.
+    from modules.communication.moltbot_bridge.src.foundup_job_contract import PolicyFlags
+
+    # from_dict zeroes ALL _SERVER_AUTHORED_FLAGS and preserves only dry_run_mode.
+    sanitized = PolicyFlags.from_dict(policy_flags).to_dict()
+
+    dry_run_defaulted = "dry_run_mode" not in policy_flags
+    if dry_run_defaulted:
+        # from_dict({}) yields dry_run_mode=False; restore the router's safe
+        # default so missing flags are NOT treated as live.
+        sanitized["dry_run_mode"] = True
+
+    return sanitized, dry_run_defaulted
+
+
 def validate_foundup_job_envelope(envelope: Dict[str, Any]) -> EnvelopeValidationResult:
     """
     Validate envelope for FoundUpJob execution.
@@ -418,10 +464,12 @@ def validate_foundup_job_envelope(envelope: Dict[str, Any]) -> EnvelopeValidatio
             "[WSP97] FoundUpJob envelope missing policy_flags - dry_run_mode defaulted to True"
         )
     elif isinstance(policy_flags, dict):
-        policy_snapshot = policy_flags
-        if "dry_run_mode" not in policy_flags:
-            dry_run_defaulted = True
-            policy_snapshot["dry_run_mode"] = True
+        # SECURITY (#752): raw envelope dict is UNTRUSTED. Sanitize so self-asserted
+        # gate/token flags cannot survive; preserve safe dry_run default.
+        policy_snapshot, dry_run_defaulted = _sanitize_untrusted_policy_flags_dict(
+            policy_flags
+        )
+        if dry_run_defaulted:
             logger.info(
                 "[WSP97] FoundUpJob envelope missing dry_run_mode - defaulted to True"
             )
@@ -564,8 +612,14 @@ def _validate_live_mode_gates(
 
     Required gates for Phase 1:
       - human_approval=True OR permission_gate_passed=True
-      - security_gate_passed=True (if security_gate_checked=True)
+      - security_gate_passed=True (required in live mode)
       - Non-empty evidence_refs (evidence_pending=False)
+
+    SECURITY (#752): Gate 2 is FAIL-CLOSED. In live mode, security MUST have
+    passed; ``security_gate_passed`` is read from a server-authored snapshot only
+    (raw envelope dicts are sanitized to False upstream), so a self-asserted raw
+    dict can never satisfy this gate. The legacy ``security_gate_checked`` opt-in
+    is no longer a precondition.
 
     Args:
         policy_snapshot: Policy flags at validation time
@@ -584,12 +638,18 @@ def _validate_live_mode_gates(
     if not human_approval and not permission_gate_passed:
         missing_gates.append("human_approval")
 
-    # Gate 2: Security gate (if checked, must pass)
+    # Gate 2: Security gate (FAIL-CLOSED) — must pass in live mode.
+    # security_gate_checked is retained for logging only; it is NOT a precondition.
     security_gate_checked = policy_snapshot.get("security_gate_checked", False)
     security_gate_passed = policy_snapshot.get("security_gate_passed", False)
 
-    if security_gate_checked and not security_gate_passed:
+    if not security_gate_passed:
         missing_gates.append("security_gate_passed")
+        logger.info(
+            "[WSP97] Live mode security_gate_passed=False "
+            "(security_gate_checked=%s) - fail-closed",
+            security_gate_checked,
+        )
 
     # Gate 3: Evidence must be present (not pending)
     if evidence_pending or evidence_count == 0:

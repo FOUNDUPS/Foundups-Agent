@@ -1,5 +1,41 @@
 # TestModLog - wre_core/tests
 
+## 2026-06-02: FOUNDUP_JOB_ROUTER_POLICYFLAGS_BOUNDARY_SANITIZATION_AND_GATE2_FAILCLOSED_PHASE1 (W6)
+
+**Slice**: `FOUNDUP_JOB_ROUTER_POLICYFLAGS_BOUNDARY_SANITIZATION_AND_GATE2_FAILCLOSED_PHASE1` | **Predecessors**: #752, #747/#746/#744
+
+**New** `test_foundup_job_router_policyflags_boundary.py` (12 tests):
+- `TestRawDictSelfAssertionSanitized`: forged gate/token flags do NOT survive helper or envelope snapshot.
+- `TestMissingDryRunDefaultsSafe` / `TestMissingPolicyFlagsNoneBranch`: absent `dry_run_mode` → safe True (dry-run, not live); None branch unchanged.
+- `TestLiveRawDictWithoutSecurityBlocked` / `TestLiveRawDictForgedSecurityBlocked`: explicit live raw dict (incl. forged `security_gate_passed=True`) is BLOCKED after sanitization.
+- `TestLegitimateLivePassServerAuthored`: server-authored snapshot live-passes; missing security still fails (fail-closed).
+- `TestGenericDAENoRegression`: run_wre-style `{objective}` envelope still classifies GENERIC_DAE and passes.
+
+**Updated existing suites to the NEW fail-closed/sanitized semantics** (each justified in audit §10).
+Root cause: under the locked design a legitimate live PASS is no longer reachable through the public
+envelope API (raw dicts sanitized; the unchanged object branch coerces a falsy `dry_run_mode` object back
+to dry-run). Per dispatch Test #6, legitimate live passes and live-only gate codes are exercised directly
+on `_validate_live_mode_gates` / `_validate_compute_budget` with SERVER-AUTHORED snapshots. No assertion
+deleted without a replacement.
+- `test_foundup_envelope_with_explicit_dry_run_false_not_defaulted`: proves explicit `dry_run_mode=False`
+  preserved (`dry_run_defaulted False`, `is_live_mode True`) AND fail-closed BLOCK.
+- WSP-97 truth-field tests (`..._verification_complete` / `..._cabr_ready` / `..._payout_ready`,
+  renamed to `test_live_mode_gate_pass_does_not_imply_*`): gate PASS via server-authored snapshot +
+  truth field False on a valid envelope (mode-independent guarantee).
+- Evidence-required tests (`test_live_mode_with_empty_evidence_fails`, `..._no_evidence_field_fails`):
+  direct `_validate_live_mode_gates` with server-authored snapshot so evidence is the sole missing gate.
+- Security-gate tests (`test_live_mode_security_gate_passed_false_fails`,
+  `..._required_even_when_not_checked` — the latter INVERTS the old `..._not_checked_passes` to fail-closed).
+- Compute-budget live tests: direct `_validate_compute_budget(is_live_mode=True)`.
+- `test_live_mode_fields_in_serialized_result`: serialization shape + `is_live_mode True` via explicit raw
+  live dict; gate PASS proven at gate surface.
+
+**Determinism**: pure validation-layer unit tests; NO network / NO model / NO live DAE / NO WRE start.
+
+**Run**: `pytest modules/infrastructure/wre_core/tests/test_foundup_job_router_policyflags_boundary.py
+test_foundup_job_envelope_validation.py test_foundup_job_router.py` → 140 passed. Full `wre_core/tests`
+→ 1395 passed, 5 failed (pre-existing, unrelated — proven on clean origin/main), 3 skipped, 2 xfailed.
+
 ## 2026-06-02: HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1 (W6)
 
 **Slice**: `HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1` | **Predecessors**: #746, #744, HXA24/27/30
