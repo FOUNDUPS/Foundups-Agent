@@ -2,6 +2,46 @@
 
 ## Chronological Change Log
 
+### [2026-06-02] - FOUNDUP_JOB_ROUTER_POLICYFLAGS_BOUNDARY_SANITIZATION_AND_GATE2_FAILCLOSED_PHASE1 (W6)
+
+**WSP Protocol References**: WSP 97 (Truth Boundary), WSP 50 (Pre-Action), WSP 22 (ModLog), WSP 5 (Coverage)
+**Predecessors**: #752 (DAE gateway gate-flags trust-boundary audit, decision-only); #744 → #746 → #747 → #751 (PolicyFlags write-back / `from_dict` chokepoint line)
+**Impact Analysis**: Closes the bounded #752 trust-boundary defect at the ROUTER boundary. ROUTER-ONLY; no gateway/Hermes/contract mutation.
+
+**Change** — `src/foundup_job_router.py` (3 changes, locked design):
+- **NEW helper** `_sanitize_untrusted_policy_flags_dict(policy_flags) -> Tuple[Dict[str,bool], bool]` (`:337`-region).
+  Deferred import of `PolicyFlags` (matches existing `:1073` pattern → no circular dep). Runs the raw
+  envelope dict through `PolicyFlags.from_dict(...).to_dict()` — zeroes ALL `_SERVER_AUTHORED_FLAGS`
+  (security/permission/exfoliation/wsp-preflight gates + all capability_token_*), preserving only
+  `dry_run_mode`. Restores the router's safe default (`dry_run_mode=True`) when the inbound dict omits
+  it (because `from_dict({})` yields `dry_run_mode=False`).
+- **Dict branch** (`:420`-region): replaced `policy_snapshot = policy_flags` (RAW — the defect) with
+  `policy_snapshot, dry_run_defaulted = _sanitize_untrusted_policy_flags_dict(policy_flags)`; retained the
+  `[WSP97] ... missing dry_run_mode - defaulted to True` log. None branch and object branch unchanged.
+- **Gate 2 fail-closed** in `_validate_live_mode_gates` (`:587`-region): replaced the
+  `if security_gate_checked and not security_gate_passed:` opt-in with `if not security_gate_passed:`
+  (`security_gate_checked` retained log-only). Docstring updated to "security_gate_passed=True (required
+  in live mode)".
+
+**Behavior**: A raw self-asserted live envelope (e.g. forged `security_gate_passed=True`) is sanitized to
+all-gates-False and BLOCKED in live mode. An absent `dry_run_mode` stays SAFE (dry-run, not live). A
+legitimate live PASS requires a server-authored `PolicyFlags` object snapshot with
+`security_gate_passed=True`. GENERIC_DAE routing is non-regressed.
+
+**Sibling `route_foundup_job` (`:1101`): DEFERRED** — operates on a `FoundUpJob` OBJECT (already
+sanitized by the #747 chokepoint) and has NO live-mode discriminator at `:1091-1111`; forcing fail-closed
+there would block legitimate dry-run routing. Follow-up: `FOUNDUP_JOB_ROUTER_ROUTE_GATE_LIVE_MODE_DISCRIMINATOR_PHASE1`.
+
+**Tests**: new `tests/test_foundup_job_router_policyflags_boundary.py` (12 passed). Updated 12 existing
+tests in `test_foundup_job_envelope_validation.py` to the new fail-closed/sanitized semantics (legitimate
+live passes + live-only gate codes exercised directly on `_validate_live_mode_gates` /
+`_validate_compute_budget` with server-authored snapshots; no assertion deleted without replacement).
+Focused router/envelope/boundary: 140 passed. Full `wre_core/tests`: 1395 passed, 5 failed
+(pre-existing, unrelated — `test_hxa16_real_hermes_delegate_adapter_safe_harness.py` x4 + 
+`test_wre_skills_discovery.py::test_initialization`; proven identical on clean origin/main), 3 skipped,
+2 xfailed.
+**Audit**: `docs/audits/security/FOUNDUP_JOB_ROUTER_POLICYFLAGS_BOUNDARY_SANITIZATION_AND_GATE2_FAILCLOSED_PHASE1.md`.
+
 ### [2026-06-02] - HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1 (W6)
 
 **WSP Protocol References**: WSP 97 (Truth Boundary), WSP 22 (ModLog), WSP 50 (Pre-Action)
