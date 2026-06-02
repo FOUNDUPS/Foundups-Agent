@@ -1,5 +1,36 @@
 # ModLog - moltbot_bridge
 
+## 2026-06-02: PolicyFlags Write-Back Remediation — Deserialization Sanitization (W6)
+
+**Author**: 0102 (Worker-Lane W6)
+**WSP**: 97 (Truth Boundary), 50 (Pre-Action Verification)
+**Slice**: `HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1`
+**Predecessors**: #746 (enforcement audit, `GAP_CONFIRMED_BOUNDED`), #744, HXA24/27/30
+
+### Summary
+
+Closes the #746 bounded PolicyFlags write-back defect (CHANGE 1 of 2). Security/token gate flags are
+now **server-authored only** — deserialized job data can never grant a passing gate or a valid token.
+
+### Changes
+- `src/foundup_job_contract.py`:
+  - Added module-level `_SERVER_AUTHORED_FLAGS` frozenset (12 gate/token fields).
+  - Rewrote `PolicyFlags.from_dict` to **force every server-authored flag to `False`** regardless of
+    inbound data; only `dry_run_mode` is preserved (operator-authored; `True` = safe/sandbox direction).
+  - `FoundUpJob.from_dict` (`:613`) and `__post_init__` (`:411-412`) both route through this single
+    chokepoint, so both untrusted-deserialization paths are covered.
+  - Direct `PolicyFlags(...)` constructor + `default_factory=PolicyFlags` are UNCHANGED — server code can
+    still author `True` flags by direct object assignment.
+- Audit: `docs/audits/security/HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1.md` (sanitization +
+  write-back field matrices, guard-sequencing proof, D3/D4/D5/D6 boundary proof, WSP 97 24/24 YES).
+
+**Regression**: `git grep FoundUpJob.from_dict` non-test caller count = **0** (no production wiring).
+
+**Tests**: `tests/test_foundup_job_contract.py` → **78 passed** (round-trip tests updated to assert the
+new sanitization; new `TestPolicyFlagsDeserializationSanitization` positive-control class added).
+
+---
+
 ## 2026-06-01: WSP 109 Genesis Gate Remediation (W6)
 
 **Author**: 0102 (Worker-Lane W6)

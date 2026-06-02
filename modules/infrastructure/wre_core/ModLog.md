@@ -2,6 +2,35 @@
 
 ## Chronological Change Log
 
+### [2026-06-02] - HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1 (W6)
+
+**WSP Protocol References**: WSP 97 (Truth Boundary), WSP 22 (ModLog), WSP 50 (Pre-Action)
+**Predecessors**: #746 (enforcement audit, `GAP_CONFIRMED_BOUNDED`), #744, HXA24/27/30
+**Impact Analysis**: Positive-control closure of the #746 PolicyFlags write-back defect (CHANGE 2 of 2).
+
+**Change** — `src/hermes_job_executor.py`:
+- Added private helper `_writeback_token_verdict(job, token_validation_result)` (`:1158`).
+- Called once in `execute()` (`:1521`), **immediately before** `_evaluate_destructive_action_guard`
+  (`:1524`) and after `_validate_token_if_present` (`:1496`) + the invalid-token early-return.
+- Writes the server-authored token verdict into `job.policy_flags`:
+  `capability_token_checked=True`; `capability_token_present = result is not None`;
+  `capability_token_validated = result is not None and result.token_valid`;
+  `capability_token_scope_authorized = validated and not result.scope_action_class_mismatch`.
+- `security_gate_*` intentionally left at server-default `False` (no security-gate evaluator here; the
+  sole writer is the separate `modules/foundups/agent/src/hermes_foundup_job_executor.py:362`). Wiring a
+  real security-gate verdict is deferred (future).
+
+**Behavior**: unchanged. No-token/invalid-token → capability flags not all-True → D3 BLOCKED;
+valid-token → capability flags True but `security_gate_passed` still False → D3 still BLOCKED;
+D4/D5/D6 unconditionally blocked. **Bypass closed**: a payload pre-setting `capability_token_*=True`
+with no real token is still BLOCKED at D3.
+
+**Tests**: `test_hermes_job_executor.py` (94 passed); new
+`test_hxa_policyflags_writeback_remediation.py` (13 passed); full `wre_core/tests/` 1383 passed
+(5 pre-existing worktree-environmental failures deselected, verified unrelated). HXA4/12/14/16/24/25/28
+test helpers updated to supply REAL tokens (forging flags no longer works).
+**Audit**: `docs/audits/security/HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1.md`.
+
 ### [2026-05-28] - REDDOG_BOOTSTRAP_CONTEXT_RETRIEVAL_PHASE1 (v0.8.42)
 
 **WSP Protocol References**: WSP 00 (Zen State), WSP 60 (Module Memory), WSP 22 (ModLog)

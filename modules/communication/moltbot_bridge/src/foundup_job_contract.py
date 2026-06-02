@@ -189,6 +189,32 @@ class StatusReasonCode(str, Enum):
 # ---------------------------------------------------------------------------
 
 
+# HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1 (#746):
+# Security/token gate flags are SERVER-AUTHORED ONLY. They MUST NOT be trusted
+# from deserialized (untrusted) job data. PolicyFlags.from_dict forces every
+# field in this frozenset to False regardless of inbound data; server authority
+# comes exclusively from runtime validation write-back in the executor.
+#
+# NOT in this set (preserved across deserialization):
+#   - dry_run_mode: operator-authored; True is the safe/sandbox direction.
+_SERVER_AUTHORED_FLAGS: frozenset = frozenset(
+    {
+        "security_gate_checked",
+        "security_gate_passed",
+        "permission_gate_checked",
+        "permission_gate_passed",
+        "exfoliation_gate_checked",
+        "exfoliation_gate_passed",
+        "wsp_preflight_checked",
+        "wsp_preflight_passed",
+        "capability_token_checked",
+        "capability_token_present",
+        "capability_token_validated",
+        "capability_token_scope_authorized",
+    }
+)
+
+
 @dataclass(slots=True)
 class PolicyFlags:
     """
@@ -256,22 +282,45 @@ class PolicyFlags:
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> PolicyFlags:
-        """Deserialize from dict."""
+        """Deserialize from dict.
+
+        SECURITY (HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1, #746):
+        Deserialized gate/token state is UNTRUSTED and is FORCED to False.
+        Every field in ``_SERVER_AUTHORED_FLAGS`` (all security/permission/
+        exfoliation/wsp-preflight gate flags and all four capability_token_*
+        flags) is zeroed REGARDLESS of inbound data — a malicious or stale
+        payload can never grant itself a passing gate or a valid token by
+        carrying ``True`` here.
+
+        Server authority for these flags comes EXCLUSIVELY from runtime
+        validation write-back (see HermesJobExecutor.execute, which writes the
+        validator verdict into job.policy_flags before the destructive-action
+        guard reads it). Code that legitimately needs a flag True must set it
+        via the direct ``PolicyFlags(...)`` constructor or by object attribute
+        assignment (server-authored), NOT through this untrusted path.
+
+        ONLY ``dry_run_mode`` is preserved from inbound data: it is
+        operator-authored and ``True`` is the safe/sandbox direction.
+        """
+        # Single deserialization chokepoint. Both FoundUpJob.from_dict and
+        # FoundUpJob.__post_init__ route here, so this covers every path.
         return cls(
-            security_gate_checked=bool(data.get("security_gate_checked", False)),
-            security_gate_passed=bool(data.get("security_gate_passed", False)),
-            permission_gate_checked=bool(data.get("permission_gate_checked", False)),
-            permission_gate_passed=bool(data.get("permission_gate_passed", False)),
-            exfoliation_gate_checked=bool(data.get("exfoliation_gate_checked", False)),
-            exfoliation_gate_passed=bool(data.get("exfoliation_gate_passed", False)),
-            wsp_preflight_checked=bool(data.get("wsp_preflight_checked", False)),
-            wsp_preflight_passed=bool(data.get("wsp_preflight_passed", False)),
+            # Server-authored gate/token flags: forced False (untrusted input
+            # is NOT read). See _SERVER_AUTHORED_FLAGS.
+            security_gate_checked=False,
+            security_gate_passed=False,
+            permission_gate_checked=False,
+            permission_gate_passed=False,
+            exfoliation_gate_checked=False,
+            exfoliation_gate_passed=False,
+            wsp_preflight_checked=False,
+            wsp_preflight_passed=False,
+            capability_token_checked=False,
+            capability_token_present=False,
+            capability_token_validated=False,
+            capability_token_scope_authorized=False,
+            # Operator-authored: preserved (True is the safe/sandbox direction).
             dry_run_mode=bool(data.get("dry_run_mode", False)),
-            # HXA24: Capability token policy flags (backward compatible)
-            capability_token_checked=bool(data.get("capability_token_checked", False)),
-            capability_token_present=bool(data.get("capability_token_present", False)),
-            capability_token_validated=bool(data.get("capability_token_validated", False)),
-            capability_token_scope_authorized=bool(data.get("capability_token_scope_authorized", False)),
         )
 
 
