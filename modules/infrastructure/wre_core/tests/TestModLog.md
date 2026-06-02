@@ -1,5 +1,30 @@
 # TestModLog - wre_core/tests
 
+## 2026-06-03: FOUNDUP_JOB_ROUTER_ROUTE_GATE_LIVE_MODE_DISCRIMINATOR_PHASE1 (W6)
+
+**Slice**: `FOUNDUP_JOB_ROUTER_ROUTE_GATE_LIVE_MODE_DISCRIMINATOR_PHASE1` | **Predecessors**: #753 (deferred this sibling), #752, #744->#751
+
+**New** `test_route_foundup_job_live_mode_gate.py` (5 tests; all via `route_foundup_job(job)`; no skip/xfail; NO network/model/live-DAE):
+- `TestObjectPathNeverLive::test_default_policyflags_object_still_routes`  -  object `PolicyFlags()` (dry_run_mode=False default) ROUTES. PRIMARY no-over-block proof.
+- `TestObjectPathNeverLive::test_dry_run_true_object_still_routes`  -  object `dry_run_mode=True` ROUTES.
+- `TestObjectPathNeverLive::test_server_authored_live_object_routes_by_design_asymmetry`  -  "live-looking" server-authored object ROUTES (documents the routing-seam object-path asymmetry; strict live validation belongs to `_validate_live_mode_gates`).
+- `TestRawDictExplicitLiveFailClosed::test_forged_live_raw_dict_blocked`  -  raw dict `dry_run_mode=False` + forged `security_gate_passed=True` is BLOCKED (`BLOCKED_POLICY_GATE`); sanitized snapshot proves `security_gate_passed False`.
+- `TestRawDictMissingDryRunNotLive::test_raw_dict_missing_dry_run_routes_and_sanitizes`  -  raw dict with no `dry_run_mode` + forged flags ROUTES as dry-run; forged flags zeroed; `dry_run_mode` restored True (#753 footgun preserved).
+
+**Updated** `test_foundup_job_router.py`: legacy `test_security_gate_failed_blocks_routing`
+(object-path opt-in BLOCK under the removed semantics) -> `test_security_gate_failed_object_path_still_routes`
+asserting ROUTED + `OK_ROUTED` + `!= BLOCKED_POLICY_GATE`. STRICTER replacement (proves no over-block under
+the live-mode discriminator); no assertion deleted without a stricter replacement; no skip/xfail.
+
+**Run**: focused new file -> 5 passed. Routing area (`test_route_foundup_job_live_mode_gate.py` +
+`test_foundup_job_router.py` + `test_foundup_job_router_policyflags_boundary.py` +
+`test_foundup_job_envelope_validation.py` + `test_foundup_job_consumer.py`) -> 176 passed. Full
+`wre_core/tests` -> 1400 passed, 5 failed (PRE-EXISTING, unrelated  - 
+`test_hxa16_real_hermes_delegate_adapter_safe_harness.py` + `test_wre_skills_discovery.py`; proven on
+stashed clean origin/main: 5 failed / 34 passed), 3 skipped, 2 xfailed. (Full-suite run mutates
+`config/WRE_RUNBOOK.md` + `config/wre_defaults.env` as a pre-existing unrelated side-effect  -  reverted;
+routing test files do not mutate config.)
+
 ## 2026-06-02: FOUNDUP_JOB_ROUTER_POLICYFLAGS_BOUNDARY_SANITIZATION_AND_GATE2_FAILCLOSED_PHASE1 (W6)
 
 **Slice**: `FOUNDUP_JOB_ROUTER_POLICYFLAGS_BOUNDARY_SANITIZATION_AND_GATE2_FAILCLOSED_PHASE1` | **Predecessors**: #752, #747/#746/#744

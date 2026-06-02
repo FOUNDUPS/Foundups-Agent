@@ -1151,24 +1151,36 @@ def route_foundup_job(job: Any) -> RouteEnvelope:
         # === Policy Check ===
         policy_flags = getattr(job, "policy_flags", None)
         policy_summary: Dict[str, bool] = {}
+        dry_run_defaulted = True  # default: treat as NOT explicit-live so dry-run/default routing is preserved
         if policy_flags:
             if hasattr(policy_flags, "to_dict"):
                 policy_summary = policy_flags.to_dict()
+                # object path: server-authored; FoundUpJob default dry_run_mode is False and is
+                # indistinguishable from explicit-live, so we do NOT treat the object path as live
+                # (keeps dry_run_defaulted True) -> default/dry-run object routing is never over-blocked.
             elif isinstance(policy_flags, dict):
-                policy_summary = policy_flags
+                # SECURITY (#752/#753): a raw envelope-style dict is UNTRUSTED. Sanitize through the
+                # existing #753 router-local helper so self-asserted gate flags cannot survive.
+                policy_summary, dry_run_defaulted = _sanitize_untrusted_policy_flags_dict(policy_flags)
 
-            # Check for blocking policy state
-            if policy_summary.get("security_gate_checked") and not policy_summary.get("security_gate_passed"):
-                return _make_blocked_envelope(
-                    job_id=job_id,
-                    tenant_id=tenant_id,
-                    action=requested_action,
-                    reason_code=RouteReasonCode.BLOCKED_POLICY_GATE,
-                    reason_human="Security gate check failed",
-                    source_status=status_str,
-                    foundup_id=getattr(job, "foundup_id", None),
-                    policy_summary=policy_summary,
-                )
+        # Live mode = explicit dry_run_mode=False that was NOT defaulted. Only the raw-dict path can be
+        # explicit-live here (object path keeps dry_run_defaulted=True).
+        is_live = policy_summary.get("dry_run_mode") is False and not dry_run_defaulted
+
+        # Gate (FAIL-CLOSED for live): live mode requires a server-authored security_gate_passed is True.
+        # security_gate_checked is TELEMETRY ONLY (not an authority bit). A raw-dict explicit-live envelope
+        # cannot satisfy this (security_gate_passed sanitized to False); object/default routing is unaffected.
+        if is_live and policy_summary.get("security_gate_passed") is not True:
+            return _make_blocked_envelope(
+                job_id=job_id,
+                tenant_id=tenant_id,
+                action=requested_action,
+                reason_code=RouteReasonCode.BLOCKED_POLICY_GATE,
+                reason_human="Live mode requires security gate passed (fail-closed)",
+                source_status=status_str,
+                foundup_id=getattr(job, "foundup_id", None),
+                policy_summary=policy_summary,
+            )
 
         # === Route to Backend ===
         target_backend = _ACTION_BACKEND_MAP.get(requested_action)

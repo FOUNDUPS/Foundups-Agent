@@ -304,10 +304,24 @@ class TestMissingIdentity:
 
 
 class TestPolicyGateBlocked:
-    """Test policy flags blocking routing."""
+    """Test policy flags blocking routing.
 
-    def test_security_gate_failed_blocks_routing(self):
-        """Security gate checked but not passed blocks routing."""
+    NOTE (live-mode discriminator, FOUNDUP_JOB_ROUTER_ROUTE_GATE_LIVE_MODE_DISCRIMINATOR_PHASE1):
+    The legacy opt-in ``security_gate_checked and not security_gate_passed`` block was
+    REPLACED by an explicit-live fail-closed gate. The object/to_dict() path is intentionally
+    never treated as live (``dry_run_defaulted`` stays True), so an object-path job with a
+    failed security gate now ROUTES rather than blocking - over-blocking the default/object
+    path is the regression the new gate explicitly avoids. Strict live-mode blocking coverage
+    lives in ``test_route_foundup_job_live_mode_gate.py`` (raw-dict explicit-live path).
+    """
+
+    def test_security_gate_failed_object_path_still_routes(self):
+        """Object-path job with security gate not passed ROUTES (object path is never live).
+
+        Replaces the legacy ``test_security_gate_failed_blocks_routing``: under the live-mode
+        discriminator the to_dict() object path keeps ``dry_run_defaulted`` True, so ``is_live``
+        is False and routing is preserved. This is the no-over-block guarantee for object jobs.
+        """
         job = MockFoundUpJob(
             job_id="job_012",
             tenant_id="tenant_larry",
@@ -320,11 +334,10 @@ class TestPolicyGateBlocked:
 
         envelope = route_foundup_job(job)
 
-        assert envelope.route_status == RouteStatus.BLOCKED
-        assert envelope.reason_code == RouteReasonCode.BLOCKED_POLICY_GATE
-        assert "security" in envelope.reason_human.lower()
-        assert envelope.policy_summary.get("security_gate_checked") is True
-        assert envelope.policy_summary.get("security_gate_passed") is False
+        # Stricter than the legacy assertion: prove the object path is NOT live-gated and routes.
+        assert envelope.route_status == RouteStatus.ROUTED
+        assert envelope.reason_code == RouteReasonCode.OK_ROUTED
+        assert envelope.reason_code != RouteReasonCode.BLOCKED_POLICY_GATE
 
     def test_security_gate_passed_allows_routing(self):
         """Security gate checked and passed allows routing."""
