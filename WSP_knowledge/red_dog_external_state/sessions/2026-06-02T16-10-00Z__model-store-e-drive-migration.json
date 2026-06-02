@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "record_type": "reddog_session_closeout",
+  "session_id": "2026-06-02__model-store-e-drive-migration",
+  "source": "reddog_session",
+  "captured_at": "2026-06-02T16:10:00Z",
+  "lane": "architect",
+  "work_summary": "Model-runtime SSD migration executed and validated. New high-speed SSD mounted as E: (label 'Agents'). F:->E: payload migration copied 6 folders (0102_Digital_Twin, LM_studio, HuggingFace, .pnpm-store, pywinassistant, HoloIndex merge-only), ~82 GB / 280k files via robocopy with 0 failed files. Ollama store hydrated: the real default Windows Ollama store (C:/Users/<user>/.ollama/models, 26 blobs / 11.11 GB) was copied NON-DESTRUCTIVELY into the configured fast-SSD target E:/0102_Digital_Twin/models. The prior premise (models on F:) was corrected - F:/0102_Digital_Twin/models was empty; the real blobs were on C:. Persistent OLLAMA_MODELS=E:/0102_Digital_Twin/models confirmed at User scope (Machine unset). Ollama restarted cleanly (server+app stopped, none remained, relaunched). Validation: ollama list shows 4 models; HTTP generate on qwen-overseer:latest returned done=True (411 tokens, ~88.5s first-load); ollama ps shows the model resident at 100% GPU - inference served from E:. C: store left INTACT pending a cleanup audit. Repo runtime config unchanged - a path-reference scan found no stale F: refs in code/config and no OLLAMA_HOME/O: ollama_models anywhere; hardcoded LM Studio/HoloIndex paths already pointed at E:, so the migration aligned the filesystem to pre-existing references. Pairs with the Hermes/Docker bootstrap (session 2026-06-02T12-00-00Z): Hermes in WSL, Docker containment working, OpenClaw import/gateway still blocked pending audit. No secrets, keys, or .env values stored.",
+  "pr_refs": [748, 749],
+  "slice_refs": [
+    "MODEL_STORE_E_DRIVE_MIGRATION_PHASE1",
+    "OLLAMA_STORE_E_DRIVE_HYDRATION_PHASE1"
+  ],
+  "decisions": [
+    "E: is the active model SSD; Ollama serves from E:/0102_Digital_Twin/models",
+    "C: default Ollama store retained via non-destructive copy, NOT deleted, pending cleanup audit",
+    "Repo runtime config left unchanged - migration aligned filesystem to pre-existing E: path references",
+    "Validation done via HTTP generate after the backgrounded ollama run stalled on ~88.5s first-load"
+  ],
+  "carry_forward": [
+    "MODEL_RUNTIME_PATH_REFERENCE_AUDIT_PHASE1",
+    "OLLAMA_C_STORE_CLEANUP_AUDIT_PHASE1"
+  ],
+  "redaction_notes": "Operational machine-state only. Absolute model-store paths recorded for recovery; the C: home username segment is anonymized as <user>. No API key values, OAuth/login codes, .env contents, or raw terminal transcript stored.",
+  "main_head_sha": "87edcd779",
+  "gaps": [
+    "C: default Ollama store not yet removed (retained pending OLLAMA_C_STORE_CLEANUP_AUDIT_PHASE1)",
+    "Server-process OLLAMA_MODELS env not directly inspected; inferred from User-scope env + fresh relaunch + successful E: serve",
+    "MODEL_RUNTIME_PATH_REFERENCE_AUDIT_PHASE1 scan completed but not yet formalized into a doc/PR"
+  ]
+}
