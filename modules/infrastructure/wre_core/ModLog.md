@@ -2,6 +2,48 @@
 
 ## Chronological Change Log
 
+### [2026-06-03] - FOUNDUP_JOB_ROUTER_ROUTE_GATE_LIVE_MODE_DISCRIMINATOR_PHASE1 (W6)
+
+**WSP Protocol References**: WSP 97 (Truth Boundary), WSP 50 (Pre-Action), WSP 22 (ModLog), WSP 5 (Coverage)
+**Predecessors**: #753 (router envelope sanitize + Gate 2 fail-closed  -  this is the sibling it DEFERRED);
+#752 (DAE gateway gate-flags trust-boundary audit, decision-only); #744 -> #751 (PolicyFlags write-back context).
+**Impact Analysis**: NARROW completion of #753. ROUTE_FOUNDUP_JOB_ONLY  -  only the Policy Check inside
+`route_foundup_job` was edited. No gateway/contract/Hermes/validation-seam/config/CI/WSP mutation.
+
+**Change**  -  `src/foundup_job_router.py`, `route_foundup_job` Policy Check (single hunk @ ~:1151):
+- Removed the legacy OPT-IN authority condition `security_gate_checked and not security_gate_passed`
+  (`security_gate_checked` is telemetry only, never an authority bit).
+- Removed the RAW/UNTRUSTED `policy_summary = policy_flags` dict assignment. The `elif isinstance(dict)`
+  branch now calls the existing #753 router-local helper
+  `_sanitize_untrusted_policy_flags_dict(policy_flags) -> (sanitized, dry_run_defaulted)` (deferred
+  `PolicyFlags` import inside the helper -> no new circular dep; `Tuple` import already added by #753).
+- Added a live-mode discriminator + FAIL-CLOSED gate:
+  `is_live = policy_summary.get("dry_run_mode") is False and not dry_run_defaulted`; if `is_live` and
+  `security_gate_passed is not True` -> `BLOCKED_POLICY_GATE` ("Live mode requires security gate passed
+  (fail-closed)"). `_make_blocked_envelope(...)` kwargs match the existing signature.
+
+**Object-path asymmetry (by design)**: the `to_dict()` object path keeps `dry_run_defaulted=True`, so it
+is NEVER treated as live at the routing seam (a default `dry_run_mode=False` is indistinguishable from
+explicit-live; gating it would over-block normal/default/dry-run object routing). Only an explicit-live
+RAW-DICT envelope can be live here, and it can never pass the gate because sanitization forces
+`security_gate_passed` to False. Strict server-authored live validation remains the VALIDATION seam's job
+(`validate_foundup_job_envelope` / `_validate_live_mode_gates`, #753).
+
+**Behavior**: forged-live raw dict (`dry_run_mode=False` + forged `security_gate_passed=True`) is BLOCKED;
+raw dict missing `dry_run_mode` stays dry-run and ROUTES (forged flags sanitized away); default/dry-run/
+object jobs still ROUTE (no over-block). GENERIC_DAE non-regressed (`route_foundup_job` is not on that path).
+
+**Tests**: new `tests/test_route_foundup_job_live_mode_gate.py` (5 passed). Updated 1 existing test in
+`test_foundup_job_router.py` (`test_security_gate_failed_blocks_routing` ->
+`test_security_gate_failed_object_path_still_routes`: legacy opt-in block replaced with a STRICTER
+object-path-routes assertion; no assertion deleted without a stricter replacement; no skip/xfail). Routing
+area (router + boundary + envelope + consumer + new): 176 passed. Full `wre_core/tests`: 1400 passed,
+5 failed (PRE-EXISTING, unrelated  -  `test_hxa16_real_hermes_delegate_adapter_safe_harness.py` +
+`test_wre_skills_discovery.py`; proven identical on stashed clean origin/main: 5 failed / 34 passed),
+3 skipped, 2 xfailed. (Full-suite run mutates `config/WRE_RUNBOOK.md` + `config/wre_defaults.env` as a
+pre-existing unrelated test side-effect; reverted  -  NO_CONFIG_CHANGE; routing test files do not mutate config.)
+**Audit**: `docs/audits/security/FOUNDUP_JOB_ROUTER_ROUTE_GATE_LIVE_MODE_DISCRIMINATOR_PHASE1.md`.
+
 ### [2026-06-02] - FOUNDUP_JOB_ROUTER_POLICYFLAGS_BOUNDARY_SANITIZATION_AND_GATE2_FAILCLOSED_PHASE1 (W6)
 
 **WSP Protocol References**: WSP 97 (Truth Boundary), WSP 50 (Pre-Action), WSP 22 (ModLog), WSP 5 (Coverage)
