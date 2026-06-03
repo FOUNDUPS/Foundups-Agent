@@ -1,5 +1,22 @@
 # TestModLog - wre_core/tests
 
+## 2026-06-03: HXA_POLICYFLAGS_REGRESSION_GUARDS_PHASE1 (W6)
+
+**Slice**: `HXA_POLICYFLAGS_REGRESSION_GUARDS_PHASE1` | **Predecessors**: #755 (named this slice), #754, #753, #752, #746/#747
+**Audit**: `docs/audits/security/HXA_POLICYFLAGS_REGRESSION_GUARDS_PHASE1.md`. TESTS/GUARDS ONLY; no production `.py` changed; no skip/xfail; NO network/model/live-DAE/WRE start; no dependency (stdlib `ast`/`itertools`/`dataclasses`; `hypothesis` NOT used).
+
+**New** `test_policyflags_regression_guards.py` (14 tests - G1, G4, G6):
+- `TestG1NoProductionCallerInvariant` (6): AST scan of `modules/**`+`holo_index/**` (excl. tests/archives/__pycache__; BOM-tolerant). `FoundUpJob.from_dict` prod callers = 0; every `PolicyFlags.from_dict` prod CALL in the allowlist {contract:461 __post_init__, contract:662 from_dict body, router:372 sanitizer}; total prod call count = 3; chokepoints still present. Negative controls: synthetic source string detects exactly the real CALL (line 4), excludes comment/docstring/string-literal.
+- `TestG4SanitizationFuzz` (6): dynamic `dataclasses.fields(PolicyFlags)` enumeration; every non-`dry_run_mode` field in `_SERVER_AUTHORED_FLAGS`; all-True + `itertools.product` combos -> contract `from_dict().to_dict()` AND router `_sanitize_untrusted_policy_flags_dict` force every non-dry_run field False and AGREE; documents router's safe `absent dry_run -> True` vs raw contract `False` divergence. Negative control: test-local fake leaky sanitizer fails the property.
+- `TestG6WriteBackBeforeGuardOrdering` (3): static AST source-order (`_writeback_token_verdict` :1521 < `_evaluate_destructive_action_guard` :1524 in `HermesJobExecutor.execute`) + behavioral spy (relative order via `create_job` + `HERMES_DELEGATE_ENABLED=0` + `dry_run=True`, gc.collect before temp cleanup). Negative control: synthetic inverted source snippet fails `wb<guard`.
+
+**New** `wre_gateway/tests/` directory (module had NONE): `__init__.py` + `test_dae_gateway_policyflags_guards.py` (10 tests - G2, G3, G5; `route_to_dae` driven via `asyncio.run`; `_invoke_core_dae`/`_invoke_foundup_dae` replaced with `AsyncMock`; NO live DAE/WRE/Hermes/network):
+- `TestG2GatewayValidationAvailable` (3): `FOUNDUP_JOB_VALIDATION_AVAILABLE is True` (test-only health). Negative control: monkeypatch False makes the `is True` check raise.
+- `TestG3GatewayFailClosedBeforeDispatch` (4): forged live FoundUpJob envelope BLOCKED with WSP 97 code; `_invoke_core_dae`/`_invoke_foundup_dae` NOT called; `violations_prevented` metric increments; structural no-execution-path-import proof. Negative control: monkeypatch `_verify_envelope`->True makes the SAME envelope dispatch (`_invoke_core_dae.called is True`).
+- `TestG5PermissiveFallbackBounded` (3): degraded (`FOUNDUP_JOB_VALIDATION_AVAILABLE=False`) FoundUpJob-shaped w/o objective still blocked; a dispatching generic envelope reaches ONLY the core stub (sentinel), never FoundUp dispatch/route/execute. Negative control: healthy-env contrast takes the STRICT block path.
+
+**Run**: focused (both new files) -> 24 passed (14 + 10). Full `wre_core/tests` + `wre_gateway/tests` -> 1424 passed, 5 failed, 3 skipped, 2 xfailed. The 5 failures are PRE-EXISTING worktree/submodule artifacts (same set noted in prior W6 entries): `test_hxa16_real_hermes_delegate_adapter_safe_harness.py` x4 (`vendor/hermes-agent` SUBMODULE not populated in the fresh worktree -> `delegate_tool.py` absent) and `test_wre_skills_discovery.py::test_initialization` (asserts repo dir name == "Foundups-Agent"; worktree dir is `w6-hxa-policyflags`). Proven on the main checkout: all 5 PASS. Not masked with skip/xfail; no production change required. Existing PolicyFlags suites re-run clean: 61 passed.
+
 ## 2026-06-03: FOUNDUP_JOB_ROUTER_ROUTE_GATE_LIVE_MODE_DISCRIMINATOR_PHASE1 (W6)
 
 **Slice**: `FOUNDUP_JOB_ROUTER_ROUTE_GATE_LIVE_MODE_DISCRIMINATOR_PHASE1` | **Predecessors**: #753 (deferred this sibling), #752, #744->#751
