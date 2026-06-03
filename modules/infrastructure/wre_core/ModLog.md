@@ -2,6 +2,51 @@
 
 ## Chronological Change Log
 
+### [2026-06-03] - HXA_POLICYFLAGS_REGRESSION_GUARDS_PHASE1 (W6)
+
+**WSP Protocol References**: WSP 97 (Truth Boundary), WSP 50 (Pre-Action), WSP 22 (ModLog), WSP 5 (Coverage)
+**Predecessors**: #755 (router security chain closeout review, lane W9 - NAMED this guard slice as the
+outstanding work); #754 (route-gate live-mode discriminator); #753 (router boundary sanitize + Gate 2
+fail-closed); #752 (DAE gateway gate-flags trust-boundary audit); #746/#747 (PolicyFlags write-back-before-guard).
+**Impact Analysis**: TESTS/GUARDS ONLY. No production `.py` modified. CI-coverage capstone that locks the
+already-CLOSED PolicyFlags trust chain with 6 durable invariant guards. New `wre_gateway/tests/` directory
+(the module previously had none). No dependency/CI/WSP/registry/config change; no CABR/payout/DAO touch.
+
+**Guards added** (see `docs/audits/security/HXA_POLICYFLAGS_REGRESSION_GUARDS_PHASE1.md`):
+- G1 NO-PRODUCTION-CALLER INVARIANT (AST): `FoundUpJob.from_dict` prod callers = 0; every
+  `PolicyFlags.from_dict` prod caller in the 3-entry ALLOWLIST {contract:461 __post_init__, contract:662
+  from_dict body, router:372 sanitizer}. AST excludes strings/comments/docstrings (only `ast.Call` nodes);
+  tests/archives excluded by path; BOM-tolerant scan. NOT naive count==0 for PolicyFlags (it has 3 legit callers).
+- G4 SANITIZATION FUZZ (stdlib, DYNAMIC field enumeration): `dataclasses.fields(PolicyFlags)` at runtime;
+  all-True + `itertools.product` combos -> BOTH contract `from_dict().to_dict()` and router
+  `_sanitize_untrusted_policy_flags_dict` force every non-`dry_run_mode` field False; every such field in
+  `_SERVER_AUTHORED_FLAGS`; router/contract CONSISTENT.
+- G6 WRITE-BACK-BEFORE-GUARD ORDERING: static AST source-order (`_writeback_token_verdict` :1521 BEFORE
+  `_evaluate_destructive_action_guard` :1524 in `execute()`) AND behavioral spy on both (relative call order).
+- G2 GATEWAY VALIDATION AVAILABLE (test-only health, NOT a prod startup assert): `FOUNDUP_JOB_VALIDATION_AVAILABLE is True`.
+- G3 GATEWAY E2E D3 FAIL-CLOSED: forged live FoundUpJob envelope (`security_gate_passed=True` +
+  `dry_run_mode=False`) is BLOCKED, and `_invoke_core_dae`/`_invoke_foundup_dae` are NOT called
+  (blocked BEFORE dispatch); plus structural proof the gateway imports NO execution path.
+- G5 GATEWAY PERMISSIVE-FALLBACK: with `FOUNDUP_JOB_VALIDATION_AVAILABLE=False`, degraded behavior bounded
+  (FoundUpJob-shaped w/o objective still blocked; even a dispatching generic envelope reaches only the
+  pattern-recall stub, never route/execute).
+
+**Negative controls (SAFE, synthetic only - no production mutation)**: G1 synthetic source string; G2/G5
+monkeypatch module constant; G3 monkeypatch `_verify_envelope`; G4 test-local fake sanitizer; G6 synthetic
+inverted source snippet. Each proven fail-when-inverted. `git status --porcelain` clean of production files.
+
+**Real defect**: NONE found. All 6 guards pass on origin/main @ 01eb327d9; chain remains CLOSED.
+
+**Tests**: focused new files -> 24 passed (14 G1/G4/G6 + 10 G2/G3/G5). Full `wre_core/tests` +
+`wre_gateway/tests` -> 1424 passed, 5 failed (PRE-EXISTING, unrelated:
+`test_hxa16_real_hermes_delegate_adapter_safe_harness.py` x4 - `vendor/hermes-agent` SUBMODULE not
+populated in worktree; `test_wre_skills_discovery.py::test_initialization` - hardcoded repo dir name;
+all 5 PASS on a clean main checkout), 3 skipped, 2 xfailed. No skip/xfail added. Existing PolicyFlags
+suites re-run clean (61 passed).
+
+**Deferred**: nav-comment hygiene at `foundup_job_consumer.py:27` (wrong filename `hermes_foundup_job_executor.py`;
+actual import is `hermes_job_executor.execute_foundup_job`) - out of security-guard scope, not load-bearing.
+
 ### [2026-06-03] - FOUNDUP_JOB_ROUTER_ROUTE_GATE_LIVE_MODE_DISCRIMINATOR_PHASE1 (W6)
 
 **WSP Protocol References**: WSP 97 (Truth Boundary), WSP 50 (Pre-Action), WSP 22 (ModLog), WSP 5 (Coverage)
