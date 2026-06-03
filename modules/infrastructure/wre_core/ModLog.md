@@ -2,6 +2,37 @@
 
 ## Chronological Change Log
 
+### [2026-06-04] - HERMES_DELEGATE_IMPORT_PATH_REMEDIATION_PHASE1 (W6)
+
+**WSP Protocol References**: WSP 97 (Truth Boundary), WSP 50 (Pre-Action), WSP 22 (ModLog)
+**Predecessors**: #757 (HERMES_AGENT_RUNTIME_INSTALL_AND_PATH_AUDIT_PHASE1 — mapped import-path drift,
+verdict DRIFT_CONFIRMED_BENIGN_TODAY, recommended Option B: importlib spec_from_file_location)
+**Impact Analysis**: TARGETED REMEDIATION. Single production file modified (`hermes_job_executor.py`).
+Fixes the `vendor.hermes_agent` (underscore) import-path drift that prevented the real
+`vendor/hermes-agent/tools/delegate_tool.py` (hyphenated submodule) from resolving. No dependency added
+(importlib.util is stdlib). No default changed. Delegation remains disabled by default.
+
+**Change** — `src/hermes_job_executor.py` (3 changes):
+- Added `import importlib.util` to stdlib import block.
+- Added `_resolve_vendor_delegate_path()` method: resolves absolute path to vendored delegate_tool.py
+  via workspace_root or __file__ ancestry walk. Returns `Path` (caller checks `.is_file()`).
+- Added `_load_delegate_task_from_vendor_path()` method: uses `importlib.util.spec_from_file_location`
+  + `module_from_spec` + `spec.loader.exec_module` to load from hyphenated vendor path. Validates loaded
+  module has callable `delegate_task`. Returns True/False; sets `_import_error` on failure.
+- Replaced `_lazy_import_delegate_task` body: removed broken `from vendor.hermes_agent.tools.delegate_tool
+  import delegate_task` (underscore path that never resolved). Now delegates to
+  `_load_delegate_task_from_vendor_path()`. Lazy-load caching via `_import_attempted` preserved.
+
+**Behavior**: unchanged. `HERMES_DELEGATE_ENABLED` default `"0"` → SIMULATED before import is attempted.
+`dry_run=True` (production singleton) → SIMULATED before import is attempted. Only the already-unreachable
+import path is fixed: when `HERMES_DELEGATE_ENABLED=1` + `dry_run=False`, the import now succeeds
+(if vendor file exists) → `BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED` (Phase 2 block). If vendor file
+missing or has unresolvable dependencies → `BLOCKED_IMPORT_UNAVAILABLE` (same as before).
+
+**Tests**: new `test_hermes_delegate_import_path.py` (19 passed). Existing executor tests: 94 passed.
+Full `wre_core/tests`: 1438 passed, 3 skipped, 2 xfailed.
+**Audit**: `docs/audits/architecture/HERMES_DELEGATE_IMPORT_PATH_REMEDIATION_PHASE1.md`.
+
 ### [2026-06-03] - HXA_POLICYFLAGS_REGRESSION_GUARDS_PHASE1 (W6)
 
 **WSP Protocol References**: WSP 97 (Truth Boundary), WSP 50 (Pre-Action), WSP 22 (ModLog), WSP 5 (Coverage)

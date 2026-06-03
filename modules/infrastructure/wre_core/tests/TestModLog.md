@@ -1,5 +1,21 @@
 # TestModLog - wre_core/tests
 
+## 2026-06-04: HERMES_DELEGATE_IMPORT_PATH_REMEDIATION_PHASE1 (W6)
+
+**Slice**: `HERMES_DELEGATE_IMPORT_PATH_REMEDIATION_PHASE1` | **Predecessors**: #757 (HERMES_AGENT_RUNTIME_INSTALL_AND_PATH_AUDIT_PHASE1)
+**Audit**: `docs/audits/architecture/HERMES_DELEGATE_IMPORT_PATH_REMEDIATION_PHASE1.md`. Targeted import-path remediation; no skip/xfail; NO network/model/live-Hermes/WRE/WSL/Docker start; no dependency (importlib.util is stdlib).
+
+**New** `test_hermes_delegate_import_path.py` (19 tests):
+- `TestBrokenUnderscoreImportNotUsed` (4): Source inspection of `_lazy_import_delegate_task` and `_load_delegate_task_from_vendor_path` proves no `from vendor.hermes_agent` statement; `spec_from_file_location` is present; `find_spec("vendor.hermes_agent...")` still fails (ModuleNotFoundError or None).
+- `TestFilePathImportResolvesFromHyphenatedPath` (2): Synthetic `delegate_tool.py` in temp `vendor/test-hyphen/tools/` (hyphenated path) resolves via `_load_delegate_task_from_vendor_path()`. Resolved callable named `delegate_task`.
+- `TestMissingVendorFileReturnsImportUnavailable` (2): Nonexistent vendor file → `_load_delegate_task_from_vendor_path()` returns False + `_import_error` set; through `execute()` with `HERMES_DELEGATE_ENABLED=1` + mocked guard → `BLOCKED_IMPORT_UNAVAILABLE`.
+- `TestVendorFileExistsAndDefinesDelegateTask` (3): `vendor/hermes-agent/tools/delegate_tool.py` exists, text contains `def delegate_task` (shape test, no import); `_resolve_vendor_delegate_path` source uses `hermes-agent` (hyphen), not `hermes_agent` (underscore).
+- `TestDisabledPathDoesNotImport` (2): `HERMES_DELEGATE_ENABLED=0` → `_import_attempted` stays False; `_load_delegate_task_from_vendor_path` not called.
+- `TestEnabledWithGoodDelegateResolvesButBlocked` (2): `HERMES_DELEGATE_ENABLED=1` + mocked import success → `BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED`; `delegate_task` NOT invoked; default remains disabled.
+- `TestNoLiveRuntimeStarted` (4): No `HERMES_RUNNING`/`WRE_DOCKER_STARTED` env vars; `importlib.util` is stdlib.
+
+**Run**: focused → 19 passed. Existing executor → 94 passed. Full `wre_core/tests` → 1438 passed, 3 skipped, 2 xfailed.
+
 ## 2026-06-03: HXA_POLICYFLAGS_REGRESSION_GUARDS_PHASE1 (W6)
 
 **Slice**: `HXA_POLICYFLAGS_REGRESSION_GUARDS_PHASE1` | **Predecessors**: #755 (named this slice), #754, #753, #752, #746/#747
