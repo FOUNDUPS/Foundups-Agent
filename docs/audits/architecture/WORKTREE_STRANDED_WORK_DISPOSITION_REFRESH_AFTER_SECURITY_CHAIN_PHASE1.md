@@ -56,18 +56,18 @@ The security chain has since LANDED most of that value, mooting the salvage reas
 
 | # | Worktree | Branch | Dirty | Disposition | Rationale (file-level) |
 |---|----------|--------|:-----:|-------------|------------------------|
-| 1 | `agent-a5d1278` | `worktree-agent-a5d1278…` | dirty | **ESCALATE_ENGINEERING_REVIEW** | Untracked DI SignatureVerifier/NonceRegistry/NO_VERIFIER **absent on main**, unique across all worktrees |
-| 2 | `agent-a7eb1c4` | `worktree-agent-a7eb1c4…` | dirty | REMOVE_NOW | HXA27 write-back landed #572/#746/#747; draft stale, no unique source |
+| 1 | `agent-a5d1278` | `worktree-agent-a5d1278...` | dirty | **ESCALATE_ENGINEERING_REVIEW** | Untracked DI SignatureVerifier/NonceRegistry/NO_VERIFIER **absent on main**, unique across all worktrees |
+| 2 | `agent-a7eb1c4` | `worktree-agent-a7eb1c4...` | dirty | REMOVE_NOW | HXA27 write-back landed #572/#746/#747; draft stale, no unique source |
 | 3 | `agent-ab7fd78` | `feat/hxa27-hermes-token-validation-integration` | dirty | REMOVE_NOW | Same HXA27 landed #572; draft-only methods superseded by `_writeback_token_verdict` |
-| 4 | `agent-a38c0fe` | `worktree-agent-a38c0fe…` | clean | REMOVE_NOW | HXA27 predecessor; audit doc byte-identical to main; 0 unique symbols |
-| 5 | `agent-ad998a8` | `worktree-agent-ad998a8…` | dirty | REMOVE_NOW | HXA29/30 landed #575/#576/#743; OOP design is superseded alternative |
+| 4 | `agent-a38c0fe` | `worktree-agent-a38c0fe...` | clean | REMOVE_NOW | HXA27 predecessor; audit doc byte-identical to main; 0 unique symbols |
+| 5 | `agent-ad998a8` | `worktree-agent-ad998a8...` | dirty | REMOVE_NOW | HXA29/30 landed #575/#576/#743; OOP design is superseded alternative |
 | 6 | `agent-a856df` | `docs/workspace-wrapper-model-update` | clean | SALVAGE_TO_PR | WSP_97 fork->wrapper correction NOT landed (FORK_PLAN.md still "Fork Plan") |
-| 7 | `agent-abd459f` | `worktree-agent-abd459f…` | clean | SALVAGE_TO_PR | 1052-line edge-observer schema spec absent on main |
-| 8 | `agent-ad2c339` | `worktree-agent-ad2c339…` | clean | SALVAGE_TO_PR | 893-line FoundUp DAE layered build-flow audit absent on main |
-| 9 | `agent-a3072b9` | `worktree-agent-a3072b9…` | clean | SALVAGE_TO_PR | 700-line RedDog preference-capsule audit absent on main |
+| 7 | `agent-abd459f` | `worktree-agent-abd459f...` | clean | SALVAGE_TO_PR | 1052-line edge-observer schema spec absent on main |
+| 8 | `agent-ad2c339` | `worktree-agent-ad2c339...` | clean | SALVAGE_TO_PR | 893-line FoundUp DAE layered build-flow audit absent on main |
+| 9 | `agent-a3072b9` | `worktree-agent-a3072b9...` | clean | SALVAGE_TO_PR | 700-line RedDog preference-capsule audit absent on main |
 | 10 | `w6-registry-build-integration` | `docs/foundup-build-system-registry-integration-audit` | clean | SALVAGE_TO_PR | Main has only the 80-line W10 template (#634); worktree is the 308-line filled audit |
-| 11 | `w9-roc-pipeline-integration-audit` | `worktree-w9-roc-…` | clean | SALVAGE_TO_PR | 519-line ROC pipeline audit absent on main |
-| 12 | `trade-deterministic-clock-fix` | `fix/trade-…-clock` | clean | SALVAGE_TO_PR | HEAD not ancestor of main; **#691 landed a DIFFERENT remediation** -> this version unique-not-landed |
+| 11 | `w9-roc-pipeline-integration-audit` | `worktree-w9-roc-...` | clean | SALVAGE_TO_PR | 519-line ROC pipeline audit absent on main |
+| 12 | `trade-deterministic-clock-fix` | `fix/trade-...-clock` | clean | SALVAGE_TO_PR | HEAD not ancestor of main; **#691 landed a DIFFERENT remediation** -> this version unique-not-landed |
 | 13 | `MCPFSR-W9` | `docs/mcp-foundup-scope-reaudit-phase1` | dirty (staged) | ARCHIVE_DOC | Staged-only re-audit; filename missing on main; archive doc then remove |
 | 14 | `vote-concat-audit` | `docs/vote-existing-concatenation-audit` | dirty (staged) | ARCHIVE_DOC | Staged-only concatenation audit; archive doc then remove |
 | 15 | `w1-holoindex-hxa-fix` | `worktree-w1-holoindex-hxa-fix` | dirty | REMOVE_NOW | Source byte-identical via #621 squash; only dirty = lone artifact |
@@ -76,8 +76,8 @@ The security chain has since LANDED most of that value, mooting the salvage reas
 | 18 | `0102-clean-main` | (detached) | clean | KEEP_0102_CLEAN_MAIN | Protected clean-main reference; NEVER removed |
 | 19 | `w6_autoagent_rescue` | `docs/autoagent-lab-park-note` | clean | KEEP_OPEN_PR | Protected; backs open PR #418; NEVER removed |
 
-**Counts (reconcile to 19):** REMOVE_NOW **7** · SALVAGE_TO_PR **7** · ARCHIVE_DOC **2** ·
-ESCALATE_ENGINEERING_REVIEW **1** · KEEP_0102_CLEAN_MAIN **1** · KEEP_OPEN_PR **1** = **19**.
+**Counts (reconcile to 19):** REMOVE_NOW **7**  |  SALVAGE_TO_PR **7**  |  ARCHIVE_DOC **2**  | 
+ESCALATE_ENGINEERING_REVIEW **1**  |  KEEP_0102_CLEAN_MAIN **1**  |  KEEP_OPEN_PR **1** = **19**.
 
 ---
 
@@ -138,10 +138,10 @@ primitive (slice `HXA_DI_SIGNATURE_VERIFIER_SALVAGE_PHASE1`) or intentionally ab
 
 | Path | Branch | Head | Dirty | Lock | Decision | Execution Slice |
 |------|--------|------|:-----:|:----:|----------|-----------------|
-| `.claude/worktrees/agent-a7eb1c4…` | `worktree-agent-a7eb1c4…` | `0c01a268a` | dirty | lock | REMOVE_NOW | WORKTREE_STRANDED_WORK_REMOVAL_EXECUTION_PHASE1 |
-| `.claude/worktrees/agent-ab7fd78…` | `feat/hxa27-hermes-token-validation-integration` | `0c01a268a` | dirty | lock | REMOVE_NOW | WORKTREE_STRANDED_WORK_REMOVAL_EXECUTION_PHASE1 |
-| `.claude/worktrees/agent-a38c0fe…` | `worktree-agent-a38c0fe…` | `50ac3dc11` | clean | lock | REMOVE_NOW | WORKTREE_STRANDED_WORK_REMOVAL_EXECUTION_PHASE1 |
-| `.claude/worktrees/agent-ad998a8…` | `worktree-agent-ad998a8…` | `facdd7362` | dirty | lock | REMOVE_NOW | WORKTREE_STRANDED_WORK_REMOVAL_EXECUTION_PHASE1 |
+| `.claude/worktrees/agent-a7eb1c4...` | `worktree-agent-a7eb1c4...` | `0c01a268a` | dirty | lock | REMOVE_NOW | WORKTREE_STRANDED_WORK_REMOVAL_EXECUTION_PHASE1 |
+| `.claude/worktrees/agent-ab7fd78...` | `feat/hxa27-hermes-token-validation-integration` | `0c01a268a` | dirty | lock | REMOVE_NOW | WORKTREE_STRANDED_WORK_REMOVAL_EXECUTION_PHASE1 |
+| `.claude/worktrees/agent-a38c0fe...` | `worktree-agent-a38c0fe...` | `50ac3dc11` | clean | lock | REMOVE_NOW | WORKTREE_STRANDED_WORK_REMOVAL_EXECUTION_PHASE1 |
+| `.claude/worktrees/agent-ad998a8...` | `worktree-agent-ad998a8...` | `facdd7362` | dirty | lock | REMOVE_NOW | WORKTREE_STRANDED_WORK_REMOVAL_EXECUTION_PHASE1 |
 | `.claude/worktrees/w1-holoindex-hxa-fix` | `worktree-w1-holoindex-hxa-fix` | `8f05f1f4b` | dirty | - | REMOVE_NOW | WORKTREE_STRANDED_WORK_REMOVAL_EXECUTION_PHASE1 |
 | `.claude/worktrees/w6-hxa-policyflags` | `test/hxa-policyflags-regression-guards-phase1` | `47fc79d2d` | clean | - | REMOVE_NOW | WORKTREE_STRANDED_WORK_REMOVAL_EXECUTION_PHASE1 |
 | `O:/tmp/w_tq3_routing` | `research/tq3-per-collection-routing` | `b9f8a9a6f` | dirty | - | REMOVE_NOW | WORKTREE_STRANDED_WORK_REMOVAL_EXECUTION_PHASE1 |
