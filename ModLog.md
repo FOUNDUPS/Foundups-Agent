@@ -1,5 +1,46 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-03] Worktree Stranded-Work Removal - Execution Phase 1 (W6)
+
+**Change Type**: Maintenance / Controlled Destructive (worktree removal only)
+**By**: 0102 (Worker-Lane W6)
+**WSP References**: WSP 00, WSP 22, WSP 50, WSP 64, WSP 97
+**Predecessors**: #758 (allowlist decision), #741 (Windows reconciliation pattern)
+
+### Summary
+
+Executed removal of exactly the 7 stranded worktrees allowlisted in #758. No
+branch deletions, no source mutation, no touch to PROTECTED / ESCALATE
+(a5d1278) / SALVAGE (7) / ARCHIVE (2) worktrees.
+
+### What Changed
+
+- Removed 7 worktrees (all `git worktree remove`, exit 0 each):
+  1. `.claude/worktrees/agent-a7eb1c4ac8465b49f` (--force, was locked, dirty backed up)
+  2. `.claude/worktrees/agent-ab7fd78b358b1cff2` (--force, was locked, dirty backed up)
+  3. `.claude/worktrees/agent-a38c0fe37c0231091` (--force, was locked-admin, clean)
+  4. `.claude/worktrees/agent-ad998a8e0c488774a` (--force, was locked, dirty backed up)
+  5. `.claude/worktrees/w1-holoindex-hxa-fix` (--force, dirty backed up)
+  6. `.claude/worktrees/w6-hxa-policyflags` (plain remove, clean)
+  7. `O:/tmp/w_tq3_routing` (--force, dirty backed up)
+- Unlocked 4 stale-locked paths first (lock owner pid 26164 verified NOT_RUNNING).
+- Created out-of-repo dirty backups for all 5 dirty paths BEFORE any force at
+  `O:/tmp/worktree_removal_backups/20260603T123951Z/` (diffs + untracked copies).
+- Ran `git worktree prune` (exit 0); `prune --dry-run` now empty.
+- Linked worktrees: 19 -> 12. Branch count: 263 -> 263 (no deletions).
+- Primary checkout unchanged: `main` @ 4b10da5a9.
+
+### Files Added (this phase)
+
+- `scripts/worktree_removal_execution_phase1_dryrun.ps1` - non-destructive dry-run (run before real removal).
+- `docs/audits/architecture/WORKTREE_STRANDED_WORK_REMOVAL_EXECUTION_PHASE1.md` - 12-section execution audit + WSP_97 checklist (22/22 YES).
+
+### Deferred
+
+- Branch hygiene (pruning the 7 orphaned worktree branches) - NOT done this phase.
+
+---
+
 ## [2026-04-18] p.fMALL Device Policy Hardening
 
 **Change Type**: Security / Hardening
