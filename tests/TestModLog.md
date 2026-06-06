@@ -1,5 +1,20 @@
 # TestModLog - shared tests
 
+## 2026-06-07: Headless bootstrap seam (WRE/OpenClaw/Hermes dry-run, W6)
+
+- File: `tests/test_main_runtime_bootstrap.py` (extended: 5 existing + 4 new = 9 tests)
+- Slice: `WRE_OPENCLAW_HERMES_AUTONOMOUS_BUILD_DRYRUN_PHASE1`
+- New tests:
+  - `test_run_headless_bootstraps_dae_specs_before_supervisor_cycle` - asserts call order [bootstrap, run_cycle] and shared broker (OPENCLAW_HEADLESS_MAX_CYCLES=1).
+  - `test_run_headless_fail_closed_when_wre_not_ready` - exits 1, no bootstrap/supervisor.
+  - `test_run_headless_one_cycle_no_live_execution` - asserts RESIDENT/SUPERVISOR autostart + ALLOW_RESTART defaulted "0".
+  - `test_supervisor_triage_escalates_not_live_starts_when_restart_disabled` - triage escalates `resident_openclaw_down_restart_disabled`, not the live `start_openclaw` action.
+- Command: `python -m pytest tests/test_main_runtime_bootstrap.py -q`
+- Status: **9 passed**. All heavy seams mocked; no live process/network/model/OAuth/Docker/GitHub-write.
+- Note: bounded one-cycle dry-run proof only (WSP 97). Pre-existing `test_openclaw_supervisor_p0.py::test_run_cycle_executes_and_completes_pending_autonomous_task` fails on clean main (verified via stash) - out of scope.
+
+---
+
 ## 2026-03-18: Main bootstrap resident OpenClaw registration
 
 - Command: `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest tests/test_main_runtime_bootstrap.py -q`

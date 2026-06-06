@@ -1344,10 +1344,24 @@ def run_headless() -> int:
 
     try:
         from modules.communication.moltbot_bridge.src.openclaw_supervisor import OpenClawSupervisor
-        from modules.infrastructure.dae_daemon.src.dae_launch_broker import DAELaunchBroker
         from modules.infrastructure.dae_daemon.src.dae_observer import DAEObserver
 
-        broker = DAELaunchBroker()
+        # WSP 97 headless bootstrap seam: register broker-managed DAE launch specs
+        # BEFORE the supervisor cycle by reusing the existing bootstrap path (no
+        # duplicated specs; shared singleton broker). Default the headless loop to a
+        # BOUNDED, dry-run-safe posture so a one-cycle run performs no live launch:
+        #   - suppress resident/supervisor DAE autostart (avoid duplicate runtimes)
+        #   - suppress the supervisor's service-restart path so triage escalates
+        #     ("resident_openclaw_down_restart_disabled") instead of live-starting
+        #     the resident webhook service.
+        # Autonomous task/maintenance execution is already off by default
+        # (OPENCLAW_AUTO_TASKS_ENABLED / OPENCLAW_MAINTENANCE_ENABLED default "0").
+        # An operator opts into live autonomy via these existing env flags.
+        os.environ.setdefault("OPENCLAW_RESIDENT_AUTOSTART", "0")
+        os.environ.setdefault("OPENCLAW_SUPERVISOR_AUTOSTART", "0")
+        os.environ.setdefault("OPENCLAW_SUPERVISOR_ALLOW_RESTART", "0")
+        bootstrap_runtime_dae_launches()
+        broker = get_dae_launch_broker()
         observer = DAEObserver()
 
         supervisor = OpenClawSupervisor(
