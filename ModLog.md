@@ -1,5 +1,39 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-07] Headless Bootstrap Seam Fix - WRE/OpenClaw/Hermes Dry-Run (W6)
+
+**Change Type**: Minimal remediation + characterization tests
+**By**: 0102 (Worker-Lane W6)
+**WSP References**: WSP 00, WSP 15, WSP 22, WSP 84, WSP 97
+**Slice**: `WRE_OPENCLAW_HERMES_AUTONOMOUS_BUILD_DRYRUN_PHASE1`
+
+**Root cause**: `main.py --headless` routes to `run_headless()` (L1414-1415), bypassing
+`main()`, so `bootstrap_runtime_dae_launches()` (called only from `main()` L1260) never ran.
+`run_headless` built a FRESH empty `DAELaunchBroker()` -> the supervisor's `_observe` saw
+`registered=False` and `_triage` escalated `openclaw_runtime_not_registered` every cycle
+(dead-loop, no plan/execute).
+
+**Fix (main.py, thin router preserved)**: `run_headless` now reuses
+`bootstrap_runtime_dae_launches()` (no duplicated specs) and consumes the shared singleton
+`get_dae_launch_broker()`. It sets dry-run-safe `setdefault` defaults
+(`OPENCLAW_RESIDENT_AUTOSTART`/`OPENCLAW_SUPERVISOR_AUTOSTART`/`OPENCLAW_SUPERVISOR_ALLOW_RESTART`
+= "0") so one cycle registers specs yet launches no live service (triage escalates
+`resident_openclaw_down_restart_disabled` instead of `start_openclaw`). Operator opts into live
+autonomy via the existing env flags.
+
+**Proven (HEADLESS_BOOTSTRAP_SEAM_FIXED)**: 9 passing tests in `tests/test_main_runtime_bootstrap.py`
+(bootstrap-before-cycle order, fail-closed WRE gate, no-live-execution, restart-disabled guard).
+All heavy seams mocked; no live process/network/model/OAuth/Docker/GitHub-write.
+
+**Honest scope (WSP 97)**: bounded one-cycle dry-run only - NOT continuous autonomy. The
+FoundUp->Hermes dry-run is a verified but SEPARATE seam (via `run_wre.py`/`FoundUpJobConsumer`),
+NOT wired into the headless supervisor loop. FoundUp coverage: 11/16 HAS_TESTS, 5 NO_TEST_COVERAGE.
+Pre-existing `test_openclaw_supervisor_p0.py` failure verified on clean main (out of scope).
+Full audit: `docs/audits/architecture/WRE_OPENCLAW_HERMES_AUTONOMOUS_BUILD_DRYRUN_PHASE1.md`.
+Next: `WRE_HEADLESS_BOOTSTRAP_W10_GATE`, `FOUNDUP_AUTO_TEST_MATRIX_COVERAGE_PHASE1`. WSP_97: 22/22 YES.
+
+---
+
 ## [2026-06-03] Worktree Stranded-Work Removal - Execution Phase 1 (W6)
 
 **Change Type**: Maintenance / Controlled Destructive (worktree removal only)
