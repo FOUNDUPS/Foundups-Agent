@@ -1,7 +1,7 @@
 # Hermes Delegate Import-Path Remediation (Phase 1)
 
 **Slice:** HERMES_DELEGATE_IMPORT_PATH_REMEDIATION_PHASE1
-**Worker-Lane:** W6 — **Author:** 0102 (WSP_00 zen state, WSP_97 Truth Boundary discipline)
+**Worker-Lane:** W6 - **Author:** 0102 (WSP_00 zen state, WSP_97 Truth Boundary discipline)
 **Type:** Targeted code remediation + focused regression tests.
 **Base:** origin/main, branch `fix/hermes-delegate-import-path-remediation-phase1`
 
@@ -26,7 +26,7 @@ the vendor submodule, mutating the vendor directory, starting any live runtime, 
 - Finding: `hermes_job_executor.py:623` `from vendor.hermes_agent.tools.delegate_tool import delegate_task`
   uses an underscore package path that does not resolve (the real artifact is `vendor/hermes-agent`, a
   hyphenated git submodule directory not addressable by Python dotted import)
-- Recommendation: **Option B** — `importlib.util.spec_from_file_location` from the hyphen dir
+- Recommendation: **Option B** - `importlib.util.spec_from_file_location` from the hyphen dir
 
 ---
 
@@ -38,7 +38,7 @@ the vendor submodule, mutating the vendor directory, starting any live runtime, 
 | `find_spec("vendor.hermes_agent...")` | `ModuleNotFoundError` | import FAILS |
 | Path refs `:31/:739/:2069` | `vendor/hermes-agent/...` (hyphen) | FILESYSTEM correct |
 | On-disk file | `vendor/hermes-agent/tools/delegate_tool.py` exists, defines `delegate_task` | PRESENT |
-| Tests | Mock `_lazy_import_delegate_task` — never exercise real import | SILENT GAP |
+| Tests | Mock `_lazy_import_delegate_task` - never exercise real import | SILENT GAP |
 
 ---
 
@@ -49,7 +49,7 @@ the vendor submodule, mutating the vendor directory, starting any live runtime, 
 1. **Added `import importlib.util`** to stdlib import block (no new dependency).
 
 2. **Added `_resolve_vendor_delegate_path()`**: resolves absolute path to vendored `delegate_tool.py`.
-   Resolution order: `workspace_root` → `__file__` ancestry walk. Returns `Path`.
+   Resolution order: `workspace_root` -> `__file__` ancestry walk. Returns `Path`.
 
 3. **Added `_load_delegate_task_from_vendor_path()`**: uses `importlib.util.spec_from_file_location`
    + `module_from_spec` + `spec.loader.exec_module` to load from the hyphenated vendor path. Validates
@@ -113,10 +113,10 @@ The file-path import resolves to the real vendored delegate tool.
 |---|-----------|-------|----------|
 | 1 | `TestBrokenUnderscoreImportNotUsed` | 4 | Source inspection + find_spec failure |
 | 2 | `TestFilePathImportResolvesFromHyphenatedPath` | 2 | Synthetic hyphenated path resolution |
-| 3 | `TestMissingVendorFileReturnsImportUnavailable` | 2 | Missing file → BLOCKED_IMPORT_UNAVAILABLE |
+| 3 | `TestMissingVendorFileReturnsImportUnavailable` | 2 | Missing file -> BLOCKED_IMPORT_UNAVAILABLE |
 | 4 | `TestVendorFileExistsAndDefinesDelegateTask` | 3 | Vendor file shape + path agreement |
 | 5 | `TestDisabledPathDoesNotImport` | 2 | HERMES_DELEGATE_ENABLED=0 does not import |
-| 6 | `TestEnabledWithGoodDelegateResolvesButBlocked` | 2 | Enabled → BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED |
+| 6 | `TestEnabledWithGoodDelegateResolvesButBlocked` | 2 | Enabled -> BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED |
 | 7 | `TestNoLiveRuntimeStarted` | 4 | No Hermes/WRE/WSL/Docker/network |
 | **Total** | | **19** | |
 
@@ -159,7 +159,7 @@ Vendor submodule untouched. No live runtime started. Full test suite passes.
 | 5 | WSL_RUNTIME_UNTOUCHED | YES | No WSL commands or `~/.hermes` access |
 | 6 | FILE_PATH_IMPORT_USED | YES | `importlib.util.spec_from_file_location` in `_load_delegate_task_from_vendor_path` |
 | 7 | BROKEN_UNDERSCORE_IMPORT_NOT_SUCCESS_PATH | YES | `from vendor.hermes_agent...` removed; source inspection tests prove absence |
-| 8 | BLOCKED_IMPORT_UNAVAILABLE_PRESERVED | YES | Missing vendor file → `BLOCKED_IMPORT_UNAVAILABLE`; test proves |
+| 8 | BLOCKED_IMPORT_UNAVAILABLE_PRESERVED | YES | Missing vendor file -> `BLOCKED_IMPORT_UNAVAILABLE`; test proves |
 | 9 | TESTS_NO_LIVE_RUNTIME | YES | No Hermes/WRE/WSL/Docker/network/model started; meta-test verifies |
 | 10 | NO_DEPENDENCY_CHANGE | YES | `importlib.util` is Python stdlib; no requirements/packaging modified |
 | 11 | NO_CI_CHANGE | YES | No CI/CD configuration files modified |

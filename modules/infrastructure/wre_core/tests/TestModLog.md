@@ -8,13 +8,13 @@
 **New** `test_hermes_delegate_import_path.py` (19 tests):
 - `TestBrokenUnderscoreImportNotUsed` (4): Source inspection of `_lazy_import_delegate_task` and `_load_delegate_task_from_vendor_path` proves no `from vendor.hermes_agent` statement; `spec_from_file_location` is present; `find_spec("vendor.hermes_agent...")` still fails (ModuleNotFoundError or None).
 - `TestFilePathImportResolvesFromHyphenatedPath` (2): Synthetic `delegate_tool.py` in temp `vendor/test-hyphen/tools/` (hyphenated path) resolves via `_load_delegate_task_from_vendor_path()`. Resolved callable named `delegate_task`.
-- `TestMissingVendorFileReturnsImportUnavailable` (2): Nonexistent vendor file → `_load_delegate_task_from_vendor_path()` returns False + `_import_error` set; through `execute()` with `HERMES_DELEGATE_ENABLED=1` + mocked guard → `BLOCKED_IMPORT_UNAVAILABLE`.
+- `TestMissingVendorFileReturnsImportUnavailable` (2): Nonexistent vendor file -> `_load_delegate_task_from_vendor_path()` returns False + `_import_error` set; through `execute()` with `HERMES_DELEGATE_ENABLED=1` + mocked guard -> `BLOCKED_IMPORT_UNAVAILABLE`.
 - `TestVendorFileExistsAndDefinesDelegateTask` (3): `vendor/hermes-agent/tools/delegate_tool.py` exists, text contains `def delegate_task` (shape test, no import); `_resolve_vendor_delegate_path` source uses `hermes-agent` (hyphen), not `hermes_agent` (underscore).
-- `TestDisabledPathDoesNotImport` (2): `HERMES_DELEGATE_ENABLED=0` → `_import_attempted` stays False; `_load_delegate_task_from_vendor_path` not called.
-- `TestEnabledWithGoodDelegateResolvesButBlocked` (2): `HERMES_DELEGATE_ENABLED=1` + mocked import success → `BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED`; `delegate_task` NOT invoked; default remains disabled.
+- `TestDisabledPathDoesNotImport` (2): `HERMES_DELEGATE_ENABLED=0` -> `_import_attempted` stays False; `_load_delegate_task_from_vendor_path` not called.
+- `TestEnabledWithGoodDelegateResolvesButBlocked` (2): `HERMES_DELEGATE_ENABLED=1` + mocked import success -> `BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED`; `delegate_task` NOT invoked; default remains disabled.
 - `TestNoLiveRuntimeStarted` (4): No `HERMES_RUNNING`/`WRE_DOCKER_STARTED` env vars; `importlib.util` is stdlib.
 
-**Run**: focused → 19 passed. Existing executor → 94 passed. Full `wre_core/tests` → 1438 passed, 3 skipped, 2 xfailed.
+**Run**: focused -> 19 passed. Existing executor -> 94 passed. Full `wre_core/tests` -> 1438 passed, 3 skipped, 2 xfailed.
 
 ## 2026-06-03: HXA_POLICYFLAGS_REGRESSION_GUARDS_PHASE1 (W6)
 
@@ -64,12 +64,12 @@ routing test files do not mutate config.)
 
 **New** `test_foundup_job_router_policyflags_boundary.py` (12 tests):
 - `TestRawDictSelfAssertionSanitized`: forged gate/token flags do NOT survive helper or envelope snapshot.
-- `TestMissingDryRunDefaultsSafe` / `TestMissingPolicyFlagsNoneBranch`: absent `dry_run_mode` → safe True (dry-run, not live); None branch unchanged.
+- `TestMissingDryRunDefaultsSafe` / `TestMissingPolicyFlagsNoneBranch`: absent `dry_run_mode` -> safe True (dry-run, not live); None branch unchanged.
 - `TestLiveRawDictWithoutSecurityBlocked` / `TestLiveRawDictForgedSecurityBlocked`: explicit live raw dict (incl. forged `security_gate_passed=True`) is BLOCKED after sanitization.
 - `TestLegitimateLivePassServerAuthored`: server-authored snapshot live-passes; missing security still fails (fail-closed).
 - `TestGenericDAENoRegression`: run_wre-style `{objective}` envelope still classifies GENERIC_DAE and passes.
 
-**Updated existing suites to the NEW fail-closed/sanitized semantics** (each justified in audit §10).
+**Updated existing suites to the NEW fail-closed/sanitized semantics** (each justified in audit Section 10).
 Root cause: under the locked design a legitimate live PASS is no longer reachable through the public
 envelope API (raw dicts sanitized; the unchanged object branch coerces a falsy `dry_run_mode` object back
 to dry-run). Per dispatch Test #6, legitimate live passes and live-only gate codes are exercised directly
@@ -83,7 +83,7 @@ deleted without a replacement.
 - Evidence-required tests (`test_live_mode_with_empty_evidence_fails`, `..._no_evidence_field_fails`):
   direct `_validate_live_mode_gates` with server-authored snapshot so evidence is the sole missing gate.
 - Security-gate tests (`test_live_mode_security_gate_passed_false_fails`,
-  `..._required_even_when_not_checked` — the latter INVERTS the old `..._not_checked_passes` to fail-closed).
+  `..._required_even_when_not_checked` - the latter INVERTS the old `..._not_checked_passes` to fail-closed).
 - Compute-budget live tests: direct `_validate_compute_budget(is_live_mode=True)`.
 - `test_live_mode_fields_in_serialized_result`: serialization shape + `is_live_mode True` via explicit raw
   live dict; gate PASS proven at gate surface.
@@ -91,8 +91,8 @@ deleted without a replacement.
 **Determinism**: pure validation-layer unit tests; NO network / NO model / NO live DAE / NO WRE start.
 
 **Run**: `pytest modules/infrastructure/wre_core/tests/test_foundup_job_router_policyflags_boundary.py
-test_foundup_job_envelope_validation.py test_foundup_job_router.py` → 140 passed. Full `wre_core/tests`
-→ 1395 passed, 5 failed (pre-existing, unrelated — proven on clean origin/main), 3 skipped, 2 xfailed.
+test_foundup_job_envelope_validation.py test_foundup_job_router.py` -> 140 passed. Full `wre_core/tests`
+-> 1395 passed, 5 failed (pre-existing, unrelated - proven on clean origin/main), 3 skipped, 2 xfailed.
 
 ## 2026-06-02: HXA_POLICYFLAGS_WRITEBACK_REMEDIATION_PHASE1 (W6)
 
@@ -100,18 +100,18 @@ test_foundup_job_envelope_validation.py test_foundup_job_router.py` → 140 pass
 
 **New** `test_hxa_policyflags_writeback_remediation.py` (13 tests):
 - `TestWriteBackReflectsVerdict`: valid / no-token / invalid-token write-back of `capability_token_*`.
-- `TestBypassClosed`: payload pre-set `capability_token_*=True` + no token → STILL BLOCKED at D3;
+- `TestBypassClosed`: payload pre-set `capability_token_*=True` + no token -> STILL BLOCKED at D3;
   write-back demotes forged object flags before guard.
 - `TestBoundaryUnchanged`: D4/D5/D6 blocked even with valid token (parametrized); D3 dry-run only;
   write-back never fabricates `security_gate_passed`.
 - `TestWriteBackHelperSemantics`: direct unit coverage of `_writeback_token_verdict` mapping.
 
-**Updated existing suites to the NEW correct semantics** (each justified in audit §9):
-- `test_hxa24…`: 3 from_dict round-trip tests now assert sanitization (forced False); 2 D3 "all gates"
+**Updated existing suites to the NEW correct semantics** (each justified in audit Section 9):
+- `test_hxa24...`: 3 from_dict round-trip tests now assert sanitization (forced False); 2 D3 "all gates"
   tests now supply a REAL token in payload (forging flags no longer works).
-- `test_hxa25…` / `test_hxa28…`: `_create_*_with_all_gates` helpers attach a REAL broad-scope token
+- `test_hxa25...` / `test_hxa28...`: `_create_*_with_all_gates` helpers attach a REAL broad-scope token
   (D3 passes guard; D4/D5/D6 validate token but guard-blocked by class).
-- `test_hxa4/12/14/16…`: `set_d3_capability_token_gates` attaches a REAL D3 token (`dry_run_only=False`
+- `test_hxa4/12/14/16...`: `set_d3_capability_token_gates` attaches a REAL D3 token (`dry_run_only=False`
   so it validates in both dry/live executor modes); imports the issuer via the FULL package path so
   `CapabilityToken` class identity matches the executor's `isinstance` check.
 

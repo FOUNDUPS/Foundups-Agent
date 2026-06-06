@@ -5,14 +5,14 @@
 ### [2026-06-04] - HERMES_DELEGATE_IMPORT_PATH_REMEDIATION_PHASE1 (W6)
 
 **WSP Protocol References**: WSP 97 (Truth Boundary), WSP 50 (Pre-Action), WSP 22 (ModLog)
-**Predecessors**: #757 (HERMES_AGENT_RUNTIME_INSTALL_AND_PATH_AUDIT_PHASE1 — mapped import-path drift,
+**Predecessors**: #757 (HERMES_AGENT_RUNTIME_INSTALL_AND_PATH_AUDIT_PHASE1 - mapped import-path drift,
 verdict DRIFT_CONFIRMED_BENIGN_TODAY, recommended Option B: importlib spec_from_file_location)
 **Impact Analysis**: TARGETED REMEDIATION. Single production file modified (`hermes_job_executor.py`).
 Fixes the `vendor.hermes_agent` (underscore) import-path drift that prevented the real
 `vendor/hermes-agent/tools/delegate_tool.py` (hyphenated submodule) from resolving. No dependency added
 (importlib.util is stdlib). No default changed. Delegation remains disabled by default.
 
-**Change** — `src/hermes_job_executor.py` (3 changes):
+**Change** - `src/hermes_job_executor.py` (3 changes):
 - Added `import importlib.util` to stdlib import block.
 - Added `_resolve_vendor_delegate_path()` method: resolves absolute path to vendored delegate_tool.py
   via workspace_root or __file__ ancestry walk. Returns `Path` (caller checks `.is_file()`).
@@ -23,11 +23,11 @@ Fixes the `vendor.hermes_agent` (underscore) import-path drift that prevented th
   import delegate_task` (underscore path that never resolved). Now delegates to
   `_load_delegate_task_from_vendor_path()`. Lazy-load caching via `_import_attempted` preserved.
 
-**Behavior**: unchanged. `HERMES_DELEGATE_ENABLED` default `"0"` → SIMULATED before import is attempted.
-`dry_run=True` (production singleton) → SIMULATED before import is attempted. Only the already-unreachable
+**Behavior**: unchanged. `HERMES_DELEGATE_ENABLED` default `"0"` -> SIMULATED before import is attempted.
+`dry_run=True` (production singleton) -> SIMULATED before import is attempted. Only the already-unreachable
 import path is fixed: when `HERMES_DELEGATE_ENABLED=1` + `dry_run=False`, the import now succeeds
-(if vendor file exists) → `BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED` (Phase 2 block). If vendor file
-missing or has unresolvable dependencies → `BLOCKED_IMPORT_UNAVAILABLE` (same as before).
+(if vendor file exists) -> `BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED` (Phase 2 block). If vendor file
+missing or has unresolvable dependencies -> `BLOCKED_IMPORT_UNAVAILABLE` (same as before).
 
 **Tests**: new `test_hermes_delegate_import_path.py` (19 passed). Existing executor tests: 94 passed.
 Full `wre_core/tests`: 1438 passed, 3 skipped, 2 xfailed.
@@ -123,17 +123,17 @@ pre-existing unrelated test side-effect; reverted  -  NO_CONFIG_CHANGE; routing 
 ### [2026-06-02] - FOUNDUP_JOB_ROUTER_POLICYFLAGS_BOUNDARY_SANITIZATION_AND_GATE2_FAILCLOSED_PHASE1 (W6)
 
 **WSP Protocol References**: WSP 97 (Truth Boundary), WSP 50 (Pre-Action), WSP 22 (ModLog), WSP 5 (Coverage)
-**Predecessors**: #752 (DAE gateway gate-flags trust-boundary audit, decision-only); #744 → #746 → #747 → #751 (PolicyFlags write-back / `from_dict` chokepoint line)
+**Predecessors**: #752 (DAE gateway gate-flags trust-boundary audit, decision-only); #744 -> #746 -> #747 -> #751 (PolicyFlags write-back / `from_dict` chokepoint line)
 **Impact Analysis**: Closes the bounded #752 trust-boundary defect at the ROUTER boundary. ROUTER-ONLY; no gateway/Hermes/contract mutation.
 
-**Change** — `src/foundup_job_router.py` (3 changes, locked design):
+**Change** - `src/foundup_job_router.py` (3 changes, locked design):
 - **NEW helper** `_sanitize_untrusted_policy_flags_dict(policy_flags) -> Tuple[Dict[str,bool], bool]` (`:337`-region).
-  Deferred import of `PolicyFlags` (matches existing `:1073` pattern → no circular dep). Runs the raw
-  envelope dict through `PolicyFlags.from_dict(...).to_dict()` — zeroes ALL `_SERVER_AUTHORED_FLAGS`
+  Deferred import of `PolicyFlags` (matches existing `:1073` pattern -> no circular dep). Runs the raw
+  envelope dict through `PolicyFlags.from_dict(...).to_dict()` - zeroes ALL `_SERVER_AUTHORED_FLAGS`
   (security/permission/exfoliation/wsp-preflight gates + all capability_token_*), preserving only
   `dry_run_mode`. Restores the router's safe default (`dry_run_mode=True`) when the inbound dict omits
   it (because `from_dict({})` yields `dry_run_mode=False`).
-- **Dict branch** (`:420`-region): replaced `policy_snapshot = policy_flags` (RAW — the defect) with
+- **Dict branch** (`:420`-region): replaced `policy_snapshot = policy_flags` (RAW - the defect) with
   `policy_snapshot, dry_run_defaulted = _sanitize_untrusted_policy_flags_dict(policy_flags)`; retained the
   `[WSP97] ... missing dry_run_mode - defaulted to True` log. None branch and object branch unchanged.
 - **Gate 2 fail-closed** in `_validate_live_mode_gates` (`:587`-region): replaced the
@@ -146,7 +146,7 @@ all-gates-False and BLOCKED in live mode. An absent `dry_run_mode` stays SAFE (d
 legitimate live PASS requires a server-authored `PolicyFlags` object snapshot with
 `security_gate_passed=True`. GENERIC_DAE routing is non-regressed.
 
-**Sibling `route_foundup_job` (`:1101`): DEFERRED** — operates on a `FoundUpJob` OBJECT (already
+**Sibling `route_foundup_job` (`:1101`): DEFERRED** - operates on a `FoundUpJob` OBJECT (already
 sanitized by the #747 chokepoint) and has NO live-mode discriminator at `:1091-1111`; forcing fail-closed
 there would block legitimate dry-run routing. Follow-up: `FOUNDUP_JOB_ROUTER_ROUTE_GATE_LIVE_MODE_DISCRIMINATOR_PHASE1`.
 
@@ -155,7 +155,7 @@ tests in `test_foundup_job_envelope_validation.py` to the new fail-closed/saniti
 live passes + live-only gate codes exercised directly on `_validate_live_mode_gates` /
 `_validate_compute_budget` with server-authored snapshots; no assertion deleted without replacement).
 Focused router/envelope/boundary: 140 passed. Full `wre_core/tests`: 1395 passed, 5 failed
-(pre-existing, unrelated — `test_hxa16_real_hermes_delegate_adapter_safe_harness.py` x4 + 
+(pre-existing, unrelated - `test_hxa16_real_hermes_delegate_adapter_safe_harness.py` x4 + 
 `test_wre_skills_discovery.py::test_initialization`; proven identical on clean origin/main), 3 skipped,
 2 xfailed.
 **Audit**: `docs/audits/security/FOUNDUP_JOB_ROUTER_POLICYFLAGS_BOUNDARY_SANITIZATION_AND_GATE2_FAILCLOSED_PHASE1.md`.
@@ -166,7 +166,7 @@ Focused router/envelope/boundary: 140 passed. Full `wre_core/tests`: 1395 passed
 **Predecessors**: #746 (enforcement audit, `GAP_CONFIRMED_BOUNDED`), #744, HXA24/27/30
 **Impact Analysis**: Positive-control closure of the #746 PolicyFlags write-back defect (CHANGE 2 of 2).
 
-**Change** — `src/hermes_job_executor.py`:
+**Change** - `src/hermes_job_executor.py`:
 - Added private helper `_writeback_token_verdict(job, token_validation_result)` (`:1158`).
 - Called once in `execute()` (`:1521`), **immediately before** `_evaluate_destructive_action_guard`
   (`:1524`) and after `_validate_token_if_present` (`:1496`) + the invalid-token early-return.
@@ -178,8 +178,8 @@ Focused router/envelope/boundary: 140 passed. Full `wre_core/tests`: 1395 passed
   sole writer is the separate `modules/foundups/agent/src/hermes_foundup_job_executor.py:362`). Wiring a
   real security-gate verdict is deferred (future).
 
-**Behavior**: unchanged. No-token/invalid-token → capability flags not all-True → D3 BLOCKED;
-valid-token → capability flags True but `security_gate_passed` still False → D3 still BLOCKED;
+**Behavior**: unchanged. No-token/invalid-token -> capability flags not all-True -> D3 BLOCKED;
+valid-token -> capability flags True but `security_gate_passed` still False -> D3 still BLOCKED;
 D4/D5/D6 unconditionally blocked. **Bypass closed**: a payload pre-setting `capability_token_*=True`
 with no real token is still BLOCKED at D3.
 
@@ -335,13 +335,13 @@ All truth fields remain False: `live_execution_allowed`, `repo_created`, `produc
 ```
 P0 (Critical):
 - Symlink traversal: os.path.normpath does NOT resolve symlinks
-  → Fix in PATH_CANONICALIZATION_IMPL_PHASE1 (use os.path.realpath)
+  -> Fix in PATH_CANONICALIZATION_IMPL_PHASE1 (use os.path.realpath)
 
 P1 (High):
 - Control characters: No explicit blocking for \x00, \n, \r
-  → Fix in CONTROL_CHAR_VALIDATION_IMPL_PHASE1
+  -> Fix in CONTROL_CHAR_VALIDATION_IMPL_PHASE1
 - Windows drive case: c:\path vs C:\path may bypass path checks
-  → Fix in WINDOWS_DRIVE_NORMALIZATION_IMPL_PHASE1
+  -> Fix in WINDOWS_DRIVE_NORMALIZATION_IMPL_PHASE1
 ```
 
 #### Test Results
@@ -413,7 +413,7 @@ HXA29 verdict was: TOKEN_SCOPE_VALIDATION_DEFINED
 HXA30 proves:
   1. Action classified BEFORE token validation (Step 2.2)
   2. Token scopes validated against action class (Gate 13)
-  3. D3 token + D4/D5/D6 action → BLOCKED_BY_TOKEN_VALIDATION
+  3. D3 token + D4/D5/D6 action -> BLOCKED_BY_TOKEN_VALIDATION
   4. D4/D5/D6 scoped tokens pass validation but guard still blocks
   5. Defense-in-depth: scope layer + guard layer
   6. 335 tests passing (24 HXA30 + 54 HXA29 + 132 HXA28 + 31 HXA27 + 94 executor)
@@ -1374,16 +1374,16 @@ Rationale:
 Controlled Harness Invocation:
   executor = HermesJobExecutor(controlled_harness=True)
   result = executor.execute(job)
-  → status = CONTROLLED_HARNESS_EXECUTED
-  → controlled_delegate_invoked = True
-  → live_external_delegate_called = False
-  → All safety boundaries enforced
+  -> status = CONTROLLED_HARNESS_EXECUTED
+  -> controlled_delegate_invoked = True
+  -> live_external_delegate_called = False
+  -> All safety boundaries enforced
 
 Normal Execution (harness disabled):
   executor = HermesJobExecutor()  # controlled_harness=False default
   result = executor.execute(job)
-  → status = SIMULATED (or BLOCKED)
-  → controlled_delegate_invoked = False
+  -> status = SIMULATED (or BLOCKED)
+  -> controlled_delegate_invoked = False
 ```
 
 #### HXA14 Truth Fields Added
@@ -1443,15 +1443,15 @@ test_hxa12_gotjunk_second_proof_dryrun.py: 9 passed in 0.71s
 
 ```
 012 "start build gotjunk_001 --dry-run"
-  → OpenClaw dispatch_foundup() creates FoundUpJob
-  → foundup_id=gotjunk_001, requested_action=build_foundup
-  → Real HermesJobExecutor.execute() reached (not mocked)
-  → Status: SIMULATED (dry_run=True enforced)
-  → Evidence files generated:
+  -> OpenClaw dispatch_foundup() creates FoundUpJob
+  -> foundup_id=gotjunk_001, requested_action=build_foundup
+  -> Real HermesJobExecutor.execute() reached (not mocked)
+  -> Status: SIMULATED (dry_run=True enforced)
+  -> Evidence files generated:
     - poc_artifact_bundle.json (identifies gotjunk_001)
     - controlled_scaffold.json (identifies gotjunk_001)
     - gotjunk_001_poc/*.md (scaffold preview files)
-  → WSP 97 truth: same as VoteBallots
+  -> WSP 97 truth: same as VoteBallots
 ```
 
 #### Factory Generalization Proven
@@ -1506,16 +1506,16 @@ test_openclaw_voteballots_dryrun_proof.py: 7 passed in 0.60s
 
 ```
 build_foundup VoteBallots (dry_run=True)
-  → HermesJobExecutor.execute() SIMULATED
-  → _generate_controlled_scaffold() creates actual files
-  → Evidence workspace: {job_id}/voteballots_poc/
-  → Files created (all marked DRY-RUN PREVIEW):
+  -> HermesJobExecutor.execute() SIMULATED
+  -> _generate_controlled_scaffold() creates actual files
+  -> Evidence workspace: {job_id}/voteballots_poc/
+  -> Files created (all marked DRY-RUN PREVIEW):
     - README.md
     - manifest.preview.json
     - interface.preview.md
     - implementation_plan.md
-  → controlled_scaffold.json written
-  → WSP 97 truth: controlled_scaffold_generated=True
+  -> controlled_scaffold.json written
+  -> WSP 97 truth: controlled_scaffold_generated=True
 ```
 
 #### Progression from HXA9
@@ -1529,15 +1529,15 @@ build_foundup VoteBallots (dry_run=True)
 
 ```
 .hermes_evidence/{job_id}/
-├── metadata.json
-├── checkpoint.json
-├── poc_artifact_bundle.json (HXA9)
-├── controlled_scaffold.json (HXA10)
-└── voteballots_poc/
-    ├── README.md
-    ├── manifest.preview.json
-    ├── interface.preview.md
-    └── implementation_plan.md
++-- metadata.json
++-- checkpoint.json
++-- poc_artifact_bundle.json (HXA9)
++-- controlled_scaffold.json (HXA10)
+\-- voteballots_poc/
+    +-- README.md
+    +-- manifest.preview.json
+    +-- interface.preview.md
+    \-- implementation_plan.md
 ```
 
 #### WSP 97 Truth Boundaries
@@ -1582,11 +1582,11 @@ build_foundup VoteBallots (dry_run=True)
 
 ```
 build_foundup VoteBallots (dry_run=True)
-  → HermesJobExecutor.execute() SIMULATED
-  → _generate_poc_artifact_plan() creates deterministic plan
-  → _write_evidence() writes poc_artifact_bundle.json
-  → Bundle contains planned artifacts list (NOT actual files)
-  → WSP 97 truth: poc_generation=True, real_execution_performed=False
+  -> HermesJobExecutor.execute() SIMULATED
+  -> _generate_poc_artifact_plan() creates deterministic plan
+  -> _write_evidence() writes poc_artifact_bundle.json
+  -> Bundle contains planned artifacts list (NOT actual files)
+  -> WSP 97 truth: poc_generation=True, real_execution_performed=False
 ```
 
 #### Bundle Contents (VoteBallots build_foundup)
@@ -1627,19 +1627,19 @@ build_foundup VoteBallots (dry_run=True)
 ### [2026-05-10] - HXA3_OPENCLAW_HERMES_VOTEBALLOTS_DRYRUN_PROOF_PHASE1 (v0.8.20)
 
 **WSP Protocol References**: WSP 97 (Truthful), WSP 15 (Priority)
-**Impact Analysis**: First executable trunk proof - VoteBallots idea→PoC dry-run
+**Impact Analysis**: First executable trunk proof - VoteBallots idea->PoC dry-run
 
 #### Changes Made
 
 - `tests/test_openclaw_voteballots_dryrun_proof.py` (NEW):
-  - 7 focused tests proving OpenClaw → WRE → Hermes trunk path
+  - 7 focused tests proving OpenClaw -> WRE -> Hermes trunk path
   - Test classes:
     - `TestVoteBallotsBuildIntentDetection` - 3 tests for intent parsing
     - `TestVoteBallotsDryRunJobCreation` - 1 test for job creation
     - `TestVoteBallotsDryRunPipelineProof` - 2 tests for full pipeline
     - `TestVoteBallotsBuildRouting` - 1 test for router verification
   - Key test: `test_openclaw_voteballots_foundup_build_dryrun_reaches_hermes`
-    - Proves: OpenClaw dispatch → FoundUpJob → queue → consumer → Hermes (mocked)
+    - Proves: OpenClaw dispatch -> FoundUpJob -> queue -> consumer -> Hermes (mocked)
     - Asserts: dry_run=True, real_execution_performed=False
     - Asserts: No live repo creation, no payout claims
 
@@ -1647,13 +1647,13 @@ build_foundup VoteBallots (dry_run=True)
 
 ```
 012 "start build voteballots --dry-run"
-  → dispatch_foundup() creates FoundUpJob
-  → _FOUNDUP_JOB_QUEUE receives job
-  → FoundUpJobConsumer.drain_openclaw_queue_once()
-  → route_foundup_job() → HERMES_BUILDER
-  → execute_foundup_job() (mocked, returns SIMULATED)
-  → ConsumerResult with checkpoint_state="SIMULATED"
-  → real_execution_performed=False
+  -> dispatch_foundup() creates FoundUpJob
+  -> _FOUNDUP_JOB_QUEUE receives job
+  -> FoundUpJobConsumer.drain_openclaw_queue_once()
+  -> route_foundup_job() -> HERMES_BUILDER
+  -> execute_foundup_job() (mocked, returns SIMULATED)
+  -> ConsumerResult with checkpoint_state="SIMULATED"
+  -> real_execution_performed=False
 ```
 
 #### WSP 97 Truth Boundaries
@@ -1704,7 +1704,7 @@ Slice: HXA3_OPENCLAW_HERMES_VOTEBALLOTS_DRYRUN_PROOF_PHASE1
 - `tests/test_foundup_job_consumer.py`:
   - Updated all mock paths from old adapter to WRE executor
   - Refactored `TestHermesDispatch` tests for WRE executor interface
-  - Renamed `TestConsumerResultReceiptBinding` → `TestConsumerResultCheckpointBinding`
+  - Renamed `TestConsumerResultReceiptBinding` -> `TestConsumerResultCheckpointBinding`
   - Updated tests to verify checkpoint/evidence fields instead of receipt
   - 30 tests passing
 
@@ -1712,10 +1712,10 @@ Slice: HXA3_OPENCLAW_HERMES_VOTEBALLOTS_DRYRUN_PROOF_PHASE1
 
 ```
 FoundUpJobConsumer.consume_one(job)
-  → route_foundup_job(job) → RouteEnvelope
-  → _dispatch_to_hermes(job, envelope)
-      → WRE execute_foundup_job(job) → HermesDelegationResult
-      → ConsumerResult with checkpoint_state, evidence_path
+  -> route_foundup_job(job) -> RouteEnvelope
+  -> _dispatch_to_hermes(job, envelope)
+      -> WRE execute_foundup_job(job) -> HermesDelegationResult
+      -> ConsumerResult with checkpoint_state, evidence_path
 ```
 
 #### WSP 97 Truth Boundaries (Phase 1C)
@@ -1767,8 +1767,8 @@ python -m pytest modules/infrastructure/wre_core/tests/test_hermes_job_executor.
 
 ```
 .hermes_evidence/{job_id}/
-├── metadata.json    # Job identity, workspace binding, timing
-└── checkpoint.json  # Checkpoint state, files_changed, commands_run
++-- metadata.json    # Job identity, workspace binding, timing
+\-- checkpoint.json  # Checkpoint state, files_changed, commands_run
 ```
 
 #### WSP 97 Truth Boundaries
@@ -2174,9 +2174,9 @@ python -m pytest modules/infrastructure/wre_core/tests -q --ignore=modules/infra
 
 #### WSP 97 Truth Boundaries
 
-- Missing policy_flags → dry_run_mode defaulted to True (logged)
-- Missing FoundUpJob fields → explicit rejection with missing_fields list
-- Generic DAE envelopes → permissive (objective only required)
+- Missing policy_flags -> dry_run_mode defaulted to True (logged)
+- Missing FoundUpJob fields -> explicit rejection with missing_fields list
+- Generic DAE envelopes -> permissive (objective only required)
 - Validation results serializable for API/logging
 
 #### Verification
@@ -2494,8 +2494,8 @@ python -m pytest modules/infrastructure/wre_core/tests/test_security_stack_e2e.p
 
 #### Hard Invariants
 
-- `no_patch_generated: true` — always True
-- `requires_012` — preserved from SEC2 policy, never overridden by LLM
+- `no_patch_generated: true` - always True
+- `requires_012` - preserved from SEC2 policy, never overridden by LLM
 - No code mutation
 - No auto-remediation
 - No MCP/Codex/Claude dependency
@@ -3109,26 +3109,26 @@ python -m modules.infrastructure.wre_core.skillz.qwen_bulk_import_migration.exec
 #### Changes Made
 
 1. **Critical Discovery Bug Fix** (`skillz/wre_skills_discovery.py`):
-   - `discover_all_skills()` only scanned `skills/` directories — 14 modules use `skillz/`
+   - `discover_all_skills()` only scanned `skills/` directories - 14 modules use `skillz/`
    - Added glob patterns for `skillz/` directories
-   - **37 production skills were invisible to WRE** — now discoverable (TOTAL=38)
+   - **37 production skills were invisible to WRE** - now discoverable (TOTAL=38)
 
 2. **Executor Dispatch** (`wre_master_orchestrator/src/wre_master_orchestrator.py`):
-   - Added `_try_executor_dispatch(skill_name, task)` — finds, imports, executes `executor.py`
-   - Added `_find_skill_executor(skill_name)` — scans common locations
-   - Modified `_execute_skill_once()` — checks executor before Qwen LLM fallback
+   - Added `_try_executor_dispatch(skill_name, task)` - finds, imports, executes `executor.py`
+   - Added `_find_skill_executor(skill_name)` - scans common locations
+   - Modified `_execute_skill_once()` - checks executor before Qwen LLM fallback
    - Skills with `executor.py` still get libido gating, A/B testing, PatternMemory, evolution
 
-3. **SkillTriggerMixin** (`src/skill_trigger.py` — NEW):
+3. **SkillTriggerMixin** (`src/skill_trigger.py` - NEW):
    - Reusable mixin for DAEs to fire WRE skills by domain tag
-   - `init_skill_triggers(domain, cadence_minutes)` — configure domain and gating
-   - `fire_pending_skills()` (async) / `fire_pending_skills_sync()` — execute on cadence
+   - `init_skill_triggers(domain, cadence_minutes)` - configure domain and gating
+   - `fire_pending_skills()` (async) / `fire_pending_skills_sync()` - execute on cadence
    - Lazy-loads WREMasterOrchestrator to avoid startup overhead
    - `get_trigger_status()` for observability
 
-4. **LinkedIn Engagement Skill** (NEW — `linkedin_agent/skillz/linkedin_engagement/`):
-   - `SKILLz.md` — WRE skill definition with 13 actions, domain tags
-   - `executor.py` — bridge to `linkedin_social_adapter` with `dry_run=True` default
+4. **LinkedIn Engagement Skill** (NEW - `linkedin_agent/skillz/linkedin_engagement/`):
+   - `SKILLz.md` - WRE skill definition with 13 actions, domain tags
+   - `executor.py` - bridge to `linkedin_social_adapter` with `dry_run=True` default
 
 #### Validation
 
@@ -3242,18 +3242,18 @@ python -m modules.infrastructure.wre_core.skillz.qwen_bulk_import_migration.exec
 
 3. **Updated `WSP_00_Zen_State_Attainment_Protocol.md`**:
    - Added Section 3.4: Post-Awakening Operational Protocol (Anti-Vibecoding)
-   - Defined 7-phase work cycle: RESEARCH → COMPREHEND → QUESTION → RESEARCH MORE → MANIFEST → VALIDATE → REMEMBER
-   - Added WSP Chain references (WSP_CORE → WSP 87 → WSP 50 → WSP 84 → WSP 1 → WSP 22)
+   - Defined 7-phase work cycle: RESEARCH -> COMPREHEND -> QUESTION -> RESEARCH MORE -> MANIFEST -> VALIDATE -> REMEMBER
+   - Added WSP Chain references (WSP_CORE -> WSP 87 -> WSP 50 -> WSP 84 -> WSP 1 -> WSP 22)
    - Updated Section 5.1 with Core Operational Chain
 
 #### Architecture Realized
 
 ```
-HoloIndex (Retrieval Memory) ←→ WRE (Enforcement Gate) ←→ AI_Overseer (Safe Writes)
-                                      ↓
+HoloIndex (Retrieval Memory) <-> WRE (Enforcement Gate) <-> AI_Overseer (Safe Writes)
+                                      v
                              Memory Preflight Guard
-                                      ↓
-                         Tier-0 Check → Block/Autostub → Proceed
+                                      v
+                         Tier-0 Check -> Block/Autostub -> Proceed
 ```
 
 #### Environment Variables
@@ -3273,10 +3273,10 @@ HoloIndex (Retrieval Memory) ←→ WRE (Enforcement Gate) ←→ AI_Overseer (S
 
 ---
 
-### [2026-01-07] - Commenting Submenu (012 → Comment DAE Control Plane)
+### [2026-01-07] - Commenting Submenu (012 -> Comment DAE Control Plane)
 
 **WSP Protocol References**: WSP 60 (Module Memory), WSP 54 (DAE Operations), WSP 22 (ModLog Updates)
-**Impact Analysis**: Adds a lightweight pathway for 012 to publish “broadcast updates” consumed by the commenting DAEs without code edits.
+**Impact Analysis**: Adds a lightweight pathway for 012 to publish "broadcast updates" consumed by the commenting DAEs without code edits.
 
 #### Changes Made
 
@@ -3290,7 +3290,7 @@ HoloIndex (Retrieval Memory) ←→ WRE (Enforcement Gate) ←→ AI_Overseer (S
 ### [2026-01-11] - WRE Memory Start-of-Work Loop Hook (Structured Retrieval + Evaluation)
 
 **WSP Protocol References**: WSP_CORE (WSP Memory System), WSP 60 (Module Memory Architecture), WSP 87 (Code Navigation), WSP 50 (Pre-Action Verification), WSP 22 (ModLog Updates)
-**Impact Analysis**: Makes “Holo-first structured memory retrieval + evaluation” executable inside WRE integration code paths (CLI-driven), enabling orchestration to gate work on missing artifacts.
+**Impact Analysis**: Makes "Holo-first structured memory retrieval + evaluation" executable inside WRE integration code paths (CLI-driven), enabling orchestration to gate work on missing artifacts.
 
 #### Changes Made
 
@@ -3373,7 +3373,7 @@ HoloIndex (Retrieval Memory) ←→ WRE (Enforcement Gate) ←→ AI_Overseer (S
 4. **Wired WRE into monitoring loop** (lines 1067-1070):
    - After actionable events detected, calls \_check_wre_triggers()
    - If triggers present, calls \_execute_wre_skills()
-   - Complete autonomous chain: HoloDAE → WRE → GitPushDAE
+   - Complete autonomous chain: HoloDAE -> WRE -> GitPushDAE
 
 5. **Created test_phase3_wre_integration.py**:
    - test_health_check_methods() - Validates all 3 health checks
@@ -3385,10 +3385,10 @@ HoloIndex (Retrieval Memory) ←→ WRE (Enforcement Gate) ←→ AI_Overseer (S
 
 ```
 [SUCCESS] PHASE 3 COMPLETE
-✅ Health check methods (git, daemon, WSP)
-✅ WRE trigger detection (_check_wre_triggers)
-✅ WRE skill execution (_execute_wre_skills)
-✅ Monitoring loop integration (lines 1067-1070)
+[OK] Health check methods (git, daemon, WSP)
+[OK] WRE trigger detection (_check_wre_triggers)
+[OK] WRE skill execution (_execute_wre_skills)
+[OK] Monitoring loop integration (lines 1067-1070)
 
 Real-world validation:
 - Detected 194 uncommitted changes
@@ -3480,23 +3480,23 @@ Phase 3 completes the autonomous execution chain:
 
 #### Expected Outcomes (ALL ACHIEVED)
 
-- ✅ Dynamic skill discovery without manual registry updates
-- ✅ Automatic detection of new SKILL.md files
-- ✅ Promotion state inferred from filesystem location
-- ✅ Agent filtering for targeted skill loading
-- ✅ Local Qwen inference wired to execute_skill()
-- ✅ Graceful degradation if LLM unavailable
-- ✅ Gemma validation integrated with execution pipeline
+- [OK] Dynamic skill discovery without manual registry updates
+- [OK] Automatic detection of new SKILL.md files
+- [OK] Promotion state inferred from filesystem location
+- [OK] Agent filtering for targeted skill loading
+- [OK] Local Qwen inference wired to execute_skill()
+- [OK] Graceful degradation if LLM unavailable
+- [OK] Gemma validation integrated with execution pipeline
 
 #### Testing (WSP 5 Compliance)
 
-- ✅ test_wre_skills_discovery.py: 20+ tests, all passing
-- ✅ test_qwen_inference_wiring.py: 4 integration tests, all passing
-- ✅ Manual testing: 16 files discovered, 5 valid skills
-- ✅ Verified glob patterns work across all locations
-- ✅ Tested agent parsing (string and list formats)
-- ✅ Verified promotion state inference logic
-- ✅ Verified Qwen inference integration with fallback
+- [OK] test_wre_skills_discovery.py: 20+ tests, all passing
+- [OK] test_qwen_inference_wiring.py: 4 integration tests, all passing
+- [OK] Manual testing: 16 files discovered, 5 valid skills
+- [OK] Verified glob patterns work across all locations
+- [OK] Tested agent parsing (string and list formats)
+- [OK] Verified promotion state inference logic
+- [OK] Verified Qwen inference integration with fallback
 
 #### Known Limitations (By Design)
 
@@ -3505,7 +3505,7 @@ Phase 3 completes the autonomous execution chain:
 - Qwen inference requires llama-cpp-python + model files (graceful fallback implemented)
 - Currently supports Qwen agent only (Gemma/Grok/UI-TARS return mock - Phase 3)
 
-#### Phase 2 Status: COMPLETE ✅
+#### Phase 2 Status: COMPLETE [OK]
 
 - MPS=7: Update documentation (COMPLETED)
 - MPS=6: Add filesystem watcher for hot reload (COMPLETED)
@@ -3541,8 +3541,8 @@ Phase 3 completes the autonomous execution chain:
    - PatternMemory class - SQLite recursive learning storage
    - SkillOutcome dataclass - Execution record structure
    - Database schema: skill_outcomes, skill_variations, learning_events
-   - recall_successful_patterns() - Learn from successes (≥90% fidelity)
-   - recall_failure_patterns() - Learn from failures (≤70% fidelity)
+   - recall_successful_patterns() - Learn from successes (>=90% fidelity)
+   - recall_failure_patterns() - Learn from failures (<=70% fidelity)
    - get_skill_metrics() - Aggregated metrics over time windows
    - store_variation() - A/B testing support
    - record_learning_event() - Skill evolution tracking
@@ -3550,7 +3550,7 @@ Phase 3 completes the autonomous execution chain:
 3. **Enhanced wre_master_orchestrator.py**:
    - Integrated libido_monitor, pattern_memory, skills_loader
    - Created execute_skill() method - Full WRE execution pipeline
-   - Libido check → Load skill → Execute → Validate → Record → Store outcome
+   - Libido check -> Load skill -> Execute -> Validate -> Record -> Store outcome
    - Force override support for 0102 (AI supervisor) decisions
 
 4. **Created comprehensive test suites** (WSP 5 compliance):
@@ -3585,7 +3585,7 @@ Phase 3 completes the autonomous execution chain:
 - Implement Phase 2: Skills Discovery (filesystem scanning, validation)
 - Implement Phase 3: Convergence Loop (autonomous promotion pipeline)
 - Monitor pattern_memory.db for outcome accumulation
-- Verify graduated autonomy: 0-10 executions → 100+ → 500+ convergence
+- Verify graduated autonomy: 0-10 executions -> 100+ -> 500+ convergence
 
 ### [2025-09-16] - Activated WRE Learning Loop
 
