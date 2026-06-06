@@ -33,9 +33,9 @@ ALLOW_SANDBOXED_DRYRUN_LAUNCH, BLOCK_PENDING_SECURITY_GATE}.
 `ollama --version` = 0.24.0 (Windows, `C:\Users\user\AppData\Local\Programs\Ollama\ollama.exe`; WSL has no
 ollama). `ollama launch --help` exposes **13 integrations**:
 
-`claude` (Claude Code) · `codex-app` (Codex App; aliases codex-desktop/codex-gui) · `hermes` (Hermes Agent) ·
-`openclaw` (OpenClaw; aliases clawdbot/moltbot) · `opencode` (OpenCode) · `codex` (Codex) · `copilot`
-(Copilot CLI) · `droid` (Droid) · `kimi` (Kimi Code CLI) · `pi` (Pi) · `pool` (Pool) · `cline` (Cline) ·
+`claude` (Claude Code) | `codex-app` (Codex App; aliases codex-desktop/codex-gui) | `hermes` (Hermes Agent) |
+`openclaw` (OpenClaw; aliases clawdbot/moltbot) | `opencode` (OpenCode) | `codex` (Codex) | `copilot`
+(Copilot CLI) | `droid` (Droid) | `kimi` (Kimi Code CLI) | `pi` (Pi) | `pool` (Pool) | `cline` (Cline) |
 `vscode` (VS Code; alias code).
 
 Notable launch flags: `-y/--yes` auto-answers confirmation prompts; `--config` configures without launching;
