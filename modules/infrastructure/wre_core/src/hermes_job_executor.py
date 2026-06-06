@@ -40,6 +40,7 @@ Slice: HXA23_HERMES_GUARD_INTEGRATION_PHASE1
 from __future__ import annotations
 
 import fnmatch
+import importlib.util
 import json
 import logging
 import os
@@ -607,9 +608,123 @@ class HermesJobExecutor:
             return os.path.abspath(env_root)
         return os.getcwd()
 
+    def _resolve_vendor_delegate_path(self) -> Path:
+        """
+        Resolve the absolute path to the vendored delegate_tool.py.
+
+        Resolution order:
+          1. workspace_root / vendor/hermes-agent/tools/delegate_tool.py
+          2. Repo root detected from this file's ancestry
+
+        Returns:
+            Path to delegate_tool.py (may not exist)
+        """
+        relative = Path("vendor") / "hermes-agent" / "tools" / "delegate_tool.py"
+
+        # Try workspace_root first (set by constructor or env)
+        if self.workspace_root:
+            candidate = Path(self.workspace_root) / relative
+            if candidate.is_file():
+                return candidate
+
+        # Fallback: walk from this file's location to find repo root
+        # hermes_job_executor.py lives at modules/infrastructure/wre_core/src/
+        this_dir = Path(__file__).resolve().parent
+        # Walk up to find a directory containing the vendor submodule
+        for ancestor in [this_dir] + list(this_dir.parents):
+            candidate = ancestor / relative
+            if candidate.is_file():
+                return candidate
+
+        # Return workspace_root-based path (caller checks .is_file())
+        return Path(self.workspace_root) / relative
+
+    def _load_delegate_task_from_vendor_path(self) -> bool:
+        """
+        Load delegate_task from vendored Hermes path using file-path import.
+
+        Uses importlib.util.spec_from_file_location to load the module
+        from vendor/hermes-agent/tools/delegate_tool.py (hyphenated path)
+        which cannot be addressed by a dotted Python import statement.
+
+        Validates the loaded module has a callable 'delegate_task' attribute.
+
+        Returns:
+            True if load succeeded and delegate_task is callable, False otherwise
+        """
+        vendor_path = self._resolve_vendor_delegate_path()
+
+        if not vendor_path.is_file():
+            self._import_error = (
+                f"Vendor delegate tool not found: {vendor_path}"
+            )
+            logger.warning(
+                "[HERMES-EXEC] Vendor delegate tool not found: %s",
+                vendor_path,
+            )
+            return False
+
+        try:
+            spec = importlib.util.spec_from_file_location(
+                "hermes_delegate_tool", str(vendor_path)
+            )
+            if spec is None or spec.loader is None:
+                self._import_error = (
+                    f"Could not create import spec for {vendor_path}"
+                )
+                logger.warning(
+                    "[HERMES-EXEC] Could not create import spec for %s",
+                    vendor_path,
+                )
+                return False
+
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+
+            delegate_fn = getattr(module, "delegate_task", None)
+            if delegate_fn is None or not callable(delegate_fn):
+                self._import_error = (
+                    f"Module {vendor_path} does not define callable delegate_task"
+                )
+                logger.warning(
+                    "[HERMES-EXEC] Module %s does not define callable delegate_task",
+                    vendor_path,
+                )
+                return False
+
+            self._delegate_task_fn = delegate_fn
+            logger.info(
+                "[HERMES-EXEC] delegate_task loaded from vendor path: %s",
+                vendor_path,
+            )
+            return True
+
+        except ImportError as exc:
+            self._import_error = (
+                f"Import error loading {vendor_path}: {exc}"
+            )
+            logger.warning(
+                "[HERMES-EXEC] Import error loading vendor delegate: %s",
+                exc,
+            )
+            return False
+        except Exception as exc:
+            self._import_error = (
+                f"Unexpected error loading {vendor_path}: {exc}"
+            )
+            logger.error(
+                "[HERMES-EXEC] Unexpected error loading vendor delegate: %s",
+                exc,
+            )
+            return False
+
     def _lazy_import_delegate_task(self) -> bool:
         """
         Lazy-load Hermes delegate_task function.
+
+        Uses file-path import via importlib.util.spec_from_file_location
+        to resolve vendor/hermes-agent/tools/delegate_tool.py (hyphenated
+        vendor submodule path that cannot be addressed by dotted import).
 
         Returns:
             True if import succeeded, False otherwise
@@ -618,27 +733,7 @@ class HermesJobExecutor:
             return self._delegate_task_fn is not None
 
         self._import_attempted = True
-
-        try:
-            from vendor.hermes_agent.tools.delegate_tool import delegate_task
-
-            self._delegate_task_fn = delegate_task
-            logger.info("[HERMES-EXEC] delegate_task imported successfully")
-            return True
-        except ImportError as exc:
-            self._import_error = str(exc)
-            logger.warning(
-                "[HERMES-EXEC] Failed to import delegate_task: %s",
-                exc,
-            )
-            return False
-        except Exception as exc:
-            self._import_error = f"Unexpected error: {exc}"
-            logger.error(
-                "[HERMES-EXEC] Unexpected import error: %s",
-                exc,
-            )
-            return False
+        return self._load_delegate_task_from_vendor_path()
 
     def _execute_controlled_delegate(
         self,
