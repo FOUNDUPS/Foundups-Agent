@@ -362,9 +362,79 @@ Remove duplication per WSP 84.
 
 ---
 
+## Addendum: Shell-Exec Surface Classification (LIVE vs DEAD/STALE)
+
+**Added by**: W9 (W10 return action)
+**Reason**: The audit must classify EVERY `shell=True` auto-fix surface explicitly
+as either a LIVE execution path or a DEAD/STALE duplicate, with grep/import
+evidence. `ai_overseer.py.backup` was already classified INERT; `auto_fix_engine.py`
+was previously mentioned only once (Section 10, "Extracted auto-fix engine, same
+pattern") with no classification and no evidence. This addendum closes that gap.
+
+### A.1 Classification Table (every shell=True auto-fix surface)
+
+| Surface | File:Line | Classification | Evidence |
+|---------|-----------|----------------|----------|
+| `_apply_auto_fix` primary (subprocess.run shell=True) | `daemon_monitor_mixin.py:329-335` | LIVE_EXEC_SURFACE | Section 2.1 trigger chain; reached via `monitor_daemon()` -> `_apply_auto_fix()` |
+| `_apply_auto_fix` library substitution path (shell=True branch) | `daemon_monitor_mixin.py:321-327` | LIVE_EXEC_SURFACE | Section 3.3 $1 substitution feeds the same `subprocess.run(..., shell=True)` |
+| `check_rotation_stalls` / rotation_supervisor (shell=True) | `daemon_monitor_mixin.py:807` | LIVE_EXEC_SURFACE | Section 2.3 table row (shell=True YES); `trigger_next_rotation` handler line 443-464 |
+| `_apply_auto_fix` duplicate (subprocess.run shell=True) | `ai_overseer.py:2659-2665` | LIVE_EXEC_SURFACE | Section 2.2 duplicated `_apply_auto_fix()` in main class; on Python import path, live |
+| `AutoFixEngine` extracted engine (subprocess.run shell=True) | `auto_fix_engine.py:118-124` (`class AutoFixEngine` at `auto_fix_engine.py:19`) | DEAD/STAGING_DUPLICATE_NOT_WIRED | See A.2 grep/import evidence: ZERO production imports |
+| `_apply_auto_fix` backup copy | `ai_overseer.py.backup` | DEAD/STALE (inert backup) | Section 5.5 / Q12: `.backup` extension not on Python import path |
+
+### A.2 Evidence: auto_fix_engine.py = DEAD/STAGING_DUPLICATE_NOT_WIRED
+
+Re-confirmed read-only against `origin/main` (no working-tree changes):
+
+Command 1 -- production imports (excludes tests and .backup):
+```
+git grep -nE "import.*auto_fix_engine|from.*auto_fix_engine" origin/main -- '*.py' ':!**/tests/**' ':!**/*.backup'
+```
+Result: ZERO matches (exit code 1). No production module imports `auto_fix_engine`.
+
+Command 2 -- all references to the symbol anywhere in the tree:
+```
+git grep -nE "auto_fix_engine|AutoFixEngine" origin/main
+```
+Result: references appear ONLY in:
+- `modules/ai_intelligence/ai_overseer/REFACTOR_PLAN.md` (the extraction plan that
+  *proposes* wiring `from .src.auto_fix_engine import AutoFixEngine` -- not yet done)
+- `modules/ai_intelligence/ai_overseer/src/auto_fix_engine.py:19` (the file's own
+  `class AutoFixEngine` definition)
+- audit docs (this audit and `OLLAMA_LAUNCH_AGENT_CAPABILITY_GOVERNANCE_AUDIT_PHASE1.md`)
+
+**Conclusion**: `auto_fix_engine.py` is an extracted-but-unwired refactor artifact.
+It contains `shell=True` code (`auto_fix_engine.py:118-124`) but has NO live caller:
+the only `import`/instantiation references live in `REFACTOR_PLAN.md` (a plan, not
+executed code). It is therefore DEAD/STAGING_DUPLICATE_NOT_WIRED, not a live path.
+
+### A.3 Live-path count clarification
+
+The audit's "3 paths" (Section 4, Question 1) refers strictly to the LIVE execution
+paths: `daemon_monitor_mixin._apply_auto_fix` (2 locations) plus `check_rotation_stalls`.
+The duplicate live surface `ai_overseer.py:2659` `_apply_auto_fix` (Section 2.2) is the
+same family of live paths via the duplicated implementation.
+
+`auto_fix_engine.py` and `ai_overseer.py.backup` are recorded SEPARATELY in A.1 as
+dead/stale duplicate code. They are NOT counted among the live paths and they are NOT
+ignored -- they are explicitly classified as non-live shell-exec surfaces.
+
+### A.4 Remediation implication
+
+Because both dead/stale duplicates contain `shell=True` code, the remediation slice
+(`AI_OVERSEER_AUTOFIX_SHELL_EXEC_REMEDIATION_PHASE1`) must ALSO disable/delete or
+prove-unreachable these duplicates, so they cannot become live re-entry points:
+- `auto_fix_engine.py`: delete the unwired artifact, or harden it to the same typed
+  FixAction allowlist (Section 8.1) before any future wiring, so a later import cannot
+  reintroduce a `shell=True` surface.
+- `ai_overseer.py.backup`: delete the inert backup (it must remain off the import path
+  and should not be revived as-is).
+
+---
+
 ## 9. Truth Boundary Checklist
 
-Declared count: 12 items
+Declared count: 13 items
 
 | # | Truth Boundary Checklist Item | Status | Evidence |
 |---|-------------------------------|--------|----------|
@@ -380,8 +450,9 @@ Declared count: 12 items
 | 10 | VERDICT_STATED | YES | GAP_CONFIRMED_BOUNDED |
 | 11 | REMEDIATION_SCOPED | YES | 4 remediation items defined |
 | 12 | ASCII_CLEAN | YES | No non-ASCII characters |
+| 13 | DEAD_STALE_DUPLICATES_CLASSIFIED_WITH_EVIDENCE | YES | auto_fix_engine.py (0 prod imports; REFACTOR_PLAN.md only) DEAD; ai_overseer.py.backup INERT (not importable) |
 
-Actual rows: 12
+Actual rows: 13
 
 ---
 
