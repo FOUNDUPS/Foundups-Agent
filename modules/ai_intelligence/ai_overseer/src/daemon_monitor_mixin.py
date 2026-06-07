@@ -21,6 +21,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from modules.infrastructure.shared_utilities.local_model_selection import resolve_code_model_path
+# Typed, allowlisted, shell=False auto-fix executor (security remediation; PR #767 follow-up)
+from modules.ai_intelligence.ai_overseer.src.autofix_executor import execute_fix
 from .types import AgentRole, AgentTeam
 
 logger = logging.getLogger(__name__)
@@ -313,27 +315,11 @@ class DaemonMonitorMixin:
 
         try:
             if fix_action in ["run_reauthorization_script", "install_missing_library"]:
-                fix_command = bug["config"].get("fix_command")
-                if not fix_command:
-                    return {"success": False, "bug": pattern_name, "error": "No fix_command in skill config"}
-
-                # Handle variable substitution for missing library names
-                if "$1" in fix_command and "matches" in bug:
-                    # Extract library name from regex match groups
-                    matches = bug.get("matches", [])
-                    if matches and len(matches) > 0:
-                        # Use the first capture group from the regex
-                        library_name = matches[0] if isinstance(matches[0], str) else str(matches[0])
-                        fix_command = fix_command.replace("$1", library_name.strip())
-
-                result = subprocess.run(
-                    fix_command,
-                    shell=True,
-                    capture_output=True,
-                    text=True,
-                    timeout=30,
-                )
-                success = result.returncode == 0
+                # Typed, allowlisted, shell=False executor. Skill config can only SELECT
+                # the action; no command string reaches a shell. install_missing_library is
+                # NOT allowlisted (no live config uses it; latent) -> executor REJECTS it.
+                packet = execute_fix(fix_action, bug.get("config", {}), wait=True, timeout=30)
+                success = packet.success
                 execution_time_ms = int((time.time() - start_time) * 1000)
                 self.metrics.append_performance_metric(
                     skill_name=skill_name,
@@ -349,18 +335,17 @@ class DaemonMonitorMixin:
                     expected_decision=fix_action,
                     correct=success,
                     confidence=1.0 if success else 0.0,
-                    reasoning=f"OAuth reauth {'succeeded' if success else 'failed'}: {fix_command}",
+                    reasoning=f"{fix_action} {packet.decision}: {packet.reason}",
                     agent="ai_overseer",
                 )
                 return {
                     "success": success,
                     "bug": pattern_name,
                     "fix_applied": fix_action,
-                    "method": "subprocess",
-                    "command": fix_command,
-                    "stdout": result.stdout[:500],
-                    "stderr": result.stderr[:500] if result.stderr else None,
-                    "returncode": result.returncode,
+                    "method": "autofix_executor",
+                    "decision": packet.decision,
+                    "evidence": packet.to_dict(),
+                    "returncode": packet.returncode,
                     "execution_id": exec_id,
                 }
 
@@ -439,30 +424,21 @@ class DaemonMonitorMixin:
                     "execution_id": exec_id,
                 }
 
-            # 2026-03-07: RotationSupervisor stall recovery (WSP 77)
+            # 2026-03-07: RotationSupervisor stall recovery (WSP 77) - typed, shell=False.
+            # browser/operation come from breadcrumb metadata and are enum-validated by the
+            # executor (chrome|edge x comments|shorts); argv is a fixed vector, never a string.
             if fix_action == "trigger_next_rotation":
-                fix_commands = bug["config"].get("fix_commands", {})
-                # Determine which browser/operation to rotate based on breadcrumb context
                 browser = bug.get("metadata", {}).get("browser", "edge")
                 operation = bug.get("metadata", {}).get("operation", "comments")
-                cmd_key = f"{browser}_{operation}"
-                fix_command = fix_commands.get(cmd_key)
-
-                if not fix_command:
-                    # Default to edge comments rotation
-                    fix_command = fix_commands.get("edge_comments") or \
-                        "python -m modules.communication.livechat.src.rotation_supervisor --browser edge --operation comments --timeout 300"
-
-                logger.info(f"[AUTO-FIX] Triggering rotation: {fix_command}")
-                result = subprocess.run(
-                    fix_command,
-                    shell=True,
-                    capture_output=True,
-                    text=True,
+                packet = execute_fix(
+                    fix_action,
+                    bug.get("config", {}),
+                    {"browser": browser, "operation": operation},
+                    wait=True,
                     timeout=360,  # 6 min for full rotation
-                    cwd=str(self.repo_root),
+                    cwd=self.repo_root,
                 )
-                success = result.returncode == 0
+                success = packet.success
                 execution_time_ms = int((time.time() - start_time) * 1000)
                 self.metrics.append_performance_metric(
                     skill_name=skill_name,
@@ -478,18 +454,17 @@ class DaemonMonitorMixin:
                     expected_decision=fix_action,
                     correct=success,
                     confidence=1.0 if success else 0.0,
-                    reasoning=f"Rotation trigger {'succeeded' if success else 'failed'}: {cmd_key}",
+                    reasoning=f"Rotation trigger {packet.decision}: {browser}_{operation}",
                     agent="ai_overseer",
                 )
                 return {
                     "success": success,
                     "bug": pattern_name,
                     "fix_applied": fix_action,
-                    "method": "cli_rotation",
-                    "command": fix_command,
-                    "stdout": result.stdout[-500:] if result.stdout else None,
-                    "stderr": result.stderr[-500:] if result.stderr else None,
-                    "returncode": result.returncode,
+                    "method": "autofix_executor",
+                    "decision": packet.decision,
+                    "evidence": packet.to_dict(),
+                    "returncode": packet.returncode,
                     "execution_id": exec_id,
                 }
 
@@ -795,28 +770,28 @@ index 0000000..1111111 100644
         }
 
         if auto_trigger and stalls_found:
-            # Trigger rotation for the most recent stall
+            # Trigger rotation for the most recent stall via the typed, shell=False executor
+            # (non-blocking spawn). browser is enum-validated; operation fixed to comments.
             latest_stall = stalls_found[-1]
             browser = latest_stall.get("metadata", {}).get("browser", "edge")
             operation = "comments"  # Default to comments rotation
 
-            cmd = f"python -m modules.communication.livechat.src.rotation_supervisor --browser {browser} --operation {operation} --timeout 300"
-            logger.info(f"[STALL-CHECK] Triggering rotation: {cmd}")
-
-            try:
-                proc = subprocess.Popen(
-                    cmd,
-                    shell=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    cwd=str(self.repo_root),
-                )
+            packet = execute_fix(
+                "trigger_next_rotation",
+                {},
+                {"browser": browser, "operation": operation},
+                wait=False,
+                cwd=self.repo_root,
+            )
+            if packet.decision == "ALLOWED" and packet.success:
                 result["rotations_triggered"] = 1
-                result["rotation_pid"] = proc.pid
-                result["rotation_command"] = cmd
-                logger.info(f"[STALL-CHECK] Rotation spawned (PID: {proc.pid})")
-            except Exception as e:
-                result["rotation_error"] = str(e)
-                logger.error(f"[STALL-CHECK] Failed to spawn rotation: {e}")
+                result["rotation_pid"] = packet.pid
+                result["rotation_evidence"] = packet.to_dict()
+                logger.info(f"[STALL-CHECK] Rotation spawned (PID: {packet.pid})")
+            else:
+                result["rotation_error"] = packet.reason
+                logger.error(
+                    f"[STALL-CHECK] Rotation not spawned: {packet.decision}/{packet.reason}"
+                )
 
         return result

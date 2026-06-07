@@ -1,5 +1,12 @@
 # WSP 62 Refactoring Plan: ai_overseer.py
 
+> **2026-06-07 NOTE (AI_OVERSEER_AUTOFIX_SHELL_EXEC_REMEDIATION_PHASE1):** the
+> `src/auto_fix_engine.py` referenced below was DELETED as a dead/stale duplicate
+> (0 production imports; carried a `shell=True` auto-fix path). The auto-fix surface
+> is now the typed, allowlisted, `shell=False` `src/autofix_executor.py`. References
+> to `auto_fix_engine` / `AutoFixEngine` in this plan are historical and no longer
+> apply.
+
 **Status:** In Progress
 **Date:** 2025-12-19
 **Violation:** 1833 lines (333 lines over 1500 critical window)

@@ -54,6 +54,8 @@ import asyncio
 
 # MetricsAppender for WSP 77 promotion tracking (WSP 3 compliant path)
 from modules.infrastructure.metrics_appender.src.metrics_appender import MetricsAppender
+# Typed, allowlisted, shell=False auto-fix executor (security remediation; PR #767 follow-up)
+from modules.ai_intelligence.ai_overseer.src.autofix_executor import execute_fix
 
 # PatchExecutor for autonomous code fixes (WSP 3 compliant path)
 from modules.infrastructure.patch_executor.src.patch_executor import PatchExecutor, PatchAllowlist
@@ -2645,26 +2647,17 @@ class AIIntelligenceOverseer:
         logger.info(f"[AUTO-FIX] Applying {fix_action} for {pattern_name} | exec_id={exec_id}")
 
         try:
-            # Operational Fix 1: OAuth Reauthorization (P0, Complexity 2)
+            # Operational Fix 1: OAuth Reauthorization (P0) - typed, allowlisted, shell=False.
+            # Routes through the centralized autofix_executor: skill config can only SELECT
+            # the action; it can never inject a command string (no shell, no fix_command).
             if fix_action == "run_reauthorization_script":
-                fix_command = bug["config"].get("fix_command")
-                if not fix_command:
-                    return {
-                        "success": False,
-                        "bug": pattern_name,
-                        "error": "No fix_command in skill config"
-                    }
-
-                logger.info(f"[AUTO-FIX] Running OAuth reauth: {fix_command}")
-                result = subprocess.run(
-                    fix_command,
-                    shell=True,
-                    capture_output=True,
-                    text=True,
-                    timeout=30
+                packet = execute_fix(
+                    fix_action,
+                    bug.get("config", {}),
+                    wait=True,
+                    timeout=30,
                 )
-
-                success = result.returncode == 0
+                success = packet.success
 
                 # Track metrics
                 execution_time_ms = int((time.time() - start_time) * 1000)
@@ -2673,7 +2666,7 @@ class AIIntelligenceOverseer:
                     execution_id=exec_id,
                     execution_time_ms=execution_time_ms,
                     agent="ai_overseer",
-                    exception_occurred=False
+                    exception_occurred=not success
                 )
                 self.metrics.append_outcome_metric(
                     skill_name=skill_name,
@@ -2682,7 +2675,7 @@ class AIIntelligenceOverseer:
                     expected_decision=fix_action,
                     correct=success,
                     confidence=1.0 if success else 0.0,
-                    reasoning=f"OAuth reauth {'succeeded' if success else 'failed'}: {fix_command}",
+                    reasoning=f"OAuth reauth {packet.decision}: {packet.reason}",
                     agent="ai_overseer"
                 )
 
@@ -2690,11 +2683,10 @@ class AIIntelligenceOverseer:
                     "success": success,
                     "bug": pattern_name,
                     "fix_applied": fix_action,
-                    "method": "subprocess",
-                    "command": fix_command,
-                    "stdout": result.stdout[:500],  # Truncate for metrics
-                    "stderr": result.stderr[:500] if result.stderr else None,
-                    "returncode": result.returncode,
+                    "method": "autofix_executor",
+                    "decision": packet.decision,
+                    "evidence": packet.to_dict(),
+                    "returncode": packet.returncode,
                     "execution_id": exec_id
                 }
 

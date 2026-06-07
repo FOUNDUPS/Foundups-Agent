@@ -6,6 +6,36 @@
 
 ---
 
+## 2026-06-07 - AI_OVERSEER_AUTOFIX_SHELL_EXEC_REMEDIATION_PHASE1 (W6, security)
+
+**Author**: 0102 (Worker-Lane W6)
+**WSP**: 00, 50/87 (HoloIndex-first), 84 (reuse), 97 (Truth Boundary)
+**Predecessor**: #767 governance audit (merged 0b55b5cdd)
+
+Eliminated the auto-fix arbitrary-shell-exec surface. Replaced freeform
+`subprocess.run(fix_command, shell=True)` with a typed, statically-allowlisted,
+`shell=False` executor (`src/autofix_executor.py`). Security property: config
+SELECTS an allowlisted `FixAction` (REAUTHORIZE, ROTATION_RECOVERY) with
+enum-validated discrete params; it can never inject a command string into a shell.
+
+- Migrated 4 shell paths through the executor: `ai_overseer._apply_auto_fix` (live
+  OAuth reauth, was :2659) + `daemon_monitor_mixin` reauth/install (:329), rotation
+  (:457), and `check_rotation_stalls` Popen (:807).
+- `install_missing_library` is latent (no live config) -> REJECTED, not implemented.
+- Deleted dead/stale duplicates `auto_fix_engine.py` (0 prod imports, shell=True) and
+  `ai_overseer.py.backup`.
+- Migrated live skill config `youtube_daemon_monitor.json` (removed fix_command /
+  fix_commands; runtime now REJECTS command-shaped config fields).
+- Autonomy preserved: no 012 runtime-approval gate; boundary is code-enforced.
+- Re-verified line numbers on 0b55b5cdd; corrected #767 reachability (daemon_monitor_mixin
+  paths are latent/orphaned, not inherited by the live overseer - migrated anyway).
+
+49 security tests pass + independent adversarial config-injection pass (refuted=true).
+Audit: `docs/audits/security/AI_OVERSEER_AUTOFIX_SHELL_EXEC_REMEDIATION_PHASE1.md`.
+WSP_97 Truth Boundary: 21/21 YES.
+
+---
+
 ## 2026-04-23 - FAM-IDEATION2: FoundUp Genesis Envelope Schema + Validator
 
 **Author**: 0102

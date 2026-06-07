@@ -2,6 +2,7 @@
 
 | Date       | Author | Description | Notes |
 |------------|--------|-------------|-------|
+| 2026-06-07 | 0102 (W6) | `test_autofix_executor_security.py` (NEW, 49 tests) - security proof for the typed shell=False auto-fix executor (AI_OVERSEER_AUTOFIX_SHELL_EXEC_REMEDIATION_PHASE1) | `49 passed`. Config-injection battery (10 payloads x fix_command/fix_commands/browser) all REJECTED + subprocess never called; AST scan proves 0 shell=True across 3 source files (negative control catches a planted shell=True); static argv allowlist; autonomy-preserved (no approval param, input() never called); evidence packet safe; dead duplicates gone. Added to conftest run-allowlist so it runs in CI (not skipped). No skip/xfail. |
 | 2026-03-10 | 0102   | Revalidated FoundUps architect audit skill after complexity-floor/test fix | `2 passed, 2 warnings` with `AI_OVERSEER_HEAVY_TESTS=1`; confirms guard is exercised and audit artifacts still write correctly |
 | 2026-03-10 | 0102   | Added FoundUps architect audit skill tests | `test_foundups_architect_audit.py` validates artifact generation and qwen3.5 routing recommendation behavior |
 | 2026-03-10 | 0102   | FoundUps architect audit validation complete | `2 passed, 2 warnings` with `AI_OVERSEER_HEAVY_TESTS=1` for `test_foundups_architect_audit.py` |
