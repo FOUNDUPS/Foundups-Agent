@@ -80,6 +80,12 @@ New module `src/autofix_executor.py`:
   NOTHING executes.
 - `EvidencePacket`: action, decision, safe argv, cwd, timeout, returncode, pid, truncated
   stdout/stderr, timestamp, success, reason. No env/token/secret fields (Addendum #6).
+- **Output redaction (W10 micro-repair):** captured `stdout`/`stderr` and any `execution_error`
+  reason are passed through `redact_sensitive()` BEFORE storage (redaction applied before tail
+  truncation, so no token straddles the boundary). It redacts access/refresh/id tokens,
+  client_secret/client_id, OAuth `code`/`user_code`/`authorization_code`, OAuth URL query params
+  (`code=`/`access_token=`/...), `*_TOKEN`/`*_SECRET`/`*_PASSWORD`/`*_API_KEY` env-style pairs,
+  bearer tokens, and known token shapes (`ya29.`, `1//`, `AIza`, `sk-`, `gh[posru]_`).
 
 ---
 
@@ -145,8 +151,9 @@ attacker-controlled string reaches a shell or selects the executed program.
 
 ## 8. Test Matrix (each guard with a negative control)
 
-File: `tests/test_autofix_executor_security.py` - **49 passed** (added to the conftest
-default-run allowlist so it runs in CI, not skipped).
+File: `tests/test_autofix_executor_security.py` - **63 passed** (added to the conftest
+default-run allowlist so it runs in CI, not skipped). The 14 added by the W10 micro-repair
+prove evidence-packet VALUE-level redaction (below).
 
 | Guard | Test(s) | Negative control |
 |-------|---------|------------------|
@@ -159,6 +166,7 @@ default-run allowlist so it runs in CI, not skipped).
 | Callsite guard | `test_callsites_use_execute_fix_and_no_config_command_read` | n/a |
 | Autonomy preserved | `test_execute_fix_has_no_approval_parameter`, `_executes_without_prompt` (input never called) | n/a |
 | Evidence packet | `test_evidence_packet_fields_present_and_safe`, `_spawn_evidence_has_pid` | safety: no secret fields |
+| Evidence VALUE redaction (W10) | `TestEvidencePacketRedaction` (10 token/code/secret/OAuth-URL payloads + leaky stdout/stderr + error reason) | `test_negative_control_non_secret_output_survives` (ordinary output is NOT over-redacted) |
 | Duplicates gone | `test_dead_files_deleted`, `test_no_production_import_of_auto_fix_engine` | n/a |
 | Live config migrated | `test_youtube_daemon_monitor_has_no_command_fields` | n/a |
 
@@ -190,7 +198,7 @@ recorded. Residual non-exec concerns are documented for follow-up.
 
 ## 11. WSP_97 Truth Boundary Checklist
 
-Declared count: 21 / 21 YES (rows below = 21).
+Declared count: 22 / 22 YES (rows below = 22).
 
 | # | Truth Boundary Checklist Item | Status | Evidence |
 |---|-------------------------------|--------|----------|
@@ -205,7 +213,8 @@ Declared count: 21 / 21 YES (rows below = 21).
 | 9 | INSTALL_MISSING_LIBRARY_REJECTED | YES | not in enum; `test_install_missing_library_rejected_latent` |
 | 10 | ROTATION_PARAMS_ENUM_VALIDATED | YES | browser{chrome,edge}, operation{comments,shorts}; reject tests |
 | 11 | SYS_EXECUTABLE_USED | YES | argv[0]==sys.executable (no bare "python"); argv tests |
-| 12 | EVIDENCE_PACKET_SAFE_NO_SECRETS | YES | `test_evidence_packet_fields_present_and_safe` |
+| 12 | EVIDENCE_PACKET_SAFE_NO_SECRETS | YES | key-level: `test_evidence_packet_fields_present_and_safe` |
+| 22 | EVIDENCE_OUTPUT_VALUE_REDACTED (W10) | YES | `redact_sensitive` applied to stdout/stderr/error before store; `TestEvidencePacketRedaction` proves token/code/secret/OAuth-URL values are gone, with negative control |
 | 13 | CONFIG_COMMAND_FIELDS_REJECTED | YES | `assert_no_command_fields`; reject (not ignore) |
 | 14 | LIVE_CONFIG_MIGRATED | YES | youtube_daemon_monitor.json fix_command/fix_commands removed; test |
 | 15 | POPEN_SHELL_REMOVED | YES | check_rotation_stalls -> execute_fix(wait=False); no `subprocess.Popen` in mixin src |
@@ -216,7 +225,7 @@ Declared count: 21 / 21 YES (rows below = 21).
 | 20 | ASCII_CLEAN | YES | audit + executor + tests are ASCII |
 | 21 | NO_BEHAVIOR_REGRESSION_SAFE_FIXES | YES | Python-native fix branches untouched; allowlisted reauth/rotation still apply |
 
-**WSP 97 Truth Boundary Checklist: 21/21 YES.**
+**WSP 97 Truth Boundary Checklist: 22/22 YES.**
 
 ---
 

@@ -26,8 +26,24 @@ from modules.ai_intelligence.ai_overseer.src.autofix_executor import (
     FixAction,
     FixActionRejected,
     execute_fix,
+    redact_sensitive,
     resolve_fix_action,
 )
+
+# Sensitive material that must NEVER survive into an EvidencePacket. Each tuple is
+# (raw_text_fragment, secret_substring_that_must_be_gone).
+_SENSITIVE_SAMPLES = [
+    ("access token ya29.A0ARrdaM-SeCrEtAcCeSsToKeN1234567890", "ya29.A0ARrdaM-SeCrEtAcCeSsToKeN1234567890"),
+    ("refresh 1//0gabcdRefreshTokenValue1234567890abc", "1//0gabcdRefreshTokenValue1234567890abc"),
+    ("api key AIzaSyABCDEF1234567890abcdefGHIJ", "AIzaSyABCDEF1234567890abcdefGHIJ"),
+    ("https://accounts.google.com/o/oauth2/auth?code=4/0AX4SECRETCODEvalue&scope=x", "4/0AX4SECRETCODEvalue"),
+    ('{"access_token": "tok_SeCrEtJsOnValue123", "x": 1}', "tok_SeCrEtJsOnValue123"),
+    ("CLIENT_SECRET=GOCSPX-supersecretclientvalue", "GOCSPX-supersecretclientvalue"),
+    ("Authorization: Bearer bearerSecretTokenABCDEF1234567890", "bearerSecretTokenABCDEF1234567890"),
+    ('"client_secret": "GOCSPX-anotherSecret999"', "GOCSPX-anotherSecret999"),
+    ("YT_API_KEY = AIzaKEYvalue1234567890abcdef", "AIzaKEYvalue1234567890abcdef"),
+    ("user_code: WDJB-SECRETUSERCODE", "WDJB-SECRETUSERCODE"),
+]
 
 _REPO_ROOT = Path(__file__).resolve().parents[4]
 _SRC = _REPO_ROOT / "modules" / "ai_intelligence" / "ai_overseer" / "src"
@@ -260,6 +276,64 @@ class TestEvidencePacket:
         # shell=False asserted on the actual call
         _, kwargs = mock_sub.Popen.call_args
         assert kwargs.get("shell") is False
+
+
+class TestEvidencePacketRedaction:
+    """W10 micro-repair: stdout/stderr/error VALUES must be redacted, not just keys."""
+
+    @pytest.mark.parametrize("raw,secret", _SENSITIVE_SAMPLES)
+    def test_redact_sensitive_removes_secret_value(self, raw, secret):
+        out = redact_sensitive(raw)
+        assert secret not in out
+        assert "[REDACTED]" in out
+
+    def test_redact_handles_empty_and_none(self):
+        assert redact_sensitive("") == ""
+        assert redact_sensitive(None) == ""
+
+    def test_stdout_stderr_values_are_redacted_in_packet(self):
+        """A reauth subprocess whose stdout/stderr leak OAuth material -> packet is clean."""
+        leaky_stdout = (
+            "Opening browser https://accounts.google.com/o/oauth2/auth?code=4/0AX4LEAKEDCODE&scope=yt\n"
+            "access_token=ya29.A0ARrdaMLEAKEDtoken1234567890\n"
+        )
+        leaky_stderr = 'WARNING {"refresh_token": "1//0gLEAKEDrefresh1234567890"} CLIENT_SECRET=GOCSPX-LEAKEDsecret'
+        with patch(_EXECUTOR_PATH) as mock_sub:
+            mock_sub.run.return_value = MagicMock(
+                returncode=0, stdout=leaky_stdout, stderr=leaky_stderr
+            )
+            packet = execute_fix("run_reauthorization_script", {}, wait=True)
+        d = packet.to_dict()
+        blob = d["stdout_tail"] + "\n" + d["stderr_tail"]
+        for leaked in (
+            "4/0AX4LEAKEDCODE",
+            "ya29.A0ARrdaMLEAKEDtoken1234567890",
+            "1//0gLEAKEDrefresh1234567890",
+            "GOCSPX-LEAKEDsecret",
+        ):
+            assert leaked not in blob, f"secret leaked into evidence: {leaked}"
+        assert "[REDACTED]" in blob
+
+    def test_execution_error_reason_is_redacted(self):
+        """An exception message carrying a token must be redacted in packet.reason."""
+        with patch(_EXECUTOR_PATH) as mock_sub:
+            mock_sub.run.side_effect = RuntimeError(
+                "spawn failed near token=ya29.A0ARrdaMERRORtoken99887766 in env"
+            )
+            packet = execute_fix("run_reauthorization_script", {}, wait=True)
+        assert packet.success is False
+        assert "ya29.A0ARrdaMERRORtoken99887766" not in packet.reason
+        assert "[REDACTED]" in packet.reason
+
+    def test_negative_control_non_secret_output_survives(self):
+        """Negative control: ordinary output is NOT over-redacted away to nothing."""
+        with patch(_EXECUTOR_PATH) as mock_sub:
+            mock_sub.run.return_value = MagicMock(
+                returncode=0, stdout="Reauthorization complete for set1. 3 channels refreshed.", stderr=""
+            )
+            packet = execute_fix("run_reauthorization_script", {}, wait=True)
+        assert "Reauthorization complete" in packet.stdout_tail
+        assert "3 channels refreshed" in packet.stdout_tail
 
 
 class TestDuplicatesGone:

@@ -30,9 +30,11 @@ enum-validated discrete params; it can never inject a command string into a shel
 - Re-verified line numbers on 0b55b5cdd; corrected #767 reachability (daemon_monitor_mixin
   paths are latent/orphaned, not inherited by the live overseer - migrated anyway).
 
-49 security tests pass + independent adversarial config-injection pass (refuted=true).
-Audit: `docs/audits/security/AI_OVERSEER_AUTOFIX_SHELL_EXEC_REMEDIATION_PHASE1.md`.
-WSP_97 Truth Boundary: 21/21 YES.
+63 security tests pass + independent adversarial config-injection pass (refuted=true).
+**W10 micro-repair:** `EvidencePacket` now redacts captured stdout/stderr/error via
+`redact_sensitive()` BEFORE storage (tokens, OAuth codes/URLs, secrets) - value-level, not
+just key-level. Audit: `docs/audits/security/AI_OVERSEER_AUTOFIX_SHELL_EXEC_REMEDIATION_PHASE1.md`.
+WSP_97 Truth Boundary: 22/22 YES.
 
 ---
 

@@ -21,6 +21,7 @@ Remediation: AI_OVERSEER_AUTOFIX_SHELL_EXEC_REMEDIATION_PHASE1.
 from __future__ import annotations
 
 import enum
+import re
 import subprocess
 import sys
 import time
@@ -55,6 +56,54 @@ _ALLOWED_OPERATIONS = ("comments", "shorts")
 
 # Config fields that must never carry an executable command string for auto-fix.
 _FORBIDDEN_CONFIG_FIELDS = ("fix_command", "fix_commands")
+
+# WSP_97 evidence safety: redact credential-adjacent material from any captured output
+# (stdout/stderr/error text) BEFORE it is stored in an EvidencePacket. Auto-fix actions
+# are OAuth-adjacent, so raw output could contain auth URLs, tokens, codes, or secrets.
+_REDACTION = "[REDACTED]"
+_REDACT_SUBS = (
+    # sensitive key followed by a value:  key=val | key: val | "key": "val"
+    (
+        re.compile(
+            r"(\b(?:access_token|refresh_token|id_token|client_secret|client_id|"
+            r"user_code|authorization_code|password|passwd|api_key|apikey|token)\b"
+            r"\s*[\"']?\s*[:=]\s*[\"']?)([^\s&\"'}]+)",
+            re.IGNORECASE,
+        ),
+        r"\1" + _REDACTION,
+    ),
+    # OAuth URL query params:  ?code=... &access_token=... &refresh_token=...
+    (
+        re.compile(
+            r"([?&](?:code|access_token|refresh_token|id_token|token)=)[^\s&\"'}]+",
+            re.IGNORECASE,
+        ),
+        r"\1" + _REDACTION,
+    ),
+    # env-style KEY=VALUE for sensitive suffixes
+    (
+        re.compile(r"(\b[A-Z0-9_]*(?:TOKEN|SECRET|PASSWORD|API_KEY|APIKEY)\s*[:=]\s*)(\S+)"),
+        r"\1" + _REDACTION,
+    ),
+    # bearer tokens
+    (re.compile(r"(\b[Bb]earer\s+)[A-Za-z0-9._\-]+"), r"\1" + _REDACTION),
+    # known token shapes (redact the value even out of key=value context)
+    (re.compile(r"\bya29\.[0-9A-Za-z._\-]+"), _REDACTION),       # Google OAuth access token
+    (re.compile(r"\b1//[0-9A-Za-z._\-]{10,}"), _REDACTION),      # Google OAuth refresh token
+    (re.compile(r"\bAIza[0-9A-Za-z_\-]{10,}"), _REDACTION),      # Google API key
+    (re.compile(r"\bsk-[A-Za-z0-9]{16,}"), _REDACTION),          # OpenAI-style key
+    (re.compile(r"\bgh[posru]_[A-Za-z0-9]{16,}"), _REDACTION),   # GitHub token
+)
+
+
+def redact_sensitive(text: Optional[str]) -> str:
+    """Redact credential-adjacent material (tokens, OAuth codes/URLs, secrets) from text."""
+    if not text:
+        return ""
+    out = str(text)
+    for pattern, repl in _REDACT_SUBS:
+        out = pattern.sub(repl, out)
+    return out
 
 
 class FixActionRejected(Exception):
@@ -228,8 +277,9 @@ def execute_fix(
                 cwd=cwd_str,
                 timeout=timeout,
                 returncode=proc.returncode,
-                stdout_tail=(proc.stdout or "")[-_STDIO_TAIL:],
-                stderr_tail=(proc.stderr or "")[-_STDIO_TAIL:],
+                # Redact BEFORE truncation so no token straddles the tail boundary.
+                stdout_tail=redact_sensitive(proc.stdout)[-_STDIO_TAIL:],
+                stderr_tail=redact_sensitive(proc.stderr)[-_STDIO_TAIL:],
                 timestamp=_now_iso(),
                 success=proc.returncode == 0,
                 reason="completed",
@@ -261,5 +311,5 @@ def execute_fix(
             timeout=timeout,
             timestamp=_now_iso(),
             success=False,
-            reason=f"execution_error: {type(exc).__name__}: {exc}",
+            reason=redact_sensitive(f"execution_error: {type(exc).__name__}: {exc}"),
         )
