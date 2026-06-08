@@ -27,6 +27,7 @@ _ALLOWLIST = {
     "test_vulnerability_scan_policy.py",
     "test_preflight_resolution.py",
     "test_foundup_genesis_validator.py",
+    "test_autofix_executor_security.py",
 }
 
 _HEAVY_TARGETS = [
