@@ -1,5 +1,51 @@
 # Agent Module TestModLog
 
+## 2026-06-09 - FoundUp Manifest Validator Module Path Exact-Match Hardening Tests
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_foundup_manifest_validator.py -q
+```
+
+**Result**: PASS
+
+**Summary**: 88 passed in 0.28s.
+
+**Slice**: FOUNDUP_MANIFEST_VALIDATOR_MODULE_PATH_EXACT_MATCH_HARDENING_PHASE1
+
+**Added**:
+- `TestExactMatchHelperDirect`: 8 direct unit tests on the
+  `_expected_module_path_matches` helper and the two new canonicalize
+  helpers. Pin the trust boundary mechanically -- not only through the
+  full validator surface.
+- `TestSuffixCollisionRejected`: 6 explicit suffix-collision cases that
+  must fail under exact-only matching, including the shadow-prefix
+  collision and the cross-domain `whack_a_magat` example from the W6
+  dispatch.
+- `TestCanonicalPathNormalization`: 16 parametrized variants split into
+  accept (harmless: `./`, `//`, `.` segment, backslashes, trailing `/`)
+  and reject (absolute drive, leading `/`, UNC, `..` traversal anywhere
+  in the path, shadow directory, extra suffix segment).
+- `TestOldSuffixBehaviorRegression`: 3 tests that compute the OLD
+  suffix-fallback locally inside the test, assert it would have accepted
+  the input, and assert the NEW exact-only helper rejects it. Pins the
+  regression mechanically so any future loosening fails.
+
+**Boundary preserved**:
+- `test_validator_imports_no_runtime_executors` still passes (no
+  hermes / openclaw / ai_overseer / job_consumer / wre_core imports).
+- `test_validator_no_exec_process_network_or_write` still passes
+  (no subprocess / socket / urllib / open / Popen / write / etc.).
+- Negative controls (shell strings, shell metacharacters, gate-bypass
+  flag, missing required gates, external_agent_allowed=true,
+  build_ready=true, autonomous_execution_ready=true, manifest_ready=true
+  without promotion) all still trigger rejection.
+
+**No skip / xfail on any security assertion.**
+
+---
+
 ## 2026-06-08 - FoundUp Manifest Validator Tests (FOUNDUP_MANIFEST_BASELINE_IMPL_PHASE1)
 
 **Command**:

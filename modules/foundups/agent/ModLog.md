@@ -1,5 +1,100 @@
 # Agent Module ModLog
 
+## 2026-06-09 - FoundUp Manifest Validator Module Path Exact-Match Hardening (v0.15.1)
+
+**Author**: 0102 (W6)
+**Slice**: FOUNDUP_MANIFEST_VALIDATOR_MODULE_PATH_EXACT_MATCH_HARDENING_PHASE1
+**Predecessors**:
+- PR #770 - manifest readiness + execution ecosystem boundary
+- PR #771 - baseline build_contract / execution_routing + read-only validator
+- PR #772 - WRE context-bundle boundary audit (identified suffix-match fallback)
+**WSP References**: WSP 11, WSP 50, WSP 84, WSP 97
+
+### Changed
+
+- **foundup_manifest_validator.py** - `_expected_module_path_matches` now
+  requires EXACT normalized repo-relative path equality between
+  `build_contract.module_path` and the manifest file's parent directory.
+  The prior suffix-match fallback (`parent.endswith("/" + norm_module)`)
+  identified by PR #772 has been removed.
+  - New helper `_canonicalize_module_path(raw)`: canonicalizes a manifest-
+    declared module_path to repo-relative POSIX form. Accepts harmless
+    equivalents (leading `./`, repeated `/`, `.` segments, backslashes).
+    Rejects empty, absolute (drive letter, leading `/`), UNC (`\\\\`),
+    and any `..` segment.
+  - New helper `_canonicalize_manifest_path_for_compare(raw)`: as above,
+    plus strips the validator's known repo-root prefix (case-insensitive
+    for Windows drive-letter casing) so absolute on-disk manifest paths
+    still compare correctly.
+  - New module-level constants `_VALIDATOR_FILE`, `_REPO_ROOT_POSIX`,
+    `_ABSOLUTE_OR_UNC_PATTERN` (used only for compare; no IO, no exec).
+  - Module-level `import re` and `from pathlib import Path` added. The
+    AST self-check tests confirm no banned-module imports, no
+    `subprocess` / network / file-write calls, and no runtime executor
+    or consumer imports.
+
+### Boundary preserved
+
+- Validator remains READ-ONLY. No subprocess, Popen, os.system, eval,
+  exec, dynamic import, network, or file write.
+- No manifest mutation. All 6 existing manifests still validate.
+- No registry mutation. No runtime consumer wiring.
+- No readiness promotion. No CABR / payout / DAO / token touch.
+- AI Overseer is not invoked. External agents remain disabled.
+
+### Test additions
+
+- Existing tests: 51 pre-hardening tests still pass unchanged.
+- `TestExactMatchHelperDirect` (8 unit tests on the helper itself).
+- `TestSuffixCollisionRejected` (6 explicit suffix-collision cases).
+- `TestCanonicalPathNormalization` (16 parametrized variants).
+- `TestOldSuffixBehaviorRegression` (3 regressions that mechanically
+  prove the old suffix fallback would have accepted these and the new
+  exact-only rule rejects them).
+- Total: 88 tests pass; 0 skipped; 0 xfailed.
+
+### What this unblocks
+
+- `WRE_CONTEXT_BUNDLE_BUILDER_PHASE1` may now safely derive
+  `allowed_source_roots` from `build_contract.module_path`.
+- This slice does NOT implement that builder; it only removes the
+  pre-consumer trust gap.
+
+### WSP_97 Truth Boundary Checklist
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | VALIDATOR_HARDENING_ONLY | YES | git diff: only 4 in-scope files changed (validator src, test, ModLog, TestModLog). |
+| 2 | EXACT_MATCH_ONLY | YES | `foundup_manifest_validator.py::_expected_module_path_matches` returns `parent == canonical_module`; no other path is accepted. |
+| 3 | SUFFIX_FALLBACK_REMOVED | YES | Prior `parent.endswith("/" + norm_module)` branch removed; not present anywhere in `foundup_manifest_validator.py`. Verified by Grep. |
+| 4 | SUFFIX_COLLISION_NEGATIVE_TESTS_PASS | YES | `TestSuffixCollisionRejected` (6 cases) + `TestCanonicalPathNormalization::test_unsafe_or_shadow_module_paths_rejected` (10 parametrized cases) all pass. |
+| 5 | SIX_EXISTING_MANIFESTS_STILL_VALIDATE | YES | `test_all_six_manifests_validate` parametrized over `TARGET_MANIFESTS` (6 entries) passes; also `TestExactMatchHelperDirect::test_real_manifest_locations_match_exactly` covers each pair directly. |
+| 6 | MAGADOOM_CROSS_DOMAIN_EXACT_MATCH_VALID | YES | `magadoom_001` at `modules/gamification/whack_a_magat/foundup_manifest.json` declares `module_path=modules/gamification/whack_a_magat`; exact-only match accepts. Covered by `TestExactMatchHelperDirect::test_real_manifest_locations_match_exactly[magadoom row]`. |
+| 7 | NO_MANIFEST_MUTATION | YES | `git diff --name-only` shows no `foundup_manifest.json` files changed. |
+| 8 | NO_REGISTRY_MUTATION | YES | No file under `modules/foundups/registry/`, `modules/foundups/manifest/`, `modules/foundups/projection/`, or `modules/foundups/catalog/` touched. |
+| 9 | NO_RUNTIME_CONSUMER_WIRING | YES | No file in `modules/communication/moltbot_bridge/`, `modules/infrastructure/wre_core/`, `modules/ai_intelligence/ai_overseer/`, or any `*_dae.py` touched. |
+| 10 | NO_BUILD_RUN | YES | No build/test execution performed by this slice beyond running the validator test file itself. |
+| 11 | NO_READINESS_PROMOTION | YES | `test_reject_build_ready_true`, `test_reject_autonomous_execution_ready_true`, `test_reject_manifest_ready_true_without_promotion` still pass; no manifest readiness field flipped. |
+| 12 | VALIDATOR_READ_ONLY | YES | `test_validator_no_exec_process_network_or_write` passes; no banned-name calls (`open`, `eval`, `exec`, `compile`, etc.), no banned-attr calls (`run`, `Popen`, `write`, `urlopen`, etc.). |
+| 13 | VALIDATOR_IMPORTS_NO_RUNTIME_EXECUTORS | YES | `test_validator_imports_no_runtime_executors` passes; module imports: `__future__`, `dataclasses`, `json`, `pathlib`, `re`, `typing`. No `hermes`, `openclaw`, `ai_overseer`, `job_consumer`, `build_plan_executor`, `wre_core`. |
+| 14 | COMMANDS_REMAIN_ARGV_OR_NULL | YES | `_validate_command_block` and `_is_argv_list_or_null` unchanged; `test_reject_shell_string_command` and `test_reject_shell_metacharacters_in_argv` still pass. |
+| 15 | EXTERNAL_AGENTS_STILL_DISABLED | YES | `test_reject_external_agent_allowed_true` and `test_execution_routing_declarative_only` still pass; no relaxation of external-agent gating. |
+| 16 | AI_OVERSEER_NOT_BUILDER | YES | `ALLOWED_AUDITORS = frozenset({"ai_overseer"})` unchanged; AI Overseer remains in the auditor allowlist only, not in `ALLOWED_EXECUTORS` (still `{"hermes"}`) or `ALLOWED_ORCHESTRATORS` (still `{"openclaw"}`). |
+| 17 | CITES_PR_771 | YES | This ModLog entry's Predecessors block and the new validator docstring on `_expected_module_path_matches` cite PR #771 (baseline build_contract / validator). |
+| 18 | CITES_PR_772 | YES | This ModLog entry's Predecessors block and the docstring on `_expected_module_path_matches` cite PR #772 (suffix-match audit). |
+| 19 | NO_CABR_PAYOUT_DAO | YES | No file under `modules/foundups/agent_market/`, no CABR/UPS/Du/F_i/Treasury references added; validator does not emit any economic signal. |
+| 20 | NO_SKIP_XFAIL | YES | `pytest -q` summary: `88 passed in 0.28s`; no `s` (skip) or `x` (xfail) markers in test output. |
+| 21 | ASCII_CLEAN | YES | Slice-introduced content is 0 non-ASCII bytes (validator src=0, test=0, TestModLog.md=0, this ModLog entry=0). The 60 non-ASCII bytes elsewhere in `ModLog.md` are pre-existing box-drawing glyphs (U+2502, U+2500, U+2514, etc.) in an unrelated earlier entry; out of slice scope and not modified. |
+| 22 | CANONICAL_REPO_RELATIVE_PATH_MATCH | YES | `_canonicalize_module_path` + `_canonicalize_manifest_path_for_compare` normalize both inputs to repo-relative POSIX form before comparing. `TestCanonicalPathNormalization::test_harmless_module_path_normalizations_accepted` (6 variants: `./`, `//`, `.` segment, backslashes, trailing `/`, baseline) all match. |
+| 23 | TRAVERSAL_PATHS_REJECTED | YES | `_canonicalize_module_path` returns None on any `..` segment (leading, mid-path, or trailing). `TestExactMatchHelperDirect::test_canonical_module_path_rejects_unsafe_forms` and `..._rejects_internal_traversal` cover 3 traversal positions. |
+| 24 | ABSOLUTE_AND_UNC_PATHS_REJECTED | YES | `_ABSOLUTE_OR_UNC_PATTERN = re.compile(r"^([A-Za-z]:\|/)")` rejects drive-prefixed and leading-slash forms; UNC (`\\\\srv\\share`) becomes `//srv/share` after backslash conversion and is caught by the leading-slash branch. `TestCanonicalPathNormalization::test_unsafe_or_shadow_module_paths_rejected` covers `O:/`, `C:/`, `/`, UNC. |
+| 25 | OLD_SUFFIX_BEHAVIOR_REGRESSION_PINNED | YES | `TestOldSuffixBehaviorRegression::test_suffix_match_that_old_validator_would_accept_is_rejected` re-implements the legacy logic inline and asserts it would have accepted the input; the new helper rejects it. Two cases (shadow-prefixed and deep-shadow nesting) plus a positive control. |
+| 26 | EXACT_MATCH_HELPER_TESTED_DIRECTLY | YES | `TestExactMatchHelperDirect` calls `_expected_module_path_matches`, `_canonicalize_module_path`, and `_canonicalize_manifest_path_for_compare` directly (not only through full-manifest validation) so the trust boundary is mechanically pinned. |
+
+**WSP_97 VERDICT**: PASS (26/26).
+
+---
+
 ## 2026-06-08 - FoundUp Manifest Baseline Build/Test Contract Validator (v0.15.0)
 
 **Author**: 0102 (W6)

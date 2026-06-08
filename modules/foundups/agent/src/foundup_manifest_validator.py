@@ -39,8 +39,9 @@ NAVIGATION:
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass, field
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 from typing import Any, Dict, List, Optional, Union
 
 __all__ = [
@@ -96,6 +97,28 @@ _SHELL_METACHARACTERS: frozenset = frozenset(
 _SHELL_METAStringS: tuple = ("&&", "||", "$(", "${", ">>", "<<")
 
 _COMMAND_FIELDS: tuple = ("build", "test", "dry_run")
+
+# ---------------------------------------------------------------------------
+# Canonical repo-relative path matching (predecessor PR #772 hardening)
+# ---------------------------------------------------------------------------
+# PR #772 audited the WRE context-bundle boundary and identified the prior
+# suffix-match fallback in _expected_module_path_matches as latent today but
+# mandatory to remove before any consumer derives allowed_source_roots from
+# build_contract.module_path. This block implements exact-only repo-relative
+# path equality with explicit rejection of absolute / UNC / traversal forms.
+# No execution. No IO. No dynamic import.
+
+# Validator file lives at modules/foundups/agent/src/foundup_manifest_validator.py.
+# Four directory levels above is the repo root. The repo root is used ONLY to
+# strip a known prefix from on-disk manifest paths during the compare; it is
+# not used to read or execute anything.
+_VALIDATOR_FILE = Path(__file__).resolve()
+_REPO_ROOT_POSIX = _VALIDATOR_FILE.parents[4].as_posix()
+
+# Matches a Windows drive prefix (e.g. "C:") or a leading "/". After
+# backslash conversion, UNC paths such as "\\\\server\\share\\..." become
+# "//server/share/..." which the leading-slash branch catches.
+_ABSOLUTE_OR_UNC_PATTERN = re.compile(r"^([A-Za-z]:|/)")
 
 
 @dataclass
@@ -156,14 +179,100 @@ def _scan_bypass_flags(node: Any, trail: str, errors: List[str]) -> None:
             _scan_bypass_flags(item, f"{trail}{idx}.", errors)
 
 
+def _canonicalize_module_path(raw: Any) -> Optional[str]:
+    """Canonicalize a manifest-declared module_path to repo-relative POSIX form.
+
+    Accepts harmless equivalents only: leading "./", repeated "/", "."
+    segments, backslashes. Returns the canonical form with no leading or
+    trailing "/", no "." segments, and no "//"-runs.
+
+    Rejects (returns None):
+      - non-string or empty input
+      - absolute paths (drive letter prefix such as "C:" or leading "/")
+      - UNC paths (after backslash conversion they appear as leading "//")
+      - any ".." segment (traversal not permitted in a declarative
+        repo-relative subpath)
+    """
+    if not isinstance(raw, str):
+        return None
+    text = raw.strip().replace("\\", "/")
+    if not text:
+        return None
+    if _ABSOLUTE_OR_UNC_PATTERN.match(text):
+        return None
+    parts: List[str] = []
+    for seg in text.split("/"):
+        seg = seg.strip()
+        if seg in ("", "."):
+            continue
+        if seg == "..":
+            return None
+        parts.append(seg)
+    if not parts:
+        return None
+    return "/".join(parts)
+
+
+def _canonicalize_manifest_path_for_compare(raw: Any) -> Optional[str]:
+    """Canonicalize an on-disk manifest path to repo-relative POSIX form.
+
+    Identical to ``_canonicalize_module_path`` with one additional step: if
+    the path begins with the validator's known repo root, that prefix is
+    stripped (case-insensitive, to tolerate Windows drive-letter casing).
+    Any leftover absolute / UNC / traversal form is rejected.
+    """
+    if not isinstance(raw, str):
+        return None
+    text = raw.strip().replace("\\", "/")
+    if not text:
+        return None
+    repo_lower = _REPO_ROOT_POSIX.lower()
+    text_lower = text.lower()
+    if text_lower.startswith(repo_lower + "/"):
+        text = text[len(_REPO_ROOT_POSIX) + 1:]
+    elif text_lower == repo_lower:
+        # The path IS the repo root; there is no manifest there. Reject.
+        return None
+    if _ABSOLUTE_OR_UNC_PATTERN.match(text):
+        return None
+    parts: List[str] = []
+    for seg in text.split("/"):
+        seg = seg.strip()
+        if seg in ("", "."):
+            continue
+        if seg == "..":
+            return None
+        parts.append(seg)
+    if not parts:
+        return None
+    return "/".join(parts)
+
+
 def _expected_module_path_matches(manifest_path: str, module_path: str) -> bool:
-    """module_path must match the manifest's real on-disk location."""
-    norm_manifest = _normalize(manifest_path)
-    norm_module = _normalize(module_path).rstrip("/")
-    if not norm_module:
+    """Require EXACT normalized repo-relative path equality between
+    ``build_contract.module_path`` and the manifest file's parent directory.
+
+    Both inputs are canonicalized to repo-relative POSIX form (backslashes
+    converted to "/", leading "./" stripped, "." segments collapsed,
+    "//"-runs collapsed, repo-root prefix stripped from the manifest path
+    only). Absolute paths, UNC paths, and ".." traversal are REJECTED in
+    both inputs.
+
+    Suffix-only matches (parent that merely ends with "/" + module_path)
+    are REJECTED. Predecessor PR #772 identified the prior suffix-match
+    fallback as latent today but mandatory to remove before any consumer
+    derives ``allowed_source_roots`` from ``module_path``.
+    """
+    canonical_module = _canonicalize_module_path(module_path)
+    if canonical_module is None:
         return False
-    parent = PurePosixPath(norm_manifest).parent.as_posix()
-    return parent == norm_module or parent.endswith("/" + norm_module)
+    canonical_manifest = _canonicalize_manifest_path_for_compare(manifest_path)
+    if canonical_manifest is None:
+        return False
+    parent = PurePosixPath(canonical_manifest).parent.as_posix()
+    if parent == ".":
+        return False
+    return parent == canonical_module
 
 
 def _validate_command_block(
@@ -401,8 +510,6 @@ def validate_manifest_file(
 
     Reads via Path.read_text; performs no writes and no execution.
     """
-    from pathlib import Path  # local import keeps module-level surface minimal
-
     path_str = _normalize(str(manifest_path))
     try:
         raw = Path(manifest_path).read_text(encoding="utf-8")
