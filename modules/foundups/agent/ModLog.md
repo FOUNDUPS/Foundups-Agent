@@ -1,5 +1,51 @@
 # Agent Module ModLog
 
+## 2026-06-08 - FoundUp Manifest Baseline Build/Test Contract Validator (v0.15.0)
+
+**Author**: 0102 (W6)
+**Slice**: FOUNDUP_MANIFEST_BASELINE_IMPL_PHASE1
+**Predecessor**: PR #770 (FOUNDUP_MANIFEST_READINESS_AUDIT, merged f3459a070)
+**WSP References**: WSP 11, WSP 50, WSP 84, WSP 97
+
+### Added
+
+- **foundup_manifest_validator.py** - read-only validator for the new
+  declarative `build_contract` / `execution_routing` manifest blocks.
+  - `validate_manifest(data, manifest_path, *, allow_readiness_promotion=False)`
+    - pure, no IO, returns `ManifestValidationResult(ok, errors, warnings, manifest_path)`.
+  - `validate_manifest_file(path)` - reads via `Path.read_text` (read-only), then validates.
+  - Enforces: foundup_id match, module_path matches manifest location, commands are
+    argv-list-or-null (never shell strings), no shell metacharacters in argv,
+    forbidden_paths cover `.env`/`main.py`/`*_dae.py`/`vendor`, all 8 required gates
+    present (genesis/manifest/dry_run/test/D0-D6/typed_exec/no_live_launch/
+    policy_required_sovereign_valve), executor/orchestrator/auditor are
+    non-privileged, `external_agent_allowed`/`can_self_authorize` cannot be true,
+    `dry_run.default` cannot be false, readiness cannot promote build/autonomous/
+    manifest readiness, and no gate-bypass flag may be truthy.
+  - EXECUTES NOTHING. Imports no Hermes/OpenClaw/WRE consumer/AI Overseer runtime;
+    no process, network, dynamic-import, or file-write calls.
+
+### Manifest contract blocks (declarative only, no runtime wiring)
+
+Added sibling `build_contract` + `execution_routing` blocks to the 6
+MANIFEST_PRESENT_BUT_INCOMPLETE FoundUps identified by #770:
+
+| FoundUp | module_path | status |
+|---------|-------------|--------|
+| gotjunk_001 | modules/foundups/gotjunk | BASELINE_DECLARATIVE_ONLY |
+| kosei | modules/foundups/kosei | BASELINE_DECLARATIVE_ONLY |
+| magadoom_001 | modules/gamification/whack_a_magat | BASELINE_DECLARATIVE_ONLY |
+| antifafm_001 | modules/platform_integration/antifafm_broadcaster | BASELINE_DECLARATIVE_ONLY |
+| voteballots | modules/foundups/voteballots | NEEDS_LABEL_RECONCILIATION |
+| trade | modules/foundups/trade | NEEDS_LABEL_RECONCILIATION |
+
+- All 6 keep `manifest_ready=false`, `build_ready=false`,
+  `autonomous_execution_ready=false`. This slice establishes contract presence only.
+- No consumer wired; no autonomous build run; no runtime behavior changed; registry
+  untouched; AI Overseer remains auditor (not a builder).
+- voteballots/trade carry the #770 label-vs-surface conflict (labels say
+  SPECIFIED_NOT_IMPLEMENTED but real src/tests exist) and are flagged, not build-trusted.
+
 ## 2026-05-01 - Worker Queue Observability Scaffold (v0.14.0)
 
 **Author**: 0102 (W4)
