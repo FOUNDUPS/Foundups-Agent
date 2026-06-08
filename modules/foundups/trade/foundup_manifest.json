@@ -34,5 +34,80 @@
   "category": "trading",
   "launch_readiness": "discoverable_only",
   "created_at": "2026-05-04T00:00:00Z",
+  "build_contract": {
+    "contract_version": "0.1.0",
+    "foundup_id": "trade",
+    "module_path": "modules/foundups/trade",
+    "owner_lane": "WRE",
+    "status": "NEEDS_LABEL_RECONCILIATION",
+    "build": {
+      "mode": "no_build",
+      "command": null,
+      "notes": "Baseline contract only; no autonomous build enabled."
+    },
+    "test": {
+      "command": ["python", "-m", "pytest", "modules/foundups/trade/tests"],
+      "required": true,
+      "notes": "Baseline test contract; does not imply build readiness."
+    },
+    "dry_run": {
+      "required": true,
+      "default": true,
+      "command": null,
+      "notes": "Dry-run required before any real execution."
+    },
+    "safe_mutation_surface": [
+      "modules/foundups/trade/**"
+    ],
+    "forbidden_paths": [
+      ".env",
+      ".env.*",
+      "main.py",
+      "**/*_dae.py",
+      "**/vendor/**",
+      "**/wallet/**",
+      "**/token/**",
+      "**/reward/**",
+      "**/payout/**",
+      "**/cabr/**",
+      "**/blockchain/**",
+      "**/credentials*",
+      "**/secrets*"
+    ],
+    "required_gates": [
+      "genesis_gate",
+      "manifest_gate",
+      "dry_run_gate",
+      "test_gate",
+      "destructive_action_guard_d0_d6",
+      "typed_exec_boundary",
+      "no_live_launch",
+      "policy_required_sovereign_valve_for_non_dry_run"
+    ],
+    "evidence_output": {
+      "path": "modules/foundups/trade/evidence/",
+      "redaction_required": true,
+      "notes": "Evidence path declaration only; no evidence emitted in this slice."
+    },
+    "readiness": {
+      "manifest_ready": false,
+      "build_ready": false,
+      "autonomous_execution_ready": false,
+      "reason": "Baseline build/test contract added; runtime execution remains gated and disabled."
+    }
+  },
+  "execution_routing": {
+    "orchestrator": "openclaw",
+    "executor": "hermes",
+    "auditor": "ai_overseer",
+    "wre_coordinator": true,
+    "external_agent_allowed": false,
+    "external_agent_contract_required": true,
+    "declarative_only": true,
+    "can_self_authorize": false,
+    "build_plan_source": "modules/foundups/agent/src/build_plan_generator.py",
+    "job_contract_source": "modules/communication/moltbot_bridge/src/foundup_job_contract.py",
+    "notes": "Routing declaration only. Does not grant execution permission or bypass WRE gates."
+  },
   "signature": ""
 }

@@ -1,5 +1,51 @@
 # Agent Module TestModLog
 
+## 2026-06-08 - FoundUp Manifest Validator Tests (FOUNDUP_MANIFEST_BASELINE_IMPL_PHASE1)
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_foundup_manifest_validator.py -q
+```
+
+**Result**: PASS
+
+**Summary**: 51 passed in 0.28s.
+
+**Coverage**:
+1. All 6 updated manifests validate (positive, parametrized).
+2. foundup_id matches build_contract.foundup_id (real manifests + mismatch negative).
+3. forbidden_paths cover .env / main.py / *_dae.py / vendor (all 6).
+4. Negative: reject unknown executor.
+5. Negative: reject privileged + self-authorizing executor config.
+6. Negative: reject missing required gate (genesis_gate).
+7. Negative: reject dry_run.default=false.
+8. Negative: reject external_agent_allowed=true.
+9. Negative: reject build_ready=true.
+10. Negative: reject autonomous_execution_ready=true.
+11. Negative: reject manifest_ready=true without promotion.
+12. Negative: reject shell-string command for build/test/dry_run.
+13. Negative: reject shell metacharacters in argv (4 injection shapes).
+14. Negative: reject truthy gate-bypass flag.
+15. execution_routing declarative-only (all 6).
+16. voteballots/trade flagged NEEDS_LABEL_RECONCILIATION (and not build-trusted).
+17. Validator source imports no Hermes/OpenClaw/WRE consumer/AI Overseer runtime (AST).
+18. Validator source makes no exec/process/network/file-write calls (AST).
+19. Validation is pure (does not mutate input; repeatable).
+
+**Cross-checked existing tests (still pass after manifest edits)**:
+
+```bash
+python -m pytest modules/foundups/gotjunk/tests/test_manifest.py -q              # 12 passed
+python -m pytest modules/foundups/kosei/tests/test_manifest_contract.py -q       # 7 passed
+python -m pytest modules/foundups/trade/tests/test_manifest_contract.py -q       # 15 passed
+python -m pytest modules/foundups/voteballots/tests/test_shell_integration.py -q # 62 passed
+python -m pytest modules/foundups/agent/tests/ -q                                # 330 passed
+```
+
+Note: cross-module collection of two same-named `tests` packages in ONE pytest
+invocation collides (pre-existing layout); run per-file as above.
+
 ## 2026-05-01 - Worker Queue Observability Tests (OC20)
 
 **Command**:
