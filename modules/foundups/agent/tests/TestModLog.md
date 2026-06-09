@@ -1,5 +1,352 @@
 # Agent Module TestModLog
 
+## 2026-06-10 - WRE ContextBundle Builder Phase 1 FIX2c Tests
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/ -q -p no:cacheprovider
+```
+
+**Result**: PASS
+
+**Summary**:
+- Full agent-module suite: **530 passed in 7.77s**; 0 skipped; 0 xfailed
+  (520 FIX2b + 10 FIX2c source-authority-boundary tests).
+
+**Slice**: WRE_CONTEXT_BUNDLE_BUILDER_PHASE1_FIX2C
+
+**Added** (in `test_context_bundle_builder.py`):
+
+- `TestMonorepoPhase1SourceAuthorityBoundary` (FIX2c / W10
+  MONOREPO_POC_SOURCE_AUTHORITY_EXPLICIT): the bundle is HONEST about its
+  monorepo-PoC Phase-1 scope and a manifest CANNOT promote its lifecycle
+  stage by declaration:
+  - `test_source_authority_constant_is_monorepo_poc` -- `SOURCE_AUTHORITY`
+    builder constant is exactly `"monorepo_poc"`.
+  - `test_real_manifest_source_authority_is_monorepo_poc` -- 6 parametrized
+    real manifests; both `bundle.source_authority` and
+    `to_dict()["source_authority"]` are `"monorepo_poc"`.
+  - `test_manifest_cannot_self_promote_lifecycle_stage` -- ANTI-SELF-PROMOTION
+    (load-bearing): a manifest adding top-level `source_authority:
+    "dao_managed"` + build_contract `lifecycle_stage: "mvp_runtime"` STILL
+    builds a bundle with `source_authority == "monorepo_poc"` (manifest stage
+    is ignored, not merely rejected -- the bundle IS produced).
+  - `test_to_dict_has_no_external_dao_mvp_readiness_authority` -- `to_dict()`
+    carries NO external/DAO/MVP readiness key as a truthy authority surface;
+    `source_authority` is exactly the Phase-1 constant.
+  - `test_source_authority_not_in_bundle_id_fingerprint` -- determinism:
+    `source_authority` does NOT enter the bundle_id formula; bundle_id stays
+    `sha256(manifest_sha256 | module_path | BUNDLE_VERSION)`.
+
+**Coverage delta**: the bundle now declares an explicit monorepo-PoC Phase-1
+boundary via a builder-constant `source_authority` field, proven to be
+non-manifest-sourced (anti-self-promotion). No external_proto / mvp_runtime /
+dao_managed / archived handling, no DAO/MVP/CABR/payout fields, no lifecycle
+transitions were added. All prior FIX1 / FIX2 / FIX2-tighten / FIX2b tests
+still pass unchanged; the 6 real manifests still build; `BUNDLE_VERSION` and
+the bundle_id formula are unchanged; no skip / no xfail; both `.py` files 0
+non-ASCII bytes.
+
+---
+
+## 2026-06-10 - WRE ContextBundle Builder Phase 1 FIX2b Tests
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/ -q -p no:cacheprovider
+```
+
+**Result**: PASS
+
+**Summary**:
+- Full agent-module suite: **520 passed in 8.86s**; 0 skipped; 0 xfailed
+  (514 in FIX2 + 6 FIX2b control-char tests).
+
+**Slice**: WRE_CONTEXT_BUNDLE_BUILDER_PHASE1_FIX2B
+
+**Added** (in `test_context_bundle_builder.py`):
+
+- Module-level CONTROL-CHARACTER fixtures (W10 FIX2b), all built from
+  `\xXX` / `\r` / `\n` / `\t` ESCAPE sequences so the source stays 0
+  non-ASCII bytes; each is ASCII (passes `isascii()`) but NOT printable
+  (carries a control char) and contains NO authority keyword:
+  - `_CTRL_NUL_SPLIT` -> `gate\x00name` (embedded NUL U+0000).
+  - `_CTRL_CRLF_LOG` -> `ok\r\nFAKELOG: granted` (CRLF log-injection shape).
+  - `_CTRL_ESC_ANSI` -> `x\x1b[31m` (ESC U+001B ANSI terminal escape).
+  - `_CTRL_TAB` -> `a\tb` (bare TAB U+0009 control char).
+- `TestControlCharactersRejected` (FIX2b / W10 final residual,
+  printable-ASCII-only contract for the three protected list fields):
+  - `test_control_char_fixtures_are_ascii_but_not_printable` -- non-vacuity:
+    each fixture `isascii()` True, `isprintable()` False, no authority
+    keyword (so it reaches the NEW printable check, not an earlier guard).
+  - `test_nul_split_in_required_gates_rejected` -- NUL-split appended as a
+    9th gate (8 real gate names preserved, validator passes); rejected
+    BEFORE any bundle is produced.
+  - `test_crlf_log_injection_in_safe_mutation_surface_rejected` --
+    W10-EXPLOIT FIELD (safe_mutation_surface) with a CRLF log-injection
+    shape; rejected.
+  - `test_esc_ansi_in_forbidden_paths_rejected` -- ESC ANSI escape rejected.
+  - `test_bare_tab_in_safe_mutation_surface_rejected` -- bare TAB rejected.
+  - `test_printable_ascii_element_still_builds` -- positive control /
+    non-vacuity: `modules/foundups/gotjunk/**` still builds and is preserved
+    verbatim, with an explicit `isprintable()` positive assertion.
+
+**Coverage delta**: control characters (NUL/CR/LF/TAB/ESC) are now refused
+in `required_gates` / `forbidden_paths` / `safe_mutation_surface`,
+completing the printable-ASCII-only contract and ending the
+Unicode/control-char evasion class. All prior FIX1 / FIX2 / FIX2-tighten
+tests still pass unchanged; the 6 real manifests still build; no skip / no
+xfail; both `.py` files 0 non-ASCII bytes.
+
+---
+
+## 2026-06-10 - WRE ContextBundle Builder Phase 1 FIX2 Tests
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/ -q -p no:cacheprovider
+```
+
+**Result**: PASS
+
+**Summary**:
+- Full agent-module suite: **514 passed in 8.47s**; 0 skipped; 0 xfailed
+  (496 in FIX1 + 8 first-FIX2 tests + 10 FIX2-tighten tests).
+
+**Slice**: WRE_CONTEXT_BUNDLE_BUILDER_PHASE1_FIX2
+
+**Added** (in `test_context_bundle_builder.py`):
+
+- Module-level fixtures `_FW_PAYOUT_READY`, `_FW_DAO_APPROVED`,
+  `_FW_GATE_PASSED`, `_MIXED_HUMAN_APPROVAL`, built from `\uFFxx` ESCAPE
+  sequences (source stays 0 non-ASCII bytes) -- fullwidth-Unicode forms of
+  authority keywords that NFKC-normalize back to plain ASCII.
+- Module-level BENIGN non-ASCII NON-authority fixtures `_NONASCII_CAFE_GLOB`
+  (`caf<U+00E9>-glob`) and `_NONASCII_CJK_PATH` (`modules/foundups/
+  <U+6587>/x`), built from `\uXXXX` ESCAPE sequences -- path/glob shapes that
+  carry a non-ASCII char but no authority keyword (GAP A coverage).
+- Module-level detector helper `_find_manifest_listlike_bypasses` (shared by
+  the completeness guard and all its non-vacuity proofs; the prior name
+  `_find_bare_tuple_of_manifest_access` is kept as a backwards-compatible
+  alias).
+- `TestFullwidthUnicodeAuthorityEvasionRejected` (FIX2 / W10 residual gap 1,
+  fullwidth-Unicode evasion):
+  - `test_fullwidth_fixtures_normalize_as_documented` -- non-vacuity guard:
+    each fixture is a fullwidth form that NFKC-normalizes to its keyword and
+    is NOT already that ASCII keyword.
+  - `test_fullwidth_payout_ready_in_safe_mutation_surface_rejected` --
+    W10-EXPLOIT FIELD (safe_mutation_surface) with fullwidth `payout_ready`;
+    rejected BEFORE any bundle is produced.
+  - `test_fullwidth_dao_approved_in_safe_mutation_surface_rejected`.
+  - `test_fullwidth_gate_passed_appended_to_required_gates_rejected` --
+    fullwidth `gate_passed` appended as a 9th gate (8 real names preserved).
+  - `test_fullwidth_payout_ready_appended_to_forbidden_paths_rejected`.
+  - `test_generic_nfkc_compatibility_form_also_rejected` -- mixed-form
+    `human_approval` (single fullwidth char) also rejected.
+- `TestNonAsciiNonAuthorityElementsRejected` (FIX2-tighten / W10 GAP A,
+  ASCII-only contract):
+  - `test_nonascii_fixtures_are_benign_and_nonascii` -- non-vacuity: each
+    fixture is non-ASCII and carries NO authority keyword.
+  - `test_nonascii_nonauthority_in_required_gates_rejected` (benign
+    non-ASCII 9th gate; 8 real names preserved).
+  - `test_nonascii_nonauthority_in_forbidden_paths_rejected`.
+  - `test_nonascii_nonauthority_in_safe_mutation_surface_rejected`
+    (the W10-exploit field).
+  - `test_ascii_elements_preserved_unchanged` -- positive control: ASCII
+    inputs build and are preserved verbatim (no rewrite).
+- `TestManifestListFieldsStringOnly` (FIX2 / W10 residual gap 2,
+  completeness; FIX2-tighten broadens beyond `tuple()`):
+  - `test_no_bare_tuple_of_manifest_access_bypasses_helper` -- COMPLETENESS
+    AST guard: ZERO manifest-derived list-like bypasses
+    (tuple/list/set/frozenset conversion, comprehension/genexp, direct
+    assignment reaching a ContextBundle field) that skip
+    `_require_str_tuple`.
+  - `test_completeness_guard_detects_synthetic_bare_tuple` -- NON-VACUITY:
+    the same detector flags a synthetic `tuple(build_contract.get(...))`.
+  - `test_completeness_guard_detects_synthetic_bare_list` -- NON-VACUITY:
+    flags `list(build_contract.get(...))`.
+  - `test_completeness_guard_detects_synthetic_bare_set_and_frozenset` --
+    NON-VACUITY: flags `set(...)` and `frozenset(...)`.
+  - `test_completeness_guard_detects_synthetic_comprehension` --
+    NON-VACUITY: flags listcomp/setcomp/genexp over a manifest access.
+  - `test_completeness_guard_detects_synthetic_direct_assignment` --
+    NON-VACUITY: flags `x = build_contract.get(...)` reaching a
+    ContextBundle field.
+  - `test_completeness_guard_no_false_positive_on_local_assignment` --
+    FALSE-POSITIVE guard: local conversions (`tuple(included)` /
+    `dict(excluded)`) and manifest dict reads whose name never reaches a
+    ContextBundle field are NOT flagged.
+  - The original positive `test_no_other_manifest_list_field_is_serialized`
+    is retained unchanged.
+
+**WSP_97**: table stays at 34 rows (rows 33-34 and 18 evidence updated to
+cite the ASCII-only rejection and the multi-pattern completeness detector).
+Both `.py` files 0 non-ASCII bytes. No skip / no xfail.
+
+---
+
+## 2026-06-09 - WRE ContextBundle Builder Phase 1 FIX1 Tests
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_context_bundle_builder.py -q
+python -m pytest modules/foundups/agent/tests/ -q
+```
+
+**Result**: PASS
+
+**Summary**:
+- Builder test file alone: **129 passed in 2.40s** (54 prior + 75 new).
+- Full agent-module suite: **496 passed in 7.87s**; 0 skipped; 0 xfailed.
+
+**Slice**: WRE_CONTEXT_BUNDLE_BUILDER_PHASE1_FIX1
+
+**Added** (in `test_context_bundle_builder.py`):
+
+- `TestRequireStrTupleListFieldsRejectsAuthorityLaundering`:
+  - `test_required_gates_with_appended_dict_rejected` -- the W10
+    exact example for required_gates.
+  - `test_required_gates_with_non_str_element_rejected` -- 7
+    parametrized non-str element types (`int`, `True`, `False`,
+    `None`, list, dict, float).
+  - `test_required_gates_as_dict_value_rejected`.
+  - `test_forbidden_paths_with_appended_dict_rejected` -- the W10
+    exact example for forbidden_paths.
+  - `test_forbidden_paths_with_non_str_element_rejected` -- 6
+    parametrized.
+  - `test_safe_mutation_surface_as_dict_value_rejected_w10_repro` --
+    the ADVERSARIAL REPRO: exact W10 exploit
+    `{"payout_ready": true, "dao_approved": true}` rejected before
+    bundle construction.
+  - `test_safe_mutation_surface_with_appended_dict_rejected`.
+  - `test_safe_mutation_surface_with_non_str_element_rejected` -- 7
+    parametrized.
+  - `test_authority_keyword_strings_rejected` -- 9 parametrized
+    `(field, keyword)` cases proving authority-keyword substring
+    smuggling is refused (`payout_ready`, `dao_approved`,
+    `manifest_ready`, `human_approval`, `external_agent_allowed`,
+    `is_authorized`, `approval_level`, `gate_passed`,
+    `security_passed`).
+  - `test_empty_string_element_rejected` -- 3 parametrized fields.
+  - `test_real_manifests_still_build_with_helpers` -- all 6 real
+    manifests pass the helper unchanged.
+  - `test_to_dict_never_produced_for_crafted_input` -- proves the
+    bundle's `to_dict()` is never produced for poisoned input.
+
+- `TestRequireStrictBoolScalarFieldsRejectsAuthorityLaundering`:
+  - `test_readiness_with_non_bool_value_rejected` -- 3 readiness
+    fields x 5 bad values (`{"is_authorized": True}`,
+    `{"payout_ready": True, "dao_approved": True}`, list, int,
+    `"true"` string).
+  - `test_routing_flag_with_non_bool_value_rejected` -- 2 routing
+    flags x 4 bad values.
+  - `test_truthy_dict_readiness_not_laundered_to_true` -- explicit
+    repro that the prior `bool(dict)` smuggle is closed.
+
+- `TestManifestListFieldsStringOnly`:
+  - `test_all_list_field_elements_are_str_after_build` -- type-check
+    every element of every list field for all 6 real manifests.
+  - `test_no_other_manifest_list_field_is_serialized` -- AST scan
+    asserts `_require_str_tuple` is applied to exactly
+    `{"required_gates", "forbidden_paths", "safe_mutation_surface"}`.
+    If a future change adds a fourth list field that gets copied into
+    the bundle, this test fails until it is routed through the helper.
+
+**Boundary preserved (FIX1)**:
+
+- All prior security AST scans still pass (no banned imports / banned
+  calls / runtime executor imports / nondeterministic imports).
+- Validator NOT edited.
+- No new dependencies.
+- No skip / no xfail.
+- All 6 real manifests still build (clean-manifest behavior identical).
+
+---
+
+## 2026-06-09 - WRE ContextBundle Builder Phase 1 Tests
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_context_bundle_builder.py \
+                 modules/foundups/agent/tests/test_foundup_manifest_validator.py -q
+```
+
+**Result**: PASS
+
+**Summary**: 142 passed in 1.20s; 0 skipped; 0 xfailed.
+
+**Slice**: WRE_CONTEXT_BUNDLE_BUILDER_PHASE1
+
+**Added** (in `test_context_bundle_builder.py`):
+- `TestRealManifestsBuild`: each of the 6 real manifests builds a
+  bundle; refs+sha256-only shape pinned at dataclass and `to_dict`
+  levels; manifest ref present; declared test refs included where
+  safe.
+- `TestForbiddenPathsAndCap`: forbidden-path segment screen + total-cap
+  fail-closed + cap-never-exceeded property.
+- `TestValidatorRejectionsPropagate`: invalid manifest, three readiness
+  promotions, `external_agent_allowed=true`, `can_self_authorize=true`,
+  and module_path mismatch (via the #773 validator) all rejected.
+- `TestNoGatePassNoCabrNoPayoutNoDao`: full-dict walk rejects 14
+  forbidden authority keys; `required_gates_to_recheck` carries
+  string names only.
+- `TestOutsideModulePathExcluded`: docs outside `module_root` are not
+  included.
+- `TestPathTraversalRejected`: `..` in module_path rejected via the
+  #773 validator canonicalizer.
+- `TestSymlinkEscapeRejected`: integration test on platforms that
+  support `os.symlink` (Windows without dev mode returns early without
+  asserting) PLUS `test_is_path_within_helper_rejects_path_outside_base`
+  -- the always-runs mechanical pin for the same boundary.
+- `TestBuilderImportAndExecutionSafety`: AST scan -- no banned-module
+  imports, no banned name/attr calls, no runtime executor imports.
+- `TestBundleIdDeterministic`: 5 cases plus a static-AST check that
+  the builder does not import `time` / `datetime` / `random` /
+  `secrets` / `uuid`.
+- `TestStreamHashAndOversized`: patched-cap oversized exclusion plus
+  an AST scan proving `_stream_sha256` uses a while-loop with
+  chunked reads.
+- `TestReconciliationFlaggedStillBuild`: voteballots and trade build
+  at the declarative level; readiness flags stay false
+  (NEEDS_LABEL_RECONCILIATION not promoted).
+- `TestNoConsumerWiringNoBuildRun`: signature has no consumer handle;
+  source contains no runtime-consumer class identifier.
+- `TestNo774LegacyPayloadAuthority`: API has no `payload` /
+  `job_payload` / `job` / `task` / `request` parameter; bundle
+  `module_path` comes from the validated manifest only; source has no
+  `payload` / `job_payload` / `legacy_payload` identifier.
+- `TestBundleStructuralIntegrity`: every required top-level field
+  present; provenance carries builder version + validator path/sha256
+  + applied WSPs (`WSP_50`, `WSP_77`, `WSP_84`, `WSP_97`).
+
+**Boundary preserved**:
+- AST scan rejects subprocess / socket / urllib / importlib /
+  multiprocessing / pickle / marshal at the module-import level.
+- AST scan rejects `eval` / `exec` / `compile` / `__import__` /
+  `input` / `execfile` at the call level.
+- AST scan rejects `system` / `popen` / `Popen` / `run` / `call` /
+  `check_call` / `check_output` / `getoutput` / `write_text` /
+  `write_bytes` / `writelines` / `urlopen` / `urlretrieve` / `connect` /
+  `spawn` / `fork` / `execv` / `execve` / `remove` / `unlink` /
+  `rmdir` / `makedirs` / `chmod` / `kill` at the attribute call level.
+- AST scan rejects `hermes` / `openclaw` / `ai_overseer` /
+  `job_consumer` / `foundup_job_consumer` / `build_plan_executor` /
+  `wre_core` / `wre_master_orchestrator` / `build_plan_swarm` imports.
+- AST scan rejects identifier-level references to `Hermes` / `OpenClaw`
+  / `AIIntelligenceOverseer` / `AIOverseer` / `FoundUpJobConsumer` /
+  `FoundUpJob` / `BuildPlanExecutor` / `WREMasterOrchestrator` while
+  allowing the same words in docstrings/comments (which document the
+  forbidden boundary).
+
+**No skip / no xfail on any security assertion.**
+
+---
+
 ## 2026-06-09 - FoundUp Manifest Validator Module Path Exact-Match Hardening Tests
 
 **Command**:

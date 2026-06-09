@@ -14,8 +14,17 @@
 - [x] Mesa model lifecycle tracking integration
 - [x] SSE streaming to animation
 - [x] Ticker message templates in animation
-- [x] State machine documented (01(02) → 0102 → 01/02)
+- [x] State machine documented (01(02) -> 0102 -> 01/02)
 - [x] Rank system defined (1-7, mirror of 012)
+- [x] Read-only `foundup_manifest_validator` (PR #771)
+- [x] Validator hardened to canonical exact module_path match (PR #773)
+- [x] Read-only `context_bundle_builder` (WRE_CONTEXT_BUNDLE_BUILDER_PHASE1)
+  - Imports `validate_manifest_file` -- does not reimplement
+  - Deterministic sha256-derived `bundle_id`; `created_at` injected
+  - Stream-hashed file refs (no full-body load); per-file + total caps
+  - Refuses any readiness promotion, external agent, self-authorize
+  - No Hermes / OpenClaw / WRE consumer wiring (consumer wiring blocked
+    until #774 carry-forward removes legacy payload.module_path trust)
 
 ### Phase 1: Core State Machine (v0.2.0)
 
