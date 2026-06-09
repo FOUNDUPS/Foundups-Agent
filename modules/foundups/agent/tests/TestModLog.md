@@ -1,5 +1,55 @@
 # Agent Module TestModLog
 
+## 2026-06-10 - WRE ContextBundle Builder Phase 1 FIX2c Tests
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/ -q -p no:cacheprovider
+```
+
+**Result**: PASS
+
+**Summary**:
+- Full agent-module suite: **530 passed in 7.77s**; 0 skipped; 0 xfailed
+  (520 FIX2b + 10 FIX2c source-authority-boundary tests).
+
+**Slice**: WRE_CONTEXT_BUNDLE_BUILDER_PHASE1_FIX2C
+
+**Added** (in `test_context_bundle_builder.py`):
+
+- `TestMonorepoPhase1SourceAuthorityBoundary` (FIX2c / W10
+  MONOREPO_PHASE1_SOURCE_AUTHORITY_BOUNDARY): the bundle is HONEST about its
+  monorepo-PoC Phase-1 scope and a manifest CANNOT promote its lifecycle
+  stage by declaration:
+  - `test_source_authority_constant_is_monorepo_poc` -- `SOURCE_AUTHORITY`
+    builder constant is exactly `"monorepo_poc"`.
+  - `test_real_manifest_source_authority_is_monorepo_poc` -- 6 parametrized
+    real manifests; both `bundle.source_authority` and
+    `to_dict()["source_authority"]` are `"monorepo_poc"`.
+  - `test_manifest_cannot_self_promote_lifecycle_stage` -- ANTI-SELF-PROMOTION
+    (load-bearing): a manifest adding top-level `source_authority:
+    "dao_managed"` + build_contract `lifecycle_stage: "mvp_runtime"` STILL
+    builds a bundle with `source_authority == "monorepo_poc"` (manifest stage
+    is ignored, not merely rejected -- the bundle IS produced).
+  - `test_to_dict_has_no_external_dao_mvp_readiness_authority` -- `to_dict()`
+    carries NO external/DAO/MVP readiness key as a truthy authority surface;
+    `source_authority` is exactly the Phase-1 constant.
+  - `test_source_authority_not_in_bundle_id_fingerprint` -- determinism:
+    `source_authority` does NOT enter the bundle_id formula; bundle_id stays
+    `sha256(manifest_sha256 | module_path | BUNDLE_VERSION)`.
+
+**Coverage delta**: the bundle now declares an explicit monorepo-PoC Phase-1
+boundary via a builder-constant `source_authority` field, proven to be
+non-manifest-sourced (anti-self-promotion). No external_proto / mvp_runtime /
+dao_managed / archived handling, no DAO/MVP/CABR/payout fields, no lifecycle
+transitions were added. All prior FIX1 / FIX2 / FIX2-tighten / FIX2b tests
+still pass unchanged; the 6 real manifests still build; `BUNDLE_VERSION` and
+the bundle_id formula are unchanged; no skip / no xfail; both `.py` files 0
+non-ASCII bytes.
+
+---
+
 ## 2026-06-10 - WRE ContextBundle Builder Phase 1 FIX2b Tests
 
 **Command**:

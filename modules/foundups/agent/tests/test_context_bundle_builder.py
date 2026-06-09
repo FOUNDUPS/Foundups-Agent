@@ -57,6 +57,7 @@ import pytest
 from modules.foundups.agent.src.context_bundle_builder import (
     BUNDLE_VERSION,
     BUILDER_VERSION,
+    SOURCE_AUTHORITY,
     DEFAULT_MAX_CONTEXT_BYTES,
     PER_FILE_READ_CAP_BYTES,
     ContextBundle,
@@ -1743,6 +1744,109 @@ class TestControlCharactersRejected:
         # Every protected-field element is printable ASCII (helper guarantee).
         for s in bundle.safe_mutation_surface:
             assert type(s) is str and s.isascii() and s.isprintable()
+
+
+class TestMonorepoPhase1SourceAuthorityBoundary:
+    """FIX2c / W10 MONOREPO_PHASE1_SOURCE_AUTHORITY_BOUNDARY: the bundle is
+    HONEST about its monorepo-PoC Phase-1 scope and a manifest CANNOT
+    promote its lifecycle stage by declaration.
+
+    012 architectural ruling: #775 is monorepo-PoC Phase-1 infrastructure,
+    NOT the external-state FoundUp lifecycle system. ``source_authority`` is
+    a BUILDER CONSTANT (``SOURCE_AUTHORITY == "monorepo_poc"``), hard-set by
+    the builder and NEVER read from the manifest / build_contract /
+    execution_routing. The full lifecycle transition model (external_proto /
+    mvp_runtime / dao_managed / archived) is deferred to
+    FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_CONTRACT_PHASE1 and is NOT in scope
+    here.
+    """
+
+    def test_source_authority_constant_is_monorepo_poc(self):
+        """The builder constant is exactly the Phase-1 value."""
+        assert SOURCE_AUTHORITY == "monorepo_poc"
+
+    @pytest.mark.parametrize("foundup_id,rel_path,status", TARGET_MANIFESTS)
+    def test_real_manifest_source_authority_is_monorepo_poc(
+        self, foundup_id, rel_path, status
+    ):
+        """For every real manifest, the built bundle (object + to_dict)
+        carries source_authority == "monorepo_poc"."""
+        bundle = build_context_bundle(
+            _real_manifest(rel_path), REPO_ROOT, created_at=FIXED_T0
+        )
+        assert bundle.source_authority == "monorepo_poc"
+        assert bundle.to_dict()["source_authority"] == "monorepo_poc"
+
+    def test_manifest_cannot_self_promote_lifecycle_stage(self, tmp_repo_root):
+        """ANTI-SELF-PROMOTION (load-bearing): a manifest that ADDS a
+        top-level ``source_authority: "dao_managed"`` AND a build_contract
+        ``lifecycle_stage: "mvp_runtime"`` must STILL yield a bundle whose
+        source_authority == "monorepo_poc". This proves the builder ignores
+        any manifest-supplied stage: a bundle cannot promote its lifecycle
+        stage by declaration."""
+        def mutate(data):
+            # Manifest attempts to self-declare a higher lifecycle stage.
+            data["source_authority"] = "dao_managed"
+            data["build_contract"]["source_authority"] = "dao_managed"
+            data["build_contract"]["lifecycle_stage"] = "mvp_runtime"
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        bundle = build_context_bundle(
+            manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+        )
+        # The builder hard-set the constant; manifest declaration is ignored.
+        assert bundle.source_authority == "monorepo_poc"
+        assert bundle.to_dict()["source_authority"] == "monorepo_poc"
+
+    def test_to_dict_has_no_external_dao_mvp_readiness_authority(self):
+        """to_dict() must contain NO external/DAO/MVP readiness keys as a
+        truthy authority surface, and source_authority must be exactly the
+        Phase-1 constant. Recurses the full serialized dict."""
+        bundle = build_context_bundle(
+            _real_manifest("modules/foundups/gotjunk/foundup_manifest.json"),
+            REPO_ROOT,
+            created_at=FIXED_T0,
+        )
+        d = bundle.to_dict()
+        assert d["source_authority"] == "monorepo_poc"
+        forbidden_authority_keys = {
+            "dao_ready", "dao_managed", "dao_approved",
+            "mvp_runtime", "mvp_ready",
+            "external_proto", "external_agent_allowed_authority",
+            "cabr_ready", "payout_ready", "archived",
+        }
+        stack = [d]
+        offenders = []
+        while stack:
+            node = stack.pop()
+            if isinstance(node, dict):
+                for k, v in node.items():
+                    if k in forbidden_authority_keys and bool(v):
+                        offenders.append((k, v))
+                    if isinstance(v, (dict, list)):
+                        stack.append(v)
+            elif isinstance(node, list):
+                stack.extend(node)
+        assert offenders == [], (
+            f"forbidden external/DAO/MVP authority keys present as truthy: "
+            f"{offenders}"
+        )
+
+    def test_source_authority_not_in_bundle_id_fingerprint(self):
+        """Determinism: source_authority is additive and must NOT enter the
+        bundle_id formula (sha256 of manifest_sha256 | module_path |
+        BUNDLE_VERSION). bundle_id stays the documented value."""
+        b = build_context_bundle(
+            _real_manifest("modules/foundups/gotjunk/foundup_manifest.json"),
+            REPO_ROOT,
+            created_at=FIXED_T0,
+        )
+        expected = hashlib.sha256(
+            (b.source_manifest_sha256 + "|" + b.module_path + "|" + BUNDLE_VERSION).encode("utf-8")
+        ).hexdigest()
+        assert b.bundle_id == expected
 
 
 class TestRequireStrictBoolScalarFieldsRejectsAuthorityLaundering:

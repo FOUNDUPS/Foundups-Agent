@@ -14,6 +14,15 @@ use. This module produces the bundle object ONLY. It does NOT:
   - promote manifest / build / autonomous-execution readiness
   - serialize gate pass-or-fail booleans as authority
 
+MONOREPO_PHASE1_BOUNDARY:
+  This builder is valid only for monorepo-resident PoC FoundUps. It does
+  not claim support for external Proto/MVP/DAO FoundUps. Any path field
+  (module_path, source refs) is a Phase-1 monorepo source reference, NOT
+  permanent FoundUp identity. The lifecycle transition model is deferred
+  to FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_CONTRACT_PHASE1. A bundle cannot
+  promote its lifecycle stage by declaration; source_authority is a
+  builder constant, not manifest-sourced.
+
 Predecessors:
   #768 typed shell=False exec boundary + redaction
   #769 durable design / build on existing primitives
@@ -95,6 +104,7 @@ __all__ = [
     "build_context_bundle",
     "BUNDLE_VERSION",
     "BUILDER_VERSION",
+    "SOURCE_AUTHORITY",
     "DEFAULT_MAX_CONTEXT_BYTES",
     "PER_FILE_READ_CAP_BYTES",
 ]
@@ -105,6 +115,21 @@ __all__ = [
 
 BUNDLE_VERSION = "0.1.0"
 BUILDER_VERSION = "0.1.0"
+
+# Phase-1 source-authority stage. This is a BUILDER CONSTANT, hard-set by
+# the builder and NEVER read from the manifest / build_contract /
+# execution_routing. It declares that every bundle this builder produces
+# describes a monorepo-resident PoC FoundUp ONLY. Because it is builder-set,
+# a manifest CANNOT self-declare a higher lifecycle stage (e.g. dao_managed):
+# if a manifest happens to carry a ``source_authority`` or ``lifecycle_stage``
+# key, the builder IGNORES it entirely. This enforces the hard rule "a
+# context bundle cannot promote its lifecycle stage by declaration".
+#
+# The full lifecycle transition model (future stages external_proto /
+# mvp_runtime / dao_managed / archived) is DEFERRED to the separate slice
+# FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_CONTRACT_PHASE1 and is NOT implemented
+# here. Only the Phase-1 constant below is in scope.
+SOURCE_AUTHORITY = "monorepo_poc"
 
 # Default total cap for the sum of all included-file sizes in a bundle.
 DEFAULT_MAX_CONTEXT_BYTES = 65536  # 64 KiB
@@ -224,9 +249,19 @@ class ContextBundle:
     gate_passed / security_passed / permission_passed / dry_run_passed /
     build_ready / autonomous_execution_ready / cabr_ready / payout_ready /
     dao_ready = true as truth fields.
+
+    MONOREPO_PHASE1_BOUNDARY: this bundle is valid only for monorepo-resident
+    PoC FoundUps. It does not claim support for external Proto/MVP/DAO
+    FoundUps. Any path field (module_path, source refs) is a Phase-1 monorepo
+    source reference, NOT permanent FoundUp identity. ``source_authority`` is
+    hard-set by the builder to ``SOURCE_AUTHORITY`` ("monorepo_poc") and is
+    NEVER manifest-sourced, so a bundle cannot promote its lifecycle stage by
+    declaration. The lifecycle transition model is deferred to
+    FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_CONTRACT_PHASE1.
     """
 
     bundle_version: str
+    source_authority: str  # builder constant; never manifest-sourced
     bundle_id: str
     created_at: str
     source_manifest_path: str
@@ -251,6 +286,7 @@ class ContextBundle:
     def to_dict(self) -> Dict[str, Any]:
         return {
             "bundle_version": self.bundle_version,
+            "source_authority": self.source_authority,
             "bundle_id": self.bundle_id,
             "created_at": self.created_at,
             "source_manifest_path": self.source_manifest_path,
@@ -866,6 +902,10 @@ def build_context_bundle(
 
     return ContextBundle(
         bundle_version=BUNDLE_VERSION,
+        # Builder constant, NOT manifest-sourced: a bundle cannot promote its
+        # lifecycle stage by declaration (any manifest source_authority /
+        # lifecycle_stage key is ignored).
+        source_authority=SOURCE_AUTHORITY,
         bundle_id=bundle_id,
         created_at=created_at,
         source_manifest_path=_normalize_posix(str(manifest_path)),
