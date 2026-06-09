@@ -126,6 +126,32 @@ def _write_tmp_manifest(tmp_dir: Path, foundup_id: str, module_rel: str, mutator
     return manifest_path
 
 
+def _find_bare_tuple_of_manifest_access(tree, is_manifest_access, is_require_str_tuple_call):
+    """Return source line numbers of every ``tuple(...)`` call whose single
+    argument is a manifest dict access that is NOT a ``_require_str_tuple``
+    call.
+
+    Shared by the completeness guard (run over the real builder source) and
+    its non-vacuity proof (run over a synthetic source that contains the
+    forbidden pattern). Keeping the detector in one place guarantees both
+    tests exercise identical logic.
+    """
+    offenders = []
+    for node in ast.walk(tree):
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "tuple"
+            and len(node.args) == 1
+        ):
+            arg = node.args[0]
+            if is_require_str_tuple_call(arg):
+                continue  # routed through the guard -> safe
+            if is_manifest_access(arg):
+                offenders.append(getattr(node, "lineno", -1))
+    return offenders
+
+
 # ===========================================================================
 # 1, 2, 3, 4. Positive: real manifests build; refs+sha256 only; manifest ref
 # ===========================================================================
@@ -1169,6 +1195,173 @@ class TestRequireStrTupleListFieldsRejectsAuthorityLaundering:
         assert produced == [], "to_dict() was produced for crafted-authority input"
 
 
+# ---------------------------------------------------------------------------
+# FIX2 fixtures: fullwidth-Unicode authority keywords.
+#
+# These strings are built from ``\uFFxx`` ESCAPE SEQUENCES so the SOURCE
+# FILE stays 0 non-ASCII bytes. At runtime each decodes to the fullwidth
+# (Halfwidth-and-Fullwidth-Forms) glyphs of an authority keyword; each
+# NFKC-normalizes back to its plain-ASCII keyword (verified below by
+# ``test_fullwidth_fixtures_normalize_as_documented``).
+#
+#   _FW_PAYOUT_READY -> "payout_ready"  (U+FF50 U+FF41 U+FF59 U+FF4F
+#                                        U+FF55 U+FF54 "_" U+FF52 U+FF45
+#                                        U+FF41 U+FF44 U+FF59)
+#   _FW_DAO_APPROVED -> "dao_approved"
+#   _FW_GATE_PASSED  -> "gate_passed"
+#   _MIXED_HUMAN_APPROVAL -> "human_approval" (one fullwidth "a" U+FF41,
+#       rest ASCII -- a GENERIC NFKC-compatibility evasion, not a full
+#       fullwidth string).
+# ---------------------------------------------------------------------------
+
+# Fullwidth "payout_ready":
+#   p=U+FF50 a=U+FF41 y=U+FF59 o=U+FF4F u=U+FF55 t=U+FF54 "_"
+#   r=U+FF52 e=U+FF45 a=U+FF41 d=U+FF44 y=U+FF59
+_FW_PAYOUT_READY = (
+    "\uff50\uff41\uff59\uff4f\uff55\uff54" "_" "\uff52\uff45\uff41\uff44\uff59"
+)
+# Fullwidth "dao_approved":
+#   d=U+FF44 a=U+FF41 o=U+FF4F "_" a=U+FF41 p=U+FF50 p=U+FF50 r=U+FF52
+#   o=U+FF4F v=U+FF56 e=U+FF45 d=U+FF44
+_FW_DAO_APPROVED = (
+    "\uff44\uff41\uff4f" "_" "\uff41\uff50\uff50\uff52\uff4f\uff56\uff45\uff44"
+)
+# Fullwidth "gate_passed":
+#   g=U+FF47 a=U+FF41 t=U+FF54 e=U+FF45 "_" p=U+FF50 a=U+FF41 s=U+FF53
+#   s=U+FF53 e=U+FF45 d=U+FF44
+_FW_GATE_PASSED = (
+    "\uff47\uff41\uff54\uff45" "_" "\uff50\uff41\uff53\uff53\uff45\uff44"
+)
+# Generic NFKC-compatibility evasion: ASCII "hum" + fullwidth "a" (U+FF41)
+# + ASCII "n_approval" -> NFKC normalizes to "human_approval".
+_MIXED_HUMAN_APPROVAL = "hum" "\uff41" "n_approval"
+
+
+class TestFullwidthUnicodeAuthorityEvasionRejected:
+    """FIX2 / W10 residual gap 1: fullwidth-Unicode evasion of the
+    ``_AUTHORITY_KEYWORDS`` substring scan.
+
+    W10 adversarial re-gate proved that a fullwidth-Unicode form of an
+    authority keyword (e.g. fullwidth ``"payout_ready"``) is a ``str``,
+    passed the prior raw ``item.lower()`` denylist scan, landed in
+    ``bundle.to_dict()``, and NFKC-normalized to ``"payout_ready"``
+    downstream -- laundering authority past the denylist.
+
+    The fix NFKC-normalizes each element BEFORE the denylist scan. These
+    tests assert ``ContextBundleRejected`` is raised BEFORE any bundle is
+    produced, for each fullwidth payload, across each of the three
+    manifest list fields (including the SAME field the W10 exploit used:
+    ``safe_mutation_surface``).
+    """
+
+    def test_fullwidth_fixtures_normalize_as_documented(self):
+        """Non-vacuity guard: prove the fixtures really are fullwidth
+        forms that NFKC-normalize to the documented authority keywords.
+        If this fails, the rejection tests below would be vacuous."""
+        import unicodedata
+        assert unicodedata.normalize("NFKC", _FW_PAYOUT_READY).lower() == "payout_ready"
+        assert unicodedata.normalize("NFKC", _FW_DAO_APPROVED).lower() == "dao_approved"
+        assert unicodedata.normalize("NFKC", _FW_GATE_PASSED).lower() == "gate_passed"
+        assert unicodedata.normalize("NFKC", _MIXED_HUMAN_APPROVAL).lower() == "human_approval"
+        # And confirm each raw fixture is NOT already its ASCII keyword
+        # (i.e. it would have evaded a raw ``item.lower()`` substring scan).
+        assert "payout_ready" not in _FW_PAYOUT_READY.lower()
+        assert "dao_approved" not in _FW_DAO_APPROVED.lower()
+        assert "gate_passed" not in _FW_GATE_PASSED.lower()
+        assert "human_approval" not in _MIXED_HUMAN_APPROVAL.lower()
+
+    def test_fullwidth_payout_ready_in_safe_mutation_surface_rejected(self, tmp_repo_root):
+        """W10-EXPLOIT FIELD: fullwidth ``payout_ready`` appended to
+        ``safe_mutation_surface`` (the exact field the W10 exploit used).
+        Must reject BEFORE any bundle is produced."""
+        def mutate(data):
+            surface = list(data["build_contract"]["safe_mutation_surface"])
+            surface.append(_FW_PAYOUT_READY)
+            data["build_contract"]["safe_mutation_surface"] = surface
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        produced = []
+        with pytest.raises(ContextBundleRejected, match="safe_mutation_surface"):
+            bundle = build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+            produced.append(bundle)  # must NEVER reach here
+        assert produced == []
+
+    def test_fullwidth_dao_approved_in_safe_mutation_surface_rejected(self, tmp_repo_root):
+        def mutate(data):
+            surface = list(data["build_contract"]["safe_mutation_surface"])
+            surface.append(_FW_DAO_APPROVED)
+            data["build_contract"]["safe_mutation_surface"] = surface
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected, match="safe_mutation_surface"):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+    def test_fullwidth_gate_passed_appended_to_required_gates_rejected(self, tmp_repo_root):
+        """Append fullwidth ``gate_passed`` as a 9th element so the 8 real
+        gate names remain present (validator still passes), then prove the
+        builder rejects on the smuggled 9th element."""
+        def mutate(data):
+            gates = list(data["build_contract"]["required_gates"])
+            assert len(gates) == 8, "baseline manifest must carry 8 required gates"
+            gates.append(_FW_GATE_PASSED)  # 9th element
+            data["build_contract"]["required_gates"] = gates
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        produced = []
+        with pytest.raises(ContextBundleRejected, match="required_gates"):
+            bundle = build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+            produced.append(bundle)  # must NEVER reach here
+        assert produced == []
+
+    def test_fullwidth_payout_ready_appended_to_forbidden_paths_rejected(self, tmp_repo_root):
+        """Append fullwidth ``payout_ready`` to a valid forbidden_paths
+        list. Must reject BEFORE any bundle is produced."""
+        def mutate(data):
+            paths = list(data["build_contract"]["forbidden_paths"])
+            paths.append(_FW_PAYOUT_READY)
+            data["build_contract"]["forbidden_paths"] = paths
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected, match="forbidden_paths"):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+    def test_generic_nfkc_compatibility_form_also_rejected(self, tmp_repo_root):
+        """Recommended generic-evasion coverage: a string that is mostly
+        ASCII but uses a single fullwidth letter ("hum<FW a>n_approval")
+        is NOT itself the ASCII keyword, yet NFKC-normalizes to
+        ``human_approval``. It must be rejected too -- proving the fix
+        catches arbitrary NFKC-compatibility forms, not just fully
+        fullwidth strings."""
+        def mutate(data):
+            surface = list(data["build_contract"]["safe_mutation_surface"])
+            surface.append(_MIXED_HUMAN_APPROVAL)
+            data["build_contract"]["safe_mutation_surface"] = surface
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected, match="safe_mutation_surface"):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+
 class TestRequireStrictBoolScalarFieldsRejectsAuthorityLaundering:
     """Defense-in-depth audit for scalar fields where the validator's
     ``is True`` check is the only gate. A truthy dict passes validation
@@ -1274,11 +1467,9 @@ class TestManifestListFieldsStringOnly:
                 )
 
     def test_no_other_manifest_list_field_is_serialized(self):
-        """Source-level audit: no manifest-provided list/tuple other than
-        required_gates / forbidden_paths / safe_mutation_surface is
-        forwarded into the bundle. Verified by AST: every
-        ``build_contract.get(...)`` call that produces a list-valued
-        bundle field goes through ``_require_str_tuple``."""
+        """Source-level audit (POSITIVE half): the set of fields routed
+        through ``_require_str_tuple`` is exactly
+        required_gates / forbidden_paths / safe_mutation_surface."""
         tree = ast.parse(BUILDER_SOURCE.read_text(encoding="utf-8"))
         protected_field_args: set = set()
         for node in ast.walk(tree):
@@ -1298,6 +1489,121 @@ class TestManifestListFieldsStringOnly:
             f"unexpected protected fields: {protected_field_args}; if a new "
             f"manifest list field is being copied into the bundle, route it "
             f"through _require_str_tuple and add a WSP_97 evidence line."
+        )
+
+    def test_no_bare_tuple_of_manifest_access_bypasses_helper(self):
+        """FIX2 / W10 residual gap 2: COMPLETENESS guard (the positive-only
+        check above is NOT sufficient).
+
+        The positive check asserts the set of fields routed through
+        ``_require_str_tuple`` == the expected three. But a FUTURE
+        ``tuple(build_contract.get("new_list", []))`` that BYPASSES the
+        helper would STILL pass that positive check (the helper-routed set
+        would be unchanged). That is the gap W10 proved.
+
+        This test walks the builder AST and flags any ``tuple(...)`` call
+        whose argument is a MANIFEST DICT ACCESS (``<manifest>.get(...)``
+        or ``<manifest>[...]`` for manifest dicts build_contract / routing
+        / readiness / data) that is NOT itself a ``_require_str_tuple(...)``
+        call. Every manifest list field MUST route through the helper, so
+        there must be ZERO such bare patterns.
+
+        NON-VACUITY: if a hypothetical bare
+        ``tuple(build_contract.get("new_list", []))`` were added to the
+        builder, ``_is_manifest_access`` would return True for its
+        argument, the argument is not a ``_require_str_tuple`` call, and
+        this test would FAIL. Proven by
+        ``test_completeness_guard_detects_synthetic_bare_tuple`` below,
+        which runs the same detector over a synthetic AST that DOES
+        contain the bare pattern and asserts it is detected.
+        """
+        manifest_dicts = {"build_contract", "routing", "readiness", "data"}
+
+        def _is_manifest_access(node: ast.AST) -> bool:
+            # <manifest>.get(...)
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "get"
+                and isinstance(node.func.value, ast.Name)
+                and node.func.value.id in manifest_dicts
+            ):
+                return True
+            # <manifest>[...]
+            if (
+                isinstance(node, ast.Subscript)
+                and isinstance(node.value, ast.Name)
+                and node.value.id in manifest_dicts
+            ):
+                return True
+            return False
+
+        def _is_require_str_tuple_call(node: ast.AST) -> bool:
+            return (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Name)
+                and node.func.id == "_require_str_tuple"
+            )
+
+        tree = ast.parse(BUILDER_SOURCE.read_text(encoding="utf-8"))
+        offenders = _find_bare_tuple_of_manifest_access(
+            tree, _is_manifest_access, _is_require_str_tuple_call
+        )
+        assert offenders == [], (
+            "bare tuple(...) of a manifest dict access bypasses "
+            f"_require_str_tuple at source lines {offenders}; every manifest "
+            "list field MUST route through _require_str_tuple (NFKC + type + "
+            "authority-keyword guard)."
+        )
+
+    def test_completeness_guard_detects_synthetic_bare_tuple(self):
+        """NON-VACUITY proof for the completeness guard: feed the SAME
+        detector a synthetic source that DOES contain the forbidden
+        pattern ``tuple(build_contract.get("new_list", []))`` and assert
+        it IS detected. This guarantees the guard above is not vacuous."""
+        manifest_dicts = {"build_contract", "routing", "readiness", "data"}
+
+        def _is_manifest_access(node: ast.AST) -> bool:
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "get"
+                and isinstance(node.func.value, ast.Name)
+                and node.func.value.id in manifest_dicts
+            ):
+                return True
+            if (
+                isinstance(node, ast.Subscript)
+                and isinstance(node.value, ast.Name)
+                and node.value.id in manifest_dicts
+            ):
+                return True
+            return False
+
+        def _is_require_str_tuple_call(node: ast.AST) -> bool:
+            return (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Name)
+                and node.func.id == "_require_str_tuple"
+            )
+
+        synthetic = (
+            "def f(build_contract):\n"
+            "    x = tuple(build_contract.get('new_list', []))\n"
+            "    y = tuple(build_contract['other_list'])\n"
+            "    ok = tuple(_require_str_tuple('required_gates', build_contract.get('required_gates', [])))\n"
+            "    z = tuple(some_local_list)\n"
+            "    return x, y, ok, z\n"
+        )
+        tree = ast.parse(synthetic)
+        offenders = _find_bare_tuple_of_manifest_access(
+            tree, _is_manifest_access, _is_require_str_tuple_call
+        )
+        # Two bare patterns: build_contract.get(...) and build_contract[...].
+        # The _require_str_tuple-wrapped one and the local-list one are NOT
+        # flagged.
+        assert len(offenders) == 2, (
+            f"expected 2 synthetic offenders, got {len(offenders)}: {offenders}"
         )
 
 

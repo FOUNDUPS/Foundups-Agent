@@ -1,5 +1,58 @@
 # Agent Module TestModLog
 
+## 2026-06-10 - WRE ContextBundle Builder Phase 1 FIX2 Tests
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/ -q -p no:cacheprovider
+```
+
+**Result**: PASS
+
+**Summary**:
+- Full agent-module suite: **504 passed in 8.18s**; 0 skipped; 0 xfailed
+  (496 in FIX1 + 8 new FIX2 tests).
+
+**Slice**: WRE_CONTEXT_BUNDLE_BUILDER_PHASE1_FIX2
+
+**Added** (in `test_context_bundle_builder.py`):
+
+- Module-level fixtures `_FW_PAYOUT_READY`, `_FW_DAO_APPROVED`,
+  `_FW_GATE_PASSED`, `_MIXED_HUMAN_APPROVAL`, built from `\uFFxx` ESCAPE
+  sequences (source stays 0 non-ASCII bytes) -- fullwidth-Unicode forms of
+  authority keywords that NFKC-normalize back to plain ASCII.
+- Module-level detector helper `_find_bare_tuple_of_manifest_access`
+  (shared by the completeness guard and its non-vacuity proof).
+- `TestFullwidthUnicodeAuthorityEvasionRejected` (FIX2 / W10 residual gap 1,
+  fullwidth-Unicode evasion):
+  - `test_fullwidth_fixtures_normalize_as_documented` -- non-vacuity guard:
+    each fixture is a fullwidth form that NFKC-normalizes to its keyword and
+    is NOT already that ASCII keyword.
+  - `test_fullwidth_payout_ready_in_safe_mutation_surface_rejected` --
+    W10-EXPLOIT FIELD (safe_mutation_surface) with fullwidth `payout_ready`;
+    rejected BEFORE any bundle is produced.
+  - `test_fullwidth_dao_approved_in_safe_mutation_surface_rejected`.
+  - `test_fullwidth_gate_passed_appended_to_required_gates_rejected` --
+    fullwidth `gate_passed` appended as a 9th gate (8 real names preserved).
+  - `test_fullwidth_payout_ready_appended_to_forbidden_paths_rejected`.
+  - `test_generic_nfkc_compatibility_form_also_rejected` -- mixed-form
+    `human_approval` (single fullwidth char) also rejected.
+- `TestManifestListFieldsStringOnly` (FIX2 / W10 residual gap 2,
+  completeness):
+  - `test_no_bare_tuple_of_manifest_access_bypasses_helper` -- COMPLETENESS
+    AST guard: ZERO bare `tuple(<manifest access>)` that bypass
+    `_require_str_tuple`.
+  - `test_completeness_guard_detects_synthetic_bare_tuple` -- NON-VACUITY:
+    the same detector flags a synthetic `tuple(build_contract.get(...))`.
+  - The original positive `test_no_other_manifest_list_field_is_serialized`
+    is retained unchanged.
+
+**WSP_97**: table now 34 rows (rows 33-34 added; rows 18 and 24 evidence
+Unicode-hardened). Both `.py` files 0 non-ASCII bytes. No skip / no xfail.
+
+---
+
 ## 2026-06-09 - WRE ContextBundle Builder Phase 1 FIX1 Tests
 
 **Command**:

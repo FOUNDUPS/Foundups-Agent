@@ -76,6 +76,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import unicodedata
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -309,10 +310,22 @@ def _require_str_tuple(field_name: str, value: Any) -> Tuple[str, ...]:
       - any element whose Python type is not exactly ``str`` (rejects
         dict / list / set / bool / int / None / object elements);
       - any element that is empty or whitespace-only;
-      - any element whose lower-case form contains an authority
-        keyword from ``_AUTHORITY_KEYWORDS`` (defense against
+      - any element whose NFKC-normalized lower-case form contains an
+        authority keyword from ``_AUTHORITY_KEYWORDS`` (defense against
         authority-string smuggling such as a path declared as
         ``"payout_ready"``).
+
+    Unicode robustness (W10 FIX2): the denylist scan runs against the
+    NFKC-normalized lower-case form of each element. W10 adversarial
+    re-gate proved that a fullwidth-Unicode form of ``"payout_ready"``
+    (U+FF50 U+FF41 U+FF59 U+FF4F U+FF55 U+FF54 "_" U+FF52 U+FF45 U+FF41
+    U+FF44 U+FF59) is a ``str``, evaded a raw ``item.lower()`` substring
+    scan, and NFKC-normalizes back to ``"payout_ready"`` downstream.
+    Normalizing BEFORE the scan closes that evasion. The normalized form
+    is used for the rejection DECISION ONLY; the value appended to the
+    output tuple remains the ORIGINAL ``item`` (the bundle keeps the
+    author's exact string -- this module never silently rewrites a
+    serialized value).
     """
     if not isinstance(value, (list, tuple)):
         raise ContextBundleRejected(
@@ -334,14 +347,19 @@ def _require_str_tuple(field_name: str, value: Any) -> Tuple[str, ...]:
                 "build_contract." + field_name + "[" + str(i) + "] is empty "
                 "or whitespace; rejected"
             )
-        lowered = item.lower()
+        # NFKC-normalize BEFORE the denylist scan so Unicode-compatibility
+        # forms (e.g. fullwidth glyphs) of an authority keyword cannot evade
+        # the substring check. The normalized form is used for the rejection
+        # DECISION ONLY; the ORIGINAL ``item`` is what is appended to the
+        # output tuple (no silent rewrite of the serialized value).
+        norm = unicodedata.normalize("NFKC", item).lower()
         for kw in _AUTHORITY_KEYWORDS:
-            if kw in lowered:
+            if kw in norm:
                 raise ContextBundleRejected(
                     "build_contract." + field_name + "[" + str(i) + "]="
                     + repr(item) + " contains authority keyword "
-                    + repr(kw) + "; rejected to prevent authority laundering "
-                    "through " + field_name
+                    + repr(kw) + " (after NFKC normalization); rejected to "
+                    "prevent authority laundering through " + field_name
                 )
         out.append(item)
     return tuple(out)
