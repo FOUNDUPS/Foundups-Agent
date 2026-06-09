@@ -387,6 +387,27 @@ def _require_str_tuple(field_name: str, value: Any) -> Tuple[str, ...]:
                 + field_name + " elements must be ASCII gate names / "
                 "repo-relative paths / path globs (ambiguity refused)"
             )
+        # Printable-ASCII-only contract (W10 FIX2b tighten): at this point
+        # the element is already known ASCII, but ASCII CONTROL CHARACTERS
+        # (NUL U+0000, CR U+000D, LF U+000A, TAB U+0009, ESC U+001B, DEL
+        # U+007F, ...) pass ``isascii()`` and would land in the bundle. They
+        # are not authority laundering (still strings) but are a
+        # string-hygiene / log-injection / terminal-escape shape in a
+        # provenance field future consumers may log. ``str.isprintable()`` is
+        # False for ASCII control chars and True for normal gate names /
+        # repo-relative paths / path globs (space is printable), so this
+        # rejects control chars with zero regression on real manifests. The
+        # appended value remains the ORIGINAL ``item`` (no rewrite); the
+        # ``repr(item)`` in the message keeps the output ASCII-safe. This
+        # completes the printable-ASCII-only contract and ends the
+        # Unicode/control-char evasion class for required_gates /
+        # forbidden_paths / safe_mutation_surface.
+        if not item.isprintable():
+            raise ContextBundleRejected(
+                "build_contract." + field_name + "[" + str(i) + "]=" + repr(item)
+                + " contains non-printable / control characters; "
+                + field_name + " elements must be printable ASCII (control characters refused)"
+            )
         out.append(item)
     return tuple(out)
 

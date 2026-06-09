@@ -1335,6 +1335,38 @@ _NONASCII_CAFE_GLOB = "caf" "\u00e9" "-glob"
 # A repo-relative-looking path with one CJK char (U+6587).
 _NONASCII_CJK_PATH = "modules/foundups/" "\u6587" "/x"
 
+# ---------------------------------------------------------------------------
+# FIX2b fixtures: ASCII CONTROL-CHARACTER strings (W10 FIX2b).
+#
+# W10 final adversarial review proved a residual after the ASCII-only
+# contract: ASCII CONTROL CHARACTERS (NUL U+0000, CR U+000D, LF U+000A,
+# TAB U+0009, ESC U+001B, BEL U+0007, ...) ARE ASCII, so they pass
+# ``item.isascii()`` and would LAND in the bundle -- a string-hygiene /
+# log-injection / terminal-escape shape in a provenance field future
+# consumers may log. The printable-ASCII-only contract refuses them via
+# ``str.isprintable()`` (False for ASCII control chars, True for normal
+# gate names / repo-relative paths / path globs; space is printable).
+#
+# Encoded via ``\xXX`` / ``\uXXXX`` ESCAPES so the source stays 0 non-ASCII
+# bytes. Each fixture is ASCII (passes isascii) but NOT printable (control
+# char present), and contains NO authority keyword, so it reaches the NEW
+# printable-ASCII check rather than tripping an earlier guard.
+#
+#   _CTRL_NUL_SPLIT    -> "gate\x00name"          (NUL embedded)
+#   _CTRL_CRLF_LOG     -> "ok\r\nFAKELOG: granted" (CRLF log-injection shape)
+#   _CTRL_ESC_ANSI     -> "x\x1b[31m"             (ESC ANSI terminal escape)
+#   _CTRL_TAB          -> "a\tb"                  (bare TAB control char)
+# ---------------------------------------------------------------------------
+
+# NUL-split string: a gate-name-shaped value with an embedded NUL (U+0000).
+_CTRL_NUL_SPLIT = "gate" "\x00" "name"
+# CRLF log-injection shape: the W10-exploit field will carry this.
+_CTRL_CRLF_LOG = "ok" "\r\n" "FAKELOG: granted"
+# ESC-based ANSI terminal escape (colour code).
+_CTRL_ESC_ANSI = "x" "\x1b" "[31m"
+# Bare TAB control character embedded in an otherwise plain string.
+_CTRL_TAB = "a" "\t" "b"
+
 
 class TestFullwidthUnicodeAuthorityEvasionRejected:
     """FIX2 / W10 residual gap 1: fullwidth-Unicode evasion of the
@@ -1569,6 +1601,148 @@ class TestNonAsciiNonAuthorityElementsRejected:
         # values for ASCII inputs).
         for s in bundle.safe_mutation_surface:
             assert type(s) is str and s.isascii()
+
+
+class TestControlCharactersRejected:
+    """FIX2b / W10 final residual: PRINTABLE-ASCII-only contract for the
+    three protected list fields (required_gates / forbidden_paths /
+    safe_mutation_surface).
+
+    W10 final adversarial review proved that ASCII CONTROL CHARACTERS
+    (NUL U+0000, CR U+000D, LF U+000A, TAB U+0009, ESC U+001B, ...) ARE
+    ASCII, so they passed ``item.isascii()`` and would land in the bundle.
+    Not authority laundering (still strings), but a string-hygiene /
+    log-injection / terminal-escape shape in a provenance field future
+    consumers may log. 0102's ruling: upgrade the contract to
+    printable-ASCII-only via ``str.isprintable()`` (False for ASCII control
+    chars, True for normal gate names / repo-relative paths / path globs;
+    space is printable), ending the Unicode/control-char evasion class.
+
+    Each negative test appends a control-char string while keeping the real
+    gate / path names intact (validator still passes), then asserts
+    ``ContextBundleRejected`` is raised BEFORE any bundle is produced. The
+    authority-keyword check and the ASCII-only check run FIRST; these benign
+    ASCII control-char strings carry no authority keyword and ARE ASCII, so
+    they reach the NEW printable check and trip on ``not item.isprintable()``.
+    """
+
+    def test_control_char_fixtures_are_ascii_but_not_printable(self):
+        """Non-vacuity guard: each fixture is genuinely ASCII (so it passes
+        the isascii check) but NOT printable (so it reaches and trips the
+        NEW printable-ASCII-only check), and contains NO authority keyword
+        (so it is not rejected earlier by the authority scan)."""
+        import unicodedata
+        from modules.foundups.agent.src.context_bundle_builder import (
+            _AUTHORITY_KEYWORDS,
+        )
+        for fixture in (
+            _CTRL_NUL_SPLIT, _CTRL_CRLF_LOG, _CTRL_ESC_ANSI, _CTRL_TAB,
+        ):
+            assert fixture.isascii(), f"{fixture!r} must be ASCII"
+            assert not fixture.isprintable(), (
+                f"{fixture!r} must contain a non-printable control char"
+            )
+            norm = unicodedata.normalize("NFKC", fixture).lower()
+            for kw in _AUTHORITY_KEYWORDS:
+                assert kw not in norm, (
+                    f"{fixture!r} unexpectedly contains authority keyword {kw!r}"
+                )
+
+    def test_nul_split_in_required_gates_rejected(self, tmp_repo_root):
+        """NUL-split string appended as a 9th element (8 real gate names
+        preserved, validator passes). Must reject on printable-ASCII."""
+        def mutate(data):
+            gates = list(data["build_contract"]["required_gates"])
+            assert len(gates) == 8, "baseline manifest must carry 8 required gates"
+            gates.append(_CTRL_NUL_SPLIT)  # 9th element
+            data["build_contract"]["required_gates"] = gates
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        produced = []
+        with pytest.raises(ContextBundleRejected, match="required_gates"):
+            bundle = build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+            produced.append(bundle)  # must NEVER reach here
+        assert produced == []
+
+    def test_crlf_log_injection_in_safe_mutation_surface_rejected(self, tmp_repo_root):
+        """W10-EXPLOIT FIELD: a CRLF log-injection shape appended to
+        ``safe_mutation_surface`` (the exact field the W10 exploit used).
+        Must reject BEFORE any bundle is produced."""
+        def mutate(data):
+            surface = list(data["build_contract"]["safe_mutation_surface"])
+            surface.append(_CTRL_CRLF_LOG)
+            data["build_contract"]["safe_mutation_surface"] = surface
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        produced = []
+        with pytest.raises(ContextBundleRejected, match="safe_mutation_surface"):
+            bundle = build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+            produced.append(bundle)  # must NEVER reach here
+        assert produced == []
+
+    def test_esc_ansi_in_forbidden_paths_rejected(self, tmp_repo_root):
+        """An ESC-based ANSI terminal-escape string appended to a valid
+        forbidden_paths list. Must reject BEFORE any bundle is produced."""
+        def mutate(data):
+            paths = list(data["build_contract"]["forbidden_paths"])
+            paths.append(_CTRL_ESC_ANSI)
+            data["build_contract"]["forbidden_paths"] = paths
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected, match="forbidden_paths"):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+    def test_bare_tab_in_safe_mutation_surface_rejected(self, tmp_repo_root):
+        """A bare TAB control character embedded in an otherwise plain
+        string. Must reject BEFORE any bundle is produced."""
+        def mutate(data):
+            surface = list(data["build_contract"]["safe_mutation_surface"])
+            surface.append(_CTRL_TAB)
+            data["build_contract"]["safe_mutation_surface"] = surface
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected, match="safe_mutation_surface"):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+    def test_printable_ascii_element_still_builds(self, tmp_repo_root):
+        """Positive control / non-vacuity: a normal printable ASCII element
+        (a path glob) still builds and is preserved verbatim. Explicit
+        ``isprintable()`` positive assertion confirms real manifest values
+        are printable and pass the new check with zero regression."""
+        sentinel = "modules/foundups/gotjunk/**"
+        assert sentinel.isascii() and sentinel.isprintable()
+
+        def mutate(data):
+            surface = list(data["build_contract"]["safe_mutation_surface"])
+            surface.append(sentinel)
+            data["build_contract"]["safe_mutation_surface"] = surface
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        bundle = build_context_bundle(
+            manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+        )
+        assert sentinel in bundle.safe_mutation_surface
+        # Every protected-field element is printable ASCII (helper guarantee).
+        for s in bundle.safe_mutation_surface:
+            assert type(s) is str and s.isascii() and s.isprintable()
 
 
 class TestRequireStrictBoolScalarFieldsRejectsAuthorityLaundering:

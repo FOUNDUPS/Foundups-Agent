@@ -1,5 +1,57 @@
 # Agent Module TestModLog
 
+## 2026-06-10 - WRE ContextBundle Builder Phase 1 FIX2b Tests
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/ -q -p no:cacheprovider
+```
+
+**Result**: PASS
+
+**Summary**:
+- Full agent-module suite: **520 passed in 8.86s**; 0 skipped; 0 xfailed
+  (514 in FIX2 + 6 FIX2b control-char tests).
+
+**Slice**: WRE_CONTEXT_BUNDLE_BUILDER_PHASE1_FIX2B
+
+**Added** (in `test_context_bundle_builder.py`):
+
+- Module-level CONTROL-CHARACTER fixtures (W10 FIX2b), all built from
+  `\xXX` / `\r` / `\n` / `\t` ESCAPE sequences so the source stays 0
+  non-ASCII bytes; each is ASCII (passes `isascii()`) but NOT printable
+  (carries a control char) and contains NO authority keyword:
+  - `_CTRL_NUL_SPLIT` -> `gate\x00name` (embedded NUL U+0000).
+  - `_CTRL_CRLF_LOG` -> `ok\r\nFAKELOG: granted` (CRLF log-injection shape).
+  - `_CTRL_ESC_ANSI` -> `x\x1b[31m` (ESC U+001B ANSI terminal escape).
+  - `_CTRL_TAB` -> `a\tb` (bare TAB U+0009 control char).
+- `TestControlCharactersRejected` (FIX2b / W10 final residual,
+  printable-ASCII-only contract for the three protected list fields):
+  - `test_control_char_fixtures_are_ascii_but_not_printable` -- non-vacuity:
+    each fixture `isascii()` True, `isprintable()` False, no authority
+    keyword (so it reaches the NEW printable check, not an earlier guard).
+  - `test_nul_split_in_required_gates_rejected` -- NUL-split appended as a
+    9th gate (8 real gate names preserved, validator passes); rejected
+    BEFORE any bundle is produced.
+  - `test_crlf_log_injection_in_safe_mutation_surface_rejected` --
+    W10-EXPLOIT FIELD (safe_mutation_surface) with a CRLF log-injection
+    shape; rejected.
+  - `test_esc_ansi_in_forbidden_paths_rejected` -- ESC ANSI escape rejected.
+  - `test_bare_tab_in_safe_mutation_surface_rejected` -- bare TAB rejected.
+  - `test_printable_ascii_element_still_builds` -- positive control /
+    non-vacuity: `modules/foundups/gotjunk/**` still builds and is preserved
+    verbatim, with an explicit `isprintable()` positive assertion.
+
+**Coverage delta**: control characters (NUL/CR/LF/TAB/ESC) are now refused
+in `required_gates` / `forbidden_paths` / `safe_mutation_surface`,
+completing the printable-ASCII-only contract and ending the
+Unicode/control-char evasion class. All prior FIX1 / FIX2 / FIX2-tighten
+tests still pass unchanged; the 6 real manifests still build; no skip / no
+xfail; both `.py` files 0 non-ASCII bytes.
+
+---
+
 ## 2026-06-10 - WRE ContextBundle Builder Phase 1 FIX2 Tests
 
 **Command**:

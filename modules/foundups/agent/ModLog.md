@@ -1,5 +1,79 @@
 # Agent Module ModLog
 
+## 2026-06-10 - WRE ContextBundle Builder Phase 1 FIX2b (printable-ASCII-only protected list elements)
+
+**Author**: 0102 (W6)
+**Slice**: WRE_CONTEXT_BUNDLE_BUILDER_PHASE1_FIX2B
+**Predecessor**: FIX2 (this branch, PR #775)
+**Trigger**: W10 final adversarial review of PR #775
+
+**W10 final residual (proven after FIX2 ASCII-only contract)**:
+
+> The protected list fields (required_gates / forbidden_paths /
+> safe_mutation_surface) are guarded by `_require_str_tuple`, which rejects
+> non-str, empty/whitespace, NFKC authority-keyword substrings, and
+> non-ASCII (`if not item.isascii()`). RESIDUAL: ASCII CONTROL CHARACTERS
+> (NUL U+0000, CR U+000D, LF U+000A, TAB U+0009, ESC U+001B, ...) ARE
+> ASCII, so they pass `isascii()` and LAND in the bundle. Not authority
+> laundering (still strings), but a string-hygiene / log-injection /
+> terminal-escape shape in a provenance field future consumers may log.
+
+**012 ruling**: upgrade the contract to PRINTABLE-ASCII-only, which
+definitively ends the Unicode/control-char evasion class.
+
+**FIX2b changes (4 files; read-only builder; no validator/manifest/runtime
+edit; no new dependency)**:
+
+1. `src/context_bundle_builder.py`: in `_require_str_tuple`, AFTER the
+   existing `if not item.isascii(): raise` block and BEFORE
+   `out.append(item)`, added `if not item.isprintable(): raise
+   ContextBundleRejected(...)`. At this point the element is already known
+   ASCII; `str.isprintable()` is False for ASCII control chars
+   (NUL/CR/LF/TAB/ESC/DEL) and True for normal gate names / repo-relative
+   paths / path globs (space is printable), so this rejects control chars
+   with ZERO regression on real manifests. The appended value remains the
+   ORIGINAL `item` (no rewrite); `repr(item)` in the message keeps output
+   ASCII-safe. No other guard changed; `_require_strict_bool` unchanged.
+
+2. `tests/test_context_bundle_builder.py`: new `TestControlCharactersRejected`
+   (4 control-char negative tests + 1 non-vacuity fixture check + 1 printable
+   positive control). Asserts `ContextBundleRejected` is raised BEFORE any
+   bundle is produced for: NUL-split `gate\x00name` appended as a 9th gate to
+   `required_gates` (8 real gates preserved); CRLF `ok\r\nFAKELOG: granted`
+   in `safe_mutation_surface` (the W10-exploit field); ESC `x\x1b[31m` in
+   `forbidden_paths`; bare TAB `a\tb` in `safe_mutation_surface`. Plus
+   `test_control_char_fixtures_are_ascii_but_not_printable` (non-vacuity:
+   each fixture isascii() True, isprintable() False, no authority keyword)
+   and `test_printable_ascii_element_still_builds` (positive control:
+   `modules/foundups/gotjunk/**` still builds, explicit `isprintable()`
+   assertion). All control chars are `\xXX` / `\r` / `\n` / `\t` ESCAPE
+   sequences so the source stays 0 non-ASCII bytes.
+
+3. `ModLog.md`: WSP_97 table extended 34 -> 35 rows; new row 35
+   `PROTECTED_LIST_FIELDS_PRINTABLE_ASCII_ONLY`; row 33 evidence updated to
+   reference the printable-ASCII completion; FIX2b verdict added.
+
+4. `tests/TestModLog.md`: run summary updated to the new count.
+
+**Prior guarantees preserved**: no validator edit, no manifest edit, no
+runtime/consumer wiring, no build run, no new dependency. All 6 real
+manifests still build. The original W10 dict/bool exploit + fullwidth/NFKC
+authority + non-ASCII are all still rejected BEFORE `to_dict()`. The
+multi-pattern completeness detector is unchanged. No skip / no xfail.
+
+**Test run**: `python -m pytest modules/foundups/agent/tests/ -q
+-p no:cacheprovider` -> 520 passed, 0 skipped, 0 xfailed (514 FIX2 + 6
+FIX2b tests).
+
+**ASCII**: both `.py` files are 0 non-ASCII bytes (all test control chars
+are `\xXX` / `\r` / `\n` / `\t` escapes). This ModLog FIX2b entry is
+ASCII-clean.
+
+See the FIX1 entry below for the full WSP_97 Truth Boundary Checklist
+(row 35 is the FIX2b addition; verdict FIX2b PASS 35/35).
+
+---
+
 ## 2026-06-10 - WRE ContextBundle Builder Phase 1 FIX2 (W10 residual-gap closure)
 
 **Author**: 0102 (W6)
@@ -273,11 +347,13 @@ The builder-test file alone: **129 passed in 2.40s** (54 prior +
 | 30 | CITES_PR_774 | YES | PR-775 ModLog entry and builder docstring section "Trust seam (carry-forward from #774)" cite #774. |
 | 31 | ASCII_CLEAN | YES | Slice-introduced content for FIX1 (builder helpers + tests + this ModLog entry + TestModLog entry) is 0 non-ASCII bytes. Pre-existing non-ASCII bytes elsewhere in `ModLog.md`/`INTERFACE.md`/`ROADMAP.md` are unchanged. |
 | 32 | MANIFEST_LIST_FIELDS_STRING_ONLY | YES (NEW) | Every list field forwarded from the manifest into the bundle is `Tuple[str, ...]` produced by `_require_str_tuple`. The three protected fields are `required_gates`, `forbidden_paths`, `safe_mutation_surface`. Pinned by `TestManifestListFieldsStringOnly::test_all_list_field_elements_are_str_after_build` (all 6 real manifests) and `..._test_no_other_manifest_list_field_is_serialized` (AST scan asserts exactly these three field names are routed through the helper). |
-| 33 | AUTHORITY_KEYWORDS_UNICODE_NORMALIZED | YES (NEW; FIX2; tightened) | `_require_str_tuple` now applies TWO Unicode contracts in order. (a) NFKC-normalize: the `_AUTHORITY_KEYWORDS` denylist scan runs against `unicodedata.normalize("NFKC", item).lower()` BEFORE the substring match, closing the W10-proven fullwidth-Unicode evasion (a fullwidth `payout_ready` previously passed the raw `item.lower()` scan and NFKC-normalized to `payout_ready` downstream). (b) ASCII-only (FIX2-tighten): AFTER the authority check, a non-ASCII element is REFUSED outright (`if not item.isascii(): raise`) -- these fields are ASCII gate names / repo-relative paths / path globs by convention, so a BENIGN non-ASCII element (no authority keyword) is ambiguous and is rejected, not normalized-and-accepted. The authority check runs FIRST so authority strings still get the specific authority error. The serialized value remains the ORIGINAL `item` (no silent rewrite); only the rejection DECISION uses the normalized form. `unicodedata` is stdlib (no new dependency). Pinned (NFKC half) by `TestFullwidthUnicodeAuthorityEvasionRejected`: `test_fullwidth_payout_ready_in_safe_mutation_surface_rejected` (W10-exploit field), `test_fullwidth_dao_approved_in_safe_mutation_surface_rejected`, `test_fullwidth_gate_passed_appended_to_required_gates_rejected` (9th gate), `test_fullwidth_payout_ready_appended_to_forbidden_paths_rejected`, `test_generic_nfkc_compatibility_form_also_rejected` (mixed-form `human_approval`), `test_fullwidth_fixtures_normalize_as_documented`. Pinned (ASCII-only half) by `TestNonAsciiNonAuthorityElementsRejected`: `test_nonascii_nonauthority_in_required_gates_rejected` (9th gate), `..._in_forbidden_paths_rejected`, `..._in_safe_mutation_surface_rejected` (the W10-exploit field), `test_nonascii_fixtures_are_benign_and_nonascii` (non-vacuity: fixtures are non-ASCII and carry NO authority keyword), and `test_ascii_elements_preserved_unchanged` (ASCII inputs build and are kept verbatim). |
+| 33 | AUTHORITY_KEYWORDS_UNICODE_NORMALIZED | YES (NEW; FIX2; tightened) | `_require_str_tuple` now applies TWO Unicode contracts in order. (a) NFKC-normalize: the `_AUTHORITY_KEYWORDS` denylist scan runs against `unicodedata.normalize("NFKC", item).lower()` BEFORE the substring match, closing the W10-proven fullwidth-Unicode evasion (a fullwidth `payout_ready` previously passed the raw `item.lower()` scan and NFKC-normalized to `payout_ready` downstream). (b) ASCII-only (FIX2-tighten): AFTER the authority check, a non-ASCII element is REFUSED outright (`if not item.isascii(): raise`) -- these fields are ASCII gate names / repo-relative paths / path globs by convention, so a BENIGN non-ASCII element (no authority keyword) is ambiguous and is rejected, not normalized-and-accepted. The authority check runs FIRST so authority strings still get the specific authority error. The serialized value remains the ORIGINAL `item` (no silent rewrite); only the rejection DECISION uses the normalized form. `unicodedata` is stdlib (no new dependency). Pinned (NFKC half) by `TestFullwidthUnicodeAuthorityEvasionRejected`: `test_fullwidth_payout_ready_in_safe_mutation_surface_rejected` (W10-exploit field), `test_fullwidth_dao_approved_in_safe_mutation_surface_rejected`, `test_fullwidth_gate_passed_appended_to_required_gates_rejected` (9th gate), `test_fullwidth_payout_ready_appended_to_forbidden_paths_rejected`, `test_generic_nfkc_compatibility_form_also_rejected` (mixed-form `human_approval`), `test_fullwidth_fixtures_normalize_as_documented`. Pinned (ASCII-only half) by `TestNonAsciiNonAuthorityElementsRejected`: `test_nonascii_nonauthority_in_required_gates_rejected` (9th gate), `..._in_forbidden_paths_rejected`, `..._in_safe_mutation_surface_rejected` (the W10-exploit field), `test_nonascii_fixtures_are_benign_and_nonascii` (non-vacuity: fixtures are non-ASCII and carry NO authority keyword), and `test_ascii_elements_preserved_unchanged` (ASCII inputs build and are kept verbatim). (c) Printable-ASCII-only (FIX2b; see row 35): a third contract is layered AFTER the ASCII-only check -- `if not item.isprintable(): raise` rejects ASCII CONTROL CHARACTERS (NUL/CR/LF/TAB/ESC/...) that pass `isascii()`, completing the printable-ASCII-only contract for these fields and ending the Unicode/control-char evasion class. |
 | 34 | MANIFEST_LIST_FIELDS_COMPLETENESS_PINNED | YES (NEW; FIX2; tightened) | The check-5 AST guard is upgraded from positive-only to a COMPLETENESS check, and (FIX2-tighten) from `tuple(...)`-only to ALL list-like bypasses. The shared detector `_find_manifest_listlike_bypasses` walks the builder AST and flags any manifest dict access (`build_contract.get(...)` / `build_contract[...]` / routing / readiness / data) that reaches a bundle field via `tuple|list|set|frozenset(<manifest access>)`, a list/set comprehension or generator expression iterating a manifest list access, or a direct assignment `NAME = <manifest list access>` whose NAME is later a `ContextBundle(...)` keyword-arg value -- unless it is a `_require_str_tuple(...)` call. `TestManifestListFieldsStringOnly::test_no_bare_tuple_of_manifest_access_bypasses_helper` asserts ZERO such bypass patterns over the real builder source. Non-vacuity proven over synthetic sources by `test_completeness_guard_detects_synthetic_bare_tuple` (tuple), `..._synthetic_bare_list` (list), `..._synthetic_bare_set_and_frozenset` (set + frozenset), `..._synthetic_comprehension` (listcomp/setcomp/genexp), and `..._synthetic_direct_assignment` (assignment reaching a ContextBundle field). False-positive guard `test_completeness_guard_no_false_positive_on_local_assignment` proves local conversions (`tuple(included)` / `dict(excluded)`) and manifest dict reads whose name never reaches a ContextBundle field are NOT flagged. Detector restricted to `_LISTLIKE_CONVERTERS = {tuple,list,set,frozenset}` so `str(build_contract.get(...))` scalar coercions are not flagged. The original positive assertion `test_no_other_manifest_list_field_is_serialized` is retained. |
+| 35 | PROTECTED_LIST_FIELDS_PRINTABLE_ASCII_ONLY | YES (NEW; FIX2b) | `_require_str_tuple` adds, AFTER the existing `if not item.isascii(): raise` block and BEFORE `out.append(item)`, an `if not item.isprintable(): raise ContextBundleRejected(...)` guard. W10 final adversarial review proved a residual: ASCII CONTROL CHARACTERS (NUL U+0000, CR U+000D, LF U+000A, TAB U+0009, ESC U+001B, ...) ARE ASCII, so they passed `item.isascii()` and would land in the bundle -- a string-hygiene / log-injection / terminal-escape shape in a provenance field future consumers may log (not authority laundering; still strings). At this point the element is already known ASCII, so `str.isprintable()` is False for ASCII control chars and True for normal gate names / repo-relative paths / path globs (space is printable), rejecting control chars with ZERO regression on real manifests. The appended value remains the ORIGINAL `item` (no rewrite); `repr(item)` in the message keeps output ASCII-safe. Pinned by `TestControlCharactersRejected`: `test_nul_split_in_required_gates_rejected` (NUL-split `gate\x00name` as a 9th gate, 8 real gates preserved), `test_crlf_log_injection_in_safe_mutation_surface_rejected` (CRLF `ok\r\nFAKELOG: granted` in the W10-exploit field), `test_esc_ansi_in_forbidden_paths_rejected` (ESC `x\x1b[31m`), `test_bare_tab_in_safe_mutation_surface_rejected` (bare TAB `a\tb`), `test_control_char_fixtures_are_ascii_but_not_printable` (non-vacuity: each fixture isascii() True, isprintable() False, no authority keyword), and `test_printable_ascii_element_still_builds` (positive control: `modules/foundups/gotjunk/**` still builds with an explicit `isprintable()` positive assertion). This completes the printable-ASCII-only contract for `required_gates` / `forbidden_paths` / `safe_mutation_surface` and ends the Unicode/control-char evasion class. The 6 real manifests still build (`TestRealManifestsBuild`, `test_real_manifests_still_build_with_helpers`). |
 
 **WSP_97 VERDICT (FIX1)**: PASS (32/32).
-**WSP_97 VERDICT (FIX2)**: PASS (34/34). FIX2 adds rows 33-34 and Unicode-hardens the evidence for rows 18 and 24. FIX2-tighten (W10) keeps the table at 34 rows and updates rows 33-34 (and row 18) evidence to cite the ASCII-only rejection of protected list elements and the multi-pattern completeness detector; declared == actual == 34.
+**WSP_97 VERDICT (FIX2)**: PASS (34/34). FIX2 adds rows 33-34 and Unicode-hardens the evidence for rows 18 and 24. FIX2-tighten (W10) keeps the table at 34 rows and updates rows 33-34 (and row 18) evidence to cite the ASCII-only rejection of protected list elements and the multi-pattern completeness detector.
+**WSP_97 VERDICT (FIX2b)**: PASS (35/35). FIX2b adds row 35 (`PROTECTED_LIST_FIELDS_PRINTABLE_ASCII_ONLY`) and updates row 33 evidence to reference the printable-ASCII completion; declared == actual == 35.
 
 ---
 
