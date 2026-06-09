@@ -11,8 +11,8 @@ python -m pytest modules/foundups/agent/tests/ -q -p no:cacheprovider
 **Result**: PASS
 
 **Summary**:
-- Full agent-module suite: **504 passed in 8.18s**; 0 skipped; 0 xfailed
-  (496 in FIX1 + 8 new FIX2 tests).
+- Full agent-module suite: **514 passed in 8.47s**; 0 skipped; 0 xfailed
+  (496 in FIX1 + 8 first-FIX2 tests + 10 FIX2-tighten tests).
 
 **Slice**: WRE_CONTEXT_BUNDLE_BUILDER_PHASE1_FIX2
 
@@ -22,8 +22,14 @@ python -m pytest modules/foundups/agent/tests/ -q -p no:cacheprovider
   `_FW_GATE_PASSED`, `_MIXED_HUMAN_APPROVAL`, built from `\uFFxx` ESCAPE
   sequences (source stays 0 non-ASCII bytes) -- fullwidth-Unicode forms of
   authority keywords that NFKC-normalize back to plain ASCII.
-- Module-level detector helper `_find_bare_tuple_of_manifest_access`
-  (shared by the completeness guard and its non-vacuity proof).
+- Module-level BENIGN non-ASCII NON-authority fixtures `_NONASCII_CAFE_GLOB`
+  (`caf<U+00E9>-glob`) and `_NONASCII_CJK_PATH` (`modules/foundups/
+  <U+6587>/x`), built from `\uXXXX` ESCAPE sequences -- path/glob shapes that
+  carry a non-ASCII char but no authority keyword (GAP A coverage).
+- Module-level detector helper `_find_manifest_listlike_bypasses` (shared by
+  the completeness guard and all its non-vacuity proofs; the prior name
+  `_find_bare_tuple_of_manifest_access` is kept as a backwards-compatible
+  alias).
 - `TestFullwidthUnicodeAuthorityEvasionRejected` (FIX2 / W10 residual gap 1,
   fullwidth-Unicode evasion):
   - `test_fullwidth_fixtures_normalize_as_documented` -- non-vacuity guard:
@@ -38,18 +44,45 @@ python -m pytest modules/foundups/agent/tests/ -q -p no:cacheprovider
   - `test_fullwidth_payout_ready_appended_to_forbidden_paths_rejected`.
   - `test_generic_nfkc_compatibility_form_also_rejected` -- mixed-form
     `human_approval` (single fullwidth char) also rejected.
+- `TestNonAsciiNonAuthorityElementsRejected` (FIX2-tighten / W10 GAP A,
+  ASCII-only contract):
+  - `test_nonascii_fixtures_are_benign_and_nonascii` -- non-vacuity: each
+    fixture is non-ASCII and carries NO authority keyword.
+  - `test_nonascii_nonauthority_in_required_gates_rejected` (benign
+    non-ASCII 9th gate; 8 real names preserved).
+  - `test_nonascii_nonauthority_in_forbidden_paths_rejected`.
+  - `test_nonascii_nonauthority_in_safe_mutation_surface_rejected`
+    (the W10-exploit field).
+  - `test_ascii_elements_preserved_unchanged` -- positive control: ASCII
+    inputs build and are preserved verbatim (no rewrite).
 - `TestManifestListFieldsStringOnly` (FIX2 / W10 residual gap 2,
-  completeness):
+  completeness; FIX2-tighten broadens beyond `tuple()`):
   - `test_no_bare_tuple_of_manifest_access_bypasses_helper` -- COMPLETENESS
-    AST guard: ZERO bare `tuple(<manifest access>)` that bypass
+    AST guard: ZERO manifest-derived list-like bypasses
+    (tuple/list/set/frozenset conversion, comprehension/genexp, direct
+    assignment reaching a ContextBundle field) that skip
     `_require_str_tuple`.
   - `test_completeness_guard_detects_synthetic_bare_tuple` -- NON-VACUITY:
     the same detector flags a synthetic `tuple(build_contract.get(...))`.
+  - `test_completeness_guard_detects_synthetic_bare_list` -- NON-VACUITY:
+    flags `list(build_contract.get(...))`.
+  - `test_completeness_guard_detects_synthetic_bare_set_and_frozenset` --
+    NON-VACUITY: flags `set(...)` and `frozenset(...)`.
+  - `test_completeness_guard_detects_synthetic_comprehension` --
+    NON-VACUITY: flags listcomp/setcomp/genexp over a manifest access.
+  - `test_completeness_guard_detects_synthetic_direct_assignment` --
+    NON-VACUITY: flags `x = build_contract.get(...)` reaching a
+    ContextBundle field.
+  - `test_completeness_guard_no_false_positive_on_local_assignment` --
+    FALSE-POSITIVE guard: local conversions (`tuple(included)` /
+    `dict(excluded)`) and manifest dict reads whose name never reaches a
+    ContextBundle field are NOT flagged.
   - The original positive `test_no_other_manifest_list_field_is_serialized`
     is retained unchanged.
 
-**WSP_97**: table now 34 rows (rows 33-34 added; rows 18 and 24 evidence
-Unicode-hardened). Both `.py` files 0 non-ASCII bytes. No skip / no xfail.
+**WSP_97**: table stays at 34 rows (rows 33-34 and 18 evidence updated to
+cite the ASCII-only rejection and the multi-pattern completeness detector).
+Both `.py` files 0 non-ASCII bytes. No skip / no xfail.
 
 ---
 

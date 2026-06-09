@@ -313,7 +313,10 @@ def _require_str_tuple(field_name: str, value: Any) -> Tuple[str, ...]:
       - any element whose NFKC-normalized lower-case form contains an
         authority keyword from ``_AUTHORITY_KEYWORDS`` (defense against
         authority-string smuggling such as a path declared as
-        ``"payout_ready"``).
+        ``"payout_ready"``);
+      - any element that is not ASCII (these fields are gate names,
+        repo-relative paths, and path globs -- ASCII by convention --
+        so ambiguity is REFUSED, not normalized-and-accepted).
 
     Unicode robustness (W10 FIX2): the denylist scan runs against the
     NFKC-normalized lower-case form of each element. W10 adversarial
@@ -326,6 +329,16 @@ def _require_str_tuple(field_name: str, value: Any) -> Tuple[str, ...]:
     output tuple remains the ORIGINAL ``item`` (the bundle keeps the
     author's exact string -- this module never silently rewrites a
     serialized value).
+
+    ASCII-only contract (W10 FIX2 tighten): after the authority-keyword
+    check, a non-ASCII element is REFUSED outright. The authority check
+    runs FIRST so an authority string (fullwidth or otherwise) still
+    receives the specific authority-keyword error. A BENIGN non-ASCII
+    element (no authority keyword) would otherwise normalize-and-accept;
+    0102's ruling is that these fields are ASCII by convention and any
+    non-ASCII content is ambiguous and must be REFUSED rather than
+    silently carried. The value is NEVER normalized-and-accepted and
+    NEVER silently dropped.
     """
     if not isinstance(value, (list, tuple)):
         raise ContextBundleRejected(
@@ -361,6 +374,19 @@ def _require_str_tuple(field_name: str, value: Any) -> Tuple[str, ...]:
                     + repr(kw) + " (after NFKC normalization); rejected to "
                     "prevent authority laundering through " + field_name
                 )
+        # ASCII-only contract: these fields are gate names / repo-relative
+        # paths / path globs, which are ASCII by convention. A benign
+        # non-ASCII element (no authority keyword) must be REFUSED, not
+        # normalized-and-accepted -- ambiguity is rejected. The authority
+        # check above runs FIRST so authority strings still get the
+        # specific authority error.
+        if not item.isascii():
+            raise ContextBundleRejected(
+                "build_contract." + field_name + "[" + str(i) + "]="
+                + repr(item) + " contains non-ASCII characters; "
+                + field_name + " elements must be ASCII gate names / "
+                "repo-relative paths / path globs (ambiguity refused)"
+            )
         out.append(item)
     return tuple(out)
 

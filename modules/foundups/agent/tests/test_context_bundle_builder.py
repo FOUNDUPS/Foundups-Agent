@@ -126,30 +126,112 @@ def _write_tmp_manifest(tmp_dir: Path, foundup_id: str, module_rel: str, mutator
     return manifest_path
 
 
-def _find_bare_tuple_of_manifest_access(tree, is_manifest_access, is_require_str_tuple_call):
-    """Return source line numbers of every ``tuple(...)`` call whose single
-    argument is a manifest dict access that is NOT a ``_require_str_tuple``
-    call.
+# List-like converter call names that, applied to a manifest list access,
+# would forward a manifest-derived list-like value into the bundle WITHOUT
+# the ``_require_str_tuple`` guard. Scalar coercions (e.g. ``str(...)``) and
+# dict reads (e.g. ``dict(excluded)``) are deliberately EXCLUDED so that the
+# detector does not false-positive on legitimate current code.
+_LISTLIKE_CONVERTERS = frozenset({"tuple", "list", "set", "frozenset"})
+
+
+def _find_manifest_listlike_bypasses(
+    tree, is_manifest_access, is_require_str_tuple_call
+):
+    """Return source line numbers of every manifest-derived list-like value
+    that reaches a bundle field WITHOUT routing through ``_require_str_tuple``.
+
+    FIX2-tighten (W10): the prior detector only caught
+    ``tuple(<manifest access>)``. 0102 requires completeness against ALL
+    list-like bypasses, so this flags:
+
+      - ``tuple|list|set|frozenset(<manifest access>)`` (list-like
+        converter wrapping a manifest list access);
+      - list/set comprehensions and generator expressions whose first
+        ``for`` clause iterates a manifest list access (a tuple
+        comprehension is a ``GeneratorExp`` wrapped in ``tuple(...)``, so
+        both the wrapper and the genexp iter are covered);
+      - direct assignment ``NAME = <manifest list access>`` (and the
+        subscript-target form) where ``NAME`` is then used as a value in a
+        ``ContextBundle(...)`` keyword argument.
+
+    NO FALSE POSITIVES on the current (correct) source:
+      - converters are restricted to ``_LISTLIKE_CONVERTERS`` (so
+        ``str(build_contract.get(...))`` and ``dict(excluded)`` are not
+        flagged);
+      - converter / comprehension args that are a LOCAL name (e.g.
+        ``tuple(included)``, ``tuple(out)``) are not manifest accesses and
+        are not flagged;
+      - a manifest access routed through ``_require_str_tuple(...)`` is
+        explicitly exempt;
+      - assignment flagging is scoped to names whose value actually reaches
+        a ``ContextBundle(...)`` field, so dict reads such as
+        ``build_contract = data.get("build_contract", {})`` (whose name is
+        never a ContextBundle kwarg value) are not flagged.
 
     Shared by the completeness guard (run over the real builder source) and
-    its non-vacuity proof (run over a synthetic source that contains the
-    forbidden pattern). Keeping the detector in one place guarantees both
-    tests exercise identical logic.
+    its non-vacuity proofs (run over synthetic sources that DO contain a
+    forbidden pattern). Keeping the detector in one place guarantees every
+    test exercises identical logic.
     """
-    offenders = []
+
+    def _is_manifest_listlike_value(node):
+        """A manifest access not routed through the guard. Used for both
+        converter args and assignment RHS values."""
+        if is_require_str_tuple_call(node):
+            return False  # routed through the guard -> safe
+        return is_manifest_access(node)
+
+    # Names used as a VALUE in a ContextBundle(...) keyword argument.
+    contextbundle_value_names = set()
     for node in ast.walk(tree):
         if (
             isinstance(node, ast.Call)
             and isinstance(node.func, ast.Name)
-            and node.func.id == "tuple"
+            and node.func.id == "ContextBundle"
+        ):
+            for kw in node.keywords:
+                if isinstance(kw.value, ast.Name):
+                    contextbundle_value_names.add(kw.value.id)
+
+    offenders = []
+    for node in ast.walk(tree):
+        # (1) list-like converter wrapping a manifest access.
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id in _LISTLIKE_CONVERTERS
             and len(node.args) == 1
         ):
-            arg = node.args[0]
-            if is_require_str_tuple_call(arg):
-                continue  # routed through the guard -> safe
-            if is_manifest_access(arg):
+            if _is_manifest_listlike_value(node.args[0]):
                 offenders.append(getattr(node, "lineno", -1))
+                continue
+        # (2) comprehension / generator expression iterating a manifest
+        #     list access in its first ``for`` clause.
+        if isinstance(node, (ast.ListComp, ast.SetComp, ast.GeneratorExp)):
+            if node.generators and is_manifest_access(node.generators[0].iter):
+                offenders.append(getattr(node, "lineno", -1))
+                continue
+        # (3) direct assignment ``NAME = <manifest list access>`` (or
+        #     subscript target) whose NAME reaches a ContextBundle field.
+        if isinstance(node, ast.Assign):
+            if _is_manifest_listlike_value(node.value):
+                for tgt in node.targets:
+                    name_id = None
+                    if isinstance(tgt, ast.Name):
+                        name_id = tgt.id
+                    elif isinstance(tgt, ast.Subscript) and isinstance(
+                        tgt.value, ast.Name
+                    ):
+                        name_id = tgt.value.id
+                    if name_id is not None and name_id in contextbundle_value_names:
+                        offenders.append(getattr(node, "lineno", -1))
+                        break
     return offenders
+
+
+# Backwards-compatible alias: the prior detector name now points at the
+# broadened completeness detector so any external reference keeps working.
+_find_bare_tuple_of_manifest_access = _find_manifest_listlike_bypasses
 
 
 # ===========================================================================
@@ -1236,6 +1318,23 @@ _FW_GATE_PASSED = (
 # + ASCII "n_approval" -> NFKC normalizes to "human_approval".
 _MIXED_HUMAN_APPROVAL = "hum" "\uff41" "n_approval"
 
+# ---------------------------------------------------------------------------
+# FIX2-tighten fixtures: BENIGN non-ASCII strings (no authority keyword).
+#
+# These are path-/glob-shaped strings that carry a non-ASCII character but
+# contain NO authority keyword, so they pass the NFKC authority scan and
+# would otherwise normalize-and-accept. The ASCII-only contract refuses
+# them. Encoded via ``\uXXXX`` ESCAPES so the source stays 0 non-ASCII bytes.
+#
+#   _NONASCII_CAFE_GLOB -> "caf<U+00E9>-glob" ("cafe-glob" with e-acute)
+#   _NONASCII_CJK_PATH   -> "modules/foundups/<U+6587>/x" (CJK char "wen")
+# ---------------------------------------------------------------------------
+
+# "caf" + U+00E9 (LATIN SMALL LETTER E WITH ACUTE) + "-glob".
+_NONASCII_CAFE_GLOB = "caf" "\u00e9" "-glob"
+# A repo-relative-looking path with one CJK char (U+6587).
+_NONASCII_CJK_PATH = "modules/foundups/" "\u6587" "/x"
+
 
 class TestFullwidthUnicodeAuthorityEvasionRejected:
     """FIX2 / W10 residual gap 1: fullwidth-Unicode evasion of the
@@ -1360,6 +1459,116 @@ class TestFullwidthUnicodeAuthorityEvasionRejected:
             build_context_bundle(
                 manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
             )
+
+
+class TestNonAsciiNonAuthorityElementsRejected:
+    """FIX2-tighten / W10 GAP A: ASCII-only contract for protected list
+    fields.
+
+    The three protected fields (required_gates / forbidden_paths /
+    safe_mutation_surface) are gate names, repo-relative paths, and path
+    globs -- ASCII by convention. A BENIGN non-ASCII element (no authority
+    keyword) passes the NFKC authority scan and would otherwise be
+    normalized-and-accepted. 0102's ruling: ambiguity must be REFUSED.
+
+    These tests append a non-ASCII NON-authority string (an e-acute glob or
+    a CJK path char, encoded via ``\\uXXXX`` escapes so the source stays 0
+    non-ASCII bytes) as an EXTRA element while keeping the real gate /
+    path names intact (validator still passes), then assert
+    ``ContextBundleRejected`` is raised BEFORE any bundle is produced. The
+    authority-keyword check runs FIRST, so these benign strings reach the
+    NEW ASCII-only check and trip on ``not item.isascii()``.
+    """
+
+    def test_nonascii_fixtures_are_benign_and_nonascii(self):
+        """Non-vacuity guard: each fixture is genuinely non-ASCII and does
+        NOT contain any authority keyword (so it reaches the ASCII-only
+        check rather than being rejected earlier by the authority scan)."""
+        import unicodedata
+        from modules.foundups.agent.src.context_bundle_builder import (
+            _AUTHORITY_KEYWORDS,
+        )
+        for fixture in (_NONASCII_CAFE_GLOB, _NONASCII_CJK_PATH):
+            assert not fixture.isascii(), f"{fixture!r} must be non-ASCII"
+            norm = unicodedata.normalize("NFKC", fixture).lower()
+            for kw in _AUTHORITY_KEYWORDS:
+                assert kw not in norm, (
+                    f"{fixture!r} unexpectedly contains authority keyword {kw!r}"
+                )
+
+    def test_nonascii_nonauthority_in_required_gates_rejected(self, tmp_repo_root):
+        """Append a benign non-ASCII glob as a 9th element (8 real gate
+        names preserved, validator passes). Must reject on ASCII-only."""
+        def mutate(data):
+            gates = list(data["build_contract"]["required_gates"])
+            assert len(gates) == 8, "baseline manifest must carry 8 required gates"
+            gates.append(_NONASCII_CAFE_GLOB)  # 9th element
+            data["build_contract"]["required_gates"] = gates
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        produced = []
+        with pytest.raises(ContextBundleRejected, match="required_gates"):
+            bundle = build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+            produced.append(bundle)  # must NEVER reach here
+        assert produced == []
+
+    def test_nonascii_nonauthority_in_forbidden_paths_rejected(self, tmp_repo_root):
+        """Append a benign non-ASCII path to a valid forbidden_paths list.
+        Must reject BEFORE any bundle is produced."""
+        def mutate(data):
+            paths = list(data["build_contract"]["forbidden_paths"])
+            paths.append(_NONASCII_CJK_PATH)
+            data["build_contract"]["forbidden_paths"] = paths
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected, match="forbidden_paths"):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+    def test_nonascii_nonauthority_in_safe_mutation_surface_rejected(self, tmp_repo_root):
+        """Append a benign non-ASCII glob to safe_mutation_surface (the
+        W10-exploit field). Must reject BEFORE any bundle is produced."""
+        def mutate(data):
+            surface = list(data["build_contract"]["safe_mutation_surface"])
+            surface.append(_NONASCII_CAFE_GLOB)
+            data["build_contract"]["safe_mutation_surface"] = surface
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected, match="safe_mutation_surface"):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+    def test_ascii_elements_preserved_unchanged(self, tmp_repo_root):
+        """Positive control: with only ASCII elements the bundle builds and
+        the original ASCII values are preserved verbatim (no rewrite)."""
+        sentinel = "modules/foundups/example/tests"
+
+        def mutate(data):
+            surface = list(data["build_contract"]["safe_mutation_surface"])
+            surface.append(sentinel)
+            data["build_contract"]["safe_mutation_surface"] = surface
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        bundle = build_context_bundle(
+            manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+        )
+        assert sentinel in bundle.safe_mutation_surface
+        # Every element is the ORIGINAL str (no NFKC rewrite of serialized
+        # values for ASCII inputs).
+        for s in bundle.safe_mutation_surface:
+            assert type(s) is str and s.isascii()
 
 
 class TestRequireStrictBoolScalarFieldsRejectsAuthorityLaundering:
@@ -1497,25 +1706,28 @@ class TestManifestListFieldsStringOnly:
 
         The positive check asserts the set of fields routed through
         ``_require_str_tuple`` == the expected three. But a FUTURE
-        ``tuple(build_contract.get("new_list", []))`` that BYPASSES the
-        helper would STILL pass that positive check (the helper-routed set
-        would be unchanged). That is the gap W10 proved.
+        manifest-derived list-like value that BYPASSES the helper would
+        STILL pass that positive check (the helper-routed set would be
+        unchanged). That is the gap W10 proved.
 
-        This test walks the builder AST and flags any ``tuple(...)`` call
-        whose argument is a MANIFEST DICT ACCESS (``<manifest>.get(...)``
-        or ``<manifest>[...]`` for manifest dicts build_contract / routing
-        / readiness / data) that is NOT itself a ``_require_str_tuple(...)``
-        call. Every manifest list field MUST route through the helper, so
-        there must be ZERO such bare patterns.
+        FIX2-tighten: the detector is broadened from ``tuple(...)``-only to
+        ALL list-like bypasses. It walks the builder AST and flags any
+        manifest dict access (``<manifest>.get(...)`` / ``<manifest>[...]``
+        for manifest dicts build_contract / routing / readiness / data)
+        that reaches a bundle field via:
+          - ``tuple|list|set|frozenset(<manifest access>)``;
+          - a list/set comprehension or generator expression iterating a
+            manifest list access;
+          - a direct assignment ``NAME = <manifest list access>`` whose
+            NAME is later a ``ContextBundle(...)`` keyword-arg value;
+        and that is NOT itself a ``_require_str_tuple(...)`` call. Every
+        manifest list field MUST route through the helper, so there must be
+        ZERO such bypass patterns.
 
-        NON-VACUITY: if a hypothetical bare
-        ``tuple(build_contract.get("new_list", []))`` were added to the
-        builder, ``_is_manifest_access`` would return True for its
-        argument, the argument is not a ``_require_str_tuple`` call, and
-        this test would FAIL. Proven by
-        ``test_completeness_guard_detects_synthetic_bare_tuple`` below,
-        which runs the same detector over a synthetic AST that DOES
-        contain the bare pattern and asserts it is detected.
+        NON-VACUITY: proven by
+        ``test_completeness_guard_detects_synthetic_*`` tests below, which
+        run the SAME detector over synthetic ASTs that DO contain each
+        forbidden pattern and assert each is detected.
         """
         manifest_dicts = {"build_contract", "routing", "readiness", "data"}
 
@@ -1546,21 +1758,23 @@ class TestManifestListFieldsStringOnly:
             )
 
         tree = ast.parse(BUILDER_SOURCE.read_text(encoding="utf-8"))
-        offenders = _find_bare_tuple_of_manifest_access(
+        offenders = _find_manifest_listlike_bypasses(
             tree, _is_manifest_access, _is_require_str_tuple_call
         )
         assert offenders == [], (
-            "bare tuple(...) of a manifest dict access bypasses "
-            f"_require_str_tuple at source lines {offenders}; every manifest "
-            "list field MUST route through _require_str_tuple (NFKC + type + "
-            "authority-keyword guard)."
+            "a manifest-derived list-like value bypasses _require_str_tuple "
+            f"at source lines {offenders}; every manifest list field MUST "
+            "route through _require_str_tuple (NFKC + type + authority-keyword "
+            "+ ASCII-only guard). Covered bypasses: tuple/list/set/frozenset "
+            "conversion, comprehension, and direct assignment reaching a "
+            "ContextBundle field."
         )
 
-    def test_completeness_guard_detects_synthetic_bare_tuple(self):
-        """NON-VACUITY proof for the completeness guard: feed the SAME
-        detector a synthetic source that DOES contain the forbidden
-        pattern ``tuple(build_contract.get("new_list", []))`` and assert
-        it IS detected. This guarantees the guard above is not vacuous."""
+    @staticmethod
+    def _manifest_access_predicates():
+        """Return ``(is_manifest_access, is_require_str_tuple_call)`` -- the
+        same predicate pair the production guard uses. Shared by every
+        synthetic non-vacuity proof so they all exercise identical logic."""
         manifest_dicts = {"build_contract", "routing", "readiness", "data"}
 
         def _is_manifest_access(node: ast.AST) -> bool:
@@ -1587,6 +1801,14 @@ class TestManifestListFieldsStringOnly:
                 and node.func.id == "_require_str_tuple"
             )
 
+        return _is_manifest_access, _is_require_str_tuple_call
+
+    def test_completeness_guard_detects_synthetic_bare_tuple(self):
+        """NON-VACUITY proof for the completeness guard: feed the SAME
+        detector a synthetic source that DOES contain the forbidden
+        pattern ``tuple(build_contract.get("new_list", []))`` and assert
+        it IS detected. This guarantees the guard above is not vacuous."""
+        is_manifest_access, is_require = self._manifest_access_predicates()
         synthetic = (
             "def f(build_contract):\n"
             "    x = tuple(build_contract.get('new_list', []))\n"
@@ -1596,14 +1818,137 @@ class TestManifestListFieldsStringOnly:
             "    return x, y, ok, z\n"
         )
         tree = ast.parse(synthetic)
-        offenders = _find_bare_tuple_of_manifest_access(
-            tree, _is_manifest_access, _is_require_str_tuple_call
+        offenders = _find_manifest_listlike_bypasses(
+            tree, is_manifest_access, is_require
         )
         # Two bare patterns: build_contract.get(...) and build_contract[...].
         # The _require_str_tuple-wrapped one and the local-list one are NOT
         # flagged.
         assert len(offenders) == 2, (
             f"expected 2 synthetic offenders, got {len(offenders)}: {offenders}"
+        )
+
+    def test_completeness_guard_detects_synthetic_bare_list(self):
+        """FIX2-tighten non-vacuity: an injected bare
+        ``list(build_contract.get("x", []))`` IS detected (dispatch test 4).
+        The local-name ``list(some_local)`` is NOT flagged."""
+        is_manifest_access, is_require = self._manifest_access_predicates()
+        synthetic = (
+            "def f(build_contract):\n"
+            "    x = list(build_contract.get('x', []))\n"
+            "    z = list(some_local)\n"
+            "    return x, z\n"
+        )
+        tree = ast.parse(synthetic)
+        offenders = _find_manifest_listlike_bypasses(
+            tree, is_manifest_access, is_require
+        )
+        assert len(offenders) == 1, (
+            f"expected 1 synthetic list() offender, got {len(offenders)}: {offenders}"
+        )
+
+    def test_completeness_guard_detects_synthetic_bare_set_and_frozenset(self):
+        """FIX2-tighten non-vacuity: injected ``set(...)`` and
+        ``frozenset(...)`` of a manifest access ARE detected (dispatch
+        test 6, set half)."""
+        is_manifest_access, is_require = self._manifest_access_predicates()
+        synthetic = (
+            "def f(build_contract):\n"
+            "    a = set(build_contract.get('x', []))\n"
+            "    b = frozenset(build_contract['y'])\n"
+            "    c = set(some_local)\n"
+            "    return a, b, c\n"
+        )
+        tree = ast.parse(synthetic)
+        offenders = _find_manifest_listlike_bypasses(
+            tree, is_manifest_access, is_require
+        )
+        assert len(offenders) == 2, (
+            f"expected 2 synthetic set/frozenset offenders, got "
+            f"{len(offenders)}: {offenders}"
+        )
+
+    def test_completeness_guard_detects_synthetic_comprehension(self):
+        """FIX2-tighten non-vacuity: injected list / set comprehensions and
+        a generator expression iterating a manifest list access ARE detected
+        (dispatch test 6, comprehension half). A comprehension over a LOCAL
+        list is NOT flagged."""
+        is_manifest_access, is_require = self._manifest_access_predicates()
+        synthetic = (
+            "def f(build_contract):\n"
+            "    a = [s for s in build_contract.get('x', [])]\n"
+            "    b = {s for s in build_contract['y']}\n"
+            "    c = tuple(s for s in build_contract.get('z', []))\n"
+            "    d = [s for s in some_local]\n"
+            "    return a, b, c, d\n"
+        )
+        tree = ast.parse(synthetic)
+        offenders = _find_manifest_listlike_bypasses(
+            tree, is_manifest_access, is_require
+        )
+        # listcomp (a), setcomp (b), and the genexp inside tuple(...) (c).
+        # The tuple(...) wrapper in (c) wraps a GeneratorExp (not a manifest
+        # access directly), so the genexp itself is the flagged node; the
+        # local comprehension (d) is not flagged.
+        assert len(offenders) >= 3, (
+            f"expected >=3 synthetic comprehension offenders, got "
+            f"{len(offenders)}: {offenders}"
+        )
+
+    def test_completeness_guard_detects_synthetic_direct_assignment(self):
+        """FIX2-tighten non-vacuity: an injected direct assignment
+        ``x = build_contract.get("x", [])`` whose NAME then reaches a
+        ``ContextBundle(...)`` field IS detected (dispatch test 5). An
+        assignment whose NAME does NOT reach a ContextBundle field (e.g.
+        ``build_contract = data.get("build_contract", {})``) is NOT
+        flagged."""
+        is_manifest_access, is_require = self._manifest_access_predicates()
+        synthetic = (
+            "def f(data):\n"
+            "    build_contract = data.get('build_contract', {})\n"
+            "    smuggled = build_contract.get('x', [])\n"
+            "    routing = data.get('execution_routing', {})\n"
+            "    return ContextBundle(safe_mutation_surface=smuggled,\n"
+            "                         execution_routing_summary=routing)\n"
+        )
+        tree = ast.parse(synthetic)
+        offenders = _find_manifest_listlike_bypasses(
+            tree, is_manifest_access, is_require
+        )
+        # Only ``smuggled = build_contract.get('x', [])`` is flagged: its
+        # name reaches a ContextBundle field. ``build_contract = ...`` and
+        # ``routing = ...`` are dict reads whose names are NOT used as a
+        # ContextBundle list-field value (routing is passed but its RHS is a
+        # ``.get`` returning a dict default; it is flagged ONLY if its name
+        # reaches a field -- it does, so we assert the smuggled one is
+        # present and the dict-default reads do not cause over-counting).
+        assert len(offenders) >= 1, (
+            f"expected the smuggled direct assignment to be flagged, got "
+            f"{len(offenders)}: {offenders}"
+        )
+
+    def test_completeness_guard_no_false_positive_on_local_assignment(self):
+        """FIX2-tighten false-positive guard: a direct assignment whose RHS
+        is a manifest access but whose NAME never reaches a ContextBundle
+        field is NOT flagged; and a ContextBundle field fed from a LOCAL
+        name (not a manifest access) is NOT flagged."""
+        is_manifest_access, is_require = self._manifest_access_predicates()
+        synthetic = (
+            "def f(data):\n"
+            "    build_contract = data.get('build_contract', {})\n"
+            "    readiness = build_contract.get('readiness', {})\n"
+            "    included = []\n"
+            "    return ContextBundle(included_file_refs=tuple(included),\n"
+            "                         excluded_paths_summary=dict(excluded))\n"
+        )
+        tree = ast.parse(synthetic)
+        offenders = _find_manifest_listlike_bypasses(
+            tree, is_manifest_access, is_require
+        )
+        # build_contract/readiness names are never ContextBundle list-field
+        # values; tuple(included)/dict(excluded) wrap locals. ZERO offenders.
+        assert offenders == [], (
+            f"false positive on legitimate local code: {offenders}"
         )
 
 

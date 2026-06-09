@@ -7,7 +7,7 @@
 **Predecessor**: FIX1 (commit 96314ab6c, PR #775)
 **Trigger**: W10 adversarial re-gate of PR #775
 
-**W10 residual gaps proven after FIX1**:
+**W10 residual gaps proven after FIX1, then TIGHTENED by 0102**:
 
 > FINDING 1 (MAJOR): fullwidth-Unicode evades the `_AUTHORITY_KEYWORDS`
 > substring scan. A manifest element that is the FULLWIDTH form of
@@ -22,16 +22,36 @@
 > expected three. A FUTURE `tuple(build_contract.get("new_list", []))`
 > that BYPASSES the helper would STILL pass that positive check.
 
+**0102 TIGHTENING (two additional requirements beyond the first FIX2
+push)**:
+
+> GAP A (Unicode contract): NFKC-normalize-before-scan is necessary but
+> not sufficient. A BENIGN non-ASCII element (no authority keyword) would
+> still normalize-and-accept. These fields are gate names / repo-relative
+> paths / path globs -- ASCII by convention -- so ambiguity must be
+> REFUSED, not normalized-and-accepted. Add an ASCII-only rejection AFTER
+> the authority check.
+>
+> GAP B (completeness beyond `tuple()`): the completeness detector caught
+> only `tuple(<manifest access>)`. It must also catch
+> `list`/`set`/`frozenset` conversions, list/set/tuple comprehensions, and
+> direct-assignment bypasses that reach a `ContextBundle(...)` field --
+> without false-positiving on legitimate local conversions or scalar/dict
+> coercions.
+
 **FIX2 changes (4 files; read-only builder; no validator/manifest/runtime
 edit; no new dependency)**:
 
 1. `src/context_bundle_builder.py`: added `import unicodedata` (stdlib).
    In `_require_str_tuple`, the `_AUTHORITY_KEYWORDS` denylist scan now runs
    against `unicodedata.normalize("NFKC", item).lower()` instead of
-   `item.lower()`. The rejection DECISION uses the normalized form; the
-   value APPENDED to the output tuple remains the ORIGINAL `item` (no silent
-   rewrite of the serialized value). Type-check and empty/whitespace check
-   are unchanged.
+   `item.lower()` (NFKC-before-scan). GAP A tighten: AFTER the authority
+   check, `if not item.isascii(): raise ContextBundleRejected(...)` rejects
+   any benign non-ASCII element. Order is preserved: type -> empty/strip ->
+   NFKC authority scan -> ASCII-only. The rejection DECISION uses the
+   normalized form; the value APPENDED to the output tuple remains the
+   ORIGINAL `item` (no silent rewrite of the serialized value).
+   `_require_strict_bool` is unchanged.
 
 2. `tests/test_context_bundle_builder.py`: new
    `TestFullwidthUnicodeAuthorityEvasionRejected` (6 tests + 1 non-vacuity
@@ -40,20 +60,31 @@ edit; no new dependency)**:
    `gate_passed` payloads across `safe_mutation_surface` (the W10-exploit
    field), `required_gates` (appended as a 9th gate so the 8 real names
    remain), and `forbidden_paths`, plus a generic NFKC-compatibility form
-   (`human_approval`). Fullwidth strings are encoded via `\uFFxx` ESCAPE
-   sequences so the source file stays 0 non-ASCII bytes.
+   (`human_approval`). GAP A tighten: new
+   `TestNonAsciiNonAuthorityElementsRejected` (5 tests) asserts a BENIGN
+   non-ASCII NON-authority string (`caf<U+00E9>-glob` / `modules/foundups/
+   <U+6587>/x`) is rejected on ASCII-only across all three fields, plus a
+   non-vacuity fixture check and an ASCII positive-control. All non-ASCII
+   test strings are `\uXXXX` ESCAPE sequences so the source stays 0
+   non-ASCII bytes.
 
 3. `tests/test_context_bundle_builder.py`: check-5 AST guard upgraded to
-   COMPLETENESS. New `test_no_bare_tuple_of_manifest_access_bypasses_helper`
-   walks the builder AST and flags any `tuple(...)` of a manifest dict
-   access not routed through `_require_str_tuple` (asserts ZERO). Non-vacuity
-   proven by `test_completeness_guard_detects_synthetic_bare_tuple` (same
-   detector flags a synthetic bare `tuple(build_contract.get("new_list",
-   []))`). The original positive assertion is retained.
+   COMPLETENESS and (GAP B tighten) from `tuple(...)`-only to ALL list-like
+   bypasses via the broadened shared detector
+   `_find_manifest_listlike_bypasses`
+   (`tuple`/`list`/`set`/`frozenset` conversion, comprehension/genexp,
+   direct assignment reaching a `ContextBundle(...)` field).
+   `test_no_bare_tuple_of_manifest_access_bypasses_helper` asserts ZERO
+   bypass patterns over the real builder source. Non-vacuity proven over
+   synthetic sources by `test_completeness_guard_detects_synthetic_bare_tuple`,
+   `..._synthetic_bare_list`, `..._synthetic_bare_set_and_frozenset`,
+   `..._synthetic_comprehension`, and `..._synthetic_direct_assignment`;
+   plus `..._no_false_positive_on_local_assignment`. The original positive
+   assertion is retained.
 
-4. `ModLog.md` / `tests/TestModLog.md`: WSP_97 table extended to 34 rows
-   (rows 33-34 added; rows 18 and 24 evidence Unicode-hardened); test-run
-   summary updated.
+4. `ModLog.md` / `tests/TestModLog.md`: WSP_97 table stays at 34 rows
+   (rows 33-34 evidence tightened to cite the ASCII-only rejection and the
+   multi-pattern detector); test-run summary updated.
 
 **FIX1 guarantees preserved**: no validator edit, no manifest edit, no
 runtime/consumer wiring, no build run, no new dependency. All 6 real
@@ -63,11 +94,12 @@ readiness/routing, int readiness) is still rejected BEFORE `to_dict()`.
 No skip / no xfail.
 
 **Test run**: `python -m pytest modules/foundups/agent/tests/ -q
--p no:cacheprovider` -> 504 passed, 0 skipped, 0 xfailed (496 in FIX1 +
-8 new FIX2 tests).
+-p no:cacheprovider` -> 514 passed, 0 skipped, 0 xfailed (496 in FIX1 +
+8 first-FIX2 tests + 10 tighten tests: 5 ASCII-only + 5 detector
+non-vacuity/false-positive).
 
-**ASCII**: both `.py` files are 0 non-ASCII bytes (fullwidth test strings
-are `\uFFxx` escapes). This ModLog FIX2 entry is ASCII-clean.
+**ASCII**: both `.py` files are 0 non-ASCII bytes (all test strings are
+`\uFFxx` / `\uXXXX` escapes). This ModLog FIX2 entry is ASCII-clean.
 
 See the FIX1 entry below for the full 34-row WSP_97 Truth Boundary
 Checklist (rows 33-34 are the FIX2 additions; verdict FIX2 PASS 34/34).
@@ -226,7 +258,7 @@ The builder-test file alone: **129 passed in 2.40s** (54 prior +
 | 15 | MAX_CONTEXT_BYTES_ENFORCED | YES | Total-cap logic unchanged. |
 | 16 | FORBIDDEN_PATHS_EXCLUDED | YES | `_is_path_forbidden` segment screen unchanged. |
 | 17 | SYMLINK_ESCAPE_REJECTED | YES | `_is_path_within` helper-level test still passes. |
-| 18 | GATE_NAMES_ONLY_NOT_PASS_BOOLEANS | YES (repaired; FIX2 Unicode-robust) | Now backed by `_require_str_tuple` element-type check + `_AUTHORITY_KEYWORDS` denylist substring rejection, and (FIX2) the denylist scan is NFKC-normalized before matching so fullwidth-Unicode forms cannot evade it. Crafted-test evidence: `test_required_gates_with_appended_dict_rejected` (W10 exact example), `test_required_gates_with_non_str_element_rejected` (7 parametrized non-str types), `test_required_gates_as_dict_value_rejected`, `test_authority_keyword_strings_rejected` (9 parametrized authority-keyword smuggle cases), `test_fullwidth_gate_passed_appended_to_required_gates_rejected` (FIX2: fullwidth `gate_passed` appended as a 9th gate), `test_all_list_field_elements_are_str_after_build` (all 6 real manifests). |
+| 18 | GATE_NAMES_ONLY_NOT_PASS_BOOLEANS | YES (repaired; FIX2 Unicode-robust + ASCII-only) | Now backed by `_require_str_tuple` element-type check + `_AUTHORITY_KEYWORDS` denylist substring rejection; (FIX2) the denylist scan is NFKC-normalized before matching so fullwidth-Unicode forms cannot evade it; and (FIX2-tighten) a benign non-ASCII element is rejected on ASCII-only after the authority check (gate names are ASCII by convention). Crafted-test evidence: `test_required_gates_with_appended_dict_rejected` (W10 exact example), `test_required_gates_with_non_str_element_rejected` (7 parametrized non-str types), `test_required_gates_as_dict_value_rejected`, `test_authority_keyword_strings_rejected` (9 parametrized authority-keyword smuggle cases), `test_fullwidth_gate_passed_appended_to_required_gates_rejected` (FIX2: fullwidth `gate_passed` appended as a 9th gate), `test_nonascii_nonauthority_in_required_gates_rejected` (FIX2-tighten: benign non-ASCII 9th gate), `test_all_list_field_elements_are_str_after_build` (all 6 real manifests). |
 | 19 | NO_READINESS_PROMOTION | YES | `_require_strict_bool` now rejects truthy-dict / list / int / "true"-string smuggling on each readiness field. Crafted evidence: `test_readiness_with_non_bool_value_rejected` (3 fields x 5 bad values), `test_truthy_dict_readiness_not_laundered_to_true`. Defense-in-depth check still raises `ContextBundleRejected` on `is True`. |
 | 20 | BUNDLE_ID_DETERMINISTIC_NOT_WALLCLOCK | YES | bundle_id formula unchanged; `TestBundleIdDeterministic` still passes (4 cases + AST scan for nondeterministic imports). |
 | 21 | EXTERNAL_AGENTS_STILL_DISABLED | YES | `_require_strict_bool` rejects non-bool `external_agent_allowed`; `test_routing_flag_with_non_bool_value_rejected` (parametrized) and the existing `test_external_agent_allowed_true_rejected` both pin this. |
@@ -241,11 +273,11 @@ The builder-test file alone: **129 passed in 2.40s** (54 prior +
 | 30 | CITES_PR_774 | YES | PR-775 ModLog entry and builder docstring section "Trust seam (carry-forward from #774)" cite #774. |
 | 31 | ASCII_CLEAN | YES | Slice-introduced content for FIX1 (builder helpers + tests + this ModLog entry + TestModLog entry) is 0 non-ASCII bytes. Pre-existing non-ASCII bytes elsewhere in `ModLog.md`/`INTERFACE.md`/`ROADMAP.md` are unchanged. |
 | 32 | MANIFEST_LIST_FIELDS_STRING_ONLY | YES (NEW) | Every list field forwarded from the manifest into the bundle is `Tuple[str, ...]` produced by `_require_str_tuple`. The three protected fields are `required_gates`, `forbidden_paths`, `safe_mutation_surface`. Pinned by `TestManifestListFieldsStringOnly::test_all_list_field_elements_are_str_after_build` (all 6 real manifests) and `..._test_no_other_manifest_list_field_is_serialized` (AST scan asserts exactly these three field names are routed through the helper). |
-| 33 | AUTHORITY_KEYWORDS_UNICODE_NORMALIZED | YES (NEW; FIX2) | The `_AUTHORITY_KEYWORDS` denylist scan in `_require_str_tuple` NFKC-normalizes each element (`unicodedata.normalize("NFKC", item).lower()`) BEFORE the substring match, closing the W10-proven fullwidth-Unicode evasion (a fullwidth `payout_ready` previously passed the raw `item.lower()` scan and NFKC-normalized to `payout_ready` downstream). The serialized value remains the ORIGINAL `item` (no silent rewrite); only the rejection DECISION uses the normalized form. `unicodedata` is stdlib (no new dependency). Pinned by `TestFullwidthUnicodeAuthorityEvasionRejected`: `test_fullwidth_payout_ready_in_safe_mutation_surface_rejected` (W10-exploit field), `test_fullwidth_dao_approved_in_safe_mutation_surface_rejected`, `test_fullwidth_gate_passed_appended_to_required_gates_rejected` (9th gate), `test_fullwidth_payout_ready_appended_to_forbidden_paths_rejected`, `test_generic_nfkc_compatibility_form_also_rejected` (mixed-form `human_approval`), and the non-vacuity guard `test_fullwidth_fixtures_normalize_as_documented`. |
-| 34 | MANIFEST_LIST_FIELDS_COMPLETENESS_PINNED | YES (NEW; FIX2) | The check-5 AST guard is upgraded from positive-only to a COMPLETENESS check. `TestManifestListFieldsStringOnly::test_no_bare_tuple_of_manifest_access_bypasses_helper` walks the builder AST and flags any `tuple(...)` whose argument is a manifest dict access (`build_contract.get(...)` / `build_contract[...]` / routing / readiness / data) that is NOT a `_require_str_tuple(...)` call; asserts ZERO such bare patterns. Non-vacuity proven by `test_completeness_guard_detects_synthetic_bare_tuple`, which runs the SAME detector over a synthetic source containing `tuple(build_contract.get("new_list", []))` and asserts it IS detected (so a future bare bypass would fail the guard). The original positive assertion is retained. |
+| 33 | AUTHORITY_KEYWORDS_UNICODE_NORMALIZED | YES (NEW; FIX2; tightened) | `_require_str_tuple` now applies TWO Unicode contracts in order. (a) NFKC-normalize: the `_AUTHORITY_KEYWORDS` denylist scan runs against `unicodedata.normalize("NFKC", item).lower()` BEFORE the substring match, closing the W10-proven fullwidth-Unicode evasion (a fullwidth `payout_ready` previously passed the raw `item.lower()` scan and NFKC-normalized to `payout_ready` downstream). (b) ASCII-only (FIX2-tighten): AFTER the authority check, a non-ASCII element is REFUSED outright (`if not item.isascii(): raise`) -- these fields are ASCII gate names / repo-relative paths / path globs by convention, so a BENIGN non-ASCII element (no authority keyword) is ambiguous and is rejected, not normalized-and-accepted. The authority check runs FIRST so authority strings still get the specific authority error. The serialized value remains the ORIGINAL `item` (no silent rewrite); only the rejection DECISION uses the normalized form. `unicodedata` is stdlib (no new dependency). Pinned (NFKC half) by `TestFullwidthUnicodeAuthorityEvasionRejected`: `test_fullwidth_payout_ready_in_safe_mutation_surface_rejected` (W10-exploit field), `test_fullwidth_dao_approved_in_safe_mutation_surface_rejected`, `test_fullwidth_gate_passed_appended_to_required_gates_rejected` (9th gate), `test_fullwidth_payout_ready_appended_to_forbidden_paths_rejected`, `test_generic_nfkc_compatibility_form_also_rejected` (mixed-form `human_approval`), `test_fullwidth_fixtures_normalize_as_documented`. Pinned (ASCII-only half) by `TestNonAsciiNonAuthorityElementsRejected`: `test_nonascii_nonauthority_in_required_gates_rejected` (9th gate), `..._in_forbidden_paths_rejected`, `..._in_safe_mutation_surface_rejected` (the W10-exploit field), `test_nonascii_fixtures_are_benign_and_nonascii` (non-vacuity: fixtures are non-ASCII and carry NO authority keyword), and `test_ascii_elements_preserved_unchanged` (ASCII inputs build and are kept verbatim). |
+| 34 | MANIFEST_LIST_FIELDS_COMPLETENESS_PINNED | YES (NEW; FIX2; tightened) | The check-5 AST guard is upgraded from positive-only to a COMPLETENESS check, and (FIX2-tighten) from `tuple(...)`-only to ALL list-like bypasses. The shared detector `_find_manifest_listlike_bypasses` walks the builder AST and flags any manifest dict access (`build_contract.get(...)` / `build_contract[...]` / routing / readiness / data) that reaches a bundle field via `tuple|list|set|frozenset(<manifest access>)`, a list/set comprehension or generator expression iterating a manifest list access, or a direct assignment `NAME = <manifest list access>` whose NAME is later a `ContextBundle(...)` keyword-arg value -- unless it is a `_require_str_tuple(...)` call. `TestManifestListFieldsStringOnly::test_no_bare_tuple_of_manifest_access_bypasses_helper` asserts ZERO such bypass patterns over the real builder source. Non-vacuity proven over synthetic sources by `test_completeness_guard_detects_synthetic_bare_tuple` (tuple), `..._synthetic_bare_list` (list), `..._synthetic_bare_set_and_frozenset` (set + frozenset), `..._synthetic_comprehension` (listcomp/setcomp/genexp), and `..._synthetic_direct_assignment` (assignment reaching a ContextBundle field). False-positive guard `test_completeness_guard_no_false_positive_on_local_assignment` proves local conversions (`tuple(included)` / `dict(excluded)`) and manifest dict reads whose name never reaches a ContextBundle field are NOT flagged. Detector restricted to `_LISTLIKE_CONVERTERS = {tuple,list,set,frozenset}` so `str(build_contract.get(...))` scalar coercions are not flagged. The original positive assertion `test_no_other_manifest_list_field_is_serialized` is retained. |
 
 **WSP_97 VERDICT (FIX1)**: PASS (32/32).
-**WSP_97 VERDICT (FIX2)**: PASS (34/34). FIX2 adds rows 33-34 and Unicode-hardens the evidence for rows 18 and 24; declared == actual == 34.
+**WSP_97 VERDICT (FIX2)**: PASS (34/34). FIX2 adds rows 33-34 and Unicode-hardens the evidence for rows 18 and 24. FIX2-tighten (W10) keeps the table at 34 rows and updates rows 33-34 (and row 18) evidence to cite the ASCII-only rejection of protected list elements and the multi-pattern completeness detector; declared == actual == 34.
 
 ---
 
