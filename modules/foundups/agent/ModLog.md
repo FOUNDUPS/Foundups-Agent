@@ -1,5 +1,177 @@
 # Agent Module ModLog
 
+## 2026-06-09 - WRE ContextBundle Builder Phase 1 FIX1 (authority-laundering closure)
+
+**Author**: 0102 (W6)
+**Slice**: WRE_CONTEXT_BUNDLE_BUILDER_PHASE1_FIX1
+**Predecessor**: this branch's prior commit (PR #775 first push)
+**Trigger**: W10 return-from-review on PR #775
+
+**W10 blocker**:
+
+> A manifest that passes `validate_manifest_file` can smuggle non-string
+> authority dicts into `bundle.to_dict()` because `context_bundle_builder.py`
+> copies these build_contract list fields verbatim:
+>   - required_gates_to_recheck
+>   - forbidden_paths
+>   - safe_mutation_surface
+>
+> Examples proven by W10:
+>   required_gates_to_recheck: `{"gate_passed": true, "security_passed": true, "human_approval": true}`
+>   forbidden_paths: `{"is_authorized": true, "approval_level": "CRITICAL"}`
+>   safe_mutation_surface: `{"payout_ready": true, "dao_approved": true}`
+>
+> This refutes WSP_97 rows GATE_NAMES_ONLY_NOT_PASS_BOOLEANS and
+> NO_CABR_PAYOUT_DAO.
+
+**Root cause**: the #771/#773 validator does NOT enforce element types
+on `required_gates` / `forbidden_paths`, and does not type-check
+`safe_mutation_surface` at all. The prior builder's
+`tuple(build_contract.get(field, []) or [])` faithfully forwarded any
+element (or, for `safe_mutation_surface`, a dict-as-value where
+`tuple(dict)` yields the dict's keys) into the bundle. The
+validator's `is True` check on readiness / routing scalars created the
+same vector at scalar granularity (a truthy dict passes `is True` then
+`bool(dict)` coerces to True).
+
+### Changed
+
+- **`context_bundle_builder.py`**:
+  - Added `_AUTHORITY_KEYWORDS` denylist constant (gate-pass / readiness
+    / CABR / payout / DAO / human-approval / external-agent /
+    self-authorization keywords; lower-case substring match).
+  - Added `_require_str_tuple(field_name, value) -> Tuple[str, ...]`
+    helper: rejects non-list/tuple value (dict-as-field), any element
+    whose `type(item) is not str` (rejects dict / list / bool / int /
+    None / object), empty / whitespace-only strings, and strings whose
+    lower-cased form contains any authority keyword from
+    `_AUTHORITY_KEYWORDS`. No silent drop -- raises
+    `ContextBundleRejected`.
+  - Added `_require_strict_bool(field_name, value, *, default=False)
+    -> bool` helper: rejects anything that is not exactly `bool` /
+    `None`. None / missing maps to `default`. No `bool(dict)` smuggle.
+  - Applied `_require_strict_bool` to `readiness.manifest_ready`,
+    `readiness.build_ready`, `readiness.autonomous_execution_ready`,
+    `execution_routing.external_agent_allowed`,
+    `execution_routing.can_self_authorize`, and
+    `build_contract.dry_run.required` BEFORE the defense-in-depth
+    safety re-checks (step 3a). The re-checks now operate on
+    strictly-typed locals (step 3b).
+  - Applied `_require_str_tuple` to `required_gates`, `forbidden_paths`,
+    `safe_mutation_surface` BEFORE bundle construction (step 3c). The
+    resulting `Tuple[str, ...]` values flow directly into
+    `ContextBundle(...)`; the prior verbatim `tuple(...)` calls are
+    gone.
+
+### Audit -- other manifest-provided list/tuple fields copied into the bundle
+
+Source audit performed: the ONLY manifest-provided list/tuple values
+forwarded into the bundle are `required_gates`, `forbidden_paths`, and
+`safe_mutation_surface`. Pinned mechanically by
+`TestManifestListFieldsStringOnly::test_no_other_manifest_list_field_is_serialized`:
+an AST scan of `context_bundle_builder.py` extracts the field-name
+argument of every `_require_str_tuple(...)` call and asserts it equals
+exactly `{"required_gates", "forbidden_paths", "safe_mutation_surface"}`.
+If a future change adds a fourth list field that goes into the bundle,
+that test fails until it is routed through the helper and a WSP_97
+evidence line is added.
+
+Scalar manifest fields audited:
+- `foundup_id`, `module_path`, `contract_version`,
+  `build_contract_status` -- already `str(...)`-coerced; cannot carry
+  authority dicts even under malicious manifests.
+- `routing.orchestrator` / `executor` / `auditor` -- validator already
+  rejects anything not in the respective `ALLOWED_*` `frozenset`s (must
+  be `str`).
+- `routing.declarative_only` -- validator already rejects anything that
+  is not the `True` singleton.
+- `routing.external_agent_allowed`, `routing.can_self_authorize`,
+  `readiness.*`, `build_contract.dry_run.required` -- newly routed
+  through `_require_strict_bool` in this fix.
+
+### Tests added
+
+In `test_context_bundle_builder.py`:
+
+- `TestRequireStrTupleListFieldsRejectsAuthorityLaundering` -- crafted
+  manifests with appended dicts, parametrized non-str element types
+  (`int`, `True`, `False`, `None`, nested list, dict, float, zero),
+  dict-as-field-value (the safe_mutation_surface W10 repro), authority-
+  keyword string smuggling (9 parametrized `(field, keyword)` cases),
+  empty-string elements, all-six real manifests still build with
+  helper applied, and the `to_dict()` is NEVER produced for crafted
+  input.
+- `TestRequireStrictBoolScalarFieldsRejectsAuthorityLaundering` --
+  crafted truthy-dict / list / int / string values on each of three
+  readiness fields and two routing flags; plus a specific repro that a
+  truthy dict in `readiness.build_ready` is NOT laundered to True.
+- `TestManifestListFieldsStringOnly` -- WSP_97 row coverage: every list
+  field element is `str` after build for all six real manifests; AST
+  scan pins that the helper is applied to exactly the three protected
+  field names.
+
+Full suite: `pytest -q modules/foundups/agent/tests/` ->
+**496 passed in 7.87s**; 0 skipped; 0 xfailed.
+
+The builder-test file alone: **129 passed in 2.40s** (54 prior +
+75 new in FIX1).
+
+### Boundary preserved
+
+- READ_ONLY_BUILDER_ONLY. No new module-level imports beyond what was
+  already there; no subprocess / network / dynamic-import / file-write.
+- NO_CONSUMER_WIRING. NO_HERMES_CALL. NO_OPENCLAW_CALL.
+  NO_JOB_ENQUEUE_OR_DRAIN. NO_BUILD_RUN.
+- Validator NOT edited (one of the explicit RETURN_CONDITIONS).
+- Manifests NOT edited.
+- Bundle remains deterministic (`bundle_id` formula unchanged;
+  `created_at` still injected; helpers do not introduce nondeterminism).
+- All 6 real manifests still build (`TestRealManifestsBuild` plus
+  `TestRequireStrTupleListFieldsRejectsAuthorityLaundering::
+  test_real_manifests_still_build_with_helpers`).
+- No skip / no xfail on any security assertion.
+
+### WSP_97 Truth Boundary Checklist (FIX1 repair: 32 rows)
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | HOLOINDEX_PRIOR_ART_SEARCHED | YES | 4 HoloIndex queries recorded in the previous PR-775 ModLog entry below; this fix uses the same Phase 0 result (no prior art for `ContextBundle`). |
+| 2 | WSP_84_REUSE_DECISION_DOCUMENTED | YES | Validator imported (`_require_str_tuple` and `_require_strict_bool` are NEW helpers private to the builder; they do not duplicate validator logic). |
+| 3 | VALIDATOR_REUSED_NOT_REIMPLEMENTED | YES | `context_bundle_builder.py` imports `validate_manifest_file`, `ManifestValidationResult`, `_canonicalize_module_path` and adds NO new logic that lives in the validator. The two new helpers operate solely on the bundle-output boundary. |
+| 4 | READ_ONLY_BUILDER_ONLY | YES | `test_builder_no_subprocess_network_dynamic_import_or_write` still passes after FIX1; AST scan: no new banned-module imports, no banned calls. |
+| 5 | NO_CONSUMER_WIRING | YES | `test_builder_signature_has_no_consumer_handle` still passes; no new consumer parameter. |
+| 6 | NO_HERMES_CALL | YES | `test_builder_imports_no_runtime_executors` still passes. |
+| 7 | NO_OPENCLAW_CALL | YES | Same test. |
+| 8 | NO_JOB_ENQUEUE_OR_DRAIN | YES | No queue / broker / publish API referenced. |
+| 9 | NO_BUILD_RUN | YES | No `subprocess.run` / `Popen`. |
+| 10 | VALIDATOR_REQUIRED_BEFORE_MODULE_PATH_TRUST | YES | Order preserved: step 1 calls `validate_manifest_file(manifest_path)`; helpers run AFTER validator passes. `TestValidatorRejectionsPropagate` still pins this. |
+| 11 | JOB_PAYLOAD_MODULE_PATH_NOT_TRUSTED | YES | `TestNo774LegacyPayloadAuthority` still passes; FIX1 did not add any payload-accepting parameter. |
+| 12 | REFS_AND_SHA256_ONLY | YES | `FileRef` shape unchanged; `test_bundle_carries_only_refs_no_file_bodies` still passes. |
+| 13 | NO_FILE_BODIES | YES | Same test. |
+| 14 | STREAM_HASHED_NO_FULL_BODY_LOAD | YES | `_stream_sha256` unchanged. |
+| 15 | MAX_CONTEXT_BYTES_ENFORCED | YES | Total-cap logic unchanged. |
+| 16 | FORBIDDEN_PATHS_EXCLUDED | YES | `_is_path_forbidden` segment screen unchanged. |
+| 17 | SYMLINK_ESCAPE_REJECTED | YES | `_is_path_within` helper-level test still passes. |
+| 18 | GATE_NAMES_ONLY_NOT_PASS_BOOLEANS | YES (repaired) | Now backed by `_require_str_tuple` element-type check + `_AUTHORITY_KEYWORDS` denylist substring rejection. Crafted-test evidence: `test_required_gates_with_appended_dict_rejected` (W10 exact example), `test_required_gates_with_non_str_element_rejected` (7 parametrized non-str types), `test_required_gates_as_dict_value_rejected`, `test_authority_keyword_strings_rejected` (9 parametrized authority-keyword smuggle cases), `test_all_list_field_elements_are_str_after_build` (all 6 real manifests). |
+| 19 | NO_READINESS_PROMOTION | YES | `_require_strict_bool` now rejects truthy-dict / list / int / "true"-string smuggling on each readiness field. Crafted evidence: `test_readiness_with_non_bool_value_rejected` (3 fields x 5 bad values), `test_truthy_dict_readiness_not_laundered_to_true`. Defense-in-depth check still raises `ContextBundleRejected` on `is True`. |
+| 20 | BUNDLE_ID_DETERMINISTIC_NOT_WALLCLOCK | YES | bundle_id formula unchanged; `TestBundleIdDeterministic` still passes (4 cases + AST scan for nondeterministic imports). |
+| 21 | EXTERNAL_AGENTS_STILL_DISABLED | YES | `_require_strict_bool` rejects non-bool `external_agent_allowed`; `test_routing_flag_with_non_bool_value_rejected` (parametrized) and the existing `test_external_agent_allowed_true_rejected` both pin this. |
+| 22 | EXECUTION_ROUTING_DECLARATIVE_ONLY | YES | Validator's `is not True` check unchanged; `routing.declarative_only` cannot be a dict (validator rejects). |
+| 23 | AI_OVERSEER_NOT_BUILDER | YES | No `ai_overseer` import or identifier added. |
+| 24 | NO_CABR_PAYOUT_DAO | YES (repaired) | Now backed by `_AUTHORITY_KEYWORDS` containing `cabr_ready`, `cabr_passed`, `payout_ready`, `payout_passed`, `payout_approved`, `dao_ready`, `dao_approved`, `dao_passed`, `dao_signed` (substring rejection in `_require_str_tuple`); plus `_require_strict_bool` for readiness fields. Crafted-test evidence: `test_safe_mutation_surface_as_dict_value_rejected_w10_repro` (the exact W10 example `{"payout_ready": True, "dao_approved": True}` rejected), `test_authority_keyword_strings_rejected` includes `payout_ready` and `dao_approved` as parametrized rejected substrings, `test_to_dict_never_produced_for_crafted_input` proves the bundle is never produced for the W10 payload. |
+| 25 | MANIFESTS_BUNDLE_BUILD_TESTED | YES | All 6 real manifests still build (`TestRealManifestsBuild::test_each_manifest_builds`, `TestReconciliationFlaggedStillBuild`, and new `TestRequireStrTupleListFieldsRejectsAuthorityLaundering::test_real_manifests_still_build_with_helpers`). |
+| 26 | BUILDER_IMPORTS_NO_RUNTIME_EXECUTORS | YES | Imports unchanged from prior PR-775 push. |
+| 27 | NO_SKIP_XFAIL | YES | `pytest -q modules/foundups/agent/tests/` -> 496 passed in 7.87s; 0 skipped; 0 xfailed. |
+| 28 | CITES_PR_772 | YES | PR-775 ModLog entry and builder docstring both cite #772. |
+| 29 | CITES_PR_773 | YES | PR-775 ModLog entry and builder docstring both cite #773. Validator imported. |
+| 30 | CITES_PR_774 | YES | PR-775 ModLog entry and builder docstring section "Trust seam (carry-forward from #774)" cite #774. |
+| 31 | ASCII_CLEAN | YES | Slice-introduced content for FIX1 (builder helpers + tests + this ModLog entry + TestModLog entry) is 0 non-ASCII bytes. Pre-existing non-ASCII bytes elsewhere in `ModLog.md`/`INTERFACE.md`/`ROADMAP.md` are unchanged. |
+| 32 | MANIFEST_LIST_FIELDS_STRING_ONLY | YES (NEW) | Every list field forwarded from the manifest into the bundle is `Tuple[str, ...]` produced by `_require_str_tuple`. The three protected fields are `required_gates`, `forbidden_paths`, `safe_mutation_surface`. Pinned by `TestManifestListFieldsStringOnly::test_all_list_field_elements_are_str_after_build` (all 6 real manifests) and `..._test_no_other_manifest_list_field_is_serialized` (AST scan asserts exactly these three field names are routed through the helper). |
+
+**WSP_97 VERDICT (FIX1)**: PASS (32/32).
+
+---
+
 ## 2026-06-09 - WRE ContextBundle Builder Phase 1 (v0.16.0)
 
 **Author**: 0102 (W6)

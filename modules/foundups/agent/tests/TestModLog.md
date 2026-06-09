@@ -1,5 +1,84 @@
 # Agent Module TestModLog
 
+## 2026-06-09 - WRE ContextBundle Builder Phase 1 FIX1 Tests
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_context_bundle_builder.py -q
+python -m pytest modules/foundups/agent/tests/ -q
+```
+
+**Result**: PASS
+
+**Summary**:
+- Builder test file alone: **129 passed in 2.40s** (54 prior + 75 new).
+- Full agent-module suite: **496 passed in 7.87s**; 0 skipped; 0 xfailed.
+
+**Slice**: WRE_CONTEXT_BUNDLE_BUILDER_PHASE1_FIX1
+
+**Added** (in `test_context_bundle_builder.py`):
+
+- `TestRequireStrTupleListFieldsRejectsAuthorityLaundering`:
+  - `test_required_gates_with_appended_dict_rejected` -- the W10
+    exact example for required_gates.
+  - `test_required_gates_with_non_str_element_rejected` -- 7
+    parametrized non-str element types (`int`, `True`, `False`,
+    `None`, list, dict, float).
+  - `test_required_gates_as_dict_value_rejected`.
+  - `test_forbidden_paths_with_appended_dict_rejected` -- the W10
+    exact example for forbidden_paths.
+  - `test_forbidden_paths_with_non_str_element_rejected` -- 6
+    parametrized.
+  - `test_safe_mutation_surface_as_dict_value_rejected_w10_repro` --
+    the ADVERSARIAL REPRO: exact W10 exploit
+    `{"payout_ready": true, "dao_approved": true}` rejected before
+    bundle construction.
+  - `test_safe_mutation_surface_with_appended_dict_rejected`.
+  - `test_safe_mutation_surface_with_non_str_element_rejected` -- 7
+    parametrized.
+  - `test_authority_keyword_strings_rejected` -- 9 parametrized
+    `(field, keyword)` cases proving authority-keyword substring
+    smuggling is refused (`payout_ready`, `dao_approved`,
+    `manifest_ready`, `human_approval`, `external_agent_allowed`,
+    `is_authorized`, `approval_level`, `gate_passed`,
+    `security_passed`).
+  - `test_empty_string_element_rejected` -- 3 parametrized fields.
+  - `test_real_manifests_still_build_with_helpers` -- all 6 real
+    manifests pass the helper unchanged.
+  - `test_to_dict_never_produced_for_crafted_input` -- proves the
+    bundle's `to_dict()` is never produced for poisoned input.
+
+- `TestRequireStrictBoolScalarFieldsRejectsAuthorityLaundering`:
+  - `test_readiness_with_non_bool_value_rejected` -- 3 readiness
+    fields x 5 bad values (`{"is_authorized": True}`,
+    `{"payout_ready": True, "dao_approved": True}`, list, int,
+    `"true"` string).
+  - `test_routing_flag_with_non_bool_value_rejected` -- 2 routing
+    flags x 4 bad values.
+  - `test_truthy_dict_readiness_not_laundered_to_true` -- explicit
+    repro that the prior `bool(dict)` smuggle is closed.
+
+- `TestManifestListFieldsStringOnly`:
+  - `test_all_list_field_elements_are_str_after_build` -- type-check
+    every element of every list field for all 6 real manifests.
+  - `test_no_other_manifest_list_field_is_serialized` -- AST scan
+    asserts `_require_str_tuple` is applied to exactly
+    `{"required_gates", "forbidden_paths", "safe_mutation_surface"}`.
+    If a future change adds a fourth list field that gets copied into
+    the bundle, this test fails until it is routed through the helper.
+
+**Boundary preserved (FIX1)**:
+
+- All prior security AST scans still pass (no banned imports / banned
+  calls / runtime executor imports / nondeterministic imports).
+- Validator NOT edited.
+- No new dependencies.
+- No skip / no xfail.
+- All 6 real manifests still build (clean-manifest behavior identical).
+
+---
+
 ## 2026-06-09 - WRE ContextBundle Builder Phase 1 Tests
 
 **Command**:

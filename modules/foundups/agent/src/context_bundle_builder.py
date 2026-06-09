@@ -143,6 +143,31 @@ _REASON_OVERSIZED = "oversized"
 _REASON_UNREADABLE = "unreadable"
 _REASON_OVER_TOTAL_CAP = "over_total_cap"
 
+# Authority-keyword denylist used by ``_require_str_tuple`` to reject any
+# string element of a manifest-provided list field that smuggles a
+# well-known authority field name as a path. Defense-in-depth against
+# authority laundering identified by W10 review of PR #775. Lower-cased
+# substring match.
+_AUTHORITY_KEYWORDS: frozenset = frozenset({
+    # gate / approval pass booleans
+    "gate_passed", "gates_passed",
+    "security_passed", "permission_passed",
+    "dry_run_passed", "build_passed",
+    "verification_complete", "real_execution_performed",
+    # readiness flags
+    "manifest_ready", "build_ready", "autonomous_execution_ready",
+    # economic / DAO authority
+    "cabr_ready", "cabr_passed",
+    "payout_ready", "payout_passed", "payout_approved",
+    "dao_ready", "dao_approved", "dao_passed", "dao_signed",
+    # human / agent approval surfaces
+    "human_approval", "human_approved",
+    "is_authorized", "is_approved",
+    "approval_level",
+    # external-agent / self-authorization surfaces
+    "external_agent_allowed", "can_self_authorize",
+})
+
 
 # ---------------------------------------------------------------------------
 # Exceptions
@@ -265,6 +290,88 @@ class ContextBundle:
 
 def _normalize_posix(p: str) -> str:
     return str(p).replace("\\", "/")
+
+
+def _require_str_tuple(field_name: str, value: Any) -> Tuple[str, ...]:
+    """Coerce a manifest-provided list field to ``Tuple[str, ...]`` or refuse.
+
+    This is the bundle's defense against authority-laundering through
+    list fields. Predecessor: W10 review of PR #775 proved that the
+    #771/#773 validator does not enforce element types on these list
+    fields, and that the prior plain ``tuple(...)`` coercion forwarded
+    dict / list / int / bool / None elements (and dict-as-field-value)
+    into ``bundle.to_dict()`` verbatim. That refuted WSP_97 rows
+    ``GATE_NAMES_ONLY_NOT_PASS_BOOLEANS`` and ``NO_CABR_PAYOUT_DAO``.
+
+    Refuses (raises ``ContextBundleRejected``) with NO silent drop:
+      - ``value`` is not a list or tuple (rejects dict-as-field-value
+        such as ``safe_mutation_surface = {"payout_ready": true}``);
+      - any element whose Python type is not exactly ``str`` (rejects
+        dict / list / set / bool / int / None / object elements);
+      - any element that is empty or whitespace-only;
+      - any element whose lower-case form contains an authority
+        keyword from ``_AUTHORITY_KEYWORDS`` (defense against
+        authority-string smuggling such as a path declared as
+        ``"payout_ready"``).
+    """
+    if not isinstance(value, (list, tuple)):
+        raise ContextBundleRejected(
+            "build_contract." + field_name + " must be a list of strings; got "
+            + type(value).__name__
+        )
+    out: List[str] = []
+    for i, item in enumerate(value):
+        # NOTE: ``bool`` is a subclass of ``int`` but neither is ``str``,
+        # so the str type-check is sufficient to reject bools and ints.
+        if type(item) is not str:
+            raise ContextBundleRejected(
+                "build_contract." + field_name + "[" + str(i) + "] is "
+                + type(item).__name__
+                + "; must be str (rejected to prevent authority laundering)"
+            )
+        if not item.strip():
+            raise ContextBundleRejected(
+                "build_contract." + field_name + "[" + str(i) + "] is empty "
+                "or whitespace; rejected"
+            )
+        lowered = item.lower()
+        for kw in _AUTHORITY_KEYWORDS:
+            if kw in lowered:
+                raise ContextBundleRejected(
+                    "build_contract." + field_name + "[" + str(i) + "]="
+                    + repr(item) + " contains authority keyword "
+                    + repr(kw) + "; rejected to prevent authority laundering "
+                    "through " + field_name
+                )
+        out.append(item)
+    return tuple(out)
+
+
+def _require_strict_bool(
+    field_name: str, value: Any, *, default: bool = False
+) -> bool:
+    """Coerce a manifest-provided scalar to ``bool`` or refuse.
+
+    Defense against authority-laundering through scalar fields where
+    the validator's only check is ``is True``. A truthy dict such as
+    ``{"is_authorized": True}`` is not the True singleton, so the
+    validator's ``is True`` rejection short-circuits; without this
+    coercion ``bool({"is_authorized": True})`` would smuggle ``True``
+    into ``readiness_flags`` or ``execution_routing_summary``.
+
+    None or missing maps to ``default`` (False unless overridden).
+    Anything else that is not a literal ``bool`` raises
+    ``ContextBundleRejected``.
+    """
+    if value is None:
+        return default
+    if type(value) is not bool:
+        raise ContextBundleRejected(
+            field_name + " is " + type(value).__name__
+            + "; must be a literal bool (rejected to prevent authority "
+            "laundering)"
+        )
+    return value
 
 
 def _is_path_within(child_realpath: Path, base_realpath: Path) -> bool:
@@ -497,23 +604,72 @@ def build_context_bundle(
     routing = data.get("execution_routing", {})
     readiness = build_contract.get("readiness", {}) if isinstance(build_contract, dict) else {}
 
-    # --- 3. Defence-in-depth safety re-checks (validator already enforces) ---
-    if readiness.get("build_ready") is True:
+    # --- 3a. Strict-coerce manifest scalars BEFORE any safety re-check ---
+    #
+    # The #771/#773 validator only rejects readiness/external_agent_allowed/
+    # can_self_authorize when the value ``is True`` (the True singleton).
+    # A truthy dict like ``{"is_authorized": True}`` passes that check.
+    # Without strict-bool coercion ``bool({"is_authorized": True})`` would
+    # smuggle True into readiness_flags / execution_routing_summary.
+    # W10 (PR #775 FIX1) review pinned this as authority laundering.
+    readiness_manifest_ready = _require_strict_bool(
+        "build_contract.readiness.manifest_ready",
+        readiness.get("manifest_ready"),
+    )
+    readiness_build_ready = _require_strict_bool(
+        "build_contract.readiness.build_ready",
+        readiness.get("build_ready"),
+    )
+    readiness_autonomous_execution_ready = _require_strict_bool(
+        "build_contract.readiness.autonomous_execution_ready",
+        readiness.get("autonomous_execution_ready"),
+    )
+    routing_external_agent_allowed = _require_strict_bool(
+        "execution_routing.external_agent_allowed",
+        routing.get("external_agent_allowed"),
+    )
+    routing_can_self_authorize = _require_strict_bool(
+        "execution_routing.can_self_authorize",
+        routing.get("can_self_authorize"),
+    )
+
+    # --- 3b. Defence-in-depth safety re-checks (validator already enforces) ---
+    if readiness_build_ready:
         raise ContextBundleRejected("readiness.build_ready=true; bundle refuses promotion")
-    if readiness.get("autonomous_execution_ready") is True:
+    if readiness_autonomous_execution_ready:
         raise ContextBundleRejected(
             "readiness.autonomous_execution_ready=true; bundle refuses promotion"
         )
-    if readiness.get("manifest_ready") is True:
+    if readiness_manifest_ready:
         raise ContextBundleRejected("readiness.manifest_ready=true; bundle refuses promotion")
-    if routing.get("external_agent_allowed") is True:
+    if routing_external_agent_allowed:
         raise ContextBundleRejected("execution_routing.external_agent_allowed=true; refused")
-    if routing.get("can_self_authorize") is True:
+    if routing_can_self_authorize:
         raise ContextBundleRejected("execution_routing.can_self_authorize=true; refused")
     if routing.get("declarative_only") is not True:
         raise ContextBundleRejected(
             "execution_routing.declarative_only must be true; routing is declaration only"
         )
+
+    # --- 3c. Strict-coerce manifest list fields BEFORE any further work ---
+    #
+    # The #771/#773 validator enforces presence and minimum-content for
+    # required_gates / forbidden_paths but does NOT enforce element types
+    # (and does not type-check ``safe_mutation_surface`` at all).
+    # W10 (PR #775 FIX1) review proved this allowed authority laundering:
+    # e.g. ``safe_mutation_surface = {"payout_ready": true, "dao_approved": true}``
+    # or ``required_gates = [..., {"gate_passed": true}]``. The helper
+    # rejects non-list values, non-str elements, empty strings, and
+    # strings containing ``_AUTHORITY_KEYWORDS`` substrings. No silent drop.
+    required_gates_to_recheck = _require_str_tuple(
+        "required_gates", build_contract.get("required_gates", [])
+    )
+    forbidden_paths = _require_str_tuple(
+        "forbidden_paths", build_contract.get("forbidden_paths", [])
+    )
+    safe_mutation_surface = _require_str_tuple(
+        "safe_mutation_surface", build_contract.get("safe_mutation_surface", [])
+    )
 
     # --- 4. Module path canonicalization (uses validator helper) ---
     raw_module_path = build_contract.get("module_path", "")
@@ -621,11 +777,9 @@ def build_context_bundle(
     # --- 10. Echo readiness verbatim (NEVER promote; validator already
     #         rejected truthy readiness; defensive echo only).
     readiness_flags = {
-        "manifest_ready": bool(readiness.get("manifest_ready", False)),
-        "build_ready": bool(readiness.get("build_ready", False)),
-        "autonomous_execution_ready": bool(
-            readiness.get("autonomous_execution_ready", False)
-        ),
+        "manifest_ready": readiness_manifest_ready,
+        "build_ready": readiness_build_ready,
+        "autonomous_execution_ready": readiness_autonomous_execution_ready,
     }
 
     execution_routing_summary = {
@@ -633,9 +787,17 @@ def build_context_bundle(
         "executor": routing.get("executor"),
         "auditor": routing.get("auditor"),
         "declarative_only": routing.get("declarative_only"),
-        "external_agent_allowed": routing.get("external_agent_allowed"),
-        "can_self_authorize": routing.get("can_self_authorize"),
+        "external_agent_allowed": routing_external_agent_allowed,
+        "can_self_authorize": routing_can_self_authorize,
     }
+
+    # Strict-bool dry_run_required: validator enforces dry_run.required is True
+    # (rejects anything else) so this can only be True when we get here, but
+    # keep the strict coercion for defense-in-depth.
+    dry_run_block = build_contract.get("dry_run") if isinstance(build_contract.get("dry_run"), dict) else {}
+    dry_run_required = _require_strict_bool(
+        "build_contract.dry_run.required", dry_run_block.get("required") if isinstance(dry_run_block, dict) else None
+    )
 
     return ContextBundle(
         bundle_version=BUNDLE_VERSION,
@@ -648,14 +810,11 @@ def build_context_bundle(
         contract_version=str(build_contract.get("contract_version", "")),
         build_contract_status=str(build_contract.get("status", "")),
         execution_routing_summary=execution_routing_summary,
-        dry_run_required=bool(
-            isinstance(build_contract.get("dry_run"), dict)
-            and build_contract["dry_run"].get("required", False)
-        ),
+        dry_run_required=dry_run_required,
         readiness_flags=readiness_flags,
-        required_gates_to_recheck=tuple(build_contract.get("required_gates", []) or []),
-        forbidden_paths=tuple(build_contract.get("forbidden_paths", []) or []),
-        safe_mutation_surface=tuple(build_contract.get("safe_mutation_surface", []) or []),
+        required_gates_to_recheck=required_gates_to_recheck,
+        forbidden_paths=forbidden_paths,
+        safe_mutation_surface=safe_mutation_surface,
         included_file_refs=tuple(included),
         excluded_paths_summary=dict(excluded),
         max_context_bytes=max_context_bytes,

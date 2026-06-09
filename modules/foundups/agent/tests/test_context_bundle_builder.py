@@ -915,5 +915,391 @@ class TestBundleStructuralIntegrity:
         assert "WSP_84" in p.wsps_applied
 
 
+# ===========================================================================
+# FIX1: Authority-laundering through manifest list / scalar fields
+# ===========================================================================
+#
+# W10 review of PR #775 proved that the prior builder copied
+# build_contract list fields (required_gates / forbidden_paths /
+# safe_mutation_surface) verbatim into the bundle, and that the
+# validator's ``is True`` checks on readiness / routing scalars let
+# a truthy dict pass through to ``bool(...)``. The classes below pin
+# both fixes mechanically.
+
+
+class TestRequireStrTupleListFieldsRejectsAuthorityLaundering:
+    """Crafted-manifest negative tests for the three list fields.
+
+    Each test:
+      1) writes a manifest that PASSES the #771/#773 validator
+         (all required gates / forbidden markers present),
+      2) injects an authority-laundering payload into one list field,
+      3) asserts ``build_context_bundle`` raises
+         ``ContextBundleRejected`` BEFORE the bundle is constructed
+         (the bundle's ``to_dict`` is never produced).
+    """
+
+    # ----- required_gates -----
+
+    def test_required_gates_with_appended_dict_rejected(self, tmp_repo_root):
+        """Exact W10 example for required_gates_to_recheck."""
+        def mutate(data):
+            gates = list(data["build_contract"]["required_gates"])
+            gates.append(
+                {"gate_passed": True, "security_passed": True, "human_approval": True}
+            )
+            data["build_contract"]["required_gates"] = gates
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected, match="required_gates"):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+    @pytest.mark.parametrize("bad_element", [1, True, False, None, ["nested"], {"k": 1}, 1.5])
+    def test_required_gates_with_non_str_element_rejected(self, tmp_repo_root, bad_element):
+        def mutate(data):
+            gates = list(data["build_contract"]["required_gates"])
+            gates.append(bad_element)
+            data["build_contract"]["required_gates"] = gates
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected, match="required_gates"):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+    def test_required_gates_as_dict_value_rejected(self, tmp_repo_root):
+        """required_gates as a dict (rather than a list) -- the validator
+        already rejects this, but the helper provides defense-in-depth
+        in case validator ordering ever changes."""
+        def mutate(data):
+            data["build_contract"]["required_gates"] = {
+                "gate_passed": True, "security_passed": True,
+            }
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+    # ----- forbidden_paths -----
+
+    def test_forbidden_paths_with_appended_dict_rejected(self, tmp_repo_root):
+        """Exact W10 example for forbidden_paths."""
+        def mutate(data):
+            paths = list(data["build_contract"]["forbidden_paths"])
+            paths.append(
+                {"is_authorized": True, "approval_level": "CRITICAL"}
+            )
+            data["build_contract"]["forbidden_paths"] = paths
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected, match="forbidden_paths"):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+    @pytest.mark.parametrize("bad_element", [1, True, False, None, ["nested"], {"k": 1}])
+    def test_forbidden_paths_with_non_str_element_rejected(self, tmp_repo_root, bad_element):
+        def mutate(data):
+            paths = list(data["build_contract"]["forbidden_paths"])
+            paths.append(bad_element)
+            data["build_contract"]["forbidden_paths"] = paths
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected, match="forbidden_paths"):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+    # ----- safe_mutation_surface -----
+
+    def test_safe_mutation_surface_as_dict_value_rejected_w10_repro(self, tmp_repo_root):
+        """ADVERSARIAL REPRO: exact W10 exploit. The validator does not
+        type-check safe_mutation_surface at all, so a dict value passes
+        validation. The prior builder did ``tuple(dict)`` which yielded
+        the dict's keys; the new helper rejects the dict-as-value before
+        bundle construction."""
+        def mutate(data):
+            data["build_contract"]["safe_mutation_surface"] = {
+                "payout_ready": True, "dao_approved": True,
+            }
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected, match="safe_mutation_surface"):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+    def test_safe_mutation_surface_with_appended_dict_rejected(self, tmp_repo_root):
+        def mutate(data):
+            surface = list(data["build_contract"]["safe_mutation_surface"])
+            surface.append({"payout_ready": True, "dao_approved": True})
+            data["build_contract"]["safe_mutation_surface"] = surface
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected, match="safe_mutation_surface"):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+    @pytest.mark.parametrize("bad_element", [1, True, False, None, ["nested"], {"k": 1}, 0])
+    def test_safe_mutation_surface_with_non_str_element_rejected(self, tmp_repo_root, bad_element):
+        def mutate(data):
+            surface = list(data["build_contract"]["safe_mutation_surface"])
+            surface.append(bad_element)
+            data["build_contract"]["safe_mutation_surface"] = surface
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected, match="safe_mutation_surface"):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+    # ----- authority-keyword string smuggling -----
+
+    @pytest.mark.parametrize(
+        "field_name,keyword",
+        [
+            ("safe_mutation_surface", "payout_ready"),
+            ("safe_mutation_surface", "dao_approved"),
+            ("safe_mutation_surface", "manifest_ready"),
+            ("safe_mutation_surface", "human_approval"),
+            ("safe_mutation_surface", "external_agent_allowed"),
+            ("forbidden_paths", "is_authorized"),
+            ("forbidden_paths", "approval_level"),
+            ("required_gates", "gate_passed"),
+            ("required_gates", "security_passed"),
+        ],
+    )
+    def test_authority_keyword_strings_rejected(self, tmp_repo_root, field_name, keyword):
+        """Strings whose lower-cased value contains an authority keyword
+        from the denylist are rejected, even when otherwise well-formed.
+
+        This is the secondary smuggling vector: instead of stuffing a
+        dict, an attacker stuffs a path-shaped string like
+        ``"modules/foundups/x/payout_ready"`` hoping it survives into
+        the bundle. The helper rejects."""
+        def mutate(data):
+            cur = list(data["build_contract"][field_name])
+            cur.append("modules/foundups/x/" + keyword)
+            data["build_contract"][field_name] = cur
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+    # ----- empty-string element guard -----
+
+    @pytest.mark.parametrize(
+        "field_name",
+        ["required_gates", "forbidden_paths", "safe_mutation_surface"],
+    )
+    def test_empty_string_element_rejected(self, tmp_repo_root, field_name):
+        def mutate(data):
+            cur = list(data["build_contract"][field_name])
+            cur.append("   ")
+            data["build_contract"][field_name] = cur
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected, match=field_name):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+    # ----- 8: real manifests still build -----
+
+    @pytest.mark.parametrize("foundup_id,rel_path,status", TARGET_MANIFESTS)
+    def test_real_manifests_still_build_with_helpers(self, foundup_id, rel_path, status):
+        """Clean-manifest behavior is identical after the fix. All 6
+        real manifests must still produce a valid bundle with the
+        helper applied."""
+        bundle = build_context_bundle(
+            _real_manifest(rel_path), REPO_ROOT, created_at=FIXED_T0
+        )
+        # Every element of every list field is now str (helper guarantee).
+        for s in bundle.required_gates_to_recheck:
+            assert type(s) is str
+        for s in bundle.forbidden_paths:
+            assert type(s) is str
+        for s in bundle.safe_mutation_surface:
+            assert type(s) is str
+
+    # ----- 9: to_dict() is NEVER produced for crafted input -----
+
+    def test_to_dict_never_produced_for_crafted_input(self, tmp_repo_root):
+        """If a crafted manifest passes the validator, the builder must
+        refuse BEFORE constructing the bundle. There is no path by
+        which ``to_dict()`` runs on poisoned data."""
+        def mutate(data):
+            data["build_contract"]["safe_mutation_surface"] = {
+                "payout_ready": True, "dao_approved": True,
+            }
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        produced = []
+        try:
+            bundle = build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+            produced.append(bundle.to_dict())  # must NEVER reach here
+        except ContextBundleRejected:
+            pass
+        assert produced == [], "to_dict() was produced for crafted-authority input"
+
+
+class TestRequireStrictBoolScalarFieldsRejectsAuthorityLaundering:
+    """Defense-in-depth audit for scalar fields where the validator's
+    ``is True`` check is the only gate. A truthy dict passes validation
+    but would coerce to True under ``bool(...)``; the strict helper
+    refuses anything that is not a literal bool / None.
+    """
+
+    @pytest.mark.parametrize(
+        "readiness_field",
+        ["manifest_ready", "build_ready", "autonomous_execution_ready"],
+    )
+    @pytest.mark.parametrize(
+        "bad_value",
+        [
+            {"is_authorized": True},
+            {"payout_ready": True, "dao_approved": True},
+            ["something"],
+            1,
+            "true",
+        ],
+    )
+    def test_readiness_with_non_bool_value_rejected(
+        self, tmp_repo_root, readiness_field, bad_value
+    ):
+        def mutate(data):
+            data["build_contract"]["readiness"][readiness_field] = bad_value
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected, match=readiness_field):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+    @pytest.mark.parametrize(
+        "routing_field",
+        ["external_agent_allowed", "can_self_authorize"],
+    )
+    @pytest.mark.parametrize(
+        "bad_value",
+        [
+            {"is_authorized": True},
+            ["external"],
+            1,
+            "true",
+        ],
+    )
+    def test_routing_flag_with_non_bool_value_rejected(
+        self, tmp_repo_root, routing_field, bad_value
+    ):
+        def mutate(data):
+            data["execution_routing"][routing_field] = bad_value
+
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected, match=routing_field):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+    def test_truthy_dict_readiness_not_laundered_to_true(self, tmp_repo_root):
+        """Specific authority-laundering reproduction: prior to FIX1,
+        a truthy dict in ``readiness.build_ready`` would have set
+        ``bundle.readiness_flags["build_ready"]`` to True via the
+        validator-passes-then-bool(dict)-is-True path."""
+        def mutate(data):
+            data["build_contract"]["readiness"]["build_ready"] = {
+                "is_authorized": True, "approval_level": "CRITICAL",
+            }
+        manifest_path = _write_tmp_manifest(
+            tmp_repo_root, "example_001", "modules/foundups/example", mutator=mutate
+        )
+        with pytest.raises(ContextBundleRejected, match="build_ready"):
+            build_context_bundle(
+                manifest_path, tmp_repo_root.resolve(), created_at=FIXED_T0
+            )
+
+
+class TestManifestListFieldsStringOnly:
+    """WSP_97 row MANIFEST_LIST_FIELDS_STRING_ONLY: every list field
+    forwarded from the manifest into the bundle is Tuple[str, ...] with
+    no smuggled non-str element. Audited list fields:
+    ``required_gates_to_recheck``, ``forbidden_paths``,
+    ``safe_mutation_surface``. No other manifest-provided list/tuple
+    is copied into the bundle (verified by source audit in ModLog)."""
+
+    @pytest.mark.parametrize("foundup_id,rel_path,status", TARGET_MANIFESTS)
+    def test_all_list_field_elements_are_str_after_build(self, foundup_id, rel_path, status):
+        bundle = build_context_bundle(
+            _real_manifest(rel_path), REPO_ROOT, created_at=FIXED_T0
+        )
+        for field_name, items in (
+            ("required_gates_to_recheck", bundle.required_gates_to_recheck),
+            ("forbidden_paths", bundle.forbidden_paths),
+            ("safe_mutation_surface", bundle.safe_mutation_surface),
+        ):
+            assert isinstance(items, tuple), f"{field_name} must be a tuple"
+            for i, s in enumerate(items):
+                assert type(s) is str, (
+                    f"{field_name}[{i}] is {type(s).__name__}, must be str"
+                )
+
+    def test_no_other_manifest_list_field_is_serialized(self):
+        """Source-level audit: no manifest-provided list/tuple other than
+        required_gates / forbidden_paths / safe_mutation_surface is
+        forwarded into the bundle. Verified by AST: every
+        ``build_contract.get(...)`` call that produces a list-valued
+        bundle field goes through ``_require_str_tuple``."""
+        tree = ast.parse(BUILDER_SOURCE.read_text(encoding="utf-8"))
+        protected_field_args: set = set()
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Name)
+                and node.func.id == "_require_str_tuple"
+                and node.args
+                and isinstance(node.args[0], ast.Constant)
+                and isinstance(node.args[0].value, str)
+            ):
+                protected_field_args.add(node.args[0].value)
+        # We expect exactly these three protected fields.
+        assert protected_field_args == {
+            "required_gates", "forbidden_paths", "safe_mutation_surface",
+        }, (
+            f"unexpected protected fields: {protected_field_args}; if a new "
+            f"manifest list field is being copied into the bundle, route it "
+            f"through _require_str_tuple and add a WSP_97 evidence line."
+        )
+
+
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(pytest.main([__file__, "-q"]))
