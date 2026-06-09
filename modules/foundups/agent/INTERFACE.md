@@ -1,6 +1,106 @@
 # Agent Module Interface
 
-Public API and schema contracts for agent lifecycle management, BuildPlan generation, and controlled execution.
+Public API and schema contracts for agent lifecycle management, BuildPlan generation, controlled execution, and read-only manifest provenance.
+
+## ContextBundle Builder (WRE_CONTEXT_BUNDLE_BUILDER_PHASE1)
+
+```python
+# modules/foundups/agent/src/context_bundle_builder.py
+from pathlib import Path
+
+def build_context_bundle(
+    manifest_path: Path,
+    repo_root: Path,
+    *,
+    created_at: str,                # REQUIRED non-empty; injected, not wall-clock
+    max_context_bytes: int = 65536, # total cap, fail-closed
+) -> ContextBundle:
+    """Build a read-only ContextBundle from a validated manifest.
+
+    Calls modules.foundups.agent.src.foundup_manifest_validator
+    .validate_manifest_file BEFORE trusting build_contract.module_path
+    (PR #773). Imports the validator; does NOT reimplement it.
+
+    Raises ContextBundleRejected on validation failure, readiness
+    promotion, non-declarative routing, external_agent_allowed=True,
+    can_self_authorize=True, module_path escape, or any safety refusal.
+    The builder NEVER produces a bundle on rejection.
+    """
+```
+
+### ContextBundle Dataclasses (frozen, read-only)
+
+```python
+@dataclass(frozen=True)
+class FileRef:
+    path: str            # repo-relative POSIX
+    sha256: str          # 64-hex lowercase, stream-computed
+    size_bytes: int
+    role: str            # "manifest" | "readme" | "interface" | "modlog" |
+                         # "roadmap" | "testmodlog" | "requirements" | "test"
+
+@dataclass(frozen=True)
+class ProvenanceRecord:
+    builder_version: str
+    validator_module_path: str
+    validator_sha256: str
+    repo_root: str
+    source_manifest_sha256: str
+    wsps_applied: Tuple[str, ...]
+
+@dataclass(frozen=True)
+class ContextBundle:
+    bundle_version: str
+    bundle_id: str                       # sha256-derived, deterministic
+    created_at: str                      # injected by caller
+    source_manifest_path: str
+    source_manifest_sha256: str
+    foundup_id: str
+    module_path: str                     # canonical, repo-relative POSIX
+    contract_version: str
+    build_contract_status: str
+    execution_routing_summary: Dict[str, Any]
+    dry_run_required: bool
+    readiness_flags: Dict[str, bool]     # echoed verbatim; NEVER promoted
+    required_gates_to_recheck: Tuple[str, ...]  # NAMES only, not booleans
+    forbidden_paths: Tuple[str, ...]
+    safe_mutation_surface: Tuple[str, ...]
+    included_file_refs: Tuple[FileRef, ...]      # refs + sha256 only; NO bodies
+    excluded_paths_summary: Dict[str, int]       # reason -> count
+    max_context_bytes: int
+    total_referenced_bytes: int                  # <= max_context_bytes
+    validator_result_summary: Dict[str, Any]
+    provenance: ProvenanceRecord
+    def to_dict(self) -> Dict[str, Any]: ...
+```
+
+### WSP 97 Truth Boundaries (ContextBundle)
+
+- Read-only. No subprocess / Popen / os.system / eval / exec /
+  dynamic import / network / runtime command execution.
+- File bodies are NEVER included; only path + sha256 + size + role.
+- Hashes are stream-computed in 64 KiB chunks; oversized files
+  (> `PER_FILE_READ_CAP_BYTES`, default 4 MiB) are recorded as excluded
+  without ever opening the body.
+- `max_context_bytes` enforced fail-closed; over-cap candidates are
+  recorded under `excluded_paths_summary["over_total_cap"]`, never
+  silently truncated.
+- Symlinks that resolve outside `module_root` (after `Path.resolve()`)
+  are excluded.
+- Forbidden paths excluded by segment screen: `.env*`, `main.py`,
+  `*_dae.py`, `vendor/`, `wallet/`, `token/`, `reward/`, `payout/`,
+  `cabr/`, `blockchain/`, `credentials*`, `secrets*`.
+- `bundle_id = sha256(source_manifest_sha256 + "|" + module_path + "|" + bundle_version)`.
+  Deterministic. `created_at` is recorded but is NOT part of the
+  bundle_id fingerprint.
+- Bundle NEVER serializes gate pass-or-fail authority: no
+  `gate_passed` / `security_passed` / `permission_passed` /
+  `dry_run_passed` / `build_ready` / `autonomous_execution_ready` /
+  `cabr_ready` / `payout_ready` / `dao_ready = True` fields.
+- This module does NOT call Hermes / OpenClaw / WRE consumer / AI
+  Overseer / FoundUpJob queue. The bundle's `module_path` is sourced
+  from the validated manifest only -- never from an external job
+  payload (#774 carry-forward).
 
 ## BuildPlan Pipeline (OC8/OC9/OC12)
 

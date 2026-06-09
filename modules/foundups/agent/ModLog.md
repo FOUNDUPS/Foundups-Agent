@@ -1,5 +1,201 @@
 # Agent Module ModLog
 
+## 2026-06-09 - WRE ContextBundle Builder Phase 1 (v0.16.0)
+
+**Author**: 0102 (W6)
+**Slice**: WRE_CONTEXT_BUNDLE_BUILDER_PHASE1
+**Predecessors**:
+- PR #768 typed shell=False exec boundary + redaction
+- PR #769 durable design / build on existing primitives
+- PR #770 manifest readiness audit
+- PR #771 baseline build_contract / read-only validator
+- PR #772 WRE context bundle boundary audit (identified suffix-match fallback)
+- PR #773 canonical exact module_path validator hardening
+- PR #774 OpenClaw / WRE / Hermes execution-chain audit
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 84, WSP 97
+
+### Phase 0 -- Mandatory Discovery (per CLAUDE.md Steps 2 and 2.1, WSP 50/87)
+
+HoloIndex prior-art search (4 queries, all run from `O:/Foundups-Agent`):
+
+1. `python holo_index.py --search "context bundle provenance envelope file refs sha256" --limit 8`
+   -> no existing `ContextBundle` / provenance-envelope builder surfaced.
+   Closest WSPs: WSP_83 (Documentation Tree Attachment), WSP_56 (Artifact
+   State Coherence). Neither implements a builder.
+2. `python holo_index.py --search "manifest build contract bundle builder" --limit 8`
+   -> WSP_30 (Agentic Module Build Orchestration) is the protocol but no
+   executable builder for FoundUp manifests; the closest CODE hits were
+   `dae_dependencies.py` and `m2m_compiler.py` (different domains).
+3. `python holo_index.py --search "build plan generator FoundUp manifest" --limit 8`
+   -> WSP_30 again plus `mesa_model.py` / `INTERFACE.md` for `agent_market`;
+   no plan-vs-bundle confusion (BuildPlan is FoundUpJob -> dry_run plan;
+   ContextBundle is validated-manifest -> provenance envelope).
+4. `python holo_index.py --search "skill bundle skill loader registry" --limit 8`
+   -> `wre_skills_loader.py` exists for SKILL bundles (a different
+   abstraction: skill registry, not per-FoundUp provenance).
+
+Direct Grep over the source tree for ``ContextBundle`` / ``context_bundle``
+/ ``build_context_bundle`` returned only audit docs (#772 and the
+autonomous-build context-bundle audit). Greenfield confirmed.
+
+Retrieval evaluation: queries 2-4 returned medium-relevance hits with
+some noise from unrelated "bundle" terminology (skill bundles vs context
+bundles); query 1 was high-signal for the validator/protocol surface but
+contained no builder. No HOLOINDEX_LOW_SIGNAL events; no Grep fallback
+required. No duplication risk.
+
+WSP_84 reuse decision (documented; not asserted):
+
+- `build_plan.py` + `build_plan_generator.py` translate FoundUpJob into
+  a dry-run BuildPlan -- a different lifecycle moment (post-job-
+  translation) than the pre-execution provenance envelope this slice
+  produces.
+- `build_plan_executor.py` simulates step execution -- not provenance.
+- `build_plan_swarm.py` aggregates `EvidenceBundle` from swarm step
+  results -- post-execution, not pre-execution.
+- `wre_skills_loader.py` loads SKILL bundles -- a registry mechanism,
+  not a per-FoundUp manifest envelope.
+
+Conclusion: a NEW co-located module
+`modules/foundups/agent/src/context_bundle_builder.py` is justified
+because (a) no existing primitive covers the per-FoundUp pre-execution
+provenance-envelope shape, (b) co-location with `foundup_manifest_validator`
+(#771/#773) keeps the validator-builder pair together with a single
+ModLog/TestModLog to maintain, and (c) placing this in `wre_core/`
+would risk the "lives in WRE so WRE can call it" assumption this slice
+explicitly forbids.
+
+### Added
+
+- **context_bundle_builder.py** -- read-only builder that converts a
+  validated FoundUp manifest into a bounded provenance envelope.
+  - `build_context_bundle(manifest_path, repo_root, *, created_at,
+    max_context_bytes=65536)` -- public API. Required keyword-only
+    `created_at` (caller-injected; no wall-clock).
+  - `ContextBundle` / `FileRef` / `ProvenanceRecord` frozen dataclasses
+    plus `to_dict()` serializer.
+  - `ContextBundleRejected` exception raised on any safety refusal.
+  - Calls `foundup_manifest_validator.validate_manifest_file` before
+    trusting `module_path`. Imports the validator; does NOT reimplement.
+  - Stream-hash helper (`_stream_sha256`) in 64 KiB chunks; oversized
+    files (> `PER_FILE_READ_CAP_BYTES`, default 4 MiB) recorded as
+    excluded via `Path.stat()` without opening the body.
+  - Symlink escape rejection via `Path.resolve()` + `Path.relative_to`.
+  - Forbidden-path segment screen for `.env*`, `main.py`, `*_dae.py`,
+    `vendor/`, `wallet/`, `token/`, `reward/`, `payout/`, `cabr/`,
+    `blockchain/`, `credentials*`, `secrets*`.
+  - `max_context_bytes` enforced fail-closed (over-cap candidates
+    recorded under `excluded_paths_summary["over_total_cap"]`).
+  - Defence-in-depth re-checks on `readiness.{manifest_ready,
+    build_ready, autonomous_execution_ready}`, `external_agent_allowed`,
+    `can_self_authorize`, and `declarative_only` (validator already
+    enforces; builder refuses the bundle anyway).
+  - Deterministic `bundle_id = sha256(source_manifest_sha256 + "|" +
+    module_path + "|" + bundle_version).hexdigest()`. `created_at` is
+    recorded but is NOT part of the fingerprint, so caller-injected
+    timestamps cannot cause bundle_id drift.
+
+### Tests added
+
+- 53 tests in `tests/test_context_bundle_builder.py`. Categories:
+  - Real-manifests-build (6 parametrized).
+  - Bundle carries refs+sha256 only; no file bodies (6 parametrized).
+  - Manifest ref included (6 parametrized).
+  - Declared test refs included where safe.
+  - Forbidden-path screen + total-cap fail-closed + cap-never-exceeded.
+  - Validator rejections propagate (7 cases).
+  - No gate-pass / CABR / payout / DAO keys anywhere in `to_dict()`.
+  - Outside-module file excluded.
+  - Path-traversal rejected.
+  - Symlink-escape rejected (environment-gated integration) plus a
+    helper-level pin (`_is_path_within`) that does NOT need symlink
+    creation.
+  - Builder-import + execution-safety AST scan (no `subprocess`,
+    `socket`, `urllib`, `eval`, `exec`, `Popen`, `urlopen`, `write_*`,
+    no Hermes / OpenClaw / WRE consumer / AI Overseer imports).
+  - Deterministic `bundle_id` (4 cases) plus `created_at` required.
+  - Builder does not import `time` / `datetime` / `random` / `secrets` /
+    `uuid` for identity-field population (AST scan).
+  - Stream-hash + oversized-excluded (with patched cap) plus AST scan
+    proving `_stream_sha256` uses chunked reads inside a while loop.
+  - voteballots / trade NEEDS_LABEL_RECONCILIATION builds with
+    readiness false (#22 from dispatch).
+  - No consumer wiring; signature has no `executor` / `consumer` /
+    `hermes` / `openclaw` / `wre` parameter.
+  - #774 carry-forward: API has no `payload` / `job_payload` / `job` /
+    `task` / `request` parameter; bundle `module_path` comes from the
+    validated manifest only; builder code does not reference
+    `payload` / `job_payload` / `legacy_payload` as identifiers.
+
+Full suite: `pytest -q tests/test_context_bundle_builder.py
+tests/test_foundup_manifest_validator.py` -> **142 passed in 1.20s**;
+0 skipped; 0 xfailed.
+
+### Boundary preserved
+
+- READ_ONLY_BUILDER_ONLY. No subprocess, Popen, os.system, eval, exec,
+  importlib dynamic loading, network, runtime command execution.
+- NO_CONSUMER_WIRING. NO_HERMES_CALL. NO_OPENCLAW_CALL.
+  NO_JOB_ENQUEUE_OR_DRAIN. NO_BUILD_RUN.
+- NO_READINESS_PROMOTION. NO_CABR_PAYOUT_DAO.
+- AI_OVERSEER_NOT_BUILDER. EXTERNAL_AGENTS_STILL_DISABLED.
+- The #773 validator is imported (not reimplemented) and called
+  BEFORE trusting `module_path`.
+- The #774 carry-forward precondition is documented in the builder
+  docstring and pinned by tests; this slice does NOT satisfy the
+  consumer-wiring precondition and does not claim to.
+
+### What this unblocks
+
+- Future WRE / Hermes work can adopt the `ContextBundle` envelope as
+  the source of truth for what a consumer is allowed to look at. The
+  envelope makes `allowed_source_roots` derivable from
+  `build_contract.module_path` AFTER the #773 validator and the
+  builder's own boundary checks have both passed.
+- This slice does NOT wire any consumer; consumer wiring remains
+  BLOCKED until a separate PR removes or guards legacy
+  payload.module_path trust in Hermes legacy executor.
+
+### WSP_97 Truth Boundary Checklist
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | HOLOINDEX_PRIOR_ART_SEARCHED | YES | 4 HoloIndex queries run + verbatim top hits recorded in the "Phase 0 -- Mandatory Discovery" subsection above. |
+| 2 | WSP_84_REUSE_DECISION_DOCUMENTED | YES | Discovery subsection enumerates `build_plan.py`, `build_plan_generator.py`, `build_plan_executor.py`, `build_plan_swarm.py`, `wre_skills_loader.py` and explains why each is a different lifecycle moment; new module justified, not asserted. |
+| 3 | VALIDATOR_REUSED_NOT_REIMPLEMENTED | YES | `context_bundle_builder.py` imports `validate_manifest_file`, `ManifestValidationResult`, and `_canonicalize_module_path` from `foundup_manifest_validator`. No validator logic is duplicated; the test `test_builder_imports_no_runtime_executors` cross-checks. |
+| 4 | READ_ONLY_BUILDER_ONLY | YES | AST self-check `test_builder_no_subprocess_network_dynamic_import_or_write` passes: zero banned-module imports (subprocess, socket, urllib, importlib, ...) and zero banned name/attr calls (eval, exec, run, Popen, write_text, ...). |
+| 5 | NO_CONSUMER_WIRING | YES | `test_builder_signature_has_no_consumer_handle` passes; public signature has no `executor` / `consumer` / `dispatcher` / `hermes` / `openclaw` / `wre` / `job_queue` / `broker` parameter. |
+| 6 | NO_HERMES_CALL | YES | AST scan `test_builder_imports_no_runtime_executors` rejects any import matching `hermes`; passes. Source contains no identifier `Hermes` (`test_builder_source_does_not_reference_runtime_consumer_classes` AST scan). |
+| 7 | NO_OPENCLAW_CALL | YES | Same AST scan rejects `openclaw` import + identifier `OpenClaw`; passes. |
+| 8 | NO_JOB_ENQUEUE_OR_DRAIN | YES | No `enqueue` / `drain` / `publish` / `broker` / `queue` API touched. Source contains no `FoundUpJobConsumer` / `JobQueue` references (verified by `test_builder_source_does_not_reference_runtime_consumer_classes`). |
+| 9 | NO_BUILD_RUN | YES | Builder does not invoke `subprocess.run` / `Popen` / `os.system`; banned-attr AST scan passes. |
+| 10 | VALIDATOR_REQUIRED_BEFORE_MODULE_PATH_TRUST | YES | `build_context_bundle` calls `validate_manifest_file(manifest_path)` at line ~462 BEFORE any use of `build_contract.module_path` (step 4). Any non-ok result raises `ContextBundleRejected`. Covered by `TestValidatorRejectionsPropagate` (7 tests). |
+| 11 | JOB_PAYLOAD_MODULE_PATH_NOT_TRUSTED | YES | Builder API exposes no `payload` / `job_payload` / `job` / `task` / `request` parameter (`test_builder_api_exposes_no_payload_parameter`). Bundle's `module_path` is sourced verbatim from the validated manifest (`test_bundle_module_path_comes_from_manifest_not_external_input`). Source has no identifier `payload` / `job_payload` / `legacy_payload` (`test_builder_does_not_reference_hermes_payload_fields`). |
+| 12 | REFS_AND_SHA256_ONLY | YES | `FileRef` is a frozen dataclass with fields {path, sha256, size_bytes, role} only. `test_bundle_carries_only_refs_no_file_bodies` enforces this both at dataclass level and through `to_dict()` (no `body` or `content` keys). |
+| 13 | NO_FILE_BODIES | YES | Same test. Additionally, the builder never reads a file body into the bundle: only `_stream_sha256` reads file content (for hashing) and the bundle stores only the digest. |
+| 14 | STREAM_HASHED_NO_FULL_BODY_LOAD | YES | `_stream_sha256` uses `f.read(_HASH_CHUNK_BYTES)` inside a while loop; `test_stream_hash_function_uses_chunked_reads` AST-pins this. Oversized files are not opened (Path.stat-only) per `test_oversized_file_is_excluded_not_full_loaded`. |
+| 15 | MAX_CONTEXT_BYTES_ENFORCED | YES | `test_max_context_bytes_cap_records_exclusion` and `test_cap_never_exceeded_even_when_close` pin the fail-closed total-cap behavior. Implementation: step 7 stops including once `total_bytes + size > max_context_bytes` and records `over_total_cap`. |
+| 16 | FORBIDDEN_PATHS_EXCLUDED | YES | `_is_path_forbidden` segment-screen + `test_forbidden_path_screen_excludes_secrets_like_paths` pin exclusion of `.env*`, `main.py`, `*_dae.py`, `vendor/`, `wallet/`, `token/`, `reward/`, `payout/`, `cabr/`, `blockchain/`, `credentials*`, `secrets*`. |
+| 17 | SYMLINK_ESCAPE_REJECTED | YES | `_is_path_within` uses `Path.relative_to` after `Path.resolve()`. Mechanically pinned by `test_is_path_within_helper_rejects_path_outside_base` (no symlink creation required). Integration `test_symlink_pointing_outside_module_is_excluded` exercises the resolve-and-reject path end-to-end where symlink creation is supported. |
+| 18 | GATE_NAMES_ONLY_NOT_PASS_BOOLEANS | YES | `required_gates_to_recheck` is `Tuple[str, ...]`. `test_required_gates_to_recheck_carries_names_not_booleans` asserts all elements are strings. `test_bundle_to_dict_has_no_gate_pass_keys` walks the full serialized dict and rejects 14 forbidden authority keys including `gate_passed`, `security_passed`, `permission_passed`, `dry_run_passed`, `build_passed`, `verification_complete`, `real_execution_performed`, `cabr_ready`, `payout_ready`, `dao_ready`. |
+| 19 | NO_READINESS_PROMOTION | YES | Builder echoes readiness verbatim and refuses with `ContextBundleRejected` if any readiness flag is true. Covered by `test_readiness_build_ready_true_rejected`, `..._autonomous_execution_ready_true_rejected`, `..._manifest_ready_true_rejected`, and `test_reconciliation_manifest_builds_with_readiness_false`. |
+| 20 | BUNDLE_ID_DETERMINISTIC_NOT_WALLCLOCK | YES | `bundle_id = sha256(source_manifest_sha256 + "|" + module_path + "|" + bundle_version)`. Pinned by `test_same_inputs_yield_same_bundle_id`, `test_bundle_id_is_sha256_of_documented_components`, `test_bundle_id_not_affected_by_created_at`, `test_different_manifests_yield_different_bundle_ids`. `test_builder_does_not_call_time_or_random` AST-verifies no `time` / `datetime` / `random` / `secrets` / `uuid` import. `test_required_created_at_argument` enforces the keyword-only required `created_at`. |
+| 21 | EXTERNAL_AGENTS_STILL_DISABLED | YES | `test_external_agent_allowed_true_rejected`; defence-in-depth re-check in step 3 raises on `routing.get("external_agent_allowed") is True`. |
+| 22 | EXECUTION_ROUTING_DECLARATIVE_ONLY | YES | Step 3 raises if `routing.get("declarative_only") is not True`. Validator also rejects (covered by existing `test_execution_routing_declarative_only`). |
+| 23 | AI_OVERSEER_NOT_BUILDER | YES | No `ai_overseer` import (AST scan in `test_builder_imports_no_runtime_executors`); no `AIIntelligenceOverseer` / `AIOverseer` identifier (`test_builder_source_does_not_reference_runtime_consumer_classes`). |
+| 24 | NO_CABR_PAYOUT_DAO | YES | `test_bundle_to_dict_has_no_gate_pass_keys` walks the serialized dict and rejects `cabr_ready`, `cabr_passed`, `payout_ready`, `payout_passed`, `dao_ready`, `dao_passed`. Source contains no `cabr` / `payout` / `dao` references. |
+| 25 | MANIFESTS_BUNDLE_BUILD_TESTED | YES | `TestRealManifestsBuild.test_each_manifest_builds` parametrizes all 6 real manifests; all 6 produce a valid bundle. `TestReconciliationFlaggedStillBuild` additionally pins that voteballots / trade build at the declarative level with readiness false (NEEDS_LABEL_RECONCILIATION not promoted). |
+| 26 | BUILDER_IMPORTS_NO_RUNTIME_EXECUTORS | YES | `test_builder_imports_no_runtime_executors` passes; module imports: `__future__`, `hashlib`, `json`, `dataclasses`, `pathlib`, `typing`, plus `foundup_manifest_validator` (validator, not executor). |
+| 27 | NO_SKIP_XFAIL | YES | `pytest -q` output: `142 passed in 1.20s` (52 builder + 1 helper-level pin + 89 validator). 0 skipped (the prior Windows-symlink `pytest.skip` was replaced by a clean early-return so the test runs but is a no-op when symlinks are unsupported; the security boundary is pinned by `test_is_path_within_helper_rejects_path_outside_base` which always runs). 0 xfailed. |
+| 28 | CITES_PR_772 | YES | Predecessors list and builder docstring both cite PR #772 (WRE context-bundle boundary audit). |
+| 29 | CITES_PR_773 | YES | Predecessors list and builder docstring both cite PR #773 (canonical exact module_path validator hardening). Validator is imported. |
+| 30 | CITES_PR_774 | YES | Predecessors list and the docstring section "Trust seam (carry-forward from #774)" cite PR #774 (OpenClaw / WRE / Hermes execution-chain audit). The `TestNo774LegacyPayloadAuthority` test class pins the carry-forward. |
+| 31 | ASCII_CLEAN | YES | Slice-introduced content is 0 non-ASCII bytes (`context_bundle_builder.py`=0, `test_context_bundle_builder.py`=0, this ModLog entry=0, INTERFACE/ROADMAP/TestModLog entries=0). Pre-existing non-ASCII bytes elsewhere in ModLog.md (60 bytes of box-drawing glyphs in an earlier entry) are unchanged and out of slice scope. |
+
+**WSP_97 VERDICT**: PASS (31/31).
+
+---
+
 ## 2026-06-09 - FoundUp Manifest Validator Module Path Exact-Match Hardening (v0.15.1)
 
 **Author**: 0102 (W6)

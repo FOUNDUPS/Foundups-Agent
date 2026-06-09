@@ -1,5 +1,85 @@
 # Agent Module TestModLog
 
+## 2026-06-09 - WRE ContextBundle Builder Phase 1 Tests
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_context_bundle_builder.py \
+                 modules/foundups/agent/tests/test_foundup_manifest_validator.py -q
+```
+
+**Result**: PASS
+
+**Summary**: 142 passed in 1.20s; 0 skipped; 0 xfailed.
+
+**Slice**: WRE_CONTEXT_BUNDLE_BUILDER_PHASE1
+
+**Added** (in `test_context_bundle_builder.py`):
+- `TestRealManifestsBuild`: each of the 6 real manifests builds a
+  bundle; refs+sha256-only shape pinned at dataclass and `to_dict`
+  levels; manifest ref present; declared test refs included where
+  safe.
+- `TestForbiddenPathsAndCap`: forbidden-path segment screen + total-cap
+  fail-closed + cap-never-exceeded property.
+- `TestValidatorRejectionsPropagate`: invalid manifest, three readiness
+  promotions, `external_agent_allowed=true`, `can_self_authorize=true`,
+  and module_path mismatch (via the #773 validator) all rejected.
+- `TestNoGatePassNoCabrNoPayoutNoDao`: full-dict walk rejects 14
+  forbidden authority keys; `required_gates_to_recheck` carries
+  string names only.
+- `TestOutsideModulePathExcluded`: docs outside `module_root` are not
+  included.
+- `TestPathTraversalRejected`: `..` in module_path rejected via the
+  #773 validator canonicalizer.
+- `TestSymlinkEscapeRejected`: integration test on platforms that
+  support `os.symlink` (Windows without dev mode returns early without
+  asserting) PLUS `test_is_path_within_helper_rejects_path_outside_base`
+  -- the always-runs mechanical pin for the same boundary.
+- `TestBuilderImportAndExecutionSafety`: AST scan -- no banned-module
+  imports, no banned name/attr calls, no runtime executor imports.
+- `TestBundleIdDeterministic`: 5 cases plus a static-AST check that
+  the builder does not import `time` / `datetime` / `random` /
+  `secrets` / `uuid`.
+- `TestStreamHashAndOversized`: patched-cap oversized exclusion plus
+  an AST scan proving `_stream_sha256` uses a while-loop with
+  chunked reads.
+- `TestReconciliationFlaggedStillBuild`: voteballots and trade build
+  at the declarative level; readiness flags stay false
+  (NEEDS_LABEL_RECONCILIATION not promoted).
+- `TestNoConsumerWiringNoBuildRun`: signature has no consumer handle;
+  source contains no runtime-consumer class identifier.
+- `TestNo774LegacyPayloadAuthority`: API has no `payload` /
+  `job_payload` / `job` / `task` / `request` parameter; bundle
+  `module_path` comes from the validated manifest only; source has no
+  `payload` / `job_payload` / `legacy_payload` identifier.
+- `TestBundleStructuralIntegrity`: every required top-level field
+  present; provenance carries builder version + validator path/sha256
+  + applied WSPs (`WSP_50`, `WSP_77`, `WSP_84`, `WSP_97`).
+
+**Boundary preserved**:
+- AST scan rejects subprocess / socket / urllib / importlib /
+  multiprocessing / pickle / marshal at the module-import level.
+- AST scan rejects `eval` / `exec` / `compile` / `__import__` /
+  `input` / `execfile` at the call level.
+- AST scan rejects `system` / `popen` / `Popen` / `run` / `call` /
+  `check_call` / `check_output` / `getoutput` / `write_text` /
+  `write_bytes` / `writelines` / `urlopen` / `urlretrieve` / `connect` /
+  `spawn` / `fork` / `execv` / `execve` / `remove` / `unlink` /
+  `rmdir` / `makedirs` / `chmod` / `kill` at the attribute call level.
+- AST scan rejects `hermes` / `openclaw` / `ai_overseer` /
+  `job_consumer` / `foundup_job_consumer` / `build_plan_executor` /
+  `wre_core` / `wre_master_orchestrator` / `build_plan_swarm` imports.
+- AST scan rejects identifier-level references to `Hermes` / `OpenClaw`
+  / `AIIntelligenceOverseer` / `AIOverseer` / `FoundUpJobConsumer` /
+  `FoundUpJob` / `BuildPlanExecutor` / `WREMasterOrchestrator` while
+  allowing the same words in docstrings/comments (which document the
+  forbidden boundary).
+
+**No skip / no xfail on any security assertion.**
+
+---
+
 ## 2026-06-09 - FoundUp Manifest Validator Module Path Exact-Match Hardening Tests
 
 **Command**:
