@@ -19,7 +19,7 @@ python -m pytest modules/foundups/agent/tests/ -q -p no:cacheprovider
 **Added** (in `test_context_bundle_builder.py`):
 
 - `TestMonorepoPhase1SourceAuthorityBoundary` (FIX2c / W10
-  MONOREPO_PHASE1_SOURCE_AUTHORITY_BOUNDARY): the bundle is HONEST about its
+  MONOREPO_POC_SOURCE_AUTHORITY_EXPLICIT): the bundle is HONEST about its
   monorepo-PoC Phase-1 scope and a manifest CANNOT promote its lifecycle
   stage by declaration:
   - `test_source_authority_constant_is_monorepo_poc` -- `SOURCE_AUTHORITY`
