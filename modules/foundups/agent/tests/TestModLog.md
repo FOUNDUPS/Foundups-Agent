@@ -1,5 +1,96 @@
 # Agent Module TestModLog
 
+## 2026-06-10 - Hermes Module-Path Trust Removal Phase 1 Tests
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_hermes_foundup_job_executor.py -q
+python -m pytest modules/foundups/agent/tests/ -q
+```
+
+**Result**: PASS
+
+**Summary**:
+- Executor test file alone: **46 passed in 0.84s** (22 pre-existing + 24
+  new in `TestResolvedModulePathValidation`).
+- Full agent-module suite: **621 passed in 9.06s**; 0 skipped; 0 xfailed
+  (575 prior + 46 executor).
+
+**Slice**: HERMES_MODULE_PATH_TRUST_REMOVAL_PHASE1
+
+**Added** (in `test_hermes_foundup_job_executor.py`):
+
+- `TestResolvedModulePathValidation` (24 tests, mapped 1:1 to dispatch
+  Addenda C and D):
+  - Happy paths: real gotjunk_001 manifest; cross-domain kosei.
+  - Addendum C #1 -- payload path with no backing manifest rejected.
+  - Addendum C #2 -- source_module alias receives the same treatment as
+    module_path (happy + reject variants).
+  - Addendum C #4 -- bare basename and partial paths rejected at
+    syntactic-harden step.
+  - Addendum C #5 -- backslashes rejected pre-manifest.
+  - Addendum C #6 -- absolute / drive-prefix / `..` traversal /
+    internal traversal rejected pre-manifest.
+  - Addendum C #7 -- omitted payload derives from validated manifest
+    via bounded foundup_id scan; unknown id -> manifest_missing.
+  - Addendum C #8 -- rejected payload value visible in
+    `evidence_refs` (end-to-end through `execute_foundup_job`).
+  - Addendum D #1 -- cross-FoundUp substitution (job foundup_id A,
+    payload module_path B's real path) rejected with
+    `cross_foundup_mismatch`; also via alias.
+  - Addendum D #3 -- case-variant payload rejected; uppercase
+    `Modules/` prefix rejected at syntactic guard.
+  - Addendum D #4 -- empty-string payload semantics: treated as ABSENT
+    (falsy); derivation falls through; `ignored=None`.
+  - Closed-set token taxonomy: `test_all_fail_tokens_present_in_taxonomy`
+    asserts `ALL_FAIL_TOKENS == {syntactic_reject, manifest_mismatch,
+    manifest_missing, cross_foundup_mismatch}` exactly.
+  - End-to-end fail-closed guards: `test_execute_foundup_job_fails_closed_on_invalid_payload`,
+    `..._on_cross_foundup_substitution`, both asserting
+    `HermesFoundUpBuilder` is NEVER instantiated when resolution fails.
+
+**Updated assertions** (per dispatch "UPDATE stale assertions" + "flag
+each updated assertion in TestModLog"):
+
+- `TestActionDispatch::test_extract_foundup_calls_extract_method` --
+  expected `source_module` argument changed from `"modules/foundups/widget"`
+  to `"modules/foundups/gotjunk"` (the fixture now anchors on a real
+  validator-passing manifest; the dispatch forwards the validator-
+  confirmed canonical, not a raw payload string).
+- `TestActionDispatch::test_validate_foundup_calls_gate_and_boundary` --
+  same change for `check_exfoliation_gate` and `analyze_boundary`.
+- `TestModulePathExtraction::test_foundup_id_as_fallback` -- RENAMED to
+  `test_foundup_id_path_heuristic_removed`. Assertion flipped from "a
+  path-shaped foundup_id IS used as a path source" to "a path-shaped
+  foundup_id is NEVER a path source; bounded scan or
+  `manifest_missing` wins". Asserts
+  `resolved.fail_token == FAIL_TOKEN_MANIFEST_MISSING`.
+- `TestModulePathExtraction::test_module_path_from_payload` /
+  `test_source_module_from_payload` -- docstrings updated to record
+  that the payload-shape check is documentary; behavioral coverage
+  now lives in `TestResolvedModulePathValidation`.
+
+**Updated fixtures**:
+
+- `queued_extract_job` / `queued_validate_job` / `queued_build_job` --
+  switched from synthetic `"modules/foundups/widget"` (which no longer
+  reaches the executor under the new pre-flight) to the real
+  `gotjunk_001` / `modules/foundups/gotjunk` pair. Fixture docstring
+  explains the change.
+
+**Boundary preserved**:
+
+- AST scan rejects new banned imports (verified by `git diff`: only
+  added imports are stdlib `json`, `dataclasses.dataclass`, and the
+  intra-repo validator import).
+- Validator NOT edited.
+- Manifests NOT edited.
+- No new dependencies.
+- No skip / no xfail.
+
+---
+
 ## 2026-06-10 - FoundUp Source-Authority Contract Phase 1 Tests
 
 **Command**:

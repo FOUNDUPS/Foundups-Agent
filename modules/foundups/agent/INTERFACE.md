@@ -1,6 +1,90 @@
 # Agent Module Interface
 
-Public API and schema contracts for agent lifecycle management, BuildPlan generation, controlled execution, read-only manifest provenance, and the FoundUp source-authority contract.
+Public API and schema contracts for agent lifecycle management, BuildPlan generation, controlled execution, read-only manifest provenance, source-authority contract, and validated module-path resolution.
+
+## Validated Module-Path Resolution (HERMES_MODULE_PATH_TRUST_REMOVAL_PHASE1)
+
+Closes the #774 carry-forward by forcing every job's `module_path` through the
+#773 manifest validator before the Hermes executor's subprocess sink is reached.
+This is the LAST consumer-wiring precondition.
+
+```python
+# modules/foundups/agent/src/hermes_foundup_job_executor.py
+from dataclasses import dataclass
+from typing import Optional
+
+
+@dataclass(frozen=True)
+class ResolvedModulePath:
+    """Outcome of validated module-path resolution. Observable-ignore shape."""
+    effective: Optional[str]              # canonical module_path from validated manifest
+    ignored: Optional[str]                # stringified payload-declared value (None iff no declaration)
+    failed: bool
+    fail_token: Optional[str]             # closed-set greppable token, or None on success
+    fail_human: str                       # token-prefixed explanation; empty on success
+
+
+def _resolve_validated_module_path(
+    job: FoundUpJob,
+    repo_root: Path,
+) -> ResolvedModulePath:
+    """Resolve a job's module_path through the #773 validator. Fail-closed.
+
+    Pinned design:
+    - candidate = payload.module_path | payload.source_module (alias).
+    - empty-string is ABSENT (Addendum D #4).
+    - foundup_id-as-path heuristic REMOVED ("/" in foundup_id is never a source).
+    - syntactic hardening BEFORE manifest contact: backslashes / absolute /
+      UNC / ".." traversal / not-under-modules/ all reject pre-manifest.
+    - manifest located: <repo_root>/<canonical>/foundup_manifest.json, OR
+      bounded foundup_id scan when candidate absent.
+    - validator gate: validate_manifest_file (#773); never raises.
+    - cross-FoundUp substitution defense (Addendum D #1, load-bearing):
+      the manifest's foundup_id MUST equal job.foundup_id; otherwise reject.
+    - case-variant defense (Addendum D #3): candidate canonical exact-string
+      compared against manifest canonical (case-sensitive).
+    - observable ignored: payload-declared value visible in result.ignored
+      even on success (mirrors source_authority.resolve_source_authority).
+    """
+```
+
+### Greppable failure-mode tokens
+
+`StatusReasonCode` stays frozen at `FAIL_VALIDATION_ERROR`; granularity is
+emitted as a token prefix on `reason_human` plus a parallel
+`evidence_refs` entry (`fail_token:<token>`):
+
+```python
+FAIL_TOKEN_SYNTACTIC_REJECT       = "syntactic_reject"        # absolute / UNC / .. / backslash / not-under-modules/
+FAIL_TOKEN_MANIFEST_MISMATCH      = "manifest_mismatch"       # validator returned shape error or candidate != manifest canonical
+FAIL_TOKEN_MANIFEST_MISSING       = "manifest_missing"        # file not found / unreadable / JSON-invalid
+FAIL_TOKEN_CROSS_FOUNDUP_MISMATCH = "cross_foundup_mismatch"  # manifest foundup_id != job.foundup_id
+
+ALL_FAIL_TOKENS: frozenset = frozenset({
+    "syntactic_reject", "manifest_mismatch", "manifest_missing", "cross_foundup_mismatch",
+})
+```
+
+### Evidence-trail contract (`execute_foundup_job` failure path)
+
+When the resolver fails, `execute_foundup_job` calls
+`job.fail(reason_code=FAIL_VALIDATION_ERROR, reason_human=resolved.fail_human,
+evidence_refs=evidence)` BEFORE `job.start(...)`, so the subprocess sink
+(`HermesFoundUpBuilder.run_hermes_extraction` per the #774 audit) is
+never reached. The evidence list includes:
+
+- `rejected_payload_value:<stringified declaration>` (only if the payload
+  actually declared something), and
+- `fail_token:<one of ALL_FAIL_TOKENS>` (always).
+
+### Consumer-wiring precondition status
+
+This slice satisfies the #774 carry-forward at the Hermes executor seam.
+The follow-up `BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1`
+(Phase-0 ruling: `OUT_OF_SCOPE_NAMED_FOLLOWUP`, Addendum B/D tie-break:
+"current reachability decides") is a hard precondition for
+`WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1` or any other slice that
+makes `build_plan_generator` reachable from a real-execution sink.
 
 ## Source-Authority Contract (FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_CONTRACT_PHASE1)
 
