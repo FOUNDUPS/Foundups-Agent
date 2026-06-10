@@ -40,6 +40,31 @@
   - Observable-ignore: rejected payload value visible in evidence_refs
   - StatusReasonCode unchanged (FAIL_VALIDATION_ERROR); no job-contract
     schema changes; no validator / manifest / runtime / WSP touch
+- [x] Validated module-path resolution in build_plan_generator + shared
+  resolver extraction
+  (BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1)
+  - Closes the #778 carry-forward by reusing the #778 resolver via
+    extraction (Addendum-C behavior-preserving)
+  - NEW `modules/foundups/agent/src/module_path_resolution.py` --
+    single source of truth for the module-path trust rule across the
+    agent module
+  - Hermes executor re-exports the same names (back-compat shim);
+    test_hermes_foundup_job_executor.py passes with ZERO edits (46/46
+    tests, Addendum C #3 satisfied)
+  - DELETED `KNOWN_FOUNDUP_PATHS` dict + `get_known_foundup_path()`
+    wrapper + `_is_valid_foundup_path()` prefix-only gate +
+    `f"modules/foundups/{foundup_id}"` synthesis fallback
+  - GenerationValidationResult now carries closed-set #778
+    `error_code` tokens + `rejected_payload_value` observable channel
+  - PWA-surface ruling: DERIVED_ONLY (basename of canonical
+    module_path); payload-supplied surface paths NEVER trusted as
+    module identity
+  - `BuildTarget.module_path` is ALWAYS the resolver's canonical
+    `effective` value; the rejected payload value never propagates
+    into BuildPlan output (mechanically pinned in tests)
+  - Single-source-of-truth invariant pinned by AST scans on both
+    executor and generator
+  - No validator / manifest / runtime / WSP touch
 - [x] FoundUp source-authority contract (FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_CONTRACT_PHASE1)
   - Authoritative definition doc at
     `docs/architecture/FOUNDUP_SOURCE_AUTHORITY_CONTRACT.md`
