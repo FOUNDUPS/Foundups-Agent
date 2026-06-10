@@ -1,5 +1,77 @@
 # Agent Module TestModLog
 
+## 2026-06-10 - FoundUp Source-Authority Contract Phase 1 Tests
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_source_authority.py -q
+python -m pytest modules/foundups/agent/tests/ -q
+```
+
+**Result**: PASS
+
+**Summary**:
+- New enum test file alone: **67 passed in 0.36s**.
+- Full agent-module suite: **597 passed in 9.43s**; 0 skipped; 0 xfailed
+  (530 prior FIX2c + 67 new source-authority tests).
+
+**Slice**: FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_CONTRACT_PHASE1
+
+**Added** (in `test_source_authority.py`):
+
+- `TestEnumShape` (4 tests): exactly 5 members, exact string values,
+  exact member names, str-enum subclass verification.
+- `TestActiveStages` (6 tests): `ACTIVE_STAGES == {MONOREPO_POC}`;
+  frozen (mutation raises); each of the 4 non-active members is NOT
+  in the active set.
+- `TestResolveSourceAuthorityAlwaysMonorepoPoc` (12 tests): None /
+  explicit None returns `(MONOREPO_POC, None)`; each non-active stage
+  (string + enum) returns `(MONOREPO_POC, value)`; self-declared
+  `"monorepo_poc"` is STILL reported as ignored (contract: builder
+  decides, not caller).
+- `TestResolveSourceAuthorityGarbageInputFuzz` (20 parametrized
+  garbage inputs covering casing variants, whitespace, ints, floats,
+  bools, tuples, lists, dicts, arbitrary objects, NUL, CRLF
+  log-injection shape, ESC ANSI): NEVER raises; ALWAYS returns
+  `MONOREPO_POC`; ignored is a non-None string.
+- `TestRequestPromotionAlwaysRaises` (17 tests): every non-active
+  string + enum target raises; even `MONOREPO_POC` target raises;
+  garbage targets raise; error message references `Phase-1` and
+  `FOUNDUP_SOURCE_AUTHORITY_CONTRACT`.
+- `TestBuilderValueParity` (2 tests):
+  `SourceAuthority.MONOREPO_POC.value == context_bundle_builder.SOURCE_AUTHORITY`;
+  builder constant is exactly `"monorepo_poc"`. The test-only import of
+  the builder is the ONLY contact between this slice and the builder.
+- `TestSourceAuthorityAstSafety` (4 tests): AST scan rejects all
+  imports beyond `{__future__, enum, typing}`; rejects any import
+  containing `hermes` / `openclaw` / `ai_overseer` / `job_consumer` /
+  `foundup_job_consumer` / `build_plan_executor` / `wre_core` /
+  `wre_master_orchestrator` / `build_plan_swarm` /
+  `context_bundle_builder` / `foundup_manifest_validator`; rejects
+  `subprocess` / `socket` / `urllib` / `importlib` / `multiprocessing` /
+  `os` / `sys` / `shutil` / `pickle` / `marshal`; rejects banned name
+  calls (`eval`, `exec`, `compile`, `__import__`, `open`); rejects
+  banned attr calls (`system`, `popen`, `Popen`, `run`, `write_text`,
+  `urlopen`, `connect`, `kill`, ...); rejects CABR / payout / DAO /
+  treasury / F_i / UPS / token surface identifiers.
+- `TestEnumNotWiredIntoBuilder` (1 test): AST scan on
+  `context_bundle_builder.py` asserts NO import of `source_authority`
+  (Phase-1 boundary; unification deferred to
+  `SOURCE_AUTHORITY_BUILDER_ENUM_UNIFICATION_PHASE2`).
+
+**Coverage delta**: this slice adds a typed-enum code-pin for the
+FoundUp source-authority axis defined by the new contract doc, with
+fully mechanical coverage of the hard rule ("cannot promote by
+declaration") via 20 garbage-input fuzz cases + observable-ignore
+verification + `request_promotion` always-raises + builder
+value-parity + AST safety. The 6 real manifests still build (the
+builder is untouched); all prior FIX1 / FIX2 / FIX2-tighten / FIX2b /
+FIX2c tests still pass unchanged; no skip / no xfail; both new `.py`
+files 0 non-ASCII bytes.
+
+---
+
 ## 2026-06-10 - WRE ContextBundle Builder Phase 1 FIX2c Tests
 
 **Command**:

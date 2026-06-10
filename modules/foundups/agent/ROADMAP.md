@@ -25,6 +25,22 @@
   - Refuses any readiness promotion, external agent, self-authorize
   - No Hermes / OpenClaw / WRE consumer wiring (consumer wiring blocked
     until #774 carry-forward removes legacy payload.module_path trust)
+- [x] FoundUp source-authority contract (FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_CONTRACT_PHASE1)
+  - Authoritative definition doc at
+    `docs/architecture/FOUNDUP_SOURCE_AUTHORITY_CONTRACT.md`
+    (5 stages, per-stage matrix, maturity coupling table, transition
+    gates, hard rule)
+  - Minimal typed enum + 2 functions in
+    `modules/foundups/agent/src/source_authority.py`
+    (`SourceAuthority`, `ACTIVE_STAGES = {MONOREPO_POC}`,
+    `resolve_source_authority`, `request_promotion`)
+  - Value-parity tested against
+    `context_bundle_builder.SOURCE_AUTHORITY` (drift guard)
+  - Enum NOT wired into the builder; unification deferred to
+    `SOURCE_AUTHORITY_BUILDER_ENUM_UNIFICATION_PHASE2`
+  - WSP placement: docs/architecture (cites WSP 27/103/109 triad);
+    promotion to WSP deferred to
+    `FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_WSP_FORMALIZATION_PHASE1`
 
 ### Phase 1: Core State Machine (v0.2.0)
 
