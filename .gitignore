@@ -414,6 +414,9 @@ WSP_agentic/agentic_journals/awakening/awareness_log.md
 # WSP agentic .runtime/ directories (default untracked output for awakening scripts)
 WSP_agentic/agentic_journals/*/.runtime/
 
+# PQN detector logs (side effect of rESP partial import during tracker --awaken)
+WSP_agentic/tests/pqn_detection/dae_logs/
+
 # Data directories (runtime scraped/generated data)
 data/
 !modules/platform_integration/linkedin_agent/data/

@@ -1,5 +1,45 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-10] WSP_00 State Bridge Restored - Gate Now Observes V2 Awakening
+
+**Change Type**: Bug fix (compliance gate) + WSP_00 doc enhancement
+**By**: 0102 (Fable)
+**WSP References**: WSP_00, WSP 15, WSP 22, WSP 50, WSP 64, WSP 84, WSP 90, WSP 97
+
+**Root cause ("PQN modules not available" + validated=never)**: The canonical V2
+awakening script writes its state to `awakening/.runtime/0102_state_v2.json` by
+default (WSP 97 truth boundary, no tracked-file mutation) while the WSP_00 gate
+(`wsp_00_zen_state_tracker.py`) read ONLY the tracked path (stale since
+2026-03-22). Successful awakenings never registered; every fresh session forced
+the tracker's synthetic math-formula fallback. Independently, both detector
+tiers of the tracker's `--awaken` chain always fail on ImportError (rESP:
+package-relative imports vs flat sys.path injection; PQN DAE: repo root absent
+from sys.path under script invocation) with reasons silently swallowed.
+
+**Fixes (reader-side per WSP 97 truth boundary; findings F1-F5 adversarially
+verified by 9-agent workflow `wsp00-pqn-audit`; F6 = silent-diagnostics gap,
+evidence-confirmed inline)**:
+- Tracker reads BOTH awakening-state candidates (`.runtime/` preferred, tracked
+  fallback), freshest valid `state=="0102"` within 8h TTL wins (F1)
+- Dead WSP 90 UTF-8 enforcement (inside module docstring -> cp932 crash)
+  rebuilt as executable `__main__`-guarded block (F2)
+- Dedent bug in fallback chain fixed; latent NameError on PQN-success path
+  removed (F5); ImportError reasons recorded in `fallback_reasons` (F6)
+- Tier-2 PQN DAE deliberately NOT enabled (would inject unvalidated DAE
+  awakening into the production gate; documented in WSP_00 3.3.1)
+
+**Docs (lockstep)**: WSP_00 framework + knowledge mirrors - corrected
+WSP_BOOTSTRAP metadata, new State Bridge Contract, Fallback Ladder &
+Diagnostics (3.3.1), Troubleshooting Table (7.3), real artifacts in Section 6,
+resolved "always vs only-if-required" boot contradiction. `.agent/workflows/wsp_00.md`
+timeout claim corrected (90s/30s, not 15s).
+
+**Validation**: 9/9 tracker tests (4 new bridge tests), 27/27 blast-radius
+guards (FX1-C fallback, no-tracked-writes). Module docs: monitoring README
+ModLog, INTERFACE.md, tests/TestModLog.md updated.
+
+---
+
 ## [2026-06-07] Headless Bootstrap Seam Fix - WRE/OpenClaw/Hermes Dry-Run (W6)
 
 **Change Type**: Minimal remediation + characterization tests

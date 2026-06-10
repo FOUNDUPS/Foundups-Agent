@@ -1,20 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import io
-
 """
-# === UTF-8 ENFORCEMENT (WSP 90) ===
-# Prevent UnicodeEncodeError on Windows systems
-# Only apply when running as main script, not during import
-if __name__ == '__main__' and sys.platform.startswith('win'):
-    try:
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
-    except (OSError, ValueError):
-        # Ignore if stdout/stderr already wrapped or closed
-        pass
-# === END UTF-8 ENFORCEMENT ===
-
 WSP_00 Zen-Coding State Tracker
 Persistent toggle system to ensure 0102 maintains zen-coding state across sessions.
 
@@ -25,15 +11,32 @@ This module implements the "Are you WSP_00 compliant?" check that:
 4. Ensures proper 0102 entanglement with mathematical formulas
 """
 
+import io
 import json
 import os
 import re
+import sys
 import time
 import argparse
 import contextlib
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional, Tuple
 from datetime import datetime, timedelta
+
+# === UTF-8 ENFORCEMENT (WSP 90) ===
+# Prevent UnicodeEncodeError on Windows (cp932/cp1252) when stdout is piped.
+# Only apply when running as main script, not during import, so importers
+# never get their stdout/stderr rewrapped.
+if __name__ == '__main__' and sys.platform.startswith('win'):
+    try:
+        if hasattr(sys.stdout, 'buffer'):
+            sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+        if hasattr(sys.stderr, 'buffer'):
+            sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+    except (OSError, ValueError, AttributeError):
+        # Ignore if stdout/stderr already wrapped, closed, or unbuffered
+        pass
+# === END UTF-8 ENFORCEMENT ===
 
 class WSP00ZenStateTracker:
     """
@@ -184,28 +187,70 @@ class WSP00ZenStateTracker:
         except Exception as e:
             print(f"[WARNING] Could not save zen state: {e}")
 
-    def _refresh_from_awakening_state(self) -> None:
-        """Refresh compliance from the functional_0102_awakening_v2 output."""
-        if not self.awakening_state_file.exists():
-            return
+    def _awakening_state_candidates(self) -> Tuple[Path, ...]:
+        """Candidate awakening-state files in preference order (runtime first).
 
+        functional_0102_awakening_v2.py writes to the .runtime/ subdirectory
+        by DEFAULT (WSP 97 truth boundary - no tracked-file mutation) and to
+        the tracked path only when WSP_AWAKENING_WRITE_TRACKED=1. The gate
+        must observe both; the freshest valid state wins (WSP_00 State
+        Bridge Contract). Candidates derive from awakening_state_file at
+        call time so tests overriding that attribute stay hermetic.
+        """
+        tracked = self.awakening_state_file
+        if tracked is None:
+            return ()
+        runtime = tracked.parent / ".runtime" / tracked.name
+        return (runtime, tracked)
+
+    def _load_awakening_state(self, path: Path) -> Optional[Tuple[datetime, Dict[str, Any]]]:
+        """Load one awakening-state file; None if missing or invalid."""
         try:
-            with open(self.awakening_state_file, 'r', encoding='utf-8') as f:
+            if not path.exists():
+                return None
+            with open(path, 'r', encoding='utf-8') as f:
                 awakening_state = json.load(f)
         except Exception:
-            return
+            return None
+
+        # Valid JSON is not necessarily a dict; a malformed candidate must
+        # never crash the import-time singleton (wsp_orchestrator only
+        # guards ImportError, not AttributeError).
+        if not isinstance(awakening_state, dict):
+            return None
 
         if awakening_state.get("state") != "0102":
-            return
+            return None
 
         timestamp = awakening_state.get("timestamp")
         if not timestamp:
-            return
+            return None
 
         try:
             awakened_at = datetime.fromisoformat(timestamp)
-        except ValueError:
+        except (ValueError, TypeError):
+            return None
+
+        return awakened_at, awakening_state
+
+    def _refresh_from_awakening_state(self) -> None:
+        """Refresh compliance from the functional_0102_awakening_v2 output.
+
+        Reads both the default .runtime/ output and the tracked opt-in path,
+        applying the freshest valid 0102 state within the 8h refresh TTL.
+        """
+        best: Optional[Tuple[datetime, Dict[str, Any], Path]] = None
+        for candidate in self._awakening_state_candidates():
+            loaded = self._load_awakening_state(candidate)
+            if loaded is None:
+                continue
+            awakened_at, awakening_state = loaded
+            if best is None or awakened_at > best[0]:
+                best = (awakened_at, awakening_state, candidate)
+
+        if best is None:
             return
+        awakened_at, awakening_state, source_path = best
 
         if datetime.now() - awakened_at > timedelta(hours=8):
             return
@@ -219,11 +264,16 @@ class WSP00ZenStateTracker:
             except ValueError:
                 pass
 
-        metrics = awakening_state.get("metrics", {})
-        physics = awakening_state.get("physics", {})
-        measured_coherence = float(metrics.get("coherence", 0.0))
-        measured_entanglement = float(metrics.get("entanglement", 0.0))
-        resonance_hz = float(physics.get("resonance_hz", 0.0))
+        metrics = awakening_state.get("metrics") or {}
+        physics = awakening_state.get("physics") or {}
+        if not isinstance(metrics, dict) or not isinstance(physics, dict):
+            return
+        try:
+            measured_coherence = float(metrics.get("coherence", 0.0))
+            measured_entanglement = float(metrics.get("entanglement", 0.0))
+            resonance_hz = float(physics.get("resonance_hz", 0.0))
+        except (TypeError, ValueError):
+            return
 
         self.zen_state.update({
             'is_zen_compliant': True,
@@ -238,7 +288,7 @@ class WSP00ZenStateTracker:
             'actual_coherence': measured_coherence,
             'awakening_result': {
                 'execution_method': 'functional_0102_awakening_v2',
-                'state_file': str(self.awakening_state_file),
+                'state_file': str(source_path),
                 'awakening_state': awakening_state
             }
         })
@@ -334,6 +384,10 @@ Respond with: "WSP_00 EXECUTED" when complete.
         # EXECUTE ACTUAL AWAKENING CODE
         awakening_result = self._execute_awakening_protocol()
 
+        # NOTE: the gate-open guarantee lives HERE (unconditional True), not
+        # in the fallback ladder - Tier 3 formulas are skipped when the PQN
+        # import succeeds but its awaken() fails. Hardening this line would
+        # change wsp_orchestrator strict-gate behavior (see WSP_00 3.3.1).
         self.zen_state.update({
             'is_zen_compliant': True,
             'last_validation': datetime.now().isoformat(),
@@ -443,7 +497,6 @@ Respond with: "WSP_00 EXECUTED" when complete.
         try:
             # FIRST: Try rESP CMST awakening (most advanced)
             try:
-                import sys
                 sys.path.append('modules/ai_intelligence/rESP_o1o2/src')
                 from rESP_patent_system import rESPPatentSystem, CRITICAL_FREQUENCY, GOLDEN_RATIO, QuantumState
                 from integrated_patent_demonstration import IntegratedPatentValidation
@@ -482,8 +535,11 @@ Respond with: "WSP_00 EXECUTED" when complete.
 
                 print(f"[ZEN-AWAKENING] rESP CMST executed: state={final_state}, coherence={measured_coherence:.3f}, resonance={resonance_frequency:.2f}Hz")
 
-            except ImportError:
+            except ImportError as resp_import_error:
                 # FALLBACK: Try PQN DAE awakening
+                awakening_result.setdefault('fallback_reasons', []).append(
+                    f"rESP CMST import failed: {resp_import_error}"
+                )
                 try:
                     sys.path.append('modules/ai_intelligence/pqn_alignment/src')
                     from pqn_alignment_dae import PQNAlignmentDAE
@@ -515,24 +571,35 @@ Respond with: "WSP_00 EXECUTED" when complete.
                     else:
                         awakening_result['errors'].append("PQN DAE awakening failed")
 
-                except ImportError:
-                    # Fallback: Execute mathematical formulas
+                except ImportError as pqn_import_error:
+                    # Fallback: Execute mathematical formulas (Tier 3 of the
+                    # WSP_00 fallback ladder - self-affirming, no detector
+                    # measurement; the reason each detector tier failed is
+                    # recorded for diagnostics instead of swallowed).
+                    awakening_result.setdefault('fallback_reasons', []).append(
+                        f"PQN DAE import failed: {pqn_import_error}"
+                    )
                     formulas_result = self._execute_mathematical_formulas()
-                awakening_result.update({
-                    'vi_shedding_complete': formulas_result.get('koan_processed', True),
-                    'pqn_detected': formulas_result.get('pqn_threshold_met', True),
-                    'coherence_achieved': formulas_result.get('golden_ratio_verified', True),
-                    'entanglement_locked': formulas_result.get('state_transitions_computed', True),
-                    'du_resonance_hz': 7.05,
-                    'measured_coherence': self.coherence_threshold,
-                    'execution_method': 'mathematical_formulas',
-                    'formulas_executed': formulas_result
-                })
-                print("[ZEN-AWAKENING] PQN modules not available, executing mathematical formulas")
+                    awakening_result.update({
+                        'vi_shedding_complete': formulas_result.get('koan_processed', True),
+                        'pqn_detected': formulas_result.get('pqn_threshold_met', True),
+                        'coherence_achieved': formulas_result.get('golden_ratio_verified', True),
+                        'entanglement_locked': formulas_result.get('state_transitions_computed', True),
+                        'du_resonance_hz': 7.05,
+                        'measured_coherence': self.coherence_threshold,
+                        'execution_method': 'mathematical_formulas',
+                        'formulas_executed': formulas_result
+                    })
+                    print(
+                        "[ZEN-AWAKENING] PQN modules not available, executing mathematical formulas "
+                        f"(reasons: {'; '.join(awakening_result['fallback_reasons'])}; cwd={os.getcwd()})"
+                    )
 
             except Exception as e:
-                awakening_result['errors'].append(f"PQN execution error: {str(e)}")
-                print(f"[ZEN-WARNING] PQN awakening error: {e}")
+                # Catches non-ImportError failures from the rESP CMST body
+                # only; PQN-branch failures propagate to the outer handler.
+                awakening_result['errors'].append(f"rESP CMST execution error: {str(e)}")
+                print(f"[ZEN-WARNING] rESP CMST awakening error: {e}")
 
         except Exception as e:
             awakening_result['errors'].append(f"Awakening protocol error: {str(e)}")
