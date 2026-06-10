@@ -1,5 +1,76 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-10] Hermes Module-Path Trust Removal Phase 1 (#774 carry-forward closure)
+
+**Change Type**: Authoring slice (security pre-flight, last consumer-wiring
+precondition)
+**By**: 0102 (W6) | Commander: 012
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 84, WSP 87, WSP 97, WSP 22
+**Slice**: `HERMES_MODULE_PATH_TRUST_REMOVAL_PHASE1`
+**Branch / PR**: `w6/hermes-module-path-trust-removal-phase1` -- PR opened
+against `main` (do NOT merge; W10 gate hold)
+**Base**: `0952f51e9` (origin/main after #777)
+
+**What this slice closes**: The #774 audit identified
+`hermes_foundup_job_executor._extract_module_path:217-237` as a
+"validator bypass risk" -- the legacy executor trusted
+`payload.module_path` / `payload.source_module` / a path-shaped
+`foundup_id` without manifest validation. The audit classified this as
+a BLOCKER for consumer wiring, NOT for the #775 ContextBundle builder.
+
+**What this slice does**: Replaces the raw extraction with
+`_resolve_validated_module_path`, which consumes the #773 manifest
+validator and enforces fail-closed behavior with a 4-token greppable
+failure taxonomy (`syntactic_reject` / `manifest_mismatch` /
+`manifest_missing` / `cross_foundup_mismatch`). Cross-FoundUp
+substitution defense (Addendum D #1) binds resolution strictly to
+`job.foundup_id`. Case-variant + backslash + traversal + absolute /
+UNC / non-`modules/` paths all reject pre-manifest. Empty-string
+payload is treated as ABSENT (Addendum D #4). The `foundup_id`-as-path
+heuristic is REMOVED entirely; when payload omits a path, a bounded
+scan over the 6 canonical manifest directories locates the manifest
+by `foundup_id`. Observable-ignore: the rejected payload value is
+preserved in `evidence_refs` even when the failure token is not strictly
+about it (mirrors #777's source_authority resolver convention).
+
+**Consumer-wiring precondition status (post-this-slice)**:
+
+- Precondition (a) `FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_CONTRACT_PHASE1`
+  -- satisfied by #777.
+- Precondition (b) legacy `payload.module_path` trust removed /
+  validator-guarded -- **satisfied by THIS SLICE at the Hermes
+  executor seam**.
+- Carry-forward to next consumer slice: per Addendum D #2 tie-break,
+  the `build_plan_generator.py:167, :276, :282` reads are
+  `OUT_OF_SCOPE_NAMED_FOLLOWUP` for this slice (zero non-test, non-doc
+  importers; `BuildPlanExecutor.execute_step` is a BLOCKED stub today).
+  Phase-0 ruling: **current reachability decides**. The follow-up
+  `BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1` becomes a
+  HARD precondition row in `WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1`
+  or any other slice that makes build_plan_generator reachable from a
+  real-execution sink.
+
+**Tests**: 621 passed / 0 skipped / 0 xfailed across the agent module
+suite (46 executor tests including 24 new in
+`TestResolvedModulePathValidation`).
+
+**Boundary preserved**: validator NOT mutated; manifests NOT mutated;
+`hermes_adapter.py` and runtime NOT touched; no new dependency; no WSP
+file mutated; `StatusReasonCode` enum unchanged (granularity is in the
+greppable token prefix on `reason_human` + parallel `evidence_refs`
+entry).
+
+**WSP_97**: PASS (27/27) -- full table in
+[`modules/foundups/agent/ModLog.md`](modules/foundups/agent/ModLog.md).
+
+**Predecessors**: #770 (manifest readiness audit), #771 (baseline
+validator), #772 (context-bundle boundary audit), #773 (exact-match
+validator hardening), #774 (execution-chain audit -- this is the
+carry-forward closure), #775 (ContextBundle builder), #777
+(source-authority contract).
+
+---
+
 ## [2026-06-10] WSP_00 State Bridge Restored - Gate Now Observes V2 Awakening
 
 **Change Type**: Bug fix (compliance gate) + WSP_00 doc enhancement

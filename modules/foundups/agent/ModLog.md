@@ -1,5 +1,267 @@
 # Agent Module ModLog
 
+## 2026-06-10 - Hermes Module-Path Trust Removal Phase 1 (#774 carry-forward closure)
+
+**Author**: 0102 (W6)
+**Commander**: 012
+**Slice**: HERMES_MODULE_PATH_TRUST_REMOVAL_PHASE1
+**Branch**: `w6/hermes-module-path-trust-removal-phase1`
+**Base**: `0952f51e9` (origin/main after #777)
+**Effort**: ULTRA
+
+**Type**: Authoring slice (last consumer-wiring precondition).
+Closes the #774 carry-forward by forcing every job's `module_path`
+through the #773 validator before the Hermes executor's subprocess
+sink. Fail-closed. No consumer wiring; no validator / manifest /
+runtime / WSP touch.
+
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 84, WSP 87, WSP 97,
+WSP 22.
+
+### Phase 0 -- Mandatory Discovery summary
+
+- **HoloIndex**: 4/4 queries returned HOLOINDEX_LOW_SIGNAL despite the
+  subject domain being well-represented in `modules/foundups/agent/`,
+  `modules/communication/moltbot_bridge/`, and recent commits
+  (`27d6d2c22` hermes delegate-path fix). `public/litepaper.html` and
+  similar large HTML/JS surfaces dominated cosine ranking. Recorded as
+  a HoloIndex tuning concern, not a slice blocker; manual `Read`/`Grep`
+  surfaced every target file with verbatim file:line citations.
+- **Executor + validator + manifest convention survey**: full quotes
+  with file:line cited; the manifest-on-disk join key is
+  `<repo_root>/<module_path>/foundup_manifest.json`. No
+  `foundup_id`-to-path index exists; bounded scan over the 6 canonical
+  manifest directories (8 manifests today) is the explicit alternative
+  to the removed `foundup_id`-as-path heuristic.
+- **#774 audit verbatim finding**: "Legacy executor trusts
+  payload.module_path. This is a consumer-wiring blocker, not a
+  builder blocker." Cited at
+  `docs/audits/architecture/OPENCLAW_HERMES_WRE_EXECUTION_CHAIN_AUDIT_PHASE1.md:378-390`
+  with evidence pointer to
+  `modules/foundups/agent/src/hermes_foundup_job_executor.py:217-237`
+  (the now-removed `_extract_module_path`).
+- **#770-#773 ModLog reading**: lineage captured. The #773 validator
+  exposes `validate_manifest` / `validate_manifest_file` /
+  `ManifestValidationResult` publicly; `_canonicalize_module_path` is
+  module-private but consumable via explicit import (minimum
+  blast-radius per Survey B.2; no public-surface change).
+- **Build-plan-generator scope ruling** (Addendum B/D, load-bearing):
+  **`OUT_OF_SCOPE_NAMED_FOLLOWUP`**. Evidence:
+  `modules/foundups/agent/src/build_plan_generator.py:167, :276` read
+  `payload.module_path`/`source_module` and at `:282` synthesize
+  `f"modules/foundups/{job.foundup_id}"`. Reachability analysis
+  confirmed ZERO non-test, non-doc importers; the only downstream
+  consumer (`BuildPlanExecutor.execute_step`) is a stub that returns
+  `StepExecutionStatus.BLOCKED` for any real execution
+  (`build_plan_executor.py:634-665`). `build_plan_swarm.py` and
+  `swarm_dispatch_integration.py` only label-match
+  `target.module_path`; no `subprocess`, no `hermes_adapter` import.
+  Tie-break per Addendum D #2: **current reachability decides** --
+  unreachable now, follow-up
+  `BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1` becomes a
+  hard precondition row in `WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1`
+  or any other slice that makes build_plan_generator reachable from a
+  real-execution sink.
+
+### Changed
+
+- **`modules/foundups/agent/src/hermes_foundup_job_executor.py`**:
+  - **REMOVED** `_extract_module_path` (raw-trust extraction; the
+    function and its 3-priority cascade including the
+    `foundup_id`-with-`/`-is-a-path heuristic).
+  - **ADDED** `ResolvedModulePath` frozen dataclass with the
+    observable-ignore tuple shape (`effective`, `ignored`, `failed`,
+    `fail_token`, `fail_human`) mirroring #777's
+    `source_authority.resolve_source_authority`.
+  - **ADDED** `_stringify_ignored(declared)` -- mirror of
+    source_authority's ignored-value stringification; None iff
+    declaration None, else `str(declared)`.
+  - **ADDED** `_find_manifest_for_foundup_id(repo_root, foundup_id)` --
+    bounded glob over the 6 canonical manifest directories; reads each
+    candidate's top-level `foundup_id` and returns the first match.
+    Used ONLY when payload omits both `module_path` and `source_module`.
+    Replaces the removed `foundup_id`-as-path heuristic with an
+    explicit, evidence-backed lookup.
+  - **ADDED** `_resolve_validated_module_path(job, repo_root)` -- the
+    fail-closed resolver. Pinned-design conformance:
+      1. candidate from `payload.module_path` / `payload.source_module`
+         (alias); empty string is ABSENT (Addendum D #4).
+      2. syntactic hardening BEFORE any manifest contact: backslashes
+         (Addendum C #5), absolute / UNC (Addendum C #6), `..`
+         traversal (Addendum C #6), `not startswith("modules/")` all
+         REJECTED with `fail_token=syntactic_reject`.
+      3. manifest located at
+         `<repo_root>/<canonical>/foundup_manifest.json`, OR via
+         bounded `foundup_id` scan when candidate absent.
+      4. `validate_manifest_file` (#773) gates; I/O-class errors map to
+         `manifest_missing`, shape errors to `manifest_mismatch`.
+      5. **Cross-FoundUp substitution defense** (Addendum D #1,
+         load-bearing): manifest's `foundup_id` MUST equal
+         `job.foundup_id`; otherwise `fail_token=cross_foundup_mismatch`.
+      6. **Case-variant defense** (Addendum D #3, Windows host
+         reality): candidate canonical exact-string-compared
+         (case-sensitive) against manifest canonical; mismatch =>
+         `fail_token=manifest_mismatch`.
+      7. Success: `effective` is the manifest's canonical
+         `module_path` (the source of truth). The payload-declared
+         value remains in `ignored` even when it matches (observable
+         silent-swallow refused).
+  - **ADDED** `DEFAULT_REPO_ROOT` (derived from `__file__`),
+    `_MANIFEST_SEARCH_GLOBS`, `ALL_FAIL_TOKENS` frozenset, and four
+    `FAIL_TOKEN_*` constants (`syntactic_reject`, `manifest_mismatch`,
+    `manifest_missing`, `cross_foundup_mismatch`) -- greppable
+    failure-mode taxonomy per Addendum D #5.
+  - **REPLACED** the prior `if not module_path: job.fail(...)` block
+    (lines 153-167) with the resolver invocation. On failure, the
+    evidence list carries both
+    `rejected_payload_value:<stringified>` (when the payload declared
+    something) and `fail_token:<one of ALL_FAIL_TOKENS>` (always).
+    `StatusReasonCode.FAIL_VALIDATION_ERROR` reused as-is; no
+    job-contract schema changes.
+- **`modules/foundups/agent/tests/test_hermes_foundup_job_executor.py`**:
+  - **UPDATED FIXTURES** `queued_extract_job` / `queued_validate_job` /
+    `queued_build_job` to use the real manifest `gotjunk_001`
+    (`modules/foundups/gotjunk`) so the new validated-resolution
+    pre-flight passes and the downstream mocked-Hermes paths still
+    exercise their mappings. Prior synthetic `modules/foundups/widget`
+    path no longer reaches the executor (refused as
+    `manifest_missing`).
+  - **UPDATED** `TestActionDispatch::test_extract_foundup_calls_extract_method`
+    and `..._validate_foundup_calls_gate_and_boundary` assertions to
+    expect `modules/foundups/gotjunk` (was `widget`).
+  - **UPDATED** `TestModulePathExtraction`: replaced
+    `test_foundup_id_as_fallback` with
+    `test_foundup_id_path_heuristic_removed` (explicit no-inference
+    assertion); existing `test_module_path_from_payload` and
+    `test_source_module_from_payload` retained as documentation of
+    payload shape; new behavior covered in
+    `TestResolvedModulePathValidation`.
+  - **ADDED** `TestResolvedModulePathValidation` (24 tests, no skip /
+    no xfail) covering:
+    - Happy paths: real `gotjunk_001` manifest; cross-domain `kosei`.
+    - Addendum C #1 (`test_payload_path_wrong_manifest_path_rejected`)
+      + payload alias variant.
+    - Addendum C #2 (`test_source_module_alias_validates_same_as_module_path`,
+      `..._with_wrong_path_rejected`).
+    - Addendum C #4 (`test_suffix_only_path_rejected`,
+      `test_partial_path_rejected`).
+    - Addendum C #5 (`test_backslash_payload_rejected_pre_manifest`).
+    - Addendum C #6 (`test_absolute_path_rejected_pre_manifest`,
+      `..._absolute_drive_path_..`, `..._traversal_path_..`,
+      `..._internal_traversal_..`).
+    - Addendum C #7 (`test_payload_omitted_derives_from_validated_manifest`,
+      `..._unknown_foundup_id_fails_missing`).
+    - Addendum C #8 (`test_rejected_payload_value_appears_in_evidence`,
+      end-to-end through `execute_foundup_job`).
+    - Addendum D #1 (`test_cross_foundup_substitution_rejected`,
+      `..._via_alias_rejected`).
+    - Addendum D #3 (`test_case_variant_payload_rejected`,
+      `test_uppercase_modules_prefix_rejected`).
+    - Addendum D #4 (`test_empty_string_payload_treated_as_absent`,
+      `..._empty_string_alias_..`).
+    - Closed-set token taxonomy
+      (`test_all_fail_tokens_present_in_taxonomy`).
+    - End-to-end no-builder-instantiation guards
+      (`test_execute_foundup_job_fails_closed_on_invalid_payload`,
+      `..._on_cross_foundup_substitution`).
+
+### Boundary preserved
+
+- **NO_VALIDATOR_MUTATION**: `foundup_manifest_validator.py` untouched;
+  the executor IMPORTS public + one underscore-helper without changing
+  the validator's surface.
+- **NO_MANIFEST_MUTATION**: no `foundup_manifest.json` modified.
+- **NO_RUNTIME_OR_BUILDER_CHANGE**: `hermes_adapter.py` and the rest of
+  the runtime are untouched. The patch is purely in the executor's
+  pre-flight; the subprocess sink remains exactly where it was
+  (`hermes_adapter.py:939, :946`).
+- **NO_CONSUMER_WIRING**: no new caller wired into the Hermes
+  executor; this slice only hardens the EXISTING execution seam.
+- **NO_WSP_FILE_MUTATION**: nothing under `WSP_framework/` or
+  `WSP_knowledge/`.
+- **NO_NEW_DEPENDENCY**: only stdlib imports (`json`, `pathlib`,
+  `dataclasses`) and the existing intra-repo validator import.
+- **NO_JOB_CONTRACT_SCHEMA_CHANGE**: `StatusReasonCode` enum unchanged;
+  `FAIL_VALIDATION_ERROR` reused. Granularity comes from the greppable
+  fail-token prefix on `reason_human` + a parallel `evidence_refs`
+  entry.
+
+### Tests
+
+```
+python -m pytest modules/foundups/agent/tests/test_hermes_foundup_job_executor.py -q
+  -> 46 passed in 0.84s
+python -m pytest modules/foundups/agent/tests/ -q
+  -> 621 passed in 9.06s (575 prior + 22 pre-existing executor + 24 new resolution tests)
+```
+
+0 skipped. 0 xfailed.
+
+### Updated assertions (logged for W10 audit per dispatch)
+
+- `TestActionDispatch::test_extract_foundup_calls_extract_method` --
+  expected source_module changed from `modules/foundups/widget` to
+  `modules/foundups/gotjunk` (validator-confirmed real manifest).
+- `TestActionDispatch::test_validate_foundup_calls_gate_and_boundary` --
+  same change.
+- `TestModulePathExtraction::test_foundup_id_as_fallback` -- RENAMED to
+  `test_foundup_id_path_heuristic_removed`; assertion flipped from
+  "foundup_id with '/' is used as a path" to "foundup_id with '/' is
+  NEVER used as a path; bounded scan or manifest_missing wins".
+- Fixtures `queued_extract_job` / `queued_validate_job` /
+  `queued_build_job` -- payload/foundup_id changed from synthetic
+  `widget` to real `gotjunk_001`/`modules/foundups/gotjunk`.
+
+### WSP_97 Truth Boundary Checklist
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | HOLOINDEX_PRIOR_ART_SEARCHED | YES | Phase-0 ran 4 queries; results recorded above with retrieval evaluation. All 4 returned LOW signal -- a HoloIndex tuning finding, not a slice blocker. Manual Read/Grep surfaced every target file. |
+| 2 | WSP_84_REUSE_DECISION_DOCUMENTED | YES | Imports validator (`validate_manifest_file`, `_canonicalize_module_path`) -- does not reimplement. No competing axis invented. |
+| 3 | VALIDATOR_REUSED_NOT_REIMPLEMENTED | YES | `from modules.foundups.agent.src.foundup_manifest_validator import validate_manifest_file` and `_canonicalize_module_path as _validator_canonicalize_module_path`. No validator logic duplicated. |
+| 4 | NO_VALIDATOR_MUTATION | YES | `git diff` confirms `foundup_manifest_validator.py` is unchanged. |
+| 5 | NO_MANIFEST_MUTATION | YES | `git diff` confirms no `foundup_manifest.json` modified. |
+| 6 | NO_RUNTIME_OR_BUILDER_CHANGE | YES | `hermes_adapter.py` untouched. The patch is purely in the executor's pre-flight; the subprocess sink (`hermes_adapter.py:939, :946`) is unreached for failed jobs (verified by end-to-end test with mocked builder). |
+| 7 | NO_CONSUMER_WIRING | YES | No new caller wired; existing execution seam only hardened. |
+| 8 | NO_WSP_FILE_MUTATION | YES | `git diff` confirms no file under `WSP_framework/` or `WSP_knowledge/`. |
+| 9 | NO_JOB_CONTRACT_SCHEMA_CHANGE | YES | `StatusReasonCode` enum unchanged; `FAIL_VALIDATION_ERROR` reused. |
+| 10 | NO_USER_QUESTION_FRAMING | YES | Addendum A respected: no AskUser dialog used in this slice. Phase-0 fork (`build_plan_generator` ruling) was decided by 4-step protocol (evidence -> WSP_97 condition -> recommendation -> stop only if dispatch requires) -- ruling was OUT_OF_SCOPE_NAMED_FOLLOWUP, recorded in the Phase-0 summary. |
+| 11 | BUILD_PLAN_GENERATOR_SCOPE_RULED | YES | Phase-0 ruling: `OUT_OF_SCOPE_NAMED_FOLLOWUP`. Evidence: `build_plan_generator.py:167, :276, :282` quoted; reachability shows zero non-test, non-doc importers and BuildPlanExecutor.execute_step is a BLOCKED stub. Follow-up named: `BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1`. Tie-break per Addendum D #2: current reachability decides; follow-up becomes a hard precondition row in `WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1`. |
+| 12 | OLD_PAYLOAD_MODULE_PATH_TRUST_DEAD | YES | The prior `_extract_module_path` is REMOVED from the source tree. `git diff` confirms removal. Tests that would have passed under the legacy trust (`test_payload_path_wrong_manifest_path_rejected`, `test_cross_foundup_substitution_rejected`) now FAIL the prior behavior and PASS the new fail-closed semantics. |
+| 13 | SOURCE_MODULE_ALIAS_VALIDATED | YES | `test_source_module_alias_validates_same_as_module_path` (happy path), `..._with_wrong_path_rejected` (alias gets the same fail-closed treatment), `test_cross_foundup_substitution_via_alias_rejected`, `test_empty_string_alias_also_treated_as_absent`. |
+| 14 | FOUNDUP_ID_PATH_HEURISTIC_REMOVED | YES | Source: the `if job.foundup_id and "/" in job.foundup_id: return job.foundup_id` branch is gone. Test: `TestModulePathExtraction::test_foundup_id_path_heuristic_removed` asserts that a path-shaped foundup_id with empty payload returns `failed=True, fail_token=manifest_missing`, NOT a derived path. |
+| 15 | REJECTED_PAYLOAD_VALUE_OBSERVABLE | YES | `ResolvedModulePath.ignored` preserved even on success. `test_happy_path_real_manifest_resolves_to_canonical` asserts `ignored == "modules/foundups/gotjunk"` even on a successful match. `test_rejected_payload_value_appears_in_evidence` asserts the `rejected_payload_value:...` entry is in `evidence_refs` on FAILED end-to-end. |
+| 16 | VALIDATED_MANIFEST_SOURCE_OF_TRUTH | YES | `ResolvedModulePath.effective` is sourced from `manifest_data.get("build_contract", {}).get("module_path", "")` after `validate_manifest_file` returns `ok=True`. Payload candidate is only used for the candidate-vs-manifest exact-string check; the effective value is always the manifest's canonical module_path. `test_payload_omitted_derives_from_validated_manifest` pins the derivation. |
+| 17 | CROSS_FOUNDUP_SUBSTITUTION_REJECTED | YES | Step 6 of the resolver enforces `manifest_foundup_id != job.foundup_id -> FAIL_TOKEN_CROSS_FOUNDUP_MISMATCH`. Tests: `test_cross_foundup_substitution_rejected` (primary, via `module_path`), `test_cross_foundup_substitution_via_alias_rejected` (via `source_module`), `test_execute_foundup_job_fails_closed_on_cross_foundup_substitution` (end-to-end with mocked builder asserting `mock_builder_cls.assert_not_called()`). |
+| 18 | CASE_VARIANT_PATH_REJECTED | YES | `test_case_variant_payload_rejected` (`modules/Foundups/gotjunk` -- inner caps), `test_uppercase_modules_prefix_rejected` (`Modules/foundups/gotjunk` -- prefix caps). Both reject (either at the `startswith("modules/")` syntactic guard or at the step-7 case-sensitive exact-match against the manifest canonical). |
+| 19 | SYNTACTIC_REJECT_PRE_MANIFEST | YES | `test_backslash_payload_rejected_pre_manifest`, `test_absolute_path_rejected_pre_manifest`, `test_absolute_drive_path_rejected_pre_manifest`, `test_traversal_path_rejected_pre_manifest`, `test_internal_traversal_rejected`, `test_suffix_only_path_rejected`, `test_partial_path_rejected`. All return `fail_token=syntactic_reject` BEFORE the manifest is read. |
+| 20 | GREPPABLE_FAIL_TOKENS_PINNED | YES | `test_all_fail_tokens_present_in_taxonomy` asserts the closed set is exactly `{syntactic_reject, manifest_mismatch, manifest_missing, cross_foundup_mismatch}`. Every `_resolve_validated_module_path` failure path emits one of these tokens via `reason_human` prefix + `evidence_refs[fail_token:...]` entry. |
+| 21 | EMPTY_STRING_TREATED_AS_ABSENT | YES | `test_empty_string_payload_treated_as_absent` and `..._empty_string_alias_..` pin that `""` is falsy and falls through to derivation; `ignored` stays `None`. |
+| 22 | NO_NEW_DEPENDENCY | YES | Imports added: stdlib `json`, `dataclasses.dataclass`; intra-repo validator only. No new package or version. |
+| 23 | NO_SKIP_XFAIL | YES | `pytest -q modules/foundups/agent/tests/` -> `621 passed in 9.06s`; 0 skipped; 0 xfailed. |
+| 24 | CITES_PR_770_771_772_773_774_AND_777 | YES | Header Predecessors cites #770-#774; section 5 cites the laundering-fix lineage and #777's observable-ignore convention; the resolver docstring cites #773 for exact-match and #774 for the trust gap; INTERFACE.md "Consumer-wiring precondition status" cites the follow-up name. |
+| 25 | CONSUMER_WIRING_REMAINS_BLOCKED_UNTIL_FOLLOWUP | YES | INTERFACE.md and the contract section above state that
+`BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1` is a hard precondition row for `WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1`. Tie-break per Addendum D #2: current reachability decides. |
+| 26 | INTERFACE_MD_UPDATED | YES | New "Validated Module-Path Resolution" section added (WSP_22 order: INTERFACE -> ROADMAP -> ModLog -> TestModLog). |
+| 27 | ASCII_CLEAN | YES | Slice-introduced content is 0 non-ASCII bytes across `hermes_foundup_job_executor.py` patch, new tests, INTERFACE/ROADMAP additions, this ModLog entry, TestModLog entry, and root ModLog entry. |
+
+**WSP_97 VERDICT**: PASS (27/27).
+
+### Follow-ups (recorded; not executed here)
+
+- `BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1` -- hardens
+  the build_plan_generator value flow with the same validator gate;
+  becomes a HARD precondition row in
+  `WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1` per Addendum D #2.
+- `HOLOINDEX_LIFECYCLE_TUNING_PHASE1` (already proposed by #777) --
+  the LOW signal on all 4 Phase-0 queries here strengthens the case.
+- `WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1` -- can now safely wire
+  the #775 ContextBundle into the Hermes executor seam IF AND ONLY IF
+  the BUILD_PLAN_GENERATOR follow-up has landed (per Addendum D #2
+  tie-break).
+
+---
+
 ## 2026-06-10 - FoundUp Lifecycle / Source-Authority Contract Phase 1
 
 **Author**: 0102 (W6)

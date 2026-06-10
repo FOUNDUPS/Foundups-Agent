@@ -23,8 +23,23 @@
   - Deterministic sha256-derived `bundle_id`; `created_at` injected
   - Stream-hashed file refs (no full-body load); per-file + total caps
   - Refuses any readiness promotion, external agent, self-authorize
-  - No Hermes / OpenClaw / WRE consumer wiring (consumer wiring blocked
-    until #774 carry-forward removes legacy payload.module_path trust)
+  - No Hermes / OpenClaw / WRE consumer wiring
+- [x] Validated module-path resolution in Hermes executor
+  (HERMES_MODULE_PATH_TRUST_REMOVAL_PHASE1)
+  - Closes the #774 carry-forward: payload.module_path is no longer trusted
+  - `_resolve_validated_module_path` consumes the #773 validator;
+    `_extract_module_path` raw-trust function REMOVED
+  - foundup_id-as-path heuristic REMOVED (path-shaped foundup_id is not
+    a path source); bounded foundup_id scan used when payload omits path
+  - Cross-FoundUp substitution defense: manifest's foundup_id MUST equal
+    job.foundup_id (Addendum D #1)
+  - Case-variant + backslash + traversal + absolute + UNC all rejected
+    pre-manifest (`fail_token=syntactic_reject`)
+  - Greppable failure tokens: `syntactic_reject` / `manifest_mismatch` /
+    `manifest_missing` / `cross_foundup_mismatch`
+  - Observable-ignore: rejected payload value visible in evidence_refs
+  - StatusReasonCode unchanged (FAIL_VALIDATION_ERROR); no job-contract
+    schema changes; no validator / manifest / runtime / WSP touch
 - [x] FoundUp source-authority contract (FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_CONTRACT_PHASE1)
   - Authoritative definition doc at
     `docs/architecture/FOUNDUP_SOURCE_AUTHORITY_CONTRACT.md`
