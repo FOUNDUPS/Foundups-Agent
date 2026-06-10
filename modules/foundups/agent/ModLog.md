@@ -1,5 +1,134 @@
 # Agent Module ModLog
 
+## 2026-06-10 - FoundUp Lifecycle / Source-Authority Contract Phase 1
+
+**Author**: 0102 (W6)
+**Commander**: 012
+**Slice**: FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_CONTRACT_PHASE1
+**Predecessors**:
+- #775 (merged `96a860cc3`): ContextBundle producer with
+  builder-constant `SOURCE_AUTHORITY = "monorepo_poc"`.
+- `96314ab6c`: laundering-fix precedent that anchors the "cannot
+  promote by declaration" hard rule.
+
+**WSP References**: WSP 11, WSP 27, WSP 30, WSP 50, WSP 64, WSP 84,
+WSP 97, WSP 103, WSP 109, WSP 22.
+
+**Type**: Contract / design slice (decision-only). Authoritative
+definition of the source-authority axis. Pins `monorepo_poc` as the
+only reachable stage in Phase-1.
+
+### Phase 0 -- Mandatory Discovery summary
+
+- HoloIndex: 3 queries, MEDIUM / HIGH / MEDIUM signal. No existing
+  `SourceAuthority` enum. WSP_27 / WSP_103 / WSP_109 did NOT directly
+  surface for the lifecycle queries despite being load-bearing -- a
+  HoloIndex tuning follow-up is proposed
+  (`HOLOINDEX_LIFECYCLE_TUNING_PHASE1`).
+- Axis reconciliation: WSP 27 Section 11.0 owns the canonical maturity
+  lifecycle; WSP 103:616-617 owns the OPO transition gate; WSP 109:42,
+  89-103, 350-360 owns the RedDog intake actor and `entity_type` enum.
+- OPO LAUNCH vs smartDAO: SEQUENTIAL (not equal), derived from WSP 27
+  tier numbers (OPO LAUNCH = Tier 2 Thriving; smartDAO = Tier 1
+  Sovereign). The contract treats them as distinct points: `mvp_runtime`
+  brackets post-OPO operation; `dao_managed` brackets post-Tier-1.
+- Terminology drift recorded (NOT fixed): smartDAO (WSP 27) vs OPO
+  LAUNCH (WSP 103); OBAI/RedDog is the intake actor (WSP 109), not a
+  maturity stage. Follow-up
+  `WSP27_LIFECYCLE_TERMINOLOGY_ALIGNMENT_PHASE1` proposed.
+- WSP placement audit: recommendation (c) -- REMAIN a docs/architecture
+  contract. Justification: single consumer at present
+  (`context_bundle_builder.py`), WSP 27 + WSP 103 + WSP 109 citation
+  triad is sufficient, WSP 109 already partially covers intake-time
+  source-authority via `entity_type`. Promotion to WSP deferred to
+  `FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_WSP_FORMALIZATION_PHASE1`.
+
+### Added
+
+- **`docs/architecture/FOUNDUP_SOURCE_AUTHORITY_CONTRACT.md`** -- the
+  authoritative contract doc. Defines 5 stages
+  (`monorepo_poc` / `external_proto` / `mvp_runtime` / `dao_managed` /
+  `archived`), per-stage matrix (9 dimensions), maturity coupling
+  table (8 maturity rows x source-authority bindings with citations),
+  4 transition gates (defined; not implemented), the verbatim hard
+  rule, enforcement mechanism, relationship to the consumer-wiring
+  precondition, explicit non-goals, proposed follow-ups, and the
+  WSP_97 28-row Truth Boundary Checklist (canonical header).
+- **`modules/foundups/agent/src/source_authority.py`** -- minimal
+  typed enum module pinning the contract in code.
+  - `SourceAuthority(str, enum.Enum)` with 5 members; values EXACT.
+  - `ACTIVE_STAGES: frozenset = frozenset({SourceAuthority.MONOREPO_POC})`.
+  - `resolve_source_authority(declared)` ALWAYS returns
+    `(MONOREPO_POC, ignored_declaration_stringified_or_None)`; NEVER
+    raises; observable ignored declaration (no silent swallow).
+  - `request_promotion(target)` ALWAYS raises
+    `NotImplementedError`; error message points readers at the
+    contract doc.
+  - Pure / read-only: imports only `__future__`, `enum`, `typing`.
+- **`modules/foundups/agent/tests/test_source_authority.py`** -- 67
+  tests across 8 classes covering enum shape, ACTIVE_STAGES,
+  always-MONOREPO_POC resolution, garbage-input fuzz (20 parametrized
+  inputs), request_promotion always-raises (parametrized by every
+  member + garbage), builder value parity, AST safety scan, and the
+  enum-not-wired-into-builder guard.
+- **`modules/foundups/agent/INTERFACE.md`** -- new "Source-Authority
+  Contract" public-API section with enum signature, function
+  contracts, the hard rule, and citation triad. WSP_22 doc-update
+  order honored.
+- **`modules/foundups/agent/ROADMAP.md`** -- contract entry added
+  under Completed.
+
+### Boundary preserved
+
+- No file under `WSP_framework/` or `WSP_knowledge/` modified
+  (`NO_WSP_FILE_MUTATION`).
+- `modules/foundups/agent/src/context_bundle_builder.py` untouched
+  (`NO_BUILDER_CHANGE`).
+- `foundup_manifest_validator.py` untouched.
+- No manifest, registry, OpenClaw, Hermes, AI Overseer, WRE consumer,
+  `*_dae.py`, `main.py`, `vendor/`, `.env`, CI, or dependency file
+  touched.
+- No CABR / payout / DAO / token logic added.
+- The enum is NOT wired into the builder
+  (`SOURCE_AUTHORITY_BUILDER_ENUM_UNIFICATION_PHASE2` proposed as a
+  follow-up).
+- Consumer wiring remains BLOCKED -- this slice satisfies precondition
+  (a) of the consumer-wiring precondition; precondition (b) (#774
+  carry-forward, legacy payload.module_path trust removal) is NOT
+  satisfied.
+
+### Tests
+
+```
+python -m pytest modules/foundups/agent/tests/test_source_authority.py -q
+  -> 67 passed in 0.36s
+python -m pytest modules/foundups/agent/tests/ -q
+  -> 597 passed in 9.43s (530 prior FIX2c + 67 new)
+```
+
+0 skipped. 0 xfailed.
+
+### WSP_97 Truth Boundary Checklist
+
+Full 28-row checklist with verbatim evidence lives at
+[FOUNDUP_SOURCE_AUTHORITY_CONTRACT.md](../../../docs/architecture/FOUNDUP_SOURCE_AUTHORITY_CONTRACT.md)
+Section 10. **PASS (28/28)**.
+
+### Proposed follow-ups (recorded; not executed here)
+
+- `WSP27_LIFECYCLE_TERMINOLOGY_ALIGNMENT_PHASE1` -- harmonize WSP 27 /
+  WSP 103 vocabularies; RedDog actor-vs-stage callout.
+- `FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_WSP_FORMALIZATION_PHASE1` --
+  promote to WSP 110 candidate slot once a second module consumes
+  `source_authority`.
+- `SOURCE_AUTHORITY_BUILDER_ENUM_UNIFICATION_PHASE2` -- replace the
+  builder constant with an import of
+  `SourceAuthority.MONOREPO_POC.value`.
+- `HOLOINDEX_LIFECYCLE_TUNING_PHASE1` -- investigate why WSP_27 /
+  WSP_103 / WSP_109 did not surface for the lifecycle queries.
+
+---
+
 ## 2026-06-10 - WRE ContextBundle Builder Phase 1 FIX2c (explicit monorepo-PoC Phase-1 boundary)
 
 **Author**: 0102 (W6)

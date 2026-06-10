@@ -1,6 +1,83 @@
 # Agent Module Interface
 
-Public API and schema contracts for agent lifecycle management, BuildPlan generation, controlled execution, and read-only manifest provenance.
+Public API and schema contracts for agent lifecycle management, BuildPlan generation, controlled execution, read-only manifest provenance, and the FoundUp source-authority contract.
+
+## Source-Authority Contract (FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_CONTRACT_PHASE1)
+
+Contract doc: [docs/architecture/FOUNDUP_SOURCE_AUTHORITY_CONTRACT.md](../../../docs/architecture/FOUNDUP_SOURCE_AUTHORITY_CONTRACT.md).
+
+```python
+# modules/foundups/agent/src/source_authority.py
+import enum
+from typing import NoReturn, Optional, Tuple, Union
+
+
+class SourceAuthority(str, enum.Enum):
+    """The five source-authority stages defined by the Phase-1 contract.
+    Exactly 5 members; string values are EXACT and stable."""
+    MONOREPO_POC   = "monorepo_poc"     # ACTIVE in Phase-1
+    EXTERNAL_PROTO = "external_proto"   # defined; UNREACHABLE in Phase-1
+    MVP_RUNTIME    = "mvp_runtime"      # defined; UNREACHABLE in Phase-1
+    DAO_MANAGED    = "dao_managed"      # defined; UNREACHABLE in Phase-1
+    ARCHIVED       = "archived"         # defined; UNREACHABLE in Phase-1
+
+
+# Exactly one entry in Phase-1. Downstream code may compare against this set
+# to decide whether to proceed without crossing the Phase-1 boundary.
+ACTIVE_STAGES: frozenset = frozenset({SourceAuthority.MONOREPO_POC})
+
+
+def resolve_source_authority(
+    declared: Optional[Union[str, SourceAuthority]] = None,
+) -> Tuple[SourceAuthority, Optional[str]]:
+    """Resolve the effective source-authority stage. ALWAYS returns MONOREPO_POC.
+
+    NEVER raises. NEVER trusts ``declared``. Returns
+    ``(MONOREPO_POC, ignored_declaration_stringified_or_None)``. The
+    caller can observe the second element to detect a (potentially
+    malicious) declaration attempt. Garbage input (wrong type, casing
+    variants, control chars, ints, dicts) is treated identically:
+    ignored and reported.
+    """
+
+
+def request_promotion(
+    target: Union[str, SourceAuthority],
+) -> NoReturn:
+    """Promotion request. ALWAYS raises NotImplementedError in Phase-1.
+
+    Promotion is not a function call; it is a multi-WSP multi-evidence
+    event (sovereign-valve decision + federation/OPO/SmartDAO gate +
+    CABR readiness + signed evidence envelope). None implemented here.
+    The error message points readers at the contract doc.
+    """
+```
+
+### The hard rule (verbatim, load-bearing)
+
+> A context bundle / manifest must be lifecycle-aware but CANNOT promote
+> its lifecycle stage by declaration; promotion requires evidence + WSP
+> gate + CABR / DAO proof. A declared stage from any manifest / external
+> input is NEVER trusted.
+
+Phase-1 enforcement:
+
+- `SOURCE_AUTHORITY` is a BUILDER constant
+  ([context_bundle_builder.py:132](src/context_bundle_builder.py#L132)),
+  NOT read from any manifest. The enum module's
+  `SourceAuthority.MONOREPO_POC.value` is value-parity tested against
+  this constant (drift guard; the enum is NOT yet wired into the builder
+  -- see follow-up `SOURCE_AUTHORITY_BUILDER_ENUM_UNIFICATION_PHASE2`).
+- `resolve_source_authority(declared)` ALWAYS returns MONOREPO_POC.
+- `request_promotion(target)` ALWAYS raises `NotImplementedError`.
+- The laundering-fix precedent (`96314ab6c`) is why this is enforced
+  in code, not by guideline.
+
+### Citation triad
+
+- WSP 27 Section 11 (canonical maturity lifecycle).
+- WSP 103 lines 616-617 (Pre-OPO `F0_DAE` / Post-OPO `F1_OPO+` gate).
+- WSP 109 lines 42, 89-103, 350-360 (RedDog intake actor; `entity_type`).
 
 ## ContextBundle Builder (WRE_CONTEXT_BUNDLE_BUILDER_PHASE1)
 
