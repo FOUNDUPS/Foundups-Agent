@@ -2,6 +2,145 @@
 
 Public API and schema contracts for agent lifecycle management, BuildPlan generation, controlled execution, read-only manifest provenance, source-authority contract, and validated module-path resolution.
 
+## Shared Module-Path Resolver (BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1)
+
+The validated-module-path resolver originally introduced in
+[`hermes_foundup_job_executor.py`](src/hermes_foundup_job_executor.py) by #778
+has been EXTRACTED into a shared module -- single source of truth for the
+module-path trust rule across the agent module.
+
+```python
+# modules/foundups/agent/src/module_path_resolution.py  (NEW in this slice)
+
+from dataclasses import dataclass
+from typing import Optional
+
+
+@dataclass(frozen=True)
+class ResolvedModulePath:
+    """Observable-ignore shape mirroring source_authority.resolve_source_authority.
+    Identical to the #778 surface; moved verbatim."""
+    effective: Optional[str]
+    ignored: Optional[str]
+    failed: bool
+    fail_token: Optional[str]
+    fail_human: str
+
+
+def _resolve_validated_module_path(
+    job: FoundUpJob, repo_root: Path,
+) -> ResolvedModulePath:
+    """Resolve a job's module_path through the #773 validator. Fail-closed.
+    
+    Pinned design unchanged from #778. Closed-set tokens:
+    {syntactic_reject, manifest_mismatch, manifest_missing, cross_foundup_mismatch}.
+    """
+
+
+# Plus DEFAULT_REPO_ROOT, _MANIFEST_SEARCH_GLOBS, the four FAIL_TOKEN_* constants,
+# ALL_FAIL_TOKENS, _stringify_ignored, _find_manifest_for_foundup_id.
+```
+
+### Behavior-preserving back-compat shim (Addendum C #3)
+
+The Hermes executor re-exports every name so existing imports keep working
+with **zero edits** in `test_hermes_foundup_job_executor.py` (proven by a
+46-test pass after extraction):
+
+```python
+# modules/foundups/agent/src/hermes_foundup_job_executor.py
+from modules.foundups.agent.src.module_path_resolution import (  # noqa: F401
+    ALL_FAIL_TOKENS,
+    DEFAULT_REPO_ROOT,
+    FAIL_TOKEN_CROSS_FOUNDUP_MISMATCH,
+    FAIL_TOKEN_MANIFEST_MISMATCH,
+    FAIL_TOKEN_MANIFEST_MISSING,
+    FAIL_TOKEN_SYNTACTIC_REJECT,
+    ResolvedModulePath,
+    _find_manifest_for_foundup_id,
+    _MANIFEST_SEARCH_GLOBS,
+    _resolve_validated_module_path,
+    _stringify_ignored,
+)
+```
+
+Identity is preserved: `hermes_foundup_job_executor._resolve_validated_module_path
+is module_path_resolution._resolve_validated_module_path` is `True`.
+`build_plan_generator` imports the SAME function from the shared module.
+The single-source-of-truth invariant is mechanically pinned by AST scans
+on both files (`TestSharedResolverIsSingleSourceOfTruth`).
+
+## BuildPlan Generator -- Validated Resolution (BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1)
+
+The build_plan_generator no longer trusts raw `payload.module_path` /
+`source_module`, no longer infers from `KNOWN_FOUNDUP_PATHS` (deleted as
+dead code), no longer synthesizes `modules/foundups/{foundup_id}` (deleted),
+and no longer uses the prefix-only `.lower()` `_is_valid_foundup_path`
+gate (deleted). All module-identity flows through the shared resolver.
+
+```python
+# modules/foundups/agent/src/build_plan_generator.py
+
+@dataclass
+class GenerationValidationResult:
+    """Result of job validation for BuildPlan generation."""
+    valid: bool
+    error_code: Optional[str] = None                  # closed-set #778 tokens on resolver failure
+    error_message: Optional[str] = None
+    inferred_module_path: Optional[str] = None        # manifest-derived canonical (None on failure)
+    rejected_payload_value: Optional[str] = None      # observable-ignore (mirrors resolver.ignored)
+
+
+def validate_job_for_build_plan(
+    job: FoundUpJob, repo_root: Optional[Path] = None,
+) -> GenerationValidationResult:
+    """Pre-gate (MISSING_FOUNDUP_ID / UNSUPPORTED_ACTION / UNKNOWN_ACTION)
+    then the shared resolver. ``error_code`` on resolver failure is one of
+    {syntactic_reject, manifest_mismatch, manifest_missing, cross_foundup_mismatch}."""
+
+
+def build_target_from_job(
+    job: FoundUpJob, repo_root: Optional[Path] = None,
+) -> BuildTarget:
+    """ALWAYS calls the resolver and uses the canonical ``effective``
+    module_path. PWA-surface ruling: DERIVED_ONLY -- ``pwa_surface_path``
+    is derived from the canonical module_path's basename; payload-supplied
+    surface paths are NOT trusted as module identity."""
+```
+
+### KNOWN_FOUNDUP_PATHS retention ruling
+
+**DELETE_AS_DEAD_CODE.** Phase-0 census found 2 PATH_IDENTITY_USE sites
+(both removed by this slice) and 1 DISPLAY_CATALOG_USE inline error
+string co-located inside the severed branch. Zero non-test cross-module
+callers. The constant and its `get_known_foundup_path()` wrapper are gone.
+
+### PWA-surface ruling
+
+**DERIVED_ONLY.** `BuildTarget.pwa_surface_path` is derived as
+`f"public/member/foundups/{module_basename}/"` where `module_basename`
+is the last segment of the resolver's canonical `module_path`. The
+legacy admit of `public/member/foundups/<id>` paths as module identity
+is gone -- they reject at `syntactic_reject` because they don't
+`startswith("modules/")`.
+
+### Greppable failure tokens (closed set, unchanged from #778)
+
+```python
+FAIL_TOKEN_SYNTACTIC_REJECT       = "syntactic_reject"
+FAIL_TOKEN_MANIFEST_MISMATCH      = "manifest_mismatch"
+FAIL_TOKEN_MANIFEST_MISSING       = "manifest_missing"
+FAIL_TOKEN_CROSS_FOUNDUP_MISMATCH = "cross_foundup_mismatch"
+```
+
+### Consumer-wiring precondition status
+
+This slice closes the last #778 carry-forward (the
+build_plan_generator trust surface that was OUT_OF_SCOPE_NAMED_FOLLOWUP
+in #778's ruling). `WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1` no
+longer needs to gate on a generator hardening precondition; the single
+source of truth is in place across both consumers.
+
 ## Validated Module-Path Resolution (HERMES_MODULE_PATH_TRUST_REMOVAL_PHASE1)
 
 Closes the #774 carry-forward by forcing every job's `module_path` through the
