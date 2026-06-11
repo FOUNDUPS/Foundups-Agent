@@ -1,5 +1,62 @@
 # Agent Module TestModLog
 
+## 2026-06-12 - BuildPlan Generator Module-Path Trust Removal Phase 1 Tests
+
+**Slice**: BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1
+**Author**: 0102 (W6)
+
+**Commands**:
+
+```bash
+PYTHONIOENCODING=utf-8 python -m pytest modules/foundups/agent/tests/test_hermes_foundup_job_executor.py -q -p no:cacheprovider
+PYTHONIOENCODING=utf-8 python -m pytest modules/foundups/agent/tests/test_build_plan_generator.py -q -p no:cacheprovider
+PYTHONIOENCODING=utf-8 python -m pytest modules/foundups/agent/tests/ -q -p no:cacheprovider
+```
+
+**Result**: PASS
+
+**Summary**:
+- test_hermes_foundup_job_executor.py: 46 passed. File UNCHANGED vs Base
+  (git diff --stat HEAD empty) -- Addendum C #3 satisfied; the resolver
+  extraction into the shared module did not require a single edit to the
+  #778 executor tests.
+- test_build_plan_generator.py: 72 passed (40 legacy -> 72). +32 tests added
+  (14-test dispatch contract + shared-resolver single-source-of-truth +
+  Hermes-unchanged meta-tests). One new import added (from pathlib import Path,
+  required by the new AST/identity tests).
+- Full agent suite: 647 passed, 0 skip / 0 xfail.
+- Cross-module moltbot_bridge/tests/test_internal_voteballot_build_poc.py:
+  33 passed (generator still consumed correctly downstream; voteballots jobs
+  without payload now resolve via the bounded manifest scan instead of the
+  deleted KNOWN_FOUNDUP_PATHS dict, producing the identical canonical path).
+
+**Updated legacy assertions** (flagged per dispatch -- each PASSED under legacy
+behavior and now reflects validated semantics):
+
+1. test_module_path_from_payload (was :304): docstring updated -- the asserted
+   value is unchanged (modules/foundups/voteballots) but the SOURCE is now the
+   validated manifest canonical, not the raw payload string.
+2. test_infer_module_path_for_voteballots: was asserting KNOWN_FOUNDUP_PATHS
+   dict inference; now asserts the shared resolver bounded foundup_id scan
+   derives the canonical path; added rejected_payload_value is None.
+3. test_unknown_foundup_without_module_path_fails: error_code changed from the
+   legacy MISSING_MODULE_PATH to manifest_missing (bounded scan miss).
+4. TestOutsideScopeRejected.test_infrastructure_path_rejected and
+   test_ai_intelligence_path_rejected: error_code changed from legacy
+   INVALID_MODULE_PATH to manifest_missing (paths under modules/ with no
+   FoundUp manifest reach the validator and fail there).
+5. TestOutsideScopeRejected.test_root_path_rejected: error_code changed from
+   legacy INVALID_MODULE_PATH to syntactic_reject (/etc/passwd is rejected at
+   the pre-manifest syntactic-harden step).
+
+**Deleted legacy tests**: the two KNOWN_FOUNDUP_PATHS-dict assertions
+(test_known_foundup_paths_include_voteballots,
+test_get_known_foundup_path_returns_voteballots) were removed because the
+symbols they tested are DELETED; replaced by
+test_known_foundup_paths_symbol_is_gone (asserts ImportError).
+
+
+
 ## 2026-06-10 - Hermes Module-Path Trust Removal Phase 1 Tests
 
 **Command**:

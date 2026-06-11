@@ -287,6 +287,46 @@ def can_generate_build_plan(job: FoundUpJob) -> bool:
     """Check if job can generate a BuildPlan."""
 ```
 
+#### Module-path resolution contract (BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1)
+
+The generator resolves module identity ONLY through the shared resolver
+`modules/foundups/agent/src/module_path_resolution.py` -- the SAME single
+source of truth the Hermes executor (#778) consumes via a re-export shim
+(WSP 84; there is exactly one `_resolve_validated_module_path`).
+
+```python
+# modules/foundups/agent/src/module_path_resolution.py (shared, validator-gated)
+def _resolve_validated_module_path(job, repo_root) -> ResolvedModulePath: ...
+# Re-exported by hermes_foundup_job_executor.py (back-compat shim) and
+# consumed by build_plan_generator.py. No second implementation exists.
+```
+
+Fail-closed taxonomy (`GenerationValidationResult.error_code`):
+- Pre-resolver gates: `MISSING_FOUNDUP_ID` / `UNSUPPORTED_ACTION` / `UNKNOWN_ACTION`
+- Closed-set #778 resolver tokens: `syntactic_reject` / `manifest_mismatch` /
+  `manifest_missing` / `cross_foundup_mismatch`
+
+Observability: `GenerationValidationResult.rejected_payload_value` mirrors the
+resolver's observable-ignore channel (the stringified payload candidate). It is
+visible even on success and NEVER propagates into `BuildTarget` / `BuildPlan`
+output. On rejection `create_build_plan_from_job` / `build_target_from_job`
+raise `ValueError` before any BuildTarget is produced.
+
+Removed trust seams (DELETED in this slice):
+- `KNOWN_FOUNDUP_PATHS` dict + `get_known_foundup_path()` inference
+  (ruling: DELETE_AS_DEAD_CODE; Phase-0 census found 0 non-test cross-module
+  consumers, no display-only survivor -- the symbol is gone, not retained)
+- `f"modules/foundups/{job.foundup_id}"` synthesis fallback
+- `_is_valid_foundup_path` case-insensitive prefix-only gate (which admitted
+  `public/member/foundups/`)
+
+PWA-surface ruling: DERIVED_ONLY. `BuildTarget.pwa_surface_path` is derived
+deterministically from the validated canonical `module_path` basename
+(`public/member/foundups/<basename>/`), never from a payload-supplied surface
+path. `public/member/foundups/...` payloads are NOT module identity and reject
+at `syntactic_reject`.
+
+
 ### BuildPlan Executor (Interface Stub)
 
 ```python

@@ -56,6 +56,25 @@
   - WSP placement: docs/architecture (cites WSP 27/103/109 triad);
     promotion to WSP deferred to
     `FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_WSP_FORMALIZATION_PHASE1`
+- [x] Validated module-path resolution in BuildPlan generator
+  (BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1)
+  - Closes the #778 carry-forward: the LAST legacy payload.module_path
+    trust surface. build_plan_generator no longer trusts raw
+    payload.module_path / source_module, no longer infers from
+    KNOWN_FOUNDUP_PATHS, no longer synthesizes modules/foundups/{foundup_id}
+  - The #778 resolver was EXTRACTED into a shared module
+    modules/foundups/agent/src/module_path_resolution.py
+    (WSP 84 single source of truth); hermes_foundup_job_executor re-exports
+    the same names via a back-compat shim (behavior-preserving; #778
+    executor tests pass with ZERO edits)
+  - Generator and executor now reference the SAME
+    _resolve_validated_module_path object (exactly one implementation)
+  - KNOWN_FOUNDUP_PATHS ruling: DELETE_AS_DEAD_CODE (Phase-0 census: 0
+    non-test cross-module consumers, no display-only survivor)
+  - PWA-surface ruling: DERIVED_ONLY (pwa_surface_path derived from the
+    validated canonical module_path basename, never payload-trusted)
+  - Generator remains ORPHANED (no consumer wiring); this slice fences it
+    BEFORE WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1 makes it reachable
 
 ### Phase 1: Core State Machine (v0.2.0)
 

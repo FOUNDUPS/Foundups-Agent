@@ -1,5 +1,40 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-12] BuildPlan Generator Module-Path Trust Removal Phase 1 (#778 carry-forward closure)
+
+**Change Type**: Authoring slice (security pre-flight; closes the LAST
+consumer-wiring precondition)
+**By**: 0102 (W6) | Commander: 012 (via 0102/W10)
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 84, WSP 87, WSP 97, WSP 22
+**Slice**: BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1
+**Base**: a3e70b5a4 (origin/main after #778)
+
+Closes the #778 carry-forward: removes the last legacy payload.module_path
+trust surface (build_plan_generator). The #778 validator-guarded resolver was
+EXTRACTED into a shared module
+modules/foundups/agent/src/module_path_resolution.py (WSP 84 single source of
+truth); hermes_foundup_job_executor.py re-exports the same names via a
+behavior-preserving back-compat shim (the #778 executor test file passes with
+ZERO edits and is UNCHANGED vs Base). build_plan_generator now resolves module
+identity exclusively through that shared resolver.
+
+Removed trust seams: KNOWN_FOUNDUP_PATHS dict + get_known_foundup_path
+(DELETE_AS_DEAD_CODE), the modules/foundups/{foundup_id} synthesis, and
+_is_valid_foundup_path (case-insensitive .lower() compare + public/member/
+foundups/ admit). PWA-surface ruling: DERIVED_ONLY (surface derived from the
+validated canonical module_path basename, never payload-trusted). The generator
+remains ORPHANED (no consumer wiring); this slice fences it BEFORE
+WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1 makes anything reachable.
+
+Tests: full agent suite 647 passed, 0 skip / 0 xfail; generator suite 72
+passed; executor suite 46 passed (file unchanged). Exactly one
+_resolve_validated_module_path implementation in the repo. All changed/new .py
+files 0 non-ASCII. WSP_97 table 14/14 in modules/foundups/agent/ModLog.md.
+
+No validator / manifest / registry / WSP / CI / dependency mutation; no
+behavior change to the Hermes executor beyond the extraction move + shim.
+
+
 ## [2026-06-10] Hermes Module-Path Trust Removal Phase 1 (#774 carry-forward closure)
 
 **Change Type**: Authoring slice (security pre-flight, last consumer-wiring

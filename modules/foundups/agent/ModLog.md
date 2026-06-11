@@ -1,5 +1,131 @@
 # Agent Module ModLog
 
+## 2026-06-12 - BuildPlan Generator Module-Path Trust Removal Phase 1 (#778 carry-forward closure)
+
+**Author**: 0102 (W6)
+**Commander**: 012 (via 0102/W10)
+**Slice**: BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1
+**Base**: a3e70b5a4 (origin/main after #778)
+**Effort**: ULTRA
+
+**Type**: Authoring slice (closes the LAST consumer-wiring precondition).
+Removes the last legacy payload.module_path trust surface
+(build_plan_generator) by EXTRACTING the #778 validator-guarded resolver into
+a shared module and reusing it. The generator is ORPHANED today; this slice
+fences it BEFORE WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1 makes anything
+reachable. Fail-closed. No consumer wiring; no validator / manifest / registry
+/ WSP / CI / dependency mutation; no behavior change to the Hermes executor
+beyond the extraction move + re-export shim.
+
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 84, WSP 87, WSP 97, WSP 22.
+
+### Phase 0 -- Mandatory Discovery summary
+
+- Trust points re-verified at the exact line numbers the dispatch cited in
+  build_plan_generator.py (Base a3e70b5a4): :167 and :276 raw payload
+  module_path/source_module; :172 (+ :96 .lower() lookup) KNOWN_FOUNDUP_PATHS
+  inference; :282 foundup_id-as-path synthesis; :203-219 _is_valid_foundup_path
+  case-insensitive .lower() (:211) + public/member/foundups/ admit (:216).
+- Reachability re-check: generator remains ORPHANED. Importers are test-only
+  (test_build_plan_executor, test_build_plan_swarm, test_build_plan_swarm_queue,
+  test_swarm_dispatch_integration, test_build_plan_generator) plus the one
+  cross-module test moltbot_bridge/tests/test_internal_voteballot_build_poc.py.
+  Manifest build_plan_source fields and audit docs are doc/string references,
+  not imports. Zero non-test production importers.
+- KNOWN_FOUNDUP_PATHS consumer census (drives pin-2 ruling): 2 PATH_IDENTITY_USE
+  fallback sites (both inside the generator), 1 co-located error-string
+  interpolation of .keys() inside the now-deleted branch, 0 non-test
+  cross-module callers. Ruling: DELETE_AS_DEAD_CODE (no display-only non-test
+  survivor).
+- #778 resolver docstring read at the executor as the contract; pins mirrored
+  verbatim (empty-string-as-absent, cross-FoundUp binding, case defense,
+  observable-ignore).
+- Manifest grounding: real on-disk manifests confirm voteballots
+  (foundup_id=voteballots), kosei (foundup_id=kosei), trade (foundup_id=trade)
+  with canonical build_contract.module_path; legacy dead-dict entries
+  pqn_portal / social_twin / move2japan have NO on-disk manifest -> fail-closed
+  manifest_missing.
+- HoloIndex: not separately re-run; the #778 lineage already recorded
+  HOLOINDEX_LOW_SIGNAL for this domain (public HTML/JS surfaces dominate
+  ranking). Manual Read/Grep/git-show recovered every target; recorded as a
+  standing tuning concern, not a blocker.
+
+### Changes
+
+- NEW modules/foundups/agent/src/module_path_resolution.py (shared,
+  validator-gated). Behavior-preserving extraction (Addendum C) of the #778
+  resolver: DEFAULT_REPO_ROOT, _MANIFEST_SEARCH_GLOBS, the four FAIL_TOKEN_*
+  constants, ALL_FAIL_TOKENS, ResolvedModulePath, _stringify_ignored,
+  _find_manifest_for_foundup_id, _resolve_validated_module_path. Single source
+  of truth (WSP 84).
+- SHIM hermes_foundup_job_executor.py re-imports and re-exports every one of
+  those names from the shared module (noqa F401). The inline
+  constants/dataclass/three-function block was removed; the executor body
+  (execute_foundup_job, _dispatch_action, result mapping) is unchanged.
+  Identity preserved across the import boundary. The #778 executor test file is
+  UNCHANGED vs Base (Addendum C #3) and green.
+- GENERATOR build_plan_generator.py resolves module identity exclusively
+  through the shared resolver. Deleted: KNOWN_FOUNDUP_PATHS,
+  get_known_foundup_path, the foundup_id synthesis, and _is_valid_foundup_path
+  (with its .lower() compare and PWA admit). GenerationValidationResult gained
+  rejected_payload_value (observable-ignore). On rejection the closed-set #778
+  fail_token becomes the error_code and the rejected value is never used.
+- Absorbed finding (determinism hardening): documented the first-match-wins
+  determinism of _find_manifest_for_foundup_id in the shared module docstring.
+  The per-glob sorted plus fixed glob order yields a stable first match; the
+  step-6 cross-FoundUp binding (manifest.foundup_id == job.foundup_id) prevents
+  any wrong-foundup_id resolution. Zero collisions among the current manifest
+  set. No code-path change (consume-as-is); absorbed as a doc-level hardening.
+
+### PWA-surface ruling: DERIVED_ONLY
+
+BuildTarget.pwa_surface_path is derived deterministically from the validated
+canonical module_path basename (public/member/foundups/<basename>/), never from
+a payload-supplied surface path. A public/member/foundups/... payload is NOT
+module identity and rejects at syntactic_reject (the resolver enforces
+startswith modules/). Evidence: build_plan_generator.py build_target_from_job
+PWA derivation block; test test_pwa_surface_path_as_module_identity_rejected.
+This is the expected DERIVED_ONLY ruling; the BLOCKER_REQUIRES_012_DECISION
+branch did NOT fire (BuildPlan does not structurally require a payload-specified
+surface path).
+
+### WSP_97 Truth Boundary Checklist (14/14)
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+| --- | --- | --- | --- |
+| 1 | OLD_PAYLOAD_MODULE_PATH_TRUST_DEAD | YES | build_plan_generator.py no longer reads payload module_path/source_module for identity; both former sites (:167, :276) replaced by _resolve_validated_module_path. AST test test_no_second_resolver_in_build_plan_generator; behavior tests 1, 2, 11. |
+| 2 | KNOWN_FOUNDUP_PATHS_INFERENCE_DEAD | YES | KNOWN_FOUNDUP_PATHS dict + get_known_foundup_path DELETED (ruling DELETE_AS_DEAD_CODE; census 0 non-test consumers). Tests test_known_foundup_paths_symbol_is_gone (ImportError), test_known_foundup_id_without_on_disk_manifest_fails_closed. |
+| 3 | FOUNDUP_ID_SYNTHESIS_DEAD | YES | foundup_id-as-path synthesis (:282) DELETED. Tests test_foundup_id_synthesis_dead_no_modules_foundups_fallback, test_build_target_does_not_use_synthesized_path (raises ValueError, no fabricated path). |
+| 4 | CASE_VARIANT_PATH_REJECTED | YES | .lower() compare in _is_valid_foundup_path (:211) DELETED. Tests test_case_variant_payload_rejected (modules/Foundups/voteballots), test_uppercase_modules_prefix_rejected (Modules/... maps to syntactic_reject). |
+| 5 | CROSS_FOUNDUP_SUBSTITUTION_REJECTED | YES | Resolver step-6 binding manifest.foundup_id == job.foundup_id. Test test_cross_foundup_substitution_rejected (foundup_id=voteballots + payload=kosei real path maps to cross_foundup_mismatch; both ids in message). |
+| 6 | PWA_SURFACE_RULING_RECORDED | YES | DERIVED_ONLY recorded (this entry, INTERFACE.md). Surface derived from canonical basename; PWA payload rejects syntactic_reject. Tests test_pwa_surface_path_as_module_identity_rejected, test_buildplan_carries_only_canonical_when_payload_provided. |
+| 7 | VALIDATED_MANIFEST_SOURCE_OF_TRUTH | YES | inferred_module_path / BuildTarget.module_path = resolved.effective (manifest canonical), even when a payload candidate supplied. Tests test_buildplan_carries_only_canonical_when_payload_provided, test_module_path_from_payload, test_infer_module_path_for_voteballots. |
+| 8 | REJECTED_PAYLOAD_VALUE_OBSERVABLE | YES | GenerationValidationResult.rejected_payload_value mirrors resolved.ignored; visible on failure AND success. Tests test_rejected_value_observable_on_failure, test_rejected_value_observable_on_success. |
+| 9 | REJECTED_VALUE_NOT_IN_BUILDPLAN_OUTPUT | YES | On rejection create_build_plan_from_job / build_target_from_job raise before any BuildTarget; rejected value appears only in error message. Test test_rejected_payload_value_does_not_propagate_into_buildtarget. |
+| 10 | HERMES_778_TESTS_UNCHANGED_GREEN | YES | git diff --stat HEAD on tests/test_hermes_foundup_job_executor.py empty; 46 passed. Tests test_executor_test_imports_still_resolve, test_executor_attribute_access_pattern_still_works. |
+| 11 | SHARED_RESOLVER_SINGLE_SOURCE_OF_TRUTH | YES | One impl in module_path_resolution.py; generator and executor reference the SAME object. Tests test_executor_shim_and_shared_module_resolve_same_function, test_generator_uses_same_resolver_as_executor, test_exactly_one_resolver_definition_in_repo_module_set. |
+| 12 | HERMES_RESOLVER_EXTRACTION_BEHAVIOR_PRESERVED | YES | Executor re-exports identical objects; #778 executor tests pass with ZERO edits; full agent suite 647 passed / 0 skip / 0 xfail. Behavior spot-checks reproduce #778 tokens verbatim. |
+| 13 | NO_SECOND_MODULE_PATH_RESOLVER | YES | grep for the resolver def returns exactly one hit (module_path_resolution.py:198). AST tests assert no in-file def in executor or generator. |
+| 14 | NO_USER_QUESTION_FRAMING | YES | No AskUser dialog; Addendum A respected. Every fork (KNOWN_FOUNDUP_PATHS ruling, PWA-surface ruling) decided by evidence then WSP_97 condition then single recommendation; PWA BLOCKER branch evaluated and did NOT fire. |
+
+**Declared count: 14. Actual rows: 14. All YES. ASCII-clean.**
+
+### Tests
+
+- test_build_plan_generator.py: 72 passed (was 40 legacy; +32 added, 5 legacy
+  assertions updated to validated semantics; see TestModLog).
+- test_hermes_foundup_job_executor.py: 46 passed, file UNCHANGED vs Base.
+- Full agent suite: 647 passed, 0 skip / 0 xfail.
+- Cross-module test_internal_voteballot_build_poc.py: 33 passed.
+
+### Non-goals honored
+
+No consumer wiring (generator stays orphaned). No #775 ContextBundle adoption.
+No foundup_manifest_validator.py mutation (consumed as-is). No behavior change to
+the Hermes executor beyond the move/shim. No manifests / registry / WSP / CI /
+dependency mutation.
+
+
 ## 2026-06-10 - Hermes Module-Path Trust Removal Phase 1 (#774 carry-forward closure)
 
 **Author**: 0102 (W6)
