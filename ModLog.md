@@ -1,5 +1,49 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-12] Repo Hygiene + Security Consistency Phase 1 (PR#184 carry-forwards)
+
+**Change Type**: Bug fix (quota gate) + repo hygiene batch
+**By**: 0102 (W8) | Commander: 012
+**WSP References**: WSP 5, WSP 22, WSP 50, WSP 64, WSP 97
+**Slice**: REPO_HYGIENE_SECURITY_CONSISTENCY_PHASE1
+
+**Triage basis**: external security/hygiene report (PR#184-era findings + 8
+secret-scanning alerts) re-verified against live state. STALE: CI failures
+(current CI green across #776-#780). Current tree contains ZERO live API keys
+(historical-only exposure; remediation = key rotation + scanning re-enable,
+both 012-only console/settings actions - history rewrite REFUSED: invalidates
+all SHA-pinned audits, zero security benefit post-rotation).
+
+**Fixed (verified-live findings)**:
+- T2 Quota bypass: `no_quota_stream_checker.py` API verification now requires
+  global `YOUTUBE_API_ENABLED` AND `YT_STREAM_API_VERIFY` (global-off beats
+  local-on; quota-protected by default). BEHAVIORAL CHANGE - see
+  stream_resolver ModLog. 6 new toggle-matrix tests; 3 API-path tests opt in
+  explicitly; 29/29 green.
+- T3 `.claude/settings.local.json` untracked via `git rm --cached` (gitignore
+  entry existed at :395 but is ineffective on tracked files; ends permanent
+  dirty-status noise in every worktree; file preserved on disk).
+- T4 `.gitignore` `data/` -> `/data/` (bare pattern silently ignored EVERY
+  module-level data/ dir); linkedin_agent targeted rules retained; clean-
+  checkout audit: zero unexpected newly-visible files.
+- T5 `0102_HOLO_ID` (invalid POSIX shell identifier, unsourceable) ->
+  canonical `HOLO_ID_0102` in .env.example; all 6 code readers accept the
+  canonical name first with legacy fallback (no breaking change):
+  log_follower (x2), agent_logger, breadcrumb_tracer,
+  agentic_output_throttler, cli/utilities.
+- T7 `.venv` in M2M batch plan: NOT REPRODUCIBLE - no M2M batch-plan file
+  containing `.venv` exists in the current tree; verified clean.
+
+**Deferred (named follow-ups)**:
+- T6 `HOLO_SILENT` consolidation (24 reads / 12 files) ->
+  `HOLO_SILENT_HELPER_CONSOLIDATION_PHASE1` (medium-risk refactor across live
+  HoloIndex internals; disproportionate to a hygiene batch).
+- Secret remediation W6 slice (history-verification sweep + CI secret-pattern
+  guard) -> `SECRET_EXPOSURE_REMEDIATION_PHASE1`, queued behind 012 key
+  rotation + scanning re-enable.
+
+---
+
 ## [2026-06-10] Hermes Module-Path Trust Removal Phase 1 (#774 carry-forward closure)
 
 **Change Type**: Authoring slice (security pre-flight, last consumer-wiring

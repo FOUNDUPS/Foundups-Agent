@@ -1,6 +1,31 @@
 # Testing Evolution Log - Stream Resolver
 
-## LATEST UPDATE - 2026-04-18 Truth Signal Hardening (Worker SR1) [OK]
+## LATEST UPDATE - 2026-06-12 Quota Toggle Consistency (Worker W8) [OK]
+
+### Test Run
+```bash
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest modules/platform_integration/stream_resolver/tests/test_no_quota_stream_checker.py -q
+```
+
+### Results
+- `test_no_quota_stream_checker.py`: **29 passed** in 67s (was 23)
+
+### New Tests Added
+- `TestApiVerificationQuotaGate` (6 tests): toggle matrix for
+  `_api_verification_enabled()` - defaults quota-protected; global-off beats
+  local-on (the PR#184 defect case); local opt-out respected; unset semantics.
+
+### Updated Assertions (PR#184 quota-gate behavioral change)
+These 3 API-path tests previously relied on the implicit default (API verify
+active with no env set); each now opts in via
+`@patch.dict(os.environ, {"YOUTUBE_API_ENABLED": "true"})`:
+- `test_api_verification_reuses_cached_service`
+- `test_channel_mismatch_is_recommended_debug_not_warning`
+- `test_stale_indicator_returned_when_live_dom_has_no_verified_stream`
+
+---
+
+## 2026-04-18 Truth Signal Hardening (Worker SR1) [OK]
 
 ### Test Run
 ```bash

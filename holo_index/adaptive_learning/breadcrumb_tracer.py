@@ -188,7 +188,7 @@ class BreadcrumbTracer:
     def __init__(self):
         # WSP 78 Database integration - replaces JSON files
         self.db = AgentDB()
-        raw_agent_id = os.getenv("0102_HOLO_ID", "0102").strip()
+        raw_agent_id = (os.getenv("HOLO_ID_0102") or os.getenv("0102_HOLO_ID") or "0102").strip()
         self.agent_id = raw_agent_id if raw_agent_id else "0102"
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.session_id = f"{self.agent_id}_{timestamp}"

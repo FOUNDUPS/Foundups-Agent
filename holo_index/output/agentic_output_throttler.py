@@ -60,7 +60,7 @@ class AgenticOutputThrottler:
         self.max_sections = 3  # FIRST PRINCIPLES: Limit to prevent overload
 
         # Agent detection: Supports 0102 (Claude), qwen (1.5B), gemma (270M)
-        raw_agent_id = os.getenv("0102_HOLO_ID", "0102").strip()
+        raw_agent_id = (os.getenv("HOLO_ID_0102") or os.getenv("0102_HOLO_ID") or "0102").strip()
         self.agent_id = raw_agent_id if raw_agent_id else "0102"
 
         self.skill_manifest = self._load_skill_manifest()

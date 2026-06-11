@@ -49,6 +49,21 @@ def _env_truthy(name: str, default: str = "false") -> bool:
     return os.getenv(name, default).strip().lower() in ("1", "true", "yes", "y", "on")
 
 
+def _api_verification_enabled() -> bool:
+    """Quota gate for API-based stream verification (PR#184 consistency fix).
+
+    YOUTUBE_API_ENABLED is the global quota-protection toggle (.env.example:
+    OFF by default to protect the 10K units/day budget). YT_STREAM_API_VERIFY
+    is the stream-specific opt-out. API verification runs ONLY when the global
+    toggle allows it AND the stream-specific toggle has not disabled it -
+    global-off beats local-on, so YOUTUBE_API_ENABLED=false guarantees zero
+    YouTube Data API calls from this module regardless of YT_STREAM_API_VERIFY.
+    """
+    if not _env_truthy("YOUTUBE_API_ENABLED", "false"):
+        return False
+    return os.getenv("YT_STREAM_API_VERIFY", "true").lower() not in ("false", "0", "no")
+
+
 class NoQuotaStreamChecker:
     """Check YouTube stream status without using API quota
 
@@ -346,7 +361,7 @@ class NoQuotaStreamChecker:
             return {"live": False, "skipped": True, "reason": "stream_scraping_disabled", "video_id": video_id}
 
         verbose_logs = _env_truthy("STREAM_VERBOSE_LOGS", "false")
-        skip_api = os.getenv("YT_STREAM_API_VERIFY", "true").lower() in ("false", "0", "no")
+        skip_api = not _api_verification_enabled()
         scraping_indicated_live = False
 
         # FIRST PRINCIPLES: PRIORITY 1 - Cheap scraping pre-filter (0 API cost)
@@ -440,10 +455,10 @@ class NoQuotaStreamChecker:
         # TRUE NO-API MODE: Skip API verification entirely if YT_STREAM_API_VERIFY=false
         if skip_api:
             if scraping_indicated_live:
-                logger.info(f"[NO-API] ✅ YT_STREAM_API_VERIFY=false - Trusting scraping indicators (LIVE)")
+                logger.info(f"[NO-API] ✅ API verification disabled (YOUTUBE_API_ENABLED/YT_STREAM_API_VERIFY) - Trusting scraping indicators (LIVE)")
                 return {"live": True, "video_id": video_id, "method": "scraping_no_api"}
             else:
-                logger.info(f"[NO-API] ⚪ YT_STREAM_API_VERIFY=false - No strong indicators (NOT LIVE)")
+                logger.info(f"[NO-API] ⚪ API verification disabled (YOUTUBE_API_ENABLED/YT_STREAM_API_VERIFY) - No strong indicators (NOT LIVE)")
                 return {"live": False, "method": "scraping_no_api", "status": "no_indicators"}
 
         if verbose_logs:
@@ -861,7 +876,7 @@ class NoQuotaStreamChecker:
             return {"live": False, "skipped": True, "reason": "stream_scraping_disabled"}
 
         verbose_logs = _env_truthy("STREAM_VERBOSE_LOGS", "false")
-        skip_api = os.getenv("YT_STREAM_API_VERIFY", "true").lower() in ("false", "0", "no")
+        skip_api = not _api_verification_enabled()
         saw_strong_live_indicator = False
 
         # Check global CAPTCHA cooldown first
@@ -1077,7 +1092,7 @@ class NoQuotaStreamChecker:
                                 display_name = channel_name or channel_id
                                 trusted_video = videos_to_check[0]
                                 logger.info(
-                                    f"[NO-API] YT_STREAM_API_VERIFY=false - trusting /live indicators for {display_name}: {trusted_video}"
+                                    f"[NO-API] API verification disabled (YOUTUBE_API_ENABLED/YT_STREAM_API_VERIFY) - trusting /live indicators for {display_name}: {trusted_video}"
                                 )
                                 return {
                                     "live": True,
@@ -1295,7 +1310,7 @@ class NoQuotaStreamChecker:
                         trusted_video = videos_to_check[0]
                         indicator_count = sum([has_is_live_now, has_live_badge, has_watching, has_live_text])
                         logger.info(
-                            f"[NO-API] YT_STREAM_API_VERIFY=false - trusting /streams indicators for {display_name}: {trusted_video}"
+                            f"[NO-API] API verification disabled (YOUTUBE_API_ENABLED/YT_STREAM_API_VERIFY) - trusting /streams indicators for {display_name}: {trusted_video}"
                         )
                         return {
                             "live": True,

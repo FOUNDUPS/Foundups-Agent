@@ -12,6 +12,36 @@ This log tracks changes specific to the **stream_resolver** module in the **plat
 
 ## MODLOG ENTRIES
 
+### 2026-06-12 - Quota Toggle Consistency Fix (PR#184 carry-forward, Worker W8)
+
+**By:** 0102 - Worker W8
+**WSP References:** WSP 97 (Truth Boundary), WSP 22 (ModLog), WSP 5 (Testing)
+**Slice:** REPO_HYGIENE_SECURITY_CONSISTENCY_PHASE1
+
+**Problem (PR#184 review finding, verified live):** `no_quota_stream_checker.py`
+gated API verification ONLY on `YT_STREAM_API_VERIFY` (default "true") and never
+consulted the global quota-protection toggle `YOUTUBE_API_ENABLED`
+(.env.example: OFF by default, 10K units/day budget). Stream verification could
+make YouTube Data API calls while the operator believed the API was disabled -
+defeating the quota-protection intent.
+
+**Fix:** new module helper `_api_verification_enabled()`: API verification runs
+ONLY when `YOUTUBE_API_ENABLED` is truthy AND `YT_STREAM_API_VERIFY` has not
+disabled it. Global-off beats local-on; `YOUTUBE_API_ENABLED=false` (or unset)
+guarantees zero API calls from this module. Both `skip_api` sites (video check,
+channel check) use the helper; the four `[NO-API]` log lines now name both
+toggles instead of claiming `YT_STREAM_API_VERIFY=false`.
+
+**BEHAVIORAL CHANGE:** with neither env var set, API verification is now OFF
+(quota-protected default, consistent with .env.example and video_indexer's
+`indexer_config.py` default). Deployments relying on implicit API verification
+must set `YOUTUBE_API_ENABLED=true` explicitly.
+
+**Tests:** new `TestApiVerificationQuotaGate` (6-case toggle matrix incl. the
+defect case global-off+local-on); 3 existing API-path tests updated to opt in
+explicitly via `YOUTUBE_API_ENABLED=true` (flagged in tests/TestModLog.md).
+29/29 passing.
+
 ### 2026-04-18 - Truth Signal Hardening (Worker SR1)
 
 **By:** 0102 - Worker SR1

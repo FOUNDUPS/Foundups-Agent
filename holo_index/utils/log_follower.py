@@ -16,7 +16,7 @@ class LogFollower:
     """Follows the unified agent log stream in real-time."""
 
     def __init__(self, agent_id: str = "LOG-FOLLOWER", log_file: str = "holo_index/logs/unified_agent_activity.log"):
-        resolved = agent_id or os.getenv("0102_HOLO_ID") or os.getenv("HOLO_AGENT_ID")
+        resolved = agent_id or os.getenv("HOLO_ID_0102") or os.getenv("0102_HOLO_ID") or os.getenv("HOLO_AGENT_ID")
         self.agent_id = resolved if resolved else "LOG-FOLLOWER"
         self.log_file = Path(log_file)
         self.last_position = 0
@@ -95,5 +95,5 @@ def follow_agent_logs(agent_id: str = "012-FOLLOWER"):
 
 if __name__ == "__main__":
     # Allow custom agent ID via environment variable
-    agent_id = os.getenv("0102_HOLO_ID") or os.getenv("HOLO_AGENT_ID") or "LOG-FOLLOWER"
+    agent_id = os.getenv("HOLO_ID_0102") or os.getenv("0102_HOLO_ID") or os.getenv("HOLO_AGENT_ID") or "LOG-FOLLOWER"
     follow_agent_logs(agent_id)

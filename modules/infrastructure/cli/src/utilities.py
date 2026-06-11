@@ -329,7 +329,7 @@ def holo_advanced_controls_menu() -> None:
         base_url = os.getenv("HOLO_LLM_BASE_URL", "").strip()
         api_key_masked = mask_secret(os.getenv("HOLO_LLM_API_KEY", "").strip())
         agent_id = os.getenv("HOLO_AGENT_ID", "").strip() or "unset"
-        holo_id = os.getenv("0102_HOLO_ID", "").strip() or "unset"
+        holo_id = (os.getenv("HOLO_ID_0102") or os.getenv("0102_HOLO_ID") or "").strip() or "unset"
         mcp_enabled_on = env_truthy("HOLO_MCP_ENABLED", "true")
         mcp_warn_on = env_truthy("HOLO_MCP_WARNINGS", "true")
         pattern_logs_on = env_truthy("HOLO_PATTERN_MEMORY_LOGS", "true")

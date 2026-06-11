@@ -198,9 +198,14 @@ class TestNoQuotaStreamChecker(unittest.TestCase):
         self.assertIsInstance(result, dict)
         self.assertFalse(result.get('live', True))
 
+    @patch.dict(os.environ, {"YOUTUBE_API_ENABLED": "true"})
     @patch('modules.platform_integration.youtube_auth.src.youtube_auth.get_authenticated_service')
     def test_api_verification_reuses_cached_service(self, mock_auth):
-        """API verification should not rebuild the YouTube service per video check."""
+        """API verification should not rebuild the YouTube service per video check.
+
+        PR#184 quota-gate fix: API verification now requires the global
+        YOUTUBE_API_ENABLED toggle, so this API-path test opts in explicitly.
+        """
         mock_service = MagicMock()
         mock_service._credential_set = 10
         mock_service.videos.return_value.list.return_value.execute.return_value = {
@@ -223,11 +228,15 @@ class TestNoQuotaStreamChecker(unittest.TestCase):
         self.assertFalse(second.get("live"))
         mock_auth.assert_called_once()
 
+    @patch.dict(os.environ, {"YOUTUBE_API_ENABLED": "true"})
     @patch('requests.Session.get')
     @patch.object(NoQuotaStreamChecker, "_anti_detection_delay")
     @patch.object(NoQuotaStreamChecker, "check_video_is_live")
     def test_channel_mismatch_is_recommended_debug_not_warning(self, mock_check_video, mock_delay, mock_get):
-        """Recommended streams from other channels are expected, not warnings."""
+        """Recommended streams from other channels are expected, not warnings.
+
+        Opts into the API path (PR#184 quota-gate fix made no-API the default).
+        """
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.url = f"https://www.youtube.com/channel/{self.test_channel_id}/live"
@@ -250,11 +259,15 @@ class TestNoQuotaStreamChecker(unittest.TestCase):
         mock_warning.assert_not_called()
         self.assertTrue(any("[RECOMMENDED]" in str(call) for call in mock_debug.call_args_list))
 
+    @patch.dict(os.environ, {"YOUTUBE_API_ENABLED": "true"})
     @patch('requests.Session.get')
     @patch.object(NoQuotaStreamChecker, "_anti_detection_delay")
     @patch.object(NoQuotaStreamChecker, "check_video_is_live")
     def test_stale_indicator_returned_when_live_dom_has_no_verified_stream(self, mock_check_video, mock_delay, mock_get):
-        """Live-looking DOM without verified live videos is reported as stale, not live."""
+        """Live-looking DOM without verified live videos is reported as stale, not live.
+
+        Opts into the API path (PR#184 quota-gate fix made no-API the default).
+        """
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.url = f"https://www.youtube.com/channel/{self.test_channel_id}/live"
@@ -355,6 +368,55 @@ class TestNoQuotaStreamCheckerIntegration(unittest.TestCase):
         # The actual retry logic is tested in HTTP adapter
         self.assertIsNotNone(self.checker.session)
         self.assertTrue(hasattr(self.checker.session, 'mount'))
+
+
+class TestApiVerificationQuotaGate(unittest.TestCase):
+    """PR#184 consistency fix: YOUTUBE_API_ENABLED (global quota toggle) must
+    gate API verification; YT_STREAM_API_VERIFY alone cannot bypass it.
+    Global-off beats local-on."""
+
+    @staticmethod
+    def _enabled(env):
+        from modules.platform_integration.stream_resolver.src import no_quota_stream_checker as mod
+        cleared = {k: "" for k in ("YOUTUBE_API_ENABLED", "YT_STREAM_API_VERIFY")}
+        cleared.update(env)
+        with patch.dict(os.environ, cleared):
+            # Empty string == unset for these toggles (getenv default applies
+            # only on missing keys, so pop the empties explicitly).
+            for key, value in cleared.items():
+                if value == "":
+                    os.environ.pop(key, None)
+            return mod._api_verification_enabled()
+
+    def test_defaults_are_quota_protected(self):
+        """Both unset: global default false -> no API verification."""
+        self.assertFalse(self._enabled({}))
+
+    def test_global_off_beats_local_on(self):
+        """The PR#184 defect case: verify=true must NOT bypass global off."""
+        self.assertFalse(self._enabled({
+            "YOUTUBE_API_ENABLED": "false",
+            "YT_STREAM_API_VERIFY": "true",
+        }))
+
+    def test_global_on_local_on(self):
+        self.assertTrue(self._enabled({
+            "YOUTUBE_API_ENABLED": "true",
+            "YT_STREAM_API_VERIFY": "true",
+        }))
+
+    def test_global_on_local_off(self):
+        """Stream-specific opt-out still respected when API is enabled."""
+        self.assertFalse(self._enabled({
+            "YOUTUBE_API_ENABLED": "true",
+            "YT_STREAM_API_VERIFY": "false",
+        }))
+
+    def test_global_on_local_unset_defaults_to_verify(self):
+        self.assertTrue(self._enabled({"YOUTUBE_API_ENABLED": "true"}))
+
+    def test_global_unset_local_off(self):
+        self.assertFalse(self._enabled({"YT_STREAM_API_VERIFY": "false"}))
 
 
 if __name__ == '__main__':

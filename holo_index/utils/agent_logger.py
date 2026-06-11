@@ -26,7 +26,7 @@ if os.name == 'nt':
 
 def _current_identity() -> str:
     """Resolve the active 0102 agent identity."""
-    raw_identity = (os.getenv("0102_HOLO_ID") or os.getenv("HOLO_AGENT_ID") or "").strip()
+    raw_identity = (os.getenv("HOLO_ID_0102") or os.getenv("0102_HOLO_ID") or os.getenv("HOLO_AGENT_ID") or "").strip()
     return raw_identity if raw_identity else "0102"
 
 class AgentLogger:

@@ -417,14 +417,13 @@ WSP_agentic/agentic_journals/*/.runtime/
 # PQN detector logs (side effect of rESP partial import during tracker --awaken)
 WSP_agentic/tests/pqn_detection/dae_logs/
 
-# Data directories (runtime scraped/generated data)
-data/
-!modules/platform_integration/linkedin_agent/data/
+# Data directories (PR#184 fix: root-only - the old bare `data/` pattern
+# silently ignored EVERY module-level data/ directory, hiding legitimate
+# files; module data dirs are now visible by default with targeted ignores)
+/data/
+# linkedin_agent: only the publishing map is versioned; rest is runtime data
 modules/platform_integration/linkedin_agent/data/*
 !modules/platform_integration/linkedin_agent/data/linkedin_publishing_map.json
-# Website static datasets must be versioned for deterministic deploys
-!public/data/
-!public/data/**
 
 # Temporary output files
 tmp_*.txt

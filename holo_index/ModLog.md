@@ -1,5 +1,19 @@
 # HoloIndex Package ModLog
 
+## [2026-06-12] Agent identity env var: canonical HOLO_ID_0102 (W8)
+
+**Agent**: W8 (0102)
+**WSP References**: WSP 22, WSP 97
+**Slice**: REPO_HYGIENE_SECURITY_CONSISTENCY_PHASE1 (PR#184 carry-forward T5)
+
+Legacy env var `0102_HOLO_ID` is not a valid POSIX shell identifier (cannot be
+sourced/exported by sh/bash). Canonical name is now `HOLO_ID_0102`
+(.env.example updated). Readers accept canonical first, legacy fallback second
+(NO breaking change): `utils/log_follower.py` (x2), `utils/agent_logger.py`,
+`adaptive_learning/breadcrumb_tracer.py`, `output/agentic_output_throttler.py`
+(+ `modules/infrastructure/cli/src/utilities.py`). Follow-up named:
+`HOLO_SILENT_HELPER_CONSOLIDATION_PHASE1` (24 env reads / 12 files - deferred).
+
 ## [2026-05-30] HOLOINDEX_T1_RANKING_QUALITY_PHASE1 (W6 resume)
 
 **Agent**: W6 (0102)
