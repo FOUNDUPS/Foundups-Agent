@@ -2,6 +2,68 @@
 
 ## Chronological Change Log
 
+### [2026-06-12] - OPERATIONAL_WRE_MONOREPO_POC_VERTICAL_PROOF_PHASE1 (W6)
+
+**WSP Protocol References**: WSP 11 (Interface), WSP 50 (Pre-Action), WSP 77 (Agent
+Coordination), WSP 97 (Truth Boundary), WSP 22 (ModLog)
+**Base**: `c7839c2ab` (origin/main = #787 dry-run runtime wiring)
+**Predecessors**: #774 (consumer seam), #775 (`build_context_bundle`), #777
+(source_authority), #778/#779 (shared `_resolve_validated_module_path`), #786
+(`consume_context_bundle_dry_run`), #787 (`_attach_context_bundle_dry_run`
+runtime wiring).
+**Type**: VERTICAL PROOF (integration test + proof doc). NO production code, NO
+new wiring, NO broadening of actions.
+
+**Mission (012)**: Prove ONE full dry-run invocation end-to-end through the
+EXISTING OpenClaw/WRE create+drain seam using a safe FoundUp (`gotjunk_001`).
+
+**Phase 0 (HoloIndex)**: 2 queries (`FoundUpJobConsumer drain consume_one
+dispatch foundup job queue create`; `OpenClaw create foundup job enqueue WRE
+consumer ConsumerResult`). Retrieval assessment: hits surfaced the job contract /
+router / webhook receiver but NOT `foundup_job_consumer.py` (missing-artifact /
+staleness gap); closed via glob `**/foundup_job_consumer.py` + base ground-truth
+read (`git show c7839c2ab:<path>`). REAL path identified:
+- CREATE: `openclaw_foundup_orchestrator.dispatch_foundup` (line 840) ->
+  `_handle_build_intent` (914) -> `create_job` + `_FOUNDUP_JOB_QUEUE.append`
+  (976); `get_job_queue` (230).
+- DRAIN: `FoundUpJobConsumer.drain_openclaw_queue_with_retention` (consumer
+  line 858) -> `drain_jobs` (823) -> `consume_one` (370) -> `_dispatch_to_hermes`
+  (424) -> `execute_foundup_job` (SIMULATED) -> `_attach_context_bundle_dry_run`
+  (537) -> `ConsumerResult.context_bundle_dry_run` (188).
+
+**Deliverable** - NEW test
+`tests/test_operational_wre_monorepo_poc_vertical_proof.py` (3 tests, all pass,
+0 skip/xfail). Drives the REAL create entry (`dispatch_foundup` enqueue) and the
+REAL drain entry (`drain_openclaw_queue_with_retention`); does NOT mock the seam
+and does NOT call the #786 consumer in isolation. The only mocks are the
+real-execution sinks (`subprocess.Popen`/`run`/`call` and
+`HermesJobExecutor._lazy_import_delegate_task`), asserted `assert_not_called`
+through the full seam.
+
+**Acceptance proven in ONE invocation**: real create + real drain; SIMULATED /
+`real_execution_performed False`; ContextBundle BUILT (#775); #786 consumer RAN;
+DryRunResult ATTACHED to receipt; `source_authority == monorepo_poc`;
+`resolved_module_path` from the shared validated resolver (== validated
+canonical, not payload); `evidence_refs` refs+sha256(+size+role) only; no file
+bodies; no live Hermes delegation; no subprocess/build execution; readiness all
+False. NEGATIVE: a forged cross-FoundUp `module_path` is rejected end-to-end via
+the shared resolver (`cross_foundup_mismatch`; rejected value observable; never
+used). `validate_foundup` is the action that reaches SIMULATED (build/extract
+guard-blocked) -- asserted directly. `gotjunk_001` is a PARAMETERIZED fixture
+default, not a hard-code.
+
+**Boundary**: NO production-code changes. `git diff --name-only c7839c2ab HEAD`
+lists only the new test, the new proof doc
+(`docs/audits/architecture/OPERATIONAL_WRE_MONOREPO_POC_VERTICAL_PROOF_PHASE1.md`),
+and the wre_core + root ModLogs. Real-exec / Hermes-delegation branch untouched
+and BLOCKED. New `.py`/`.md` 0 non-ASCII.
+
+**Verification**: new test 3 passed, 0 skip/xfail; broader wre_core consumer
+suite 58 passed (isolated worktree). Evidence writes redirected to a tmp
+workspace via `FOUNDUPS_WORKSPACE_ROOT` (no repo artifact).
+
+---
+
 ### [2026-06-12] - WRE_CONTEXT_BUNDLE_DRYRUN_RUNTIME_WIRING_PHASE2 (W6)
 
 **WSP Protocol References**: WSP 11 (Interface), WSP 50 (Pre-Action), WSP 77 (Agent
