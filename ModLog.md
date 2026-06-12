@@ -1,5 +1,54 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-12] HoloIndex Reindex for Operational WRE Phase 1 (audit, docs-only)
+
+**Change Type**: Docs-only audit slice + external index refresh (E:/HoloIndex,
+untracked, outside repo)
+**By**: 0102 (W6) | Commander: 012
+**WSP References**: WSP 50, WSP 87, WSP 97, WSP 22
+**Slice**: `HOLOINDEX_REINDEX_FOR_OPERATIONAL_WRE_PHASE1`
+**Branch / PR**: `w6/holoindex-reindex-for-operational-wre-phase1` -- PR opened
+against `main` (do NOT merge; W10 gate hold)
+**Base**: `a3e70b5a4` (origin/main, re-pinned at execution; equals dispatch base)
+
+**What this slice does**: Restores HoloIndex retrieval signal for the
+operational-WRE component chain (#768-#778) before the
+OPERATIONAL_WRE_MONOREPO_POC program dispatches. Ran
+`python holo_index.py --index-all` (494.6s, rc=0: 20000 symbols, 3399 docs,
+1451 knowledge, 65 SKILLz, 701 CLI entrypoints, 296 NAVIGATION code entries,
+117 WSPs) and measured 5 falsifiable benchmark queries in both modes
+before/after (20 result sets).
+
+**Measured outcome (strict component-surfaced scoring)**: semantic 1/9 -> 4/9
+expected components, with three rank-1 placements
+(hermes_foundup_job_executor.py, context_bundle_builder.py,
+build_plan_executor.py); lexical unchanged by construction (offline mode
+scores only NAVIGATION NEED_TO; `holo_index/_cli_main.py:1301-1366`). One
+honest degradation recorded: Q5 wsp_00_zen_state_tracker.py displaced from
+the semantic code lane by bridge-symbol matches (retained lexical rank 1).
+Index freshness now postdates a3e70b5a4 (active store
+E:/HoloIndex/vectors rewritten 2026-06-12 07:23:48, source=manual_index);
+legacy E:/HoloIndex/chroma + chroma.sqlite3 confirmed orphaned (untouched by
+the current pipeline).
+
+**Residual (real HOLOINDEX_LOW_SIGNAL findings)**: foundup_job_consumer.py,
+receipt_emitter.py, build_plan_generator.py, foundup_job_router.py remain
+invisible - each shadowed by a same-domain sibling file. Named follow-up:
+`HOLOINDEX_RETRIEVAL_QUALITY_PHASE1` (symbol-pass 20000 cap, sibling
+shadowing, 4-lane ranking fusion; benchmark queries become its regression
+fixture). NAVIGATION.py NEED_TO coverage update folded into the follow-up
+(NAVIGATION mutation outside this slice's fence).
+
+**Report**: `docs/audits/infrastructure/HOLOINDEX_REINDEX_FOR_OPERATIONAL_WRE_PHASE1.md`
+(BEFORE/AFTER timestamps, 20 result sets, per-query verdicts, 4-way
+failure-mode taxonomy applied, WSP_97 18/18). Note: the report path was under
+the `docs/audits/*` ignore rule (`.gitignore:324`) without an
+`infrastructure/` negation pair; the initial commit used explicit `git add -f`
+with the deviation disclosed. 012 returned the slice for an authorized
+micro-repair: the 2-line negation pair (`!docs/audits/infrastructure/` +
+`/**`) is now added at `.gitignore:358-359`, matching the 17 precedent pairs,
+so the report (and future infrastructure audit docs) are tracked without
+force-add. Repair scope: .gitignore + report + ModLog only.
 ## [2026-06-11] BuildPlan Generator Module-Path Trust Removal Phase 1 (#778 carry-forward closure + shared resolver extraction)
 
 **Change Type**: Authoring slice (security pre-flight; closes the last
