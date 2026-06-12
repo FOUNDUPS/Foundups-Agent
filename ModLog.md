@@ -1,5 +1,39 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-13] WRE Multi-Agent Concurrency Risk Confirmation Phase 1 (W9, decision-only)
+
+**Change Type**: DECISION-ONLY confirmation audit. NO src change, NO fix, NO committed test.
+Confirms, against current main, the two concurrency races the parent evolution audit documented as
+"DOCUMENTED, NOT FIXED" and re-derives every file:line cite at the base SHA (no blind trust of the
+parent's numbers).
+**By**: 0102 (W9, Worker-Lane A) | Commander: 012 | Reviewer: W10
+**WSP References**: WSP 22, WSP 50, WSP 65, WSP 77, WSP 97
+**Slice**: WRE_MULTI_AGENT_CONCURRENCY_RISK_CONFIRMATION_PHASE1
+**Base**: `dc685f93400151b840e90326134d20b6a10fffc4` (origin/main)
+
+- NEW `docs/audits/architecture/WRE_MULTI_AGENT_CONCURRENCY_RISK_CONFIRMATION_PHASE1.md`. Confirms
+  both races REAL at dc685f934 and both LATENT (real root cause, not reachable on current main):
+  - Race 1 (policy_flags in-place mutation): `_writeback_token_verdict` mutates `job.policy_flags`
+    in place (hermes_job_executor.py:1302-1305, docstring :1287), called :1616, guard reads the
+    mutated flags :1227-1232 via :1619. A throwaway probe (o:/tmp, NOT committed) ran single-thread
+    and confirmed the shared-state-mutation PRECONDITION: same policy_flags object mutated (no copy)
+    and a second writeback on a shared job flips the first's guard input (RESULT
+    PRECONDITION_CONFIRMED). Reachability LATENT: drain/execute runs single-shot, synchronous,
+    single-process; no concurrent driver exists in the repo (concurrency-primitive sweep over
+    wre_core = 5 files, ZERO touch the drain/queue/executor symbols).
+  - Race 2 (queue split-authority TOCTOU): `_FOUNDUP_JOB_QUEUE` global (orchestrator:39),
+    `get_job_queue()` returns the live global (:230-232), `remove_jobs_by_id` exported AND rebinds
+    the global (:240/:252-255); consumer does read->drain->remove as 3 non-atomic, lock-free calls
+    (foundup_job_consumer.py:897/:914/:930). Reachability LATENT: same single-drain evidence; a
+    TOCTOU needs two interleaving drains, which do not exist today.
+- Minimal fixes SPECCED, NOT implemented: Race 1 -> return token verdict as request-scoped metadata
+  (stop mutating job.policy_flags); Race 2 -> single locked QueueManager owning append+remove with
+  atomic classify-remove, OpenClaw PUSH-only. Proposed execution slices, in order:
+  WRE_POLICY_FLAGS_RACE_FIX_PHASE1 then WRE_QUEUE_OWNERSHIP_CONSOLIDATION_PHASE1; both MUST land
+  before any parallelize-drain (2nd in-process lane).
+- Files (exactly 2): NEW audit doc + EDIT root ModLog (this entry). Zero .py changed; no test
+  committed. Boundary: races DOCUMENTED + CONFIRMED, NOT FIXED; real execution stays BLOCKED.
+
 ## [2026-06-13] WSP Multi-Agent Evolution Audit Phase 1 (W9, decision-only)
 
 **Change Type**: DECISION-ONLY architecture audit. NO code, NO tests, NO runtime
