@@ -19,7 +19,7 @@ matplotlib>=3.7.0
 torch>=2.0.0
 
 # Local LLM inference for HoloIndex Qwen advisor
-llama-cpp-python==0.2.69
+llama-cpp-python==0.2.72
 
 # Web framework for Vercel deployment
 fastapi>=0.104.0

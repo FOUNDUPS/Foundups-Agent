@@ -1,6 +1,6 @@
 # HoloIndex Dependencies
 # Local LLM inference for Qwen advisor
-llama-cpp-python==0.2.69
+llama-cpp-python==0.2.72
 
 # Sentence transformers for semantic search
 sentence-transformers>=2.2.0
