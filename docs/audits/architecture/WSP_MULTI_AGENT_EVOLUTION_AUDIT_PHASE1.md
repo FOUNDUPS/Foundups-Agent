@@ -69,8 +69,8 @@ concurrent run was executed; the present PoC is single-drain and dry-run.
 
 ## 2. WSP 97 Truth Boundary Report
 
-Classification counts across the audited surface: PROVEN 12, IMPLEMENTED 30, PLANNED 5,
-HYPOTHETICAL 1 (47 components across 5 internal lanes).
+Classification tags across the audited surface (internal subsystems + blueprint
+components): PROVEN 12, IMPLEMENTED 30, PLANNED 5, HYPOTHETICAL 1 (48 total).
 
 Epistemic caveats:
 - Duplicate-authority findings are HIGH confidence: the critic re-verified the two load-bearing
