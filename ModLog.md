@@ -49,6 +49,82 @@ micro-repair: the 2-line negation pair (`!docs/audits/infrastructure/` +
 `/**`) is now added at `.gitignore:358-359`, matching the 17 precedent pairs,
 so the report (and future infrastructure audit docs) are tracked without
 force-add. Repair scope: .gitignore + report + ModLog only.
+## [2026-06-11] BuildPlan Generator Module-Path Trust Removal Phase 1 (#778 carry-forward closure + shared resolver extraction)
+
+**Change Type**: Authoring slice (security pre-flight; closes the last
+trust seam; extracts the resolver into a shared single source of truth)
+**By**: 0102 (W6) | Commander: 012
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 84, WSP 87, WSP 97, WSP 22
+**Slice**: `BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1`
+**Branch / PR**: `w6/build-plan-generator-module-path-trust-removal-phase1` --
+PR opened against `main` (do NOT merge; W10 gate hold)
+**Base**: `a3e70b5a4` (origin/main after #778)
+
+**What this slice closes**: The #778 PR landed the validator-guarded
+resolver in the Hermes executor and explicitly named
+`BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1` as a hard
+precondition row for `WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1`. This
+slice satisfies that precondition by reusing the #778 resolver through
+behavior-preserving extraction (Addendum C).
+
+**What this slice does**:
+
+- Creates `modules/foundups/agent/src/module_path_resolution.py` as the
+  SHARED single source of truth for the module-path trust rule.
+- Refactors `hermes_foundup_job_executor.py` into a back-compat shim
+  that re-exports every name from the shared module; the #778 test
+  file passes with **ZERO edits** (Addendum C #3 hard gate).
+- Refactors `build_plan_generator.py` to consume the shared resolver:
+  - DELETES the `KNOWN_FOUNDUP_PATHS` dict + `get_known_foundup_path()`
+    inference wrapper (DELETE_AS_DEAD_CODE per the Phase-0 census).
+  - DELETES the `f"modules/foundups/{job.foundup_id}"` synthesis
+    fallback (line 282 in the prior layout).
+  - DELETES the prefix-only `_is_valid_foundup_path()` gate with its
+    case-insensitive `.lower()` compare and PWA-surface admit.
+  - REWROTES `validate_job_for_build_plan` and `build_target_from_job`
+    to flow through `_resolve_validated_module_path`.
+  - ADDS `rejected_payload_value` field to
+    `GenerationValidationResult` (observable-ignore).
+  - PWA-surface ruling: DERIVED_ONLY -- `pwa_surface_path` derived
+    from the canonical module_path basename; payload-supplied surface
+    paths NEVER trusted as module identity.
+- Pins the single-source-of-truth invariant via AST scans on both the
+  executor and the generator.
+- 27 new generator tests covering the full 14-test dispatch contract
+  (Addendum C + D folded), plus 4 Addendum-C extraction-equivalence
+  tests, plus 2 meta-tests verifying the #778 import patterns still
+  resolve through the shim.
+
+**Consumer-wiring precondition status (post-this-slice)**:
+
+- Precondition (a) `FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_CONTRACT_PHASE1`
+  -- satisfied by #777.
+- Precondition (b) legacy `payload.module_path` trust removed at
+  Hermes executor seam -- satisfied by #778.
+- Precondition (c) `BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1`
+  (the precondition row #778 named) -- **satisfied by THIS SLICE**.
+- `WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1` is now unblocked.
+
+**Tests**: 646 passed / 0 skipped / 0 xfailed across the agent module
+suite. The #778 executor test file passes with ZERO edits (46/46).
+
+**Boundary preserved**: validator NOT mutated; manifests NOT mutated;
+`hermes_adapter.py` and runtime NOT touched; no new dependency; no WSP
+file mutated; generator remains orphaned (no consumer wired);
+`StatusReasonCode` and `GenerationValidationResult.error_code`
+taxonomies stay frozen (new tokens are the closed-set #778 strings;
+no schema-level change).
+
+**WSP_97**: PASS (14/14) -- full table in
+[`modules/foundups/agent/ModLog.md`](modules/foundups/agent/ModLog.md).
+
+**Predecessors**: #770 (manifest readiness audit), #771 (baseline
+validator), #772 (context-bundle boundary audit), #773 (exact-match
+validator hardening), #774 (execution-chain audit), #775 (ContextBundle
+builder), #777 (source-authority contract), #778 (Hermes executor
+trust removal -- the resolver this slice extracts and reuses).
+
+---
 
 ## [2026-06-10] Hermes Module-Path Trust Removal Phase 1 (#774 carry-forward closure)
 

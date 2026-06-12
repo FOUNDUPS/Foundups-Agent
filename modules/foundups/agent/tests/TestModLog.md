@@ -1,5 +1,109 @@
 # Agent Module TestModLog
 
+## 2026-06-11 - BuildPlan Generator Module-Path Trust Removal Phase 1 Tests
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_build_plan_generator.py -q
+python -m pytest modules/foundups/agent/tests/test_hermes_foundup_job_executor.py -q
+python -m pytest modules/foundups/agent/tests/ -q
+```
+
+**Result**: PASS
+
+**Summary**:
+- Generator test file: **71 passed in 0.97s** (44 prior + 27 new).
+- Executor test file (#778 file, **ZERO edits**): **46 passed in 0.83s** --
+  Addendum C #3 satisfied.
+- Full agent-module suite: **646 passed in 8.99s**; 0 skipped; 0 xfailed.
+
+**Slice**: BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1
+
+**Updated assertions** (flagged per dispatch "Update stale legacy
+assertions ... flag each in TestModLog"):
+
+- DELETED `TestModulePathInference::test_known_foundup_paths_include_voteballots`
+  (line 489-492 in pre-slice file). The symbol `KNOWN_FOUNDUP_PATHS`
+  is deleted; the assertion is moot.
+- DELETED `TestModulePathInference::test_get_known_foundup_path_returns_voteballots`
+  (line 494-497 in pre-slice file). The function
+  `get_known_foundup_path` is deleted.
+- UPDATED `TestModulePathInference::test_infer_module_path_for_voteballots`
+  docstring to record the bounded foundup_id scan as the new
+  derivation path. Now also asserts `rejected_payload_value is None`
+  (observable-ignore on the absent-payload branch).
+- UPDATED `TestModulePathInference::test_unknown_foundup_without_module_path_fails`
+  expected `error_code` from `"MISSING_MODULE_PATH"` to
+  `"manifest_missing"` (legacy MISSING_MODULE_PATH branch deleted
+  along with the KNOWN_FOUNDUP_PATHS error-message interpolation).
+- UPDATED `TestOutsideScopeRejected::test_infrastructure_path_rejected`
+  expected `error_code` from `"INVALID_MODULE_PATH"` to
+  `"manifest_missing"`. Path is under `modules/` but no on-disk
+  manifest -> resolver rejects with manifest_missing.
+- UPDATED `TestOutsideScopeRejected::test_root_path_rejected` expected
+  `error_code` from `"INVALID_MODULE_PATH"` to `"syntactic_reject"`.
+  `/etc/passwd` is an absolute path; the resolver rejects pre-manifest
+  at the syntactic-harden step.
+- UPDATED `TestOutsideScopeRejected::test_ai_intelligence_path_rejected`
+  expected `error_code` from `"INVALID_MODULE_PATH"` to
+  `"manifest_missing"`.
+
+**Added** (in `test_build_plan_generator.py`):
+
+- `TestSharedResolverValidationInGenerator` (the 14 dispatch-required
+  tests + happy-path controls). Mapping to the dispatch's 14-test
+  contract:
+  1. `test_payload_path_with_no_backing_manifest_rejected`
+  2. `test_source_module_alias_with_wrong_path_rejected`,
+     `test_source_module_alias_happy_path`
+  3. `test_cross_foundup_substitution_rejected`
+  4. `test_suffix_basename_partial_match_rejected`
+  5. `test_case_variant_payload_rejected`,
+     `test_uppercase_modules_prefix_rejected`
+  6. `test_absolute_path_rejected_pre_manifest`,
+     `test_drive_prefix_path_rejected_pre_manifest`,
+     `test_traversal_rejected_pre_manifest`,
+     `test_backslash_rejected_pre_manifest`
+  7. `test_empty_string_payload_treated_as_absent`
+  8. `test_known_foundup_id_without_on_disk_manifest_fails_closed`
+     (parametrized over `pqn_portal`, `social_twin`, `move2japan`),
+     `test_known_foundup_paths_symbol_is_gone`
+  9. `test_foundup_id_synthesis_dead_no_modules_foundups_fallback`,
+     `test_build_target_does_not_use_synthesized_path`
+  10. `test_pwa_surface_path_as_module_identity_rejected`
+  11. `test_rejected_value_observable_on_failure`,
+      `test_rejected_value_observable_on_success`
+  12. `TestHermes778TestsUnchanged::test_executor_test_imports_still_resolve`,
+      `..._executor_attribute_access_pattern_still_works`
+  13. Full agent suite green (646 / 0 / 0).
+  14. `test_rejected_payload_value_does_not_propagate_into_buildtarget`,
+      `test_buildplan_carries_only_canonical_when_payload_provided`
+- `TestSharedResolverIsSingleSourceOfTruth` (Addendum C #4 -- prove
+  exactly ONE implementation):
+  - `test_executor_shim_and_shared_module_resolve_same_function` --
+    `is` identity check on every moved name.
+  - `test_generator_uses_same_resolver_as_executor` -- `is` identity
+    between generator and executor references.
+  - `test_no_second_resolver_implementation_in_executor` -- AST scan
+    on executor file asserts no local definition of the moved names.
+  - `test_no_second_resolver_in_build_plan_generator` -- symmetric AST
+    scan on generator file; also asserts `KNOWN_FOUNDUP_PATHS`
+    assignment is gone.
+- `TestHermes778TestsUnchanged` -- meta-test that the #778 test file's
+  import patterns still resolve through the shim (Addendum C #3).
+
+**Boundary preserved**:
+
+- The #778 executor test file (`test_hermes_foundup_job_executor.py`)
+  has ZERO edits. Verified via `pytest -q` returning `46 passed`
+  unchanged from the #778 baseline.
+- AST scans reject any second resolver implementation in either the
+  executor or the generator.
+- No skip / no xfail on any security assertion.
+
+---
+
 ## 2026-06-10 - Hermes Module-Path Trust Removal Phase 1 Tests
 
 **Command**:
