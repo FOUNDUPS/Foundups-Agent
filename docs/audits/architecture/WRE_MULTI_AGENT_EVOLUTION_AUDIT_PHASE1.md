@@ -1,6 +1,6 @@
-# WSP Multi-Agent Evolution Audit -- Phase 1 (Decision-Only)
+# WRE Multi-Agent Evolution Audit -- Phase 1 (Decision-Only)
 
-- Slice: WSP_MULTI_AGENT_EVOLUTION_AUDIT_PHASE1
+- Slice: WRE_MULTI_AGENT_EVOLUTION_AUDIT_PHASE1
 - Base SHA: 3339d34c4
 - Method: WSP_00 (Zen State) / WSP_50 (pre-action verification) / WSP_97 (Truth Boundary) / COTCAR
 - Status: decision-only architecture audit. NO runtime / source / test changes. No fixes.
@@ -377,4 +377,4 @@ Declared rows: 11
 | 8 | NO_NAVIGATION_CHANGE | YES | NAVIGATION.py not touched; out of scope this slice; git diff confirms it is not in the changed set |
 | 9 | NO_HOLOINDEX_ARTIFACTS_COMMITTED | YES | No HoloIndex DB/index, AGENT_CLI_CATALOG.md, command_rolodex.json, or .claude/** staged; only the three in-scope docs |
 | 10 | ASCII_CLEAN | YES | Audit doc byte-checked NON_ASCII 0; ROADMAP added lines and ModLog entry contain 0 non-ASCII bytes |
-| 11 | FILE_SCOPE_EXACTLY_THREE | YES | git diff --cached --name-only = exactly docs/audits/architecture/WSP_MULTI_AGENT_EVOLUTION_AUDIT_PHASE1.md, modules/infrastructure/wre_core/wre_master_orchestrator/ROADMAP.md, ModLog.md |
+| 11 | FILE_SCOPE_EXACTLY_THREE | YES | git diff --cached --name-only = exactly docs/audits/architecture/WRE_MULTI_AGENT_EVOLUTION_AUDIT_PHASE1.md, modules/infrastructure/wre_core/wre_master_orchestrator/ROADMAP.md, ModLog.md |

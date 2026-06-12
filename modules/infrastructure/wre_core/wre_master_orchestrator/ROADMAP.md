@@ -20,7 +20,7 @@ Grounded current state: WREMasterOrchestrator declares "THE orchestrator" but is
 FoundUpJob seam (grep FoundUpJob/drain/_FOUNDUP_JOB_QUEUE in this module = ZERO); 4-5 competing
 orchestrators run as peers; thread-safety is accidental (worktree process isolation + GIL, not
 guaranteed in-process). Full evidence and blueprint:
-[docs/audits/architecture/WSP_MULTI_AGENT_EVOLUTION_AUDIT_PHASE1.md](../../../../docs/audits/architecture/WSP_MULTI_AGENT_EVOLUTION_AUDIT_PHASE1.md)
+[docs/audits/architecture/WRE_MULTI_AGENT_EVOLUTION_AUDIT_PHASE1.md](../../../../docs/audits/architecture/WRE_MULTI_AGENT_EVOLUTION_AUDIT_PHASE1.md)
 Ordered next slices:
 1. WRE_MULTI_AGENT_CONCURRENCY_RISK_CONFIRMATION_PHASE1 (confirm queue TOCTOU + policy_flags race vs current main)
 2. queue-ownership consolidation (OpenClaw PUSH only; consumer sole drainer/remover)
