@@ -5,7 +5,7 @@
 - Method: WSP_00 (Zen State) / WSP_50 (pre-action verification) / WSP_97 (Truth Boundary) / COTCAR
 - Status: DECISION-ONLY confirmation. NO src change, NO fix, NO committed test.
 - Worker-Lane: A (W9)
-- Parent: docs/audits/architecture/WSP_MULTI_AGENT_EVOLUTION_AUDIT_PHASE1.md (documented these two
+- Parent: docs/audits/architecture/WRE_MULTI_AGENT_EVOLUTION_AUDIT_PHASE1.md (documented these two
   races as "DOCUMENTED, NOT FIXED" and named this slice as the first execution follow-up).
 
 ---
