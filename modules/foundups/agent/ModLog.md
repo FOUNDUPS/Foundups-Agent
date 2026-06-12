@@ -1,5 +1,90 @@
 # Agent Module ModLog
 
+## 2026-06-12 - WRE ContextBundle Dry-Run Consumer Phase 1 (first consumer adopts #775 bundle as trusted input)
+
+**Author**: 0102 (W6)
+**Commander**: 012
+**Slice**: WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1
+**Branch**: `w6/wre-context-bundle-dryrun-consumer-phase1`
+**Base**: `90a7ec0ee` (origin/main after #779 and #781)
+**Effort**: ULTRA
+
+**Type**: Limited implementation. First consumer wiring of a trust artifact
+(the #775 ContextBundle) into the EXISTING dry-run evidence path. Dry-run
+only; no live execution. STANDALONE module + tests (ruling A): consumes a
+ContextBundle + the shared validated resolver and RETURNS a typed
+`DryRunResult` (ruling B: return-value-only, no side effects). NOT plumbed
+into the live OpenClaw/WRE loop (runtime wiring is a separate Phase-2 slice).
+
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 84, WSP 97, WSP 22.
+
+### Phase 0 -- Mandatory Discovery summary
+
+- **HoloIndex** (index refreshed in #781): 3/3 queries returned the
+  canonical files in the top hits (`build_plan_executor.py`,
+  `hermes_foundup_job_executor.py`, `context_bundle_builder.py`,
+  `module_path_resolution.py`, `source_authority.py`). Retrieval signal
+  was GOOD this slice (the #781 reindex resolved the two prior LOW-signal
+  slices). Manual `Read`/`Grep` cross-checked every target against the
+  committed base per the tool-staleness guard.
+- **Existing dry-run path ADOPTED (not invented)**: confirmed two existing
+  dry-run primitives. (1) `hermes_foundup_job_executor.execute_foundup_job`
+  (`modules/foundups/agent/src/hermes_foundup_job_executor.py:104-261`)
+  resolves module_path via the shared `_resolve_validated_module_path`
+  (line 186) before any sink; real-exec sink is
+  `HermesFoundUpBuilder.extract_foundup`. (2) `BuildPlanExecutor.execute_step`
+  (`modules/foundups/agent/src/build_plan_executor.py:618-665`): dry-run
+  delegates to `simulate_step` (SIMULATED), real returns BLOCKED;
+  `ExecutionReceipt` truth fields all False. The consumer reuses these
+  shapes STANDALONE; it introduces NO live-loop wiring and NO second
+  orchestrator.
+
+### What changed
+
+- **NEW** `src/context_bundle_dry_run_consumer.py` (~340 lines):
+  `consume_context_bundle_dry_run(bundle, *, job=None, repo_root=None)`
+  returns a frozen `DryRunResult`. Pinned design:
+  - The ContextBundle is the TRUSTED input; the consumer reads validated
+    fields (`module_path`, `source_authority`, `required_gates_to_recheck`,
+    `readiness_flags`, `included_file_refs`) and does NOT re-derive trust
+    from a raw payload.
+  - `module_path` is ALWAYS the bundle's validated canonical value. When a
+    `job` is supplied (it may carry a forged `payload.module_path` /
+    `source_module`), the SAME shared `_resolve_validated_module_path`
+    (#778/#779) is run as defense-in-depth and its effective path MUST equal
+    the bundle's `module_path`; the payload candidate is surfaced as
+    observable-ignore in `rejected_input` and is NEVER used. NO second
+    resolver is defined (AST-pinned; exactly one resolver def repo-wide).
+  - `source_authority` MUST equal `monorepo_poc` (via `resolve_source_authority`
+    + `ACTIVE_STAGES`, #777); the consumer CANNOT promote a stage; any
+    non-monorepo_poc bundle is REFUSED.
+  - `required_gates_to_recheck` are gate NAMES to re-check, never pass-state;
+    no gate-pass boolean is computed or serialized.
+  - DRY-RUN ONLY: `dry_run=True` / `real_execution_performed=False`; no real
+    build / subprocess / Hermes real delegation / executor sink invoked.
+    `HERMES_DELEGATE_ENABLED` is never set; real delegation stays BLOCKED.
+- **NEW** `tests/test_context_bundle_dry_run_consumer.py` (51 tests, 0
+  skip/xfail): happy path, forged-payload rejection (cross-FoundUp / alias /
+  syntactic), non-monorepo_poc refusal, gates-as-names (no pass-state
+  serialized), real-exec sink + Hermes delegation + subprocess
+  `assert_not_called`, no-file-bodies, HERMES flag respected, AST guards
+  (no orchestrator / no second resolver / no subprocess-network-write),
+  return-value-only (no file write, frozen result, no FAM import), and all 6
+  real manifests.
+
+### Tests
+
+- New consumer suite: 51 passed, 0 skip/xfail.
+- Full `modules/foundups/agent/tests/`: 697 passed, 0 skip/xfail.
+
+### Non-goals / boundaries honoured
+
+- NO new orchestrator; NO live build/real execution/subprocess; NO external
+  agent; NO readiness promotion; NO repo concatenation (refs+sha256 only);
+  NO mutation of `context_bundle_builder.py` / `module_path_resolution.py` /
+  `source_authority.py` / `foundup_manifest_validator.py` (git diff confirms);
+  NO live-loop runtime wiring; NO FAM event / file write.
+
 ## 2026-06-11 - BuildPlan Generator Module-Path Trust Removal Phase 1 (#778 carry-forward closure + shared resolver extraction)
 
 **Author**: 0102 (W6)

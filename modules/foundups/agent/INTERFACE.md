@@ -1,6 +1,79 @@
 # Agent Module Interface
 
-Public API and schema contracts for agent lifecycle management, BuildPlan generation, controlled execution, read-only manifest provenance, source-authority contract, and validated module-path resolution.
+Public API and schema contracts for agent lifecycle management, BuildPlan generation, controlled execution, read-only manifest provenance, source-authority contract, validated module-path resolution, and the read-only ContextBundle dry-run consumer.
+
+## ContextBundle Dry-Run Consumer (WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1)
+
+First consumer wiring of the read-only #775 ContextBundle into the EXISTING
+dry-run evidence path. STANDALONE and return-value-only: it consumes a
+ContextBundle as its TRUSTED input and RETURNS a typed `DryRunResult`
+describing what a FoundUp dry-run WOULD do. It performs NO live build, NO real
+execution, NO subprocess, NO Hermes real delegation, NO executor sink, NO FAM
+event, and NO file write. It is NOT plumbed into the live OpenClaw/WRE loop
+(runtime wiring is a separate Phase-2 slice).
+
+```python
+# modules/foundups/agent/src/context_bundle_dry_run_consumer.py  (NEW)
+
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, Optional, Tuple
+
+from modules.communication.moltbot_bridge.src.foundup_job_contract import FoundUpJob
+from modules.foundups.agent.src.context_bundle_builder import ContextBundle
+
+
+@dataclass(frozen=True)
+class PlannedAction:
+    """A build/test action the dry-run WOULD run -- declared, never executed."""
+    name: str
+    argv: Optional[Tuple[str, ...]]   # declared tokens; never executed
+    would_mutate: bool
+    executed: bool                    # ALWAYS False
+
+
+@dataclass(frozen=True)
+class DryRunResult:
+    """Return-value-only dry-run preview. No side effects produced it."""
+    consumer_version: str
+    bundle_id: str
+    foundup_id: str
+    resolved_module_path: str         # validated canonical; never a payload value
+    source_authority: str             # always "monorepo_poc"
+    planned_actions: Tuple[PlannedAction, ...]
+    gates_to_recheck: Tuple[str, ...]  # gate NAMES; never pass-state
+    readiness_flags: Dict[str, bool]   # echoed; all False
+    evidence_refs: Tuple[Dict[str, Any], ...]  # path+sha256+size+role; NO bodies
+    rejected_input: Dict[str, Any]     # observable-ignore of any payload value
+    dry_run: bool = True
+    real_execution_performed: bool = False
+    def to_dict(self) -> Dict[str, Any]: ...
+
+
+class DryRunConsumerRejected(Exception):
+    """Raised on non-monorepo_poc authority, resolver mismatch, promoted
+    readiness, external-agent-allowed, or cross-FoundUp payload substitution.
+    The consumer NEVER returns a DryRunResult on rejection."""
+
+
+def consume_context_bundle_dry_run(
+    bundle: ContextBundle,
+    *,
+    job: Optional[FoundUpJob] = None,
+    repo_root: Optional[Path] = None,
+) -> DryRunResult:
+    """Consume a trusted ContextBundle and RETURN a dry-run preview.
+
+    - The bundle is the TRUSTED input; trust is NOT re-derived from a payload.
+    - module_path is ALWAYS the bundle's validated canonical value. When a
+      ``job`` is supplied, the SHARED ``_resolve_validated_module_path``
+      (#778/#779) re-validates defensively and its effective path MUST match
+      the bundle's; the payload candidate is observable-ignore only.
+    - source_authority MUST equal "monorepo_poc" (no stage promotion).
+    - required_gates are NAMES to re-check, never pass-state.
+    - dry_run=True / real_execution_performed=False; no sink invoked.
+    """
+```
 
 ## Shared Module-Path Resolver (BUILD_PLAN_GENERATOR_MODULE_PATH_TRUST_REMOVAL_PHASE1)
 
