@@ -1,5 +1,45 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-12] Operational WRE monorepo-PoC Operator Runbook Phase 1 (W6, decision-only)
+
+**Change Type**: DECISION-ONLY operator runbook. NO code, NO tests, NO production
+change. Lets 012/0102 reproduce the merged monorepo-PoC dry-run vertical proof
+and correctly interpret its evidence and boundary. Does NOT move toward real
+execution; no scope expansion into external_proto / MVP / DAO / CABR.
+**By**: 0102 (W6) | Commander: 012 | Reviewer: W10
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 97, WSP 22
+**Slice**: OPERATIONAL_WRE_MONOREPO_POC_OPERATOR_RUNBOOK_PHASE1
+**Base**: `a9fd0cb19dbb8620fe5a6df828edd40122637f54` (origin/main = #789 closeout merge)
+
+- NEW `docs/audits/architecture/OPERATIONAL_WRE_MONOREPO_POC_OPERATOR_RUNBOOK_PHASE1.md`.
+  Seven sections: (1) PURPOSE & SCOPE -- monorepo_poc DRY-RUN ONLY; NOT MVP /
+  external_proto / real-live execution / deployment. (2) PREREQUISITES --
+  repo at a9fd0cb19+, proof landed in #788, `HERMES_DELEGATE_ENABLED` unset/0
+  precondition; proof self-contains its sink mocks. (3) REPRODUCE -- the exact
+  command `python -m pytest modules/infrastructure/wre_core/tests/test_operational_wre_monorepo_poc_vertical_proof.py -q`,
+  expected `3 passed` exit 0 (duration NOT pinned), 3 tests named. (4) INTERPRET
+  THE EVIDENCE -- table of operator-visible fields with expected values and
+  file:line cites verified against the merged #788 proof test
+  (`checkpoint_state==SIMULATED`, `bundle_id`/`consumer_version` populated
+  proving #775/#786, `source_authority==monorepo_poc`, validated
+  `resolved_module_path`, resolver fields, WSP_97 truth fields all False, no
+  body/pass-state leak, sinks assert_not_called, forged-path rejection tokens).
+  (5) BOUNDARY -- what a green run does NOT prove; POINTS to closeout Sections
+  2/3/4 (not re-cited raw). (6) TROUBLESHOOTING -- failure classes mapped to
+  owning seam/PR (#775/#786/#778/#779/#787); a fired sink mock = real-execution
+  LEAK, STOP/escalate. (7) WSP_97 Truth Boundary Checklist (11 rows,
+  declared==actual, all YES).
+- POINTS to the merged closeout
+  `docs/audits/architecture/OPERATIONAL_WRE_MONOREPO_POC_CLOSEOUT_PHASE1.md` for
+  the formal boundary rather than re-deriving boundary file:line. Field cites
+  grounded against `git show a9fd0cb19:<proof test>`. PRs referenced: #775
+  (producer), #786 (consumer), #787 (dispatch seam), #788 (proof), #789
+  (closeout merge).
+- Boundary: `git diff --name-only` against base lists ONLY this runbook + this
+  root ModLog entry -- 0 `.py`, 0 test, 0 `.json`, 0 `.yml`. Runbook 0
+  non-ASCII (byte-checked). No move toward real execution; precondition
+  `HERMES_DELEGATE_ENABLED` unset/0 preserved, not enabled.
+
 ## [2026-06-12] Operational WRE monorepo-PoC Closeout Phase 1 (W6, decision-only)
 
 **Change Type**: DECISION-ONLY closeout doc. NO code, NO tests, NO production
