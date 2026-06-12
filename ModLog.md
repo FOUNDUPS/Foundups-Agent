@@ -41,11 +41,14 @@ fixture). NAVIGATION.py NEED_TO coverage update folded into the follow-up
 
 **Report**: `docs/audits/infrastructure/HOLOINDEX_REINDEX_FOR_OPERATIONAL_WRE_PHASE1.md`
 (BEFORE/AFTER timestamps, 20 result sets, per-query verdicts, 4-way
-failure-mode taxonomy applied, WSP_97 18/18). Note: the report path is under
+failure-mode taxonomy applied, WSP_97 18/18). Note: the report path was under
 the `docs/audits/*` ignore rule (`.gitignore:324`) without an
-`infrastructure/` negation pair; committed via explicit `git add -f` to keep
-the repo diff at exactly report + ModLog. Adding the 2-line negation pair is
-left for W10 authorization.
+`infrastructure/` negation pair; the initial commit used explicit `git add -f`
+with the deviation disclosed. 012 returned the slice for an authorized
+micro-repair: the 2-line negation pair (`!docs/audits/infrastructure/` +
+`/**`) is now added at `.gitignore:358-359`, matching the 17 precedent pairs,
+so the report (and future infrastructure audit docs) are tracked without
+force-add. Repair scope: .gitignore + report + ModLog only.
 
 ## [2026-06-10] Hermes Module-Path Trust Removal Phase 1 (#774 carry-forward closure)
 
