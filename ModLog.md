@@ -1,5 +1,37 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-12] WRE ContextBundle Dry-Run Runtime Wiring Phase 2 (W6)
+
+**Change Type**: FIRST runtime integration -- wires the standalone #786
+ContextBundle dry-run consumer into the EXISTING #774 OpenClaw/WRE dispatch
+seam. Dry-run path only; the live-execution boundary stays intact and BLOCKED.
+**By**: 0102 (W6) | Commander: 012 | Reviewer: W10
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 97, WSP 22
+**Slice**: WRE_CONTEXT_BUNDLE_DRYRUN_RUNTIME_WIRING_PHASE2
+**Base**: `22423bfd0` (origin/main = #786)
+
+- CHANGED `modules/infrastructure/wre_core/src/foundup_job_consumer.py`
+  (+192 lines): one OPTIONAL evidence field `context_bundle_dry_run` on the
+  EXISTING `ConsumerResult` receipt, one new private method
+  `_attach_context_bundle_dry_run`, and one call to it inside the PRE-EXISTING
+  dry-run branch of `_dispatch_to_hermes`. On the dry-run branch (Hermes status
+  SIMULATED, `HERMES_DELEGATE_ENABLED` unset/0) the seam builds the #775
+  `ContextBundle` via the resolved manifest and calls the #786
+  `consume_context_bundle_dry_run`, mapping `DryRunResult` into the EXISTING
+  receipt. No new orchestrator/loop, no new receipt type, no second resolver.
+- The real-exec / Hermes-delegation branch is UNCHANGED and BLOCKED
+  (`BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED`); `hermes_job_executor.py`, the #786
+  consumer, the #775 builder, the shared resolver, `source_authority.py`, and the
+  validator are NOT modified. `source_authority=monorepo_poc` visible; gates are
+  recheck-NAMES; readiness False; ContextBundle refs + sha256 only (no bodies).
+- NEW `modules/infrastructure/wre_core/tests/test_foundup_job_consumer_context_bundle_wiring.py`
+  (24 passed, 0 skip/xfail): real-exec sinks (subprocess + Hermes delegate
+  loader) assert_not_called through the seam dry-run path; forged-payload
+  rejection via the shared resolver; non-monorepo_poc refusal; AST guards
+  (one resolver repo-wide, no new orchestrator).
+- Audit: `docs/audits/architecture/WRE_CONTEXT_BUNDLE_DRYRUN_RUNTIME_WIRING_PHASE2.md`
+  (WSP_97 21/21 YES, ASCII-clean).
+
 ## [2026-06-12] WRE ContextBundle Dry-Run Consumer Phase 1 (W6)
 
 **Change Type**: Limited implementation -- first consumer wiring of a trust

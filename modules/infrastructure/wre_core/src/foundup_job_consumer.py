@@ -185,6 +185,23 @@ class ConsumerResult:
     real_execution_performed: bool = False
     """WSP 97: True ONLY if real delegate_task was called (never in Phase 1)."""
 
+    context_bundle_dry_run: Optional[Dict[str, Any]] = None
+    """
+    WRE_CONTEXT_BUNDLE_DRYRUN_RUNTIME_WIRING_PHASE2: serialized DryRunResult.
+
+    Carries the #786 ContextBundle dry-run preview
+    (``DryRunResult.to_dict()``) when, and ONLY when, the seam took its
+    PRE-EXISTING dry-run branch (Hermes execution status == SIMULATED and
+    ``real_execution_performed`` is False, i.e. HERMES_DELEGATE_ENABLED
+    unset/0). This is an OPTIONAL evidence field on the EXISTING
+    ConsumerResult receipt -- NOT a new receipt type and NOT a new
+    orchestrator. It is ``None`` on the real-exec / BLOCKED branch and
+    whenever the bundle build / consume could not run (an observable error
+    projection is recorded instead of raising). It contains refs + sha256
+    only (no file bodies), source_authority="monorepo_poc", gate NAMES to
+    re-check (never pass-state), and readiness flags all False.
+    """
+
     consumed_at: datetime = field(default_factory=_utc_now)
     """Timestamp when consumption completed."""
 
@@ -205,6 +222,8 @@ class ConsumerResult:
             "checkpoint_next_action": self.checkpoint_next_action,
             "evidence_path": self.evidence_path,
             "real_execution_performed": self.real_execution_performed,
+            # WRE_CONTEXT_BUNDLE_DRYRUN_RUNTIME_WIRING_PHASE2 evidence (dry-run only)
+            "context_bundle_dry_run": self.context_bundle_dry_run,
             # WSP 97 truth fields (always present via properties)
             "verification_complete": self.verification_complete,
             "cabr_ready": self.cabr_ready,
@@ -463,6 +482,17 @@ class FoundUpJobConsumer:
                 else:
                     reason += f"; receipt_error={receipt_emission.error}"
 
+            # WRE_CONTEXT_BUNDLE_DRYRUN_RUNTIME_WIRING_PHASE2:
+            # Attach the #786 ContextBundle dry-run preview ONLY on the
+            # seam's PRE-EXISTING dry-run branch (SIMULATED + no real exec).
+            # The real-exec / BLOCKED branch is untouched and contributes no
+            # bundle evidence. This is the only runtime wiring of the dry-run
+            # consumer into the existing dispatch seam; no new orchestrator,
+            # no new receipt type, no second resolver, no real execution.
+            context_bundle_dry_run = self._attach_context_bundle_dry_run(
+                job, hermes_result, job_id
+            )
+
             return ConsumerResult(
                 job_id=job_id,
                 dispatched=dispatched,
@@ -479,6 +509,7 @@ class FoundUpJobConsumer:
                 checkpoint_next_action=hermes_result.checkpoint_next_action,
                 evidence_path=hermes_result.evidence_path,
                 real_execution_performed=hermes_result.real_execution_performed,
+                context_bundle_dry_run=context_bundle_dry_run,
             )
 
         except ImportError as e:
@@ -502,6 +533,167 @@ class FoundUpJobConsumer:
                 reason=f"Hermes dispatch exception: {e}",
                 envelope=envelope,
             )
+
+    def _attach_context_bundle_dry_run(
+        self, job: Any, hermes_result: Any, job_id: str
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Build the #786 ContextBundle dry-run preview on the dry-run branch ONLY.
+
+        WRE_CONTEXT_BUNDLE_DRYRUN_RUNTIME_WIRING_PHASE2 (W6).
+
+        This runs the read-only #775 ContextBundle producer and the #786
+        ``consume_context_bundle_dry_run`` consumer and returns the
+        serialized ``DryRunResult`` (``to_dict()``) for attachment to the
+        EXISTING ``ConsumerResult`` receipt.
+
+        Strict boundary (no overclaim, no real execution):
+          - Runs ONLY when the seam took its PRE-EXISTING dry-run branch:
+            the Hermes execution status is SIMULATED AND
+            ``real_execution_performed`` is False (HERMES_DELEGATE_ENABLED
+            unset/0). On the real-exec / BLOCKED branch this returns None
+            and contributes no bundle evidence.
+          - As a positive control, it also requires
+            ``is_hermes_delegation_enabled()`` to be False so the wiring can
+            never be reached with the live-delegation flag set.
+          - The module_path is resolved ONLY through the single shared
+            validated resolver (#778/#779). The bundle is built from the
+            resolved manifest path. NO second resolver is defined here.
+          - The #786 consumer receives the job so its shared-resolver
+            cross-check / observable-ignore runs; a forged
+            payload.module_path / source_module is rejected there and the
+            rejected value is surfaced (never used) in the result.
+          - NO subprocess, NO Hermes real delegation, NO file write, NO FAM
+            event. The consumer is return-value-only.
+          - Any failure (resolver reject, builder reject, consumer reject,
+            import error) is captured as an OBSERVABLE error projection and
+            returned; it NEVER raises into the dispatch path and NEVER
+            promotes readiness.
+
+        Returns:
+            Serialized ``DryRunResult`` dict on the dry-run branch, an
+            observable ``{"dry_run": True, "context_bundle_error": ...}``
+            dict if the bundle could not be produced, or None when the
+            branch is not the dry-run branch.
+        """
+        # --- Gate 1: only the PRE-EXISTING dry-run branch (SIMULATED, no real exec) ---
+        status = getattr(hermes_result, "status", None)
+        status_value = status.value if hasattr(status, "value") else str(status)
+        real_exec = getattr(hermes_result, "real_execution_performed", False)
+        if status_value != "SIMULATED" or real_exec:
+            # Real-exec / BLOCKED / error branch: no bundle evidence attached.
+            return None
+
+        # --- Gate 2: positive control -- live delegation flag must be unset/0 ---
+        try:
+            from modules.infrastructure.wre_core.src.hermes_job_executor import (
+                is_hermes_delegation_enabled,
+            )
+        except ImportError as exc:  # pragma: no cover - defensive
+            return {
+                "dry_run": True,
+                "real_execution_performed": False,
+                "context_bundle_error": f"flag_check_import_failed: {type(exc).__name__}",
+            }
+        if is_hermes_delegation_enabled():
+            # Not the dry-run branch by flag; do not attach (defensive).
+            return None
+
+        # --- Build + consume the bundle (return-value-only; no side effects) ---
+        try:
+            from pathlib import Path as _Path
+
+            from modules.foundups.agent.src.module_path_resolution import (
+                DEFAULT_REPO_ROOT,
+                _resolve_validated_module_path,
+            )
+            from modules.foundups.agent.src.context_bundle_builder import (
+                build_context_bundle,
+            )
+            from modules.foundups.agent.src.context_bundle_dry_run_consumer import (
+                DryRunConsumerRejected,
+                consume_context_bundle_dry_run,
+            )
+        except ImportError as exc:
+            logger.info(
+                "[CONSUMER] ContextBundle dry-run wiring unavailable for job %s: %s",
+                job_id,
+                exc,
+            )
+            return {
+                "dry_run": True,
+                "real_execution_performed": False,
+                "context_bundle_error": f"import_unavailable: {type(exc).__name__}",
+            }
+
+        repo_root = DEFAULT_REPO_ROOT
+
+        # Resolve module_path via the SINGLE shared validated resolver. The
+        # manifest path is derived from the validated canonical path; the
+        # bundle is built from that manifest. No payload value is trusted.
+        try:
+            resolved = _resolve_validated_module_path(job, repo_root)
+        except Exception as exc:  # pragma: no cover - resolver is fail-closed
+            return {
+                "dry_run": True,
+                "real_execution_performed": False,
+                "context_bundle_error": f"resolver_exception: {type(exc).__name__}",
+            }
+        if resolved.failed or not resolved.effective:
+            return {
+                "dry_run": True,
+                "real_execution_performed": False,
+                "context_bundle_error": "module_path_resolution_failed",
+                "fail_token": resolved.fail_token,
+                "payload_module_path_ignored": resolved.ignored,
+            }
+
+        manifest_path = _Path(repo_root) / resolved.effective / "foundup_manifest.json"
+
+        # created_at: the builder requires a string; it is NOT used for
+        # bundle_id (sha256-derived). Use a wall-clock ISO value for
+        # provenance only.
+        created_at = _utc_now().isoformat()
+
+        try:
+            bundle = build_context_bundle(
+                manifest_path, repo_root, created_at=created_at
+            )
+        except Exception as exc:
+            return {
+                "dry_run": True,
+                "real_execution_performed": False,
+                "context_bundle_error": f"bundle_build_rejected: {type(exc).__name__}",
+            }
+
+        try:
+            dry_run_result = consume_context_bundle_dry_run(
+                bundle, job=job, repo_root=repo_root
+            )
+        except DryRunConsumerRejected as exc:
+            # Non-monorepo_poc, forged payload, or readiness promotion: the
+            # consumer refused. Surface the refusal as observable evidence;
+            # never promote, never raise into dispatch.
+            return {
+                "dry_run": True,
+                "real_execution_performed": False,
+                "context_bundle_error": f"consumer_rejected: {type(exc).__name__}",
+            }
+        except Exception as exc:  # pragma: no cover - defensive
+            return {
+                "dry_run": True,
+                "real_execution_performed": False,
+                "context_bundle_error": f"consumer_exception: {type(exc).__name__}",
+            }
+
+        logger.info(
+            "[CONSUMER] ContextBundle dry-run preview attached for job %s "
+            "(module_path=%s, source_authority=%s)",
+            job_id,
+            dry_run_result.resolved_module_path,
+            dry_run_result.source_authority,
+        )
+        return dry_run_result.to_dict()
 
     def _emit_receipt_if_terminal(
         self, job: Any, job_id: str
