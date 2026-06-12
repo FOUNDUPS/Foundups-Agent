@@ -1,5 +1,47 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-12] Operational WRE monorepo-PoC Closeout Phase 1 (W6, decision-only)
+
+**Change Type**: DECISION-ONLY closeout doc. NO code, NO tests, NO production
+change. A plain, evidence-backed statement of where the operational-WRE
+monorepo-PoC stands as of base `4f57af549` (#788). PROVEN vs DEFERRED kept
+strictly separate; does NOT move toward real execution.
+**By**: 0102 (W6) | Commander: 012 | Reviewer: W10
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 97, WSP 22
+**Slice**: OPERATIONAL_WRE_MONOREPO_POC_CLOSEOUT_PHASE1
+**Base**: `4f57af5499c1a4c7f5ecffbcb58a360c5ece906a` (origin/main = #788 vertical proof)
+
+- NEW `docs/audits/architecture/OPERATIONAL_WRE_MONOREPO_POC_CLOSEOUT_PHASE1.md`.
+  Four grounded sections: (1) WHAT NOW WORKS (PROVEN) -- the dry-run
+  producer->consumer->dispatch-seam loop proven end-to-end by #788 (real
+  OpenClaw create -> WRE drain -> SIMULATED -> ContextBundle #775 -> #786
+  consumer -> DryRunResult in the ConsumerResult receipt; single validated
+  module_path resolver; `source_authority` pinned `monorepo_poc`). (2) STILL
+  DRY-RUN / SIMULATED -- real execution BLOCKED (`HERMES_DELEGATE_ENABLED`
+  default 0; `BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED`; only `validate_foundup`
+  reaches SIMULATED, build/extract D0-D6 guard-blocked; no subprocess/mutation).
+  (3) NOT MVP -- `monorepo_poc` ONLY; not OPO/MVP/external_proto/dao_managed; no
+  CABR/payout/DAO; cannot self-promote. (4) external_proto gap enumerated as
+  DEFERRED per the #777 contract transition gates + per-stage matrix, PLUS the
+  separate real-execution gap (D0-D6 guard + sovereign valve + CABR + Phase-2
+  delegation) -- no plan to start now.
+- Reproducible PoC Proof section: POINTER to #788's existing test
+  `modules/infrastructure/wre_core/tests/test_operational_wre_monorepo_poc_vertical_proof.py`;
+  command `python -m pytest <that file> -q`; pass condition `3 passed`
+  (verified once: `3 passed in 0.73s`, exit 0). Enumerates the evidence-chain
+  fields PROVEN present (validated manifest reference, ContextBundle metadata,
+  `source_authority=monorepo_poc`, `resolved_module_path` from the shared
+  resolver, DryRunResult, ConsumerResult/receipt, truth fields all False, no
+  file bodies, no live execution) with the assertion site for each.
+- Grounded in MERGED code/tests/PR (read via `git show 4f57af549:<path>`), not
+  memory: #775/#777/#778/#779/#786/#787/#788 all cited. HoloIndex used for
+  discovery only (MEDIUM signal; exact closeout-chain artifacts not in top
+  hits) -- recorded, not relied on for truth.
+- Boundary: `git diff --name-only 4f57af549 HEAD` lists ONLY this doc + this
+  root ModLog -- 0 `.py`, 0 test files, 0 production change. Doc 0 non-ASCII.
+  WSP_97 14-row Truth Boundary Checklist (declared==actual, all YES). Did NOT
+  touch the 4 allow-listed out-of-scope files.
+
 ## [2026-06-12] Operational WRE monorepo-PoC Vertical Dry-Run Proof Phase 1 (W6)
 
 **Change Type**: VERTICAL PROOF (integration test + proof doc). Proves one full
