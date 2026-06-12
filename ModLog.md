@@ -1,5 +1,45 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-12] Operational WRE monorepo-PoC Vertical Dry-Run Proof Phase 1 (W6)
+
+**Change Type**: VERTICAL PROOF (integration test + proof doc). Proves one full
+dry-run invocation end-to-end through the EXISTING OpenClaw/WRE create+drain seam
+for a safe monorepo_poc FoundUp (`gotjunk_001`). NO production code, NO new
+wiring, NO broadening of actions.
+**By**: 0102 (W6) | Commander: 012 | Reviewer: W10
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 97, WSP 22
+**Slice**: OPERATIONAL_WRE_MONOREPO_POC_VERTICAL_PROOF_PHASE1
+**Base**: `c7839c2ab` (origin/main = #787 dry-run runtime wiring)
+
+- NEW `modules/infrastructure/wre_core/tests/test_operational_wre_monorepo_poc_vertical_proof.py`
+  (3 passed, 0 skip/xfail). Drives the REAL create entry
+  (`openclaw_foundup_orchestrator.dispatch_foundup` enqueue ->
+  `_FOUNDUP_JOB_QUEUE.append`) and the REAL drain entry
+  (`FoundUpJobConsumer.drain_openclaw_queue_with_retention` -> `consume_one` ->
+  `_dispatch_to_hermes` -> `execute_foundup_job` SIMULATED ->
+  `_attach_context_bundle_dry_run` #787). Does NOT mock the seam; does NOT call
+  the #786 consumer in isolation. Only mocks are the real-exec sinks
+  (`subprocess.Popen`/`run`/`call`, `HermesJobExecutor._lazy_import_delegate_task`),
+  asserted `assert_not_called` through the full seam.
+- ACCEPTANCE (one invocation): real create + real drain; SIMULATED /
+  `real_execution_performed False`; ContextBundle BUILT (#775); #786 consumer
+  RAN; DryRunResult ATTACHED to the EXISTING `ConsumerResult` receipt;
+  `source_authority == monorepo_poc`; `resolved_module_path` from the shared
+  validated resolver (validated canonical, NOT payload); `evidence_refs`
+  refs+sha256(+size+role) only; no file bodies; no live Hermes delegation; no
+  subprocess/build execution; readiness all False. NEGATIVE: forged cross-FoundUp
+  `module_path` rejected end-to-end (`cross_foundup_mismatch`; observable; never
+  used). `validate_foundup` is the action reaching SIMULATED (build/extract
+  guard-blocked). `gotjunk_001` is a PARAMETERIZED fixture default.
+- NEW `docs/audits/architecture/OPERATIONAL_WRE_MONOREPO_POC_VERTICAL_PROOF_PHASE1.md`
+  (proof doc: REAL path file:line, asserted chain, WSP_97 20-row table).
+- Boundary: `git diff --name-only c7839c2ab HEAD` lists ONLY the new test, the
+  new proof doc, and the wre_core + root ModLogs -- 0 production-code files. New
+  `.py`/`.md` 0 non-ASCII. Broader wre_core consumer suite 58 passed (isolated
+  worktree).
+
+---
+
 ## [2026-06-12] WRE ContextBundle Dry-Run Runtime Wiring Phase 2 (W6)
 
 **Change Type**: FIRST runtime integration -- wires the standalone #786
