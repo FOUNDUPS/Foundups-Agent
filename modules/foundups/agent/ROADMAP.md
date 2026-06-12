@@ -81,6 +81,30 @@
   - WSP placement: docs/architecture (cites WSP 27/103/109 triad);
     promotion to WSP deferred to
     `FOUNDUP_LIFECYCLE_SOURCE_AUTHORITY_WSP_FORMALIZATION_PHASE1`
+- [x] ContextBundle dry-run consumer (WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1)
+  - NEW `modules/foundups/agent/src/context_bundle_dry_run_consumer.py`:
+    `consume_context_bundle_dry_run(bundle, *, job=None, repo_root=None)`
+    returns a frozen `DryRunResult` (return-value-only, no side effects)
+  - First consumer wiring of the #775 ContextBundle into the EXISTING
+    dry-run evidence path (adopts the `BuildPlanExecutor` /
+    `hermes_foundup_job_executor` dry-run primitives STANDALONE)
+  - ContextBundle is the TRUSTED input; trust NOT re-derived from payload
+  - module_path is ALWAYS the bundle's validated canonical; when a job is
+    supplied, the SHARED `_resolve_validated_module_path` (#778/#779)
+    re-validates and its effective path MUST match the bundle's; payload
+    candidate is observable-ignore only; NO second resolver introduced
+  - source_authority MUST be `monorepo_poc` (via `resolve_source_authority`
+    + `ACTIVE_STAGES`); consumer CANNOT promote a stage
+  - `required_gates_to_recheck` carried as NAMES; no gate-pass boolean
+    computed or serialized
+  - DRY-RUN ONLY: `dry_run=True` / `real_execution_performed=False`; no
+    real build / subprocess / Hermes real delegation / executor sink;
+    `HERMES_DELEGATE_ENABLED` never set (real delegation stays BLOCKED)
+  - STANDALONE: NOT plumbed into the live OpenClaw/WRE loop; runtime
+    wiring deferred to a Phase-2 slice
+  - No producer / validator / source_authority / WSP / manifest mutation
+  - Deferred: `WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_RUNTIME_WIRING_PHASE2`
+    (plumb the consumer into the #774 WRE consumer dispatch seam)
 
 ### Phase 1: Core State Machine (v0.2.0)
 

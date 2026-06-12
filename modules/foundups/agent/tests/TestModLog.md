@@ -1,5 +1,53 @@
 # Agent Module TestModLog
 
+## 2026-06-12 - WRE ContextBundle Dry-Run Consumer Phase 1 Tests
+
+**Command**:
+
+```
+PYTHONIOENCODING=utf-8 python -m pytest modules/foundups/agent/tests/test_context_bundle_dry_run_consumer.py -q -p no:cacheprovider
+PYTHONIOENCODING=utf-8 python -m pytest modules/foundups/agent/tests/ -q -p no:cacheprovider
+```
+
+**Slice**: WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1 (W6)
+**New file**: `tests/test_context_bundle_dry_run_consumer.py` (51 tests)
+
+**Result**: consumer suite 51 passed, 0 skip/xfail. Full
+`modules/foundups/agent/tests/`: 697 passed, 0 skip/xfail.
+
+**Coverage (negatives prove the boundary)**:
+
+- Happy path: valid monorepo_poc bundle -> `DryRunResult`;
+  `resolved_module_path` == validated canonical (from bundle/resolver),
+  NEVER a payload value; observable-ignore surfaced even on a matching job.
+- Forged payload `module_path` / `source_module` -> rejected via the SHARED
+  resolver (cross-FoundUp, alias, absolute/traversal); rejected value
+  observable in the rejection message.
+- Non-monorepo_poc `source_authority` (dao_managed / mvp_runtime /
+  external_proto) -> refused; consumer cannot promote a stage.
+- `required_gates` appear as `gates_to_recheck` NAMES; no gate-pass boolean
+  on the result object or anywhere in the serialized dict (denylist + token
+  substring scan).
+- Dry-run emits evidence but performs NO real execution:
+  `HermesFoundUpBuilder.extract_foundup`, the wre_core
+  `hermes_job_executor.execute_foundup_job`, and `subprocess.Popen/run/call`
+  are all `assert_not_called` (both on the no-job and job-supplied paths).
+- No file bodies in evidence (refs+sha256+size+role only); a distinctive
+  manifest body line is asserted ABSENT from the serialized result.
+- `HERMES_DELEGATE_ENABLED` unset/0 keeps `is_hermes_delegation_enabled()`
+  False; the consumer never sets the flag (AST-scanned).
+- AST guards: consumer imports NO orchestrator / runtime loop, defines NO
+  second `_resolve_validated_module_path` (and binds the SAME shared object
+  as the executor; exactly one resolver def repo-wide), performs NO
+  subprocess / network / dynamic-import / file-write, and does not import the
+  validator (trust is pre-validated).
+- Return-value-only: no file write during consumption (patched
+  `builtins.open` write-mode sentinel), result is a frozen dataclass, no FAM
+  module imported.
+- All 6 real manifests (gotjunk, kosei, whack_a_magat, antifafm_broadcaster,
+  voteballots, trade) consume to a valid dry-run preview, with and without a
+  matching job.
+
 ## 2026-06-11 - BuildPlan Generator Module-Path Trust Removal Phase 1 Tests
 
 **Command**:

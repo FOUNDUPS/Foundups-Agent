@@ -1,5 +1,37 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-12] WRE ContextBundle Dry-Run Consumer Phase 1 (W6)
+
+**Change Type**: Limited implementation -- first consumer wiring of a trust
+artifact (the #775 ContextBundle) into the EXISTING dry-run evidence path.
+Dry-run only; no live execution.
+**By**: 0102 (W6) | Commander: 012 | Reviewer: W10
+**WSP References**: WSP 11, WSP 50, WSP 77, WSP 84, WSP 97, WSP 22
+**Slice**: WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1
+**Base**: `90a7ec0ee` (origin/main after #779 and #781)
+
+- NEW `modules/foundups/agent/src/context_bundle_dry_run_consumer.py`:
+  `consume_context_bundle_dry_run(bundle, *, job=None, repo_root=None)` returns
+  a frozen `DryRunResult`. STANDALONE (ruling A), return-value-only (ruling B):
+  no side effects, no FAM event, no file write, no subprocess, no Hermes real
+  delegation, no executor sink.
+- Adopts the EXISTING dry-run primitives STANDALONE
+  (`hermes_foundup_job_executor.execute_foundup_job` + `BuildPlanExecutor.
+  execute_step`); NOT plumbed into the live OpenClaw/WRE loop (Phase-2).
+- Trust rules: bundle is the TRUSTED input; module_path ALWAYS the bundle's
+  validated canonical (job path re-validated via the SHARED #778/#779
+  resolver, payload never trusted, NO second resolver); `source_authority`
+  MUST be `monorepo_poc` (no promotion); `required_gates` carried as NAMES
+  (no pass-state); `dry_run=True`/`real_execution_performed=False`;
+  `HERMES_DELEGATE_ENABLED` never set.
+- NEW `modules/foundups/agent/tests/test_context_bundle_dry_run_consumer.py`
+  (51 tests, 0 skip/xfail; real-exec sink + delegation + subprocess
+  `assert_not_called`). Full agent suite: 697 passed, 0 skip/xfail.
+- WSP_97 table: `docs/audits/architecture/WRE_CONTEXT_BUNDLE_DRYRUN_CONSUMER_PHASE1.md`
+  (23 rows, all YES, ASCII-clean).
+- No mutation of context_bundle_builder.py / module_path_resolution.py /
+  source_authority.py / foundup_manifest_validator.py / WSP / manifests.
+
 ## [2026-06-12] HoloIndex Reindex for Operational WRE Phase 1 (audit, docs-only)
 
 **Change Type**: Docs-only audit slice + external index refresh (E:/HoloIndex,
