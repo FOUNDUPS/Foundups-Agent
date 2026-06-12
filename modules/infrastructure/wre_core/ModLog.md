@@ -2,6 +2,68 @@
 
 ## Chronological Change Log
 
+### [2026-06-12] - WRE_CONTEXT_BUNDLE_DRYRUN_RUNTIME_WIRING_PHASE2 (W6)
+
+**WSP Protocol References**: WSP 11 (Interface), WSP 50 (Pre-Action), WSP 77 (Agent
+Coordination), WSP 97 (Truth Boundary), WSP 22 (ModLog)
+**Base**: `22423bfd0` (origin/main = #786 dry-run consumer)
+**Predecessors**: #774 (OpenClaw/WRE/Hermes execution-chain audit; the consumer
+seam), #775 (`build_context_bundle`), #777 (source_authority contract), #778/#779
+(shared `_resolve_validated_module_path`), #786 (standalone
+`consume_context_bundle_dry_run` -> `DryRunResult`).
+**Type**: FIRST runtime integration. Dry-run path only. Live-execution boundary
+intact.
+
+**Mission (012)**: Wire the standalone #786 dry-run consumer into the EXISTING
+OpenClaw/WRE dispatch seam for DRY-RUN ONLY. No live Hermes delegation, no real
+execution, no readiness/stage promotion, no second orchestrator.
+
+**Phase 0 (HoloIndex)**: 3 queries. Top code hits identified the EXISTING #774
+seam (`foundup_job_consumer.py` `ConsumerResult` / `_dispatch_to_hermes` ->
+`execute_foundup_job`) and the PRE-EXISTING dry-run branch/gate
+(`hermes_job_executor.py` `is_hermes_delegation_enabled()` -> `SIMULATED`;
+`BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED` real-exec branch). All constructs
+confirmed at Base via `git show 22423bfd0:<path>` before edit.
+
+**Change** - `src/foundup_job_consumer.py` (+192 lines, 0 deletions):
+- Added one OPTIONAL field `context_bundle_dry_run: Optional[Dict[str, Any]]` to
+  the EXISTING `ConsumerResult` dataclass (+ serialized in `to_dict`). This
+  EXTENDS the existing receipt; it is NOT a new receipt type.
+- Added one private method `_attach_context_bundle_dry_run(job, hermes_result,
+  job_id)`: runs ONLY on the PRE-EXISTING dry-run branch (Hermes status
+  SIMULATED AND `real_execution_performed` False AND
+  `is_hermes_delegation_enabled()` False as positive control). It resolves
+  module_path via the single shared resolver (#778/#779), builds the #775
+  `ContextBundle` from the resolved manifest, calls the #786
+  `consume_context_bundle_dry_run(bundle, job=job)`, and returns
+  `DryRunResult.to_dict()`. Any failure becomes an OBSERVABLE error projection;
+  it never raises into dispatch and never promotes readiness.
+- Added one call to the helper inside the PRE-EXISTING dry-run branch of
+  `_dispatch_to_hermes`, passing the result into the EXISTING `ConsumerResult`.
+
+**Boundary**: The real-exec / Hermes-delegation branch is UNCHANGED and BLOCKED
+(`HERMES_DELEGATE_ENABLED=0` intact; `BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED`
+untouched). `hermes_job_executor.py`, the #786 consumer, the #775 builder, the
+shared resolver, `source_authority.py`, and the validator were NOT modified
+(`git diff --name-only` lists only `foundup_job_consumer.py` + the new test +
+docs). No second resolver, no new orchestrator/loop, no subprocess, no real
+execution, no external agent. ContextBundle stays refs + sha256 only (no bodies);
+`source_authority=monorepo_poc` visible; gates are recheck-NAMES; readiness False.
+
+**Tests**: new `test_foundup_job_consumer_context_bundle_wiring.py` (24 passed, 0
+skip/xfail) incl. real-exec sink (subprocess Popen/run/call + Hermes delegate
+loader) assert_not_called THROUGH the seam dry-run path, forged-payload rejection
+via the shared resolver (observable, never used), non-monorepo_poc refusal, and
+AST guards (one resolver repo-wide, no new orchestrator). Existing
+`test_foundup_job_consumer.py` + `test_hermes_job_executor.py` + #786/#775/#777
+agent suites green (476 passed across targeted suites, 0 skip/xfail). Pre-existing
+environmental failures (un-checked-out `vendor/hermes-agent` submodule;
+skills-discovery init) are unrelated and reproduce at Base with this change
+reverted.
+
+**Audit**: `docs/audits/architecture/WRE_CONTEXT_BUNDLE_DRYRUN_RUNTIME_WIRING_PHASE2.md`
+(WSP_97 21/21 YES, ASCII-clean).
+
 ### [2026-06-04] - HERMES_DELEGATE_IMPORT_PATH_REMEDIATION_PHASE1 (W6)
 
 **WSP Protocol References**: WSP 97 (Truth Boundary), WSP 50 (Pre-Action), WSP 22 (ModLog)
