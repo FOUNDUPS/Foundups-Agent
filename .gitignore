@@ -14,7 +14,9 @@
 # WSP 3: Module artifacts should stay in modules/
 # Firebase rules belong in modules/foundups/gotjunk/firestore.rules
 /firestore.rules
-/firebase.json
+# /firebase.json - TRACKED: hosting routing/headers are repo truth for reproducible
+#   PFmall deploy (no secrets). See docs/audits/domain_ops/. .firebaserc /
+#   firestore.* remain ignored (project IDs / per-module rules).
 
 # Firebase deployment artifacts (root level - not module-specific)
 /.firebase/

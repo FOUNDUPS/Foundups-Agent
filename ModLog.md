@@ -1,5 +1,35 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-13] PFmall Firebase Hosting Config -- RE2 Fix + Reproducibility (config remediation, no deploy)
+
+**Change Type**: CODE/CONFIG remediation. Fixed `firebase.json` so PFmall hosting deploy is
+Firebase-accepted and reproducible. NO deploy, NO DNS change, NO noindex change, NO app-code change.
+**By**: 0102 | Commander: 012 | Gate: external W10 (do NOT self-merge)
+**WSP References**: WSP 22, WSP 50, WSP 97
+**Slice**: PFMALL_FIREBASE_HOSTING_CONFIG_REPRODUCIBILITY_AND_RE2_FIX_PHASE1
+**Doc**: docs/audits/domain_ops/PFMALL_FIREBASE_HOSTING_CONFIG_RE2_FIX_PHASE1.md
+**Why**: DEPLOY slice PFMALL_PUBLIC_BROWSE_HOSTING_DEPLOY_PHASE1 failed at finalization --
+`firebase.json` header pattern `"regex": "^/(?!kosei/).*"` uses a negative lookahead; Firebase
+Hosting validates header patterns with RE2, which rejects lookahead. Upload completed, finalization
+rejected, live site unchanged (non-destructive).
+**Changes**:
+- `firebase.json`: removed the RE2-invalid lookahead regex rule. Restructured headers to documented
+  Firebase LAST-MATCH-WINS semantics (firebase-tools #8917/#9467): catch-all `**` -> `X-Frame-Options:
+  DENY` FIRST, `/kosei/app/**` -> `X-Frame-Options: ""` (+ frame-ancestors CSP) LAST. Zero `regex`
+  keys remain -> RE2 error class structurally eliminated. Kosei iframe policy preserved exactly.
+- `.gitignore`: un-ignored `/firebase.json` (now repo truth -- routing/headers only, no secrets).
+  `.firebaserc`, `firestore.rules`, `firestore.indexes.json` remain ignored (project IDs / per-module
+  rules / deploy artifact) by explicit decision.
+**Validation (non-production)**: Firebase hosting emulator parsed config + started cleanly (RE2 accepted,
+the exact failure production raised). Static-serving precedence proven empirically: `/f/public_catalog.json`
+-> `application/json`, `Content-Length: 2219` (exact repo file), NOT swallowed by `/f/**` rewrite. Header
+application proven by documented last-match-wins (emulator does not emit custom headers -- known limitation).
+Route matrix table in doc. `json.load(firebase.json)` valid.
+**Boundaries**: no production deploy; no DNS; noindex preserved (`CONTENT_DECISION_PENDING`); no #799/#801
+artifacts touched; no secrets read.
+**Next**: after this lands, re-run PFMALL_PUBLIC_BROWSE_HOSTING_DEPLOY_PHASE1 (finalization will now accept
+the config). Optional preview-channel deploy confirms server-side header emission before touching live.
+
 ## [2026-06-13] Open-PR Backlog Disposition Audit Phase 1 -- AUTHOR-CORRECTION (Lane Hc, decision-only)
 
 **Change Type**: READ-ONLY disposition audit, AUTHOR-CORRECTION of PR #798. ONE doc + this ModLog entry.
