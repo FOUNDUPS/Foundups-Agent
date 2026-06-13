@@ -1,5 +1,40 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-13] PlayFoundups Mall Public Discovery Audit Phase 1 (Lane A, decision-only)
+
+**Change Type**: READ-ONLY multi-lane discovery audit. ONE audit doc + this ModLog entry. NO source/
+runtime/SKILLz/WSP/registry/auth change; nothing un-gated; no implementation.
+**By**: 0102 (Worker-Lane A; discovery lanes B-F + adversarial sentinel) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP References**: WSP 22, WSP 50, WSP 84, WSP 87, WSP 97
+**Slice**: PLAYFOUNDUPS_MALL_PUBLIC_DISCOVERY_AUDIT_PHASE1
+**Base**: `486eb69d7` (origin/main; re-pinned at author time, not advanced)
+**Reconciles**: FOUNDUPS_PORTFOLIO_DATA_PROJECTION_SPEC_PHASE1, FOUNDUPS_PORTFOLIO_DISPLAY_COMPONENT_PHASE1,
+FOUNDUPS_PUBLIC_PORTFOLIO_STATUS_SCHEMA_PHASE1, FOUNDUP_PUBLIC_SURFACE_STATUS_AUDIT_PHASE1,
+FOUNDUP_PUBLIC_POC_FUNNEL_AND_VOTE_CONCATENATION_AUDIT_PHASE1, HOLOINDEX_PUBLIC_FOUNDUP_CONNECTIVE_TRUST_SURFACE_DOCS_PHASE1.
+
+- ADD `docs/audits/architecture/PLAYFOUNDUPS_MALL_PUBLIC_DISCOVERY_AUDIT_PHASE1.md` -- maps EXISTS/PARTIAL/
+  MISSING (file:line) across Mall, FoundUp page template, gateway, agent workspace, and WRE readiness, and
+  orders the smallest build slices to make the Mall the public DISCOVERY layer.
+- Central finding: TWO surfaces over the same catalog with OPPOSITE gating. A thin public showcase already
+  ships at `/f/` (public/f/index.html, unauthenticated, noindex'd); the RICH Mall browse UX lives only
+  behind the Clerk+invite gate (public/member/index.html:380-383). So DISCOVERY is effectively gated and
+  PARTICIPATION is unenforced -- the inversion of the target. Fix: move the read-only browse in front of
+  the gate; keep participation (not wired in code today) behind it.
+- Schema: EXTEND foundup_registry.schema.json RegistryEntry (mission/pain/solution/outcome/lightpaper_url),
+  reuse display_name/poc_url/invite_required/token_symbol; do NOT fork -- portfolio_data.json stays a
+  DERIVED projection (projection spec).
+- Sentinel (separation of duties) UPHELD all 7 load-bearing claims (3 refined, none refuted). Biggest risk:
+  `/f/` reads the member runtime mall-video-catalog.json whole, client-side, with no field filtering -- a
+  future member-scoped field would leak. Mitigation captured as smallest-step #1: project a SCOPE-FREE
+  public catalog (mirror the portfolio_data.json projection), and read that, not the runtime catalog.
+- Smallest steps (ordered): (1) projected public catalog, (2) read-only public browse, (3) registry
+  narrative fields, (4) holoindex_prod_01 registry-orphan fix, (5) participation-gate runtime enforcement,
+  (6) AgentJoinService sqlite persistence, (7) WRE ContextBundle builder arc.
+- Constraints honored: decision-only; file scope EXACTLY 2 (audit doc + this ModLog); ASCII-clean (0
+  non-ASCII); window-agnostic (no W-numbers in the artifact); prior public-surface audits reconciled.
+- Internal sentinel verdict MERGE_READY; PR opened against origin/main; STOP at MERGE_READY for the
+  external 0102 gate (do NOT self-merge).
+
 ## [2026-06-13] Autonomous Slice Worker SKILLz Phase 1 (Lane A, additive spec-only)
 
 **Change Type**: ADDITIVE SKILLz authoring (spec-only). ONE new SKILLz.md + this ModLog entry. NO
