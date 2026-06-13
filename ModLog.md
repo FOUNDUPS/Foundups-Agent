@@ -1,5 +1,34 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-13] Open-PR Backlog Disposition Audit Phase 1 -- AUTHOR-CORRECTION (Lane Hc, decision-only)
+
+**Change Type**: READ-ONLY disposition audit, AUTHOR-CORRECTION of PR #798. ONE doc + this ModLog entry.
+NO PR closed, merged, pushed, or commented; only read via git/gh (list/view/checks/diff). Classification
+with content-level evidence; 0102/W10 executes any close/merge afterward under explicit 012 authorization.
+**By**: 0102 (Worker-Lane Hc) | Commander: 012 | Gate: external 0102/W10 (do NOT self-merge)
+**WSP References**: WSP 22, WSP 50, WSP 64, WSP 97
+**Slice**: OPEN_PR_BACKLOG_DISPOSITION_AUDIT_PHASE1
+**Base**: `4464040d9` (origin/main; re-fetched and rebased onto current HEAD at correction time)
+**Doc**: docs/audits/architecture/OPEN_PR_BACKLOG_DISPOSITION_AUDIT_PHASE1.md
+**Why corrected**: W10 REFUTED the prior SUPERSEDED_CLOSE bucket. The original audit proved supersession via
+`git show --stat` / path-presence -- INVALID (same path on main != same content). Re-verified every former
+SUPERSEDED_CLOSE PR with merge-base-aware THREE-DOT diffs (`git diff origin/main...<pr-head> -- <files>`).
+**Corrected dispositions (content-backed)**:
+- MERGE_GATE_NOW (1): #796 (base==current main, CI fresh today).
+- FUNCTIONALLY_SUPERSEDED_012_DECISION (3): #765 (divergent audit at same path), #694 (divergent doc
+  version at same path), #745 (own doc ABSENT from main; core finding remediated by #761/#757). NOT auto-close.
+- UNIQUE_CONTENT_REQUIRES_REBASE (1): #659 (carries UNIQUE unmerged S2-validation content; closing would
+  LOSE work). Was wrongly SUPERSEDED_CLOSE.
+- CONTENT_IDENTICAL_SUPERSEDED (0): NONE -- no former SUPERSEDED_CLOSE PR is byte-equivalent on main.
+- DEPENDABOT_REVIEW (3): #783, #785 (clean); #784 (redteam-observation FAIL).
+- REBASE_FIRST (7): #782, #750, #749, #729, #722, #418, #408 (stale CI / conflicting / base behind).
+- KEEP_PARKED (0): none qualifies.
+**Content-level corrections**: #765/#659/#694 are NO LONGER any *_SUPERSEDED_CLOSE bucket. Merge-base-aware
+three-dot diffs show non-empty divergent content for all three; #659 specifically carries unmerged unique
+work. The content-backed auto-close-eligible set is EMPTY.
+**WSP_97**: 14/14 declared==actual YES (added 6 content-supersession truth-boundary rows). SENTINEL verdict
+READY (no auto-close recommended; functional closes require explicit 012 authorization).
+
 ## [2026-06-13] PlayFoundups Mall Public Discovery Audit Phase 1 (Lane A, decision-only)
 
 **Change Type**: READ-ONLY multi-lane discovery audit. ONE audit doc + this ModLog entry. NO source/
