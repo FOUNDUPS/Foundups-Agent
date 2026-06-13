@@ -35,6 +35,37 @@ FOUNDUP_PUBLIC_POC_FUNNEL_AND_VOTE_CONCATENATION_AUDIT_PHASE1, HOLOINDEX_PUBLIC_
 - Internal sentinel verdict MERGE_READY; PR opened against origin/main; STOP at MERGE_READY for the
   external 0102 gate (do NOT self-merge).
 
+## [2026-06-13] AutoPost Reusable Capture Engine Audit Phase 1 (Lane G, decision-only)
+
+**Change Type**: READ-ONLY cross-repo discovery audit. ONE audit doc + this ModLog entry. NO code/runtime
+change in any repo; the AutoPost repo (O:/repos/AutoPost) was read-only, never modified. Decision-only.
+**By**: 0102 (Worker-Lane G) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP References**: WSP 22, WSP 50, WSP 64, WSP 77, WSP 97
+**Slice**: AUTOPOST_REUSABLE_CAPTURE_ENGINE_AUDIT_PHASE1
+**Base**: `486eb69d7` (origin/main at dispatch; rebased onto current origin/main, which now carries the merged Mall discovery audit)
+
+- ADD `docs/audits/architecture/AUTOPOST_REUSABLE_CAPTURE_ENGINE_AUDIT_PHASE1.md` -- maps whether
+  AutoPost's CAPTURE engine can become a reusable, FoundUp-agnostic capture->listing template (the
+  creation half complementing the Mall's discovery half).
+- Per-lane headline (EXISTS/PARTIAL/MISSING, file:line grounded; 5 discovery lanes + 1 adversarial
+  Sentinel): CAPTURE = real but VIDEO-ONLY (camera/multi-segment/flip/gesture EXIST; no image/upload
+  intake); RECOGNITION = MISSING (geminiProvider.ts fully mocked, @google/genai never imported, output is
+  social caption+hashtags only); LISTING = MISSING (PostRecord is a social-post model; connectors orphaned
+  dead code; persistence dead -- better-sqlite3 never imported); REUSABILITY = only GotJunk CapturedItem is
+  a real capture->list consumer (recognition unbuilt), Move2Japan has no property model, GetK module does
+  not exist, pfMALL "catalog" is a directory of apps not items.
+- Reconciled 6 prior merged audits (do NOT re-derive: 35% PoC, AI Studio SPA, tool-vs-FoundUp boundary,
+  external public surface, not_portfolio/placeholder). Recorded 3 verified CONTRADICTIONS as decision-only
+  observations (NOT edits to prior files): Gemini "FUNCTIONAL" vs mock; "better-sqlite3 client-side" vs
+  in-memory useState; connectors "stub" vs orphaned dead code.
+- Defined the reusable capture-engine template (4 seams + per-FoundUp config), the capture-half -> Mall
+  ListingRecord metadata contract, a dry-run-respecting WRE automation roadmap (publish leg = D5, BLOCKED
+  Phase 1), and 7 ordered smallest build slices. GotJunk CapturedItem is the seed listing schema.
+- Constraints honored: ASCII-clean (0 non-ASCII); window-agnostic (no W-numbers); cross-repo read-only;
+  base SHA pinned; isolated worktree; WSP_97 Truth Boundary 12/12 declared==actual; file scope = 2.
+- Internal SENTINEL (independent adversarial lane) UPHELD all load-bearing claims -> MERGE_READY; PR opened
+  against origin/main; STOP for the external 0102 gate (do NOT self-merge).
+
 ## [2026-06-13] Autonomous Slice Worker SKILLz Phase 1 (Lane A, additive spec-only)
 
 **Change Type**: ADDITIVE SKILLz authoring (spec-only). ONE new SKILLz.md + this ModLog entry. NO
