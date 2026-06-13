@@ -1151,39 +1151,81 @@
 
         html += '      <p class="portfolio-card-summary">' + esc(summary) + '</p>';
 
-        html += '      <div class="portfolio-card-links">';
-        html += '        <a href="/f/' + esc(entity.foundup_id) + (window.location.search || '') + '" class="portfolio-link-btn portfolio-link-btn-main">';
-        html += '          <span>View Details</span>';
-        html += '          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>';
-        html += '        </a>';
-
-        // Public outbound links only (allowlisted url fields). View-only.
-        // safeUrl() validates the URL SCHEME before esc()-escaping; a rejected
-        // (non-http(s)/relative) URL yields '' and the link is omitted.
-        var pocSafe = safeUrl(entity.poc_url);
-        var appSafe = safeUrl(entity.app_url);
-        var siteSafe = safeUrl(entity.website_url);
-        if (pocSafe) {
-          html += '        <a href="' + esc(pocSafe) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">Demo App</a>';
-        } else if (appSafe) {
-          html += '        <a href="' + esc(appSafe) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">Open App</a>';
-        } else if (siteSafe) {
-          html += '        <a href="' + esc(siteSafe) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">Website</a>';
-        }
-        var ghSafe = safeUrl(entity.github_url);
-        if (ghSafe) {
-          html += '        <a href="' + esc(ghSafe) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">GitHub</a>';
-        }
-        var lpSafe = safeUrl(entity.lightpaper_url);
-        if (lpSafe) {
-          html += '        <a href="' + esc(lpSafe) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">Litepaper</a>';
-        }
-
-        html += '      </div>';
+        // Links wrapper only (TEXT). Outbound/internal href values are NOT
+        // concatenated into innerHTML; they are set on anchor .href PROPERTIES
+        // after insertion (see wireShowcaseLinks below). data-foundup-id gives a
+        // stable querySelector target for that post-render wiring.
+        html += '      <div class="portfolio-card-links" data-foundup-id="' + esc(entity.foundup_id) + '"></div>';
         html += '    </div>';
       });
 
       grid.innerHTML = html;
+
+      // Post-render: build every link as a DOM element and set its href via the
+      // .href PROPERTY (a CodeQL-recognized safe sink), never via an innerHTML
+      // string. safeUrl()-rejected (non-http(s)/relative) values are skipped.
+      wireShowcaseLinks(grid, visible);
+    }
+
+    // Build the internal View-Details link and outbound CTA links for each
+    // showcase card as DOM elements, setting href via .href PROPERTY. No URL is
+    // ever written into an innerHTML/attribute string here.
+    function wireShowcaseLinks(grid, visible) {
+      visible.forEach(function(entity) {
+        var sel = '.portfolio-card-links[data-foundup-id="' + cssAttrEscape(entity.foundup_id) + '"]';
+        var linksContainer = grid.querySelector(sel);
+        if (!linksContainer) return;
+
+        // Internal View-Details link (site-relative). href set via property.
+        var view = document.createElement('a');
+        view.href = '/f/' + encodeURIComponent(entity.foundup_id) + (window.location.search || '');
+        view.className = 'portfolio-link-btn portfolio-link-btn-main';
+        var viewLabel = document.createElement('span');
+        viewLabel.textContent = 'View Details';
+        view.appendChild(viewLabel);
+        view.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>');
+        linksContainer.appendChild(view);
+
+        // Public outbound links only (allowlisted url fields). View-only.
+        // safeUrl() validates the URL SCHEME; a rejected value yields '' and the
+        // link is omitted (skipped). Precedence: poc_url else app_url else
+        // website_url; then github_url; then lightpaper_url.
+        var pocSafe = safeUrl(entity.poc_url);
+        var appSafe = safeUrl(entity.app_url);
+        var siteSafe = safeUrl(entity.website_url);
+        if (pocSafe) {
+          linksContainer.appendChild(makeOutboundLink(pocSafe, 'Demo App'));
+        } else if (appSafe) {
+          linksContainer.appendChild(makeOutboundLink(appSafe, 'Open App'));
+        } else if (siteSafe) {
+          linksContainer.appendChild(makeOutboundLink(siteSafe, 'Website'));
+        }
+        var ghSafe = safeUrl(entity.github_url);
+        if (ghSafe) {
+          linksContainer.appendChild(makeOutboundLink(ghSafe, 'GitHub'));
+        }
+        var lpSafe = safeUrl(entity.lightpaper_url);
+        if (lpSafe) {
+          linksContainer.appendChild(makeOutboundLink(lpSafe, 'Litepaper'));
+        }
+      });
+    }
+
+    // Build a single outbound anchor: href set via .href PROPERTY (safe sink),
+    // label set via textContent. url MUST already be safeUrl()-validated.
+    function makeOutboundLink(url, label) {
+      var a = document.createElement('a');
+      a.href = url;                 // PROPERTY assignment, validated URL: safe sink
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.className = 'portfolio-link-btn portfolio-link-btn-sec';
+      a.textContent = label;        // textContent, never innerHTML, for the label
+      return a;
+    }
+
+    // Escape a value for safe use inside a CSS attribute selector ("...").
+    function cssAttrEscape(s) {
+      return String(s).replace(/["\\]/g, '\\$&');
     }
 
     // READ-ONLY public landing. Renders ONLY public-allowlisted projection
@@ -1219,7 +1261,9 @@
       // Public landing links (allowlisted url fields only). View-only.
       // safeUrl() validates the scheme; only http(s)/relative URLs survive, so a
       // javascript:/data: registry value is dropped (push is skipped) and never
-      // becomes an href.
+      // becomes an href. The URL itself is NOT concatenated into innerHTML; only
+      // an empty TEXT container is emitted here, and the anchors are built as DOM
+      // elements (href set via .href PROPERTY) after container.innerHTML below.
       var links = [];
       var addLink = function(field, label, url) {
         var safe = safeUrl(url);
@@ -1232,13 +1276,7 @@
       addLink('docs_url', 'Docs', item.docs_url);
       addLink('lightpaper_url', 'Litepaper', item.lightpaper_url);
       if (links.length) {
-        html += '<div class="entry-cta-block">';
-        links.forEach(function(l) {
-          html += '<a href="' + esc(l[2]) + '" target="_blank" rel="noopener" class="entry-cta-btn">';
-          html += '<span>' + esc(l[1]) + '</span><span>\u2197</span>';
-          html += '</a> ';
-        });
-        html += '</div>';
+        html += '<div class="entry-cta-block"></div>';
       }
 
       // Narrative sections (allowlisted optional fields) - public landing info.
@@ -1271,6 +1309,31 @@
       html += '</footer>';
 
       container.innerHTML = html;
+
+      // Post-render: build the outbound CTA anchors as DOM elements and set href
+      // via the .href PROPERTY (CodeQL-recognized safe sink). links[][2] is
+      // already safeUrl()-validated; no URL is written into innerHTML.
+      if (links.length) {
+        var ctaBlock = container.querySelector('.entry-cta-block');
+        if (ctaBlock) {
+          links.forEach(function(l) {
+            var a = document.createElement('a');
+            a.href = l[2];              // PROPERTY assignment, validated URL: safe sink
+            a.target = '_blank';
+            a.rel = 'noopener';
+            a.className = 'entry-cta-btn';
+            var labelSpan = document.createElement('span');
+            labelSpan.textContent = l[1];
+            var arrowSpan = document.createElement('span');
+            arrowSpan.textContent = '\u2197';
+            a.appendChild(labelSpan);
+            a.appendChild(arrowSpan);
+            ctaBlock.appendChild(a);
+            ctaBlock.appendChild(document.createTextNode(' '));
+          });
+        }
+      }
+
       document.title = displayName + ' | FoundUps Mall';
     }
 
