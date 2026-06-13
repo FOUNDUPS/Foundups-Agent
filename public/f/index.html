@@ -1158,18 +1158,25 @@
         html += '        </a>';
 
         // Public outbound links only (allowlisted url fields). View-only.
-        if (entity.poc_url) {
-          html += '        <a href="' + esc(entity.poc_url) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">Demo App</a>';
-        } else if (entity.app_url) {
-          html += '        <a href="' + esc(entity.app_url) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">Open App</a>';
-        } else if (entity.website_url) {
-          html += '        <a href="' + esc(entity.website_url) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">Website</a>';
+        // safeUrl() validates the URL SCHEME before esc()-escaping; a rejected
+        // (non-http(s)/relative) URL yields '' and the link is omitted.
+        var pocSafe = safeUrl(entity.poc_url);
+        var appSafe = safeUrl(entity.app_url);
+        var siteSafe = safeUrl(entity.website_url);
+        if (pocSafe) {
+          html += '        <a href="' + esc(pocSafe) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">Demo App</a>';
+        } else if (appSafe) {
+          html += '        <a href="' + esc(appSafe) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">Open App</a>';
+        } else if (siteSafe) {
+          html += '        <a href="' + esc(siteSafe) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">Website</a>';
         }
-        if (entity.github_url) {
-          html += '        <a href="' + esc(entity.github_url) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">GitHub</a>';
+        var ghSafe = safeUrl(entity.github_url);
+        if (ghSafe) {
+          html += '        <a href="' + esc(ghSafe) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">GitHub</a>';
         }
-        if (entity.lightpaper_url) {
-          html += '        <a href="' + esc(entity.lightpaper_url) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">Litepaper</a>';
+        var lpSafe = safeUrl(entity.lightpaper_url);
+        if (lpSafe) {
+          html += '        <a href="' + esc(lpSafe) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">Litepaper</a>';
         }
 
         html += '      </div>';
@@ -1210,13 +1217,20 @@
       html += '</div>';
 
       // Public landing links (allowlisted url fields only). View-only.
+      // safeUrl() validates the scheme; only http(s)/relative URLs survive, so a
+      // javascript:/data: registry value is dropped (push is skipped) and never
+      // becomes an href.
       var links = [];
-      if (item.poc_url) links.push(['poc_url', 'View PoC', item.poc_url]);
-      if (item.app_url) links.push(['app_url', 'Open App', item.app_url]);
-      if (item.website_url) links.push(['website_url', 'Website', item.website_url]);
-      if (item.github_url) links.push(['github_url', 'GitHub', item.github_url]);
-      if (item.docs_url) links.push(['docs_url', 'Docs', item.docs_url]);
-      if (item.lightpaper_url) links.push(['lightpaper_url', 'Litepaper', item.lightpaper_url]);
+      var addLink = function(field, label, url) {
+        var safe = safeUrl(url);
+        if (safe) links.push([field, label, safe]);
+      };
+      addLink('poc_url', 'View PoC', item.poc_url);
+      addLink('app_url', 'Open App', item.app_url);
+      addLink('website_url', 'Website', item.website_url);
+      addLink('github_url', 'GitHub', item.github_url);
+      addLink('docs_url', 'Docs', item.docs_url);
+      addLink('lightpaper_url', 'Litepaper', item.lightpaper_url);
       if (links.length) {
         html += '<div class="entry-cta-block">';
         links.forEach(function(l) {
@@ -1273,6 +1287,22 @@
       var d = document.createElement('div');
       d.textContent = String(s);
       return d.innerHTML;
+    }
+
+    // Scheme allowlist for OUTBOUND hrefs. esc() handles HTML-escaping but does
+    // NOT validate the URL scheme, so a registry-sourced javascript:/data:/
+    // vbscript: URL would execute on click. safeUrl() permits only http(s)
+    // absolute, protocol-relative (-> https), and site-relative paths; it
+    // rejects everything else (returns '' so the caller omits the link).
+    // trim()+lowercase makes the scheme check robust to "  JavaScript:" tricks.
+    function safeUrl(u) {
+      if (!u) return '';
+      var s = String(u).trim();
+      var lower = s.toLowerCase();
+      if (lower.indexOf('http://') === 0 || lower.indexOf('https://') === 0) return s;
+      if (s.indexOf('//') === 0) return 'https:' + s;       // protocol-relative -> https
+      if (s.charAt(0) === '/') return s;                    // site-relative path
+      return '';                                            // reject javascript:/data:/vbscript:/mailto:/etc
     }
 
     // -- Red Dog concierge --
