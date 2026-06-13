@@ -1,5 +1,36 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-13] Hermes Kanban Fork Status and WRE Surface Audit Phase 1 (Lane A, decision-only)
+
+**Change Type**: READ-ONLY architecture audit. ONE audit doc + this ModLog entry. NO code, NO runtime
+wiring, NO submodule update, NO vendoring. Decision-only.
+**By**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP References**: WSP 22, WSP 50, WSP 97
+**Base**: `ed3ad2066` (origin/main after #801)
+
+- ADD `docs/audits/architecture/HERMES_KANBAN_FORK_STATUS_AND_WRE_SURFACE_AUDIT_PHASE1.md` (15 sections,
+  WSP_97 20/20). Tests KANBAN_AS_SURFACE_YES / KANBAN_AS_AUTHORITY_NO.
+- FORK-STATUS (verified from repo at base): `.gitmodules` vendors `FOUNDUPS/hermes-agent` at
+  `vendor/hermes-agent`, pinned `d1d425e9` (v2026.4.13). grep over the pinned submodule = ZERO kanban
+  hits -- the vendored fork does NOT carry the Kanban feature. `foundups-agent-workspace` is NOT
+  cloned/vendored here (only docs; FORK_PLAN checkbox unchecked; ROADMAP "external, NOT cloned/vendored").
+  The swarm-Kanban code (`swarm-kanban-store.ts`, `~/.hermes/swarm2-kanban.json`) is in external
+  `outsourc-e/hermes-workspace`; the official SQLite kanban (`~/.hermes/kanban.db`, OS-process workers,
+  gateway dispatcher, worktree-per-task, trusted-local-user) is a NEWER hermes-agent feature than the pin
+  (verified from the official doc).
+- VERDICT: GOVERNED_EXTERNAL_WORKER_BOARD_CANDIDATE, qualified -- INSPIRATION + GOVERNED-EXTERNAL-CANDIDATE,
+  NOT WIRE_NOW, NOT_EVEN_VENDORED_YET. WRE/OpenClaw stays the orchestration authority; ContextBundle is the
+  work-package authority; WSP_97 the truth boundary; LAND/SENTINEL the merge governance. Hermes Kanban is a
+  display/coordination surface + bounded worker board only.
+- KEY RISK: Hermes Kanban ships its OWN gateway dispatcher (claims + spawns OS-process workers) and runs
+  workers with the local uid / full fs access (trusted-local-user) -- a second-orchestrator + gate-bypass
+  hazard unless fenced. Boundaries + a one-way-publisher-first integration (reusing work_completion_publisher
+  / github_orchestrator FAM mirror / public_catalog_projector) are specified; nothing built.
+- Ordered next slices: HERMES_KANBAN_VENDORING_DECISION_PHASE1 (which fork carries the surface; re-verify
+  remotes), WRE_TO_KANBAN_CARD_PUBLISHER_PHASE1 (one-way, dispatch off), KANBAN_FENCED_WORKER_PILOT_PHASE1
+  (one ContextBundle-bounded worker, AST-fenced, stops at MERGE_READY).
+- STOP at MERGE_READY for the external 0102 gate.
+
 ## [2026-06-13] Open-PR Backlog Disposition Audit Phase 1 -- AUTHOR-CORRECTION (Lane Hc, decision-only)
 
 **Change Type**: READ-ONLY disposition audit, AUTHOR-CORRECTION of PR #798. ONE doc + this ModLog entry.
