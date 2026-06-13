@@ -1,5 +1,32 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-13] GetK FoundUp Monorepo PoC Bootstrap Phase 1 (Lane W6/AUTHOR, CODE_NON_SPINE)
+
+**Change Type**: Additive FoundUp bootstrap -- new module scaffold + registry entry +
+pure-Python PoC contracts + WRE dry-run proof + audit doc. STOP at MERGE_READY (not self-merged).
+**By**: 0102 (Worker-Lane W6 / AUTHOR) | Commander: 012 | Gate: external 0102
+**WSP References**: WSP 3, WSP 11, WSP 22, WSP 49, WSP 50, WSP 55, WSP 97, WSP 109
+**Slice**: GETK_FOUNDUP_MONOREPO_POC_BOOTSTRAP_PHASE1
+**Base**: `20c26b7d4` (origin/main after #799)
+
+- Proves the operational-WRE build path by adding GetK ("Get a Kei Truck") to the roster: registry
+  entry + valid manifest + WSP-49 module (README/INTERFACE/ROADMAP/src/tests/memory/requirements) +
+  pure-Python PoC contract model (capture/listing/estimate/stakeholder-gate/token-utility/deferred-auction).
+- WRE/OpenClaw/Hermes dry-run PROOF passes via the EXISTING create+drain seam (no new wiring): GetK
+  reaches SIMULATED, source_authority monorepo_poc, resolved_module_path modules/foundups/getk from the
+  shared validated resolver, readiness false, real-exec sinks asserted not-called. No seam gap.
+- Tests: getk contracts 16, getk manifest 11, WRE dry-run proof 2 (29 new); cross-checks registry schema
+  46 + catalog projector 42 still pass. No skips/xfail. No network, no real execution.
+- Boundaries: no auction lookup/scraping/login, no bidding, no payments, no token economics, no PFmall
+  wiring, no AutoPost integration, no regulatory claims as truth, no source_authority promotion, no
+  CABR/PAYOUT/DAO/MVP claim. GETK token is internal utility only (TOKEN_DEFERRED).
+- SKILLz-gap assessment (per 012): RAILS exist (registry, manifest, dry-run seam, autonomous_slice_worker
+  meta-skill) but (a) no FoundUp product SKILLz exist, (b) no end-to-end WRE FoundUp-onboarding BUILD skill
+  (onboarding was manual here), (c) the registry is not HoloIndex-indexed (remembered via README only).
+  Named follow-ups: GETK_IMPORT_REGULATORY_PROVIDER_AUDIT_PHASE1, the GETK product SKILLz,
+  WRE_FOUNDUP_ONBOARDING_BUILDER_SKILL_PHASE1, FOUNDUP_REGISTRY_HOLOINDEX_BRIDGE_PHASE1.
+- Doc: docs/audits/architecture/GETK_FOUNDUP_MONOREPO_POC_BOOTSTRAP_PHASE1.md (11 sections, WSP_97 18/18).
+
 ## [2026-06-13] Open-PR Backlog Disposition Audit Phase 1 -- AUTHOR-CORRECTION (Lane Hc, decision-only)
 
 **Change Type**: READ-ONLY disposition audit, AUTHOR-CORRECTION of PR #798. ONE doc + this ModLog entry.
