@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0.0",
+  "projection": "public_catalog",
+  "source": "modules/foundups/foundup_registry.json",
+  "note": "DERIVED scope-free public catalog. Generated from the canonical registry; contains ONLY public-allowlisted fields. Never hand-authored. Does NOT read public/member/mall-video-catalog.json.",
+  "entities": [
+    {
+      "foundup_id": "gotjunk_001",
+      "display_name": "GotJunk",
+      "portfolio_status": "portfolio_candidate",
+      "poc_landing_status": "functional",
+      "website_url": null,
+      "poc_url": "https://gotjunk-56566376153.us-west1.run.app/",
+      "app_url": null,
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": "AI-powered junk removal coordination platform. Upload photos, get quotes, schedule pickups.",
+      "portfolio_priority": 1,
+      "portfolio_ready": false,
+      "token_symbol": "JUNK"
+    },
+    {
+      "foundup_id": "kosei",
+      "display_name": "Kosei AI Systems",
+      "portfolio_status": "portfolio_candidate",
+      "poc_landing_status": "functional",
+      "website_url": null,
+      "poc_url": "https://foundupscom.web.app/kosei/app/",
+      "app_url": "https://foundupscom.web.app/kosei/app/",
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": "AI content automation for businesses. Generate, schedule, and optimize social media content.",
+      "portfolio_priority": 2,
+      "portfolio_ready": false,
+      "token_symbol": "KOSEI"
+    },
+    {
+      "foundup_id": "holoindex_prod_01",
+      "display_name": "HoloIndex",
+      "portfolio_status": "portfolio_candidate",
+      "poc_landing_status": "polished",
+      "website_url": "https://foundups.com/holoindex",
+      "poc_url": "https://foundups.com/holoindex",
+      "app_url": null,
+      "github_url": null,
+      "docs_url": null,
+      "screenshot_url": null,
+      "public_summary": "Enterprise-grade semantic retrieval and memory system. Internal infrastructure with public p.fMALL-discoverable surface.",
+      "portfolio_priority": 3,
+      "portfolio_ready": false,
+      "is_dual_identity": true
+    }
+  ]
+}
