@@ -1,5 +1,34 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-13] Hermes Kanban FoundUps Plugin Contract Phase 1 (Lane A, decision-only)
+
+**Change Type**: READ-ONLY contract definition. ONE doc + this ModLog entry. NO code, NO runtime wiring,
+NO vendoring, NO submodule change. Decision-only.
+**By**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP References**: WSP 22, WSP 50, WSP 97
+**Base**: `ed3ad2066` (origin/main after #801)
+**Predecessor**: #803 HERMES_KANBAN_FORK_STATUS_AND_WRE_SURFACE_AUDIT_PHASE1 (OPEN)
+
+- ADD `docs/audits/architecture/HERMES_KANBAN_FOUNDUPS_PLUGIN_CONTRACT_PHASE1.md` (12 sections, WSP_97 18/18).
+  Reframes the next step from "vendoring decision" to "plugin contract first": define a FoundUps/WRE
+  plugin-adapter for Hermes Kanban so Hermes workers run FoundUps-shaped work WITHOUT Kanban becoming the
+  authority.
+- The plugin does THREE things only: (1) PUBLISH work to Kanban (WRE slice -> card: slice_id, lane,
+  contextbundle_id, required_gates, allowed/forbidden paths, branch/worktree, expected_evidence -- a
+  projection of WRE-authored state, no gate-pass/promotion/merge token); (2) CONSTRAIN workers (receive a
+  ContextBundle not raw repo authority; no arbitrary task picking; no self-promotion from metadata; no merge;
+  no real exec unless a WRE gate says so); (3) INGEST evidence back (PR/head_sha/tests/WSP_97 rows/artifact
+  refs, redacted via #768 redact_sensitive) as ADVISORY -- WRE decides the state transition, not Kanban.
+- FORBIDDEN for Kanban: WSP compliance, SourceAuthority promotion, ContextBundle bypass, real-exec auth, PR
+  merge, second-scheduler dispatch, DB-as-canonical. Load-bearing rule:
+  EVIDENCE_RETURNED_NOT_TRUSTED_UNTIL_WRE_VERIFIED (executor proposes; authority verifies).
+- Reuses existing WRE primitives (ContextBundle, FoundUpJob, work_completion_publisher / github_orchestrator
+  FAM mirror / public_catalog_projector, #768 EvidencePacket+redaction, LAND/SENTINEL, FAM
+  VERIFICATION_RECORDED). NET-NEW (future): the 3 adapter ops, the card publisher, a fenced kanban-worker.
+- Ordered next slices: HERMES_KANBAN_VENDORING_DECISION_PHASE1, HERMES_KANBAN_PLUGIN_CONTRACT_IMPL_PHASE1
+  (typed module + tests, AST-fenced), WRE_TO_KANBAN_CARD_PUBLISHER_PHASE1, KANBAN_FENCED_WORKER_PILOT_PHASE1.
+- STOP at MERGE_READY for the external 0102 gate.
+
 ## [2026-06-13] Open-PR Backlog Disposition Audit Phase 1 -- AUTHOR-CORRECTION (Lane Hc, decision-only)
 
 **Change Type**: READ-ONLY disposition audit, AUTHOR-CORRECTION of PR #798. ONE doc + this ModLog entry.
