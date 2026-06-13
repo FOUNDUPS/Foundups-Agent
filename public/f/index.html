@@ -618,6 +618,42 @@
       gap: 2rem;
       margin-top: 2rem;
     }
+    /* Read-only discovery filter bar (PUBLIC_MALL_READ_ONLY_BROWSE_PHASE1) */
+    .portfolio-filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .portfolio-filter-search,
+    .portfolio-filter-select {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      color: #e4e2ec;
+      font-size: 0.9rem;
+      padding: 0.65rem 0.9rem;
+      min-height: 44px;
+    }
+    .portfolio-filter-search {
+      flex: 1 1 240px;
+    }
+    .portfolio-filter-search:focus,
+    .portfolio-filter-select:focus {
+      outline: none;
+      border-color: rgba(124,92,252,0.5);
+    }
+    .portfolio-filter-select option {
+      background: #18181f;
+      color: #e4e2ec;
+    }
+    .portfolio-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: rgba(228,226,236,0.5);
+      padding: 2rem 1rem;
+    }
     .portfolio-card {
       background: rgba(255,255,255,0.02);
       border: 1px solid rgba(255,255,255,0.06);
@@ -856,32 +892,41 @@
      * Full Red Dog concierge runtime ported from foundup.html.
      */
 
-    var MALL_CATALOG_URL = '/member/mall-video-catalog.json';
+    // PUBLIC_MALL_READ_ONLY_BROWSE_PHASE1: the public /f/ surface reads the
+    // SCOPE-FREE projection (public/f/public_catalog.json, built by the
+    // public_catalog_projector). It MUST NOT read the member runtime catalog
+    // public/member/mall-video-catalog.json - that is the gated runtime source
+    // and reading it whole client-side would leak any future member-scoped
+    // field. DISCOVERY is public; PARTICIPATION stays gated behind /member/.
+    var PUBLIC_CATALOG_URL = '/f/public_catalog.json';
     var MALL_HOME = '/member/';
+
+    // Only fields on the public allowlist (mirrors PUBLIC_ALLOWLIST in
+    // modules/foundups/public_catalog_projector). The renderer NEVER reads a
+    // member-scoped field; the projection is already scope-free.
+    var PUBLIC_FIELD_ALLOWLIST = {
+      foundup_id: true, display_name: true, mission: true, pain: true,
+      solution: true, outcome: true, token_symbol: true, portfolio_status: true,
+      poc_landing_status: true, lightpaper_url: true, website_url: true,
+      poc_url: true, app_url: true, github_url: true, docs_url: true,
+      screenshot_url: true, public_summary: true, portfolio_priority: true,
+      portfolio_ready: true, is_dual_identity: true
+    };
+
+    // Human-readable labels for poc_landing_status (the public readiness field).
+    var READINESS_STATUS_LABELS = {
+      polished: 'Polished',
+      functional: 'Functional',
+      partial: 'Partial',
+      stub: 'Stub',
+      discoverable_only: 'Discoverable Only'
+    };
 
     // Preserve devMall param for localhost harness continuity
     var searchParams = new URLSearchParams(window.location.search);
     if (searchParams.get('devMall') === '1') {
       MALL_HOME += MALL_HOME.includes('?') ? '&devMall=1' : '?devMall=1';
     }
-
-    // Source-type-aware CTA config
-    var SOURCE_TYPE_CTA = {
-      github_repo:      { label: 'View Repo',    icon: '\u2197', urlField: 'external_url' },
-      external_app:     { label: 'Open App',     icon: '\u2197', urlField: 'external_url' },
-      internal_service: { label: 'Open Service', icon: '\u2197', urlField: 'external_url' }
-    };
-    var NON_VIDEO_SOURCE_TYPES = { github_repo: true, external_app: true, internal_service: true };
-    var READINESS_LABELS = {
-      ready: 'Ready',
-      conditional: 'Conditional',
-      discoverable_only: 'Discoverable Only'
-    };
-    var WHAT_NEXT = {
-      ready: 'This FoundUp is ready for direct shell handoff. When tenant embedding is wired, you will enter its live surface from here.',
-      conditional: 'This FoundUp has a working frontend but carries known gaps. When conditions are cleared, it will move to full readiness.',
-      discoverable_only: 'This FoundUp is a backend service visible in the Mall for discovery. It cannot be loaded as a live tenant yet because it has no web frontend.'
-    };
 
     var container = document.getElementById('entryContent');
 
@@ -895,94 +940,195 @@
 
     if (isPortfolioIndex) {
       document.title = 'FoundUps | Public Portfolio Showcase';
-      Promise.all([
-        fetch(MALL_CATALOG_URL).then(function(r) { if (!r.ok) throw new Error(); return r.json(); }),
-        fetch('/f/portfolio_data.json').then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
-      ])
-      .then(function(results) {
-        var catalog = results[0];
-        var portfolio = results[1];
-        renderPortfolioShowcase(catalog, portfolio);
-      })
-      .catch(function(err) {
-        console.error('Portfolio load error:', err);
-        renderNotFound('Error', 'Failed to load public portfolio showcase.');
-      });
+      // Read ONLY the scope-free public projection (no member runtime catalog).
+      fetch(PUBLIC_CATALOG_URL)
+        .then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
+        .then(function(projection) {
+          renderPortfolioShowcase(projection);
+        })
+        .catch(function(err) {
+          console.error('Portfolio load error:', err);
+          renderNotFound('Error', 'Failed to load public portfolio showcase.');
+        });
       return;
     }
 
     var foundupId = decodeURIComponent(match[1]);
-    // Capture subpath for /app mount (WSP 104)
+    // Capture subpath (forward-compat indicator only).
     var subpathMatch = path.match(/^\/f\/[^\/]+\/(.+)$/);
     var subpath = subpathMatch ? subpathMatch[1] : null;
 
-    // WSP 104: Detect app mount mode
-    // /f/{id}/app -> app root
-    // /f/{id}/app/{path...} -> app deep link
+    // PARTICIPATION GATE: /f/{id}/app is shell handoff (enter the live tenant
+    // surface) - a PARTICIPATION action, not public discovery. Route it to the
+    // EXISTING membership gate (/member/) instead of mounting a member-scoped
+    // app from the public path. No new enforcement here; this just declines to
+    // open a participation surface publicly.
     var isAppMount = subpath && (subpath === 'app' || subpath.startsWith('app/'));
-    var appSubpath = isAppMount && subpath.length > 3 ? subpath.substring(4) : null;
+    if (isAppMount) {
+      window.location.href = MALL_HOME;
+      return;
+    }
 
-    fetch(MALL_CATALOG_URL)
+    fetch(PUBLIC_CATALOG_URL)
       .then(function(r) {
         if (!r.ok) throw new Error('Catalog fetch failed');
         return r.json();
       })
-      .then(function(catalog) {
-        // Catalog may be array directly or { items: [...] }
-        var items = Array.isArray(catalog) ? catalog : (catalog.items || []);
+      .then(function(projection) {
+        // Scope-free public projection: { entities: [...] }
+        var items = projectionEntities(projection);
         var item = items.find(function(i) { return i.foundup_id === foundupId; });
         if (!item) {
           renderNotFound('FoundUp not found', 'The FoundUp "' + esc(foundupId) + '" does not exist in the catalog.');
           return;
         }
 
-        // WSP 104: Route to app mount or landing
-        if (isAppMount) {
-          renderAppMount(item, appSubpath);
-        } else {
-          renderEntry(item);
-          populateConciergeContext(item);
-        }
+        // READ-ONLY public discovery: landing only. App mount / shell handoff
+        // is a gated participation surface and is NOT served from the public
+        // /f/ projection path (no entry_url field exists in the allowlist).
+        renderEntry(item);
+        populateConciergeContext(item);
       })
       .catch(function(err) {
         console.error('Catalog load error:', err);
         renderNotFound('Error', 'Failed to load FoundUp catalog.');
       });
 
-    function renderPortfolioShowcase(catalog, portfolio) {
-      var items = Array.isArray(catalog) ? catalog : (catalog.items || []);
-      var entities = portfolio.entities || [];
+    // Defense-in-depth: strip any field NOT on the public allowlist from a
+    // projection entry before the renderer ever sees it. The projection is
+    // already scope-free; this is a belt-and-braces leak guard so the public
+    // renderer can never surface a member-scoped field even if one slipped in.
+    function sanitizeEntity(entity) {
+      if (!entity || typeof entity !== 'object') return {};
+      var out = {};
+      for (var k in entity) {
+        if (Object.prototype.hasOwnProperty.call(entity, k) && PUBLIC_FIELD_ALLOWLIST[k] === true) {
+          out[k] = entity[k];
+        }
+      }
+      return out;
+    }
 
-      // Sort entities by priority
-      entities.sort(function(a, b) {
-        var prioA = a.portfolio_priority === null ? 9999 : a.portfolio_priority;
-        var prioB = b.portfolio_priority === null ? 9999 : b.portfolio_priority;
+    // Extract the entity list from the scope-free public projection.
+    // The projection shape is { entities: [...] }. Defensive against array /
+    // { items: [...] } shapes, but never reads any other source. Every entry is
+    // sanitized to the public allowlist before use.
+    function projectionEntities(projection) {
+      var raw = [];
+      if (!projection) raw = [];
+      else if (Array.isArray(projection)) raw = projection;
+      else if (Array.isArray(projection.entities)) raw = projection.entities;
+      else if (Array.isArray(projection.items)) raw = projection.items;
+      return raw.map(sanitizeEntity);
+    }
+
+    // Module-scoped state for the read-only browse filter (index surface only).
+    var showcaseEntities = [];
+    var showcaseFilter = { query: '', readiness: '' };
+
+    function renderPortfolioShowcase(projection) {
+      // Sort by portfolio_priority (nulls last). Pure read of the projection.
+      showcaseEntities = projectionEntities(projection).slice().sort(function(a, b) {
+        var prioA = (a.portfolio_priority === null || a.portfolio_priority === undefined) ? 9999 : a.portfolio_priority;
+        var prioB = (b.portfolio_priority === null || b.portfolio_priority === undefined) ? 9999 : b.portfolio_priority;
         return prioA - prioB;
       });
 
+      renderShowcaseShell();
+      renderShowcaseGrid();
+
+      // The index showcase is a pure browse: no per-FoundUp concierge.
+      document.getElementById('entryRedDog').style.display = 'none';
+      document.getElementById('conciergeSheet').style.display = 'none';
+      document.getElementById('conciergeScrim').style.display = 'none';
+    }
+
+    // Distinct readiness values present in the projection (allowlisted field
+    // poc_landing_status only) - powers the read-only filter dropdown.
+    function showcaseReadinessOptions() {
+      var seen = {};
+      var out = [];
+      showcaseEntities.forEach(function(e) {
+        var r = e.poc_landing_status;
+        if (r && !seen[r]) { seen[r] = true; out.push(r); }
+      });
+      return out;
+    }
+
+    function renderShowcaseShell() {
       var html = '<div class="portfolio-container">';
       html += '  <header class="portfolio-header">';
       html += '    <h1 class="portfolio-title">FoundUps Public Showcase</h1>';
       html += '    <p class="portfolio-tagline">Consolidated portfolio of active incubating platforms, candidates, and infrastructure substrate under development.</p>';
       html += '  </header>';
 
-      html += '  <div class="portfolio-grid">';
+      // Read-only client-side filter: text search (display_name / public_summary)
+      // + readiness filter (poc_landing_status). Both fields are on the public
+      // allowlist; no member-scoped field is referenced.
+      html += '  <div class="portfolio-filter-bar">';
+      html += '    <input type="text" id="showcaseSearch" class="portfolio-filter-search" placeholder="Search FoundUps..." aria-label="Search FoundUps" value="' + esc(showcaseFilter.query) + '">';
+      html += '    <select id="showcaseReadiness" class="portfolio-filter-select" aria-label="Filter by readiness">';
+      html += '      <option value="">All readiness</option>';
+      showcaseReadinessOptions().forEach(function(r) {
+        var sel = (showcaseFilter.readiness === r) ? ' selected' : '';
+        html += '      <option value="' + esc(r) + '"' + sel + '>' + esc(READINESS_STATUS_LABELS[r] || r) + '</option>';
+      });
+      html += '    </select>';
+      html += '  </div>';
 
-      entities.forEach(function(entity) {
-        var catalogItem = items.find(function(i) { return i.foundup_id === entity.foundup_id; }) || {};
+      html += '  <div class="portfolio-grid" id="showcaseGrid"></div>';
+      html += '</div>'; // container
 
-        var name = entity.display_name || catalogItem.name || catalogItem.title || entity.foundup_id;
-        var tokenSymbol = catalogItem.token_symbol || entity.foundup_id.toUpperCase().substring(0, 4);
-        var summary = entity.public_summary || catalogItem.description || catalogItem.summary || 'Incubating FoundUp.';
-        
-        var tier = catalogItem.tier || 'F0_DAE';
-        var stage = catalogItem.lifecycle_stage || 'incubating';
-        var readiness = catalogItem.launch_readiness || entity.poc_landing_status || 'discoverable_only';
-        
-        var isHolo = entity.foundup_id === 'holoindex_prod_01';
+      container.innerHTML = html;
+
+      var searchEl = document.getElementById('showcaseSearch');
+      var readinessEl = document.getElementById('showcaseReadiness');
+      if (searchEl) {
+        searchEl.addEventListener('input', function() {
+          showcaseFilter.query = searchEl.value || '';
+          renderShowcaseGrid();
+        });
+      }
+      if (readinessEl) {
+        readinessEl.addEventListener('change', function() {
+          showcaseFilter.readiness = readinessEl.value || '';
+          renderShowcaseGrid();
+        });
+      }
+    }
+
+    function showcaseMatchesFilter(entity) {
+      if (showcaseFilter.readiness && entity.poc_landing_status !== showcaseFilter.readiness) {
+        return false;
+      }
+      var q = (showcaseFilter.query || '').trim().toLowerCase();
+      if (!q) return true;
+      var hay = ((entity.display_name || '') + ' ' + (entity.public_summary || '') + ' ' + (entity.foundup_id || '')).toLowerCase();
+      return hay.indexOf(q) !== -1;
+    }
+
+    function renderShowcaseGrid() {
+      var grid = document.getElementById('showcaseGrid');
+      if (!grid) return;
+
+      var visible = showcaseEntities.filter(showcaseMatchesFilter);
+      if (!visible.length) {
+        grid.innerHTML = '<p class="portfolio-empty">No FoundUps match your filter.</p>';
+        return;
+      }
+
+      var html = '';
+      visible.forEach(function(entity) {
+        // READ-ONLY: render ONLY public-allowlisted fields from the projection.
+        var name = entity.display_name || entity.foundup_id;
+        var tokenSymbol = entity.token_symbol || entity.foundup_id.toUpperCase().substring(0, 4);
+        var summary = entity.public_summary || 'Incubating FoundUp.';
+        var readiness = entity.poc_landing_status || 'discoverable_only';
+        var status = entity.portfolio_status || '';
+        var isHolo = entity.is_dual_identity === true;
 
         html += '    <div class="portfolio-card">';
-        
+
         if (isHolo) {
           html += '      <div class="portfolio-dual-identity-tag">Dual Identity</div>';
         }
@@ -995,209 +1141,110 @@
         html += '      </div>';
 
         html += '      <div class="portfolio-card-badges">';
-        html += '        <span class="portfolio-badge portfolio-badge-tier">' + esc(tier) + '</span>';
-        html += '        <span class="portfolio-badge portfolio-badge-stage">' + esc(stage) + '</span>';
-        
+        if (status) {
+          html += '        <span class="portfolio-badge portfolio-badge-stage">' + esc(status.replace(/_/g, ' ')) + '</span>';
+        }
         var readinessClass = (readiness === 'discoverable_only') ? 'discoverable' : '';
-        var readinessLabel = (readiness === 'discoverable_only') ? 'Discoverable' : readiness.charAt(0).toUpperCase() + readiness.slice(1);
+        var readinessLabel = READINESS_STATUS_LABELS[readiness] || readiness;
         html += '        <span class="portfolio-badge portfolio-badge-readiness ' + readinessClass + '">' + esc(readinessLabel) + '</span>';
         html += '      </div>';
 
         html += '      <p class="portfolio-card-summary">' + esc(summary) + '</p>';
 
         html += '      <div class="portfolio-card-links">';
-        // Canonical route back button preservation link
         html += '        <a href="/f/' + esc(entity.foundup_id) + (window.location.search || '') + '" class="portfolio-link-btn portfolio-link-btn-main">';
         html += '          <span>View Details</span>';
         html += '          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>';
         html += '        </a>';
 
+        // Public outbound links only (allowlisted url fields). View-only.
         if (entity.poc_url) {
           html += '        <a href="' + esc(entity.poc_url) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">Demo App</a>';
+        } else if (entity.app_url) {
+          html += '        <a href="' + esc(entity.app_url) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">Open App</a>';
         } else if (entity.website_url) {
           html += '        <a href="' + esc(entity.website_url) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">Website</a>';
         }
         if (entity.github_url) {
           html += '        <a href="' + esc(entity.github_url) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">GitHub</a>';
         }
-        
+        if (entity.lightpaper_url) {
+          html += '        <a href="' + esc(entity.lightpaper_url) + '" target="_blank" rel="noopener" class="portfolio-link-btn portfolio-link-btn-sec">Litepaper</a>';
+        }
+
         html += '      </div>';
-        html += '      </div>';
+        html += '    </div>';
       });
 
-      html += '  </div>'; // grid
-      html += '</div>'; // container
-
-      container.innerHTML = html;
-
-      // Ensure concierge contexts and Red Dog concierge knows this is the portfolio showcase
-      document.getElementById('entryRedDog').style.display = 'none';
-      document.getElementById('conciergeSheet').style.display = 'none';
-      document.getElementById('conciergeScrim').style.display = 'none';
+      grid.innerHTML = html;
     }
 
-    /**
-     * WSP 104: App Mount Rendering
-     * Loads the tenant app in an isolated container.
-     * Uses manifest entry_url to determine app entry point.
-     */
-    function renderAppMount(item, deepPath) {
-      var displayName = item.name || item.title || item.entity || item.foundup_id;
-      var entryUrl = item.entry_url;
-      var routingPrefix = item.routing_prefix || '/f/' + foundupId;
-
-      // Hide landing content, Red Dog FAB, and concierge
-      container.style.display = 'none';
-      document.getElementById('entryRedDog').style.display = 'none';
-      document.getElementById('conciergeSheet').style.display = 'none';
-      document.getElementById('conciergeScrim').style.display = 'none';
-
-      // Create app mount container
-      var appContainer = document.createElement('div');
-      appContainer.className = 'app-mount-container';
-      appContainer.id = 'appMountContainer';
-
-      // Check if app is ready to mount
-      if (!entryUrl) {
-        appContainer.innerHTML =
-          '<div class="app-mount-header">' +
-            '<a href="/f/' + esc(foundupId) + '" class="app-mount-back">' +
-              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>' +
-              'Back to FoundUp' +
-            '</a>' +
-            '<span class="app-mount-title">' + esc(displayName) + '</span>' +
-          '</div>' +
-          '<div class="app-mount-body">' +
-            '<div class="app-mount-error">' +
-              '<h2>App Not Ready</h2>' +
-              '<p>This FoundUp does not have an app entry configured yet.</p>' +
-              '<a href="/f/' + esc(foundupId) + '">Return to FoundUp landing</a>' +
-            '</div>' +
-          '</div>';
-        document.body.appendChild(appContainer);
-        document.title = displayName + ' | App Not Ready';
-        return;
-      }
-
-      // Use entry_url directly - catalog should provide fully resolved URLs
-      // Absolute URLs (http://, https://, /) are used as-is
-      // Relative URLs are resolved relative to /foundups/{foundup_id}/ deployment path
-      var resolvedUrl = entryUrl;
-      if (!entryUrl.startsWith('http://') && !entryUrl.startsWith('https://') && !entryUrl.startsWith('/')) {
-        // Relative URL - resolve to FoundUp deployment path (not routing_prefix)
-        resolvedUrl = '/foundups/' + foundupId + '/' + entryUrl;
-      }
-
-      // Append deep path if present
-      if (deepPath) {
-        resolvedUrl += (resolvedUrl.includes('?') ? '&' : '?') + 'path=' + encodeURIComponent(deepPath);
-      }
-
-      appContainer.innerHTML =
-        '<div class="app-mount-header">' +
-          '<a href="/f/' + esc(foundupId) + '" class="app-mount-back">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>' +
-            'Back to FoundUp' +
-          '</a>' +
-          '<span class="app-mount-title">' + esc(displayName) + '</span>' +
-        '</div>' +
-        '<div class="app-mount-body">' +
-          '<iframe ' +
-            'class="app-mount-frame" ' +
-            'src="' + esc(resolvedUrl) + '" ' +
-            'title="' + esc(displayName) + ' App" ' +
-            'sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals" ' +
-            'loading="eager">' +
-          '</iframe>' +
-        '</div>';
-
-      document.body.appendChild(appContainer);
-      document.title = displayName + ' | App';
-    }
-
+    // READ-ONLY public landing. Renders ONLY public-allowlisted projection
+    // fields (see PUBLIC_FIELD_ALLOWLIST). No member-scoped field (tagline,
+    // creator, lifecycle_stage, tier, routing_prefix, video_count, source_type,
+    // external_url, entry_url, ...) is referenced. No participation control.
     function renderEntry(item) {
-      var displayName = item.name || item.title || item.entity || item.foundup_id;
-      var displayToken = item.token_symbol || item.source_handle || item.foundup_id;
-      var tagline = item.tagline || item.summary || '';
-      var description = item.description || '';
-      var readiness = item.launch_readiness || item.status || 'active';
-      var readinessLabel = READINESS_LABELS[readiness] || readiness || 'Unknown';
-      var entryCopy = item.entry_copy || WHAT_NEXT[readiness] || '';
-
-      var isNonVideo = NON_VIDEO_SOURCE_TYPES[item.source_type];
-      var ctaConfig = SOURCE_TYPE_CTA[item.source_type];
-      var ctaUrl = ctaConfig && item[ctaConfig.urlField] ? item[ctaConfig.urlField] : null;
+      var displayName = item.display_name || item.foundup_id;
+      var displayToken = item.token_symbol || item.foundup_id;
+      var summary = item.public_summary || '';
+      var readiness = item.poc_landing_status || 'discoverable_only';
+      var readinessLabel = READINESS_STATUS_LABELS[readiness] || readiness || 'Unknown';
 
       var html = '';
 
-      // Canonical route indicator (WSP 104)
+      // Canonical route indicator
       html += '<div class="entry-canonical-route">Canonical: /f/' + esc(foundupId) + '</div>';
-
-      // Subpath indicator (forward-compat)
-      if (subpath) {
-        html += '<div class="entry-subpath-info">Subpath: /' + esc(subpath) + ' (reserved for future /app mount)</div>';
-      }
 
       // Hero
       html += '<section class="entry-hero">';
       html += '<div class="entry-hero-token">$' + esc(displayToken) + '</div>';
       html += '<h1 class="entry-hero-name">' + esc(displayName) + '</h1>';
-      if (tagline) html += '<p class="entry-hero-tagline">' + esc(tagline) + '</p>';
+      if (item.is_dual_identity === true) {
+        html += '<p class="entry-hero-tagline">Dual identity FoundUp.</p>';
+      }
       html += '</section>';
 
-      // Readiness block
+      // Readiness block (poc_landing_status)
       html += '<div class="entry-readiness-block readiness-' + esc(readiness) + '">';
       html += '<div class="entry-readiness-label">' + esc(readinessLabel) + '</div>';
-      if (entryCopy) html += '<p class="entry-readiness-copy">' + esc(entryCopy) + '</p>';
       html += '</div>';
 
-      // CTA for non-video source types
-      if (isNonVideo && ctaUrl && ctaConfig) {
+      // Public landing links (allowlisted url fields only). View-only.
+      var links = [];
+      if (item.poc_url) links.push(['poc_url', 'View PoC', item.poc_url]);
+      if (item.app_url) links.push(['app_url', 'Open App', item.app_url]);
+      if (item.website_url) links.push(['website_url', 'Website', item.website_url]);
+      if (item.github_url) links.push(['github_url', 'GitHub', item.github_url]);
+      if (item.docs_url) links.push(['docs_url', 'Docs', item.docs_url]);
+      if (item.lightpaper_url) links.push(['lightpaper_url', 'Litepaper', item.lightpaper_url]);
+      if (links.length) {
         html += '<div class="entry-cta-block">';
-        html += '<a href="' + esc(ctaUrl) + '" target="_blank" rel="noopener" class="entry-cta-btn">';
-        html += '<span>' + esc(ctaConfig.label) + '</span>';
-        html += '<span>' + ctaConfig.icon + '</span>';
-        html += '</a>';
-        html += '<div class="entry-source-type-label">' + esc((item.source_type || '').replace(/_/g, ' ')) + '</div>';
-        html += '</div>';
-      }
-
-      // WSP 104: Launch App CTA (only if entry_url is configured)
-      if (item.entry_url) {
-        var appRoute = '/f/' + foundupId + '/app';
-        html += '<div class="entry-launch-app-block">';
-        html += '<a href="' + esc(appRoute) + '" class="entry-launch-app-btn">';
-        html += '<span>Launch App</span>';
-        html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>';
-        html += '</a>';
-        html += '<div class="entry-launch-app-hint">Opens ' + esc(displayName) + ' in the FoundUp shell</div>';
-        html += '</div>';
-      }
-
-      // Details table
-      var details = [];
-      if (item.creator || item.creator_display) details.push(['Creator', item.creator_display || item.creator]);
-      if (item.lifecycle_stage) details.push(['Lifecycle', item.lifecycle_stage]);
-      if (item.tier) details.push(['Tier', item.tier]);
-      if (item.routing_prefix) details.push(['Route', item.routing_prefix]);
-      if (item.video_count) details.push(['Videos', item.video_count]);
-
-      if (details.length) {
-        html += '<div class="entry-details">';
-        details.forEach(function(d) {
-          html += '<div class="entry-detail-row">';
-          html += '<span class="entry-detail-label">' + esc(d[0]) + '</span>';
-          html += '<span class="entry-detail-value">' + esc(d[1]) + '</span>';
-          html += '</div>';
+        links.forEach(function(l) {
+          html += '<a href="' + esc(l[2]) + '" target="_blank" rel="noopener" class="entry-cta-btn">';
+          html += '<span>' + esc(l[1]) + '</span><span>\u2197</span>';
+          html += '</a> ';
         });
         html += '</div>';
       }
 
-      // Description
-      if (description) {
+      // Narrative sections (allowlisted optional fields) - public landing info.
+      var narrative = [];
+      if (item.mission) narrative.push(['Mission', item.mission]);
+      if (item.pain) narrative.push(['Pain', item.pain]);
+      if (item.solution) narrative.push(['Solution', item.solution]);
+      if (item.outcome) narrative.push(['Outcome', item.outcome]);
+      narrative.forEach(function(n) {
+        html += '<div class="entry-description">';
+        html += '<h3>' + esc(n[0]) + '</h3>';
+        html += '<p>' + esc(n[1]) + '</p>';
+        html += '</div>';
+      });
+
+      // Summary
+      if (summary) {
         html += '<div class="entry-description">';
         html += '<h3>About</h3>';
-        html += '<p>' + esc(description) + '</p>';
+        html += '<p>' + esc(summary) + '</p>';
         html += '</div>';
       }
 
@@ -1250,6 +1297,7 @@
       entryRedDogBtn.classList.remove('active');
     }
 
+    // Concierge context - public allowlisted fields only. No participation.
     function populateConciergeContext(item) {
       currentItem = item;
       var body = document.getElementById('conciergeContextBody');
@@ -1257,42 +1305,34 @@
         body.innerHTML = 'No FoundUp loaded.';
         return;
       }
-      var displayName = item.name || item.title || item.entity || item.foundup_id;
-      var displayStatus = item.launch_readiness || item.status || 'active';
-      var readinessLabel = READINESS_LABELS[displayStatus] || displayStatus || 'Unknown';
+      var displayName = item.display_name || item.foundup_id;
+      var displayStatus = item.poc_landing_status || 'discoverable_only';
+      var readinessLabel = READINESS_STATUS_LABELS[displayStatus] || displayStatus || 'Unknown';
       body.innerHTML =
-        '<strong>' + esc(displayName) + '</strong> is currently <strong>' + esc(readinessLabel) + '</strong>.' +
-        '<br>' + esc(item.entry_copy || WHAT_NEXT[item.launch_readiness] || WHAT_NEXT[displayStatus] || '');
+        '<strong>' + esc(displayName) + '</strong> readiness: <strong>' + esc(readinessLabel) + '</strong>.';
       renderBriefing(item);
       renderRecommendations(item);
     }
 
-    // -- Briefing: shell-truthful context lines --
+    // -- Briefing: public allowlisted context lines only --
     function renderBriefing(item) {
       var el = document.getElementById('entryBriefingBody');
       if (!el || !item) return;
       var lines = [];
-      var displayName = item.name || item.title || item.entity || item.foundup_id;
-      var displayStatus = item.launch_readiness || item.status || 'active';
-      var readinessLabel = READINESS_LABELS[displayStatus] || displayStatus || 'Unknown';
+      var displayName = item.display_name || item.foundup_id;
+      var displayStatus = item.poc_landing_status || 'discoverable_only';
+      var readinessLabel = READINESS_STATUS_LABELS[displayStatus] || displayStatus || 'Unknown';
       lines.push('You are viewing <strong>' + esc(displayName) + '</strong>');
       lines.push('Readiness: <strong>' + esc(readinessLabel) + '</strong>');
-      if (item.token_symbol || item.source_handle) lines.push('Token: <strong>' + esc(item.token_symbol || item.source_handle) + '</strong>');
-      if (item.creator || item.creator_display) lines.push('Creator: <strong>' + esc(item.creator_display || item.creator) + '</strong>');
-      if (item.lifecycle_stage) lines.push('Lifecycle: <strong>' + esc(item.lifecycle_stage) + '</strong>');
-      if (item.tier) lines.push('Tier: <strong>' + esc(item.tier) + '</strong>');
-      if (item.routing_prefix) lines.push('Route: <strong>' + esc(item.routing_prefix) + '</strong>');
-      if (item.video_count) lines.push('Videos: <strong>' + item.video_count + '</strong>');
-      if (NON_VIDEO_SOURCE_TYPES[item.source_type]) {
-        lines.push('Type: <strong>' + esc((item.source_type || '').replace(/_/g, ' ')) + '</strong>');
-        if (item.external_url) lines.push('URL: <strong>' + esc(item.external_url) + '</strong>');
-      }
+      if (item.token_symbol) lines.push('Token: <strong>' + esc(item.token_symbol) + '</strong>');
+      if (item.portfolio_status) lines.push('Status: <strong>' + esc(item.portfolio_status.replace(/_/g, ' ')) + '</strong>');
+      if (item.is_dual_identity === true) lines.push('Type: <strong>Dual identity</strong>');
       el.innerHTML = lines.map(function(l) {
         return '<div class="entry-briefing-line">' + l + '</div>';
       }).join('');
     }
 
-    // -- Recommended actions: truthful, local-only --
+    // -- Recommended actions: truthful, local navigation only (no participation) --
     var ENTRY_RECOMMENDATIONS = [
       {
         id: 'return_to_mall',
@@ -1322,24 +1362,9 @@
     function renderRecommendations(item) {
       var el = document.getElementById('entryRecsBody');
       if (!el) return;
+      // Read-only public surface: navigation suggestions only. No Launch App /
+      // open-source participation actions are surfaced from the public path.
       var recs = ENTRY_RECOMMENDATIONS.slice();
-      // WSP 104: Add Launch App if entry_url is configured
-      if (item.entry_url) {
-        recs.unshift({
-          id: 'launch_app',
-          label: 'Launch App',
-          run: function() { window.location.href = '/f/' + foundupId + '/app'; }
-        });
-      }
-      // Add source-specific CTA
-      if (NON_VIDEO_SOURCE_TYPES[item.source_type] && SOURCE_TYPE_CTA[item.source_type] && item.external_url) {
-        var cta = SOURCE_TYPE_CTA[item.source_type];
-        recs.unshift({
-          id: 'open_source',
-          label: cta.label,
-          run: function() { window.open(item.external_url, '_blank'); }
-        });
-      }
       var html = '<div class="entry-recs-row">';
       recs.forEach(function(rec, idx) {
         html += '<button class="entry-rec-action" data-rec-idx="' + idx + '">' + esc(rec.label) + '</button>';
