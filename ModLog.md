@@ -1,5 +1,38 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-13] WRE/PFmall/Kanban FoundUp Launch Flow Audit Phase 1 (Window W9 / Lane A, decision-only)
+
+**Change Type**: READ-ONLY architecture/design audit. ONE doc + this ModLog entry. NO code, NO CLI/MCP/
+PFmall/adapter implementation, NO Kanban vendoring, NO repo provisioning, NO manifest/registry/catalog
+mutation. Decision-only.
+**By**: 0102 (Window W9, Worker-Lane A / AUTHOR) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP References**: WSP 22, WSP 50, WSP 64, WSP 97, WSP 109
+**Base**: `ed3ad2066` (origin/main after #801)
+**Predecessors**: #803 (Kanban surface-not-authority), #804 (plugin contract), #805 (Option D), #802 (GetK PoC), #799/#801 (public catalog projector + /f/)
+
+- ADD `docs/audits/architecture/WRE_PFMALL_KANBAN_FOUNDUP_LAUNCH_FLOW_AUDIT_PHASE1.md` (22 sections,
+  WSP_97 27/27). Defines the missing SYSTEM CONTRACT: the public-to-worker-to-PR-to-PFmall loop for
+  creating a new FoundUp, with WRE as authority and Hermes Kanban as the worker surface.
+- CONTROLLED CLOSED LOOP (not omnidirectional): bidirectional only through 4 governed seams (PFmall->WRE
+  proposal-only; WRE->Kanban bounded cards; Kanban->WRE advisory evidence+PR; WRE->PFmall derived projection
+  after source-of-truth update). 5 forbidden direct paths (PFmall<->Kanban, public->code/repo,
+  evidence->catalog without verify, Kanban-DB->canonical).
+- 14-state launch state machine with authority owner per state (PFmall/WRE/Kanban/Worker/SENTINEL/LAND/
+  GitHub/Registry); WRE owns every transition. Stores separated: CANONICAL (repo/PR/manifest/registry/WSP)
+  vs DERIVED (public_catalog.json, allowlist-only) vs ADVISORY (EvidencePacket, Kanban SQLite DB).
+- Grounded by direct read: PFmall today is catalog+browse only (projector derives public_catalog.json
+  allowlist-only/fail-closed; #801 /f/ reads it); intake+status are net-new. FoundUpProposal REUSES the
+  existing FoundUpGenesisEnvelope (foundup_genesis envelope.py+validator.py; external_repo_requested=False
+  at genesis; WSP 64/109). source_authority=monorepo_poc is un-self-promotable (context_bundle_builder.py:132).
+  External repo creation gated: named-but-BLOCKED WRE_FOUNDUP_EXTERNAL_REPO_PROVISIONER_PHASE1 (6 conditions;
+  prior art HXA19_REPO_CREATION_APPROVAL_GATE). CLI-first/MCP-later: `project` verb exists (projector
+  __main__); propose/kanban-publish/kanban-ingest net-new.
+- Public intake hardened as hostile input (Phase-1 invite/authn-gated default; allowed fields vs must-not-
+  contain code/secrets/repo/source_authority/merge tokens). PFmall populated ONLY by derived projection.
+- Ordered next slices: HERMES_KANBAN_PLUGIN_CONTRACT_IMPL_PHASE1, FOUNDUP_LAUNCH_REQUEST_CONTRACT_IMPL_PHASE1,
+  FOUNDUPS_CLI_LAUNCH_SEAM_PHASE1, KANBAN_EXTERNAL_ADAPTER_PILOT_PHASE1, (BLOCKED) external repo provisioner.
+- STOP at MERGE_READY for the external 0102 gate.
+
 ## [2026-06-13] Open-PR Backlog Disposition Audit Phase 1 -- AUTHOR-CORRECTION (Lane Hc, decision-only)
 
 **Change Type**: READ-ONLY disposition audit, AUTHOR-CORRECTION of PR #798. ONE doc + this ModLog entry.
