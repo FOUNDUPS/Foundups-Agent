@@ -1,5 +1,31 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-13] Hermes Kanban Vendoring Decision Phase 1 (Lane A, decision-only)
+
+**Change Type**: READ-ONLY decision. ONE doc + this ModLog entry. NO vendoring, NO submodule update, NO
+fetch-into-tree, NO wiring, NO code. Decision-only.
+**By**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP References**: WSP 22, WSP 50, WSP 97
+**Base**: `ed3ad2066` (origin/main after #801)
+**Predecessors**: #803 (fork-status + surface-not-authority), #804 (plugin contract) -- both OPEN
+
+- ADD `docs/audits/architecture/HERMES_KANBAN_VENDORING_DECISION_PHASE1.md` (13 sections, WSP_97 16/16).
+  Answers: which substrate satisfies the #804 plugin contract with least risk?
+- Options evaluated: A (official SQLite kanban as-is), B (advance FOUNDUPS/hermes-agent past the pin to
+  include kanban), C (foundups-agent-workspace swarm-kanban JSON), D (do not vendor; external CLI/API/export
+  adapter first). RECOMMENDATION: **Option D** -- least inherited risk (no second scheduler/persistence),
+  fully reversible, proves the plugin boundary before touching either fork. The value is the board/workflow
+  SURFACE, not code ownership; WRE/ContextBundle/WSP/PR is already the source of truth.
+- Fork-state re-verified at base: pinned `d1d425e9` (v2026.4.13) has ZERO kanban; FOUNDUPS/hermes-agent
+  remote main `0d25e1c1` is AHEAD of the pin (read-only ls-remote), but whether it carries the official
+  kanban is UNVERIFIED without a fetch (deferred; not load-bearing for D); foundups-agent-workspace is NOT
+  vendored here. The ls-remote was read-only -- pin and working tree unchanged.
+- Ordered next slices: HERMES_KANBAN_PLUGIN_CONTRACT_IMPL_PHASE1 (typed KanbanCardSpec/WorkerTaskSpec/
+  WreEvidencePacket + validator + tests, no Hermes import, no DB write, no worker spawn, no wiring) ->
+  HERMES_KANBAN_EXTERNAL_ADAPTER_PILOT_PHASE1 (3 adapter ops over an external boundary, dispatch off) ->
+  (only if D proves out) HERMES_KANBAN_VENDORING_EXECUTION_PHASE1 (re-open A/B with the fence validated).
+- Operator ratifies the vendoring decision (Option D) at the external gate. STOP at MERGE_READY.
+
 ## [2026-06-13] Open-PR Backlog Disposition Audit Phase 1 -- AUTHOR-CORRECTION (Lane Hc, decision-only)
 
 **Change Type**: READ-ONLY disposition audit, AUTHOR-CORRECTION of PR #798. ONE doc + this ModLog entry.
