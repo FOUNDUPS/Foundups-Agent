@@ -15,6 +15,27 @@ logger = logging.getLogger(__name__)
 # Example: "file_cache is only supported with oauth2client<4.0.0"
 logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.WARNING)
 
+# Fixed OAuth redirect-listener ports per credential set. These MUST mirror the
+# authorize scripts so the supervised preflight reauth lands on the SAME port
+# Google has whitelisted for each client (authorize_set1.py -> 8080,
+# authorize_set10.py -> 8090). Historically preflight used run_local_server(port=0)
+# which picks a random port; that mismatch can cause redirect_uri_mismatch and
+# silently swallowed Set-1 failures. Env overrides mirror the authorize scripts.
+OAUTH_PORT_SET1 = 8080
+OAUTH_PORT_SET10 = 8090
+
+
+def _oauth_port_for_set(set_id: int) -> int:
+    """Resolve the fixed OAuth listener port for a credential set.
+
+    Mirrors authorize_set1.py / authorize_set10.py exactly (env override first,
+    then the fixed default). Unknown sets fall back to OAUTH_PORT_SET1's default
+    so we never regress to a random port=0 in the supervised path.
+    """
+    if set_id == 10:
+        return int(os.getenv("OAUTH_PORT_SET10", str(OAUTH_PORT_SET10)))
+    return int(os.getenv("OAUTH_PORT_SET1", str(OAUTH_PORT_SET1)))
+
 # Initialize quota monitor
 quota_monitor = QuotaMonitor()
 
@@ -489,6 +510,127 @@ if __name__ == '__main__':
         logger.exception(f"An unexpected error occurred: {e}")
 
 
+def run_supervised_reauth_for_set(set_id, client_secrets, token_file, scopes) -> bool:
+    """Run a supervised, fixed-port OAuth reauth for ONE credential set.
+
+    This is the supervised counterpart to the authorize scripts. It is BLOCKING
+    by design: run_local_server() blocks until the operator completes (or cancels)
+    the consent in the browser. Callers MUST invoke this sequentially per set so
+    Set 1's browser window resolves before Set 10's opens (012 sees Chrome then
+    Edge, not just Edge).
+
+    Behavior:
+      - Resolves the correct browser per set via #811's
+        oauth_browser.resolve_browser_for_set (Set 1 -> Chrome, Set 10 -> Edge).
+      - Uses the FIXED listener port for the set (OAUTH_PORT_SET1=8080 /
+        OAUTH_PORT_SET10=8090), NOT port=0, so the redirect_uri matches the
+        client Google whitelisted.
+      - Prints the account label from oauth_health.SET_METADATA so the operator
+        knows which Google account to pick.
+      - On success, persists the new token to token_file and returns True.
+      - On any failure (browser-not-found, cancelled consent, save error), logs
+        and returns False; the caller keeps the set in its expired list.
+
+    Never logs/prints tokens or client_secret contents (WSP security).
+
+    Args:
+        set_id: credential set id (1 or 10).
+        client_secrets: path to the client secrets JSON for this set.
+        token_file: path to write the authorized-user token JSON.
+        scopes: list of OAuth scopes.
+
+    Returns:
+        True if reauth completed and the token was obtained, else False.
+    """
+    # Function-local imports to avoid top-of-file collisions with concurrent
+    # edits to get_authenticated_service (PR3) and to keep import-light.
+    import webbrowser
+    import subprocess
+    from modules.platform_integration.youtube_auth.src.oauth_browser import (
+        resolve_browser_for_set,
+        BrowserNotFoundError,
+    )
+
+    meta = oauth_health.SET_METADATA.get(set_id, {})
+    account_label = meta.get("account_label", f"Set {set_id}")
+    port = _oauth_port_for_set(set_id)
+
+    # Resolve which browser executable to launch for this set (single source of
+    # truth in oauth_browser per #811). Failure here is a hard stop for the set.
+    try:
+        browser_name, browser_path = resolve_browser_for_set(set_id)
+    except BrowserNotFoundError as browser_err:
+        logger.critical(
+            f"[REAUTH] Cannot launch OAuth for set {set_id} ({account_label}): "
+            f"{browser_err}. Operator action: {browser_err.operator_action}"
+        )
+        return False
+
+    # Re-verify the executable still exists (resolver checked, but a binary can
+    # be removed between resolution and launch).
+    if not os.path.exists(browser_path):
+        action = oauth_health.reauth_command_for(set_id)
+        logger.critical(
+            f"[REAUTH] Resolved browser for set {set_id} no longer exists at "
+            f"{browser_path}. Operator action: {action}"
+        )
+        return False
+
+    # CodeQL-safe operator banner: log ONLY sanitized non-secret scalars - an
+    # int set id, the resolver-derived browser name, an int port, and a STATIC
+    # public channel-role literal (NOT read from any credential/oauth container,
+    # so it cannot be tainted as sensitive). Never logs token/client_secret.
+    _sid = int(set_id)
+    _port_num = int(port)
+    _browser = str(browser_name).upper()
+    _role = {1: "UnDaoDu/Move2Japan", 10: "FoundUps/antifaFM"}.get(_sid, "channel")
+    logger.info(
+        "[REAUTH] credential set %s -> %s on port %s (%s)",
+        _sid, _browser, _port_num, _role,
+    )
+    print(f"\n{'=' * 60}")
+    print(f"[IMPORTANT] credential set {_sid} reauth: open {_browser} ({_role})")
+    print(f"  - Set 1: Chrome (UnDaoDu/Move2Japan account)")
+    print(f"  - Set 10: Edge (FoundUps/antifaFM account)")
+    print(f"  - Listener port: {_port_num} (fixed, matches authorize_set{_sid}.py)")
+    print(f"{'=' * 60}\n")
+
+    original_open = webbrowser.open
+    try:
+        # Route the consent URL through the per-set browser executable.
+        def custom_open(url, new=0, autoraise=True):
+            subprocess.Popen([browser_path, url])
+            return True
+
+        webbrowser.open = custom_open
+
+        flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
+            client_secrets, scopes
+        )
+        # BLOCKING: fixed port (not port=0) so redirect_uri matches the client.
+        creds = flow.run_local_server(port=port)
+    except Exception as auth_e:
+        logger.error(f"[REAUTH] Set {set_id} ({account_label}) reauth failed: {auth_e}")
+        return False
+    finally:
+        webbrowser.open = original_open
+
+    if not creds:
+        logger.error(f"[REAUTH] Set {set_id} ({account_label}) returned no credentials")
+        return False
+
+    try:
+        os.makedirs(os.path.dirname(token_file), exist_ok=True)
+        with open(token_file, 'w', encoding='utf-8') as f:
+            f.write(creds.to_json())
+        logger.info(f"[REAUTH] Set {set_id} ({account_label}) re-authenticated successfully")
+    except Exception as save_e:
+        logger.error(f"[REAUTH] Set {set_id} reauth succeeded but token save failed: {save_e}")
+        return False
+
+    return True
+
+
 def preflight_oauth_check(auto_reauth: bool = False, credential_sets=None) -> dict:
     """
     Preflight check for OAuth token health. Call at startup to detect invalid_grant errors.
@@ -521,8 +663,12 @@ def preflight_oauth_check(auto_reauth: bool = False, credential_sets=None) -> di
         return result
     scopes = scopes_str.split()
 
-    all_sets = credential_sets if credential_sets is not None else get_available_credential_sets()
-    logger.info(f"[PREFLIGHT] Checking {len(all_sets)} credential sets: {all_sets}")
+    raw_sets = credential_sets if credential_sets is not None else get_available_credential_sets()
+    # Process in ascending set order so supervised reauth opens Set 1 (Chrome /
+    # UnDaoDu) BEFORE Set 10 (Edge / FoundUps). run_local_server blocks, so a
+    # stable order guarantees 012 sees Chrome first, then Edge.
+    all_sets = sorted(raw_sets)
+    logger.info(f"[PREFLIGHT] Checking {len(all_sets)} credential sets (sorted): {all_sets}")
 
     for index in all_sets:
         creds_data = get_credentials_for_index(index)
@@ -588,85 +734,28 @@ def preflight_oauth_check(auto_reauth: bool = False, credential_sets=None) -> di
                 )
 
                 if auto_reauth:
-                    # Determine correct browser based on credential set (WSP 84:
-                    # single source of truth in oauth_browser).
-                    # Set 1 = UnDaoDu/Move2Japan = Chrome
-                    # Set 10 = FoundUps/antifaFM = Edge
-                    from modules.platform_integration.youtube_auth.src.oauth_browser import (
-                        resolve_browser_for_set,
-                        BrowserNotFoundError,
+                    # Supervised, fixed-port, SEQUENTIAL reauth (WSP 84: single
+                    # source of truth in run_supervised_reauth_for_set, which uses
+                    # the per-set browser (#811 resolve_browser_for_set) and the
+                    # FIXED port OAUTH_PORT_SET1/10 -- NOT port=0). run_local_server
+                    # blocks, so Set 1 fully completes/cancels before Set 10 opens.
+                    reauth_ok = run_supervised_reauth_for_set(
+                        index, client_secrets_file, token_file, scopes
                     )
-
-                    try:
-                        browser_name, browser_path = resolve_browser_for_set(index)
-                    except BrowserNotFoundError as browser_err:
-                        logger.critical(
-                            f"[PREFLIGHT] Cannot auto-reauth set {index}: "
-                            f"{browser_err}. Operator action: {browser_err.operator_action}"
-                        )
-                        # Consistent with this block's error contract: do not
-                        # crash preflight; the set stays in 'expired' and the
-                        # operator_action was logged at CRITICAL above.
-                        continue
-
-                    logger.info(f"[PREFLIGHT] Auto-reauth for set {index} - USE {browser_name.upper()}!")
-                    print(f"\n{'='*60}")
-                    print(f"[IMPORTANT] Set {index} requires {browser_name.upper()} browser!")
-                    print(f"  - Set 1: Chrome (UnDaoDu/Move2Japan account)")
-                    print(f"  - Set 10: Edge (FoundUps/antifaFM account)")
-                    print(f"{'='*60}\n")
-
-                    try:
-                        import webbrowser
-                        import subprocess
-
-                        # Re-verify the resolved executable before launching so a
-                        # removed binary surfaces a CRITICAL operator action
-                        # rather than an opaque Popen failure.
-                        if not os.path.exists(browser_path):
-                            action = oauth_health.reauth_command_for(index)
-                            logger.critical(
-                                f"[PREFLIGHT] Resolved browser for set {index} no longer "
-                                f"exists at {browser_path}. Operator action: {action}"
-                            )
-                            raise BrowserNotFoundError(
-                                set_id=index,
-                                attempted_paths=[browser_path],
-                                operator_action=action,
-                            )
-
-                        # Override webbrowser.open to use the correct browser
-                        original_open = webbrowser.open
-                        def custom_open(url, new=0, autoraise=True):
-                            subprocess.Popen([browser_path, url])
-                            return True
-                        webbrowser.open = custom_open
-
-                        print(f"[INFO] Will open {browser_name} for authentication...")
-
-                        flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(
-                            client_secrets_file, scopes)
-
-                        # run_local_server will now use our custom browser opener
-                        creds = flow.run_local_server(port=0)
-
-                        # Restore original webbrowser.open
-                        webbrowser.open = original_open
-
-                        # Save new credentials
-                        with open(token_file, 'w', encoding='utf-8') as f:
-                            f.write(creds.to_json())
-                        logger.info(f"[PREFLIGHT] Set {index} re-authenticated successfully!")
+                    if reauth_ok:
                         result['expired'].remove(index)
                         result['healthy'].append(index)
                         result['reauth_needed'] = len(result['expired']) > 0
-                    except Exception as auth_e:
-                        logger.error(f"[PREFLIGHT] Auto-reauth failed for set {index}: {auth_e}")
-                        # Restore original webbrowser.open on error too
-                        try:
-                            webbrowser.open = original_open
-                        except:
-                            pass
+                        per_set_classified[index] = oauth_health.build_set_entry(
+                            index, oauth_health.STATUS_HEALTHY
+                        )
+                    else:
+                        # WSP 97: no false OK. Keep the set in expired[] and tell
+                        # the operator exactly how to fix it.
+                        logger.critical(
+                            f"[PREFLIGHT] Set {index} reauth FAILED -- still dead. "
+                            f"Operator action: {oauth_health.reauth_command_for(index)}"
+                        )
             else:
                 logger.error(f"[PREFLIGHT] Set {index} error: {error_msg}")
                 result['expired'].append(index)

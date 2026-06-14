@@ -271,15 +271,62 @@ async def monitor_youtube(disable_lock: bool = False, enable_ai_monitoring: bool
                 print("[INFO] Kill it manually or wait for TTL expiry, then retry.")
                 return
 
-        # PREFLIGHT: Check OAuth token health before starting
-        print("[PREFLIGHT] Checking OAuth token health...")
+        # PREFLIGHT: Check OAuth token health before starting.
+        # DUAL-SET CONTRACT (YT-OAUTH-DUAL-PREFLIGHT-MENU-PHASE1): pass
+        # credential_sets=[1, 10] explicitly so BOTH the UnDaoDu/Move2Japan
+        # (Set 1 / Chrome) and FoundUps/antifaFM (Set 10 / Edge) accounts are
+        # checked and supervised-reauthed in order (Set 1 before Set 10). This is
+        # the menu 1->1 ("Live Chat Monitor") entry path -- the menu launches
+        # monitor_youtube(), which runs this single preflight; we do NOT run a
+        # second preflight in the menu file to avoid double consent prompts.
+        print("[PREFLIGHT] Checking OAuth token health (dual-set: Set 1 + Set 10)...")
         try:
             from modules.platform_integration.youtube_auth.src.youtube_auth import preflight_oauth_check
-            oauth_status = preflight_oauth_check(auto_reauth=auto_reauth)
+            oauth_status = preflight_oauth_check(auto_reauth=auto_reauth, credential_sets=[1, 10])
+
+            # WSP 97 truthful dual-set summary (healthy / still-dead / missing).
+            # Sanitize to fresh int set-id lists (non-secret) before logging so
+            # CodeQL does not treat the oauth-status container as a clear-text
+            # sensitive sink. These are credential-set IDs (1/10), never secrets.
+            _ok_ids = sorted(int(s) for s in oauth_status.get('healthy', []))
+            _dead_ids = sorted(int(s) for s in oauth_status.get('expired', []))
+            _missing_ids = sorted(int(s) for s in oauth_status.get('missing', []))
+            print(
+                "[PREFLIGHT] Dual-set summary: "
+                f"healthy={_ok_ids} still_dead={_dead_ids} missing={_missing_ids}"
+            )
+            # No false OK: if Set 1 is still dead, UnDaoDu/Move2Japan will fail.
+            if 1 in oauth_status.get('expired', []) or 1 in oauth_status.get('missing', []):
+                print(
+                    "[WARN] Set 1 (UnDaoDu / Move2Japan, Chrome) is NOT healthy -- "
+                    "those channels will FAIL. Fix: python modules/platform_integration/"
+                    "youtube_auth/scripts/authorize_set1.py"
+                )
+            if 10 in oauth_status.get('expired', []) or 10 in oauth_status.get('missing', []):
+                print(
+                    "[WARN] Set 10 (FoundUps / antifaFM, Edge) is NOT healthy -- "
+                    "those channels will FAIL. Fix: python modules/platform_integration/"
+                    "youtube_auth/scripts/authorize_set10.py"
+                )
+
+            # SECTION C: reconciled quota headroom for BOTH sets (read-only) so
+            # 012 sees Set 1 AND Set 10, not Set 1 only. Import function-locally.
+            try:
+                from modules.platform_integration.youtube_auth.src.quota_monitor import QuotaMonitor
+                quota_summary = QuotaMonitor().get_usage_summary()
+                for _set_id in (1, 10):
+                    _s = quota_summary.get('sets', {}).get(_set_id)
+                    if _s:
+                        print(
+                            f"[QUOTA] Set {_set_id}: {_s['used']}/{_s['limit']} used "
+                            f"({_s['available']} headroom, {_s['status']})"
+                        )
+            except Exception as quota_exc:
+                logger.debug(f"[QUOTA] dual-set headroom log skipped: {quota_exc}")
 
             if oauth_status['reauth_needed'] and not auto_reauth:
                 print("\\n[CRITICAL] OAuth tokens need re-authentication!")
-                print("Expired/invalid sets:", oauth_status['expired'])
+                print("Expired/invalid sets:", sorted(int(s) for s in oauth_status.get('expired', [])))
                 print("\\nOptions:")
                 print("  1. Re-authenticate now (will open browser)")
                 print("  2. Continue in read-only mode (no chat messages)")
@@ -300,7 +347,7 @@ async def monitor_youtube(disable_lock: bool = False, enable_ai_monitoring: bool
                     print("[WARN] Continuing in read-only mode...")
 
             if oauth_status['healthy']:
-                print(f"[OK] OAuth healthy: sets {oauth_status['healthy']}")
+                print(f"[OK] OAuth healthy: sets {sorted(int(s) for s in oauth_status.get('healthy', []))}")
             else:
                 print("[WARN] No healthy OAuth tokens - running in read-only mode")
                 # DJ2-C: Dispatch OAuth no-healthy-tokens warning (WSP 97 truth distinction)
