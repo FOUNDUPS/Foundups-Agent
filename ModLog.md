@@ -1,5 +1,32 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-13] Hermes Kanban Plugin Contract Impl Phase 1 (Lane A, LIMITED IMPLEMENTATION)
+
+**Change Type**: LIMITED IMPLEMENTATION -- ONE pure typed-contract module + tests. NO Hermes import, NO
+Kanban DB write, NO worker spawn, NO PFmall change, NO registry/manifest mutation, NO runtime wiring.
+**By**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP References**: WSP 11, WSP 22, WSP 50, WSP 84, WSP 97
+**Slice**: HERMES_KANBAN_PLUGIN_CONTRACT_IMPL_PHASE1
+**Base**: `ed3ad2066` (origin/main after #801)
+**Predecessors**: #804 (plugin contract), #806 (launch flow), #805 (Option D), #803 (surface)
+
+- ADD `modules/foundups/agent/src/kanban_plugin_contract.py` + tests -- the clean WRE-side seam that lets
+  Kanban workers exist WITHOUT giving Kanban authority. Implements `KanbanCardSpec` / `WorkerTaskSpec` /
+  `WreEvidencePacket` (+ `ArtifactRef`) and validators that prove forbidden authority cannot ride through.
+- Hardening (Addenda A-H): unified recursive authority scan normalizes keys (NFKC + camel-split + casefold
+  + separator->underscore) and scans string VALUES too (anti-evasion: gatePassed/gate-passed/GATE_PASSED/
+  fullwidth/source_authority promotion all rejected); path/ref hygiene (printable ASCII, repo-relative,
+  reject absolute/drive/UNC/traversal/control/shell-metachars); value-level secret redaction (#768 policy,
+  reimplemented locally); `verified` advisory-only (verified=true rejected at construction/ingest, nested
+  too; verifier transition deferred to WRE_EVIDENCE_PACKET_VERIFICATION_TRANSITION_PHASE1); deterministic
+  json-safe `to_dict()`.
+- Tests: 71 passed (positive + 14 forbidden-authority keys + 13 normalized-evasion + 10 authority-value +
+  path hygiene + 10 value-level redaction + serialization + AST no-runtime/network/subprocess/DB + no second
+  orchestrator). Full agent suite: 768 passed (no regression). No skip/xfail. Redaction extended to structured fields (pr_url/head_sha/tests_run) per the internal SENTINEL hardening observation.
+- Boundary: module imports nothing from Hermes/Kanban/OpenClaw/WRE-consumer/AI-Overseer (AST-tested); no
+  subprocess/network/file-write/Kanban-DB/worker-spawn; no PFmall/registry/manifest change.
+- STOP at MERGE_READY for the external 0102 gate.
+
 ## [2026-06-13] PFmall Firebase Hosting Config -- RE2 Fix + Reproducibility (config remediation, no deploy)
 
 **Change Type**: CODE/CONFIG remediation. Fixed `firebase.json` so PFmall hosting deploy is

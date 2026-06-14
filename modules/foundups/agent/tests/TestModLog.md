@@ -1,5 +1,38 @@
 # Agent Module TestModLog
 
+## 2026-06-13 - Kanban Plugin Contract Tests (HERMES_KANBAN_PLUGIN_CONTRACT_IMPL_PHASE1)
+
+**Command**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_kanban_plugin_contract.py -q
+```
+
+**Result**: PASS
+
+**Summary**: 71 passed. Full agent suite: 768 passed (no regression/collision).
+
+**Coverage**:
+1. Clean CardSpec / WorkerTaskSpec / WreEvidencePacket validate.
+2. verified advisory-only: defaults False; construct verified=True raises; dict verified=true rejected;
+   nested verified=true rejected; serialized verified is False.
+3. Forbidden authority keys rejected (14 parametrized: gate_passed/all_gates_passed/merge_approved/
+   merge_token/can_merge/land_approved/dao_approved/payout_ready/cabr_ready/create_repo/
+   external_repo_requested/real_execution/source_authority promotion/lifecycle_stage mvp).
+4. Public code/shell field rejected; shell-string command rejected.
+5. Normalized authority evasion rejected (13 parametrized incl. gatePassed, gate-passed, gate.passed,
+   GATE_PASSED, fullwidth gate_passed, mergeApproved, externalRepoRequested, canMerge, landApproved,
+   camelCase sourceAuthority promotion).
+6. Authority by semantic VALUE rejected (10 parametrized free-text values).
+7. Path/ref hygiene: absolute/drive/UNC/traversal/shell-metachar rejected; two distinct foundup paths ok.
+8. Value-level redaction: 10 secret shapes in free-text + structured-field redaction (pr_url/head_sha/tests_run) per the SENTINEL hardening observation; 11 secret shapes (sk-/ghp_/Bearer/access_token/refresh_token/client_secret/
+   AIza/1// /ya29./env *_TOKEN=) absent from serialized to_dict.
+9. Serialization deterministic + json-safe; no forbidden keys/values in the blob.
+10. AST: no banned imports (os/sys/subprocess/socket/urllib/...); no runtime executor/consumer import; no
+    banned builtin/attr calls; no second-orchestrator symbols (drain/queue/dispatch/spawn/scheduler/kanban.db).
+
+No skips, no xfail.
+
 ## 2026-06-12 - WRE ContextBundle Dry-Run Consumer Phase 1 Tests
 
 **Command**:
