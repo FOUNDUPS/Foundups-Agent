@@ -1,5 +1,33 @@
 # Simulator ModLog
 
+## 2026-06-14 - Nomenclature Alignment: Universal Compute Account (UCA) & internal flows
+
+### Why
+Align definitions and notation across documentation as directed by 012: the macro
+structures keep the "Universal" prefix (UCA / UBA / UBR / UBD), while the internal
+sub-flow acronyms drop the prefix and resolve to `ca` / `cr` / `cd`.
+
+### Updated
+- `docs/ROC_FORMULA_DERIVATION.md`
+  - Kept UCA (Universal Compute Account).
+  - Kept UBA / UBR / UBD (Universal Basic Allocation / Reserve / Dividend).
+  - Canonical native sub-flows: `ca` = Compute Award, `cr` = Compute Reward, `cd` = Compute Dividend.
+  - Translation bridge `UCA = UBA + UBR + UBD`; native flow `UCA = ca + cr + cd`.
+  - Updated formulas, tables, concept mappings, and the Truth Boundary checklist to match.
+
+### W6 repair (2026-06-15)
+- Canonicalized notation: removed math-dollar delimiters (fenced code / backticks instead),
+  made native-flow definitions rg-matchable, dropped any u-prefixed native-flow tokens, removed
+  the dollar-suffixed UPS literal, and removed the unverified WebSearch/WebFetch footer claim.
+- HoloIndex retrieval marked NOT re-run this docs-only pass (no fabricated ratings).
+
+### WSP References
+- WSP 00: Zen State Attainment
+- WSP 22: ModLog documentation
+- WSP 97: Truth Boundary
+
+---
+
 ## 2026-04-01 - Founding Channel Partner Public-Seat Framing Clarification
 
 ### Why
