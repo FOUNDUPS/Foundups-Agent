@@ -6,6 +6,8 @@ The YouTube Authentication module handles OAuth 2.0 authentication with the YouT
 ## Exports
 This module exports:
 - `get_authenticated_service`: Function to authenticate and obtain a YouTube API service object
+- `oauth_browser.resolve_browser_for_set`: Resolve the per-set OAuth browser executable
+- `oauth_browser.BrowserNotFoundError`: Raised when no browser executable can be resolved for a set
 
 ## Functions
 
@@ -27,12 +29,38 @@ Authenticates the user with YouTube API using OAuth 2.0 and returns a YouTube AP
 - Falls back to the next credential set if authentication fails or quota is exceeded
 - Raises an exception if all credential sets fail
 
+## oauth_browser (per-set OAuth browser resolution)
+
+`src/oauth_browser.py` is the single source of truth for which browser
+executable the OAuth consent flow opens per credential set. It centralizes the
+candidate-path ordering that previously lived (and drifted) inline in
+youtube_auth.py and in the authorize_setN.py scripts.
+
+### `resolve_browser_for_set(set_id: int) -> tuple[str, str]`
+Returns `(browser_name, executable_path)` for a credential set.
+
+- `set_id == 1` -> `browser_name == "chrome"`; candidate order (first existing wins):
+  `CHROME_PATH` env, then 64-bit Chrome, then x86 Chrome (mirrors `authorize_set1.py`).
+- `set_id == 10` -> `browser_name == "edge"`; candidate order:
+  `EDGE_PATH` env, then 64-bit Edge, then x86 Edge (mirrors `authorize_set10.py`).
+- Raises `BrowserNotFoundError` if no candidate exists, or if `set_id` is unknown.
+
+### `class BrowserNotFoundError(Exception)`
+Carries operator-actionable context:
+- `set_id`: the credential set that failed resolution.
+- `attempted_paths`: concrete candidate paths that were checked (unset env vars skipped).
+- `operator_action`: the exact reauth command from `oauth_health.reauth_command_for(set_id)`.
+
 ## Environment Variables
 The module requires the following environment variables to be set:
 
 - `YOUTUBE_SCOPES`: Space-separated list of OAuth scopes required
 - `GOOGLE_CLIENT_SECRETS_FILE_1` through `GOOGLE_CLIENT_SECRETS_FILE_4`: Paths to client secrets files
 - `OAUTH_TOKEN_FILE_1` through `OAUTH_TOKEN_FILE_4`: Paths to token files for credential storage
+
+Optional (used by `oauth_browser.resolve_browser_for_set`):
+- `CHROME_PATH`: Override the Chrome executable used for set 1 OAuth.
+- `EDGE_PATH`: Override the Edge executable used for set 10 OAuth.
 
 ## Usage Example
 ```python
