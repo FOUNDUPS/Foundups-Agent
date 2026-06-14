@@ -49,8 +49,8 @@ creation, no source_authority claim.
 
 **WSP_97 Truth Boundary checklist (25/25 YES):**
 
-| # | Boundary | Verdict | Evidence |
-|---|----------|---------|----------|
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
 | 1 | LAUNCHREQUEST_TYPE_DEFINED | YES | `LaunchRequest` dataclass, allowed proposal fields only |
 | 2 | PRODUCES_EXISTING_GENESIS_ENVELOPE_NOT_PARALLEL | YES | `to_genesis_envelope` returns `FoundUpGenesisEnvelope` (WSP 64) |
 | 3 | PUBLIC_PAYLOAD_CANNOT_SELF_AUTHENTICATE | YES | `_scan_auth_fields` rejects auth/role/admin/approved/verified keys; SENTINEL 16-attempt lane clean |
