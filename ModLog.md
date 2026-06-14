@@ -1,5 +1,35 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-15] FoundUp Launch Request Phase 1 (Lane A, public intake seam)
+
+**Change Type**: LIMITED IMPLEMENTATION -- ONE module + tests (contract + mapping only). NO Kanban publish,
+NO PFmall UI, NO repo creation, NO source_authority claim, NO Hermes/runtime import, NO registry/manifest mutation.
+**By**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP References**: WSP 00, 50/87, 64, 84, 97, 104, 109
+**Slice**: FOUNDUP_LAUNCH_REQUEST_PHASE1
+**Base**: `01158a113` (origin/main after #807 LAND)
+**Predecessors**: #806 (PFmall/Kanban/WRE launch flow), #807 (Kanban plugin contract)
+
+- ADD `modules/ai_intelligence/ai_overseer/src/foundup_genesis/launch_request.py` -- the PUBLIC front-door
+  seam (#806 seam [1] PFmall -> WRE). Typed `LaunchRequest` (proposal-only) + TRUSTED `LaunchRequestIntakeContext`
+  (never payload-populated) + `validate_launch_request(payload, context)` + `to_genesis_envelope(payload, context)`.
+  PRODUCES the EXISTING `FoundUpGenesisEnvelope` (WSP 64 enhance-before-create -- no parallel intake envelope).
+  REUSES (imports) the #807 `kanban_plugin_contract` helpers (`redact_sensitive` / `_scan_authority` / `_normalize`).
+- Trust boundary (Addendum C): a public payload can NEVER self-authenticate -- any auth/gate/role/admin/invite/
+  approved/verified field in the PAYLOAD is rejected even with an authenticated context; the intake gate opens
+  ONLY on `context.authenticated` or `context.invite_token_verified`. Normalized-key/value scan defeats
+  camelCase/separator/UPPER/NFKC-fullwidth/nesting evasion. Mapping FORCES `external_repo_requested=False`,
+  lifecycle in {IDEA, INCUBATING}, no `source_authority`, `requested_by` from the trusted context (never payload).
+- Internal SENTINEL (4 adversarial lanes) found ONE real break: a RAW inbound dict bypassed dataclass redaction,
+  leaking a `problem_statement` secret into envelope `description`/`tagline`. Closed by redacting at the SINK in
+  `to_genesis_envelope` + a raw-dict regression test; all other invariants held.
+- Tests: `tests/test_foundup_launch_request.py` (40, conftest-allowlisted for CI). Affected-package regression
+  `69 passed` (40 launch_request + 29 genesis validator). No skip/xfail. AST proves no Hermes/runtime/network/
+  subprocess/file-write (only the sanctioned #807 import). WSP_97 Truth Boundary 25/25 (table in the ai_overseer ModLog).
+- **Named follow-up (BLOCKED until built): `FOUNDUP_LAUNCH_REQUEST_AUTH_CONTEXT_PROVIDER_PHASE2`** -- the real
+  server-side authn/invite verifier that POPULATES `LaunchRequestIntakeContext`. Phase 1 is the contract only.
+- STOP at MERGE_READY for the external 0102 gate.
+
 ## [2026-06-13] Hermes Kanban Plugin Contract Impl Phase 1 (Lane A, LIMITED IMPLEMENTATION)
 
 **Change Type**: LIMITED IMPLEMENTATION -- ONE pure typed-contract module + tests. NO Hermes import, NO
