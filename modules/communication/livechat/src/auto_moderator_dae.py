@@ -844,6 +844,11 @@ class AutoModeratorDAE:
         if not self.service and video_id:
             logger.info("[AUTH] Stream found! Attempting authentication for chat interaction...")
             try:
+                # Function-local import (WSP coordination: avoid touching the
+                # module-level import block another change may also edit).
+                from modules.platform_integration.youtube_auth.src.youtube_auth import (
+                    OAuthReauthRequiredError,
+                )
                 force_set_raw = os.getenv("YT_FORCE_CREDENTIAL_SET", "").strip()
                 token_index = None
                 if force_set_raw:
@@ -895,6 +900,19 @@ class AutoModeratorDAE:
                             logger.info(f"[OK] Got chat ID with API: {live_chat_id[:20]}...")
                         else:
                             logger.warning("[WARN] Could not get chat ID even with API")
+            except OAuthReauthRequiredError as reauth_err:
+                # Pinned credential set is dead (invalid_grant). Do NOT silently
+                # authenticate via another account/set and do NOT log
+                # "[OK] Authenticated". Surface the exact operator reauth command
+                # with the Chrome/Edge hint so 012 can fix the pinned account.
+                logger.critical(
+                    f"[AUTH] Pinned credential set {reauth_err.set_id} requires "
+                    f"re-authorization (invalid_grant) - NO silent fallback. "
+                    f"Operator action: {reauth_err.operator_action} "
+                    f"(Set 1 -> Chrome for UnDaoDu/Move2Japan, "
+                    f"Set 10 -> Edge for FoundUps/antifaFM)"
+                )
+                logger.info("[NO-QUOTA] Continuing in NO-QUOTA mode (view-only)")
             except Exception as e:
                 logger.warning(f"[WARN] Authentication failed: {e}")
                 logger.info("[NO-QUOTA] Continuing in NO-QUOTA mode (view-only)")

@@ -6,6 +6,7 @@ The YouTube Authentication module handles OAuth 2.0 authentication with the YouT
 ## Exports
 This module exports:
 - `get_authenticated_service`: Function to authenticate and obtain a YouTube API service object
+- `OAuthReauthRequiredError`: Raised when a dead (invalid_grant) credential set cannot be authenticated and no silent fallback is permitted
 - `oauth_browser.resolve_browser_for_set`: Resolve the per-set OAuth browser executable
 - `oauth_browser.BrowserNotFoundError`: Raised when no browser executable can be resolved for a set
 
@@ -21,13 +22,34 @@ Authenticates the user with YouTube API using OAuth 2.0 and returns a YouTube AP
 - `googleapiclient.discovery.Resource`: A YouTube API service object that can be used to make API calls
 
 **Behavior:**
-- Sequentially tries up to 4 credential sets defined in environment variables
+- Sequentially tries the configured credential sets (auto-rotation) or a single
+  explicitly pinned set when `token_index` is supplied
 - Loads existing credentials from token files if available
 - Refreshes credentials if expired
 - Initiates a new OAuth flow if no valid credentials are found
 - Saves new or refreshed credentials to the appropriate token file
-- Falls back to the next credential set if authentication fails or quota is exceeded
+- Falls back to the next credential set ONLY during auto-rotation, and only if a
+  healthy set remains; emits a truthful `[OAUTH-HEALTH]` capacity line after each skip
 - Raises an exception if all credential sets fail
+
+**No silent fallback for a pinned set (WSP 97):**
+- When `token_index` is EXPLICITLY pinned (e.g. UnDaoDu/Move2Japan pinned to
+  set 1), an `invalid_grant` refresh failure raises `OAuthReauthRequiredError`
+  immediately. The function does NOT try another set (e.g. set 10) and does NOT
+  degrade to read-only no-auth mode — that would silently authenticate via the
+  wrong account.
+- During auto-rotation (`token_index=None`), a dead set is skipped only when a
+  healthy set remains. If ALL configured sets are dead via `invalid_grant`, the
+  function raises `OAuthReauthRequiredError` listing every reauth command instead
+  of degrading to no-auth.
+
+### `class OAuthReauthRequiredError(Exception)`
+Raised when a credential set's refresh token is dead (`invalid_grant`) and no
+silent fallback is allowed. Carries operator-actionable context:
+- `set_id`: the credential set (or a list of set ids when all sets are dead) that
+  requires re-authorization.
+- `operator_action`: the exact reauth command(s) from
+  `oauth_health.reauth_command_for(set_id)`, joined with `; ` for multiple sets.
 
 ## oauth_browser (per-set OAuth browser resolution)
 
@@ -92,6 +114,9 @@ except Exception as e:
 
 ## Error Handling
 - `ValueError`: Raised if required environment variables are missing
+- `OAuthReauthRequiredError`: Raised when a pinned set is dead (`invalid_grant`)
+  or when all sets are dead during auto-rotation; carries `set_id` and
+  `operator_action` (the exact reauth command(s))
 - `Exception`: Raised if all credential sets fail to authenticate
 - HTTP errors from the YouTube API are logged but handled internally during authentication
 

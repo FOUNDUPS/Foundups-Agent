@@ -12,6 +12,61 @@ This log tracks changes specific to the **youtube_auth** module in the **platfor
 
 ## MODLOG ENTRIES
 
+### 2026-06-15 - YT-OAUTH-INVALID-GRANT-NO-SILENT-FALLBACK-PHASE1: No silent Set-10 fallback for a pinned set
+
+**By:** 0102 (Worker P3)
+**Slice:** YT-OAUTH-INVALID-GRANT-NO-SILENT-FALLBACK-PHASE1 (builds on #811)
+**WSP References:** WSP 22 (ModLog), WSP 50 (Pre-Action Verification), WSP 97 (Truth Signaling)
+
+**HoloIndex Retrieval (backfilled 2026-06-15, pre-contract worker):** the full retroactive retrieval report + verdict + attention flags are in the PR #812 body. NEEDS_012: HoloIndex miss - retroactive queries surfaced only adjacent files (e.g. livechat/persona_registry.py) and did NOT surface the edit target youtube_auth.py; the get_authenticated_service edits + auto_moderator_dae.py:867 auth block were located by architect-pre-verified direct reads (WSP 50). Indexing gap tracked as HOLOINDEX_YOUTUBE_AUTH_INDEXING_GAP_PHASE1.
+
+**Problem (verified):**
+- `get_authenticated_service()` on `invalid_grant` for a set logged CRITICAL,
+  added the set to `exhausted_sets`, then `continue`d to the NEXT set - even when
+  the caller had EXPLICITLY pinned a credential set. UnDaoDu/Move2Japan are
+  pinned to set 1 (`resolve_channel_credential_set`), so a dead set 1 token
+  silently authenticated via set 10 (the FoundUps/antifaFM account) or degraded
+  to read-only no-auth mode. `auto_moderator_dae.py` then logged
+  "[OK] Authenticated" as if the pinned set had worked.
+
+**Changes:**
+- **Added** `OAuthReauthRequiredError(Exception)` in `src/youtube_auth.py`,
+  carrying `set_id` (int, or list when all sets are dead) and `operator_action`
+  derived from `oauth_health.reauth_command_for(set_id)` (imported
+  function-locally). Exported in INTERFACE.md.
+- **`get_authenticated_service(token_index)`** (no change to
+  `preflight_oauth_check`):
+  - Tracks `is_pinned = token_index is not None`.
+  - Pinned + `invalid_grant` -> raises `OAuthReauthRequiredError(set_id,
+    reauth_command)`. NO fallback to another set, NO no-auth degrade.
+  - Auto-rotation + `invalid_grant` on set N -> marks exhausted, emits a
+    truthful `[OAUTH-HEALTH]` capacity line after the skip, and continues ONLY
+    if a healthy set remains; logs an explicit "falling back to remaining
+    healthy set(s)" line.
+  - Auto-rotation + ALL sets dead -> raises `OAuthReauthRequiredError` listing
+    EVERY reauth command (no no-auth degrade).
+- **`auto_moderator_dae.py`** auth block (~L867 only): catches
+  `OAuthReauthRequiredError` (function-local import) -> logs CRITICAL with the
+  operator reauth command + Chrome/Edge hint; does NOT log "[OK] Authenticated"
+  on a pinned-set failure.
+
+**Tests:** `tests/test_oauth_no_silent_fallback.py` (no network; refresh mocked
+to raise `invalid_grant`):
+- `test_pinned_set1_invalid_grant_does_not_use_set10` - asserts
+  `OAuthReauthRequiredError` raised, set 10 never consulted, no service built.
+- `test_auto_rotation_set1_dead_falls_back_to_set10_when_set10_healthy` -
+  explicit fallback still works, log says fallback to set 10.
+- `test_all_sets_dead_raises_with_both_commands` - raises listing both reauth
+  commands, no no-auth degrade.
+- Result: 3 passed. (Pre-existing legacy `test_youtube_auth.py` failures are
+  unrelated and present on the base branch.)
+
+**Coordination:** Edited ONLY `get_authenticated_service()` + new exception in
+`youtube_auth.py`; `preflight_oauth_check()` left untouched (sibling PR2 owns
+it). Stacks on #811 (browser resolver); merge order #811 -> PR2 -> this PR.
+
+---
+
 ### 2026-06-15 - YT-OAUTH-DUAL-PREFLIGHT-MENU-PHASE1: Dual-set fixed-port OAuth preflight + menu 1->1 wiring
 
 **By:** 0102 (Worker P2)
