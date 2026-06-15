@@ -22,19 +22,14 @@ from .dom_automation import YouTubeStudioDOM
 from .schedule_tracker import ScheduleTracker
 from .schedule_dba import record_schedule_outcome
 from .index_weave import (
-    ensure_index_json,
     load_index_json,
     save_index_json,
-    build_topic_hashtags,
-    build_human_description_context,
-    inject_context_into_description,
     build_digital_twin_index_block,
-    weave_description,
     update_index_after_schedule,
+    build_index_metadata_context,
 )
 from .content_generator import (
     generate_clickbait_title,
-    generate_clickbait_title_from_index,
     get_standard_description,
     generate_description_with_context,
 )
@@ -358,59 +353,50 @@ class YouTubeShortsScheduler:
                         })
                         continue
 
-                    # CONTENT-CHANNEL GATE: Re-index if FFCPLN detected on non-FFCPLN channels (WSP 97)
+                    # CONTENT-CHANNEL GATE: detect FFCPLN content on non-FFCPLN channels (WSP 97).
+                    # PHASE 1 DECOUPLING: this gate is now READ-ONLY. It reads an EXISTING
+                    # index artifact (produced outside the scheduler, #819) to refine the
+                    # classification with transcript context. It no longer deletes the
+                    # artifact or re-indexes via Gemini (no scheduler-owned indexing, no
+                    # GeminiVideoAnalyzer coupling). If the artifact is absent, the gate
+                    # falls back to the title-only classification result.
                     if CLASSIFIER_AVAILABLE and self.channel_key in ["undaodu", "foundups"]:
                         try:
                             classification = classify_content(title=original_title, channel=self.channel_key)
                             content_type = classification.get("content_type", "")
                             if content_type in ["ffcpln_music", "ffcpln_news"]:
-                                # Title suggests FFCPLN - index may be stale, trigger re-index
+                                # Title suggests FFCPLN - refine using the existing artifact (read-only).
                                 logger.warning(
-                                    f"[SCHEDULER] [REINDEX] FFCPLN classification on {self.channel_key} - checking index"
+                                    f"[SCHEDULER] [GATE] FFCPLN classification on {self.channel_key} - checking index (read-only)"
                                 )
-                                idx_path = Path(f"memory/video_index/{self.channel_key}/{video_id}.json")
-                                if idx_path.exists():
-                                    # Delete stale index and re-index with Gemini
-                                    logger.info(f"[SCHEDULER] [REINDEX] Deleting stale index: {idx_path}")
-                                    idx_path.unlink()
-                                    # Re-index with Gemini to get actual content
-                                    reindex_result = ensure_index_json(
-                                        channel_key=self.channel_key,
-                                        video_id=video_id,
-                                        allow_indexing_if_missing=True,
-                                        mode="gemini",
-                                        stub_title=original_title,
+                                existing_idx = load_index_json(channel_key=self.channel_key, video_id=video_id)
+                                if isinstance(existing_idx, dict):
+                                    audio = existing_idx.get("audio") or {}
+                                    transcript = audio.get("transcript_summary", "")
+                                    reclassification = classify_content(
+                                        title=original_title,
+                                        channel=self.channel_key,
+                                        transcript=transcript,
                                     )
-                                    if reindex_result.ok:
-                                        logger.info(f"[SCHEDULER] [REINDEX] Re-indexed {video_id} with Gemini")
-                                        # Re-classify with fresh index
-                                        fresh_idx = load_index_json(channel_key=self.channel_key, video_id=video_id)
-                                        transcript = ""
-                                        if fresh_idx:
-                                            audio = fresh_idx.get("audio") or {}
-                                            transcript = audio.get("transcript_summary", "")
-                                        reclassification = classify_content(
-                                            title=original_title,
-                                            channel=self.channel_key,
-                                            transcript=transcript,
-                                        )
-                                        new_content_type = reclassification.get("content_type", "")
-                                        logger.info(f"[SCHEDULER] [REINDEX] New classification: {new_content_type}")
-                                        if new_content_type in ["ffcpln_music", "ffcpln_news"]:
-                                            # Still FFCPLN after re-index - actually wrong channel
-                                            logger.warning(f"[SCHEDULER] [GATE] Still FFCPLN after re-index - SKIPPING")
-                                            results["skipped"].append({
-                                                "video_id": video_id,
-                                                "reason": f"Content mismatch confirmed: {new_content_type} on {self.channel_key}",
-                                                "classification": reclassification,
-                                            })
-                                            continue
-                                        # Reclassification passed - proceed with scheduling
-                                        logger.info(f"[SCHEDULER] [REINDEX] Reclassified as {new_content_type} - proceeding")
-                                    else:
-                                        logger.warning(f"[SCHEDULER] [REINDEX] Failed: {reindex_result.error}")
+                                    new_content_type = reclassification.get("content_type", "")
+                                    logger.info(f"[SCHEDULER] [GATE] Refined classification: {new_content_type}")
+                                    if new_content_type in ["ffcpln_music", "ffcpln_news"]:
+                                        # Still FFCPLN after reading the artifact - actually wrong channel.
+                                        logger.warning(f"[SCHEDULER] [GATE] Still FFCPLN after artifact read - SKIPPING")
+                                        results["skipped"].append({
+                                            "video_id": video_id,
+                                            "reason": f"Content mismatch confirmed: {new_content_type} on {self.channel_key}",
+                                            "classification": reclassification,
+                                        })
+                                        continue
+                                    # Reclassification passed - proceed with scheduling.
+                                    logger.info(f"[SCHEDULER] [GATE] Reclassified as {new_content_type} - proceeding")
+                                else:
+                                    logger.debug(
+                                        f"[SCHEDULER] [GATE] No index artifact for {video_id} - using title-only classification"
+                                    )
                         except Exception as e:
-                            logger.debug(f"[SCHEDULER] Classification/reindex error (continuing): {e}")
+                            logger.debug(f"[SCHEDULER] Classification gate error (continuing): {e}")
 
                     import time as time_module
                     video_start = time_module.time()
@@ -893,71 +879,41 @@ class YouTubeShortsScheduler:
 
             # Optional: weave Digital Twin index into description.
             # Default ON; disable with YT_SCHEDULER_INDEX_WEAVE_ENABLED=false
+            #
+            # PHASE 1 DECOUPLING (read-for-context only):
+            # The scheduler is a READ-ONLY CONSUMER of the video index artifact
+            # (produced OUTSIDE the scheduler by the Studio Ask / video_indexer
+            # SKILLz action, #819). It no longer OWNS/creates the artifact here:
+            # ensure_index_json / GeminiVideoAnalyzer have been removed from this
+            # read path. If the artifact is ABSENT, build_index_metadata_context
+            # returns None and we SKIP enhancement (keep base_description /
+            # original title) -- we do NOT "index now".
             if os.getenv("YT_SCHEDULER_INDEX_WEAVE_ENABLED", "true").lower() in ("1", "true", "yes"):
-                # For NEW unlisted Shorts, default to a local stub index (no API calls).
-                # Override to "gemini" when you explicitly want full indexing.
-                # NOTE: Gemini API cannot access UNLISTED videos! Use "stub" for new uploads.
-                index_mode = os.getenv("YT_SCHEDULER_INDEX_MODE", "stub").strip().lower() or "stub"
-                ensure = ensure_index_json(
+                inform_title = os.getenv(
+                    "YT_SCHEDULER_INDEX_INFORM_TITLE", "false"
+                ).lower() in ("1", "true", "yes")
+                enhance_description = os.getenv(
+                    "YT_SCHEDULER_INDEX_ENHANCE_DESCRIPTION", "true"
+                ).lower() in ("1", "true", "yes")
+
+                ctx = build_index_metadata_context(
                     channel_key=self.channel_key,
                     video_id=video_id,
-                    allow_indexing_if_missing=True,
-                    index_to_holoindex=True,
-                    mode=index_mode,
-                    stub_title=new_title,
-                    stub_base_description=base_description,
+                    original_title=original_title,
+                    base_description=base_description,
+                    inform_title=inform_title,
+                    enhance_description=enhance_description,
                 )
-
-                # FALLBACK: If Gemini fails (e.g., unlisted videos), retry with stub mode
-                if not ensure.ok and index_mode == "gemini":
-                    logger.warning(f"[SCHEDULER] Gemini indexing failed ({ensure.error}), falling back to stub")
-                    ensure = ensure_index_json(
-                        channel_key=self.channel_key,
-                        video_id=video_id,
-                        allow_indexing_if_missing=True,
-                        index_to_holoindex=False,  # Skip HoloIndex for stub
-                        mode="stub",
-                        stub_title=new_title,
-                        stub_base_description=base_description,
+                if ctx is not None:
+                    # Artifact present -> apply woven title/description.
+                    new_title = ctx.new_title
+                    new_description = ctx.new_description
+                else:
+                    # Artifact absent -> skip enhancement (NOT index now).
+                    logger.debug(
+                        "[SCHEDULER] No index artifact for %s - skipping enhancement",
+                        video_id,
                     )
-
-                if not ensure.ok:
-                    logger.warning(f"[SCHEDULER] Index weaving skipped: {ensure.error}")
-
-                if ensure.ok:
-                    idx = load_index_json(channel_key=self.channel_key, video_id=video_id)
-                    if isinstance(idx, dict):
-                        # Optional: allow index artifact to inform the title (best-effort).
-                        if os.getenv("YT_SCHEDULER_INDEX_INFORM_TITLE", "false").lower() in ("1", "true", "yes"):
-                            try:
-                                new_title = generate_clickbait_title_from_index(
-                                    original_title=original_title,
-                                    index_json=idx,
-                                )
-                            except Exception as exc:
-                                logger.debug("[SCHEDULER] Index-informed title skipped: %s", exc)
-
-                        # Use indexing to enhance the human-facing description.
-                        # Default ON; disable with YT_SCHEDULER_INDEX_ENHANCE_DESCRIPTION=false
-                        enhanced_base = base_description
-                        if os.getenv("YT_SCHEDULER_INDEX_ENHANCE_DESCRIPTION", "true").lower() in ("1", "true", "yes"):
-                            context = build_human_description_context(idx)
-                            enhanced_base = inject_context_into_description(
-                                base_description=base_description,
-                                context_block=context,
-                            )
-
-                        tags = build_topic_hashtags(idx, max_tags=5)
-                        block = build_digital_twin_index_block(
-                            channel_key=self.channel_key,
-                            video_id=video_id,
-                            index_json=idx,
-                        )
-                        new_description = weave_description(
-                            base_description=enhanced_base,
-                            index_block=block,
-                            extra_hashtags=tags,
-                        )
 
             # Update via DOM
             self.dom.edit_title(new_title)
@@ -1021,22 +977,33 @@ class YouTubeShortsScheduler:
         sort_oldest: bool = True,
     ) -> Dict[str, Any]:
         """
-        Run indexing WITHOUT scheduling (Occam's Razor - same flow, skip schedule step).
+        Run a READ-ONLY artifact/context VALIDATION pass (no live YouTube mutation).
 
-        This treats old videos the same as unlisted shorts, but:
-        - Navigates to all videos (not just unlisted shorts)
-        - Sorts by oldest first
-        - Updates metadata (title, description + Digital Twin index)
-        - SKIPS the scheduling step
-        - Saves the video
+        DEPRECATED / READ-ONLY (Phase 1 decoupling): historically this method wove
+        metadata and called self.dom.edit_title / edit_description / save_video,
+        which silently mutated production metadata under the guise of "indexing".
+        That coupling is removed. The scheduler is a READ-ONLY CONSUMER of the
+        video index artifact (produced OUTSIDE the scheduler by the Studio Ask /
+        video_indexer SKILLz action, #819). The scheduler does NOT create/refresh
+        the artifact and does NOT write live metadata here.
+
+        This method now ONLY:
+        - Navigates to the content list and the video edit page (read navigation).
+        - Calls the PURE build_index_metadata_context() to confirm whether an index
+          artifact is present and to compute the would-be context (no DOM, no write).
+        - Records presence/absence per video in the results.
+
+        It MUST NOT call self.dom.edit_title / edit_description / schedule_video /
+        save_video. The live metadata WRITE happens ONLY on the explicit
+        scheduling/publish path (run_scheduling_cycle).
 
         Args:
-            max_videos: Maximum videos to process
+            max_videos: Maximum videos to validate
             video_type: "shorts", "videos", or "all"
             sort_oldest: If True, sort by oldest first
 
         Returns:
-            Summary dict with indexed_count, errors, etc.
+            Summary dict with indexed_count (artifact-present count), errors, etc.
         """
         if not self.driver:
             raise RuntimeError("Not connected to browser. Call connect_browser() first.")
@@ -1122,53 +1089,48 @@ class YouTubeShortsScheduler:
 
                 try:
                     if self.dry_run:
-                        logger.info(f"[DRY RUN] Would index {video_id}")
+                        logger.info(f"[DRY RUN] Would validate index for {video_id}")
                         results["indexed"].append({"video_id": video_id, "dry_run": True})
                         processed += 1
                         continue
 
-                    # Navigate to video edit page
+                    # Navigate to video edit page (read navigation only).
                     self.dom.navigate_to_video(video_id)
                     await asyncio.sleep(1.5)
 
-                    # Update metadata (same as scheduling - creates index + weaves description)
-                    await self._update_video_metadata(
+                    # READ-ONLY: confirm whether an index artifact exists for this
+                    # video and compute the would-be context, WITHOUT touching the DOM
+                    # (no edit_title/edit_description) and WITHOUT creating/refreshing
+                    # the artifact (no ensure_index_json / Gemini / save_video).
+                    description_template = self.config.get("description_template", "ffcpln")
+                    base_description = get_standard_description(description_template)
+                    ctx = build_index_metadata_context(
+                        channel_key=self.channel_key,
                         video_id=video_id,
                         original_title=original_title,
-                        date_str="",  # No schedule date
-                        time_str="",  # No schedule time
+                        base_description=base_description,
+                        inform_title=False,
+                        enhance_description=True,
                     )
 
-                    # SKIP SCHEDULING - This is the key difference!
-                    # Just save the video (description was already updated)
-                    save_ok = self.dom.save_video()
-                    await asyncio.sleep(1)
-
-                    if save_ok:
-                        # Update local index JSON
-                        try:
-                            idx = load_index_json(channel_key=self.channel_key, video_id=video_id)
-                            if isinstance(idx, dict):
-                                idx["indexed_at"] = datetime.now().isoformat()
-                                idx["indexed_by"] = "0102_indexer"
-                                save_index_json(channel_key=self.channel_key, video_id=video_id, data=idx)
-                        except Exception as exc:
-                            logger.debug(f"[INDEXER] Index save skipped: {exc}")
-
+                    if ctx is not None:
                         results["indexed"].append({
                             "video_id": video_id,
                             "title": original_title[:50],
+                            "artifact_present": True,
                         })
-                        logger.info(f"[INDEXER] ✅ Indexed: {video_id}")
+                        logger.info(f"[INDEXER] Artifact present (read-only validated): {video_id}")
                     else:
-                        results["errors"].append({
+                        # Artifact absent -> skip enhancement (NOT index now). No mutation.
+                        results["skipped"].append({
                             "video_id": video_id,
-                            "error": "Save failed",
+                            "reason": "No index artifact (read-only validation; not indexing now)",
                         })
+                        logger.info(f"[INDEXER] No artifact for {video_id} - skipped (read-only)")
 
                     processed += 1
 
-                    # Return to list for next video
+                    # Return to list for next video (read navigation only).
                     self.driver.get(content_url)
                     await asyncio.sleep(2)
 
@@ -1271,24 +1233,32 @@ async def run_indexer_dae(
     dry_run: bool = False,
 ) -> Dict[str, Any]:
     """
-    DAE entry point for Video Indexing (Occam's Razor approach).
+    DAE entry point for a READ-ONLY artifact/context VALIDATION pass (Phase 1 decoupling).
 
-    Same flow as scheduling but SKIPS the schedule step.
-    Weaves Digital Twin index into description for cloud memory.
+    This delegates to run_indexing_cycle, which is a READ-ONLY CONSUMER of the
+    video-index artifact produced OUTSIDE the scheduler (Studio Ask /
+    video_indexer SKILLz action, #819). It does NOT write live metadata, does
+    NOT weave into the live description, and does NOT schedule. Live metadata
+    writes happen ONLY on the explicit scheduling path
+    (run_scheduler_dae / run_scheduling_cycle).
 
     Args:
         channel_key: "move2japan", "undaodu", "foundups", or "antifafm"
-        max_videos: Maximum videos to index
+        max_videos: Maximum videos to validate
         video_type: "shorts", "videos", or "all"
         sort_oldest: If True, process oldest videos first
-        dry_run: Preview mode without actual changes
+        dry_run: Preview mode. Indexing makes no live changes regardless of
+            this flag (it is read-only); the flag is passed through for parity
+            with the scheduling path.
 
     Returns:
         Indexing results dict
 
     WSP Compliance:
         WSP 60: Memory artifacts in memory/video_index/{channel}/
-        WSP 73: Digital Twin block in description (cloud memory)
+        WSP 73: The Digital Twin block is applied on the explicit scheduling
+            path (run_scheduling_cycle), NOT during indexing; indexing only
+            reads/validates the artifact and never writes it to live metadata.
         WSP 80: DAE pattern for background indexing
     """
     scheduler = YouTubeShortsScheduler(channel_key, dry_run=dry_run)

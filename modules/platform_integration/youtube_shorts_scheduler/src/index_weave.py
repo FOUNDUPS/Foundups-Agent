@@ -536,6 +536,98 @@ def weave_description(
     return desc
 
 
+@dataclass(frozen=True)
+class MetadataContext:
+    """
+    Read-only context computed from an EXISTING index artifact.
+
+    This carries the woven title/description that the scheduling/publish path
+    applies via the live DOM. It is produced WITHOUT any live YouTube mutation
+    and WITHOUT creating/refreshing the index artifact (no ensure_index_json,
+    no save_index_json, no create_stub_index_json, no GeminiVideoAnalyzer).
+
+    A None return from build_index_metadata_context() means "artifact missing ->
+    skip enhancement" (NOT "index now").
+    """
+    new_title: str
+    new_description: str
+    used_index: bool
+
+
+def build_index_metadata_context(
+    *,
+    channel_key: str,
+    video_id: str,
+    original_title: str,
+    base_description: str,
+    inform_title: bool = False,
+    enhance_description: bool = True,
+    base_dir: Optional[Path] = None,
+) -> Optional[MetadataContext]:
+    """
+    PURE, read-only context builder (Phase 1 decoupling).
+
+    Reads an EXISTING index artifact and composes the woven title/description.
+    It NEVER touches the DOM/driver (takes no dom argument), NEVER creates or
+    refreshes the artifact, and NEVER imports/instantiates GeminiVideoAnalyzer.
+
+    Returns:
+        MetadataContext when an artifact is present (used_index=True), carrying
+        the composed new_title/new_description.
+        None when the artifact is MISSING (load_index_json returned None) -> the
+        caller treats this as "skip enhancement", NOT "index now".
+
+    Composition mirrors the scheduling read path exactly so the live write bytes
+    are unchanged for the artifact-present case:
+        - optional index-informed title (inform_title)
+        - optional human-facing context injection (enhance_description)
+        - topic hashtags + Digital Twin index block woven into the description
+    """
+    idx = load_index_json(channel_key=channel_key, video_id=video_id, base_dir=base_dir)
+    if not isinstance(idx, dict):
+        # Artifact missing -> caller skips enhancement (does NOT index now).
+        return None
+
+    new_title = original_title
+    if inform_title:
+        try:
+            from .content_generator import generate_clickbait_title_from_index
+
+            new_title = generate_clickbait_title_from_index(
+                original_title=original_title,
+                index_json=idx,
+            )
+        except Exception as exc:
+            logger.debug("[INDEX-WEAVE] Index-informed title skipped: %s", exc)
+            new_title = original_title
+
+    enhanced_base = base_description
+    if enhance_description:
+        context = build_human_description_context(idx)
+        enhanced_base = inject_context_into_description(
+            base_description=base_description,
+            context_block=context,
+        )
+
+    tags = build_topic_hashtags(idx, max_tags=5)
+    block = build_digital_twin_index_block(
+        channel_key=channel_key,
+        video_id=video_id,
+        index_json=idx,
+    )
+    new_description = weave_description(
+        base_description=enhanced_base,
+        index_block=block,
+        extra_hashtags=tags,
+    )
+
+    return MetadataContext(
+        new_title=new_title,
+        new_description=new_description,
+        used_index=True,
+    )
+
+
 def update_index_after_schedule(
     *,
     index_json: Dict[str, Any],
