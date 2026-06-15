@@ -1,5 +1,31 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-06-15 - UNLISTED Filter Enforcement (Scheduled vs Unlisted)
+
+**By:** 0102
+**WSP References:** WSP 22, WSP 97 (Truth Signaling)
+
+### Problem
+
+Shorts scheduler could run on **Scheduled** / **Has schedule** filter instead of **Unlisted**
+(e.g. antifaFM after prior audit/sync). F5 refresh does not switch filters — unlisted rows
+stay invisible and processing silently finds zero videos or wrong rows.
+
+### Solution
+
+- Clear **Has schedule** chips before applying Unlisted
+- Uncheck other visibility checkboxes in filter dialog when switching to Unlisted
+- URL-first UNLISTED navigation (`YT_SCHEDULER_URL_FILTER_FIRST=true` default)
+- Abort scheduler cycle if list filter is still SCHEDULED
+- Skip videos whose edit page shows Scheduled (not Unlisted)
+- Strict row scrape rejects Scheduled-looking rows
+
+### Tests
+
+- `tests/test_visibility_filter_enforcement.py`
+
+---
+
 ## 2026-05-04 - OC21: Agentic Content-Channel Verification Gate
 
 **By:** 0102 (Worker AW3)

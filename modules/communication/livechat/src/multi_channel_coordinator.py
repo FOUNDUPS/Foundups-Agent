@@ -53,6 +53,16 @@ def _env_truthy(key: str, default: str = "false") -> bool:
     return val in ("true", "1", "yes")
 
 
+def _shorts_scheduled_count(result: Optional[Dict[str, Any]]) -> int:
+    """Normalize scheduler result scheduled count (list vs int)."""
+    if not result:
+        return 0
+    total = result.get("total_scheduled")
+    if total is not None:
+        return int(total)
+    raw = result.get("scheduled", 0)
+    return len(raw) if isinstance(raw, list) else int(raw or 0)
+
 def _is_session_error(error_text: str) -> bool:
     """Check if error indicates a recoverable session error."""
     if not error_text:
@@ -695,7 +705,7 @@ class MultiChannelCoordinator:
                                     lambda: asyncio.run(shorts_scheduler.run_scheduling_cycle(max_videos=max_shorts))
                                 )
 
-                                scheduled = shorts_result.get("scheduled", 0) if shorts_result else 0
+                                scheduled = _shorts_scheduled_count(shorts_result)
                                 logger.info(f"[ROTATE] [Edge] {account_name} shorts: {scheduled} scheduled")
 
                                 shorts_scheduler.close()
@@ -1096,7 +1106,7 @@ class MultiChannelCoordinator:
                                     lambda: asyncio.run(shorts_scheduler.run_scheduling_cycle(max_videos=max_shorts))
                                 )
 
-                                scheduled = shorts_result.get("scheduled", 0) if shorts_result else 0
+                                scheduled = _shorts_scheduled_count(shorts_result)
                                 total_shorts_scheduled += scheduled  # Accumulate for LinkedIn trigger
                                 logger.info(f"[ROTATE] [Chrome] {account_name} shorts: {scheduled} scheduled (total: {total_shorts_scheduled})")
 
