@@ -2,6 +2,101 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## V0.21.0 - Typed SKILLz/ACTION SURFACE + bounded Studio Ask single-video action (VIDEO_INDEXING_SKILLZ_ACTION_SURFACE_PHASE1) (2026-06-16)
+
+### Why
+Predecessor audit #818 found the indexing menu mislabels providers and there is
+NO bounded single-video Studio-Ask test entrypoint. Callers (menu, OpenClaw/WRE,
+Hermes/Kanban, any 0102 agent) reached indexing via a one-off menu helper rather
+than a shared, governed capability. This phase introduces a typed action surface
+so all callers invoke the SAME governed capability by action ID.
+
+Model: SKILLz = capability contract; DAE = executor; menu = operator trigger;
+heartbeat = observability; scheduler = artifact CONSUMER (NOT owner of indexing).
+
+### Changed
+- NEW `src/action_surface.py`:
+  - Typed action IDs (`VideoIndexAction`):
+    - IMPLEMENTED: `video_index.studio_ask.single_video`.
+    - REGISTERED ONLY (NOT wired -> 'not_implemented'; no Gemini/scheduler
+      import): `video_index.studio_ask.channel_cycle`,
+      `video_index.studio_ask.daemon_cycle`,
+      `video_index.gemini_api.single_video`,
+      `video_index.whisper.local_transcript`,
+      `shorts_scheduler.consume_video_index`.
+  - Typed `StudioAskSingleVideoInput` (video_id raw-ID-or-URL, browser, optional
+    channel_id, persist) + `StudioAskSingleVideoOutput` (success, video_id,
+    browser, provider='studio_ask', response_text_length, topics_count,
+    saved_path, error).
+  - `run_studio_ask_single_video(inp)`: attaches to the governed browser
+    (chrome->9222 / edge->9223 via existing dae_dependencies connect helpers;
+    attach only, NO credentials), calls `StudioAskIndexer.ask_about_video`, and
+    (if persist AND success) writes
+    `memory/video_index/{channel}/{video_id}.json` via the EXISTING
+    `VideoIndexStore` + `StudioAskIndexer._ask_result_to_index_data` (no new
+    store invented). Fail-closed on any error.
+  - `run_action(action_id, **kwargs)` dispatcher routes by ID.
+  - BOUNDARY: never imports/calls `GeminiVideoAnalyzer`, the Shorts Scheduler,
+    or any publish/schedule/metadata-mutation path. Lazy module-specific imports
+    (not the package `__init__`) keep the path Gemini-free. NOT added to
+    `src/__init__.py` (avoids pulling Gemini into the surface import).
+- `modules/infrastructure/cli/src/indexing_menu.py`:
+  - Relabeled per #818 audit: option 1 "[GEMINI] Gemini AI Indexing" ->
+    "[STUDIO ASK] Browser Studio Ask Indexing" (it runs the browser Studio Ask
+    cycle, not the API); option 4 "[TEST] Test Video Indexing (single video)" ->
+    "[GEMINI API] Gemini Video Analyzer (single video)" (it runs
+    GeminiVideoAnalyzer). Underlying Gemini/whisper behavior UNCHANGED.
+  - Added option 8 "[TEST] Studio Ask Single Video (bounded action surface)" ->
+    prompts for video id/URL + browser (chrome|edge) + optional channel, then
+    `run_action('video_index.studio_ask.single_video', ...)` and prints the
+    typed output (no secrets).
+- `skillz/transcript_ask/SKILLz.md`: documented the action-surface binding +
+  the #817 Ask-Studio header selector model; KEPT `promotion_state: prototype`
+  and `evals: []` (graduation blocked pending operator live-DOM proof, #818
+  Appendix A). ASCII-clean.
+- `INTERFACE.md`: added the Action Surface exports section.
+
+### Tests
+- NEW `tests/test_action_surface.py` (21): action-ID registry (impl vs
+  registered-only; consume_video_index is a SEPARATE registered ID); URL->bare
+  ID parse; browser->port (chrome 9222 / edge 9223); single_video calls
+  ask_about_video + returns typed output; fail-closed (ask fail / no driver);
+  persists to memory/video_index/{channel}/{video_id}.json ONLY when persist=True
+  AND success (mocked store; path shape asserted); does NOT call
+  GeminiVideoAnalyzer (patched raise-if-called, asserted not called); does NOT
+  call the Shorts Scheduler / mutate metadata (patched edit_title /
+  edit_description / schedule_video on YouTubeStudioDOM raise-if-called, asserted
+  not called); dispatcher routing.
+- NO live browser: StudioAskIndexer / driver / ask_about_video and the connect
+  helpers are mocked. pytest: 21 passed. Related suite re-run (header /
+  persistence / scheduler-order): 15 passed. No skip/xfail.
+
+### HoloIndex Retrieval Report
+- Q1 "video indexer studio ask action surface skill executor" -> HIGH
+  (transcript_ask/executor.py, studio_ask_indexer.py, WSP_95 wardrobe).
+- Q2 "StudioAskIndexer ask_about_video single video" -> HIGH
+  (studio_ask_indexer.py top hit; confirmed signature
+  `ask_about_video(video_id, prompt=None, channel_entry=None) -> AskResult`).
+- Q3 "indexing_menu studio ask gemini option handler" -> HIGH
+  (indexing_menu.py + studio_ask_indexer.py; confirmed option 1 routes to
+  run_video_indexing_cycle, option 4 routes to GeminiVideoAnalyzer).
+- Retrieval evaluation: low noise, correct ordering, no missing artifacts;
+  staleness low (files re-read directly from worktree). Direct-reads:
+  studio_ask_indexer.py, video_index_store.py, indexing_menu.py,
+  transcript_ask/{SKILLz.md,executor.py}, dae_dependencies.py connect helpers.
+
+### Attention flags
+- StudioAskIndexer ctor takes a `driver` (NOT a browser/port). The 9222/9223
+  port mapping lives in dae_dependencies connect helpers; the action surface
+  constructs the driver via those and passes it in. BROWSER_PORTS is documented
+  for callers but the ctor itself is driver-based.
+- `save_video` is NOT a method on the scheduler DOM class; the mutation methods
+  that DO exist on `YouTubeStudioDOM` are edit_title/edit_description/
+  schedule_video (all patched + asserted-not-called).
+- This is runtime CODE (browser-driving). The action surface is bounded and
+  governed; live execution requires an already-authenticated session. PR left
+  OPEN for the sovereign gate. transcript_ask stays prototype (evals []).
+
 ## V0.20.0 - Ask Studio Header PRIMARY path (STUDIO_ASK_STUDIO_HEADER_PHASE1) (2026-06-15)
 
 ### Why
