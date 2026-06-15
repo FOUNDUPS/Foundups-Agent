@@ -1,5 +1,39 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-16] Video Indexing / Studio Ask / DAE Entrypoint Audit Phase 1 (W9, decision-only)
+
+**Change Type**: READ-ONLY architecture audit. ONE audit doc + this ModLog entry. NO code/SKILLz/scheduler/
+menu/WSP/registry/manifest/CI/dependency change; nothing run live; no publish/schedule/metadata mutation.
+**By**: 0102 (Worker-Lane W9; 4 discovery lanes + adversarial sentinel) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP References**: WSP 22, WSP 50, WSP 87, WSP 97
+**Slice**: VIDEO_INDEXING_STUDIO_ASK_DAE_ENTRYPOINT_AUDIT_PHASE1
+**Base**: `5461fb4f7` (origin/main)
+
+- ADD `docs/audits/architecture/VIDEO_INDEXING_STUDIO_ASK_DAE_ENTRYPOINT_AUDIT_PHASE1.md` -- maps how
+  YouTube video indexing, Studio Ask, transcript_ask SKILLz, DAE Phase 2, and the Shorts Scheduler connect,
+  and classifies the next implementation slice.
+- Menu reality: option 1 labeled "[GEMINI] Gemini AI Indexing" actually runs STUDIO_ASK
+  (run_video_indexing_cycle); option 4 "[TEST] single video" is the Gemini API (GeminiVideoAnalyzer), not
+  Studio Ask. Two label/provider mismatches (indexing_menu.py:25,28,69,235).
+- Single-video Studio-Ask test GAP confirmed: StudioAskIndexer.ask_about_video (studio_ask_indexer.py:453)
+  is unwired; every Studio-Ask menu path runs the full cycle.
+- DAE Phase 2 indexing seam EXISTS and is correct (auto_moderator_dae.py:1563-1582, gated chrome +
+  YT_VIDEO_INDEXING_ENABLED, emits ActivityType.VIDEO_INDEXING) -- reuse, do not duplicate. Heartbeat
+  observes-only (_heartbeat_loop:2133-2582 never executes indexing).
+- studio_ask_indexer is already on the #817 Ask-Studio header selectors; transcript_ask SKILLz BODY is
+  stale (documents old watch-page selectors) and correctly stays promotion_state: prototype.
+- CRITICAL / NEEDS_012 (sentinel REFUTED the read-only assumption): the Shorts Scheduler already consumes
+  memory/video_index via index_weave.load_index_json (no duplicate store) BUT OWNS Studio Ask/Gemini
+  indexing AND mutates live YouTube title/description (+ save_video) during the index step, INCLUDING its
+  "INDEXING-ONLY MODE" (scheduler.py:963,966,1135,1144). A bounded indexing test must NOT route through the
+  scheduler; the safe single-video seam is ask_about_video.
+- Governed browser surface: Chrome 9222 (Move2Japan/UnDaoDu) / Edge 9223 (FoundUps/antifaFM) debug-port
+  attach (auto_moderator_dae.py:412 debuggerAddress); 012 owns the profile, 0102 attaches, zero credential
+  handling. Appendix A defines the operator-assisted live-DOM proof gating transcript_ask promotion.
+- Next slice: VIDEO_INDEXING_STUDIO_ASK_MENU_AND_SKILL_ENTRYPOINT_PHASE1; separate NEEDS_012 =
+  SHORTS_SCHEDULER_INDEX_METADATA_DECOUPLING. File scope EXACTLY 2; ASCII-clean; WSP_97 22/22 YES.
+- Internal review READY; PR opened against origin/main; STOP at MERGE_READY for the external 0102 gate.
+
 ## [2026-06-15] FoundUp Launch Request Phase 1 (Lane A, public intake seam)
 
 **Change Type**: LIMITED IMPLEMENTATION -- ONE module + tests (contract + mapping only). NO Kanban publish,
