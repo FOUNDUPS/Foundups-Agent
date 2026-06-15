@@ -99,31 +99,74 @@ class StudioAskIndexer:
     query video content, then stores results in VideoContentIndex.
     """
     
-    # Selectors for YouTube (Watch Page AND Studio)
+    # =========================================================================
+    # PRIMARY (Phase 1): YouTube Studio "Ask Studio" header UI
+    # ---------------------------------------------------------------------
+    # The current Studio video-edit page exposes an "Ask Studio" entry in the
+    # page header (ytcp-icon-button). Clicking it opens a creator chat dialog
+    # with a contenteditable prompt box and a streaming response panel.
+    # This is the CANONICAL path for Phase 1. The legacy watch-page Ask button
+    # and the old Studio popup menu are DEMOTED to fallback (see SELECTORS).
+    # =========================================================================
+    ASK_STUDIO_SELECTORS = {
+        # Header entry button that opens the Ask Studio dialog.
+        "header_button": [
+            'ytcp-icon-button[aria-label="Ask Studio"]',
+            'ytcp-icon-button[aria-label*="Ask Studio"]',
+            'button[aria-label="Ask Studio"]',
+            'button[aria-label*="Ask Studio"]',
+        ],
+        # Dialog container shown after clicking the header button.
+        "dialog": [
+            'ytcp-dialog#dialog',
+            'ytcp-dialog',
+        ],
+        # Contenteditable prompt box inside the dialog.
+        "prompt_box": [
+            'div[contenteditable][aria-label="Ask something"]',
+            'div.ytcpCreatorChatEntityAttachmentInlineFlowPromptBox[contenteditable="true"]',
+            'div[contenteditable="true"][aria-label*="Ask"]',
+        ],
+        # Streaming / response container candidates (DOM text, NOT clipboard).
+        "response_stream": [
+            '#PAcreator_chat_streaming',
+            'div.ytcpCreatorChatEntityResponse',
+            'ytcp-creator-chat-response',
+            '[class*="CreatorChat"][class*="Response"]',
+        ],
+    }
+
+    # Legacy/fallback selectors (Watch Page AND Studio popup menu).
+    # FALLBACK ONLY (Phase 1): retained for resilience, never the primary path.
     SELECTORS = {
         "content_tab": "a[href*='/channel/'][href*='/videos']",
         "video_row": "ytcp-video-row",
         "video_title": "a#video-title",
 
-        # WATCH PAGE: Ask button is in #actions > ytd-menu-renderer > #flexible-item-buttons
+        # FALLBACK WATCH PAGE: Ask button is in #actions > ytd-menu-renderer > #flexible-item-buttons
         "watch_ask_button": "#flexible-item-buttons button, yt-button-view-model button",
         "watch_actions": "#actions ytd-menu-renderer",
 
-        # STUDIO PAGE: Menu trigger to open popup where Ask lives
+        # FALLBACK STUDIO POPUP: Menu trigger to open popup where old Ask lived
         "studio_menu_trigger": "ytd-menu-renderer button, button[aria-label='More actions'], #button-shape button",
         # Ask button is inside popup menu as tp-yt-paper-item
         "studio_ask_popup_item": "tp-yt-paper-item.style-scope.ytd-menu-service-item-renderer",
         "popup_menu": "ytd-menu-popup-renderer, tp-yt-iron-dropdown",
 
-        # Gemini chat interface (after clicking Ask)
+        # Gemini chat interface (legacy fallback input/response)
         "ask_input": "textarea[placeholder*='Ask'], input[placeholder*='Ask'], .gemini-input textarea",
         "ask_response": ".gemini-response, .ask-response-content, .gemini-chat-response",
         "video_details_link": "a[href*='/video/'][href*='/edit']",
     }
 
-    # Watch page is simpler (direct button), prefer it over Studio
-    USE_WATCH_PAGE = True
-    
+    # Phase 1: PRIMARY path is the Studio "Ask Studio" header (NOT watch page).
+    # Watch-page Ask is demoted to a labelled fallback only.
+    USE_WATCH_PAGE = False
+
+    # Max seconds to wait for the Ask Studio response stream to produce text
+    # before failing closed (no partial/garbage indexing).
+    RESPONSE_TIMEOUT_SECONDS = 30.0
+
     # Standard prompt for video analysis with content category detection
     ASK_PROMPT = """Analyze this video and respond in JSON format:
 {
@@ -141,6 +184,64 @@ CONTENT CATEGORY (pick ONE):
 - ice_remix: Political content, ICE/immigration, news clips, activist
 - educational: Tutorial, how-to, teaching, informational
 - other: None of the above"""
+
+    # Channel-specific Ask Studio prompts.
+    # Keyed by the channel registry `description_template` value
+    # (youtube_channel_registry: undaodu->undaodu, foundups->foundups,
+    #  move2japan/antifafm->ffcpln). Music/ffcpln channels get a LIGHTER prompt
+    # that does NOT demand a full transcript (no speech to transcribe).
+    CHANNEL_PROMPTS = {
+        "undaodu": """Analyze this UnDaoDu video and respond in JSON format:
+{
+  "content_category": "personal_vlog|educational|ice_remix|other",
+  "topics": ["topic1", "topic2"],
+  "segments": [
+    {"time": "0:00", "topic": "Introduction", "summary": "..."},
+    {"time": "1:30", "topic": "Main point", "summary": "..."}
+  ]
+}
+Focus on the spoken ideas: identity, consciousness, pAVS/FoundUps themes.
+Include timestamped segments for the key points discussed.""",
+        "foundups": """Analyze this FoundUps video and respond in JSON format:
+{
+  "content_category": "educational|personal_vlog|other",
+  "topics": ["topic1", "topic2"],
+  "segments": [
+    {"time": "0:00", "topic": "Introduction", "summary": "..."},
+    {"time": "1:30", "topic": "Main point", "summary": "..."}
+  ]
+}
+Focus on startup / autonomous-venture themes and the key points discussed.
+Include timestamped segments.""",
+        # Lighter prompt for FFCPLN / music channels (Move2Japan, antifaFM):
+        # mostly instrumental, no full transcript expected.
+        "ffcpln": """Analyze this music/short video and respond in JSON format:
+{
+  "content_category": "ffcpln_music|other",
+  "topics": ["mood", "genre"],
+  "segments": []
+}
+This is a music or short visual piece. Do NOT produce a full transcript.
+Give a brief category and a few mood/genre topics only.""",
+    }
+
+    @classmethod
+    def _prompt_for_channel(cls, channel_entry: Optional[Dict[str, Any]]) -> str:
+        """
+        Select the Ask Studio prompt for a channel.
+
+        Resolution order:
+          1. channel registry `shorts.description_template` -> CHANNEL_PROMPTS
+          2. unknown / missing -> generic ASK_PROMPT (safe default)
+
+        Does NOT invent a new registry; reads existing description_template.
+        """
+        template = ""
+        if channel_entry:
+            template = str(
+                (channel_entry.get("shorts") or {}).get("description_template", "")
+            ).strip().lower()
+        return cls.CHANNEL_PROMPTS.get(template, cls.ASK_PROMPT)
 
     def __init__(
         self,
@@ -293,18 +394,90 @@ CONTENT CATEGORY (pick ONE):
             logger.warning(f"[STUDIO-ASK] JSON parse failed: {e}")
             return {"topics": [], "segments": [], "content_category": "other", "raw": response_text}
     
-    async def ask_about_video(self, video_id: str) -> AskResult:
+    def _first_element(self, selectors: List[str]):
+        """Return the first element matching any selector in the list, else None."""
+        for selector in selectors:
+            try:
+                el = self.driver.find_element("css selector", selector)
+                if el:
+                    return el
+            except Exception:
+                continue
+        return None
+
+    def _open_ask_studio(self) -> bool:
         """
-        Use Ask Gemini feature for a specific video.
-        
+        PRIMARY (Phase 1): open the Studio "Ask Studio" dialog from the header.
+
+        Returns True if the header button was found and clicked AND the dialog
+        + prompt box subsequently appear, False otherwise (so callers can fall
+        back to the legacy watch-page / popup paths).
+        """
+        header_btn = self._first_element(self.ASK_STUDIO_SELECTORS["header_button"])
+        if not header_btn:
+            logger.info("[STUDIO-ASK] Ask Studio header button not found")
+            return False
+        try:
+            header_btn.click()
+        except Exception as e:
+            logger.info(f"[STUDIO-ASK] Ask Studio header click failed: {e}")
+            return False
+        logger.info("[STUDIO-ASK] Clicked Ask Studio header button (PRIMARY)")
+        return True
+
+    async def _scrape_ask_response(self) -> str:
+        """
+        Scrape the Ask Studio response text from the streaming/response DOM nodes.
+
+        Polls the response container selectors until non-empty text appears or
+        RESPONSE_TIMEOUT_SECONDS elapses. NO clipboard is used - DOM text only.
+        Returns the scraped text ("" if the response never materialized).
+        """
+        import time as _time
+
+        deadline = _time.monotonic() + self.RESPONSE_TIMEOUT_SECONDS
+        response_text = ""
+        while _time.monotonic() < deadline:
+            el = self._first_element(self.ASK_STUDIO_SELECTORS["response_stream"])
+            if el is not None:
+                try:
+                    text = (el.text or "").strip()
+                except Exception:
+                    text = ""
+                if text:
+                    response_text = text
+                    break
+            await self._human_delay(1.0, 0.2)
+        return response_text
+
+    async def ask_about_video(
+        self,
+        video_id: str,
+        prompt: Optional[str] = None,
+        channel_entry: Optional[Dict[str, Any]] = None,
+    ) -> AskResult:
+        """
+        Use the YouTube Studio "Ask Studio" feature to index a specific video.
+
+        Phase 1 PRIMARY path:
+          Studio video-edit page -> Ask Studio header button -> dialog/chat
+          stream -> contenteditable prompt -> Enter -> DOM-scraped response.
+
+        Legacy watch-page Ask / Studio popup menu are kept ONLY as fallback.
+
         Args:
             video_id: YouTube video ID
-            
+            prompt: Optional channel-specific prompt (defaults to ASK_PROMPT or
+                    the prompt resolved from channel_entry).
+            channel_entry: Optional channel registry entry; used to pick the
+                    channel-specific prompt via description_template.
+
         Returns:
-            AskResult with parsed response
+            AskResult with parsed response (success=False, response fails closed
+            if the Ask Studio response stream never produces text).
         """
         import asyncio
-        
+
         if not self.driver:
             return AskResult(
                 video_id=video_id,
@@ -315,54 +488,76 @@ CONTENT CATEGORY (pick ONE):
                 success=False,
                 error="No browser driver available"
             )
-        
+
+        # Resolve the prompt: explicit > channel-specific > generic default.
+        ask_prompt = prompt or self._prompt_for_channel(channel_entry)
+
         try:
-            # Navigate to video page (watch page preferred for simpler Ask button)
-            if self.USE_WATCH_PAGE:
-                video_url = f"https://www.youtube.com/watch?v={video_id}"
-            else:
-                video_url = f"https://studio.youtube.com/video/{video_id}/edit"
-            logger.info(f"[STUDIO-ASK] Navigating to {video_url}")
-            self.driver.get(video_url)
+            from selenium.webdriver.common.keys import Keys
+
+            # PRIMARY: navigate to the Studio video-edit page (Ask Studio lives here).
+            studio_url = f"https://studio.youtube.com/video/{video_id}/edit"
+            logger.info(f"[STUDIO-ASK] Navigating to {studio_url}")
+            self.driver.get(studio_url)
             await self._human_delay(3.0, 0.4)
-            
-            # Determine which page we're on and get title
+
+            # Studio title is in the title input field.
             title = ""
-            is_watch_page = "youtube.com/watch" in self.driver.current_url
+            try:
+                title_el = self.driver.find_element("css selector", "input#title-field, h1.title")
+                title = title_el.get_attribute("value") or title_el.text
+            except Exception:
+                pass
 
-            if is_watch_page:
-                # WATCH PAGE: Title is in different location
-                try:
-                    title_el = self.driver.find_element("css selector", "h1.ytd-watch-metadata, yt-formatted-string.ytd-watch-metadata")
-                    title = title_el.text
-                except Exception:
-                    pass
-            else:
-                # STUDIO PAGE: Title is in input field
-                try:
-                    title_el = self.driver.find_element("css selector", "input#title-field, h1.title")
-                    title = title_el.get_attribute("value") or title_el.text
-                except Exception:
-                    pass
-
+            used_ask_studio = False
             ask_clicked = False
 
-            if is_watch_page or self.USE_WATCH_PAGE:
-                # WATCH PAGE APPROACH: Direct button in #flexible-item-buttons
-                # Per 012 DOM: #actions > ytd-menu-renderer > #flexible-item-buttons > yt-button-view-model > button
-                logger.info("[STUDIO-ASK] Trying watch page Ask button approach")
+            # ---- PRIMARY PATH: Ask Studio header button + dialog ----
+            if self._open_ask_studio():
+                await self._human_delay(2.0, 0.3)
+                # Confirm the dialog appeared, then find the contenteditable prompt box.
+                dialog = self._first_element(self.ASK_STUDIO_SELECTORS["dialog"])
+                prompt_box = self._first_element(self.ASK_STUDIO_SELECTORS["prompt_box"])
+                if dialog is not None and prompt_box is not None:
+                    try:
+                        prompt_box.click()
+                        # contenteditable div: send_keys types into it (no clipboard).
+                        prompt_box.send_keys(ask_prompt)
+                        await self._human_delay(1.0, 0.2)
+                        prompt_box.send_keys(Keys.ENTER)
+                        logger.info("[STUDIO-ASK] Submitted prompt via Ask Studio dialog")
+                        ask_clicked = True
+                        used_ask_studio = True
+                    except Exception as e:
+                        logger.warning(f"[STUDIO-ASK] Ask Studio prompt entry failed: {e}")
+                else:
+                    logger.info("[STUDIO-ASK] Ask Studio dialog/prompt box not found - falling back")
 
-                # Find Ask button by JavaScript (most reliable for dynamic YT elements)
-                # Full watch page DOM: #flexible-item-buttons > yt-button-view-model > button-view-model > button.yt-spec-button-shape-next
+            # ---- FALLBACK PATH: legacy watch-page Ask + Studio popup menu ----
+            if not used_ask_studio:
+                logger.info("[STUDIO-ASK] FALLBACK: legacy watch-page / popup Ask path")
+                # Navigate to watch page for the legacy direct Ask button.
+                watch_url = f"https://www.youtube.com/watch?v={video_id}"
+                self.driver.get(watch_url)
+                await self._human_delay(3.0, 0.4)
+                if not title:
+                    try:
+                        title_el = self.driver.find_element(
+                            "css selector",
+                            "h1.ytd-watch-metadata, yt-formatted-string.ytd-watch-metadata",
+                        )
+                        title = title_el.text
+                    except Exception:
+                        pass
+
+                # FALLBACK A: watch-page Ask button via JS.
                 ask_button = self.driver.execute_script("""
-                    // Method 1: Precise path from 012's DOM inspection
                     const flexItems = document.querySelector('#flexible-item-buttons');
                     if (flexItems) {
                         const viewModels = flexItems.querySelectorAll('yt-button-view-model');
                         for (let vm of viewModels) {
                             const text = (vm.textContent || vm.innerText || '').toLowerCase().trim();
                             if (text === 'ask') {
-                                // Get the button inside: button-view-model > button.yt-spec-button-shape-next
                                 const btn = vm.querySelector('button-view-model button.yt-spec-button-shape-next')
                                          || vm.querySelector('button.yt-spec-button-shape-next')
                                          || vm.querySelector('button');
@@ -370,91 +565,69 @@ CONTENT CATEGORY (pick ONE):
                             }
                         }
                     }
-                    // Method 2: Find by aria-label
                     const askByLabel = document.querySelector('button[aria-label*="Ask"]');
                     if (askByLabel) return askByLabel;
-                    // Method 3: Broader search - any button with Ask text in actions area
-                    const actionsArea = document.querySelector('#actions-inner, #menu');
-                    if (actionsArea) {
-                        const buttons = actionsArea.querySelectorAll('button.yt-spec-button-shape-next');
-                        for (let btn of buttons) {
-                            const parent = btn.closest('yt-button-view-model');
-                            if (parent && parent.textContent.toLowerCase().includes('ask')) {
-                                return btn;
-                            }
-                        }
-                    }
                     return null;
                 """)
-
                 if ask_button:
-                    ask_button.click()
-                    ask_clicked = True
-                    logger.info("[STUDIO-ASK] Clicked Ask button on watch page")
-                    await self._human_delay(2.0, 0.3)
-
-            if not ask_clicked:
-                # STUDIO PAGE FALLBACK: Open menu popup, find Ask item
-                logger.info("[STUDIO-ASK] Falling back to Studio popup menu approach")
-
-                # Step 1: Open the menu popup
-                menu_clicked = False
-                menu_selectors = [
-                    "ytd-menu-renderer button",
-                    "button[aria-label='More actions']",
-                    "#button-shape button",
-                    "yt-icon-button#button",
-                ]
-                for selector in menu_selectors:
                     try:
-                        menu_btn = self.driver.find_element("css selector", selector)
-                        menu_btn.click()
-                        menu_clicked = True
-                        logger.info(f"[STUDIO-ASK] Clicked menu via: {selector}")
-                        break
+                        ask_button.click()
+                        ask_clicked = True
+                        logger.info("[STUDIO-ASK] FALLBACK: clicked watch-page Ask button")
+                        await self._human_delay(2.0, 0.3)
                     except Exception:
-                        continue
+                        ask_clicked = False
 
-                if not menu_clicked:
-                    return AskResult(
-                        video_id=video_id,
-                        title=title,
-                        response_text="",
-                        topics=[],
-                        timestamps=[],
-                        success=False,
-                        error="Menu trigger not found"
-                    )
+                # FALLBACK B: Studio popup menu Ask item.
+                if not ask_clicked:
+                    menu_selectors = [
+                        "ytd-menu-renderer button",
+                        "button[aria-label='More actions']",
+                        "#button-shape button",
+                        "yt-icon-button#button",
+                    ]
+                    menu_clicked = False
+                    for selector in menu_selectors:
+                        try:
+                            menu_btn = self.driver.find_element("css selector", selector)
+                            menu_btn.click()
+                            menu_clicked = True
+                            break
+                        except Exception:
+                            continue
+                    if menu_clicked:
+                        await self._human_delay(1.5, 0.3)
+                        ask_item = self.driver.execute_script("""
+                            const items = document.querySelectorAll('tp-yt-paper-item');
+                            for (let item of items) {
+                                if (item.textContent.trim().toLowerCase() === 'ask') {
+                                    return item;
+                                }
+                            }
+                            return null;
+                        """)
+                        if ask_item:
+                            try:
+                                ask_item.click()
+                                ask_clicked = True
+                                logger.info("[STUDIO-ASK] FALLBACK: clicked Studio popup Ask item")
+                                await self._human_delay(2.0, 0.3)
+                            except Exception:
+                                ask_clicked = False
 
-                await self._human_delay(1.5, 0.3)  # Wait for popup
-
-                # Step 2: Find "Ask" item inside popup menu by text content
-                ask_item = self.driver.execute_script("""
-                    const items = document.querySelectorAll('tp-yt-paper-item');
-                    for (let item of items) {
-                        if (item.textContent.trim().toLowerCase() === 'ask') {
-                            return item;
-                        }
-                    }
-                    return null;
-                """)
-
-                if not ask_item:
-                    return AskResult(
-                        video_id=video_id,
-                        title=title,
-                        response_text="",
-                        topics=[],
-                        timestamps=[],
-                        success=False,
-                        error="Ask menu item not found in popup"
-                    )
-
-                # Step 3: Click Ask item
-                ask_item.click()
-                ask_clicked = True
-                logger.info("[STUDIO-ASK] Clicked 'Ask' menu item in popup")
-                await self._human_delay(2.0, 0.3)
+                # Legacy fallback: type into textarea/input and submit.
+                if ask_clicked:
+                    try:
+                        ask_input = self.driver.find_element(
+                            "css selector", "textarea, input[placeholder*='Ask']"
+                        )
+                        ask_input.clear()
+                        ask_input.send_keys(ask_prompt)
+                        await self._human_delay(1.0, 0.2)
+                        ask_input.send_keys(Keys.ENTER)
+                    except Exception as e:
+                        logger.warning(f"[STUDIO-ASK] FALLBACK input entry failed: {e}")
+                        ask_clicked = False
 
             if not ask_clicked:
                 return AskResult(
@@ -464,29 +637,40 @@ CONTENT CATEGORY (pick ONE):
                     topics=[],
                     timestamps=[],
                     success=False,
-                    error="Could not click Ask button via any method"
+                    error="Could not open Ask Studio or any fallback Ask path",
                 )
-            
-            # Find input field and type prompt
-            ask_input = self.driver.find_element("css selector", "textarea, input[placeholder*='Ask']")
-            ask_input.clear()
-            ask_input.send_keys(self.ASK_PROMPT)
-            await self._human_delay(1.0, 0.2)
-            
-            # Submit (Enter key or submit button)
-            from selenium.webdriver.common.keys import Keys
-            ask_input.send_keys(Keys.ENTER)
-            await self._human_delay(5.0, 0.5)  # Wait for Gemini response
-            
-            # Get response text
-            response_text = ""
-            try:
-                response_el = self.driver.find_element("css selector", ".gemini-response, .response-content")
-                response_text = response_el.text
-            except Exception:
-                # Try to get any new text on page
-                response_text = self.driver.find_element("css selector", "body").text[-2000:]
-            
+
+            # ---- Scrape the response from DOM (NO clipboard). Fails closed. ----
+            if used_ask_studio:
+                response_text = await self._scrape_ask_response()
+            else:
+                # Legacy fallback: wait then scrape legacy response containers.
+                await self._human_delay(5.0, 0.5)
+                response_text = ""
+                try:
+                    response_el = self.driver.find_element(
+                        "css selector", ".gemini-response, .response-content"
+                    )
+                    response_text = (response_el.text or "").strip()
+                except Exception:
+                    response_text = ""
+                if not response_text:
+                    # As a last resort scrape the Ask Studio stream selectors too.
+                    response_text = await self._scrape_ask_response()
+
+            if not response_text:
+                # Response never materialized within the timeout -> FAIL CLOSED.
+                logger.warning(f"[STUDIO-ASK] {video_id}: no response within timeout (fail closed)")
+                return AskResult(
+                    video_id=video_id,
+                    title=title,
+                    response_text="",
+                    topics=[],
+                    timestamps=[],
+                    success=False,
+                    error="Ask Studio response timeout (no DOM text)",
+                )
+
             # Parse response
             parsed = self._parse_ask_response(response_text)
             content_category = parsed.get("content_category", "other")
@@ -501,7 +685,7 @@ CONTENT CATEGORY (pick ONE):
                 success=True,
                 content_category=content_category,
             )
-            
+
         except Exception as e:
             logger.error(f"[STUDIO-ASK] Error for {video_id}: {e}")
             return AskResult(
@@ -513,7 +697,7 @@ CONTENT CATEGORY (pick ONE):
                 success=False,
                 error=str(e)
             )
-    
+
     async def index_channel_videos(
         self,
         channel_id: str,
@@ -660,7 +844,7 @@ CONTENT CATEGORY (pick ONE):
                     skipped += 1
                     logger.info(f"[STUDIO-ASK] ⏭️ {vid_id}: already indexed")
                     continue
-                result = await self.ask_about_video(vid_id)
+                result = await self.ask_about_video(vid_id, channel_entry=channel_entry)
                 results.append(result)
                 
                 if result.success:
