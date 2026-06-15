@@ -12,6 +12,57 @@ This log tracks changes specific to the **youtube_auth** module in the **platfor
 
 ## MODLOG ENTRIES
 
+### 2026-06-15 - YT-OAUTH-BROWSER-RESOLVER-PHASE1: Per-set OAuth browser resolver
+
+**By:** 0102 (Worker P1)
+**Slice:** YT-OAUTH-BROWSER-RESOLVER-PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 50 (Pre-Action Verification), WSP 84 (Code Reuse / single source of truth), WSP 97 (Truth Signaling)
+
+**Problem:**
+- `youtube_auth.py` hardcoded browser executable paths inline in TWO places
+  (`get_authenticated_service()` OAuth block and `preflight_oauth_check()`
+  auto-reauth block). No `CHROME_PATH`/`EDGE_PATH` env override and no
+  32/64-bit fallback. The inline set 10 path also pointed only at the x86 Edge
+  location, drifting from `authorize_set10.py` (which checks env, 64-bit, x86).
+- The authorize scripts (`authorize_set1.py`, `authorize_set10.py`) already had
+  the richer candidate ordering, so the same logic existed twice and diverged.
+
+**Changes:**
+- **Added** `src/oauth_browser.py`:
+  - `resolve_browser_for_set(set_id) -> (browser_name, executable_path)`.
+    Set 1 -> "chrome" (CHROME_PATH, 64-bit, x86); set 10 -> "edge"
+    (EDGE_PATH, 64-bit, x86). Candidate order EXACTLY mirrors the authorize
+    scripts. Returns the first path that `os.path.exists()`.
+  - `class BrowserNotFoundError(Exception)` carrying `set_id`,
+    `attempted_paths`, and `operator_action` (from
+    `oauth_health.reauth_command_for(set_id)`). Unknown `set_id` raises it too.
+  - Import-light: only `os` at load; `oauth_health` imported lazily inside the
+    error path to avoid import cycles.
+- **Refactored** `src/youtube_auth.py`: both inline browser-path blocks now call
+  `resolve_browser_for_set(index)`, verify `os.path.exists` before
+  `subprocess.Popen`, and on `BrowserNotFoundError` log CRITICAL with the
+  operator_action then follow the surrounding block's existing error contract
+  (OAuth block re-raises into its `except ... continue`; auto-reauth block
+  `continue`s to the next set). No browser path string literals remain in
+  either block.
+- **Tests** `tests/test_oauth_browser.py` (no network, mocks `os.path.exists`/env):
+  `test_resolve_browser_set1_prefers_chrome_path_env`,
+  `test_resolve_browser_set10_prefers_edge_path_env`,
+  `test_missing_browser_raises_with_reauth_command`, plus fallback-order and
+  unknown-set coverage. 6 passed.
+- **Docs**: INTERFACE.md documents the new exports and the CHROME_PATH/EDGE_PATH
+  env overrides.
+
+**Scope (Phase 1):** browser executable path resolution only. Out of scope:
+menu wiring, OAUTH port parity, `run_local_server(port=0)`, invalid_grant
+rotation/fallback, exhausted_sets logic (separate PRs build on this).
+
+**Verification:**
+```
+python -m pytest modules/platform_integration/youtube_auth/tests/test_oauth_browser.py
+# 6 passed
+```
+
 ### 2026-05-01 - OC21: WSP 97 Truth Violation + Operations KeyError Fix
 
 **By:** 0102 (Worker AW3)

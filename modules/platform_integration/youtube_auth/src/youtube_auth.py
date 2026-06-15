@@ -227,21 +227,44 @@ def get_authenticated_service(token_index=None):
                 try:
                     import webbrowser
                     import subprocess
+                    from modules.platform_integration.youtube_auth.src.oauth_browser import (
+                        resolve_browser_for_set,
+                        BrowserNotFoundError,
+                    )
 
-                    # Browser selection based on credential set
+                    # Browser selection based on credential set (WSP 84: single
+                    # source of truth in oauth_browser.resolve_browser_for_set).
                     # Set 1 = UnDaoDu/Move2Japan = Chrome
                     # Set 10 = FoundUps/antifaFM = Edge
-                    if index == 1:
-                        browser_name = "Chrome"
-                        browser_path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
-                    else:  # Set 10
-                        browser_name = "Edge"
-                        browser_path = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+                    try:
+                        browser_name, browser_path = resolve_browser_for_set(index)
+                    except BrowserNotFoundError as browser_err:
+                        logger.critical(
+                            f"[BROWSER] Cannot launch OAuth for set {index}: "
+                            f"{browser_err}. Operator action: {browser_err.operator_action}"
+                        )
+                        raise
 
                     logger.info(f"[BROWSER] Set {index} will use {browser_name.upper()} for OAuth")
                     print(f"\n[IMPORTANT] Opening {browser_name.upper()} for Set {index} authentication")
                     print(f"  - Set 1: Chrome (UnDaoDu/Move2Japan account)")
                     print(f"  - Set 10: Edge (FoundUps/antifaFM account)\n")
+
+                    # Verify the resolved executable before launching. The
+                    # resolver already checked existence, but re-verify here so
+                    # a removed binary surfaces a CRITICAL operator action
+                    # rather than an opaque Popen failure.
+                    if not os.path.exists(browser_path):
+                        action = oauth_health.reauth_command_for(index)
+                        logger.critical(
+                            f"[BROWSER] Resolved browser for set {index} no longer "
+                            f"exists at {browser_path}. Operator action: {action}"
+                        )
+                        raise BrowserNotFoundError(
+                            set_id=index,
+                            attempted_paths=[browser_path],
+                            operator_action=action,
+                        )
 
                     # Override webbrowser.open to use the correct browser
                     original_open = webbrowser.open
@@ -565,15 +588,26 @@ def preflight_oauth_check(auto_reauth: bool = False, credential_sets=None) -> di
                 )
 
                 if auto_reauth:
-                    # Determine correct browser based on credential set
+                    # Determine correct browser based on credential set (WSP 84:
+                    # single source of truth in oauth_browser).
                     # Set 1 = UnDaoDu/Move2Japan = Chrome
                     # Set 10 = FoundUps/antifaFM = Edge
-                    if index == 1:
-                        browser_name = "Chrome"
-                        browser_path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
-                    else:  # Set 10
-                        browser_name = "Edge"
-                        browser_path = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+                    from modules.platform_integration.youtube_auth.src.oauth_browser import (
+                        resolve_browser_for_set,
+                        BrowserNotFoundError,
+                    )
+
+                    try:
+                        browser_name, browser_path = resolve_browser_for_set(index)
+                    except BrowserNotFoundError as browser_err:
+                        logger.critical(
+                            f"[PREFLIGHT] Cannot auto-reauth set {index}: "
+                            f"{browser_err}. Operator action: {browser_err.operator_action}"
+                        )
+                        # Consistent with this block's error contract: do not
+                        # crash preflight; the set stays in 'expired' and the
+                        # operator_action was logged at CRITICAL above.
+                        continue
 
                     logger.info(f"[PREFLIGHT] Auto-reauth for set {index} - USE {browser_name.upper()}!")
                     print(f"\n{'='*60}")
@@ -585,6 +619,21 @@ def preflight_oauth_check(auto_reauth: bool = False, credential_sets=None) -> di
                     try:
                         import webbrowser
                         import subprocess
+
+                        # Re-verify the resolved executable before launching so a
+                        # removed binary surfaces a CRITICAL operator action
+                        # rather than an opaque Popen failure.
+                        if not os.path.exists(browser_path):
+                            action = oauth_health.reauth_command_for(index)
+                            logger.critical(
+                                f"[PREFLIGHT] Resolved browser for set {index} no longer "
+                                f"exists at {browser_path}. Operator action: {action}"
+                            )
+                            raise BrowserNotFoundError(
+                                set_id=index,
+                                attempted_paths=[browser_path],
+                                operator_action=action,
+                            )
 
                         # Override webbrowser.open to use the correct browser
                         original_open = webbrowser.open
