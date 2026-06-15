@@ -42,6 +42,44 @@ quota_monitor = QuotaMonitor()
 # Load environment variables once when the module is imported
 load_dotenv()
 
+
+class OAuthReauthRequiredError(Exception):
+    """
+    Raised when a credential set cannot be authenticated because its refresh
+    token is dead (invalid_grant) and no silent fallback is permitted.
+
+    Carries operator-actionable context so callers can surface the exact
+    re-authorization command instead of silently degrading to a different
+    account or to read-only no-auth mode.
+
+    Attributes:
+        set_id: The credential set (or list of set ids when all sets are dead)
+            that requires re-authorization.
+        operator_action: The exact reauth command(s) an operator must run,
+            derived from oauth_health.reauth_command_for(set_id).
+    """
+
+    def __init__(self, set_id, operator_action=None, message=None):
+        self.set_id = set_id
+        if operator_action is None:
+            # Import function-locally to avoid coupling the module-level import
+            # block (which sibling work also edits).
+            from modules.platform_integration.youtube_auth.src import oauth_health as _oh
+            if isinstance(set_id, (list, tuple, set)):
+                operator_action = "; ".join(
+                    _oh.reauth_command_for(s) for s in set_id
+                )
+            else:
+                operator_action = _oh.reauth_command_for(set_id)
+        self.operator_action = operator_action
+        if message is None:
+            message = (
+                f"Credential set {set_id} requires re-authorization "
+                f"(invalid_grant); operator must run: {operator_action}"
+            )
+        super().__init__(message)
+
+
 def get_credentials_for_index(index):
     """
     Get credentials for a specific index (1-5).
@@ -131,8 +169,12 @@ def get_authenticated_service(token_index=None):
         get_authenticated_service.exhausted_sets.clear()
         get_authenticated_service.last_reset = current_time
 
-    # Determine which credential sets to try
-    if token_index is not None:
+    # Determine which credential sets to try.
+    # is_pinned == True means the caller EXPLICITLY pinned a credential set
+    # (e.g. UnDaoDu/Move2Japan -> set 1). For a pinned set we must NOT silently
+    # fall back to another account/set on invalid_grant; we raise instead.
+    is_pinned = token_index is not None
+    if is_pinned:
         # Use specific token index (already 1-based from caller)
         indices_to_try = [token_index]
         logger.info(f"[TARGET] Using specific credential set {token_index}")
@@ -164,6 +206,11 @@ def get_authenticated_service(token_index=None):
         ])
         logger.info(f"[OAUTH-HEALTH] {oauth_health.format_capacity_log(capacity_snapshot)}")
     
+    # Track credential sets that died via invalid_grant during this call so
+    # auto-rotation can raise a combined re-auth error if EVERY set is dead
+    # (instead of silently degrading to no-auth read-only mode).
+    invalid_grant_sets = []
+
     for index in indices_to_try:
         logger.info(f"[U+1F511] Attempting authentication with credential set {index}")
         creds_data = get_credentials_for_index(index)
@@ -230,14 +277,75 @@ def get_authenticated_service(token_index=None):
                         oauth_health.emit_critical_reauth(index, status, reason)
                         # Mark this set offline for this process to avoid repeated retries during fallback flows
                         get_authenticated_service.exhausted_sets.add(index)
+                        invalid_grant_sets.append(index)
+
+                        # Persist operator-visible health artifact for this failure
+                        _persist_health_snapshot(failing_set=index, failing_status=status, failing_reason=reason)
+
+                        if is_pinned:
+                            # No silent fallback for an EXPLICITLY pinned set:
+                            # UnDaoDu/Move2Japan are pinned to set 1 and must NOT
+                            # be allowed to authenticate via a different account
+                            # (set 10) or degrade to read-only no-auth mode.
+                            reauth_command = oauth_health.reauth_command_for(index)
+                            raise OAuthReauthRequiredError(
+                                set_id=index,
+                                operator_action=reauth_command,
+                            )
+
+                        # Auto-rotation: emit a truthful effective-capacity line
+                        # after this skip so operators see real remaining quota,
+                        # not just rotation targets. Only continue if at least one
+                        # other healthy (not-yet-dead) set remains.
+                        from modules.platform_integration.youtube_auth.src.quota_monitor import (
+                            get_available_credential_sets,
+                        )
+                        configured_sets = get_available_credential_sets()
+                        capacity_snapshot = oauth_health.compute_effective_capacity([
+                            oauth_health.build_set_entry(
+                                s,
+                                oauth_health.STATUS_TOKEN_EXPIRED_OR_REVOKED
+                                if s in get_authenticated_service.exhausted_sets
+                                else oauth_health.STATUS_HEALTHY,
+                            )
+                            for s in configured_sets
+                        ])
+                        logger.info(
+                            f"[OAUTH-HEALTH] {oauth_health.format_capacity_log(capacity_snapshot)}"
+                        )
+
+                        remaining_healthy = [
+                            s for s in configured_sets
+                            if s not in get_authenticated_service.exhausted_sets
+                        ]
+                        if not remaining_healthy:
+                            # ALL sets dead via invalid_grant: do NOT degrade to
+                            # no-auth; raise listing every reauth command.
+                            dead_sets = sorted(set(invalid_grant_sets))
+                            combined_action = "; ".join(
+                                oauth_health.reauth_command_for(s) for s in dead_sets
+                            )
+                            logger.critical(
+                                f"[OAUTH-HEALTH] CRITICAL: all credential sets "
+                                f"{dead_sets} are dead (invalid_grant); operator "
+                                f"must run: {combined_action}"
+                            )
+                            raise OAuthReauthRequiredError(
+                                set_id=dead_sets,
+                                operator_action=combined_action,
+                            )
+                        logger.info(
+                            f"[REFRESH] Set {index} dead (invalid_grant); falling "
+                            f"back to remaining healthy set(s): {remaining_healthy}"
+                        )
+                        # Continue to next credential set instead of trying OAuth flow
+                        continue
                     else:
                         logger.error(f"[FAIL] Failed to refresh token for set {index}: {e}")
-
-                    # Persist operator-visible health artifact for this failure
-                    _persist_health_snapshot(failing_set=index, failing_status=status, failing_reason=reason)
-
-                    # Continue to next credential set instead of trying OAuth flow
-                    continue
+                        # Persist operator-visible health artifact for this failure
+                        _persist_health_snapshot(failing_set=index, failing_status=status, failing_reason=reason)
+                        # Continue to next credential set instead of trying OAuth flow
+                        continue
             else:
                 if creds and creds.expired and not creds.refresh_token:
                     logger.warning(f"[U+26A0]️ Credentials expired for set {index} but no refresh token available")
