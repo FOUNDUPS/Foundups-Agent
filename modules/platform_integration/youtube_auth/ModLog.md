@@ -12,6 +12,83 @@ This log tracks changes specific to the **youtube_auth** module in the **platfor
 
 ## MODLOG ENTRIES
 
+### 2026-06-15 - YT-OAUTH-DUAL-PREFLIGHT-MENU-PHASE1: Dual-set fixed-port OAuth preflight + menu 1->1 wiring
+
+**By:** 0102 (Worker P2)
+**Slice:** YT-OAUTH-DUAL-PREFLIGHT-MENU-PHASE1 (stacks on #811 YT-OAUTH-BROWSER-RESOLVER-PHASE1)
+**WSP References:** WSP 22 (ModLog), WSP 50 (Pre-Action Verification), WSP 84 (Code Reuse / single source of truth), WSP 97 (Truth Signaling)
+
+**HoloIndex Retrieval (backfilled 2026-06-15, pre-contract worker):** the full retroactive retrieval report + verdict + attention flags are in the PR #813 body. NEEDS_012: HoloIndex miss - retroactive queries surfaced only adjacent files (e.g. cli/youtube_menu.py) and did NOT surface the edit target youtube_auth.py; the real preflight call site (main.py:monitor_youtube) and all edits were located by architect-pre-verified direct reads (WSP 50). Indexing gap tracked as HOLOINDEX_YOUTUBE_AUTH_INDEXING_GAP_PHASE1.
+
+**CODEQL_FALSE_POSITIVE_STRUCTURALLY_CLEANED (2026-06-15):** the post-rebase CodeQL run flagged 5 `py/clear-text-logging-sensitive-data` (high) - all confirmed false positives (logs credential-set IDs / account labels / browser / ports, never a token or secret; the same rule has 58 pre-existing instances on main). Per 012 direction (remediate, NOT dismiss / merge-red), the 5 log statements (youtube_auth.py reauth banner + main.py preflight summary/expired/healthy) were restructured to log ONLY sanitized non-secret scalars: int set IDs, resolver-derived browser name, int port, and a STATIC public channel-role literal - removing any value read from the oauth/credential container. No OAuth behavior change.
+
+**Problem (verified):**
+- YouTube DAE menu 1->1 ("Live Chat Monitor") runs OAuth preflight via
+  `main.monitor_youtube()`, whose auto-reauth path used
+  `run_local_server(port=0)` (a RANDOM port) instead of the authorize scripts'
+  FIXED ports (`OAUTH_PORT_SET1=8080` / `OAUTH_PORT_SET10=8090`). A random port
+  can mismatch the client's whitelisted redirect_uri.
+- A Set-1 reauth failure was effectively swallowed (the per-set `except`
+  continued without keeping the set dead / surfacing it), so the monitor could
+  start on Set 10 only. 012 saw Edge (Set 10) open but Chrome (Set 1) never did.
+- Preflight iterated sets in dict/registry order (no guarantee Set 1 before
+  Set 10), so even when both were dead the browsers could open out of order.
+
+**Changes:**
+- **Added** `src/youtube_auth.py :: run_supervised_reauth_for_set(set_id, client_secrets, token_file, scopes) -> bool`:
+  - Resolves the per-set browser via #811 `oauth_browser.resolve_browser_for_set`
+    (Set 1 -> Chrome, Set 10 -> Edge).
+  - Uses the FIXED listener port (`OAUTH_PORT_SET1`=8080 / `OAUTH_PORT_SET10`=8090,
+    env-overridable, mirroring `authorize_set1.py`/`authorize_set10.py`) -- NOT
+    `port=0`.
+  - Prints the account label from `oauth_health.SET_METADATA`; returns success
+    bool. BLOCKING by design (run_local_server blocks) so callers run it
+    sequentially. Never logs tokens / client_secret.
+- **Added** module constants `OAUTH_PORT_SET1` / `OAUTH_PORT_SET10` and helper
+  `_oauth_port_for_set(set_id)`.
+- **Refactored** `preflight_oauth_check(auto_reauth=True)`:
+  - Sets are now processed in `sorted()` order (Set 1 before Set 10).
+  - The inline `port=0` auto-reauth block is REPLACED by a SEQUENTIAL call to
+    `run_supervised_reauth_for_set`. On failure the set STAYS in `expired[]` and a
+    CRITICAL log emits the exact `reauth_command_for(set_id)` (WSP 97: no false OK).
+  - `get_authenticated_service()` is intentionally untouched (its `port=0` is
+    owned by a separate slice/PR3).
+- **Wired** `main.py :: monitor_youtube()` (the menu 1->1 / monitor entry path):
+  - Calls `preflight_oauth_check(auto_reauth=..., credential_sets=[1, 10])`
+    explicitly (dual-set contract).
+  - Prints a truthful dual-set summary (`healthy` / `still_dead` / `missing`) and
+    a per-set WARN when Set 1 (UnDaoDu/Move2Japan) or Set 10 (FoundUps/antifaFM)
+    is not healthy.
+  - **SECTION C**: after preflight, logs reconciled quota headroom for BOTH sets
+    via `QuotaMonitor.get_usage_summary()` (function-local import, read-only) so
+    012 sees Set 1 AND Set 10, not Set 1 only.
+- **Tests** `tests/test_dual_set_preflight.py` (no network; mocks
+  `InstalledAppFlow.run_local_server` + `resolve_browser_for_set`):
+  - `both_sets_dead_opens_set1_then_set10` (order [1, 10] asserted; ports
+    [8080, 8090]).
+  - `set1_reauth_failure_set10_still_attempted` (Set 1 stays expired, Set 10
+    still attempted and recovered).
+  - `supervised_reauth_uses_fixed_port_set1/set10` (asserts port=8080 / 8090,
+    not 0) + browser-not-found returns False without crashing.
+  - `menu_path_calls_dual_set_preflight` (mocks preflight; asserts
+    `credential_sets=[1, 10]`).
+  - Result: 9 passed (this file); 22 passed with `test_oauth_credential_health.py`.
+
+**Scope (Phase 1):** dual-set preflight, fixed ports in the SUPERVISED path,
+menu 1->1 wiring, dual-set quota visibility. Out of scope:
+`get_authenticated_service` invalid_grant/fallback (PR3); quota_monitor internals
+(read-only here); the browser resolver itself (#811).
+
+**Verification:**
+```
+python -m pytest modules/platform_integration/youtube_auth/tests/test_dual_set_preflight.py \
+  modules/platform_integration/youtube_auth/tests/test_oauth_credential_health.py
+# 22 passed
+```
+Pre-existing failures in `test_youtube_auth.py` / `test_quota_monitor.py` /
+`test_youtube_auth_coverage.py` were confirmed identical on the pristine #811
+base (target `get_authenticated_service` / quota internals -- not this slice).
+
 ### 2026-06-15 - YT-OAUTH-BROWSER-RESOLVER-PHASE1: Per-set OAuth browser resolver
 
 **By:** 0102 (Worker P1)
