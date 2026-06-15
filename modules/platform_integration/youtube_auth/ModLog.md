@@ -194,6 +194,93 @@ rotation/fallback, exhausted_sets logic (separate PRs build on this).
 python -m pytest modules/platform_integration/youtube_auth/tests/test_oauth_browser.py
 # 6 passed
 ```
+### 2026-06-15 - YT-QUOTA-TRACKING-TRUTH-PHASE1: Quota Tracking Truth (drift reconcile, PT reset boundary, real-signal alert gating)
+
+**By:** 0102 (Worker-Lane Q1, Slice YT-QUOTA-TRACKING-TRUTH-PHASE1)
+**WSP References:** WSP 22 (ModLog), WSP 50 (Pre-Action Verification), WSP 84 (Code Reuse), WSP 97 (Truth Signaling)
+
+**Problem (verified from source, not assumed):**
+`quota_monitor.py` could emit a CRITICAL "~99% quota" alert from a STALE / drift-corrupted
+local counter rather than a real Google `quotaExceeded`. This is a WSP 97 truth violation:
+the monitor signalled exhaustion that was not true.
+
+Three confirmed mechanisms in `src/quota_monitor.py`:
+1. `_normalize_usage_data()` loaded the stored `sets.N.used` verbatim without checking it
+   against the sum of its per-operation `units` ledger. A corrupted record (e.g.
+   `used=9901` while the operations ledger sums to `1`) loaded as 99% used.
+2. `_check_alerts()` computed `usage_percent = used / limit` purely from that local counter
+   and raised CRITICAL with no requirement for a real Google signal.
+3. `_check_daily_reset()` used a rolling-24h-from-last_reset window, NOT Google's actual
+   midnight-Pacific quota boundary, so a stale counter could persist across the real reset.
+
+**Changes (`src/quota_monitor.py` only):**
+- **Drift reconciliation on load** (`_normalize_usage_data`): per set, compute
+  `used_from_ops = sum(op["units"])`; if `abs(used - used_from_ops) > 1`, log
+  `WARNING [QUOTA-DRIFT] set N used=X ops_sum=Y; reconciling to Y` and set `used = used_from_ops`.
+  The operations ledger is treated as the source of truth.
+- **Pacific-Time daily reset boundary** (`_check_daily_reset`): reset when the *Pacific-Time
+  calendar date* rolls over (midnight America/Los_Angeles), replacing rolling-24h. Added
+  `to_pacific()` + `_us_pacific_offset_hours()` helpers using stdlib `zoneinfo` when available,
+  with a manual US-DST fallback (PST UTC-8 / PDT UTC-7, 2nd-Sun-Mar to 1st-Sun-Nov) for hosts
+  where the tz database is unavailable. NOTE: this host has no `tzdata` (zoneinfo raised
+  `ZoneInfoNotFoundError`), so the manual fallback is the ACTIVE path here and is exercised by
+  the tests. `last_reset` is now persisted as Pacific wall-clock isoformat.
+- **Real-signal alert gating** (`_check_alerts` + new `report_quota_signal()`): a CRITICAL/
+  WARNING alert now requires EITHER a real Google signal (`report_quota_signal`,
+  for HTTP 403 `quotaExceeded` / `dailyLimitExceeded`) OR a *reconciled* local `used` at/above
+  the threshold. Because the counter is reconciled at load, a drift-corrupted counter alone can
+  no longer produce a false CRITICAL. Alerts now carry a `trigger` field (`google_signal` /
+  `local_counter`) for auditability. Real signals are cleared on the PT daily reset.
+- **Injectable clock**: `__init__` accepts an optional `now_provider` (defaults to
+  `datetime.now`); all internal time reads go through `self._now()` / `self._now_pacific()` so
+  tests are deterministic and offline. Fully backward compatible (additive kwarg; existing
+  callers `QuotaMonitor()` / `QuotaMonitor(memory_dir=...)` unchanged).
+
+**Tests (`tests/test_quota_monitor.py`):**
+- New `TestQuotaTruthSignaling` class (8 tests, all deterministic / no network):
+  corrupt `{used:9901, ops sum:1}` load -> `used==1` + `[QUOTA-DRIFT]` warning; no false
+  CRITICAL after corrupt load; consistent counter -> no drift warning; real `quotaExceeded`
+  signal raises CRITICAL even at ~0% local usage; genuinely high reconciled counter still
+  alerts (`trigger=local_counter`); PT same-day no-reset; PT cross-day reset; PT-boundary is
+  not rolling-24h (1h gap that crosses PT midnight still resets). Times injected as tz-aware
+  UTC for host-independent determinism.
+- Updated the two pre-existing reset tests (`test_check_daily_reset`,
+  `test_check_daily_reset_not_needed`) to assert the new PT-day boundary instead of the
+  removed rolling-24h contract (they previously encoded the old behavior).
+
+**Verification (truthful, executed):**
+- `pytest tests/test_quota_monitor.py` -> 22 passed, 5 failed.
+- The 5 failures are PRE-EXISTING and unrelated to this slice: the test file still assumes a
+  7-set (1-7) credential config while production `daily_limits` is `{1, 10}`
+  (`test_initialization`, `test_get_best_credential_set`,
+  `test_get_best_credential_set_all_exhausted`, `test_get_usage_summary`,
+  `test_quota_file_persistence`). Baseline before this slice was also 5 failed / 14 passed;
+  this slice adds 8 passing tests and fixes 2 reset tests without changing the pre-existing
+  failure set. Those 7-set mismatches are out of scope for this truth slice.
+
+### HoloIndex Retrieval Report
+| # | Query | Hits | Top result | Quality | Used? |
+|---|-------|------|------------|---------|-------|
+| 1 | quota monitor usage reconcile drift credential set | 20 | modules\communication\livechat\src\quota_aware_poller.py | LOW | N |
+| 2 | youtube quota daily reset pacific time critical alert threshold | 20 | modules\communication\livechat\src\mcp_youtube_integration.py | LOW | N |
+| 3 | quota_usage operations units track_api_call get_usage_summary | 20 | modules\communication\livechat\src\intelligent_throttle_manager.py | LOW | N |
+
+### Retrieval verdict
+- noise: HIGH - all 3 queries returned livechat throttle/poller + WSP/docs; none surfaced the
+  actual target `quota_monitor.py`.
+- ordering: target file never ranked; semantic index biased toward livechat quota consumers.
+- missing artifacts: `modules/platform_integration/youtube_auth/src/quota_monitor.py` and its
+  tests were absent from all result sets.
+- staleness/duplication: not the issue; this is a retrieval miss.
+- action: re-queried 3x (all LOW) -> fell back to direct path reads via Glob + Read of
+  `quota_monitor.py`, `tests/test_quota_monitor.py`, and `youtube_auth/ModLog.md`.
+
+### Attention flags (012 triage)
+- [ ] NEEDS_012: merge / sovereign nod / OAuth browser / secrets
+- [x] NEEDS_012: HoloIndex miss - relied on direct path reads (target file not surfaced by 3 queries)
+- [ ] NEEDS_012: test failure / worktree integrity / quota drift (5 failures are PRE-EXISTING 7-set mismatch, not introduced)
+- [ ] CLEAR: CI green, worktree clean, no flags
+- Note: this is quota runtime code -> PR left OPEN for the external gate regardless.
 
 ### 2026-05-01 - OC21: WSP 97 Truth Violation + Operations KeyError Fix
 
