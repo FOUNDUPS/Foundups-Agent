@@ -1233,24 +1233,32 @@ async def run_indexer_dae(
     dry_run: bool = False,
 ) -> Dict[str, Any]:
     """
-    DAE entry point for Video Indexing (Occam's Razor approach).
+    DAE entry point for a READ-ONLY artifact/context VALIDATION pass (Phase 1 decoupling).
 
-    Same flow as scheduling but SKIPS the schedule step.
-    Weaves Digital Twin index into description for cloud memory.
+    This delegates to run_indexing_cycle, which is a READ-ONLY CONSUMER of the
+    video-index artifact produced OUTSIDE the scheduler (Studio Ask /
+    video_indexer SKILLz action, #819). It does NOT write live metadata, does
+    NOT weave into the live description, and does NOT schedule. Live metadata
+    writes happen ONLY on the explicit scheduling path
+    (run_scheduler_dae / run_scheduling_cycle).
 
     Args:
         channel_key: "move2japan", "undaodu", "foundups", or "antifafm"
-        max_videos: Maximum videos to index
+        max_videos: Maximum videos to validate
         video_type: "shorts", "videos", or "all"
         sort_oldest: If True, process oldest videos first
-        dry_run: Preview mode without actual changes
+        dry_run: Preview mode. Indexing makes no live changes regardless of
+            this flag (it is read-only); the flag is passed through for parity
+            with the scheduling path.
 
     Returns:
         Indexing results dict
 
     WSP Compliance:
         WSP 60: Memory artifacts in memory/video_index/{channel}/
-        WSP 73: Digital Twin block in description (cloud memory)
+        WSP 73: The Digital Twin block is applied on the explicit scheduling
+            path (run_scheduling_cycle), NOT during indexing; indexing only
+            reads/validates the artifact and never writes it to live metadata.
         WSP 80: DAE pattern for background indexing
     """
     scheduler = YouTubeShortsScheduler(channel_key, dry_run=dry_run)
