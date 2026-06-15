@@ -1,16 +1,18 @@
 ---
 name: transcript_ask
-description: Extract full video transcripts using YouTube's "Ask" Gemini feature
+description: Extract video transcripts/topics via the YouTube Studio "Ask Studio" header feature (browser, no API)
 version: 1.0.0
 author: 0102_video_indexer_team
 agents: [gemini, qwen]
-dependencies: [browser_actions, studio_ask_indexer]
+dependencies: [browser_actions, studio_ask_indexer, action_surface]
 domain: video_indexing
 intent_type: EXTRACTION
 promotion_state: prototype
 category: capability-uplift
 evals: []
 retirement_date: null
+action_ids:
+  - video_index.studio_ask.single_video
 ---
 # Transcript Ask SKILLz
 
@@ -23,26 +25,55 @@ retirement_date: null
 
 ---
 
-## ⚠️ Phase 1 Selector Notice (STUDIO_ASK_STUDIO_HEADER_PHASE1)
+## Phase 1 Selector Notice (STUDIO_ASK_STUDIO_HEADER_PHASE1)
 
 **STALE**: The watch-page `button[aria-label="Ask"]` path documented below
 (Architecture / Step 2) is **STALE** and is now a labelled *fallback only*.
 
-**Phase 1 canonical path** is the **YouTube Studio "Ask Studio" header**:
+**Phase 1 canonical path** is the **YouTube Studio "Ask Studio" header**
+(#817 Ask-Studio header selector model):
 - Entry: `ytcp-icon-button[aria-label="Ask Studio"]` on the Studio video-edit page
 - Dialog: `ytcp-dialog#dialog`
 - Prompt: `div[contenteditable][aria-label="Ask something"]`
 - Response: scraped from `#PAcreator_chat_streaming` (DOM text, **no clipboard**)
 
 Canonical implementation: `src/studio_ask_indexer.py`
-(`ASK_STUDIO_SELECTORS`, `StudioAskIndexer.ask_about_video`).
+(`ASK_STUDIO_SELECTORS`, `StudioAskIndexer.ask_about_video`). The watch-page
+selectors in Step 2 below are retained only as documented fallback.
 
-**Phase 2 — `STUDIO_ASK_SKILL_PROMOTE_PHASE2`**: promote the working Ask Studio
-selectors into an `ask_studio_index` Skillz and register with WRE *after* Phase 1
-proves stable. (Phase 1 does NOT touch the Skillz registry or WRE router.)
+## Action Surface Binding (SKILLZ_ACTION_SURFACE_PHASE1)
 
-**Phase 3 — `INDEX_BEFORE_SHORTS_SCHEDULE_PHASE3`**: only after Phase 1 is stable,
-revisit scheduler ordering (already `comments -> index -> schedule` in
+This Skillz contract is backed by the typed action surface in
+`src/action_surface.py`. The action ID it backs is:
+
+- `video_index.studio_ask.single_video` (IMPLEMENTED Phase 1) -> a bounded,
+  single-video Studio Ask index test. Routes ONLY to
+  `StudioAskIndexer.ask_about_video` (navigate + DOM scrape) and optionally
+  persists to `memory/video_index/{channel}/{video_id}.json` via
+  `VideoIndexStore`. It NEVER calls the Gemini API
+  (`GeminiVideoAnalyzer`), the Shorts Scheduler, or any
+  publish/schedule/metadata-mutation path.
+
+The same surface REGISTERS (IDs only, NOT wired in Phase 1):
+`video_index.studio_ask.channel_cycle`, `video_index.studio_ask.daemon_cycle`,
+`video_index.gemini_api.single_video`, `video_index.whisper.local_transcript`,
+`shorts_scheduler.consume_video_index` (scheduler is an artifact CONSUMER, not
+the owner of indexing).
+
+The CLI menu, OpenClaw/WRE, and Hermes invoke the SAME capability via
+`run_action(action_id, ...)` instead of a one-off menu helper.
+
+**Promotion gate**: this Skillz stays `promotion_state: prototype` with
+`evals: []`. Graduation is BLOCKED pending operator live-DOM proof of the Ask
+Studio selectors (#818 Appendix A). Phase 1 does NOT touch the Skillz registry
+or WRE router.
+
+**Phase 2 - `STUDIO_ASK_SKILL_PROMOTE_PHASE2`**: promote the working Ask Studio
+selectors into a registered Skillz and wire the channel/daemon action IDs
+*after* Phase 1 proves stable.
+
+**Phase 3 - `INDEX_BEFORE_SHORTS_SCHEDULE_PHASE3`**: only after Phase 1 is
+stable, revisit scheduler ordering (already `comments -> index -> schedule` in
 `auto_moderator_dae.py`).
 
 ---
@@ -64,15 +95,20 @@ Extract **full verbatim transcripts** from YouTube videos using the built-in "As
 
 ```
 Browser (Selenium/Antigravity)
-    ↓
+    |
+    v
 Navigate to: youtube.com/watch?v={video_id}
-    ↓
+    |
+    v
 Click "Ask" button (aria-label="Ask")
-    ↓
+    |
+    v
 Query: "Give me the full transcript with timestamps"
-    ↓
-Parse Gemini response → Structured segments
-    ↓
+    |
+    v
+Parse Gemini response -> Structured segments
+    |
+    v
 Update video JSON in memory/video_index/
 ```
 
@@ -210,17 +246,17 @@ def update_video_json(video_id: str, segments: List[Dict], channel: str):
 
 ## WSP Compliance
 
-- **WSP 96**: Micro Chain-of-Thought ✅
-- **WSP 91**: DAE Observability (logging) ✅
-- **WSP 72**: Module Independence ✅
-- **WSP 84**: Code Reuse (uses existing browser infra) ✅
+- **WSP 96**: Micro Chain-of-Thought (PASS)
+- **WSP 91**: DAE Observability (logging) (PASS)
+- **WSP 72**: Module Independence (PASS)
+- **WSP 84**: Code Reuse (uses existing browser infra) (PASS)
 
 ---
 
 ## Integration
 
 **Called From**:
-- `auto_moderator_dae.py` → `run_video_indexing_cycle()`
+- `auto_moderator_dae.py` -> `run_video_indexing_cycle()`
 - Manual: CLI tool
 
 **Output Storage**:

@@ -275,6 +275,69 @@ async def run_indexing_daemon(
     """Run continuous indexing cycles with STOP/REINDEX signals."""
 ```
 
+### Action Surface (typed SKILLz/ACTION SURFACE - Phase 1)
+
+A typed, reusable capability surface so the CLI menu, OpenClaw/WRE, Hermes, or
+any 0102 agent invoke the SAME governed indexing capability by action ID
+instead of a one-off helper.
+
+```python
+from modules.ai_intelligence.video_indexer.src.action_surface import (
+    VideoIndexAction,            # typed action IDs (string constants)
+    StudioAskSingleVideoInput,   # typed input dataclass
+    StudioAskSingleVideoOutput,  # typed output dataclass
+    run_action,                  # dispatcher: run_action(action_id, **kwargs)
+    run_studio_ask_single_video, # direct entry for the single_video action
+    parse_video_id,              # raw ID or URL -> bare video ID
+    port_for_browser,            # 'chrome'->9222, 'edge'->9223
+    BROWSER_PORTS,
+    ALL_ACTION_IDS,
+    IMPLEMENTED_ACTION_IDS,
+    REGISTERED_ONLY_ACTION_IDS,
+)
+
+# Action IDs
+#   IMPLEMENTED (Phase 1):
+#     VideoIndexAction.STUDIO_ASK_SINGLE_VIDEO = "video_index.studio_ask.single_video"
+#   REGISTERED ONLY (NOT wired this phase -> 'not_implemented'):
+#     STUDIO_ASK_CHANNEL_CYCLE = "video_index.studio_ask.channel_cycle"
+#     STUDIO_ASK_DAEMON_CYCLE  = "video_index.studio_ask.daemon_cycle"
+#     GEMINI_API_SINGLE_VIDEO  = "video_index.gemini_api.single_video"
+#     WHISPER_LOCAL_TRANSCRIPT = "video_index.whisper.local_transcript"
+#     SHORTS_SCHEDULER_CONSUME = "shorts_scheduler.consume_video_index"
+
+@dataclass
+class StudioAskSingleVideoInput:
+    video_id: str               # raw ID OR a URL (parsed to bare ID)
+    browser: str = "chrome"     # 'chrome' (9222) | 'edge' (9223)
+    channel_id: Optional[str] = None
+    persist: bool = True        # write memory/video_index/{channel}/{video_id}.json
+
+@dataclass
+class StudioAskSingleVideoOutput:
+    success: bool
+    video_id: str
+    browser: str
+    provider: str = "studio_ask"
+    response_text_length: int = 0
+    topics_count: int = 0
+    saved_path: Optional[str] = None
+    error: Optional[str] = None
+
+async def run_studio_ask_single_video(
+    inp: StudioAskSingleVideoInput,
+) -> StudioAskSingleVideoOutput:
+    """Bounded single-video Studio Ask index. Routes ONLY to
+    StudioAskIndexer.ask_about_video (navigate + DOM scrape). NEVER calls the
+    Gemini API, the Shorts Scheduler, or any publish/schedule/metadata-mutation
+    path. Attaches to an already-authenticated browser session (no credentials).
+    Fail-closed on error."""
+
+async def run_action(action_id: str, **kwargs) -> Any:
+    """Route by typed action ID. Implemented IDs run real work; registered-only
+    IDs return a 'not_implemented' result; unknown IDs raise ValueError."""
+```
+
 ## Data Classes
 
 ```python
