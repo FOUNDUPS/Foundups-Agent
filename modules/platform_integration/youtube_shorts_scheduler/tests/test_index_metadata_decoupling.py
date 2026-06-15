@@ -175,25 +175,122 @@ async def test_control4_indexing_does_not_access_save_video(tmp_path, monkeypatc
     `def save_video`). With a spec_set double, ANY access to save_video raises
     AttributeError. The refactored indexing path must therefore never touch it.
 
-    On the OLD code, run_indexing_cycle called self.dom.save_video(): against this
-    strict double that path would raise AttributeError (latent bug surfaced).
-    We do NOT invent save_video (no create=True, no loose Mock).
+    NON-VACUITY (hardened): the per-video loop in run_indexing_cycle wraps each
+    video body in an inner `except Exception as e:` that appends {"video_id",
+    "error": str(e)} into results["errors"]; only the OUTER except sets
+    results["fatal_error"]. So a swallowed AttributeError from a missing
+    save_video access lands in results["errors"] mentioning 'save_video', and
+    NEVER reaches results["fatal_error"]. Asserting only `"fatal_error" not in
+    results` would therefore be VACUOUS (it cannot observe a save_video access).
+    This control instead inspects results["errors"] directly:
+
+      (a) REACHABILITY: navigate_to_video was called with the video id, proving
+          the per-video loop body actually executed (dry_run=False; a no-op loop
+          would make every "not accessed" claim vacuous). results["indexed"] is
+          NOT asserted non-empty because the empty tmp artifact dir makes the
+          builder return None -> the video lands in results["skipped"], which is
+          the correct read-only behavior.
+      (b) NON-VACUOUS DETECTION: no entry in results["errors"] references
+          'save_video', AND results["errors"] == [] for the clean read-only path.
+          If the indexing path accessed save_video, the spec_set AttributeError
+          ("Mock object has no attribute 'save_video'") would be swallowed into
+          results["errors"] and this assertion would FAIL.
+      (c) DOCUMENTATION: the strict spec_set double genuinely lacks save_video
+          (no create=True, no loose Mock - inventing it would re-vacuate Control 4).
+
+    The discrimination test test_control4_detection_channel_surfaces_save_video
+    PROVES (b) has teeth: injecting an actual save_video access makes this exact
+    channel surface 'save_video' in results["errors"].
 
     Records: SAVE_VIDEO_LATENT_BUG_REMOVED_FROM_INDEXING_PATH.
     """
     monkeypatch.setenv("VIDEO_INDEXER_ARTIFACT_PATH", str(tmp_path))
     scheduler = _make_scheduler()
 
-    # The strict spec_set double does not expose save_video at all.
+    # (c) DOCUMENTATION: the strict spec_set double does not expose save_video.
     assert not hasattr(scheduler.dom, "save_video")
 
-    # Cycle completes WITHOUT raising AttributeError for a missing save_video.
     results = await scheduler.run_indexing_cycle(max_videos=1, video_type="shorts")
 
+    # (a) REACHABILITY: the per-video loop body executed for vid1.
     scheduler.dom.navigate_to_video.assert_called_with("vid1")
+
+    # (b) NON-VACUOUS DETECTION: a swallowed save_video AttributeError would land
+    # in results["errors"]; on the clean read-only path there are no errors and
+    # none reference save_video.
+    assert not any(
+        "save_video" in (e.get("error", "")) for e in results["errors"]
+    ), f"indexing path accessed save_video; swallowed into errors: {results['errors']}"
+    assert results["errors"] == [], (
+        f"clean read-only indexing path produced errors: {results['errors']}"
+    )
+
+    # The OUTER except (fatal_error) is NOT the detection channel here; documented
+    # for completeness only.
     assert "fatal_error" not in results
     # Still no save_video attribute was materialised on the double.
     assert not hasattr(scheduler.dom, "save_video")
+
+
+# ---------------------------------------------------------------------------
+# CONTROL 4 (discrimination) - the save_video detection channel has teeth
+# ---------------------------------------------------------------------------
+
+async def test_control4_detection_channel_surfaces_save_video(tmp_path, monkeypatch):
+    """
+    DISCRIMINATION test for Control 4 (no product-code edit).
+
+    Proves the detection channel Control 4 relies on actually works: if the
+    indexing path accesses self.dom.save_video(), the spec_set AttributeError is
+    swallowed by the per-video inner `except` into results["errors"] mentioning
+    'save_video' (it is NOT promoted to results["fatal_error"]).
+
+    We monkeypatch the BOUND name the indexing loop calls -
+    scheduler.py line ~1107: `ctx = build_index_metadata_context(...)`, imported
+    at scheduler.py:29 into the scheduler module namespace - with a stand-in that
+    first calls scheduler.dom.save_video() (forcing the spec_set AttributeError
+    INSIDE the per-video try body) and then delegates to the real builder. This
+    simulates "the indexing path touches save_video" WITHOUT editing product code.
+
+    Expected: the AttributeError surfaces in results["errors"] (any entry's error
+    string contains 'save_video'), and Control 4's
+    `assert results["errors"] == []` / `not any("save_video" in ...)` would FAIL
+    under this injection. This is what makes Control 4 non-vacuous.
+    """
+    from modules.platform_integration.youtube_shorts_scheduler.src import (
+        scheduler as scheduler_module,
+    )
+
+    monkeypatch.setenv("VIDEO_INDEXER_ARTIFACT_PATH", str(tmp_path))
+    scheduler = _make_scheduler()
+
+    real_builder = scheduler_module.build_index_metadata_context
+
+    def _builder_touching_save_video(**kwargs):
+        # Force the exact spec_set AttributeError Control 4 must detect, from
+        # INSIDE the per-video loop body so the inner except swallows it.
+        scheduler.dom.save_video()  # AttributeError: spec_set has no save_video
+        return real_builder(**kwargs)  # pragma: no cover - never reached
+
+    monkeypatch.setattr(
+        scheduler_module,
+        "build_index_metadata_context",
+        _builder_touching_save_video,
+    )
+
+    results = await scheduler.run_indexing_cycle(max_videos=1, video_type="shorts")
+
+    # Reachability: the loop body executed for vid1.
+    scheduler.dom.navigate_to_video.assert_called_with("vid1")
+
+    # The swallowed save_video AttributeError SURFACES via results["errors"].
+    assert any(
+        "save_video" in e.get("error", "") for e in results["errors"]
+    ), f"expected save_video AttributeError in errors, got: {results['errors']}"
+
+    # It is swallowed by the inner except, NOT promoted to fatal_error - which is
+    # precisely why Control 4 must inspect results["errors"], not fatal_error.
+    assert "fatal_error" not in results
 
 
 # ---------------------------------------------------------------------------

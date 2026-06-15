@@ -57,10 +57,26 @@ no external runtime callers.
 
 ### Tests
 
-- `tests/test_index_metadata_decoupling.py` (7 controls + 2 pure-builder cases). Negative controls
-  1/2/4/5 demonstrably FAIL on the old coupled code; control 3 is honestly paired with control 7
-  (positive scheduling-write regression anchor). Strict `spec_set` DOM double of `YouTubeStudioDOM`
-  (no invented `save_video`).
+- `tests/test_index_metadata_decoupling.py` (7 controls + 1 Control-4 discrimination test + 2
+  pure-builder cases). Negative controls 1/2/4/5 demonstrably FAIL on the old coupled code; control
+  3 is honestly paired with control 7 (positive scheduling-write regression anchor). Strict
+  `spec_set` DOM double of `YouTubeStudioDOM` (no invented `save_video`).
+
+- Control 4 hardened (non-vacuous): the per-video loop in `run_indexing_cycle` swallows each video
+  body exception into `results["errors"]` (inner `except`), and only the OUTER except sets
+  `results["fatal_error"]`. A swallowed `save_video` `AttributeError` therefore lands in
+  `results["errors"]` (mentioning `save_video`) and NEVER in `fatal_error`. Control 4 now asserts
+  REACHABILITY (`navigate_to_video` called with the video id) and NON-VACUOUS DETECTION
+  (`results["errors"] == []` AND no error references `save_video`), keeping `not hasattr(dom,
+  "save_video")` as documentation only. Asserting `"fatal_error" not in results` alone would be
+  VACUOUS because the inner except hides the access.
+
+- Discrimination test `test_control4_detection_channel_surfaces_save_video` PROVES the channel has
+  teeth: it monkeypatches the bound `scheduler.build_index_metadata_context` (the loop's call at
+  `scheduler.py:1107`, imported `scheduler.py:29`) with a stand-in that calls
+  `scheduler.dom.save_video()`, then asserts the swallowed `AttributeError` SURFACES via
+  `any("save_video" in e["error"] for e in results["errors"])` (still no `fatal_error`). No product
+  code is edited. Verified: under this injection the hardened Control 4 raises `AssertionError`.
 
 ---
 
