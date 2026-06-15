@@ -1,5 +1,69 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-06-16 - Decouple Index Read-for-Context from Live Metadata Write (Phase 1)
+
+**By:** 0102 (Worker-Lane SSIMD-AUTHOR)
+**Slice:** SHORTS_SCHEDULER_INDEX_METADATA_DECOUPLING_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 50 (Pre-Action), WSP 84 (Code Reuse), WSP 97 (Truth Signaling)
+**Decision basis:** merged audit #818; producer precondition #819.
+
+### Problem
+
+The scheduler entangled "READ the video index for context" with "WRITE live YouTube
+metadata". The indexing path (`run_indexing_cycle`, INDEXING-ONLY MODE) called
+`_update_video_metadata` (live `edit_title`/`edit_description`) and `self.dom.save_video()`,
+and the read path called scheduler-owned `ensure_index_json` (stub/Gemini). A bounded index
+pass or artifact refresh could silently overwrite production metadata.
+
+### Resolution (read/write split)
+
+- Added a PURE, read-only context builder `build_index_metadata_context(...) -> Optional[MetadataContext]`
+  in `index_weave.py`. It only `load_index_json` + the existing pure builders
+  (`build_human_description_context`, `inject_context_into_description`, `build_topic_hashtags`,
+  `build_digital_twin_index_block`, `weave_description`, optional `generate_clickbait_title_from_index`).
+  It takes NO dom/driver, NEVER calls `ensure_index_json`/`save_index_json`/`create_stub_index_json`,
+  and NEVER imports/instantiates `GeminiVideoAnalyzer`. Returns None on a MISSING artifact ->
+  caller "skip enhancement", NOT "index now".
+- `_update_video_metadata` (scheduling read path) now consumes the pure builder. The
+  scheduler-owned `ensure_index_json` create/Gemini calls were removed from this read path.
+  Live `edit_title`/`edit_description` order and the env gates
+  (`YT_SCHEDULER_INDEX_WEAVE_ENABLED`/`_INDEX_MODE`/`_INDEX_INFORM_TITLE`/`_INDEX_ENHANCE_DESCRIPTION`)
+  are preserved; artifact-present bytes are unchanged.
+- The content-channel gate's delete+Gemini-reindex branch is now READ-ONLY: it reads an
+  EXISTING artifact for transcript-refined classification (no unlink, no `ensure_index_json`,
+  no Gemini coupling).
+- `run_indexing_cycle` is now a READ-ONLY artifact/context VALIDATION path (marked
+  deprecated/read-only in its docstring). It no longer calls `_update_video_metadata`,
+  `edit_title`/`edit_description`/`schedule_video`, or `save_video`. It records artifact
+  presence/absence per video.
+
+### save_video resolution
+
+`self.dom.save_video()` was a LATENT AttributeError: `dom_automation.py` defines no
+`def save_video`; `YouTubeStudioDOM` (class at `dom_automation.py:336`) has no base class and no
+`__getattr__`/`__getattribute__`. The only reference was `scheduler.py` (indexing path). The real
+page-level save is `click_save` (`dom_automation.py:2703`), reached on the scheduling path via
+`schedule_video`. The call was removed from the indexing path (no save implementation added).
+Recorded: SAVE_VIDEO_LATENT_BUG_REMOVED_FROM_INDEXING_PATH.
+
+### Behavior preservation
+
+INDEXING is now read-only; SCHEDULING still writes (unchanged). The explicit scheduling/publish
+path (`run_scheduling_cycle` -> `_update_video_metadata` -> `schedule_video`), per-video order,
+visibility guards, dry_run short-circuit, post-schedule artifact bookkeeping, and
+`record_schedule_outcome` are untouched. External callers use `run_scheduler_dae` only
+(`multi_channel_coordinator.py`); `run_indexing_cycle`/`run_indexer_dae` are not exported and have
+no external runtime callers.
+
+### Tests
+
+- `tests/test_index_metadata_decoupling.py` (7 controls + 2 pure-builder cases). Negative controls
+  1/2/4/5 demonstrably FAIL on the old coupled code; control 3 is honestly paired with control 7
+  (positive scheduling-write regression anchor). Strict `spec_set` DOM double of `YouTubeStudioDOM`
+  (no invented `save_video`).
+
+---
+
 ## 2026-06-15 - UNLISTED Filter Enforcement (Scheduled vs Unlisted)
 
 **By:** 0102
