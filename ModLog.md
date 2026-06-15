@@ -1,5 +1,50 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-16] FoundUp Launch Request Auth Context Provider Phase 2 (Lane A, trusted intake verifier)
+
+**Change Type**: LIMITED IMPLEMENTATION -- ONE module + tests. The trusted server-side verifier that
+POPULATES the Phase-1 LaunchRequestIntakeContext (additive integration; Phase-1 launch_request.py
+UNCHANGED). NO web framework, NO HTTP parsing, NO Hermes/OpenClaw/WRE runtime import, NO network/subprocess,
+NO registry/manifest mutation. The only file I/O is the local SQLite NonceStore.
+**By**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP References**: WSP 00, 50, 64, 84, 87, 97
+**Slice**: FOUNDUP_LAUNCH_REQUEST_AUTH_CONTEXT_PROVIDER_PHASE2
+**Base**: `973a67e75` (origin/main)
+**Predecessors**: #806, #807, FOUNDUP_LAUNCH_REQUEST_PHASE1
+
+- ADD `modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_auth_provider.py` -- the ONLY
+  component allowed to set `authenticated` / `invite_token_verified` / `requester_handle`. Pure, fail-closed
+  verifier of two already-extracted token strings (session, invite); reads NO payload / PFmall / Kanban /
+  vouch assertion (confused-deputy rejected). HMAC-SHA256 tokens, constant-time verify, env secret with
+  `_PREVIOUS` rotation (never logged/returned), expiry enforced, invite single-use via ATOMIC
+  verify-and-consume (UNIQUE(nonce) insert) -- deliberately NOT the magats verify/consume SPLIT (TOCTOU).
+  Public surface: `build_intake_context(...)`, `NonceStore` Protocol + `InMemoryNonceStore` +
+  `SQLiteNonceStore`, plus TEST-ONLY minting helpers (production only VERIFIES).
+- HARDENING (012-approved direction; pre-adversarial-review addenda A-F applied to the SAME files):
+  - (A) Token KIND+VERSION: exact `sess.v1.`/`invite.v1.` prefixes, part of the SIGNED bytes; kind-locked
+    (session token can set ONLY `authenticated`, invite ONLY `invite_token_verified`); session<->invite
+    confusion, `sess.v2.`, unknown/no prefix all fail closed.
+  - (B) Unambiguous canonicalization: independent base64url fields, fixed per-kind count -> a `.`/`|`/extra
+    part inside a field can't change parsing; empty/whitespace subject/handle/nonce + malformed base64 rejected.
+  - (C) Time policy: `exp` + `iat` REQUIRED; `now==exp` -> EXPIRED; MAX TTL enforced separately (3600s
+    session / 7d invite) rejected even with valid signature; `CLOCK_SKEW_SECONDS=0`; future-iat rejected.
+  - (D) Nonce store = ONE atomic method `consume_once(nonce, *, expires_at, subject)`; replay rejected across
+    two `SQLiteNonceStore` instances on the same db FILE; IntegrityError -> False, no raise escapes.
+  - (E) Injectable `secret_provider` seam (env default via `os.getenv`); tests inject WITHOUT mutating
+    `os.environ`; no dotenv/logging/print; empty current fail closed; previous verify-only (never signs).
+  - (F) Mint helpers reclassified `_make_session_token`/`_make_invite_token` -- non-production-issuer,
+    underscore, NOT exported, explicit-`secret` only.
+- REUSES (imports/patterns, not copies): correlator HMAC-env+rotation+compare_digest, capability-token
+  ordered-fail-closed-gates + register-nonce-only-after-all-pass, #807 redact+normalize handle hygiene.
+- Tests: `tests/test_intake_auth_provider.py` (47 -> 83 tests, allowlisted -> runs in CI without the heavy
+  flag AND with `AI_OVERSEER_HEAVY_TESTS=1`). Affected-package regression `152 passed`
+  (83 + 40 launch-request + 29 genesis-validator). No skip/xfail. No STOP condition tripped.
+- Two named follow-ups (BLOCKED until built): `FOUNDUP_LAUNCH_REQUEST_INTAKE_TRANSPORT_PHASE3` (extract token
+  strings from a real request; also owns real token ISSUANCE) and `FOUNDUP_LAUNCH_REQUEST_ENTITLEMENT_PHASE3B`
+  (authorization of a verified handle). WSP_97 33/33 YES; ASCII-clean; file scope EXACTLY (module, test,
+  conftest, package __init__, 3 ModLogs + TestModLog).
+- STOP at MERGE_READY for the external 0102 gate (independent 5-lane adversarial review pending).
+
 ## [2026-06-16] Video Indexing / Studio Ask / DAE Entrypoint Audit Phase 1 (W9, decision-only)
 
 **Change Type**: READ-ONLY architecture audit. ONE audit doc + this ModLog entry. NO code/SKILLz/scheduler/

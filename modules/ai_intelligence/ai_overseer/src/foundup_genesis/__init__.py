@@ -1,5 +1,5 @@
 """
-FoundUp Genesis — RedDog intake capability for AI Overseer.
+FoundUp Genesis -- RedDog intake capability for AI Overseer.
 
 Creates validated FoundUpGenesisEnvelope before any new FoundUp is scaffolded.
 WSP 97: No implementation claims without evidence.
@@ -30,6 +30,16 @@ from .launch_request import (
     validate_launch_request,
     to_genesis_envelope,
 )
+from .intake_auth_provider import (
+    build_intake_context,
+    NonceStore,
+    InMemoryNonceStore,
+    SQLiteNonceStore,
+    HMAC_SECRET_ENV,
+    HMAC_SECRET_PREVIOUS_ENV,
+    ENTITLEMENT_SLICE,
+    TRANSPORT_SLICE,
+)
 
 __all__ = [
     "FoundUpGenesisEnvelope",
@@ -46,4 +56,12 @@ __all__ = [
     "LaunchRequestError",
     "validate_launch_request",
     "to_genesis_envelope",
+    "build_intake_context",
+    "NonceStore",
+    "InMemoryNonceStore",
+    "SQLiteNonceStore",
+    "HMAC_SECRET_ENV",
+    "HMAC_SECRET_PREVIOUS_ENV",
+    "ENTITLEMENT_SLICE",
+    "TRANSPORT_SLICE",
 ]
