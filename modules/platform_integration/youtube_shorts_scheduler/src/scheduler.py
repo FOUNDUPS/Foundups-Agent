@@ -283,6 +283,17 @@ class YouTubeShortsScheduler:
                 logger.error("[SCHEDULER] Failed to navigate to unlisted Shorts")
                 results["errors"].append({"error": "Navigation to unlisted Shorts failed"})
                 return results
+            filter_state = self.dom.read_visibility_filter_state()
+            logger.info(
+                f"[SCHEDULER] List filter state: detected={filter_state.get('detected')} "
+                f"chips={filter_state.get('chip_texts')}"
+            )
+            if filter_state.get("detected") == "SCHEDULED":
+                logger.error(
+                    "[SCHEDULER] Aborting cycle — Shorts list is on Scheduled/Has schedule, not Unlisted"
+                )
+                results["errors"].append({"error": "Wrong visibility filter: SCHEDULED"})
+                return results
             await asyncio.sleep(2)  # Wait for page load
 
             # Step 1.5: Set page size to 50 for larger batches (2026-01-28)
@@ -442,6 +453,27 @@ class YouTubeShortsScheduler:
                         # Navigate to video edit page
                         self.dom.navigate_to_video(video_id)
                         await asyncio.sleep(1.5)
+
+                        edit_vis = self.dom.read_edit_page_visibility()
+                        if edit_vis == "scheduled":
+                            logger.warning(
+                                f"[SCHEDULER] SKIP {video_id}: edit page visibility is Scheduled "
+                                f"(wrong Shorts filter or already published to schedule)"
+                            )
+                            results["skipped"].append({
+                                "video_id": video_id,
+                                "reason": "Already Scheduled on YouTube (not Unlisted)",
+                            })
+                            continue
+                        if edit_vis not in ("unlisted", "unknown"):
+                            logger.warning(
+                                f"[SCHEDULER] SKIP {video_id}: visibility={edit_vis} (expected Unlisted)"
+                            )
+                            results["skipped"].append({
+                                "video_id": video_id,
+                                "reason": f"Wrong visibility on edit page: {edit_vis}",
+                            })
+                            continue
 
                         # Update metadata if requested
                         if update_metadata:
