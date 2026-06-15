@@ -23,6 +23,30 @@ retirement_date: null
 
 ---
 
+## ⚠️ Phase 1 Selector Notice (STUDIO_ASK_STUDIO_HEADER_PHASE1)
+
+**STALE**: The watch-page `button[aria-label="Ask"]` path documented below
+(Architecture / Step 2) is **STALE** and is now a labelled *fallback only*.
+
+**Phase 1 canonical path** is the **YouTube Studio "Ask Studio" header**:
+- Entry: `ytcp-icon-button[aria-label="Ask Studio"]` on the Studio video-edit page
+- Dialog: `ytcp-dialog#dialog`
+- Prompt: `div[contenteditable][aria-label="Ask something"]`
+- Response: scraped from `#PAcreator_chat_streaming` (DOM text, **no clipboard**)
+
+Canonical implementation: `src/studio_ask_indexer.py`
+(`ASK_STUDIO_SELECTORS`, `StudioAskIndexer.ask_about_video`).
+
+**Phase 2 — `STUDIO_ASK_SKILL_PROMOTE_PHASE2`**: promote the working Ask Studio
+selectors into an `ask_studio_index` Skillz and register with WRE *after* Phase 1
+proves stable. (Phase 1 does NOT touch the Skillz registry or WRE router.)
+
+**Phase 3 — `INDEX_BEFORE_SHORTS_SCHEDULE_PHASE3`**: only after Phase 1 is stable,
+revisit scheduler ordering (already `comments -> index -> schedule` in
+`auto_moderator_dae.py`).
+
+---
+
 ## Skill Purpose
 
 Extract **full verbatim transcripts** from YouTube videos using the built-in "Ask" Gemini feature. This bypasses API quotas by using browser automation.

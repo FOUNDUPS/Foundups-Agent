@@ -2,6 +2,52 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## V0.20.0 - Ask Studio Header PRIMARY path (STUDIO_ASK_STUDIO_HEADER_PHASE1) (2026-06-15)
+
+### Why
+The watch-page "Ask" button and the old Studio popup menu selectors were stale.
+The current YouTube Studio video-edit page exposes an "Ask Studio" entry in the
+page header. Phase 1 makes that the canonical (PRIMARY) indexing path.
+
+### Changed
+- `src/studio_ask_indexer.py`:
+  - Added `ASK_STUDIO_SELECTORS` (header button, dialog, contenteditable prompt,
+    streaming/response containers) as PRIMARY.
+  - Demoted (kept, not deleted) the watch-page Ask + Studio popup selectors to
+    labelled FALLBACK. `USE_WATCH_PAGE` flipped to `False`.
+  - Rewrote `ask_about_video`: Studio edit page -> Ask Studio header -> dialog ->
+    focus contenteditable prompt -> type -> Enter -> DOM-scraped response
+    (`_open_ask_studio`, `_scrape_ask_response`, `_first_element` helpers).
+  - Added `RESPONSE_TIMEOUT_SECONDS` (30s) — response scrape **fails closed**
+    (no DOM text => `success=False`, nothing stored).
+  - Added `CHANNEL_PROMPTS` + `_prompt_for_channel()` keyed off the existing
+    registry `shorts.description_template` (undaodu / foundups / ffcpln-music
+    lighter / generic fallback). Threaded `channel_entry` through
+    `index_channel_videos` -> `ask_about_video`.
+- Reused existing writer `VideoIndexStore.save_index` ->
+  `memory/video_index/{channel}/{video_id}.json` (NO new storage invented).
+- **No clipboard. No publish/schedule mutation. No Skillz/WRE promotion.**
+- Scheduler order unchanged — already `comments -> index -> schedule` in
+  `auto_moderator_dae.py` (re-ordering deferred to Phase 3).
+
+### Tests
+- `tests/test_studio_ask_header.py` (12): selector presence, PRIMARY path success,
+  Ask Studio succeeds when watch-page Ask missing, response timeout fails closed,
+  no-clipboard guard, channel prompt selection (undaodu != foundups,
+  ffcpln lighter, unknown -> generic), channel prompt threaded into ask.
+- `tests/test_indexer_scheduler_order.py` (2): locks comments->index->schedule.
+- Mock DOM only; no live YouTube. No skip/xfail.
+
+### Phase notes
+- `STUDIO_ASK_SKILL_PROMOTE_PHASE2`: promote selectors into `ask_studio_index`
+  Skillz + WRE registration (later).
+- `INDEX_BEFORE_SHORTS_SCHEDULE_PHASE3`: revisit scheduler ordering after stable.
+
+### WSP
+- WSP 22 (ModLog), WSP 84 (reused VideoIndexStore + registry), WSP 72 (independence)
+
+---
+
 ## V0.19.3 - LIVE Video Prioritization + Daemon Mode (2026-03-18)
 
 ### Added
