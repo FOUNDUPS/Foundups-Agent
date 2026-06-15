@@ -30,6 +30,34 @@ NO PFmall UI, NO repo creation, NO source_authority claim, NO Hermes/runtime imp
   server-side authn/invite verifier that POPULATES `LaunchRequestIntakeContext`. Phase 1 is the contract only.
 - STOP at MERGE_READY for the external 0102 gate.
 
+## [2026-06-14] ROC Academic Paper Evolution Update (docs-only UCA/ROC integration)
+
+**Change Type**: DOCS/RESEARCH update.
+**By**: 0102 | Commander: 012 | Gate: external (do NOT self-merge)
+**WSP References**: WSP_00, WSP 15, WSP 26, WSP 29, WSP 97
+**Slice**: ROC_UCA_ECONOMIC_EVOLUTION_SECTION_PHASE1
+**Doc**: modules/foundups/simulator/docs/ROC_FORMULA_DERIVATION.md
+**Why**: Bridge the matured Universal Compute Account (UCA) notation to Return on Compute (ROC), establishing a canonical academic link between economic participation, distribution mechanics, and productivity measurement in a post-money compute economy.
+**Changes**:
+- `modules/foundups/simulator/docs/ROC_FORMULA_DERIVATION.md`:
+  - Updated Document Structure to include new Section 5.
+  - Added Section 5 ("Economic Evolution: From UBI to UCA to ROC") detailing the transition from ROI/UBI to ROC/UCA.
+  - Documented dual-notation bridge: `UCA = UBA + UBR + UBD` (bridge) and `UCA = ca + cr + cd` (native).
+  - Defined lower-case internal flows: Compute Award (`ca`), Compute Reward (`cr`), and Compute Dividend (`cd`).
+  - Added Economic Concept Mapping matrix table.
+  - Re-numbered subsequent sections (old 5-10 to new 6-11).
+  - Added Section 12 for the WSP 97 Truth Boundary checklist (HoloIndex retrieval marked not re-run this pass).
+- **W6 repair (2026-06-15)**: canonicalized notation -- removed all math-dollar delimiters (fenced code / backticks
+  instead), made native-flow definitions rg-matchable (`ca = Compute Award` etc.), scrubbed u-prefixed native-flow tokens,
+  removed the dollar-suffixed UPS literal from the checklist evidence, and dropped the unverified WebSearch/WebFetch
+  footer claim.
+**Validation**:
+- `rg` confirms `UCA = UBA + UBR + UBD` and `UCA = ca + cr + cd` present.
+- `rg` confirms `ca = Compute Award`, `cr = Compute Reward`, `cd = Compute Dividend` present.
+- `rg` confirms no dollar-suffixed UPS notation and no `uca/ucr/ucd` native-flow notation in the doc.
+- `git diff --check` clean.
+- Zero executable code changes (Markdown docs only).
+
 ## [2026-06-13] Hermes Kanban Plugin Contract Impl Phase 1 (Lane A, LIMITED IMPLEMENTATION)
 
 **Change Type**: LIMITED IMPLEMENTATION -- ONE pure typed-contract module + tests. NO Hermes import, NO
