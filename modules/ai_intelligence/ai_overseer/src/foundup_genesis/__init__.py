@@ -7,6 +7,7 @@ WSP 97: No implementation claims without evidence.
 Modules:
     envelope: FoundUpGenesisEnvelope schema and dataclasses
     validator: Validates envelopes against WSP rules
+    launch_request: Public intake seam -> produces the genesis envelope (gated)
 """
 
 from .envelope import (
@@ -21,6 +22,14 @@ from .validator import (
     ValidationResult,
     validate_genesis_envelope,
 )
+from .launch_request import (
+    LaunchRequest,
+    LaunchRequestIntakeContext,
+    LaunchValidationResult,
+    LaunchRequestError,
+    validate_launch_request,
+    to_genesis_envelope,
+)
 
 __all__ = [
     "FoundUpGenesisEnvelope",
@@ -31,4 +40,10 @@ __all__ = [
     "GenesisEnvelopeValidator",
     "ValidationResult",
     "validate_genesis_envelope",
+    "LaunchRequest",
+    "LaunchRequestIntakeContext",
+    "LaunchValidationResult",
+    "LaunchRequestError",
+    "validate_launch_request",
+    "to_genesis_envelope",
 ]

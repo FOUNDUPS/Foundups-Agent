@@ -1,5 +1,35 @@
 # Agent Module ModLog
 
+## 2026-06-13 - Kanban Plugin Contract (WRE-side typed seam) (HERMES_KANBAN_PLUGIN_CONTRACT_IMPL_PHASE1)
+
+**Author**: 0102 (Worker-Lane A) | Commander: 012
+**WSP References**: WSP 11, WSP 22, WSP 50, WSP 84, WSP 97
+**Base**: `ed3ad2066` (origin/main after #801)
+**Predecessors**: #804 (plugin contract), #806 (launch flow), #805 (Option D), #803 (surface-not-authority)
+
+### Added
+
+- **kanban_plugin_contract.py** -- pure, execution-free WRE-side typed seam implementing the three #804/#806
+  shapes: `KanbanCardSpec` (WRE->Kanban), `WorkerTaskSpec` (worker receives), `WreEvidencePacket`
+  (Kanban->WRE, ADVISORY) + `ArtifactRef`. Validators `validate_card_spec` / `validate_worker_task_spec` /
+  `validate_evidence_packet` accept a typed shape OR a hostile inbound dict.
+- Forbidden AUTHORITY cannot ride through any shape: a unified recursive scan normalizes keys (NFKC +
+  camel-split + casefold + separator->underscore, defeating gatePassed/gate-passed/GATE_PASSED/fullwidth)
+  and rejects authority-marker keys by PRESENCE, AND scans every string VALUE for authority markers
+  (gate-pass / merge / land / repo-create / dao / payout / cabr / real-execution / source_authority
+  promotion). Path/ref fields are hygiene-checked (printable ASCII, repo-relative, reject absolute/drive/
+  UNC/traversal/control-chars/shell-metachars). Commands smuggled into command-named keys are rejected.
+- `WreEvidencePacket.verified` is advisory-only: always False at construction; constructing/ingesting
+  verified=true is rejected (nested too). The WRE-side verifier transition is deferred to the named slice
+  WRE_EVIDENCE_PACKET_VERIFICATION_TRANSITION_PHASE1.
+- Secret VALUES are redacted before storage across ALL string-bearing fields (free-text + pr_url/head_sha/
+  tests_run/wsp97_rows/changed_files; defense-in-depth from the SENTINEL observation) -- the #768 policy,
+  reimplemented locally so the module imports no ai_overseer runtime. Deterministic `to_dict()` serialization (json-safe, stable, verified=False, no
+  forbidden keys/values).
+- Boundary: imports nothing from Hermes/Kanban/OpenClaw/WRE-consumer/AI-Overseer; no subprocess/network/
+  file-write/Kanban-DB/worker-spawn (AST-tested). No second orchestrator. Beside context_bundle_builder.py,
+  foundup_manifest_validator.py, module_path_resolution.py.
+
 ## 2026-06-12 - WRE ContextBundle Dry-Run Consumer Phase 1 (first consumer adopts #775 bundle as trusted input)
 
 **Author**: 0102 (W6)

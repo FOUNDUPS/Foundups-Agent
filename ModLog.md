@@ -1,5 +1,35 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-15] FoundUp Launch Request Phase 1 (Lane A, public intake seam)
+
+**Change Type**: LIMITED IMPLEMENTATION -- ONE module + tests (contract + mapping only). NO Kanban publish,
+NO PFmall UI, NO repo creation, NO source_authority claim, NO Hermes/runtime import, NO registry/manifest mutation.
+**By**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP References**: WSP 00, 50/87, 64, 84, 97, 104, 109
+**Slice**: FOUNDUP_LAUNCH_REQUEST_PHASE1
+**Base**: `01158a113` (origin/main after #807 LAND)
+**Predecessors**: #806 (PFmall/Kanban/WRE launch flow), #807 (Kanban plugin contract)
+
+- ADD `modules/ai_intelligence/ai_overseer/src/foundup_genesis/launch_request.py` -- the PUBLIC front-door
+  seam (#806 seam [1] PFmall -> WRE). Typed `LaunchRequest` (proposal-only) + TRUSTED `LaunchRequestIntakeContext`
+  (never payload-populated) + `validate_launch_request(payload, context)` + `to_genesis_envelope(payload, context)`.
+  PRODUCES the EXISTING `FoundUpGenesisEnvelope` (WSP 64 enhance-before-create -- no parallel intake envelope).
+  REUSES (imports) the #807 `kanban_plugin_contract` helpers (`redact_sensitive` / `_scan_authority` / `_normalize`).
+- Trust boundary (Addendum C): a public payload can NEVER self-authenticate -- any auth/gate/role/admin/invite/
+  approved/verified field in the PAYLOAD is rejected even with an authenticated context; the intake gate opens
+  ONLY on `context.authenticated` or `context.invite_token_verified`. Normalized-key/value scan defeats
+  camelCase/separator/UPPER/NFKC-fullwidth/nesting evasion. Mapping FORCES `external_repo_requested=False`,
+  lifecycle in {IDEA, INCUBATING}, no `source_authority`, `requested_by` from the trusted context (never payload).
+- Internal SENTINEL (4 adversarial lanes) found ONE real break: a RAW inbound dict bypassed dataclass redaction,
+  leaking a `problem_statement` secret into envelope `description`/`tagline`. Closed by redacting at the SINK in
+  `to_genesis_envelope` + a raw-dict regression test; all other invariants held.
+- Tests: `tests/test_foundup_launch_request.py` (40, conftest-allowlisted for CI). Affected-package regression
+  `69 passed` (40 launch_request + 29 genesis validator). No skip/xfail. AST proves no Hermes/runtime/network/
+  subprocess/file-write (only the sanctioned #807 import). WSP_97 Truth Boundary 25/25 (table in the ai_overseer ModLog).
+- **Named follow-up (BLOCKED until built): `FOUNDUP_LAUNCH_REQUEST_AUTH_CONTEXT_PROVIDER_PHASE2`** -- the real
+  server-side authn/invite verifier that POPULATES `LaunchRequestIntakeContext`. Phase 1 is the contract only.
+- STOP at MERGE_READY for the external 0102 gate.
+
 ## [2026-06-14] ROC Academic Paper Evolution Update (docs-only UCA/ROC integration)
 
 **Change Type**: DOCS/RESEARCH update.
@@ -27,6 +57,33 @@
 - `rg` confirms no dollar-suffixed UPS notation and no `uca/ucr/ucd` native-flow notation in the doc.
 - `git diff --check` clean.
 - Zero executable code changes (Markdown docs only).
+
+## [2026-06-13] Hermes Kanban Plugin Contract Impl Phase 1 (Lane A, LIMITED IMPLEMENTATION)
+
+**Change Type**: LIMITED IMPLEMENTATION -- ONE pure typed-contract module + tests. NO Hermes import, NO
+Kanban DB write, NO worker spawn, NO PFmall change, NO registry/manifest mutation, NO runtime wiring.
+**By**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP References**: WSP 11, WSP 22, WSP 50, WSP 84, WSP 97
+**Slice**: HERMES_KANBAN_PLUGIN_CONTRACT_IMPL_PHASE1
+**Base**: `ed3ad2066` (origin/main after #801)
+**Predecessors**: #804 (plugin contract), #806 (launch flow), #805 (Option D), #803 (surface)
+
+- ADD `modules/foundups/agent/src/kanban_plugin_contract.py` + tests -- the clean WRE-side seam that lets
+  Kanban workers exist WITHOUT giving Kanban authority. Implements `KanbanCardSpec` / `WorkerTaskSpec` /
+  `WreEvidencePacket` (+ `ArtifactRef`) and validators that prove forbidden authority cannot ride through.
+- Hardening (Addenda A-H): unified recursive authority scan normalizes keys (NFKC + camel-split + casefold
+  + separator->underscore) and scans string VALUES too (anti-evasion: gatePassed/gate-passed/GATE_PASSED/
+  fullwidth/source_authority promotion all rejected); path/ref hygiene (printable ASCII, repo-relative,
+  reject absolute/drive/UNC/traversal/control/shell-metachars); value-level secret redaction (#768 policy,
+  reimplemented locally); `verified` advisory-only (verified=true rejected at construction/ingest, nested
+  too; verifier transition deferred to WRE_EVIDENCE_PACKET_VERIFICATION_TRANSITION_PHASE1); deterministic
+  json-safe `to_dict()`.
+- Tests: 71 passed (positive + 14 forbidden-authority keys + 13 normalized-evasion + 10 authority-value +
+  path hygiene + 10 value-level redaction + serialization + AST no-runtime/network/subprocess/DB + no second
+  orchestrator). Full agent suite: 768 passed (no regression). No skip/xfail. Redaction extended to structured fields (pr_url/head_sha/tests_run) per the internal SENTINEL hardening observation.
+- Boundary: module imports nothing from Hermes/Kanban/OpenClaw/WRE-consumer/AI-Overseer (AST-tested); no
+  subprocess/network/file-write/Kanban-DB/worker-spawn; no PFmall/registry/manifest change.
+- STOP at MERGE_READY for the external 0102 gate.
 
 ## [2026-06-13] PFmall Firebase Hosting Config -- RE2 Fix + Reproducibility (config remediation, no deploy)
 

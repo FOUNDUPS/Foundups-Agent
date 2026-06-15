@@ -2,7 +2,80 @@
 
 **Module**: `modules/ai_intelligence/ai_overseer/`
 **Status**: Active (Autonomous Code Patching + Daemon Restart + Activity Routing)
-**Version**: 0.10.4
+**Version**: 0.10.5
+
+---
+
+## 2026-06-15 - FOUNDUP_LAUNCH_REQUEST_PHASE1 (Lane A, public intake seam)
+
+**Author**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP**: 00, 50/87 (HoloIndex-first), 64 (enhance-before-create), 84 (reuse), 97 (Truth Boundary), 104/109 (foundup_id / onboarding)
+**Slice**: FOUNDUP_LAUNCH_REQUEST_PHASE1
+**Base**: `01158a113` (origin/main after #807 LAND)
+**Predecessors**: #806 (PFmall/Kanban/WRE launch flow), #807 (Kanban plugin contract)
+
+The PUBLIC front-door seam (#806 seam [1] PFmall -> WRE). A typed `LaunchRequest`
+carries ONLY user-authored proposal data; authentication/invite facts come from a
+TRUSTED server-side `LaunchRequestIntakeContext`, never the public payload (Addendum C).
+A validated request PRODUCES the EXISTING `FoundUpGenesisEnvelope` (WSP 64 -- no parallel
+intake envelope). Contract + mapping ONLY: no Kanban publish, no PFmall UI, no repo
+creation, no source_authority claim.
+
+- ADD `src/foundup_genesis/launch_request.py` -- `LaunchRequest` (proposal-only),
+  `LaunchRequestIntakeContext` (trusted; never payload-populated), `validate_launch_request(payload, context)`,
+  `to_genesis_envelope(payload, context)`. REUSES (imports, does not copy) the #807
+  `kanban_plugin_contract` helpers `redact_sensitive` / `_scan_authority` / `_normalize`.
+- The load-bearing fix (Addendum C): a public payload can NEVER self-authenticate. Any
+  auth/gate/role/admin/invite/approved/verified field in the PAYLOAD is rejected even when
+  the context is authenticated; the intake gate opens ONLY on `context.authenticated` or
+  `context.invite_token_verified`. Evasions (camelCase / separator / UPPER / NFKC-fullwidth /
+  nesting) collapse via `_normalize` and are caught.
+- Mapping invariants: `external_repo_requested=False` (FORCED), lifecycle in {IDEA, INCUBATING},
+  no `source_authority` (envelope has no such field; the builder owns it), `requested_by` from
+  the TRUSTED context (or `public_intake`) -- NEVER the payload.
+- SENTINEL hardening: an independent 4-lane adversarial fan-out (self-auth evasion / code-repo-authority /
+  trusted-handle+urls / redaction+static) found ONE real break -- a RAW inbound dict bypassed
+  `LaunchRequest.to_dict()` redaction, leaking a secret from `problem_statement` into the envelope
+  `description`/`tagline`. Closed by redacting at the SINK in `to_genesis_envelope` (name/tagline/
+  description now `redact_sensitive`-wrapped) + a raw-dict regression test. Re-verified live: secret -> `[REDACTED]`.
+- Tests: `tests/test_foundup_launch_request.py` (40 tests, allowlisted in conftest so it runs in CI).
+  Affected-package regression `40 + 29 genesis-validator = 69 passed`. No skip/xfail.
+- Boundary (AST-proved): imports no Hermes/OpenClaw/WRE-consumer runtime; no subprocess/network/file-write;
+  the ONLY non-stdlib import is the sanctioned #807 `kanban_plugin_contract` (+ sibling envelope/validator).
+- **Follow-up (named, BLOCKED until built): `FOUNDUP_LAUNCH_REQUEST_AUTH_CONTEXT_PROVIDER_PHASE2`** --
+  the real server-side authn/invite verifier that POPULATES `LaunchRequestIntakeContext`. Phase 1 defines
+  ONLY the trusted-context contract.
+- STOP at MERGE_READY for the external 0102 gate.
+
+**WSP_97 Truth Boundary checklist (25/25 YES):**
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | LAUNCHREQUEST_TYPE_DEFINED | YES | `LaunchRequest` dataclass, allowed proposal fields only |
+| 2 | PRODUCES_EXISTING_GENESIS_ENVELOPE_NOT_PARALLEL | YES | `to_genesis_envelope` returns `FoundUpGenesisEnvelope` (WSP 64) |
+| 3 | PUBLIC_PAYLOAD_CANNOT_SELF_AUTHENTICATE | YES | `_scan_auth_fields` rejects auth/role/admin/approved/verified keys; SENTINEL 16-attempt lane clean |
+| 4 | TRUSTED_INTAKE_CONTEXT_REQUIRED | YES | `validate_launch_request` rejects non-`LaunchRequestIntakeContext` |
+| 5 | AUTH_INVITE_FACTS_NOT_USER_FIELDS | YES | gate reads context fields only (launch_request.py:229) |
+| 6 | INTAKE_GATE_DEPENDS_ON_CONTEXT_ONLY | YES | `context(False,False)+payload{authenticated:true}` stays CLOSED (test + SENTINEL) |
+| 7 | PUBLIC_INPUT_CANNOT_BECOME_CODE | YES | code/shell payload fields rejected; `_scan_authority` on keys+values |
+| 8 | NO_REPO_REQUEST | YES | `external_repo_requested`/`create_repo` payload fields rejected |
+| 9 | EXTERNAL_REPO_REQUESTED_FORCED_FALSE | YES | envelope hard-sets False; SENTINEL found no coercion |
+| 10 | NO_SOURCE_AUTHORITY_CLAIM | YES | no `source_authority` key in produced envelope; payload claim rejected |
+| 11 | MERGE_GATE_TOKENS_REJECTED | YES | merge/gate-pass tokens rejected via `_scan_authority` |
+| 12 | AUTHORITY_EVASION_NORMALIZED_KEYS_AND_VALUES | YES | `_normalize` NFKC+camel+casefold+sep; SENTINEL evasion lane clean |
+| 13 | REFERENCE_URLS_REFS_ONLY | YES | `_check_url_ref` http(s)-only, no local/file/shell metachars |
+| 14 | REDACTION_APPLIED | YES | free-text redacted in `to_dict` AND at envelope sink (SENTINEL fix) |
+| 15 | REQUESTER_HANDLE_FROM_CONTEXT_NOT_PAYLOAD | YES | `requested_by=context.requester_handle or 'public_intake'`; test proves 'attacker' never used |
+| 16 | PRODUCED_ENVELOPE_PASSES_GENESIS_VALIDATOR | YES | `validate_genesis_envelope(env, strict_mode=False).is_valid` |
+| 17 | NO_KANBAN_PUBLISH | YES | no CardSpec/publish/worker symbols (test_no_kanban_publish) |
+| 18 | NO_HERMES_IMPORT | YES | AST import scan: no hermes/openclaw/wre runtime |
+| 19 | AST_NO_RUNTIME_NETWORK_SUBPROCESS_FILEWRITE | YES | AST: no os/sys/subprocess/socket/urllib/open/exec/write |
+| 20 | REUSES_807_AND_GENESIS_NOT_REINVENTED | YES | imports #807 helpers + genesis envelope/validator |
+| 21 | NEGATIVE_CONTROL_TESTS_PASS | YES | clean payload+authed context validates and maps |
+| 22 | NO_SKIP_XFAIL | YES | 0 skip/xfail in the new suite |
+| 23 | CITES_806_807 | YES | this entry + module docstring |
+| 24 | ASCII_CLEAN | YES | byte-check 0 non-ASCII in module + test |
+| 25 | FILE_SCOPE_EXACT | YES | launch_request.py, test, conftest allowlist, package __init__, 3 ModLogs |
 
 ---
 
