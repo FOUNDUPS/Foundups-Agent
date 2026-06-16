@@ -6,7 +6,101 @@
 
 ---
 
-## 2026-06-16 - FOUNDUP_GENESIS_NAME_CONTROL_CHAR_REJECT_PHASE1 (Lane A, reject control/format chars in display fields)
+## 2026-06-16 - FOUNDUP_GENESIS_ID_ERROR_NO_RAW_VALUE_ECHO_PHASE1 (Lane A, genesis error-message hygiene: no raw-value echo)
+
+**Author**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: independent 5-lane SENTINEL (do NOT self-merge)
+**WSP**: 00, 50/87 (HoloIndex-first read), 64 (enhance-before-create), 84 (reuse #824 safe-error style), 97 (Truth Boundary)
+**Slice**: FOUNDUP_GENESIS_ID_ERROR_NO_RAW_VALUE_ECHO_PHASE1
+**Base**: `8018a1f62` (origin/main; contains #810/#821/#823/#824)
+**Motivating finding**: the #824 leakage lane surfaced a PRE-EXISTING (#428) genesis validation error
+that echoed the RAW `foundup_id` into its message (`validator.py:~249-252` pre-fix:
+`f"foundup_id '{envelope.foundup_id}' invalid format..."`). A hand-built `FoundUpGenesisEnvelope`
+with a control char (e.g. U+0000) in `foundup_id` therefore surfaced a RAW control byte in that error
+string. NOT public-intake reachable (the public path slugs `foundup_id`, stripping control chars) and
+the id is rejected anyway -- so this is hygiene, not a live leak. Closed so NO genesis validation error
+echoes a raw user-controlled value.
+
+**Scope (Addendum A -- swept ALL `validate_genesis_envelope` error messages; message-only):**
+- `validator.py` is the ONLY src file changed. `envelope.py::is_valid_foundup_id`
+  (`envelope.py:290-302`) returns a bool and builds NO error message -> out of scope, untouched.
+- Error-building sites changed (file:line, before -> after STYLE; field + rule/policy + allowed-set
+  NAMES only, NEVER the raw value / `repr()` / offending char / raw byte):
+  - `validator.py:248-256` foundup_id format: `"foundup_id '{id}' invalid format..."` ->
+    `"foundup_id has invalid format..."` (stable "invalid format" label kept).
+  - `validator.py:263-265` reserved: `"foundup_id '{id}' is reserved..."` ->
+    `"foundup_id is reserved (infrastructure or existing)"` ("reserved" kept).
+  - `validator.py:267-269` already-exists: `"foundup_id '{id}' already exists"` ->
+    `"foundup_id already exists"` ("already exists" kept).
+  - `validator.py:277-280` lifecycle_stage: dropped `'{stage.value}'` echo -> field + allowed-set
+    NAMES only (`sorted(s.value for s in VALID_GENESIS_STAGES)`).
+  - `validator.py:286-290` binding_state: dropped `'{state.value}'` echo -> field + allowed-set NAMES.
+  - `validator.py:345-348` truth_state_map WSP-97: dropped raw `'{ts.feature}'` + `'{marker.value}'`
+    echo -> `"truth_state_map[i] claims an implementation marker but has no evidence. WSP 97 violation."`
+    (index + "WSP 97 violation" label kept).
+  - `validator.py:359-362` category: dropped `'{category}'` echo (Addendum A: no "Invalid category:
+    {cat}") -> `"category is unknown (not in standard list). Must be one of: {sorted(VALID_CATEGORIES)}"`
+    (allowed-set NAMES only).
+- LEFT AS-IS (already safe; verified): the #824/#823 display-field errors
+  (`_reject_display_field` + Check-11 loop, `validator.py:100-118`, `:376-382`) name the FIELD only and
+  are the safe-style reference reused here; `acceptance_criteria[i] missing fields: {missing}`
+  (`:316-317`, `missing` is a fixed list of LITERAL field-name strings) and
+  `truth_state_map[i] missing feature name` (`:337`, int index) interpolate NO user value;
+  `'{fld}' is required` (`:378`, `fld` from the literal `["name","tagline","description"]`) is a FIELD
+  NAME, not the value.
+
+**Behavior parity (Addendum B -- message-only, MECHANICALLY proven):** every input rejected before is
+still rejected with the SAME fields/classes and SAME `is_valid_*` checks; only message STRINGS changed.
+No rule loosened/tightened, no new rejected inputs. Proven: (1) all 12 pre-existing validator tests stay
+green -- their text assertions hit the kept stable labels (`"invalid format"`, `"reserved"`,
+`"already exists"`, `"WSP 97 violation"`, `"'name' is required"`); (2) new per-field tests assert SAME
+rejection (`not result.is_valid`) + SAME field/label present + raw value ABSENT.
+
+**Tests** (extended `test_foundup_genesis_validator.py`; no new files):
+- `TestGenesisErrorsNeverEchoRawValue`: per-field no-echo -- foundup_id with NUL / CRLF+ESC / DEL / bidi
+  RLO, a plain printable hostile id, reserved id, existing-id conflict, hostile `category`
+  (allowed-set names shown, bad input absent), `truth_state_map.feature` echo, lifecycle/binding
+  allowed-set-only shape.
+- `TestAdversarialErrorScanner` (Addendum C scanner): a battery of adversarial invalid envelopes covering
+  EVERY user-controlled field; `_assert_no_raw_echo` scans EVERY returned error string and asserts the
+  raw value is absent, none of `\x00,\r,\n,\t,ESC,DEL` or the #824 dangerous Cf chars appear literally,
+  no `\\xNN`/`\\uNNNN` repr-escape of those codepoints appears, AND a stable field/rule label is present;
+  `test_all_error_strings_are_pure_ascii` proves every emitted error is ASCII-encodable.
+- All adversarial fixtures built from `chr(codepoint)` / `\uXXXX` so test SOURCE stays pure ASCII.
+
+**Out-of-genesis raw-echo (Addendum D -- RECORDED as follow-up, NOT fixed this slice):** the public-intake
+boundary `launch_request.py` (pinned untouchable this slice) has 2 raw-echo error sites for a FOLLOW-UP:
+`:195` `"shell/code metacharacters in reference: {sorted(bad)}"` (echoes user-derived metachars, may
+include `\n\r\t\\`) and `:236` `"forbidden/unknown payload field: {key!r}"` (echoes `repr()` of a
+user key). Both are in the #824-pinned transport/auth path -> deferred, not message-only-in-genesis.
+
+**Results**: affected-package regression
+`test_foundup_genesis_validator + test_foundup_launch_request + test_intake_auth_provider + test_intake_transport`
+= **555 passed** in BOTH modes (heavy `AI_OVERSEER_HEAVY_TESTS=1` and CI). `-rsx`: no skip/xfail/error.
+Genesis validator file alone: **117 passed**. ASCII byte-check: 0 non-ASCII bytes on both edited files
+(`validator.py` -- the 3 pre-existing docstring em-dashes were normalized to `--` so the edited file is now
+fully ASCII; test file 0 non-ASCII). STOP at MERGE_READY for the independent SENTINEL gate (left dirty).
+
+**WSP_97 Truth Boundary checklist (13/13 YES):**
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | ALL_GENESIS_ERRORS_RAW_ECHO_SWEEP | YES | every `validate_genesis_envelope` error-building site enumerated + each user-controlled echo removed (validator.py:248-362); `TestAdversarialErrorScanner` battery covers every field |
+| 2 | ERROR_MESSAGES_FIELD_AND_RULE_ONLY | YES | each changed message = field name + rule/policy + allowed-set NAMES only; `_stable_label_present` asserts a stable label survives in every adversarial error |
+| 3 | CONTROL_AND_FORMAT_CHARS_NOT_IN_ERRORS | YES | `_assert_no_raw_echo` asserts none of the Cc sweep + pinned Cf codepoints (and their `\\xNN`/`\\uNNNN` repr-escapes) appear in any error (test_no_adversarial_error_echoes_raw_or_byte) |
+| 4 | VALIDATION_OUTCOME_PARITY_PROVEN | YES | only message STRINGS changed; 12 pre-existing tests green on kept labels; new tests assert SAME `not is_valid` + SAME field/label; no rule add/remove |
+| 5 | NO_AUTH_TRANSPORT_OR_DISPLAY_POLICY_DRIFT | YES | launch_request.py / intake_auth_provider.py / intake_transport.py / __init__.py UNCHANGED; #824 Cc+Cf policy + display-field errors untouched (git status --short) |
+| 6 | GENESIS_ERRORS_NEVER_ECHO_RAW_VALUE | YES | foundup_id/category/feature/lifecycle/binding echoes removed; per-field `assert raw not in e` (TestGenesisErrorsNeverEchoRawValue) |
+| 7 | FOUNDUP_ID_ERROR_NO_RAW_BYTE | YES | foundup_id with NUL/CRLF/ESC/DEL -> rejected, no raw byte in any error (test_foundup_id_with_control_char_no_raw_byte, ..._crlf_and_esc...) |
+| 8 | VALIDATION_BEHAVIOR_UNCHANGED_ONLY_MESSAGES | YES | no validation LOGIC touched; same `is_valid_foundup_id`/reserved/existing/enum/category/truth checks; same error COUNT per envelope (parity tests) |
+| 9 | REUSES_824_SAFE_ERROR_STYLE | YES | new messages mirror the #824 `_reject_display_field` field+policy style; codepoint logic NOT duplicated (no new helper added) -- WSP 84 |
+| 10 | PHASE810_821_823_824_UNCHANGED | YES | base `8018a1f62` contains #810/#821/#823/#824; only validator.py + its test suite touched; #823/#824 display-field tests still green |
+| 11 | ASCII_CLEAN | YES | 0 non-ASCII bytes on both edited files (validator.py docstring em-dashes normalized to `--`); fixtures via `chr()`/`\uXXXX` |
+| 12 | NO_SKIP_XFAIL | YES | `-rsx` shows `555 passed` (and `117 passed` genesis-only), no skip/xfail/error |
+| 13 | FILE_SCOPE_EXACT | YES | src: validator.py only; tests: test_foundup_genesis_validator.py only; + 3 ModLog/TestModLog docs; envelope.py / 3 intake src / __init__.py UNCHANGED |
+
+---
+
+
 
 **Author**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: independent 5-lane SENTINEL (do NOT self-merge)
 **WSP**: 00, 50/87 (HoloIndex-first), 64 (enhance-before-create), 84 (single shared helper, reuse), 97 (Truth Boundary)
