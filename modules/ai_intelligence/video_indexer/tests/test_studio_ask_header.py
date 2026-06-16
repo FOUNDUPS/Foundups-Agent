@@ -25,6 +25,12 @@ from modules.ai_intelligence.video_indexer.src.studio_ask_indexer import (
     StudioAskIndexer,
 )
 
+# A registry-known channel ID (UnDaoDu) so the now-required owning-channel
+# context (STUDIO_ASK_CHANNEL_CONTEXT_PHASE1 STEP 3) resolves in these
+# input/selector tests. The channel-context behavior itself is covered
+# separately in test_studio_ask_channel_context.py.
+UNDAODU_ID = "UCfHM9Fw9HD-NwiS0seD_oIA"
+
 
 # ---------------------------------------------------------------------------
 # Mock DOM / Selenium driver
@@ -69,7 +75,10 @@ class FakeDriver:
     def __init__(self, css_map=None, script_result=None):
         self.css_map = css_map or {}
         self.script_result = script_result
-        self.current_url = "https://studio.youtube.com/video/vidX/edit"
+        # STUDIO_ASK_CHANNEL_CONTEXT_PHASE1: a single Studio tab is the active
+        # target (STEP 0 single-target path passes), already on Studio.
+        self.current_url = "https://studio.youtube.com/channel/UCfHM9Fw9HD-NwiS0seD_oIA/videos/upload"
+        self.title = "YouTube Studio"
         self.visited = []
 
     def get(self, url):
@@ -183,7 +192,7 @@ async def test_ask_studio_primary_path_succeeds():
     driver = FakeDriver(css_map=css_map, script_result=None)
     indexer = StudioAskIndexer(driver=driver)
 
-    result = await indexer.ask_about_video("vidX")
+    result = await indexer.ask_about_video("vidX", channel_id=UNDAODU_ID)
 
     assert result.success is True
     assert "topics" in result.response_text  # came from the response DOM node
@@ -194,8 +203,17 @@ async def test_ask_studio_primary_path_succeeds():
     # and confirm the prompt content reached the box.
     typed = _typed_text(prompt_box)
     assert "content_category" in typed or "Analyze" in typed or "Focus" in typed
-    # We navigated to the Studio edit page (PRIMARY), not the watch page first.
-    assert driver.visited[0] == "https://studio.youtube.com/video/vidX/edit"
+    # We set the OWNING-channel context (channel-scoped URL) BEFORE the
+    # channel-agnostic edit page (STUDIO_ASK_CHANNEL_CONTEXT_PHASE1 STEP 1),
+    # and never the watch page first.
+    assert driver.visited[0] == (
+        f"https://studio.youtube.com/channel/{UNDAODU_ID}/videos/upload"
+    )
+    edit_url = "https://studio.youtube.com/video/vidX/edit"
+    assert edit_url in driver.visited
+    assert driver.visited.index(edit_url) > driver.visited.index(
+        f"https://studio.youtube.com/channel/{UNDAODU_ID}/videos/upload"
+    )
 
 
 async def test_ask_studio_succeeds_when_watch_ask_missing():
@@ -208,7 +226,7 @@ async def test_ask_studio_succeeds_when_watch_ask_missing():
     driver = FakeDriver(css_map=css_map, script_result=None)
     indexer = StudioAskIndexer(driver=driver)
 
-    result = await indexer.ask_about_video("vidX")
+    result = await indexer.ask_about_video("vidX", channel_id=UNDAODU_ID)
 
     assert result.success is True
     # Never had to fall back to the watch page.
@@ -223,7 +241,7 @@ async def test_response_timeout_fails_closed():
     driver = FakeDriver(css_map=css_map, script_result=None)
     indexer = StudioAskIndexer(driver=driver)
 
-    result = await indexer.ask_about_video("vidX")
+    result = await indexer.ask_about_video("vidX", channel_id=UNDAODU_ID)
 
     assert result.success is False
     assert result.response_text == ""
@@ -254,7 +272,7 @@ async def test_no_clipboard_used(monkeypatch):
     css_map, _ = _ask_studio_dom('{"topics": ["x"], "segments": []}')
     driver = FakeDriver(css_map=css_map, script_result=None)
     indexer = StudioAskIndexer(driver=driver)
-    await indexer.ask_about_video("vidX")
+    await indexer.ask_about_video("vidX", channel_id=UNDAODU_ID)
 
     assert sentinel["used"] is False
 
@@ -297,7 +315,7 @@ async def test_channel_prompt_threaded_into_ask(monkeypatch):
     driver = FakeDriver(css_map=css_map, script_result=None)
     indexer = StudioAskIndexer(driver=driver)
 
-    await indexer.ask_about_video("vidX", channel_entry=_entry("ffcpln"))
+    await indexer.ask_about_video("vidX", channel_entry=_entry("ffcpln"), channel_id=UNDAODU_ID)
 
     typed = _typed_text(prompt_box)
     assert "Do NOT produce a full transcript" in typed

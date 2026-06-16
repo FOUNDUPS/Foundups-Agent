@@ -47,6 +47,90 @@ browser by default.
 - WSP 5 (gate, do not delete coverage), WSP 22 (ModLog), WSP 50 (verify
   before edit), WSP 84 (standard pytest marker + skip pattern), WSP 97 (Truth
   Boundary: tests/ + conftest only; no src/ or production code touched).
+## V0.23.0 - Ask Studio single-video: select Studio TARGET + owning-channel CONTEXT, fail-closed on mismatch (STUDIO_ASK_CHANNEL_CONTEXT_PHASE1) [stacked on #825] (2026-06-16)
+
+### Why
+012 live-observed TWO defects on the Studio Ask single-video path:
+1. WRONG BROWSER TARGET: Selenium attached to a Chrome SIDE-PANEL target first
+   (chrome://glic / the gemini.google.com glic panel) even with a Studio edit
+   tab open, so the action "asked" inside a Gemini side panel.
+2. WRONG CHANNEL CONTEXT: `ask_about_video` navigated straight to the
+   channel-AGNOSTIC `studio.youtube.com/video/{id}/edit` and never switched the
+   active channel (channel_id was used only for prompt + save path). With
+   Move2Japan active and an UnDaoDu video, Ask Studio could not access it ->
+   metadata-only guess. The BATCH path was already channel-scoped
+   (`index_channel_videos` `studio.youtube.com/channel/{id}/videos/upload`); the
+   single-video path did not use that pattern.
+
+### Changed (`src/studio_ask_indexer.py`)
+- NEW `_select_studio_target()` (STEP 0): before ANY channel nav, iterate the
+  EXISTING driver's `window_handles` (same idiom as
+  `foundups_selenium/devtools_mcp_adapter.list_pages`), `switch_to.window` the
+  first YouTube-Studio / normal-web target, and REJECT chrome://glic /
+  chrome-untrusted://glic / `gemini.google.com/glic` / RotateCookiesPage. If
+  every handle is a side panel, open a NORMAL tab via the existing driver
+  (`window.open`); never open a NEW browser. Fail closed -> typed error
+  `studio_target_unavailable`.
+- NEW `_set_channel_context(channel_id)` (STEP 1): navigate the CHANNEL-SCOPED
+  Studio URL (mirrors the batch path) to make the owner the active channel
+  BEFORE `/video/{id}/edit`.
+- NEW `_verify_channel_context(video_id)` (STEP 2): OBSERVABLE (NOT URL-only)
+  owner verification - no permission/not-found/sign-in/account-switch/Oops
+  signal in the page title/body AND the edit surface (title field) present
+  within the timeout; else fail closed -> typed error `wrong_channel_context`.
+- `ask_about_video(...)` now ORDERS: STEP 3 channel_id-required check ->
+  STEP 0 target -> STEP 1 context -> /video/{id}/edit -> STEP 2 verify -> Ask.
+  channel_id is REQUIRED (resolved from the new backward-compatible
+  `channel_id` kwarg, else the passed `channel_entry["id"]`); missing/blank/
+  unknown (not registry-known via `get_channel_by_id`) -> typed error
+  `channel_unresolved`. NO guessing from body/path/video URL. An explicitly
+  passed `channel_entry` is preserved for PROMPT selection (ownership comes
+  from channel_id).
+- WSP 84 REUSE: the existing `youtube_channel_registry.get_channel_by_id` (NOT
+  a 2nd map) and the standard Selenium window-handle idiom. The avatar/
+  account-switcher DOM flow (`studio_account_switcher.py`) is deliberately NOT
+  used (Phase 2 / STOP condition if the channel-scoped URL proves insufficient
+  live).
+
+### Changed (`src/action_surface.py`)
+- `run_studio_ask_single_video` now passes the EXISTING `inp.channel_id`
+  through to `ask_about_video` so the worker can set owner context + fail
+  closed. NO new public action arg, NO #819 action-id change, NO output-schema
+  field change (only new typed error VALUES in the existing `error` field).
+
+### Persistence guard (STEP 4)
+- `save_index` is NEVER reached on `channel_unresolved`,
+  `studio_target_unavailable`, `wrong_channel_context`, or any success=False
+  (the existing index/action persistence guards only save on result.success).
+
+### Tests (mock only - NO live browser; NON-VACUOUS)
+- NEW `tests/test_studio_ask_channel_context.py` (+18): target-selection
+  (glic-first -> Studio), target fail-closed, target-before-context,
+  context-before-ask, observable-verify fail-closed (permission page + absent
+  edit surface) + proceed, channel_id required (blank/unknown/no-URL-guess),
+  no-persist on each failure, registry reuse, action-id/schema preservation,
+  and TWO explicit BEHAVIORAL non-vacuity proofs (using only the pre-existing
+  `channel_entry` signature) that FAIL with an AssertionError - not a
+  TypeError - on the pre-fix code.
+- Updated `tests/test_studio_ask_header.py` + `tests/test_studio_ask_human_input.py`
+  to supply the now-required owning channel context (channel_id) and assert the
+  channel-scoped URL precedes the edit URL.
+- Module pytest: 2 pre-existing failures only
+  (`gemini_video_analyzer._pattern_memory @ :475`) + the 4 known live-browser
+  integration tests (no account in CI); all studio-ask + new context tests pass.
+
+### Live gap (HONEST)
+- Selector / target-selection / channel-switch behavior is MOCK-validated
+  ONLY (#817 KNOWN-GAP class). The REAL proof is 012's live re-test on the
+  COMBINED stacked branch (#825 + this). See the PR's operator live-test
+  checklist. If the channel-scoped URL proves insufficient live (requires the
+  avatar/account-switcher DOM), that is Phase 2 - STOP, do NOT build here.
+
+### WSP
+- WSP 5/6 (tests), WSP 22 (this), WSP 50/84/87 (reuse + pre-action), WSP 72
+  (module independence), WSP 97 (Truth Boundary). Stacked on #825 (shared
+  `ask_about_video`); merge #825 FIRST, then rebase this onto main + re-verify.
+
 ## V0.22.0 - Ask Studio human-input behavior: single clean submission, no newline-spam (STUDIO_ASK_HUMAN_INPUT_BEHAVIOR_PHASE1) (2026-06-16)
 
 ### Why

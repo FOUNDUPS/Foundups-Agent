@@ -293,8 +293,13 @@ async def run_studio_ask_single_video(
     # Run the bounded Studio Ask (navigate + scrape only; no mutation).
     try:
         indexer = StudioAskIndexer(driver=driver)
+        # STUDIO_ASK_CHANNEL_CONTEXT_PHASE1: pass the EXISTING channel_id through
+        # so the worker can set the OWNING-channel context + fail closed with the
+        # typed "channel_unresolved" error when it is missing/blank/unknown. This
+        # is the SAME existing input field (no new public action arg, no #819
+        # action-id / output-schema change - only new typed error VALUES).
         ask_result = await indexer.ask_about_video(
-            video_id, channel_entry=channel_entry,
+            video_id, channel_entry=channel_entry, channel_id=inp.channel_id,
         )
     except Exception as e:
         logger.error(f"[ACTION-SURFACE] ask_about_video error: {e}")
