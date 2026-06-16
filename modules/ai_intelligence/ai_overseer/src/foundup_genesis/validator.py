@@ -19,8 +19,9 @@ Pattern Sources:
 from __future__ import annotations
 
 import logging
+import unicodedata
 from dataclasses import dataclass, field
-from typing import List, Optional, Set
+from typing import Any, List, Optional, Set
 
 from .envelope import (
     FoundUpGenesisEnvelope,
@@ -31,6 +32,90 @@ from .envelope import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+# -----------------------------------------------------------------------------
+# Disallowed control / format character policy for PUBLIC DISPLAY fields
+# (#823 -- ARCHITECT-pinned: reject, do NOT sanitize/strip/coerce).
+# -----------------------------------------------------------------------------
+#
+# WHY: A public display field (proposed_name / tagline / description / etc.) is
+# HOSTILE input. The #823 independent re-review found that a control char (e.g.
+# U+0000) in proposed_name was ACCEPTED by the Phase-1 validators and then
+# silently SANITIZED into a normal display name at envelope construction (via
+# _normalize NFKC + redact_sensitive), producing a draft FoundUp with a
+# laundered display name. The fix REJECTS such a value at validation time,
+# BEFORE any envelope is constructed, and runs the detection on the RAW value
+# BEFORE any normalization/redaction can hide the offending codepoint.
+#
+# POLICY (Addendum A -- PINNED; no open fork):
+#   - Reject EVERY Unicode category Cc (C0 + C1 control). This single rule
+#     already covers TAB U+0009, LF U+000A, CR U+000D, NUL U+0000, ESC U+001B,
+#     DEL U+007F, and the C1 block U+0080-U+009F. Newline is therefore rejected
+#     in description too (description is NOT exempt this phase).
+#   - Reject this dangerous Unicode category Cf subset:
+#       zero-width:  U+200B U+200C U+200D U+FEFF U+2060
+#       bidi/isolate: U+202A U+202B U+202C U+202D U+202E
+#                     U+2066 U+2067 U+2068 U+2069
+#     (The rest of category Cf is NOT rejected this phase -- do not over-broaden.)
+#
+# This is deliberately NOT an ASCII-only rule: ordinary letters in any script
+# (accented Latin, CJK, etc.), punctuation, and (if the validators already
+# accept them) emoji are all category Lo/Ll/Lu/So/... and pass untouched. Only
+# Cc and the pinned Cf codepoints are rejected.
+
+# The dangerous Cf subset (zero-width joiners/spaces + bidi overrides/isolates).
+_DISALLOWED_FORMAT_CODEPOINTS: Set[int] = frozenset({
+    0x200B, 0x200C, 0x200D, 0xFEFF, 0x2060,            # zero-width
+    0x202A, 0x202B, 0x202C, 0x202D, 0x202E,            # bidi embedding/override
+    0x2066, 0x2067, 0x2068, 0x2069,                    # bidi isolates
+})
+
+
+def _contains_disallowed_display_char(s: str) -> bool:
+    """True iff `s` contains a disallowed control/format codepoint (#823 policy).
+
+    Detection is on the RAW value -- call this BEFORE any normalization/redaction
+    so a laundering transform (NFKC / redact) can never hide the offending char.
+
+    Rejects (Addendum A, PINNED):
+      - any Unicode category Cc codepoint (C0 controls 0x00-0x1F incl. TAB/LF/CR,
+        DEL 0x7F, and the C1 block 0x80-0x9F);
+      - the dangerous Cf subset in _DISALLOWED_FORMAT_CODEPOINTS (zero-width
+        U+200B/200C/200D/FEFF/2060; bidi/isolates U+202A-202E, U+2066-2069).
+
+    A non-str argument is NOT this function's concern (callers reject non-strings
+    via the field-type gate); for safety it returns False rather than raising.
+    """
+    if not isinstance(s, str):
+        return False
+    for ch in s:
+        if unicodedata.category(ch) == "Cc":
+            return True
+        if ord(ch) in _DISALLOWED_FORMAT_CODEPOINTS:
+            return True
+    return False
+
+
+def _reject_display_field(field_name: str, value: Any, errors: List[str]) -> None:
+    """Append a SAFE rejection to `errors` if `value` is not a valid display string.
+
+    A display field MUST be a string (Addendum B: a non-string present where a
+    display value is expected is INVALID -> reject). If it is a string, it must
+    not contain a disallowed control/format character (detected on the RAW value).
+
+    The error names the field + policy class ONLY. It NEVER echoes the raw value,
+    repr(value), the offending character, or any raw bytes (Addendum B: no leak).
+    """
+    if not isinstance(value, str):
+        errors.append(
+            f"{field_name} must be a string (non-string display field is invalid)"
+        )
+        return
+    if _contains_disallowed_display_char(value):
+        errors.append(
+            f"{field_name} contains disallowed control/format character"
+        )
 
 
 # -----------------------------------------------------------------------------
@@ -265,12 +350,22 @@ class GenesisEnvelopeValidator:
         else:
             result.passed_checks.append("category_valid")
 
-        # Check 11: required fields are non-empty
+        # Check 11: required display fields are non-empty AND carry no disallowed
+        # control/format character (#823). These are PUBLIC display fields, so a
+        # control char (Cc) or a dangerous format char (pinned Cf subset) is
+        # REJECTED here -- detected on the RAW value, never sanitized. This is the
+        # genesis-side line of defense for any caller that builds an envelope
+        # directly (the intake path also rejects at validate_launch_request,
+        # BEFORE this envelope is ever constructed).
         required_fields = ["name", "tagline", "description"]
         for fld in required_fields:
             val = getattr(envelope, fld, None)
-            if not val or not val.strip():
+            if not isinstance(val, str) or not val.strip():
                 result.errors.append(f"'{fld}' is required and cannot be empty")
+            elif _contains_disallowed_display_char(val):
+                result.errors.append(
+                    f"{fld} contains disallowed control/format character"
+                )
             else:
                 result.passed_checks.append(f"{fld}_present")
 
