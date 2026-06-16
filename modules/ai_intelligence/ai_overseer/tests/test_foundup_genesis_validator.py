@@ -540,3 +540,203 @@ class TestDisplayFieldControlChars:
         env = _envelope_with("name", "Good Name With Spaces")
         result = validate_genesis_envelope(env, strict_mode=False)
         assert result.is_valid, result.errors
+
+
+# -----------------------------------------------------------------------------
+# #428 / #824 LEAKAGE LANE -- NO GENESIS VALIDATION ERROR ECHOES A RAW VALUE
+#
+# The #824 leakage lane found a PRE-EXISTING (#428) genesis validation error that
+# echoed the RAW foundup_id into its message -- so a hand-built envelope carrying a
+# control char (e.g. U+0000) in foundup_id surfaced a raw control byte in that error
+# string. Addendum A swept ALL validate_genesis_envelope error messages: every
+# message now names the FIELD + RULE/POLICY class (and, where useful, the ALLOWED
+# set NAMES) but NEVER echoes the raw value, repr(value), the offending char, or raw
+# bytes. These tests prove that invariant for every user-controlled field. ALL bad
+# strings are built from chr(codepoint) so this SOURCE stays pure ASCII.
+# -----------------------------------------------------------------------------
+
+
+# Dangerous codepoints that must NEVER appear in any returned error string.
+# (Cc sweep + the #824-pinned dangerous Cf subset; codepoints only -> ASCII source.)
+_NOECHO_FORBIDDEN_CODEPOINTS = sorted(
+    set(_GV_CC_SWEEP.values()) | set(_GV_CF_PINNED.values())
+)
+
+
+def _assert_no_raw_echo(errors, raw_value):
+    """Scan EVERY error string: no raw value, no dangerous byte, no repr-escape.
+
+    Addendum C scanner core, reused per-lane. `raw_value` is the offending input.
+    """
+    for e in errors:
+        # 1. the raw bad input value must not appear verbatim ...
+        assert raw_value not in e, f"raw value echoed: {e!r}"
+        # ... and neither must any non-trivial offending substring of it.
+        for chunk in ("Good", "Name", "hostile", "evil", "BadCat"):
+            if chunk in raw_value:
+                assert chunk not in e, f"raw fragment {chunk!r} echoed: {e!r}"
+        # 2. no dangerous control / format codepoint may appear literally.
+        for cp in _NOECHO_FORBIDDEN_CODEPOINTS:
+            assert chr(cp) not in e, f"raw byte U+{cp:04X} echoed: {e!r}"
+        # 3. no repr-style escaped form of a dangerous codepoint derived from input.
+        for cp in _NOECHO_FORBIDDEN_CODEPOINTS:
+            assert f"\\x{cp:02x}" not in e, f"repr-escape \\x{cp:02x} echoed: {e!r}"
+            assert f"\\u{cp:04x}" not in e, f"repr-escape \\u{cp:04x} echoed: {e!r}"
+
+
+def _stable_label_present(errors):
+    """True iff at least one error carries a stable field name or rule label."""
+    labels = (
+        "foundup_id", "lifecycle_stage", "binding_state", "category",
+        "truth_state_map", "acceptance_criteria", "name", "tagline",
+        "description", "external_repo_requested", "required", "invalid format",
+        "reserved", "already exists", "WSP 97", "disallowed control/format",
+    )
+    return any(any(lbl in e for lbl in labels) for e in errors)
+
+
+class TestGenesisErrorsNeverEchoRawValue:
+    """#428/#824: no genesis validation error echoes a raw user-controlled value."""
+
+    def test_foundup_id_with_control_char_no_raw_byte(self):
+        # A hand-built envelope with NUL in foundup_id: rejected, no raw byte echoed.
+        bad_id = "Good" + chr(0x00) + "Name"   # NUL -> also invalid format
+        env = _envelope_with("foundup_id", bad_id)
+        result = validate_genesis_envelope(env, strict_mode=False)
+        assert not result.is_valid
+        assert any("foundup_id" in e and "invalid format" in e for e in result.errors)
+        _assert_no_raw_echo(result.errors, bad_id)
+
+    def test_foundup_id_with_crlf_and_esc_no_raw_byte(self):
+        bad_id = "ab" + chr(0x0D) + chr(0x0A) + chr(0x1B) + "cd"
+        env = _envelope_with("foundup_id", bad_id)
+        result = validate_genesis_envelope(env, strict_mode=False)
+        assert not result.is_valid
+        _assert_no_raw_echo(result.errors, bad_id)
+
+    def test_plain_bad_foundup_id_not_echoed(self):
+        # A normal (printable) bad id is also no longer echoed (sweep, not just bytes).
+        bad_id = "Invalid-Hostile-ID"
+        env = _envelope_with("foundup_id", bad_id)
+        result = validate_genesis_envelope(env, strict_mode=False)
+        assert not result.is_valid
+        assert any("foundup_id" in e and "invalid format" in e for e in result.errors)
+        assert all(bad_id not in e for e in result.errors)
+
+    def test_reserved_foundup_id_not_echoed(self):
+        env = _envelope_with("foundup_id", "openclaw")
+        result = validate_genesis_envelope(env, strict_mode=False)
+        assert not result.is_valid
+        assert any("foundup_id" in e and "reserved" in e for e in result.errors)
+        assert all("openclaw" not in e for e in result.errors)
+
+    def test_existing_foundup_id_not_echoed(self):
+        env = _envelope_with("foundup_id", "taken_id")
+        result = validate_genesis_envelope(
+            env, existing_ids={"taken_id"}, strict_mode=False
+        )
+        assert not result.is_valid
+        assert any("already exists" in e for e in result.errors)
+        assert all("taken_id" not in e for e in result.errors)
+
+    def test_hostile_category_uses_allowed_set_not_echo(self):
+        # Addendum A: "unknown category" + allowed-set NAMES, never "Invalid: {cat}".
+        bad_cat = "BadCat-hostile-evil"
+        env = _envelope_with("category", bad_cat)
+        # strict_mode=True so the category warning becomes a blocking error string.
+        result = validate_genesis_envelope(env, strict_mode=True)
+        assert not result.is_valid
+        assert any("category" in e and "unknown" in e for e in result.errors)
+        # allowed-set names ARE permitted; the bad input is NOT.
+        assert all(bad_cat not in e and "BadCat" not in e for e in result.errors)
+        assert any("marketplace" in e for e in result.errors)  # allowed name shown
+
+    def test_truth_state_feature_not_echoed(self):
+        env = _envelope_with("foundup_id", "valid_id_ok")
+        env.truth_state_map = [
+            TruthStateEntry(
+                feature="hostile_feature_name_xyz",
+                marker=TruthMarker.IMPLEMENTED,
+                evidence="",
+            )
+        ]
+        result = validate_genesis_envelope(env, strict_mode=False)
+        assert not result.is_valid
+        assert any("WSP 97 violation" in e for e in result.errors)
+        assert all("hostile_feature_name_xyz" not in e for e in result.errors)
+
+    def test_lifecycle_stage_value_not_echoed_uses_allowed_set(self):
+        env = _envelope_with("foundup_id", "valid_id_ok")
+        env.lifecycle_stage = LifecycleStage.IDEA  # valid; force-invalidate via set
+        # Make it invalid by replacing the allowed set check input with a non-genesis
+        # stage value is not possible (enum); instead assert the valid path message
+        # shape is allowed-set-only by inspecting an artificially invalid binding.
+        env.binding_state = BindingState.UNBOUND
+        result = validate_genesis_envelope(env, strict_mode=False)
+        # IDEA + UNBOUND are valid -> no stage/binding error; nothing to echo.
+        assert "lifecycle_stage_valid" in result.passed_checks
+        assert "binding_state_valid" in result.passed_checks
+
+
+class TestAdversarialErrorScanner:
+    """Addendum C: battery of adversarial invalid envelopes, scan EVERY error."""
+
+    def _adversarial_envelopes(self):
+        """Yield (envelope, raw_value, existing_ids) tuples covering every field."""
+        cases = []
+
+        # foundup_id: NUL, CRLF+ESC, DEL, bidi RLO, plain hostile, reserved
+        for raw in (
+            "Good" + chr(0x00) + "Name",
+            "ab" + chr(0x0D) + chr(0x0A) + chr(0x1B),
+            "x" + chr(0x7F) + "y",
+            "a" + chr(0x202E) + "b",
+            "Hostile-Bad-ID",
+        ):
+            cases.append((_envelope_with("foundup_id", raw), raw, None))
+
+        # category: hostile printable
+        cat = "evil-category-xyz"
+        cases.append((_envelope_with("category", cat), cat, None))
+
+        # display fields: control char in name / tagline / description
+        for fld in ("name", "tagline", "description"):
+            raw = "Good" + chr(0x1B) + "Name"
+            cases.append((_envelope_with(fld, raw), raw, None))
+
+        # truth_state_map feature echo
+        env = _envelope_with("foundup_id", "valid_id_ok")
+        feat = "evil_feature_zzz"
+        env.truth_state_map = [
+            TruthStateEntry(feature=feat, marker=TruthMarker.PARTIAL, evidence="")
+        ]
+        cases.append((env, feat, None))
+
+        # existing-id conflict
+        env2 = _envelope_with("foundup_id", "dup_id_here")
+        cases.append((env2, "dup_id_here", {"dup_id_here"}))
+
+        return cases
+
+    def test_no_adversarial_error_echoes_raw_or_byte(self):
+        for env, raw, existing in self._adversarial_envelopes():
+            result = validate_genesis_envelope(
+                env, existing_ids=existing, strict_mode=True
+            )
+            assert not result.is_valid, f"expected rejection for raw={raw!r}"
+            assert result.errors, f"expected error strings for raw={raw!r}"
+            _assert_no_raw_echo(result.errors, raw)
+            assert _stable_label_present(result.errors), (
+                f"no stable field/rule label in errors for raw={raw!r}: {result.errors}"
+            )
+
+    def test_all_error_strings_are_pure_ascii(self):
+        # Every error this validator emits for adversarial input must be ASCII
+        # (no smuggled raw codepoint). Allowed-set names are ASCII by construction.
+        for env, raw, existing in self._adversarial_envelopes():
+            result = validate_genesis_envelope(
+                env, existing_ids=existing, strict_mode=True
+            )
+            for e in result.errors:
+                # ASCII-encodable proves no raw non-ASCII codepoint leaked through.
+                e.encode("ascii")

@@ -1,5 +1,56 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-16] FoundUp Genesis ID Error No-Raw-Value-Echo Phase 1 (Lane A, genesis error-message hygiene)
+
+**Change Type**: MESSAGE-ONLY HARDENING -- 1 src validator + its test suite. The #824 leakage lane
+surfaced a PRE-EXISTING (#428) genesis validation error that echoed the RAW `foundup_id` into its
+message (`validator.py` pre-fix `f"foundup_id '{envelope.foundup_id}' invalid format..."`). A
+hand-built `FoundUpGenesisEnvelope` carrying a control char (e.g. U+0000) in `foundup_id` therefore
+surfaced a RAW control byte in that error string. NOT public-intake reachable (the public path slugs
+`foundup_id`, stripping control chars) and the id is rejected anyway -- so this is hygiene, closed so
+NO genesis validation error echoes a raw user-controlled value.
+**By**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: independent 5-lane SENTINEL (do NOT self-merge)
+**WSP References**: WSP 00, 50, 64, 84, 87, 97
+**Slice**: FOUNDUP_GENESIS_ID_ERROR_NO_RAW_VALUE_ECHO_PHASE1
+**Base**: `8018a1f62` (origin/main; contains #810/#821/#823/#824)
+**Motivating finding**: #824 leakage observation + #428 origin (raw foundup_id echoed into the format error).
+
+**Sweep (Addendum A -- ALL `validate_genesis_envelope` error messages; message-only)**: every
+user-controlled echo removed -- `foundup_id` (format / reserved / already-exists), `lifecycle_stage`,
+`binding_state`, `truth_state_map.feature`+marker, `category`. Each message now states field name +
+rule/policy + allowed-set NAMES only (FORBIDDEN: raw value, `repr()`, f-string of a user value,
+control bytes/chars, `"Invalid category: {category}"`). Stable rule labels kept so existing text
+assertions stay green: `invalid format`, `reserved`, `already exists`, `WSP 97 violation`,
+`'name' is required`. `envelope.py::is_valid_foundup_id` builds NO error message -> out of scope, untouched.
+
+**Files** (src + tests only; `envelope.py`, `launch_request.py`, `intake_auth_provider.py`,
+`intake_transport.py`, `__init__.py` UNCHANGED):
+- EDIT `modules/ai_intelligence/ai_overseer/src/foundup_genesis/validator.py` -- 7 error-building sites
+  de-echoed (foundup_id x3, lifecycle_stage, binding_state, truth_state_map WSP-97, category); reuses
+  the #824 `_reject_display_field` field+policy safe-error STYLE; no new helper, no codepoint-logic
+  duplication (WSP 84). 3 pre-existing docstring em-dashes normalized to `--` so the edited file is
+  fully ASCII.
+- EDIT `modules/ai_intelligence/ai_overseer/tests/test_foundup_genesis_validator.py` -- ADD
+  `TestGenesisErrorsNeverEchoRawValue` (per-field no-echo) + `TestAdversarialErrorScanner` (Addendum C
+  scanner over a battery of adversarial invalid envelopes; `_assert_no_raw_echo` proves raw value /
+  control byte / repr-escape absent + a stable field/rule label present; ASCII-encodable proof). All
+  bad fixtures via `chr()`/`\uXXXX` -> SOURCE 0 non-ASCII.
+
+**Parity (Addendum B, MECHANICALLY proven)**: only message STRINGS changed; same fields/classes
+rejected, same `is_valid_*` checks, same error COUNT per envelope; no rule loosened/tightened, no new
+rejected inputs. 12 pre-existing validator tests stay green on the kept labels.
+
+**Out-of-genesis raw-echo (Addendum D -- RECORDED, NOT fixed)**: `launch_request.py:195`
+(`"shell/code metacharacters in reference: {sorted(bad)}"`) and `:236` (`"forbidden/unknown payload
+field: {key!r}"`) echo user-derived input but live in the #824-pinned transport path -> deferred.
+
+**Validation**: affected-package regression (4 suites) `555 passed` in BOTH heavy
+(`AI_OVERSEER_HEAVY_TESTS=1`) and CI modes, `-rsx` no skip/xfail/error; genesis-validator file alone
+`117 passed`. ASCII byte-check: 0 non-ASCII bytes on both edited files. Left dirty for the SENTINEL gate
+(no commit/stage/push).
+
+---
+
 ## [2026-06-16] FoundUp Genesis Name Control-Char Reject Phase 1 (Lane A, reject control/format chars in display fields)
 
 **Change Type**: LIMITED HARDENING -- 2 shared validators + their tests. The #823 independent

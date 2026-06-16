@@ -7,9 +7,9 @@ Validates envelopes against WSP rules BEFORE scaffold or implementation.
 Prevents "vibes-based" development by enforcing testable criteria.
 
 WSP Compliance:
-    WSP 97: Implementation Truth — no claims without evidence
-    WSP 104: Namespace Protocol — foundup_id format
-    WSP 49: Module Structure — validates required fields
+    WSP 97: Implementation Truth -- no claims without evidence
+    WSP 104: Namespace Protocol -- foundup_id format
+    WSP 49: Module Structure -- validates required fields
 
 Pattern Sources:
     - modules/ai_intelligence/video_indexer/skillz/transcript_ask/validator.py
@@ -243,42 +243,51 @@ class GenesisEnvelopeValidator:
         result = ValidationResult()
 
         # Check 1: foundup_id format (WSP 104)
+        # #428 leak fix (Addendum A): NEVER echo the raw foundup_id value. A
+        # hand-built envelope can carry a control char in foundup_id; echoing it
+        # would surface a raw control byte in the error string. The message names
+        # the field + the rule ("invalid format" stable label) ONLY -- no raw
+        # value, no repr(), no offending byte.
         if not envelope.foundup_id:
             result.errors.append("foundup_id is required")
         elif not is_valid_foundup_id(envelope.foundup_id):
             result.errors.append(
-                f"foundup_id '{envelope.foundup_id}' invalid format. "
+                "foundup_id has invalid format. "
                 "Must be 3-50 chars, lowercase letters/digits/underscores, start with letter."
             )
         else:
             result.passed_checks.append("foundup_id_format")
 
         # Check 2: foundup_id not reserved
+        # Field + rule label only; never echo the raw foundup_id (Addendum A).
         if envelope.foundup_id in RESERVED_FOUNDUP_IDS:
             result.errors.append(
-                f"foundup_id '{envelope.foundup_id}' is reserved (infrastructure or existing)"
+                "foundup_id is reserved (infrastructure or existing)"
             )
         elif envelope.foundup_id in self.existing_ids:
             result.errors.append(
-                f"foundup_id '{envelope.foundup_id}' already exists"
+                "foundup_id already exists"
             )
         else:
             result.passed_checks.append("foundup_id_not_reserved")
 
         # Check 3: lifecycle_stage is valid at genesis
+        # State the allowed-set NAMES only; do not echo the offending value
+        # (Addendum A: field + policy + allowed-set names, never the input).
         if envelope.lifecycle_stage not in VALID_GENESIS_STAGES:
             result.errors.append(
-                f"lifecycle_stage '{envelope.lifecycle_stage.value}' not valid at genesis. "
-                f"Must be one of: {[s.value for s in VALID_GENESIS_STAGES]}"
+                "lifecycle_stage not valid at genesis. "
+                f"Must be one of: {sorted(s.value for s in VALID_GENESIS_STAGES)}"
             )
         else:
             result.passed_checks.append("lifecycle_stage_valid")
 
         # Check 4: binding_state is valid at genesis
+        # Allowed-set names only; no echo of the offending value (Addendum A).
         if envelope.binding_state not in VALID_GENESIS_BINDING:
             result.errors.append(
-                f"binding_state '{envelope.binding_state.value}' not valid at genesis. "
-                f"Must be one of: {[s.value for s in VALID_GENESIS_BINDING]}"
+                "binding_state not valid at genesis. "
+                f"Must be one of: {sorted(s.value for s in VALID_GENESIS_BINDING)}"
             )
         else:
             result.passed_checks.append("binding_state_valid")
@@ -327,13 +336,15 @@ class GenesisEnvelopeValidator:
             if not ts.feature:
                 result.errors.append(f"truth_state_map[{i}] missing feature name")
             # Check for implementation claims without evidence
+            # Index + rule only; never echo the raw ts.feature value or the
+            # marker value (Addendum A: feature is user-controlled free text).
             if ts.marker in {
                 TruthMarker.IMPLEMENTED,
                 TruthMarker.IMPLEMENTED_IN_TESTS,
                 TruthMarker.PARTIAL,
             } and not ts.evidence:
                 result.errors.append(
-                    f"truth_state_map[{i}] '{ts.feature}' claims '{ts.marker.value}' "
+                    f"truth_state_map[{i}] claims an implementation marker "
                     "but has no evidence. WSP 97 violation."
                 )
 
@@ -343,9 +354,12 @@ class GenesisEnvelopeValidator:
             result.passed_checks.append("truth_state_map_valid")
 
         # Check 10: category is valid
+        # Allowed-set NAMES only; never echo the raw category value (Addendum A:
+        # no "Invalid category: {category}" -- say "unknown category" + allowed set).
         if envelope.category and envelope.category.lower() not in VALID_CATEGORIES:
             result.warnings.append(
-                f"category '{envelope.category}' not in standard list: {sorted(VALID_CATEGORIES)}"
+                "category is unknown (not in standard list). "
+                f"Must be one of: {sorted(VALID_CATEGORIES)}"
             )
         else:
             result.passed_checks.append("category_valid")
