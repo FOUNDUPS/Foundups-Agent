@@ -30,6 +30,7 @@ _ALLOWLIST = {
     "test_autofix_executor_security.py",
     "test_foundup_launch_request.py",
     "test_intake_auth_provider.py",
+    "test_intake_transport.py",
 }
 
 _HEAVY_TARGETS = [
