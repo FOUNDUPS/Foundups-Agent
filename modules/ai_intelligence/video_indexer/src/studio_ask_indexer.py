@@ -32,6 +32,18 @@ from modules.ai_intelligence.video_indexer.src.video_index_store import (
     IndexData,
 )
 
+# WSP 84 REUSE: the proven "012 input behavior" already used by YT comment replies
+# (tars_like_heart_reply/src/reply_executor.py). We reuse get_human_behavior ->
+# HumanBehavior.human_type / human_delay rather than reinventing typing cadence.
+try:
+    from modules.infrastructure.foundups_selenium.src.human_behavior import (
+        get_human_behavior,
+    )
+    HUMAN_BEHAVIOR_AVAILABLE = True
+except ImportError:  # pragma: no cover - import guard mirrors reply_executor
+    get_human_behavior = None
+    HUMAN_BEHAVIOR_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 INDEX_ROOT = Path("memory") / "video_index"
@@ -127,6 +139,15 @@ class StudioAskIndexer:
             'div.ytcpCreatorChatEntityAttachmentInlineFlowPromptBox[contenteditable="true"]',
             'div[contenteditable="true"][aria-label*="Ask"]',
         ],
+        # Send / submit button inside the dialog. PREFERRED submission path
+        # (mirror reply_executor's button-click submit, NEVER Enter-spam).
+        "send_button": [
+            'ytcp-icon-button[aria-label="Send"]',
+            'ytcp-icon-button[aria-label*="Send"]',
+            'button[aria-label="Send"]',
+            'button[aria-label*="Send"]',
+            'button[aria-label*="Submit"]',
+        ],
         # Streaming / response container candidates (DOM text, NOT clipboard).
         "response_stream": [
             '#PAcreator_chat_streaming',
@@ -135,6 +156,22 @@ class StudioAskIndexer:
             '[class*="CreatorChat"][class*="Response"]',
         ],
     }
+
+    # Refusal / no-answer markers. If the STABILIZED Ask Studio response contains
+    # any of these, we fail closed (success=False) and persist NOTHING - a refusal
+    # must never be stored as transcript_summary. (Data-integrity guard.)
+    REFUSAL_MARKERS = (
+        "query unsuccessful",
+        "i didn't quite understand",
+        "i'm not quite sure what you're asking",
+        "transcript is unavailable",
+        "i cannot analyze",
+        "you canceled this response",
+    )
+
+    # Response is considered COMPLETE once its text stops growing for this many
+    # consecutive polls (stabilization), guarding against partial/streaming reads.
+    RESPONSE_STABLE_POLLS = 3
 
     # Legacy/fallback selectors (Watch Page AND Studio popup menu).
     # FALLBACK ONLY (Phase 1): retained for resilience, never the primary path.
@@ -425,30 +462,142 @@ Give a brief category and a few mood/genre topics only.""",
         logger.info("[STUDIO-ASK] Clicked Ask Studio header button (PRIMARY)")
         return True
 
+    @staticmethod
+    def _is_refusal(text: str) -> bool:
+        """True if the response text is an Ask Studio refusal / no-answer."""
+        if not text:
+            return False
+        lowered = text.lower()
+        return any(marker in lowered for marker in StudioAskIndexer.REFUSAL_MARKERS)
+
     async def _scrape_ask_response(self) -> str:
         """
-        Scrape the Ask Studio response text from the streaming/response DOM nodes.
+        Scrape the Ask Studio response text, waiting for it to STABILIZE.
 
-        Polls the response container selectors until non-empty text appears or
-        RESPONSE_TIMEOUT_SECONDS elapses. NO clipboard is used - DOM text only.
-        Returns the scraped text ("" if the response never materialized).
+        The response streams in token-by-token. Grabbing the first non-empty
+        text can capture a partial/streaming/canceled fragment. Instead we poll
+        the response container and only return once the text STOPS GROWING for
+        RESPONSE_STABLE_POLLS consecutive polls (completion signal) or
+        RESPONSE_TIMEOUT_SECONDS elapses. NO clipboard - DOM text only.
+        Returns the stabilized text ("" if the response never materialized).
         """
         import time as _time
 
         deadline = _time.monotonic() + self.RESPONSE_TIMEOUT_SECONDS
         response_text = ""
+        stable_count = 0
         while _time.monotonic() < deadline:
             el = self._first_element(self.ASK_STUDIO_SELECTORS["response_stream"])
+            text = ""
             if el is not None:
                 try:
                     text = (el.text or "").strip()
                 except Exception:
                     text = ""
-                if text:
+
+            if text:
+                if text == response_text:
+                    # Text unchanged since last poll -> it may have completed.
+                    stable_count += 1
+                    if stable_count >= self.RESPONSE_STABLE_POLLS:
+                        # Stabilized: stopped growing for N consecutive polls.
+                        break
+                else:
+                    # Still streaming (grew/changed) -> reset the stability run.
                     response_text = text
-                    break
+                    stable_count = 0
+
             await self._human_delay(1.0, 0.2)
         return response_text
+
+    def _type_prompt_human(self, prompt_box, prompt: str) -> None:
+        """
+        Enter the prompt into the contenteditable box mimicking 012's input
+        behavior (REUSE human_behavior), NEWLINE-SAFE: no bare "\\n" ever reaches
+        the box (a bare "\\n" == ENTER == a submit in this contenteditable).
+
+        Internal "\\n" are converted to Shift+Enter SOFT newlines (ActionChains:
+        SHIFT down -> ENTER -> SHIFT up) so multi-line structure is preserved
+        WITHOUT submitting. Typing cadence reuses HumanBehavior (human_type /
+        human_delay); falls back to per-char send_keys if human infra is absent.
+        """
+        # Focus the box (preserves test assertion prompt_box.clicked is True).
+        try:
+            prompt_box.click()
+        except Exception:
+            pass
+
+        lines = (prompt or "").split("\n")
+        for idx, line in enumerate(lines):
+            if idx > 0:
+                # SOFT newline between logical lines (NEVER a bare ENTER submit).
+                self._soft_newline(prompt_box)
+            if not line:
+                continue
+            if self.human is not None:
+                # REUSE the proven 012 typing cadence (human_type), same infra
+                # comment replies use. clear() only on the first line so soft
+                # newlines aren't wiped.
+                try:
+                    if idx == 0:
+                        self.human.human_type(prompt_box, line)
+                    else:
+                        for ch in line:
+                            prompt_box.send_keys(ch)
+                    continue
+                except Exception:
+                    # Fall through to plain per-char send_keys on any human-infra
+                    # hiccup (keeps the single-submit guarantee intact).
+                    pass
+            for ch in line:
+                prompt_box.send_keys(ch)
+
+    def _soft_newline(self, element) -> None:
+        """
+        Emit a Shift+Enter SOFT newline (keeps multi-line structure WITHOUT
+        submitting). Prefer ActionChains SHIFT-down/ENTER/SHIFT-up; fall back to
+        element.send_keys((SHIFT, ENTER)) when ActionChains is unavailable.
+        NEVER sends a bare ENTER here.
+        """
+        from selenium.webdriver.common.keys import Keys
+
+        try:
+            from selenium.webdriver.common.action_chains import ActionChains
+
+            (
+                ActionChains(self.driver)
+                .key_down(Keys.SHIFT)
+                .send_keys(Keys.ENTER)
+                .key_up(Keys.SHIFT)
+                .perform()
+            )
+        except Exception:
+            try:
+                element.send_keys(Keys.SHIFT, Keys.ENTER)
+            except Exception:
+                pass
+
+    def _submit_ask_prompt(self, prompt_box) -> str:
+        """
+        Submit the typed prompt EXACTLY ONCE.
+
+        PREFERRED: locate + click an Ask Studio send/submit button (mirror
+        reply_executor's button-click submit). If no button is present, send
+        EXACTLY ONE Keys.ENTER after the full prompt. Returns the method used
+        ("button" or "enter") for observability/tests.
+        """
+        from selenium.webdriver.common.keys import Keys
+
+        send_btn = self._first_element(self.ASK_STUDIO_SELECTORS["send_button"])
+        if send_btn is not None:
+            try:
+                send_btn.click()
+                return "button"
+            except Exception as e:
+                logger.info(f"[STUDIO-ASK] Send button click failed, using Enter: {e}")
+        # Exactly ONE Enter after the full prompt is typed.
+        prompt_box.send_keys(Keys.ENTER)
+        return "enter"
 
     async def ask_about_video(
         self,
@@ -492,6 +641,14 @@ Give a brief category and a few mood/genre topics only.""",
         # Resolve the prompt: explicit > channel-specific > generic default.
         ask_prompt = prompt or self._prompt_for_channel(channel_entry)
 
+        # WSP 84 REUSE: lazily attach the proven 012 input behavior (same infra
+        # the YT comment replies use: comment_engagement_dae -> get_human_behavior).
+        if self.human is None and HUMAN_BEHAVIOR_AVAILABLE and get_human_behavior is not None:
+            try:
+                self.human = get_human_behavior(self.driver)
+            except Exception as e:  # pragma: no cover - defensive
+                logger.info(f"[STUDIO-ASK] human behavior init skipped: {e}")
+
         try:
             from selenium.webdriver.common.keys import Keys
 
@@ -520,12 +677,14 @@ Give a brief category and a few mood/genre topics only.""",
                 prompt_box = self._first_element(self.ASK_STUDIO_SELECTORS["prompt_box"])
                 if dialog is not None and prompt_box is not None:
                     try:
-                        prompt_box.click()
-                        # contenteditable div: send_keys types into it (no clipboard).
-                        prompt_box.send_keys(ask_prompt)
+                        # NEWLINE-SAFE human-cadence typing (no bare "\n" -> no
+                        # implicit ENTER per line), then submit EXACTLY ONCE.
+                        self._type_prompt_human(prompt_box, ask_prompt)
                         await self._human_delay(1.0, 0.2)
-                        prompt_box.send_keys(Keys.ENTER)
-                        logger.info("[STUDIO-ASK] Submitted prompt via Ask Studio dialog")
+                        submit_via = self._submit_ask_prompt(prompt_box)
+                        logger.info(
+                            f"[STUDIO-ASK] Submitted prompt via Ask Studio dialog (submit={submit_via})"
+                        )
                         ask_clicked = True
                         used_ask_studio = True
                     except Exception as e:
@@ -621,10 +780,19 @@ Give a brief category and a few mood/genre topics only.""",
                         ask_input = self.driver.find_element(
                             "css selector", "textarea, input[placeholder*='Ask']"
                         )
-                        ask_input.clear()
-                        ask_input.send_keys(ask_prompt)
+                        try:
+                            ask_input.clear()
+                        except Exception:
+                            pass
+                        # SAME single-submit/human-type fix as the primary path:
+                        # newline-safe typing (no bare "\n" -> no implicit ENTER),
+                        # then submit EXACTLY ONCE (button if present, else 1 Enter).
+                        self._type_prompt_human(ask_input, ask_prompt)
                         await self._human_delay(1.0, 0.2)
-                        ask_input.send_keys(Keys.ENTER)
+                        submit_via = self._submit_ask_prompt(ask_input)
+                        logger.info(
+                            f"[STUDIO-ASK] FALLBACK submitted prompt (submit={submit_via})"
+                        )
                     except Exception as e:
                         logger.warning(f"[STUDIO-ASK] FALLBACK input entry failed: {e}")
                         ask_clicked = False
@@ -669,6 +837,22 @@ Give a brief category and a few mood/genre topics only.""",
                     timestamps=[],
                     success=False,
                     error="Ask Studio response timeout (no DOM text)",
+                )
+
+            # FAIL CLOSED on a refusal / no-answer: never persist a refusal as
+            # index content (transcript_summary). success=False, store nothing.
+            if self._is_refusal(response_text):
+                logger.warning(
+                    f"[STUDIO-ASK] {video_id}: Ask Studio refusal/no-answer (fail closed)"
+                )
+                return AskResult(
+                    video_id=video_id,
+                    title=title,
+                    response_text="",
+                    topics=[],
+                    timestamps=[],
+                    success=False,
+                    error="ask_studio_no_answer",
                 )
 
             # Parse response
