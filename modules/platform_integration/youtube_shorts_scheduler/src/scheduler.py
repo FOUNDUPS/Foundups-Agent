@@ -888,6 +888,7 @@ class YouTubeShortsScheduler:
             # read path. If the artifact is ABSENT, build_index_metadata_context
             # returns None and we SKIP enhancement (keep base_description /
             # original title) -- we do NOT "index now".
+            index_context = "disabled"
             if os.getenv("YT_SCHEDULER_INDEX_WEAVE_ENABLED", "true").lower() in ("1", "true", "yes"):
                 inform_title = os.getenv(
                     "YT_SCHEDULER_INDEX_INFORM_TITLE", "false"
@@ -906,14 +907,16 @@ class YouTubeShortsScheduler:
                 )
                 if ctx is not None:
                     # Artifact present -> apply woven title/description.
+                    index_context = "present"
                     new_title = ctx.new_title
                     new_description = ctx.new_description
                 else:
                     # Artifact absent -> skip enhancement (NOT index now).
-                    logger.debug(
-                        "[SCHEDULER] No index artifact for %s - skipping enhancement",
-                        video_id,
-                    )
+                    index_context = "missing"
+
+            # Behaviour-neutral observability: which index-context branch ran
+            # (no response body, no transcript, no secrets).
+            logger.info("[SCHEDULER] index_context=%s for %s", index_context, video_id)
 
             # Update via DOM
             self.dom.edit_title(new_title)

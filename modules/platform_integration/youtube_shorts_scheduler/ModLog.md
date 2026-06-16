@@ -1,5 +1,29 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-06-16 - Pin video-index context consumption on the scheduling path (Phase 1)
+
+**By:** 0102 (Worker-Lane SSVCC-AUTHOR)
+**Slice:** SHORTS_SCHEDULER_VIDEO_INDEX_CONTEXT_CONSUMPTION_COVERAGE_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 50 (Pre-Action), WSP 84 (Code Reuse), WSP 97 (Truth Signaling)
+**Basis:** #820 ALREADY built the artifact-consumption path; this slice PINS it with tests (no rebuild).
+
+### Tests (deliverable)
+
+Added scheduling-path consumption coverage to `tests/test_index_metadata_decoupling.py` (reusing the
+existing harness): TEST A (MISSING artifact -> base content, no enhancement, no scheduler-owned
+indexing) and TEST B (PRESENT artifact -> index context + woven hashtags + `0102 DIGITAL TWIN INDEX`
+block applied; `schedule_video` only on the explicit scheduling path), plus an env-gate complement and
+an observability-marker test. See `tests/TestModLog.md` for details and non-vacuity notes.
+
+### Production (observability only - the single permitted touch)
+
+`_update_video_metadata` now emits ONE behaviour-neutral log line
+`index_context=present|missing|disabled` (present = `ctx` not None; missing = artifact absent/`ctx`
+None; disabled = `YT_SCHEDULER_INDEX_WEAVE_ENABLED` false). This unifies/replaces the prior
+"No index artifact ... skipping enhancement" debug line. No response body, no transcript, no secrets.
+Control flow (consumption logic) is UNCHANGED - the `present`/`missing` branches still set the same
+`new_title`/`new_description` as before; only the log output differs.
+
 ## 2026-06-16 - Decouple Index Read-for-Context from Live Metadata Write (Phase 1)
 
 **By:** 0102 (Worker-Lane SSIMD-AUTHOR)
