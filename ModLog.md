@@ -1,5 +1,56 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-16] FoundUp Genesis Name Control-Char Reject Phase 1 (Lane A, reject control/format chars in display fields)
+
+**Change Type**: LIMITED HARDENING -- 2 shared validators + their tests. The #823 independent
+re-review found a control char (e.g. U+0000) in `proposed_name` was ACCEPTED by the Phase-1
+validators and silently SANITIZED into a normal display name at envelope construction (via
+`_normalize` NFKC + `redact_sensitive`), producing a draft FoundUp with a LAUNDERED display
+name. Public display fields are hostile input; a control/format char must be REJECTED before
+envelope creation, not sanitized. This slice closes it AT the Phase-1 validators.
+**By**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: independent 5-lane SENTINEL (do NOT self-merge)
+**WSP References**: WSP 00, 50, 64, 84, 87, 97
+**Slice**: FOUNDUP_GENESIS_NAME_CONTROL_CHAR_REJECT_PHASE1
+**Base**: `7eb1b8c6c` (origin/main)
+**Motivating finding**: #823 re-review (laundered display name via sanitize-instead-of-reject).
+
+**ARCHITECT-pinned policy (Addendum A; no open fork)**: in ALL listed display fields, reject every
+Unicode category **Cc** (covers TAB U+0009, LF U+000A, CR U+000D, NUL U+0000, ESC U+001B, DEL
+U+007F, C1 U+0080-U+009F) PLUS the dangerous **Cf** subset -- zero-width U+200B/200C/200D/FEFF/2060
+and bidi/isolates U+202A-202E, U+2066-2069. Newline in `description`/free-text is NOT exempt this
+phase (it is Cc). Reject -- do NOT sanitize/strip/coerce. Detection runs on the RAW value BEFORE
+any normalization/redaction.
+
+**Files** (src + tests only; `intake_auth_provider.py`, `intake_transport.py`, `__init__.py` UNCHANGED):
+- EDIT `modules/ai_intelligence/ai_overseer/src/foundup_genesis/validator.py` -- ADD ONE shared
+  helper (WSP 84): `_contains_disallowed_display_char(s)` (Cc via `unicodedata.category` + pinned
+  14-codepoint Cf set `_DISALLOWED_FORMAT_CODEPOINTS`) and `_reject_display_field(field, value, errors)`
+  (SAFE error; non-string display field invalid; never echoes raw value/byte/char). Wired into the
+  Check 11 required-fields loop for `name`/`tagline`/`description`.
+- EDIT `modules/ai_intelligence/ai_overseer/src/foundup_genesis/launch_request.py` -- import the shared
+  `_reject_display_field`; new step 5b rejects a disallowed char in `proposed_name` (required) +
+  `problem_statement`/`intended_users`/`requested_type` (optional, absent/None preserved). Detection
+  reads the RAW payload value (dataclass attribute / raw dict key), NOT the redacted `to_dict()`.
+- EXTEND `tests/test_foundup_launch_request.py`, `tests/test_foundup_genesis_validator.py`,
+  `tests/test_intake_transport.py` (all already allowlisted in conftest; no new files).
+
+**Transport (#823 Addendum C) covered for free**: the transport runs `validate_launch_request` as its
+PRE-PROVIDER body preflight, so a control-char display field -> `invalid_request` with ZERO
+`build_intake_context` calls -> the single-use invite nonce is NEVER consumed and the SAME invite
+works in a later valid request (proven on InMemory AND a real `SQLiteNonceStore`). Addendum D: envelope
+construction is not reached (`to_genesis_envelope` raises + `FoundUpGenesisEnvelope` ctor spied 0 calls).
+Not over-broadened (Addendum E): accented Latin, CJK, ASCII punctuation, and emoji (So) are accepted.
+
+**Tests/Results**: affected-package regression
+`test_foundup_launch_request + test_foundup_genesis_validator + test_intake_auth_provider + test_intake_transport`
+= **545 passed** in BOTH modes (heavy `AI_OVERSEER_HEAVY_TESTS=1` and CI allowlist); `-rsx` shows no
+skip/xfail/error. The Addendum C+D regressions FAIL against pre-fix source (verified by stashing only the
+two src files). ASCII byte-check: 0 non-ASCII bytes on all created/edited content (fixtures via
+`chr()`/`\uXXXX`). Full 18-row WSP_97 Truth Boundary table in the ai_overseer ModLog. STOP at
+MERGE_READY for the independent SENTINEL gate (do NOT self-merge; left dirty).
+
+---
+
 ## [2026-06-16] FoundUp Launch Request Intake Transport Phase 3 (Lane A, framework-agnostic intake adapter)
 
 **Change Type**: LIMITED IMPLEMENTATION -- ONE module + tests. A framework-agnostic INTAKE

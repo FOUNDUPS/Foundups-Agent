@@ -416,3 +416,127 @@ class TestValidatorIntegration:
         assert restored.lifecycle_stage == original.lifecycle_stage
         assert len(restored.acceptance_criteria) == 1
         assert restored.acceptance_criteria[0].observable == "Works"
+
+
+# -----------------------------------------------------------------------------
+# #823 -- CONTROL / FORMAT CHARACTER REJECTION IN PUBLIC DISPLAY FIELDS
+#
+# name / tagline / description are PUBLIC display fields. A control char (Cc) or a
+# dangerous format char (pinned Cf subset) must be REJECTED -- never sanitized.
+# This is the genesis-side line of defense (the intake path rejects earlier, at
+# validate_launch_request, BEFORE an envelope is ever constructed). ALL fixtures
+# are built from chr(codepoint) so this SOURCE stays pure ASCII (byte-check clean).
+# -----------------------------------------------------------------------------
+
+
+# Representative Unicode category Cc sweep (C0 + DEL + C1) -- codepoints only.
+_GV_CC_SWEEP = {
+    "NUL_0x00": 0x00,
+    "TAB_0x09": 0x09,
+    "LF_0x0A": 0x0A,
+    "CR_0x0D": 0x0D,
+    "ESC_0x1B": 0x1B,
+    "DEL_0x7F": 0x7F,
+    "NEL_0x85": 0x85,   # C1
+    "APC_0x9F": 0x9F,   # C1
+}
+
+# The ARCHITECT-pinned dangerous Cf subset -- codepoints only.
+_GV_CF_PINNED = {
+    "ZWSP_200B": 0x200B,
+    "ZWNJ_200C": 0x200C,
+    "ZWJ_200D": 0x200D,
+    "BOM_FEFF": 0xFEFF,
+    "WJ_2060": 0x2060,
+    "LRE_202A": 0x202A,
+    "RLE_202B": 0x202B,
+    "PDF_202C": 0x202C,
+    "LRO_202D": 0x202D,
+    "RLO_202E": 0x202E,
+    "LRI_2066": 0x2066,
+    "RLI_2067": 0x2067,
+    "FSI_2068": 0x2068,
+    "PDI_2069": 0x2069,
+}
+
+# The three DISPLAY fields validated by the genesis validator.
+_GV_DISPLAY_FIELDS = ["name", "tagline", "description"]
+
+# Negative controls that MUST still be ACCEPTED (Addendum E). chr() keeps source ASCII.
+_GV_NEGATIVE_VALUES = [
+    "Caf" + chr(0x00E9) + " " + chr(0x00C9) + "tude",   # accented Latin
+    chr(0x672A) + chr(0x6765) + " FoundUp",             # CJK "future" + FoundUp
+    "O'Hara-Smith (test)",                              # ordinary ASCII punctuation
+]
+
+
+def _envelope_with(field, value):
+    """A valid genesis envelope with one display field overridden."""
+    fields = {
+        "foundup_id": "ctl_char_test",
+        "name": "Clean Name",
+        "tagline": "Clean tagline",
+        "description": "Clean description.",
+        "category": "tools",
+    }
+    fields[field] = value
+    return FoundUpGenesisEnvelope(**fields)
+
+
+class TestDisplayFieldControlChars:
+    """#823: control/format chars rejected in name/tagline/description."""
+
+    @pytest.mark.parametrize("char_name,cp", sorted(_GV_CC_SWEEP.items()))
+    @pytest.mark.parametrize("field", _GV_DISPLAY_FIELDS)
+    def test_cc_control_char_rejected(self, field, char_name, cp):
+        env = _envelope_with(field, "Good" + chr(cp) + "Name")
+        result = validate_genesis_envelope(env, strict_mode=False)
+        assert not result.is_valid, f"{field} with {char_name} not rejected"
+        assert any(
+            f"{field} contains disallowed control/format character" in e
+            for e in result.errors
+        )
+
+    @pytest.mark.parametrize("char_name,cp", sorted(_GV_CF_PINNED.items()))
+    @pytest.mark.parametrize("field", _GV_DISPLAY_FIELDS)
+    def test_cf_format_char_rejected(self, field, char_name, cp):
+        env = _envelope_with(field, "Good" + chr(cp) + "Name")
+        result = validate_genesis_envelope(env, strict_mode=False)
+        assert not result.is_valid, f"{field} with {char_name} not rejected"
+        assert any(
+            f"{field} contains disallowed control/format character" in e
+            for e in result.errors
+        )
+
+    def test_newline_rejected_in_description_phase1(self):
+        # description is NOT exempt this phase: a newline (LF, Cc) is rejected.
+        env = _envelope_with("description", "line one" + chr(0x0A) + "line two")
+        result = validate_genesis_envelope(env, strict_mode=False)
+        assert not result.is_valid
+        assert any(
+            "description contains disallowed control/format character" in e
+            for e in result.errors
+        )
+
+    @pytest.mark.parametrize("field", _GV_DISPLAY_FIELDS)
+    @pytest.mark.parametrize("value", _GV_NEGATIVE_VALUES)
+    def test_unicode_letters_not_false_positive_rejected(self, field, value):
+        # Accented Latin / CJK / ordinary punctuation are NOT Cc/Cf -> accepted.
+        env = _envelope_with(field, value)
+        result = validate_genesis_envelope(env, strict_mode=False)
+        assert result.is_valid, f"{field}={value!r} wrongly rejected: {result.errors}"
+
+    def test_reject_error_never_echoes_raw_control_char(self):
+        # SAFE error policy: never echo the raw value, repr(value), or the offending char.
+        offender = chr(0x202E)  # RLO
+        env = _envelope_with("name", "Good" + offender + "Name")
+        result = validate_genesis_envelope(env, strict_mode=False)
+        assert not result.is_valid
+        for e in result.errors:
+            assert offender not in e
+            assert "Good" not in e
+
+    def test_plain_space_accepted(self):
+        env = _envelope_with("name", "Good Name With Spaces")
+        result = validate_genesis_envelope(env, strict_mode=False)
+        assert result.is_valid, result.errors

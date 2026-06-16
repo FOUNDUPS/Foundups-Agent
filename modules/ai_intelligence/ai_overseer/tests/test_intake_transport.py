@@ -989,3 +989,166 @@ def test_null_name_does_not_produce_none_named_envelope():
     assert r.status == "rejected"
     assert r.reason == "invalid_request"
     assert r.envelope is None
+
+
+# ===========================================================================
+# #823 -- CONTROL / FORMAT CHARACTER IN A PUBLIC DISPLAY FIELD MUST REJECT
+# PRE-PROVIDER AND PRESERVE A SINGLE-USE INVITE.
+#
+# A control char (e.g. U+0000 / TAB) in proposed_name was ACCEPTED by the Phase-1
+# validators and silently laundered into a draft FoundUp display name. The fix
+# rejects it at validate_launch_request -- which the transport runs as its
+# PRE-PROVIDER body preflight -- so an invalid display field is rejected with ZERO
+# provider calls and a single-use invite is NEVER consumed. Control/format chars are
+# encoded as chr(codepoint) so this SOURCE stays pure ASCII (byte-check clean).
+# These tests FAIL against pre-fix behavior (which created a draft and burned the
+# invite) and PASS after the fix.
+# ===========================================================================
+
+
+def test_control_char_proposed_name_rejected_pre_provider_invite_preserved():
+    """ADDENDUM C: a valid invite token + proposed_name containing a control char (the
+    architect note renders it as a space inside the name; encoded here as TAB U+0009)
+    -> rejected, generic low-cardinality reason, the #821 provider/consume_once was NOT
+    called (proven with a spy provider AND a real nonce store: the nonce stays usable),
+    and the SAME invite works in a later VALID request. FAILS pre-fix."""
+    store = InMemoryNonceStore()
+    spy = SpyProvider()
+    tok = _invite_token(nonce="ctl-char-invite-preserved")
+
+    bad = _clean_body_dict()
+    bad["proposed_name"] = "Good" + chr(0x09) + "Name"  # TAB control char (Cc)
+    r_bad = intake_request(
+        {"X-FoundUp-Invite": tok}, json.dumps(bad).encode("utf-8"),
+        nonce_store=store, now=_now(), secret_provider=_provider(), _provider=spy,
+    )
+    # (a) rejected as a body-shape failure with a generic, low-cardinality reason.
+    assert r_bad.status == "rejected"
+    assert r_bad.reason == "invalid_request"
+    assert r_bad.envelope is None
+    # (b) the #821 provider (which owns consume_once) was NEVER called -> nonce untouched.
+    assert spy.calls == []
+
+    # (c) the SAME invite token still works in a later VALID request (nonce never consumed).
+    r_good = intake_request(
+        {"X-FoundUp-Invite": tok}, _clean_body_bytes(),
+        nonce_store=store, now=_now(), secret_provider=_provider(),
+    )
+    assert r_good.status == "created"
+    assert r_good.envelope["requested_by"] == "bob"
+
+
+def test_control_char_proposed_name_invite_preserved_real_sqlite_store():
+    """ADDENDUM C with a REAL durable nonce store (SQLiteNonceStore): prove the nonce
+    remains claimable after the control-char rejection by consuming it exactly once in a
+    later valid request."""
+    store = SQLiteNonceStore()
+    try:
+        spy = SpyProvider()
+        tok = _invite_token(nonce="ctl-char-sqlite-preserved")
+        bad = _clean_body_dict()
+        bad["proposed_name"] = "Good" + chr(0x00) + "Name"  # NUL control char (Cc)
+        r_bad = intake_request(
+            {"X-FoundUp-Invite": tok}, json.dumps(bad).encode("utf-8"),
+            nonce_store=store, now=_now(), secret_provider=_provider(), _provider=spy,
+        )
+        assert r_bad.status == "rejected"
+        assert r_bad.reason == "invalid_request"
+        assert spy.calls == []  # the single-use invite was never offered to the provider
+
+        r_good = intake_request(
+            {"X-FoundUp-Invite": tok}, _clean_body_bytes(),
+            nonce_store=store, now=_now(), secret_provider=_provider(),
+        )
+        assert r_good.status == "created"
+        assert r_good.envelope["requested_by"] == "bob"
+    finally:
+        store.close()
+
+
+@pytest.mark.parametrize("cp", [0x00, 0x09, 0x0A, 0x0D, 0x1B, 0x7F, 0x85, 0x9F,
+                                0x200B, 0xFEFF, 0x2060, 0x202E, 0x2066, 0x2069])
+def test_control_or_format_char_in_display_field_rejected_pre_provider(cp):
+    # Sweep representative Cc + pinned Cf codepoints: each rejects pre-provider with no
+    # provider call (invite never seen). Covers proposed_name (the display field on the body).
+    store = InMemoryNonceStore()
+    spy = SpyProvider()
+    tok = _invite_token(nonce=f"sweep-{cp:04x}")
+    bad = _clean_body_dict()
+    bad["proposed_name"] = "Good" + chr(cp) + "Name"
+    r = intake_request(
+        {"X-FoundUp-Invite": tok}, json.dumps(bad).encode("utf-8"),
+        nonce_store=store, now=_now(), secret_provider=_provider(), _provider=spy,
+    )
+    assert r.status == "rejected", hex(cp)
+    assert r.reason == "invalid_request", hex(cp)
+    assert spy.calls == [], hex(cp)
+
+
+def test_control_char_in_optional_display_field_rejected_pre_provider():
+    # A control char in an OPTIONAL display field (problem_statement) also rejects
+    # pre-provider -- the body preflight covers every display field, not just the name.
+    store = InMemoryNonceStore()
+    spy = SpyProvider()
+    tok = _invite_token(nonce="ctl-optional-field")
+    bad = _clean_body_dict()
+    bad["problem_statement"] = "line one" + chr(0x0A) + "line two"  # newline (Cc)
+    r = intake_request(
+        {"X-FoundUp-Invite": tok}, json.dumps(bad).encode("utf-8"),
+        nonce_store=store, now=_now(), secret_provider=_provider(), _provider=spy,
+    )
+    assert r.status == "rejected"
+    assert r.reason == "invalid_request"
+    assert spy.calls == []
+
+
+def test_control_char_result_reason_is_generic_no_leak():
+    # ADDENDUM C: the rejection reason is generic/low-cardinality and leaks no raw value.
+    r = _call(
+        headers={"Authorization": f"Bearer {_session_token()}"},
+        body=json.dumps({**_clean_body_dict(), "proposed_name": "Good" + chr(0x202E) + "Name"}).encode("utf-8"),
+    )
+    assert r.status == "rejected"
+    assert r.reason == "invalid_request"  # one of the three enum reasons; no offender echoed
+    assert chr(0x202E) not in r.reason
+    assert "Good" not in r.reason
+
+
+def test_control_char_name_envelope_construction_not_reached():
+    """ADDENDUM D: proposed_name with a control char must reject BEFORE the envelope is
+    constructed. We spy the FoundUpGenesisEnvelope constructor (used by to_genesis_envelope)
+    and assert it is NEVER called for a control-char name -- the old path reached it and
+    laundered the value into a draft. Uses a valid session token so auth is NOT the reason
+    for rejection (only the display-field defect is)."""
+    import modules.ai_intelligence.ai_overseer.src.foundup_genesis.launch_request as lr
+
+    calls = {"n": 0}
+    real_ctor = lr.FoundUpGenesisEnvelope
+
+    def _spy_ctor(*a, **k):
+        calls["n"] += 1
+        return real_ctor(*a, **k)
+
+    lr.FoundUpGenesisEnvelope = _spy_ctor
+    try:
+        bad = _clean_body_dict()
+        bad["proposed_name"] = "Good" + chr(0x00) + "Name"
+        r = _call(
+            headers={"Authorization": f"Bearer {_session_token()}"},
+            body=json.dumps(bad).encode("utf-8"),
+        )
+    finally:
+        lr.FoundUpGenesisEnvelope = real_ctor
+
+    assert r.status == "rejected"
+    assert r.reason == "invalid_request"
+    assert r.envelope is None
+    assert calls["n"] == 0, "envelope constructor was reached for a control-char display field"
+
+
+def test_clean_body_still_creates_draft_after_fix():
+    # Guard against over-broadening: a perfectly clean body (no control/format char) with a
+    # valid token still creates a draft envelope after the fix.
+    r = _call(headers={"Authorization": f"Bearer {_session_token()}"})
+    assert r.status == "created"
+    assert r.envelope["name"] == "Get Kei Truck Marketplace"

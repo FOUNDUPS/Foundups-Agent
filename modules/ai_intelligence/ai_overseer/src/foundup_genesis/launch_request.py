@@ -45,7 +45,11 @@ from .envelope import (
     LifecycleStage,
     is_valid_foundup_id,
 )
-from .validator import VALID_CATEGORIES, validate_genesis_envelope
+from .validator import (
+    VALID_CATEGORIES,
+    validate_genesis_envelope,
+    _reject_display_field,
+)
 
 __all__ = [
     "LaunchRequest",
@@ -83,6 +87,27 @@ _FORBIDDEN_AUTH_FIELDS = frozenset({
 })
 
 _URL_SCHEMES_OK = ("http://", "https://")
+
+# PUBLIC display fields whose RAW value must carry no disallowed control/format
+# character (#823). proposed_name is ALWAYS required (rejected non-empty elsewhere);
+# the rest are optional -- absent/None is allowed, but if PRESENT they must be a
+# string with no disallowed char (Addendum B). The reject runs on the RAW value
+# BEFORE redaction/normalization (DETECTION_ON_RAW_VALUE_PRE_NORMALIZATION).
+_DISPLAY_FIELDS_REQUIRED = ("proposed_name",)
+_DISPLAY_FIELDS_OPTIONAL = ("problem_statement", "intended_users", "requested_type")
+
+
+def _raw_display_value(payload: Any, field_name: str) -> Any:
+    """Read a display field's RAW value (pre-redaction) from a LaunchRequest or dict.
+
+    For a LaunchRequest dataclass we read the ATTRIBUTE directly (NOT to_dict(),
+    which redacts/copies) so the control/format detection sees the original
+    codepoints. For a raw dict we read the key directly (also unredacted). A
+    field that is absent returns None.
+    """
+    if isinstance(payload, dict):
+        return payload.get(field_name)
+    return getattr(payload, field_name, None)
 
 
 class LaunchRequestError(ValueError):
@@ -224,6 +249,21 @@ def validate_launch_request(
     # 5. minimal proposal shape.
     if not str(data.get("proposed_name", "")).strip():
         errors.append("proposed_name is required")
+
+    # 5b. PUBLIC display fields must carry no disallowed control/format char (#823).
+    #     Detection is on the RAW payload value (NOT the redacted `data`), BEFORE any
+    #     normalization/redaction, so a control char can never be silently sanitized
+    #     into a laundered display name at envelope construction. Reject -- never strip.
+    #     proposed_name is always required (always checked); the other display fields
+    #     are optional -- absent/None is allowed, but a PRESENT non-string or a string
+    #     with a disallowed char is rejected (Addendum B).
+    for field_name in _DISPLAY_FIELDS_REQUIRED:
+        _reject_display_field(field_name, _raw_display_value(payload, field_name), errors)
+    for field_name in _DISPLAY_FIELDS_OPTIONAL:
+        raw_value = _raw_display_value(payload, field_name)
+        if raw_value is None:
+            continue  # optional + absent -> allowed (OPTIONAL_ABSENT_FIELDS_PRESERVED)
+        _reject_display_field(field_name, raw_value, errors)
 
     # 6. INTAKE GATE (Addendum C): depends ONLY on the trusted context.
     if not (context.authenticated or context.invite_token_verified):

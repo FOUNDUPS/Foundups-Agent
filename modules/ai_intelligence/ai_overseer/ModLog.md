@@ -6,6 +6,96 @@
 
 ---
 
+## 2026-06-16 - FOUNDUP_GENESIS_NAME_CONTROL_CHAR_REJECT_PHASE1 (Lane A, reject control/format chars in display fields)
+
+**Author**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: independent 5-lane SENTINEL (do NOT self-merge)
+**WSP**: 00, 50/87 (HoloIndex-first), 64 (enhance-before-create), 84 (single shared helper, reuse), 97 (Truth Boundary)
+**Slice**: FOUNDUP_GENESIS_NAME_CONTROL_CHAR_REJECT_PHASE1
+**Base**: `7eb1b8c6c` (origin/main)
+**Motivating finding**: the #823 independent re-review found a control char (e.g. U+0000) in
+`proposed_name` was ACCEPTED by the Phase-1 validators and silently SANITIZED into a normal
+display name at envelope construction (via `_normalize` NFKC + `redact_sensitive`), producing a
+draft FoundUp with a LAUNDERED display name. Public display fields are hostile input; a
+control/format char must be REJECTED before envelope creation, not sanitized.
+
+ARCHITECT-PINNED POLICY (Addendum A; no open fork): in ALL listed display fields, reject every
+Unicode category **Cc** (already covers TAB U+0009, LF U+000A, CR U+000D, NUL U+0000, ESC U+001B,
+DEL U+007F, C1 U+0080-U+009F) PLUS the dangerous **Cf** subset -- zero-width U+200B/200C/200D/FEFF/2060
+and bidi/isolates U+202A-202E, U+2066-2069. Newline in `description`/free-text is NOT exempt this
+phase (it is a Cc char). Reject -- do NOT sanitize/strip/coerce. Detection runs on the RAW value
+BEFORE any normalization/redaction.
+
+- ADD ONE shared helper in `src/foundup_genesis/validator.py` (single definition, reused -- WSP 84):
+  - `_contains_disallowed_display_char(s) -> bool` -- True iff `s` has a Cc codepoint
+    (`unicodedata.category(ch) == "Cc"`) OR a codepoint in `_DISALLOWED_FORMAT_CODEPOINTS`
+    (the pinned 14-codepoint Cf subset). The exact Cc+Cf set is documented in the helper docstring.
+  - `_reject_display_field(field_name, value, errors)` -- appends a SAFE error. A non-string display
+    field is INVALID (`"<field> must be a string ..."`); a string with a disallowed char yields
+    `"<field> contains disallowed control/format character"`. The error NEVER echoes the raw value,
+    `repr(value)`, raw bytes, or the offending character (Addendum B).
+- WIRE the reject in BOTH validators, ADJACENT to existing field checks, BEFORE envelope creation:
+  - `validate_launch_request` (`launch_request.py`): new step **5b** after the proposed_name
+    non-empty check (`launch_request.py:~252-264`). Display fields: `proposed_name` (required) +
+    `problem_statement`/`intended_users`/`requested_type` (optional -- absent/None preserved). The
+    reject reads the RAW payload value via `_raw_display_value` (the dataclass ATTRIBUTE, NOT
+    `to_dict()` which redacts; or the raw dict key), so detection is pre-normalization/redaction.
+  - `validate_genesis_envelope` (`validator.py`): Check 11 required-fields loop
+    (`validator.py:~293-307`) now also rejects a disallowed char in `name`/`tagline`/`description`.
+- TRANSPORT (#823 Addendum C) is covered FOR FREE: the transport preflight runs
+  `validate_launch_request` PRE-PROVIDER, so a control-char display field rejects with `invalid_request`
+  and ZERO `build_intake_context` calls -> the single-use invite nonce is NEVER consumed and the SAME
+  invite works in a later valid request (proven against InMemory AND a real SQLite nonce store).
+- NOT over-broadened (Addendum E): accented Latin, CJK, ordinary punctuation, and emoji (category So)
+  are NOT Cc/Cf and remain ACCEPTED. This is NOT an ASCII-only rule.
+- Phase-2 `intake_auth_provider.py` and the transport `intake_transport.py` are UNCHANGED (the reject
+  lives entirely in the two shared validators).
+
+**Tests** (extended existing allowlisted suites; no new files):
+- `test_foundup_launch_request.py`: per-display-field Cc sweep (00/09/0A/0D/1B/7F/85/9F) + pinned Cf set
+  (200B/200C/200D/FEFF/2060/202A-202E/2066-2069); non-string display field rejected; optional-absent
+  preserved; safe error carries no raw byte/value; negative controls (accented/CJK/punctuation) accepted;
+  Addendum D construction-not-reached (`to_genesis_envelope` raises + envelope ctor spied 0 calls).
+- `test_foundup_genesis_validator.py`: same Cc+Cf sweep on `name`/`tagline`/`description`; newline rejected
+  in `description`; safe error; negatives accepted.
+- `test_intake_transport.py`: Addendum C invite-preservation (InMemory + real SQLite store, spy proves
+  provider 0 calls + nonce reusable); pinned codepoint sweep pre-provider; optional-field control char;
+  generic no-leak reason; Addendum D envelope-construction-not-reached via the transport path.
+- All control/format/Unicode fixtures use `chr(codepoint)` / `\uXXXX` so test SOURCE stays pure ASCII.
+- The Addendum C + D regressions FAIL against pre-fix source (verified by stashing only the two src files:
+  5 representative new tests failed -- envelope built, no rejection -- then restored).
+
+**Results**: affected-package regression
+`test_foundup_launch_request + test_foundup_genesis_validator + test_intake_auth_provider + test_intake_transport`
+= **545 passed** in BOTH modes (heavy `AI_OVERSEER_HEAVY_TESTS=1` and CI). No skip/xfail/error.
+ASCII byte-check: 0 non-ASCII bytes on all created/edited content (pre-existing em-dashes in the
+`validator.py` docstring header are out of scope and untouched). STOP at MERGE_READY for the
+independent SENTINEL gate (do NOT self-merge; left dirty).
+
+**WSP_97 Truth Boundary checklist (17/17 YES):**
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | CONTROL_CHARS_REJECTED_NOT_SANITIZED | YES | `_reject_display_field` appends an error (no strip/coerce); a control-char name -> `not ok` / `LaunchRequestError`, no laundered envelope (test_control_char_rejected_before_envelope_construction) |
+| 2 | REJECT_BEFORE_ENVELOPE_CREATION | YES | step 5b runs inside `validate_launch_request`, which `to_genesis_envelope` calls first and raises on `not ok` -> `FoundUpGenesisEnvelope(...)` never reached (test_control_char_envelope_construction_not_reached_spy: ctor spied 0 calls) |
+| 3 | DISPLAY_FIELDS_COVERED_INTAKE_AND_GENESIS | YES | intake: proposed_name/problem_statement/intended_users/requested_type; genesis: name/tagline/description (test_cc_control_char_rejected_per_display_field, TestDisplayFieldControlChars::test_cc_control_char_rejected) |
+| 4 | DETECTION_ON_RAW_VALUE_PRE_NORMALIZATION | YES | `_raw_display_value` reads the dataclass ATTRIBUTE / raw dict key (NOT `to_dict()` redaction); dataclass-path raw control char rejected (test_control_char_rejected_on_launchrequest_dataclass_raw_value) |
+| 5 | SINGLE_SHARED_HELPER_NOT_DUPLICATED | YES | one `_contains_disallowed_display_char` + `_reject_display_field` in `validator.py`; `launch_request.py` imports `_reject_display_field` (no copy-pasted codepoint set) -- WSP 84 |
+| 6 | ARCHITECT_POLICY_PINNED_CC_AND_CF | YES | rejects all category Cc + exactly the pinned 14 Cf codepoints; `_DISALLOWED_FORMAT_CODEPOINTS == {200B,200C,200D,FEFF,2060,202A-202E,2066-2069}` (test_cf_format_char_rejected_per_display_field; set-equality smoke verified) |
+| 7 | NEWLINE_REJECTED_IN_DESCRIPTION_PHASE1 | YES | LF (Cc) in description/problem_statement rejected (test_newline_rejected_in_problem_statement_phase1, TestDisplayFieldControlChars::test_newline_rejected_in_description_phase1) |
+| 8 | NON_STRING_DISPLAY_FIELDS_REJECTED | YES | int/bool/dict/list/float present in a display field -> `"<field> must be a string"` (test_non_string_display_field_rejected) |
+| 9 | OPTIONAL_ABSENT_FIELDS_PRESERVED | YES | optional display field absent/None in a raw dict is allowed -- no false reject (test_optional_display_field_absent_is_preserved) |
+| 10 | TRANSPORT_INVITE_NOT_CONSUMED_ON_INVALID_DISPLAY_FIELD | YES | control-char name + valid invite -> `invalid_request`, spy provider 0 calls, nonce reusable later (test_control_char_proposed_name_rejected_pre_provider_invite_preserved, ..._real_sqlite_store) |
+| 11 | ENVELOPE_CONSTRUCTION_NOT_REACHED_ON_REJECTED_DISPLAY_FIELD | YES | ctor spied 0 calls on both the direct mapping path and the transport path (test_control_char_envelope_construction_not_reached_spy, test_control_char_name_envelope_construction_not_reached) |
+| 12 | UNICODE_LETTERS_NOT_FALSE_POSITIVE_REJECTED | YES | accented Latin / CJK / ASCII punctuation accepted; emoji (So) not rejected (test_unicode_letters_not_false_positive_rejected x2 suites; emoji smoke) |
+| 13 | NO_RAW_CONTROL_BYTE_IN_ERROR_OR_LOG | YES | error names field+policy class only; offending char / `Good...` value / `repr(value)` never echoed (test_reject_error_never_echoes_raw_control_char x2; transport test_control_char_result_reason_is_generic_no_leak) |
+| 14 | TRANSPORT_REJECTS_PRE_PROVIDER_INVITE_PRESERVED | YES | pinned codepoint sweep + optional field rejects pre-provider with spy 0 calls (test_control_or_format_char_in_display_field_rejected_pre_provider, test_control_char_in_optional_display_field_rejected_pre_provider) |
+| 15 | NO_REGRESSION_FULL_SUITE | YES | 545 passed in both heavy + CI modes across the 4 affected suites |
+| 16 | ASCII_CLEAN | YES | 0 non-ASCII bytes on all created/edited content; fixtures via `chr()`/`\uXXXX` (git-diff-added lines: 0 non-ASCII) |
+| 17 | NO_SKIP_XFAIL | YES | `-rsx` shows `545 passed`, no skip/xfail/error |
+| 18 | FILE_SCOPE_EXACT | YES | only validator.py + launch_request.py (src) + their 3 test suites touched; intake_auth_provider.py / intake_transport.py / __init__.py UNCHANGED |
+
+---
+
 ## 2026-06-16 - FOUNDUP_LAUNCH_REQUEST_INTAKE_TRANSPORT_PHASE3 (Lane A, framework-agnostic intake adapter)
 
 **Author**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: external 0102 + 5-lane SENTINEL (do NOT self-merge)
