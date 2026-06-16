@@ -6,6 +6,194 @@
 
 ---
 
+## 2026-06-16 - FOUNDUP_LAUNCH_REQUEST_INTAKE_TRANSPORT_PHASE3 (Lane A, framework-agnostic intake adapter)
+
+**Author**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: external 0102 + 5-lane SENTINEL (do NOT self-merge)
+**WSP**: 00, 50/87 (HoloIndex-first), 64 (enhance-before-create), 84 (reuse), 97 (Truth Boundary)
+**Slice**: FOUNDUP_LAUNCH_REQUEST_INTAKE_TRANSPORT_PHASE3
+**Base**: `a96c2e8b1` (origin/main; already contains #810 launch_request.py + #821 intake_auth_provider.py)
+**Predecessors**: #810 (FOUNDUP_LAUNCH_REQUEST_PHASE1 pipeline), #821 (AUTH_CONTEXT_PROVIDER_PHASE2 verifier)
+
+The framework-agnostic INTAKE ADAPTER that turns a transport-neutral request
+(headers + cookies + body) into a DRAFT `FoundUpGenesisEnvelope` or a SAFE rejection. It is
+PURE orchestration + token EXTRACTION: it pulls the session/invite token STRINGS only from
+TRANSPORT METADATA (headers/cookies), NEVER the body, then REUSES the EXISTING pipeline --
+`build_intake_context` (#821) -> `validate_launch_request` -> `to_genesis_envelope` (#810).
+It reimplements NONE of that verification/mapping, makes NO entitlement decision, writes NO
+catalog/repo/registry/Kanban, and speaks NO HTTP (imports no web framework). Additive --
+Phase-1 `launch_request.py` and Phase-2 `intake_auth_provider.py` are UNCHANGED (empty git diff).
+
+- ADD `src/foundup_genesis/intake_transport.py` -- public surface:
+  `intake_request(headers, body, *, cookies=None, nonce_store=None, now=None, secret_provider=None, max_body_bytes=16*1024, _provider=None) -> IntakeResult`
+  and `@dataclass IntakeResult(status, envelope, reason, http_status)`. `_provider` is an
+  injection seam (default = `build_intake_context`) so tests spy that the provider is called
+  EXACTLY ONCE without monkeypatching globals (Addendum D). Internal extraction helpers are
+  NOT exported (could leak a token). `intake_request` + `IntakeResult` + `SURFACE_BINDING_SLICE`
+  added to the `foundup_genesis` `__init__` (additive).
+- CRITICAL ORDERING (012's load-bearing requirement -- an invalid proposal must NOT consume a
+  single-use invite). The pipeline is STRICTLY ordered so EVERY body-shape failure is
+  PRE-PROVIDER (zero `build_intake_context` calls -> the invite nonce is never claimed):
+  1. normalize header/cookie NAMES case-insensitively; reject case-collisions [pre-provider]
+  2. enforce `max_body_bytes` BEFORE any decode/parse (oversize -> reject)      [pre-provider]
+  3. parse + validate the proposal body: UTF-8 only, JSON OBJECT only, allowlisted proposal
+     fields only, reject unknown/auth-ish/authority fields, require non-empty proposed_name
+     -- a body that fails THIS gate is rejected with ZERO provider calls          [pre-provider]
+  4. extract session/invite token strings from headers/cookies                  [pre-provider]
+  5. call `build_intake_context` EXACTLY ONCE (the ONLY provider call)           [PROVIDER]
+  6. `validate_launch_request(proposal_dict, context)`                          [post-provider]
+  7. `to_genesis_envelope(...)` -> draft envelope                               [post-provider]
+- PRE-PROVIDER failures (status=rejected, reason=`invalid_request`, ZERO provider calls,
+  invite NOT consumed): oversize body; invalid UTF-8 / non-JSON / non-object JSON; unknown /
+  forbidden / auth-ish proposal field; missing proposed_name; header/cookie case-collision.
+  POST-PROVIDER failures (provider WAS called once, reason=`not_authorized`): the verified
+  context opens no gate (nothing authenticated / invite not verified) -> #810 intake gate
+  fails. Missing/ambiguous tokens do NOT pre-empt the provider -- the per-mechanism token is
+  dropped to `None` and the ONE fail-closed auth decision is still made in #821.
+- HARDENING ADDENDA APPLIED:
+  - (A) HEADER/COOKIE PRECEDENCE + AMBIGUITY: session = Authorization Bearer, else session
+    cookie ONLY if Authorization absent; invite = `X-FoundUp-Invite` header, else invite
+    cookie ONLY if header absent. Multiple Bearer tokens / comma-list / malformed
+    Authorization -> reject that mechanism with NO cookie fallback. Header+cookie present but
+    DIFFER -> reject. Header NAMES case-normalized; case-colliding duplicate names/cookies ->
+    `invalid_request`. Body tokens never participate.
+  - (B) BODY PARSING / ALLOWLIST: JSON OBJECT only (arrays/strings/numbers/bools/null
+    rejected); `max_body_bytes` enforced BEFORE decode/parse; strict UTF-8; a Mapping body is
+    COPIED into a fresh plain dict (no proxy/mutable side effects); raw body never logged.
+    The proposal-field gate REUSES Phase-1 `ALLOWED_LAUNCH_FIELDS` + `_FORBIDDEN_AUTH_FIELDS`
+    + `_scan_auth_fields` + #807 `_scan_authority` + `_normalize` -- applied PRE-provider so an
+    invalid body is rejected BEFORE the provider (Phase-1 `validate_launch_request` also
+    rejects them, but post-provider; we run the SAME helpers earlier to protect the invite).
+  - (C) RESULT IS NOT A SECRET SIDE CHANNEL: `IntakeResult.reason` is low-cardinality enum-like
+    -- exactly one of `created` / `invalid_request` / `not_authorized`. Forged / expired /
+    replayed / missing / malformed tokens are INDISTINGUISHABLE (all -> `not_authorized`); no
+    token/signature/replay/nonce/body text in reason or `repr(result)`.
+  - (D) PROVIDER EXACTLY ONCE, ONLY AFTER BODY GATES: spy seam proves one call on a valid
+    request, ZERO on oversize / malformed-JSON, and that a VALID invite is NOT consumed when
+    the body is invalid (a real `InMemoryNonceStore` shows the nonce is still usable after).
+  - (E) DO NOT NORMALIZE TOKEN VALUES: header NAMES may be case-normalized; token VALUES are
+    NOT lowercased / NFKC-normalized / inner-stripped -- only external whitespace around the
+    WHOLE token is trimmed. Tokens with CR/LF/TAB, internal space, comma, or non-ASCII
+    (fullwidth lookalike) are rejected -- never coerced into a valid `sess.v1`/`invite.v1`.
+    The exact string passed to #821 equals the provided token after boundary-trim only.
+- REUSE (imports, NOT copies): `build_intake_context` (#821, the ONLY token verifier / invite
+  consumer); `validate_launch_request` + `to_genesis_envelope` (#810 pipeline); Phase-1
+  proposal-field policy helpers `ALLOWED_LAUNCH_FIELDS` (launch_request.py:66-74),
+  `_FORBIDDEN_AUTH_FIELDS` (78-83), `_scan_auth_fields` (144-156), `_scan_authority` + `_normalize`
+  (#807 via launch_request.py:37-41). Imports = stdlib (`json`, `dataclasses`, `typing`) + the
+  two sibling intake modules ONLY.
+- NOT ROUTED THROUGH (confused-deputy hazard, verified by direct read): `pfmall/http_api.py`
+  is GET-only (`@app.get` only, zero POST routes); `moltbot_bridge/src/webhook_receiver.py` is
+  a GENERIC OpenClaw router (`POST /webhook/openclaw -> OpenClawDAE.process`) -- routing
+  proposals through it would trust a relayed/generic assertion. No production caller constructs
+  an intake context today (only the two intake test files + `__init__` reference it), so this
+  adapter is the genuinely-missing wiring. It is framework-agnostic and wired into NEITHER.
+- GENERAL SECURITY: tokens ONLY from transport; a body field named `session_token` /
+  `invite_token` / `authenticated` can NEVER authenticate (rejected pre-provider as a
+  forbidden field). No relayed `X-Authenticated` / `on_behalf_of` / vouch header trusted. FAIL
+  CLOSED on any exception -> generic `not_authorized`. The envelope is a DRAFT, RETURNED only.
+- SENTINEL REVIEW FIXES (3 findings; Phase-1 `launch_request.py` + Phase-2
+  `intake_auth_provider.py` STILL UNCHANGED -- only `intake_transport.py` + its test edited):
+  - **FINDING 1 (HIGH) -- single-use invite burned by an invalid proposal.** The old
+    pre-provider gate `_proposal_fields_ok` reused Phase-1's field-allowlist + `_scan_auth_fields`
+    + `_scan_authority` + non-empty name but OMITTED Phase-1's `reference_urls` validation
+    (`_check_url_ref`, launch_request.py:159-170), which only runs POST-provider. So a proposal
+    whose only defect was a bad `reference_urls` entry passed the pre-gate, the provider was
+    called once, the invite nonce was CONSUMED, and validate THEN rejected it -> the invite was
+    permanently burned by a proposal that produced no FoundUp. FIX: the pre-gate is now a
+    COMPLETE SUPERSET of `validate_launch_request`'s PAYLOAD checks via a PAYLOAD PRE-FLIGHT --
+    `validate_launch_request(dict(data), LaunchRequestIntakeContext(authenticated=True))` run
+    BEFORE token extraction / `build_intake_context`. The dummy `authenticated=True` context is a
+    STRICTLY-LOCAL throwaway used ONLY to force the intake gate open so `preflight.ok` reflects
+    PAYLOAD VALIDITY ALONE (fields + auth-scan + authority-scan + `reference_urls` + non-empty
+    name); it is NEVER returned, NEVER the real context, and NEVER reaches the provider (the REAL
+    context still comes from `build_intake_context`, step 6). `validate_launch_request` has no
+    side effects (consumes no nonce), so preflight + the real validate are harmless. ANY payload
+    defect now rejects with ZERO provider calls -> the invite is NOT consumed.
+  - **FINDING 2 (MEDIUM) -- token-value over-trim coerced CR/LF/Unicode-whitespace into validity.**
+    `_trim_outer` and `_parse_single_bearer` used bare `str.strip()`, which strips the FULL
+    Unicode-whitespace class (CR, LF, VTAB 0x0B, FF 0x0C, NBSP U+00A0, U+2003, U+2028, ZWSP
+    U+200B), so a valid token decorated with one of those at a boundary was trimmed to validity
+    and authenticated. FIX (Addendum E -- RFC 7230 OWS = SP / HTAB only): both outer trims now
+    use `.strip(' \t')`; the scheme/token split uses an OWS-only `_split_first_ows` (not
+    `str.split(None,...)`), so a Unicode-whitespace separator cannot be coerced into the Bearer
+    delimiter either. Any residual control/CR/LF/non-ASCII char is then rejected by
+    `_token_value_ok` -> `not_authorized`. Ordinary leading/trailing SP or HTAB still works.
+  - **FINDING 3 (LOW) -- typed/null `proposed_name` evaded the non-empty check.**
+    `{"proposed_name": null}` and typed names (123/true/{}/[]) passed because
+    `str(None).strip() == 'None'` is non-empty, producing an envelope named `None`/`123`/etc. FIX:
+    the pre-gate now requires `proposed_name` to be a NON-EMPTY str INSTANCE (rejects None + non-str
+    types) BEFORE the preflight -- stricter than Phase-1's `str()` coercion, enforced in the ADAPTER
+    (Phase-1 unchanged). Typed/null names reject `invalid_request` with ZERO provider calls.
+- Tests: `tests/test_intake_transport.py` (152 tests, allowlisted in conftest so it runs in CI
+  WITHOUT `AI_OVERSEER_HEAVY_TESTS`). Covers every addendum + all 5 SENTINEL lanes
+  (transport-extraction / body-boundary / auth-oracle-leakage / pipeline-integrity /
+  scope-architecture AST) + positives (header session -> created; header invite -> created +
+  single-use across requests; both; clean body maps to proposal; `requested_by == verified
+  handle`, never a body `requester_handle`). NEW SENTINEL regression tests:
+  `test_payload_defect_rejected_pre_provider_and_invite_not_burned` (8 payload-defect classes
+  incl. all 6 `reference_urls` variants) + `test_bad_reference_urls_is_the_high_finding_regression`
+  + `test_missing_name_payload_defect_does_not_burn_invite` + `test_preflight_dummy_context_is_not_an_auth_bypass`
+  (FINDING 1, each asserts rejected/invalid_request + ZERO provider calls + a REAL nonce store
+  still usable afterward -- created); `test_session_header_{ows,non_ows}_decoration_*` /
+  `test_session_cookie_*_decoration_*` / `test_invite_{header,cookie}_non_ows_decoration_rejected`
+  / `test_invite_header_ows_decoration_accepted` / `test_unicode_separator_not_coerced_into_bearer_delimiter`
+  (FINDING 2, OWS {SP,HTAB} accepted; CR/LF/VTAB/FF/NBSP/U+2003/U+2028/ZWSP rejected on
+  Authorization + session cookie + invite header + invite cookie, via `\uXXXX` escapes);
+  `test_typed_or_null_proposed_name_rejected_pre_provider` + `test_null_name_does_not_produce_none_named_envelope`
+  (FINDING 3, null/int/bool/dict/list -> invalid_request, zero provider calls). The HIGH
+  `reference_urls` tests FAIL on the pre-fix code and PASS after. Forged tokens use the #821
+  `_make_*` signers with an explicit secret via `secret_provider`. AST sweep: no
+  web-framework/network/subprocess imports; only the two sibling intake modules + stdlib. No skip/xfail.
+- VALIDATION: `152 passed` heavy AND CI (no env var). Affected-package regression (transport +
+  intake_auth_provider + foundup_launch_request + foundup_genesis_validator) = `318 passed`,
+  both modes, no regression. New nonce-preservation + trim tests run 5x consecutively =
+  deterministic (`80 passed` each run). ASCII byte-check: 0 non-ASCII on all created/edited files
+  (the fullwidth-lookalike + Unicode-whitespace test fixtures use `\uXXXX` escapes so the source
+  stays pure ASCII).
+  Phase-1 `launch_request.py` AND Phase-2 `intake_auth_provider.py`: empty git diff.
+- **Follow-ups (named, BLOCKED until built):**
+  - `FOUNDUP_LAUNCH_REQUEST_INTAKE_SURFACE_BINDING_PHASE3C` -- bind this adapter to a concrete
+    transport surface (the function that reads a real request and calls `intake_request`).
+  - `FOUNDUP_LAUNCH_REQUEST_ENTITLEMENT_PHASE3B` -- decide what a verified handle is ALLOWED to
+    launch (authorization), deliberately out of scope here (authentication/intake only).
+- STOP at MERGE_READY for the external 0102 + 5-lane SENTINEL gate (do NOT self-merge; left dirty).
+
+**WSP_97 Truth Boundary checklist (29/29 YES):**
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | AUTH_TOKENS_FROM_TRANSPORT_NOT_BODY | YES | tokens extracted only in `_extract_session`/`_extract_invite` from headers/cookies; body session_token field -> `invalid_request` (test_body_session_token_field_cannot_authenticate) |
+| 2 | BODY_IS_PROPOSAL_FIELDS_ONLY | YES | `_proposal_fields_ok` allowlists ALLOWED_LAUNCH_FIELDS; unknown/auth-ish rejected (test_unknown_field_rejected_not_dropped, test_auth_ish_body_field_rejected) |
+| 3 | REUSES_821_PROVIDER_AND_810_PIPELINE_NOT_REIMPLEMENTED | YES | imports build_intake_context / validate_launch_request / to_genesis_envelope; AST test_module_imports_only_sibling_intake_modules_and_stdlib |
+| 4 | SINGLE_USE_INVITE_RESPECTED_ACROSS_REQUESTS | YES | shared InMemoryNonceStore -> 2nd request replays -> not_authorized (test_header_invite_creates_draft_and_is_single_use) |
+| 5 | NO_ENTITLEMENT_DECISION_DEFERRED_3B | YES | no entitlement logic; ENTITLEMENT_SLICE named (test_named_followup_slices_present) |
+| 6 | PRODUCES_DRAFT_NOT_PUBLISHED_NO_CATALOG_REPO_REGISTRY_KANBAN | YES | returns envelope.to_dict() only; AST test_module_makes_no_exec_process_or_network_calls (no write/open/connect) |
+| 7 | REJECTION_REASON_GENERIC_NO_LEAK_NO_ORACLE | YES | reason in {created, invalid_request, not_authorized}; forged/expired/replayed/missing all not_authorized (test_all_auth_failures_share_one_generic_reason) |
+| 8 | HEADER_EXTRACTION_CASE_INSENSITIVE_FAIL_CLOSED | YES | `_normalize_name_map` lowercases names; lower/upper both work (test_lowercase_and_uppercase_header_names_both_work) |
+| 9 | CONFUSED_DEPUTY_RELAYED_AUTH_HEADER_REJECTED | YES | X-Authenticated/X-On-Behalf-Of not trusted (test_relayed_already_authenticated_header_is_not_trusted) |
+| 10 | NO_TOKEN_COOKIE_SECRET_IN_LOGS_OR_REASON | YES | no logging import (AST test_module_has_no_logging_or_print); token not in repr/reason (test_no_token_substring_in_result) |
+| 11 | OVERSIZE_BODY_REJECTED_PRE_PARSE | YES | size checked before decode/parse; spy shows zero provider calls (test_oversize_body_rejected_before_parse) |
+| 12 | NO_WEB_FRAMEWORK_OR_NETWORK_OR_SUBPROCESS_AST | YES | AST test_module_imports_no_web_framework_network_or_subprocess (fastapi/flask/socket/urllib/subprocess banned) |
+| 13 | PHASE1_AND_PHASE2_MODULES_UNCHANGED | YES | empty `git diff` for launch_request.py + intake_auth_provider.py |
+| 14 | SURFACE_BINDING_DEFERRED_AND_NAMED | YES | SURFACE_BINDING_SLICE = FOUNDUP_LAUNCH_REQUEST_INTAKE_SURFACE_BINDING_PHASE3C (test_named_followup_slices_present) |
+| 15 | ASCII_CLEAN | YES | 0 non-ASCII bytes on all 4 created/edited files (fullwidth fixture via `\uXXXX` escapes) |
+| 16 | NO_SKIP_XFAIL | YES | no pytest.mark.skip/xfail in test_intake_transport.py; 64 passed both modes |
+| 17 | FILE_SCOPE_EXACT | YES | only intake_transport.py (new) + test_intake_transport.py (new) + __init__.py + conftest.py (additive) touched |
+| 18 | HEADER_COOKIE_PRECEDENCE_DETERMINISTIC | YES | header value used when present; cookie only if header absent (test_session_cookie_used_only_when_authorization_absent, test_invite_header_takes_precedence_over_cookie) |
+| 19 | HEADER_COOKIE_CONFLICT_REJECTED | YES | header+cookie differ -> reject (test_session_header_cookie_mismatch_rejected, test_invite_header_cookie_mismatch_rejected) |
+| 20 | TOKEN_VALUES_NOT_NORMALIZED_OR_LOGGED | YES | value passed byte-for-byte (outer-trim only) to #821 (test_token_value_preserved_byte_for_byte_to_provider); CR/LF/comma/space/fullwidth rejected |
+| 21 | BODY_JSON_OBJECT_ONLY | YES | `_json_object` rejects array/str/num/bool/null (test_array_body_rejected_pre_provider, test_non_object_json_rejected) |
+| 22 | UNKNOWN_AND_AUTH_BODY_FIELDS_REJECTED | YES | `_proposal_fields_ok` rejects unknown + auth-ish (test_unknown_field_rejected_not_dropped, test_auth_ish_body_field_rejected) |
+| 23 | PROVIDER_ZERO_CALL_ON_INVALID_BODY | YES | spy.calls == [] on oversize/malformed/invalid body (test_provider_zero_calls_on_oversize_body, test_provider_zero_calls_on_malformed_json) |
+| 24 | PROVIDER_EXACTLY_ONCE_ON_VALID_BODY | YES | spy len(calls)==1 on a normal request (test_provider_called_exactly_once_on_valid_request) |
+| 25 | RESULT_REASON_LOW_CARDINALITY_NO_AUTH_ORACLE | YES | reason set is {created, invalid_request, not_authorized} (test_reason_is_low_cardinality_enum, test_all_auth_failures_share_one_generic_reason) |
+| 26 | INVITE_NOT_CONSUMED_BY_INVALID_PROPOSAL + NO_SURFACE_BINDING_CREATED | YES | real nonce store still usable after invalid-body request (test_invalid_body_does_not_consume_invite_nonce); adapter binds to no transport surface (AST sibling-only imports) |
+| 27 | PRE_PROVIDER_GATE_COMPLETE_NO_NONCE_BURN_ON_ANY_PAYLOAD_DEFECT | YES | pre-gate is a COMPLETE SUPERSET of validate_launch_request's PAYLOAD checks via a payload preflight (dummy authenticated context, never the real context); ANY payload defect -- incl. bad reference_urls (file:// / local path / shell metachar / non-string / empty / non-ASCII), unknown/auth field, missing/typed/null name -- rejects with ZERO provider calls and the real invite nonce STILL USABLE (test_payload_defect_rejected_pre_provider_and_invite_not_burned [8 classes], test_bad_reference_urls_is_the_high_finding_regression, test_missing_name_payload_defect_does_not_burn_invite, test_preflight_dummy_context_is_not_an_auth_bypass) |
+| 28 | TOKEN_OUTER_TRIM_OWS_ONLY_NO_CONTROL_OR_UNICODE_WS | YES | outer trim is RFC-7230 OWS (SP/HTAB) only via `.strip(' \t')` + OWS-only scheme/token split (`_split_first_ows`, not str.split(None)); CR/LF/VTAB/FF/NBSP/U+2003/U+2028/ZWSP at either boundary -> not_authorized on Authorization + session cookie + invite header + invite cookie; SP/HTAB still accepted (test_session_header_{ows,non_ows}_decoration_*, test_session_cookie_*_decoration_*, test_invite_{header,cookie}_non_ows_decoration_rejected, test_invite_header_ows_decoration_accepted, test_unicode_separator_not_coerced_into_bearer_delimiter) |
+| 29 | PROPOSED_NAME_NONEMPTY_STRING_TYPE | YES | pre-gate requires proposed_name to be a NON-EMPTY str INSTANCE (rejects None + int/bool/dict/list) BEFORE the preflight, stricter than Phase-1 str() coercion and enforced in the ADAPTER (Phase-1 unchanged); typed/null -> invalid_request, ZERO provider calls (test_typed_or_null_proposed_name_rejected_pre_provider, test_null_name_does_not_produce_none_named_envelope) |
+
+---
+
 ## 2026-06-16 - FOUNDUP_LAUNCH_REQUEST_AUTH_CONTEXT_PROVIDER_PHASE2 (Lane A, trusted intake verifier)
 
 **Author**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: external 0102 (do NOT self-merge)

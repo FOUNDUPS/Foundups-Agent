@@ -1,5 +1,70 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-16] FoundUp Launch Request Intake Transport Phase 3 (Lane A, framework-agnostic intake adapter)
+
+**Change Type**: LIMITED IMPLEMENTATION -- ONE module + tests. A framework-agnostic INTAKE
+ADAPTER that turns a transport-neutral request (headers + cookies + body) into a DRAFT
+`FoundUpGenesisEnvelope` or a SAFE rejection. PURE orchestration + token EXTRACTION: it pulls
+session/invite token STRINGS only from TRANSPORT METADATA (headers/cookies), NEVER the body,
+then REUSES the EXISTING pipeline -- `build_intake_context` (#821) -> `validate_launch_request`
+-> `to_genesis_envelope` (#810). NO entitlement, NO catalog/repo/registry/Kanban write, NO web
+framework / HTTP / network / subprocess. Additive -- Phase-1 `launch_request.py` AND Phase-2
+`intake_auth_provider.py` are UNCHANGED (empty git diff).
+**By**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: external 0102 + 5-lane SENTINEL (do NOT self-merge)
+**WSP References**: WSP 00, 50, 64, 84, 87, 97
+**Slice**: FOUNDUP_LAUNCH_REQUEST_INTAKE_TRANSPORT_PHASE3
+**Base**: `a96c2e8b1` (origin/main; already contains #810 launch_request.py + #821 intake_auth_provider.py)
+**Predecessors**: #810 (FOUNDUP_LAUNCH_REQUEST_PHASE1), #821 (AUTH_CONTEXT_PROVIDER_PHASE2)
+
+**Load-bearing ordering** (012's requirement -- an invalid proposal must NOT consume a
+single-use invite): normalize headers/cookies -> enforce `max_body_bytes` BEFORE parse ->
+parse + validate body (UTF-8, JSON OBJECT, allowlisted proposal fields, reject
+unknown/auth-ish, require proposed_name) -> extract tokens -> `build_intake_context` EXACTLY
+ONCE -> `validate_launch_request` -> `to_genesis_envelope`. EVERY body-shape failure is
+PRE-PROVIDER (`invalid_request`, ZERO provider calls -> invite never consumed); auth/gate
+failures are POST-provider (`not_authorized`). Proven against a real nonce store: an invalid
+body with a valid invite leaves the nonce usable.
+
+**Files**:
+- ADD `modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_transport.py` --
+  `intake_request(headers, body, *, cookies, nonce_store, now, secret_provider, max_body_bytes, _provider) -> IntakeResult`
+  + `@dataclass IntakeResult(status, envelope, reason, http_status)`. `_provider` injection seam
+  (default `build_intake_context`) for the exactly-once spy. Internal extraction helpers NOT exported.
+- ADD `modules/ai_intelligence/ai_overseer/tests/test_intake_transport.py` (64 tests) +
+  allowlist it in `tests/conftest.py` so it runs in CI without the heavy env var.
+- EDIT `modules/ai_intelligence/ai_overseer/src/foundup_genesis/__init__.py` -- additively
+  export `intake_request`, `IntakeResult`, `SURFACE_BINDING_SLICE`.
+
+**Security (Addenda A-E)**: header NAMES case-normalized + case-collision rejected; Authorization
+Bearer > session cookie, X-FoundUp-Invite > invite cookie (cookie only if header absent);
+multiple Bearer / malformed Authorization / header-cookie mismatch rejected with no fallback;
+JSON OBJECT only, size before parse, strict UTF-8, Mapping body copied; proposal-field gate
+REUSES Phase-1 `ALLOWED_LAUNCH_FIELDS`/`_FORBIDDEN_AUTH_FIELDS`/`_scan_auth_fields`/#807
+`_scan_authority`/`_normalize` PRE-provider; reason low-cardinality {created, invalid_request,
+not_authorized} (no auth oracle, no token/secret/nonce/body leak); provider exactly once after
+gates; token VALUES never normalized (CR/LF/comma/space/fullwidth rejected, passed byte-for-byte
+to #821). Tokens ONLY from transport (a body `session_token` field cannot authenticate); relayed
+`X-Authenticated`/`on_behalf_of` not trusted (confused deputy); FAIL CLOSED on any exception.
+
+**NOT routed through** (confused-deputy hazard, verified by direct read): `pfmall/http_api.py`
+is GET-only (zero POST routes); `moltbot_bridge/src/webhook_receiver.py` is a generic OpenClaw
+router. No production caller constructs an intake context today; this adapter is the missing
+wiring and is framework-agnostic (wired into neither).
+
+**Validation**: `64 passed` heavy AND CI; affected-package regression (transport +
+intake_auth_provider + foundup_launch_request + foundup_genesis_validator) = `230 passed`, both
+modes, no regression. ASCII: 0 non-ASCII on all 4 created/edited files. Phase-1 + Phase-2 module
+diffs empty. WSP_97 Truth Boundary checklist 26/26 YES (see ai_overseer ModLog). No skip/xfail.
+
+**Follow-ups (named, BLOCKED until built)**:
+- `FOUNDUP_LAUNCH_REQUEST_INTAKE_SURFACE_BINDING_PHASE3C` -- bind the adapter to a concrete
+  transport surface (the function that reads a real request and calls `intake_request`).
+- `FOUNDUP_LAUNCH_REQUEST_ENTITLEMENT_PHASE3B` -- what a verified handle is ALLOWED to launch.
+
+STOP at MERGE_READY for the external 0102 + 5-lane SENTINEL gate (do NOT self-merge; left dirty).
+
+---
+
 ## [2026-06-16] FoundUp Launch Request Auth Context Provider Phase 2 (Lane A, trusted intake verifier)
 
 **Change Type**: LIMITED IMPLEMENTATION -- ONE module + tests. The trusted server-side verifier that

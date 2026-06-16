@@ -40,6 +40,11 @@ from .intake_auth_provider import (
     ENTITLEMENT_SLICE,
     TRANSPORT_SLICE,
 )
+from .intake_transport import (
+    intake_request,
+    IntakeResult,
+    SURFACE_BINDING_SLICE,
+)
 
 __all__ = [
     "FoundUpGenesisEnvelope",
@@ -64,4 +69,7 @@ __all__ = [
     "HMAC_SECRET_PREVIOUS_ENV",
     "ENTITLEMENT_SLICE",
     "TRANSPORT_SLICE",
+    "intake_request",
+    "IntakeResult",
+    "SURFACE_BINDING_SLICE",
 ]
