@@ -6,6 +6,149 @@
 
 ---
 
+## 2026-06-16 - FOUNDUP_LAUNCH_REQUEST_AUTH_CONTEXT_PROVIDER_PHASE2 (Lane A, trusted intake verifier)
+
+**Author**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP**: 00, 50/87 (HoloIndex-first), 64 (enhance-before-create), 84 (reuse), 97 (Truth Boundary)
+**Slice**: FOUNDUP_LAUNCH_REQUEST_AUTH_CONTEXT_PROVIDER_PHASE2
+**Base**: `973a67e75` (origin/main)
+**Predecessors**: #806 (PFmall/Kanban/WRE launch flow), #807 (Kanban plugin contract), FOUNDUP_LAUNCH_REQUEST_PHASE1
+
+The trusted server-side verifier that POPULATES the Phase-1 `LaunchRequestIntakeContext`.
+It is the ONLY component permitted to set `authenticated` / `invite_token_verified` /
+`requester_handle`. PURE verifier: it sees ONLY two already-extracted token strings
+(session, invite), reads NO payload / PFmall / Kanban / relayed vouch assertion, does no
+HTTP parsing, imports no web framework. FAIL-CLOSED on any error / missing secret /
+malformed / forged / expired token / replayed invite. Additive integration -- Phase-1
+`launch_request.py` behavior is UNCHANGED.
+
+- ADD `src/foundup_genesis/intake_auth_provider.py` -- public surface:
+  `build_intake_context(session_token, invite_token, *, nonce_store=None, now=None, secret_provider=None) -> LaunchRequestIntakeContext`,
+  a `NonceStore` Protocol with the SINGLE atomic method `consume_once(nonce, *, expires_at, subject)`
+  + `InMemoryNonceStore` + durable `SQLiteNonceStore`, a `default_secret_provider()` env reader,
+  and TIME-policy constants `MAX_TTL_SESSION_SECONDS` / `MAX_TTL_INVITE_SECONDS` / `CLOCK_SKEW_SECONDS`.
+  TEST-ONLY mint helpers are `_make_session_token` / `_make_invite_token` (underscore, NOT exported,
+  require an explicit `secret` arg, never read env) -- NON-PRODUCTION-ISSUER (Addendum F).
+- HARDENING ADDENDA APPLIED (012-approved direction, pre-adversarial-review):
+  - (A) TOKEN KIND + VERSION: prefixes are the EXACT literals `sess.v1.` / `invite.v1.`; the
+    kind+version is part of the SIGNED bytes (a kind/version swap breaks the signature). A
+    `sess.v1` token can set ONLY `authenticated`; an `invite.v1` token ONLY `invite_token_verified`.
+    Cross-kind (invite-into-session / session-into-invite), `sess.v2.`, unknown/missing prefix -> fail closed.
+  - (B) UNAMBIGUOUS CANONICALIZATION: every field is INDEPENDENTLY base64url-encoded; the KINDVER
+    prefix is consumed by literal strip (not `.`-split), and the per-kind field count is FIXED
+    (session=3, invite=4), so a `.`/`|`/extra part inside a field can NEVER change field count or
+    meaning. Empty/whitespace subject/handle/nonce rejected; malformed base64 rejected. The same
+    logical token always signs the same exact bytes.
+  - (C) TIME + CLOCK SKEW: `exp` REQUIRED both kinds; `iat` REQUIRED (documented: enables precise
+    MAX-TTL). `CLOCK_SKEW_SECONDS = 0` (single trust domain, documented). Boundary `now == exp` ->
+    EXPIRED/rejected (valid iff `now < exp`, tested). MAX TTL enforced SEPARATELY from exp:
+    `exp - iat <= cap` with caps 3600s sessions / 604800s (7d) invites -- over-TTL rejected even
+    with a valid signature. Future `iat` rejected. (No `nbf` field in this format; documented.)
+  - (D) NONCE STORE = ONE ATOMIC METHOD: Protocol is now `consume_once(...) -> bool` only (no
+    `consume`/`verify` split). SQLite does ONE INSERT inside a transaction; `IntegrityError` ->
+    `False` (no pre-check, no raise escapes). Replay rejected ACROSS two `SQLiteNonceStore`
+    instances on the SAME db file (durable). `expires_at` + `subject` stored as columns.
+  - (E) ENV SECRET SEAM: injectable `secret_provider: () -> (current, previous)`; default reads
+    `os.getenv` (current + `_PREVIOUS`). Tests inject secrets WITHOUT mutating `os.environ`. NEVER
+    loads dotenv, NEVER prints/logs (no `logging` import, AST-asserted). Empty current -> fail
+    closed; previous accepted ONLY for verification, NEVER for signing; both missing -> fail closed.
+  - (F) MINT HELPERS CLASSIFIED: `_`-prefixed, excluded from `__all__` + package `__init__`,
+    explicit-`secret` only, never env, docstring marks them developer/test utilities (issuance
+    policy = `FOUNDUP_LAUNCH_REQUEST_INTAKE_TRANSPORT_PHASE3`).
+- Token model (final): compact ASCII; signed bytes = `KINDVER "." b64url(f0) "." ... "." b64url(fn)`
+  (the whole token minus `".<sig>"`); sig = urlsafe-b64 HMAC-SHA256, constant-time verify (loop does
+  not short-circuit on first match). Session = `sess.v1.b64(subject).b64(iat).b64(exp).sig` -> sets
+  `authenticated`. Invite = `invite.v1.b64(handle).b64(nonce).b64(iat).b64(exp).sig` ->
+  sets `invite_token_verified`, single-use.
+- REUSE (imports/patterns, NOT copies):
+  - HMAC-from-env + `_PREVIOUS` rotation + `hmac.compare_digest` constant-time compare:
+    `security_event_correlator.py:189-190, 1039-1070`.
+  - Fail-closed ORDERED gates + register-nonce-ONLY-after-all-gates-pass (atomic):
+    `capability_token_validator.py:50-86, 490-532, 619-620`.
+  - Handle hygiene (redact then normalize): `kanban_plugin_contract.py:105-112, 123-136`.
+- ANTI-PATTERN AVOIDED (did NOT copy): `magats_economy.py` `verify_claim()` (verifies nonce +
+  signature -> True) and `process_claim()` (consumes the nonce in a SEPARATE later call) =
+  verify/consume SPLIT = TOCTOU double-spend. Here verify-and-consume is ATOMIC in ONE
+  `consume_once` call: the invite nonce is claimed by a `UNIQUE(nonce)` insert (SQLite) only after
+  every prior gate passes; a second use returns `False` (IntegrityError translated, never raised).
+- Security decisions: (a) `os` is imported but used ONLY for `os.getenv` (asserted by a dedicated
+  AST test `test_os_used_only_for_getenv`) -- the secret is read via the injectable provider,
+  never printed/logged/returned; (b) handle is `redact_sensitive` FIRST then `_normalize`
+  (normalize-first would rewrite separators and defeat the `sk-`/`Bearer` credential regexes);
+  (c) a `None` nonce_store falls back to a fresh in-memory store so a missing store can NEVER make
+  replay succeed.
+- Tests: `tests/test_intake_auth_provider.py` (97 tests, allowlisted in conftest so it runs in CI
+  WITHOUT `AI_OVERSEER_HEAVY_TESTS`; +14 over the prior 83: 4 concurrency exactly-once race tests
+  and 10 strict-digit iat/exp parametrizations for the post-review hardening). Affected-package
+  regression `97 + 40 launch-request + 29 genesis-validator = 166 passed`. No skip/xfail.
+- Boundary (AST-proved): no web framework (fastapi/flask/starlette/django/aiohttp/...), no
+  Hermes/OpenClaw/WRE runtime, no network/subprocess, `os` getenv-only, the only file I/O is the
+  local SQLite NonceStore; sanctioned non-stdlib import is the #807 `kanban_plugin_contract`.
+- **Follow-ups (named, BLOCKED until built):**
+  - `FOUNDUP_LAUNCH_REQUEST_INTAKE_TRANSPORT_PHASE3` -- extracts the token strings from a real
+    HTTP request / cookie / header and feeds this verifier (this slice's inputs are already-extracted strings).
+  - `FOUNDUP_LAUNCH_REQUEST_ENTITLEMENT_PHASE3B` -- decides what a verified handle is ALLOWED to
+    launch (authorization), deliberately out of scope here (authentication only).
+- STOP at MERGE_READY for the external 0102 gate.
+
+**Post-review hardening (adversarial 5-lane review):** the replay/nonce lane found a HIGH
+double-spend break -- `SQLiteNonceStore` shared ONE `sqlite3.Connection`
+(`check_same_thread=False`), which is NOT thread-safe at the cursor level, so under
+concurrency the `IntegrityError` was not delivered deterministically and MULTIPLE callers
+received True for the SAME nonce (single-use invite double-spent; one trial even leaked
+`SystemError` from the corrupted shared connection). FIX: `consume_once` now serializes the
+claim with a `threading.Lock` (in-process races) and uses `BEGIN IMMEDIATE` + the on-disk
+`UNIQUE(nonce)` PRIMARY KEY + bounded `OperationalError`-locked retry/backoff (cross-process
+races); it returns True to AT MOST ONE caller per nonce, ever, and NEVER raises. The class
+docstring no longer claims the shared connection's on-disk uniqueness made the RETURN VALUE
+correct -- it states the Lock + BEGIN IMMEDIATE + PRIMARY KEY mechanism precisely.
+`InMemoryNonceStore` made its Lock explicit too. ALSO closed the crypto lane's non-breaking
+nit: `_parse_int_field` now requires the decoded iat/exp to be ASCII digits-only before
+`int()` (rejects sign/whitespace/Unicode-digit coercion). Phase-1 `launch_request.py`
+UNCHANGED. See WSP_97 rows 34-35.
+
+**WSP_97 Truth Boundary checklist (35/35 YES):**
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | PROVIDER_POPULATES_PHASE1_CONTEXT_NOT_PARALLEL_TYPE | YES | returns `LaunchRequestIntakeContext` (imported from launch_request); no new context type |
+| 2 | CONTEXT_BOOLEANS_SET_ONLY_BY_VERIFIED_MECHANISM | YES | `authenticated`/`invite_token_verified` set only after `_verify_session`/`_verify_invite` succeed |
+| 3 | PAYLOAD_NEVER_READ_FOR_AUTH_FACTS | YES | `build_intake_context` has no payload arg (test_provider_has_expected_signature_no_payload_confused_deputy) |
+| 4 | REQUESTER_HANDLE_FROM_VERIFIED_SUBJECT_ONLY | YES | handle taken from verified token only; genesis `requested_by` == verified handle, not payload |
+| 5 | INVITE_TOKEN_SIGNATURE_VERIFIED_HMAC_CONSTANT_TIME | YES | `_verify_sig` uses `hmac.compare_digest`, loop never short-circuits (forged/tampered rejected) |
+| 6 | INVITE_TOKEN_SINGLE_USE_ATOMIC_VERIFY_AND_CONSUME | YES | nonce consumed in same call as verify, last gate; single `consume_once` UNIQUE insert |
+| 7 | REPLAY_REJECTED_VIA_NONCE_REGISTRY | YES | 2nd use -> `consume_once()` False -> rejected, incl. across two SQLite instances on same file |
+| 8 | EXPIRY_ENFORCED | YES | `now >= exp` rejects; `now == exp` boundary tested EXPIRED; `now` param honored |
+| 9 | SESSION_TOKEN_SIGNATURE_VERIFIED_CONSTANT_TIME | YES | session uses same `_verify_sig` constant-time path |
+| 10 | FAIL_CLOSED_ON_EXCEPTION_OR_MISSING_SECRET | YES | whole body wrapped in try/except -> `LaunchRequestIntakeContext()`; empty/missing secret tests |
+| 11 | NO_DOWNGRADE_BETWEEN_MECHANISMS | YES | bad-session+good-invite sets ONLY invite, and vice-versa (2 tests) |
+| 12 | CONFUSED_DEPUTY_VOUCH_REJECTED | YES | no payload/vouch/on_behalf_of param; only token-string + nonce_store/now/secret_provider args |
+| 13 | SECRET_FROM_ENV_WITH_ROTATION_NEVER_PRINTED | YES | `_resolve_secrets` via injectable provider (env default) primary+`_PREVIOUS`; rotation tests |
+| 14 | NO_TOKEN_NONCE_SECRET_IN_LOGS_RETURN_OR_ENVELOPE | YES | no logger; context repr/dict carries no token/secret/nonce (leak test) |
+| 15 | PRODUCED_CONTEXT_OPENS_PHASE1_GATE | YES | `validate_launch_request(clean, ctx).ok` for session and invite |
+| 16 | MAPS_TO_GENESIS_REQUESTED_BY_FROM_CONTEXT | YES | `to_genesis_envelope(...).requested_by == verified handle`, not payload handle |
+| 17 | REUSES_807_AND_VALIDATOR_PATTERNS_NOT_REINVENTED | YES | imports #807 helpers; reuses correlator + validator patterns (cited file:line) |
+| 18 | DID_NOT_COPY_MAGATS_VERIFY_CONSUME_SPLIT | YES | atomic verify-and-consume in one `consume_once` call; no separate process_claim step |
+| 19 | NO_WEB_FRAMEWORK_OR_RUNTIME_IMPORT_AST | YES | AST test bans fastapi/flask/.../hermes/openclaw/wre + dotenv; passes |
+| 20 | PHASE1_CONTRACT_UNCHANGED | YES | `launch_request.py` untouched; integration is additive (git status / git diff --stat empty) |
+| 21 | ENTITLEMENT_DEFERRED_AND_NAMED | YES | `FOUNDUP_LAUNCH_REQUEST_ENTITLEMENT_PHASE3B` named here + as module constant |
+| 22 | TRANSPORT_DEFERRED_AND_NAMED | YES | `FOUNDUP_LAUNCH_REQUEST_INTAKE_TRANSPORT_PHASE3` named here + as module constant |
+| 23 | ASCII_CLEAN | YES | byte-check 0 non-ASCII in module + test (verified) ; ModLog uses `--`/`->` only |
+| 24 | NO_SKIP_XFAIL | YES | 0 skip/xfail in the new suite (83 tests) |
+| 25 | FILE_SCOPE_EXACT | YES | intake_auth_provider.py, test, conftest allowlist, package __init__, ModLog + TestModLog |
+| 26 | TOKEN_KIND_AND_VERSION_ENFORCED | YES | exact `sess.v1.`/`invite.v1.` prefixes, signed; `sess.v2.`/no-prefix/unknown-prefix rejected; kindver in signed bytes (kindver-swap-breaks-signature test) |
+| 27 | SESSION_INVITE_TOKEN_CONFUSION_REJECTED | YES | invite-into-session and session-into-invite both fail closed (kind-locked `_verify_session`/`_verify_invite`) |
+| 28 | UNAMBIGUOUS_CANONICALIZATION_INDEPENDENT_B64URL_FIELDS | YES | each field b64url-encoded, fixed per-kind count; `.extra`/`.`/`|` inside a field cannot change parsing; malformed b64 rejected |
+| 29 | EMPTY_OR_WHITESPACE_SUBJECT_HANDLE_NONCE_REJECTED | YES | `_clean_handle` + nonce `.strip()` reject empty/whitespace (6 tests) |
+| 30 | TIME_POLICY_IAT_REQUIRED_MAXTTL_BOUNDARY_SKEW_ZERO | YES | iat+exp required; `now==exp` EXPIRED; future-iat rejected; MAX TTL (3600s/7d) rejected with valid sig; `CLOCK_SKEW_SECONDS=0` |
+| 31 | NONCE_STORE_SINGLE_ATOMIC_CONSUME_ONCE_DURABLE | YES | Protocol has only `consume_once`; SQLite ONE INSERT/txn, IntegrityError->False (no raise escapes), durable across two instances on same file |
+| 32 | ENV_SECRET_READ_ONLY_NO_DOTENV_NO_PRINT | YES | injectable `secret_provider`, env default via `os.getenv`; tests inject without mutating `os.environ`; no dotenv/logging/print (AST-asserted); empty current -> fail closed; previous verify-only |
+| 33 | MINT_HELPERS_NON_PRODUCTION_ISSUER_NOT_EXPORTED | YES | `_make_session_token`/`_make_invite_token` underscore, not in `__all__`/`__init__`, require explicit `secret`, never read env (Addendum F tests) |
+| 34 | NONCE_STORE_CONCURRENCY_SAFE_EXACTLY_ONCE | YES | `SQLiteNonceStore.consume_once` returns True to AT MOST ONE caller per nonce under maximal concurrency (threads AND separate instances/processes on same file) and NEVER raises: in-process `threading.Lock` serializes the claim so the shared connection cannot deliver `IntegrityError` nondeterministically; cross-process `BEGIN IMMEDIATE` + on-disk `UNIQUE(nonce)` PRIMARY KEY + bounded `OperationalError`-locked retry. `InMemoryNonceStore` Lock-guarded too. Evidence: `test_sqlite_consume_once_exactly_one_true_under_thread_race`, `test_build_intake_context_same_invite_verified_exactly_once_under_race`, `test_sqlite_two_instances_same_file_exactly_one_true_under_race`, `test_inmemory_consume_once_exactly_one_true_under_thread_race` (24 threads x 8 trials, Barrier-synchronized; all four FAIL against the prior single-shared-connection impl -- reproduced 11/16+ True for one nonce -- and PASS against the fix; exactly 1 row per nonce) |
+| 35 | INT_FIELDS_STRICT_DIGITS_ONLY | YES | `_parse_int_field` requires the decoded iat/exp to be ASCII digits-only (`^[0-9]+$` via `isascii()`+`isdigit()`) BEFORE `int()`: a leading `+`/`-` sign, surrounding/embedded whitespace, or any non-digit (incl. Unicode digits) is rejected, never silently coerced. Evidence: `test_session_iat_with_sign_or_whitespace_rejected`, `test_session_exp_with_sign_or_whitespace_rejected`, `test_strict_digit_iat_still_accepted` |
+
+---
+
 ## 2026-06-15 - FOUNDUP_LAUNCH_REQUEST_PHASE1 (Lane A, public intake seam)
 
 **Author**: 0102 (Worker-Lane A / AUTHOR) | Commander: 012 | Gate: external 0102 (do NOT self-merge)

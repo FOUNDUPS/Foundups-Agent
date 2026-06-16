@@ -29,6 +29,7 @@ _ALLOWLIST = {
     "test_foundup_genesis_validator.py",
     "test_autofix_executor_security.py",
     "test_foundup_launch_request.py",
+    "test_intake_auth_provider.py",
 }
 
 _HEAVY_TARGETS = [
