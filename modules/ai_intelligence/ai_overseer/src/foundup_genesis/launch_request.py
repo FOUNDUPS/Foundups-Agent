@@ -167,13 +167,21 @@ class LaunchValidationResult:
 # ---------------------------------------------------------------------------
 
 def _scan_auth_fields(node: Any, trail: str, errors: List[str]) -> None:
-    """Recursively reject any key that asserts authentication/authority (Addendum C)."""
+    """Recursively reject any key that asserts authentication/authority (Addendum C).
+
+    SAFE-ERROR POLICY (FOUNDUP_LAUNCH_REQUEST_ERROR_NO_RAW_ECHO_PHASE1, #826 invariant):
+    the rejection names the POLICY CLASS only -- it NEVER echoes the offending raw key,
+    its repr(), or the user-built `trail` path. A hostile key (control chars / lookalikes
+    / secret-shaped names) can therefore never surface as a raw substring in the error
+    string. Field-family locality is preserved by naming the auth/authority class
+    (Addendum C); the operator learns WHICH class failed without seeing the raw value.
+    """
     if isinstance(node, dict):
         for key, value in node.items():
             if isinstance(key, str) and _normalize(key) in _FORBIDDEN_AUTH_FIELDS:
                 errors.append(
-                    f"{trail}{key}: public payload cannot self-assert auth/authority "
-                    f"(intake facts come from the trusted context, not the request)"
+                    "payload contains a forbidden auth/authority field "
+                    "(intake facts come from the trusted context, not the request)"
                 )
             _scan_auth_fields(value, f"{trail}{key}.", errors)
     elif isinstance(node, (list, tuple, set)):
@@ -192,7 +200,10 @@ def _check_url_ref(field_name: str, value: Any, errors: List[str]) -> None:
         errors.append(f"{field_name}: reference must be a public http(s) URL (no local paths / file://)")
     bad = set(";|&$`><(){}\n\r\t\\\"'") & set(value)
     if bad:
-        errors.append(f"{field_name}: shell/code metacharacters in reference: {sorted(bad)}")
+        # SAFE-ERROR POLICY (#826 invariant): name the field + rule class only. NEVER echo
+        # the offending metachar LIST (sorted(bad)) -- those chars are user-controlled and
+        # include control bytes (\n \r \t). field_name keeps reference_urls[i] index locality.
+        errors.append(f"{field_name} contains shell/code metacharacters")
 
 
 def _slug_foundup_id(name: str) -> str:
@@ -230,10 +241,14 @@ def validate_launch_request(
     data = payload.to_dict() if hasattr(payload, "to_dict") else dict(payload)
 
     # 1. payload may carry ONLY allowed proposal fields.
+    # SAFE-ERROR POLICY (#826 invariant): a forbidden/unknown key is arbitrary user input
+    # (control chars / lookalikes / secret-shaped names), so it is NEVER echoed -- not the
+    # value, not repr(key). The error names the field CLASS only (Addendum C: field-class
+    # locality preserved; a SAFE count is allowed, never the key).
     allowed_norm = {_normalize(a) for a in ALLOWED_LAUNCH_FIELDS}
     for key in data:
         if not isinstance(key, str) or _normalize(key) not in allowed_norm:
-            errors.append(f"forbidden/unknown payload field: {key!r}")
+            errors.append("payload contains a forbidden or unknown field")
 
     # 2. payload cannot self-assert auth/authority (Addendum C).
     _scan_auth_fields(data, "", errors)
