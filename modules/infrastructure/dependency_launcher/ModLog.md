@@ -7,6 +7,61 @@
 
 ## Change Log
 
+### 2026-06-17: Non-Destructive Attach Recovery - Open a Tab, Do NOT Kill (Phase 1)
+
+**By:** 0102 (Worker-Lane: ATTACH-AUTHOR)
+**Slice:** BROWSER_ATTACH_RECOVERY_NO_KILL_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 50 (Pre-Action), WSP 84 (Code Reuse), WSP 87 (Navigation), WSP 97 (Truth Boundary)
+
+**Problem (012 live-observed):** When the operator-prepared Chrome on 9222 is UP
+(DevTools /json/version works) but has NO discoverable page target (/json
+page-list empty -> Selenium raises "unable to discover open pages"),
+`connect_chrome_with_retry` ran `taskkill /F /IM chrome.exe` and relaunched a
+fresh Chrome. This DESTROYED the operator's authenticated/prepared window,
+relaunched a Chrome whose auth/active-channel state is uncertain, and confounded
+every live test. Edge had the identical destructive path.
+
+**Solution (NO_KILL contract):** On the discover-pages (no-page) condition, RECOVER
+NON-DESTRUCTIVELY:
+1. New helper `open_devtools_page(port, url='about:blank')` opens a normal tab via
+   the DevTools HTTP endpoint - HTTP PUT `/json/new?about:blank` (modern Chrome/Edge)
+   with GET fallback. Reuses the existing `urllib.request` + `/json` pattern from
+   `is_devtools_responding` (no new HTTP machinery, no new dependency).
+2. `connect_chrome_with_retry` / `connect_edge_with_retry` no-page branch now calls
+   `open_devtools_page`, re-checks `is_devtools_responding`, and RETRIES the attach.
+3. If a tab cannot be opened (endpoint blocked), they log a CLEAR actionable error
+   ("open a normal tab in the debug Chrome/Edge, or relaunch with
+   --remote-allow-origins") and return None - NEVER taskkill. The success attach
+   path is unchanged.
+
+**Reuse:** Checked for an existing DevTools open-tab helper. `foundups_selenium/src/
+devtools_mcp_adapter.py:new_page()` (:510) exists but requires an already-initialized
+driver/MCP backend (`self._driver.execute_script("window.open")`), so it CANNOT
+recover the pre-attach no-driver case. No repo code uses `/json/new` or
+`Target.createTarget`. Reused the in-file urllib/`/json` HTTP pattern instead.
+
+**Out of scope / follow-up:** The genuinely-DevTools-DOWN path (port not answering
+/json/version twice) still taskkills+relaunches; left in place, logged loudly, and
+tracked as **BROWSER_ATTACH_RECOVERY_DEVTOOLS_DOWN_PHASE2**.
+
+**Files Changed:**
+- `src/dae_dependencies.py`: added `open_devtools_page()`; rewrote the no-page branch
+  of `connect_chrome_with_retry` and `connect_edge_with_retry` to be non-destructive.
+- `tests/test_attach_recovery_no_kill.py`: 11 mock-only tests (no live browser).
+- `INTERFACE.md`: documented `open_devtools_page` + recovery behavior.
+
+**Tests:** `python -m pytest modules/infrastructure/dependency_launcher/` -> 11 passed.
+No-kill proof: the core `test_*_no_kill_on_discover_pages` tests FAIL on the base
+SHA (which invokes `taskkill /F /IM chrome.exe` at the discover-pages branch and
+has no `open_devtools_page`); they PASS on this change.
+
+**HONEST LIVE GAP:** Whether PUT/GET `/json/new` actually opens a discoverable tab
+on real Chrome 149 is MOCK-validated ONLY. 012 live-validates by re-running with an
+operator-prepared 9222 that has no normal tab: expect a NEW tab opened + successful
+attach + NO "killing stale Chrome" in the logs.
+
+---
+
 ### 2026-03-22: Multi-Model Auto-Loading (WSP 77 Agent Coordination)
 
 **By:** 0102

@@ -65,6 +65,31 @@ Launch LM Studio for UI-TARS vision.
 
 ---
 
+### `connect_chrome_with_retry(max_retries=3, retry_delay=2.0, relaunch_on_fail=True) -> Optional[WebDriver]`
+
+Attach Selenium to the debug-port Chrome with retries and DevTools verification.
+
+**Non-destructive recovery (Phase 1):** if DevTools is UP but exposes no
+discoverable page target (Selenium "unable to discover open pages"), this opens a
+normal tab via `open_devtools_page()` and retries the attach. It does NOT taskkill
+the operator's prepared Chrome on this path; if a tab cannot be opened it logs a
+clear actionable error and returns `None`. The genuinely-DevTools-DOWN path still
+relaunches (follow-up: BROWSER_ATTACH_RECOVERY_DEVTOOLS_DOWN_PHASE2).
+
+### `connect_edge_with_retry(max_retries=3, retry_delay=2.0, relaunch_on_fail=True) -> Optional[WebDriver]`
+
+Same as `connect_chrome_with_retry` for Edge (port 9223), including the
+non-destructive no-page recovery (no `msedge.exe` taskkill on the no-page path).
+
+### `open_devtools_page(port: int, url: str = "about:blank", timeout: float = 3.0) -> bool`
+
+Open a new normal page/tab via the DevTools HTTP endpoint (`PUT /json/new?<url>`
+with `GET` fallback). Used to recover the "unable to discover open pages" condition
+without killing the browser. Returns `True` if DevTools reported a new target,
+`False` otherwise. Never raises, never kills any process.
+
+---
+
 ### `is_chrome_running() -> bool`
 
 Check if Chrome debug port is responding.
