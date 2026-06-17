@@ -1314,3 +1314,86 @@ def test_valid_invite_not_consumed_by_each_hostile_class(label, field, value):
     )
     assert r_good.status == "created", label
     assert r_good.envelope["requested_by"] == "bob", label
+
+
+# ===========================================================================
+# FOUNDUP_KANBAN_CONTRACT_ERROR_NO_RAW_ECHO_PHASE1 -- ADDENDUM C DOWNSTREAM RECHECK.
+#
+# launch_request imports the #807 _scan_authority from kanban_plugin_contract.py, which the
+# transport runs as its PRE-PROVIDER body preflight. After the kanban scanner's MESSAGE
+# rewrite, an authority-bearing body must STILL: (a) be rejected, (b) collapse to the generic
+# low-cardinality reason invalid_request (no auth oracle), (c) leak NO raw key/value/trail/
+# repr/control-byte into the result/repr/serialized dict, and (d) NOT consume a valid
+# single-use invite (real SQLiteNonceStore + spy provider). Hostile fixtures are source-ASCII.
+# ===========================================================================
+
+
+def test_kanban807_authority_body_low_cardinality_and_no_raw_echo():
+    """Authority-bearing body via the IMPORTED #807 scanner -> generic invalid_request and
+    NO raw key/value/trail/repr/control-byte in the transport result (Addendum C)."""
+    leak_val = "z9LEAKvalueZ9"
+    body = _clean_body_dict()
+    # A clean ALLOWED field carrying a #807 authority marker VALUE -> _scan_authority
+    # (value-carries-authority path). The raw value must NOT surface anywhere.
+    body["problem_statement"] = "please " + leak_val + " create_repo right now"
+    r = _call(headers={"Authorization": f"Bearer {_session_token()}"},
+              body=json.dumps(body).encode("utf-8"))
+    assert r.status == "rejected"
+    assert r.reason == "invalid_request"  # low-cardinality; no auth oracle
+    blob = _result_blob(r)
+    # No raw value, no #807 scanner phrasing, no marker class token reaches the result.
+    assert leak_val not in blob
+    assert "create_repo" not in blob
+    assert "value carries a forbidden authority marker" not in blob
+    assert "class:" not in blob
+
+
+def test_kanban807_authority_key_body_low_cardinality_no_echo():
+    # A forbidden authority KEY (presence) carrying a leak marker also collapses to the
+    # generic reason; neither the marker class nor the user key reaches the result.
+    body = _clean_body_dict()
+    # category is an allowed field whose VALUE normalizes to contain the gate_passed marker,
+    # so the #807 scanner's value-authority path runs end-to-end with a user-controlled token.
+    body["category"] = "gate_passed_z9LEAKkeyZ9"
+    r = _call(headers={"Authorization": f"Bearer {_session_token()}"},
+              body=json.dumps(body).encode("utf-8"))
+    assert r.status == "rejected"
+    assert r.reason == "invalid_request"
+    blob = _result_blob(r)
+    assert "z9LEAKkeyZ9" not in blob
+    assert "forbidden authority field present" not in blob
+    assert "gate_passed" not in blob
+
+
+def test_kanban807_authority_body_does_not_consume_valid_invite_sqlite_spy():
+    """ADDENDUM C: a VALID invite + an authority-bearing body (rejected by the IMPORTED #807
+    scanner pre-provider) must NOT consume the single-use invite. Proven with a spy provider
+    (zero calls) AND a REAL SQLiteNonceStore (the nonce is still claimable afterward)."""
+    store = SQLiteNonceStore()
+    try:
+        spy = SpyProvider()
+        tok = _invite_token(nonce="kanban807-authority-preserve")
+        leak_val = "z9LEAKvalueZ9"
+        bad = _clean_body_dict()
+        bad["problem_statement"] = "set " + leak_val + " merge_token please"  # #807 value-authority
+        r_bad = intake_request(
+            {"X-FoundUp-Invite": tok}, json.dumps(bad).encode("utf-8"),
+            nonce_store=store, now=_now(), secret_provider=_provider(), _provider=spy,
+        )
+        assert r_bad.status == "rejected"
+        assert r_bad.reason == "invalid_request"
+        assert spy.calls == []  # provider never called -> single-use invite never offered
+        blob = _result_blob(r_bad)
+        assert leak_val not in blob
+        assert "merge_token" not in blob
+        assert "value carries a forbidden authority marker" not in blob
+
+        # The invite SURVIVES: a later VALID request consumes it exactly once -> created.
+        r_good = intake_request(
+            {"X-FoundUp-Invite": tok}, _clean_body_bytes(),
+            nonce_store=store, now=_now(), secret_provider=_provider(),
+        )
+        assert r_good.status == "created"
+        assert r_good.envelope["requested_by"] == "bob"
+    finally:
+        store.close()

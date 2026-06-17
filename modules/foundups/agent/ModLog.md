@@ -1,5 +1,97 @@
 # Agent Module ModLog
 
+## 2026-06-18 - Kanban Plugin Contract no-raw-echo for the #807 authority scanner (FOUNDUP_KANBAN_CONTRACT_ERROR_NO_RAW_ECHO_PHASE1)
+
+**Author**: 0102 (AUTHOR worker) | Commander: 012
+**WSP References**: WSP 22, WSP 50, WSP 84, WSP 97
+**Base**: `edbd90642` (origin/main; contains #810/#821/#823/#824/#826/#830)
+**Predecessor**: #830 launch_request slice DEFERRED the imported #807 authority-scanner echo.
+
+### Why
+
+The #830 launch_request no-raw-echo slice DEFERRED `kanban_plugin_contract.py::_scan_authority`
+(the #807 AUTHORITY BOUNDARY shared by `validate_launch_request` AND `validate_card_spec` /
+`validate_worker_task_spec` / `validate_evidence_packet`). Its error messages echoed raw
+user-controlled keys / values / `repr()` / nested trail. This slice COMPLETES the no-raw-echo
+invariant for the authority-scan path. MESSAGE TEXT ONLY -- the authority-detection LOGIC is
+byte-identical (proven mechanically).
+
+### Changed (message text only -- error sites in kanban_plugin_contract.py)
+
+`_scan_authority` (the #807 boundary):
+- non-string key: `f"{trail}: non-string key {key!r}"` -> `"non-string key rejected"`
+- non-printable key: `f"{trail}{key}: non-ASCII / non-printable key rejected"` -> `"non-ASCII / non-printable key rejected"`
+- verified=true: `f"{trail}{key}: verified=true is forbidden ..."` -> `"verified=true is forbidden (advisory-until-verified)"`
+- source_authority promotion: `f"{trail}{key}: '{value}' is a source_authority promotion ..."` -> `"source_authority promotion is forbidden (only monorepo_poc)"`
+- promotion flag: `f"{trail}{key}: promotion flag is forbidden"` -> `"promotion flag is forbidden"`
+- forbidden authority field (KEY presence): `f"{trail}{key}: forbidden authority field '{m}' (presence)"` -> `f"forbidden authority field present (class: {m})"` (KEEP `{m}`, DROP `{trail}{key}`)
+- shell-string command: `f"{trail}{key}: shell-string command is forbidden ..."` -> `"shell-string command is forbidden (argv-or-null only)"`
+- value-carried authority: `f"{trail}: value carries authority '{carried}': {node!r}"` -> `f"value carries a forbidden authority marker (class: {carried})"` (KEEP `{carried}`, DROP `{trail}`+`{node!r}`)
+
+`_check_path` (drop raw `value!r` and the offending char list, keep the fixed field label + rule):
+- `path/ref must be printable ASCII: {value!r}` -> `path/ref must be printable ASCII`
+- `absolute/UNC path forbidden: {value!r}` -> `absolute/UNC path forbidden`
+- `drive path forbidden: {value!r}` -> `drive path forbidden`
+- `path traversal '..' forbidden: {value!r}` -> `path traversal '..' forbidden`
+- `shell metacharacters in path/ref: {sorted(bad)}` -> `shell metacharacters in path/ref forbidden`
+
+`validate_card_spec`:
+- `risk_class '{data.get('risk_class')}' not in {...}` -> `risk_class not in allowed set {sorted(ALLOWED_RISK_CLASSES)}` (drop raw value; keep fixed allowed-set taxonomy)
+
+The fixed `{m}` / `{carried}` tokens come from the `_AUTHORITY_MARKERS` taxonomy (NOT user input) and
+are RETAINED (Addendum-B message locality). The user-controlled nested `trail` is still computed for
+recursion descent but is NEVER interpolated into a message.
+
+### Authority-detection parity proof (logic byte-identical)
+
+1. AST control-flow SKELETON parity: every string literal AND every f-string (`JoinedStr`) is
+   uniformly blanked, so an f-string -> plain-string message rewrite is invisible; ANY branch /
+   condition / call / marker-set change would change the hash. The blanked skeleton SHA-256 of the
+   current file equals the frozen origin/main baseline (`f2ee0e26...`). SELF-CONTAINED -- no
+   `git show` at runtime (the #830 shallow-CI lesson).
+2. NAMED-category authority battery (Addendum A): ~42 fixtures across the #807 corpus
+   (forbidden-authority keys by PRESENCE, ~13 normalized evasions incl. camelCase/separator/UPPER/
+   fullwidth, ~10 authority-by-value, source_authority promotion, verified=true nested,
+   shell-command keys, non-string/non-ASCII keys). Each fixture is mapped to its expected violation
+   CLASS by INPUT DESIGN; the battery asserts rejection WITHOUT parsing the human-readable message
+   (a weakened detector fails even though the message text changed).
+3. No-raw-echo battery: seeds sentinel leak tokens into keys, nested trails, values, and paths;
+   asserts no raw content / repr / control-byte appears in any produced message.
+
+### Downstream
+
+- `validate_launch_request` (#810) imports `_scan_authority`; its SOURCE is UNCHANGED. The #823
+  intake_transport caller-regression (real `SQLiteNonceStore` + spy) confirms an authority-bearing
+  payload is rejected, `IntakeResult.reason == "invalid_request"` (low-cardinality, no auth oracle),
+  no raw key/value/trail leaks into the result/repr/serialized dict, and a valid single-use invite
+  is NOT consumed. `validate_card_spec` / `validate_worker_task_spec` / `validate_evidence_packet`
+  still reject exactly the same inputs (outcome-only assertions; only error TEXT changed).
+- Two `test_foundup_launch_request.py` tests that pinned the #830-DEFERRED old #807 echo text were
+  updated (text-only; outcome assertions kept) to pin the now-LANDED safe rule-only messages.
+
+### WSP_97 Truth Boundary Checklist
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | SCAN_AUTHORITY_ERRORS_NEVER_ECHO_RAW_KEY_VALUE_TRAIL | YES | `_scan_authority` 8 sites reworded; no-raw-echo battery seeds leak tokens into key/trail/value -> 0 leaks |
+| 2 | AUTHORITY_MARKER_CLASS_KEPT_RAW_DROPPED | YES | `forbidden authority field present (class: {m})` + `value carries a forbidden authority marker (class: {carried})`; `test_marker_class_token_is_taxonomy_not_user_input` |
+| 3 | AUTHORITY_DETECTION_LOGIC_BYTE_IDENTICAL | YES | AST skeleton SHA-256 == frozen origin/main baseline `f2ee0e26...`; NAMED-category battery rejects all fixtures |
+| 4 | FULL_AUTHORITY_AND_EVASION_BATTERY_PARITY | YES | ~42-fixture battery: presence keys, ~13 normalized evasions, ~10 by-value, source_authority/verified/promotion/shell/non-string/non-ASCII |
+| 5 | ERROR_CATEGORY_BASELINE_NOT_MESSAGE_DERIVED | YES | category mapped by INPUT DESIGN (`_AUTHORITY_BATTERY`); pass/fail = rejection, never message parse |
+| 6 | SAFE_MESSAGE_LOCALITY_PRESERVED | YES | `test_safe_message_locality_preserved` asserts distinct rule families, not one bland phrase |
+| 7 | DOWNSTREAM_VALIDATORS_OUTCOME_UNCHANGED | YES | `test_downstream_validators_reject_authority_payloads` + clean-shape accept (outcome-only) |
+| 8 | LAUNCH_REQUEST_SOURCE_UNCHANGED | YES | `git diff` launch_request.py empty; only its imported `_scan_authority` messages changed |
+| 9 | TRANSPORT_LOW_CARDINALITY_RECHECKED | YES | `test_kanban807_authority_body_low_cardinality_and_no_raw_echo`: reason == invalid_request, no leak |
+| 10 | VALID_INVITE_NOT_CONSUMED_BY_AUTHORITY_PAYLOAD | YES | `test_kanban807_authority_body_does_not_consume_valid_invite_sqlite_spy` (real SQLiteNonceStore + spy) |
+| 11 | AST_SKELETON_PARITY_SELF_CONTAINED_NO_GIT | YES | `test_authority_logic_skeleton_matches_origin_baseline` uses frozen hash, no runtime `git show` |
+| 12 | NESTED_TRAIL_NOT_ECHOED | YES | trail computed for descent only; never interpolated; battery seeds `_LEAK_TRAIL` -> 0 leaks |
+| 13 | REPR_VALUE_NOT_ECHOED | YES | all `{value!r}`/`{node!r}`/`{key!r}` removed; `_assert_no_leak` checks `repr(n) not in blob` |
+| 14 | CONTROL_BYTES_NOT_IN_ERRORS | YES | `_assert_no_leak` asserts no `ord(c) < 32 or == 127` in any produced error |
+| 15 | NO_OTHER_807_SLICE_DRIFT | YES | `git status` shows only kanban_plugin_contract.py + 3 test files; scope-guard sources empty diff |
+| 16 | ASCII_CLEAN | YES | byte-check 0 non-ASCII on all 4 edited files; fixtures via `chr()`/`\uXXXX` |
+| 17 | NO_SKIP_XFAIL | YES | grep: no `pytest.skip`/`xfail`/`skipif` in edits; all suites fully run |
+| 18 | FILE_SCOPE_EXACT | YES | kanban_plugin_contract.py + test_kanban_plugin_contract.py + test_intake_transport.py + test_foundup_launch_request.py |
+
 ## 2026-06-13 - Kanban Plugin Contract (WRE-side typed seam) (HERMES_KANBAN_PLUGIN_CONTRACT_IMPL_PHASE1)
 
 **Author**: 0102 (Worker-Lane A) | Commander: 012

@@ -549,7 +549,7 @@ def test_reference_metachars_not_echoed():
         e == "reference_urls[0] contains shell/code metacharacters" for e in res.errors
     ), f"expected safe metachar message with index locality; got {res.errors}"
     # No metachar list, no raw URL, no offending chars in ANY launch_request-local error.
-    local = [e for e in res.errors if "carries authority" not in e]  # exclude #807 (deferred)
+    local = _launch_request_local_errors(res.errors)  # exclude IMPORTED #807 lines
     for e in local:
         assert _HOSTILE_METACHAR_URL not in e
         assert "sorted(" not in e
@@ -577,14 +577,14 @@ def test_intake_gate_message_is_safe():
 
 def _launch_request_local_errors(errors):
     """Drop errors that originate in the IMPORTED #807 _scan_authority (kanban_plugin_
-    contract.py). Those are DEFERRED to FOUNDUP_KANBAN_CONTRACT_ERROR_NO_RAW_ECHO_PHASE1
-    (Addendum E) and are NOT this slice's local sites. We identify them by their stable
-    #807 message stems."""
+    contract.py), leaving only launch_request-LOCAL sites. The #807 no-raw-echo fix LANDED
+    (FOUNDUP_KANBAN_CONTRACT_ERROR_NO_RAW_ECHO_PHASE1), so these stems now match the SAFE
+    rule-only messages (the fixed marker class is retained as taxonomy)."""
     _807_STEMS = (
-        "value carries authority",
-        "is a source_authority promotion",
-        "forbidden authority field",
-        "non-string key",
+        "value carries a forbidden authority marker",
+        "source_authority promotion is forbidden",
+        "forbidden authority field present",
+        "non-string key rejected",
         "non-ASCII / non-printable key",
         "verified=true is forbidden",
         "promotion flag is forbidden",
@@ -651,54 +651,58 @@ def test_launchrequesterror_unknown_field_key_not_echoed():
 
 # --- ADDENDUM E: #807 _scan_authority echo is DEFERRED, not modified ---------
 
-def test_807_scan_authority_echo_is_documented_and_deferred():
-    """ADDENDUM E: the IMPORTED #807 _scan_authority (kanban_plugin_contract.py) DOES echo
-    raw user input (key/value/repr) for authority-class rejections reachable from
-    validate_launch_request. This slice does NOT modify #807; it records the behavior and
-    names the follow-up FOUNDUP_KANBAN_CONTRACT_ERROR_NO_RAW_ECHO_PHASE1. This test PINS the
-    deferred behavior so a future change to #807 is noticed. It also confirms the
-    launch_request-LOCAL errors for the SAME payload are themselves safe."""
+def test_807_scan_authority_no_raw_echo_after_deferral_landed():
+    """The IMPORTED #807 _scan_authority (kanban_plugin_contract.py) authority-class echo was
+    DEFERRED by the #830 launch_request slice; FOUNDUP_KANBAN_CONTRACT_ERROR_NO_RAW_ECHO_PHASE1
+    has now LANDED that fix. The source_authority-promotion rejection is still produced (outcome
+    unchanged) but the message is now the SAFE rule-only phrasing -- no raw value/key/trail.
+    The raw promotion value ('external_proto') must NOT appear in ANY error."""
     payload = {"proposed_name": "X", "category": "marketplace", "source_authority": "external_proto"}
     res = validate_launch_request(dict(payload), _authed())
     assert not res.ok
-    # The #807 echo IS present (documented deferral, not a regression of THIS slice).
-    assert any("is a source_authority promotion" in e and "external_proto" in e for e in res.errors), \
-        "expected the documented #807 echo; if absent, #807 was changed -- update the deferral note"
-    # The launch_request-LOCAL errors (everything except the #807 line) are leak-free.
-    local = _launch_request_local_errors(res.errors)
-    _all_errors_leak_free(local, "source_authority")
+    # The #807 rejection still fires, now with the SAFE rule-only message (no raw value).
+    assert any(e == "source_authority promotion is forbidden (only monorepo_poc)" for e in res.errors), \
+        "expected the safe #807 rule-only message after the no-raw-echo fix landed"
+    # No raw promotion value leaks from ANY error (the old echo carried 'external_proto').
+    for e in res.errors:
+        assert "external_proto" not in e
 
 
 def test_807_non_ascii_key_echo_is_documented_and_deferred():
-    """ADDENDUM E: a control/bidi-decorated KEY trips the IMPORTED #807 non-ASCII-key echo
-    (kanban_plugin_contract.py 'non-ASCII / non-printable key rejected'), which echoes the
-    raw key. DEFERRED, not modified. The launch_request-LOCAL allowed-fields message for the
-    SAME key is still safe (the class name, never the key)."""
+    """A control/bidi-decorated KEY trips the IMPORTED #807 non-printable-key rejection
+    (kanban_plugin_contract.py 'non-ASCII / non-printable key rejected'). After the no-raw-echo
+    fix LANDED, this message is the SAFE rule-only phrasing -- the raw key is NOT echoed by it
+    OR by the launch_request-LOCAL allowed-fields message (the class name, never the key)."""
     payload = {"proposed_name": "X", "category": "marketplace", _HOSTILE_FIELD_KEY_CTRL: "v"}
     res = validate_launch_request(dict(payload), _authed())
     assert not res.ok
-    # Documented #807 echo present (the deferred site).
-    assert any("non-ASCII / non-printable key rejected" in e for e in res.errors), \
-        "expected the documented #807 non-ASCII-key echo; if absent, #807 was changed"
+    # Safe #807 rule-only message present, EXACTLY (no raw key/trail prefix any more).
+    assert any(e == "non-ASCII / non-printable key rejected" for e in res.errors), \
+        "expected the safe #807 non-printable-key message after the no-raw-echo fix landed"
     # Launch-LOCAL message for this key is the safe class name (no raw key).
     assert any(e == "payload contains a forbidden or unknown field" for e in res.errors)
-    local = _launch_request_local_errors(res.errors)
-    _all_errors_leak_free(local, _HOSTILE_FIELD_KEY_CTRL)
+    # The raw key leaks from NO error -- not the #807 line, not the launch-local line.
+    _all_errors_leak_free(res.errors, _HOSTILE_FIELD_KEY_CTRL)
 
 
-def test_807_module_not_modified_by_this_slice():
-    """ADDENDUM E: this slice changes only launch_request.py. The #807 contract source is
-    untouched -- its known raw-echo lines are still present verbatim (proves no silent
-    expansion of scope into kanban_plugin_contract.py)."""
+def test_807_module_no_longer_carries_raw_echo_lines():
+    """The #807 no-raw-echo fix (FOUNDUP_KANBAN_CONTRACT_ERROR_NO_RAW_ECHO_PHASE1) has LANDED:
+    the DEFERRED raw-echo lines that interpolated the user key/value/trail are GONE from
+    kanban_plugin_contract.py, replaced by SAFE rule-only messages (the fixed marker class is
+    retained as taxonomy). This pins the completed invariant from the launch_request side."""
     contract = (
         Path(__file__).resolve().parents[3]
         / "foundups" / "agent" / "src" / "kanban_plugin_contract.py"
     )
     src = contract.read_text(encoding="utf-8")
-    # These raw-echo lines are the DEFERRED #807 sites; they must still be present (unchanged).
-    assert "is a source_authority promotion (only monorepo_poc)" in src
-    assert "value carries authority" in src
-    assert "non-string key" in src
+    # The OLD raw-echo f-string fragments must be ABSENT (no {trail}/{key}/{value}/{node!r}).
+    assert "is a source_authority promotion (only monorepo_poc)" not in src  # old: f"...'{value}'..."
+    assert "value carries authority '" not in src                            # old: f"...'{carried}': {node!r}"
+    assert "non-string key {" not in src                                     # old: f"...{key!r}"
+    # The SAFE rule-only replacements ARE present (class kept for the marker taxonomy).
+    assert "source_authority promotion is forbidden (only monorepo_poc)" in src
+    assert "value carries a forbidden authority marker (class: " in src
+    assert "non-string key rejected" in src
 
 
 # ===========================================================================
@@ -741,8 +745,9 @@ def _categorize(err: str) -> str:
         return "display_type"
     if "contains disallowed control/format character" in e:
         return "display_control_char"
-    if ("carries authority" in e or "source_authority promotion" in e or "forbidden authority field" in e
-            or "non-string key" in e or "non-ASCII / non-printable key" in e or "verified=true is forbidden" in e
+    if ("value carries a forbidden authority marker" in e or "source_authority promotion is forbidden" in e
+            or "forbidden authority field present" in e or "non-string key rejected" in e
+            or "non-ASCII / non-printable key" in e or "verified=true is forbidden" in e
             or "promotion flag is forbidden" in e or "shell-string command is forbidden" in e):
         return "authority_807"
     return "UNCLASSIFIED::" + e
