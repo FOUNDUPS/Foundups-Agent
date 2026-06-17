@@ -2,6 +2,25 @@
 
 ## Public API
 
+### FusionAdapter (advisory Fusion worker-panel, CONTRACT-ONLY)
+
+```python
+from modules.communication.moltbot_bridge.src.fusion_adapter import (
+    FusionAdapter,            # runtime_checkable Protocol: run(FusionRequest) -> ModelContributionReceipt
+    FusionRequest,            # digests/refs only; panel_models bounded 1-8; use FusionRequest.for_mock(...)
+    FusionAnalysis,           # consensus / contradictions / partial_coverage / unique_insights / blind_spots
+    ModelContributionReceipt, # advisory_not_canonical=True; redaction_status=BLOCKED_PENDING_REDACTION_GATE
+    FusionMode,               # MOCK/DRY_RUN execute; ALIAS/SERVER_TOOL/LOCAL_FALLBACK raise RedactionGateBlocked
+    FusionProvider,           # OPENROUTER/LOCAL/MOCK (only MOCK reachable in this slice)
+    MockFusionAdapter,        # deterministic mock/dry-run; no network, no key read, no OpenRouter client
+    RedactionGateBlocked,     # raised for any live/future mode
+)
+```
+
+Contract-only (`HERMES_FUSION_ADAPTER_CONTRACT_PHASE1`). Fusion output is ADVISORY and never canonical.
+Live OpenRouter is `BLOCKED_PENDING_REDACTION_GATE`. Spec:
+`docs/audits/architecture/OPENROUTER_FUSION_FOUNDUPS_INTEGRATION_AUDIT_PHASE1.md`.
+
 ### WebhookReceiver
 
 ```python

@@ -1,5 +1,38 @@
 # ModLog - moltbot_bridge
 
+## 2026-06-16: FusionAdapter Contract -- Hermes Advisory Worker-Panel (mock/dry-run) (W6)
+
+**Author**: 0102 (Worker-Lane W6, AUTHOR + internal SENTINEL)
+**WSP**: 11 (Interface), 50 (Pre-Action), 97 (Truth Boundary)
+**Slice**: `HERMES_FUSION_ADAPTER_CONTRACT_PHASE1`
+**Predecessor**: #829 (`OPENROUTER_FUSION_FOUNDUPS_INTEGRATION_AUDIT_PHASE1`, landed)
+
+### Summary
+
+Builds the typed FusionAdapter CONTRACT recommended by the #829 audit (Section 7) and corrects the stale
+OpenRouter `landed` claim. Contract-only: structurally incapable of a live OpenRouter call.
+
+- ADD `src/fusion_adapter.py` -- typed `FusionRequest` / `FusionAnalysis` / `ModelContributionReceipt` +
+  `MockFusionAdapter` (deterministic mock/dry-run). The module never imports `os` (cannot read keys) and
+  imports no network client. Live modes (alias/server_tool/local_fallback) are declared but raise
+  `RedactionGateBlocked`. The receipt forces `advisory_not_canonical=True` and
+  `redaction_status=BLOCKED_PENDING_REDACTION_GATE`, and stores digests/refs -- never raw prompt/context.
+- ADD `tests/test_fusion_adapter.py` -- 20 tests incl a NON-VACUOUS AST guard (negative control proves it
+  fails on a forbidden import / getenv("OPENROUTER...") / subprocess / file write), a no-network proof
+  (socket patched to raise), panel bounds (1-8), future-mode raises, receipt truth boundary, manifest honesty.
+- EDIT `config/openclaw_integration_manifest.json` -- OpenRouter `status: "landed"` -> `"parked"` (the
+  manifest schema enum is landed/planned/parked/removed; the precise `contract_pending` /
+  `BLOCKED_PENDING_REDACTION_GATE` wording is carried in the new `notes` field). No `landed`/`ready` overclaim remains.
+- ADD `modules/infrastructure/openrouter_client/README.md` -- honest dormant marker (the shell's source was
+  reverted in `6f952f6b9`; only untracked `.pyc` linger and are intentionally left alone).
+- EDIT `INTERFACE.md` -- document the FusionAdapter public contract surface.
+
+### Boundaries honored
+
+No live OpenRouter call, no API key read, no new dependency, no runtime wiring, no merge/CABR/payout/
+source-authority. Privacy stays `BLOCKED_PENDING_REDACTION_GATE`. Tests: 42 pass (20 new + 22 manifest
+regression). Internal SENTINEL ran. Opened as DRAFT; STOP at MERGE_READY (external 0102 gate).
+
 ## 2026-06-02: PolicyFlags Write-Back Remediation — Deserialization Sanitization (W6)
 
 **Author**: 0102 (Worker-Lane W6)

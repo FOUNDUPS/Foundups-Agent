@@ -87,7 +87,8 @@
       "name": "OpenRouter",
       "type": "standalone_llm_router",
       "owner_module": "modules/infrastructure/openrouter_client",
-      "status": "landed",
+      "status": "parked",
+      "notes": "contract_pending / BLOCKED_PENDING_REDACTION_GATE. Live OpenRouter client is dormant: modules/infrastructure/openrouter_client is an empty/reverted shell. The FusionAdapter contract lives at modules/communication/moltbot_bridge/src/fusion_adapter.py (mock/dry-run only). Status 'parked' is the manifest-schema honest value (enum: landed/planned/parked/removed); it is NOT 'landed'. See docs/audits/architecture/OPENROUTER_FUSION_FOUNDUPS_INTEGRATION_AUDIT_PHASE1.md.",
       "default": "off",
       "env_keys": [
         "OPENROUTER_BASE_URL",
