@@ -516,9 +516,14 @@ def run_hybrid_test(video_id: str = None) -> Dict[str, Any]:
 # Test Cases
 # =============================================================================
 
+@pytest.mark.live_browser
 @pytest.mark.integration
 class TestStage3bHybridIndexing:
-    """Stage 3b: Hybrid video indexing tests."""
+    """Stage 3b: Hybrid video indexing tests.
+
+    LIVE BROWSER: attaches to a signed-in Chrome on port 9222 and navigates
+    YouTube Studio / a watch page. Skipped by default; pass --run-live to run.
+    """
 
     def test_approach_a_studio_download(self):
         """Test: Download video via YouTube Studio."""
