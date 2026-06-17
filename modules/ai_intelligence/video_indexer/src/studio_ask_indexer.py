@@ -45,6 +45,22 @@ except ImportError:  # pragma: no cover - import guard mirrors reply_executor
     get_human_behavior = None
     HUMAN_BEHAVIOR_AVAILABLE = False
 
+# WSP 84 REUSE: shadow-DOM deep finder (returns REAL WebElements). YouTube Studio
+# is shadow-rooted, so flat find_element silently fails on the live page even
+# when the element exists (#817 fixed selector NAMES but not the TRAVERSAL model).
+# first_deep tries shadow-piercing CSS chains FIRST, then a flat fallback - so the
+# PRIMARY path is shadow traversal while light-DOM pages still resolve.
+try:
+    from modules.infrastructure.foundups_selenium.src.shadow_dom_finder import (
+        find_deep,
+        first_deep,
+    )
+    SHADOW_FINDER_AVAILABLE = True
+except ImportError:  # pragma: no cover - import guard
+    find_deep = None
+    first_deep = None
+    SHADOW_FINDER_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 INDEX_ROOT = Path("memory") / "video_index"
@@ -121,23 +137,50 @@ class StudioAskIndexer:
     # This is the CANONICAL path for Phase 1. The legacy watch-page Ask button
     # and the old Studio popup menu are DEMOTED to fallback (see SELECTORS).
     # =========================================================================
+    # =========================================================================
+    # LIVE-GROUNDED SELECTORS (STUDIO_ASK_SHADOW_DOM_SELECTORS_PHASE1)
+    # ---------------------------------------------------------------------
+    # 012 captured these from the REAL shadow-rooted Studio DOM, so they are the
+    # source-of-truth PRIMARY targets (resolved via the shadow-DOM deep finder).
+    # The old aria-label="Ask Studio" flat selector does NOT exist on the live
+    # page -- the real entry is the creator-chat "spark" trigger. Each entry is
+    # either a CSS string (single deep step) or a list (a CROSS-SHADOW chain for
+    # shadow_query). The legacy flat selectors are kept ONLY as documented
+    # fallbacks (so light-DOM pages + the existing mock drivers still resolve).
+    # =========================================================================
+
+    # Edit-surface / title field (contains div#textbox[contenteditable]).
+    TITLE_TEXTAREA_SELECTOR = "ytcp-social-suggestions-textbox#title-textarea"
+
     ASK_STUDIO_SELECTORS = {
         # Header entry button that opens the Ask Studio dialog.
+        # PRIMARY (live-grounded): the "spark" creator-chat trigger chain
+        # ytcp-creator-chat-trigger -> ytcp-icon-button (NOT aria-label="Ask Studio").
         "header_button": [
+            ["ytcp-creator-chat-trigger", "ytcp-icon-button"],
+            ["ytcp-creator-chat-trigger", "ytcp-creator-chat-spark", "ytcp-icon-button"],
+            "ytcp-creator-chat-trigger",
+            # Legacy flat fallbacks (resilience only; not present on live page).
             'ytcp-icon-button[aria-label="Ask Studio"]',
             'ytcp-icon-button[aria-label*="Ask Studio"]',
             'button[aria-label="Ask Studio"]',
             'button[aria-label*="Ask Studio"]',
         ],
-        # Dialog container shown after clicking the header button.
+        # Dialog container shown after clicking the header button. Live-observed:
+        # the dialog HOST computes visible:false while its CHILDREN are visible,
+        # so callers confirm "opened" via the PROMPT BOX / STREAM, not the dialog.
         "dialog": [
+            "tp-yt-paper-dialog#dialog",
+            "ytcp-dialog",
+            # Legacy flat fallback.
             'ytcp-dialog#dialog',
-            'ytcp-dialog',
         ],
-        # Contenteditable prompt box inside the dialog.
+        # Contenteditable prompt box inside the dialog (live-grounded class).
         "prompt_box": [
-            'div[contenteditable][aria-label="Ask something"]',
+            'div.ytcpCreatorChatEntityAttachmentInlineFlowPromptBox[contenteditable="true"][aria-label="Ask something"]',
             'div.ytcpCreatorChatEntityAttachmentInlineFlowPromptBox[contenteditable="true"]',
+            # Legacy flat fallbacks.
+            'div[contenteditable][aria-label="Ask something"]',
             'div[contenteditable="true"][aria-label*="Ask"]',
         ],
         # Send / submit button inside the dialog. PREFERRED submission path
@@ -149,14 +192,30 @@ class StudioAskIndexer:
             'button[aria-label*="Send"]',
             'button[aria-label*="Submit"]',
         ],
-        # Streaming / response container candidates (DOM text, NOT clipboard).
+        # Streaming / response container (live-grounded). DOM text, NOT clipboard.
         "response_stream": [
-            '#PAcreator_chat_streaming',
+            "ytcp-engagement-panel-section-list-renderer#PAcreator_chat_streaming",
+            "#PAcreator_chat_streaming",
+            # Legacy flat fallbacks.
             'div.ytcpCreatorChatEntityResponse',
             'ytcp-creator-chat-response',
             '[class*="CreatorChat"][class*="Response"]',
         ],
     }
+
+    # Zero-state suggestion view ("How can Ask Studio help me? Summarize comments
+    # ...") rendered in the stream BEFORE any real answer. Live caveat: this must
+    # NOT be scraped as the answer -- the real answer renders after submit.
+    ZERO_STATE_SELECTOR = "ytcp-ask-studio-zero-state-view-model"
+
+    # Markers proving a scraped stream block is the ZERO-STATE suggestion list,
+    # not a real answer. If the stabilized text is ONLY zero-state, fail closed.
+    ZERO_STATE_MARKERS = (
+        "how can ask studio help",
+        "how can i help you",
+        "summarize comments",
+        "summarize the comments",
+    )
 
     # Refusal / no-answer markers. If the STABILIZED Ask Studio response contains
     # any of these, we fail closed (success=False) and persist NOTHING - a refusal
@@ -480,9 +539,30 @@ Give a brief category and a few mood/genre topics only.""",
             logger.warning(f"[STUDIO-ASK] JSON parse failed: {e}")
             return {"topics": [], "segments": [], "content_category": "other", "raw": response_text}
     
-    def _first_element(self, selectors: List[str]):
-        """Return the first element matching any selector in the list, else None."""
+    def _first_element(self, selectors: List[Any]):
+        """
+        Return the first element resolving from the selector list, else None.
+
+        PRIMARY: shadow-DOM deep traversal (first_deep) - each entry is a CSS
+        string (single deep step) OR a list (a cross-shadow chain). This pierces
+        YouTube Studio's shadow roots and returns a REAL WebElement (so #825's
+        human_type + #827's .click() keep working). FALLBACK: a flat
+        find_element per string selector (cheap, documented) so light-DOM pages
+        and the existing mock drivers still resolve. The PRIMARY mechanism is
+        shadow traversal, not the flat fallback.
+        """
+        # PRIMARY: shadow-piercing deep find (handles css strings + chains).
+        if SHADOW_FINDER_AVAILABLE and first_deep is not None:
+            try:
+                el = first_deep(self.driver, selectors)
+                if el is not None:
+                    return el
+            except Exception:
+                pass
+        # FALLBACK: flat light-DOM find for plain string selectors only.
         for selector in selectors:
+            if not isinstance(selector, str):
+                continue
             try:
                 el = self.driver.find_element("css selector", selector)
                 if el:
@@ -519,6 +599,19 @@ Give a brief category and a few mood/genre topics only.""",
         lowered = text.lower()
         return any(marker in lowered for marker in StudioAskIndexer.REFUSAL_MARKERS)
 
+    @staticmethod
+    def _is_zero_state(text: str) -> bool:
+        """
+        True if the stream text is the Ask Studio ZERO-STATE suggestion list
+        ("How can Ask Studio help me? / Summarize comments ...") and NOT a real
+        answer. Live caveat: the stream renders this zero-state BEFORE any
+        submit, so it must never be scraped/persisted as the answer.
+        """
+        if not text:
+            return False
+        lowered = text.lower()
+        return any(marker in lowered for marker in StudioAskIndexer.ZERO_STATE_MARKERS)
+
     async def _scrape_ask_response(self) -> str:
         """
         Scrape the Ask Studio response text, waiting for it to STABILIZE.
@@ -543,6 +636,14 @@ Give a brief category and a few mood/genre topics only.""",
                     text = (el.text or "").strip()
                 except Exception:
                     text = ""
+
+            # ZERO-STATE GUARD: the stream shows the suggestion list
+            # ("How can Ask Studio help me? / Summarize comments ...") BEFORE any
+            # real answer. Never treat that as content - keep polling for the
+            # real answer (so a zero-state is never returned/persisted).
+            if text and self._is_zero_state(text):
+                await self._human_delay(1.0, 0.2)
+                continue
 
             if text:
                 if text == response_text:
@@ -811,16 +912,23 @@ Give a brief category and a few mood/genre topics only.""",
     def _edit_surface_present(self) -> bool:
         """
         True if an owner/edit-surface element (the title field) is present on
-        the Studio video-edit page. Reuses the SAME title selector the edit
-        flow already relies on (ask_about_video title read).
+        the Studio video-edit page.
+
+        PRIMARY (live-grounded): the shadow-rooted title textarea
+        ytcp-social-suggestions-textbox#title-textarea via the deep finder (the
+        flat input#title-field silently fails on the live shadow DOM). FALLBACK:
+        the legacy flat input#title-field / h1.title so light-DOM pages and the
+        existing mock drivers still resolve.
         """
-        try:
-            el = self.driver.find_element(
-                "css selector", "input#title-field, h1.title"
-            )
-            return el is not None
-        except Exception:
-            return False
+        el = self._first_element(
+            [
+                self.TITLE_TEXTAREA_SELECTOR,
+                "input#title-field, h1.title",
+                "input#title-field",
+                "h1.title",
+            ]
+        )
+        return el is not None
 
     async def _verify_channel_context(self, video_id: str) -> bool:
         """
@@ -989,13 +1097,23 @@ Give a brief category and a few mood/genre topics only.""",
                     error="wrong_channel_context",
                 )
 
-            # Studio title is in the title input field.
+            # Studio title is in the (shadow-rooted) title textarea. Use the
+            # deep finder PRIMARY (ytcp-social-suggestions-textbox#title-textarea),
+            # flat input#title-field / h1.title as documented fallback.
             title = ""
-            try:
-                title_el = self.driver.find_element("css selector", "input#title-field, h1.title")
-                title = title_el.get_attribute("value") or title_el.text
-            except Exception:
-                pass
+            title_el = self._first_element(
+                [
+                    self.TITLE_TEXTAREA_SELECTOR,
+                    "input#title-field, h1.title",
+                    "input#title-field",
+                    "h1.title",
+                ]
+            )
+            if title_el is not None:
+                try:
+                    title = title_el.get_attribute("value") or title_el.text
+                except Exception:
+                    title = ""
 
             used_ask_studio = False
             ask_clicked = False
@@ -1003,10 +1121,13 @@ Give a brief category and a few mood/genre topics only.""",
             # ---- PRIMARY PATH: Ask Studio header button + dialog ----
             if self._open_ask_studio():
                 await self._human_delay(2.0, 0.3)
-                # Confirm the dialog appeared, then find the contenteditable prompt box.
-                dialog = self._first_element(self.ASK_STUDIO_SELECTORS["dialog"])
+                # CONFIRM-OPEN via CHILDREN, not the dialog host: live-observed the
+                # tp-yt-paper-dialog#dialog host computes visible:false while its
+                # prompt box + stream are visible. So "opened" == the prompt box
+                # (and/or stream) resolved, regardless of the dialog host's state.
                 prompt_box = self._first_element(self.ASK_STUDIO_SELECTORS["prompt_box"])
-                if dialog is not None and prompt_box is not None:
+                stream = self._first_element(self.ASK_STUDIO_SELECTORS["response_stream"])
+                if prompt_box is not None and stream is not None:
                     try:
                         # NEWLINE-SAFE human-cadence typing (no bare "\n" -> no
                         # implicit ENTER per line), then submit EXACTLY ONCE.
