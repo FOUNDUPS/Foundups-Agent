@@ -19,7 +19,7 @@ Pillow==10.1.0
 requests==2.31.0
 
 # Video/Audio Download (X integration)
-yt-dlp==2024.3.10
+yt-dlp==2026.6.9
 
 # Ethereum Integration (testnet only)
 web3==6.15.0
