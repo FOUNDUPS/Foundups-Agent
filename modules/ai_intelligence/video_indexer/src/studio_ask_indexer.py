@@ -25,6 +25,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from urllib.parse import urlparse
 
 from modules.infrastructure.shared_utilities.youtube_channel_registry import get_channel_by_id
 from modules.ai_intelligence.video_indexer.src.video_index_store import (
@@ -678,6 +679,22 @@ Give a brief category and a few mood/genre topics only.""",
             return True
         return any(low.startswith(p) for p in cls.ACCEPTABLE_NORMAL_URL_PREFIXES)
 
+    @staticmethod
+    def _is_studio_youtube_url(url: str) -> bool:
+        """
+        True ONLY if the URL host is EXACTLY studio.youtube.com. A prefix check
+        like startswith("https://studio.youtube.com") is bypassable by a host
+        such as https://studio.youtube.com.evil.com (CodeQL
+        py/incomplete-url-substring-sanitization); parse + compare the host.
+        """
+        if not url:
+            return False
+        try:
+            host = (urlparse(url.strip()).hostname or "").lower()
+        except Exception:
+            return False
+        return host == "studio.youtube.com"
+
     def _select_studio_target(self) -> bool:
         """
         STEP 0: select/verify a browser window/tab that is YouTube Studio or a
@@ -715,11 +732,10 @@ Give a brief category and a few mood/genre topics only.""",
                 url = driver.current_url or ""
             except Exception:
                 continue
-            low = url.strip().lower()
             if self._is_non_studio_target(url):
                 # Explicit glic / Gemini panel / RotateCookies -> never use.
                 continue
-            if low.startswith("https://studio.youtube.com"):
+            if self._is_studio_youtube_url(url):
                 studio_handle = handle
                 break
             if normal_handle is None and self._is_acceptable_target(url):

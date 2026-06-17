@@ -620,3 +620,26 @@ def test_action_id_and_output_schema_preserved():
     # Input dataclass fields unchanged (channel_id remains the existing field).
     in_fields = set(a.StudioAskSingleVideoInput.__dataclass_fields__.keys())
     assert in_fields == {"video_id", "browser", "channel_id", "persist"}
+
+
+def test_is_studio_youtube_url_is_host_anchored():
+    """STEP0 studio-target detection must match the HOST exactly, not a URL
+    prefix. Regression for CodeQL py/incomplete-url-substring-sanitization:
+    a startswith("https://studio.youtube.com") check accepted look-alike hosts
+    like https://studio.youtube.com.evil.com -- those must be rejected.
+    """
+    f = StudioAskIndexer._is_studio_youtube_url
+    # Real Studio URLs (host == studio.youtube.com) are accepted.
+    assert f("https://studio.youtube.com/video/vidX/edit") is True
+    assert f("https://studio.youtube.com/channel/UC123/videos/upload") is True
+    assert f("https://studio.youtube.com") is True
+    assert f("HTTPS://STUDIO.YOUTUBE.COM/video/x") is True  # host is case-insensitive
+    # Bypass / look-alike hosts (the vulnerability) are rejected.
+    assert f("https://studio.youtube.com.evil.com/video/x") is False
+    assert f("https://evil.com/https://studio.youtube.com") is False
+    assert f("https://notstudio.youtube.com/x") is False
+    assert f("https://studio.youtube.com@evil.com/x") is False
+    # Non-URLs / empties are rejected (never raise).
+    assert f("") is False
+    assert f("chrome://glic") is False
+    assert f("about:blank") is False

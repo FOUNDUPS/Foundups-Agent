@@ -49,6 +49,14 @@ browser by default.
   Boundary: tests/ + conftest only; no src/ or production code touched).
 ## V0.23.0 - Ask Studio single-video: select Studio TARGET + owning-channel CONTEXT, fail-closed on mismatch (STUDIO_ASK_CHANNEL_CONTEXT_PHASE1) [stacked on #825] (2026-06-16)
 
+### Security (CodeQL py/incomplete-url-substring-sanitization, high) - 2026-06-17
+- STEP0 studio-target detection used `low.startswith("https://studio.youtube.com")`,
+  which a look-alike host (`https://studio.youtube.com.evil.com`) would satisfy.
+  Replaced with `_is_studio_youtube_url()` (host-anchored: `urlparse().hostname ==
+  "studio.youtube.com"`). Added regression test
+  `test_is_studio_youtube_url_is_host_anchored` (accepts real Studio hosts; rejects
+  `*.evil.com`, userinfo `@evil.com`, and `notstudio.youtube.com`).
+
 ### Why
 012 live-observed TWO defects on the Studio Ask single-video path:
 1. WRONG BROWSER TARGET: Selenium attached to a Chrome SIDE-PANEL target first
