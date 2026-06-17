@@ -32,7 +32,9 @@ from modules.communication.moltbot_bridge.src.fusion_adapter import (
     ModelContributionReceipt,
     MockFusionAdapter,
     RedactionGateBlocked,
+    DIGEST_HEX_LEN,
     digest,
+    is_valid_digest,
 )
 
 ADAPTER_SRC = (
@@ -378,3 +380,88 @@ def test_manifest_openrouter_no_longer_claims_landed():
     assert entry["status"] in HONEST_NON_LANDED_STATUSES
     # the precise contract-pending / redaction-gate semantics are carried in notes
     assert "BLOCKED_PENDING_REDACTION_GATE" in entry.get("notes", "")
+
+
+# ---------------------------------------------------------------------------
+# Digest format guard (sha256:<64 hex>) -- raw prompt/context must fail early
+# ---------------------------------------------------------------------------
+
+
+def test_digest_produces_valid_sha256_64hex():
+    d = digest("anything")
+    assert d.startswith("sha256:")
+    assert len(d) == len("sha256:") + DIGEST_HEX_LEN
+    assert is_valid_digest(d) is True
+
+
+@pytest.mark.parametrize(
+    "bad",
+    [
+        "raw prompt text",        # raw text
+        "",                       # empty
+        "sha256:",                # prefix only
+        "deadbeef" * 8,           # 64 hex but no prefix
+        "sha256:" + "g" * 64,     # non-hex body
+        "sha256:" + "a" * 63,     # too short
+        "sha256:" + "a" * 65,     # too long
+        "SHA256:" + "a" * 64,     # wrong-case prefix
+        "md5:" + "a" * 64,        # wrong algo prefix
+        None,                     # not a string
+        123,                      # not a string
+    ],
+)
+def test_is_valid_digest_rejects_bad(bad):
+    assert is_valid_digest(bad) is False
+
+
+def test_is_valid_digest_accepts_real_digest():
+    assert is_valid_digest(digest("x")) is True
+
+
+def test_raw_prompt_in_prompt_digest_rejected():
+    with pytest.raises(ValueError):
+        FusionRequest(task_id="t", prompt_digest="raw prompt text", panel_models=["m"])
+
+
+def test_empty_prompt_digest_rejected():
+    with pytest.raises(ValueError):
+        FusionRequest(task_id="t", prompt_digest="", panel_models=["m"])
+
+
+def test_raw_context_in_context_digest_rejected():
+    with pytest.raises(ValueError):
+        FusionRequest(
+            task_id="t",
+            prompt_digest=digest("p"),
+            panel_models=["m"],
+            context_digest="raw context body",
+        )
+
+
+def test_valid_digests_accepted():
+    req = FusionRequest(
+        task_id="t",
+        prompt_digest=digest("p"),
+        panel_models=["m"],
+        context_digest=digest("c"),
+    )
+    assert is_valid_digest(req.prompt_digest)
+    assert is_valid_digest(req.context_digest)
+
+
+def test_none_context_digest_accepted():
+    req = FusionRequest(task_id="t", prompt_digest=digest("p"), panel_models=["m"])
+    assert req.context_digest is None
+
+
+def test_for_mock_produces_valid_digests_and_no_raw_in_receipt():
+    req = FusionRequest.for_mock(
+        "t", "secret prompt body", ["a", "b"], raw_context="secret context body"
+    )
+    assert is_valid_digest(req.prompt_digest)
+    assert is_valid_digest(req.context_digest)
+    receipt = MockFusionAdapter().run(req)
+    assert is_valid_digest(receipt.prompt_digest)
+    blob = json.dumps(receipt.to_dict())
+    assert "secret prompt body" not in blob
+    assert "secret context body" not in blob

@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-06-17: FusionAdapter Contract REPAIR1 -- WSP_97 table + digest format guard (W6)
+
+**Author**: 0102 (Worker-Lane W6) | **Slice**: `HERMES_FUSION_ADAPTER_CONTRACT_PHASE1_REPAIR1`
+**Target**: PR #832 branch (repair only; no new PR) | **WSP**: 11, 97
+
+Repair of two review findings on the #832 contract slice. No scope expansion (no live OpenRouter, no key
+read, no dependency, no runtime wiring, no manifest status change beyond the already-done `parked`).
+
+- INTERFACE.md: added the canonical 23-row WSP_97 Truth Boundary table (declared == actual == 23, all YES),
+  evidence pointing to `fusion_adapter.py` / tests / manifest / README.
+- `src/fusion_adapter.py`: `digest()` now emits a full `sha256:<64 hex>` (was truncated to 16); added
+  `is_valid_digest()` and enforced it in `FusionRequest.__post_init__` so `prompt_digest` / `context_digest`
+  must be `sha256:<64 hex>` -- raw text / empty / non-hex / missing-prefix is rejected early. `for_mock()`
+  behavior preserved (it digests inputs, which now validate).
+- `tests/test_fusion_adapter.py`: added digest-format tests (raw prompt rejected, raw context rejected,
+  valid 64-hex accepted, `for_mock` still valid, receipt carries no raw prompt/context). 62 pass.
+
 ## 2026-06-16: FusionAdapter Contract -- Hermes Advisory Worker-Panel (mock/dry-run) (W6)
 
 **Author**: 0102 (Worker-Lane W6, AUTHOR + internal SENTINEL)

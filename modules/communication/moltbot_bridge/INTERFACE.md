@@ -18,8 +18,39 @@ from modules.communication.moltbot_bridge.src.fusion_adapter import (
 ```
 
 Contract-only (`HERMES_FUSION_ADAPTER_CONTRACT_PHASE1`). Fusion output is ADVISORY and never canonical.
-Live OpenRouter is `BLOCKED_PENDING_REDACTION_GATE`. Spec:
+Live OpenRouter is `BLOCKED_PENDING_REDACTION_GATE`. `prompt_digest` / `context_digest` must be
+`sha256:<64 hex>` (raw prompt/context bodies are rejected by `FusionRequest.__post_init__`). Spec:
 `docs/audits/architecture/OPENROUTER_FUSION_FOUNDUPS_INTEGRATION_AUDIT_PHASE1.md`.
+
+#### WSP_97 Truth Boundary Checklist (HERMES_FUSION_ADAPTER_CONTRACT_PHASE1)
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | CONTRACT_ONLY_NO_LIVE_CALL | YES | `fusion_adapter.py` mock/dry-run only; live modes raise; no network import |
+| 2 | NO_API_KEY_READ | YES | `fusion_adapter.py` never imports `os`; `test_module_does_not_import_os` |
+| 3 | NO_DEPENDENCY_ADDED | YES | stdlib-only imports; no requirements change |
+| 4 | NO_RUNTIME_WIRING | YES | no consumer imports the adapter (standalone) |
+| 5 | MOCK_DRY_RUN_ONLY | YES | `EXECUTABLE_MODES = {MOCK, DRY_RUN}` |
+| 6 | OUTPUT_ADVISORY_NOT_CANONICAL | YES | `ModelContributionReceipt` forces `advisory_not_canonical=True` at construction + `to_dict` |
+| 7 | PRIVACY_BLOCKED_PENDING_REDACTION_GATE | YES | `redaction_status` default BLOCKED; live modes raise `RedactionGateBlocked` |
+| 8 | AST_GUARD_ENFORCES_NO_LIVE | YES | `test_ast_guard_real_module_clean` (module scans clean) |
+| 9 | MANIFEST_LANDED_CLAIM_CORRECTED | YES | `openclaw_integration_manifest.json` OpenRouter status `landed` -> `parked` |
+| 10 | STALE_SHELL_CORRECTED | YES | `modules/infrastructure/openrouter_client/README.md` dormant marker; untracked `.pyc` left alone |
+| 11 | NO_MERGE_OR_CABR_AUTHORITY | YES | no merge/CABR/payout/source-authority symbols (AST `_FORBIDDEN_NAMES`) |
+| 12 | TESTS_EXERCISE_CONTRACT | YES | `test_fusion_adapter.py` calls `run()` and asserts real behavior |
+| 13 | NO_SKIP_XFAIL | YES | no skip/xfail in the test file |
+| 14 | FILE_SCOPE_EXACT | YES | contract module + test + manifest + README + INTERFACE + ModLogs |
+| 15 | HOLOINDEX_RESULTS_RATED | YES | architect-pinned targets confirmed by direct read; ratings carried from #829 |
+| 16 | INTERNAL_SENTINEL_READY | YES | adversarial SENTINEL ran; findings fixed |
+| 17 | MANIFEST_STATUS_NO_LONGER_OVERCLAIMS | YES | status `parked`; no landed/ready/runtime_enabled |
+| 18 | AST_GUARD_NON_VACUOUS_NEGATIVE_CONTROL | YES | `test_ast_guard_is_non_vacuous_negative_control` (>=8 violations on bad fixture) |
+| 19 | HERMES_PLACEMENT_NOT_INFRA_OPENROUTER_CLIENT | YES | contract in `moltbot_bridge/src`; `openrouter_client` dormant |
+| 20 | MODEL_CONTRIBUTION_RECEIPT_DEFINED | YES | `ModelContributionReceipt` dataclass (full field set) |
+| 21 | RECEIPT_DIGESTS_REFS_NOT_RAW_CONTEXT | YES | `FusionRequest` has no raw field; `is_valid_digest` enforces `sha256:<64 hex>`; `test_for_mock_produces_valid_digests_and_no_raw_in_receipt` |
+| 22 | FUTURE_LIVE_MODES_DECLARED_BUT_BLOCKED | YES | alias/server_tool/local_fallback declared, raise `RedactionGateBlocked` |
+| 23 | REDACTION_GATE_HARD_BLOCKER_NOT_TODO | YES | `redaction_status` is a hard field default BLOCKED; live modes refuse |
+
+Declared == Actual == 23 / 23 YES.
 
 ### WebhookReceiver
 

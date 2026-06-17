@@ -78,9 +78,26 @@ class RedactionGateBlocked(RuntimeError):
     """Raised when a non-mock/dry-run Fusion mode is invoked before the redaction gate exists."""
 
 
+DIGEST_PREFIX = "sha256:"
+DIGEST_HEX_LEN = 64
+_HEX_CHARS = frozenset("0123456789abcdef")
+
+
 def digest(text: str) -> str:
-    """Return a short, stable, non-reversible digest. Never store raw prompt/context bodies."""
-    return "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+    """Return a stable, non-reversible 'sha256:<64 hex>' digest. Never store raw prompt/context bodies."""
+    return DIGEST_PREFIX + hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def is_valid_digest(value: object) -> bool:
+    """True only for a 'sha256:<64 lowercase hex>' string.
+
+    Rejects raw text, empty strings, non-hex bodies, and a missing 'sha256:' prefix -- so a
+    digest/ref field can never silently carry a raw prompt or raw context body.
+    """
+    if not isinstance(value, str) or not value.startswith(DIGEST_PREFIX):
+        return False
+    body = value[len(DIGEST_PREFIX):]
+    return len(body) == DIGEST_HEX_LEN and all(c in _HEX_CHARS for c in body)
 
 
 # ---------------------------------------------------------------------------
@@ -115,6 +132,17 @@ class FusionRequest:
             )
         if not isinstance(self.mode, FusionMode):
             raise TypeError("mode must be a FusionMode")
+        # Digest/ref discipline: prompt_digest and context_digest must be 'sha256:<64 hex>'.
+        # This makes raw prompt/context text fail early (the contract carries digests, never bodies).
+        if not is_valid_digest(self.prompt_digest):
+            raise ValueError(
+                "prompt_digest must be 'sha256:<64 hex>' (use FusionRequest.for_mock() or digest()); "
+                "raw prompt text / empty / non-hex / missing-prefix is rejected"
+            )
+        if self.context_digest is not None and not is_valid_digest(self.context_digest):
+            raise ValueError(
+                "context_digest must be 'sha256:<64 hex>' or None; raw context text is rejected"
+            )
 
     @classmethod
     def for_mock(
@@ -323,6 +351,9 @@ __all__ = [
     "FusionProvider",
     "RedactionGateBlocked",
     "digest",
+    "is_valid_digest",
+    "DIGEST_PREFIX",
+    "DIGEST_HEX_LEN",
     "FusionRequest",
     "FusionAnalysis",
     "ModelContributionReceipt",
