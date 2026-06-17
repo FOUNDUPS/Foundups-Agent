@@ -2,6 +2,52 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## V0.21.1 - Gate live-browser tests behind --run-live (VIDEO_INDEXER_LIVE_TEST_GATING_PHASE1) (2026-06-17)
+
+### Why
+Automated/default pytest runs were attaching to the operator's REAL signed-in
+Chrome on port 9222 and navigating to a hardcoded video (8_DUQaqY6Tc), opening
+tabs in the operator's browser. These showed up as the "pre-existing failures"
+and drove the live operator session. Test runs must never touch the operator's
+browser by default.
+
+### Added
+- NEW `tests/conftest.py`:
+  - Registers the `live_browser` marker (`pytest_configure` /
+    `addinivalue_line`).
+  - Adds a `--run-live` command-line option (default `False`).
+  - `pytest_collection_modifyitems` auto-SKIPS every `live_browser` item unless
+    `--run-live` is passed (reason: "live-browser test: needs a signed-in Chrome
+    on 9222; pass --run-live to run").
+
+### Changed
+- Marked 4 real live-browser test classes with `@pytest.mark.live_browser`
+  (these attach to Chrome 9222 via `debuggerAddress` and call `driver.get(...)`,
+  or run the real VideoIndexer pipeline against the hardcoded video):
+  - `tests/test_integration_oldest_video.py::TestUnDaoDuOldestVideo`
+  - `tests/test_stage2_batch_navigation.py::TestStage2BatchNavigation`
+  - `tests/test_stage3_video_indexing.py::TestStage3VideoIndexing`
+  - `tests/test_stage3b_hybrid_indexing.py::TestStage3bHybridIndexing`
+- NOT gated (mock-only; patch/FakeDriver the driver, no live attach):
+  `tests/test_action_surface.py`, `tests/test_studio_ask_header.py`,
+  `tests/test_studio_ask_indexer_*.py`. Also NOT gated: `test_stage4_validation.py`
+  (reads index JSON from disk only) and `test_selenium_navigation.py` (no pytest
+  items; runnable only via `__main__`).
+
+### Result
+- Default `pytest tests/`: the 8 live-browser tests are now SKIPPED, not run
+  (84s -> 0.18s for the candidate files; no browser driven).
+- `pytest tests/ -m live_browser --run-live --collect-only` still collects all 8.
+- OUT OF SCOPE (unchanged here): the 4 remaining
+  `test_gemini_video_analyzer.py` failures - 2 are the pre-existing
+  `GeminiVideoAnalyzer._pattern_memory` bug in `src/gemini_video_analyzer.py`,
+  2 are Gemini-API-key failures. None drive the operator's Chrome session.
+
+### WSP Compliance
+- WSP 5 (gate, do not delete coverage), WSP 22 (ModLog), WSP 50 (verify
+  before edit), WSP 84 (standard pytest marker + skip pattern), WSP 97 (Truth
+  Boundary: tests/ + conftest only; no src/ or production code touched).
+
 ## V0.21.0 - Typed SKILLz/ACTION SURFACE + bounded Studio Ask single-video action (VIDEO_INDEXING_SKILLZ_ACTION_SURFACE_PHASE1) (2026-06-16)
 
 ### Why
