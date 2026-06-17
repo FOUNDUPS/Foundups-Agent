@@ -234,7 +234,13 @@ async def test_ask_studio_succeeds_when_watch_ask_missing():
 
 
 async def test_response_timeout_fails_closed():
-    """No response DOM text -> success False, no garbage stored."""
+    """
+    A BLANK stream (Gemini never initializes: no greeting, no answer) -> the
+    readiness gate never passes and, on a single-tab mock that cannot open a new
+    tab, the retry loop exhausts -> fail closed "gemini_did_not_load", nothing
+    stored. (STUDIO_ASK_GEMINI_READINESS_RETRY_PHASE1 supersedes the old generic
+    timeout error for the never-loaded case.)
+    """
     css_map, _ = _ask_studio_dom(response_text="")  # response node has empty text
     # Remove the response node entirely to simulate a stream that never fills.
     css_map["#PAcreator_chat_streaming"] = FakeElement(text="")
@@ -245,7 +251,7 @@ async def test_response_timeout_fails_closed():
 
     assert result.success is False
     assert result.response_text == ""
-    assert "timeout" in (result.error or "").lower()
+    assert result.error == "gemini_did_not_load"
 
 
 async def test_no_clipboard_used(monkeypatch):
@@ -309,8 +315,15 @@ def test_unknown_channel_falls_back_to_generic():
     assert StudioAskIndexer._prompt_for_channel(None) == StudioAskIndexer.ASK_PROMPT
 
 
-async def test_channel_prompt_threaded_into_ask(monkeypatch):
-    """index path passes channel_entry through so the ffcpln prompt is used."""
+async def test_primary_prompt_names_the_specific_video(monkeypatch):
+    """
+    STUDIO_ASK_GEMINI_READINESS_RETRY_PHASE1 (req #4 - LIVE-PROVEN correctness):
+    the PRIMARY Ask Studio path types a prompt that NAMES the exact video (title
+    + video id + studio URL) and requests JSON. This pins Gemini (a CHANNEL
+    assistant) to THIS video; a query WITHOUT the id analyzed a DIFFERENT video
+    live. The channel-specific prompt is still used on the legacy fallback and is
+    selected by _prompt_for_channel (covered by the prompt-selection tests).
+    """
     css_map, prompt_box = _ask_studio_dom('{"topics": ["m"], "segments": []}')
     driver = FakeDriver(css_map=css_map, script_result=None)
     indexer = StudioAskIndexer(driver=driver)
@@ -318,4 +331,8 @@ async def test_channel_prompt_threaded_into_ask(monkeypatch):
     await indexer.ask_about_video("vidX", channel_entry=_entry("ffcpln"), channel_id=UNDAODU_ID)
 
     typed = _typed_text(prompt_box)
-    assert "Do NOT produce a full transcript" in typed
+    # Names the exact video (id + studio URL + title) and requests JSON.
+    assert "video id vidX" in typed
+    assert "studio.youtube.com/video/vidX" in typed
+    assert "Studio Title" in typed
+    assert "JSON" in typed
