@@ -91,6 +91,27 @@ class FakeDriver:
         return self.script_result
 
 
+def _typed_text(element) -> str:
+    """
+    Reassemble the visible prompt text from a FakeElement's per-char keystrokes.
+
+    The newline-safe human-cadence path types one character at a time and emits
+    a single Keys.ENTER (\\ue007) to submit. We drop that ENTER (and any other
+    non-printable control key) so the assertion checks only the prompt content.
+    """
+    from selenium.webdriver.common.keys import Keys
+
+    control_keys = {Keys.ENTER, Keys.SHIFT, Keys.BACKSPACE}
+    return "".join(k for k in element.sent_keys if k not in control_keys)
+
+
+def _count_enter_submits(element) -> int:
+    """Count bare Keys.ENTER keystrokes sent to the element (== submit count)."""
+    from selenium.webdriver.common.keys import Keys
+
+    return sum(1 for k in element.sent_keys if k == Keys.ENTER)
+
+
 # Patch the indexer's human delay to be instant so timeout tests are fast.
 @pytest.fixture(autouse=True)
 def _fast_delays(monkeypatch):
@@ -168,8 +189,11 @@ async def test_ask_studio_primary_path_succeeds():
     assert "topics" in result.response_text  # came from the response DOM node
     # The prompt box (contenteditable) actually received keystrokes.
     assert prompt_box.clicked is True
-    assert any("content_category" in str(k) or "Analyze" in str(k) or "Focus" in str(k)
-               for k in prompt_box.sent_keys)
+    # Newline-safe human-cadence typing now enters the prompt CHAR-BY-CHAR.
+    # Reassemble the per-char keystrokes (drop the single trailing ENTER submit)
+    # and confirm the prompt content reached the box.
+    typed = _typed_text(prompt_box)
+    assert "content_category" in typed or "Analyze" in typed or "Focus" in typed
     # We navigated to the Studio edit page (PRIMARY), not the watch page first.
     assert driver.visited[0] == "https://studio.youtube.com/video/vidX/edit"
 
@@ -275,5 +299,5 @@ async def test_channel_prompt_threaded_into_ask(monkeypatch):
 
     await indexer.ask_about_video("vidX", channel_entry=_entry("ffcpln"))
 
-    typed = " ".join(str(k) for k in prompt_box.sent_keys)
+    typed = _typed_text(prompt_box)
     assert "Do NOT produce a full transcript" in typed

@@ -47,6 +47,66 @@ browser by default.
 - WSP 5 (gate, do not delete coverage), WSP 22 (ModLog), WSP 50 (verify
   before edit), WSP 84 (standard pytest marker + skip pattern), WSP 97 (Truth
   Boundary: tests/ + conftest only; no src/ or production code touched).
+## V0.22.0 - Ask Studio human-input behavior: single clean submission, no newline-spam (STUDIO_ASK_HUMAN_INPUT_BEHAVIOR_PHASE1) (2026-06-16)
+
+### Why
+012 live-observed the Studio Ask single-video action SPAM + CANCEL its own
+response ~7x, then submit a malformed fragment. ROOT CAUSE (code-proven):
+`studio_ask_indexer.py` did `prompt_box.send_keys(ask_prompt)` where `ask_prompt`
+is the MULTI-LINE template (`ASK_PROMPT`, `CHANNEL_PROMPTS`). In a submit-on-Enter
+contenteditable, EVERY internal `\n` fires ENTER == a submit; each new submit
+cancels the prior streaming answer ("You canceled this response." x newlines).
+The legacy fallback path (`ask_input.send_keys(ask_prompt)`) had the same defect.
+
+### Changed (`src/studio_ask_indexer.py`)
+- WSP 84 REUSE: import + lazily attach `get_human_behavior` (the SAME proven
+  "012 input behavior" used by YT comment replies in
+  `tars_like_heart_reply/src/reply_executor.py`; init mirrors
+  `comment_engagement_dae.py:673`). NOT reinvented.
+- NEW `_type_prompt_human(box, prompt)`: NEWLINE-SAFE entry. Splits the prompt on
+  `\n`, types each line via the reused human cadence (`HumanBehavior.human_type`),
+  and converts internal newlines to Shift+Enter SOFT newlines
+  (`_soft_newline`: ActionChains SHIFT-down -> ENTER -> SHIFT-up; falls back to
+  `send_keys(SHIFT, ENTER)`). NO bare `\n` ever reaches the box.
+- NEW `_submit_ask_prompt(box)`: submit EXACTLY ONCE. Prefers locating + CLICKING
+  an Ask Studio send/submit button (new `send_button` selectors, mirroring
+  reply_executor's button-click submit); else EXACTLY ONE `Keys.ENTER`.
+- BOTH paths fixed: primary Ask Studio dialog (~:516-534) and the legacy fallback
+  (~:625) now route through `_type_prompt_human` + `_submit_ask_prompt`.
+- `_scrape_ask_response` now WAITS FOR COMPLETION: polls the response container
+  and returns only once the text STABILIZES (stops growing for
+  `RESPONSE_STABLE_POLLS=3` consecutive polls) or the timeout elapses - no longer
+  captures the first partial/streaming/canceled fragment.
+- FAIL-CLOSED on refusal: `_is_refusal` + `REFUSAL_MARKERS`. A stabilized refusal
+  ("I'm not quite sure what you're asking", "Query unsuccessful", "transcript is
+  unavailable", "You canceled this response.", ...) returns `success=False` with
+  typed error `ask_studio_no_answer` and persists NOTHING (never stored as
+  `transcript_summary`).
+
+### Tests (mock only - NO live browser)
+- NEW `tests/test_studio_ask_human_input.py` (14 tests). NON-VACUOUS:
+  - SINGLE-SUBMIT regression: a contenteditable mock that models submit-on-Enter
+    asserts EXACTLY 1 submit on a multi-line prompt. Proven to FAIL on old code:
+    the old `send_keys(ASK_PROMPT)` + Enter yields 16 submits (15 newlines + 1).
+  - `human_type` reuse asserted; Shift+Enter soft newlines never submit.
+  - WAIT-FOR-COMPLETION: a growing-then-stable response -> scraper returns the
+    STABILIZED full text, not the first partial.
+  - FAIL-CLOSED REFUSAL (parametrized): success=False, error=ask_studio_no_answer,
+    nothing persisted (save_index spy never called).
+  - Fallback path single-submit covered.
+- Updated `tests/test_studio_ask_header.py`: the two #817 assertions that encoded
+  the OLD whole-string `send_keys` now assert the new char-by-char content (helper
+  `_typed_text`). 12/12 still pass.
+
+### HONEST LIVE GAP (#817 KNOWN-GAP class)
+Selectors, the real Ask Studio send-button presence, and streaming-completion
+timing are MOCK-validated ONLY. NOT live-verified. 012 must live-re-test on the
+correct channel (UnDaoDu) to confirm the spam is gone and a real answer is
+captured. Do not treat as live-verified.
+
+### OUT OF SCOPE (follow-ups)
+Channel-context switch/verify; redesigning the JSON prompt into a conversational
+prompt + prose parser; #819 action-surface signature; dom_automation; scheduler.
 
 ## V0.21.0 - Typed SKILLz/ACTION SURFACE + bounded Studio Ask single-video action (VIDEO_INDEXING_SKILLZ_ACTION_SURFACE_PHASE1) (2026-06-16)
 
