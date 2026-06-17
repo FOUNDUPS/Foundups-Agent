@@ -25,6 +25,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from urllib.parse import urlparse
 
 from modules.infrastructure.shared_utilities.youtube_channel_registry import get_channel_by_id
 from modules.ai_intelligence.video_indexer.src.video_index_store import (
@@ -203,6 +204,54 @@ class StudioAskIndexer:
     # Max seconds to wait for the Ask Studio response stream to produce text
     # before failing closed (no partial/garbage indexing).
     RESPONSE_TIMEOUT_SECONDS = 30.0
+
+    # ---------------------------------------------------------------------
+    # STUDIO_ASK_CHANNEL_CONTEXT_PHASE1: right TARGET -> right CHANNEL -> verify
+    # ---------------------------------------------------------------------
+    # STEP 0 (target selection): 012 live-observed Selenium attach to a Chrome
+    # SIDE-PANEL target first (chrome://glic / the gemini.google.com glic side
+    # panel / accounts.google.com RotateCookiesPage), NOT the Studio tab. A
+    # URL whose scheme/host matches any of these is NEVER a valid Ask target.
+    NON_STUDIO_TARGET_URL_MARKERS = (
+        "chrome://glic",
+        "chrome-untrusted://glic",
+        "gemini.google.com/glic",
+        "/glic",
+        "rotatecookiespage",
+        "accounts.google.com/rotatecookies",
+    )
+
+    # A usable Ask target is a YouTube Studio tab or (acceptably) a normal
+    # https web tab we can drive to Studio. about:blank / new-tab pages are
+    # acceptable normal targets the driver can navigate.
+    ACCEPTABLE_TARGET_URL_PREFIXES = (
+        "https://studio.youtube.com",
+        "https://www.youtube.com",
+        "https://youtube.com",
+    )
+    ACCEPTABLE_NORMAL_URL_PREFIXES = (
+        "https://",
+        "http://",
+        "about:blank",
+        "chrome://newtab",
+    )
+
+    # STEP 2 (observable verification): markers that the channel-scoped Studio
+    # context did NOT load as the owning channel (permission / not-found /
+    # sign-in / account-switch / generic Oops). Detected in page title/body.
+    WRONG_CONTEXT_MARKERS = (
+        "oops",
+        "not found",
+        "no access",
+        "don't have access",
+        "permission",
+        "unavailable",
+        "switch account",
+        "choose an account",
+        "sign in",
+        "this page isn",
+        "something went wrong",
+    )
 
     # Standard prompt for video analysis with content category detection
     ASK_PROMPT = """Analyze this video and respond in JSON format:
@@ -599,18 +648,227 @@ Give a brief category and a few mood/genre topics only.""",
         prompt_box.send_keys(Keys.ENTER)
         return "enter"
 
+    # =====================================================================
+    # STEP 0 - BROWSER TARGET SELECTION (STUDIO_ASK_CHANNEL_CONTEXT_PHASE1)
+    # =====================================================================
+    @classmethod
+    def _is_non_studio_target(cls, url: str) -> bool:
+        """
+        True if a window/tab URL is a Chrome side-panel / glic / Gemini panel /
+        RotateCookiesPage target that must NEVER be used to Ask. (012 live-
+        observed Selenium attach to chrome://glic first.)
+        """
+        if not url:
+            return False
+        low = url.strip().lower()
+        return any(marker in low for marker in cls.NON_STUDIO_TARGET_URL_MARKERS)
+
+    @classmethod
+    def _is_acceptable_target(cls, url: str) -> bool:
+        """
+        True if a window/tab URL is a usable Ask target: a YouTube/Studio tab,
+        or a NORMAL web tab the existing driver can navigate to Studio. Side-
+        panel / glic / Gemini / RotateCookies targets are rejected.
+        """
+        if not url:
+            return False
+        if cls._is_non_studio_target(url):
+            return False
+        low = url.strip().lower()
+        if any(low.startswith(p) for p in cls.ACCEPTABLE_TARGET_URL_PREFIXES):
+            return True
+        return any(low.startswith(p) for p in cls.ACCEPTABLE_NORMAL_URL_PREFIXES)
+
+    @staticmethod
+    def _is_studio_youtube_url(url: str) -> bool:
+        """
+        True ONLY if the URL host is EXACTLY studio.youtube.com. A prefix check
+        like startswith("https://studio.youtube.com") is bypassable by a host
+        such as https://studio.youtube.com.evil.com (CodeQL
+        py/incomplete-url-substring-sanitization); parse + compare the host.
+        """
+        if not url:
+            return False
+        try:
+            host = (urlparse(url.strip()).hostname or "").lower()
+        except Exception:
+            return False
+        return host == "studio.youtube.com"
+
+    def _select_studio_target(self) -> bool:
+        """
+        STEP 0: select/verify a browser window/tab that is YouTube Studio or a
+        normal web target (NOT chrome://glic / a Gemini side panel /
+        RotateCookiesPage / iframe-webview) BEFORE any channel-context
+        navigation. Switches the driver to the first acceptable handle using
+        the EXISTING Selenium window-handle idiom (mirrors
+        foundups_selenium/devtools_mcp_adapter.list_pages :570-581); creates a
+        normal tab via the existing driver only if every open handle is a
+        side-panel target. Returns True if an acceptable target is active,
+        False (-> studio_target_unavailable) otherwise. Never opens a NEW
+        browser.
+        """
+        driver = self.driver
+        # Single-target drivers (no multi-window API) -> verify the one URL.
+        handles = getattr(driver, "window_handles", None)
+        if not handles:
+            try:
+                current = driver.current_url
+            except Exception:
+                current = ""
+            if self._is_acceptable_target(current):
+                return True
+            logger.warning(
+                f"[STUDIO-ASK] STEP0 target reject (single target, url={current!r})"
+            )
+            return False
+
+        # Prefer a handle already on Studio, then any acceptable normal target.
+        studio_handle = None
+        normal_handle = None
+        for handle in handles:
+            try:
+                driver.switch_to.window(handle)
+                url = driver.current_url or ""
+            except Exception:
+                continue
+            if self._is_non_studio_target(url):
+                # Explicit glic / Gemini panel / RotateCookies -> never use.
+                continue
+            if self._is_studio_youtube_url(url):
+                studio_handle = handle
+                break
+            if normal_handle is None and self._is_acceptable_target(url):
+                normal_handle = handle
+
+        target = studio_handle or normal_handle
+        if target is not None:
+            try:
+                driver.switch_to.window(target)
+                logger.info(
+                    f"[STUDIO-ASK] STEP0 selected Studio/normal target "
+                    f"(studio={studio_handle is not None})"
+                )
+                return True
+            except Exception as e:
+                logger.warning(f"[STUDIO-ASK] STEP0 switch to target failed: {e}")
+                return False
+
+        # Every open handle is a side-panel target. Try to open a NORMAL tab via
+        # the EXISTING driver (no new browser); fail closed if unsupported.
+        try:
+            driver.execute_script("window.open('about:blank');")
+            new_handles = getattr(driver, "window_handles", []) or []
+            for handle in new_handles:
+                if handle in handles:
+                    continue
+                driver.switch_to.window(handle)
+                if self._is_acceptable_target(driver.current_url or "about:blank"):
+                    logger.info("[STUDIO-ASK] STEP0 opened normal tab via existing driver")
+                    return True
+        except Exception as e:
+            logger.warning(f"[STUDIO-ASK] STEP0 could not open normal tab: {e}")
+        logger.warning("[STUDIO-ASK] STEP0 no usable Studio/normal target (fail closed)")
+        return False
+
+    # =====================================================================
+    # STEP 1/2 - CHANNEL CONTEXT + OBSERVABLE VERIFICATION
+    # =====================================================================
+    def _set_channel_context(self, channel_id: str) -> None:
+        """
+        STEP 1: set the OWNING channel as the active Studio context by
+        navigating to the CHANNEL-SCOPED Studio URL (mirrors the batch path
+        index_channel_videos :962 studio.youtube.com/channel/{id}/videos/upload)
+        BEFORE the channel-agnostic /video/{id}/edit page. Reuses the same
+        channel_id resolved from the registry; invents no second map.
+        """
+        context_url = f"https://studio.youtube.com/channel/{channel_id}/videos/upload"
+        logger.info(f"[STUDIO-ASK] STEP1 setting channel context: {context_url}")
+        self.driver.get(context_url)
+
+    def _detect_wrong_context(self) -> bool:
+        """
+        True if the current page shows a permission / not-found / sign-in /
+        account-switch / Oops signal (NOT the owning channel). Reads page title
+        + a bounded body sample. URL-only proof is NOT trusted (STEP 2).
+        """
+        driver = self.driver
+        try:
+            title = (driver.title or "").lower()
+        except Exception:
+            title = ""
+        if any(marker in title for marker in self.WRONG_CONTEXT_MARKERS):
+            return True
+        # Bounded body text sample (avoid scraping the whole DOM).
+        body_text = ""
+        try:
+            body_el = driver.find_element("css selector", "body")
+            body_text = (body_el.text or "")[:2000].lower()
+        except Exception:
+            body_text = ""
+        return any(marker in body_text for marker in self.WRONG_CONTEXT_MARKERS)
+
+    def _edit_surface_present(self) -> bool:
+        """
+        True if an owner/edit-surface element (the title field) is present on
+        the Studio video-edit page. Reuses the SAME title selector the edit
+        flow already relies on (ask_about_video title read).
+        """
+        try:
+            el = self.driver.find_element(
+                "css selector", "input#title-field, h1.title"
+            )
+            return el is not None
+        except Exception:
+            return False
+
+    async def _verify_channel_context(self, video_id: str) -> bool:
+        """
+        STEP 2: OBSERVABLE owner-context verification AFTER navigating
+        channel-scoped context -> /video/{id}/edit. NOT URL-only. Requires:
+          - NO permission/not-found/sign-in/account-switch/Oops signal, AND
+          - the edit surface (title field) present within the timeout.
+        Returns True if the owning-channel edit surface is observably present;
+        False (-> wrong_channel_context) otherwise.
+        """
+        import time as _time
+
+        if self._detect_wrong_context():
+            logger.warning(
+                f"[STUDIO-ASK] STEP2 wrong-context page detected for {video_id}"
+            )
+            return False
+
+        deadline = _time.monotonic() + self.RESPONSE_TIMEOUT_SECONDS
+        while _time.monotonic() < deadline:
+            if self._detect_wrong_context():
+                logger.warning(
+                    f"[STUDIO-ASK] STEP2 wrong-context appeared for {video_id}"
+                )
+                return False
+            if self._edit_surface_present():
+                return True
+            await self._human_delay(1.0, 0.2)
+        logger.warning(
+            f"[STUDIO-ASK] STEP2 edit surface absent after timeout for {video_id}"
+        )
+        return False
+
     async def ask_about_video(
         self,
         video_id: str,
         prompt: Optional[str] = None,
         channel_entry: Optional[Dict[str, Any]] = None,
+        channel_id: Optional[str] = None,
     ) -> AskResult:
         """
         Use the YouTube Studio "Ask Studio" feature to index a specific video.
 
-        Phase 1 PRIMARY path:
-          Studio video-edit page -> Ask Studio header button -> dialog/chat
-          stream -> contenteditable prompt -> Enter -> DOM-scraped response.
+        Phase 1 PRIMARY path (STUDIO_ASK_CHANNEL_CONTEXT_PHASE1 ordering):
+          select Studio TARGET (STEP 0) -> set OWNING-channel context via the
+          channel-scoped URL (STEP 1) -> /video/{id}/edit -> OBSERVABLE
+          verify (STEP 2) -> Ask Studio header button -> dialog/chat stream ->
+          contenteditable prompt -> single submit -> DOM-scraped response.
 
         Legacy watch-page Ask / Studio popup menu are kept ONLY as fallback.
 
@@ -619,11 +877,18 @@ Give a brief category and a few mood/genre topics only.""",
             prompt: Optional channel-specific prompt (defaults to ASK_PROMPT or
                     the prompt resolved from channel_entry).
             channel_entry: Optional channel registry entry; used to pick the
-                    channel-specific prompt via description_template.
+                    channel-specific prompt via description_template AND (when
+                    channel_id is not passed) to resolve the OWNING channel_id.
+            channel_id: REQUIRED owning channel ID for single-video Ask. Resolved
+                    from channel_entry["id"] when omitted. If neither yields a
+                    registry-known channel -> fail closed "channel_unresolved".
+                    (Backward-compatible optional kwarg; NOT a new public action
+                    arg + NO #819 action-id/output-schema change.)
 
         Returns:
-            AskResult with parsed response (success=False, response fails closed
-            if the Ask Studio response stream never produces text).
+            AskResult. success=False (fail-closed, NOTHING persisted) on:
+            channel_unresolved, studio_target_unavailable, wrong_channel_context,
+            response timeout, or a refusal.
         """
         import asyncio
 
@@ -637,6 +902,37 @@ Give a brief category and a few mood/genre topics only.""",
                 success=False,
                 error="No browser driver available"
             )
+
+        # STEP 3 - channel_id REQUIRED (NO guessing from body/path/video URL).
+        # Resolve the OWNING channel_id from the explicit kwarg, else the passed
+        # registry entry's id. Then CONFIRM it is a registry-known channel
+        # (get_channel_by_id). Missing / blank / unknown -> fail closed
+        # "channel_unresolved". An EXPLICITLY-passed channel_entry is preserved
+        # for PROMPT selection (ownership comes from channel_id; prompt comes
+        # from the caller's entry when supplied).
+        resolved_channel_id = (channel_id or "").strip()
+        if not resolved_channel_id and channel_entry:
+            resolved_channel_id = str(channel_entry.get("id") or "").strip()
+        owning_entry = (
+            get_channel_by_id(resolved_channel_id) if resolved_channel_id else None
+        )
+        if not resolved_channel_id or owning_entry is None:
+            logger.warning(
+                f"[STUDIO-ASK] {video_id}: channel_id unresolved (fail closed)"
+            )
+            return AskResult(
+                video_id=video_id,
+                title="",
+                response_text="",
+                topics=[],
+                timestamps=[],
+                success=False,
+                error="channel_unresolved",
+            )
+        # Prompt selection uses the caller's explicit entry if given, else the
+        # registry entry resolved from the owning channel_id.
+        if channel_entry is None:
+            channel_entry = owning_entry
 
         # Resolve the prompt: explicit > channel-specific > generic default.
         ask_prompt = prompt or self._prompt_for_channel(channel_entry)
@@ -652,11 +948,46 @@ Give a brief category and a few mood/genre topics only.""",
         try:
             from selenium.webdriver.common.keys import Keys
 
+            # STEP 0 - BROWSER TARGET SELECTION (before ANY channel nav). Reject
+            # chrome://glic / Gemini side panel / RotateCookiesPage. Fail closed.
+            if not self._select_studio_target():
+                logger.warning(
+                    f"[STUDIO-ASK] {video_id}: no Studio target (fail closed)"
+                )
+                return AskResult(
+                    video_id=video_id,
+                    title="",
+                    response_text="",
+                    topics=[],
+                    timestamps=[],
+                    success=False,
+                    error="studio_target_unavailable",
+                )
+
+            # STEP 1 - SET OWNING-CHANNEL CONTEXT via the channel-scoped URL
+            # (mirror the batch path) BEFORE the channel-agnostic edit page.
+            self._set_channel_context(resolved_channel_id)
+            await self._human_delay(3.0, 0.4)
+
             # PRIMARY: navigate to the Studio video-edit page (Ask Studio lives here).
             studio_url = f"https://studio.youtube.com/video/{video_id}/edit"
             logger.info(f"[STUDIO-ASK] Navigating to {studio_url}")
             self.driver.get(studio_url)
             await self._human_delay(3.0, 0.4)
+
+            # STEP 2 - OBSERVABLE channel verification (NOT URL-only). Fail
+            # closed "wrong_channel_context" on permission/not-found/sign-in/
+            # account-switch/Oops or an absent edit surface.
+            if not await self._verify_channel_context(video_id):
+                return AskResult(
+                    video_id=video_id,
+                    title="",
+                    response_text="",
+                    topics=[],
+                    timestamps=[],
+                    success=False,
+                    error="wrong_channel_context",
+                )
 
             # Studio title is in the title input field.
             title = ""
@@ -1028,7 +1359,9 @@ Give a brief category and a few mood/genre topics only.""",
                     skipped += 1
                     logger.info(f"[STUDIO-ASK] ⏭️ {vid_id}: already indexed")
                     continue
-                result = await self.ask_about_video(vid_id, channel_entry=channel_entry)
+                result = await self.ask_about_video(
+                    vid_id, channel_entry=channel_entry, channel_id=channel_id
+                )
                 results.append(result)
                 
                 if result.success:

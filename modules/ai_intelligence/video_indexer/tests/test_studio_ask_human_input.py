@@ -29,6 +29,12 @@ from modules.ai_intelligence.video_indexer.src.studio_ask_indexer import (
     StudioAskIndexer,
 )
 
+# A registry-known channel ID (UnDaoDu) so the now-required owning-channel
+# context (STUDIO_ASK_CHANNEL_CONTEXT_PHASE1 STEP 3) resolves in these
+# input-behavior tests (the channel-context behavior itself is covered in
+# test_studio_ask_channel_context.py).
+UNDAODU_ID = "UCfHM9Fw9HD-NwiS0seD_oIA"
+
 
 # ---------------------------------------------------------------------------
 # Mock DOM that models a submit-on-Enter contenteditable
@@ -108,7 +114,10 @@ class SoftNewlineDriver:
     def __init__(self, css_map=None, script_result=None):
         self.css_map = css_map or {}
         self.script_result = script_result
+        # Single Studio tab is the active target (STEP 0 single-target path
+        # passes). title has no wrong-context marker (STEP 2 passes).
         self.current_url = "https://studio.youtube.com/video/vidX/edit"
+        self.title = "YouTube Studio"
         self.visited = []
         self.soft_newlines = 0
 
@@ -217,7 +226,7 @@ async def test_single_submit_no_newline_spam_on_multiline_prompt(monkeypatch):
     # The real generic prompt is multi-line (proves the bug surface).
     assert StudioAskIndexer.ASK_PROMPT.count("\n") >= 7
 
-    result = await indexer.ask_about_video("vidX")
+    result = await indexer.ask_about_video("vidX", channel_id=UNDAODU_ID)
 
     # EXACTLY ONE submit regardless of how many lines the prompt has.
     assert box.submits == 1, f"expected exactly 1 submit, got {box.submits}"
@@ -248,7 +257,7 @@ async def test_submit_prefers_send_button_single_click(monkeypatch):
     )
     indexer = StudioAskIndexer(driver=driver)
 
-    result = await indexer.ask_about_video("vidX")
+    result = await indexer.ask_about_video("vidX", channel_id=UNDAODU_ID)
 
     assert send_btn.clicked is True
     # Button submit => ZERO bare-ENTER submits fired on the box. (Soft Shift+Enter
@@ -268,7 +277,7 @@ async def test_human_type_is_used_not_raw_multiline_send_keys(monkeypatch):
     driver = SoftNewlineDriver(css_map=_make_css_map(box, response_text="{\"topics\": [\"x\"]}"))
     indexer = StudioAskIndexer(driver=driver)
 
-    await indexer.ask_about_video("vidX")
+    await indexer.ask_about_video("vidX", channel_id=UNDAODU_ID)
 
     assert calls["human_type"] >= 1
     # No single sent_key is the whole multi-line prompt (would be the old bug).
@@ -348,7 +357,7 @@ async def test_refusal_fails_closed_and_persists_nothing(monkeypatch, refusal):
     driver = SoftNewlineDriver(css_map=_make_css_map(box, response_text=refusal))
     indexer = StudioAskIndexer(driver=driver)
 
-    result = await indexer.ask_about_video("vidX")
+    result = await indexer.ask_about_video("vidX", channel_id=UNDAODU_ID)
 
     assert result.success is False
     assert result.error == "ask_studio_no_answer"
@@ -435,7 +444,7 @@ async def test_fallback_path_single_submit(monkeypatch):
     driver = FallbackDriver()
     indexer = StudioAskIndexer(driver=driver)
 
-    result = await indexer.ask_about_video("vidX")
+    result = await indexer.ask_about_video("vidX", channel_id=UNDAODU_ID)
 
     # Exactly one submit on the fallback textarea too.
     assert box.submits == 1
