@@ -1,5 +1,39 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-16] OpenRouter Fusion FoundUps Integration Audit Phase 1 (Lane W9/AUDIT, decision-only)
+
+**Change Type**: READ-ONLY architecture audit. ONE audit doc + this ModLog entry. NO code, NO dependency,
+NO env change, NO API call, NO OpenRouter key read, NO runtime wiring. Decision-only.
+**By**: 0102 (Worker-Lane W9 / AUDIT) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP References**: WSP 00, WSP 15, WSP 50, WSP 77, WSP 84, WSP 87, WSP 97
+**Slice**: OPENROUTER_FUSION_FOUNDUPS_INTEGRATION_AUDIT_PHASE1
+**Base**: `6f651a8c6` (origin/main at dispatch)
+
+- ADD `docs/audits/architecture/OPENROUTER_FUSION_FOUNDUPS_INTEGRATION_AUDIT_PHASE1.md` -- audits whether
+  OpenRouter Fusion should become a Hermes worker-panel reasoning layer, and defines the safest path.
+- External: all 10 OpenRouter Fusion doc claims VERIFIED from the two official pages (no API call, no key);
+  server-tool beta = RISK (claim 5); privacy/data-handling is UNDOCUMENTED -> open question driving the
+  redaction gate. Recommendation: ADOPT Fusion under Hermes as an ADVISORY worker-panel, but build the
+  FusionAdapter CONTRACT first, not runtime wiring.
+- Placement justified at the single gate-cleared Hermes seam: hermes_job_executor.py execute() between
+  guard-allowed (:1669) and dispatch (:1672); D4/D5/D6 blocked, fail-closed to D6. HoloIndex supplies
+  context (discovery, not runtime authority); OpenClaw enforces policy; WRE stores receipts; the FoundUps
+  consensus layer scores output vs WSP 15/50/77/97. Model output stays advisory, never canonical.
+- Provider abstraction = PARTIAL (model_registry.py catalog + ai_gateway.py 4 hardcoded providers, no
+  pluggable seam + hermes_model_router.py local-only); NO `openrouter` provider. STALE-LANDED contradiction
+  recorded (decision-only): openclaw_integration_manifest.json declares OpenRouter `status:"landed"` but
+  modules/infrastructure/openrouter_client/ is an empty shell (added a0fad35b3, reverted 6f952f6b9);
+  `.env.example` has no OPENROUTER_* entries.
+- Defined the Model Contribution Receipt (sibling of proof_of_compute_receipt.py ProofOfComputeReceipt,
+  append-only JSONL), 3 FusionAdapter modes (alias/server_tool/local_fallback), the degradation model
+  (ok_with_failed_models / ok_without_analysis / hard_error), and a docs->adapter->dry-run->gated roadmap.
+- Privacy = BLOCKED_PENDING_REDACTION_GATE (external/beta context egress; redact secrets, raw repo, PII;
+  context_refs not full HoloIndex dump; prompt_digest not raw prompt). LOCAL_FALLBACK_PRESENT (gemma-270m,
+  qwen3/3.5-4b, qwen-coder-7b), lower-confidence.
+- Constraints honored: ASCII-clean (0 non-ASCII); file scope = 2; no code/dep/env/API/key; WSP_97 Truth
+  Boundary 17/17 declared==actual. Follow-up (NOT built here): HERMES_FUSION_ADAPTER_CONTRACT_PHASE1.
+- Internal review: MERGE_READY; PR opened against origin/main; STOP for external 0102 gate (do NOT self-merge).
+
 ## [2026-06-16] FoundUp Genesis ID Error No-Raw-Value-Echo Phase 1 (Lane A, genesis error-message hygiene)
 
 **Change Type**: MESSAGE-ONLY HARDENING -- 1 src validator + its test suite. The #824 leakage lane
