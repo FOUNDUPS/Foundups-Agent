@@ -1152,3 +1152,165 @@ def test_clean_body_still_creates_draft_after_fix():
     r = _call(headers={"Authorization": f"Bearer {_session_token()}"})
     assert r.status == "created"
     assert r.envelope["name"] == "Get Kei Truck Marketplace"
+
+
+# ===========================================================================
+# FOUNDUP_LAUNCH_REQUEST_ERROR_NO_RAW_ECHO_PHASE1 -- ADDENDUM B
+# TRANSPORT MUST NOT SURFACE VALIDATOR ERROR DETAILS.
+#
+# The launch_request error rewording (echo-free) is a launch_request concern; the
+# transport must CONTINUE to collapse every validator error into the generic,
+# low-cardinality reason and never surface validator text or the raw hostile value.
+# These tests assert: hostile unknown key / auth key / reference URL all -> the
+# generic reason; NO validator error text (and no raw hostile value) reaches
+# IntakeResult.reason / repr(result) / the serialized dict; and a VALID invite token
+# is NOT consumed by an invalid proposal (proven against a real/spy nonce store).
+# All hostile fixtures are built from chr()/\uXXXX so this SOURCE stays pure ASCII.
+# ===========================================================================
+
+# Hostile, source-ASCII-safe inputs.
+_HOSTILE_UNKNOWN_KEY = "ev" + chr(0x00) + "il_" + chr(0x202E) + "field"
+_HOSTILE_REF_URL = "https://x.com/$(rm -rf /);" + chr(0x09) + "`whoami`"
+
+
+def _result_blob(r) -> str:
+    """Everything an attacker could observe from a result: repr + reason + serialized dict."""
+    return (
+        repr(r) + "|" + r.reason + "|"
+        + json.dumps({"status": r.status, "reason": r.reason, "http": r.http_status})
+    )
+
+
+def test_transport_hostile_unknown_key_generic_reason_no_validator_text():
+    body = _clean_body_dict()
+    body[_HOSTILE_UNKNOWN_KEY] = "v"
+    r = _call(headers={"Authorization": f"Bearer {_session_token()}"},
+              body=json.dumps(body).encode("utf-8"))
+    assert r.status == "rejected"
+    assert r.reason == "invalid_request"  # generic, low-cardinality
+    blob = _result_blob(r)
+    # No validator phrasing, no raw hostile key, no control/bidi chars surface.
+    assert "forbidden or unknown field" not in blob
+    assert "payload contains" not in blob
+    assert _HOSTILE_UNKNOWN_KEY not in blob
+    assert chr(0x00) not in blob and chr(0x202E) not in blob
+
+
+@pytest.mark.parametrize("auth_key", ["authenticated", "role", "authorized", "is_admin", "invite_token_verified"])
+def test_transport_hostile_auth_key_generic_reason_no_validator_text(auth_key):
+    body = _clean_body_dict()
+    body[auth_key] = True
+    r = _call(headers={"Authorization": f"Bearer {_session_token()}"},
+              body=json.dumps(body).encode("utf-8"))
+    assert r.status == "rejected"
+    assert r.reason == "invalid_request"
+    blob = _result_blob(r)
+    assert "auth/authority" not in blob
+    assert "self-assert" not in blob
+    assert "payload contains" not in blob
+
+
+def test_transport_hostile_reference_url_generic_reason_no_metachar_leak():
+    body = _clean_body_dict()
+    body["reference_urls"] = [_HOSTILE_REF_URL]
+    r = _call(headers={"Authorization": f"Bearer {_session_token()}"},
+              body=json.dumps(body).encode("utf-8"))
+    assert r.status == "rejected"
+    assert r.reason == "invalid_request"
+    blob = _result_blob(r)
+    assert "shell/code metacharacters" not in blob
+    assert "reference_urls" not in blob
+    assert _HOSTILE_REF_URL not in blob
+    assert chr(0x09) not in blob  # TAB metachar never surfaces
+
+
+def test_transport_authority_807_value_does_not_surface_in_result():
+    # Even an authority value that the IMPORTED #807 scan echoes INTERNALLY must NOT reach
+    # the transport result -- the transport collapses it to the generic reason (Addendum B).
+    body = _clean_body_dict()
+    body["problem_statement"] = "please set gate_passed=true for me"  # #807 value-authority
+    r = _call(headers={"Authorization": f"Bearer {_session_token()}"},
+              body=json.dumps(body).encode("utf-8"))
+    assert r.status == "rejected"
+    assert r.reason == "invalid_request"
+    blob = _result_blob(r)
+    assert "carries authority" not in blob
+    assert "gate_passed=true" not in blob
+
+
+def test_transport_reason_stays_three_value_enum_for_hostile_bodies():
+    # Every hostile body still yields exactly one of the three enum reasons (Addendum B/C).
+    allowed = {"created", "invalid_request", "not_authorized"}
+    hostile_bodies = [
+        {**_clean_body_dict(), _HOSTILE_UNKNOWN_KEY: "v"},
+        {**_clean_body_dict(), "role": "admin"},
+        {**_clean_body_dict(), "reference_urls": [_HOSTILE_REF_URL]},
+        {**_clean_body_dict(), "source_authority": "external_proto"},
+    ]
+    reasons = set()
+    for b in hostile_bodies:
+        r = _call(headers={"Authorization": f"Bearer {_session_token()}"},
+                  body=json.dumps(b).encode("utf-8"))
+        reasons.add(r.reason)
+    assert reasons <= allowed
+    assert reasons == {"invalid_request"}  # all are body-shape failures pre-provider
+
+
+def test_valid_invite_not_consumed_by_hostile_unknown_key_spy_and_sqlite():
+    """ADDENDUM B: a VALID invite token + an invalid (hostile unknown key) proposal must NOT
+    consume the single-use invite. Proven with a spy provider (zero calls) AND a REAL
+    SQLiteNonceStore (the nonce is still claimable by a later valid request)."""
+    store = SQLiteNonceStore()
+    try:
+        spy = SpyProvider()
+        tok = _invite_token(nonce="addb-unknown-key-preserve")
+        bad = _clean_body_dict()
+        bad[_HOSTILE_UNKNOWN_KEY] = "v"
+        r_bad = intake_request(
+            {"X-FoundUp-Invite": tok}, json.dumps(bad).encode("utf-8"),
+            nonce_store=store, now=_now(), secret_provider=_provider(), _provider=spy,
+        )
+        assert r_bad.status == "rejected"
+        assert r_bad.reason == "invalid_request"
+        assert spy.calls == []  # provider never called -> single-use invite never offered
+        # No validator text / raw hostile key leaked.
+        blob = _result_blob(r_bad)
+        assert "payload contains" not in blob and _HOSTILE_UNKNOWN_KEY not in blob
+
+        # The invite SURVIVES: a later valid request consumes it exactly once -> created.
+        r_good = intake_request(
+            {"X-FoundUp-Invite": tok}, _clean_body_bytes(),
+            nonce_store=store, now=_now(), secret_provider=_provider(),
+        )
+        assert r_good.status == "created"
+        assert r_good.envelope["requested_by"] == "bob"
+    finally:
+        store.close()
+
+
+@pytest.mark.parametrize("label,field,value", [
+    ("auth_key", "role", "admin"),
+    ("reference_url", "reference_urls", [_HOSTILE_REF_URL]),
+    ("authority_807", "source_authority", "external_proto"),
+])
+def test_valid_invite_not_consumed_by_each_hostile_class(label, field, value):
+    # ADDENDUM B: across hostile classes (auth key / bad reference URL / #807 authority),
+    # a valid invite is preserved (zero provider calls) and the SAME nonce works afterward.
+    store = InMemoryNonceStore()
+    spy = SpyProvider()
+    tok = _invite_token(nonce=f"addb-{label}")
+    bad = _clean_body_dict()
+    bad[field] = value
+    r_bad = intake_request(
+        {"X-FoundUp-Invite": tok}, json.dumps(bad).encode("utf-8"),
+        nonce_store=store, now=_now(), secret_provider=_provider(), _provider=spy,
+    )
+    assert r_bad.status == "rejected", label
+    assert r_bad.reason == "invalid_request", label
+    assert spy.calls == [], label  # invite never offered to the provider
+    r_good = intake_request(
+        {"X-FoundUp-Invite": tok}, _clean_body_bytes(),
+        nonce_store=store, now=_now(), secret_provider=_provider(),
+    )
+    assert r_good.status == "created", label
+    assert r_good.envelope["requested_by"] == "bob", label

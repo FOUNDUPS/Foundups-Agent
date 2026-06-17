@@ -1,5 +1,60 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-17] FoundUp Launch-Request Error No-Raw-Echo Phase 1 (AUTHOR, public-intake validator error-message hygiene)
+
+**Change Type**: MESSAGE-ONLY HARDENING -- 1 src validator + 2 test suites. The #826 sweep hardened the
+genesis validator but DEFERRED two `validate_launch_request` error strings that echo user-derived
+content: `launch_request.py:195` (`"shell/code metacharacters in reference: {sorted(bad)}"`) and
+`launch_request.py:236` (`"forbidden/unknown payload field: {key!r}"`). `validate_launch_request` is the
+PUBLIC-INTAKE validator (called by the #823 transport pre-flight AND by `to_genesis_envelope`), so its
+error strings -- and the `LaunchRequestError` it raises -- must be echo-free to match the #826 invariant.
+Closed: no launch_request-LOCAL error echoes raw user-controlled input (value, `repr()`, offending char,
+metachar list, or raw bytes). MESSAGE TEXT ONLY -- validation behavior unchanged.
+**By**: 0102 (AUTHOR) | Commander: 012 | Gate: independent 5-lane SENTINEL (do NOT self-merge)
+**WSP References**: WSP 00, 50, 64, 84, 87, 97
+**Slice**: FOUNDUP_LAUNCH_REQUEST_ERROR_NO_RAW_ECHO_PHASE1
+**Base**: `6f651a8c6` (origin/main; contains #810/#821/#823/#824/#826)
+**Motivating finding**: the #826 sweep explicitly DEFERRED the two `validate_launch_request` echo sites.
+
+**Sweep (launch_request.py's OWN sites only; message-only)**: enumerated every `errors.append(...)` /
+`raise LaunchRequestError` reachable from `validate_launch_request` by direct read. Reworded:
+`_scan_auth_fields` (`:174`, dropped `{trail}{key}` -> `"payload contains a forbidden auth/authority
+field..."`), allowed-fields loop (`:236`, dropped `{key!r}` -> `"payload contains a forbidden or unknown
+field"`), `_check_url_ref` (`:195`, dropped `{sorted(bad)}` -> `"reference_urls[i] contains shell/code
+metacharacters"`). LEFT AS-IS (already safe): other `_check_url_ref` msgs (`:186`/`:189`/`:192`),
+`proposed_name is required` (`:251`), intake-gate (`:270`), and the #824 `_reject_display_field` reject
+messages (reused, not duplicated). Field/family locality preserved (Addendum C): the operator learns
+WHICH field class failed without seeing the raw value (FORBIDDEN: a single generic "invalid input").
+
+**Parity (HARD CONSTRAINT -- mechanically proven, no logic change)**:
+- AST control-flow skeleton with EVERY string constant + f-string blanked == origin/main `launch_request.py`
+  (same control flow, calls, branches).
+- Runtime ERROR-CATEGORY PARITY (Addendum A -- NOT just count): 25-input battery (valid + every invalid
+  class) HEAD vs origin/main -> 0 divergences in (`ok`, ORDERED category-label list). Error TEXT differs at
+  the 3 reworded sites; the stable rule CATEGORY does not.
+Same fields rejected, same intake-gate decision, same single-use-invite behavior, same
+`external_repo_requested=False`, same `requester_handle`-from-context. No check weakened, no new rejects.
+
+**Addendum E -- #807 `_scan_authority` DEFERRED (not modified)**: the IMPORTED #807 scan
+(`modules/foundups/agent/src/kanban_plugin_contract.py:199/201/210/218/231`) echoes raw key/value/repr for
+authority-class rejects reachable via `launch_request.py:243`. NOT modified here. Launch-local sites are
+safe regardless, and the #823 transport collapses ALL of these to the generic `invalid_request` (Addendum B
+tests prove no #807 echo reaches the public surface). Follow-up named:
+**FOUNDUP_KANBAN_CONTRACT_ERROR_NO_RAW_ECHO_PHASE1**. Non-blocking (objective satisfiable without #807).
+
+**Files** (src + tests only; `envelope.py`, `validator.py`, `intake_auth_provider.py`,
+`intake_transport.py` src, `kanban_plugin_contract.py`, `__init__.py` UNCHANGED):
+- EDIT `modules/ai_intelligence/ai_overseer/src/foundup_genesis/launch_request.py` -- 3 error sites de-echoed.
+- EDIT `modules/ai_intelligence/ai_overseer/tests/test_foundup_launch_request.py` -- leak scanner + per-site
+  no-echo + error-scanner battery + Addendum A category-parity helper + AST skeleton parity + #807 deferral pins.
+- EDIT `modules/ai_intelligence/ai_overseer/tests/test_intake_transport.py` -- Addendum B transport non-leak +
+  invite-preservation (real `SQLiteNonceStore` + spy provider).
+
+**Tests/Regression**: affected-package = launch_request + genesis_validator + intake_auth_provider +
+intake_transport = `589 passed`, 0 skipped/xfailed, in BOTH CI allowlist mode AND `AI_OVERSEER_HEAVY_TESTS=1`.
+ASCII byte-check: 0 non-ASCII on all 3 edited files (hostile fixtures via `chr()`/`\uXXXX`). WSP_97 Truth
+Boundary Checklist (18 rows) in the ai_overseer ModLog.
+
 ## [2026-06-16] FoundUp Genesis ID Error No-Raw-Value-Echo Phase 1 (Lane A, genesis error-message hygiene)
 
 **Change Type**: MESSAGE-ONLY HARDENING -- 1 src validator + its test suite. The #824 leakage lane
