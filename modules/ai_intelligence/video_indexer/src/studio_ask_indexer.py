@@ -61,11 +61,44 @@ except ImportError:  # pragma: no cover - import guard
     first_deep = None
     SHADOW_FINDER_AVAILABLE = False
 
+# WSP 84 REUSE: the proven anti-detection stealth JS already used to harden the
+# undetected browser. We REUSE _inject_stealth_js (which registers a CDP
+# Page.addScriptToEvaluateOnNewDocument hook hiding navigator.webdriver +
+# spoofing plugins/chrome runtime). The cdc_/$cdc property strip is added on top
+# in _register_stealth (the undetected_browser JS does not strip cdc_). This
+# reduces the Ask Studio "Gemini chat loads blank under automation" rate; the
+# load-bearing fix remains the NEW-TAB retry below.
+try:
+    from modules.infrastructure.foundups_selenium.src.undetected_browser import (
+        UndetectedBrowserManager,
+    )
+    UNDETECTED_BROWSER_AVAILABLE = True
+except ImportError:  # pragma: no cover - import guard
+    UndetectedBrowserManager = None
+    UNDETECTED_BROWSER_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 INDEX_ROOT = Path("memory") / "video_index"
 STOP_FILE = Path("memory") / "STOP_VIDEO_INDEXER"
 REINDEX_FILE = Path("memory") / "REINDEX_VIDEO_INDEXER"
+
+# WRE "no hang actions": a single guaranteed-terminating OUTER guard over the
+# whole ask_about_video flow. The per-loop timeouts (readiness gate,
+# answer-capture) already bound each stage, but a guaranteed-terminating action
+# needs ONE hard ceiling measured from the start of the ask. If the total
+# monotonic runtime of ask_about_video exceeds this, the flow ABORTS and returns
+# success=False, error="ask_studio_timeout", and persists NOTHING. Measured with
+# time.monotonic() (NOT wall-clock that a test could mock away). Tests may inject
+# a tiny budget (e.g. 0.0) to force the timeout with a never-arriving answer.
+ASK_TOTAL_RUNTIME_BUDGET_SECONDS = 180.0
+
+# Heartbeat cadence for the long readiness-wait / answer-capture loops. The loops
+# emit a periodic "[STUDIO-ASK] heartbeat: waiting for <phase> t+Ns/<budget>s" log
+# every ~this many seconds so a watching operator/WRE sees the action is alive and
+# NOT hung (WRE "no hang actions"). Heartbeat cadence is independent of the
+# per-poll delay; we only emit once this many seconds elapse since the last beat.
+ASK_HEARTBEAT_INTERVAL_SECONDS = 8.0
 
 
 def _env_truthy(name: str, default: str = "false") -> bool:
@@ -117,6 +150,12 @@ class AskResult:
     success: bool
     # Content category detected from browser Gemini (no API needed)
     content_category: str = "other"  # ffcpln_music, personal_vlog, ice_remix, educational, other
+    # RAW Gemini content_category string BEFORE enum normalization. Gemini often
+    # returns a richer label ("Educational Philosophy & Future Trends") than the
+    # 5-value enum. _parse_ask_response MAPS the raw label to the closest enum for
+    # content_category, but PRESERVES the original here (+ in the saved index) so
+    # the rich label is never lost. Equals content_category for an exact enum hit.
+    content_category_raw: Optional[str] = None
     error: Optional[str] = None
 
 
@@ -210,11 +249,29 @@ class StudioAskIndexer:
 
     # Markers proving a scraped stream block is the ZERO-STATE suggestion list,
     # not a real answer. If the stabilized text is ONLY zero-state, fail closed.
+    #
+    # LIVE-PROVEN false-success (STUDIO_ASK_GEMINI_READINESS_RETRY_PHASE1): after
+    # submit the capture stabilized at +6s on the ZERO-STATE *suggestion* variant
+    # and saved 106 chars: "A/B Testing Guide / Hello, UnDaoDu / Suggest new video
+    # ideas / Summarize my channel performance / More suggestions" (topics=[],
+    # category=other). The old marker set ("how can ask studio help" / "summarize
+    # comments") did NOT contain these phrases, so the suggestion list survived
+    # _strip_boilerplate and was scraped as the answer. We extend the marker set
+    # to ALSO catch the suggestion-chip variant + the channel greeting so a stream
+    # of ONLY these (no JSON block, no substantial prose) is recognized as the
+    # zero-state and NEVER persisted as the answer.
     ZERO_STATE_MARKERS = (
         "how can ask studio help",
         "how can i help you",
         "summarize comments",
         "summarize the comments",
+        # Suggestion-chip variant (live-captured 106-char false success).
+        "suggest new video ideas",
+        "summarize my channel performance",
+        "more suggestions",
+        "a/b testing",
+        # Channel greeting line ("Hello, <ChannelName>") that heads the zero-state.
+        "hello,",
     )
 
     # Refusal / no-answer markers. If the STABILIZED Ask Studio response contains
@@ -232,6 +289,51 @@ class StudioAskIndexer:
     # Response is considered COMPLETE once its text stops growing for this many
     # consecutive polls (stabilization), guarding against partial/streaming reads.
     RESPONSE_STABLE_POLLS = 3
+
+    # Minimum chars of boilerplate-stripped PROSE (no JSON block) to count as a
+    # REAL answer. LIVE-PROVEN guard: the zero-state suggestion variant stripped
+    # down to ~100 chars of chips ("Suggest new video ideas / Summarize my channel
+    # performance / More suggestions"). Below this length (and with no JSON index
+    # block) the stream is NOT an answer -> fail closed "ask_studio_no_answer".
+    # A genuine Gemini prose answer is well above this; the JSON-index happy path
+    # is unaffected (JSON block is extracted BEFORE this threshold applies).
+    MIN_SUBSTANTIAL_PROSE_CHARS = 400
+
+    # =====================================================================
+    # STUDIO_ASK_GEMINI_READINESS_RETRY_PHASE1 (live-proven loop constants)
+    # ---------------------------------------------------------------------
+    # GEMINI-READY marker: the zero-state greeting Gemini renders in the stream
+    # ONCE its chat has initialized ("how can i help"). Live-proven: when the
+    # dialog opens BLANK (no greeting, only the disclaimer placeholder), Gemini
+    # never initialized and typing scrapes the disclaimer as a false success.
+    # The greeting (case-insensitive substring) is the PRIMARY, proven readiness
+    # signal -- NOT a coordinate/vision check (that is Phase 2, out of scope).
+    # =====================================================================
+    GEMINI_READY_MARKER = "how can i help"
+
+    # Max seconds to poll the stream for the readiness greeting after opening Ask
+    # Studio, before declaring the panel BLANK (-> new-tab retry).
+    GEMINI_READY_TIMEOUT_SECONDS = 16.0
+
+    # Max NEW-TAB retries when Gemini loads blank (the load-bearing live fix:
+    # attempt1=BLANK, attempt2(new tab)=LOADED). After N exhausted attempts with
+    # no greeting -> fail closed "gemini_did_not_load".
+    GEMINI_MAX_LOAD_ATTEMPTS = 5
+
+    # DISCLAIMER footer rendered under every Ask Studio answer (NEVER the answer).
+    # Live-grounded: "AI can make mistakes. You are responsible for the content
+    # you publish. Learn more". Matched case-insensitively and stripped.
+    DISCLAIMER_MARKERS = (
+        "ai can make mistakes",
+        "you are responsible for the content you publish",
+    )
+
+    # Transient PROCESSING lines that stream BEFORE the real answer (never the
+    # answer). Live-grounded; stripped from the captured answer block.
+    PROCESSING_MARKERS = (
+        "reviewing your request",
+        "looking through your content",
+    )
 
     # Legacy/fallback selectors (Watch Page AND Studio popup menu).
     # FALLBACK ONLY (Phase 1): retained for resilience, never the primary path.
@@ -261,8 +363,19 @@ class StudioAskIndexer:
     USE_WATCH_PAGE = False
 
     # Max seconds to wait for the Ask Studio response stream to produce text
-    # before failing closed (no partial/garbage indexing).
-    RESPONSE_TIMEOUT_SECONDS = 30.0
+    # before failing closed (no partial/garbage indexing). LIVE-PROVEN: the real
+    # JSON index streams ~30s AFTER submit (the zero-state is immediately stable
+    # at +6s), so the wait must outlast the zero-state and STABILIZE ON THE
+    # EXTRACTED ANSWER, not the immediately-stable zero-state. Bumped 30s -> 60s.
+    RESPONSE_TIMEOUT_SECONDS = 60.0
+
+    # WRE "no hang actions" (class-attribute mirrors of the module constants so a
+    # test can monkeypatch a tiny budget). ASK_TOTAL_RUNTIME_BUDGET_SECONDS is the
+    # guaranteed-terminating OUTER ceiling on the whole ask_about_video flow
+    # (monotonic-measured); past it the flow aborts "ask_studio_timeout" and
+    # persists nothing. ASK_HEARTBEAT_INTERVAL_SECONDS paces the liveness beat.
+    ASK_TOTAL_RUNTIME_BUDGET_SECONDS = ASK_TOTAL_RUNTIME_BUDGET_SECONDS
+    ASK_HEARTBEAT_INTERVAL_SECONDS = ASK_HEARTBEAT_INTERVAL_SECONDS
 
     # ---------------------------------------------------------------------
     # STUDIO_ASK_CHANNEL_CONTEXT_PHASE1: right TARGET -> right CHANNEL -> verify
@@ -388,6 +501,28 @@ Give a brief category and a few mood/genre topics only.""",
             ).strip().lower()
         return cls.CHANNEL_PROMPTS.get(template, cls.ASK_PROMPT)
 
+    @staticmethod
+    def _build_video_prompt(title: str, video_id: str) -> str:
+        """
+        Build a SINGLE-LINE prompt that NAMES the exact video (title + video id +
+        studio URL) and requests a CLEAN JSON index.
+
+        LIVE-PROVEN correctness requirement (STUDIO_ASK_GEMINI_READINESS_RETRY):
+        Ask Studio is a CHANNEL assistant. A query WITHOUT the specific video id
+        made Gemini analyze a DIFFERENT video even though the right one was loaded
+        (a data-integrity disaster). Naming title+id+url pins it to THIS video.
+        The JSON-requesting form is live-proven to return a clean JSON index
+        (content_category + topics[] + segments[{time,topic,summary}]). Single
+        line (no embedded "\\n") so the contenteditable never sees a stray ENTER.
+        """
+        safe_title = (title or "").replace('"', "'").strip()
+        return (
+            f'Analyze the video titled "{safe_title}" (video id {video_id}, '
+            f"studio.youtube.com/video/{video_id}). Respond ONLY with a JSON "
+            'index: {"content_category":"...","topics":["..."],'
+            '"segments":[{"time":"0:00","topic":"...","summary":"..."}]}'
+        )
+
     def __init__(
         self,
         driver=None,
@@ -405,6 +540,10 @@ Give a brief category and a few mood/genre topics only.""",
         self.driver = driver
         self.human = human
         self.max_videos_per_cycle = max_videos_per_cycle
+        # Tabs THIS flow opens during the new-tab retry (step 3). Tracked so the
+        # end-of-flow cleanup (step 7) closes ONLY flow-created tabs, never the
+        # operator's pre-existing tabs.
+        self._created_handles: List[str] = []
         
         # Initialize video index if available
         self.video_index = None
@@ -419,13 +558,40 @@ Give a brief category and a few mood/genre topics only.""",
         """Human-like delay for anti-detection."""
         import asyncio
         import random
-        
+
         if self.human:
             delay = self.human.human_delay(base, variance)
         else:
             delay = base * (1 + random.uniform(-variance, variance))
-        
+
         await asyncio.sleep(delay)
+
+    def _maybe_heartbeat(
+        self,
+        phase: str,
+        start_monotonic: float,
+        last_beat: float,
+    ) -> float:
+        """
+        Emit a periodic "[STUDIO-ASK] heartbeat: waiting for <phase> t+Ns/<budget>s"
+        log if at least ASK_HEARTBEAT_INTERVAL_SECONDS have elapsed since the last
+        beat (WRE "no hang actions" liveness signal). Returns the (possibly
+        updated) last-beat monotonic timestamp so the caller can carry it forward.
+
+        Uses time.monotonic() for elapsed/last-beat math (NOT wall-clock that a
+        test could mock away); ``start_monotonic`` is the monotonic clock at the
+        start of the ask flow so t+N is measured against the SAME guaranteed total
+        runtime budget enforced by the outer no-hang guard.
+        """
+        now = time.monotonic()
+        if (now - last_beat) < self.ASK_HEARTBEAT_INTERVAL_SECONDS:
+            return last_beat
+        elapsed = now - start_monotonic
+        logger.info(
+            f"[STUDIO-ASK] heartbeat: waiting for {phase} "
+            f"t+{elapsed:.0f}s/{self.ASK_TOTAL_RUNTIME_BUDGET_SECONDS:.0f}s"
+        )
+        return now
     
     def _extract_video_id_from_url(self, url: str) -> Optional[str]:
         """Extract video ID from YouTube URL."""
@@ -500,6 +666,10 @@ Give a brief category and a few mood/genre topics only.""",
                 "key_points": [],
                 "summary": ask_result.response_text or "",
                 "content_category": ask_result.content_category or "other",
+                # PRESERVE Gemini's raw (pre-normalization) category in the saved
+                # index so the rich label is never lost. None if Gemini returned no
+                # category string (parse failure / prose fallback edge).
+                "content_category_raw": ask_result.content_category_raw,
             },
             gemini_summary={
                 "ask_response": ask_result.response_text or "",
@@ -509,18 +679,69 @@ Give a brief category and a few mood/genre topics only.""",
             transcript_source="gemini",
         )
     
+    # Canonical content_category enum (the 5 values the index/classifier expect).
+    CONTENT_CATEGORY_ENUM = ("educational", "personal_vlog", "ice_remix", "ffcpln_music", "other")
+
+    @classmethod
+    def _normalize_content_category(cls, raw: Any) -> str:
+        """
+        Map an arbitrary Gemini content_category string to the closest enum value.
+
+        Gemini frequently returns a RICHER label than the 5-value enum (e.g.
+        "Educational Philosophy & Future Trends"). An EXACT enum value passes
+        through unchanged. Otherwise we keyword-map (case-insensitive substring):
+          contains "educat"                              -> educational
+          "vlog"/"personal"/"daily"/"diary"             -> personal_vlog
+          "ice"/"immigration"/"politic"/"activist"/"news"-> ice_remix
+          "music"/"instrumental"/"visualizer"           -> ffcpln_music
+          else                                          -> other
+        The RAW string is preserved separately (content_category_raw) by callers
+        so the rich label is never lost; this method only resolves the enum slot.
+        """
+        if not isinstance(raw, str):
+            return "other"
+        low = raw.strip().lower()
+        if low in cls.CONTENT_CATEGORY_ENUM:
+            return low
+        if "educat" in low:
+            return "educational"
+        if any(kw in low for kw in ("vlog", "personal", "daily", "diary")):
+            return "personal_vlog"
+        if any(kw in low for kw in ("ice", "immigration", "politic", "activist", "news")):
+            return "ice_remix"
+        if any(kw in low for kw in ("music", "instrumental", "visualizer")):
+            return "ffcpln_music"
+        return "other"
+
     def _parse_ask_response(self, response_text: str) -> Dict[str, Any]:
-        """Parse JSON from Ask Gemini response."""
+        """
+        Parse the Ask Studio answer: the JSON index block FIRST (Gemini returns a
+        clean JSON index for the JSON-requesting prompt - live-proven:
+        content_category + topics[] + segments[{time,topic,summary}]), then a
+        prose/keyword fallback if no JSON block parses. Strict JSON is NOT
+        required (prose tolerance is the documented fallback).
+
+        CONTENT_CATEGORY NORMALIZE + PRESERVE: a content_category NOT in the enum
+        (e.g. "Educational Philosophy & Future Trends") is MAPPED to the closest
+        enum value (_normalize_content_category) for content_category, while the
+        ORIGINAL Gemini string is preserved in content_category_raw (never lost).
+        An exact enum value passes through unchanged with raw == that same value.
+        """
         try:
-            # Try to extract JSON from response (allow nested braces for segments)
+            # JSON BLOCK FIRST: the last balanced {...} with topics /
+            # content_category (the proven Gemini JSON index). Tolerant: try the
+            # extracted block, falling back to the legacy non-greedy match.
+            json_block = self._extract_json_block(response_text)
+            if json_block:
+                try:
+                    parsed = json.loads(json_block)
+                    return self._apply_category_normalization(parsed)
+                except Exception:
+                    pass  # malformed JSON block -> try legacy match, then prose
             json_match = re.search(r'\{[\s\S]*?"topics"[\s\S]*?\}(?=\s*$|\s*```)', response_text)
             if json_match:
                 parsed = json.loads(json_match.group())
-                # Validate content_category
-                valid_categories = {"ffcpln_music", "personal_vlog", "ice_remix", "educational", "other"}
-                if parsed.get("content_category") not in valid_categories:
-                    parsed["content_category"] = "other"
-                return parsed
+                return self._apply_category_normalization(parsed)
 
             # Fallback: extract topics manually + detect category from keywords
             topics = re.findall(r'"([^"]+)"', response_text)
@@ -534,10 +755,34 @@ Give a brief category and a few mood/genre topics only.""",
                 category = "ice_remix"
             elif any(kw in text_lower for kw in ["tutorial", "how to", "learn", "explain"]):
                 category = "educational"
-            return {"topics": topics[:10], "segments": [], "content_category": category}
+            return {
+                "topics": topics[:10],
+                "segments": [],
+                "content_category": category,
+                "content_category_raw": category,
+            }
         except Exception as e:
             logger.warning(f"[STUDIO-ASK] JSON parse failed: {e}")
-            return {"topics": [], "segments": [], "content_category": "other", "raw": response_text}
+            return {
+                "topics": [],
+                "segments": [],
+                "content_category": "other",
+                "content_category_raw": None,
+                "raw": response_text,
+            }
+
+    def _apply_category_normalization(self, parsed: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Normalize ``parsed["content_category"]`` to the enum + preserve the RAW
+        Gemini string in ``parsed["content_category_raw"]``. A non-string / missing
+        category yields content_category="other" with raw=None; an exact enum value
+        passes through with raw == that same value; a rich label is mapped to the
+        closest enum while raw keeps the original. Mutates and returns ``parsed``.
+        """
+        raw = parsed.get("content_category")
+        parsed["content_category"] = self._normalize_content_category(raw)
+        parsed["content_category_raw"] = raw if isinstance(raw, str) else None
+        return parsed
     
     def _first_element(self, selectors: List[Any]):
         """
@@ -591,6 +836,409 @@ Give a brief category and a few mood/genre topics only.""",
         logger.info("[STUDIO-ASK] Clicked Ask Studio header button (PRIMARY)")
         return True
 
+    # =====================================================================
+    # STEALTH (STUDIO_ASK_GEMINI_READINESS_RETRY_PHASE1 step 1)
+    # =====================================================================
+    # CDP pre-load script: strip cdc_/$cdc webdriver fingerprints + set
+    # navigator.webdriver=undefined. Re-registered on every NEW tab (the CDP
+    # hook is per-page). REUSES undetected_browser._inject_stealth_js when
+    # importable (hides webdriver, spoofs plugins/chrome runtime); the cdc_ strip
+    # is layered on top because that JS does not strip cdc_.
+    _STEALTH_CDC_STRIP_JS = (
+        "(function(){try{for(const k of Object.keys(window)){"
+        "if(/cdc_|[$]cdc/.test(k)){try{delete window[k];}catch(e){}}}"
+        "Object.defineProperty(navigator,'webdriver',{get:()=>undefined});"
+        "}catch(e){}})();"
+    )
+
+    def _register_stealth(self) -> bool:
+        """
+        Register the anti-detection CDP pre-load script on the CURRENT driver/tab.
+
+        Page.addScriptToEvaluateOnNewDocument runs the script on EVERY document
+        the tab loads, so it must be (re-)registered per new tab. REUSES the
+        proven undetected_browser stealth JS (navigator.webdriver hide + plugin /
+        chrome-runtime spoof) when importable, then layers the cdc_/$cdc strip on
+        top. Best-effort: a driver without execute_cdp_cmd (e.g. mock) is a no-op
+        returning False, never raising (stealth is a softener, the new-tab retry
+        is the load-bearing fix). Returns True if any stealth hook registered.
+        """
+        driver = self.driver
+        # The stealth hooks REQUIRE execute_cdp_cmd (both the reused
+        # undetected_browser JS and the cdc_ strip register a CDP pre-load
+        # script). A driver without it (e.g. a mock) is a no-op returning False.
+        cdp = getattr(driver, "execute_cdp_cmd", None)
+        if not callable(cdp):
+            return False
+        registered = False
+        # REUSE: undetected_browser stealth JS (per-new-document CDP hook).
+        if UNDETECTED_BROWSER_AVAILABLE and UndetectedBrowserManager is not None:
+            try:
+                UndetectedBrowserManager._inject_stealth_js(driver)
+                registered = True
+            except Exception as e:  # pragma: no cover - defensive
+                logger.debug(f"[STUDIO-ASK] reused stealth JS skipped: {e}")
+        # LAYER: cdc_/$cdc strip + webdriver=undefined (undetected JS omits cdc_).
+        try:
+            cdp(
+                "Page.addScriptToEvaluateOnNewDocument",
+                {"source": self._STEALTH_CDC_STRIP_JS},
+            )
+            registered = True
+        except Exception as e:  # pragma: no cover - defensive
+            logger.debug(f"[STUDIO-ASK] cdc_ strip CDP hook skipped: {e}")
+        if registered:
+            logger.info("[STUDIO-ASK] Stealth CDP pre-load registered for tab")
+        return registered
+
+    # =====================================================================
+    # GEMINI-READINESS GATE (step 2)
+    # =====================================================================
+    @classmethod
+    def _is_gemini_ready(cls, text: str) -> bool:
+        """
+        True if the stream text shows Gemini has INITIALIZED: the proven
+        zero-state greeting ("how can i help") OR the Ask Studio zero-state
+        suggestion view ("How can Ask Studio help me? / Summarize comments ...").
+        Either greeting proves the chat loaded (not the BLANK disclaimer-only
+        placeholder). A blank/disclaimer-only stream is NOT ready (-> retry).
+        """
+        if not text:
+            return False
+        low = text.lower()
+        if cls.GEMINI_READY_MARKER in low:
+            return True
+        return any(m in low for m in cls.ZERO_STATE_MARKERS)
+
+    async def _wait_for_gemini_ready(self, start_monotonic: Optional[float] = None) -> bool:
+        """
+        POLL the Ask Studio stream for the Gemini-ready greeting ("how can i
+        help") up to GEMINI_READY_TIMEOUT_SECONDS. Returns True once the greeting
+        appears (Gemini initialized), False if the panel stays BLANK (no
+        greeting) within the timeout -> caller triggers the NEW-TAB retry. Do NOT
+        type into a blank panel.
+
+        Emits a periodic "waiting for readiness" heartbeat (WRE "no hang actions").
+        ``start_monotonic`` is the ask-flow start time used for the t+N heartbeat
+        readout; defaults to "now" when called outside the flow.
+        """
+        import time as _time
+
+        if start_monotonic is None:
+            start_monotonic = _time.monotonic()
+        last_beat = _time.monotonic()
+        deadline = _time.monotonic() + self.GEMINI_READY_TIMEOUT_SECONDS
+        while _time.monotonic() < deadline:
+            el = self._first_element(self.ASK_STUDIO_SELECTORS["response_stream"])
+            text = ""
+            if el is not None:
+                try:
+                    text = (el.text or "").strip()
+                except Exception:
+                    text = ""
+            # Gemini is READY when it has initialized: either the zero-state
+            # greeting ("how can i help") is present, OR a real answer block is
+            # already extractable (a non-empty stream past the blank placeholder).
+            # The DISCLAIMER-only / empty placeholder is the BLANK case.
+            if self._is_gemini_ready(text) or self._extract_answer(text):
+                logger.info("[STUDIO-ASK] Gemini ready (greeting or answer present)")
+                return True
+            last_beat = self._maybe_heartbeat("readiness", start_monotonic, last_beat)
+            await self._human_delay(1.0, 0.2)
+        logger.info("[STUDIO-ASK] Gemini readiness greeting NOT seen (blank panel)")
+        return False
+
+    # =====================================================================
+    # REAL-ANSWER CAPTURE (step 5) - strip boilerplate, never zero on greeting
+    # =====================================================================
+    @classmethod
+    def _strip_boilerplate(cls, text: str) -> str:
+        """
+        Remove Ask Studio boilerplate from a stream block: the persistent
+        zero-state greeting + suggestion list, the transient PROCESSING lines
+        ("Reviewing your request", "Looking through your content"), and the
+        DISCLAIMER footer ("AI can make mistakes..."). Returns the remaining body
+        text. NOTE: this is used to decide whether a REAL answer is present -- it
+        does NOT zero the stream merely because the persistent greeting is there
+        (the proven scraper bug). Pure string helper (no DOM).
+        """
+        if not text:
+            return ""
+        kept: List[str] = []
+        for raw_line in text.splitlines():
+            line = raw_line.strip()
+            if not line:
+                continue
+            low = line.lower()
+            if any(m in low for m in cls.ZERO_STATE_MARKERS):
+                continue
+            if any(m in low for m in cls.PROCESSING_MARKERS):
+                continue
+            if any(m in low for m in cls.DISCLAIMER_MARKERS):
+                continue
+            if low == "learn more":
+                continue
+            kept.append(line)
+        return "\n".join(kept).strip()
+
+    @staticmethod
+    def _extract_json_block(text: str) -> Optional[str]:
+        """
+        Return the LAST balanced ``{...}`` block in ``text`` that contains a
+        ``topics`` or ``content_category`` key (the JSON index Gemini returns for
+        the JSON prompt), else None. Scans balanced brace runs so prompt-echo
+        JSON examples ABOVE the answer don't shadow the real (last) answer block.
+        """
+        if not text or "{" not in text:
+            return None
+        best: Optional[str] = None
+        depth = 0
+        start = -1
+        for i, ch in enumerate(text):
+            if ch == "{":
+                if depth == 0:
+                    start = i
+                depth += 1
+            elif ch == "}":
+                if depth > 0:
+                    depth -= 1
+                    if depth == 0 and start >= 0:
+                        block = text[start : i + 1]
+                        low = block.lower()
+                        if '"topics"' in low or '"content_category"' in low:
+                            best = block  # keep LAST qualifying block
+                        start = -1
+        return best
+
+    def _extract_answer(self, stream_text: str, prompt: str = "") -> str:
+        """
+        Extract the REAL answer from the Ask Studio stream, fixing BOTH the
+        false-success scrape AND the greeting-zeroing bug.
+
+        The stream PERSISTS the greeting + suggestions + prompt echo ABOVE the
+        answer, so we must NOT reject the whole stream just because the greeting
+        ("how can i help") is present. Instead:
+          1. Prefer the JSON index block (last balanced {...} with topics /
+             content_category) -- returned verbatim for tolerant JSON parsing.
+          2. Else strip boilerplate (greeting/suggestions/processing/disclaimer)
+             and the prompt echo, returning the remaining prose body.
+        Returns "" only when nothing but boilerplate/greeting/disclaimer remains
+        (caller fails closed "ask_studio_no_answer").
+        """
+        if not stream_text:
+            return ""
+        # 1) JSON index block (proven happy path for the JSON-requesting prompt).
+        json_block = self._extract_json_block(stream_text)
+        if json_block:
+            return json_block
+        # 2) Prose fallback: drop boilerplate, then drop the echoed prompt lines.
+        body = self._strip_boilerplate(stream_text)
+        if not body:
+            return ""
+        if prompt:
+            prompt_lines = {ln.strip() for ln in prompt.splitlines() if ln.strip()}
+            body = "\n".join(
+                ln for ln in body.splitlines() if ln.strip() not in prompt_lines
+            ).strip()
+        return body
+
+    @classmethod
+    def _is_real_answer(cls, extracted: str) -> bool:
+        """
+        True if an EXTRACTED block is a REAL answer worth stabilizing/persisting:
+          - a JSON INDEX block (balanced {...} with topics/content_category), OR
+          - SUBSTANTIAL non-boilerplate prose (>= MIN_SUBSTANTIAL_PROSE_CHARS).
+
+        LIVE-PROVEN guard: the zero-state suggestion variant, after boilerplate
+        stripping, is only a short run of suggestion chips (~100 chars) -- NOT a
+        JSON index and below the prose threshold -> NOT a real answer. This is the
+        capture/persist gate; the pure _extract_answer helper stays a faithful
+        "non-boilerplate body" extractor (so #836's prose-extraction proofs hold).
+        """
+        if not extracted:
+            return False
+        if cls._extract_json_block(extracted) is not None:
+            return True
+        return len(extracted) >= cls.MIN_SUBSTANTIAL_PROSE_CHARS
+
+    # =====================================================================
+    # NEW-TAB RETRY ON BLANK (step 3) - the LOAD-BEARING live fix
+    # =====================================================================
+    async def _open_ask_studio_ready(
+        self,
+        video_id: str,
+        start_monotonic: Optional[float] = None,
+        total_deadline: Optional[float] = None,
+    ) -> str:
+        """
+        Open Ask Studio and ensure Gemini is READY, retrying on a BLANK panel by
+        opening a FRESH tab (the live-proven fix: attempt1=BLANK,
+        attempt2(new tab)=LOADED).
+
+        Loop, up to GEMINI_MAX_LOAD_ATTEMPTS:
+          - register stealth on the current tab
+          - open Ask Studio header dialog
+          - run the readiness gate (poll for "how can i help")
+          - if ready -> return "ready" (prompt box is safe to type into)
+          - if blank -> open a NEW tab, re-register stealth, re-navigate to the
+            video edit page, CLOSE the OLD blank tab (do not accumulate dead
+            tabs), and retry.
+
+        Returns one of:
+          "ready"    - Gemini greeted / answered; safe to type.
+          "blank"    - the Ask Studio header WAS found but Gemini stayed blank
+                       across all retries (-> caller fails closed
+                       "gemini_did_not_load", no ask, no persist).
+          "no_header" - the Ask Studio header was never found (legacy-only DOM)
+                       so the loop never engaged (-> caller may try the legacy
+                       watch-page / popup fallback).
+        Tabs THIS flow creates are tracked in self._created_handles for
+        end-of-flow cleanup; the operator's pre-existing tab is never closed.
+        """
+        import time as _time
+
+        driver = self.driver
+        header_ever_found = False
+        for attempt in range(1, self.GEMINI_MAX_LOAD_ATTEMPTS + 1):
+            # OUTER no-hang guard: never start a new retry attempt past the total
+            # runtime budget (the readiness gate itself is also budget-bounded).
+            if total_deadline is not None and _time.monotonic() >= total_deadline:
+                logger.warning(
+                    f"[STUDIO-ASK] {video_id}: total runtime budget exceeded "
+                    f"during readiness (attempt {attempt}) -> abort"
+                )
+                return "blank" if header_ever_found else "no_header"
+
+            # STEALTH: (re)register the CDP pre-load hook on THIS tab.
+            self._register_stealth()
+
+            # Open the Ask Studio dialog (header spark trigger).
+            if self._open_ask_studio():
+                header_ever_found = True
+                await self._human_delay(2.0, 0.3)
+                # READINESS GATE: do NOT type into a blank panel.
+                if await self._wait_for_gemini_ready(start_monotonic):
+                    logger.info(
+                        f"[STUDIO-ASK] {video_id}: Gemini ready on attempt {attempt}"
+                    )
+                    return "ready"
+
+            logger.info(
+                f"[STUDIO-ASK] {video_id}: blank panel on attempt {attempt}/"
+                f"{self.GEMINI_MAX_LOAD_ATTEMPTS}"
+            )
+            if attempt >= self.GEMINI_MAX_LOAD_ATTEMPTS:
+                break
+
+            # NEW-TAB RETRY: open a fresh tab, re-stealth, re-navigate, then CLOSE
+            # the OLD blank tab. Requires multi-window support; if the driver
+            # cannot open a new window, we cannot retry -> stop.
+            old_handle = None
+            try:
+                old_handle = driver.current_window_handle
+            except Exception:
+                old_handle = None
+            try:
+                driver.switch_to.new_window("tab")
+            except Exception as e:
+                logger.warning(
+                    f"[STUDIO-ASK] {video_id}: cannot open new tab for retry: {e}"
+                )
+                break
+            # Track the tab THIS flow created (for end-of-flow cleanup).
+            try:
+                new_handle = driver.current_window_handle
+                self._created_handles.append(new_handle)
+            except Exception:
+                new_handle = None
+            # Re-register stealth on the fresh tab + re-navigate to the edit page.
+            self._register_stealth()
+            studio_url = f"https://studio.youtube.com/video/{video_id}/edit"
+            try:
+                driver.get(studio_url)
+            except Exception as e:
+                logger.warning(f"[STUDIO-ASK] {video_id}: retry nav failed: {e}")
+            await self._human_delay(3.0, 0.4)
+            # CLOSE the OLD blank tab (012: do not accumulate non-working tabs).
+            if old_handle is not None and new_handle is not None and old_handle != new_handle:
+                self._close_handle(old_handle, restore_to=new_handle)
+        if not header_ever_found:
+            # The Studio header was never present (legacy-only DOM): the readiness
+            # loop never engaged, so let the caller try the legacy fallback.
+            logger.info(
+                f"[STUDIO-ASK] {video_id}: Ask Studio header never found -> fallback"
+            )
+            return "no_header"
+        logger.warning(
+            f"[STUDIO-ASK] {video_id}: Gemini never loaded after "
+            f"{self.GEMINI_MAX_LOAD_ATTEMPTS} attempts (fail closed)"
+        )
+        return "blank"
+
+    def _close_handle(self, handle, restore_to=None) -> None:
+        """
+        Close a SINGLE window handle this flow opened, then switch back to
+        ``restore_to`` (or the first remaining handle). Only ever called with a
+        handle THIS flow created/owns (the old blank retry tab); never closes the
+        operator's pre-existing tab. Best-effort; never raises.
+        """
+        driver = self.driver
+        try:
+            driver.switch_to.window(handle)
+            driver.close()
+        except Exception as e:  # pragma: no cover - defensive
+            logger.debug(f"[STUDIO-ASK] close handle skipped: {e}")
+        finally:
+            if handle in self._created_handles:
+                try:
+                    self._created_handles.remove(handle)
+                except ValueError:
+                    pass
+        target = restore_to
+        try:
+            handles = getattr(driver, "window_handles", None) or []
+            if target is None or target not in handles:
+                target = handles[0] if handles else None
+            if target is not None:
+                driver.switch_to.window(target)
+        except Exception as e:  # pragma: no cover - defensive
+            logger.debug(f"[STUDIO-ASK] restore handle skipped: {e}")
+
+    def _cleanup_created_tabs(self) -> None:
+        """
+        TAB CLEANUP (step 7): close EXTRA tabs THIS flow opened (the retry tabs
+        tracked in self._created_handles), leaving the operator session clean.
+
+        Crucially this NEVER closes:
+          - the operator's pre-existing tabs (only flow-created handles are in
+            the list), NOR
+          - the CURRENTLY-ACTIVE tab. When the new-tab retry succeeded, the
+            answer lives in a flow-created tab that became the active working
+            tab; that survivor must be KEPT (it replaced the original blank tab,
+            which the retry already closed). We only close flow-created tabs that
+            are NOT the current active tab.
+        Best-effort; never raises.
+        """
+        driver = self.driver
+        created = list(getattr(self, "_created_handles", []) or [])
+        if not created:
+            return
+        # The active tab (answer/working tab) is the survivor and is never closed.
+        try:
+            survivor = driver.current_window_handle
+        except Exception:
+            survivor = None
+        for handle in created:
+            if handle == survivor:
+                # Keep the active working tab; just drop it from bookkeeping.
+                if handle in self._created_handles:
+                    try:
+                        self._created_handles.remove(handle)
+                    except ValueError:
+                        pass
+                continue
+            self._close_handle(handle, restore_to=survivor)
+
     @staticmethod
     def _is_refusal(text: str) -> bool:
         """True if the response text is an Ask Studio refusal / no-answer."""
@@ -612,53 +1260,84 @@ Give a brief category and a few mood/genre topics only.""",
         lowered = text.lower()
         return any(marker in lowered for marker in StudioAskIndexer.ZERO_STATE_MARKERS)
 
-    async def _scrape_ask_response(self) -> str:
+    async def _scrape_ask_response(
+        self,
+        prompt: str = "",
+        start_monotonic: Optional[float] = None,
+        total_deadline: Optional[float] = None,
+    ) -> str:
         """
-        Scrape the Ask Studio response text, waiting for it to STABILIZE.
+        Scrape the Ask Studio response, EXTRACTING the real answer and waiting
+        for it to STABILIZE.
 
-        The response streams in token-by-token. Grabbing the first non-empty
-        text can capture a partial/streaming/canceled fragment. Instead we poll
-        the response container and only return once the text STOPS GROWING for
-        RESPONSE_STABLE_POLLS consecutive polls (completion signal) or
+        Fixes BOTH the false-success scrape AND the greeting-zeroing bug: the
+        stream PERSISTS the greeting + suggestions + prompt echo ABOVE the answer,
+        so we do NOT reject the whole stream just because "how can i help" is
+        present. Each poll we EXTRACT the answer block (_extract_answer: the last
+        balanced {...} with topics/content_category, else the boilerplate-stripped
+        prose body) and stabilize on the EXTRACTED answer.
+
+        LIVE-PROVEN: the real JSON index streams ~30s AFTER submit, while the
+        zero-state suggestion variant is IMMEDIATELY stable at +6s and (with the
+        extended ZERO_STATE_MARKERS) strips to a short chip run. We therefore only
+        treat an extracted block as the answer once it is a REAL answer
+        (_is_real_answer: a JSON index block OR substantial non-boilerplate prose)
+        -- a short zero-state remainder NEVER stabilizes, so the loop keeps
+        WAITING for the real answer that streams later. We return once the REAL
+        answer STOPS GROWING for RESPONSE_STABLE_POLLS consecutive polls, or
         RESPONSE_TIMEOUT_SECONDS elapses. NO clipboard - DOM text only.
-        Returns the stabilized text ("" if the response never materialized).
+
+        Returns the stabilized REAL answer ("" if no real answer block ever
+        materialized -> caller fails closed "ask_studio_no_answer").
+
+        Emits a periodic "waiting for answer" heartbeat (WRE "no hang actions")
+        and respects the OUTER total-runtime budget: ``total_deadline`` (a
+        monotonic timestamp) caps this loop so it can never outlast the guaranteed
+        ask_about_video ceiling, even when RESPONSE_TIMEOUT_SECONDS is larger.
         """
         import time as _time
 
+        if start_monotonic is None:
+            start_monotonic = _time.monotonic()
+        last_beat = _time.monotonic()
         deadline = _time.monotonic() + self.RESPONSE_TIMEOUT_SECONDS
-        response_text = ""
+        # Honor the OUTER total-runtime budget: never poll past it.
+        if total_deadline is not None:
+            deadline = min(deadline, total_deadline)
+        answer_text = ""
         stable_count = 0
         while _time.monotonic() < deadline:
             el = self._first_element(self.ASK_STUDIO_SELECTORS["response_stream"])
-            text = ""
+            raw = ""
             if el is not None:
                 try:
-                    text = (el.text or "").strip()
+                    raw = (el.text or "").strip()
                 except Exception:
-                    text = ""
+                    raw = ""
 
-            # ZERO-STATE GUARD: the stream shows the suggestion list
-            # ("How can Ask Studio help me? / Summarize comments ...") BEFORE any
-            # real answer. Never treat that as content - keep polling for the
-            # real answer (so a zero-state is never returned/persisted).
-            if text and self._is_zero_state(text):
-                await self._human_delay(1.0, 0.2)
-                continue
+            # EXTRACT the real answer (DO NOT zero just because the persistent
+            # greeting is present). "" while only greeting/disclaimer/processing.
+            extracted = self._extract_answer(raw, prompt)
 
-            if text:
-                if text == response_text:
-                    # Text unchanged since last poll -> it may have completed.
+            # REAL-ANSWER GATE: a short zero-state remainder (suggestion chips that
+            # slipped past the marker set) is NOT an answer -> never stabilizes;
+            # keep polling for the JSON index / substantial prose that streams
+            # ~30s later. Only stabilize on a JSON block or substantial prose.
+            if extracted and self._is_real_answer(extracted):
+                if extracted == answer_text:
+                    # Real answer unchanged since last poll -> may be done.
                     stable_count += 1
                     if stable_count >= self.RESPONSE_STABLE_POLLS:
                         # Stabilized: stopped growing for N consecutive polls.
                         break
                 else:
-                    # Still streaming (grew/changed) -> reset the stability run.
-                    response_text = text
+                    # Still streaming (answer grew/changed) -> reset stability.
+                    answer_text = extracted
                     stable_count = 0
 
+            last_beat = self._maybe_heartbeat("answer", start_monotonic, last_beat)
             await self._human_delay(1.0, 0.2)
-        return response_text
+        return answer_text
 
     def _type_prompt_human(self, prompt_box, prompt: str) -> None:
         """
@@ -996,9 +1675,20 @@ Give a brief category and a few mood/genre topics only.""",
         Returns:
             AskResult. success=False (fail-closed, NOTHING persisted) on:
             channel_unresolved, studio_target_unavailable, wrong_channel_context,
-            response timeout, or a refusal.
+            response timeout, or a refusal. ALSO success=False with
+            error="ask_studio_timeout" (nothing persisted) if the TOTAL monotonic
+            runtime exceeds ASK_TOTAL_RUNTIME_BUDGET_SECONDS (the guaranteed-
+            terminating outer no-hang guard; per-loop timeouts still apply).
         """
         import asyncio
+
+        # WRE "no hang actions": a single guaranteed-terminating OUTER guard.
+        # Measured with time.monotonic() (NOT wall-clock that a test could mock
+        # away) from the START of the ask flow. The per-loop timeouts still bound
+        # each stage; this is the hard total-runtime ceiling beyond which we ABORT
+        # and persist nothing. Tests may inject a tiny budget to force the timeout.
+        ask_start_monotonic = time.monotonic()
+        total_deadline = ask_start_monotonic + self.ASK_TOTAL_RUNTIME_BUDGET_SECONDS
 
         if not self.driver:
             return AskResult(
@@ -1042,8 +1732,14 @@ Give a brief category and a few mood/genre topics only.""",
         if channel_entry is None:
             channel_entry = owning_entry
 
-        # Resolve the prompt: explicit > channel-specific > generic default.
+        # Resolve the channel/default prompt (explicit > channel-specific >
+        # generic). The PRIMARY path REBUILDS this into a single-line, video-NAMING
+        # JSON prompt (_build_video_prompt) once the title is read, so Gemini (a
+        # channel assistant) analyzes THIS exact video. The fallback paths still
+        # use this multi-line channel prompt.
         ask_prompt = prompt or self._prompt_for_channel(channel_entry)
+        # Reset per-call retry-tab tracking (no leakage across calls).
+        self._created_handles = []
 
         # WSP 84 REUSE: lazily attach the proven 012 input behavior (same infra
         # the YT comment replies use: comment_engagement_dae -> get_human_behavior).
@@ -1117,21 +1813,63 @@ Give a brief category and a few mood/genre topics only.""",
 
             used_ask_studio = False
             ask_clicked = False
+            # PRIMARY prompt: NAME the exact video (title+id+url) + request JSON.
+            # Falls back to ask_prompt only if no title resolved (still id-pinned).
+            primary_prompt = self._build_video_prompt(title, video_id)
 
-            # ---- PRIMARY PATH: Ask Studio header button + dialog ----
-            if self._open_ask_studio():
-                await self._human_delay(2.0, 0.3)
-                # CONFIRM-OPEN via CHILDREN, not the dialog host: live-observed the
-                # tp-yt-paper-dialog#dialog host computes visible:false while its
-                # prompt box + stream are visible. So "opened" == the prompt box
-                # (and/or stream) resolved, regardless of the dialog host's state.
+            # ---- PRIMARY PATH: Ask Studio header + READINESS GATE + NEW-TAB
+            # RETRY ON BLANK (the live-proven loop). Never type into a blank
+            # panel; fail closed "gemini_did_not_load" if Gemini never loads. ----
+            ready_state = await self._open_ask_studio_ready(
+                video_id,
+                start_monotonic=ask_start_monotonic,
+                total_deadline=total_deadline,
+            )
+
+            # OUTER no-hang guard: if the readiness phase already blew the total
+            # runtime budget, ABORT here (success=False, "ask_studio_timeout",
+            # persist NOTHING) rather than proceeding to type/scrape.
+            if time.monotonic() >= total_deadline:
+                logger.warning(
+                    f"[STUDIO-ASK] {video_id}: total runtime budget exceeded "
+                    f"after readiness -> ask_studio_timeout (no persist)"
+                )
+                self._cleanup_created_tabs()
+                return AskResult(
+                    video_id=video_id,
+                    title=title,
+                    response_text="",
+                    topics=[],
+                    timestamps=[],
+                    success=False,
+                    error="ask_studio_timeout",
+                )
+
+            if ready_state == "blank":
+                # The Studio header WAS found but Gemini stayed blank across all
+                # retries -> fail closed, no ask, no persist. Clean up retry tabs.
+                self._cleanup_created_tabs()
+                return AskResult(
+                    video_id=video_id,
+                    title=title,
+                    response_text="",
+                    topics=[],
+                    timestamps=[],
+                    success=False,
+                    error="gemini_did_not_load",
+                )
+
+            if ready_state == "ready":
+                # READY: confirm the prompt box + stream resolved (open verified
+                # via CHILDREN, not the dialog host's visibility), then type +
+                # submit ONCE.
                 prompt_box = self._first_element(self.ASK_STUDIO_SELECTORS["prompt_box"])
                 stream = self._first_element(self.ASK_STUDIO_SELECTORS["response_stream"])
                 if prompt_box is not None and stream is not None:
                     try:
                         # NEWLINE-SAFE human-cadence typing (no bare "\n" -> no
-                        # implicit ENTER per line), then submit EXACTLY ONCE.
-                        self._type_prompt_human(prompt_box, ask_prompt)
+                        # implicit ENTER per line), then submit EXACTLY ONCE (#825).
+                        self._type_prompt_human(prompt_box, primary_prompt)
                         await self._human_delay(1.0, 0.2)
                         submit_via = self._submit_ask_prompt(prompt_box)
                         logger.info(
@@ -1143,6 +1881,10 @@ Give a brief category and a few mood/genre topics only.""",
                         logger.warning(f"[STUDIO-ASK] Ask Studio prompt entry failed: {e}")
                 else:
                     logger.info("[STUDIO-ASK] Ask Studio dialog/prompt box not found - falling back")
+            else:
+                # "no_header": legacy-only DOM -> proceed to the watch-page /
+                # popup fallback below (preserves the legacy fallback path).
+                logger.info("[STUDIO-ASK] Ask Studio header absent - legacy fallback")
 
             # ---- FALLBACK PATH: legacy watch-page Ask + Studio popup menu ----
             if not used_ask_studio:
@@ -1250,6 +1992,7 @@ Give a brief category and a few mood/genre topics only.""",
                         ask_clicked = False
 
             if not ask_clicked:
+                self._cleanup_created_tabs()
                 return AskResult(
                     video_id=video_id,
                     title=title,
@@ -1260,9 +2003,16 @@ Give a brief category and a few mood/genre topics only.""",
                     error="Could not open Ask Studio or any fallback Ask path",
                 )
 
-            # ---- Scrape the response from DOM (NO clipboard). Fails closed. ----
+            # ---- Scrape + EXTRACT the real answer from DOM (NO clipboard).
+            # _scrape_ask_response strips the persistent greeting/suggestions +
+            # processing + disclaimer and returns ONLY the answer block. Fails
+            # closed. ----
             if used_ask_studio:
-                response_text = await self._scrape_ask_response()
+                response_text = await self._scrape_ask_response(
+                    primary_prompt,
+                    start_monotonic=ask_start_monotonic,
+                    total_deadline=total_deadline,
+                )
             else:
                 # Legacy fallback: wait then scrape legacy response containers.
                 await self._human_delay(5.0, 0.5)
@@ -1271,16 +2021,29 @@ Give a brief category and a few mood/genre topics only.""",
                     response_el = self.driver.find_element(
                         "css selector", ".gemini-response, .response-content"
                     )
-                    response_text = (response_el.text or "").strip()
+                    response_text = self._extract_answer(
+                        (response_el.text or "").strip(), ask_prompt
+                    )
                 except Exception:
                     response_text = ""
                 if not response_text:
                     # As a last resort scrape the Ask Studio stream selectors too.
-                    response_text = await self._scrape_ask_response()
+                    response_text = await self._scrape_ask_response(
+                        ask_prompt,
+                        start_monotonic=ask_start_monotonic,
+                        total_deadline=total_deadline,
+                    )
 
-            if not response_text:
-                # Response never materialized within the timeout -> FAIL CLOSED.
-                logger.warning(f"[STUDIO-ASK] {video_id}: no response within timeout (fail closed)")
+            # OUTER no-hang guard: if the answer-capture phase consumed the total
+            # runtime budget without a real answer, report "ask_studio_timeout"
+            # (the guaranteed-terminating ceiling) rather than the generic
+            # "ask_studio_no_answer". Either way NOTHING is persisted.
+            if not response_text and time.monotonic() >= total_deadline:
+                logger.warning(
+                    f"[STUDIO-ASK] {video_id}: total runtime budget exceeded "
+                    f"during answer capture -> ask_studio_timeout (no persist)"
+                )
+                self._cleanup_created_tabs()
                 return AskResult(
                     video_id=video_id,
                     title=title,
@@ -1288,15 +2051,16 @@ Give a brief category and a few mood/genre topics only.""",
                     topics=[],
                     timestamps=[],
                     success=False,
-                    error="Ask Studio response timeout (no DOM text)",
+                    error="ask_studio_timeout",
                 )
 
-            # FAIL CLOSED on a refusal / no-answer: never persist a refusal as
-            # index content (transcript_summary). success=False, store nothing.
-            if self._is_refusal(response_text):
+            if not response_text:
+                # No ANSWER block materialized within the timeout (stream was only
+                # greeting/disclaimer/processing) -> FAIL CLOSED, persist nothing.
                 logger.warning(
-                    f"[STUDIO-ASK] {video_id}: Ask Studio refusal/no-answer (fail closed)"
+                    f"[STUDIO-ASK] {video_id}: no answer block within timeout (fail closed)"
                 )
+                self._cleanup_created_tabs()
                 return AskResult(
                     video_id=video_id,
                     title=title,
@@ -1307,10 +2071,36 @@ Give a brief category and a few mood/genre topics only.""",
                     error="ask_studio_no_answer",
                 )
 
-            # Parse response
+            # FAIL CLOSED on a refusal / no-answer: never persist a refusal as
+            # index content (transcript_summary). success=False, store nothing.
+            if self._is_refusal(response_text):
+                logger.warning(
+                    f"[STUDIO-ASK] {video_id}: Ask Studio refusal/no-answer (fail closed)"
+                )
+                self._cleanup_created_tabs()
+                return AskResult(
+                    video_id=video_id,
+                    title=title,
+                    response_text="",
+                    topics=[],
+                    timestamps=[],
+                    success=False,
+                    error="ask_studio_no_answer",
+                )
+
+            # Parse response (JSON block FIRST, prose fallback). content_category
+            # is enum-normalized; content_category_raw keeps Gemini's rich label.
             parsed = self._parse_ask_response(response_text)
             content_category = parsed.get("content_category", "other")
-            logger.info(f"[STUDIO-ASK] Content category detected: {content_category}")
+            content_category_raw = parsed.get("content_category_raw")
+            logger.info(
+                f"[STUDIO-ASK] Content category detected: {content_category}"
+                f" (raw={content_category_raw!r})"
+            )
+
+            # TAB CLEANUP (step 7): close any retry tabs THIS flow opened, leaving
+            # the operator session clean (success path).
+            self._cleanup_created_tabs()
 
             return AskResult(
                 video_id=video_id,
@@ -1320,10 +2110,16 @@ Give a brief category and a few mood/genre topics only.""",
                 timestamps=parsed.get("segments", []),
                 success=True,
                 content_category=content_category,
+                content_category_raw=content_category_raw,
             )
 
         except Exception as e:
             logger.error(f"[STUDIO-ASK] Error for {video_id}: {e}")
+            # Best-effort: never leak retry tabs THIS flow opened on an error.
+            try:
+                self._cleanup_created_tabs()
+            except Exception:  # pragma: no cover - defensive
+                pass
             return AskResult(
                 video_id=video_id,
                 title="",

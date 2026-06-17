@@ -47,6 +47,235 @@ browser by default.
 - WSP 5 (gate, do not delete coverage), WSP 22 (ModLog), WSP 50 (verify
   before edit), WSP 84 (standard pytest marker + skip pattern), WSP 97 (Truth
   Boundary: tests/ + conftest only; no src/ or production code touched).
+## V0.27.0 - Ask Studio: heartbeat + hard no-hang runtime budget + content_category normalize/preserve (STUDIO_ASK_GEMINI_READINESS_RETRY_PHASE1) [updates #836] (2026-06-17)
+
+Final polish before merge (Worker-Lane SSREADY-POLISH). Two focused additions on
+top of #836; #825/#827/#833/#836 behavior intact; no action-id/schema change
+beyond a new field + a new error string; no UI-TARS/coordinate code; no
+scheduler/dom_automation/dependency_launcher touch.
+
+### (1) HEARTBEAT + HARD NO-HANG RUNTIME BUDGET (WRE "no hang actions")
+- NEW module/class constants `ASK_TOTAL_RUNTIME_BUDGET_SECONDS = 180.0` and
+  `ASK_HEARTBEAT_INTERVAL_SECONDS = 8.0` (class-attribute mirrors so tests can
+  monkeypatch a tiny budget).
+- NEW `_maybe_heartbeat(phase, start_monotonic, last_beat)`: emits a periodic
+  "[STUDIO-ASK] heartbeat: waiting for <readiness|answer> t+Ns/<budget>s" log once
+  the interval elapses; returns the advanced last-beat timestamp. Wired into BOTH
+  the readiness-wait loop (`_wait_for_gemini_ready`) and the answer-capture loop
+  (`_scrape_ask_response`). Uses `time.monotonic()` (NEVER wall-clock).
+- HARD TOTAL-RUNTIME BUDGET over the whole `ask_about_video` flow, measured from
+  the start with `time.monotonic()`: `total_deadline = start + budget`, plumbed
+  into `_open_ask_studio_ready` and `_scrape_ask_response`. If the budget is
+  exceeded the flow ABORTS and returns `success=False, error="ask_studio_timeout"`
+  and persists NOTHING (`save_index` not called). The existing per-loop timeouts
+  (readiness gate, response stabilization) stay; this is the single
+  guaranteed-terminating OUTER guard. Three guard points: top of the readiness
+  retry loop, immediately after readiness returns, and after answer capture
+  (so a budget-exhausted no-answer reports `ask_studio_timeout`, not the generic
+  `ask_studio_no_answer`). The answer-capture loop also caps its own deadline at
+  `min(RESPONSE_TIMEOUT_SECONDS, total_deadline)`.
+
+### (2) CONTENT_CATEGORY NORMALIZE + PRESERVE
+- NEW `AskResult.content_category_raw: Optional[str]` (default None) + persisted in
+  the saved index `metadata["content_category_raw"]` (so the rich Gemini label is
+  never lost).
+- NEW enum `CONTENT_CATEGORY_ENUM` + `_normalize_content_category(raw)`: an exact
+  enum value passes through unchanged; a non-enum label is keyword-mapped to the
+  closest enum ("educat"->educational; "vlog"/"personal"/"daily"/"diary"->
+  personal_vlog; "ice"/"immigration"/"politic"/"activist"/"news"->ice_remix;
+  "music"/"instrumental"/"visualizer"->ffcpln_music; else other).
+- `_parse_ask_response` now routes JSON-block + legacy-match paths through
+  `_apply_category_normalization`, which sets the normalized `content_category` AND
+  preserves `content_category_raw` (the original Gemini string, or None when no
+  string category was present). `ask_about_video` surfaces both on the success
+  `AskResult`; `_ask_result_to_index_data` persists both in metadata.
+
+### Tests (mock only - NO live browser; NON-VACUOUS) - test_studio_ask_readiness_polish.py
+- (a) heartbeat emitted during a multi-tick answer wait (caplog asserts a
+  "heartbeat" line carrying the phase + budget readout); plus a pure-helper proof
+  that `_maybe_heartbeat` is interval-gated.
+- (b) a tiny injected total-budget with a never-arriving answer ->
+  `success=False`, `error="ask_studio_timeout"`, `save_index` call_count == 0
+  (both the readiness-phase and the answer-capture-phase budget paths); plus a
+  happy-path sanity test (ample budget still succeeds + persists).
+- (c) content_category "Educational Philosophy & Future Trends" ->
+  `content_category=="educational"` AND `content_category_raw=="Educational
+  Philosophy & Future Trends"`; an enum value "personal_vlog" passes through; a
+  nonsense category -> "other" with raw preserved; per-bucket keyword map proof;
+  end-to-end proof that the raw label surfaces on the AskResult AND the persisted
+  index metadata.
+- All prior #836 tests still pass (18/18 readiness; 107/107 across all studio_ask
+  test files incl. the 11 new polish tests).
+- Full video_indexer suite: 122 passed, 2 skipped, 5 pre-existing unrelated
+  failures (4x gemini_video_analyzer.py `_pattern_memory` AttributeError; 1x
+  stage2_batch_navigation live-browser test). None touch studio_ask_indexer.py.
+
+### WSP_97 Truth Boundary Checklist
+- NO_REGISTRY_MUTATION: no registry mutation; only new timing constants, a new
+  enum tuple, and a new optional dataclass field + metadata key.
+- NO_ACTION_ID_CHANGE: action-id + output schema unchanged. Additive only: one new
+  AskResult field (`content_category_raw`), one new metadata key, and one new error
+  string (`ask_studio_timeout`). No existing field/behavior changed.
+- FAIL_CLOSED_PRESERVED: budget exceeded -> success=False, error
+  ask_studio_timeout, save_index NOT called (proven by test (b) call_count==0);
+  the existing no-answer/refusal/gemini_did_not_load fail-closed paths are intact.
+- MONOTONIC_CLOCK: the budget + heartbeat math use time.monotonic() exclusively
+  (no wall-clock that a test could mock away).
+- SCOPE_GUARD: edits confined to studio_ask_indexer.py + the new polish test file;
+  no scheduler/dom_automation/dependency_launcher; no UI-TARS/coordinate code.
+- #836/#833/#827/#825 BEHAVIOR INTACT: 107/107 studio_ask tests green.
+
+### HONEST LIVE GAP
+The total-runtime budget abort + heartbeat cadence are exercised with a MOCK
+driver + injected tiny budgets / zeroed intervals; the live 180s ceiling and the
+~8s operator heartbeat cadence are validated by 0102's live re-test. Updates #836
+(PR stays OPEN).
+
+## V0.26.0 - Ask Studio: wait for the REAL answer + catch the zero-state SUGGESTION variant false-success (STUDIO_ASK_GEMINI_READINESS_RETRY_PHASE1) [updates #836] (2026-06-17)
+
+### Why (LIVE-PROVEN by 0102 running the real action)
+After submit, the capture STABILIZED ON THE ZERO-STATE at +6s and saved 106 chars
+"A/B Testing Guide / Hello, UnDaoDu / Suggest new video ideas / Summarize my
+channel performance / More suggestions" with topics=[] category=other -> FALSE
+SUCCESS. The real JSON index (the full content_category/topics/segments block)
+streams ~30s LATER. The #836 zero-state/no-answer guard MISSED this SUGGESTION
+variant: its ZERO_STATE_MARKERS ("how can ask studio help" / "summarize comments")
+did NOT contain the suggestion-chip phrases, so _strip_boilerplate kept the chips
+and _extract_answer returned them as a "substantial" answer that immediately
+stabilized (the zero-state is stable at +6s; the real answer is not there yet).
+Result: a false success that persisted a non-answer.
+
+### Changed (src/studio_ask_indexer.py)
+- ZERO_STATE_MARKERS: EXTENDED to also catch the live suggestion-chip variant +
+  the channel greeting: "suggest new video ideas", "summarize my channel
+  performance", "more suggestions", "a/b testing", "hello,". A stream that is ONLY
+  these (no JSON block / no substantial answer) is now recognized as the
+  zero-state (so _is_zero_state, _strip_boilerplate, and the readiness
+  _is_gemini_ready all see it as zero-state, NOT an answer).
+- NEW MIN_SUBSTANTIAL_PROSE_CHARS = 400 + NEW _is_real_answer(extracted)
+  capture/persist GATE: an extracted block counts as a REAL answer only if it is a
+  JSON INDEX block (balanced {...} with topics/content_category) OR substantial
+  non-boilerplate prose (>= 400 chars). A short zero-state remainder (suggestion
+  chips that slip past the marker set) is NOT a real answer.
+- _scrape_ask_response: now STABILIZES ONLY ON A REAL ANSWER (_is_real_answer),
+  NOT on the immediately-stable zero-state. A short zero-state remainder never
+  stabilizes, so the loop keeps WAITING for the JSON index / substantial prose
+  that streams ~30s later. Returns "" if none materializes -> caller fails closed
+  ask_studio_no_answer (NO persist; save_index not called).
+- RESPONSE_TIMEOUT_SECONDS: 30s -> 60s so the wait OUTLASTS the +6s zero-state and
+  reaches the ~30s real answer (timeouts are mock-overridden in tests).
+- _extract_answer is UNCHANGED for prose (it stays a faithful "non-boilerplate
+  body" extractor); the substantial-vs-short decision lives in the new
+  _is_real_answer gate used by _scrape_ask_response. This preserves #836's
+  prose-extraction proofs.
+- KEEPS everything in #836/#833/#827/#825 intact: readiness gate, new-tab retry,
+  video-id-naming prompt, human_type single submit, shadow finder, fail-closed.
+  NO action-id/output-schema change beyond the existing error strings. NO
+  UI-TARS/coordinate code. No scheduler/dom_automation/dependency_launcher touch.
+
+### Tests (mock only - NO live browser; NON-VACUOUS)
+- (a) zero-state suggestion variant for the first 3 polls THEN the JSON answer ->
+  capture returns the JSON answer (content_category=educational, topics
+  alpha/beta), NOT the zero-state chips
+  (test_zero_state_then_json_answer_captures_json_not_zero_state).
+- (b) the EXACT 106-char suggestion stream for the WHOLE timeout -> fail closed
+  ask_studio_no_answer, save_index call_count == 0
+  (test_zero_state_suggestion_only_whole_timeout_fails_closed_no_persist).
+- Marker + gate proofs: test_zero_state_markers_cover_suggestion_variant,
+  test_is_real_answer_gate_json_vs_short_prose.
+- (c) the prior #836 readiness/retry/strip tests still pass (18/18 in
+  test_studio_ask_gemini_readiness.py; 75/75 across all studio_ask test files).
+- Full video_indexer suite: 111 passed, 2 skipped, 5 pre-existing unrelated
+  failures (4x gemini_video_analyzer.py _pattern_memory AttributeError; 1x
+  stage2_batch_navigation live-browser test). None touch studio_ask_indexer.py.
+
+### WSP_97 Truth Boundary Checklist
+- NO_REGISTRY_MUTATION: no registry/schema changes; only marker strings + a
+  prose-length constant added.
+- NO_ACTION_ID_CHANGE: action-id + output schema unchanged; only existing error
+  string ask_studio_no_answer is (re)used (no new error strings).
+- FAIL_CLOSED_PRESERVED: no-real-answer -> success=False, error
+  ask_studio_no_answer, save_index NOT called (proven by test (b) call_count==0).
+- SCOPE_GUARD: edits confined to studio_ask_indexer.py + the readiness test file;
+  no scheduler/dom_automation/dependency_launcher; no UI-TARS/coordinate code.
+- #836/#833/#827/#825 BEHAVIOR INTACT: 75/75 studio_ask tests green.
+
+### HONEST LIVE GAP
+The +6s-zero-state / ~30s-real-answer timing is reproduced in a MOCK
+polling-stream; the combined live happy path (submit -> wait past zero-state ->
+real JSON captured) is validated by 0102's live re-test. Updates #836 (PR stays
+OPEN).
+
+## V0.25.0 - Ask Studio Gemini readiness gate + new-tab retry + real-answer capture (STUDIO_ASK_GEMINI_READINESS_RETRY_PHASE1) [stacked on #833] (2026-06-17)
+
+### Why
+ROOT CAUSE (live-proven by 0102): the Ask Studio GEMINI CHAT loads
+INTERMITTENTLY-BLANK under automation - the dialog opens but Gemini never
+initializes (no greeting, only a disclaimer placeholder). The prior code typed
+into the not-yet-loaded panel and scraped the disclaimer ("AI can make
+mistakes...") as a FALSE success. It ALSO zeroed the whole stream whenever the
+persistent greeting was present (the greeting-zeroing scraper bug). LIVE-PROVEN
+FIX: poll for the Gemini-ready greeting ("how can i help") BEFORE typing; on a
+blank panel open a FRESH tab and retry (closing the old blank tab) -> Gemini
+loads (0102 saw attempt1=BLANK, attempt2(new tab)=LOADED); then a video-NAMING
+JSON ask streams a real JSON index (a real 1894-char answer was captured live).
+
+### Changed
+- `src/studio_ask_indexer.py`:
+  - STEALTH (`_register_stealth`): registers a CDP `Page.addScriptToEvaluateOnNewDocument`
+    pre-load script that strips `cdc_`/`$cdc` props + sets `navigator.webdriver=undefined`.
+    WSP 84 REUSE of `undetected_browser._inject_stealth_js` (webdriver hide +
+    plugin/chrome spoof) layered with the cdc_ strip. Re-registered per new tab.
+  - GEMINI-READINESS GATE (`_wait_for_gemini_ready` / `_is_gemini_ready`): polls
+    `#PAcreator_chat_streaming` for the greeting (or an already-extractable
+    answer) up to `GEMINI_READY_TIMEOUT_SECONDS` before typing. Never types into
+    a blank panel.
+  - NEW-TAB RETRY (`_open_ask_studio_ready`): on a blank panel opens a fresh tab
+    (`switch_to.new_window('tab')`), re-registers stealth, re-navigates to the
+    video edit page, reopens Ask Studio, re-gates, and CLOSES the old blank tab;
+    up to `GEMINI_MAX_LOAD_ATTEMPTS=5`. Distinguishes header-found-but-blank
+    (fail closed `gemini_did_not_load`, no ask, no persist) from header-never-found
+    (falls through to the legacy fallback). Tabs THIS flow opens are tracked and
+    cleaned up at end-of-flow (`_cleanup_created_tabs`) WITHOUT closing the active
+    answer tab or the operator's pre-existing tabs.
+  - PROMPT (`_build_video_prompt`): the PRIMARY path now NAMES the exact video
+    (title + video id + studio URL) and requests a clean JSON index. LIVE-PROVEN
+    correctness: a query WITHOUT the id made Gemini analyze a DIFFERENT video.
+  - REAL-ANSWER CAPTURE (`_extract_answer` / `_extract_json_block` /
+    `_strip_boilerplate`): extracts the answer (last balanced `{...}` with
+    topics/content_category, else boilerplate-stripped prose) from the stream
+    WITHOUT zeroing on the persistent greeting; strips the disclaimer footer +
+    processing lines ("Reviewing your request", "Looking through your content").
+    `_scrape_ask_response` stabilizes on the EXTRACTED answer. Fail closed
+    `ask_studio_no_answer` (no persist) ONLY when no answer block ever renders.
+  - PARSE (`_parse_ask_response`): parses the JSON index block FIRST, prose
+    fallback (strict JSON not required).
+- KEEPS #825 input behavior (human_type, single clean submit), #827
+  target/channel fail-closed, and #833 shadow-DOM deep finder EXACTLY. NO
+  action-id/output-schema change. NO UI-TARS/coordinate code.
+
+### Tests (mock only - NO live browser; NON-VACUOUS)
+- NEW `tests/test_studio_ask_gemini_readiness.py` (14 tests): readiness gate
+  blocks typing on a blank panel; new-tab retry opens new + closes old blank +
+  proceeds on attempt 2; never-loads -> `gemini_did_not_load`, no persist;
+  capture strips disclaimer/processing/echo end-to-end (greeting present, answer
+  captured); fail-closed on boilerplate-only -> `ask_studio_no_answer`, no
+  persist; stealth CDP hook registered (and per new tab); JSON-block extraction
+  picks the LAST qualifying block; tab cleanup keeps only the active tab.
+- Updated 3 prior assertions to the new contract: `test_response_timeout_fails_closed`
+  -> `gemini_did_not_load`; `test_zero_state_not_scraped_as_answer` ->
+  `ask_studio_no_answer`; `test_channel_prompt_threaded_into_ask` ->
+  `test_primary_prompt_names_the_specific_video`.
+- Full video_indexer suite: 107 passed, 2 skipped, 5 pre-existing failures
+  (gemini_video_analyzer `_pattern_memory`, stage2_batch_navigation) NOT in this
+  slice's scope.
+
+### HONEST LIVE GAP
+The retry/readiness/timing constants are mock-tested; the combined live happy
+path (new-tab retry -> Gemini loads -> real answer captured) is validated by
+0102's live re-test AFTER this lands. STACKED on #833 -> #827 -> #825; none merge
+until the live happy path is reliable.
+
 ## V0.24.0 - Ask Studio shadow-DOM traversal: deep finder + live-grounded selectors (STUDIO_ASK_SHADOW_DOM_SELECTORS_PHASE1) [stacked on #827] (2026-06-17)
 
 ### Why

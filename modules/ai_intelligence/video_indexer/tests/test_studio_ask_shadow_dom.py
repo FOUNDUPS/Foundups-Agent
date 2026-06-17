@@ -319,9 +319,11 @@ async def test_dialog_open_confirmed_via_children_not_host():
 
 async def test_zero_state_not_scraped_as_answer():
     """
-    The stream first shows the ZERO-STATE suggestion list, which must NOT be
-    returned as the answer. With ONLY zero-state text present -> the scrape times
-    out (no real answer) and the ask fails closed (nothing persisted).
+    The stream shows the ZERO-STATE suggestion list (Gemini greeted == ready) but
+    no real answer ever renders. The greeting must NOT be returned as the answer:
+    the scrape extracts nothing -> the ask fails closed "ask_studio_no_answer"
+    (nothing persisted). (STUDIO_ASK_GEMINI_READINESS_RETRY_PHASE1 boilerplate-
+    only fail-closed supersedes the old generic timeout error.)
     """
     driver = ShadowDriver()
     _shadow_dom(driver, response_text="How can Ask Studio help me? Summarize comments")
@@ -331,7 +333,7 @@ async def test_zero_state_not_scraped_as_answer():
 
     assert result.success is False
     assert result.response_text == ""
-    assert "timeout" in (result.error or "").lower()
+    assert result.error == "ask_studio_no_answer"
 
 
 def test_is_zero_state_classifier():
