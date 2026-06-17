@@ -47,6 +47,59 @@ browser by default.
 - WSP 5 (gate, do not delete coverage), WSP 22 (ModLog), WSP 50 (verify
   before edit), WSP 84 (standard pytest marker + skip pattern), WSP 97 (Truth
   Boundary: tests/ + conftest only; no src/ or production code touched).
+## V0.24.0 - Ask Studio shadow-DOM traversal: deep finder + live-grounded selectors (STUDIO_ASK_SHADOW_DOM_SELECTORS_PHASE1) [stacked on #827] (2026-06-17)
+
+### Why
+ROOT CAUSE (live-confirmed): YouTube Studio's DOM is SHADOW-ROOTED. Flat
+Selenium `find_element("css selector", ...)` does NOT pierce shadow roots, so the
+indexer's selectors silently failed on the live page even when the element
+existed. #817 fixed selector NAMES but not the TRAVERSAL model. Proven live: the
+flat `input#title-field` returns nothing but a shadow walk finds
+`ytcp-social-suggestions-textbox#title-textarea`; the old Ask-button selector
+`aria-label="Ask Studio"` does NOT exist - the real entry is the creator-chat
+"spark" trigger (`ytcp-creator-chat-trigger` -> `ytcp-icon-button`).
+
+### Changed
+- NEW `modules/infrastructure/foundups_selenium/src/shadow_dom_finder.py`:
+  `find_deep` / `shadow_query` / `first_deep` return REAL WebElements by having
+  `execute_script` RETURN the matched node (so `human_type` + `.click()` keep
+  working). WSP 84 REUSE: the recursive `findInShadow` traversal is the SAME
+  algorithm already used by the YT comment-reply path (`reply_executor.findInShadow`);
+  the only change is the return contract (node, not text/boolean). Exported via
+  `foundups_selenium/src/__init__.py`.
+- `src/studio_ask_indexer.py`: `_first_element` now does shadow-DOM deep find
+  PRIMARY (css strings + cross-shadow chains) with a flat fallback. PINNED
+  live-grounded selectors: title `ytcp-social-suggestions-textbox#title-textarea`;
+  Ask button spark chain `ytcp-creator-chat-trigger -> ytcp-icon-button` (aria-label
+  demoted to fallback); prompt
+  `div.ytcpCreatorChatEntityAttachmentInlineFlowPromptBox[contenteditable="true"][aria-label="Ask something"]`;
+  dialog `tp-yt-paper-dialog#dialog`; stream
+  `ytcp-engagement-panel-section-list-renderer#PAcreator_chat_streaming`. Dialog
+  OPEN is confirmed via the prompt box + stream (CHILDREN), never the dialog
+  host (live-observed host computes visible:false). NEW `_is_zero_state` guard:
+  the zero-state suggestion list ("How can Ask Studio help me? / Summarize
+  comments ...") is never scraped/persisted as the answer.
+- KEEPS #825 input behavior (human_type, single clean submit) and #827
+  target/channel fail-closed EXACTLY (all 44 prior tests green via the flat
+  fallback). NO action-id/output-schema change (no UI-TARS/coordinate code).
+
+### Tests
+- NEW `tests/test_studio_ask_shadow_dom.py` (10 mock tests, NO live browser):
+  flat-fails/shadow-finds (title + Ask button), full primary path over a
+  shadow-only DOM, dialog-open via children, zero-state-not-scraped, wrong/error
+  page still fails closed (#827), no-persist-on-failure, #825 single-submit
+  preserved over the shadow path.
+- NEW `modules/infrastructure/foundups_selenium/tests/test_shadow_dom_finder.py`
+  (7 tests for the helper).
+- NON-VACUITY proven: with the deep finder disabled (pre-slice flat-only model)
+  both shadow-rooted title + Ask button resolve to None/False.
+
+### Honest live gap
+Selectors are LIVE-GROUNDED (012 captured them; resolve via shadow find + Ask
+Studio opens). Mock tests + grounded selectors only; the COMBINED live happy
+path (submit -> stream -> scrape) is validated by 0102's live re-test AFTER this.
+STACKED on #827 -> do not merge before #825/#827; final order #825 -> #827 -> this.
+
 ## V0.23.0 - Ask Studio single-video: select Studio TARGET + owning-channel CONTEXT, fail-closed on mismatch (STUDIO_ASK_CHANNEL_CONTEXT_PHASE1) [stacked on #825] (2026-06-16)
 
 ### Security (CodeQL py/incomplete-url-substring-sanitization, high) - 2026-06-17

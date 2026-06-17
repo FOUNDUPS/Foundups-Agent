@@ -1,6 +1,31 @@
 # Video Indexer Tests - ModLog
 **WSP Compliance**: WSP 34 (Test Documentation), WSP 22 (Change Log)
 
+## 2026-06-17 - STUDIO_ASK_SHADOW_DOM_SELECTORS_PHASE1
+
+### Test Run
+- **Command**: `python -m pytest modules/ai_intelligence/video_indexer/tests/ -q`
+- **Result**: 90 passed, 2 skipped, 8 FAILED (all pre-existing, unrelated:
+  4x `gemini_video_analyzer.py` `_pattern_memory` AttributeError; 4x live-browser
+  integration/stage tests needing a signed-in Chrome on 9222 - "Chrome not
+  running on port 9222" / "Expected 10 videos, got 0"). None touch
+  `studio_ask_indexer.py` or the new shadow-DOM files.
+- New `test_studio_ask_shadow_dom.py`: 10 passed. Prior #825/#827 suites
+  (`test_studio_ask_header.py` + `test_studio_ask_human_input.py` +
+  `test_studio_ask_channel_context.py`): 44 passed (unchanged behavior via the
+  flat fallback).
+
+### Notes
+- `test_studio_ask_shadow_dom.py`: NON-VACUOUS flat-fails/shadow-finds. A
+  `ShadowDriver` models a shadow tree where the OLD flat selector is ABSENT
+  (`find_element` raises) but the element exists under a shadow root (resolved by
+  `execute_script`). The flat path returns None (pre-fix flat-only code fails)
+  while the deep finder returns the real element. Covers title + Ask button +
+  full primary path + dialog-open-via-children + zero-state-not-scraped +
+  wrong/error page fail-closed (#827) + no-persist-on-failure + #825 single
+  submit preserved. NON-VACUITY also proven by disabling the deep finder (the
+  pre-slice flat-only model) -> both shadow-rooted elements resolve to None/False.
+
 ## 2026-06-16 - STUDIO_ASK_HUMAN_INPUT_BEHAVIOR_PHASE1
 
 ### Test Run
