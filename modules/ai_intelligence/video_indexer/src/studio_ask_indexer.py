@@ -225,6 +225,10 @@ class StudioAskIndexer:
         # Send / submit button inside the dialog. PREFERRED submission path
         # (mirror reply_executor's button-click submit, NEVER Enter-spam).
         "send_button": [
+            # 012 live-grounded: the Ask Studio prompt-box send/action button
+            # (ytcp-ask-studio-input-view-model -> ...ActionButton -> ytcp-icon-button#action-button).
+            # Tried FIRST; the aria-label variants + the Enter fallback (_submit_prompt) remain.
+            "ytcp-icon-button#action-button",
             'ytcp-icon-button[aria-label="Send"]',
             'ytcp-icon-button[aria-label*="Send"]',
             'button[aria-label="Send"]',
