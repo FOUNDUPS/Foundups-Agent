@@ -1,5 +1,45 @@
 # Agent Module TestModLog
 
+## 2026-06-18 - Kanban Contract no-raw-echo + authority-parity tests (FOUNDUP_KANBAN_CONTRACT_ERROR_NO_RAW_ECHO_PHASE1)
+
+**Commands**:
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_kanban_plugin_contract.py -q
+python -m pytest modules/foundups/agent -q                         # full agent suite
+# launch-intake affected packages (both modes):
+AI_OVERSEER_HEAVY_TESTS=1 python -m pytest modules/ai_intelligence/ai_overseer/tests/test_foundup_launch_request.py \
+  modules/ai_intelligence/ai_overseer/tests/test_foundup_genesis_validator.py \
+  modules/ai_intelligence/ai_overseer/tests/test_intake_auth_provider.py \
+  modules/ai_intelligence/ai_overseer/tests/test_intake_transport.py -q
+```
+
+**Result**: PASS
+
+**Summary**:
+- `test_kanban_plugin_contract.py`: 135 passed (was 71; +64 new). Full agent suite: 832 passed
+  (heavy and CI mode), no regression.
+- launch-intake affected packages: 592 passed (heavy and CI mode). intake_transport alone: 188 passed.
+
+**New coverage (this slice)**:
+1. No-raw-echo scanner battery: every `_scan_authority` + `_check_path` + `validate_card_spec`
+   rejection names the rule (+ fixed marker class) and NEVER echoes the raw key/value/repr/nested
+   trail or a control byte. Sentinel leak tokens seeded into keys, trails, values, paths.
+2. Addendum-A NAMED-category authority-detection parity: ~42 fixtures across the #807 corpus, each
+   mapped to its expected violation class BY INPUT DESIGN (never message-derived); asserts rejection
+   so a weakened detector fails even though the message text changed. Plus a coverage test that every
+   named category appears in the battery.
+3. Addendum-B message-locality: distinct safe rule families are present (not collapsed to one bland
+   phrase) and the `{m}`/`{carried}` class token is from the fixed `_AUTHORITY_MARKERS` taxonomy.
+4. AST-skeleton self-contained backstop: blanked control-flow skeleton SHA-256 == frozen origin/main
+   baseline (no `git show` at runtime); a self-consistency check proves the skeleton is sensitive to
+   LOGIC, not message text.
+5. Downstream validate_* parity (outcome-only) + a `test_intake_transport.py` caller-regression
+   (3 tests, incl. real `SQLiteNonceStore` + spy): authority-bearing body -> rejected,
+   `reason == "invalid_request"`, no raw key/value/trail leak, valid invite NOT consumed.
+6. Updated 4 `test_foundup_launch_request.py` assertions/helpers that pinned the #830-DEFERRED old
+   #807 echo text (text-only; outcome assertions kept).
+
 ## 2026-06-13 - Kanban Plugin Contract Tests (HERMES_KANBAN_PLUGIN_CONTRACT_IMPL_PHASE1)
 
 **Command**:

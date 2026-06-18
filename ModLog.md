@@ -1,5 +1,45 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-18] Kanban Contract #807 Authority-Scanner No-Raw-Echo Phase 1 (AUTHOR, completes the #830 deferral)
+
+**Change Type**: MESSAGE-ONLY HARDENING -- 1 src file (`modules/foundups/agent/src/kanban_plugin_contract.py`)
++ its tests + 2 cross-package ai_overseer test suites. The #830 launch_request slice DEFERRED the imported
+#807 authority scanner `_scan_authority`, whose error messages echoed raw user-controlled keys / values /
+`repr()` / nested trail. `kanban_plugin_contract.py` is the #807 AUTHORITY BOUNDARY shared by
+`validate_launch_request` AND `validate_card_spec` / `validate_worker_task_spec` /
+`validate_evidence_packet`. Closed: no validation error in that module echoes the raw key, value, `repr()`,
+nested trail, or raw bytes -- each names the rule (+ the fixed `_AUTHORITY_MARKERS` class token `{m}`/`{carried}`,
+which is taxonomy, NOT user input). MESSAGE TEXT ONLY -- the authority-detection LOGIC is byte-identical.
+**By**: 0102 (AUTHOR) | Commander: 012 | Gate: independent 5-lane SENTINEL (do NOT self-merge)
+**WSP References**: WSP 00, 22, 50, 64, 84, 87, 97
+**Slice**: FOUNDUP_KANBAN_CONTRACT_ERROR_NO_RAW_ECHO_PHASE1
+**Base**: `edbd90642` (origin/main; contains #810/#821/#823/#824/#826/#830)
+**Motivating finding**: #830 explicitly DEFERRED the `_scan_authority` echo sites.
+
+**Sites reworded (kanban_plugin_contract.py)**: `_scan_authority` (8 sites: non-string key, non-printable
+key, verified=true, source_authority promotion, promotion flag, forbidden-authority-field-by-presence
+[KEEP `{m}`], shell-string command, value-carried-authority [KEEP `{carried}`]); `_check_path` (5 sites:
+dropped `{value!r}` and the offending-char list); `validate_card_spec` (1 site: dropped raw `risk_class`).
+The nested `trail` is still computed for recursion descent but NEVER interpolated into a message.
+
+**Parity proof (logic byte-identical)**: (1) AST control-flow skeleton with every string literal AND every
+f-string uniformly blanked -> SHA-256 equals the frozen origin/main baseline (SELF-CONTAINED, no runtime
+`git show`, per the #830 shallow-CI lesson); (2) a NAMED-category authority battery (~42 fixtures: the #807
+corpus incl. ~13 normalized evasions and ~10 authority-by-value) where each fixture's expected violation
+class is mapped BY INPUT DESIGN, never message-derived, so a weakened detector fails even though the message
+text changed.
+
+**Downstream**: `launch_request.py` SOURCE unchanged (imports `_scan_authority`, behavior unchanged). Added a
+`test_intake_transport.py` caller-regression (real `SQLiteNonceStore` + spy): authority-bearing payload ->
+rejected, `IntakeResult.reason == "invalid_request"` (low-cardinality, no auth oracle), no raw
+key/value/trail in result/repr/serialized, valid single-use invite NOT consumed. `validate_card_spec` /
+`validate_worker_task_spec` / `validate_evidence_packet` reject the same inputs (outcome-only). Updated 4
+`test_foundup_launch_request.py` assertions/helpers that pinned the #830-DEFERRED old echo text (text-only).
+
+**Tests**: kanban contract suite 135 passed (+64); full agent suite 832 passed (heavy + CI); launch-intake
+affected packages 592 passed (heavy + CI); intake_transport 188 passed. No skip/xfail. All 4 edited files
+byte-checked ASCII-clean (0 non-ASCII). Scope-guard SOURCE files (launch_request.py / intake_*.py /
+validator.py / envelope.py) confirmed UNCHANGED (empty diff).
 ## [2026-06-17] Hermes FusionAdapter Contract Phase 1 (Lane W6, AUTHOR + internal SENTINEL, contract-only)
 
 **Change Type**: CONTRACT-ONLY typed adapter + tests + manifest correction + dormant marker + docs. NO live
