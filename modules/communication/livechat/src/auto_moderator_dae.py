@@ -968,30 +968,36 @@ class AutoModeratorDAE:
             logger.warning(f"[COMMUNITY] Failed to initialize monitor: {e}")
             self.community_monitor = None
 
-        # Phase 4: Comment engagement is DISABLED during live chat
-        # User requirement: "Once on live chat, do NOT return to comments"
-        # Comment engagement runs ONLY at startup, before first stream found
+        # Phase 4 (ALWAYS-FLOW, 012-decided 2026-06): Comment engagement is NOT
+        # disabled during live chat. The old in-code requirement
+        # "Once on live chat, do NOT return to comments" is SUPERSEDED: on live
+        # handoff only the live channel yields (handled by the per-channel defer in
+        # multi_channel_coordinator.py). The other channels, indexing, and
+        # scheduling keep flowing so the system never goes idle.
 
         # Start monitoring
         logger.info("="*60)
         logger.info("MONITORING CHAT - WSP-COMPLIANT ARCHITECTURE")
         logger.info("="*60)
 
-        # === FIX 2026-02-06: Verify live chat BEFORE terminating comments ===
-        # Previously: Comments terminated → live chat failed → disruption + 2min stream search
-        # Now: Verify live chat works → THEN terminate comments → no disruption if chat unavailable
-        logger.info("[LOCK] Verifying live chat availability before disabling comments...")
+        # === FIX 2026-02-06: Verify live chat BEFORE handing off from comments ===
+        # Previously: Comments terminated -> live chat failed -> disruption + 2min stream search
+        # Now: Verify live chat works -> THEN hand off -> no disruption if chat unavailable
+        logger.info("[LOCK] Verifying live chat availability before live handoff...")
         if not self.livechat or not await self.livechat.initialize():
             logger.warning("[LOCK] Live chat NOT available - keeping comment engagement ACTIVE")
             logger.info("[LOCK] Will search for another stream without disrupting comments")
             return  # Exit monitor_chat, will search for new stream without disrupting comments
 
-        # === Live chat CONFIRMED available - NOW safe to terminate comments ===
-        logger.info("[LOCK] Live chat CONFIRMED - disabling comment engagement")
-        await self.terminate_comment_engagement()
+        # === Live chat CONFIRMED available - ALWAYS-FLOW live handoff ===
+        # Do NOT blanket-cancel the engagement supervisor (that would kill BOTH
+        # browser loops). The per-channel defer skips only the live channel; the
+        # other channels + indexing + scheduling keep flowing (no idle state).
+        logger.info("[LOCK] Live chat CONFIRMED - live handoff (ALWAYS-FLOW)")
+        await self.terminate_comment_engagement(for_live_handoff=True)
         self._live_stream_pending = False
         self._live_chat_active = True
-        logger.info("[LOCK] Live chat mode ACTIVE - comment engagement DISABLED")
+        logger.info("[LOCK] Live chat mode ACTIVE - non-live engagement keeps flowing")
 
         # === CARDIOVASCULAR: Start heartbeat task (WSP 91) ===
         heartbeat_task = None
@@ -1032,13 +1038,45 @@ class AutoModeratorDAE:
             if self.livechat:
                 self.livechat.stop_listening()
 
-    async def terminate_comment_engagement(self):
+    async def terminate_comment_engagement(self, for_live_handoff: bool = False):
         """
-        Terminate any running comment engagement subprocess (prevent dual-process race condition).
+        Terminate any running comment engagement supervisor.
 
-        Called when switching from comment processing to live chat monitoring.
-        WSP 49: Process isolation - ensure only ONE mode active at a time.
+        ``self._comment_engagement_task`` is the per-browser engagement SUPERVISOR
+        (``_comment_engagement_loop``), which spawns and owns BOTH browser loops
+        (``_browser_tasks = {"chrome": T, "edge": T}``). Cancelling it therefore
+        blanket-cancels Chrome AND Edge engagement via the supervisor's
+        CancelledError handler -- not just the live channel's work.
+
+        ALWAYS-FLOW POLICY (012-decided, supersedes the old in-code rule
+        "Once on live chat, do NOT return to comments"): on a LIVE HANDOFF the
+        system must NOT go idle. Only the live channel yields; the other channels,
+        indexing, and scheduling keep flowing. There is NO browser contention to
+        guard against: live chat runs on the YouTube Data API (livechat_core.py,
+        ``youtube_service``) while the comment executor drives Chrome via CDP on
+        port 9222 (multi_channel_coordinator.py). The single real contention --
+        two processes driving the SAME live channel's browser -- is already
+        prevented by the per-channel live-defer in the coordinator
+        (multi_channel_coordinator.py chrome :880-889 / edge :502-511), which
+        skips ONLY the live channel and keeps rotating the rest.
+
+        Args:
+            for_live_handoff: When True (live-confirm path), do NOT cancel the
+                supervisor. The per-channel defer already skips the live channel,
+                so the non-live loops, indexing, and scheduling keep flowing.
+                When False (default; rotation / inbox-retry restart paths), retain
+                the legacy cancel-and-restart behavior.
         """
+        if for_live_handoff:
+            # ALWAYS-FLOW: do not blanket-cancel the supervisor. The per-channel
+            # live-defer handles skipping the live channel; everything else keeps
+            # flowing (no idle state on live handoff).
+            logger.info(
+                "[LOCK] Live handoff (ALWAYS-FLOW): keeping comment engagement supervisor "
+                "ACTIVE; per-channel defer will skip only the live channel."
+            )
+            return
+
         if self._comment_engagement_task and not self._comment_engagement_task.done():
             logger.info("[LOCK] Terminating comment engagement subprocess (switching to live chat)...")
             self._comment_engagement_task.cancel()
