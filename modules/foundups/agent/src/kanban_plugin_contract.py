@@ -196,31 +196,35 @@ def _scan_authority(node: Any, trail: str, errors: List[str]) -> None:
     if isinstance(node, dict):
         for key, value in node.items():
             if not isinstance(key, str):
-                errors.append(f"{trail}: non-string key {key!r}")
+                # No-raw-echo (#807): never echo the raw key/value/repr/trail. Name the
+                # rule only; the offending key/value are user-controlled.
+                errors.append("non-string key rejected")
                 continue
             if not _is_printable_ascii(unicodedata.normalize("NFKC", key)):
-                errors.append(f"{trail}{key}: non-ASCII / non-printable key rejected")
+                errors.append("non-ASCII / non-printable key rejected")
             nkey = _normalize(key)
             # verified=true anywhere is rejected (advisory-until-verified).
             if nkey == "verified" and _truthy(value):
-                errors.append(f"{trail}{key}: verified=true is forbidden (advisory-until-verified)")
+                errors.append("verified=true is forbidden (advisory-until-verified)")
             # source_authority promotion.
             if nkey in ("source_authority", "lifecycle_stage", "source_authority_stage"):
                 if isinstance(value, str) and _normalize(value) not in ("monorepo_poc", "incubating", "idea", ""):
-                    errors.append(f"{trail}{key}: '{value}' is a source_authority promotion (only monorepo_poc)")
+                    errors.append("source_authority promotion is forbidden (only monorepo_poc)")
             if "promote" in nkey or "promotion" in nkey:
                 if _truthy(value):
-                    errors.append(f"{trail}{key}: promotion flag is forbidden")
+                    errors.append("promotion flag is forbidden")
             # authority-marker key: PRESENCE is forbidden (no legitimate field
-            # normalizes to an authority marker), regardless of value.
+            # normalizes to an authority marker), regardless of value. KEEP the fixed
+            # marker class {m} (from _AUTHORITY_MARKERS taxonomy -- NOT user input);
+            # DROP the user-controlled key/trail.
             for m in _AUTHORITY_MARKERS:
                 if m in nkey:
-                    errors.append(f"{trail}{key}: forbidden authority field '{m}' (presence)")
+                    errors.append(f"forbidden authority field present (class: {m})")
                     break
             # smuggled shell command.
             if any(c in nkey for c in _COMMAND_KEY_MARKERS) and isinstance(value, str):
                 if _has_shell(value):
-                    errors.append(f"{trail}{key}: shell-string command is forbidden (argv-or-null only)")
+                    errors.append("shell-string command is forbidden (argv-or-null only)")
             _scan_authority(value, f"{trail}{key}.", errors)
     elif isinstance(node, (list, tuple, set)):
         for idx, item in enumerate(node):
@@ -228,7 +232,9 @@ def _scan_authority(node: Any, trail: str, errors: List[str]) -> None:
     elif isinstance(node, str):
         carried = _value_carries_authority(node)
         if carried:
-            errors.append(f"{trail}: value carries authority '{carried}': {node!r}")
+            # KEEP the fixed carried-marker class {carried} (taxonomy, NOT user input);
+            # DROP the user-controlled value repr and the trail.
+            errors.append(f"value carries a forbidden authority marker (class: {carried})")
 
 
 def _has_shell(value: str) -> bool:
@@ -245,6 +251,10 @@ _DRIVE = re.compile(r"^[A-Za-z]:")
 
 
 def _check_path(field_name: str, value: Any, errors: List[str]) -> None:
+    # No-raw-echo (#807): field_name is a FIXED contract field label + positional index
+    # (not user content) and the type name is a fixed Python type -- both safe to keep.
+    # The user-controlled path/ref VALUE (and any raw bytes it carries) is NEVER echoed:
+    # name the field + the rule only, never repr(value) or the offending characters.
     if not isinstance(value, str):
         errors.append(f"{field_name}: path/ref must be a string, got {type(value).__name__}")
         return
@@ -252,22 +262,22 @@ def _check_path(field_name: str, value: Any, errors: List[str]) -> None:
         errors.append(f"{field_name}: empty path/ref")
         return
     if not _is_printable_ascii(value):
-        errors.append(f"{field_name}: path/ref must be printable ASCII: {value!r}")
+        errors.append(f"{field_name}: path/ref must be printable ASCII")
         return
     if _has_control_chars(value):
         errors.append(f"{field_name}: control character in path/ref")
         return
     if value.startswith("/") or value.startswith("\\") or value.startswith("//") or value.startswith("\\\\"):
-        errors.append(f"{field_name}: absolute/UNC path forbidden: {value!r}")
+        errors.append(f"{field_name}: absolute/UNC path forbidden")
     if _DRIVE.match(value):
-        errors.append(f"{field_name}: drive path forbidden: {value!r}")
+        errors.append(f"{field_name}: drive path forbidden")
     norm_sep = value.replace("\\", "/")
     if ".." in norm_sep.split("/"):
-        errors.append(f"{field_name}: path traversal '..' forbidden: {value!r}")
+        errors.append(f"{field_name}: path traversal '..' forbidden")
     # shell-control metacharacters (glob '*'/'?'/'[]' and '/' are allowed in path fields).
     bad = set(";|&$`><(){}\n\r\t!#") & set(value)
     if bad:
-        errors.append(f"{field_name}: shell metacharacters in path/ref: {sorted(bad)}")
+        errors.append(f"{field_name}: shell metacharacters in path/ref forbidden")
 
 
 # ---------------------------------------------------------------------------
@@ -421,7 +431,9 @@ def validate_card_spec(obj: Union[KanbanCardSpec, Dict[str, Any]]) -> ContractVa
     res = _validate_common(obj, ("allowed_paths", "forbidden_paths", "worktree", "expected_evidence"))
     data = _as_dict(obj)
     if data.get("risk_class") not in ALLOWED_RISK_CLASSES:
-        res.errors.append(f"risk_class '{data.get('risk_class')}' not in {sorted(ALLOWED_RISK_CLASSES)}")
+        # No-raw-echo (#807): the supplied risk_class is user-controlled -- name the rule and
+        # the fixed allowed set (taxonomy, NOT user input), never the rejected value.
+        res.errors.append(f"risk_class not in allowed set {sorted(ALLOWED_RISK_CLASSES)}")
     for req in ("slice_id", "contextbundle_id", "lane"):
         if not data.get(req):
             res.errors.append(f"{req} missing or empty")
