@@ -2,6 +2,34 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## V0.28.0 - Ask Studio: pin ytcp-icon-button#action-button as PRIMARY send selector (STUDIO_ASK_SEND_ACTION_BUTTON_SELECTOR_PHASE1) (2026-06-18)
+
+### Why
+012 live-grounded the real Ask Studio prompt-box send control as
+`ytcp-icon-button#action-button` (ytcp-ask-studio-input-view-model ->
+...ActionButton). The `send_button` list led with the aria-label variants only;
+the action button is the more reliable primary click target. This selector was
+validated during the live Studio Ask proof but left uncommitted; this slice lands
+it with coverage.
+
+### Changed
+- `ASK_STUDIO_SELECTORS["send_button"]`: prepend `"ytcp-icon-button#action-button"`
+  as index 0 (primary). The aria-label variants and the Enter fallback
+  (`_submit_prompt`) are unchanged and remain as fallbacks. Submit path, action ID,
+  and output schema untouched.
+
+### Tests
+- `test_action_button_pinned_first_in_send_button_list`: pins the selector + its
+  index-0 ordering (guard against silent drop/reorder).
+- `test_action_button_preferred_over_aria_label`: with BOTH the action button and
+  an aria-label Send button present, submit clicks the action button (primary) and
+  never the aria-label one. Non-vacuity proven by removal-injection (both fail when
+  the selector is removed).
+
+### WSP Compliance
+- WSP 22 (ModLog), WSP 50 (verify), WSP 84 (extend existing selector list, no new
+  mechanism), WSP 97 (Truth Boundary: selector + tests only).
+
 ## V0.21.1 - Gate live-browser tests behind --run-live (VIDEO_INDEXER_LIVE_TEST_GATING_PHASE1) (2026-06-17)
 
 ### Why

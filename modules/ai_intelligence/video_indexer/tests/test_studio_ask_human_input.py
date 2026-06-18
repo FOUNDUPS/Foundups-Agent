@@ -266,6 +266,39 @@ async def test_submit_prefers_send_button_single_click(monkeypatch):
     assert result.success is True
 
 
+def test_action_button_pinned_first_in_send_button_list():
+    """012 live-grounded: ytcp-icon-button#action-button is pinned as the PRIMARY
+    send selector (index 0), ahead of the aria-label variants which remain as
+    fallbacks. Regression guard so it can't be silently dropped or reordered.
+    """
+    sels = StudioAskIndexer.ASK_STUDIO_SELECTORS["send_button"]
+    assert "ytcp-icon-button#action-button" in sels
+    assert sels[0] == "ytcp-icon-button#action-button"
+    assert 'ytcp-icon-button[aria-label="Send"]' in sels  # fallback retained
+
+
+async def test_action_button_preferred_over_aria_label(monkeypatch):
+    """With BOTH the action button and an aria-label Send button present, submit
+    clicks the action button (primary) and never the aria-label one -- proving the
+    pinned ordering is actually exercised by the submit path, not just declared.
+    """
+    _patch_human_for_box(monkeypatch)
+    box = ContentEditableBox()
+    action_btn = _Simple(attributes={"id": "action-button"})
+    aria_btn = _Simple(attributes={"aria-label": "Send"})
+    css = _make_css_map(box, response_text="{\"topics\": [\"x\"]}", send_button=aria_btn)
+    css["ytcp-icon-button#action-button"] = action_btn
+    driver = SoftNewlineDriver(css_map=css)
+    indexer = StudioAskIndexer(driver=driver)
+
+    result = await indexer.ask_about_video("vidX", channel_id=UNDAODU_ID)
+
+    assert action_btn.clicked is True   # primary clicked
+    assert aria_btn.clicked is False    # fallback never reached
+    assert box.submits == 0             # no bare-Enter submit
+    assert result.success is True
+
+
 # ---------------------------------------------------------------------------
 # HUMAN_TYPE reuse
 # ---------------------------------------------------------------------------
