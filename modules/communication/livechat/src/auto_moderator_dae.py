@@ -2381,38 +2381,45 @@ class AutoModeratorDAE:
                             # ORIENT: Query for next activity decision
                             decision = activity_router.get_next_activity()
 
-                            # DECIDE: Determine current activity based on ACTUAL page state (not just _live_chat_active)
-                            # FIX (2026-02-21): Use Chrome page type to determine actual activity
-                            chrome_page = page_state.get("chrome", {}).get("page_type") if page_state else None
+                            # DECIDE: channel-scope the activity signal across BOTH browser
+                            # groups (RC3) instead of the Chrome page alone. Chrome 9222 =
+                            # M2J/UnDaoDu, Edge 9223 = FoundUps/antifaFM; a Chrome comments tab
+                            # says nothing about whether the Edge-bound channels are processed.
+                            # The rollup current_activity precedence is UNCHANGED (FIX 2026-02-21:
+                            # Chrome page wins -> live -> default) so should_pivot is identical.
+                            from .ooda_activity_signal import derive_activity_signal
+                            activity_signal = derive_activity_signal(page_state, self._live_chat_active)
+                            current_activity = activity_signal.current_activity
 
-                            # If Chrome is on comments page, that's what we're doing (regardless of _live_chat_active)
-                            if chrome_page == "youtube_studio_comments":
-                                current_activity = ActivityType.COMMENT_ENGAGEMENT
-
-                                # FIX: When comments are cleared AND we're on comments page, signal completion
-                                if edge_comments_cleared:
-                                    # Get current channel from router
-                                    router_channel_id = activity_router.current_channel_id
-                                    if router_channel_id:
-                                        logger.info(f"[OODA-PIVOT] Comments cleared for {router_channel_id} - signaling completion")
-                                        activity_router.signal_comments_complete(router_channel_id)
-                                        # After signaling, get updated decision
-                                        decision = activity_router.get_next_activity()
-                            elif self._live_chat_active:
-                                current_activity = ActivityType.LIVE_CHAT
-                            else:
-                                current_activity = ActivityType.COMMENT_ENGAGEMENT
+                            # PRESERVED: when Chrome is on comments AND edge comments cleared,
+                            # signal completion to the router (router-state side effect, unchanged).
+                            if activity_signal.chrome_on_comments and edge_comments_cleared:
+                                router_channel_id = activity_router.current_channel_id
+                                if router_channel_id:
+                                    logger.info(f"[OODA-PIVOT] Comments cleared for {router_channel_id} - signaling completion")
+                                    activity_router.signal_comments_complete(router_channel_id)
+                                    # After signaling, get updated decision
+                                    decision = activity_router.get_next_activity()
 
                             should_pivot = decision.next_activity != current_activity and decision.next_activity != ActivityType.IDLE
 
-                            # Log OODA decision
+                            # Log OODA decision -- lead with the channel-scoped truth so a stale
+                            # Chrome comments tab during live cannot read as a real outage.
                             logger.info(
                                 f"[OODA] Pulse #{heartbeat_count}: "
                                 f"Current={current_activity.name}, "
+                                f"{activity_signal.log_summary()}, "
                                 f"Suggested={decision.next_activity.name}, "
                                 f"Pivot={'YES' if should_pivot else 'NO'}, "
                                 f"Reason={decision.reason[:50] if decision.reason else 'none'}"
                             )
+                            if activity_signal.is_misleading_comment_signal:
+                                logger.warning(
+                                    "[OODA] RC3: Current=COMMENT_ENGAGEMENT is a STALE comments tab during live "
+                                    f"(chrome_stale={activity_signal.chrome_stale_during_live}, "
+                                    f"edge_stale={activity_signal.edge_stale_during_live}); the Edge-bound "
+                                    "channels (FoundUps/antifaFM) are NOT being processed this pulse."
+                                )
 
                             # ACT: Signal pivot opportunity (actual pivot handled by higher orchestration)
                             if should_pivot and decision.next_activity != ActivityType.IDLE:
@@ -2438,6 +2445,14 @@ class AutoModeratorDAE:
                                                 # Layer 5: Page state observation
                                                 "page_state_chrome": page_state.get("chrome", {}).get("page_type") if page_state else None,
                                                 "page_state_edge": page_state.get("edge", {}).get("page_type") if page_state else None,
+                                                # RC3: channel-scoped activity signal (Chrome 9222 = M2J/UnDaoDu,
+                                                # Edge 9223 = FoundUps/antifaFM) so a stale Chrome tab can't read
+                                                # as Edge-channel comment processing.
+                                                "chrome_activity": activity_signal.chrome_activity.name if activity_signal.chrome_activity else None,
+                                                "edge_activity": activity_signal.edge_activity.name if activity_signal.edge_activity else None,
+                                                "chrome_stale_during_live": activity_signal.chrome_stale_during_live,
+                                                "edge_stale_during_live": activity_signal.edge_stale_during_live,
+                                                "is_misleading_comment_signal": activity_signal.is_misleading_comment_signal,
                                             }
                                         )
                                     except Exception as bc_e:
