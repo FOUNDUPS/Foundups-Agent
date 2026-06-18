@@ -10,6 +10,45 @@ This log tracks changes specific to the **livechat** module in the **communicati
 
 ---
 
+## 2026-06-18 - RC3: channel-scope the OODA activity signal (YOUTUBE_COMMENT_FLOW_OODA_OBSERVABILITY_PHASE1)
+
+**By:** 0102 (CTO)
+**WSP References:** WSP 22 (ModLog), WSP 50 (verify), WSP 84 (reuse page-state probe), WSP 97 (Truth Signaling)
+
+### Why
+The heartbeat's OODA `current_activity` was derived from the **Chrome page-type
+alone** (`auto_moderator_dae.py:2386-2404`). Chrome 9222 = Move2Japan/UnDaoDu,
+Edge 9223 = FoundUps/antifaFM, so a (possibly stale) Chrome comments tab made the
+OODA log REPORT `Current=COMMENT_ENGAGEMENT ... Processing comments for FoundUps`
+while the Edge-bound channels were untouched. During a live stream the executor
+loop is cancelled, so a Chrome comments tab is a stale tab - this mislabel made a
+live-stream window look like a comment-processing outage (the trigger for the
+comment-flow audit). Forensic confirmed the executor was cancelled, not stalled.
+
+### Changed (observability only - no behavior change to should_pivot or the router)
+- NEW `src/ooda_activity_signal.py`: pure, unit-testable `derive_activity_signal(page_state,
+  live_chat_active) -> ActivitySignal`. Reports per-browser activity (chrome 9222 /
+  edge 9223), `chrome_stale_during_live` / `edge_stale_during_live`, and
+  `is_misleading_comment_signal`. The rollup `current_activity` preserves the exact
+  2026-02-21 precedence (Chrome-comments -> live -> default) so `should_pivot` is
+  byte-for-byte unchanged.
+- `auto_moderator_dae.py` OODA block: uses the helper; the OODA log now leads with
+  the channel-scoped truth and emits a `[OODA] RC3` WARNING when the rollup says
+  COMMENT_ENGAGEMENT but it is only a stale tab during live. `signal_comments_complete`
+  (router-state side effect) preserved exactly. Breadcrumb metadata enriched with the
+  channel-scoped fields (prerequisite for later reliable pivot detection).
+
+### Tests
+- NEW `tests/test_ooda_activity_signal.py` (15 tests): rollup precedence unchanged
+  (parametrized), RC3 stale-tab-during-live flagged + Edge not mislabelled, per-browser
+  channel-scoping (non-vacuous: independent activities), malformed/None page_state safe.
+  Non-vacuity proven by inject/revert (disabling the stale flag fails the RC3 test).
+
+### Scope (WSP 97)
+Observability/diagnostics only. No change to the executor loop, the supervisor
+cancellation, the break gate, or `should_pivot`/router behavior. The selective-cancellation
+"always-flow" fix is a SEPARATE future slice.
+
 ## 2026-05-01 - OC21: WSP 97 Auth Truth Signaling Fix
 
 **By:** 0102 (Worker AW3)

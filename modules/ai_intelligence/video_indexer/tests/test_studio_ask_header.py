@@ -25,6 +25,12 @@ from modules.ai_intelligence.video_indexer.src.studio_ask_indexer import (
     StudioAskIndexer,
 )
 
+# A registry-known channel ID (UnDaoDu) so the now-required owning-channel
+# context (STUDIO_ASK_CHANNEL_CONTEXT_PHASE1 STEP 3) resolves in these
+# input/selector tests. The channel-context behavior itself is covered
+# separately in test_studio_ask_channel_context.py.
+UNDAODU_ID = "UCfHM9Fw9HD-NwiS0seD_oIA"
+
 
 # ---------------------------------------------------------------------------
 # Mock DOM / Selenium driver
@@ -69,7 +75,10 @@ class FakeDriver:
     def __init__(self, css_map=None, script_result=None):
         self.css_map = css_map or {}
         self.script_result = script_result
-        self.current_url = "https://studio.youtube.com/video/vidX/edit"
+        # STUDIO_ASK_CHANNEL_CONTEXT_PHASE1: a single Studio tab is the active
+        # target (STEP 0 single-target path passes), already on Studio.
+        self.current_url = "https://studio.youtube.com/channel/UCfHM9Fw9HD-NwiS0seD_oIA/videos/upload"
+        self.title = "YouTube Studio"
         self.visited = []
 
     def get(self, url):
@@ -89,6 +98,27 @@ class FakeDriver:
         # Legacy fallback JS calls return None by default (so the watch-page
         # Ask button is treated as MISSING unless a result is provided).
         return self.script_result
+
+
+def _typed_text(element) -> str:
+    """
+    Reassemble the visible prompt text from a FakeElement's per-char keystrokes.
+
+    The newline-safe human-cadence path types one character at a time and emits
+    a single Keys.ENTER (\\ue007) to submit. We drop that ENTER (and any other
+    non-printable control key) so the assertion checks only the prompt content.
+    """
+    from selenium.webdriver.common.keys import Keys
+
+    control_keys = {Keys.ENTER, Keys.SHIFT, Keys.BACKSPACE}
+    return "".join(k for k in element.sent_keys if k not in control_keys)
+
+
+def _count_enter_submits(element) -> int:
+    """Count bare Keys.ENTER keystrokes sent to the element (== submit count)."""
+    from selenium.webdriver.common.keys import Keys
+
+    return sum(1 for k in element.sent_keys if k == Keys.ENTER)
 
 
 # Patch the indexer's human delay to be instant so timeout tests are fast.
@@ -162,16 +192,28 @@ async def test_ask_studio_primary_path_succeeds():
     driver = FakeDriver(css_map=css_map, script_result=None)
     indexer = StudioAskIndexer(driver=driver)
 
-    result = await indexer.ask_about_video("vidX")
+    result = await indexer.ask_about_video("vidX", channel_id=UNDAODU_ID)
 
     assert result.success is True
     assert "topics" in result.response_text  # came from the response DOM node
     # The prompt box (contenteditable) actually received keystrokes.
     assert prompt_box.clicked is True
-    assert any("content_category" in str(k) or "Analyze" in str(k) or "Focus" in str(k)
-               for k in prompt_box.sent_keys)
-    # We navigated to the Studio edit page (PRIMARY), not the watch page first.
-    assert driver.visited[0] == "https://studio.youtube.com/video/vidX/edit"
+    # Newline-safe human-cadence typing now enters the prompt CHAR-BY-CHAR.
+    # Reassemble the per-char keystrokes (drop the single trailing ENTER submit)
+    # and confirm the prompt content reached the box.
+    typed = _typed_text(prompt_box)
+    assert "content_category" in typed or "Analyze" in typed or "Focus" in typed
+    # We set the OWNING-channel context (channel-scoped URL) BEFORE the
+    # channel-agnostic edit page (STUDIO_ASK_CHANNEL_CONTEXT_PHASE1 STEP 1),
+    # and never the watch page first.
+    assert driver.visited[0] == (
+        f"https://studio.youtube.com/channel/{UNDAODU_ID}/videos/upload"
+    )
+    edit_url = "https://studio.youtube.com/video/vidX/edit"
+    assert edit_url in driver.visited
+    assert driver.visited.index(edit_url) > driver.visited.index(
+        f"https://studio.youtube.com/channel/{UNDAODU_ID}/videos/upload"
+    )
 
 
 async def test_ask_studio_succeeds_when_watch_ask_missing():
@@ -184,7 +226,7 @@ async def test_ask_studio_succeeds_when_watch_ask_missing():
     driver = FakeDriver(css_map=css_map, script_result=None)
     indexer = StudioAskIndexer(driver=driver)
 
-    result = await indexer.ask_about_video("vidX")
+    result = await indexer.ask_about_video("vidX", channel_id=UNDAODU_ID)
 
     assert result.success is True
     # Never had to fall back to the watch page.
@@ -192,18 +234,24 @@ async def test_ask_studio_succeeds_when_watch_ask_missing():
 
 
 async def test_response_timeout_fails_closed():
-    """No response DOM text -> success False, no garbage stored."""
+    """
+    A BLANK stream (Gemini never initializes: no greeting, no answer) -> the
+    readiness gate never passes and, on a single-tab mock that cannot open a new
+    tab, the retry loop exhausts -> fail closed "gemini_did_not_load", nothing
+    stored. (STUDIO_ASK_GEMINI_READINESS_RETRY_PHASE1 supersedes the old generic
+    timeout error for the never-loaded case.)
+    """
     css_map, _ = _ask_studio_dom(response_text="")  # response node has empty text
     # Remove the response node entirely to simulate a stream that never fills.
     css_map["#PAcreator_chat_streaming"] = FakeElement(text="")
     driver = FakeDriver(css_map=css_map, script_result=None)
     indexer = StudioAskIndexer(driver=driver)
 
-    result = await indexer.ask_about_video("vidX")
+    result = await indexer.ask_about_video("vidX", channel_id=UNDAODU_ID)
 
     assert result.success is False
     assert result.response_text == ""
-    assert "timeout" in (result.error or "").lower()
+    assert result.error == "gemini_did_not_load"
 
 
 async def test_no_clipboard_used(monkeypatch):
@@ -230,7 +278,7 @@ async def test_no_clipboard_used(monkeypatch):
     css_map, _ = _ask_studio_dom('{"topics": ["x"], "segments": []}')
     driver = FakeDriver(css_map=css_map, script_result=None)
     indexer = StudioAskIndexer(driver=driver)
-    await indexer.ask_about_video("vidX")
+    await indexer.ask_about_video("vidX", channel_id=UNDAODU_ID)
 
     assert sentinel["used"] is False
 
@@ -267,13 +315,24 @@ def test_unknown_channel_falls_back_to_generic():
     assert StudioAskIndexer._prompt_for_channel(None) == StudioAskIndexer.ASK_PROMPT
 
 
-async def test_channel_prompt_threaded_into_ask(monkeypatch):
-    """index path passes channel_entry through so the ffcpln prompt is used."""
+async def test_primary_prompt_names_the_specific_video(monkeypatch):
+    """
+    STUDIO_ASK_GEMINI_READINESS_RETRY_PHASE1 (req #4 - LIVE-PROVEN correctness):
+    the PRIMARY Ask Studio path types a prompt that NAMES the exact video (title
+    + video id + studio URL) and requests JSON. This pins Gemini (a CHANNEL
+    assistant) to THIS video; a query WITHOUT the id analyzed a DIFFERENT video
+    live. The channel-specific prompt is still used on the legacy fallback and is
+    selected by _prompt_for_channel (covered by the prompt-selection tests).
+    """
     css_map, prompt_box = _ask_studio_dom('{"topics": ["m"], "segments": []}')
     driver = FakeDriver(css_map=css_map, script_result=None)
     indexer = StudioAskIndexer(driver=driver)
 
-    await indexer.ask_about_video("vidX", channel_entry=_entry("ffcpln"))
+    await indexer.ask_about_video("vidX", channel_entry=_entry("ffcpln"), channel_id=UNDAODU_ID)
 
-    typed = " ".join(str(k) for k in prompt_box.sent_keys)
-    assert "Do NOT produce a full transcript" in typed
+    typed = _typed_text(prompt_box)
+    # Names the exact video (id + studio URL + title) and requests JSON.
+    assert "video id vidX" in typed
+    assert "studio.youtube.com/video/vidX" in typed
+    assert "Studio Title" in typed
+    assert "JSON" in typed

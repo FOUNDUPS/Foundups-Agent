@@ -331,7 +331,21 @@ async def run_studio_ask_single_video(
     StudioAskIndexer.ask_about_video (navigate + DOM scrape). NEVER calls the
     Gemini API, the Shorts Scheduler, or any publish/schedule/metadata-mutation
     path. Attaches to an already-authenticated browser session (no credentials).
-    Fail-closed on error."""
+    Fail-closed on error.
+
+    STUDIO_ASK_CHANNEL_CONTEXT_PHASE1: the existing channel_id input is now
+    REQUIRED for the single-video path (the worker sets the OWNING-channel
+    context before asking). The action ID and the output schema are UNCHANGED;
+    only new typed error VALUES are added to the existing 'error' field:
+      - 'channel_unresolved'        - channel_id missing/blank/unknown
+      - 'studio_target_unavailable' - no usable Studio/normal browser target
+                                      (e.g. only a chrome://glic / Gemini side
+                                      panel was open and no normal tab could be
+                                      opened via the existing driver)
+      - 'wrong_channel_context'     - the owning-channel edit surface did not
+                                      load (permission/not-found/sign-in/Oops or
+                                      absent title field after the timeout)
+    On any of these the result is success=False and NOTHING is persisted."""
 
 async def run_action(action_id: str, **kwargs) -> Any:
     """Route by typed action ID. Implemented IDs run real work; registered-only

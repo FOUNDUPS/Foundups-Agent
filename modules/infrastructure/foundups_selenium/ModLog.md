@@ -1,5 +1,31 @@
 # ModLog — FoundUps Selenium
 
+## V1.2.0 — Shadow-DOM deep finder (returns real WebElements)
+
+**Date**: 2026-06-17
+**WSP Compliance**: WSP 3 (infrastructure), WSP 11 (Interface), WSP 84 (Reuse)
+
+### Summary
+NEW `src/shadow_dom_finder.py`: `find_deep` / `shadow_query` / `first_deep`
+pierce nested shadow roots and return REAL Selenium WebElements (the matched DOM
+node is RETURNED by `execute_script`, so `human_type` + `.click()` keep working).
+Flat `find_element` does not pierce shadow roots; YouTube Studio's DOM is
+shadow-rooted, so flat selectors silently fail even when the element exists.
+
+WSP 84 REUSE: the recursive `findInShadow` traversal is the SAME algorithm
+already used by the YT comment-reply path
+(`modules/communication/video_comments/skillz/tars_like_heart_reply/src/reply_executor.py`
+`findInShadow`); the difference is the return contract (a node, not text/boolean).
+`shadow_query` resolves a CHAIN across shadow boundaries (e.g.
+`ytcp-creator-chat-trigger -> ytcp-icon-button`). Exported via `src/__init__.py`.
+Consumed by `ai_intelligence/video_indexer/studio_ask_indexer.py`
+(STUDIO_ASK_SHADOW_DOM_SELECTORS_PHASE1).
+
+### Tests
+- NEW `tests/test_shadow_dom_finder.py` (7 mock tests): flat-fails/shadow-finds,
+  flat fallback when no shadow match, cross-shadow chain resolution, first_deep
+  ordering. NO live browser.
+
 ## V1.1.0 — Chrome DevTools MCP Adapter
 
 **Date**: 2026-03-18
