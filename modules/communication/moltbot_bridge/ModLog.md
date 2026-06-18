@@ -1,5 +1,42 @@
 # ModLog - moltbot_bridge
 
+## 2026-06-19: Fusion Redaction Gate -- deterministic FAIL-CLOSED precondition (W6)
+
+**Author**: 0102 (Worker-Lane W6, AUTHOR + internal SENTINEL)
+**WSP**: 11 (Interface), 50 (Pre-Action), 84 (Reuse evaluated), 97 (Truth Boundary)
+**Slice**: `HERMES_FUSION_REDACTION_GATE_PHASE1`
+**Predecessor**: #832 (FusionAdapter contract, merged `7bd68e73a`)
+**Base**: `31a71946c` (origin/main; #832 landed)
+
+### Summary
+
+Builds the deterministic, FAIL-CLOSED redaction gate the #832 contract anticipates ("Privacy stays
+BLOCKED_PENDING_REDACTION_GATE until a separate redaction-gate slice lands"). Precondition ONLY -- it
+does NOT enable any live OpenRouter call; alias/server_tool/local_fallback still raise RedactionGateBlocked.
+
+- ADD `src/fusion_redaction_gate.py` -- pure-Python (stdlib-only) policy redactor + gate with two action
+  classes: REDACT (keys/bearer/.env/complete private-key/PII/credential-URLs -> replaced, may PASS if the
+  re-scan is clean) and BLOCK (private chain-of-thought, merge-authorization, source_authority, CABR/payout/
+  benefit authority, governance, malformed key header -> status stays BLOCKED even if a token were swapped).
+  PASS only when redaction ran AND a post-redaction re-scan finds zero residual AND zero block markers AND no
+  error. Digests computed FROM the redacted output. Counts-only report (policy_version `fusion_redaction.v1`;
+  `categories_hit` dict; `blocked_categories` tuple; `residual_forbidden_count`). Low-cardinality reasons
+  (clean/redacted/blocked_policy/residual_forbidden_pattern/redactor_error) that never echo raw input. Module
+  never imports `os`; makes no network call.
+- ADD `tests/test_fusion_redaction_gate.py` -- 61 adversarial tests across 6 sentinel lanes (secret-leak,
+  authority-block, private-reasoning, source-literal, live-mode, non-vacuity): synthetic split-fragment secret
+  corpus + no-leak invariant, BLOCK corpus never passes, fail-closed (non-text/exception/residual), digests-
+  from-redacted, report-counts-not-snippets, no-raw-exception-echo, source-literal scan, determinism, no-network,
+  live-modes-still-blocked, non-vacuous negative control. 65 gate tests; 127 pass (incl. 40 adapter + 22 manifest regression).
+- WSP 84: an in-tree `redact_sensitive()` exists (duplicated in autofix_executor.py / kanban_plugin_contract.py;
+  `redact_secrets()` in openclaw_codebase_agent.py) but is text-only, cross-domain, and lacks the report/digest/
+  fail-closed/REDACT-vs-BLOCK split; the gate is self-contained (a security primitive must own its verification,
+  WSP 3) with a detector set that is a documented SUPERSET. Follow-up: HERMES_REDACTOR_CONSOLIDATION (unify into
+  shared_utilities).
+- Boundaries: no live OpenRouter, no key read, no dependency, no runtime wiring. ASCII-clean (0 non-ASCII; no
+  mojibake). WSP_97 26/26 declared==actual (INTERFACE.md). DRAFT; STOP at MERGE_READY (external 0102 gate).
+  Next (NOT this slice): HERMES_FUSION_ALIAS_MODE_PHASE2 (only after this gate lands + is proven).
+
 ## 2026-06-17: FusionAdapter Contract REPAIR1 -- WSP_97 table + digest format guard (W6)
 
 **Author**: 0102 (Worker-Lane W6) | **Slice**: `HERMES_FUSION_ADAPTER_CONTRACT_PHASE1_REPAIR1`

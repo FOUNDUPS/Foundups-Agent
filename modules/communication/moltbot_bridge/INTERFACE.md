@@ -52,6 +52,63 @@ Live OpenRouter is `BLOCKED_PENDING_REDACTION_GATE`. `prompt_digest` / `context_
 
 Declared == Actual == 23 / 23 YES.
 
+### Fusion Redaction Gate (CONTRACT-ONLY precondition; does NOT enable live modes)
+
+```python
+from modules.communication.moltbot_bridge.src.fusion_redaction_gate import (
+    evaluate_redaction_gate,   # (prompt, context=None) -> RedactionGateResult (FAIL-CLOSED)
+    redaction_status_for,      # convenience: -> "REDACTION_GATE_PASSED" | "BLOCKED_PENDING_REDACTION_GATE"
+    redact_text,               # (text) -> (redacted_text, RedactionReport)
+    scan_forbidden,            # (text) -> [category, ...]   (empty == clean)
+    RedactionGateResult,       # status/reason/redacted_prompt/redacted_context/prompt_digest/context_digest/report
+    RedactionReport,           # policy_version / categories_hit:dict / blocked_categories:tuple / residual_forbidden_count:int
+    REDACT_CATEGORIES, BLOCK_CATEGORIES,   # REDACT vs BLOCK action classes (disjoint)
+    REDACTION_GATE_PASSED, REDACTION_BLOCKED, ALLOWED_REASONS,
+)
+```
+
+Two action classes. **REDACT** (API keys, bearer, .env secrets, complete private-key blocks, member
+PII, credential URLs) are replaced; the payload may PASS if the post-redaction re-scan is clean.
+**BLOCK** (private chain-of-thought, merge-authorization tokens, source_authority, CABR/payout/benefit
+authority, governance instructions, malformed key headers) keep status `BLOCKED_PENDING_REDACTION_GATE`
+even if a token were swapped. Digests are computed FROM the redacted output. Reasons are low-cardinality
+(`clean`/`redacted`/`blocked_policy`/`residual_forbidden_pattern`/`redactor_error`) and never echo raw
+input. This slice does NOT enable live OpenRouter -- alias/server_tool/local_fallback still raise
+`RedactionGateBlocked`. Spec: audit `OPENROUTER_FUSION_FOUNDUPS_INTEGRATION_AUDIT_PHASE1.md` Section 9.
+
+#### WSP_97 Truth Boundary Checklist (HERMES_FUSION_REDACTION_GATE_PHASE1)
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | REDACTOR_FAILS_CLOSED | YES | `evaluate_redaction_gate` default BLOCKED; non-text/error -> BLOCKED (`test_non_text_prompt_fails_closed`) |
+| 2 | NO_SENSITIVE_LEAK_IN_CORPUS | YES | `test_redactable_item_passes_clean`: post-gate `scan_forbidden`==[] for every corpus item |
+| 3 | GATE_PASSED_ONLY_ON_CLEAN_OUTPUT | YES | PASS requires zero residual + zero block markers (`evaluate_redaction_gate`) |
+| 4 | LIVE_MODES_STILL_BLOCKED | YES | `test_live_modes_remain_blocked` |
+| 5 | NO_LIVE_OPENROUTER_CALL | YES | gate is text-only; no client; `test_gate_makes_zero_network` |
+| 6 | NO_API_KEY_READ | YES | gate never imports `os` (`test_gate_module_imports_no_os_no_network`) |
+| 7 | NO_DEPENDENCY_ADDED | YES | stdlib-only (`re`, `dataclasses`, `typing`) + intra-module import |
+| 8 | REDACTOR_NO_NETWORK | YES | `test_gate_makes_zero_network` (socket patched to raise) |
+| 9 | DETERMINISTIC_REDACTION | YES | `test_deterministic` |
+| 10 | NO_REAL_SECRET_IN_TESTS | YES | synthetic split-fragment fixtures only |
+| 11 | BLOCKED_IS_DEFAULT_UNTIL_PASS | YES | `_blocked` default; status flips only on clean pass |
+| 12 | NO_MERGE_OR_CABR_AUTHORITY | YES | gate touches no merge/CABR/payout/authority; those are BLOCK categories |
+| 13 | TESTS_ADVERSARIAL_CORPUS_NON_VACUOUS | YES | `test_no_leak_assertion_is_non_vacuous` |
+| 14 | NO_SKIP_XFAIL | YES | none in the test file |
+| 15 | FILE_SCOPE_EXACT | YES | gate module + test + INTERFACE + module ModLog + root ModLog |
+| 16 | HOLOINDEX_RESULTS_RATED | YES | Phase 0 ratings recorded (module ModLog); reuse evaluated (WSP 84) |
+| 17 | INTERNAL_SENTINEL_READY | YES | 6 sentinel lanes ran; findings folded |
+| 18 | REDACT_VS_BLOCK_POLICY_DEFINED | YES | `REDACT_CATEGORIES`/`BLOCK_CATEGORIES` (`test_redact_and_block_categories_disjoint_and_populated`) |
+| 19 | BLOCK_CATEGORIES_NEVER_PASS | YES | `test_block_item_is_blocked`, `test_block_categories_never_pass_even_when_mixed_with_redactable` |
+| 20 | PRIVATE_REASONING_BLOCKED | YES | `test_private_reasoning_is_blocked_not_merely_redacted` |
+| 21 | DIGESTS_FROM_REDACTED_OUTPUT_ONLY | YES | `prompt_digest == digest(redacted_prompt) != digest(raw)` (`test_digests_are_from_redacted_output_not_raw`) |
+| 22 | REPORT_HAS_COUNTS_NOT_SNIPPETS | YES | `categories_hit: dict[str,int]`; no raw in serialized report (`test_report_has_counts_not_snippets`) |
+| 23 | NO_RAW_EXCEPTION_ECHO | YES | `test_exception_fails_closed_no_raw_echo` (raw never in reason/report) |
+| 24 | NO_LITERAL_SECRET_PATTERN_IN_SOURCE | YES | `test_no_literal_secret_pattern_in_source` scans gate + test source |
+| 25 | POST_REDACTION_RESCAN_REQUIRED | YES | `test_residual_forbidden_fails_closed` |
+| 26 | LIVE_MODES_REMAIN_BLOCKED_AFTER_GATE | YES | `test_live_modes_remain_blocked` (fusion_adapter unchanged) |
+
+Declared == Actual == 26 / 26 YES.
+
 ### WebhookReceiver
 
 ```python

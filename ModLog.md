@@ -1,5 +1,34 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-19] Hermes Fusion Redaction Gate Phase 1 (Lane W6, AUTHOR + internal SENTINEL, security precondition)
+
+**Change Type**: SECURITY-CRITICAL redaction gate + adversarial tests + module docs. NO live OpenRouter,
+NO API key read, NO new dependency, NO runtime wiring, NO enabling of any live Fusion mode. Opened DRAFT.
+**By**: 0102 (Worker-Lane W6) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP References**: WSP 11, WSP 50, WSP 84, WSP 97
+**Slice**: HERMES_FUSION_REDACTION_GATE_PHASE1
+**Predecessor**: #832 (FusionAdapter contract, merged `7bd68e73a`)
+**Base**: `31a71946c` (origin/main; #832 landed)
+
+- ADD `modules/communication/moltbot_bridge/src/fusion_redaction_gate.py` -- deterministic pure-Python
+  (stdlib-only) policy redactor + FAIL-CLOSED gate with REDACT vs BLOCK action classes. REDACT (keys/bearer/
+  .env/complete private-key/PII/credential-URLs) is replaced and may PASS if the post-redaction re-scan is
+  clean; BLOCK (private chain-of-thought, merge-authorization, source_authority, CABR/payout/benefit authority,
+  governance instructions, malformed key headers) keeps status BLOCKED_PENDING_REDACTION_GATE even if a token
+  were swapped. PASS requires redaction ran + zero residual + zero block markers + no error. Digests are
+  computed FROM the redacted output. Counts-only report; low-cardinality reasons that never echo raw input.
+  Never imports os; no network. Live Fusion modes remain blocked (fusion_adapter unchanged).
+- ADD `modules/communication/moltbot_bridge/tests/test_fusion_redaction_gate.py` -- 61 adversarial tests over
+  6 sentinel lanes (secret-leak, authority-block, private-reasoning, source-literal, live-mode, non-vacuity).
+  127 pass (65 gate + 40 adapter + 22 manifest regression). No skip/xfail.
+- EDIT `modules/communication/moltbot_bridge/INTERFACE.md` + module ModLog -- gate public surface + 26-row
+  WSP_97 table (declared==actual==26).
+- WSP 84: existing redact_sensitive()/redact_secrets() evaluated and NOT imported (text-only, cross-domain,
+  no fail-closed/report/REDACT-vs-BLOCK); gate is self-contained with a documented SUPERSET detector set.
+  Follow-up HERMES_REDACTOR_CONSOLIDATION to unify into shared_utilities.
+- Boundaries honored; ASCII-clean (0 non-ASCII, no mojibake). Internal SENTINEL ran; DRAFT PR; STOP at
+  MERGE_READY for the external 0102 gate. Next (NOT this slice): HERMES_FUSION_ALIAS_MODE_PHASE2.
+
 ## [2026-06-17] Hermes FusionAdapter Contract Phase 1 (Lane W6, AUTHOR + internal SENTINEL, contract-only)
 
 **Change Type**: CONTRACT-ONLY typed adapter + tests + manifest correction + dormant marker + docs. NO live
