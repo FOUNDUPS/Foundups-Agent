@@ -10,6 +10,57 @@ This log tracks changes specific to the **livechat** module in the **communicati
 
 ---
 
+## 2026-06-18 - LIVE_HANDOFF_SELECTIVE_CANCELLATION_PHASE1: always-flow live handoff (Option A)
+
+**By:** 0102 (Worker-Lane SELCANCEL-AUTHOR)
+**WSP References:** WSP 22 (ModLog), WSP 50 (verify), WSP 84 (reuse per-channel defer), WSP 97 (Truth Boundary)
+
+### Why (the defect)
+On live handoff the system went fully idle. `terminate_comment_engagement()`
+(`auto_moderator_dae.py:1035`) cancelled `self._comment_engagement_task`, which is
+the per-browser engagement SUPERVISOR (`_comment_engagement_loop`, `:1244`). The
+supervisor's CancelledError handler (`:1389-1394`) then blanket-cancels BOTH
+`_browser_tasks["chrome"]` AND `["edge"]`, killing ALL executor work -- not just
+the live channel. It was invoked from the live-confirm path (`~:991`).
+
+### Phase 0 finding -- no real race; Option A (preferred)
+The cited "WSP 49 process isolation / dual-process race" does not apply to the
+live-chat-vs-comments case. Live chat runs on the YouTube Data API
+(`livechat_core.py:96`, `youtube_service`); the comment executor drives Chrome via
+CDP on port 9222 (`multi_channel_coordinator.py:812`, `connect_chrome_with_retry`)
+and makes ZERO Data API calls (verified: no `youtube_service` / `liveChatMessages`
+/ `googleapiclient` in the coordinator). No shared quota, credentials, lock/file,
+or mutable state is touched by both paths. The single real contention -- two
+processes driving the SAME live channel's browser -- is already prevented by the
+per-channel live-defer (`multi_channel_coordinator.py` chrome `:880-889` / edge
+`:502-511`), which skips ONLY the live channel and keeps rotating the rest.
+
+### Changed (ALWAYS-FLOW, 012-decided; supersedes "Once on live chat, do NOT return to comments")
+- `terminate_comment_engagement(for_live_handoff: bool = False)`: on the live
+  handoff path it no longer cancels the supervisor -- it logs and returns. The
+  EXISTING per-channel defer (unchanged) skips only the live channel so the other
+  channels + indexing + scheduling keep flowing. The default `False` preserves the
+  legacy cancel-and-restart for rotation / inbox-retry paths.
+- Live-confirm call site (`~:991`) now passes `for_live_handoff=True`; surrounding
+  log/comments updated to reflect always-flow.
+- Untouched: the per-channel defer, the livechat_core Data API path, the
+  inbox-clear gate (separate slice), and #840's OODA signal.
+
+### Tests (mock-only, NO live browser)
+- NEW `tests/test_live_handoff_selective_cancellation.py` (5 tests): exercises the
+  REAL `terminate_comment_engagement` against a fake supervisor that mirrors the
+  blanket-cancel handler, plus a faithful model of the per-channel defer.
+  - M2J (Chrome) live: Chrome keeps UnDaoDu, skips M2J; Edge unaffected.
+  - FoundUps (Edge) live: Edge keeps antifaFM, skips FoundUps; Chrome unaffected.
+  - Offline: full dual-browser loops.
+  - 2 non-vacuity tests assert the legacy `for_live_handoff=False` path DOES kill
+    all executor work.
+- MUST-FAIL proof: temporarily disabling the always-flow guard (inject
+  `if for_live_handoff and False:`) makes the 3 positive tests FAIL; reverting
+  restores 5/5 PASS.
+
+---
+
 ## 2026-06-18 - RC3: channel-scope the OODA activity signal (YOUTUBE_COMMENT_FLOW_OODA_OBSERVABILITY_PHASE1)
 
 **By:** 0102 (CTO)
