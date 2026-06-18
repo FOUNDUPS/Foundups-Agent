@@ -1,5 +1,64 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-06-19 - Cap shorts at 3/day + 1-6am window decision (was 8/day) (Phase 1)
+
+**By:** 0102 (Worker-Lane SCHED-DENSITY)
+**Slice:** SHORTS_SCHEDULE_DENSITY_AND_WINDOW_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (Pre-Action), WSP 84 (Code Reuse), WSP 97 (Truth Signaling)
+
+### Problem
+
+The scheduler over-schedules: the registry defaulted `max_per_day: 8` for all 4 channels
+and the live persisted `memory/youtube_channels.json` carries `max_per_day: 8` with an 8-slot
+24h grid. The only per-day enforcement was `if count < max_per_day:` in the allocator, which
+honored whatever value the config passed (8), so the running system schedules up to 8 shorts/day.
+
+### Changes (minimal)
+
+1. **Authoritative clamp (load-bearing).** Added module constant `HARD_CAP_PER_DAY = 3` in
+   `src/schedule_tracker.py` and clamped at the allocator:
+   `effective_cap = min(max_per_day, HARD_CAP_PER_DAY)`. This holds even when a caller passes a
+   stale `max_per_day=8` (e.g. from the untracked runtime JSON), so it fixes the running system
+   regardless of config drift.
+2. **Registry/config defaults 8 -> 3.** `youtube_channel_registry.py` (4 channel entries +
+   `_normalize_channel` fallback) and `channel_config.py` `_build_channel_config` fallback now
+   default `max_per_day` to 3.
+3. **Persisted `memory/youtube_channels.json` NOT committed.** It is gitignored
+   (`.gitignore:143:memory/`) and absent from a fresh checkout; it still carries `max_per_day: 8`
+   in the runtime repo. Per scope, it is NOT committed -- the HARD_CAP_PER_DAY clamp covers the
+   stale value at allocation time.
+4. **Stale report fixed.** `get_summary` / `has_sufficient_coverage` / `log_schedule_report`
+   previously hard-coded the "full day" threshold to 3 (and printed a literal "Full days (3/3)").
+   These now use `HARD_CAP_PER_DAY`, so the report stops lying if the cap changes.
+
+### Window (1-6am): DEFERRED -- timezone unverified
+
+The 8-slot `_DEFAULT_TIME_SLOTS` grid was intentionally LEFT UNCHANGED. The scheduler types the
+bare time string into YouTube Studio and deliberately never sets the timezone selector
+(`src/dom_automation.py` set_schedule_time ~3196; timezone-select guard ~3226-3232). Studio
+interprets that time in each account's own configured timezone, which the code does not read or
+verify. The registry timezones disagree (Move2Japan/UnDaoDu = Asia/Tokyo; FoundUps/antifaFM =
+America/New_York), so a fixed "1:30 AM" would publish at different wall-clocks per channel and 2 of
+4 would be wrong for a JST-based 012. Wrong tz = videos publish at the wrong outward-facing time, so
+per the slice's safety rule the grid change is deferred until the Studio timezone is verified. The
+clamp still concentrates publishing into the first 3 grid slots (12AM/3AM/6AM) per day.
+
+### Tests (unit, mock-only, non-vacuous)
+
+`tests/test_scheduler.py` -> new `TestScheduleDensityCap`:
+- `test_allocator_caps_at_three_per_day`: 4 videos at max_per_day=3 roll the 4th to the next day
+  (counts == [3, 1]).
+- `test_clamp_authority_overrides_caller_max_per_day_eight`: 9 videos with max_per_day=8 yield
+  exactly 3 days of 3 (NON-VACUITY: reverting the clamp to `effective_cap = max_per_day` makes this
+  fail with "got 8 (>3)" -- verified by temporary revert, then restored).
+- `test_report_threshold_matches_effective_cap`: full/partial day counts track HARD_CAP_PER_DAY.
+- `test_hard_cap_constant_is_three`.
+Also corrected two pre-existing flaky exact-time assertions (jitter randomizes the slot) to use a
+bounded `_within_jitter` helper, and updated `test_get_channel_config_move2japan` to assert
+`max_per_day == 3` (slot count not asserted since the grid is unchanged this slice).
+
+Scoped pytest: 34 passed, 2 skipped (browser integration, correctly skipped).
+
 ## 2026-06-16 - Pin video-index context consumption on the scheduling path (Phase 1)
 
 **By:** 0102 (Worker-Lane SSVCC-AUTHOR)

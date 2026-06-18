@@ -19,7 +19,23 @@ from modules.platform_integration.youtube_shorts_scheduler.src.channel_config im
 )
 from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import (
     ScheduleTracker,
+    HARD_CAP_PER_DAY,
+    MAX_JITTER_STEPS,
 )
+
+
+def _within_jitter(actual_time: str, base_time: str, max_steps: int = MAX_JITTER_STEPS) -> bool:
+    """
+    Return True if actual_time is within +/- (max_steps * 15 min) of base_time.
+
+    The allocator applies randomized 15-min-step jitter to each base slot, so
+    exact-time assertions are flaky. This verifies the slot is the expected base
+    slot (i.e. correct ordering) while tolerating the bounded jitter window.
+    """
+    parsed_actual = datetime.strptime(actual_time.strip(), "%I:%M %p")
+    parsed_base = datetime.strptime(base_time.strip(), "%I:%M %p")
+    delta_min = abs((parsed_actual - parsed_base).total_seconds()) / 60.0
+    return delta_min <= max_steps * 15
 from modules.platform_integration.youtube_shorts_scheduler.src.content_generator import (
     generate_clickbait_title,
     extract_title_hint_from_index,
@@ -52,7 +68,11 @@ class TestChannelConfig:
         assert config is not None
         assert config["id"] == "UC-LSSlOZwpGIRIYihaz8zCw"
         assert config["chrome_port"] == 9222
-        assert len(config["time_slots"]) == 3
+        # Density cap is 3/day (was 8). NOTE: the time-slot grid itself is
+        # intentionally NOT reduced in this slice (1-6am window deferred:
+        # Studio timezone is unverified) so slot count is not asserted here.
+        # The HARD_CAP_PER_DAY clamp guarantees <= 3/day regardless of grid size.
+        assert config["max_per_day"] == 3
 
     def test_get_channel_config_undaodu(self):
         """Test UnDaoDu channel config."""
@@ -134,7 +154,7 @@ class TestScheduleTracker:
             assert tracker2.get_count("Jan 6, 2026") == 1
 
     def test_get_next_available_slot_empty(self):
-        """Test finding slot with empty schedule."""
+        """Test finding slot with empty schedule (base slot 0, allowing jitter)."""
         with tempfile.TemporaryDirectory() as tmpdir:
             tracker = ScheduleTracker("test_channel", Path(tmpdir))
             time_slots = ["5:00 AM", "11:00 AM", "5:00 PM"]
@@ -142,10 +162,12 @@ class TestScheduleTracker:
             slot = tracker.get_next_available_slot(time_slots, max_per_day=3)
             assert slot is not None
             date_str, time_str = slot
-            assert time_str == "5:00 AM"  # First slot on empty day
+            # First slot on empty day = base "5:00 AM" +/- jitter (max +/-30 min).
+            # Jitter is randomized, so assert the result is within the slot-0 window.
+            assert _within_jitter(time_str, "5:00 AM")
 
     def test_get_next_available_slot_partial(self):
-        """Test finding slot with partially filled day."""
+        """Test finding slot with partially filled day (rolls to base slot 1)."""
         with tempfile.TemporaryDirectory() as tmpdir:
             tracker = ScheduleTracker("test_channel", Path(tmpdir))
             time_slots = ["5:00 AM", "11:00 AM", "5:00 PM"]
@@ -158,8 +180,8 @@ class TestScheduleTracker:
             slot = tracker.get_next_available_slot(time_slots, max_per_day=3)
             assert slot is not None
             returned_date, time_str = slot
-            # Should get second slot (11:00 AM) on same day
-            assert time_str == "11:00 AM"
+            # Should get second slot (base "11:00 AM") on same day, +/- jitter.
+            assert _within_jitter(time_str, "11:00 AM")
 
     def test_get_summary(self):
         """Test schedule summary."""
@@ -352,3 +374,99 @@ class TestIndexWeave:
         assert stub["video_id"] == "vid123"
         assert stub["indexer"] == "scheduler_stub"
         assert stub["metadata"]["summary"]
+
+
+def _allocate_n(tracker, time_slots, n, max_per_day):
+    """
+    Allocate n videos one at a time, recording each into the tracker.
+
+    Mirrors the scheduler loop: get_next_available_slot -> increment.
+    Returns the list of (date_str, time_str) slots actually allocated
+    (None entries mean the window was exhausted).
+    """
+    allocated = []
+    for i in range(n):
+        slot = tracker.get_next_available_slot(time_slots, max_per_day=max_per_day)
+        if slot is None:
+            allocated.append(None)
+            continue
+        date_str, time_str = slot
+        tracker.increment(date_str, f"vid{i}")
+        allocated.append((date_str, time_str))
+    return allocated
+
+
+class TestScheduleDensityCap:
+    """
+    Density-cap tests for SHORTS_SCHEDULE_DENSITY_AND_WINDOW_PHASE1.
+
+    These prove the authoritative HARD_CAP_PER_DAY clamp at the allocator:
+    no single day may receive more than HARD_CAP_PER_DAY (=3) videos, even
+    when a caller passes a larger max_per_day. NON-VACUOUS: removing the
+    clamp (effective_cap = min(max_per_day, HARD_CAP_PER_DAY)) makes the
+    8/day case below exceed 3 and the assertions fail.
+    """
+
+    def test_hard_cap_constant_is_three(self):
+        assert HARD_CAP_PER_DAY == 3
+
+    def test_allocator_caps_at_three_per_day(self):
+        """Allocating 4 videos with max_per_day=3 must roll the 4th to the next day."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tracker = ScheduleTracker("test_channel", Path(tmpdir))
+            time_slots = ["1:30 AM", "3:30 AM", "5:30 AM"]
+
+            allocated = _allocate_n(tracker, time_slots, n=4, max_per_day=3)
+            assert all(s is not None for s in allocated)
+
+            # No day exceeds 3
+            for date_str, count in tracker.schedule.items():
+                assert count <= 3, f"{date_str} got {count} (>3)"
+
+            # The 4th video rolled to a second, distinct day
+            distinct_days = {s[0] for s in allocated}
+            assert len(distinct_days) == 2
+            # First day holds exactly 3, second day holds exactly 1
+            counts = sorted(tracker.schedule.values(), reverse=True)
+            assert counts == [3, 1]
+
+    def test_clamp_authority_overrides_caller_max_per_day_eight(self):
+        """
+        Even when called with max_per_day=8 (stale registry value), the
+        authoritative clamp must keep every day at <= HARD_CAP_PER_DAY (3).
+        This is the load-bearing belt-and-suspenders guarantee.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tracker = ScheduleTracker("test_channel", Path(tmpdir))
+            time_slots = ["1:30 AM", "3:30 AM", "5:30 AM"]
+
+            # Try to cram 9 videos with the OLD cap of 8 per day.
+            allocated = _allocate_n(tracker, time_slots, n=9, max_per_day=8)
+            assert all(s is not None for s in allocated)
+
+            # Despite max_per_day=8, no day exceeds the hard cap of 3.
+            for date_str, count in tracker.schedule.items():
+                assert count <= HARD_CAP_PER_DAY, f"{date_str} got {count} (>{HARD_CAP_PER_DAY})"
+
+            # 9 videos at 3/day => exactly 3 distinct days, each full.
+            assert len(tracker.schedule) == 3
+            assert sorted(tracker.schedule.values()) == [3, 3, 3]
+
+    def test_report_threshold_matches_effective_cap(self):
+        """
+        get_summary's full/partial day counts must use HARD_CAP_PER_DAY,
+        not a lying hard-coded value. A day with exactly the cap is 'full';
+        one below it is 'partial'.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tracker = ScheduleTracker("test_channel", Path(tmpdir))
+            # One full day (== cap) and one partial day (cap - 1).
+            for i in range(HARD_CAP_PER_DAY):
+                tracker.increment("Jan 5, 2026", f"full{i}")
+            for i in range(HARD_CAP_PER_DAY - 1):
+                tracker.increment("Jan 6, 2026", f"part{i}")
+
+            summary = tracker.get_summary()
+            assert summary["full_days"] == 1
+            assert summary["partial_days"] == 1
+            assert summary["total_scheduled"] == (2 * HARD_CAP_PER_DAY - 1)

@@ -16,6 +16,12 @@ logger = logging.getLogger(__name__)
 # Default storage location
 TRACKER_DIR = Path(__file__).parent.parent / "memory"
 
+# Authoritative per-channel daily cap on scheduled shorts.
+# Belt-and-suspenders: the allocator clamps to this value even if a caller
+# passes a larger max_per_day (e.g. a stale registry/config value of 8).
+# Lowering this is the single load-bearing knob to stop over-scheduling.
+HARD_CAP_PER_DAY = 3
+
 # Time jitter: max number of 15-minute steps to shift from base time
 # e.g. MAX_JITTER_STEPS=2 means ±30 min (±2 steps x 15 min)
 MAX_JITTER_STEPS = 2
@@ -204,6 +210,10 @@ class ScheduleTracker:
         if end_date is None:
             end_date = start_date + timedelta(days=60)
 
+        # Authoritative clamp: never schedule more than HARD_CAP_PER_DAY per day,
+        # even if a caller passes a larger max_per_day from a stale registry/config.
+        effective_cap = min(max_per_day, HARD_CAP_PER_DAY)
+
         current = start_date
 
         while current <= end_date:
@@ -213,11 +223,11 @@ class ScheduleTracker:
 
             count = self.get_count(date_str)
 
-            if count < max_per_day:
+            if count < effective_cap:
                 # Determine base time slot, then add jitter for human-like variance
                 base_time = time_slots[count] if count < len(time_slots) else time_slots[-1]
                 time_slot = _add_time_jitter(base_time)
-                slot_label = f"slot {count + 1}/{max_per_day}"
+                slot_label = f"slot {count + 1}/{effective_cap}"
                 logger.info(
                     f"[TRACKER] Allocated: {date_str} at {time_slot} ({slot_label}, base={base_time})"
                 )
@@ -238,8 +248,8 @@ class ScheduleTracker:
         """
         total = sum(self.schedule.values())
         dates_with_videos = {d: c for d, c in self.schedule.items() if c > 0}
-        full_days = sum(1 for c in dates_with_videos.values() if c >= 3)
-        partial_days = sum(1 for c in dates_with_videos.values() if 0 < c < 3)
+        full_days = sum(1 for c in dates_with_videos.values() if c >= HARD_CAP_PER_DAY)
+        partial_days = sum(1 for c in dates_with_videos.values() if 0 < c < HARD_CAP_PER_DAY)
 
         # Date range
         sorted_dates = sorted(dates_with_videos.keys(), key=lambda d: self._parse_date(d))
@@ -288,7 +298,7 @@ class ScheduleTracker:
         for date_str, count in self.schedule.items():
             try:
                 parsed_date = self._parse_date(date_str).date()
-                if parsed_date > today and count >= 3:
+                if parsed_date > today and count >= HARD_CAP_PER_DAY:
                     future_full_days += 1
             except Exception:
                 continue
@@ -312,7 +322,7 @@ class ScheduleTracker:
 
         logger.info(f"[TRACKER] ╔══ SCHEDULE REPORT: {self.channel_id[:12]}... ══╗")
         logger.info(f"[TRACKER] ║ Total scheduled: {total:>4} videos")
-        logger.info(f"[TRACKER] ║ Full days (3/3): {full:>4} days")
+        logger.info(f"[TRACKER] ║ Full days ({HARD_CAP_PER_DAY}/{HARD_CAP_PER_DAY}): {full:>4} days")
         logger.info(f"[TRACKER] ║ Partial days:    {partial:>4} days")
         logger.info(f"[TRACKER] ║ Date range:      {first} → {last}")
         logger.info(f"[TRACKER] ╚{'═' * 44}╝")
