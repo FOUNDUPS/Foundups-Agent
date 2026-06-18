@@ -1,5 +1,64 @@
 # Agent Module TestModLog
 
+## 2026-06-19 - Kanban Contract card-redaction + command-argv tests (FOUNDUP_KANBAN_CONTRACT_CARD_REDACTION_AND_COMMAND_ARGV_PHASE1)
+
+**Commands** (PYTHONIOENCODING=utf-8):
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_kanban_plugin_contract.py -q
+AI_OVERSEER_HEAVY_TESTS=1 python -m pytest modules/foundups/agent -q   # heavy
+python -m pytest modules/foundups/agent -q                            # CI mode
+```
+
+**Result**: PASS
+
+**Summary**:
+- `test_kanban_plugin_contract.py`: 251 passed (was 135; +116 net new). Full agent suite:
+  948 passed in BOTH heavy and CI mode (was 832; +116 from the new contract tests). No
+  skip/xfail, no regression.
+
+### SENTINEL re-audit addendum (empty argv-list strengthening)
+
+`_command_value_is_argv_or_null` accepted an EMPTY argv list `[]` (`all([])` is True),
+contradicting its "NON-EMPTY argv LIST" docstring. The code was aligned to the contract so `[]`
+is now REJECTED (strictly a strengthening; 0 newly-accepted, parity preserved). New tests:
+- `test_command_empty_argv_list_rejected` (parametrized over command/cmd/argv/shell/exec/run_cmd/script):
+  `{"<cmd_key>": []}` is REJECTED.
+- `test_command_empty_argv_rejection_no_raw_echo`: the empty-list rejection names the rule class only.
+- `test_command_null_and_nonempty_argv_still_accepted`: null/absent command and a NON-EMPTY all-safe
+  argv list are STILL accepted.
+- Added 7 empty-argv-list cases (one per command key) to `_NEW_REJECTED_BARE_COMMANDS` so the
+  no-weakening battery + `test_no_weakening_zero_newly_accepted_summary` cover the strengthening
+  (still 0 origin-rejected payloads newly accepted).
+
+**New coverage (this slice)**:
+1. **Finding A -- card `to_dict()` redaction**: a raw secret in a scalar free-text field (branch)
+   and in a nested list field (expected_evidence / required_gates) does NOT appear in `to_dict()`
+   ([REDACTED] present); redaction is deterministic and does NOT mutate the instance.
+2. **CARD_ID_FROM_REDACTED_CANONICAL_BODY**: a sha256 digest over `to_dict()` is stable across two
+   cards differing ONLY in a secret's raw bytes (both collapse to the same redacted canonical body).
+3. **"adapter would now serialize safely"**: the exact property the parked publish adapter relies on
+   -- a card carrying a secret yields a `to_dict()` with no raw secret.
+4. **Finding B -- command argv-or-null**: bare metachar-free command strings (command/cmd/argv/
+   shell/exec/run_cmd/script, incl. nested) REJECTED; argv LIST accepted ONLY if every element is a
+   safe string (shell-metachar / authority / absolute / traversal / non-string element -> rejected);
+   null/None command accepted; dict command rejected. No raw command echoed in any message.
+5. **No-weakening behavioral parity battery** (REPLACES the prior AST-skeleton baseline test, which
+   no longer applies to a logic change): a self-contained, checked-in corpus of origin-rejected
+   inputs (authority markers + ~13 normalized evasions + source_authority promotion + verified=true
+   + ~10 authority-by-value + path-hygiene + shell-metachar command cases) re-asserted REJECTED by
+   HEAD; the NEW bare/unsafe command inputs asserted REJECTED; clean valid inputs asserted ACCEPTED;
+   a summary guard asserts ZERO origin-rejected payloads are newly accepted. NO runtime git-show in
+   the committed tests (the #830 shallow-CI lesson).
+
+**Updated (outcome preserved, OLD pinned text refreshed)**:
+- `test_scanner_shell_command_no_raw_echo`: pinned message updated to the new argv-or-null phrasing;
+  added `test_scanner_bare_metachar_free_command_no_raw_echo`.
+- `test_safe_message_locality_preserved`: command family phrase updated to the new message.
+- REMOVED `test_authority_logic_skeleton_matches_origin_baseline` +
+  `test_skeleton_blanking_is_message_insensitive_self_check` (AST-skeleton-identical does not apply
+  to a logic change); replaced by the behavioral battery above.
+
 ## 2026-06-18 - Kanban Contract no-raw-echo + authority-parity tests (FOUNDUP_KANBAN_CONTRACT_ERROR_NO_RAW_ECHO_PHASE1)
 
 **Commands**:

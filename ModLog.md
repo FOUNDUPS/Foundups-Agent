@@ -1,5 +1,53 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-19] Kanban Contract Card Redaction + Command argv-or-null Phase 1 (AUTHOR, closes 2 HIGH adapter findings at the contract source)
+
+**Change Type**: LOGIC HARDENING of the #807 authority contract -- 1 src file
+(`modules/foundups/agent/src/kanban_plugin_contract.py`) + its tests + ModLogs. The parked Kanban
+publish adapter (slice KANBAN_EXTERNAL_ADAPTER_PUBLISH_PILOT_PHASE1, NOT part of this slice) surfaced
+two latent gaps; decision A = harden the contract at its SOURCE so the adapter and any consumer
+inherit safety.
+**By**: 0102 (AUTHOR) | Commander: 012 | Gate: independent SENTINEL (do NOT self-merge)
+**WSP References**: WSP 00, 22, 50, 64, 84, 87, 97
+**Slice**: FOUNDUP_KANBAN_CONTRACT_CARD_REDACTION_AND_COMMAND_ARGV_PHASE1
+**Base**: `9e6d6d063` (origin/main; contains #807 + the landed #838 no-raw-echo)
+
+**Finding A (redaction)**: origin/main `KanbanCardSpec.to_dict()` returned `asdict(self)` with NO
+redaction (only `WreEvidencePacket` redacted), so a raw secret in any card free-text field
+serialized verbatim. Fix: a pure deep redactor `_redact_deep()` recurses list/tuple/dict and applies
+`redact_sensitive` to every string leaf; `to_dict()` now returns the REDACTED canonical body
+(redaction AT serialization -- the dataclass instance is NOT mutated; the redacted dict is the body
+any consumer digest is computed over, so a digest is over redacted text).
+
+**Finding B (command argv-or-null)**: origin/main's command-key handling rejected only shell
+METACHARS, so a metachar-free `{"command":"rm -rf /"}` passed. Fix: command-key value is accepted
+ONLY when None (null) OR an argv LIST of safe strings (each element re-checked with the existing
+`_has_shell` + authority + path/traversal guards). A bare string (even metachar-free), a dict, or a
+list with any unsafe/non-string element is rejected. Message names the rule class only (the #838
+no-raw-echo invariant preserved). The shared scanner change also covers worker-task/evidence shapes.
+SENTINEL re-audit alignment: `_command_value_is_argv_or_null` accepted an EMPTY argv list `[]`
+(`all([])` is True), contradicting its "NON-EMPTY argv LIST" docstring. The code was aligned to the
+contract (`len(value) >= 1 and all(...)`) so `{"command": []}` is now REJECTED. This is strictly a
+STRENGTHENING (origin accepted `[]`, HEAD rejects it) -- the no-weakening invariant holds (0 newly
+accepted). Nothing else changed (redaction, bare-string rejection, authority detection untouched).
+
+**No weakening**: only ADDED rejections (bare/unsafe commands) + ADDED redaction. Proven by BATTERY
+(AST-skeleton-identical no longer applies to a logic change): the prior AST-skeleton baseline test
+was replaced by a self-contained behavioral no-weakening battery. AUDIT cross-check (origin/main
+module vs HEAD): 77/77 origin-rejected inputs still rejected (0 newly accepted), 14/14 new
+bare/unsafe command inputs rejected, 5/5 clean inputs accepted; redaction parity confirmed
+(origin leaks, HEAD redacts). WSP_97 table (CARD_TO_DICT_REDACTS_SECRETS,
+CARD_ID_FROM_REDACTED_CANONICAL_BODY, BARE_COMMAND_STRING_REJECTED, COMMAND_ARGV_OR_NULL_ONLY,
+AUTHORITY_DETECTION_NOT_WEAKENED, NO_RAW_ERROR_ECHO, ADAPTER_FINDINGS_CLOSED_AT_CONTRACT_SOURCE +
+ASCII_CLEAN, NO_SKIP_XFAIL, FILE_SCOPE_EXACT, NO_HERMES_OR_DB_OR_RUNTIME_WIRING) in the module ModLog.
+
+**Validation**: contract tests 251 passed (was 135; +16 empty-argv-list strengthening cases from the
+SENTINEL re-audit). Full agent suite 948 passed in BOTH heavy (`AI_OVERSEER_HEAVY_TESTS=1`) and CI
+mode -- no skip/xfail, no regression. Both edited files ASCII-clean (0 non-ASCII).
+
+**Follow-up**: the parked KANBAN_EXTERNAL_ADAPTER_PUBLISH_PILOT_PHASE1 will be rebased onto this once
+it lands (it relies on the now-guaranteed redacted `to_dict()` + argv-or-null command contract).
+
 ## [2026-06-18] Kanban Contract #807 Authority-Scanner No-Raw-Echo Phase 1 (AUTHOR, completes the #830 deferral)
 
 **Change Type**: MESSAGE-ONLY HARDENING -- 1 src file (`modules/foundups/agent/src/kanban_plugin_contract.py`)

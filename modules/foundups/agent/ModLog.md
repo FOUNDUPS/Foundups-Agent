@@ -1,5 +1,92 @@
 # Agent Module ModLog
 
+## 2026-06-19 - Kanban Contract card redaction + command argv-or-null (FOUNDUP_KANBAN_CONTRACT_CARD_REDACTION_AND_COMMAND_ARGV_PHASE1)
+
+**Author**: 0102 (AUTHOR worker) | Commander: 012 | Gate: independent SENTINEL (do NOT self-merge)
+**WSP References**: WSP 22, WSP 50, WSP 64, WSP 84, WSP 97
+**Base**: `9e6d6d063` (origin/main; contains #807 + the landed #838 no-raw-echo)
+**Slice**: FOUNDUP_KANBAN_CONTRACT_CARD_REDACTION_AND_COMMAND_ARGV_PHASE1
+
+### Why (closes 2 HIGH findings the parked Kanban publish adapter surfaced)
+
+The parked publish adapter (slice KANBAN_EXTERNAL_ADAPTER_PUBLISH_PILOT_PHASE1, NOT part of this
+slice) exposed two latent gaps in the #807 authority contract. Decision A: harden the contract at
+its SOURCE so the adapter and any consumer inherit safety.
+- **Finding A**: `KanbanCardSpec.to_dict()` returned `asdict(self)` with NO redaction -- only
+  `WreEvidencePacket` redacted (via `__post_init__`). A raw secret in a card free-text field
+  serialized VERBATIM. (Proven: origin/main `to_dict()` leaks `sk-...`; HEAD does not.)
+- **Finding B**: `validate_card_spec`'s command-key handling only rejected shell METACHARS. A
+  metachar-free destructive command like `{"command": "rm -rf /"}` PASSED, despite the contract's
+  stated guarantee being "argv-or-null only".
+
+### Changed (LOGIC change -- src: `kanban_plugin_contract.py`)
+
+1. **Finding A -- `KanbanCardSpec.to_dict()` now returns a REDACTED canonical body**
+   (`~line 326`): added a pure deep redactor `_redact_deep()` (`~line 116`) that recurses
+   list/tuple/dict and applies the existing `redact_sensitive` to EVERY string leaf. `to_dict()`
+   returns `_redact_deep(asdict(self))`. Approach = redact AT SERIALIZATION (the dataclass instance
+   is NOT mutated; chosen because the card has no `__post_init__` and the redacted dict is the
+   canonical body any consumer digest is computed over -- so CARD_ID_FROM_REDACTED_CANONICAL_BODY
+   holds without mutating state). Documented in the `to_dict()` docstring.
+2. **Finding B -- `validate_card_spec` command-key is now argv-or-null ONLY** (in the shared
+   `_scan_authority`, `~line 244`): added `_command_value_is_argv_or_null()` + `_argv_element_unsafe()`
+   (`~line 252`). A command-key value is ACCEPTED only when None (null) OR an argv LIST whose every
+   element is a safe string (reusing `_has_shell` + `_value_carries_authority` + `_check_path` per
+   element). A bare STRING (even metachar-free), a dict, or a list with any unsafe/non-string element
+   is REJECTED. Message names the rule class only -- the #838 no-raw-echo invariant is preserved
+   (the raw command value is NEVER echoed).
+3. **No weakening**: every input origin/main rejected is still rejected -- only ADDED rejections
+   (bare/unsafe command strings) + ADDED redaction. The shared scanner change also propagates the
+   argv-or-null rule to `validate_worker_task_spec` / `validate_evidence_packet` (defense-in-depth).
+4. **SENTINEL re-audit alignment (code/docstring agreement)**: `_command_value_is_argv_or_null`
+   (`~line 290`) docstring stated "null OR a NON-EMPTY argv LIST", but the body
+   `all(not _argv_element_unsafe(item) for item in value)` accepted an EMPTY argv list `[]`
+   (`all([])` is True), so `{"command": []}` was ACCEPTED -- contradicting the docstring. Made the
+   CODE match the stated contract: a command-key is accepted only when null/absent OR a NON-EMPTY
+   argv list of all-safe strings; an empty argv list is degenerate/malformed and is REJECTED
+   (`len(value) >= 1 and all(...)`). This is strictly a STRENGTHENING (HEAD now rejects `command: []`
+   which origin accepted) -- the no-weakening invariant is preserved (0 newly-accepted). The SAFE
+   error message is unchanged (no raw echo). Nothing else changed (redaction, bare-string rejection,
+   authority detection untouched).
+
+### Parity proof (this is a LOGIC change -> AST-skeleton-identical no longer applies)
+
+Proven by BATTERY (not skeleton hash). The prior AST-skeleton baseline test was REPLACED by a
+self-contained behavioral no-weakening battery (origin-rejected corpus embedded in the committed
+tests; NO runtime git-show). AUDIT-time cross-check loaded origin/main's module vs HEAD over the
+full corpus: **77/77 origin-rejected inputs still rejected, 0 newly accepted** (zero weakening);
+**14/14 new bare/unsafe command inputs rejected by HEAD** (13 are clean ACCEPTED(origin)->
+REJECTED(HEAD) flips, 1 was already rejected by the authority-by-value scan); **5/5 clean valid
+inputs still accepted**. Redaction parity: origin `to_dict()` leaks the secret, HEAD redacts +
+digest stable on the redacted body + instance not mutated.
+
+### WSP_97 Truth Boundary Checklist
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|---|---|---|
+| 1 | CARD_TO_DICT_REDACTS_SECRETS | PASS | `to_dict()` returns `_redact_deep(asdict(self))`; tests assert no raw secret in scalar + nested list fields |
+| 2 | CARD_ID_FROM_REDACTED_CANONICAL_BODY | PASS | redacted dict is the canonical body; digest over `to_dict()` stable across two cards differing only in raw secret bytes |
+| 3 | BARE_COMMAND_STRING_REJECTED | PASS | `{"command":"rm -rf /"}` (+ cmd/exec/shell/script/argv/run_cmd, metachar-free, nested) rejected |
+| 4 | COMMAND_ARGV_OR_NULL_ONLY | PASS | null accepted; NON-EMPTY argv list accepted iff every element is a safe string; string/dict/unsafe-element/EMPTY-list rejected (code now matches docstring) |
+| 5 | AUTHORITY_DETECTION_NOT_WEAKENED | PASS | 77/77 origin-rejected still rejected; 0 newly accepted (battery + AUDIT cross-check) |
+| 6 | NO_RAW_ERROR_ECHO | PASS | command rejection names the rule class only; no raw command/secret in any message |
+| 7 | ADAPTER_FINDINGS_CLOSED_AT_CONTRACT_SOURCE | PASS | Findings A+B fixed in the contract; adapter inherits safety |
+| 8 | ASCII_CLEAN | PASS | 0 non-ASCII bytes in both edited files (fullwidth fixture via `\uXXXX`) |
+| 9 | NO_SKIP_XFAIL | PASS | no skip/xfail added |
+| 10 | FILE_SCOPE_EXACT | PASS | only `kanban_plugin_contract.py` + its tests + ModLogs changed |
+| 11 | NO_HERMES_OR_DB_OR_RUNTIME_WIRING | PASS | pure dataclasses/validators; no Hermes import, no Kanban DB, no runtime wiring |
+
+### Validation
+
+- `test_kanban_plugin_contract.py`: 251 passed (was 135; +116 net new, incl. +16 empty-argv-list
+  strengthening cases from the SENTINEL re-audit). Full agent suite: 948 passed in BOTH heavy
+  (`AI_OVERSEER_HEAVY_TESTS=1`) and CI mode -- no skip/xfail, no regression.
+
+### Follow-up
+
+The parked slice **KANBAN_EXTERNAL_ADAPTER_PUBLISH_PILOT_PHASE1** will be rebased onto this once it
+lands (it relies on the now-guaranteed redacted `to_dict()` + argv-or-null command contract).
+
 ## 2026-06-18 - Kanban Plugin Contract no-raw-echo for the #807 authority scanner (FOUNDUP_KANBAN_CONTRACT_ERROR_NO_RAW_ECHO_PHASE1)
 
 **Author**: 0102 (AUTHOR worker) | Commander: 012
