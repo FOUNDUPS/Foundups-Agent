@@ -1,5 +1,33 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-17] Hermes FusionAdapter Contract Phase 1 (Lane W6, AUTHOR + internal SENTINEL, contract-only)
+
+**Change Type**: CONTRACT-ONLY typed adapter + tests + manifest correction + dormant marker + docs. NO live
+OpenRouter, NO API key read, NO new dependency, NO runtime wiring, NO model/provider mutation. Opened DRAFT.
+**By**: 0102 (Worker-Lane W6) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP References**: WSP 11, WSP 50, WSP 84, WSP 87, WSP 97
+**Slice**: HERMES_FUSION_ADAPTER_CONTRACT_PHASE1
+**Predecessor**: #829 (OPENROUTER_FUSION_FOUNDUPS_INTEGRATION_AUDIT_PHASE1, landed)
+**Base**: `62998eaba` (origin/main at dispatch, re-pinned)
+
+- ADD `modules/communication/moltbot_bridge/src/fusion_adapter.py` -- typed FusionRequest / FusionAnalysis /
+  ModelContributionReceipt + MockFusionAdapter (deterministic mock/dry-run). Module never imports `os` (cannot
+  read keys); no network client. Live modes (alias/server_tool/local_fallback) declared but raise
+  RedactionGateBlocked; only mock/dry_run execute. Receipt forces advisory_not_canonical=True and
+  redaction_status=BLOCKED_PENDING_REDACTION_GATE; stores digests/refs, never raw prompt/context.
+- ADD `modules/communication/moltbot_bridge/tests/test_fusion_adapter.py` -- 20 tests incl a NON-VACUOUS AST
+  guard (negative control fails on forbidden import/getenv/subprocess/write), no-network proof (socket patched),
+  panel bounds 1-8, future-mode raises, receipt truth boundary, manifest honesty. 42 pass (20 new + 22 manifest).
+- EDIT `modules/communication/moltbot_bridge/config/openclaw_integration_manifest.json` -- OpenRouter status
+  `landed` -> `parked` (schema enum landed/planned/parked/removed; contract_pending / BLOCKED_PENDING_REDACTION_GATE
+  carried in `notes`). The false "landed" overclaim is corrected.
+- ADD `modules/infrastructure/openrouter_client/README.md` -- honest dormant marker (source reverted `6f952f6b9`;
+  only untracked `.pyc` linger, left alone per the no-touch-untracked rule).
+- EDIT `modules/communication/moltbot_bridge/INTERFACE.md` -- document the FusionAdapter public contract surface.
+- Boundaries: privacy stays BLOCKED_PENDING_REDACTION_GATE; no merge/CABR/payout/source-authority; no live call.
+  Follow-up (NOT built): the redaction gate + live `server_tool_mode`. Internal SENTINEL ran; DRAFT PR; STOP at
+  MERGE_READY for the external 0102 gate.
+
 ## [2026-06-17] FoundUp Launch-Request Error No-Raw-Echo Phase 1 (AUTHOR, public-intake validator error-message hygiene)
 
 **Change Type**: MESSAGE-ONLY HARDENING -- 1 src validator + 2 test suites. The #826 sweep hardened the
