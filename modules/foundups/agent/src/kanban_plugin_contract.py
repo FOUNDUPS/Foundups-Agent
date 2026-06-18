@@ -112,6 +112,22 @@ def redact_sensitive(text: Optional[str]) -> str:
     return out
 
 
+def _redact_deep(node: Any) -> Any:
+    """Deep-redact EVERY string in a value, recursing into list/tuple/dict.
+
+    Reuses ``redact_sensitive`` per string so a raw secret can NEVER appear in
+    serialized output, even when nested inside a list/dict free-text field. Pure;
+    returns a NEW structure (does not mutate the input). Non-string leaves pass
+    through unchanged (only string-shaped credential material is touched)."""
+    if isinstance(node, str):
+        return redact_sensitive(node)
+    if isinstance(node, dict):
+        return {k: _redact_deep(v) for k, v in node.items()}
+    if isinstance(node, (list, tuple)):
+        return [_redact_deep(item) for item in node]
+    return node
+
+
 # ---------------------------------------------------------------------------
 # Authority-evasion normalization (Addendum D) + markers (Addenda D/E)
 # ---------------------------------------------------------------------------
@@ -221,10 +237,14 @@ def _scan_authority(node: Any, trail: str, errors: List[str]) -> None:
                 if m in nkey:
                     errors.append(f"forbidden authority field present (class: {m})")
                     break
-            # smuggled shell command.
-            if any(c in nkey for c in _COMMAND_KEY_MARKERS) and isinstance(value, str):
-                if _has_shell(value):
-                    errors.append("shell-string command is forbidden (argv-or-null only)")
+            # command-key: argv-or-null ONLY. A command-key value is accepted only
+            # when it is null/None OR an argv LIST of safe strings. A bare STRING
+            # (even metachar-free, e.g. "rm -rf /"), a dict, or a list with any unsafe
+            # element (shell metachar / authority marker / path bypass) is rejected.
+            # No-raw-echo (#838): name the rule class only; NEVER echo the command value.
+            if any(c in nkey for c in _COMMAND_KEY_MARKERS):
+                if not _command_value_is_argv_or_null(value):
+                    errors.append("command must be argv-list-or-null (bare string / unsafe argv forbidden)")
             _scan_authority(value, f"{trail}{key}.", errors)
     elif isinstance(node, (list, tuple, set)):
         for idx, item in enumerate(node):
@@ -241,6 +261,36 @@ def _has_shell(value: str) -> bool:
     if any(ch in _SHELL_METACHARS for ch in value):
         return True
     return any(tok in value for tok in _SHELL_METASTRINGS)
+
+
+def _argv_element_unsafe(item: Any) -> bool:
+    """An argv element is SAFE only if it is a string with no shell metachar, no
+    authority marker, and no path/traversal bypass. Any other element type (or an
+    unsafe string) is UNSAFE. Reuses the existing _has_shell + authority/path checks
+    per element -- nothing here weakens those checks."""
+    if not isinstance(item, str):
+        return True
+    if _has_shell(item):
+        return True
+    if _value_carries_authority(item) is not None:
+        return True
+    path_errs: List[str] = []
+    _check_path("argv", item, path_errs)
+    return bool(path_errs)
+
+
+def _command_value_is_argv_or_null(value: Any) -> bool:
+    """The contract guarantee: a command-key value is ACCEPTED only if it is None
+    (null) OR a non-empty argv LIST whose every element is a safe string. A bare
+    STRING (even metachar-free, e.g. ``rm -rf /``), a dict, or a list with any unsafe
+    element is REJECTED -- 'argv-or-null only', NOT 'metachar-free string allowed'."""
+    if value is None:
+        return True
+    if isinstance(value, (list, tuple)):
+        # A NON-EMPTY argv list of all-safe elements. An empty argv list ([]) is
+        # degenerate/malformed and is REJECTED (all([]) would otherwise pass it).
+        return len(value) >= 1 and all(not _argv_element_unsafe(item) for item in value)
+    return False
 
 
 # ---------------------------------------------------------------------------
@@ -313,7 +363,14 @@ class KanbanCardSpec:
     expected_evidence: List[str] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
+        """REDACTED canonical body (WRE -> Kanban). Defense-in-depth: every string
+        field -- and every string nested in a list/dict field -- is passed through
+        ``redact_sensitive`` so a raw secret in any free-text field NEVER serializes
+        verbatim (parity with WreEvidencePacket's value redaction). Redaction is done
+        at SERIALIZATION (the dataclass instance is NOT mutated); the redacted dict is
+        the canonical body, so any digest a consumer computes over ``to_dict()`` is a
+        digest over redacted text (CARD_ID_FROM_REDACTED_CANONICAL_BODY)."""
+        return _redact_deep(asdict(self))
 
 
 @dataclass
