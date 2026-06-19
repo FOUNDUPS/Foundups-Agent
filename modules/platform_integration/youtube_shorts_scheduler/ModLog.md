@@ -1,5 +1,86 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-06-19 - Enable long-form video scheduling for all 4 channels (flag-gated, default OFF)
+
+**By:** 0102 (Worker-Lane LONGFORM-SCHED)
+**Slice:** LONG_FORM_SCHEDULING_ENABLE_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (Pre-Action), WSP 84 (Code Reuse: ContentPageScheduler/ScheduleTracker already complete; mirror #858 rotation), WSP 97 (truth signaling)
+
+### Why (the dormant long-form path)
+The long-form (Videos-tab) scheduling pass already exists inside
+`run_multi_channel_scheduler` (`scripts/launch.py`, the `YT_VIDEO_PROCESSING_ENABLED`
+block; ~`:1028-1085` on origin/main `36b0d2892`). It is DORMANT for two reasons:
+1. Master gate `YT_VIDEO_PROCESSING_ENABLED` (default `"false"`, `launch.py:1031`) is set
+   nowhere in daemon operation (the DAE PHASE 3, `auto_moderator_dae.py:1592-1640`, never
+   sets it) -> long-form never runs.
+2. Even with the flag on, the block requires the registry `content_types` to include
+   `"upload"` (`launch.py:1034-1035`). On origin/main only `move2japan` + `undaodu` had
+   `"upload"`; `foundups` + `antifafm` were `["short"]` -> 2/4 channels skipped.
+
+OUTWARD-FACING: scheduling a long-form upload publishes it PUBLIC at its slot, so the
+master gate stays DEFAULT OFF — 012 enables it deliberately.
+
+### What changed (minimal; registry defaults + launch.py long-form block only)
+- **Registry DEFAULTS** (`youtube_channel_registry.py:_default_channels`): added `"upload"`
+  to `foundups` (`:85`) and `antifafm` (`:102`) `content_types`, so all 4 channels are
+  long-form-eligible when the flag is enabled.
+  - **RUNTIME SHADOW (deployment note):** the persisted `memory/youtube_channels.json` is
+    gitignored and holds `foundups`/`antifafm` at `["short"]`. `_merge_defaults` is
+    NON-destructive (only adds missing channels, never updates existing), so the persisted
+    file SHADOWS this default at runtime. Ops must regenerate it (delete the file so
+    `load_registry` rebuilds from defaults) or edit those two `content_types` in place; the
+    file is NOT committed.
+- **Rotation budget for long-form** (mirror of the shorts #858 fix): new env knob
+  `YT_VIDEO_PER_CHANNEL_PER_PASS` (default `8` = 2 days x `max_per_day=4`), parsed once with
+  safe fallback on garbage/non-positive. The per-channel call now uses
+  `max_videos = min(max_per_channel, vps_per_pass)` so long-form ROTATES instead of draining
+  the first eligible channel; the daemon's next PHASE 3 continues draining round-robin.
+- **Master gate unchanged & DEFAULT OFF.** Long-form does NOT auto-enable.
+- **Breadcrumbs:** `[VIDEO][LONG-FORM] <ch>: pass START (budget=..,max_per_day=4,tz=..)` and
+  `[VIDEO][LONG-FORM] <ch>: scheduled N/budget this pass -> rotating`.
+
+### TZ / window finding (#847 follow-up — STOP-and-reported, NOT silently enabled)
+The shorts path publishes at US-ET peak everywhere: `scheduler.py` uses
+`get_peak_slots_et()` (`:90`) AND passes `channel_tz=self.channel_tz` into
+`tracker.get_next_available_slot(...)` (`:457-460`), which DST-aware-converts ET ->
+Studio-account tz (`schedule_tracker.py:250-252`, `peak_window.convert_et_to_channel_tz`).
+The long-form path does NOT: `ContentPageScheduler.schedule_all_visible` calls
+`tracker.get_next_available_slot(time_slots, max_per_day)` WITHOUT `channel_tz`
+(`content_page_scheduler.py:896`), and the bare `time_slots` are typed AS-IS in the
+account's own tz. Consequence:
+- `foundups`/`antifafm` (America/New_York): tz-coherent (ET account == ET slots), though the
+  default fallback slot list (`_DEFAULT_TIME_SLOTS_FALLBACK`, 8 slots incl. overnight) is not
+  the #847 peak set.
+- `move2japan`/`undaodu` (Asia/Tokyo): bare times are typed in Tokyo-local -> NOT the US-ET
+  peak wall-clock.
+Full tz-correctness requires forwarding `channel_tz` through `schedule_all_visible`
+(`content_page_scheduler.py`) — OUT OF SCOPE for this slice (touch only registry + launch.py
++ tests + ModLog). Mitigation in scope: the gate is DEFAULT OFF (nothing publishes until 012
+enables), and a `[VIDEO][TZ-WARN]` breadcrumb fires for any non-ET account at runtime.
+**Required follow-up (LONG_FORM_TZ_PEAK_WINDOW_PHASE1):** forward `channel_tz` + use
+`get_peak_slots_et()` for long-form before enabling the Tokyo channels.
+
+### Tests (mock-only, non-vacuous, NO browser)
+`tests/test_long_form_scheduling_enable.py` (10 tests, green in ~0.7s):
+- registry: `foundups` AND `antifafm` defaults include `"upload"` (MUST-FAIL on origin/main
+  `["short"]` — verified: restoring origin/main registry made both params FAIL with
+  `assert 'upload' in ['short']`); pre-existing upload channels not regressed;
+- flag DEFAULT OFF -> long-form `ContentPageScheduler` NEVER constructed, `schedule_all_visible`
+  NEVER called (explicit-`false` variant too);
+- flag ON (`YT_VIDEO_PROCESSING_ENABLED=1`) -> `schedule_all_visible` runs once per channel for
+  ALL FOUR keys incl. `foundups`/`antifafm`, navigating the Videos tab (`content_type="upload"`);
+- rotation budget: every channel called with `max_videos == 8` (not 9999); each schedules
+  exactly 8 of a 100-video backlog (mock honors `max_videos` -> non-vacuous); MUST-FAIL drain
+  probe (`first_max < backlog`); env override + invalid-env fallback.
+Existing `test_schedule_rotation_fairness.py` (#858) still green (no regression).
+
+### Scope
+Touched: `youtube_channel_registry.py` (defaults), `scripts/launch.py` (long-form block only),
+the new test, this ModLog. Did NOT touch: private path, indexing, the detector, shorts path
+internals, `content_page_scheduler.py`. The persisted gitignored registry json is NOT committed.
+
+---
+
 ## 2026-06-19 - Rotate ~3 days per channel per pass (fairness) instead of draining one fully
 
 **By:** 0102 (Worker-Lane SCHED-ROTATION)
