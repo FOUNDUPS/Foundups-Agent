@@ -1,5 +1,44 @@
 # ModLog - moltbot_bridge
 
+## 2026-06-19: Fusion ALIAS live path -- valve-gated OFF, redaction-gated, advisory-only (W6)
+
+**Author**: 0102 (Worker-Lane W6, AUTHOR + internal SENTINEL)
+**WSP**: 11 (Interface), 50 (Pre-Action), 84 (HTTP-client reuse), 97 (Truth Boundary)
+**Slice**: `HERMES_FUSION_ALIAS_MODE_PHASE2`
+**Predecessors**: #832 (contract, `7bd68e73a`), #842 (redaction gate, `972d082a0`)
+**Base**: `005dd3629` (origin/main; #842 landed)
+
+### Summary
+
+First live OpenRouter integration -- but it makes ZERO live calls on landing. The actual network call is
+behind a SOVEREIGN VALVE: env flag `FUSION_ALIAS_LIVE_ENABLED` (default OFF) AND a typed
+`LiveFusionAuthorization` (authority `012`). Raw text is redacted ON ENTRY via the landed redaction gate;
+only the REDACTED prompt/context is sent; only digests are retained. Phase 0 (HoloIndex MEDIUM/HIGH;
+gate exposes `redacted_prompt`/`.passed`; ai_gateway uses `requests`) confirmed: no gate API gap, no new dep.
+
+- ADD `src/fusion_alias_live.py` -- `run_alias_live(prompt, context=None, *, authorization, ...)`:
+  redaction-gate-first -> env valve -> typed 012 authorization -> key -> budget -> ONE bounded POST (no
+  stream, no retry) to `openrouter/fusion` via the reused `requests` client. `LiveFusionAuthorization`
+  (frozen, not bool-coercible); `AliasLiveResult` (status/reason/made_network_call/receipt). Response is
+  re-scanned with the same policy before a bounded summary can enter the advisory `ModelContributionReceipt`
+  (advisory_not_canonical forced True; `redaction_status=REDACTION_GATE_PASSED`; digests from redacted
+  output). Key read via `os.getenv`, never logged. Manual smoke in `__main__` (`run_manual_smoke`, requires
+  `--authorize-012`) -- NOT a pytest, never collected in CI.
+- ADD `tests/test_fusion_alias_live.py` -- 33 tests over 5 sentinel lanes (valve-bypass, raw-egress,
+  response-retention, manual-smoke, live-mode-scope): valve-off zero-network (socket-blocked), env-flag-alone
+  cannot enable, bad/typed-invalid auth refused, redacted-only send (raw prompt + raw context absent),
+  block-category-builds-no-request, key-never-in-output, response re-scan, fail-closed (timeout/http/malformed/
+  missing-key/budget), no-streaming, no-new-dependency, live-modes-still-blocked. Network MOCKED; synthetic keys.
+  138 pass (33 alias + 65 gate + 40 adapter regression). No skip/xfail.
+- EDIT `INTERFACE.md` + module/root ModLog -- alias surface, manual-smoke command, 28-row WSP_97 table
+  (declared==actual==28).
+- `fusion_adapter` UNCHANGED: ALIAS/SERVER_TOOL/LOCAL_FALLBACK still raise via MockFusionAdapter; the live
+  path is a separate, fully-gated entry. FusionRequest stays digest-only.
+- Boundaries: no live call by default, no new dependency, no key logged, no raw retained, advisory only, no
+  CABR/payout/merge authority. ASCII-clean (0 non-ASCII; no mojibake). DRAFT; STOP at MERGE_READY.
+  Next (NOT this slice): operationally flipping FUSION_ALIAS_LIVE_ENABLED is a separate sovereign action;
+  SERVER_TOOL mode is a later slice.
+
 ## 2026-06-19: Fusion Redaction Gate -- deterministic FAIL-CLOSED precondition (W6)
 
 **Author**: 0102 (Worker-Lane W6, AUTHOR + internal SENTINEL)
