@@ -1561,9 +1561,16 @@ class AutoModeratorDAE:
                     logger.debug(f"[{tag}-LOOP] [ACTIVITY-ROUTER] Signal failed: {e}")
 
                 # ============================================
-                # PHASE 2: VIDEO INDEXING (Chrome only, optional)
+                # PHASE 2: VIDEO INDEXING (per-browser, optional)
+                # 2026-06-18 (EDGE_LOOP_INDEXING_PHASE1): Run for WHICHEVER
+                # browser drives this loop, not Chrome-only. The Chrome-only
+                # gate left Edge channels (FoundUps/antifaFM, port 9223) never
+                # indexed by the loop. run_video_indexing_cycle already filters
+                # channels by the browser param (WSP 84 reuse), so passing
+                # browser_name="edge" indexes FoundUps/antifaFM, "chrome" still
+                # indexes Move2Japan/UnDaoDu. Same YT_VIDEO_INDEXING_ENABLED gate.
                 # ============================================
-                if browser_name == "chrome" and os.getenv("YT_VIDEO_INDEXING_ENABLED", "false").lower() in ("1", "true", "yes"):
+                if os.getenv("YT_VIDEO_INDEXING_ENABLED", "false").lower() in ("1", "true", "yes"):
                     try:
                         from modules.ai_intelligence.video_indexer.src.studio_ask_indexer import run_video_indexing_cycle
                         logger.info(f"[{tag}-LOOP] PHASE 2: VIDEO INDEXING starting...")
