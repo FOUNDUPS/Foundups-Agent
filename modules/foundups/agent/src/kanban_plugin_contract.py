@@ -118,11 +118,21 @@ def _redact_deep(node: Any) -> Any:
     Reuses ``redact_sensitive`` per string so a raw secret can NEVER appear in
     serialized output, even when nested inside a list/dict free-text field. Pure;
     returns a NEW structure (does not mutate the input). Non-string leaves pass
-    through unchanged (only string-shaped credential material is touched)."""
+    through unchanged (only string-shaped credential material is touched).
+
+    Dict KEYS are redacted with the SAME ``redact_sensitive`` redactor as values
+    (a secret used as a nested dict KEY -- not just a value -- must NEVER survive
+    into serialized output). Non-string keys pass through unchanged. The result is
+    a NEW dict (the input mapping is not mutated); downstream ``to_dict()`` is the
+    canonical body, and any consumer digest over it is a digest over redacted keys
+    AND values."""
     if isinstance(node, str):
         return redact_sensitive(node)
     if isinstance(node, dict):
-        return {k: _redact_deep(v) for k, v in node.items()}
+        return {
+            (redact_sensitive(k) if isinstance(k, str) else k): _redact_deep(v)
+            for k, v in node.items()
+        }
     if isinstance(node, (list, tuple)):
         return [_redact_deep(item) for item in node]
     return node
@@ -152,6 +162,17 @@ def _normalize(token: Any) -> str:
     return s.strip("_ \t")
 
 
+def _key_is_command(key: str) -> bool:
+    """A KEY names a command/exec field IFF, after ``_normalize``, one of its
+    underscore-split TOKENS is EXACTLY a single-token command marker (TOKEN/BOUNDARY
+    precise -- NOT substring). This catches command/cmd/argv/shell/exec/script,
+    run_command/run_cmd/runCmd (-> cmd), exec_now (-> exec), shell_command
+    (-> shell/command); and does NOT catch description/transcript/subscription/
+    executive/scripted/prescription (each a single NON-marker token)."""
+    tokens = [t for t in _normalize(key).split("_") if t]
+    return any(t in _COMMAND_KEY_MARKERS for t in tokens)
+
+
 def _is_printable_ascii(s: str) -> bool:
     return all(32 <= ord(c) < 127 for c in s)
 
@@ -176,8 +197,16 @@ _NON_MONOREPO_STAGES: frozenset = frozenset({
     "external_proto", "proto", "soft_proto", "mvp", "opo", "growth", "infra",
     "mega", "systemic", "dao", "smartdao",
 })
-# Keys that name a command/exec field; a shell-string value there is a smuggle.
-_COMMAND_KEY_MARKERS: tuple = ("command", "cmd", "argv", "shell", "exec", "run_cmd", "script")
+# Single-TOKEN command-key markers. A key names a command/exec field IFF, after
+# normalization, one of its underscore-split TOKENS is EXACTLY one of these markers
+# (TOKEN/BOUNDARY-precise, NOT substring). So run_cmd -> [run, cmd] -> cmd (caught),
+# runCmd -> normalize run_cmd -> [run, cmd] -> cmd, exec_now -> [exec, now] -> exec,
+# shell_command -> [shell, command] -> shell/command; while description (token
+# [description], NOT "script"), transcript, subscription, executive, scripted,
+# prescription, etc. each normalize to a single NON-marker token and are NOT
+# command-keys. ("run_cmd" itself is NOT a single token -- it is caught via its
+# "cmd" token -- so it is intentionally absent from this single-token marker set.)
+_COMMAND_KEY_MARKERS: frozenset = frozenset({"command", "cmd", "argv", "shell", "exec", "script"})
 _SHELL_METACHARS: frozenset = frozenset(";|&$`><(){}\n\r\t!#\\\"'")
 _SHELL_METASTRINGS: tuple = ("&&", "||", "$(", "${", ">>", "<<")
 
@@ -241,8 +270,12 @@ def _scan_authority(node: Any, trail: str, errors: List[str]) -> None:
             # when it is null/None OR an argv LIST of safe strings. A bare STRING
             # (even metachar-free, e.g. "rm -rf /"), a dict, or a list with any unsafe
             # element (shell metachar / authority marker / path bypass) is rejected.
+            # The KEY match is TOKEN/BOUNDARY-precise (a NORMALIZED token == a single-
+            # token marker), NOT substring -- so "description"/"transcript" are NOT
+            # command-keys (the #843 substring over-rejection regression is fixed) while
+            # the true command keys still reject bare strings.
             # No-raw-echo (#838): name the rule class only; NEVER echo the command value.
-            if any(c in nkey for c in _COMMAND_KEY_MARKERS):
+            if _key_is_command(nkey):
                 if not _command_value_is_argv_or_null(value):
                     errors.append("command must be argv-list-or-null (bare string / unsafe argv forbidden)")
             _scan_authority(value, f"{trail}{key}.", errors)

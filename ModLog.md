@@ -1,5 +1,35 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-20] Kanban Contract: dict-KEY redaction + token-precise command match (AUTHOR worker, gate=independent SENTINEL)
+
+**Change Type**: LOGIC change to the #807 Kanban authority contract closing 2 findings the parked
+publish adapter's RE-REVIEW exposed (after #843). Contract source + tests + ModLogs only. NO adapter
+code, NO Kanban DB, NO Hermes import, NO runtime wiring.
+**By**: 0102 (AUTHOR worker) | Commander: 012 | Gate: independent SENTINEL (do NOT self-merge)
+**WSP References**: WSP 22, WSP 50, WSP 64, WSP 84, WSP 97
+**Slice**: FOUNDUP_KANBAN_CONTRACT_REDACT_KEYS_AND_PRECISE_COMMAND_MATCH_PHASE1
+**Base**: `005dd3629` (origin/main; contains landed #807 + #838 + #843)
+
+- EDIT `modules/foundups/agent/src/kanban_plugin_contract.py` (2 logic edits):
+  - **Fix 1 (`_redact_deep` dict branch)**: now redacts string dict KEYS via the same
+    `redact_sensitive` used for values (`{(redact_sensitive(k) if str else k): _redact_deep(v) ...}`).
+    Non-string keys pass through; returns a NEW structure (no mutation). A secret used AS a nested
+    dict KEY no longer survives into `to_dict()`/serialization (origin leaked it; HEAD does not).
+  - **Fix 2 (command-key match)**: replaced SUBSTRING matching with `_key_is_command()` --
+    TOKEN/BOUNDARY-precise: `_normalize` the key, split on `_`, match IFF a token EXACTLY equals a
+    single-token marker `{command, cmd, argv, shell, exec, script}`. Fixes the #843 over-rejection
+    regression: `description`/`transcript`/`subscription`/... (substring-only) are no longer treated
+    as command-keys (flip REJECTED->ACCEPTED for ordinary string values). `run_cmd`/`runCmd`/
+    `exec_now`/`shell_command` still caught via their `cmd`/`exec`/`shell`/`command` tokens; a bare
+    string under a TRUE command key still REJECTED (`_command_value_is_argv_or_null` unchanged).
+- TWO-DIRECTIONAL parity proven (live origin-vs-HEAD cross-check + committed batteries): NO WEAKENING
+  of AUTHORITY detection (0 origin-rejected authority payloads newly accepted) AND NO FALSE-POSITIVE
+  on legit command-substring fields (new `_FALSE_POSITIVE_BATTERY`, the invariant #843 lacked).
+- EDIT `tests/test_kanban_plugin_contract.py`: 319 passed (was 251; +68). Full agent suite **1016
+  passed** in BOTH heavy (`AI_OVERSEER_HEAVY_TESTS=1`) and CI mode; no skip/xfail, no regression.
+- 14-row WSP_97 Truth Boundary Checklist in the module ModLog. ASCII-clean (0 non-ASCII; synthetic
+  secret via `chr()`). Parked KANBAN_EXTERNAL_ADAPTER_PUBLISH_PILOT_PHASE1 rebases onto this. Left
+  dirty for the orchestrator audit + independent SENTINEL (no commit/stage).
 ## [2026-06-19] Hermes Fusion ALIAS Mode Phase 2 (Lane W6, AUTHOR + internal SENTINEL, valve-gated live egress OFF)
 
 **Change Type**: First LIVE OpenRouter integration -- VALVE-GATED OFF by default. NO live call on landing,

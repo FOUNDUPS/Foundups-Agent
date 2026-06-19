@@ -1,5 +1,100 @@
 # Agent Module ModLog
 
+## 2026-06-20 - Kanban Contract dict-key redaction + token-precise command match (FOUNDUP_KANBAN_CONTRACT_REDACT_KEYS_AND_PRECISE_COMMAND_MATCH_PHASE1)
+
+**Author**: 0102 (AUTHOR worker) | Commander: 012 | Gate: independent SENTINEL (do NOT self-merge)
+**WSP References**: WSP 22, WSP 50, WSP 64, WSP 84, WSP 97
+**Base**: `005dd3629` (origin/main; contains the landed #807 + #838 + #843)
+**Slice**: FOUNDUP_KANBAN_CONTRACT_REDACT_KEYS_AND_PRECISE_COMMAND_MATCH_PHASE1
+
+### Why (closes 2 findings the parked publish adapter's RE-REVIEW exposed)
+
+After #843 landed, a re-review of the parked publish adapter (slice
+KANBAN_EXTERNAL_ADAPTER_PUBLISH_PILOT_PHASE1, NOT part of this slice) exposed two NEW gaps in the
+#807 authority contract. Decision A (again): fix the contract at its SOURCE.
+- **Finding 1 (secret-as-dict-KEY survives serialization)**: `_redact_deep` redacted string
+  VALUES/leaves but NOT dict KEYS (`{k: _redact_deep(v) for k, v in node.items()}`). A secret used
+  as a nested dict KEY therefore survived verbatim into `to_dict()` and the adapter outbox.
+  Confirmed live: origin `to_dict()` of a card carrying `{sk: "v", "f": sk}` in a list field leaks
+  the raw `sk-...` as a KEY; HEAD does not.
+- **Finding 2 (#843 command-key over-rejection regression)**: the command-key check used SUBSTRING
+  matching (`any(c in nkey for c in _COMMAND_KEY_MARKERS)`), so `description` (contains "script"),
+  `transcript`, `subscription`, etc. were treated as command-keys. Since #843 made command-keys
+  reject bare strings, an ordinary raw-dict field like `{"description": "ordinary text"}` was now
+  FALSELY REJECTED. The #843 no-weakening lane allowed this regression because a field going
+  accepted->rejected reads as a "strengthening". Confirmed live: origin REJECTS description/
+  transcript/subscription/executive_summary/scripted_notes/prescription/descriptor with an ordinary
+  string value; HEAD ACCEPTS them.
+
+### Changed (LOGIC change to the #807 authority contract -- src: `kanban_plugin_contract.py`)
+
+1. **Fix 1 -- `_redact_deep` now redacts string KEYS as well as string values** (dict branch,
+   `~line 124`): `{(redact_sensitive(k) if isinstance(k, str) else k): _redact_deep(v) for k, v in
+   node.items()}`. Non-string keys pass through unchanged. Uses the SAME `redact_sensitive` redactor
+   as values, returns a NEW structure (the input mapping is NOT mutated), and preserves the
+   deterministic/canonical behavior (downstream `to_dict()` is `json.dumps(sort_keys=True)`). A
+   secret-as-key can no longer survive into `to_dict()` or any serialization.
+2. **Fix 2 -- command-key matching is now TOKEN/BOUNDARY-precise, NOT substring** (`~line 245`):
+   replaced the substring test with `_key_is_command()` (`~line 165`), which runs the existing
+   `_normalize` on the key, splits the normalized key into tokens by `_`, and matches a command-key
+   IFF some TOKEN is EXACTLY a single-token command marker. `_COMMAND_KEY_MARKERS` is now the
+   single-token set `{command, cmd, argv, shell, exec, script}` (frozenset). `run_cmd`/`runCmd` are
+   caught via their `cmd` token; `exec_now` via `exec`; `shell_command` via `shell`/`command`. Legit
+   fields whose names merely CONTAIN a marker substring (description/transcript/subscription/
+   executive/scripted/prescription/...) each normalize to a single NON-marker token and are NOT
+   command-keys. `_command_value_is_argv_or_null` is UNCHANGED -- a bare string under a TRUE command
+   key remains REJECTED; a valid all-safe argv list under a true command key is still ACCEPTED.
+
+### Two-directional parity (this slice needs BOTH no-weakening AND no-over-rejection)
+
+AUTHORITY detection is UNCHANGED and not weakened (the command-KEY change is the only logic change
+on the key path; redaction only ADDS key coverage). The command-KEY change is an INTENDED narrowing:
+it removes false-positive command-keys (description/transcript/...) while keeping the true command
+keys. So `{description: "text"}` flips REJECTED(origin)->ACCEPTED(HEAD) -- the intended fix, NOT a
+weakening (it was never a real authority/command key). The no-weakening invariant applies to
+AUTHORITY markers, not to the command-substring over-matches being fixed.
+
+AUDIT-time live cross-check (origin/main module vs HEAD over the corpus):
+- **NO WEAKENING**: 0 origin-rejected AUTHORITY payloads newly accepted by HEAD.
+- **TRUE command keys (command/cmd/shell/script/exec/argv + run_command/runCmd/exec_now/
+  shell_command) still reject a bare string** (origin False -> HEAD False; #843 invariant carried).
+- **FALSE-POSITIVE FIX**: description/transcript/subscription/executive_summary/scripted_notes/
+  prescription/descriptor flip REJECTED(origin)->ACCEPTED(HEAD).
+- **KEY-REDACTION**: secret-as-key survives origin `to_dict()` (True), does NOT survive HEAD (False);
+  HEAD instance not mutated.
+
+### WSP_97 Truth Boundary Checklist
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|---|---|---|
+| 1 | DICT_KEYS_REDACTED | PASS | `_redact_deep` dict branch redacts string KEYS via `redact_sensitive`; non-string keys pass through |
+| 2 | NESTED_KEYS_REDACTED | PASS | secret-as-KEY nested several levels deep is redacted (test) |
+| 3 | TO_DICT_NO_SECRET_IN_KEYS_OR_VALUES | PASS | card `to_dict()` of `{sk:"v","f":sk}` in a list field carries no raw secret in keys OR values |
+| 4 | COMMAND_MATCH_TOKEN_PRECISE_NOT_SUBSTRING | PASS | `_key_is_command` matches on a normalized `_`-token == single-token marker; substring fields excluded |
+| 5 | DESCRIPTION_TRANSCRIPT_NOT_COMMAND_KEYS | PASS | description/transcript (+ false-positive battery) accepted with ordinary string values |
+| 6 | TRUE_COMMAND_KEYS_STILL_REJECT_BARE_STRING | PASS | command/cmd/shell/script/exec/argv/run_command/runCmd/exec_now/shell_command bare string rejected |
+| 7 | AUTHORITY_DETECTION_NOT_WEAKENED | PASS | full origin-rejected AUTHORITY corpus still rejected; 0 newly accepted (battery + live cross-check) |
+| 8 | FALSE_POSITIVE_BATTERY_PRESENT | PASS | corpus of legit command-substring field names with ordinary values, all ACCEPTED (NEW #843-lacked invariant) |
+| 9 | ADAPTER_FINDINGS_CLOSED_AT_CONTRACT_SOURCE | PASS | both findings fixed in the contract; adapter inherits safety |
+| 10 | ASCII_CLEAN | PASS | 0 non-ASCII bytes in both edited files (synthetic secret via `chr()`) |
+| 11 | NO_SKIP_XFAIL | PASS | no skip/xfail added |
+| 12 | FILE_SCOPE_EXACT | PASS | only `kanban_plugin_contract.py` + its tests + ModLogs changed |
+| 13 | NO_HERMES_OR_DB_OR_RUNTIME_WIRING | PASS | pure dataclasses/validators; no Hermes import, no Kanban DB, no runtime wiring |
+| 14 | ORIGINAL_OBJECT_NOT_MUTATED | PASS | `_redact_deep` builds a NEW dict; card instance keeps raw key/value after `to_dict()` |
+
+### Validation
+
+- `test_kanban_plugin_contract.py`: 319 passed (was 251; +68 net new for key-redaction + token-
+  precise-command + two-directional parity). Full agent suite: **1016 passed** in BOTH heavy
+  (`AI_OVERSEER_HEAVY_TESTS=1`) and CI mode -- no skip/xfail, no regression.
+
+### Follow-up
+
+The parked slice **KANBAN_EXTERNAL_ADAPTER_PUBLISH_PILOT_PHASE1** rebases onto this once it lands
+(it relies on the now-guaranteed key+value redaction and the token-precise command-key contract).
+
+---
+
 ## 2026-06-19 - Kanban Contract card redaction + command argv-or-null (FOUNDUP_KANBAN_CONTRACT_CARD_REDACTION_AND_COMMAND_ARGV_PHASE1)
 
 **Author**: 0102 (AUTHOR worker) | Commander: 012 | Gate: independent SENTINEL (do NOT self-merge)
