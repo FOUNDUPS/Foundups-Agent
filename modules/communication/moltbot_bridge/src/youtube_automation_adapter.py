@@ -11,6 +11,7 @@ Supported actions:
   scheduling        -> shorts scheduler CLI
   schedule_priority -> what_should_i_schedule SKILLz (read-only channel need ranking)
   reschedule_plan   -> reschedule_plan SKILLz (dry-run rebalance PLAN for over-cap days; apply is Phase 2)
+  reschedule_apply  -> reschedule_apply SKILLz (flag-gated apply of the plan; DEFAULT DRY-RUN, mutates nothing unless YT_RESCHEDULE_APPLY=1)
 
 Examples:
   youtube action comments channel=move2japan max_comments=3 like=true heart=true reply=false
@@ -18,6 +19,7 @@ Examples:
   youtube action scheduling channel=foundups max_videos=3 dry_run=true
   youtube action schedule_priority upcoming_days=7
   youtube action reschedule_plan horizon_days=90
+  youtube action reschedule_apply
 """
 
 from __future__ import annotations
@@ -37,6 +39,7 @@ SUPPORTED_ACTIONS = {
     "scheduling",
     "schedule_priority",
     "reschedule_plan",
+    "reschedule_apply",
 }
 
 ACTION_ALIASES = {
@@ -56,6 +59,10 @@ ACTION_ALIASES = {
     "reschedule": "reschedule_plan",
     "rebalance": "reschedule_plan",
     "rebalance_plan": "reschedule_plan",
+    # reschedule_apply SKILLz: flag-gated apply of the plan (DEFAULT DRY-RUN)
+    "apply_reschedule": "reschedule_apply",
+    "rebalance_apply": "reschedule_apply",
+    "reschedule_apply_plan": "reschedule_apply",
 }
 
 # Repo root: modules/communication/moltbot_bridge/src -> parents[4]
@@ -321,6 +328,25 @@ def _build_reschedule_plan_command(params: Dict[str, str]) -> list[str]:
     return cmd
 
 
+def _build_reschedule_apply_command(params: Dict[str, str]) -> list[str]:
+    """Build the reschedule_apply SKILLz invocation.
+
+    Flag-gated apply of the reschedule plan. Via this subprocess surface no live
+    browser is supplied, so it is DRY-RUN by construction (it logs would-apply
+    moves, mutates nothing). Real apply requires YT_RESCHEDULE_APPLY=1 AND a live
+    driver wired through the daemon path (not this CLI surface).
+    """
+    cmd = [
+        sys.executable,
+        "-m",
+        "modules.platform_integration.youtube_shorts_scheduler.skillz.reschedule_apply.run_skill",
+        "--json",
+    ]
+    if _truthy(params.get("no_signals", "false")):
+        cmd.append("--no-signals")
+    return cmd
+
+
 async def execute_youtube_action(action: str, params: Dict[str, str]) -> Dict[str, Any]:
     if action == "comments":
         cmd = _build_comments_command(params)
@@ -366,6 +392,21 @@ async def execute_youtube_action(action: str, params: Dict[str, str]) -> Dict[st
 
     if action == "reschedule_plan":
         cmd = _build_reschedule_plan_command(params)
+        timeout_s = _int_param(params, "timeout_s", 120)
+        run_result = await asyncio.to_thread(_run_subprocess, cmd, timeout_s)
+        parsed = _extract_json_tail(run_result.get("stdout_tail", ""))
+        success = bool(run_result.get("success", False))
+        if isinstance(parsed, dict) and parsed.get("success") is False:
+            success = False
+        return {
+            "success": success,
+            "action": action,
+            "result": parsed,
+            **run_result,
+        }
+
+    if action == "reschedule_apply":
+        cmd = _build_reschedule_apply_command(params)
         timeout_s = _int_param(params, "timeout_s", 120)
         run_result = await asyncio.to_thread(_run_subprocess, cmd, timeout_s)
         parsed = _extract_json_tail(run_result.get("stdout_tail", ""))

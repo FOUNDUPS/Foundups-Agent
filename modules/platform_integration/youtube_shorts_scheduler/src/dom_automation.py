@@ -2788,6 +2788,157 @@ class YouTubeStudioDOM:
         raise TimeoutException(f"Save button not found/clickable: {last_err}")
 
     # =========================================
+    # RESCHEDULE (already-scheduled video) — edit-popup entry
+    # =========================================
+
+    def open_scheduled_edit_popup(self, video_id: Optional[str] = None) -> bool:
+        """Open the visibility-edit popup for an already-Scheduled list row.
+
+        Reschedule entry (Mode B Phase 2): on the videos/short *list* (filtered to
+        Scheduled / "Has schedule"), each row's visibility cell shows a "Scheduled"
+        ``span.label-span``. Clicking it opens ``ytcp-video-visibility-edit-popup
+        tp-yt-paper-dialog#dialog`` which exposes the SAME ``ytcp-datetime-picker``
+        date/time inputs the new-schedule flow uses — so the existing
+        ``set_schedule_date`` / ``set_schedule_time`` / ``click_done`` / ``click_save``
+        helpers drive it unchanged (WSP 84 reuse).
+
+        Args:
+            video_id: optional id to scope the click to a specific row (matches the
+                row's ``a[href*='/video/<id>']``). When None, the FIRST Scheduled
+                row's label is clicked.
+
+        Returns:
+            True if the edit popup opened (dialog present), False otherwise.
+
+        NOTE: shadow_dom_finder.first_deep pierces Studio's shadow roots; a flat
+        querySelector fallback covers light-DOM/mock drivers.
+        """
+        import time
+
+        try:
+            from modules.infrastructure.foundups_selenium.src.shadow_dom_finder import (
+                first_deep,
+            )
+        except Exception:  # pragma: no cover - defensive import
+            first_deep = None  # type: ignore
+
+        # 1) Click the row's "Scheduled" label. Prefer a video-scoped row when an id
+        #    is given so a batch never edits the wrong short.
+        clicked = False
+        if first_deep is not None:
+            try:
+                selectors: List[Any] = []
+                if video_id:
+                    # Row containing the id -> its visibility label span.
+                    selectors.append(
+                        [f"ytcp-video-row a[href*='/video/{video_id}']"],
+                    )
+                # Generic: any Scheduled label span on the list.
+                selectors.append(["ytcp-video-row span.label-span"])
+                anchor = first_deep(self.driver, selectors)
+                if anchor is not None:
+                    # If we matched the title link, hop to the row's label span.
+                    target = self.driver.execute_script(
+                        """
+                        const el = arguments[0];
+                        if (!el) return null;
+                        const row = el.closest ? el.closest('ytcp-video-row') : null;
+                        const scope = row || document;
+                        const spans = scope.querySelectorAll('span.label-span');
+                        for (const s of spans) {
+                          const t = (s.textContent || '').trim().toLowerCase();
+                          if (t.includes('scheduled')) return s;
+                        }
+                        return (scope.querySelector('span.label-span') || el);
+                        """,
+                        anchor,
+                    )
+                    self.safe_click(target or anchor)
+                    clicked = True
+            except Exception as exc:
+                logger.debug(f"[RESCHED] shadow label click failed: {exc}")
+
+        if not clicked:
+            # Flat fallback (light-DOM / mocks): click the first Scheduled label.
+            try:
+                clicked = bool(self.driver.execute_script(
+                    """
+                    const vid = arguments[0];
+                    let scope = document;
+                    if (vid) {
+                      const link = document.querySelector(
+                        "ytcp-video-row a[href*='/video/" + vid + "']");
+                      if (link && link.closest) scope = link.closest('ytcp-video-row') || document;
+                    }
+                    const spans = scope.querySelectorAll('span.label-span');
+                    for (const s of spans) {
+                      const t = (s.textContent || '').trim().toLowerCase();
+                      if (t.includes('scheduled')) { s.click(); return true; }
+                    }
+                    return false;
+                    """,
+                    video_id,
+                ))
+            except Exception as exc:
+                logger.warning(f"[RESCHED] flat label click failed: {exc}")
+                clicked = False
+
+        if not clicked:
+            logger.warning("[RESCHED] Could not click a 'Scheduled' label to open edit popup")
+            return False
+
+        time.sleep(0.6)
+
+        # 2) Confirm the edit popup dialog is present.
+        try:
+            WebDriverWait(self.driver, 8).until(lambda d: d.execute_script(
+                """
+                const popup = document.querySelector('ytcp-video-visibility-edit-popup');
+                const dlg = document.querySelector('ytcp-video-visibility-edit-popup tp-yt-paper-dialog#dialog')
+                          || document.querySelector('tp-yt-paper-dialog#dialog');
+                return !!(popup || dlg);
+                """
+            ))
+            return True
+        except Exception:
+            logger.warning("[RESCHED] Edit popup did not appear after clicking 'Scheduled'")
+            return False
+
+    def reschedule_open_set_save(self, date_str: str, time_str: str, video_id: Optional[str] = None) -> bool:
+        """Full reschedule flow for one already-scheduled video (reuses the picker).
+
+        open_scheduled_edit_popup -> set_schedule_date -> set_schedule_time ->
+        click_done -> click_save. Mirrors ``schedule_video`` but enters via the list
+        "Scheduled" label instead of the edit-page visibility dialog, and SKIPS
+        select_schedule_option (the popup is already in scheduled state).
+
+        Returns True only when every step succeeds.
+        """
+        import time as _t
+
+        if not self.open_scheduled_edit_popup(video_id=video_id):
+            return False
+        steps = [
+            ("set_schedule_date", lambda: self.set_schedule_date(date_str)),
+            ("set_schedule_time", lambda: self.set_schedule_time(time_str)),
+            ("click_done", lambda: self.click_done()),
+            ("click_save", lambda: self.click_save()),
+        ]
+        for name, fn in steps:
+            try:
+                fn()
+            except Exception as exc:
+                logger.error(f"[RESCHED] reschedule failed at {name}: {type(exc).__name__}: {exc}")
+                try:
+                    ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
+                    _t.sleep(0.4)
+                except Exception:
+                    pass
+                return False
+        logger.info(f"[RESCHED] Rescheduled {video_id or '(first scheduled)'} -> {date_str} {time_str}")
+        return True
+
+    # =========================================
     # PAGE 3: SCHEDULING DIALOG METHODS
     # =========================================
 
