@@ -44,7 +44,7 @@ def _build_channel_config() -> Dict[str, Dict[str, Any]]:
             "handle": ch.get("handle"),
             "timezone": ch.get("timezone"),
             "time_slots": shorts.get("time_slots") or [],
-            "max_per_day": shorts.get("max_per_day", 8),
+            "max_per_day": shorts.get("max_per_day", 3),
             "chrome_port": browser.get("preferred_port", CHROME_PORT),
             "preferred_port": browser.get("preferred_port", CHROME_PORT),
             "available_ports": browser.get("available_ports", ALL_PORTS),

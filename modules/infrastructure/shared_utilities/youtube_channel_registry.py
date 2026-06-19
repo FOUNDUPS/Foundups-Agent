@@ -51,7 +51,7 @@ def _default_channels() -> List[Dict[str, Any]]:
                 "available_ports": [_CHROME_PORT, _EDGE_PORT],
                 "account_section": 0,
             },
-            "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 8, "description_template": "ffcpln"},
+            "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 3, "description_template": "ffcpln"},
             "social": {"linkedin_company": "move2japan", "x_account": "geozai", "enabled": True, "signature": "0102🦞"},
         },
         {
@@ -68,7 +68,7 @@ def _default_channels() -> List[Dict[str, Any]]:
                 "available_ports": [_CHROME_PORT, _EDGE_PORT],
                 "account_section": 0,
             },
-            "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 8, "description_template": "undaodu"},
+            "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 3, "description_template": "undaodu"},
             "social": {"linkedin_company": "undaodu", "x_account": "undaodu", "enabled": True, "signature": "0102🦞012🖐️"},  # wsp01: 012 co-signs
         },
         {
@@ -85,7 +85,7 @@ def _default_channels() -> List[Dict[str, Any]]:
                 "available_ports": [_CHROME_PORT, _EDGE_PORT],
                 "account_section": 1,
             },
-            "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 8, "description_template": "foundups"},
+            "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 3, "description_template": "foundups"},
             "social": {"linkedin_company": "foundups", "x_account": "foundups", "enabled": True, "signature": "0102🦞"},
         },
         {
@@ -102,7 +102,7 @@ def _default_channels() -> List[Dict[str, Any]]:
                 "available_ports": [_CHROME_PORT, _EDGE_PORT],
                 "account_section": 1,
             },
-            "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 8, "description_template": "ffcpln"},
+            "shorts": {"time_slots": _DEFAULT_TIME_SLOTS, "max_per_day": 3, "description_template": "ffcpln"},
             "social": {"linkedin_company": "move2japan", "x_account": "antifafm", "enabled": True, "signature": "0102🦞"},  # wsp01: antifaFM posts to move2japan
         },
     ]
@@ -142,7 +142,7 @@ def _normalize_channel(channel: Dict[str, Any]) -> Dict[str, Any]:
     shorts = normalized.get("shorts") or {}
     normalized["shorts"] = {
         "time_slots": list(shorts.get("time_slots") or _DEFAULT_TIME_SLOTS),
-        "max_per_day": int(shorts.get("max_per_day", 8)),
+        "max_per_day": int(shorts.get("max_per_day", 3)),
         "description_template": str(shorts.get("description_template", "ffcpln")),
     }
 
