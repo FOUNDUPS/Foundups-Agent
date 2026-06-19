@@ -1,5 +1,57 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-06-19 - Optionally schedule PRIVATE Shorts too (flag-gated, default-off, private->public)
+
+**By:** 0102 (Worker-Lane SCHED-PRIVATE)
+**Slice:** SHORTS_SCHEDULE_INCLUDE_PRIVATE_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (Pre-Action), WSP 84 (Code Reuse: the DOM/URL layer already accepts PRIVATE), WSP 97 (truth signaling / outward-action breadcrumb)
+
+### Why (the UNLISTED-only gap)
+The scheduling cycle only processed UNLISTED Shorts: `run_scheduling_cycle` navigated with
+`navigate_to_shorts_with_fallback(channel_id, "UNLISTED")` (was `scheduler.py:317`), the batch
+loop scraped via `get_unlisted_videos()` (was `scheduler.py:350/370`), and the edit-page guard
+rejected anything not `unlisted`/`unknown` (was `scheduler.py:502`). 012 also wants PRIVATE
+videos processed. Scheduling a PRIVATE video uses the YouTube Studio `PUBLISH_FROM_PRIVATE`
+schedule radio (`dom_automation.py:144-145,240,246`) -> the video PUBLISHES PUBLIC at its slot.
+That is OUTWARD-FACING, so the PRIVATE pass is **default-OFF** and opt-in only.
+
+### Phase 0 (verified on origin/main `47a6aa437`)
+- UNLISTED-only nav: `scheduler.py:317` (and re-navs `:366`, `:666`).
+- Scrape under UNLISTED filter: `get_unlisted_videos()` is UNLISTED-hardcoded -- guard
+  `ensure_visibility_filter("UNLISTED")` (`dom_automation.py:2522`) AND a JS row scan that
+  requires `\bunlisted\b` (`dom_automation.py:2537-2540`). It returns `[]` under a PRIVATE
+  filter, so it is NOT a drop-in private scraper.
+- Edit-page guard: `scheduler.py:502` `if edit_vis not in ("unlisted","unknown")` rejects
+  `private` (which `read_edit_page_visibility` returns at `dom_automation.py:1316-1317`).
+- DOM layer ALREADY supports PRIVATE for nav + filter + schedule:
+  `navigate_to_shorts_with_fallback(..., "PRIVATE")` (`dom_automation.py:1411-1437`, generic),
+  `ensure_visibility_filter("PRIVATE")` (`:1324`), PRIVATE chip/url markers (`:294,306`),
+  and the schedule radio IS `PUBLISH_FROM_PRIVATE` (private -> public). Confirmed.
+
+### What changed (minimal; scheduler.py ONLY)
+- **`_resolve_visibility_targets()`**: default `["UNLISTED"]`; when
+  `YT_SCHEDULE_INCLUDE_PRIVATE == "1"` returns `["UNLISTED","PRIVATE"]` (strict `=="1"`;
+  emits a warning that private->public is enabled). UNLISTED is always first.
+- **`_run_visibility_pass(target, ...)`**: extracted the existing navigate + continuous batch
+  loop verbatim, with the `"UNLISTED"` literal replaced by `target`. `run_scheduling_cycle`
+  now runs this loop ONCE PER TARGET. The single `self.tracker` is shared across passes, so the
+  per-day cap (3), peak window/tz, and rotation budget are SHARED (UNLISTED fills slots first,
+  PRIVATE continues into the remainder -- no per-channel budget doubling).
+- **`_scrape_videos_for_visibility(target)`**: UNLISTED delegates to the unchanged
+  `self.dom.get_unlisted_videos()`; PRIVATE scrapes rows scheduler-side via
+  `self.driver.execute_script` (mirrors the strict scan, keyed on `private`, excludes
+  scheduled rows) -- WITHOUT modifying the DOM/URL layer. Precedent: `_get_all_videos`
+  already scrapes scheduler-side.
+- **Edit-page guard relaxed**: accepts `private` ONLY when the active pass is PRIVATE; the
+  UNLISTED pass still rejects `private`.
+- **Outward breadcrumb**: per private video scheduled, logs
+  `[PRIVATE->PUBLIC] {video_id} scheduled to publish {date} {time}` (live + dry-run) so 012 can
+  review each private->public action. Default-off => zero private scheduling unless flagged.
+
+### Scope / follow-ups
+- OUT OF SCOPE: long-form private (note as follow-up), indexing, the detector, the long-form
+  path. The DOM/URL layer was NOT modified.
+
 ## 2026-06-19 - Long-form uses US-ET peak + per-channel Studio-tz conversion (match shorts)
 
 **By:** 0102 (Worker-Lane LONGFORM-TZ)
