@@ -1,5 +1,63 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-06-19 - Auto-fire reschedule_plan + live-signal from the WRE trigger (live-signal self-gated)
+
+**By:** 0102 (Worker-Lane SKILLZ-REGISTER)
+**Slice:** SHORTS_SKILLZ_AUTONOMOUS_REGISTRATION_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (Pre-Action), WSP 84 (Code Reuse: existing domain-trigger + adapter wiring), WSP 91 (Observability), WSP 95 (SKILLz Wardrobe), WSP 97 (truth signaling: UNKNOWN never false-0)
+
+### Why (the orphaning gap)
+The WRE skill-trigger discovers + fires skills whose SKILLz.md frontmatter carries
+`domain: youtube` (`skill_trigger.py:91-115`, match at `:103`; discovery glob
+`modules/*/*/skillz/**/SKILLz.md`). `what_should_i_schedule` was given `domain: youtube`
+in the prior slice and now auto-fires; the other two read-only scheduling SKILLz
+(`reschedule_plan`, `shorts_live_schedule_signal`) LACKED `domain:` -> orphaned (never
+fired by the daemon, only reachable by `--agent-command`/`run_skill`). 012's rule:
+everything runs from the daemon autonomously, 012 observes. So these must auto-register.
+
+### What changed (minimal)
+- `skillz/reschedule_plan/SKILLz.md`: added `domain: youtube` (Skills 2.0 fields intact).
+  Cheap + offline + dry-run -> safe to auto-fire every cadence cycle. No executor change.
+- `skillz/shorts_live_schedule_signal/SKILLz.md`: added `domain: youtube` + an
+  "Auto-fire self-gate (cost control)" section.
+- `skillz/shorts_live_schedule_signal/executor.py`: NEW self-gate. `run_skill()` checks
+  `YT_LIVE_SCHEDULE_SIGNAL_ENABLED` (default `"0"`); when not `"1"` it returns a NO-OP
+  immediately (no driver/filter/scrape; `skipped=true`, `skip_reason="disabled_by_flag"`,
+  `scheduled_count=null` UNKNOWN never false-0) and still emits breadcrumb/PatternMemory
+  so the WRE records the fired-but-skipped run. When `=1` it runs the live DOM read as
+  before. Rationale: a live DOM round-trip every ~10m is costly and contends with the
+  daemon browser, so it auto-fires DEFAULT-OFF until 012 enables it.
+- `modules/communication/moltbot_bridge/src/youtube_automation_adapter.py`: mapped a new
+  `live_schedule_signal` action (+ aliases `shorts_live_schedule_signal`/`live_signal`/
+  `schedule_signal`, a `_build_live_schedule_signal_command`, and the dispatch branch),
+  mirroring the `reschedule_plan`/`schedule_priority` wiring, so it is `--agent-command`
+  invocable (it was previously only reachable via `python -m ...run_skill`).
+
+### Out of scope (unchanged)
+- `reschedule_apply` (MUTATING) stays manual / `--agent-command` + its `YT_RESCHEDULE_APPLY`
+  gate; it is NOT auto-registered (no `domain: youtube`).
+- priority/music wiring (prior slices); the executor business logic; no mutation anywhere.
+
+### Tests (mock-only, NON-VACUOUS, no live browser/daemon/models)
+- `tests/test_shorts_skillz_domain_registration.py` (NEW): both SKILLz parse via the SAME
+  parser the trigger uses (`WRESkillsDiscovery._extract_frontmatter`) with `domain==youtube`
+  and Skills 2.0 fields intact; a real `discover_all_skills()` scan surfaces both as
+  youtube; guard asserts `reschedule_apply` is NOT youtube-registered.
+- `tests/test_shorts_live_schedule_signal.py` (EXTENDED): flag-OFF run NO-OPs and the
+  filter/scrape MagicMocks are `assert_not_called()` (MUST FAIL if the DOM is scraped while
+  disabled -- verified by a gate-mutation that flips the no-op test to FAIL); flag-ON run
+  calls the (mock) scrape and returns the accurate count; existing live-path tests pin the
+  flag ON.
+- `tests/test_youtube_automation_adapter.py` (EXTENDED): `live_schedule_signal` is supported;
+  command + alias parse; builder targets the live-signal `run_skill` with `--channel/--connect/
+  --low-view-threshold/--json`; `execute_youtube_action` routes to the live-signal command.
+- Scoped run: 53 passed (`--import-mode=importlib`).
+
+### Live gap
+The live DOM read path remains mock-tested only; 012 enables it with
+`YT_LIVE_SCHEDULE_SIGNAL_ENABLED=1` and live-validates the chip-bar / "Has schedule" /
+views selectors before graduation.
+
 ## 2026-06-19 - OBSERVE-mode acoustic music/talk label log (no scheduling gate)
 
 **By:** 0102 (Worker-Lane MUSIC-OBSERVE)

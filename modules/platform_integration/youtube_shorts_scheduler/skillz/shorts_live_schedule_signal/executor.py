@@ -58,6 +58,7 @@ Usage (--agent-command surface):
 from __future__ import annotations
 
 import logging
+import os
 import re
 import time
 import uuid
@@ -69,6 +70,46 @@ logger = logging.getLogger(__name__)
 
 SOURCE_DAE = "youtube_shorts_scheduler"
 SKILL_NAME = "shorts_live_schedule_signal"
+
+# Auto-fire cost gate (SHORTS_SKILLZ_AUTONOMOUS_REGISTRATION_PHASE1).
+# This skill now carries `domain: youtube`, so the WRE trigger discovers+fires it every
+# cadence cycle. But a live DOM round-trip every ~10m is costly and contends with the
+# daemon's browser, so we self-gate: unless this env flag is "1", run_skill() returns a
+# NO-OP immediately -- it never touches the driver / applies the filter / scrapes the DOM.
+# Default OFF: the skill auto-fires (no orphan) but does no live work until 012 enables it.
+LIVE_SIGNAL_ENABLED_ENV = "YT_LIVE_SCHEDULE_SIGNAL_ENABLED"
+
+
+def _live_signal_enabled() -> bool:
+    """True only when 012 has explicitly enabled the costly live DOM read."""
+    return os.getenv(LIVE_SIGNAL_ENABLED_ENV, "0").strip() == "1"
+
+
+def _disabled_no_op_signal(channel: str, channel_id: Optional[str], low_view_threshold: int) -> Dict[str, Any]:
+    """The NO-OP result returned when the live-signal flag is OFF.
+
+    No browser, no filter, no scrape. scheduled_count is None (UNKNOWN, NEVER a false 0),
+    matching the rest of the skill's fail-safe contract.
+    """
+    return {
+        "success": True,  # the skill fired correctly; it just (by design) did no live work
+        "skill": SKILL_NAME,
+        "channel": channel,
+        "channel_id": channel_id,
+        "skipped": True,
+        "skip_reason": "disabled_by_flag",
+        "enabled_env": LIVE_SIGNAL_ENABLED_ENV,
+        "filter_applied": False,
+        "scheduled_count": None,  # UNKNOWN, not a false 0
+        "scheduled_count_status": "skipped_disabled_by_flag",
+        "low_view_threshold": low_view_threshold,
+        "low_viewed_count": None,
+        "low_viewed_videos": [],
+        "scheduled_videos": [],
+        "videos": [],
+        "row_count": 0,
+        "patterns": {},
+    }
 
 # 012: shorts under this view count are "low viewed" candidates for re-scheduling.
 DEFAULT_LOW_VIEW_THRESHOLD = 100
@@ -625,8 +666,28 @@ def run_skill(
 
     If `driver` is None, no live browser is available -> returns a clear
     unavailable result (scheduled_count None / UNKNOWN), still NEVER a false 0.
+
+    COST GATE: if `YT_LIVE_SCHEDULE_SIGNAL_ENABLED` != "1", return a NO-OP result
+    immediately WITHOUT touching the browser / applying the filter / scraping the DOM.
+    The skill still auto-fires (no orphan) but does no live work until 012 enables it.
     """
     channel_id = _resolve_channel_id(channel)
+
+    # --- Auto-fire cost gate: default-off, no live DOM work unless 012 enabled it. ---
+    if not _live_signal_enabled():
+        logger.info(
+            "[%s] live signal disabled (%s!=1) -> NO-OP (no browser/scrape)",
+            SKILL_NAME, LIVE_SIGNAL_ENABLED_ENV,
+        )
+        signal = _disabled_no_op_signal(channel, channel_id, low_view_threshold)
+        breadcrumb_emitted = False
+        outcome_stored = False
+        if emit_signals:
+            breadcrumb_emitted = _emit_breadcrumb(signal)
+            outcome_stored = _store_outcome(signal)
+        signal["breadcrumb_emitted"] = breadcrumb_emitted
+        signal["outcome_stored"] = outcome_stored
+        return signal
 
     if driver is None:
         signal = {

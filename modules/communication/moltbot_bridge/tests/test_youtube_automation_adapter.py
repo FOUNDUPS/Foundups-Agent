@@ -6,8 +6,10 @@ import unittest
 from unittest.mock import AsyncMock, patch
 
 from modules.communication.moltbot_bridge.src.youtube_automation_adapter import (
+    SUPPORTED_ACTIONS,
     _build_comments_command,
     _build_indexing_command,
+    _build_live_schedule_signal_command,
     _build_scheduling_command,
     _parse_action_command,
     execute_youtube_action,
@@ -104,6 +106,75 @@ class TestYouTubeAutomationAdapter(unittest.IsolatedAsyncioTestCase):
         )
         self.assertIsNotNone(response)
         self.assertIn("not recognized", response or "")
+
+    # --- live_schedule_signal routing (SHORTS_SKILLZ_AUTONOMOUS_REGISTRATION_PHASE1) ---
+
+    def test_live_schedule_signal_is_supported(self):
+        self.assertIn("live_schedule_signal", SUPPORTED_ACTIONS)
+
+    def test_parse_live_schedule_signal_command(self):
+        parsed = _parse_action_command(
+            "youtube action live_schedule_signal channel=foundups connect=edge"
+        )
+        self.assertIsNotNone(parsed)
+        action, params = parsed  # type: ignore[misc]
+        self.assertEqual(action, "live_schedule_signal")
+        self.assertEqual(params.get("channel"), "foundups")
+        self.assertEqual(params.get("connect"), "edge")
+
+    def test_parse_live_schedule_signal_alias(self):
+        parsed = _parse_action_command("yt action shorts_live_schedule_signal channel=antifafm")
+        self.assertIsNotNone(parsed)
+        action, params = parsed  # type: ignore[misc]
+        self.assertEqual(action, "live_schedule_signal")
+        self.assertEqual(params.get("channel"), "antifafm")
+
+    def test_build_live_schedule_signal_command(self):
+        cmd = _build_live_schedule_signal_command(
+            {"channel": "foundups", "connect": "edge", "low_view_threshold": "50"}
+        )
+        command_text = " ".join(cmd)
+        self.assertIn(
+            "modules.platform_integration.youtube_shorts_scheduler.skillz.shorts_live_schedule_signal.run_skill",
+            command_text,
+        )
+        self.assertIn("--channel", cmd)
+        self.assertIn("foundups", cmd)
+        self.assertIn("--connect", cmd)
+        self.assertIn("edge", cmd)
+        self.assertIn("--low-view-threshold", cmd)
+        self.assertIn("50", cmd)
+        self.assertIn("--json", cmd)
+
+    def test_build_live_schedule_signal_command_no_connect_omits_flag(self):
+        cmd = _build_live_schedule_signal_command({"channel": "foundups"})
+        # No connect -> the live browser flag is absent (offline/no-op by construction).
+        self.assertNotIn("--connect", cmd)
+
+    async def test_execute_live_schedule_signal_routes_and_parses_json(self):
+        fake_run = {
+            "success": True,
+            "returncode": 0,
+            "command": ["python", "-m", "fake"],
+            "stdout_tail": '{"skill":"shorts_live_schedule_signal","success":true,"scheduled_count":131}',
+            "stderr_tail": "",
+        }
+        with patch(
+            "modules.communication.moltbot_bridge.src.youtube_automation_adapter._run_subprocess",
+            return_value=fake_run,
+        ) as run_mock:
+            result = await execute_youtube_action(
+                "live_schedule_signal", {"channel": "foundups", "connect": "edge"}
+            )
+        # Routed to the live-signal builder (not some other action's command).
+        dispatched_cmd = run_mock.call_args.args[0]
+        self.assertIn(
+            "modules.platform_integration.youtube_shorts_scheduler.skillz.shorts_live_schedule_signal.run_skill",
+            " ".join(dispatched_cmd),
+        )
+        self.assertEqual(result.get("action"), "live_schedule_signal")
+        self.assertTrue(result.get("success"))
+        self.assertEqual(result.get("result", {}).get("scheduled_count"), 131)
 
 
 if __name__ == "__main__":
