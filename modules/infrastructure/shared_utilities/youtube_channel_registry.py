@@ -28,10 +28,14 @@ _REGISTRY_PATH = Path(__file__).resolve().parent / "memory" / "youtube_channels.
 _CHROME_PORT = 9222
 _EDGE_PORT = 9223
 
-_DEFAULT_TIME_SLOTS = [
-    "12:00 AM", "3:00 AM", "6:00 AM", "9:00 AM",
-    "12:00 PM", "3:00 PM", "6:00 PM", "9:00 PM",
-]
+# Canonical US-Eastern (ET) peak publish slots: morning / lunch / evening.
+# ALL shorts target the US audience, so optimum times are expressed in ET and
+# converted per-channel to the channel's Studio-account tz before typing.
+# The authoritative, env-configurable (SHORTS_PEAK_SLOTS_ET) definition and the
+# DST-aware conversion live in:
+#   modules/platform_integration/youtube_shorts_scheduler/src/peak_window.py
+# These literals are the inert default mirror (24h ET) persisted to the registry.
+_DEFAULT_TIME_SLOTS = ["08:00", "12:00", "20:00"]
 
 
 def _default_channels() -> List[Dict[str, Any]]:

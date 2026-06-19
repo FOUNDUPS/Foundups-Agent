@@ -1,3 +1,7 @@
 # YouTube Shorts Scheduler Dependencies
 selenium>=4.15.0
 undetected-chromedriver>=3.5.0
+# DST-aware US-ET -> per-channel Studio-account-tz conversion (peak_window.py).
+# pytz over zoneinfo+tzdata: pytz is already installed and a repo-wide dependency,
+# and works on the Windows host without the tzdata package.
+pytz>=2023.3

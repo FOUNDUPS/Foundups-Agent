@@ -1,5 +1,72 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-06-19 - US-ET peak slots + per-channel Studio-tz conversion (Phase 1)
+
+**By:** 0102 (Worker-Lane SCHED-WINDOW)
+**Slice:** SHORTS_SCHEDULE_US_PEAK_WINDOW_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (Pre-Action), WSP 84 (Code Reuse), WSP 97 (Truth Signaling)
+
+### Problem
+
+The prior slice (#844) capped the day at 3 but DEFERRED the publish window because the Studio
+timezone was unverified. Shorts target the US audience, but 012 posts from Japan and two of four
+channels run on Asia/Tokyo Studio accounts. The old `_DEFAULT_TIME_SLOTS` was a 24h grid whose
+first three slots (12AM/3AM/6AM ET-ish) were graveyard hours for US viewers, and a bare time typed
+into a Tokyo Studio account publishes at that time IN JST -- the wrong US wall-clock.
+
+### Phase 0 confirmation (verified, not assumed)
+
+1. **Bare-time-in-account-tz model CONFIRMED.** `src/dom_automation.py` `set_schedule_time`
+   (~3098) types the bare time string via `slow_type` (~3196) and never touches the timezone
+   selector; `click_done` explicitly guards against the timezone-select-button (~3214, ~3226-3232).
+   Studio interprets the typed time in each ACCOUNT's own tz.
+2. **Registry tz == Studio ACCOUNT tz CONFIRMED.** The `timezone` field in
+   `youtube_channel_registry.py` (Move2Japan/UnDaoDu = `Asia/Tokyo`; FoundUps/antifaFM =
+   `America/New_York`) is the Studio account tz -- corroborated by the #844 commit body, which
+   states Studio "interprets it in each account's own tz (Asia/Tokyo for Move2Japan/UnDaoDu vs
+   America/New_York for FoundUps/antifaFM)". This is the authoritative source; we did NOT have to
+   STOP.
+3. **Python tz support.** `zoneinfo` requires `tzdata` on Windows, which is NOT installed; `pytz`
+   IS installed (2026.1) and is already a repo dependency (stream_resolver, social_media_orchestrator,
+   foundups). Used `pytz` to avoid a runtime ModuleNotFoundError on the Windows host (WSP 84 reuse).
+
+### Changes (minimal)
+
+1. **Canonical ET peaks defined ONCE.** New pure module `src/peak_window.py` holds the research-
+   backed US-Eastern peaks -- morning ~08:00, lunch ~12:00, evening ~20:00 ET -- configurable via
+   env `SHORTS_PEAK_SLOTS_ET` (e.g. "08:00,12:00,20:00"). Three slots match the landed 3/day cap.
+2. **Pure DST-aware conversion.** `convert_et_to_channel_tz(et_time, channel_tz, on_date)` and
+   `get_peak_slots_for_channel(...)` map an ET target to the channel account-tz wall-clock using
+   the publish date (DST correct: 08:00 ET -> 21:00 JST in summer, 22:00 JST in winter; -> 08:00
+   for NY). Returns the bare 12h string the typer consumes.
+3. **Allocator wired (reuses cap + jitter).** `schedule_tracker.get_next_available_slot` gained an
+   optional `channel_tz`; when set it converts the ET base slot to channel-local BEFORE the existing
+   jitter. `HARD_CAP_PER_DAY` / `effective_cap` clamp is UNCHANGED. `channel_tz=None` stays
+   backwards-compatible (identity).
+4. **Scheduler passes the channel tz.** `scheduler.py` sources `self.time_slots` from
+   `peak_window.get_peak_slots_et()` and passes `channel_tz=self.config["timezone"]` at both
+   allocator call sites.
+5. **Registry grid replaced.** `_DEFAULT_TIME_SLOTS` is now the 3 ET peaks `["08:00","12:00","20:00"]`
+   (inert default mirror; the authoritative/env-config + conversion live in `peak_window.py` to
+   avoid an infra->platform import).
+
+### Future WRE enhancement (extension seam)
+
+The ET defaults are RESEARCHED static defaults. A future WRE skill can LEARN the optimum per-channel
+publish times from real engagement data (impressions/CTR/retention by hour) and replace
+`get_peak_slots_et()` or override slots per channel -- feeding through the SAME conversion path so
+the bare-time-in-account-tz contract is preserved. Seam documented in `peak_window.py` header.
+
+### Tests (unit, mock-only, non-vacuous)
+
+`tests/test_peak_window.py`: pins the ET peaks (08/12/20), proves NY=identity and Tokyo summer/winter
+offsets with explicit DST divergence, guards the old bare-time bug (Tokyo 08:00 ET is typed ~9:00 PM
+JST, NOT 8:00 AM), and proves cross-channel divergence. Non-vacuity verified by temporarily removing
+the conversion -> 3 allocator tests FAIL (Tokyo guard, NY check, divergence), restored after.
+Scoped run: 47 passed, 2 skipped (includes the #844 density-cap suite, still green).
+
+---
+
 ## 2026-06-19 - Cap shorts at 3/day + 1-6am window decision (was 8/day) (Phase 1)
 
 **By:** 0102 (Worker-Lane SCHED-DENSITY)

@@ -11,6 +11,13 @@ from pathlib import Path
 from typing import Dict, Optional, Tuple, List
 from datetime import datetime, timedelta
 
+# Pure ET-peak -> channel-account-tz conversion (DST-aware). The scheduler types
+# a bare time that Studio interprets in the account's own tz, so an ET target
+# must be converted to the channel-local wall-clock before typing.
+from modules.platform_integration.youtube_shorts_scheduler.src.peak_window import (
+    convert_et_to_channel_tz,
+)
+
 logger = logging.getLogger(__name__)
 
 # Default storage location
@@ -192,18 +199,29 @@ class ScheduleTracker:
         max_per_day: int = 3,
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
+        channel_tz: Optional[str] = None,
     ) -> Optional[Tuple[str, str]]:
         """
         Find next available scheduling slot.
 
         Args:
-            time_slots: List of time strings ["5:00 AM", "11:00 AM", "5:00 PM"]
+            time_slots: Canonical ET peak slots, e.g. ["08:00", "12:00", "20:00"]
+                (also accepts 12h "8:00 AM" form). These describe the desired
+                US-audience publish time in US-Eastern.
             max_per_day: Maximum videos per day
             start_date: Start of scheduling window (default: tomorrow)
             end_date: End of scheduling window (default: 60 days out)
+            channel_tz: IANA tz of the channel's Studio account
+                (e.g. "Asia/Tokyo", "America/New_York"). When provided, the ET
+                base slot is converted to that account's local wall-clock
+                (DST-aware) BEFORE jitter, because the scheduler types a bare
+                time string that Studio interprets in the account's own tz.
+                When None, the slot is used as-is (backwards compatible).
 
         Returns:
-            (date_str, time_str) tuple or None if all slots filled
+            (date_str, time_str) tuple or None if all slots filled.
+            time_str is the bare time to TYPE into Studio (channel-tz local
+            when channel_tz is given).
         """
         if start_date is None:
             start_date = datetime.now() + timedelta(days=1)
@@ -224,12 +242,23 @@ class ScheduleTracker:
             count = self.get_count(date_str)
 
             if count < effective_cap:
-                # Determine base time slot, then add jitter for human-like variance
-                base_time = time_slots[count] if count < len(time_slots) else time_slots[-1]
+                # Determine canonical ET base slot for this slot index.
+                et_base = time_slots[count] if count < len(time_slots) else time_slots[-1]
+
+                # Convert ET -> channel Studio-account tz (DST-aware) when known,
+                # so the bare time we type publishes at the intended US-audience
+                # peak. Identity for ET-account channels; shifts for others.
+                if channel_tz:
+                    base_time = convert_et_to_channel_tz(et_base, channel_tz, current)
+                else:
+                    base_time = et_base
+
+                # Add jitter for human-like variance (reused, unchanged).
                 time_slot = _add_time_jitter(base_time)
                 slot_label = f"slot {count + 1}/{effective_cap}"
                 logger.info(
-                    f"[TRACKER] Allocated: {date_str} at {time_slot} ({slot_label}, base={base_time})"
+                    f"[TRACKER] Allocated: {date_str} at {time_slot} "
+                    f"({slot_label}, et_base={et_base}, local_base={base_time}, tz={channel_tz or 'as-is'})"
                 )
                 return (date_str, time_slot)
 

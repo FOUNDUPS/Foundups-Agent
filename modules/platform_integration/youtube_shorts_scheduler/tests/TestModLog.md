@@ -1,5 +1,36 @@
 # YouTube Shorts Scheduler - TestModLog
 
+## 2026-06-19 - US-ET peak slots + per-channel Studio-tz conversion (Phase 1)
+
+**By:** 0102 (Worker-Lane SCHED-WINDOW)
+**Slice:** SHORTS_SCHEDULE_US_PEAK_WINDOW_PHASE1
+**WSP References:** WSP 6 (Test Audit), WSP 22 (ModLog), WSP 84 (Code Reuse), WSP 97 (Truth Signaling)
+
+### Added `tests/test_peak_window.py` (unit, mock-only -- no browser/daemon/models)
+
+- `TestCanonicalETPeaks` - defaults are exactly the US-ET peaks `["08:00","12:00","20:00"]`
+  (== `_DEFAULT_PEAK_SLOTS_ET`), count == 3 (matches the landed HARD_CAP_PER_DAY), env override
+  `SHORTS_PEAK_SLOTS_ET` respected, malformed env falls back to defaults.
+- `TestConversionPerChannel` - NY account is identity with ET; Tokyo summer 08:00 ET -> 21:00 JST
+  and 20:00 ET -> 09:00 JST; Tokyo winter 08:00 ET -> 22:00 JST; explicit DST divergence assertion
+  (summer != winter, == ("21:00","22:00")); `get_peak_slots_for_channel` preserves morning/lunch/
+  evening order; non-vacuity guard that Tokyo conversion != identity ("08:00").
+- `TestAllocatorTypesChannelLocal` - Tokyo morning slot is typed ~9:00 PM JST (within jitter), NOT
+  bare 8:00 AM (regression guard for the old bare-time bug); NY morning slot typed ~8:00 AM; Tokyo
+  vs NY diverge (PM vs AM) for the same ET morning slot, proving tz is actually consulted.
+
+### Non-vacuity proof
+
+Temporarily forced the allocator to `base_time = et_base` (conversion removed): 3 allocator tests
+FAILED (`test_tokyo_morning_slot_is_jst_evening_not_bare_8am`, `test_ny_morning_slot_is_typed_8am`,
+`test_tokyo_and_ny_diverge_for_same_et_slot`) with "tz not consulted: tokyo='08:00' ny='08:00'".
+Implementation restored; suite green.
+
+### Result
+
+Scoped run (`test_peak_window.py` + `test_scheduler.py`): 47 passed, 2 skipped. The #844
+`TestScheduleDensityCap` suite stays green (cap untouched).
+
 ## 2026-06-16 - Pin video-index context consumption on the scheduling path (Phase 1)
 
 **By:** 0102 (Worker-Lane SSVCC-AUTHOR)
