@@ -26,6 +26,9 @@ from modules.foundups.agent.src.kanban_plugin_contract import (
     _scan_authority,
     _check_path,
     _AUTHORITY_MARKERS,
+    _redact_deep,
+    _key_is_command,
+    _COMMAND_KEY_MARKERS,
 )
 
 MODULE_SRC = (
@@ -928,3 +931,200 @@ def test_downstream_bad_path_still_rejected_outcome_only():
         {"slice_id": "s", "lane": "ready", "contextbundle_id": "cb", "risk_class": "SPINE_CODE",
          "allowed_paths": ["/etc/passwd"]}
     ).ok
+
+
+# ===========================================================================
+# SLICE FIX 1 -- _redact_deep redacts string KEYS as well as string VALUES.
+# Re-review of the parked publish adapter exposed that origin/main's _redact_deep
+# redacted dict VALUES/leaves but NOT dict KEYS, so a secret used as a nested dict
+# KEY survived verbatim into to_dict() and the adapter outbox. HEAD redacts the KEY
+# with the SAME redact_sensitive used for values; non-string keys pass through; the
+# input mapping is NOT mutated.
+# ===========================================================================
+
+# A synthetic credential whose shape redact_sensitive matches (sk- + 16+ alnum).
+# Built from chr() so no literal token rides in the source.
+_SYNTH_SECRET = "sk-" + "".join(chr(c) for c in range(ord("A"), ord("A") + 16)) + "1234"
+# -> "sk-ABCDEFGHIJKLMNOP1234"; redact_sensitive must collapse it to [REDACTED].
+
+
+def test_redact_deep_redacts_string_dict_key():
+    # The exact Finding-1 case: a secret used as a dict KEY (and the same secret as a
+    # value under a benign key). BOTH must be redacted; the raw secret must not survive.
+    src = {_SYNTH_SECRET: "v", "f": _SYNTH_SECRET}
+    out = _redact_deep(src)
+    blob = json.dumps(out)
+    assert _SYNTH_SECRET not in blob, "raw secret survived as a dict KEY or VALUE"
+    # The key was redacted (no raw secret key remains); a redacted key/value is present.
+    assert _SYNTH_SECRET not in out, "raw secret survived as a dict KEY"
+    assert "[REDACTED]" in blob
+
+
+def test_redact_deep_redacts_nested_dict_key():
+    # A secret KEY nested several levels deep is still redacted. The secret is used as a
+    # STANDALONE key at each level (the Finding-1 scenario: a secret used AS a dict key),
+    # matching the same token-shape the value redactor matches (redact_sensitive uses
+    # word-boundary anchors, so a standalone secret token -- key OR value -- is redacted).
+    src = {"outer": {"mid": {_SYNTH_SECRET: {_SYNTH_SECRET: "x"}}}}
+    blob = json.dumps(_redact_deep(src))
+    assert _SYNTH_SECRET not in blob, "raw secret survived as a nested dict KEY"
+    assert "[REDACTED]" in blob
+
+
+def test_redact_deep_non_string_keys_pass_through():
+    # Non-string keys (int / tuple) are preserved as-is (only string keys are redacted).
+    src = {7: "v", (1, 2): "w"}
+    out = _redact_deep(src)
+    assert 7 in out and (1, 2) in out, "non-string keys must pass through unchanged"
+
+
+def test_redact_deep_does_not_mutate_input():
+    # Purity: the original mapping (keys AND values) is unchanged; a NEW structure is built.
+    inner = {_SYNTH_SECRET: "v"}
+    src = {"a": inner}
+    out = _redact_deep(src)
+    assert src == {"a": {_SYNTH_SECRET: "v"}}, "input mapping must not be mutated"
+    assert inner == {_SYNTH_SECRET: "v"}, "nested input mapping must not be mutated"
+    assert out is not src and out["a"] is not inner
+
+
+def test_card_to_dict_no_secret_in_keys_or_values():
+    # End-to-end through KanbanCardSpec.to_dict(): a secret hidden as a dict KEY inside a
+    # list/dict free-text field never appears in keys OR values of the serialized body.
+    card = KanbanCardSpec(
+        slice_id="s", lane="ready", contextbundle_id="cb", risk_class="SPINE_CODE",
+        expected_evidence=[{_SYNTH_SECRET: "note", "f": _SYNTH_SECRET}],
+    )
+    body = card.to_dict()
+    blob = json.dumps(body)
+    assert _SYNTH_SECRET not in blob, "raw secret leaked into card to_dict() keys OR values"
+    assert "[REDACTED]" in blob
+    # The instance is not mutated (raw secret key still present on the live object).
+    assert card.expected_evidence == [{_SYNTH_SECRET: "note", "f": _SYNTH_SECRET}]
+
+
+# ===========================================================================
+# SLICE FIX 2 -- command-key matching is TOKEN/BOUNDARY-precise, NOT substring.
+# Re-review exposed that the substring check (#843) treated "description" (contains
+# "script"), "transcript", etc. as command-keys, so an ordinary string field was
+# FALSELY REJECTED after #843 made command-keys reject bare strings. HEAD matches a
+# command-key IFF a NORMALIZED underscore-token equals a single-token marker.
+# ===========================================================================
+
+# Single-token command markers that MUST be treated as command-keys.
+_TRUE_COMMAND_KEYS = [
+    "command", "cmd", "shell", "script", "exec", "argv",
+    "run_command", "runCmd", "exec_now", "shell_command", "run_cmd",
+]
+
+# Legit field names that CONTAIN a command-marker substring but are NOT command-keys
+# (each normalizes to a single NON-marker token, or tokens with no marker token).
+_FALSE_POSITIVE_FIELDS = [
+    "description", "transcript", "subscription", "executive",
+    "scripted", "prescription", "descriptor", "executive_summary",
+    "scripted_notes", "subscription_id", "transcription",
+]
+
+
+@pytest.mark.parametrize("key", _TRUE_COMMAND_KEYS)
+def test_key_is_command_true_for_real_command_keys(key):
+    assert _key_is_command(key), f"true command key not detected: {key!r}"
+
+
+@pytest.mark.parametrize("key", _FALSE_POSITIVE_FIELDS)
+def test_key_is_command_false_for_legit_fields(key):
+    assert not _key_is_command(key), f"legit field falsely treated as command key: {key!r}"
+
+
+def test_command_match_is_token_precise_not_substring():
+    # Direct contrast: 'script' (marker) vs 'description'/'transcript' (substring only).
+    assert _key_is_command("script")
+    assert not _key_is_command("description")
+    assert not _key_is_command("transcript")
+
+
+@pytest.mark.parametrize("field_name", _FALSE_POSITIVE_FIELDS)
+def test_legit_substring_field_with_string_value_accepted(field_name):
+    # NEW invariant #843 lacked: a legit field whose name CONTAINS a command-marker
+    # substring, carrying an ordinary string value, is ACCEPTED (no false rejection).
+    res = validate_card_spec(_card(**{field_name: "ordinary text value"}))
+    assert res.ok, f"legit field {field_name!r} falsely rejected: {res.errors}"
+
+
+def test_description_and_transcript_accepted():
+    assert validate_card_spec(_card(description="ordinary string")).ok
+    assert validate_card_spec(_card(transcript="ordinary string")).ok
+
+
+@pytest.mark.parametrize("cmd_key", [
+    "command", "run_command", "runCmd", "exec_now", "shell_command",
+    "cmd", "shell", "script", "exec", "argv",
+])
+def test_true_command_keys_still_reject_bare_string(cmd_key):
+    # MUST CATCH: a bare string under any TRUE command key (incl. multi-token forms) is
+    # rejected (argv-or-null only). 'rm -rf /' / 'pytest' / 'x' all bare -> rejected.
+    res = validate_card_spec(_card(**{cmd_key: "pytest"}))
+    assert not res.ok, f"true command key {cmd_key!r} accepted a bare string"
+
+
+def test_command_rm_rf_rejected():
+    assert not validate_card_spec(_card(command="rm -rf /")).ok
+
+
+@pytest.mark.parametrize("cmd_key", ["command", "run_command", "shell_command", "cmd", "exec"])
+def test_true_command_key_safe_argv_list_accepted(cmd_key):
+    # A valid all-safe argv list under a TRUE command key is still ACCEPTED.
+    res = validate_card_spec(_card(**{cmd_key: ["python", "-m", "pytest", "tests/"]}))
+    assert res.ok, f"safe argv under {cmd_key!r} falsely rejected: {res.errors}"
+
+
+# ===========================================================================
+# TWO-DIRECTIONAL PARITY -- (a) NO WEAKENING of AUTHORITY detection and
+# (b) NO FALSE-POSITIVE on legit command-substring fields (the NEW invariant).
+# ===========================================================================
+
+# Legit field names that CONTAIN a command-marker substring, carrying ORDINARY string
+# values, must ALL be ACCEPTED. This is the NEW invariant #843's substring check lacked.
+_FALSE_POSITIVE_BATTERY = [
+    _card(description="ordinary text"),
+    _card(transcript="meeting transcript text"),
+    _card(subscription="monthly subscription note"),
+    _card(executive_summary="summary text"),
+    _card(descriptor="a descriptor string"),
+    _card(prescription="a prescription note"),
+    _card(scripted_notes="scripted notes content"),
+    _card(transcription="transcription text"),
+    _card(subscription_id="sub_12345"),
+]
+
+
+@pytest.mark.parametrize("payload", _FALSE_POSITIVE_BATTERY)
+def test_false_positive_battery_legit_fields_accepted(payload):
+    # NO FALSE-POSITIVE: a legit command-substring field with an ordinary value is ACCEPTED.
+    assert validate_card_spec(payload).ok, validate_card_spec(payload).errors
+
+
+def test_false_positive_battery_zero_falsely_rejected_summary():
+    # Summary guard: across the WHOLE legit-field corpus, ZERO are rejected by HEAD.
+    falsely_rejected = [p for p in _FALSE_POSITIVE_BATTERY if not validate_card_spec(p).ok]
+    assert falsely_rejected == [], (
+        f"{len(falsely_rejected)} legit command-substring fields falsely REJECTED (over-rejection)"
+    )
+
+
+def test_authority_detection_not_weakened_by_token_match():
+    # The command-KEY change must NOT touch AUTHORITY detection. Re-assert the whole
+    # origin-rejected AUTHORITY corpus stays rejected (the no-weakening invariant applies
+    # to AUTHORITY markers -- NOT to the command-substring over-matches being fixed).
+    authority_corpus = [p for p in _ORIGIN_REJECTED_CARDS]
+    newly_accepted = [p for p in authority_corpus if validate_card_spec(p).ok]
+    assert newly_accepted == [], (
+        f"{len(newly_accepted)} origin-rejected AUTHORITY payloads newly ACCEPTED (weakening)"
+    )
+
+
+def test_command_marker_set_is_single_token():
+    # The marker set is single-token by construction (no underscore inside any marker),
+    # which is what makes the token-equality match well-defined.
+    assert all("_" not in m for m in _COMMAND_KEY_MARKERS), _COMMAND_KEY_MARKERS
+    assert _COMMAND_KEY_MARKERS == frozenset({"command", "cmd", "argv", "shell", "exec", "script"})

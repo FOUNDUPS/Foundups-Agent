@@ -1,5 +1,54 @@
 # Agent Module TestModLog
 
+## 2026-06-20 - Kanban Contract dict-key redaction + token-precise command tests (FOUNDUP_KANBAN_CONTRACT_REDACT_KEYS_AND_PRECISE_COMMAND_MATCH_PHASE1)
+
+**Commands** (PYTHONIOENCODING=utf-8):
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_kanban_plugin_contract.py -q
+AI_OVERSEER_HEAVY_TESTS=1 python -m pytest modules/foundups/agent -q   # heavy
+python -m pytest modules/foundups/agent -q                            # CI mode
+```
+
+**Result**: PASS
+
+**Summary**:
+- `test_kanban_plugin_contract.py`: 319 passed (was 251; +68 net new). Full agent suite:
+  **1016 passed** in BOTH heavy and CI mode. No skip/xfail, no regression.
+
+**New coverage (this slice -- closes the parked-adapter RE-REVIEW findings)**:
+1. **Fix 1 -- dict-KEY redaction** (`_redact_deep`): a secret used as a string dict KEY (and as a
+   value) is redacted; a secret-as-KEY nested several levels deep is redacted; non-string keys
+   (int/tuple) pass through unchanged; `_redact_deep` does NOT mutate the input mapping (a NEW
+   structure is built); through `KanbanCardSpec.to_dict()` a secret hidden as a dict KEY inside a
+   list field appears in NEITHER keys NOR values of the serialized body, and the instance is not
+   mutated.
+2. **Fix 2 -- token-precise command-key match** (`_key_is_command`):
+   - true command keys (command/cmd/shell/script/exec/argv + run_command/runCmd/exec_now/
+     shell_command/run_cmd) are detected;
+   - legit substring fields (description/transcript/subscription/executive/scripted/prescription/
+     descriptor/executive_summary/scripted_notes/subscription_id/transcription) are NOT command keys;
+   - direct contrast test: `script` is a command key, `description`/`transcript` are not.
+3. **Must-catch / must-not-catch through the validator**: a bare string under any TRUE command key
+   (incl. multi-token forms) is REJECTED; `command: "rm -rf /"` rejected; a valid all-safe argv list
+   under a true command key is ACCEPTED; description/transcript with an ordinary string value are
+   ACCEPTED.
+4. **Two-directional parity batteries**:
+   - `_FALSE_POSITIVE_BATTERY` (NEW invariant #843 lacked): a corpus of legit field names that
+     CONTAIN a command-marker substring, carrying ordinary string values, are ALL ACCEPTED;
+     `test_false_positive_battery_zero_falsely_rejected_summary` asserts ZERO falsely rejected.
+   - `test_authority_detection_not_weakened_by_token_match`: the whole `_ORIGIN_REJECTED_CARDS`
+     AUTHORITY corpus stays rejected (0 newly accepted) -- the command-KEY change does not weaken
+     authority detection.
+   - `test_command_marker_set_is_single_token`: the marker set is single-token by construction.
+- Imports extended: `_redact_deep`, `_key_is_command`, `_COMMAND_KEY_MARKERS`.
+- ASCII-clean: the synthetic secret is built via `chr()` (0 non-ASCII bytes).
+- AUDIT cross-check (NOT a committed test): origin/main module vs HEAD over the corpus confirmed
+  0 authority weakening, true-command-keys still reject bare strings, and description/transcript/...
+  flip REJECTED(origin)->ACCEPTED(HEAD); secret-as-key survives origin `to_dict()` but not HEAD.
+
+---
+
 ## 2026-06-19 - Kanban Contract card-redaction + command-argv tests (FOUNDUP_KANBAN_CONTRACT_CARD_REDACTION_AND_COMMAND_ARGV_PHASE1)
 
 **Commands** (PYTHONIOENCODING=utf-8):
