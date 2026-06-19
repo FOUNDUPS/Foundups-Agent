@@ -19,6 +19,7 @@ Usage:
 import logging
 from typing import Optional, List
 from modules.infrastructure.shared_utilities.youtube_channel_registry import group_channels_by_browser, get_channel_by_key
+from modules.platform_integration.youtube_shorts_scheduler.src.peak_window import get_peak_slots_et
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,12 @@ BROWSER_PORTS = {
     "edge": 9223,
 }
 
-# Fallback time slots when channel config unavailable
+# LEGACY bare per-account fallback slots (overnight-heavy, NO US-peak / tz
+# awareness). RETAINED for reference only -- the long-form path now uses the
+# canonical US-ET peak slots (peak_window.get_peak_slots_et) DST-converted to
+# each channel's Studio-account tz, identical to the shorts path
+# (LONG_FORM_TZ_PEAK_WINDOW_PHASE1, #847 follow-up). Do not reintroduce these
+# as a long-form source; they publish off the US peak for non-ET channels.
 _DEFAULT_TIME_SLOTS_FALLBACK = [
     "12:00 AM", "3:00 AM", "6:00 AM", "9:00 AM",
     "12:00 PM", "3:00 PM", "6:00 PM", "9:00 PM",
@@ -1052,7 +1058,14 @@ def run_multi_channel_scheduler(
                             except Exception:
                                 pass
 
-                            vps_time_slots = (vps_config or {}).get("time_slots", _DEFAULT_TIME_SLOTS_FALLBACK)
+                            # LONG_FORM_TZ_PEAK_WINDOW_PHASE1: use the canonical
+                            # US-ET peak slots as the ET base (identical to the
+                            # shorts path scheduler.py:90), NOT the bare per-account
+                            # time_slots. These ET slots get DST-converted to the
+                            # channel account tz inside schedule_all_visible via the
+                            # channel_tz forwarded below (#847 conversion path), so
+                            # long-form publishes at the US peak for EVERY channel.
+                            vps_time_slots = get_peak_slots_et()
 
                             # LONG_FORM_SCHEDULING_ENABLE_PHASE1: per-channel per-pass
                             # ROTATION budget (mirror of the shorts #858 fairness fix).
@@ -1071,29 +1084,23 @@ def run_multi_channel_scheduler(
                                 vps_per_pass = 8
                             vps_max = min(max_per_channel, vps_per_pass)  # rotation-budgeted
 
-                            # LONG_FORM_SCHEDULING_ENABLE_PHASE1 TZ GAP (#847 follow-up):
-                            # ContentPageScheduler.schedule_all_visible() calls
-                            # tracker.get_next_available_slot(time_slots) WITHOUT channel_tz,
-                            # so these bare times are typed AS-IS in the Studio account's own
-                            # tz (no ET-peak -> account-tz conversion like the shorts path does
-                            # via scheduler.py self.channel_tz). For ET-account channels
-                            # (foundups/antifafm) this is tz-coherent; for Asia/Tokyo channels
-                            # (move2japan/undaodu) the wall-clock is NOT the US-ET peak. Full
-                            # correctness requires forwarding channel_tz through
-                            # schedule_all_visible (out of scope here: cps.py). Surface it.
-                            vps_tz = (vps_config or {}).get("timezone") or "as-is"
-                            if vps_tz not in ("America/New_York", "as-is"):
-                                print(
-                                    f"[VIDEO][TZ-WARN] {channel_key}: long-form slots typed "
-                                    f"naively in account tz '{vps_tz}' (NOT #847 ET-peak "
-                                    f"converted). Follow-up: forward channel_tz through "
-                                    f"schedule_all_visible before enabling for this channel."
-                                )
+                            # LONG_FORM_TZ_PEAK_WINDOW_PHASE1 (#847 follow-up, GAP CLOSED):
+                            # The channel's Studio-account tz (registry field) is now
+                            # forwarded into schedule_all_visible, which DST-converts the
+                            # canonical ET peak slots above to that account's local
+                            # wall-clock -- identical to the shorts path
+                            # (scheduler.py self.channel_tz). So long-form publishes at the
+                            # US-ET peak for EVERY channel: identity for ET-account channels
+                            # (foundups/antifafm), shifted for Asia/Tokyo (move2japan/undaodu).
+                            vps_channel_tz = (vps_config or {}).get("timezone")
+                            vps_tz = vps_channel_tz or "as-is"
 
                             # LONG_FORM_SCHEDULING_ENABLE_PHASE1 breadcrumb: pass is running.
+                            # tz here is now the ET->account conversion target, not a warning.
                             print(
                                 f"[VIDEO][LONG-FORM] {channel_key}: pass START "
-                                f"(budget={vps_max}/pass, max_per_day=4, tz={vps_tz})"
+                                f"(budget={vps_max}/pass, max_per_day=4, "
+                                f"ET-peak->tz={vps_tz})"
                             )
 
                             vps_results = asyncio.run(
@@ -1103,6 +1110,7 @@ def run_multi_channel_scheduler(
                                     max_per_day=4,  # Lower rate for long-form videos
                                     max_videos=vps_max,
                                     stop_event=stop_event,
+                                    channel_tz=vps_channel_tz,
                                 )
                             )
 
