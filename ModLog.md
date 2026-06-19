@@ -1,5 +1,31 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-19] Hermes Fusion ALIAS Mode Phase 2 (Lane W6, AUTHOR + internal SENTINEL, valve-gated live egress OFF)
+
+**Change Type**: First LIVE OpenRouter integration -- VALVE-GATED OFF by default. NO live call on landing,
+NO new dependency (reuses `requests`), NO key logged, NO raw retained, advisory only. Opened DRAFT.
+**By**: 0102 (Worker-Lane W6) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP References**: WSP 11, WSP 50, WSP 84, WSP 97
+**Slice**: HERMES_FUSION_ALIAS_MODE_PHASE2
+**Predecessors**: #832 (contract `7bd68e73a`), #842 (redaction gate `972d082a0`)
+**Base**: `005dd3629` (origin/main; #842 landed)
+
+- ADD `modules/communication/moltbot_bridge/src/fusion_alias_live.py` -- valve-gated, redaction-gated,
+  advisory-only ALIAS live path. A network call requires ALL of: env flag FUSION_ALIAS_LIVE_ENABLED ON
+  (default OFF) + typed LiveFusionAuthorization (authority 012, not bool-coercible) + redaction gate PASSED
+  + OPENROUTER_API_KEY + bounded budget/timeout. Raw text redacted ON ENTRY; only redacted prompt/context
+  sent to openrouter/fusion via the reused `requests` client; only digests retained; key never logged.
+  One bounded POST, no stream, no retry. Advisory ModelContributionReceipt (advisory_not_canonical=True;
+  redaction_status=REDACTION_GATE_PASSED). Response re-scanned before any bounded summary enters the receipt.
+  Manual smoke in `__main__` (--authorize-012) -- not a pytest, never in CI.
+- ADD `modules/communication/moltbot_bridge/tests/test_fusion_alias_live.py` -- 33 tests over 5 sentinel
+  lanes; network MOCKED, synthetic keys, no skip/xfail. 138 pass (33 alias + 65 gate + 40 adapter regression).
+- EDIT `INTERFACE.md` + module ModLog -- alias surface, manual-smoke command, 28-row WSP_97 table (declared==actual==28).
+- `fusion_adapter` UNCHANGED (ALIAS/SERVER_TOOL/LOCAL_FALLBACK still raise via MockFusionAdapter; FusionRequest
+  stays digest-only). Boundaries honored; ASCII-clean (0 non-ASCII, no mojibake). Internal SENTINEL (5 lanes) ran.
+  DRAFT PR; STOP at MERGE_READY (external 0102 gate). Next (NOT this slice): operationally flipping the valve is a
+  separate sovereign action; SERVER_TOOL mode is later.
+
 ## [2026-06-19] Hermes Fusion Redaction Gate Phase 1 (Lane W6, AUTHOR + internal SENTINEL, security precondition)
 
 **Change Type**: SECURITY-CRITICAL redaction gate + adversarial tests + module docs. NO live OpenRouter,
