@@ -2,6 +2,7 @@
 # Metadata (YAML Frontmatter)
 name: shorts_live_schedule_signal
 description: Read-only LIVE shorts-list signals - accurate "Has schedule" scheduled count (fixes the [CPS-AUDIT] false-0) + per-video view count -> low-viewed signal (agent-invoked)
+domain: youtube  # WRE auto-fire tag (SkillTriggerMixin domain-discovery, skill_trigger.py:91-115) -> the youtube DAE discovers+fires this every cadence cycle. COST GATE: the live DOM round-trip is costly + contends with the daemon browser, so the executor SELF-GATES on YT_LIVE_SCHEDULE_SIGNAL_ENABLED (default "0"): auto-fires but NO-OPs (no browser, no scrape) until 012 sets it to "1" (SHORTS_SKILLZ_AUTONOMOUS_REGISTRATION_PHASE1)
 version: 1.0_prototype
 author: 0102
 created: 2026-06-19
@@ -177,6 +178,27 @@ python -m modules.platform_integration.youtube_shorts_scheduler.skillz.shorts_li
 - Mode B re-schedule / apply (mutating) -- this skill is strictly read-only.
 - Wiring this signal into the scheduler ordering / `what_should_i_schedule` ranking.
 - music-vs-talk content gate.
+
+---
+
+## Auto-fire self-gate (cost control)
+
+This skill now carries `domain: youtube`, so the youtube DAE's WRE trigger discovers
+and fires it every cadence cycle WITHOUT manual invocation. But the live signal is a
+DOM round-trip (browser cost + contention with the daemon's own browser), so firing it
+unconditionally every ~10m is wasteful. The executor therefore **self-gates**:
+
+- `run_skill(...)` checks `os.getenv("YT_LIVE_SCHEDULE_SIGNAL_ENABLED", "0")`. When it is
+  not `"1"`, it returns a NO-OP result immediately -- it does **NOT** touch the browser,
+  does **NOT** apply the filter, does **NOT** scrape the DOM. The no-op result carries
+  `skipped=true`, `skip_reason="disabled_by_flag"`, `scheduled_count=null` (UNKNOWN,
+  never a false 0), and still emits the breadcrumb/PatternMemory so the WRE records that
+  the skill fired-but-skipped.
+- When `YT_LIVE_SCHEDULE_SIGNAL_ENABLED=1`, it runs exactly as before (live DOM read).
+
+Net: the skill auto-fires (no orphan), but is **default-off** so 012 enables the live
+cost explicitly. `reschedule_plan` / `what_should_i_schedule` have NO such gate -- they
+are cheap, offline, read-only and safe to auto-fire every cycle.
 
 ---
 

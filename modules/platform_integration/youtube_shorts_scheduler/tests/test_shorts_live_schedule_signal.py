@@ -31,6 +31,7 @@ import pytest
 
 from modules.platform_integration.youtube_shorts_scheduler.skillz.shorts_live_schedule_signal.executor import (
     DEFAULT_LOW_VIEW_THRESHOLD,
+    LIVE_SIGNAL_ENABLED_ENV,
     parse_row_signal,
     parse_view_count,
     read_live_schedule_signal,
@@ -279,8 +280,9 @@ def test_signal_responds_to_dom_not_static():
 # Signal emission: breadcrumb + PatternMemory must be invoked.
 # ---------------------------------------------------------------------------
 
-def test_run_skill_emits_breadcrumb_and_pattern_memory():
+def test_run_skill_emits_breadcrumb_and_pattern_memory(monkeypatch):
     """run_skill must emit a live_schedule_signal breadcrumb AND a SkillOutcome."""
+    monkeypatch.setenv(LIVE_SIGNAL_ENABLED_ENV, "1")  # enable live read for this test
     with patch(
         "modules.communication.livechat.src.breadcrumb_telemetry.get_breadcrumb_telemetry"
     ) as bc, patch(
@@ -311,8 +313,9 @@ def test_run_skill_emits_breadcrumb_and_pattern_memory():
     assert result["outcome_stored"] is True
 
 
-def test_run_skill_no_driver_returns_unknown_not_zero():
-    """No live browser -> scheduled_count None (UNKNOWN), never a false 0."""
+def test_run_skill_no_driver_returns_unknown_not_zero(monkeypatch):
+    """No live browser (flag ON) -> scheduled_count None (UNKNOWN), never a false 0."""
+    monkeypatch.setenv(LIVE_SIGNAL_ENABLED_ENV, "1")  # enabled; gate passes, driver None
     with patch(
         "modules.communication.livechat.src.breadcrumb_telemetry.get_breadcrumb_telemetry"
     ), patch(
@@ -326,8 +329,9 @@ def test_run_skill_no_driver_returns_unknown_not_zero():
     assert result["success"] is False
 
 
-def test_run_skill_no_signals_skips_emission():
+def test_run_skill_no_signals_skips_emission(monkeypatch):
     """emit_signals=False must NOT emit breadcrumb/outcome (diagnostic path)."""
+    monkeypatch.setenv(LIVE_SIGNAL_ENABLED_ENV, "1")  # enable live read for this test
     with patch(
         "modules.communication.livechat.src.breadcrumb_telemetry.get_breadcrumb_telemetry"
     ) as bc, patch(
@@ -348,6 +352,126 @@ def test_run_skill_no_signals_skips_emission():
 
 def test_default_low_view_threshold_is_sane():
     assert DEFAULT_LOW_VIEW_THRESHOLD == 100
+
+
+# ---------------------------------------------------------------------------
+# Auto-fire COST self-gate (SHORTS_SKILLZ_AUTONOMOUS_REGISTRATION_PHASE1).
+# The skill now carries `domain: youtube` and auto-fires every cadence cycle.
+# A live DOM round-trip is costly + contends with the daemon browser, so the
+# executor SELF-GATES on YT_LIVE_SCHEDULE_SIGNAL_ENABLED (default "0"):
+#   - flag OFF  -> NO-OP: filter applier + scrape are NEVER called, no DOM touch.
+#   - flag ON   -> runs as before (mock scrape drives an accurate count).
+# These are the load-bearing non-vacuity assertions: a regression that scrapes
+# the DOM while the flag is off FAILS (assert the scrape/filter not called).
+# ---------------------------------------------------------------------------
+
+def test_disabled_by_default_no_ops_without_touching_dom(monkeypatch):
+    """Flag OFF (default): no browser/filter/scrape, scheduled_count UNKNOWN not 0.
+
+    The apply_filter_fn and scrape_fn are MagicMocks that MUST NOT be invoked.
+    If the executor scrapes the DOM while disabled, these assertions FAIL.
+    """
+    monkeypatch.delenv(LIVE_SIGNAL_ENABLED_ENV, raising=False)  # ensure default-off
+
+    apply_filter_spy = MagicMock(return_value=True)
+    scrape_spy = MagicMock(return_value=_mock_rows_present_schedule())
+
+    with patch(
+        "modules.communication.livechat.src.breadcrumb_telemetry.get_breadcrumb_telemetry"
+    ), patch(
+        "modules.infrastructure.wre_core.src.pattern_memory.PatternMemory"
+    ), patch(
+        "modules.infrastructure.wre_core.src.pattern_memory.SkillOutcome"
+    ):
+        result = run_skill(
+            channel="UC_FOUNDUPS",
+            driver=MagicMock(),               # a driver IS available...
+            apply_filter_fn=apply_filter_spy,  # ...but these must NOT be called
+            scrape_fn=scrape_spy,
+            emit_signals=True,
+        )
+
+    # The DOM was NOT touched (the whole point of the cost gate).
+    apply_filter_spy.assert_not_called()
+    scrape_spy.assert_not_called()
+
+    assert result["skipped"] is True
+    assert result["skip_reason"] == "disabled_by_flag"
+    assert result["scheduled_count"] is None         # UNKNOWN, never a false 0
+    assert result["scheduled_count"] != 0
+    assert result["scheduled_count_status"] == "skipped_disabled_by_flag"
+    assert result["enabled_env"] == LIVE_SIGNAL_ENABLED_ENV
+
+
+def test_disabled_explicit_zero_no_ops(monkeypatch):
+    """Flag explicitly '0' also no-ops (not just unset)."""
+    monkeypatch.setenv(LIVE_SIGNAL_ENABLED_ENV, "0")
+    scrape_spy = MagicMock(return_value=_mock_rows_present_schedule())
+    with patch(
+        "modules.communication.livechat.src.breadcrumb_telemetry.get_breadcrumb_telemetry"
+    ), patch(
+        "modules.infrastructure.wre_core.src.pattern_memory.PatternMemory"
+    ), patch(
+        "modules.infrastructure.wre_core.src.pattern_memory.SkillOutcome"
+    ):
+        result = run_skill(
+            channel="UC_FOUNDUPS",
+            driver=MagicMock(),
+            apply_filter_fn=_filter_ok,
+            scrape_fn=scrape_spy,
+            emit_signals=False,
+        )
+    scrape_spy.assert_not_called()
+    assert result["skipped"] is True
+    assert result["scheduled_count"] is None
+
+
+def test_disabled_no_op_still_emits_signals(monkeypatch):
+    """Even when skipped, the fired-but-skipped run is recorded (breadcrumb + outcome)."""
+    monkeypatch.delenv(LIVE_SIGNAL_ENABLED_ENV, raising=False)
+    with patch(
+        "modules.communication.livechat.src.breadcrumb_telemetry.get_breadcrumb_telemetry"
+    ) as bc, patch(
+        "modules.infrastructure.wre_core.src.pattern_memory.PatternMemory"
+    ) as pm, patch(
+        "modules.infrastructure.wre_core.src.pattern_memory.SkillOutcome"
+    ):
+        result = run_skill(
+            channel="UC_FOUNDUPS",
+            driver=MagicMock(),
+            apply_filter_fn=_filter_ok,
+            scrape_fn=lambda d: _mock_rows_present_schedule(),
+            emit_signals=True,
+        )
+        bc.return_value.store_breadcrumb.assert_called_once()
+        pm.return_value.store_outcome.assert_called_once()
+    assert result["skipped"] is True
+    assert result["breadcrumb_emitted"] is True
+    assert result["outcome_stored"] is True
+
+
+def test_enabled_runs_live_path_and_scrapes(monkeypatch):
+    """Flag ON: the gate passes, the (mock) scrape IS called, accurate count returned."""
+    monkeypatch.setenv(LIVE_SIGNAL_ENABLED_ENV, "1")
+    scrape_spy = MagicMock(return_value=_mock_rows_present_schedule())
+    with patch(
+        "modules.communication.livechat.src.breadcrumb_telemetry.get_breadcrumb_telemetry"
+    ), patch(
+        "modules.infrastructure.wre_core.src.pattern_memory.PatternMemory"
+    ), patch(
+        "modules.infrastructure.wre_core.src.pattern_memory.SkillOutcome"
+    ):
+        result = run_skill(
+            channel="UC_FOUNDUPS",
+            driver=MagicMock(),
+            apply_filter_fn=_filter_ok,
+            scrape_fn=scrape_spy,
+            emit_signals=True,
+        )
+    scrape_spy.assert_called_once()                  # the DOM read DID happen when enabled
+    assert result.get("skipped") is not True
+    assert result["scheduled_count"] == 3            # accurate, mock-driven
+    assert result["success"] is True
 
 
 if __name__ == "__main__":

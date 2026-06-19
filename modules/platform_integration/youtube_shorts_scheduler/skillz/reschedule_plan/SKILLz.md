@@ -2,6 +2,7 @@
 # Metadata (YAML Frontmatter)
 name: reschedule_plan
 description: Compute a dry-run REBALANCE PLAN for over-crowded schedule days -- move count>cap excess onto under-target upcoming days into US-ET peak slots per channel tz (read-only, agent-invoked; apply is Phase 2)
+domain: youtube  # WRE auto-fire tag (SkillTriggerMixin domain-discovery, skill_trigger.py:91-115) -> the youtube DAE fires this every cadence cycle. Cheap+offline+dry-run, safe to auto-fire (SHORTS_SKILLZ_AUTONOMOUS_REGISTRATION_PHASE1)
 version: 1.0_prototype
 author: 0102
 created: 2026-06-19
