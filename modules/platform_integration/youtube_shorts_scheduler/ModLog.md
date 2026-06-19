@@ -1,5 +1,62 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-06-19 - reschedule_apply: flag-gated MUTATING apply of the #851 plan (Mode B Phase 2, DEFAULT DRY-RUN)
+
+**By:** 0102 (Worker-Lane RESCHED-APPLY)
+**Slice:** SHORTS_RESCHEDULE_APPLY_PHASE2
+**WSP References:** WSP 95 (SKILLz Wardrobe), WSP 77 (Agent Coordination), WSP 91 (Observability), WSP 60/48 (Pattern Memory), WSP 84 (Code Reuse: planner + date/time picker + shadow_dom_finder + cap), WSP 50 (flag-gated mutation, default read-only), WSP 27 (Phase 0 KNOWLEDGE), WSP 22 (ModLog), WSP 49 (Structure)
+
+### Problem
+
+The #851 `reschedule_plan` SKILLz produces a dry-run rebalance PLAN (move rows
+`{channel_id, channel_name, from_date, to_date, slot_et, slot_local, video_id}`) for
+over-crowded days, but had no applier. Phase 2 is the MUTATING apply -- built FLAG-GATED
+and DEFAULT DRY-RUN so merging this code mutates NOTHING.
+
+### What changed (default dry-run; merge mutates nothing)
+
+1. **`src/reschedule_applier.py`** -- `apply_moves` / `apply_plan` consume the #851 plan rows.
+   DEFAULT DRY-RUN: each eligible move is only LOGGED as `would move <video> <from> -> <to>
+   @ <slot_local>` plus a per-move breadcrumb (WSP 91) + PatternMemory SkillOutcome (WSP 60/48,
+   status `dry_run`). The DOM picker/save helpers are NEVER called in dry-run. Real apply happens
+   ONLY when env `YT_RESCHEDULE_APPLY == "1"` (default `"0"`) AND a live driver is connected.
+   Safety: `(needs-live-list)` rows -> skipped (`needs_live_list`); per-channel target-day cap
+   re-checked, over-cap -> skipped (`cap`); per-move try/except so one failure never aborts the batch.
+2. **`src/dom_automation.py`** -- reschedule-popup entry helpers (WSP 84 reuse):
+   `open_scheduled_edit_popup(video_id)` clicks the list row's "Scheduled" `span.label-span`
+   (shadow-pierced via `shadow_dom_finder.first_deep`) to open `ytcp-video-visibility-edit-popup`,
+   then `reschedule_open_set_save(date, time, video_id)` reuses the EXISTING `set_schedule_date`
+   (`:2947`), `set_schedule_time` (`:3098`), `click_done` (`:3200`), `click_save` (`:2703`)
+   UNCHANGED -- the popup exposes the same `ytcp-datetime-picker`. `slot_local` is the
+   ready-to-type bare 12h Studio time (ET->channel-tz, #847), typed directly.
+3. **`skillz/reschedule_apply/`** -- `executor.run_skill` (wraps `apply_plan`) + `run_skill.py`
+   (`--json`, dry-run by construction over the subprocess surface) + `SKILLz.md`. Mirrors the
+   #850/#851 read-only/agent-invoked pattern; 012 only observes outcomes and flips the env flag.
+4. **`youtube_automation_adapter.py`** -- `reschedule_apply` action + aliases
+   (`apply_reschedule`, `rebalance_apply`, `reschedule_apply_plan`) + `_build_reschedule_apply_command`
+   + dispatch branch (`youtube action reschedule_apply`).
+
+### Live gap (honest)
+
+The DOM apply path is MOCK-TESTED only (no live browser run). 012 enables `YT_RESCHEDULE_APPLY=1`,
+supplies a connected driver through the daemon, and live-validates the popup picker against real
+Studio before trusting apply.
+
+### Tests (mock-only, NON-VACUOUS, no live browser)
+
+`tests/test_reschedule_applier.py` (15 tests, all pass): dry-run default -> picker/save NOT called,
+moves logged; `YT_RESCHEDULE_APPLY=1` -> picker called with the EXACT date+time per move;
+over-cap -> skipped (`cap`); `(needs-live-list)` -> skipped; per-move error -> batch continues;
+signals emitted per move. Non-vacuity proven: temporarily disabling the dry-run guard FAILS
+`test_dryrun_must_not_call_dom_helpers` + `test_dryrun_default_logs_moves_without_dom`, then reverted.
+
+### Out of scope (NOT built here)
+
+The planner (done #851); wiring into the scheduler loop/cadence; view-based ("low-viewed first")
+selection; the music-vs-talk gate; naming `(needs-live-list)` videos from the live list.
+
+---
+
 ## 2026-06-19 - shorts_live_schedule_signal SKILLz: live "Has schedule" count fix + per-video view signal (read-only)
 
 **By:** 0102 (Worker-Lane LIVE-SIGNAL)
