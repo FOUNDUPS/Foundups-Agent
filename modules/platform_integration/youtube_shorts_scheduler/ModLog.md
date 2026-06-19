@@ -1,5 +1,57 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-06-19 - Long-form uses US-ET peak + per-channel Studio-tz conversion (match shorts)
+
+**By:** 0102 (Worker-Lane LONGFORM-TZ)
+**Slice:** LONG_FORM_TZ_PEAK_WINDOW_PHASE1  (#847 follow-up; closes the #859 TZ gap)
+**WSP References:** WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (Pre-Action), WSP 84 (Code Reuse: reuse `get_peak_slots_et` + `get_next_available_slot(channel_tz=...)` from #847, mirror the shorts path), WSP 97 (truth signaling)
+
+### Why (the long-form TZ gap, closed)
+The shorts path publishes at the US-ET peak for EVERY channel: `scheduler.py:90` uses
+`get_peak_slots_et()` and `scheduler.py:457-461` passes `channel_tz=self.channel_tz` into
+`tracker.get_next_available_slot(...)`, which DST-converts ET -> Studio-account tz
+(`schedule_tracker.py:251-252` via `peak_window.convert_et_to_channel_tz`, #847).
+The long-form path did NOT: `ContentPageScheduler.schedule_all_visible` called
+`tracker.get_next_available_slot(time_slots, max_per_day)` WITHOUT `channel_tz`
+(`content_page_scheduler.py:896` on origin/main `c1b475a06`), using the bare
+`_DEFAULT_TIME_SLOTS_FALLBACK` typed AS-IS in the account's own tz. For the Asia/Tokyo
+channels (`move2japan`/`undaodu`) that meant 08:00 ET was typed as 8:00 AM JST -- the WRONG
+US wall-clock (off the US peak). The #859 ModLog named exactly this follow-up.
+
+### What changed (minimal; mirror the shorts path)
+- **`content_page_scheduler.py` `schedule_all_visible`**: added `channel_tz: Optional[str] = None`
+  and forward it into `get_next_available_slot(time_slots, max_per_day, channel_tz=channel_tz)`.
+  When set, each ET base slot is DST-converted to the account-local wall-clock before the bare
+  time is typed (identity for ET accounts, shifted for Tokyo). Backwards compatible (None = old).
+- **`scripts/launch.py` long-form block**: now uses `get_peak_slots_et()` as the ET base slots
+  (was the bare per-account `time_slots`/`_DEFAULT_TIME_SLOTS_FALLBACK`) AND forwards
+  `channel_tz=<registry timezone>` into `schedule_all_visible`. The old `[VIDEO][TZ-WARN]`
+  "would publish off-peak" condition is REMOVED (the times are now correct); the
+  `[VIDEO][LONG-FORM] pass START` breadcrumb now reads `ET-peak->tz=<tz>` (info, not warning).
+  `_DEFAULT_TIME_SLOTS_FALLBACK` is retained for reference only with a do-not-reintroduce note.
+- **Master gate `YT_VIDEO_PROCESSING_ENABLED` unchanged & DEFAULT OFF** — enabling long-form
+  is still 012's call; this slice only makes the TIMES correct when enabled.
+
+### Tests (mock-only, non-vacuous, NO browser)
+`tests/test_long_form_tz_peak_window.py` (7 tests) drives the REAL `schedule_all_visible` with a
+REAL `ScheduleTracker`, stubbing only the DOM row-read + per-row Studio click flow to capture the
+time string that WOULD be typed:
+- Tokyo 08:00 ET -> ~21:00 JST (summer/EDT) and ~22:00 JST (winter/EST) -> DST proven (summer !=
+  winter); full-day peaks (08/12/20 ET) -> 21:00/01:00/09:00 JST in order;
+- NY 08:00 ET -> ~8:00 AM (identity); Tokyo vs NY diverge (PM vs AM) for the same ET slot;
+- MUST-FAIL probe: the no-`channel_tz` path types bare ET while the with-tz path types JST evening.
+**MUST-FAIL on origin/main:** verified -- all 7 fail there with
+`TypeError: schedule_all_visible() got an unexpected keyword argument 'channel_tz'` (the param
+does not exist pre-slice). The #859 `test_long_form_scheduling_enable.py` mock was updated to
+accept the new kwarg; it + `test_peak_window.py` + `test_scheduler.py` stay green (no regression).
+
+### Scope
+Touched: `content_page_scheduler.py` (`schedule_all_visible` channel_tz), `scripts/launch.py`
+(ET peaks + thread channel_tz, drop TZ-WARN), the new test, the #859 test mock, this ModLog.
+Did NOT touch: the enable flag, private path, indexing, shorts path, the rotation budget, the
+other `get_next_available_slot` call sites (`resolve_conflicts`/`thin_schedule` — calendar helpers,
+not the long-form launch path).
+
 ## 2026-06-19 - Enable long-form video scheduling for all 4 channels (flag-gated, default OFF)
 
 **By:** 0102 (Worker-Lane LONGFORM-SCHED)

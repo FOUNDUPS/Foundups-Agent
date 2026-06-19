@@ -843,16 +843,26 @@ class ContentPageScheduler:
         max_per_day: int = 8,
         max_videos: int = 9999,
         stop_event=None,
+        channel_tz: Optional[str] = None,
     ) -> Dict:
         """
         Schedule all visible unlisted videos on the current content page.
 
         Args:
             tracker: ScheduleTracker instance for slot management
-            time_slots: List of base time slots like ["12:00 AM", "3:00 AM", ...]
+            time_slots: Canonical US-Eastern (ET) peak slots, e.g.
+                ["08:00", "12:00", "20:00"]. These describe the desired
+                US-audience publish time in ET (also accepts 12h "8:00 AM").
             max_per_day: Max videos per day
             max_videos: Max total videos to schedule
             stop_event: Optional threading.Event for cooperative abort
+            channel_tz: IANA tz of the channel's Studio account
+                (e.g. "Asia/Tokyo", "America/New_York"). When provided, each ET
+                base slot is converted (DST-aware) to that account's local
+                wall-clock before the bare time is typed into Studio, so
+                long-form publishes at the US-ET peak for EVERY channel -- the
+                same contract the shorts path uses (#847). When None the slot is
+                typed as-is (backwards compatible).
 
         Returns:
             Dict with scheduled count, errors, video details
@@ -892,8 +902,13 @@ class ContentPageScheduler:
                 results["total_skipped"] += 1
                 continue
 
-            # Get next available slot
-            slot = tracker.get_next_available_slot(time_slots, max_per_day)
+            # Get next available slot. Forward channel_tz so the canonical ET
+            # peak slot is DST-converted to the channel account's local
+            # wall-clock before typing (identity for ET-account channels;
+            # shifts for Asia/Tokyo etc.). Mirrors the shorts path (#847).
+            slot = tracker.get_next_available_slot(
+                time_slots, max_per_day, channel_tz=channel_tz
+            )
             if slot is None:
                 logger.warning("[CPS] No more available slots — stopping")
                 break

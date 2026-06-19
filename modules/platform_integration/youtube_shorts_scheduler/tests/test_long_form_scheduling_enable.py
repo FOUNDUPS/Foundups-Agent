@@ -96,6 +96,7 @@ class _FakeContentPageScheduler:
     instances = 0                      # count constructions (flag-off must stay 0)
     schedule_calls = []                # list of (channel_key, max_videos)
     nav_calls = []                     # list of (channel_key, content_type)
+    tz_calls = []                      # list of (channel_key, channel_tz, time_slots)
 
     def __init__(self, driver):
         self.driver = driver
@@ -108,9 +109,11 @@ class _FakeContentPageScheduler:
         return True
 
     async def schedule_all_visible(self, tracker, time_slots, max_per_day=8,
-                                   max_videos=9999, stop_event=None):
+                                   max_videos=9999, stop_event=None,
+                                   channel_tz=None):
         ch = self._channel_key
         _FakeContentPageScheduler.schedule_calls.append((ch, max_videos))
+        _FakeContentPageScheduler.tz_calls.append((ch, channel_tz, list(time_slots)))
         scheduled = min(max_videos, _LONGFORM_BACKLOG)
         return {
             "total_scheduled": scheduled,
@@ -130,6 +133,7 @@ def _reset_recorders():
     _FakeContentPageScheduler.instances = 0
     _FakeContentPageScheduler.schedule_calls = []
     _FakeContentPageScheduler.nav_calls = []
+    _FakeContentPageScheduler.tz_calls = []
 
 
 @pytest.fixture
