@@ -10,12 +10,14 @@ Supported actions:
   indexing          -> video indexer CLI
   scheduling        -> shorts scheduler CLI
   schedule_priority -> what_should_i_schedule SKILLz (read-only channel need ranking)
+  reschedule_plan   -> reschedule_plan SKILLz (dry-run rebalance PLAN for over-cap days; apply is Phase 2)
 
 Examples:
   youtube action comments channel=move2japan max_comments=3 like=true heart=true reply=false
   youtube action indexing channel=undaodu batch_size=5
   youtube action scheduling channel=foundups max_videos=3 dry_run=true
   youtube action schedule_priority upcoming_days=7
+  youtube action reschedule_plan horizon_days=90
 """
 
 from __future__ import annotations
@@ -29,7 +31,13 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
 
-SUPPORTED_ACTIONS = {"comments", "indexing", "scheduling", "schedule_priority"}
+SUPPORTED_ACTIONS = {
+    "comments",
+    "indexing",
+    "scheduling",
+    "schedule_priority",
+    "reschedule_plan",
+}
 
 ACTION_ALIASES = {
     "comment": "comments",
@@ -44,6 +52,10 @@ ACTION_ALIASES = {
     "what_should_i_schedule": "schedule_priority",
     "schedule_next": "schedule_priority",
     "scheduling_priority": "schedule_priority",
+    # reschedule_plan SKILLz: dry-run rebalance PLAN for over-cap days (apply=Phase 2)
+    "reschedule": "reschedule_plan",
+    "rebalance": "reschedule_plan",
+    "rebalance_plan": "reschedule_plan",
 }
 
 # Repo root: modules/communication/moltbot_bridge/src -> parents[4]
@@ -290,6 +302,25 @@ def _build_schedule_priority_command(params: Dict[str, str]) -> list[str]:
     return cmd
 
 
+def _build_reschedule_plan_command(params: Dict[str, str]) -> list[str]:
+    """Build the dry-run reschedule_plan SKILLz invocation.
+
+    Agent/DAE-invoked rebalance PLAN for over-crowded schedule days. Read-only:
+    no browser, no mutation, no live model. The mutating apply is a Phase-2 slice.
+    """
+    cmd = [
+        sys.executable,
+        "-m",
+        "modules.platform_integration.youtube_shorts_scheduler.skillz.reschedule_plan.run_skill",
+        "--horizon-days",
+        str(_int_param(params, "horizon_days", 90)),
+        "--json",
+    ]
+    if _truthy(params.get("no_signals", "false")):
+        cmd.append("--no-signals")
+    return cmd
+
+
 async def execute_youtube_action(action: str, params: Dict[str, str]) -> Dict[str, Any]:
     if action == "comments":
         cmd = _build_comments_command(params)
@@ -320,6 +351,21 @@ async def execute_youtube_action(action: str, params: Dict[str, str]) -> Dict[st
 
     if action == "schedule_priority":
         cmd = _build_schedule_priority_command(params)
+        timeout_s = _int_param(params, "timeout_s", 120)
+        run_result = await asyncio.to_thread(_run_subprocess, cmd, timeout_s)
+        parsed = _extract_json_tail(run_result.get("stdout_tail", ""))
+        success = bool(run_result.get("success", False))
+        if isinstance(parsed, dict) and parsed.get("success") is False:
+            success = False
+        return {
+            "success": success,
+            "action": action,
+            "result": parsed,
+            **run_result,
+        }
+
+    if action == "reschedule_plan":
+        cmd = _build_reschedule_plan_command(params)
         timeout_s = _int_param(params, "timeout_s", 120)
         run_result = await asyncio.to_thread(_run_subprocess, cmd, timeout_s)
         parsed = _extract_json_tail(run_result.get("stdout_tail", ""))

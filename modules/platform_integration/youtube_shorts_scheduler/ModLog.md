@@ -1,5 +1,75 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-06-19 - reschedule_plan SKILLz: dry-run rebalance PLAN for over-cap days (Mode B Phase 1)
+
+**By:** 0102 (Worker-Lane RESCHED-PLAN)
+**Slice:** SHORTS_RESCHEDULE_PLAN_PHASE1
+**WSP References:** WSP 95 (SKILLz Wardrobe), WSP 77 (Agent Coordination), WSP 91 (Observability), WSP 60/48 (Pattern Memory), WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (Pre-Action), WSP 84 (Code Reuse)
+
+### Problem
+
+Before the per-day cap landed (`HARD_CAP_PER_DAY = 3`, `src/schedule_tracker.py:30`, #844), the
+historical backlog was scheduled at up to 8/day. Those over-crowded days are now over the cap. The
+agent needs a PREVIEW PLAN that proposes moving the excess (`count > 3`) off each over-crowded day
+onto under-target upcoming days, into the US-ET peak slots converted per channel tz. This is the
+decision layer; the mutating DOM apply is a separate Phase-2 follow-up.
+
+### Phase 0 confirmation (verified, not assumed)
+
+1. **Tracker DATA MODEL = video<->date AND counts.** `ScheduleTracker` stores BOTH
+   `schedule: Dict[date_str, int]` (`src/schedule_tracker.py:100`) AND
+   `video_ids: Dict[date_str, List[str]]` (`:101`); both persisted (`:127-128`). So the plan NAMES
+   which videos move when ids are recorded. BUT `count` is authoritative and can exceed the recorded
+   id list (`set_count()` `:185-193` and `sync_from_youtube()` can leave `video_ids` incomplete, and
+   the historical 8/day backlog predates id tracking). Surplus moves beyond recorded ids are labelled
+   `video_id="(needs-live-list)"` -- naming those specific videos needs the LIVE Studio list (Phase 2).
+2. **Peak slots + per-channel tz CONFIRMED (#847).** `src/peak_window.py`: `get_peak_slots_et()`
+   returns ET `["08:00","12:00","20:00"]`; `convert_et_to_channel_tz(et_time, channel_tz, on_date)`
+   does the DST-aware ET->account-tz wall-clock conversion (verified: NY 08:00->8:00 AM identity,
+   Tokyo 08:00->10:00 PM JST, NY 20:00->8:00 PM).
+3. **SKILLz pattern CITED + mirrored (#850).** `skillz/what_should_i_schedule/{SKILLz.md, executor.py,
+   run_skill.py, __init__.py}` -- Skills 2.0 frontmatter, pure executor + lazy-imported breadcrumb /
+   PatternMemory emit helpers, JSON-tail `run_skill` entrypoint, `--agent-command` wiring in
+   `modules/communication/moltbot_bridge/src/youtube_automation_adapter.py` (action +
+   `_build_*_command` + dispatch). New skill mirrors this exactly.
+
+### Changes (DRY-RUN / read-only, agent-invoked -- NO manual-012 apply path)
+
+1. **New pure planner** `src/reschedule_planner.py`:
+   - `find_over_cap_days(schedule, cap)`: days with `count > cap`; `excess = count - cap`.
+   - `find_target_days(...)`: under-cap upcoming days (after today, within horizon), excluding the
+     over-crowded source days; nearest-first.
+   - `assign_peak_slot(slot_index, channel_tz, on_date)`: maps fill-index 0/1/2 to ET morning/lunch/
+     evening, converted to the channel tz (#847).
+   - `plan_channel_reschedule(...)`: for each over-cap day, place the excess on the nearest target
+     with free capacity, filling each target up to (NEVER over) the cap, assigning peak slots. Returns
+     `ChannelReschedulePlan` (moves + days_over_cap, total_moves, unplaceable_moves).
+   - `plan_all_channels(...)`: aggregates across registry shorts channels; `dry_run: True` always.
+2. **New SKILLz** `skillz/reschedule_plan/{SKILLz.md, executor.py, run_skill.py, __init__.py}`:
+   - `run_skill(...)`: runs the planner and emits a breadcrumb (`source_dae=youtube_shorts_scheduler`,
+     `event_type=reschedule_plan`, full plan in metadata) + a PatternMemory `SkillOutcome` per run.
+   - `DRY_RUN = True` constant pins the preview contract; the apply is Phase 2.
+3. **--agent-command wiring** in `youtube_automation_adapter.py`: `reschedule_plan` action +
+   aliases (`reschedule`/`rebalance`/`rebalance_plan`) + `_build_reschedule_plan_command` + dispatch.
+   `youtube action reschedule_plan [horizon_days=N] [no_signals=true]`.
+
+### Documented Phase-2 / future seams (NOT built here)
+
+- **DOM apply / mutation**: the `ytcp-video-visibility-edit-popup` date/time-picker applier that
+  consumes the plan rows (each row is a complete move instruction). Gated behind its own slice.
+- **View-based ("low-viewed first") prioritization**: choosing WHICH videos move by per-video view
+  counts -- needs view data NOT in the tracker (separate Phase-2 signal). Target-DAY selection here
+  is date-driven; the `find_target_days` / `_video_ids_for_excess` seams are where it would plug in.
+
+### Tests (mock-only, NON-VACUOUS)
+
+`tests/test_reschedule_planner.py` (14 tests, all pass): day at 5 -> exactly 2 moves with no target
+over cap; near target at cap-1 takes only 1; fully-<=cap schedule -> empty plan; NY identity +
+Tokyo-offset peak/tz assignment; recorded surplus ids NAMED + missing surplus -> `(needs-live-list)`;
+no-target-within-horizon -> unplaceable; breadcrumb + PatternMemory emit invoked; `--no-signals`
+skips emit. Non-vacuity PROVEN: sabotaging the planner to ignore over-cap days fails 9/14 (incl.
+`test_planner_must_not_ignore_over_cap`). Existing adapter suite still 9/9 green.
+
 ## 2026-06-19 - what_should_i_schedule SKILLz: channel scheduling-priority (Phase 1)
 
 **By:** 0102 (Worker-Lane SCHED-PRIORITY)
