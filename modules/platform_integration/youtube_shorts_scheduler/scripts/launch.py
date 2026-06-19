@@ -128,7 +128,8 @@ def _record_channel_result(channel_key: str, cache: dict, unlisted_count: int, s
 
 
 # ---------------------------------------------------------------------------
-# Schedule-priority steering (SHORTS_PRIORITY_WIRING_PHASE1)
+# Schedule-priority steering (SHORTS_PRIORITY_WIRING_PHASE1 +
+#                             YOUTUBE_SHORTS_ROTATION_LIVE_SCHEDULE_SIGNAL_PRIORITY_PHASE1)
 #
 # Flag-gated, default-off, fallback-safe. When YT_SCHEDULE_PRIORITY_ENABLED=1
 # we consume the read-only `what_should_i_schedule` ranking (deficit per channel
@@ -137,13 +138,30 @@ def _record_channel_result(channel_key: str, cache: dict, unlisted_count: int, s
 # schedule, so no work is lost by skipping them). On ANY error we return the
 # ORIGINAL channel order unchanged -> the scheduler never breaks. This only
 # orders/skips; it never mutates schedule content.
+#
+# LIVE SIGNAL WIRING: When BOTH YT_SCHEDULE_PRIORITY_ENABLED=1 AND
+# YT_LIVE_SCHEDULE_SIGNAL_ENABLED=1 AND a driver is supplied, the ranking uses
+# the live 'Has schedule' DOM check (shorts_live_schedule_signal) as the count
+# source instead of the offline tracker JSON. A channel that the live signal
+# confirms has 0 scheduled items gets a maximum-deficit override (ranks FIRST
+# regardless of what the tracker holds). If the live check fails for any channel
+# or the flag is off, that channel falls back to the offline tracker count
+# transparently (never drops a channel from the ranking).
 # ---------------------------------------------------------------------------
-def _prioritize_channels(channels: "list[str]") -> "list[str]":
+def _prioritize_channels(channels: "list[str]", driver=None) -> "list[str]":
     """Reorder `channels` (channel KEYS) highest scheduling-need first and drop
     deficit==0 channels, gated on YT_SCHEDULE_PRIORITY_ENABLED.
 
+    When YT_LIVE_SCHEDULE_SIGNAL_ENABLED=1 AND a driver is provided, the
+    ranking substitutes the live shorts_live_schedule_signal count for the
+    offline tracker count (deficit override when live says 0). If the live
+    check is disabled, unavailable, or fails for a channel, the offline tracker
+    count is used for that channel (fallback contract, never breaks).
+
     Args:
         channels: original rotation order (list of registry channel keys).
+        driver: optional Selenium WebDriver (already connected) for the live
+                DOM check. None -> offline tracker only (existing behavior).
 
     Returns:
         Reordered+filtered keys when the flag is on and ranking succeeds;
@@ -154,6 +172,7 @@ def _prioritize_channels(channels: "list[str]") -> "list[str]":
 
     try:
         from modules.platform_integration.youtube_shorts_scheduler.skillz.what_should_i_schedule.executor import (
+            build_live_count_fn,
             rank_channels_by_need,
         )
         from modules.infrastructure.shared_utilities.youtube_channel_registry import (
@@ -168,7 +187,33 @@ def _prioritize_channels(channels: "list[str]") -> "list[str]":
             if ch.get("id") and ch.get("key")
         }
 
-        ranking = rank_channels_by_need()  # read-only; reads persisted tracker JSON
+        # LIVE SIGNAL: when the flag is on AND a driver is available, build the
+        # live-aware count_fn. On any import error fall back gracefully (None ->
+        # rank_channels_by_need uses the default offline tracker count_fn).
+        live_count_fn = None
+        live_signal_active = False
+        if driver is not None and os.getenv("YT_LIVE_SCHEDULE_SIGNAL_ENABLED", "0") == "1":
+            try:
+                live_count_fn = build_live_count_fn(driver)
+                live_signal_active = True
+                logger.info("[PRIORITY] live schedule signal ACTIVE (YT_LIVE_SCHEDULE_SIGNAL_ENABLED=1)")
+            except Exception as _live_exc:
+                logger.warning(
+                    "[PRIORITY] build_live_count_fn failed; using offline tracker: %s", _live_exc,
+                )
+
+        # Build kwargs: inject live_count_fn only when available.
+        rank_kwargs = {}
+        if live_count_fn is not None:
+            rank_kwargs["count_fn"] = live_count_fn
+
+        ranking = rank_channels_by_need(**rank_kwargs)  # read-only; tracker or live
+
+        logger.info(
+            "[PRIORITY] ranking source=%s channels=%d",
+            "live" if live_signal_active else "offline_tracker",
+            len(ranking),
+        )
 
         # Walk the ranking in need order; keep only keys present in this
         # browser's rotation and whose deficit > 0 (something to schedule).
@@ -198,7 +243,7 @@ def _prioritize_channels(channels: "list[str]") -> "list[str]":
             logger.info("[PRIORITY] all channels at cap (deficit==0); using original order")
             return original
 
-        _emit_priority_breadcrumb(original, result, skipped)
+        _emit_priority_breadcrumb(original, result, skipped, live_signal_active=live_signal_active)
         logger.info(
             "[PRIORITY] reordered %s -> %s (skipped deficit==0: %s)",
             original, result, skipped,
@@ -210,18 +255,30 @@ def _prioritize_channels(channels: "list[str]") -> "list[str]":
         return channels
 
 
-def _emit_priority_breadcrumb(original: "list[str]", chosen: "list[str]", skipped: "list[str]") -> None:
-    """Emit a WSP 91 breadcrumb of the chosen priority order + skips (best-effort)."""
+def _emit_priority_breadcrumb(
+    original: "list[str]",
+    chosen: "list[str]",
+    skipped: "list[str]",
+    *,
+    live_signal_active: bool = False,
+) -> None:
+    """Emit a WSP 91 breadcrumb of the chosen priority order + skips (best-effort).
+
+    The `live_signal_active` flag is included in the metadata so the operator
+    (and WRE pattern memory) can tell whether the live DOM signal or the offline
+    tracker drove the ranking decision for this rotation pass (WSP 91 breadcrumb).
+    """
     try:
         from modules.communication.livechat.src.breadcrumb_telemetry import (
             get_breadcrumb_telemetry,
         )
 
+        signal_label = "live_schedule_signal" if live_signal_active else "offline_tracker"
         get_breadcrumb_telemetry().store_breadcrumb(
             source_dae="youtube_shorts_scheduler",
             event_type="schedule_priority_order",
             message=(
-                f"priority steer: {len(chosen)} channel(s) by need; "
+                f"priority steer [{signal_label}]: {len(chosen)} channel(s) by need; "
                 f"order={chosen}; skipped(deficit==0)={skipped}"
             ),
             phase="SHORTS_PRIORITY_WIRING",
@@ -229,6 +286,8 @@ def _emit_priority_breadcrumb(original: "list[str]", chosen: "list[str]", skippe
                 "original_order": original,
                 "chosen_order": chosen,
                 "skipped_sufficient": skipped,
+                "ranking_signal": signal_label,
+                "live_signal_active": live_signal_active,
             },
         )
     except Exception as exc:  # pragma: no cover - telemetry is best-effort
@@ -808,12 +867,6 @@ def run_multi_channel_scheduler(
     channels = BROWSER_CHANNELS[browser]
     port = BROWSER_PORTS[browser]
 
-    # SHORTS_PRIORITY_WIRING_PHASE1: flag-gated (default-off), fallback-safe.
-    # When YT_SCHEDULE_PRIORITY_ENABLED=1, reorder highest scheduling-need first
-    # and drop channels already at the hard cap (deficit==0). On the default flag
-    # OR any error this returns `channels` unchanged -> zero behavior change.
-    channels = _prioritize_channels(channels)
-
     # SHORTS_SCHEDULE_ROTATION_FAIRNESS_PHASE1: per-channel per-pass budget.
     # Without this, each channel is scheduled with max_videos=max_per_channel
     # (default 9999), so the FIRST channel drains its ENTIRE backlog (up to the
@@ -894,6 +947,15 @@ def run_multi_channel_scheduler(
     # Import scheduler components
     from modules.platform_integration.youtube_shorts_scheduler.src.scheduler import YouTubeShortsScheduler
     from modules.communication.video_comments.skillz.tars_account_swapper.account_swapper_skill import TarsAccountSwapper
+
+    # SHORTS_PRIORITY_WIRING_PHASE1 + YOUTUBE_SHORTS_ROTATION_LIVE_SCHEDULE_SIGNAL_PRIORITY_PHASE1:
+    # Priority steering is now done AFTER driver connect so the live 'Has schedule'
+    # DOM check (shorts_live_schedule_signal) can be wired in when
+    # YT_LIVE_SCHEDULE_SIGNAL_ENABLED=1. When the flag is off or driver is
+    # unavailable, _prioritize_channels degrades to offline tracker (no behavior
+    # change vs. the original SHORTS_PRIORITY_WIRING_PHASE1 path). On any error
+    # the original channel order is returned unchanged -> scheduler never breaks.
+    channels = _prioritize_channels(channels, driver=driver)
 
     results = {"browser": browser, "channels": {}}
 

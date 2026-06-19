@@ -22,8 +22,11 @@ WSP Compliance:
 
 Malleable seams (intentional):
     - DATA SOURCE is injected via `count_fn` (default: ScheduleTracker.get_count).
-      A future LIVE 'Has schedule' DOM verify or engagement-learning signal plugs in
-      here WITHOUT touching the ranking math.
+      The LIVE 'Has schedule' DOM signal (shorts_live_schedule_signal) plugs in via
+      `build_live_count_fn()` WITHOUT touching the ranking math. When the live check
+      says scheduled_count=0 for a channel, that channel gets per-date count=0
+      (maximum deficit override). When the live check fails or returns None for a
+      channel, the offline tracker count is used as fallback (never drops a channel).
     - NEED FORMULA is injected via `deficit_fn` (default: hard-cap deficit).
       Swap the rule (e.g. weight near-term days, fold in engagement) without touching
       data loading or ranking/sort.
@@ -102,6 +105,117 @@ def _default_count_fn(channel_id: str, date_str: str) -> int:
         return 0
     tracker = ScheduleTracker(channel_id)
     return tracker.get_count(date_str)
+
+
+# === Live-signal count_fn factory (YOUTUBE_SHORTS_ROTATION_LIVE_SCHEDULE_SIGNAL_PRIORITY_PHASE1)
+#
+# build_live_count_fn() creates a drop-in replacement for the offline `count_fn`
+# seam. It calls `shorts_live_schedule_signal.read_live_schedule_signal` for each
+# channel once (result cached per call), then answers per-date queries:
+#
+#   - Live check returns scheduled_count = 0 (int, filter applied) -> return 0 for
+#     ALL date queries for that channel. This guarantees maximum deficit, ranking
+#     the channel HIGHEST regardless of what the tracker thinks.
+#   - Live check returns scheduled_count = None (filter failed / UNKNOWN) or raises
+#     any exception -> fall through to the offline tracker count for that channel.
+#   - Flag YT_LIVE_SCHEDULE_SIGNAL_ENABLED != "1" -> live check never called;
+#     offline tracker used transparently (this factory should not be called when
+#     the flag is off, but it degrades safely if it is).
+#
+# REUSE: calls read_live_schedule_signal (the existing SKILLz function) directly.
+# DOM scan logic is NOT duplicated here (WSP 84).
+# NO hardcoded channel IDs: channel_id comes from the registry via the ranking loop.
+# OUT OF SCOPE for this factory: videos, long-form, Mode B. Shorts-only.
+
+def build_live_count_fn(
+    driver: Any,
+    *,
+    live_signal_fn: Optional[Callable[..., Dict[str, Any]]] = None,
+) -> Callable[[str, str], int]:
+    """Build a live-aware count_fn that substitutes the shorts_live_schedule_signal
+    result for the offline tracker when the live check is conclusive.
+
+    The returned callable has the same signature as `_default_count_fn`:
+        (channel_id: str, date_str: str) -> int
+
+    Caches the live result per channel_id so the DOM is read once per channel per
+    ranking call, not once per day per channel.
+
+    Args:
+        driver: Selenium WebDriver already on the Studio page for the channel.
+                Must not be None when this factory is called.
+        live_signal_fn: Override for tests (default: read_live_schedule_signal from
+                        shorts_live_schedule_signal.executor). Injectable to avoid
+                        browser dependency in unit tests.
+
+    Returns:
+        A count_fn(channel_id, date_str) -> int that:
+          - Returns 0 for every date when scheduled_count == 0 (deficit override).
+          - Delegates to the offline tracker for every date when the live check
+            is unknown/failed (fallback contract).
+
+    Breadcrumb note: each channel's live-vs-offline decision is logged at INFO
+    level so the operator can see which signal drove the priority decision (WSP 91).
+    """
+    import os as _os
+
+    # Lazy import to keep the module importable without browser/selenium deps.
+    if live_signal_fn is None:
+        try:
+            from modules.platform_integration.youtube_shorts_scheduler.skillz.shorts_live_schedule_signal.executor import (
+                read_live_schedule_signal,
+            )
+            live_signal_fn = read_live_schedule_signal
+        except Exception as _imp_exc:  # pragma: no cover - import guard
+            logger.warning(
+                "[what_should_i_schedule] shorts_live_schedule_signal import failed: %s; "
+                "falling back to offline tracker for all channels.", _imp_exc,
+            )
+            # Degrade completely: use the offline tracker for every query.
+            return _default_count_fn
+
+    # Per-channel live-signal cache: channel_id -> scheduled_count (int) | None
+    _live_cache: Dict[str, Optional[int]] = {}
+
+    def _live_count_fn(channel_id: str, date_str: str) -> int:
+        """Live-aware count_fn seam: live check -> 0-override or offline fallback."""
+        # Query the live signal once per channel (cache it).
+        if channel_id not in _live_cache:
+            live_count: Optional[int] = None
+            try:
+                sig = live_signal_fn(driver, channel_id=channel_id)
+                # Only trust the count when the filter was actually applied.
+                if sig.get("filter_applied") and sig.get("scheduled_count") is not None:
+                    live_count = int(sig["scheduled_count"])
+                    signal_used = "live"
+                else:
+                    signal_used = "offline_filter_not_applied"
+            except Exception as _exc:
+                signal_used = f"offline_live_check_error({type(_exc).__name__})"
+                logger.warning(
+                    "[what_should_i_schedule] live check failed for channel_id=%r: %s; "
+                    "using offline tracker count.", channel_id, _exc,
+                )
+            _live_cache[channel_id] = live_count
+            logger.info(
+                "[what_should_i_schedule][LIVE-PRIORITY] channel_id=%r "
+                "live_scheduled_count=%r signal_used=%s",
+                channel_id, live_count, signal_used,
+            )
+
+        cached = _live_cache[channel_id]
+        if cached is not None and cached == 0:
+            # Confirmed 0 scheduled live -> max deficit override (return 0 every day).
+            return 0
+        if cached is not None and cached > 0:
+            # Live confirmed non-zero; use it as the per-date count (best available).
+            # This means a channel with many live-scheduled videos will rank lower
+            # than one with 0, which is the correct ranking behavior.
+            return cached
+        # cached is None (live check unknown/failed) -> fall back to offline tracker.
+        return _default_count_fn(channel_id, date_str)
+
+    return _live_count_fn
 
 
 # === Malleable seam 2: the need formula =====================================

@@ -1,5 +1,77 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-06-20 - Wire live HAS_SCHEDULE signal into rotation priority (flag-gated, fallback-safe)
+
+**By:** 0102 (Worker-Lane: LIVE-PRIORITY)
+**Slice:** YOUTUBE_SHORTS_ROTATION_LIVE_SCHEDULE_SIGNAL_PRIORITY_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (Pre-Action),
+WSP 84 (Code Reuse: calls existing read_live_schedule_signal, never duplicates DOM scan),
+WSP 91 (breadcrumb now records which signal drove priority), WSP 97 (truth signaling)
+
+### Why (the gap)
+`_prioritize_channels` in `scripts/launch.py` drove the rotation order using only the
+offline tracker JSON (`memory/schedule_<channel_id>.json`). If the tracker was stale or
+out-of-sync with YouTube Studio, channels with 0 LIVE scheduled items were not
+necessarily ranked first. The existing `shorts_live_schedule_signal` SKILLz already has
+the correct DOM-scraping logic for the accurate "Has schedule" count, but it was not
+wired into the priority ranking.
+
+### What changed
+
+**`skillz/what_should_i_schedule/executor.py`**
+- Added `build_live_count_fn(driver, *, live_signal_fn=None)` (new factory function).
+  Wraps `shorts_live_schedule_signal.read_live_schedule_signal` into a drop-in
+  `count_fn` for `rank_channels_by_need()`. Per-channel result is cached (live DOM
+  called once per channel per ranking call, not once per (channel, date) pair).
+  - `scheduled_count == 0` (filter confirmed applied) -> return 0 for all date queries
+    for that channel (maximum deficit override; channel ranks FIRST).
+  - `scheduled_count is None` (filter failed / UNKNOWN) or any exception -> delegate
+    to `_default_count_fn` (offline tracker) for that channel (fallback contract).
+  - No hardcoded channel IDs; channel_id always comes from the ranking loop / registry.
+  - DOM scan logic NOT duplicated (WSP 84): reuses `read_live_schedule_signal` as-is.
+- Updated docstring (DATA SOURCE seam now describes the live wiring).
+
+**`scripts/launch.py`**
+- `_prioritize_channels(channels, driver=None)` gains an optional `driver` parameter.
+  When `YT_SCHEDULE_PRIORITY_ENABLED=1` AND `YT_LIVE_SCHEDULE_SIGNAL_ENABLED=1` AND
+  `driver` is not None: calls `build_live_count_fn(driver)` and injects the resulting
+  `count_fn` into `rank_channels_by_need(**rank_kwargs)`. On any import/build error,
+  `live_count_fn` stays None and the offline tracker is used (zero regression risk).
+- Call site moved from BEFORE driver connect to AFTER driver connect + tab cleanup (so
+  `driver` is available when the live flag is on).
+- `_emit_priority_breadcrumb` gains `live_signal_active: bool = False` kwarg; the
+  breadcrumb metadata now includes `ranking_signal` ("live_schedule_signal" vs
+  "offline_tracker") so WRE/operator can audit which signal drove the decision.
+
+### Flag summary
+| Flag | Default | Effect |
+|---|---|---|
+| `YT_SCHEDULE_PRIORITY_ENABLED` | `0` (off) | Master gate: off -> original channel order unchanged |
+| `YT_LIVE_SCHEDULE_SIGNAL_ENABLED` | `0` (off) | Secondary gate: off -> offline tracker only (no live DOM call) |
+| both `1` + driver available | n/a | Live DOM check drives ranking; fallback per-channel if check fails |
+
+### Fallback contract (never breaks)
+- Per-channel: live check fails or returns UNKNOWN -> offline tracker used for that channel.
+- Any exception in `build_live_count_fn` or `rank_channels_by_need` -> original `channels`
+  list returned unchanged (existing `_prioritize_channels` safety net).
+- `driver=None` -> offline tracker path (pre-slice behavior, identical).
+
+### Tests added
+`tests/test_live_schedule_signal_priority.py` - 9 mock-only, non-vacuous tests:
+- Non-vacuity proof: OLD code (no count_fn injection) does not rank X first when live=0.
+- Live=0 -> X ranked highest regardless of tracker count.
+- Live=0 dominates over non-zero tracker.
+- Live failure -> tracker fallback (no exception, channel not dropped).
+- Filter UNKNOWN (None) -> tracker fallback (not treated as false-0).
+- Flag off -> `build_live_count_fn` never called.
+- Priority flag off -> original order returned.
+- Cache: live signal called exactly once per channel per ranking call.
+- End-to-end: `_prioritize_channels` with live=0 reorders rotation, breadcrumb shows live_signal_active=True.
+
+All 50 existing tests in the three related test files pass unchanged (zero regression).
+
+---
+
 ## 2026-06-19 - Optionally schedule PRIVATE Shorts too (flag-gated, default-off, private->public)
 
 **By:** 0102 (Worker-Lane SCHED-PRIVATE)
