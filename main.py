@@ -430,6 +430,34 @@ async def monitor_youtube(disable_lock: bool = False, enable_ai_monitoring: bool
         print(f"[INFO] AI Overseer: {'ENABLED' if enable_ai_monitoring else 'DISABLED'}")
         print("[INFO] Press Ctrl+C to stop")
 
+        # ANTIFAFM_AUTOSTART_AFTER_SELECT_PHASE1:
+        # Opt-in, after-selection auto-launch of the 24/7 antifaFM broadcaster.
+        # This is FUNCTION-SCOPE (only runs once 012 has selected the YouTube DAE
+        # and the instance lock above is held) -- NOT the menu-boot autostart that
+        # was deliberately removed (that broke the daemon; see
+        # MAIN_MENU_ANTIFAFM_STARTUP_BOUNDARY_FIX_PHASE1 at module scope).
+        #
+        # Distinct flag name ANTIFAFM_AUTOSTART (the retired ANTIFAFM_AUTO_START is
+        # still ignored). Default OFF -> merging never auto-broadcasts; 012 must opt
+        # in via .env, and start_antifafm_background() itself returns False harmlessly
+        # without ANTIFAFM_YOUTUBE_STREAM_KEY. start_antifafm_background() reuses the
+        # antifafm_broadcaster instance lock and has blocking setup (FFmpeg cleanup +
+        # ~5s settle + stream verification), so we dispatch it to a daemon thread to
+        # avoid stalling the monitor. try/except guards: a broadcaster failure must
+        # never break the YouTube daemon.
+        if os.getenv("ANTIFAFM_AUTOSTART", "0") == "1":
+            try:
+                import threading as _threading
+                _antifafm_thread = _threading.Thread(
+                    target=start_antifafm_background,
+                    daemon=True,
+                    name="antifafm-autostart-after-select",
+                )
+                _antifafm_thread.start()
+                print("[ANTIFAFM] ANTIFAFM_AUTOSTART=1 -> launching broadcaster (background, non-blocking)")
+            except Exception as _antifafm_exc:
+                logger.error(f"[ANTIFAFM] after-selection autostart failed (continuing daemon): {_antifafm_exc}")
+
         dae = AutoModeratorDAE(enable_ai_monitoring=enable_ai_monitoring)
         await dae.run()
 
