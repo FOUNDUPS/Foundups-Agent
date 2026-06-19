@@ -1,5 +1,37 @@
 # ModLog - moltbot_bridge
 
+## 2026-06-20: Fusion receipt ledger -- append-only persistence + advisory WSP_97 scoring (W6)
+
+**Author**: 0102 (Worker-Lane W6, AUTHOR + internal SENTINEL)
+**WSP**: 11 (Interface), 50 (Pre-Action), 84 (Reuse evaluated), 97 (Truth Boundary)
+**Slice**: `HERMES_FUSION_RECEIPT_PERSISTENCE_PHASE1`
+**Predecessors**: #832 (contract), #842 (redaction gate), #862 (alias live, `fb9990c2b`)
+**Base**: `fb9990c2b` (origin/main; #862 landed)
+
+### Summary
+
+Durable evidence trail for Fusion: persist `ModelContributionReceipt`s + an advisory WSP_97 scoring seam.
+Egress-free (no live call, no key, no valve) -- safe to build before the first manual smoke. The first
+of the "next Fusion choices" (receipt persistence + scoring before SERVER_TOOL).
+
+- ADD `src/fusion_receipt_ledger.py` -- `persist_receipt` (append-only JSONL, digests only; fail-closed:
+  refuses non-advisory / unserializable / `scan_forbidden`-tripping records; `store_path` REQUIRED so no
+  ledger artifact is committed); `load_receipts` (skips malformed lines, never raises); `score_receipt`
+  (advisory WSP_97 verdict -> `ReceiptScore` with `wsp97_status`, `cabr_status` ALWAYS `NOT_SUBMITTED`,
+  `advisory_only=True`, low-cardinality reasons; fail-closed to `wsp97_fail` on any doubt). NEVER mutates
+  CABR/payout/source-authority; writes no authority. Mirrors the telemetry.py append-only JSONL idiom and
+  reuses `ModelContributionReceipt.to_dict()` / `is_valid_digest` (WSP 84; the FoundUpJob-coupled
+  proof_of_compute_receipt/receipt_emitter are NOT imported -- future HERMES_RECEIPT_LEDGER_CONSOLIDATION).
+- ADD `tests/test_fusion_receipt_ledger.py` -- 19 tests: persist/load roundtrip, append-only, non-advisory
+  refused, forbidden-content refused, digests-only, required store_path, load fail-closed (malformed/blank/
+  non-dict/missing/directory), advisory scoring (pass/blocked-ok/fail paths), CABR-never-asserted, tainted/
+  non-str timestamp refused, no-egress/no-dep AST guards. 160 pass (incl 33 alias + 65 gate + 40 adapter
+  regression). No skip/xfail. Internal SENTINEL found + fixed 2 ordering/fail-closed defects (scan-after-stamp,
+  directory-path load).
+- EDIT `INTERFACE.md` + module/root ModLog -- ledger surface + 16-row WSP_97 table (declared==actual==16).
+- Boundaries: no egress, no key, no dependency, no CABR/payout/authority mutation, no committed DB artifact.
+  ASCII-clean (0 non-ASCII, no mojibake). DRAFT; STOP at MERGE_READY (external 0102 gate).
+
 ## 2026-06-19: Fusion ALIAS live path -- valve-gated OFF, redaction-gated, advisory-only (W6)
 
 **Author**: 0102 (Worker-Lane W6, AUTHOR + internal SENTINEL)

@@ -1,5 +1,30 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-20] Hermes Fusion Receipt Ledger Phase 1 (Lane W6, AUTHOR + internal SENTINEL, egress-free)
+
+**Change Type**: Durable append-only receipt persistence + advisory WSP_97 scoring. NO live egress, NO key,
+NO new dependency, NO CABR/payout/source-authority mutation, NO committed DB artifact. Opened DRAFT.
+**By**: 0102 (Worker-Lane W6) | Commander: 012 | Gate: external 0102 (do NOT self-merge)
+**WSP References**: WSP 11, WSP 50, WSP 84, WSP 97
+**Slice**: HERMES_FUSION_RECEIPT_PERSISTENCE_PHASE1
+**Predecessors**: #832 (contract), #842 (redaction gate), #862 (alias live `fb9990c2b`)
+**Base**: `fb9990c2b` (origin/main; #862 landed)
+
+- ADD `modules/communication/moltbot_bridge/src/fusion_receipt_ledger.py` -- `persist_receipt` (append-only
+  JSONL, digests only, fail-closed: refuses non-advisory/unserializable/forbidden; `store_path` REQUIRED so
+  no ledger artifact is committed), `load_receipts` (skips malformed lines), `score_receipt` (advisory
+  WSP_97 verdict; `cabr_status` ALWAYS `NOT_SUBMITTED`; fail-closed to `wsp97_fail`). NEVER mutates CABR/
+  payout/source-authority. Mirrors the telemetry.py append-only idiom; reuses ModelContributionReceipt
+  surface (WSP 84). Follow-up: HERMES_RECEIPT_LEDGER_CONSOLIDATION.
+- ADD `modules/communication/moltbot_bridge/tests/test_fusion_receipt_ledger.py` -- 19 tests (persistence,
+  load fail-closed, advisory scoring, CABR-never-asserted, no-egress/no-dep AST guards). 157 pass (incl
+  33 alias + 65 gate + 40 adapter regression). 160 total pass. No skip/xfail. Internal SENTINEL found + fixed
+  2 defects (scan ran before the timestamp stamp; directory-path load raised) -- both now fail-closed.
+- EDIT `INTERFACE.md` + module ModLog -- ledger surface + 16-row WSP_97 table (declared==actual==16).
+- Boundaries honored; ASCII-clean (0 non-ASCII, no mojibake). Internal SENTINEL ran. DRAFT PR; STOP at
+  MERGE_READY (external 0102 gate). Egress-free -- builds the durable evidence trail before the manual smoke
+  / SERVER_TOOL, per the agreed sequencing.
+
 ## [2026-06-19] Hermes Fusion ALIAS Mode Phase 2 (Lane W6, AUTHOR + internal SENTINEL, valve-gated live egress OFF)
 
 **Change Type**: First LIVE OpenRouter integration -- VALVE-GATED OFF by default. NO live call on landing,

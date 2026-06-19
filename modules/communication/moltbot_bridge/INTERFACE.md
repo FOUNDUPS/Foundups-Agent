@@ -172,6 +172,48 @@ Without `--authorize-012` it refuses. With the valve OFF it prints `valve_closed
 
 Declared == Actual == 28 / 28 YES.
 
+### Fusion receipt ledger (durable append-only persistence + advisory scoring; egress-free)
+
+```python
+from modules.communication.moltbot_bridge.src.fusion_receipt_ledger import (
+    persist_receipt,   # (receipt, store_path, *, received_at_iso=None) -> bool  (append-only, fail-closed)
+    load_receipts,     # (store_path) -> list[dict]  (skips malformed lines, never raises)
+    score_receipt,     # (receipt) -> ReceiptScore  (advisory WSP_97 verdict; mutates nothing)
+    ReceiptScore,      # wsp97_status / cabr_status (always NOT_SUBMITTED) / advisory_only / reasons
+)
+```
+
+Stores `ModelContributionReceipt`s as append-only JSONL (one per line, **digests only** -- the receipt is
+already digest-only). `persist_receipt` is **fail-closed**: it refuses a non-advisory receipt, anything
+that cannot serialize, or any record whose serialized form trips `scan_forbidden`; `store_path` is a
+**required** caller-chosen runtime path (no repo-committed ledger). `load_receipts` skips malformed lines.
+`score_receipt` returns an **advisory** WSP_97 verdict (fail-closed to `wsp97_fail` on any doubt); it
+**never** mutates CABR/payout/source-authority and `cabr_status` is **always `NOT_SUBMITTED`** (no CABR
+engine exists). No network, no key, no new dependency.
+
+#### WSP_97 Truth Boundary Checklist (HERMES_FUSION_RECEIPT_PERSISTENCE_PHASE1)
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | RECEIPT_PERSISTED_APPEND_ONLY | YES | `persist_receipt` opens `"a"`; `test_append_only` (earlier line untouched) |
+| 2 | DIGESTS_ONLY_NO_RAW_PERSISTED | YES | `test_persisted_record_has_no_raw_secret` (digests present, no raw) |
+| 3 | NON_ADVISORY_RECEIPT_NOT_PERSISTED | YES | `test_non_advisory_receipt_not_persisted` / `test_dict_non_advisory_not_persisted` |
+| 4 | LOAD_FAIL_CLOSED_SKIPS_MALFORMED | YES | `test_load_skips_malformed_lines`, `test_load_missing_file_returns_empty` |
+| 5 | SCORING_ADVISORY_NOT_AUTHORITY | YES | `score_receipt` returns `ReceiptScore`; writes nothing |
+| 6 | NO_CABR_PAYOUT_MUTATION | YES | module imports no cabr/payout (`test_module_imports_no_egress_no_authority_no_new_dep`) |
+| 7 | CABR_STATUS_ALWAYS_NOT_SUBMITTED | YES | `test_score_never_asserts_cabr_readiness` |
+| 8 | WSP97_SCORE_FAIL_CLOSED_ON_DOUBT | YES | malformed/bad-digest/bad-status/forbidden -> `wsp97_fail` (5 score-fail tests) |
+| 9 | NO_LIVE_EGRESS_NO_KEY | YES | `test_module_makes_no_calls_to_os_or_network`; no requests/os import |
+| 10 | NO_NEW_DEPENDENCY | YES | stdlib only (`json`/`dataclasses`/`pathlib`/`typing`) + intra-package |
+| 11 | NO_DB_ARTIFACT_COMMITTED | YES | `store_path` required; tests use `tmp_path`; no ledger file in scope |
+| 12 | NO_SKIP_XFAIL | YES | none in the test file |
+| 13 | FILE_SCOPE_EXACT | YES | ledger module + test + INTERFACE + module ModLog + root ModLog |
+| 14 | HOLOINDEX_RESULTS_RATED | YES | Phase 0 reuse evaluated (module ModLog) |
+| 15 | INTERNAL_SENTINEL_READY | YES | adversarial SENTINEL ran |
+| 16 | ASCII_CLEAN | YES | byte-checked 0 non-ASCII, 0 mojibake |
+
+Declared == Actual == 16 / 16 YES.
+
 ### WebhookReceiver
 
 ```python
