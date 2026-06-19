@@ -1,5 +1,29 @@
 # YouTube Shorts Scheduler - TestModLog
 
+## 2026-06-19 - test_schedule_include_private: flag-gated PRIVATE pass (mock-only, MUST-FAIL proven)
+
+**By:** 0102 (Worker-Lane SCHED-PRIVATE)
+**Slice:** SHORTS_SCHEDULE_INCLUDE_PRIVATE_PHASE1
+**File:** `tests/test_schedule_include_private.py` (11 tests, mock-only, NO live browser)
+
+### Coverage
+- Resolver: default `["UNLISTED"]`; `=="1"` -> `["UNLISTED","PRIVATE"]`; non-`"1"` stays off.
+- Flag OFF -> only the UNLISTED pass runs: `navigate_to_shorts_with_fallback` called with
+  `"UNLISTED"` and NEVER `"PRIVATE"`; no private video scheduled.
+- Flag ON -> both UNLISTED and PRIVATE passes run (navigate called with each); both videos
+  scheduled; `[PRIVATE->PUBLIC]` log fires exactly once per private video (1-video and
+  2-video cases).
+- Edit-page guard: accepts `private` on the PRIVATE pass (non-dry-run, p1 scheduled), still
+  REJECTS `private` on the UNLISTED pass (u1 skipped "Wrong visibility").
+
+### Non-vacuity (MUST-FAIL proven via mutation)
+- Forcing the resolver to always include PRIVATE (default-off broken) -> all 5 OFF-guard tests
+  FAIL, incl. `test_flag_off_never_navigates_private` (navigate called with PRIVATE while off).
+- Removing the edit-guard relax -> `test_edit_guard_accepts_private_on_private_pass` FAILS
+  (p1 rejected), while the unlisted-pass rejection test still passes.
+- Result with code intact: 11 passed. Full module suite (with `test_scheduler.py`): 45 passed,
+  2 skipped (live-browser).
+
 ## 2026-06-19 - shorts_live_schedule_signal: live "Has schedule" count + view signal (mock-only)
 
 **By:** 0102 (Worker-Lane LIVE-SIGNAL)

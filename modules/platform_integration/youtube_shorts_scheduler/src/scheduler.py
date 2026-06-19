@@ -311,63 +311,276 @@ class YouTubeShortsScheduler:
         # Pre-cycle schedule report
         self.tracker.log_schedule_report()
 
+        # SHORTS_SCHEDULE_INCLUDE_PRIVATE_PHASE1: resolve the visibility targets.
+        # Default is UNLISTED-only. When YT_SCHEDULE_INCLUDE_PRIVATE=1 the cycle
+        # ALSO makes a PRIVATE pass. Scheduling a PRIVATE video uses the
+        # PUBLISH_FROM_PRIVATE schedule radio -> the video PUBLISHES PUBLIC at its
+        # slot. This is an OUTWARD-FACING action, so it is DEFAULT-OFF and 012 must
+        # opt in deliberately (each private schedule is logged with a
+        # [PRIVATE->PUBLIC] breadcrumb below).
+        visibility_targets = self._resolve_visibility_targets()
+        results["visibility_targets"] = visibility_targets
+
         try:
-            # Step 1: Navigate to unlisted Shorts (with fallback for robustness)
-            logger.info(f"[SCHEDULER] Navigating to unlisted Shorts for {self.channel_name}")
-            if not self.dom.navigate_to_shorts_with_fallback(self.channel_id, "UNLISTED"):
-                logger.error("[SCHEDULER] Failed to navigate to unlisted Shorts")
-                results["errors"].append({"error": "Navigation to unlisted Shorts failed"})
-                return results
-            filter_state = self.dom.read_visibility_filter_state()
-            logger.info(
-                f"[SCHEDULER] List filter state: detected={filter_state.get('detected')} "
-                f"chips={filter_state.get('chip_texts')}"
-            )
-            if filter_state.get("detected") == "SCHEDULED":
-                logger.error(
-                    "[SCHEDULER] Aborting cycle — Shorts list is on Scheduled/Has schedule, not Unlisted"
+            # Run the existing navigate + batch loop ONCE PER TARGET. The single
+            # self.tracker is shared across passes, so the per-day cap (3), the
+            # peak window/tz, and the rotation budget are shared: UNLISTED fills
+            # the available slots first, then PRIVATE continues into whatever
+            # remains (no per-channel budget doubling).
+            for target in visibility_targets:
+                aborted = await self._run_visibility_pass(
+                    target=target,
+                    max_videos=max_videos,
+                    update_metadata=update_metadata,
+                    results=results,
                 )
-                results["errors"].append({"error": "Wrong visibility filter: SCHEDULED"})
-                return results
-            await asyncio.sleep(2)  # Wait for page load
+                if aborted:
+                    # Navigation/filter failure for this target — stop the cycle.
+                    break
 
-            # Step 1.5: Set page size to 50 for larger batches (2026-01-28)
-            self.dom.set_page_size(50)
-            await asyncio.sleep(1)
+        except Exception as e:
+            logger.error(f"[SCHEDULER] Cycle error: {e}")
+            results["errors"].append({"error": str(e)})
 
-            # Step 2-4: CONTINUOUS PROCESSING LOOP (2026-01-28: Added for true "until complete")
-            # Process batches of videos until no unlisted remain
-            batch_num = 0
-            total_processed = 0
-            import os
-            sync_enabled = os.getenv("YT_SCHEDULER_DO_SYNC", "false").lower() in ("1", "true", "yes")
+        cycle_elapsed = _time.time() - cycle_start
+        results["finished_at"] = datetime.now().isoformat()
+        results["total_scheduled"] = len(results["scheduled"])
+        results["total_errors"] = len(results["errors"])
+        results["total_skipped"] = len(results["skipped"])
+        results["cycle_seconds"] = round(cycle_elapsed, 1)
 
-            while True:
+        # End-of-cycle report
+        n_ok = results["total_scheduled"]
+        n_err = results["total_errors"]
+        n_skip = results["total_skipped"]
+        logger.info(f"[SCHEDULER] ╔══ CYCLE COMPLETE: {self.channel_name} ══╗")
+        logger.info(f"[SCHEDULER] ║ Scheduled: {n_ok:>4} videos")
+        logger.info(f"[SCHEDULER] ║ Errors:    {n_err:>4}")
+        logger.info(f"[SCHEDULER] ║ Skipped:   {n_skip:>4}")
+        logger.info(f"[SCHEDULER] ║ Duration:  {cycle_elapsed:>7.1f}s")
+        if n_ok > 0:
+            avg = cycle_elapsed / n_ok
+            logger.info(f"[SCHEDULER] ║ Avg/video: {avg:>7.1f}s")
+            # Date spread
+            dates_used = set(v["date"] for v in results["scheduled"])
+            logger.info(f"[SCHEDULER] ║ Dates:     {len(dates_used):>4} unique days")
+            for d in sorted(dates_used):
+                vids_on_day = [v for v in results["scheduled"] if v["date"] == d]
+                times = ", ".join(v["time"] for v in vids_on_day)
+                logger.info(f"[SCHEDULER] ║   {d}: {times}")
+        logger.info(f"[SCHEDULER] ╚{'═' * 42}╝")
+
+        # Post-cycle schedule report (updated totals)
+        self.tracker.log_schedule_report()
+
+        # Post-cycle audit: verify scheduled state matches YouTube reality
+        # Enable with YT_SCHEDULER_POST_AUDIT=true (default: false — opt-in)
+        if os.getenv("YT_SCHEDULER_POST_AUDIT", "false").lower() in ("1", "true", "yes"):
+            try:
+                from .schedule_auditor import ScheduleAuditor
+                auditor = ScheduleAuditor(self.channel_key, self.driver)
+                auto_heal = os.getenv("YT_SCHEDULER_AUDIT_AUTO_HEAL", "true").lower() in ("1", "true", "yes")
+                audit_report = auditor.run_audit(auto_heal=auto_heal)
+                results["audit"] = {
+                    "healthy": audit_report.get("healthy", False),
+                    "false_positives": len(audit_report.get("false_positives", [])),
+                    "time_collisions": len(audit_report.get("time_collisions", [])),
+                    "healed": len(audit_report.get("healed", [])),
+                }
+                if not audit_report.get("healthy"):
+                    logger.warning(
+                        f"[SCHEDULER] Post-cycle audit found issues: "
+                        f"{len(audit_report.get('false_positives', []))} false positives, "
+                        f"{len(audit_report.get('time_collisions', []))} time collisions"
+                    )
+                    # G4: Emit breadcrumb for AI Overseer sentinel detection (Phase 3)
+                    try:
+                        from modules.communication.livechat.src.breadcrumb_telemetry import get_breadcrumb_telemetry
+                        telemetry = get_breadcrumb_telemetry()
+                        telemetry.store_breadcrumb(
+                            source_dae="youtube_shorts_scheduler",
+                            event_type="schedule_audit_unhealthy",
+                            message=f"Schedule audit failed for {self.channel_key}",
+                            phase="POST_AUDIT",
+                            metadata={
+                                "channel_key": self.channel_key,
+                                "channel_id": self.channel_id,
+                                "false_positives": len(audit_report.get("false_positives", [])),
+                                "time_collisions": len(audit_report.get("time_collisions", [])),
+                                "missing_from_tracker": len(audit_report.get("missing_from_tracker", [])),
+                                "auto_heal": auto_heal,
+                                "healed": len(audit_report.get("healed", [])),
+                            },
+                        )
+                    except Exception as bc_err:
+                        logger.debug(f"[SCHEDULER] Breadcrumb emission failed: {bc_err}")
+            except Exception as e:
+                logger.debug(f"[SCHEDULER] Post-cycle audit skipped: {e}")
+
+        return results
+
+    def _resolve_visibility_targets(self) -> List[str]:
+        """Resolve which list-visibility filters the cycle should process.
+
+        SHORTS_SCHEDULE_INCLUDE_PRIVATE_PHASE1.
+
+        Default: ["UNLISTED"] (unchanged behaviour). When the OUTWARD-FACING flag
+        YT_SCHEDULE_INCLUDE_PRIVATE is enabled (=="1"), a PRIVATE pass is appended:
+        ["UNLISTED", "PRIVATE"]. UNLISTED is always processed first so it consumes
+        the rotation budget before any private->public publishing occurs.
+
+        Scheduling a PRIVATE video uses the PUBLISH_FROM_PRIVATE radio, which
+        PUBLISHES it PUBLIC at the slot — hence default-OFF and deliberate opt-in.
+        """
+        if os.getenv("YT_SCHEDULE_INCLUDE_PRIVATE", "0") == "1":
+            logger.warning(
+                "[SCHEDULER] YT_SCHEDULE_INCLUDE_PRIVATE=1 — PRIVATE pass ENABLED. "
+                "Scheduling a PRIVATE Short PUBLISHES it PUBLIC at its slot "
+                "(PUBLISH_FROM_PRIVATE). Each one is logged [PRIVATE->PUBLIC]."
+            )
+            return ["UNLISTED", "PRIVATE"]
+        return ["UNLISTED"]
+
+    def _scrape_videos_for_visibility(self, target: str) -> List[Dict[str, str]]:
+        """Scrape the Shorts row list under the ACTIVE visibility filter.
+
+        SHORTS_SCHEDULE_INCLUDE_PRIVATE_PHASE1.
+
+        UNLISTED delegates to the unchanged DOM helper
+        ``self.dom.get_unlisted_videos()`` (which enforces the UNLISTED filter and
+        rejects Scheduled rows). The DOM layer has no PRIVATE row-scraper (it is
+        UNLISTED-hardcoded by design), so for the PRIVATE pass the scheduler scrapes
+        the rows itself via the driver — mirroring the strict row scan but keyed on
+        ``private`` — WITHOUT modifying the DOM/URL layer. The PRIVATE filter is
+        navigated + enforced by the existing generic
+        ``navigate_to_shorts_with_fallback(..., "PRIVATE")`` before this is called.
+        """
+        target = (target or "UNLISTED").upper()
+        if target == "UNLISTED":
+            return self.dom.get_unlisted_videos()
+
+        # PRIVATE pass: scheduler-side scrape under the already-applied PRIVATE
+        # filter. Pattern mirrors dom_automation.get_unlisted_videos but keyed on
+        # 'private' and excludes any row that already shows a schedule.
+        try:
+            scraped = self.driver.execute_script(
+                """
+                const rows = document.querySelectorAll('ytcp-video-row');
+                const out = [];
+                for (const row of rows) {
+                    const text = (row.textContent || '').toLowerCase();
+                    const hasPrivate = /\\bprivate\\b/.test(text);
+                    const hasScheduled = /\\bscheduled\\b/.test(text) || text.includes('has schedule');
+                    if (!hasPrivate) continue;
+                    if (hasScheduled) continue;
+                    const link = row.querySelector("a[href*='/video/']");
+                    if (!link) continue;
+                    const href = link.getAttribute('href') || '';
+                    const m = href.match(/\\/video\\/([^/?]+)/);
+                    if (!m) continue;
+                    out.push({
+                        video_id: m[1],
+                        title: (link.textContent || '').trim(),
+                        href: href,
+                    });
+                }
+                return out;
+                """
+            ) or []
+        except Exception as exc:
+            logger.error(f"[SCHEDULER] Private row scrape failed: {exc}")
+            return []
+
+        videos = [
+            {
+                "video_id": item.get("video_id"),
+                "title": item.get("title", ""),
+                "href": item.get("href", ""),
+            }
+            for item in scraped
+            if item.get("video_id")
+        ]
+        logger.info(f"[SCHEDULER] Private scrape: {len(videos)} videos under PRIVATE filter")
+        return videos
+
+    async def _run_visibility_pass(
+        self,
+        target: str,
+        max_videos: int,
+        update_metadata: bool,
+        results: Dict[str, Any],
+    ) -> bool:
+        """Run the navigate + continuous batch loop for ONE visibility target.
+
+        SHORTS_SCHEDULE_INCLUDE_PRIVATE_PHASE1: extracted verbatim from the
+        original UNLISTED-only cycle body, with the hard-coded "UNLISTED" literal
+        replaced by ``target`` and the row scrape delegated to
+        ``_scrape_videos_for_visibility(target)``. The per-day cap, peak window/tz,
+        and rotation budget come from the shared ``self.tracker`` and are therefore
+        shared across targets.
+
+        Returns:
+            True if the pass aborted on a navigation/filter failure (caller should
+            stop the cycle), False otherwise.
+        """
+        is_private = (target or "").upper() == "PRIVATE"
+
+        # Step 1: Navigate to the target-visibility Shorts (with fallback).
+        logger.info(f"[SCHEDULER] Navigating to {target} Shorts for {self.channel_name}")
+        if not self.dom.navigate_to_shorts_with_fallback(self.channel_id, target):
+            logger.error(f"[SCHEDULER] Failed to navigate to {target} Shorts")
+            results["errors"].append({"error": f"Navigation to {target} Shorts failed"})
+            return True
+        filter_state = self.dom.read_visibility_filter_state()
+        logger.info(
+            f"[SCHEDULER] List filter state: detected={filter_state.get('detected')} "
+            f"chips={filter_state.get('chip_texts')}"
+        )
+        if filter_state.get("detected") == "SCHEDULED":
+            logger.error(
+                f"[SCHEDULER] Aborting {target} pass — Shorts list is on "
+                f"Scheduled/Has schedule, not {target}"
+            )
+            results["errors"].append({"error": "Wrong visibility filter: SCHEDULED"})
+            return True
+        await asyncio.sleep(2)  # Wait for page load
+
+        # Step 1.5: Set page size to 50 for larger batches (2026-01-28)
+        self.dom.set_page_size(50)
+        await asyncio.sleep(1)
+
+        # Step 2-4: CONTINUOUS PROCESSING LOOP (2026-01-28: Added for true "until complete")
+        # Process batches of videos until none remain under this filter.
+        batch_num = 0
+        total_processed = 0
+        sync_enabled = os.getenv("YT_SCHEDULER_DO_SYNC", "false").lower() in ("1", "true", "yes")
+
+        while True:
                 batch_num += 1
                 logger.info(f"[SCHEDULER] === BATCH {batch_num} ===")
 
-                # Step 2: Get unlisted videos for this batch
-                unlisted = self.dom.get_unlisted_videos()
-                logger.info(f"[SCHEDULER] Found {len(unlisted)} unlisted videos in batch {batch_num}")
+                # Step 2: Get videos for this batch under the active filter.
+                unlisted = self._scrape_videos_for_visibility(target)
+                logger.info(f"[SCHEDULER] Found {len(unlisted)} {target} videos in batch {batch_num}")
 
                 if not unlisted:
                     if batch_num == 1:
-                        results["message"] = "No unlisted videos found"
+                        results["message"] = f"No {target} videos found"
                     else:
-                        results["message"] = f"All unlisted videos processed after {batch_num - 1} batches"
-                    logger.info(f"[SCHEDULER] No more unlisted videos - continuous processing complete")
+                        results["message"] = f"All {target} videos processed after {batch_num - 1} batches"
+                    logger.info(f"[SCHEDULER] No more {target} videos - continuous processing complete")
                     break
 
                 # Step 3: Sync existing scheduled videos (disabled by default)
                 if batch_num == 1:  # Only sync on first batch
                     await self._sync_scheduled_videos()
                     if sync_enabled:
-                        logger.info("[SCHEDULER] Returning to unlisted Shorts after sync...")
-                        if not self.dom.navigate_to_shorts_with_fallback(self.channel_id, "UNLISTED"):
-                            logger.warning("[SCHEDULER] Could not return to unlisted Shorts, continuing with cached list")
+                        logger.info(f"[SCHEDULER] Returning to {target} Shorts after sync...")
+                        if not self.dom.navigate_to_shorts_with_fallback(self.channel_id, target):
+                            logger.warning(f"[SCHEDULER] Could not return to {target} Shorts, continuing with cached list")
                         await asyncio.sleep(2)
                         # Re-fetch after returning
-                        unlisted = self.dom.get_unlisted_videos()
+                        unlisted = self._scrape_videos_for_visibility(target)
 
                 # Step 4: Process each video in this batch
                 processed = 0
@@ -473,6 +686,13 @@ class YouTubeShortsScheduler:
 
                         if self.dry_run:
                             logger.info(f"[DRY RUN] Would schedule {video_id} for {date_str} at {time_str}")
+                            # SHORTS_SCHEDULE_INCLUDE_PRIVATE_PHASE1: surface the
+                            # outward private->public action in dry-run too.
+                            if is_private:
+                                logger.warning(
+                                    f"[PRIVATE->PUBLIC] {video_id} scheduled to publish "
+                                    f"{date_str} {time_str} (dry_run)"
+                                )
                             results["scheduled"].append({
                                 "video_id": video_id,
                                 "date": date_str,
@@ -499,9 +719,17 @@ class YouTubeShortsScheduler:
                                 "reason": "Already Scheduled on YouTube (not Unlisted)",
                             })
                             continue
-                        if edit_vis not in ("unlisted", "unknown"):
+                        # SHORTS_SCHEDULE_INCLUDE_PRIVATE_PHASE1: accept 'private' on
+                        # the edit page when this is the PRIVATE pass, so a private
+                        # video isn't rejected as "wrong visibility". Otherwise the
+                        # guard is unchanged (unlisted/unknown only).
+                        allowed_vis = ("unlisted", "unknown")
+                        if is_private:
+                            allowed_vis = ("unlisted", "unknown", "private")
+                        if edit_vis not in allowed_vis:
+                            expected = "Private" if is_private else "Unlisted"
                             logger.warning(
-                                f"[SCHEDULER] SKIP {video_id}: visibility={edit_vis} (expected Unlisted)"
+                                f"[SCHEDULER] SKIP {video_id}: visibility={edit_vis} (expected {expected})"
                             )
                             results["skipped"].append({
                                 "video_id": video_id,
@@ -523,6 +751,16 @@ class YouTubeShortsScheduler:
 
                         if success:
                             self.tracker.increment(date_str, video_id)
+
+                            # SHORTS_SCHEDULE_INCLUDE_PRIVATE_PHASE1: per-private-video
+                            # OUTWARD-FACING breadcrumb. Scheduling a PRIVATE Short via
+                            # PUBLISH_FROM_PRIVATE PUBLISHES it PUBLIC at the slot, so 012
+                            # gets one clear log line per private->public action to review.
+                            if is_private:
+                                logger.warning(
+                                    f"[PRIVATE->PUBLIC] {video_id} scheduled to publish "
+                                    f"{date_str} {time_str}"
+                                )
 
                             # Update local index JSON with scheduling + description sync (best-effort)
                             try:
@@ -661,94 +899,16 @@ class YouTubeShortsScheduler:
                     logger.info(f"[SCHEDULER] Reached max_videos limit ({max_videos}), stopping")
                     break
 
-                # Navigate back to unlisted Shorts list for next batch
-                logger.info("[SCHEDULER] Navigating back to unlisted Shorts for next batch...")
-                if not self.dom.navigate_to_shorts_with_fallback(self.channel_id, "UNLISTED"):
+                # Navigate back to the target-visibility Shorts list for next batch
+                logger.info(f"[SCHEDULER] Navigating back to {target} Shorts for next batch...")
+                if not self.dom.navigate_to_shorts_with_fallback(self.channel_id, target):
                     logger.warning("[SCHEDULER] Could not navigate back, attempting back button...")
                     self.dom.click_back_to_shorts_list()
                 await asyncio.sleep(2)
                 # Loop continues to get next batch
 
-        except Exception as e:
-            logger.error(f"[SCHEDULER] Cycle error: {e}")
-            results["errors"].append({"error": str(e)})
-
-        cycle_elapsed = _time.time() - cycle_start
-        results["finished_at"] = datetime.now().isoformat()
-        results["total_scheduled"] = len(results["scheduled"])
-        results["total_errors"] = len(results["errors"])
-        results["total_skipped"] = len(results["skipped"])
-        results["cycle_seconds"] = round(cycle_elapsed, 1)
-
-        # End-of-cycle report
-        n_ok = results["total_scheduled"]
-        n_err = results["total_errors"]
-        n_skip = results["total_skipped"]
-        logger.info(f"[SCHEDULER] ╔══ CYCLE COMPLETE: {self.channel_name} ══╗")
-        logger.info(f"[SCHEDULER] ║ Scheduled: {n_ok:>4} videos")
-        logger.info(f"[SCHEDULER] ║ Errors:    {n_err:>4}")
-        logger.info(f"[SCHEDULER] ║ Skipped:   {n_skip:>4}")
-        logger.info(f"[SCHEDULER] ║ Duration:  {cycle_elapsed:>7.1f}s")
-        if n_ok > 0:
-            avg = cycle_elapsed / n_ok
-            logger.info(f"[SCHEDULER] ║ Avg/video: {avg:>7.1f}s")
-            # Date spread
-            dates_used = set(v["date"] for v in results["scheduled"])
-            logger.info(f"[SCHEDULER] ║ Dates:     {len(dates_used):>4} unique days")
-            for d in sorted(dates_used):
-                vids_on_day = [v for v in results["scheduled"] if v["date"] == d]
-                times = ", ".join(v["time"] for v in vids_on_day)
-                logger.info(f"[SCHEDULER] ║   {d}: {times}")
-        logger.info(f"[SCHEDULER] ╚{'═' * 42}╝")
-
-        # Post-cycle schedule report (updated totals)
-        self.tracker.log_schedule_report()
-
-        # Post-cycle audit: verify scheduled state matches YouTube reality
-        # Enable with YT_SCHEDULER_POST_AUDIT=true (default: false — opt-in)
-        if os.getenv("YT_SCHEDULER_POST_AUDIT", "false").lower() in ("1", "true", "yes"):
-            try:
-                from .schedule_auditor import ScheduleAuditor
-                auditor = ScheduleAuditor(self.channel_key, self.driver)
-                auto_heal = os.getenv("YT_SCHEDULER_AUDIT_AUTO_HEAL", "true").lower() in ("1", "true", "yes")
-                audit_report = auditor.run_audit(auto_heal=auto_heal)
-                results["audit"] = {
-                    "healthy": audit_report.get("healthy", False),
-                    "false_positives": len(audit_report.get("false_positives", [])),
-                    "time_collisions": len(audit_report.get("time_collisions", [])),
-                    "healed": len(audit_report.get("healed", [])),
-                }
-                if not audit_report.get("healthy"):
-                    logger.warning(
-                        f"[SCHEDULER] Post-cycle audit found issues: "
-                        f"{len(audit_report.get('false_positives', []))} false positives, "
-                        f"{len(audit_report.get('time_collisions', []))} time collisions"
-                    )
-                    # G4: Emit breadcrumb for AI Overseer sentinel detection (Phase 3)
-                    try:
-                        from modules.communication.livechat.src.breadcrumb_telemetry import get_breadcrumb_telemetry
-                        telemetry = get_breadcrumb_telemetry()
-                        telemetry.store_breadcrumb(
-                            source_dae="youtube_shorts_scheduler",
-                            event_type="schedule_audit_unhealthy",
-                            message=f"Schedule audit failed for {self.channel_key}",
-                            phase="POST_AUDIT",
-                            metadata={
-                                "channel_key": self.channel_key,
-                                "channel_id": self.channel_id,
-                                "false_positives": len(audit_report.get("false_positives", [])),
-                                "time_collisions": len(audit_report.get("time_collisions", [])),
-                                "missing_from_tracker": len(audit_report.get("missing_from_tracker", [])),
-                                "auto_heal": auto_heal,
-                                "healed": len(audit_report.get("healed", [])),
-                            },
-                        )
-                    except Exception as bc_err:
-                        logger.debug(f"[SCHEDULER] Breadcrumb emission failed: {bc_err}")
-            except Exception as e:
-                logger.debug(f"[SCHEDULER] Post-cycle audit skipped: {e}")
-
-        return results
+        # Pass completed normally (not aborted).
+        return False
 
     async def _sync_scheduled_videos(self):
         """Sync tracker with actual YouTube scheduled videos.
