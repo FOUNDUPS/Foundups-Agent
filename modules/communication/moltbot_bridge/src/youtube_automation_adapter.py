@@ -6,14 +6,16 @@ Command format (strict):
   yt action <action> key=value
 
 Supported actions:
-  comments   -> like/heart/reply runner (YouTube Studio comments)
-  indexing   -> video indexer CLI
-  scheduling -> shorts scheduler CLI
+  comments          -> like/heart/reply runner (YouTube Studio comments)
+  indexing          -> video indexer CLI
+  scheduling        -> shorts scheduler CLI
+  schedule_priority -> what_should_i_schedule SKILLz (read-only channel need ranking)
 
 Examples:
   youtube action comments channel=move2japan max_comments=3 like=true heart=true reply=false
   youtube action indexing channel=undaodu batch_size=5
   youtube action scheduling channel=foundups max_videos=3 dry_run=true
+  youtube action schedule_priority upcoming_days=7
 """
 
 from __future__ import annotations
@@ -27,7 +29,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
 
-SUPPORTED_ACTIONS = {"comments", "indexing", "scheduling"}
+SUPPORTED_ACTIONS = {"comments", "indexing", "scheduling", "schedule_priority"}
 
 ACTION_ALIASES = {
     "comment": "comments",
@@ -38,6 +40,10 @@ ACTION_ALIASES = {
     "schedule": "scheduling",
     "scheduler": "scheduling",
     "shorts_scheduler": "scheduling",
+    # what_should_i_schedule SKILLz: read-only channel scheduling-priority ranking
+    "what_should_i_schedule": "schedule_priority",
+    "schedule_next": "schedule_priority",
+    "scheduling_priority": "schedule_priority",
 }
 
 # Repo root: modules/communication/moltbot_bridge/src -> parents[4]
@@ -266,6 +272,24 @@ def _build_scheduling_command(params: Dict[str, str]) -> list[str]:
     return cmd
 
 
+def _build_schedule_priority_command(params: Dict[str, str]) -> list[str]:
+    """Build the read-only what_should_i_schedule SKILLz invocation.
+
+    Agent/DAE-invoked channel scheduling-priority ranking. No browser, no mutation.
+    """
+    cmd = [
+        sys.executable,
+        "-m",
+        "modules.platform_integration.youtube_shorts_scheduler.skillz.what_should_i_schedule.run_skill",
+        "--upcoming-days",
+        str(_int_param(params, "upcoming_days", 7)),
+        "--json",
+    ]
+    if _truthy(params.get("no_signals", "false")):
+        cmd.append("--no-signals")
+    return cmd
+
+
 async def execute_youtube_action(action: str, params: Dict[str, str]) -> Dict[str, Any]:
     if action == "comments":
         cmd = _build_comments_command(params)
@@ -293,6 +317,21 @@ async def execute_youtube_action(action: str, params: Dict[str, str]) -> Dict[st
         timeout_s = _int_param(params, "timeout_s", 1800)
         run_result = await asyncio.to_thread(_run_subprocess, cmd, timeout_s)
         return {"success": bool(run_result.get("success", False)), "action": action, **run_result}
+
+    if action == "schedule_priority":
+        cmd = _build_schedule_priority_command(params)
+        timeout_s = _int_param(params, "timeout_s", 120)
+        run_result = await asyncio.to_thread(_run_subprocess, cmd, timeout_s)
+        parsed = _extract_json_tail(run_result.get("stdout_tail", ""))
+        success = bool(run_result.get("success", False))
+        if isinstance(parsed, dict) and parsed.get("success") is False:
+            success = False
+        return {
+            "success": success,
+            "action": action,
+            "result": parsed,
+            **run_result,
+        }
 
     return {"success": False, "action": action, "error": "unsupported action"}
 

@@ -1,5 +1,77 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-06-19 - what_should_i_schedule SKILLz: channel scheduling-priority (Phase 1)
+
+**By:** 0102 (Worker-Lane SCHED-PRIORITY)
+**Slice:** WHAT_SHOULD_I_SCHEDULE_SKILLZ_PHASE1
+**WSP References:** WSP 95 (SKILLz Wardrobe), WSP 77 (Agent Coordination), WSP 91 (Observability), WSP 60/48 (Pattern Memory), WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (Pre-Action), WSP 84 (Code Reuse)
+
+### Problem
+
+The shorts daemon rotates across the 4 channels but had no signal for WHERE the scheduling gap
+is. With the cap now `HARD_CAP_PER_DAY = 3` (`src/schedule_tracker.py:30`, landed #844), a channel
+empty for the next week is far more urgent than one already filled. The agent needs an answer to
+"which channel should I schedule next?" so the daemon works the most-needed channel first instead
+of wasting work on already-covered channels.
+
+### Phase 0 confirmation (verified, not assumed)
+
+1. **Data source CONFIRMED.** `ScheduleTracker(channel_id)` loads
+   `memory/schedule_<channel_id>.json` (`src/schedule_tracker.py:74-90`); `get_count(date_str)`
+   returns the per-date int (`:123-133`); tracker date keys use the format
+   `f"{d.strftime('%b')} {d.day}, {d.year}"` (`:212`). `HARD_CAP_PER_DAY = 3` at `:30`.
+2. **SKILLz pattern CITED + mirrored.** `skillz/gemma_content_type_classifier/{SKILLz.md,executor.py}`
+   -- Skills 2.0 frontmatter (`category`, `evals`, `retirement_date`), micro chain-of-thought,
+   pure executor + `__init__` re-export. New skill mirrors this structure.
+3. **Signal APIs CONFIRMED.** breadcrumb via
+   `modules/communication/livechat/src/breadcrumb_telemetry.py` `get_breadcrumb_telemetry().store_breadcrumb(...)`
+   (`:102`, singleton `:339`); pattern memory via
+   `modules/infrastructure/wre_core/src/pattern_memory.py` `PatternMemory().store_outcome(SkillOutcome(...))`
+   (`SkillOutcome` `:35`, `store_outcome` `:331`).
+4. **--agent-command surface CONFIRMED.** `main_menu.py --agent-command` (`:153`) routes to
+   `modules/communication/moltbot_bridge/src/action_cli.py::run_action_command` (`:460`), which
+   dispatches `"youtube action <action> ..."` to `youtube_automation_adapter.execute_youtube_action`.
+
+### Changes (read-only, agent-invoked -- NO manual-012 path)
+
+1. **New SKILLz** `skillz/what_should_i_schedule/{SKILLz.md, executor.py, run_skill.py, __init__.py}`:
+   - `rank_channels_by_need(upcoming_days=7)`: pure function. For each channel, inspect the next N
+     upcoming days from the tracker; per-day `deficit = max(0, HARD_CAP_PER_DAY - count)`;
+     `total_deficit` = sum; `days_empty` = days with count<=0; `recommend = schedule|sufficient`.
+     Ranked by total_deficit desc, days_empty desc, name asc. Empty channel ranks HIGHEST; a
+     cap-full channel ranks LOWEST (sufficient).
+   - `run_skill(...)`: runs the ranking and emits a breadcrumb (`source_dae=youtube_shorts_scheduler`,
+     `event_type=schedule_priority`, full ranking in metadata) + a PatternMemory `SkillOutcome` per
+     run (WRE self-improvement testbed).
+   - `run_skill.py`: `python -m ...skillz.what_should_i_schedule.run_skill --upcoming-days N --json`
+     entrypoint that the agent/adapter spawns; prints a single JSON line for deterministic parse.
+2. **--agent-command wiring** (`moltbot_bridge/src/youtube_automation_adapter.py`): added
+   `schedule_priority` action (+ aliases `what_should_i_schedule`, `schedule_next`,
+   `scheduling_priority`) that spawns the read-only SKILLz entrypoint and returns the parsed JSON.
+   Invoke: `--agent-command "youtube action schedule_priority upcoming_days=7"`.
+
+### Malleable seams (intentional)
+
+- **Data source** injected via `count_fn` (default `ScheduleTracker.get_count`) -- a future LIVE
+  `[CPS-AUDIT]` 'Has schedule' DOM verify or engagement-learning signal plugs in here WITHOUT
+  touching the ranking math.
+- **Need formula** injected via `deficit_fn` (default hard-cap deficit) -- swap the rule without
+  touching data loading or the sort.
+
+### Out of scope (separate follow-ups -- NOT built here)
+
+- Live `[CPS-AUDIT]` 'Has schedule' DOM filter-fix (live coverage verification).
+- Mode B re-schedule (mutating) -- this skill is strictly read-only.
+- music-vs-talk content gate wiring.
+
+### Tests (mock-only, NON-VACUOUS)
+
+`tests/test_what_should_i_schedule.py` -- 11 tests, all passing. Empty channel ranks highest;
+cap-full channel ranks lowest (sufficient); exact deficit math; over-cap never negative; ordering
+by deficit; breadcrumb + PatternMemory emission invoked (mocked + asserted); no-signals path skips
+emission; formula seam. **Non-vacuity proven**: forcing `_default_deficit_fn` to ignore counts
+(`return 1`) makes 5 count-sensitive tests FAIL; reverting restores 11/11 green.
+
 ## 2026-06-19 - US-ET peak slots + per-channel Studio-tz conversion (Phase 1)
 
 **By:** 0102 (Worker-Lane SCHED-WINDOW)
