@@ -104,6 +104,39 @@ class YouTubeShortsScheduler:
         logger.info(f"[SCHEDULER] Initialized for {self.channel_name} (port {self.chrome_port})")
 
     # =========================================
+    # OBSERVE-MODE acoustic music/talk label (SHORTS_MUSIC_LABEL_OBSERVE_PHASE1)
+    # =========================================
+    def _observe_audio_label_log(self, video_id: Optional[str]) -> None:
+        """READ-ONLY: log the acoustic audio_label if PHASE 2 indexing wrote one.
+
+        PHASE 2 indexing (flag YT_AUDIO_LABEL_OBSERVE) may store an acoustic
+        audio_label as a SIBLING of content_category in the index artifact. This
+        helper reads that artifact read-only and, if a label is present, emits a
+        [MUSIC-OBSERVE] log so 012 can observe acoustic-vs-LLM agreement.
+
+        OBSERVE CONTRACT: this method ALWAYS returns None and NEVER raises. It has
+        no return value the scheduling loop can branch on, so it is structurally
+        incapable of changing any scheduling decision. It only emits a log line.
+        """
+        if not video_id:
+            return None
+        try:
+            observe_idx = load_index_json(channel_key=self.channel_key, video_id=video_id)
+            if isinstance(observe_idx, dict):
+                meta = observe_idx.get("metadata") or {}
+                label = meta.get("audio_label")
+                if label:
+                    logger.info(
+                        "[MUSIC-OBSERVE] %s audio_label=%s content_category=%s",
+                        video_id,
+                        label,
+                        meta.get("content_category"),
+                    )
+        except Exception as exc:
+            logger.debug(f"[SCHEDULER] [MUSIC-OBSERVE] read skipped (continuing): {exc}")
+        return None
+
+    # =========================================
     # BROWSER CONNECTION
     # =========================================
 
@@ -404,6 +437,13 @@ class YouTubeShortsScheduler:
                                     )
                         except Exception as e:
                             logger.debug(f"[SCHEDULER] Classification gate error (continuing): {e}")
+
+                    # OBSERVE-MODE acoustic music/talk label (SHORTS_MUSIC_LABEL_OBSERVE_PHASE1).
+                    # READ-ONLY observation: emits a [MUSIC-OBSERVE] log iff PHASE 2 indexing
+                    # wrote an acoustic audio_label sibling into the artifact metadata. The
+                    # helper returns None ALWAYS -- it carries NO value the loop can branch on,
+                    # so it is structurally incapable of changing any scheduling decision.
+                    self._observe_audio_label_log(video_id)
 
                     import time as time_module
                     video_start = time_module.time()

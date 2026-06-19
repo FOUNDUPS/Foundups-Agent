@@ -131,6 +131,139 @@ def _count_indexed_by_channel(index_root: Path) -> Dict[str, int]:
         counts[child.name] = len(list(child.glob("*.json")))
     return counts
 
+
+# =============================================================================
+# OBSERVE-MODE acoustic music/talk label (SHORTS_MUSIC_LABEL_OBSERVE_PHASE1)
+# Worker-Lane: MUSIC-OBSERVE
+# =============================================================================
+# Flag-gated (YT_AUDIO_LABEL_OBSERVE, default OFF) because it adds an audio
+# DOWNLOAD to PHASE 2. When OFF this is a pure no-op: zero audio work, zero
+# change to the artifact. When ON, for each indexed video we compute an ACOUSTIC
+# audio_label (music|talk) and store it as a SIBLING to the existing LLM-derived
+# content_category so 012 can OBSERVE acoustic-vs-LLM accuracy. This NEVER gates
+# scheduling and NEVER mutates content_category. Any failure (download/classify)
+# logs and continues with NO audio_label -- indexing is never broken.
+#
+# WSP 84 REUSE (cited file:line, re-confirmed on origin/main):
+#   - audio fetch: VideoArchiveExtractor.extract_audio
+#       modules/platform_integration/youtube_live_audio/src/youtube_live_audio.py:405
+#     (returns a normalized float32 mono array; unlisted-cookie support via
+#      YT_DLP_COOKIES_BROWSER at :451)
+#   - acoustic decision: audio_content_classifier.classify_content(path) ->
+#       ClassificationResult(label='music'|'talk', confidence, ...)
+#       modules/ai_intelligence/audio_content_classifier/src/audio_content_classifier.py:294
+#     (fail-safe: returns label='talk', confidence=0.0, method='unavailable';
+#      never raises into the caller). The float32 array is persisted to a temp
+#      WAV (stdlib `wave`, no soundfile dep) so classify_content can librosa.load it.
+AUDIO_LABEL_OBSERVE_FLAG = "YT_AUDIO_LABEL_OBSERVE"
+
+
+def _audio_label_observe_enabled() -> bool:
+    """True iff the observe flag is explicitly enabled. Default OFF."""
+    return _env_truthy(AUDIO_LABEL_OBSERVE_FLAG, "0")
+
+
+def _array_to_temp_wav(audio, sample_rate: int = 16000) -> Optional[str]:
+    """Persist a normalized float32 mono array to a temp 16-bit PCM WAV.
+
+    Uses the stdlib `wave` module (NO soundfile dep) so the observe path adds no
+    new hard dependency. Returns a temp .wav path, or None on any failure.
+    """
+    import tempfile
+    import wave
+
+    try:
+        import numpy as np
+    except ImportError:
+        return None
+    try:
+        arr = np.asarray(audio, dtype=np.float32)
+        if arr.ndim > 1:
+            arr = np.mean(arr, axis=0).astype(np.float32)
+        # float32 [-1,1] -> int16 PCM
+        clipped = np.clip(arr, -1.0, 1.0)
+        pcm16 = (clipped * 32767.0).astype("<i2")
+        tmp = tempfile.NamedTemporaryFile(suffix=".wav", delete=False)
+        tmp_path = tmp.name
+        tmp.close()
+        with wave.open(tmp_path, "wb") as wav:
+            wav.setnchannels(1)
+            wav.setsampwidth(2)  # int16
+            wav.setframerate(int(sample_rate))
+            wav.writeframes(pcm16.tobytes())
+        return tmp_path
+    except Exception:
+        return None
+
+
+def _observe_audio_label(video_id: str) -> Optional[Dict[str, Any]]:
+    """OBSERVE-only: acoustically label a video's audio as music|talk.
+
+    Flag-gated (YT_AUDIO_LABEL_OBSERVE); returns None when the flag is OFF so the
+    caller does ZERO audio work and writes NO field. When ON, downloads audio
+    (VideoArchiveExtractor) and runs the acoustic classifier, returning
+    {"audio_label": "music"|"talk", "audio_label_confidence": float} or None.
+
+    HARD CONTRACT: never raises, never hangs into the indexing loop. On ANY
+    failure (flag off, missing dep, download failure, classify unavailable) it
+    returns None and the caller simply skips the field -- indexing continues.
+    """
+    if not _audio_label_observe_enabled():
+        return None
+    if not video_id:
+        return None
+
+    tmp_wav: Optional[str] = None
+    try:
+        # Lazy imports: keep the indexer hermetic when the observe flag is OFF and
+        # when these optional deps (yt-dlp/ffmpeg/librosa) are not installed.
+        from modules.platform_integration.youtube_live_audio.src.youtube_live_audio import (
+            VideoArchiveExtractor,
+        )
+        from modules.ai_intelligence.audio_content_classifier.src.audio_content_classifier import (
+            classify_content as acoustic_classify_content,
+        )
+
+        extractor = VideoArchiveExtractor()
+        audio = extractor.extract_audio(video_id)
+        if audio is None:
+            logger.warning(
+                "[MUSIC-OBSERVE] %s: audio unavailable (extract_audio returned None) -- skipping label",
+                video_id,
+            )
+            return None
+
+        tmp_wav = _array_to_temp_wav(audio, sample_rate=16000)
+        if not tmp_wav:
+            logger.warning("[MUSIC-OBSERVE] %s: could not persist temp wav -- skipping label", video_id)
+            return None
+
+        result = acoustic_classify_content(tmp_wav)
+        # method == 'unavailable' (confidence 0.0) means the classifier could not
+        # decide (missing librosa, corrupt audio). Treat as no observation.
+        if getattr(result, "method", "unavailable") == "unavailable":
+            logger.warning(
+                "[MUSIC-OBSERVE] %s: classifier unavailable (%s) -- skipping label",
+                video_id,
+                getattr(result, "method", "unavailable"),
+            )
+            return None
+
+        return {
+            "audio_label": result.label,
+            "audio_label_confidence": round(float(result.confidence), 4),
+        }
+    except Exception as exc:  # never break indexing
+        logger.warning("[MUSIC-OBSERVE] %s: observe failed (%s) -- skipping label", video_id, exc)
+        return None
+    finally:
+        if tmp_wav:
+            try:
+                Path(tmp_wav).unlink(missing_ok=True)
+            except Exception:
+                pass
+
+
 # VideoContentIndex causes segfault on Windows (ChromaDB native library issue)
 # Disable for now - indexing works without it, storage goes to JSON files
 # TODO: Fix ChromaDB segfault in holo_index/core/video_search.py
@@ -2287,9 +2420,30 @@ Give a brief category and a few mood/genre topics only.""",
                 
                 if result.success:
                     logger.info(f"[STUDIO-ASK] ✅ {vid_id}: {len(result.topics)} topics")
-                    
+
                     # Persist Ask results as JSON artifacts for indexing continuity
                     index_data = self._ask_result_to_index_data(result, channel_key=channel_key)
+
+                    # OBSERVE-MODE acoustic music/talk label (flag-gated, default OFF;
+                    # SHORTS_MUSIC_LABEL_OBSERVE_PHASE1). When YT_AUDIO_LABEL_OBSERVE=1
+                    # we download audio + acoustically classify it, storing audio_label
+                    # as a SIBLING to content_category (NEVER mutating content_category)
+                    # and emitting a compare-breadcrumb so 012 can observe acoustic-vs-
+                    # LLM accuracy. This NEVER gates scheduling and NEVER breaks indexing
+                    # on failure (the helper returns None instead of raising).
+                    observed = _observe_audio_label(vid_id)
+                    if observed:
+                        index_data.metadata["audio_label"] = observed["audio_label"]
+                        index_data.metadata["audio_label_confidence"] = observed["audio_label_confidence"]
+                        # Compare-breadcrumb: acoustic audio_label vs LLM content_category.
+                        logger.info(
+                            "[MUSIC-OBSERVE] %s audio_label=%s confidence=%s content_category=%s",
+                            vid_id,
+                            observed["audio_label"],
+                            observed["audio_label_confidence"],
+                            index_data.metadata.get("content_category"),
+                        )
+
                     store.save_index(vid_id, index_data)
                 else:
                     logger.warning(f"[STUDIO-ASK] ❌ {vid_id}: {result.error}")

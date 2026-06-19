@@ -1,5 +1,42 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-06-19 - OBSERVE-mode acoustic music/talk label log (no scheduling gate)
+
+**By:** 0102 (Worker-Lane MUSIC-OBSERVE)
+**Slice:** SHORTS_MUSIC_LABEL_OBSERVE_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (read-only observe), WSP 84 (Code Reuse: existing `load_index_json` read path), WSP 91 (Observability), WSP 97 (truth signaling -- observe vs gate)
+
+### Why
+PHASE 2 indexing (video_indexer) can now write an acoustic `audio_label` sibling of
+`content_category` into the index artifact (flag `YT_AUDIO_LABEL_OBSERVE`). The
+scheduler already reads that artifact read-only; this slice LOGS the acoustic label
+so 012 can observe acoustic-vs-LLM agreement in the scheduling signal. OBSERVE-ONLY:
+it must NEVER change a scheduling decision.
+
+### What changed (minimal, observe-only)
+- `src/scheduler.py`:
+  - NEW method `_observe_audio_label_log(video_id) -> None`: reads the index artifact
+    via the existing `load_index_json` (read-only) and, if `metadata.audio_label` is
+    present, emits `[MUSIC-OBSERVE] {video_id} audio_label=... content_category=...`.
+    ALWAYS returns None and NEVER raises -- it carries no value the loop can branch on,
+    so it is structurally incapable of gating scheduling.
+  - Per-video loop (`run_scheduling_cycle`, ~:446): a bare `self._observe_audio_label_log(video_id)`
+    call between the resume-check and slot allocation. No assignment, no branch.
+  - Does NOT touch the existing FFCPLN content-channel gate or any scheduling decision.
+
+### Tests (mock-only, NON-VACUOUS, no live browser)
+- `tests/test_audio_label_observe_log.py` (7 tests): logs the label content when present
+  (asserts the message text); no log when label absent / artifact missing; read error
+  never raises; empty video_id is a no-op (no artifact read); REGRESSION GUARD -- a
+  deterministic scheduling-decision proxy yields the SAME outcome with and without an
+  audio_label artifact (FAILS if observe ever gates scheduling); helper returns None for
+  every label value.
+
+### Live gap
+The full `run_scheduling_cycle` requires a live signed-in browser; the observe LOG path
+is unit-tested in isolation (mocked `load_index_json`). End-to-end observation is by 012
+running the daemon with `YT_AUDIO_LABEL_OBSERVE=1`.
+
 ## 2026-06-19 - shorts priority wiring: auto-fire what_should_i_schedule + flag-gated channel priority
 
 **By:** 0102 (Worker-Lane PRIORITY-WIRE)

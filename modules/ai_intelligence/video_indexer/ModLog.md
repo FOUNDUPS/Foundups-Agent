@@ -2,6 +2,54 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## V0.29.0 - OBSERVE-mode acoustic music/talk label in PHASE 2 indexing (SHORTS_MUSIC_LABEL_OBSERVE_PHASE1) (2026-06-19)
+
+**By:** 0102 (Worker-Lane MUSIC-OBSERVE)
+**Slice:** SHORTS_MUSIC_LABEL_OBSERVE_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (flag-gated default-off), WSP 84 (Code Reuse: VideoArchiveExtractor + audio_content_classifier.classify_content), WSP 91 (Observability breadcrumb)
+
+### Why
+012's rule: everything runs from the daemon, no manual script; 012 observes. The
+acoustic music-vs-talk detector (`audio_content_classifier`, R&D PoC) existed but
+was NOT wired into any autonomous flow. This slice wires it into the daemon's
+PHASE 2 video-indexing loop in OBSERVE mode so 012 can compare the acoustic
+`audio_label` against the LLM-derived `content_category` on real indexed videos --
+WITHOUT changing any behavior. Flag-gated default-OFF because it adds an audio
+DOWNLOAD per video in PHASE 2.
+
+### What changed (minimal, OBSERVE-only, default-off, fail-safe)
+- `src/studio_ask_indexer.py`:
+  - NEW module helper `_observe_audio_label(video_id)` (flag `YT_AUDIO_LABEL_OBSERVE`,
+    default OFF). When ON: lazy-imports `VideoArchiveExtractor.extract_audio`
+    (youtube_live_audio:405) -> persists the float32 array to a temp WAV via stdlib
+    `wave` (NO soundfile dep) -> runs `audio_content_classifier.classify_content`
+    (audio_content_classifier:294) -> returns `{audio_label, audio_label_confidence}`
+    or None. HARD CONTRACT: never raises, never hangs; on ANY failure (flag off,
+    missing dep, download None, classifier `method=='unavailable'`, exception) returns
+    None. Helpers `_array_to_temp_wav` + `_audio_label_observe_enabled` added.
+  - PHASE 2 per-video loop (`index_channel_videos`, ~:2434): after building IndexData
+    and BEFORE `save_index`, calls the helper; if a label is returned, writes
+    `audio_label` + `audio_label_confidence` as a SIBLING of `content_category` in
+    `IndexData.metadata` (content_category UNTOUCHED) and emits the `[MUSIC-OBSERVE]`
+    compare-breadcrumb `{video_id, audio_label, confidence, content_category}`.
+  - DEFAULT-OFF => zero audio work, zero artifact change. Indexing is NEVER gated or
+    broken by the observe path.
+
+### Tests (mock-only, NON-VACUOUS, no live audio/browser/models)
+- `tests/test_audio_label_observe.py` (9 tests): flag-on computes+returns label
+  (classifier asserted called); talk path; flag-off pure no-op (extractor/classifier
+  asserted NOT called); download-None / classify-raises / `unavailable`-method all
+  return None with no exception; label written as sibling of an UNTOUCHED
+  content_category and persisted to JSON; no field when observe returns None; the
+  `[MUSIC-OBSERVE]` compare-breadcrumb content is asserted.
+- Heavy deps avoided by injecting fake source modules into `sys.modules` so the lazy
+  imports resolve to doubles (the real youtube_live_audio has a top-level numpy import).
+
+### Live gap
+Real audio download (yt-dlp/ffmpeg) + librosa classification are NEVER exercised in
+pytest (mock-only). End-to-end on a live (unlisted) channel video is observed by 012
+when running the daemon with `YT_AUDIO_LABEL_OBSERVE=1`.
+
 ## V0.28.0 - Ask Studio: pin ytcp-icon-button#action-button as PRIMARY send selector (STUDIO_ASK_SEND_ACTION_BUTTON_SELECTOR_PHASE1) (2026-06-18)
 
 ### Why
