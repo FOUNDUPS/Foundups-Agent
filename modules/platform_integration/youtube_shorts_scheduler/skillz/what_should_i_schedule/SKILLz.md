@@ -2,6 +2,7 @@
 # Metadata (YAML Frontmatter)
 name: what_should_i_schedule
 description: Rank the shorts-enabled channels by scheduling NEED so the daemon works the most-needed channel next (read-only, agent-invoked)
+domain: youtube  # WRE auto-fire tag (SkillTriggerMixin domain-discovery, skill_trigger.py:91-115) -> the youtube DAE fires this every cadence cycle (SHORTS_PRIORITY_WIRING_PHASE1)
 version: 1.0_prototype
 author: 0102
 created: 2026-06-19
