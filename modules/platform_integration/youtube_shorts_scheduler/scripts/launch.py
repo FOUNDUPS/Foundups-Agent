@@ -122,6 +122,114 @@ def _record_channel_result(channel_key: str, cache: dict, unlisted_count: int, s
 
 
 # ---------------------------------------------------------------------------
+# Schedule-priority steering (SHORTS_PRIORITY_WIRING_PHASE1)
+#
+# Flag-gated, default-off, fallback-safe. When YT_SCHEDULE_PRIORITY_ENABLED=1
+# we consume the read-only `what_should_i_schedule` ranking (deficit per channel
+# over the upcoming window) to (a) process the highest-need channel first and
+# (b) DROP channels whose deficit==0 (already at the hard cap -> nothing to
+# schedule, so no work is lost by skipping them). On ANY error we return the
+# ORIGINAL channel order unchanged -> the scheduler never breaks. This only
+# orders/skips; it never mutates schedule content.
+# ---------------------------------------------------------------------------
+def _prioritize_channels(channels: "list[str]") -> "list[str]":
+    """Reorder `channels` (channel KEYS) highest scheduling-need first and drop
+    deficit==0 channels, gated on YT_SCHEDULE_PRIORITY_ENABLED.
+
+    Args:
+        channels: original rotation order (list of registry channel keys).
+
+    Returns:
+        Reordered+filtered keys when the flag is on and ranking succeeds;
+        otherwise the ORIGINAL `channels` list (fallback-safe, default-off).
+    """
+    if os.getenv("YT_SCHEDULE_PRIORITY_ENABLED", "0") != "1":
+        return channels
+
+    try:
+        from modules.platform_integration.youtube_shorts_scheduler.skillz.what_should_i_schedule.executor import (
+            rank_channels_by_need,
+        )
+        from modules.infrastructure.shared_utilities.youtube_channel_registry import (
+            get_channels,
+        )
+
+        # Map channel_id -> key for the shorts channels so we can translate the
+        # ranking (which is keyed by channel_id) back onto the rotation keys.
+        id_to_key = {
+            ch.get("id"): ch.get("key")
+            for ch in get_channels(role="shorts")
+            if ch.get("id") and ch.get("key")
+        }
+
+        ranking = rank_channels_by_need()  # read-only; reads persisted tracker JSON
+
+        # Walk the ranking in need order; keep only keys present in this
+        # browser's rotation and whose deficit > 0 (something to schedule).
+        original = list(channels)
+        original_set = set(original)
+        ordered: "list[str]" = []
+        skipped: "list[str]" = []
+        seen: set = set()
+        for row in ranking:
+            key = id_to_key.get(row.get("channel_id"))
+            if key is None or key not in original_set or key in seen:
+                continue
+            seen.add(key)
+            if int(row.get("total_deficit", 0)) > 0:
+                ordered.append(key)
+            else:
+                skipped.append(key)
+
+        # Any rotation key the ranking didn't cover (registry/ranking drift):
+        # keep it, in original order, so we never silently drop real work.
+        uncovered = [k for k in original if k not in seen]
+        result = ordered + uncovered
+
+        if not result:
+            # Everything was deficit==0 (or ranking covered nothing actionable).
+            # Don't hand the scheduler an empty list — fall back to original.
+            logger.info("[PRIORITY] all channels at cap (deficit==0); using original order")
+            return original
+
+        _emit_priority_breadcrumb(original, result, skipped)
+        logger.info(
+            "[PRIORITY] reordered %s -> %s (skipped deficit==0: %s)",
+            original, result, skipped,
+        )
+        return result
+    except Exception as exc:
+        # Never break the scheduler: fall back to the original order untouched.
+        logger.warning("[PRIORITY] ranking failed, using original order: %s", exc)
+        return channels
+
+
+def _emit_priority_breadcrumb(original: "list[str]", chosen: "list[str]", skipped: "list[str]") -> None:
+    """Emit a WSP 91 breadcrumb of the chosen priority order + skips (best-effort)."""
+    try:
+        from modules.communication.livechat.src.breadcrumb_telemetry import (
+            get_breadcrumb_telemetry,
+        )
+
+        get_breadcrumb_telemetry().store_breadcrumb(
+            source_dae="youtube_shorts_scheduler",
+            event_type="schedule_priority_order",
+            message=(
+                f"priority steer: {len(chosen)} channel(s) by need; "
+                f"order={chosen}; skipped(deficit==0)={skipped}"
+            ),
+            phase="SHORTS_PRIORITY_WIRING",
+            metadata={
+                "original_order": original,
+                "chosen_order": chosen,
+                "skipped_sufficient": skipped,
+            },
+        )
+    except Exception as exc:  # pragma: no cover - telemetry is best-effort
+        logger.warning(f"[PRIORITY] breadcrumb emit failed: {exc}")
+
+
+# ---------------------------------------------------------------------------
 # Idle Detection for Continuous Rotation
 # ---------------------------------------------------------------------------
 _IDLE_THRESHOLD_SECONDS = int(os.getenv("YT_IDLE_THRESHOLD", "60"))  # 1 min default
@@ -693,6 +801,12 @@ def run_multi_channel_scheduler(
 
     channels = BROWSER_CHANNELS[browser]
     port = BROWSER_PORTS[browser]
+
+    # SHORTS_PRIORITY_WIRING_PHASE1: flag-gated (default-off), fallback-safe.
+    # When YT_SCHEDULE_PRIORITY_ENABLED=1, reorder highest scheduling-need first
+    # and drop channels already at the hard cap (deficit==0). On the default flag
+    # OR any error this returns `channels` unchanged -> zero behavior change.
+    channels = _prioritize_channels(channels)
 
     print(f"\n[MULTI-CHANNEL] {browser.upper()} Rotation Scheduler")
     print("=" * 60)

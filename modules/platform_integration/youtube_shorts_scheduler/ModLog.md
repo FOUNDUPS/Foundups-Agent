@@ -1,5 +1,58 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-06-19 - shorts priority wiring: auto-fire what_should_i_schedule + flag-gated channel priority
+
+**By:** 0102 (Worker-Lane PRIORITY-WIRE)
+**Slice:** SHORTS_PRIORITY_WIRING_PHASE1
+**WSP References:** WSP 95 (SKILLz Wardrobe), WSP 77 (Agent Coordination), WSP 91 (Observability breadcrumb), WSP 60/48 (Pattern Memory via the existing skill), WSP 84 (Code Reuse: existing SkillTriggerMixin + rank_channels_by_need), WSP 50 (flag-gated, default-off, read-only steering), WSP 27 (Phase 0 KNOWLEDGE), WSP 22 (ModLog), WSP 49 (Structure)
+
+### Problem
+
+`what_should_i_schedule` (the read-only schedule-priority ranking skill, landed earlier)
+was an ORPHAN on two fronts: (1) its `SKILLz.md` frontmatter had no `domain:` field, so the
+DAE's existing WRE skill-trigger (`SkillTriggerMixin`, domain-discovery by frontmatter `domain`,
+`skill_trigger.py:91-115`; initialized `domain="youtube"` at `auto_moderator_dae.py:221`, fired
+`:1788`) never auto-fired it; and (2) the scheduler's channel rotation
+(`run_multi_channel_scheduler`, `scripts/launch.py`) ignored the ranking entirely -- it walked
+channels in static registry order with no need signal. 012's rule: everything runs from the
+daemon autonomously; 012 observes.
+
+### What changed (minimal, default-off, fallback-safe)
+
+1. **REGISTER (orphaning fix)** -- `skillz/what_should_i_schedule/SKILLz.md`: added
+   `domain: youtube` to the frontmatter. The existing youtube-domain skill-trigger now discovers
+   and auto-fires this skill every cadence cycle (emitting its breadcrumb + PatternMemory outcome
+   for 012 to observe). Skills 2.0 fields (`category`/`evals`/`retirement_date`) intact; YAML still
+   parses. Executor logic UNCHANGED.
+
+2. **STEER (flag-gated)** -- `scripts/launch.py`: new `_prioritize_channels(channels)` helper,
+   called once in `run_multi_channel_scheduler` right after `channels = BROWSER_CHANNELS[browser]`,
+   BEFORE the rotation loop. When `YT_SCHEDULE_PRIORITY_ENABLED == "1"`: call
+   `rank_channels_by_need()` (read-only), map ranking `channel_id -> registry key`, REORDER the
+   rotation highest-need-first, and DROP channels whose `total_deficit == 0` (already at the hard
+   cap -> nothing to schedule, no work lost). Any rotation key the ranking didn't cover is kept in
+   original order (no silent work loss). Wrapped in try/except -> on ANY error (or if the result is
+   empty) it returns the ORIGINAL `channels` unchanged. A WSP 91 breadcrumb
+   (`schedule_priority_order`) records the chosen order + skips. **Default-off => zero behavior
+   change** unless 012 sets the flag. No scheduling content is mutated; this only orders/skips.
+
+### Tests (mock-only, non-vacuous, NO browser)
+
+`tests/test_shorts_priority_wiring.py` (8 tests, all passing):
+- flag off (unset + explicit `0`) -> original order, no skip
+- flag on -> reorder by injected need + `deficit==0` channel dropped; breadcrumb asserted
+- NON-VACUITY: swapping which channel has the top deficit swaps the chosen head (a
+  ranking-ignoring impl FAILS -- verified by injection: 2 tests fail when the ranking is ignored)
+- rank error -> fallback to original order, no exception escapes
+- all-at-cap -> fallback to original (never hand the scheduler an empty list)
+- uncovered rotation key kept
+- `SKILLz.md` has `domain: youtube` and still parses with Skills 2.0 fields
+
+### Out of scope (separate slices)
+
+Music-vs-talk wiring, reschedule plan/apply wiring, live-signal wiring, and the executor logic
+itself. Touched ONLY `SKILLz.md` + `scripts/launch.py` (+ the new test + this ModLog).
+
 ## 2026-06-19 - reschedule_apply: flag-gated MUTATING apply of the #851 plan (Mode B Phase 2, DEFAULT DRY-RUN)
 
 **By:** 0102 (Worker-Lane RESCHED-APPLY)
