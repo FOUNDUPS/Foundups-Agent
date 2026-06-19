@@ -1,5 +1,40 @@
 # YouTube Shorts Scheduler - TestModLog
 
+## 2026-06-19 - shorts_live_schedule_signal: live "Has schedule" count + view signal (mock-only)
+
+**By:** 0102 (Worker-Lane LIVE-SIGNAL)
+**Slice:** SHORTS_LIVE_SCHEDULE_AND_VIEW_SIGNAL_PHASE1
+**WSP References:** WSP 6 (Test Audit), WSP 5 (Coverage), WSP 22 (ModLog), WSP 84 (Code Reuse), WSP 97 (Truth Signaling)
+
+### Added `tests/test_shorts_live_schedule_signal.py` (unit, mock-only -- no browser/daemon/models) -- 27 passed
+
+- `test_parse_view_count[...]` (13 cases) - pure parser: "1.2K views"->1200, "3.4M"->3.4M, "2B"->2B,
+  "1,234 views"->1234, "1.234"->1234 (plain thousands), "0"->0, "-"/""/None/"No views"->None (UNKNOWN).
+- `test_parse_view_count_unknown_is_not_zero` - UNKNOWN ("-") is None, distinct from 0.
+- `test_parse_row_signal_*` - scheduled flag derived from `span.label-span` text; unlisted rows carry
+  no scheduled_date.
+- `test_summarize_counts_scheduled_and_low_viewed` - 3 scheduled rows -> count 3 (NOT 0); low-viewed
+  = views known AND < threshold (sch1/sch3/unl1); UNKNOWN-views row (unl2) NOT counted low-viewed.
+- `test_accurate_scheduled_count_when_rows_exist` / `test_false_zero_is_fixed_*` - filter applied +
+  rows present -> scheduled_count == 3 and != 0 (the false-0 fix).
+- `test_views_parsed_from_list` - per-video views surface in the signal; UNKNOWN preserved as None.
+- `test_filter_fail_returns_unknown_not_zero` - filter TIMEOUT -> scheduled_count is None (UNKNOWN),
+  status `unknown_filter_not_applied`, success False; NEVER 0.
+- `test_old_path_produces_false_zero_then_new_path_returns_unknown` - REGRESSION ANCHOR: reproduces the
+  OLD `[CPS-AUDIT]` timeout->false-0 (`old_count == 0`), then asserts the NEW path on the SAME timeout
+  returns None. A regression to the old false-0 fails here.
+- `test_signal_responds_to_dom_not_static` - count FLIPS with the injected DOM (3 vs 1), proving the
+  scrape drives it (a static impl fails).
+- `test_run_skill_emits_breadcrumb_and_pattern_memory` - emits `live_schedule_signal` breadcrumb
+  (source_dae `youtube_shorts_scheduler`, metadata scheduled_count==3) + a PatternMemory SkillOutcome.
+- `test_run_skill_no_driver_returns_unknown_not_zero` - no browser -> None (UNKNOWN), not 0.
+- `test_run_skill_no_signals_skips_emission` - emit_signals=False emits nothing.
+
+**Non-vacuity proof (recorded):** runtime-monkeypatching the executor to the OLD false-0 behavior
+RED-fails the three load-bearing tests with `assert 0 is None`; the real executor file was unchanged.
+
+**Live gap:** DOM read is mock-only; 012 live-validates the real Studio selectors before graduation.
+
 ## 2026-06-19 - US-ET peak slots + per-channel Studio-tz conversion (Phase 1)
 
 **By:** 0102 (Worker-Lane SCHED-WINDOW)

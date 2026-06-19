@@ -1,5 +1,66 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-06-19 - shorts_live_schedule_signal SKILLz: live "Has schedule" count fix + per-video view signal (read-only)
+
+**By:** 0102 (Worker-Lane LIVE-SIGNAL)
+**Slice:** SHORTS_LIVE_SCHEDULE_AND_VIEW_SIGNAL_PHASE1
+**WSP References:** WSP 95 (SKILLz Wardrobe), WSP 77 (Agent Coordination), WSP 91 (Observability), WSP 60/48 (Pattern Memory), WSP 84 (Code Reuse: shadow_dom_finder), WSP 27 (Phase 0 KNOWLEDGE), WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (Pre-Action)
+
+### Problem (the false-0 audit bug)
+
+`content_page_scheduler.audit_calendar()` (`[CPS-AUDIT]`) reports "Total scheduled: 0"
+(`src/content_page_scheduler.py:992`) for Edge channels (foundups/antifaFM) even though the tracker
+holds 131 / 55. Root cause: it filters to Scheduled via the OLD sidebar flow
+`#filter-icon -> "Visibility" -> "Has schedule"` in `_apply_visibility_filter_via_ui`
+(`src/content_page_scheduler.py:313-412`). That flow TIMES OUT on those channels; the filter never
+lands, `navigate_to_content` "continues unfiltered" (`:276`), and `get_scheduled_videos_detailed`
+(`src/dom_automation.py:2466`) then scrapes 0 Scheduled rows on an unfiltered page -> a FALSE 0.
+012's reliable path is the **chip-bar "Filter" input -> "Has schedule" checkbox in the filter dialog**.
+
+### What changed (read-only; NO scheduling mutation)
+
+New SKILLz `skillz/shorts_live_schedule_signal/` mirroring the `what_should_i_schedule` (#850) +
+`reschedule_plan` (#851) read-only/agent-invoked pattern (`executor.py` + `run_skill.py` + `SKILLz.md`):
+
+1. **Accurate "Has schedule" count** -- `read_live_schedule_signal()` clicks the chip-bar filter input
+   and ticks the "Has schedule" label in `ytcp-filter-dialog tp-yt-paper-dialog#dialog`, then scrapes
+   `ytcp-video-row` for scheduled rows. **Fail-safe**: if the filter cannot be applied it returns
+   `scheduled_count = None` (UNKNOWN, status `unknown_filter_not_applied` / `unknown_no_driver`),
+   **NEVER a false 0**.
+2. **Per-video view signal** -- each row's views cell is parsed (`parse_view_count`: "1.2K views" ->
+   1200, "-"/"" -> None UNKNOWN, distinct from 0) into `{video_id, scheduled, scheduled_date, views}`;
+   `summarize_rows` derives the low-viewed list (views known AND < threshold; UNKNOWN never low-viewed).
+3. **WSP 84 reuse**: Studio is shadow-rooted, so the chip-bar / dialog / rows are reached with the
+   EXISTING `modules/infrastructure/foundups_selenium/src/shadow_dom_finder.py`
+   (`first_deep`/`find_deep`, from the Studio-Ask #825/#827 work), not flat CSS.
+4. **WRE signals**: every run emits a `live_schedule_signal` breadcrumb (WSP 91) + a PatternMemory
+   SkillOutcome (WSP 60/48). Agent-invoked via `--agent-command` -> `run_skill.py`; no manual-012 menu.
+
+Malleable: parsing is behind pure functions; the DOM scrape + "Has schedule" applier are injectable
+seams (`scrape_fn` / `apply_filter_fn`) so tests are mock-only.
+
+### Scope / out of scope
+
+ONLY touches `youtube_shorts_scheduler` (+ new skillz/tests/ModLog) and REUSES `shadow_dom_finder`.
+No mutation. OUT: Mode B apply, wiring into the scheduler order / ranking, music gate. The existing
+timing-out `_apply_visibility_filter_via_ui` is left intact (no behavior change there this phase);
+this skill is the accurate read-only signal the audit/daemon consumes.
+
+### Live gap (honest)
+
+DOM read path is **mock-tested only** (simulated Studio DOM); no live browser ran. 012 live-validates
+the real chip-bar / "Has schedule" / views selectors on the Edge channels before graduation. Selectors
+are 012-grounded but the live structure must be re-confirmed in-code.
+
+### Tests (mock-only, non-vacuous) -- 27 passed
+
+`tests/test_shorts_live_schedule_signal.py`. Non-vacuity proven: regressing the executor to the old
+false-0 behavior RED-fails `test_filter_fail_returns_unknown_not_zero`,
+`test_old_path_produces_false_zero_then_new_path_returns_unknown`, and
+`test_accurate_scheduled_count_when_rows_exist` (`assert 0 is None`).
+
+---
+
 ## 2026-06-19 - reschedule_plan SKILLz: dry-run rebalance PLAN for over-cap days (Mode B Phase 1)
 
 **By:** 0102 (Worker-Lane RESCHED-PLAN)
