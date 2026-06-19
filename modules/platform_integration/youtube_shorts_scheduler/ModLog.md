@@ -1,5 +1,54 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-06-19 - Rotate ~3 days per channel per pass (fairness) instead of draining one fully
+
+**By:** 0102 (Worker-Lane SCHED-ROTATION)
+**Slice:** SHORTS_SCHEDULE_ROTATION_FAIRNESS_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (Pre-Action), WSP 84 (Code Reuse: max_videos already a pure count limiter; daemon already re-invokes PHASE 3 per cycle), WSP 97 (truth signaling)
+
+### Why (the drain-one-fully bug)
+`run_multi_channel_scheduler` looped over a browser's channels and called
+`scheduler.run_scheduling_cycle(max_videos=max_per_channel)` per channel
+(`scripts/launch.py:966-968` on origin/main). `max_per_channel` defaults to `9999`
+(`:754`), and the DAE passes `YT_SHORTS_PER_CYCLE` default `9999`
+(`auto_moderator_dae.py:1613,1629`). Inside the scheduler, `max_videos` ONLY limits the
+count (`scheduler.py:336` `unlisted[:max_videos]`, stop at `:341-342`); the per-day cap is
+`HARD_CAP_PER_DAY=3` which merely SPREADS dates across a 60-day window
+(`schedule_tracker.py:186,197,205`). Net effect: the FIRST channel in the for-loop
+(`launch.py:888`) drained its ENTIRE backlog (up to ~180 videos / 60 days) before the loop
+ever reached the next channel -> channel starvation / unfair.
+
+### What changed (minimal, launch.py only)
+- New env knob `YT_SHORTS_PER_CHANNEL_PER_PASS` (default `"9"` = 3 days x 3/day), parsed
+  once per pass with a safe fallback to 9 on garbage / non-positive values.
+- The per-channel call now passes `max_videos = min(max_per_channel, per_channel_per_pass)`,
+  so each channel schedules at most ~9 (≈3 days) then the loop ROTATES to the next channel.
+  The daemon re-invokes PHASE 3 every cycle (`auto_moderator_dae.py:1592-1640`), so the
+  remaining backlog drains round-robin across subsequent passes until empty — for free, with
+  NO change to `run_scheduling_cycle` internals, the cap, the window, or the priority wiring
+  (#854/#856).
+- Breadcrumbs: a per-pass `[ROTATION]` line announcing the budget + that rotation is active,
+  and a per-channel `[ROTATION] <ch>: scheduled N/budget this pass` line.
+- Default-ON (this is 012's requested rotation behavior). Tunable: set
+  `YT_SHORTS_PER_CHANNEL_PER_PASS` very high to restore the old drain-one-fully behavior.
+
+### Tests (mock-only, non-vacuous, no browser)
+`tests/test_schedule_rotation_fairness.py` (4 tests, all green in 0.67s):
+- each channel's `run_scheduling_cycle` is called with `max_videos == 9` (not 9999), all
+  channels touched in one pass, neither drained to its 100-video backlog;
+- MUST-FAIL probe: asserts `max_videos <= 9` — FAILS on the old `max_videos=max_per_channel`
+  (verified: reverting the call to the old drain made 3/4 tests fail, output showed
+  `Scheduled 100` per channel);
+- env override restores the large (9999) budget;
+- garbage/non-positive env falls back to the default-9 budget.
+The mock `run_scheduling_cycle` honors `max_videos` against a real 100-video backlog, so a
+stub ignoring the arg could not produce the asserted partial-drain numbers.
+
+### Out of scope (unchanged)
+- `run_scheduling_cycle` internals, `HARD_CAP_PER_DAY=3`, the 60-day window, the priority
+  wiring (#854/#856), indexing, long-form/video pass, private, the detector. Only the
+  per-pass budget passed into each channel's cycle.
+
 ## 2026-06-19 - Auto-fire reschedule_plan + live-signal from the WRE trigger (live-signal self-gated)
 
 **By:** 0102 (Worker-Lane SKILLZ-REGISTER)

@@ -808,12 +808,40 @@ def run_multi_channel_scheduler(
     # OR any error this returns `channels` unchanged -> zero behavior change.
     channels = _prioritize_channels(channels)
 
+    # SHORTS_SCHEDULE_ROTATION_FAIRNESS_PHASE1: per-channel per-pass budget.
+    # Without this, each channel is scheduled with max_videos=max_per_channel
+    # (default 9999), so the FIRST channel drains its ENTIRE backlog (up to the
+    # 60-day window / ~180 videos at the HARD_CAP_PER_DAY=3 spread) before the
+    # loop ever reaches the next channel -> unfair, channel-starving.
+    #
+    # FAIRNESS: cap each channel to ~3 days of content per pass
+    # (YT_SHORTS_PER_CHANNEL_PER_PASS, default "9" = 3 days x 3/day). The loop
+    # then ROTATES to the next channel, and the daemon's NEXT PHASE 3 cycle
+    # re-invokes run_multi_channel_scheduler -> draining continues round-robin
+    # until every backlog is empty. This requires NO change to
+    # run_scheduling_cycle internals: max_videos only limits the count.
+    #
+    # Default-ON (this is the requested rotation behavior). Tunable: set
+    # YT_SHORTS_PER_CHANNEL_PER_PASS very high to restore old drain-one-fully.
+    try:
+        per_channel_per_pass = int(os.getenv("YT_SHORTS_PER_CHANNEL_PER_PASS", "9"))
+    except (TypeError, ValueError):
+        per_channel_per_pass = 9
+    if per_channel_per_pass <= 0:
+        per_channel_per_pass = 9
+
     print(f"\n[MULTI-CHANNEL] {browser.upper()} Rotation Scheduler")
     print("=" * 60)
     print(f"Browser: {browser.upper()} (port {port})")
     print(f"Channels: {' -> '.join(channels)}")
     print(f"Mode: {mode.upper()}")
     print(f"Max per channel: {max_per_channel}")
+    # SHORTS_SCHEDULE_ROTATION_FAIRNESS_PHASE1 breadcrumb: rotation active.
+    print(
+        f"[ROTATION] Per-channel budget this pass: {per_channel_per_pass} "
+        f"(~{per_channel_per_pass / 3:.0f} days @ 3/day) -> rotate to next channel, "
+        f"daemon's next PHASE 3 continues draining"
+    )
     print(f"Dry run: {dry_run}")
     print(vitals.to_dashboard())  # Show initial vitals
     print("=" * 60)
@@ -963,8 +991,12 @@ def run_multi_channel_scheduler(
                     results["channels"][channel_key] = {"error": "oops_page"}
                     continue
 
+            # SHORTS_SCHEDULE_ROTATION_FAIRNESS_PHASE1: cap THIS channel to the
+            # per-pass budget so we schedule ~3 days then rotate. max_videos only
+            # limits the count inside run_scheduling_cycle (no other behavior).
+            pass_budget = min(max_per_channel, per_channel_per_pass)
             channel_results = asyncio.run(
-                scheduler.run_scheduling_cycle(max_videos=max_per_channel)
+                scheduler.run_scheduling_cycle(max_videos=pass_budget)
             )
             results["channels"][channel_key] = channel_results
             
@@ -978,6 +1010,12 @@ def run_multi_channel_scheduler(
             vitals.record_channel(processed=True)
             
             print(f"[OK] {channel_key}: Scheduled {scheduled}, Errors {errors}")
+            # SHORTS_SCHEDULE_ROTATION_FAIRNESS_PHASE1 breadcrumb: per-channel
+            # scheduled count vs per-pass budget; rotation moves to next channel.
+            print(
+                f"[ROTATION] {channel_key}: scheduled {scheduled}/{pass_budget} this pass "
+                f"-> rotating to next channel (remaining backlog drains next PHASE 3)"
+            )
             print(vitals.to_dashboard())  # Show updated vitals
             vitals.emit_to_telemetry(phase=f"channel_{channel_key}")  # Store for 012 review
 
