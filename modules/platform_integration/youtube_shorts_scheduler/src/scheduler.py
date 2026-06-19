@@ -20,6 +20,7 @@ from selenium.common.exceptions import WebDriverException
 from .channel_config import get_channel_config, CHANNELS
 from .dom_automation import YouTubeStudioDOM
 from .schedule_tracker import ScheduleTracker
+from .peak_window import get_peak_slots_et
 from .schedule_dba import record_schedule_outcome
 from .index_weave import (
     load_index_json,
@@ -83,7 +84,13 @@ class YouTubeShortsScheduler:
         self.channel_id = self.config["id"]
         self.channel_name = self.config["name"]
         self.chrome_port = self.config["chrome_port"]
-        self.time_slots = self.config["time_slots"]
+        # Canonical US-Eastern peak slots (morning/lunch/evening), env-configurable
+        # via SHORTS_PEAK_SLOTS_ET. Defined ONCE in peak_window; these are ET and
+        # get converted to the channel's Studio-account tz at allocation time.
+        self.time_slots = get_peak_slots_et()
+        # Channel Studio-account timezone (registry field). Used to convert the
+        # ET peak slot to the local wall-clock the bare-time typer must enter.
+        self.channel_tz = self.config.get("timezone")
         self.max_per_day = self.config["max_per_day"]
         self.dry_run = dry_run
 
@@ -410,6 +417,7 @@ class YouTubeShortsScheduler:
                         slot = self.tracker.get_next_available_slot(
                             self.time_slots,
                             self.max_per_day,
+                            channel_tz=self.channel_tz,
                         )
 
                         if not slot:
@@ -955,6 +963,7 @@ class YouTubeShortsScheduler:
             slot = temp_tracker.get_next_available_slot(
                 self.time_slots,
                 self.max_per_day,
+                channel_tz=self.channel_tz,
             )
             if slot:
                 date_str, time_str = slot
