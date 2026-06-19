@@ -1027,7 +1027,11 @@ def run_multi_channel_scheduler(
             
             # 2026-02-05: VIDEO PROCESSING PASS — process Videos tab for channels
             # that produce uploads (vlogs), not just shorts (FFCPLN songs).
-            # Gated by YT_VIDEO_PROCESSING_ENABLED env var (default: false).
+            # LONG_FORM_SCHEDULING_ENABLE_PHASE1: master-gated by
+            # YT_VIDEO_PROCESSING_ENABLED (DEFAULT OFF — OUTWARD-FACING: scheduling a
+            # long-form upload publishes it PUBLIC at its slot, so 012 enables this
+            # deliberately). When ON, every channel whose registry content_types
+            # include "upload" runs the Videos-tab pass (now all 4 channels).
             video_processing_enabled = os.getenv("YT_VIDEO_PROCESSING_ENABLED", "false").lower() in ("1", "true", "yes")
             if video_processing_enabled:
                 reg_channel = get_channel_by_key(channel_key)
@@ -1049,7 +1053,48 @@ def run_multi_channel_scheduler(
                                 pass
 
                             vps_time_slots = (vps_config or {}).get("time_slots", _DEFAULT_TIME_SLOTS_FALLBACK)
-                            vps_max = min(max_per_channel, 5)  # Conservative for videos
+
+                            # LONG_FORM_SCHEDULING_ENABLE_PHASE1: per-channel per-pass
+                            # ROTATION budget (mirror of the shorts #858 fairness fix).
+                            # Without this the FIRST upload-eligible channel would drain
+                            # its whole long-form backlog (bounded only by max_per_channel)
+                            # before the loop rotates -> channel-starving. Cap each channel
+                            # to a few days of long-form per pass; the daemon's next PHASE 3
+                            # re-invocation continues draining round-robin.
+                            # Default "8" = 2 days x 4/day (max_per_day=4 below). Tunable via
+                            # YT_VIDEO_PER_CHANNEL_PER_PASS; non-positive/garbage -> default.
+                            try:
+                                vps_per_pass = int(os.getenv("YT_VIDEO_PER_CHANNEL_PER_PASS", "8"))
+                            except (TypeError, ValueError):
+                                vps_per_pass = 8
+                            if vps_per_pass <= 0:
+                                vps_per_pass = 8
+                            vps_max = min(max_per_channel, vps_per_pass)  # rotation-budgeted
+
+                            # LONG_FORM_SCHEDULING_ENABLE_PHASE1 TZ GAP (#847 follow-up):
+                            # ContentPageScheduler.schedule_all_visible() calls
+                            # tracker.get_next_available_slot(time_slots) WITHOUT channel_tz,
+                            # so these bare times are typed AS-IS in the Studio account's own
+                            # tz (no ET-peak -> account-tz conversion like the shorts path does
+                            # via scheduler.py self.channel_tz). For ET-account channels
+                            # (foundups/antifafm) this is tz-coherent; for Asia/Tokyo channels
+                            # (move2japan/undaodu) the wall-clock is NOT the US-ET peak. Full
+                            # correctness requires forwarding channel_tz through
+                            # schedule_all_visible (out of scope here: cps.py). Surface it.
+                            vps_tz = (vps_config or {}).get("timezone") or "as-is"
+                            if vps_tz not in ("America/New_York", "as-is"):
+                                print(
+                                    f"[VIDEO][TZ-WARN] {channel_key}: long-form slots typed "
+                                    f"naively in account tz '{vps_tz}' (NOT #847 ET-peak "
+                                    f"converted). Follow-up: forward channel_tz through "
+                                    f"schedule_all_visible before enabling for this channel."
+                                )
+
+                            # LONG_FORM_SCHEDULING_ENABLE_PHASE1 breadcrumb: pass is running.
+                            print(
+                                f"[VIDEO][LONG-FORM] {channel_key}: pass START "
+                                f"(budget={vps_max}/pass, max_per_day=4, tz={vps_tz})"
+                            )
 
                             vps_results = asyncio.run(
                                 vps.schedule_all_visible(
@@ -1064,6 +1109,13 @@ def run_multi_channel_scheduler(
                             vps_scheduled = vps_results.get("total_scheduled", 0)
                             vps_errors = vps_results.get("total_errors", 0)
                             print(f"[VIDEO] {channel_key}: {vps_scheduled} videos scheduled, {vps_errors} errors")
+                            # LONG_FORM_SCHEDULING_ENABLE_PHASE1 breadcrumb: per-channel
+                            # scheduled count vs per-pass budget; rotation moves to next.
+                            print(
+                                f"[VIDEO][LONG-FORM] {channel_key}: scheduled "
+                                f"{vps_scheduled}/{vps_max} this pass -> rotating "
+                                f"(remaining long-form backlog drains next PHASE 3)"
+                            )
 
                             # Track in vitals
                             vitals.record_scheduling_cycle(vps_scheduled)

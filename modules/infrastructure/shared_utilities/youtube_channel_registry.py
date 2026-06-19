@@ -82,7 +82,7 @@ def _default_channels() -> List[Dict[str, Any]]:
             "handle": "@FoundUps",
             "timezone": "America/New_York",
             "roles": {"live_check": True, "comments": True, "shorts": True, "indexing": True},
-            "content_types": ["short"],  # startup/pAVS content (NOT FFCPLN)
+            "content_types": ["short", "upload"],  # startup/pAVS content (NOT FFCPLN); long-form gated by YT_VIDEO_PROCESSING_ENABLED (default off)
             "browser": {
                 "comment_browser": "edge",
                 "preferred_port": _EDGE_PORT,
@@ -99,7 +99,7 @@ def _default_channels() -> List[Dict[str, Any]]:
             "handle": "@antifaFM",
             "timezone": "America/New_York",
             "roles": {"live_check": True, "comments": True, "shorts": True, "indexing": True},
-            "content_types": ["short"],  # music shorts only
+            "content_types": ["short", "upload"],  # music shorts + long-form; long-form gated by YT_VIDEO_PROCESSING_ENABLED (default off)
             "browser": {
                 "comment_browser": "edge",
                 "preferred_port": _EDGE_PORT,
