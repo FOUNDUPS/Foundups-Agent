@@ -766,8 +766,14 @@ Give a brief category and a few mood/genre topics only.""",
     def _ask_result_to_index_data(
         ask_result: AskResult,
         channel_key: str,
+        content_type: str = "upload",
     ) -> IndexData:
-        """Build IndexData from Ask Gemini response."""
+        """Build IndexData from Ask Gemini response.
+
+        ``content_type`` records WHICH Studio list pass produced this artifact
+        ("upload" long-form vs "short"); it is stored in metadata so shorts and
+        long-form indices are distinguishable downstream (INDEXER_SHORTS_PASS).
+        """
         segments = []
         for seg in ask_result.timestamps or []:
             start = StudioAskIndexer._parse_timestamp(seg.get("time", ""))
@@ -802,6 +808,9 @@ Give a brief category and a few mood/genre topics only.""",
                 "topics": ask_result.topics or [],
                 "key_points": [],
                 "summary": ask_result.response_text or "",
+                # Which Studio list pass produced this artifact ("short" | "upload").
+                # Lets shorts and long-form indices be told apart (INDEXER_SHORTS_PASS).
+                "content_type": content_type,
                 "content_category": ask_result.content_category or "other",
                 # PRESERVE Gemini's raw (pre-normalization) category in the saved
                 # index so the rich label is never lost. None if Gemini returned no
@@ -2272,19 +2281,30 @@ Give a brief category and a few mood/genre topics only.""",
         channel_id: str,
         max_videos: Optional[int] = None,
         force_reindex: bool = False,
+        content_type: str = "upload",
     ) -> Dict[str, Any]:
         """
         Index videos for a channel using Ask Gemini.
-        
+
         Args:
             channel_id: YouTube channel ID
             max_videos: Override max videos to index
-            
+            content_type: Which Studio list to enumerate -- "upload" (long-form,
+                the original behaviour which SKIPS short rows) or "short" (the
+                Shorts list, which KEEPS short rows so they get indexed too).
+                Navigation targets ``videos/{content_type}`` and the recorded
+                artifact metadata carries this label (INDEXER_SHORTS_PASS).
+
         Returns:
             Summary of indexing results
         """
         import asyncio
-        
+
+        content_type = (content_type or "upload").strip().lower()
+        if content_type not in ("upload", "short"):
+            content_type = "upload"
+        is_shorts_pass = content_type == "short"
+
         max_videos = max_videos or self.max_videos_per_cycle
         results = []
         skipped = 0
@@ -2293,15 +2313,16 @@ Give a brief category and a few mood/genre topics only.""",
         channel_key = (channel_entry or {}).get("key") or channel_id or "unknown"
         channel_name = (channel_entry or {}).get("name", channel_key)
 
-        logger.info(f"[STUDIO-ASK] Starting video indexing for channel {channel_id} ({channel_name})")
+        logger.info(f"[STUDIO-ASK] Starting video indexing for channel {channel_id} ({channel_name}) [pass={content_type}]")
         logger.info(f"[STUDIO-ASK] Max videos: {max_videos}")
-        
+
         if not self.driver:
             return {"error": "No browser driver", "indexed": 0}
-        
+
         try:
-            # Navigate to channel content page
-            content_url = f"https://studio.youtube.com/channel/{channel_id}/videos/upload"
+            # Navigate to channel content page. videos/upload = long-form list
+            # (skips shorts), videos/short = Shorts list (indexes shorts).
+            content_url = f"https://studio.youtube.com/channel/{channel_id}/videos/{content_type}"
             logger.info(f"[STUDIO-ASK] Navigating to: {content_url}")
             self.driver.get(content_url)
             await self._human_delay(3.0, 0.4)
@@ -2358,8 +2379,10 @@ Give a brief category and a few mood/genre topics only.""",
                 logger.warning(f"[STUDIO-ASK] Sort failed (using default order): {e}")
                 # Continue with default order - better than failing
 
-            # Get list of video IDs (PRIORITIZE: LIVE > Regular, skip Shorts)
-            # 2026-03-18: Added LIVE prioritization and Shorts filtering
+            # Get list of video IDs (PRIORITIZE: LIVE > Regular).
+            # 2026-03-18: Added LIVE prioritization and Shorts filtering.
+            # INDEXER_SHORTS_PASS: the upload pass still SKIPS short rows; the
+            # shorts pass (videos/short) KEEPS them so shorts get indexed too.
             video_ids = []
             live_videos = []
             regular_videos = []
@@ -2376,8 +2399,9 @@ Give a brief category and a few mood/genre topics only.""",
                         # Get row text to detect LIVE/Shorts
                         row_text = row.text.lower()
 
-                        # Skip Shorts (they have limited content value for indexing)
-                        if "short" in row_text or "#short" in row_text:
+                        # Skip Shorts on the long-form (upload) pass only -- they
+                        # are indexed by the dedicated shorts pass instead.
+                        if not is_shorts_pass and ("short" in row_text or "#short" in row_text):
                             continue
 
                         # Detect LIVE/Premiered videos (higher priority)
@@ -2422,7 +2446,9 @@ Give a brief category and a few mood/genre topics only.""",
                     logger.info(f"[STUDIO-ASK] ✅ {vid_id}: {len(result.topics)} topics")
 
                     # Persist Ask results as JSON artifacts for indexing continuity
-                    index_data = self._ask_result_to_index_data(result, channel_key=channel_key)
+                    index_data = self._ask_result_to_index_data(
+                        result, channel_key=channel_key, content_type=content_type
+                    )
 
                     # OBSERVE-MODE acoustic music/talk label (flag-gated, default OFF;
                     # SHORTS_MUSIC_LABEL_OBSERVE_PHASE1). When YT_AUDIO_LABEL_OBSERVE=1
@@ -2454,6 +2480,7 @@ Give a brief category and a few mood/genre topics only.""",
             indexed = sum(1 for r in results if r.success)
             return {
                 "channel_id": channel_id,
+                "content_type": content_type,
                 "indexed": indexed,
                 "skipped": skipped,
                 "failed": len(results) - indexed,
@@ -2463,6 +2490,65 @@ Give a brief category and a few mood/genre topics only.""",
         except Exception as e:
             logger.error(f"[STUDIO-ASK] Channel indexing failed: {e}")
             return {"error": str(e), "indexed": 0}
+
+
+# Canonical, ordered Studio list passes for a channel: long-form first, shorts
+# second. A channel with no usable registry content_types is indexed on BOTH.
+_DEFAULT_INDEX_PASSES = ("upload", "short")
+
+
+def _resolve_index_passes(channel_id: str) -> List[str]:
+    """Return the ordered list of content-type passes for ``channel_id``.
+
+    INDEXER_SHORTS_PASS: derived from the channel registry ``content_types``
+    (move2japan/undaodu = ["short","upload"] -> both; foundups/antifafm =
+    ["short"] -> shorts only). Unknown channel or missing/empty content_types
+    falls back to indexing BOTH lists. Order is normalized to upload-then-short
+    so long-form is indexed first, shorts second.
+    """
+    try:
+        channel_entry = get_channel_by_id(channel_id) or {}
+        content_types = channel_entry.get("content_types") or []
+        wanted = {str(ct).strip().lower() for ct in content_types}
+    except Exception as e:
+        logger.warning(f"[VIDEO-INDEX] content_types lookup failed for {channel_id}: {e}")
+        wanted = set()
+
+    passes = [ct for ct in _DEFAULT_INDEX_PASSES if ct in wanted]
+    if not passes:
+        # Absent / unrecognized content_types -> default to both passes.
+        passes = list(_DEFAULT_INDEX_PASSES)
+    return passes
+
+
+def _merge_pass_results(channel_id: str, pass_results: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Combine per-pass index_channel_videos summaries into one channel summary.
+
+    Sums indexed/skipped/failed across passes, unions the indexed video ids, and
+    keeps a per-pass breakdown (``passes``) so shorts vs long-form contribution
+    stays observable. Pass-level errors are surfaced under ``pass_errors``.
+    """
+    merged: Dict[str, Any] = {
+        "channel_id": channel_id,
+        "indexed": 0,
+        "skipped": 0,
+        "failed": 0,
+        "videos": [],
+        "passes": {},
+    }
+    pass_errors: Dict[str, str] = {}
+    for pr in pass_results:
+        ct = pr.get("content_type", "unknown")
+        merged["indexed"] += int(pr.get("indexed", 0) or 0)
+        merged["skipped"] += int(pr.get("skipped", 0) or 0)
+        merged["failed"] += int(pr.get("failed", 0) or 0)
+        merged["videos"].extend(pr.get("videos", []) or [])
+        merged["passes"][ct] = pr
+        if pr.get("error"):
+            pass_errors[ct] = pr["error"]
+    if pass_errors:
+        merged["pass_errors"] = pass_errors
+    return merged
 
 
 async def run_video_indexing_cycle(
@@ -2562,12 +2648,38 @@ async def run_video_indexing_cycle(
 
     results = {}
     for channel_id in channels:
-        result = await indexer.index_channel_videos(
-            channel_id,
-            force_reindex=force_reindex,
-        )
+        # INDEXER_SHORTS_PASS: run the passes appropriate to this channel's
+        # registry content_types. A ["short"] channel gets the shorts pass; a
+        # ["short","upload"] channel gets both; absent/unknown -> default both.
+        passes = _resolve_index_passes(channel_id)
+        pass_results = []
+        for content_type in passes:
+            # Per-pass try/except so one pass failing does not abort the other.
+            try:
+                pass_result = await indexer.index_channel_videos(
+                    channel_id,
+                    force_reindex=force_reindex,
+                    content_type=content_type,
+                )
+            except Exception as e:
+                logger.error(
+                    f"[VIDEO-INDEX] {channel_id} pass={content_type} raised: {e}"
+                )
+                pass_result = {
+                    "channel_id": channel_id,
+                    "content_type": content_type,
+                    "error": str(e),
+                    "indexed": 0,
+                }
+            pass_results.append(pass_result)
+            logger.info(
+                f"[VIDEO-INDEX] {channel_id} [{content_type}]: "
+                f"{pass_result.get('indexed', 0)} videos indexed"
+            )
+
+        result = _merge_pass_results(channel_id, pass_results)
         results[channel_id] = result
-        logger.info(f"[VIDEO-INDEX] {channel_id}: {result.get('indexed', 0)} videos indexed")
+        logger.info(f"[VIDEO-INDEX] {channel_id}: {result.get('indexed', 0)} videos indexed (all passes)")
 
     total_indexed = sum(r.get("indexed", 0) for r in results.values())
     total_skipped = sum(r.get("skipped", 0) for r in results.values())

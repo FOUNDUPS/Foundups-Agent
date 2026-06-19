@@ -2,6 +2,48 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## V0.30.0 - Index Shorts as well as long-form (add videos/short pass) (INDEXER_SHORTS_PASS_PHASE1) (2026-06-19)
+
+**By:** 0102 (Worker-Lane INDEX-SHORTS)
+**Slice:** INDEXER_SHORTS_PASS_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (existing-flag gated, no new public mutation), WSP 84 (Code Reuse: ask_about_video + VideoIndexStore.save_index), WSP 91 (per-pass observability)
+
+### Why (the gap)
+`index_channel_videos` navigated ONLY the long-form list
+(`https://studio.youtube.com/channel/{id}/videos/upload`, src:2304) and EXPLICITLY
+skipped short rows (`if "short" in row_text or "#short" in row_text: continue`,
+src:2380). Result: SHORTS were NEVER indexed, even for channels whose registry
+`content_types` are shorts-only (foundups/antifafm = `["short"]`). 012 wants both
+shorts AND long-form indexed.
+
+### What changed (minimal, read-mostly, no new public mutation)
+- `src/studio_ask_indexer.py`:
+  - `index_channel_videos(..., content_type="upload")`: navigation now targets
+    `videos/{content_type}`; the short-row skip is gated `if not is_shorts_pass`
+    so the `videos/upload` pass STILL skips shorts while the new `videos/short`
+    pass KEEPS short rows and indexes them via the SAME `ask_about_video` +
+    `save_index` path. Summary now carries `content_type`.
+  - `_ask_result_to_index_data(..., content_type="upload")`: records
+    `metadata.content_type` (`"short"`|`"upload"`) so shorts vs long-form
+    artifacts are distinguishable downstream.
+  - `run_video_indexing_cycle`: for each channel runs the passes from the
+    registry `content_types` via new helper `_resolve_index_passes` (foundups/
+    antifafm `["short"]` -> shorts only; move2japan/undaodu `["short","upload"]`
+    -> both; unknown/absent -> both). Per-pass try/except isolates a failing pass;
+    `_merge_pass_results` sums per-channel totals and keeps a per-pass breakdown
+    (`passes`, `pass_errors`).
+  - Gated by the EXISTING `YT_VIDEO_INDEXING_ENABLED` (no new flag, no scheduling
+    change). Indexing remains read-mostly JSON persistence.
+- `tests/test_shorts_indexing_pass.py` (NEW, mock-only, no live browser):
+  shorts pass indexes short rows with `content_type=short`; upload pass skips
+  shorts; `_resolve_index_passes` short-only/both/default; cycle runs the right
+  passes per channel; one failing pass does not abort the sibling. All 7 FAIL on
+  pre-change source (shorts never indexed) and PASS after the change.
+
+### Scope (OUT)
+No scheduling change, no rotation fix, no private/detector work. Touched only
+`studio_ask_indexer.py` (+ `run_video_indexing_cycle`) + the new test + this ModLog.
+
 ## V0.29.0 - OBSERVE-mode acoustic music/talk label in PHASE 2 indexing (SHORTS_MUSIC_LABEL_OBSERVE_PHASE1) (2026-06-19)
 
 **By:** 0102 (Worker-Lane MUSIC-OBSERVE)
