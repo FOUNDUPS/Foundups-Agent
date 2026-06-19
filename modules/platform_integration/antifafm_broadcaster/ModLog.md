@@ -1,5 +1,35 @@
 # antifaFM Broadcaster - ModLog
 
+## V3.6.0 - Opt-in After-Selection Auto-Launch (2026-06-19)
+
+**Slice**: `ANTIFAFM_AUTOSTART_AFTER_SELECT_PHASE1`
+**Branch**: `fix/antifafm-autostart-after-select-phase1`
+**Worker-Lane**: ANTIFAFM-AUTOSTART
+**WSP Lock**: WSP_00, WSP_22, WSP_49, WSP_50, WSP_84, WSP_97
+
+**Context**: The 24/7 antifaFM broadcaster was previously auto-launched at *menu boot* via the legacy `ANTIFAFM_AUTO_START` block. That boot-time launch broke the daemon (OBS/FFmpeg/metadata/rotator side effects before any user action) and was deliberately removed in V3.5.0 (`MAIN_MENU_ANTIFAFM_STARTUP_BOUNDARY_FIX_PHASE1`, enforced by `test_main_menu_startup_boundary.py`). This slice re-enables auto-launch but at the **correct, safe place**: *after* 012 selects/starts the YouTube DAE, inside `main.monitor_youtube()` (function scope), gated by a **new, distinct** opt-in flag — never at module-scope boot.
+
+**Changes**:
+
+1. **New flag `ANTIFAFM_AUTOSTART` (default `0`/OFF)** in `main.monitor_youtube()`:
+   - Distinct name from the retired/ignored `ANTIFAFM_AUTO_START` (note: no underscore between `AUTO` and `START`).
+   - Gate runs at *function scope*, after the instance lock is acquired and OAuth preflight completes, immediately before the blocking `await dae.run()`.
+   - Both YouTube DAE menu option 1 (Live Chat Monitor) and option 6 (Full Production Mode) route through `monitor_youtube()`, so this is the single after-selection entry point.
+
+2. **Non-blocking dispatch**: `start_antifafm_background()` has synchronous setup (FFmpeg/Edge cleanup, ~5s settle, stream verification), so it is launched on a daemon `threading.Thread` to avoid stalling the YouTube daemon (the original boot-time stall is what broke it). Wrapped in `try/except` — a broadcaster failure logs and continues; it never breaks the monitor.
+
+3. **Reuses the existing `antifafm_broadcaster` instance lock** inside `start_antifafm_background()` — no second lock added.
+
+4. **Boundary test untouched and still green**: `ANTIFAFM_AUTOSTART` does not match the boundary test's `ANTIFAFM_AUTO_START` regex; the new code calls `start_antifafm_background()` (not OBSController/`start_obs_stream`/`init_dynamic_metadata`/`rotator_thread.start`), and module-scope boot is unchanged. No edit to `test_main_menu_startup_boundary.py` was required.
+
+5. **Tests added**: `tests/test_monitor_youtube_antifafm_autostart.py` (4 tests) — extracts `monitor_youtube()` via AST and runs it with all inner deps mocked (no real browser/FFmpeg/OBS/broadcast). Asserts: flag=1 launches, unset is OFF, explicit 0 is OFF, retired `ANTIFAFM_AUTO_START` does NOT trigger the new gate. Non-vacuity verified by mutation: always-on gate fails the OFF tests; removed gate fails the ON test.
+
+**Safety**: Default OFF -> merging does NOT auto-broadcast. 012 enables via `.env` (`ANTIFAFM_AUTOSTART=1`). `start_antifafm_background()` additionally returns False harmlessly without `ANTIFAFM_YOUTUBE_STREAM_KEY`, and the launch is lock-guarded.
+
+**Scope**: Touched only `main.py` (`monitor_youtube`) + new test + this ModLog note. Broadcaster internals, OBS, scheduler, and music R&D are out of scope.
+
+---
+
 ## V3.5.0 - Main Menu Startup Boundary Fix (2026-05-26)
 
 **Slice**: `MAIN_MENU_ANTIFAFM_STARTUP_BOUNDARY_FIX_PHASE1`
