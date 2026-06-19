@@ -109,6 +109,69 @@ input. This slice does NOT enable live OpenRouter -- alias/server_tool/local_fal
 
 Declared == Actual == 26 / 26 YES.
 
+### Fusion ALIAS live path (VALVE-GATED OFF by default; first live OpenRouter integration)
+
+```python
+from modules.communication.moltbot_bridge.src.fusion_alias_live import (
+    run_alias_live,            # (prompt, context=None, *, authorization, ...) -> AliasLiveResult
+    LiveFusionAuthorization,   # typed sovereign auth (authorized=True, authority="012", purpose="fusion_alias_live_call")
+    AliasLiveResult,           # status / reason / made_network_call / receipt
+    run_manual_smoke,          # MANUAL live smoke (module __main__); NOT a pytest, never in CI
+)
+```
+
+Landing this makes **ZERO** live calls. A network call requires ALL of: (1) `FUSION_ALIAS_LIVE_ENABLED`
+env flag ON (default OFF), (2) a valid `LiveFusionAuthorization` object (authority `012` -- a bool/int/
+str/dict cannot satisfy it), (3) the redaction gate PASSED, (4) `OPENROUTER_API_KEY` present, (5) budget/
+timeout within bounds. Raw text is redacted ON ENTRY; only the REDACTED prompt/context is sent to the
+`openrouter/fusion` alias; only digests are retained; the API key is never logged. Output is ADVISORY
+(`advisory_not_canonical=True`). All failure paths fail closed with a low-cardinality reason
+(`valve_closed`/`redaction_blocked`/`authorization_missing`/`missing_api_key`/`budget_exceeded`/`timeout`/
+`http_error`/`malformed_response`). SERVER_TOOL / LOCAL_FALLBACK remain blocked. HTTP client reused from
+`ai_gateway` (`requests`) -- no new dependency.
+
+**Manual live smoke (NOT CI; requires explicit 012 opt-in):**
+```
+FUSION_ALIAS_LIVE_ENABLED=1 OPENROUTER_API_KEY=<real-key> \
+  python -m modules.communication.moltbot_bridge.src.fusion_alias_live --authorize-012
+```
+Without `--authorize-012` it refuses. With the valve OFF it prints `valve_closed` and makes no call.
+
+#### WSP_97 Truth Boundary Checklist (HERMES_FUSION_ALIAS_MODE_PHASE2)
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|-------------------------------|--------|----------|
+| 1 | ALIAS_REQUIRES_PASSED_REDACTION_GATE | YES | `run_alias_live` calls `evaluate_redaction_gate` first; not-passed -> `redaction_blocked`, no call |
+| 2 | VALVE_OFF_BY_DEFAULT_NO_LIVE_CALL | YES | `test_valve_off_by_default_makes_zero_network` (socket-blocked, 0 calls) |
+| 3 | ONLY_REDACTED_TEXT_SENT | YES | `test_only_redacted_text_is_sent` (body == gate.redacted_prompt) |
+| 4 | NO_RAW_RETAINED_OR_LOGGED | YES | `test_no_raw_prompt_or_secret_retained_in_receipt` |
+| 5 | KEY_NEVER_LOGGED | YES | `test_key_never_in_result_or_receipt` |
+| 6 | FAIL_CLOSED_ALL_BRANCHES | YES | timeout/http/malformed/missing-key/budget tests -> blocked, no crash |
+| 7 | OUTPUT_ADVISORY_NOT_CANONICAL | YES | receipt forces `advisory_not_canonical=True` (`test_receipt_invariants`) |
+| 8 | NO_NEW_DEPENDENCY_REUSE_GATEWAY | YES | reuses `requests` (ai_gateway); `test_module_no_new_dependency_imports` |
+| 9 | SERVER_TOOL_LOCALFALLBACK_STILL_BLOCKED | YES | `test_mock_adapter_live_modes_still_blocked` (incl. ALIAS via mock) |
+| 10 | NETWORK_MOCKED_IN_TESTS_NO_LIVE_CI | YES | all tests monkeypatch `requests.post`; no real call |
+| 11 | NO_CABR_OR_MERGE_AUTHORITY | YES | gate blocks authority/merge markers; alias touches none |
+| 12 | NO_REAL_KEY_COMMITTED | YES | synthetic split-fragment fake key only |
+| 13 | NO_SKIP_XFAIL | YES | `test_test_file_has_no_skip_or_xfail` (AST) |
+| 14 | FILE_SCOPE_EXACT | YES | alias module + test + INTERFACE + module ModLog + root ModLog |
+| 15 | HOLOINDEX_RESULTS_RATED | YES | Phase 0 ratings recorded (module ModLog) |
+| 16 | INTERNAL_SENTINEL_READY | YES | 5 sentinel lanes ran; findings folded |
+| 17 | FUSIONREQUEST_REMAINS_DIGEST_ONLY | YES | `fusion_adapter` unchanged; raw text is a function arg, never a FusionRequest field |
+| 18 | LIVE_INPUT_NOT_PERSISTED_OR_LOGGED | YES | raw prompt/context only function-local; never stored/logged |
+| 19 | AUTHORIZATION_NOT_BOOL_COERCIBLE | YES | `isinstance LiveFusionAuthorization` (`test_env_flag_alone_cannot_enable_network`) |
+| 20 | ENV_FLAG_ALONE_CANNOT_ENABLE_NETWORK | YES | env on + bad/no auth -> `authorization_missing`, 0 calls |
+| 21 | RAW_PROMPT_ABSENT_FROM_HTTP_BODY | YES | `test_only_redacted_text_is_sent` (raw absent, `scan_forbidden`==[]) |
+| 22 | RAW_CONTEXT_ABSENT_FROM_HTTP_BODY | YES | `test_redacted_context_sent_raw_context_absent` |
+| 23 | BLOCK_CATEGORY_BUILDS_NO_REQUEST | YES | `test_redaction_blocked_builds_no_request` (0 calls) |
+| 24 | RESPONSE_RECEIPT_ADVISORY_ONLY | YES | receipt advisory; `redaction_status=REDACTION_GATE_PASSED` |
+| 25 | RESPONSE_DOES_NOT_RETAIN_REQUEST_RAW | YES | response re-scanned; `test_response_secret_is_redacted_in_summary` / `_block_marker_is_withheld` |
+| 26 | TIMEOUT_AND_BUDGET_BOUNDED | YES | bounded timeout + `MAX_TOKENS_CEILING`; `test_budget_exceeded_fails_closed` |
+| 27 | NO_STREAMING_PHASE2 | YES | `test_no_streaming` (`stream=False`) |
+| 28 | LIVE_SMOKE_MANUAL_NOT_CI_SKIP | YES | smoke in `__main__`; `test_manual_smoke_is_main_guarded_not_collected` |
+
+Declared == Actual == 28 / 28 YES.
+
 ### WebhookReceiver
 
 ```python
