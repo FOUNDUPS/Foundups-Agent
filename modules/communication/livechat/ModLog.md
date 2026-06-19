@@ -10,6 +10,41 @@ This log tracks changes specific to the **livechat** module in the **communicati
 
 ---
 
+## 2026-06-18 - fix: run PHASE 2 video indexing on the Edge loop (EDGE_LOOP_INDEXING_PHASE1)
+
+**By:** 0102 (CTO) | **Worker-Lane:** EDGE-INDEX | **Slice:** EDGE_LOOP_INDEXING_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 50 (verify), WSP 84 (reuse), WSP 5/6 (tests)
+
+### Why
+`_browser_engagement_loop` runs PHASE 1 (comments) -> PHASE 2 (video indexing)
+-> PHASE 3 (scheduling) -> PHASE 4 (LinkedIn). PHASE 2 was gated Chrome-only at
+`src/auto_moderator_dae.py:1566` (`if browser_name == "chrome" and os.getenv("YT_VIDEO_INDEXING_ENABLED", ...)`),
+so the Edge loop (FoundUps/antifaFM, port 9223) went PHASE 1 -> PHASE 3 and those
+channels were never indexed by the loop. Artifacts confirmed the gap: move2japan
+650 / undaodu 550 indexed vs foundups 81 / antifafm 56 (stale). This is the
+indexing half of 012's #1 "fix scheduling/indexing on FoundUps/antifaFM"
+(scheduling already landed via #844 cap / #847 window).
+
+### Changed (minimal, scoped to auto_moderator_dae.py)
+- Relaxed the PHASE 2 gate to `if os.getenv("YT_VIDEO_INDEXING_ENABLED", "false")...`
+  (dropped the `browser_name == "chrome"` restriction). PHASE 2 now runs for
+  WHICHEVER browser drives the loop, under the SAME enablement flag (not a new
+  always-on path). `run_video_indexing_cycle(browser=browser_name)` is REUSED
+  unchanged (WSP 84) - it already filters channels by browser internally
+  (`studio_ask_indexer.py:903-927`: chrome=M2J/UnDaoDu, edge=FoundUps/antifaFM),
+  so passing `browser="edge"` indexes the Edge channels. PHASE 1/3/4 ordering and
+  the landed cap/window are preserved. The existing `[<TAG>-LOOP] PHASE 2: VIDEO
+  INDEXING starting...` log + `ActivityType.VIDEO_INDEXING` breadcrumb now also
+  fire for Edge, so the WRE sees Edge indexing.
+
+### Tests (mock only, no live browser)
+- NEW `tests/test_browser_loop_phase2_indexing.py` (4 tests): drives one loop
+  cycle with PHASE 1/3/4 disabled and `run_video_indexing_cycle` mocked.
+  - edge + enabled -> indexing invoked with `browser="edge"` (NON-VACUOUS:
+    FAILS on the old Chrome-only code, "Awaited 0 times").
+  - chrome + enabled -> still invoked with `browser="chrome"` (regression).
+  - edge/chrome + disabled -> indexing NOT invoked (regression guards).
+
 ## 2026-06-18 - RC3: channel-scope the OODA activity signal (YOUTUBE_COMMENT_FLOW_OODA_OBSERVABILITY_PHASE1)
 
 **By:** 0102 (CTO)
