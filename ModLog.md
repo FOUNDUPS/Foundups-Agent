@@ -1,5 +1,37 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-20] foundups/agent package __init__: lazy import closes the no-vendor IMPORT boundary (AUTHOR worker, gate=independent SENTINEL)
+
+**Change Type**: PACKAGE-STRUCTURE change to `modules/foundups/agent/src/__init__.py` only. Closes the
+#805/#806 "no Hermes / no vendor" boundary at the IMPORT boundary (decision B), not just in the file
+AST. Tests + ModLogs only besides the `__init__`. NO adapter code, NO contract code, NO Hermes code,
+NO runtime wiring.
+**By**: 0102 (AUTHOR worker) | Commander: 012 | Gate: independent SENTINEL (do NOT self-merge)
+**WSP References**: WSP 22, WSP 50, WSP 64, WSP 84, WSP 97
+**Slice**: FOUNDUP_AGENT_PACKAGE_INIT_LAZY_IMPORT_PHASE1
+**Base**: `a02b6fb9c` (origin/main)
+
+- WHY: the #807 contract leaf (`kanban_plugin_contract.py`) and the parked publish adapter MODULE are
+  AST-clean, but the package `__init__` EAGERLY imported from `.hermes_adapter` and
+  `.hermes_model_router` to expose 8 names, so ANY leaf import THROUGH the package transitively pulled
+  Hermes+subprocess+sqlite3+urllib. Confirmed live on `a02b6fb9c`: leaf import of the contract leaked
+  all five into `sys.modules`.
+- EDIT `modules/foundups/agent/src/__init__.py`: replaced the 2 eager `from .hermes_* import (...)`
+  blocks with a PEP 562 lazy `__getattr__` over a `_LAZY` name->submodule map. The 8 public names
+  resolve on ACCESS, are cached into `globals()` (cheap + identity-stable), and a leaf import no longer
+  triggers any Hermes/vendor load. `__version__` + `__all__` UNCHANGED; added `__dir__`; docstring kept.
+- PROOFS (fresh child interpreters where the import graph must be clean): leaf imports of
+  `kanban_plugin_contract` AND `source_authority` pull in NONE of
+  hermes_adapter/hermes_model_router/subprocess/sqlite3/urllib; all 8 exports resolve lazily,
+  identity-stable, and ARE the same objects as the source modules export (no behavior change); no
+  circular import in 3 orders; bogus attr -> AttributeError.
+- VALIDATE: full agent suite **1024 passed** (CI + heavy mode; was 1016 + 8 new = 1024), no skip/xfail,
+  no regression. ASCII: 0 non-ASCII bytes in `__init__.py` + the new test. `git status --short`: only
+  `M src/__init__.py` + `?? tests/test_package_init_lazy_import.py` (+ ModLogs); hermes/contract diffs
+  EMPTY. Parked publish adapter untouched (different worktree).
+- FOLLOW-UP: KANBAN_EXTERNAL_ADAPTER_PUBLISH_PILOT_PHASE1 rebases onto this head + re-runs its 7-lane
+  gate; its no-vendor lane now holds at the IMPORT boundary.
+
 ## [2026-06-20] Kanban Contract: dict-KEY redaction + token-precise command match (AUTHOR worker, gate=independent SENTINEL)
 
 **Change Type**: LOGIC change to the #807 Kanban authority contract closing 2 findings the parked

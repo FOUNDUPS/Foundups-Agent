@@ -1,5 +1,45 @@
 # Agent Module TestModLog
 
+## 2026-06-20 - Package __init__ lazy-import boundary tests (FOUNDUP_AGENT_PACKAGE_INIT_LAZY_IMPORT_PHASE1)
+
+**Commands** (PYTHONIOENCODING=utf-8):
+
+```bash
+python -m pytest modules/foundups/agent/tests/test_package_init_lazy_import.py -q
+python -m pytest modules/foundups/agent -q                              # CI mode
+AI_OVERSEER_HEAVY_TESTS=1 python -m pytest modules/foundups/agent -q    # heavy mode
+```
+
+**Result**: PASS
+
+**Summary**:
+- `test_package_init_lazy_import.py`: 8 passed (new file). Full agent suite: **1024 passed** in BOTH
+  CI and heavy mode (was 1016 + 8 new = 1024). No skip/xfail, no regression.
+
+**New coverage (closes the no-vendor boundary at the IMPORT boundary -- decision B)**:
+1. `test_leaf_adapter_import_no_vendor_pullin` -- FRESH child interpreter: importing
+   `kanban_plugin_contract` leaves none of
+   `hermes_adapter`/`hermes_model_router`/`subprocess`/`sqlite3`/`urllib` in child `sys.modules`.
+   (The publish adapter is parked in a different worktree; the #807 contract leaf is the present
+   AST-clean adapter-side leaf.)
+2. `test_leaf_contract_import_no_vendor_pullin` -- same proof for a 2nd independent AST-clean leaf
+   (`source_authority`).
+3. `test_all_public_exports_still_resolve` -- `__all__` unchanged (8 names); each resolves lazily,
+   non-None, correct type, identity-stable on 2nd access.
+4. `test_lazy_access_loads_hermes_only_on_demand` -- fresh child: `hermes_adapter` ABSENT until a
+   public name is accessed, then PRESENT.
+5. `test_lazy_access_resolves_value_identical_to_source` -- package names ARE the same objects as
+   `hermes_adapter`/`hermes_model_router` exports (no behavior change).
+6. `test_no_circular_import` -- package + both leaves + both hermes modules import in 3 orders
+   (incl. reverse) with returncode 0.
+7. `test_unknown_attribute_raises_AttributeError` -- bogus attr -> AttributeError (not ImportError).
+8. `test_dir_includes_public_names` -- `__dir__` surfaces the lazy public names.
+
+**Test method note**: proofs 1/2/4/6 run in a FRESH child interpreter via
+`subprocess.run([sys.executable, "-c", SNIPPET])` because pytest may already have imported
+subprocess/sqlite3/urllib in THIS process. The `subprocess` used in the test file is the HARNESS that
+spawns the child; the boundary assertion is about the CHILD's clean `sys.modules`.
+
 ## 2026-06-20 - Kanban Contract dict-key redaction + token-precise command tests (FOUNDUP_KANBAN_CONTRACT_REDACT_KEYS_AND_PRECISE_COMMAND_MATCH_PHASE1)
 
 **Commands** (PYTHONIOENCODING=utf-8):

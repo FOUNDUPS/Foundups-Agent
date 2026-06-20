@@ -1,5 +1,69 @@
 # Agent Module ModLog
 
+## 2026-06-20 - Package __init__ lazy import: close the no-vendor boundary at the IMPORT boundary (FOUNDUP_AGENT_PACKAGE_INIT_LAZY_IMPORT_PHASE1)
+
+**Author**: 0102 (AUTHOR worker) | Commander: 012 | Gate: independent SENTINEL (do NOT self-merge)
+**WSP References**: WSP 22, WSP 50, WSP 64, WSP 84, WSP 97
+**Base**: `a02b6fb9c` (origin/main)
+**Slice**: FOUNDUP_AGENT_PACKAGE_INIT_LAZY_IMPORT_PHASE1
+
+### Why (decision B: fix the no-vendor boundary at the IMPORT boundary, not just the file AST)
+
+The #805/#806 boundary is "no Hermes / no vendor import". The Kanban publish adapter MODULE (parked
+slice KANBAN_EXTERNAL_ADAPTER_PUBLISH_PILOT_PHASE1, a DIFFERENT worktree) and the #807 contract
+MODULE (`kanban_plugin_contract.py`) are AST-clean -- BUT importing them THROUGH the package eagerly
+loaded Hermes+subprocess+sqlite3+urllib because `modules/foundups/agent/src/__init__.py` EAGERLY
+imported from `.hermes_adapter` and `.hermes_model_router` (old lines 35-46) to expose 8
+package-level names. So a leaf-module import (e.g. `import
+modules.foundups.agent.src.kanban_plugin_contract`) transitively pulled the entire Hermes/vendor
+runtime. Confirmed live on `a02b6fb9c`: the leaf import leaked
+`hermes_adapter`/`hermes_model_router`/`subprocess`/`sqlite3`/`urllib` into `sys.modules`.
+
+### Changed (package structure only -- src: `__init__.py`)
+
+- EDIT `modules/foundups/agent/src/__init__.py`: replaced the two EAGER
+  `from .hermes_adapter import (...)` / `from .hermes_model_router import (...)` blocks with a PEP 562
+  lazy module-level `__getattr__` backed by a `_LAZY` name->submodule map. The 8 public names still
+  resolve on ACCESS (`from modules.foundups.agent.src import HermesFoundUpBuilder` works), are CACHED
+  into `globals()` on first access (cheap + identity-stable on re-access), and a leaf-module import no
+  longer triggers any Hermes/vendor import. `__version__` and `__all__` are UNCHANGED. Added a
+  `__dir__` so the lazy names still surface for introspection. The module docstring is preserved.
+- NO change to `hermes_adapter.py`, `hermes_model_router.py`, or `kanban_plugin_contract.py` (their
+  diffs are EMPTY). The parked publish adapter is untouched (different worktree).
+
+### Proofs (all in FRESH child interpreters where the boundary assertion needs a clean import graph)
+
+1. `import modules.foundups.agent.src.kanban_plugin_contract` -> none of
+   `hermes_adapter`/`hermes_model_router`/`subprocess`/`sqlite3`/`urllib` in child `sys.modules`.
+2. `import modules.foundups.agent.src.source_authority` (2nd independent AST-clean leaf) -> same.
+3. All 8 `__all__` names resolve lazily and are identity-stable across repeated access; resolved
+   values are the SAME objects exported by `hermes_adapter`/`hermes_model_router` (no behavior change).
+4. Lazy-on-demand: in a fresh child `hermes_adapter` is ABSENT until a public name is accessed, then
+   PRESENT.
+5. No circular import: package + both leaves + both hermes modules import cleanly in several orders.
+6. Bogus package attribute -> `AttributeError` (not ImportError/other).
+
+### WSP 97 Truth Boundary Checklist
+
+| # | Truth Boundary Checklist Item | Status | Evidence |
+|---|---|---|---|
+| 1 | LEAF_IMPORT_DOES_NOT_EAGER_LOAD_HERMES | YES | Fresh child: `import ...kanban_plugin_contract` leaves `hermes_adapter`/`hermes_model_router` out of `sys.modules`; old eager `__init__` removed. |
+| 2 | KANBAN_ADAPTER_PACKAGE_IMPORT_NO_VENDOR_PULLIN | YES | `test_leaf_adapter_import_no_vendor_pullin` (child): kanban_plugin_contract pulls in none of hermes_adapter/hermes_model_router/subprocess/sqlite3/urllib. (Publish adapter parked elsewhere; contract leaf is the present adapter-side AST-clean leaf.) |
+| 3 | KANBAN_CONTRACT_PACKAGE_IMPORT_NO_VENDOR_PULLIN | YES | `test_leaf_contract_import_no_vendor_pullin` (child): source_authority leaf, same clean `sys.modules`. |
+| 4 | EXISTING_PUBLIC_EXPORTS_PRESERVED | YES | `test_all_public_exports_still_resolve`: `__all__` unchanged (8 names); each resolves non-None, correct type, identity-stable on re-access. |
+| 5 | LAZY_IMPORT_NO_BEHAVIOR_CHANGE | YES | `test_lazy_access_resolves_value_identical_to_source`: package names are the SAME objects as hermes_adapter/hermes_model_router exports; their source diffs are EMPTY. |
+| 6 | NO_CIRCULAR_IMPORT | YES | `test_no_circular_import`: package + both leaves + both hermes modules import in 3 orders (incl. reverse) with returncode 0. |
+| 7 | ADAPTER_REMAINS_PARKED | YES | No `kanban_publish_adapter` file in this worktree; only `__init__.py` + new test changed (git status --short); parked slice rebases + reruns its 7-lane gate after this lands. |
+| 8 | ASCII_CLEAN | YES | Byte-check: 0 non-ASCII bytes in `__init__.py` and `test_package_init_lazy_import.py`. |
+| 9 | NO_SKIP_XFAIL | YES | Full agent suite 1024 passed (CI and heavy mode); new file 8 passed; no skip/xfail markers. |
+| 10 | FILE_SCOPE_EXACT | YES | `git status --short`: only `M src/__init__.py` + `?? tests/test_package_init_lazy_import.py` (+ ModLogs); hermes/contract diffs empty. |
+
+### Follow-up
+
+After this lands, the parked KANBAN_EXTERNAL_ADAPTER_PUBLISH_PILOT_PHASE1 (different worktree)
+rebases onto the new package head and RE-RUNS its 7-lane gate -- its no-vendor lane now holds at the
+IMPORT boundary, not just the file AST.
+
 ## 2026-06-20 - Kanban Contract dict-key redaction + token-precise command match (FOUNDUP_KANBAN_CONTRACT_REDACT_KEYS_AND_PRECISE_COMMAND_MATCH_PHASE1)
 
 **Author**: 0102 (AUTHOR worker) | Commander: 012 | Gate: independent SENTINEL (do NOT self-merge)
