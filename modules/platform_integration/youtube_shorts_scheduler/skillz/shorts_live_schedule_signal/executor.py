@@ -79,10 +79,22 @@ SKILL_NAME = "shorts_live_schedule_signal"
 # Default OFF: the skill auto-fires (no orphan) but does no live work until 012 enables it.
 LIVE_SIGNAL_ENABLED_ENV = "YT_LIVE_SCHEDULE_SIGNAL_ENABLED"
 
+# Valid content_type values (Addendum I: CONTENT_TYPE_VALIDATED_SHORT_OR_UPLOAD).
+VALID_CONTENT_TYPES = frozenset({"short", "upload"})
+
 
 def _live_signal_enabled() -> bool:
     """True only when 012 has explicitly enabled the costly live DOM read."""
     return os.getenv(LIVE_SIGNAL_ENABLED_ENV, "0").strip() == "1"
+
+
+def _validate_content_type(content_type: str) -> bool:
+    """Return True iff content_type is one of the valid values.
+
+    Invalid content_type must fail closed (never reaches URL construction).
+    Called at function entry for every public function accepting content_type.
+    """
+    return content_type in VALID_CONTENT_TYPES
 
 
 def _disabled_no_op_signal(channel: str, channel_id: Optional[str], low_view_threshold: int) -> Dict[str, Any]:
@@ -476,23 +488,35 @@ def read_live_schedule_signal(
     driver,
     *,
     channel_id: str,
+    content_type: str = "short",
     low_view_threshold: int = DEFAULT_LOW_VIEW_THRESHOLD,
     apply_filter_fn: Callable[[Any], bool] = _apply_has_schedule_filter,
     scrape_fn: Callable[[Any], List[Dict[str, Any]]] = scrape_live_rows,
 ) -> Dict[str, Any]:
-    """Read the two live read-only signals from the shorts list (no mutation).
+    """Read the live read-only HAS_SCHEDULE signal from the Studio content list.
+
+    CONTENT TYPE EXTENSION (YOUTUBE_ROTATION_UNIFIED_SHORTS_VIDEOS_SIGNAL_PHASE1):
+    The caller must navigate to the correct Studio page for the given channel
+    and content_type BEFORE calling this function. This function applies the
+    HAS_SCHEDULE filter and scrapes the visible rows -- the DOM scan logic is
+    IDENTICAL for both content types (WSP 84: no duplication).
 
     Flow:
-      1. Apply the "Has schedule" filter via the chip-bar input + dialog
+      1. Validate content_type ("short" | "upload"). Invalid -> fail closed to
+         offline fallback (scheduled_count=None, content_type_valid=False).
+      2. Apply the "Has schedule" filter via the chip-bar input + dialog
          (shadow-pierced). If it cannot be applied -> filter_applied=False and
          scheduled_count = None (UNKNOWN). We do NOT scrape an unfiltered list
          and call its scheduled rows "the count" -- and we NEVER return 0 here.
-      2. Scrape rows -> parse -> summarize: accurate scheduled_count + per-video
+      3. Scrape rows -> parse -> summarize: accurate scheduled_count + per-video
          views + low-viewed signal.
 
     Args:
-        driver: Selenium WebDriver already on the channel's shorts list.
+        driver: Selenium WebDriver already on the channel's content list
+                for the given content_type.
         channel_id: YouTube channel ID (from the registry; never hardcoded).
+        content_type: "short" or "upload". Validated at entry; invalid value
+                      fails closed (returns UNKNOWN, never reaches URL).
         low_view_threshold: views strictly below this => low-viewed candidate.
         apply_filter_fn: swappable "Has schedule" applier (default: real DOM).
         scrape_fn: swappable row scrape (default: real shadow-pierced scrape).
@@ -500,8 +524,34 @@ def read_live_schedule_signal(
     Returns a structured signal dict. KEY CONTRACT:
         - scheduled_count is an int ONLY when filter_applied is True.
         - scheduled_count is None (UNKNOWN) when the filter could not be applied
-          -- this is the false-0 fix.
+          or content_type is invalid -- this is the false-0 fix.
+        - content_type is included in the result for breadcrumb attribution.
     """
+    # Addendum I: validate content_type at entry; invalid -> fail closed.
+    if not _validate_content_type(content_type):
+        logger.warning(
+            "[%s] invalid content_type=%r (must be 'short' or 'upload'); "
+            "failing closed to offline fallback (scheduled_count=None).",
+            SKILL_NAME, content_type,
+        )
+        return {
+            "success": False,
+            "skill": SKILL_NAME,
+            "channel_id": channel_id,
+            "content_type": content_type,
+            "content_type_valid": False,
+            "filter_applied": False,
+            "scheduled_count": None,
+            "scheduled_count_status": "invalid_content_type",
+            "low_view_threshold": low_view_threshold,
+            "low_viewed_count": None,
+            "low_viewed_videos": [],
+            "scheduled_videos": [],
+            "videos": [],
+            "row_count": 0,
+            "patterns": {},
+        }
+
     patterns = {
         "has_schedule_filter_attempted": False,
         "has_schedule_filter_applied": False,
@@ -520,6 +570,8 @@ def read_live_schedule_signal(
             "success": False,
             "skill": SKILL_NAME,
             "channel_id": channel_id,
+            "content_type": content_type,
+            "content_type_valid": True,
             "filter_applied": False,
             "scheduled_count": None,  # UNKNOWN
             "scheduled_count_status": "unknown_filter_not_applied",
@@ -545,6 +597,8 @@ def read_live_schedule_signal(
         "success": True,
         "skill": SKILL_NAME,
         "channel_id": channel_id,
+        "content_type": content_type,
+        "content_type_valid": True,
         "filter_applied": True,
         "scheduled_count": summary["scheduled_count"],  # accurate int
         "scheduled_count_status": "ok",

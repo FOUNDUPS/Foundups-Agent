@@ -91,8 +91,12 @@ def _live_signal_fn_factory(live_map: Dict[str, Optional[int]], raise_for: Optio
     Args:
         live_map: {channel_id: scheduled_count} - None means filter_not_applied (UNKNOWN).
         raise_for: if set, raises RuntimeError when this channel_id is queried.
+
+    Updated to accept content_type kwarg (YOUTUBE_ROTATION_UNIFIED_SHORTS_VIDEOS_SIGNAL_PHASE1):
+    build_live_count_fn now passes content_type to live_signal_fn; ignore it here since
+    these shorts-only tests use a single live_map regardless of content type.
     """
-    def live_signal_fn(driver, *, channel_id: str) -> Dict[str, Any]:
+    def live_signal_fn(driver, *, channel_id: str, content_type: str = "short") -> Dict[str, Any]:
         if raise_for and channel_id == raise_for:
             raise RuntimeError(f"live check failed for {channel_id}")
         count = live_map.get(channel_id)
@@ -102,11 +106,15 @@ def _live_signal_fn_factory(live_map: Dict[str, Optional[int]], raise_for: Optio
                 "filter_applied": False,
                 "scheduled_count": None,
                 "scheduled_count_status": "unknown_filter_not_applied",
+                "content_type": content_type,
+                "content_type_valid": True,
             }
         return {
             "filter_applied": True,
             "scheduled_count": count,
             "scheduled_count_status": "ok",
+            "content_type": content_type,
+            "content_type_valid": True,
         }
     return live_signal_fn
 
@@ -372,9 +380,14 @@ def test_live_signal_called_once_per_channel():
     driver = MagicMock()
     call_counts: Dict[str, int] = {}
 
-    def counting_live_fn(driver, *, channel_id: str) -> Dict[str, Any]:
+    def counting_live_fn(driver, *, channel_id: str, content_type: str = "short") -> Dict[str, Any]:
         call_counts[channel_id] = call_counts.get(channel_id, 0) + 1
-        return {"filter_applied": True, "scheduled_count": 0}
+        return {
+            "filter_applied": True,
+            "scheduled_count": 0,
+            "content_type": content_type,
+            "content_type_valid": True,
+        }
 
     count_fn = build_live_count_fn(driver, live_signal_fn=counting_live_fn)
     # Simulate 3 date queries for UC_X (upcoming_days=3).
@@ -418,7 +431,7 @@ def test_prioritize_channels_live_overrides_rotation_order(monkeypatch):
 
     breadcrumb_calls = []
 
-    def capture_breadcrumb(original, chosen, skipped, *, live_signal_active=False):
+    def capture_breadcrumb(original, chosen, skipped, *, live_signal_active=False, **kwargs):
         breadcrumb_calls.append({
             "original": original,
             "chosen": chosen,
