@@ -107,7 +107,9 @@ def _default_count_fn(channel_id: str, date_str: str) -> int:
     return tracker.get_count(date_str)
 
 
-# === Live-signal count_fn factory (YOUTUBE_SHORTS_ROTATION_LIVE_SCHEDULE_SIGNAL_PRIORITY_PHASE1)
+# === Live-signal count_fn factory
+# (YOUTUBE_SHORTS_ROTATION_LIVE_SCHEDULE_SIGNAL_PRIORITY_PHASE1 +
+#  YOUTUBE_ROTATION_UNIFIED_SHORTS_VIDEOS_SIGNAL_PHASE1)
 #
 # build_live_count_fn() creates a drop-in replacement for the offline `count_fn`
 # seam. It calls `shorts_live_schedule_signal.read_live_schedule_signal` for each
@@ -125,25 +127,37 @@ def _default_count_fn(channel_id: str, date_str: str) -> int:
 # REUSE: calls read_live_schedule_signal (the existing SKILLz function) directly.
 # DOM scan logic is NOT duplicated here (WSP 84).
 # NO hardcoded channel IDs: channel_id comes from the registry via the ranking loop.
-# OUT OF SCOPE for this factory: videos, long-form, Mode B. Shorts-only.
+# content_type parameter threads through to read_live_schedule_signal without
+# duplicating the DOM scan logic (same HAS_SCHEDULE filter, same row scrape).
+# NAVIGATION: the caller (launch._prioritize_channels) navigates the driver to
+# the correct channel's Studio page for the given content_type before the ranking
+# call; build_live_count_fn's _live_count_fn applies the filter on the current page.
+#
+# Addendum D (LIVE_SIGNAL_ONE_CALL_PER_CHANNEL_CONTENT_TYPE):
+# The _live_cache is keyed by channel_id so at most ONE live call per channel
+# per ranking pass. The cache is local to the closure (not persistent).
 
 def build_live_count_fn(
     driver: Any,
     *,
+    content_type: str = "short",
     live_signal_fn: Optional[Callable[..., Dict[str, Any]]] = None,
 ) -> Callable[[str, str], int]:
-    """Build a live-aware count_fn that substitutes the shorts_live_schedule_signal
+    """Build a live-aware count_fn that substitutes the read_live_schedule_signal
     result for the offline tracker when the live check is conclusive.
 
     The returned callable has the same signature as `_default_count_fn`:
         (channel_id: str, date_str: str) -> int
 
     Caches the live result per channel_id so the DOM is read once per channel per
-    ranking call, not once per day per channel.
+    ranking call, not once per day per channel (Addendum D: one call per channel
+    per content_type per pass).
 
     Args:
         driver: Selenium WebDriver already on the Studio page for the channel.
                 Must not be None when this factory is called.
+        content_type: "short" or "upload". Validated by read_live_schedule_signal
+                      at call time (invalid -> offline fallback, no URL built).
         live_signal_fn: Override for tests (default: read_live_schedule_signal from
                         shorts_live_schedule_signal.executor). Injectable to avoid
                         browser dependency in unit tests.
@@ -157,8 +171,6 @@ def build_live_count_fn(
     Breadcrumb note: each channel's live-vs-offline decision is logged at INFO
     level so the operator can see which signal drove the priority decision (WSP 91).
     """
-    import os as _os
-
     # Lazy import to keep the module importable without browser/selenium deps.
     if live_signal_fn is None:
         try:
@@ -174,7 +186,9 @@ def build_live_count_fn(
             # Degrade completely: use the offline tracker for every query.
             return _default_count_fn
 
-    # Per-channel live-signal cache: channel_id -> scheduled_count (int) | None
+    # Per-channel live-signal cache: channel_id -> scheduled_count (int) | None.
+    # Keyed by channel_id only (content_type is fixed for the lifetime of this closure).
+    # Addendum D: at most one live call per (channel, content_type) per pass.
     _live_cache: Dict[str, Optional[int]] = {}
 
     def _live_count_fn(channel_id: str, date_str: str) -> int:
@@ -182,25 +196,32 @@ def build_live_count_fn(
         # Query the live signal once per channel (cache it).
         if channel_id not in _live_cache:
             live_count: Optional[int] = None
+            signal_used = "offline_not_yet_called"
             try:
-                sig = live_signal_fn(driver, channel_id=channel_id)
-                # Only trust the count when the filter was actually applied.
-                if sig.get("filter_applied") and sig.get("scheduled_count") is not None:
+                sig = live_signal_fn(driver, channel_id=channel_id, content_type=content_type)
+                # Only trust the count when the filter was actually applied and
+                # content_type was valid (invalid -> content_type_valid=False).
+                if (sig.get("filter_applied")
+                        and sig.get("scheduled_count") is not None
+                        and sig.get("content_type_valid", True)):
                     live_count = int(sig["scheduled_count"])
                     signal_used = "live"
+                elif not sig.get("content_type_valid", True):
+                    signal_used = "offline_invalid_content_type"
                 else:
                     signal_used = "offline_filter_not_applied"
             except Exception as _exc:
                 signal_used = f"offline_live_check_error({type(_exc).__name__})"
                 logger.warning(
-                    "[what_should_i_schedule] live check failed for channel_id=%r: %s; "
-                    "using offline tracker count.", channel_id, _exc,
+                    "[what_should_i_schedule] live check failed for "
+                    "channel_id=%r content_type=%r: %s; using offline tracker.",
+                    channel_id, content_type, _exc,
                 )
             _live_cache[channel_id] = live_count
             logger.info(
                 "[what_should_i_schedule][LIVE-PRIORITY] channel_id=%r "
-                "live_scheduled_count=%r signal_used=%s",
-                channel_id, live_count, signal_used,
+                "content_type=%r live_scheduled_count=%r signal_used=%s",
+                channel_id, content_type, live_count, signal_used,
             )
 
         cached = _live_cache[channel_id]

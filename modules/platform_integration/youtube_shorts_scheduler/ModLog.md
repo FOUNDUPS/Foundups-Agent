@@ -1,5 +1,70 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-06-20 - Unified Shorts+Videos live priority signal (flag-gated, fallback-safe)
+
+**By:** 0102 (Worker-Lane: UNIFIED-PRIORITY)
+**Slice:** YOUTUBE_ROTATION_UNIFIED_SHORTS_VIDEOS_SIGNAL_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (Pre-Action),
+WSP 84 (Code Reuse: content_type threads through to existing read_live_schedule_signal),
+WSP 91 (unified breadcrumb per channel), WSP 97 (truth signaling)
+
+### Why (the gap)
+
+The live HAS_SCHEDULE signal from the previous slice
+(YOUTUBE_SHORTS_ROTATION_LIVE_SCHEDULE_SIGNAL_PRIORITY_PHASE1) only handled Shorts.
+Channels with a FULL Shorts schedule but an EMPTY Videos schedule had no mechanism
+to be prioritized for Videos. The `YT_VIDEO_PROCESSING_ENABLED` gate already processes
+Videos in the channel loop, but the order was the raw rotation order with no live signal.
+
+### What changed
+
+**`skillz/shorts_live_schedule_signal/executor.py`**
+- Added `VALID_CONTENT_TYPES = frozenset({"short", "upload"})` constant.
+- Added `_validate_content_type(content_type)` at module level.
+- `read_live_schedule_signal()` gains `content_type: str = "short"` parameter.
+  Validated at entry (Addendum I: CONTENT_TYPE_VALIDATED_SHORT_OR_UPLOAD): invalid
+  content_type fails closed (scheduled_count=None, no URL built, no DOM access).
+  DOM scan logic (HAS_SCHEDULE filter + row scrape) is REUSED unchanged for both
+  content types (WSP 84). Result shape gains `content_type` and `content_type_valid` fields.
+
+**`skillz/what_should_i_schedule/executor.py`**
+- `build_live_count_fn(driver, *, content_type="short", ...)` gains `content_type`
+  parameter. Threads through to `read_live_schedule_signal` call without duplicating
+  DOM logic (WSP 84). Cache is per channel_id (one call per channel per pass,
+  Addendum D: LIVE_SIGNAL_ONE_CALL_PER_CHANNEL_CONTENT_TYPE).
+
+**`scripts/launch.py`**
+- `_pass_video_ranking: dict` module-level store for pass-local videos ranking.
+  Cleared at start of each `_prioritize_channels` call (no cross-pass contamination).
+- `_prioritize_channels`: when `YT_VIDEO_PROCESSING_ENABLED=1` AND driver AND
+  live signal enabled, also computes a Videos ranking via
+  `build_live_count_fn(driver, content_type="upload")`. Stores in `_pass_video_ranking`.
+  Shorts ranking is unaffected by Videos ranking failure (Addendum E systemic contract).
+- `_emit_priority_breadcrumb` gains `channel_breadcrumbs` kwarg (Addendum G):
+  per-channel low-cardinality signal summary (shorts/videos counts, sources, decision).
+  No DOM text, no auth material.
+- Videos loop: reads `_pass_video_ranking` per channel. If `total_deficit == 0` (live
+  confirms sufficient), skips the video pass for that channel this cycle (priority-only;
+  does NOT change scheduling behavior, Addendum F: VIDEO_PASS_PRIORITY_ONLY_NO_VIDEO_BEHAVIOR_CHANGE).
+
+### Decision model
+```
+Shorts=0 (live) -> highest Shorts priority (unchanged from prior slice)
+Videos=0 (live) AND YT_VIDEO_PROCESSING_ENABLED=1 -> highest Videos priority
+Both empty -> Shorts first (deterministic)
+Live check fails per-channel -> fallback that channel/dimension only (Addendum E)
+Live check fails systemically -> all channels fallback for that dimension (Addendum E)
+YT_VIDEO_PROCESSING_ENABLED=0 -> Videos live check NOT run (Addendum H)
+```
+
+### Tests added
+`tests/test_unified_shorts_videos_priority.py` - 10 mock-only, non-vacuous tests.
+`tests/test_live_schedule_signal_priority.py` - updated mocks to accept content_type.
+
+All 69 tests pass (0 regressions).
+
+---
+
 ## 2026-06-20 - Wire live HAS_SCHEDULE signal into rotation priority (flag-gated, fallback-safe)
 
 **By:** 0102 (Worker-Lane: LIVE-PRIORITY)

@@ -129,7 +129,8 @@ def _record_channel_result(channel_key: str, cache: dict, unlisted_count: int, s
 
 # ---------------------------------------------------------------------------
 # Schedule-priority steering (SHORTS_PRIORITY_WIRING_PHASE1 +
-#                             YOUTUBE_SHORTS_ROTATION_LIVE_SCHEDULE_SIGNAL_PRIORITY_PHASE1)
+#                             YOUTUBE_SHORTS_ROTATION_LIVE_SCHEDULE_SIGNAL_PRIORITY_PHASE1 +
+#                             YOUTUBE_ROTATION_UNIFIED_SHORTS_VIDEOS_SIGNAL_PHASE1)
 #
 # Flag-gated, default-off, fallback-safe. When YT_SCHEDULE_PRIORITY_ENABLED=1
 # we consume the read-only `what_should_i_schedule` ranking (deficit per channel
@@ -147,7 +148,24 @@ def _record_channel_result(channel_key: str, cache: dict, unlisted_count: int, s
 # regardless of what the tracker holds). If the live check fails for any channel
 # or the flag is off, that channel falls back to the offline tracker count
 # transparently (never drops a channel from the ranking).
+#
+# VIDEOS LIVE SIGNAL (YOUTUBE_ROTATION_UNIFIED_SHORTS_VIDEOS_SIGNAL_PHASE1):
+# When YT_VIDEO_PROCESSING_ENABLED=1 a parallel videos ranking is computed using
+# the same build_live_count_fn factory with content_type="upload". Result is
+# stored in _videos_ranking_result for the video loop to consume (priority-only;
+# no upload scheduling behavior changes). If this second ranking fails entirely,
+# the videos loop falls back to original channel order (safe).
+# Decision: IF Shorts=0 AND Videos=0 -> Shorts first (deterministic).
 # ---------------------------------------------------------------------------
+
+# Module-level pass-local store for the videos priority ranking.
+# Set by _prioritize_channels; consumed by the video loop in run_multi_channel_scheduler.
+# Reset to None at the start of each call to _prioritize_channels to ensure no
+# cross-pass contamination. Thread safety: the channel rotation loop is single-threaded
+# per browser pass so a module-level dict is sufficient.
+_pass_video_ranking: "dict[str, list]" = {}
+
+
 def _prioritize_channels(channels: "list[str]", driver=None) -> "list[str]":
     """Reorder `channels` (channel KEYS) highest scheduling-need first and drop
     deficit==0 channels, gated on YT_SCHEDULE_PRIORITY_ENABLED.
@@ -158,6 +176,11 @@ def _prioritize_channels(channels: "list[str]", driver=None) -> "list[str]":
     check is disabled, unavailable, or fails for a channel, the offline tracker
     count is used for that channel (fallback contract, never breaks).
 
+    When YT_VIDEO_PROCESSING_ENABLED=1, also computes a videos ranking
+    (content_type="upload") and stores it in _pass_video_ranking for the video
+    loop to consume. Videos ranking failure falls back gracefully; Shorts ranking
+    is NEVER affected by the videos ranking pass.
+
     Args:
         channels: original rotation order (list of registry channel keys).
         driver: optional Selenium WebDriver (already connected) for the live
@@ -167,6 +190,9 @@ def _prioritize_channels(channels: "list[str]", driver=None) -> "list[str]":
         Reordered+filtered keys when the flag is on and ranking succeeds;
         otherwise the ORIGINAL `channels` list (fallback-safe, default-off).
     """
+    # Reset the pass-local video ranking at the start of each call.
+    _pass_video_ranking.clear()
+
     if os.getenv("YT_SCHEDULE_PRIORITY_ENABLED", "0") != "1":
         return channels
 
@@ -187,31 +213,33 @@ def _prioritize_channels(channels: "list[str]", driver=None) -> "list[str]":
             if ch.get("id") and ch.get("key")
         }
 
-        # LIVE SIGNAL: when the flag is on AND a driver is available, build the
-        # live-aware count_fn. On any import error fall back gracefully (None ->
-        # rank_channels_by_need uses the default offline tracker count_fn).
+        # LIVE SIGNAL (SHORTS): when the flag is on AND a driver is available,
+        # build the live-aware count_fn for shorts. On any import error fall back
+        # gracefully (None -> rank_channels_by_need uses the offline tracker).
         live_count_fn = None
         live_signal_active = False
+        shorts_count_source = "offline_tracker"
         if driver is not None and os.getenv("YT_LIVE_SCHEDULE_SIGNAL_ENABLED", "0") == "1":
             try:
-                live_count_fn = build_live_count_fn(driver)
+                live_count_fn = build_live_count_fn(driver, content_type="short")
                 live_signal_active = True
+                shorts_count_source = "live"
                 logger.info("[PRIORITY] live schedule signal ACTIVE (YT_LIVE_SCHEDULE_SIGNAL_ENABLED=1)")
             except Exception as _live_exc:
                 logger.warning(
-                    "[PRIORITY] build_live_count_fn failed; using offline tracker: %s", _live_exc,
+                    "[PRIORITY] build_live_count_fn(short) failed; using offline tracker: %s", _live_exc,
                 )
 
         # Build kwargs: inject live_count_fn only when available.
-        rank_kwargs = {}
+        rank_kwargs: "dict" = {}
         if live_count_fn is not None:
             rank_kwargs["count_fn"] = live_count_fn
 
         ranking = rank_channels_by_need(**rank_kwargs)  # read-only; tracker or live
 
         logger.info(
-            "[PRIORITY] ranking source=%s channels=%d",
-            "live" if live_signal_active else "offline_tracker",
+            "[PRIORITY] shorts ranking source=%s channels=%d",
+            shorts_count_source,
             len(ranking),
         )
 
@@ -222,12 +250,21 @@ def _prioritize_channels(channels: "list[str]", driver=None) -> "list[str]":
         ordered: "list[str]" = []
         skipped: "list[str]" = []
         seen: set = set()
+
+        # Per-channel breadcrumb data (Addendum G).
+        channel_breadcrumbs: "dict[str, dict]" = {}
+
         for row in ranking:
             key = id_to_key.get(row.get("channel_id"))
             if key is None or key not in original_set or key in seen:
                 continue
             seen.add(key)
-            if int(row.get("total_deficit", 0)) > 0:
+            ch_deficit = int(row.get("total_deficit", 0))
+            channel_breadcrumbs[key] = {
+                "shorts_live_count": row.get("total_deficit"),
+                "shorts_count_source": shorts_count_source,
+            }
+            if ch_deficit > 0:
                 ordered.append(key)
             else:
                 skipped.append(key)
@@ -239,11 +276,74 @@ def _prioritize_channels(channels: "list[str]", driver=None) -> "list[str]":
 
         if not result:
             # Everything was deficit==0 (or ranking covered nothing actionable).
-            # Don't hand the scheduler an empty list — fall back to original.
+            # Don't hand the scheduler an empty list -- fall back to original.
             logger.info("[PRIORITY] all channels at cap (deficit==0); using original order")
             return original
 
-        _emit_priority_breadcrumb(original, result, skipped, live_signal_active=live_signal_active)
+        # VIDEOS LIVE SIGNAL (YOUTUBE_ROTATION_UNIFIED_SHORTS_VIDEOS_SIGNAL_PHASE1):
+        # Only run when YT_VIDEO_PROCESSING_ENABLED=1 AND driver available AND live
+        # signal enabled. Failure of this block MUST NOT affect Shorts ranking/result.
+        # Addendum F: does NOT enable video processing, does NOT change scheduling.
+        video_processing_enabled = os.getenv("YT_VIDEO_PROCESSING_ENABLED", "false").lower() in (
+            "1", "true", "yes"
+        )
+        if video_processing_enabled and driver is not None and os.getenv(
+            "YT_LIVE_SCHEDULE_SIGNAL_ENABLED", "0"
+        ) == "1":
+            try:
+                video_live_count_fn = build_live_count_fn(driver, content_type="upload")
+                video_ranking = rank_channels_by_need(count_fn=video_live_count_fn)
+                # Store for the video loop: channel_key -> {total_deficit, days_empty, ...}
+                for vrow in video_ranking:
+                    vkey = id_to_key.get(vrow.get("channel_id"))
+                    if vkey:
+                        _pass_video_ranking[vkey] = vrow
+                        # Merge into channel breadcrumbs (Addendum G).
+                        bc = channel_breadcrumbs.setdefault(vkey, {})
+                        bc["videos_live_count"] = vrow.get("total_deficit")
+                        bc["videos_count_source"] = "live"
+                        # Deterministic decision: if both empty -> Shorts first.
+                        s_count = bc.get("shorts_live_count", 1)
+                        v_count = vrow.get("total_deficit", 1)
+                        if s_count == 0 and v_count == 0:
+                            bc["decision"] = "both_empty_shorts_first"
+                        elif s_count == 0:
+                            bc["decision"] = "shorts_priority"
+                        elif v_count == 0:
+                            bc["decision"] = "videos_priority"
+                        else:
+                            bc["decision"] = "both_sufficient"
+                logger.info(
+                    "[PRIORITY] videos ranking computed source=live channels=%d",
+                    len(video_ranking),
+                )
+            except Exception as _vexc:
+                # Videos ranking failure MUST NOT affect Shorts result.
+                # Addendum E (systemic videos failure): all channels fall back
+                # for videos; Shorts ranking unaffected.
+                logger.warning(
+                    "[PRIORITY] videos live ranking failed (systemic); "
+                    "video loop will use original order: %s", _vexc,
+                )
+                # Mark all video breadcrumbs as error_fallback.
+                for k in original:
+                    bc = channel_breadcrumbs.setdefault(k, {})
+                    bc["videos_live_count"] = None
+                    bc["videos_count_source"] = "error_fallback"
+                    bc["decision"] = "videos_systemic_fallback"
+        elif not video_processing_enabled:
+            # Addendum H: YT_VIDEO_PROCESSING_ENABLED=0 -> video live check NOT run.
+            for k in original:
+                bc = channel_breadcrumbs.setdefault(k, {})
+                bc["videos_live_count"] = None
+                bc["videos_count_source"] = "disabled"
+                bc["decision"] = bc.get("decision", "shorts_only_videos_disabled")
+
+        _emit_priority_breadcrumb(
+            original, result, skipped,
+            live_signal_active=live_signal_active,
+            channel_breadcrumbs=channel_breadcrumbs,
+        )
         logger.info(
             "[PRIORITY] reordered %s -> %s (skipped deficit==0: %s)",
             original, result, skipped,
@@ -261,12 +361,17 @@ def _emit_priority_breadcrumb(
     skipped: "list[str]",
     *,
     live_signal_active: bool = False,
+    channel_breadcrumbs: "dict | None" = None,
 ) -> None:
     """Emit a WSP 91 breadcrumb of the chosen priority order + skips (best-effort).
 
     The `live_signal_active` flag is included in the metadata so the operator
     (and WRE pattern memory) can tell whether the live DOM signal or the offline
     tracker drove the ranking decision for this rotation pass (WSP 91 breadcrumb).
+
+    channel_breadcrumbs: per-channel low-cardinality signal summary (Addendum G).
+    Keys per channel: shorts_live_count, videos_live_count, shorts_count_source,
+    videos_count_source, decision. No DOM text, no auth material.
     """
     try:
         from modules.communication.livechat.src.breadcrumb_telemetry import (
@@ -288,6 +393,8 @@ def _emit_priority_breadcrumb(
                 "skipped_sufficient": skipped,
                 "ranking_signal": signal_label,
                 "live_signal_active": live_signal_active,
+                # Addendum G: low-cardinality per-channel breadcrumb.
+                "channel_signals": channel_breadcrumbs or {},
             },
         )
     except Exception as exc:  # pragma: no cover - telemetry is best-effort
@@ -1093,114 +1200,139 @@ def run_multi_channel_scheduler(
             unlisted_found = scheduled + errors + len(channel_results.get("skipped", []))
             _record_channel_result(channel_key, schedule_cache, unlisted_found, len(channel_results.get("skipped", [])))
             
-            # 2026-02-05: VIDEO PROCESSING PASS — process Videos tab for channels
+            # 2026-02-05: VIDEO PROCESSING PASS -- process Videos tab for channels
             # that produce uploads (vlogs), not just shorts (FFCPLN songs).
             # LONG_FORM_SCHEDULING_ENABLE_PHASE1: master-gated by
-            # YT_VIDEO_PROCESSING_ENABLED (DEFAULT OFF — OUTWARD-FACING: scheduling a
+            # YT_VIDEO_PROCESSING_ENABLED (DEFAULT OFF -- OUTWARD-FACING: scheduling a
             # long-form upload publishes it PUBLIC at its slot, so 012 enables this
             # deliberately). When ON, every channel whose registry content_types
             # include "upload" runs the Videos-tab pass (now all 4 channels).
+            #
+            # YOUTUBE_ROTATION_UNIFIED_SHORTS_VIDEOS_SIGNAL_PHASE1 priority gate:
+            # If _pass_video_ranking has a ranking for this channel and its
+            # total_deficit == 0 (videos coverage sufficient), skip the video pass
+            # for this channel this cycle. This is priority-ONLY: does NOT change
+            # YT_VIDEO_PROCESSING_ENABLED default, does NOT alter upload scheduling
+            # behavior, does NOT create new navigation outside the existing pass.
+            # Addendum F: VIDEO_PASS_PRIORITY_ONLY_NO_VIDEO_BEHAVIOR_CHANGE.
             video_processing_enabled = os.getenv("YT_VIDEO_PROCESSING_ENABLED", "false").lower() in ("1", "true", "yes")
             if video_processing_enabled:
-                reg_channel = get_channel_by_key(channel_key)
-                channel_content_types = (reg_channel or {}).get("content_types", ["short"])
-                if "upload" in channel_content_types:
-                    print(f"\n[VIDEO] Processing Videos tab for {channel_key}...")
-                    try:
-                        from modules.platform_integration.youtube_shorts_scheduler.src.content_page_scheduler import ContentPageScheduler
-                        from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import ScheduleTracker
+                # YOUTUBE_ROTATION_UNIFIED_SHORTS_VIDEOS_SIGNAL_PHASE1 priority gate:
+                # If _pass_video_ranking has an entry for this channel with
+                # total_deficit == 0, skip the video pass (coverage sufficient).
+                # Addendum F: priority-only, no video scheduling behavior change.
+                _vrow = _pass_video_ranking.get(channel_key)
+                _video_pass_skipped = (
+                    _vrow is not None and int(_vrow.get("total_deficit", 1)) == 0
+                )
+                if _video_pass_skipped:
+                    print(
+                        f"[VIDEO][PRIORITY] {channel_key}: videos coverage sufficient "
+                        f"(deficit=0 from live signal) -> skipping video pass this cycle"
+                    )
+                    results["channels"].setdefault(channel_key, {}).update(
+                        {"video_pass_skipped_reason": "videos_deficit_zero_live_signal"}
+                    )
+                else:
+                    reg_channel = get_channel_by_key(channel_key)
+                    channel_content_types = (reg_channel or {}).get("content_types", ["short"])
+                    if "upload" in channel_content_types:
+                        print(f"\n[VIDEO] Processing Videos tab for {channel_key}...")
+                        try:
+                            from modules.platform_integration.youtube_shorts_scheduler.src.content_page_scheduler import ContentPageScheduler
+                            from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import ScheduleTracker
 
-                        vps = ContentPageScheduler(driver)
-                        if vps.navigate_to_content(channel_key, content_type="upload", visibility="UNLISTED"):
-                            vps_tracker = ScheduleTracker(channel_key)
-                            vps_config = None
-                            try:
-                                from modules.platform_integration.youtube_shorts_scheduler.src.channel_config import get_channel_config
-                                vps_config = get_channel_config(channel_key)
-                            except Exception:
-                                pass
+                            vps = ContentPageScheduler(driver)
+                            if vps.navigate_to_content(channel_key, content_type="upload", visibility="UNLISTED"):
+                                vps_tracker = ScheduleTracker(channel_key)
+                                vps_config = None
+                                try:
+                                    from modules.platform_integration.youtube_shorts_scheduler.src.channel_config import get_channel_config
+                                    vps_config = get_channel_config(channel_key)
+                                except Exception:
+                                    pass
 
-                            # LONG_FORM_TZ_PEAK_WINDOW_PHASE1: use the canonical
-                            # US-ET peak slots as the ET base (identical to the
-                            # shorts path scheduler.py:90), NOT the bare per-account
-                            # time_slots. These ET slots get DST-converted to the
-                            # channel account tz inside schedule_all_visible via the
-                            # channel_tz forwarded below (#847 conversion path), so
-                            # long-form publishes at the US peak for EVERY channel.
-                            vps_time_slots = get_peak_slots_et()
+                                # LONG_FORM_TZ_PEAK_WINDOW_PHASE1: use the canonical
+                                # US-ET peak slots as the ET base (identical to the
+                                # shorts path scheduler.py:90), NOT the bare per-account
+                                # time_slots. These ET slots get DST-converted to the
+                                # channel account tz inside schedule_all_visible via the
+                                # channel_tz forwarded below (#847 conversion path), so
+                                # long-form publishes at the US peak for EVERY channel.
+                                vps_time_slots = get_peak_slots_et()
 
-                            # LONG_FORM_SCHEDULING_ENABLE_PHASE1: per-channel per-pass
-                            # ROTATION budget (mirror of the shorts #858 fairness fix).
-                            # Without this the FIRST upload-eligible channel would drain
-                            # its whole long-form backlog (bounded only by max_per_channel)
-                            # before the loop rotates -> channel-starving. Cap each channel
-                            # to a few days of long-form per pass; the daemon's next PHASE 3
-                            # re-invocation continues draining round-robin.
-                            # Default "8" = 2 days x 4/day (max_per_day=4 below). Tunable via
-                            # YT_VIDEO_PER_CHANNEL_PER_PASS; non-positive/garbage -> default.
-                            try:
-                                vps_per_pass = int(os.getenv("YT_VIDEO_PER_CHANNEL_PER_PASS", "8"))
-                            except (TypeError, ValueError):
-                                vps_per_pass = 8
-                            if vps_per_pass <= 0:
-                                vps_per_pass = 8
-                            vps_max = min(max_per_channel, vps_per_pass)  # rotation-budgeted
+                                # LONG_FORM_SCHEDULING_ENABLE_PHASE1: per-channel per-pass
+                                # ROTATION budget (mirror of the shorts #858 fairness fix).
+                                # Without this the FIRST upload-eligible channel would drain
+                                # its whole long-form backlog (bounded only by max_per_channel)
+                                # before the loop rotates -> channel-starving. Cap each channel
+                                # to a few days of long-form per pass; the daemon's next PHASE 3
+                                # re-invocation continues draining round-robin.
+                                # Default "8" = 2 days x 4/day (max_per_day=4 below). Tunable via
+                                # YT_VIDEO_PER_CHANNEL_PER_PASS; non-positive/garbage -> default.
+                                try:
+                                    vps_per_pass = int(os.getenv("YT_VIDEO_PER_CHANNEL_PER_PASS", "8"))
+                                except (TypeError, ValueError):
+                                    vps_per_pass = 8
+                                if vps_per_pass <= 0:
+                                    vps_per_pass = 8
+                                vps_max = min(max_per_channel, vps_per_pass)  # rotation-budgeted
 
-                            # LONG_FORM_TZ_PEAK_WINDOW_PHASE1 (#847 follow-up, GAP CLOSED):
-                            # The channel's Studio-account tz (registry field) is now
-                            # forwarded into schedule_all_visible, which DST-converts the
-                            # canonical ET peak slots above to that account's local
-                            # wall-clock -- identical to the shorts path
-                            # (scheduler.py self.channel_tz). So long-form publishes at the
-                            # US-ET peak for EVERY channel: identity for ET-account channels
-                            # (foundups/antifafm), shifted for Asia/Tokyo (move2japan/undaodu).
-                            vps_channel_tz = (vps_config or {}).get("timezone")
-                            vps_tz = vps_channel_tz or "as-is"
+                                # LONG_FORM_TZ_PEAK_WINDOW_PHASE1 (#847 follow-up, GAP CLOSED):
+                                # The channel's Studio-account tz (registry field) is now
+                                # forwarded into schedule_all_visible, which DST-converts the
+                                # canonical ET peak slots above to that account's local
+                                # wall-clock -- identical to the shorts path
+                                # (scheduler.py self.channel_tz). So long-form publishes at the
+                                # US-ET peak for EVERY channel: identity for ET-account channels
+                                # (foundups/antifafm), shifted for Asia/Tokyo (move2japan/undaodu).
+                                vps_channel_tz = (vps_config or {}).get("timezone")
+                                vps_tz = vps_channel_tz or "as-is"
 
-                            # LONG_FORM_SCHEDULING_ENABLE_PHASE1 breadcrumb: pass is running.
-                            # tz here is now the ET->account conversion target, not a warning.
-                            print(
-                                f"[VIDEO][LONG-FORM] {channel_key}: pass START "
-                                f"(budget={vps_max}/pass, max_per_day=4, "
-                                f"ET-peak->tz={vps_tz})"
-                            )
-
-                            vps_results = asyncio.run(
-                                vps.schedule_all_visible(
-                                    tracker=vps_tracker,
-                                    time_slots=vps_time_slots,
-                                    max_per_day=4,  # Lower rate for long-form videos
-                                    max_videos=vps_max,
-                                    stop_event=stop_event,
-                                    channel_tz=vps_channel_tz,
+                                # LONG_FORM_SCHEDULING_ENABLE_PHASE1 breadcrumb: pass is running.
+                                # tz here is now the ET->account conversion target, not a warning.
+                                print(
+                                    f"[VIDEO][LONG-FORM] {channel_key}: pass START "
+                                    f"(budget={vps_max}/pass, max_per_day=4, "
+                                    f"ET-peak->tz={vps_tz})"
                                 )
-                            )
 
-                            vps_scheduled = vps_results.get("total_scheduled", 0)
-                            vps_errors = vps_results.get("total_errors", 0)
-                            print(f"[VIDEO] {channel_key}: {vps_scheduled} videos scheduled, {vps_errors} errors")
-                            # LONG_FORM_SCHEDULING_ENABLE_PHASE1 breadcrumb: per-channel
-                            # scheduled count vs per-pass budget; rotation moves to next.
-                            print(
-                                f"[VIDEO][LONG-FORM] {channel_key}: scheduled "
-                                f"{vps_scheduled}/{vps_max} this pass -> rotating "
-                                f"(remaining long-form backlog drains next PHASE 3)"
-                            )
+                                vps_results = asyncio.run(
+                                    vps.schedule_all_visible(
+                                        tracker=vps_tracker,
+                                        time_slots=vps_time_slots,
+                                        max_per_day=4,  # Lower rate for long-form videos
+                                        max_videos=vps_max,
+                                        stop_event=stop_event,
+                                        channel_tz=vps_channel_tz,
+                                    )
+                                )
 
-                            # Track in vitals
-                            vitals.record_scheduling_cycle(vps_scheduled)
-                            for _ in range(vps_scheduled):
-                                vitals.record_op(success=True)
-                            for _ in range(vps_errors):
-                                vitals.record_op(success=False)
+                                vps_scheduled = vps_results.get("total_scheduled", 0)
+                                vps_errors = vps_results.get("total_errors", 0)
+                                print(f"[VIDEO] {channel_key}: {vps_scheduled} videos scheduled, {vps_errors} errors")
+                                # LONG_FORM_SCHEDULING_ENABLE_PHASE1 breadcrumb: per-channel
+                                # scheduled count vs per-pass budget; rotation moves to next.
+                                print(
+                                    f"[VIDEO][LONG-FORM] {channel_key}: scheduled "
+                                    f"{vps_scheduled}/{vps_max} this pass -> rotating "
+                                    f"(remaining long-form backlog drains next PHASE 3)"
+                                )
 
-                            # Store video results alongside shorts
-                            results["channels"][f"{channel_key}_videos"] = vps_results
-                        else:
-                            print(f"[VIDEO] Navigation to Videos tab failed for {channel_key}")
-                    except Exception as vps_err:
-                        print(f"[VIDEO] Video processing error for {channel_key}: {vps_err}")
-                        logger.error(f"Video processing error: {vps_err}", exc_info=True)
+                                # Track in vitals
+                                vitals.record_scheduling_cycle(vps_scheduled)
+                                for _ in range(vps_scheduled):
+                                    vitals.record_op(success=True)
+                                for _ in range(vps_errors):
+                                    vitals.record_op(success=False)
+
+                                # Store video results alongside shorts
+                                results["channels"][f"{channel_key}_videos"] = vps_results
+                            else:
+                                print(f"[VIDEO] Navigation to Videos tab failed for {channel_key}")
+                        except Exception as vps_err:
+                            print(f"[VIDEO] Video processing error for {channel_key}: {vps_err}")
+                            logger.error(f"Video processing error: {vps_err}", exc_info=True)
 
             # AUTO-STOP: Check for critical vitals
             alert = vitals.check_and_alert()
