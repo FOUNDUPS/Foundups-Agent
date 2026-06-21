@@ -456,3 +456,6 @@ modules/infrastructure/wre_core/reports/
 
 # AntifaFM telemetry (runtime event streams)
 modules/platform_integration/antifafm_broadcaster/telemetry/
+
+# RedDog Fusion extension VSIX (build artifact — package with vsce, do not commit)
+extensions/foundups_advisory_workers/*.vsix

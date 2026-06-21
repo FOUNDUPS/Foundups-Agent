@@ -1,0 +1,89 @@
+# FoundUps Fusion Worker Roadmap
+
+## Status
+
+Phase: IDE-side RedDog Architect proof surface.
+
+Current implementation:
+
+- Cursor command: `FoundUps Fusion: Open`.
+- Bottom-composer webview with scrollback output.
+- OpenRouter bridge with redaction gate.
+- WSP_00/WSP_97/WSP_15 operating prompt.
+- HoloIndex bundle-json recall with offline fallback.
+- Manual lead+panel mode for review-packet traceability.
+- REDDOG_FUSION_ORCHESTRATOR_PHASE1: internal task classifier, auto effort, schema validator, one repair pass.
+
+## Architecture Direction
+
+This extension is not the final RedDog runtime. It is the operator-facing proof surface for how RedDog should behave before becoming accessible through pfMALL or an OpenClaw/WRE route.
+
+Target path:
+
+```text
+IDE extension POC
+  -> RedDog Architect contract hardening
+  -> WSP_109 FoundUp intake packet generation
+  -> WRE/OpenClaw/Hermes dispatch surface
+  -> pfMALL RedDog surface
+  -> governed public FoundUp launch flow
+```
+
+## WSP_15 Priorities
+
+| Work Item | Complexity | Importance | Deferability | Impact | MPS | Priority | Notes |
+|---|---:|---:|---:|---:|---:|---|---|
+| Layout + RedDog Architect contract | 2 | 5 | 5 | 4 | 16 | P0 | Required for usable 012 feedback loop |
+| Tier-0/Tier-1 memory files | 1 | 4 | 4 | 4 | 13 | P1 | Required for HoloIndex discovery |
+| WSP_109 intake packet mode | 3 | 5 | 4 | 5 | 17 | P0 | Converts external project ideas into FoundUp intake artifacts |
+| Review packet persistence | 3 | 4 | 3 | 4 | 14 | P1 | Enables outcome learning and model performance memory |
+| pfMALL RedDog binding | 4 | 5 | 3 | 5 | 17 | P0 | Public/operator surface after safety contracts harden |
+| WRE/OpenClaw dispatch bridge | 4 | 5 | 3 | 5 | 17 | P0 | Must remain governed; extension cannot dispatch directly |
+
+## Next Slices
+
+### REDDOG_FUSION_ORCHESTRATOR_PHASE2
+
+- Structured JSON review packet schema for findings/evidence/fixes/WSP_15 rows/truth labels.
+- Parser tests proving output remains copyable and shareable with 0102.
+- Optional effort override audit trail in review packet.
+
+### REDDOG_ARCHITECT_EXTENSION_CONTRACT_PHASE2
+
+- Add a structured JSON review packet schema for findings, evidence, fixes, WSP_15 rows, and truth labels.
+- Add parser tests proving the output remains copyable and shareable with 0102.
+- Keep advisory-only boundary.
+
+### REDDOG_FOUNDUP_INTAKE_PACKET_MODE_PHASE1
+
+- Add worker mode that produces WSP_109 packet drafts:
+  - `INTAKE_SOURCE.md`
+  - `OUTCOME.md`
+  - `SOLUTION.md`
+  - `PAIN.md`
+  - `POC_SCOPE.md`
+  - `PROTOTYPE_GATE.md`
+  - `SKILLS_MAP.md`
+  - `FOUNDUP_MANIFEST_DRAFT.md`
+- Do not write files automatically.
+- Output as advisory packet for 012/0102 review.
+
+### REDDOG_PFMALL_SURFACE_AUDIT_PHASE1
+
+- Audit current pfMALL RedDog surfaces and determine where the advisory packet belongs.
+- Explicitly classify public vs member-gated flows.
+- No runtime wiring in audit slice.
+
+### REDDOG_WRE_OPENCLAW_HANDOFF_CONTRACT_PHASE1
+
+- Define a typed handoff from RedDog review packet to WRE/OpenClaw.
+- No direct Hermes/Kanban dispatch from the extension.
+- WRE remains dispatch authority.
+
+## Non-Goals
+
+- No direct merge authority.
+- No direct repo creation.
+- No automatic pfMALL publication.
+- No CABR/payout/source-authority claims.
+- No hidden access to `.env` or gitignored files.
