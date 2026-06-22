@@ -42,6 +42,23 @@ IDE extension POC
 
 ## Next Slices
 
+### REDDOG_GOVERNED_HANDOFF_CONTRACT_PHASE1
+
+- Typed handoff from RedDog review packet to WRE/OpenClaw/Hermes.
+- Skillz match recommendations become structured dispatch payloads.
+- Extension remains advisory; WRE retains execution authority.
+
+### REDDOG_PFMALL_SURFACE_BINDING_PHASE1
+
+- Bind RedDog architect review packets to pfMALL operator surfaces.
+- Classify public vs member-gated flows.
+- No automatic publication without verification gate.
+
+### REDDOG_REVIEW_PACKET_MEMORY_PHASE1
+
+- Persist redacted review packets for HoloIndex recall and 0102 continuity.
+- Bounded storage; no raw prompt leakage beyond redaction gate.
+
 ### REDDOG_FUSION_ORCHESTRATOR_PHASE2
 
 - Structured JSON review packet schema for findings/evidence/fixes/WSP_15 rows/truth labels.

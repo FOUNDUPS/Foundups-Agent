@@ -1,5 +1,12 @@
 # FoundUps Fusion Worker TestModLog
 
+## 2026-06-22 - v0.3.14 Auto Router + Skillz Context Tests
+
+- Updated contract test for GLM-5.2 principal, DeepSeek V4 Pro critic, and Kimi K2.7 Code implementation critic.
+- Verified Mode/Effort/Context are no longer 012-facing dropdowns.
+- Verified auto context mapping: REGULAR -> none, HIGH -> WSP/Holo/Skillz, ULTRA -> WSP/Holo/git/Skillz.
+- Verified Skillz/Wardrobe/Rolodex discovery context remains advisory-only and non-vacuous for YouTube comment ops.
+- Verified `modeSelectionReasoning`, Architect Trace / Verification gaps schema, Fusion panel structure validation, and Skillz wiring in bounded repo context.
 ## 2026-06-22 - v0.3.13 Orchestrator Contract Tests
 
 Validation added for REDDOG_FUSION_ORCHESTRATOR_PHASE1:
