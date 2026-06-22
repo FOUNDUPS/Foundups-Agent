@@ -1,5 +1,12 @@
 # FoundUps Fusion Worker ModLog
 
+## 2026-06-22 - Addendum A Gate Precision (#870 pre-land)
+
+- Verified exact scope: 8 extension-local files only; `scripts/advisory_model_once.py` unchanged.
+- Strengthened contract tests: WSP_00/97/15 non-vacuity, raw-focus bypass guard, digest boundedness.
+- Added WSP_97 truth rows: WORK_FOCUS_NOT_AUTHORITY, WSP_PROMPT_0102_GENERATED, RAW_FOCUS_NOT_SENT_AS_SOLE_AUTHORITY, DIGESTS_NOT_RAW_CONTEXT, ROUTING_UNCHANGED_FROM_0_3_14.
+- Recorded Addendum B bridge hardening controls in ROADMAP (next slice; not in #870).
+
 ## 2026-06-22 - REDDOG_WORK_FOCUS_TO_WSP_PROMPT_PHASE1 (v0.3.15)
 
 - Renamed 012-facing UI language from "prompt" to **work focus** (composer, scrollback labels, placeholders).

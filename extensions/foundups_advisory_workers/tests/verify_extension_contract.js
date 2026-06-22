@@ -173,17 +173,25 @@ includes(handoffContext, 'Skillz/Wardrobe/Rolodex discovery', 'handoff context h
 assert(/youtube|comments|skillz/i.test(handoffContext), 'handoff context must surface relevant YouTube/comment/Skillz paths');
 assert(!handoffContext.includes('(no matching Skillz/Wardrobe/Rolodex paths found'), 'handoff context must not be empty for YouTube comments');
 
-const ytFocus = 'process all youtube comments with existing skillz';
+const ytFocus = 'process youtube comments';
 const ytClass = orchestrator.classifyTaskForRedDog(ytFocus, 'auto', 'reddog_architect');
 const ytWsp = orchestrator.constructWspTaskPrompt(ytFocus, ytClass, 'HoloIndex ok', 'reddog_architect');
-includes(ytWsp, 'WSP_97', 'WSP prompt must include WSP_97 framing');
-includes(ytWsp, 'WSP_15 tier', 'WSP prompt must include tier');
-includes(ytWsp, ytFocus.slice(0, 40), 'WSP prompt must embed work focus excerpt');
-includes(ytWsp, 'non-authoritative', 'WSP prompt must label work focus non-authoritative');
+includes(ytWsp, 'WSP_00', 'WSP prompt must include WSP_00 operating frame');
+includes(ytWsp, 'WSP_97', 'WSP prompt must include WSP_97 truth boundary');
+includes(ytWsp, 'WSP_15 tier', 'WSP prompt must include WSP_15 tier/routing');
+includes(ytWsp, ytFocus, 'WSP prompt must embed bounded work focus excerpt');
+includes(ytWsp, '012 work focus (non-authoritative input)', 'WSP prompt must declare non-authoritative input');
+assert.notStrictEqual(ytWsp.trim(), ytFocus.trim(), 'raw work focus must not bypass constructWspTaskPrompt');
+assert(ytWsp.length > ytFocus.length + 50, 'WSP task prompt must wrap work focus with 0102 contract framing');
 
-const digest = orchestrator.redactedDigest('process youtube comments', 80);
-assert.strictEqual(typeof digest.hash, 'string', 'digest hash required');
-assert.strictEqual(typeof digest.excerpt, 'string', 'digest excerpt required');
-assert(digest.excerpt.includes('youtube'), 'digest excerpt must reflect input');
+const longFocus = 'process youtube comments '.repeat(200);
+const focusDigest = orchestrator.redactedDigest(longFocus, 180);
+assert.strictEqual(typeof focusDigest.hash, 'string', 'digest hash required');
+assert(focusDigest.excerpt.length <= 180, 'digest excerpt must be bounded');
+assert(!Object.prototype.hasOwnProperty.call(focusDigest, 'raw'), 'digest must not store raw full focus');
+assert(focusDigest.length === longFocus.length, 'digest length metadata may exceed excerpt');
+
+const wspDigest = orchestrator.redactedDigest(ytWsp, 320);
+assert(wspDigest.excerpt.length <= 320, 'wsp prompt digest excerpt must be bounded');
 
 console.log('FoundUps Fusion extension contract checks passed.');

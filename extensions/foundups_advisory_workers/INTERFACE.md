@@ -166,6 +166,11 @@ Formal contract:
 | Auto router REGULAR/HIGH/ULTRA | OBSERVED |
 | 012 work focus -> 0102 WSP task prompt layer | OBSERVED |
 | Review packet work_focus_digest + wsp_prompt_digest | OBSERVED |
+| WORK_FOCUS_NOT_AUTHORITY | OBSERVED |
+| WSP_PROMPT_0102_GENERATED | OBSERVED |
+| RAW_FOCUS_NOT_SENT_AS_SOLE_AUTHORITY | OBSERVED |
+| DIGESTS_NOT_RAW_CONTEXT | OBSERVED |
+| ROUTING_UNCHANGED_FROM_0_3_14 | OBSERVED |
 | Skillz/Rolodex non-vacuous for YouTube comment ops | OBSERVED |
 | Advisory-only; no shell/repo/browser/OpenClaw/Hermes execution | OBSERVED |
 | Redaction gate before OpenRouter | OBSERVED |

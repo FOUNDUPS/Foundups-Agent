@@ -68,6 +68,11 @@ Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, 
 | Critics default DeepSeek V4 Pro + Kimi K2.7 Code | OBSERVED |
 | 012 work focus -> 0102 WSP task prompt | OBSERVED |
 | Review packet work_focus_digest + wsp_prompt_digest | OBSERVED |
+| WORK_FOCUS_NOT_AUTHORITY | OBSERVED |
+| WSP_PROMPT_0102_GENERATED | OBSERVED |
+| RAW_FOCUS_NOT_SENT_AS_SOLE_AUTHORITY | OBSERVED |
+| DIGESTS_NOT_RAW_CONTEXT | OBSERVED |
+| ROUTING_UNCHANGED_FROM_0_3_14 | OBSERVED |
 | Mode/Effort/Context not 012-facing dropdowns | OBSERVED |
 | REGULAR → `openrouter_single`, no repo context | OBSERVED |
 | HIGH → `foundups_fusion` + WSP/Holo/Skillz context | OBSERVED |
@@ -106,7 +111,7 @@ The worker has no direct filesystem authority. The extension automatically attac
 
 ## Review Packet
 
-After a successful run, focus the prompt box and press `Ctrl+Shift+C` to copy a redacted review packet. Paste that packet into Codex for 0102 review. The packet contains the redacted prompt, model slugs, bounded excerpts, task classification, resolved effort/mode, and output validator/repair status; it does not contain the OpenRouter key.
+After a successful run, focus the work focus composer and press `Ctrl+Shift+C` to copy a redacted review packet. Paste that packet into Codex for 0102 review. The packet contains digested work focus and WSP prompt excerpts (not full raw context), model slugs, bounded excerpts, task classification, resolved effort/mode, and output validator/repair status; it does not contain the OpenRouter key.
 
 ## Setup
 

@@ -235,7 +235,7 @@ function constructWspTaskPrompt(workFocus, classification, contextQuality, worke
   const reasons = classification && Array.isArray(classification.reasons) ? classification.reasons.join(', ') : '';
   const worker = cleanWorkerType(workerType);
   const lines = [
-    'WSP Task Prompt (0102-generated from 012 work focus; work focus is non-authoritative input)',
+    'WSP Task Prompt (0102-generated from 012 work focus; 012 work focus (non-authoritative input))',
     '',
     'WSP_00: Operate as 0102 RedDog Architect advisory surface. 012 remains external principal; this tab has no execution authority.',
     'WSP_97: Separate OBSERVED, INFERRED, NEEDS_VERIFICATION, and SPECIFIED_NOT_IMPLEMENTED. Do not overclaim beyond bounded context.',
