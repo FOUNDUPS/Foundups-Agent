@@ -1,6 +1,6 @@
 # FoundUps Fusion Worker
 
-Version: 0.3.13
+Version: 0.3.14
 
 This local Cursor/VS Code extension opens one RedDog Architect advisory worker as an editor webview tab, similar in ergonomics to `Claude Code: Open` but without repo, shell, browser, merge, CABR, or payout authority.
 
@@ -10,8 +10,8 @@ Command:
 
 Default panel:
 
-- Lead/synthesis: `deepseek/deepseek-v3.2`
-- Critics: `z-ai/glm-5.2` and `moonshotai/kimi-k2.7-code`
+- Principal/synthesis: `z-ai/glm-5.2`
+- Critics: `deepseek/deepseek-v4-pro` and `moonshotai/kimi-k2.7-code`
 
 ## Operating Contract
 
@@ -38,14 +38,37 @@ The webview follows the VS Code terminal/chat shape:
 ## Controls
 
 - Worker: RedDog Architect, WSP Gate Critic, Repair Planner, Smoke Test.
-- Effort: Auto (WSP_15-style internal classifier), Regular, High, Ultra.
-- Mode: FoundUps manual lead + panel (RedDog WSP default), OpenRouter Fusion alias (fast/black-box), Regular OpenRouter.
-- Context: WSP + HoloIndex + active editor, WSP + HoloIndex + git diff, git diff, active editor, WSP only.
+- Routing: automatic via WSP_15-style task classification; 012 no longer picks Mode/Effort/Context for normal use.
+- Context: automatic. ULTRA tasks attach WSP + HoloIndex + active editor + git diff + Skillz/Wardrobe/Rolodex discovery; HIGH tasks attach WSP + HoloIndex + active editor + Skillz/Wardrobe/Rolodex discovery; REGULAR smoke avoids repo context.
 - Tests: regular smoke, Fusion smoke, WSP_97 repo review, RedDog architect review.
 
-For WSP work, prefer `FoundUps manual lead + panel` because it preserves a review packet with lead, critic, and synthesis excerpts. The extension auto-selects effort from prompt/context when Effort=Auto and routes RedDog WSP work to the auditable manual panel by default. OpenRouter Fusion alias remains selectable for fast black-box synthesis, but individual critic traces are not exposed by the API response.
+For WSP/security/runtime/architecture work, RedDog auto-routes to `foundups_fusion` because it preserves a review packet with principal, critic, and synthesis excerpts. Regular smoke/simple prompts auto-route to a single GLM principal call. OpenRouter Fusion alias remains implemented in the bridge for explicit future use, but is not a 012-facing default control because individual critic traces are not exposed by the API response.
 
-Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed fixes, Uncertainties, WSP_97 Truth Labels, WSP_15 Priority, Next safest step. If sections are missing, the extension runs one repair pass through the same redaction-gated bridge before showing the final answer.
+Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed fixes, Uncertainties, Architect Trace (structured evidence/alternatives/critic rationale — never raw hidden chain-of-thought), WSP_97 Truth Labels, WSP_15 Priority, Verification gaps, Next safest step. Fusion runs also expose Lead/Critic/Synthesis panel structure from the bridge. If sections are missing, the extension runs one repair pass through the same redaction-gated bridge before showing the final answer.
+
+Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, mode-selection reasoning, principal, panel, context, advisory boundary).
+
+## WSP_97 Truth Table (v0.3.14)
+
+| Claim | Status |
+| --- | --- |
+| Principal default `z-ai/glm-5.2` | OBSERVED |
+| Critics default DeepSeek V4 Pro + Kimi K2.7 Code | OBSERVED |
+| Mode/Effort/Context not 012-facing dropdowns | OBSERVED |
+| REGULAR → `openrouter_single`, no repo context | OBSERVED |
+| HIGH → `foundups_fusion` + WSP/Holo/Skillz context | OBSERVED |
+| ULTRA → `foundups_fusion` + WSP/Holo/git/Skillz context | OBSERVED |
+| Skillz/Rolodex discovery for operational prompts | OBSERVED |
+| Filesystem fallback when git spawn fails | OBSERVED |
+| RedDog Routing block in output | OBSERVED |
+| Review packet: resolved mode/effort/context/principal/panel/validation | OBSERVED |
+| Architect Trace + Verification gaps in schema | OBSERVED |
+| Mode-selection reasoning in routing + review packet | OBSERVED |
+| Fusion Lead/Critic/Synthesis structure validated | OBSERVED |
+| Governed Skillz/OpenClaw/Hermes handoff execution | SPECIFIED_NOT_IMPLEMENTED |
+| pfMALL RedDog surface binding | SPECIFIED_NOT_IMPLEMENTED |
+| Review packet persistent memory | SPECIFIED_NOT_IMPLEMENTED |
+| OpenRouter Fusion alias as default RedDog path | SPECIFIED_NOT_IMPLEMENTED (explicit path only) |
 
 ## Settings
 
@@ -53,19 +76,19 @@ The lead is configurable. Use Cursor settings or workspace/user settings:
 
 ```json
 {
-  "foundupsFusion.leadModel": "deepseek/deepseek-v3.2",
+  "foundupsFusion.leadModel": "z-ai/glm-5.2",
   "foundupsFusion.panelModels": [
-    "z-ai/glm-5.2",
+    "deepseek/deepseek-v4-pro",
     "moonshotai/kimi-k2.7-code"
   ]
 }
 ```
 
-The extension uses up to four panel models.
+The extension uses up to four panel models. RedDog defaults to GLM-5.2 as principal, DeepSeek V4 Pro as adversarial critic, and Kimi K2.7 Code as implementation critic.
 
 ## Bounded Repo Context
 
-The worker has no direct filesystem authority. The extension can attach a bounded context packet from WSP operating rules, HoloIndex recall, the active editor, and local git diff. Prompt and context are redaction-gated separately before any OpenRouter request.
+The worker has no direct filesystem authority. The extension automatically attaches a bounded context packet from WSP operating rules, HoloIndex recall, the active editor, local git diff when risk warrants it, and Skillz/Wardrobe/Rolodex discovery for governed handoff recommendations. Prompt and context are redaction-gated separately before any OpenRouter request.
 
 ## Review Packet
 
@@ -87,6 +110,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `foundups-fusion-worker-0.3.13.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `foundups-fusion-worker-0.3.14.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `FoundUps Fusion: Open` from Command Palette or the three-dot command list.

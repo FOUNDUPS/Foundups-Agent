@@ -28,11 +28,11 @@ from modules.communication.moltbot_bridge.src.fusion_redaction_gate import (  # 
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 ENV_API_KEY = "OPENROUTER_API_KEY"
-DEEPSEEK_LEAD_MODEL = "deepseek/deepseek-v3.2"
-GLM_PANEL_MODEL = "z-ai/glm-5.2"
+GLM_PRINCIPAL_MODEL = "z-ai/glm-5.2"
+DEEPSEEK_CRITIC_MODEL = "deepseek/deepseek-v4-pro"
 KIMI_PANEL_MODEL = "moonshotai/kimi-k2.7-code"
-DEFAULT_LEAD_MODEL = DEEPSEEK_LEAD_MODEL
-DEFAULT_PANEL_MODELS = (GLM_PANEL_MODEL, KIMI_PANEL_MODEL)
+DEFAULT_LEAD_MODEL = GLM_PRINCIPAL_MODEL
+DEFAULT_PANEL_MODELS = (DEEPSEEK_CRITIC_MODEL, KIMI_PANEL_MODEL)
 
 DEFAULT_SYSTEM_PROMPT = (
     "You are 0102 operating as an advisory RedDog Architect worker inside a Cursor extension tab. "

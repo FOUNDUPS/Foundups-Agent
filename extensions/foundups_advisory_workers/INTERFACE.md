@@ -11,11 +11,11 @@ It is an IDE-side proof surface for the future RedDog/pfMALL/WRE intake pattern.
 | Capability | Status | Boundary |
 |---|---|---|
 | Advisory model review | YES | OpenRouter request after Fusion redaction gate passes |
-| Bounded repo context | YES | Extension gathers HoloIndex/editor/git context and sends it through redaction gate |
+| Bounded repo context | YES | Extension auto-gathers WSP/HoloIndex/editor/git/Skillz context by WSP_15 tier and sends it through redaction gate |
 | HoloIndex recall | YES | `HOLO_SKIP_MODEL=1 --bundle-json` first; offline lexical fallback only if bundle recall fails |
 | WSP_00/WSP_97/WSP_15 prompting | YES | System prompt requires role lock, truth labels, proposed fixes, and MPS priority |
 | Repo edits | NO | No write tool exposed to model |
-| Shell execution by model | NO | Extension host runs only bounded local context/bridge commands |
+| Shell execution by model | NO | Extension host runs only bounded local context/bridge commands; model cannot execute Skillz/OpenClaw/Hermes |
 | Merge/PR authority | NO | Advisory output only |
 | CABR/payout/source authority | NO | Blocked by Fusion redaction gate and prompt contract |
 | pfMALL integration | SPECIFIED_NOT_IMPLEMENTED | Roadmap only |
@@ -88,13 +88,14 @@ Every substantive answer ends with:
 ...
 ```
 
-## RedDog Fusion Orchestrator (v0.3.13)
+## RedDog Fusion Orchestrator (v0.3.14)
 
 Internal contract layer. Advisory-only. No new authority.
 
 | Function | Purpose |
 |---|---|
 | `classifyTaskForRedDog(prompt, contextMode, workerType)` | WSP_15-style effort/risk classification |
+| `resolveAutoContextMode(classification, selectedContextMode)` | Maps Auto context to none / WSP+Holo+Skillz / WSP+Holo+git+Skillz |
 | `resolveAutoEffort(classification, selectedEffort)` | Maps Auto -> regular/high/ultra |
 | `resolveModelMode(classification, selectedMode, workerType)` | RedDog WSP work defaults to auditable manual panel |
 | `validateRedDogOutput(markdown)` | Required schema section check |
@@ -118,10 +119,16 @@ Auto effort rules:
 - `REGULAR`: simple smoke tests, simple code explanation, non-runtime UI polish.
 - If uncertain, choose `HIGH`.
 
-Model routing:
+Model and context routing:
 
-- RedDog WSP/security/architecture work defaults to `foundups_fusion` (manual lead + panel).
-- `openrouter_fusion_alias` remains selectable for fast/black-box runs.
+- RedDog WSP/security/architecture/runtime work auto-routes to `foundups_fusion` (manual principal + panel).
+- Principal/synthesis default: `z-ai/glm-5.2`.
+- Adversarial critic default: `deepseek/deepseek-v4-pro`.
+- Implementation critic default: `moonshotai/kimi-k2.7-code`.
+- REGULAR smoke/simple prompts auto-route to `openrouter_single` with the GLM principal and no repo context.
+- Context is not a 012-facing selector; it is resolved from WSP_15 tier.
+- Skillz/Wardrobe/Rolodex/OpenClaw/Hermes discovery is context only. RedDog may recommend a governed handoff, but this extension cannot execute it.
+- `openrouter_fusion_alias` remains implemented for future explicit use, but is not the RedDog default because critic traces are not exposed.
 - Repair pass: at most one; uses the same redaction-gated bridge; must not invent evidence.
 
 Review packet additions:
@@ -129,7 +136,30 @@ Review packet additions:
 - `task_classification`
 - `resolved_effort`
 - `resolved_mode`
-- `output_validation` (`validated`, `missing_sections`, `repair_attempted`, `repair_ok`)
+- `resolved_context`
+- `principal_model`
+- `panel_models`
+- `mode_selection_reasoning`
+- `output_validation` (`validated`, `missing_sections`, `repair_attempted`, `repair_ok`, `fusion_panel_ok`)
+
+Substantive architect output sections (model-generated, WSP_97-safe):
+
+- Decision, Findings, Evidence, Proposed fixes, Uncertainties
+- Architect Trace (structured chain-of-reasoning: evidence retrieved, alternatives, critic disagreements — not raw hidden CoT)
+- WSP_97 Truth Labels, WSP_15 Priority, Verification gaps, Next safest step
+- Fusion path: bridge formats `## Lead`, `## Critic`, `## Synthesis` blocks
+
+## WSP_97 Truth Table (v0.3.14)
+
+| Claim | Status |
+| --- | --- |
+| Auto router REGULAR/HIGH/ULTRA | OBSERVED |
+| Skillz/Rolodex non-vacuous for YouTube comment ops | OBSERVED |
+| Advisory-only; no shell/repo/browser/OpenClaw/Hermes execution | OBSERVED |
+| Redaction gate before OpenRouter | OBSERVED |
+| Governed handoff contract (typed WRE dispatch) | SPECIFIED_NOT_IMPLEMENTED |
+| pfMALL surface binding | SPECIFIED_NOT_IMPLEMENTED |
+| Review packet memory / persistence | SPECIFIED_NOT_IMPLEMENTED |
 
 ## Public/RedDog Roadmap Boundary
 
@@ -142,6 +172,7 @@ The extension is the IDE-side model for a future RedDog operation surface:
   -> WSP_97 truth classification
   -> WSP_15 priority
   -> WSP_109 intake packet or WRE dispatch recommendation
+  -> Skillz/Wardrobe/Rolodex match and WRE/OpenClaw/Hermes governed handoff recommendation
   -> WRE/OpenClaw/Hermes governed execution
   -> pfMALL-visible state after verification
 ```

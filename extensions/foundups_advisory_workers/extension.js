@@ -3,11 +3,11 @@ const cp = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.13';
+const EXTENSION_VERSION = '0.3.14';
 const DEFAULT_FUSION_WORKER = {
   title: 'FoundUps Fusion',
-  lead: 'deepseek/deepseek-v3.2',
-  panel: ['z-ai/glm-5.2', 'moonshotai/kimi-k2.7-code']
+  lead: 'z-ai/glm-5.2',
+  panel: ['deepseek/deepseek-v4-pro', 'moonshotai/kimi-k2.7-code']
 };
 
 const REDDOG_ARCHITECT_SYSTEM_PROMPT = [
@@ -16,10 +16,12 @@ const REDDOG_ARCHITECT_SYSTEM_PROMPT = [
   'Apply WSP_97: retrieve/evaluate supplied evidence before stating facts; separate OBSERVED, INFERRED, and NEEDS_VERIFICATION; never claim direct repo access beyond the bounded context packet.',
   'Apply WSP_15 at the bottom of every substantive answer: score each recommended next action with Complexity, Importance, Deferability, Impact, MPS total, and P0-P4 priority.',
   'For every finding, include an actionable proposed fix or a reason the fix must be deferred.',
+  'If the 012 prompt asks for operational work, map it to an existing Skillz/Wardrobe/Rolodex/OpenClaw/Hermes handoff surface when evidence is supplied; do not execute it from this advisory tab.',
   'If HoloIndex recall is weak, offline, stale, or returns zero WSP hits, treat that as a retrieval-quality finding and propose the next retrieval/index repair step instead of overclaiming.',
   'If a public/, pfMALL, RedDog, WRE, OpenClaw, Hermes, Kanban, CABR, or FoundUp onboarding boundary appears, classify whether it is implemented, specified-not-implemented, inferred, or unknown.',
   'Do not edit files, run commands, merge PRs, create repos, grant authority, route payouts, or claim CABR/verification truth. Advisory only.',
-  'Output format: Decision, Findings, Evidence, Proposed fixes, Uncertainties, WSP_97 Truth Labels, WSP_15 Priority, Next safest step.'
+  'Never expose raw hidden chain-of-thought. Use a structured Architect Trace: evidence retrieved, alternatives considered, critic disagreements, and synthesis rationale.',
+  'Output format: Decision, Findings, Evidence, Proposed fixes, Uncertainties, Architect Trace, WSP_97 Truth Labels, WSP_15 Priority, Verification gaps, Next safest step.'
 ].join(' ');
 
 const REDDOG_REQUIRED_OUTPUT_SECTIONS = [
@@ -30,7 +32,13 @@ const REDDOG_REQUIRED_OUTPUT_SECTIONS = [
   'Uncertainties',
   'WSP_97 Truth Labels',
   'WSP_15 Priority',
+  'Verification gaps',
   'Next safest step'
+];
+
+const ARCHITECT_TRACE_SECTIONS = [
+  'Architect Trace',
+  'Verification gaps'
 ];
 
 const ULTRA_TASK_PATTERNS = [
@@ -68,7 +76,14 @@ const HIGH_TASK_PATTERNS = [
   /\bgate report\b/i,
   /\brepair slice\b/i,
   /\bmodlog\b/i,
-  /\binterface\.md\b/i
+  /\binterface\.md\b/i,
+  /\bprocess all youtube comments\b/i,
+  /\byoutube comments?\b/i,
+  /\bcomment engagement\b/i,
+  /\bskillz\b/i,
+  /\bwardrobe\b/i,
+  /\brolodex\b/i,
+  /\bgoverned handoff\b/i
 ];
 
 const REGULAR_TASK_PATTERNS = [
@@ -115,6 +130,21 @@ function classifyTaskForRedDog(prompt, contextMode, workerType) {
   };
 }
 
+function resolveAutoContextMode(classification, selectedContextMode) {
+  const mode = cleanContextMode(selectedContextMode);
+  if (mode !== 'auto') {
+    return mode;
+  }
+  const tier = classification && classification.tier ? classification.tier : 'HIGH';
+  if (tier === 'REGULAR') {
+    return 'none';
+  }
+  if (tier === 'ULTRA') {
+    return 'wsp_holo_git_skillz';
+  }
+  return 'wsp_holo_skillz';
+}
+
 function resolveAutoEffort(classification, selectedEffort) {
   const effort = cleanEffort(selectedEffort);
   if (effort !== 'auto') {
@@ -133,6 +163,9 @@ function resolveAutoEffort(classification, selectedEffort) {
 function resolveModelMode(classification, selectedMode, workerType) {
   const mode = cleanMode(selectedMode);
   const worker = cleanWorkerType(workerType);
+  if (mode === 'auto') {
+    return classification && classification.tier === 'REGULAR' ? 'openrouter_single' : 'foundups_fusion';
+  }
   if (worker === 'smoke_tester') {
     return mode;
   }
@@ -145,19 +178,47 @@ function resolveModelMode(classification, selectedMode, workerType) {
   return mode;
 }
 
-function validateRedDogOutput(markdown) {
+function validateRedDogOutput(markdown, options) {
+  const opts = options || {};
+  const sections = REDDOG_REQUIRED_OUTPUT_SECTIONS.slice();
+  if (opts.substantiveArchitect) {
+    for (const section of ARCHITECT_TRACE_SECTIONS) {
+      if (!sections.includes(section)) {
+        sections.push(section);
+      }
+    }
+  }
   const text = String(markdown || '');
   const missingSections = [];
-  for (const section of REDDOG_REQUIRED_OUTPUT_SECTIONS) {
+  for (const section of sections) {
     const pattern = new RegExp('(^|\\n)\\s*(#{1,3}\\s*)?' + section.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
     if (!pattern.test(text)) {
       missingSections.push(section);
     }
   }
+  const fusionPanelOk = opts.mode !== 'foundups_fusion' || (/## Lead/i.test(text) && /## Synthesis/i.test(text));
+  if (opts.mode === 'foundups_fusion' && !fusionPanelOk) {
+    missingSections.push('Fusion panel structure (Lead + Synthesis)');
+  }
   return {
     valid: missingSections.length === 0,
-    missingSections
+    missingSections,
+    fusion_panel_ok: fusionPanelOk
   };
+}
+
+function modeSelectionReasoning(classification, resolvedEffort, resolvedMode, resolvedContextMode) {
+  const tier = classification && classification.tier ? classification.tier : 'HIGH';
+  if (resolvedMode === 'openrouter_single') {
+    return 'Single-model GLM principal: REGULAR-tier or smoke-classified work; avoids panel latency/cost; context=' + resolvedContextMode + '.';
+  }
+  if (resolvedMode === 'openrouter_fusion_alias') {
+    return 'Explicit Fusion alias path: black-box synthesis; critic transcripts not exposed.';
+  }
+  if (tier === 'ULTRA') {
+    return 'Fusion manual panel: ULTRA-tier security/runtime/auth/public-surface work needs adversarial critics; context=' + resolvedContextMode + ' includes git + Skillz/Rolodex handoff candidates.';
+  }
+  return 'Fusion manual panel: HIGH-tier WSP/architecture/operational work; auditable lead+critic+synthesis trail; context=' + resolvedContextMode + ' includes Skillz/Rolodex discovery for governed handoff only.';
 }
 
 function buildRepairPrompt(originalPrompt, badOutput, missingSections) {
@@ -181,14 +242,34 @@ function isSubstantiveRedDogWorker(workerType) {
   return worker === 'reddog_architect' || worker === 'wsp_gate_critic' || worker === 'repair_planner';
 }
 
-function attachOrchestratorMetadata(reviewPacket, classification, resolvedEffort, resolvedMode, validationState) {
+function attachOrchestratorMetadata(reviewPacket, classification, resolvedEffort, resolvedMode, validationState, resolvedContextMode, worker) {
   const base = reviewPacket && typeof reviewPacket === 'object' ? reviewPacket : {};
   return Object.assign({}, base, {
     task_classification: classification,
     resolved_effort: resolvedEffort,
     resolved_mode: resolvedMode,
+    resolved_context: resolvedContextMode,
+    principal_model: worker && worker.lead ? worker.lead : undefined,
+    panel_models: worker && Array.isArray(worker.panel) ? worker.panel : undefined,
+    mode_selection_reasoning: modeSelectionReasoning(classification, resolvedEffort, resolvedMode, resolvedContextMode),
     output_validation: validationState
   });
+}
+
+function routingSummary(workerType, classification, resolvedEffort, resolvedMode, resolvedContextMode, worker) {
+  const resolvedWorker = WORKER_TYPES[cleanWorkerType(workerType)];
+  return [
+    '## RedDog Routing',
+    '- Worker: ' + resolvedWorker.label,
+    '- WSP_15 tier: ' + (classification && classification.tier ? classification.tier : 'HIGH'),
+    '- Effort: ' + resolvedEffort,
+    '- Mode: ' + resolvedMode,
+    '- Mode selection: ' + modeSelectionReasoning(classification, resolvedEffort, resolvedMode, resolvedContextMode),
+    '- Principal: ' + worker.lead,
+    '- Panel: ' + worker.panel.join(' + '),
+    '- Context: ' + resolvedContextMode,
+    '- Boundary: advisory-only; Skillz/OpenClaw/Hermes execution requires governed handoff.'
+  ].join('\n');
 }
 
 const WORKER_TYPES = {
@@ -286,19 +367,20 @@ function wireFusionWebview(context, webview, worker, state) {
       return;
     }
 
-    const contextMode = cleanContextMode(message.contextMode);
+    const selectedContextMode = cleanContextMode(message.contextMode);
     const workerType = cleanWorkerType(message.workerType);
     const selectedEffort = cleanEffort(message.effort);
     const selectedMode = cleanMode(message.mode);
-    const classification = classifyTaskForRedDog(message.text, contextMode, workerType);
+    const classification = classifyTaskForRedDog(message.text, selectedContextMode, workerType);
     const effort = resolveAutoEffort(classification, selectedEffort);
     const mode = resolveModelMode(classification, selectedMode, workerType);
+    const contextMode = resolveAutoContextMode(classification, selectedContextMode);
     const contextPacket = buildBoundedRepoContext(contextMode, message.text);
     const systemPrompt = buildSystemPrompt(workerType, effort, contextPacket.quality);
 
     webview.postMessage({
       command: 'status',
-      text: 'Orchestrator: effort=' + effort + ' mode=' + mode + ' tier=' + classification.tier + ' (' + classification.reasons.join(', ') + ')'
+      text: 'Orchestrator: effort=' + effort + ' mode=' + mode + ' tier=' + classification.tier + ' context=' + contextMode + ' principal=' + worker.lead + ' panel=' + worker.panel.join(' + ') + ' (' + classification.reasons.join(', ') + ')'
     });
     webview.postMessage({ command: 'status', text: 'Bridge started. Redaction gate runs before any OpenRouter API call.' });
     if (contextPacket.summary) {
@@ -308,7 +390,7 @@ function wireFusionWebview(context, webview, worker, state) {
       webview.postMessage({ command: 'status', text });
     });
     if (result.ok && isSubstantiveRedDogWorker(workerType)) {
-      const validation = validateRedDogOutput(result.content || '');
+      const validation = validateRedDogOutput(result.content || '', { substantiveArchitect: true, mode: mode });
       let validationState = {
         validated: validation.valid,
         missing_sections: validation.missingSections,
@@ -335,7 +417,7 @@ function wireFusionWebview(context, webview, worker, state) {
           }
         );
         if (repairResult.ok) {
-          const repairValidation = validateRedDogOutput(repairResult.content || '');
+          const repairValidation = validateRedDogOutput(repairResult.content || '', { substantiveArchitect: true, mode: mode });
           validationState.repair_ok = repairValidation.valid;
           validationState.missing_sections_after_repair = repairValidation.missingSections;
           if (repairValidation.valid) {
@@ -357,7 +439,9 @@ function wireFusionWebview(context, webview, worker, state) {
           classification,
           effort,
           mode,
-          validationState
+          validationState,
+          contextMode,
+          worker
         );
       }
     } else if (result.ok && result.review_packet) {
@@ -366,8 +450,13 @@ function wireFusionWebview(context, webview, worker, state) {
         classification,
         effort,
         mode,
-        { validated: false, skipped: true, reason: 'non_substantive_worker' }
+        { validated: false, skipped: true, reason: 'non_substantive_worker' },
+        contextMode,
+        worker
       );
+    }
+    if (result.ok && result.content) {
+      result.content = routingSummary(workerType, classification, effort, mode, contextMode, worker) + '\n\n' + result.content;
     }
     if (result.ok && Array.isArray(result.history)) {
       state.history = result.history;
@@ -446,10 +535,10 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
 }
 
 function cleanContextMode(value) {
-  if (value === 'wsp_holo' || value === 'wsp_holo_git' || value === 'active_editor' || value === 'git_diff' || value === 'none') {
+  if (value === 'auto' || value === 'wsp_holo' || value === 'wsp_holo_git' || value === 'wsp_holo_skillz' || value === 'wsp_holo_git_skillz' || value === 'active_editor' || value === 'git_diff' || value === 'none') {
     return value;
   }
-  return 'wsp_holo';
+  return 'auto';
 }
 
 function cleanWorkerType(value) {
@@ -488,16 +577,23 @@ function buildBoundedRepoContext(mode, taskText) {
     const text = sections.join('\n');
     return { text, summary: 'Repo context: WSP operating contract only.', quality };
   }
-  if (mode === 'wsp_holo' || mode === 'wsp_holo_git') {
+  if (mode === 'wsp_holo' || mode === 'wsp_holo_git' || mode === 'wsp_holo_skillz' || mode === 'wsp_holo_git_skillz') {
     const holo = holoIndexOutput(root, taskText || '', 18000);
     quality = holo.quality;
     sections.push('### HoloIndex recall (WSP_00 bundle-json first; offline fallback only if needed)\n```text\n' + (holo.output || '(no HoloIndex output)') + '\n```');
+  }
+  if (mode === 'wsp_holo_skillz' || mode === 'wsp_holo_git_skillz') {
+    const skillz = skillzWardrobeRolodexContext(root, taskText || '', 12000);
+    sections.push(skillz);
+    if (skillz.includes('(no matching Skillz/Wardrobe/Rolodex paths found')) {
+      quality = (quality ? quality + '; ' : '') + 'Skillz/Rolodex discovery returned zero matches; treat handoff recommendations as NEEDS_VERIFICATION.';
+    }
   }
   const active = activeEditorContext(root);
   if (active) {
     sections.push(active);
   }
-  if (mode === 'git_diff' || mode === 'wsp_holo_git') {
+  if (mode === 'git_diff' || mode === 'wsp_holo_git' || mode === 'wsp_holo_git_skillz') {
     const status = gitOutput(root, ['status', '--short'], 8000);
     const stat = gitOutput(root, ['diff', '--stat'], 8000);
     const diff = gitOutput(root, ['diff', '--', '.'], 24000);
@@ -525,6 +621,139 @@ function activeEditorContext(root) {
   const max = selected ? 16000 : 24000;
   const clipped = raw.length > max ? raw.slice(0, max) + '\n...[TRUNCATED ' + (raw.length - max) + ' chars]' : raw;
   return '### active editor ' + (selected ? 'selection' : 'file') + ': ' + rel + '\n```' + (doc.languageId || 'text') + '\n' + clipped + '\n```';
+}
+
+function repoFileIndex(root, maxFiles) {
+  const gitFiles = gitOutput(root, ['ls-files'], 1000000);
+  if (gitFiles && !gitFiles.startsWith('[git context unavailable')) {
+    const files = gitFiles.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    if (files.length) {
+      return files.slice(0, maxFiles);
+    }
+  }
+  const roots = ['modules', 'holo_index', '.claude', 'extensions', 'scripts', 'data'];
+  const files = [];
+  for (const relRoot of roots) {
+    walkRepoFiles(root, relRoot, files, maxFiles);
+    if (files.length >= maxFiles) {
+      break;
+    }
+  }
+  return files;
+}
+
+function walkRepoFiles(root, relDir, files, maxFiles) {
+  if (files.length >= maxFiles) {
+    return;
+  }
+  const fullDir = path.resolve(root, relDir);
+  const resolvedRoot = path.resolve(root);
+  if (fullDir !== resolvedRoot && !fullDir.startsWith(resolvedRoot + path.sep)) {
+    return;
+  }
+  let entries;
+  try {
+    entries = fs.readdirSync(fullDir, { withFileTypes: true });
+  } catch (err) {
+    return;
+  }
+  for (const entry of entries) {
+    if (files.length >= maxFiles) {
+      return;
+    }
+    if (entry.name === '.git' || entry.name === 'node_modules' || entry.name === '__pycache__' || entry.name === '.venv' || entry.name === 'dist' || entry.name === 'build') {
+      continue;
+    }
+    const rel = path.posix.join(relDir.replace(/\\/g, '/'), entry.name);
+    if (entry.isDirectory()) {
+      walkRepoFiles(root, rel, files, maxFiles);
+    } else if (entry.isFile()) {
+      files.push(rel);
+    }
+  }
+}
+
+function skillzWardrobeRolodexContext(root, taskText, maxChars) {
+  const files = repoFileIndex(root, 12000);
+  const queryTokens = String(taskText || '')
+    .toLowerCase()
+    .split(/[^a-z0-9_]+/)
+    .filter((token) => token.length >= 3)
+    .slice(0, 24);
+  const candidates = files
+    .filter((file) => isSkillzRolodexPath(file))
+    .map((file) => ({ file, score: scoreSkillzPath(file, queryTokens) }))
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score || a.file.localeCompare(b.file))
+    .slice(0, 40);
+  const lines = [
+    '### Skillz/Wardrobe/Rolodex discovery (advisory handoff only)',
+    'RedDog may recommend these governed surfaces, but this extension does not execute them.',
+    'Top matches:'
+  ];
+  if (!candidates.length) {
+    lines.push('(no matching Skillz/Wardrobe/Rolodex paths found by bounded git index scan)');
+  }
+  for (const item of candidates) {
+    lines.push('- ' + item.file + ' (score=' + item.score + ')');
+  }
+  const snippets = [];
+  for (const item of candidates.slice(0, 8)) {
+    if (!/\.(md|json|py|js)$/i.test(item.file)) {
+      continue;
+    }
+    const snippet = readBoundedRepoFile(root, item.file, 1400);
+    if (snippet) {
+      snippets.push('#### ' + item.file + '\n```text\n' + snippet + '\n```');
+    }
+  }
+  const text = lines.join('\n') + (snippets.length ? '\n\n' + snippets.join('\n\n') : '');
+  return text.slice(0, maxChars);
+}
+
+function isSkillzRolodexPath(file) {
+  const normalized = String(file || '').replace(/\\/g, '/').toLowerCase();
+  return normalized.includes('/skillz/')
+    || normalized.includes('/skills/')
+    || normalized.includes('skills_registry')
+    || normalized.includes('skills_index')
+    || normalized.includes('wardrobe')
+    || normalized.includes('rolodex')
+    || normalized.includes('command_rolodex')
+    || normalized.includes('agent_cli_catalog')
+    || normalized.includes('hermes_job_executor')
+    || normalized.includes('openclaw');
+}
+
+function scoreSkillzPath(file, tokens) {
+  const normalized = String(file || '').replace(/\\/g, '/').toLowerCase();
+  let score = 1;
+  if (normalized.includes('skillz')) score += 3;
+  if (normalized.includes('skills_registry') || normalized.includes('skills_index')) score += 4;
+  if (normalized.includes('wardrobe') || normalized.includes('rolodex')) score += 5;
+  if (normalized.includes('hermes') || normalized.includes('openclaw')) score += 3;
+  if (normalized.endsWith('skillz.md') || normalized.endsWith('.json')) score += 2;
+  for (const token of tokens) {
+    if (normalized.includes(token)) score += 4;
+  }
+  return score;
+}
+
+function readBoundedRepoFile(root, relPath, maxChars) {
+  try {
+    const full = path.resolve(root, relPath);
+    const resolvedRoot = path.resolve(root);
+    if (full !== resolvedRoot && !full.startsWith(resolvedRoot + path.sep)) {
+      return '';
+    }
+    const stat = fs.statSync(full);
+    if (!stat.isFile() || stat.size > 500000) {
+      return '';
+    }
+    return fs.readFileSync(full, 'utf8').slice(0, maxChars);
+  } catch (err) {
+    return '';
+  }
 }
 
 function relativePath(root, filePath) {
@@ -635,10 +864,10 @@ function gitOutput(root, args, maxChars) {
 }
 
 function cleanMode(value) {
-  if (value === 'openrouter_single' || value === 'openrouter_fusion_alias' || value === 'foundups_fusion') {
+  if (value === 'auto' || value === 'openrouter_single' || value === 'openrouter_fusion_alias' || value === 'foundups_fusion') {
     return value;
   }
-  return 'foundups_fusion';
+  return 'auto';
 }
 
 function renderHtml(worker, surface, logoUri) {
@@ -672,6 +901,7 @@ function renderHtml(worker, surface, logoUri) {
     .error { border-left: 3px solid var(--vscode-errorForeground); color: var(--vscode-errorForeground); }
     form { display: grid; grid-template-columns: 1fr; gap: 7px; padding: 10px; border-top: 1px solid var(--vscode-panel-border); background: var(--vscode-editor-background); z-index: 1; }
     .toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--vscode-descriptionForeground); font-size: 11px; }
+    .pill { border: 1px solid var(--vscode-panel-border); border-radius: 999px; padding: 3px 7px; color: var(--vscode-descriptionForeground); background: var(--vscode-sideBar-background); }
     select, button { color: var(--vscode-dropdown-foreground); background: var(--vscode-dropdown-background); border: 1px solid var(--vscode-dropdown-border); padding: 3px 6px; }
     button { cursor: pointer; }
     textarea { resize: none; min-height: 74px; max-height: 180px; padding: 8px; color: var(--vscode-input-foreground); background: var(--vscode-input-background); border: 1px solid var(--vscode-input-border); font-family: var(--vscode-editor-font-family); }
@@ -683,7 +913,7 @@ function renderHtml(worker, surface, logoUri) {
   <div class="wrap">
     <header>
       <div class="brand"><img src="${escapedLogoUri}" alt="RedDawg"><h1>${escapedTitle}</h1></div>
-      <div class="meta">Build: ${EXTENSION_VERSION}<br>Surface: ${escapedSurface}<br>Lead: ${escapedLead}<br>Panel: ${escapedPanel}<br>Advisory only. Redaction-gated. No repo, shell, or merge authority.</div>
+      <div class="meta">Build: ${EXTENSION_VERSION}<br>Surface: ${escapedSurface}<br>Principal: ${escapedLead}<br>Panel: ${escapedPanel}<br>Advisory only. Redaction-gated. No repo, shell, or merge authority.</div>
     </header>
     <main id="log" aria-label="FoundUps Fusion output scrollback">
       <div class="entry status"><span class="label">status</span>FoundUps Fusion extension ${EXTENSION_VERSION} loaded.</div>
@@ -692,9 +922,8 @@ function renderHtml(worker, surface, logoUri) {
     <form id="form">
       <div class="toolbar">
         <label for="workerType">Worker</label><select id="workerType"><option value="reddog_architect" selected>RedDog Architect</option><option value="wsp_gate_critic">WSP Gate Critic</option><option value="repair_planner">Repair Planner</option><option value="smoke_tester">Smoke Test</option></select>
-        <label for="effort">Effort</label><select id="effort"><option value="auto" selected>Auto</option><option value="regular">Regular</option><option value="high">High</option><option value="ultra">Ultra</option></select>
-        <label for="mode">Mode</label><select id="mode"><option value="foundups_fusion" selected>FoundUps manual lead + panel (RedDog WSP default)</option><option value="openrouter_fusion_alias">OpenRouter Fusion alias (fast/black-box)</option><option value="openrouter_single">Regular OpenRouter</option></select>
-        <label for="contextMode">Context</label><select id="contextMode"><option value="wsp_holo" selected>WSP + HoloIndex + active editor</option><option value="wsp_holo_git">WSP + HoloIndex + git diff</option><option value="git_diff">Active editor + git diff</option><option value="active_editor">Active editor only</option><option value="none">WSP only</option></select>
+        <span class="pill">Routing: Auto via WSP_15</span>
+        <span class="pill">Context: Auto WSP + HoloIndex + Skillz/Rolodex</span>
         <label for="testPrompt">Tests</label><select id="testPrompt"><option value="">Select test...</option><option value="regular">Regular smoke</option><option value="fusion">Fusion smoke</option><option value="wsp97">WSP_97 repo review</option><option value="reddog">RedDog architect review</option></select>
         <button id="copyMd" type="button">Copy MD</button>
       </div>
@@ -706,10 +935,7 @@ function renderHtml(worker, surface, logoUri) {
     const vscode = acquireVsCodeApi();
     const form = document.getElementById('form');
     const prompt = document.getElementById('prompt');
-    const mode = document.getElementById('mode');
-    const contextMode = document.getElementById('contextMode');
     const workerType = document.getElementById('workerType');
-    const effort = document.getElementById('effort');
     const testPrompt = document.getElementById('testPrompt');
     const copyMd = document.getElementById('copyMd');
     let lastAssistantMarkdown = '';
@@ -740,10 +966,7 @@ function renderHtml(worker, surface, logoUri) {
     function setRunning(value) {
       running = value;
       prompt.disabled = value;
-      mode.disabled = value;
-      contextMode.disabled = value;
       workerType.disabled = value;
-      effort.disabled = value;
       testPrompt.disabled = value;
       copyMd.disabled = value;
       if (value) {
@@ -753,10 +976,10 @@ function renderHtml(worker, surface, logoUri) {
 
     testPrompt.addEventListener('change', () => {
       const value = testPrompt.value;
-      if (value === 'regular') { mode.value = 'openrouter_single'; contextMode.value = 'none'; workerType.value = 'smoke_tester'; effort.value = 'regular'; prompt.value = 'Reply with exactly: regular mode works'; }
-      if (value === 'fusion') { mode.value = 'openrouter_fusion_alias'; contextMode.value = 'none'; workerType.value = 'smoke_tester'; effort.value = 'regular'; prompt.value = 'Fusion smoke test. Reply with one consensus, one contradiction, and one blind spot. Keep it under 80 words.'; }
-      if (value === 'wsp97') { mode.value = 'foundups_fusion'; contextMode.value = 'wsp_holo'; workerType.value = 'wsp_gate_critic'; effort.value = 'high'; prompt.value = 'Apply WSP_00, WSP_97, and WSP_15 to the supplied context. Provide findings, evidence, proposed fixes, uncertainties, WSP_15 priority, and next safest step.'; }
-      if (value === 'reddog') { mode.value = 'foundups_fusion'; contextMode.value = 'wsp_holo_git'; workerType.value = 'reddog_architect'; effort.value = 'ultra'; prompt.value = 'Operate as RedDog Architect. Review the supplied repo context as a FoundUps intake/orchestration surface. For each issue, propose the WSP-compliant fix path and end with WSP_15 priority.'; }
+      if (value === 'regular') { workerType.value = 'smoke_tester'; prompt.value = 'Reply with exactly: regular mode works'; }
+      if (value === 'fusion') { workerType.value = 'smoke_tester'; prompt.value = 'Fusion smoke test. Reply with one consensus, one contradiction, and one blind spot. Keep it under 80 words.'; }
+      if (value === 'wsp97') { workerType.value = 'wsp_gate_critic'; prompt.value = 'Apply WSP_00, WSP_97, and WSP_15 to the supplied context. Provide findings, evidence, proposed fixes, uncertainties, WSP_15 priority, and next safest step.'; }
+      if (value === 'reddog') { workerType.value = 'reddog_architect'; prompt.value = 'Operate as RedDog Architect. Review the supplied repo context as a FoundUps intake/orchestration surface. For each issue, propose the WSP-compliant fix path and end with WSP_15 priority.'; }
       testPrompt.value = '';
       prompt.focus();
     });
@@ -793,7 +1016,7 @@ function renderHtml(worker, surface, logoUri) {
       addStatus('Request sent. Waiting for bridge...');
       add('user', text, '012 prompt');
       prompt.value = '';
-      vscode.postMessage({ command: 'ask', text, mode: mode.value, contextMode: contextMode.value, workerType: workerType.value, effort: effort.value });
+      vscode.postMessage({ command: 'ask', text, mode: 'auto', contextMode: 'auto', workerType: workerType.value, effort: 'auto' });
     }
 
     window.addEventListener('message', (event) => {
@@ -854,8 +1077,12 @@ module.exports = {
   deactivate,
   classifyTaskForRedDog,
   resolveAutoEffort,
+  resolveAutoContextMode,
   resolveModelMode,
   validateRedDogOutput,
   buildRepairPrompt,
+  modeSelectionReasoning,
+  skillzWardrobeRolodexContext,
+  buildBoundedRepoContext,
   REDDOG_REQUIRED_OUTPUT_SECTIONS
 };

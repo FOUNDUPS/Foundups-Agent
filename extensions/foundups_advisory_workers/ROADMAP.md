@@ -42,6 +42,29 @@ IDE extension POC
 
 ## Next Slices
 
+### HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1
+
+- Index `extensions/foundups_advisory_workers/extension.js`, `scripts/advisory_model_once.py`, and Skillz/Rolodex discovery paths.
+- Improve semantic recall for RedDog auto-router, WSP_15/97, and governed-handoff queries.
+- Add regression retrieval tests so extension bridge code ranks above adjacent WRE routers.
+
+### REDDOG_GOVERNED_HANDOFF_CONTRACT_PHASE1
+
+- Typed handoff from RedDog review packet to WRE/OpenClaw/Hermes.
+- Skillz match recommendations become structured dispatch payloads.
+- Extension remains advisory; WRE retains execution authority.
+
+### REDDOG_PFMALL_SURFACE_BINDING_PHASE1
+
+- Bind RedDog architect review packets to pfMALL operator surfaces.
+- Classify public vs member-gated flows.
+- No automatic publication without verification gate.
+
+### REDDOG_REVIEW_PACKET_MEMORY_PHASE1
+
+- Persist redacted review packets for HoloIndex recall and 0102 continuity.
+- Bounded storage; no raw prompt leakage beyond redaction gate.
+
 ### REDDOG_FUSION_ORCHESTRATOR_PHASE2
 
 - Structured JSON review packet schema for findings/evidence/fixes/WSP_15 rows/truth labels.
