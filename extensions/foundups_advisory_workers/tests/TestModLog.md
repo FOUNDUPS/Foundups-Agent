@@ -1,5 +1,13 @@
 # FoundUps Fusion Worker TestModLog
 
+## 2026-06-22 - v0.3.15 Work Focus to WSP Prompt Tests
+
+- Verified UI uses work focus composer (`#workFocus`) and `012 work focus` scrollback label.
+- Verified `constructWspTaskPrompt` embeds WSP_97, WSP_15 tier, and non-authoritative work focus.
+- Verified `redactedDigest` hash/excerpt contract.
+- Verified review packet fields: `work_focus_digest`, `wsp_prompt_digest`, `prompt_construction`.
+- v0.3.14 auto-router contract tests remain unchanged.
+
 ## 2026-06-22 - v0.3.14 Auto Router + Skillz Context Tests
 
 - Updated contract test for GLM-5.2 principal, DeepSeek V4 Pro critic, and Kimi K2.7 Code implementation critic.

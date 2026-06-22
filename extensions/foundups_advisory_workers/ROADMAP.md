@@ -42,6 +42,19 @@ IDE extension POC
 
 ## Next Slices
 
+### REDDOG_BRIDGE_HARDENING_PHASE1
+
+Addendum B required controls (after v0.3.15 lands):
+
+- Python resolver: configured path -> .venv/venv -> system fallback; report selected interpreter in non-secret metadata
+- Subprocess output caps: hard stdout/stderr caps; kill on exceed; bounded failure reason
+- Orphan cleanup: webview dispose kills in-flight bridge child
+- Python panel cap: advisory_model_once.py max 6 panel_models
+- Retry invariant: only HTTP 429/502/503, max 2 retries, same redacted body, no re-redaction, no retry on redaction block or 400-class (except 429)
+- Retry tests: 429-then-success and 400-no-retry
+- Context budget: bounded char budget before bridge; truncation_applied + truncation_reason in packet
+- Failure taxonomy: redaction_blocked, valve_closed, missing_key, timeout, retry_exhausted, http_error, malformed_response, subprocess_failed, output_cap_exceeded
+
 ### HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1
 
 - Index `extensions/foundups_advisory_workers/extension.js`, `scripts/advisory_model_once.py`, and Skillz/Rolodex discovery paths.

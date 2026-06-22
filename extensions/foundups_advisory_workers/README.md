@@ -1,6 +1,6 @@
 # FoundUps Fusion Worker
 
-Version: 0.3.14
+Version: 0.3.15
 
 This local Cursor/VS Code extension opens one RedDog Architect advisory worker as an editor webview tab, similar in ergonomics to `Claude Code: Open` but without repo, shell, browser, merge, CABR, or payout authority.
 
@@ -23,17 +23,29 @@ The extension is a bounded 0102 advisory surface:
 - Findings must include proposed fixes or an explicit defer/block reason.
 - HoloIndex recall uses WSP_00 `HOLO_SKIP_MODEL=1 --bundle-json` first, then falls back to offline lexical search only if bundle recall fails.
 
-The extension does not grant repo authority. Prompts and bounded repo context are sent through `scripts/advisory_model_once.py`, which runs the landed Fusion redaction gate before making OpenRouter requests. The webview receives only advisory text and redacted local history.
+The extension does not grant repo authority. **012 supplies work focus only**; 0102 assembles a WSP task prompt before the bridge runs. Work focus and bounded repo context are sent through `scripts/advisory_model_once.py`, which runs the landed Fusion redaction gate before making OpenRouter requests. The webview receives only advisory text and redacted local history.
+
+## Work Focus Contract (v0.3.15)
+
+012 does not prompt RedDog directly. The operating flow is:
+
+```text
+012 work focus -> 0102 constructWspTaskPrompt -> redaction gate -> OpenRouter bridge -> RedDog architect output
+```
+
+- Composer label: **work focus** (not "prompt")
+- Bridge receives the **WSP task prompt** assembled by 0102, not raw composer text alone
+- Review packet stores `work_focus_digest`, `wsp_prompt_digest`, and `prompt_construction: 0102_generated_from_work_focus`
 
 ## Surface Layout
 
 The webview follows the VS Code terminal/chat shape:
 
 1. Compact header.
-2. One scrollable output pane for status, prompts, responses, and errors.
-3. Fixed bottom composer.
+2. One scrollable output pane for status, work focus, responses, and errors.
+3. Fixed bottom composer (work focus input).
 
-`Enter` sends, `Shift+Enter` adds a newline, and `Ctrl+Shift+C` copies the redacted review packet. `Copy MD` copies the latest assistant markdown only, not status logs.
+`Enter` sends work focus, `Shift+Enter` adds a newline, and `Ctrl+Shift+C` copies the redacted review packet. `Copy MD` copies the latest assistant markdown only, not status logs.
 
 ## Controls
 
@@ -48,12 +60,19 @@ Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed 
 
 Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, mode-selection reasoning, principal, panel, context, advisory boundary).
 
-## WSP_97 Truth Table (v0.3.14)
+## WSP_97 Truth Table (v0.3.15)
 
 | Claim | Status |
 | --- | --- |
 | Principal default `z-ai/glm-5.2` | OBSERVED |
 | Critics default DeepSeek V4 Pro + Kimi K2.7 Code | OBSERVED |
+| 012 work focus -> 0102 WSP task prompt | OBSERVED |
+| Review packet work_focus_digest + wsp_prompt_digest | OBSERVED |
+| WORK_FOCUS_NOT_AUTHORITY | OBSERVED |
+| WSP_PROMPT_0102_GENERATED | OBSERVED |
+| RAW_FOCUS_NOT_SENT_AS_SOLE_AUTHORITY | OBSERVED |
+| DIGESTS_NOT_RAW_CONTEXT | OBSERVED |
+| ROUTING_UNCHANGED_FROM_0_3_14 | OBSERVED |
 | Mode/Effort/Context not 012-facing dropdowns | OBSERVED |
 | REGULAR → `openrouter_single`, no repo context | OBSERVED |
 | HIGH → `foundups_fusion` + WSP/Holo/Skillz context | OBSERVED |
@@ -92,7 +111,7 @@ The worker has no direct filesystem authority. The extension automatically attac
 
 ## Review Packet
 
-After a successful run, focus the prompt box and press `Ctrl+Shift+C` to copy a redacted review packet. Paste that packet into Codex for 0102 review. The packet contains the redacted prompt, model slugs, bounded excerpts, task classification, resolved effort/mode, and output validator/repair status; it does not contain the OpenRouter key.
+After a successful run, focus the work focus composer and press `Ctrl+Shift+C` to copy a redacted review packet. Paste that packet into Codex for 0102 review. The packet contains digested work focus and WSP prompt excerpts (not full raw context), model slugs, bounded excerpts, task classification, resolved effort/mode, and output validator/repair status; it does not contain the OpenRouter key.
 
 ## Setup
 
@@ -110,6 +129,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `foundups-fusion-worker-0.3.14.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `foundups-fusion-worker-0.3.15-work-focus.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
 4. Run `FoundUps Fusion: Open` from Command Palette or the three-dot command list.
