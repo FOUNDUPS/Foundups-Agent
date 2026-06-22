@@ -42,6 +42,12 @@ IDE extension POC
 
 ## Next Slices
 
+### HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1
+
+- Index `extensions/foundups_advisory_workers/extension.js`, `scripts/advisory_model_once.py`, and Skillz/Rolodex discovery paths.
+- Improve semantic recall for RedDog auto-router, WSP_15/97, and governed-handoff queries.
+- Add regression retrieval tests so extension bridge code ranks above adjacent WRE routers.
+
 ### REDDOG_GOVERNED_HANDOFF_CONTRACT_PHASE1
 
 - Typed handoff from RedDog review packet to WRE/OpenClaw/Hermes.
