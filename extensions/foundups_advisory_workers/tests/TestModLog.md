@@ -21,6 +21,11 @@ node extensions/foundups_advisory_workers/tests/verify_extension_contract.js
 rg "Stopped before OpenRouter. Nothing left the machine." extensions/foundups_advisory_workers/extension.js
 ```
 
+## 2026-06-22 - v0.3.16 Bridge Hardening Tests
+
+- Contract tests for python resolver, context budget, bridge_meta, output_cap_exceeded.
+- Python unittest: panel cap, 429 retry then success (same body, one redaction path), 400 no retry.
+
 ## 2026-06-22 - v0.3.15 Work Focus to WSP Prompt Tests
 
 - Verified UI uses work focus composer (`#workFocus`) and `012 work focus` scrollback label.

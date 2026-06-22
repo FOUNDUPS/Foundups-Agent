@@ -4,9 +4,13 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.18';
+const EXTENSION_VERSION = '0.3.19';
 const REDDOG_TERMINAL_HOLD_MS = 3000;
 const REDACTION_BLOCK_OPERATOR_MESSAGE = 'Stopped before OpenRouter. Nothing left the machine.';
+const BRIDGE_MAX_STDOUT_BYTES = 262144;
+const BRIDGE_MAX_STDERR_BYTES = 65536;
+const BRIDGE_MAX_CONTEXT_CHARS = 48000;
+const BRIDGE_MAX_PROMPT_CHARS = 12000;
 
 const ADVISORY_BRIDGE_STAGES = [
   'bridge_start',
@@ -54,6 +58,7 @@ const REDDOG_PROGRESS_ACTIONS = [
   { prefix: 'Bridge script: ', action: 'sorting', pixel: '<rd>' },
   { prefix: 'OpenRouter key visible to Cursor process: ', action: 'sorting', pixel: '<rd>' },
   { prefix: 'Context budget applied: ', action: 'tracking', pixel: '<rd>' },
+  { prefix: 'Python interpreter: ', action: 'sorting', pixel: '<rd>' },
   { prefix: 'Orchestrator: effort=', action: 'sorting', pixel: '<rd>' },
   { prefix: 'Bridge started. Redaction gate runs', action: 'nosing', pixel: '<rd>' },
   { prefix: 'Repo context attached: ', action: 'tracking', pixel: '<rd>' },
@@ -462,7 +467,9 @@ function openFusionEditor(context) {
     }
   );
   const logoUri = panel.webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'icon.png'));
-  wireFusionWebview(context, panel.webview, worker, { history: [], lastReviewPacket: null });
+  const state = { history: [], lastReviewPacket: null, bridgeChild: null };
+  wireFusionWebview(context, panel.webview, worker, state);
+  panel.onDidDispose(() => killBridgeChild(state));
   panel.webview.html = renderHtml(worker, 'editor', logoUri.toString());
 }
 
@@ -539,7 +546,7 @@ function wireFusionWebview(context, webview, worker, state) {
       postStatusMessage(webview, text);
       postProgressMessage(webview, stage, text);
     };
-    let result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, state.history, mode, onBridgeProgress);
+    let result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, state.history, mode, onBridgeProgress, state, promptConstruction);
     if (result.ok && isSubstantiveRedDogWorker(workerType)) {
       const validation = validateRedDogOutput(result.content || '', { substantiveArchitect: true, mode: mode });
       let validationState = {
@@ -560,7 +567,9 @@ function wireFusionWebview(context, webview, worker, state) {
           systemPrompt + '\n\nRepair pass: add missing schema sections only. Do not invent evidence.',
           state.history,
           mode,
-          onBridgeProgress
+          onBridgeProgress,
+          state,
+          promptConstruction
         );
         if (repairResult.ok) {
           const repairValidation = validateRedDogOutput(repairResult.content || '', { substantiveArchitect: true, mode: mode });
@@ -620,30 +629,117 @@ function wireFusionWebview(context, webview, worker, state) {
   });
 }
 
-function callFusion(context, worker, prompt, boundedContext, systemPrompt, history, mode, onProgress) {
+function killBridgeChild(state) {
+  if (!state || !state.bridgeChild) {
+    return;
+  }
+  try {
+    if (!state.bridgeChild.killed) {
+      state.bridgeChild.kill();
+    }
+  } catch (err) {
+    // ignore kill errors on already-exited children
+  }
+  state.bridgeChild = null;
+}
+
+function resolvePythonInterpreter(root, configuredPath) {
+  const candidates = [];
+  if (typeof configuredPath === 'string' && configuredPath.trim()) {
+    candidates.push({ path: configuredPath.trim(), source: 'configured' });
+  }
+  const isWin = process.platform === 'win32';
+  const relPaths = [
+    path.join('.venv', isWin ? 'Scripts' : 'bin', isWin ? 'python.exe' : 'python'),
+    path.join('venv', isWin ? 'Scripts' : 'bin', isWin ? 'python.exe' : 'python')
+  ];
+  for (const rel of relPaths) {
+    const full = path.join(root, rel);
+    if (fs.existsSync(full)) {
+      candidates.push({ path: full, source: rel.startsWith('.venv') ? 'workspace_dot_venv' : 'workspace_venv' });
+    }
+  }
+  candidates.push({ path: 'python', source: 'system_fallback' });
+  return candidates[0];
+}
+
+function applyBridgeContextBudget(prompt, context) {
+  const budget = {
+    truncation_applied: false,
+    truncation_reason: null,
+    prompt_chars_before: String(prompt || '').length,
+    context_chars_before: String(context || '').length
+  };
+  let boundedPrompt = String(prompt || '');
+  let boundedContext = String(context || '');
+  if (boundedPrompt.length > BRIDGE_MAX_PROMPT_CHARS) {
+    boundedPrompt = boundedPrompt.slice(0, BRIDGE_MAX_PROMPT_CHARS);
+    budget.truncation_applied = true;
+    budget.truncation_reason = 'prompt_char_budget';
+  }
+  if (boundedContext.length > BRIDGE_MAX_CONTEXT_CHARS) {
+    boundedContext = boundedContext.slice(0, BRIDGE_MAX_CONTEXT_CHARS);
+    budget.truncation_applied = true;
+    budget.truncation_reason = budget.truncation_reason ? 'prompt_and_context_char_budget' : 'context_char_budget';
+  }
+  return { prompt: boundedPrompt, context: boundedContext, budget: budget };
+}
+
+function attachBridgeMetadata(reviewPacket, bridgeMeta) {
+  if (!reviewPacket || typeof reviewPacket !== 'object') {
+    return reviewPacket;
+  }
+  const meta = bridgeMeta && typeof bridgeMeta === 'object' ? bridgeMeta : {};
+  return Object.assign({}, reviewPacket, meta);
+}
+
+function callFusion(context, worker, prompt, boundedContext, systemPrompt, history, mode, onProgress, state, bridgeMeta) {
   return new Promise((resolve) => {
     const root = workspaceRoot();
     const script = path.join(root, 'scripts', 'advisory_model_once.py');
     const config = vscode.workspace.getConfiguration('foundupsFusion');
-    const pythonPath = config.get('pythonPath') || 'python';
+    const configuredPython = config.get('pythonPath') || 'python';
+    const interpreter = resolvePythonInterpreter(root, configuredPython);
+    const budgeted = applyBridgeContextBudget(prompt, boundedContext);
     onProgress(null, 'Mode: ' + mode);
-    onProgress(null, 'Bridge process starting: ' + pythonPath);
+    onProgress(null, 'Python interpreter: ' + interpreter.path + ' (' + interpreter.source + ')');
+    onProgress(null, 'Bridge process starting');
     onProgress(null, 'Workspace root: ' + root);
     onProgress(null, 'Bridge script: ' + script);
     onProgress(null, 'OpenRouter key visible to Cursor process: ' + (process.env.OPENROUTER_API_KEY ? 'yes' : 'no'));
-    const child = cp.spawn(pythonPath, [script], {
+    if (budgeted.budget.truncation_applied) {
+      onProgress(null, 'Context budget applied: ' + budgeted.budget.truncation_reason);
+    }
+    let settled = false;
+    function finish(result) {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      if (state) {
+        state.bridgeChild = null;
+      }
+      resolve(result);
+    }
+
+    const child = cp.spawn(interpreter.path, [script], {
       cwd: root,
       env: process.env,
       windowsHide: true,
       stdio: ['pipe', 'pipe', 'pipe']
     });
+    if (state) {
+      state.bridgeChild = child;
+    }
 
     let stdout = '';
     let stderr = '';
+    let stdoutBytes = 0;
+    let stderrBytes = 0;
     const payload = {
       mode,
-      prompt,
-      context: boundedContext,
+      prompt: budgeted.prompt,
+      context: budgeted.context,
       system: systemPrompt,
       model: mode === 'openrouter_single' ? worker.lead : undefined,
       history,
@@ -651,11 +747,31 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
       panel_models: worker.panel,
       max_tokens: 2200,
       temperature: 0.2,
-      timeout: mode === 'foundups_fusion' ? 120 : 90
+      timeout: mode === 'foundups_fusion' ? 120 : 90,
+      bridge_meta: Object.assign({}, bridgeMeta || {}, {
+        python_interpreter: interpreter.path,
+        python_interpreter_source: interpreter.source,
+        truncation_applied: budgeted.budget.truncation_applied,
+        truncation_reason: budgeted.budget.truncation_reason
+      })
     };
 
-    child.stdout.on('data', (chunk) => { stdout += chunk.toString(); });
+    child.stdout.on('data', (chunk) => {
+      stdoutBytes += chunk.length;
+      if (stdoutBytes > BRIDGE_MAX_STDOUT_BYTES) {
+        killBridgeChild(state);
+        finish({ ok: false, reason: 'output_cap_exceeded', detail: 'stdout cap exceeded' });
+        return;
+      }
+      stdout += chunk.toString();
+    });
     child.stderr.on('data', (chunk) => {
+      stderrBytes += chunk.length;
+      if (stderrBytes > BRIDGE_MAX_STDERR_BYTES) {
+        killBridgeChild(state);
+        finish({ ok: false, reason: 'output_cap_exceeded', detail: 'stderr cap exceeded' });
+        return;
+      }
       const text = chunk.toString();
       stderr += text;
       for (const line of text.split(/\r?\n/)) {
@@ -671,14 +787,21 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
       }
     });
     child.on('error', (err) => {
-      resolve({ ok: false, reason: 'spawn_error', detail: err.message });
+      finish({ ok: false, reason: 'subprocess_failed', detail: err.message });
     });
-    child.on('close', () => {
+    child.on('close', (code) => {
+      if (settled) {
+        return;
+      }
       try {
         const parsed = JSON.parse(stdout || '{}');
-        resolve(parsed);
+        if (!parsed.ok && code !== 0 && !parsed.reason) {
+          parsed.reason = 'subprocess_failed';
+          parsed.exit_code = code;
+        }
+        finish(parsed);
       } catch (err) {
-        resolve({ ok: false, reason: 'invalid_bridge_output', detail: stderr.slice(0, 500) });
+        finish({ ok: false, reason: 'malformed_response', detail: stderr.slice(0, 500) });
       }
     });
     child.stdin.write(JSON.stringify(payload));
@@ -1396,6 +1519,11 @@ module.exports = {
   buildRepairPrompt,
   constructWspTaskPrompt,
   redactedDigest,
+  resolvePythonInterpreter,
+  applyBridgeContextBudget,
+  killBridgeChild,
+  BRIDGE_MAX_CONTEXT_CHARS,
+  BRIDGE_MAX_PROMPT_CHARS,
   modeSelectionReasoning,
   skillzWardrobeRolodexContext,
   buildBoundedRepoContext,

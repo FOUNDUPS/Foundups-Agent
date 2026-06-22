@@ -33,6 +33,9 @@ DEEPSEEK_CRITIC_MODEL = "deepseek/deepseek-v4-pro"
 KIMI_PANEL_MODEL = "moonshotai/kimi-k2.7-code"
 DEFAULT_LEAD_MODEL = GLM_PRINCIPAL_MODEL
 DEFAULT_PANEL_MODELS = (DEEPSEEK_CRITIC_MODEL, KIMI_PANEL_MODEL)
+MAX_PANEL_MODELS = 6
+RETRYABLE_HTTP_STATUS = frozenset({429, 502, 503})
+MAX_HTTP_RETRIES = 2
 
 DEFAULT_SYSTEM_PROMPT = (
     "You are 0102 operating as an advisory RedDog Architect worker inside a Cursor extension tab. "
@@ -54,19 +57,35 @@ def _progress(stage: str, text: str) -> None:
     sys.stderr.flush()
 
 
-def _post_openrouter(api_key: str, body: dict[str, Any], timeout: int) -> dict[str, Any]:
-    request = urllib.request.Request(
-        OPENROUTER_URL,
-        data=json.dumps(body).encode("utf-8"),
-        method="POST",
-        headers={
-            "Authorization": "Bearer " + api_key,
-            "Content-Type": "application/json",
-            "X-Title": "FoundUps Cursor Advisory Worker",
-        },
-    )
-    with urllib.request.urlopen(request, timeout=timeout) as response:
-        return json.loads(response.read().decode("utf-8"))
+def _post_openrouter(api_key: str, body: dict[str, Any], timeout: int) -> tuple[dict[str, Any], dict[str, Any]]:
+    retry_meta: dict[str, Any] = {"retry_count": 0, "final_retry_reason": None}
+    last_exc: urllib.error.HTTPError | None = None
+    for attempt in range(MAX_HTTP_RETRIES + 1):
+        request = urllib.request.Request(
+            OPENROUTER_URL,
+            data=json.dumps(body).encode("utf-8"),
+            method="POST",
+            headers={
+                "Authorization": "Bearer " + api_key,
+                "Content-Type": "application/json",
+                "X-Title": "FoundUps Cursor Advisory Worker",
+            },
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
+                return json.loads(response.read().decode("utf-8")), retry_meta
+        except urllib.error.HTTPError as exc:
+            status = getattr(exc, "code", None)
+            if status in RETRYABLE_HTTP_STATUS and attempt < MAX_HTTP_RETRIES:
+                retry_meta["retry_count"] = attempt + 1
+                retry_meta["final_retry_reason"] = "http_" + str(status)
+                last_exc = exc
+                continue
+            setattr(exc, "retry_meta", dict(retry_meta))
+            raise
+    if last_exc is not None:
+        raise last_exc
+    raise RuntimeError("retry loop exited without response")
 
 
 def _http_error_detail(exc: urllib.error.HTTPError) -> dict[str, Any]:
@@ -86,6 +105,22 @@ def _http_error_detail(exc: urllib.error.HTTPError) -> dict[str, Any]:
     return {"status": getattr(exc, "code", None), "detail": detail[:500]}
 
 
+def _http_failure_reason(exc: urllib.error.HTTPError, retry_meta: dict[str, Any] | None = None) -> dict[str, Any]:
+    status = getattr(exc, "code", None)
+    detail = _http_error_detail(exc)
+    meta = retry_meta if retry_meta is not None else getattr(exc, "retry_meta", None)
+    if meta and meta.get("retry_count", 0) >= MAX_HTTP_RETRIES and status in RETRYABLE_HTTP_STATUS:
+        return {
+            "ok": False,
+            "reason": "retry_exhausted",
+            "http_status": status,
+            "retry_count": meta.get("retry_count"),
+            "final_retry_reason": meta.get("final_retry_reason"),
+            **detail,
+        }
+    return {"ok": False, "reason": "http_error", "http_status": status, **detail}
+
+
 def _chat_completion(
     api_key: str,
     model: str,
@@ -94,7 +129,7 @@ def _chat_completion(
     max_tokens: int,
     temperature: float,
     timeout: int,
-) -> str:
+) -> tuple[str, dict[str, Any]]:
     body = {
         "model": model,
         "messages": messages,
@@ -102,9 +137,9 @@ def _chat_completion(
         "temperature": temperature,
         "stream": False,
     }
-    data = _post_openrouter(api_key, body, timeout)
+    data, retry_meta = _post_openrouter(api_key, body, timeout)
     content = data["choices"][0]["message"]["content"]
-    return str(content)
+    return str(content), retry_meta
 
 
 def _clean_history(value: object) -> list[dict[str, str]]:
@@ -143,7 +178,7 @@ def _panel_models(value: object) -> list[str]:
     if not isinstance(value, list):
         return list(DEFAULT_PANEL_MODELS)
     models: list[str] = []
-    for item in value[:4]:
+    for item in value[:MAX_PANEL_MODELS]:
         if isinstance(item, str) and item.strip() and len(item.strip()) <= 120:
             models.append(item.strip())
     return models or list(DEFAULT_PANEL_MODELS)
@@ -193,12 +228,12 @@ def _openrouter_fusion_alias(
     }
     _progress("fusion_alias_start", "OpenRouter Fusion alias request started. Judge: " + judge_model)
     try:
-        data = _post_openrouter(api_key, body, timeout)
+        data, retry_meta = _post_openrouter(api_key, body, timeout)
         content = str(data["choices"][0]["message"]["content"])
     except urllib.error.HTTPError as exc:
-        return {"ok": False, "reason": "fusion_alias_http_error", **_http_error_detail(exc)}
+        return _http_failure_reason(exc)
     except (urllib.error.URLError, TimeoutError):
-        return {"ok": False, "reason": "fusion_alias_network_error"}
+        return {"ok": False, "reason": "timeout"}
     except (KeyError, IndexError, TypeError, json.JSONDecodeError):
         return {"ok": False, "reason": "fusion_alias_malformed_response"}
     _progress("fusion_alias_done", "OpenRouter Fusion alias response received.")
@@ -221,6 +256,8 @@ def _openrouter_fusion_alias(
             "redacted_prompt": redacted_prompt,
             "synthesis_excerpt": content[:4000],
             "trace_boundary": "OpenRouter Fusion alias does not expose individual critic transcripts.",
+            "retry_count": retry_meta.get("retry_count", 0),
+            "final_retry_reason": retry_meta.get("final_retry_reason"),
         },
     }
 
@@ -247,8 +284,9 @@ def _run_foundups_fusion(
     lead_messages.append({"role": "user", "content": redacted_prompt})
 
     _progress("lead_start", "Lead request started: " + lead_model)
+    lead_retry: dict[str, Any] = {"retry_count": 0, "final_retry_reason": None}
     try:
-        lead_text = _chat_completion(
+        lead_text, lead_retry = _chat_completion(
             api_key,
             lead_model,
             lead_messages,
@@ -257,9 +295,9 @@ def _run_foundups_fusion(
             timeout=timeout,
         )
     except urllib.error.HTTPError as exc:
-        return {"ok": False, "reason": "lead_http_error", "lead_model": lead_model, **_http_error_detail(exc)}
+        return {**_http_failure_reason(exc), "lead_model": lead_model}
     except (urllib.error.URLError, TimeoutError):
-        return {"ok": False, "reason": "lead_network_error", "lead_model": lead_model}
+        return {"ok": False, "reason": "timeout", "lead_model": lead_model}
     except (KeyError, IndexError, TypeError, json.JSONDecodeError):
         return {"ok": False, "reason": "lead_malformed_response", "lead_model": lead_model}
 
@@ -291,13 +329,13 @@ def _run_foundups_fusion(
         for future in as_completed(futures):
             model = futures[future]
             try:
-                panel_results[model] = future.result()
+                panel_results[model], _panel_retry = future.result()
                 _progress("panel_done", "Panel response received: " + model)
             except urllib.error.HTTPError as exc:
                 panel_results[model] = "[blocked: http_error " + str(getattr(exc, "code", "")) + "]"
                 _progress("panel_blocked", "Panel blocked: " + model)
             except (urllib.error.URLError, TimeoutError):
-                panel_results[model] = "[blocked: network_error]"
+                panel_results[model] = "[blocked: timeout]"
                 _progress("panel_blocked", "Panel network error: " + model)
             except (KeyError, IndexError, TypeError, json.JSONDecodeError):
                 panel_results[model] = "[blocked: malformed_response]"
@@ -321,7 +359,7 @@ def _run_foundups_fusion(
     )
     _progress("synthesis_start", "Synthesis request started: " + lead_model)
     try:
-        synthesis = _chat_completion(
+        synthesis, _syn_retry = _chat_completion(
             api_key,
             lead_model,
             [
@@ -357,6 +395,8 @@ def _run_foundups_fusion(
             "lead_excerpt": lead_text[:4000],
             "panel_excerpts": {model: text[:3000] for model, text in panel_results.items()},
             "synthesis_excerpt": synthesis[:4000],
+            "retry_count": lead_retry.get("retry_count", 0),
+            "final_retry_reason": lead_retry.get("final_retry_reason"),
         },
     }
 
@@ -371,7 +411,7 @@ def main() -> int:
     api_key = os.getenv(ENV_API_KEY)
     _progress("env_check", "OPENROUTER_API_KEY visible to bridge: " + ("yes" if bool(api_key) else "no"))
     if not api_key:
-        return _json_result(ok=False, reason="missing_openrouter_api_key")
+        return _json_result(ok=False, reason="missing_key")
 
     model = payload.get("model")
     prompt = payload.get("prompt")
@@ -379,6 +419,7 @@ def main() -> int:
         return _json_result(ok=False, reason="missing_prompt")
     context = payload.get("context")
     context_for_gate = context if isinstance(context, str) and context.strip() else None
+    bridge_meta = payload.get("bridge_meta") if isinstance(payload.get("bridge_meta"), dict) else {}
 
     _progress("redaction_start", "Redaction gate started.")
     gate = evaluate_redaction_gate(prompt, context_for_gate)
@@ -399,10 +440,18 @@ def main() -> int:
 
     if payload.get("mode") == "openrouter_fusion_alias":
         result = _openrouter_fusion_alias(api_key, redacted_user_message, history, payload)
+        if bridge_meta:
+            packet = result.get("review_packet")
+            if isinstance(packet, dict):
+                packet.update(bridge_meta)
         return _json_result(**result)
 
     if payload.get("mode") == "foundups_fusion":
         result = _run_foundups_fusion(api_key, redacted_user_message, history, payload)
+        if bridge_meta:
+            packet = result.get("review_packet")
+            if isinstance(packet, dict):
+                packet.update(bridge_meta)
         return _json_result(**result)
 
     if payload.get("mode") == "openrouter_single":
@@ -417,7 +466,7 @@ def main() -> int:
 
     _progress("single_start", "Regular OpenRouter request started: " + model)
     try:
-        content = _chat_completion(
+        content, retry_meta = _chat_completion(
             api_key,
             model,
             messages,
@@ -426,9 +475,9 @@ def main() -> int:
             timeout=timeout,
         )
     except urllib.error.HTTPError as exc:
-        return _json_result(ok=False, reason="http_error", **_http_error_detail(exc))
+        return _json_result(**_http_failure_reason(exc))
     except (urllib.error.URLError, TimeoutError):
-        return _json_result(ok=False, reason="network_error")
+        return _json_result(ok=False, reason="timeout")
     except (KeyError, IndexError, TypeError, json.JSONDecodeError):
         return _json_result(ok=False, reason="malformed_response")
 
@@ -445,6 +494,16 @@ def main() -> int:
         redacted_prompt=redacted_user_message,
         content=assistant_text,
         history=next_history[-20:],
+        retry_count=retry_meta.get("retry_count", 0),
+        final_retry_reason=retry_meta.get("final_retry_reason"),
+        review_packet={
+            "mode": "openrouter_single",
+            "lead_model": model,
+            "redacted_prompt_excerpt": redacted_user_message[:4000],
+            "retry_count": retry_meta.get("retry_count", 0),
+            "final_retry_reason": retry_meta.get("final_retry_reason"),
+            **bridge_meta,
+        },
     )
 
 

@@ -16,8 +16,8 @@ function includes(haystack, needle, label) {
   assert(haystack.includes(needle), label || `missing ${needle}`);
 }
 
-assert.strictEqual(pkg.version, '0.3.18', 'package version must be 0.3.18');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.18'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.19', 'package version must be 0.3.19');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.19'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -34,6 +34,15 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
+includes(readme, 'Version: 0.3.19', 'README version mismatch');
+includes(extensionJs, 'function resolvePythonInterpreter', 'python resolver missing');
+includes(extensionJs, 'function applyBridgeContextBudget', 'context budget missing');
+includes(extensionJs, 'function killBridgeChild', 'orphan cleanup missing');
+includes(extensionJs, 'output_cap_exceeded', 'output cap failure reason missing');
+includes(extensionJs, 'bridge_meta', 'bridge metadata payload missing');
+includes(bridgePy, 'MAX_PANEL_MODELS = 6', 'panel cap missing in bridge');
+includes(bridgePy, 'RETRYABLE_HTTP_STATUS', 'retryable status set missing');
+includes(bridgePy, 'reason="missing_key"', 'missing_key taxonomy missing');
 
 includes(extensionJs, 'grid-template-rows: auto minmax(0, 1fr) auto', 'terminal/chat grid rows missing');
 includes(extensionJs, 'html, body { height: 100%; overflow: hidden; }', 'body overflow lock missing');
@@ -255,5 +264,14 @@ const forbiddenPixels = ['\u2022', '\u0254', '\u1401', '\u1400'];
 for (const glyph of forbiddenPixels) {
   assert(!extensionJs.includes(glyph), 'trail pixel grammar must stay ASCII-only');
 }
+
+const budget = orchestrator.applyBridgeContextBudget('p'.repeat(20000), 'c'.repeat(60000));
+assert.strictEqual(budget.budget.truncation_applied, true, 'context budget must truncate oversized prompt/context');
+assert(budget.prompt.length <= orchestrator.BRIDGE_MAX_PROMPT_CHARS, 'prompt must respect cap');
+assert(budget.context.length <= orchestrator.BRIDGE_MAX_CONTEXT_CHARS, 'context must respect cap');
+
+const interpreter = orchestrator.resolvePythonInterpreter(root, 'python');
+includes(interpreter.path, 'python', 'python resolver must return a path');
+includes(interpreter.source, 'system', 'default python must fall back to system when no configured path');
 
 console.log('Foundups®Agent extension contract checks passed.');
