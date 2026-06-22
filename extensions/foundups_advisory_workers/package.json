@@ -2,7 +2,7 @@
     "name":  "foundups-fusion-worker",
     "displayName":  "FoundUps Fusion Worker",
     "description":  "Open a WSP_00/WSP_97 RedDog Architect Fusion advisory worker in a Cursor editor webview tab.",
-    "version":  "0.3.14",
+    "version":  "0.3.15",
     "publisher":  "foundups",
     "icon":  "icon.png",
     "engines":  {

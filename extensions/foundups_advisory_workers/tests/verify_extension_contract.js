@@ -16,9 +16,9 @@ function includes(haystack, needle, label) {
   assert(haystack.includes(needle), label || `missing ${needle}`);
 }
 
-assert.strictEqual(pkg.version, '0.3.14', 'package version must be 0.3.14');
-includes(readme, 'Version: 0.3.14', 'README version mismatch');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.14'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.15', 'package version must be 0.3.15');
+includes(readme, 'Version: 0.3.15', 'README version mismatch');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.15'", 'extension build mismatch');
 
 includes(extensionJs, 'grid-template-rows: auto minmax(0, 1fr) auto', 'terminal/chat grid rows missing');
 includes(extensionJs, 'html, body { height: 100%; overflow: hidden; }', 'body overflow lock missing');
@@ -64,6 +64,17 @@ includes(readme, 'WSP_97 Truth Table', 'README WSP_97 truth table missing');
 includes(roadmap, 'REDDOG_GOVERNED_HANDOFF_CONTRACT_PHASE1', 'governed handoff roadmap slice missing');
 includes(roadmap, 'REDDOG_PFMALL_SURFACE_BINDING_PHASE1', 'pfMALL binding roadmap slice missing');
 includes(roadmap, 'REDDOG_REVIEW_PACKET_MEMORY_PHASE1', 'review packet memory roadmap slice missing');
+includes(extensionJs, 'function constructWspTaskPrompt', 'constructWspTaskPrompt missing');
+includes(extensionJs, 'function redactedDigest', 'redactedDigest missing');
+includes(extensionJs, '0102_generated_from_work_focus', 'prompt construction marker missing');
+includes(extensionJs, 'work_focus_digest', 'work focus digest in review packet missing');
+includes(extensionJs, 'wsp_prompt_digest', 'wsp prompt digest in review packet missing');
+includes(extensionJs, 'id="workFocus"', 'work focus composer missing');
+includes(extensionJs, '012 work focus', '012 work focus label missing');
+assert(!extensionJs.includes('012 prompt'), 'legacy 012 prompt label must be removed');
+includes(readme, 'Work Focus Contract', 'README work focus contract missing');
+includes(iface, '012 Work Focus to 0102 WSP Task Prompt', 'INTERFACE work focus contract missing');
+includes(roadmap, 'REDDOG_BRIDGE_HARDENING_PHASE1', 'bridge hardening roadmap slice missing');
 includes(extensionJs, 'Routing: Auto via WSP_15', 'auto routing label missing');
 includes(extensionJs, 'deepseek/deepseek-v4-pro', 'DeepSeek V4 Pro critic default missing');
 includes(extensionJs, 'z-ai/glm-5.2', 'GLM 5.2 principal default missing');
@@ -161,5 +172,18 @@ const handoffContext = orchestrator.skillzWardrobeRolodexContext(root, 'process 
 includes(handoffContext, 'Skillz/Wardrobe/Rolodex discovery', 'handoff context header missing');
 assert(/youtube|comments|skillz/i.test(handoffContext), 'handoff context must surface relevant YouTube/comment/Skillz paths');
 assert(!handoffContext.includes('(no matching Skillz/Wardrobe/Rolodex paths found'), 'handoff context must not be empty for YouTube comments');
+
+const ytFocus = 'process all youtube comments with existing skillz';
+const ytClass = orchestrator.classifyTaskForRedDog(ytFocus, 'auto', 'reddog_architect');
+const ytWsp = orchestrator.constructWspTaskPrompt(ytFocus, ytClass, 'HoloIndex ok', 'reddog_architect');
+includes(ytWsp, 'WSP_97', 'WSP prompt must include WSP_97 framing');
+includes(ytWsp, 'WSP_15 tier', 'WSP prompt must include tier');
+includes(ytWsp, ytFocus.slice(0, 40), 'WSP prompt must embed work focus excerpt');
+includes(ytWsp, 'non-authoritative', 'WSP prompt must label work focus non-authoritative');
+
+const digest = orchestrator.redactedDigest('process youtube comments', 80);
+assert.strictEqual(typeof digest.hash, 'string', 'digest hash required');
+assert.strictEqual(typeof digest.excerpt, 'string', 'digest excerpt required');
+assert(digest.excerpt.includes('youtube'), 'digest excerpt must reflect input');
 
 console.log('FoundUps Fusion extension contract checks passed.');

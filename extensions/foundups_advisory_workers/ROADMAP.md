@@ -42,6 +42,11 @@ IDE extension POC
 
 ## Next Slices
 
+### REDDOG_BRIDGE_HARDENING_PHASE1
+
+- Edge-case redaction/repair reliability after work-focus contract lands.
+- Prompt/context gate regression tests; no new execution authority.
+
 ### HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1
 
 - Index `extensions/foundups_advisory_workers/extension.js`, `scripts/advisory_model_once.py`, and Skillz/Rolodex discovery paths.

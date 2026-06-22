@@ -26,14 +26,14 @@ It is an IDE-side proof surface for the future RedDog/pfMALL/WRE intake pattern.
 The UI copies the VS Code terminal/chat layout:
 
 1. Header: build/model metadata only.
-2. Output scrollback: status, prompts, model responses, and errors.
-3. Bottom composer: fixed input box and controls.
+2. Output scrollback: status, 012 work focus, 0102 output, and errors.
+3. Bottom composer: fixed **work focus** input and controls.
 
 The output pane owns scrolling. Content must not pass behind the composer.
 
 Keyboard:
 
-- `Enter`: send prompt.
+- `Enter`: send work focus.
 - `Shift+Enter`: newline.
 - `Ctrl+Shift+C`: copy redacted review packet.
 
@@ -140,33 +140,47 @@ Review packet additions:
 - `principal_model`
 - `panel_models`
 - `mode_selection_reasoning`
+- `work_focus_digest` (`hash`, `excerpt`, `length` - redacted)
+- `wsp_prompt_digest` (`hash`, `excerpt`, `length` - redacted)
+- `prompt_construction`: `0102_generated_from_work_focus`
 - `output_validation` (`validated`, `missing_sections`, `repair_attempted`, `repair_ok`, `fusion_panel_ok`)
 
-Substantive architect output sections (model-generated, WSP_97-safe):
+## 012 Work Focus to 0102 WSP Task Prompt (v0.3.15)
 
-- Decision, Findings, Evidence, Proposed fixes, Uncertainties
-- Architect Trace (structured chain-of-reasoning: evidence retrieved, alternatives, critic disagreements — not raw hidden CoT)
-- WSP_97 Truth Labels, WSP_15 Priority, Verification gaps, Next safest step
-- Fusion path: bridge formats `## Lead`, `## Critic`, `## Synthesis` blocks
+Formal contract:
 
-## WSP_97 Truth Table (v0.3.14)
+```text
+012 work focus (non-authoritative)
+  -> 0102 constructWspTaskPrompt(workFocus, classification, contextQuality, workerType)
+  -> redaction gate (prompt + bounded context separately)
+  -> OpenRouter bridge
+  -> RedDog architect output
+```
+
+012 does not prompt RedDog directly. The bridge receives the assembled WSP task prompt, not raw work focus alone. Work focus is embedded inside the WSP prompt under an explicit non-authoritative label.
+
+## WSP_97 Truth Table (v0.3.15)
 
 | Claim | Status |
 | --- | --- |
 | Auto router REGULAR/HIGH/ULTRA | OBSERVED |
+| 012 work focus -> 0102 WSP task prompt layer | OBSERVED |
+| Review packet work_focus_digest + wsp_prompt_digest | OBSERVED |
 | Skillz/Rolodex non-vacuous for YouTube comment ops | OBSERVED |
 | Advisory-only; no shell/repo/browser/OpenClaw/Hermes execution | OBSERVED |
 | Redaction gate before OpenRouter | OBSERVED |
 | Governed handoff contract (typed WRE dispatch) | SPECIFIED_NOT_IMPLEMENTED |
 | pfMALL surface binding | SPECIFIED_NOT_IMPLEMENTED |
 | Review packet memory / persistence | SPECIFIED_NOT_IMPLEMENTED |
+| Bridge hardening (edge-case redaction/repair) | SPECIFIED_NOT_IMPLEMENTED |
 
 ## Public/RedDog Roadmap Boundary
 
 The extension is the IDE-side model for a future RedDog operation surface:
 
 ```text
-012 prompt
+012 work focus
+  -> 0102 WSP task prompt assembly
   -> RedDog Architect advisory review
   -> HoloIndex recall
   -> WSP_97 truth classification

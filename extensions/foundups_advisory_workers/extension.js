@@ -1,9 +1,10 @@
 const vscode = require('vscode');
 const cp = require('child_process');
+const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.14';
+const EXTENSION_VERSION = '0.3.15';
 const DEFAULT_FUSION_WORKER = {
   title: 'FoundUps Fusion',
   lead: 'z-ai/glm-5.2',
@@ -16,7 +17,7 @@ const REDDOG_ARCHITECT_SYSTEM_PROMPT = [
   'Apply WSP_97: retrieve/evaluate supplied evidence before stating facts; separate OBSERVED, INFERRED, and NEEDS_VERIFICATION; never claim direct repo access beyond the bounded context packet.',
   'Apply WSP_15 at the bottom of every substantive answer: score each recommended next action with Complexity, Importance, Deferability, Impact, MPS total, and P0-P4 priority.',
   'For every finding, include an actionable proposed fix or a reason the fix must be deferred.',
-  'If the 012 prompt asks for operational work, map it to an existing Skillz/Wardrobe/Rolodex/OpenClaw/Hermes handoff surface when evidence is supplied; do not execute it from this advisory tab.',
+  'If the 012 work focus describes operational work, map it to an existing Skillz/Wardrobe/Rolodex/OpenClaw/Hermes handoff surface when evidence is supplied; do not execute it from this advisory tab.',
   'If HoloIndex recall is weak, offline, stale, or returns zero WSP hits, treat that as a retrieval-quality finding and propose the next retrieval/index repair step instead of overclaiming.',
   'If a public/, pfMALL, RedDog, WRE, OpenClaw, Hermes, Kanban, CABR, or FoundUp onboarding boundary appears, classify whether it is implemented, specified-not-implemented, inferred, or unknown.',
   'Do not edit files, run commands, merge PRs, create repos, grant authority, route payouts, or claim CABR/verification truth. Advisory only.',
@@ -221,6 +222,36 @@ function modeSelectionReasoning(classification, resolvedEffort, resolvedMode, re
   return 'Fusion manual panel: HIGH-tier WSP/architecture/operational work; auditable lead+critic+synthesis trail; context=' + resolvedContextMode + ' includes Skillz/Rolodex discovery for governed handoff only.';
 }
 
+function redactedDigest(text, maxExcerpt) {
+  const raw = String(text || '');
+  const excerpt = raw.replace(/\s+/g, ' ').trim().slice(0, maxExcerpt || 240);
+  const hash = crypto.createHash('sha256').update(raw, 'utf8').digest('hex').slice(0, 16);
+  return { hash: hash, excerpt: excerpt, length: raw.length };
+}
+
+function constructWspTaskPrompt(workFocus, classification, contextQuality, workerType) {
+  const focus = String(workFocus || '').trim();
+  const tier = classification && classification.tier ? classification.tier : 'HIGH';
+  const reasons = classification && Array.isArray(classification.reasons) ? classification.reasons.join(', ') : '';
+  const worker = cleanWorkerType(workerType);
+  const lines = [
+    'WSP Task Prompt (0102-generated from 012 work focus; work focus is non-authoritative input)',
+    '',
+    'WSP_00: Operate as 0102 RedDog Architect advisory surface. 012 remains external principal; this tab has no execution authority.',
+    'WSP_97: Separate OBSERVED, INFERRED, NEEDS_VERIFICATION, and SPECIFIED_NOT_IMPLEMENTED. Do not overclaim beyond bounded context.',
+    'WSP_15 tier (auto-classified): ' + tier + (reasons ? ' (' + reasons + ')' : ''),
+    'Worker mode: ' + worker,
+    '',
+    '012 work focus (non-authoritative):',
+    focus.slice(0, 4000)
+  ];
+  if (contextQuality) {
+    lines.push('', 'Retrieval quality note: ' + String(contextQuality).slice(0, 500));
+  }
+  lines.push('', 'Produce required RedDog architect output sections per contract.');
+  return lines.join('\n');
+}
+
 function buildRepairPrompt(originalPrompt, badOutput, missingSections) {
   const sections = Array.isArray(missingSections) ? missingSections : [];
   return [
@@ -229,7 +260,7 @@ function buildRepairPrompt(originalPrompt, badOutput, missingSections) {
     'Label claims with WSP_97 truth labels where applicable.',
     'Missing sections: ' + (sections.length ? sections.join(', ') : '(none listed)'),
     '',
-    'Original task:',
+    'Original WSP task prompt:',
     String(originalPrompt || '').slice(0, 4000),
     '',
     'Draft answer to repair:',
@@ -242,8 +273,9 @@ function isSubstantiveRedDogWorker(workerType) {
   return worker === 'reddog_architect' || worker === 'wsp_gate_critic' || worker === 'repair_planner';
 }
 
-function attachOrchestratorMetadata(reviewPacket, classification, resolvedEffort, resolvedMode, validationState, resolvedContextMode, worker) {
+function attachOrchestratorMetadata(reviewPacket, classification, resolvedEffort, resolvedMode, validationState, resolvedContextMode, worker, promptConstruction) {
   const base = reviewPacket && typeof reviewPacket === 'object' ? reviewPacket : {};
+  const construction = promptConstruction && typeof promptConstruction === 'object' ? promptConstruction : {};
   return Object.assign({}, base, {
     task_classification: classification,
     resolved_effort: resolvedEffort,
@@ -252,6 +284,9 @@ function attachOrchestratorMetadata(reviewPacket, classification, resolvedEffort
     principal_model: worker && worker.lead ? worker.lead : undefined,
     panel_models: worker && Array.isArray(worker.panel) ? worker.panel : undefined,
     mode_selection_reasoning: modeSelectionReasoning(classification, resolvedEffort, resolvedMode, resolvedContextMode),
+    work_focus_digest: construction.work_focus_digest,
+    wsp_prompt_digest: construction.wsp_prompt_digest,
+    prompt_construction: '0102_generated_from_work_focus',
     output_validation: validationState
   });
 }
@@ -367,15 +402,21 @@ function wireFusionWebview(context, webview, worker, state) {
       return;
     }
 
+    const workFocus = message.text;
     const selectedContextMode = cleanContextMode(message.contextMode);
     const workerType = cleanWorkerType(message.workerType);
     const selectedEffort = cleanEffort(message.effort);
     const selectedMode = cleanMode(message.mode);
-    const classification = classifyTaskForRedDog(message.text, selectedContextMode, workerType);
+    const classification = classifyTaskForRedDog(workFocus, selectedContextMode, workerType);
     const effort = resolveAutoEffort(classification, selectedEffort);
     const mode = resolveModelMode(classification, selectedMode, workerType);
     const contextMode = resolveAutoContextMode(classification, selectedContextMode);
-    const contextPacket = buildBoundedRepoContext(contextMode, message.text);
+    const contextPacket = buildBoundedRepoContext(contextMode, workFocus);
+    const wspTaskPrompt = constructWspTaskPrompt(workFocus, classification, contextPacket.quality, workerType);
+    const promptConstruction = {
+      work_focus_digest: redactedDigest(workFocus, 180),
+      wsp_prompt_digest: redactedDigest(wspTaskPrompt, 320)
+    };
     const systemPrompt = buildSystemPrompt(workerType, effort, contextPacket.quality);
 
     webview.postMessage({
@@ -386,7 +427,8 @@ function wireFusionWebview(context, webview, worker, state) {
     if (contextPacket.summary) {
       webview.postMessage({ command: 'status', text: contextPacket.summary });
     }
-    let result = await callFusion(context, worker, message.text, contextPacket.text, systemPrompt, state.history, mode, (text) => {
+    webview.postMessage({ command: 'status', text: '0102 assembled WSP task prompt from 012 work focus (bridge receives WSP prompt, not raw focus alone).' });
+    let result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, state.history, mode, (text) => {
       webview.postMessage({ command: 'status', text });
     });
     if (result.ok && isSubstantiveRedDogWorker(workerType)) {
@@ -403,7 +445,7 @@ function wireFusionWebview(context, webview, worker, state) {
           command: 'status',
           text: 'Output schema incomplete. Missing: ' + validation.missingSections.join(', ') + '. Running one repair pass...'
         });
-        const repairPrompt = buildRepairPrompt(message.text, result.content, validation.missingSections);
+        const repairPrompt = buildRepairPrompt(wspTaskPrompt, result.content, validation.missingSections);
         const repairResult = await callFusion(
           context,
           worker,
@@ -441,7 +483,8 @@ function wireFusionWebview(context, webview, worker, state) {
           mode,
           validationState,
           contextMode,
-          worker
+          worker,
+          promptConstruction
         );
       }
     } else if (result.ok && result.review_packet) {
@@ -452,7 +495,8 @@ function wireFusionWebview(context, webview, worker, state) {
         mode,
         { validated: false, skipped: true, reason: 'non_substantive_worker' },
         contextMode,
-        worker
+        worker,
+        promptConstruction
       );
     }
     if (result.ok && result.content) {
@@ -924,19 +968,19 @@ function renderHtml(worker, surface, logoUri) {
         <label for="workerType">Worker</label><select id="workerType"><option value="reddog_architect" selected>RedDog Architect</option><option value="wsp_gate_critic">WSP Gate Critic</option><option value="repair_planner">Repair Planner</option><option value="smoke_tester">Smoke Test</option></select>
         <span class="pill">Routing: Auto via WSP_15</span>
         <span class="pill">Context: Auto WSP + HoloIndex + Skillz/Rolodex</span>
-        <label for="testPrompt">Tests</label><select id="testPrompt"><option value="">Select test...</option><option value="regular">Regular smoke</option><option value="fusion">Fusion smoke</option><option value="wsp97">WSP_97 repo review</option><option value="reddog">RedDog architect review</option></select>
+        <label for="testWorkFocus">Tests</label><select id="testWorkFocus"><option value="">Select test...</option><option value="regular">Regular smoke</option><option value="fusion">Fusion smoke</option><option value="wsp97">WSP_97 repo review</option><option value="reddog">RedDog architect review</option></select>
         <button id="copyMd" type="button">Copy MD</button>
       </div>
-      <textarea id="prompt" placeholder="Ask the FoundUps Fusion worker..."></textarea>
-      <div class="hint">Enter sends. Shift+Enter adds a new line. Ctrl+Shift+C copies the redacted review packet.</div>
+      <textarea id="workFocus" placeholder="Describe your work focus (012). 0102 converts this to a WSP task prompt for RedDog."></textarea>
+      <div class="hint">Enter sends work focus. Shift+Enter adds a new line. Ctrl+Shift+C copies the redacted review packet.</div>
     </form>
   </div>
   <script>
     const vscode = acquireVsCodeApi();
     const form = document.getElementById('form');
-    const prompt = document.getElementById('prompt');
+    const workFocus = document.getElementById('workFocus');
     const workerType = document.getElementById('workerType');
-    const testPrompt = document.getElementById('testPrompt');
+    const testWorkFocus = document.getElementById('testWorkFocus');
     const copyMd = document.getElementById('copyMd');
     let lastAssistantMarkdown = '';
     const log = document.getElementById('log');
@@ -965,23 +1009,23 @@ function renderHtml(worker, surface, logoUri) {
 
     function setRunning(value) {
       running = value;
-      prompt.disabled = value;
+      workFocus.disabled = value;
       workerType.disabled = value;
-      testPrompt.disabled = value;
+      testWorkFocus.disabled = value;
       copyMd.disabled = value;
       if (value) {
         startedAt = Date.now();
       }
     }
 
-    testPrompt.addEventListener('change', () => {
-      const value = testPrompt.value;
-      if (value === 'regular') { workerType.value = 'smoke_tester'; prompt.value = 'Reply with exactly: regular mode works'; }
-      if (value === 'fusion') { workerType.value = 'smoke_tester'; prompt.value = 'Fusion smoke test. Reply with one consensus, one contradiction, and one blind spot. Keep it under 80 words.'; }
-      if (value === 'wsp97') { workerType.value = 'wsp_gate_critic'; prompt.value = 'Apply WSP_00, WSP_97, and WSP_15 to the supplied context. Provide findings, evidence, proposed fixes, uncertainties, WSP_15 priority, and next safest step.'; }
-      if (value === 'reddog') { workerType.value = 'reddog_architect'; prompt.value = 'Operate as RedDog Architect. Review the supplied repo context as a FoundUps intake/orchestration surface. For each issue, propose the WSP-compliant fix path and end with WSP_15 priority.'; }
-      testPrompt.value = '';
-      prompt.focus();
+    testWorkFocus.addEventListener('change', () => {
+      const value = testWorkFocus.value;
+      if (value === 'regular') { workerType.value = 'smoke_tester'; workFocus.value = 'Reply with exactly: regular mode works'; }
+      if (value === 'fusion') { workerType.value = 'smoke_tester'; workFocus.value = 'Fusion smoke test. Reply with one consensus, one contradiction, and one blind spot. Keep it under 80 words.'; }
+      if (value === 'wsp97') { workerType.value = 'wsp_gate_critic'; workFocus.value = 'Apply WSP_00, WSP_97, and WSP_15 to the supplied context. Provide findings, evidence, proposed fixes, uncertainties, WSP_15 priority, and next safest step.'; }
+      if (value === 'reddog') { workerType.value = 'reddog_architect'; workFocus.value = 'Operate as RedDog Architect. Review the supplied repo context as a FoundUps intake/orchestration surface. For each issue, propose the WSP-compliant fix path and end with WSP_15 priority.'; }
+      testWorkFocus.value = '';
+      workFocus.focus();
     });
 
     copyMd.addEventListener('click', () => {
@@ -991,13 +1035,13 @@ function renderHtml(worker, surface, logoUri) {
 
     form.addEventListener('submit', (event) => {
       event.preventDefault();
-      sendPrompt();
+      sendWorkFocus();
     });
 
-    prompt.addEventListener('keydown', (event) => {
+    workFocus.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
-        sendPrompt();
+        sendWorkFocus();
       }
       if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'c') {
         event.preventDefault();
@@ -1005,17 +1049,17 @@ function renderHtml(worker, surface, logoUri) {
       }
     });
 
-    function sendPrompt() {
-      const text = prompt.value.trim();
+    function sendWorkFocus() {
+      const text = workFocus.value.trim();
       if (!text) return;
       if (running) {
         addStatus('A request is already running. Wait for the final response.');
         return;
       }
       setRunning(true);
-      addStatus('Request sent. Waiting for bridge...');
-      add('user', text, '012 prompt');
-      prompt.value = '';
+      addStatus('Work focus sent. 0102 will assemble WSP task prompt...');
+      add('user', text, '012 work focus');
+      workFocus.value = '';
       vscode.postMessage({ command: 'ask', text, mode: 'auto', contextMode: 'auto', workerType: workerType.value, effort: 'auto' });
     }
 
@@ -1034,7 +1078,7 @@ function renderHtml(worker, surface, logoUri) {
           addStatus('Stopped: ' + failure);
           add('error', 'Blocked/failed: ' + failure, 'error');
         }
-        prompt.focus();
+        workFocus.focus();
       }
     });
   </script>
@@ -1081,6 +1125,8 @@ module.exports = {
   resolveModelMode,
   validateRedDogOutput,
   buildRepairPrompt,
+  constructWspTaskPrompt,
+  redactedDigest,
   modeSelectionReasoning,
   skillzWardrobeRolodexContext,
   buildBoundedRepoContext,
