@@ -1,5 +1,14 @@
 # FoundUps Fusion Worker ModLog
 
+## V0.3.17 — REDDOG_WORKING_TRAIL_PHASE1 (Design Contract) — 2026-06-23
+
+- Authored design contract for RedDog working trail (docs/REDDOG_WORKING_TRAIL_PHASE1.md).
+- Defines UI contract (`reddogWorkingTrail` strip), event-to-action mapping for all 16 bridge progress events, JSONL training schema, and WSP_97 truth boundary checklist.
+- Phase 1: design only. Phase 2 implements extension.js trail strip + elapsed timer; advisory_model_once.py unchanged in Phase 2.
+- WSP_97 N/10 (all 10 truth boundary items PASS per design).
+
+WSP: WSP_22, WSP_97, WSP_15.
+
 ## 2026-06-22 - Addendum A Gate Precision (#870 pre-land)
 
 - Verified exact scope: 8 extension-local files only; `scripts/advisory_model_once.py` unchanged.

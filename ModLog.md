@@ -1,5 +1,17 @@
 # FoundUps Agent - Development Log
 
+## [2026-06-23] feat(extension): RedDog working trail Phase 1 — design contract (AUTHOR worker, branch=feat/reddog-working-trail-phase1)
+
+**Change Type**: DECISION_ONLY_DOCS — design contract only; no implementation code.
+**By**: 0102 (AUTHOR worker) | Commander: 012 | Gate: independent external gate required before Phase 2
+**Slice**: REDDOG_WORKING_TRAIL_PHASE1
+**Branch**: feat/reddog-working-trail-phase1 (off origin/main 4a345d867)
+
+- Adds `extensions/foundups_advisory_workers/docs/REDDOG_WORKING_TRAIL_PHASE1.md`: full 10-section design contract for RedDog working trail strip.
+- Defines UI contract, all 16 bridge progress event mappings, 12 RedDog actions with pixel grammar, JSONL training schema, WSP_97 truth boundary checklist, WSP_15 priority table, and acceptance criteria.
+- Phase 2 (separate CODE_NON_SPINE slice) will implement the trail in extension.js only; advisory_model_once.py unchanged in Phase 2.
+- Do NOT merge without 012 sovereign nod after gate verdict.
+
 ## [2026-06-20] foundups/agent package __init__: lazy import closes the no-vendor IMPORT boundary (AUTHOR worker, gate=independent SENTINEL)
 
 **Change Type**: PACKAGE-STRUCTURE change to `modules/foundups/agent/src/__init__.py` only. Closes the
