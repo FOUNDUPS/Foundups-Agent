@@ -1,0 +1,78 @@
+{
+    "name":  "foundups-fusion-worker",
+    "displayName":  "FoundUps Fusion Worker",
+    "description":  "Open a WSP_00/WSP_97 RedDog Architect Fusion advisory worker in a Cursor editor webview tab.",
+    "version":  "0.3.13",
+    "publisher":  "foundups",
+    "icon":  "icon.png",
+    "engines":  {
+                    "vscode":  "^1.74.0"
+                },
+    "categories":  [
+                       "Other"
+                   ],
+    "activationEvents":  [
+                             "onCommand:foundupsFusion.open"
+                         ],
+    "main":  "./extension.js",
+    "contributes":  {
+                        "commands":  [
+                                         {
+                                             "command":  "foundupsFusion.open",
+                                             "title":  "FoundUps Fusion: Open",
+                                             "category":  "FoundUps"
+                                         }
+                                     ],
+                        "menus":  {
+                                      "commandPalette":  [
+                                                             {
+                                                                 "command":  "foundupsFusion.open"
+                                                             }
+                                                         ],
+                                      "editor/title":  [
+                                                           {
+                                                               "command":  "foundupsFusion.open",
+                                                               "group":  "navigation@100"
+                                                           }
+                                                       ],
+                                      "editor/title/context":  [
+                                                                   {
+                                                                       "command":  "foundupsFusion.open",
+                                                                       "group":  "navigation@100"
+                                                                   }
+                                                               ]
+                                  },
+                        "configuration":  {
+                                              "title":  "FoundUps Fusion Worker",
+                                              "properties":  {
+                                                                 "foundupsFusion.pythonPath":  {
+                                                                                                   "type":  "string",
+                                                                                                   "default":  "python",
+                                                                                                   "description":  "Python executable used to call the redaction-gated OpenRouter bridge."
+                                                                                               },
+                                                                 "foundupsFusion.leadModel":  {
+                                                                                                  "type":  "string",
+                                                                                                  "default":  "deepseek/deepseek-v3.2",
+                                                                                                  "description":  "OpenRouter model slug for the lead/synthesis worker."
+                                                                                              },
+                                                                 "foundupsFusion.panelModels":  {
+                                                                                                    "type":  "array",
+                                                                                                    "default":  [
+                                                                                                                    "z-ai/glm-5.2",
+                                                                                                                    "moonshotai/kimi-k2.7-code"
+                                                                                                                ],
+                                                                                                    "items":  {
+                                                                                                                  "type":  "string"
+                                                                                                              },
+                                                                                                    "description":  "OpenRouter model slugs for panel critics. The extension uses up to four."
+                                                                                                }
+                                                             }
+                                          }
+                    },
+    "license":  "UNLICENSED",
+    "homepage":  "https://github.com/FOUNDUPS/Foundups-Agent",
+    "repository":  {
+                       "type":  "git",
+                       "url":  "https://github.com/FOUNDUPS/Foundups-Agent"
+                   }
+}
