@@ -1,5 +1,25 @@
 # Foundups®Agent ModLog
 
+## 2026-06-24 - v0.3.20 Redaction Gate Report + WRE Handoff Readiness (Addendum F)
+- Rebased onto #871 bridge hardening (`9e5416af4`); version bump 0.3.19 -> 0.3.20.
+- Copy MD redaction blocks now include `## Redaction Gate Report` with WSP_97 truth labels (OBSERVED/UNKNOWN); no raw blocked content.
+- Required fields: `BLOCKED_LOCALLY`, `made_network_call: false`, `blocked_stage: pre_openrouter_request`, `blocked_payload_part: unknown` when gate cannot identify part, `raw_snippets_included: false`, bounded digest, safe summary, `next_safe_context`.
+- Substantive tasks append `## Governed Handoff Recommendation` (`advisory_only`, bounded evidence refs, WSP_15 priority inference).
+- Copy MD Work Trail: allowlisted normalized events (cap 50), `sanitizeCopyMdText` for secret-adjacent phrases.
+- Run Trace: dual effort (`reddog_effort` + provider reasoning report-only); HoloIndex recall scorecard when bundle context used.
+
+WSP: WSP_22, WSP_97, WSP_15.
+
+## 2026-06-24 - v0.3.19 RedDog UX + Review Packet Polish
+- Moved Working Tail strip above controls row (output → trail → 0102 Role/controls → 012 work focus).
+- Renamed UI label `Worker` → `0102 Role`; role options unchanged.
+- Copy MD now prepends `Run Trace` (role, tier, effort, mode, models, context, redaction, validation).
+- Redaction-block and repair-failure Copy MD include `BLOCKED_LOCALLY` / `OUTPUT_VALIDATION_FAILED` with explicit incomplete-advisory wording.
+- Added mojibake detector (`窶`, `竊`) with `mojibake_detected` flag in output_validation and Copy MD warning.
+- Validation repair failure appends local static footer (Verification Gaps + Next safest step); no extra network call.
+
+WSP: WSP_22, WSP_97.
+
 ## 2026-06-24 - v0.3.18 Foundups®Agent Branding
 - Renamed user-facing extension surface from "FoundUps Fusion Worker" to "Foundups®Agent".
 - Kept internal package id and command id stable (`foundups-fusion-worker`, `foundupsFusion.open`) to avoid breaking existing installs/settings.

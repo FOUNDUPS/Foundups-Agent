@@ -16,8 +16,8 @@ function includes(haystack, needle, label) {
   assert(haystack.includes(needle), label || `missing ${needle}`);
 }
 
-assert.strictEqual(pkg.version, '0.3.19', 'package version must be 0.3.19');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.19'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.20', 'package version must be 0.3.20');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.20'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -34,7 +34,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.19', 'README version mismatch');
+includes(readme, 'Version: 0.3.20', 'README version mismatch');
 includes(extensionJs, 'function resolvePythonInterpreter', 'python resolver missing');
 includes(extensionJs, 'function applyBridgeContextBudget', 'context budget missing');
 includes(extensionJs, 'function killBridgeChild', 'orphan cleanup missing');
@@ -329,5 +329,121 @@ try {
 } catch (err) {
   // ignore temp cleanup errors on Windows file locks
 }
+
+assert(!extensionJs.includes('for="workerType">Worker<'), 'Worker UI label must be renamed to 0102 Role');
+includes(extensionJs, 'for="workerType">0102 Role<', '0102 Role label missing');
+assert(extensionJs.indexOf('id="reddogWorkingTrail"') < extensionJs.indexOf('class="toolbar"'), 'Working Tail must precede controls row');
+assert(extensionJs.indexOf('class="toolbar"') < extensionJs.indexOf('id="workFocus"'), 'controls row must precede 012 work focus composer');
+includes(extensionJs, 'function buildCopyMarkdown', 'buildCopyMarkdown missing');
+includes(extensionJs, 'function buildRunTraceSection', 'buildRunTraceSection missing');
+includes(extensionJs, 'function buildWorkTrailSection', 'buildWorkTrailSection missing');
+includes(extensionJs, 'function buildRedactionGateReport', 'buildRedactionGateReport missing');
+includes(extensionJs, 'function buildGovernedHandoffRecommendation', 'buildGovernedHandoffRecommendation missing');
+includes(extensionJs, 'function detectMojibake', 'detectMojibake missing');
+includes(extensionJs, 'copy_markdown', 'copy_markdown payload missing');
+
+const mojibakeSample = orchestrator.detectMojibake('section \u7aa6 broken \u7aaa tail');
+assert.strictEqual(mojibakeSample.detected, true, 'mojibake detector must catch attached-output pattern');
+assert(mojibakeSample.markers.includes('\u7aa6'), 'mojibake detector must catch U+7AA6');
+assert(mojibakeSample.markers.includes('\u7aaa'), 'mojibake detector must catch U+7AAA');
+
+const handoffRec = orchestrator.buildGovernedHandoffRecommendation('audit WRE bridge handoff', { tier: 'ULTRA' }, 'reddog_architect', 'wsp_holo_skillz', {
+  substantive: true,
+  workFocusDigest: 'abc123',
+  wspPromptDigest: 'def456'
+});
+assert.strictEqual(handoffRec.target, 'WRE', 'substantive WRE task must target WRE handoff');
+assert.strictEqual(handoffRec.authority_level, 'advisory_only', 'handoff must remain advisory_only');
+
+const blockedCopy = orchestrator.buildCopyMarkdown({
+  reason: 'redaction_blocked',
+  redaction_reason: 'blocked_policy',
+  review_packet: {
+    task_classification: { tier: 'HIGH' },
+    resolved_effort: 'high',
+    resolved_mode: 'openrouter_single',
+    resolved_context: 'wsp_holo_skillz',
+    mode_selection_reasoning: 'Single-model GLM principal',
+    principal_model: 'z-ai/glm-5.2',
+    panel_models: ['deepseek/deepseek-v4-pro'],
+    holoindex_scorecard: {
+      holoindex_status: 'bundle_json_ok',
+      wsp_hits: 3,
+      code_hits: 2,
+      skill_hits: 1,
+      index_gap_detected: false,
+      direct_read_fallback_used: false
+    },
+    output_validation: { validated: false, reason: 'redaction_blocked' },
+    made_network_call: false,
+    retry_count: 0
+  }
+}, 'reddog_architect', 'Repo context attached: wsp_holo_skillz', orchestrator.createWorkTrail(), {
+  holoindex_status: 'bundle_json_ok',
+  wsp_hits: 3,
+  code_hits: 2,
+  skill_hits: 1,
+  index_gap_detected: false,
+  direct_read_fallback_used: false
+}, 'high', {
+  promptConstruction: {
+    work_focus_digest: { hash: 'abc1234567890abcd' },
+    wsp_prompt_digest: { hash: 'def1234567890abcd' }
+  },
+  contextMode: 'wsp_holo_skillz',
+  substantive: true,
+  handoffRecommendation: handoffRec
+});
+includes(blockedCopy, '## Run Trace', 'Copy MD must include Run Trace');
+includes(blockedCopy, '## Work Trail', 'Copy MD must include Work Trail');
+includes(blockedCopy, '## Redaction Gate Report', 'blocked Copy MD must include Redaction Gate Report');
+includes(blockedCopy, '0102 role: RedDog Architect', 'Run Trace must include 0102 role');
+includes(blockedCopy, 'BLOCKED_LOCALLY', 'redaction Copy MD must include BLOCKED_LOCALLY');
+includes(blockedCopy, 'made_network_call: false', 'redaction Copy MD must include made_network_call=false');
+includes(blockedCopy, 'blocked_payload_part: unknown', 'unknown payload part must stay unknown');
+includes(blockedCopy, 'raw_snippets_included: false', 'blocked packet must declare no raw snippets');
+includes(blockedCopy, 'holoindex_status:', 'Copy MD must include HoloIndex recall scorecard');
+includes(blockedCopy, '## Governed Handoff Recommendation', 'substantive task must include governed handoff recommendation');
+includes(blockedCopy, 'authority_level: advisory_only', 'handoff must remain advisory_only');
+assert(!blockedCopy.includes('OPENROUTER_API_KEY'), 'Copy MD must not include secret-adjacent env names');
+assert(!blockedCopy.includes('Bearer sk-'), 'Copy MD must not include bearer/token patterns');
+
+const cappedTrail = orchestrator.createWorkTrail();
+for (let i = 0; i < 60; i++) {
+  cappedTrail.push('orchestrator_started', 'event-' + i);
+}
+assert.strictEqual(cappedTrail.count(), orchestrator.WORK_TRAIL_MAX_EVENTS, 'Work Trail must cap normalized events');
+
+const repairFailCopy = orchestrator.buildCopyMarkdown({
+  ok: true,
+  content: '## Decision\npartial answer',
+  review_packet: {
+    task_classification: { tier: 'HIGH' },
+    resolved_effort: 'high',
+    resolved_mode: 'openrouter_single',
+    resolved_context: 'wsp_holo',
+    mode_selection_reasoning: 'Single-model GLM principal',
+    principal_model: 'z-ai/glm-5.2',
+    panel_models: ['deepseek/deepseek-v4-pro'],
+    made_network_call: true,
+    output_validation: {
+      validated: false,
+      output_validation_failed: true,
+      repair_attempted: true,
+      repair_failure_reason: 'redaction_blocked',
+      missing_sections: ['Architect Trace', 'WSP_15 Priority']
+    }
+  }
+}, 'reddog_architect', 'Repo context attached', null, null, 'high', { substantive: false });
+includes(repairFailCopy, 'OUTPUT_VALIDATION_FAILED', 'repair-blocked Copy MD must include validation failure');
+includes(repairFailCopy, 'repair_failure_reason: redaction_blocked', 'repair-blocked Copy MD must include repair_failure_reason');
+includes(repairFailCopy, 'Architect Trace', 'repair-blocked Copy MD must list missing sections');
+includes(repairFailCopy, 'Output failed local contract validation.', 'repair-blocked Copy MD must include local fallback footer');
+includes(repairFailCopy, 'reddog_effort:', 'Run Trace must include reddog_effort');
+includes(repairFailCopy, 'provider_reasoning_requested:', 'Run Trace must include provider reasoning requested');
+includes(repairFailCopy, 'provider_reasoning_applied: unknown', 'provider reasoning applied must be unknown in report-only slice');
+
+const sanitized = orchestrator.sanitizeCopyMdText('OPENROUTER_API_KEY visible to bridge: yes');
+includes(sanitized, 'key_env_present: true', 'trail sanitizer must normalize secret-adjacent env phrase');
 
 console.log('Foundups®Agent extension contract checks passed.');

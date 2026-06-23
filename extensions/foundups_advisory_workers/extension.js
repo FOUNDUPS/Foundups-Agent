@@ -4,13 +4,60 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.19';
+const EXTENSION_VERSION = '0.3.20';
 const REDDOG_TERMINAL_HOLD_MS = 3000;
 const REDACTION_BLOCK_OPERATOR_MESSAGE = 'Stopped before OpenRouter. Nothing left the machine.';
 const BRIDGE_MAX_STDOUT_BYTES = 262144;
 const BRIDGE_MAX_STDERR_BYTES = 65536;
 const BRIDGE_MAX_CONTEXT_CHARS = 48000;
 const BRIDGE_MAX_PROMPT_CHARS = 12000;
+const MOJIBAKE_MARKERS = ['\u7aa6', '\u7aaa'];
+const WORK_TRAIL_MAX_EVENTS = 50;
+const VALIDATION_FAILED_FOOTER = [
+  '## Verification Gaps',
+  'Output failed local contract validation.',
+  '',
+  '## Next safest step',
+  'Re-run with narrower context or hand packet to 0102 for review.'
+].join('\n');
+
+const WORK_TRAIL_ALLOWLIST = new Set([
+  'orchestrator_started',
+  'repo_context_attached',
+  'holoindex_result',
+  'wsp_prompt_assembled',
+  'redaction_gate_started',
+  'redaction_gate_passed',
+  'redaction_gate_blocked',
+  'lead_started',
+  'panel_started',
+  'synthesis_started',
+  'validator_started',
+  'repair_started',
+  'repair_blocked',
+  'repair_complete',
+  'completed',
+  'failed'
+]);
+
+const BRIDGE_STAGE_WORK_TRAIL = {
+  bridge_start: 'orchestrator_started',
+  env_check: 'orchestrator_started',
+  redaction_start: 'redaction_gate_started',
+  redaction_blocked: 'redaction_gate_blocked',
+  redaction_pass: 'redaction_gate_passed',
+  lead_start: 'lead_started',
+  lead_done: 'lead_started',
+  panel_start: 'panel_started',
+  panel_done: 'panel_started',
+  panel_blocked: 'panel_started',
+  synthesis_start: 'synthesis_started',
+  synthesis_done: 'synthesis_started',
+  single_start: 'lead_started',
+  single_done: 'lead_started',
+  fusion_alias_start: 'panel_started',
+  fusion_alias_done: 'panel_started'
+};
 
 const ADVISORY_BRIDGE_STAGES = [
   'bridge_start',
@@ -119,6 +166,370 @@ function enrichRedactionBlockResult(result) {
   packet.retry_count = 0;
   packet.reason = 'redaction_blocked';
   return Object.assign({}, result, { review_packet: packet, retry_count: 0 });
+}
+
+function detectMojibake(text) {
+  const src = String(text || '');
+  const markers = MOJIBAKE_MARKERS.filter((marker) => src.includes(marker));
+  return { detected: markers.length > 0, markers: markers };
+}
+
+function formatOutputValidationStatus(validationState) {
+  const vs = validationState && typeof validationState === 'object' ? validationState : {};
+  if (vs.output_validation_failed || (vs.repair_attempted && !vs.validated)) {
+    return 'failed';
+  }
+  if (vs.validated === true) {
+    return 'passed';
+  }
+  if (vs.skipped) {
+    return 'skipped';
+  }
+  return 'unknown';
+}
+
+function buildValidationFailedSection(validationState) {
+  const vs = validationState && typeof validationState === 'object' ? validationState : {};
+  const missing = vs.missing_sections_after_repair || vs.missing_sections || [];
+  const lines = [
+    '## OUTPUT_VALIDATION_FAILED',
+    '- missing sections: ' + (missing.length ? missing.join(', ') : '(none listed)'),
+    '- repair_failure_reason: ' + (vs.repair_failure_reason || vs.reason || 'schema_incomplete'),
+    '- note: Output is advisory and incomplete.'
+  ];
+  return lines.join('\n');
+}
+
+function sanitizeCopyMdText(text) {
+  let s = String(text || '');
+  const keyPresent = (_m, yn) => (String(yn).toLowerCase() === 'yes' ? 'true' : 'false');
+  s = s.replace(/OPENROUTER_API_KEY visible to bridge:\s*(yes|no)/gi, (_m, yn) => `key_env_present: ${keyPresent(_m, yn)}`);
+  s = s.replace(/OpenRouter key visible to Cursor process:\s*(yes|no)/gi, (_m, yn) => `key_env_present: ${keyPresent(_m, yn)}`);
+  s = s.replace(/Bearer\s+[A-Za-z0-9._-]+/gi, 'Bearer [REDACTED]');
+  s = s.replace(/\bsk-[A-Za-z0-9]+\b/gi, 'sk-[REDACTED]');
+  return s;
+}
+
+function createWorkTrail() {
+  const events = [];
+  return {
+    push(name, detail) {
+      if (!WORK_TRAIL_ALLOWLIST.has(name)) {
+        return;
+      }
+      const entry = { event: name };
+      if (detail) {
+        entry.detail = sanitizeCopyMdText(String(detail)).slice(0, 240);
+      }
+      events.push(entry);
+      while (events.length > WORK_TRAIL_MAX_EVENTS) {
+        events.shift();
+      }
+    },
+    toEvents() {
+      return events.slice();
+    },
+    count() {
+      return events.length;
+    }
+  };
+}
+
+function normalizeBridgeStageToWorkTrail(stage, text) {
+  const stageName = stage ? String(stage) : '';
+  if (stageName && BRIDGE_STAGE_WORK_TRAIL[stageName]) {
+    return { event: BRIDGE_STAGE_WORK_TRAIL[stageName], detail: sanitizeCopyMdText(text) };
+  }
+  const sanitized = sanitizeCopyMdText(text || '');
+  if (/Output schema incomplete/.test(sanitized)) {
+    return { event: 'validator_started', detail: 'schema_check' };
+  }
+  if (/Running one repair pass/.test(sanitized)) {
+    return { event: 'repair_started', detail: 'repair_pass' };
+  }
+  return null;
+}
+
+function buildWorkTrailSection(workTrail) {
+  const events = workTrail && typeof workTrail.toEvents === 'function'
+    ? workTrail.toEvents()
+    : Array.isArray(workTrail) ? workTrail : [];
+  const capped = events.slice(-WORK_TRAIL_MAX_EVENTS);
+  const lines = ['## Work Trail'];
+  for (const entry of capped) {
+    const label = entry && entry.event ? entry.event : 'unknown';
+    lines.push('- ' + label + (entry.detail ? ': ' + entry.detail : ''));
+  }
+  if (!capped.length) {
+    lines.push('- (no normalized trail events recorded)');
+  }
+  return lines.join('\n');
+}
+
+function resolveProviderReasoningReport(resolvedEffort) {
+  const effort = String(resolvedEffort || 'high').toLowerCase();
+  const requestedMap = { regular: 'none', high: 'medium', ultra: 'high' };
+  return {
+    provider_reasoning_requested: requestedMap[effort] || 'medium',
+    provider_reasoning_applied: 'unknown',
+    provider_reasoning_note: 'Report-only in v0.3.20; bridge does not confirm provider reasoning application.'
+  };
+}
+
+function extractHoloIndexScorecard(contextMode, holoMeta) {
+  if (!contextMode || !String(contextMode).includes('holo')) {
+    return null;
+  }
+  const meta = holoMeta && typeof holoMeta === 'object' ? holoMeta : {};
+  return {
+    holoindex_status: meta.holoindex_status || 'unknown',
+    wsp_hits: meta.wsp_hits !== undefined ? meta.wsp_hits : 'unknown',
+    code_hits: meta.code_hits !== undefined ? meta.code_hits : 'unknown',
+    skill_hits: meta.skill_hits !== undefined ? meta.skill_hits : 'unknown',
+    index_gap_detected: meta.index_gap_detected !== undefined ? meta.index_gap_detected : 'unknown',
+    direct_read_fallback_used: meta.direct_read_fallback_used !== undefined ? meta.direct_read_fallback_used : 'unknown'
+  };
+}
+
+function formatHoloIndexScorecardLines(scorecard) {
+  if (!scorecard) {
+    return [];
+  }
+  return [
+    '- holoindex_status: ' + scorecard.holoindex_status,
+    '- wsp_hits: ' + scorecard.wsp_hits,
+    '- code_hits: ' + scorecard.code_hits,
+    '- skill_hits: ' + scorecard.skill_hits,
+    '- index_gap_detected: ' + scorecard.index_gap_detected,
+    '- direct_read_fallback_used: ' + scorecard.direct_read_fallback_used
+  ];
+}
+
+function buildRunTraceSection(result, workerType, contextSummary, holoScorecard, resolvedEffort) {
+  const rp = result && result.review_packet && typeof result.review_packet === 'object' ? result.review_packet : {};
+  const cls = rp.task_classification && typeof rp.task_classification === 'object' ? rp.task_classification : {};
+  const workerLabel = WORKER_TYPES[cleanWorkerType(workerType)] ? WORKER_TYPES[cleanWorkerType(workerType)].label : String(workerType || 'unknown');
+  const panelModels = Array.isArray(rp.panel_models) ? rp.panel_models.join(' + ') : 'unknown';
+  const providerReport = resolveProviderReasoningReport(rp.resolved_effort || resolvedEffort);
+  const reddogEffort = String(rp.resolved_effort || resolvedEffort || 'unknown').toLowerCase();
+  const lines = [
+    '## Run Trace',
+    '- 0102 role: ' + workerLabel,
+    '- WSP_15 tier: ' + (cls.tier || 'unknown'),
+    '- reddog_effort: ' + reddogEffort,
+    '- effort: ' + (rp.resolved_effort || resolvedEffort || 'unknown'),
+    '- provider_reasoning_requested: ' + providerReport.provider_reasoning_requested,
+    '- provider_reasoning_applied: ' + providerReport.provider_reasoning_applied,
+    '- provider_reasoning_note: ' + providerReport.provider_reasoning_note,
+    '- mode: ' + (rp.resolved_mode || result.mode || 'unknown'),
+    '- mode selection reason: ' + (rp.mode_selection_reasoning || 'unknown'),
+    '- principal model: ' + (rp.principal_model || result.lead_model || 'unknown'),
+    '- panel models: ' + panelModels,
+    '- context mode: ' + (rp.resolved_context || 'unknown')
+  ];
+  if (contextSummary) {
+    lines.push('- HoloIndex/context summary: ' + sanitizeCopyMdText(String(contextSummary)).slice(0, 500));
+  }
+  lines.push.apply(lines, formatHoloIndexScorecardLines(holoScorecard || rp.holoindex_scorecard));
+  if (result && result.reason === 'redaction_blocked') {
+    lines.push('- redaction gate status: BLOCKED_LOCALLY');
+    lines.push('- made_network_call: false');
+    lines.push('- operator message: ' + REDACTION_BLOCK_OPERATOR_MESSAGE);
+  } else {
+    lines.push('- redaction gate status: passed');
+    lines.push('- made_network_call: ' + (rp.made_network_call === true ? 'true' : rp.made_network_call === false ? 'false' : 'unknown'));
+    if (rp.retry_count !== undefined && rp.retry_count !== null) {
+      lines.push('- retry_count: ' + rp.retry_count);
+    }
+  }
+  lines.push('- output_validation: ' + formatOutputValidationStatus(rp.output_validation));
+  return lines.join('\n');
+}
+
+function compositePayloadDigest(promptConstruction) {
+  if (!promptConstruction || typeof promptConstruction !== 'object') {
+    return undefined;
+  }
+  const parts = [];
+  if (promptConstruction.work_focus_digest && promptConstruction.work_focus_digest.hash) {
+    parts.push('work_focus:' + promptConstruction.work_focus_digest.hash);
+  }
+  if (promptConstruction.wsp_prompt_digest && promptConstruction.wsp_prompt_digest.hash) {
+    parts.push('wsp_prompt:' + promptConstruction.wsp_prompt_digest.hash);
+  }
+  if (!parts.length) {
+    return undefined;
+  }
+  return 'sha256:' + crypto.createHash('sha256').update(parts.join('|'), 'utf8').digest('hex');
+}
+
+function inferNextSafeContext(contextMode) {
+  const mode = String(contextMode || 'none');
+  if (mode === 'none') {
+    return 'wsp_only';
+  }
+  if (mode.includes('git')) {
+    return 'narrowed_diff';
+  }
+  return 'local_0102_review';
+}
+
+function buildRedactionGateReport(result, promptConstruction, contextMode) {
+  const observedReason = typeof result.redaction_reason === 'string' && result.redaction_reason.length > 0;
+  const ruleClasses = observedReason ? [String(result.redaction_reason)] : ['unknown'];
+  const ruleCounts = observedReason ? { [String(result.redaction_reason)]: 1 } : { unknown: 'unknown' };
+  const digest = compositePayloadDigest(promptConstruction);
+  return {
+    decision: 'BLOCKED_LOCALLY',
+    made_network_call: false,
+    blocked_stage: 'pre_openrouter_request',
+    blocked_payload_part: 'unknown',
+    rule_classes: ruleClasses,
+    rule_counts: ruleCounts,
+    raw_snippets_included: false,
+    redacted_payload_digest: digest || 'unknown',
+    safe_summary: 'Redaction gate blocked egress before OpenRouter. No raw blocked content is included in this packet.',
+    next_safe_context: inferNextSafeContext(contextMode),
+    truth_labels: {
+      decision: 'OBSERVED',
+      made_network_call: 'OBSERVED',
+      blocked_stage: 'OBSERVED',
+      blocked_payload_part: 'UNKNOWN',
+      rule_classes: observedReason ? 'OBSERVED' : 'UNKNOWN',
+      rule_counts: observedReason ? 'OBSERVED' : 'UNKNOWN',
+      raw_snippets_included: 'OBSERVED',
+      redacted_payload_digest: digest ? 'OBSERVED' : 'UNKNOWN',
+      safe_summary: 'OBSERVED',
+      next_safe_context: 'INFERRED'
+    }
+  };
+}
+
+function buildRedactionGateReportSection(report) {
+  const r = report && typeof report === 'object' ? report : {};
+  const labels = r.truth_labels && typeof r.truth_labels === 'object' ? r.truth_labels : {};
+  const lines = ['## Redaction Gate Report'];
+  const entries = [
+    ['decision', r.decision],
+    ['made_network_call', r.made_network_call],
+    ['blocked_stage', r.blocked_stage],
+    ['blocked_payload_part', r.blocked_payload_part],
+    ['rule_classes', JSON.stringify(r.rule_classes || ['unknown'])],
+    ['rule_counts', JSON.stringify(r.rule_counts || { unknown: 'unknown' })],
+    ['raw_snippets_included', r.raw_snippets_included],
+    ['redacted_payload_digest', r.redacted_payload_digest || 'unknown'],
+    ['safe_summary', r.safe_summary || 'unknown'],
+    ['next_safe_context', r.next_safe_context || 'unknown']
+  ];
+  for (const entry of entries) {
+    const key = entry[0];
+    const label = labels[key] || 'UNKNOWN';
+    lines.push('- ' + key + ': ' + entry[1] + ' [' + label + ']');
+  }
+  return lines.join('\n');
+}
+
+function buildGovernedHandoffRecommendation(workFocus, classification, workerType, contextMode, options) {
+  const opts = options && typeof options === 'object' ? options : {};
+  const substantive = !!opts.substantive;
+  const text = String(workFocus || '').toLowerCase();
+  let target = 'none';
+  if (/\bwre\b/.test(text)) {
+    target = 'WRE';
+  } else if (/\bopenclaw\b/.test(text)) {
+    target = 'OpenClaw';
+  } else if (/\bhermes\b/.test(text)) {
+    target = 'Hermes';
+  } else if (/\bsentinel\b/.test(text)) {
+    target = 'Sentinel';
+  }
+  let handoffNeeded = 'false';
+  if (!substantive) {
+    handoffNeeded = 'false';
+  } else if (target !== 'none') {
+    handoffNeeded = 'true';
+  } else {
+    handoffNeeded = 'unknown';
+  }
+  const tier = classification && classification.tier ? classification.tier : 'HIGH';
+  const priority = tier === 'ULTRA' ? 'P0' : tier === 'REGULAR' ? 'P2' : 'P1';
+  const evidenceRefs = [];
+  if (opts.workFocusDigest) {
+    evidenceRefs.push('work_focus_digest:' + opts.workFocusDigest);
+  }
+  if (opts.wspPromptDigest) {
+    evidenceRefs.push('wsp_prompt_digest:' + opts.wspPromptDigest);
+  }
+  if (contextMode) {
+    evidenceRefs.push('context_mode:' + String(contextMode));
+  }
+  return {
+    handoff_needed: handoffNeeded,
+    target: target,
+    authority_level: 'advisory_only',
+    suggested_slice_name: target !== 'none' ? 'REDDOG_' + target + '_GOVERNED_HANDOFF_PHASE1' : 'none',
+    wsp15_priority: priority,
+    required_human_gate: handoffNeeded === 'true' ? '012_sovereign' : 'none',
+    evidence_refs: evidenceRefs.length ? evidenceRefs : ['unknown']
+  };
+}
+
+function buildGovernedHandoffSection(recommendation) {
+  const rec = recommendation && typeof recommendation === 'object' ? recommendation : {};
+  const lines = [
+    '## Governed Handoff Recommendation',
+    '- handoff_needed: ' + (rec.handoff_needed || 'unknown') + ' [INFERRED]',
+    '- target: ' + (rec.target || 'none') + ' [INFERRED]',
+    '- authority_level: advisory_only [OBSERVED]',
+    '- suggested_slice_name: ' + (rec.suggested_slice_name || 'none') + ' [INFERRED]',
+    '- WSP_15 priority: ' + (rec.wsp15_priority || 'unknown') + ' [INFERRED]',
+    '- required_human_gate: ' + (rec.required_human_gate || 'none') + ' [INFERRED]',
+    '- evidence_refs: ' + JSON.stringify(rec.evidence_refs || ['unknown']) + ' [OBSERVED]'
+  ];
+  return lines.join('\n');
+}
+
+function buildCopyMarkdown(result, workerType, contextSummary, workTrail, holoScorecard, resolvedEffort, copyContext) {
+  const packet = result && typeof result === 'object' ? result : {};
+  const ctx = copyContext && typeof copyContext === 'object' ? copyContext : {};
+  const sections = [buildRunTraceSection(packet, workerType, contextSummary, holoScorecard, resolvedEffort)];
+  sections.push(buildWorkTrailSection(workTrail || packet.work_trail || []));
+  if (packet.reason === 'redaction_blocked') {
+    const report = packet.redaction_gate_report || buildRedactionGateReport(packet, ctx.promptConstruction, ctx.contextMode);
+    sections.push(buildRedactionGateReportSection(report));
+  }
+  const validation = packet.review_packet && packet.review_packet.output_validation;
+  if (validation && (validation.output_validation_failed || (validation.repair_attempted && !validation.validated))) {
+    sections.push(buildValidationFailedSection(validation));
+    sections.push(VALIDATION_FAILED_FOOTER);
+  }
+  if (ctx.substantive) {
+    sections.push(buildGovernedHandoffSection(ctx.handoffRecommendation || packet.governed_handoff_recommendation));
+  }
+  const mojibake = detectMojibake(packet.content || '');
+  const flagged = (validation && validation.mojibake_detected) || mojibake.detected;
+  if (flagged) {
+    const markers = (validation && validation.mojibake_markers) || mojibake.markers;
+    sections.push('## Mojibake Warning\n- mojibake_detected: true\n- markers: ' + markers.join(', '));
+  }
+  if (packet.reason === 'redaction_blocked') {
+    sections.push('## 0102 Output');
+    sections.push('(no model output - blocked locally before OpenRouter)');
+  } else if (packet.content) {
+    sections.push('## 0102 Output');
+    sections.push(sanitizeCopyMdText(String(packet.content)));
+  }
+  return sanitizeCopyMdText(sections.join('\n\n'));
+}
+
+function appendValidationFailureContent(content, validationState) {
+  const missing = validationState.missing_sections_after_repair || validationState.missing_sections || [];
+  const reason = validationState.repair_failure_reason || 'schema_incomplete_after_repair';
+  return String(content || '') + '\n\n---\n\n**OUTPUT_VALIDATION_FAILED**\n'
+    + '- missing sections: ' + (missing.length ? missing.join(', ') : '(none listed)') + '\n'
+    + '- repair_failure_reason: ' + reason + '\n'
+    + '- note: Output is advisory and incomplete.\n\n'
+    + VALIDATION_FAILED_FOOTER;
 }
 const DEFAULT_FUSION_WORKER = {
   title: 'Foundups®Agent',
@@ -388,12 +799,14 @@ function isSubstantiveRedDogWorker(workerType) {
   return worker === 'reddog_architect' || worker === 'wsp_gate_critic' || worker === 'repair_planner';
 }
 
-function attachOrchestratorMetadata(reviewPacket, classification, resolvedEffort, resolvedMode, validationState, resolvedContextMode, worker, promptConstruction) {
+function attachOrchestratorMetadata(reviewPacket, classification, resolvedEffort, resolvedMode, validationState, resolvedContextMode, worker, promptConstruction, holoScorecard, workTrail) {
   const base = reviewPacket && typeof reviewPacket === 'object' ? reviewPacket : {};
   const construction = promptConstruction && typeof promptConstruction === 'object' ? promptConstruction : {};
+  const providerReport = resolveProviderReasoningReport(resolvedEffort);
   return Object.assign({}, base, {
     task_classification: classification,
     resolved_effort: resolvedEffort,
+    reddog_effort: String(resolvedEffort || 'unknown').toLowerCase(),
     resolved_mode: resolvedMode,
     resolved_context: resolvedContextMode,
     principal_model: worker && worker.lead ? worker.lead : undefined,
@@ -402,7 +815,12 @@ function attachOrchestratorMetadata(reviewPacket, classification, resolvedEffort
     work_focus_digest: construction.work_focus_digest,
     wsp_prompt_digest: construction.wsp_prompt_digest,
     prompt_construction: '0102_generated_from_work_focus',
-    output_validation: validationState
+    output_validation: validationState,
+    holoindex_scorecard: holoScorecard || undefined,
+    work_trail: workTrail && typeof workTrail.toEvents === 'function' ? workTrail.toEvents() : workTrail,
+    provider_reasoning_requested: providerReport.provider_reasoning_requested,
+    provider_reasoning_applied: providerReport.provider_reasoning_applied,
+    provider_reasoning_note: providerReport.provider_reasoning_note
   });
 }
 
@@ -410,7 +828,7 @@ function routingSummary(workerType, classification, resolvedEffort, resolvedMode
   const resolvedWorker = WORKER_TYPES[cleanWorkerType(workerType)];
   return [
     '## RedDog Routing',
-    '- Worker: ' + resolvedWorker.label,
+    '- 0102 role: ' + resolvedWorker.label,
     '- WSP_15 tier: ' + (classification && classification.tier ? classification.tier : 'HIGH'),
     '- Effort: ' + resolvedEffort,
     '- Mode: ' + resolvedMode,
@@ -544,15 +962,32 @@ function wireFusionWebview(context, webview, worker, state) {
     if (contextPacket.summary) {
       postStatusAndProgress(webview, null, contextPacket.summary);
     }
-    postStatusAndProgress(webview, null, '0102 assembled WSP task prompt from 012 work focus (bridge receives WSP prompt, not raw focus alone).');
+    postStatusAndProgress(webview, null, '0102 assembled WSP task prompt from 012 work focus (bridge receives WSP task prompt, not raw focus alone).');
+    const holoScorecard = contextPacket.holoindex_scorecard || extractHoloIndexScorecard(contextMode, contextPacket.holoindex_meta);
+    const workTrail = createWorkTrail();
+    workTrail.push('orchestrator_started');
+    if (contextPacket.summary) {
+      workTrail.push('repo_context_attached', contextPacket.summary);
+    }
+    if (holoScorecard) {
+      workTrail.push('holoindex_result', 'wsp_hits=' + holoScorecard.wsp_hits + '; code_hits=' + holoScorecard.code_hits);
+    }
+    workTrail.push('wsp_prompt_assembled');
+
+    let validationState = { validated: false, skipped: true, reason: 'not_validated' };
     const onBridgeProgress = (stage, text) => {
       postStatusMessage(webview, text);
       postProgressMessage(webview, stage, text);
+      const normalized = normalizeBridgeStageToWorkTrail(stage, text);
+      if (normalized) {
+        workTrail.push(normalized.event, normalized.detail);
+      }
     };
     let result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, state.history, mode, onBridgeProgress, state, promptConstruction);
     if (result.ok && isSubstantiveRedDogWorker(workerType)) {
+      workTrail.push('validator_started');
       const validation = validateRedDogOutput(result.content || '', { substantiveArchitect: true, mode: mode });
-      let validationState = {
+      validationState = {
         validated: validation.valid,
         missing_sections: validation.missingSections,
         repair_attempted: false,
@@ -560,6 +995,7 @@ function wireFusionWebview(context, webview, worker, state) {
       };
       if (!validation.valid && validation.missingSections.length) {
         validationState.repair_attempted = true;
+        workTrail.push('repair_started');
         postStatusAndProgress(webview, null, 'Output schema incomplete. Missing: ' + validation.missingSections.join(', ') + '. Running one repair pass...');
         const repairPrompt = buildRepairPrompt(wspTaskPrompt, result.content, validation.missingSections);
         const repairResult = await callFusion(
@@ -582,52 +1018,80 @@ function wireFusionWebview(context, webview, worker, state) {
             result = repairResult;
             validationState.validated = true;
             validationState.missing_sections = [];
+            workTrail.push('repair_complete');
           } else {
-            result.content = String(result.content || '') + '\n\n---\n\n**Validator warning:** Output still missing sections after repair: '
-              + repairValidation.missingSections.join(', ');
+            validationState.validated = false;
+            validationState.output_validation_failed = true;
+            validationState.repair_failure_reason = 'schema_incomplete_after_repair';
+            result.content = appendValidationFailureContent(result.content, validationState);
           }
         } else {
-          result.content = String(result.content || '') + '\n\n---\n\n**Validator warning:** Repair pass failed ('
-            + (repairResult.reason || 'unknown') + '). Missing sections: ' + validation.missingSections.join(', ');
+          validationState.validated = false;
+          validationState.output_validation_failed = true;
+          validationState.repair_ok = false;
+          validationState.repair_failure_reason = repairResult.reason || 'unknown';
+          workTrail.push(repairResult.reason === 'redaction_blocked' ? 'repair_blocked' : 'repair_blocked', validationState.repair_failure_reason);
+          result.content = appendValidationFailureContent(result.content, validationState);
         }
       }
-      if (result.review_packet) {
-        result.review_packet = attachOrchestratorMetadata(
-          result.review_packet,
-          classification,
-          effort,
-          mode,
-          validationState,
-          contextMode,
-          worker,
-          promptConstruction
-        );
-      }
-    } else if (result.ok && result.review_packet) {
-      result.review_packet = attachOrchestratorMetadata(
-        result.review_packet,
-        classification,
-        effort,
-        mode,
-        { validated: false, skipped: true, reason: 'non_substantive_worker' },
-        contextMode,
-        worker,
-        promptConstruction
-      );
+    } else if (result.ok) {
+      validationState = { validated: false, skipped: true, reason: 'non_substantive_worker' };
+    } else if (result.reason === 'redaction_blocked') {
+      validationState = { validated: false, skipped: true, reason: 'redaction_blocked' };
+      workTrail.push('redaction_gate_blocked');
+    } else {
+      workTrail.push('failed', result.reason || 'unknown');
     }
+    const substantiveTask = isSubstantiveRedDogWorker(workerType);
+    const handoffRecommendation = buildGovernedHandoffRecommendation(workFocus, classification, workerType, contextMode, {
+      substantive: substantiveTask,
+      workFocusDigest: promptConstruction.work_focus_digest && promptConstruction.work_focus_digest.hash,
+      wspPromptDigest: promptConstruction.wsp_prompt_digest && promptConstruction.wsp_prompt_digest.hash
+    });
+    result.review_packet = attachOrchestratorMetadata(
+      result.review_packet || {},
+      classification,
+      effort,
+      mode,
+      validationState,
+      contextMode,
+      worker,
+      promptConstruction,
+      holoScorecard,
+      workTrail
+    );
+    result.governed_handoff_recommendation = handoffRecommendation;
+    if (result.reason === 'redaction_blocked') {
+      result.redaction_gate_report = buildRedactionGateReport(result, promptConstruction, contextMode);
+      result.review_packet.redaction_gate_report = result.redaction_gate_report;
+    }
+    if (result.ok) {
+      workTrail.push('completed');
+    }
+    result.work_trail = workTrail.toEvents();
     if (result.ok && result.content) {
       result.content = routingSummary(workerType, classification, effort, mode, contextMode, worker) + '\n\n' + result.content;
+      const mojibake = detectMojibake(result.content);
+      if (mojibake.detected) {
+        result.review_packet.output_validation = Object.assign({}, result.review_packet.output_validation || {}, {
+          mojibake_detected: true,
+          mojibake_markers: mojibake.markers
+        });
+      }
     }
     if (result.ok && Array.isArray(result.history)) {
       state.history = result.history;
-    }
-    if (result.ok && result.review_packet) {
-      state.lastReviewPacket = result.review_packet;
     }
     result = enrichRedactionBlockResult(result);
     if (result.review_packet) {
       state.lastReviewPacket = result.review_packet;
     }
+    result.copy_markdown = buildCopyMarkdown(result, workerType, contextPacket.summary, workTrail, holoScorecard, effort, {
+      promptConstruction: promptConstruction,
+      contextMode: contextMode,
+      substantive: substantiveTask,
+      handoffRecommendation: handoffRecommendation
+    });
     webview.postMessage({ command: 'result', result });
   });
 }
@@ -852,13 +1316,17 @@ function buildBoundedRepoContext(mode, taskText) {
     'Workspace root: ' + root
   ];
   let quality = 'No HoloIndex requested for this context mode.';
+  let holoindex_meta = null;
+  let holoindex_scorecard = null;
   if (mode === 'none') {
     const text = sections.join('\n');
-    return { text, summary: 'Repo context: WSP operating contract only.', quality };
+    return { text, summary: 'Repo context: WSP operating contract only.', quality, holoindex_meta, holoindex_scorecard };
   }
   if (mode === 'wsp_holo' || mode === 'wsp_holo_git' || mode === 'wsp_holo_skillz' || mode === 'wsp_holo_git_skillz') {
     const holo = holoIndexOutput(root, taskText || '', 18000);
     quality = holo.quality;
+    holoindex_meta = holo.meta || null;
+    holoindex_scorecard = extractHoloIndexScorecard(mode, holoindex_meta);
     sections.push('### HoloIndex recall (WSP_00 bundle-json first; offline fallback only if needed)\n```text\n' + (holo.output || '(no HoloIndex output)') + '\n```');
   }
   if (mode === 'wsp_holo_skillz' || mode === 'wsp_holo_git_skillz') {
@@ -881,7 +1349,7 @@ function buildBoundedRepoContext(mode, taskText) {
     sections.push('### git diff -- . (bounded)\n```diff\n' + (diff || '(no diff)') + '\n```');
   }
   const text = sections.join('\n\n').slice(0, 42000);
-  return { text, summary: 'Repo context attached: ' + mode + ' (' + text.length + ' chars). ' + quality, quality };
+  return { text, summary: 'Repo context attached: ' + mode + ' (' + text.length + ' chars). ' + quality, quality, holoindex_meta, holoindex_scorecard };
 }
 
 function activeEditorContext(root) {
@@ -1066,6 +1534,33 @@ function moduleHintFromActive(root) {
   return parts[0];
 }
 
+function holoIndexMetaFromBundle(output, usedOfflineFallback) {
+  const meta = {
+    holoindex_status: usedOfflineFallback ? 'offline_fallback' : 'unknown',
+    wsp_hits: 'unknown',
+    code_hits: 'unknown',
+    skill_hits: 'unknown',
+    index_gap_detected: 'unknown',
+    direct_read_fallback_used: usedOfflineFallback ? true : false
+  };
+  try {
+    const data = JSON.parse(String(output || '{}'));
+    const bundleMeta = data.task_retrieval && data.task_retrieval.metadata ? data.task_retrieval.metadata : {};
+    const missing = data.structured_memory && Array.isArray(data.structured_memory.missing_required)
+      ? data.structured_memory.missing_required
+      : [];
+    meta.holoindex_status = usedOfflineFallback ? 'offline_fallback' : 'bundle_json_ok';
+    meta.wsp_hits = Number(bundleMeta.wsp_count || 0);
+    meta.code_hits = Number(bundleMeta.code_count || 0);
+    meta.skill_hits = bundleMeta.skill_count !== undefined ? Number(bundleMeta.skill_count) : 'unknown';
+    meta.index_gap_detected = missing.length > 0 || meta.wsp_hits === 0;
+    meta.direct_read_fallback_used = !!usedOfflineFallback;
+  } catch (err) {
+    meta.holoindex_status = usedOfflineFallback ? 'offline_fallback' : 'parse_error';
+  }
+  return meta;
+}
+
 function holoIndexOutput(root, taskText, maxChars) {
   const query = String(taskText || '').replace(/\s+/g, ' ').trim().slice(0, 500) || 'FoundUps RedDog WSP_00 WSP_97 WSP_15 current task';
   const moduleHint = moduleHintFromActive(root);
@@ -1079,7 +1574,8 @@ function holoIndexOutput(root, taskText, maxChars) {
       maxBuffer: Math.max(maxChars * 4, 65536),
       windowsHide: true
     });
-    return { output: String(output || '').slice(0, maxChars), quality: summarizeHoloBundle(output) };
+    const meta = holoIndexMetaFromBundle(output, false);
+    return { output: String(output || '').slice(0, maxChars), quality: summarizeHoloBundle(output), meta: meta };
   } catch (bundleErr) {
     try {
       const output = cp.execFileSync('python', ['-B', 'holo_index.py', '--offline', '--search', query, '--limit', '5'], {
@@ -1089,14 +1585,17 @@ function holoIndexOutput(root, taskText, maxChars) {
         maxBuffer: Math.max(maxChars * 4, 65536),
         windowsHide: true
       });
+      const meta = holoIndexMetaFromBundle(output, true);
       return {
         output: String(output || '').slice(0, maxChars),
-        quality: 'HoloIndex bundle-json failed; offline lexical fallback used. Treat protocol coverage as NEEDS_VERIFICATION and propose re-index/bundle repair if WSP hits are missing.'
+        quality: 'HoloIndex bundle-json failed; offline lexical fallback used. Treat protocol coverage as NEEDS_VERIFICATION and propose re-index/bundle repair if WSP hits are missing.',
+        meta: meta
       };
     } catch (offlineErr) {
       return {
         output: '[HoloIndex unavailable: ' + (offlineErr && offlineErr.message ? offlineErr.message.slice(0, 180) : 'unknown') + ']',
-        quality: 'HoloIndex unavailable. Use supplied editor/git evidence only; propose HoloIndex recovery as a fix when retrieval affects the decision.'
+        quality: 'HoloIndex unavailable. Use supplied editor/git evidence only; propose HoloIndex recovery as a fix when retrieval affects the decision.',
+        meta: holoIndexMetaFromBundle('', false)
       };
     }
   }
@@ -1222,20 +1721,20 @@ function renderHtml(worker, surface, logoUri) {
       <div class="entry status"><span class="label">status</span>OPENROUTER_API_KEY must be set in the environment used to launch Cursor. Do not paste secrets.</div>
     </main>
     <form id="form">
-      <div class="toolbar">
-        <label for="workerType">Worker</label><select id="workerType"><option value="reddog_architect" selected>RedDog Architect</option><option value="wsp_gate_critic">WSP Gate Critic</option><option value="repair_planner">Repair Planner</option><option value="smoke_tester">Smoke Test</option></select>
-        <span class="pill">Routing: Auto via WSP_15</span>
-        <span class="pill">Context: Auto WSP + HoloIndex + Skillz/Rolodex</span>
-        <label for="testWorkFocus">Tests</label><select id="testWorkFocus"><option value="">Select test...</option><option value="regular">Regular smoke</option><option value="fusion">Fusion smoke</option><option value="wsp97">WSP_97 repo review</option><option value="reddog">RedDog architect review</option></select>
-        <button id="copyMd" type="button">Copy MD</button>
-      </div>
-      <textarea id="workFocus" placeholder="Describe your work focus (012). 0102 converts this to a WSP task prompt for RedDog."></textarea>
-      <div class="hint">Enter sends work focus. Shift+Enter adds a new line. Ctrl+Shift+C copies the redacted review packet.</div>
       <div id="reddogWorkingTrail" class="reddog-working-trail" aria-live="polite" aria-atomic="false">
         <span data-reddog-pixel>~~~</span>
         <span data-reddog-action>idle</span>
         <span data-reddog-elapsed></span>
       </div>
+      <div class="toolbar">
+        <label for="workerType">0102 Role</label><select id="workerType"><option value="reddog_architect" selected>RedDog Architect</option><option value="wsp_gate_critic">WSP Gate Critic</option><option value="repair_planner">Repair Planner</option><option value="smoke_tester">Smoke Test</option></select>
+        <span class="pill">Routing: Auto via WSP_15</span>
+        <span class="pill">Context: Auto WSP + HoloIndex + Skillz/Rolodex</span>
+        <label for="testWorkFocus">Tests</label><select id="testWorkFocus"><option value="">Select test...</option><option value="regular">Regular smoke</option><option value="fusion">Fusion smoke</option><option value="wsp97">WSP_97 repo review</option><option value="reddog">RedDog architect review</option></select>
+        <button id="copyMd" type="button">Copy MD</button>
+      </div>
+      <textarea id="workFocus" placeholder="Describe your work focus (012). 0102 converts this to a WSP task prompt for RedDog." aria-label="012 work focus"></textarea>
+      <div class="hint">012 work focus: Enter sends. Shift+Enter adds a new line. Ctrl+Shift+C copies the redacted review packet.</div>
     </form>
   </div>
   <script>
@@ -1465,10 +1964,15 @@ function renderHtml(worker, surface, logoUri) {
       if (msg.command === 'progress') applyProgressEvent(msg);
       if (msg.command === 'result') {
         setRunning(false, msg.result);
+        const copyPayload = (msg.result && msg.result.copy_markdown) || (msg.result && msg.result.content) || '';
+        lastAssistantMarkdown = copyPayload;
         if (msg.result && msg.result.ok) {
           addStatus('Complete: ' + (msg.result.mode || msg.result.model || 'ok'));
-          lastAssistantMarkdown = msg.result.content || '';
-          add('assistant', lastAssistantMarkdown, '0102 output');
+          const ov = msg.result.review_packet && msg.result.review_packet.output_validation;
+          if (ov && (ov.output_validation_failed || (ov.repair_attempted && !ov.validated))) {
+            add('error', 'OUTPUT_VALIDATION_FAILED: advisory output incomplete. See Copy MD for Run Trace and missing sections.', 'validation');
+          }
+          add('assistant', msg.result.content || '', '0102 output');
         } else if (msg.result && msg.result.reason === 'redaction_blocked') {
           addStatus(TRAIL.operatorMessage);
           add('error', TRAIL.operatorMessage, 'error');
@@ -1547,5 +2051,22 @@ module.exports = {
   REDDOG_TERMINAL_HOLD_MS,
   REDACTION_BLOCK_OPERATOR_MESSAGE,
   ADVISORY_BRIDGE_STAGES,
-  enrichRedactionBlockResult
+  enrichRedactionBlockResult,
+  detectMojibake,
+  buildRunTraceSection,
+  buildWorkTrailSection,
+  buildCopyMarkdown,
+  appendValidationFailureContent,
+  formatOutputValidationStatus,
+  sanitizeCopyMdText,
+  createWorkTrail,
+  buildRedactionGateReport,
+  buildRedactionGateReportSection,
+  buildGovernedHandoffRecommendation,
+  buildGovernedHandoffSection,
+  compositePayloadDigest,
+  extractHoloIndexScorecard,
+  MOJIBAKE_MARKERS,
+  WORK_TRAIL_MAX_EVENTS,
+  VALIDATION_FAILED_FOOTER
 };
