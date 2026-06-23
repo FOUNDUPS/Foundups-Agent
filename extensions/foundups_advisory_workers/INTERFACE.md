@@ -6,6 +6,37 @@
 
 It is an IDE-side proof surface for the future RedDog/pfMALL/WRE intake pattern. It does not implement pfMALL runtime wiring, WRE dispatch, FoundUp registration, repository creation, or CABR verification.
 
+## RedDog and the Recursive 0102 DAE Ecosystem
+
+012 does not orchestrate every worker. 012 talks to RedDog. RedDog participates in the recursive 0102 DAE ecosystem. Autonomous WRE/DAE agents perform bounded system work under Hermes/OpenClaw/WRE governance.
+
+### Architecture Stack
+
+```text
+012 work focus
+  -> RedDog digital twin / architect interface
+  -> recursive 0102 DAE ecosystem
+```
+
+### Layer Roles
+
+| Layer | Role |
+| --- | --- |
+| RedDog | Digital-twin architect/interface. 012's first contact point. |
+| Hermes | Scaffolding, lifecycle, scheduling, queues, receipts. Not policy authority. |
+| OpenClaw | Policy and intent gate. |
+| HoloIndex | Memory and retrieval. |
+| Skillz/Rolodex | Capability catalog. |
+| Autonomous WRE/DAE agents | Code, docs, tests, ops, promotion, FoundUp launch. |
+| Sentinels | Critique, truth, drift, regression review. Review only, no execution. |
+| WRE | Repo and process authority. Verification and dispatch. |
+| CABR/pAVS | Benefit validation, routing, reputation. |
+| 012 | Work focus, testing, sovereign authorization, override. |
+
+### Autonomy Boundary
+
+Autonomous WRE/DAE agents are NOT 012 work. 012 provides work focus, testing, sovereign approval, and override. 0102 DAEs communicate recursively and perform bounded autonomous work.
+
 ## Authority Boundary
 
 | Capability | Status | Boundary |
@@ -178,6 +209,14 @@ Formal contract:
 | pfMALL surface binding | SPECIFIED_NOT_IMPLEMENTED |
 | Review packet memory / persistence | SPECIFIED_NOT_IMPLEMENTED |
 | Bridge hardening (edge-case redaction/repair) | SPECIFIED_NOT_IMPLEMENTED |
+| REDDOG_IS_ARCHITECT_INTERFACE | OBSERVED |
+| AUTONOMOUS_DAE_WORK_NOT_012_WORK | OBSERVED |
+| HERMES_IS_SCAFFOLDING_NOT_POLICY | OBSERVED |
+| OPENCLAW_IS_POLICY_GATE | OBSERVED |
+| WRE_RETAINS_REPO_AUTHORITY | OBSERVED |
+| SENTINELS_REVIEW_NOT_EXECUTE | OBSERVED |
+| CABR_PAVS_VALIDATES_BENEFIT | OBSERVED |
+| EXTENSION_REMAINS_ADVISORY_ONLY | OBSERVED |
 
 ## Public/RedDog Roadmap Boundary
 
