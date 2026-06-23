@@ -1,6 +1,11 @@
-# FoundUps Fusion Worker ModLog
+# Foundups®Agent ModLog
 
-## V0.3.17 — REDDOG_WORKING_TRAIL_PHASE1_CODE — 2026-06-23
+## 2026-06-24 - v0.3.18 Foundups®Agent Branding
+- Renamed user-facing extension surface from "FoundUps Fusion Worker" to "Foundups®Agent".
+- Kept internal package id and command id stable (`foundups-fusion-worker`, `foundupsFusion.open`) to avoid breaking existing installs/settings.
+- Clarified that RedDog is the 0102 digital-twin architect inside Foundups®Agent and Fusion is an internal reasoning mode.
+
+## V0.3.17 窶・REDDOG_WORKING_TRAIL_PHASE1_CODE 窶・2026-06-23
 
 - Implemented RedDog working trail strip (`#reddogWorkingTrail`) under work focus composer.
 - ASCII pixel grammar: `~~~`, `.rd.`, `<rd>`, `>rd>`, `!rd!`.
@@ -25,7 +30,7 @@ Audit and doc additions for correct FoundUps architecture capture:
 
 WSP: WSP_00, WSP_48, WSP_54, WSP_73, WSP_97.
 
-## V0.3.17b — REDDOG_WORKING_TRAIL_PHASE1_REPAIR — 2026-06-23
+## V0.3.17b 窶・REDDOG_WORKING_TRAIL_PHASE1_REPAIR 窶・2026-06-23
 
 - Repair pass on docs/REDDOG_WORKING_TRAIL_PHASE1.md.
 - ASCII pixel grammar: replaced `.v.`, `xvx`, `!v!`, `IvI` Unicode glyphs with `.rd.`, `<rd>`, `!rd!`, `>rd>` throughout (tables, code blocks, prose, JS signatures, CSS). Zero non-ASCII confirmed by rg scan.

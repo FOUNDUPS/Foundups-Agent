@@ -1,10 +1,12 @@
-# FoundUps Fusion Worker Interface
+# Foundups®Agent Interface
 
 ## Purpose
 
-`foundups-fusion-worker` is a local Cursor/VS Code extension that opens a RedDog Architect advisory surface backed by OpenRouter models through `scripts/advisory_model_once.py`.
+`foundups-fusion-worker` is a local Cursor/VS Code extension whose user-facing product name is Foundups®Agent. It opens a RedDog Architect advisory surface backed by OpenRouter models through `scripts/advisory_model_once.py`.
 
 It is an IDE-side proof surface for the future RedDog/pfMALL/WRE intake pattern. It does not implement pfMALL runtime wiring, WRE dispatch, FoundUp registration, repository creation, or CABR verification.
+
+Foundups®Agent is the product surface. RedDog is the 0102 digital-twin architect inside it. Fusion is one internal reasoning mode, not the product identity.
 
 ## RedDog and the Recursive 0102 DAE Ecosystem
 
@@ -51,6 +53,14 @@ Autonomous WRE/DAE agents are NOT 012 work. 012 provides work focus, testing, so
 | CABR/payout/source authority | NO | Blocked by Fusion redaction gate and prompt contract |
 | pfMALL integration | SPECIFIED_NOT_IMPLEMENTED | Roadmap only |
 | FoundUp onboarding automation | SPECIFIED_NOT_IMPLEMENTED | Roadmap only; WSP_109 packet production is not implemented here |
+
+## F0 Safety Boundary
+
+F0 is the foundation Foundups-Agent repo. Foundups®Agent must never mutate F0 automatically.
+
+The extension may gather bounded context and produce advisory review packets. It must not execute model-generated code, install packages, create persistence, write files, mutate repositories, publish artifacts, or call Skillz/OpenClaw/Hermes/WRE execution surfaces directly. Any future execution path must be a governed handoff where WRE retains repo/process authority and 012 remains sovereign for test, land, publish, and override decisions.
+
+External repositories are assessed through advisory WSP intake before they can become FoundUps candidates. The extension can recommend a FoundUp intake packet and integration risk report; it cannot automatically enroll or mutate an external repo.
 
 ## Webview Contract
 

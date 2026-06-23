@@ -1,4 +1,4 @@
-# FoundUps Fusion Worker Roadmap
+# Foundups®Agent Roadmap
 
 ## Status
 
@@ -6,7 +6,7 @@ Phase: IDE-side RedDog Architect proof surface.
 
 Current implementation:
 
-- Cursor command: `FoundUps Fusion: Open`.
+- Cursor command: `Foundups®Agent: Open`.
 - Bottom-composer webview with scrollback output.
 - OpenRouter bridge with redaction gate.
 - WSP_00/WSP_97/WSP_15 operating prompt.
@@ -17,6 +17,8 @@ Current implementation:
 ## Architecture Direction
 
 This extension is not the final RedDog runtime. It is the operator-facing proof surface for how RedDog should behave before becoming accessible through pfMALL or an OpenClaw/WRE route.
+
+Foundups®Agent is the product surface. RedDog is the 0102 digital-twin architect inside it. Fusion is one internal reasoning mode, not the product identity.
 
 ### RedDog and the Recursive 0102 DAE Ecosystem
 
@@ -62,6 +64,13 @@ IDE extension POC
 | WRE/OpenClaw dispatch bridge | 4 | 5 | 3 | 5 | 17 | P0 | Must remain governed; extension cannot dispatch directly |
 
 ## Next Slices
+
+### FOUNDUPS_AGENT_INTAKE_MODE_PHASE1
+
+- Assess arbitrary external repositories for FoundUps integration readiness.
+- Produce advisory WSP readiness audit, FoundUp intake packet, Skillz map, and integration risk report.
+- No automatic onboarding, repo mutation, package install, or execution.
+- Governed WRE handoff recommendation only.
 
 ### REDDOG_BRIDGE_HARDENING_PHASE1
 
@@ -144,3 +153,5 @@ Addendum B required controls (after v0.3.15 lands):
 - No automatic pfMALL publication.
 - No CABR/payout/source-authority claims.
 - No hidden access to `.env` or gitignored files.
+- No automatic F0 mutation.
+- No worm-like self-propagation, auto-install, or background repo modification behavior.

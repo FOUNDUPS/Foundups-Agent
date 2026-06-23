@@ -16,8 +16,15 @@ function includes(haystack, needle, label) {
   assert(haystack.includes(needle), label || `missing ${needle}`);
 }
 
-assert.strictEqual(pkg.version, '0.3.17', 'package version must be 0.3.17');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.17'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.18', 'package version must be 0.3.18');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.18'", 'extension build mismatch');
+assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
+assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
+includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
+includes(extensionJs, "title: 'Foundups®Agent'", 'webview title must use Foundups®Agent');
+includes(readme, 'Foundups®Agent is the product surface', 'README product identity statement missing');
+includes(iface, 'Fusion is one internal reasoning mode, not the product identity', 'INTERFACE mode identity statement missing');
+includes(roadmap, 'Foundups®Agent is the product surface', 'ROADMAP product identity statement missing');
 includes(extensionJs, 'id="reddogWorkingTrail"', 'working trail DOM missing');
 includes(extensionJs, 'data-reddog-pixel', 'trail pixel attribute missing');
 includes(extensionJs, "command: 'progress'", 'progress command shape missing');
@@ -249,4 +256,4 @@ for (const glyph of forbiddenPixels) {
   assert(!extensionJs.includes(glyph), 'trail pixel grammar must stay ASCII-only');
 }
 
-console.log('FoundUps Fusion extension contract checks passed.');
+console.log('Foundups®Agent extension contract checks passed.');

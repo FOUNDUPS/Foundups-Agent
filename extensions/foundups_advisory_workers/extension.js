@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.17';
+const EXTENSION_VERSION = '0.3.18';
 const REDDOG_TERMINAL_HOLD_MS = 3000;
 const REDACTION_BLOCK_OPERATOR_MESSAGE = 'Stopped before OpenRouter. Nothing left the machine.';
 
@@ -116,7 +116,7 @@ function enrichRedactionBlockResult(result) {
   return Object.assign({}, result, { review_packet: packet, retry_count: 0 });
 }
 const DEFAULT_FUSION_WORKER = {
-  title: 'FoundUps Fusion',
+  title: 'Foundups®Agent',
   lead: 'z-ai/glm-5.2',
   panel: ['deepseek/deepseek-v4-pro', 'moonshotai/kimi-k2.7-code']
 };
@@ -1090,8 +1090,8 @@ function renderHtml(worker, surface, logoUri) {
       <div class="brand"><img src="${escapedLogoUri}" alt="RedDawg"><h1>${escapedTitle}</h1></div>
       <div class="meta">Build: ${EXTENSION_VERSION}<br>Surface: ${escapedSurface}<br>Principal: ${escapedLead}<br>Panel: ${escapedPanel}<br>Advisory only. Redaction-gated. No repo, shell, or merge authority.</div>
     </header>
-    <main id="log" aria-label="FoundUps Fusion output scrollback">
-      <div class="entry status"><span class="label">status</span>FoundUps Fusion extension ${EXTENSION_VERSION} loaded.</div>
+    <main id="log" aria-label="Foundups®Agent output scrollback">
+      <div class="entry status"><span class="label">status</span>Foundups®Agent extension ${EXTENSION_VERSION} loaded.</div>
       <div class="entry status"><span class="label">status</span>OPENROUTER_API_KEY must be set in the environment used to launch Cursor. Do not paste secrets.</div>
     </main>
     <form id="form">
