@@ -16,9 +16,17 @@ function includes(haystack, needle, label) {
   assert(haystack.includes(needle), label || `missing ${needle}`);
 }
 
-assert.strictEqual(pkg.version, '0.3.15', 'package version must be 0.3.15');
-includes(readme, 'Version: 0.3.15', 'README version mismatch');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.15'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.17', 'package version must be 0.3.17');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.17'", 'extension build mismatch');
+includes(extensionJs, 'id="reddogWorkingTrail"', 'working trail DOM missing');
+includes(extensionJs, 'data-reddog-pixel', 'trail pixel attribute missing');
+includes(extensionJs, "command: 'progress'", 'progress command shape missing');
+includes(extensionJs, 'Stopped before OpenRouter. Nothing left the machine.', 'redaction operator message missing');
+assert(!extensionJs.includes("command: 'status', stage"), 'status must not carry stage field');
+includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
+includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
+includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
+includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
 
 includes(extensionJs, 'grid-template-rows: auto minmax(0, 1fr) auto', 'terminal/chat grid rows missing');
 includes(extensionJs, 'html, body { height: 100%; overflow: hidden; }', 'body overflow lock missing');
@@ -193,5 +201,52 @@ assert(focusDigest.length === longFocus.length, 'digest length metadata may exce
 
 const wspDigest = orchestrator.redactedDigest(ytWsp, 320);
 assert(wspDigest.excerpt.length <= 320, 'wsp prompt digest excerpt must be bounded');
+
+function extractBridgeStages(source) {
+  const stages = [];
+  const re = /_progress\("([^"]+)"/g;
+  let match;
+  while ((match = re.exec(source)) !== null) {
+    stages.push(match[1]);
+  }
+  return [...new Set(stages)].sort();
+}
+
+const bridgeStages = extractBridgeStages(bridgePy);
+const mappedStages = Object.keys(orchestrator.REDDOG_STAGE_ACTIONS).sort();
+assert.deepStrictEqual(mappedStages, bridgeStages, 'REDDOG_STAGE_ACTIONS must cover every advisory bridge stage');
+assert.strictEqual(bridgeStages.length, 16, 'expected 16 unique bridge stages');
+assert.strictEqual(orchestrator.REDDOG_TERMINAL_HOLD_MS, 3000, 'terminal hold must be 3000ms');
+
+const redactionMatch = orchestrator.matchReddogProgress({ stage: 'redaction_blocked', text: 'Redaction gate blocked before network.' });
+assert.strictEqual(redactionMatch.action, 'barking', 'redaction_blocked must map to barking');
+assert.strictEqual(redactionMatch.pixel, '!rd!', 'redaction_blocked must use barking pixel');
+
+const successMatch = orchestrator.matchReddogProgress({ stage: 'single_done', text: 'Regular OpenRouter response received: x' });
+assert.strictEqual(successMatch.action, 'pointing', 'single_done must map to pointing');
+assert.strictEqual(successMatch.pixel, '>rd>', 'single_done must use pointing pixel');
+
+const failureMatch = orchestrator.matchReddogProgress({ stage: 'panel_blocked', text: 'Panel blocked: x' });
+assert.strictEqual(failureMatch.action, 'sitting', 'panel_blocked must map to sitting');
+assert.strictEqual(failureMatch.pixel, '.rd.', 'panel_blocked must use sitting pixel');
+
+const diggingMatch = orchestrator.matchReddogProgress({ stage: null, text: 'Output schema incomplete. Missing: Architect Trace. Running one repair pass...' });
+assert.strictEqual(diggingMatch.action, 'digging', 'repair pass text must map to digging');
+
+const sniffMatch = orchestrator.matchReddogProgress({ stage: null, text: 'Work focus sent. 0102 will assemble WSP task prompt...' });
+assert.strictEqual(sniffMatch.action, 'sniffing', 'work focus sent must map to sniffing');
+
+assert.strictEqual(orchestrator.formatElapsed(45000), '45s', 'formatElapsed under 60s');
+assert.strictEqual(orchestrator.formatElapsed(62000), '1m02s', 'formatElapsed above 60s');
+
+const blocked = orchestrator.enrichRedactionBlockResult({ ok: false, reason: 'redaction_blocked' });
+assert.strictEqual(blocked.review_packet.made_network_call, false, 'redaction block must set made_network_call=false');
+assert.strictEqual(blocked.review_packet.retry_count, 0, 'redaction block must set retry_count=0');
+assert.strictEqual(orchestrator.REDACTION_BLOCK_OPERATOR_MESSAGE, 'Stopped before OpenRouter. Nothing left the machine.', 'operator message constant');
+
+const forbiddenPixels = ['\u2022', '\u0254', '\u1401', '\u1400'];
+for (const glyph of forbiddenPixels) {
+  assert(!extensionJs.includes(glyph), 'trail pixel grammar must stay ASCII-only');
+}
 
 console.log('FoundUps Fusion extension contract checks passed.');

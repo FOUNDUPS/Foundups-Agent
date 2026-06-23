@@ -1,5 +1,22 @@
 # FoundUps Fusion Worker TestModLog
 
+## 2026-06-23 — v0.3.17 Working Trail Phase 2 CODE Tests
+
+- Trail DOM + progress command shape + operator message rg gate.
+- `REDDOG_STAGE_ACTIONS` key set equals unique `_progress` stages from bridge (16/16).
+- Stage mapping: redaction_blocked -> barking, single_done -> pointing, panel_blocked -> sitting.
+- Regex fallback: Work focus sent -> sniffing; Output schema incomplete -> digging.
+- Terminal hold constant 3000ms; enrichRedactionBlockResult metadata contract.
+- #870 work-focus regression guards retained.
+
+Commands:
+
+```powershell
+node --check extensions/foundups_advisory_workers/extension.js
+node extensions/foundups_advisory_workers/tests/verify_extension_contract.js
+rg "Stopped before OpenRouter. Nothing left the machine." extensions/foundups_advisory_workers/extension.js
+```
+
 ## 2026-06-22 - v0.3.15 Work Focus to WSP Prompt Tests
 
 - Verified UI uses work focus composer (`#workFocus`) and `012 work focus` scrollback label.

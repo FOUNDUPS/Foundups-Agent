@@ -1,5 +1,17 @@
 # FoundUps Fusion Worker ModLog
 
+## V0.3.17 — REDDOG_WORKING_TRAIL_PHASE1_CODE — 2026-06-23
+
+- Implemented RedDog working trail strip (`#reddogWorkingTrail`) under work focus composer.
+- ASCII pixel grammar: `~~~`, `.rd.`, `<rd>`, `>rd>`, `!rd!`.
+- Structured progress: host posts `{ command: 'progress', stage, text }`; scrollback uses `{ command: 'status', text }` unchanged.
+- `REDDOG_STAGE_ACTIONS` covers all 16 unique `advisory_model_once.py` bridge stages; regex fallback for webview-local events.
+- Elapsed timer (1s), 10s no-event sitting fallback, idle pixel cycle while running, terminal hold 3000ms.
+- Redaction-block UX: operator message, `made_network_call=false`, `retry_count=0`; no raw blocked content in scrollback.
+- `advisory_model_once.py` unchanged (Phase 3 review-packet summary deferred).
+
+WSP: WSP_22, WSP_97.
+
 ## 2026-06-23 - REDDOG_RECURSIVE_DAE_ECOSYSTEM_ARCHITECTURE_PHASE1
 
 Audit and doc additions for correct FoundUps architecture capture:
@@ -13,7 +25,7 @@ Audit and doc additions for correct FoundUps architecture capture:
 
 WSP: WSP_00, WSP_48, WSP_54, WSP_73, WSP_97.
 
-## V0.3.17b - REDDOG_WORKING_TRAIL_PHASE1_REPAIR - 2026-06-23
+## V0.3.17b — REDDOG_WORKING_TRAIL_PHASE1_REPAIR — 2026-06-23
 
 - Repair pass on docs/REDDOG_WORKING_TRAIL_PHASE1.md.
 - ASCII pixel grammar: replaced `.v.`, `xvx`, `!v!`, `IvI` Unicode glyphs with `.rd.`, `<rd>`, `!rd!`, `>rd>` throughout (tables, code blocks, prose, JS signatures, CSS). Zero non-ASCII confirmed by rg scan.
