@@ -467,9 +467,12 @@ function openFusionEditor(context) {
     }
   );
   const logoUri = panel.webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'icon.png'));
-  const state = { history: [], lastReviewPacket: null, bridgeChild: null };
+  const state = { history: [], lastReviewPacket: null, bridgeChild: null, disposed: false };
   wireFusionWebview(context, panel.webview, worker, state);
-  panel.onDidDispose(() => killBridgeChild(state));
+  panel.onDidDispose(() => {
+    killBridgeChild(state);
+    state.disposed = true;
+  });
   panel.webview.html = renderHtml(worker, 'editor', logoUri.toString());
 }
 
@@ -644,23 +647,24 @@ function killBridgeChild(state) {
 }
 
 function resolvePythonInterpreter(root, configuredPath) {
-  const candidates = [];
-  if (typeof configuredPath === 'string' && configuredPath.trim()) {
-    candidates.push({ path: configuredPath.trim(), source: 'configured' });
+  const trimmed = typeof configuredPath === 'string' ? configuredPath.trim() : '';
+  if (trimmed && trimmed !== 'python' && fs.existsSync(trimmed)) {
+    return { path: trimmed, source: 'configured' };
   }
   const isWin = process.platform === 'win32';
-  const relPaths = [
-    path.join('.venv', isWin ? 'Scripts' : 'bin', isWin ? 'python.exe' : 'python'),
-    path.join('venv', isWin ? 'Scripts' : 'bin', isWin ? 'python.exe' : 'python')
-  ];
-  for (const rel of relPaths) {
-    const full = path.join(root, rel);
-    if (fs.existsSync(full)) {
-      candidates.push({ path: full, source: rel.startsWith('.venv') ? 'workspace_dot_venv' : 'workspace_venv' });
-    }
+  const dotVenv = path.join(root, '.venv', isWin ? 'Scripts' : 'bin', isWin ? 'python.exe' : 'python');
+  if (fs.existsSync(dotVenv)) {
+    return { path: dotVenv, source: 'workspace_dotvenv' };
   }
-  candidates.push({ path: 'python', source: 'system_fallback' });
-  return candidates[0];
+  const venvPath = path.join(root, 'venv', isWin ? 'Scripts' : 'bin', isWin ? 'python.exe' : 'python');
+  if (fs.existsSync(venvPath)) {
+    return { path: venvPath, source: 'workspace_venv' };
+  }
+  return { path: trimmed || 'python', source: 'system' };
+}
+
+function bridgeStreamCapExceeded(currentBytes, chunkLength, cap) {
+  return currentBytes + chunkLength > cap;
 }
 
 function applyBridgeContextBudget(prompt, context) {
@@ -712,7 +716,7 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
     }
     let settled = false;
     function finish(result) {
-      if (settled) {
+      if (!shouldAcceptBridgeCompletion(settled, state)) {
         return;
       }
       settled = true;
@@ -758,7 +762,7 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
 
     child.stdout.on('data', (chunk) => {
       stdoutBytes += chunk.length;
-      if (stdoutBytes > BRIDGE_MAX_STDOUT_BYTES) {
+      if (bridgeStreamCapExceeded(stdoutBytes, 0, BRIDGE_MAX_STDOUT_BYTES)) {
         killBridgeChild(state);
         finish({ ok: false, reason: 'output_cap_exceeded', detail: 'stdout cap exceeded' });
         return;
@@ -767,7 +771,7 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
     });
     child.stderr.on('data', (chunk) => {
       stderrBytes += chunk.length;
-      if (stderrBytes > BRIDGE_MAX_STDERR_BYTES) {
+      if (bridgeStreamCapExceeded(stderrBytes, 0, BRIDGE_MAX_STDERR_BYTES)) {
         killBridgeChild(state);
         finish({ ok: false, reason: 'output_cap_exceeded', detail: 'stderr cap exceeded' });
         return;
@@ -1506,6 +1510,10 @@ function escapeHtml(value) {
     .replace(/"/g, '&quot;');
 }
 
+function shouldAcceptBridgeCompletion(settled, state) {
+  return !settled && !(state && state.disposed);
+}
+
 function deactivate() {}
 
 module.exports = {
@@ -1522,8 +1530,12 @@ module.exports = {
   resolvePythonInterpreter,
   applyBridgeContextBudget,
   killBridgeChild,
+  bridgeStreamCapExceeded,
+  shouldAcceptBridgeCompletion,
   BRIDGE_MAX_CONTEXT_CHARS,
   BRIDGE_MAX_PROMPT_CHARS,
+  BRIDGE_MAX_STDOUT_BYTES,
+  BRIDGE_MAX_STDERR_BYTES,
   modeSelectionReasoning,
   skillzWardrobeRolodexContext,
   buildBoundedRepoContext,

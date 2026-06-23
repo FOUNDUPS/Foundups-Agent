@@ -21,6 +21,18 @@ node extensions/foundups_advisory_workers/tests/verify_extension_contract.js
 rg "Stopped before OpenRouter. Nothing left the machine." extensions/foundups_advisory_workers/extension.js
 ```
 
+## 2026-06-22 - v0.3.16 Addendum C Gate Tests
+
+- Python (8 tests): panel truncation meta; 429 main-path redaction-once + same body; 400 no retry; redaction_blocked zero network; panel_models_truncated in review_packet.
+- JS contract: bridgeStreamCapExceeded non-vacuity; killBridgeChild once; shouldAcceptBridgeCompletion dispose guard; resolver configured/system/dotvenv paths; WSP_97 survives truncation; #870 work-focus regression guards.
+
+Commands:
+
+```powershell
+python -B -m unittest scripts.tests.test_advisory_model_once_hardening -v
+node extensions/foundups_advisory_workers/tests/verify_extension_contract.js
+```
+
 ## 2026-06-22 - v0.3.16 Bridge Hardening Tests
 
 - Contract tests for python resolver, context budget, bridge_meta, output_cap_exceeded.

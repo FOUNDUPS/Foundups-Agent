@@ -175,13 +175,19 @@ def _model_slug(value: object, default: str) -> str:
 
 
 def _panel_models(value: object) -> list[str]:
+    models, _truncated = _panel_models_with_meta(value)
+    return models
+
+
+def _panel_models_with_meta(value: object) -> tuple[list[str], bool]:
     if not isinstance(value, list):
-        return list(DEFAULT_PANEL_MODELS)
+        return list(DEFAULT_PANEL_MODELS), False
     models: list[str] = []
     for item in value[:MAX_PANEL_MODELS]:
         if isinstance(item, str) and item.strip() and len(item.strip()) <= 120:
             models.append(item.strip())
-    return models or list(DEFAULT_PANEL_MODELS)
+    truncated = len(value) > MAX_PANEL_MODELS
+    return (models or list(DEFAULT_PANEL_MODELS), truncated)
 
 
 def _system_prompt(payload: dict[str, Any]) -> str:
@@ -211,7 +217,7 @@ def _openrouter_fusion_alias(
 ) -> dict[str, Any]:
     timeout = _bounded_int(payload.get("timeout"), 120, 1, 240)
     judge_model = _model_slug(payload.get("lead_model"), DEFAULT_LEAD_MODEL)
-    panel_models = _panel_models(payload.get("panel_models"))
+    panel_models, panel_models_truncated = _panel_models_with_meta(payload.get("panel_models"))
     messages = [{"role": "system", "content": _system_prompt(payload)}]
     messages.extend(history)
     messages.append({"role": "user", "content": redacted_prompt})
@@ -272,7 +278,7 @@ def _run_foundups_fusion(
     max_tokens = _bounded_int(payload.get("max_tokens"), 1600, 256, 4096)
     temperature = _bounded_temperature(payload.get("temperature"), 0.2)
     lead_model = _model_slug(payload.get("lead_model"), DEFAULT_LEAD_MODEL)
-    panel_models = _panel_models(payload.get("panel_models"))
+    panel_models, panel_models_truncated = _panel_models_with_meta(payload.get("panel_models"))
     base_system = _system_prompt(payload)
 
     lead_system = (
@@ -391,6 +397,7 @@ def _run_foundups_fusion(
             "mode": "foundups_fusion",
             "lead_model": lead_model,
             "panel_models": panel_models,
+            "panel_models_truncated": panel_models_truncated,
             "redacted_prompt": redacted_prompt,
             "lead_excerpt": lead_text[:4000],
             "panel_excerpts": {model: text[:3000] for model, text in panel_results.items()},
@@ -420,12 +427,17 @@ def main() -> int:
     context = payload.get("context")
     context_for_gate = context if isinstance(context, str) and context.strip() else None
     bridge_meta = payload.get("bridge_meta") if isinstance(payload.get("bridge_meta"), dict) else {}
+    _panel_input = payload.get("panel_models")
+    _panel_truncated = isinstance(_panel_input, list) and len(_panel_input) > MAX_PANEL_MODELS
+    if _panel_truncated:
+        bridge_meta = dict(bridge_meta)
+        bridge_meta["panel_models_truncated"] = True
 
     _progress("redaction_start", "Redaction gate started.")
     gate = evaluate_redaction_gate(prompt, context_for_gate)
     if gate.status != REDACTION_GATE_PASSED or not gate.redacted_prompt:
         _progress("redaction_blocked", "Redaction gate blocked before network.")
-        return _json_result(ok=False, reason="redaction_blocked", redaction_reason=gate.reason)
+        return _json_result(ok=False, reason="redaction_blocked", redaction_reason=gate.reason, retry_count=0)
 
     _progress("redaction_pass", "Redaction gate passed.")
     system_prompt = _system_prompt(payload)
