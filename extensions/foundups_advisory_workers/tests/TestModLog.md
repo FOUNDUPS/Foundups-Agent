@@ -1,4 +1,11 @@
-# FoundUps Fusion Worker TestModLog
+# FoundUps Agent TestModLog
+
+## 2026-06-24 — FoundUps Agent branding + F0 safety contract tests
+
+- Package id unchanged: `foundups-fusion-worker`.
+- displayName: FoundUps Agent; command: FoundUps Agent: Open RedDog.
+- README/INTERFACE product identity + F0 + Intake Mode wording.
+- Fusion-as-internal-mode assertions; no Fusion-as-product title.
 
 ## 2026-06-23 — v0.3.17 Working Trail Phase 2 CODE Tests
 

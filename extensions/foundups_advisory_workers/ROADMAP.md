@@ -1,12 +1,12 @@
-# FoundUps Fusion Worker Roadmap
+# FoundUps Agent Roadmap (RedDog Architect)
 
 ## Status
 
-Phase: IDE-side RedDog Architect proof surface.
+Phase: IDE-side **FoundUps Agent** proof surface with **RedDog Architect** persona.
 
 Current implementation:
 
-- Cursor command: `FoundUps Fusion: Open`.
+- Cursor command: `FoundUps Agent: Open RedDog`.
 - Bottom-composer webview with scrollback output.
 - OpenRouter bridge with redaction gate.
 - WSP_00/WSP_97/WSP_15 operating prompt.
@@ -62,6 +62,26 @@ IDE extension POC
 | WRE/OpenClaw dispatch bridge | 4 | 5 | 3 | 5 | 17 | P0 | Must remain governed; extension cannot dispatch directly |
 
 ## Next Slices
+
+### FOUNDUPS_AGENT_INTAKE_MODE_PHASE1
+
+External repo -> FoundUps integration assessment (advisory only):
+
+- Bounded context scan of target repo
+- WSP readiness audit
+- WSP_109 FoundUp intake packet draft
+- Skillz map recommendation
+- Integration risk / F0 safety report
+- Governed WRE handoff recommendation
+- No automatic onboarding or repo mutation without verification
+
+### FOUNDUPS_AGENT_UI_LABELS_PHASE1
+
+Align runtime webview strings in `extension.js` with manifest branding:
+
+- Header: `FoundUps Agent — RedDog Architect`
+- Loaded status line
+- Keep package id and command id unchanged
 
 ### REDDOG_BRIDGE_HARDENING_PHASE1
 

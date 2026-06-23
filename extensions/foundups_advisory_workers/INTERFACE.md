@@ -1,10 +1,16 @@
-# FoundUps Fusion Worker Interface
+# FoundUps Agent Interface (RedDog Architect)
 
 ## Purpose
 
-`foundups-fusion-worker` is a local Cursor/VS Code extension that opens a RedDog Architect advisory surface backed by OpenRouter models through `scripts/advisory_model_once.py`.
+FoundUps Agent is the product surface. RedDog is the 0102 architect persona inside it. Fusion is an internal reasoning mode, not the product name.
 
-It is an IDE-side proof surface for the future RedDog/pfMALL/WRE intake pattern. It does not implement pfMALL runtime wiring, WRE dispatch, FoundUp registration, repository creation, or CABR verification.
+Package id (unchanged for install stability): `foundups-fusion-worker`
+
+This local Cursor/VS Code extension opens the RedDog Architect advisory surface backed by OpenRouter models through `scripts/advisory_model_once.py`.
+
+It is a WSP-guided advisory coding architect for integrating projects into FoundUps. It is an IDE-side proof surface for the future RedDog/pfMALL/WRE intake pattern. It does not implement pfMALL runtime wiring, WRE dispatch, FoundUp registration, repository creation, or CABR verification.
+
+**F0:** The FoundUps-Agent repo is F0. The extension must never mutate F0 automatically. External repos are assessed through advisory WSP intake, not automatic execution.
 
 ## RedDog and the Recursive 0102 DAE Ecosystem
 

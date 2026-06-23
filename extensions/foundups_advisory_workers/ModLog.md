@@ -1,4 +1,15 @@
-# FoundUps Fusion Worker ModLog
+# FoundUps Agent ModLog (package: foundups-fusion-worker)
+
+## 2026-06-24 - FOUNDUPS_AGENT_EXTENSION_BRANDING_AND_F0_SAFETY_PHASE1
+
+- Renamed user-facing identity: **FoundUps Agent** (product) with **RedDog Architect** persona.
+- Manifest: `displayName` FoundUps Agent; command `FoundUps Agent: Open RedDog`; package id unchanged (`foundups-fusion-worker`).
+- Documented F0 safety boundary, capability can/cannot matrix, threat model, and future Intake Mode path.
+- Added audit: `docs/audits/architecture/FOUNDUPS_AGENT_EXTENSION_F0_SAFETY_PHASE1.md`.
+- Fusion documented as internal mode only; no runtime behavior changes.
+- Webview header strings deferred to `FOUNDUPS_AGENT_UI_LABELS_PHASE1`.
+
+WSP: WSP_22, WSP_97.
 
 ## V0.3.17 — REDDOG_WORKING_TRAIL_PHASE1_CODE — 2026-06-23
 

@@ -1,14 +1,18 @@
-# FoundUps Fusion Worker
+# FoundUps Agent — RedDog Architect
 
-Version: 0.3.15
+Version: 0.3.17
 
-This local Cursor/VS Code extension opens one RedDog Architect advisory worker as an editor webview tab, similar in ergonomics to `Claude Code: Open` but without repo, shell, browser, merge, CABR, or payout authority.
+FoundUps Agent is the product surface. RedDog is the 0102 digital-twin / architect persona inside it. Fusion is one internal reasoning mode (along with single-model and panel paths), not the product name.
+
+This local Cursor/VS Code extension opens the RedDog Architect advisory worker as an editor webview tab — similar in ergonomics to `Claude Code: Open` but without repo, shell, browser, merge, CABR, or payout authority.
 
 Command:
 
-- `FoundUps Fusion: Open`
+- `FoundUps Agent: Open RedDog`
 
-Default panel:
+**F0 safety:** F0 is the foundation FoundUps-Agent repo. The extension must never mutate F0 automatically. External repos can be assessed for FoundUps integration through advisory WSP intake, not automatic execution.
+
+Default panel (internal Fusion mode):
 
 - Principal/synthesis: `z-ai/glm-5.2`
 - Critics: `deepseek/deepseek-v4-pro` and `moonshotai/kimi-k2.7-code`
@@ -43,6 +47,42 @@ Default panel:
 ### Autonomy Boundary
 
 Autonomous WRE/DAE agents are NOT 012 work. 012 provides work focus, testing, sovereign approval, and override. 0102 DAEs communicate recursively and perform bounded autonomous work under WRE governance. The extension remains advisory; WRE retains execution authority.
+
+## Capability truth (F0)
+
+### Can do now
+
+- Read bounded repo context (extension-gathered; model has no direct filesystem access)
+- Run HoloIndex / git diff context gathering (tiered by WSP_15)
+- Send redaction-gated prompts to OpenRouter
+- Produce WSP_00 / WSP_97 / WSP_15 advisory reviews
+- Recommend Skillz / OpenClaw / Hermes / WRE handoffs (advisory only)
+- Copy redacted review packet for 0102 review
+
+### Cannot do now
+
+- Edit code directly
+- Run arbitrary shell for the model
+- Merge PRs or create repos
+- Execute Skillz / OpenClaw / Hermes
+- Guarantee safe operation on arbitrary repos without a dedicated safety audit
+- Automatically onboard external repos into FoundUps
+
+## Future: FoundUps Agent Intake Mode
+
+For "any repo can integrate into FoundUps," the planned path is **FoundUps Agent Intake Mode**:
+
+```text
+external repo
+  -> bounded context scan
+  -> WSP readiness audit
+  -> FoundUp intake packet (WSP_109)
+  -> Skillz map
+  -> integration risk / safety report
+  -> optional governed WRE handoff recommendation
+```
+
+No automatic onboarding without verification. Intake Mode is not implemented in v0.3.17.
 
 ## Operating Contract
 
@@ -85,7 +125,7 @@ The webview follows the VS Code terminal/chat shape:
 - Context: automatic. ULTRA tasks attach WSP + HoloIndex + active editor + git diff + Skillz/Wardrobe/Rolodex discovery; HIGH tasks attach WSP + HoloIndex + active editor + Skillz/Wardrobe/Rolodex discovery; REGULAR smoke avoids repo context.
 - Tests: regular smoke, Fusion smoke, WSP_97 repo review, RedDog architect review.
 
-For WSP/security/runtime/architecture work, RedDog auto-routes to `foundups_fusion` because it preserves a review packet with principal, critic, and synthesis excerpts. Regular smoke/simple prompts auto-route to a single GLM principal call. OpenRouter Fusion alias remains implemented in the bridge for explicit future use, but is not a 012-facing default control because individual critic traces are not exposed by the API response.
+For WSP/security/runtime/architecture work, RedDog auto-routes to internal **`foundups_fusion`** panel mode because it preserves a review packet with principal, critic, and synthesis excerpts. Regular smoke/simple prompts auto-route to a single GLM principal call. OpenRouter Fusion alias remains implemented in the bridge for explicit future use, but is not a 012-facing default control because individual critic traces are not exposed by the API response.
 
 Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed fixes, Uncertainties, Architect Trace (structured evidence/alternatives/critic rationale — never raw hidden chain-of-thought), WSP_97 Truth Labels, WSP_15 Priority, Verification gaps, Next safest step. Fusion runs also expose Lead/Critic/Synthesis panel structure from the bridge. If sections are missing, the extension runs one repair pass through the same redaction-gated bridge before showing the final answer.
 
@@ -127,6 +167,10 @@ Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, 
 | SENTINELS_REVIEW_NOT_EXECUTE | OBSERVED |
 | CABR_PAVS_VALIDATES_BENEFIT | OBSERVED |
 | EXTENSION_REMAINS_ADVISORY_ONLY | OBSERVED |
+| PRODUCT_NAME_IS_FOUNDUPS_AGENT | OBSERVED (manifest; webview labels follow-up) |
+| FUSION_IS_INTERNAL_MODE | OBSERVED |
+| F0_NO_AUTO_MUTATION | OBSERVED (no extension write path) |
+| FOUNDUPS_AGENT_INTAKE_MODE | SPECIFIED_NOT_IMPLEMENTED |
 
 ## Settings
 
@@ -170,4 +214,4 @@ From Cursor:
 1. Open Command Palette.
 2. Run `Extensions: Install from VSIX...` and select the generated `foundups-fusion-worker-0.3.15-work-focus.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
-4. Run `FoundUps Fusion: Open` from Command Palette or the three-dot command list.
+4. Run `FoundUps Agent: Open RedDog` from Command Palette or the three-dot command list.
