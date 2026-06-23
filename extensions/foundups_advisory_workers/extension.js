@@ -4,7 +4,117 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.15';
+const EXTENSION_VERSION = '0.3.17';
+const REDDOG_TERMINAL_HOLD_MS = 3000;
+const REDACTION_BLOCK_OPERATOR_MESSAGE = 'Stopped before OpenRouter. Nothing left the machine.';
+
+const ADVISORY_BRIDGE_STAGES = [
+  'bridge_start',
+  'env_check',
+  'redaction_start',
+  'redaction_blocked',
+  'redaction_pass',
+  'fusion_alias_start',
+  'fusion_alias_done',
+  'lead_start',
+  'lead_done',
+  'panel_start',
+  'panel_done',
+  'panel_blocked',
+  'synthesis_start',
+  'synthesis_done',
+  'single_start',
+  'single_done'
+];
+
+const REDDOG_STAGE_ACTIONS = {
+  bridge_start: { action: 'sorting', pixel: '<rd>' },
+  env_check: { action: 'nosing', pixel: '<rd>' },
+  redaction_start: { action: 'nosing', pixel: '<rd>' },
+  redaction_blocked: { action: 'barking', pixel: '!rd!' },
+  redaction_pass: { action: 'nosing', pixel: '<rd>' },
+  fusion_alias_start: { action: 'fetching', pixel: '<rd>' },
+  fusion_alias_done: { action: 'crystallizing', pixel: '<rd>' },
+  lead_start: { action: 'fetching', pixel: '<rd>' },
+  lead_done: { action: 'herding', pixel: '<rd>' },
+  panel_start: { action: 'herding', pixel: '<rd>' },
+  panel_done: { action: 'herding', pixel: '<rd>' },
+  panel_blocked: { action: 'sitting', pixel: '.rd.' },
+  synthesis_start: { action: 'crystallizing', pixel: '<rd>' },
+  synthesis_done: { action: 'pointing', pixel: '>rd>' },
+  single_start: { action: 'fetching', pixel: '<rd>' },
+  single_done: { action: 'pointing', pixel: '>rd>' }
+};
+
+const REDDOG_PROGRESS_ACTIONS = [
+  { prefix: 'Work focus sent.', action: 'sniffing', pixel: '.rd.' },
+  { prefix: 'Mode: ', action: 'sorting', pixel: '<rd>' },
+  { prefix: 'Bridge process starting', action: 'sorting', pixel: '<rd>' },
+  { prefix: 'Workspace root: ', action: 'sorting', pixel: '<rd>' },
+  { prefix: 'Bridge script: ', action: 'sorting', pixel: '<rd>' },
+  { prefix: 'OpenRouter key visible to Cursor process: ', action: 'sorting', pixel: '<rd>' },
+  { prefix: 'Context budget applied: ', action: 'tracking', pixel: '<rd>' },
+  { prefix: 'Orchestrator: effort=', action: 'sorting', pixel: '<rd>' },
+  { prefix: 'Bridge started. Redaction gate runs', action: 'nosing', pixel: '<rd>' },
+  { prefix: 'Repo context attached: ', action: 'tracking', pixel: '<rd>' },
+  { prefix: 'Repo context: WSP operating contract only.', action: 'tracking', pixel: '<rd>' },
+  { prefix: '0102 assembled WSP task prompt', action: 'sniffing', pixel: '.rd.' },
+  { prefix: 'Output schema incomplete. Missing: ', action: 'digging', pixel: '<rd>' }
+];
+
+function formatElapsed(ms) {
+  const s = Math.floor(Math.max(0, ms) / 1000);
+  if (s < 60) {
+    return s + 's';
+  }
+  return Math.floor(s / 60) + 'm' + String(s % 60).padStart(2, '0') + 's';
+}
+
+function matchReddogProgress(input) {
+  const stage = input && input.stage ? String(input.stage) : '';
+  const text = input && input.text ? String(input.text) : '';
+  if (stage && Object.prototype.hasOwnProperty.call(REDDOG_STAGE_ACTIONS, stage)) {
+    return Object.assign({}, REDDOG_STAGE_ACTIONS[stage]);
+  }
+  for (const rule of REDDOG_PROGRESS_ACTIONS) {
+    if (rule.prefix && text.startsWith(rule.prefix)) {
+      return { action: rule.action, pixel: rule.pixel };
+    }
+  }
+  return null;
+}
+
+function postStatusMessage(webview, text) {
+  webview.postMessage({ command: 'status', text: text });
+}
+
+function postProgressMessage(webview, stage, text) {
+  webview.postMessage({
+    command: 'progress',
+    stage: stage || null,
+    text: text || ''
+  });
+}
+
+function postStatusAndProgress(webview, stage, text) {
+  if (text) {
+    postStatusMessage(webview, text);
+  }
+  postProgressMessage(webview, stage, text);
+}
+
+function enrichRedactionBlockResult(result) {
+  if (!result || result.reason !== 'redaction_blocked') {
+    return result;
+  }
+  const packet = result.review_packet && typeof result.review_packet === 'object'
+    ? Object.assign({}, result.review_packet)
+    : {};
+  packet.made_network_call = false;
+  packet.retry_count = 0;
+  packet.reason = 'redaction_blocked';
+  return Object.assign({}, result, { review_packet: packet, retry_count: 0 });
+}
 const DEFAULT_FUSION_WORKER = {
   title: 'FoundUps Fusion',
   lead: 'z-ai/glm-5.2',
@@ -419,18 +529,17 @@ function wireFusionWebview(context, webview, worker, state) {
     };
     const systemPrompt = buildSystemPrompt(workerType, effort, contextPacket.quality);
 
-    webview.postMessage({
-      command: 'status',
-      text: 'Orchestrator: effort=' + effort + ' mode=' + mode + ' tier=' + classification.tier + ' context=' + contextMode + ' principal=' + worker.lead + ' panel=' + worker.panel.join(' + ') + ' (' + classification.reasons.join(', ') + ')'
-    });
-    webview.postMessage({ command: 'status', text: 'Bridge started. Redaction gate runs before any OpenRouter API call.' });
+    postStatusAndProgress(webview, null, 'Orchestrator: effort=' + effort + ' mode=' + mode + ' tier=' + classification.tier + ' context=' + contextMode + ' principal=' + worker.lead + ' panel=' + worker.panel.join(' + ') + ' (' + classification.reasons.join(', ') + ')');
+    postStatusAndProgress(webview, null, 'Bridge started. Redaction gate runs before any OpenRouter API call.');
     if (contextPacket.summary) {
-      webview.postMessage({ command: 'status', text: contextPacket.summary });
+      postStatusAndProgress(webview, null, contextPacket.summary);
     }
-    webview.postMessage({ command: 'status', text: '0102 assembled WSP task prompt from 012 work focus (bridge receives WSP prompt, not raw focus alone).' });
-    let result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, state.history, mode, (text) => {
-      webview.postMessage({ command: 'status', text });
-    });
+    postStatusAndProgress(webview, null, '0102 assembled WSP task prompt from 012 work focus (bridge receives WSP prompt, not raw focus alone).');
+    const onBridgeProgress = (stage, text) => {
+      postStatusMessage(webview, text);
+      postProgressMessage(webview, stage, text);
+    };
+    let result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, state.history, mode, onBridgeProgress);
     if (result.ok && isSubstantiveRedDogWorker(workerType)) {
       const validation = validateRedDogOutput(result.content || '', { substantiveArchitect: true, mode: mode });
       let validationState = {
@@ -441,10 +550,7 @@ function wireFusionWebview(context, webview, worker, state) {
       };
       if (!validation.valid && validation.missingSections.length) {
         validationState.repair_attempted = true;
-        webview.postMessage({
-          command: 'status',
-          text: 'Output schema incomplete. Missing: ' + validation.missingSections.join(', ') + '. Running one repair pass...'
-        });
+        postStatusAndProgress(webview, null, 'Output schema incomplete. Missing: ' + validation.missingSections.join(', ') + '. Running one repair pass...');
         const repairPrompt = buildRepairPrompt(wspTaskPrompt, result.content, validation.missingSections);
         const repairResult = await callFusion(
           context,
@@ -454,9 +560,7 @@ function wireFusionWebview(context, webview, worker, state) {
           systemPrompt + '\n\nRepair pass: add missing schema sections only. Do not invent evidence.',
           state.history,
           mode,
-          (text) => {
-            webview.postMessage({ command: 'status', text });
-          }
+          onBridgeProgress
         );
         if (repairResult.ok) {
           const repairValidation = validateRedDogOutput(repairResult.content || '', { substantiveArchitect: true, mode: mode });
@@ -508,6 +612,10 @@ function wireFusionWebview(context, webview, worker, state) {
     if (result.ok && result.review_packet) {
       state.lastReviewPacket = result.review_packet;
     }
+    result = enrichRedactionBlockResult(result);
+    if (result.review_packet) {
+      state.lastReviewPacket = result.review_packet;
+    }
     webview.postMessage({ command: 'result', result });
   });
 }
@@ -518,11 +626,11 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
     const script = path.join(root, 'scripts', 'advisory_model_once.py');
     const config = vscode.workspace.getConfiguration('foundupsFusion');
     const pythonPath = config.get('pythonPath') || 'python';
-    onProgress('Mode: ' + mode);
-    onProgress('Bridge process starting: ' + pythonPath);
-    onProgress('Workspace root: ' + root);
-    onProgress('Bridge script: ' + script);
-    onProgress('OpenRouter key visible to Cursor process: ' + (process.env.OPENROUTER_API_KEY ? 'yes' : 'no'));
+    onProgress(null, 'Mode: ' + mode);
+    onProgress(null, 'Bridge process starting: ' + pythonPath);
+    onProgress(null, 'Workspace root: ' + root);
+    onProgress(null, 'Bridge script: ' + script);
+    onProgress(null, 'OpenRouter key visible to Cursor process: ' + (process.env.OPENROUTER_API_KEY ? 'yes' : 'no'));
     const child = cp.spawn(pythonPath, [script], {
       cwd: root,
       env: process.env,
@@ -555,7 +663,7 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
         try {
           const event = JSON.parse(line);
           if (event && event.event === 'progress' && event.text) {
-            onProgress(event.text);
+            onProgress(event.stage || null, event.text);
           }
         } catch (err) {
           // stderr can contain non-JSON diagnostics from Python dependencies.
@@ -914,6 +1022,15 @@ function cleanMode(value) {
   return 'auto';
 }
 
+function reddogTrailWebviewBootstrapJson() {
+  return JSON.stringify({
+    stageActions: REDDOG_STAGE_ACTIONS,
+    progressActions: REDDOG_PROGRESS_ACTIONS,
+    terminalHoldMs: REDDOG_TERMINAL_HOLD_MS,
+    operatorMessage: REDACTION_BLOCK_OPERATOR_MESSAGE
+  });
+}
+
 function renderHtml(worker, surface, logoUri) {
   const escapedTitle = escapeHtml(worker.title);
   const escapedLead = escapeHtml(worker.lead);
@@ -951,6 +1068,20 @@ function renderHtml(worker, surface, logoUri) {
     textarea { resize: none; min-height: 74px; max-height: 180px; padding: 8px; color: var(--vscode-input-foreground); background: var(--vscode-input-background); border: 1px solid var(--vscode-input-border); font-family: var(--vscode-editor-font-family); }
     textarea:focus { outline: 1px solid var(--vscode-focusBorder); }
     .hint { color: var(--vscode-descriptionForeground); font-size: 11px; }
+    .reddog-working-trail {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 0 2px 0;
+      font-size: 11px;
+      font-family: var(--vscode-editor-font-family);
+      color: var(--vscode-descriptionForeground);
+      min-height: 18px;
+      user-select: none;
+    }
+    .reddog-working-trail[data-active="true"] { color: var(--vscode-charts-green); }
+    .reddog-working-trail[data-active="error"] { color: var(--vscode-errorForeground); }
+    [data-reddog-elapsed] { font-variant-numeric: tabular-nums; }
   </style>
 </head>
 <body>
@@ -973,19 +1104,116 @@ function renderHtml(worker, surface, logoUri) {
       </div>
       <textarea id="workFocus" placeholder="Describe your work focus (012). 0102 converts this to a WSP task prompt for RedDog."></textarea>
       <div class="hint">Enter sends work focus. Shift+Enter adds a new line. Ctrl+Shift+C copies the redacted review packet.</div>
+      <div id="reddogWorkingTrail" class="reddog-working-trail" aria-live="polite" aria-atomic="false">
+        <span data-reddog-pixel>~~~</span>
+        <span data-reddog-action>idle</span>
+        <span data-reddog-elapsed></span>
+      </div>
     </form>
   </div>
   <script>
     const vscode = acquireVsCodeApi();
+    const TRAIL = ${reddogTrailWebviewBootstrapJson()};
     const form = document.getElementById('form');
     const workFocus = document.getElementById('workFocus');
     const workerType = document.getElementById('workerType');
     const testWorkFocus = document.getElementById('testWorkFocus');
     const copyMd = document.getElementById('copyMd');
+    const trailEl = document.getElementById('reddogWorkingTrail');
     let lastAssistantMarkdown = '';
     const log = document.getElementById('log');
     let running = false;
     let startedAt = 0;
+    let lastTrailUpdate = 0;
+    let elapsedTimer = null;
+    let idleCycleTimer = null;
+    let sittingTimer = null;
+    let terminalTimer = null;
+    let idleFrame = 0;
+    const idleFrames = ['~~~', '.rd.', '<rd>', '.rd.'];
+    let currentTrailAction = 'idle';
+    let currentTrailPixel = '~~~';
+
+    function formatElapsed(ms) {
+      const s = Math.floor(Math.max(0, ms) / 1000);
+      if (s < 60) return s + 's';
+      return Math.floor(s / 60) + 'm' + String(s % 60).padStart(2, '0') + 's';
+    }
+
+    function matchReddogProgressWeb(input) {
+      const stage = input && input.stage ? String(input.stage) : '';
+      const text = input && input.text ? String(input.text) : '';
+      if (stage && TRAIL.stageActions[stage]) {
+        return TRAIL.stageActions[stage];
+      }
+      for (const rule of TRAIL.progressActions) {
+        if (rule.prefix && text.startsWith(rule.prefix)) {
+          return { action: rule.action, pixel: rule.pixel };
+        }
+      }
+      return null;
+    }
+
+    function updateReddogTrail(action, pixel, suffix, opts) {
+      const pixelEl = trailEl.querySelector('[data-reddog-pixel]');
+      const actionEl = trailEl.querySelector('[data-reddog-action]');
+      const elapsedEl = trailEl.querySelector('[data-reddog-elapsed]');
+      currentTrailAction = action;
+      currentTrailPixel = pixel;
+      pixelEl.textContent = pixel;
+      actionEl.textContent = suffix ? action + ' ' + suffix : action;
+      const elapsedMs = running && startedAt ? Date.now() - startedAt : 0;
+      elapsedEl.textContent = running && elapsedMs > 0 ? formatElapsed(elapsedMs) : '';
+      trailEl.removeAttribute('data-active');
+      trailEl.removeAttribute('data-active-error');
+      if (opts && opts.error) {
+        trailEl.setAttribute('data-active', 'error');
+      } else if (running || (opts && opts.active)) {
+        trailEl.setAttribute('data-active', 'true');
+      }
+      lastTrailUpdate = Date.now();
+    }
+
+    function resetTrailIdle() {
+      updateReddogTrail('idle', '~~~', '', {});
+    }
+
+    function clearTrailTimers() {
+      if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; }
+      if (idleCycleTimer) { clearInterval(idleCycleTimer); idleCycleTimer = null; }
+      if (sittingTimer) { clearInterval(sittingTimer); sittingTimer = null; }
+    }
+
+    function refreshTrailElapsed() {
+      if (!running) return;
+      const elapsedEl = trailEl.querySelector('[data-reddog-elapsed]');
+      const elapsedMs = startedAt ? Date.now() - startedAt : 0;
+      elapsedEl.textContent = elapsedMs > 0 ? formatElapsed(elapsedMs) : '';
+    }
+
+    function startTrailTimers() {
+      clearTrailTimers();
+      elapsedTimer = setInterval(refreshTrailElapsed, 1000);
+      idleCycleTimer = setInterval(() => {
+        if (!running || Date.now() - lastTrailUpdate < 2000) return;
+        if (currentTrailAction === 'idle' || currentTrailPixel === '>rd>' || currentTrailPixel === '!rd!') return;
+        idleFrame = (idleFrame + 1) % idleFrames.length;
+        trailEl.querySelector('[data-reddog-pixel]').textContent = idleFrames[idleFrame];
+      }, 800);
+      sittingTimer = setInterval(() => {
+        if (!running) return;
+        if (Date.now() - lastTrailUpdate > 10000) {
+          updateReddogTrail('sitting', '.rd.', '', { active: true });
+        }
+      }, 1000);
+    }
+
+    function applyProgressEvent(msg) {
+      const matched = matchReddogProgressWeb({ stage: msg.stage, text: msg.text });
+      if (matched) {
+        updateReddogTrail(matched.action, matched.pixel, '', { active: true });
+      }
+    }
 
     function add(cls, text, label) {
       const el = document.createElement('div');
@@ -1007,7 +1235,11 @@ function renderHtml(worker, surface, logoUri) {
       add('status', text + elapsed(), 'status');
     }
 
-    function setRunning(value) {
+    function setRunning(value, result) {
+      if (terminalTimer) {
+        clearTimeout(terminalTimer);
+        terminalTimer = null;
+      }
       running = value;
       workFocus.disabled = value;
       workerType.disabled = value;
@@ -1015,7 +1247,34 @@ function renderHtml(worker, surface, logoUri) {
       copyMd.disabled = value;
       if (value) {
         startedAt = Date.now();
+        lastTrailUpdate = Date.now();
+        idleFrame = 0;
+        applyProgressEvent({ stage: null, text: 'Work focus sent.' });
+        startTrailTimers();
+        return;
       }
+      clearTrailTimers();
+      let action = 'growling';
+      let pixel = '!rd!';
+      let suffix = 'stopped';
+      let error = true;
+      if (result && result.ok) {
+        action = 'pointing';
+        pixel = '>rd>';
+        suffix = 'complete';
+        error = false;
+      } else if (result && result.reason === 'redaction_blocked') {
+        action = 'barking';
+        pixel = '!rd!';
+        suffix = 'blocked';
+        error = true;
+      }
+      updateReddogTrail(action, pixel, suffix, { error: error, active: false });
+      terminalTimer = setTimeout(() => {
+        if (!running) {
+          resetTrailIdle();
+        }
+      }, TRAIL.terminalHoldMs);
     }
 
     testWorkFocus.addEventListener('change', () => {
@@ -1063,16 +1322,29 @@ function renderHtml(worker, surface, logoUri) {
       vscode.postMessage({ command: 'ask', text, mode: 'auto', contextMode: 'auto', workerType: workerType.value, effort: 'auto' });
     }
 
+    function failureText(result) {
+      if (!result) return 'unknown';
+      const parts = [result.reason || 'unknown'];
+      if (result.status) parts.push('status=' + result.status);
+      if (result.lead_model) parts.push('lead=' + result.lead_model);
+      if (result.detail && result.detail !== result.reason) parts.push(result.detail);
+      return parts.join(' | ');
+    }
+
     window.addEventListener('message', (event) => {
       const msg = event.data;
       if (!msg) return;
       if (msg.command === 'status') addStatus(msg.text);
+      if (msg.command === 'progress') applyProgressEvent(msg);
       if (msg.command === 'result') {
-        setRunning(false);
+        setRunning(false, msg.result);
         if (msg.result && msg.result.ok) {
           addStatus('Complete: ' + (msg.result.mode || msg.result.model || 'ok'));
           lastAssistantMarkdown = msg.result.content || '';
           add('assistant', lastAssistantMarkdown, '0102 output');
+        } else if (msg.result && msg.result.reason === 'redaction_blocked') {
+          addStatus(TRAIL.operatorMessage);
+          add('error', TRAIL.operatorMessage, 'error');
         } else {
           const failure = failureText(msg.result);
           addStatus('Stopped: ' + failure);
@@ -1099,9 +1371,6 @@ function failureText(result) {
   }
   if (result.detail && result.detail !== result.reason) {
     parts.push(result.detail);
-  }
-  if (result.redaction_reason) {
-    parts.push('redaction=' + result.redaction_reason);
   }
   return parts.join(' | ');
 }
@@ -1130,5 +1399,13 @@ module.exports = {
   modeSelectionReasoning,
   skillzWardrobeRolodexContext,
   buildBoundedRepoContext,
-  REDDOG_REQUIRED_OUTPUT_SECTIONS
+  REDDOG_REQUIRED_OUTPUT_SECTIONS,
+  formatElapsed,
+  matchReddogProgress,
+  REDDOG_STAGE_ACTIONS,
+  REDDOG_PROGRESS_ACTIONS,
+  REDDOG_TERMINAL_HOLD_MS,
+  REDACTION_BLOCK_OPERATOR_MESSAGE,
+  ADVISORY_BRIDGE_STAGES,
+  enrichRedactionBlockResult
 };
