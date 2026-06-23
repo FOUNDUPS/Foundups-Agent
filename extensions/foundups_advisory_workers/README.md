@@ -1,12 +1,14 @@
-# FoundUps Fusion Worker
+# Foundups®Agent
 
-Version: 0.3.15
+Version: 0.3.18
 
 This local Cursor/VS Code extension opens one RedDog Architect advisory worker as an editor webview tab, similar in ergonomics to `Claude Code: Open` but without repo, shell, browser, merge, CABR, or payout authority.
 
+Foundups®Agent is the product surface. RedDog is the 0102 digital-twin architect inside it. Fusion is one internal reasoning mode, not the product identity.
+
 Command:
 
-- `FoundUps Fusion: Open`
+- `Foundups®Agent: Open`
 
 Default panel:
 
@@ -56,6 +58,21 @@ The extension is a bounded 0102 advisory surface:
 
 The extension does not grant repo authority. **012 supplies work focus only**; 0102 assembles a WSP task prompt before the bridge runs. Work focus and bounded repo context are sent through `scripts/advisory_model_once.py`, which runs the landed Fusion redaction gate before making OpenRouter requests. The webview receives only advisory text and redacted local history.
 
+## F0 Safety Boundary
+
+F0 is the foundation Foundups-Agent repo. Foundups®Agent must never mutate F0 automatically.
+
+Current behavior is advisory-only:
+
+- no model-controlled shell execution
+- no automatic file edits
+- no automatic PR creation, merge, deployment, or repository creation
+- no CABR, payout, source-authority, or verification claims
+- no direct Skillz/OpenClaw/Hermes/WRE execution from the extension
+- redaction gate runs before any OpenRouter egress
+
+External repositories can be assessed for FoundUps integration through advisory WSP intake, not automatic execution. The future path is FoundUps Agent Intake Mode: WSP readiness audit, FoundUp intake packet, Skillz map, integration risk report, and governed WRE handoff recommendation.
+
 ## Work Focus Contract (v0.3.15)
 
 012 does not prompt RedDog directly. The operating flow is:
@@ -87,7 +104,7 @@ The webview follows the VS Code terminal/chat shape:
 
 For WSP/security/runtime/architecture work, RedDog auto-routes to `foundups_fusion` because it preserves a review packet with principal, critic, and synthesis excerpts. Regular smoke/simple prompts auto-route to a single GLM principal call. OpenRouter Fusion alias remains implemented in the bridge for explicit future use, but is not a 012-facing default control because individual critic traces are not exposed by the API response.
 
-Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed fixes, Uncertainties, Architect Trace (structured evidence/alternatives/critic rationale — never raw hidden chain-of-thought), WSP_97 Truth Labels, WSP_15 Priority, Verification gaps, Next safest step. Fusion runs also expose Lead/Critic/Synthesis panel structure from the bridge. If sections are missing, the extension runs one repair pass through the same redaction-gated bridge before showing the final answer.
+Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed fixes, Uncertainties, Architect Trace (structured evidence/alternatives/critic rationale 窶・never raw hidden chain-of-thought), WSP_97 Truth Labels, WSP_15 Priority, Verification gaps, Next safest step. Fusion runs also expose Lead/Critic/Synthesis panel structure from the bridge. If sections are missing, the extension runs one repair pass through the same redaction-gated bridge before showing the final answer.
 
 Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, mode-selection reasoning, principal, panel, context, advisory boundary).
 
@@ -105,9 +122,9 @@ Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, 
 | DIGESTS_NOT_RAW_CONTEXT | OBSERVED |
 | ROUTING_UNCHANGED_FROM_0_3_14 | OBSERVED |
 | Mode/Effort/Context not 012-facing dropdowns | OBSERVED |
-| REGULAR → `openrouter_single`, no repo context | OBSERVED |
-| HIGH → `foundups_fusion` + WSP/Holo/Skillz context | OBSERVED |
-| ULTRA → `foundups_fusion` + WSP/Holo/git/Skillz context | OBSERVED |
+| REGULAR 竊・`openrouter_single`, no repo context | OBSERVED |
+| HIGH 竊・`foundups_fusion` + WSP/Holo/Skillz context | OBSERVED |
+| ULTRA 竊・`foundups_fusion` + WSP/Holo/git/Skillz context | OBSERVED |
 | Skillz/Rolodex discovery for operational prompts | OBSERVED |
 | Filesystem fallback when git spawn fails | OBSERVED |
 | RedDog Routing block in output | OBSERVED |
@@ -168,6 +185,6 @@ vsce package --no-dependencies
 From Cursor:
 
 1. Open Command Palette.
-2. Run `Extensions: Install from VSIX...` and select the generated `foundups-fusion-worker-0.3.15-work-focus.vsix` (or current package version).
+2. Run `Extensions: Install from VSIX...` and select the generated `foundups-fusion-worker-0.3.18.vsix` (or current package version).
 3. Do not use workspace-extension install for normal operation; install the VSIX and reload the window.
-4. Run `FoundUps Fusion: Open` from Command Palette or the three-dot command list.
+4. Run `Foundups®Agent: Open` from Command Palette or the three-dot command list.

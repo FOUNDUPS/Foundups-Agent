@@ -1,6 +1,10 @@
-# FoundUps Fusion Worker TestModLog
+# Foundups®Agent TestModLog
 
-## 2026-06-23 — v0.3.17 Working Trail Phase 2 CODE Tests
+## 2026-06-24 - v0.3.18 Branding Contract
+- Verified user-facing branding uses Foundups®Agent while the internal package id and command id remain stable.
+- Verified Fusion remains documented as an internal mode, not the product identity.
+
+## 2026-06-23 窶・v0.3.17 Working Trail Phase 2 CODE Tests
 
 - Trail DOM + progress command shape + operator message rg gate.
 - `REDDOG_STAGE_ACTIONS` key set equals unique `_progress` stages from bridge (16/16).
