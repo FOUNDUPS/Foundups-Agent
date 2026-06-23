@@ -1,5 +1,26 @@
 # FoundUps Fusion Worker ModLog
 
+## V0.3.17b — REDDOG_WORKING_TRAIL_PHASE1_REPAIR — 2026-06-23
+
+- Repair pass on docs/REDDOG_WORKING_TRAIL_PHASE1.md.
+- ASCII pixel grammar: replaced `.v.`, `xvx`, `!v!`, `IvI` Unicode glyphs with `.rd.`, `<rd>`, `!rd!`, `>rd>` throughout (tables, code blocks, prose, JS signatures, CSS). Zero non-ASCII confirmed by rg scan.
+- Phase 2/3 split: clarified Phase 2 = extension.js only (~123 lines, no advisory_model_once.py); Phase 3 = bounded working_trail_summary / review event emission. Renamed "training events" to `working_trail_events` / `trail telemetry` in Phase 2 scope.
+- Terminal state hold: corrected `setRunning(false)` contract -- terminal states (`>rd>`, `!rd!`) held >=3s via `setTimeout(3000)` before idle reset; immediate reset removed.
+- Structured stage first: Section 2 now specifies stage-field primary match (advisory_model_once.py emits `_progress(stage, text)` confirmed); text regex is fallback only.
+- Resolved Open Questions (Section 10): Q1=review-packet append, Q2=ASCII-safe Phase 2, Q3=continue elapsed; removed as open questions.
+- WSP_97 expanded from 10 to 16 rows (items 11-16: MOJIBAKE_FREE, ASCII_PIXEL_FALLBACK, PHASE2_EXTENSION_ONLY, TRAINING_EVENTS_DEFERRED, TERMINAL_STATE_VISIBLE, STRUCTURED_STAGE_FIRST).
+
+WSP: WSP_22, WSP_97.
+
+## V0.3.17 — REDDOG_WORKING_TRAIL_PHASE1 (Design Contract) — 2026-06-23
+
+- Authored design contract for RedDog working trail (docs/REDDOG_WORKING_TRAIL_PHASE1.md).
+- Defines UI contract (`reddogWorkingTrail` strip), event-to-action mapping for all 16 bridge progress events, JSONL training schema, and WSP_97 truth boundary checklist.
+- Phase 1: design only. Phase 2 implements extension.js trail strip + elapsed timer; advisory_model_once.py unchanged in Phase 2.
+- WSP_97 N/10 (all 10 truth boundary items PASS per design).
+
+WSP: WSP_22, WSP_97, WSP_15.
+
 ## 2026-06-22 - Addendum A Gate Precision (#870 pre-land)
 
 - Verified exact scope: 8 extension-local files only; `scripts/advisory_model_once.py` unchanged.
