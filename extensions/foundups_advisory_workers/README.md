@@ -13,6 +13,37 @@ Default panel:
 - Principal/synthesis: `z-ai/glm-5.2`
 - Critics: `deepseek/deepseek-v4-pro` and `moonshotai/kimi-k2.7-code`
 
+## RedDog and the Recursive 0102 DAE Ecosystem
+
+012 does not orchestrate every worker. 012 talks to RedDog. RedDog participates in the recursive 0102 DAE ecosystem. Autonomous WRE/DAE agents perform bounded system work under Hermes/OpenClaw/WRE governance.
+
+### Architecture Stack
+
+```text
+012 work focus
+  -> RedDog digital twin / architect interface
+  -> recursive 0102 DAE ecosystem
+```
+
+### Layer Roles
+
+| Layer | Role |
+| --- | --- |
+| RedDog | Digital-twin architect/interface. 012's first contact point. Assembles WSP task prompts, classifies work focus, recommends handoffs. |
+| Hermes | Scaffolding, lifecycle, scheduling, queues, receipts. Infrastructure coordination. Not policy authority. |
+| OpenClaw | Policy and intent gate. Validates FoundUp onboarding, enforces WSP boundaries, governs dispatch. |
+| HoloIndex | Memory and retrieval. Semantic code search, WSP lookup, module discovery. |
+| Skillz/Rolodex | Capability catalog. Wardrobe discovery for governed handoff recommendations. |
+| Autonomous WRE/DAE agents | Code, docs, tests, ops, promotion, FoundUp launch. Bounded work under WRE verification. |
+| Sentinels | Critique, truth, drift, regression review. Observe and flag, do not execute. |
+| WRE | Repo and process authority. Verification, dispatch, coordination. Retains execution control. |
+| CABR/pAVS | Benefit validation, routing, reputation. Proof-of-Benefit scoring for FoundUp work. |
+| 012 | Work focus, testing, sovereign authorization, override. Harmonic Recursive Partner role (WSP 54). |
+
+### Autonomy Boundary
+
+Autonomous WRE/DAE agents are NOT 012 work. 012 provides work focus, testing, sovereign approval, and override. 0102 DAEs communicate recursively and perform bounded autonomous work under WRE governance. The extension remains advisory; WRE retains execution authority.
+
 ## Operating Contract
 
 The extension is a bounded 0102 advisory surface:
@@ -88,6 +119,14 @@ Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, 
 | pfMALL RedDog surface binding | SPECIFIED_NOT_IMPLEMENTED |
 | Review packet persistent memory | SPECIFIED_NOT_IMPLEMENTED |
 | OpenRouter Fusion alias as default RedDog path | SPECIFIED_NOT_IMPLEMENTED (explicit path only) |
+| REDDOG_IS_ARCHITECT_INTERFACE | OBSERVED |
+| AUTONOMOUS_DAE_WORK_NOT_012_WORK | OBSERVED |
+| HERMES_IS_SCAFFOLDING_NOT_POLICY | OBSERVED |
+| OPENCLAW_IS_POLICY_GATE | OBSERVED |
+| WRE_RETAINS_REPO_AUTHORITY | OBSERVED |
+| SENTINELS_REVIEW_NOT_EXECUTE | OBSERVED |
+| CABR_PAVS_VALIDATES_BENEFIT | OBSERVED |
+| EXTENSION_REMAINS_ADVISORY_ONLY | OBSERVED |
 
 ## Settings
 

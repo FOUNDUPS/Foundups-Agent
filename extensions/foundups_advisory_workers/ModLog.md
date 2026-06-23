@@ -1,6 +1,19 @@
 # FoundUps Fusion Worker ModLog
 
-## V0.3.17b — REDDOG_WORKING_TRAIL_PHASE1_REPAIR — 2026-06-23
+## 2026-06-23 - REDDOG_RECURSIVE_DAE_ECOSYSTEM_ARCHITECTURE_PHASE1
+
+Audit and doc additions for correct FoundUps architecture capture:
+
+- Added "RedDog and the Recursive 0102 DAE Ecosystem" section to README.md, INTERFACE.md, ROADMAP.md.
+- Architecture stack: 012 -> RedDog digital twin / architect -> recursive 0102 DAE ecosystem.
+- Layer roles table: RedDog, Hermes, OpenClaw, HoloIndex, Skillz/Rolodex, Autonomous WRE/DAE agents, Sentinels, WRE, CABR/pAVS, 012.
+- Key correction documented: Autonomous WRE/DAE agents are NOT 012 work. 012 provides work focus, testing, sovereign approval, and override.
+- Added WSP_97 truth table rows: REDDOG_IS_ARCHITECT_INTERFACE, AUTONOMOUS_DAE_WORK_NOT_012_WORK, HERMES_IS_SCAFFOLDING_NOT_POLICY, OPENCLAW_IS_POLICY_GATE, WRE_RETAINS_REPO_AUTHORITY, SENTINELS_REVIEW_NOT_EXECUTE, CABR_PAVS_VALIDATES_BENEFIT, EXTENSION_REMAINS_ADVISORY_ONLY.
+- HoloIndex Phase 0 retrieval audit complete (4 queries, all PASS, INDEX_GAP noted for extension.js/advisory_model_once.py).
+
+WSP: WSP_00, WSP_48, WSP_54, WSP_73, WSP_97.
+
+## V0.3.17b - REDDOG_WORKING_TRAIL_PHASE1_REPAIR - 2026-06-23
 
 - Repair pass on docs/REDDOG_WORKING_TRAIL_PHASE1.md.
 - ASCII pixel grammar: replaced `.v.`, `xvx`, `!v!`, `IvI` Unicode glyphs with `.rd.`, `<rd>`, `!rd!`, `>rd>` throughout (tables, code blocks, prose, JS signatures, CSS). Zero non-ASCII confirmed by rg scan.
@@ -12,7 +25,7 @@
 
 WSP: WSP_22, WSP_97.
 
-## V0.3.17 — REDDOG_WORKING_TRAIL_PHASE1 (Design Contract) — 2026-06-23
+## V0.3.17 - REDDOG_WORKING_TRAIL_PHASE1 (Design Contract) - 2026-06-23
 
 - Authored design contract for RedDog working trail (docs/REDDOG_WORKING_TRAIL_PHASE1.md).
 - Defines UI contract (`reddogWorkingTrail` strip), event-to-action mapping for all 16 bridge progress events, JSONL training schema, and WSP_97 truth boundary checklist.
@@ -52,7 +65,7 @@ Pre-edit retrieval audit (bundle-json; all four queries PASS, no offline fallbac
 
 **WSP_97 finding (retrieval weakness):** HoloIndex bundle-json correctly resolved extension module memory (tier0_complete, README/INTERFACE present) but semantic code search returned adjacent routers (`fusion_adapter.py`, `wsp_adaptive_router_integration.py`) instead of `extensions/foundups_advisory_workers/extension.js` or `scripts/advisory_model_once.py`. Direct-read confirmed edit targets post-retrieval.
 
-**Follow-up slice recorded:** `HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1` — index extension.js, advisory_model_once.py, and Skillz discovery paths for RedDog queries.
+**Follow-up slice recorded:** `HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1` - index extension.js, advisory_model_once.py, and Skillz discovery paths for RedDog queries.
 
 WSP: WSP_87, WSP_97.
 

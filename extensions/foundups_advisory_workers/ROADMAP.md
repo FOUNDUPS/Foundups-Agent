@@ -18,6 +18,27 @@ Current implementation:
 
 This extension is not the final RedDog runtime. It is the operator-facing proof surface for how RedDog should behave before becoming accessible through pfMALL or an OpenClaw/WRE route.
 
+### RedDog and the Recursive 0102 DAE Ecosystem
+
+012 does not orchestrate every worker. 012 talks to RedDog. RedDog participates in the recursive 0102 DAE ecosystem. Autonomous WRE/DAE agents perform bounded system work under Hermes/OpenClaw/WRE governance.
+
+```text
+012 work focus
+  -> RedDog digital twin / architect interface
+  -> recursive 0102 DAE ecosystem
+  -> Hermes scaffolding / lifecycle / scheduling
+  -> OpenClaw policy + intent gate
+  -> HoloIndex memory / retrieval
+  -> Skillz / Rolodex capability catalog
+  -> autonomous WRE/DAE agents
+  -> Sentinels / AI overseer review
+  -> WRE verification + repo/process authority
+  -> CABR / pAVS benefit validation
+  -> receipts / memory / recursive improvement
+```
+
+Autonomous WRE/DAE agents are NOT 012 work. 012 provides work focus, testing, sovereign approval, and override. 0102 DAEs communicate recursively and perform bounded autonomous work.
+
 Target path:
 
 ```text
