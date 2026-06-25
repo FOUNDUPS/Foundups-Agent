@@ -51,6 +51,18 @@ WSP: WSP_22, WSP_97.
 
 WSP: WSP_22, WSP_97, WSP_15.
 
+## 2026-06-22 - REDDOG_BRIDGE_HARDENING_PHASE1 (v0.3.16)
+
+- Python resolver chain: configured -> .venv/venv -> system fallback; reports interpreter in bridge_meta.
+- Subprocess stdout/stderr caps with kill-on-exceed and output_cap_exceeded reason.
+- Webview dispose kills in-flight bridge child (orphan cleanup).
+- Context/prompt char budget before bridge; truncation_applied + truncation_reason in review packet.
+- advisory_model_once: panel_models cap 6; HTTP retry only on 429/502/503 (max 2); same redacted body; retry metadata in packet.
+- Failure taxonomy: redaction_blocked, missing_key, timeout, retry_exhausted, http_error, malformed_response, subprocess_failed, output_cap_exceeded.
+- Added scripts/tests/test_advisory_model_once_hardening.py for retry invariants.
+
+WSP: WSP_97, WSP_87.
+
 ## 2026-06-22 - Addendum A Gate Precision (#870 pre-land)
 
 - Verified exact scope: 8 extension-local files only; `scripts/advisory_model_once.py` unchanged.

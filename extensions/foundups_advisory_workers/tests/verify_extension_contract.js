@@ -16,8 +16,8 @@ function includes(haystack, needle, label) {
   assert(haystack.includes(needle), label || `missing ${needle}`);
 }
 
-assert.strictEqual(pkg.version, '0.3.18', 'package version must be 0.3.18');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.18'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.19', 'package version must be 0.3.19');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.19'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -34,6 +34,15 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
+includes(readme, 'Version: 0.3.19', 'README version mismatch');
+includes(extensionJs, 'function resolvePythonInterpreter', 'python resolver missing');
+includes(extensionJs, 'function applyBridgeContextBudget', 'context budget missing');
+includes(extensionJs, 'function killBridgeChild', 'orphan cleanup missing');
+includes(extensionJs, 'output_cap_exceeded', 'output cap failure reason missing');
+includes(extensionJs, 'bridge_meta', 'bridge metadata payload missing');
+includes(bridgePy, 'MAX_PANEL_MODELS = 6', 'panel cap missing in bridge');
+includes(bridgePy, 'RETRYABLE_HTTP_STATUS', 'retryable status set missing');
+includes(bridgePy, 'reason="missing_key"', 'missing_key taxonomy missing');
 
 includes(extensionJs, 'grid-template-rows: auto minmax(0, 1fr) auto', 'terminal/chat grid rows missing');
 includes(extensionJs, 'html, body { height: 100%; overflow: hidden; }', 'body overflow lock missing');
@@ -254,6 +263,71 @@ assert.strictEqual(orchestrator.REDACTION_BLOCK_OPERATOR_MESSAGE, 'Stopped befor
 const forbiddenPixels = ['\u2022', '\u0254', '\u1401', '\u1400'];
 for (const glyph of forbiddenPixels) {
   assert(!extensionJs.includes(glyph), 'trail pixel grammar must stay ASCII-only');
+}
+
+const budget = orchestrator.applyBridgeContextBudget('p'.repeat(20000), 'c'.repeat(60000));
+assert.strictEqual(budget.budget.truncation_applied, true, 'context budget must truncate oversized prompt/context');
+assert(budget.budget.truncation_reason === 'prompt_char_budget' || budget.budget.truncation_reason === 'prompt_and_context_char_budget', 'truncation_reason must be low-cardinality');
+assert(budget.prompt.length <= orchestrator.BRIDGE_MAX_PROMPT_CHARS, 'prompt must respect cap');
+assert(budget.context.length <= orchestrator.BRIDGE_MAX_CONTEXT_CHARS, 'context must respect cap');
+
+const truncatedFocus = 'process youtube comments '.repeat(400);
+const truncatedClass = orchestrator.classifyTaskForRedDog(truncatedFocus, 'auto', 'reddog_architect');
+const truncatedWsp = orchestrator.constructWspTaskPrompt(truncatedFocus, truncatedClass, 'HoloIndex ok', 'reddog_architect');
+const budgetedWsp = orchestrator.applyBridgeContextBudget(truncatedWsp, 'c'.repeat(60000));
+includes(budgetedWsp.prompt, 'WSP_97', 'WSP_97 contract must survive context truncation');
+includes(budgetedWsp.prompt, '012 work focus (non-authoritative input)', 'work-focus contract must survive truncation');
+assert.strictEqual(budgetedWsp.budget.truncation_applied, true, 'oversized work focus must trigger truncation_applied');
+
+assert.strictEqual(
+  orchestrator.bridgeStreamCapExceeded(orchestrator.BRIDGE_MAX_STDOUT_BYTES - 1024, 2048, orchestrator.BRIDGE_MAX_STDOUT_BYTES),
+  true,
+  'stdout cap helper must detect overflow before retaining full stream'
+);
+assert.strictEqual(
+  orchestrator.bridgeStreamCapExceeded(orchestrator.BRIDGE_MAX_STDOUT_BYTES - 4096, 1024, orchestrator.BRIDGE_MAX_STDOUT_BYTES),
+  false,
+  'stdout cap helper must allow bounded streams'
+);
+
+const fakeChild = {
+  killed: false,
+  killCount: 0,
+  kill() {
+    this.killCount += 1;
+    this.killed = true;
+  }
+};
+const bridgeState = { bridgeChild: fakeChild, disposed: false };
+orchestrator.killBridgeChild(bridgeState);
+assert.strictEqual(fakeChild.killCount, 1, 'dispose cleanup must call child.kill() once');
+assert.strictEqual(bridgeState.bridgeChild, null, 'bridge child reference must clear after kill');
+
+assert.strictEqual(orchestrator.shouldAcceptBridgeCompletion(false, { disposed: true }), false, 'disposed panel must reject late completion packets');
+assert.strictEqual(orchestrator.shouldAcceptBridgeCompletion(false, { disposed: false }), true, 'active panel must accept first completion packet');
+assert.strictEqual(orchestrator.shouldAcceptBridgeCompletion(true, { disposed: false }), false, 'settled bridge must ignore duplicate completion packets');
+
+const configuredPath = path.join(root, 'scripts', 'advisory_model_once.py');
+const configuredInterp = orchestrator.resolvePythonInterpreter(root, configuredPath);
+assert.strictEqual(configuredInterp.source, 'configured', 'existing configured path must win');
+assert.strictEqual(configuredInterp.path, configuredPath, 'configured interpreter path must be selected');
+
+const systemRoot = fs.mkdtempSync(path.join(require('os').tmpdir(), 'reddog-bridge-'));
+const systemInterp = orchestrator.resolvePythonInterpreter(systemRoot, 'python');
+assert.strictEqual(systemInterp.source, 'system', 'default python must fall back to system when no workspace venv');
+includes(systemInterp.path, 'python', 'system fallback must return python executable name');
+
+if (fs.existsSync(path.join(root, '.venv'))) {
+  const dotVenvInterp = orchestrator.resolvePythonInterpreter(root, 'python');
+  assert.strictEqual(dotVenvInterp.source, 'workspace_dotvenv', 'workspace .venv must win over default python');
+}
+
+const interpreter = orchestrator.resolvePythonInterpreter(systemRoot, 'python');
+assert(['configured', 'workspace_dotvenv', 'workspace_venv', 'system'].includes(interpreter.source), 'resolver source must be configured|workspace_dotvenv|workspace_venv|system');
+try {
+  fs.rmSync(systemRoot, { recursive: true, force: true });
+} catch (err) {
+  // ignore temp cleanup errors on Windows file locks
 }
 
 console.log('Foundups®Agent extension contract checks passed.');

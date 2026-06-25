@@ -186,6 +186,21 @@ Review packet additions:
 - `prompt_construction`: `0102_generated_from_work_focus`
 - `output_validation` (`validated`, `missing_sections`, `repair_attempted`, `repair_ok`, `fusion_panel_ok`)
 
+## Bridge Hardening (v0.3.16)
+
+| Control | Status |
+| --- | --- |
+| Python resolver chain | OBSERVED |
+| Subprocess output caps | OBSERVED |
+| Orphan cleanup on webview dispose | OBSERVED |
+| Context/prompt char budget | OBSERVED |
+| Panel models cap (max 6) | OBSERVED |
+| HTTP retry 429/502/503 only, max 2 | OBSERVED |
+| Failure taxonomy (low-cardinality reasons) | OBSERVED |
+| Work-focus contract unchanged | OBSERVED |
+
+Failure reasons include: `redaction_blocked`, `missing_key`, `timeout`, `retry_exhausted`, `http_error`, `malformed_response`, `subprocess_failed`, `output_cap_exceeded`.
+
 ## 012 Work Focus to 0102 WSP Task Prompt (v0.3.15)
 
 Formal contract:
