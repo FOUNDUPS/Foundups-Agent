@@ -13,6 +13,8 @@ Current implementation:
 - HoloIndex bundle-json recall with offline fallback.
 - Manual lead+panel mode for review-packet traceability.
 - REDDOG_FUSION_ORCHESTRATOR_PHASE1: internal task classifier, auto effort, schema validator, one repair pass.
+- REDDOG_UX_PACKET_POLISH_PHASE1 (v0.3.19): Working Tail above controls; 0102 Role label; Copy MD Run Trace; mojibake flag; validation-failure packet semantics.
+- REDDOG_UX_PACKET_POLISH_PHASE1b (v0.3.20, rebased on #871): Copy MD Redaction Gate Report (WSP_97 truth labels); Governed Handoff Recommendation for substantive tasks; Work Trail sanitization + cap 50; HoloIndex scorecard in Run Trace; provider reasoning report-only effort fields.
 
 ## Architecture Direction
 

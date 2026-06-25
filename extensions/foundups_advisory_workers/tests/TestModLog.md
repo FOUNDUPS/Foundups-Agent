@@ -1,5 +1,26 @@
 # Foundups®Agent TestModLog
 
+## 2026-06-24 - v0.3.20 Redaction Gate + Governed Handoff Contract
+- Verified blocked Copy MD includes `## Redaction Gate Report` with `BLOCKED_LOCALLY`, `made_network_call: false`, `blocked_payload_part: unknown`, `raw_snippets_included: false`.
+- Verified blocked packet contains no `OPENROUTER_API_KEY`, Bearer, or sk- token patterns.
+- Verified substantive Copy MD includes `## Governed Handoff Recommendation` with `authority_level: advisory_only`.
+- Verified Work Trail cap at 50 events; `sanitizeCopyMdText` maps key visibility to `key_env_present: true/false`.
+- Verified HoloIndex recall scorecard fields in Run Trace for `wsp_holo_skillz` context.
+
+Commands:
+
+```powershell
+node --check extensions/foundups_advisory_workers/extension.js
+node extensions/foundups_advisory_workers/tests/verify_extension_contract.js
+git diff --check -- extensions/foundups_advisory_workers
+```
+
+## 2026-06-24 - v0.3.19 UX + Copy MD Contract
+- Verified Working Tail DOM precedes toolbar and work focus composer in HTML order.
+- Verified `Worker` UI label removed; `0102 Role` label present.
+- Verified `buildCopyMarkdown` Run Trace fields, BLOCKED_LOCALLY redaction block, repair-failure warnings.
+- Verified `detectMojibake` catches `窶` and `竊`.
+
 ## 2026-06-24 - v0.3.18 Branding Contract
 - Verified user-facing branding uses Foundups®Agent while the internal package id and command id remain stable.
 - Verified Fusion remains documented as an internal mode, not the product identity.

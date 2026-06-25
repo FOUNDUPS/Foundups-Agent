@@ -67,8 +67,10 @@ External repositories are assessed through advisory WSP intake before they can b
 The UI copies the VS Code terminal/chat layout:
 
 1. Header: build/model metadata only.
-2. Output scrollback: status, 012 work focus, 0102 output, and errors.
-3. Bottom composer: fixed **work focus** input and controls.
+2. Output scrollback: status, 012 work focus, 0102 output, validation errors, and errors.
+3. Working Tail / RedDog action strip (above controls).
+4. Control row: **0102 Role**, routing/context pills, tests, Copy MD.
+5. Bottom composer: fixed **012 work focus** input.
 
 The output pane owns scrolling. Content must not pass behind the composer.
 
@@ -80,12 +82,15 @@ Keyboard:
 
 Copy:
 
-- `Copy MD`: copies the latest assistant answer only.
-- Status/progress logs are visible in output but excluded from markdown copy.
+- `Copy MD`: copies a markdown packet with `Run Trace` (role, tier, effort, mode, models, context, redaction, validation), `Work Trail` (allowlisted normalized events, cap 50), and 0102 output.
+- Redaction-block runs include `## Redaction Gate Report` (`BLOCKED_LOCALLY`, WSP_97 truth labels, no raw snippets) before any model output.
+- Validation-failure runs include `OUTPUT_VALIDATION_FAILED` with local static footer (no extra network call).
+- Substantive tasks include `## Governed Handoff Recommendation` (`advisory_only`; bounded digest evidence refs only).
+- Status/progress scrollback lines are summarized in Run Trace / Work Trail; raw status lines are not duplicated verbatim unless needed for trace fields.
 
-## Worker Modes
+## 0102 Roles
 
-| Worker | Intended Use |
+| 0102 Role | Intended Use |
 |---|---|
 | RedDog Architect | Default architecture review and FoundUps intake/orchestration reasoning |
 | WSP Gate Critic | Gate reports, return-to-author findings, WSP_97 critique |
@@ -242,6 +247,41 @@ Formal contract:
 | SENTINELS_REVIEW_NOT_EXECUTE | OBSERVED |
 | CABR_PAVS_VALIDATES_BENEFIT | OBSERVED |
 | EXTENSION_REMAINS_ADVISORY_ONLY | OBSERVED |
+
+## Redaction Gate Report (v0.3.20)
+
+When redaction blocks before OpenRouter, Copy MD includes `## Redaction Gate Report`. Raw blocked content is never included.
+
+| Field | Notes |
+| --- | --- |
+| decision | `BLOCKED_LOCALLY` |
+| made_network_call | `false` |
+| blocked_stage | `pre_openrouter_request` |
+| blocked_payload_part | `work_focus` \| `system_prompt` \| `repo_context` \| `holoindex_context` \| `skillz_context` \| `unknown` |
+| rule_classes | Detector class names or safe categories |
+| rule_counts | Category -> count map |
+| raw_snippets_included | Always `false` |
+| redacted_payload_digest | `sha256:<64 hex>` when available |
+| safe_summary | One sentence, no raw content |
+| next_safe_context | `none` \| `wsp_only` \| `narrowed_diff` \| `local_0102_review` |
+
+All fields carry WSP_97 truth labels (`OBSERVED` or `UNKNOWN`). If the gate cannot identify the payload part, report `unknown`; do not infer.
+
+## Governed Handoff Recommendation (v0.3.20)
+
+Substantive Copy MD packets append `## Governed Handoff Recommendation`:
+
+| Field | Notes |
+| --- | --- |
+| handoff_needed | `true` \| `false` \| `unknown` |
+| target | `WRE` \| `OpenClaw` \| `Hermes` \| `Sentinel` \| `none` |
+| authority_level | Always `advisory_only` |
+| suggested_slice_name | Bounded slice identifier |
+| WSP_15 priority | Inferred from tier |
+| required_human_gate | `012_sovereign` \| `none` |
+| evidence_refs | Bounded digest references only |
+
+Extension retains no repo/shell/merge authority.
 
 ## Public/RedDog Roadmap Boundary
 
