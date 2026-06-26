@@ -1,5 +1,16 @@
 # Foundups®Agent ModLog
 
+## 2026-06-14 - REDDOG_CONTEXT_UNICODE_NORMALIZATION_PHASE1 (v0.3.24)
+
+- Added `normalizeBridgeTextForUnicode()` to replace isolated UTF-16 surrogates with `[MALFORMED_SURROGATE]` and apply NFC before bridge/redaction gate.
+- Wired normalization in `callFusion` for WSP task prompt, bounded context, and repair prompt (`repair_prompt` source label).
+- Run Trace / review packet: `unicode_normalization_applied`, `unicode_replacements_count`, `unicode_normalization_sources`, `unicode_normalization_form`.
+- Contract tests UNI-001..UNI-007; fixtures `MALFORMED_UNICODE_CONTEXT`, `BLOCKED_POLICY_CONTEXT`.
+- `fusion_redaction_gate.py` unchanged; policy not weakened.
+- Version bump 0.3.23 -> 0.3.24.
+
+WSP: WSP_00, WSP_15, WSP_97, WSP_22, WSP_84.
+
 ## 2026-06-14 - REDDOG_ALWAYS_HOLOINDEX_GROUNDING_PHASE1 (v0.3.23)
 
 - REGULAR auto context: `none` -> `wsp_holo` (HoloIndex bundle-json; no Skillz/git/Fusion panel).

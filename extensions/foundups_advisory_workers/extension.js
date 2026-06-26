@@ -4,7 +4,8 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.23';
+const EXTENSION_VERSION = '0.3.24';
+const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
 const TARGET_READ_BLOCKED_EXTENSIONS = ['.vsix'];
@@ -407,6 +408,90 @@ function formatHoloIndexScorecardLines(scorecard) {
   ];
 }
 
+function normalizeBridgeTextForUnicode(text, sourceLabel) {
+  const source = typeof sourceLabel === 'string' && sourceLabel.length ? sourceLabel : 'unknown';
+  const input = String(text || '');
+  let replacements = 0;
+  let stripped = '';
+  for (let i = 0; i < input.length; i++) {
+    const code = input.charCodeAt(i);
+    if (code >= 0xD800 && code <= 0xDBFF) {
+      if (i + 1 < input.length) {
+        const next = input.charCodeAt(i + 1);
+        if (next >= 0xDC00 && next <= 0xDFFF) {
+          stripped += input[i] + input[i + 1];
+          i += 1;
+          continue;
+        }
+      }
+      stripped += UNICODE_SURROGATE_PLACEHOLDER;
+      replacements += 1;
+    } else if (code >= 0xDC00 && code <= 0xDFFF) {
+      stripped += UNICODE_SURROGATE_PLACEHOLDER;
+      replacements += 1;
+    } else {
+      stripped += input[i];
+    }
+  }
+  let normalized = stripped;
+  let form = 'none';
+  try {
+    normalized = stripped.normalize('NFC');
+    form = 'NFC';
+  } catch (err) {
+    normalized = stripped;
+  }
+  return {
+    text: normalized,
+    unicode_normalization_applied: replacements > 0,
+    unicode_replacements_count: replacements,
+    unicode_normalization_source: source,
+    unicode_normalization_form: form
+  };
+}
+
+function emptyUnicodeNormalizationMeta() {
+  return {
+    unicode_normalization_applied: false,
+    unicode_replacements_count: 0,
+    unicode_normalization_sources: '',
+    unicode_normalization_form: 'none'
+  };
+}
+
+function mergeUnicodeNormalizationMeta(existing, incoming) {
+  const base = existing && typeof existing === 'object' ? existing : emptyUnicodeNormalizationMeta();
+  if (!incoming || typeof incoming !== 'object') {
+    return base;
+  }
+  const sources = new Set(String(base.unicode_normalization_sources || '').split('|').filter(Boolean));
+  if (incoming.unicode_normalization_source) {
+    sources.add(String(incoming.unicode_normalization_source));
+  }
+  if (Array.isArray(incoming.unicode_normalization_sources)) {
+    incoming.unicode_normalization_sources.forEach((item) => {
+      if (item) {
+        sources.add(String(item));
+      }
+    });
+  } else if (typeof incoming.unicode_normalization_sources === 'string' && incoming.unicode_normalization_sources) {
+    incoming.unicode_normalization_sources.split('|').filter(Boolean).forEach((item) => sources.add(item));
+  }
+  const replacementDelta = typeof incoming.unicode_replacements_count === 'number' ? incoming.unicode_replacements_count : 0;
+  const applied = base.unicode_normalization_applied === true
+    || incoming.unicode_normalization_applied === true
+    || replacementDelta > 0;
+  const form = incoming.unicode_normalization_form && incoming.unicode_normalization_form !== 'none'
+    ? incoming.unicode_normalization_form
+    : base.unicode_normalization_form || 'none';
+  return {
+    unicode_normalization_applied: applied,
+    unicode_replacements_count: (base.unicode_replacements_count || 0) + replacementDelta,
+    unicode_normalization_sources: Array.from(sources).sort().join('|'),
+    unicode_normalization_form: form
+  };
+}
+
 function buildRunTraceSection(result, workerType, contextSummary, holoScorecard, resolvedEffort) {
   const rp = result && result.review_packet && typeof result.review_packet === 'object' ? result.review_packet : {};
   const cls = rp.task_classification && typeof rp.task_classification === 'object' ? rp.task_classification : {};
@@ -433,6 +518,10 @@ function buildRunTraceSection(result, workerType, contextSummary, holoScorecard,
     lines.push('- HoloIndex/context summary: ' + sanitizeCopyMdText(String(contextSummary)).slice(0, 500));
   }
   lines.push.apply(lines, formatHoloIndexScorecardLines(holoScorecard || rp.holoindex_scorecard));
+  lines.push('- unicode_normalization_applied: ' + (rp.unicode_normalization_applied === true ? 'true' : rp.unicode_normalization_applied === false ? 'false' : 'unknown'));
+  lines.push('- unicode_replacements_count: ' + (typeof rp.unicode_replacements_count === 'number' ? rp.unicode_replacements_count : 'unknown'));
+  lines.push('- unicode_normalization_sources: ' + (typeof rp.unicode_normalization_sources === 'string' && rp.unicode_normalization_sources.length ? rp.unicode_normalization_sources : '(none)'));
+  lines.push('- unicode_normalization_form: ' + (rp.unicode_normalization_form || 'none'));
   if (result && result.reason === 'redaction_blocked') {
     lines.push('- redaction gate status: BLOCKED_LOCALLY');
     lines.push('- made_network_call: false');
@@ -922,10 +1011,11 @@ function isSubstantiveRedDogWorker(workerType) {
   return worker === 'reddog_architect' || worker === 'wsp_gate_critic' || worker === 'repair_planner';
 }
 
-function attachOrchestratorMetadata(reviewPacket, classification, resolvedEffort, resolvedMode, validationState, resolvedContextMode, worker, promptConstruction, holoScorecard, workTrail) {
+function attachOrchestratorMetadata(reviewPacket, classification, resolvedEffort, resolvedMode, validationState, resolvedContextMode, worker, promptConstruction, holoScorecard, workTrail, unicodeMeta) {
   const base = reviewPacket && typeof reviewPacket === 'object' ? reviewPacket : {};
   const construction = promptConstruction && typeof promptConstruction === 'object' ? promptConstruction : {};
   const providerReport = resolveProviderReasoningReport(resolvedEffort);
+  const unicode = unicodeMeta && typeof unicodeMeta === 'object' ? unicodeMeta : emptyUnicodeNormalizationMeta();
   return Object.assign({}, base, {
     task_classification: classification,
     resolved_effort: resolvedEffort,
@@ -943,7 +1033,11 @@ function attachOrchestratorMetadata(reviewPacket, classification, resolvedEffort
     work_trail: workTrail && typeof workTrail.toEvents === 'function' ? workTrail.toEvents() : workTrail,
     provider_reasoning_requested: providerReport.provider_reasoning_requested,
     provider_reasoning_applied: providerReport.provider_reasoning_applied,
-    provider_reasoning_note: providerReport.provider_reasoning_note
+    provider_reasoning_note: providerReport.provider_reasoning_note,
+    unicode_normalization_applied: unicode.unicode_normalization_applied === true,
+    unicode_replacements_count: typeof unicode.unicode_replacements_count === 'number' ? unicode.unicode_replacements_count : 0,
+    unicode_normalization_sources: typeof unicode.unicode_normalization_sources === 'string' ? unicode.unicode_normalization_sources : '',
+    unicode_normalization_form: unicode.unicode_normalization_form || 'none'
   });
 }
 
@@ -1098,6 +1192,18 @@ function wireFusionWebview(context, webview, worker, state) {
     workTrail.push('wsp_prompt_assembled');
 
     let validationState = { validated: false, skipped: true, reason: 'not_validated' };
+    let unicodeMeta = emptyUnicodeNormalizationMeta();
+    const absorbUnicodeMeta = (bridgeResult) => {
+      if (!bridgeResult || typeof bridgeResult !== 'object') {
+        return;
+      }
+      unicodeMeta = mergeUnicodeNormalizationMeta(unicodeMeta, {
+        unicode_normalization_applied: bridgeResult.unicode_normalization_applied,
+        unicode_replacements_count: bridgeResult.unicode_replacements_count,
+        unicode_normalization_sources: bridgeResult.unicode_normalization_sources,
+        unicode_normalization_form: bridgeResult.unicode_normalization_form
+      });
+    };
     const onBridgeProgress = (stage, text) => {
       postStatusMessage(webview, text);
       postProgressMessage(webview, stage, text);
@@ -1107,6 +1213,7 @@ function wireFusionWebview(context, webview, worker, state) {
       }
     };
     let result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, state.history, mode, onBridgeProgress, state, promptConstruction);
+    absorbUnicodeMeta(result);
     if (result.ok && isSubstantiveRedDogWorker(workerType)) {
       workTrail.push('validator_started');
       const validation = validateRedDogOutput(result.content || '', { substantiveArchitect: true, mode: mode });
@@ -1131,8 +1238,10 @@ function wireFusionWebview(context, webview, worker, state) {
           mode,
           onBridgeProgress,
           state,
-          promptConstruction
+          promptConstruction,
+          { promptSource: 'repair_prompt' }
         );
+        absorbUnicodeMeta(repairResult);
         if (repairResult.ok) {
           const repairValidation = validateRedDogOutput(repairResult.content || '', { substantiveArchitect: true, mode: mode });
           validationState.repair_ok = repairValidation.valid;
@@ -1182,7 +1291,8 @@ function wireFusionWebview(context, webview, worker, state) {
       worker,
       promptConstruction,
       holoScorecard,
-      workTrail
+      workTrail,
+      unicodeMeta
     );
     result.governed_handoff_recommendation = handoffRecommendation;
     if (result.reason === 'redaction_blocked') {
@@ -1285,14 +1395,19 @@ function attachBridgeMetadata(reviewPacket, bridgeMeta) {
   return Object.assign({}, reviewPacket, meta);
 }
 
-function callFusion(context, worker, prompt, boundedContext, systemPrompt, history, mode, onProgress, state, bridgeMeta) {
+function callFusion(context, worker, prompt, boundedContext, systemPrompt, history, mode, onProgress, state, bridgeMeta, callOptions) {
   return new Promise((resolve) => {
     const root = workspaceRoot();
     const script = path.join(root, 'scripts', 'advisory_model_once.py');
     const config = vscode.workspace.getConfiguration('foundupsFusion');
     const configuredPython = config.get('pythonPath') || 'python';
     const interpreter = resolvePythonInterpreter(root, configuredPython);
-    const budgeted = applyBridgeContextBudget(prompt, boundedContext);
+    const promptSource = callOptions && callOptions.promptSource ? callOptions.promptSource : 'prompt';
+    const promptNorm = normalizeBridgeTextForUnicode(prompt, promptSource);
+    const contextNorm = normalizeBridgeTextForUnicode(boundedContext, 'context');
+    const unicodeMeta = mergeUnicodeNormalizationMeta(null, Object.assign({}, promptNorm, { unicode_normalization_source: promptSource }));
+    const mergedUnicodeMeta = mergeUnicodeNormalizationMeta(unicodeMeta, Object.assign({}, contextNorm, { unicode_normalization_source: 'context' }));
+    const budgeted = applyBridgeContextBudget(promptNorm.text, contextNorm.text);
     onProgress(null, 'Mode: ' + mode);
     onProgress(null, 'Python interpreter: ' + interpreter.path + ' (' + interpreter.source + ')');
     onProgress(null, 'Bridge process starting');
@@ -1301,6 +1416,9 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
     onProgress(null, 'OpenRouter key visible to Cursor process: ' + (process.env.OPENROUTER_API_KEY ? 'yes' : 'no'));
     if (budgeted.budget.truncation_applied) {
       onProgress(null, 'Context budget applied: ' + budgeted.budget.truncation_reason);
+    }
+    if (mergedUnicodeMeta.unicode_normalization_applied) {
+      onProgress(null, 'Unicode normalization applied before redaction gate: replacements=' + mergedUnicodeMeta.unicode_replacements_count + ' sources=' + (mergedUnicodeMeta.unicode_normalization_sources || 'unknown'));
     }
     let settled = false;
     function finish(result) {
@@ -1344,7 +1462,11 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
         python_interpreter: interpreter.path,
         python_interpreter_source: interpreter.source,
         truncation_applied: budgeted.budget.truncation_applied,
-        truncation_reason: budgeted.budget.truncation_reason
+        truncation_reason: budgeted.budget.truncation_reason,
+        unicode_normalization_applied: mergedUnicodeMeta.unicode_normalization_applied,
+        unicode_replacements_count: mergedUnicodeMeta.unicode_replacements_count,
+        unicode_normalization_sources: mergedUnicodeMeta.unicode_normalization_sources,
+        unicode_normalization_form: mergedUnicodeMeta.unicode_normalization_form
       })
     };
 
@@ -1391,7 +1513,7 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
           parsed.reason = 'subprocess_failed';
           parsed.exit_code = code;
         }
-        finish(parsed);
+        finish(Object.assign({}, parsed, mergedUnicodeMeta));
       } catch (err) {
         finish({ ok: false, reason: 'malformed_response', detail: stderr.slice(0, 500) });
       }
@@ -2485,5 +2607,9 @@ module.exports = {
   WSP97_PROTOCOL_REL_PATH,
   MOJIBAKE_MARKERS,
   WORK_TRAIL_MAX_EVENTS,
-  VALIDATION_FAILED_FOOTER
+  VALIDATION_FAILED_FOOTER,
+  UNICODE_SURROGATE_PLACEHOLDER,
+  normalizeBridgeTextForUnicode,
+  emptyUnicodeNormalizationMeta,
+  mergeUnicodeNormalizationMeta
 };

@@ -52,8 +52,33 @@ function extractTargetRecallSection(contextText) {
   return next === -1 ? tail : tail.slice(0, next);
 }
 
-assert.strictEqual(pkg.version, '0.3.23', 'package version must be 0.3.23');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.23'", 'extension build mismatch');
+function assertFusionRedactionGateBlocks(contextText, expectedReason, label) {
+  const script = [
+    'import sys',
+    'from modules.communication.moltbot_bridge.src.fusion_redaction_gate import evaluate_redaction_gate, REDACTION_GATE_PASSED',
+    'ctx = sys.stdin.read()',
+    'r = evaluate_redaction_gate("012 work focus digest placeholder for gate probe", ctx)',
+    'if r.status == REDACTION_GATE_PASSED:',
+    '    print("UNEXPECTED_PASS")',
+    '    sys.exit(1)',
+    'print(r.reason)'
+  ].join('\n');
+  const out = cp.execFileSync('python', ['-B', '-c', script], {
+    cwd: root,
+    input: String(contextText || ''),
+    encoding: 'utf8',
+    timeout: 30000,
+    maxBuffer: 1024 * 1024
+  }).trim();
+  assert.strictEqual(out, expectedReason, label || 'bounded context must be blocked by fusion redaction gate');
+}
+
+function assertFusionRedactionGateFails(contextText, expectedReason, label) {
+  assertFusionRedactionGateBlocks(contextText, expectedReason, label);
+}
+
+assert.strictEqual(pkg.version, '0.3.24', 'package version must be 0.3.24');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.24'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -70,8 +95,10 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.23', 'README version mismatch');
-includes(extensionJs, 'function resolvePythonInterpreter', 'python resolver missing');
+includes(readme, 'Version: 0.3.24', 'README version mismatch');
+includes(extensionJs, 'function normalizeBridgeTextForUnicode', 'unicode normalization helper missing');
+includes(extensionJs, 'UNICODE_SURROGATE_PLACEHOLDER', 'unicode surrogate placeholder missing');
+includes(extensionJs, 'unicode_normalization_applied', 'unicode normalization telemetry missing');
 includes(extensionJs, 'function applyBridgeContextBudget', 'context budget missing');
 includes(extensionJs, 'function killBridgeChild', 'orphan cleanup missing');
 includes(extensionJs, 'output_cap_exceeded', 'output cap failure reason missing');
@@ -557,7 +584,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.23'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.24'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -571,7 +598,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.23'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.24'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -583,7 +610,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.23'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.24'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -615,5 +642,55 @@ assert(regularHoloContext.holoindex_scorecard !== null, 'THG-005: wsp_holo must 
 const regularReasoning = orchestrator.modeSelectionReasoning(regular, 'regular', 'openrouter_single', 'wsp_holo');
 includes(regularReasoning, 'wsp_holo', 'THG-006: REGULAR mode selection must cite wsp_holo');
 includes(regularReasoning, 'HoloIndex-grounded', 'THG-006: REGULAR mode selection must state HoloIndex grounding');
+
+// ADDENDUM G - REDDOG_CONTEXT_UNICODE_NORMALIZATION_PHASE1 (UNI-001..UNI-007)
+let uni001Failed = false;
+try {
+  cp.execFileSync('python', ['-B', '-c', "import hashlib; s='PR\\udc94'; hashlib.sha256(s.encode('utf-8')).hexdigest()"], {
+    cwd: root,
+    encoding: 'utf8',
+    timeout: 30000
+  });
+} catch (err) {
+  uni001Failed = /UnicodeEncodeError|surrogate/i.test(String(err && (err.stderr || err.message || err)));
+}
+assert(uni001Failed, 'UNI-001: lone surrogate must break UTF-8 digest path without normalization');
+
+assertFusionRedactionGateFails(fixtures.MALFORMED_UNICODE_CONTEXT, 'redactor_error', 'UNI-002: malformed surrogate context must fail gate before normalization');
+
+const normalizedMalformed = orchestrator.normalizeBridgeTextForUnicode(fixtures.MALFORMED_UNICODE_CONTEXT, 'context');
+assert(normalizedMalformed.unicode_replacements_count > 0, 'UNI-003: lone surrogate must increment replacement count');
+includes(normalizedMalformed.text, orchestrator.UNICODE_SURROGATE_PLACEHOLDER, 'UNI-003: lone surrogate must become ASCII placeholder');
+assert(!normalizedMalformed.text.includes('\udc94'), 'UNI-007: raw malformed surrogate must not remain in normalized text');
+assertFusionRedactionGatePasses(normalizedMalformed.text, 'UNI-004: normalized malformed context must pass fusion redaction gate');
+assertFusionRedactionGateBlocks(fixtures.BLOCKED_POLICY_CONTEXT, 'blocked_policy', 'UNI-005: blocked_policy context must still block after normalization contract');
+
+const unicodeTrace = orchestrator.buildRunTraceSection({
+  review_packet: {
+    task_classification: { tier: 'HIGH' },
+    resolved_effort: 'high',
+    resolved_mode: 'openrouter_single',
+    resolved_context: 'wsp_holo_skillz',
+    mode_selection_reasoning: 'Single-model GLM principal',
+    principal_model: 'z-ai/glm-5.2',
+    panel_models: ['deepseek/deepseek-v4-pro'],
+    unicode_normalization_applied: true,
+    unicode_replacements_count: 1,
+    unicode_normalization_sources: 'context',
+    unicode_normalization_form: 'NFC',
+    holoindex_scorecard: {
+      holoindex_status: 'bundle_json_ok',
+      wsp_hits: 3,
+      code_hits_count: 3,
+      code_hits: 3
+    },
+    output_validation: { validated: false, skipped: true }
+  }
+}, 'reddog_architect', 'Repo context attached', null, 'high');
+includes(unicodeTrace, 'unicode_normalization_applied: true', 'UNI-006: Run Trace must expose unicode normalization applied');
+includes(unicodeTrace, 'unicode_replacements_count: 1', 'UNI-006: Run Trace must expose replacement count');
+includes(unicodeTrace, 'unicode_normalization_sources: context', 'UNI-006: Run Trace must expose normalization sources');
+includes(unicodeTrace, 'unicode_normalization_form: NFC', 'UNI-006: Run Trace must expose normalization form');
+assert(!unicodeTrace.includes('\udc94'), 'UNI-007: Run Trace must not echo raw malformed surrogate');
 
 console.log('Foundups®Agent extension contract checks passed.');

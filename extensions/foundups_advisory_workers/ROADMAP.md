@@ -123,10 +123,18 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_ALWAYS_HOLOINDEX_GROUNDING_PHASE1
 
-- **Status:** IN PROGRESS (v0.3.23) - REGULAR auto context `none` -> `wsp_holo`.
+- **Status:** **LANDED** #885 (`888d0c9cc`) — REGULAR auto context `none` -> `wsp_holo`.
 - Every auto-routed tier attaches HoloIndex bundle-json at minimum; REGULAR stays single-model without Skillz/git.
 - Prerequisite: #883 landed (target content + sanitization on v0.3.22).
 - Does not fix output validation, made_network_call telemetry, or mojibake (separate slices).
+
+### REDDOG_CONTEXT_UNICODE_NORMALIZATION_PHASE1
+
+- **Status:** IN PROGRESS (v0.3.24) — normalize malformed Unicode in bridge payload before redaction gate.
+- Trigger: safe architect prompt blocked with `redactor_error` when HoloIndex context contains lone surrogate (e.g. `\udc94`).
+- Run Trace: `unicode_normalization_applied`, `unicode_replacements_count`, `unicode_normalization_sources`, `unicode_normalization_form`.
+- Out of scope: redaction policy weakening, schema repair, made_network_call telemetry, HoloIndex upstream cleanup (follow-up).
+- Acceptance: synthetic surrogate normalized; gate passes; `blocked_policy` unchanged; TCI + THG regression green.
 
 ### REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1
 

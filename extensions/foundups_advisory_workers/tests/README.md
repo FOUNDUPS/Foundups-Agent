@@ -31,7 +31,7 @@ python -m pytest holo_index/tests/test_reddog_extension_bundle_recall.py -q
 
 ## TEST_REGISTRY
 
-See `TestModLog.md` for TCI-001 through TCI-010 and THG-001 through THG-006.
+See `TestModLog.md` for TCI-001 through TCI-010, THG-001 through THG-006, and UNI-001 through UNI-007.
 
 ## Expected behavior
 

@@ -128,6 +128,15 @@ Run Trace HoloIndex scorecard fields (v0.3.22+):
 | `target_content_sanitized` | Block-triggering literals replaced before egress | OBSERVED |
 | `target_content_sanitized_categories` | Fusion BLOCK categories sanitized (metadata only) | OBSERVED |
 
+Run Trace Unicode normalization fields (v0.3.24+):
+
+| Field | Meaning | WSP_97 |
+|---|---|---|
+| `unicode_normalization_applied` | Bridge payload required surrogate replacement before gate | OBSERVED |
+| `unicode_replacements_count` | Count of isolated surrogate replacements (counts only) | OBSERVED |
+| `unicode_normalization_sources` | Pipe-separated: `prompt`, `context`, `repair_prompt` | OBSERVED |
+| `unicode_normalization_form` | `NFC` when normalization ran; `none` when skipped | OBSERVED |
+
 `evaluateTargetRecall(taskText, bundleOutput)` and `inferRecallTargetPaths(taskText)` implement target-specific recall inference from bundle `task_retrieval.code_hits`.
 
 Target content egress (v0.3.22+): `buildTargetRecallContentSection(root, taskText, maxChars)` reads workspace-confined snippets for inferred recall targets after HoloIndex path ranking. Snippets pass through `sanitizeTargetSnippetForRedaction()` before inclusion (ADDENDUM F); placeholders use neutral `[SANITIZED_BLOCK:NN]` tokens so category names do not re-trigger the Fusion gate. Telemetry reflects the **final** bounded context string assembled by `buildBoundedRepoContext` (before the 42000-char slice). `buildWsp97ProtocolExcerpt(root, maxChars)` adds a bounded WSP_97 protocol excerpt when the task mentions WSP_97 or truth labels.
