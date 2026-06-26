@@ -70,6 +70,7 @@ Direct-read fallback used per WSP_87 after HoloIndex retrieval evaluation.
 | LANE_B_EXCLUDED | OBSERVED |
 | PATH_RANKING_DISTINCT_FROM_CONTENT_INCLUSION | OBSERVED |
 | EXT_ACC_001_REPLACEMENT_REQUIRES_SOURCE_CONTENT | OBSERVED |
+| HEADER_BUILD_LABEL_DISTINCT_FROM_HOST_CODE | OBSERVED |
 
 ---
 
@@ -89,13 +90,28 @@ Direct-read fallback used per WSP_87 after HoloIndex retrieval evaluation.
 
 ### Preflight
 
-1. Confirm `origin/main` includes v0.3.21 (#878 landed).
+**Current shipped label:** Foundups(R)Agent **0.3.22** on branch `feat/reddog-context-target-content-inclusion-phase1` (VERIFIED_READY draft PR; main still **0.3.21** until merge).
+
+1. Confirm `origin/main` includes landed slices under test (e.g. #882 at `99d0e35c2`+).
 2. Build VSIX: `cd extensions/foundups_advisory_workers && npx vsce package --no-dependencies --out foundups-fusion-worker-0.3.21.vsix`
-3. Install VSIX; **Developer: Reload Window**.
+3. Force reinstall (preferred CLI):
+   ```powershell
+   cursor --install-extension "O:\Foundups-Agent\extensions\foundups_advisory_workers\foundups-fusion-worker-0.3.21.vsix" --force
+   ```
+   Or **Extensions: Install from VSIX...** then **Developer: Reload Window**.
 4. Open **Foundups(R)Agent: Open**.
-5. Confirm header shows **Build: 0.3.21**.
-6. Set `OPENROUTER_API_KEY` in Cursor launch environment (never paste into work focus).
-7. Record `installed_version_confirmed: true` only after header matches.
+5. Header `Build: 0.3.21` is **expected** today. It is not sufficient alone - same label can hide stale pre-#882 host code.
+6. **Install verification (required):** First Copy MD Run Trace must show:
+   - `provider_reasoning_note: Report-only in v0.3.21` (not v0.3.20)
+   - `code_hits_count: ...`
+   - `target_recall_ok: ...`
+   Optional disk check (012): compare installed Cursor extension folder `extension.js` against repo.
+7. Set `OPENROUTER_API_KEY` in Cursor launch environment (never paste into work focus).
+8. Record `installed_version_confirmed: true` only when **Run Trace internals** match post-#882 landed code on **0.3.21**.
+
+**Not in scope:** `devcontainer.json` does not install local VSIX or fix Cursor extension cache - do not use for this issue.
+
+**WSP_97:** Header `Build` = OBSERVED label only. Run Trace telemetry fields = OBSERVED proof of installed host code.
 
 ### Per-prompt procedure
 
@@ -393,10 +409,100 @@ Comparison fields: `012_verdict`, rubric totals, HoloIndex hit quality, `target_
 
 **012 action order:**
 
-1. Clean/land PR #882 (`HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1`).
-2. Rerun EXT-ACC-001 and EXT-ACC-003 on installed extension.
-3. If EXT-ACC-001 sees paths but not source content → queue `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1` (do not start until probe proves need).
-4. If EXT-ACC-001 passes all five replacement criteria → schedule full `REDDOG_EXTERNAL_ACCEPTANCE_REPLACEMENT_PHASE1`.
+1. ~~Clean/land PR #882~~ **DONE** (`99d0e35c2`).
+2. Rerun EXT-ACC-001 and EXT-ACC-003 on installed extension (post-#882 VSIX required).
+3. If probe **`redactor_error`** on clean post-#882 install → `REDDOG_REDACTION_GATE_CONTEXT_ERROR_DIAGNOSTIC_PHASE1`.
+4. **Telemetry gate:** One clean EXT-ACC-001 rerun must show `v0.3.21` note + `code_hits_count` + `target_recall_ok` before closing post-#882 verification.
+5. **Content-inclusion queue:** Stale/mixed artifacts may **queue** `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1` but do **not** close the telemetry gate or dispatch the slice alone.
+6. After telemetry gate + criterion #2 fail on clean run → dispatch `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1`.
+7. If EXT-ACC-001 passes all five replacement criteria → schedule full `REDDOG_EXTERNAL_ACCEPTANCE_REPLACEMENT_PHASE1`.
+
+---
+
+## Post-#882 probe results (recorded)
+
+### EXT-ACC-001_post_882_probe (2026-06-26)
+
+```yaml
+EXT-ACC-001_post_882_probe:
+  verdict: blocked
+  test_intent_fulfilled: false
+  reason: redaction_gate_blocked_before_openrouter
+  rule_class: redactor_error
+  made_network_call: false
+  model_output: none
+  target_recall_ok: not_reported
+  index_gap_detected: false  # transport-style; not useful when gate errors
+  holoindex_evaluated: false  # HoloIndex fix not assessable at model layer
+  context_chars: ~25708
+  context_mode: wsp_holo_skillz
+  stale_build_signal: provider_reasoning_note v0.3.20 in trace (post-#882 expects v0.3.21 + target_recall_ok)
+  next_slice_candidate: REDDOG_REDACTION_GATE_CONTEXT_ERROR_DIAGNOSTIC_PHASE1
+```
+
+**WSP_97 distinction:** `redactor_error` ≠ intentional `blocked_policy`. The redaction gate **errored while scanning** the bounded prompt/context, then failed closed. Correct safety behavior; blocks replacement probe.
+
+**Does not evaluate:** HoloIndex ranking (#882), target recall telemetry, or criterion #2 (source content inclusion).
+
+### EXT-ACC-001_post_882_probe_r2 (2026-06-26)
+
+```yaml
+EXT-ACC-001_post_882_probe_r2:
+  verdict: needs_repair
+  test_intent_fulfilled: partial
+  post_882_telemetry_gate: open  # v0.3.20 note; code_hits_count/target_recall_ok missing
+  reason: path_ranked_no_source_content; output_validation_failed
+  made_network_call: true
+  redaction_primary: passed
+  redaction_repair: blocked
+  model_quality: partial_good
+  target_recall_ok: not_reported
+  target_content_included: false
+  wsp97_finding_on_source_content: false
+  holoindex_path_hit: true
+  replacement_pass: fail
+  queue_content_inclusion: true
+  close_post_882_telemetry_gate: false
+  next_slice_candidate: REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1
+  secondary_slice: REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1
+```
+
+**WSP_97 calibration (012):** This artifact is sufficient to **queue** `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1`, but **not** sufficient to close the post-#882 telemetry verification gate. Main egress succeeded (not `redactor_error`). RedDog correctly refused to fake a source review; strongest signal: path hit, no source body in bounded context.
+
+**Pending:** One clean EXT-ACC-001 after force-install VSIX; then dispatch content-inclusion if criterion #2 still fails with telemetry active.
+
+**Install trap (2026-06-26, OBSERVED):** Header showed `Build: 0.3.21` while Run Trace had `v0.3.20` note and missing #882 fields. Cause: #882 changed `extension.js` without bumping version past `0.3.21`; Cursor retained older installed host. Force VSIX install + reload required; disk verify optional.
+
+### EXT-ACC-001_post_882_probe_r3 (2026-06-26)
+
+```yaml
+EXT-ACC-001_post_882_probe_r3:
+  verdict: needs_repair
+  test_intent_fulfilled: partial
+  post_882_telemetry_gate: open  # still v0.3.20 note; no code_hits_count/target_recall_ok
+  reason: path_ranked_no_source_content; output_validation_failed_after_repair
+  made_network_call: true
+  redaction_primary: passed
+  redaction_repair: passed  # both repair bridge passes succeeded (vs r2 repair blocked)
+  model_quality: partial_good
+  target_recall_ok: not_reported
+  target_content_included: false
+  wsp97_finding_on_source_content: false
+  holoindex_path_hit: true
+  replacement_pass: fail
+  queue_content_inclusion: true
+  close_post_882_telemetry_gate: false
+  mojibake_in_output: true  # 窶? in lead prose
+  next_slice_candidate: REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1
+  secondary_slice: REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1
+  install_action: force_install_did_not_stick_in_run_trace — re-verify Cursor extension host folder
+```
+
+**0102 note:** Same substantive signal as r2 (path hit, no source body). Telemetry gate **still open** — not valid as final post-#882 proof artifact. Sufficient to **queue** content inclusion; **dispatch** only after one run shows `v0.3.21` note + `target_recall_ok`.
+
+### EXT-ACC-003_post_882_probe
+
+**Status:** DEFER — rerun EXT-ACC-001 on clean install first (comparison path already established).
 
 ---
 
@@ -404,9 +510,10 @@ Comparison fields: `012_verdict`, rubric totals, HoloIndex hit quality, `target_
 
 | Slice | C | I | D | Impact | MPS | P | Trigger |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
-| HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1 | 3 | 5 | 4 | 5 | 17 | **P0** | EXT-ACC-003/014 INDEX_GAP — PR #882 draft |
-| REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1 | 4 | 5 | 3 | 5 | 17 | **P0** | **Conditional:** EXT-ACC-001 post-#882 probe shows path hit but no source snippet in bounded context |
-| REDDOG_EXTERNAL_ACCEPTANCE_REPLACEMENT_PHASE1 | 2 | 5 | 5 | 4 | 16 | **P0** | After #882 probe + any required content-inclusion slice |
+| HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1 | 3 | 5 | 4 | 5 | 17 | **P0** | **LANDED** #882 — path ranking + target recall telemetry |
+| REDDOG_REDACTION_GATE_CONTEXT_ERROR_DIAGNOSTIC_PHASE1 | 4 | 5 | 3 | 5 | 17 | **P0** | `redactor_error` on **clean** post-#882 install (probe r1 only so far) |
+| REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1 | 4 | 5 | 3 | 5 | 17 | **P0** | **QUEUED** — worker prompt ready; dispatch on architect approval |
+| REDDOG_EXTERNAL_ACCEPTANCE_REPLACEMENT_PHASE1 | 2 | 5 | 5 | 4 | 16 | **P0** | After probe + redaction fix + any content-inclusion slice |
 | REDDOG_DISPATCH_PROMPT_GENERATOR_PHASE1 | 3 | 5 | 3 | 5 | 16 | **P1** | EXT-ACC-006 weak dispatch output |
 | REDDOG_MODEL_REGISTRY_AND_ROUTING_AUDIT_PHASE1 | 2 | 4 | 3 | 4 | 13 | **P1** | EXT-ACC-008 routing confusion |
 | REDDOG_REVIEW_PACKET_MEMORY_PHASE1 | 3 | 4 | 2 | 4 | 13 | **P2** | After replacement pass |

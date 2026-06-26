@@ -1,5 +1,34 @@
 # Foundups®Agent TestModLog
 
+## 2026-06-14 - REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1 (ADDENDUM E)
+
+**Reuse:** `tests/fixtures.js` + registry below. Do not duplicate EXT-ACC-001 prompt strings in new tests.
+
+### TEST_REGISTRY (contract runner)
+
+| ID | Location | Asserts | Reuse for |
+| --- | --- | --- | --- |
+| TCI-001 | `verify_extension_contract.js` | `inferRecallTargetPaths(EXT_ACC_001_PROMPT)` -> `extension.js` | Recall inference regressions |
+| TCI-002 | same | `readBoundedTargetSnippet` nonzero body, `omitted_reason: none` | Snippet read regressions |
+| TCI-003 | same | `TARGET_READ_DENIED_PATHS` all rejected by `isTargetReadPathDenied` | Path safety regressions |
+| TCI-004 | same | `resolveSafeRepoFile` ok for `extension.js` | Workspace confinement |
+| TCI-005 | same | `buildTargetRecallContentSection` header + `target_content_included: true` | Section assembly |
+| TCI-006 | same | `buildWsp97ProtocolExcerpt` protocol title present | WSP_97 excerpt on task match |
+| TCI-007 | same | `buildBoundedRepoContext('wsp_holo_skillz', EXT_ACC_001_PROMPT)` integration | End-to-end bounded context |
+| TCI-008 | same | `inferRecallTargetPaths(BUILD_COPY_MARKDOWN_PROMPT)` -> `extension.js` | Symbol/path dual inference |
+
+**Fixtures file:** `tests/fixtures.js` exports `EXT_ACC_001_PROMPT`, `EXT_ACC_001_TARGET_PATH`, `BUILD_COPY_MARKDOWN_PROMPT`, `TARGET_READ_DENIED_PATHS`.
+
+**Prior slice (do not recreate):** HoloIndex path ranking -> `holo_index/tests/test_reddog_extension_bundle_recall.py` + TCI predecessor block (`evaluateTargetRecall`, `target_recall_ok`) in same contract file ~line 443.
+
+Commands:
+
+```powershell
+node --check extensions/foundups_advisory_workers/extension.js
+node extensions/foundups_advisory_workers/tests/verify_extension_contract.js
+git diff --check -- extensions/foundups_advisory_workers
+```
+
 ## 2026-06-26 - HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1
 - Verified `extension.js` in top 3 for EXT-ACC-001 review query (bundle-json + pytest).
 - Verified `extension.js:buildCopyMarkdown` top hit for buildCopyMarkdown query.
