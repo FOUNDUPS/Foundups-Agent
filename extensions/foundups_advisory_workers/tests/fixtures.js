@@ -8,6 +8,8 @@ const EXT_ACC_001_TARGET_PATH = 'extensions/foundups_advisory_workers/extension.
 
 const BUILD_COPY_MARKDOWN_PROMPT = 'Review buildCopyMarkdown in extensions/foundups_advisory_workers/extension.js for WSP_97 compliance.';
 
+const REGULAR_SMOKE_PROMPT = 'Reply with exactly: regular mode works';
+
 const TARGET_READ_DENIED_PATHS = [
   ['C:/Windows/System32/drivers/etc/hosts', 'absolute path'],
   ['../outside.txt', 'traversal'],
@@ -21,5 +23,6 @@ module.exports = {
   EXT_ACC_001_PROMPT,
   EXT_ACC_001_TARGET_PATH,
   BUILD_COPY_MARKDOWN_PROMPT,
+  REGULAR_SMOKE_PROMPT,
   TARGET_READ_DENIED_PATHS
 };

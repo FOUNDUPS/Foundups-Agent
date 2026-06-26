@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.22';
+const EXTENSION_VERSION = '0.3.23';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
 const TARGET_READ_BLOCKED_EXTENSIONS = ['.vsix'];
@@ -303,7 +303,7 @@ function resolveProviderReasoningReport(resolvedEffort) {
   return {
     provider_reasoning_requested: requestedMap[effort] || 'medium',
     provider_reasoning_applied: 'unknown',
-    provider_reasoning_note: 'Report-only in v0.3.22; bridge does not confirm provider reasoning application.'
+    provider_reasoning_note: 'Report-only in v0.3.23; bridge does not confirm provider reasoning application.'
   };
 }
 
@@ -784,7 +784,7 @@ function resolveAutoContextMode(classification, selectedContextMode) {
   }
   const tier = classification && classification.tier ? classification.tier : 'HIGH';
   if (tier === 'REGULAR') {
-    return 'none';
+    return 'wsp_holo';
   }
   if (tier === 'ULTRA') {
     return 'wsp_holo_git_skillz';
@@ -857,7 +857,10 @@ function validateRedDogOutput(markdown, options) {
 function modeSelectionReasoning(classification, resolvedEffort, resolvedMode, resolvedContextMode) {
   const tier = classification && classification.tier ? classification.tier : 'HIGH';
   if (resolvedMode === 'openrouter_single') {
-    return 'Single-model GLM principal: REGULAR-tier or smoke-classified work; avoids panel latency/cost; context=' + resolvedContextMode + '.';
+    if (tier === 'REGULAR') {
+      return 'Single-model GLM principal: REGULAR-tier work; HoloIndex-grounded wsp_holo (no Fusion panel, Skillz, or git); context=' + resolvedContextMode + '.';
+    }
+    return 'Single-model GLM principal: smoke-classified work; avoids panel latency/cost; context=' + resolvedContextMode + '.';
   }
   if (resolvedMode === 'openrouter_fusion_alias') {
     return 'Explicit Fusion alias path: black-box synthesis; critic transcripts not exposed.';

@@ -1,6 +1,6 @@
 # Foundups®Agent
 
-Version: 0.3.22
+Version: 0.3.23
 
 This local Cursor/VS Code extension opens one RedDog Architect advisory worker as an editor webview tab, similar in ergonomics to `Claude Code: Open` but without repo, shell, browser, merge, CABR, or payout authority.
 
@@ -99,7 +99,7 @@ The webview follows the VS Code terminal/chat shape:
 
 - Worker: RedDog Architect, WSP Gate Critic, Repair Planner, Smoke Test.
 - Routing: automatic via WSP_15-style task classification; 012 no longer picks Mode/Effort/Context for normal use.
-- Context: automatic. ULTRA tasks attach WSP + HoloIndex + active editor + git diff + Skillz/Wardrobe/Rolodex discovery; HIGH tasks attach WSP + HoloIndex + active editor + Skillz/Wardrobe/Rolodex discovery; REGULAR smoke avoids repo context.
+- Context: automatic. ULTRA tasks attach WSP + HoloIndex + active editor + git diff + Skillz/Wardrobe/Rolodex discovery; HIGH tasks attach WSP + HoloIndex + active editor + Skillz/Wardrobe/Rolodex discovery; REGULAR attaches WSP + HoloIndex only (`wsp_holo`, no Skillz/git).
 - Tests: regular smoke, Fusion smoke, WSP_97 repo review, RedDog architect review.
 
 For WSP/security/runtime/architecture work, RedDog auto-routes to `foundups_fusion` because it preserves a review packet with principal, critic, and synthesis excerpts. Regular smoke/simple prompts auto-route to a single GLM principal call. OpenRouter Fusion alias remains implemented in the bridge for explicit future use, but is not a 012-facing default control because individual critic traces are not exposed by the API response.
@@ -122,9 +122,9 @@ Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, 
 | DIGESTS_NOT_RAW_CONTEXT | OBSERVED |
 | ROUTING_UNCHANGED_FROM_0_3_14 | OBSERVED |
 | Mode/Effort/Context not 012-facing dropdowns | OBSERVED |
-| REGULAR 竊・`openrouter_single`, no repo context | OBSERVED |
-| HIGH 竊・`foundups_fusion` + WSP/Holo/Skillz context | OBSERVED |
-| ULTRA 竊・`foundups_fusion` + WSP/Holo/git/Skillz context | OBSERVED |
+| REGULAR -> `openrouter_single` + `wsp_holo` (HoloIndex only; no Skillz/git) | OBSERVED |
+| HIGH -> `foundups_fusion` + WSP/Holo/Skillz context | OBSERVED |
+| ULTRA -> `foundups_fusion` + WSP/Holo/git/Skillz context | OBSERVED |
 | Skillz/Rolodex discovery for operational prompts | OBSERVED |
 | Filesystem fallback when git spawn fails | OBSERVED |
 | RedDog Routing block in output | OBSERVED |

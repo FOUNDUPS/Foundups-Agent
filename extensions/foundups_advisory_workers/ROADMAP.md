@@ -121,9 +121,16 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - Add regression retrieval tests so extension bridge code ranks above adjacent WRE routers.
 - **Status:** **LANDED** #882 (`99d0e35c2`) — ranking + target recall telemetry only; not source-content inclusion.
 
+### REDDOG_ALWAYS_HOLOINDEX_GROUNDING_PHASE1
+
+- **Status:** IN PROGRESS (v0.3.23) - REGULAR auto context `none` -> `wsp_holo`.
+- Every auto-routed tier attaches HoloIndex bundle-json at minimum; REGULAR stays single-model without Skillz/git.
+- Prerequisite: #883 landed (target content + sanitization on v0.3.22).
+- Does not fix output validation, made_network_call telemetry, or mojibake (separate slices).
+
 ### REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1
 
-- **Status:** IN PROGRESS (v0.3.22) — test-first ADDENDUM E; 0102-runnable without 012 Cursor UI.
+- **Status:** VERIFIED_READY on #883 (v0.3.22) - stacked base for grounding slice.
 - Inject target file **content/snippets** into bounded bridge context when HoloIndex ranks the path but omits source body.
 - Trigger: EXT-ACC-001 criterion #2 fail with model egress (path hit ~7.4%, no source body) — **OBSERVED**.
 - Run Trace: `target_content_included`, `target_content_paths`, `target_content_chars`, `target_content_omitted_reason`, `target_content_truncated`.
