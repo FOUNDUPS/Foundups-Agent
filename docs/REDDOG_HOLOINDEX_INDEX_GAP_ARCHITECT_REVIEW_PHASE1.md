@@ -1,10 +1,10 @@
 # RedDog Architect Review — HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1
 
-**Status:** `VERIFIED_READY` (draft PR pending sovereign token)  
-**Lane:** External 012-facing Foundups(R)Agent / RedDog only — Lane B excluded  
-**Branch:** `feat/holoindex-reddog-extension-index-gap-phase1`  
-**Baseline:** EXT-ACC batch 1 (001, 003, 007, 011, 015) on extension **v0.3.21**  
-**Worker slice:** `HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1`  
+**Status:** `VERIFIED_READY` (draft PR pending sovereign token)
+**Lane:** External 012-facing Foundups(R)Agent / RedDog only — Lane B excluded
+**Branch:** `feat/holoindex-reddog-extension-index-gap-phase1`
+**Baseline:** EXT-ACC batch 1 (001, 003, 007, 011, 015) on extension **v0.3.21**
+**Worker slice:** `HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1`
 **Date:** 2026-06-26
 
 ---
@@ -169,10 +169,10 @@ git diff --check -- extensions/foundups_advisory_workers holo_index NAVIGATION.p
 
 ## Follow-on slices (ordered)
 
-1. **Merge this slice** → rerun EXT-ACC-001 + EXT-ACC-003  
-2. `REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1`  
-3. `REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1`  
-4. `REDDOG_REDACTION_CONTEXT_TUNING_PHASE1`  
+1. **Merge this slice** → rerun EXT-ACC-001 + EXT-ACC-003
+2. `REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1`
+3. `REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1`
+4. `REDDOG_REDACTION_CONTEXT_TUNING_PHASE1`
 5. `REDDOG_EXTERNAL_ACCEPTANCE_REPLACEMENT_PHASE1` (full 15-pack)
 
 ---
@@ -191,11 +191,11 @@ PR body must embed: baseline citations, this before/after table, hard checks 1�
 
 ## Architect review checklist
 
-- [ ] Baseline finding acknowledged: transport OK ≠ target recall OK  
-- [ ] Hard checks 1–5 evidence acceptable  
-- [ ] NAVIGATION fix verified (`NEED_TO` not `DAE_ARCHITECTURE`)  
-- [ ] No Lane B / OpenRouter / redaction scope creep  
-- [ ] Residual gaps assigned to correct follow-on slices  
-- [ ] Ready to rerun EXT-ACC-001 + EXT-ACC-003 after merge  
+- [ ] Baseline finding acknowledged: transport OK ≠ target recall OK
+- [ ] Hard checks 1–5 evidence acceptable
+- [ ] NAVIGATION fix verified (`NEED_TO` not `DAE_ARCHITECTURE`)
+- [ ] No Lane B / OpenRouter / redaction scope creep
+- [ ] Residual gaps assigned to correct follow-on slices
+- [ ] Ready to rerun EXT-ACC-001 + EXT-ACC-003 after merge
 
 **Worker recommendation:** `APPROVE_DRAFT_PR`
