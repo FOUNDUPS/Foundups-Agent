@@ -31,13 +31,14 @@ python -m pytest holo_index/tests/test_reddog_extension_bundle_recall.py -q
 
 ## TEST_REGISTRY
 
-See `TestModLog.md` for TCI-001 through TCI-010. Extend registry rows; do not duplicate probes.
+See `TestModLog.md` for TCI-001 through TCI-010 and THG-001 through THG-006.
 
 ## Expected behavior
 
 - `inferRecallTargetPaths(EXT_ACC_001_PROMPT)` includes `extension.js`.
-- `buildBoundedRepoContext('wsp_holo_skillz', EXT_ACC_001_PROMPT)` includes target recall content, WSP_97 excerpt, and `target_content_included: true` in scorecard.
+- `resolveAutoContextMode(EXT_ACC_001_PROMPT tier HIGH)` unchanged; REGULAR -> `wsp_holo`.
 - ADDENDUM F: sanitized snippets pass Python `evaluate_redaction_gate` (TCI-009/TCI-010).
+- THG-001..006: REGULAR HoloIndex grounding (see TestModLog registry).
 - Path safety rejects absolute, traversal, `.env`, `.git`, `node_modules`, `.vsix`.
 
 ## Integration requirements

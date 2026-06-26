@@ -164,7 +164,7 @@ Internal contract layer. Advisory-only. No new authority.
 | Function | Purpose |
 |---|---|
 | `classifyTaskForRedDog(prompt, contextMode, workerType)` | WSP_15-style effort/risk classification |
-| `resolveAutoContextMode(classification, selectedContextMode)` | Maps Auto context to none / WSP+Holo+Skillz / WSP+Holo+git+Skillz |
+| `resolveAutoContextMode(classification, selectedContextMode)` | Maps Auto context to `wsp_holo` (REGULAR) / WSP+Holo+Skillz (HIGH) / WSP+Holo+git+Skillz (ULTRA) |
 | `resolveAutoEffort(classification, selectedEffort)` | Maps Auto -> regular/high/ultra |
 | `resolveModelMode(classification, selectedMode, workerType)` | RedDog WSP work defaults to auditable manual panel |
 | `validateRedDogOutput(markdown)` | Required schema section check |
@@ -194,7 +194,7 @@ Model and context routing:
 - Principal/synthesis default: `z-ai/glm-5.2`.
 - Adversarial critic default: `deepseek/deepseek-v4-pro`.
 - Implementation critic default: `moonshotai/kimi-k2.7-code`.
-- REGULAR smoke/simple prompts auto-route to `openrouter_single` with the GLM principal and no repo context.
+- REGULAR smoke/simple prompts auto-route to `openrouter_single` with the GLM principal and `wsp_holo` HoloIndex grounding (no Fusion panel, Skillz, or git).
 - Context is not a 012-facing selector; it is resolved from WSP_15 tier.
 - Skillz/Wardrobe/Rolodex/OpenClaw/Hermes discovery is context only. RedDog may recommend a governed handoff, but this extension cannot execute it.
 - `openrouter_fusion_alias` remains implemented for future explicit use, but is not the RedDog default because critic traces are not exposed.

@@ -1,5 +1,26 @@
 # Foundups®Agent TestModLog
 
+## 2026-06-14 - REDDOG_ALWAYS_HOLOINDEX_GROUNDING_PHASE1 (THG-001..006)
+
+| ID | Asserts |
+| --- | --- |
+| THG-001 | `resolveAutoContextMode(regular, 'auto') === 'wsp_holo'` |
+| THG-002 | HIGH -> `wsp_holo_skillz` (unchanged) |
+| THG-003 | ULTRA -> `wsp_holo_git_skillz` (unchanged) |
+| THG-004 | `buildBoundedRepoContext('wsp_holo', REGULAR_SMOKE_PROMPT)` includes HoloIndex recall |
+| THG-005 | `wsp_holo` returns non-null `holoindex_scorecard` |
+| THG-006 | `modeSelectionReasoning` cites HoloIndex-grounded `wsp_holo` for REGULAR |
+
+Regression: TCI-001..TCI-010 (#883) must still pass.
+
+Commands:
+
+```powershell
+node --check extensions/foundups_advisory_workers/extension.js
+node extensions/foundups_advisory_workers/tests/verify_extension_contract.js
+git diff --check -- extensions/foundups_advisory_workers
+```
+
 ## 2026-06-14 - REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1 (ADDENDUM E)
 
 **Reuse:** `tests/fixtures.js` + registry below. Do not duplicate EXT-ACC-001 prompt strings in new tests.

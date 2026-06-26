@@ -1,5 +1,15 @@
 # Foundups®Agent ModLog
 
+## 2026-06-14 - REDDOG_ALWAYS_HOLOINDEX_GROUNDING_PHASE1 (v0.3.23)
+
+- REGULAR auto context: `none` -> `wsp_holo` (HoloIndex bundle-json; no Skillz/git/Fusion panel).
+- Updated `modeSelectionReasoning` for REGULAR: cites HoloIndex-grounded wsp_holo.
+- Contract tests THG-001..006; fixtures `REGULAR_SMOKE_PROMPT`.
+- Preserved #883 target content + TCI-001..TCI-010 + ADDENDUM F gate tests.
+- Version bump 0.3.22 -> 0.3.23.
+
+WSP: WSP_00, WSP_15, WSP_87, WSP_97, WSP_22.
+
 ## 2026-06-14 - ADDENDUM F redaction-safe target snippets (v0.3.22)
 
 - Raw `extension.js` snippets tripped Fusion BLOCK categories (`governance_instruction`, `private_reasoning`, etc.) before OpenRouter.

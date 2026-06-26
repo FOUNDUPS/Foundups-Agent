@@ -52,8 +52,8 @@ function extractTargetRecallSection(contextText) {
   return next === -1 ? tail : tail.slice(0, next);
 }
 
-assert.strictEqual(pkg.version, '0.3.22', 'package version must be 0.3.22');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.22'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.23', 'package version must be 0.3.23');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.23'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -70,7 +70,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.22', 'README version mismatch');
+includes(readme, 'Version: 0.3.23', 'README version mismatch');
 includes(extensionJs, 'function resolvePythonInterpreter', 'python resolver missing');
 includes(extensionJs, 'function applyBridgeContextBudget', 'context budget missing');
 includes(extensionJs, 'function killBridgeChild', 'orphan cleanup missing');
@@ -210,7 +210,7 @@ assert.strictEqual(
 assert.strictEqual(orchestrator.resolveAutoEffort(ultra, 'auto'), 'ultra', 'auto effort must map ULTRA classification to ultra');
 assert.strictEqual(orchestrator.resolveAutoContextMode(ultra, 'auto'), 'wsp_holo_git_skillz', 'ULTRA must attach WSP/Holo/git/Skillz context');
 assert.strictEqual(orchestrator.resolveAutoContextMode(wsp, 'auto'), 'wsp_holo_skillz', 'HIGH/WSP must attach WSP/Holo/Skillz context');
-assert.strictEqual(orchestrator.resolveAutoContextMode(regular, 'auto'), 'none', 'REGULAR smoke must avoid repo context');
+assert.strictEqual(orchestrator.resolveAutoContextMode(regular, 'auto'), 'wsp_holo', 'REGULAR must attach wsp_holo HoloIndex grounding');
 assert.strictEqual(orchestrator.resolveAutoEffort(regular, 'auto'), 'regular', 'auto effort must map REGULAR classification to regular');
 
 const reasoning = orchestrator.modeSelectionReasoning(wsp, 'high', 'foundups_fusion', 'wsp_holo_skillz');
@@ -557,7 +557,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.22'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.23'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -571,7 +571,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.22'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.23'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -583,7 +583,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.22'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.23'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -607,5 +607,13 @@ assertFusionRedactionGatePasses(targetRecallSection, 'target recall section must
 assertFusionRedactionGatePasses(boundedContext.text, 'EXT-ACC-001 bounded context must pass fusion redaction gate');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_sanitized, true, 'scorecard target_content_sanitized must be true when replacements occurred');
 assert(boundedContext.holoindex_scorecard.target_content_sanitized_categories.length > 0, 'scorecard must list sanitized categories');
+
+// ADDENDUM B - REDDOG_ALWAYS_HOLOINDEX_GROUNDING_PHASE1 (THG-001..THG-006)
+const regularHoloContext = orchestrator.buildBoundedRepoContext('wsp_holo', fixtures.REGULAR_SMOKE_PROMPT);
+includes(regularHoloContext.text, '### HoloIndex recall', 'THG-004: wsp_holo must include HoloIndex recall section');
+assert(regularHoloContext.holoindex_scorecard !== null, 'THG-005: wsp_holo must return holoindex_scorecard');
+const regularReasoning = orchestrator.modeSelectionReasoning(regular, 'regular', 'openrouter_single', 'wsp_holo');
+includes(regularReasoning, 'wsp_holo', 'THG-006: REGULAR mode selection must cite wsp_holo');
+includes(regularReasoning, 'HoloIndex-grounded', 'THG-006: REGULAR mode selection must state HoloIndex grounding');
 
 console.log('Foundups®Agent extension contract checks passed.');
