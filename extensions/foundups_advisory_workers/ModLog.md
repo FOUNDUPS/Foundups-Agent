@@ -1,5 +1,28 @@
 # Foundups®Agent ModLog
 
+## 2026-06-14 - ADDENDUM F redaction-safe target snippets (v0.3.22)
+
+- Raw `extension.js` snippets tripped Fusion BLOCK categories (`governance_instruction`, `private_reasoning`, etc.) before OpenRouter.
+- Added `sanitizeTargetSnippetForRedaction()` mirroring `fusion_redaction_gate.py` BLOCK detectors; neutral `[SANITIZED_BLOCK:NN]` placeholders (category names in metadata only).
+- Run Trace: `target_content_sanitized`, `target_content_sanitized_categories`.
+- Contract tests TCI-009/TCI-010: Python gate probe on EXT-ACC-001 bounded context (no OpenRouter).
+- `fusion_redaction_gate.py` unchanged.
+
+WSP: WSP_97, WSP_22, WSP_84.
+
+## 2026-06-14 - REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1 (v0.3.22)
+
+- Added workspace-confined target snippet readers: `readBoundedTargetSnippet`, `buildTargetRecallContentSection`, `buildWsp97ProtocolExcerpt`.
+- Wired `buildBoundedRepoContext` to egress `### Target recall content` after HoloIndex bundle-json (before Skillz noise).
+- WSP_97 tasks append bounded `### WSP protocol excerpt (bounded)` from `WSP_97_System_Execution_Prompting_Protocol.md`.
+- Run Trace scorecard: `target_content_included`, `target_content_paths`, `target_content_chars`, `target_content_omitted_reason`, `target_content_truncated`.
+- Path safety rejects absolute paths, `..`, `.git`, `node_modules`, `.env`, `.vsix`; realpath confinement.
+- ADDENDUM E contract tests: inferRecallTargetPaths, snippet inclusion, buildBoundedRepoContext integration, path denial (no OpenRouter).
+- Shared fixtures: `tests/fixtures.js`; TEST_REGISTRY TCI-001..008 in `tests/TestModLog.md`; `tests/README.md` for reuse policy.
+- Version bump 0.3.21 -> 0.3.22 (install hygiene).
+
+WSP: WSP_00, WSP_15, WSP_87, WSP_97, WSP_22, WSP_84.
+
 ## 2026-06-26 - REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1 (docs)
 - Added `docs/REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md`: 15-prompt pack, 012 rubric, runbook, WSP_97 truth rows, baseline vs replacement pass.
 - Added `docs/acceptance/README.md` artifact storage rules.
@@ -7,6 +30,57 @@
 - No runtime behavior changes; external lane scoreboard only.
 
 WSP: WSP_00, WSP_15, WSP_87, WSP_97, WSP_22.
+
+## 2026-06-26 - Content inclusion prompt REQUEST_CHANGES resolved
+
+- Architect addenda A-D merged into `.prompt_reddog_context_target_content_inclusion_phase1.md`
+- ASCII clean dispatch; MOJIBAKE validation via `MOJIBAKE_MARKERS` export not embedded chars
+- Workspace-confined read safety + final-context telemetry + test exports specified
+- Status: **APPROVE_WORKER_DISPATCH** (architect) pending worker implementation
+
+WSP: WSP_97, WSP_22.
+
+## 2026-06-26 - REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION worker prompt (review)
+
+- Worker prompt: `.prompt_reddog_context_target_content_inclusion_phase1.md`
+- Queued from EXT-ACC-001 evidence: path hit, no source content in bounded context.
+- Version bump 0.3.22 planned in slice (install hygiene).
+
+WSP: WSP_97, WSP_22.
+
+## 2026-06-26 - EXT-ACC-001 post-#882 probe r3 (telemetry gate still open)
+
+- Same path-only signal as r2; repair redaction passed (r2 repair blocked).
+- Run Trace still `v0.3.20` — force-install did not reflect in host; telemetry gate open.
+- Queue content inclusion; hold dispatch until `target_recall_ok` appears in Run Trace.
+
+WSP: WSP_97, WSP_22.
+
+## 2026-06-26 - Install trap: header 0.3.21 vs stale host (docs)
+
+- **OBSERVED:** Cursor header `Build: 0.3.21` while installed `extension.js` had `v0.3.20` provider note and no #882 telemetry.
+- **Cause:** #882 landed without version bump beyond `0.3.21`; force VSIX install required.
+- **Runbook:** Preflight requires Run Trace internals, not header alone.
+
+WSP: WSP_97, WSP_22.
+
+## 2026-06-26 - EXT-ACC-001 post-#882 probe r2 (needs_repair, stale telemetry)
+
+- Main egress succeeded; RedDog correctly BLOCKed on missing source (path hit ~7.4%, no content body).
+- **Queue** `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1` — do **not** treat as final post-#882 proof (v0.3.20 note; no `target_recall_ok` / `code_hits_count`).
+- **Pending:** Clean EXT-ACC-001 after force-install VSIX; then dispatch content-inclusion if criterion #2 still fails with telemetry active.
+
+WSP: WSP_97, WSP_22.
+
+## 2026-06-26 - EXT-ACC-001 post-#882 probe recorded (blocked)
+
+- **Verdict:** `blocked` — `redactor_error` before OpenRouter; HoloIndex fix not assessable at model layer.
+- **Distinction:** `redactor_error` (gate scan error, fail-closed) ≠ `blocked_policy` (intentional policy block).
+- **Next slice (P0):** `REDDOG_REDACTION_GATE_CONTEXT_ERROR_DIAGNOSTIC_PHASE1` — before `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1`.
+- **Pending:** EXT-ACC-003 post-#882 probe (confirms context bundle vs work focus if same error).
+- **Note:** Trace showed `v0.3.20` provider note — reinstall post-#882 VSIX before reruns.
+
+WSP: WSP_97, WSP_22.
 
 ## 2026-06-26 - Post-#882 acceptance criteria update (docs)
 

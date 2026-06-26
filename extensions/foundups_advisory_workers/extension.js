@@ -4,7 +4,23 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.21';
+const EXTENSION_VERSION = '0.3.22';
+const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
+const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
+const TARGET_READ_BLOCKED_EXTENSIONS = ['.vsix'];
+const TARGET_SNIPPET_MAX_FILE_BYTES = 500000;
+const TARGET_SNIPPET_DEFAULT_CHARS = 16000;
+const WSP97_EXCERPT_MAX_CHARS = 4096;
+const WSP97_PROTOCOL_REL_PATH = 'WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md';
+// Mirrors fusion_redaction_gate.py BLOCK categories only (policy v1). Do not weaken Python gate.
+const TARGET_SNIPPET_BLOCK_SANITIZERS = [
+  ['private_key_residual', /-----BEGIN [A-Z0-9 ]*PRIVATE KEY-----/gi],
+  ['private_reasoning', /(?:<\s*think(?:ing)?\b|<\/\s*think|<\s*scratchpad|chain[\s_\-]?of[\s_\-]?thought|hidden[\s_\-]+chain[\s_\-]?of[\s_\-]?thought|hidden[\s_\-]?reasoning|private[\s_\-]?reasoning)/gi],
+  ['merge_authorization', /\b(?:pull_request_merge|merge[\s_\-]?token|auto[\s_\-]?merge[\s_\-]?token|merge[\s_\-]?authoriz\w*)\b/gi],
+  ['source_authority', /\bsource[\s_\-]?authority\b/gi],
+  ['cabr_payout_authority', /\b(?:cabr[\s_\-]?ready|cabr[\s_\-]?payout|payout[\s_\-]?ready|payout[\s_\-]?routing|benefit[\s_\-]?routing|route[\s_\-]?payouts|capability_token\w*)\b/gi],
+  ['governance_instruction', /\b(?:internal[\s_\-]?governance|governance[\s_\-]?instruction|redaction_gate_(?:passed|blocked|started)|gate[\s_\-]?passed|grant[\s_\-]?authority)\b/gi]
+];
 const REDDOG_TERMINAL_HOLD_MS = 3000;
 const REDACTION_BLOCK_OPERATOR_MESSAGE = 'Stopped before OpenRouter. Nothing left the machine.';
 const BRIDGE_MAX_STDOUT_BYTES = 262144;
@@ -287,7 +303,7 @@ function resolveProviderReasoningReport(resolvedEffort) {
   return {
     provider_reasoning_requested: requestedMap[effort] || 'medium',
     provider_reasoning_applied: 'unknown',
-    provider_reasoning_note: 'Report-only in v0.3.21; bridge does not confirm provider reasoning application.'
+    provider_reasoning_note: 'Report-only in v0.3.22; bridge does not confirm provider reasoning application.'
   };
 }
 
@@ -354,7 +370,16 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     skill_hits: meta.skill_hits !== undefined ? meta.skill_hits : 'unknown',
     target_recall_ok: meta.target_recall_ok !== undefined ? meta.target_recall_ok : 'unknown',
     index_gap_detected: meta.index_gap_detected !== undefined ? meta.index_gap_detected : 'unknown',
-    direct_read_fallback_used: meta.direct_read_fallback_used !== undefined ? meta.direct_read_fallback_used : 'unknown'
+    direct_read_fallback_used: meta.direct_read_fallback_used !== undefined ? meta.direct_read_fallback_used : 'unknown',
+    target_content_included: meta.target_content_included !== undefined ? meta.target_content_included : 'unknown',
+    target_content_paths: Array.isArray(meta.target_content_paths) ? meta.target_content_paths : 'unknown',
+    target_content_chars: meta.target_content_chars !== undefined ? meta.target_content_chars : 'unknown',
+    target_content_omitted_reason: meta.target_content_omitted_reason !== undefined ? meta.target_content_omitted_reason : 'unknown',
+    target_content_truncated: meta.target_content_truncated !== undefined ? meta.target_content_truncated : 'unknown',
+    target_content_sanitized: meta.target_content_sanitized !== undefined ? meta.target_content_sanitized : 'unknown',
+    target_content_sanitized_categories: Array.isArray(meta.target_content_sanitized_categories)
+      ? meta.target_content_sanitized_categories
+      : 'unknown'
   };
 }
 
@@ -369,7 +394,16 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- skill_hits: ' + scorecard.skill_hits,
     '- target_recall_ok: ' + scorecard.target_recall_ok,
     '- index_gap_detected: ' + scorecard.index_gap_detected,
-    '- direct_read_fallback_used: ' + scorecard.direct_read_fallback_used
+    '- direct_read_fallback_used: ' + scorecard.direct_read_fallback_used,
+    '- target_content_included: ' + scorecard.target_content_included,
+    '- target_content_paths: ' + (Array.isArray(scorecard.target_content_paths) ? scorecard.target_content_paths.join(', ') : scorecard.target_content_paths),
+    '- target_content_chars: ' + scorecard.target_content_chars,
+    '- target_content_omitted_reason: ' + scorecard.target_content_omitted_reason,
+    '- target_content_truncated: ' + scorecard.target_content_truncated,
+    '- target_content_sanitized: ' + scorecard.target_content_sanitized,
+    '- target_content_sanitized_categories: ' + (Array.isArray(scorecard.target_content_sanitized_categories)
+      ? scorecard.target_content_sanitized_categories.join(', ')
+      : scorecard.target_content_sanitized_categories)
   ];
 }
 
@@ -1416,6 +1450,24 @@ function buildBoundedRepoContext(mode, taskText) {
     holoindex_scorecard = extractHoloIndexScorecard(mode, holoindex_meta);
     sections.push('### HoloIndex recall (WSP_00 bundle-json first; offline fallback only if needed)\n```text\n' + (holo.output || '(no HoloIndex output)') + '\n```');
   }
+  let targetContentMeta = null;
+  if (mode !== 'none') {
+    const targetSection = buildTargetRecallContentSection(root, taskText || '', 24000);
+    if (targetSection.text) {
+      sections.push(targetSection.text);
+    }
+    targetContentMeta = targetSection.meta;
+    holoindex_meta = mergeTargetContentMeta(holoindex_meta, targetContentMeta);
+    holoindex_scorecard = extractHoloIndexScorecard(mode, holoindex_meta);
+    if (taskMentionsWsp97(taskText)) {
+      const wsp97 = buildWsp97ProtocolExcerpt(root, WSP97_EXCERPT_MAX_CHARS);
+      if (wsp97.text) {
+        sections.push(wsp97.text);
+        holoindex_meta = applyWsp97SanitizationMeta(holoindex_meta, wsp97.meta);
+        holoindex_scorecard = extractHoloIndexScorecard(mode, holoindex_meta);
+      }
+    }
+  }
   if (mode === 'wsp_holo_skillz' || mode === 'wsp_holo_git_skillz') {
     const skillz = skillzWardrobeRolodexContext(root, taskText || '', 12000);
     sections.push(skillz);
@@ -1571,6 +1623,264 @@ function scoreSkillzPath(file, tokens) {
     if (normalized.includes(token)) score += 4;
   }
   return score;
+}
+
+function normalizeRelRepoPath(relPath) {
+  return String(relPath || '').replace(/\\/g, '/').replace(/^\/+/, '');
+}
+
+function isTargetReadPathDenied(relPath) {
+  const normalized = normalizeRelRepoPath(relPath);
+  if (!normalized) {
+    return 'path_missing';
+  }
+  if (path.isAbsolute(normalized) || /^[a-zA-Z]:/.test(normalized)) {
+    return 'outside_root';
+  }
+  if (normalized.includes('..')) {
+    return 'outside_root';
+  }
+  const lower = normalized.toLowerCase();
+  const parts = lower.split('/');
+  for (const seg of TARGET_READ_BLOCKED_SEGMENTS) {
+    if (parts.includes(seg)) {
+      return 'outside_root';
+    }
+  }
+  const base = path.basename(lower);
+  for (const name of TARGET_READ_BLOCKED_BASENAMES) {
+    if (base === name || base.startsWith(name + '.')) {
+      return 'outside_root';
+    }
+  }
+  for (const ext of TARGET_READ_BLOCKED_EXTENSIONS) {
+    if (lower.endsWith(ext)) {
+      return 'outside_root';
+    }
+  }
+  return null;
+}
+
+function resolveSafeRepoFile(root, relPath) {
+  const deny = isTargetReadPathDenied(relPath);
+  if (deny) {
+    return { ok: false, reason: deny };
+  }
+  try {
+    const resolvedRoot = path.resolve(root);
+    const full = path.resolve(resolvedRoot, relPath);
+    if (full !== resolvedRoot && !full.startsWith(resolvedRoot + path.sep)) {
+      return { ok: false, reason: 'outside_root' };
+    }
+    const realpathFn = fs.realpathSync.native || fs.realpathSync;
+    const real = realpathFn(full);
+    const realRoot = realpathFn(resolvedRoot);
+    if (real !== realRoot && !real.startsWith(realRoot + path.sep)) {
+      return { ok: false, reason: 'outside_root' };
+    }
+    return { ok: true, full: real };
+  } catch (err) {
+    return { ok: false, reason: 'path_missing' };
+  }
+}
+
+function isLikelyBinaryFile(fullPath) {
+  try {
+    const fd = fs.openSync(fullPath, 'r');
+    const buf = Buffer.alloc(8192);
+    const n = fs.readSync(fd, buf, 0, 8192, 0);
+    fs.closeSync(fd);
+    return buf.slice(0, n).includes(0);
+  } catch (err) {
+    return true;
+  }
+}
+
+function targetSnippetLanguageId(relPath) {
+  const normalized = normalizeRelRepoPath(relPath).toLowerCase();
+  if (normalized.endsWith('.py')) {
+    return 'python';
+  }
+  if (normalized.endsWith('.js')) {
+    return 'javascript';
+  }
+  if (normalized.endsWith('.md')) {
+    return 'markdown';
+  }
+  return 'text';
+}
+
+function sanitizeTargetSnippetForRedaction(raw) {
+  let out = String(raw || '');
+  const categories = [];
+  TARGET_SNIPPET_BLOCK_SANITIZERS.forEach((entry, idx) => {
+    const cat = entry[0];
+    const rx = entry[1];
+    const placeholder = '[SANITIZED_BLOCK:' + String(idx + 1).padStart(2, '0') + ']';
+    let hit = false;
+    out = out.replace(rx, () => {
+      hit = true;
+      return placeholder;
+    });
+    if (hit && categories.indexOf(cat) === -1) {
+      categories.push(cat);
+    }
+  });
+  return { text: out, sanitized: categories.length > 0, categories: categories };
+}
+
+function mergeSanitizedCategories(into, from) {
+  const merged = Array.isArray(into) ? into.slice() : [];
+  if (!Array.isArray(from)) {
+    return merged;
+  }
+  for (const cat of from) {
+    if (merged.indexOf(cat) === -1) {
+      merged.push(cat);
+    }
+  }
+  return merged;
+}
+
+function readBoundedTargetSnippet(root, relPath, maxChars) {
+  const max = maxChars || TARGET_SNIPPET_DEFAULT_CHARS;
+  const resolved = resolveSafeRepoFile(root, relPath);
+  if (!resolved.ok) {
+    return { content: '', omitted_reason: resolved.reason, truncated: false, chars: 0 };
+  }
+  try {
+    const stat = fs.statSync(resolved.full);
+    if (!stat.isFile()) {
+      return { content: '', omitted_reason: 'path_missing', truncated: false, chars: 0 };
+    }
+    if (stat.size > TARGET_SNIPPET_MAX_FILE_BYTES) {
+      return { content: '', omitted_reason: 'binary_or_oversized', truncated: false, chars: 0 };
+    }
+    if (isLikelyBinaryFile(resolved.full)) {
+      return { content: '', omitted_reason: 'binary_or_oversized', truncated: false, chars: 0 };
+    }
+    const raw = fs.readFileSync(resolved.full, 'utf8');
+    const truncated = raw.length > max;
+    const clipped = truncated ? raw.slice(0, max) + '\n...[TRUNCATED ' + (raw.length - max) + ' chars]' : raw;
+    const sanitized = sanitizeTargetSnippetForRedaction(clipped);
+    return {
+      content: sanitized.text,
+      omitted_reason: 'none',
+      truncated,
+      chars: sanitized.text.length,
+      sanitized: sanitized.sanitized,
+      sanitized_categories: sanitized.categories
+    };
+  } catch (err) {
+    return { content: '', omitted_reason: 'read_error', truncated: false, chars: 0, sanitized: false, sanitized_categories: [] };
+  }
+}
+
+function readBoundedTargetSnippets(root, taskText, opts) {
+  const options = opts && typeof opts === 'object' ? opts : {};
+  const built = buildTargetRecallContentSection(root, taskText, options.maxChars || 24000);
+  return {
+    sections: built.text ? [built.text] : [],
+    meta: built.meta
+  };
+}
+
+function buildTargetRecallContentSection(root, taskText, maxChars) {
+  const budget = maxChars || 24000;
+  const targets = inferRecallTargetPaths(taskText).filter((target) => !target.startsWith('symbol:'));
+  const meta = {
+    target_content_included: false,
+    target_content_paths: [],
+    target_content_chars: 0,
+    target_content_omitted_reason: 'no_targets',
+    target_content_truncated: false,
+    target_content_sanitized: false,
+    target_content_sanitized_categories: []
+  };
+  if (!targets.length) {
+    return { text: '', meta };
+  }
+  const sections = [];
+  let used = 0;
+  let anyIncluded = false;
+  let truncatedAny = false;
+  const omitted = [];
+  for (const rel of targets) {
+    const perFile = Math.max(2000, Math.floor(budget / targets.length));
+    const snippet = readBoundedTargetSnippet(root, rel, perFile);
+    if (snippet.content) {
+      anyIncluded = true;
+      meta.target_content_paths.push(rel);
+      used += snippet.chars;
+      if (snippet.truncated) {
+        truncatedAny = true;
+      }
+      if (snippet.sanitized) {
+        meta.target_content_sanitized = true;
+        meta.target_content_sanitized_categories = mergeSanitizedCategories(meta.target_content_sanitized_categories, snippet.sanitized_categories);
+      }
+      sections.push('#### ' + rel + '\n```' + targetSnippetLanguageId(rel) + '\n' + snippet.content + '\n```');
+    } else if (snippet.omitted_reason && snippet.omitted_reason !== 'none') {
+      omitted.push(snippet.omitted_reason);
+    }
+  }
+  meta.target_content_included = anyIncluded;
+  meta.target_content_chars = used;
+  meta.target_content_truncated = truncatedAny;
+  meta.target_content_omitted_reason = anyIncluded ? 'none' : (omitted[0] || 'path_missing');
+  if (!sections.length) {
+    return { text: '', meta };
+  }
+  return { text: '### Target recall content\n' + sections.join('\n\n'), meta };
+}
+
+function taskMentionsWsp97(taskText) {
+  return /wsp[_\s-]?97|truth[\s_-]?label/i.test(String(taskText || ''));
+}
+
+function buildWsp97ProtocolExcerpt(root, maxChars) {
+  const snippet = readBoundedTargetSnippet(root, WSP97_PROTOCOL_REL_PATH, maxChars || WSP97_EXCERPT_MAX_CHARS);
+  if (!snippet.content) {
+    return { text: '', meta: { wsp97_excerpt_included: false, wsp97_excerpt_chars: 0, wsp97_excerpt_sanitized: false, wsp97_excerpt_sanitized_categories: [] } };
+  }
+  return {
+    text: '### WSP protocol excerpt (bounded)\n```markdown\n' + snippet.content + '\n```',
+    meta: {
+      wsp97_excerpt_included: true,
+      wsp97_excerpt_chars: snippet.chars,
+      wsp97_excerpt_sanitized: !!snippet.sanitized,
+      wsp97_excerpt_sanitized_categories: snippet.sanitized_categories || []
+    }
+  };
+}
+
+function mergeTargetContentMeta(holoMeta, targetMeta) {
+  const meta = holoMeta && typeof holoMeta === 'object' ? Object.assign({}, holoMeta) : {};
+  if (targetMeta) {
+    meta.target_content_included = targetMeta.target_content_included;
+    meta.target_content_paths = targetMeta.target_content_paths || [];
+    meta.target_content_chars = targetMeta.target_content_chars || 0;
+    meta.target_content_omitted_reason = targetMeta.target_content_omitted_reason || 'unknown';
+    meta.target_content_truncated = !!targetMeta.target_content_truncated;
+    meta.target_content_sanitized = !!targetMeta.target_content_sanitized;
+    meta.target_content_sanitized_categories = Array.isArray(targetMeta.target_content_sanitized_categories)
+      ? targetMeta.target_content_sanitized_categories.slice()
+      : [];
+  }
+  return meta;
+}
+
+function applyWsp97SanitizationMeta(holoMeta, wsp97Meta) {
+  const meta = holoMeta && typeof holoMeta === 'object' ? Object.assign({}, holoMeta) : {};
+  if (!wsp97Meta || !wsp97Meta.wsp97_excerpt_sanitized) {
+    return meta;
+  }
+  meta.target_content_sanitized = true;
+  meta.target_content_sanitized_categories = mergeSanitizedCategories(
+    meta.target_content_sanitized_categories,
+    wsp97Meta.wsp97_excerpt_sanitized_categories
+  );
+  return meta;
 }
 
 function readBoundedRepoFile(root, relPath, maxChars) {
@@ -2157,6 +2467,19 @@ module.exports = {
   evaluateTargetRecall,
   inferRecallTargetPaths,
   holoIndexMetaFromBundle,
+  isTargetReadPathDenied,
+  resolveSafeRepoFile,
+  readBoundedTargetSnippet,
+  readBoundedTargetSnippets,
+  buildTargetRecallContentSection,
+  taskMentionsWsp97,
+  buildWsp97ProtocolExcerpt,
+  mergeTargetContentMeta,
+  applyWsp97SanitizationMeta,
+  sanitizeTargetSnippetForRedaction,
+  mergeSanitizedCategories,
+  TARGET_SNIPPET_BLOCK_SANITIZERS,
+  WSP97_PROTOCOL_REL_PATH,
   MOJIBAKE_MARKERS,
   WORK_TRAIL_MAX_EVENTS,
   VALIDATION_FAILED_FOOTER

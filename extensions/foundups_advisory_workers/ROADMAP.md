@@ -99,19 +99,38 @@ Addendum B required controls (after v0.3.15 lands):
 - Context budget: bounded char budget before bridge; truncation_applied + truncation_reason in packet
 - Failure taxonomy: redaction_blocked, valve_closed, missing_key, timeout, retry_exhausted, http_error, malformed_response, subprocess_failed, output_cap_exceeded
 
+Add slice spec section before WSP_15 table or after - actually add to ROADMAP with full acceptance criteria
+
+### REDDOG_REDACTION_GATE_CONTEXT_ERROR_DIAGNOSTIC_PHASE1
+
+- **Trigger:** Post-#882 EXT-ACC-001/003 probe returns `redactor_error` on `wsp_holo_skillz` bounded context (~25k chars).
+- **Purpose:** Identify what in post-#882 bounded context triggers `redactor_error`; preserve fail-closed behavior.
+- **In scope:** Low-cardinality reason telemetry; safe category reporting (`blocked_policy`, `residual_forbidden`, `non_text_context`, etc.); redaction tests.
+- **Out of scope:** Policy weakening; raw blocked snippets in Copy MD; OpenRouter routing changes.
+- **Acceptance:**
+  - Same EXT-ACC-001 prompt no longer returns `redactor_error`
+  - If blocked, reports specific safe category (not generic `redactor_error`)
+  - No raw blocked content included
+  - Redaction gate tests pass
+- **Blocks:** `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1` until diagnostic lands and probe reruns successfully.
+
 ### HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1
 
 - Index `extensions/foundups_advisory_workers/extension.js`, `scripts/advisory_model_once.py`, and Skillz/Rolodex discovery paths.
 - Improve semantic recall for RedDog auto-router, WSP_15/97, and governed-handoff queries.
 - Add regression retrieval tests so extension bridge code ranks above adjacent WRE routers.
-- **Status:** PR #882 draft — land before post-land acceptance probe.
+- **Status:** **LANDED** #882 (`99d0e35c2`) — ranking + target recall telemetry only; not source-content inclusion.
 
 ### REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1
 
-- **Conditional — do not start until post-#882 probe proves need.**
+- **Status:** IN PROGRESS (v0.3.22) — test-first ADDENDUM E; 0102-runnable without 012 Cursor UI.
 - Inject target file **content/snippets** into bounded bridge context when HoloIndex ranks the path but omits source body.
-- Trigger: EXT-ACC-001 post-#882 fails criterion 2 (path hit, no source content) despite `target_recall_ok: true`.
-- Distinct from HoloIndex ranking (#882); this slice is bounded context assembly, not retrieval index work.
+- Trigger: EXT-ACC-001 criterion #2 fail with model egress (path hit ~7.4%, no source body) — **OBSERVED**.
+- Run Trace: `target_content_included`, `target_content_paths`, `target_content_chars`, `target_content_omitted_reason`, `target_content_truncated`.
+- WSP_97 tasks: bounded protocol excerpt section.
+- Bump version **0.3.22** (install hygiene after #882 no-bump trap).
+- Distinct from HoloIndex ranking (#882); bounded context assembly in `buildBoundedRepoContext`.
+- 012 only: installed Cursor UX smoke + Copy MD usability after PR VERIFIED_READY.
 
 ### REDDOG_GOVERNED_HANDOFF_CONTRACT_PHASE1
 

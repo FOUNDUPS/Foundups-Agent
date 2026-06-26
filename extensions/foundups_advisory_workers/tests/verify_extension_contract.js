@@ -1,7 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
+const cp = require('child_process');
 const Module = require('module');
+
+const fixtures = require('./fixtures');
 
 const root = path.resolve(__dirname, '..', '..', '..');
 const extDir = path.join(root, 'extensions', 'foundups_advisory_workers');
@@ -16,8 +19,41 @@ function includes(haystack, needle, label) {
   assert(haystack.includes(needle), label || `missing ${needle}`);
 }
 
-assert.strictEqual(pkg.version, '0.3.21', 'package version must be 0.3.21');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.21'", 'extension build mismatch');
+function assertFusionRedactionGatePasses(contextText, label) {
+  const script = [
+    'import sys',
+    'from modules.communication.moltbot_bridge.src.fusion_redaction_gate import evaluate_redaction_gate, REDACTION_GATE_PASSED',
+    'ctx = sys.stdin.read()',
+    'r = evaluate_redaction_gate("012 work focus digest placeholder for gate probe", ctx)',
+    'if r.status != REDACTION_GATE_PASSED:',
+    '    cats = ",".join(r.report.blocked_categories)',
+    '    print("BLOCKED:" + r.reason + ":" + cats)',
+    '    sys.exit(1)',
+    'print("PASSED")'
+  ].join('\n');
+  const out = cp.execFileSync('python', ['-B', '-c', script], {
+    cwd: root,
+    input: String(contextText || ''),
+    encoding: 'utf8',
+    timeout: 30000,
+    maxBuffer: 1024 * 1024
+  }).trim();
+  assert.strictEqual(out, 'PASSED', label || 'bounded context must pass fusion redaction gate');
+}
+
+function extractTargetRecallSection(contextText) {
+  const marker = '### Target recall content';
+  const start = String(contextText || '').indexOf(marker);
+  if (start === -1) {
+    return '';
+  }
+  const tail = contextText.slice(start);
+  const next = tail.indexOf('\n### ', marker.length);
+  return next === -1 ? tail : tail.slice(0, next);
+}
+
+assert.strictEqual(pkg.version, '0.3.22', 'package version must be 0.3.22');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.22'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -34,7 +70,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.21', 'README version mismatch');
+includes(readme, 'Version: 0.3.22', 'README version mismatch');
 includes(extensionJs, 'function resolvePythonInterpreter', 'python resolver missing');
 includes(extensionJs, 'function applyBridgeContextBudget', 'context budget missing');
 includes(extensionJs, 'function killBridgeChild', 'orphan cleanup missing');
@@ -512,5 +548,64 @@ includes(repairFailCopy, 'provider_reasoning_applied: unknown', 'provider reason
 
 const sanitized = orchestrator.sanitizeCopyMdText('OPENROUTER_API_KEY visible to bridge: yes');
 includes(sanitized, 'key_env_present: true', 'trail sanitizer must normalize secret-adjacent env phrase');
+
+// ADDENDUM E - 0102 test-first content inclusion (no OpenRouter)
+// Fixtures: tests/fixtures.js — reuse EXT_ACC_001_PROMPT; do not duplicate.
+const extAcc001Prompt = fixtures.EXT_ACC_001_PROMPT;
+
+const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
+assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
+
+const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.22'", 'target snippet must include extension.js source');
+assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
+assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
+
+for (const [badPath, label] of fixtures.TARGET_READ_DENIED_PATHS) {
+  assert(orchestrator.isTargetReadPathDenied(badPath), 'must reject ' + label + ': ' + badPath);
+}
+
+const safeResolve = orchestrator.resolveSafeRepoFile(root, fixtures.EXT_ACC_001_TARGET_PATH);
+assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside workspace root');
+
+const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
+includes(targetSection.text, '### Target recall content', 'target recall section header missing');
+includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.22'", 'target recall must include source snippet');
+assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
+assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
+
+const wsp97Excerpt = orchestrator.buildWsp97ProtocolExcerpt(root, 4096);
+includes(wsp97Excerpt.text, '### WSP protocol excerpt (bounded)', 'WSP_97 excerpt header missing');
+includes(wsp97Excerpt.text, 'WSP 97: System Execution Prompting Protocol', 'WSP_97 excerpt must include protocol title');
+assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerpt_included must be true');
+
+const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
+includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
+includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.22'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
+includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
+assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
+assert(boundedContext.holoindex_scorecard.target_content_chars > 0, 'scorecard target_content_chars must be > 0');
+includes(boundedContext.holoindex_scorecard.target_content_paths.join(','), fixtures.EXT_ACC_001_TARGET_PATH, 'scorecard must list included path');
+
+const copyTargets = orchestrator.inferRecallTargetPaths(fixtures.BUILD_COPY_MARKDOWN_PROMPT);
+assert(copyTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'buildCopyMarkdown prompt must map to extension.js');
+
+// ADDENDUM F - redaction-safe target snippets (reuse fixtures; gate probe via Python policy)
+assert.strictEqual(targetSection.meta.target_content_sanitized, true, 'extension.js snippet must be sanitized for gate safety');
+assert(targetSection.meta.target_content_sanitized_categories.length > 0, 'sanitized categories must be recorded');
+includes(targetSection.text, '[SANITIZED_BLOCK:', 'sanitized placeholders must preserve review shape');
+assert(!targetSection.text.includes('grant authority'), 'raw grant authority must not remain in target recall section');
+assert(!targetSection.text.includes('hidden chain-of-thought'), 'raw hidden chain-of-thought must not remain in target recall section');
+assert(!targetSection.text.includes('redaction_gate_passed'), 'raw redaction_gate_passed must not remain in target recall section');
+
+const targetRecallSection = extractTargetRecallSection(boundedContext.text);
+assert(targetRecallSection.length > 0, 'target recall section must exist for gate probe');
+assertFusionRedactionGatePasses(targetRecallSection, 'target recall section must pass fusion redaction gate');
+assertFusionRedactionGatePasses(boundedContext.text, 'EXT-ACC-001 bounded context must pass fusion redaction gate');
+assert.strictEqual(boundedContext.holoindex_scorecard.target_content_sanitized, true, 'scorecard target_content_sanitized must be true when replacements occurred');
+assert(boundedContext.holoindex_scorecard.target_content_sanitized_categories.length > 0, 'scorecard must list sanitized categories');
 
 console.log('Foundups®Agent extension contract checks passed.');

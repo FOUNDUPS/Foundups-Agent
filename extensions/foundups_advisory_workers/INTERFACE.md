@@ -111,7 +111,7 @@ The model cannot access the filesystem. It receives only the bounded context pac
 
 If HoloIndex recall reports zero WSP hits, missing Tier-0 docs, stale/offline fallback, or unavailable output, the answer must treat protocol claims as `NEEDS_VERIFICATION` and propose retrieval/index repair before strong claims.
 
-Run Trace HoloIndex scorecard fields (v0.3.21+):
+Run Trace HoloIndex scorecard fields (v0.3.22+):
 
 | Field | Meaning | WSP_97 |
 | --- | --- | --- |
@@ -120,8 +120,19 @@ Run Trace HoloIndex scorecard fields (v0.3.21+):
 | `target_recall_ok` | Requested target file/symbol appeared in hits | OBSERVED |
 | `index_gap_detected` | Target-specific miss (may be true when `code_hits_count > 0`) | OBSERVED |
 | `direct_read_fallback_used` | Offline lexical fallback used | OBSERVED |
+| `target_content_included` | Target snippet section present in final bounded context | OBSERVED |
+| `target_content_paths` | Relative paths whose snippets were included | OBSERVED |
+| `target_content_chars` | Character count of included target snippets | OBSERVED |
+| `target_content_omitted_reason` | Why snippets omitted when `target_content_included=false` | OBSERVED |
+| `target_content_truncated` | Any target snippet truncated by per-file budget | OBSERVED |
+| `target_content_sanitized` | Block-triggering literals replaced before egress | OBSERVED |
+| `target_content_sanitized_categories` | Fusion BLOCK categories sanitized (metadata only) | OBSERVED |
 
 `evaluateTargetRecall(taskText, bundleOutput)` and `inferRecallTargetPaths(taskText)` implement target-specific recall inference from bundle `task_retrieval.code_hits`.
+
+Target content egress (v0.3.22+): `buildTargetRecallContentSection(root, taskText, maxChars)` reads workspace-confined snippets for inferred recall targets after HoloIndex path ranking. Snippets pass through `sanitizeTargetSnippetForRedaction()` before inclusion (ADDENDUM F); placeholders use neutral `[SANITIZED_BLOCK:NN]` tokens so category names do not re-trigger the Fusion gate. Telemetry reflects the **final** bounded context string assembled by `buildBoundedRepoContext` (before the 42000-char slice). `buildWsp97ProtocolExcerpt(root, maxChars)` adds a bounded WSP_97 protocol excerpt when the task mentions WSP_97 or truth labels.
+
+Exported helpers for contract tests: `isTargetReadPathDenied`, `resolveSafeRepoFile`, `readBoundedTargetSnippet`, `readBoundedTargetSnippets`, `buildTargetRecallContentSection`, `sanitizeTargetSnippetForRedaction`, `taskMentionsWsp97`, `buildWsp97ProtocolExcerpt`.
 
 ## WSP_97 Truth Boundary
 
