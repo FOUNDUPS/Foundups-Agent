@@ -21,6 +21,8 @@ Review this packet and return one of:
 
 After merge: 012 reruns **EXT-ACC-001** and **EXT-ACC-003** only before scheduling full replacement pass.
 
+**Post-#882 EXT-ACC-001 replacement gate (all five required):** (1) `extension.js` in top hits, (2) source content/snippet in bounded context, (3) ≥1 WSP_97 finding on source content, (4) `target_recall_ok: true`, (5) output validation passes. If (1)+(4) pass but (2) fails → `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1` (conditional; do not start until probe proves path-only context).
+
 ---
 
 ## Executive summary
@@ -162,6 +164,7 @@ git diff --check -- extensions/foundups_advisory_workers holo_index NAVIGATION.p
 | Q6 ranking | `verify_extension_contract.js` can outrank `extension.js` on WSP_97 query | Acceptable for lexical mode; monitor semantic (`HOLO_SKIP_MODEL=0`) path |
 | EXT-ACC-003 | Redaction gate may still block holo-heavy prompts | Separate slice: `REDDOG_REDACTION_CONTEXT_TUNING_PHASE1` |
 | EXT-ACC-001 repair | Output schema + repair redaction | Separate slice: `REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1` |
+| Path hit without source content | INFERRED until post-#882 probe | Conditional: `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1` |
 | Skillz discovery | Q3 still surfaces `agent_market/README.md` at #3 | Future: Skillz path indexing (not this slice) |
 | Telemetry | `made_network_call: unknown`, duplicate Work Trail events | `REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1` |
 
@@ -169,11 +172,12 @@ git diff --check -- extensions/foundups_advisory_workers holo_index NAVIGATION.p
 
 ## Follow-on slices (ordered)
 
-1. **Merge this slice** → rerun EXT-ACC-001 + EXT-ACC-003
-2. `REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1`
-3. `REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1`
-4. `REDDOG_REDACTION_CONTEXT_TUNING_PHASE1`
-5. `REDDOG_EXTERNAL_ACCEPTANCE_REPLACEMENT_PHASE1` (full 15-pack)
+1. **Merge this slice (#882)** → rerun EXT-ACC-001 + EXT-ACC-003 (five-criteria gate on 001)
+2. If EXT-ACC-001 path-only → `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1`
+3. `REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1`
+4. `REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1`
+5. `REDDOG_REDACTION_CONTEXT_TUNING_PHASE1`
+6. `REDDOG_EXTERNAL_ACCEPTANCE_REPLACEMENT_PHASE1` (full 15-pack)
 
 ---
 

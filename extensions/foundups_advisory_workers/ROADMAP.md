@@ -104,6 +104,14 @@ Addendum B required controls (after v0.3.15 lands):
 - Index `extensions/foundups_advisory_workers/extension.js`, `scripts/advisory_model_once.py`, and Skillz/Rolodex discovery paths.
 - Improve semantic recall for RedDog auto-router, WSP_15/97, and governed-handoff queries.
 - Add regression retrieval tests so extension bridge code ranks above adjacent WRE routers.
+- **Status:** PR #882 draft — land before post-land acceptance probe.
+
+### REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1
+
+- **Conditional — do not start until post-#882 probe proves need.**
+- Inject target file **content/snippets** into bounded bridge context when HoloIndex ranks the path but omits source body.
+- Trigger: EXT-ACC-001 post-#882 fails criterion 2 (path hit, no source content) despite `target_recall_ok: true`.
+- Distinct from HoloIndex ranking (#882); this slice is bounded context assembly, not retrieval index work.
 
 ### REDDOG_GOVERNED_HANDOFF_CONTRACT_PHASE1
 

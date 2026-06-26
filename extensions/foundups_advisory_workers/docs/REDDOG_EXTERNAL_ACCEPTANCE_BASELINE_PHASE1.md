@@ -33,6 +33,8 @@ This slice defines the prompt pack, rubric, runbook, and artifact template. It d
 
 Future **replacement pass** reruns the same 15 prompts after HoloIndex index-gap and dispatch improvements and compares against baseline artifacts.
 
+**Post-#882 probe (before full 15-pack):** After PR #882 lands, rerun **EXT-ACC-001** and **EXT-ACC-003** only. Do not schedule the full replacement pass until both probes complete and are scored against the criteria below.
+
 ---
 
 ## HoloIndex Phase 0 preflight (2026-06-26)
@@ -66,6 +68,8 @@ Direct-read fallback used per WSP_87 after HoloIndex retrieval evaluation.
 | FALLBACK_CASE_INCLUDED | OBSERVED |
 | BASELINE_REPLACEMENT_COMPARABLE | OBSERVED |
 | LANE_B_EXCLUDED | OBSERVED |
+| PATH_RANKING_DISTINCT_FROM_CONTENT_INCLUSION | OBSERVED |
+| EXT_ACC_001_REPLACEMENT_REQUIRES_SOURCE_CONTENT | OBSERVED |
 
 ---
 
@@ -149,6 +153,9 @@ model_routing:
   principal: "<slug>"
   panel: ["<slug>", ...]
 holoindex_status: bundle_json_ok|offline_fallback|unknown|not_applicable
+target_recall_ok: true|false|unknown
+target_content_included: true|false|unknown
+wsp97_finding_on_source_content: true|false|unknown
 made_network_call: true|false
 redaction_blocked: true|false
 output_validation_failed: true|false
@@ -187,8 +194,21 @@ Placeholders: `[BRANCH]`, `[PR]`, `[MODULE_PATH]`, `[DIFF_SUMMARY]`.
 | **Expected mode/context** | `foundups_fusion` + `wsp_holo_skillz` or `wsp_holo_git_skillz` |
 | **Work focus** | Review `[MODULE_PATH]` for WSP_97 truth-label compliance. List OBSERVED vs INFERRED claims, missing evidence, and smallest valid fixes. Include WSP_15 priority for each fix. |
 | **Expected Copy MD** | Run Trace, Work Trail, 0102 Output with Decision/Findings/Evidence/Architect Trace/WSP_97/WSP_15 |
-| **Pass/block** | Pass if usable review with bounded evidence; block only if redaction triggers |
-| **012 paste-back** | Copy MD + sovereign verdict + follow-up slice if INDEX_GAP hurts evidence |
+| **Pass/block (baseline v0.3.21)** | Score honestly; baseline may be `needs_repair` when paths rank but source content is absent |
+| **Pass/block (replacement, post-#882)** | Pass only if **all five** replacement criteria below are satisfied |
+| **012 paste-back** | Copy MD + sovereign verdict + follow-up slice if INDEX_GAP or path-only context hurts evidence |
+
+**Replacement pass criteria (post-#882) — EXT-ACC-001 passes only if all five:**
+
+| # | Criterion | How to verify | WSP_97 |
+| ---: | --- | --- | --- |
+| 1 | `extension.js` appears in top HoloIndex code hits | Run Trace scorecard / HoloIndex hit list | OBSERVED |
+| 2 | `extension.js` **content or snippet** included in bounded context sent to bridge | Copy MD repo-context section or bounded digest cites source lines, not path-only | OBSERVED |
+| 3 | Model performs ≥1 **actual WSP_97 finding on source content** | Finding references function/line/behavior from `extension.js`, not meta about missing files | OBSERVED |
+| 4 | `target_recall_ok: true` | Run Trace HoloIndex scorecard | OBSERVED |
+| 5 | `output_validation` passes | Required schema sections present; no validation-failure footer | OBSERVED |
+
+**Interpretation:** PR #882 improves path ranking and telemetry. RedDog can find the file path without injecting file contents into the model context. If criteria 1 and 4 pass but criterion 2 fails after #882 lands, the next slice is `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1` — do **not** start that slice until the post-land EXT-ACC-001 probe proves path-only context.
 
 ### EXT-ACC-002 — PR gate / return-to-author review
 
@@ -211,8 +231,9 @@ Placeholders: `[BRANCH]`, `[PR]`, `[MODULE_PATH]`, `[DIFF_SUMMARY]`.
 | **Expected mode/context** | HoloIndex context required |
 | **Work focus** | What does HoloIndex retrieve for `extensions/foundups_advisory_workers/extension.js` and `buildCopyMarkdown`? Report hits, gaps, and whether recall is sufficient for architecture review. |
 | **Expected Copy MD** | HoloIndex scorecard in Run Trace; honest INDEX_GAP if recall weak |
-| **Pass/block** | Pass if scorecard present and gap acknowledged; baseline may score low on evidence |
-| **012 paste-back** | Copy MD + INDEX_GAP note for HoloIndex slice |
+| **Pass/block (baseline v0.3.21)** | Pass if scorecard present and gap acknowledged; baseline may score low on evidence |
+| **Pass/block (replacement, post-#882)** | Pass if scorecard present, `target_recall_ok` honest, and recall analysis distinguishes **path hit** vs **content included** |
+| **012 paste-back** | Copy MD + INDEX_GAP note; if path-only after #882, cite `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1` |
 
 ### EXT-ACC-004 — git diff audit
 
@@ -364,10 +385,18 @@ Placeholders: `[BRANCH]`, `[PR]`, `[MODULE_PATH]`, `[DIFF_SUMMARY]`.
 
 | Pass | When | Goal |
 | --- | --- | --- |
-| **Baseline** | Now (v0.3.21) | Honest scoreboard; expose INDEX_GAP and usefulness gaps |
-| **Replacement** | After HoloIndex + dispatch slices | Same 15 prompts; rubric scores must improve vs baseline artifacts |
+| **Baseline** | v0.3.21 (batch 1 complete) | Honest scoreboard; expose INDEX_GAP and path-vs-content gap |
+| **Post-#882 probe** | After #882 lands | Rerun **EXT-ACC-001** + **EXT-ACC-003** only; apply EXT-ACC-001 five-criteria gate |
+| **Full replacement** | After probe passes or follow-on slice lands | Same 15 prompts; rubric scores must improve vs baseline artifacts |
 
-Comparison fields: `012_verdict`, rubric totals, HoloIndex hit quality, WSP_15 actionable fixes count, latency bucket.
+Comparison fields: `012_verdict`, rubric totals, HoloIndex hit quality, `target_recall_ok`, `target_content_included`, `wsp97_finding_on_source_content`, WSP_15 actionable fixes count, latency bucket.
+
+**012 action order:**
+
+1. Clean/land PR #882 (`HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1`).
+2. Rerun EXT-ACC-001 and EXT-ACC-003 on installed extension.
+3. If EXT-ACC-001 sees paths but not source content → queue `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1` (do not start until probe proves need).
+4. If EXT-ACC-001 passes all five replacement criteria → schedule full `REDDOG_EXTERNAL_ACCEPTANCE_REPLACEMENT_PHASE1`.
 
 ---
 
@@ -375,8 +404,9 @@ Comparison fields: `012_verdict`, rubric totals, HoloIndex hit quality, WSP_15 a
 
 | Slice | C | I | D | Impact | MPS | P | Trigger |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
-| HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1 | 3 | 5 | 4 | 5 | 17 | **P0** | EXT-ACC-003/014 INDEX_GAP |
-| REDDOG_EXTERNAL_ACCEPTANCE_REPLACEMENT_PHASE1 | 2 | 5 | 5 | 4 | 16 | **P0** | After index + dispatch |
+| HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1 | 3 | 5 | 4 | 5 | 17 | **P0** | EXT-ACC-003/014 INDEX_GAP — PR #882 draft |
+| REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1 | 4 | 5 | 3 | 5 | 17 | **P0** | **Conditional:** EXT-ACC-001 post-#882 probe shows path hit but no source snippet in bounded context |
+| REDDOG_EXTERNAL_ACCEPTANCE_REPLACEMENT_PHASE1 | 2 | 5 | 5 | 4 | 16 | **P0** | After #882 probe + any required content-inclusion slice |
 | REDDOG_DISPATCH_PROMPT_GENERATOR_PHASE1 | 3 | 5 | 3 | 5 | 16 | **P1** | EXT-ACC-006 weak dispatch output |
 | REDDOG_MODEL_REGISTRY_AND_ROUTING_AUDIT_PHASE1 | 2 | 4 | 3 | 4 | 13 | **P1** | EXT-ACC-008 routing confusion |
 | REDDOG_REVIEW_PACKET_MEMORY_PHASE1 | 3 | 4 | 2 | 4 | 13 | **P2** | After replacement pass |
@@ -398,6 +428,7 @@ rg "窶|竊|遯|遶|ﾂｮ" extensions/foundups_advisory_workers/docs/REDDOG_EXT
 ## Residual NEEDS_VERIFICATION
 
 - All 15 prompts executed by 012 with stored artifacts (not done in this doc slice)
-- Replacement pass comparison after HoloIndex index-gap fix
+- Post-#882 EXT-ACC-001/003 probe with five-criteria replacement gate for EXT-ACC-001
+- Full replacement pass comparison after probe (and content-inclusion slice if required)
 - OpenRouter cost/latency baselines per tier (012 observation only)
 - EXT-ACC-014 env-specific fallback simulation may vary by machine
