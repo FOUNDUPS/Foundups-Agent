@@ -1,5 +1,12 @@
 # Foundups®Agent ModLog
 
+## 2026-06-25 - v0.3.21 Blocked RedDog Copy MD polish
+- Adjacent duplicate Work Trail events collapse to one entry (detail-bearing event retained).
+- Redaction-block-only runs use conservative Governed Handoff defaults: `handoff_needed: unknown`, `reason: blocked_context_needs_local_0102_review`, `wsp15_priority: P1`, `suggested_slice_name: none`.
+- Target may remain `[INFERRED]` from work focus; no automatic WRE dispatch assertion on blocked-local packets.
+
+WSP: WSP_22, WSP_97.
+
 ## 2026-06-24 - v0.3.20 Redaction Gate Report + WRE Handoff Readiness (Addendum F)
 - Rebased onto #871 bridge hardening (`9e5416af4`); version bump 0.3.19 -> 0.3.20.
 - Copy MD redaction blocks now include `## Redaction Gate Report` with WSP_97 truth labels (OBSERVED/UNKNOWN); no raw blocked content.

@@ -1,5 +1,20 @@
 # Foundups®Agent TestModLog
 
+## 2026-06-25 - v0.3.21 Blocked Copy MD polish
+- Verified adjacent duplicate Work Trail events dedupe; detail-bearing event retained.
+- Verified blocked-local Copy MD has no duplicate `redaction_gate_blocked` lines.
+- Verified conservative blocked-local handoff: `handoff_needed: unknown`, `reason: blocked_context_needs_local_0102_review`, `WSP_15 priority: P1`, `suggested_slice_name: none`.
+- Verified successful substantive runs retain prior assertive handoff behavior when model output exists.
+- Verified Copy MD excludes secret-adjacent strings.
+
+Commands:
+
+```powershell
+node --check extensions/foundups_advisory_workers/extension.js
+node extensions/foundups_advisory_workers/tests/verify_extension_contract.js
+git diff --check -- extensions/foundups_advisory_workers
+```
+
 ## 2026-06-24 - v0.3.20 Redaction Gate + Governed Handoff Contract
 - Verified blocked Copy MD includes `## Redaction Gate Report` with `BLOCKED_LOCALLY`, `made_network_call: false`, `blocked_payload_part: unknown`, `raw_snippets_included: false`.
 - Verified blocked packet contains no `OPENROUTER_API_KEY`, Bearer, or sk- token patterns.

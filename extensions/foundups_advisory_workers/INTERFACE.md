@@ -267,7 +267,7 @@ When redaction blocks before OpenRouter, Copy MD includes `## Redaction Gate Rep
 
 All fields carry WSP_97 truth labels (`OBSERVED` or `UNKNOWN`). If the gate cannot identify the payload part, report `unknown`; do not infer.
 
-## Governed Handoff Recommendation (v0.3.20)
+## Governed Handoff Recommendation (v0.3.20+)
 
 Substantive Copy MD packets append `## Governed Handoff Recommendation`:
 
@@ -279,7 +279,10 @@ Substantive Copy MD packets append `## Governed Handoff Recommendation`:
 | suggested_slice_name | Bounded slice identifier |
 | WSP_15 priority | Inferred from tier |
 | required_human_gate | `012_sovereign` \| `none` |
+| reason | Conservative blocked-local reason when no model output (e.g. `blocked_context_needs_local_0102_review`) |
 | evidence_refs | Bounded digest references only |
+
+Redaction-block-only runs default to `handoff_needed: unknown`, `wsp15_priority: P1`, and `suggested_slice_name: none` unless concrete fix evidence exists.
 
 Extension retains no repo/shell/merge authority.
 
