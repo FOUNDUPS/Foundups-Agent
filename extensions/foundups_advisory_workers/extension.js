@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.20';
+const EXTENSION_VERSION = '0.3.21';
 const REDDOG_TERMINAL_HOLD_MS = 3000;
 const REDACTION_BLOCK_OPERATOR_MESSAGE = 'Stopped before OpenRouter. Nothing left the machine.';
 const BRIDGE_MAX_STDOUT_BYTES = 262144;
@@ -221,6 +221,21 @@ function createWorkTrail() {
       if (detail) {
         entry.detail = sanitizeCopyMdText(String(detail)).slice(0, 240);
       }
+      const last = events[events.length - 1];
+      if (last && last.event === name) {
+        const lastDetail = last.detail || '';
+        const newDetail = entry.detail || '';
+        if (!newDetail && lastDetail) {
+          return;
+        }
+        if (newDetail && !lastDetail) {
+          last.detail = newDetail;
+          return;
+        }
+        if (newDetail && lastDetail && newDetail === lastDetail) {
+          return;
+        }
+      }
       events.push(entry);
       while (events.length > WORK_TRAIL_MAX_EVENTS) {
         events.shift();
@@ -432,6 +447,7 @@ function buildRedactionGateReportSection(report) {
 function buildGovernedHandoffRecommendation(workFocus, classification, workerType, contextMode, options) {
   const opts = options && typeof options === 'object' ? options : {};
   const substantive = !!opts.substantive;
+  const redactionBlockedOnly = !!opts.redactionBlockedOnly;
   const text = String(workFocus || '').toLowerCase();
   let target = 'none';
   if (/\bwre\b/.test(text)) {
@@ -443,16 +459,6 @@ function buildGovernedHandoffRecommendation(workFocus, classification, workerTyp
   } else if (/\bsentinel\b/.test(text)) {
     target = 'Sentinel';
   }
-  let handoffNeeded = 'false';
-  if (!substantive) {
-    handoffNeeded = 'false';
-  } else if (target !== 'none') {
-    handoffNeeded = 'true';
-  } else {
-    handoffNeeded = 'unknown';
-  }
-  const tier = classification && classification.tier ? classification.tier : 'HIGH';
-  const priority = tier === 'ULTRA' ? 'P0' : tier === 'REGULAR' ? 'P2' : 'P1';
   const evidenceRefs = [];
   if (opts.workFocusDigest) {
     evidenceRefs.push('work_focus_digest:' + opts.workFocusDigest);
@@ -463,6 +469,28 @@ function buildGovernedHandoffRecommendation(workFocus, classification, workerTyp
   if (contextMode) {
     evidenceRefs.push('context_mode:' + String(contextMode));
   }
+  if (redactionBlockedOnly) {
+    return {
+      handoff_needed: 'unknown',
+      target: target,
+      authority_level: 'advisory_only',
+      reason: 'blocked_context_needs_local_0102_review',
+      suggested_slice_name: 'none',
+      wsp15_priority: 'P1',
+      required_human_gate: 'none',
+      evidence_refs: evidenceRefs.length ? evidenceRefs : ['unknown']
+    };
+  }
+  let handoffNeeded = 'false';
+  if (!substantive) {
+    handoffNeeded = 'false';
+  } else if (target !== 'none') {
+    handoffNeeded = 'true';
+  } else {
+    handoffNeeded = 'unknown';
+  }
+  const tier = classification && classification.tier ? classification.tier : 'HIGH';
+  const priority = tier === 'ULTRA' ? 'P0' : tier === 'REGULAR' ? 'P2' : 'P1';
   return {
     handoff_needed: handoffNeeded,
     target: target,
@@ -480,12 +508,17 @@ function buildGovernedHandoffSection(recommendation) {
     '## Governed Handoff Recommendation',
     '- handoff_needed: ' + (rec.handoff_needed || 'unknown') + ' [INFERRED]',
     '- target: ' + (rec.target || 'none') + ' [INFERRED]',
-    '- authority_level: advisory_only [OBSERVED]',
+    '- authority_level: advisory_only [OBSERVED]'
+  ];
+  if (rec.reason) {
+    lines.push('- reason: ' + rec.reason + ' [INFERRED]');
+  }
+  lines.push(
     '- suggested_slice_name: ' + (rec.suggested_slice_name || 'none') + ' [INFERRED]',
     '- WSP_15 priority: ' + (rec.wsp15_priority || 'unknown') + ' [INFERRED]',
     '- required_human_gate: ' + (rec.required_human_gate || 'none') + ' [INFERRED]',
     '- evidence_refs: ' + JSON.stringify(rec.evidence_refs || ['unknown']) + ' [OBSERVED]'
-  ];
+  );
   return lines.join('\n');
 }
 
@@ -1045,6 +1078,7 @@ function wireFusionWebview(context, webview, worker, state) {
     const substantiveTask = isSubstantiveRedDogWorker(workerType);
     const handoffRecommendation = buildGovernedHandoffRecommendation(workFocus, classification, workerType, contextMode, {
       substantive: substantiveTask,
+      redactionBlockedOnly: result.reason === 'redaction_blocked',
       workFocusDigest: promptConstruction.work_focus_digest && promptConstruction.work_focus_digest.hash,
       wspPromptDigest: promptConstruction.wsp_prompt_digest && promptConstruction.wsp_prompt_digest.hash
     });

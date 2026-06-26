@@ -16,8 +16,8 @@ function includes(haystack, needle, label) {
   assert(haystack.includes(needle), label || `missing ${needle}`);
 }
 
-assert.strictEqual(pkg.version, '0.3.20', 'package version must be 0.3.20');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.20'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.21', 'package version must be 0.3.21');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.21'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -34,7 +34,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.20', 'README version mismatch');
+includes(readme, 'Version: 0.3.21', 'README version mismatch');
 includes(extensionJs, 'function resolvePythonInterpreter', 'python resolver missing');
 includes(extensionJs, 'function applyBridgeContextBudget', 'context budget missing');
 includes(extensionJs, 'function killBridgeChild', 'orphan cleanup missing');
@@ -353,7 +353,26 @@ const handoffRec = orchestrator.buildGovernedHandoffRecommendation('audit WRE br
   wspPromptDigest: 'def456'
 });
 assert.strictEqual(handoffRec.target, 'WRE', 'substantive WRE task must target WRE handoff');
+assert.strictEqual(handoffRec.handoff_needed, 'true', 'successful substantive WRE task may recommend handoff');
 assert.strictEqual(handoffRec.authority_level, 'advisory_only', 'handoff must remain advisory_only');
+
+const blockedHandoffRec = orchestrator.buildGovernedHandoffRecommendation('audit WRE bridge handoff', { tier: 'ULTRA' }, 'reddog_architect', 'wsp_holo_skillz', {
+  substantive: true,
+  redactionBlockedOnly: true,
+  workFocusDigest: 'abc123',
+  wspPromptDigest: 'def456'
+});
+assert.strictEqual(blockedHandoffRec.handoff_needed, 'unknown', 'redaction-block-only run must use conservative handoff_needed');
+assert.strictEqual(blockedHandoffRec.target, 'WRE', 'target may remain inferred for blocked-local packet');
+assert.strictEqual(blockedHandoffRec.reason, 'blocked_context_needs_local_0102_review', 'blocked-local handoff must include conservative reason');
+assert.strictEqual(blockedHandoffRec.wsp15_priority, 'P1', 'blocked-local handoff must default to P1');
+assert.strictEqual(blockedHandoffRec.suggested_slice_name, 'none', 'blocked-local handoff must not invent slice name');
+
+const dedupeTrail = orchestrator.createWorkTrail();
+dedupeTrail.push('redaction_gate_blocked', 'Redaction gate blocked before network.');
+dedupeTrail.push('redaction_gate_blocked');
+assert.strictEqual(dedupeTrail.count(), 1, 'adjacent duplicate Work Trail events must dedupe');
+assert.strictEqual(dedupeTrail.toEvents()[0].detail, 'Redaction gate blocked before network.', 'dedupe must keep detail-bearing event');
 
 const blockedCopy = orchestrator.buildCopyMarkdown({
   reason: 'redaction_blocked',
@@ -392,7 +411,7 @@ const blockedCopy = orchestrator.buildCopyMarkdown({
   },
   contextMode: 'wsp_holo_skillz',
   substantive: true,
-  handoffRecommendation: handoffRec
+  handoffRecommendation: blockedHandoffRec
 });
 includes(blockedCopy, '## Run Trace', 'Copy MD must include Run Trace');
 includes(blockedCopy, '## Work Trail', 'Copy MD must include Work Trail');
@@ -404,9 +423,24 @@ includes(blockedCopy, 'blocked_payload_part: unknown', 'unknown payload part mus
 includes(blockedCopy, 'raw_snippets_included: false', 'blocked packet must declare no raw snippets');
 includes(blockedCopy, 'holoindex_status:', 'Copy MD must include HoloIndex recall scorecard');
 includes(blockedCopy, '## Governed Handoff Recommendation', 'substantive task must include governed handoff recommendation');
+includes(blockedCopy, 'handoff_needed: unknown', 'blocked-local packet must use conservative handoff_needed');
+includes(blockedCopy, 'reason: blocked_context_needs_local_0102_review', 'blocked-local packet must include conservative handoff reason');
+includes(blockedCopy, 'WSP_15 priority: P1', 'blocked-local packet must default handoff priority to P1');
+includes(blockedCopy, 'suggested_slice_name: none', 'blocked-local packet must not invent slice name');
 includes(blockedCopy, 'authority_level: advisory_only', 'handoff must remain advisory_only');
 assert(!blockedCopy.includes('OPENROUTER_API_KEY'), 'Copy MD must not include secret-adjacent env names');
 assert(!blockedCopy.includes('Bearer sk-'), 'Copy MD must not include bearer/token patterns');
+
+const blockedTrail = orchestrator.createWorkTrail();
+blockedTrail.push('orchestrator_started');
+blockedTrail.push('redaction_gate_blocked', 'Redaction gate blocked before network.');
+blockedTrail.push('redaction_gate_blocked');
+const blockedTrailCopy = orchestrator.buildCopyMarkdown({
+  reason: 'redaction_blocked',
+  review_packet: { made_network_call: false, retry_count: 0, output_validation: { validated: false, reason: 'redaction_blocked' } }
+}, 'reddog_architect', '', blockedTrail, null, 'high', { substantive: true, handoffRecommendation: blockedHandoffRec });
+const trailLines = blockedTrailCopy.split('\n').filter((line) => line.startsWith('- redaction_gate_blocked'));
+assert.strictEqual(trailLines.length, 1, 'blocked-local Copy MD must not show adjacent duplicate Work Trail events');
 
 const cappedTrail = orchestrator.createWorkTrail();
 for (let i = 0; i < 60; i++) {
