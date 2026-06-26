@@ -1,5 +1,13 @@
 # Foundups®Agent ModLog
 
+## 2026-06-26 - REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1 (docs)
+- Added `docs/REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md`: 15-prompt pack, 012 rubric, runbook, WSP_97 truth rows, baseline vs replacement pass.
+- Added `docs/acceptance/README.md` artifact storage rules.
+- HoloIndex Phase 0: INDEX_GAP for extension.js and advisory_model_once.py retrieval.
+- No runtime behavior changes; external lane scoreboard only.
+
+WSP: WSP_00, WSP_15, WSP_87, WSP_97, WSP_22.
+
 ## 2026-06-25 - v0.3.21 Blocked RedDog Copy MD polish
 - Adjacent duplicate Work Trail events collapse to one entry (detail-bearing event retained).
 - Redaction-block-only runs use conservative Governed Handoff defaults: `handoff_needed: unknown`, `reason: blocked_context_needs_local_0102_review`, `wsp15_priority: P1`, `suggested_slice_name: none`.

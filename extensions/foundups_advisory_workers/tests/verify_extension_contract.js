@@ -44,6 +44,17 @@ includes(bridgePy, 'MAX_PANEL_MODELS = 6', 'panel cap missing in bridge');
 includes(bridgePy, 'RETRYABLE_HTTP_STATUS', 'retryable status set missing');
 includes(bridgePy, 'reason="missing_key"', 'missing_key taxonomy missing');
 
+const acceptanceDoc = fs.readFileSync(path.join(extDir, 'docs', 'REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md'), 'utf8');
+includes(acceptanceDoc, 'REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1', 'acceptance baseline doc title missing');
+includes(acceptanceDoc, 'EXT-ACC-001', 'acceptance prompt pack missing EXT-ACC-001');
+includes(acceptanceDoc, 'EXT-ACC-015', 'acceptance prompt pack missing EXT-ACC-015');
+includes(acceptanceDoc, 'BASELINE_NOT_FIX', 'acceptance WSP_97 row missing');
+includes(acceptanceDoc, 'LANE_B_EXCLUDED', 'acceptance lane lock missing');
+includes(acceptanceDoc, 'NO_LIVE_OPENROUTER_IN_CI', 'acceptance CI boundary missing');
+includes(acceptanceDoc, 'blocked_context_needs_local_0102_review', 'acceptance blocked handoff reference missing');
+includes(roadmap, 'REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1', 'ROADMAP acceptance baseline missing');
+includes(iface, 'External Acceptance Baseline', 'INTERFACE acceptance boundary missing');
+
 includes(extensionJs, 'grid-template-rows: auto minmax(0, 1fr) auto', 'terminal/chat grid rows missing');
 includes(extensionJs, 'html, body { height: 100%; overflow: hidden; }', 'body overflow lock missing');
 includes(extensionJs, '#log { min-height: 0; overflow-y: auto;', 'scrollback output contract missing');

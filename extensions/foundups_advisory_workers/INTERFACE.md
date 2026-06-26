@@ -286,6 +286,20 @@ Redaction-block-only runs default to `handoff_needed: unknown`, `wsp15_priority:
 
 Extension retains no repo/shell/merge authority.
 
+## External Acceptance Baseline (v0.3.21+)
+
+Foundups(R)Agent external-lane usefulness is measured by a **fixed 15-prompt acceptance pack** documented in `docs/REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md`.
+
+| Layer | Scope |
+| --- | --- |
+| CI | Contract tests, syntax, bridge AST — **no live OpenRouter** |
+| 012 manual | Full prompt pack, rubric scoring, Copy MD artifacts, sovereign verdict |
+| Artifacts | Redacted records under `docs/acceptance/` — no secrets |
+
+Baseline pass records honest scores on v0.3.21. Replacement pass reruns the same prompts after HoloIndex/dispatch improvements.
+
+Lane B (internal WRE architect / Sakana loop) is **excluded** from this acceptance boundary.
+
 ## Public/RedDog Roadmap Boundary
 
 The extension is the IDE-side model for a future RedDog operation surface:
