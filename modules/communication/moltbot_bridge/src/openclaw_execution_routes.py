@@ -669,18 +669,68 @@ async def execute_automation(dae: Any, intent: Any) -> str:
         return f"Automation error: {exc}"
 
 
+# WAE-L0 (#737): launch/onboard/create/genesis verbs that would otherwise reach a
+# real ``fam_adapter.launch_foundup`` via FAM passthrough. The ImportError fallback
+# below must FAIL CLOSED for these verbs (the WSP 109 genesis gate lives in the
+# orchestrator; if the orchestrator import fails, the gate is unavailable and no
+# launch may proceed). Local/private predicate only - NOT a shared classifier.
+_LAUNCH_ONBOARD_GENESIS_VERBS = (
+    "launch foundup",
+    "launch this foundup",
+    "onboard",
+    "create foundup",
+    "genesis",
+    "go live",
+)
+
+
+def _is_launch_or_onboard_verb(message: str) -> bool:
+    """Detect launch/onboard/create-foundup/genesis verbs (WAE-L0, #737).
+
+    These verbs would reach a real FAM launch via passthrough and therefore MUST
+    pass the WSP 109 genesis gate first. The gate lives in the orchestrator, so if
+    the orchestrator import fails we cannot gate the intent and must fail closed.
+    Defensive against non-string ``raw_message`` (e.g. mock intents).
+    """
+    if not isinstance(message, str):
+        return False
+    msg_lower = message.lower().strip()
+    return any(verb in msg_lower for verb in _LAUNCH_ONBOARD_GENESIS_VERBS)
+
+
 def execute_foundup(dae: Any, intent: Any) -> str:
     """Route FOUNDUP intent through orchestrator entrypoint.
 
     Phase 1 (OC1): Orchestrator dispatches to FAM with safe fallback.
     Phase 2+: Will add genesis validation gate before FAM handoff.
+
+    WAE-L0 (#737): the ImportError fallback fails CLOSED for launch/onboard/create/
+    genesis verbs. The WSP 109 genesis gate lives in the orchestrator; if its import
+    fails the gate is unavailable, so a launch/onboard intent must return NOT_READY
+    rather than reaching ``fam_adapter.launch_foundup`` ungated. Non-launch advisory
+    queries keep the safe FAM passthrough.
     """
     try:
         from .openclaw_foundup_orchestrator import dispatch_foundup
 
         return dispatch_foundup(dae, intent)
     except ImportError as exc:
-        # Fallback: orchestrator unavailable, try direct FAM
+        # WAE-L0 (#737): orchestrator (and thus the WSP 109 genesis gate) is
+        # unavailable. For launch/onboard/create/genesis verbs we FAIL CLOSED - no
+        # ungated path may reach fam_adapter.launch_foundup.
+        if _is_launch_or_onboard_verb(getattr(intent, "raw_message", "")):
+            logger.warning(
+                "[OPENCLAW-DAE] Genesis gate unavailable (orchestrator import "
+                "failed); launch/onboard intent blocked NOT_READY: %s",
+                exc,
+            )
+            return (
+                "FoundUp launch/onboarding is NOT_READY: the WSP 109 genesis gate "
+                "is unavailable (orchestrator import failed), so this request is "
+                "blocked. No FoundUp was started. Required next action: restore the "
+                "FoundUp orchestrator, then retry."
+            )
+        # Non-launch advisory queries: orchestrator unavailable, safe FAM passthrough.
         logger.warning(
             "[OPENCLAW-DAE] Orchestrator unavailable, trying direct FAM: %s", exc
         )
