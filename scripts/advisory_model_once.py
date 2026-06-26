@@ -408,10 +408,20 @@ def _run_foundups_fusion(
     }
 
 
+def _read_stdin_json() -> dict[str, Any]:
+    """Read bridge payload as UTF-8 bytes (ADDENDUM B: Windows text stdin is not UTF-8-safe)."""
+    raw = sys.stdin.buffer.read()
+    text = raw.decode("utf-8", errors="replace")
+    data = json.loads(text)
+    if not isinstance(data, dict):
+        raise json.JSONDecodeError("expected JSON object", text, 0)
+    return data
+
+
 def main() -> int:
     _progress("bridge_start", "Bridge Python started.")
     try:
-        payload = json.loads(sys.stdin.read())
+        payload = _read_stdin_json()
     except json.JSONDecodeError:
         return _json_result(ok=False, reason="invalid_json")
 

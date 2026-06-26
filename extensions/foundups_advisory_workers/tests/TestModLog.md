@@ -1,5 +1,15 @@
 # Foundups®Agent TestModLog
 
+## 2026-06-14 - ADDENDUM B bridge UTF-8 stdin (UNI-008..UNI-010)
+
+| ID | Asserts |
+| --- | --- |
+| UNI-008 | `evaluate_redaction_gate(safe, EMDASH_UNICODE_CONTEXT)` passes (U+2014) |
+| UNI-009 | `buildBridgePythonEnv` sets PYTHONIOENCODING + PYTHONUTF8 |
+| UNI-010 | `test_main_em_dash_utf8_stdin_not_redactor_error` passes |
+
+Regression: UNI-001..UNI-007, TCI, THG unchanged.
+
 ## 2026-06-14 - REDDOG_CONTEXT_UNICODE_NORMALIZATION_PHASE1 (UNI-001..UNI-007)
 
 | ID | Asserts |

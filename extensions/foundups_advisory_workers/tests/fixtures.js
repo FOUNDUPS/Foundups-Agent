@@ -14,6 +14,8 @@ const MALFORMED_UNICODE_CONTEXT = 'PR #718 WSP_109_FOUNDUP_ONBOARDI' + '\udc94' 
 
 const BLOCKED_POLICY_CONTEXT = 'Bounded repo context with grant authority and merge authorization token present.';
 
+const EMDASH_UNICODE_CONTEXT = 'PR #718 \u2014 `WSP_109_FOUNDUP_ONBOARDI' + ' trailing HoloIndex context for UTF-8 bridge probe.';
+
 const TARGET_READ_DENIED_PATHS = [
   ['C:/Windows/System32/drivers/etc/hosts', 'absolute path'],
   ['../outside.txt', 'traversal'],
@@ -30,5 +32,6 @@ module.exports = {
   REGULAR_SMOKE_PROMPT,
   MALFORMED_UNICODE_CONTEXT,
   BLOCKED_POLICY_CONTEXT,
+  EMDASH_UNICODE_CONTEXT,
   TARGET_READ_DENIED_PATHS
 };

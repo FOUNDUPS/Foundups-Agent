@@ -130,7 +130,7 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_CONTEXT_UNICODE_NORMALIZATION_PHASE1
 
-- **Status:** IN PROGRESS (v0.3.24) — normalize malformed Unicode in bridge payload before redaction gate.
+- **Status:** IN PROGRESS (v0.3.25) — JS surrogate normalization + bridge UTF-8 stdin invariant (Addendum B).
 - Trigger: safe architect prompt blocked with `redactor_error` when HoloIndex context contains lone surrogate (e.g. `\udc94`).
 - Run Trace: `unicode_normalization_applied`, `unicode_replacements_count`, `unicode_normalization_sources`, `unicode_normalization_form`.
 - Out of scope: redaction policy weakening, schema repair, made_network_call telemetry, HoloIndex upstream cleanup (follow-up).

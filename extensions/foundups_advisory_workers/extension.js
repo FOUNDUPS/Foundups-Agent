@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.24';
+const EXTENSION_VERSION = '0.3.25';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -1365,6 +1365,13 @@ function bridgeStreamCapExceeded(currentBytes, chunkLength, cap) {
   return currentBytes + chunkLength > cap;
 }
 
+function buildBridgePythonEnv(baseEnv) {
+  return Object.assign({}, baseEnv || process.env, {
+    PYTHONIOENCODING: 'utf-8',
+    PYTHONUTF8: '1'
+  });
+}
+
 function applyBridgeContextBudget(prompt, context) {
   const budget = {
     truncation_applied: false,
@@ -1434,7 +1441,7 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
 
     const child = cp.spawn(interpreter.path, [script], {
       cwd: root,
-      env: process.env,
+      env: buildBridgePythonEnv(process.env),
       windowsHide: true,
       stdio: ['pipe', 'pipe', 'pipe']
     });
@@ -2555,6 +2562,7 @@ module.exports = {
   constructWspTaskPrompt,
   redactedDigest,
   resolvePythonInterpreter,
+  buildBridgePythonEnv,
   applyBridgeContextBudget,
   killBridgeChild,
   bridgeStreamCapExceeded,
