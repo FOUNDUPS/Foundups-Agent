@@ -1,5 +1,19 @@
 # Foundups®Agent TestModLog
 
+## 2026-06-26 - External acceptance baseline docs
+- Verified acceptance baseline doc exists with 15 prompt IDs (EXT-ACC-001..015).
+- Verified WSP_97 acceptance rows and baseline-vs-replacement language present.
+- Verified static contract references acceptance doc path (no live OpenRouter in CI).
+
+Commands:
+
+```powershell
+node --check extensions/foundups_advisory_workers/extension.js
+node extensions/foundups_advisory_workers/tests/verify_extension_contract.js
+python -B -c "import ast, pathlib; ast.parse(pathlib.Path('scripts/advisory_model_once.py').read_text(encoding='utf-8'))"
+git diff --check -- extensions/foundups_advisory_workers
+```
+
 ## 2026-06-25 - v0.3.21 Blocked Copy MD polish
 - Verified adjacent duplicate Work Trail events dedupe; detail-bearing event retained.
 - Verified blocked-local Copy MD has no duplicate `redaction_gate_blocked` lines.

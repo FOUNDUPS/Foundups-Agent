@@ -14,7 +14,8 @@ Current implementation:
 - Manual lead+panel mode for review-packet traceability.
 - REDDOG_FUSION_ORCHESTRATOR_PHASE1: internal task classifier, auto effort, schema validator, one repair pass.
 - REDDOG_UX_PACKET_POLISH_PHASE1 (v0.3.19): Working Tail above controls; 0102 Role label; Copy MD Run Trace; mojibake flag; validation-failure packet semantics.
-- REDDOG_UX_PACKET_POLISH_PHASE1b (v0.3.20, rebased on #871): Copy MD Redaction Gate Report (WSP_97 truth labels); Governed Handoff Recommendation for substantive tasks; Work Trail sanitization + cap 50; HoloIndex scorecard in Run Trace; provider reasoning report-only effort fields.
+- REDDOG_BLOCKED_COPY_POLISH_PHASE1 (v0.3.21, #878): Work Trail dedupe; conservative blocked-local Governed Handoff.
+- REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1 (docs): fixed 15-prompt pack, rubric, runbook, artifact template for 012 replacement scoreboard.
 
 ## Architecture Direction
 
@@ -66,6 +67,17 @@ IDE extension POC
 | WRE/OpenClaw dispatch bridge | 4 | 5 | 3 | 5 | 17 | P0 | Must remain governed; extension cannot dispatch directly |
 
 ## Next Slices
+
+### REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1
+
+- **Baseline pass (v0.3.21):** 15 fixed prompts, 012 rubric, redacted artifact template (`docs/REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md`).
+- Measures "Can 012 use Foundups(R)Agent instead of Claude Code for advisory work?" — does **not** require fixes in the same slice.
+- **Replacement pass (future):** rerun same pack after HoloIndex index-gap and dispatch improvements; compare against baseline artifacts in `docs/acceptance/`.
+
+### REDDOG_EXTERNAL_ACCEPTANCE_REPLACEMENT_PHASE1
+
+- Re-run baseline prompt pack after HOLOINDEX + dispatch slices land.
+- Pass criteria: improved rubric scores and 012 verdicts vs baseline artifacts.
 
 ### FOUNDUPS_AGENT_INTAKE_MODE_PHASE1
 
