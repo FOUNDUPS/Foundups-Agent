@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
+const cp = require('child_process');
 const Module = require('module');
 
 const fixtures = require('./fixtures');
@@ -16,6 +17,39 @@ const roadmap = fs.readFileSync(path.join(extDir, 'ROADMAP.md'), 'utf8');
 
 function includes(haystack, needle, label) {
   assert(haystack.includes(needle), label || `missing ${needle}`);
+}
+
+function assertFusionRedactionGatePasses(contextText, label) {
+  const script = [
+    'import sys',
+    'from modules.communication.moltbot_bridge.src.fusion_redaction_gate import evaluate_redaction_gate, REDACTION_GATE_PASSED',
+    'ctx = sys.stdin.read()',
+    'r = evaluate_redaction_gate("012 work focus digest placeholder for gate probe", ctx)',
+    'if r.status != REDACTION_GATE_PASSED:',
+    '    cats = ",".join(r.report.blocked_categories)',
+    '    print("BLOCKED:" + r.reason + ":" + cats)',
+    '    sys.exit(1)',
+    'print("PASSED")'
+  ].join('\n');
+  const out = cp.execFileSync('python', ['-B', '-c', script], {
+    cwd: root,
+    input: String(contextText || ''),
+    encoding: 'utf8',
+    timeout: 30000,
+    maxBuffer: 1024 * 1024
+  }).trim();
+  assert.strictEqual(out, 'PASSED', label || 'bounded context must pass fusion redaction gate');
+}
+
+function extractTargetRecallSection(contextText) {
+  const marker = '### Target recall content';
+  const start = String(contextText || '').indexOf(marker);
+  if (start === -1) {
+    return '';
+  }
+  const tail = contextText.slice(start);
+  const next = tail.indexOf('\n### ', marker.length);
+  return next === -1 ? tail : tail.slice(0, next);
 }
 
 assert.strictEqual(pkg.version, '0.3.22', 'package version must be 0.3.22');
@@ -558,5 +592,20 @@ includes(boundedContext.holoindex_scorecard.target_content_paths.join(','), fixt
 
 const copyTargets = orchestrator.inferRecallTargetPaths(fixtures.BUILD_COPY_MARKDOWN_PROMPT);
 assert(copyTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'buildCopyMarkdown prompt must map to extension.js');
+
+// ADDENDUM F - redaction-safe target snippets (reuse fixtures; gate probe via Python policy)
+assert.strictEqual(targetSection.meta.target_content_sanitized, true, 'extension.js snippet must be sanitized for gate safety');
+assert(targetSection.meta.target_content_sanitized_categories.length > 0, 'sanitized categories must be recorded');
+includes(targetSection.text, '[SANITIZED_BLOCK:', 'sanitized placeholders must preserve review shape');
+assert(!targetSection.text.includes('grant authority'), 'raw grant authority must not remain in target recall section');
+assert(!targetSection.text.includes('hidden chain-of-thought'), 'raw hidden chain-of-thought must not remain in target recall section');
+assert(!targetSection.text.includes('redaction_gate_passed'), 'raw redaction_gate_passed must not remain in target recall section');
+
+const targetRecallSection = extractTargetRecallSection(boundedContext.text);
+assert(targetRecallSection.length > 0, 'target recall section must exist for gate probe');
+assertFusionRedactionGatePasses(targetRecallSection, 'target recall section must pass fusion redaction gate');
+assertFusionRedactionGatePasses(boundedContext.text, 'EXT-ACC-001 bounded context must pass fusion redaction gate');
+assert.strictEqual(boundedContext.holoindex_scorecard.target_content_sanitized, true, 'scorecard target_content_sanitized must be true when replacements occurred');
+assert(boundedContext.holoindex_scorecard.target_content_sanitized_categories.length > 0, 'scorecard must list sanitized categories');
 
 console.log('Foundups®Agent extension contract checks passed.');

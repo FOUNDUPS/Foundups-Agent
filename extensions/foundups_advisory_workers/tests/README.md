@@ -27,12 +27,17 @@ python -m pytest holo_index/tests/test_reddog_extension_bundle_recall.py -q
 | File | Purpose |
 | --- | --- |
 | `fixtures.js` | Shared prompts and path lists (EXT-ACC-001, denied paths) |
-| `verify_extension_contract.js` | Single contract runner; ADDENDUM E block ~line 516+ |
+| `verify_extension_contract.js` | Single contract runner; ADDENDUM E ~line 518+, ADDENDUM F gate probe ~line 595+ |
+
+## TEST_REGISTRY
+
+See `TestModLog.md` for TCI-001 through TCI-010. Extend registry rows; do not duplicate probes.
 
 ## Expected behavior
 
 - `inferRecallTargetPaths(EXT_ACC_001_PROMPT)` includes `extension.js`.
 - `buildBoundedRepoContext('wsp_holo_skillz', EXT_ACC_001_PROMPT)` includes target recall content, WSP_97 excerpt, and `target_content_included: true` in scorecard.
+- ADDENDUM F: sanitized snippets pass Python `evaluate_redaction_gate` (TCI-009/TCI-010).
 - Path safety rejects absolute, traversal, `.env`, `.git`, `node_modules`, `.vsix`.
 
 ## Integration requirements

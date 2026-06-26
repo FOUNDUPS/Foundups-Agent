@@ -125,12 +125,14 @@ Run Trace HoloIndex scorecard fields (v0.3.22+):
 | `target_content_chars` | Character count of included target snippets | OBSERVED |
 | `target_content_omitted_reason` | Why snippets omitted when `target_content_included=false` | OBSERVED |
 | `target_content_truncated` | Any target snippet truncated by per-file budget | OBSERVED |
+| `target_content_sanitized` | Block-triggering literals replaced before egress | OBSERVED |
+| `target_content_sanitized_categories` | Fusion BLOCK categories sanitized (metadata only) | OBSERVED |
 
 `evaluateTargetRecall(taskText, bundleOutput)` and `inferRecallTargetPaths(taskText)` implement target-specific recall inference from bundle `task_retrieval.code_hits`.
 
-Target content egress (v0.3.22+): `buildTargetRecallContentSection(root, taskText, maxChars)` reads workspace-confined snippets for inferred recall targets after HoloIndex path ranking. Telemetry reflects the **final** bounded context string assembled by `buildBoundedRepoContext` (before the 42000-char slice). `buildWsp97ProtocolExcerpt(root, maxChars)` adds a bounded WSP_97 protocol excerpt when the task mentions WSP_97 or truth labels.
+Target content egress (v0.3.22+): `buildTargetRecallContentSection(root, taskText, maxChars)` reads workspace-confined snippets for inferred recall targets after HoloIndex path ranking. Snippets pass through `sanitizeTargetSnippetForRedaction()` before inclusion (ADDENDUM F); placeholders use neutral `[SANITIZED_BLOCK:NN]` tokens so category names do not re-trigger the Fusion gate. Telemetry reflects the **final** bounded context string assembled by `buildBoundedRepoContext` (before the 42000-char slice). `buildWsp97ProtocolExcerpt(root, maxChars)` adds a bounded WSP_97 protocol excerpt when the task mentions WSP_97 or truth labels.
 
-Exported helpers for contract tests: `isTargetReadPathDenied`, `resolveSafeRepoFile`, `readBoundedTargetSnippet`, `readBoundedTargetSnippets`, `buildTargetRecallContentSection`, `taskMentionsWsp97`, `buildWsp97ProtocolExcerpt`.
+Exported helpers for contract tests: `isTargetReadPathDenied`, `resolveSafeRepoFile`, `readBoundedTargetSnippet`, `readBoundedTargetSnippets`, `buildTargetRecallContentSection`, `sanitizeTargetSnippetForRedaction`, `taskMentionsWsp97`, `buildWsp97ProtocolExcerpt`.
 
 ## WSP_97 Truth Boundary
 

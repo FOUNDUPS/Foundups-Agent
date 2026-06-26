@@ -1,5 +1,15 @@
 # Foundups®Agent ModLog
 
+## 2026-06-14 - ADDENDUM F redaction-safe target snippets (v0.3.22)
+
+- Raw `extension.js` snippets tripped Fusion BLOCK categories (`governance_instruction`, `private_reasoning`, etc.) before OpenRouter.
+- Added `sanitizeTargetSnippetForRedaction()` mirroring `fusion_redaction_gate.py` BLOCK detectors; neutral `[SANITIZED_BLOCK:NN]` placeholders (category names in metadata only).
+- Run Trace: `target_content_sanitized`, `target_content_sanitized_categories`.
+- Contract tests TCI-009/TCI-010: Python gate probe on EXT-ACC-001 bounded context (no OpenRouter).
+- `fusion_redaction_gate.py` unchanged.
+
+WSP: WSP_97, WSP_22, WSP_84.
+
 ## 2026-06-14 - REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1 (v0.3.22)
 
 - Added workspace-confined target snippet readers: `readBoundedTargetSnippet`, `buildTargetRecallContentSection`, `buildWsp97ProtocolExcerpt`.

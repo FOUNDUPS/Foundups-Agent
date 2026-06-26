@@ -16,6 +16,10 @@
 | TCI-006 | same | `buildWsp97ProtocolExcerpt` protocol title present | WSP_97 excerpt on task match |
 | TCI-007 | same | `buildBoundedRepoContext('wsp_holo_skillz', EXT_ACC_001_PROMPT)` integration | End-to-end bounded context |
 | TCI-008 | same | `inferRecallTargetPaths(BUILD_COPY_MARKDOWN_PROMPT)` -> `extension.js` | Symbol/path dual inference |
+| TCI-009 | same | `target_content_sanitized` + no raw block literals in target section | ADDENDUM F sanitization |
+| TCI-010 | same | Python `evaluate_redaction_gate` PASS on target section + full EXT-ACC-001 context | Egress safety (no OpenRouter) |
+
+**Gate probe helper:** `assertFusionRedactionGatePasses()` in contract runner (stdin to Python policy).
 
 **Fixtures file:** `tests/fixtures.js` exports `EXT_ACC_001_PROMPT`, `EXT_ACC_001_TARGET_PATH`, `BUILD_COPY_MARKDOWN_PROMPT`, `TARGET_READ_DENIED_PATHS`.
 
