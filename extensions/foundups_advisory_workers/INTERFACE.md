@@ -111,6 +111,18 @@ The model cannot access the filesystem. It receives only the bounded context pac
 
 If HoloIndex recall reports zero WSP hits, missing Tier-0 docs, stale/offline fallback, or unavailable output, the answer must treat protocol claims as `NEEDS_VERIFICATION` and propose retrieval/index repair before strong claims.
 
+Run Trace HoloIndex scorecard fields (v0.3.21+):
+
+| Field | Meaning | WSP_97 |
+| --- | --- | --- |
+| `holoindex_status` | Bundle transport result (e.g. `bundle_json_ok`) | OBSERVED |
+| `code_hits_count` | Count of code hits returned | OBSERVED |
+| `target_recall_ok` | Requested target file/symbol appeared in hits | OBSERVED |
+| `index_gap_detected` | Target-specific miss (may be true when `code_hits_count > 0`) | OBSERVED |
+| `direct_read_fallback_used` | Offline lexical fallback used | OBSERVED |
+
+`evaluateTargetRecall(taskText, bundleOutput)` and `inferRecallTargetPaths(taskText)` implement target-specific recall inference from bundle `task_retrieval.code_hits`.
+
 ## WSP_97 Truth Boundary
 
 Every substantive answer should classify claims:

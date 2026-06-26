@@ -399,9 +399,11 @@ const blockedCopy = orchestrator.buildCopyMarkdown({
     holoindex_scorecard: {
       holoindex_status: 'bundle_json_ok',
       wsp_hits: 3,
-      code_hits: 2,
+      code_hits_count: 3,
+      code_hits: 3,
       skill_hits: 1,
-      index_gap_detected: false,
+      target_recall_ok: false,
+      index_gap_detected: true,
       direct_read_fallback_used: false
     },
     output_validation: { validated: false, reason: 'redaction_blocked' },
@@ -411,9 +413,11 @@ const blockedCopy = orchestrator.buildCopyMarkdown({
 }, 'reddog_architect', 'Repo context attached: wsp_holo_skillz', orchestrator.createWorkTrail(), {
   holoindex_status: 'bundle_json_ok',
   wsp_hits: 3,
-  code_hits: 2,
+  code_hits_count: 3,
+  code_hits: 3,
   skill_hits: 1,
-  index_gap_detected: false,
+  target_recall_ok: false,
+  index_gap_detected: true,
   direct_read_fallback_used: false
 }, 'high', {
   promptConstruction: {
@@ -433,6 +437,24 @@ includes(blockedCopy, 'made_network_call: false', 'redaction Copy MD must includ
 includes(blockedCopy, 'blocked_payload_part: unknown', 'unknown payload part must stay unknown');
 includes(blockedCopy, 'raw_snippets_included: false', 'blocked packet must declare no raw snippets');
 includes(blockedCopy, 'holoindex_status:', 'Copy MD must include HoloIndex recall scorecard');
+includes(blockedCopy, 'code_hits_count:', 'Run Trace must include code_hits_count');
+includes(blockedCopy, 'target_recall_ok:', 'Run Trace must include target_recall_ok');
+
+const recallHit = orchestrator.evaluateTargetRecall('Review extensions/foundups_advisory_workers/extension.js for WSP_97', {
+  task_retrieval: {
+    code_hits: [{ location: 'extensions/foundups_advisory_workers/extension.js', need: 'path match: extension.js' }]
+  }
+});
+assert.strictEqual(recallHit.target_recall_ok, true, 'target recall must pass when extension.js is in hits');
+assert.strictEqual(recallHit.index_gap_detected, false, 'index_gap must be false when target recall ok');
+
+const recallMiss = orchestrator.evaluateTargetRecall('Review extensions/foundups_advisory_workers/extension.js for WSP_97', {
+  task_retrieval: {
+    code_hits: [{ location: 'extensions/foundups_advisory_workers/package.json', need: 'path match: package.json' }]
+  }
+});
+assert.strictEqual(recallMiss.target_recall_ok, false, 'target recall must fail when only adjacent paths hit');
+assert.strictEqual(recallMiss.index_gap_detected, true, 'index_gap must be true on target-specific miss');
 includes(blockedCopy, '## Governed Handoff Recommendation', 'substantive task must include governed handoff recommendation');
 includes(blockedCopy, 'handoff_needed: unknown', 'blocked-local packet must use conservative handoff_needed');
 includes(blockedCopy, 'reason: blocked_context_needs_local_0102_review', 'blocked-local packet must include conservative handoff reason');

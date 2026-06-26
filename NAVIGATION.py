@@ -336,6 +336,15 @@ NEED_TO = {
     "generate clip candidates": "modules/ai_intelligence/video_indexer/src/clip_generator.py:ClipGenerator.generate_candidates()",
     "score viral potential": "modules/ai_intelligence/video_indexer/src/clip_generator.py:ClipGenerator._score_virality()",
     "video index storage": "modules/ai_intelligence/video_indexer/src/video_index_store.py:VideoIndexStore",
+
+    # Foundups(R)Agent / RedDog external extension lane (012-facing)
+    "foundups agent extension Copy MD Work Trail Run Trace": "extensions/foundups_advisory_workers/extension.js",
+    "foundups advisory workers extension Copy MD": "extensions/foundups_advisory_workers/extension.js",
+    "buildCopyMarkdown Redaction Gate Report Governed Handoff": "extensions/foundups_advisory_workers/extension.js:buildCopyMarkdown",
+    "extension.js WSP_97 truth label compliance review": "extensions/foundups_advisory_workers/extension.js",
+    "RedDog external worker acceptance baseline": "extensions/foundups_advisory_workers/docs/REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md",
+    "advisory_model_once redaction gate bridge OpenRouter": "scripts/advisory_model_once.py",
+    "Foundups Agent OpenRouter bridge redaction": "scripts/advisory_model_once.py",
 }
 
 # === MODULE_GRAPH: Module Relationships ===

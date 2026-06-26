@@ -1,5 +1,20 @@
 # Foundups®Agent TestModLog
 
+## 2026-06-26 - HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1
+- Verified `extension.js` in top 3 for EXT-ACC-001 review query (bundle-json + pytest).
+- Verified `extension.js:buildCopyMarkdown` top hit for buildCopyMarkdown query.
+- Verified `scripts/advisory_model_once.py` in top 3 for bridge query.
+- Verified `evaluateTargetRecall`: `target_recall_ok` false + `index_gap_detected` true when adjacent hits only.
+- Verified Run Trace scorecard includes `code_hits_count` and `target_recall_ok`.
+
+Commands:
+
+```powershell
+python -m pytest holo_index/tests/test_reddog_extension_bundle_recall.py -q
+node --check extensions/foundups_advisory_workers/extension.js
+node extensions/foundups_advisory_workers/tests/verify_extension_contract.js
+```
+
 ## 2026-06-26 - External acceptance baseline docs
 - Verified acceptance baseline doc exists with 15 prompt IDs (EXT-ACC-001..015).
 - Verified WSP_97 acceptance rows and baseline-vs-replacement language present.

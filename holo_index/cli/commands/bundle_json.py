@@ -190,6 +190,12 @@ def _lexical_task_retrieval(repo_root, task: str, limit: int, ssd_path: str, mod
     code_hits: List[Dict[str, Any]] = []
     for need, location in list(need_to.items()):
         score = _score_text(tokens, need, location)
+        need_lower = need.lower()
+        query_lower = (task or "").lower()
+        if need_lower == query_lower:
+            score += 12.0
+        elif need_lower in query_lower or query_lower in need_lower:
+            score += 8.0
         if score <= 0:
             continue
         similarity = min(1.0, score / max(1.0, len(tokens) * 3.0))
@@ -204,14 +210,19 @@ def _lexical_task_retrieval(repo_root, task: str, limit: int, ssd_path: str, mod
 
     # Path-based fallback when module hint is provided (fast lexical, no embeddings)
     if module_dir is not None and module_dir.exists():
-        allowed_ext = {".py", ".md", ".txt", ".json", ".yaml", ".yml"}
+        allowed_ext = {".py", ".js", ".md", ".txt", ".json", ".yaml", ".yml"}
         for path in module_dir.rglob("*"):
             if not path.is_file():
                 continue
             if path.suffix.lower() not in allowed_ext:
                 continue
             rel_path = str(path.relative_to(repo_root)).replace("\\", "/")
+            name_lower = path.name.lower()
+            stem_lower = path.stem.lower()
             score = _score_text(tokens, rel_path, path.name)
+            for tok in tokens:
+                if tok == stem_lower or tok == name_lower:
+                    score += 6.0
             if score <= 0:
                 continue
             similarity = min(1.0, score / max(1.0, len(tokens) * 3.0))
