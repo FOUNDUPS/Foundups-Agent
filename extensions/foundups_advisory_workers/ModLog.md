@@ -8,6 +8,33 @@
 
 WSP: WSP_00, WSP_15, WSP_87, WSP_97, WSP_22.
 
+## 2026-06-26 - Post-#882 acceptance criteria update (docs)
+
+- Updated `REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md`: EXT-ACC-001 replacement pass requires five criteria (path hit, source content in bounded context, WSP_97 finding on source, `target_recall_ok`, output validation).
+- Documented path-ranking vs content-inclusion distinction; post-#882 probe order (001 + 003 only before full 15-pack).
+- Recorded conditional follow-on `REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1` — do not start until post-land probe proves path-only context.
+
+WSP: WSP_97, WSP_22.
+
+## 2026-06-26 - HOLOINDEX_REDDOG_EXTENSION_INDEX_GAP_PHASE1 (worker slice)
+
+**Problem (OBSERVED):** EXT-ACC-001 showed `bundle_json_ok` + `code_hits=5` but `extension.js` not retrieved; `index_gap_detected` falsely reported `false`.
+
+**Root causes (OBSERVED):**
+- `bundle_json.py` path fallback `allowed_ext` excluded `.js`.
+- RedDog NAVIGATION recall keys were appended to `DAE_ARCHITECTURE` instead of `NEED_TO`.
+- `holoIndexMetaFromBundle()` inferred gap from structured memory / zero WSP hits, not target path recall.
+
+**Fixes (IMPLEMENTED):**
+- Added `.js` to lexical path fallback; filename token + NEED_TO exact/substring scoring boosts.
+- Moved RedDog keys into `NEED_TO`; added `HOLOINDEX.md` manifest.
+- Added `inferRecallTargetPaths()`, `evaluateTargetRecall()`, `target_recall_ok`, `code_hits_count` scorecard fields.
+- Regression tests: `holo_index/tests/test_reddog_extension_bundle_recall.py`; contract tests updated.
+
+**Architect review packet:** `docs/REDDOG_HOLOINDEX_INDEX_GAP_ARCHITECT_REVIEW_PHASE1.md`
+
+WSP: WSP_50, WSP_84, WSP_87, WSP_97.
+
 ## 2026-06-25 - v0.3.21 Blocked RedDog Copy MD polish
 - Adjacent duplicate Work Trail events collapse to one entry (detail-bearing event retained).
 - Redaction-block-only runs use conservative Governed Handoff defaults: `handoff_needed: unknown`, `reason: blocked_context_needs_local_0102_review`, `wsp15_priority: P1`, `suggested_slice_name: none`.

@@ -287,7 +287,57 @@ function resolveProviderReasoningReport(resolvedEffort) {
   return {
     provider_reasoning_requested: requestedMap[effort] || 'medium',
     provider_reasoning_applied: 'unknown',
-    provider_reasoning_note: 'Report-only in v0.3.20; bridge does not confirm provider reasoning application.'
+    provider_reasoning_note: 'Report-only in v0.3.21; bridge does not confirm provider reasoning application.'
+  };
+}
+
+function inferRecallTargetPaths(taskText) {
+  const task = String(taskText || '').toLowerCase();
+  const targets = [];
+  if (/extension\.js|foundups.*agent|copy md|run trace|work trail|buildcopymarkdown|reddog.*extension/.test(task)) {
+    targets.push('extensions/foundups_advisory_workers/extension.js');
+  }
+  if (/buildcopymarkdown/.test(task)) {
+    targets.push('symbol:buildCopyMarkdown');
+  }
+  if (/advisory_model_once|openrouter bridge|redaction gate bridge/.test(task)) {
+    targets.push('scripts/advisory_model_once.py');
+  }
+  if (/acceptance baseline|ext-acc|external acceptance/.test(task)) {
+    targets.push('extensions/foundups_advisory_workers/docs/REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md');
+  }
+  return targets;
+}
+
+function evaluateTargetRecall(taskText, bundleData) {
+  const targets = inferRecallTargetPaths(taskText);
+  if (!targets.length) {
+    return { target_recall_ok: 'unknown', index_gap_detected: false, recall_targets: [] };
+  }
+  const hits = bundleData && bundleData.task_retrieval && Array.isArray(bundleData.task_retrieval.code_hits)
+    ? bundleData.task_retrieval.code_hits
+    : [];
+  const locations = hits.map((h) => String(h.location || '').replace(/\\/g, '/').toLowerCase());
+  const needs = hits.map((h) => String(h.need || '').toLowerCase());
+  let allFound = true;
+  for (const target of targets) {
+    if (target.startsWith('symbol:')) {
+      const symbol = target.slice(7).toLowerCase();
+      const symbolHit = needs.some((n) => n.includes(symbol)) || locations.some((loc) => loc.endsWith('extension.js'));
+      if (!symbolHit) {
+        allFound = false;
+      }
+      continue;
+    }
+    const normalized = target.toLowerCase();
+    if (!locations.some((loc) => loc === normalized || loc.endsWith('/' + normalized.split('/').pop()))) {
+      allFound = false;
+    }
+  }
+  return {
+    target_recall_ok: allFound,
+    index_gap_detected: !allFound,
+    recall_targets: targets
   };
 }
 
@@ -298,9 +348,11 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
   const meta = holoMeta && typeof holoMeta === 'object' ? holoMeta : {};
   return {
     holoindex_status: meta.holoindex_status || 'unknown',
+    code_hits_count: meta.code_hits !== undefined ? meta.code_hits : 'unknown',
     wsp_hits: meta.wsp_hits !== undefined ? meta.wsp_hits : 'unknown',
     code_hits: meta.code_hits !== undefined ? meta.code_hits : 'unknown',
     skill_hits: meta.skill_hits !== undefined ? meta.skill_hits : 'unknown',
+    target_recall_ok: meta.target_recall_ok !== undefined ? meta.target_recall_ok : 'unknown',
     index_gap_detected: meta.index_gap_detected !== undefined ? meta.index_gap_detected : 'unknown',
     direct_read_fallback_used: meta.direct_read_fallback_used !== undefined ? meta.direct_read_fallback_used : 'unknown'
   };
@@ -312,9 +364,10 @@ function formatHoloIndexScorecardLines(scorecard) {
   }
   return [
     '- holoindex_status: ' + scorecard.holoindex_status,
+    '- code_hits_count: ' + scorecard.code_hits_count,
     '- wsp_hits: ' + scorecard.wsp_hits,
-    '- code_hits: ' + scorecard.code_hits,
     '- skill_hits: ' + scorecard.skill_hits,
+    '- target_recall_ok: ' + scorecard.target_recall_ok,
     '- index_gap_detected: ' + scorecard.index_gap_detected,
     '- direct_read_fallback_used: ' + scorecard.direct_read_fallback_used
   ];
@@ -1568,27 +1621,28 @@ function moduleHintFromActive(root) {
   return parts[0];
 }
 
-function holoIndexMetaFromBundle(output, usedOfflineFallback) {
+function holoIndexMetaFromBundle(output, usedOfflineFallback, taskText) {
   const meta = {
     holoindex_status: usedOfflineFallback ? 'offline_fallback' : 'unknown',
     wsp_hits: 'unknown',
     code_hits: 'unknown',
     skill_hits: 'unknown',
+    target_recall_ok: 'unknown',
     index_gap_detected: 'unknown',
     direct_read_fallback_used: usedOfflineFallback ? true : false
   };
   try {
     const data = JSON.parse(String(output || '{}'));
     const bundleMeta = data.task_retrieval && data.task_retrieval.metadata ? data.task_retrieval.metadata : {};
-    const missing = data.structured_memory && Array.isArray(data.structured_memory.missing_required)
-      ? data.structured_memory.missing_required
-      : [];
+    const recall = evaluateTargetRecall(taskText, data);
     meta.holoindex_status = usedOfflineFallback ? 'offline_fallback' : 'bundle_json_ok';
     meta.wsp_hits = Number(bundleMeta.wsp_count || 0);
     meta.code_hits = Number(bundleMeta.code_count || 0);
     meta.skill_hits = bundleMeta.skill_count !== undefined ? Number(bundleMeta.skill_count) : 'unknown';
-    meta.index_gap_detected = missing.length > 0 || meta.wsp_hits === 0;
+    meta.target_recall_ok = recall.target_recall_ok;
+    meta.index_gap_detected = recall.index_gap_detected;
     meta.direct_read_fallback_used = !!usedOfflineFallback;
+    meta.recall_targets = recall.recall_targets;
   } catch (err) {
     meta.holoindex_status = usedOfflineFallback ? 'offline_fallback' : 'parse_error';
   }
@@ -1608,7 +1662,7 @@ function holoIndexOutput(root, taskText, maxChars) {
       maxBuffer: Math.max(maxChars * 4, 65536),
       windowsHide: true
     });
-    const meta = holoIndexMetaFromBundle(output, false);
+    const meta = holoIndexMetaFromBundle(output, false, query);
     return { output: String(output || '').slice(0, maxChars), quality: summarizeHoloBundle(output), meta: meta };
   } catch (bundleErr) {
     try {
@@ -1619,7 +1673,7 @@ function holoIndexOutput(root, taskText, maxChars) {
         maxBuffer: Math.max(maxChars * 4, 65536),
         windowsHide: true
       });
-      const meta = holoIndexMetaFromBundle(output, true);
+      const meta = holoIndexMetaFromBundle(output, true, query);
       return {
         output: String(output || '').slice(0, maxChars),
         quality: 'HoloIndex bundle-json failed; offline lexical fallback used. Treat protocol coverage as NEEDS_VERIFICATION and propose re-index/bundle repair if WSP hits are missing.',
@@ -2100,6 +2154,9 @@ module.exports = {
   buildGovernedHandoffSection,
   compositePayloadDigest,
   extractHoloIndexScorecard,
+  evaluateTargetRecall,
+  inferRecallTargetPaths,
+  holoIndexMetaFromBundle,
   MOJIBAKE_MARKERS,
   WORK_TRAIL_MAX_EVENTS,
   VALIDATION_FAILED_FOOTER
