@@ -130,11 +130,18 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_CONTEXT_UNICODE_NORMALIZATION_PHASE1
 
-- **Status:** IN PROGRESS (v0.3.25) — JS surrogate normalization + bridge UTF-8 stdin invariant (Addendum B).
-- Trigger: safe architect prompt blocked with `redactor_error` when HoloIndex context contains lone surrogate (e.g. `\udc94`).
-- Run Trace: `unicode_normalization_applied`, `unicode_replacements_count`, `unicode_normalization_sources`, `unicode_normalization_form`.
-- Out of scope: redaction policy weakening, schema repair, made_network_call telemetry, HoloIndex upstream cleanup (follow-up).
-- Acceptance: synthetic surrogate normalized; gate passes; `blocked_policy` unchanged; TCI + THG regression green.
+- **Status:** **LANDED** #886 (`ca5703611`) — JS surrogate normalization + bridge UTF-8 stdin (0.3.25).
+
+### REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1
+
+- **Status:** IN PROGRESS (v0.3.26) — repair pass minimal context, sanitized draft, merge supplement.
+- Trigger: primary Fusion egress ok but `output_validation: failed`; repair re-blocked on full context.
+- Run Trace: `repair_context_mode: repair_minimal`, `repair_mode: openrouter_single`.
+- Does not replace sanitized-target provenance slice (fold placeholder guidance there).
+
+### REDDOG_SANITIZED_TARGET_CONTEXT_PROVENANCE_PHASE1
+
+- **Status:** QUEUED — tell RedDog target snippets may contain egress-safe placeholders; not repo source truth.
 
 ### REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1
 

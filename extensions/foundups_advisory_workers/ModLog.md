@@ -1,5 +1,16 @@
 # Foundups®Agent ModLog
 
+## 2026-06-14 - REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1 (v0.3.26)
+
+- Repair pass uses `buildRepairBoundedContext()` (minimal WSP contract; no HoloIndex resend).
+- Repair routes `openrouter_single` with sanitized draft via `sanitizeTargetSnippetForRedaction`.
+- `mergeRepairedOutput()` appends schema supplement to primary Fusion output.
+- Run Trace: `repair_context_mode`, `repair_mode` on validation state.
+- Contract tests OSR-001..OSR-006.
+- Version bump 0.3.25 -> 0.3.26.
+
+WSP: WSP_97, WSP_22, WSP_84.
+
 ## 2026-06-14 - ADDENDUM B bridge UTF-8 stdin invariant (v0.3.25)
 
 - **Problem:** Valid U+2014 em dash in HoloIndex context passed JS normalization but Windows Python text stdin mis-decoded UTF-8 to surrogate `\udc94`, causing `redactor_error` at digest.

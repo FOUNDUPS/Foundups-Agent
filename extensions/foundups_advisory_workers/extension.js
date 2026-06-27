@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.25';
+const EXTENSION_VERSION = '0.3.26';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -534,6 +534,12 @@ function buildRunTraceSection(result, workerType, contextSummary, holoScorecard,
     }
   }
   lines.push('- output_validation: ' + formatOutputValidationStatus(rp.output_validation));
+  if (rp.output_validation && rp.output_validation.repair_context_mode) {
+    lines.push('- repair_context_mode: ' + rp.output_validation.repair_context_mode);
+  }
+  if (rp.output_validation && rp.output_validation.repair_mode) {
+    lines.push('- repair_mode: ' + rp.output_validation.repair_mode);
+  }
   return lines.join('\n');
 }
 
@@ -992,18 +998,48 @@ function constructWspTaskPrompt(workFocus, classification, contextQuality, worke
 
 function buildRepairPrompt(originalPrompt, badOutput, missingSections) {
   const sections = Array.isArray(missingSections) ? missingSections : [];
+  const sanitizedDraft = sanitizeTargetSnippetForRedaction(String(badOutput || '').slice(0, 12000));
   return [
-    'Repair pass: preserve the existing answer content and add only the missing required schema sections.',
-    'Do not invent evidence, repo paths, test results, or authority.',
-    'Label claims with WSP_97 truth labels where applicable.',
+    'Repair pass: add ONLY the missing required schema sections listed below.',
+    'Preserve factual content from the draft answer. Do not invent evidence, repo paths, test results, or authority.',
+    'Draft text may contain egress-safe placeholders such as [SANITIZED_BLOCK:NN]; those are not repo source truth.',
+    'Label new claims with WSP_97 truth labels where applicable.',
     'Missing sections: ' + (sections.length ? sections.join(', ') : '(none listed)'),
     '',
-    'Original WSP task prompt:',
-    String(originalPrompt || '').slice(0, 4000),
+    'Original WSP task prompt (bounded excerpt):',
+    String(originalPrompt || '').slice(0, 2000),
     '',
-    'Draft answer to repair:',
-    String(badOutput || '').slice(0, 12000)
+    'Draft answer to repair (sanitized for redaction gate):',
+    sanitizedDraft.text
   ].join('\n');
+}
+
+function buildRepairBoundedContext() {
+  return [
+    '## REPAIR_PASS_BOUNDED_CONTEXT',
+    'Schema repair pass only. Full repo/HoloIndex context was consumed in the primary advisory pass.',
+    'Do not treat this packet as fresh repo evidence. Complete missing schema sections from the draft in the user prompt.',
+    'Target recall snippets may contain egress-safe placeholders; do not claim placeholders exist in committed repo source.',
+    '',
+    '## WSP_OPERATING_CONTRACT',
+    '- Advisory only. No shell, repo modification, credential, browser, deploy, or runtime control.',
+    '- Apply WSP_97 truth labels on any new claims.'
+  ].join('\n');
+}
+
+function mergeRepairedOutput(primaryContent, repairContent) {
+  const primary = String(primaryContent || '').trim();
+  const repair = String(repairContent || '').trim();
+  if (!repair) {
+    return primary;
+  }
+  if (/^## Decision\b/m.test(repair) && /## (?:Lead|Synthesis)\b/m.test(repair)) {
+    return repair;
+  }
+  if (!primary) {
+    return repair;
+  }
+  return primary + '\n\n## Schema repair supplement\n\n' + repair;
 }
 
 function isSubstantiveRedDogWorker(workerType) {
@@ -1228,26 +1264,31 @@ function wireFusionWebview(context, webview, worker, state) {
         workTrail.push('repair_started');
         postStatusAndProgress(webview, null, 'Output schema incomplete. Missing: ' + validation.missingSections.join(', ') + '. Running one repair pass...');
         const repairPrompt = buildRepairPrompt(wspTaskPrompt, result.content, validation.missingSections);
+        const repairContext = buildRepairBoundedContext();
+        const repairSystemPrompt = 'Complete missing advisory markdown sections only. Output the missing section headers and bodies. Do not repeat the full document unless necessary.';
         const repairResult = await callFusion(
           context,
           worker,
           repairPrompt,
-          contextPacket.text,
-          systemPrompt + '\n\nRepair pass: add missing schema sections only. Do not invent evidence.',
-          state.history,
-          mode,
+          repairContext,
+          repairSystemPrompt,
+          [],
+          'openrouter_single',
           onBridgeProgress,
           state,
           promptConstruction,
           { promptSource: 'repair_prompt' }
         );
         absorbUnicodeMeta(repairResult);
+        validationState.repair_context_mode = 'repair_minimal';
+        validationState.repair_mode = 'openrouter_single';
         if (repairResult.ok) {
-          const repairValidation = validateRedDogOutput(repairResult.content || '', { substantiveArchitect: true, mode: mode });
+          const mergedContent = mergeRepairedOutput(result.content, repairResult.content);
+          const repairValidation = validateRedDogOutput(mergedContent, { substantiveArchitect: true, mode: mode });
           validationState.repair_ok = repairValidation.valid;
           validationState.missing_sections_after_repair = repairValidation.missingSections;
           if (repairValidation.valid) {
-            result = repairResult;
+            result = Object.assign({}, repairResult, { content: mergedContent });
             validationState.validated = true;
             validationState.missing_sections = [];
             workTrail.push('repair_complete');
@@ -2559,6 +2600,8 @@ module.exports = {
   resolveModelMode,
   validateRedDogOutput,
   buildRepairPrompt,
+  buildRepairBoundedContext,
+  mergeRepairedOutput,
   constructWspTaskPrompt,
   redactedDigest,
   resolvePythonInterpreter,
