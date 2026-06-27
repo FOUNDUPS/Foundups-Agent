@@ -32,10 +32,13 @@ def _passed_gate(*, prompt: str = "redacted-prompt", context: str | None = None)
 
 class AdvisoryBridgeHardeningTests(unittest.TestCase):
     def _invoke_main(self, payload: dict, *, api_key: str = "test-key") -> tuple[int, dict]:
-        stdin = io.StringIO(json.dumps(payload))
+        stdin_bytes = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        stdin_buffer = io.BytesIO(stdin_bytes)
         stdout = io.StringIO()
         env = {bridge.ENV_API_KEY: api_key}
-        with mock.patch("sys.stdin", stdin), mock.patch("sys.stdout", stdout), mock.patch.dict(
+        fake_stdin = mock.Mock()
+        fake_stdin.buffer = stdin_buffer
+        with mock.patch("sys.stdin", fake_stdin), mock.patch("sys.stdout", stdout), mock.patch.dict(
             os.environ, env, clear=False
         ):
             rc = bridge.main()
@@ -210,6 +213,39 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         self.assertTrue(packet.get("panel_models_truncated"))
         self.assertEqual(packet.get("python_interpreter_source"), "system")
         self.assertLessEqual(len(packet.get("panel_models") or []), bridge.MAX_PANEL_MODELS)
+
+    def test_read_stdin_json_em_dash(self) -> None:
+        payload = {"prompt": "safe", "context": "PR #718 \u2014 `WSP_109_FOUNDUP_ONBOARDI"}
+        stdin_buffer = io.BytesIO(json.dumps(payload, ensure_ascii=False).encode("utf-8"))
+        fake_stdin = mock.Mock()
+        fake_stdin.buffer = stdin_buffer
+        with mock.patch("sys.stdin", fake_stdin):
+            parsed = bridge._read_stdin_json()
+        self.assertIn("\u2014", parsed["context"])
+
+    def test_main_em_dash_utf8_stdin_not_redactor_error(self) -> None:
+        context = "PR #718 \u2014 `WSP_109_FOUNDUP_ONBOARDI"
+        responses = [
+            json.dumps({"choices": [{"message": {"content": "ok"}}]}).encode("utf-8"),
+        ]
+
+        def fake_urlopen(request, timeout=0):  # noqa: ARG001
+            item = responses.pop(0)
+            return io.BytesIO(item)
+
+        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen):
+            _rc, out = self._invoke_main(
+                {
+                    "mode": "openrouter_single",
+                    "prompt": "Operate as RedDog Architect. Review the supplied repo context.",
+                    "context": context,
+                    "lead_model": "z-ai/glm-5.2",
+                }
+            )
+
+        self.assertNotEqual(out.get("reason"), "redaction_blocked")
+        self.assertNotEqual(out.get("redaction_reason"), "redactor_error")
+        self.assertTrue(out.get("ok"))
 
 
 if __name__ == "__main__":

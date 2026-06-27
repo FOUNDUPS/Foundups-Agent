@@ -1,5 +1,37 @@
 # Foundups®Agent TestModLog
 
+## 2026-06-14 - ADDENDUM B bridge UTF-8 stdin (UNI-008..UNI-010)
+
+| ID | Asserts |
+| --- | --- |
+| UNI-008 | `evaluate_redaction_gate(safe, EMDASH_UNICODE_CONTEXT)` passes (U+2014) |
+| UNI-009 | `buildBridgePythonEnv` sets PYTHONIOENCODING + PYTHONUTF8 |
+| UNI-010 | `test_main_em_dash_utf8_stdin_not_redactor_error` passes |
+
+Regression: UNI-001..UNI-007, TCI, THG unchanged.
+
+## 2026-06-14 - REDDOG_CONTEXT_UNICODE_NORMALIZATION_PHASE1 (UNI-001..UNI-007)
+
+| ID | Asserts |
+| --- | --- |
+| UNI-001 | Lone surrogate breaks UTF-8 digest path without normalization |
+| UNI-002 | `evaluate_redaction_gate(safe, MALFORMED_UNICODE_CONTEXT)` -> `redactor_error` |
+| UNI-003 | `normalizeBridgeTextForUnicode` replaces lone surrogate; count > 0 |
+| UNI-004 | Normalized context passes Python gate |
+| UNI-005 | `BLOCKED_POLICY_CONTEXT` still -> `blocked_policy` |
+| UNI-006 | `buildRunTraceSection` exposes unicode normalization telemetry |
+| UNI-007 | No raw malformed surrogate in normalized text or Run Trace |
+
+Regression: TCI-001..TCI-010 and THG-001..THG-006 must still pass.
+
+Commands:
+
+```powershell
+node --check extensions/foundups_advisory_workers/extension.js
+node extensions/foundups_advisory_workers/tests/verify_extension_contract.js
+git diff --check -- extensions/foundups_advisory_workers
+```
+
 ## 2026-06-14 - REDDOG_ALWAYS_HOLOINDEX_GROUNDING_PHASE1 (THG-001..006)
 
 | ID | Asserts |

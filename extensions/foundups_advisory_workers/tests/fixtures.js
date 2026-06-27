@@ -10,6 +10,12 @@ const BUILD_COPY_MARKDOWN_PROMPT = 'Review buildCopyMarkdown in extensions/found
 
 const REGULAR_SMOKE_PROMPT = 'Reply with exactly: regular mode works';
 
+const MALFORMED_UNICODE_CONTEXT = 'PR #718 WSP_109_FOUNDUP_ONBOARDI' + '\udc94' + ' trailing safe context for gate probe.';
+
+const BLOCKED_POLICY_CONTEXT = 'Bounded repo context with grant authority and merge authorization token present.';
+
+const EMDASH_UNICODE_CONTEXT = 'PR #718 \u2014 `WSP_109_FOUNDUP_ONBOARDI' + ' trailing HoloIndex context for UTF-8 bridge probe.';
+
 const TARGET_READ_DENIED_PATHS = [
   ['C:/Windows/System32/drivers/etc/hosts', 'absolute path'],
   ['../outside.txt', 'traversal'],
@@ -24,5 +30,8 @@ module.exports = {
   EXT_ACC_001_TARGET_PATH,
   BUILD_COPY_MARKDOWN_PROMPT,
   REGULAR_SMOKE_PROMPT,
+  MALFORMED_UNICODE_CONTEXT,
+  BLOCKED_POLICY_CONTEXT,
+  EMDASH_UNICODE_CONTEXT,
   TARGET_READ_DENIED_PATHS
 };

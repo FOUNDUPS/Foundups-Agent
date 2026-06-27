@@ -1,5 +1,27 @@
 # Foundups®Agent ModLog
 
+## 2026-06-14 - ADDENDUM B bridge UTF-8 stdin invariant (v0.3.25)
+
+- **Problem:** Valid U+2014 em dash in HoloIndex context passed JS normalization but Windows Python text stdin mis-decoded UTF-8 to surrogate `\udc94`, causing `redactor_error` at digest.
+- **`scripts/advisory_model_once.py`:** `_read_stdin_json()` reads `sys.stdin.buffer` as UTF-8 (`errors="replace"`).
+- **`extension.js`:** `buildBridgePythonEnv()` sets `PYTHONIOENCODING=utf-8`, `PYTHONUTF8=1` on bridge child.
+- Tests UNI-008..UNI-010; Python `test_main_em_dash_utf8_stdin_not_redactor_error`.
+- Prior surrogate normalization (Addendum A / UNI-001..007) unchanged.
+- Version bump 0.3.24 -> 0.3.25.
+
+WSP: WSP_00, WSP_97, WSP_22, WSP_84.
+
+## 2026-06-14 - REDDOG_CONTEXT_UNICODE_NORMALIZATION_PHASE1 (v0.3.24)
+
+- Added `normalizeBridgeTextForUnicode()` to replace isolated UTF-16 surrogates with `[MALFORMED_SURROGATE]` and apply NFC before bridge/redaction gate.
+- Wired normalization in `callFusion` for WSP task prompt, bounded context, and repair prompt (`repair_prompt` source label).
+- Run Trace / review packet: `unicode_normalization_applied`, `unicode_replacements_count`, `unicode_normalization_sources`, `unicode_normalization_form`.
+- Contract tests UNI-001..UNI-007; fixtures `MALFORMED_UNICODE_CONTEXT`, `BLOCKED_POLICY_CONTEXT`.
+- `fusion_redaction_gate.py` unchanged; policy not weakened.
+- Version bump 0.3.23 -> 0.3.24.
+
+WSP: WSP_00, WSP_15, WSP_97, WSP_22, WSP_84.
+
 ## 2026-06-14 - REDDOG_ALWAYS_HOLOINDEX_GROUNDING_PHASE1 (v0.3.23)
 
 - REGULAR auto context: `none` -> `wsp_holo` (HoloIndex bundle-json; no Skillz/git/Fusion panel).
