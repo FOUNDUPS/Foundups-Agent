@@ -179,7 +179,9 @@ Internal contract layer. Advisory-only. No new authority.
 | `resolveAutoEffort(classification, selectedEffort)` | Maps Auto -> regular/high/ultra |
 | `resolveModelMode(classification, selectedMode, workerType)` | RedDog WSP work defaults to auditable manual panel |
 | `validateRedDogOutput(markdown)` | Required schema section check |
-| `buildRepairPrompt(originalPrompt, badOutput, missingSections)` | One bounded repair pass |
+| `buildRepairPrompt(originalPrompt, badOutput, missingSections)` | One bounded repair pass; sanitizes draft for gate |
+| `buildRepairBoundedContext()` | Minimal WSP-only context for repair (no HoloIndex resend) |
+| `mergeRepairedOutput(primaryContent, repairContent)` | Appends schema supplement to primary Fusion output |
 
 Required substantive output sections:
 
@@ -223,7 +225,7 @@ Review packet additions:
 - `work_focus_digest` (`hash`, `excerpt`, `length` - redacted)
 - `wsp_prompt_digest` (`hash`, `excerpt`, `length` - redacted)
 - `prompt_construction`: `0102_generated_from_work_focus`
-- `output_validation` (`validated`, `missing_sections`, `repair_attempted`, `repair_ok`, `fusion_panel_ok`)
+- `output_validation` (`validated`, `missing_sections`, `repair_attempted`, `repair_ok`, `repair_context_mode`, `repair_mode`, `fusion_panel_ok`)
 
 ## Bridge Hardening (v0.3.16)
 

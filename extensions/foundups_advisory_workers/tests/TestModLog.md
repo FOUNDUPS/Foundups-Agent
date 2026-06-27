@@ -1,5 +1,27 @@
 # Foundups®Agent TestModLog
 
+## 2026-06-14 - REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING addendum (OSR-007..OSR-010)
+
+| ID | Asserts |
+| --- | --- |
+| OSR-007 | Primary missing Evidence/Architect Trace/Verification gaps/Next safest step; supplement completes schema |
+| OSR-008 | Repair trail maps single/panel stages to `repair_single_started` |
+| OSR-009 | Repair prompt lists explicit `## Section` headers |
+| OSR-010 | Failed repair still exposes repair metadata + missing_sections_after_repair |
+
+## 2026-06-14 - REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1 (OSR-001..OSR-006)
+
+| ID | Asserts |
+| --- | --- |
+| OSR-001 | `buildRepairBoundedContext()` minimal, declares repair pass |
+| OSR-002 | Repair context notes egress-safe placeholders |
+| OSR-003 | Minimal repair context passes Python gate |
+| OSR-004 | `buildRepairPrompt` sanitizes block literals; gate passes |
+| OSR-005 | `mergeRepairedOutput` satisfies Fusion schema when supplemented |
+| OSR-006 | Run Trace exposes `repair_context_mode` / `repair_mode` |
+
+Regression: UNI, TCI, THG unchanged.
+
 ## 2026-06-14 - ADDENDUM B bridge UTF-8 stdin (UNI-008..UNI-010)
 
 | ID | Asserts |

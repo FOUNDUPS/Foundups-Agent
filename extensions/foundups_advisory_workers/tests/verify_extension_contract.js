@@ -79,8 +79,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.25', 'package version must be 0.3.25');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.25'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.27', 'package version must be 0.3.27');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.27'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -97,7 +97,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.25', 'README version mismatch');
+includes(readme, 'Version: 0.3.27', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -159,7 +159,13 @@ includes(extensionJs, 'function resolveModelMode', 'resolveModelMode missing');
 includes(extensionJs, 'function validateRedDogOutput', 'validateRedDogOutput missing');
 includes(extensionJs, 'function buildRepairPrompt', 'buildRepairPrompt missing');
 includes(extensionJs, 'output_validation', 'review packet validator status missing');
-includes(extensionJs, 'Do not invent evidence', 'repair prompt evidence guard missing');
+includes(extensionJs, 'function buildRepairBoundedContext', 'repair bounded context helper missing');
+includes(extensionJs, 'function mergeRepairedOutput', 'merge repaired output helper missing');
+includes(extensionJs, 'repair_minimal', 'repair context mode telemetry missing');
+includes(extensionJs, 'egress-safe placeholders', 'repair prompt placeholder provenance missing');
+includes(extensionJs, 'repair_single_started', 'repair single trail event missing');
+includes(extensionJs, 'normalizeRepairBridgeStageToWorkTrail', 'repair trail normalizer missing');
+includes(extensionJs, 'function extractMarkdownSection', 'extractMarkdownSection missing');
 includes(extensionJs, 'function modeSelectionReasoning', 'mode selection reasoning missing');
 includes(extensionJs, 'Architect Trace', 'architect trace schema missing');
 includes(extensionJs, 'Verification gaps', 'verification gaps schema missing');
@@ -271,7 +277,76 @@ assert(validation.missingSections.includes('Proposed fixes'), 'validator must li
 
 const repairPrompt = orchestrator.buildRepairPrompt('task', badOutput, validation.missingSections);
 includes(repairPrompt, 'Do not invent evidence', 'repair prompt must forbid invented evidence');
-includes(repairPrompt, 'preserve the existing answer content', 'repair prompt must be bounded');
+includes(repairPrompt, 'egress-safe placeholders', 'repair prompt must warn on sanitized placeholders');
+includes(repairPrompt, 'Preserve factual content', 'repair prompt must preserve draft content');
+
+// OSR-001..OSR-006 REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1
+const repairContext = orchestrator.buildRepairBoundedContext();
+assert(repairContext.length < 2000, 'OSR-001: repair context must stay minimal');
+includes(repairContext, 'REPAIR_PASS_BOUNDED_CONTEXT', 'OSR-001: repair context must declare repair pass');
+includes(repairContext, 'egress-safe placeholders', 'OSR-002: repair context must note placeholder provenance');
+assertFusionRedactionGatePasses(repairContext, 'OSR-003: minimal repair context must pass gate');
+
+const blockDraftPrompt = orchestrator.buildRepairPrompt('safe task', fixtures.REPAIR_DRAFT_WITH_BLOCK_LITERALS, ['Proposed fixes']);
+assert(!blockDraftPrompt.includes('grant authority'), 'OSR-004: repair prompt must sanitize block literals in draft');
+assertFusionRedactionGatePasses(blockDraftPrompt, 'OSR-004: sanitized repair prompt must pass gate');
+
+const fusionPrimary = '## RedDog Routing\n\n## Lead (z-ai/glm-5.2)\n\n## Decision\n\nok\n\n## Findings\n\nF1\n\n## Critic (deepseek/deepseek-v4-pro)\n\nNone\n\n## Synthesis (z-ai/glm-5.2)\n\n## Decision\n\nok\n\n## Findings\n\nF1';
+const mergedRepair = orchestrator.mergeRepairedOutput(
+  fusionPrimary,
+  fixtures.REPAIR_SUPPLEMENT_SECTIONS,
+  ['Proposed fixes', 'Uncertainties', 'WSP_97 Truth Labels', 'WSP_15 Priority', 'Verification gaps', 'Next safest step', 'Architect Trace', 'Evidence']
+);
+const mergedValidation = orchestrator.validateRedDogOutput(mergedRepair.text, { substantiveArchitect: true, mode: 'foundups_fusion' });
+assert.strictEqual(mergedValidation.valid, true, 'OSR-005: merged primary+supplement must satisfy schema');
+assert(mergedRepair.text.includes('## Schema repair supplement'), 'OSR-005: merged output must retain supplement marker');
+
+const primaryMissingTail = fusionPrimary;
+const combinedSupplement = fixtures.REPAIR_TAIL_SUPPLEMENT + '\n\n' + fixtures.REPAIR_SUPPLEMENT_SECTIONS;
+const tailMerge = orchestrator.mergeRepairedOutput(
+  primaryMissingTail,
+  combinedSupplement,
+  ['Evidence', 'Verification gaps', 'Next safest step', 'Architect Trace', 'Proposed fixes', 'Uncertainties', 'WSP_97 Truth Labels', 'WSP_15 Priority']
+);
+includes(tailMerge.text, '## Evidence', 'OSR-007: tail merge must include Evidence');
+includes(tailMerge.text, '## Verification gaps', 'OSR-007: tail merge must include Verification gaps');
+includes(tailMerge.text, '## Next safest step', 'OSR-007: tail merge must include Next safest step');
+includes(tailMerge.text, '## Architect Trace', 'OSR-007: tail merge must include Architect Trace');
+const tailValidation = orchestrator.validateRedDogOutput(tailMerge.text, { substantiveArchitect: true, mode: 'foundups_fusion' });
+assert.strictEqual(tailValidation.valid, true, 'OSR-007: tail supplement must complete schema');
+
+const repairStage = orchestrator.normalizeRepairBridgeStageToWorkTrail('single_start', 'Regular OpenRouter request started');
+assert.strictEqual(repairStage.event, 'repair_single_started', 'OSR-008: repair single_start maps to repair_single_started');
+const repairPanelStage = orchestrator.normalizeRepairBridgeStageToWorkTrail('panel_start', 'Panel requests started');
+assert.strictEqual(repairPanelStage.event, 'repair_single_started', 'OSR-008: repair panel_start must not emit panel_started');
+
+const repairPromptSections = orchestrator.buildRepairPrompt('task', 'draft', ['Evidence', 'Architect Trace', 'Next safest step']);
+includes(repairPromptSections, '## Evidence', 'OSR-009: repair prompt must list required headers');
+includes(repairPromptSections, '## Architect Trace', 'OSR-009: repair prompt must list Architect Trace header');
+includes(repairPromptSections, '## Next safest step', 'OSR-009: repair prompt must list Next safest step header');
+
+const repairTraceFailed = orchestrator.buildRunTraceSection({
+  review_packet: {
+    task_classification: { tier: 'HIGH' },
+    resolved_effort: 'high',
+    resolved_mode: 'foundups_fusion',
+    resolved_context: 'wsp_holo_skillz',
+    mode_selection_reasoning: 'Fusion manual panel',
+    principal_model: 'z-ai/glm-5.2',
+    panel_models: ['deepseek/deepseek-v4-pro'],
+    output_validation: {
+      validated: false,
+      repair_attempted: true,
+      repair_ok: false,
+      repair_context_mode: 'repair_minimal',
+      repair_mode: 'openrouter_single',
+      missing_sections_after_repair: ['Evidence', 'Next safest step']
+    }
+  }
+}, 'reddog_architect', 'Repo context attached', null, 'high');
+includes(repairTraceFailed, 'repair_context_mode: repair_minimal', 'OSR-010: Run Trace must expose repair context on failed repair');
+includes(repairTraceFailed, 'repair_mode: openrouter_single', 'OSR-010: Run Trace must expose repair mode on failed repair');
+includes(repairTraceFailed, 'missing_sections_after_repair: Evidence, Next safest step', 'OSR-010: Run Trace must list remaining missing sections');
 
 const handoffContext = orchestrator.skillzWardrobeRolodexContext(root, 'process all youtube comments with existing skillz', 12000);
 includes(handoffContext, 'Skillz/Wardrobe/Rolodex discovery', 'handoff context header missing');
@@ -591,7 +666,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.25'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.27'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -605,7 +680,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.25'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.27'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -617,7 +692,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.25'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.27'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');

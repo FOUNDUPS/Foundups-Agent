@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.25';
+const EXTENSION_VERSION = '0.3.27';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -53,6 +53,11 @@ const WORK_TRAIL_ALLOWLIST = new Set([
   'repair_started',
   'repair_blocked',
   'repair_complete',
+  'repair_redaction_started',
+  'repair_redaction_passed',
+  'repair_redaction_blocked',
+  'repair_single_started',
+  'repair_single_done',
   'completed',
   'failed'
 ]);
@@ -74,6 +79,22 @@ const BRIDGE_STAGE_WORK_TRAIL = {
   single_done: 'lead_started',
   fusion_alias_start: 'panel_started',
   fusion_alias_done: 'panel_started'
+};
+
+const BRIDGE_REPAIR_STAGE_WORK_TRAIL = {
+  bridge_start: 'repair_started',
+  env_check: 'repair_started',
+  redaction_start: 'repair_redaction_started',
+  redaction_blocked: 'repair_redaction_blocked',
+  redaction_pass: 'repair_redaction_passed',
+  single_start: 'repair_single_started',
+  single_done: 'repair_single_done',
+  lead_start: 'repair_single_started',
+  lead_done: 'repair_single_done',
+  panel_start: 'repair_single_started',
+  panel_done: 'repair_single_started',
+  synthesis_start: 'repair_single_started',
+  synthesis_done: 'repair_single_started'
 };
 
 const ADVISORY_BRIDGE_STAGES = [
@@ -265,6 +286,14 @@ function createWorkTrail() {
       return events.length;
     }
   };
+}
+
+function normalizeRepairBridgeStageToWorkTrail(stage, text) {
+  const stageName = stage ? String(stage) : '';
+  if (stageName && BRIDGE_REPAIR_STAGE_WORK_TRAIL[stageName]) {
+    return { event: BRIDGE_REPAIR_STAGE_WORK_TRAIL[stageName], detail: sanitizeCopyMdText(text) };
+  }
+  return null;
 }
 
 function normalizeBridgeStageToWorkTrail(stage, text) {
@@ -534,6 +563,13 @@ function buildRunTraceSection(result, workerType, contextSummary, holoScorecard,
     }
   }
   lines.push('- output_validation: ' + formatOutputValidationStatus(rp.output_validation));
+  if (rp.output_validation && rp.output_validation.repair_attempted) {
+    lines.push('- repair_context_mode: ' + (rp.output_validation.repair_context_mode || 'unknown'));
+    lines.push('- repair_mode: ' + (rp.output_validation.repair_mode || 'unknown'));
+    if (Array.isArray(rp.output_validation.missing_sections_after_repair) && rp.output_validation.missing_sections_after_repair.length) {
+      lines.push('- missing_sections_after_repair: ' + rp.output_validation.missing_sections_after_repair.join(', '));
+    }
+  }
   return lines.join('\n');
 }
 
@@ -990,20 +1026,91 @@ function constructWspTaskPrompt(workFocus, classification, contextQuality, worke
   return lines.join('\n');
 }
 
+function buildSectionHeaderPattern(sectionName) {
+  const escaped = String(sectionName || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp('(^|\\n)\\s*(#{1,3}\\s*)?' + escaped + '\\b', 'i');
+}
+
+function extractMarkdownSection(text, sectionName) {
+  const src = String(text || '');
+  const pattern = buildSectionHeaderPattern(sectionName);
+  const match = pattern.exec(src);
+  if (!match) {
+    return '';
+  }
+  const start = match.index + match[0].length;
+  const tail = src.slice(start);
+  const nextHeader = tail.search(/\n#{1,3}\s+\S/);
+  const body = (nextHeader === -1 ? tail : tail.slice(0, nextHeader)).trim();
+  if (!body) {
+    return '';
+  }
+  return '## ' + sectionName + '\n\n' + body;
+}
+
 function buildRepairPrompt(originalPrompt, badOutput, missingSections) {
   const sections = Array.isArray(missingSections) ? missingSections : [];
+  const sanitizedDraft = sanitizeTargetSnippetForRedaction(String(badOutput || '').slice(0, 12000));
+  const requiredHeaders = sections.map((section) => '## ' + section).join('\n');
   return [
-    'Repair pass: preserve the existing answer content and add only the missing required schema sections.',
-    'Do not invent evidence, repo paths, test results, or authority.',
-    'Label claims with WSP_97 truth labels where applicable.',
+    'Repair pass: add ONLY the missing required schema sections listed below.',
+    'Preserve factual content from the draft answer. Do not invent evidence, repo paths, test results, or authority.',
+    'Draft text may contain egress-safe placeholders such as [SANITIZED_BLOCK:NN]; those are not repo source truth.',
+    'Label new claims with WSP_97 truth labels where applicable.',
     'Missing sections: ' + (sections.length ? sections.join(', ') : '(none listed)'),
     '',
-    'Original WSP task prompt:',
-    String(originalPrompt || '').slice(0, 4000),
+    'Required output format — include EVERY missing section using exactly these markdown headers (one section each):',
+    requiredHeaders || '(none listed)',
+    'Do not omit any listed section. Each section must contain at least one substantive line.',
     '',
-    'Draft answer to repair:',
-    String(badOutput || '').slice(0, 12000)
+    'Original WSP task prompt (bounded excerpt):',
+    String(originalPrompt || '').slice(0, 2000),
+    '',
+    'Draft answer to repair (sanitized for redaction gate):',
+    sanitizedDraft.text
   ].join('\n');
+}
+
+function buildRepairBoundedContext() {
+  return [
+    '## REPAIR_PASS_BOUNDED_CONTEXT',
+    'Schema repair pass only. Full repo/HoloIndex context was consumed in the primary advisory pass.',
+    'Do not treat this packet as fresh repo evidence. Complete missing schema sections from the draft in the user prompt.',
+    'Target recall snippets may contain egress-safe placeholders; do not claim placeholders exist in committed repo source.',
+    '',
+    '## WSP_OPERATING_CONTRACT',
+    '- Advisory only. No shell, repo modification, credential, browser, deploy, or runtime control.',
+    '- Apply WSP_97 truth labels on any new claims.'
+  ].join('\n');
+}
+
+function mergeRepairedOutput(primaryContent, repairContent, missingSections) {
+  const primary = String(primaryContent || '').trim();
+  const repair = String(repairContent || '').trim();
+  const wanted = Array.isArray(missingSections) ? missingSections.slice() : [];
+  let merged = primary;
+  if (repair) {
+    if (/^## Decision\b/m.test(repair) && /## (?:Lead|Synthesis)\b/m.test(repair)) {
+      merged = repair;
+    } else if (!primary) {
+      merged = repair;
+    } else {
+      merged = primary + '\n\n## Schema repair supplement\n\n' + repair;
+    }
+  }
+  const appended = [];
+  for (const section of wanted) {
+    if (buildSectionHeaderPattern(section).test(merged)) {
+      continue;
+    }
+    const extracted = extractMarkdownSection(repair, section);
+    if (extracted) {
+      merged += '\n\n' + extracted;
+      appended.push(section);
+    }
+  }
+  const stillMissing = wanted.filter((section) => !buildSectionHeaderPattern(section).test(merged));
+  return { text: merged, appendedSections: appended, stillMissing: stillMissing };
 }
 
 function isSubstantiveRedDogWorker(workerType) {
@@ -1212,6 +1319,14 @@ function wireFusionWebview(context, webview, worker, state) {
         workTrail.push(normalized.event, normalized.detail);
       }
     };
+    const onRepairBridgeProgress = (stage, text) => {
+      postStatusMessage(webview, text);
+      postProgressMessage(webview, stage, text);
+      const normalized = normalizeRepairBridgeStageToWorkTrail(stage, text);
+      if (normalized) {
+        workTrail.push(normalized.event, normalized.detail);
+      }
+    };
     let result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, state.history, mode, onBridgeProgress, state, promptConstruction);
     absorbUnicodeMeta(result);
     if (result.ok && isSubstantiveRedDogWorker(workerType)) {
@@ -1225,37 +1340,50 @@ function wireFusionWebview(context, webview, worker, state) {
       };
       if (!validation.valid && validation.missingSections.length) {
         validationState.repair_attempted = true;
-        workTrail.push('repair_started');
+        validationState.repair_context_mode = 'repair_minimal';
+        validationState.repair_mode = 'openrouter_single';
+        workTrail.push('repair_started', 'repair_mode=openrouter_single; context=repair_minimal');
         postStatusAndProgress(webview, null, 'Output schema incomplete. Missing: ' + validation.missingSections.join(', ') + '. Running one repair pass...');
         const repairPrompt = buildRepairPrompt(wspTaskPrompt, result.content, validation.missingSections);
+        const repairContext = buildRepairBoundedContext();
+        const repairSystemPrompt = [
+          'Complete missing advisory markdown sections only.',
+          'Output ONLY the missing section headers and bodies listed in the user prompt.',
+          'Use openrouter_single repair semantics; do not invoke a Fusion panel.',
+          'Do not repeat the full document unless necessary.'
+        ].join(' ');
         const repairResult = await callFusion(
           context,
           worker,
           repairPrompt,
-          contextPacket.text,
-          systemPrompt + '\n\nRepair pass: add missing schema sections only. Do not invent evidence.',
-          state.history,
-          mode,
-          onBridgeProgress,
+          repairContext,
+          repairSystemPrompt,
+          [],
+          'openrouter_single',
+          onRepairBridgeProgress,
           state,
           promptConstruction,
-          { promptSource: 'repair_prompt' }
+          { promptSource: 'repair_prompt', maxTokens: 2400 }
         );
         absorbUnicodeMeta(repairResult);
         if (repairResult.ok) {
-          const repairValidation = validateRedDogOutput(repairResult.content || '', { substantiveArchitect: true, mode: mode });
+          const mergeResult = mergeRepairedOutput(result.content, repairResult.content, validation.missingSections);
+          validationState.repair_appended_sections = mergeResult.appendedSections;
+          const repairValidation = validateRedDogOutput(mergeResult.text, { substantiveArchitect: true, mode: mode });
           validationState.repair_ok = repairValidation.valid;
-          validationState.missing_sections_after_repair = repairValidation.missingSections;
+          validationState.missing_sections_after_repair = repairValidation.missingSections.length
+            ? repairValidation.missingSections
+            : mergeResult.stillMissing;
           if (repairValidation.valid) {
-            result = repairResult;
+            result = Object.assign({}, repairResult, { content: mergeResult.text, mode: mode });
             validationState.validated = true;
             validationState.missing_sections = [];
-            workTrail.push('repair_complete');
+            workTrail.push('repair_complete', 'schema_repair_pass');
           } else {
             validationState.validated = false;
             validationState.output_validation_failed = true;
             validationState.repair_failure_reason = 'schema_incomplete_after_repair';
-            result.content = appendValidationFailureContent(result.content, validationState);
+            result.content = appendValidationFailureContent(mergeResult.text, validationState);
           }
         } else {
           validationState.validated = false;
@@ -1402,14 +1530,15 @@ function attachBridgeMetadata(reviewPacket, bridgeMeta) {
   return Object.assign({}, reviewPacket, meta);
 }
 
-function callFusion(context, worker, prompt, boundedContext, systemPrompt, history, mode, onProgress, state, bridgeMeta, callOptions) {
+function callFusion(context, worker, prompt, boundedContext, systemPrompt, history, mode, onProgress, state, bridgeMeta, callOptionsArg) {
   return new Promise((resolve) => {
     const root = workspaceRoot();
     const script = path.join(root, 'scripts', 'advisory_model_once.py');
     const config = vscode.workspace.getConfiguration('foundupsFusion');
     const configuredPython = config.get('pythonPath') || 'python';
     const interpreter = resolvePythonInterpreter(root, configuredPython);
-    const promptSource = callOptions && callOptions.promptSource ? callOptions.promptSource : 'prompt';
+    const callOptions = callOptionsArg && typeof callOptionsArg === 'object' ? callOptionsArg : {};
+    const promptSource = callOptions.promptSource ? callOptions.promptSource : 'prompt';
     const promptNorm = normalizeBridgeTextForUnicode(prompt, promptSource);
     const contextNorm = normalizeBridgeTextForUnicode(boundedContext, 'context');
     const unicodeMeta = mergeUnicodeNormalizationMeta(null, Object.assign({}, promptNorm, { unicode_normalization_source: promptSource }));
@@ -1462,7 +1591,7 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
       history,
       lead_model: worker.lead,
       panel_models: worker.panel,
-      max_tokens: 2200,
+      max_tokens: callOptions.maxTokens || 2200,
       temperature: 0.2,
       timeout: mode === 'foundups_fusion' ? 120 : 90,
       bridge_meta: Object.assign({}, bridgeMeta || {}, {
@@ -2559,6 +2688,12 @@ module.exports = {
   resolveModelMode,
   validateRedDogOutput,
   buildRepairPrompt,
+  buildRepairBoundedContext,
+  mergeRepairedOutput,
+  extractMarkdownSection,
+  buildSectionHeaderPattern,
+  normalizeRepairBridgeStageToWorkTrail,
+  BRIDGE_REPAIR_STAGE_WORK_TRAIL,
   constructWspTaskPrompt,
   redactedDigest,
   resolvePythonInterpreter,
