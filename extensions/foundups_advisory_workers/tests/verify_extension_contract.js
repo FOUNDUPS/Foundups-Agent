@@ -14,6 +14,8 @@ const pkg = JSON.parse(fs.readFileSync(path.join(extDir, 'package.json'), 'utf8'
 const readme = fs.readFileSync(path.join(extDir, 'README.md'), 'utf8');
 const iface = fs.readFileSync(path.join(extDir, 'INTERFACE.md'), 'utf8');
 const roadmap = fs.readFileSync(path.join(extDir, 'ROADMAP.md'), 'utf8');
+const auditDocPath = path.join(root, 'docs', 'audits', 'architecture', 'REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md');
+const auditDoc = fs.readFileSync(auditDocPath, 'utf8');
 
 function includes(haystack, needle, label) {
   assert(haystack.includes(needle), label || `missing ${needle}`);
@@ -173,7 +175,14 @@ includes(extensionJs, "mode === 'wsp_holo_skillz' || mode === 'wsp_holo_git_skil
 includes(extensionJs, 'mode_selection_reasoning', 'review packet mode selection reasoning missing');
 includes(readme, 'WSP_97 Truth Table', 'README WSP_97 truth table missing');
 includes(roadmap, 'REDDOG_GOVERNED_HANDOFF_CONTRACT_PHASE1', 'governed handoff roadmap slice missing');
-includes(roadmap, 'REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1', 'governed repo work order contract slice missing');
+includes(auditDoc, 'RedDogGovernedWorkOrder', 'audit doc schema missing');
+includes(auditDoc, 'authenticated principal', 'audit doc principal wording missing');
+includes(auditDoc, 'HoloIndex Discoverability', 'audit doc discoverability section missing');
+includes(auditDoc, 'F0_AUTONOMOUS_MERGE_NOT_IMPLEMENTED', 'audit doc F0 merge row missing');
+includes(iface, 'REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md', 'INTERFACE audit doc pointer missing');
+includes(readme, 'REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md', 'README audit doc pointer missing');
+includes(roadmap, 'docs/audits/architecture/REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md', 'audit doc path missing from roadmap');
+includes(roadmap, 'REDDOG_GITHUB_PERMISSION_PROBE_PHASE1', 'github permission probe slice missing');
 includes(roadmap, 'External RedDog Lane Queue (post-#888)', 'post-#888 external lane queue missing');
 includes(roadmap, 'REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1', 'governed work order dryrun slice missing');
 includes(roadmap, 'REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1', 'run trace telemetry correction slice missing');

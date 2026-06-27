@@ -73,6 +73,18 @@ Current behavior is advisory-only:
 
 External repositories can be assessed for FoundUps integration through advisory WSP intake, not automatic execution. The future path is FoundUps Agent Intake Mode: WSP readiness audit, FoundUp intake packet, Skillz map, integration risk report, and governed WRE handoff recommendation.
 
+## Governed Repo Work Order (contract)
+
+RedDog does **not** hold standing repository authority. RedDog **receives a bounded delegated capability for one work order after fresh verification** (authenticated principal, GitHub permission snapshot, OpenClaw policy gate, WRE execution).
+
+Canonical architecture contract (docs only, v0.3.27):
+
+- `docs/audits/architecture/REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md`
+- Schema draft: `RedDogGovernedWorkOrder` (see audit doc)
+- F0 autonomous merge: **SPECIFIED_NOT_IMPLEMENTED** — not planned until prior gates land
+
+Future RedDog runtime must run **WSP Applicability Preflight** before emitting any work order (identify WSPs + Skillz from HoloIndex; block if recall is weak).
+
 ## Work Focus Contract (v0.3.15)
 
 012 does not prompt RedDog directly. The operating flow is:
@@ -132,8 +144,13 @@ Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, 
 | Architect Trace + Verification gaps in schema | OBSERVED |
 | Mode-selection reasoning in routing + review packet | OBSERVED |
 | Fusion Lead/Critic/Synthesis structure validated | OBSERVED |
-| Governed Skillz/OpenClaw/Hermes handoff execution | SPECIFIED_NOT_IMPLEMENTED |
-| pfMALL RedDog surface binding | SPECIFIED_NOT_IMPLEMENTED |
+| Governed handoff contract (typed WRE dispatch) | SPECIFIED_NOT_IMPLEMENTED |
+| Governed repo work order contract | OBSERVED (audit doc); RUNTIME_EMISSION SPECIFIED_NOT_IMPLEMENTED |
+| RedDogGovernedWorkOrder schema | SPECIFIED_NOT_IMPLEMENTED (draft in audit doc) |
+| GitHub permission probe per work order | SPECIFIED_NOT_IMPLEMENTED |
+| F0 autonomous merge | SPECIFIED_NOT_IMPLEMENTED (not planned) |
+| WSP Applicability Preflight before work order | SPECIFIED_NOT_IMPLEMENTED |
+| pfMALL surface binding | SPECIFIED_NOT_IMPLEMENTED |
 | Review packet persistent memory | SPECIFIED_NOT_IMPLEMENTED |
 | OpenRouter Fusion alias as default RedDog path | SPECIFIED_NOT_IMPLEMENTED (explicit path only) |
 | REDDOG_IS_ARCHITECT_INTERFACE | OBSERVED |
