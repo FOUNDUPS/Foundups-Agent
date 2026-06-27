@@ -134,7 +134,7 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1
 
-- **Status:** IN PROGRESS (v0.3.26) — repair pass minimal context, sanitized draft, merge supplement.
+- **Status:** IN PROGRESS (v0.3.27) — repair telemetry, isolated trail, section-aware merge.
 - Trigger: primary Fusion egress ok but `output_validation: failed`; repair re-blocked on full context.
 - Run Trace: `repair_context_mode: repair_minimal`, `repair_mode: openrouter_single`.
 - Does not replace sanitized-target provenance slice (fold placeholder guidance there).

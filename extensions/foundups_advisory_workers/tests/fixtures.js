@@ -27,6 +27,8 @@ const REPAIR_DRAFT_WITH_BLOCK_LITERALS = [
 ].join('\n');
 
 const REPAIR_SUPPLEMENT_SECTIONS = [
+  '## Evidence',
+  'E1: OBSERVED — primary pass completed with bounded context attached.',
   '## Proposed fixes',
   'F1: defer until verified.',
   '## Uncertainties',
@@ -44,6 +46,18 @@ const REPAIR_SUPPLEMENT_SECTIONS = [
   '## Next safest step',
   'Re-run with narrower context.'
 ].join('\n');
+
+const REPAIR_TAIL_SUPPLEMENT = [
+  '## Evidence',
+  'E1: OBSERVED — primary Fusion pass completed with routing summary attached.',
+  '## Architect Trace',
+  '- Evidence retrieved: primary lead/panel/synthesis excerpts from prior pass.',
+  '- Alternatives considered: full re-run rejected; schema supplement chosen.',
+  '## Verification gaps',
+  'NEEDS_VERIFICATION: whether supplement fully satisfies local schema validator.',
+  '## Next safest step',
+  '012 confirms Run Trace shows repair_minimal + openrouter_single, then land if validation passes.'
+].join('\n\n');
 
 const TARGET_READ_DENIED_PATHS = [
   ['C:/Windows/System32/drivers/etc/hosts', 'absolute path'],
@@ -64,5 +78,6 @@ module.exports = {
   EMDASH_UNICODE_CONTEXT,
   REPAIR_DRAFT_WITH_BLOCK_LITERALS,
   REPAIR_SUPPLEMENT_SECTIONS,
+  REPAIR_TAIL_SUPPLEMENT,
   TARGET_READ_DENIED_PATHS
 };

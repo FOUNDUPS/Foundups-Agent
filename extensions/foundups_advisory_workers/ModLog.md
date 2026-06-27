@@ -1,5 +1,16 @@
 # Foundups®Agent ModLog
 
+## 2026-06-14 - REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1 addendum (v0.3.27)
+
+- Run Trace always emits `repair_context_mode` / `repair_mode` when `repair_attempted`.
+- Dedicated repair Work Trail mapping (`repair_single_started`, no `panel_started` after repair).
+- `extractMarkdownSection` + section-aware `mergeRepairedOutput(..., missingSections)`.
+- Repair prompt lists required `## Section` headers explicitly; repair `max_tokens: 2400`.
+- Contract tests OSR-007..OSR-010 (smoke-missing tail sections).
+- Version bump 0.3.26 -> 0.3.27.
+
+WSP: WSP_97, WSP_22.
+
 ## 2026-06-14 - REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1 (v0.3.26)
 
 - Repair pass uses `buildRepairBoundedContext()` (minimal WSP contract; no HoloIndex resend).

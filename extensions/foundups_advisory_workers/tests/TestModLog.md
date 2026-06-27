@@ -1,5 +1,14 @@
 # Foundups®Agent TestModLog
 
+## 2026-06-14 - REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING addendum (OSR-007..OSR-010)
+
+| ID | Asserts |
+| --- | --- |
+| OSR-007 | Primary missing Evidence/Architect Trace/Verification gaps/Next safest step; supplement completes schema |
+| OSR-008 | Repair trail maps single/panel stages to `repair_single_started` |
+| OSR-009 | Repair prompt lists explicit `## Section` headers |
+| OSR-010 | Failed repair still exposes repair metadata + missing_sections_after_repair |
+
 ## 2026-06-14 - REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1 (OSR-001..OSR-006)
 
 | ID | Asserts |
