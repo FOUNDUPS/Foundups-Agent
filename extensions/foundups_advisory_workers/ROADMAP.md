@@ -66,6 +66,41 @@ IDE extension POC
 | pfMALL RedDog binding | 4 | 5 | 3 | 5 | 17 | P0 | Public/operator surface after safety contracts harden |
 | WRE/OpenClaw dispatch bridge | 4 | 5 | 3 | 5 | 17 | P0 | Must remain governed; extension cannot dispatch directly |
 
+## External RedDog Lane Queue (post-#888)
+
+Goal: **RedDog replaces Claude Code-style work** — not only extension polish. Advisory RedDog must bridge to governed WRE execution before random implementation.
+
+```text
+DONE
+1. #886 Unicode / UTF-8 bridge (ca5703611, v0.3.25)
+2. #888 schema repair hardening (9c3a8f829, v0.3.27)
+
+P0 NEXT
+3. REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1
+   - docs/audit only
+   - records authenticated principal -> GitHub permission -> governed work order
+     -> WRE/OpenClaw/Hermes execution -> PR/review/merge gate
+   - prevents random implementation before authority model is written
+
+P1
+4. REDDOG_SANITIZED_TARGET_CONTEXT_PROVENANCE_PHASE1
+   - clarify sanitized snippets are not repo truth
+
+P1
+5. REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1
+   - stale provider_reasoning_note (Report-only in v0.3.23)
+   - made_network_call: unknown
+   - Work Trail duplicate cleanup
+
+P2
+6. REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1
+   - only after contract lands
+   - validates work-order envelope
+   - no real branch/PR/write yet
+```
+
+**Rationale:** Sanitized provenance and telemetry are real polish issues, but the strategic blocker is that RedDog still cannot safely become a worker. The work-order contract is the missing bridge between “advisory RedDog” and “RedDog can direct WRE to do meaningful code work.”
+
 ## Next Slices
 
 ### REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1
@@ -134,14 +169,34 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1
 
-- **Status:** IN PROGRESS (v0.3.27) — repair telemetry, isolated trail, section-aware merge.
-- Trigger: primary Fusion egress ok but `output_validation: failed`; repair re-blocked on full context.
+- **Status:** **LANDED** #888 (`9c3a8f829`) — v0.3.27; 012 smoke PASS (2026-06-27).
+- Repair telemetry, isolated Work Trail (`repair_single_*`), section-aware merge, OSR-007..010.
 - Run Trace: `repair_context_mode: repair_minimal`, `repair_mode: openrouter_single`.
-- Does not replace sanitized-target provenance slice (fold placeholder guidance there).
+- Stale `provider_reasoning_note` deferred to `REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1`.
+
+### REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1
+
+- **Status:** **P0 NEXT** — docs/audit only; no runtime wiring.
+- **Purpose:** Authority model for RedDog → WRE worker path (replaces ad-hoc handoff before contract exists).
+- **Records:** authenticated principal → GitHub permission → governed work order → WRE/OpenClaw/Hermes execution → PR/review/merge gate.
+- **Blocks:** implementation slices that grant execution authority; `REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1` until contract lands.
+- **Does not:** write files, open branches, or dispatch jobs from the extension.
 
 ### REDDOG_SANITIZED_TARGET_CONTEXT_PROVENANCE_PHASE1
 
-- **Status:** QUEUED — tell RedDog target snippets may contain egress-safe placeholders; not repo source truth.
+- **Status:** **P1 QUEUED** — tell RedDog target snippets may contain egress-safe placeholders; not repo source truth.
+- **Trigger:** model misreads `[SANITIZED_BLOCK:NN]` in bounded context as live repo source (F10 class).
+
+### REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1
+
+- **Status:** **P1 QUEUED** — report-only telemetry fixes; not functional blockers.
+- **Scope:** stale `provider_reasoning_note: Report-only in v0.3.23`; `made_network_call: unknown`; Work Trail duplicate cleanup.
+
+### REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1
+
+- **Status:** **P2 QUEUED** — after work-order contract audit lands.
+- **Purpose:** validate work-order envelope shape and gate semantics without real branch/PR/write.
+- **Prerequisite:** `REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1`.
 
 ### REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1
 
@@ -156,6 +211,7 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_GOVERNED_HANDOFF_CONTRACT_PHASE1
 
+- **Status:** DEFERRED — implementation follows `REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1` audit.
 - Typed handoff from RedDog review packet to WRE/OpenClaw/Hermes.
 - Skillz match recommendations become structured dispatch payloads.
 - Extension remains advisory; WRE retains execution authority.
@@ -205,6 +261,7 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_WRE_OPENCLAW_HANDOFF_CONTRACT_PHASE1
 
+- **Status:** DEFERRED — folded under work-order contract + dryrun phases.
 - Define a typed handoff from RedDog review packet to WRE/OpenClaw.
 - No direct Hermes/Kanban dispatch from the extension.
 - WRE remains dispatch authority.

@@ -173,6 +173,10 @@ includes(extensionJs, "mode === 'wsp_holo_skillz' || mode === 'wsp_holo_git_skil
 includes(extensionJs, 'mode_selection_reasoning', 'review packet mode selection reasoning missing');
 includes(readme, 'WSP_97 Truth Table', 'README WSP_97 truth table missing');
 includes(roadmap, 'REDDOG_GOVERNED_HANDOFF_CONTRACT_PHASE1', 'governed handoff roadmap slice missing');
+includes(roadmap, 'REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1', 'governed repo work order contract slice missing');
+includes(roadmap, 'External RedDog Lane Queue (post-#888)', 'post-#888 external lane queue missing');
+includes(roadmap, 'REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1', 'governed work order dryrun slice missing');
+includes(roadmap, 'REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1', 'run trace telemetry correction slice missing');
 includes(roadmap, 'REDDOG_PFMALL_SURFACE_BINDING_PHASE1', 'pfMALL binding roadmap slice missing');
 includes(roadmap, 'REDDOG_REVIEW_PACKET_MEMORY_PHASE1', 'review packet memory roadmap slice missing');
 includes(extensionJs, 'function constructWspTaskPrompt', 'constructWspTaskPrompt missing');
