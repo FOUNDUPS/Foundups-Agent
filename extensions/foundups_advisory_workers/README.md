@@ -146,7 +146,8 @@ Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, 
 | Fusion Lead/Critic/Synthesis structure validated | OBSERVED |
 | Governed handoff contract (typed WRE dispatch) | SPECIFIED_NOT_IMPLEMENTED |
 | Governed repo work order contract | OBSERVED (audit doc); RUNTIME_EMISSION SPECIFIED_NOT_IMPLEMENTED |
-| RedDogGovernedWorkOrder schema | SPECIFIED_NOT_IMPLEMENTED (draft in audit doc) |
+| RedDogGovernedWorkOrder dry-run validator | OBSERVED (OpenClaw bridge module) |
+| RedDogGovernedWorkOrder schema | SPECIFIED_NOT_IMPLEMENTED (extension emission) |
 | GitHub permission probe per work order | SPECIFIED_NOT_IMPLEMENTED |
 | F0 autonomous merge | SPECIFIED_NOT_IMPLEMENTED (not planned) |
 | WSP Applicability Preflight before work order | SPECIFIED_NOT_IMPLEMENTED |
