@@ -777,3 +777,18 @@ Composes `#890` `validate_work_order_dryrun()` and embedded `repo_permission_sna
 (uses `#892` `permission_to_capabilities` only — does not call `probe_repo_permission` or `gh`).
 Returns Hermes-shaped receipt with `no_execution_performed: true`. Spec:
 `docs/audits/architecture/REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md`.
+
+### RedDog Work-Order Receipt (Hermes-compatible audit trail, no execution)
+
+```python
+from modules.communication.moltbot_bridge.src.reddog_work_order_receipt import (
+    build_reddog_work_order_receipt,   # PolicyGateReceipt -> RedDogWorkOrderReceipt
+    emit_work_order_receipt,           # optional SQLite persist via RedDogWorkOrderReceiptStore
+    RedDogWorkOrderReceipt,
+    RedDogWorkOrderReceiptStore,
+    RECEIPT_SOURCE,                    # "reddog_openclaw_policy_gate"
+)
+```
+
+Pre-execution audit trail only. Maps #893 `PolicyGateReceipt` into durable Hermes-compatible
+records (digests/refs only). NOT live Hermes queue dispatch, NOT WRE execution.

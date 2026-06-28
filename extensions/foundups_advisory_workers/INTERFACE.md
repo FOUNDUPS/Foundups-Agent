@@ -77,6 +77,8 @@ RedDog is the 0102 architect interface — **not an authority owner**. RedDog re
 
 **OpenClaw policy gate (no execution):** `modules/communication/moltbot_bridge/src/reddog_openclaw_work_order_policy_gate.py` — `evaluate_work_order_policy_gate()` composes dry-run + permission freshness + HoloIndex policy; returns `PolicyGateReceipt`. Extension does not invoke it yet.
 
+**Work-order receipt (Hermes-compatible audit):** `modules/communication/moltbot_bridge/src/reddog_work_order_receipt.py` — `emit_work_order_receipt()` persists/emits pre-execution audit records from `PolicyGateReceipt`. Extension does not invoke it yet.
+
 **Specified flow (not implemented in extension v0.3.27):**
 
 ```text
@@ -303,6 +305,7 @@ Formal contract:
 | Governed handoff contract (typed WRE dispatch) | SPECIFIED_NOT_IMPLEMENTED |
 | GitHub permission probe (read-only snapshot) | OBSERVED (github_integration module) |
 | OpenClaw work-order policy gate | OBSERVED (moltbot_bridge module); no execution |
+| RedDog work-order receipt (Hermes-compatible audit) | OBSERVED (moltbot_bridge module); not live Hermes queue |
 | Governed repo work order dry-run validator | OBSERVED (OpenClaw bridge module) |
 | Governed repo work order (`RedDogGovernedWorkOrder`) | SPECIFIED_NOT_IMPLEMENTED (runtime emission from extension) |
 | GitHub permission snapshot per work order | SPECIFIED_NOT_IMPLEMENTED |

@@ -1,5 +1,12 @@
 # Foundups®Agent ModLog
 
+## 2026-06-28 - REDDOG_HERMES_WORK_ORDER_RECEIPT_PHASE1 (extension pointers)
+
+- Points to `modules/communication/moltbot_bridge/src/reddog_work_order_receipt.py`.
+- Pre-execution audit trail from #893 `PolicyGateReceipt`; Hermes-compatible, not live queue.
+
+WSP: WSP_34, WSP_50, WSP_91, WSP_97.
+
 ## 2026-06-28 - REDDOG_OPENCLAW_WORK_ORDER_POLICY_GATE_PHASE1 (extension pointers)
 
 - Points to `modules/communication/moltbot_bridge/src/reddog_openclaw_work_order_policy_gate.py`.

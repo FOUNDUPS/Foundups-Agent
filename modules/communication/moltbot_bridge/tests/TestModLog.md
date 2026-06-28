@@ -1,3 +1,13 @@
+## 2026-06-28: REDDOG_HERMES_WORK_ORDER_RECEIPT_PHASE1
+
+**File**: `test_reddog_work_order_receipt.py` (NEW — 14 tests)
+**Slice**: `REDDOG_HERMES_WORK_ORDER_RECEIPT_PHASE1` | **Predecessors**: #893 policy gate
+
+Hermes-compatible receipt emission/persistence from `PolicyGateReceipt`; digest stability, secret
+redaction, idempotent SQLite store, no mutation imports.
+
+**Run**: `pytest modules/communication/moltbot_bridge/tests/test_reddog_work_order_receipt.py -q`
+
 ## 2026-06-28: REDDOG_OPENCLAW_WORK_ORDER_POLICY_GATE_PHASE1
 
 **File**: `test_reddog_openclaw_work_order_policy_gate.py` (NEW — 22 tests)
