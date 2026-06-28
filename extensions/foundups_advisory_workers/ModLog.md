@@ -1,5 +1,12 @@
 # Foundups®Agent ModLog
 
+## 2026-06-28 - REDDOG_GITHUB_PERMISSION_PROBE_PHASE1 (extension pointers)
+
+- Points to `modules/platform_integration/github_integration/src/reddog_github_permission_probe.py`.
+- Read-only snapshot feeds `repo_permission_snapshot` for future work-order emission.
+
+WSP: WSP_34, WSP_50, WSP_97.
+
 ## 2026-06-28 - #890 LANDED + post-dryrun queue revision
 
 - **#890 merged** @ `bd68ab83a` — `validate_work_order_dryrun()` pure validation module.
