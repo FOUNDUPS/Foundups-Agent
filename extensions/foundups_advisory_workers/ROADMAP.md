@@ -74,22 +74,27 @@ Goal: **RedDog replaces Claude Code-style work** — not only extension polish. 
 DONE
 1. #886 Unicode / UTF-8 bridge (ca5703611, v0.3.25)
 2. #888 schema repair hardening (9c3a8f829, v0.3.27)
-3. REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1 (audit doc)
+3. #889 governed repo work-order contract (764084bc4)
+4. #890 governed work-order dry-run validator (bd68ab83a)
 
-P0 NEXT
-4. REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1
+P0 NEXT (sequenced — permission before OpenClaw wiring)
 5. REDDOG_GITHUB_PERMISSION_PROBE_PHASE1
+   - read-only GitHub permission snapshot; no branch/PR/write
 6. REDDOG_OPENCLAW_WORK_ORDER_POLICY_GATE_PHASE1
-7. REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_PHASE1
+   - OpenClaw calls dry-run validator; still no execution
+7. REDDOG_HERMES_WORK_ORDER_RECEIPT_PHASE1
+   - persist dry-run receipts
+8. REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_PHASE1
+   - only after policy + permission + receipts proven
 
 P1
-8. REDDOG_SANITIZED_TARGET_CONTEXT_PROVENANCE_PHASE1
-9. REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1
-10. HOLOINDEX_REDDOG_GOVERNED_WORK_ORDER_INDEX_GAP_PHASE1 (required — extension md not in docs index)
+9. REDDOG_SANITIZED_TARGET_CONTEXT_PROVENANCE_PHASE1
+10. REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1
+11. HOLOINDEX_REDDOG_GOVERNED_WORK_ORDER_INDEX_GAP_PHASE1
 
 P2/P3
-11. REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
-12. REDDOG_AUTONOMOUS_MERGE_POLICY_PHASE1 (blocked)
+12. REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
+13. REDDOG_AUTONOMOUS_MERGE_POLICY_PHASE1 (blocked)
 ```
 
 **Rationale:** Sanitized provenance and telemetry are real polish issues, but the strategic blocker is that RedDog still cannot safely become a worker. The work-order contract is the missing bridge between “advisory RedDog” and “RedDog can direct WRE to do meaningful code work.”
@@ -169,7 +174,7 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1
 
-- **Status:** **PR-READY** — docs/audit only; no runtime wiring.
+- **Status:** **LANDED** #889 (`764084bc4`) — docs/audit only; no runtime wiring.
 - **Canonical audit:** `docs/audits/architecture/REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md`
 - **Purpose:** Authority model for RedDog → WRE worker path; `RedDogGovernedWorkOrder` schema draft.
 - **Records:** authenticated principal → GitHub permission snapshot → governed work order → OpenClaw → Hermes → WRE → review → merge gate.
@@ -178,17 +183,28 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - **Blocks:** runtime execution slices until dryrun + permission probe land.
 - **HoloIndex:** `--index-docs` gate PASS for audit doc (query 1); INDEX_GAP for extension ROADMAP/INTERFACE (probe 7) — follow-up slice required.
 
+### REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1
+
+- **Status:** **LANDED** #890 (`bd68ab83a`) — pure validation; stdlib only; `no_mutation_performed: true` invariant.
+- **Module:** `modules/communication/moltbot_bridge/src/reddog_governed_work_order_dryrun.py`
+- **Tests:** 13 pytest in `test_reddog_governed_work_order_dryrun.py`
+
 ### REDDOG_GITHUB_PERMISSION_PROBE_PHASE1
 
-- **Status:** **P0 QUEUED** — fresh GitHub permission snapshot for authenticated principal before write path.
+- **Status:** **P0 NEXT** — read-only GitHub permission snapshot; no branch/PR/write.
+- **Rationale:** OpenClaw can validate envelope shape only after fresh permission evidence exists.
 
 ### REDDOG_OPENCLAW_WORK_ORDER_POLICY_GATE_PHASE1
 
-- **Status:** **P0 QUEUED** — OpenClaw validates `RedDogGovernedWorkOrder` (nonce, expiry, scope).
+- **Status:** **P0 QUEUED** — after permission probe; OpenClaw calls `validate_work_order_dryrun()`; still no execution.
+
+### REDDOG_HERMES_WORK_ORDER_RECEIPT_PHASE1
+
+- **Status:** **P0 QUEUED** — persist dry-run receipts; Hermes lifecycle only; no execution dispatch.
 
 ### REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_PHASE1
 
-- **Status:** **P0/P1 QUEUED** — WRE isolated worktree: branch, patch, test, PR draft.
+- **Status:** **P0 QUEUED** — after permission probe + OpenClaw gate + Hermes receipts.
 
 ### REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
 
@@ -211,15 +227,6 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 - **Status:** **P1 QUEUED** — report-only telemetry fixes; not functional blockers.
 - **Scope:** stale `provider_reasoning_note: Report-only in v0.3.23`; `made_network_call: unknown`; Work Trail duplicate cleanup.
-
-### REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1
-
-- **Status:** **PR-READY** — dry-run validator; no GitHub/branch/PR/write.
-- **Module:** `modules/communication/moltbot_bridge/src/reddog_governed_work_order_dryrun.py`
-- **Tests:** `modules/communication/moltbot_bridge/tests/test_reddog_governed_work_order_dryrun.py`
-- Validates `RedDogGovernedWorkOrder` + `HoloIndexEvidencePacket`; returns `WOULD_ACCEPT` / `WOULD_REJECT` / `WOULD_ACCEPT_WITH_RETRIEVAL_GAP` receipt.
-- **Prerequisite:** #889 contract merged.
-- **Blocks:** GitHub permission probe until dry-run gate passes review.
 
 ### REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1
 

@@ -1,5 +1,12 @@
 # Foundups®Agent ModLog
 
+## 2026-06-28 - #890 LANDED + post-dryrun queue revision
+
+- **#890 merged** @ `bd68ab83a` — `validate_work_order_dryrun()` pure validation module.
+- P0 sequence: GitHub permission probe → OpenClaw policy gate → Hermes receipts → WRE executor.
+
+WSP: WSP_15, WSP_22.
+
 ## 2026-06-28 - REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1
 
 - Added `reddog_governed_work_order_dryrun.py` — typed `RedDogGovernedWorkOrder` + `HoloIndexEvidencePacket` dry-run validator.
