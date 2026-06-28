@@ -1,5 +1,12 @@
 # Foundups®Agent ModLog
 
+## 2026-06-28 - REDDOG_OPENCLAW_WORK_ORDER_POLICY_GATE_PHASE1 (extension pointers)
+
+- Points to `modules/communication/moltbot_bridge/src/reddog_openclaw_work_order_policy_gate.py`.
+- Policy gate composes #890 dry-run + #892 permission snapshot freshness; Hermes-shaped receipt; no execution.
+
+WSP: WSP_34, WSP_50, WSP_97.
+
 ## 2026-06-28 - REDDOG_GITHUB_PERMISSION_PROBE_PHASE1 (extension pointers)
 
 - Points to `modules/platform_integration/github_integration/src/reddog_github_permission_probe.py`.

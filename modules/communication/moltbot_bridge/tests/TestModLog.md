@@ -1,3 +1,14 @@
+## 2026-06-28: REDDOG_OPENCLAW_WORK_ORDER_POLICY_GATE_PHASE1
+
+**File**: `test_reddog_openclaw_work_order_policy_gate.py` (NEW — 22 tests)
+**Slice**: `REDDOG_OPENCLAW_WORK_ORDER_POLICY_GATE_PHASE1` | **Predecessors**: #890 dry-run, #892 permission probe
+
+Policy gate tests use mocked `repo_permission_snapshot` only (Addendum D — no live `gh`).
+Covers: accept write/audit, reject admin/stale/replay/forbidden paths, HoloIndex Addendum A paths,
+receipt compatibility (Addendum C), WAE runtime non-import (Addendum B).
+
+**Run**: `pytest modules/communication/moltbot_bridge/tests/test_reddog_openclaw_work_order_policy_gate.py -q`
+
 ## 2026-06-02: PolicyFlags Deserialization Sanitization Tests (W6)
 
 **File**: `test_foundup_job_contract.py` (UPDATED + new class)
