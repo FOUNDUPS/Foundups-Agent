@@ -1,5 +1,15 @@
 # ModLog - moltbot_bridge
 
+## 2026-06-28: REDDOG_HERMES_WORK_ORDER_RECEIPT_PHASE1
+
+**Slice:** Hermes-compatible pre-execution audit receipts for governed work orders
+**WSP:** WSP_34, WSP_50, WSP_91, WSP_97, WSP_22
+
+- ADD `src/reddog_work_order_receipt.py` — `RedDogWorkOrderReceipt`, `emit_work_order_receipt()`, SQLite `RedDogWorkOrderReceiptStore`.
+- ADD `tests/test_reddog_work_order_receipt.py` — 14 tests (digest stability, redaction, idempotency, no-execution boundary).
+- Reuses #893 `PolicyGateReceipt`; Hermes-compatible shape; NOT live Hermes queue wiring.
+- HoloIndex: pre-edit hits on Hermes/CABR receipt patterns; post-edit static pointers in INTERFACE/ModLog (INDEX_GAP for semantic ranking — follow-up if needed).
+
 ## 2026-06-28: REDDOG_OPENCLAW_WORK_ORDER_POLICY_GATE_PHASE1
 
 **Slice:** OpenClaw policy gate — dry-run + permission freshness + HoloIndex policy (no execution)

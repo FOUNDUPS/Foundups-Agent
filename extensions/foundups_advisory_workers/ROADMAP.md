@@ -78,19 +78,19 @@ DONE
 4. #890 governed work-order dry-run validator (bd68ab83a)
 5. #891 post-#890 queue docs (3cbc58913)
 6. #892 GitHub permission probe (21aeff32d)
+7. #893 OpenClaw policy gate (329db7113)
 
-P0 NEXT (sequenced — policy before receipts before executor)
-7. REDDOG_OPENCLAW_WORK_ORDER_POLICY_GATE_PHASE1
-   - dry-run + permission freshness + HoloIndex policy; still no execution
+P0 NEXT (sequenced — receipts before executor)
 8. REDDOG_HERMES_WORK_ORDER_RECEIPT_PHASE1
-   - persist policy gate receipts
+   - persist policy gate receipts (pre-execution audit)
 9. REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_PHASE1
-   - only after policy + receipts proven
+   - only after receipts proven
 
 P1
 10. REDDOG_SANITIZED_TARGET_CONTEXT_PROVENANCE_PHASE1
 11. REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1
 12. HOLOINDEX_REDDOG_GOVERNED_WORK_ORDER_INDEX_GAP_PHASE1
+13. HOLOINDEX_REDDOG_RECEIPT_MODULE_INDEX_GAP_PHASE1 (semantic ranking; static pointers landed)
 
 P2/P3
 13. REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
@@ -196,17 +196,19 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_OPENCLAW_WORK_ORDER_POLICY_GATE_PHASE1
 
-- **Status:** **PR-READY** — `evaluate_work_order_policy_gate()` in moltbot_bridge.
+- **Status:** **LANDED** #893 (`329db7113`) — `evaluate_work_order_policy_gate()` in moltbot_bridge.
 - **Module:** `modules/communication/moltbot_bridge/src/reddog_openclaw_work_order_policy_gate.py`
-- Composes #890 dry-run + permission freshness + HoloIndex policy (Addenda A–D); Hermes-shaped receipt; no execution.
 
 ### REDDOG_HERMES_WORK_ORDER_RECEIPT_PHASE1
 
-- **Status:** **P0 QUEUED** — persist policy gate receipts; Hermes lifecycle only; no execution dispatch.
+- **Status:** **PR-READY** — `emit_work_order_receipt()` + SQLite audit store.
+- **Module:** `modules/communication/moltbot_bridge/src/reddog_work_order_receipt.py`
+- Hermes-compatible pre-execution audit; idempotent by `policy_gate_receipt_digest`.
+- HoloIndex: INDEX_GAP for semantic ranking (static INTERFACE/ModLog pointers added).
 
 ### REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_PHASE1
 
-- **Status:** **P0 QUEUED** — after OpenClaw gate + Hermes receipts.
+- **Status:** **P0 QUEUED** — after Hermes receipts.
 
 ### REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
 

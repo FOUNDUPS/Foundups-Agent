@@ -188,6 +188,11 @@ includes(policyGatePy, 'evaluate_work_order_policy_gate', 'OpenClaw policy gate 
 includes(policyGatePy, 'POLICY_ACCEPT_WITH_RETRIEVAL_GAP', 'policy gate retrieval gap decision missing');
 includes(policyGatePy, 'no_execution_performed', 'policy gate no_execution_performed missing');
 includes(policyGatePy, 'permission_truth_label', 'policy gate permission_truth_label missing');
+const receiptPy = fs.readFileSync(path.join(root, 'modules', 'communication', 'moltbot_bridge', 'src', 'reddog_work_order_receipt.py'), 'utf8');
+includes(receiptPy, 'emit_work_order_receipt', 'RedDog work order receipt emitter missing');
+includes(receiptPy, 'RedDogWorkOrderReceipt', 'RedDogWorkOrderReceipt schema missing');
+includes(receiptPy, 'no_execution_performed', 'work order receipt no_execution_performed missing');
+includes(iface, 'reddog_work_order_receipt.py', 'INTERFACE work order receipt pointer missing');
 includes(iface, 'reddog_openclaw_work_order_policy_gate.py', 'INTERFACE policy gate pointer missing');
 includes(iface, 'reddog_github_permission_probe.py', 'INTERFACE permission probe pointer missing');
 includes(iface, 'reddog_governed_work_order_dryrun.py', 'INTERFACE dry-run module pointer missing');
@@ -199,6 +204,7 @@ includes(readme, 'REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md', 'README a
 includes(roadmap, 'docs/audits/architecture/REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md', 'audit doc path missing from roadmap');
 includes(roadmap, 'REDDOG_GITHUB_PERMISSION_PROBE_PHASE1', 'github permission probe slice missing');
 includes(roadmap, 'REDDOG_OPENCLAW_WORK_ORDER_POLICY_GATE_PHASE1', 'OpenClaw policy gate slice missing');
+includes(roadmap, 'REDDOG_HERMES_WORK_ORDER_RECEIPT_PHASE1', 'Hermes work order receipt slice missing');
 includes(roadmap, 'External RedDog Lane Queue (post-#888)', 'post-#888 external lane queue missing');
 includes(roadmap, 'REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1', 'governed work order dryrun slice missing');
 includes(roadmap, 'REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1', 'run trace telemetry correction slice missing');
