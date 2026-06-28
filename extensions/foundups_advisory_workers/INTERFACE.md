@@ -62,6 +62,29 @@ The extension may gather bounded context and produce advisory review packets. It
 
 External repositories are assessed through advisory WSP intake before they can become FoundUps candidates. The extension can recommend a FoundUp intake packet and integration risk report; it cannot automatically enroll or mutate an external repo.
 
+## Governed Repo Work Order Contract
+
+RedDog is the 0102 architect interface — **not an authority owner**. RedDog receives **bounded delegated capability for one work order after fresh verification**; it does not "have authority."
+
+| Artifact | Location |
+|---|---|
+| Authority contract + schema | `docs/audits/architecture/REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md` |
+| Slice queue | `extensions/foundups_advisory_workers/ROADMAP.md` |
+
+**Specified flow (not implemented in extension v0.3.27):**
+
+```text
+authenticated principal -> GitHub permission snapshot -> RedDogGovernedWorkOrder
+  -> OpenClaw policy gate -> Hermes lifecycle/receipts
+  -> WRE isolated worktree (branch, tests, PR draft)
+  -> Sentinel/reviewer opinions (review only)
+  -> merge gate (012/operator sovereign valve on F0)
+```
+
+**WSP Applicability Preflight (specified):** before any future work-order emission, identify applicable WSPs (WSP_34, WSP_50, WSP_54, WSP_95, WSP_97, WSP_109) and Skillz candidates from HoloIndex; attach evidence refs; block if recall is weak.
+
+**F0 autonomous merge:** SPECIFIED_NOT_IMPLEMENTED — not planned behavior until dryrun, permission probe, OpenClaw envelope gate, WRE executor, and review receipts land.
+
 ## Webview Contract
 
 The UI copies the VS Code terminal/chat layout:
@@ -272,6 +295,10 @@ Formal contract:
 | Advisory-only; no shell/repo/browser/OpenClaw/Hermes execution | OBSERVED |
 | Redaction gate before OpenRouter | OBSERVED |
 | Governed handoff contract (typed WRE dispatch) | SPECIFIED_NOT_IMPLEMENTED |
+| Governed repo work order (`RedDogGovernedWorkOrder`) | SPECIFIED_NOT_IMPLEMENTED (schema in audit doc) |
+| GitHub permission snapshot per work order | SPECIFIED_NOT_IMPLEMENTED |
+| F0 autonomous merge | SPECIFIED_NOT_IMPLEMENTED |
+| WSP Applicability Preflight | SPECIFIED_NOT_IMPLEMENTED |
 | pfMALL surface binding | SPECIFIED_NOT_IMPLEMENTED |
 | Review packet memory / persistence | SPECIFIED_NOT_IMPLEMENTED |
 | Bridge hardening (edge-case redaction/repair) | SPECIFIED_NOT_IMPLEMENTED |

@@ -1,5 +1,25 @@
 # Foundups®Agent ModLog
 
+## 2026-06-28 - REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1
+
+- Added `docs/audits/architecture/REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md` — authority model, `RedDogGovernedWorkOrder` schema, HoloIndex discoverability + reindex gate.
+- Updated ROADMAP queue: contract DONE; P0 dryrun + GitHub probe + OpenClaw gate + WRE executor.
+- README/INTERFACE: governed work-order contract pointers; authenticated principal wording; F0 merge SPECIFIED_NOT_IMPLEMENTED.
+- HoloIndex: baseline Phase 0 + targeted `--index-docs` post-edit (Addendum C).
+- No extension runtime, bridge, or HoloIndex ranking code changes.
+
+WSP: WSP_00, WSP_34, WSP_50, WSP_54, WSP_95, WSP_97, WSP_109, WSP_22.
+
+## 2026-06-27 - #888 LANDED + external lane queue revision (v0.3.27)
+
+- **#888 merged** to `main` @ `9c3a8f829`; 012 smoke PASS (schema repair minimal path, `output_validation: passed`).
+- **Queue revised:** P0 next is `REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1` (docs/audit authority model).
+- P1: sanitized-target provenance, Run Trace telemetry correction.
+- P2: governed work-order dryrun (after contract).
+- Stale `provider_reasoning_note` tracked under telemetry slice, not #888.
+
+WSP: WSP_15, WSP_22.
+
 ## 2026-06-14 - REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING_PHASE1 addendum (v0.3.27)
 
 - Run Trace always emits `repair_context_mode` / `repair_mode` when `repair_attempted`.
