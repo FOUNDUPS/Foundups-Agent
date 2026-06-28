@@ -183,6 +183,12 @@ includes(dryrunPy, 'HoloIndexEvidencePacket', 'HoloIndex evidence packet missing
 const probePy = fs.readFileSync(path.join(root, 'modules', 'platform_integration', 'github_integration', 'src', 'reddog_github_permission_probe.py'), 'utf8');
 includes(probePy, 'probe_repo_permission', 'GitHub permission probe missing');
 includes(probePy, 'raw_secret_included', 'probe raw_secret_included flag missing');
+const policyGatePy = fs.readFileSync(path.join(root, 'modules', 'communication', 'moltbot_bridge', 'src', 'reddog_openclaw_work_order_policy_gate.py'), 'utf8');
+includes(policyGatePy, 'evaluate_work_order_policy_gate', 'OpenClaw policy gate missing');
+includes(policyGatePy, 'POLICY_ACCEPT_WITH_RETRIEVAL_GAP', 'policy gate retrieval gap decision missing');
+includes(policyGatePy, 'no_execution_performed', 'policy gate no_execution_performed missing');
+includes(policyGatePy, 'permission_truth_label', 'policy gate permission_truth_label missing');
+includes(iface, 'reddog_openclaw_work_order_policy_gate.py', 'INTERFACE policy gate pointer missing');
 includes(iface, 'reddog_github_permission_probe.py', 'INTERFACE permission probe pointer missing');
 includes(iface, 'reddog_governed_work_order_dryrun.py', 'INTERFACE dry-run module pointer missing');
 includes(auditDoc, 'authenticated principal', 'audit doc principal wording missing');
@@ -192,6 +198,7 @@ includes(iface, 'REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md', 'INTERFACE
 includes(readme, 'REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md', 'README audit doc pointer missing');
 includes(roadmap, 'docs/audits/architecture/REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md', 'audit doc path missing from roadmap');
 includes(roadmap, 'REDDOG_GITHUB_PERMISSION_PROBE_PHASE1', 'github permission probe slice missing');
+includes(roadmap, 'REDDOG_OPENCLAW_WORK_ORDER_POLICY_GATE_PHASE1', 'OpenClaw policy gate slice missing');
 includes(roadmap, 'External RedDog Lane Queue (post-#888)', 'post-#888 external lane queue missing');
 includes(roadmap, 'REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1', 'governed work order dryrun slice missing');
 includes(roadmap, 'REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1', 'run trace telemetry correction slice missing');

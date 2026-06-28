@@ -1,5 +1,15 @@
 # ModLog - moltbot_bridge
 
+## 2026-06-28: REDDOG_OPENCLAW_WORK_ORDER_POLICY_GATE_PHASE1
+
+**Slice:** OpenClaw policy gate — dry-run + permission freshness + HoloIndex policy (no execution)
+**WSP:** WSP_34, WSP_50, WSP_97, WSP_22
+
+- ADD `src/reddog_openclaw_work_order_policy_gate.py` — `evaluate_work_order_policy_gate()` returns Hermes-shaped `PolicyGateReceipt`.
+- ADD `tests/test_reddog_openclaw_work_order_policy_gate.py` — 22 tests (Addenda A–D; mocked permissions only).
+- Reuses #890 `validate_work_order_dryrun()` and #892 `permission_to_capabilities()`; no WAE runtime, no `gh`, no execution.
+- WAE-L1 ↔ RedDog ↔ PolicyGateReceipt mapping in module docstring (Addendum B).
+
 ## 2026-06-28: REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1
 
 **Slice:** External RedDog lane dry-run validator (shared with future OpenClaw policy gate)

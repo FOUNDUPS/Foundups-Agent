@@ -759,3 +759,21 @@ if mutation_surface_report:
 ```
 
 Higher-priority work (restarts, autonomous tasks, self-audit events) blocks skill evolution report generation.
+
+### RedDog Governed Work-Order Policy Gate (no execution)
+
+```python
+from modules.communication.moltbot_bridge.src.reddog_openclaw_work_order_policy_gate import (
+    evaluate_work_order_policy_gate,  # (order, *, now, seen_nonces, permission_ttl_seconds, permission_expires_at) -> PolicyGateReceipt
+    PolicyGateReceipt,
+    POLICY_ACCEPT,
+    POLICY_REJECT,
+    POLICY_ACCEPT_WITH_RETRIEVAL_GAP,
+    permission_truth_label,
+)
+```
+
+Composes `#890` `validate_work_order_dryrun()` and embedded `repo_permission_snapshot` freshness
+(uses `#892` `permission_to_capabilities` only — does not call `probe_repo_permission` or `gh`).
+Returns Hermes-shaped receipt with `no_execution_performed: true`. Spec:
+`docs/audits/architecture/REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md`.
