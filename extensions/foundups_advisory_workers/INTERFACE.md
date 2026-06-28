@@ -71,6 +71,8 @@ RedDog is the 0102 architect interface — **not an authority owner**. RedDog re
 | Authority contract + schema | `docs/audits/architecture/REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md` |
 | Slice queue | `extensions/foundups_advisory_workers/ROADMAP.md` |
 
+**Dry-run validator (no mutation):** `modules/communication/moltbot_bridge/src/reddog_governed_work_order_dryrun.py` — validates envelope + HoloIndex evidence packet; returns `WOULD_ACCEPT` / `WOULD_REJECT` / `WOULD_ACCEPT_WITH_RETRIEVAL_GAP`. Extension v0.3.27 does not invoke it yet.
+
 **Specified flow (not implemented in extension v0.3.27):**
 
 ```text
@@ -295,7 +297,8 @@ Formal contract:
 | Advisory-only; no shell/repo/browser/OpenClaw/Hermes execution | OBSERVED |
 | Redaction gate before OpenRouter | OBSERVED |
 | Governed handoff contract (typed WRE dispatch) | SPECIFIED_NOT_IMPLEMENTED |
-| Governed repo work order (`RedDogGovernedWorkOrder`) | SPECIFIED_NOT_IMPLEMENTED (schema in audit doc) |
+| Governed repo work order dry-run validator | OBSERVED (Python module); extension does not invoke yet |
+| Governed repo work order (`RedDogGovernedWorkOrder`) | SPECIFIED_NOT_IMPLEMENTED (runtime emission from extension) |
 | GitHub permission snapshot per work order | SPECIFIED_NOT_IMPLEMENTED |
 | F0 autonomous merge | SPECIFIED_NOT_IMPLEMENTED |
 | WSP Applicability Preflight | SPECIFIED_NOT_IMPLEMENTED |

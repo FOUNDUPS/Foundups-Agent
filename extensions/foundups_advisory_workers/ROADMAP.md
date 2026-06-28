@@ -214,9 +214,12 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1
 
-- **Status:** **P0 QUEUED** — first implementation slice after contract PR merges.
-- **Purpose:** validate work-order envelope shape and gate semantics without real branch/PR/write.
-- **Prerequisite:** `REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1` merged.
+- **Status:** **PR-READY** — dry-run validator; no GitHub/branch/PR/write.
+- **Module:** `modules/communication/moltbot_bridge/src/reddog_governed_work_order_dryrun.py`
+- **Tests:** `modules/communication/moltbot_bridge/tests/test_reddog_governed_work_order_dryrun.py`
+- Validates `RedDogGovernedWorkOrder` + `HoloIndexEvidencePacket`; returns `WOULD_ACCEPT` / `WOULD_REJECT` / `WOULD_ACCEPT_WITH_RETRIEVAL_GAP` receipt.
+- **Prerequisite:** #889 contract merged.
+- **Blocks:** GitHub permission probe until dry-run gate passes review.
 
 ### REDDOG_CONTEXT_TARGET_CONTENT_INCLUSION_PHASE1
 

@@ -1,5 +1,15 @@
 # Foundups®Agent ModLog
 
+## 2026-06-28 - REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1
+
+- Added `reddog_governed_work_order_dryrun.py` — typed `RedDogGovernedWorkOrder` + `HoloIndexEvidencePacket` dry-run validator.
+- Decisions: `WOULD_ACCEPT`, `WOULD_REJECT`, `WOULD_ACCEPT_WITH_RETRIEVAL_GAP`; receipt digest; in-memory nonce replay guard.
+- Gates: required fields, expiry, nonce, forbidden ops/paths, main mutation block, HoloIndex evidence (Addendum A), WAE-L1 mapping docstring (Addendum B).
+- Tests: 13 pytest cases (accept + all rejection paths).
+- No GitHub, branch, PR, write, shell, or merge calls.
+
+WSP: WSP_34, WSP_50, WSP_97, WSP_22.
+
 ## 2026-06-28 - REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1
 
 - Added `docs/audits/architecture/REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md` — authority model, `RedDogGovernedWorkOrder` schema, HoloIndex discoverability + reindex gate.

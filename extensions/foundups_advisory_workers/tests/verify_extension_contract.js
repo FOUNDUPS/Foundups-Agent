@@ -176,6 +176,11 @@ includes(extensionJs, 'mode_selection_reasoning', 'review packet mode selection 
 includes(readme, 'WSP_97 Truth Table', 'README WSP_97 truth table missing');
 includes(roadmap, 'REDDOG_GOVERNED_HANDOFF_CONTRACT_PHASE1', 'governed handoff roadmap slice missing');
 includes(auditDoc, 'RedDogGovernedWorkOrder', 'audit doc schema missing');
+const dryrunPy = fs.readFileSync(path.join(root, 'modules', 'communication', 'moltbot_bridge', 'src', 'reddog_governed_work_order_dryrun.py'), 'utf8');
+includes(dryrunPy, 'validate_work_order_dryrun', 'dry-run validator missing');
+includes(dryrunPy, 'WOULD_ACCEPT_WITH_RETRIEVAL_GAP', 'dry-run retrieval gap decision missing');
+includes(dryrunPy, 'HoloIndexEvidencePacket', 'HoloIndex evidence packet missing');
+includes(iface, 'reddog_governed_work_order_dryrun.py', 'INTERFACE dry-run module pointer missing');
 includes(auditDoc, 'authenticated principal', 'audit doc principal wording missing');
 includes(auditDoc, 'HoloIndex Discoverability', 'audit doc discoverability section missing');
 includes(auditDoc, 'F0_AUTONOMOUS_MERGE_NOT_IMPLEMENTED', 'audit doc F0 merge row missing');

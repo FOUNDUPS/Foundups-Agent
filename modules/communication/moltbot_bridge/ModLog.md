@@ -1,5 +1,15 @@
 # ModLog - moltbot_bridge
 
+## 2026-06-28: REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1
+
+**Slice:** External RedDog lane dry-run validator (shared with future OpenClaw policy gate)
+**WSP:** WSP_34, WSP_50, WSP_97, WSP_22
+
+- ADD `src/reddog_governed_work_order_dryrun.py` — `validate_work_order_dryrun()` with typed envelope, HoloIndex evidence gate, nonce replay guard, receipt digest.
+- ADD `tests/test_reddog_governed_work_order_dryrun.py` — 13 tests (accept + rejection paths).
+- WAE-L1 field mapping documented in module docstring (Addendum B); no WAE runtime changes.
+- No GitHub, branch, PR, write, shell, or merge.
+
 ## 2026-06-19: Fusion ALIAS live path -- valve-gated OFF, redaction-gated, advisory-only (W6)
 
 **Author**: 0102 (Worker-Lane W6, AUTHOR + internal SENTINEL)
