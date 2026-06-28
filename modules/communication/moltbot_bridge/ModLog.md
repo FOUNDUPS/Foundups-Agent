@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-06-28: REDDOG_WORK_ORDER_RUNTIME_INVOCATION_DRYRUN_PHASE1
+
+**Slice:** Runtime dry-run invocation orchestrator (policy gate + receipt, no execution)
+**WSP:** WSP_34, WSP_50, WSP_91, WSP_97, WSP_22
+
+- ADD `src/reddog_work_order_runtime_invocation.py` — `invoke_reddog_work_order_dryrun()` chains #893 + #894.
+- ADD `tests/test_reddog_work_order_runtime_invocation.py` — 7 tests (accept/reject/replay/idempotency/AST denylist).
+- HoloIndex: pre-edit hits on OpenClaw orchestrator/routing; post-edit INDEX_GAP for new module — static pointers added.
+
 ## 2026-06-28: REDDOG_HERMES_WORK_ORDER_RECEIPT_PHASE1
 
 **Slice:** Hermes-compatible pre-execution audit receipts for governed work orders

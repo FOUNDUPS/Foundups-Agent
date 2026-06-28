@@ -1,5 +1,12 @@
 # Foundups®Agent ModLog
 
+## 2026-06-28 - REDDOG_WORK_ORDER_RUNTIME_INVOCATION_DRYRUN_PHASE1 (extension pointers)
+
+- Points to `modules/communication/moltbot_bridge/src/reddog_work_order_runtime_invocation.py`.
+- Chains #893 policy gate + #894 receipt; proves handoff without repo mutation.
+
+WSP: WSP_34, WSP_50, WSP_97.
+
 ## 2026-06-28 - REDDOG_HERMES_WORK_ORDER_RECEIPT_PHASE1 (extension pointers)
 
 - Points to `modules/communication/moltbot_bridge/src/reddog_work_order_receipt.py`.

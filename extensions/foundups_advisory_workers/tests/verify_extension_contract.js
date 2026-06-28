@@ -192,6 +192,10 @@ const receiptPy = fs.readFileSync(path.join(root, 'modules', 'communication', 'm
 includes(receiptPy, 'emit_work_order_receipt', 'RedDog work order receipt emitter missing');
 includes(receiptPy, 'RedDogWorkOrderReceipt', 'RedDogWorkOrderReceipt schema missing');
 includes(receiptPy, 'no_execution_performed', 'work order receipt no_execution_performed missing');
+const invokePy = fs.readFileSync(path.join(root, 'modules', 'communication', 'moltbot_bridge', 'src', 'reddog_work_order_runtime_invocation.py'), 'utf8');
+includes(invokePy, 'invoke_reddog_work_order_dryrun', 'runtime invocation dryrun missing');
+includes(invokePy, 'no_execution_performed', 'runtime invocation no_execution_performed missing');
+includes(iface, 'reddog_work_order_runtime_invocation.py', 'INTERFACE runtime invocation pointer missing');
 includes(iface, 'reddog_work_order_receipt.py', 'INTERFACE work order receipt pointer missing');
 includes(iface, 'reddog_openclaw_work_order_policy_gate.py', 'INTERFACE policy gate pointer missing');
 includes(iface, 'reddog_github_permission_probe.py', 'INTERFACE permission probe pointer missing');
@@ -205,6 +209,7 @@ includes(roadmap, 'docs/audits/architecture/REDDOG_GOVERNED_REPO_WORK_ORDER_CONT
 includes(roadmap, 'REDDOG_GITHUB_PERMISSION_PROBE_PHASE1', 'github permission probe slice missing');
 includes(roadmap, 'REDDOG_OPENCLAW_WORK_ORDER_POLICY_GATE_PHASE1', 'OpenClaw policy gate slice missing');
 includes(roadmap, 'REDDOG_HERMES_WORK_ORDER_RECEIPT_PHASE1', 'Hermes work order receipt slice missing');
+includes(roadmap, 'REDDOG_WORK_ORDER_RUNTIME_INVOCATION_DRYRUN_PHASE1', 'runtime invocation dryrun slice missing');
 includes(roadmap, 'External RedDog Lane Queue (post-#888)', 'post-#888 external lane queue missing');
 includes(roadmap, 'REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1', 'governed work order dryrun slice missing');
 includes(roadmap, 'REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1', 'run trace telemetry correction slice missing');

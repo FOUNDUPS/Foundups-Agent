@@ -792,3 +792,18 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_receipt import (
 
 Pre-execution audit trail only. Maps #893 `PolicyGateReceipt` into durable Hermes-compatible
 records (digests/refs only). NOT live Hermes queue dispatch, NOT WRE execution.
+
+### RedDog Work-Order Runtime Invocation Dry-Run (no execution)
+
+```python
+from modules.communication.moltbot_bridge.src.reddog_work_order_runtime_invocation import (
+    invoke_reddog_work_order_dryrun,  # (work_order, permission_snapshot, *, now, seen_nonces, receipt_store) -> WorkOrderDryRunInvocationResult
+    WorkOrderDryRunInvocationResult,
+    INVOCATION_ACCEPT,
+    INVOCATION_REJECT,
+    INVOCATION_ACCEPT_WITH_RETRIEVAL_GAP,
+)
+```
+
+Orchestrates #893 policy gate + #894 receipt emission/persistence. Returns audit result to caller.
+No WRE, git, shell, live GitHub probe, or extension runtime wiring.
