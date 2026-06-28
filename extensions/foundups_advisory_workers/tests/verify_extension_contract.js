@@ -180,6 +180,10 @@ const dryrunPy = fs.readFileSync(path.join(root, 'modules', 'communication', 'mo
 includes(dryrunPy, 'validate_work_order_dryrun', 'dry-run validator missing');
 includes(dryrunPy, 'WOULD_ACCEPT_WITH_RETRIEVAL_GAP', 'dry-run retrieval gap decision missing');
 includes(dryrunPy, 'HoloIndexEvidencePacket', 'HoloIndex evidence packet missing');
+const probePy = fs.readFileSync(path.join(root, 'modules', 'platform_integration', 'github_integration', 'src', 'reddog_github_permission_probe.py'), 'utf8');
+includes(probePy, 'probe_repo_permission', 'GitHub permission probe missing');
+includes(probePy, 'raw_secret_included', 'probe raw_secret_included flag missing');
+includes(iface, 'reddog_github_permission_probe.py', 'INTERFACE permission probe pointer missing');
 includes(iface, 'reddog_governed_work_order_dryrun.py', 'INTERFACE dry-run module pointer missing');
 includes(auditDoc, 'authenticated principal', 'audit doc principal wording missing');
 includes(auditDoc, 'HoloIndex Discoverability', 'audit doc discoverability section missing');

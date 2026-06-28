@@ -13,6 +13,11 @@
 
 ## [ROCKET] Core Functionality
 
+### **RedDog Permission Probe (read-only)**
+- **`probe_repo_permission()`**: Read-only GitHub permission snapshot for governed work orders
+- **Conservative mapping**: `write`/`maintain`/`admin` -> `can_write`; `unknown` fail-closed
+- **No mutation**: allowlisted `gh` GET commands only; injectable mock backend for tests
+
 ### **GitHub API Client**
 - **Complete REST API Coverage**: Repository, pull requests, issues, branches, commits, workflows
 - **Async/Await Architecture**: High-performance async operations with aiohttp

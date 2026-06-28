@@ -1,5 +1,14 @@
 # GitHub Integration Module Log
 
+## 2026-06-28 - REDDOG_GITHUB_PERMISSION_PROBE_PHASE1
+
+- ADD `src/reddog_github_permission_probe.py` — read-only `probe_repo_permission()` with gh CLI allowlist backend.
+- Snapshot maps to `#889` `repo_permission_snapshot` via `to_repo_permission_snapshot()`.
+- Tests: 14 pytest cases + dry-run integration; mocks only in CI.
+- No branch/PR/write/merge/token persistence.
+
+WSP: WSP_34, WSP_50, WSP_97, WSP_22.
+
 ## Version History
 
 ### v1.0.0 - Complete GitHub Integration (Current)

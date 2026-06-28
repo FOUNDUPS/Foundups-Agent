@@ -191,7 +191,9 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_GITHUB_PERMISSION_PROBE_PHASE1
 
-- **Status:** **P0 NEXT** — read-only GitHub permission snapshot; no branch/PR/write.
+- **Status:** **PR-READY** — read-only `probe_repo_permission()` in github_integration.
+- **Module:** `modules/platform_integration/github_integration/src/reddog_github_permission_probe.py`
+- Maps to `repo_permission_snapshot` for `#890` dry-run validator.
 - **Rationale:** OpenClaw can validate envelope shape only after fresh permission evidence exists.
 
 ### REDDOG_OPENCLAW_WORK_ORDER_POLICY_GATE_PHASE1
