@@ -1,3 +1,12 @@
+## 2026-06-28: REDDOG_WORK_ORDER_RUNTIME_INVOCATION_DRYRUN_PHASE1
+
+**File**: `test_reddog_work_order_runtime_invocation.py` (NEW — 7 tests)
+**Slice**: `REDDOG_WORK_ORDER_RUNTIME_INVOCATION_DRYRUN_PHASE1` | **Predecessors**: #893 policy gate, #894 receipt
+
+End-to-end dry-run invocation: policy gate + receipt store; accept/reject/replay/idempotency; AST denylist.
+
+**Run**: `pytest modules/communication/moltbot_bridge/tests/test_reddog_work_order_runtime_invocation.py -q`
+
 ## 2026-06-28: REDDOG_HERMES_WORK_ORDER_RECEIPT_PHASE1
 
 **File**: `test_reddog_work_order_receipt.py` (NEW — 14 tests)
