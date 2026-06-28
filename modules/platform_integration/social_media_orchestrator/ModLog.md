@@ -21,6 +21,18 @@ Centralized orchestration system providing unified social media management acros
 
 ## Recent Changes
 
+### 2026-06-13 - FoundUp Campaign Operator SKILLz Placeholder
+**By:** 0102 - **Slice:** `FOUNDUP_CAMPAIGN_OPERATOR_SKILLZ_PLACEHOLDER_PHASE1`
+**WSP References:** WSP 95 (Wardrobe placement), WSP 109 (intake evidence), WSP 97 (truth boundary), WSP 15 (next-slice MPS), WSP 22 (ModLog)
+
+**Created (placeholder + contract only; no executor, no posting, no API):**
+- `skillz/foundup_campaign_operator/README.md` - non-executing SKILLz placeholder marker (no `SKILLz.md`, no `executor.py`; fail-closed). Reserves the canonical module-local wardrobe location next to `antifafm_linkedin_post/` per WSP 95 ("skills belong with the modules they serve").
+- `docs/audits/architecture/FOUNDUP_CAMPAIGN_OPERATOR_SKILLZ_PLACEHOLDER_PHASE1.md` - audit + non-executing `CampaignBrief` / `CampaignWorkOrder` contract, placement dialectic, governance chain (RedDog recommends -> OpenClaw gates -> Hermes routes -> WRE/SKILLz executes after authorization -> AutoPost/social publish behind policy), and recorded HoloIndex INDEX_GAP.
+
+**Boundary:** No live campaign execution, no Runway API, no AutoPost execution, no scheduling, no secrets, no account auth, no browser automation, no HoloIndex ranking-code change. INTERFACE/ROADMAP intentionally untouched (no public API change).
+
+**Follow-up:** `HOLOINDEX_FOUNDUP_CAMPAIGN_SKILLZ_DISCOVERABILITY_PHASE1` (re-index + close RedDog `skill_hits: 0` gap).
+
 ### 2026-03-08 - LinkedIn Optional MCP Fallback Hardening
 **WSP References**: WSP 22 (ModLog), WSP 5 (Testing Standards), WSP 91 (Graceful Failure)
 
