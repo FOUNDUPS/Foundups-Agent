@@ -80,22 +80,24 @@ DONE
 6. #892 GitHub permission probe (21aeff32d)
 7. #893 OpenClaw policy gate (329db7113)
 8. #894 Hermes-compatible receipt (b42db2165)
+9. #896 runtime invocation dry-run (f65ecff4e)
 
-P0 NEXT
-9. REDDOG_WORK_ORDER_RUNTIME_INVOCATION_DRYRUN_PHASE1
-   - invoke policy gate + receipt; no repo mutation
+P0 NEXT (contract before execution)
 10. REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1
-   - contract only, after invocation dry-run proven
+    - executor cage definition; no implementation
+11. REDDOG_WRE_EXECUTION_VALVE_PHASE1
+    - default CLOSED valve before any PoC
 
 P1
-11. REDDOG_SANITIZED_TARGET_CONTEXT_PROVENANCE_PHASE1
-12. REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1
-13. HOLOINDEX_REDDOG_GOVERNED_WORK_ORDER_INDEX_GAP_PHASE1
-14. HOLOINDEX_REDDOG_RUNTIME_INVOCATION_INDEX_GAP_PHASE1
+12. REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_POC_PHASE1
+13. REDDOG_SANITIZED_TARGET_CONTEXT_PROVENANCE_PHASE1
+14. REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1
+15. HOLOINDEX_REDDOG_GOVERNED_WORK_ORDER_INDEX_GAP_PHASE1
+16. HOLOINDEX_REDDOG_WRE_EXECUTOR_CONTRACT_INDEX_GAP_PHASE1
 
 P2/P3
-15. REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
-16. REDDOG_AUTONOMOUS_MERGE_POLICY_PHASE1 (blocked)
+17. REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
+18. REDDOG_AUTONOMOUS_MERGE_POLICY_PHASE1 (blocked)
 ```
 
 **Rationale:** Sanitized provenance and telemetry are real polish issues, but the strategic blocker is that RedDog still cannot safely become a worker. The work-order contract is the missing bridge between “advisory RedDog” and “RedDog can direct WRE to do meaningful code work.”
@@ -207,13 +209,18 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_WORK_ORDER_RUNTIME_INVOCATION_DRYRUN_PHASE1
 
-- **Status:** **PR-READY** — `invoke_reddog_work_order_dryrun()` chains #893 + #894.
+- **Status:** **LANDED** #896 (`f65ecff4e`) — `invoke_reddog_work_order_dryrun()` chains #893 + #894.
 - **Module:** `modules/communication/moltbot_bridge/src/reddog_work_order_runtime_invocation.py`
-- Proves runtime handoff + audit receipt without repo mutation.
+
+### REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1
+
+- **Status:** **PR-READY** — contract-only audit doc; no executor code.
+- **Canonical:** `docs/audits/architecture/REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1.md`
+- Entry conditions, worktree isolation, mutation bounds, rollback, output schema, WSP_15 next slices.
 
 ### REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_PHASE1
 
-- **Status:** **P0 QUEUED** — after invocation dry-run + executor contract.
+- **Status:** **BLOCKED** — until contract + execution valve land.
 
 ### REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
 
