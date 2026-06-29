@@ -1,5 +1,12 @@
 # Foundups®Agent ModLog
 
+## 2026-06-28 - REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_DRYRUN_PHASE1 (extension pointers)
+
+- Module: `modules/communication/moltbot_bridge/src/reddog_wre_executor_dryrun.py`
+- `plan_wre_isolated_worktree_execution_dryrun()` — plan + phase receipts; no git/worktree mutation.
+
+WSP: WSP_00, WSP_15, WSP_50, WSP_97, WSP_22.
+
 ## 2026-06-28 - REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1 (audit doc)
 
 - Canonical: `docs/audits/architecture/REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1.md`

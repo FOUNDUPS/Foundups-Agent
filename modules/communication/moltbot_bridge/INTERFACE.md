@@ -807,3 +807,20 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_runtime_invocati
 
 Orchestrates #893 policy gate + #894 receipt emission/persistence. Returns audit result to caller.
 No WRE, git, shell, live GitHub probe, or extension runtime wiring.
+
+### RedDog WRE Executor Dry-Run Planner (no mutation)
+
+```python
+from modules.communication.moltbot_bridge.src.reddog_wre_executor_dryrun import (
+    plan_wre_isolated_worktree_execution_dryrun,  # (invocation_result, work_order, *, now, locks, repo_root) -> WREExecutorDryRunResult
+    WREExecutorPlan,
+    WREExecutorDryRunResult,
+    ExecutorDryRunPhaseReceipt,
+    EXECUTOR_PLAN_ACCEPT,
+    EXECUTOR_PLAN_REJECT,
+)
+```
+
+Consumes accepted #896 `WorkOrderDryRunInvocationResult`; validates #897 contract rules;
+emits phase receipts (`plan_built`, `lock_checked`, `cleanup_planned`). No git, worktree,
+file edits, task commands, PR, or merge.

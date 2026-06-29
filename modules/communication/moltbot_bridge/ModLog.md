@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-06-28: REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_DRYRUN_PHASE1
+
+**Slice:** WRE isolated worktree executor dry-run planner (plan + receipts, no mutation)
+**WSP:** WSP_34, WSP_50, WSP_91, WSP_97, WSP_22
+
+- ADD `src/reddog_wre_executor_dryrun.py` — `plan_wre_isolated_worktree_execution_dryrun()`, `WREExecutorPlan`.
+- ADD `tests/test_reddog_wre_executor_dryrun.py` — accept/reject/lock/cleanup/AST denylist.
+- Consumes #896 invocation result; validates #897 contract rules; no git/subprocess/worktree.
+
 ## 2026-06-28: REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1 (pointer)
 
 **Slice:** WRE isolated worktree executor **contract only** (audit doc; no module code)

@@ -1,3 +1,13 @@
+## 2026-06-28: REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_DRYRUN_PHASE1
+
+**File**: `test_reddog_wre_executor_dryrun.py` (NEW — 8 tests)
+**Slice**: `REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_DRYRUN_PHASE1` | **Predecessors**: #896 invocation, #897 contract
+
+Executor plan dry-run: accepted invocation -> WREExecutorPlan + phase receipts; reject protected branch,
+forbidden paths, lock collision, missing cleanup; AST denylist; no git/worktree mutation.
+
+**Run**: `pytest modules/communication/moltbot_bridge/tests/test_reddog_wre_executor_dryrun.py -q`
+
 ## 2026-06-28: REDDOG_WORK_ORDER_RUNTIME_INVOCATION_DRYRUN_PHASE1
 
 **File**: `test_reddog_work_order_runtime_invocation.py` (NEW — 7 tests)
