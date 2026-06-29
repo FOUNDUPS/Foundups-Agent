@@ -81,23 +81,26 @@ DONE
 7. #893 OpenClaw policy gate (329db7113)
 8. #894 Hermes-compatible receipt (b42db2165)
 9. #896 runtime invocation dry-run (f65ecff4e)
+10. #897 WRE isolated worktree executor contract (2fe60a280)
 
-P0 NEXT (contract before execution)
-10. REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1
-    - executor cage definition; no implementation
-11. REDDOG_WRE_EXECUTION_VALVE_PHASE1
-    - default CLOSED valve before any PoC
+P0 NEXT (plan before mutation)
+11. REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_DRYRUN_PHASE1
+    - executor plan + phase receipts; no git/worktree/file mutation
+12. REDDOG_WRE_EXECUTION_VALVE_PHASE1
+    - default CLOSED valve before first real worktree create
 
 P1
-12. REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_POC_PHASE1
-13. REDDOG_SANITIZED_TARGET_CONTEXT_PROVENANCE_PHASE1
-14. REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1
-15. HOLOINDEX_REDDOG_GOVERNED_WORK_ORDER_INDEX_GAP_PHASE1
-16. HOLOINDEX_REDDOG_WRE_EXECUTOR_CONTRACT_INDEX_GAP_PHASE1
+13. REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_WORKTREE_CREATE_PHASE1
+    - first real isolated worktree; valve OPEN only
+14. REDDOG_SANITIZED_TARGET_CONTEXT_PROVENANCE_PHASE1
+15. REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1
+16. HOLOINDEX_REDDOG_GOVERNED_WORK_ORDER_INDEX_GAP_PHASE1
+17. HOLOINDEX_REDDOG_WRE_EXECUTOR_CONTRACT_INDEX_GAP_PHASE1
+18. HOLOINDEX_REDDOG_WRE_EXECUTOR_DRYRUN_INDEX_GAP_PHASE1
 
 P2/P3
-17. REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
-18. REDDOG_AUTONOMOUS_MERGE_POLICY_PHASE1 (blocked)
+19. REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
+20. REDDOG_AUTONOMOUS_MERGE_POLICY_PHASE1 (blocked)
 ```
 
 **Rationale:** Sanitized provenance and telemetry are real polish issues, but the strategic blocker is that RedDog still cannot safely become a worker. The work-order contract is the missing bridge between “advisory RedDog” and “RedDog can direct WRE to do meaningful code work.”
@@ -214,13 +217,18 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1
 
-- **Status:** **PR-READY** — contract-only audit doc; no executor code.
+- **Status:** **LANDED** #897 (`2fe60a280`) — contract-only audit doc; no executor code.
 - **Canonical:** `docs/audits/architecture/REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1.md`
-- Entry conditions, worktree isolation, mutation bounds, rollback, output schema, WSP_15 next slices.
 
-### REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_PHASE1
+### REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_DRYRUN_PHASE1
 
-- **Status:** **BLOCKED** — until contract + execution valve land.
+- **Status:** **PR-READY** — `plan_wre_isolated_worktree_execution_dryrun()`; plan + receipts only.
+- **Module:** `modules/communication/moltbot_bridge/src/reddog_wre_executor_dryrun.py`
+- No git, worktree, file edits, task commands, PR, or merge.
+
+### REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_WORKTREE_CREATE_PHASE1
+
+- **Status:** **BLOCKED** — until dry-run planner + execution valve land.
 
 ### REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
 

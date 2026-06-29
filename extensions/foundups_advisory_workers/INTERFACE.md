@@ -83,6 +83,8 @@ RedDog is the 0102 architect interface — **not an authority owner**. RedDog re
 
 **WRE isolated worktree executor (contract only):** `docs/audits/architecture/REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1.md` — defines future executor cage; **no implementation**.
 
+**WRE executor dry-run planner:** `modules/communication/moltbot_bridge/src/reddog_wre_executor_dryrun.py` — `plan_wre_isolated_worktree_execution_dryrun()`; plan + phase receipts; **no git/worktree mutation**.
+
 **Specified flow (not implemented in extension v0.3.27):**
 
 ```text
@@ -312,6 +314,7 @@ Formal contract:
 | RedDog work-order receipt (Hermes-compatible audit) | OBSERVED (moltbot_bridge module); not live Hermes queue |
 | RedDog runtime invocation dry-run | OBSERVED (moltbot_bridge module); no execution |
 | WRE isolated worktree executor | SPECIFIED_NOT_IMPLEMENTED (contract doc only) |
+| WRE executor dry-run planner | OBSERVED (moltbot_bridge module); no mutation |
 | Governed repo work order dry-run validator | OBSERVED (OpenClaw bridge module) |
 | Governed repo work order (`RedDogGovernedWorkOrder`) | SPECIFIED_NOT_IMPLEMENTED (runtime emission from extension) |
 | GitHub permission snapshot per work order | SPECIFIED_NOT_IMPLEMENTED |

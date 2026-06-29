@@ -220,6 +220,12 @@ includes(executorContractDoc, 'WSP_97 truth table', 'executor contract WSP_97 ta
 includes(executorContractDoc, 'WSP_15 — Next implementation slices', 'executor contract WSP_15 slices missing');
 includes(iface, 'REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1.md', 'INTERFACE executor contract pointer missing');
 includes(roadmap, 'docs/audits/architecture/REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1.md', 'executor contract path missing from roadmap');
+const executorDryrunPy = fs.readFileSync(path.join(root, 'modules', 'communication', 'moltbot_bridge', 'src', 'reddog_wre_executor_dryrun.py'), 'utf8');
+includes(executorDryrunPy, 'plan_wre_isolated_worktree_execution_dryrun', 'WRE executor dryrun planner missing');
+includes(executorDryrunPy, 'WREExecutorPlan', 'WREExecutorPlan schema missing');
+includes(executorDryrunPy, 'no_mutation_performed', 'executor dryrun no_mutation_performed missing');
+includes(iface, 'reddog_wre_executor_dryrun.py', 'INTERFACE executor dryrun pointer missing');
+includes(roadmap, 'REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_DRYRUN_PHASE1', 'executor dryrun slice missing');
 includes(roadmap, 'External RedDog Lane Queue (post-#888)', 'post-#888 external lane queue missing');
 includes(roadmap, 'REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1', 'governed work order dryrun slice missing');
 includes(roadmap, 'REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1', 'run trace telemetry correction slice missing');
