@@ -1,5 +1,16 @@
 # Foundups®Agent ModLog
 
+# ModLog - Foundups®Agent Extension
+
+## 2026-06-28 - REDDOG_REVIEW_PACKET_MEMORY_AND_FOLLOWUP_PHASE1 (v0.3.28)
+
+- ADD `buildSanitizedContinuationSummary()` — WSP_97-safe packet memory from last run (success or BLOCKED_LOCALLY).
+- ADD `appendContinuationSummaryToWspPrompt()` — follow-up path without pasting raw Copy MD.
+- UI: "Use last RedDog packet" checkbox (default ON); in-memory `state.lastContinuationSummary` only.
+- Copy MD optional safe Continuation Summary section; fusion redaction gate tested on continuation block.
+
+WSP: WSP_00, WSP_50, WSP_97, WSP_22. Version 0.3.27 -> 0.3.28.
+
 ## 2026-06-28 - REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_DRYRUN_PHASE1 (extension pointers)
 
 - Module: `modules/communication/moltbot_bridge/src/reddog_wre_executor_dryrun.py`

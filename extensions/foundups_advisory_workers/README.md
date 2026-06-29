@@ -1,6 +1,6 @@
 # Foundups®Agent
 
-Version: 0.3.27
+Version: 0.3.28
 
 This local Cursor/VS Code extension opens one RedDog Architect advisory worker as an editor webview tab, similar in ergonomics to `Claude Code: Open` but without repo, shell, browser, merge, CABR, or payout authority.
 
@@ -186,6 +186,8 @@ The worker has no direct filesystem authority. The extension automatically attac
 ## Review Packet
 
 After a successful run, focus the work focus composer and press `Ctrl+Shift+C` to copy a redacted review packet. Paste that packet into Codex for 0102 review. The packet contains digested work focus and WSP prompt excerpts (not full raw context), model slugs, bounded excerpts, task classification, resolved effort/mode, and output validator/repair status; it does not contain the OpenRouter key.
+
+**Follow-up memory (v0.3.28):** Enable **Use last RedDog packet** (default ON) to append a WSP_97-safe continuation summary to the next prompt instead of pasting raw Copy MD back into the composer. In-memory per tab only; no cross-reload persistence yet.
 
 ## Setup
 

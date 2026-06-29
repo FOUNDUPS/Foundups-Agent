@@ -276,10 +276,16 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - Classify public vs member-gated flows.
 - No automatic publication without verification gate.
 
+### REDDOG_REVIEW_PACKET_MEMORY_AND_FOLLOWUP_PHASE1
+
+- **Status:** **PR-READY** — in-memory WSP_97-safe continuation summary; "Use last RedDog packet" toggle (default ON).
+- Sanitized follow-up memory from last run; appends to WSP task prompt without raw Copy MD paste.
+- No disk persistence, no WRE/OpenClaw runtime wiring.
+
 ### REDDOG_REVIEW_PACKET_MEMORY_PHASE1
 
-- Persist redacted review packets for HoloIndex recall and 0102 continuity.
-- Bounded storage; no raw prompt leakage beyond redaction gate.
+- **Status:** **PARTIAL** — Phase 1 in-memory continuation only (`REDDOG_REVIEW_PACKET_MEMORY_AND_FOLLOWUP_PHASE1`).
+- Persist redacted review packets for HoloIndex recall and cross-session continuity (future).
 
 ### REDDOG_FUSION_ORCHESTRATOR_PHASE2
 
