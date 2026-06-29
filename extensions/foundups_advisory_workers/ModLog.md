@@ -1,5 +1,13 @@
 # Foundups®Agent ModLog
 
+## 2026-06-28 - REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1 (audit doc)
+
+- Canonical: `docs/audits/architecture/REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1.md`
+- Defines executor cage: entry conditions, isolation, mutation bounds, rollback, output contract.
+- No runtime implementation in this slice.
+
+WSP: WSP_00, WSP_15, WSP_50, WSP_97, WSP_22.
+
 ## 2026-06-28 - REDDOG_WORK_ORDER_RUNTIME_INVOCATION_DRYRUN_PHASE1 (extension pointers)
 
 - Points to `modules/communication/moltbot_bridge/src/reddog_work_order_runtime_invocation.py`.

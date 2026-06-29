@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-06-28: REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1 (pointer)
+
+**Slice:** WRE isolated worktree executor **contract only** (audit doc; no module code)
+**WSP:** WSP_15, WSP_50, WSP_97, WSP_22
+
+- Canonical: `docs/audits/architecture/REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1.md`
+- ADD `tests/test_reddog_wre_executor_contract_doc.py` — static doc-presence assertions only.
+- Future executor consumes #893 PolicyGateReceipt + #894 RedDogWorkOrderReceipt after execution valve.
+
 ## 2026-06-28: REDDOG_WORK_ORDER_RUNTIME_INVOCATION_DRYRUN_PHASE1
 
 **Slice:** Runtime dry-run invocation orchestrator (policy gate + receipt, no execution)

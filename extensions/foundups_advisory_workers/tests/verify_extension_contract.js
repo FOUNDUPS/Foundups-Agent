@@ -16,6 +16,8 @@ const iface = fs.readFileSync(path.join(extDir, 'INTERFACE.md'), 'utf8');
 const roadmap = fs.readFileSync(path.join(extDir, 'ROADMAP.md'), 'utf8');
 const auditDocPath = path.join(root, 'docs', 'audits', 'architecture', 'REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md');
 const auditDoc = fs.readFileSync(auditDocPath, 'utf8');
+const executorContractDocPath = path.join(root, 'docs', 'audits', 'architecture', 'REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1.md');
+const executorContractDoc = fs.readFileSync(executorContractDocPath, 'utf8');
 
 function includes(haystack, needle, label) {
   assert(haystack.includes(needle), label || `missing ${needle}`);
@@ -210,6 +212,14 @@ includes(roadmap, 'REDDOG_GITHUB_PERMISSION_PROBE_PHASE1', 'github permission pr
 includes(roadmap, 'REDDOG_OPENCLAW_WORK_ORDER_POLICY_GATE_PHASE1', 'OpenClaw policy gate slice missing');
 includes(roadmap, 'REDDOG_HERMES_WORK_ORDER_RECEIPT_PHASE1', 'Hermes work order receipt slice missing');
 includes(roadmap, 'REDDOG_WORK_ORDER_RUNTIME_INVOCATION_DRYRUN_PHASE1', 'runtime invocation dryrun slice missing');
+includes(roadmap, 'REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1', 'WRE executor contract slice missing');
+includes(executorContractDoc, 'WREExecutorResult', 'executor contract output schema missing');
+includes(executorContractDoc, 'Execution valve', 'executor contract execution valve missing');
+includes(executorContractDoc, 'no autonomous merge', 'executor contract merge guard missing');
+includes(executorContractDoc, 'WSP_97 truth table', 'executor contract WSP_97 table missing');
+includes(executorContractDoc, 'WSP_15 — Next implementation slices', 'executor contract WSP_15 slices missing');
+includes(iface, 'REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1.md', 'INTERFACE executor contract pointer missing');
+includes(roadmap, 'docs/audits/architecture/REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1.md', 'executor contract path missing from roadmap');
 includes(roadmap, 'External RedDog Lane Queue (post-#888)', 'post-#888 external lane queue missing');
 includes(roadmap, 'REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1', 'governed work order dryrun slice missing');
 includes(roadmap, 'REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1', 'run trace telemetry correction slice missing');
