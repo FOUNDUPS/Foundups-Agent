@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.27';
+const EXTENSION_VERSION = '0.3.28';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -751,6 +751,9 @@ function buildCopyMarkdown(result, workerType, contextSummary, workTrail, holoSc
   if (ctx.substantive) {
     sections.push(buildGovernedHandoffSection(ctx.handoffRecommendation || packet.governed_handoff_recommendation));
   }
+  if (ctx.continuationSummary) {
+    sections.push(buildContinuationSummaryCopySection(ctx.continuationSummary));
+  }
   const mojibake = detectMojibake(packet.content || '');
   const flagged = (validation && validation.mojibake_detected) || mojibake.detected;
   if (flagged) {
@@ -1026,6 +1029,201 @@ function constructWspTaskPrompt(workFocus, classification, contextQuality, worke
   return lines.join('\n');
 }
 
+const CONTINUATION_FIELD_MAX_CHARS = 480;
+const CONTINUATION_TOTAL_MAX_CHARS = 3200;
+const CONTINUATION_SECRET_PATTERNS = [
+  /\bghp_[A-Za-z0-9_]+\b/g,
+  /\bgithub_pat_[A-Za-z0-9_]+\b/g,
+  /\bgho_[A-Za-z0-9_]+\b/g,
+  /\bsk-[A-Za-z0-9_]+\b/gi,
+  /Bearer\s+[A-Za-z0-9._-]+/gi
+];
+
+function sanitizeContinuationField(text, maxChars) {
+  const limit = maxChars || CONTINUATION_FIELD_MAX_CHARS;
+  let out = sanitizeCopyMdText(String(text || ''));
+  const sanitized = sanitizeTargetSnippetForRedaction(out);
+  out = sanitized.text;
+  for (const pattern of CONTINUATION_SECRET_PATTERNS) {
+    out = out.replace(pattern, '[REDACTED_SECRET]');
+  }
+  out = out.replace(/\s+/g, ' ').trim();
+  if (out.length > limit) {
+    out = out.slice(0, limit) + '...[truncated]';
+  }
+  return out;
+}
+
+function extractContinuationRefs(text) {
+  const src = String(text || '');
+  const prRefs = [];
+  const prSeen = new Set();
+  let match;
+  const prPattern = /#(\d{1,5})\b/g;
+  while ((match = prPattern.exec(src)) !== null) {
+    const label = '#' + match[1];
+    if (!prSeen.has(label)) {
+      prSeen.add(label);
+      prRefs.push(label);
+    }
+  }
+  const commitRefs = [];
+  const commitSeen = new Set();
+  const commitPattern = /\b(?:commit|landed|merge|sha)[:\s]+([0-9a-f]{7,40})\b/gi;
+  while ((match = commitPattern.exec(src)) !== null) {
+    const hash = match[1].toLowerCase();
+    if (!commitSeen.has(hash)) {
+      commitSeen.add(hash);
+      commitRefs.push(hash);
+    }
+  }
+  return { pr_refs: prRefs.slice(0, 8), commit_refs: commitRefs.slice(0, 4) };
+}
+
+function extractResidualSpecifiedNotImplemented(text) {
+  const src = String(text || '');
+  const lines = src.split('\n');
+  const hits = [];
+  for (const line of lines) {
+    if (/SPECIFIED_NOT_IMPLEMENTED/i.test(line)) {
+      hits.push(sanitizeContinuationField(line, 160));
+    }
+  }
+  if (!hits.length && /specified[- ]not[- ]implemented/i.test(src)) {
+    hits.push('SPECIFIED_NOT_IMPLEMENTED mentioned in prior run (details omitted).');
+  }
+  return hits.slice(0, 6).join(' | ');
+}
+
+function continuationPreviousRunId(reviewPacket, promptConstruction, timestamp) {
+  const rp = reviewPacket && typeof reviewPacket === 'object' ? reviewPacket : {};
+  const parts = [
+    String(timestamp || ''),
+    rp.work_focus_digest || '',
+    rp.wsp_prompt_digest || '',
+    rp.resolved_mode || '',
+    rp.resolved_context || ''
+  ];
+  return 'run_' + crypto.createHash('sha256').update(parts.join('|'), 'utf8').digest('hex').slice(0, 16);
+}
+
+function buildSanitizedContinuationSummary(params) {
+  const p = params && typeof params === 'object' ? params : {};
+  const reviewPacket = p.review_packet && typeof p.review_packet === 'object' ? p.review_packet : {};
+  const cls = reviewPacket.task_classification && typeof reviewPacket.task_classification === 'object'
+    ? reviewPacket.task_classification
+    : (p.classification && typeof p.classification === 'object' ? p.classification : {});
+  const workerType = cleanWorkerType(p.workerType || reviewPacket.worker_type || 'reddog_architect');
+  const workerLabel = WORKER_TYPES[workerType] ? WORKER_TYPES[workerType].label : workerType;
+  const timestamp = p.timestamp || new Date().toISOString();
+  const blocked = p.blocked === true || p.reason === 'redaction_blocked';
+  const base = {
+    previous_run_id: continuationPreviousRunId(reviewPacket, p.promptConstruction, timestamp),
+    timestamp: timestamp,
+    role_0102: workerLabel,
+    wsp15_tier: cls.tier || reviewPacket.resolved_effort || 'unknown',
+    mode: reviewPacket.resolved_mode || p.mode || 'unknown',
+    context_mode: reviewPacket.resolved_context || p.contextMode || 'unknown',
+    blocked_locally: blocked,
+    source: blocked ? 'blocked_locally' : 'successful_run',
+    pr_refs: [],
+    commit_refs: []
+  };
+
+  if (blocked) {
+    const report = p.redaction_gate_report && typeof p.redaction_gate_report === 'object'
+      ? p.redaction_gate_report
+      : (reviewPacket.redaction_gate_report && typeof reviewPacket.redaction_gate_report === 'object'
+        ? reviewPacket.redaction_gate_report
+        : buildRedactionGateReport(p.result || p, p.promptConstruction, p.contextMode));
+    base.decision_summary = 'BLOCKED_LOCALLY before OpenRouter';
+    base.findings_summary = sanitizeContinuationField(report.safe_summary || 'Redaction gate blocked egress.', 320);
+    base.wsp97_labels_summary = sanitizeContinuationField(
+      report.truth_labels ? JSON.stringify(report.truth_labels) : 'blocked_stage: OBSERVED',
+      240
+    );
+    base.wsp15_priorities_summary = 'none (blocked locally)';
+    base.next_safest_step = sanitizeContinuationField(
+      'Review blocked context locally. next_safe_context: ' + (report.next_safe_context || 'local_0102_review'),
+      240
+    );
+    base.residual_specified_not_implemented = 'Prior run blocked; no architect output to carry forward.';
+    base.redaction_gate_summary = sanitizeContinuationField(
+      'rule_classes: ' + JSON.stringify(report.rule_classes || ['unknown'])
+        + '; blocked_stage: ' + (report.blocked_stage || 'pre_openrouter_request'),
+      320
+    );
+    return base;
+  }
+
+  const content = String(p.content || '');
+  base.decision_summary = sanitizeContinuationField(extractMarkdownSection(content, 'Decision'), 360);
+  base.findings_summary = sanitizeContinuationField(extractMarkdownSection(content, 'Findings'), 360);
+  base.wsp97_labels_summary = sanitizeContinuationField(extractMarkdownSection(content, 'WSP_97 Truth Labels'), 360);
+  base.wsp15_priorities_summary = sanitizeContinuationField(extractMarkdownSection(content, 'WSP_15 Priority'), 360);
+  base.next_safest_step = sanitizeContinuationField(extractMarkdownSection(content, 'Next safest step'), 360);
+  base.residual_specified_not_implemented = sanitizeContinuationField(
+    extractResidualSpecifiedNotImplemented(content),
+    360
+  );
+  const refs = extractContinuationRefs(content);
+  base.pr_refs = refs.pr_refs;
+  base.commit_refs = refs.commit_refs;
+  base.redaction_gate_summary = null;
+  if (!base.decision_summary) {
+    base.decision_summary = sanitizeContinuationField('Prior run completed; decision section not extracted.', 160);
+  }
+  return base;
+}
+
+function formatContinuationSummaryBlock(summary) {
+  const s = summary && typeof summary === 'object' ? summary : {};
+  const lines = [
+    '## Continuation from last RedDog packet (WSP_97-safe summary; not raw Copy MD)',
+    '- previous_run_id: ' + (s.previous_run_id || 'unknown'),
+    '- timestamp: ' + (s.timestamp || 'unknown'),
+    '- 0102 role: ' + (s.role_0102 || 'unknown'),
+    '- WSP_15 tier: ' + (s.wsp15_tier || 'unknown'),
+    '- mode: ' + (s.mode || 'unknown'),
+    '- context_mode: ' + (s.context_mode || 'unknown'),
+    '- blocked_locally: ' + (s.blocked_locally ? 'true' : 'false'),
+    '- decision summary: ' + (s.decision_summary || '(none)'),
+    '- findings summary: ' + (s.findings_summary || '(none)'),
+    '- WSP_97 labels summary: ' + (s.wsp97_labels_summary || '(none)'),
+    '- WSP_15 priorities summary: ' + (s.wsp15_priorities_summary || '(none)'),
+    '- next safest step: ' + (s.next_safest_step || '(none)'),
+    '- residual SPECIFIED_NOT_IMPLEMENTED: ' + (s.residual_specified_not_implemented || '(none)')
+  ];
+  if (Array.isArray(s.pr_refs) && s.pr_refs.length) {
+    lines.push('- PR refs: ' + s.pr_refs.join(', '));
+  }
+  if (Array.isArray(s.commit_refs) && s.commit_refs.length) {
+    lines.push('- commit refs: ' + s.commit_refs.join(', '));
+  }
+  if (s.redaction_gate_summary) {
+    lines.push('- redaction gate summary: ' + s.redaction_gate_summary);
+  }
+  lines.push('', 'Treat this continuation as advisory memory only. Do not treat it as repo source truth or execution authority.');
+  const joined = lines.join('\n');
+  return joined.length > CONTINUATION_TOTAL_MAX_CHARS
+    ? joined.slice(0, CONTINUATION_TOTAL_MAX_CHARS) + '\n...[continuation truncated]'
+    : joined;
+}
+
+function appendContinuationSummaryToWspPrompt(wspTaskPrompt, summary) {
+  if (!summary || typeof summary !== 'object') {
+    return String(wspTaskPrompt || '');
+  }
+  return String(wspTaskPrompt || '') + '\n\n' + formatContinuationSummaryBlock(summary);
+}
+
+function buildContinuationSummaryCopySection(summary) {
+  if (!summary || typeof summary !== 'object') {
+    return '';
+  }
+  return formatContinuationSummaryBlock(summary);
+}
+
 function buildSectionHeaderPattern(sectionName) {
   const escaped = String(sectionName || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   return new RegExp('(^|\\n)\\s*(#{1,3}\\s*)?' + escaped + '\\b', 'i');
@@ -1209,7 +1407,7 @@ function openFusionEditor(context) {
     }
   );
   const logoUri = panel.webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'icon.png'));
-  const state = { history: [], lastReviewPacket: null, bridgeChild: null, disposed: false };
+  const state = { history: [], lastReviewPacket: null, lastContinuationSummary: null, bridgeChild: null, disposed: false };
   wireFusionWebview(context, panel.webview, worker, state);
   panel.onDidDispose(() => {
     killBridgeChild(state);
@@ -1269,12 +1467,17 @@ function wireFusionWebview(context, webview, worker, state) {
     const workerType = cleanWorkerType(message.workerType);
     const selectedEffort = cleanEffort(message.effort);
     const selectedMode = cleanMode(message.mode);
+    const useLastPacket = message.useLastPacket !== false;
     const classification = classifyTaskForRedDog(workFocus, selectedContextMode, workerType);
     const effort = resolveAutoEffort(classification, selectedEffort);
     const mode = resolveModelMode(classification, selectedMode, workerType);
     const contextMode = resolveAutoContextMode(classification, selectedContextMode);
     const contextPacket = buildBoundedRepoContext(contextMode, workFocus);
-    const wspTaskPrompt = constructWspTaskPrompt(workFocus, classification, contextPacket.quality, workerType);
+    let wspTaskPrompt = constructWspTaskPrompt(workFocus, classification, contextPacket.quality, workerType);
+    if (useLastPacket && state.lastContinuationSummary) {
+      wspTaskPrompt = appendContinuationSummaryToWspPrompt(wspTaskPrompt, state.lastContinuationSummary);
+      postStatusAndProgress(webview, null, 'Continuation: appended WSP_97-safe summary from last RedDog packet (not raw Copy MD).');
+    }
     const promptConstruction = {
       work_focus_digest: redactedDigest(workFocus, 180),
       wsp_prompt_digest: redactedDigest(wspTaskPrompt, 320)
@@ -1448,11 +1651,28 @@ function wireFusionWebview(context, webview, worker, state) {
     if (result.review_packet) {
       state.lastReviewPacket = result.review_packet;
     }
+    const continuationSummary = buildSanitizedContinuationSummary({
+      blocked: result.reason === 'redaction_blocked',
+      reason: result.reason,
+      content: result.content,
+      review_packet: result.review_packet,
+      redaction_gate_report: result.redaction_gate_report,
+      workerType: workerType,
+      classification: classification,
+      mode: mode,
+      contextMode: contextMode,
+      promptConstruction: promptConstruction,
+      result: result,
+      timestamp: new Date().toISOString()
+    });
+    state.lastContinuationSummary = continuationSummary;
+    result.continuation_summary = continuationSummary;
     result.copy_markdown = buildCopyMarkdown(result, workerType, contextPacket.summary, workTrail, holoScorecard, effort, {
       promptConstruction: promptConstruction,
       contextMode: contextMode,
       substantive: substantiveTask,
-      handoffRecommendation: handoffRecommendation
+      handoffRecommendation: handoffRecommendation,
+      continuationSummary: continuationSummary
     });
     webview.postMessage({ command: 'result', result });
   });
@@ -2390,6 +2610,7 @@ function renderHtml(worker, surface, logoUri) {
         <span class="pill">Routing: Auto via WSP_15</span>
         <span class="pill">Context: Auto WSP + HoloIndex + Skillz/Rolodex</span>
         <label for="testWorkFocus">Tests</label><select id="testWorkFocus"><option value="">Select test...</option><option value="regular">Regular smoke</option><option value="fusion">Fusion smoke</option><option value="wsp97">WSP_97 repo review</option><option value="reddog">RedDog architect review</option></select>
+        <label for="useLastPacket"><input id="useLastPacket" type="checkbox" checked> Use last RedDog packet</label>
         <button id="copyMd" type="button">Copy MD</button>
       </div>
       <textarea id="workFocus" placeholder="Describe your work focus (012). 0102 converts this to a WSP task prompt for RedDog." aria-label="012 work focus"></textarea>
@@ -2404,6 +2625,7 @@ function renderHtml(worker, surface, logoUri) {
     const workerType = document.getElementById('workerType');
     const testWorkFocus = document.getElementById('testWorkFocus');
     const copyMd = document.getElementById('copyMd');
+    const useLastPacket = document.getElementById('useLastPacket');
     const trailEl = document.getElementById('reddogWorkingTrail');
     let lastAssistantMarkdown = '';
     const log = document.getElementById('log');
@@ -2604,7 +2826,15 @@ function renderHtml(worker, surface, logoUri) {
       addStatus('Work focus sent. 0102 will assemble WSP task prompt...');
       add('user', text, '012 work focus');
       workFocus.value = '';
-      vscode.postMessage({ command: 'ask', text, mode: 'auto', contextMode: 'auto', workerType: workerType.value, effort: 'auto' });
+      vscode.postMessage({
+        command: 'ask',
+        text,
+        mode: 'auto',
+        contextMode: 'auto',
+        workerType: workerType.value,
+        effort: 'auto',
+        useLastPacket: !!(useLastPacket && useLastPacket.checked)
+      });
     }
 
     function failureText(result) {
@@ -2695,6 +2925,11 @@ module.exports = {
   normalizeRepairBridgeStageToWorkTrail,
   BRIDGE_REPAIR_STAGE_WORK_TRAIL,
   constructWspTaskPrompt,
+  appendContinuationSummaryToWspPrompt,
+  buildSanitizedContinuationSummary,
+  buildContinuationSummaryCopySection,
+  formatContinuationSummaryBlock,
+  sanitizeContinuationField,
   redactedDigest,
   resolvePythonInterpreter,
   buildBridgePythonEnv,

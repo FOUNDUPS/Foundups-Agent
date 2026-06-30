@@ -83,8 +83,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.27', 'package version must be 0.3.27');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.27'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.28', 'package version must be 0.3.28');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.28'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -101,7 +101,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.27', 'README version mismatch');
+includes(readme, 'Version: 0.3.28', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -722,7 +722,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.27'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.28'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -736,7 +736,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.27'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.28'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -748,7 +748,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.27'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.28'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -848,5 +848,100 @@ includes(unicodeTrace, 'unicode_replacements_count: 1', 'UNI-006: Run Trace must
 includes(unicodeTrace, 'unicode_normalization_sources: context', 'UNI-006: Run Trace must expose normalization sources');
 includes(unicodeTrace, 'unicode_normalization_form: NFC', 'UNI-006: Run Trace must expose normalization form');
 assert(!unicodeTrace.includes('\udc94'), 'UNI-007: Run Trace must not echo raw malformed surrogate');
+
+// ADDENDUM G - redaction-safe continuation memory (REDDOG_REVIEW_PACKET_MEMORY_AND_FOLLOWUP_PHASE1)
+includes(extensionJs, 'buildSanitizedContinuationSummary', 'continuation summary builder missing');
+includes(extensionJs, 'appendContinuationSummaryToWspPrompt', 'continuation append helper missing');
+includes(extensionJs, 'Use last RedDog packet', 'continuation UI toggle missing');
+includes(extensionJs, 'lastContinuationSummary', 'in-memory continuation store missing');
+includes(roadmap, 'REDDOG_REVIEW_PACKET_MEMORY_AND_FOLLOWUP_PHASE1', 'continuation memory roadmap slice missing');
+
+const sampleArchitectOutput = [
+  '## Decision',
+  'Proceed with gate review for #898; land when CI is green.',
+  '',
+  '## Findings',
+  'Executor dry-run planner proves plan layer before valve.',
+  '',
+  '## WSP_97 Truth Labels',
+  'Dry-run scope: OBSERVED; valve: SPECIFIED_NOT_IMPLEMENTED',
+  '',
+  '## WSP_15 Priority',
+  'Execution valve slice: P0 NEXT',
+  '',
+  '## Next safest step',
+  'Gate and land #898, then queue execution valve slice.',
+  '',
+  'Persistent disk memory: SPECIFIED_NOT_IMPLEMENTED in Phase 1.'
+].join('\n');
+
+const successSummary = orchestrator.buildSanitizedContinuationSummary({
+  blocked: false,
+  content: sampleArchitectOutput,
+  workerType: 'reddog_architect',
+  classification: { tier: 'HIGH' },
+  mode: 'openrouter_single',
+  contextMode: 'wsp_holo',
+  review_packet: { task_classification: { tier: 'HIGH' }, resolved_mode: 'openrouter_single', resolved_context: 'wsp_holo' },
+  promptConstruction: { work_focus_digest: { hash: 'abc' }, wsp_prompt_digest: { hash: 'def' } },
+  timestamp: '2026-06-28T20:00:00.000Z'
+});
+assert.strictEqual(successSummary.blocked_locally, false, 'successful continuation must not be blocked_locally');
+assert(successSummary.decision_summary.length > 0, 'continuation must include decision summary');
+assert(successSummary.pr_refs.includes('#898'), 'continuation must capture PR refs');
+assert(!JSON.stringify(successSummary).includes('private_reasoning'), 'continuation must not retain private_reasoning category text raw');
+
+const poisonedOutput = sampleArchitectOutput + '\n\nhidden chain-of-thought leak';
+const poisonedSummary = orchestrator.buildSanitizedContinuationSummary({
+  blocked: false,
+  content: poisonedOutput,
+  workerType: 'reddog_architect',
+  classification: { tier: 'HIGH' },
+  review_packet: { task_classification: { tier: 'HIGH' } },
+  timestamp: '2026-06-28T20:01:00.000Z'
+});
+assert(!JSON.stringify(poisonedSummary).toLowerCase().includes('chain-of-thought'), 'continuation must strip private reasoning markers');
+
+const blockedSummary = orchestrator.buildSanitizedContinuationSummary({
+  blocked: true,
+  reason: 'redaction_blocked',
+  workerType: 'reddog_architect',
+  classification: { tier: 'HIGH' },
+  contextMode: 'wsp_holo_git',
+  redaction_gate_report: {
+    decision: 'BLOCKED_LOCALLY',
+    safe_summary: 'Redaction gate blocked egress before OpenRouter.',
+    rule_classes: ['blocked_policy'],
+    blocked_stage: 'pre_openrouter_request',
+    next_safe_context: 'local_0102_review',
+    truth_labels: { decision: 'OBSERVED' }
+  },
+  promptConstruction: { work_focus_digest: { hash: 'abc' }, wsp_prompt_digest: { hash: 'def' } },
+  timestamp: '2026-06-28T20:02:00.000Z'
+});
+assert.strictEqual(blockedSummary.blocked_locally, true, 'blocked continuation must set blocked_locally');
+assert.strictEqual(blockedSummary.source, 'blocked_locally', 'blocked continuation source label');
+assert(blockedSummary.redaction_gate_summary.includes('blocked_policy'), 'blocked continuation must include safe gate summary');
+assert(!blockedSummary.findings_summary.includes('OPENROUTER_API_KEY'), 'blocked continuation must not include secrets');
+
+const followupPrompt = orchestrator.appendContinuationSummaryToWspPrompt(
+  orchestrator.constructWspTaskPrompt('Follow up on executor dry-run land status.', { tier: 'HIGH', reasons: ['architecture'] }, 'bundle_json_ok', 'reddog_architect'),
+  successSummary
+);
+includes(followupPrompt, 'Continuation from last RedDog packet', 'follow-up prompt must include continuation block');
+includes(followupPrompt, 'previous_run_id:', 'follow-up prompt must include previous_run_id');
+assertFusionRedactionGatePasses(followupPrompt, 'continuation-augmented WSP prompt must pass fusion redaction gate');
+assertFusionRedactionGatePasses(orchestrator.formatContinuationSummaryBlock(successSummary), 'continuation summary block must pass fusion redaction gate');
+
+const continuationCopy = orchestrator.buildCopyMarkdown(
+  { ok: true, content: sampleArchitectOutput, review_packet: { task_classification: { tier: 'HIGH' }, output_validation: { validated: true } } },
+  'reddog_architect',
+  'Repo context attached',
+  [],
+  null,
+  'high',
+  { substantive: true, continuationSummary: successSummary }
+);
+includes(continuationCopy, 'Continuation from last RedDog packet', 'Copy MD may include safe continuation summary section');
 
 console.log('Foundups®Agent extension contract checks passed.');

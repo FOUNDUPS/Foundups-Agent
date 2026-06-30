@@ -264,6 +264,17 @@ Review packet additions:
 - `prompt_construction`: `0102_generated_from_work_focus`
 - `output_validation` (`validated`, `missing_sections`, `repair_attempted`, `repair_ok`, `repair_context_mode`, `repair_mode`, `fusion_panel_ok`)
 
+## RedDog Follow-Up Memory (v0.3.28)
+
+In-memory WSP_97-safe continuation from the last successful or `BLOCKED_LOCALLY` run:
+
+- `buildSanitizedContinuationSummary()` — extracts Decision/Findings/WSP_97/WSP_15/Next step summaries; strips secrets and blocked-policy literals.
+- `appendContinuationSummaryToWspPrompt()` — appends sanitized summary to the next WSP task prompt when **Use last RedDog packet** is enabled (default ON).
+- `state.lastContinuationSummary` — per-tab in-memory only; no disk persistence in Phase 1.
+- Copy MD may include a safe **Continuation Summary** section for the stored packet (not raw prior model output).
+
+Does **not** paste raw Copy MD, bounded context, or blocked snippets into follow-up prompts.
+
 ## Bridge Hardening (v0.3.16)
 
 | Control | Status |

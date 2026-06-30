@@ -1,5 +1,18 @@
 # Foundups®Agent TestModLog
 
+## 2026-06-28 - REDDOG_REVIEW_PACKET_MEMORY_AND_FOLLOWUP_PHASE1 (Addendum G)
+
+| ID | Asserts |
+| --- | --- |
+| G-001 | `buildSanitizedContinuationSummary` success path captures decision + PR refs |
+| G-002 | Poisoned output strips private reasoning markers |
+| G-003 | Blocked run stores safe redaction gate summary only |
+| G-004 | `appendContinuationSummaryToWspPrompt` includes continuation block |
+| G-005 | Continuation-augmented prompt passes fusion redaction gate |
+| G-006 | Copy MD includes safe Continuation Summary section when provided |
+
+**Run:** `node extensions/foundups_advisory_workers/tests/verify_extension_contract.js`
+
 ## 2026-06-14 - REDDOG_OUTPUT_SCHEMA_REPAIR_HARDENING addendum (OSR-007..OSR-010)
 
 | ID | Asserts |
