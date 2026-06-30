@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-06-28: REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1 (pointer)
+
+**Slice:** OpenClaw FoundUpJob adapter **contract only** (audit doc)
+**WSP:** WSP_15, WSP_50, WSP_77, WSP_97, WSP_22
+
+- Canonical: `docs/audits/architecture/REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1.md`
+- ADD `tests/test_reddog_openclaw_adapter_contract_doc.py` — static doc-presence assertions.
+- Ruling: AssignmentDispatcher simulated scaffold; OpenClaw owns worker loop.
+
 ## 2026-06-28: REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_DRYRUN_PHASE1
 
 **Slice:** WRE isolated worktree executor dry-run planner (plan + receipts, no mutation)

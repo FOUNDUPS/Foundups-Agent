@@ -85,6 +85,8 @@ RedDog is the 0102 architect interface — **not an authority owner**. RedDog re
 
 **WRE executor dry-run planner:** `modules/communication/moltbot_bridge/src/reddog_wre_executor_dryrun.py` — `plan_wre_isolated_worktree_execution_dryrun()`; plan + phase receipts; **no git/worktree mutation**.
 
+**OpenClaw handoff adapter (contract only):** `docs/audits/architecture/REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1.md` — RedDog → FoundUpJob mapping; OpenClaw owns worker loop; **AssignmentDispatcher not canonical**.
+
 **Specified flow (not implemented in extension v0.3.27):**
 
 ```text
@@ -326,6 +328,8 @@ Formal contract:
 | RedDog runtime invocation dry-run | OBSERVED (moltbot_bridge module); no execution |
 | WRE isolated worktree executor | SPECIFIED_NOT_IMPLEMENTED (contract doc only) |
 | WRE executor dry-run planner | OBSERVED (moltbot_bridge module); no mutation |
+| OpenClaw FoundUpJob adapter | SPECIFIED_NOT_IMPLEMENTED (contract doc only) |
+| AssignmentDispatcher as worker launcher | FORBIDDEN (simulated scaffold only) |
 | Governed repo work order dry-run validator | OBSERVED (OpenClaw bridge module) |
 | Governed repo work order (`RedDogGovernedWorkOrder`) | SPECIFIED_NOT_IMPLEMENTED (runtime emission from extension) |
 | GitHub permission snapshot per work order | SPECIFIED_NOT_IMPLEMENTED |

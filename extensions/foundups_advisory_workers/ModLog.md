@@ -2,7 +2,15 @@
 
 # ModLog - Foundups®Agent Extension
 
-## 2026-06-28 - REDDOG_REVIEW_PACKET_MEMORY_AND_FOLLOWUP_PHASE1 (v0.3.28)
+## 2026-06-28 - REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1 (audit doc)
+
+- Canonical: `docs/audits/architecture/REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1.md`
+- Ruling: OpenClaw Supervisor / FoundUpJob intake is canonical; AssignmentDispatcher is simulated scaffold only.
+- No runtime adapter in this slice.
+
+WSP: WSP_00, WSP_15, WSP_50, WSP_77, WSP_97, WSP_22.
+
+## 2026-06-28 - REDDOG_REVIEW_PACKET_MEMORY_AND_FOLLOWUP_PHASE1 (LANDED #899)
 
 - ADD `buildSanitizedContinuationSummary()` — WSP_97-safe packet memory from last run (success or BLOCKED_LOCALLY).
 - ADD `appendContinuationSummaryToWspPrompt()` — follow-up path without pasting raw Copy MD.
