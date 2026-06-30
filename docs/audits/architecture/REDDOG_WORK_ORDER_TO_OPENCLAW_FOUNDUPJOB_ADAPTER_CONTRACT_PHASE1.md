@@ -2,29 +2,29 @@
 
 **Retrieval tags:** RedDog work order OpenClaw FoundUpJob | AssignmentDispatcher simulated dispatch | OpenClaw Supervisor autonomous tasks | Hermes WRE FoundUpJob receipt | RedDogGovernedWorkOrder adapter | OpenClaw worker loop intake
 
-**Slice:** External RedDog lane — OpenClaw handoff **adapter contract only** (docs/audit)  
-**Type:** Architecture contract / audit — **no runtime adapter implementation**  
+**Slice:** External RedDog lane -- OpenClaw handoff **adapter contract only** (docs/audit)  
+**Type:** Architecture contract / audit -- **no runtime adapter implementation**  
 **Date:** 2026-06-28  
 **Base:** `c70433d7d` (post-#899 continuation memory land)  
-**Status:** PR-READY — draft PR only; no merge without sovereign token  
+**Status:** PR-READY -- draft PR only; no merge without sovereign token  
 **WSP lock:** WSP_00, WSP_15, WSP_34, WSP_50, WSP_77, WSP_91, WSP_97, WSP_109, WSP_22
 
 ---
 
 ## Purpose
 
-Define the **canonical adapter contract** from landed RedDog governed work orders (#889–#898) to the **OpenClaw-owned worker loop** (`FoundUpJob`, AgentDB `autonomous_task`, future OpenClaw queue items).
+Define the **canonical adapter contract** from landed RedDog governed work orders (#889-#898) to the **OpenClaw-owned worker loop** (`FoundUpJob`, AgentDB `autonomous_task`, future OpenClaw queue items).
 
 This slice **settles ownership** and prevents RedDog from binding to `AssignmentDispatcher` (simulated scaffold).
 
 ```text
-[LANDED RedDog spine — no execution]
+[LANDED RedDog spine -- no execution]
   work order -> dry-run -> permission -> policy gate -> receipt -> invocation dry-run -> executor plan dry-run
 
-[THIS SLICE — contract only]
+[THIS SLICE -- contract only]
   REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1
 
-[FUTURE — not this slice]
+[FUTURE -- not this slice]
   adapter implementation -> execution valve -> OpenClaw intake -> WRE/Hermes execution
 ```
 
@@ -40,13 +40,13 @@ This slice **settles ownership** and prevents RedDog from binding to `Assignment
 | OpenClaw Supervisor | `openclaw_supervisor.py` | Canonical 24/7 state machine; polls AgentDB `autonomous_task` | **OBSERVED** |
 | FoundUp orchestrator | `openclaw_foundup_orchestrator.py` | Genesis gate; `FoundUpJob` queue; build intent detection | **OBSERVED** |
 | FoundUpJob contract | `foundup_job_contract.py` | Canonical job identity, lifecycle, `policy_flags`, `evidence_refs` | **OBSERVED** |
-| OpenClaw execution routes | `openclaw_execution_routes.py` | Route dispatch (`fam_adapter`, `wre_orchestrator`, …) | **OBSERVED** |
-| Hermes job executor (WRE) | `hermes_job_executor.py` | FoundUpJob → delegation adapter; `HERMES_DELEGATE_ENABLED=0` default | **OBSERVED** |
-| Hermes FoundUp executor (agent) | `hermes_foundup_job_executor.py` | OpenClaw → FoundUpJob → Hermes builder seam | **OBSERVED** |
+| OpenClaw execution routes | `openclaw_execution_routes.py` | Route dispatch (`fam_adapter`, `wre_orchestrator`, ...) | **OBSERVED** |
+| Hermes job executor (WRE) | `hermes_job_executor.py` | FoundUpJob -> delegation adapter; `HERMES_DELEGATE_ENABLED=0` default | **OBSERVED** |
+| Hermes FoundUp executor (agent) | `hermes_foundup_job_executor.py` | OpenClaw -> FoundUpJob -> Hermes builder seam | **OBSERVED** |
 | AgentDB autonomous tasks | `agent_db.py` | `create_autonomous_task` / `get_autonomous_tasks`; supervisor consumes | **OBSERVED** |
 | Extension continuation | #899 `extension.js` | In-tab WSP_97-safe memory; **not** worker intake | **OBSERVED** |
 
-**Stale claim corrected:** RedDog extension `SPECIFIED_NOT_IMPLEMENTED` for governed spine is **obsolete** — spine modules #889–#898 are **LANDED** in `moltbot_bridge`. Extension still does not invoke them at runtime.
+**Stale claim corrected:** RedDog extension `SPECIFIED_NOT_IMPLEMENTED` for governed spine is **obsolete** -- spine modules #889-#898 are **LANDED** in `moltbot_bridge`. Extension still does not invoke them at runtime.
 
 ---
 
@@ -67,25 +67,25 @@ This slice **settles ownership** and prevents RedDog from binding to `Assignment
 
 | Disposition | Detail |
 |-------------|--------|
-| Status | **SIMULATED_SCAFFOLD** — `AssignmentDispatchStatus.SIMULATED_DISPATCH` only |
+| Status | **SIMULATED_SCAFFOLD** -- `AssignmentDispatchStatus.SIMULATED_DISPATCH` only |
 | Allowed use | Typed DTO / protocol reference / future deprecation source |
 | Forbidden | RedDog spine termination target; real worker launch; bypass of OpenClaw Supervisor |
 | Future | Demote to contract-only module or archive after OpenClaw intake adapter lands |
 
-**Do not wire** RedDog governed work orders → `AssignmentDispatcher.dispatch_assignment()`.
+**Do not wire** RedDog governed work orders -> `AssignmentDispatcher.dispatch_assignment()`.
 
 ---
 
-## HoloIndex Phase 0 — Baseline (before edits)
+## HoloIndex Phase 0 -- Baseline (before edits)
 
 | # | Query | Top hits | Expected | Class |
 |---|-------|----------|----------|-------|
-| 1 | RedDog work order OpenClaw FoundUpJob | `foundup_job_contract.py`; OpenClaw routing tests | Partial — job contract **yes**; adapter doc **no** | **INDEX_GAP** |
-| 2 | AssignmentDispatcher simulated dispatch | `worker_assignment_protocol.py`; REAL_WORKER_ASSIGNMENT_PROTOCOL.md | Partial — scaffold **yes**; RedDog binding **no** | **MEDIUM** |
-| 3 | OpenClaw Supervisor autonomous tasks | `openclaw_supervisor.py`; skill evolution tests | Partial — supervisor **yes**; RedDog adapter **no** | **MEDIUM** |
-| 4 | Hermes WRE FoundUpJob receipt | `hermes_job_executor.py`; proof_of_compute patterns | Partial — executor **yes**; receipt chain **no** | **MEDIUM** |
+| 1 | RedDog work order OpenClaw FoundUpJob | `foundup_job_contract.py`; OpenClaw routing tests | Partial -- job contract **yes**; adapter doc **no** | **INDEX_GAP** |
+| 2 | AssignmentDispatcher simulated dispatch | `worker_assignment_protocol.py`; REAL_WORKER_ASSIGNMENT_PROTOCOL.md | Partial -- scaffold **yes**; RedDog binding **no** | **MEDIUM** |
+| 3 | OpenClaw Supervisor autonomous tasks | `openclaw_supervisor.py`; skill evolution tests | Partial -- supervisor **yes**; RedDog adapter **no** | **MEDIUM** |
+| 4 | Hermes WRE FoundUpJob receipt | `hermes_job_executor.py`; proof_of_compute patterns | Partial -- executor **yes**; receipt chain **no** | **MEDIUM** |
 
-**Follow-up if post-edit probe fails:** `HOLOINDEX_REDDOG_OPENCLAW_ADAPTER_CONTRACT_INDEX_GAP_PHASE1` — no ranking code changes in this slice.
+**Follow-up if post-edit probe fails:** `HOLOINDEX_REDDOG_OPENCLAW_ADAPTER_CONTRACT_INDEX_GAP_PHASE1` -- no ranking code changes in this slice.
 
 ---
 
@@ -109,14 +109,14 @@ Future valve receipt (**SPECIFIED_NOT_IMPLEMENTED** until `REDDOG_WRE_EXECUTION_
 
 | Target | Owner | When to use | Status |
 |--------|-------|-------------|--------|
-| **`FoundUpJob`** | OpenClaw → Hermes | Repo-scoped governed work with `requested_action`, `policy_flags`, `evidence_refs` | **CANONICAL** for FoundUp/build/extract/validate ops |
+| **`FoundUpJob`** | OpenClaw -> Hermes | Repo-scoped governed work with `requested_action`, `policy_flags`, `evidence_refs` | **CANONICAL** for FoundUp/build/extract/validate ops |
 | **AgentDB `autonomous_task`** | OpenClaw Supervisor | Supervisor-scheduled background tasks (`execute_autonomous_task` plan action) | **CANONICAL** for supervisor loop items |
 | **OpenClaw queue item (future)** | OpenClaw | Typed intake record linking digests + job_id | **SPECIFIED_NOT_IMPLEMENTED** |
 | **`AssignmentDispatcher` assignment** | Simulator | Never for RedDog governed path | **FORBIDDEN** |
 
 ---
 
-## 3. Field mapping — RedDog → FoundUpJob (primary)
+## 3. Field mapping -- RedDog -> FoundUpJob (primary)
 
 | RedDog / spine field | FoundUpJob field | Notes |
 |----------------------|------------------|-------|
@@ -132,7 +132,7 @@ Future valve receipt (**SPECIFIED_NOT_IMPLEMENTED** until `REDDOG_WRE_EXECUTION_
 | `WREExecutorPlan.plan_id` | `payload.executor_plan_id` | Required after #898 |
 | `PolicyGateReceipt.permission_truth_label` | `policy_flags.permission_gate_checked` | Server-authored at intake; never from untrusted deserialize |
 | Valve state (future) | `policy_flags.*` + capability token flags | **SPECIFIED_NOT_IMPLEMENTED** |
-| — | `dry_run_mode` | `True` until valve OPEN + sovereign token |
+| -- | `dry_run_mode` | `True` until valve OPEN + sovereign token |
 
 ### Action mapping (initial)
 
@@ -157,20 +157,20 @@ AgentDB `autonomous_task` mapping (supervisor path):
 ## 4. Gate ordering (mandatory sequence)
 
 ```text
-1. RedDog advisory (extension) — no execution
+1. RedDog advisory (extension) -- no execution
 2. #890 dry-run validation
 3. #892 permission snapshot (read-only probe)
 4. #893 OpenClaw policy gate
 5. #894 Hermes-compatible receipt
 6. #896 runtime invocation dry-run
 7. #898 executor plan dry-run
-8. REDDOG_WRE_EXECUTION_VALVE_PHASE1 (future — default CLOSED)
-9. THIS ADAPTER (future implementation) — translate to FoundUpJob / autonomous_task
+8. REDDOG_WRE_EXECUTION_VALVE_PHASE1 (future -- default CLOSED)
+9. THIS ADAPTER (future implementation) -- translate to FoundUpJob / autonomous_task
 10. OpenClaw Supervisor / FoundUp orchestrator intake
 11. Hermes / WRE execution (guarded)
 ```
 
-**No step skipping.** Adapter step 9 MUST NOT run before steps 2–7 pass and step 8 is OPEN for write-sensitive ops.
+**No step skipping.** Adapter step 9 MUST NOT run before steps 2-7 pass and step 8 is OPEN for write-sensitive ops.
 
 ---
 
@@ -248,7 +248,7 @@ Reconciliation rule: every downstream id MUST link back to `work_order_id` + `po
 
 | # | Claim | Label |
 |---|-------|-------|
-| 1 | RedDog spine #889–#898 LANDED with `no_execution_performed` | **OBSERVED** |
+| 1 | RedDog spine #889-#898 LANDED with `no_execution_performed` | **OBSERVED** |
 | 2 | OpenClaw Supervisor is canonical worker loop owner | **OBSERVED** |
 | 3 | AssignmentDispatcher is simulated scaffold only | **OBSERVED** |
 | 4 | This doc defines adapter contract only; no runtime code | **OBSERVED** |
@@ -259,7 +259,7 @@ Reconciliation rule: every downstream id MUST link back to `work_order_id` + `po
 
 ---
 
-## WSP_15 — Next implementation slices (ordered)
+## WSP_15 -- Next implementation slices (ordered)
 
 | Order | Slice | Type | Depends on |
 |-------|-------|------|------------|

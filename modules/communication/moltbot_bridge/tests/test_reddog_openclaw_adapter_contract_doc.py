@@ -23,7 +23,7 @@ REQUIRED_SECTIONS = (
     "## 6. Receipt reconciliation model",
     "## 7. Explicit non-goals",
     "## WSP_97 truth table",
-    "## WSP_15 — Next implementation slices",
+    "## WSP_15 -- Next implementation slices",
 )
 
 REQUIRED_MARKERS = (
