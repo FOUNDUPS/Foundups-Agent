@@ -82,25 +82,29 @@ DONE
 8. #894 Hermes-compatible receipt (b42db2165)
 9. #896 runtime invocation dry-run (f65ecff4e)
 10. #897 WRE isolated worktree executor contract (2fe60a280)
+11. #898 WRE executor plan dry-run (e215bf890)
+12. #899 RedDog continuation memory (c70433d7d)
 
-P0 NEXT (plan before mutation)
-11. REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_DRYRUN_PHASE1
-    - executor plan + phase receipts; no git/worktree/file mutation
-12. REDDOG_WRE_EXECUTION_VALVE_PHASE1
+P0 NEXT (execution track)
+13. REDDOG_WRE_EXECUTION_VALVE_PHASE1
     - default CLOSED valve before first real worktree create
+14. REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1
+    - OpenClaw ownership + field mapping; no AssignmentDispatcher binding
 
 P1
-13. REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_WORKTREE_CREATE_PHASE1
+15. REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_PHASE1
+16. REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_WORKTREE_CREATE_PHASE1
     - first real isolated worktree; valve OPEN only
-14. REDDOG_SANITIZED_TARGET_CONTEXT_PROVENANCE_PHASE1
-15. REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1
-16. HOLOINDEX_REDDOG_GOVERNED_WORK_ORDER_INDEX_GAP_PHASE1
-17. HOLOINDEX_REDDOG_WRE_EXECUTOR_CONTRACT_INDEX_GAP_PHASE1
-18. HOLOINDEX_REDDOG_WRE_EXECUTOR_DRYRUN_INDEX_GAP_PHASE1
+17. REDDOG_SANITIZED_TARGET_CONTEXT_PROVENANCE_PHASE1
+18. REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1
+19. HOLOINDEX_REDDOG_GOVERNED_WORK_ORDER_INDEX_GAP_PHASE1
+20. HOLOINDEX_REDDOG_WRE_EXECUTOR_CONTRACT_INDEX_GAP_PHASE1
+21. HOLOINDEX_REDDOG_WRE_EXECUTOR_DRYRUN_INDEX_GAP_PHASE1
+22. HOLOINDEX_REDDOG_OPENCLAW_ADAPTER_CONTRACT_INDEX_GAP_PHASE1
 
 P2/P3
-19. REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
-20. REDDOG_AUTONOMOUS_MERGE_POLICY_PHASE1 (blocked)
+23. REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
+24. REDDOG_AUTONOMOUS_MERGE_POLICY_PHASE1 (blocked)
 ```
 
 **Rationale:** Sanitized provenance and telemetry are real polish issues, but the strategic blocker is that RedDog still cannot safely become a worker. The work-order contract is the missing bridge between “advisory RedDog” and “RedDog can direct WRE to do meaningful code work.”
@@ -222,9 +226,18 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_DRYRUN_PHASE1
 
-- **Status:** **PR-READY** — `plan_wre_isolated_worktree_execution_dryrun()`; plan + receipts only.
+- **Status:** **LANDED** #898 (`e215bf890`) — `plan_wre_isolated_worktree_execution_dryrun()`.
 - **Module:** `modules/communication/moltbot_bridge/src/reddog_wre_executor_dryrun.py`
-- No git, worktree, file edits, task commands, PR, or merge.
+
+### REDDOG_REVIEW_PACKET_MEMORY_AND_FOLLOWUP_PHASE1
+
+- **Status:** **LANDED** #899 (`c70433d7d`) — in-memory WSP_97-safe continuation; v0.3.28.
+
+### REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1
+
+- **Status:** **PR-READY** — contract-only audit doc; OpenClaw owns worker loop.
+- **Canonical:** `docs/audits/architecture/REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1.md`
+- **Ruling:** `AssignmentDispatcher` is simulated scaffold — **not** canonical intake target.
 
 ### REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_WORKTREE_CREATE_PHASE1
 
