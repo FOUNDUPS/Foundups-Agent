@@ -2,6 +2,12 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-11 - REDDOG_OPENCLAW_LIVE_ENQUEUE_CONTRACT_PHASE1 (refreshed contract pointer)
+
+- Refresh stale #905 contract on current main after signed authority (#950) and signed receipt chain (#951).
+- Contract remains docs/static-test only: no extension runtime call, no OpenClaw enqueue, no AgentDB write, no Hermes/WRE dispatch.
+- Future live enqueue requires `VALVE_OPEN_LIVE_ENQUEUE`, accepted signed work authority, and signed receipt-chain verification.
+
 ## 2026-07-11 - REDDOG_JUDGMENT_GENERATION_WIRING_PHASE1 (Determine verifier wiring, 0.3.47)
 
 - Wire the landed Determine contract plus adversarial verifier panel into the live RedDog extension path.

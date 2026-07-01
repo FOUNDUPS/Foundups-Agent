@@ -1,5 +1,13 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-11: REDDOG_OPENCLAW_LIVE_ENQUEUE_CONTRACT_PHASE1 (refreshed)
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Refreshed stale #905 live enqueue contract on current main. The contract defines the future boundary for converting a #904 proposed FoundUpJob / `autonomous_task` record into a live OpenClaw queue item.
+- Updated the contract to require accepted signed work authority (`signature_gate_status=SIGNATURE_GATE_ACCEPTED`) and signed receipt-chain verification before any future live enqueue can be considered.
+- Boundary: docs/static tests only. No runtime enqueue module, no AgentDB write, no queue append, no Hermes/WRE dispatch, no shell, no repo mutation.
+
 ## 2026-07-11: REDDOG_SIGNED_RECEIPT_CHAIN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97

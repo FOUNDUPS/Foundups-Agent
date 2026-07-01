@@ -92,6 +92,8 @@ DONE
 14. #903 WRE execution valve (2761f2e65)
 
 P0 NEXT (execution track)
+15. REDDOG_OPENCLAW_LIVE_ENQUEUE_CONTRACT_PHASE1
+    - refreshed contract boundary for future live OpenClaw enqueue; no runtime enqueue
 15. REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_PHASE1
     - propose FoundUpJob / autonomous_task intake; no live enqueue
 
