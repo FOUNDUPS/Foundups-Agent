@@ -89,6 +89,8 @@ RedDog is the 0102 architect interface — **not an authority owner**. RedDog re
 
 **WRE execution valve:** `modules/communication/moltbot_bridge/src/reddog_wre_execution_valve.py` -- `evaluate_reddog_execution_valve()`; default `VALVE_CLOSED`; pure evaluation only. Contract: `docs/audits/architecture/REDDOG_WRE_EXECUTION_VALVE_CONTRACT_PHASE1.md`.
 
+**OpenClaw adapter dry-run:** `modules/communication/moltbot_bridge/src/reddog_openclaw_adapter_dryrun.py` -- `plan_reddog_openclaw_adapter_dryrun()`; proposes FoundUpJob / `autonomous_task` intake only; **no enqueue**. Contract: `docs/audits/architecture/REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_CONTRACT_PHASE1.md`.
+
 **Specified flow (not implemented in extension v0.3.27):**
 
 ```text

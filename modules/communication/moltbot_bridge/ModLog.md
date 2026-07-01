@@ -1,5 +1,15 @@
 # ModLog - moltbot_bridge
 
+## 2026-06-28: REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_PHASE1
+
+**Slice:** OpenClaw FoundUpJob adapter dry-run planner (propose only, no enqueue)
+**WSP:** WSP_15, WSP_34, WSP_50, WSP_91, WSP_97, WSP_22
+
+- ADD `src/reddog_openclaw_adapter_dryrun.py` -- `plan_reddog_openclaw_adapter_dryrun()`, `RedDogOpenClawAdapterDryRunResult`.
+- ADD `tests/test_reddog_openclaw_adapter_dryrun.py` -- FoundUpJob/autonomous_task propose, valve rejects, AST denylist.
+- ADD `docs/audits/architecture/REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_CONTRACT_PHASE1.md`.
+- Requires `VALVE_OPEN_DRYRUN_ONLY`; always `no_enqueue_performed` + `no_execution_performed`.
+
 ## 2026-06-28: REDDOG_WRE_EXECUTION_VALVE_PHASE1
 
 **Slice:** Closed-by-default WRE execution valve evaluator (pure evaluation)
