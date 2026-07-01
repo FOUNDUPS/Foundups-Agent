@@ -165,7 +165,11 @@ Run Trace HoloIndex scorecard fields (v0.3.22+):
 | `required_targets_total` | Count of paths parsed from an explicit "Required direct-read targets" prompt list (0 = none present) | OBSERVED |
 | `required_targets_recalled` | Required targets whose content-bearing path appeared in the bundle (self-file `extension.js` excluded) | OBSERVED |
 | `required_targets_missing` | Required target paths absent from content (drives `index_gap_detected`) | OBSERVED |
-| `direct_read_fallback_used` | Offline lexical fallback used | OBSERVED |
+| `direct_read_fallback_used` | Governed direct-read-by-path fetch ran (or offline lexical fallback used) | OBSERVED |
+| `direct_read_paths` | Repo-relative target paths actually fetched by the Python bundle layer | OBSERVED |
+| `direct_read_rejected` | `{path, reason}` for denied/traversal/absolute/secret/symlink-escape hits (never read) | OBSERVED |
+| `direct_read_bytes` | Total bytes injected across all fetched targets (bounded by total budget) | OBSERVED |
+| `direct_read_truncated` | `{path, bytes}` for targets clipped by the per-file byte cap | OBSERVED |
 | `target_content_included` | Target snippet section present in final bounded context | OBSERVED |
 | `target_content_paths` | Relative paths whose snippets were included | OBSERVED |
 | `target_content_chars` | Character count of included target snippets | OBSERVED |
@@ -189,7 +193,9 @@ Bridge child env (v0.3.25+): `PYTHONIOENCODING=utf-8`, `PYTHONUTF8=1`. Python br
 
 Target content egress (v0.3.22+): `buildTargetRecallContentSection(root, taskText, maxChars)` reads workspace-confined snippets for inferred recall targets after HoloIndex path ranking. Snippets pass through `sanitizeTargetSnippetForRedaction()` before inclusion (ADDENDUM F); placeholders use neutral `[SANITIZED_BLOCK:NN]` tokens so category names do not re-trigger the Fusion gate. Telemetry reflects the **final** bounded context string assembled by `buildBoundedRepoContext` (before the 42000-char slice). `buildWsp97ProtocolExcerpt(root, maxChars)` adds a bounded WSP_97 protocol excerpt when the task mentions WSP_97 or truth labels.
 
-Exported helpers for contract tests: `isTargetReadPathDenied`, `resolveSafeRepoFile`, `readBoundedTargetSnippet`, `readBoundedTargetSnippets`, `buildTargetRecallContentSection`, `sanitizeTargetSnippetForRedaction`, `taskMentionsWsp97`, `buildWsp97ProtocolExcerpt`, `parseRequiredTargetPaths`, `isSelfFileLocation`, `requiredTargetMatchesLocation`, `formatHoloIndexScorecardLines`.
+Governed direct-read-by-path (REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1, slice 2/3): when slice-1's detector reports `index_gap_detected=true` with a non-empty `required_targets_missing`, `holoIndexOutput` re-invokes the bundle with `buildMustIncludeArgs(missing)` -> `--bundle-must-include <path>` so the **Python bundle layer** (`holo_index/cli/commands/bundle_json.py::_direct_read_fetch`) reads the named repo files and returns their content in the bundle. The extension does NOT read those files via raw fs; it only names the paths. Fetched hits are spliced into `task_retrieval.code_hits` (so slice-1 recall re-evaluates and flips `target_recall_ok`) and rendered by `buildDirectReadContentSection(bundleOutput)` into a bounded section. Hard security allowlist (all in the Python layer): repo-relative only; realpath must stay inside repo root (rejects absolute, `..` traversal, symlink-escape); hard-deny basenames/globs (`.env*`, `*.pem`, `*.key`, `id_rsa*`, `id_ed25519*`, `*.p12`, `*.keystore`, `*secret*`/`*credential*`/`*token*`, `.git/` and credential dot-dirs); per-file byte cap (12KB) plus a total fetch budget (96KB) spread across MANY targets ranked by prompt order; every denial is recorded in `direct_read_rejected` and never aborts the bundle. Fetched content passes through the EXISTING redaction gate unchanged (slice 3 owns audit-mode redaction). No execution authority, no write path, no shell-out.
+
+Exported helpers for contract tests: `isTargetReadPathDenied`, `resolveSafeRepoFile`, `readBoundedTargetSnippet`, `readBoundedTargetSnippets`, `buildTargetRecallContentSection`, `sanitizeTargetSnippetForRedaction`, `taskMentionsWsp97`, `buildWsp97ProtocolExcerpt`, `parseRequiredTargetPaths`, `isSelfFileLocation`, `requiredTargetMatchesLocation`, `formatHoloIndexScorecardLines`, `buildMustIncludeArgs`, `buildDirectReadContentSection`.
 
 ## WSP_97 Truth Boundary
 

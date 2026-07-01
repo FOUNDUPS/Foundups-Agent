@@ -643,6 +643,17 @@ def main():
         type=str,
         help='Override task string used for bundle generation (defaults to --search)'
     )
+    parser.add_argument(
+        '--bundle-must-include',
+        action='append',
+        default=None,
+        help=(
+            'Repo-relative target path(s) to fetch into the bundle under the '
+            'governed direct-read allowlist (repeatable or comma-separated). '
+            'Used when required direct-read targets are absent from the semantic '
+            'bundle. Read-only; hard-denies secrets/traversal/symlink-escape.'
+        )
+    )
     parser.add_argument('--index', action='store_true', help='Index both code and WSP (alias for --index-all)')
     parser.add_argument('--index-all', action='store_true', help='Index both code and WSP')
     parser.add_argument('--index-code', action='store_true', help='Index code (NAVIGATION.py)')
