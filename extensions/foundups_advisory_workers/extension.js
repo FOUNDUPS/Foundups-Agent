@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.29';
+const EXTENSION_VERSION = '0.3.30';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -605,6 +605,10 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     required_targets_recalled: meta.required_targets_recalled !== undefined ? meta.required_targets_recalled : 'unknown',
     required_targets_missing: Array.isArray(meta.required_targets_missing) ? meta.required_targets_missing : 'unknown',
     direct_read_fallback_used: meta.direct_read_fallback_used !== undefined ? meta.direct_read_fallback_used : 'unknown',
+    direct_read_paths: Array.isArray(meta.direct_read_paths) ? meta.direct_read_paths : 'unknown',
+    direct_read_rejected: Array.isArray(meta.direct_read_rejected) ? meta.direct_read_rejected : 'unknown',
+    direct_read_bytes: meta.direct_read_bytes !== undefined ? meta.direct_read_bytes : 'unknown',
+    direct_read_truncated: Array.isArray(meta.direct_read_truncated) ? meta.direct_read_truncated : 'unknown',
     target_content_included: meta.target_content_included !== undefined ? meta.target_content_included : 'unknown',
     target_content_paths: Array.isArray(meta.target_content_paths) ? meta.target_content_paths : 'unknown',
     target_content_chars: meta.target_content_chars !== undefined ? meta.target_content_chars : 'unknown',
@@ -632,6 +636,10 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- required_targets_recalled: ' + scorecard.required_targets_recalled,
     '- required_targets_missing: ' + (Array.isArray(scorecard.required_targets_missing) ? (scorecard.required_targets_missing.length ? scorecard.required_targets_missing.join(', ') : '(none)') : scorecard.required_targets_missing),
     '- direct_read_fallback_used: ' + scorecard.direct_read_fallback_used,
+    '- direct_read_paths: ' + (Array.isArray(scorecard.direct_read_paths) ? (scorecard.direct_read_paths.length ? scorecard.direct_read_paths.join(', ') : '(none)') : scorecard.direct_read_paths),
+    '- direct_read_rejected: ' + (Array.isArray(scorecard.direct_read_rejected) ? (scorecard.direct_read_rejected.length ? scorecard.direct_read_rejected.map((r) => (r && r.path ? r.path + ' (' + r.reason + ')' : String(r))).join(', ') : '(none)') : scorecard.direct_read_rejected),
+    '- direct_read_bytes: ' + scorecard.direct_read_bytes,
+    '- direct_read_truncated: ' + (Array.isArray(scorecard.direct_read_truncated) ? (scorecard.direct_read_truncated.length ? scorecard.direct_read_truncated.map((t) => (t && t.path ? t.path + ' (' + t.bytes + 'B)' : String(t))).join(', ') : '(none)') : scorecard.direct_read_truncated),
     '- target_content_included: ' + scorecard.target_content_included,
     '- target_content_paths: ' + (Array.isArray(scorecard.target_content_paths) ? scorecard.target_content_paths.join(', ') : scorecard.target_content_paths),
     '- target_content_chars: ' + scorecard.target_content_chars,
@@ -2137,6 +2145,12 @@ function buildBoundedRepoContext(mode, taskText) {
     holoindex_meta = holo.meta || null;
     holoindex_scorecard = extractHoloIndexScorecard(mode, holoindex_meta);
     sections.push('### HoloIndex recall (WSP_00 bundle-json first; offline fallback only if needed)\n```text\n' + (holo.output || '(no HoloIndex output)') + '\n```');
+    // REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1: surface the governed direct-read
+    // content as a dedicated bounded section so the truncated recall JSON does not
+    // drop the fetched source the model needs to reason on.
+    if (holo.direct_read_section && holo.direct_read_section.text) {
+      sections.push(holo.direct_read_section.text);
+    }
   }
   let targetContentMeta = null;
   if (mode !== 'none') {
@@ -2630,7 +2644,11 @@ function holoIndexMetaFromBundle(output, usedOfflineFallback, taskText) {
     direct_read_fallback_used: usedOfflineFallback ? true : false,
     required_targets_total: 0,
     required_targets_recalled: 0,
-    required_targets_missing: []
+    required_targets_missing: [],
+    direct_read_paths: [],
+    direct_read_rejected: [],
+    direct_read_bytes: 0,
+    direct_read_truncated: []
   };
   try {
     const data = JSON.parse(String(output || '{}'));
@@ -2642,15 +2660,50 @@ function holoIndexMetaFromBundle(output, usedOfflineFallback, taskText) {
     meta.skill_hits = bundleMeta.skill_count !== undefined ? Number(bundleMeta.skill_count) : 'unknown';
     meta.target_recall_ok = recall.target_recall_ok;
     meta.index_gap_detected = recall.index_gap_detected;
-    meta.direct_read_fallback_used = !!usedOfflineFallback;
     meta.recall_targets = recall.recall_targets;
     meta.required_targets_total = recall.required_targets_total;
     meta.required_targets_recalled = recall.required_targets_recalled;
     meta.required_targets_missing = recall.required_targets_missing;
+    // REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1: surface the Python-side
+    // governed direct-read telemetry when the bundle carried a fetch.
+    const dr = data.direct_read && typeof data.direct_read === 'object' ? data.direct_read : null;
+    if (dr) {
+      meta.direct_read_fallback_used = !!dr.direct_read_fallback_used;
+      meta.direct_read_paths = Array.isArray(dr.direct_read_paths) ? dr.direct_read_paths : [];
+      meta.direct_read_rejected = Array.isArray(dr.direct_read_rejected) ? dr.direct_read_rejected : [];
+      meta.direct_read_bytes = Number(dr.direct_read_bytes || 0);
+      meta.direct_read_truncated = Array.isArray(dr.direct_read_truncated) ? dr.direct_read_truncated : [];
+    } else {
+      meta.direct_read_fallback_used = !!usedOfflineFallback;
+    }
   } catch (err) {
     meta.holoindex_status = usedOfflineFallback ? 'offline_fallback' : 'parse_error';
   }
   return meta;
+}
+
+// REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1 (slice 2/3): when slice-1's
+// detector reports a required-target index gap, ask the Python bundle layer to
+// fetch the missing repo-relative targets (governed direct-read). The fetch and
+// the hard security allowlist live in bundle_json.py; the extension only names
+// the paths. Content flows back through the EXISTING redaction gate unchanged.
+function buildMustIncludeArgs(missingTargets) {
+  const args = [];
+  const seen = new Set();
+  for (const raw of (Array.isArray(missingTargets) ? missingTargets : [])) {
+    const target = String(raw || '').trim();
+    if (!target || target.startsWith('symbol:')) {
+      // Symbols cannot be direct-read by path; leave them for later retrieval.
+      continue;
+    }
+    const norm = target.toLowerCase();
+    if (seen.has(norm)) {
+      continue;
+    }
+    seen.add(norm);
+    args.push('--bundle-must-include', target);
+  }
+  return args;
 }
 
 function holoIndexOutput(root, taskText, maxChars) {
@@ -2658,7 +2711,8 @@ function holoIndexOutput(root, taskText, maxChars) {
   const moduleHint = moduleHintFromActive(root);
   try {
     const env = Object.assign({}, process.env, { HOLO_SKIP_MODEL: '1' });
-    const output = cp.execFileSync('python', ['-B', 'holo_index.py', '--bundle-json', '--search', query, '--bundle-module-hint', moduleHint, '--limit', '5', '--quiet-root-alerts'], {
+    const baseArgs = ['-B', 'holo_index.py', '--bundle-json', '--search', query, '--bundle-module-hint', moduleHint, '--limit', '5', '--quiet-root-alerts'];
+    let output = cp.execFileSync('python', baseArgs, {
       cwd: root,
       env,
       encoding: 'utf8',
@@ -2666,8 +2720,38 @@ function holoIndexOutput(root, taskText, maxChars) {
       maxBuffer: Math.max(maxChars * 4, 65536),
       windowsHide: true
     });
-    const meta = holoIndexMetaFromBundle(output, false, query);
-    return { output: String(output || '').slice(0, maxChars), quality: summarizeHoloBundle(output), meta: meta };
+    let meta = holoIndexMetaFromBundle(output, false, taskText);
+    // Direct-read fallback: if a required-target list was present and any target
+    // is missing from the semantic bundle, re-run once asking the Python layer
+    // to fetch exactly those paths, then re-evaluate recall on the enriched bundle.
+    const missing = Array.isArray(meta.required_targets_missing) ? meta.required_targets_missing : [];
+    if (meta.index_gap_detected === true && missing.length) {
+      const mustInclude = buildMustIncludeArgs(missing);
+      if (mustInclude.length) {
+        try {
+          const enrichedArgs = baseArgs.concat(mustInclude);
+          const enriched = cp.execFileSync('python', enrichedArgs, {
+            cwd: root,
+            env,
+            encoding: 'utf8',
+            timeout: 30000,
+            maxBuffer: Math.max(maxChars * 8, 131072),
+            windowsHide: true
+          });
+          output = enriched;
+          meta = holoIndexMetaFromBundle(enriched, false, taskText);
+        } catch (fetchErr) {
+          // Fetch failure must not abort recall; keep the pre-fetch bundle+meta.
+        }
+      }
+    }
+    const directReadSection = buildDirectReadContentSection(output);
+    return {
+      output: String(output || '').slice(0, maxChars),
+      quality: summarizeHoloBundle(output),
+      meta: meta,
+      direct_read_section: directReadSection
+    };
   } catch (bundleErr) {
     try {
       const output = cp.execFileSync('python', ['-B', 'holo_index.py', '--offline', '--search', query, '--limit', '5'], {
@@ -2691,6 +2775,46 @@ function holoIndexOutput(root, taskText, maxChars) {
       };
     }
   }
+}
+
+// Render the Python-fetched direct-read target content (already budget-bounded
+// and security-allowlisted by bundle_json.py) into a dedicated bounded section.
+// This does NOT re-read the filesystem and does NOT apply any redaction-category
+// logic (slice 3); the assembled context still passes through the existing
+// Python egress redaction gate unchanged before leaving the machine.
+function buildDirectReadContentSection(output) {
+  const empty = { text: '', paths: [], chars: 0 };
+  let data;
+  try {
+    data = JSON.parse(String(output || '{}'));
+  } catch (err) {
+    return empty;
+  }
+  const hits = data && data.task_retrieval && Array.isArray(data.task_retrieval.code_hits)
+    ? data.task_retrieval.code_hits
+    : [];
+  const directHits = hits.filter((h) => h && h.direct_read === true && typeof h.content === 'string' && h.content.length);
+  if (!directHits.length) {
+    return empty;
+  }
+  const sections = [];
+  const paths = [];
+  let used = 0;
+  for (const hit of directHits) {
+    const rel = String(hit.location || '').replace(/\\/g, '/');
+    const lang = targetSnippetLanguageId(rel);
+    const truncatedNote = hit.content_truncated ? ' (truncated to governed budget)' : '';
+    sections.push('#### ' + rel + truncatedNote + '\n```' + lang + '\n' + hit.content + '\n```');
+    paths.push(rel);
+    used += hit.content.length;
+  }
+  return {
+    text: '### Direct-read target content (governed fetch by path)\n'
+      + 'Fetched by the Python bundle layer under the direct-read allowlist; still redaction-gated before egress.\n\n'
+      + sections.join('\n\n'),
+    paths: paths,
+    chars: used
+  };
 }
 
 function summarizeHoloBundle(output) {
@@ -3187,6 +3311,8 @@ module.exports = {
   isSelfFileLocation,
   requiredTargetMatchesLocation,
   holoIndexMetaFromBundle,
+  buildMustIncludeArgs,
+  buildDirectReadContentSection,
   isTargetReadPathDenied,
   resolveSafeRepoFile,
   readBoundedTargetSnippet,

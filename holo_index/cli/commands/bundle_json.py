@@ -17,6 +17,275 @@ def _env_truthy(key: str, default: str = "false") -> bool:
     return os.getenv(key, default).lower() in {"1", "true", "yes", "on"}
 
 
+# ---------------------------------------------------------------------------
+# REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1 (slice 2/3): governed direct-read.
+#
+# When slice-1's detector reports an index gap on an explicit required-target
+# list, the extension asks the Python bundle layer (this module) to fetch those
+# exact repo files' content so RedDog reasons on real source instead of HOLDing
+# blind. This is a READ-ONLY capability with a HARD security allowlist. It adds
+# no execution authority, no write path, and no shell-out. Fetched content still
+# passes through the EXISTING extension.js redaction gate unchanged (slice 3
+# owns redaction-category behavior).
+# ---------------------------------------------------------------------------
+
+# Per-file byte cap: many targets each get a bounded snippet rather than one
+# file consuming the whole budget (the failing run truncated a single 24K/104K
+# file and dropped the rest).
+DIRECT_READ_PER_FILE_BYTES = 12000
+# Total fetch budget across ALL targets. Spread so many targets each land.
+DIRECT_READ_TOTAL_BUDGET_BYTES = 96000
+# Hard cap on how many targets we will even attempt (defensive; ranked by order).
+DIRECT_READ_MAX_TARGETS = 40
+
+# HARD-DENY basenames (exact match, case-insensitive).
+DIRECT_READ_DENY_BASENAMES = frozenset({
+    ".env",
+    "id_rsa",
+    "id_ed25519",
+})
+
+# HARD-DENY path segments: any path traversing one of these dirs is rejected.
+DIRECT_READ_DENY_SEGMENTS = frozenset({
+    ".git",
+    ".ssh",
+    ".gnupg",
+    ".aws",
+    ".azure",
+    ".gcloud",
+    "node_modules",
+    "__pycache__",
+    ".venv",
+})
+
+# HARD-DENY glob-ish suffix / substring rules applied to the lowercased basename
+# (and, for the *secret*/*credential*/*token* rules, any path segment).
+DIRECT_READ_DENY_SUFFIXES = (
+    ".pem",
+    ".key",
+    ".p12",
+    ".keystore",
+    ".pfx",
+    ".vsix",
+)
+# basename prefixes that hard-deny (covers .env.local, id_rsa.pub, etc.).
+DIRECT_READ_DENY_PREFIXES = (
+    ".env",
+    "id_rsa",
+    "id_ed25519",
+)
+# substring markers that hard-deny anywhere in a path segment.
+DIRECT_READ_DENY_SUBSTRINGS = (
+    "secret",
+    "credential",
+    "token",
+)
+
+
+def _direct_read_deny_reason(rel_norm: str) -> Optional[str]:
+    """Return a deny reason string for a normalized repo-relative path, else None.
+
+    Pure lexical gate (no filesystem access). Absolute paths, drive-letters and
+    `..` traversal are rejected here; realpath containment is checked separately.
+    """
+    if not rel_norm:
+        return "path_missing"
+    # Absolute POSIX path or Windows drive-letter path -> reject.
+    if rel_norm.startswith("/") or (len(rel_norm) >= 2 and rel_norm[1] == ":"):
+        return "absolute_path"
+    parts = rel_norm.lower().split("/")
+    if any(p == ".." for p in parts):
+        return "traversal"
+    # Deny by path segment (credential dirs, .git, caches).
+    for seg in parts:
+        if seg in DIRECT_READ_DENY_SEGMENTS:
+            return "denied_segment"
+        for marker in DIRECT_READ_DENY_SUBSTRINGS:
+            if marker in seg:
+                return "denied_secret_like"
+    base = parts[-1]
+    if base in DIRECT_READ_DENY_BASENAMES:
+        return "denied_basename"
+    for pref in DIRECT_READ_DENY_PREFIXES:
+        if base == pref or base.startswith(pref + "."):
+            return "denied_basename"
+    for suf in DIRECT_READ_DENY_SUFFIXES:
+        if base.endswith(suf):
+            return "denied_extension"
+    return None
+
+
+def _normalize_direct_read_path(raw: str) -> str:
+    """Normalize a requested target into a candidate path string.
+
+    IMPORTANT: this MUST preserve a leading '/' or a drive-letter prefix so the
+    deny gate can reject absolute paths. It only trims quotes/whitespace and
+    collapses a leading './'. It never strips a leading slash (doing so would
+    silently turn '/etc/passwd' into a relative 'etc/passwd' and defeat the
+    absolute-path rejection).
+    """
+    norm = str(raw or "").strip().replace("\\", "/")
+    # Strip surrounding quotes/backticks a prompt might carry through.
+    norm = norm.strip("`'\"")
+    if norm in ("", "."):
+        return ""
+    # Collapse a leading ./ but keep the rest verbatim (do NOT resolve here).
+    while norm.startswith("./"):
+        norm = norm[2:]
+    return norm
+
+
+def _resolve_within_repo(repo_root, rel_norm: str):
+    """Resolve rel_norm against repo_root and verify realpath containment.
+
+    Returns (real_path, None) on success or (None, reason) when the resolved
+    real path escapes the repo root (covers symlink-escape). Never raises.
+    """
+    from pathlib import Path as _Path
+    try:
+        root_real = _Path(os.path.realpath(str(repo_root)))
+        candidate = (root_real / rel_norm)
+        real = _Path(os.path.realpath(str(candidate)))
+    except Exception:
+        return None, "path_missing"
+    try:
+        real.relative_to(root_real)
+    except ValueError:
+        return None, "outside_root"
+    return real, None
+
+
+def _read_bounded_direct_read(real_path, per_file_cap: int, remaining_budget: int):
+    """Read a bounded UTF-8 snippet honoring per-file cap and remaining budget.
+
+    Returns dict: {content, bytes, truncated, omitted_reason}. Binary files and
+    read errors are omitted (never abort the bundle).
+    """
+    from pathlib import Path as _Path
+    p = _Path(real_path)
+    try:
+        if not p.is_file():
+            return {"content": "", "bytes": 0, "truncated": False, "omitted_reason": "not_a_file"}
+    except Exception:
+        return {"content": "", "bytes": 0, "truncated": False, "omitted_reason": "path_missing"}
+
+    cap = max(0, min(per_file_cap, remaining_budget))
+    if cap <= 0:
+        return {"content": "", "bytes": 0, "truncated": False, "omitted_reason": "budget_exhausted"}
+    try:
+        with open(p, "rb") as fh:
+            raw = fh.read(cap + 1)
+    except Exception:
+        return {"content": "", "bytes": 0, "truncated": False, "omitted_reason": "read_error"}
+    # Binary sniff: a NUL byte in the head means "not source we should inline".
+    if b"\x00" in raw:
+        return {"content": "", "bytes": 0, "truncated": False, "omitted_reason": "binary"}
+    truncated = len(raw) > cap
+    clipped = raw[:cap]
+    text = clipped.decode("utf-8", errors="replace")
+    return {
+        "content": text,
+        "bytes": len(clipped),
+        "truncated": truncated,
+        "omitted_reason": "none",
+    }
+
+
+def _direct_read_fetch(repo_root, requested_paths, seen_locations=None):
+    """Governed direct-read-by-path fetch (slice 2/3).
+
+    Given repo-relative target paths (ranked by caller / prompt order), read a
+    bounded snippet of each into the bundle. All security rejections are recorded
+    (never abort). Returns a telemetry dict plus the fetched hit records so the
+    caller can splice content-bearing locations into code_hits.
+    """
+    from pathlib import Path as _Path
+
+    seen = set(seen_locations or [])
+    telemetry = {
+        "direct_read_fallback_used": False,
+        "direct_read_paths": [],
+        "direct_read_rejected": [],
+        "direct_read_bytes": 0,
+        "direct_read_truncated": [],
+        "per_file_cap": DIRECT_READ_PER_FILE_BYTES,
+        "total_budget": DIRECT_READ_TOTAL_BUDGET_BYTES,
+    }
+    hits: List[Dict[str, Any]] = []
+
+    # De-duplicate while preserving prompt order; cap total attempted targets.
+    ordered: List[str] = []
+    ordered_seen = set()
+    for raw in (requested_paths or []):
+        rel = _normalize_direct_read_path(raw)
+        if not rel:
+            telemetry["direct_read_rejected"].append({"path": str(raw), "reason": "path_missing"})
+            continue
+        key = rel.lower()
+        if key in ordered_seen:
+            continue
+        ordered_seen.add(key)
+        ordered.append(rel)
+    if len(ordered) > DIRECT_READ_MAX_TARGETS:
+        for extra in ordered[DIRECT_READ_MAX_TARGETS:]:
+            telemetry["direct_read_rejected"].append({"path": extra, "reason": "too_many_targets"})
+        ordered = ordered[:DIRECT_READ_MAX_TARGETS]
+
+    remaining = DIRECT_READ_TOTAL_BUDGET_BYTES
+    for rel in ordered:
+        # 1) lexical hard-deny + traversal/absolute check.
+        deny = _direct_read_deny_reason(rel)
+        if deny:
+            telemetry["direct_read_rejected"].append({"path": rel, "reason": deny})
+            continue
+        # 2) realpath containment (covers symlink escape).
+        real, reason = _resolve_within_repo(repo_root, rel)
+        if real is None:
+            telemetry["direct_read_rejected"].append({"path": rel, "reason": reason})
+            continue
+        # 3) re-check deny rules against the resolved real basename (defense in
+        #    depth: a symlink named foo.txt could target bar.key inside repo).
+        try:
+            real_rel = str(_Path(os.path.realpath(str(repo_root))))
+            resolved_rel = os.path.relpath(str(real), real_rel).replace("\\", "/")
+        except Exception:
+            resolved_rel = rel
+        deny2 = _direct_read_deny_reason(resolved_rel)
+        if deny2:
+            telemetry["direct_read_rejected"].append({"path": rel, "reason": deny2})
+            continue
+        if remaining <= 0:
+            telemetry["direct_read_rejected"].append({"path": rel, "reason": "budget_exhausted"})
+            continue
+        # 4) bounded read.
+        snippet = _read_bounded_direct_read(real, DIRECT_READ_PER_FILE_BYTES, remaining)
+        if not snippet["content"]:
+            if snippet["omitted_reason"] not in ("none",):
+                telemetry["direct_read_rejected"].append({"path": rel, "reason": snippet["omitted_reason"]})
+            continue
+        remaining -= snippet["bytes"]
+        telemetry["direct_read_bytes"] += snippet["bytes"]
+        telemetry["direct_read_paths"].append(rel)
+        if snippet["truncated"]:
+            telemetry["direct_read_truncated"].append({"path": rel, "bytes": snippet["bytes"]})
+        if rel.lower() not in seen:
+            seen.add(rel.lower())
+            hits.append({
+                "need": "direct-read target: " + rel,
+                "location": rel,
+                "similarity": "100.0%",
+                "cube": None,
+                "type": "code",
+                "priority": 1,
+                "direct_read": True,
+                "content": snippet["content"],
+                "content_bytes": snippet["bytes"],
+                "content_truncated": snippet["truncated"],
+            })
+    telemetry["direct_read_fallback_used"] = len(telemetry["direct_read_paths"]) > 0
+    return {"telemetry": telemetry, "hits": hits}
+
+
 def _resolve_module_dir(repo_root, hint: str):
     """Resolve a module hint to an actual directory path."""
     from pathlib import Path as _Path
@@ -354,6 +623,45 @@ def handle_bundle_json(args):
     if module_dir is not None:
         structured_memory = _artifact_snapshot(module_dir)
 
+    # REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1 (slice 2/3): governed direct-read.
+    # When the extension names must-include target paths (from an explicit
+    # "Required direct-read targets" prompt list) that the semantic bundle did
+    # not surface, fetch those exact files here under the hard security allowlist
+    # and splice them into code_hits so slice-1's recall check sees real content.
+    must_include_raw = getattr(args, "bundle_must_include", None)
+    must_include: List[str] = []
+    if must_include_raw:
+        if isinstance(must_include_raw, (list, tuple)):
+            for item in must_include_raw:
+                must_include.extend([p for p in str(item).split(",") if p.strip()])
+        else:
+            must_include.extend([p for p in str(must_include_raw).split(",") if p.strip()])
+
+    direct_read = None
+    if must_include:
+        existing_locations = set()
+        try:
+            for hit in (search_payload.get("code_hits") or []):
+                loc = str(hit.get("location") or "").replace("\\", "/").lower()
+                if loc:
+                    existing_locations.add(loc)
+        except Exception:
+            existing_locations = set()
+        fetched = _direct_read_fetch(repo_root, must_include, seen_locations=existing_locations)
+        direct_read = fetched["telemetry"]
+        if fetched["hits"]:
+            try:
+                # Prepend direct-read hits (highest priority) so recall + display
+                # both see the fetched content-bearing locations first.
+                search_payload["code_hits"] = fetched["hits"] + list(search_payload.get("code_hits") or [])
+                search_payload["code"] = search_payload["code_hits"]
+                meta = search_payload.get("metadata")
+                if isinstance(meta, dict):
+                    meta["code_count"] = len(search_payload["code_hits"])
+                    meta["direct_read_fallback_used"] = direct_read["direct_read_fallback_used"]
+            except Exception:
+                pass
+
     bundle = {
         "schema_version": "wsp_memory_bundle_v1",
         "generated_at": _dt.utcnow().isoformat() + "Z",
@@ -363,6 +671,7 @@ def handle_bundle_json(args):
         "module_path": module_path,
         "structured_memory": structured_memory,
         "task_retrieval": search_payload,
+        "direct_read": direct_read,
     }
 
     sys.stdout.write(_json.dumps(bundle, ensure_ascii=True) + "\n")

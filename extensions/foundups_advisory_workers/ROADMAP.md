@@ -163,6 +163,24 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - Add regression retrieval tests so extension bridge code ranks above adjacent WRE routers.
 - **Status:** **LANDED** #882 (`99d0e35c2`) — ranking + target recall telemetry only; not source-content inclusion.
 
+### REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1 (slice 2/3)
+
+- **Status:** GOVERNED FETCH (this slice), stacked on slice 1 (#906). When slice-1's detector reports
+  `index_gap_detected=true` with missing required targets, the extension asks the Python bundle layer to FETCH
+  those exact repo files (via `--bundle-must-include`) so RedDog reasons on real source instead of HOLDing blind.
+- Fetch lives in `holo_index/cli/commands/bundle_json.py::_direct_read_fetch` (NOT raw fs in extension.js; no
+  shell-out, no model/router change). Fetched hits splice into `code_hits`; slice-1 recall re-runs and flips
+  `target_recall_ok` true; `direct_read_fallback_used=true`.
+- HARD security allowlist: repo-relative only; realpath must stay in repo root (rejects absolute, `..` traversal,
+  symlink-escape); hard-deny `.env*`/`*.pem`/`*.key`/`id_rsa*`/`id_ed25519*`/`*.p12`/`*.keystore`/
+  `*secret*`/`*credential*`/`*token*`/`.git/`; per-file cap (12KB) + total budget (96KB) spread across many
+  targets; denials recorded (`direct_read_rejected`), never abort the bundle.
+- New telemetry: `direct_read_paths`, `direct_read_rejected`, `direct_read_bytes`, `direct_read_truncated`.
+- **Slice boundary:** NO redaction-category change, NO audit-mode change (slice 3); NO execution authority.
+  Fetched content passes the EXISTING redaction gate unchanged (governance content may still be over-sanitized
+  until slice 3 - that is the slice-3 deliverable). Slice-2 bar = targets fetched + present + recall satisfied,
+  NOT final answer quality.
+
 ### REDDOG_TARGET_RECALL_PATH_AWARE_PHASE1 (slice 1/3)
 
 - **Status:** DETECTOR ONLY (this slice). Parse an explicit "Required direct-read targets" prompt list; compare against

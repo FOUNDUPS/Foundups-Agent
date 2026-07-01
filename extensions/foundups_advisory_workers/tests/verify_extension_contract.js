@@ -83,8 +83,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.29', 'package version must be 0.3.29');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.29'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.30', 'package version must be 0.3.30');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.30'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -101,7 +101,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.29', 'README version mismatch');
+includes(readme, 'Version: 0.3.30', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -772,6 +772,118 @@ includes(trpScorecardLines, '- required_targets_total: 3', 'TRP-007: rendered sc
 includes(trpScorecardLines, '- required_targets_recalled: 0', 'TRP-007: rendered scorecard must show required_targets_recalled');
 includes(trpScorecardLines, '- required_targets_missing: ', 'TRP-007: rendered scorecard must show required_targets_missing');
 
+// REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1 (slice 2/3): governed direct-read telemetry.
+includes(extensionJs, 'function buildMustIncludeArgs', 'DRF: must-include arg builder missing');
+includes(extensionJs, 'function buildDirectReadContentSection', 'DRF: direct-read content section builder missing');
+includes(extensionJs, '--bundle-must-include', 'DRF: extension must request must-include paths from the Python bundle layer');
+includes(extensionJs, 'direct_read_fallback_used', 'DRF: direct_read_fallback_used telemetry missing');
+includes(extensionJs, 'direct_read_paths', 'DRF: direct_read_paths telemetry missing');
+includes(extensionJs, 'direct_read_rejected', 'DRF: direct_read_rejected telemetry missing');
+includes(extensionJs, 'direct_read_bytes', 'DRF: direct_read_bytes telemetry missing');
+includes(extensionJs, 'direct_read_truncated', 'DRF: direct_read_truncated telemetry missing');
+
+// DRF-001: must-include args are built from missing targets, symbols excluded, deduped, path-quoted per --bundle-must-include.
+const drfArgs = orchestrator.buildMustIncludeArgs([
+  'WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md',
+  'symbol:createFoundUp',
+  'WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md',
+  'modules/foundups/agent/src/source_authority.py'
+]);
+assert.deepStrictEqual(drfArgs, [
+  '--bundle-must-include', 'WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md',
+  '--bundle-must-include', 'modules/foundups/agent/src/source_authority.py'
+], 'DRF-001: must-include args must dedup, drop symbols, and prefix each path with --bundle-must-include');
+assert.deepStrictEqual(orchestrator.buildMustIncludeArgs([]), [], 'DRF-001: empty missing list => no fetch args');
+assert.deepStrictEqual(orchestrator.buildMustIncludeArgs(['symbol:only']), [], 'DRF-001: symbol-only missing list => no fetch args');
+
+// DRF-002: direct-read telemetry from the Python bundle flows into meta + scorecard.
+const drfBundle = JSON.stringify({
+  task_retrieval: {
+    code_hits: [
+      { location: 'WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md', need: 'direct-read target', direct_read: true, content: '# WSP 109 onboarding', content_truncated: true },
+      { location: 'modules/foundups/agent/src/source_authority.py', need: 'direct-read target', direct_read: true, content: 'class SourceAuthority: pass', content_truncated: false }
+    ],
+    metadata: { code_count: 2, wsp_count: 0 }
+  },
+  direct_read: {
+    direct_read_fallback_used: true,
+    direct_read_paths: ['WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md', 'modules/foundups/agent/src/source_authority.py'],
+    direct_read_rejected: [{ path: '.env', reason: 'denied_basename' }, { path: '../../etc/passwd', reason: 'traversal' }],
+    direct_read_bytes: 4096,
+    direct_read_truncated: [{ path: 'WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md', bytes: 12000 }]
+  }
+});
+const drfPrompt = [
+  'Audit the FoundUp creation monorepo WSP_109 execution path.',
+  '',
+  'Required direct-read targets:',
+  '- WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md',
+  '- modules/foundups/agent/src/source_authority.py',
+  '',
+  'Produce required architect sections.'
+].join('\n');
+const drfMeta = orchestrator.holoIndexMetaFromBundle(drfBundle, false, drfPrompt);
+assert.strictEqual(drfMeta.direct_read_fallback_used, true, 'DRF-002: direct_read_fallback_used must reflect the Python fetch');
+assert.deepStrictEqual(drfMeta.direct_read_paths, ['WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md', 'modules/foundups/agent/src/source_authority.py'], 'DRF-002: direct_read_paths must pass through');
+assert.strictEqual(drfMeta.direct_read_bytes, 4096, 'DRF-002: direct_read_bytes must pass through');
+assert.strictEqual(drfMeta.direct_read_rejected.length, 2, 'DRF-002: direct_read_rejected must pass through');
+assert.strictEqual(drfMeta.direct_read_truncated.length, 1, 'DRF-002: direct_read_truncated must pass through');
+
+// DRF-003: after the fetch is present, slice-1 recall reports satisfied (gap resolved).
+assert.strictEqual(drfMeta.target_recall_ok, true, 'DRF-003: fetched targets must satisfy required recall');
+assert.strictEqual(drfMeta.index_gap_detected, false, 'DRF-003: index gap must clear once targets are fetched');
+assert.strictEqual(drfMeta.required_targets_recalled, 2, 'DRF-003: both required targets must count as recalled');
+
+// DRF-004: scorecard surfaces the direct-read vocabulary for the Work Trail.
+const drfScorecard = orchestrator.extractHoloIndexScorecard('wsp_holo', drfMeta);
+const drfLines = orchestrator.formatHoloIndexScorecardLines(drfScorecard).join('\n');
+includes(drfLines, '- direct_read_fallback_used: true', 'DRF-004: rendered scorecard must show direct_read_fallback_used');
+includes(drfLines, '- direct_read_paths: ', 'DRF-004: rendered scorecard must show direct_read_paths');
+includes(drfLines, '- direct_read_rejected: .env (denied_basename)', 'DRF-004: rendered scorecard must show rejected path + reason');
+includes(drfLines, '- direct_read_bytes: 4096', 'DRF-004: rendered scorecard must show direct_read_bytes');
+includes(drfLines, '- direct_read_truncated: ', 'DRF-004: rendered scorecard must show direct_read_truncated');
+
+// DRF-005: direct-read content section renders the fetched source (no fs re-read; from bundle JSON).
+const drfSection = orchestrator.buildDirectReadContentSection(drfBundle);
+assert(drfSection.text.length > 0, 'DRF-005: direct-read content section must render when direct_read hits exist');
+includes(drfSection.text, '# WSP 109 onboarding', 'DRF-005: fetched content must be present in the section');
+includes(drfSection.text, 'class SourceAuthority: pass', 'DRF-005: every fetched target content must be present');
+includes(drfSection.text, '(truncated to governed budget)', 'DRF-005: truncated targets must be labelled');
+assert.strictEqual(drfSection.paths.length, 2, 'DRF-005: section must list both fetched paths');
+const drfEmptySection = orchestrator.buildDirectReadContentSection(JSON.stringify({ task_retrieval: { code_hits: [] } }));
+assert.strictEqual(drfEmptySection.text, '', 'DRF-005: no direct_read hits => empty section (no fabricated content)');
+
+// DRF-006: benign fetched content passes the EXISTING redaction gate unchanged.
+// (This proves the direct-read section is normal context text; slice 2 adds no
+// new sanitizer and weakens none.)
+const drfBenignBundle = JSON.stringify({
+  task_retrieval: {
+    code_hits: [
+      { location: 'modules/foundups/agent/src/example_readme.md', need: 'direct-read target', direct_read: true, content: '# Example\nThis module wires the onboarding flow and returns a status dict.', content_truncated: false }
+    ],
+    metadata: { code_count: 1, wsp_count: 0 }
+  }
+});
+const drfBenignSection = orchestrator.buildDirectReadContentSection(drfBenignBundle);
+assertFusionRedactionGatePasses(drfBenignSection.text, 'DRF-006: benign direct-read content must pass the existing redaction gate');
+
+// DRF-007: SLICE BOUNDARY PROOF. Governance-adjacent fetched content is STILL
+// blocked by the EXISTING redaction gate (source_authority category), unchanged
+// by slice 2. Slice 3 owns audit-mode redaction relaxation; slice 2 must not
+// weaken (or expand) any redaction category. The gate behavior is identical to
+// before this slice for such content.
+const drfGovSection = orchestrator.buildDirectReadContentSection(drfBundle);
+let drfGovBlocked = false;
+let drfGovCategory = '';
+try {
+  assertFusionRedactionGatePasses(drfGovSection.text, 'probe');
+} catch (govErr) {
+  drfGovBlocked = true;
+  drfGovCategory = String((govErr && govErr.stdout) || '');
+}
+assert(drfGovBlocked, 'DRF-007: governance-adjacent fetched content must STILL be blocked by the unchanged redaction gate (slice-3 owns relaxation)');
+includes(drfGovCategory, 'source_authority', 'DRF-007: the existing source_authority category must still fire (no category change in slice 2)');
+
 includes(blockedCopy, '## Governed Handoff Recommendation', 'substantive task must include governed handoff recommendation');
 includes(blockedCopy, 'handoff_needed: unknown', 'blocked-local packet must use conservative handoff_needed');
 includes(blockedCopy, 'reason: blocked_context_needs_local_0102_review', 'blocked-local packet must include conservative handoff reason');
@@ -838,7 +950,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.29'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.30'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -852,7 +964,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.29'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.30'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -864,7 +976,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.29'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.30'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
