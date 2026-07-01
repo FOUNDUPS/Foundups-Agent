@@ -111,8 +111,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.31', 'package version must be 0.3.31');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.31'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.32', 'package version must be 0.3.32');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.32'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -129,7 +129,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.31', 'README version mismatch');
+includes(readme, 'Version: 0.3.32', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -1010,7 +1010,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.31'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.32'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -1024,7 +1024,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.31'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.32'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -1036,7 +1036,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.31'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.32'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -1228,8 +1228,80 @@ const continuationCopy = orchestrator.buildCopyMarkdown(
   [],
   null,
   'high',
-  { substantive: true, continuationSummary: successSummary }
+  {
+    substantive: true,
+    continuationEnabled: true,
+    continuationSummary: successSummary,
+    continuationTelemetry: { continuation_enabled: true, continuation_appended: true, continuation_source_run_id: successSummary.previous_run_id }
+  }
 );
 includes(continuationCopy, 'Continuation from last RedDog packet', 'Copy MD may include safe continuation summary section');
+
+// ADDENDUM H - deterministic Use-last-packet toggle + continuation telemetry
+// (REDDOG_CONTINUATION_TOGGLE_HARDENING_PHASE1)
+// Backend fail-closed default: continuation is included ONLY on explicit useLastPacket === true.
+includes(extensionJs, 'const continuationEnabled = message.useLastPacket === true', 'backend must fail closed (useLastPacket === true)');
+assert(!extensionJs.includes('message.useLastPacket !== false'), 'legacy permissive default must be removed');
+includes(extensionJs, 'const continuationAppended = continuationEnabled', 'single continuation_appended boolean must gate inclusion');
+includes(extensionJs, 'Continuation: disabled for this run.', 'UI must show disabled status line');
+includes(extensionJs, 'buildContinuationTelemetrySection', 'Copy MD continuation telemetry section missing');
+includes(extensionJs, 'formatContinuationTelemetryLines', 'Run Trace continuation telemetry lines missing');
+
+// Telemetry section (Copy MD) shape.
+const telemetryOnSection = orchestrator.buildContinuationTelemetrySection({
+  continuation_enabled: true,
+  continuation_appended: true,
+  continuation_source_run_id: 'run_abc123'
+});
+includes(telemetryOnSection, '## Continuation Telemetry', 'telemetry section header missing');
+includes(telemetryOnSection, 'continuation_enabled: true', 'telemetry must report continuation_enabled');
+includes(telemetryOnSection, 'continuation_appended: true', 'telemetry must report continuation_appended');
+includes(telemetryOnSection, 'continuation_source_run_id: run_abc123', 'telemetry must report source run id');
+
+// Telemetry appears in Run Trace section too.
+const runTraceWithTelemetry = orchestrator.buildRunTraceSection(
+  { review_packet: { task_classification: { tier: 'HIGH' }, continuation_telemetry: { continuation_enabled: true, continuation_appended: true, continuation_source_run_id: 'run_xyz789' } } },
+  'reddog_architect', null, null, 'high'
+);
+includes(runTraceWithTelemetry, 'continuation_enabled: true', 'Run Trace must include continuation_enabled');
+includes(runTraceWithTelemetry, 'continuation_appended: true', 'Run Trace must include continuation_appended');
+includes(runTraceWithTelemetry, 'continuation_source_run_id: run_xyz789', 'Run Trace must include continuation_source_run_id');
+
+// Case 1: enabled + stored summary => appended in Copy MD (prompt-side parity via appendContinuationSummaryToWspPrompt).
+const enabledTelemetry = { continuation_enabled: true, continuation_appended: true, continuation_source_run_id: successSummary.previous_run_id };
+const copyEnabled = orchestrator.buildCopyMarkdown(
+  { ok: true, content: sampleArchitectOutput, review_packet: { task_classification: { tier: 'HIGH' }, output_validation: { validated: true }, continuation_telemetry: enabledTelemetry } },
+  'reddog_architect', 'Repo context attached', [], null, 'high',
+  { substantive: true, continuationEnabled: true, continuationSummary: successSummary, continuationTelemetry: enabledTelemetry }
+);
+includes(copyEnabled, 'Continuation from last RedDog packet', 'enabled: Copy MD must include continuation summary');
+includes(copyEnabled, 'continuation_appended: true', 'enabled: Copy MD telemetry must report appended=true');
+includes(copyEnabled, 'continuation_enabled: true', 'enabled: Copy MD telemetry must report enabled=true');
+const promptEnabled = orchestrator.appendContinuationSummaryToWspPrompt('WSP task prompt body', successSummary);
+includes(promptEnabled, 'Continuation from last RedDog packet', 'enabled: model prompt must include continuation block');
+
+// Case 2: disabled + stored summary => NOT appended (Copy MD) and telemetry enabled=false, appended=false.
+const disabledTelemetry = { continuation_enabled: false, continuation_appended: false, continuation_source_run_id: 'none' };
+const copyDisabled = orchestrator.buildCopyMarkdown(
+  { ok: true, content: sampleArchitectOutput, review_packet: { task_classification: { tier: 'HIGH' }, output_validation: { validated: true }, continuation_telemetry: disabledTelemetry } },
+  'reddog_architect', 'Repo context attached', [], null, 'high',
+  { substantive: true, continuationEnabled: false, continuationSummary: null, continuationTelemetry: disabledTelemetry }
+);
+assert(!copyDisabled.includes('Continuation from last RedDog packet'), 'disabled: Copy MD must NOT include continuation summary');
+includes(copyDisabled, 'continuation_enabled: false', 'disabled: Copy MD telemetry must report enabled=false');
+includes(copyDisabled, 'continuation_appended: false', 'disabled: Copy MD telemetry must report appended=false');
+includes(copyDisabled, 'continuation_source_run_id: none', 'disabled: Copy MD telemetry must report source=none');
+
+// Case 3: missing toggle (fail-closed) mirrors disabled: enabled false when summary passed as null.
+const missingTelemetry = orchestrator.normalizeContinuationTelemetry(undefined);
+assert.strictEqual(missingTelemetry.continuation_enabled, false, 'missing toggle must normalize to enabled=false (fail-closed)');
+assert.strictEqual(missingTelemetry.continuation_appended, false, 'missing toggle must normalize to appended=false');
+assert.strictEqual(missingTelemetry.continuation_source_run_id, 'none', 'missing toggle must normalize source to none');
+const copyMissing = orchestrator.buildCopyMarkdown(
+  { ok: true, content: sampleArchitectOutput, review_packet: { task_classification: { tier: 'HIGH' }, output_validation: { validated: true } } },
+  'reddog_architect', 'Repo context attached', [], null, 'high',
+  { substantive: true, continuationSummary: successSummary }
+);
+assert(!copyMissing.includes('Continuation from last RedDog packet'), 'missing/undefined continuationEnabled must NOT include continuation summary (fail-closed)');
 
 console.log('Foundups®Agent extension contract checks passed.');
