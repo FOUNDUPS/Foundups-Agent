@@ -235,6 +235,17 @@ includes(adapterContractDoc, 'Receipt reconciliation', 'adapter contract receipt
 includes(adapterContractDoc, 'WSP_97 truth table', 'adapter contract WSP_97 table missing');
 includes(iface, 'REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1.md', 'INTERFACE OpenClaw adapter pointer missing');
 includes(roadmap, 'REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1', 'OpenClaw adapter contract slice missing');
+const valveContractDocPath = path.join(root, 'docs', 'audits', 'architecture', 'REDDOG_WRE_EXECUTION_VALVE_CONTRACT_PHASE1.md');
+const valveContractDoc = fs.readFileSync(valveContractDocPath, 'utf8');
+includes(valveContractDoc, 'VALVE_CLOSED', 'execution valve contract default state missing');
+includes(valveContractDoc, 'VALVE_OPEN_DRYRUN_ONLY', 'execution valve dryrun state missing');
+includes(valveContractDoc, 'VALVE_OPEN_WORKTREE_CREATE', 'execution valve worktree state missing');
+includes(valveContractDoc, 'assignment_dispatcher', 'execution valve AssignmentDispatcher reject missing');
+const valvePy = fs.readFileSync(path.join(root, 'modules', 'communication', 'moltbot_bridge', 'src', 'reddog_wre_execution_valve.py'), 'utf8');
+includes(valvePy, 'evaluate_reddog_execution_valve', 'execution valve evaluator missing');
+includes(valvePy, 'no_execution_performed', 'execution valve no_execution_performed missing');
+includes(iface, 'reddog_wre_execution_valve.py', 'INTERFACE execution valve pointer missing');
+includes(roadmap, 'REDDOG_WRE_EXECUTION_VALVE_PHASE1', 'execution valve slice missing');
 includes(roadmap, 'External RedDog Lane Queue (post-#888)', 'post-#888 external lane queue missing');
 includes(roadmap, 'REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1', 'governed work order dryrun slice missing');
 includes(roadmap, 'REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1', 'run trace telemetry correction slice missing');

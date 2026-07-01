@@ -1,5 +1,15 @@
 # ModLog - moltbot_bridge
 
+## 2026-06-28: REDDOG_WRE_EXECUTION_VALVE_PHASE1
+
+**Slice:** Closed-by-default WRE execution valve evaluator (pure evaluation)
+**WSP:** WSP_15, WSP_34, WSP_50, WSP_91, WSP_97, WSP_22
+
+- ADD `src/reddog_wre_execution_valve.py` -- `evaluate_reddog_execution_valve()`, `ExecutionValveDecision`.
+- ADD `tests/test_reddog_wre_execution_valve.py` -- default closed, dry-run open, worktree token, rejections, AST denylist.
+- ADD `docs/audits/architecture/REDDOG_WRE_EXECUTION_VALVE_CONTRACT_PHASE1.md` -- contract + gate ordering.
+- Default `VALVE_CLOSED`; requires full #889-#898 spine + #901 canonical intake target.
+
 ## 2026-06-28: REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1 (pointer)
 
 **Slice:** OpenClaw FoundUpJob adapter **contract only** (audit doc)

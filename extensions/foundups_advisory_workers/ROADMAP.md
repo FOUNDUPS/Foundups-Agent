@@ -84,15 +84,14 @@ DONE
 10. #897 WRE isolated worktree executor contract (2fe60a280)
 11. #898 WRE executor plan dry-run (e215bf890)
 12. #899 RedDog continuation memory (c70433d7d)
+13. #901 OpenClaw FoundUpJob adapter contract (2c8df23dd)
 
 P0 NEXT (execution track)
-13. REDDOG_WRE_EXECUTION_VALVE_PHASE1
+14. REDDOG_WRE_EXECUTION_VALVE_PHASE1
     - default CLOSED valve before first real worktree create
-14. REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1
-    - OpenClaw ownership + field mapping; no AssignmentDispatcher binding
+15. REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_PHASE1
 
 P1
-15. REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_PHASE1
 16. REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_WORKTREE_CREATE_PHASE1
     - first real isolated worktree; valve OPEN only
 17. REDDOG_SANITIZED_TARGET_CONTEXT_PROVENANCE_PHASE1
@@ -235,13 +234,19 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1
 
-- **Status:** **PR-READY** — contract-only audit doc; OpenClaw owns worker loop.
+- **Status:** **LANDED** #901 (`2c8df23dd`) -- contract-only audit doc; OpenClaw owns worker loop.
 - **Canonical:** `docs/audits/architecture/REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1.md`
-- **Ruling:** `AssignmentDispatcher` is simulated scaffold — **not** canonical intake target.
+- **Ruling:** `AssignmentDispatcher` is simulated scaffold -- **not** canonical intake target.
+
+### REDDOG_WRE_EXECUTION_VALVE_PHASE1
+
+- **Status:** **PR-READY** -- `evaluate_reddog_execution_valve()`; default `VALVE_CLOSED`.
+- **Module:** `modules/communication/moltbot_bridge/src/reddog_wre_execution_valve.py`
+- **Contract:** `docs/audits/architecture/REDDOG_WRE_EXECUTION_VALVE_CONTRACT_PHASE1.md`
 
 ### REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_WORKTREE_CREATE_PHASE1
 
-- **Status:** **BLOCKED** — until dry-run planner + execution valve land.
+- **Status:** **BLOCKED** -- until execution valve lands and opens with sovereign token.
 
 ### REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
 
