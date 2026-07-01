@@ -160,8 +160,11 @@ Run Trace HoloIndex scorecard fields (v0.3.22+):
 | --- | --- | --- |
 | `holoindex_status` | Bundle transport result (e.g. `bundle_json_ok`) | OBSERVED |
 | `code_hits_count` | Count of code hits returned | OBSERVED |
-| `target_recall_ok` | Requested target file/symbol appeared in hits | OBSERVED |
-| `index_gap_detected` | Target-specific miss (may be true when `code_hits_count > 0`) | OBSERVED |
+| `target_recall_ok` | Requested target file/symbol appeared in hits (never `unknown` when a required list exists) | OBSERVED |
+| `index_gap_detected` | Target-specific miss (true whenever `required_targets_missing` is non-empty, even when `code_hits_count > 0`) | OBSERVED |
+| `required_targets_total` | Count of paths parsed from an explicit "Required direct-read targets" prompt list (0 = none present) | OBSERVED |
+| `required_targets_recalled` | Required targets whose content-bearing path appeared in the bundle (self-file `extension.js` excluded) | OBSERVED |
+| `required_targets_missing` | Required target paths absent from content (drives `index_gap_detected`) | OBSERVED |
 | `direct_read_fallback_used` | Offline lexical fallback used | OBSERVED |
 | `target_content_included` | Target snippet section present in final bounded context | OBSERVED |
 | `target_content_paths` | Relative paths whose snippets were included | OBSERVED |
@@ -182,11 +185,11 @@ Run Trace Unicode normalization fields (v0.3.24+) and bridge UTF-8 invariant (v0
 
 Bridge child env (v0.3.25+): `PYTHONIOENCODING=utf-8`, `PYTHONUTF8=1`. Python bridge reads stdin via `sys.stdin.buffer` UTF-8 decode so valid Unicode (e.g. U+2014 em dash) is not mis-decoded on Windows before the redaction gate.
 
-`evaluateTargetRecall(taskText, bundleOutput)` and `inferRecallTargetPaths(taskText)` implement target-specific recall inference from bundle `task_retrieval.code_hits`.
+`evaluateTargetRecall(taskText, bundleOutput)` and `inferRecallTargetPaths(taskText)` implement target-specific recall from bundle `task_retrieval.code_hits`. Path-aware detector (REDDOG_TARGET_RECALL_PATH_AWARE_PHASE1, slice 1/3): when the prompt carries an explicit "Required direct-read targets" list, `parseRequiredTargetPaths(taskText)` parses it into repo-relative paths/globs and `evaluateTargetRecall` compares each required path against content-bearing bundle locations, using `isSelfFileLocation()` so retrieving `extension.js` (RedDog itself) can never satisfy a required target. This closes the `content_included(any file) != required_targets_recalled` false negative: `index_gap_detected` is honestly `true` when required targets are absent. Prompts without a required list keep prior inferred-target behavior. This slice is detector-only: it does NOT read required files (slice 2) or change redaction (slice 3).
 
 Target content egress (v0.3.22+): `buildTargetRecallContentSection(root, taskText, maxChars)` reads workspace-confined snippets for inferred recall targets after HoloIndex path ranking. Snippets pass through `sanitizeTargetSnippetForRedaction()` before inclusion (ADDENDUM F); placeholders use neutral `[SANITIZED_BLOCK:NN]` tokens so category names do not re-trigger the Fusion gate. Telemetry reflects the **final** bounded context string assembled by `buildBoundedRepoContext` (before the 42000-char slice). `buildWsp97ProtocolExcerpt(root, maxChars)` adds a bounded WSP_97 protocol excerpt when the task mentions WSP_97 or truth labels.
 
-Exported helpers for contract tests: `isTargetReadPathDenied`, `resolveSafeRepoFile`, `readBoundedTargetSnippet`, `readBoundedTargetSnippets`, `buildTargetRecallContentSection`, `sanitizeTargetSnippetForRedaction`, `taskMentionsWsp97`, `buildWsp97ProtocolExcerpt`.
+Exported helpers for contract tests: `isTargetReadPathDenied`, `resolveSafeRepoFile`, `readBoundedTargetSnippet`, `readBoundedTargetSnippets`, `buildTargetRecallContentSection`, `sanitizeTargetSnippetForRedaction`, `taskMentionsWsp97`, `buildWsp97ProtocolExcerpt`, `parseRequiredTargetPaths`, `isSelfFileLocation`, `requiredTargetMatchesLocation`, `formatHoloIndexScorecardLines`.
 
 ## WSP_97 Truth Boundary
 
