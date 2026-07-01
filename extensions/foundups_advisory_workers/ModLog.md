@@ -2,6 +2,15 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-02 - Version bump to 0.3.29 (REDDOG_TARGET_RECALL_PATH_AWARE_PHASE1, slice 1/3)
+
+- Mechanical build-label bump 0.3.28 -> 0.3.29 across LIVE version surfaces so an installed
+  host does not stay stale on this senses-spine slice. No runtime logic change.
+- Surfaces: `package.json`, `extension.js` (`EXTENSION_VERSION`), `README.md` header,
+  `tests/verify_extension_contract.js` LIVE-version assertions.
+
+WSP: WSP_22.
+
 ## 2026-07-01 - REDDOG_TARGET_RECALL_PATH_AWARE_PHASE1 (slice 1/3, detector only)
 
 - File: `extensions/foundups_advisory_workers/extension.js`
