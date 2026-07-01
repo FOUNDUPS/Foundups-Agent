@@ -2,6 +2,16 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-02 - Version bump to 0.3.30 (REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1, slice 2/3)
+
+- Mechanical build-label bump to 0.3.30 across LIVE version surfaces so an installed
+  host does not stay stale on this senses-spine slice. No runtime logic change.
+- Surfaces: `package.json`, `extension.js` (`EXTENSION_VERSION`), `README.md` header,
+  `tests/verify_extension_contract.js` LIVE-version assertions.
+- Stacked on slice 1 (#906); label sits above the pre-bump base until 012 rebases the stack.
+
+WSP: WSP_22.
+
 ## 2026-07-01 - REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1 (slice 2/3, governed fetch)
 
 - Files: `holo_index/cli/commands/bundle_json.py` (fetch + hard allowlist), `holo_index/_cli_main.py`
