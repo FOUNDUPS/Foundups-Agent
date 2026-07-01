@@ -56,16 +56,29 @@ Declared == Actual == 23 / 23 YES.
 
 ```python
 from modules.communication.moltbot_bridge.src.fusion_redaction_gate import (
-    evaluate_redaction_gate,   # (prompt, context=None) -> RedactionGateResult (FAIL-CLOSED)
-    redaction_status_for,      # convenience: -> "REDACTION_GATE_PASSED" | "BLOCKED_PENDING_REDACTION_GATE"
-    redact_text,               # (text) -> (redacted_text, RedactionReport)
-    scan_forbidden,            # (text) -> [category, ...]   (empty == clean)
+    evaluate_redaction_gate,   # (prompt, context=None, audit_mode=False) -> RedactionGateResult (FAIL-CLOSED)
+    redaction_status_for,      # (prompt, context=None, audit_mode=False) -> "REDACTION_GATE_PASSED" | "BLOCKED_PENDING_REDACTION_GATE"
+    redact_text,               # (text, audit_mode=False) -> (redacted_text, RedactionReport)
+    scan_forbidden,            # (text, audit_mode=False) -> [category, ...]   (empty == clean)
     RedactionGateResult,       # status/reason/redacted_prompt/redacted_context/prompt_digest/context_digest/report
     RedactionReport,           # policy_version / categories_hit:dict / blocked_categories:tuple / residual_forbidden_count:int
     REDACT_CATEGORIES, BLOCK_CATEGORIES,   # REDACT vs BLOCK action classes (disjoint)
+    AUDIT_STRUCTURAL_CATEGORIES,           # frozenset of BLOCK cats made audit-visible (subset of BLOCK)
     REDACTION_GATE_PASSED, REDACTION_BLOCKED, ALLOWED_REASONS,
 )
 ```
+
+**Audit mode** (`audit_mode=True`, default `False` -> non-audit path byte-identical;
+REDDOG_AUDIT_MODE_REDACTION_PHASE1, slice 3/3): governance audits must READ governance STRUCTURE.
+The four `AUDIT_STRUCTURAL_CATEGORIES` (`source_authority`, `merge_authorization`,
+`cabr_payout_authority`, `governance_instruction`) match on the bare identifier and so BLOCK the whole
+payload on the default path. In audit_mode those identifiers are PRESERVED (readable enum/field/gate/
+action names + WSP refs) while dedicated audit VALUE redactors + every always-on REDACT detector STILL
+remove any secret VALUE / payout AMOUNT / authorization TOKEN. Audit mode NEVER relaxes
+`private_reasoning` (free-text always BLOCKS), `private_key_residual` (ambiguous -> BLOCKS), or any
+REDACT category. Rule: keep the left-hand key/identifier; redact the right-hand value; when ambiguous,
+REDACT (fail-closed). `run_alias_live(..., audit_context=True)` threads the flag from an audit-context
+retrieval (slice-2 direct-read fallback of required governance targets).
 
 Two action classes. **REDACT** (API keys, bearer, .env secrets, complete private-key blocks, member
 PII, credential URLs) are replaced; the payload may PASS if the post-redaction re-scan is clean.
@@ -106,19 +119,31 @@ input. This slice does NOT enable live OpenRouter -- alias/server_tool/local_fal
 | 24 | NO_LITERAL_SECRET_PATTERN_IN_SOURCE | YES | `test_no_literal_secret_pattern_in_source` scans gate + test source |
 | 25 | POST_REDACTION_RESCAN_REQUIRED | YES | `test_residual_forbidden_fails_closed` |
 | 26 | LIVE_MODES_REMAIN_BLOCKED_AFTER_GATE | YES | `test_live_modes_remain_blocked` (fusion_adapter unchanged) |
+| 27 | AUDIT_MODE_PRESERVES_STRUCTURE | YES | `test_audit_mode_preserves_governance_structure` (enum/field/action/WSP identifiers survive) |
+| 28 | AUDIT_MODE_OFF_BYTE_IDENTICAL | YES | `test_audit_mode_off_is_byte_identical_default` (default path unchanged) |
+| 29 | AUDIT_MODE_STILL_REDACTS_SECRETS | YES | `test_audit_mode_still_redacts_fake_api_key`, `..._oauth_token`, `..._mixed_line_keeps_key_redacts_value` |
+| 30 | AUDIT_MODE_REDACTS_PAYOUT_AND_TOKEN | YES | `test_audit_mode_redacts_cabr_payout_amount_keeps_identifier`, `..._merge_authorization_token_keeps_gate_name` |
+| 31 | AUDIT_MODE_NEVER_RELAXES_PRIVATE_OR_MALFORMED | YES | `test_audit_mode_private_reasoning_still_blocks`, `..._malformed_private_key_still_blocks` |
+| 32 | AUDIT_STRUCTURAL_SUBSET_OF_BLOCK | YES | `test_audit_structural_categories_are_subset_of_block` (excludes private_reasoning/private_key_residual) |
 
-Declared == Actual == 26 / 26 YES.
+Declared == Actual == 32 / 32 YES.
 
 ### Fusion ALIAS live path (VALVE-GATED OFF by default; first live OpenRouter integration)
 
 ```python
 from modules.communication.moltbot_bridge.src.fusion_alias_live import (
-    run_alias_live,            # (prompt, context=None, *, authorization, ...) -> AliasLiveResult
+    run_alias_live,            # (prompt, context=None, *, authorization, ..., audit_context=False) -> AliasLiveResult
     LiveFusionAuthorization,   # typed sovereign auth (authorized=True, authority="012", purpose="fusion_alias_live_call")
     AliasLiveResult,           # status / reason / made_network_call / receipt
     run_manual_smoke,          # MANUAL live smoke (module __main__); NOT a pytest, never in CI
 )
 ```
+
+`audit_context=True` (default `False`) threads audit-mode into the entry redaction gate for an
+audit-context retrieval (slice-2 direct-read fallback of required governance targets): governance
+STRUCTURE stays readable while secret VALUES / payout AMOUNTS / authorization TOKENS are still
+redacted. The request body is always built from the REDACTED text only; secret redaction is never
+weakened. Default `False` keeps the live path byte-identical.
 
 Landing this makes **ZERO** live calls. A network call requires ALL of: (1) `FUSION_ALIAS_LIVE_ENABLED`
 env flag ON (default OFF), (2) a valid `LiveFusionAuthorization` object (authority `012` -- a bool/int/

@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.30';
+const EXTENSION_VERSION = '0.3.31';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -2779,11 +2779,18 @@ function holoIndexOutput(root, taskText, maxChars) {
 
 // Render the Python-fetched direct-read target content (already budget-bounded
 // and security-allowlisted by bundle_json.py) into a dedicated bounded section.
-// This does NOT re-read the filesystem and does NOT apply any redaction-category
-// logic (slice 3); the assembled context still passes through the existing
-// Python egress redaction gate unchanged before leaving the machine.
+// This does NOT re-read the filesystem and does NOT apply any redaction logic here;
+// the assembled context still passes through the existing Python egress redaction
+// gate before leaving the machine.
+//
+// REDDOG_AUDIT_MODE_REDACTION_PHASE1 (slice 3/3): when direct-read fetched required
+// targets (slice-2 fallback), this IS an audit-context retrieval. The section carries
+// an audit_context=true signal so the egress redaction gate can run in audit_mode --
+// preserving STRUCTURAL governance identifiers while STILL redacting every secret
+// VALUE / payout AMOUNT / authorization TOKEN. audit_context stays false when no
+// direct-read fetch occurred (backward compatible; default egress path unchanged).
 function buildDirectReadContentSection(output) {
-  const empty = { text: '', paths: [], chars: 0 };
+  const empty = { text: '', paths: [], chars: 0, audit_context: false };
   let data;
   try {
     data = JSON.parse(String(output || '{}'));
@@ -2810,10 +2817,14 @@ function buildDirectReadContentSection(output) {
   }
   return {
     text: '### Direct-read target content (governed fetch by path)\n'
-      + 'Fetched by the Python bundle layer under the direct-read allowlist; still redaction-gated before egress.\n\n'
+      + 'Fetched by the Python bundle layer under the direct-read allowlist; still redaction-gated before egress '
+      + '(audit-mode: governance STRUCTURE readable, secret/payout/authority VALUES redacted).\n\n'
       + sections.join('\n\n'),
     paths: paths,
-    chars: used
+    chars: used,
+    // Direct-read of required targets == governance audit context. The egress gate
+    // uses this to run in audit_mode (structure-preserving, value-redacting).
+    audit_context: true
   };
 }
 

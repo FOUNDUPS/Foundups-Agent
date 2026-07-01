@@ -18,12 +18,32 @@ POLICY -- two action classes (REDACT vs BLOCK):
             material the policy cannot confidently classify e.g. a malformed private-key header).
             Presence of ANY block category keeps status BLOCKED_PENDING_REDACTION_GATE.
 
+AUDIT MODE (REDDOG_AUDIT_MODE_REDACTION_PHASE1, slice 3/3) -- OFF by default:
+  Governance audits must READ governance STRUCTURE (enum member names, dataclass field lists,
+  gate/action-name constants, WSP refs). In the default (non-audit) path the four STRUCTURAL block
+  categories -- source_authority, merge_authorization, cabr_payout_authority, governance_instruction
+  -- match on the bare IDENTIFIER and so BLOCK the whole payload, stripping the very structure a
+  governance audit must see. When audit_mode=True those four categories become AUDIT-VISIBLE: the
+  identifier text is PRESERVED, but secret/payout/authority VALUES are STILL removed --
+    * every REDACT detector remains active unchanged (API keys/tokens/creds always removed);
+    * audit-only VALUE redactors strip the RHS bound to a structural identifier
+      (payout AMOUNTS, merge-authorization TOKENS/grants, secret-shaped values).
+  audit_mode NEVER relaxes: private_reasoning (free-text always BLOCKS), private_key_residual
+  (malformed header -> cannot confidently redact -> BLOCKS), and every REDACT category. The line
+  between value and structure is: KEEP the left-hand key/identifier + enum member names; REDACT the
+  right-hand value. When ambiguous, REDACT (fail-closed). audit_mode default False keeps the
+  non-audit path byte-identical (backward compatible).
+
 WSP 97 TRUTH BOUNDARIES:
   DOES: deterministic REDACT vs BLOCK; emit a counts-only report + sha256:<64 hex> digests computed
         FROM THE REDACTED OUTPUT; PASS only when redaction ran AND a post-redaction re-scan finds
-        zero REDACT residual AND zero BLOCK markers AND no error; FAIL CLOSED otherwise.
+        zero REDACT residual AND zero BLOCK markers AND no error; FAIL CLOSED otherwise; when
+        audit_mode=True, preserve STRUCTURAL governance identifiers while still redacting their
+        secret/payout/authority VALUES (never weakens any REDACT category or secret pattern).
   DOES NOT: make any network call; read any env/API key (never imports os); enable any live Fusion
-        mode; touch merge / CABR / payout / source-authority; echo raw input in any error/reason.
+        mode; touch merge / CABR / payout / source-authority; echo raw input in any error/reason;
+        (audit_mode) leak any secret VALUE, payout AMOUNT, or authorization TOKEN, or relax
+        private_reasoning / private_key_residual / any REDACT category.
 
 REUSE NOTE (WSP 84): an in-tree redactor exists -- redact_sensitive() (duplicated byte-for-byte in
 ai_overseer/src/autofix_executor.py:99 and foundups/agent/src/kanban_plugin_contract.py:105) and
@@ -153,6 +173,91 @@ _DETECTORS: Tuple[Tuple[str, "re.Pattern[str]", str], ...] = (
 REDACT_CATEGORIES: Tuple[str, ...] = tuple(c for c, _, a in _DETECTORS if a == ACTION_REDACT)
 BLOCK_CATEGORIES: Tuple[str, ...] = tuple(c for c, _, a in _DETECTORS if a == ACTION_BLOCK)
 
+# ---------------------------------------------------------------------------
+# AUDIT MODE (REDDOG_AUDIT_MODE_REDACTION_PHASE1, slice 3/3)
+#
+# The four STRUCTURAL block categories below match on the bare governance
+# identifier (enum/field/gate/action name). In audit_mode they become
+# AUDIT-VISIBLE: the identifier is preserved (not blocked) so a governance audit
+# can read the structure, while dedicated audit-only VALUE redactors + every
+# existing REDACT detector still remove any secret value / payout amount /
+# authorization token. private_reasoning and private_key_residual are NOT in
+# this set -- they always BLOCK (free-text / ambiguous -> fail-closed).
+# ---------------------------------------------------------------------------
+AUDIT_STRUCTURAL_CATEGORIES: frozenset = frozenset({
+    "source_authority",
+    "merge_authorization",
+    "cabr_payout_authority",
+    "governance_instruction",
+})
+
+# REDACT categories whose always-on detector swallows the key IDENTIFIER along
+# with the value. In audit mode they are handled by key-preserving audit variants
+# below instead, so the always-on versions are skipped (audit_mode only) to keep
+# the left-hand key name readable. Secret VALUES are still fully removed either way.
+AUDIT_KEY_PRESERVING_SUPERSEDES: frozenset = frozenset({"secret_kv", "env_secret_line"})
+
+# Audit-only VALUE redactors -- run ONLY when audit_mode=True, BEFORE structural
+# identifiers are preserved, so preserving an identifier can never leak a value.
+# Each strips the RIGHT-HAND-SIDE value/amount/token while keeping the left-hand
+# identifier readable. These ADD redaction (never subtract); they are appended to
+# the always-on REDACT set for the audit scan.
+#   * payout AMOUNTS bound to a cabr/payout identifier (numbers, currency)
+#   * merge-authorization TOKEN/grant values bound to a merge identifier
+#   * governance/source grant VALUES bound to those identifiers
+# NOTE: the identifier itself (LHS) is preserved by (\bkey\b[\s:=]+) capture.
+_AUDIT_VALUE_REDACTORS: Tuple[Tuple[str, "re.Pattern[str]"], ...] = (
+    # Key-preserving secret-KV redactor: keep the LHS key name + separator as
+    # readable structure, redact ONLY the RHS value. Runs before the always-on
+    # secret_kv detector (which would otherwise swallow the key name too). Same
+    # key set as secret_kv so audit output keeps `api_key`, `token`, etc.
+    (
+        "audit_secret_kv_value",
+        re.compile(
+            r"(?i)\b((?:access_token|refresh_token|id_token|client_secret|client_id|user_code|"
+            r"authorization_code|password|passwd|api_key|apikey|token)"
+            r"\b\s*[:=]\s*[\"']?)"
+            r"[^\s&\"'}]+",
+        ),
+    ),
+    # Key-preserving env-secret-line redactor: keep the FOO_SECRET/BAR_TOKEN key,
+    # redact only its value. Runs before env_secret_line for the same reason.
+    (
+        "audit_env_secret_value",
+        re.compile(
+            r"\b([A-Z0-9_]*(?:TOKEN|SECRET|PASSWORD|API_KEY|APIKEY|CREDENTIAL)"
+            r"\b\s*[:=]\s*)"
+            r"\S+",
+        ),
+    ),
+    (
+        "audit_payout_amount",
+        re.compile(
+            r"(?i)\b((?:cabr[\s_\-]?payout|payout[\s_\-]?amount|payout|cabr)"
+            r"[\w\s]*?[:=]\s*)"
+            r"\$?\d[\d,]*(?:\.\d+)?",
+        ),
+    ),
+    (
+        "audit_merge_token",
+        re.compile(
+            r"(?i)\b((?:merge[\s_\-]?authoriz\w*|merge[\s_\-]?token|"
+            r"auto[\s_\-]?merge[\s_\-]?token|pull_request_merge|grant[\s_\-]?authority)"
+            r"[\w\s]*?[:=]\s*)"
+            r"[\"']?[^\s\"'}]+",
+        ),
+    ),
+    (
+        "audit_authority_grant",
+        re.compile(
+            r"(?i)\b((?:source[\s_\-]?authority[\s_\-]?override|"
+            r"governance[\s_\-]?grant|grant[\s_\-]?token)"
+            r"[\w\s]*?[:=]\s*)"
+            r"[\"']?[^\s\"'}]+",
+        ),
+    ),
+)
+
 
 # ---------------------------------------------------------------------------
 # Report + result (counts only -- never raw snippets / values / headers / prompt / context)
@@ -188,21 +293,41 @@ class RedactionGateResult:
 # ---------------------------------------------------------------------------
 
 
-def scan_forbidden(text: object) -> List[str]:
+def scan_forbidden(text: object, audit_mode: bool = False) -> List[str]:
     """Return all detector categories (REDACT or BLOCK) whose pattern matches `text`.
 
-    Empty list == clean. A non-string input is itself forbidden (fail closed)."""
+    Empty list == clean. A non-string input is itself forbidden (fail closed).
+
+    In audit_mode the four AUDIT_STRUCTURAL_CATEGORIES are EXCLUDED from the residual
+    scan (their identifiers are intentionally preserved as readable structure). Every
+    other category -- all REDACT secret patterns, private_reasoning, private_key_residual
+    -- is scanned unchanged, so a leaked secret value still shows up as residual.
+    """
     if not isinstance(text, str):
         return ["non_text_input"]
-    return [cat for cat, rx, _ in _DETECTORS if rx.search(text)]
+    hits = [cat for cat, rx, _ in _DETECTORS if rx.search(text)]
+    if audit_mode:
+        # Structural identifiers are intentionally preserved; the key-preserving
+        # audit variants supersede secret_kv/env_secret_line (which would otherwise
+        # re-match the surviving `key = [REDACTED:...]` structure and read as residual).
+        excluded = AUDIT_STRUCTURAL_CATEGORIES | AUDIT_KEY_PRESERVING_SUPERSEDES
+        hits = [cat for cat in hits if cat not in excluded]
+    return hits
 
 
-def redact_text(text: object) -> Tuple[str, RedactionReport]:
+def redact_text(text: object, audit_mode: bool = False) -> Tuple[str, RedactionReport]:
     """Deterministically apply the policy. Returns (redacted_text, report).
 
     REDACT categories are replaced by a category placeholder; BLOCK categories are detected and
     recorded (never silently removed). The report carries category->count, blocked category names,
     and the post-redaction residual count -- never a raw value or snippet.
+
+    When audit_mode=True: the audit-only VALUE redactors run FIRST (stripping payout amounts /
+    merge tokens / grant values while preserving their left-hand identifiers), then the four
+    AUDIT_STRUCTURAL_CATEGORIES are recorded (categories_hit) but NOT added to blocked_categories --
+    their bare identifier text is preserved as readable governance structure. All REDACT secret
+    detectors and the non-structural block categories (private_reasoning, private_key_residual)
+    behave exactly as in the default path, so no secret value can leak.
     """
     report = RedactionReport()
     if not isinstance(text, str):
@@ -212,19 +337,41 @@ def redact_text(text: object) -> Tuple[str, RedactionReport]:
     out = text
     counts: Dict[str, int] = {}
     blocked: List[str] = []
+    # Audit-only VALUE redactors first: strip RHS value/amount/token, keep the LHS identifier.
+    if audit_mode:
+        for cat, rx in _AUDIT_VALUE_REDACTORS:
+            n = sum(1 for _ in rx.finditer(out))
+            if not n:
+                continue
+            counts[cat] = counts.get(cat, 0) + n
+            # \1 preserves the captured "identifier:" LHS; the RHS value is replaced.
+            out = rx.sub(lambda m: m.group(1) + _PLACEHOLDER.format(cat=cat), out)
     for cat, rx, action in _DETECTORS:
+        # In audit mode the key-preserving audit variants above already redacted the
+        # VALUE for these key/value shapes (keeping the key name). Skipping the always-on
+        # versions here prevents them from re-swallowing the surviving `key = [REDACTED]`
+        # structure. The audit variants cover the identical key set, so no secret value
+        # can escape -- and every provider-specific secret pattern (sk-/AIza/ghp_/bearer/
+        # JWT/...) is a SEPARATE detector that stays fully active.
+        if audit_mode and cat in AUDIT_KEY_PRESERVING_SUPERSEDES:
+            continue
         n = sum(1 for _ in rx.finditer(out))
         if not n:
             continue
         counts[cat] = counts.get(cat, 0) + n
         if action == ACTION_BLOCK:
+            # In audit mode, structural governance identifiers are preserved (not blocked).
+            if audit_mode and cat in AUDIT_STRUCTURAL_CATEGORIES:
+                continue
             blocked.append(cat)
         else:
             out = rx.sub(_PLACEHOLDER.format(cat=cat), out)
     report.categories_hit = counts
     report.blocked_categories = tuple(sorted(set(blocked)))
     # post-redaction re-scan: any REDACT pattern still present, or any BLOCK marker present
-    report.residual_forbidden_count = len(scan_forbidden(out))
+    report.residual_forbidden_count = (
+        len(scan_forbidden(out, audit_mode=True)) if audit_mode else len(scan_forbidden(out))
+    )
     return out, report
 
 
@@ -233,22 +380,36 @@ def redact_text(text: object) -> Tuple[str, RedactionReport]:
 # ---------------------------------------------------------------------------
 
 
-def evaluate_redaction_gate(prompt: object, context: object = None) -> RedactionGateResult:
+def evaluate_redaction_gate(prompt: object, context: object = None, audit_mode: bool = False) -> RedactionGateResult:
     """Deterministic, FAIL-CLOSED gate.
 
     PASS requires: prompt (and context if given) are text, redaction ran without error, NO block
     category was detected, and the post-redaction re-scan residual count is 0. Any other case ->
     BLOCKED_PENDING_REDACTION_GATE. Digests are computed FROM THE REDACTED OUTPUT, not raw input.
+
+    audit_mode (default False -> byte-identical to the pre-slice-3 path): preserves the four
+    AUDIT_STRUCTURAL_CATEGORIES identifiers as readable governance structure while still redacting
+    every secret VALUE / payout AMOUNT / authorization TOKEN. Secret redaction is NEVER weakened.
     """
     try:
         if not isinstance(prompt, str) or (context is not None and not isinstance(context, str)):
             return _blocked(REASON_REDACTOR_ERROR, RedactionReport(error=True))
 
-        red_p, rep_p = redact_text(prompt)
-        if context is not None:
-            red_c, rep_c = redact_text(context)
+        # Call redact_text/scan_forbidden with the EXACT pre-slice-3 signature on the
+        # default path (no audit kwarg) so the non-audit behavior is byte-identical and
+        # single-arg monkeypatched doubles keep working. Only audit runs pass the kwarg.
+        if audit_mode:
+            red_p, rep_p = redact_text(prompt, audit_mode=True)
+            if context is not None:
+                red_c, rep_c = redact_text(context, audit_mode=True)
+            else:
+                red_c, rep_c = None, RedactionReport()
         else:
-            red_c, rep_c = None, RedactionReport()
+            red_p, rep_p = redact_text(prompt)
+            if context is not None:
+                red_c, rep_c = redact_text(context)
+            else:
+                red_c, rep_c = None, RedactionReport()
 
         merged = _merge_reports(rep_p, rep_c, context is not None)
         if rep_p.error or rep_c.error:
@@ -256,7 +417,12 @@ def evaluate_redaction_gate(prompt: object, context: object = None) -> Redaction
         if merged.blocked_categories:
             return _blocked(REASON_BLOCKED_POLICY, merged)
         # residual REDACT/BLOCK patterns left in the redacted output -> never pass dirty output
-        post = len(scan_forbidden(red_p)) + (len(scan_forbidden(red_c)) if context is not None else 0)
+        if audit_mode:
+            post = len(scan_forbidden(red_p, audit_mode=True)) + (
+                len(scan_forbidden(red_c, audit_mode=True)) if context is not None else 0
+            )
+        else:
+            post = len(scan_forbidden(red_p)) + (len(scan_forbidden(red_c)) if context is not None else 0)
         if post > 0:
             return _blocked(REASON_RESIDUAL, merged)
 
@@ -274,9 +440,9 @@ def evaluate_redaction_gate(prompt: object, context: object = None) -> Redaction
         return _blocked(REASON_REDACTOR_ERROR, RedactionReport(error=True))
 
 
-def redaction_status_for(prompt: object, context: object = None) -> str:
+def redaction_status_for(prompt: object, context: object = None, audit_mode: bool = False) -> str:
     """Convenience: return only the gate status string (PASSED or BLOCKED)."""
-    return evaluate_redaction_gate(prompt, context).status
+    return evaluate_redaction_gate(prompt, context, audit_mode=audit_mode).status
 
 
 def _blocked(reason: str, report: RedactionReport) -> RedactionGateResult:
@@ -317,6 +483,7 @@ __all__ = [
     "ACTION_BLOCK",
     "REDACT_CATEGORIES",
     "BLOCK_CATEGORIES",
+    "AUDIT_STRUCTURAL_CATEGORIES",
     "ALLOWED_REASONS",
     "REASON_CLEAN",
     "REASON_REDACTED",

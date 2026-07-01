@@ -24,6 +24,7 @@ import pytest
 
 from modules.communication.moltbot_bridge.src.fusion_redaction_gate import (
     ALLOWED_REASONS,
+    AUDIT_STRUCTURAL_CATEGORIES,
     BLOCK_CATEGORIES,
     REASON_BLOCKED_POLICY,
     REASON_CLEAN,
@@ -343,3 +344,185 @@ def test_no_leak_assertion_is_non_vacuous():
 def test_scan_forbidden_non_text_is_forbidden():
     assert scan_forbidden(123) == ["non_text_input"]
     assert scan_forbidden(None) == ["non_text_input"]
+
+
+# ---------------------------------------------------------------------------
+# AUDIT MODE lane (REDDOG_AUDIT_MODE_REDACTION_PHASE1, slice 3/3)
+#
+# audit_mode preserves STRUCTURAL governance identifiers (enum members, field
+# names, gate/action constants, WSP refs) while STILL redacting every secret
+# VALUE / payout AMOUNT / authorization TOKEN. Secret redaction is NEVER weakened.
+# All fixtures are SYNTHETIC (split-prefix) fakes -- no real secret.
+# ---------------------------------------------------------------------------
+
+# A realistic FoundUp governance snippet: enum, field list, action constants, WSP ref.
+_AUDIT_STRUCTURE_SAMPLE = (
+    "class SourceAuthority(str, enum.Enum):\n"
+    '    MONOREPO_POC = "monorepo_poc"\n'
+    '    EXTERNAL_PROTO = "external_proto"\n'
+    "requested_action: str = \"build_foundup\"\n"
+    "CANONICAL_ACTIONS = (\"build_foundup\", \"extract_foundup\")\n"
+    "# See WSP 109 onboarding intake. source_authority resolve convention; "
+    "merge_authorization gate ordering; cabr_payout_authority routing; "
+    "governance_instruction gate name.\n"
+    "FoundUpJob fields: requested_action, module_path, source_authority.\n"
+)
+
+
+def test_audit_mode_preserves_governance_structure():
+    res = evaluate_redaction_gate(_AUDIT_STRUCTURE_SAMPLE, audit_mode=True)
+    assert res.status == REDACTION_GATE_PASSED, res.report
+    out = res.redacted_prompt or ""
+    # enum + member identifiers preserved
+    assert "SourceAuthority" in out
+    assert "source_authority" in out
+    assert "MONOREPO_POC" in out
+    assert "EXTERNAL_PROTO" in out
+    # action-name constants + field names preserved
+    assert "build_foundup" in out
+    assert "extract_foundup" in out
+    assert "CANONICAL_ACTIONS" in out
+    assert "requested_action" in out
+    assert "module_path" in out
+    # structural governance gate names preserved (not value)
+    assert "merge_authorization" in out
+    assert "cabr_payout_authority" in out
+    assert "governance_instruction" in out
+    # WSP ref preserved
+    assert "WSP 109" in out
+
+
+def test_audit_mode_same_structure_blocks_in_default_mode():
+    # The identical content BLOCKS on the default (non-audit) path -- proves audit
+    # mode is what unblocks the structure, not a general weakening.
+    res = evaluate_redaction_gate(_AUDIT_STRUCTURE_SAMPLE, audit_mode=False)
+    assert res.status == REDACTION_BLOCKED
+    assert res.reason == REASON_BLOCKED_POLICY
+    assert "source_authority" in res.report.blocked_categories
+
+
+def test_audit_mode_still_redacts_fake_api_key():
+    # CRITICAL SAFETY TEST: a synthetic API key must STILL be redacted in audit mode.
+    secret = _SK + "FAKE" + "A" * 40
+    res = evaluate_redaction_gate("here is a loose key " + secret, audit_mode=True)
+    assert res.status == REDACTION_GATE_PASSED
+    out = res.redacted_prompt or ""
+    assert "[REDACTED" in out
+    assert secret not in out
+    assert scan_forbidden(out, audit_mode=True) == []
+
+
+def test_audit_mode_still_redacts_fake_oauth_token():
+    # Synthetic OAuth access token (ya29.*) -- STILL redacted in audit mode.
+    token = "ya29." + "F" * 44
+    res = evaluate_redaction_gate("token=" + token, audit_mode=True)
+    assert res.status == REDACTION_GATE_PASSED
+    out = res.redacted_prompt or ""
+    assert token not in out
+    assert "F" * 44 not in out
+
+
+def test_audit_mode_redacts_cabr_payout_amount_keeps_identifier():
+    res = evaluate_redaction_gate("cabr_payout = 12500.50 approved", audit_mode=True)
+    assert res.status == REDACTION_GATE_PASSED
+    out = res.redacted_prompt or ""
+    # identifier kept, numeric AMOUNT gone
+    assert "cabr_payout" in out
+    assert "12500.50" not in out
+    assert "[REDACTED" in out
+
+
+def test_audit_mode_redacts_merge_authorization_token_keeps_gate_name():
+    # Preserve that a merge gate EXISTS + its name; redact any authorization token value.
+    grant = "gh" "p_" + "T" * 36
+    res = evaluate_redaction_gate("merge_authorization = " + grant, audit_mode=True)
+    assert res.status == REDACTION_GATE_PASSED
+    out = res.redacted_prompt or ""
+    assert "merge_authorization" in out   # gate name kept (structure)
+    assert grant not in out               # token value gone
+    assert "T" * 36 not in out
+
+
+def test_audit_mode_private_reasoning_still_blocks():
+    # private_reasoning free-text is NEVER relaxed by audit mode.
+    res = evaluate_redaction_gate("prefix <thinking> hidden plan </thinking> suffix", audit_mode=True)
+    assert res.status == REDACTION_BLOCKED
+    assert "private_reasoning" in res.report.blocked_categories
+
+
+def test_audit_mode_malformed_private_key_still_blocks():
+    # Ambiguous (header, no END) -> cannot confidently redact -> still BLOCKS in audit mode.
+    res = evaluate_redaction_gate(_PK_BEGIN + "\n" + "M" * 40, audit_mode=True)
+    assert res.status == REDACTION_BLOCKED
+    assert "private_key_residual" in res.report.blocked_categories
+
+
+def test_audit_mode_mixed_line_keeps_key_redacts_value():
+    # ACCEPTANCE fixture: `api_key = "sk-FAKE123"` -> key name kept, value redacted.
+    secret = _SK + "FAKE123" + "B" * 30
+    res = evaluate_redaction_gate('api_key = "' + secret + '"', audit_mode=True)
+    assert res.status == REDACTION_GATE_PASSED
+    out = res.redacted_prompt or ""
+    assert "api_key" in out               # key/identifier kept (structure)
+    assert secret not in out              # value redacted
+    assert "FAKE123" not in out
+    assert "[REDACTED" in out
+
+
+def test_audit_mode_generic_secret_kv_value_still_removed():
+    # A non-provider-shaped value only caught by the secret_kv shape must still be
+    # removed by the key-preserving audit variant (safety net preserved).
+    res = evaluate_redaction_gate("password = hunter2topsecretvalue", audit_mode=True)
+    assert res.status == REDACTION_GATE_PASSED
+    out = res.redacted_prompt or ""
+    assert "password" in out
+    assert "hunter2topsecretvalue" not in out
+
+
+def test_audit_mode_combined_structure_and_secret():
+    # A payload with BOTH governance structure AND a fake secret: structure survives,
+    # secret is redacted, gate PASSES (this is the slice-3 acceptance shape).
+    secret = _SK + "MIXED" + "C" * 40
+    payload = _AUDIT_STRUCTURE_SAMPLE + '\napi_key = "' + secret + '"\n'
+    res = evaluate_redaction_gate(payload, audit_mode=True)
+    assert res.status == REDACTION_GATE_PASSED, res.report
+    out = res.redacted_prompt or ""
+    assert "SourceAuthority" in out and "build_foundup" in out
+    assert secret not in out
+    assert scan_forbidden(out, audit_mode=True) == []
+
+
+def test_audit_mode_off_is_byte_identical_default():
+    # Backward-compat: audit_mode=False (default) must equal an explicit False AND the
+    # no-kwarg call, for structure (blocks), secrets (redact), and clean text.
+    samples = [
+        _AUDIT_STRUCTURE_SAMPLE,
+        _SK + "A" * 48,
+        "password = hunter2topsecretvalue",
+        "ordinary prompt about ramen shops in tokyo",
+        "source_authority = x",
+    ]
+    for s in samples:
+        default = evaluate_redaction_gate(s)
+        explicit_false = evaluate_redaction_gate(s, audit_mode=False)
+        assert default.status == explicit_false.status
+        assert default.reason == explicit_false.reason
+        assert default.redacted_prompt == explicit_false.redacted_prompt
+        assert default.report.blocked_categories == explicit_false.report.blocked_categories
+
+
+def test_audit_structural_categories_are_subset_of_block():
+    # The audit-visible structural set must be a strict subset of BLOCK categories and
+    # must NOT include private_reasoning or private_key_residual (never relaxed).
+    assert AUDIT_STRUCTURAL_CATEGORIES.issubset(set(BLOCK_CATEGORIES))
+    assert "private_reasoning" not in AUDIT_STRUCTURAL_CATEGORIES
+    assert "private_key_residual" not in AUDIT_STRUCTURAL_CATEGORIES
+
+
+def test_audit_mode_makes_zero_network(monkeypatch):
+    def _boom(*a, **k):
+        raise AssertionError("network attempted by redaction gate in audit mode")
+
+    monkeypatch.setattr(socket, "socket", _boom)
+    evaluate_redaction_gate(_AUDIT_STRUCTURE_SAMPLE, audit_mode=True)
+    evaluate_redaction_gate(_SK + "A" * 48, audit_mode=True)
