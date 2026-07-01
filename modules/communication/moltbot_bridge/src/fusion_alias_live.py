@@ -181,14 +181,22 @@ def run_alias_live(
     slice_id: Optional[str] = None,
     timeout_seconds: int = DEFAULT_TIMEOUT_SECONDS,
     max_tokens: int = DEFAULT_MAX_TOKENS,
+    audit_context: bool = False,
 ) -> AliasLiveResult:
     """Run a redacted, valve-gated, advisory-only ALIAS call. Makes NO call unless every gate opens.
 
     Precedence (fail-closed): redaction gate PASSED -> env flag ON -> typed 012 authorization ->
     API key present -> budget within bounds -> ONE bounded POST. Any failure -> blocked, no raw leak.
+
+    audit_context (REDDOG_AUDIT_MODE_REDACTION_PHASE1, slice 3/3, default False -> live behavior
+    byte-identical): when the caller is an audit-context retrieval (slice-2 direct-read fallback
+    fetched required governance targets), the redaction gate runs in audit_mode so STRUCTURAL
+    governance identifiers survive while every secret VALUE / payout AMOUNT / authorization TOKEN
+    is still redacted. Secret redaction is NEVER weakened; the request body is always built from the
+    REDACTED text only.
     """
     # 1. Redact on entry. Raw prompt/context are used ONLY to compute the gate result and never stored.
-    gate = evaluate_redaction_gate(prompt, context)
+    gate = evaluate_redaction_gate(prompt, context, audit_mode=bool(audit_context))
     if not gate.passed:
         return _blocked(REASON_REDACTION_BLOCKED)  # BLOCK category / dirty -> no request body is built
 

@@ -1,5 +1,28 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-01: REDDOG_AUDIT_MODE_REDACTION_PHASE1 (slice 3/3)
+
+**Slice:** Audit-mode redaction preserves governance STRUCTURE while still redacting VALUES
+**WSP:** WSP_11, WSP_50, WSP_84, WSP_97, WSP_22
+**Stacked on:** slice 2 (#907, feat/reddog-direct-read-fallback-by-path-phase1)
+
+- EDIT `src/fusion_redaction_gate.py` -- add `audit_mode` param to `evaluate_redaction_gate`,
+  `redaction_status_for`, `redact_text`, `scan_forbidden` (default `False` -> non-audit path
+  byte-identical). Add `AUDIT_STRUCTURAL_CATEGORIES` (source_authority / merge_authorization /
+  cabr_payout_authority / governance_instruction) made audit-visible, plus audit-only VALUE
+  redactors (payout amounts, merge tokens, grant values, key-preserving secret_kv/env_secret_line).
+- FIX over-sanitization from the FoundUp-creation run trace: those four BLOCK categories matched on
+  the bare identifier and stripped the governance STRUCTURE a governance audit must read.
+- SAFETY (non-negotiable): audit mode NEVER relaxes `private_reasoning`, `private_key_residual`, or
+  any REDACT category. Fake API key / OAuth token / payout amount / merge token STILL `[REDACTED]`.
+- EDIT `src/fusion_alias_live.py` -- add `audit_context=False` to `run_alias_live`, threaded into the
+  entry gate (`audit_mode=`); default keeps the live path byte-identical.
+- ADD 14 audit-mode tests in `tests/test_fusion_redaction_gate.py` (structure preserved, secrets
+  still redacted, backward-compat byte-identical). 79/79 pass (65 prior + 14 new).
+- Extension surfaces `audit_context=true` from `buildDirectReadContentSection` when slice-2 direct-read
+  fetched required governance targets (extensions/foundups_advisory_workers); DRF-008/009 contract
+  proofs added. No detector/fetch/allowlist change; no execution/write/shell-out authority.
+
 ## 2026-06-28: REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_PHASE1
 
 **Slice:** OpenClaw FoundUpJob adapter dry-run planner (propose only, no enqueue)

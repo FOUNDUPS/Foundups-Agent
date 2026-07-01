@@ -46,6 +46,34 @@ function assertFusionRedactionGatePasses(contextText, label) {
   assert.strictEqual(out, 'PASSED', label || 'bounded context must pass fusion redaction gate');
 }
 
+// Audit-mode gate probe (REDDOG_AUDIT_MODE_REDACTION_PHASE1, slice 3/3): runs the
+// egress redaction gate with audit_mode=True and returns the REDACTED context so the
+// caller can assert (a) it PASSED, (b) governance STRUCTURE survived, (c) secret
+// VALUES are gone. Fails the test if the gate blocks.
+function fusionRedactionGateAuditMode(contextText, label) {
+  const script = [
+    'import sys, json',
+    'from modules.communication.moltbot_bridge.src.fusion_redaction_gate import evaluate_redaction_gate, REDACTION_GATE_PASSED',
+    'ctx = sys.stdin.buffer.read().decode("utf-8", errors="replace")',
+    'r = evaluate_redaction_gate("012 work focus digest placeholder for gate probe", ctx, audit_mode=True)',
+    'if r.status != REDACTION_GATE_PASSED:',
+    '    cats = ",".join(r.report.blocked_categories)',
+    '    print("BLOCKED:" + r.reason + ":" + cats)',
+    '    sys.exit(1)',
+    'sys.stdout.write(json.dumps({"redacted_context": r.redacted_context or ""}))'
+  ].join('\n');
+  const out = cp.execFileSync('python', ['-B', '-c', script], {
+    cwd: root,
+    input: Buffer.from(String(contextText || ''), 'utf8'),
+    encoding: 'utf8',
+    timeout: 30000,
+    maxBuffer: 1024 * 1024,
+    env: Object.assign({}, process.env, { PYTHONIOENCODING: 'utf-8', PYTHONUTF8: '1' })
+  }).trim();
+  assert(!out.startsWith('BLOCKED:'), (label || 'audit-mode gate') + ' must PASS in audit mode: ' + out);
+  return JSON.parse(out).redacted_context;
+}
+
 function extractTargetRecallSection(contextText) {
   const marker = '### Target recall content';
   const start = String(contextText || '').indexOf(marker);
@@ -83,8 +111,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.30', 'package version must be 0.3.30');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.30'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.31', 'package version must be 0.3.31');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.31'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -101,7 +129,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.30', 'README version mismatch');
+includes(readme, 'Version: 0.3.31', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -881,8 +909,40 @@ try {
   drfGovBlocked = true;
   drfGovCategory = String((govErr && govErr.stdout) || '');
 }
-assert(drfGovBlocked, 'DRF-007: governance-adjacent fetched content must STILL be blocked by the unchanged redaction gate (slice-3 owns relaxation)');
-includes(drfGovCategory, 'source_authority', 'DRF-007: the existing source_authority category must still fire (no category change in slice 2)');
+assert(drfGovBlocked, 'DRF-007: governance-adjacent fetched content must STILL be blocked by the DEFAULT redaction gate (audit-mode is opt-in)');
+includes(drfGovCategory, 'source_authority', 'DRF-007: the existing source_authority category must still fire on the default (non-audit) path');
+
+// DRF-008 (REDDOG_AUDIT_MODE_REDACTION_PHASE1, slice 3/3): the SAME governance-adjacent
+// fetched content that DRF-007 shows BLOCKS by default now PASSES in audit_mode with the
+// governance STRUCTURE preserved. Direct-read of required targets IS an audit context, so
+// buildDirectReadContentSection surfaces audit_context=true.
+assert.strictEqual(drfGovSection.audit_context, true, 'DRF-008: direct-read of required targets must surface audit_context=true');
+assert.strictEqual(drfEmptySection.audit_context, false, 'DRF-008: no direct-read => audit_context stays false (backward compatible)');
+const drfAuditRedacted = fusionRedactionGateAuditMode(drfGovSection.text, 'DRF-008 audit-mode gate');
+includes(drfAuditRedacted, 'SourceAuthority', 'DRF-008: audit-mode must preserve the SourceAuthority enum identifier');
+includes(drfAuditRedacted, 'source_authority', 'DRF-008: audit-mode must preserve the source_authority field name');
+
+// DRF-009: CRITICAL SAFETY. In audit-mode a SYNTHETIC secret embedded in fetched content
+// is STILL redacted (structure readable != secret readable). Fake key is split-prefixed so
+// no literal provider secret is committed to this test source.
+const _drfFakeKey = ('s' + 'k-') + 'FAKE' + 'Z'.repeat(44);
+const drfSecretBundle = JSON.stringify({
+  task_retrieval: {
+    code_hits: [
+      { location: 'modules/foundups/agent/src/source_authority.py', need: 'direct-read target', direct_read: true,
+        content: 'class SourceAuthority(str, enum.Enum):\n    MONOREPO_POC = "monorepo_poc"\napi_key = "' + _drfFakeKey + '"\ncabr_payout = 12500.50', content_truncated: false }
+    ],
+    metadata: { code_count: 1, wsp_count: 0 }
+  }
+});
+const drfSecretSection = orchestrator.buildDirectReadContentSection(drfSecretBundle);
+const drfSecretRedacted = fusionRedactionGateAuditMode(drfSecretSection.text, 'DRF-009 audit-mode gate');
+includes(drfSecretRedacted, 'SourceAuthority', 'DRF-009: audit-mode keeps governance structure readable');
+includes(drfSecretRedacted, 'MONOREPO_POC', 'DRF-009: audit-mode keeps enum member readable');
+includes(drfSecretRedacted, 'cabr_payout', 'DRF-009: audit-mode keeps the payout identifier readable');
+assert(!drfSecretRedacted.includes(_drfFakeKey), 'DRF-009: SECRET VALUE must STILL be redacted in audit mode (no under-redaction)');
+assert(!drfSecretRedacted.includes('12500.50'), 'DRF-009: payout AMOUNT must STILL be redacted in audit mode');
+includes(drfSecretRedacted, '[REDACTED', 'DRF-009: redaction placeholder must be present for the stripped value');
 
 includes(blockedCopy, '## Governed Handoff Recommendation', 'substantive task must include governed handoff recommendation');
 includes(blockedCopy, 'handoff_needed: unknown', 'blocked-local packet must use conservative handoff_needed');
@@ -950,7 +1010,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.30'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.31'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -964,7 +1024,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.30'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.31'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -976,7 +1036,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.30'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.31'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');

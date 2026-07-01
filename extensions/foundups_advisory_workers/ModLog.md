@@ -2,6 +2,34 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-02 - Version bump to 0.3.31 (REDDOG_AUDIT_MODE_REDACTION_PHASE1, slice 3/3)
+
+- Mechanical build-label bump 0.3.30 -> 0.3.31 across LIVE version surfaces.
+- Surfaces: `package.json`, `extension.js` (`EXTENSION_VERSION`), `README.md` header,
+  `tests/verify_extension_contract.js` LIVE-version assertions.
+
+WSP: WSP_22.
+
+## 2026-07-01 - REDDOG_AUDIT_MODE_REDACTION_PHASE1 (slice 3/3, structure-preserving redaction)
+
+- Files: `modules/communication/moltbot_bridge/src/fusion_redaction_gate.py` (audit_mode + structural
+  categories + audit value redactors), `.../src/fusion_alias_live.py` (`audit_context` param),
+  `extensions/foundups_advisory_workers/extension.js` (`buildDirectReadContentSection` surfaces
+  `audit_context=true` when slice-2 direct-read fetched required governance targets).
+- Goal: fix the FoundUp-creation over-sanitization -- `source_authority`, `merge_authorization`,
+  `cabr_payout_authority`, `governance_instruction` matched on the bare identifier and BLOCKED the whole
+  fetched payload, hiding the enum members / field names / gate ordering a governance audit must read.
+- Value-vs-structure line: audit_mode PRESERVES identifiers (enum members `SourceAuthority.MONOREPO_POC`,
+  field names, `CANONICAL_ACTIONS` incl. `build_foundup`/`extract_foundup`, valve gate names, WSP refs)
+  and STILL REDACTS every secret VALUE / payout AMOUNT / authorization TOKEN / private_reasoning free-text.
+- SAFETY: audit_mode never relaxes `private_reasoning`, `private_key_residual`, or any REDACT category.
+  Fake `sk-...` key / OAuth token / payout amount / merge token remain `[REDACTED]` in audit mode.
+- Trigger: OFF by default (backward compatible; non-audit path byte-identical). ON only for audit-context
+  retrieval (direct-read of required targets). No detector/fetch/allowlist change; no execution/write/shell.
+- Tests: 14 audit-mode unit tests in `modules/communication/moltbot_bridge/tests/test_fusion_redaction_gate.py`
+  (79/79 pass); DRF-008 (structure readable in audit mode) + DRF-009 (secret STILL redacted) in
+  `tests/verify_extension_contract.js`. INTERFACE truth-boundary rows 27-32 added (32/32 YES).
+
 ## 2026-07-02 - Version bump to 0.3.30 (REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1, slice 2/3)
 
 - Mechanical build-label bump 0.3.29 -> 0.3.30 across LIVE version surfaces.
