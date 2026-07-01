@@ -2,7 +2,15 @@
 
 # ModLog - Foundups®Agent Extension
 
-## 2026-06-28 - REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1 (audit doc)
+## 2026-06-28 - REDDOG_WRE_EXECUTION_VALVE_PHASE1 (extension pointers)
+
+- Module: `modules/communication/moltbot_bridge/src/reddog_wre_execution_valve.py`
+- `evaluate_reddog_execution_valve()` -- closed-by-default; pure evaluation only.
+- Contract: `docs/audits/architecture/REDDOG_WRE_EXECUTION_VALVE_CONTRACT_PHASE1.md`
+
+WSP: WSP_00, WSP_15, WSP_50, WSP_97, WSP_22.
+
+## 2026-06-28 - REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1 (LANDED #901)
 
 - Canonical: `docs/audits/architecture/REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1.md`
 - Ruling: OpenClaw Supervisor / FoundUpJob intake is canonical; AssignmentDispatcher is simulated scaffold only.

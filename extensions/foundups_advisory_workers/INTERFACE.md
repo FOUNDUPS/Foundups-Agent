@@ -87,6 +87,8 @@ RedDog is the 0102 architect interface — **not an authority owner**. RedDog re
 
 **OpenClaw handoff adapter (contract only):** `docs/audits/architecture/REDDOG_WORK_ORDER_TO_OPENCLAW_FOUNDUPJOB_ADAPTER_CONTRACT_PHASE1.md` — RedDog → FoundUpJob mapping; OpenClaw owns worker loop; **AssignmentDispatcher not canonical**.
 
+**WRE execution valve:** `modules/communication/moltbot_bridge/src/reddog_wre_execution_valve.py` -- `evaluate_reddog_execution_valve()`; default `VALVE_CLOSED`; pure evaluation only. Contract: `docs/audits/architecture/REDDOG_WRE_EXECUTION_VALVE_CONTRACT_PHASE1.md`.
+
 **Specified flow (not implemented in extension v0.3.27):**
 
 ```text
