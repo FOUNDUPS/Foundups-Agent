@@ -59,6 +59,26 @@ const REPAIR_TAIL_SUPPLEMENT = [
   '012 confirms Run Trace shows repair_minimal + openrouter_single, then land if validation passes.'
 ].join('\n\n');
 
+// REDDOG_TARGET_RECALL_PATH_AWARE_PHASE1 (slice 1/3): a FoundUp-creation audit
+// prompt carrying an explicit "Required direct-read targets" list. The detector
+// must honestly report index_gap_detected when none of these are recalled.
+const FOUNDUP_REQUIRED_TARGETS = [
+  'WSP_framework/src/WSP_109_FoundUp_Onboarding_Protocol.md',
+  'modules/infrastructure/openclaw/src/openclaw_foundup_orchestrator.py',
+  'modules/communication/moltbot_bridge/src/hermes_foundup_job_executor.py'
+];
+
+const FOUNDUP_CREATION_PROMPT = [
+  'Audit the FoundUp creation monorepo WSP_109 execution path.',
+  '',
+  'Required direct-read targets:',
+  '- ' + FOUNDUP_REQUIRED_TARGETS[0],
+  '- ' + FOUNDUP_REQUIRED_TARGETS[1],
+  '- ' + FOUNDUP_REQUIRED_TARGETS[2],
+  '',
+  'Produce required RedDog architect output sections per contract.'
+].join('\n');
+
 const TARGET_READ_DENIED_PATHS = [
   ['C:/Windows/System32/drivers/etc/hosts', 'absolute path'],
   ['../outside.txt', 'traversal'],
@@ -79,5 +99,7 @@ module.exports = {
   REPAIR_DRAFT_WITH_BLOCK_LITERALS,
   REPAIR_SUPPLEMENT_SECTIONS,
   REPAIR_TAIL_SUPPLEMENT,
-  TARGET_READ_DENIED_PATHS
+  TARGET_READ_DENIED_PATHS,
+  FOUNDUP_REQUIRED_TARGETS,
+  FOUNDUP_CREATION_PROMPT
 };

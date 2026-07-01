@@ -687,6 +687,91 @@ const recallMiss = orchestrator.evaluateTargetRecall('Review extensions/foundups
 });
 assert.strictEqual(recallMiss.target_recall_ok, false, 'target recall must fail when only adjacent paths hit');
 assert.strictEqual(recallMiss.index_gap_detected, true, 'index_gap must be true on target-specific miss');
+
+// REDDOG_TARGET_RECALL_PATH_AWARE_PHASE1 (slice 1/3): path-aware required-target detector.
+includes(extensionJs, 'function parseRequiredTargetPaths', 'required-target parser missing');
+includes(extensionJs, 'function isSelfFileLocation', 'self-file guard missing');
+includes(extensionJs, 'required_targets_total', 'required_targets_total scorecard field missing');
+includes(extensionJs, 'required_targets_recalled', 'required_targets_recalled scorecard field missing');
+includes(extensionJs, 'required_targets_missing', 'required_targets_missing scorecard field missing');
+
+// TRP-001: explicit required list is parsed into repo-relative paths.
+const trpParsed = orchestrator.parseRequiredTargetPaths(fixtures.FOUNDUP_CREATION_PROMPT);
+assert.strictEqual(trpParsed.length, fixtures.FOUNDUP_REQUIRED_TARGETS.length, 'TRP-001: parser must recover every required target');
+for (const req of fixtures.FOUNDUP_REQUIRED_TARGETS) {
+  assert(trpParsed.includes(req), 'TRP-001: parser must include ' + req);
+}
+assert.strictEqual(orchestrator.parseRequiredTargetPaths('Review extension.js for WSP_97').length, 0, 'TRP-001: no required list => empty parse (backward compatible)');
+
+// TRP-002: 0 of N required targets in bundle => honest blind report.
+const trpMissAll = orchestrator.evaluateTargetRecall(fixtures.FOUNDUP_CREATION_PROMPT, {
+  task_retrieval: { code_hits: [{ location: 'docs/unrelated.md', need: 'path match: unrelated.md' }] }
+});
+assert.strictEqual(trpMissAll.index_gap_detected, true, 'TRP-002: 0/N required must set index_gap_detected=true');
+assert.strictEqual(trpMissAll.target_recall_ok, false, 'TRP-002: 0/N required must set target_recall_ok=false');
+assert.strictEqual(trpMissAll.required_targets_total, fixtures.FOUNDUP_REQUIRED_TARGETS.length, 'TRP-002: required_targets_total must equal N');
+assert.strictEqual(trpMissAll.required_targets_recalled, 0, 'TRP-002: required_targets_recalled must be 0');
+assert.strictEqual(trpMissAll.required_targets_missing.length, fixtures.FOUNDUP_REQUIRED_TARGETS.length, 'TRP-002: all required must be missing');
+for (const req of fixtures.FOUNDUP_REQUIRED_TARGETS) {
+  assert(trpMissAll.required_targets_missing.includes(req), 'TRP-002: missing list must name ' + req);
+}
+
+// TRP-003: self-file guard - retrieving ONLY extension.js must NOT satisfy required targets.
+const trpSelfOnly = orchestrator.evaluateTargetRecall(fixtures.FOUNDUP_CREATION_PROMPT, {
+  task_retrieval: { code_hits: [{ location: 'extensions/foundups_advisory_workers/extension.js', need: 'path match: extension.js' }] }
+});
+assert.strictEqual(trpSelfOnly.index_gap_detected, true, 'TRP-003: self-file only must set index_gap_detected=true');
+assert.strictEqual(trpSelfOnly.required_targets_recalled, 0, 'TRP-003: self-file must not count toward required recall');
+assert(orchestrator.isSelfFileLocation('extensions/foundups_advisory_workers/extension.js'), 'TRP-003: extension.js path must be self-file');
+assert(orchestrator.isSelfFileLocation('some/other/extension.js'), 'TRP-003: extension.js basename must be self-file');
+assert(!orchestrator.isSelfFileLocation('WSP_framework/src/WSP_109_FoundUp_Onboarding_Protocol.md'), 'TRP-003: required target must not be self-file');
+
+// TRP-004: all required targets present in content => honest satisfied report.
+const trpAllPresent = orchestrator.evaluateTargetRecall(fixtures.FOUNDUP_CREATION_PROMPT, {
+  task_retrieval: { code_hits: fixtures.FOUNDUP_REQUIRED_TARGETS.map((p) => ({ location: p, need: 'path match: ' + p })) }
+});
+assert.strictEqual(trpAllPresent.index_gap_detected, false, 'TRP-004: all required present must set index_gap_detected=false');
+assert.strictEqual(trpAllPresent.target_recall_ok, true, 'TRP-004: all required present must set target_recall_ok=true');
+assert.strictEqual(trpAllPresent.required_targets_recalled, fixtures.FOUNDUP_REQUIRED_TARGETS.length, 'TRP-004: required_targets_recalled must equal N');
+assert.strictEqual(trpAllPresent.required_targets_missing.length, 0, 'TRP-004: no required target may be missing');
+
+// TRP-005: self-file plus required targets present => required still satisfied (self-file ignored, not penalized).
+const trpMixed = orchestrator.evaluateTargetRecall(fixtures.FOUNDUP_CREATION_PROMPT, {
+  task_retrieval: { code_hits: [{ location: 'extensions/foundups_advisory_workers/extension.js', need: 'self' }].concat(
+    fixtures.FOUNDUP_REQUIRED_TARGETS.map((p) => ({ location: p, need: 'path match: ' + p }))
+  ) }
+});
+assert.strictEqual(trpMixed.target_recall_ok, true, 'TRP-005: self-file alongside required targets must still satisfy recall');
+assert.strictEqual(trpMixed.required_targets_recalled, fixtures.FOUNDUP_REQUIRED_TARGETS.length, 'TRP-005: self-file must not reduce recalled count');
+
+// TRP-006: backward-compat - no required list preserves prior inference behavior and never claims unknown as a gap.
+const trpLegacy = orchestrator.evaluateTargetRecall('Review extensions/foundups_advisory_workers/extension.js for WSP_97', {
+  task_retrieval: { code_hits: [{ location: 'extensions/foundups_advisory_workers/extension.js', need: 'path match: extension.js' }] }
+});
+assert.strictEqual(trpLegacy.target_recall_ok, true, 'TRP-006: legacy inferred recall must still pass');
+assert.strictEqual(trpLegacy.index_gap_detected, false, 'TRP-006: legacy inferred recall must not flag gap');
+assert.strictEqual(trpLegacy.required_targets_total, 0, 'TRP-006: legacy path reports zero required targets');
+
+const trpEmptyMeta = orchestrator.evaluateTargetRecall('generic task with no targets', { task_retrieval: { code_hits: [] } });
+assert.strictEqual(trpEmptyMeta.target_recall_ok, 'unknown', 'TRP-006: no targets at all must remain unknown, not a false gap');
+assert.strictEqual(trpEmptyMeta.index_gap_detected, false, 'TRP-006: unknown recall must not fabricate a gap');
+
+// TRP-007: scorecard surfaces the truthful required-target vocabulary for the blind case.
+const trpScorecard = orchestrator.extractHoloIndexScorecard('wsp_holo', {
+  target_recall_ok: false,
+  index_gap_detected: true,
+  required_targets_total: 3,
+  required_targets_recalled: 0,
+  required_targets_missing: fixtures.FOUNDUP_REQUIRED_TARGETS.slice()
+});
+const trpScorecardLines = orchestrator.formatHoloIndexScorecardLines(trpScorecard).join('\n');
+assert.strictEqual(trpScorecard.required_targets_total, 3, 'TRP-007: scorecard required_targets_total must pass through');
+assert.strictEqual(trpScorecard.required_targets_recalled, 0, 'TRP-007: scorecard required_targets_recalled must pass through');
+assert(Array.isArray(trpScorecard.required_targets_missing) && trpScorecard.required_targets_missing.length === 3, 'TRP-007: scorecard required_targets_missing must be preserved');
+includes(trpScorecardLines, '- required_targets_total: 3', 'TRP-007: rendered scorecard must show required_targets_total');
+includes(trpScorecardLines, '- required_targets_recalled: 0', 'TRP-007: rendered scorecard must show required_targets_recalled');
+includes(trpScorecardLines, '- required_targets_missing: ', 'TRP-007: rendered scorecard must show required_targets_missing');
+
 includes(blockedCopy, '## Governed Handoff Recommendation', 'substantive task must include governed handoff recommendation');
 includes(blockedCopy, 'handoff_needed: unknown', 'blocked-local packet must use conservative handoff_needed');
 includes(blockedCopy, 'reason: blocked_context_needs_local_0102_review', 'blocked-local packet must include conservative handoff reason');

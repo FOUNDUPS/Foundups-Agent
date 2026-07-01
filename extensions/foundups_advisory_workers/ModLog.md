@@ -2,6 +2,26 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-01 - REDDOG_TARGET_RECALL_PATH_AWARE_PHASE1 (slice 1/3, detector only)
+
+- File: `extensions/foundups_advisory_workers/extension.js`
+- Problem: on the FoundUp-creation audit run, the run trace reported `index_gap_detected: false` even though
+  none of the 20+ required direct-read targets were retrieved. The only retrieved file was `extension.js`
+  (RedDog itself), and that "content included" falsely satisfied the recall check
+  (`content_included(any file) != required_targets_recalled`).
+- Fix (detector only): `parseRequiredTargetPaths()` parses an explicit "Required direct-read targets" prompt
+  list into repo-relative paths/globs; `evaluateTargetRecall()` now compares that list against content-bearing
+  bundle locations, with a self-file guard (`isSelfFileLocation()`) so retrieving `extension.js` never counts.
+- New truthful scorecard/telemetry fields: `required_targets_total`, `required_targets_recalled`,
+  `required_targets_missing`, honest `target_recall_ok` and `index_gap_detected`
+  (never `unknown` when a required list exists).
+- Backward compatible: prompts with no required-target list preserve prior inferred-target behavior.
+- No file-read added (slice 2), no redaction-category change (slice 3). Advisory boundary preserved.
+- Tests: `holo_index/tests/test_reddog_extension_bundle_recall.py` (4 new: 0/N gap, self-file guard, all-present,
+  backward-compat) + `tests/verify_extension_contract.js` (TRP-001..007 scorecard vocabulary).
+
+WSP: WSP_00, WSP_15, WSP_50, WSP_97, WSP_22.
+
 ## 2026-06-28 - REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_PHASE1 (extension pointers)
 
 - Module: `modules/communication/moltbot_bridge/src/reddog_openclaw_adapter_dryrun.py`

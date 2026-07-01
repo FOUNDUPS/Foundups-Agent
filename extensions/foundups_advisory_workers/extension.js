@@ -337,6 +337,128 @@ function resolveProviderReasoningReport(resolvedEffort) {
   };
 }
 
+// Self-file guard: retrieving RedDog itself (or the module-under-audit shell)
+// must never count toward required-target recall. This was the false-positive
+// source in REDDOG_HOLOINDEX_INDEX_GAP_ARCHITECT_REVIEW_PHASE1 where retrieving
+// extension.js falsely satisfied the recall check.
+const TARGET_RECALL_SELF_FILE_BASENAMES = ['extension.js'];
+const TARGET_RECALL_SELF_FILE_PATHS = ['extensions/foundups_advisory_workers/extension.js'];
+
+// Header lines that introduce an explicit required-direct-read-target list in a
+// 012 work focus / prompt. Matched case-insensitively; list items follow until a
+// blank line or a non-list line.
+const REQUIRED_TARGET_HEADER_PATTERNS = [
+  /required\s+direct[\s_-]?read\s+targets?/i,
+  /required\s+read\s+targets?/i,
+  /direct[\s_-]?read\s+targets?\s*(?:\(required\))?/i
+];
+
+function normalizeTargetPath(raw) {
+  return String(raw || '')
+    .replace(/\\/g, '/')
+    .replace(/^[`'"(\[]+/, '')
+    .replace(/[`'")\].,;:]+$/, '')
+    .trim();
+}
+
+// Extract repo-relative path/glob tokens from a single list line. A line may hold
+// one path or a slash-delimited "a / b / c" alternatives list (as prompts often
+// phrase them). Symbol tokens (symbol:foo) are preserved verbatim.
+function extractTargetTokensFromLine(line) {
+  const tokens = [];
+  const body = normalizeTargetPath(line);
+  if (!body) {
+    return tokens;
+  }
+  if (/^symbol:/i.test(body)) {
+    tokens.push('symbol:' + body.slice(7).trim());
+    return tokens;
+  }
+  // Split on whitespace-padded slashes used as "or" separators, or on commas,
+  // while keeping intra-path slashes intact (those have no surrounding spaces).
+  const parts = body.split(/\s*(?:,|\s\/\s|\bor\b)\s*/i);
+  for (const part of parts) {
+    const candidate = normalizeTargetPath(part);
+    if (!candidate) {
+      continue;
+    }
+    // A target must look like a path/glob or a bare source filename.
+    if (/[\/]/.test(candidate) || /\.[a-z0-9]{1,6}$/i.test(candidate) || /[*?]/.test(candidate)) {
+      tokens.push(candidate);
+    }
+  }
+  return tokens;
+}
+
+// Parse an explicit "Required direct-read targets" section from prompt text into
+// a de-duplicated list of repo-relative paths/globs. Returns [] when no such
+// section is present (backward compatible: callers then fall back to inference).
+function parseRequiredTargetPaths(taskText) {
+  const text = String(taskText || '');
+  const lines = text.split(/\r?\n/);
+  const targets = [];
+  const seen = new Set();
+  let capturing = false;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const stripped = line.trim();
+    if (!capturing) {
+      if (REQUIRED_TARGET_HEADER_PATTERNS.some((pattern) => pattern.test(stripped))) {
+        capturing = true;
+        // Header may itself carry inline targets after a colon.
+        const colonIdx = stripped.indexOf(':');
+        if (colonIdx !== -1) {
+          const inline = stripped.slice(colonIdx + 1);
+          for (const token of extractTargetTokensFromLine(inline)) {
+            const norm = token.toLowerCase();
+            if (!seen.has(norm)) {
+              seen.add(norm);
+              targets.push(token);
+            }
+          }
+        }
+      }
+      continue;
+    }
+    // Capturing mode: stop at a blank line (end of list block).
+    if (!stripped) {
+      break;
+    }
+    // Only consume list-style lines (-, *, digit., or bare path). Stop if a new
+    // prose header appears before any list content is a paragraph, not a target.
+    const listMatch = stripped.match(/^(?:[-*+]|\d+[.)])\s+(.*)$/);
+    const itemText = listMatch ? listMatch[1] : stripped;
+    const tokens = extractTargetTokensFromLine(itemText);
+    if (!tokens.length) {
+      // A non-list, non-path line ends the section.
+      if (!listMatch) {
+        break;
+      }
+      continue;
+    }
+    for (const token of tokens) {
+      const norm = token.toLowerCase();
+      if (!seen.has(norm)) {
+        seen.add(norm);
+        targets.push(token);
+      }
+    }
+  }
+  return targets;
+}
+
+function isSelfFileLocation(location) {
+  const loc = String(location || '').replace(/\\/g, '/').toLowerCase();
+  if (!loc) {
+    return false;
+  }
+  if (TARGET_RECALL_SELF_FILE_PATHS.some((p) => loc === p.toLowerCase() || loc.endsWith('/' + p.toLowerCase()))) {
+    return true;
+  }
+  const base = loc.split('/').pop();
+  return TARGET_RECALL_SELF_FILE_BASENAMES.includes(base);
+}
+
 function inferRecallTargetPaths(taskText) {
   const task = String(taskText || '').toLowerCase();
   const targets = [];
@@ -355,16 +477,92 @@ function inferRecallTargetPaths(taskText) {
   return targets;
 }
 
-function evaluateTargetRecall(taskText, bundleData) {
-  const targets = inferRecallTargetPaths(taskText);
-  if (!targets.length) {
-    return { target_recall_ok: 'unknown', index_gap_detected: false, recall_targets: [] };
+// Match a required repo-relative path/glob against the content-bearing locations
+// actually present in the bundle. Self-file locations are excluded by the caller
+// before this runs so retrieving RedDog itself cannot satisfy a required target.
+function requiredTargetMatchesLocation(target, location) {
+  const want = normalizeTargetPath(target).toLowerCase();
+  const have = String(location || '').replace(/\\/g, '/').toLowerCase();
+  if (!want || !have) {
+    return false;
   }
+  if (have === want) {
+    return true;
+  }
+  // Glob support: translate * and ? to a bounded regex (path-segment safe).
+  if (/[*?]/.test(want)) {
+    const escaped = want.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]*').replace(/\?/g, '[^/]');
+    const re = new RegExp('(^|/)' + escaped + '$');
+    return re.test(have);
+  }
+  // Basename fallback only when the required token is a bare filename (no dir),
+  // so a required directoried path is not satisfied by an unrelated same-name file.
+  if (!want.includes('/')) {
+    return have.split('/').pop() === want;
+  }
+  return have.endsWith('/' + want);
+}
+
+function evaluateTargetRecall(taskText, bundleData) {
   const hits = bundleData && bundleData.task_retrieval && Array.isArray(bundleData.task_retrieval.code_hits)
     ? bundleData.task_retrieval.code_hits
     : [];
   const locations = hits.map((h) => String(h.location || '').replace(/\\/g, '/').toLowerCase());
   const needs = hits.map((h) => String(h.need || '').toLowerCase());
+
+  // Slice 1: an explicit "Required direct-read targets" list, when present, is the
+  // authoritative recall contract. Compare each required path against content-bearing
+  // locations, excluding self-file hits (extension.js / module-under-audit shell).
+  const required = parseRequiredTargetPaths(taskText);
+  if (required.length) {
+    const contentLocations = locations.filter((loc) => !isSelfFileLocation(loc));
+    const missing = [];
+    let recalled = 0;
+    for (const target of required) {
+      let found = false;
+      if (target.startsWith('symbol:')) {
+        // Symbols cannot be honestly resolved from a path-only bundle; a symbol in
+        // a required list is only satisfied by a non-self content location whose
+        // need/location names it. It must NOT be satisfied by the self-file.
+        const symbol = target.slice(7).toLowerCase();
+        found = hits.some((h) => {
+          const loc = String(h.location || '').replace(/\\/g, '/').toLowerCase();
+          if (isSelfFileLocation(loc)) {
+            return false;
+          }
+          return String(h.need || '').toLowerCase().includes(symbol);
+        });
+      } else {
+        found = contentLocations.some((loc) => requiredTargetMatchesLocation(target, loc));
+      }
+      if (found) {
+        recalled += 1;
+      } else {
+        missing.push(target);
+      }
+    }
+    return {
+      target_recall_ok: missing.length === 0,
+      index_gap_detected: missing.length > 0,
+      recall_targets: required,
+      required_targets_total: required.length,
+      required_targets_recalled: recalled,
+      required_targets_missing: missing
+    };
+  }
+
+  // Backward-compatible inference path (no explicit required list in prompt).
+  const targets = inferRecallTargetPaths(taskText);
+  if (!targets.length) {
+    return {
+      target_recall_ok: 'unknown',
+      index_gap_detected: false,
+      recall_targets: [],
+      required_targets_total: 0,
+      required_targets_recalled: 0,
+      required_targets_missing: []
+    };
+  }
   let allFound = true;
   for (const target of targets) {
     if (target.startsWith('symbol:')) {
@@ -383,7 +581,10 @@ function evaluateTargetRecall(taskText, bundleData) {
   return {
     target_recall_ok: allFound,
     index_gap_detected: !allFound,
-    recall_targets: targets
+    recall_targets: targets,
+    required_targets_total: 0,
+    required_targets_recalled: 0,
+    required_targets_missing: []
   };
 }
 
@@ -400,6 +601,9 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     skill_hits: meta.skill_hits !== undefined ? meta.skill_hits : 'unknown',
     target_recall_ok: meta.target_recall_ok !== undefined ? meta.target_recall_ok : 'unknown',
     index_gap_detected: meta.index_gap_detected !== undefined ? meta.index_gap_detected : 'unknown',
+    required_targets_total: meta.required_targets_total !== undefined ? meta.required_targets_total : 'unknown',
+    required_targets_recalled: meta.required_targets_recalled !== undefined ? meta.required_targets_recalled : 'unknown',
+    required_targets_missing: Array.isArray(meta.required_targets_missing) ? meta.required_targets_missing : 'unknown',
     direct_read_fallback_used: meta.direct_read_fallback_used !== undefined ? meta.direct_read_fallback_used : 'unknown',
     target_content_included: meta.target_content_included !== undefined ? meta.target_content_included : 'unknown',
     target_content_paths: Array.isArray(meta.target_content_paths) ? meta.target_content_paths : 'unknown',
@@ -424,6 +628,9 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- skill_hits: ' + scorecard.skill_hits,
     '- target_recall_ok: ' + scorecard.target_recall_ok,
     '- index_gap_detected: ' + scorecard.index_gap_detected,
+    '- required_targets_total: ' + scorecard.required_targets_total,
+    '- required_targets_recalled: ' + scorecard.required_targets_recalled,
+    '- required_targets_missing: ' + (Array.isArray(scorecard.required_targets_missing) ? (scorecard.required_targets_missing.length ? scorecard.required_targets_missing.join(', ') : '(none)') : scorecard.required_targets_missing),
     '- direct_read_fallback_used: ' + scorecard.direct_read_fallback_used,
     '- target_content_included: ' + scorecard.target_content_included,
     '- target_content_paths: ' + (Array.isArray(scorecard.target_content_paths) ? scorecard.target_content_paths.join(', ') : scorecard.target_content_paths),
@@ -2420,7 +2627,10 @@ function holoIndexMetaFromBundle(output, usedOfflineFallback, taskText) {
     skill_hits: 'unknown',
     target_recall_ok: 'unknown',
     index_gap_detected: 'unknown',
-    direct_read_fallback_used: usedOfflineFallback ? true : false
+    direct_read_fallback_used: usedOfflineFallback ? true : false,
+    required_targets_total: 0,
+    required_targets_recalled: 0,
+    required_targets_missing: []
   };
   try {
     const data = JSON.parse(String(output || '{}'));
@@ -2434,6 +2644,9 @@ function holoIndexMetaFromBundle(output, usedOfflineFallback, taskText) {
     meta.index_gap_detected = recall.index_gap_detected;
     meta.direct_read_fallback_used = !!usedOfflineFallback;
     meta.recall_targets = recall.recall_targets;
+    meta.required_targets_total = recall.required_targets_total;
+    meta.required_targets_recalled = recall.required_targets_recalled;
+    meta.required_targets_missing = recall.required_targets_missing;
   } catch (err) {
     meta.holoindex_status = usedOfflineFallback ? 'offline_fallback' : 'parse_error';
   }
@@ -2967,8 +3180,12 @@ module.exports = {
   buildGovernedHandoffSection,
   compositePayloadDigest,
   extractHoloIndexScorecard,
+  formatHoloIndexScorecardLines,
   evaluateTargetRecall,
   inferRecallTargetPaths,
+  parseRequiredTargetPaths,
+  isSelfFileLocation,
+  requiredTargetMatchesLocation,
   holoIndexMetaFromBundle,
   isTargetReadPathDenied,
   resolveSafeRepoFile,

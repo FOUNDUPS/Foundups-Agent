@@ -163,6 +163,19 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - Add regression retrieval tests so extension bridge code ranks above adjacent WRE routers.
 - **Status:** **LANDED** #882 (`99d0e35c2`) — ranking + target recall telemetry only; not source-content inclusion.
 
+### REDDOG_TARGET_RECALL_PATH_AWARE_PHASE1 (slice 1/3)
+
+- **Status:** DETECTOR ONLY (this slice). Parse an explicit "Required direct-read targets" prompt list; compare against
+  content-bearing bundle locations (path-aware), with a self-file guard so retrieving `extension.js` (RedDog itself)
+  cannot satisfy a required target.
+- Fixes the `content_included(any file) != required_targets_recalled` false negative: RedDog now HONESTLY reports
+  `index_gap_detected=true` when required targets are absent instead of falsely reporting no gap.
+- New scorecard fields: `required_targets_total`, `required_targets_recalled`, `required_targets_missing`,
+  and honest `target_recall_ok` / `index_gap_detected` (never `unknown` when a required list exists).
+- Backward compatible: prompts with no required-target list keep prior inferred-target behavior.
+- **Slice split:** 1/3 = this detector; 2 = direct-read-by-path fetch (0/8 -> 8/8 recall); 3 = audit-mode redaction.
+  This slice makes the blindness VISIBLE; it does NOT add any file-read or change redaction.
+
 ### REDDOG_ALWAYS_HOLOINDEX_GROUNDING_PHASE1
 
 - **Status:** **LANDED** #885 (`888d0c9cc`) — REGULAR auto context `none` -> `wsp_holo`.
