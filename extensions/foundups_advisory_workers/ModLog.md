@@ -11,6 +11,37 @@
 
 WSP: WSP_22.
 
+## 2026-07-01 - REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1 (slice 2/3, governed fetch)
+
+- Files: `holo_index/cli/commands/bundle_json.py` (fetch + hard allowlist), `holo_index/_cli_main.py`
+  (`--bundle-must-include`), `extensions/foundups_advisory_workers/extension.js` (request paths + telemetry).
+- Goal: when slice-1's detector reports `index_gap_detected=true` and the prompt named required targets absent
+  from the bundle, FETCH those exact files' content so RedDog reasons on real source instead of HOLDing blind.
+- Architecture: the FETCH lives in the PYTHON bundle layer (`_direct_read_fetch`); the extension only REQUESTS
+  must-include paths via `--bundle-must-include` (no raw fs in extension.js, no shell-out, no model/router change).
+  Fetched hits are spliced into `task_retrieval.code_hits`; slice-1's `evaluateTargetRecall` re-runs so
+  `target_recall_ok` / `required_targets_recalled` reflect the now-present content.
+- HARD security allowlist (WSP_50): repo-relative only; realpath must stay inside repo root (rejects absolute,
+  `..` traversal, symlink-escape); hard-deny `.env*`, `*.pem`, `*.key`, `id_rsa*`, `id_ed25519*`, `*.p12`,
+  `*.keystore`, `*secret*`/`*credential*`/`*token*`, `.git/` and credential dot-dirs; per-file byte cap (12KB)
+  plus total fetch budget (96KB) spread across MANY targets (ranked by prompt order) so no single file starves
+  the rest; every rejection recorded and never aborts the bundle.
+- Telemetry: `direct_read_fallback_used`, `direct_read_paths`, `direct_read_rejected` (`{path, reason}`),
+  `direct_read_bytes`, `direct_read_truncated` (`{path, bytes}`) added to the Run Trace scorecard.
+- Boundary: NO redaction-category change and NO audit-mode change (slice 3). Fetched content passes through the
+  EXISTING redaction gate unchanged (governance content may still be over-sanitized until slice 3 - expected).
+  NO execution authority, NO write capability, NO shell-out added.
+- Acceptance (slice-2 bar): on the FoundUp-creation required-target list against a bundle lacking them, the
+  targets (WSP_109, openclaw_foundup_orchestrator, hermes_foundup_job_executor, foundup_job_contract,
+  reddog_governed_work_order_dryrun, reddog_wre_execution_valve, source_authority) are fetched + present,
+  `direct_read_fallback_used=true`, `target_recall_ok=true`.
+- Tests: `holo_index/tests/test_reddog_extension_bundle_recall.py` (deny-gate unit, real-target fetch,
+  recall-flip via node, traversal/absolute/secret-fixture/symlink-escape rejection, per-file cap + total budget
+  spread, CLI end-to-end) + `tests/verify_extension_contract.js` (DRF-001..007 incl. slice-boundary proof that
+  the existing redaction gate STILL blocks governance content, unchanged).
+- Stacked on slice 1 (#906). WSP: WSP_00, WSP_15, WSP_50, WSP_97, WSP_22.
+
+
 ## 2026-07-01 - REDDOG_TARGET_RECALL_PATH_AWARE_PHASE1 (slice 1/3, detector only)
 
 - File: `extensions/foundups_advisory_workers/extension.js`
