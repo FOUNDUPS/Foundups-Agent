@@ -2,6 +2,14 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-06-28 - REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_PHASE1 (extension pointers)
+
+- Module: `modules/communication/moltbot_bridge/src/reddog_openclaw_adapter_dryrun.py`
+- `plan_reddog_openclaw_adapter_dryrun()` -- propose FoundUpJob / autonomous_task intake; no enqueue.
+- Contract: `docs/audits/architecture/REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_CONTRACT_PHASE1.md`
+
+WSP: WSP_00, WSP_15, WSP_50, WSP_97, WSP_22.
+
 ## 2026-06-28 - REDDOG_WRE_EXECUTION_VALVE_PHASE1 (extension pointers)
 
 - Module: `modules/communication/moltbot_bridge/src/reddog_wre_execution_valve.py`

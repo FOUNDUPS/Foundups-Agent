@@ -246,6 +246,17 @@ includes(valvePy, 'evaluate_reddog_execution_valve', 'execution valve evaluator 
 includes(valvePy, 'no_execution_performed', 'execution valve no_execution_performed missing');
 includes(iface, 'reddog_wre_execution_valve.py', 'INTERFACE execution valve pointer missing');
 includes(roadmap, 'REDDOG_WRE_EXECUTION_VALVE_PHASE1', 'execution valve slice missing');
+const adapterDryrunContractDocPath = path.join(root, 'docs', 'audits', 'architecture', 'REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_CONTRACT_PHASE1.md');
+const adapterDryrunContractDoc = fs.readFileSync(adapterDryrunContractDocPath, 'utf8');
+includes(adapterDryrunContractDoc, 'no_enqueue_performed', 'adapter dryrun contract no_enqueue missing');
+includes(adapterDryrunContractDoc, 'VALVE_OPEN_DRYRUN_ONLY', 'adapter dryrun contract valve requirement missing');
+includes(adapterDryrunContractDoc, 'foundup_job', 'adapter dryrun contract foundup_job target missing');
+includes(adapterDryrunContractDoc, 'autonomous_task', 'adapter dryrun contract autonomous_task target missing');
+const adapterDryrunPy = fs.readFileSync(path.join(root, 'modules', 'communication', 'moltbot_bridge', 'src', 'reddog_openclaw_adapter_dryrun.py'), 'utf8');
+includes(adapterDryrunPy, 'plan_reddog_openclaw_adapter_dryrun', 'adapter dryrun planner missing');
+includes(adapterDryrunPy, 'no_enqueue_performed', 'adapter dryrun no_enqueue_performed missing');
+includes(iface, 'reddog_openclaw_adapter_dryrun.py', 'INTERFACE adapter dryrun pointer missing');
+includes(roadmap, 'REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_PHASE1', 'adapter dryrun slice missing');
 includes(roadmap, 'External RedDog Lane Queue (post-#888)', 'post-#888 external lane queue missing');
 includes(roadmap, 'REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1', 'governed work order dryrun slice missing');
 includes(roadmap, 'REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1', 'run trace telemetry correction slice missing');

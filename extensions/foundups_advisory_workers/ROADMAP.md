@@ -85,11 +85,11 @@ DONE
 11. #898 WRE executor plan dry-run (e215bf890)
 12. #899 RedDog continuation memory (c70433d7d)
 13. #901 OpenClaw FoundUpJob adapter contract (2c8df23dd)
+14. #903 WRE execution valve (2761f2e65)
 
 P0 NEXT (execution track)
-14. REDDOG_WRE_EXECUTION_VALVE_PHASE1
-    - default CLOSED valve before first real worktree create
 15. REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_PHASE1
+    - propose FoundUpJob / autonomous_task intake; no live enqueue
 
 P1
 16. REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_WORKTREE_CREATE_PHASE1
@@ -240,13 +240,19 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_WRE_EXECUTION_VALVE_PHASE1
 
-- **Status:** **PR-READY** -- `evaluate_reddog_execution_valve()`; default `VALVE_CLOSED`.
+- **Status:** **LANDED** #903 (`2761f2e65`) -- `evaluate_reddog_execution_valve()`; default `VALVE_CLOSED`.
 - **Module:** `modules/communication/moltbot_bridge/src/reddog_wre_execution_valve.py`
 - **Contract:** `docs/audits/architecture/REDDOG_WRE_EXECUTION_VALVE_CONTRACT_PHASE1.md`
 
+### REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_PHASE1
+
+- **Status:** **PR-READY** -- `plan_reddog_openclaw_adapter_dryrun()`; propose only, no enqueue.
+- **Module:** `modules/communication/moltbot_bridge/src/reddog_openclaw_adapter_dryrun.py`
+- **Contract:** `docs/audits/architecture/REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_CONTRACT_PHASE1.md`
+
 ### REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_WORKTREE_CREATE_PHASE1
 
-- **Status:** **BLOCKED** -- until execution valve lands and opens with sovereign token.
+- **Status:** **BLOCKED** -- until adapter dry-run lands; worktree requires `VALVE_OPEN_WORKTREE_CREATE`.
 
 ### REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
 
