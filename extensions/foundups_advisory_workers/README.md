@@ -1,6 +1,6 @@
 # Foundups®Agent
 
-Version: 0.3.36
+Version: 0.3.37
 
 This local Cursor/VS Code extension opens one RedDog Architect advisory worker as an editor webview tab, similar in ergonomics to `Claude Code: Open` but without repo, shell, browser, merge, CABR, or payout authority.
 

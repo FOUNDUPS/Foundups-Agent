@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.36';
+const EXTENSION_VERSION = '0.3.37';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -802,6 +802,7 @@ function buildRunTraceSection(result, workerType, contextSummary, holoScorecard,
   const reddogEffort = String(rp.resolved_effort || resolvedEffort || 'unknown').toLowerCase();
   const lines = [
     '## Run Trace',
+    '- extension_version: ' + EXTENSION_VERSION,
     '- 0102 role: ' + workerLabel,
     '- WSP_15 tier: ' + (cls.tier || 'unknown'),
     '- reddog_effort: ' + reddogEffort,

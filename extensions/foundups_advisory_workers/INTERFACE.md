@@ -125,7 +125,8 @@ Keyboard:
 
 Copy:
 
-- `Copy MD`: copies a markdown packet with `Run Trace` (role, tier, effort, mode, models, context, redaction, validation), `Work Trail` (allowlisted normalized events, cap 50), and 0102 output.
+- `Copy MD`: copies a markdown packet with `Run Trace` (extension_version, role, tier, effort, mode, models, context, redaction, validation), `Work Trail` (allowlisted normalized events, cap 50), and 0102 output.
+- Run Trace build-version field (REDDOG_RUN_TRACE_BUILD_VERSION_FIELD_PHASE1, v0.3.37): the `## Run Trace` block emits `- extension_version: <EXTENSION_VERSION>` near the top (after the header, before role/tier). It reads the real installed-build `EXTENSION_VERSION` constant, NOT any prompt/packet/model value, so build staleness is machine-checkable from telemetry and never masked by model output. 012/tooling gates build staleness on this field, not on model text.
 - Redaction-block runs include `## Redaction Gate Report` (`BLOCKED_LOCALLY`, WSP_97 truth labels, no raw snippets) before any model output.
 - Validation-failure runs include `OUTPUT_VALIDATION_FAILED` with local static footer (no extra network call).
 - Substantive tasks include `## Governed Handoff Recommendation` (`advisory_only`; bounded digest evidence refs only).

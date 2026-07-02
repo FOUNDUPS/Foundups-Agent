@@ -2,6 +2,28 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-03 - REDDOG_RUN_TRACE_BUILD_VERSION_FIELD_PHASE1 (emit extension_version in Run Trace scorecard, 0.3.37)
+
+- Incident: a golden rerun was mistakenly run on a STALE 0.3.34 build, but the model OUTPUT header claimed
+  "Build: 0.3.36" because it parroted a "Version expected:" line from the prompt. The Run Trace scorecard
+  did NOT emit the actual installed build version as a telemetry field, so staleness could not be detected
+  from the trace itself (only from the UI footer). The model text masked the real build.
+- Fix: `buildRunTraceSection(...)` now emits `- extension_version: ` + `EXTENSION_VERSION` (the real
+  installed-build constant) near the TOP of the `## Run Trace` block, immediately after the header and
+  before the role/tier fields. It reads the constant, NOT any value from the prompt, packet, or model
+  output, so build staleness is machine-checkable from telemetry and can never be masked by model text.
+- Purely additive telemetry. No packing, redaction, fetch, or continuation logic changed. No new
+  file-read. No execution authority.
+- Tests (verify_extension_contract.js): (a) `buildRunTraceSection(...)` output contains
+  `- extension_version: ` followed by the current EXTENSION_VERSION; (b) that value equals the
+  package.json version (they must agree - the trace proves the build); (c) the source line reads the
+  EXTENSION_VERSION constant, not prompt/packet/model text. Full JS contract suite exit 0 on 0.3.37.
+- 012 note: the Run Trace now carries `extension_version` = the real installed build; use it (not model
+  text) as the staleness gate.
+- Version: LIVE-surface bump 0.3.36 -> 0.3.37.
+- Stacked on REDDOG_CONTINUATION_DEFAULT_OFF_PHASE1 (#915).
+- WSP: WSP_00, WSP_50, WSP_97, WSP_22.
+
 ## 2026-07-03 - REDDOG_CONTINUATION_DEFAULT_OFF_PHASE1 (default Use-last-packet checkbox OFF, opt-in continuation, 0.3.36)
 
 - Change: the webview "Use last RedDog packet" checkbox now defaults UNCHECKED. Continuation is opt-IN

@@ -163,6 +163,21 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - Add regression retrieval tests so extension bridge code ranks above adjacent WRE routers.
 - **Status:** **LANDED** #882 (`99d0e35c2`) — ranking + target recall telemetry only; not source-content inclusion.
 
+### REDDOG_RUN_TRACE_BUILD_VERSION_FIELD_PHASE1 (v0.3.37)
+
+- **Status:** VERIFIED_READY (this slice). The `## Run Trace` scorecard now emits
+  `- extension_version: <EXTENSION_VERSION>` near the top of the block (after the header, before the
+  role/tier fields). It reads the real installed-build constant, NOT any prompt/packet/model value.
+- Incident driving it: a golden rerun was mistakenly run on a STALE 0.3.34 build while the model OUTPUT
+  header claimed "Build: 0.3.36" (it parroted a "Version expected:" prompt line). The trace carried no
+  machine-checkable build field, so staleness was invisible from telemetry.
+- Purely additive telemetry. No packing/redaction/fetch/continuation change; no new file-read; no
+  execution authority.
+- Golden bar: `buildRunTraceSection(...)` output contains `- extension_version: ` == package.json version;
+  the source line reads the EXTENSION_VERSION constant. 012 gates build staleness on this field, not model
+  text.
+- Stacked on REDDOG_CONTINUATION_DEFAULT_OFF_PHASE1 (#915).
+
 ### REDDOG_CONTINUATION_DEFAULT_OFF_PHASE1 (v0.3.36)
 
 - **Status:** VERIFIED_READY (this slice). The webview "Use last RedDog packet" checkbox now defaults
