@@ -2,6 +2,37 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-02 - REDDOG_CONTINUATION_TOGGLE_HARDENING_PHASE1 (deterministic Use-last-packet toggle + telemetry, 0.3.32)
+
+- Problem (012-observed): 012 unchecked "Use last RedDog packet" but Copy MD still emitted the
+  "Continuation from last RedDog packet" block. Two independent defects in landed 0.3.31 `extension.js`:
+  1. Backend default too permissive: `const useLastPacket = message.useLastPacket !== false` defaulted
+     ON unless the field was exactly `false` (missing/stale field => ON).
+  2. Copy MD continuation append was gated only on `ctx.continuationSummary` EXISTING, not on the toggle;
+     and the summary is always built + stored, so even a correct `false` would not strip Copy MD.
+- Fix (fail-closed): continuation is included THIS run ONLY when `message.useLastPacket === true`.
+  Single boolean `continuationEnabled` drives both append sites. `continuationAppended = continuationEnabled
+  && !!state.lastContinuationSummary`. Missing/stale toggle => OFF (a stale packet no longer contaminates
+  redaction or acceptance scoring).
+- Both append sites now gated on the toggle: the model-prompt append (`appendContinuationSummaryToWspPrompt`)
+  and the Copy MD append (`buildContinuationSummaryCopySection`, now requires `ctx.continuationEnabled`).
+  Building/storing the summary for the NEXT run is unchanged; only INCLUDING it this run is gated.
+- Telemetry (Run Trace + Copy MD "## Continuation Telemetry"): `continuation_enabled`, `continuation_appended`,
+  `continuation_source_run_id` (`run_xxx` when appended, else `none`). New helpers:
+  `normalizeContinuationTelemetry`, `formatContinuationTelemetryLines`, `buildContinuationTelemetrySection`.
+- UI: when disabled, webview shows status line "Continuation: disabled for this run." (frontend on send +
+  backend on assemble).
+- Version: mechanical LIVE-surface bump 0.3.31 -> 0.3.32 (`package.json`, `EXTENSION_VERSION`, README header,
+  every LIVE 0.3.31 assertion in `tests/verify_extension_contract.js` incl. target-snippet content checks).
+  Historical `vX.Y.Z` annotations untouched.
+- Tests: ADDENDUM H in `tests/verify_extension_contract.js` - enabled+stored => appended (prompt + Copy MD)
+  with `continuation_appended=true`; disabled+stored => NOT appended with `continuation_enabled=false`;
+  missing toggle => fail-closed NOT appended; telemetry fields present in Run Trace + Copy MD. Full suite PASS.
+- Out of scope (unchanged): no model/routing/redaction policy change; no direct-read fallback change; no
+  cross-session memory; no mid-run steering.
+
+WSP: WSP_22, WSP_50, WSP_97.
+
 ## 2026-07-02 - Version bump to 0.3.31 (REDDOG_AUDIT_MODE_REDACTION_PHASE1, slice 3/3)
 
 - Mechanical build-label bump 0.3.30 -> 0.3.31 across LIVE version surfaces.

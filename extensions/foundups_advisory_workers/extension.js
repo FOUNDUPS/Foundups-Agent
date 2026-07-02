@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.31';
+const EXTENSION_VERSION = '0.3.32';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -777,6 +777,7 @@ function buildRunTraceSection(result, workerType, contextSummary, holoScorecard,
       lines.push('- retry_count: ' + rp.retry_count);
     }
   }
+  lines.push.apply(lines, formatContinuationTelemetryLines(rp.continuation_telemetry || (result && result.continuation_telemetry)));
   lines.push('- output_validation: ' + formatOutputValidationStatus(rp.output_validation));
   if (rp.output_validation && rp.output_validation.repair_attempted) {
     lines.push('- repair_context_mode: ' + (rp.output_validation.repair_context_mode || 'unknown'));
@@ -966,7 +967,9 @@ function buildCopyMarkdown(result, workerType, contextSummary, workTrail, holoSc
   if (ctx.substantive) {
     sections.push(buildGovernedHandoffSection(ctx.handoffRecommendation || packet.governed_handoff_recommendation));
   }
-  if (ctx.continuationSummary) {
+  sections.push(buildContinuationTelemetrySection(ctx.continuationTelemetry || packet.continuation_telemetry));
+  // Gate Copy MD continuation inclusion on the toggle (continuationEnabled), not merely on summary existence.
+  if (ctx.continuationEnabled && ctx.continuationSummary) {
     sections.push(buildContinuationSummaryCopySection(ctx.continuationSummary));
   }
   const mojibake = detectMojibake(packet.content || '');
@@ -1439,6 +1442,30 @@ function buildContinuationSummaryCopySection(summary) {
   return formatContinuationSummaryBlock(summary);
 }
 
+function normalizeContinuationTelemetry(telemetry) {
+  const t = telemetry && typeof telemetry === 'object' ? telemetry : {};
+  return {
+    continuation_enabled: t.continuation_enabled === true,
+    continuation_appended: t.continuation_appended === true,
+    continuation_source_run_id: typeof t.continuation_source_run_id === 'string' && t.continuation_source_run_id.length
+      ? t.continuation_source_run_id
+      : 'none'
+  };
+}
+
+function formatContinuationTelemetryLines(telemetry) {
+  const t = normalizeContinuationTelemetry(telemetry);
+  return [
+    '- continuation_enabled: ' + (t.continuation_enabled ? 'true' : 'false'),
+    '- continuation_appended: ' + (t.continuation_appended ? 'true' : 'false'),
+    '- continuation_source_run_id: ' + t.continuation_source_run_id
+  ];
+}
+
+function buildContinuationTelemetrySection(telemetry) {
+  return ['## Continuation Telemetry'].concat(formatContinuationTelemetryLines(telemetry)).join('\n');
+}
+
 function buildSectionHeaderPattern(sectionName) {
   const escaped = String(sectionName || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   return new RegExp('(^|\\n)\\s*(#{1,3}\\s*)?' + escaped + '\\b', 'i');
@@ -1682,16 +1709,32 @@ function wireFusionWebview(context, webview, worker, state) {
     const workerType = cleanWorkerType(message.workerType);
     const selectedEffort = cleanEffort(message.effort);
     const selectedMode = cleanMode(message.mode);
-    const useLastPacket = message.useLastPacket !== false;
+    // Fail-closed: continuation is included this run ONLY when 012 explicitly enabled it.
+    // Missing/stale useLastPacket => OFF (do not carry a stale packet into redaction/acceptance scoring).
+    const continuationEnabled = message.useLastPacket === true;
     const classification = classifyTaskForRedDog(workFocus, selectedContextMode, workerType);
     const effort = resolveAutoEffort(classification, selectedEffort);
     const mode = resolveModelMode(classification, selectedMode, workerType);
     const contextMode = resolveAutoContextMode(classification, selectedContextMode);
     const contextPacket = buildBoundedRepoContext(contextMode, workFocus);
     let wspTaskPrompt = constructWspTaskPrompt(workFocus, classification, contextPacket.quality, workerType);
-    if (useLastPacket && state.lastContinuationSummary) {
+    // continuation_appended is true only when 012 enabled it AND a stored summary exists.
+    const continuationAppended = continuationEnabled && !!state.lastContinuationSummary;
+    const continuationSourceRunId = continuationAppended && state.lastContinuationSummary
+      ? (state.lastContinuationSummary.previous_run_id || 'unknown')
+      : 'none';
+    const continuationTelemetry = {
+      continuation_enabled: continuationEnabled,
+      continuation_appended: continuationAppended,
+      continuation_source_run_id: continuationSourceRunId
+    };
+    if (continuationAppended) {
       wspTaskPrompt = appendContinuationSummaryToWspPrompt(wspTaskPrompt, state.lastContinuationSummary);
-      postStatusAndProgress(webview, null, 'Continuation: appended WSP_97-safe summary from last RedDog packet (not raw Copy MD).');
+      postStatusAndProgress(webview, null, 'Continuation: appended WSP_97-safe summary from last RedDog packet (not raw Copy MD). source_run_id=' + continuationSourceRunId);
+    } else if (!continuationEnabled) {
+      postStatusAndProgress(webview, null, 'Continuation: disabled for this run.');
+    } else {
+      postStatusAndProgress(webview, null, 'Continuation: enabled but no prior RedDog packet stored yet; nothing appended.');
     }
     const promptConstruction = {
       work_focus_digest: redactedDigest(workFocus, 180),
@@ -1880,14 +1923,22 @@ function wireFusionWebview(context, webview, worker, state) {
       result: result,
       timestamp: new Date().toISOString()
     });
+    // Building/storing the summary for the NEXT run is always fine; INCLUDING it THIS run is gated above.
     state.lastContinuationSummary = continuationSummary;
     result.continuation_summary = continuationSummary;
+    result.continuation_telemetry = continuationTelemetry;
+    if (result.review_packet) {
+      result.review_packet.continuation_telemetry = continuationTelemetry;
+    }
     result.copy_markdown = buildCopyMarkdown(result, workerType, contextPacket.summary, workTrail, holoScorecard, effort, {
       promptConstruction: promptConstruction,
       contextMode: contextMode,
       substantive: substantiveTask,
       handoffRecommendation: handoffRecommendation,
-      continuationSummary: continuationSummary
+      continuationEnabled: continuationEnabled,
+      continuationTelemetry: continuationTelemetry,
+      // Only pass the summary for Copy MD inclusion when appended this run (fail-closed).
+      continuationSummary: continuationTelemetry.continuation_appended ? continuationSummary : null
     });
     webview.postMessage({ command: 'result', result });
   });
@@ -3172,6 +3223,10 @@ function renderHtml(worker, surface, logoUri) {
       }
       setRunning(true);
       addStatus('Work focus sent. 0102 will assemble WSP task prompt...');
+      const continuationOn = !!(useLastPacket && useLastPacket.checked);
+      if (!continuationOn) {
+        addStatus('Continuation: disabled for this run.');
+      }
       add('user', text, '012 work focus');
       workFocus.value = '';
       vscode.postMessage({
@@ -3181,7 +3236,7 @@ function renderHtml(worker, surface, logoUri) {
         contextMode: 'auto',
         workerType: workerType.value,
         effort: 'auto',
-        useLastPacket: !!(useLastPacket && useLastPacket.checked)
+        useLastPacket: continuationOn
       });
     }
 
@@ -3277,6 +3332,9 @@ module.exports = {
   buildSanitizedContinuationSummary,
   buildContinuationSummaryCopySection,
   formatContinuationSummaryBlock,
+  buildContinuationTelemetrySection,
+  formatContinuationTelemetryLines,
+  normalizeContinuationTelemetry,
   sanitizeContinuationField,
   redactedDigest,
   resolvePythonInterpreter,
