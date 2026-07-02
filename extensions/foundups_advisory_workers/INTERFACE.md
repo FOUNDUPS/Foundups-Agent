@@ -170,7 +170,10 @@ Run Trace HoloIndex scorecard fields (v0.3.22+):
 | `direct_read_rejected` | `{path, reason}` for denied/traversal/absolute/secret/symlink-escape hits (never read) | OBSERVED |
 | `direct_read_bytes` | Total bytes injected across all fetched targets (bounded by total budget) | OBSERVED |
 | `direct_read_truncated` | `{path, bytes}` for targets clipped by the per-file byte cap | OBSERVED |
-| `target_content_included` | Target snippet section present in final bounded context | OBSERVED |
+| `direct_read_fetch_attempted` | Enriched direct-read subprocess was invoked (v0.3.33+) | OBSERVED |
+| `direct_read_fetch_error` | Classified fetch failure (`timeout`, `max_buffer`, `process_error`, `unknown`, or none) | OBSERVED |
+| `audit_context_requested` | Extension requested audit-mode redaction for governance direct-read context (v0.3.34+) | OBSERVED |
+| `audit_context_applied` | Bridge passed `audit_mode=True` into `evaluate_redaction_gate()` (v0.3.34+) | OBSERVED |
 | `target_content_paths` | Relative paths whose snippets were included | OBSERVED |
 | `target_content_chars` | Character count of included target snippets | OBSERVED |
 | `target_content_omitted_reason` | Why snippets omitted when `target_content_included=false` | OBSERVED |
@@ -196,6 +199,8 @@ Target content egress (v0.3.22+): `buildTargetRecallContentSection(root, taskTex
 Governed direct-read-by-path (REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1, slice 2/3): when slice-1's detector reports `index_gap_detected=true` with a non-empty `required_targets_missing`, `holoIndexOutput` re-invokes the bundle with `buildMustIncludeArgs(missing)` -> `--bundle-must-include <path>` so the **Python bundle layer** (`holo_index/cli/commands/bundle_json.py::_direct_read_fetch`) reads the named repo files and returns their content in the bundle. The extension does NOT read those files via raw fs; it only names the paths. Fetched hits are spliced into `task_retrieval.code_hits` (so slice-1 recall re-evaluates and flips `target_recall_ok`) and rendered by `buildDirectReadContentSection(bundleOutput)` into a bounded section. Hard security allowlist (all in the Python layer): repo-relative only; realpath must stay inside repo root (rejects absolute, `..` traversal, symlink-escape); hard-deny basenames/globs (`.env*`, `*.pem`, `*.key`, `id_rsa*`, `id_ed25519*`, `*.p12`, `*.keystore`, `*secret*`/`*credential*`/`*token*`, `.git/` and credential dot-dirs); per-file byte cap (12KB) plus a total fetch budget (96KB) spread across MANY targets ranked by prompt order; every denial is recorded in `direct_read_rejected` and never aborts the bundle. Fetched content passes through the EXISTING redaction gate unchanged (slice 3 owns audit-mode redaction). No execution authority, no write path, no shell-out.
 
 Exported helpers for contract tests: `isTargetReadPathDenied`, `resolveSafeRepoFile`, `readBoundedTargetSnippet`, `readBoundedTargetSnippets`, `buildTargetRecallContentSection`, `sanitizeTargetSnippetForRedaction`, `taskMentionsWsp97`, `buildWsp97ProtocolExcerpt`, `parseRequiredTargetPaths`, `isSelfFileLocation`, `requiredTargetMatchesLocation`, `formatHoloIndexScorecardLines`, `buildMustIncludeArgs`, `buildDirectReadContentSection`.
+
+Audit-context bridge wire (REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_PHASE1, v0.3.34): when `buildDirectReadContentSection()` sets `audit_context: true` (governance direct-read fetch), `buildBoundedRepoContext()` preserves the flag; `callFusion()` sends `audit_context: true` in the bridge stdin payload; `scripts/advisory_model_once.py` passes `audit_mode=True` into `evaluate_redaction_gate()` **only** when explicitly requested. Default path (no governance direct-read) remains byte-identical strict blocking. HoloIndex anchor terms: `audit_context bridge wire`, `advisory_model_once audit_mode`, `buildDirectReadContentSection audit_context`, `fusion_redaction_gate audit_mode`, `RedDog golden FoundUp creation audit`. Follow-up if not indexed: `HOLOINDEX_REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_INDEX_GAP_PHASE1`.
 
 ## WSP_97 Truth Boundary
 

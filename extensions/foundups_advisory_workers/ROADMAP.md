@@ -163,6 +163,17 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - Add regression retrieval tests so extension bridge code ranks above adjacent WRE routers.
 - **Status:** **LANDED** #882 (`99d0e35c2`) — ranking + target recall telemetry only; not source-content inclusion.
 
+### REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_PHASE1 (v0.3.34)
+
+- **Status:** WIRE COMPLETE (this slice). Golden 0.3.33 proved senses stack PASS but egress FAIL
+  (`BLOCKED_LOCALLY`) because `audit_mode` never reached `advisory_model_once.py`.
+- Wire path: `buildDirectReadContentSection().audit_context` -> `buildBoundedRepoContext().audit_context`
+  -> `callFusion()` payload `audit_context` -> `evaluate_redaction_gate(..., audit_mode=True)`.
+- Run Trace: `audit_context_requested`, `audit_context_applied`.
+- Default path unchanged: no governance direct-read => strict gate unchanged.
+- HoloIndex: static anchors in INTERFACE/ModLog; indexing follow-up
+  `HOLOINDEX_REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_INDEX_GAP_PHASE1` if queries still miss implementation files.
+
 ### REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1 (slice 2/3)
 
 - **Status:** GOVERNED FETCH (this slice), stacked on slice 1 (#906). When slice-1's detector reports

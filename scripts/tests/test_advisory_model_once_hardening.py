@@ -177,6 +177,7 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
             )
 
         post_mock.assert_not_called()
+        gate_mock.assert_called_once_with("secret material", None, audit_mode=False)
         self.assertFalse(out.get("ok"))
         self.assertEqual(out.get("reason"), "redaction_blocked")
         self.assertEqual(out.get("retry_count"), 0)
@@ -246,6 +247,85 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         self.assertNotEqual(out.get("reason"), "redaction_blocked")
         self.assertNotEqual(out.get("redaction_reason"), "redactor_error")
         self.assertTrue(out.get("ok"))
+
+    def test_audit_context_false_strict_blocks_governance_sample(self) -> None:
+        from modules.communication.moltbot_bridge.tests.test_fusion_redaction_gate import (  # noqa: WPS433
+            _AUDIT_STRUCTURE_SAMPLE,
+        )
+
+        _rc, out = self._invoke_main(
+            {
+                "mode": "openrouter_single",
+                "prompt": "012 work focus",
+                "context": _AUDIT_STRUCTURE_SAMPLE,
+                "lead_model": "z-ai/glm-5.2",
+                "audit_context": False,
+            }
+        )
+
+        self.assertFalse(out.get("ok"))
+        self.assertEqual(out.get("reason"), "redaction_blocked")
+        self.assertFalse(out.get("audit_context_requested"))
+        self.assertFalse(out.get("audit_context_applied"))
+
+    def test_audit_context_true_preserves_governance_structure(self) -> None:
+        from modules.communication.moltbot_bridge.tests.test_fusion_redaction_gate import (  # noqa: WPS433
+            _AUDIT_STRUCTURE_SAMPLE,
+        )
+
+        responses = [
+            json.dumps({"choices": [{"message": {"content": "ok"}}]}).encode("utf-8"),
+        ]
+
+        def fake_urlopen(request, timeout=0):  # noqa: ARG001
+            return io.BytesIO(responses.pop(0))
+
+        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen):
+            _rc, out = self._invoke_main(
+                {
+                    "mode": "openrouter_single",
+                    "prompt": "012 work focus",
+                    "context": _AUDIT_STRUCTURE_SAMPLE,
+                    "lead_model": "z-ai/glm-5.2",
+                    "audit_context": True,
+                }
+            )
+
+        self.assertTrue(out.get("ok"))
+        self.assertTrue(out.get("audit_context_requested"))
+        self.assertTrue(out.get("audit_context_applied"))
+        self.assertIn("SourceAuthority", out.get("redacted_prompt") or "")
+
+    def test_audit_context_true_still_redacts_fake_secret(self) -> None:
+        secret = ("s" + "k-") + "FAKE" + ("Z" * 44)
+        context = (
+            "class SourceAuthority(str, enum.Enum):\n"
+            '    MONOREPO_POC = "monorepo_poc"\n'
+            f'api_key = "{secret}"\n'
+        )
+        responses = [
+            json.dumps({"choices": [{"message": {"content": "ok"}}]}).encode("utf-8"),
+        ]
+
+        def fake_urlopen(request, timeout=0):  # noqa: ARG001
+            return io.BytesIO(responses.pop(0))
+
+        with mock.patch("urllib.request.urlopen", side_effect=fake_urlopen):
+            _rc, out = self._invoke_main(
+                {
+                    "mode": "openrouter_single",
+                    "prompt": "012 work focus",
+                    "context": context,
+                    "lead_model": "z-ai/glm-5.2",
+                    "audit_context": True,
+                }
+            )
+
+        self.assertTrue(out.get("ok"))
+        redacted = out.get("redacted_prompt") or ""
+        self.assertIn("SourceAuthority", redacted)
+        self.assertNotIn(secret, redacted)
+        self.assertIn("[REDACTED", redacted)
 
 
 if __name__ == "__main__":

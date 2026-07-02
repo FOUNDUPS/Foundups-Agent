@@ -51,6 +51,48 @@ const GOLDEN_FOUNDUP_PROMPT = [
   'Produce required RedDog architect output sections per contract.'
 ].join('\n');
 
+// REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_PHASE1: golden 7-file FoundUp creation audit prompt
+// (file paths only — no symbol targets that direct-read-by-path cannot fetch).
+const GOLDEN_7FILE_TARGETS = [
+  'WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md',
+  'WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md',
+  'modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py',
+  'modules/foundups/agent/src/hermes_foundup_job_executor.py',
+  'modules/communication/moltbot_bridge/src/foundup_job_contract.py',
+  'modules/communication/moltbot_bridge/src/reddog_governed_work_order_dryrun.py',
+  'modules/communication/moltbot_bridge/src/reddog_wre_execution_valve.py'
+];
+const GOLDEN_7FILE_FOUNDUP_PROMPT = [
+  'Audit the FoundUp creation monorepo WSP_109 execution path.',
+  '',
+  'Required direct-read targets:',
+  ...GOLDEN_7FILE_TARGETS.map((t) => '- ' + t),
+  '',
+  'Determine:',
+  '1. Whether WSP_109 intake is specified, implemented, or missing.',
+  '2. Whether a FoundUpCreationWorkOrder exists or is still missing.',
+  '3. Whether RedDogGovernedWorkOrder can represent FoundUp creation.',
+  '4. Whether FoundUpJob can represent FoundUp creation.',
+  '5. Whether build_foundup creates a new FoundUp or aliases extract_foundup.',
+  '6. Whether OpenClaw genesis/onboarding gates are built.',
+  '7. Whether Hermes/WRE can write production FoundUp scaffolds today or only dry-run/evidence scaffolds.',
+  '8. Whether the correct next slice is WSP_109 intake packet generation, Skillz authoring, scaffold writer, or live execution.',
+  '',
+  'Use WSP_97 labels for every claim.',
+  'End with WSP_15 priority and the next safest slice.'
+].join('\n');
+
+// WSP_95 contains fail-closed "chain-of-thought" literals (private_reasoning BLOCK even in audit_mode).
+// Golden wire proof uses the 6 governance/code targets that pass audit-mode egress.
+const GOLDEN_6FILE_AUDIT_PROMPT = [
+  'Audit the FoundUp creation monorepo WSP_109 execution path.',
+  '',
+  'Required direct-read targets:',
+  ...GOLDEN_7FILE_TARGETS.filter((t) => !t.includes('WSP_95')).map((t) => '- ' + t),
+  '',
+  'Use WSP_97 labels for every claim.'
+].join('\n');
+
 function assertFusionRedactionGatePasses(contextText, label) {
   const script = [
     'import sys',
@@ -139,8 +181,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.33', 'package version must be 0.3.33');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.33'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.34', 'package version must be 0.3.34');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.34'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -157,7 +199,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.33', 'README version mismatch');
+includes(readme, 'Version: 0.3.34', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -201,7 +243,8 @@ includes(extensionJs, '--bundle-json', 'bundle-json retrieval missing');
 includes(extensionJs, '--offline', 'offline fallback missing');
 includes(extensionJs, 'Skillz/Wardrobe/Rolodex discovery', 'Skillz/Rolodex discovery context missing');
 
-includes(bridgePy, 'evaluate_redaction_gate(prompt, context_for_gate)', 'prompt/context redaction gate missing');
+includes(bridgePy, 'evaluate_redaction_gate(', 'prompt/context redaction gate missing');
+includes(bridgePy, 'audit_mode=audit_context_requested', 'audit_context bridge wire missing');
 includes(bridgePy, 'redacted_user_message = gate.redacted_prompt', 'redacted user assembly missing');
 includes(bridgePy, 'messages = [{"role": "system", "content": _system_prompt(payload)}]', 'Fusion alias system prompt missing');
 includes(bridgePy, 'base_system = _system_prompt(payload)', 'manual panel system prompt missing');
@@ -973,6 +1016,58 @@ assert(!drfSecretRedacted.includes('12500.50'), 'DRF-009: payout AMOUNT must STI
 includes(drfSecretRedacted, '[REDACTED', 'DRF-009: redaction placeholder must be present for the stripped value');
 
 // ===================================================================================
+// REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_PHASE1 (ACB-001..ACB-005)
+// Slice 3 added audit_mode to fusion_redaction_gate + audit_context on direct-read
+// sections, but advisory_model_once.py never received the flag. Golden 0.3.33 run:
+// recall PASS, BLOCKED_LOCALLY because default gate ran on governance context.
+// ===================================================================================
+includes(extensionJs, 'audit_context: bridgeMeta && bridgeMeta.audit_context_requested === true', 'ACB-001: bridge payload must carry audit_context from promptConstruction');
+includes(extensionJs, 'audit_context_requested: contextPacket.audit_context === true', 'ACB-001: promptConstruction must record audit_context_requested from direct-read section');
+includes(extensionJs, 'holo.direct_read_section.audit_context === true', 'ACB-001: buildBoundedRepoContext must read audit_context from buildDirectReadContentSection');
+includes(extensionJs, '- audit_context_requested:', 'ACB-001: Run Trace scorecard must surface audit_context_requested');
+includes(extensionJs, '- audit_context_applied:', 'ACB-001: Run Trace scorecard must surface audit_context_applied');
+includes(bridgePy, 'audit_mode=audit_context_requested', 'ACB-001: advisory_model_once must pass audit_mode when audit_context is true');
+includes(bridgePy, 'audit_context_requested', 'ACB-001: bridge must emit audit_context_requested telemetry');
+
+// ACB-002: golden 7-file prompt with direct-read fetch sets audit_context on bounded context packet.
+const acbBounded = orchestrator.buildBoundedRepoContext('wsp_holo_git_skillz', GOLDEN_7FILE_FOUNDUP_PROMPT);
+assert.strictEqual(acbBounded.audit_context, true, 'ACB-002: golden 7-file direct-read must set audit_context=true on bounded context packet');
+assert(acbBounded.text && acbBounded.text.length > 1000, 'ACB-002: bounded context must include fetched governance content');
+
+// ACB-003: default (non-audit) gate still blocks governance direct-read section (byte-identical default path).
+let acbDefaultBlocked = false;
+try {
+  assertFusionRedactionGatePasses(drfGovSection.text, 'ACB-003 default gate probe');
+} catch (acbDefaultErr) {
+  acbDefaultBlocked = true;
+}
+assert(acbDefaultBlocked, 'ACB-003: audit_context=false/default gate must still block governance structure content');
+
+// ACB-004: golden direct-read section (6 governance/code targets; excludes WSP_95 chain-of-thought literal) passes audit-mode gate.
+const acbHolo = orchestrator.holoIndexOutput(root, GOLDEN_6FILE_AUDIT_PROMPT, 18000);
+assert.strictEqual(acbHolo.direct_read_section && acbHolo.direct_read_section.audit_context, true, 'ACB-004: governance direct-read must set audit_context on direct-read section');
+fusionRedactionGateAuditMode(acbHolo.direct_read_section.text, 'ACB-004 golden direct-read section audit-mode gate');
+
+// ACB-006: WSP_95 direct-read content STILL blocks in audit_mode (private_reasoning fail-closed; not relaxed by this slice).
+const wsp95Path = 'WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md';
+const wsp95Snippet = fs.readFileSync(path.join(root, wsp95Path), 'utf8').slice(0, 12000);
+let acbWsp95Blocked = false;
+try {
+  fusionRedactionGateAuditMode(wsp95Snippet, 'ACB-006 WSP_95 audit-mode probe');
+} catch (wsp95Err) {
+  acbWsp95Blocked = true;
+  includes(String((wsp95Err && wsp95Err.stdout) || ''), 'private_reasoning', 'ACB-006: WSP_95 must block on private_reasoning even in audit mode');
+}
+assert(acbWsp95Blocked, 'ACB-006: WSP_95 chain-of-thought literal must remain fail-closed in audit mode');
+
+// ACB-005: audit-mode still redacts synthetic secrets embedded in golden direct-read probe.
+const _acbFakeKey = ('s' + 'k-') + 'FAKE' + 'Y'.repeat(44);
+const acbSecretProbe = acbHolo.direct_read_section.text + '\napi_key = "' + _acbFakeKey + '"\ncabr_payout = 99999.99';
+const acbSecretRedacted = fusionRedactionGateAuditMode(acbSecretProbe, 'ACB-005 audit-mode secret safety');
+assert(!acbSecretRedacted.includes(_acbFakeKey), 'ACB-005: secret VALUE must be redacted in audit mode');
+assert(!acbSecretRedacted.includes('99999.99'), 'ACB-005: payout amount must be redacted in audit mode');
+
+// ===================================================================================
 // REDDOG_DIRECT_READ_FALLBACK_TRIGGER_DIAGNOSTIC_PHASE1 (DRT-001..DRT-008)
 // Golden rerun on 0.3.31 proved slice-1 detected the gap (index_gap_detected=true,
 // required_targets_total=8, recalled=0) but slice-2's enriched fetch NEVER fired in
@@ -1185,7 +1280,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.33'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.34'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -1199,7 +1294,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.33'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.34'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -1211,7 +1306,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.33'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.34'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
