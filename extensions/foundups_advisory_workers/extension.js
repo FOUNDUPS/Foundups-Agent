@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.32';
+const EXTENSION_VERSION = '0.3.33';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -609,6 +609,10 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     direct_read_rejected: Array.isArray(meta.direct_read_rejected) ? meta.direct_read_rejected : 'unknown',
     direct_read_bytes: meta.direct_read_bytes !== undefined ? meta.direct_read_bytes : 'unknown',
     direct_read_truncated: Array.isArray(meta.direct_read_truncated) ? meta.direct_read_truncated : 'unknown',
+    direct_read_fetch_attempted: meta.direct_read_fetch_attempted !== undefined ? meta.direct_read_fetch_attempted : 'unknown',
+    direct_read_fetch_error: meta.direct_read_fetch_error !== undefined ? meta.direct_read_fetch_error : 'unknown',
+    direct_read_fetch_arg_count: meta.direct_read_fetch_arg_count !== undefined ? meta.direct_read_fetch_arg_count : 'unknown',
+    direct_read_fetch_timeout_ms: meta.direct_read_fetch_timeout_ms !== undefined ? meta.direct_read_fetch_timeout_ms : 'unknown',
     target_content_included: meta.target_content_included !== undefined ? meta.target_content_included : 'unknown',
     target_content_paths: Array.isArray(meta.target_content_paths) ? meta.target_content_paths : 'unknown',
     target_content_chars: meta.target_content_chars !== undefined ? meta.target_content_chars : 'unknown',
@@ -640,6 +644,10 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- direct_read_rejected: ' + (Array.isArray(scorecard.direct_read_rejected) ? (scorecard.direct_read_rejected.length ? scorecard.direct_read_rejected.map((r) => (r && r.path ? r.path + ' (' + r.reason + ')' : String(r))).join(', ') : '(none)') : scorecard.direct_read_rejected),
     '- direct_read_bytes: ' + scorecard.direct_read_bytes,
     '- direct_read_truncated: ' + (Array.isArray(scorecard.direct_read_truncated) ? (scorecard.direct_read_truncated.length ? scorecard.direct_read_truncated.map((t) => (t && t.path ? t.path + ' (' + t.bytes + 'B)' : String(t))).join(', ') : '(none)') : scorecard.direct_read_truncated),
+    '- direct_read_fetch_attempted: ' + scorecard.direct_read_fetch_attempted,
+    '- direct_read_fetch_error: ' + (scorecard.direct_read_fetch_error === null ? '(none)' : scorecard.direct_read_fetch_error),
+    '- direct_read_fetch_arg_count: ' + scorecard.direct_read_fetch_arg_count,
+    '- direct_read_fetch_timeout_ms: ' + scorecard.direct_read_fetch_timeout_ms,
     '- target_content_included: ' + scorecard.target_content_included,
     '- target_content_paths: ' + (Array.isArray(scorecard.target_content_paths) ? scorecard.target_content_paths.join(', ') : scorecard.target_content_paths),
     '- target_content_chars: ' + scorecard.target_content_chars,
@@ -2699,7 +2707,14 @@ function holoIndexMetaFromBundle(output, usedOfflineFallback, taskText) {
     direct_read_paths: [],
     direct_read_rejected: [],
     direct_read_bytes: 0,
-    direct_read_truncated: []
+    direct_read_truncated: [],
+    // REDDOG_DIRECT_READ_FALLBACK_TRIGGER_DIAGNOSTIC_PHASE1: attempt/error telemetry.
+    // Defaults describe "no enriched fetch attempted"; holoIndexOutput overwrites
+    // these when the index-gap trigger fires (attempted=true, error classified).
+    direct_read_fetch_attempted: false,
+    direct_read_fetch_error: null,
+    direct_read_fetch_arg_count: 0,
+    direct_read_fetch_timeout_ms: 0
   };
   try {
     const data = JSON.parse(String(output || '{}'));
@@ -2757,6 +2772,40 @@ function buildMustIncludeArgs(missingTargets) {
   return args;
 }
 
+// REDDOG_DIRECT_READ_FALLBACK_TRIGGER_DIAGNOSTIC_PHASE1: classify a caught
+// enriched-fetch subprocess error into a stable, non-sensitive telemetry token.
+// The golden rerun on 0.3.31 showed the enriched fetch throwing ENOBUFS
+// (enriched bundle ~185KB > the old maxBuffer of 144000 bytes) into an EMPTY
+// catch, so fallback_used read false with no paths and no visible cause. This
+// classifier lets the scorecard distinguish "never triggered" from "triggered
+// but errored" WITHOUT surfacing any raw stdout/stderr snippet.
+//   timeout       - execFileSync killed the child (ETIMEDOUT / SIGTERM signal)
+//   max_buffer    - stdout exceeded maxBuffer (ENOBUFS / "maxBuffer" in message)
+//   process_error - the child ran but exited non-zero (numeric status !== 0)
+//   unknown       - anything else
+function classifyDirectReadFetchError(err) {
+  if (!err || typeof err !== 'object') {
+    return 'unknown';
+  }
+  const code = typeof err.code === 'string' ? err.code : '';
+  const signal = typeof err.signal === 'string' ? err.signal : '';
+  const message = typeof err.message === 'string' ? err.message : '';
+  // ORDER MATTERS: a maxBuffer overflow raises BOTH code='ENOBUFS' AND signal='SIGTERM'
+  // (Node kills the overflowing child), whereas a real timeout raises code='ETIMEDOUT'
+  // + SIGTERM with NO ENOBUFS. Check the definitive buffer signal FIRST so an overflow
+  // is not misread as a timeout -- the exact 0.3.31 failure this slice surfaces.
+  if (code === 'ENOBUFS' || /maxbuffer/i.test(message)) {
+    return 'max_buffer';
+  }
+  if (code === 'ETIMEDOUT' || signal === 'SIGTERM' || signal === 'SIGKILL') {
+    return 'timeout';
+  }
+  if (typeof err.status === 'number' && err.status !== 0) {
+    return 'process_error';
+  }
+  return 'unknown';
+}
+
 function holoIndexOutput(root, taskText, maxChars) {
   const query = String(taskText || '').replace(/\s+/g, ' ').trim().slice(0, 500) || 'FoundUps RedDog WSP_00 WSP_97 WSP_15 current task';
   const moduleHint = moduleHintFromActive(root);
@@ -2776,25 +2825,55 @@ function holoIndexOutput(root, taskText, maxChars) {
     // is missing from the semantic bundle, re-run once asking the Python layer
     // to fetch exactly those paths, then re-evaluate recall on the enriched bundle.
     const missing = Array.isArray(meta.required_targets_missing) ? meta.required_targets_missing : [];
-    if (meta.index_gap_detected === true && missing.length) {
+    // Coerce defensively so a stringified 'true' from any upstream serialization
+    // cannot silently defeat the strict === true trigger condition below.
+    const indexGap = meta.index_gap_detected === true || meta.index_gap_detected === 'true';
+    let fetchTelemetry = null;
+    if (indexGap && missing.length) {
       const mustInclude = buildMustIncludeArgs(missing);
       if (mustInclude.length) {
+        // REDDOG_DIRECT_READ_FALLBACK_TRIGGER_DIAGNOSTIC_PHASE1: buffer + timeout
+        // are sized for a REAL enriched bundle (semantic ~100KB + Python-side total
+        // fetch budget ~96KB + section/JSON overhead), not the ~185KB observed size.
+        // 8MB floor leaves wide headroom if the Python fetch budgets grow; 45s
+        // covers the enriched call re-running HoloIndex and reading N target files
+        // under load. --bundle-must-include args are two per fetchable target.
+        const enrichedMaxBuffer = Math.max(maxChars * 16, 8 * 1024 * 1024);
+        const enrichedTimeoutMs = 45000;
+        // Attempt telemetry is set BEFORE the call so an error can never make the
+        // scorecard read as if the fetch was never triggered (the 0.3.31 defect).
+        fetchTelemetry = {
+          direct_read_fetch_attempted: true,
+          direct_read_fetch_error: null,
+          direct_read_fetch_arg_count: mustInclude.length / 2,
+          direct_read_fetch_timeout_ms: enrichedTimeoutMs
+        };
         try {
           const enrichedArgs = baseArgs.concat(mustInclude);
           const enriched = cp.execFileSync('python', enrichedArgs, {
             cwd: root,
             env,
             encoding: 'utf8',
-            timeout: 30000,
-            maxBuffer: Math.max(maxChars * 8, 131072),
+            timeout: enrichedTimeoutMs,
+            maxBuffer: enrichedMaxBuffer,
             windowsHide: true
           });
           output = enriched;
           meta = holoIndexMetaFromBundle(enriched, false, taskText);
         } catch (fetchErr) {
-          // Fetch failure must not abort recall; keep the pre-fetch bundle+meta.
+          // Fetch failure must not abort recall; keep the pre-fetch bundle+meta,
+          // but classify + surface the cause so it is never silent again.
+          fetchTelemetry.direct_read_fetch_error = classifyDirectReadFetchError(fetchErr);
         }
       }
+    }
+    // Apply attempt telemetry AFTER the try/catch so it survives both the success
+    // rebuild of meta (holoIndexMetaFromBundle) and the pre-fetch-meta failure path.
+    if (fetchTelemetry) {
+      meta.direct_read_fetch_attempted = fetchTelemetry.direct_read_fetch_attempted;
+      meta.direct_read_fetch_error = fetchTelemetry.direct_read_fetch_error;
+      meta.direct_read_fetch_arg_count = fetchTelemetry.direct_read_fetch_arg_count;
+      meta.direct_read_fetch_timeout_ms = fetchTelemetry.direct_read_fetch_timeout_ms;
     }
     const directReadSection = buildDirectReadContentSection(output);
     return {
@@ -3380,7 +3459,9 @@ module.exports = {
   isSelfFileLocation,
   requiredTargetMatchesLocation,
   holoIndexMetaFromBundle,
+  holoIndexOutput,
   buildMustIncludeArgs,
+  classifyDirectReadFetchError,
   buildDirectReadContentSection,
   isTargetReadPathDenied,
   resolveSafeRepoFile,

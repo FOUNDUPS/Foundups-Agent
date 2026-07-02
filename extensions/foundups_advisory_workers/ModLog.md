@@ -2,6 +2,51 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-02 - REDDOG_DIRECT_READ_FALLBACK_TRIGGER_DIAGNOSTIC_PHASE1 (enriched-fetch buffer + fetch-error telemetry, 0.3.33)
+
+- Problem (golden rerun on landed 0.3.31): slice-1 detector WORKED (index_gap_detected=true,
+  required_targets_total=8, recalled=0) but slice-2 enriched fetch NEVER surfaced in the scorecard
+  (direct_read_fallback_used=false, 0 paths, 0 rejected). CONFIRMED ROOT CAUSE = maxBuffer overflow,
+  swallowed silently. The caller passes maxChars=18000; the enriched `execFileSync` set
+  `maxBuffer: Math.max(maxChars*8, 131072)` = 144000 bytes (~141KB). The enriched bundle for the 8
+  FoundUp targets is ~184.5KB (proxy-measured 184529 bytes = semantic bundle + governed fetched
+  content). 184.5KB > 141KB => the subprocess throws ENOBUFS+SIGTERM, and the EMPTY `catch (fetchErr)`
+  swallowed it, keeping the pre-fetch bundle/meta and reporting fallback_used=false with no cause.
+- Fix 1 (buffer + timeout): the enriched call now sizes `maxBuffer = Math.max(maxChars*16, 8*1024*1024)`
+  (8MB floor, wide headroom over the ~185KB observed size and the ~96KB Python total fetch budget) and
+  `timeout = 45000` (up from 30s; the enriched call re-runs HoloIndex + reads N target files under load).
+- Fix 2 (fetch-error telemetry): the previously-empty catch now classifies the caught error via
+  `classifyDirectReadFetchError` and surfaces it. Attempt telemetry is set BEFORE the enriched call so a
+  failure can never again read as "never triggered". New meta/scorecard/Run-Trace fields:
+  `direct_read_fetch_attempted` (bool), `direct_read_fetch_error` (timeout | max_buffer | process_error |
+  unknown | null), `direct_read_fetch_arg_count` (fetchable target count), `direct_read_fetch_timeout_ms`.
+- Secondary bug found + fixed: a maxBuffer overflow raises BOTH `code='ENOBUFS'` AND `signal='SIGTERM'`;
+  the classifier now checks the definitive ENOBUFS/maxBuffer signal BEFORE the SIGTERM timeout branch so
+  an overflow is not misclassified as a timeout (a real timeout is ETIMEDOUT+SIGTERM with no ENOBUFS).
+- Trigger hardening: the `index_gap_detected === true` condition is coercion-hardened to also accept the
+  string 'true', so no upstream serialization can silently defeat the strict-equality trigger.
+- Honest-gap invariant preserved: the golden 8th target is a non-fetchable `symbol:`; the fallback resolves
+  all 7 fetchable paths (recalled=7) and leaves exactly the symbol missing -- it never fabricates symbol
+  resolution. arg_count (7) therefore equals the fetchable target count, not the total (8).
+- Version: mechanical LIVE-surface bump 0.3.32 -> 0.3.33 (`package.json`, `EXTENSION_VERSION`, README header,
+  every LIVE 0.3.32 assertion in `tests/verify_extension_contract.js` incl. target-snippet content checks).
+  Historical annotations untouched.
+- Tests: DRT-001..DRT-008 in `tests/verify_extension_contract.js` - classifier ordering (ENOBUFS+SIGTERM =>
+  max_buffer); default + error telemetry through meta/scorecard/formatter; regression guard on the >=8MB
+  buffer floor and the removed 144KB constant; END-TO-END trigger via `holoIndexOutput` on the golden prompt
+  proving direct_read_fetch_attempted=true + direct_read_fallback_used=true + 7 fetchable paths under the
+  raised buffer; a real 4KB-buffer overflow simulation classifying as max_buffer; continuation-independence
+  (fetch fires identically with/without a trailing continuation block); golden 8-target contract (total 8,
+  arg pairs 7). Full node suite PASS on 0.3.33. Python `test_reddog_extension_bundle_recall.py`: 15 pass;
+  the 2 `*_top_hits_/_recall` lexical-ranking failures are PRE-EXISTING on the #911 base (reproduced with all
+  changes stashed) and out of scope for this slice.
+- Stacked on REDDOG_CONTINUATION_TOGGLE_HARDENING_PHASE1 (#911). No continuation change here; the direct-read
+  trigger reads only the required-target list + bundle recall and is independent of the continuation toggle.
+- Out of scope (unchanged): no new file-write authority; no Python fetch/allowlist change (that is #910); no
+  redaction policy change; no continuation change (that is #911).
+
+WSP: WSP_22, WSP_50, WSP_97.
+
 ## 2026-07-02 - REDDOG_CONTINUATION_TOGGLE_HARDENING_PHASE1 (deterministic Use-last-packet toggle + telemetry, 0.3.32)
 
 - Problem (012-observed): 012 unchecked "Use last RedDog packet" but Copy MD still emitted the

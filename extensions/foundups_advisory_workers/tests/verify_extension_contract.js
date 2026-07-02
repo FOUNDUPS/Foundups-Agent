@@ -23,6 +23,34 @@ function includes(haystack, needle, label) {
   assert(haystack.includes(needle), label || `missing ${needle}`);
 }
 
+// REDDOG_DIRECT_READ_FALLBACK_TRIGGER_DIAGNOSTIC_PHASE1: the golden FoundUp-creation
+// audit prompt. Its "Required direct-read targets" list is what the 0.3.31 golden run
+// parsed to required_targets_total=8 / recalled=0. Seven are real, fetchable repo
+// files (identical to the bundle_json pytest FOUNDUP_ACCEPTANCE_TARGETS); the 8th is a
+// non-fetchable symbol, so total=8 but arg_count=7 (symbols are dropped by
+// buildMustIncludeArgs). These fetchable files exist on disk so DRT-005/006/007 run a
+// real enriched fetch through the Python bundle CLI under the raised buffer.
+const GOLDEN_FETCHABLE_TARGETS = [
+  'WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md',
+  'modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py',
+  'modules/foundups/agent/src/hermes_foundup_job_executor.py',
+  'modules/communication/moltbot_bridge/src/foundup_job_contract.py',
+  'modules/communication/moltbot_bridge/src/reddog_governed_work_order_dryrun.py',
+  'modules/communication/moltbot_bridge/src/reddog_wre_execution_valve.py',
+  'modules/foundups/agent/src/source_authority.py'
+];
+// The 8th required target is a symbol reference (non-fetchable by path): total 8, fetchable 7.
+const GOLDEN_SYMBOL_TARGET = 'symbol:create_foundup';
+const GOLDEN_FOUNDUP_PROMPT = [
+  'Audit the FoundUp creation monorepo WSP_109 execution path.',
+  '',
+  'Required direct-read targets:',
+  ...GOLDEN_FETCHABLE_TARGETS.map((t) => '- ' + t),
+  '- ' + GOLDEN_SYMBOL_TARGET,
+  '',
+  'Produce required RedDog architect output sections per contract.'
+].join('\n');
+
 function assertFusionRedactionGatePasses(contextText, label) {
   const script = [
     'import sys',
@@ -111,8 +139,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.32', 'package version must be 0.3.32');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.32'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.33', 'package version must be 0.3.33');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.33'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -129,7 +157,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.32', 'README version mismatch');
+includes(readme, 'Version: 0.3.33', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -944,6 +972,153 @@ assert(!drfSecretRedacted.includes(_drfFakeKey), 'DRF-009: SECRET VALUE must STI
 assert(!drfSecretRedacted.includes('12500.50'), 'DRF-009: payout AMOUNT must STILL be redacted in audit mode');
 includes(drfSecretRedacted, '[REDACTED', 'DRF-009: redaction placeholder must be present for the stripped value');
 
+// ===================================================================================
+// REDDOG_DIRECT_READ_FALLBACK_TRIGGER_DIAGNOSTIC_PHASE1 (DRT-001..DRT-008)
+// Golden rerun on 0.3.31 proved slice-1 detected the gap (index_gap_detected=true,
+// required_targets_total=8, recalled=0) but slice-2's enriched fetch NEVER fired in
+// the scorecard (direct_read_fallback_used=false, 0 paths). Root cause: the enriched
+// bundle (~185KB) overflowed the old maxBuffer (max(18000*8,131072)=144000 bytes),
+// the subprocess threw ENOBUFS, and the EMPTY catch swallowed it. These tests fix the
+// buffer and make any future fetch error impossible to hide.
+// ===================================================================================
+
+// DRT-001: fetch-error classifier maps each subprocess failure shape to a stable token.
+assert.strictEqual(orchestrator.classifyDirectReadFetchError({ code: 'ENOBUFS' }), 'max_buffer', 'DRT-001: ENOBUFS => max_buffer');
+assert.strictEqual(orchestrator.classifyDirectReadFetchError({ message: 'stdout maxBuffer length exceeded' }), 'max_buffer', 'DRT-001: maxBuffer message => max_buffer');
+// ORDERING GUARD: a real maxBuffer overflow raises BOTH ENOBUFS and SIGTERM; it must
+// classify as max_buffer, never timeout (the misclassification DRT-006 originally caught).
+assert.strictEqual(orchestrator.classifyDirectReadFetchError({ code: 'ENOBUFS', signal: 'SIGTERM', status: null, message: 'spawnSync python ENOBUFS' }), 'max_buffer', 'DRT-001: ENOBUFS+SIGTERM => max_buffer (not timeout)');
+assert.strictEqual(orchestrator.classifyDirectReadFetchError({ code: 'ETIMEDOUT', signal: 'SIGTERM' }), 'timeout', 'DRT-001: ETIMEDOUT+SIGTERM => timeout');
+assert.strictEqual(orchestrator.classifyDirectReadFetchError({ code: 'ETIMEDOUT' }), 'timeout', 'DRT-001: ETIMEDOUT => timeout');
+assert.strictEqual(orchestrator.classifyDirectReadFetchError({ signal: 'SIGTERM' }), 'timeout', 'DRT-001: SIGTERM signal => timeout');
+assert.strictEqual(orchestrator.classifyDirectReadFetchError({ status: 1 }), 'process_error', 'DRT-001: non-zero exit => process_error');
+assert.strictEqual(orchestrator.classifyDirectReadFetchError({ status: 0 }), 'unknown', 'DRT-001: clean exit object => unknown');
+assert.strictEqual(orchestrator.classifyDirectReadFetchError(null), 'unknown', 'DRT-001: null error => unknown (never throws)');
+assert.strictEqual(orchestrator.classifyDirectReadFetchError({ code: 'EACCES' }), 'unknown', 'DRT-001: unrelated code => unknown');
+
+// DRT-002: default meta carries the attempt telemetry fields (no fetch attempted state).
+const drtDefaultMeta = orchestrator.holoIndexMetaFromBundle('{}', false, 'no required targets here');
+assert.strictEqual(drtDefaultMeta.direct_read_fetch_attempted, false, 'DRT-002: default attempted=false');
+assert.strictEqual(drtDefaultMeta.direct_read_fetch_error, null, 'DRT-002: default error=null');
+assert.strictEqual(drtDefaultMeta.direct_read_fetch_arg_count, 0, 'DRT-002: default arg_count=0');
+assert.strictEqual(drtDefaultMeta.direct_read_fetch_timeout_ms, 0, 'DRT-002: default timeout_ms=0');
+
+// DRT-003: scorecard + formatter surface attempt telemetry, incl. a classified error.
+const drtErrorMeta = Object.assign({}, drtDefaultMeta, {
+  direct_read_fetch_attempted: true,
+  direct_read_fetch_error: 'max_buffer',
+  direct_read_fetch_arg_count: 8,
+  direct_read_fetch_timeout_ms: 45000
+});
+const drtScorecard = orchestrator.extractHoloIndexScorecard('wsp_holo', drtErrorMeta);
+assert.strictEqual(drtScorecard.direct_read_fetch_attempted, true, 'DRT-003: scorecard carries attempted');
+assert.strictEqual(drtScorecard.direct_read_fetch_error, 'max_buffer', 'DRT-003: scorecard carries classified error');
+const drtErrLines = orchestrator.formatHoloIndexScorecardLines(drtScorecard).join('\n');
+includes(drtErrLines, '- direct_read_fetch_attempted: true', 'DRT-003: rendered attempted=true');
+includes(drtErrLines, '- direct_read_fetch_error: max_buffer', 'DRT-003: rendered classified error');
+includes(drtErrLines, '- direct_read_fetch_arg_count: 8', 'DRT-003: rendered arg_count');
+includes(drtErrLines, '- direct_read_fetch_timeout_ms: 45000', 'DRT-003: rendered timeout');
+// A null error renders as (none), never as literal 'null'.
+const drtNoneLines = orchestrator.formatHoloIndexScorecardLines(orchestrator.extractHoloIndexScorecard('wsp_holo', drtDefaultMeta)).join('\n');
+includes(drtNoneLines, '- direct_read_fetch_attempted: false', 'DRT-003: attempted=false when no fetch');
+includes(drtNoneLines, '- direct_read_fetch_error: (none)', 'DRT-003: null error renders as (none)');
+
+// DRT-004: REGRESSION GUARD. The enriched fetch buffer must be sized for a REAL
+// enriched bundle (>=8MB floor), never the ~144KB that swallowed the 0.3.31 fetch.
+includes(extensionJs, '8 * 1024 * 1024', 'DRT-004: enriched maxBuffer must have a multi-MB floor (>=8MB)');
+assert(!extensionJs.includes('maxBuffer: Math.max(maxChars * 8, 131072)'), 'DRT-004: the old 144KB enriched maxBuffer must be gone');
+includes(extensionJs, 'const enrichedTimeoutMs = 45000', 'DRT-004: enriched timeout must be raised to 45s');
+includes(extensionJs, 'direct_read_fetch_attempted: true', 'DRT-004: attempt telemetry set BEFORE the enriched call');
+includes(extensionJs, 'classifyDirectReadFetchError(fetchErr)', 'DRT-004: the enriched catch must classify (no empty catch)');
+includes(extensionJs, "meta.index_gap_detected === true || meta.index_gap_detected === 'true'", 'DRT-004: trigger must be coercion-hardened against stringified true');
+
+// DRT-005: END-TO-END TRIGGER + FETCH SUCCESS. holoIndexOutput, given the golden
+// 8-target FoundUp prompt, must (a) detect the gap, (b) fire buildMustIncludeArgs,
+// (c) attempt the enriched fetch, and (d) succeed under the raised buffer so
+// direct_read_fallback_used flips true with the fetched paths present. This is the
+// exact scenario the 0.3.31 golden run FAILED. Runs the real Python bundle CLI.
+(function drt005EndToEndTrigger() {
+  const holo = orchestrator.holoIndexOutput(root, GOLDEN_FOUNDUP_PROMPT, 18000);
+  const m = holo && holo.meta ? holo.meta : {};
+  // Trigger fired: gap detected on the pre-fetch bundle and a fetch was attempted.
+  assert.strictEqual(m.direct_read_fetch_attempted, true, 'DRT-005: enriched fetch must be attempted for the golden gap prompt');
+  assert.strictEqual(m.direct_read_fetch_error, null, 'DRT-005: enriched fetch must SUCCEED (no error) under the raised buffer');
+  assert.strictEqual(m.direct_read_fetch_arg_count, GOLDEN_FETCHABLE_TARGETS.length, 'DRT-005: arg_count must equal the fetchable target count');
+  assert.strictEqual(m.direct_read_fetch_timeout_ms, 45000, 'DRT-005: raised timeout must be recorded');
+  // Fetch landed: Python direct-read telemetry present, all fetchable paths fetched.
+  assert.strictEqual(m.direct_read_fallback_used, true, 'DRT-005: direct_read_fallback_used must flip true once the fetch lands');
+  const fetched = new Set(Array.isArray(m.direct_read_paths) ? m.direct_read_paths : []);
+  for (const t of GOLDEN_FETCHABLE_TARGETS) {
+    assert(fetched.has(t), 'DRT-005: golden target must be fetched: ' + t);
+  }
+  // HONEST-GAP INVARIANT: the 8th target is a symbol (never path-fetchable), so recall
+  // still reports it missing after the fetch. The fallback resolved every fetchable
+  // target (7/7); it must NOT fabricate resolution of the un-fetchable symbol.
+  assert.strictEqual(m.required_targets_recalled, GOLDEN_FETCHABLE_TARGETS.length, 'DRT-005: all 7 fetchable targets recalled after fetch');
+  const stillMissing = Array.isArray(m.required_targets_missing) ? m.required_targets_missing : [];
+  assert.strictEqual(stillMissing.length, 1, 'DRT-005: only the non-fetchable symbol remains missing');
+  assert(stillMissing[0].startsWith('symbol:'), 'DRT-005: the lone residual gap is the symbol target (honest, not fabricated)');
+})();
+
+// DRT-006: INVISIBLE-FAILURE PROOF (faithful ENOBUFS simulation). Re-run the EXACT
+// enriched CLI command with a deliberately tiny maxBuffer to reproduce the 0.3.31
+// overflow, then assert (a) it throws and (b) the classifier tags it max_buffer --
+// i.e. the very failure that was silent is now classifiable and surfaced.
+(function drt006SimulatedMaxBufferThrow() {
+  const env = Object.assign({}, process.env, { HOLO_SKIP_MODEL: '1' });
+  const args = ['-B', 'holo_index.py', '--bundle-json', '--search',
+    'Audit FoundUp creation monorepo WSP_109 execution path', '--limit', '5', '--quiet-root-alerts'];
+  for (const t of GOLDEN_FETCHABLE_TARGETS) {
+    args.push('--bundle-must-include', t);
+  }
+  let threw = false;
+  let classified = 'unknown';
+  try {
+    cp.execFileSync('python', args, {
+      cwd: root,
+      env,
+      encoding: 'utf8',
+      timeout: 45000,
+      maxBuffer: 4096, // Far below the ~185KB enriched bundle => forces the overflow.
+      windowsHide: true
+    });
+  } catch (err) {
+    threw = true;
+    classified = orchestrator.classifyDirectReadFetchError(err);
+  }
+  assert(threw, 'DRT-006: a 4KB buffer against the enriched bundle MUST throw (reproduces the 0.3.31 overflow)');
+  assert.strictEqual(classified, 'max_buffer', 'DRT-006: the overflow must classify as max_buffer (never silent again)');
+})();
+
+// DRT-007: CONTINUATION INDEPENDENCE. The direct-read trigger reads only the required-
+// target list + bundle recall; it never touches the continuation toggle. Prove the
+// enriched fetch fires identically whether continuation would be enabled or disabled by
+// running holoIndexOutput on the golden prompt with/without a trailing continuation block.
+(function drt007ContinuationIndependence() {
+  const withContinuation = GOLDEN_FOUNDUP_PROMPT +
+    '\n\nContinuation from last RedDog packet (run_prev123): prior audit HELD on evidence.\n';
+  const a = orchestrator.holoIndexOutput(root, GOLDEN_FOUNDUP_PROMPT, 18000).meta || {};
+  const b = orchestrator.holoIndexOutput(root, withContinuation, 18000).meta || {};
+  assert.strictEqual(a.direct_read_fetch_attempted, true, 'DRT-007: fetch attempted (continuation absent)');
+  assert.strictEqual(b.direct_read_fetch_attempted, true, 'DRT-007: fetch attempted (continuation present)');
+  assert.strictEqual(a.direct_read_fallback_used, true, 'DRT-007: fallback used (continuation absent)');
+  assert.strictEqual(b.direct_read_fallback_used, true, 'DRT-007: fallback used (continuation present)');
+  assert.strictEqual(a.direct_read_fetch_arg_count, b.direct_read_fetch_arg_count, 'DRT-007: arg_count is continuation-invariant');
+})();
+
+// DRT-008: GOLDEN CONTRACT. The 8-target golden FoundUp prompt parses to exactly 8
+// required targets, of which GOLDEN_FETCHABLE_TARGETS are direct-read fetchable, and
+// buildMustIncludeArgs emits one --bundle-must-include pair per fetchable target.
+(function drt008GoldenContract() {
+  const parsed = orchestrator.parseRequiredTargetPaths(GOLDEN_FOUNDUP_PROMPT);
+  assert.strictEqual(parsed.length, 8, 'DRT-008: golden prompt must parse to 8 required targets');
+  const mustInclude = orchestrator.buildMustIncludeArgs(parsed);
+  assert.strictEqual(mustInclude.length, GOLDEN_FETCHABLE_TARGETS.length * 2, 'DRT-008: one --bundle-must-include pair per fetchable target');
+  assert.strictEqual(mustInclude.length / 2, GOLDEN_FETCHABLE_TARGETS.length, 'DRT-008: arg_count (pairs) == fetchable target count');
+  // The one non-fetchable target (a symbol:) is counted in total but excluded from args.
+  assert(parsed.some((t) => t.startsWith('symbol:')), 'DRT-008: golden 8th target is a non-fetchable symbol (total 8 > fetchable 7)');
+})();
+
 includes(blockedCopy, '## Governed Handoff Recommendation', 'substantive task must include governed handoff recommendation');
 includes(blockedCopy, 'handoff_needed: unknown', 'blocked-local packet must use conservative handoff_needed');
 includes(blockedCopy, 'reason: blocked_context_needs_local_0102_review', 'blocked-local packet must include conservative handoff reason');
@@ -1010,7 +1185,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.32'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.33'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -1024,7 +1199,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.32'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.33'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -1036,7 +1211,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.32'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.33'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
