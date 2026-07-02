@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.35', 'package version must be 0.3.35');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.35'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.36', 'package version must be 0.3.36');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.36'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.35', 'README version mismatch');
+includes(readme, 'Version: 0.3.36', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -1408,7 +1408,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.35'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.36'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -1422,7 +1422,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.35'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.36'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -1434,7 +1434,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.35'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.36'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -1539,6 +1539,8 @@ assert(!unicodeTrace.includes('\udc94'), 'UNI-007: Run Trace must not echo raw m
 includes(extensionJs, 'buildSanitizedContinuationSummary', 'continuation summary builder missing');
 includes(extensionJs, 'appendContinuationSummaryToWspPrompt', 'continuation append helper missing');
 includes(extensionJs, 'Use last RedDog packet', 'continuation UI toggle missing');
+includes(extensionJs, '<input id="useLastPacket" type="checkbox"> Use last RedDog packet', 'continuation checkbox must default OFF');
+assert(!extensionJs.includes('<input id="useLastPacket" type="checkbox" checked>'), 'continuation checkbox must not default checked');
 includes(extensionJs, 'lastContinuationSummary', 'in-memory continuation store missing');
 includes(roadmap, 'REDDOG_REVIEW_PACKET_MEMORY_AND_FOLLOWUP_PHASE1', 'continuation memory roadmap slice missing');
 
@@ -1701,5 +1703,52 @@ const copyMissing = orchestrator.buildCopyMarkdown(
   { substantive: true, continuationSummary: successSummary }
 );
 assert(!copyMissing.includes('Continuation from last RedDog packet'), 'missing/undefined continuationEnabled must NOT include continuation summary (fail-closed)');
+
+// REDDOG_CONTINUATION_DEFAULT_OFF_PHASE1 (v0.3.36) - continuation is opt-IN.
+// (a) Webview checkbox default is UNCHECKED (no `checked` attribute); feature stays manually available.
+const useLastPacketInputMatch = extensionJs.match(/<input id="useLastPacket" type="checkbox"([^>]*)>/);
+assert(useLastPacketInputMatch, 'useLastPacket checkbox input must exist (feature stays manually available)');
+assert(
+  !/\bchecked\b/.test(useLastPacketInputMatch[1]),
+  'useLastPacket checkbox must default OFF (no `checked` attribute) - continuation is opt-in'
+);
+// Frontend still sends the deterministic boolean from the checkbox state.
+includes(extensionJs, 'useLastPacket: continuationOn', 'frontend must send useLastPacket from checkbox state');
+includes(extensionJs, 'const continuationOn = !!(useLastPacket && useLastPacket.checked)', 'frontend continuation flag must derive from checkbox.checked');
+
+// (b) Default submit: useLastPacket false/absent => continuation_enabled=false AND continuation_appended=false.
+//     Mirrors the backend fail-closed derivation (message.useLastPacket === true), reusing #911's telemetry path.
+const defaultOffFromFalse = orchestrator.normalizeContinuationTelemetry(
+  { continuation_enabled: (false === true), continuation_appended: ((false === true) && true) }
+);
+assert.strictEqual(defaultOffFromFalse.continuation_enabled, false, 'default off (useLastPacket=false): continuation_enabled must be false');
+assert.strictEqual(defaultOffFromFalse.continuation_appended, false, 'default off (useLastPacket=false): continuation_appended must be false');
+const defaultOffFromAbsent = orchestrator.normalizeContinuationTelemetry(
+  { continuation_enabled: (undefined === true), continuation_appended: ((undefined === true) && true) }
+);
+assert.strictEqual(defaultOffFromAbsent.continuation_enabled, false, 'default off (useLastPacket absent): continuation_enabled must be false');
+assert.strictEqual(defaultOffFromAbsent.continuation_appended, false, 'default off (useLastPacket absent): continuation_appended must be false');
+const copyDefaultOff = orchestrator.buildCopyMarkdown(
+  { ok: true, content: sampleArchitectOutput, review_packet: { task_classification: { tier: 'HIGH' }, output_validation: { validated: true }, continuation_telemetry: defaultOffFromFalse } },
+  'reddog_architect', 'Repo context attached', [], null, 'high',
+  { substantive: true, continuationEnabled: false, continuationSummary: successSummary, continuationTelemetry: defaultOffFromFalse }
+);
+assert(!copyDefaultOff.includes('Continuation from last RedDog packet'), 'default off: Copy MD must NOT append continuation summary even when a prior packet exists');
+includes(copyDefaultOff, 'continuation_enabled: false', 'default off: Copy MD telemetry must report enabled=false');
+includes(copyDefaultOff, 'continuation_appended: false', 'default off: Copy MD telemetry must report appended=false');
+
+// (c) Manual check (useLastPacket=true) still appends when a summary is present (feature not removed).
+const manualCheckTelemetry = orchestrator.normalizeContinuationTelemetry(
+  { continuation_enabled: (true === true), continuation_appended: ((true === true) && true), continuation_source_run_id: successSummary.previous_run_id }
+);
+assert.strictEqual(manualCheckTelemetry.continuation_enabled, true, 'manual check (useLastPacket=true): continuation_enabled must be true');
+assert.strictEqual(manualCheckTelemetry.continuation_appended, true, 'manual check + prior packet: continuation_appended must be true');
+const copyManualCheck = orchestrator.buildCopyMarkdown(
+  { ok: true, content: sampleArchitectOutput, review_packet: { task_classification: { tier: 'HIGH' }, output_validation: { validated: true }, continuation_telemetry: manualCheckTelemetry } },
+  'reddog_architect', 'Repo context attached', [], null, 'high',
+  { substantive: true, continuationEnabled: true, continuationSummary: successSummary, continuationTelemetry: manualCheckTelemetry }
+);
+includes(copyManualCheck, 'Continuation from last RedDog packet', 'manual check: Copy MD must still append continuation summary (feature available on opt-in)');
+includes(copyManualCheck, 'continuation_enabled: true', 'manual check: Copy MD telemetry must report enabled=true');
 
 console.log('Foundups®Agent extension contract checks passed.');

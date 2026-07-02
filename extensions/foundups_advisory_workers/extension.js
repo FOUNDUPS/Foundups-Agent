@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.35';
+const EXTENSION_VERSION = '0.3.36';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -3387,7 +3387,7 @@ function renderHtml(worker, surface, logoUri) {
         <span class="pill">Routing: Auto via WSP_15</span>
         <span class="pill">Context: Auto WSP + HoloIndex + Skillz/Rolodex</span>
         <label for="testWorkFocus">Tests</label><select id="testWorkFocus"><option value="">Select test...</option><option value="regular">Regular smoke</option><option value="fusion">Fusion smoke</option><option value="wsp97">WSP_97 repo review</option><option value="reddog">RedDog architect review</option></select>
-        <label for="useLastPacket"><input id="useLastPacket" type="checkbox" checked> Use last RedDog packet</label>
+        <label for="useLastPacket"><input id="useLastPacket" type="checkbox"> Use last RedDog packet</label>
         <button id="copyMd" type="button">Copy MD</button>
       </div>
       <textarea id="workFocus" placeholder="Describe your work focus (012). 0102 converts this to a WSP task prompt for RedDog." aria-label="012 work focus"></textarea>

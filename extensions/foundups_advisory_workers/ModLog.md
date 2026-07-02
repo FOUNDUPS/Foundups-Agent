@@ -2,6 +2,31 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-03 - REDDOG_CONTINUATION_DEFAULT_OFF_PHASE1 (default Use-last-packet checkbox OFF, opt-in continuation, 0.3.36)
+
+- Change: the webview "Use last RedDog packet" checkbox now defaults UNCHECKED. Continuation is opt-IN
+  instead of opt-out. The feature stays manually available (012 can check the box to append the prior
+  WSP_97-safe summary). One-line HTML edit: removed the `checked` attribute from
+  `<input id="useLastPacket" type="checkbox">`.
+- No backend logic change. The #911 fail-closed backend (`const continuationEnabled = message.useLastPacket
+  === true`) already treats missing/false as OFF, so an unchecked default yields
+  `continuation_enabled=false` AND `continuation_appended=false` with no new code. The frontend still sends
+  `useLastPacket: continuationOn` where `continuationOn = !!(useLastPacket && useLastPacket.checked)`.
+- The "Continuation: disabled for this run." status line (from #911) now renders by default (unchecked run),
+  which is the intended opt-in signal.
+- No packing change (#914), no direct-read change, no redaction change, no new telemetry (continuation
+  telemetry already exists from #911).
+- Tests (verify_extension_contract.js): (a) the useLastPacket checkbox HTML default has NO `checked`
+  attribute; (b) default submit (useLastPacket false/absent) yields continuation_enabled=false AND
+  continuation_appended=false and Copy MD does NOT append the summary even when a prior packet exists;
+  (c) manual check (useLastPacket=true) still appends when a summary is present (feature not removed). Full
+  JS contract suite exit 0 on 0.3.36.
+- Golden rerun note: default-off is now the shipped behavior; the golden rerun no longer needs a manual
+  uncheck of the box.
+- Version: LIVE-surface bump 0.3.35 -> 0.3.36.
+- Stacked on REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 (#914).
+- WSP: WSP_00, WSP_50, WSP_97, WSP_22.
+
 ## 2026-07-03 - REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 (protect required-target excerpts in final model context, 0.3.35)
 
 - Problem (golden 6-file FoundUp-creation audit on 0.3.34): senses stack PASS
