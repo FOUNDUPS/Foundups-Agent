@@ -163,6 +163,27 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - Add regression retrieval tests so extension bridge code ranks above adjacent WRE routers.
 - **Status:** **LANDED** #882 (`99d0e35c2`) — ranking + target recall telemetry only; not source-content inclusion.
 
+### REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 (v0.3.35)
+
+- **Status:** PACKING COMPLETE (this slice). Golden 6-file FoundUp-creation audit on 0.3.34 proved senses
+  PASS (direct_read_fallback_used=true, 6/6 recalled) and audit egress PASS, but the MODEL claimed fetched
+  files were "not in bounded context". Root cause = PACKING: `buildBoundedRepoContext()` joined all sections
+  then applied one `.slice(0, 42000)` tail cut, so the HoloIndex JSON blob + git diff + self-file
+  `extension.js` snippet crowded out the fetched required-target excerpts.
+- Fix: when an explicit "Required direct-read targets" list is present AND the governed fetch succeeded, pack
+  a PROTECTED required-target block FIRST with stable markers `### Required direct-read target: <path>`
+  (per-target min 1800 / max 6000 chars, protected total 30000). Lower-priority sections yield to the 42K cut;
+  the self-file snippet is demoted/omitted and can never precede the required-target markers.
+- Proof (ADDENDUM B): `required_targets_in_model_context` / `_context_missing` / `_context_chars` /
+  `_context_truncated` computed from the FINAL post-cut context string (marker scan), not fetch telemetry.
+  Run Trace shows BOTH `required_targets_recalled` (fetched) and `required_targets_in_model_context`
+  (model-visible).
+- Backward compat: no required list => byte-identical packing, proof fields `unknown`. No new fs read path,
+  no execution authority, no redaction/allowlist change.
+- Tests: RTP-001..005 + ADDENDUM B in `verify_extension_contract.js` (`GOLDEN_6FILE_FOUNDUP_PROMPT`).
+- HoloIndex: static anchors in INTERFACE/ModLog; indexing follow-up
+  `HOLOINDEX_REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_INDEX_GAP_PHASE1` if queries still miss the packing files.
+
 ### REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_PHASE1 (v0.3.34)
 
 - **Status:** WIRE COMPLETE (this slice). Golden 0.3.33 proved senses stack PASS but egress FAIL

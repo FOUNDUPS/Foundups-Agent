@@ -93,6 +93,22 @@ const GOLDEN_6FILE_AUDIT_PROMPT = [
   'Use WSP_97 labels for every claim.'
 ].join('\n');
 
+// REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 (RTP-001..005 + ADDENDUM B): the golden
+// 6-file FoundUp-creation audit prompt used to prove protected required-target packing.
+// Uses the 6 governance/code targets (WSP_95 excluded: its chain-of-thought literals
+// fail-closed in audit_mode) and DELIBERATELY omits "WSP_97" prose so the packing tests
+// do not trip the WSP_97 excerpt path -- this is a pure PACKING proof.
+const GOLDEN_6FILE_TARGETS = GOLDEN_7FILE_TARGETS.filter((t) => !t.includes('WSP_95'));
+const GOLDEN_6FILE_FOUNDUP_PROMPT = [
+  'Audit the FoundUp creation monorepo execution path.',
+  '',
+  'Required direct-read targets:',
+  ...GOLDEN_6FILE_TARGETS.map((t) => '- ' + t),
+  '',
+  'Determine whether FoundUp creation is specified, implemented, or missing.',
+  'End with the next safest slice.'
+].join('\n');
+
 function assertFusionRedactionGatePasses(contextText, label) {
   const script = [
     'import sys',
@@ -181,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.34', 'package version must be 0.3.34');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.34'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.35', 'package version must be 0.3.35');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.35'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -199,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.34', 'README version mismatch');
+includes(readme, 'Version: 0.3.35', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -1068,6 +1084,118 @@ assert(!acbSecretRedacted.includes(_acbFakeKey), 'ACB-005: secret VALUE must be 
 assert(!acbSecretRedacted.includes('99999.99'), 'ACB-005: payout amount must be redacted in audit mode');
 
 // ===================================================================================
+// REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 (RTP-001..RTP-005 + ADDENDUM B)
+// Root cause: buildBoundedRepoContext joined all sections then tail-sliced to 42K, so
+// the fetched required-target direct-read content (mid/tail of the section list) was
+// guillotined while the HoloIndex JSON blob, git diff, and self-file extension.js
+// snippet consumed the head budget. Fix: when an explicit "Required direct-read targets"
+// list is present AND the governed fetch succeeded, pack a protected required-target
+// block FIRST (with stable markers) and PROVE presence from the FINAL post-cut context.
+// ===================================================================================
+
+// Static anchors: the packing code + constants must exist and be discoverable in source.
+includes(extensionJs, 'function buildRequiredTargetProtectedSection', 'RTP: protected required-target section builder missing');
+includes(extensionJs, 'function assembleFinalBoundedContext', 'RTP: final bounded-context assembler missing');
+includes(extensionJs, 'function computeRequiredTargetContextProof', 'RTP: final-context proof computer missing');
+includes(extensionJs, 'REQUIRED_TARGET_MARKER_PREFIX', 'RTP: stable required-target marker prefix constant missing');
+includes(extensionJs, 'BOUNDED_CONTEXT_MAX_CHARS', 'RTP: 42K bounded-context constant missing');
+includes(extensionJs, 'required_targets_in_model_context', 'RTP: model-context proof telemetry missing');
+includes(extensionJs, 'required_targets_context_missing', 'RTP: context-missing telemetry missing');
+includes(extensionJs, 'required_targets_context_truncated', 'RTP: context-truncated telemetry missing');
+assert.strictEqual(orchestrator.REQUIRED_TARGET_MARKER_PREFIX, '### Required direct-read target: ', 'RTP: marker prefix must be the stable audited string');
+assert.strictEqual(orchestrator.BOUNDED_CONTEXT_MAX_CHARS, 42000, 'RTP: bounded context cap must remain 42000');
+
+// Helper: synthesize a direct-read section object (like buildDirectReadContentSection
+// returns) with per-target content of a given size. No filesystem read.
+function makeDirectReadSection(specs) {
+  const hits = specs.map((s) => ({ location: s.path, content: s.body, content_truncated: !!s.truncated }));
+  return { text: 'stub', paths: hits.map((h) => h.location), chars: 0, audit_context: true, hits: hits };
+}
+function fill(marker, n) {
+  let out = '';
+  while (out.length < n) { out += marker + ' '; }
+  return out.slice(0, n);
+}
+
+// RTP-002 (unit): required_targets_in_model_context == required_targets_total when the
+// protected section carries every required target. Proof is computed from the FINAL
+// context string, not from fetch telemetry.
+const rtpPaths = GOLDEN_6FILE_TARGETS.slice();
+const rtpSection = makeDirectReadSection(rtpPaths.map((p, i) => ({ path: p, body: fill('body-' + i, 3000) })));
+const rtpProtected = orchestrator.buildRequiredTargetProtectedSection(rtpPaths, rtpSection);
+assert(rtpProtected.text && rtpProtected.included_paths.length === rtpPaths.length, 'RTP-002: protected section must include every required target');
+const rtpFinal = orchestrator.assembleFinalBoundedContext(['## HEAD'], rtpProtected.text, ['### lower A', '### lower B']);
+const rtpProof = orchestrator.computeRequiredTargetContextProof(rtpFinal, rtpPaths, rtpProtected);
+assert.strictEqual(rtpProof.required_targets_in_model_context, rtpPaths.length, 'RTP-002: all required targets must be in model context');
+assert.strictEqual(rtpProof.required_targets_context_total, rtpPaths.length, 'RTP-002: context_total must equal required total');
+
+// RTP-003 (unit): required_targets_context_missing == [] when every target is packed.
+assert(Array.isArray(rtpProof.required_targets_context_missing) && rtpProof.required_targets_context_missing.length === 0, 'RTP-003: no required target may be missing from model context');
+
+// ADDENDUM B (5): proof must be computed from the FINAL context, so a marker that exists
+// pre-cut but is guillotined by .slice must count as MISSING (never as present).
+const rtpCutFinal = rtpFinal.slice(0, rtpFinal.indexOf(orchestrator.REQUIRED_TARGET_MARKER_PREFIX + rtpPaths[rtpPaths.length - 1]) + 5);
+const rtpCutProof = orchestrator.computeRequiredTargetContextProof(rtpCutFinal, rtpPaths, rtpProtected);
+assert(rtpCutProof.required_targets_context_missing.length >= 1, 'ADDENDUM B: a marker cut from the final context must be reported missing (proof is post-cut, not telemetry)');
+
+// RTP-005 (unit): one large required file must NOT starve later required files. Even when
+// the first file could consume the whole budget, per-target minimum-first allocation keeps
+// every required target present inside the 42K cap.
+const rtpStarvePaths = GOLDEN_6FILE_TARGETS.slice();
+const rtpStarveSection = makeDirectReadSection(rtpStarvePaths.map((p, i) => ({
+  path: p,
+  body: i === 0 ? fill('HUGE', 500000) : fill('small-' + i, 2500),
+  truncated: i === 0
+})));
+const rtpStarveProtected = orchestrator.buildRequiredTargetProtectedSection(rtpStarvePaths, rtpStarveSection);
+// Simulate a bloated lower context (HoloIndex JSON + git diff + self snippet) far bigger
+// than 42K; the protected block leads, so ALL required markers survive the cut.
+const rtpBloatLower = [fill('### HoloIndex JSON blob\nX', 40000), fill('### git diff\nY', 40000), fill('### self extension.js\nZ', 40000)];
+const rtpStarveFinal = orchestrator.assembleFinalBoundedContext(['## HEAD'], rtpStarveProtected.text, rtpBloatLower);
+assert(rtpStarveFinal.length <= orchestrator.BOUNDED_CONTEXT_MAX_CHARS, 'RTP-005: final context must respect the 42K cap');
+const rtpStarveProof = orchestrator.computeRequiredTargetContextProof(rtpStarveFinal, rtpStarvePaths, rtpStarveProtected);
+assert.strictEqual(rtpStarveProof.required_targets_context_missing.length, 0, 'RTP-005: no required file may be starved out of the final context by a large sibling');
+assert.strictEqual(rtpStarveProof.required_targets_in_model_context, rtpStarvePaths.length, 'RTP-005: every required target survives when HoloIndex+git+self would exceed 42K');
+
+// ADDENDUM B (5): the self-file extension.js snippet must never appear BEFORE the
+// required-target markers in explicit-target audit mode. Here lower sections (incl. a
+// self snippet) are packed AFTER the protected block by construction.
+const rtpSelfIdx = rtpStarveFinal.indexOf('self extension.js');
+const rtpFirstMarkerIdx = rtpStarveFinal.indexOf(orchestrator.REQUIRED_TARGET_MARKER_PREFIX);
+assert(rtpFirstMarkerIdx !== -1, 'ADDENDUM B: required-target markers must be present');
+assert(rtpSelfIdx === -1 || rtpSelfIdx > rtpFirstMarkerIdx, 'ADDENDUM B: self-file snippet must never precede required-target markers in explicit-target mode');
+
+// RTP-001 (live): the GOLDEN_6FILE prompt through the real buildBoundedRepoContext must
+// place all 6 required paths in the final .text via the enriched direct-read fetch.
+const rtpLive = orchestrator.buildBoundedRepoContext('wsp_holo_git_skillz', GOLDEN_6FILE_FOUNDUP_PROMPT);
+assert(rtpLive.text.length <= orchestrator.BOUNDED_CONTEXT_MAX_CHARS, 'RTP-001: live final context must respect the 42K cap');
+for (const p of GOLDEN_6FILE_TARGETS) {
+  includes(rtpLive.text, orchestrator.REQUIRED_TARGET_MARKER_PREFIX + p, 'RTP-001: golden 6-file required target must appear in final model context: ' + p);
+}
+const rtpLiveSc = rtpLive.holoindex_scorecard || {};
+// RTP-002 (live): recall satisfied => in_model_context == total.
+assert.strictEqual(rtpLiveSc.required_targets_recalled, GOLDEN_6FILE_TARGETS.length, 'RTP-002 live: all 6 required targets recalled from bundle');
+assert.strictEqual(rtpLiveSc.required_targets_in_model_context, GOLDEN_6FILE_TARGETS.length, 'RTP-002 live: required_targets_in_model_context must equal required_targets_total when recall satisfied');
+// RTP-003 (live): fetch succeeded => context_missing == [].
+assert(Array.isArray(rtpLiveSc.required_targets_context_missing) && rtpLiveSc.required_targets_context_missing.length === 0, 'RTP-003 live: required_targets_context_missing must be [] when fetch succeeded');
+assert.strictEqual(rtpLiveSc.direct_read_fallback_used, true, 'RTP-001 live: golden prompt must trigger the governed direct-read fallback');
+// ADDENDUM B (6): both layers surfaced and NOT conflated in the Run Trace scorecard.
+const rtpTraceLines = orchestrator.formatHoloIndexScorecardLines(rtpLiveSc);
+const rtpTraceText = rtpTraceLines.join('\n');
+includes(rtpTraceText, '- required_targets_recalled: ', 'ADDENDUM B: Run Trace must surface required_targets_recalled (fetched layer)');
+includes(rtpTraceText, '- required_targets_in_model_context: ', 'ADDENDUM B: Run Trace must surface required_targets_in_model_context (model-visible layer)');
+
+// RTP-004 (legacy): a prompt WITHOUT a required-target list must NOT emit protected
+// markers and must report the model-context proof fields as 'unknown' (backward compat).
+const rtpLegacy = orchestrator.buildBoundedRepoContext('wsp_holo', fixtures.REGULAR_SMOKE_PROMPT);
+assert(rtpLegacy.text.indexOf(orchestrator.REQUIRED_TARGET_MARKER_PREFIX) === -1, 'RTP-004: legacy prompt must not inject protected required-target markers');
+const rtpLegacySc = rtpLegacy.holoindex_scorecard || {};
+assert.strictEqual(rtpLegacySc.required_targets_in_model_context, 'unknown', 'RTP-004: legacy prompt must not compute model-context proof (stays unknown)');
+// RTP-004: assembleFinalBoundedContext with no protected text == plain head+lower join+cut.
+const rtpLegacyAssembled = orchestrator.assembleFinalBoundedContext(['## HEAD'], '', ['### A', '### B']);
+assert.strictEqual(rtpLegacyAssembled, ['## HEAD', '### A', '### B'].join('\n\n'), 'RTP-004: no-protected assembly must be byte-identical to legacy head+lower join');
+
+// ===================================================================================
 // REDDOG_DIRECT_READ_FALLBACK_TRIGGER_DIAGNOSTIC_PHASE1 (DRT-001..DRT-008)
 // Golden rerun on 0.3.31 proved slice-1 detected the gap (index_gap_detected=true,
 // required_targets_total=8, recalled=0) but slice-2's enriched fetch NEVER fired in
@@ -1280,7 +1408,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.34'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.35'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -1294,7 +1422,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.34'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.35'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -1306,7 +1434,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.34'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.35'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');

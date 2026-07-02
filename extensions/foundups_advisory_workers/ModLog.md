@@ -2,6 +2,54 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-03 - REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 (protect required-target excerpts in final model context, 0.3.35)
+
+- Problem (golden 6-file FoundUp-creation audit on 0.3.34): senses stack PASS
+  (direct_read_fallback_used=true, target_recall_ok=true, 6/6 recalled) and audit egress PASS
+  (audit_context requested+applied, redaction passed), but the model pass FAILED: the model claimed
+  fetched files (foundup_job_contract.py, hermes_foundup_job_executor.py,
+  reddog_governed_work_order_dryrun.py, reddog_wre_execution_valve.py) were "not in bounded context".
+- Root cause = PACKING, not fetch/recall. `buildBoundedRepoContext()` joined all sections then applied a
+  single `.slice(0, 42000)` tail cut. Section order put the HoloIndex raw JSON blob (18KB), the git diff
+  (24KB), and the self-file `extension.js` target-recall snippet (24KB) ahead of / around the fetched
+  direct-read required-target content, so the required-target excerpts were guillotined by the tail cut.
+  direct_read_bytes=72000 but final bounded context = 42000 chars; the fetch/recall telemetry read 6/6
+  while the model saw far fewer.
+- Fix: when a prompt carries an explicit "Required direct-read targets" list AND the governed fetch
+  succeeded (`direct_read_fallback_used`), pack a PROTECTED required-target block FIRST (right after the
+  WSP contract head), each target rendered with a STABLE marker `### Required direct-read target: <path>`.
+  Per-target minimum-first budget (min 1800 / max 6000 chars, protected total 30000) so a large early file
+  cannot starve later required files. Lower-priority sections (HoloIndex JSON blob, git diff, Skillz,
+  self-file snippet) yield to the 42K cut instead of the required-target excerpts; the self-file
+  `extension.js` target-recall snippet is DEMOTED/OMITTED in explicit-target audit mode.
+- ADDENDUM B (model-context proof): new telemetry `required_targets_in_model_context`,
+  `required_targets_context_total`, `required_targets_context_chars`, `required_targets_context_missing`,
+  `required_targets_context_truncated` are computed by scanning the FINAL post-cut context string for the
+  stable markers -- NOT from fetch/bundle telemetry. Run Trace renders BOTH `required_targets_recalled`
+  (fetched/available layer) and `required_targets_in_model_context` (actually model-visible layer); the two
+  layers are never conflated.
+- Backward compat: prompts WITHOUT a required-target list pack byte-identically (head+lower join+same 42K
+  cut); model-context proof fields stay 'unknown'. No new file-read paths (protected block reuses the
+  already-fetched, already-redaction-gated direct-read hit content). No execution authority, no redaction
+  policy change, no change to the Python fetch/allowlist or the #913 audit_mode wire.
+- Tests: RTP-001..RTP-005 + ADDENDUM B assertions in `verify_extension_contract.js`
+  (`GOLDEN_6FILE_FOUNDUP_PROMPT` live packing proof: all 6 markers survive the 42K cut;
+  in_model_context == total when recall satisfied; context_missing == []; legacy prompt preserves ordering
+  and stays 'unknown'; large required file does not starve siblings; a marker cut post-slice counts as
+  missing). Full JS contract suite exit 0. Python `test_reddog_extension_bundle_recall.py`: 15 pass, 2 pre-
+  existing discoverability failures (extension.js not in top HoloIndex hits) that also fail on the base SHA
+  -- index-staleness, not a regression of this slice.
+- HoloIndex discoverability (ADDENDUM A, pre-edit): queries "RedDog required target context packing",
+  "buildBoundedRepoContext 42000 slice", "buildDirectReadContentSection direct-read target content",
+  "buildTargetRecallContentSection extension.js" did NOT surface `extension.js` or
+  `verify_extension_contract.js` in top code hits (INDEX_GAP -- OBSERVED). Static anchors added to
+  INTERFACE.md / ROADMAP.md. Follow-up indexing slice:
+  `HOLOINDEX_REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_INDEX_GAP_PHASE1` (SPECIFIED_NOT_IMPLEMENTED -- no
+  ranking/reindex code changed here). Discoverability is NOT the acceptance bar; acceptance is final-context
+  marker proof + golden model answer quality.
+- Version: LIVE-surface bump 0.3.34 -> 0.3.35.
+- WSP: WSP_00, WSP_15, WSP_50, WSP_97, WSP_22.
+
 ## 2026-07-02 - REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_PHASE1 (audit_context bridge wire, 0.3.34)
 
 - Problem (golden rerun on 0.3.33): **senses stack PASS** (7/7 recall, direct_read_fallback_used=true,

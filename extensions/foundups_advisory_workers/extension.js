@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.34';
+const EXTENSION_VERSION = '0.3.35';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -353,6 +353,24 @@ const REQUIRED_TARGET_HEADER_PATTERNS = [
   /direct[\s_-]?read\s+targets?\s*(?:\(required\))?/i
 ];
 
+// REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1: when a prompt carries an explicit
+// "Required direct-read targets" list AND the governed direct-read fetch succeeded,
+// the FINAL 42K model-visible context MUST preserve a readable excerpt from EVERY
+// required target. The prior packing joined all sections then tail-sliced to 42K, so
+// the fetched required-target content (mid/tail of the section list) was guillotined
+// while the HoloIndex raw JSON blob, git diff, and the self-file extension.js snippet
+// consumed the head budget. These constants govern the protected required-target
+// budget that survives the final cut. Numbers are adjustable; the contract test proves
+// all golden required files survive inside the 42K cap.
+const BOUNDED_CONTEXT_MAX_CHARS = 42000;
+const REQUIRED_TARGET_MARKER_PREFIX = '### Required direct-read target: ';
+const REQUIRED_TARGET_MIN_CHARS = 1800;   // guaranteed minimum excerpt per required target
+const REQUIRED_TARGET_MAX_CHARS = 6000;   // max excerpt per required target before spreading extra
+// Total protected budget for ALL required targets combined. Capped separately from the
+// 42K whole-context budget so a large required file cannot starve later required files,
+// and lower-priority sections (HoloIndex JSON, git diff, self-file snippet) yield first.
+const REQUIRED_TARGET_PROTECTED_TOTAL_CHARS = 30000;
+
 function normalizeTargetPath(raw) {
   return String(raw || '')
     .replace(/\\/g, '/')
@@ -604,6 +622,15 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     required_targets_total: meta.required_targets_total !== undefined ? meta.required_targets_total : 'unknown',
     required_targets_recalled: meta.required_targets_recalled !== undefined ? meta.required_targets_recalled : 'unknown',
     required_targets_missing: Array.isArray(meta.required_targets_missing) ? meta.required_targets_missing : 'unknown',
+    // REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 / ADDENDUM B: final-context proof.
+    // required_targets_recalled (above) = fetched/available from the bundle; the fields
+    // below = actually visible to the model AFTER the 42K cut. Different layers; must
+    // not be conflated. Values default to 'unknown' when no required list was present.
+    required_targets_in_model_context: meta.required_targets_in_model_context !== undefined ? meta.required_targets_in_model_context : 'unknown',
+    required_targets_context_total: meta.required_targets_context_total !== undefined ? meta.required_targets_context_total : 'unknown',
+    required_targets_context_chars: meta.required_targets_context_chars !== undefined ? meta.required_targets_context_chars : 'unknown',
+    required_targets_context_missing: Array.isArray(meta.required_targets_context_missing) ? meta.required_targets_context_missing : 'unknown',
+    required_targets_context_truncated: Array.isArray(meta.required_targets_context_truncated) ? meta.required_targets_context_truncated : 'unknown',
     direct_read_fallback_used: meta.direct_read_fallback_used !== undefined ? meta.direct_read_fallback_used : 'unknown',
     direct_read_paths: Array.isArray(meta.direct_read_paths) ? meta.direct_read_paths : 'unknown',
     direct_read_rejected: Array.isArray(meta.direct_read_rejected) ? meta.direct_read_rejected : 'unknown',
@@ -639,6 +666,14 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- required_targets_total: ' + scorecard.required_targets_total,
     '- required_targets_recalled: ' + scorecard.required_targets_recalled,
     '- required_targets_missing: ' + (Array.isArray(scorecard.required_targets_missing) ? (scorecard.required_targets_missing.length ? scorecard.required_targets_missing.join(', ') : '(none)') : scorecard.required_targets_missing),
+    // REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 / ADDENDUM B (6): render BOTH the
+    // fetched/available layer (required_targets_recalled) and the actually-model-visible
+    // layer (required_targets_in_model_context). They are different guarantees.
+    '- required_targets_in_model_context: ' + scorecard.required_targets_in_model_context,
+    '- required_targets_context_total: ' + scorecard.required_targets_context_total,
+    '- required_targets_context_chars: ' + scorecard.required_targets_context_chars,
+    '- required_targets_context_missing: ' + (Array.isArray(scorecard.required_targets_context_missing) ? (scorecard.required_targets_context_missing.length ? scorecard.required_targets_context_missing.join(', ') : '(none)') : scorecard.required_targets_context_missing),
+    '- required_targets_context_truncated: ' + (Array.isArray(scorecard.required_targets_context_truncated) ? (scorecard.required_targets_context_truncated.length ? scorecard.required_targets_context_truncated.map((t) => (t && t.path ? t.path + ' (' + t.chars + ')' : String(t))).join(', ') : '(none)') : scorecard.required_targets_context_truncated),
     '- direct_read_fallback_used: ' + scorecard.direct_read_fallback_used,
     '- direct_read_paths: ' + (Array.isArray(scorecard.direct_read_paths) ? (scorecard.direct_read_paths.length ? scorecard.direct_read_paths.join(', ') : '(none)') : scorecard.direct_read_paths),
     '- direct_read_rejected: ' + (Array.isArray(scorecard.direct_read_rejected) ? (scorecard.direct_read_rejected.length ? scorecard.direct_read_rejected.map((r) => (r && r.path ? r.path + ' (' + r.reason + ')' : String(r))).join(', ') : '(none)') : scorecard.direct_read_rejected),
@@ -2192,6 +2227,183 @@ function buildSystemPrompt(workerType, effort, retrievalQuality) {
   return [worker.prompt, effortText, qualityText, 'Always end with a WSP_15 Priority block and one Next safest step.'].filter(Boolean).join('\n\n');
 }
 
+// REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1: extract per-required-target excerpts
+// from the ALREADY-FETCHED governed direct-read hits (buildDirectReadContentSection's
+// output object). This does NOT re-read the filesystem: it only slices content the
+// Python bundle layer already fetched and redaction-gated. Each required target that has
+// a fetched hit gets a stable marker section:
+//   ### Required direct-read target: <repo-relative-path>
+//   ```text
+//   <bounded excerpt>
+//   ```
+// The scorecard later proves presence by scanning the FINAL context for these markers,
+// so telemetry cannot lie: a target counts as "in model context" only if its marker
+// survives the final cut.
+function buildRequiredTargetProtectedSection(requiredTargets, directReadSection) {
+  const empty = { text: '', included_paths: [], truncated: [], total_chars: 0, ordered_targets: [] };
+  const targets = Array.isArray(requiredTargets) ? requiredTargets : [];
+  if (!targets.length || !directReadSection || !Array.isArray(directReadSection.hits)) {
+    return empty;
+  }
+  // Map fetched direct-read hits by normalized path for lookup against required list.
+  const hitByPath = new Map();
+  for (const hit of directReadSection.hits) {
+    if (!hit || typeof hit.content !== 'string' || !hit.content.length) {
+      continue;
+    }
+    const rel = String(hit.location || '').replace(/\\/g, '/');
+    if (!rel) {
+      continue;
+    }
+    hitByPath.set(rel.toLowerCase(), { rel, content: hit.content, truncated: !!hit.content_truncated });
+  }
+  // Resolve each required target (path-only; symbols cannot be direct-read) to a hit.
+  const resolved = [];
+  for (const raw of targets) {
+    const target = normalizeTargetPath(raw);
+    if (!target || target.toLowerCase().startsWith('symbol:')) {
+      continue;
+    }
+    const wantLower = target.toLowerCase();
+    let match = hitByPath.get(wantLower);
+    if (!match) {
+      // basename / suffix fallback so a directoried required token still resolves the
+      // same fetched hit the recall detector matched.
+      for (const [key, value] of hitByPath.entries()) {
+        if (requiredTargetMatchesLocation(target, key)) {
+          match = value;
+          break;
+        }
+      }
+    }
+    if (match && !resolved.some((r) => r.rel.toLowerCase() === match.rel.toLowerCase())) {
+      resolved.push(match);
+    }
+  }
+  if (!resolved.length) {
+    return empty;
+  }
+  // Per-target minimum-first allocation: every required target gets at least MIN chars
+  // before any one target is allowed extra (up to MAX), so a large early file cannot
+  // starve later required files. Total protected budget is capped separately.
+  const n = resolved.length;
+  const totalBudget = REQUIRED_TARGET_PROTECTED_TOTAL_CHARS;
+  const minPer = Math.max(400, Math.min(REQUIRED_TARGET_MIN_CHARS, Math.floor(totalBudget / n)));
+  const budgets = resolved.map(() => minPer);
+  let spent = minPer * n;
+  // Distribute remaining budget round-robin so no file exceeds MAX and none starves.
+  let remaining = Math.max(0, totalBudget - spent);
+  let progress = true;
+  while (remaining > 0 && progress) {
+    progress = false;
+    for (let i = 0; i < n && remaining > 0; i++) {
+      const want = resolved[i].content.length;
+      const cap = Math.min(REQUIRED_TARGET_MAX_CHARS, want);
+      if (budgets[i] < cap) {
+        const grant = Math.min(cap - budgets[i], remaining, 512);
+        if (grant > 0) {
+          budgets[i] += grant;
+          remaining -= grant;
+          progress = true;
+        }
+      }
+    }
+  }
+  const sections = [];
+  const includedPaths = [];
+  const truncated = [];
+  let totalChars = 0;
+  for (let i = 0; i < n; i++) {
+    const item = resolved[i];
+    const budget = budgets[i];
+    const excerpt = item.content.length > budget ? item.content.slice(0, budget) : item.content;
+    const wasTruncated = item.truncated || item.content.length > budget;
+    const note = wasTruncated ? ' (bounded excerpt)' : '';
+    const lang = targetSnippetLanguageId(item.rel);
+    sections.push(REQUIRED_TARGET_MARKER_PREFIX + item.rel + note + '\n```' + lang + '\n' + excerpt + '\n```');
+    includedPaths.push(item.rel);
+    if (wasTruncated) {
+      truncated.push({ path: item.rel, chars: excerpt.length });
+    }
+    totalChars += excerpt.length;
+  }
+  const header = '## REQUIRED_DIRECT_READ_TARGET_CONTENT (protected)\n'
+    + 'These are the explicit required direct-read targets for this audit. They were fetched by\n'
+    + 'the Python bundle layer under the direct-read allowlist and redaction-gated before egress.\n'
+    + 'Every required target below IS present in this bounded context. Do NOT claim any of these\n'
+    + 'files were not retrieved or are absent from context.\n';
+  return {
+    text: header + '\n' + sections.join('\n\n'),
+    included_paths: includedPaths,
+    truncated: truncated,
+    total_chars: totalChars,
+    ordered_targets: resolved.map((r) => r.rel)
+  };
+}
+
+// REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1: assemble the final bounded context so
+// the protected required-target section is packed FIRST and survives the 42K tail cut.
+// Section order: [head (WSP contract + BOUNDED_REPO_CONTEXT header)] -> [protected
+// required targets, if any] -> [remaining lower-priority sections]. The whole string is
+// still capped at BOUNDED_CONTEXT_MAX_CHARS, but because the protected section precedes
+// the lower-priority sections it is the git diff / HoloIndex JSON / self-file snippet
+// that yield to the cut, never the required-target excerpts.
+function assembleFinalBoundedContext(headSections, protectedText, lowerSections) {
+  const head = (Array.isArray(headSections) ? headSections : []).slice();
+  const lower = (Array.isArray(lowerSections) ? lowerSections : []).slice();
+  const ordered = head.slice();
+  if (protectedText) {
+    ordered.push(protectedText);
+  }
+  for (const s of lower) {
+    if (s) {
+      ordered.push(s);
+    }
+  }
+  return ordered.join('\n\n').slice(0, BOUNDED_CONTEXT_MAX_CHARS);
+}
+
+// REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 / ADDENDUM B: compute proof telemetry
+// from the FINAL (post-cut) model-visible context string, NOT from fetch/bundle
+// telemetry. A required target counts as "in model context" only if its stable marker
+// survives after the 42K cap is applied. This is the only honest signal that the model
+// actually saw the file.
+function computeRequiredTargetContextProof(finalText, requiredTargets, protectedMeta) {
+  const targets = Array.isArray(requiredTargets)
+    ? requiredTargets.map((t) => normalizeTargetPath(t)).filter((t) => t && !t.toLowerCase().startsWith('symbol:'))
+    : [];
+  const text = String(finalText || '');
+  const inContext = [];
+  const missing = [];
+  let contextChars = 0;
+  const truncated = Array.isArray(protectedMeta && protectedMeta.truncated) ? protectedMeta.truncated : [];
+  for (const target of targets) {
+    const marker = REQUIRED_TARGET_MARKER_PREFIX + target;
+    const idx = text.indexOf(marker);
+    if (idx === -1) {
+      missing.push(target);
+      continue;
+    }
+    inContext.push(target);
+    // Measure the fenced excerpt length that survived for this target.
+    const fenceStart = text.indexOf('```', idx);
+    if (fenceStart !== -1) {
+      const bodyStart = text.indexOf('\n', fenceStart);
+      const fenceEnd = bodyStart !== -1 ? text.indexOf('```', bodyStart) : -1;
+      if (bodyStart !== -1 && fenceEnd !== -1) {
+        contextChars += Math.max(0, fenceEnd - bodyStart - 1);
+      }
+    }
+  }
+  return {
+    required_targets_in_model_context: inContext.length,
+    required_targets_context_total: targets.length,
+    required_targets_context_chars: contextChars,
+    required_targets_context_missing: missing,
+    required_targets_context_truncated: truncated.filter((t) => inContext.indexOf(t.path) !== -1)
+  };
+}
+
 function buildBoundedRepoContext(mode, taskText) {
   const root = workspaceRoot();
   const sections = [
@@ -2216,29 +2428,56 @@ function buildBoundedRepoContext(mode, taskText) {
     const text = sections.join('\n');
     return { text, summary: 'Repo context: WSP operating contract only.', quality, holoindex_meta, holoindex_scorecard, audit_context };
   }
+  // REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1: the head sections (WSP contract +
+  // BOUNDED_REPO_CONTEXT preamble) always lead. Lower-priority sections (HoloIndex raw
+  // JSON blob, direct-read section, target-recall self-snippet, Skillz, git diff) go
+  // into a separate list so they can yield to the 42K cut AFTER the protected required-
+  // target block when an explicit required-target list is present.
+  const headSections = sections.slice();
+  const lowerSections = [];
+  const requiredTargets = parseRequiredTargetPaths(taskText);
+  let directReadSection = null;
   if (mode === 'wsp_holo' || mode === 'wsp_holo_git' || mode === 'wsp_holo_skillz' || mode === 'wsp_holo_git_skillz') {
     const holo = holoIndexOutput(root, taskText || '', 18000);
     quality = holo.quality;
     holoindex_meta = holo.meta || null;
     holoindex_scorecard = extractHoloIndexScorecard(mode, holoindex_meta);
-    sections.push('### HoloIndex recall (WSP_00 bundle-json first; offline fallback only if needed)\n```text\n' + (holo.output || '(no HoloIndex output)') + '\n```');
-    // REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1: surface the governed direct-read
-    // content as a dedicated bounded section so the truncated recall JSON does not
-    // drop the fetched source the model needs to reason on.
-    if (holo.direct_read_section && holo.direct_read_section.text) {
-      sections.push(holo.direct_read_section.text);
-    }
+    lowerSections.push('### HoloIndex recall (WSP_00 bundle-json first; offline fallback only if needed)\n```text\n' + (holo.output || '(no HoloIndex output)') + '\n```');
+    directReadSection = holo.direct_read_section || null;
     // REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_PHASE1: preserve audit_context from slice-3
     // direct-read section so the bridge can run audit-mode redaction on egress.
     if (holo.direct_read_section && holo.direct_read_section.audit_context === true) {
       audit_context = true;
     }
   }
+  // REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1: protected packing is active only when
+  // the prompt named explicit required direct-read targets AND the governed fetch
+  // actually succeeded (fallback used, hits present). Otherwise the legacy ordering is
+  // preserved byte-for-byte (backward compat).
+  const directReadFallbackUsed = !!(holoindex_meta && holoindex_meta.direct_read_fallback_used);
+  const protectedInfo = (requiredTargets.length && directReadFallbackUsed && directReadSection)
+    ? buildRequiredTargetProtectedSection(requiredTargets, directReadSection)
+    : { text: '', included_paths: [], truncated: [], total_chars: 0, ordered_targets: [] };
+  const packProtected = !!protectedInfo.text;
+  // REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1: surface the governed direct-read content
+  // as a dedicated bounded section. When protected packing is active the SAME content is
+  // already rendered (with stable markers) in the protected block, so the legacy plain
+  // direct-read section is demoted to AFTER the protected block (and it may be cut before
+  // the protected excerpts, never the reverse).
+  if (directReadSection && directReadSection.text && !packProtected) {
+    lowerSections.push(directReadSection.text);
+  }
   let targetContentMeta = null;
   if (mode !== 'none') {
     const targetSection = buildTargetRecallContentSection(root, taskText || '', 24000);
-    if (targetSection.text) {
-      sections.push(targetSection.text);
+    // ADDENDUM B (3): when explicit required targets exist, demote/OMIT the self-file
+    // target-recall snippet (extensions/foundups_advisory_workers/extension.js) so it
+    // cannot consume the protected required-target budget. Its meta is still recorded.
+    const selfOnly = Array.isArray(targetSection.meta && targetSection.meta.target_content_paths)
+      && targetSection.meta.target_content_paths.length > 0
+      && targetSection.meta.target_content_paths.every((p) => isSelfFileLocation(p));
+    if (targetSection.text && !(packProtected && selfOnly)) {
+      lowerSections.push(targetSection.text);
     }
     targetContentMeta = targetSection.meta;
     holoindex_meta = mergeTargetContentMeta(holoindex_meta, targetContentMeta);
@@ -2246,7 +2485,7 @@ function buildBoundedRepoContext(mode, taskText) {
     if (taskMentionsWsp97(taskText)) {
       const wsp97 = buildWsp97ProtocolExcerpt(root, WSP97_EXCERPT_MAX_CHARS);
       if (wsp97.text) {
-        sections.push(wsp97.text);
+        lowerSections.push(wsp97.text);
         holoindex_meta = applyWsp97SanitizationMeta(holoindex_meta, wsp97.meta);
         holoindex_scorecard = extractHoloIndexScorecard(mode, holoindex_meta);
       }
@@ -2254,24 +2493,40 @@ function buildBoundedRepoContext(mode, taskText) {
   }
   if (mode === 'wsp_holo_skillz' || mode === 'wsp_holo_git_skillz') {
     const skillz = skillzWardrobeRolodexContext(root, taskText || '', 12000);
-    sections.push(skillz);
+    lowerSections.push(skillz);
     if (skillz.includes('(no matching Skillz/Wardrobe/Rolodex paths found')) {
       quality = (quality ? quality + '; ' : '') + 'Skillz/Rolodex discovery returned zero matches; treat handoff recommendations as NEEDS_VERIFICATION.';
     }
   }
   const active = activeEditorContext(root);
   if (active) {
-    sections.push(active);
+    lowerSections.push(active);
   }
   if (mode === 'git_diff' || mode === 'wsp_holo_git' || mode === 'wsp_holo_git_skillz') {
     const status = gitOutput(root, ['status', '--short'], 8000);
     const stat = gitOutput(root, ['diff', '--stat'], 8000);
     const diff = gitOutput(root, ['diff', '--', '.'], 24000);
-    sections.push('### git status --short\n```text\n' + (status || '(clean)') + '\n```');
-    sections.push('### git diff --stat\n```text\n' + (stat || '(no diff)') + '\n```');
-    sections.push('### git diff -- . (bounded)\n```diff\n' + (diff || '(no diff)') + '\n```');
+    lowerSections.push('### git status --short\n```text\n' + (status || '(clean)') + '\n```');
+    lowerSections.push('### git diff --stat\n```text\n' + (stat || '(no diff)') + '\n```');
+    lowerSections.push('### git diff -- . (bounded)\n```diff\n' + (diff || '(no diff)') + '\n```');
   }
-  const text = sections.join('\n\n').slice(0, 42000);
+  // Backward compat: when protected packing is NOT active the assembled order is exactly
+  // head + lower (== the legacy single sections list), then the same 42K tail cut.
+  const text = packProtected
+    ? assembleFinalBoundedContext(headSections, protectedInfo.text, lowerSections)
+    : headSections.concat(lowerSections).join('\n\n').slice(0, BOUNDED_CONTEXT_MAX_CHARS);
+  // ADDENDUM B (1,2): compute required-target presence proof from the FINAL (post-cut)
+  // model-visible context, scanning for the stable markers -- never from fetch telemetry.
+  if (requiredTargets.length) {
+    const proof = computeRequiredTargetContextProof(text, requiredTargets, protectedInfo);
+    holoindex_meta = holoindex_meta && typeof holoindex_meta === 'object' ? holoindex_meta : {};
+    holoindex_meta.required_targets_in_model_context = proof.required_targets_in_model_context;
+    holoindex_meta.required_targets_context_total = proof.required_targets_context_total;
+    holoindex_meta.required_targets_context_chars = proof.required_targets_context_chars;
+    holoindex_meta.required_targets_context_missing = proof.required_targets_context_missing;
+    holoindex_meta.required_targets_context_truncated = proof.required_targets_context_truncated;
+    holoindex_scorecard = extractHoloIndexScorecard(mode, holoindex_meta);
+  }
   return { text, summary: 'Repo context attached: ' + mode + ' (' + text.length + ' chars). ' + quality, quality, holoindex_meta, holoindex_scorecard, audit_context };
 }
 
@@ -2943,7 +3198,7 @@ function holoIndexOutput(root, taskText, maxChars) {
 // VALUE / payout AMOUNT / authorization TOKEN. audit_context stays false when no
 // direct-read fetch occurred (backward compatible; default egress path unchanged).
 function buildDirectReadContentSection(output) {
-  const empty = { text: '', paths: [], chars: 0, audit_context: false };
+  const empty = { text: '', paths: [], chars: 0, audit_context: false, hits: [] };
   let data;
   try {
     data = JSON.parse(String(output || '{}'));
@@ -2975,6 +3230,15 @@ function buildDirectReadContentSection(output) {
       + sections.join('\n\n'),
     paths: paths,
     chars: used,
+    // REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1: expose the raw fetched hits
+    // (location + content + content_truncated) so the protected required-target packer
+    // can slice per-target excerpts WITHOUT re-reading the filesystem. Same already-
+    // fetched, already-redaction-gated content -- no new read path.
+    hits: directHits.map((h) => ({
+      location: String(h.location || '').replace(/\\/g, '/'),
+      content: h.content,
+      content_truncated: !!h.content_truncated
+    })),
     // Direct-read of required targets == governance audit context. The egress gate
     // uses this to run in audit_mode (structure-preserving, value-redacting).
     audit_context: true
@@ -3452,6 +3716,11 @@ module.exports = {
   modeSelectionReasoning,
   skillzWardrobeRolodexContext,
   buildBoundedRepoContext,
+  buildRequiredTargetProtectedSection,
+  assembleFinalBoundedContext,
+  computeRequiredTargetContextProof,
+  REQUIRED_TARGET_MARKER_PREFIX,
+  BOUNDED_CONTEXT_MAX_CHARS,
   REDDOG_REQUIRED_OUTPUT_SECTIONS,
   formatElapsed,
   matchReddogProgress,
