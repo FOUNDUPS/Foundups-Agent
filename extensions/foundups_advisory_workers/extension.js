@@ -372,11 +372,23 @@ const REQUIRED_TARGET_MAX_CHARS = 6000;   // max excerpt per required target bef
 const REQUIRED_TARGET_PROTECTED_TOTAL_CHARS = 30000;
 
 function normalizeTargetPath(raw) {
-  return String(raw || '')
-    .replace(/\\/g, '/')
-    .replace(/^[`'"(\[]+/, '')
-    .replace(/[`'")\].,;:]+$/, '')
-    .trim();
+  // Backslash -> forward slash, then strip wrapper/punctuation chars from each end via
+  // a linear scan. The prior regex form (/^[`'"(\[]+/ and /[`'")\].,;:]+$/) was flagged
+  // by CodeQL js/polynomial-redos: the end-anchored `[...]+$` backtracks quadratically on
+  // uncontrolled input with many repeated quote chars. This O(n) trim preserves the exact
+  // leading/trailing character sets and ordering.
+  const s = String(raw || '').replace(/\\/g, '/');
+  const LEAD = ['`', "'", '"', '(', '['];
+  const TRAIL = ['`', "'", '"', ')', ']', '.', ',', ';', ':'];
+  let start = 0;
+  let end = s.length;
+  while (start < end && LEAD.indexOf(s.charAt(start)) !== -1) {
+    start += 1;
+  }
+  while (end > start && TRAIL.indexOf(s.charAt(end - 1)) !== -1) {
+    end -= 1;
+  }
+  return s.slice(start, end).trim();
 }
 
 // Extract repo-relative path/glob tokens from a single list line. A line may hold
