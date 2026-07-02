@@ -296,7 +296,7 @@ Review packet additions:
 In-memory WSP_97-safe continuation from the last successful or `BLOCKED_LOCALLY` run:
 
 - `buildSanitizedContinuationSummary()` — extracts Decision/Findings/WSP_97/WSP_15/Next step summaries; strips secrets and blocked-policy literals.
-- `appendContinuationSummaryToWspPrompt()` — appends sanitized summary to the next WSP task prompt when **Use last RedDog packet** is enabled (default ON).
+- `appendContinuationSummaryToWspPrompt()` — appends sanitized summary to the next WSP task prompt when **Use last RedDog packet** is enabled (default OFF as of v0.3.36 — continuation is opt-in; 012 checks the box to enable).
 - `state.lastContinuationSummary` — per-tab in-memory only; no disk persistence in Phase 1.
 - Copy MD may include a safe **Continuation Summary** section for the stored packet (not raw prior model output).
 

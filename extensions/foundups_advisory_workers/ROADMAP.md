@@ -163,6 +163,20 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - Add regression retrieval tests so extension bridge code ranks above adjacent WRE routers.
 - **Status:** **LANDED** #882 (`99d0e35c2`) — ranking + target recall telemetry only; not source-content inclusion.
 
+### REDDOG_CONTINUATION_DEFAULT_OFF_PHASE1 (v0.3.36)
+
+- **Status:** VERIFIED_READY (this slice). The webview "Use last RedDog packet" checkbox now defaults
+  UNCHECKED — continuation is opt-IN, not opt-out. One-line HTML edit removed the `checked` attribute; the
+  feature stays manually available (012 checks the box to append the prior WSP_97-safe summary).
+- No backend logic change: the #911 fail-closed backend (`message.useLastPacket === true`) already treats
+  missing/false as OFF, so an unchecked default yields `continuation_enabled=false` AND
+  `continuation_appended=false` with no new code. The "Continuation: disabled for this run." status line
+  (from #911) renders by default.
+- No packing change (#914), no direct-read change, no redaction change, no new telemetry.
+- Golden bar: default submit yields continuation_enabled=false AND continuation_appended=false; manual
+  check still appends when a prior packet exists. Golden rerun no longer needs a manual uncheck.
+- Stacked on REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 (#914).
+
 ### REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 (v0.3.35)
 
 - **Status:** PACKING COMPLETE (this slice). Golden 6-file FoundUp-creation audit on 0.3.34 proved senses
@@ -365,7 +379,7 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_REVIEW_PACKET_MEMORY_AND_FOLLOWUP_PHASE1
 
-- **Status:** **PR-READY** — in-memory WSP_97-safe continuation summary; "Use last RedDog packet" toggle (default ON).
+- **Status:** **PR-READY** — in-memory WSP_97-safe continuation summary; "Use last RedDog packet" toggle (default OFF as of v0.3.36 — opt-in; see REDDOG_CONTINUATION_DEFAULT_OFF_PHASE1).
 - Sanitized follow-up memory from last run; appends to WSP task prompt without raw Copy MD paste.
 - No disk persistence, no WRE/OpenClaw runtime wiring.
 
