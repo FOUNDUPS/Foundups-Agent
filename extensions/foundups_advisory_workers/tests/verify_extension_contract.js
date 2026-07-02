@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.36', 'package version must be 0.3.36');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.36'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.37', 'package version must be 0.3.37');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.37'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.36', 'README version mismatch');
+includes(readme, 'Version: 0.3.37', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -549,6 +549,11 @@ const repairTraceFailed = orchestrator.buildRunTraceSection({
 includes(repairTraceFailed, 'repair_context_mode: repair_minimal', 'OSR-010: Run Trace must expose repair context on failed repair');
 includes(repairTraceFailed, 'repair_mode: openrouter_single', 'OSR-010: Run Trace must expose repair mode on failed repair');
 includes(repairTraceFailed, 'missing_sections_after_repair: Evidence, Next safest step', 'OSR-010: Run Trace must list remaining missing sections');
+
+// RTBV-001: Run Trace must emit the REAL installed build version (EXTENSION_VERSION constant),
+// so build staleness is machine-checkable from telemetry and never masked by model text.
+includes(repairTraceFailed, '- extension_version: ' + pkg.version, 'RTBV-001: Run Trace must emit extension_version = package version (the real build)');
+includes(extensionJs, "'- extension_version: ' + EXTENSION_VERSION", 'RTBV-001: Run Trace line must read the EXTENSION_VERSION constant, not prompt/packet/model text');
 
 const handoffContext = orchestrator.skillzWardrobeRolodexContext(root, 'process all youtube comments with existing skillz', 12000);
 includes(handoffContext, 'Skillz/Wardrobe/Rolodex discovery', 'handoff context header missing');
@@ -1408,7 +1413,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.36'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.37'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -1422,7 +1427,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.36'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.37'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -1434,7 +1439,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.36'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.37'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
