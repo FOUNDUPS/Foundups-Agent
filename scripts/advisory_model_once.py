@@ -3,6 +3,9 @@
 
 Reads JSON from stdin and writes JSON to stdout. Raw prompt and bounded
 context are evaluated by the Fusion redaction gate before any external request.
+When `audit_context` is true in the payload (REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_PHASE1),
+the gate runs in audit_mode so governance direct-read structure survives egress while
+secret values remain redacted. Default path (audit_context absent/false) is unchanged.
 The caller should store only the returned redacted history/review packet.
 """
 
@@ -437,17 +440,35 @@ def main() -> int:
     context = payload.get("context")
     context_for_gate = context if isinstance(context, str) and context.strip() else None
     bridge_meta = payload.get("bridge_meta") if isinstance(payload.get("bridge_meta"), dict) else {}
+    audit_context_requested = payload.get("audit_context") is True
+    audit_context_applied = audit_context_requested
+    audit_telemetry = {
+        "audit_context_requested": audit_context_requested,
+        "audit_context_applied": audit_context_applied,
+    }
     _panel_input = payload.get("panel_models")
     _panel_truncated = isinstance(_panel_input, list) and len(_panel_input) > MAX_PANEL_MODELS
     if _panel_truncated:
         bridge_meta = dict(bridge_meta)
         bridge_meta["panel_models_truncated"] = True
+    bridge_meta = dict(bridge_meta)
+    bridge_meta.update(audit_telemetry)
 
     _progress("redaction_start", "Redaction gate started.")
-    gate = evaluate_redaction_gate(prompt, context_for_gate)
+    gate = evaluate_redaction_gate(
+        prompt,
+        context_for_gate,
+        audit_mode=audit_context_requested,
+    )
     if gate.status != REDACTION_GATE_PASSED or not gate.redacted_prompt:
         _progress("redaction_blocked", "Redaction gate blocked before network.")
-        return _json_result(ok=False, reason="redaction_blocked", redaction_reason=gate.reason, retry_count=0)
+        return _json_result(
+            ok=False,
+            reason="redaction_blocked",
+            redaction_reason=gate.reason,
+            retry_count=0,
+            **audit_telemetry,
+        )
 
     _progress("redaction_pass", "Redaction gate passed.")
     system_prompt = _system_prompt(payload)
@@ -466,7 +487,7 @@ def main() -> int:
             packet = result.get("review_packet")
             if isinstance(packet, dict):
                 packet.update(bridge_meta)
-        return _json_result(**result)
+        return _json_result(**{**result, **audit_telemetry})
 
     if payload.get("mode") == "foundups_fusion":
         result = _run_foundups_fusion(api_key, redacted_user_message, history, payload)
@@ -474,7 +495,7 @@ def main() -> int:
             packet = result.get("review_packet")
             if isinstance(packet, dict):
                 packet.update(bridge_meta)
-        return _json_result(**result)
+        return _json_result(**{**result, **audit_telemetry})
 
     if payload.get("mode") == "openrouter_single":
         model = payload.get("lead_model") or model
@@ -526,6 +547,7 @@ def main() -> int:
             "final_retry_reason": retry_meta.get("final_retry_reason"),
             **bridge_meta,
         },
+        **audit_telemetry,
     )
 
 

@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.33';
+const EXTENSION_VERSION = '0.3.34';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -656,7 +656,9 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- target_content_sanitized: ' + scorecard.target_content_sanitized,
     '- target_content_sanitized_categories: ' + (Array.isArray(scorecard.target_content_sanitized_categories)
       ? scorecard.target_content_sanitized_categories.join(', ')
-      : scorecard.target_content_sanitized_categories)
+      : scorecard.target_content_sanitized_categories),
+    '- audit_context_requested: ' + scorecard.audit_context_requested,
+    '- audit_context_applied: ' + scorecard.audit_context_applied
   ];
 }
 
@@ -1746,7 +1748,8 @@ function wireFusionWebview(context, webview, worker, state) {
     }
     const promptConstruction = {
       work_focus_digest: redactedDigest(workFocus, 180),
-      wsp_prompt_digest: redactedDigest(wspTaskPrompt, 320)
+      wsp_prompt_digest: redactedDigest(wspTaskPrompt, 320),
+      audit_context_requested: contextPacket.audit_context === true
     };
     const systemPrompt = buildSystemPrompt(workerType, effort, contextPacket.quality);
 
@@ -1756,7 +1759,14 @@ function wireFusionWebview(context, webview, worker, state) {
       postStatusAndProgress(webview, null, contextPacket.summary);
     }
     postStatusAndProgress(webview, null, '0102 assembled WSP task prompt from 012 work focus (bridge receives WSP task prompt, not raw focus alone).');
-    const holoScorecard = contextPacket.holoindex_scorecard || extractHoloIndexScorecard(contextMode, contextPacket.holoindex_meta);
+    const holoScorecard = Object.assign(
+      {},
+      contextPacket.holoindex_scorecard || extractHoloIndexScorecard(contextMode, contextPacket.holoindex_meta),
+      {
+        audit_context_requested: contextPacket.audit_context === true,
+        audit_context_applied: false
+      }
+    );
     const workTrail = createWorkTrail();
     workTrail.push('orchestrator_started');
     if (contextPacket.summary) {
@@ -1797,6 +1807,12 @@ function wireFusionWebview(context, webview, worker, state) {
       }
     };
     let result = await callFusion(context, worker, wspTaskPrompt, contextPacket.text, systemPrompt, state.history, mode, onBridgeProgress, state, promptConstruction);
+    if (holoScorecard) {
+      holoScorecard.audit_context_applied = result && result.audit_context_applied === true;
+      if (result && result.audit_context_requested !== undefined) {
+        holoScorecard.audit_context_requested = result.audit_context_requested === true;
+      }
+    }
     absorbUnicodeMeta(result);
     if (result.ok && isSubstantiveRedDogWorker(workerType)) {
       workTrail.push('validator_started');
@@ -2088,6 +2104,7 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
       max_tokens: callOptions.maxTokens || 2200,
       temperature: 0.2,
       timeout: mode === 'foundups_fusion' ? 120 : 90,
+      audit_context: bridgeMeta && bridgeMeta.audit_context_requested === true,
       bridge_meta: Object.assign({}, bridgeMeta || {}, {
         python_interpreter: interpreter.path,
         python_interpreter_source: interpreter.source,
@@ -2194,9 +2211,10 @@ function buildBoundedRepoContext(mode, taskText) {
   let quality = 'No HoloIndex requested for this context mode.';
   let holoindex_meta = null;
   let holoindex_scorecard = null;
+  let audit_context = false;
   if (mode === 'none') {
     const text = sections.join('\n');
-    return { text, summary: 'Repo context: WSP operating contract only.', quality, holoindex_meta, holoindex_scorecard };
+    return { text, summary: 'Repo context: WSP operating contract only.', quality, holoindex_meta, holoindex_scorecard, audit_context };
   }
   if (mode === 'wsp_holo' || mode === 'wsp_holo_git' || mode === 'wsp_holo_skillz' || mode === 'wsp_holo_git_skillz') {
     const holo = holoIndexOutput(root, taskText || '', 18000);
@@ -2209,6 +2227,11 @@ function buildBoundedRepoContext(mode, taskText) {
     // drop the fetched source the model needs to reason on.
     if (holo.direct_read_section && holo.direct_read_section.text) {
       sections.push(holo.direct_read_section.text);
+    }
+    // REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_PHASE1: preserve audit_context from slice-3
+    // direct-read section so the bridge can run audit-mode redaction on egress.
+    if (holo.direct_read_section && holo.direct_read_section.audit_context === true) {
+      audit_context = true;
     }
   }
   let targetContentMeta = null;
@@ -2249,7 +2272,7 @@ function buildBoundedRepoContext(mode, taskText) {
     sections.push('### git diff -- . (bounded)\n```diff\n' + (diff || '(no diff)') + '\n```');
   }
   const text = sections.join('\n\n').slice(0, 42000);
-  return { text, summary: 'Repo context attached: ' + mode + ' (' + text.length + ' chars). ' + quality, quality, holoindex_meta, holoindex_scorecard };
+  return { text, summary: 'Repo context attached: ' + mode + ' (' + text.length + ' chars). ' + quality, quality, holoindex_meta, holoindex_scorecard, audit_context };
 }
 
 function activeEditorContext(root) {

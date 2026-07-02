@@ -2,6 +2,29 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-02 - REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_PHASE1 (audit_context bridge wire, 0.3.34)
+
+- Problem (golden rerun on 0.3.33): **senses stack PASS** (7/7 recall, direct_read_fallback_used=true,
+  continuation off) but **model pass FAIL** — `redaction gate status: BLOCKED_LOCALLY`,
+  `made_network_call: false`. Root cause: slice-3 `audit_mode` exists in `fusion_redaction_gate.py` and
+  `buildDirectReadContentSection()` surfaces `audit_context: true`, but the live path
+  `extension.js` -> `scripts/advisory_model_once.py` never passed the flag into
+  `evaluate_redaction_gate()`.
+- Fix: `buildBoundedRepoContext()` preserves `audit_context` from `holo.direct_read_section`;
+  `callFusion()` payload carries `audit_context: true` when `promptConstruction.audit_context_requested`;
+  `advisory_model_once.py` passes `audit_mode=audit_context_requested` into the entry gate only.
+  Run Trace telemetry: `audit_context_requested`, `audit_context_applied`.
+- Default path byte-identical: no direct-read governance context => `audit_context=false` => strict gate unchanged.
+- Tests: ACB-001..005 in `verify_extension_contract.js`; 3 bridge tests in
+  `scripts/tests/test_advisory_model_once_hardening.py`.
+- HoloIndex discoverability (ADDENDUM A, pre-edit): queries for bridge wire / audit_mode did NOT surface
+  `extension.js`, `advisory_model_once.py`, or `fusion_redaction_gate.py` in top code hits
+  (INDEX_GAP — OBSERVED). Static anchors added to INTERFACE.md / ROADMAP.md. Follow-up indexing slice:
+  `HOLOINDEX_REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_INDEX_GAP_PHASE1` (SPECIFIED_NOT_IMPLEMENTED — no ranking
+  code changed in this slice).
+- Version: mechanical LIVE-surface bump 0.3.33 -> 0.3.34.
+- WSP: WSP_00, WSP_15, WSP_50, WSP_97, WSP_22.
+
 ## 2026-07-02 - REDDOG_DIRECT_READ_FALLBACK_TRIGGER_DIAGNOSTIC_PHASE1 (enriched-fetch buffer + fetch-error telemetry, 0.3.33)
 
 - Problem (golden rerun on landed 0.3.31): slice-1 detector WORKED (index_gap_detected=true,
