@@ -1,5 +1,25 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-03: REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (v0.3.39)
+
+**Slice:** Authoritative required-target section identification (marker forgery hardening)
+**WSP:** WSP_00, WSP_11, WSP_22, WSP_50, WSP_97
+**Stacked on:** REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1 (#917)
+
+- EDIT `src/fusion_redaction_gate.py` — add `_normalize_required_target_path()`; extend
+  `_isolate_required_targets(context, authoritative_paths=None)` so marker-delimited sections are
+  required-target sections only when their path is IN the authoritative packed list threaded from
+  the JS packer. Phantom markers (path not in list) fold back verbatim as ordinary content; checked/
+  passed/blocked/missing cannot exceed the authoritative count; `blocked_paths` is a subset of
+  authoritative paths. `authoritative_paths=None` preserves byte-identical #917 behavior.
+- EDIT `evaluate_redaction_gate(..., required_target_paths=None)` — thread authoritative list into
+  isolation path.
+- EDIT `scripts/advisory_model_once.py` (bridge) — read `required_target_paths` from stdin payload.
+- ADD 6 MFH adversarial tests in `tests/test_fusion_redaction_gate.py` (embedded marker not a
+  section; malicious fixture no inflation; blocked_paths subset; full adversarial fixture;
+  None-byte-identical legacy; one-blocked sibling survives with authoritative list). 95/95 pass.
+- No weakening: identification-only; no detector relaxed; audit-mode value-vs-structure unchanged.
+
 ## 2026-07-01: REDDOG_AUDIT_MODE_REDACTION_PHASE1 (slice 3/3)
 
 **Slice:** Audit-mode redaction preserves governance STRUCTURE while still redacting VALUES

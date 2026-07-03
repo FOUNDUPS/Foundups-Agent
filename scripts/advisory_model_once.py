@@ -442,6 +442,15 @@ def main() -> int:
     bridge_meta = payload.get("bridge_meta") if isinstance(payload.get("bridge_meta"), dict) else {}
     audit_context_requested = payload.get("audit_context") is True
     audit_context_applied = audit_context_requested
+    # REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1: authoritative packed required-target
+    # paths (from the JS packer). Threaded into the gate so phantom markers minted by file content
+    # cannot be treated as required-target sections. Absent/empty -> None (legacy path, unchanged).
+    _rt_paths_raw = payload.get("required_target_paths")
+    required_target_paths = (
+        tuple(str(p) for p in _rt_paths_raw if isinstance(p, str) and p.strip())
+        if isinstance(_rt_paths_raw, list) and _rt_paths_raw
+        else None
+    )
     audit_telemetry = {
         "audit_context_requested": audit_context_requested,
         "audit_context_applied": audit_context_applied,
@@ -459,6 +468,7 @@ def main() -> int:
         prompt,
         context_for_gate,
         audit_mode=audit_context_requested,
+        required_target_paths=required_target_paths,
     )
     # REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1: surface the per-required-target isolation
     # counts (counts/paths/reasons only -- never raw content) so the extension Run Trace scorecard

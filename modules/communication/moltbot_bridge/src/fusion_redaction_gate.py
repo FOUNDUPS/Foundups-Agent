@@ -86,6 +86,21 @@ REQUIRED_TARGET_MARKER_PREFIX = "### Required direct-read target: "
 # target existed but was withheld; only the fenced body is replaced.
 _REQUIRED_TARGET_BLOCKED_NOTICE = "[REQUIRED TARGET REDACTED: blocked by {cats}]"
 
+
+def _normalize_required_target_path(raw: object) -> str:
+    """Normalize a required-target path label for authoritative-set comparison.
+
+    REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1: backslash -> forward slash, drop a
+    trailing "(bounded excerpt)" packer note, strip surrounding whitespace, and lowercase. Used ONLY
+    to decide whether a marker-delimited section's path is in the authoritative packed set; it never
+    changes what is scanned or redacted.
+    """
+    s = str(raw or "").replace("\\", "/").strip()
+    note = " (bounded excerpt)"
+    if s.endswith(note):
+        s = s[: -len(note)].strip()
+    return s.lower()
+
 # Low-cardinality reasons -- NEVER echo raw input.
 REASON_CLEAN = "clean"
 REASON_REDACTED = "redacted"
@@ -417,8 +432,24 @@ def _section_is_blocked(section_body: str) -> Tuple[bool, Tuple[str, ...]]:
     return (bool(rep.blocked_categories), tuple(rep.blocked_categories))
 
 
-def _isolate_required_targets(context: str) -> Optional[Tuple[str, Dict[str, object]]]:
+def _isolate_required_targets(
+    context: str,
+    authoritative_paths: Optional[Tuple[str, ...]] = None,
+) -> Optional[Tuple[str, Dict[str, object]]]:
     """Marker-aware per-target redaction isolation for an audit-mode merged context.
+
+    REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1: `authoritative_paths` is the AUTHORITATIVE
+    list of required-target paths the packer actually packed (threaded from the JS packer via the
+    bridge payload). When it is provided (non-None), a marker-delimited section is only treated as a
+    REQUIRED-TARGET SECTION when its path label is IN that list; a marker whose path is NOT authoritative
+    (a phantom minted by file CONTENT, e.g. a self-referential audit body that literally contains
+    "### Required direct-read target: fake/evil.py") is treated as ORDINARY content -- folded back into
+    the preceding real section verbatim, never counted as its own checked/passed/blocked section, and
+    never able to mint a blocked_path. Consequently checked/passed/blocked/missing can never exceed the
+    authoritative count and blocked_paths is a subset of the authoritative paths. When
+    `authoritative_paths` is None (e.g. legacy callers / no list threaded) behavior is byte-identical to
+    the pre-hardening path (every marker section is checked), so the JS pack-time marker neutralization
+    is the defense-in-depth that keeps phantom markers out of the packed body in the first place.
 
     Splits `context` into a preamble plus per-required-target sections delimited by the stable
     marker REQUIRED_TARGET_MARKER_PREFIX, evaluates each section's block status INDEPENDENTLY,
@@ -450,19 +481,40 @@ def _isolate_required_targets(context: str) -> Optional[Tuple[str, Dict[str, obj
     if not sections:
         return None
 
+    # REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1: build the authoritative lookup set.
+    # None => no list threaded (legacy path, every marker section is a required-target section).
+    # A provided list => only sections whose path is in the set are required-target sections; the rest
+    # are phantom markers (file content) folded back as ordinary text.
+    authoritative_set: Optional[set] = None
+    if authoritative_paths is not None:
+        authoritative_set = {
+            _normalize_required_target_path(p) for p in authoritative_paths if str(p or "").strip()
+        }
+
     checked = 0
     passed = 0
     blocked_paths: List[str] = []
     blocked_reasons: List[str] = []
     rebuilt: List[str] = []
     for body in sections:
-        checked += 1
         # The path is the first line after the marker (may carry a "(bounded excerpt)" suffix and
         # then a fenced block). Keep the ENTIRE original body for survivors (byte-identical); only a
         # blocked section is rewritten. The path label is telemetry-only.
         newline = body.find("\n")
         header_line = body if newline == -1 else body[:newline]
         path_label = header_line.strip()
+        # Authoritative gate: when an authoritative list is threaded, a marker whose path is NOT in it
+        # is a PHANTOM minted by file content. Fold it back verbatim (marker + body) into the preceding
+        # output as ORDINARY content -- it is NOT a required-target section, so it is neither checked nor
+        # counted and can never contribute a blocked_path. Its content still flows to the whole-context
+        # gate via reassembly (so any real secret in it is still value-redacted / fails closed there).
+        if authoritative_set is not None and _normalize_required_target_path(path_label) not in authoritative_set:
+            if rebuilt:
+                rebuilt[-1] = rebuilt[-1] + marker + body
+            else:
+                preamble = preamble + marker + body
+            continue
+        checked += 1
         is_blocked, cats = _section_is_blocked(body)
         if is_blocked:
             blocked_paths.append(path_label)
@@ -499,7 +551,12 @@ def _isolate_required_targets(context: str) -> Optional[Tuple[str, Dict[str, obj
 # ---------------------------------------------------------------------------
 
 
-def evaluate_redaction_gate(prompt: object, context: object = None, audit_mode: bool = False) -> RedactionGateResult:
+def evaluate_redaction_gate(
+    prompt: object,
+    context: object = None,
+    audit_mode: bool = False,
+    required_target_paths: Optional[Tuple[str, ...]] = None,
+) -> RedactionGateResult:
     """Deterministic, FAIL-CLOSED gate.
 
     PASS requires: prompt (and context if given) are text, redaction ran without error, NO block
@@ -518,6 +575,13 @@ def evaluate_redaction_gate(prompt: object, context: object = None, audit_mode: 
     (so audit-mode value-redaction still applies to survivors and any residual still fails closed).
     This changes ONLY the GRANULARITY of the block (per-target vs whole-payload), never what is
     blocked. If no markers exist or the split is ambiguous -> fall back to the whole-context path.
+
+    REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1: `required_target_paths` is the AUTHORITATIVE
+    list of packed required-target paths (threaded from the JS packer). When provided, per-target
+    isolation only treats a marker-delimited section as a required-target section when its path is in
+    this list; a marker minted by file CONTENT (path not in the list) is ordinary content and cannot
+    inflate the isolation counts / blocked_paths. This changes only how sections are IDENTIFIED as
+    required targets -- no detector is relaxed and the whole-context gate still redacts every survivor.
     """
     try:
         if not isinstance(prompt, str) or (context is not None and not isinstance(context, str)):
@@ -529,7 +593,7 @@ def evaluate_redaction_gate(prompt: object, context: object = None, audit_mode: 
         gate_context = context
         target_telemetry: Optional[Dict[str, object]] = None
         if audit_mode and isinstance(context, str):
-            isolated = _isolate_required_targets(context)
+            isolated = _isolate_required_targets(context, required_target_paths)
             if isolated is not None:
                 gate_context, target_telemetry = isolated
 

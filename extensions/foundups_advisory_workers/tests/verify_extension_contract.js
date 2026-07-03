@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.38', 'package version must be 0.3.38');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.38'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.39', 'package version must be 0.3.39');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.39'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.38', 'README version mismatch');
+includes(readme, 'Version: 0.3.39', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -1191,6 +1191,67 @@ includes(rtpTraceText, '- required_targets_recalled: ', 'ADDENDUM B: Run Trace m
 includes(rtpTraceText, '- required_targets_in_model_context: ', 'ADDENDUM B: Run Trace must surface required_targets_in_model_context (model-visible layer)');
 
 // ===================================================================================
+// REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (MFH-J-001..006)
+// The required-target proof must be AUTHORITATIVE and unforgeable by file content: it is
+// derived from the STRUCTURED packed record (protectedInfo.included_paths), NOT by scanning
+// markers out of the merged final text. A phantom marker minted inside a target BODY must
+// never be counted as in_model_context, and body-embedded marker strings are neutralized at
+// pack time. Static anchors + unit proofs (no filesystem read).
+// ===================================================================================
+includes(extensionJs, 'function neutralizeRequiredTargetMarker', 'MFH-J: pack-time marker neutralizer missing');
+includes(extensionJs, 'function requiredTargetSectionSurvived', 'MFH-J: authoritative section-survival check missing');
+includes(extensionJs, 'included_paths', 'MFH-J: authoritative included_paths structured record missing');
+
+// MFH-J-001: the proof counts ONLY authoritative packed paths. A requested target NOT in the
+// authoritative included set is missing (never flipped to present by a stray marker in text).
+const mfhPaths = ['modules/a/first.py', 'modules/b/second.py'];
+const mfhSection = makeDirectReadSection(mfhPaths.map((p, i) => ({ path: p, body: fill('clean-' + i, 3000) })));
+const mfhProtected = orchestrator.buildRequiredTargetProtectedSection(mfhPaths, mfhSection);
+const mfhFinal = orchestrator.assembleFinalBoundedContext(['## HEAD'], mfhProtected.text, []);
+const mfhProof = orchestrator.computeRequiredTargetContextProof(mfhFinal, mfhPaths, mfhProtected);
+assert.strictEqual(mfhProof.required_targets_in_model_context, mfhPaths.length, 'MFH-J-001: authoritative targets counted from structured record');
+
+// MFH-J-002 (THE ADVERSARIAL PROOF): a phantom marker for a path that was NEVER fetched/packed,
+// injected DIRECTLY into the final text, must NOT be counted as in_model_context. The proof
+// iterates the authoritative included_paths, so fake/evil.py (not authoritative) is ignored.
+const mfhForgedFinal = mfhFinal
+  + '\n\n' + orchestrator.REQUIRED_TARGET_MARKER_PREFIX + 'fake/evil.py\n```text\nphantom body\n```';
+const mfhForgedProof = orchestrator.computeRequiredTargetContextProof(mfhForgedFinal, mfhPaths.concat(['fake/evil.py']), mfhProtected);
+assert.strictEqual(mfhForgedProof.required_targets_in_model_context, mfhPaths.length, 'MFH-J-002: a phantom (non-authoritative) marker must NOT inflate in_model_context');
+assert(mfhForgedProof.required_targets_context_missing.indexOf('fake/evil.py') !== -1, 'MFH-J-002: a requested-but-never-packed path must be reported missing, not present');
+// context_total counts requested path-only targets; the phantom requested path is missing, not present.
+assert(mfhForgedProof.required_targets_in_model_context <= mfhForgedProof.required_targets_context_total, 'MFH-J-002: in_model_context can never exceed context_total');
+
+// MFH-J-003: a target's OWN BODY that embeds the marker string cannot mint a sibling section.
+// After neutralization the body no longer contains the exact marker prefix byte sequence.
+const mfhBodyWithMarker = 'legit code\n' + orchestrator.REQUIRED_TARGET_MARKER_PREFIX + 'fake/evil.py\nmore code';
+const mfhNeutralized = orchestrator.neutralizeRequiredTargetMarker(mfhBodyWithMarker);
+assert(mfhNeutralized.indexOf(orchestrator.REQUIRED_TARGET_MARKER_PREFIX) === -1, 'MFH-J-003: neutralized body must not contain the exact marker prefix');
+assert(mfhNeutralized.indexOf('fake/evil.py') !== -1, 'MFH-J-003: neutralization preserves the readable text (only the marker byte sequence is broken)');
+
+// MFH-J-004: pack a real target whose fetched CONTENT embeds a phantom marker. The packed
+// protected section must NOT expose the exact marker prefix inside the body (only the packer's
+// own header markers use it), so the count of authoritative marker headers equals included_paths.
+const mfhEvilContent = 'real A source\n' + orchestrator.REQUIRED_TARGET_MARKER_PREFIX + 'fake/evil.py\n```text\nx\n```\ntail';
+const mfhEvilSection = makeDirectReadSection([
+  { path: 'real/a.py', body: mfhEvilContent },
+  { path: 'real/b.py', body: 'clean B' }
+]);
+const mfhEvilProtected = orchestrator.buildRequiredTargetProtectedSection(['real/a.py', 'real/b.py'], mfhEvilSection);
+const mfhMarkerCount = mfhEvilProtected.text.split(orchestrator.REQUIRED_TARGET_MARKER_PREFIX).length - 1;
+assert.strictEqual(mfhMarkerCount, mfhEvilProtected.included_paths.length, 'MFH-J-004: packed section exposes exactly one marker per authoritative target (body-embedded marker neutralized)');
+const mfhEvilFinal = orchestrator.assembleFinalBoundedContext(['## HEAD'], mfhEvilProtected.text, []);
+const mfhEvilProof = orchestrator.computeRequiredTargetContextProof(mfhEvilFinal, ['real/a.py', 'real/b.py', 'fake/evil.py'], mfhEvilProtected);
+assert.strictEqual(mfhEvilProof.required_targets_in_model_context, 2, 'MFH-J-004: only the 2 real authoritative targets are in model context');
+assert(mfhEvilProof.required_targets_context_missing.indexOf('fake/evil.py') !== -1, 'MFH-J-004: fake/evil.py (embedded in a body) is never in model context');
+
+// MFH-J-005: a genuinely-packed authoritative target whose fenced body is cut by the 42K slice
+// counts as missing (survival check requires marker AND fenced body) -- keeps ADDENDUM B honest.
+const mfhCut = mfhFinal.slice(0, mfhFinal.indexOf(orchestrator.REQUIRED_TARGET_MARKER_PREFIX + mfhPaths[1]) + 5);
+const mfhCutProof = orchestrator.computeRequiredTargetContextProof(mfhCut, mfhPaths, mfhProtected);
+assert(mfhCutProof.required_targets_context_missing.length >= 1, 'MFH-J-005: an authoritative target whose fenced body is cut is reported missing');
+
+// ===================================================================================
 // REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1 (RPTI-001..RPTI-004)
 // The Python redaction layer isolates each required-target excerpt and, when ONE hits a
 // hard block, omits ONLY that target (keeping the clean ones). The bridge returns 5
@@ -1452,7 +1513,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.38'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.39'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -1466,7 +1527,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.38'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.39'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -1478,7 +1539,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.38'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.39'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');

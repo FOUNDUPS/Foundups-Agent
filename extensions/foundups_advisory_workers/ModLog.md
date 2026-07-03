@@ -2,6 +2,55 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-03 - REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (authoritative unforgeable required-target telemetry, 0.3.39)
+
+- Root cause (marker-reparse forgery): the required-target telemetry was derived by REPARSING marker
+  strings out of merged text, so file CONTENT could forge it. JS `computeRequiredTargetContextProof`
+  (extension.js) counted marker substrings via `text.indexOf(REQUIRED_TARGET_MARKER_PREFIX + target)`
+  over the FINAL text, so a phantom marker inside a target BODY flipped a never-fetched target from
+  missing -> in_model_context. Python `_isolate_required_targets` (fusion_redaction_gate.py) split the
+  context on the marker and derived checked/passed/blocked + blocked_paths from marker-delimited
+  SECTIONS, so a body containing "### Required direct-read target: <path>" minted a PHANTOM section ->
+  inflated checked/passed and forged blocked_paths. The marker is not exotic (RedDog's own
+  docs/ModLog/INTERFACE/verify_extension_contract.js contain it), so this fired on realistic
+  self-referential audits, not just attacks.
+- Fix (structured-records; identification only, no policy change):
+  - JS proof is now AUTHORITATIVE: `computeRequiredTargetContextProof` iterates the packer's STRUCTURED
+    record (`protectedInfo.included_paths` -- the paths actually packed), NOT markers scanned out of
+    text. A requested target counts as in_model_context only if it is in the authoritative packed set
+    AND its OWN fenced section survived the final cut (`requiredTargetSectionSurvived`). A phantom marker
+    for a path not in the authoritative set is never counted; a requested-but-never-packed path is
+    reported missing (never flipped present by a stray marker).
+  - JS pack-time defense-in-depth: `neutralizeRequiredTargetMarker` inserts a zero-width WORD JOINER
+    (U+2060, written in source as the ASCII escape backslash-u-2060) after the "### " lead of any literal
+    marker occurring INSIDE an excerpt BODY, so a target's content can never mint a sibling marker (nor
+    a phantom section for the Python splitter). Visually inert to reader/model; breaks the byte sequence.
+  - Python authoritative-list intersection: the JS packer threads its authoritative `included_paths`
+    through the bridge payload (`required_target_paths`) -> `advisory_model_once.py` ->
+    `evaluate_redaction_gate(..., required_target_paths=...)` -> `_isolate_required_targets(context,
+    authoritative_paths)`. A marker-delimited section is treated as a required-target section only when
+    its path is IN the authoritative list; phantom markers (path not in list) are folded back verbatim
+    as ORDINARY content (still redacted by the whole-context gate, never counted as a section). So
+    checked/passed/blocked/missing can never exceed the authoritative count and blocked_paths is a
+    subset of authoritative paths. When no list is threaded (None) behavior is byte-identical to #917.
+- No weakening: identification-only. No ACTION_BLOCK detector relaxed; AUDIT_STRUCTURAL_CATEGORIES
+  untouched; audit-mode value-vs-structure behavior unchanged; the #917 content-safety fix (one blocked
+  target omitted while siblings survive) is preserved. This slice only changes how telemetry / sections
+  are IDENTIFIED, never what is blocked.
+- Tests: 6 new Python tests in test_fusion_redaction_gate.py (embedded-marker-not-a-section;
+  malicious-fixture-no-extra-sections; blocked_paths-subset-of-authoritative; the ADVERSARIAL
+  full-fixture no-inflation/no-phantom; authoritative-None-byte-identical-legacy;
+  authoritative-one-blocked-sibling-survives) -> 95/95 gate tests pass. Contract test adds
+  MFH-J-001..005 (authoritative structured proof; the adversarial phantom-marker-in-final-text proof;
+  body neutralization; packed-section marker-count == included_paths; post-cut survival honesty). Full
+  JS contract suite exit 0 on 0.3.39.
+- Version: LIVE-surface bump 0.3.38 -> 0.3.39.
+- Stacked on REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1 (#917).
+- HoloIndex: the new hardening functions do not surface in semantic recall (index gap) ->
+  HOLOINDEX_REDDOG_MARKER_FORGERY_INDEX_GAP_PHASE1 (SPECIFIED_NOT_IMPLEMENTED; static anchors here + in
+  INTERFACE only; no ranking/reindex code changed). HoloIndex discoverability is NOT an acceptance gate.
+- WSP: WSP_00, WSP_50, WSP_97, WSP_22.
+
 ## 2026-07-03 - REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1 (per-target redaction isolation for required-target evidence, 0.3.38)
 
 - Root cause: the packing path (#914) assembles all required-target excerpts into ONE merged context,

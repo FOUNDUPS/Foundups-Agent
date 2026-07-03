@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.38';
+const EXTENSION_VERSION = '0.3.39';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -1815,7 +1815,15 @@ function wireFusionWebview(context, webview, worker, state) {
     const promptConstruction = {
       work_focus_digest: redactedDigest(workFocus, 180),
       wsp_prompt_digest: redactedDigest(wspTaskPrompt, 320),
-      audit_context_requested: contextPacket.audit_context === true
+      audit_context_requested: contextPacket.audit_context === true,
+      // REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1: the AUTHORITATIVE set of
+      // required-target paths the packer actually packed. Threaded to the Python redaction
+      // gate so marker-delimited sections are only treated as required-target sections when
+      // their path is authoritative; phantom markers (path not in this list) are ordinary
+      // content and cannot inflate the per-target isolation counts / blocked_paths.
+      required_targets_authoritative_paths: Array.isArray(contextPacket.required_targets_authoritative_paths)
+        ? contextPacket.required_targets_authoritative_paths.slice()
+        : []
     };
     const systemPrompt = buildSystemPrompt(workerType, effort, contextPacket.quality);
 
@@ -2196,6 +2204,11 @@ function callFusion(context, worker, prompt, boundedContext, systemPrompt, histo
       temperature: 0.2,
       timeout: mode === 'foundups_fusion' ? 120 : 90,
       audit_context: bridgeMeta && bridgeMeta.audit_context_requested === true,
+      // REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1: authoritative packed
+      // required-target paths -> the Python gate uses this to reject phantom markers.
+      required_target_paths: bridgeMeta && Array.isArray(bridgeMeta.required_targets_authoritative_paths)
+        ? bridgeMeta.required_targets_authoritative_paths.slice()
+        : [],
       bridge_meta: Object.assign({}, bridgeMeta || {}, {
         python_interpreter: interpreter.path,
         python_interpreter_source: interpreter.source,
@@ -2283,6 +2296,27 @@ function buildSystemPrompt(workerType, effort, retrievalQuality) {
   return [worker.prompt, effortText, qualityText, 'Always end with a WSP_15 Priority block and one Next safest step.'].filter(Boolean).join('\n\n');
 }
 
+// REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1: break any literal occurrence of
+// the required-target marker prefix inside excerpt BODY text so a target's own content can
+// never mint a sibling required-target marker. A zero-width word joiner (U+2060) is inserted
+// after the "### " lead of the marker: this is visually inert to a reader/model but changes
+// the exact byte sequence, so neither the JS proof nor the Python isolation splitter treats
+// the body text as a new marker-delimited section. Legitimate marker headers the PACKER
+// writes are added AFTER this step, so they are unaffected.
+function neutralizeRequiredTargetMarker(body) {
+  const s = String(body || '');
+  if (s.indexOf(REQUIRED_TARGET_MARKER_PREFIX) === -1) {
+    return s;
+  }
+  // Split the exact marker prefix "### Required direct-read target: " into
+  // "### " + WORD_JOINER + "Required direct-read target: " so the concatenation no longer
+  // equals REQUIRED_TARGET_MARKER_PREFIX byte-for-byte. WORD_JOINER (U+2060) is expressed as
+  // a unicode escape so the SOURCE stays ASCII-clean; the runtime string carries the char.
+  const WORD_JOINER = '\u2060';
+  const broken = '### ' + WORD_JOINER + REQUIRED_TARGET_MARKER_PREFIX.slice(4);
+  return s.split(REQUIRED_TARGET_MARKER_PREFIX).join(broken);
+}
+
 // REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1: extract per-required-target excerpts
 // from the ALREADY-FETCHED governed direct-read hits (buildDirectReadContentSection's
 // output object). This does NOT re-read the filesystem: it only slices content the
@@ -2292,9 +2326,11 @@ function buildSystemPrompt(workerType, effort, retrievalQuality) {
 //   ```text
 //   <bounded excerpt>
 //   ```
-// The scorecard later proves presence by scanning the FINAL context for these markers,
-// so telemetry cannot lie: a target counts as "in model context" only if its marker
-// survives the final cut.
+// REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1: presence is proven from the
+// AUTHORITATIVE structured record (included_paths -> computeRequiredTargetContextProof),
+// NOT by scanning arbitrary markers out of the merged text, and body-embedded marker
+// strings are neutralized before packing. A target counts as "in model context" only if it
+// is in the authoritative packed set AND its own fenced section survived the final cut.
 function buildRequiredTargetProtectedSection(requiredTargets, directReadSection) {
   const empty = { text: '', included_paths: [], truncated: [], total_chars: 0, ordered_targets: [] };
   const targets = Array.isArray(requiredTargets) ? requiredTargets : [];
@@ -2372,7 +2408,13 @@ function buildRequiredTargetProtectedSection(requiredTargets, directReadSection)
   for (let i = 0; i < n; i++) {
     const item = resolved[i];
     const budget = budgets[i];
-    const excerpt = item.content.length > budget ? item.content.slice(0, budget) : item.content;
+    const rawExcerpt = item.content.length > budget ? item.content.slice(0, budget) : item.content;
+    // REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (defense-in-depth): neutralize
+    // any literal REQUIRED_TARGET_MARKER_PREFIX occurring INSIDE the excerpt BODY before
+    // packing, so a target's own content cannot mint a sibling required-target marker. The
+    // authoritative proof already ignores non-authoritative markers, but escaping here also
+    // stops the Python isolation splitter from ever seeing a phantom marker in a survivor body.
+    const excerpt = neutralizeRequiredTargetMarker(rawExcerpt);
     const wasTruncated = item.truncated || item.content.length > budget;
     const note = wasTruncated ? ' (bounded excerpt)' : '';
     const lang = targetSnippetLanguageId(item.rel);
@@ -2419,37 +2461,53 @@ function assembleFinalBoundedContext(headSections, protectedText, lowerSections)
   return ordered.join('\n\n').slice(0, BOUNDED_CONTEXT_MAX_CHARS);
 }
 
-// REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 / ADDENDUM B: compute proof telemetry
-// from the FINAL (post-cut) model-visible context string, NOT from fetch/bundle
-// telemetry. A required target counts as "in model context" only if its stable marker
-// survives after the 42K cap is applied. This is the only honest signal that the model
-// actually saw the file.
+// REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1: the proof is AUTHORITATIVE and
+// unforgeable by file content. It is derived from the STRUCTURED record the packer emitted
+// (protectedMeta.included_paths / ordered_targets -- the paths the packer actually packed),
+// NOT by regex/indexOf scanning for markers over the merged final text. A phantom marker
+// minted inside a target BODY (e.g. a self-referential audit whose file text literally
+// contains "### Required direct-read target: fake/evil.py") is NEVER counted, because
+// fake/evil.py is not in the authoritative included_paths set.
+//
+// For each AUTHORITATIVE included path we still confirm its OWN packed section SURVIVED the
+// post-cut final text: its marker must be present AND a fenced body must follow. This keeps
+// ADDENDUM B honest (a section guillotined by the 42K cap counts as missing) without letting
+// a body-embedded marker forge presence for a path the packer never packed.
+//
+// required_targets_context_total counts the authoritative requested targets (path-only,
+// symbols excluded) so a phantom marker cannot inflate the denominator either.
 function computeRequiredTargetContextProof(finalText, requiredTargets, protectedMeta) {
   const targets = Array.isArray(requiredTargets)
     ? requiredTargets.map((t) => normalizeTargetPath(t)).filter((t) => t && !t.toLowerCase().startsWith('symbol:'))
     : [];
   const text = String(finalText || '');
+  // AUTHORITATIVE fetched/packed set: only paths the packer actually included get a section.
+  // A path present here is proven to have been fetched + packed (never derived from body text).
+  const authoritative = Array.isArray(protectedMeta && protectedMeta.included_paths)
+    ? protectedMeta.included_paths.map((p) => normalizeTargetPath(p)).filter(Boolean)
+    : [];
+  const authoritativeLower = new Set(authoritative.map((p) => p.toLowerCase()));
+  const truncated = Array.isArray(protectedMeta && protectedMeta.truncated) ? protectedMeta.truncated : [];
   const inContext = [];
   const missing = [];
   let contextChars = 0;
-  const truncated = Array.isArray(protectedMeta && protectedMeta.truncated) ? protectedMeta.truncated : [];
+  // Iterate the AUTHORITATIVE requested targets. A requested target counts as "in model
+  // context" iff (a) it is in the authoritative packed set AND (b) its OWN section survived
+  // the final cut (marker + fenced body present). Requested targets never packed -> missing.
   for (const target of targets) {
-    const marker = REQUIRED_TARGET_MARKER_PREFIX + target;
-    const idx = text.indexOf(marker);
-    if (idx === -1) {
+    if (!authoritativeLower.has(target.toLowerCase())) {
+      // Requested but never fetched/packed -> genuinely missing. A phantom marker for this
+      // path in some other file's BODY must NOT flip it to present, so we do not scan text.
+      missing.push(target);
+      continue;
+    }
+    const survived = requiredTargetSectionSurvived(text, target);
+    if (!survived.present) {
       missing.push(target);
       continue;
     }
     inContext.push(target);
-    // Measure the fenced excerpt length that survived for this target.
-    const fenceStart = text.indexOf('```', idx);
-    if (fenceStart !== -1) {
-      const bodyStart = text.indexOf('\n', fenceStart);
-      const fenceEnd = bodyStart !== -1 ? text.indexOf('```', bodyStart) : -1;
-      if (bodyStart !== -1 && fenceEnd !== -1) {
-        contextChars += Math.max(0, fenceEnd - bodyStart - 1);
-      }
-    }
+    contextChars += survived.chars;
   }
   return {
     required_targets_in_model_context: inContext.length,
@@ -2458,6 +2516,30 @@ function computeRequiredTargetContextProof(finalText, requiredTargets, protected
     required_targets_context_missing: missing,
     required_targets_context_truncated: truncated.filter((t) => inContext.indexOf(t.path) !== -1)
   };
+}
+
+// REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1: confirm the AUTHORITATIVE section
+// for `target` survived the post-cut final text. Requires the stable marker AND a following
+// fenced body (```...```). Returns { present, chars }. This is a survival check for a path we
+// already know was authoritatively packed -- it is NEVER used to discover new targets, so a
+// body-embedded marker cannot introduce a section for a path outside the authoritative set.
+function requiredTargetSectionSurvived(text, target) {
+  const marker = REQUIRED_TARGET_MARKER_PREFIX + target;
+  const idx = text.indexOf(marker);
+  if (idx === -1) {
+    return { present: false, chars: 0 };
+  }
+  const fenceStart = text.indexOf('```', idx);
+  if (fenceStart === -1) {
+    // Marker survived but its fenced body was cut -> the model did not actually get the file.
+    return { present: false, chars: 0 };
+  }
+  const bodyStart = text.indexOf('\n', fenceStart);
+  const fenceEnd = bodyStart !== -1 ? text.indexOf('```', bodyStart) : -1;
+  if (bodyStart === -1 || fenceEnd === -1) {
+    return { present: false, chars: 0 };
+  }
+  return { present: true, chars: Math.max(0, fenceEnd - bodyStart - 1) };
 }
 
 function buildBoundedRepoContext(mode, taskText) {
@@ -2571,8 +2653,16 @@ function buildBoundedRepoContext(mode, taskText) {
   const text = packProtected
     ? assembleFinalBoundedContext(headSections, protectedInfo.text, lowerSections)
     : headSections.concat(lowerSections).join('\n\n').slice(0, BOUNDED_CONTEXT_MAX_CHARS);
-  // ADDENDUM B (1,2): compute required-target presence proof from the FINAL (post-cut)
-  // model-visible context, scanning for the stable markers -- never from fetch telemetry.
+  // ADDENDUM B (1,2) + REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1: compute the
+  // required-target presence proof from the AUTHORITATIVE structured record (protectedInfo
+  // .included_paths -- the paths the packer actually packed), NOT by scanning arbitrary
+  // markers out of the final text. A body-embedded phantom marker cannot inflate the counts.
+  // required_targets_authoritative_paths carries the packed set forward so the Python
+  // redaction gate can treat any non-authoritative marker in the merged text as ordinary
+  // content (never a phantom required-target section).
+  const authoritativePacked = Array.isArray(protectedInfo && protectedInfo.included_paths)
+    ? protectedInfo.included_paths.slice()
+    : [];
   if (requiredTargets.length) {
     const proof = computeRequiredTargetContextProof(text, requiredTargets, protectedInfo);
     holoindex_meta = holoindex_meta && typeof holoindex_meta === 'object' ? holoindex_meta : {};
@@ -2581,9 +2671,10 @@ function buildBoundedRepoContext(mode, taskText) {
     holoindex_meta.required_targets_context_chars = proof.required_targets_context_chars;
     holoindex_meta.required_targets_context_missing = proof.required_targets_context_missing;
     holoindex_meta.required_targets_context_truncated = proof.required_targets_context_truncated;
+    holoindex_meta.required_targets_authoritative_paths = authoritativePacked;
     holoindex_scorecard = extractHoloIndexScorecard(mode, holoindex_meta);
   }
-  return { text, summary: 'Repo context attached: ' + mode + ' (' + text.length + ' chars). ' + quality, quality, holoindex_meta, holoindex_scorecard, audit_context };
+  return { text, summary: 'Repo context attached: ' + mode + ' (' + text.length + ' chars). ' + quality, quality, holoindex_meta, holoindex_scorecard, audit_context, required_targets_authoritative_paths: authoritativePacked };
 }
 
 function activeEditorContext(root) {
@@ -3775,6 +3866,8 @@ module.exports = {
   buildRequiredTargetProtectedSection,
   assembleFinalBoundedContext,
   computeRequiredTargetContextProof,
+  requiredTargetSectionSurvived,
+  neutralizeRequiredTargetMarker,
   REQUIRED_TARGET_MARKER_PREFIX,
   BOUNDED_CONTEXT_MAX_CHARS,
   REDDOG_REQUIRED_OUTPUT_SECTIONS,

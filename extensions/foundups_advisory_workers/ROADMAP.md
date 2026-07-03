@@ -163,6 +163,30 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - Add regression retrieval tests so extension bridge code ranks above adjacent WRE routers.
 - **Status:** **LANDED** #882 (`99d0e35c2`) — ranking + target recall telemetry only; not source-content inclusion.
 
+### REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (v0.3.39)
+
+- **Status:** VERIFIED_READY (this slice). Required-target telemetry is now AUTHORITATIVE and
+  unforgeable by file content. JS `computeRequiredTargetContextProof` iterates the packer's
+  structured record (`protectedInfo.included_paths`) plus `requiredTargetSectionSurvived`, NOT marker
+  substrings scanned from merged text. JS `neutralizeRequiredTargetMarker` breaks literal marker bytes
+  inside excerpt bodies at pack time (defense-in-depth). The extension threads
+  `required_targets_authoritative_paths` through the bridge payload as `required_target_paths`; Python
+  `_isolate_required_targets(context, authoritative_paths)` treats marker-delimited sections as
+  required-target sections only when their path is in the authoritative list -- phantom markers minted
+  by file content fold back as ordinary content and cannot inflate checked/passed/blocked/missing or
+  forge `blocked_paths`.
+- Root cause it fixes: marker-reparse forgery -- realistic self-referential audit bodies containing
+  `### Required direct-read target: <path>` could flip never-fetched targets to in_model_context (JS)
+  or mint phantom sections that inflated per-target redaction counts (Python).
+- No weakening: identification-only. No ACTION_BLOCK detector relaxed; AUDIT_STRUCTURAL_CATEGORIES
+  untouched; #917 per-target isolation preserved (one blocked sibling omitted, rest survive).
+- Tests: 6 new Python MFH tests (95/95 gate pass); contract MFH-J-001..005 adversarial proofs; full
+  JS contract suite exit 0 on 0.3.39.
+- Golden bar: 6-file prompt yields `required_targets_in_model_context: 6`,
+  `required_targets_context_missing: []`; adversarial fixture with embedded phantom marker cannot inflate
+  counts; `required_targets_redaction_checked` never exceeds authoritative packed count.
+- Stacked on REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1 (#917).
+
 ### REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1 (v0.3.38)
 
 - **Status:** VERIFIED_READY (this slice). The audit-mode redaction gate now isolates each
