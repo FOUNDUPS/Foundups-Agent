@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.40', 'package version must be 0.3.40');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.40'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.41', 'package version must be 0.3.41');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.41'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.40', 'README version mismatch');
+includes(readme, 'Version: 0.3.41', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -1215,7 +1215,47 @@ includes(extensionJs, 'bridgeMeta.required_targets_authoritative_paths.slice()',
 // marker section (Python per-path dedup is the robust closure; this keeps the phantom out of the body).
 includes(extensionJs, 'neutralizeRequiredTargetMarker(holo.output || \'(no HoloIndex output)\')', 'MFH-J-007: HoloIndex recall blob must be marker-neutralized before assembly');
 includes(extensionJs, 'neutralizeRequiredTargetMarker(active)', 'MFH-J-007: active-editor content must be marker-neutralized before assembly');
+includes(extensionJs, 'neutralizeRequiredTargetMarker(status || \'(clean)\')', 'MFH-J-007: git status body must be marker-neutralized before assembly');
+includes(extensionJs, 'neutralizeRequiredTargetMarker(stat || \'(no diff)\')', 'MFH-J-007: git diff --stat body must be marker-neutralized before assembly');
 includes(extensionJs, 'neutralizeRequiredTargetMarker(diff || \'(no diff)\')', 'MFH-J-007: git diff body must be marker-neutralized before assembly');
+
+// MFH-J-007b (VECTOR A closure -- RAW FILE-BODY LOWER SECTIONS): the three remaining file-body
+// sections (target-recall, WSP_97 excerpt, Skillz/Wardrobe/Rolodex) and the plain direct-read
+// section each embed RAW repo file bodies. A recalled/fetched file whose OWN content carries the
+// literal "### Required direct-read target: <path>" marker would push that marker un-neutralized
+// into the SAME gate_context the Python splitter reads -> a phantom marker section. Each of these
+// four call sites MUST route its section through neutralizeRequiredTargetMarker before push. A
+// future edit dropping any one of these anchors fails the runner (forgery reopened).
+includes(extensionJs, 'lowerSections.push(neutralizeRequiredTargetMarker(targetSection.text))', 'MFH-J-007b: target-recall section (raw file bodies) must be marker-neutralized before push');
+includes(extensionJs, 'lowerSections.push(neutralizeRequiredTargetMarker(wsp97.text))', 'MFH-J-007b: WSP_97 excerpt (raw protocol body) must be marker-neutralized before push');
+includes(extensionJs, 'lowerSections.push(neutralizeRequiredTargetMarker(skillz))', 'MFH-J-007b: Skillz/Wardrobe/Rolodex section (raw file bodies) must be marker-neutralized before push');
+includes(extensionJs, 'lowerSections.push(neutralizeRequiredTargetMarker(directReadSection.text))', 'MFH-J-007b: plain direct-read section (raw fetched bodies) must be marker-neutralized before push');
+
+// MFH-J-008 (COMPLETENESS / FORWARD-SAFETY GUARD): ENUMERATE every lowerSections.push call site in
+// the extension source and assert EVERY ONE routes through neutralizeRequiredTargetMarker. The
+// protected required-target block is assembled SEPARATELY (via assembleFinalBoundedContext with
+// protectedInfo.text) and is the AUTHORITATIVE source -- it is NOT a lowerSections.push, and its
+// own excerpt bodies are neutralized inside buildRequiredTargetProtectedSection. Therefore the
+// invariant is: 100% of lowerSections.push arguments are neutralizeRequiredTargetMarker(...). A
+// FUTURE new raw-body section pushed WITHOUT neutralization fails THIS test rather than silently
+// reopening the forgery vector.
+const mfhLowerPushRe = /lowerSections\.push\(/g;
+const mfhLowerPushes = (extensionJs.match(mfhLowerPushRe) || []).length;
+assert(mfhLowerPushes >= 9, 'MFH-J-008: expected at least the 9 known lowerSections.push sites (enumeration guard sanity)');
+// Split on the push token; each following chunk begins with the pushed expression. Assert every
+// pushed section either IS a neutralizeRequiredTargetMarker(...) call or wraps its body in one.
+const mfhPushChunks = extensionJs.split('lowerSections.push(').slice(1);
+assert.strictEqual(mfhPushChunks.length, mfhLowerPushes, 'MFH-J-008: push-site split count must equal regex count');
+mfhPushChunks.forEach((chunk, idx) => {
+  // Look only at the pushed argument expression (up to the end of this statement / next push).
+  const arg = chunk.slice(0, 400);
+  assert(
+    arg.indexOf('neutralizeRequiredTargetMarker(') !== -1,
+    'MFH-J-008: lowerSections.push site #' + (idx + 1) + ' does NOT route its body through '
+      + 'neutralizeRequiredTargetMarker -- a raw file-body section can mint a forged required-target '
+      + 'marker. Neutralize it (or, if it is provably marker-free, add an explicit allowlist anchor).'
+  );
+});
 
 // MFH-J-001: the proof counts ONLY authoritative packed paths. A requested target NOT in the
 // authoritative included set is missing (never flipped to present by a stray marker in text).
@@ -1528,7 +1568,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.40'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.41'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -1542,7 +1582,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.40'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.41'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -1554,7 +1594,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.40'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.41'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');

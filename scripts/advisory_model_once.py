@@ -444,13 +444,32 @@ def main() -> int:
     audit_context_applied = audit_context_requested
     # REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1: authoritative packed required-target
     # paths (from the JS packer). Threaded into the gate so phantom markers minted by file content
-    # cannot be treated as required-target sections. Absent/empty -> None (legacy path, unchanged).
+    # cannot be treated as required-target sections.
+    #
+    # VECTOR B closure (legacy None path): under audit_mode the empty/absent authoritative list MUST
+    # NOT collapse to None. On the non-authoritative path (audit_context=true but packProtected=false:
+    # direct-read code_hits present -> audit_context true, but direct_read_fallback_used false -> the
+    # JS packer emits authoritativePacked=[]), collapsing [] -> None would reach
+    # fusion_redaction_gate with authoritative_paths=None, which is the LEGACY "every marker section is
+    # a required-target section" path -- so a body-embedded phantom marker would be checked/counted and
+    # could mint a content-controlled blocked_path. Passing an EXPLICIT EMPTY tuple instead makes the
+    # gate build an EMPTY authoritative_set: every marker's norm_path is "not in" the empty set, so
+    # every marker folds back as ordinary content (checked==0, no forged blocked_paths) while its body
+    # STILL flows to the whole-context audit gate and fails closed on any real secret/token.
+    #
+    # Non-audit legacy behavior is preserved byte-identical: when audit_context is NOT requested an
+    # absent/empty list still collapses to None (the pre-hardening legacy path is unchanged).
     _rt_paths_raw = payload.get("required_target_paths")
-    required_target_paths = (
-        tuple(str(p) for p in _rt_paths_raw if isinstance(p, str) and p.strip())
-        if isinstance(_rt_paths_raw, list) and _rt_paths_raw
-        else None
-    )
+    if isinstance(_rt_paths_raw, list) and _rt_paths_raw:
+        required_target_paths = tuple(
+            str(p) for p in _rt_paths_raw if isinstance(p, str) and p.strip()
+        )
+    elif audit_context_requested:
+        # Audit-mode with no authoritative packed paths -> explicit empty set sentinel (NOT None),
+        # so the gate treats every marker as non-authoritative (folded), never legacy all-authoritative.
+        required_target_paths = ()
+    else:
+        required_target_paths = None
     audit_telemetry = {
         "audit_context_requested": audit_context_requested,
         "audit_context_applied": audit_context_applied,

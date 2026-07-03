@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.40';
+const EXTENSION_VERSION = '0.3.41';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -2607,7 +2607,14 @@ function buildBoundedRepoContext(mode, taskText) {
   // direct-read section is demoted to AFTER the protected block (and it may be cut before
   // the protected excerpts, never the reverse).
   if (directReadSection && directReadSection.text && !packProtected) {
-    lowerSections.push(directReadSection.text);
+    // REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (VECTOR A closure): the plain
+    // direct-read section (buildDirectReadContentSection) embeds RAW fetched file bodies
+    // ("#### <rel>\n```...\n<hit.content>\n```"). Its own header uses "####" (not the marker
+    // prefix), but a fetched file whose OWN content carries "### Required direct-read target:
+    // <path>" would push that literal marker un-neutralized. This branch only runs when
+    // packProtected is false (the exact Vector B legacy window), so neutralize the body here
+    // so no splitter marker can be minted from fetched content on the non-authoritative path.
+    lowerSections.push(neutralizeRequiredTargetMarker(directReadSection.text));
   }
   let targetContentMeta = null;
   if (mode !== 'none') {
@@ -2619,7 +2626,14 @@ function buildBoundedRepoContext(mode, taskText) {
       && targetSection.meta.target_content_paths.length > 0
       && targetSection.meta.target_content_paths.every((p) => isSelfFileLocation(p));
     if (targetSection.text && !(packProtected && selfOnly)) {
-      lowerSections.push(targetSection.text);
+      // REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (VECTOR A closure): the
+      // target-recall section embeds RAW file bodies (buildTargetRecallContentSection ->
+      // "#### <rel>\n```...\n<snippet.content>\n```"). A recalled file whose OWN content
+      // carries "### Required direct-read target: <path>" would push that literal marker
+      // un-neutralized into the merged context and reach the Python isolation splitter as
+      // a phantom marker section. Neutralize the whole file-body section before push so no
+      // splitter marker can be minted from recalled content.
+      lowerSections.push(neutralizeRequiredTargetMarker(targetSection.text));
     }
     targetContentMeta = targetSection.meta;
     holoindex_meta = mergeTargetContentMeta(holoindex_meta, targetContentMeta);
@@ -2627,7 +2641,11 @@ function buildBoundedRepoContext(mode, taskText) {
     if (taskMentionsWsp97(taskText)) {
       const wsp97 = buildWsp97ProtocolExcerpt(root, WSP97_EXCERPT_MAX_CHARS);
       if (wsp97.text) {
-        lowerSections.push(wsp97.text);
+        // REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (VECTOR A closure): the
+        // WSP_97 excerpt embeds the RAW protocol file body ("```markdown\n<snippet.content>```").
+        // Neutralize any literal required-target marker in the excerpt body so a WSP file that
+        // documents/echoes the marker line cannot mint a phantom splitter marker section.
+        lowerSections.push(neutralizeRequiredTargetMarker(wsp97.text));
         holoindex_meta = applyWsp97SanitizationMeta(holoindex_meta, wsp97.meta);
         holoindex_scorecard = extractHoloIndexScorecard(mode, holoindex_meta);
       }
@@ -2635,7 +2653,12 @@ function buildBoundedRepoContext(mode, taskText) {
   }
   if (mode === 'wsp_holo_skillz' || mode === 'wsp_holo_git_skillz') {
     const skillz = skillzWardrobeRolodexContext(root, taskText || '', 12000);
-    lowerSections.push(skillz);
+    // REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (VECTOR A closure): the Skillz/
+    // Wardrobe/Rolodex discovery section embeds RAW file bodies (readBoundedRepoFile ->
+    // "#### <file>\n```text\n<snippet>\n```"). A discovered Skillz/registry file whose content
+    // carries "### Required direct-read target: <path>" would push that literal marker
+    // un-neutralized. Neutralize the whole section before push so no splitter marker is minted.
+    lowerSections.push(neutralizeRequiredTargetMarker(skillz));
     if (skillz.includes('(no matching Skillz/Wardrobe/Rolodex paths found')) {
       quality = (quality ? quality + '; ' : '') + 'Skillz/Rolodex discovery returned zero matches; treat handoff recommendations as NEEDS_VERIFICATION.';
     }

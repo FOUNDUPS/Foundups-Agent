@@ -18,15 +18,19 @@ if str(REPO_ROOT) not in sys.path:
 import scripts.advisory_model_once as bridge  # noqa: E402
 from modules.communication.moltbot_bridge.src.fusion_redaction_gate import (  # noqa: E402
     REDACTION_GATE_PASSED,
+    RedactionReport,
 )
 
 
 def _passed_gate(*, prompt: str = "redacted-prompt", context: str | None = None):
+    # Attach a REAL RedactionReport so the per-target-isolation telemetry fields
+    # (blocked_paths / blocked_reasons) are iterable tuples, not Mock attributes.
     return mock.Mock(
         status=REDACTION_GATE_PASSED,
         redacted_prompt=prompt,
         redacted_context=context,
         reason="ok",
+        report=RedactionReport(),
     )
 
 
@@ -161,6 +165,7 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
                 redacted_prompt="",
                 redacted_context=None,
                 reason="blocked",
+                report=RedactionReport(),
             )
         )
         post_mock = mock.Mock()
@@ -177,7 +182,10 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
             )
 
         post_mock.assert_not_called()
-        gate_mock.assert_called_once_with("secret material", None, audit_mode=False)
+        # Non-audit legacy path: required_target_paths collapses to None (byte-identical to pre-hardening).
+        gate_mock.assert_called_once_with(
+            "secret material", None, audit_mode=False, required_target_paths=None
+        )
         self.assertFalse(out.get("ok"))
         self.assertEqual(out.get("reason"), "redaction_blocked")
         self.assertEqual(out.get("retry_count"), 0)
@@ -326,6 +334,126 @@ class AdvisoryBridgeHardeningTests(unittest.TestCase):
         self.assertIn("SourceAuthority", redacted)
         self.assertNotIn(secret, redacted)
         self.assertIn("[REDACTED", redacted)
+
+    # ------------------------------------------------------------------
+    # REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 -- VECTOR B closure
+    # (legacy None path under audit_mode). When audit_context is requested but the JS
+    # packer emits NO authoritative packed paths (audit_context true because direct-read
+    # code_hits are present, but direct_read_fallback_used is false so packProtected is
+    # false -> authoritativePacked=[]), the bridge MUST forward an EXPLICIT EMPTY tuple
+    # sentinel -- NOT None -- so the gate builds an EMPTY authoritative_set (every marker
+    # folds back as ordinary content, checked==0) instead of the legacy no-filter path
+    # (authoritative_set=None -> every marker is a required-target section).
+    # ------------------------------------------------------------------
+
+    def test_vectorb_audit_mode_empty_required_targets_forwards_empty_tuple_not_none(self) -> None:
+        # audit_context=true + required_target_paths ABSENT -> gate receives () (empty set sentinel).
+        gate_mock = mock.Mock(return_value=_passed_gate(context="ctx"))
+        responses = [json.dumps({"choices": [{"message": {"content": "ok"}}]}).encode("utf-8")]
+
+        def fake_urlopen(request, timeout=0):  # noqa: ARG001
+            return io.BytesIO(responses.pop(0))
+
+        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch(
+            "urllib.request.urlopen", side_effect=fake_urlopen
+        ):
+            self._invoke_main(
+                {
+                    "mode": "openrouter_single",
+                    "prompt": "012 audit focus",
+                    "context": "audit body",
+                    "lead_model": "z-ai/glm-5.2",
+                    "audit_context": True,
+                }
+            )
+
+        gate_mock.assert_called_once()
+        kwargs = gate_mock.call_args.kwargs
+        self.assertTrue(kwargs["audit_mode"])
+        self.assertEqual(
+            kwargs["required_target_paths"],
+            (),
+            "audit_mode with no packed paths MUST forward an explicit empty tuple, not None",
+        )
+        self.assertIsNotNone(kwargs["required_target_paths"])
+
+    def test_vectorb_audit_mode_empty_list_forwards_empty_tuple_not_none(self) -> None:
+        # audit_context=true + required_target_paths=[] (empty list, the JS authoritativePacked=[]
+        # value) -> gate receives () (never None).
+        gate_mock = mock.Mock(return_value=_passed_gate(context="ctx"))
+        responses = [json.dumps({"choices": [{"message": {"content": "ok"}}]}).encode("utf-8")]
+
+        def fake_urlopen(request, timeout=0):  # noqa: ARG001
+            return io.BytesIO(responses.pop(0))
+
+        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch(
+            "urllib.request.urlopen", side_effect=fake_urlopen
+        ):
+            self._invoke_main(
+                {
+                    "mode": "openrouter_single",
+                    "prompt": "012 audit focus",
+                    "context": "audit body",
+                    "lead_model": "z-ai/glm-5.2",
+                    "audit_context": True,
+                    "required_target_paths": [],
+                }
+            )
+
+        kwargs = gate_mock.call_args.kwargs
+        self.assertEqual(kwargs["required_target_paths"], ())
+
+    def test_vectorb_non_audit_empty_required_targets_stays_none_byte_identical(self) -> None:
+        # NON-AUDIT legacy path preserved byte-identical: no packed paths -> None (unchanged).
+        gate_mock = mock.Mock(return_value=_passed_gate(context="ctx"))
+        responses = [json.dumps({"choices": [{"message": {"content": "ok"}}]}).encode("utf-8")]
+
+        def fake_urlopen(request, timeout=0):  # noqa: ARG001
+            return io.BytesIO(responses.pop(0))
+
+        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch(
+            "urllib.request.urlopen", side_effect=fake_urlopen
+        ):
+            self._invoke_main(
+                {
+                    "mode": "openrouter_single",
+                    "prompt": "012 work focus",
+                    "context": "ordinary body",
+                    "lead_model": "z-ai/glm-5.2",
+                }
+            )
+
+        kwargs = gate_mock.call_args.kwargs
+        self.assertFalse(kwargs["audit_mode"])
+        self.assertIsNone(
+            kwargs["required_target_paths"],
+            "non-audit path must keep legacy None (byte-identical to pre-hardening)",
+        )
+
+    def test_vectorb_audit_mode_real_paths_still_forwarded(self) -> None:
+        # A real authoritative list is still forwarded verbatim (unchanged behavior).
+        gate_mock = mock.Mock(return_value=_passed_gate(context="ctx"))
+        responses = [json.dumps({"choices": [{"message": {"content": "ok"}}]}).encode("utf-8")]
+
+        def fake_urlopen(request, timeout=0):  # noqa: ARG001
+            return io.BytesIO(responses.pop(0))
+
+        with mock.patch.object(bridge, "evaluate_redaction_gate", gate_mock), mock.patch(
+            "urllib.request.urlopen", side_effect=fake_urlopen
+        ):
+            self._invoke_main(
+                {
+                    "mode": "openrouter_single",
+                    "prompt": "012 audit focus",
+                    "context": "audit body",
+                    "lead_model": "z-ai/glm-5.2",
+                    "audit_context": True,
+                    "required_target_paths": ["real/a.py", "real/b.py"],
+                }
+            )
+
+        kwargs = gate_mock.call_args.kwargs
+        self.assertEqual(kwargs["required_target_paths"], ("real/a.py", "real/b.py"))
 
 
 if __name__ == "__main__":

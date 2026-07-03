@@ -163,6 +163,33 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - Add regression retrieval tests so extension bridge code ranks above adjacent WRE routers.
 - **Status:** **LANDED** #882 (`99d0e35c2`) — ranking + target recall telemetry only; not source-content inclusion.
 
+### REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (v0.3.39 -> v0.3.40 dedup -> v0.3.41 all-section + legacy-path closure)
+
+- **Status (v0.3.41):** VERIFIED_READY. Closes the LAST two forgery vectors so `forgery_inert=true`
+  holds on ALL paths/sections, not only the authoritative (packProtected=true) path.
+  - **VECTOR A (incomplete lower-section neutralization):** four raw file-body lower sections still
+    pushed UN-neutralized content that could carry a literal `### Required direct-read target: <path>`
+    marker minted from file CONTENT -- target-recall (`buildTargetRecallContentSection`), WSP_97 excerpt
+    (`buildWsp97ProtocolExcerpt`), Skillz/Wardrobe/Rolodex (`skillzWardrobeRolodexContext` ->
+    `readBoundedRepoFile`), and the plain direct-read section (`buildDirectReadContentSection`, reachable
+    only when packProtected=false). Fix: EVERY `lowerSections.push(...)` now routes through
+    `neutralizeRequiredTargetMarker`; no file-body section can emit the marker prefix into the splitter.
+  - **VECTOR B (legacy None path):** `audit_context=true` + `packProtected=false` (direct-read code_hits
+    present -> audit_context true, `direct_read_fallback_used` false -> `authoritativePacked=[]`) collapsed
+    `[]` -> `None` in `scripts/advisory_model_once.py`, hitting the legacy `_isolate_required_targets(None)`
+    no-filter path where every marker (incl. content-minted phantoms) is checked/counted. Fix: under
+    `audit_context_requested` forward an EXPLICIT EMPTY tuple `()` -> the gate builds an EMPTY
+    `authoritative_set` so every marker folds back as ordinary content (checked==0, no forged
+    `blocked_paths`), while a real token in a folded body STILL fails the whole payload closed. Non-audit
+    legacy behavior stays byte-identical (absent/empty -> None); the direct None legacy contract unchanged.
+- **Completeness / forward-safety (v0.3.41):** MFH-J-008 ENUMERATES every `lowerSections.push` site and
+  asserts 100% route through `neutralizeRequiredTargetMarker` -- a FUTURE new raw-body section pushed
+  un-neutralized fails the runner rather than silently reopening the forgery. MFH-J-007b pins the four new
+  file-body call sites. Python: `test_mfh_vectorb_*` (empty-set folds every marker, zero counts, still fails
+  closed on a token, differs from legacy None) + `test_vectorb_*` (bridge forwards `()` under audit_mode,
+  `None` on the non-audit path). No weakening: identification/counting-only; no ACTION_BLOCK detector
+  relaxed; `AUDIT_STRUCTURAL_CATEGORIES` untouched; #917 content-safety + #914 budget preserved.
+
 ### REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (v0.3.39 -> v0.3.40 dedup completion)
 
 - **Status:** VERIFIED_READY (this slice). Required-target telemetry is now AUTHORITATIVE and

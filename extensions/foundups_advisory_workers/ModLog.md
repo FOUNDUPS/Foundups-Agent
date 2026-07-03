@@ -2,6 +2,46 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-03 - REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (all-section + legacy-path closure, 0.3.41)
+
+- Closes the LAST two residual required-target-telemetry forgery vectors so forgery_inert=true holds on
+  ALL paths/sections, not only the authoritative (packProtected=true) path that 0.3.39/0.3.40 hardened.
+- VECTOR A (incomplete lower-section neutralization): `neutralizeRequiredTargetMarker` was applied to the
+  HoloIndex recall blob, active-editor content, and git status/stat/diff bodies, but THREE (really four)
+  raw file-body lower sections still pushed UN-neutralized content that could contain a literal
+  "### Required direct-read target: <path>" marker minted from file CONTENT:
+    - target-recall section (`buildTargetRecallContentSection` -> `#### <rel>` fenced raw snippets),
+      neutralized at push (extension.js ~2636).
+    - WSP_97 excerpt (`buildWsp97ProtocolExcerpt` -> raw protocol body), neutralized at push (~2648).
+    - Skillz/Wardrobe/Rolodex discovery (`skillzWardrobeRolodexContext` -> `readBoundedRepoFile` raw
+      snippets), neutralized at push (~2661).
+    - plain direct-read section (`buildDirectReadContentSection` -> raw fetched `hit.content`), reachable
+      only when packProtected=false (the exact Vector B window); neutralized at push (~2617).
+  Now EVERY `lowerSections.push(...)` routes its body through `neutralizeRequiredTargetMarker`. No
+  file-body section can emit the literal marker prefix into the Python isolation splitter.
+- VECTOR B (legacy None path): when `audit_context=true` but `packProtected=false` (direct-read code_hits
+  present -> audit_context true, but `direct_read_fallback_used` false -> `authoritativePacked=[]`), the
+  JS emitted an EMPTY authoritative list. `scripts/advisory_model_once.py` collapsed the empty list to
+  `None`, and `fusion_redaction_gate._isolate_required_targets(None)` is the LEGACY path where
+  `authoritative_set` is None -> EVERY marker section (including content-minted phantoms) is
+  checked/counted and could mint content-controlled `blocked_paths`. Fix: under `audit_context_requested`
+  the empty/absent list is NOT collapsed to None -- an EXPLICIT EMPTY tuple `()` is forwarded, so the gate
+  builds an EMPTY `authoritative_set`: every marker's `norm_path not in authoritative_set` is true ->
+  every marker folds back as ordinary content (checked==0, passed==0, no forged blocked_paths), while any
+  real secret/token in a folded body STILL fails the whole payload closed via the audit-mode whole-context
+  gate. Non-audit legacy behavior stays byte-identical (absent/empty -> None). The direct
+  `_isolate_required_targets(..., None)` legacy contract is unchanged (no frg.py guard added), so
+  `test_mfh_authoritative_none_is_byte_identical_legacy` still holds.
+- Completeness / forward-safety: MFH-J-008 ENUMERATES every `lowerSections.push` site in the extension
+  source and asserts 100% route through `neutralizeRequiredTargetMarker`; a FUTURE new raw-body section
+  pushed without neutralization fails the contract runner rather than silently reopening the forgery.
+  MFH-J-007b pins the four new file-body call sites explicitly. Python: `test_mfh_vectorb_*` (empty-set
+  folds every marker, zero counts, still fails closed on a token; differs from legacy None) +
+  `test_vectorb_*` (bridge forwards `()` under audit_mode, `None` on the non-audit legacy path).
+- No weakening: identification/counting only. No ACTION_BLOCK detector relaxed, `AUDIT_STRUCTURAL_CATEGORIES`
+  unchanged, #917 one-blocked-sibling-survives content-safety and #914 budget preserved. Authoritative path
+  (dedup / neutralization / #917 / #914) still inert. Version bump 0.3.40 -> 0.3.41.
+
 ## 2026-07-03 - REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (per-path dedup completion, 0.3.40)
 
 - Closes the residual duplicate-authoritative-marker bypass that survived the 0.3.39 authoritative fix.
