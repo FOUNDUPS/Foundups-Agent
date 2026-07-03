@@ -163,6 +163,127 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - Add regression retrieval tests so extension bridge code ranks above adjacent WRE routers.
 - **Status:** **LANDED** #882 (`99d0e35c2`) — ranking + target recall telemetry only; not source-content inclusion.
 
+### REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (v0.3.39 -> v0.3.40 dedup -> v0.3.41 all-section + legacy-path closure)
+
+- **Status (v0.3.41):** VERIFIED_READY. Closes the LAST two forgery vectors so `forgery_inert=true`
+  holds on ALL paths/sections, not only the authoritative (packProtected=true) path.
+  - **VECTOR A (incomplete lower-section neutralization):** four raw file-body lower sections still
+    pushed UN-neutralized content that could carry a literal `### Required direct-read target: <path>`
+    marker minted from file CONTENT -- target-recall (`buildTargetRecallContentSection`), WSP_97 excerpt
+    (`buildWsp97ProtocolExcerpt`), Skillz/Wardrobe/Rolodex (`skillzWardrobeRolodexContext` ->
+    `readBoundedRepoFile`), and the plain direct-read section (`buildDirectReadContentSection`, reachable
+    only when packProtected=false). Fix: EVERY `lowerSections.push(...)` now routes through
+    `neutralizeRequiredTargetMarker`; no file-body section can emit the marker prefix into the splitter.
+  - **VECTOR B (legacy None path):** `audit_context=true` + `packProtected=false` (direct-read code_hits
+    present -> audit_context true, `direct_read_fallback_used` false -> `authoritativePacked=[]`) collapsed
+    `[]` -> `None` in `scripts/advisory_model_once.py`, hitting the legacy `_isolate_required_targets(None)`
+    no-filter path where every marker (incl. content-minted phantoms) is checked/counted. Fix: under
+    `audit_context_requested` forward an EXPLICIT EMPTY tuple `()` -> the gate builds an EMPTY
+    `authoritative_set` so every marker folds back as ordinary content (checked==0, no forged
+    `blocked_paths`), while a real token in a folded body STILL fails the whole payload closed. Non-audit
+    legacy behavior stays byte-identical (absent/empty -> None); the direct None legacy contract unchanged.
+- **Completeness / forward-safety (v0.3.41):** MFH-J-008 ENUMERATES every `lowerSections.push` site and
+  asserts 100% route through `neutralizeRequiredTargetMarker` -- a FUTURE new raw-body section pushed
+  un-neutralized fails the runner rather than silently reopening the forgery. MFH-J-007b pins the four new
+  file-body call sites. Python: `test_mfh_vectorb_*` (empty-set folds every marker, zero counts, still fails
+  closed on a token, differs from legacy None) + `test_vectorb_*` (bridge forwards `()` under audit_mode,
+  `None` on the non-audit path). No weakening: identification/counting-only; no ACTION_BLOCK detector
+  relaxed; `AUDIT_STRUCTURAL_CATEGORIES` untouched; #917 content-safety + #914 budget preserved.
+
+### REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (v0.3.39 -> v0.3.40 dedup completion)
+
+- **Status:** VERIFIED_READY (this slice). Required-target telemetry is now AUTHORITATIVE and
+  unforgeable by file content. JS `computeRequiredTargetContextProof` iterates the packer's
+  structured record (`protectedInfo.included_paths`) plus `requiredTargetSectionSurvived`, NOT marker
+  substrings scanned from merged text. JS `neutralizeRequiredTargetMarker` breaks literal marker bytes
+  inside excerpt bodies at pack time (defense-in-depth). The extension threads
+  `required_targets_authoritative_paths` through the bridge payload as `required_target_paths`; Python
+  `_isolate_required_targets(context, authoritative_paths)` treats marker-delimited sections as
+  required-target sections only when their path is in the authoritative list -- phantom markers minted
+  by file content fold back as ordinary content and cannot inflate checked/passed/blocked/missing or
+  forge `blocked_paths`.
+- Root cause it fixes: marker-reparse forgery -- realistic self-referential audit bodies containing
+  `### Required direct-read target: <path>` could flip never-fetched targets to in_model_context (JS)
+  or mint phantom sections that inflated per-target redaction counts (Python).
+- **v0.3.40 dedup completion (closes the residual duplicate-authoritative bypass):** the 0.3.39 JS
+  neutralization protected only the packed EXCERPT bodies; the LOWER sections (git diff, HoloIndex
+  recall JSON, active editor) merged UN-neutralized into the same `gate_context` Python splits, so a
+  MODIFIED required file whose OWN body contains its authoritative marker line rendered a SECOND marker
+  section that normalized to an ALREADY-authoritative path -- checked/passed exceeded the authoritative
+  count and a hard-block token in that diff body forged a `blocked_paths` entry for the clean protected
+  section. Closure: (1) PRIMARY robust fix -- Python per-path dedup in `_isolate_required_targets`
+  (first occurrence is authoritative; any later marker whose normalized path is already-consumed folds
+  back as ordinary content) so each authoritative path is checked/passed/blocked AT MOST ONCE and the
+  invariant checked/passed/blocked/missing <= authoritative count now HOLDS FOR REAL; (2) defense-in-depth
+  -- `neutralizeRequiredTargetMarker` now also wraps the git-diff / HoloIndex-recall / active-editor
+  lower-section bodies before assembly; (3) JS threading contract assertion (MFH-J-006) pins the bridge
+  payload line that sets `required_target_paths` from `bridgeMeta.required_targets_authoritative_paths`
+  so a future edit cannot silently drop it (which would make Python receive None -> forgeable fallback).
+- No weakening: identification-only. No ACTION_BLOCK detector relaxed; AUDIT_STRUCTURAL_CATEGORIES
+  untouched; #917 per-target isolation preserved (one blocked sibling omitted, rest survive).
+- Tests: 9 Python MFH tests (6 authoritative + 3 dedup regression) -- 98/98 gate pass; the 3 dedup tests
+  FAIL without the per-path dedup (proven non-vacuous) and PASS with it; contract MFH-J-001..007
+  adversarial + threading + lower-section-neutralization proofs; full JS contract suite exit 0 on 0.3.40.
+- Golden bar: 6-file prompt yields `required_targets_in_model_context: 6`,
+  `required_targets_context_missing: []`, `required_targets_redaction_blocked: 0`; adversarial fixture
+  with embedded phantom AND duplicate-authoritative markers cannot inflate counts;
+  `required_targets_redaction_checked` never exceeds authoritative packed count.
+- Stacked on REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1 (#917).
+
+### REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1 (v0.3.38)
+
+- **Status:** VERIFIED_READY (this slice). The audit-mode redaction gate now isolates each
+  required-target excerpt INDEPENDENTLY. When the merged context carries the stable marker
+  `### Required direct-read target: <path>`, the Python redaction layer
+  (`fusion_redaction_gate.py::_isolate_required_targets`) splits it into preamble + per-target
+  sections, evaluates each section's block status on its own, OMITS only the sections that hit a
+  non-audit-structural hard block (marker + a redaction notice kept, body gone), preserves the rest,
+  reassembles, and runs the UNCHANGED whole-context audit-mode gate over the survivors.
+- Root cause it fixes: the packing path (#914) merged all required excerpts into ONE context gated as
+  a single unit, so ONE hard-block token (private_reasoning / private_key_residual) blocked the ENTIRE
+  payload (`redacted_context=None`) and dropped ALL required targets even in audit_mode.
+- No weakening: granularity-only change. No ACTION_BLOCK detector relaxed; nothing added to
+  AUDIT_STRUCTURAL_CATEGORIES; audit-mode value-vs-structure behavior unchanged; a blocked target's
+  secrets never reach the model. Fail-closed: no markers / ambiguous split / block outside a section
+  all fall back to the unchanged whole-context block.
+- Telemetry: 5 new counts-only fields in the Run Trace scorecard (`required_targets_redaction_checked`,
+  `_passed`, `_blocked`, `_blocked_paths`, `_blocked_reasons`), emitted by the gate report through the
+  bridge. Default zero/empty on the non-audit / no-marker path (backward compatible).
+- Golden bar: the 6-file FoundUp-creation audit (clean, 0 triggers) yields
+  `required_targets_redaction_blocked: 0` and `required_targets_in_model_context: 6`. Adversarial proof:
+  N>=3 sections with exactly ONE private_reasoning trigger -> only that target omitted, the rest survive,
+  overall gate passes. 89/89 Python redaction tests pass; JS contract suite exit 0 on 0.3.38.
+- Stacked on REDDOG_RUN_TRACE_BUILD_VERSION_FIELD_PHASE1 (#916).
+
+### REDDOG_RUN_TRACE_BUILD_VERSION_FIELD_PHASE1 (v0.3.37)
+
+- **Status:** VERIFIED_READY (this slice). The `## Run Trace` scorecard now emits
+  `- extension_version: <EXTENSION_VERSION>` near the top of the block (after the header, before the
+  role/tier fields). It reads the real installed-build constant, NOT any prompt/packet/model value.
+- Incident driving it: a golden rerun was mistakenly run on a STALE 0.3.34 build while the model OUTPUT
+  header claimed "Build: 0.3.36" (it parroted a "Version expected:" prompt line). The trace carried no
+  machine-checkable build field, so staleness was invisible from telemetry.
+- Purely additive telemetry. No packing/redaction/fetch/continuation change; no new file-read; no
+  execution authority.
+- Golden bar: `buildRunTraceSection(...)` output contains `- extension_version: ` == package.json version;
+  the source line reads the EXTENSION_VERSION constant. 012 gates build staleness on this field, not model
+  text.
+- Stacked on REDDOG_CONTINUATION_DEFAULT_OFF_PHASE1 (#915).
+
+### REDDOG_CONTINUATION_DEFAULT_OFF_PHASE1 (v0.3.36)
+
+- **Status:** VERIFIED_READY (this slice). The webview "Use last RedDog packet" checkbox now defaults
+  UNCHECKED — continuation is opt-IN, not opt-out. One-line HTML edit removed the `checked` attribute; the
+  feature stays manually available (012 checks the box to append the prior WSP_97-safe summary).
+- No backend logic change: the #911 fail-closed backend (`message.useLastPacket === true`) already treats
+  missing/false as OFF, so an unchecked default yields `continuation_enabled=false` AND
+  `continuation_appended=false` with no new code. The "Continuation: disabled for this run." status line
+  (from #911) renders by default.
+- No packing change (#914), no direct-read change, no redaction change, no new telemetry.
+- Golden bar: default submit yields continuation_enabled=false AND continuation_appended=false; manual
+  check still appends when a prior packet exists. Golden rerun no longer needs a manual uncheck.
+- Stacked on REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 (#914).
+
 ### REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 (v0.3.35)
 
 - **Status:** PACKING COMPLETE (this slice). Golden 6-file FoundUp-creation audit on 0.3.34 proved senses
@@ -365,7 +486,7 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_REVIEW_PACKET_MEMORY_AND_FOLLOWUP_PHASE1
 
-- **Status:** **PR-READY** — in-memory WSP_97-safe continuation summary; "Use last RedDog packet" toggle (default ON).
+- **Status:** **PR-READY** — in-memory WSP_97-safe continuation summary; "Use last RedDog packet" toggle (default OFF as of v0.3.36 — opt-in; see REDDOG_CONTINUATION_DEFAULT_OFF_PHASE1).
 - Sanitized follow-up memory from last run; appends to WSP task prompt without raw Copy MD paste.
 - No disk persistence, no WRE/OpenClaw runtime wiring.
 

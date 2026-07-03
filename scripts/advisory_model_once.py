@@ -442,6 +442,34 @@ def main() -> int:
     bridge_meta = payload.get("bridge_meta") if isinstance(payload.get("bridge_meta"), dict) else {}
     audit_context_requested = payload.get("audit_context") is True
     audit_context_applied = audit_context_requested
+    # REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1: authoritative packed required-target
+    # paths (from the JS packer). Threaded into the gate so phantom markers minted by file content
+    # cannot be treated as required-target sections.
+    #
+    # VECTOR B closure (legacy None path): under audit_mode the empty/absent authoritative list MUST
+    # NOT collapse to None. On the non-authoritative path (audit_context=true but packProtected=false:
+    # direct-read code_hits present -> audit_context true, but direct_read_fallback_used false -> the
+    # JS packer emits authoritativePacked=[]), collapsing [] -> None would reach
+    # fusion_redaction_gate with authoritative_paths=None, which is the LEGACY "every marker section is
+    # a required-target section" path -- so a body-embedded phantom marker would be checked/counted and
+    # could mint a content-controlled blocked_path. Passing an EXPLICIT EMPTY tuple instead makes the
+    # gate build an EMPTY authoritative_set: every marker's norm_path is "not in" the empty set, so
+    # every marker folds back as ordinary content (checked==0, no forged blocked_paths) while its body
+    # STILL flows to the whole-context audit gate and fails closed on any real secret/token.
+    #
+    # Non-audit legacy behavior is preserved byte-identical: when audit_context is NOT requested an
+    # absent/empty list still collapses to None (the pre-hardening legacy path is unchanged).
+    _rt_paths_raw = payload.get("required_target_paths")
+    if isinstance(_rt_paths_raw, list) and _rt_paths_raw:
+        required_target_paths = tuple(
+            str(p) for p in _rt_paths_raw if isinstance(p, str) and p.strip()
+        )
+    elif audit_context_requested:
+        # Audit-mode with no authoritative packed paths -> explicit empty set sentinel (NOT None),
+        # so the gate treats every marker as non-authoritative (folded), never legacy all-authoritative.
+        required_target_paths = ()
+    else:
+        required_target_paths = None
     audit_telemetry = {
         "audit_context_requested": audit_context_requested,
         "audit_context_applied": audit_context_applied,
@@ -459,7 +487,23 @@ def main() -> int:
         prompt,
         context_for_gate,
         audit_mode=audit_context_requested,
+        required_target_paths=required_target_paths,
     )
+    # REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1: surface the per-required-target isolation
+    # counts (counts/paths/reasons only -- never raw content) so the extension Run Trace scorecard
+    # can prove ONE blocked required target did not drop the clean ones. Fields are zero/empty on
+    # the non-audit / no-marker path (backward compatible). Merged into bridge_meta (-> review_packet)
+    # AND emitted top-level (mirrors the audit_context_applied flow).
+    _rep = gate.report
+    redaction_telemetry = {
+        "required_targets_redaction_checked": _rep.required_targets_redaction_checked,
+        "required_targets_redaction_passed": _rep.required_targets_redaction_passed,
+        "required_targets_redaction_blocked": _rep.required_targets_redaction_blocked,
+        "required_targets_redaction_blocked_paths": list(_rep.required_targets_redaction_blocked_paths),
+        "required_targets_redaction_blocked_reasons": list(_rep.required_targets_redaction_blocked_reasons),
+    }
+    bridge_meta = dict(bridge_meta)
+    bridge_meta.update(redaction_telemetry)
     if gate.status != REDACTION_GATE_PASSED or not gate.redacted_prompt:
         _progress("redaction_blocked", "Redaction gate blocked before network.")
         return _json_result(
@@ -468,6 +512,7 @@ def main() -> int:
             redaction_reason=gate.reason,
             retry_count=0,
             **audit_telemetry,
+            **redaction_telemetry,
         )
 
     _progress("redaction_pass", "Redaction gate passed.")
@@ -487,7 +532,7 @@ def main() -> int:
             packet = result.get("review_packet")
             if isinstance(packet, dict):
                 packet.update(bridge_meta)
-        return _json_result(**{**result, **audit_telemetry})
+        return _json_result(**{**result, **audit_telemetry, **redaction_telemetry})
 
     if payload.get("mode") == "foundups_fusion":
         result = _run_foundups_fusion(api_key, redacted_user_message, history, payload)
@@ -495,7 +540,7 @@ def main() -> int:
             packet = result.get("review_packet")
             if isinstance(packet, dict):
                 packet.update(bridge_meta)
-        return _json_result(**{**result, **audit_telemetry})
+        return _json_result(**{**result, **audit_telemetry, **redaction_telemetry})
 
     if payload.get("mode") == "openrouter_single":
         model = payload.get("lead_model") or model
@@ -548,6 +593,7 @@ def main() -> int:
             **bridge_meta,
         },
         **audit_telemetry,
+        **redaction_telemetry,
     )
 
 
