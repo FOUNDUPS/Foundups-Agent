@@ -2,6 +2,42 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-03 - REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1 (per-target redaction isolation for required-target evidence, 0.3.38)
+
+- Root cause: the packing path (#914) assembles all required-target excerpts into ONE merged context,
+  then the WHOLE context is redaction-gated once (advisory_model_once.py evaluate_redaction_gate;
+  fusion_alias_live.py line ~199). The gate had NO per-target isolation: if ONE required excerpt
+  contained a hard-block token (private_reasoning / private_key_residual), the ENTIRE merged payload
+  blocked -> redacted_context=None -> ALL required targets dropped, even in audit_mode. The 6 golden
+  files are clean (0 triggers), but this was a known sharp edge on the evidence-ingress path.
+- Fix (granularity only, in the Python redaction layer fusion_redaction_gate.py): when audit_mode AND
+  the context carries the stable marker `### Required direct-read target: <path>`, the gate now splits
+  the context into preamble + per-target sections, evaluates each section's block status INDEPENDENTLY,
+  OMITS only the sections that trigger a non-audit-structural block (marker + a redaction notice kept,
+  body gone -> secrets never reach the model), preserves all other sections verbatim, reassembles, and
+  runs the UNCHANGED whole-context audit-mode gate over the survivors. One blocked required target no
+  longer drops the clean ones; the overall gate passes (redacted_context non-None).
+- No weakening: this changes ONLY the GRANULARITY of the block (per-target instead of whole-payload),
+  never WHAT is blocked. No ACTION_BLOCK detector relaxed; AUDIT_STRUCTURAL_CATEGORIES untouched;
+  audit-mode value-vs-structure behavior unchanged; private_reasoning / private_key_residual still
+  always block their section. The in-context notice sanitizes the block-category name (underscore ->
+  dot) so it can never re-trigger a detector; the real category name lives only in counts-only
+  telemetry. Fail-closed: no markers or an ambiguous split -> the unchanged whole-context gate runs; a
+  block outside a target section still blocks the whole payload.
+- Telemetry (5 new counts-only fields; surfaced in the Run Trace scorecard): required_targets_redaction_checked,
+  required_targets_redaction_passed, required_targets_redaction_blocked, required_targets_redaction_blocked_paths[],
+  required_targets_redaction_blocked_reasons[]. Emitted by the Python gate report -> advisory_model_once.py
+  (top-level result + review_packet) -> extension.js holoScorecard -> formatHoloIndexScorecardLines. Default
+  zero/empty on the non-audit / no-marker path (backward compatible).
+- Tests: 10 new per-target isolation tests in test_fusion_redaction_gate.py (adversarial one-blocked-others-survive;
+  secret target withheld; loose secret redacted-in-place; all-clean 6-file mirror; backward-compat no-markers;
+  non-audit path unchanged; block-outside-section still blocks; notice-does-not-reintroduce-trigger;
+  no-detector-relaxed; zero-network). 89/89 pass. Contract test adds RPTI-001..004 (scorecard mapping +
+  render + defaults). Full JS contract suite exit 0 on 0.3.38.
+- Version: LIVE-surface bump 0.3.37 -> 0.3.38.
+- Stacked on REDDOG_RUN_TRACE_BUILD_VERSION_FIELD_PHASE1 (#916).
+- WSP: WSP_00, WSP_50, WSP_97, WSP_22.
+
 ## 2026-07-03 - REDDOG_RUN_TRACE_BUILD_VERSION_FIELD_PHASE1 (emit extension_version in Run Trace scorecard, 0.3.37)
 
 - Incident: a golden rerun was mistakenly run on a STALE 0.3.34 build, but the model OUTPUT header claimed

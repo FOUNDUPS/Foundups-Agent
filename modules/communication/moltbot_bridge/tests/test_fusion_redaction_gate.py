@@ -35,6 +35,7 @@ from modules.communication.moltbot_bridge.src.fusion_redaction_gate import (
     REDACTION_BLOCKED,
     REDACTION_GATE_PASSED,
     REDACTION_POLICY_VERSION,
+    REQUIRED_TARGET_MARKER_PREFIX,
     RedactionReport,
     evaluate_redaction_gate,
     redact_text,
@@ -526,3 +527,244 @@ def test_audit_mode_makes_zero_network(monkeypatch):
     monkeypatch.setattr(socket, "socket", _boom)
     evaluate_redaction_gate(_AUDIT_STRUCTURE_SAMPLE, audit_mode=True)
     evaluate_redaction_gate(_SK + "A" * 48, audit_mode=True)
+
+
+# ---------------------------------------------------------------------------
+# PER-TARGET ISOLATION lane (REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1)
+#
+# Before this slice the packing path merged all required-target excerpts into ONE
+# context; a single hard-block token in ONE excerpt blocked the WHOLE payload ->
+# redacted_context=None -> every required target dropped even in audit_mode. This
+# slice makes the audit-mode gate marker-aware: it evaluates each required-target
+# section INDEPENDENTLY, OMITS only the blocked one (marker + notice kept, body
+# gone), preserves the rest, and reassembles so the overall gate passes. This
+# changes only the GRANULARITY of the block, never WHAT is blocked. All secrets are
+# SYNTHETIC (split-prefix) fakes -- no real secret.
+# ---------------------------------------------------------------------------
+
+_M = REQUIRED_TARGET_MARKER_PREFIX
+
+
+def _target_section(path, body):
+    return _M + path + "\n```text\n" + body + "\n```"
+
+
+def _merged_targets(preamble, *sections):
+    return preamble + "\n\n".join(sections)
+
+
+_PROTECTED_PREAMBLE = (
+    "## REQUIRED_DIRECT_READ_TARGET_CONTENT (protected)\n"
+    "These are the explicit required direct-read targets for this audit.\n"
+)
+
+
+def test_per_target_isolation_one_blocked_others_survive():
+    # THE KEY ADVERSARIAL TEST: N=3 required-target sections, exactly ONE carries a
+    # private_reasoning trigger. Only that one is omitted; the other two survive intact;
+    # the overall gate does NOT return None.
+    n = 3
+    clean_a = "clean architecture notes for target A, no forbidden content here"
+    clean_c = "clean architecture notes for target C, ordinary source lines only"
+    blocked_b = "here is my private_reasoning about the hidden plan, do not share"
+    ctx = _merged_targets(
+        _PROTECTED_PREAMBLE,
+        _target_section("modules/a/first.py", clean_a),
+        _target_section("modules/b/second.py", blocked_b),
+        _target_section("modules/c/third.py", clean_c),
+    )
+    res = evaluate_redaction_gate("audit prompt", ctx, audit_mode=True)
+    assert res.status == REDACTION_GATE_PASSED, res.report
+    assert res.redacted_context is not None  # overall gate does NOT return None
+    out = res.redacted_context
+    rep = res.report
+    # exactly one target omitted, its path recorded, its reason recorded
+    assert rep.required_targets_redaction_checked == n
+    assert rep.required_targets_redaction_blocked == 1
+    assert rep.required_targets_redaction_passed == n - 1
+    assert rep.required_targets_redaction_blocked_paths == ("modules/b/second.py",)
+    assert "private_reasoning" in rep.required_targets_redaction_blocked_reasons
+    # the other N-1 survive with content intact ("in model context" == passed == N-1)
+    assert clean_a in out
+    assert clean_c in out
+    assert rep.required_targets_redaction_passed == n - 1
+    # the blocked body is gone; marker kept + notice present
+    assert "hidden plan" not in out
+    assert (_M + "modules/b/second.py") in out
+    assert "REQUIRED TARGET REDACTED" in out
+    # no residual trigger left -> gate is genuinely clean
+    assert scan_forbidden(out, audit_mode=True) == []
+
+
+def test_per_target_isolation_secret_target_withheld_others_survive():
+    # A real synthetic secret shape in one target. A PEM header (private_key_residual,
+    # ACTION_BLOCK) omits that target; a lone sk- (REDACT) would be redacted in place.
+    # Either way the secret never appears in output and the other targets survive.
+    clean_a = "clean target A content, safe to send"
+    pem_body = _PK_BEGIN + "\n" + "M" * 40  # header, no END -> private_key_residual BLOCK
+    clean_c = "clean target C content, safe to send"
+    ctx = _merged_targets(
+        _PROTECTED_PREAMBLE,
+        _target_section("path/a.py", clean_a),
+        _target_section("path/pem.py", pem_body),
+        _target_section("path/c.py", clean_c),
+    )
+    res = evaluate_redaction_gate("audit prompt", ctx, audit_mode=True)
+    assert res.status == REDACTION_GATE_PASSED, res.report
+    out = res.redacted_context or ""
+    assert res.report.required_targets_redaction_blocked == 1
+    assert res.report.required_targets_redaction_blocked_paths == ("path/pem.py",)
+    assert _PK_BEGIN not in out            # secret material never in output
+    assert clean_a in out and clean_c in out  # others survive
+    assert scan_forbidden(out, audit_mode=True) == []
+
+
+def test_per_target_isolation_loose_secret_redacted_in_place_not_omitted():
+    # A lone synthetic sk- key (REDACT class, not BLOCK) does NOT omit the target: it is
+    # redacted in place. Target survives with a placeholder; secret never in output.
+    secret = _SK + "FAKE" + "A" * 40
+    ctx = _merged_targets(
+        _PROTECTED_PREAMBLE,
+        _target_section("path/a.py", "clean A"),
+        _target_section("path/key.py", 'api_key = "' + secret + '"'),
+        _target_section("path/c.py", "clean C"),
+    )
+    res = evaluate_redaction_gate("audit prompt", ctx, audit_mode=True)
+    assert res.status == REDACTION_GATE_PASSED, res.report
+    out = res.redacted_context or ""
+    assert res.report.required_targets_redaction_blocked == 0  # REDACT != omit
+    assert (_M + "path/key.py") in out       # target survives
+    assert secret not in out                 # secret redacted
+    assert "[REDACTED" in out
+    assert "clean A" in out and "clean C" in out
+
+
+def test_per_target_isolation_all_clean_six_file_mirror():
+    # Mirror the golden 6-file expectation: structural governance categories present
+    # (source_authority / merge_authorization / cabr_payout_authority /
+    # governance_instruction) but NO private_reasoning. All 6 survive, none blocked,
+    # audit-mode preserves the structural identifiers.
+    bodies = [
+        "source_authority = monorepo_poc resolve convention",
+        "merge_authorization gate ordering note",
+        "cabr_payout_authority routing description",
+        "governance_instruction gate name reference",
+        "ordinary clean governance file five",
+        "ordinary clean governance file six",
+    ]
+    sections = [_target_section("gov/file%d.py" % i, b) for i, b in enumerate(bodies)]
+    ctx = _merged_targets(_PROTECTED_PREAMBLE, *sections)
+    res = evaluate_redaction_gate("audit prompt", ctx, audit_mode=True)
+    assert res.status == REDACTION_GATE_PASSED, res.report
+    rep = res.report
+    assert rep.required_targets_redaction_checked == 6
+    assert rep.required_targets_redaction_blocked == 0
+    assert rep.required_targets_redaction_passed == 6
+    assert rep.required_targets_redaction_blocked_paths == ()
+    out = res.redacted_context or ""
+    # all 6 markers survive
+    for i in range(6):
+        assert (_M + "gov/file%d.py" % i) in out
+    # audit-mode preserves the structural identifiers
+    assert "source_authority" in out
+    assert "merge_authorization" in out
+
+
+def test_per_target_isolation_backward_compat_no_markers_byte_identical():
+    # A context with NO required-target markers -> behavior byte-identical to a
+    # gate that never ran isolation. Same reassembly is impossible (no split), so the
+    # whole-context path runs unchanged, and the per-target telemetry stays zero/empty.
+    plain = (
+        "just some audit context with a governance mention: source_authority = monorepo_poc\n"
+        'api_key = "' + _SK + "B" * 40 + '"\n'
+    )
+    res = evaluate_redaction_gate("prompt", plain, audit_mode=True)
+    assert res.status == REDACTION_GATE_PASSED
+    rep = res.report
+    assert rep.required_targets_redaction_checked == 0
+    assert rep.required_targets_redaction_passed == 0
+    assert rep.required_targets_redaction_blocked == 0
+    assert rep.required_targets_redaction_blocked_paths == ()
+    assert rep.required_targets_redaction_blocked_reasons == ()
+
+
+def test_per_target_isolation_non_audit_path_unchanged():
+    # In the DEFAULT (non-audit) path, isolation NEVER runs: a private_reasoning trigger
+    # in a marker section still BLOCKS the whole payload (fail-closed, no granularity change).
+    ctx = _merged_targets(
+        _PROTECTED_PREAMBLE,
+        _target_section("path/a.py", "clean A"),
+        _target_section("path/b.py", "private_reasoning hidden plan"),
+    )
+    res = evaluate_redaction_gate("prompt", ctx, audit_mode=False)
+    assert res.status == REDACTION_BLOCKED
+    assert res.reason == REASON_BLOCKED_POLICY
+    assert "private_reasoning" in res.report.blocked_categories
+    # per-target telemetry stays zero on the non-audit path
+    assert res.report.required_targets_redaction_checked == 0
+
+
+def test_per_target_isolation_block_outside_target_section_still_blocks_whole():
+    # A hard-block token in the PREAMBLE (not inside a required-target section) must still
+    # block the whole payload -- isolation only splits the target sections, it never
+    # excuses a block that lives outside them. Fail-closed.
+    preamble = _PROTECTED_PREAMBLE + "note: private_reasoning appears in the preamble here\n"
+    ctx = _merged_targets(
+        preamble,
+        _target_section("path/a.py", "clean A"),
+        _target_section("path/c.py", "clean C"),
+    )
+    res = evaluate_redaction_gate("prompt", ctx, audit_mode=True)
+    assert res.status == REDACTION_BLOCKED
+    assert "private_reasoning" in res.report.blocked_categories
+
+
+def test_per_target_isolation_notice_does_not_reintroduce_trigger():
+    # NO-WEAKENING proof: the block-category NAME (e.g. "private_reasoning") is itself a
+    # trigger substring. The in-context notice must sanitize it so the reassembled payload
+    # cannot re-trigger a detector; the REAL name is preserved only in counts-only telemetry.
+    ctx = _merged_targets(
+        _PROTECTED_PREAMBLE,
+        _target_section("path/a.py", "clean A"),
+        _target_section("path/b.py", "chain of thought hidden reasoning here"),
+        _target_section("path/c.py", "clean C"),
+    )
+    res = evaluate_redaction_gate("prompt", ctx, audit_mode=True)
+    assert res.status == REDACTION_GATE_PASSED, res.report
+    out = res.redacted_context or ""
+    # notice present but the literal trigger form is NOT re-scannable
+    assert "REQUIRED TARGET REDACTED" in out
+    assert scan_forbidden(out, audit_mode=True) == []
+    # telemetry keeps the REAL underscore category name (never scanned)
+    assert "private_reasoning" in res.report.required_targets_redaction_blocked_reasons
+
+
+def test_per_target_isolation_no_detector_relaxed_granularity_only():
+    # Prove this slice did not add/relax any ACTION_BLOCK detector nor touch the audit
+    # structural set: BLOCK_CATEGORIES and AUDIT_STRUCTURAL_CATEGORIES are unchanged, and
+    # private_reasoning / private_key_residual remain outside the audit-structural set.
+    assert AUDIT_STRUCTURAL_CATEGORIES.issubset(set(BLOCK_CATEGORIES))
+    assert "private_reasoning" not in AUDIT_STRUCTURAL_CATEGORIES
+    assert "private_key_residual" not in AUDIT_STRUCTURAL_CATEGORIES
+    # a private_reasoning-only single target (no marker preamble split still blocks it as
+    # a section) is blocked, never passed through
+    ctx = _merged_targets(_PROTECTED_PREAMBLE, _target_section("p/x.py", "private_reasoning here"))
+    res = evaluate_redaction_gate("prompt", ctx, audit_mode=True)
+    # single blocked target -> that target omitted; gate can still pass with an empty survivor set
+    assert res.report.required_targets_redaction_blocked == 1
+    assert "private_reasoning" in res.report.required_targets_redaction_blocked_reasons
+    out = res.redacted_context or ""
+    assert "private_reasoning here" not in out
+
+
+def test_per_target_isolation_makes_zero_network(monkeypatch):
+    def _boom(*a, **k):
+        raise AssertionError("network attempted by per-target isolation")
+
+    monkeypatch.setattr(socket, "socket", _boom)
+    ctx = _merged_targets(
+        _PROTECTED_PREAMBLE,
+        _target_section("path/a.py", "clean A"),
+        _target_section("path/b.py", "private_reasoning hidden"),
+    )
+    evaluate_redaction_gate("prompt", ctx, audit_mode=True)
