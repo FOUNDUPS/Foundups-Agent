@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.37';
+const EXTENSION_VERSION = '0.3.38';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -643,6 +643,17 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     required_targets_context_chars: meta.required_targets_context_chars !== undefined ? meta.required_targets_context_chars : 'unknown',
     required_targets_context_missing: Array.isArray(meta.required_targets_context_missing) ? meta.required_targets_context_missing : 'unknown',
     required_targets_context_truncated: Array.isArray(meta.required_targets_context_truncated) ? meta.required_targets_context_truncated : 'unknown',
+    // REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1: per-required-target redaction isolation proof
+    // (produced by the Python redaction layer). required_targets_in_model_context (above) counts
+    // marker survival through the 42K cut; the fields below count the SEPARATE redaction layer --
+    // how many required targets passed per-target redaction vs were omitted for a hard block. A
+    // blocked target's body never reaches the model; clean targets survive. Default 'unknown' when
+    // no audit-mode marker-aware isolation ran (non-audit / no required list).
+    required_targets_redaction_checked: meta.required_targets_redaction_checked !== undefined ? meta.required_targets_redaction_checked : 'unknown',
+    required_targets_redaction_passed: meta.required_targets_redaction_passed !== undefined ? meta.required_targets_redaction_passed : 'unknown',
+    required_targets_redaction_blocked: meta.required_targets_redaction_blocked !== undefined ? meta.required_targets_redaction_blocked : 'unknown',
+    required_targets_redaction_blocked_paths: Array.isArray(meta.required_targets_redaction_blocked_paths) ? meta.required_targets_redaction_blocked_paths : 'unknown',
+    required_targets_redaction_blocked_reasons: Array.isArray(meta.required_targets_redaction_blocked_reasons) ? meta.required_targets_redaction_blocked_reasons : 'unknown',
     direct_read_fallback_used: meta.direct_read_fallback_used !== undefined ? meta.direct_read_fallback_used : 'unknown',
     direct_read_paths: Array.isArray(meta.direct_read_paths) ? meta.direct_read_paths : 'unknown',
     direct_read_rejected: Array.isArray(meta.direct_read_rejected) ? meta.direct_read_rejected : 'unknown',
@@ -686,6 +697,13 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- required_targets_context_chars: ' + scorecard.required_targets_context_chars,
     '- required_targets_context_missing: ' + (Array.isArray(scorecard.required_targets_context_missing) ? (scorecard.required_targets_context_missing.length ? scorecard.required_targets_context_missing.join(', ') : '(none)') : scorecard.required_targets_context_missing),
     '- required_targets_context_truncated: ' + (Array.isArray(scorecard.required_targets_context_truncated) ? (scorecard.required_targets_context_truncated.length ? scorecard.required_targets_context_truncated.map((t) => (t && t.path ? t.path + ' (' + t.chars + ')' : String(t))).join(', ') : '(none)') : scorecard.required_targets_context_truncated),
+    // REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1: per-required-target redaction isolation proof.
+    // Proves ONE required target that hit a hard block was omitted WITHOUT dropping the clean ones.
+    '- required_targets_redaction_checked: ' + scorecard.required_targets_redaction_checked,
+    '- required_targets_redaction_passed: ' + scorecard.required_targets_redaction_passed,
+    '- required_targets_redaction_blocked: ' + scorecard.required_targets_redaction_blocked,
+    '- required_targets_redaction_blocked_paths: ' + (Array.isArray(scorecard.required_targets_redaction_blocked_paths) ? (scorecard.required_targets_redaction_blocked_paths.length ? scorecard.required_targets_redaction_blocked_paths.join(', ') : '(none)') : scorecard.required_targets_redaction_blocked_paths),
+    '- required_targets_redaction_blocked_reasons: ' + (Array.isArray(scorecard.required_targets_redaction_blocked_reasons) ? (scorecard.required_targets_redaction_blocked_reasons.length ? scorecard.required_targets_redaction_blocked_reasons.join(', ') : '(none)') : scorecard.required_targets_redaction_blocked_reasons),
     '- direct_read_fallback_used: ' + scorecard.direct_read_fallback_used,
     '- direct_read_paths: ' + (Array.isArray(scorecard.direct_read_paths) ? (scorecard.direct_read_paths.length ? scorecard.direct_read_paths.join(', ') : '(none)') : scorecard.direct_read_paths),
     '- direct_read_rejected: ' + (Array.isArray(scorecard.direct_read_rejected) ? (scorecard.direct_read_rejected.length ? scorecard.direct_read_rejected.map((r) => (r && r.path ? r.path + ' (' + r.reason + ')' : String(r))).join(', ') : '(none)') : scorecard.direct_read_rejected),
@@ -1812,7 +1830,14 @@ function wireFusionWebview(context, webview, worker, state) {
       contextPacket.holoindex_scorecard || extractHoloIndexScorecard(contextMode, contextPacket.holoindex_meta),
       {
         audit_context_requested: contextPacket.audit_context === true,
-        audit_context_applied: false
+        audit_context_applied: false,
+        // REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1: defaults until the Python bridge returns
+        // its per-required-target redaction isolation counts (attached from `result` below).
+        required_targets_redaction_checked: 'unknown',
+        required_targets_redaction_passed: 'unknown',
+        required_targets_redaction_blocked: 'unknown',
+        required_targets_redaction_blocked_paths: 'unknown',
+        required_targets_redaction_blocked_reasons: 'unknown'
       }
     );
     const workTrail = createWorkTrail();
@@ -1859,6 +1884,24 @@ function wireFusionWebview(context, webview, worker, state) {
       holoScorecard.audit_context_applied = result && result.audit_context_applied === true;
       if (result && result.audit_context_requested !== undefined) {
         holoScorecard.audit_context_requested = result.audit_context_requested === true;
+      }
+      // REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1: pull the Python redaction layer's per-target
+      // isolation counts (top-level result fields, mirroring audit_context_applied) onto the
+      // scorecard so the Run Trace proves ONE blocked required target did not drop the clean ones.
+      if (result && result.required_targets_redaction_checked !== undefined) {
+        holoScorecard.required_targets_redaction_checked = result.required_targets_redaction_checked;
+      }
+      if (result && result.required_targets_redaction_passed !== undefined) {
+        holoScorecard.required_targets_redaction_passed = result.required_targets_redaction_passed;
+      }
+      if (result && result.required_targets_redaction_blocked !== undefined) {
+        holoScorecard.required_targets_redaction_blocked = result.required_targets_redaction_blocked;
+      }
+      if (result && Array.isArray(result.required_targets_redaction_blocked_paths)) {
+        holoScorecard.required_targets_redaction_blocked_paths = result.required_targets_redaction_blocked_paths;
+      }
+      if (result && Array.isArray(result.required_targets_redaction_blocked_reasons)) {
+        holoScorecard.required_targets_redaction_blocked_reasons = result.required_targets_redaction_blocked_reasons;
       }
     }
     absorbUnicodeMeta(result);

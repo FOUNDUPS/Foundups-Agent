@@ -163,6 +163,31 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - Add regression retrieval tests so extension bridge code ranks above adjacent WRE routers.
 - **Status:** **LANDED** #882 (`99d0e35c2`) — ranking + target recall telemetry only; not source-content inclusion.
 
+### REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1 (v0.3.38)
+
+- **Status:** VERIFIED_READY (this slice). The audit-mode redaction gate now isolates each
+  required-target excerpt INDEPENDENTLY. When the merged context carries the stable marker
+  `### Required direct-read target: <path>`, the Python redaction layer
+  (`fusion_redaction_gate.py::_isolate_required_targets`) splits it into preamble + per-target
+  sections, evaluates each section's block status on its own, OMITS only the sections that hit a
+  non-audit-structural hard block (marker + a redaction notice kept, body gone), preserves the rest,
+  reassembles, and runs the UNCHANGED whole-context audit-mode gate over the survivors.
+- Root cause it fixes: the packing path (#914) merged all required excerpts into ONE context gated as
+  a single unit, so ONE hard-block token (private_reasoning / private_key_residual) blocked the ENTIRE
+  payload (`redacted_context=None`) and dropped ALL required targets even in audit_mode.
+- No weakening: granularity-only change. No ACTION_BLOCK detector relaxed; nothing added to
+  AUDIT_STRUCTURAL_CATEGORIES; audit-mode value-vs-structure behavior unchanged; a blocked target's
+  secrets never reach the model. Fail-closed: no markers / ambiguous split / block outside a section
+  all fall back to the unchanged whole-context block.
+- Telemetry: 5 new counts-only fields in the Run Trace scorecard (`required_targets_redaction_checked`,
+  `_passed`, `_blocked`, `_blocked_paths`, `_blocked_reasons`), emitted by the gate report through the
+  bridge. Default zero/empty on the non-audit / no-marker path (backward compatible).
+- Golden bar: the 6-file FoundUp-creation audit (clean, 0 triggers) yields
+  `required_targets_redaction_blocked: 0` and `required_targets_in_model_context: 6`. Adversarial proof:
+  N>=3 sections with exactly ONE private_reasoning trigger -> only that target omitted, the rest survive,
+  overall gate passes. 89/89 Python redaction tests pass; JS contract suite exit 0 on 0.3.38.
+- Stacked on REDDOG_RUN_TRACE_BUILD_VERSION_FIELD_PHASE1 (#916).
+
 ### REDDOG_RUN_TRACE_BUILD_VERSION_FIELD_PHASE1 (v0.3.37)
 
 - **Status:** VERIFIED_READY (this slice). The `## Run Trace` scorecard now emits

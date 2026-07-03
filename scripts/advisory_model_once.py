@@ -460,6 +460,21 @@ def main() -> int:
         context_for_gate,
         audit_mode=audit_context_requested,
     )
+    # REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1: surface the per-required-target isolation
+    # counts (counts/paths/reasons only -- never raw content) so the extension Run Trace scorecard
+    # can prove ONE blocked required target did not drop the clean ones. Fields are zero/empty on
+    # the non-audit / no-marker path (backward compatible). Merged into bridge_meta (-> review_packet)
+    # AND emitted top-level (mirrors the audit_context_applied flow).
+    _rep = gate.report
+    redaction_telemetry = {
+        "required_targets_redaction_checked": _rep.required_targets_redaction_checked,
+        "required_targets_redaction_passed": _rep.required_targets_redaction_passed,
+        "required_targets_redaction_blocked": _rep.required_targets_redaction_blocked,
+        "required_targets_redaction_blocked_paths": list(_rep.required_targets_redaction_blocked_paths),
+        "required_targets_redaction_blocked_reasons": list(_rep.required_targets_redaction_blocked_reasons),
+    }
+    bridge_meta = dict(bridge_meta)
+    bridge_meta.update(redaction_telemetry)
     if gate.status != REDACTION_GATE_PASSED or not gate.redacted_prompt:
         _progress("redaction_blocked", "Redaction gate blocked before network.")
         return _json_result(
@@ -468,6 +483,7 @@ def main() -> int:
             redaction_reason=gate.reason,
             retry_count=0,
             **audit_telemetry,
+            **redaction_telemetry,
         )
 
     _progress("redaction_pass", "Redaction gate passed.")
@@ -487,7 +503,7 @@ def main() -> int:
             packet = result.get("review_packet")
             if isinstance(packet, dict):
                 packet.update(bridge_meta)
-        return _json_result(**{**result, **audit_telemetry})
+        return _json_result(**{**result, **audit_telemetry, **redaction_telemetry})
 
     if payload.get("mode") == "foundups_fusion":
         result = _run_foundups_fusion(api_key, redacted_user_message, history, payload)
@@ -495,7 +511,7 @@ def main() -> int:
             packet = result.get("review_packet")
             if isinstance(packet, dict):
                 packet.update(bridge_meta)
-        return _json_result(**{**result, **audit_telemetry})
+        return _json_result(**{**result, **audit_telemetry, **redaction_telemetry})
 
     if payload.get("mode") == "openrouter_single":
         model = payload.get("lead_model") or model
@@ -548,6 +564,7 @@ def main() -> int:
             **bridge_meta,
         },
         **audit_telemetry,
+        **redaction_telemetry,
     )
 
 

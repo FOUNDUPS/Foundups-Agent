@@ -72,6 +72,20 @@ ACTION_BLOCK = "block"
 
 _PLACEHOLDER = "[REDACTED:{cat}]"
 
+# REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1 -- marker-aware per-target redaction isolation.
+# The extension packs required direct-read target excerpts into ONE merged context, each delimited
+# by this stable marker (JS const REQUIRED_TARGET_MARKER_PREFIX in extension.js). Before this slice the
+# WHOLE merged context was redaction-gated as one unit: a single hard-block token (private_reasoning /
+# private_key_residual) in ONE required excerpt blocked the ENTIRE payload -> redacted_context=None ->
+# every required target dropped, even in audit_mode. This slice ONLY changes the GRANULARITY of the
+# block (per-target instead of whole-payload); it NEVER relaxes what is blocked. A blocked target's body
+# is OMITTED and replaced with a notice (its secrets never reach the model); clean targets survive.
+REQUIRED_TARGET_MARKER_PREFIX = "### Required direct-read target: "
+# Stable notice that replaces a blocked target's body. The category names are the low-cardinality
+# BLOCK category identifiers (never raw content). The marker is preserved so the model still learns the
+# target existed but was withheld; only the fenced body is replaced.
+_REQUIRED_TARGET_BLOCKED_NOTICE = "[REQUIRED TARGET REDACTED: blocked by {cats}]"
+
 # Low-cardinality reasons -- NEVER echo raw input.
 REASON_CLEAN = "clean"
 REASON_REDACTED = "redacted"
@@ -271,6 +285,14 @@ class RedactionReport:
     blocked_categories: Tuple[str, ...] = ()
     residual_forbidden_count: int = 0
     error: bool = False
+    # REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1 -- per-required-target isolation telemetry.
+    # All default empty/zero so the non-audit / no-marker path stays byte-identical (backward compat):
+    # these fields are populated ONLY when audit-mode marker-aware isolation actually ran.
+    required_targets_redaction_checked: int = 0
+    required_targets_redaction_passed: int = 0
+    required_targets_redaction_blocked: int = 0
+    required_targets_redaction_blocked_paths: Tuple[str, ...] = ()
+    required_targets_redaction_blocked_reasons: Tuple[str, ...] = ()
 
 
 @dataclass
@@ -376,6 +398,103 @@ def redact_text(text: object, audit_mode: bool = False) -> Tuple[str, RedactionR
 
 
 # ---------------------------------------------------------------------------
+# REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1 -- marker-aware per-target isolation
+# ---------------------------------------------------------------------------
+
+
+def _section_is_blocked(section_body: str) -> Tuple[bool, Tuple[str, ...]]:
+    """Return (is_blocked, block_category_names) for ONE required-target section body.
+
+    A section is "blocked" iff, under AUDIT-MODE scanning, it triggers at least one
+    NON-audit-structural ACTION_BLOCK category (private_reasoning / private_key_residual).
+    This reuses redact_text(audit_mode=True): its blocked_categories already excludes the four
+    AUDIT_STRUCTURAL_CATEGORIES (they are preserved as readable structure, never blocked). So the
+    ONLY categories that can appear here are the always-block ones -- exactly the spec's
+    "non-audit-structural ACTION_BLOCK category". No detector is relaxed; this only asks the
+    existing audit-mode policy whether THIS section would block.
+    """
+    _redacted, rep = redact_text(section_body, audit_mode=True)
+    return (bool(rep.blocked_categories), tuple(rep.blocked_categories))
+
+
+def _isolate_required_targets(context: str) -> Optional[Tuple[str, Dict[str, object]]]:
+    """Marker-aware per-target redaction isolation for an audit-mode merged context.
+
+    Splits `context` into a preamble plus per-required-target sections delimited by the stable
+    marker REQUIRED_TARGET_MARKER_PREFIX, evaluates each section's block status INDEPENDENTLY,
+    OMITS only the sections that trigger a non-audit-structural block (replacing their body with a
+    stable notice while keeping the marker), preserves all other sections verbatim, and reassembles.
+
+    Returns (reassembled_context, telemetry) when isolation applied, or None to signal "fall back to
+    the existing whole-context gate" (no markers present, or the split is ambiguous -> FAIL CLOSED).
+
+    Fail-closed contract: if parsing/reassembly is at all ambiguous, return None so the caller runs
+    the unchanged whole-context block. This never PASSES a payload that the whole-context gate blocks;
+    it only splits an already-audit-mode context so ONE bad target cannot drop the clean ones.
+    """
+    if not isinstance(context, str):
+        return None
+    marker = REQUIRED_TARGET_MARKER_PREFIX
+    first = context.find(marker)
+    if first == -1:
+        return None  # no required-target markers -> unchanged whole-context path
+
+    preamble = context[:first]
+    # Split the remainder on the marker. re.split keeps every occurrence boundary; because the marker
+    # begins each section, splitting on it and re-prefixing is unambiguous and order-preserving.
+    remainder = context[first:]
+    raw_sections = remainder.split(marker)
+    # raw_sections[0] is "" (remainder starts with the marker); every subsequent item is one section
+    # body WITHOUT its leading marker. A malformed split (nothing after the marker) -> fail closed.
+    sections = [s for s in raw_sections[1:]]
+    if not sections:
+        return None
+
+    checked = 0
+    passed = 0
+    blocked_paths: List[str] = []
+    blocked_reasons: List[str] = []
+    rebuilt: List[str] = []
+    for body in sections:
+        checked += 1
+        # The path is the first line after the marker (may carry a "(bounded excerpt)" suffix and
+        # then a fenced block). Keep the ENTIRE original body for survivors (byte-identical); only a
+        # blocked section is rewritten. The path label is telemetry-only.
+        newline = body.find("\n")
+        header_line = body if newline == -1 else body[:newline]
+        path_label = header_line.strip()
+        is_blocked, cats = _section_is_blocked(body)
+        if is_blocked:
+            blocked_paths.append(path_label)
+            for c in cats:
+                if c not in blocked_reasons:
+                    blocked_reasons.append(c)
+            # The block-category NAMES themselves contain their own trigger substrings
+            # (e.g. the literal "private_reasoning" matches the private_reasoning detector).
+            # Sanitize the name for the IN-CONTEXT notice (underscore -> dot) so the notice can
+            # never re-trigger a detector and re-block the reassembled payload. The REAL
+            # underscore names are preserved ONLY in the counts-only telemetry (never scanned).
+            safe_cats = ", ".join(c.replace("_", ".") for c in cats) if cats else "policy"
+            notice = _REQUIRED_TARGET_BLOCKED_NOTICE.format(cats=safe_cats)
+            # Preserve the marker + path header so the model knows the target existed; replace the
+            # BODY (fenced content) with the notice. The blocked content never reaches egress.
+            rebuilt.append(marker + header_line + "\n" + notice + "\n")
+        else:
+            passed += 1
+            rebuilt.append(marker + body)
+
+    reassembled = preamble + "".join(rebuilt)
+    telemetry: Dict[str, object] = {
+        "required_targets_redaction_checked": checked,
+        "required_targets_redaction_passed": passed,
+        "required_targets_redaction_blocked": len(blocked_paths),
+        "required_targets_redaction_blocked_paths": tuple(blocked_paths),
+        "required_targets_redaction_blocked_reasons": tuple(blocked_reasons),
+    }
+    return reassembled, telemetry
+
+
+# ---------------------------------------------------------------------------
 # Gate
 # ---------------------------------------------------------------------------
 
@@ -390,28 +509,53 @@ def evaluate_redaction_gate(prompt: object, context: object = None, audit_mode: 
     audit_mode (default False -> byte-identical to the pre-slice-3 path): preserves the four
     AUDIT_STRUCTURAL_CATEGORIES identifiers as readable governance structure while still redacting
     every secret VALUE / payout AMOUNT / authorization TOKEN. Secret redaction is NEVER weakened.
+
+    REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1 (audit_mode + required-target markers only):
+    the merged context is FIRST split by REQUIRED_TARGET_MARKER_PREFIX and each required-target
+    section is evaluated for a non-audit-structural block INDEPENDENTLY. A blocked section's body is
+    OMITTED (marker + a redaction notice survive; its secrets never reach egress) while every other
+    section is preserved; the reassembled context then flows through the UNCHANGED whole-context gate
+    (so audit-mode value-redaction still applies to survivors and any residual still fails closed).
+    This changes ONLY the GRANULARITY of the block (per-target vs whole-payload), never what is
+    blocked. If no markers exist or the split is ambiguous -> fall back to the whole-context path.
     """
     try:
         if not isinstance(prompt, str) or (context is not None and not isinstance(context, str)):
             return _blocked(REASON_REDACTOR_ERROR, RedactionReport(error=True))
+
+        # Per-target isolation (audit_mode + markers only). Runs BEFORE the whole-context gate on a
+        # COPY of the context; survivors + notices reassemble into gate_context. Fail-closed: when it
+        # returns None (no markers / ambiguous split) the original context flows through unchanged.
+        gate_context = context
+        target_telemetry: Optional[Dict[str, object]] = None
+        if audit_mode and isinstance(context, str):
+            isolated = _isolate_required_targets(context)
+            if isolated is not None:
+                gate_context, target_telemetry = isolated
 
         # Call redact_text/scan_forbidden with the EXACT pre-slice-3 signature on the
         # default path (no audit kwarg) so the non-audit behavior is byte-identical and
         # single-arg monkeypatched doubles keep working. Only audit runs pass the kwarg.
         if audit_mode:
             red_p, rep_p = redact_text(prompt, audit_mode=True)
-            if context is not None:
-                red_c, rep_c = redact_text(context, audit_mode=True)
+            if gate_context is not None:
+                red_c, rep_c = redact_text(gate_context, audit_mode=True)
             else:
                 red_c, rep_c = None, RedactionReport()
         else:
             red_p, rep_p = redact_text(prompt)
-            if context is not None:
-                red_c, rep_c = redact_text(context)
+            if gate_context is not None:
+                red_c, rep_c = redact_text(gate_context)
             else:
                 red_c, rep_c = None, RedactionReport()
 
         merged = _merge_reports(rep_p, rep_c, context is not None)
+        if target_telemetry is not None:
+            merged.required_targets_redaction_checked = int(target_telemetry["required_targets_redaction_checked"])
+            merged.required_targets_redaction_passed = int(target_telemetry["required_targets_redaction_passed"])
+            merged.required_targets_redaction_blocked = int(target_telemetry["required_targets_redaction_blocked"])
+            merged.required_targets_redaction_blocked_paths = tuple(target_telemetry["required_targets_redaction_blocked_paths"])
+            merged.required_targets_redaction_blocked_reasons = tuple(target_telemetry["required_targets_redaction_blocked_reasons"])
         if rep_p.error or rep_c.error:
             return _blocked(REASON_REDACTOR_ERROR, merged)
         if merged.blocked_categories:
@@ -484,6 +628,7 @@ __all__ = [
     "REDACT_CATEGORIES",
     "BLOCK_CATEGORIES",
     "AUDIT_STRUCTURAL_CATEGORIES",
+    "REQUIRED_TARGET_MARKER_PREFIX",
     "ALLOWED_REASONS",
     "REASON_CLEAN",
     "REASON_REDACTED",
