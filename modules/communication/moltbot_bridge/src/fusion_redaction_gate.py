@@ -441,15 +441,28 @@ def _isolate_required_targets(
     REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1: `authoritative_paths` is the AUTHORITATIVE
     list of required-target paths the packer actually packed (threaded from the JS packer via the
     bridge payload). When it is provided (non-None), a marker-delimited section is only treated as a
-    REQUIRED-TARGET SECTION when its path label is IN that list; a marker whose path is NOT authoritative
-    (a phantom minted by file CONTENT, e.g. a self-referential audit body that literally contains
-    "### Required direct-read target: fake/evil.py") is treated as ORDINARY content -- folded back into
-    the preceding real section verbatim, never counted as its own checked/passed/blocked section, and
-    never able to mint a blocked_path. Consequently checked/passed/blocked/missing can never exceed the
-    authoritative count and blocked_paths is a subset of the authoritative paths. When
-    `authoritative_paths` is None (e.g. legacy callers / no list threaded) behavior is byte-identical to
-    the pre-hardening path (every marker section is checked), so the JS pack-time marker neutralization
-    is the defense-in-depth that keeps phantom markers out of the packed body in the first place.
+    REQUIRED-TARGET SECTION when its path label is IN that list AND that normalized path has NOT already
+    been consumed by an earlier required-target section. Two forgery vectors are therefore both folded
+    back as ORDINARY content (marker + body re-joined verbatim into the preceding output, never counted
+    and never able to mint a blocked_path):
+      (1) PHANTOM path: a marker whose path is NOT authoritative (minted by file CONTENT, e.g. a
+          self-referential audit body that literally contains
+          "### Required direct-read target: fake/evil.py").
+      (2) DUPLICATE authoritative path: a SECOND (or later) marker whose normalized path equals one
+          already consumed by the FIRST occurrence. The first occurrence is the real packed protected
+          section (packed BEFORE any lower git-diff / recall-JSON / active-editor section), so it is the
+          authoritative one; a later marker for the same path -- e.g. a modified required file whose diff
+          body itself contains its own authoritative marker line -- would otherwise be checked/passed a
+          SECOND time (inflating the counts past the authoritative count) and, if that diff body carried
+          a hard-block token, would forge a blocked_path entry for a path whose REAL protected section
+          was clean. Per-path dedup collapses that second section back to ordinary content.
+    Consequently checked/passed/blocked/missing can NEVER exceed the authoritative count (each
+    authoritative path is checked AT MOST ONCE), and blocked_paths is a subset of the authoritative paths.
+    Duplicate-folded bodies still flow to the whole-context gate via reassembly, so any real secret in
+    them is still value-redacted / fails closed there. When `authoritative_paths` is None (e.g. legacy
+    callers / no list threaded) behavior is byte-identical to the pre-hardening path (every marker section
+    is checked), so the JS pack-time marker neutralization is the defense-in-depth that keeps phantom
+    markers out of the packed body in the first place.
 
     Splits `context` into a preamble plus per-required-target sections delimited by the stable
     marker REQUIRED_TARGET_MARKER_PREFIX, evaluates each section's block status INDEPENDENTLY,
@@ -490,6 +503,12 @@ def _isolate_required_targets(
         authoritative_set = {
             _normalize_required_target_path(p) for p in authoritative_paths if str(p or "").strip()
         }
+    # Per-path dedup ledger: normalized authoritative paths already CONSUMED by an earlier required-target
+    # section. The FIRST marker for a path is the real packed protected section (packed before any lower
+    # git-diff / recall-JSON / active-editor section); every LATER marker for the same normalized path is
+    # a duplicate minted by lower-section content and MUST fold back as ordinary content so an authoritative
+    # path is checked/passed/blocked AT MOST ONCE. Only tracked when an authoritative list is threaded.
+    consumed_paths: set = set()
 
     checked = 0
     passed = 0
@@ -503,17 +522,25 @@ def _isolate_required_targets(
         newline = body.find("\n")
         header_line = body if newline == -1 else body[:newline]
         path_label = header_line.strip()
-        # Authoritative gate: when an authoritative list is threaded, a marker whose path is NOT in it
-        # is a PHANTOM minted by file content. Fold it back verbatim (marker + body) into the preceding
-        # output as ORDINARY content -- it is NOT a required-target section, so it is neither checked nor
-        # counted and can never contribute a blocked_path. Its content still flows to the whole-context
-        # gate via reassembly (so any real secret in it is still value-redacted / fails closed there).
-        if authoritative_set is not None and _normalize_required_target_path(path_label) not in authoritative_set:
-            if rebuilt:
-                rebuilt[-1] = rebuilt[-1] + marker + body
-            else:
-                preamble = preamble + marker + body
-            continue
+        # Authoritative + dedup gate: when an authoritative list is threaded, a marker section is a REAL
+        # required-target section ONLY IF (a) its normalized path is in the authoritative set AND (b) that
+        # normalized path has NOT already been consumed by an earlier section. Otherwise it is a PHANTOM
+        # (path not authoritative -> minted by file content) or a DUPLICATE (path already consumed by the
+        # first, real occurrence -> a self-referential marker echoed in a lower git-diff/recall/editor
+        # section). In BOTH cases fold it back verbatim (marker + body) into the preceding output as
+        # ORDINARY content -- it is NOT counted (neither checked nor passed) and can never contribute a
+        # blocked_path. Its content still flows to the whole-context gate via reassembly (so any real
+        # secret in it is still value-redacted / fails closed there).
+        if authoritative_set is not None:
+            norm_path = _normalize_required_target_path(path_label)
+            if norm_path not in authoritative_set or norm_path in consumed_paths:
+                if rebuilt:
+                    rebuilt[-1] = rebuilt[-1] + marker + body
+                else:
+                    preamble = preamble + marker + body
+                continue
+            # First occurrence of an authoritative path -> consume it so later duplicates fold back.
+            consumed_paths.add(norm_path)
         checked += 1
         is_blocked, cats = _section_is_blocked(body)
         if is_blocked:

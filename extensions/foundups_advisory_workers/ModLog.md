@@ -2,6 +2,51 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-03 - REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (per-path dedup completion, 0.3.40)
+
+- Closes the residual duplicate-authoritative-marker bypass that survived the 0.3.39 authoritative fix.
+  #918 made the JS `in_model_context` proof unforgeable, but the Python isolation telemetry
+  (`required_targets_redaction_checked/passed/blocked/blocked_paths/reasons`) was still forgeable:
+  `neutralizeRequiredTargetMarker` was applied ONLY to the protected required-target EXCERPT bodies, so
+  the LOWER sections (git diff, HoloIndex recall JSON blob, active editor) merged UN-neutralized into the
+  same `gate_context` that Python's `_isolate_required_targets` splits. In `wsp_holo_git*` modes a
+  MODIFIED required file whose OWN body contains the literal line
+  "### Required direct-read target: <its-own-authoritative-path>" rendered that marker un-neutralized in
+  the git diff; Python split it as a SECOND section whose path normalized to the SAME authoritative path,
+  PASSED the authoritative gate, and was counted AGAIN (no per-path dedup) -> checked/passed EXCEEDED the
+  authoritative count (falsifying the docstring invariant). If that diff body also carried a hard-block
+  token, the clean authoritative path was appended to blocked_paths with a forged reason while its REAL
+  protected section was clean.
+- Fix (robust single point = per-path dedup; identification only, no policy change):
+  - PRIMARY (Python per-path dedup) in `_isolate_required_targets` (fusion_redaction_gate.py ~:499-543):
+    a `consumed_paths` set tracks normalized authoritative paths already consumed. An authoritative path
+    is checked/passed/blocked AT MOST ONCE (the FIRST marker section for that path -- the real packed
+    protected section, packed BEFORE any lower section). Any SUBSEQUENT marker whose normalized path is
+    already-consumed folds back as ORDINARY content (exactly like a non-authoritative phantom). This makes
+    checked/passed/blocked/missing <= authoritative count HOLD FOR REAL, even with duplicate authoritative
+    markers minted by lower sections; blocked_paths stays a subset of authoritative paths.
+  - Defense-in-depth (JS lower-section neutralization) in extension.js: `neutralizeRequiredTargetMarker`
+    now also wraps the git-diff (`### git status/--stat/git diff -- .` bodies ~:2643-2649), HoloIndex
+    recall JSON blob (~:2583), and active-editor content (~:2639) before assembly, so a literal marker in
+    those sections cannot reach the Python splitter as a real marker in the first place.
+  - JS threading contract assertion (MFH-J-006 in verify_extension_contract.js): pins the bridge payload
+    line that sets `required_target_paths` from `bridgeMeta.required_targets_authoritative_paths` so a
+    future edit cannot silently drop it (which would make Python receive None -> the forgeable #917
+    fallback at runtime while Python-direct tests still pass). MFH-J-007 pins the three lower-section
+    neutralization call sites.
+- No weakening: identification-only. No ACTION_BLOCK detector relaxed; AUDIT_STRUCTURAL_CATEGORIES
+  untouched; the #917 one-blocked-sibling-survives content-safety fix and #914 budget math preserved.
+- Tests: 3 new Python dedup regression tests in test_fusion_redaction_gate.py
+  (duplicate-authoritative-marker-in-git-diff-not-recounted; duplicate-with-hard-block-token-does-not-
+  forge-blocked-path; counts-never-exceed-authoritative-with-many-duplicates) -> 98/98 gate tests pass.
+  Proven non-vacuous: the 3 dedup tests FAIL when the per-path dedup condition is disabled (checked=6
+  instead of 2) and PASS with it. Contract test adds MFH-J-006 (threading) + MFH-J-007 (lower-section
+  neutralization). Full JS contract suite exit 0 on 0.3.40; golden 6-file still in_model_context=6,
+  redaction_blocked=0.
+- Version: LIVE-surface bump 0.3.39 -> 0.3.40.
+- Stacked on the 0.3.39 authoritative fix (same #918 slice) and REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1 (#917).
+- WSP: WSP_00, WSP_50, WSP_97, WSP_22.
+
 ## 2026-07-03 - REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (authoritative unforgeable required-target telemetry, 0.3.39)
 
 - Root cause (marker-reparse forgery): the required-target telemetry was derived by REPARSING marker

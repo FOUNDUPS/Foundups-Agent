@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.39', 'package version must be 0.3.39');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.39'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.40', 'package version must be 0.3.40');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.40'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.39', 'README version mismatch');
+includes(readme, 'Version: 0.3.40', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -1202,6 +1202,21 @@ includes(extensionJs, 'function neutralizeRequiredTargetMarker', 'MFH-J: pack-ti
 includes(extensionJs, 'function requiredTargetSectionSurvived', 'MFH-J: authoritative section-survival check missing');
 includes(extensionJs, 'included_paths', 'MFH-J: authoritative included_paths structured record missing');
 
+// MFH-J-006 (THREADING CONTRACT): the bridge payload MUST literally set required_target_paths from
+// bridgeMeta.required_targets_authoritative_paths. A future edit dropping this payload line would make
+// Python receive None -> the forgeable #917 fallback path at RUNTIME while Python-direct tests still
+// pass. This static anchor closes that residual coverage gap (mirrors the ACB-001 audit_context anchor).
+includes(extensionJs, 'required_target_paths: bridgeMeta && Array.isArray(bridgeMeta.required_targets_authoritative_paths)', 'MFH-J-006: bridge payload must thread required_target_paths from bridgeMeta.required_targets_authoritative_paths (authoritative list reaches Python)');
+includes(extensionJs, 'bridgeMeta.required_targets_authoritative_paths.slice()', 'MFH-J-006: bridge payload must pass a COPY of the authoritative packed paths');
+
+// MFH-J-007 (LOWER-SECTION NEUTRALIZATION, defense-in-depth): the git-diff / HoloIndex-recall /
+// active-editor lower sections merge into the SAME gate_context the Python splitter reads. A literal
+// marker in those bodies must be neutralized BEFORE assembly so it cannot reach Python as a real
+// marker section (Python per-path dedup is the robust closure; this keeps the phantom out of the body).
+includes(extensionJs, 'neutralizeRequiredTargetMarker(holo.output || \'(no HoloIndex output)\')', 'MFH-J-007: HoloIndex recall blob must be marker-neutralized before assembly');
+includes(extensionJs, 'neutralizeRequiredTargetMarker(active)', 'MFH-J-007: active-editor content must be marker-neutralized before assembly');
+includes(extensionJs, 'neutralizeRequiredTargetMarker(diff || \'(no diff)\')', 'MFH-J-007: git diff body must be marker-neutralized before assembly');
+
 // MFH-J-001: the proof counts ONLY authoritative packed paths. A requested target NOT in the
 // authoritative included set is missing (never flipped to present by a stray marker in text).
 const mfhPaths = ['modules/a/first.py', 'modules/b/second.py'];
@@ -1513,7 +1528,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.39'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.40'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -1527,7 +1542,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.39'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.40'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -1539,7 +1554,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.39'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.40'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');

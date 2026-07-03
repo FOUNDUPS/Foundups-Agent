@@ -916,3 +916,104 @@ def test_mfh_authoritative_one_blocked_sibling_survives():
     assert "hidden plan" not in out
     assert "REQUIRED TARGET REDACTED" in out
     assert scan_forbidden(out, audit_mode=True) == []
+
+
+# ---------------------------------------------------------------------------
+# REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 -- PER-PATH DEDUP (MFH-P-DEDUP-001..003)
+# CLOSES THE RESIDUAL BYPASS: JS neutralization protects only the packed EXCERPT bodies; the LOWER
+# sections (git diff / HoloIndex recall JSON / active editor) were merged UN-neutralized into the SAME
+# gate_context that Python splits. A MODIFIED required file whose OWN body contains its authoritative
+# marker line renders that marker verbatim in the git diff -> a SECOND marker section whose path
+# normalizes to an ALREADY-AUTHORITATIVE path. Without per-path dedup it is checked/passed AGAIN
+# (checked/passed exceed the authoritative count) and, if it carries a hard-block token, forges a
+# blocked_path for a path whose REAL protected section was clean. Per-path dedup (first occurrence is
+# authoritative; later duplicates fold back as ordinary content) makes checked/passed/blocked/missing
+# <= authoritative count HOLD FOR REAL. All secrets/triggers SYNTHETIC. Identification only.
+# ---------------------------------------------------------------------------
+
+
+def _git_diff_section(diff_body):
+    # Mirror the extension's lower git-diff section shape (### git diff -- . (bounded)).
+    return "### git diff -- . (bounded)\n```diff\n" + diff_body + "\n```"
+
+
+def test_mfh_dedup_duplicate_authoritative_marker_in_git_diff_not_recounted():
+    # THE DEDUP PROOF: real/a.py is packed ONCE as a clean protected section. A lower git-diff section
+    # then renders real/a.py's OWN authoritative marker line a SECOND time (a modified required file
+    # whose diff body echoes its own marker). The duplicate must fold back as ORDINARY content: the
+    # authoritative path real/a.py is checked/passed AT MOST ONCE -> counts never exceed the count.
+    dup_marker = REQUIRED_TARGET_MARKER_PREFIX + "real/a.py\n```text\nrecalled duplicate body\n```"
+    ctx = _merged_targets(
+        _PROTECTED_PREAMBLE,
+        _target_section("real/a.py", "clean protected body for A"),
+        _target_section("real/b.py", "clean protected body for B"),
+    ) + "\n\n" + _git_diff_section(
+        "diff --git a/real/a.py b/real/a.py\n"
+        "@@ modified required file whose body echoes its own marker @@\n" + dup_marker
+    )
+    authoritative = ("real/a.py", "real/b.py")
+    res = evaluate_redaction_gate("audit prompt", ctx, audit_mode=True, required_target_paths=authoritative)
+    assert res.status == REDACTION_GATE_PASSED, res.report
+    rep = res.report
+    # each authoritative path checked/passed EXACTLY ONCE -> equal to the authoritative count (not inflated)
+    assert rep.required_targets_redaction_checked == len(authoritative)
+    assert rep.required_targets_redaction_passed == len(authoritative)
+    assert rep.required_targets_redaction_blocked == 0
+    assert rep.required_targets_redaction_blocked_paths == ()
+    # the duplicate body still survives verbatim (it folded into ordinary content, not a new section)
+    out = res.redacted_context or ""
+    assert "recalled duplicate body" in out
+
+
+def test_mfh_dedup_duplicate_with_hard_block_token_does_not_forge_blocked_path():
+    # THE FORGERY-CLOSURE PROOF: the FIRST (real, protected) real/a.py section is CLEAN. A lower git-diff
+    # section renders real/a.py's authoritative marker AGAIN with a hard-block token in its body. Without
+    # dedup this forges blocked_paths=("real/a.py",) for a clean protected target. With dedup the duplicate
+    # is ORDINARY content -> its trigger blocks the WHOLE payload via the fail-closed whole-context gate
+    # (no leak), but NEVER mints a per-target blocked_path for the clean authoritative section.
+    dup_with_block = (
+        REQUIRED_TARGET_MARKER_PREFIX + "real/a.py\n```text\n"
+        "here is my <thinking>hidden reasoning</thinking> about the plan\n```"
+    )
+    ctx = _merged_targets(
+        _PROTECTED_PREAMBLE,
+        _target_section("real/a.py", "genuinely clean protected body for A"),
+        _target_section("real/b.py", "genuinely clean protected body for B"),
+    ) + "\n\n" + _git_diff_section(
+        "diff --git a/real/a.py b/real/a.py\n@@ modified @@\n" + dup_with_block
+    )
+    authoritative = ("real/a.py", "real/b.py")
+    res = evaluate_redaction_gate("audit prompt", ctx, audit_mode=True, required_target_paths=authoritative)
+    rep = res.report
+    # blocked_paths is a SUBSET of authoritative AND does NOT contain the clean-protected real/a.py forgery
+    norm_auth = {a.lower() for a in authoritative}
+    for p in rep.required_targets_redaction_blocked_paths:
+        assert str(p).replace("\\", "/").strip().lower() in norm_auth
+    # per-target isolation never recorded a block for the CLEAN authoritative section (no forged entry)
+    assert rep.required_targets_redaction_blocked == 0
+    assert rep.required_targets_redaction_blocked_paths == ()
+    # the duplicate's hard-block token lives in ordinary content -> whole payload fails closed (no leak)
+    assert res.status == REDACTION_BLOCKED
+    assert "private_reasoning" in res.report.blocked_categories
+
+
+def test_mfh_dedup_counts_never_exceed_authoritative_with_many_duplicates():
+    # BOUND PROOF: many duplicate authoritative markers (from several lower sections) can never push
+    # checked/passed/blocked past the authoritative count. Each authoritative path counts at most once.
+    dups = "\n".join(
+        REQUIRED_TARGET_MARKER_PREFIX + p + "\n```text\ndup body %d\n```" % i
+        for i, p in enumerate(("real/a.py", "real/b.py", "real/a.py", "real/b.py"))
+    )
+    ctx = _merged_targets(
+        _PROTECTED_PREAMBLE,
+        _target_section("real/a.py", "clean A"),
+        _target_section("real/b.py", "clean B"),
+    ) + "\n\n" + _git_diff_section("@@ diff echoing markers @@\n" + dups)
+    authoritative = ("real/a.py", "real/b.py")
+    res = evaluate_redaction_gate("audit prompt", ctx, audit_mode=True, required_target_paths=authoritative)
+    assert res.status == REDACTION_GATE_PASSED, res.report
+    rep = res.report
+    assert rep.required_targets_redaction_checked == len(authoritative)
+    assert rep.required_targets_redaction_passed <= len(authoritative)
+    assert rep.required_targets_redaction_blocked <= len(authoritative)
+    assert rep.required_targets_redaction_checked <= len(authoritative)

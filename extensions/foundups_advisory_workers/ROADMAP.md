@@ -163,7 +163,7 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - Add regression retrieval tests so extension bridge code ranks above adjacent WRE routers.
 - **Status:** **LANDED** #882 (`99d0e35c2`) — ranking + target recall telemetry only; not source-content inclusion.
 
-### REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (v0.3.39)
+### REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (v0.3.39 -> v0.3.40 dedup completion)
 
 - **Status:** VERIFIED_READY (this slice). Required-target telemetry is now AUTHORITATIVE and
   unforgeable by file content. JS `computeRequiredTargetContextProof` iterates the packer's
@@ -178,13 +178,29 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - Root cause it fixes: marker-reparse forgery -- realistic self-referential audit bodies containing
   `### Required direct-read target: <path>` could flip never-fetched targets to in_model_context (JS)
   or mint phantom sections that inflated per-target redaction counts (Python).
+- **v0.3.40 dedup completion (closes the residual duplicate-authoritative bypass):** the 0.3.39 JS
+  neutralization protected only the packed EXCERPT bodies; the LOWER sections (git diff, HoloIndex
+  recall JSON, active editor) merged UN-neutralized into the same `gate_context` Python splits, so a
+  MODIFIED required file whose OWN body contains its authoritative marker line rendered a SECOND marker
+  section that normalized to an ALREADY-authoritative path -- checked/passed exceeded the authoritative
+  count and a hard-block token in that diff body forged a `blocked_paths` entry for the clean protected
+  section. Closure: (1) PRIMARY robust fix -- Python per-path dedup in `_isolate_required_targets`
+  (first occurrence is authoritative; any later marker whose normalized path is already-consumed folds
+  back as ordinary content) so each authoritative path is checked/passed/blocked AT MOST ONCE and the
+  invariant checked/passed/blocked/missing <= authoritative count now HOLDS FOR REAL; (2) defense-in-depth
+  -- `neutralizeRequiredTargetMarker` now also wraps the git-diff / HoloIndex-recall / active-editor
+  lower-section bodies before assembly; (3) JS threading contract assertion (MFH-J-006) pins the bridge
+  payload line that sets `required_target_paths` from `bridgeMeta.required_targets_authoritative_paths`
+  so a future edit cannot silently drop it (which would make Python receive None -> forgeable fallback).
 - No weakening: identification-only. No ACTION_BLOCK detector relaxed; AUDIT_STRUCTURAL_CATEGORIES
   untouched; #917 per-target isolation preserved (one blocked sibling omitted, rest survive).
-- Tests: 6 new Python MFH tests (95/95 gate pass); contract MFH-J-001..005 adversarial proofs; full
-  JS contract suite exit 0 on 0.3.39.
+- Tests: 9 Python MFH tests (6 authoritative + 3 dedup regression) -- 98/98 gate pass; the 3 dedup tests
+  FAIL without the per-path dedup (proven non-vacuous) and PASS with it; contract MFH-J-001..007
+  adversarial + threading + lower-section-neutralization proofs; full JS contract suite exit 0 on 0.3.40.
 - Golden bar: 6-file prompt yields `required_targets_in_model_context: 6`,
-  `required_targets_context_missing: []`; adversarial fixture with embedded phantom marker cannot inflate
-  counts; `required_targets_redaction_checked` never exceeds authoritative packed count.
+  `required_targets_context_missing: []`, `required_targets_redaction_blocked: 0`; adversarial fixture
+  with embedded phantom AND duplicate-authoritative markers cannot inflate counts;
+  `required_targets_redaction_checked` never exceeds authoritative packed count.
 - Stacked on REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1 (#917).
 
 ### REDDOG_REDACTION_PER_TARGET_ISOLATION_PHASE1 (v0.3.38)

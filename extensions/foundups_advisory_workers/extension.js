@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.39';
+const EXTENSION_VERSION = '0.3.40';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -2580,7 +2580,11 @@ function buildBoundedRepoContext(mode, taskText) {
     quality = holo.quality;
     holoindex_meta = holo.meta || null;
     holoindex_scorecard = extractHoloIndexScorecard(mode, holoindex_meta);
-    lowerSections.push('### HoloIndex recall (WSP_00 bundle-json first; offline fallback only if needed)\n```text\n' + (holo.output || '(no HoloIndex output)') + '\n```');
+    // REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (defense-in-depth): neutralize any
+    // literal required-target marker embedded in the HoloIndex recall JSON blob so a recall payload
+    // whose text echoes "### Required direct-read target: <path>" cannot reach the Python isolation
+    // splitter as a real marker section. Dedup in Python is the robust closure; this is belt-and-braces.
+    lowerSections.push('### HoloIndex recall (WSP_00 bundle-json first; offline fallback only if needed)\n```text\n' + neutralizeRequiredTargetMarker(holo.output || '(no HoloIndex output)') + '\n```');
     directReadSection = holo.direct_read_section || null;
     // REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_PHASE1: preserve audit_context from slice-3
     // direct-read section so the bridge can run audit-mode redaction on egress.
@@ -2638,15 +2642,23 @@ function buildBoundedRepoContext(mode, taskText) {
   }
   const active = activeEditorContext(root);
   if (active) {
-    lowerSections.push(active);
+    // REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (defense-in-depth): neutralize any
+    // literal required-target marker in the active-editor content so an open buffer that contains
+    // "### Required direct-read target: <path>" cannot mint a phantom/duplicate marker section.
+    lowerSections.push(neutralizeRequiredTargetMarker(active));
   }
   if (mode === 'git_diff' || mode === 'wsp_holo_git' || mode === 'wsp_holo_git_skillz') {
     const status = gitOutput(root, ['status', '--short'], 8000);
     const stat = gitOutput(root, ['diff', '--stat'], 8000);
     const diff = gitOutput(root, ['diff', '--', '.'], 24000);
-    lowerSections.push('### git status --short\n```text\n' + (status || '(clean)') + '\n```');
-    lowerSections.push('### git diff --stat\n```text\n' + (stat || '(no diff)') + '\n```');
-    lowerSections.push('### git diff -- . (bounded)\n```diff\n' + (diff || '(no diff)') + '\n```');
+    // REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (defense-in-depth): neutralize any
+    // literal required-target marker inside the raw git-diff body. A MODIFIED required file whose
+    // OWN content contains its authoritative marker line renders that marker verbatim in the diff;
+    // neutralizing here stops it reaching the Python isolation splitter as a duplicate real marker
+    // (Python per-path dedup is the robust closure -- this keeps the phantom out of the body too).
+    lowerSections.push('### git status --short\n```text\n' + neutralizeRequiredTargetMarker(status || '(clean)') + '\n```');
+    lowerSections.push('### git diff --stat\n```text\n' + neutralizeRequiredTargetMarker(stat || '(no diff)') + '\n```');
+    lowerSections.push('### git diff -- . (bounded)\n```diff\n' + neutralizeRequiredTargetMarker(diff || '(no diff)') + '\n```');
   }
   // Backward compat: when protected packing is NOT active the assembled order is exactly
   // head + lower (== the legacy single sections list), then the same 42K tail cut.
