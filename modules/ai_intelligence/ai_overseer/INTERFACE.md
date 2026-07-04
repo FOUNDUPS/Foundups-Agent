@@ -826,6 +826,34 @@ from modules.ai_intelligence.ai_overseer.src.holo_adapter import HoloAdapter
 
 ---
 
+## FoundUp Genesis Intake Packet Builder (WSP109_INTAKE_PACKET_BUILDER_PHASE1)
+
+`src/foundup_genesis/intake_packet_builder.py` -- **dry-run** intake: chat/idea text ->
+`FoundUpGenesisEnvelope` -> the existing OpenClaw genesis gate. It fills the builder/populator gap so
+the already-built genesis gate is reachable end-to-end. It never scaffolds, enqueues, or mutates.
+
+```python
+from modules.ai_intelligence.ai_overseer.src.foundup_genesis.intake_packet_builder import (
+    build_intake_packet_dry_run,
+)
+
+result = build_intake_packet_dry_run(idea_text, actor_id="0102", source_channel="reddog")
+# result.gate_passed : bool
+# result.gate_reason : "GATE_PASSED" | "NO_ENVELOPE" | "ENVELOPE_INVALID" | ...
+# result.envelope    : dict | None
+# result.dry_run=True, result.fam_called=False, result.hermes_called=False,
+# result.registry_mutated=False, result.evidence_refs=[...]
+```
+
+**Intake format** (structured `key: value` lines): `name`, `tagline`, `description`, `category`,
+`foundup_id` (optional; derived from `name` if absent), `lifecycle_stage` (`idea`|`incubating`),
+`binding_state` (`unbound`|`discoverable_only`), and one or more
+`acceptance: observable | method | oracle | pass_condition` lines. Empty or unstructured input ->
+`NO_ENVELOPE`. The genesis validator (strict mode) is the authority on `GATE_PASSED`. Dry-run only:
+never calls FAM, Hermes, registry, or any writer (AST-guarded).
+
+---
+
 **API Version**: 0.1.0
 **Status**: POC - Ready for integration testing
 **Next**: See `tests/test_ai_overseer.py` for usage examples

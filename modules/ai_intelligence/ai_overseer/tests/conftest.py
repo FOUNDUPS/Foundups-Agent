@@ -31,6 +31,7 @@ _ALLOWLIST = {
     "test_foundup_launch_request.py",
     "test_intake_auth_provider.py",
     "test_intake_transport.py",
+    "test_intake_packet_builder.py",
 }
 
 _HEAVY_TARGETS = [
