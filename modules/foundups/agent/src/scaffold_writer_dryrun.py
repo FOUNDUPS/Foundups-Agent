@@ -217,6 +217,19 @@ def materialize_scaffold_dry_run(
             "module_path must be exactly modules/foundups/{foundup_id}",
         )
 
+    # Reject Windows device / extended-length prefixes (\\?\ , \\.\ , //?/ , //./ ,
+    # and \\?\UNC\ which begins with \\?\) BEFORE resolving/comparing. They disable
+    # Win32 normalization, so .resolve() keeps a distinct anchor and an output_root
+    # physically INSIDE the repo would evade the _is_inside isolation guard below.
+    _raw_out = str(output_root)
+    _res_out = str(Path(output_root).resolve())
+    for _dp in ("\\\\?\\", "\\\\.\\", "//?/", "//./"):
+        if _raw_out.startswith(_dp) or _res_out.startswith(_dp):
+            return _reject(
+                "FAIL_WRITE_TO_MAIN_REPO",
+                "output_root uses an extended-length/device prefix; forbidden (isolation)",
+            )
+
     out_r = Path(output_root).resolve()
     # Anchor on the sentinel-checked TRUE repo root AND any caller-supplied repo:
     # a caller cannot NARROW the forbidden zone by lying about real_repo_root.

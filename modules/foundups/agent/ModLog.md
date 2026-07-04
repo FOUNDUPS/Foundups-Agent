@@ -1,5 +1,62 @@
 # Agent Module ModLog
 
+## 2026-07-04 - FIRST live scaffold writer: isolated worktree + draft PR only (FOUNDUP_SCAFFOLD_WRITER_LIVE_PHASE1)
+
+**Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
+**WSP**: 00, 15, 22, 49, 50, 97, 109
+**Base**: `9b96ac68d` (main; P0 #919 ... preauth #924)
+**Slice**: FOUNDUP_SCAFFOLD_WRITER_LIVE_PHASE1
+
+### Changed
+
+- NEW `src/foundup_scaffold_writer_live.py`: `run_foundup_scaffold_writer_live(...)` -- orchestration
+  that materializes the planned WSP-49 scaffold into an ISOLATED git worktree (outside the main repo)
+  and opens a DRAFT PR ONLY. Subprocess-FREE (delegates every side effect to an injected `runner`).
+  Authorization gates run BEFORE any side effect: preauth_ready + attestations, packet digest binding,
+  contract digest binding, sovereign token bound to the valve env, valve resolving
+  VALVE_OPEN_WORKTREE_CREATE, foundup_id/module_path pin, allowed/denied paths, per-artifact
+  scope/traversal/denied (incl .env/secrets/registry/public/api/WSP-framework), target-not-on-base,
+  worktree-outside-main. Materialization reuses the hardened `scaffold_writer_dryrun` (#923). Emits the
+  7 required receipts; NEVER mutates main/registry/routes/secrets; NEVER merges or marks ready. On any
+  post-worktree failure it invokes `runner.cleanup_worktree` + records a rollback plan. No sovereign
+  token in any receipt/result.
+- NEW `src/worktree_pr_runner.py`: the APPROVED side-effect helper (the ONLY module with subprocess).
+  `RealWorktreeRunner` runs argv-only (no shell) git worktree add/commit/push + `gh pr create --draft`
+  + worktree remove. NO ready/merge method exists.
+- TEST `tests/test_foundup_scaffold_writer_live.py` (31): guard tests with an injected FakeRunner
+  (NO real git/gh in CI) + a subprocess-mocked runner test (draft-only, no ready/merge) + preauth
+  field-compat + Round-4/5 regressions (device-prefix worktree/output_root; materializer-import
+  fail-closed). Agent suite 1128 passed.
+- FIX `src/scaffold_writer_dryrun.py` (#923, second isolation layer): reject Windows device /
+  extended-length prefix output_root (`\\?\`, `\\.\`, `//?/`, `//./`) before `_is_inside` -- same
+  root cause the live writer closes at Guard 8.
+
+### Adversarial (CoR) -- 5 rounds, gate = all-SAFE / 0 blocker / 0 major
+
+Multi-lens sweep (worktree escape / auth bypass / traversal-denied-routes / merge-ready /
+cleanup-partial-write / runner-secrets) run before commit. Rounds 1-4 each surfaced REAL, distinct
+execution-safety findings; all fixed with regression tests:
+
+- R1: Guard-8 anchored only on caller repo_root (major) -> union {repo, _default_repo_root()};
+  uncaught materialize exception skipped cleanup (major) -> wrapped in guarded try/except.
+- R2: pre-seeded worktree could smuggle out-of-scope files (blocker) -> clean-target guard +
+  on-disk rglob validation (on_disk == planned == written) + scoped `git add -- <module_path>`.
+- R3: relative worktree_path guard/runner cwd divergence (blocker) -> `FAIL_WORKTREE_NOT_ABSOLUTE`
+  + RealRunner absolute-path refusal; create-failure orphan (major) -> force `worktree_created=True`.
+- R4: Windows device/extended-length prefix (`\\?\`, `//?/`) evaded `_is_inside`, letting a write
+  land INSIDE main (blocker) -> reject device/extended-length prefixes on raw+resolved string in
+  BOTH the live writer (Guard 8) AND the materializer; deferred materializer import could orphan a
+  worktree on import failure (major) -> import bound BEFORE worktree creation (`FAIL_MATERIALIZER_IMPORT`).
+- R5: all 6 lenses SAFE, 0 blocker / 0 major. Residual = 2 accepted minors (optional: add 'secrets'
+  to the materializer denylist for defense-in-depth; both already dominated by guard-4 exact-set +
+  on-disk validation -- no safety change required).
+
+### Boundary
+
+Draft PR ONLY. Live run requires a real caller supplying a valid preauth packet + 012/DAO sovereign
+token + a valve env emitting VALVE_OPEN_WORKTREE_CREATE. NOT auto-invoked. HoloIndex INDEX_GAP:
+`HOLOINDEX_FOUNDUP_SCAFFOLD_WRITER_LIVE_DISCOVERABILITY_PHASE1` (operator re-index).
+
 ## 2026-07-04 - Live-writer preauthorization packet (generic) (FOUNDUP_LIVE_WRITER_PREAUTH_PACKET_PHASE1)
 
 **Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
