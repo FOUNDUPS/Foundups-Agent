@@ -131,7 +131,21 @@ class HermesFoundUpBuilder:
 
         # Environment controls
         self.enabled = os.environ.get("HERMES_BUILDER_ENABLED", "1") == "1"
-        self.dry_run = os.environ.get("HERMES_BUILDER_DRY_RUN", "0") == "1"
+        # HERMES_BUILDER_DRYRUN_DEFAULT_SAFETY_PHASE1: dry-run by DEFAULT.
+        # Real writes require an explicit DOUBLE opt-in -- BOTH must be set:
+        #   HERMES_BUILDER_ALLOW_REAL_WRITES=1  AND  HERMES_BUILDER_DRY_RUN=0
+        # Any other combination (including all-unset) stays dry-run/safe. This
+        # aligns the adapter-level default with BuildPlanExecutor(dry_run=True)
+        # and HermesJobExecutor(dry_run=True), closing the OBSERVED default-on
+        # write risk found in the RedDog FoundUp-creation execution-path audit
+        # (docs/audits/architecture/HERMES_BUILDER_DRYRUN_DEFAULT_SAFETY_PHASE1.md).
+        self.allow_real_writes = (
+            os.environ.get("HERMES_BUILDER_ALLOW_REAL_WRITES", "0") == "1"
+        )
+        self.dry_run = not (
+            self.allow_real_writes
+            and os.environ.get("HERMES_BUILDER_DRY_RUN", "1") == "0"
+        )
         self.require_security_gate = os.environ.get("HERMES_BUILDER_SECURITY_GATE", "1") == "1"
 
         # MCP Bridge perception layer (v1.4)
