@@ -52,10 +52,23 @@ def utc_iso(dt: Optional[datetime]) -> Optional[str]:
 # All workers (W1/W4/W5/W6) MUST use these exact strings.
 # Short forms (build, extract, validate, queue) are NOT supported.
 CANONICAL_ACTIONS: frozenset[str] = frozenset({
+    "create_foundup",     # NEW: author a NEW monorepo FoundUp scaffold from a
+                          # validated genesis envelope. Distinct from
+                          # build_foundup/extract_foundup (which operate on an
+                          # EXISTING module). See
+                          # docs/audits/architecture/FOUNDUP_SCAFFOLD_CONTRACT_PHASE1.md.
     "build_foundup",      # W4: Hermes builds FoundUp from spec
     "extract_foundup",    # W4: Hermes extracts FoundUp to external repo
     "validate_foundup",   # W4: Hermes validates FoundUp manifest/gates
     "queue_foundup_job",  # W5: WRE queues job for later execution
+})
+
+# Actions that operate on an EXISTING module (extraction/build). create_foundup
+# MUST NOT be routed to any of these (FOUNDUP_SCAFFOLD_CONTRACT_PHASE1 Section 3,
+# no-alias rule). A future executor branches on the action string BEFORE dispatch.
+EXISTING_MODULE_ACTIONS: frozenset[str] = frozenset({
+    "build_foundup",
+    "extract_foundup",
 })
 
 
@@ -179,6 +192,11 @@ class StatusReasonCode(str, Enum):
 
     # Failed - Action
     FAIL_UNSUPPORTED_ACTION = "FAIL_UNSUPPORTED_ACTION"
+
+    # Failed - create_foundup (FOUNDUP_CREATE_ACTION_DRYRUN_PHASE1)
+    FAIL_FOUNDUP_ID_EXISTS = "FAIL_FOUNDUP_ID_EXISTS"
+    FAIL_CREATE_ALIASED_TO_EXTRACT = "FAIL_CREATE_ALIASED_TO_EXTRACT"
+    FAIL_ENVELOPE_NOT_GATE_PASSED = "FAIL_ENVELOPE_NOT_GATE_PASSED"
 
     # Unknown
     UNKNOWN = "UNKNOWN"

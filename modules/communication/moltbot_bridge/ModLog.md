@@ -1,5 +1,22 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-04: FOUNDUP_CREATE_ACTION_DRYRUN_PHASE1 (create_foundup canonical action)
+
+**Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
+**WSP**: 00, 15, 22, 49, 50, 97, 109 | **Base**: `0046423c6`
+
+- `foundup_job_contract.py`: added `create_foundup` to `CANONICAL_ACTIONS` (now 5) -- a NEW-scaffold
+  action DISTINCT from build/extract. Added `EXISTING_MODULE_ACTIONS = {build_foundup, extract_foundup}`
+  taxonomy so the no-alias invariant (P2 contract Section 3) is checkable. Added fail-closed
+  `StatusReasonCode`s: `FAIL_FOUNDUP_ID_EXISTS`, `FAIL_CREATE_ALIASED_TO_EXTRACT`,
+  `FAIL_ENVELOPE_NOT_GATE_PASSED`.
+- The dry-run planner consuming this action lives in
+  `modules/foundups/agent/src/create_foundup_dryrun.py` (writes nothing).
+- TEST `tests/test_foundup_job_contract.py`: updated the canonical-actions count (4 -> 5) + added a
+  create_foundup canonical + no-alias assertion.
+- Pre-existing (NOT this slice): `test_e2e_foundup_job_seam.py` has 3 env-dependent extract failures
+  that reproduce on clean main; CI env passes them.
+
 ## 2026-07-03: REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (v0.3.39)
 
 **Slice:** Authoritative required-target section identification (marker forgery hardening)
