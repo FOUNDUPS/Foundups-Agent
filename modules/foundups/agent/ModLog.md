@@ -1,5 +1,37 @@
 # Agent Module ModLog
 
+## 2026-07-04 - create_foundup dry-run scaffold planner (FOUNDUP_CREATE_ACTION_DRYRUN_PHASE1)
+
+**Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
+**WSP**: 00, 15, 22, 49, 50, 97, 109
+**Base**: `0046423c6` (main; includes P0 #919 + P1 #920 + P2 #921 scaffold contract)
+**Slice**: FOUNDUP_CREATE_ACTION_DRYRUN_PHASE1
+
+### Changed
+
+- NEW `src/create_foundup_dryrun.py`: `plan_create_foundup_dry_run(envelope)` re-validates a genesis
+  envelope (ai_overseer validator, fail-closed), rejects an existing `foundup_id`
+  (`FAIL_FOUNDUP_ID_EXISTS`) or invalid envelope (`FAIL_ENVELOPE_NOT_GATE_PASSED`), and returns a
+  DRY-RUN `FoundUpScaffoldContract` + planned WSP-49 artifacts + planned manifest + registry seed.
+  Writes NOTHING (`dry_run=True`, `files_written=[]`, fam/hermes/registry/worktree all False). Maps to
+  the P2 `FOUNDUP_SCAFFOLD_CONTRACT_PHASE1` contract. No FAM/Hermes/writer import (AST-guarded).
+- Registry existence check reads `modules/foundups/foundup_registry.json` directly (the read-only
+  loader import is blocked by `modules/foundups/src/__init__` eagerly importing a missing
+  `platform_manager` -- residual, out of scope).
+- TEST `tests/test_create_foundup_dryrun.py` (10): incl. the planned manifest passing the REAL
+  `foundup_manifest_validator`, exists-rejection, invalid/reserved rejection, no-alias invariant,
+  dry-run-no-writes, AST guard. Agent suite green (1041 passed).
+
+### Note
+
+Contract change lives in `moltbot_bridge/foundup_job_contract.py` (create_foundup added to
+CANONICAL_ACTIONS + EXISTING_MODULE_ACTIONS taxonomy + 3 fail-closed StatusReasonCodes).
+
+### Next
+
+FOUNDUP_SCAFFOLD_WRITER_DRYRUN_PHASE1 (valve-gated dry-run writer), then live writer behind
+VALVE_OPEN_WORKTREE_CREATE + 012/DAO sovereign token.
+
 ## 2026-07-04 - Hermes builder dry-run by DEFAULT: double opt-in for real writes (HERMES_BUILDER_DRYRUN_DEFAULT_SAFETY_PHASE1)
 
 **Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)

@@ -861,12 +861,27 @@ class TestCanonicalActions:
     """Tests for canonical requested_action validation."""
 
     def test_canonical_actions_frozenset_exists(self):
-        """CANONICAL_ACTIONS frozenset exists and is immutable."""
+        """CANONICAL_ACTIONS frozenset exists and is immutable.
+
+        5 actions after FOUNDUP_CREATE_ACTION_DRYRUN_PHASE1 added create_foundup
+        (a NEW-scaffold action, distinct from the existing build/extract actions).
+        """
         from modules.communication.moltbot_bridge.src.foundup_job_contract import (
             CANONICAL_ACTIONS,
+            EXISTING_MODULE_ACTIONS,
         )
         assert isinstance(CANONICAL_ACTIONS, frozenset)
-        assert len(CANONICAL_ACTIONS) == 4
+        assert len(CANONICAL_ACTIONS) == 5
+        assert "create_foundup" in CANONICAL_ACTIONS
+        # No-alias invariant: create_foundup is NOT an existing-module action.
+        assert "create_foundup" not in EXISTING_MODULE_ACTIONS
+
+    def test_create_foundup_is_canonical(self):
+        """create_foundup is a canonical action (FOUNDUP_CREATE_ACTION_DRYRUN_PHASE1)."""
+        from modules.communication.moltbot_bridge.src.foundup_job_contract import (
+            is_supported_action,
+        )
+        assert is_supported_action("create_foundup") is True
 
     def test_build_foundup_is_canonical(self):
         """build_foundup is a canonical action."""
