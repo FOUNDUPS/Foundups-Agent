@@ -1,5 +1,31 @@
 # Agent Module ModLog
 
+## 2026-07-04 - Scaffold dry-run materializer: sandbox-only, fail-closed (FOUNDUP_SCAFFOLD_WRITER_DRYRUN_PHASE1)
+
+**Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
+**WSP**: 00, 15, 22, 49, 50, 97, 109
+**Base**: `2ed3e5418` (main; includes P0 #919, P1 #920, P2 #921, create-action #922)
+**Slice**: FOUNDUP_SCAFFOLD_WRITER_DRYRUN_PHASE1
+
+### Changed
+
+- NEW `src/scaffold_writer_dryrun.py`: `materialize_scaffold_dry_run(contract, output_root, *, real_repo_root)`
+  materializes the FoundUpScaffoldContract's 14 planned WSP-49 artifacts into an ISOLATED sandbox
+  `output_root` ONLY. Fail-closed guards (all BEFORE any write): `FAIL_WRITE_TO_MAIN_REPO` (output_root
+  inside the real repo), `FAIL_MODULE_EXISTS` (module already in real repo), `FAIL_PATH_TRAVERSAL`
+  (absolute/drive/`..`/escape), `FAIL_DENIED_PATH` (.env/main.py/`*_dae.py`/vendor),
+  `FAIL_REGISTRY_OVERWRITE` (foundup_registry.json). `registry_mutated`/`worktree_created`/
+  `wrote_to_main_repo` pinned False. No FAM/Hermes import (AST-guarded).
+- TEST `tests/test_scaffold_writer_dryrun.py` (11): exact-14 materialization end-to-end from the
+  create_foundup planner; written manifest passes the REAL foundup_manifest_validator; all 5 fail-closed
+  classes; AST guard; and the LIVE writer (`foundup_scaffold_writer.py`) proven still ABSENT.
+  Agent suite 1052 passed; P2 contract static test still green.
+
+### Boundary
+
+Dry-run sandbox writer ONLY. The LIVE writer (real-repo paths + registry seed write) remains deferred
+to a future slice gated by `VALVE_OPEN_WORKTREE_CREATE` + 012/DAO sovereign token.
+
 ## 2026-07-04 - create_foundup dry-run scaffold planner (FOUNDUP_CREATE_ACTION_DRYRUN_PHASE1)
 
 **Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
