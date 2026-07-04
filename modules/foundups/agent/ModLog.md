@@ -1,5 +1,38 @@
 # Agent Module ModLog
 
+## 2026-07-04 - Live-writer preauthorization packet (generic) (FOUNDUP_LIVE_WRITER_PREAUTH_PACKET_PHASE1)
+
+**Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
+**WSP**: 00, 15, 22, 49, 50, 97, 109
+**Base**: `75e092789` (main; P0 #919, P1 #920, P2 #921, create-action #922, writer-dryrun #923)
+**Slice**: FOUNDUP_LIVE_WRITER_PREAUTH_PACKET_PHASE1
+
+### Changed
+
+- NEW `src/live_writer_preauth_packet.py`: `build_live_writer_preauth_packet(idea, foundup_id,
+  foundup_name, module_path, target_branch, ...)` chains the landed dry-run stack -- WSP 109 intake +
+  genesis envelope (P1 builder) -> OpenClaw gate GATE_PASSED -> registry non-existence -> create_foundup
+  dry-run plan -> scaffold writer dry-run sandbox materialization -> emits a GENERIC
+  `LiveWriterPreauthPacket` (all step digests + fail-closed capability flags). Proves the prerequisites
+  for REQUESTING `VALVE_OPEN_WORKTREE_CREATE` are satisfied. Opens NO valve; writes NO real repo/registry;
+  creates NO branch/PR/worktree. Refuses forbidden capability flags, wrong valve state/operation,
+  existing/invalid foundup_id/module_path, gate failure, or plan/artifact mismatch. No subprocess/git/gh
+  (AST-guarded).
+- TEST `tests/test_live_writer_preauth_packet.py` (22): the 12 acceptance items with the pAccess
+  (paccess_001) fixture (fixture only, not implementation) + parametrized capability/valve/module_path
+  refusals + AST denylist. Agent suite 1093 passed.
+
+### Boundary
+
+pAccess is an acceptance FIXTURE only. This is NOT the live writer and NOT pAccess-specific. The LIVE
+writer remains forbidden until FOUNDUP_SCAFFOLD_WRITER_LIVE_PHASE1 (VALVE_OPEN_WORKTREE_CREATE + 012/DAO
+sovereign token + isolated worktree + no protected branch + receipt chain + rollback/cleanup).
+
+### HoloIndex (Addendum)
+
+Preflight recorded; new module + landed #922/#923 modules do not surface (index predates them) ->
+`HOLOINDEX_FOUNDUP_LIVE_WRITER_PREAUTH_PACKET_DISCOVERABILITY_PHASE1` (operator re-index, not RedDog runtime).
+
 ## 2026-07-04 - Scaffold dry-run materializer: sandbox-only, fail-closed (FOUNDUP_SCAFFOLD_WRITER_DRYRUN_PHASE1)
 
 **Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
