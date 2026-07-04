@@ -1,5 +1,16 @@
 # FoundUps Agent - Development Log
 
+## [2026-07-04] docs(audit): RedDog FoundUp creation path audit + WSP_109 slice ordering (0102 architect, WSP_97)
+
+**Change Type**: DECISION_ONLY_DOCS — audit record and slice specs; no runtime mutation.
+**By**: 0102 (architect) | WSP: WSP_00, WSP_15, WSP_22, WSP_97, WSP_109
+**Trigger**: 0.3.41 golden proved senses spine; swarm/claude beat RedDog on audit substance.
+
+- ADD `docs/audits/architecture/REDDOG_FOUNDUP_CREATION_EXECUTION_PATH_AUDIT_PHASE1.md` — WSP_97 verdict, updated sequence, RedDog follow-up slices.
+- ADD `docs/audits/architecture/HERMES_BUILDER_DRYRUN_DEFAULT_SAFETY_PHASE1.md` — P0: flip HermesFoundUpBuilder dry-run default (hermes_adapter.py:134 currently off).
+- ADD `docs/audits/architecture/WSP109_INTAKE_PACKET_BUILDER_PHASE1.md` — P1: chat/idea → FoundUpGenesisEnvelope → GATE_PASSED dry-run proof.
+- ADD `docs/audits/architecture/FOUNDUP_SCAFFOLD_CONTRACT_PHASE1.md` — P2 queued: create_foundup + WSP-49 scaffold contract.
+
 ## [2026-06-23] feat(extension): RedDog working trail Phase 1 — design contract (AUTHOR worker, branch=feat/reddog-working-trail-phase1)
 
 **Change Type**: DECISION_ONLY_DOCS — design contract only; no implementation code.
