@@ -183,3 +183,12 @@ Full RedDog UI wiring → follow-up `REDDOG_WSP109_INTAKE_UI_PHASE1`.
 - Audit: `REDDOG_FOUNDUP_CREATION_EXECUTION_PATH_AUDIT_PHASE1.md`
 - Prior gate audit: `OPENCLAW_WSP109_GENESIS_GATE_REMEDIATION_PHASE1.md`
 - FAM flow spec: `docs/0102_session_briefings/REDDOG_FAM_GENESIS_FLOW_SPEC_PHASE1.md`
+
+---
+
+## ADDENDUM B - Safety Before Intake
+
+`HERMES_BUILDER_DRYRUN_DEFAULT_SAFETY_PHASE1` must land before any WSP109 intake builder path can
+call, simulate, or test Hermes handoff behavior. Intake builder tests may verify OpenClaw gate
+outcomes, but must **not** invoke Hermes real-write paths (no import of
+`HermesFoundUpBuilder.extract_foundup` / `build_foundup`; AST guard per Section 6).

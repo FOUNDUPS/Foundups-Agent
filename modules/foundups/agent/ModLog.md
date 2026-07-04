@@ -1,5 +1,45 @@
 # Agent Module ModLog
 
+## 2026-07-04 - Hermes builder dry-run by DEFAULT: double opt-in for real writes (HERMES_BUILDER_DRYRUN_DEFAULT_SAFETY_PHASE1)
+
+**Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
+**WSP References**: WSP 00, WSP 15, WSP 22, WSP 50, WSP 97
+**Base**: `ac1cc611a` (main)
+**Slice**: HERMES_BUILDER_DRYRUN_DEFAULT_SAFETY_PHASE1
+
+### Why (OBSERVED safety finding)
+
+The RedDog FoundUp-creation execution-path audit found `HermesFoundUpBuilder.__init__` set
+`self.dry_run = os.environ.get("HERMES_BUILDER_DRY_RUN", "0") == "1"` -- dry_run defaulted to FALSE
+(real writes ON) when the env var was unset. This was the outlier: `BuildPlanExecutor` and
+`HermesJobExecutor` both default `dry_run=True`, and `build_plan_generator` always emits dry-run
+plans. The default-on adapter-level write (`generate_adapters` mkdir + write_text) was reachable via
+the extract/build path, gated only by an env flag plus the security sentinel.
+
+### Changed (safety tightening only; no gate weakened)
+
+- EDIT `src/hermes_adapter.py` (`HermesFoundUpBuilder.__init__`): dry-run is now the DEFAULT. Real
+  writes require an explicit DOUBLE opt-in -- BOTH `HERMES_BUILDER_ALLOW_REAL_WRITES=1` AND
+  `HERMES_BUILDER_DRY_RUN=0`. Any other combination (including all-unset) stays dry-run/safe. Added
+  `self.allow_real_writes` for observability. No change to the security sentinel, CABR, OpenClaw
+  genesis gate, or the WRE execution valve.
+- TEST `tests/test_hermes_foundup_builder.py::TestDryRunDefaultSafety` (A1/A2/A3/A5) and
+  `tests/test_hermes_foundup_job_executor.py::test_a4_executor_respects_builder_dry_run_default` (A4).
+  Full agent suite green: 1031 passed.
+- DOCS INTERFACE.md (env contract) + README.md (safety defaults).
+
+### HoloIndex (Addendum A)
+
+Pre-run recall surfaced `hermes_adapter.py` at #1 for "HERMES_BUILDER_DRY_RUN default". The four new
+audit docs committed at `ac1cc611a` are NOT yet discoverable (code index predates the commit):
+recorded as `HOLOINDEX_FOUNDUP_CREATION_AUDIT_DISCOVERABILITY_PHASE1`. Re-index is an explicit
+operator action, out of scope for this code slice.
+
+### Residual (SPECIFIED_NOT_IMPLEMENTED)
+
+- Hermes real delegation in `hermes_job_executor.py` remains BLOCKED (out of scope).
+- Re-index for the new audit docs pending (operator/worker action, not RedDog runtime).
+
 ## 2026-06-20 - Package __init__ lazy import: close the no-vendor boundary at the IMPORT boundary (FOUNDUP_AGENT_PACKAGE_INIT_LAZY_IMPORT_PHASE1)
 
 **Author**: 0102 (AUTHOR worker) | Commander: 012 | Gate: independent SENTINEL (do NOT self-merge)

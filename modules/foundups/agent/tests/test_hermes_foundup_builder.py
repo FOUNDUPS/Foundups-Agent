@@ -433,3 +433,99 @@ class TestRealRepoReadOnly:
             "Kosei manifest declares entry_url and launch_readiness=ready; "
             "deploy surface should be recognized after Phase 1 detection fix."
         )
+
+
+# --------------------------------------------------------------------------- #
+# HERMES_BUILDER_DRYRUN_DEFAULT_SAFETY_PHASE1 acceptance (A1-A3, A5)
+# --------------------------------------------------------------------------- #
+
+class TestDryRunDefaultSafety:
+    """Builder must default to dry-run; real writes need an explicit double opt-in.
+
+    Acceptance criteria per
+    docs/audits/architecture/HERMES_BUILDER_DRYRUN_DEFAULT_SAFETY_PHASE1.md:
+      A1 fresh builder with no env -> dry_run is True
+      A2 default builder extract/generate_adapters emit dry_run: true, write nothing
+      A3 real-write path requires BOTH opt-in env vars; otherwise dry_run stays True
+      A5 no test enables real writes (DRY_RUN=0) without a real-write opt-in marker
+    """
+
+    def test_a1_default_is_dry_run_with_no_env(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.delenv("HERMES_BUILDER_DRY_RUN", raising=False)
+        monkeypatch.delenv("HERMES_BUILDER_ALLOW_REAL_WRITES", raising=False)
+        builder = HermesFoundUpBuilder(repo_root=tmp_path)
+        assert builder.dry_run is True
+        assert builder.allow_real_writes is False
+
+    def test_a2_default_builder_writes_nothing(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.delenv("HERMES_BUILDER_DRY_RUN", raising=False)
+        monkeypatch.delenv("HERMES_BUILDER_ALLOW_REAL_WRITES", raising=False)
+        monkeypatch.setenv("HERMES_BUILDER_SECURITY_GATE", "0")
+        _make_module(
+            tmp_path,
+            "modules/foundups/widget",
+            manifest=_ready_manifest("widget"),
+            deploy_kind="firebase",
+        )
+        _write(
+            tmp_path / "modules/foundups/widget/src/uses_fam.py",
+            "from modules.foundups.agent_market import fam_daemon\n",
+        )
+        builder = HermesFoundUpBuilder(repo_root=tmp_path)
+        assert builder.dry_run is True
+
+        extract = builder.extract_foundup("modules/foundups/widget")
+        assert extract["dry_run"] is True
+
+        gen = builder.generate_adapters("modules/foundups/widget")
+        assert gen["dry_run"] is True
+        assert gen["adapters_created"] == []
+        # No adapter directory materialised on disk in the default (safe) path.
+        assert not (tmp_path / "modules/foundups/widget/adapters").exists()
+
+    def test_a3_dry_run_zero_alone_stays_safe(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # HERMES_BUILDER_DRY_RUN=0 WITHOUT the allow flag must NOT enable writes.
+        monkeypatch.setenv("HERMES_BUILDER_DRY_RUN", "0")
+        monkeypatch.delenv("HERMES_BUILDER_ALLOW_REAL_WRITES", raising=False)
+        assert HermesFoundUpBuilder(repo_root=tmp_path).dry_run is True
+
+    def test_a3_allow_flag_alone_stays_safe(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # allow flag alone (DRY_RUN not explicitly 0) must NOT enable writes.
+        monkeypatch.setenv("HERMES_BUILDER_ALLOW_REAL_WRITES", "1")
+        monkeypatch.delenv("HERMES_BUILDER_DRY_RUN", raising=False)
+        assert HermesFoundUpBuilder(repo_root=tmp_path).dry_run is True
+
+    def test_a3_double_opt_in_enables_real_writes(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        # BOTH flags -> dry_run False (explicit, deliberate real-write opt-in).
+        monkeypatch.setenv("HERMES_BUILDER_ALLOW_REAL_WRITES", "1")
+        monkeypatch.setenv("HERMES_BUILDER_DRY_RUN", "0")
+        builder = HermesFoundUpBuilder(repo_root=tmp_path)
+        assert builder.allow_real_writes is True
+        assert builder.dry_run is False
+
+    def test_a5_no_test_enables_real_writes_without_opt_in_marker(self) -> None:
+        """CI tripwire: a test file that forces HERMES_BUILDER_DRY_RUN=0 must also
+        carry the HERMES_BUILDER_ALLOW_REAL_WRITES marker (deliberate opt-in)."""
+        import re
+
+        tests_dir = Path(__file__).resolve().parent
+        pattern = re.compile(r"HERMES_BUILDER_DRY_RUN[\"'],\s*[\"']0[\"']")
+        offenders = []
+        for pyf in sorted(tests_dir.glob("*.py")):
+            text = pyf.read_text(encoding="utf-8")
+            if pattern.search(text) and "HERMES_BUILDER_ALLOW_REAL_WRITES" not in text:
+                offenders.append(pyf.name)
+        assert offenders == [], (
+            "test files set HERMES_BUILDER_DRY_RUN=0 without a real-write opt-in "
+            f"marker: {offenders}"
+        )

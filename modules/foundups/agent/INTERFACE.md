@@ -991,3 +991,21 @@ agent_ranked:   "founder_001 rank UP: 2→3 (Contributor)"
 agent_earned:   "founder_001 earned 50 F₁"
 agent_leaves:   "0xfound001... logs off (1250 F_i)"
 ```
+
+---
+
+## HermesFoundUpBuilder Environment Contract (HERMES_BUILDER_DRYRUN_DEFAULT_SAFETY_PHASE1)
+
+`HermesFoundUpBuilder` (`src/hermes_adapter.py`) is **dry-run by default**. Real filesystem writes
+(e.g. `generate_adapters` adapter stubs) require an explicit **double opt-in**:
+
+| Env var | Default | Meaning |
+|---------|---------|---------|
+| `HERMES_BUILDER_ALLOW_REAL_WRITES` | `0` | Must be `1` to permit any real write |
+| `HERMES_BUILDER_DRY_RUN` | unset = dry-run | Must be explicitly `0` to permit any real write |
+
+`self.dry_run` is `False` **only** when `HERMES_BUILDER_ALLOW_REAL_WRITES=1` AND
+`HERMES_BUILDER_DRY_RUN=0`. Every other combination (including all-unset) is dry-run. `self.dry_run`
+is surfaced in `extract_foundup` / `build_foundup` / `generate_adapters` result dicts and written
+back to `FoundUpJob.policy_flags.dry_run_mode` by the executor. Callers that already force dry-run
+(`execute_foundup_job(..., force_dry_run=True)`, or `HERMES_BUILDER_DRY_RUN=1`) are unchanged.

@@ -97,3 +97,45 @@ This slice **tightens** defaults only. It does not relax:
 
 - Parent audit: `REDDOG_FOUNDUP_CREATION_EXECUTION_PATH_AUDIT_PHASE1.md`
 - Next: `WSP109_INTAKE_PACKET_BUILDER_PHASE1.md`
+
+---
+
+## ADDENDUM A - HoloIndex Discoverability / Re-index Gate
+
+Before implementation:
+
+1. Run HoloIndex queries for:
+   - Hermes builder dry-run default safety
+   - HERMES_BUILDER_DRY_RUN default
+   - WSP109 intake packet builder
+   - FoundUpGenesisEnvelope builder
+   - FoundUp scaffold contract
+   - build_foundup extract_foundup
+
+2. Record top hits and whether the new audit docs are discoverable.
+
+3. If the new docs or target implementation files are not in top results, record:
+   `HOLOINDEX_FOUNDUP_CREATION_AUDIT_DISCOVERABILITY_PHASE1`
+
+4. Re-index is allowed only as an explicit worker/operator action, not inside RedDog runtime:
+   - docs/WSP index
+   - code index
+   - symbols index
+   - Skillz index if campaign/FoundUp Skillz are involved
+
+5. No HoloIndex ranking-code changes in the Hermes safety slice unless local tests prove ranking
+   code is the defect.
+
+Acceptance:
+- The implementation slice must list HoloIndex pre/post query results.
+- Any INDEX_GAP must be recorded honestly in ROADMAP/ModLog.
+- Do not claim RedDog recall success unless target files and relevant symbols are actually surfaced
+  or direct-read targets are supplied.
+
+---
+
+## ADDENDUM B - Safety Before Intake
+
+`HERMES_BUILDER_DRYRUN_DEFAULT_SAFETY_PHASE1` must land before any WSP109 intake builder path can
+call, simulate, or test Hermes handoff behavior. Intake builder tests may verify OpenClaw gate
+outcomes, but must not invoke Hermes real-write paths.
