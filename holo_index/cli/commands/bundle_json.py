@@ -7,9 +7,10 @@ Self-contained lexical search + artifact snapshot + JSON bundle output.
 """
 
 import os
+import re
 import sys
 import logging
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Tuple
 
 
 def _env_truthy(key: str, default: str = "false") -> bool:
@@ -37,6 +38,21 @@ DIRECT_READ_PER_FILE_BYTES = 12000
 DIRECT_READ_TOTAL_BUDGET_BYTES = 96000
 # Hard cap on how many targets we will even attempt (defensive; ranked by order).
 DIRECT_READ_MAX_TARGETS = 40
+
+# REDDOG_SYMBOL_AWARE_EXCERPT_DEPTH_PHASE1: when a target is `path#symbol`, return a bounded LINE
+# WINDOW around the symbol's DEFINITION instead of the head-clip, so a symbol defined deep in a large
+# file (e.g. build_foundup / extract_foundup past the 12KB head) actually reaches the model. The
+# window is still clamped to DIRECT_READ_PER_FILE_BYTES + the total budget. To LOCATE the symbol we
+# may scan past the head, but only up to a hard cap (transient; never inlined) so a pathological file
+# cannot force an unbounded read. Symbol is an OPAQUE search key -- never a path segment.
+DIRECT_READ_SYMBOL_SCAN_BYTES = 262144   # max bytes scanned to LOCATE a symbol (not inlined)
+DIRECT_READ_SYMBOL_LEAD_LINES = 6        # context lines kept BEFORE the def line (decorators/docstring)
+# Cap symbol targets per file so a caller naming MANY (plausible-but-absent) symbols of ONE file
+# cannot consume all target slots (DIRECT_READ_MAX_TARGETS) and starve other required targets.
+DIRECT_READ_MAX_SYMBOLS_PER_PATH = 8
+# A valid symbol is a bounded identifier. Rejecting anything else keeps the symbol an opaque, safe
+# search key (no regex-injection, no path traversal via the '#' suffix).
+_SYMBOL_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]{0,127}$")
 
 # HARD-DENY basenames (exact match, case-insensitive).
 DIRECT_READ_DENY_BASENAMES = frozenset({
@@ -191,6 +207,111 @@ def _read_bounded_direct_read(real_path, per_file_cap: int, remaining_budget: in
     }
 
 
+def _split_path_symbol(normalized: str) -> Tuple[str, Optional[str]]:
+    """Split a normalized `path#symbol` target into (path, symbol).
+
+    The symbol is an OPAQUE search key -- it is returned separately and NEVER used as a path
+    segment (the deny/containment gates run on the path only). A target with no '#', or whose
+    suffix is not a valid identifier, is returned as (target, None) so the whole string is
+    treated as a path (backward-compatible; a real filename containing '#' is not a symbol).
+    """
+    s = str(normalized or "")
+    if "#" not in s:
+        return s, None
+    path_part, _, sym = s.partition("#")
+    sym = sym.strip()
+    if _SYMBOL_RE.match(sym):
+        return path_part, sym
+    return s, None
+
+
+def _locate_symbol_line(lines: List[str], symbol: str) -> Optional[int]:
+    """0-based index of the best line for `symbol`: PREFER a definition line (a def/class/function/
+    const/... keyword immediately followed by the symbol, or the symbol at line start followed by
+    '=' / ':' / '('), else the FIRST whole-word occurrence. Matching is WORD-boundary (not
+    substring) so 'build_foundup' does not match 'build_foundup_v2' or 'extract_build_foundup'.
+
+    Prior art: holo_index/core/introspection_engine.py:_find_symbol_line (first-substring, reads the
+    WHOLE file). Not reused here: this module requires a BOUNDED scan (the direct-read security model)
+    and a DEFINITION preference (head-clip already had the first mention).
+    """
+    esc = re.escape(symbol)
+    word = re.compile(r"(?<![A-Za-z0-9_])" + esc + r"(?![A-Za-z0-9_])")
+    kw_def = re.compile(
+        r"\b(?:async\s+def|def|class|function|func|fn|const|let|var|type|interface|struct|enum)\s+"
+        + esc + r"(?![A-Za-z0-9_])")
+    assign_def = re.compile(
+        r"^\s*(?:export\s+|default\s+|public\s+|private\s+|protected\s+|static\s+|final\s+)*"
+        + esc + r"\s*[=:(]")
+    first_occ: Optional[int] = None
+    for i, line in enumerate(lines):
+        if not word.search(line):
+            continue
+        if first_occ is None:
+            first_occ = i
+        if kw_def.search(line) or assign_def.search(line):
+            return i
+    return first_occ
+
+
+def _read_symbol_window(real_path, symbol, per_file_cap: int, remaining_budget: int):
+    """Read a bounded LINE WINDOW around `symbol`'s definition (same return contract as
+    _read_bounded_direct_read). Fail-closed omitted_reason values ('symbol_invalid',
+    'symbol_not_found', 'symbol_window_empty', 'binary', 'read_error', 'budget_exhausted') tell the
+    caller to fall back to the head-clip. The scan to LOCATE the symbol is bounded by
+    DIRECT_READ_SYMBOL_SCAN_BYTES; the returned window is clamped to the per-file/remaining cap and
+    ALWAYS includes the definition line (forward from the def line first, then lead context)."""
+    from pathlib import Path as _Path
+    if not (isinstance(symbol, str) and _SYMBOL_RE.match(symbol)):
+        return {"content": "", "bytes": 0, "truncated": False, "omitted_reason": "symbol_invalid"}
+    cap = max(0, min(per_file_cap, remaining_budget))
+    if cap <= 0:
+        return {"content": "", "bytes": 0, "truncated": False, "omitted_reason": "budget_exhausted"}
+    try:
+        with open(_Path(real_path), "rb") as fh:
+            raw = fh.read(DIRECT_READ_SYMBOL_SCAN_BYTES + 1)
+    except Exception:
+        return {"content": "", "bytes": 0, "truncated": False, "omitted_reason": "read_error"}
+    if b"\x00" in raw:  # binary sniff on the bytes we actually read
+        return {"content": "", "bytes": 0, "truncated": False, "omitted_reason": "binary"}
+    text = raw[:DIRECT_READ_SYMBOL_SCAN_BYTES].decode("utf-8", errors="replace")
+    lines = text.split("\n")
+    idx = _locate_symbol_line(lines, symbol)
+    if idx is None:
+        return {"content": "", "bytes": 0, "truncated": False, "omitted_reason": "symbol_not_found"}
+
+    last = len(lines) - 1
+
+    def _enc(j: int) -> Tuple[str, int]:
+        piece = lines[j] + ("\n" if j < last else "")
+        return piece, len(piece.encode("utf-8"))
+
+    chosen = {}
+    used = 0
+    for j in range(idx, len(lines)):            # def line FIRST (guaranteed), then body forward
+        piece, pb = _enc(j)
+        if used + pb > cap:
+            break
+        chosen[j] = piece
+        used += pb
+    for j in range(idx - 1, max(-1, idx - 1 - DIRECT_READ_SYMBOL_LEAD_LINES), -1):  # lead context
+        piece, pb = _enc(j)
+        if used + pb > cap:
+            break
+        chosen[j] = piece
+        used += pb
+    if idx not in chosen:
+        # The DEFINITION line itself did not fit the cap (e.g. a >12KB one-line def, a big inline
+        # literal, or a minified single-line file). The lead loop may have added shorter preceding
+        # lines, but shipping lead-ONLY context labeled as a successful symbol window would hide the
+        # very symbol RedDog asked for (and falsely satisfy recall). Fail-closed -> head-clip fallback.
+        return {"content": "", "bytes": 0, "truncated": False, "omitted_reason": "symbol_window_empty"}
+    lo, hi = min(chosen), max(chosen)           # contiguous by construction (grown from idx both ways)
+    content = "".join(chosen[j] for j in range(lo, hi + 1))
+    truncated = (lo > 0) or (hi < last)
+    return {"content": content, "bytes": used, "truncated": truncated, "omitted_reason": "none"}
+
+
 def _direct_read_fetch(repo_root, requested_paths, seen_locations=None):
     """Governed direct-read-by-path fetch (slice 2/3).
 
@@ -208,31 +329,47 @@ def _direct_read_fetch(repo_root, requested_paths, seen_locations=None):
         "direct_read_rejected": [],
         "direct_read_bytes": 0,
         "direct_read_truncated": [],
+        "direct_read_symbol_windows": [],  # {path, symbol} per symbol-windowed fetch (proof it fired)
         "per_file_cap": DIRECT_READ_PER_FILE_BYTES,
         "total_budget": DIRECT_READ_TOTAL_BUDGET_BYTES,
     }
     hits: List[Dict[str, Any]] = []
 
-    # De-duplicate while preserving prompt order; cap total attempted targets.
-    ordered: List[str] = []
+    # De-duplicate while preserving prompt order; cap total attempted targets. A `path#symbol` target
+    # is split into (path, symbol) HERE: the symbol is an opaque key, keyed alongside the path so two
+    # symbols of the same file each get their own window (and are not collapsed with a plain-path hit).
+    ordered: List[Tuple[str, Optional[str]]] = []
     ordered_seen = set()
+    per_path_symbols: Dict[str, int] = {}
     for raw in (requested_paths or []):
-        rel = _normalize_direct_read_path(raw)
+        norm = _normalize_direct_read_path(raw)
+        rel, symbol = _split_path_symbol(norm)
         if not rel:
             telemetry["direct_read_rejected"].append({"path": str(raw), "reason": "path_missing"})
             continue
-        key = rel.lower()
+        # Path is case-folded (Windows), but the symbol is CASE-SENSITIVE (the locator matches
+        # case-sensitively) -- 'Config' (class) and 'config' (var) are distinct symbols and must
+        # each get their own window; lowercasing the symbol would silently collapse them.
+        key = (rel.lower(), symbol or "")
         if key in ordered_seen:
             continue
+        # Bound how many symbol targets one file may contribute, so many (plausible-but-absent)
+        # symbols of one file cannot fill all target slots and starve other required targets.
+        if symbol:
+            if per_path_symbols.get(rel.lower(), 0) >= DIRECT_READ_MAX_SYMBOLS_PER_PATH:
+                telemetry["direct_read_rejected"].append(
+                    {"path": rel + "#" + symbol, "reason": "too_many_symbols_for_path"})
+                continue
+            per_path_symbols[rel.lower()] = per_path_symbols.get(rel.lower(), 0) + 1
         ordered_seen.add(key)
-        ordered.append(rel)
+        ordered.append((rel, symbol))
     if len(ordered) > DIRECT_READ_MAX_TARGETS:
-        for extra in ordered[DIRECT_READ_MAX_TARGETS:]:
-            telemetry["direct_read_rejected"].append({"path": extra, "reason": "too_many_targets"})
+        for extra_rel, _extra_sym in ordered[DIRECT_READ_MAX_TARGETS:]:
+            telemetry["direct_read_rejected"].append({"path": extra_rel, "reason": "too_many_targets"})
         ordered = ordered[:DIRECT_READ_MAX_TARGETS]
 
     remaining = DIRECT_READ_TOTAL_BUDGET_BYTES
-    for rel in ordered:
+    for rel, symbol in ordered:
         # 1) lexical hard-deny + traversal/absolute check.
         deny = _direct_read_deny_reason(rel)
         if deny:
@@ -257,31 +394,52 @@ def _direct_read_fetch(repo_root, requested_paths, seen_locations=None):
         if remaining <= 0:
             telemetry["direct_read_rejected"].append({"path": rel, "reason": "budget_exhausted"})
             continue
-        # 4) bounded read.
-        snippet = _read_bounded_direct_read(real, DIRECT_READ_PER_FILE_BYTES, remaining)
+        # 4) bounded read. A `path#symbol` target reads a bounded LINE WINDOW around the symbol's
+        #    definition; if the symbol is not locatable (or the window is unusable) it falls back to
+        #    the head-clip so nothing regresses. A plain path always head-clips (unchanged).
+        symbol_windowed = False
+        if symbol:
+            snippet = _read_symbol_window(real, symbol, DIRECT_READ_PER_FILE_BYTES, remaining)
+            if snippet["content"]:
+                symbol_windowed = True
+            else:
+                snippet = _read_bounded_direct_read(real, DIRECT_READ_PER_FILE_BYTES, remaining)
+        else:
+            snippet = _read_bounded_direct_read(real, DIRECT_READ_PER_FILE_BYTES, remaining)
         if not snippet["content"]:
             if snippet["omitted_reason"] not in ("none",):
                 telemetry["direct_read_rejected"].append({"path": rel, "reason": snippet["omitted_reason"]})
             continue
+        # Content dedup keys on the ACTUAL read MODE, not on whether a symbol was requested. A GENUINE
+        # symbol window keys on (path, symbol) [case-sensitive symbol] so two distinct real symbols of
+        # one file both land and neither collapses against a plain-path code_hit. A symbol target that
+        # FELL BACK to the head-clip produces path-based content identical to the plain path's, so it
+        # keys on the bare path -- colliding with the plain-path hit and with seen_locations (code_hits)
+        # -- so N absent symbols of one file cannot each redraw a per-file cap and blow the total budget.
+        seen_key = (rel.lower() + "#" + symbol) if symbol_windowed else rel.lower()
+        if seen_key in seen:
+            continue
+        seen.add(seen_key)
         remaining -= snippet["bytes"]
         telemetry["direct_read_bytes"] += snippet["bytes"]
         telemetry["direct_read_paths"].append(rel)
         if snippet["truncated"]:
             telemetry["direct_read_truncated"].append({"path": rel, "bytes": snippet["bytes"]})
-        if rel.lower() not in seen:
-            seen.add(rel.lower())
-            hits.append({
-                "need": "direct-read target: " + rel,
-                "location": rel,
-                "similarity": "100.0%",
-                "cube": None,
-                "type": "code",
-                "priority": 1,
-                "direct_read": True,
-                "content": snippet["content"],
-                "content_bytes": snippet["bytes"],
-                "content_truncated": snippet["truncated"],
-            })
+        if symbol_windowed:
+            telemetry["direct_read_symbol_windows"].append({"path": rel, "symbol": symbol})
+        hits.append({
+            "need": "direct-read target: " + rel + ("#" + symbol if symbol else ""),
+            "location": rel,
+            "similarity": "100.0%",
+            "cube": None,
+            "type": "code",
+            "priority": 1,
+            "direct_read": True,
+            "symbol": symbol if symbol_windowed else None,
+            "content": snippet["content"],
+            "content_bytes": snippet["bytes"],
+            "content_truncated": snippet["truncated"],
+        })
     telemetry["direct_read_fallback_used"] = len(telemetry["direct_read_paths"]) > 0
     return {"telemetry": telemetry, "hits": hits}
 

@@ -2,6 +2,23 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-05 - REDDOG_SYMBOL_AWARE_EXCERPT_DEPTH_PHASE1 (symbol line windows reach the model, 0.3.43)
+
+- A required direct-read target may now be `path#symbol`. The Python bundle layer
+  (holo_index/cli/commands/bundle_json.py) returns a bounded LINE WINDOW around the symbol's
+  DEFINITION instead of the head-clip of the first 12KB, so a symbol defined deep in a large file
+  (e.g. `build_foundup` / `extract_foundup`) actually reaches the model.
+- Extension wiring: the full `path#symbol` token is forwarded to `--bundle-must-include` verbatim
+  (a pathless `symbol:` prefix is still excluded, unchanged). `stripSymbolSuffix(target)` normalizes
+  `path#symbol` -> the bare path for all recall/resolve comparisons (`requiredTargetMatchesLocation`,
+  the resolver, the required-target context-proof denominator), because the fetched hit's location is
+  the bare path. `extractTargetTokensFromLine` shape-checks the PATH portion so a `path#symbol` target
+  parses. `stripSymbolSuffix` is bounded/anchored (ReDoS-safe).
+- Extension contract test extended: stripSymbolSuffix behavior, recall-by-bare-path for a `path#symbol`
+  target, forwarded `--bundle-must-include` token, end-to-end `parseRequiredTargetPaths`, and the
+  unchanged `symbol:`-prefix exclusion.
+- Gate: VERIFIED_READY draft PR only (do NOT self-merge). Judgment-lane slice 3 (after #933/#934).
+
 ## 2026-07-05 - REDDOG_REPAIR_PRESERVES_EVIDENCE_PHASE1 (repair preserves Determine evidence, 0.3.42)
 
 - The schema-repair pass now PRESERVES a primary Determine answer block. A repair exists to ADD missing
