@@ -1,5 +1,15 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-05: REDDOG_RECURSIVE_SELF_GOVERNANCE_THREAT_MODEL_PHASE1 (decision doc, pointer)
+
+**Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: decision-only PR (no code, no authority change)
+**WSP**: 00, 15, 22, 48, 50, 54, 58, 64, 95, 96, 97, 100 | **Base**: `c7bb3ff5` (after #925/#926/#927/#928)
+
+- Decision-only threat model. NO code, NO keys, NO chain, NO authority change, NO re-index. Slice C in the corrected A-H sequence.
+- ADD `docs/audits/architecture/REDDOG_RECURSIVE_SELF_GOVERNANCE_THREAT_MODEL_PHASE1.md` -- threats specific to RedDog becoming recursively self-improving AND execution-capable. Identity-spoofing is #926's territory (cited, not duplicated); this owns self-governance under recursion. 7 threat families: G1 derivation-substrate poisoning (oracle/WSP-index/HoloIndex + NEW pattern-memory + derivation prompt-injection); G2 self-governance mutation (+ NEW meta-authority/governance-capture); G3 integrity!=authenticity; G4 replay+concurrency (+ NEW distributed-TOCTOU, worktree/chain-fork, mutating-quorum-membership, non-atomic-6-step-gate, tamper-preserving-audit-rewrite); G5 executable-supply-chain (poisoned in-process Skill/dep reaches the vault -> emits a VALID signature -- signatures alone insufficient); G6 economic (Goodhart farming, collusive self-dealing, CABR-oracle poisoning); G7 availability/side-channel/social (DoS/fail-open, HMAC timing side-channel, social-engineer the honest reviewer). 15 RESIDUAL controls = the backlog. Sharpens slice E with two mandatory requirements: key isolation from plugin/Skillz/dependency runtime + constant-time signature compare with no expected-value leakage.
+- TEST `tests/test_reddog_recursive_self_governance_threat_model_doc.py` (15): asserts G1-G7 present, integrity-not-authenticity, key-isolation/supply-chain, constant-time/no-timing-leak, concurrency/TOCTOU, economic gaming, DoS/fail-open, and NO runtime code / NO verifier implementation; ASCII-clean.
+- Corrected sequence: A #925(done) -> B #927(done) -> **C(this)** -> D #926 ratified #928 -> **E0 REDDOG_SIGNING_KEY_ISOLATION_CONTRACT_PHASE1** -> E1 REDDOG_WORK_ORDER_SIGNATURE_VERIFIER_PHASE1 -> F signed receipts -> G reward mapping -> H generic writer. E split into E0+E1 per C's G5.1 finding (a verifier without key isolation can still emit valid forged authority).
+
 ## 2026-07-05: REDDOG_OPERATOR_LOOP_AND_GENERIC_SPINE_AUDIT_PHASE1 (decision docs, pointer)
 
 **Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: decision-only PR (no code, no authority change)
