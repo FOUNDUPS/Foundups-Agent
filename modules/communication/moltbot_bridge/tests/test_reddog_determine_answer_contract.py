@@ -246,6 +246,19 @@ def test_unicode_digit_line_locator_rejected() -> None:
     assert r.valid is False and ReasonCode.VAGUE_EVIDENCE in r.reason_codes
 
 
+@pytest.mark.parametrize("bad_refs", [7, {"x": 1}, "modules/x.py:1", None, True])
+def test_scalar_evidence_refs_fails_closed_not_crash(bad_refs) -> None:
+    """CoR robustness: a non-list `evidence_refs` (scalar/dict) must coerce to [] (-> no
+    evidence -> MISSING/VAGUE), never raise a TypeError from iterating a non-iterable."""
+    qs = parse_determine_questions(AUDIT_PROMPT)
+    ans = _valid_answers(qs)
+    ans[3]["evidence_refs"] = bad_refs  # Q4 answer carries a non-list evidence_refs
+    r = validate_answer_set(qs, ans)  # must not raise
+    assert r.valid is False
+    assert (ReasonCode.MISSING_EVIDENCE in r.reason_codes
+            or ReasonCode.VAGUE_EVIDENCE in r.reason_codes)
+
+
 def test_non_integer_index_fails_closed_not_crash() -> None:
     """CoR R20 robustness: a non-integer answer index ('3abc') must fail CLOSED (coerced to 0
     -> out of the 1..N range -> INVENTED_ANSWER, real question stays MISSING_ANSWER), never
@@ -852,6 +865,18 @@ def test_repair_strengthening_existing_file_line_evidence_is_allowed() -> None:
     repaired[2]["evidence_refs"] = ["modules/x/file_3.py:30", "modules/x/file_3.py:88"]
     r = assert_repair_preserves(qs, orig, repaired)
     assert r.valid is True, r.reason_codes
+
+
+def test_repair_dropping_surplus_original_index_fails() -> None:
+    """CoR (repair-guard R1): a repair that drops an ORIGINAL answer at a SURPLUS index (beyond
+    len(qs)) must be rejected. The per-question steps iterate `for q in qs` and skip surplus
+    indices, so the original-answered-index coverage check in step 1 is what catches it."""
+    qs = parse_determine_questions("Determine:\n1. a?\n2. b?\n3. c?\n")
+    orig = [_answer(1, qs[0].text), _answer(2, qs[1].text), _answer(3, qs[2].text),
+            _answer(4, "surplus sub-finding", ev=["modules/valve.py:44"])]
+    repaired = copy.deepcopy(orig)[:3]  # dropped the surplus index-4 answer + its evidence
+    r = assert_repair_preserves(qs, orig, repaired)
+    assert r.valid is False and ReasonCode.REPAIR_COLLAPSED_TO_PROSE in r.reason_codes
 
 
 def test_repair_reformatting_evidence_is_allowed() -> None:

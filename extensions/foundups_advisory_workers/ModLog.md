@@ -2,6 +2,28 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-05 - REDDOG_REPAIR_PRESERVES_EVIDENCE_PHASE1 (repair preserves Determine evidence, 0.3.42)
+
+- The schema-repair pass now PRESERVES a primary Determine answer block. A repair exists to ADD missing
+  sections; it must not silently drop / reorder / weaken (OBSERVED -> vague NEEDS_VERIFICATION) / strip
+  file:line evidence / fabricate anchors in the evidence-backed Determine answers.
+- Wiring (repair path, callFusion review flow):
+  - PRE-REPAIR: `runRepairGuard(context, 'protect', ...)` extracts the protected block and prepends it to
+    the `repair_minimal` bounded context, so the repair model reproduces the answers UNCHANGED.
+  - POST-MERGE: after `mergeRepairedOutput`, `runRepairGuard(context, 'guard', ...)` revalidates the merged
+    output. On `keep_original` the merge is DISCARDED and the primary + its validation failure is kept
+    (`repair_failure_reason: repair_dropped_determine_evidence`). Existing schema-completeness acceptance is
+    unchanged for the non-keep-original branch.
+  - Fail-closed: if the guard bridge is unavailable, a primary that carried a Determine block still keeps
+    the original (`repair_evidence_reasons: ['guard_bridge_unavailable']`).
+- REUSES the Python Determine contract's `assert_repair_preserves` (no preservation rules reimplemented in
+  JS) via `scripts/reddog_repair_guard_once.py` (synchronous `cp.execFileSync`, same pattern as HoloIndex/git).
+  New helpers `runRepairGuard` / `hasDetermineAnswersBlock` exported; telemetry `repair_evidence_protected` /
+  `repair_evidence_preserved` / `repair_evidence_reasons` added to output_validation.
+- Guard hardened via a 5-round 8-lens adversarial CoR (R5 all SAFE, 0 findings). Extension contract test
+  extended: source wiring + ATX/SETEXT block presence + real end-to-end guard bridge (protect/faithful/strip/drop).
+- Gate: VERIFIED_READY draft PR only (do NOT self-merge). Judgment-lane slice 2 (after #933 Determine contract).
+
 ## 2026-07-03 - REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (all-section + legacy-path closure, 0.3.41)
 
 - Closes the LAST two residual required-target-telemetry forgery vectors so forgery_inert=true holds on
