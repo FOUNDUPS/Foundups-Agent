@@ -1,5 +1,19 @@
 # HoloIndex Package ModLog
 
+## [2026-07-05] REDDOG_SYMBOL_AWARE_EXCERPT_DEPTH_PHASE1 (judgment lane, slice 3)
+
+**Agent**: 0102 (RedDog Architect, Judgment lane) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
+**WSP**: 00, 15, 22, 50, 64, 84, 97 | **Base**: `1cb605717`
+
+- `cli/commands/bundle_json.py`: the governed direct-read now supports a `path#symbol` target -- instead of the HEAD-CLIP of the first 12KB, it returns a bounded LINE WINDOW around the symbol's DEFINITION, so a symbol defined deep in a large file (e.g. `build_foundup` / `extract_foundup` past the 12KB head) actually reaches the model. Motivation: audit `REDDOG_FOUNDUP_CREATION_EXECUTION_PATH_AUDIT_PHASE1.md` s6 named this SPECIFIED_NOT_IMPLEMENTED ("misses build_foundup/extract_foundup line windows").
+- `_split_path_symbol` splits `path#symbol` -> (path, symbol) AFTER normalization; the symbol is an OPAQUE, validated identifier (`_SYMBOL_RE=^[A-Za-z_][A-Za-z0-9_]{0,127}$`) and is NEVER a path segment -- ALL security gates (deny basenames/extensions/segments, traversal, absolute, realpath containment/symlink-escape, resolved-basename re-deny, binary NUL sniff) run on the PATH ONLY.
+- `_locate_symbol_line`: bounded, DEFINITION-preferring, WORD-boundary locator (`build_foundup` != `build_foundup_v2`; prefers `def/class/function/const/... SYMBOL` or `SYMBOL =/:/(` over a call-site; case-sensitive). Prior art `core/introspection_engine.py:_find_symbol_line` NOT reused (it reads the WHOLE file + first-substring) because this module requires a BOUNDED scan (`DIRECT_READ_SYMBOL_SCAN_BYTES=262144`, transient, never inlined) + definition preference (WSP 84 note documented in-code).
+- `_read_symbol_window`: window grows from the def line FIRST then body forward then lead context, clamped to the per-file cap + total budget; the def line is ALWAYS present or it fail-closes `symbol_window_empty` -> head-clip fallback (never lead-only content labelled a success). Fallbacks (symbol invalid/not-found/binary/read-error) degrade to the head-clip, never crash. Dedup: a GENUINE window keys on case-sensitive `(path, symbol)`; a fallback keys on the bare path (so N absent symbols cannot redraw a per-file cap); `DIRECT_READ_MAX_SYMBOLS_PER_PATH=8` bounds slot exhaustion. Telemetry `direct_read_symbol_windows`. hit['location'] stays the bare path (recall stays path-based).
+- **4-lens adversarial CoR (symbol-injection / redos-scan / window-integrity / fallback-dedup-budget), 4 rounds, effort:high.** R1 def-line-exceeds-cap (false success w/ lead-only), R2 case-distinct-symbol collapse, R3 fallback-dedup budget + per-path target amplification -- all folded. **R4: all 4 lenses SAFE, 0 findings.**
+- TEST `tests/test_reddog_extension_bundle_recall.py` (+15 symbol tests): deep-past-head window; lead context; oversized-def fallback; not-found/invalid fallback; security-deny on the path portion; two-symbols + case-distinct both window; binary; scan-cap; fallback-dedups-on-path; amplification cannot blow the budget; split/locate units. 29 pass (2 unrelated pre-existing lexical-ranking failures).
+- WIRED into `extensions/foundups_advisory_workers/extension.js` (0.3.42 -> 0.3.43): `stripSymbolSuffix` normalizes `path#symbol` -> path for recall (`requiredTargetMatchesLocation`), resolve, and the context-proof denominator; `extractTargetTokensFromLine` shape-checks the path portion; the full `path#symbol` token is forwarded to `--bundle-must-include` (a pathless `symbol:` prefix stays excluded). Extension contract test extended (stripSymbolSuffix / recall-by-path / forwarded token / parse end-to-end).
+- Judgment lane: 1 DETERMINE_CONTRACT #933 -> 2 REPAIR_PRESERVES_EVIDENCE #934 -> **3 (this)** -> 4 ADVERSARIAL_VERIFIER_PANEL -> 5 FOUNDUP_INTAKE_PACKET_MODE. VERIFIED_READY draft PR only; not merged.
+
 ## [2026-05-30] HOLOINDEX_T1_RANKING_QUALITY_PHASE1 (W6 resume)
 
 **Agent**: W6 (0102)

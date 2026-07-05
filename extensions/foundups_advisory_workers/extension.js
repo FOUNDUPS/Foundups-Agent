@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.42';
+const EXTENSION_VERSION = '0.3.43';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -391,6 +391,16 @@ function normalizeTargetPath(raw) {
   return s.slice(start, end).trim();
 }
 
+// REDDOG_SYMBOL_AWARE_EXCERPT_DEPTH_PHASE1: a required direct-read target may be `path#symbol` (the
+// Python bundle layer returns a bounded line window around the symbol's DEFINITION). The full
+// `path#symbol` string is forwarded to --bundle-must-include, but the fetched hit's location is the
+// BARE path, so recall/resolve/denominator comparisons must strip a trailing `#<identifier>` suffix.
+// Only a valid identifier suffix is stripped (mirrors the Python _SYMBOL_RE); a real '#' inside a
+// path is left intact. The regex is bounded/anchored (ReDoS-safe).
+function stripSymbolSuffix(target) {
+  return String(target || '').replace(/#[A-Za-z_][A-Za-z0-9_]{0,127}$/, '');
+}
+
 // Extract repo-relative path/glob tokens from a single list line. A line may hold
 // one path or a slash-delimited "a / b / c" alternatives list (as prompts often
 // phrase them). Symbol tokens (symbol:foo) are preserved verbatim.
@@ -412,8 +422,11 @@ function extractTargetTokensFromLine(line) {
     if (!candidate) {
       continue;
     }
-    // A target must look like a path/glob or a bare source filename.
-    if (/[\/]/.test(candidate) || /\.[a-z0-9]{1,6}$/i.test(candidate) || /[*?]/.test(candidate)) {
+    // A target must look like a path/glob or a bare source filename. Shape-check the PATH portion
+    // (a `path#symbol` target's shape lives in the path, not the symbol suffix) but keep the FULL
+    // `path#symbol` token so the symbol is forwarded to the direct-read layer.
+    const pathPortion = stripSymbolSuffix(candidate);
+    if (/[\/]/.test(pathPortion) || /\.[a-z0-9]{1,6}$/i.test(pathPortion) || /[*?]/.test(pathPortion)) {
       tokens.push(candidate);
     }
   }
@@ -511,7 +524,7 @@ function inferRecallTargetPaths(taskText) {
 // actually present in the bundle. Self-file locations are excluded by the caller
 // before this runs so retrieving RedDog itself cannot satisfy a required target.
 function requiredTargetMatchesLocation(target, location) {
-  const want = normalizeTargetPath(target).toLowerCase();
+  const want = stripSymbolSuffix(normalizeTargetPath(target)).toLowerCase();
   const have = String(location || '').replace(/\\/g, '/').toLowerCase();
   if (!want || !have) {
     return false;
@@ -2455,7 +2468,7 @@ function buildRequiredTargetProtectedSection(requiredTargets, directReadSection)
     if (!target || target.toLowerCase().startsWith('symbol:')) {
       continue;
     }
-    const wantLower = target.toLowerCase();
+    const wantLower = stripSymbolSuffix(target).toLowerCase();  // `path#symbol` resolves by path
     let match = hitByPath.get(wantLower);
     if (!match) {
       // basename / suffix fallback so a directoried required token still resolves the
@@ -2577,7 +2590,7 @@ function assembleFinalBoundedContext(headSections, protectedText, lowerSections)
 // symbols excluded) so a phantom marker cannot inflate the denominator either.
 function computeRequiredTargetContextProof(finalText, requiredTargets, protectedMeta) {
   const targets = Array.isArray(requiredTargets)
-    ? requiredTargets.map((t) => normalizeTargetPath(t)).filter((t) => t && !t.toLowerCase().startsWith('symbol:'))
+    ? requiredTargets.map((t) => stripSymbolSuffix(normalizeTargetPath(t))).filter((t) => t && !t.toLowerCase().startsWith('symbol:'))
     : [];
   const text = String(finalText || '');
   // AUTHORITATIVE fetched/packed set: only paths the packer actually included get a section.
@@ -4035,6 +4048,8 @@ module.exports = {
   parseRequiredTargetPaths,
   isSelfFileLocation,
   requiredTargetMatchesLocation,
+  stripSymbolSuffix,
+  extractTargetTokensFromLine,
   holoIndexMetaFromBundle,
   holoIndexOutput,
   buildMustIncludeArgs,

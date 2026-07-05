@@ -20,8 +20,12 @@ from holo_index.cli.commands.bundle_json import (
     _direct_read_deny_reason,
     _normalize_direct_read_path,
     _resolve_within_repo,
+    _split_path_symbol,
+    _locate_symbol_line,
+    _read_symbol_window,
     DIRECT_READ_PER_FILE_BYTES,
     DIRECT_READ_TOTAL_BUDGET_BYTES,
+    DIRECT_READ_SYMBOL_SCAN_BYTES,
 )
 
 EXTENSION_JS = REPO_ROOT / "extensions" / "foundups_advisory_workers" / "extension.js"
@@ -405,6 +409,221 @@ def test_direct_read_symlink_escape_rejected(tmp_path):
     assert reasons.get("escape_link.txt") == "outside_root"
     joined = "\n".join(h.get("content", "") for h in result["hits"])
     assert "SYNTHETIC-outside-do-not-read" not in joined
+
+
+# --- REDDOG_SYMBOL_AWARE_EXCERPT_DEPTH_PHASE1 (slice 3/3): symbol line windows ----------------
+def _deep_symbol_repo(tmp_path):
+    """A synthetic repo with a file whose symbol is defined DEEP past the 12KB head-clip."""
+    fake_root = tmp_path / "repo"
+    (fake_root / "src").mkdir(parents=True)
+    rel = "src/hermes.py"
+    head = "# header\n" + ("# filler padding padding padding padding padding\n" * 400)  # ~18KB head
+    assert len(head.encode("utf-8")) > DIRECT_READ_PER_FILE_BYTES
+    body = ("def build_foundup(job):\n    return extract_foundup(job)  # DEEP-DEF-MARKER\n"
+            + ("# trailing filler\n" * 100))
+    (fake_root / rel).write_text(head + body, encoding="utf-8")
+    return fake_root, rel
+
+
+def test_split_path_symbol_forms():
+    assert _split_path_symbol("modules/x/y.py#build_foundup") == ("modules/x/y.py", "build_foundup")
+    assert _split_path_symbol("modules/x/y.py") == ("modules/x/y.py", None)
+    assert _split_path_symbol("notes#draft.md") == ("notes#draft.md", None)  # suffix not an identifier
+    assert _split_path_symbol("a#b#c") == ("a#b#c", None)                    # ambiguous -> whole path
+    # the symbol is opaque: an absolute/traversal PATH portion is preserved for the deny gate
+    assert _split_path_symbol("/etc/passwd#foo") == ("/etc/passwd", "foo")
+    assert _split_path_symbol("../../.env#foo") == ("../../.env", "foo")
+
+
+def test_locate_symbol_line_prefers_definition_word_boundary():
+    lines = [
+        "import build_foundup_v2            # substring, NOT this",
+        "x = build_foundup()                # a call-site (first occurrence)",
+        "def extract_build_foundup(): pass  # substring, NOT this",
+        "def build_foundup(job):            # THE definition",
+        "    return job",
+    ]
+    assert _locate_symbol_line(lines, "build_foundup") == 3          # def preferred over call-site
+    # word-boundary: a symbol only present as a substring is not matched
+    assert _locate_symbol_line(["build_foundup_v2 = 1"], "build_foundup") is None
+    # JS/TS style definitions
+    assert _locate_symbol_line(["const buildFoundup = () => {}"], "buildFoundup") == 0
+    assert _locate_symbol_line(["export function buildFoundup() {}"], "buildFoundup") == 0
+
+
+def test_symbol_window_reaches_symbol_deep_past_head(tmp_path):
+    """CORE FIX: a symbol defined past the 12KB head-clip reaches the model via a line window,
+    while the plain path (head-clip) misses it."""
+    fake_root, rel = _deep_symbol_repo(tmp_path)
+    result = _direct_read_fetch(fake_root, [rel + "#build_foundup", rel])
+    by_need = {h["need"]: h for h in result["hits"]}
+    win = by_need["direct-read target: " + rel + "#build_foundup"]
+    plain = by_need["direct-read target: " + rel]
+    assert "DEEP-DEF-MARKER" in win["content"] and win["symbol"] == "build_foundup"
+    assert win["content_bytes"] <= DIRECT_READ_PER_FILE_BYTES
+    assert "DEEP-DEF-MARKER" not in plain["content"] and plain["symbol"] is None  # head-clip misses it
+    assert {"path": rel, "symbol": "build_foundup"} in result["telemetry"]["direct_read_symbol_windows"]
+
+
+def test_symbol_window_lead_context_included(tmp_path):
+    """The window keeps a few lead lines (decorators/docstring) before the def and stays contiguous."""
+    fake_root = tmp_path / "repo"
+    (fake_root / "src").mkdir(parents=True)
+    rel = "src/w.py"
+    (fake_root / rel).write_text(
+        "\n".join([f"# lead {i}" for i in range(20)] + ["@decorator", "def target(x):", "    return x"])
+        + "\n", encoding="utf-8")
+    r = _direct_read_fetch(fake_root, [rel + "#target"])
+    content = r["hits"][0]["content"]
+    assert "@decorator" in content and "def target(x):" in content
+    assert "# lead 19" in content  # nearest lead line kept as context
+
+
+def test_symbol_not_found_falls_back_to_head_clip(tmp_path):
+    fake_root = tmp_path / "repo"
+    (fake_root / "src").mkdir(parents=True)
+    rel = "src/f.py"
+    (fake_root / rel).write_text("def other():\n    return 1\n", encoding="utf-8")
+    r = _direct_read_fetch(fake_root, [rel + "#nonexistent_symbol"])
+    assert len(r["hits"]) == 1
+    assert r["hits"][0]["content"].startswith("def other():")     # head-clip fallback
+    assert r["hits"][0]["symbol"] is None                          # not a symbol window
+    assert r["telemetry"]["direct_read_symbol_windows"] == []
+
+
+def test_invalid_symbol_falls_back_to_head_clip(tmp_path):
+    fake_root = tmp_path / "repo"
+    (fake_root / "src").mkdir(parents=True)
+    rel = "src/g.py"
+    (fake_root / rel).write_text("def build_foundup():\n    return 1\n", encoding="utf-8")
+    # a non-identifier suffix is not split as a symbol -> whole '#...' treated as a path -> not_a_file
+    r = _direct_read_fetch(fake_root, [rel + "#not a valid symbol!"])
+    assert r["telemetry"]["direct_read_symbol_windows"] == []
+
+
+def test_symbol_split_does_not_bypass_security_deny(tmp_path):
+    """The deny/containment gates run on the PATH portion only; a symbol suffix cannot smuggle a
+    denied path past them."""
+    fake_root = tmp_path / "repo"
+    (fake_root / "src").mkdir(parents=True)
+    (fake_root / ".env").write_text("DUMMY=synthetic-not-a-real-secret\n", encoding="utf-8")
+    (fake_root / "src" / "ok.py").write_text("def build_foundup():\n    return 1\n", encoding="utf-8")
+    r = _direct_read_fetch(fake_root, [".env#build_foundup", "/etc/passwd#x",
+                                       "../../outside.py#y", "src/ok.py#build_foundup"])
+    reasons = {t["path"]: t["reason"] for t in r["telemetry"]["direct_read_rejected"]}
+    assert reasons.get(".env") == "denied_basename"
+    assert reasons.get("/etc/passwd") == "absolute_path"
+    assert reasons.get("../../outside.py") == "traversal"
+    joined = "\n".join(h.get("content", "") for h in r["hits"])
+    assert "synthetic-not-a-real-secret" not in joined            # denied file never read
+    assert "def build_foundup():" in joined                        # the safe symbol target still fetched
+
+
+def test_two_symbols_same_file_both_windowed(tmp_path):
+    fake_root = tmp_path / "repo"
+    (fake_root / "src").mkdir(parents=True)
+    rel = "src/two.py"
+    (fake_root / rel).write_text(
+        "def build_foundup():\n    return 1\n\n\ndef extract_foundup():\n    return 2\n", encoding="utf-8")
+    r = _direct_read_fetch(fake_root, [rel + "#build_foundup", rel + "#extract_foundup"])
+    syms = {w["symbol"] for w in r["telemetry"]["direct_read_symbol_windows"]}
+    assert syms == {"build_foundup", "extract_foundup"}
+    assert len(r["hits"]) == 2
+    for h in r["hits"]:
+        assert h["location"] == rel                                # location stays the bare path
+
+
+def test_case_distinct_symbols_same_file_both_windowed(tmp_path):
+    """CoR R2 (major): case-differing symbols ('Config' class vs 'config' factory) are DISTINCT
+    (matching is case-sensitive) and must each get their own window -- the dedup key must not
+    lowercase the symbol."""
+    fake_root = tmp_path / "repo"
+    (fake_root / "src").mkdir(parents=True)
+    rel = "src/c.py"
+    (fake_root / rel).write_text(
+        "class Config:  # UPPER-CONFIG-MARKER\n    pass\n\n\ndef config():  # lower-config-marker\n    return 1\n",
+        encoding="utf-8")
+    r = _direct_read_fetch(fake_root, [rel + "#Config", rel + "#config"])
+    syms = {w["symbol"] for w in r["telemetry"]["direct_read_symbol_windows"]}
+    assert syms == {"Config", "config"}
+    joined = "\n".join(h["content"] for h in r["hits"])
+    assert "UPPER-CONFIG-MARKER" in joined and "lower-config-marker" in joined
+
+
+def test_symbol_window_binary_file_omitted(tmp_path):
+    fake_root = tmp_path / "repo"
+    (fake_root / "src").mkdir(parents=True)
+    rel = "src/b.py"
+    (fake_root / rel).write_bytes(b"def build_foundup():\x00\x01binary\n")
+    r = _direct_read_fetch(fake_root, [rel + "#build_foundup"])
+    assert r["hits"] == []
+    reasons = {t["path"]: t["reason"] for t in r["telemetry"]["direct_read_rejected"]}
+    assert reasons.get(rel) == "binary"
+
+
+def test_symbol_window_oversized_def_line_falls_back_not_lead_only(tmp_path):
+    """CoR R1 (blocker/major x3): a def line LONGER than the per-file cap must NOT ship lead-only
+    context labeled as a successful symbol window (the symbol would be absent while recall reads as
+    satisfied). It falls back to the head-clip and is NOT reported as a symbol window."""
+    fake_root = tmp_path / "repo"
+    (fake_root / "src").mkdir(parents=True)
+    rel = "src/f.py"
+    lead = "# leadA\n# leadB\n# leadC\n"
+    big_def = "def build_foundup(" + ("a," * 7000) + "):  # DEEP-DEF-MARKER\n"  # >12KB single def line
+    assert len(big_def.encode("utf-8")) > DIRECT_READ_PER_FILE_BYTES
+    (fake_root / rel).write_text(lead + big_def + "    return 1\n", encoding="utf-8")
+    # unit: the window read reports symbol_window_empty (def did not fit)
+    snip = _read_symbol_window(fake_root / rel, "build_foundup", DIRECT_READ_PER_FILE_BYTES,
+                               DIRECT_READ_TOTAL_BUDGET_BYTES)
+    assert snip["omitted_reason"] == "symbol_window_empty"
+    # end-to-end: falls back to head-clip, NOT a symbol window, and never ships lead-only content
+    r = _direct_read_fetch(fake_root, [rel + "#build_foundup"])
+    assert r["telemetry"]["direct_read_symbol_windows"] == []
+    assert len(r["hits"]) == 1 and r["hits"][0]["symbol"] is None
+    assert r["hits"][0]["content"].startswith("# leadA")  # deterministic head-clip, not lead-then-nothing
+
+
+def test_symbol_fallback_head_clip_dedups_on_path_not_symbol(tmp_path):
+    """CoR R3 (major): a symbol target that FALLS BACK to the head-clip produces path-based content;
+    it must dedup on the bare path (colliding with the plain-path hit), not on (path, symbol) -- else
+    the same head-clip is emitted twice and budget is double-charged."""
+    fake_root = tmp_path / "repo"
+    (fake_root / "src").mkdir(parents=True)
+    rel = "src/f.py"
+    (fake_root / rel).write_text("def other():\n    return 1\n", encoding="utf-8")
+    r = _direct_read_fetch(fake_root, [rel + "#absent_symbol", rel])
+    assert len(r["hits"]) == 1                                   # one head-clip, not two
+    assert r["telemetry"]["direct_read_paths"] == [rel]          # not double-counted
+
+
+def test_many_absent_symbols_one_file_cannot_blow_total_budget(tmp_path):
+    """CoR R3 (major, amplification): many absent symbols of ONE big file must NOT each redraw a
+    per-file cap and starve a distinct legitimate target of the total budget."""
+    fake_root = tmp_path / "repo"
+    (fake_root / "src").mkdir(parents=True)
+    big = "src/big.py"
+    (fake_root / big).write_text("# no matching symbols here\n" + ("X" * 60000), encoding="utf-8")
+    (fake_root / "src" / "important.py").write_text("IMPORTANT-CONTENT = 1\n", encoding="utf-8")
+    targets = [f"{big}#sym{i}" for i in range(40)] + ["src/important.py"]
+    r = _direct_read_fetch(fake_root, targets)
+    joined = "\n".join(h["content"] for h in r["hits"])
+    assert "IMPORTANT-CONTENT" in joined                          # the legit distinct target still lands
+    assert r["telemetry"]["direct_read_bytes"] <= DIRECT_READ_TOTAL_BUDGET_BYTES
+    assert len({h["location"] for h in r["hits"]}) >= 2           # budget spread, not consumed by one file
+
+
+def test_read_symbol_window_bounded_scan_cap(tmp_path):
+    """A symbol beyond the scan cap is not located (bounded scan) -> omitted 'symbol_not_found',
+    so a pathological file cannot force an unbounded read."""
+    fake_root = tmp_path / "repo"
+    (fake_root / "src").mkdir(parents=True)
+    rel = "src/huge.py"
+    filler = "# filler line to push the symbol beyond the scan cap zzzzzzzzzzzzzzzzzz\n"
+    reps = (DIRECT_READ_SYMBOL_SCAN_BYTES // len(filler.encode("utf-8"))) + 50
+    (fake_root / rel).write_text(filler * reps + "def build_foundup():\n    return 1\n", encoding="utf-8")
+    real = fake_root / rel
+    snip = _read_symbol_window(real, "build_foundup", DIRECT_READ_PER_FILE_BYTES, DIRECT_READ_TOTAL_BUDGET_BYTES)
+    assert snip["omitted_reason"] == "symbol_not_found"
 
 
 def test_direct_read_cli_end_to_end(monkeypatch):

@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.42', 'package version must be 0.3.42');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.42'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.43', 'package version must be 0.3.43');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.43'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.42', 'README version mismatch');
+includes(readme, 'Version: 0.3.43', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -1568,7 +1568,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.42'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.43'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -1582,7 +1582,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.42'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.43'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -1594,7 +1594,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.42'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.43'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -1947,5 +1947,31 @@ if (rgProtect && rgProtect.ok) {
 } else {
   console.log('  repair-evidence guard bridge unavailable (python) -- source wiring + presence checks still enforced');
 }
+
+// REDDOG_SYMBOL_AWARE_EXCERPT_DEPTH_PHASE1: a required direct-read target may be `path#symbol`.
+// The extension forwards the FULL token to --bundle-must-include (so the Python bundle layer returns
+// a bounded line window around the symbol's definition) but matches recall/resolve by the BARE path.
+assert.strictEqual(orchestrator.stripSymbolSuffix('modules/x/foo.py#build_foundup'), 'modules/x/foo.py',
+  'stripSymbolSuffix removes a trailing #identifier');
+assert.strictEqual(orchestrator.stripSymbolSuffix('modules/x/foo.py'), 'modules/x/foo.py',
+  'stripSymbolSuffix leaves a plain path untouched');
+assert.strictEqual(orchestrator.stripSymbolSuffix('weird#name.md'), 'weird#name.md',
+  'stripSymbolSuffix leaves a non-identifier # suffix (real path) untouched');
+// recall: a path#symbol required target is satisfied by the fetched BARE-path location
+assert(orchestrator.requiredTargetMatchesLocation('modules/x/foo.py#build_foundup', 'modules/x/foo.py'),
+  'path#symbol recall matches the bare-path fetched location');
+// the token survives parsing (list marker stripped upstream) and end-to-end block parsing
+const symToks = orchestrator.extractTargetTokensFromLine('modules/x/hermes.py#build_foundup');
+assert(symToks.includes('modules/x/hermes.py#build_foundup'), 'path#symbol token is parsed and kept');
+const symBlock = orchestrator.parseRequiredTargetPaths(
+  'Audit.\n\nRequired direct-read targets:\n- modules/x/hermes.py#build_foundup\n- modules/x/plain.py\n');
+assert(symBlock.includes('modules/x/hermes.py#build_foundup') && symBlock.includes('modules/x/plain.py'),
+  'parseRequiredTargetPaths keeps a path#symbol target end-to-end');
+const symArgs = orchestrator.buildMustIncludeArgs(['modules/x/hermes.py#build_foundup']);
+assert(symArgs.includes('modules/x/hermes.py#build_foundup'),
+  'path#symbol is forwarded to --bundle-must-include (not dropped)');
+// a pathless `symbol:` prefix is still excluded (unchanged)
+assert(!orchestrator.buildMustIncludeArgs(['symbol:create_foundup']).includes('symbol:create_foundup'),
+  'pathless symbol: prefix is still excluded from direct-read');
 
 console.log('Foundups®Agent extension contract checks passed.');
