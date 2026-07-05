@@ -1,5 +1,19 @@
 # HoloIndex Package ModLog
 
+## [2026-07-06] HOLOINDEX_FRESHNESS_AND_SCALING_GOVERNANCE_PHASE1 (decision-only audit)
+
+**Agent**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
+**WSP**: 00, 15, 22, 50, 64, 84, 97 | **Base**: `28b9c71ea`
+
+- ADD `docs/audits/infrastructure/HOLOINDEX_FRESHNESS_AND_SCALING_GOVERNANCE_PHASE1.md` -- decision-only governance audit (no runtime mutation, no re-index run, no ranking-code change). Ratifies the 012 ruling: HoloIndex is an EVIDENCE SUBSTRATE; RedDog runtime = QUERY ONLY; WRE/CI/operator owns re-index.
+- Headline (OBSERVED): the "RedDog never re-indexes" invariant HOLDS today but by ARCHITECTURE + CONVENTION, not a hard guard. RedDog's `--bundle-json` returns at `_cli_main.py:746-747` BEFORE the search-time auto-refresh (`:1135-1196`); the offline path keeps `holo=None`; adapters call `holo.search()` (query-only). No `--index`/`*_collection.add` is reachable from a RedDog process TODAY.
+- Structural findings: NO incremental/per-file/per-FoundUp re-index (every `--index*` = `_reset_collection` delete+create, positional ids); INDEX_GAP is detected but the signal is DISCARDED (no durable WRE work item); direct-read (#934/#935) can MASK a rotting store; silent caps (`HOLO_SYMBOL_MAX_FILES=5000`/`HOLO_SYMBOL_MAX_ENTRIES=20000`) drop later FoundUps at scale; a divergent second store (`.ssd/vectors`) is a staleness hazard.
+- Owner model: RedDog query-only; WRE owns maintenance (a DORMANT WRE `holoindex_plugin._index_with_patterns` already exists -- `index_all()` is a latent AttributeError -- bring it under the model, do not author a second indexer); CI/post-merge targeted re-index against a freshness receipt; operator full/scheduled.
+- 5 sequenced slices: (1) READONLY_QUERY_GUARD (hard-enforce + gate auto-refresh), (2) FRESHNESS_RECEIPT, (3) INDEX_GAP_TO_WRE_WORKITEM, (4) CI_FRESHNESS_GATE, (5) INCREMENTAL_PER_FOUNDUP_INDEX (scaling primitive, deferred).
+- **4-lens adversarial refute-CoR (reddog-readonly / architecture-facts / prior-art / completeness): all 4 SOUND. Central claims deep-traced + confirmed; folded 1 major (unaudited WRE holoindex plugin write surface -> enumerated + "not net-new") + 3 minors (env-var names, non-code/WSP collections have no auto-trigger owner).**
+- TEST `tests/test_holoindex_freshness_governance_doc.py` (25 static anchors + ASCII-clean + decision-only assertion). No runtime code.
+- Companion: APPENDIX A (HoloIndex freshness/re-index boundary) rides the deferred REDDOG_ADVERSARIAL_VERIFIER_PANEL_PHASE1 slice (verifier records post-edit HoloIndex discoverability; RedDog never self-reindex).
+
 ## [2026-07-05] REDDOG_SYMBOL_AWARE_EXCERPT_DEPTH_PHASE1 (judgment lane, slice 3)
 
 **Agent**: 0102 (RedDog Architect, Judgment lane) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
