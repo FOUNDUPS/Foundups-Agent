@@ -54,8 +54,10 @@ types. No field may be added to the signed set without a new contract revision.
 
 | Field | Type | Req/Opt | Nullable | Allowed values / constraints |
 |-------|------|---------|----------|------------------------------|
-| principal_id | string | required | no | Stable id of the authenticated 012 principal. Format "github:<login>" or "intake:<subject>". MUST equal a token-verified subject (see intake discipline), never free text. |
-| principal_provider | string (enum) | required | no | One of: "github", "intake_session", "intake_invite". No other value is valid. |
+| principal_id | string | required | no | Stable id of the authenticated 012 principal. Format "github:<login>" or "intake:<subject>". MUST equal a token-verified subject at issuance (see Section 5 principal-authentication basis), never free text. |
+| principal_provider | string (enum) | required | no | One of: "github", "intake_session", "intake_invite". No other value is valid. This names the token-verification basis that gated issuance (Section 5). |
+| principal_public_key | string | required | no | The PRINCIPAL's PUBLIC key, encoded per Section 4a. The principal (NOT the RedDog) signs this identity record with the matching private half (Section 2, Section 5). Private half never appears (Section 4d). |
+| principal_key_fingerprint | string | required | no | Public-only fingerprint of principal_public_key, derived per Section 4b. Used for display and principal revocation lookup. |
 | principal_wallet | string | optional | yes | PUBLIC reward address only. NEVER a private key. May be null pre-OPO. Presence does NOT confer repo authority. |
 | reddog_id | string | required | no | Stable public id of THIS RedDog instance. Format "reddog:<fingerprint-prefix>". Absent in code today (INFERRED from audit Section 3). |
 | reddog_public_key | string | required | no | Instance PUBLIC key, encoded per Section 4. The private half NEVER appears in this record or anywhere (invariant, Section 4d). |
@@ -68,7 +70,7 @@ types. No field may be added to the signed set without a new contract revision.
 | identity_nonce | string | required | no | Single-use issuance nonce per Section 3. Consumed on first acceptance. |
 | issued_at | integer (unix seconds) | required | no | Issuance time. Part of expiry semantics (Section 3), therefore INCLUDED in signed payload. |
 | expires_at | integer (unix seconds) | required | no | Identity TTL bound per Section 3. Fail-closed when now > expires_at. |
-| signature | string | required | no | Signature over the canonical payload (Section 2). EXCLUDED from the payload it signs (Addendum A). |
+| signature | string | required | no | The PRINCIPAL's signature over the canonical payload (Section 2, prefix "reddog-identity.v1"), verifiable against principal_public_key. This is a DELEGATION instrument: it MUST be signed by the principal, NEVER by reddog_public_key (a RedDog cannot sign its own scope grant, Section 5). EXCLUDED from the payload it signs (Addendum A). |
 
 ### 1b. RedDogDelegatedWorkAuthority
 
@@ -87,8 +89,8 @@ types. No field may be added to the signed set without a new contract revision.
 | issued_at | integer (unix seconds) | required | no | Issue time; part of expiry semantics; INCLUDED in signed payload. |
 | expires_at | integer (unix seconds) | required | no | Short TTL per Section 3. Fail-closed on now > expires_at. |
 | valve_state_required | string | required | no | Required execution-valve state. Replaces the plain env-var token (OBSERVED fabricatable in reddog_wre_execution_valve.py, audit Section 2a). |
-| receipt_chain | array of SignedReceipt | required | no | Ordered SIGNED receipts (Section 8). May be empty at issuance; grows only with signed receipts. |
-| signature | string | required | no | Signature over the canonical payload (Section 2). EXCLUDED from the payload it signs (Addendum A). |
+| receipt_chain | array of SignedReceipt | required | no | Ordered SIGNED receipts (Section 8). May be empty at issuance; grows POST-issuance with signed receipts. EXCLUDED from the work-authority signed payload (Addendum A): a signature fixed at issuance cannot cover a growing array. Chain integrity derives from each receipt's own signature + prev_receipt_hash, and each receipt binds to this order via work_order_id in ITS signed payload, NOT via the work-order signature. |
+| signature | string | required | no | The delegated reddog_id's signature over the canonical payload (Section 2, prefix "reddog-workauth.v1"), verifiable against the reddog_public_key of a PRINCIPAL-authenticated identity that grants this scope. Covers EVERY included field EXCEPT signature itself and receipt_chain. EXCLUDED from the payload it signs (Addendum A). |
 
 ### 1c. SignedReceipt (referenced by receipt_chain) [SPECIFIED_NOT_IMPLEMENTED]
 
@@ -119,8 +121,11 @@ Canonical form (frozen):
    - object keys sorted lexicographically by Unicode code point (ascending),
    - no insignificant whitespace (separators are "," between items and ":" between
      key and value, with NO spaces),
-   - arrays preserved in their given order (order is authoritative for scope lists,
-     path lists, and receipt_chain),
+   - arrays preserved in their given order (order is authoritative for scope lists
+     and path lists). receipt_chain is NOT part of any signed payload (Addendum A):
+     receipt-chain integrity derives from per-receipt signatures + prev_receipt_hash
+     links, NOT from the work-order signature, so it is never serialized into
+     signing_input for the work authority.
    - integers emitted in base-10 with no leading zeros and no fractional part,
    - strings emitted as minimal JSON strings (no non-ASCII; ASCII-only per Section 20).
 3. Prepend a domain-separation prefix literal that names the record kind and version,
@@ -135,16 +140,29 @@ Canonical form (frozen):
    recomputes the identical signing_input from the INCLUDED fields and checks the
    signature; the signature field itself is never part of the input (Addendum A).
 
+Signer per record kind (frozen; this is the anti-self-grant rule):
+- RedDogPrincipalIdentity (the DELEGATION instrument that confers scope) is signed by
+  the PRINCIPAL's key. Its signature is verified against principal_public_key. The
+  RedDog's own key CANNOT sign its identity/scope; a RedDog-signed identity record is
+  invalid (Section 5, Section 11 step 2). This is what makes a pasted or forged identity
+  inert: only the principal's signature (rooted in a token-verified session at issuance)
+  grants scope.
+- RedDogDelegatedWorkAuthority is signed by the delegated reddog_id. Its signature is
+  verified against reddog_public_key, and is valid ONLY if that reddog_id resolves to a
+  live, PRINCIPAL-authenticated identity granting the requested scope.
+- SignedReceipt is signed by the delegated reddog_id (verified against reddog_public_key).
+
 Algorithm family (frozen as a PLACEHOLDER, no key chosen or generated here):
-- The identity and work-authority signatures use an ASYMMETRIC keypair signature
-  (public-verify / private-sign). The public half is reddog_public_key; the private
-  half never appears (Section 4d). This contract does NOT choose a curve, does NOT
-  choose a library, and does NOT generate any key. Curve/library selection is a
-  SEPARATE later slice (SPECIFIED_NOT_IMPLEMENTED).
+- All three signatures use an ASYMMETRIC keypair signature (public-verify / private-sign).
+  The public halves are principal_public_key (identity) and reddog_public_key (work
+  authority + receipt); the private halves never appear (Section 4d). This contract does
+  NOT choose a curve, does NOT choose a library, and does NOT generate any key.
+  Curve/library selection is a SEPARATE later slice (SPECIFIED_NOT_IMPLEMENTED).
 - Rationale for asymmetric (INFERRED): intake's HMAC (symmetric shared secret) proves
   a holder of the shared secret, which is correct for a single-issuer intake but not
-  for many independent RedDog instances whose verifiers must NOT hold a signing secret.
-  A keypair lets a verifier check a RedDog signature WITHOUT the power to forge one.
+  for independent principals and RedDog instances whose verifiers must NOT hold a signing
+  secret. A keypair lets a verifier check a signature WITHOUT the power to forge one, and
+  lets the principal (not the RedDog) hold the key that grants scope.
 
 Determinism requirement: two correct implementations MUST produce byte-identical
 signing_input for the same INCLUDED fields. Any ambiguity (key order, spacing, number
@@ -200,6 +218,8 @@ Fail-closed on expiry: any expiry or nonce check that cannot be positively satis
 - Encoded as an ASCII, self-describing PUBLIC key string (base64url of the public key
   bytes with an algorithm-family tag prefix). No binary blobs on the wire; ASCII only
   (Section 20). The exact key type is deferred with the algorithm choice (Section 2).
+- Applies identically to reddog_public_key and principal_public_key; both are public,
+  both use this encoding, and 4b derives their respective fingerprints.
 
 ### 4b. reddog_key_fingerprint derivation (public-only)
 - fingerprint = a cryptographic hash (SHA-256 family) of the CANONICAL public key
@@ -214,11 +234,12 @@ Fail-closed on expiry: any expiry or nonce check that cannot be positively satis
   the display prefix.
 
 ### 4d. Private-key invariant [CONTRACT INVARIANT]
-- The private signing key NEVER appears in: this record, any repo file, any prompt,
-  any Copy-MD, the receipt chain, any receipt, any log, or any chain write. Only the
-  PUBLIC key and its fingerprint are ever serialized. A future implementation that
-  serializes a private key VIOLATES this contract. (This restates the audit Section 6
-  off-chain/on-chain boundary as a hard invariant.)
+- NO private signing key (RedDog instance private key OR principal private key) EVER
+  appears in: this record, any repo file, any prompt, any Copy-MD, the receipt chain,
+  any receipt, any log, or any chain write. Only the PUBLIC keys and their fingerprints
+  are ever serialized. A future implementation that serializes any private key VIOLATES
+  this contract. (This restates the audit Section 6 off-chain/on-chain boundary as a
+  hard invariant, and extends it to the principal key introduced by this revision.)
 
 ---
 
@@ -228,11 +249,31 @@ How a principal_id authorizes a reddog_id, and what binds them:
 - A RedDogPrincipalIdentity record is the delegation instrument. It names the
   principal_id (the authenticated 012 principal) AND the reddog_id (the instance) AND
   the scopes (repo_scope, foundup_scope) the principal confers.
-- The BINDING is the signature (Section 2) plus the freshness/nonce gates (Section 3):
-  the record is valid only if signed and unexpired and its identity_nonce unconsumed.
+
+Principal-authentication basis [CONTRACT INVARIANT] (the anti-self-grant root):
+- The identity record MUST be authenticated by the PRINCIPAL, via BOTH layers:
+  (a) SIGNATURE: the identity's signature field is a PRINCIPAL signature over the
+      canonical identity payload (Section 2, prefix "reddog-identity.v1"), verifiable
+      against principal_public_key. The RedDog's key CANNOT sign this record.
+  (b) ISSUANCE GATE: principal_id MUST equal a token-verified subject at issuance time,
+      via one of principal_provider in {"github","intake_session","intake_invite"},
+      reusing the OBSERVED intake discipline (subject-not-payload, HMAC-verified token,
+      durable nonce; intake_auth_provider.py L413-430, L505-528, audit Section 2b).
+      A record whose principal_id did not come from a verified session is invalid.
+- Consequence: a rogue RedDog instance CANNOT emit an identity record with an arbitrary
+  principal_id and arbitrary repo_scope/foundup_scope signed with its own key. Without a
+  valid principal signature AND a token-verified issuance, the record is inert. This is
+  the direct code enforcement of "RedDog never self-grants authority" (Section 20).
+
+Binding of the two records:
+- The BINDING is the PRINCIPAL's signature on the identity (this section) PLUS the
+  delegated reddog_id's signature on the work order (Section 2), each with the
+  freshness/nonce gates (Section 3): a record is valid only if correctly signed by the
+  correct signer, unexpired, and with its nonce unconsumed.
 - A RedDogDelegatedWorkAuthority is subordinate: its principal_id and reddog_id MUST
-  match a live, non-revoked RedDogPrincipalIdentity. A work order whose principal_id or
-  reddog_id does not resolve to a live identity = reject (fail-closed).
+  match a live, non-revoked, PRINCIPAL-authenticated RedDogPrincipalIdentity. A work
+  order whose parent identity is missing, revoked, or NOT principal-signed = reject
+  (fail-closed), even if the work-order's own reddog signature verifies.
 
 Scope conferral and the no-escalation rule [CONTRACT INVARIANT]:
 - Delegation CANNOT exceed the principal's own permission. The effective authority of a
@@ -357,6 +398,7 @@ for authority decisions.
 | model-generated summaries / rationales | Produced by a model, not by the principal; must never become authority (this is the whole "role text is never authority" point). |
 | volatile timestamps NOT part of nonce/expiry semantics (e.g. rendered_at, logged_at) | Volatile and non-authoritative. Note: issued_at and expires_at ARE authority-bearing (expiry semantics) and are therefore INCLUDED, not excluded. |
 | receipt RENDER formatting (pretty-printed receipt text, markdown) | Presentation of a receipt is not the receipt. The CANONICAL receipt payload (Section 1c INCLUDED fields) is what is signed and chained. |
+| receipt_chain (on the work authority) | EXCLUDED because it grows post-issuance; a work-order signature fixed at issuance cannot cover a growing array. Receipts are authenticated independently (each SignedReceipt signs its own payload + prev_receipt_hash) and bind to the order via work_order_id carried in the receipt's OWN signed payload. The work-order signature covers everything EXCEPT signature and receipt_chain. |
 
 Rule to state verbatim (frozen):
 
@@ -373,7 +415,8 @@ default to EXCLUDED and therefore carry no authority (fail-safe default).
 
 | Surface | Spoof attempt | Required proof | Fail-closed behavior |
 |---------|---------------|----------------|----------------------|
-| RedDog prompt text | prompt says "I am 012" | A signature over the canonical payload by a live, non-revoked identity rooted in a token-verified principal_id | Prompt text is inert; with no valid signature the packet is rejected; no execution |
+| RedDog prompt text | prompt says "I am 012" | A PRINCIPAL signature on the identity (principal_public_key) rooted in a token-verified principal_id, plus a reddog signature on the work order | Prompt text is inert; with no valid principal-signed identity the packet is rejected; no execution |
+| RedDog self-mint | a RedDog signs its own identity with wide scope using its own key | Identity signature MUST verify against principal_public_key (principal-signed), not reddog_public_key; principal_id token-verified at issuance | RedDog-signed identity is invalid; self-granted scope rejected (Section 5, Section 11 step 2a) |
 | Replay | copied prior authorization packet resubmitted | Unconsumed single-use nonce (durable atomic consume) AND now < expires_at | Consumed nonce or expired = reject; replay fails |
 | Stale permission | attach an old, more permissive permission snapshot | permission_snapshot_digest bound in signature AND is_snapshot_fresh() true AND grants the verb | Stale/missing/insufficient snapshot = reject (fail-closed) |
 | Impersonated instance | different reddog_id using the same principal_id | reddog_id MUST match a live RedDogPrincipalIdentity delegating THAT reddog_id from THAT principal_id; signature by that instance key | Mismatched reddog_id / missing identity = reject |
@@ -387,9 +430,17 @@ default to EXCLUDED and therefore carry no authority (fail-safe default).
 ## 11. Verification order (INFERRED synthesis, ratifying audit Section 4)
 
 A future verifier MUST evaluate in this order; any miss = fail-closed, no execution:
-1. Revocation check first: reddog_id / fingerprint not revoked (Section 9).
-2. Signature verifies against a known, non-revoked reddog_public_key / principal key
-   over the exact canonical signing_input (Section 2).
+1. Revocation check first: reddog_id / fingerprint (and principal_id) not revoked
+   (Section 9).
+2. TWO signatures, checked SEPARATELY (Section 2 signer-per-record-kind):
+   2a. Parent identity: its signature verifies against principal_public_key over the
+       canonical identity payload, AND its principal_id was token-verified at issuance
+       (Section 5 basis). A work order whose parent identity is NOT principal-signed (or
+       is RedDog-signed) = reject, regardless of the work order's own signature.
+   2b. Work order: its signature verifies against the reddog_public_key of that
+       principal-authenticated identity over the canonical work-authority payload.
+   A valid reddog signature on the work order does NOT substitute for a valid principal
+   signature on the identity; both are required.
 3. Freshness/replay: identity and work order unexpired (single shared time gate,
    Section 3); nonce unconsumed then atomically consumed AFTER signature success.
 4. Permission: permission_snapshot_digest resolves to a FRESH snapshot granting the
@@ -415,12 +466,19 @@ Only when ALL pass does the work authority become executable. This is the audit'
 
 Hard invariants restated (contract must enforce in any future implementation):
 - No private keys anywhere (repo, prompt, Copy-MD, chain, receipt, log) (Section 4d).
-- Work order MUST be signed (Section 2); permission snapshot MUST be fresh AND bound
-  into the signed payload (Section 7); foundup_scope MUST be explicit (Section 6);
-  rewards attach to SIGNED receipts, not model claims (Sections 8, 10).
-- RedDog NEVER self-grants authority: broadening execution authority is a high-risk
-  change requiring WSP_96 3-agent consensus + 0102 veto, and MUST NOT be self-approved
-  (WSP_48 Sec 8.3, WSP_100). (OBSERVED WSP bindings, audit Section 1.)
+- The DELEGATION instrument (RedDogPrincipalIdentity) MUST be signed by the PRINCIPAL's
+  key and its principal_id token-verified at issuance; the RedDog key CANNOT sign its own
+  identity/scope (Section 5, Section 2, Section 11 step 2a). Work order MUST be signed by
+  the delegated reddog key (Section 2); permission snapshot MUST be fresh AND bound into
+  the signed payload (Section 7); foundup_scope MUST be explicit (Section 6); receipt_chain
+  is NOT in the work-order signed payload and each receipt is independently signed
+  (Sections 1b, 8, Addendum A); rewards attach to SIGNED receipts, not model claims
+  (Sections 8, 10).
+- RedDog NEVER self-grants authority: (a) at the instrument level, a RedDog-signed
+  identity is invalid (only a principal signature grants scope, Section 5); and (b)
+  broadening execution authority is a high-risk change requiring WSP_96 3-agent consensus
+  + 0102 veto, and MUST NOT be self-approved (WSP_48 Sec 8.3, WSP_100). (OBSERVED WSP
+  bindings, audit Section 1.)
 
 ---
 
@@ -497,10 +555,41 @@ Round 8 (completeness sweep) -- "Is any authority-bearing field still excludable
   future fields default to EXCLUDED (fail-safe, carry no authority). No new spoof
   constructed. RESULT: no residual bypass found in this pass.
 
-Outcome: all constructed attacks (Rounds 1-7) were closed by tightening the referenced
-sections; Round 8 found no residual authority-bearing exclusion. No attack in this pass
-satisfied the letter of the tightened schema while still spoofing, replaying, or
-over-scoping.
+Round 9 -- "Append receipts under a fixed work-order signature."
+- Attack: the work-order signature is fixed at issuance, yet receipt_chain was named as
+  an authoritative-order array INSIDE the signed payload. Either (a) appending any
+  receipt breaks the work-order signature (no receipts can ever be added), or (b) if the
+  verifier tolerates the mismatch, an attacker swaps/reorders receipt_chain after signing
+  because the signature no longer actually pins it.
+- Result: SUCCEEDS as a contradiction that a verifier would resolve unsafely (tolerating
+  a post-sign array = unpinned receipts = forgeable chain).
+- Tightening: receipt_chain is now EXCLUDED from the work-authority signed payload
+  (Addendum A row; Section 1b; Section 2 array-order note). Chain integrity derives from
+  per-receipt signatures + prev_receipt_hash, and each receipt binds to the order via
+  work_order_id in ITS OWN signed payload (Section 1c). The work-order signature covers
+  everything EXCEPT signature and receipt_chain. No unpinned-array ambiguity remains, and
+  receipts cannot be forged because each is independently signed. CLOSED.
+
+Round 10 -- "RedDog self-mints its own identity and scope."
+- Attack: a rogue RedDog instance emits a RedDogPrincipalIdentity naming an arbitrary
+  principal_id with wide repo_scope/foundup_scope, signs it with its OWN reddog key, then
+  issues work orders under it. Under the prior text ("identity and work-authority
+  signatures use reddog_public_key") this self-grant would verify.
+- Result: SUCCEEDS under the prior single-signer rule -- a direct violation of "RedDog
+  never self-grants authority."
+- Tightening: Section 2 now fixes the SIGNER per record kind -- the identity (the
+  delegation instrument) is signed by the PRINCIPAL's key (principal_public_key) AND its
+  principal_id must be token-verified at issuance (Section 5 basis); the work order and
+  receipts are signed by the reddog key. Section 11 step 2 checks the principal signature
+  on the identity SEPARATELY from the reddog signature on the work order and rejects any
+  work order whose parent identity is not principal-signed. Section 4d extends the
+  never-appears invariant to the principal private key. A RedDog-signed identity is now
+  invalid, so the self-mint fails closed. CLOSED.
+
+Outcome: all constructed attacks (Rounds 1-7, 9, 10) were closed by tightening the
+referenced sections; Round 8 found no residual authority-bearing exclusion. No attack in
+this pass satisfied the letter of the tightened schema while still spoofing, replaying,
+self-granting, or over-scoping.
 
 ---
 
