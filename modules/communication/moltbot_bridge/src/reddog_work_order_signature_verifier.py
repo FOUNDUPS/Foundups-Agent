@@ -14,6 +14,16 @@ generalizing the proven intake_auth_provider pattern:
     - bounded expiry via a single shared time gate with fixed leeway
     - fail-closed on any miss; reason CODES only (never expected-value / key material)
 
+NONCE SEMANTICS (two distinct nonces; contract Section 3):
+    - The IDENTITY credential (RedDogPrincipalIdentity) is a longer-lived, REUSABLE
+      delegation instrument bounded by its TTL; its identity_nonce is an ISSUANCE-time
+      concern and is NOT consumed here. The same identity may authorize many work orders
+      within its TTL. (Consuming it per work order would wrongly lock out legitimate reuse.)
+    - The WORK-AUTHORITY nonce is CONSUME-ONCE: it is durably consumed on a full ACCEPT
+      (the terminal step, still AFTER signature success), so a work order cannot be replayed.
+    In short: identity credential nonce != work-authority nonce; the identity is reusable
+    within TTL, the work authority is single-use.
+
 The raw asymmetric signature check is DEFERRED per contract Section 2 (no curve/library
 chosen, no key generated here). It is provided by an injected `SignatureVerifier`; the
 default is fail-closed. Tests inject a mock backend. `constant_time_compare` wraps

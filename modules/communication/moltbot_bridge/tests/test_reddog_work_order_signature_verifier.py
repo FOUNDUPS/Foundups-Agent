@@ -442,6 +442,48 @@ def test_non_bool_truthy_verifier_result_rejects() -> None:
     assert r.accepted is False and ReasonCode.IDENTITY_SIGNATURE_INVALID in r.reason_codes
 
 
+# ---- 012 review point 1: nonce semantics (identity reusable; work-auth once) --- #
+def test_identity_reusable_but_work_authority_nonce_consume_once() -> None:
+    """The SAME identity authorizes multiple work orders (reusable within TTL); each
+    work-authority nonce is single-use; reusing a work-auth nonce replays."""
+    crypto, identity, wa1, ctx = _build()
+    store = ctx["nonce_store"]  # one store shared across all submissions
+
+    # wo-1 with its own nonce -> ACCEPT (identity used once)
+    assert _run(identity, wa1, ctx).accepted is True
+
+    # wo-2: SAME identity, DIFFERENT work order + DIFFERENT nonce -> ACCEPT (identity reused)
+    wa2 = dict(wa1)
+    wa2["work_order_id"] = "wo-2"
+    wa2["nonce"] = "nonce-unique-0002"
+    _resign_wa(crypto, identity, wa2)
+    assert _run(identity, wa2, ctx).accepted is True, "identity must be reusable within TTL"
+
+    # wo-3: SAME identity but REUSE wo-1's nonce -> REPLAY (work-auth nonce is consume-once)
+    wa3 = dict(wa1)
+    wa3["work_order_id"] = "wo-3"
+    wa3["nonce"] = wa1["nonce"]  # reused
+    _resign_wa(crypto, identity, wa3)
+    r3 = _run(identity, wa3, ctx)
+    assert r3.accepted is False and ReasonCode.NONCE_REPLAY in r3.reason_codes
+
+
+# ---- 012 review point 2: a rejected result must be falsey (cannot authorize) --- #
+def test_rejected_result_is_falsey_and_cannot_authorize() -> None:
+    from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
+        require_authorized, WorkOrderRejected,
+    )
+    _, identity, workauth, ctx = _build()
+    workauth["allowed_paths"] = ["**"]  # tamper -> rejected
+    rejected = _run(identity, workauth, ctx)
+    assert rejected.accepted is False
+    assert bool(rejected) is False              # accidental `if result:` cannot authorize
+    assert not rejected                          # explicit falsiness
+    assert rejected.reason_codes                 # ...even though reason_codes is a NON-empty (truthy) list
+    with pytest.raises(WorkOrderRejected):
+        require_authorized(rejected)
+
+
 # ---- CoR-R2 regression: non-serializable payload fails closed (no crash) ---- #
 def test_non_serializable_payload_fails_closed() -> None:
     _, identity, workauth, ctx = _build()
