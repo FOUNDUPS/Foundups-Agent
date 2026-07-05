@@ -1,5 +1,17 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-05: REDDOG_WORK_ORDER_SIGNATURE_VERIFIER_PHASE1 (E1 -- first implementation)
+
+**Author**: 0102 (RedDog Architect, Lane A Identity/Delegation/Signing) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
+**WSP**: 00, 15, 22, 50, 54, 71, 96, 97 | **Base**: `1a2412c0d` (after #925-#931; E0 merged)
+
+- NEW `src/reddog_work_order_signature_verifier.py`: VERIFICATION ONLY. Validates a signed `RedDogDelegatedWorkAuthority` against its `RedDogPrincipalIdentity` per the ratified contract #928 (canonicalization Section 2, order Section 11) + E0. Implements canonical_signing_input (sorted-key compact JSON + LITERAL domain-prefix strip, ASCII-only, exclude {signature, receipt_chain}) and the full pipeline: revocation-first -> anti-self-mint anchors -> two signatures (identity by principal key, work order by reddog key) -> freshness (single shared time gate) -> snapshot fresh+digest-bound+grants -> repo/foundup scope -> forbidden-op + effective-path IN-FOUNDUP-SCOPE -> valve -> nonce-consume-LAST. Returns `VerificationResult(accepted, reason_codes)` (static codes, no expected-value/key leak). Raw asymmetric verify is INJECTED (algorithm deferred by contract); default `FailClosedSignatureVerifier`. NO signing, NO keygen, NO private key, NO execution side effect, NO subprocess/os/secrets import.
+- Generalizes the proven intake_auth_provider pattern: verified-subject-not-payload, literal prefix strip, durable single-use nonce (consumed only after signature success), fail-closed, `hmac.compare_digest` constant-time.
+- Enforcement seam: `require_authorized(result)` raises `WorkOrderRejected`; `VerificationResult.__bool__` == accepted (a bare `if result:` cannot mean "object exists").
+- TEST `tests/test_reddog_work_order_signature_verifier.py` (29): the 17 required (valid; tamper; non-canonical; expiry; nonce replay; revoked key_epoch; wrong principal; wrong reddog_id; changed allowed_paths; changed foundup_scope; snapshot stale+mismatch; missing signature; free-text "012"; no-leak; constant-time; no-private-key; AST denylist) + CoR regressions (path-out-of-scope; traversal; untrusted/mismatched principal key; key-reuse self-mint; empty key_epoch; nonce-not-burned-on-transient-reject; bool/require_authorized; admin-verb-needs-can_admin; non-bool-verifier; non-serializable-fail-closed). 74 spine tests green, no regression.
+- **9-lens adversarial CoR, 2 rounds: R1 found 3 blocker (path widening, principal self-mint, key-reuse self-mint) + 4 major (nonce lockout, key_epoch omission bypass, unwrapped deps, truthy-result misuse) + 2 minor -- ALL folded; R2 all 9 lenses SAFE, 0 blocker/0 major (2 residual minors: identity_nonce intentionally not consumed at work-order time = reusable identity; caller-enforcement is require_authorized).**
+- **E0/E1 Sequence Lock honored: E0 is merged (#931); no signature is authority until BOTH E0+E1 land + gate review. This slice = VERIFIED_READY draft PR only; not merged.** INDEX_GAP: new verifier + E0/E1 docs unindexed (operator re-index).
+
 ## 2026-07-05: REDDOG_SIGNING_KEY_ISOLATION_CONTRACT_PHASE1 (E0 decision doc, pointer)
 
 **Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: decision-only PR (no code, no keys, no authority change)
