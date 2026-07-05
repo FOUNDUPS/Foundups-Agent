@@ -61,6 +61,16 @@ def _safe_int(v: Any) -> int:
         return 0
 
 
+def _as_ref_list(v: Any) -> List[str]:
+    """Coerce evidence_refs to a list of str, FAILING CLOSED to [] for any non-list/tuple (a
+    scalar/dict/None). A model-emitted scalar `evidence_refs` (e.g. 7) must normalize to no
+    evidence, never raise a TypeError from iterating a non-iterable (CoR robustness, mirrors
+    _safe_int for index)."""
+    if isinstance(v, (list, tuple)):
+        return [str(r) for r in v]
+    return []
+
+
 class ReasonCode:
     """Static validation reason codes (no invented / free-text answers pass)."""
 
@@ -112,7 +122,7 @@ class DetermineAnswer:
             question_text=str(obj.get("question_text", "")),
             answer=str(obj.get("answer", "")).strip().lower(),
             wsp97_label=str(obj.get("wsp97_label", "")).strip(),
-            evidence_refs=[str(r) for r in (obj.get("evidence_refs") or [])],
+            evidence_refs=_as_ref_list(obj.get("evidence_refs")),
         )
 
 
@@ -561,9 +571,16 @@ def assert_repair_preserves(
     rep = _coerce_answers(repaired_answers)
     result = RepairValidation(valid=False)
 
-    # 1. one answer per question survives (no collapse to prose)
+    # 1. one answer per question survives (no collapse to prose) AND every ORIGINAL-answered
+    #    index survives. The len(qs) check catches a collapse below the question count; the
+    #    original-coverage check additionally catches a repair that drops an answer the primary
+    #    produced at an index OUTSIDE 1..len(qs) (a surplus/over-answered index) -- those are
+    #    invisible to the per-question (`for q in qs`) steps, so without this a surplus answer
+    #    could be dropped with its evidence and still pass (fail-closed instead).
     rep_indices = [a.index for a in rep if a.index in {q.index for q in qs}]
-    if len(set(rep_indices)) < len(qs):
+    rep_all_indices = {a.index for a in rep}
+    orig_answered_indices = {a.index for a in orig}
+    if len(set(rep_indices)) < len(qs) or not orig_answered_indices.issubset(rep_all_indices):
         result.reason_codes.append(ReasonCode.REPAIR_COLLAPSED_TO_PROSE)
 
     # 2. Determine list preserved (indices + question text)

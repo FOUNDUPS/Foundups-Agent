@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.41';
+const EXTENSION_VERSION = '0.3.42';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -1629,6 +1629,47 @@ function mergeRepairedOutput(primaryContent, repairContent, missingSections) {
   return { text: merged, appendedSections: appended, stillMissing: stillMissing };
 }
 
+// REDDOG_REPAIR_PRESERVES_EVIDENCE_PHASE1: a JS-side presence check for a Determine answer block
+// (ATX or SETEXT heading). Used ONLY to fail closed when the Python guard bridge is unavailable --
+// never to make a preservation decision (that is the Python guard's job).
+const DETERMINE_ANSWERS_BLOCK_RE = /^[ \t]*(?:#{1,6}[ \t]+[^\n]*\bdetermine[ \t]+answers\b|[^\n]*\bdetermine[ \t]+answers\b[^\n]*\n[ \t]*(?:=+|-+)[ \t]*$)/im;
+
+function hasDetermineAnswersBlock(text) {
+  return typeof text === 'string' && DETERMINE_ANSWERS_BLOCK_RE.test(text);
+}
+
+// Synchronously invoke the RedDog repair-evidence guard bridge (scripts/reddog_repair_guard_once.py),
+// which REUSES the Determine contract's assert_repair_preserves (no rules duplicated in JS).
+//   action 'protect' -> { ok, has_determine, protected_context }
+//   action 'guard'   -> { ok, has_determine, preserved, keep_original, reason_codes }
+// Fail-closed: any error returns { ok: false } and the caller decides conservatively.
+function runRepairGuard(context, action, prompt, primary, repaired) {
+  try {
+    const root = workspaceRoot();
+    const config = vscode.workspace.getConfiguration('foundupsFusion');
+    const configuredPython = config.get('pythonPath') || 'python';
+    const interpreter = resolvePythonInterpreter(root, configuredPython);
+    const script = path.join(root, 'scripts', 'reddog_repair_guard_once.py');
+    const payload = { action: action, prompt: String(prompt || ''), primary: String(primary || '') };
+    if (typeof repaired === 'string') {
+      payload.repaired = repaired;
+    }
+    const stdout = cp.execFileSync(interpreter.path, ['-B', script], {
+      input: JSON.stringify(payload),
+      cwd: root,
+      env: buildBridgePythonEnv(process.env),
+      encoding: 'utf8',
+      timeout: 15000,
+      maxBuffer: 8 * 1024 * 1024,
+      windowsHide: true
+    });
+    const lines = String(stdout || '').trim().split('\n');
+    return JSON.parse(lines[lines.length - 1]);
+  } catch (e) {
+    return { ok: false, reason: 'guard_bridge_error' };
+  }
+}
+
 function isSubstantiveRedDogWorker(workerType) {
   const worker = cleanWorkerType(workerType);
   return worker === 'reddog_architect' || worker === 'wsp_gate_critic' || worker === 'repair_planner';
@@ -1929,7 +1970,14 @@ function wireFusionWebview(context, webview, worker, state) {
         workTrail.push('repair_started', 'repair_mode=openrouter_single; context=repair_minimal');
         postStatusAndProgress(webview, null, 'Output schema incomplete. Missing: ' + validation.missingSections.join(', ') + '. Running one repair pass...');
         const repairPrompt = buildRepairPrompt(wspTaskPrompt, result.content, validation.missingSections);
-        const repairContext = buildRepairBoundedContext();
+        let repairContext = buildRepairBoundedContext();
+        // REDDOG_REPAIR_PRESERVES_EVIDENCE_PHASE1: if the primary carries a Determine answer block,
+        // prepend the protected block so the repair model reproduces it UNCHANGED (add sections only).
+        const evidenceProtect = runRepairGuard(context, 'protect', wspTaskPrompt, result.content, null);
+        if (evidenceProtect && evidenceProtect.ok && evidenceProtect.has_determine && evidenceProtect.protected_context) {
+          repairContext = evidenceProtect.protected_context + '\n\n' + repairContext;
+          validationState.repair_evidence_protected = true;
+        }
         const repairSystemPrompt = [
           'Complete missing advisory markdown sections only.',
           'Output ONLY the missing section headers and bodies listed in the user prompt.',
@@ -1953,21 +2001,51 @@ function wireFusionWebview(context, webview, worker, state) {
         if (repairResult.ok) {
           const mergeResult = mergeRepairedOutput(result.content, repairResult.content, validation.missingSections);
           validationState.repair_appended_sections = mergeResult.appendedSections;
-          const repairValidation = validateRedDogOutput(mergeResult.text, { substantiveArchitect: true, mode: mode });
-          validationState.repair_ok = repairValidation.valid;
-          validationState.missing_sections_after_repair = repairValidation.missingSections.length
-            ? repairValidation.missingSections
-            : mergeResult.stillMissing;
-          if (repairValidation.valid) {
-            result = Object.assign({}, repairResult, { content: mergeResult.text, mode: mode });
-            validationState.validated = true;
-            validationState.missing_sections = [];
-            workTrail.push('repair_complete', 'schema_repair_pass');
+          // REDDOG_REPAIR_PRESERVES_EVIDENCE_PHASE1: revalidate that the merge PRESERVED the primary's
+          // Determine evidence. If the repair dropped/reordered/weakened/fabricated it, DISCARD the
+          // merge and keep the primary + its validation failure (fail-closed). The preservation rules
+          // are the Python guard's (assert_repair_preserves) -- not reimplemented here.
+          const evidenceGuard = runRepairGuard(context, 'guard', wspTaskPrompt, result.content, mergeResult.text);
+          let evidenceKeepOriginal;
+          if (evidenceGuard && evidenceGuard.ok) {
+            evidenceKeepOriginal = evidenceGuard.keep_original === true;
+            validationState.repair_evidence_preserved = !evidenceKeepOriginal;
+            if (Array.isArray(evidenceGuard.reason_codes) && evidenceGuard.reason_codes.length) {
+              validationState.repair_evidence_reasons = evidenceGuard.reason_codes;
+            }
           } else {
+            // guard bridge unavailable -> fail closed if the primary carried a Determine block
+            evidenceKeepOriginal = hasDetermineAnswersBlock(result.content);
+            validationState.repair_evidence_preserved = !evidenceKeepOriginal;
+            if (evidenceKeepOriginal) {
+              validationState.repair_evidence_reasons = ['guard_bridge_unavailable'];
+            }
+          }
+          if (evidenceKeepOriginal) {
             validationState.validated = false;
             validationState.output_validation_failed = true;
-            validationState.repair_failure_reason = 'schema_incomplete_after_repair';
-            result.content = appendValidationFailureContent(mergeResult.text, validationState);
+            validationState.repair_ok = false;
+            validationState.repair_failure_reason = 'repair_dropped_determine_evidence';
+            validationState.missing_sections_after_repair = validation.missingSections;
+            workTrail.push('repair_blocked', 'repair_dropped_determine_evidence');
+            result.content = appendValidationFailureContent(result.content, validationState);
+          } else {
+            const repairValidation = validateRedDogOutput(mergeResult.text, { substantiveArchitect: true, mode: mode });
+            validationState.repair_ok = repairValidation.valid;
+            validationState.missing_sections_after_repair = repairValidation.missingSections.length
+              ? repairValidation.missingSections
+              : mergeResult.stillMissing;
+            if (repairValidation.valid) {
+              result = Object.assign({}, repairResult, { content: mergeResult.text, mode: mode });
+              validationState.validated = true;
+              validationState.missing_sections = [];
+              workTrail.push('repair_complete', 'schema_repair_pass');
+            } else {
+              validationState.validated = false;
+              validationState.output_validation_failed = true;
+              validationState.repair_failure_reason = 'schema_incomplete_after_repair';
+              result.content = appendValidationFailureContent(mergeResult.text, validationState);
+            }
           }
         } else {
           validationState.validated = false;
@@ -3871,6 +3949,8 @@ module.exports = {
   buildRepairPrompt,
   buildRepairBoundedContext,
   mergeRepairedOutput,
+  hasDetermineAnswersBlock,
+  runRepairGuard,
   extractMarkdownSection,
   buildSectionHeaderPattern,
   normalizeRepairBridgeStageToWorkTrail,

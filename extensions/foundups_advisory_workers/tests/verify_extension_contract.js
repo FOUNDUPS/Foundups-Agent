@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.41', 'package version must be 0.3.41');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.41'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.42', 'package version must be 0.3.42');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.42'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.41', 'README version mismatch');
+includes(readme, 'Version: 0.3.42', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -1568,7 +1568,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.41'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.42'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -1582,7 +1582,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.41'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.42'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -1594,7 +1594,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.41'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.42'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -1910,5 +1910,42 @@ const copyManualCheck = orchestrator.buildCopyMarkdown(
 );
 includes(copyManualCheck, 'Continuation from last RedDog packet', 'manual check: Copy MD must still append continuation summary (feature available on opt-in)');
 includes(copyManualCheck, 'continuation_enabled: true', 'manual check: Copy MD telemetry must report enabled=true');
+
+// REDDOG_REPAIR_PRESERVES_EVIDENCE_PHASE1: the repair path must protect a primary Determine
+// answer block through the schema-repair pass (reuses the Python guard; no rules duplicated in JS).
+// (a) source wiring: pre-repair protect-block injection + post-merge revalidate + keep-original.
+includes(extensionJs, "runRepairGuard(context, 'protect'", 'repair path must inject the protected Determine block before repair');
+includes(extensionJs, "runRepairGuard(context, 'guard'", 'repair path must revalidate the merged output against the guard');
+includes(extensionJs, 'repair_dropped_determine_evidence', 'repair path must keep the original when the repair loses Determine evidence');
+includes(extensionJs, 'repair_evidence_preserved', 'repair path must record evidence-preservation telemetry');
+assert(fs.existsSync(path.join(root, 'scripts', 'reddog_repair_guard_once.py')), 'repair guard bridge script must exist');
+
+// (b) hasDetermineAnswersBlock presence check (fail-closed fallback): ATX + SETEXT, not prose.
+assert(orchestrator.hasDetermineAnswersBlock('## Determine Answers\n\n```json\n[]\n```') === true, 'ATX Determine block detected');
+assert(orchestrator.hasDetermineAnswersBlock('Determine Answers\n=================\n') === true, 'SETEXT Determine block detected');
+assert(orchestrator.hasDetermineAnswersBlock('## Decision\n\nprose only, no block') === false, 'prose must not be detected as a block');
+
+// (c) end-to-end through the real Python guard bridge (reuses assert_repair_preserves).
+const rgPrompt = 'Audit.\n\nDetermine:\n1. Is the valve closed?\n2. Is the gate built?\n\nEnd.\n';
+const rgAnswers = [
+  { index: 1, question_text: 'Is the valve closed?', answer: 'yes', wsp97_label: 'OBSERVED', evidence_refs: ['modules/x/valve.py:9'] },
+  { index: 2, question_text: 'Is the gate built?', answer: 'no', wsp97_label: 'OBSERVED', evidence_refs: ['modules/x/gate.py:12'] }
+];
+const rgBlock = (answers) => '## Determine Answers\n\n```json\n' + JSON.stringify(answers, null, 2) + '\n```';
+const rgPrimary = '## Decision\n\nProceed.\n\n' + rgBlock(rgAnswers);
+const rgProtect = orchestrator.runRepairGuard(null, 'protect', rgPrompt, rgPrimary, null);
+if (rgProtect && rgProtect.ok) {
+  assert(rgProtect.has_determine === true, 'protect: block detected');
+  assert(/modules\/x\/valve\.py:9/.test(rgProtect.protected_context || ''), 'protect: context carries file:line evidence, not just a summary');
+  const rgFaithful = orchestrator.runRepairGuard(null, 'guard', rgPrompt, rgPrimary, rgPrimary + '\n\n## Findings\n\nadded.');
+  assert(rgFaithful.ok === true && rgFaithful.keep_original === false, 'guard: faithful repair (adds a section) is accepted');
+  const rgStripped = orchestrator.runRepairGuard(null, 'guard', rgPrompt, rgPrimary, '## Decision\n\nProceed.\n\n' + rgBlock([Object.assign({}, rgAnswers[0], { evidence_refs: [] }), rgAnswers[1]]));
+  assert(rgStripped.ok === true && rgStripped.keep_original === true, 'guard: evidence-stripping repair keeps original');
+  const rgDropped = orchestrator.runRepairGuard(null, 'guard', rgPrompt, rgPrimary, '## Decision\n\nProceed. See above.\n');
+  assert(rgDropped.ok === true && rgDropped.keep_original === true, 'guard: repair that drops the whole block keeps original');
+  console.log('  repair-evidence guard bridge end-to-end: OK');
+} else {
+  console.log('  repair-evidence guard bridge unavailable (python) -- source wiring + presence checks still enforced');
+}
 
 console.log('Foundups®Agent extension contract checks passed.');
