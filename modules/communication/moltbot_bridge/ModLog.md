@@ -1,5 +1,16 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-05: REDDOG_OPERATOR_LOOP_AND_GENERIC_SPINE_AUDIT_PHASE1 (decision docs, pointer)
+
+**Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: decision-only PR (no code, no authority change)
+**WSP**: 00, 15, 22, 48, 50, 54, 64, 66, 96, 97 | **Base**: `4094ed58e` (#925 merged)
+
+- Decision/contract-only slice. NO code, NO extension change, NO WSP-framework edit, NO live-writer change, NO re-index. Two docs land the record on main as the basis for the next layer (threat model, slice C).
+- ADD `docs/audits/architecture/REDDOG_GENERIC_AGENT_WORKTREE_WRITE_SPINE_AUDIT_PHASE1.md` -- 5-lens audit of #925: verdict KEEP_FOUNDUP_SPECIFIC_FOR_NOW + EXTRACT_GENERIC_SPINE_CONTRACT_NEXT; ~8 generic-SPINE vs ~5 FoundUp-POLICY couplings; runner already generic; 2 latent blockers gate genericization/012-out-of-loop (caller allowed_paths deletes containment; writer uses `_resolve_valve_state(env,[])` skipping the spine chain). Hard rule: generic != unbounded. INDEX_GAP confirmed.
+- ADD `docs/audits/architecture/REDDOG_OPERATOR_LOOP_WSP97_BINDING_PHASE1.md` -- binds RedDog to run the WSP 97 operator loop autonomously (the 5 mandatory questions as a preamble receipt chain), ACTIVE-DERIVED not caller-asserted; extends WSP 97 (WSP 64, no new WSP). 4-lens adversarial CoR (9 blocker/11 major DESIGN findings) folded. **Core boundary (enforced by static test): the operator loop gives INTEGRITY, not AUTHENTICITY -- WSP derivation does NOT prove authorization.** Adds protected-oracle requirement (5A), 7 permanent system invariants (5B), derived-WSP-to-actual-work binding (5C). Signature/authenticity layer deferred to slices C/D; valve must not trust the unsigned `REDDOG` label until then.
+- TEST `tests/test_reddog_operator_loop_and_generic_spine_audit_phase1.py`: static doc test (reads the .md files, asserts anchor strings incl. the integrity-not-authenticity boundary + the no-authenticity-overclaim gate; ASCII-clean). No runtime import, no authority behavior.
+- Sequence: A(prove #925) -> **B(these docs)** -> C(REDDOG_IDENTITY_SPOOFING_AND_DELEGATION_THREAT_MODEL_PHASE1) -> D(PRINCIPAL_IDENTITY_AND_DELEGATION_CONTRACT) -> E(GENERIC_SPINE_CONTRACT) -> F(generic writer, later).
+
 ## 2026-07-04: FOUNDUP_CREATE_ACTION_DRYRUN_PHASE1 (create_foundup canonical action)
 
 **Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
