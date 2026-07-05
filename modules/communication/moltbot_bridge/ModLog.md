@@ -1,5 +1,16 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-05: REDDOG_SIGNING_KEY_ISOLATION_CONTRACT_PHASE1 (E0 decision doc, pointer)
+
+**Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: decision-only PR (no code, no keys, no authority change)
+**WSP**: 00, 15, 22, 48, 50, 54, 64, 71, 95, 96, 97 | **Base**: `62e6e7a48` (after #925-#929)
+
+- Decision/contract-only. Slice E0 -- the mandatory precondition for E1 (the signature verifier). Extends WSP 71 (Secrets Mgmt + s3.4 SkillSafetyGate); grounds on secrets_mcp/vault_resolver.py (op://+TTL+audit-hash SHAPE, MOCK/no-principal-scoping) + intake_auth_provider.py (compare_digest, sign-current/verify-current+previous).
+- ADD `docs/audits/architecture/REDDOG_SIGNING_KEY_ISOLATION_CONTRACT_PHASE1.md` -- isolates the future signing key from any code RedDog loads (closes threat-model G5.1: poisoned in-process Skill/dep reaches vault -> emits a VALID signature). 4-lens adversarial CoR (11 blocker/12 major) folded. Boundary invariants: MANDATORY distinct OS principal (same-user separation is NOT a boundary; PR_SET_DUMPABLE=0/RLIMIT_CORE=0/no-ptrace); no inherited env; host connects (not spawns) over perm-restricted socket; requester identity from KERNEL peer credential (SO_PEERCRED) not request-body; sign-what-you-validate (canonical_payload single source of truth); high-authority tiers need consensus/012-DAO co-sign + per-principal rate/volume cap; sign-current-key-only + key_epoch; resolve-per-sign/zeroize/TTL-at-use; key_fingerprint from public material never sha256(secret); keyed/chained audit_mac; WSP71 permission-validated retrieval (get_secret+agent_id->PermissionDeniedError) not op:// possession; constant-time both sides + no secret in argv/exit/shm/coredump.
+- **Strict E0/E1 Sequence Lock (012): E1 verifier implementation is BLOCKED until E0 lands. E1 tests/APIs/semantics authored before E0 merge are non-authoritative and discarded/revalidated after E0. No signature is authority until BOTH E0 and E1 have landed + passed gate review.**
+- TEST `tests/test_reddog_signing_key_isolation_contract_doc.py` (11): asserts distinct-OS-principal, kernel-peer-credential, sign-what-you-validate, co-sign+rate-cap, fingerprint-not-secret-hash + keyed-audit, WSP71-permission-validated-retrieval, the E0/E1 sequence lock, no-parallel-build-relaxation, decision-only; ASCII-clean.
+- Sequence: A #925 -> B #927 -> C #929 -> D #926/#928 -> **E0(this)** -> E1 signature verifier (BLOCKED until E0 merges) -> F signed receipts -> G reward mapping -> H generic writer.
+
 ## 2026-07-05: REDDOG_RECURSIVE_SELF_GOVERNANCE_THREAT_MODEL_PHASE1 (decision doc, pointer)
 
 **Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: decision-only PR (no code, no authority change)
