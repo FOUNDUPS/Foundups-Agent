@@ -1631,11 +1631,32 @@ function mergeRepairedOutput(primaryContent, repairContent, missingSections) {
 
 // REDDOG_REPAIR_PRESERVES_EVIDENCE_PHASE1: a JS-side presence check for a Determine answer block
 // (ATX or SETEXT heading). Used ONLY to fail closed when the Python guard bridge is unavailable --
-// never to make a preservation decision (that is the Python guard's job).
-const DETERMINE_ANSWERS_BLOCK_RE = /^[ \t]*(?:#{1,6}[ \t]+[^\n]*\bdetermine[ \t]+answers\b|[^\n]*\bdetermine[ \t]+answers\b[^\n]*\n[ \t]*(?:=+|-+)[ \t]*$)/im;
+// never to make a preservation decision (that is the Python guard's job). Implemented per physical
+// line with only bounded/single-quantifier regexes (no overlapping `[^\n]*` -> ReDoS-safe).
+const DETERMINE_ANSWERS_HEADING_TEXT_RE = /determine[ \t]+answers/i;
+const DETERMINE_ANSWERS_ATX_PREFIX_RE = /^[ \t]{0,8}#{1,6}[ \t]/;
+const SETEXT_UNDERLINE_RE = /^[ \t]*(?:=+|-+)[ \t]*$/;
 
 function hasDetermineAnswersBlock(text) {
-  return typeof text === 'string' && DETERMINE_ANSWERS_BLOCK_RE.test(text);
+  if (typeof text !== 'string' || !text) {
+    return false;
+  }
+  const lines = text.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!DETERMINE_ANSWERS_HEADING_TEXT_RE.test(line)) {
+      continue;
+    }
+    // ATX: "# ... Determine Answers"
+    if (DETERMINE_ANSWERS_ATX_PREFIX_RE.test(line)) {
+      return true;
+    }
+    // SETEXT: a "Determine Answers" line underlined by === / --- on the next line
+    if (i + 1 < lines.length && SETEXT_UNDERLINE_RE.test(lines[i + 1])) {
+      return true;
+    }
+  }
+  return false;
 }
 
 // Synchronously invoke the RedDog repair-evidence guard bridge (scripts/reddog_repair_guard_once.py),
