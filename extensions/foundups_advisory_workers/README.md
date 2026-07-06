@@ -1,6 +1,6 @@
 # Foundups®Agent
 
-Version: 0.3.43
+Version: 0.3.44
 
 This local Cursor/VS Code extension opens one RedDog Architect advisory worker as an editor webview tab, similar in ergonomics to `Claude Code: Open` but without repo, shell, browser, merge, CABR, or payout authority.
 
@@ -55,6 +55,7 @@ The extension is a bounded 0102 advisory surface:
 - WSP_15: substantive answers must end with a priority block: Complexity, Importance, Deferability, Impact, MPS total, and P0-P4 class.
 - Findings must include proposed fixes or an explicit defer/block reason.
 - HoloIndex recall uses WSP_00 `HOLO_SKIP_MODEL=1 --bundle-json` first, then falls back to offline lexical search only if bundle recall fails.
+- Free-form target derivation (v0.3.44): repo-relative paths named with read-intent anywhere in the work focus are promoted to required direct-read targets, not only paths under the exact `Required direct-read targets:` header. Recognized read-intent shapes are: the explicit required-targets header, `Read first:` / `READ BEFORE EDITING` blocks, WSP_99 M2M `READ:` arrays, M2M `CTX.FILES` / `CTX: FILES:` arrays, markdown bullet lists of paths, and inline or backticked paths in prose. When a path is named this way it drives the SAME governed direct-read fetch, so it is retrieved even when HoloIndex semantic recall misses. Command/validation fences (```powershell / ```bash with `git diff --check`, `node --check`, `python holo_index.py ...`) and scope-out / "Do NOT touch" sections are excluded, and derivation prefers precision when read-intent is ambiguous.
 
 The extension does not grant repo authority. **012 supplies work focus only**; 0102 assembles a WSP task prompt before the bridge runs. Work focus and bounded repo context are sent through `scripts/advisory_model_once.py`, which runs the landed Fusion redaction gate before making OpenRouter requests. The webview receives only advisory text and redacted local history.
 

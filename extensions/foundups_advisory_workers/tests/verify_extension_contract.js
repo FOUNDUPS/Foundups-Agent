@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.43', 'package version must be 0.3.43');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.43'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.44', 'package version must be 0.3.44');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.44'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.43', 'README version mismatch');
+includes(readme, 'Version: 0.3.44', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -1568,7 +1568,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.43'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.44'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -1582,7 +1582,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.43'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.44'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -1594,7 +1594,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.43'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.44'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -1973,5 +1973,135 @@ assert(symArgs.includes('modules/x/hermes.py#build_foundup'),
 // a pathless `symbol:` prefix is still excluded (unchanged)
 assert(!orchestrator.buildMustIncludeArgs(['symbol:create_foundup']).includes('symbol:create_foundup'),
   'pathless symbol: prefix is still excluded from direct-read');
+
+// REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1 (WFTD-001..WFTD-012): free-form target derivation.
+// Repo paths named with read-intent OUTSIDE the exact "Required direct-read targets:" header must
+// still be promoted to required direct-read targets so the governed fetch fires. Reuses the SAME
+// governed direct-read gate (bundle_json.py); no HoloIndex ranking/index changes.
+includes(extensionJs, 'function deriveWorkFocusTargets', 'WFTD: work-focus target deriver missing');
+includes(extensionJs, 'function collectRequiredTargets', 'WFTD: merged required-target collector missing');
+includes(extensionJs, 'work_focus_targets_derived', 'WFTD: derivation telemetry field missing');
+includes(extensionJs, 'work_focus_target_derivation_sources', 'WFTD: derivation-source telemetry field missing');
+
+// WFTD-001: existing exact "Required direct-read targets:" prompt is byte-identical (backward compat).
+// The merged collector's targets must equal the header-only parser's output, in the same order.
+const wftdHeaderParsed = orchestrator.parseRequiredTargetPaths(fixtures.FOUNDUP_CREATION_PROMPT);
+const wftdHeaderCollected = orchestrator.collectRequiredTargets(fixtures.FOUNDUP_CREATION_PROMPT);
+assert.deepStrictEqual(wftdHeaderCollected.targets, wftdHeaderParsed, 'WFTD-001: header-only shape must collect byte-identically to parseRequiredTargetPaths');
+assert.strictEqual(wftdHeaderCollected.derived, false, 'WFTD-001: pure header shape must not report derivation');
+assert(wftdHeaderCollected.derivation_sources.includes('required_block'), 'WFTD-001: header shape source is required_block');
+
+// WFTD-002: "Read first:" list with 3 repo paths derives all 3.
+const wftdReadFirst = orchestrator.collectRequiredTargets(fixtures.WORK_FOCUS_READ_FIRST_PROMPT);
+for (const p of fixtures.WORK_FOCUS_ORCH_PATHS) {
+  assert(wftdReadFirst.targets.includes(p), 'WFTD-002: Read-first must derive ' + p);
+}
+assert.strictEqual(wftdReadFirst.derived, true, 'WFTD-002: Read-first must report derived=true');
+assert(wftdReadFirst.derivation_sources.includes('read_first'), 'WFTD-002: source must be read_first');
+
+// WFTD-003: WSP_99 M2M READ: array derives all paths.
+const wftdM2m = orchestrator.collectRequiredTargets(fixtures.WORK_FOCUS_M2M_READ_PROMPT);
+assert(wftdM2m.targets.includes(fixtures.WORK_FOCUS_ORCH_PATHS[0]), 'WFTD-003: M2M READ must derive first path');
+assert(wftdM2m.targets.includes(fixtures.WORK_FOCUS_ORCH_PATHS[2]), 'WFTD-003: M2M READ must derive third path');
+assert(wftdM2m.derivation_sources.includes('m2m_read'), 'WFTD-003: source must be m2m_read');
+
+// WFTD-004: M2M CTX.FILES derives all paths (and does NOT capture the CTX.FILES key token).
+const wftdCtx = orchestrator.collectRequiredTargets(fixtures.WORK_FOCUS_CTX_FILES_PROMPT);
+assert(wftdCtx.targets.includes(fixtures.WORK_FOCUS_ORCH_PATHS[0]), 'WFTD-004: CTX.FILES must derive first path');
+assert(wftdCtx.targets.includes(fixtures.WORK_FOCUS_ORCH_PATHS[1]), 'WFTD-004: CTX.FILES must derive second path');
+assert(!wftdCtx.targets.some((t) => /^ctx\.files$/i.test(t)), 'WFTD-004: the CTX.FILES key token must NOT be derived as a path');
+assert(wftdCtx.derivation_sources.includes('ctx_files'), 'WFTD-004: source must be ctx_files');
+
+// WFTD-005: backticked repo paths derive correctly.
+const wftdBacktick = orchestrator.collectRequiredTargets(fixtures.WORK_FOCUS_BACKTICK_PROMPT);
+assert(wftdBacktick.targets.includes(fixtures.WORK_FOCUS_ORCH_PATHS[2]), 'WFTD-005: backtick path 1 derived');
+assert(wftdBacktick.targets.includes(fixtures.WORK_FOCUS_ORCH_PATHS[1]), 'WFTD-005: backtick path 2 derived');
+assert(wftdBacktick.derivation_sources.includes('backtick_path'), 'WFTD-005: source must be backtick_path');
+
+// WFTD-006: inline prose repo paths derive AND do not capture surrounding words.
+const wftdInline = orchestrator.collectRequiredTargets(fixtures.WORK_FOCUS_INLINE_PROMPT);
+assert(wftdInline.targets.includes(fixtures.WORK_FOCUS_ORCH_PATHS[0]), 'WFTD-006: inline path 1 derived');
+assert(wftdInline.targets.includes(fixtures.WORK_FOCUS_ORCH_PATHS[2]), 'WFTD-006: inline path 2 derived');
+// no derived token may contain a space or an English filler word from the prose
+for (const t of wftdInline.targets) {
+  assert(!/\s/.test(t), 'WFTD-006: derived inline token must not contain whitespace: ' + t);
+  assert(!/(^|\/)(for|and|check|too|see|before|the)(\/|$)/i.test(t), 'WFTD-006: derived token must not capture prose words: ' + t);
+}
+assert(wftdInline.derivation_sources.includes('inline_path'), 'WFTD-006: source must be inline_path');
+
+// WFTD-007: invalid/traversal/.env/secret paths are EMITTED honestly by derivation but REJECTED by
+// the existing governed gate (they must never be fetched). Derivation stays truthful; the Python
+// gate is the enforcement boundary. Verify (a) the deriver emits them and (b) the gate denies them.
+const wftdDenied = orchestrator.collectRequiredTargets(fixtures.WORK_FOCUS_DENIED_MIX_PROMPT);
+assert(wftdDenied.targets.includes('.env'), 'WFTD-007: deriver emits .env honestly (gate rejects it, not the deriver)');
+assert(wftdDenied.targets.includes('../outside.txt'), 'WFTD-007: deriver emits traversal honestly');
+assert(wftdDenied.targets.includes('modules/communication/moltbot_bridge/src/foundup_job_contract.py'), 'WFTD-007: legitimate path still derived');
+assert(orchestrator.isTargetReadPathDenied('.env'), 'WFTD-007: .env must be denied by the existing gate');
+assert(orchestrator.isTargetReadPathDenied('../outside.txt'), 'WFTD-007: traversal must be denied by the existing gate');
+// buildMustIncludeArgs forwards them (the Python gate is authoritative), but they land in rejected.
+const wftdMustInc = orchestrator.buildMustIncludeArgs(wftdDenied.targets);
+assert(wftdMustInc.length >= 2, 'WFTD-007: must-include args are built for the derived targets');
+
+// WFTD-008: HoloIndex miss + explicit/derived path list still direct-reads. evaluateTargetRecall on
+// a derived-path prompt whose bundle recalled NOTHING must report index_gap_detected=true (fetch will
+// fire) with required_targets_total>0 -- the exact dormant-stack failure this slice fixes.
+const wftdRecallMiss = orchestrator.evaluateTargetRecall(fixtures.WORK_FOCUS_READ_FIRST_PROMPT, {
+  task_retrieval: { code_hits: [{ location: 'docs/unrelated.md', need: 'semantic: unrelated' }] }
+});
+assert.strictEqual(wftdRecallMiss.required_targets_total, fixtures.WORK_FOCUS_ORCH_PATHS.length, 'WFTD-008: derived paths make required_targets_total > 0');
+assert.strictEqual(wftdRecallMiss.index_gap_detected, true, 'WFTD-008: HoloIndex miss on derived paths sets index_gap_detected=true (fetch fires)');
+assert.strictEqual(wftdRecallMiss.target_recall_ok, false, 'WFTD-008: none recalled => target_recall_ok=false');
+assert.strictEqual(wftdRecallMiss.work_focus_targets_derived, true, 'WFTD-008: recall telemetry reports work_focus_targets_derived=true');
+assert(Array.isArray(wftdRecallMiss.work_focus_target_derivation_sources) && wftdRecallMiss.work_focus_target_derivation_sources.includes('read_first'), 'WFTD-008: recall telemetry carries derivation sources');
+
+// WFTD-009: no explicit AND no derivable paths -> behavior unchanged (total stays 0; inference intact).
+const wftdNoneRecall = orchestrator.evaluateTargetRecall(fixtures.REGULAR_SMOKE_PROMPT, { task_retrieval: { code_hits: [] } });
+assert.strictEqual(wftdNoneRecall.required_targets_total, 0, 'WFTD-009: no derivable paths keeps required_targets_total=0');
+assert.strictEqual(wftdNoneRecall.target_recall_ok, 'unknown', 'WFTD-009: unknown recall unchanged (no fabricated gap)');
+assert.strictEqual(wftdNoneRecall.work_focus_targets_derived, false, 'WFTD-009: nothing derived');
+assert.strictEqual(orchestrator.collectRequiredTargets(fixtures.REGULAR_SMOKE_PROMPT).targets.length, 0, 'WFTD-009: collector empty for a no-path prompt');
+
+// WFTD-010: guard B-i -- a ```powershell validation block naming extension.js must NOT derive it.
+const wftdCmdFence = orchestrator.collectRequiredTargets(fixtures.WORK_FOCUS_COMMAND_FENCE_PROMPT);
+assert.strictEqual(wftdCmdFence.targets.length, 0, 'WFTD-010: command/validation fence must derive no targets');
+assert(!wftdCmdFence.targets.some((t) => /extension\.js$/i.test(t)), 'WFTD-010: extension.js in a command fence must not be derived');
+assert.strictEqual(wftdCmdFence.derived, false, 'WFTD-010: command fence => derived=false');
+
+// WFTD-011: guard B-ii -- a "SCOPE - OUT" bullet naming a path must NOT derive; the in-scope
+// "Read first" path in the same prompt still derives.
+const wftdScope = orchestrator.collectRequiredTargets(fixtures.WORK_FOCUS_SCOPE_OUT_PROMPT);
+assert(!wftdScope.targets.some((t) => /off_limits/.test(t)), 'WFTD-011: SCOPE-OUT paths must not be derived');
+assert(wftdScope.targets.includes('modules/in/scope.py'), 'WFTD-011: in-scope Read-first path still derived');
+
+// WFTD-012: REGRESSION -- the real multi-lane orchestration audit prompt shape. Names 3 repo files
+// in a "Read first" block (no explicit header). Must yield required_targets_total >= 3 AND fire the
+// governed fetch; the three files are included OR honestly rejected (never silently ignored). Runs
+// the real Python bundle CLI end-to-end.
+(function wftd012Regression() {
+  const holo = orchestrator.holoIndexOutput(root, fixtures.WORK_FOCUS_READ_FIRST_PROMPT, 18000);
+  const m = holo && holo.meta ? holo.meta : {};
+  assert(m.required_targets_total >= 3, 'WFTD-012: derived required_targets_total must be >= 3');
+  assert.strictEqual(m.work_focus_targets_derived, true, 'WFTD-012: meta must record work_focus_targets_derived=true');
+  assert(Array.isArray(m.work_focus_target_derivation_sources) && m.work_focus_target_derivation_sources.includes('read_first'), 'WFTD-012: meta carries read_first source');
+  assert.strictEqual(m.direct_read_fetch_attempted, true, 'WFTD-012: governed direct-read fetch must be ATTEMPTED for the derived-path prompt');
+  const fetched = new Set(Array.isArray(m.direct_read_paths) ? m.direct_read_paths : []);
+  const rejected = new Set((Array.isArray(m.direct_read_rejected) ? m.direct_read_rejected : []).map((r) => (r && r.path ? String(r.path).replace(/\\/g, '/') : String(r))));
+  const missing = new Set(Array.isArray(m.required_targets_missing) ? m.required_targets_missing : []);
+  for (const p of fixtures.WORK_FOCUS_ORCH_PATHS) {
+    const accountedFor = fetched.has(p) || rejected.has(p) || missing.has(p);
+    assert(accountedFor, 'WFTD-012: orchestration target must be fetched, rejected, or honestly-missing (never silently ignored): ' + p);
+  }
+})();
+
+// WFTD-013: derivation telemetry surfaces in the scorecard + Run Trace.
+const wftdMeta = { holoindex_status: 'bundle_json_ok', code_hits: 2, wsp_hits: 1, skill_hits: 0,
+  required_targets_total: 3, required_targets_recalled: 0, required_targets_missing: fixtures.WORK_FOCUS_ORCH_PATHS,
+  work_focus_targets_derived: true, work_focus_target_derivation_sources: ['read_first'] };
+const wftdScorecard = orchestrator.extractHoloIndexScorecard('wsp_holo', wftdMeta);
+assert.strictEqual(wftdScorecard.work_focus_targets_derived, true, 'WFTD-013: scorecard carries work_focus_targets_derived');
+assert(Array.isArray(wftdScorecard.work_focus_target_derivation_sources) && wftdScorecard.work_focus_target_derivation_sources.includes('read_first'), 'WFTD-013: scorecard carries derivation sources');
+const wftdLines = orchestrator.formatHoloIndexScorecardLines(wftdScorecard).join('\n');
+includes(wftdLines, '- work_focus_targets_derived: true', 'WFTD-013: Run Trace renders work_focus_targets_derived');
+includes(wftdLines, '- work_focus_target_derivation_sources: read_first', 'WFTD-013: Run Trace renders derivation sources');
 
 console.log('Foundups®Agent extension contract checks passed.');
