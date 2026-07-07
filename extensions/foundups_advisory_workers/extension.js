@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.43';
+const EXTENSION_VERSION = '0.3.44';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -433,6 +433,44 @@ function extractTargetTokensFromLine(line) {
   return tokens;
 }
 
+// ReDoS-safe list-marker stripper. Replaces the old bullet-marker regex (a marker, then a
+// one-or-more whitespace run, then a greedy capture) whose leading whitespace class overlapped
+// the trailing capture on whitespace (CodeQL js/polynomial-redos: alert #174 + the two new
+// PR #942 instances). This is a linear O(n) scan with NO backtracking, mirroring the
+// normalizeTargetPath linear-trim fix. Returns { isList, itemText }: for a marker line, itemText is
+// the content after the marker and its following whitespace run; for a non-list line, isList=false
+// and itemText echoes the input (matching the old `listMatch ? listMatch[1] : stripped` idiom).
+// The only regex used is a single-character `\s` test (no quantifier -> ReDoS-immune).
+function stripListMarker(line) {
+  const s = String(line || '');
+  const n = s.length;
+  let i = 0;
+  const c0 = s.charAt(0);
+  if (c0 === '-' || c0 === '*' || c0 === '+') {
+    i = 1;
+  } else if (c0 >= '0' && c0 <= '9') {
+    let j = 0;
+    while (j < n && s.charAt(j) >= '0' && s.charAt(j) <= '9') {
+      j += 1;
+    }
+    if (j < n && (s.charAt(j) === '.' || s.charAt(j) === ')')) {
+      i = j + 1;
+    } else {
+      return { isList: false, itemText: s };
+    }
+  } else {
+    return { isList: false, itemText: s };
+  }
+  // Require at least one whitespace after the marker (the original \s+).
+  if (i >= n || !/\s/.test(s.charAt(i))) {
+    return { isList: false, itemText: s };
+  }
+  while (i < n && /\s/.test(s.charAt(i))) {
+    i += 1;
+  }
+  return { isList: true, itemText: s.slice(i) };
+}
+
 // Parse an explicit "Required direct-read targets" section from prompt text into
 // a de-duplicated list of repo-relative paths/globs. Returns [] when no such
 // section is present (backward compatible: callers then fall back to inference).
@@ -469,12 +507,12 @@ function parseRequiredTargetPaths(taskText) {
     }
     // Only consume list-style lines (-, *, digit., or bare path). Stop if a new
     // prose header appears before any list content is a paragraph, not a target.
-    const listMatch = stripped.match(/^(?:[-*+]|\d+[.)])\s+(.*)$/);
-    const itemText = listMatch ? listMatch[1] : stripped;
+    const lm = stripListMarker(stripped);
+    const itemText = lm.isList ? lm.itemText : stripped;
     const tokens = extractTargetTokensFromLine(itemText);
     if (!tokens.length) {
       // A non-list, non-path line ends the section.
-      if (!listMatch) {
+      if (!lm.isList) {
         break;
       }
       continue;
@@ -488,6 +526,342 @@ function parseRequiredTargetPaths(taskText) {
     }
   }
   return targets;
+}
+
+// REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1: repo targets are frequently named in
+// free-form work-focus prose, WSP_99 M2M packets, and "Read first" sections rather than
+// under the exact "Required direct-read targets:" header. Those named paths must still be
+// promoted to required direct-read targets so the governed direct-read fetch fires even when
+// HoloIndex semantic recall misses. The building blocks below REUSE the existing
+// normalizeTargetPath / stripSymbolSuffix / self-file guard; the ONLY new primitives are a
+// bounded/anchored path-TOKEN regex (for inline/backticked prose) and a small set of
+// read-intent header detectors. Everything flows into the SAME governed direct-read gate.
+
+// A repo-relative path TOKEN, matched inside ordinary prose. It requires either a '/'
+// (directory) or a file extension so bare English words are not captured. The pattern is
+// linear/bounded (bounded char classes, bounded quantifiers, no end-anchored `[...]+$` on
+// uncontrolled input) per the CodeQL js/polynomial-redos lesson at normalizeTargetPath.
+//   segment  : [A-Za-z0-9._-] up to 128 chars
+//   path      : one-or-more '/'-joined segments, bounded to 32 segments
+//   optional trailing #symbol (bounded identifier) preserved for the symbol-aware layer
+const WORK_FOCUS_PATH_TOKEN_RE = /\b[A-Za-z0-9_.-]{1,128}(?:\/[A-Za-z0-9_.-]{1,128}){0,32}(?:#[A-Za-z_][A-Za-z0-9_]{0,127})?/g;
+
+// Read-intent block headers (source 2). Case-insensitive; a matching header begins a
+// capture window consumed exactly like the explicit required-target block.
+const WORK_FOCUS_READ_HEADER_PATTERNS = [
+  /read\s+first/i,
+  /read\s+before\s+editing/i,
+  /files?\s+to\s+read/i,
+  /must[\s_-]?read/i
+];
+
+// Non-read-intent / scope-out block headers (guard B-ii). A matching header suppresses
+// derivation for the block that follows it (until a blank line / new header).
+const WORK_FOCUS_SCOPE_OUT_PATTERNS = [
+  /out\s+of\s+scope/i,
+  /scope[\s:_-]+out/i,
+  /scope\s*[-—]\s*out/i,
+  /do\s+not\s+touch/i,
+  /do\s+not\s+read/i,
+  /don'?t\s+read/i,
+  /do\s+not\s+modify/i
+];
+
+// Fenced code/command/validation block languages we treat as command args, not read
+// targets (guard B-i). Combined with the command-shape heuristic below.
+const WORK_FOCUS_COMMAND_FENCE_LANGS = ['powershell', 'bash', 'sh', 'shell', 'ps', 'cmd', 'console', 'bat'];
+// Command tokens that mark a fenced block as a command/validation block even when the fence
+// carries no language tag (```...``` with `git diff --check` inside, etc.).
+const WORK_FOCUS_COMMAND_SHAPE_RE = /(?:^|\s)(?:git|node|python|py|pytest|rg|grep|npm|npx|node\s+--check|python\s+holo_index\.py)\b/i;
+
+function looksLikeCommandFence(lang, body) {
+  const l = String(lang || '').trim().toLowerCase();
+  if (WORK_FOCUS_COMMAND_FENCE_LANGS.indexOf(l) !== -1) {
+    return true;
+  }
+  return WORK_FOCUS_COMMAND_SHAPE_RE.test(String(body || ''));
+}
+
+// Extract path tokens from ONE prose/inline line via the bounded token regex, then run the
+// SAME shape-check + self-file exclusion used by the list-line tokenizer. Prose words that
+// happen to be adjacent to a path ("see docs/x.md for details") are NOT captured because the
+// token regex only yields the path substring, not the surrounding words.
+function extractInlinePathTokens(line) {
+  const out = [];
+  const text = String(line || '');
+  if (!text) {
+    return out;
+  }
+  const matches = text.match(WORK_FOCUS_PATH_TOKEN_RE);
+  if (!matches) {
+    return out;
+  }
+  for (const raw of matches) {
+    const candidate = normalizeTargetPath(raw);
+    if (!candidate) {
+      continue;
+    }
+    const pathPortion = stripSymbolSuffix(candidate);
+    // A derived path token must contain a '/' (a directory path) OR a real, LOWERCASE file
+    // extension (.py/.md/.json/...). A bare word with a dot but an UPPERCASE suffix
+    // (CTX.FILES, WSP_99.SECTION) is NOT a file path -- requiring a lowercase extension for
+    // slash-less tokens rejects M2M keys / acronyms while keeping real filenames like main.js.
+    // Tokens that DO contain a '/' keep the case-insensitive rule (path segments may be mixed
+    // case). This is stricter than extractTargetTokensFromLine on purpose: prose is untrusted.
+    const hasSlash = /[\/]/.test(pathPortion);
+    const hasLowerExt = /\.[a-z0-9]{1,6}$/.test(pathPortion);
+    if (!(hasSlash || hasLowerExt)) {
+      continue;
+    }
+    if (isSelfFileLocation(pathPortion)) {
+      continue;
+    }
+    out.push(candidate);
+  }
+  return out;
+}
+
+// Collect targets from a WSP_99 M2M inline array shape, e.g.
+//   READ: ["a/b.py", "c/d.md"]  |  CTX.FILES: [a/b.py, c/d.md]  |  CTX: FILES: [...]
+// Only the bracketed array body is scanned (bounded), and each element goes through the same
+// inline token extractor. Returns [] when the key is absent.
+function extractM2mArrayTargets(taskText, keyPatterns) {
+  const text = String(taskText || '');
+  const out = [];
+  for (const keyRe of keyPatterns) {
+    let m;
+    const scan = new RegExp(keyRe.source, keyRe.flags.indexOf('g') === -1 ? keyRe.flags + 'g' : keyRe.flags);
+    while ((m = scan.exec(text)) !== null) {
+      const after = text.slice(m.index + m[0].length);
+      const open = after.indexOf('[');
+      if (open === -1 || open > 4) {
+        continue;
+      }
+      const close = after.indexOf(']', open);
+      if (close === -1) {
+        continue;
+      }
+      const body = after.slice(open + 1, close);
+      for (const token of extractInlinePathTokens(body)) {
+        out.push(token);
+      }
+      // advance scan past this array to avoid re-matching the same key text
+      scan.lastIndex = m.index + m[0].length + close + 1;
+    }
+  }
+  return out;
+}
+
+// Derive required direct-read targets from broader read-intent shapes (sources 2-7) WITHOUT
+// touching the explicit-header parser. Returns { targets, sources } where sources is a set of
+// derivation-source tags. Command/validation fences and scope-out blocks are excluded (guard B).
+function deriveWorkFocusTargets(taskText) {
+  const text = String(taskText || '');
+  const lines = text.split(/\r?\n/);
+  const targets = [];
+  const seen = new Set();
+  const sources = new Set();
+  const add = (token, source) => {
+    if (!token) {
+      return;
+    }
+    const norm = token.toLowerCase();
+    if (seen.has(norm)) {
+      // still record the source that also names it (honest provenance)
+      sources.add(source);
+      return;
+    }
+    seen.add(norm);
+    targets.push(token);
+    sources.add(source);
+  };
+
+  // Pass over the lines with a small state machine tracking:
+  //  - inside a fenced code block (```): suppress derivation if it is a command/validation fence
+  //  - inside a read-intent capture window (Read first / READ BEFORE EDITING): derive list items
+  //  - inside a scope-out window: suppress derivation
+  let inFence = false;
+  let fenceIsCommand = false;
+  let fenceBody = '';
+  let fenceLang = '';
+  let fenceStartIdx = -1;
+  let readCapture = false;
+  let scopeOut = false;
+
+  const fenceLines = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const stripped = line.trim();
+    const fenceMatch = stripped.match(/^```([A-Za-z0-9_-]*)/);
+    if (fenceMatch) {
+      if (!inFence) {
+        inFence = true;
+        fenceLang = fenceMatch[1] || '';
+        fenceBody = '';
+        fenceStartIdx = i;
+        fenceLines.length = 0;
+      } else {
+        // closing fence: decide read-intent for the accumulated body.
+        inFence = false;
+        fenceIsCommand = looksLikeCommandFence(fenceLang, fenceBody);
+        if (!fenceIsCommand) {
+          // A non-command fence may hold a plain path list (e.g. a fenced "files" block).
+          for (const bodyLine of fenceLines) {
+            for (const token of extractInlinePathTokens(bodyLine)) {
+              add(token, 'inline_path');
+            }
+          }
+        }
+        fenceLang = '';
+        fenceBody = '';
+        fenceStartIdx = -1;
+        fenceLines.length = 0;
+      }
+      continue;
+    }
+    if (inFence) {
+      fenceBody += line + '\n';
+      fenceLines.push(line);
+      continue;
+    }
+
+    // Scope-out / read-intent window transitions (outside fences).
+    if (WORK_FOCUS_SCOPE_OUT_PATTERNS.some((p) => p.test(stripped))) {
+      scopeOut = true;
+      readCapture = false;
+      continue;
+    }
+    if (WORK_FOCUS_READ_HEADER_PATTERNS.some((p) => p.test(stripped))) {
+      readCapture = true;
+      scopeOut = false;
+      continue;
+    }
+    if (!stripped) {
+      // Blank line ends any capture/scope window.
+      readCapture = false;
+      scopeOut = false;
+      continue;
+    }
+    if (scopeOut) {
+      // A scope-out block suppresses derivation for its (list) lines.
+      if (stripListMarker(stripped).isList) {
+        continue;
+      }
+      // A non-list line ends the scope-out window (fall through to normal handling of THIS line).
+      scopeOut = false;
+    }
+
+    // WSP_99 M2M inline array-KEY lines (READ: [...], CTX.FILES: [...], CTX: FILES: [...]) are
+    // owned by the global M2M pass below so their paths carry the correct m2m_read / ctx_files
+    // provenance (not a generic inline_path tag). Skip such lines in the per-line pass.
+    if (/^(?:READ|CTX\.FILES|CTX)\s*:/i.test(stripped) && /\[/.test(stripped)) {
+      continue;
+    }
+    // Otherwise handle here the per-line list + prose shapes.
+    const lm = stripListMarker(stripped);
+    if (readCapture) {
+      const itemText = lm.isList ? lm.itemText : stripped;
+      const listTokens = extractTargetTokensFromLine(itemText).filter((t) => !isSelfFileLocation(stripSymbolSuffix(t)));
+      if (listTokens.length) {
+        for (const token of listTokens) {
+          add(token, 'read_first');
+        }
+        continue;
+      }
+      // Non-path line ends the read window (unless it is still a bullet, keep scanning).
+      if (!lm.isList) {
+        readCapture = false;
+      }
+      // fall through so a read-window line that also holds an inline path is still captured
+    }
+
+    // Markdown bullet list of repo paths (source 5) OR inline/backtick prose paths (6/7).
+    if (lm.isList) {
+      const bulletTokens = extractTargetTokensFromLine(lm.itemText).filter((t) => !isSelfFileLocation(stripSymbolSuffix(t)));
+      for (const token of bulletTokens) {
+        add(token, 'markdown_bullet');
+      }
+      // A bullet may still carry an extra inline path in prose after the primary token.
+      for (const token of extractInlinePathTokens(lm.itemText)) {
+        if (!bulletTokens.some((b) => b.toLowerCase() === token.toLowerCase())) {
+          add(token, 'inline_path');
+        }
+      }
+      continue;
+    }
+
+    // Inline prose / backticked paths (sources 6 & 7). Backticks are stripped by
+    // normalizeTargetPath inside the token extractor, so both shapes resolve here.
+    const backtickHits = new Set();
+    const bt = stripped.match(/`[^`]{1,256}`/g);
+    if (bt) {
+      for (const seg of bt) {
+        for (const token of extractInlinePathTokens(seg)) {
+          backtickHits.add(token.toLowerCase());
+          add(token, 'backtick_path');
+        }
+      }
+    }
+    for (const token of extractInlinePathTokens(stripped)) {
+      if (!backtickHits.has(token.toLowerCase())) {
+        add(token, 'inline_path');
+      }
+    }
+  }
+
+  // WSP_99 M2M array shapes (sources 3 & 4), scanned globally on the whole text.
+  for (const token of extractM2mArrayTargets(text, [/\bREAD\s*:/i])) {
+    add(token, 'm2m_read');
+  }
+  for (const token of extractM2mArrayTargets(text, [/\bCTX\.FILES\s*:/i, /\bCTX\s*:\s*FILES\s*:/i])) {
+    add(token, 'ctx_files');
+  }
+
+  return { targets: targets, sources: Array.from(sources) };
+}
+
+// Merge the AUTHORITATIVE explicit "Required direct-read targets" header list (first, order and
+// bytes preserved for the header-only shape) with derived work-focus targets (sources 2-7).
+// De-duplicated case-insensitively, first-seen order preserved. Returns
+// { targets, derived, derivation_sources } so callers can both drive recall AND emit telemetry.
+function collectRequiredTargets(taskText) {
+  const explicit = parseRequiredTargetPaths(taskText);
+  const derivedInfo = deriveWorkFocusTargets(taskText);
+  const targets = [];
+  const seen = new Set();
+  const usedSources = new Set();
+  for (const t of explicit) {
+    const norm = String(t || '').toLowerCase();
+    if (t && !seen.has(norm)) {
+      seen.add(norm);
+      targets.push(t);
+    }
+  }
+  if (explicit.length) {
+    usedSources.add('required_block');
+  }
+  for (const t of derivedInfo.targets) {
+    const norm = String(t || '').toLowerCase();
+    if (t && !seen.has(norm)) {
+      seen.add(norm);
+      targets.push(t);
+    }
+  }
+  // Record derivation sources only for targets that were NOT already covered by the explicit
+  // header (honest provenance: a source tag means "this shape contributed at least one path").
+  const explicitSet = new Set(explicit.map((t) => String(t || '').toLowerCase()));
+  const anyDerivedNew = derivedInfo.targets.some((t) => !explicitSet.has(String(t || '').toLowerCase()));
+  if (anyDerivedNew) {
+    for (const s of derivedInfo.sources) {
+      usedSources.add(s);
+    }
+  }
+  return {
+    targets: targets,
+    derived: anyDerivedNew,
+    derivation_sources: Array.from(usedSources)
+  };
 }
 
 function isSelfFileLocation(location) {
@@ -553,10 +927,17 @@ function evaluateTargetRecall(taskText, bundleData) {
   const locations = hits.map((h) => String(h.location || '').replace(/\\/g, '/').toLowerCase());
   const needs = hits.map((h) => String(h.need || '').toLowerCase());
 
-  // Slice 1: an explicit "Required direct-read targets" list, when present, is the
-  // authoritative recall contract. Compare each required path against content-bearing
-  // locations, excluding self-file hits (extension.js / module-under-audit shell).
-  const required = parseRequiredTargetPaths(taskText);
+  // Slice 1 + REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1: the AUTHORITATIVE recall contract is
+  // the explicit "Required direct-read targets" header list MERGED with work-focus targets derived
+  // from broader read-intent shapes (Read first / M2M READ / CTX.FILES / markdown bullets / inline
+  // & backticked prose paths). When ANY repo path is named with read-intent the required list is
+  // non-empty, so required_targets_total > 0 and the governed direct-read fetch fires regardless of
+  // HoloIndex semantic recall. Compare each required path against content-bearing locations,
+  // excluding self-file hits (extension.js / module-under-audit shell).
+  const collected = collectRequiredTargets(taskText);
+  const required = collected.targets;
+  const workFocusDerived = collected.derived;
+  const workFocusSources = collected.derivation_sources;
   if (required.length) {
     const contentLocations = locations.filter((loc) => !isSelfFileLocation(loc));
     const missing = [];
@@ -590,11 +971,15 @@ function evaluateTargetRecall(taskText, bundleData) {
       recall_targets: required,
       required_targets_total: required.length,
       required_targets_recalled: recalled,
-      required_targets_missing: missing
+      required_targets_missing: missing,
+      // REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1: honest provenance for the required list.
+      work_focus_targets_derived: workFocusDerived === true,
+      work_focus_target_derivation_sources: Array.isArray(workFocusSources) ? workFocusSources : []
     };
   }
 
-  // Backward-compatible inference path (no explicit required list in prompt).
+  // Backward-compatible inference path (no explicit required list AND no derivable work-focus
+  // paths in prompt). work_focus fields stay honest defaults (nothing was derived).
   const targets = inferRecallTargetPaths(taskText);
   if (!targets.length) {
     return {
@@ -603,7 +988,9 @@ function evaluateTargetRecall(taskText, bundleData) {
       recall_targets: [],
       required_targets_total: 0,
       required_targets_recalled: 0,
-      required_targets_missing: []
+      required_targets_missing: [],
+      work_focus_targets_derived: false,
+      work_focus_target_derivation_sources: []
     };
   }
   let allFound = true;
@@ -627,7 +1014,9 @@ function evaluateTargetRecall(taskText, bundleData) {
     recall_targets: targets,
     required_targets_total: 0,
     required_targets_recalled: 0,
-    required_targets_missing: []
+    required_targets_missing: [],
+    work_focus_targets_derived: false,
+    work_focus_target_derivation_sources: []
   };
 }
 
@@ -647,6 +1036,10 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     required_targets_total: meta.required_targets_total !== undefined ? meta.required_targets_total : 'unknown',
     required_targets_recalled: meta.required_targets_recalled !== undefined ? meta.required_targets_recalled : 'unknown',
     required_targets_missing: Array.isArray(meta.required_targets_missing) ? meta.required_targets_missing : 'unknown',
+    // REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1: whether the required list was (partly) derived
+    // from free-form work-focus / M2M / Read-first shapes, and which shapes contributed.
+    work_focus_targets_derived: meta.work_focus_targets_derived !== undefined ? meta.work_focus_targets_derived : 'unknown',
+    work_focus_target_derivation_sources: Array.isArray(meta.work_focus_target_derivation_sources) ? meta.work_focus_target_derivation_sources : 'unknown',
     // REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 / ADDENDUM B: final-context proof.
     // required_targets_recalled (above) = fetched/available from the bundle; the fields
     // below = actually visible to the model AFTER the 42K cut. Different layers; must
@@ -702,6 +1095,9 @@ function formatHoloIndexScorecardLines(scorecard) {
     '- required_targets_total: ' + scorecard.required_targets_total,
     '- required_targets_recalled: ' + scorecard.required_targets_recalled,
     '- required_targets_missing: ' + (Array.isArray(scorecard.required_targets_missing) ? (scorecard.required_targets_missing.length ? scorecard.required_targets_missing.join(', ') : '(none)') : scorecard.required_targets_missing),
+    // REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1: free-form target derivation provenance.
+    '- work_focus_targets_derived: ' + scorecard.work_focus_targets_derived,
+    '- work_focus_target_derivation_sources: ' + (Array.isArray(scorecard.work_focus_target_derivation_sources) ? (scorecard.work_focus_target_derivation_sources.length ? scorecard.work_focus_target_derivation_sources.join(', ') : '(none)') : scorecard.work_focus_target_derivation_sources),
     // REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 / ADDENDUM B (6): render BOTH the
     // fetched/available layer (required_targets_recalled) and the actually-model-visible
     // layer (required_targets_in_model_context). They are different guarantees.
@@ -2685,7 +3081,11 @@ function buildBoundedRepoContext(mode, taskText) {
   // target block when an explicit required-target list is present.
   const headSections = sections.slice();
   const lowerSections = [];
-  const requiredTargets = parseRequiredTargetPaths(taskText);
+  // REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1: protected packing / proof must cover the SAME
+  // required set the recall/direct-read layer uses -- the explicit header list MERGED with
+  // work-focus-derived paths. Using the merged collector (not the header-only parser) ensures a
+  // derived target that was direct-read is also packed into the protected block and proven present.
+  const requiredTargets = collectRequiredTargets(taskText).targets;
   let directReadSection = null;
   if (mode === 'wsp_holo' || mode === 'wsp_holo_git' || mode === 'wsp_holo_skillz' || mode === 'wsp_holo_git_skillz') {
     const holo = holoIndexOutput(root, taskText || '', 18000);
@@ -3276,6 +3676,9 @@ function holoIndexMetaFromBundle(output, usedOfflineFallback, taskText) {
     required_targets_total: 0,
     required_targets_recalled: 0,
     required_targets_missing: [],
+    // REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1: default provenance (nothing derived yet).
+    work_focus_targets_derived: false,
+    work_focus_target_derivation_sources: [],
     direct_read_paths: [],
     direct_read_rejected: [],
     direct_read_bytes: 0,
@@ -3302,6 +3705,11 @@ function holoIndexMetaFromBundle(output, usedOfflineFallback, taskText) {
     meta.required_targets_total = recall.required_targets_total;
     meta.required_targets_recalled = recall.required_targets_recalled;
     meta.required_targets_missing = recall.required_targets_missing;
+    // REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1: surface derivation provenance from recall.
+    meta.work_focus_targets_derived = recall.work_focus_targets_derived === true;
+    meta.work_focus_target_derivation_sources = Array.isArray(recall.work_focus_target_derivation_sources)
+      ? recall.work_focus_target_derivation_sources
+      : [];
     // REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1: surface the Python-side
     // governed direct-read telemetry when the bundle carried a fetch.
     const dr = data.direct_read && typeof data.direct_read === 'object' ? data.direct_read : null;
@@ -4046,6 +4454,11 @@ module.exports = {
   evaluateTargetRecall,
   inferRecallTargetPaths,
   parseRequiredTargetPaths,
+  stripListMarker,
+  deriveWorkFocusTargets,
+  collectRequiredTargets,
+  extractInlinePathTokens,
+  extractM2mArrayTargets,
   isSelfFileLocation,
   requiredTargetMatchesLocation,
   stripSymbolSuffix,

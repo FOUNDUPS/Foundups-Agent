@@ -1,5 +1,26 @@
 # Foundups®Agent TestModLog
 
+## 2026-07-07 - REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1 (WFTD-001..WFTD-013)
+
+| ID | Asserts |
+| --- | --- |
+| WFTD-001 | Header-only shape: `collectRequiredTargets` == `parseRequiredTargetPaths` (byte-identical, backward compatible); `derived=false`, source `required_block` |
+| WFTD-002 | `Read first:` list of 3 repo paths derives all 3; source `read_first` |
+| WFTD-003 | WSP_99 M2M `READ:` array derives its paths; source `m2m_read` |
+| WFTD-004 | M2M `CTX.FILES` array derives its paths; the `CTX.FILES` KEY token is NOT derived; source `ctx_files` |
+| WFTD-005 | Backticked repo paths derive; source `backtick_path` |
+| WFTD-006 | Inline prose repo paths derive AND do not capture surrounding prose words; source `inline_path` |
+| WFTD-007 | Denied paths (`.env`, traversal) EMITTED honestly by the deriver but DENIED by the existing gate (`isTargetReadPathDenied`); a legitimate path still derives |
+| WFTD-008 | HoloIndex miss on derived paths: `required_targets_total > 0`, `index_gap_detected=true` (fetch fires), `work_focus_targets_derived=true` |
+| WFTD-009 | No explicit AND no derivable paths: `required_targets_total=0`, recall `unknown`, `derived=false` (inference path intact) |
+| WFTD-010 | Guard B-i: a ```powershell validation block naming `extension.js` derives NOTHING |
+| WFTD-011 | Guard B-ii: a `SCOPE - OUT` bullet path is NOT derived; an in-scope `Read first` path in the same prompt IS derived |
+| WFTD-012 | Regression (real Python CLI): multi-lane orchestration `Read first` prompt -> `required_targets_total >= 3`, `direct_read_fetch_attempted=true`, each named file fetched / rejected / honestly-missing |
+| WFTD-013 | `work_focus_targets_derived` + `work_focus_target_derivation_sources` surface in `extractHoloIndexScorecard` and render in the Run Trace scorecard lines |
+| WFTD-014 | ReDoS remediation (CodeQL js/polynomial-redos): `stripListMarker` parity (dash/numbered/multi-space bullets stripped; non-list + marker-without-whitespace return `isList=false`); the flagged `.match(/^(?:[-*+]...)` bullet-regex USE is absent from source; pathological 200KB-whitespace input stays linear (<200ms) |
+
+**Run:** `node extensions/foundups_advisory_workers/tests/verify_extension_contract.js`
+
 ## 2026-06-28 - REDDOG_REVIEW_PACKET_MEMORY_AND_FOLLOWUP_PHASE1 (Addendum G)
 
 | ID | Asserts |

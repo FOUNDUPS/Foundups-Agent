@@ -2,6 +2,55 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-07 - REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1 (free-form target derivation, 0.3.44)
+
+- Problem (OBSERVED, real run at 0.3.41/0.3.43): a multi-lane-orchestration audit named
+  `docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md`, `docs/0102_session_briefings/work_ledger.schema.json`,
+  and `holo_index/adaptive_learning/breadcrumb_tracer.py` in prose bullets, but NOT under the exact
+  `Required direct-read targets:` header. Result: `required_targets_total: 0`,
+  `direct_read_fetch_attempted: false`, `direct_read_fallback_used: false` -- the whole direct-read stack
+  stayed dormant even though real paths were named. RedDog was retrieval-blind to free-form targets.
+- Fix (extension.js only; NO Python change): new `deriveWorkFocusTargets(taskText)` derives required
+  direct-read targets from read-intent shapes -- `Read first:` / `READ BEFORE EDITING` blocks, WSP_99 M2M
+  `READ:` arrays, M2M `CTX.FILES` / `CTX: FILES:` arrays, markdown bullet path lists, and inline/backticked
+  repo paths in prose. New `collectRequiredTargets(taskText)` MERGES the explicit-header list (kept FIRST,
+  byte-identical for the header-only shape) with derived targets, de-duped case-insensitively in first-seen
+  order. `evaluateTargetRecall` and `buildBoundedRepoContext` consume the MERGED list, so a derived path
+  makes `required_targets_total > 0`, fires the SAME governed direct-read fetch, and is packed/proven like
+  a header target -- regardless of HoloIndex semantic recall.
+- False-positive guards: (A) inline/prose extraction uses a bounded, anchored, ReDoS-safe path-TOKEN regex
+  (`WORK_FOCUS_PATH_TOKEN_RE`; a slash-less token requires a LOWERCASE file extension so acronyms / M2M keys
+  like `CTX.FILES` are not captured and surrounding prose words are never swept in) -- heeds the CodeQL
+  js/polynomial-redos lesson at `normalizeTargetPath`; (B) command/validation fences
+  (```powershell / ```bash with `git diff --check`, `node --check`, `python holo_index.py ...`, `rg ...`)
+  and scope-out / `Do NOT touch` / `OUT OF SCOPE` sections are EXCLUDED; ambiguous read-intent prefers
+  precision (no derivation).
+- CI hardening (folded into this PR before promotion): CodeQL flagged 2 new HIGH `js/polynomial-redos`
+  alerts on the bullet-list marker regex (marker + `\s+` + greedy capture, where the leading whitespace
+  class overlapped the trailing capture) -- the same rule/family as pre-existing alert #174. Replaced ALL
+  THREE instances (the pre-existing one in `parseRequiredTargetPaths` plus the two new derivation instances)
+  with a single linear O(n) `stripListMarker(line)` helper (no backtracking; the only regex is a
+  quantifier-free single-character `\s` test), mirroring the `normalizeTargetPath` linear-trim remediation.
+  Behavior is byte-identical (`{ isList, itemText }` matches the old `listMatch ? listMatch[1] : stripped`
+  idiom). `stripListMarker` exported; WFTD-014 adds parity + regex-absence + pathological-input timing
+  guards. Version stays 0.3.44 (unreleased; fix folded in, no VSIX churn).
+- Governance unchanged: denied paths (`.env`, traversal, secret-like) are EMITTED honestly by the deriver
+  and REJECTED by the unchanged Python direct-read gate (`bundle_json.py`); denylist / traversal protection /
+  byte budgets / redaction / audit_context / required-target packing are all untouched. No HoloIndex
+  ranking/index change; no runtime reindex; no live-writer / orchestration-brain change.
+- Telemetry: `work_focus_targets_derived` (bool) + `work_focus_target_derivation_sources` (array from
+  `{required_block, read_first, m2m_read, ctx_files, markdown_bullet, inline_path, backtick_path, symbol}`),
+  threaded through `evaluateTargetRecall` -> `holoIndexMetaFromBundle` -> `extractHoloIndexScorecard` ->
+  `formatHoloIndexScorecardLines` (Run Trace). Both labeled OBSERVED (WSP_97).
+- Tests: WFTD-001..WFTD-013 in `tests/verify_extension_contract.js` (+ fixtures in `tests/fixtures.js`),
+  covering all 8 source shapes, both guards, the denied-path honesty case, the HoloIndex-miss-still-fetches
+  case, the no-path backward-compat case, and a real end-to-end regression (`holoIndexOutput` on the
+  multi-lane prompt: `required_targets_total >= 3`, `direct_read_fetch_attempted: true`, all three files
+  fetched/rejected/honestly-missing).
+- Version 0.3.43 -> 0.3.44 (package.json + EXTENSION_VERSION + README + contract-test version assertions).
+- Gate: VERIFIED_READY draft PR only (do NOT self-merge; merge is harness/012-gated, VSIX build is a 012
+  host step). Judgment-lane retrieval-blindness fix (parallel to the judgment-lane slices #933-#935).
+
 ## 2026-07-05 - REDDOG_SYMBOL_AWARE_EXCERPT_DEPTH_PHASE1 (symbol line windows reach the model, 0.3.43)
 
 - A required direct-read target may now be `path#symbol`. The Python bundle layer

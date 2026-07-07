@@ -16,6 +16,7 @@ Current implementation:
 - REDDOG_UX_PACKET_POLISH_PHASE1 (v0.3.19): Working Tail above controls; 0102 Role label; Copy MD Run Trace; mojibake flag; validation-failure packet semantics.
 - REDDOG_BLOCKED_COPY_POLISH_PHASE1 (v0.3.21, #878): Work Trail dedupe; conservative blocked-local Governed Handoff.
 - REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1 (docs): fixed 15-prompt pack, rubric, runbook, artifact template for 012 replacement scoreboard.
+- REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1 (v0.3.44): repo paths named with read-intent in free-form prose / WSP_99 M2M / "Read first" sections (not only under the exact `Required direct-read targets:` header) are promoted to required direct-read targets so the governed fetch fires even on HoloIndex semantic miss; command/validation fences and scope-out sections excluded.
 
 ## Architecture Direction
 
@@ -162,6 +163,16 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - Improve semantic recall for RedDog auto-router, WSP_15/97, and governed-handoff queries.
 - Add regression retrieval tests so extension bridge code ranks above adjacent WRE routers.
 - **Status:** **LANDED** #882 (`99d0e35c2`) — ranking + target recall telemetry only; not source-content inclusion.
+
+### REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1 (v0.3.44)
+
+- **Status:** VERIFIED_READY (draft PR only; do NOT self-merge -- merge is harness/012-gated, VSIX build is a 012 host step).
+- **Problem (OBSERVED):** a real multi-lane-orchestration audit named three repo files in prose bullets, not under the exact `Required direct-read targets:` header -> `required_targets_total: 0`, `direct_read_fetch_attempted: false`; the whole direct-read stack stayed dormant. RedDog was retrieval-blind to free-form targets.
+- **Fix (extension.js only; no Python change):** `deriveWorkFocusTargets(taskText)` derives required direct-read targets from read-intent shapes (`Read first:` / `READ BEFORE EDITING`, WSP_99 M2M `READ:` arrays, M2M `CTX.FILES` / `CTX: FILES:` arrays, markdown bullet path lists, inline + backticked prose paths). `collectRequiredTargets(taskText)` merges the explicit-header list (FIRST, byte-identical for the header-only shape) with derived targets, deduped case-insensitively; `evaluateTargetRecall` + `buildBoundedRepoContext` consume the merged list so a named path makes `required_targets_total > 0` and fires the SAME governed direct-read fetch regardless of HoloIndex recall.
+- **Guards:** (A) bounded/anchored ReDoS-safe path-TOKEN regex (slash-less token requires a LOWERCASE extension, so M2M keys / acronyms and surrounding prose words are not captured); (B) command/validation fences (```powershell / ```bash with `git diff --check`, `node --check`, `python holo_index.py ...`) and scope-out / `Do NOT touch` / `OUT OF SCOPE` sections excluded; ambiguous read-intent prefers precision.
+- **Governance:** denied paths (`.env`, traversal, secret-like) emitted honestly and rejected by the UNCHANGED Python direct-read gate; denylist / byte budgets / redaction / packing untouched. No ranking/index/reindex change; no live-writer / orchestration-brain change.
+- **Telemetry:** `work_focus_targets_derived`, `work_focus_target_derivation_sources` (both OBSERVED). Tests WFTD-001..WFTD-013 including a real end-to-end regression on the multi-lane prompt.
+- **Follow-up if not indexed:** `HOLOINDEX_REDDOG_WORK_FOCUS_TARGET_DERIVATION_INDEX_GAP_PHASE1` (SPECIFIED_NOT_IMPLEMENTED).
 
 ### REDDOG_REQUIRED_TARGET_MARKER_FORGERY_HARDENING_PHASE1 (v0.3.39 -> v0.3.40 dedup -> v0.3.41 all-section + legacy-path closure)
 

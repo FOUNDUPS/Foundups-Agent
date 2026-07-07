@@ -88,6 +88,88 @@ const TARGET_READ_DENIED_PATHS = [
   ['extensions/foundups_advisory_workers/foundups-fusion-worker-0.3.21.vsix', 'vsix extension']
 ];
 
+// REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1 (WFTD): free-form work-focus prompt shapes.
+// Repo paths are named OUTSIDE the exact "Required direct-read targets:" header and must still
+// be promoted to required direct-read targets so the governed fetch fires.
+
+// The three paths from the real multi-lane-orchestration audit run that stayed dormant at
+// v0.3.41/0.3.43 (target_recall_ok:false, required_targets_total:0, fetch never attempted).
+const WORK_FOCUS_ORCH_PATHS = [
+  'docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md',
+  'docs/0102_session_briefings/work_ledger.schema.json',
+  'holo_index/adaptive_learning/breadcrumb_tracer.py'
+];
+
+// Source 2: "Read first:" block.
+const WORK_FOCUS_READ_FIRST_PROMPT = [
+  'Audit the multi-lane orchestration brain.',
+  '',
+  'Read first:',
+  '- ' + WORK_FOCUS_ORCH_PATHS[0],
+  '- ' + WORK_FOCUS_ORCH_PATHS[1],
+  '- ' + WORK_FOCUS_ORCH_PATHS[2],
+  '',
+  'Produce required RedDog architect output sections per contract.'
+].join('\n');
+
+// Source 3: WSP_99 M2M READ: array.
+const WORK_FOCUS_M2M_READ_PROMPT = [
+  'M2M work order (WSP_99).',
+  'READ: ["' + WORK_FOCUS_ORCH_PATHS[0] + '", "' + WORK_FOCUS_ORCH_PATHS[2] + '"]',
+  'Determine current state.'
+].join('\n');
+
+// Source 4: WSP_99 M2M CTX.FILES array.
+const WORK_FOCUS_CTX_FILES_PROMPT = [
+  'M2M work order (WSP_99).',
+  'CTX.FILES: [' + WORK_FOCUS_ORCH_PATHS[0] + ', ' + WORK_FOCUS_ORCH_PATHS[1] + ']',
+  'Determine current state.'
+].join('\n');
+
+// Source 7: backticked repo paths in prose.
+const WORK_FOCUS_BACKTICK_PROMPT =
+  'Review `' + WORK_FOCUS_ORCH_PATHS[2] + '` and `' + WORK_FOCUS_ORCH_PATHS[1] + '` for the ledger contract.';
+
+// Source 6: inline repo paths embedded in ordinary prose (must NOT capture surrounding words).
+const WORK_FOCUS_INLINE_PROMPT =
+  'See ' + WORK_FOCUS_ORCH_PATHS[0] + ' for the active slice ledger and check '
+  + WORK_FOCUS_ORCH_PATHS[2] + ' too before proceeding.';
+
+// Guard B-i: a validation fence naming extension.js must NOT derive it.
+const WORK_FOCUS_COMMAND_FENCE_PROMPT = [
+  'Validate the change.',
+  '',
+  '```powershell',
+  'node --check extensions/foundups_advisory_workers/extension.js',
+  'python holo_index.py --search "reddog work focus"',
+  '```',
+  '',
+  'Then land.'
+].join('\n');
+
+// Guard B-ii: a SCOPE - OUT bullet naming a path must NOT derive; an in-scope Read-first does.
+const WORK_FOCUS_SCOPE_OUT_PROMPT = [
+  'Audit.',
+  '',
+  'SCOPE - OUT:',
+  '- modules/off_limits/secret_area.py',
+  '- modules/off_limits/do_not_touch.py',
+  '',
+  'Read first:',
+  '- modules/in/scope.py',
+  '',
+  'Proceed.'
+].join('\n');
+
+// Denied paths named with read-intent are emitted honestly (so the Python gate rejects them),
+// alongside one legitimate path that survives.
+const WORK_FOCUS_DENIED_MIX_PROMPT = [
+  'Read first:',
+  '- .env',
+  '- ../outside.txt',
+  '- modules/communication/moltbot_bridge/src/foundup_job_contract.py'
+].join('\n');
+
 module.exports = {
   EXT_ACC_001_PROMPT,
   EXT_ACC_001_TARGET_PATH,
@@ -101,5 +183,14 @@ module.exports = {
   REPAIR_TAIL_SUPPLEMENT,
   TARGET_READ_DENIED_PATHS,
   FOUNDUP_REQUIRED_TARGETS,
-  FOUNDUP_CREATION_PROMPT
+  FOUNDUP_CREATION_PROMPT,
+  WORK_FOCUS_ORCH_PATHS,
+  WORK_FOCUS_READ_FIRST_PROMPT,
+  WORK_FOCUS_M2M_READ_PROMPT,
+  WORK_FOCUS_CTX_FILES_PROMPT,
+  WORK_FOCUS_BACKTICK_PROMPT,
+  WORK_FOCUS_INLINE_PROMPT,
+  WORK_FOCUS_COMMAND_FENCE_PROMPT,
+  WORK_FOCUS_SCOPE_OUT_PROMPT,
+  WORK_FOCUS_DENIED_MIX_PROMPT
 };
