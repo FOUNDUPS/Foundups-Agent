@@ -433,6 +433,44 @@ function extractTargetTokensFromLine(line) {
   return tokens;
 }
 
+// ReDoS-safe list-marker stripper. Replaces the old bullet-marker regex (a marker, then a
+// one-or-more whitespace run, then a greedy capture) whose leading whitespace class overlapped
+// the trailing capture on whitespace (CodeQL js/polynomial-redos: alert #174 + the two new
+// PR #942 instances). This is a linear O(n) scan with NO backtracking, mirroring the
+// normalizeTargetPath linear-trim fix. Returns { isList, itemText }: for a marker line, itemText is
+// the content after the marker and its following whitespace run; for a non-list line, isList=false
+// and itemText echoes the input (matching the old `listMatch ? listMatch[1] : stripped` idiom).
+// The only regex used is a single-character `\s` test (no quantifier -> ReDoS-immune).
+function stripListMarker(line) {
+  const s = String(line || '');
+  const n = s.length;
+  let i = 0;
+  const c0 = s.charAt(0);
+  if (c0 === '-' || c0 === '*' || c0 === '+') {
+    i = 1;
+  } else if (c0 >= '0' && c0 <= '9') {
+    let j = 0;
+    while (j < n && s.charAt(j) >= '0' && s.charAt(j) <= '9') {
+      j += 1;
+    }
+    if (j < n && (s.charAt(j) === '.' || s.charAt(j) === ')')) {
+      i = j + 1;
+    } else {
+      return { isList: false, itemText: s };
+    }
+  } else {
+    return { isList: false, itemText: s };
+  }
+  // Require at least one whitespace after the marker (the original \s+).
+  if (i >= n || !/\s/.test(s.charAt(i))) {
+    return { isList: false, itemText: s };
+  }
+  while (i < n && /\s/.test(s.charAt(i))) {
+    i += 1;
+  }
+  return { isList: true, itemText: s.slice(i) };
+}
+
 // Parse an explicit "Required direct-read targets" section from prompt text into
 // a de-duplicated list of repo-relative paths/globs. Returns [] when no such
 // section is present (backward compatible: callers then fall back to inference).
@@ -469,12 +507,12 @@ function parseRequiredTargetPaths(taskText) {
     }
     // Only consume list-style lines (-, *, digit., or bare path). Stop if a new
     // prose header appears before any list content is a paragraph, not a target.
-    const listMatch = stripped.match(/^(?:[-*+]|\d+[.)])\s+(.*)$/);
-    const itemText = listMatch ? listMatch[1] : stripped;
+    const lm = stripListMarker(stripped);
+    const itemText = lm.isList ? lm.itemText : stripped;
     const tokens = extractTargetTokensFromLine(itemText);
     if (!tokens.length) {
       // A non-list, non-path line ends the section.
-      if (!listMatch) {
+      if (!lm.isList) {
         break;
       }
       continue;
@@ -707,8 +745,7 @@ function deriveWorkFocusTargets(taskText) {
     }
     if (scopeOut) {
       // A scope-out block suppresses derivation for its (list) lines.
-      const listMatch = stripped.match(/^(?:[-*+]|\d+[.)])\s+/);
-      if (listMatch) {
+      if (stripListMarker(stripped).isList) {
         continue;
       }
       // A non-list line ends the scope-out window (fall through to normal handling of THIS line).
@@ -722,9 +759,9 @@ function deriveWorkFocusTargets(taskText) {
       continue;
     }
     // Otherwise handle here the per-line list + prose shapes.
-    const listMatch = stripped.match(/^(?:[-*+]|\d+[.)])\s+(.*)$/);
+    const lm = stripListMarker(stripped);
     if (readCapture) {
-      const itemText = listMatch ? listMatch[1] : stripped;
+      const itemText = lm.isList ? lm.itemText : stripped;
       const listTokens = extractTargetTokensFromLine(itemText).filter((t) => !isSelfFileLocation(stripSymbolSuffix(t)));
       if (listTokens.length) {
         for (const token of listTokens) {
@@ -733,20 +770,20 @@ function deriveWorkFocusTargets(taskText) {
         continue;
       }
       // Non-path line ends the read window (unless it is still a bullet, keep scanning).
-      if (!listMatch) {
+      if (!lm.isList) {
         readCapture = false;
       }
       // fall through so a read-window line that also holds an inline path is still captured
     }
 
     // Markdown bullet list of repo paths (source 5) OR inline/backtick prose paths (6/7).
-    if (listMatch) {
-      const bulletTokens = extractTargetTokensFromLine(listMatch[1]).filter((t) => !isSelfFileLocation(stripSymbolSuffix(t)));
+    if (lm.isList) {
+      const bulletTokens = extractTargetTokensFromLine(lm.itemText).filter((t) => !isSelfFileLocation(stripSymbolSuffix(t)));
       for (const token of bulletTokens) {
         add(token, 'markdown_bullet');
       }
       // A bullet may still carry an extra inline path in prose after the primary token.
-      for (const token of extractInlinePathTokens(listMatch[1])) {
+      for (const token of extractInlinePathTokens(lm.itemText)) {
         if (!bulletTokens.some((b) => b.toLowerCase() === token.toLowerCase())) {
           add(token, 'inline_path');
         }
@@ -4417,6 +4454,7 @@ module.exports = {
   evaluateTargetRecall,
   inferRecallTargetPaths,
   parseRequiredTargetPaths,
+  stripListMarker,
   deriveWorkFocusTargets,
   collectRequiredTargets,
   extractInlinePathTokens,

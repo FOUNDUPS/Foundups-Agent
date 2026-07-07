@@ -25,6 +25,15 @@
   (```powershell / ```bash with `git diff --check`, `node --check`, `python holo_index.py ...`, `rg ...`)
   and scope-out / `Do NOT touch` / `OUT OF SCOPE` sections are EXCLUDED; ambiguous read-intent prefers
   precision (no derivation).
+- CI hardening (folded into this PR before promotion): CodeQL flagged 2 new HIGH `js/polynomial-redos`
+  alerts on the bullet-list marker regex (marker + `\s+` + greedy capture, where the leading whitespace
+  class overlapped the trailing capture) -- the same rule/family as pre-existing alert #174. Replaced ALL
+  THREE instances (the pre-existing one in `parseRequiredTargetPaths` plus the two new derivation instances)
+  with a single linear O(n) `stripListMarker(line)` helper (no backtracking; the only regex is a
+  quantifier-free single-character `\s` test), mirroring the `normalizeTargetPath` linear-trim remediation.
+  Behavior is byte-identical (`{ isList, itemText }` matches the old `listMatch ? listMatch[1] : stripped`
+  idiom). `stripListMarker` exported; WFTD-014 adds parity + regex-absence + pathological-input timing
+  guards. Version stays 0.3.44 (unreleased; fix folded in, no VSIX churn).
 - Governance unchanged: denied paths (`.env`, traversal, secret-like) are EMITTED honestly by the deriver
   and REJECTED by the unchanged Python direct-read gate (`bundle_json.py`); denylist / traversal protection /
   byte budgets / redaction / audit_context / required-target packing are all untouched. No HoloIndex

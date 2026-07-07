@@ -17,6 +17,7 @@
 | WFTD-011 | Guard B-ii: a `SCOPE - OUT` bullet path is NOT derived; an in-scope `Read first` path in the same prompt IS derived |
 | WFTD-012 | Regression (real Python CLI): multi-lane orchestration `Read first` prompt -> `required_targets_total >= 3`, `direct_read_fetch_attempted=true`, each named file fetched / rejected / honestly-missing |
 | WFTD-013 | `work_focus_targets_derived` + `work_focus_target_derivation_sources` surface in `extractHoloIndexScorecard` and render in the Run Trace scorecard lines |
+| WFTD-014 | ReDoS remediation (CodeQL js/polynomial-redos): `stripListMarker` parity (dash/numbered/multi-space bullets stripped; non-list + marker-without-whitespace return `isList=false`); the flagged `.match(/^(?:[-*+]...)` bullet-regex USE is absent from source; pathological 200KB-whitespace input stays linear (<200ms) |
 
 **Run:** `node extensions/foundups_advisory_workers/tests/verify_extension_contract.js`
 

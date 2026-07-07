@@ -2104,4 +2104,19 @@ const wftdLines = orchestrator.formatHoloIndexScorecardLines(wftdScorecard).join
 includes(wftdLines, '- work_focus_targets_derived: true', 'WFTD-013: Run Trace renders work_focus_targets_derived');
 includes(wftdLines, '- work_focus_target_derivation_sources: read_first', 'WFTD-013: Run Trace renders derivation sources');
 
+// WFTD-014: the bullet-list marker is stripped by a ReDoS-safe LINEAR helper, not the
+// /^(?:[-*+]|\d+[.)])\s+(.*)$/ polynomial-redos regex CodeQL flagged (alert #174 + 2 new PR #942
+// instances). Guard: (a) stripListMarker parity with the old regex semantics, (b) the flagged
+// regex literal is absent from extension.js source so it cannot silently return.
+assert.deepStrictEqual(orchestrator.stripListMarker('- docs/a/b.py'), { isList: true, itemText: 'docs/a/b.py' }, 'WFTD-014: dash bullet stripped');
+assert.deepStrictEqual(orchestrator.stripListMarker('12. src/main.go'), { isList: true, itemText: 'src/main.go' }, 'WFTD-014: numbered bullet stripped');
+assert.deepStrictEqual(orchestrator.stripListMarker('*   a/b.md'), { isList: true, itemText: 'a/b.md' }, 'WFTD-014: multi-space bullet stripped');
+assert.strictEqual(orchestrator.stripListMarker('plain prose line').isList, false, 'WFTD-014: non-list line not treated as bullet');
+assert.strictEqual(orchestrator.stripListMarker('-nospace').isList, false, 'WFTD-014: marker without following whitespace is not a bullet');
+assert(!/\.match\(\/\^\(\?:\[-\*\+\]/.test(extensionJs), 'WFTD-014: polynomial-redos bullet regex USE (.match(/^(?:[-*+]...) must be absent from source');
+// Pathological-input ReDoS budget: stripping a 200KB whitespace line stays linear (<200ms).
+const wftdRedosStart = Date.now();
+orchestrator.stripListMarker('* ' + ' '.repeat(200000) + 'x/y.py');
+assert(Date.now() - wftdRedosStart < 200, 'WFTD-014: stripListMarker stays linear on pathological whitespace');
+
 console.log('Foundups®Agent extension contract checks passed.');
