@@ -170,6 +170,34 @@ const WORK_FOCUS_DENIED_MIX_PROMPT = [
   '- modules/communication/moltbot_bridge/src/foundup_job_contract.py'
 ].join('\n');
 
+// REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (WFTD-015+): the EXACT failed 0.3.44
+// prompt shape. Three files named in ONE flowing "Read first:" sentence, with a period + prose
+// after breadcrumb_tracer.py ("...breadcrumb_tracer.py. Determine ...") and the embedded-slash
+// English fragment "and the breadcrumb/handoff layer". At 0.3.44 the comma-splitter produced
+// required_targets_total=4 / recalled=2 / target_recall_ok=false. This fixture is FLOWING PROSE by
+// design -- the CoR guard forbids rewriting it as bullets to make the fix pass.
+const WORK_FOCUS_PROSE_READ_FIRST_PROMPT = [
+  'Audit the multi-lane orchestration brain and its lane-state derivation.',
+  '',
+  'Read first:',
+  'the sources are ' + WORK_FOCUS_ORCH_PATHS[0] + ', ' + WORK_FOCUS_ORCH_PATHS[1] + ', and '
+    + WORK_FOCUS_ORCH_PATHS[2] + '. Determine current lane-state sources and the breadcrumb/handoff layer.',
+  '',
+  'Produce required RedDog architect output sections per contract.'
+].join('\n');
+
+// Option-3 REGRESSION guard: the SAME three files, one path per line as a BULLETED "Read first:"
+// list, must still derive all three cleanly (must not regress when the prose branch was tightened).
+const WORK_FOCUS_PROSE_READ_FIRST_BULLET_PROMPT = WORK_FOCUS_READ_FIRST_PROMPT;
+
+// Tiered-strictness proof: the EXPLICIT / M2M / CLEAN-BULLET tiers still accept an intentionally
+// named DIRECTORY-style path (slash, no file extension) -- only FLOWING PROSE is stricter.
+const WORK_FOCUS_DIR_PATH_M2M_PROMPT = [
+  'M2M work order (WSP_99).',
+  'READ: ["holo_index/adaptive_learning", "' + WORK_FOCUS_ORCH_PATHS[2] + '"]',
+  'Determine current state.'
+].join('\n');
+
 module.exports = {
   EXT_ACC_001_PROMPT,
   EXT_ACC_001_TARGET_PATH,
@@ -192,5 +220,8 @@ module.exports = {
   WORK_FOCUS_INLINE_PROMPT,
   WORK_FOCUS_COMMAND_FENCE_PROMPT,
   WORK_FOCUS_SCOPE_OUT_PROMPT,
-  WORK_FOCUS_DENIED_MIX_PROMPT
+  WORK_FOCUS_DENIED_MIX_PROMPT,
+  WORK_FOCUS_PROSE_READ_FIRST_PROMPT,
+  WORK_FOCUS_PROSE_READ_FIRST_BULLET_PROMPT,
+  WORK_FOCUS_DIR_PATH_M2M_PROMPT
 };

@@ -31,7 +31,7 @@ python -m pytest holo_index/tests/test_reddog_extension_bundle_recall.py -q
 
 ## TEST_REGISTRY
 
-See `TestModLog.md` for TCI-001 through TCI-010, THG-001 through THG-006, UNI-001 through UNI-007, and WFTD-001 through WFTD-013 (free-form work-focus target derivation).
+See `TestModLog.md` for TCI-001 through TCI-010, THG-001 through THG-006, UNI-001 through UNI-007, WFTD-001 through WFTD-013 (free-form work-focus target derivation), and WFTD-015 through WFTD-020 (flowing-prose read-capture tokenization + tiered strictness, v0.3.45).
 
 ## Expected behavior
 

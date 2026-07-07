@@ -2,6 +2,55 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-07 - REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (P0 hotfix, 0.3.44 -> 0.3.45)
+
+- Problem (OBSERVED, real 0.3.44 run on a free-form prose prompt): a `Read first:` prompt naming three
+  files in ONE flowing sentence produced `target_recall_ok: false`. The read-capture branch tokenized the
+  NON-bullet prose line with the COMMA-splitter (`extractTargetTokensFromLine`), so
+  `holo_index/adaptive_learning/breadcrumb_tracer.py. Determine current lane-state sources` was captured
+  WHOLE as `not_a_file` (breadcrumb_tracer.py MISSED) and `and the breadcrumb/handoff layer` (an
+  embedded-slash English fragment) was captured whole as a garbage target. Result:
+  `required_targets_total=4, recalled=2, target_recall_ok=false`. Derivation ENGAGED (0->4 derived,
+  2 fetched) but prose tokenization was imprecise.
+- Root cause (VERIFIED by reading): `deriveWorkFocusTargets`'s `read_first` capture used the comma-splitter
+  on NON-bullet prose lines. The comma-splitter treats each comma-chunk as one token, so a chunk with a
+  path+trailing-prose or an embedded slash becomes a bad target. The bounded path-token regex
+  (`extractInlinePathTokens`, already used for source-6 inline prose) isolates clean path substrings.
+- Fix (extension.js only; NO Python change):
+  - Fix A (essential): the NON-bullet read-capture branch now tokenizes with `extractInlinePathTokens`
+    (via new `extractProsePathTokens`) instead of `extractTargetTokensFromLine`. CLEAN BULLETS
+    (`stripListMarker(...).isList`) keep the comma/`or`-splitter to preserve the `a / b / c` alternatives
+    shape. Recovers `breadcrumb_tracer.py` cleanly.
+  - Fix B (recall semantics + tiered strictness): FLOWING-PROSE-derived tokens (read-first prose +
+    source-6 inline + source-7 backtick) are LOW-confidence -- a required target ONLY if it normalizes to a
+    FILE SHAPE (a lowercase file extension). A prose token with a slash but NO extension
+    (`breadcrumb/handoff`) is NOT required: dropped from `required_targets_total` / `required_targets_missing`
+    (so it cannot flip `target_recall_ok`) and reported in the NEW `work_focus_targets_dropped_low_confidence`
+    telemetry array. The explicit "Required direct-read targets" header, M2M `READ:`, M2M `CTX.FILES`, and
+    CLEAN BULLETS keep the broader slash-OR-extension tier (a named directory path is still accepted). Only
+    flowing prose is stricter -- the explicit/M2M/bullet tiers were NOT tightened.
+  - Fix C (punctuation trim): `normalizeTargetPath` trailing set adds `}` to the existing
+    `.` `,` `;` `:` `)` `]`, so `.../breadcrumb_tracer.py. Determine` -> `.../breadcrumb_tracer.py`.
+- Reuse / ReDoS: `extractProsePathTokens` REUSES the existing bounded/anchored ReDoS-safe
+  `extractInlinePathTokens` (no new backtracking regex introduced); `stripListMarker` (the ReDoS fix) is
+  untouched. No `js/polynomial-redos`-style regex added. The governed fetch gate
+  (`--bundle-must-include` -> `bundle_json.py` deny/traversal/budget) is unchanged; derived paths still flow
+  through it. No Python / bundle_json.py / HoloIndex ranking / redaction change; no live-writer /
+  orchestration-brain / budget-prioritization change (budget-prioritization is Phase 2, separate).
+- Telemetry: NEW `work_focus_targets_dropped_low_confidence` (array of dropped raw tokens) threaded through
+  `evaluateTargetRecall` -> `holoIndexMetaFromBundle` -> `extractHoloIndexScorecard` ->
+  `formatHoloIndexScorecardLines` (Run Trace). Labeled OBSERVED (WSP_97). All existing fields preserved.
+- Tests: WFTD-015..WFTD-020 in `tests/verify_extension_contract.js` using the EXACT failed 0.3.44 flowing-
+  prose prompt as a fixture (`WORK_FOCUS_PROSE_READ_FIRST_PROMPT` in `tests/fixtures.js`): asserts
+  `required_targets_total=3 / recalled=3 / target_recall_ok=true / index_gap_detected=false`, the 3 real
+  files present + breadcrumb_tracer.py clean (no trailing " Determine..."), `breadcrumb/handoff` in
+  `work_focus_targets_dropped_low_confidence` and NOT in required, Fix C trailing-punctuation trim, the
+  bulleted-Read-first Option-3 regression, and the explicit/M2M/bullet broader-tier proof. WFTD-001..014
+  regression preserved.
+- Version 0.3.44 -> 0.3.45 (package.json + EXTENSION_VERSION + README + contract-test version assertions).
+- Gate: VERIFIED_READY draft PR only (do NOT self-merge; merge is harness/012-gated, VSIX build is a 012
+  host step).
+
 ## 2026-07-07 - REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1 (free-form target derivation, 0.3.44)
 
 - Problem (OBSERVED, real run at 0.3.41/0.3.43): a multi-lane-orchestration audit named
