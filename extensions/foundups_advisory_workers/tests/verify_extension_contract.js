@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.44', 'package version must be 0.3.44');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.44'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.45', 'package version must be 0.3.45');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.45'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.44', 'README version mismatch');
+includes(readme, 'Version: 0.3.45', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -1568,7 +1568,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.44'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.45'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -1582,7 +1582,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.44'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.45'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -1594,7 +1594,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.44'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.45'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -2118,5 +2118,72 @@ assert(!/\.match\(\/\^\(\?:\[-\*\+\]/.test(extensionJs), 'WFTD-014: polynomial-r
 const wftdRedosStart = Date.now();
 orchestrator.stripListMarker('* ' + ' '.repeat(200000) + 'x/y.py');
 assert(Date.now() - wftdRedosStart < 200, 'WFTD-014: stripListMarker stays linear on pathological whitespace');
+
+// REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (WFTD-015..WFTD-020): the exact failed
+// 0.3.44 flowing-prose "Read first:" prompt must now derive the 3 real files cleanly, drop the
+// slash-only English fragment as low-confidence, and NOT flip target_recall_ok. Uses the same
+// governed direct-read gate; no HoloIndex ranking / Python changes.
+includes(extensionJs, 'function extractProsePathTokens', 'WFTD-015: prose token partitioner missing');
+includes(extensionJs, 'work_focus_targets_dropped_low_confidence', 'WFTD-015: dropped-low-confidence telemetry field missing');
+
+// WFTD-015: the flowing-prose Read-first prompt derives EXACTLY the 3 real files, clean.
+const wftdProse = orchestrator.collectRequiredTargets(fixtures.WORK_FOCUS_PROSE_READ_FIRST_PROMPT);
+for (const p of fixtures.WORK_FOCUS_ORCH_PATHS) {
+  assert(wftdProse.targets.includes(p), 'WFTD-015: flowing prose must derive ' + p);
+}
+// breadcrumb_tracer.py must be present AND clean (no trailing " Determine..." glued on).
+const wftdBreadcrumb = fixtures.WORK_FOCUS_ORCH_PATHS[2];
+assert(wftdProse.targets.includes(wftdBreadcrumb), 'WFTD-015: breadcrumb_tracer.py must be derived');
+assert(!wftdProse.targets.some((t) => /breadcrumb_tracer\.py\s+determine/i.test(t) || /breadcrumb_tracer\.py\.$/.test(t)), 'WFTD-015: breadcrumb_tracer.py must be clean (no trailing prose / period)');
+assert.strictEqual(wftdProse.derived, true, 'WFTD-015: prose prompt must report derived=true');
+assert(wftdProse.derivation_sources.includes('read_first'), 'WFTD-015: source must be read_first');
+
+// WFTD-016: recall on the flowing-prose prompt with all 3 real files present = total 3 / recalled 3 /
+// recall_ok true / gap false (the exact 0.3.44 failure inverted: was total 4 / recalled 2 / ok false).
+const wftdProseHits = { task_retrieval: { code_hits: fixtures.WORK_FOCUS_ORCH_PATHS.map((p) => ({ location: p, need: 'semantic: ' + p })) } };
+const wftdProseRecall = orchestrator.evaluateTargetRecall(fixtures.WORK_FOCUS_PROSE_READ_FIRST_PROMPT, wftdProseHits);
+assert.strictEqual(wftdProseRecall.required_targets_total, 3, 'WFTD-016: required_targets_total must be 3 (not 4)');
+assert.strictEqual(wftdProseRecall.required_targets_recalled, 3, 'WFTD-016: required_targets_recalled must be 3');
+assert.strictEqual(wftdProseRecall.target_recall_ok, true, 'WFTD-016: target_recall_ok must be true');
+assert.strictEqual(wftdProseRecall.index_gap_detected, false, 'WFTD-016: index_gap_detected must be false');
+// The 3 direct_read-eligible required targets are exactly the 3 real files (no garbage 4th target).
+assert.deepStrictEqual([...wftdProseRecall.recall_targets].sort(), [...fixtures.WORK_FOCUS_ORCH_PATHS].sort(), 'WFTD-016: required targets are exactly the 3 real files');
+
+// WFTD-017: the breadcrumb/handoff-style slash-only fragment IS in dropped-low-confidence, is NOT a
+// required target, and does NOT affect target_recall_ok.
+const wftdDropped = wftdProseRecall.work_focus_targets_dropped_low_confidence;
+assert(Array.isArray(wftdDropped), 'WFTD-017: dropped-low-confidence must be an array');
+assert(wftdDropped.some((t) => /breadcrumb\/handoff/i.test(t)), 'WFTD-017: breadcrumb/handoff fragment must be dropped');
+assert(!wftdProseRecall.recall_targets.some((t) => /breadcrumb\/handoff/i.test(t)), 'WFTD-017: dropped fragment must NOT be a required target');
+assert(!wftdProseRecall.required_targets_missing.some((t) => /breadcrumb\/handoff/i.test(t)), 'WFTD-017: dropped fragment must NOT be in required_targets_missing (cannot flip recall_ok)');
+// Even with the fragment's directory absent from the bundle, recall stays ok (fragment excluded).
+assert.strictEqual(wftdProseRecall.target_recall_ok, true, 'WFTD-017: dropped fragment does not flip target_recall_ok');
+
+// WFTD-018: Fix C -- normalizeTargetPath (via the exported extractTargetTokensFromLine) trims trailing
+// . , ; : ) ] } from a derived path.
+for (const trail of ['.', ',', ';', ':', ')', ']', '}']) {
+  const toks = orchestrator.extractTargetTokensFromLine('x/y.py' + trail);
+  assert.deepStrictEqual(toks, ['x/y.py'], 'WFTD-018: trailing "' + trail + '" must be trimmed');
+}
+// The prose extractor also trims a ${path}-style brace wrapper down to the clean path.
+const wftdBrace = orchestrator.extractProsePathTokens('see ${docs/a/b.py} for details');
+assert.deepStrictEqual(wftdBrace.accepted, ['docs/a/b.py'], 'WFTD-018: ${docs/a/b.py} brace wrapper trimmed to clean path');
+
+// WFTD-019: Option-3 REGRESSION -- a BULLETED "Read first:" list (one path per line) still derives all 3
+// cleanly (the prose-branch tightening must not regress the bullet branch).
+const wftdBullet = orchestrator.collectRequiredTargets(fixtures.WORK_FOCUS_PROSE_READ_FIRST_BULLET_PROMPT);
+for (const p of fixtures.WORK_FOCUS_ORCH_PATHS) {
+  assert(wftdBullet.targets.includes(p), 'WFTD-019: bulleted Read-first must still derive ' + p);
+}
+assert(!Array.isArray(wftdBullet.dropped_low_confidence) || wftdBullet.dropped_low_confidence.length === 0, 'WFTD-019: clean bullets drop nothing');
+
+// WFTD-020: tiered strictness -- the EXPLICIT/M2M/CLEAN-BULLET tiers still accept an intentionally-named
+// DIRECTORY-style path (slash, NO file extension); only FLOWING PROSE is stricter. (In the prose prompt
+// above, breadcrumb/handoff -- slash, no extension -- was correctly DROPPED.)
+const wftdDir = orchestrator.collectRequiredTargets(fixtures.WORK_FOCUS_DIR_PATH_M2M_PROMPT);
+assert(wftdDir.targets.includes('holo_index/adaptive_learning'), 'WFTD-020: M2M tier accepts a directory-style path (slash, no extension)');
+assert(wftdDir.derivation_sources.includes('m2m_read'), 'WFTD-020: directory path derived via m2m_read tier');
+// Prove the asymmetry in one place: the same slash-only shape is DROPPED in flowing prose but ACCEPTED in M2M.
+assert(wftdDropped.some((t) => !/\.[a-z0-9]{1,6}$/.test(t)), 'WFTD-020: a slash-only prose fragment was dropped (prose stricter)');
 
 console.log('Foundups®Agent extension contract checks passed.');

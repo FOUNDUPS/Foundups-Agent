@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.44';
+const EXTENSION_VERSION = '0.3.45';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -379,7 +379,11 @@ function normalizeTargetPath(raw) {
   // leading/trailing character sets and ordering.
   const s = String(raw || '').replace(/\\/g, '/');
   const LEAD = ['`', "'", '"', '(', '['];
-  const TRAIL = ['`', "'", '"', ')', ']', '.', ',', ';', ':'];
+  // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (Fix C): a prose path can end
+  // with a closing brace ('}') in addition to the existing prose-punctuation set (a trailing
+  // '.' ',' ';' ':' ')' ']'). Trim '}' too so `.../breadcrumb_tracer.py.` and a `${path}`-style
+  // wrapper both normalize to the clean repo-relative path.
+  const TRAIL = ['`', "'", '"', ')', ']', '}', '.', ',', ';', ':'];
   let start = 0;
   let end = s.length;
   while (start < end && LEAD.indexOf(s.charAt(start)) !== -1) {
@@ -621,6 +625,34 @@ function extractInlinePathTokens(line) {
   return out;
 }
 
+// REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (Fix B): FLOWING-PROSE-derived tokens
+// (read_first prose lines, source-6 inline prose, source-7 backtick prose) are LOW-confidence.
+// A prose token is promoted to a REQUIRED target ONLY when it has a real, LOWERCASE file
+// extension (a file SHAPE). A prose token that carries a '/' but NO file extension -- e.g.
+// `breadcrumb/handoff` captured from "...and the breadcrumb/handoff layer" -- is a directory-ish
+// English fragment, NOT an intentionally-named file, so it must NOT flip recall. Such tokens are
+// dropped from the required list and reported separately in work_focus_targets_dropped_low_confidence.
+// This REUSES extractInlinePathTokens (same bounded token regex + self-file guard) and only
+// partitions its already-clean output; the explicit/M2M/clean-bullet tiers stay broader (untouched).
+// Returns { accepted: [file-shape tokens], dropped: [slash-only, no-extension raw tokens] }.
+function extractProsePathTokens(line) {
+  const accepted = [];
+  const dropped = [];
+  for (const token of extractInlinePathTokens(line)) {
+    const pathPortion = stripSymbolSuffix(token);
+    // File shape = a real lowercase extension anywhere the path ends (.py/.md/.json/main.js ...).
+    // (extractInlinePathTokens already rejected UPPERCASE-suffix acronyms like CTX.FILES.)
+    if (/\.[a-z0-9]{1,6}$/.test(pathPortion)) {
+      accepted.push(token);
+    } else {
+      // Slash-only, no file extension -> low-confidence prose fragment (kept out of the required
+      // list but surfaced honestly for telemetry). Symbol tokens are preserved verbatim.
+      dropped.push(token);
+    }
+  }
+  return { accepted: accepted, dropped: dropped };
+}
+
 // Collect targets from a WSP_99 M2M inline array shape, e.g.
 //   READ: ["a/b.py", "c/d.md"]  |  CTX.FILES: [a/b.py, c/d.md]  |  CTX: FILES: [...]
 // Only the bracketed array body is scanned (bounded), and each element goes through the same
@@ -661,6 +693,11 @@ function deriveWorkFocusTargets(taskText) {
   const targets = [];
   const seen = new Set();
   const sources = new Set();
+  // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (Fix B): low-confidence prose
+  // fragments dropped from the required list (slash-only, no file extension). Deduped, honest
+  // telemetry only -- these never enter `targets` and never affect recall.
+  const dropped = [];
+  const droppedSeen = new Set();
   const add = (token, source) => {
     if (!token) {
       return;
@@ -674,6 +711,30 @@ function deriveWorkFocusTargets(taskText) {
     seen.add(norm);
     targets.push(token);
     sources.add(source);
+  };
+  const addDropped = (token) => {
+    if (!token) {
+      return;
+    }
+    const norm = token.toLowerCase();
+    if (droppedSeen.has(norm)) {
+      return;
+    }
+    droppedSeen.add(norm);
+    dropped.push(token);
+  };
+  // Route ONE flowing-prose line's tokens through the low-confidence partition: file-shape tokens
+  // become required targets under `source`; slash-only fragments are dropped (reported, not required).
+  const addProse = (line, source) => {
+    const partitioned = extractProsePathTokens(line);
+    for (const token of partitioned.accepted) {
+      if (!isSelfFileLocation(stripSymbolSuffix(token))) {
+        add(token, source);
+      }
+    }
+    for (const token of partitioned.dropped) {
+      addDropped(token);
+    }
   };
 
   // Pass over the lines with a small state machine tracking:
@@ -761,16 +822,30 @@ function deriveWorkFocusTargets(taskText) {
     // Otherwise handle here the per-line list + prose shapes.
     const lm = stripListMarker(stripped);
     if (readCapture) {
-      const itemText = lm.isList ? lm.itemText : stripped;
-      const listTokens = extractTargetTokensFromLine(itemText).filter((t) => !isSelfFileLocation(stripSymbolSuffix(t)));
-      if (listTokens.length) {
-        for (const token of listTokens) {
-          add(token, 'read_first');
+      if (lm.isList) {
+        // CLEAN BULLET inside a read window: keep the comma/or splitter so the intentional
+        // `a / b / c` alternatives shape is preserved (broader tier -- bullets are structured).
+        const listTokens = extractTargetTokensFromLine(lm.itemText).filter((t) => !isSelfFileLocation(stripSymbolSuffix(t)));
+        if (listTokens.length) {
+          for (const token of listTokens) {
+            add(token, 'read_first');
+          }
+          continue;
         }
-        continue;
-      }
-      // Non-path line ends the read window (unless it is still a bullet, keep scanning).
-      if (!lm.isList) {
+        // A non-path bullet: keep scanning the read window (still bulleted).
+      } else {
+        // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (Fix A): a NON-bullet prose
+        // read line ("Read first: a.md, b.json, and c.py. Determine ... breadcrumb/handoff layer")
+        // must be tokenized with the bounded path-token regex (via the low-confidence prose
+        // partition), NOT the comma-splitter -- the splitter glued trailing prose onto c.py and
+        // captured `breadcrumb/handoff` whole. addProse isolates clean file-shape paths and drops
+        // the slash-only English fragment into work_focus_targets_dropped_low_confidence.
+        const before = targets.length;
+        addProse(stripped, 'read_first');
+        if (targets.length > before) {
+          continue;
+        }
+        // Non-path prose line ends the read window.
         readCapture = false;
       }
       // fall through so a read-window line that also holds an inline path is still captured
@@ -793,19 +868,34 @@ function deriveWorkFocusTargets(taskText) {
 
     // Inline prose / backticked paths (sources 6 & 7). Backticks are stripped by
     // normalizeTargetPath inside the token extractor, so both shapes resolve here.
+    // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (Fix B): these are FLOWING PROSE
+    // (low-confidence). Route through extractProsePathTokens so slash-only fragments are dropped
+    // (reported) rather than promoted to required targets. isSelfFileLocation exclusion runs
+    // inside extractInlinePathTokens already.
     const backtickHits = new Set();
     const bt = stripped.match(/`[^`]{1,256}`/g);
     if (bt) {
       for (const seg of bt) {
-        for (const token of extractInlinePathTokens(seg)) {
+        const btPart = extractProsePathTokens(seg);
+        for (const token of btPart.accepted) {
           backtickHits.add(token.toLowerCase());
           add(token, 'backtick_path');
         }
+        for (const token of btPart.dropped) {
+          backtickHits.add(token.toLowerCase());
+          addDropped(token);
+        }
       }
     }
-    for (const token of extractInlinePathTokens(stripped)) {
+    const inlinePart = extractProsePathTokens(stripped);
+    for (const token of inlinePart.accepted) {
       if (!backtickHits.has(token.toLowerCase())) {
         add(token, 'inline_path');
+      }
+    }
+    for (const token of inlinePart.dropped) {
+      if (!backtickHits.has(token.toLowerCase())) {
+        addDropped(token);
       }
     }
   }
@@ -818,7 +908,11 @@ function deriveWorkFocusTargets(taskText) {
     add(token, 'ctx_files');
   }
 
-  return { targets: targets, sources: Array.from(sources) };
+  // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (Fix B): a fragment that was dropped
+  // as low-confidence but ALSO appears as an accepted required target elsewhere (e.g. named cleanly
+  // in an M2M array) is a real target -> remove it from the dropped list (honest telemetry).
+  const droppedFinal = dropped.filter((t) => !seen.has(t.toLowerCase()));
+  return { targets: targets, sources: Array.from(sources), dropped: droppedFinal };
 }
 
 // Merge the AUTHORITATIVE explicit "Required direct-read targets" header list (first, order and
@@ -857,10 +951,17 @@ function collectRequiredTargets(taskText) {
       usedSources.add(s);
     }
   }
+  // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (Fix B): forward the dropped
+  // low-confidence prose fragments, minus any that the explicit/M2M/bullet tiers accepted as a
+  // real required target (a fragment named cleanly elsewhere is not "dropped").
+  const requiredSet = new Set(targets.map((t) => String(t || '').toLowerCase()));
+  const droppedLowConfidence = (Array.isArray(derivedInfo.dropped) ? derivedInfo.dropped : [])
+    .filter((t) => t && !requiredSet.has(String(t).toLowerCase()));
   return {
     targets: targets,
     derived: anyDerivedNew,
-    derivation_sources: Array.from(usedSources)
+    derivation_sources: Array.from(usedSources),
+    dropped_low_confidence: droppedLowConfidence
   };
 }
 
@@ -938,6 +1039,10 @@ function evaluateTargetRecall(taskText, bundleData) {
   const required = collected.targets;
   const workFocusDerived = collected.derived;
   const workFocusSources = collected.derivation_sources;
+  // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (Fix B): low-confidence prose
+  // fragments dropped from the required list. These are excluded from required_targets_total /
+  // _missing (so they CANNOT flip target_recall_ok) and reported here for honest telemetry.
+  const workFocusDropped = Array.isArray(collected.dropped_low_confidence) ? collected.dropped_low_confidence : [];
   if (required.length) {
     const contentLocations = locations.filter((loc) => !isSelfFileLocation(loc));
     const missing = [];
@@ -974,7 +1079,10 @@ function evaluateTargetRecall(taskText, bundleData) {
       required_targets_missing: missing,
       // REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1: honest provenance for the required list.
       work_focus_targets_derived: workFocusDerived === true,
-      work_focus_target_derivation_sources: Array.isArray(workFocusSources) ? workFocusSources : []
+      work_focus_target_derivation_sources: Array.isArray(workFocusSources) ? workFocusSources : [],
+      // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1: dropped low-confidence prose
+      // fragments (NOT counted in required_targets_total; cannot flip target_recall_ok).
+      work_focus_targets_dropped_low_confidence: workFocusDropped
     };
   }
 
@@ -990,7 +1098,8 @@ function evaluateTargetRecall(taskText, bundleData) {
       required_targets_recalled: 0,
       required_targets_missing: [],
       work_focus_targets_derived: false,
-      work_focus_target_derivation_sources: []
+      work_focus_target_derivation_sources: [],
+      work_focus_targets_dropped_low_confidence: workFocusDropped
     };
   }
   let allFound = true;
@@ -1016,7 +1125,8 @@ function evaluateTargetRecall(taskText, bundleData) {
     required_targets_recalled: 0,
     required_targets_missing: [],
     work_focus_targets_derived: false,
-    work_focus_target_derivation_sources: []
+    work_focus_target_derivation_sources: [],
+    work_focus_targets_dropped_low_confidence: workFocusDropped
   };
 }
 
@@ -1040,6 +1150,9 @@ function extractHoloIndexScorecard(contextMode, holoMeta) {
     // from free-form work-focus / M2M / Read-first shapes, and which shapes contributed.
     work_focus_targets_derived: meta.work_focus_targets_derived !== undefined ? meta.work_focus_targets_derived : 'unknown',
     work_focus_target_derivation_sources: Array.isArray(meta.work_focus_target_derivation_sources) ? meta.work_focus_target_derivation_sources : 'unknown',
+    // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1: low-confidence prose fragments
+    // dropped from the required list (do NOT affect target_recall_ok).
+    work_focus_targets_dropped_low_confidence: Array.isArray(meta.work_focus_targets_dropped_low_confidence) ? meta.work_focus_targets_dropped_low_confidence : 'unknown',
     // REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 / ADDENDUM B: final-context proof.
     // required_targets_recalled (above) = fetched/available from the bundle; the fields
     // below = actually visible to the model AFTER the 42K cut. Different layers; must
@@ -1098,6 +1211,8 @@ function formatHoloIndexScorecardLines(scorecard) {
     // REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1: free-form target derivation provenance.
     '- work_focus_targets_derived: ' + scorecard.work_focus_targets_derived,
     '- work_focus_target_derivation_sources: ' + (Array.isArray(scorecard.work_focus_target_derivation_sources) ? (scorecard.work_focus_target_derivation_sources.length ? scorecard.work_focus_target_derivation_sources.join(', ') : '(none)') : scorecard.work_focus_target_derivation_sources),
+    // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1: dropped low-confidence prose fragments.
+    '- work_focus_targets_dropped_low_confidence: ' + (Array.isArray(scorecard.work_focus_targets_dropped_low_confidence) ? (scorecard.work_focus_targets_dropped_low_confidence.length ? scorecard.work_focus_targets_dropped_low_confidence.join(', ') : '(none)') : scorecard.work_focus_targets_dropped_low_confidence),
     // REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1 / ADDENDUM B (6): render BOTH the
     // fetched/available layer (required_targets_recalled) and the actually-model-visible
     // layer (required_targets_in_model_context). They are different guarantees.
@@ -3679,6 +3794,8 @@ function holoIndexMetaFromBundle(output, usedOfflineFallback, taskText) {
     // REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1: default provenance (nothing derived yet).
     work_focus_targets_derived: false,
     work_focus_target_derivation_sources: [],
+    // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1: default (no dropped fragments).
+    work_focus_targets_dropped_low_confidence: [],
     direct_read_paths: [],
     direct_read_rejected: [],
     direct_read_bytes: 0,
@@ -3709,6 +3826,10 @@ function holoIndexMetaFromBundle(output, usedOfflineFallback, taskText) {
     meta.work_focus_targets_derived = recall.work_focus_targets_derived === true;
     meta.work_focus_target_derivation_sources = Array.isArray(recall.work_focus_target_derivation_sources)
       ? recall.work_focus_target_derivation_sources
+      : [];
+    // REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1: surface dropped low-confidence prose.
+    meta.work_focus_targets_dropped_low_confidence = Array.isArray(recall.work_focus_targets_dropped_low_confidence)
+      ? recall.work_focus_targets_dropped_low_confidence
       : [];
     // REDDOG_DIRECT_READ_FALLBACK_BY_PATH_PHASE1: surface the Python-side
     // governed direct-read telemetry when the bundle carried a fetch.
@@ -4458,6 +4579,7 @@ module.exports = {
   deriveWorkFocusTargets,
   collectRequiredTargets,
   extractInlinePathTokens,
+  extractProsePathTokens,
   extractM2mArrayTargets,
   isSelfFileLocation,
   requiredTargetMatchesLocation,

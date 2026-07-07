@@ -1,5 +1,18 @@
 # Foundups®Agent TestModLog
 
+## 2026-07-07 - REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (WFTD-015..WFTD-020, v0.3.45)
+
+| ID | Asserts |
+| --- | --- |
+| WFTD-015 | Flowing-prose `Read first:` prompt (the EXACT failed 0.3.44 shape: 3 files in one sentence, period+prose after breadcrumb_tracer.py, `and the breadcrumb/handoff layer`) derives EXACTLY the 3 real files; breadcrumb_tracer.py is present AND clean (no trailing " Determine..." / period); `derived=true`, source `read_first`; `extractProsePathTokens` + `work_focus_targets_dropped_low_confidence` present in source |
+| WFTD-016 | Recall on the prose prompt with all 3 files present: `required_targets_total=3`, `required_targets_recalled=3`, `target_recall_ok=true`, `index_gap_detected=false` (inverts the 0.3.44 `total 4 / recalled 2 / ok false`); the required targets are EXACTLY the 3 real files |
+| WFTD-017 | The `breadcrumb/handoff` slash-only fragment IS in `work_focus_targets_dropped_low_confidence`, is NOT a required target, is NOT in `required_targets_missing`, and does NOT flip `target_recall_ok` |
+| WFTD-018 | Fix C: trailing `. , ; : ) ] }` trimmed from a derived path (via `extractTargetTokensFromLine`); a `${docs/a/b.py}` brace wrapper trims to the clean path (via `extractProsePathTokens`) |
+| WFTD-019 | Option-3 REGRESSION: a BULLETED `Read first:` list (one path per line) still derives all 3 cleanly; clean bullets drop nothing |
+| WFTD-020 | Tiered strictness: the M2M tier still accepts an intentionally-named DIRECTORY-style path (slash, no extension) via `m2m_read`; the SAME slash-only shape is DROPPED in flowing prose (prose stricter, explicit/M2M/bullet broader) |
+
+**Run:** `node extensions/foundups_advisory_workers/tests/verify_extension_contract.js`
+
 ## 2026-07-07 - REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1 (WFTD-001..WFTD-013)
 
 | ID | Asserts |

@@ -17,6 +17,7 @@ Current implementation:
 - REDDOG_BLOCKED_COPY_POLISH_PHASE1 (v0.3.21, #878): Work Trail dedupe; conservative blocked-local Governed Handoff.
 - REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1 (docs): fixed 15-prompt pack, rubric, runbook, artifact template for 012 replacement scoreboard.
 - REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1 (v0.3.44): repo paths named with read-intent in free-form prose / WSP_99 M2M / "Read first" sections (not only under the exact `Required direct-read targets:` header) are promoted to required direct-read targets so the governed fetch fires even on HoloIndex semantic miss; command/validation fences and scope-out sections excluded.
+- REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (v0.3.45): flowing-prose `Read first:` lines are tokenized with the bounded path-token regex (not the comma-splitter), so a path followed by prose and an embedded-slash English fragment (`breadcrumb/handoff`) no longer corrupt derived targets; tiered strictness (flowing prose requires a file extension, explicit/M2M/bullet tiers keep slash-OR-extension); slash-only prose fragments reported in `work_focus_targets_dropped_low_confidence` and never flip `target_recall_ok`; `}` added to trailing-punctuation trim.
 
 ## Architecture Direction
 
@@ -163,6 +164,15 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 - Improve semantic recall for RedDog auto-router, WSP_15/97, and governed-handoff queries.
 - Add regression retrieval tests so extension bridge code ranks above adjacent WRE routers.
 - **Status:** **LANDED** #882 (`99d0e35c2`) — ranking + target recall telemetry only; not source-content inclusion.
+
+### REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (v0.3.45)
+
+- **Status:** VERIFIED_READY (draft PR only; do NOT self-merge -- merge is harness/012-gated, VSIX build is a 012 host step). P0 hotfix on the live derivation path.
+- **Problem (OBSERVED):** a real 0.3.44 run on a FLOWING-PROSE `Read first:` prompt (three files named in one sentence, `.../breadcrumb_tracer.py. Determine ...` then `and the breadcrumb/handoff layer`) reported `target_recall_ok: false`. The read-capture branch tokenized the prose line with the COMMA-splitter, gluing trailing prose onto the path (`breadcrumb_tracer.py. Determine current lane-state sources` -> `not_a_file`, breadcrumb_tracer.py MISSED) and capturing the embedded-slash English fragment whole (`and the breadcrumb/handoff layer` -> garbage). Result `required_targets_total=4 / recalled=2`.
+- **Fix (extension.js only; no Python change):** (A) NON-bullet read-capture prose is tokenized with the bounded path-token regex (`extractInlinePathTokens` via new `extractProsePathTokens`), not the comma-splitter; CLEAN BULLETS keep the comma/`or`-splitter to preserve the `a / b / c` alternatives shape. (B) Tiered strictness: flowing-prose tokens (read-first prose + inline + backtick) are required ONLY with a lowercase file extension (file shape); slash-only-no-extension prose fragments (`breadcrumb/handoff`) are dropped, reported in `work_focus_targets_dropped_low_confidence`, and EXCLUDED from `required_targets_total` / `_missing` (cannot flip `target_recall_ok`). Explicit header / M2M / clean bullets keep the broader slash-OR-extension tier. (C) `normalizeTargetPath` adds `}` to the trailing-punctuation trim set.
+- **Guards / reuse:** `extractProsePathTokens` REUSES the existing bounded ReDoS-safe `extractInlinePathTokens` (no new backtracking regex); `stripListMarker` untouched. Governed direct-read gate (`bundle_json.py`) unchanged; derived paths still flow through it. No ranking/index/reindex change; no live-writer / orchestration-brain / budget-prioritization change.
+- **Telemetry:** `work_focus_targets_dropped_low_confidence` (OBSERVED). Tests WFTD-015..WFTD-020 (the exact failed 0.3.44 prose prompt as fixture) plus WFTD-001..014 regression.
+- **Follow-up:** none new (budget-prioritization deferred to Phase 2, out of scope here).
 
 ### REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1 (v0.3.44)
 
