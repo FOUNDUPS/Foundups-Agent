@@ -103,12 +103,74 @@ Get or create the bypass classifier singleton.
 4. **No raw storage**: Only hashes and lengths, never raw content
 5. **M2M output**: All decisions in WSP-99 M2M format
 
+## Public API (P3: Telemetry Service)
+
+### Classes
+
+#### `TokenCompressionEvent`
+
+Telemetry event for token compression measurement.
+
+```python
+@dataclass
+class TokenCompressionEvent:
+    event_id: str
+    timestamp: int
+    source_layer: SourceLayer
+    operation: Operation
+    content_type: ContentType
+    input_bytes: int
+    input_estimated_tokens: int
+    output_bytes: int
+    output_estimated_tokens: int
+    bytes_saved: int
+    tokens_saved: int
+    savings_ratio: float
+    compression_status: CompressionStatus
+    bypass_decision: str | None
+    fidelity_status: str | None
+    raw_ref_present: bool
+    ctx_holo_present: bool
+    index_gap_detected: bool
+    runtime_reindex_allowed: bool  # Always False
+    no_command_execution: bool     # Always True
+    no_rtk_invocation: bool        # Always True
+    no_secret_persistence: bool    # Always True
+    
+    def to_m2m_compact(self) -> str: ...
+    def to_m2m_yaml(self) -> str: ...
+    def to_dict(self) -> dict: ...
+```
+
+### Functions
+
+#### `estimate_tokens(text: str) -> int`
+
+Estimate token count from text (4 chars/token).
+
+#### `build_token_compression_event(...) -> TokenCompressionEvent`
+
+Build validated event with computed savings.
+
+#### `validate_token_event(event) -> ValidationResult`
+
+Validate event against invariants.
+
+#### `summarize_token_events(events) -> TelemetrySummary`
+
+Aggregate metrics from event list.
+
+### Enums
+
+- `SourceLayer`: WSP99_M2M, RTK_EVALUATION, BYPASS_CLASSIFIER, FIDELITY_GATE, UNKNOWN
+- `Operation`: COMPILE, DECOMPILE, CLASSIFY, EVALUATE, BYPASS, FIDELITY_CHECK
+- `ContentType`: M2M_PROMPT, TOOL_OUTPUT, RAW_REF, UNKNOWN
+- `CompressionStatus`: COMPRESSED, BYPASSED, UNCHANGED, ERROR, NOT_APPLICABLE
+
 ## Not Implemented (Future Phases)
 
 | Component | Phase | Status |
 |-----------|-------|--------|
-| M2M fidelity gate | P2 | SPECIFIED_NOT_IMPLEMENTED |
-| Token telemetry | P3 | SPECIFIED_NOT_IMPLEMENTED |
 | Compute governor | P4 | SPECIFIED_NOT_IMPLEMENTED |
 | RTK adapter | P5 | SPECIFIED_NOT_IMPLEMENTED |
 | Compression seam | P6 | SPECIFIED_NOT_IMPLEMENTED |
