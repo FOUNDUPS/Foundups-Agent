@@ -17,9 +17,40 @@ from .bypass_classifier import (
     get_bypass_classifier,
 )
 
+from .m2m_fidelity_gate import (
+    M2MFidelityGate,
+    M2MFidelityResult,
+    FidelityError,
+    CTXHolo,
+    HoloStatus,
+    HoloMode,
+    HoloInvariants,
+    IndexGapEvent,
+    RawRef,
+    assert_m2m_fidelity,
+    to_m2m_compact,
+    to_m2m_yaml,
+    HOLO_REQUIRED_MODES,
+)
+
 __all__ = [
+    # Bypass classifier (P1)
     "BypassClass",
     "BypassClassifier",
     "BypassDecision",
     "get_bypass_classifier",
+    # M2M fidelity gate (P2)
+    "M2MFidelityGate",
+    "M2MFidelityResult",
+    "FidelityError",
+    "CTXHolo",
+    "HoloStatus",
+    "HoloMode",
+    "HoloInvariants",
+    "IndexGapEvent",
+    "RawRef",
+    "assert_m2m_fidelity",
+    "to_m2m_compact",
+    "to_m2m_yaml",
+    "HOLO_REQUIRED_MODES",
 ]

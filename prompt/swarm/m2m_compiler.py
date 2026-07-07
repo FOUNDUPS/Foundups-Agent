@@ -37,6 +37,10 @@ class Mode(Enum):
     EXEC = "exec"
     PLAN = "plan"
     QA = "qa"
+    AUDIT = "audit"
+    REVIEW = "review"
+    VERIFY = "verify"
+    IMPLEMENT = "implement"
 
 
 class Status(Enum):
