@@ -33,6 +33,26 @@ from .m2m_fidelity_gate import (
     HOLO_REQUIRED_MODES,
 )
 
+from .telemetry_service import (
+    TokenCompressionEvent,
+    TelemetrySummary,
+    TelemetryValidationError,
+    ValidationResult,
+    SourceLayer,
+    Operation,
+    ContentType,
+    CompressionStatus,
+    InMemoryTelemetryStore,
+    estimate_tokens,
+    compute_content_hash,
+    generate_event_id,
+    build_token_compression_event,
+    validate_token_event,
+    summarize_token_events,
+    get_telemetry_store,
+    reset_telemetry_store,
+)
+
 __all__ = [
     # Bypass classifier (P1)
     "BypassClass",
@@ -53,4 +73,22 @@ __all__ = [
     "to_m2m_compact",
     "to_m2m_yaml",
     "HOLO_REQUIRED_MODES",
+    # Telemetry service (P3)
+    "TokenCompressionEvent",
+    "TelemetrySummary",
+    "TelemetryValidationError",
+    "ValidationResult",
+    "SourceLayer",
+    "Operation",
+    "ContentType",
+    "CompressionStatus",
+    "InMemoryTelemetryStore",
+    "estimate_tokens",
+    "compute_content_hash",
+    "generate_event_id",
+    "build_token_compression_event",
+    "validate_token_event",
+    "summarize_token_events",
+    "get_telemetry_store",
+    "reset_telemetry_store",
 ]
