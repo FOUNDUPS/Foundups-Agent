@@ -1,6 +1,6 @@
 # Foundups®Agent
 
-Version: 0.3.45
+Version: 0.3.46
 
 This local Cursor/VS Code extension opens one RedDog Architect advisory worker as an editor webview tab, similar in ergonomics to `Claude Code: Open` but without repo, shell, browser, merge, CABR, or payout authority.
 
@@ -88,7 +88,7 @@ Canonical architecture contract (docs only, v0.3.27):
 
 Future RedDog runtime must run **WSP Applicability Preflight** before emitting any work order (identify WSPs + Skillz from HoloIndex; block if recall is weak).
 
-## WRE Operational Spine Dry-Run Preview (v0.3.45)
+## WRE Operational Spine Dry-Run Preview (v0.3.46)
 
 Substantive non-blocked RedDog packets now include a typed `## WRE Operational Spine Dry-Run Preview` section in Copy MD and `review_packet.wre_operational_spine_dryrun_preview`. This is a bridge contract only: it names the future `reddog_wre_operational_spine` target, stores SHA256 digests plus a redacted work-focus summary, and records that no Python spine invocation, worktree create, task execution, OpenClaw enqueue, Hermes dispatch, PR creation, or merge occurred.
 

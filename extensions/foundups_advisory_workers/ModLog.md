@@ -2,7 +2,7 @@
 
 # ModLog - Foundups®Agent Extension
 
-## 2026-07-09 - REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1 (extension dry-run preview, 0.3.45)
+## 2026-07-09 - REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1 (extension dry-run preview, 0.3.46)
 
 - Added `buildWreOperationalSpineDryRunPreview()` and `buildWreOperationalSpineDryRunPreviewSection()`.
   Substantive non-blocked RedDog packets now emit `review_packet.wre_operational_spine_dryrun_preview`
@@ -14,8 +14,8 @@
 - Safety: raw work focus is not stored in the preview; it records a full SHA256 `command_digest`, bounded
   sanitized `command_redacted_summary`, digest evidence refs, `required_future_valve: VALVE_OPEN_WORKTREE_CREATE`,
   and `required_human_gate: 012_sovereign`.
-- Version remains 0.3.45 (stacked after the prose-tokenization hotfix; package.json, EXTENSION_VERSION,
-  README, and contract-test version assertions stay aligned).
+- Version 0.3.45 -> 0.3.46 (package.json + EXTENSION_VERSION + README + contract-test version assertions)
+  so this dry-run preview build is distinguishable from the prior prose-tokenization 0.3.45 build.
 - Next gate: `REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_EXPLICIT_VALVE_INVOKE_PHASE1` only after explicit
   `012_sovereign` + `VALVE_OPEN_WORKTREE_CREATE` and leak/non-mutation tests.
 

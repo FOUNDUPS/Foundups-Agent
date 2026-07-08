@@ -18,7 +18,7 @@ Current implementation:
 - REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1 (docs): fixed 15-prompt pack, rubric, runbook, artifact template for 012 replacement scoreboard.
 - REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1 (v0.3.44): repo paths named with read-intent in free-form prose / WSP_99 M2M / "Read first" sections (not only under the exact `Required direct-read targets:` header) are promoted to required direct-read targets so the governed fetch fires even on HoloIndex semantic miss; command/validation fences and scope-out sections excluded.
 - REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (v0.3.45): flowing-prose `Read first:` lines are tokenized with the bounded path-token regex (not the comma-splitter), so a path followed by prose and an embedded-slash English fragment (`breadcrumb/handoff`) no longer corrupt derived targets; tiered strictness (flowing prose requires a file extension, explicit/M2M/bullet tiers keep slash-OR-extension); slash-only prose fragments reported in `work_focus_targets_dropped_low_confidence` and never flip `target_recall_ok`; `}` added to trailing-punctuation trim.
-- REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1 (v0.3.45): Copy MD/review packet emits typed WRE operational spine dry-run preview; no Python spine invocation, worktree create, task execution, OpenClaw enqueue, Hermes dispatch, PR, push, merge, or repo mutation.
+- REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1 (v0.3.46): Copy MD/review packet emits typed WRE operational spine dry-run preview; no Python spine invocation, worktree create, task execution, OpenClaw enqueue, Hermes dispatch, PR, push, merge, or repo mutation.
 
 ## Architecture Direction
 
@@ -472,7 +472,7 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1
 
-- **Status:** **IMPLEMENTED (extension dry-run preview only, v0.3.45)** -- `buildWreOperationalSpineDryRunPreview()` emits a typed candidate envelope into Copy MD and `review_packet.wre_operational_spine_dryrun_preview`.
+- **Status:** **IMPLEMENTED (extension dry-run preview only, v0.3.46)** -- `buildWreOperationalSpineDryRunPreview()` emits a typed candidate envelope into Copy MD and `review_packet.wre_operational_spine_dryrun_preview`.
 - **Boundary:** no `cp.execFileSync` call to `reddog_wre_operational_spine.py`, no worktree create, no task execution, no file edit, no PR, no OpenClaw enqueue, no Hermes dispatch, no push, no merge. Blocked-local packets skip the preview.
 - **Next gate:** `REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_EXPLICIT_VALVE_INVOKE_PHASE1` -- only after `012_sovereign` + `VALVE_OPEN_WORKTREE_CREATE` are explicit and tests prove no raw work focus/API key leakage.
 

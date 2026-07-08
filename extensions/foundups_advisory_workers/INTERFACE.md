@@ -92,7 +92,7 @@ RedDog is the 0102 architect interface — **not an authority owner**. RedDog re
 
 **OpenClaw adapter dry-run:** `modules/communication/moltbot_bridge/src/reddog_openclaw_adapter_dryrun.py` -- `plan_reddog_openclaw_adapter_dryrun()`; proposes FoundUpJob / `autonomous_task` intake only; **no enqueue**. Contract: `docs/audits/architecture/REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_CONTRACT_PHASE1.md`.
 
-**WRE operational spine dry-run preview (extension v0.3.45):** `buildWreOperationalSpineDryRunPreview()` emits `review_packet.wre_operational_spine_dryrun_preview` and Copy MD section `## WRE Operational Spine Dry-Run Preview`. It references `modules/communication/moltbot_bridge/src/reddog_wre_operational_spine.py::run_reddog_wre_worktree_create_spine` as a future call target only. The extension does **not** invoke Python for this preview and records `python_invocation_performed=false`, `wre_spine_invoked=false`, `worktree_create_performed=false`, `task_execution_performed=false`, `openclaw_enqueue_performed=false`, `hermes_dispatch_performed=false`, `pr_created=false`, and `merge_performed=false`. Future live use requires `VALVE_OPEN_WORKTREE_CREATE` and `012_sovereign`.
+**WRE operational spine dry-run preview (extension v0.3.46):** `buildWreOperationalSpineDryRunPreview()` emits `review_packet.wre_operational_spine_dryrun_preview` and Copy MD section `## WRE Operational Spine Dry-Run Preview`. It references `modules/communication/moltbot_bridge/src/reddog_wre_operational_spine.py::run_reddog_wre_worktree_create_spine` as a future call target only. The extension does **not** invoke Python for this preview and records `python_invocation_performed=false`, `wre_spine_invoked=false`, `worktree_create_performed=false`, `task_execution_performed=false`, `openclaw_enqueue_performed=false`, `hermes_dispatch_performed=false`, `pr_created=false`, and `merge_performed=false`. Future live use requires `VALVE_OPEN_WORKTREE_CREATE` and `012_sovereign`.
 
 **Specified flow (not implemented in extension v0.3.27):**
 
@@ -379,7 +379,7 @@ Formal contract:
 | AssignmentDispatcher as worker launcher | FORBIDDEN (simulated scaffold only) |
 | Governed repo work order dry-run validator | OBSERVED (OpenClaw bridge module) |
 | Governed repo work order (`RedDogGovernedWorkOrder`) | SPECIFIED_NOT_IMPLEMENTED (runtime emission from extension) |
-| WRE operational spine dry-run preview | OBSERVED (extension v0.3.45); metadata only, no invocation |
+| WRE operational spine dry-run preview | OBSERVED (extension v0.3.46); metadata only, no invocation |
 | Extension invokes `reddog_wre_operational_spine.py` | SPECIFIED_NOT_IMPLEMENTED |
 | GitHub permission snapshot per work order | SPECIFIED_NOT_IMPLEMENTED |
 | F0 autonomous merge | SPECIFIED_NOT_IMPLEMENTED |
@@ -434,7 +434,7 @@ Redaction-block-only runs default to `handoff_needed: unknown`, `wsp15_priority:
 
 Extension retains no repo/shell/merge authority.
 
-## WRE Operational Spine Dry-Run Preview (v0.3.45)
+## WRE Operational Spine Dry-Run Preview (v0.3.46)
 
 Substantive non-blocked Copy MD packets append `## WRE Operational Spine Dry-Run Preview` after the governed handoff section. The preview is a typed candidate envelope for the WRE spine path and includes only digests, redacted summary text, target labels, and no-execution booleans. Blocked-local packets skip this preview so blocked payload content is not summarized.
 
