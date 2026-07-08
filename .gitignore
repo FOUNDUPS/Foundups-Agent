@@ -75,6 +75,7 @@ env/
 
 # Git worktrees (local working directories)
 .worktrees/
+.reddog/
 
 # Claude Code worktrees (local runtime artifacts)
 .claude/worktrees/

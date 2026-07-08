@@ -27,3 +27,8 @@ Optional custom args:
 ```powershell
 .\modules\communication\moltbot_bridge\tests\run_tests.ps1 -PytestArgs @("-q", "-k", "skill_safety")
 ```
+
+Focused RedDog WRE operational spine:
+```powershell
+python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_wre_operational_spine.py modules/communication/moltbot_bridge/tests/test_reddog_wre_worktree_create.py modules/communication/moltbot_bridge/tests/test_reddog_wre_execution_valve.py modules/communication/moltbot_bridge/tests/test_reddog_wre_executor_dryrun.py modules/communication/moltbot_bridge/tests/test_reddog_work_order_runtime_invocation.py -q
+```

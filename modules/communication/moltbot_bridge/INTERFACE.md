@@ -849,3 +849,39 @@ from modules.communication.moltbot_bridge.src.reddog_wre_executor_dryrun import 
 Consumes accepted #896 `WorkOrderDryRunInvocationResult`; validates #897 contract rules;
 emits phase receipts (`plan_built`, `lock_checked`, `cleanup_planned`). No git, worktree,
 file edits, task commands, PR, or merge.
+
+### RedDog WRE Worktree Create (worktree only, no task execution)
+
+```python
+from modules.communication.moltbot_bridge.src.reddog_wre_worktree_create import (
+    create_reddog_wre_worktree,  # (work_order, executor_plan_result, valve_decision, *, runner, repo_root, now, locks) -> RedDogWorktreeCreateResult
+    RedDogWorktreeCreateResult,
+    WORKTREE_CREATE_ACCEPT,
+    WORKTREE_CREATE_REJECT,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_worktree_runner import (
+    RealRedDogWorktreeRunner,    # argv-only git worktree add/remove helper
+)
+```
+
+Consumes an accepted executor dry-run plan plus `VALVE_OPEN_WORKTREE_CREATE`.
+Creates only the isolated `.reddog/worktrees/<work_order_id>/<nonce>/` worktree through an
+injected runner. No file edits, tests, PR, push, merge, Skillz execution, Hermes queue,
+OpenClaw dispatch, or task command execution.
+
+### RedDog WRE Worktree Operational Spine (worktree-create only)
+
+```python
+from modules.communication.moltbot_bridge.src.reddog_wre_operational_spine import (
+    run_reddog_wre_worktree_create_spine,  # (work_order, *, valve_environment, runner, repo_root, now, locks) -> RedDogWREOperationalSpineResult
+    RedDogWREOperationalSpineResult,
+    WORKTREE_SPINE_ACCEPT,
+    WORKTREE_SPINE_REJECT,
+)
+```
+
+Composes the governed RedDog path into one callable API:
+runtime invocation dry-run, executor plan dry-run, execution valve, then isolated
+worktree create. Requires `VALVE_OPEN_WORKTREE_CREATE` for acceptance. The result
+keeps WSP 97 truth fields explicit: no task execution, no file edits, no PR, no
+OpenClaw enqueue, no Hermes dispatch, no push, and no merge.

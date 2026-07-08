@@ -96,16 +96,18 @@ P0 NEXT (execution track)
 P1
 16. REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_WORKTREE_CREATE_PHASE1
     - first real isolated worktree; valve OPEN only
-17. REDDOG_SANITIZED_TARGET_CONTEXT_PROVENANCE_PHASE1
-18. REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1
-19. HOLOINDEX_REDDOG_GOVERNED_WORK_ORDER_INDEX_GAP_PHASE1
-20. HOLOINDEX_REDDOG_WRE_EXECUTOR_CONTRACT_INDEX_GAP_PHASE1
-21. HOLOINDEX_REDDOG_WRE_EXECUTOR_DRYRUN_INDEX_GAP_PHASE1
-22. HOLOINDEX_REDDOG_OPENCLAW_ADAPTER_CONTRACT_INDEX_GAP_PHASE1
+17. REDDOG_WRE_OPERATIONAL_SPINE_WORKTREE_CREATE_PHASE1
+    - compose invocation dry-run -> executor plan -> valve -> worktree create; no task execution
+18. REDDOG_SANITIZED_TARGET_CONTEXT_PROVENANCE_PHASE1
+19. REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1
+20. HOLOINDEX_REDDOG_GOVERNED_WORK_ORDER_INDEX_GAP_PHASE1
+21. HOLOINDEX_REDDOG_WRE_EXECUTOR_CONTRACT_INDEX_GAP_PHASE1
+22. HOLOINDEX_REDDOG_WRE_EXECUTOR_DRYRUN_INDEX_GAP_PHASE1
+23. HOLOINDEX_REDDOG_OPENCLAW_ADAPTER_CONTRACT_INDEX_GAP_PHASE1
 
 P2/P3
-23. REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
-24. REDDOG_AUTONOMOUS_MERGE_POLICY_PHASE1 (blocked)
+24. REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
+25. REDDOG_AUTONOMOUS_MERGE_POLICY_PHASE1 (blocked)
 ```
 
 **Rationale:** Sanitized provenance and telemetry are real polish issues, but the strategic blocker is that RedDog still cannot safely become a worker. The work-order contract is the missing bridge between “advisory RedDog” and “RedDog can direct WRE to do meaningful code work.”
@@ -457,7 +459,15 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_WORKTREE_CREATE_PHASE1
 
-- **Status:** **BLOCKED** -- until adapter dry-run lands; worktree requires `VALVE_OPEN_WORKTREE_CREATE`.
+- **Status:** **IMPLEMENTED (worktree-create only)** -- `create_reddog_wre_worktree()` consumes an accepted executor dry-run plan plus `VALVE_OPEN_WORKTREE_CREATE`, creates the isolated worktree through an injected runner, and stops before edits/tests/PR/merge.
+- **Module:** `modules/communication/moltbot_bridge/src/reddog_wre_worktree_create.py`
+- **Runner:** `modules/communication/moltbot_bridge/src/reddog_wre_worktree_runner.py`
+
+### REDDOG_WRE_OPERATIONAL_SPINE_WORKTREE_CREATE_PHASE1
+
+- **Status:** **IMPLEMENTED (worktree-create spine only)** -- `run_reddog_wre_worktree_create_spine()` composes #896 invocation dry-run, #898 executor plan, #903 execution valve, and `create_reddog_wre_worktree()` into one callable API.
+- **Module:** `modules/communication/moltbot_bridge/src/reddog_wre_operational_spine.py`
+- **Boundary:** no task execution, file edits, tests, PR, OpenClaw enqueue, Hermes dispatch, push, or merge. VS Code extension runtime wiring is a future gated slice.
 
 ### REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
 

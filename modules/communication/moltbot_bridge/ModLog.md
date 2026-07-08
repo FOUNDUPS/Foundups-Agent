@@ -1,5 +1,21 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-08: REDDOG_WRE_OPERATIONAL_SPINE_WORKTREE_CREATE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 22, 34, 50, 97
+
+- Added `src/reddog_wre_operational_spine.py`: composes the governed RedDog path into one callable API: work-order invocation dry-run, WRE executor plan dry-run, execution valve, then isolated worktree create. It requires `VALVE_OPEN_WORKTREE_CREATE` for acceptance and stops before task execution, file edits, tests, PR, OpenClaw enqueue, Hermes dispatch, push, or merge.
+- Added `tests/test_reddog_wre_operational_spine.py`: full-spine accept path, default-closed valve rejection, invocation rejection on write-sensitive index gap, lock-collision rejection before runner, digest stability, sovereign-token non-egress, and AST boundary checks.
+- Focused validation: `test_reddog_wre_operational_spine.py` passed (6 tests); adjacent invocation / executor dry-run / valve / worktree-create suites passed (35 tests).
+
+## 2026-07-08: REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_WORKTREE_CREATE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 22, 34, 50, 97
+
+- Added `src/reddog_wre_worktree_create.py`: consumes an accepted RedDog executor dry-run plan plus `VALVE_OPEN_WORKTREE_CREATE`, validates branch/worktree/receipt boundaries, and creates only the isolated `.reddog/worktrees/<work_order_id>/<nonce>/` worktree through an injected runner. It emits deterministic receipts and preserves invariants: no task execution, no file edits, no PR, no push, no merge, and main checkout untouched.
+- Added `src/reddog_wre_worktree_runner.py`: argv-only `git worktree add/remove` helper. Authorization remains outside the helper in the orchestration module.
+- Added `tests/test_reddog_wre_worktree_create.py`: accept path, closed-valve/path-scope rejects, cleanup on create failure, digest stability, token non-leak, and AST boundary checks. Focused validation: 8 new tests passed; adjacent RedDog execution valve / executor dry-run / OpenClaw adapter dry-run suites still pass.
+
 ## 2026-07-05: REDDOG_REPAIR_PRESERVES_EVIDENCE_PHASE1 (judgment lane, slice 2)
 
 **Author**: 0102 (RedDog Architect, Judgment lane) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
