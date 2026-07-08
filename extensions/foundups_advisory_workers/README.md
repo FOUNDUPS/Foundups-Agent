@@ -72,6 +72,7 @@ Current behavior is advisory-only:
 - no CABR, payout, source-authority, or verification claims
 - no direct Skillz/OpenClaw/Hermes/WRE execution from the extension
 - redaction gate runs before any OpenRouter egress
+- WRE operational spine preview is dry-run metadata only; the extension does not call the spine, create a worktree, run tests, enqueue OpenClaw, dispatch Hermes, create a PR, or merge.
 
 External repositories can be assessed for FoundUps integration through advisory WSP intake, not automatic execution. The future path is FoundUps Agent Intake Mode: WSP readiness audit, FoundUp intake packet, Skillz map, integration risk report, and governed WRE handoff recommendation.
 
@@ -86,6 +87,12 @@ Canonical architecture contract (docs only, v0.3.27):
 - F0 autonomous merge: **SPECIFIED_NOT_IMPLEMENTED** — not planned until prior gates land
 
 Future RedDog runtime must run **WSP Applicability Preflight** before emitting any work order (identify WSPs + Skillz from HoloIndex; block if recall is weak).
+
+## WRE Operational Spine Dry-Run Preview (v0.3.45)
+
+Substantive non-blocked RedDog packets now include a typed `## WRE Operational Spine Dry-Run Preview` section in Copy MD and `review_packet.wre_operational_spine_dryrun_preview`. This is a bridge contract only: it names the future `reddog_wre_operational_spine` target, stores SHA256 digests plus a redacted work-focus summary, and records that no Python spine invocation, worktree create, task execution, OpenClaw enqueue, Hermes dispatch, PR creation, or merge occurred.
+
+The preview requires a future explicit `VALVE_OPEN_WORKTREE_CREATE` and `012_sovereign` gate before any live spine call.
 
 ## Work Focus Contract (v0.3.15)
 

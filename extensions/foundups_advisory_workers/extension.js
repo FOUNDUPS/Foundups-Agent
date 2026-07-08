@@ -28,6 +28,10 @@ const BRIDGE_MAX_STDOUT_BYTES = 262144;
 const BRIDGE_MAX_STDERR_BYTES = 65536;
 const BRIDGE_MAX_CONTEXT_CHARS = 48000;
 const BRIDGE_MAX_PROMPT_CHARS = 12000;
+const WRE_OPERATIONAL_SPINE_DRYRUN_SLICE = 'REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1';
+const WRE_OPERATIONAL_SPINE_TARGET = 'reddog_wre_operational_spine';
+const WRE_OPERATIONAL_SPINE_CALL = 'modules/communication/moltbot_bridge/src/reddog_wre_operational_spine.py::run_reddog_wre_worktree_create_spine';
+const WRE_OPERATIONAL_SPINE_REQUIRED_VALVE = 'VALVE_OPEN_WORKTREE_CREATE';
 const MOJIBAKE_MARKERS = ['\u7aa6', '\u7aaa'];
 const WORK_TRAIL_MAX_EVENTS = 50;
 const VALIDATION_FAILED_FOOTER = [
@@ -1550,6 +1554,98 @@ function buildGovernedHandoffSection(recommendation) {
   return lines.join('\n');
 }
 
+function buildWreOperationalSpineDryRunPreview(workFocus, classification, handoffRecommendation, options) {
+  const opts = options && typeof options === 'object' ? options : {};
+  const rec = handoffRecommendation && typeof handoffRecommendation === 'object' ? handoffRecommendation : {};
+  const construction = opts.promptConstruction && typeof opts.promptConstruction === 'object' ? opts.promptConstruction : {};
+  const rawFocus = String(workFocus || '');
+  const workFocusDigest = construction.work_focus_digest && construction.work_focus_digest.hash
+    ? construction.work_focus_digest.hash
+    : (opts.workFocusDigest || 'unknown');
+  const wspPromptDigest = construction.wsp_prompt_digest && construction.wsp_prompt_digest.hash
+    ? construction.wsp_prompt_digest.hash
+    : (opts.wspPromptDigest || 'unknown');
+  const commandDigest = 'sha256:' + crypto.createHash('sha256').update(rawFocus, 'utf8').digest('hex');
+  const tier = classification && classification.tier ? classification.tier : 'HIGH';
+  const evidenceRefs = [];
+  if (workFocusDigest && workFocusDigest !== 'unknown') {
+    evidenceRefs.push('work_focus_digest:' + workFocusDigest);
+  }
+  if (wspPromptDigest && wspPromptDigest !== 'unknown') {
+    evidenceRefs.push('wsp_prompt_digest:' + wspPromptDigest);
+  }
+  if (opts.contextMode) {
+    evidenceRefs.push('context_mode:' + String(opts.contextMode));
+  }
+  if (rec.target) {
+    evidenceRefs.push('handoff_target:' + String(rec.target));
+  }
+  return {
+    preview_kind: 'RedDogWREOperationalSpineDryRunPreview',
+    slice_name: WRE_OPERATIONAL_SPINE_DRYRUN_SLICE,
+    target: WRE_OPERATIONAL_SPINE_TARGET,
+    dry_run_only: true,
+    candidate_work_order_emitted: true,
+    work_order_type: 'RedDogGovernedWorkOrder',
+    command_digest: commandDigest,
+    command_redacted_summary: sanitizeContinuationField(rawFocus, 180),
+    raw_work_focus_stored: false,
+    work_focus_digest: workFocusDigest,
+    wsp_prompt_digest: wspPromptDigest,
+    classification_tier: tier,
+    context_mode: opts.contextMode || 'unknown',
+    handoff_target: rec.target || 'none',
+    handoff_authority_level: rec.authority_level || 'advisory_only',
+    would_call: WRE_OPERATIONAL_SPINE_CALL,
+    python_invocation_performed: false,
+    wre_spine_invoked: false,
+    worktree_create_performed: false,
+    task_execution_performed: false,
+    file_edit_performed: false,
+    pr_created: false,
+    openclaw_enqueue_performed: false,
+    hermes_dispatch_performed: false,
+    merge_performed: false,
+    required_future_valve: WRE_OPERATIONAL_SPINE_REQUIRED_VALVE,
+    required_human_gate: '012_sovereign',
+    not_invoked_reason: 'extension_dry_run_preview_only',
+    evidence_refs: evidenceRefs.length ? evidenceRefs : ['unknown']
+  };
+}
+
+function buildWreOperationalSpineDryRunPreviewSection(preview) {
+  const p = preview && typeof preview === 'object' ? preview : {};
+  const lines = [
+    '## WRE Operational Spine Dry-Run Preview',
+    '- preview_kind: ' + (p.preview_kind || 'unknown') + ' [OBSERVED]',
+    '- slice_name: ' + (p.slice_name || WRE_OPERATIONAL_SPINE_DRYRUN_SLICE) + ' [OBSERVED]',
+    '- target: ' + (p.target || WRE_OPERATIONAL_SPINE_TARGET) + ' [OBSERVED]',
+    '- dry_run_only: ' + (p.dry_run_only === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- candidate_work_order_emitted: ' + (p.candidate_work_order_emitted === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- work_order_type: ' + (p.work_order_type || 'unknown') + ' [OBSERVED]',
+    '- command_digest: ' + (p.command_digest || 'unknown') + ' [OBSERVED]',
+    '- command_redacted_summary: ' + (p.command_redacted_summary || '(empty)') + ' [OBSERVED]',
+    '- raw_work_focus_stored: ' + (p.raw_work_focus_stored === false ? 'false' : 'unknown') + ' [OBSERVED]',
+    '- handoff_target: ' + (p.handoff_target || 'none') + ' [INFERRED]',
+    '- handoff_authority_level: ' + (p.handoff_authority_level || 'advisory_only') + ' [OBSERVED]',
+    '- would_call: ' + (p.would_call || WRE_OPERATIONAL_SPINE_CALL) + ' [OBSERVED]',
+    '- python_invocation_performed: ' + (p.python_invocation_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- wre_spine_invoked: ' + (p.wre_spine_invoked === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- worktree_create_performed: ' + (p.worktree_create_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- task_execution_performed: ' + (p.task_execution_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- file_edit_performed: ' + (p.file_edit_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- pr_created: ' + (p.pr_created === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- openclaw_enqueue_performed: ' + (p.openclaw_enqueue_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- hermes_dispatch_performed: ' + (p.hermes_dispatch_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- merge_performed: ' + (p.merge_performed === true ? 'true' : 'false') + ' [OBSERVED]',
+    '- required_future_valve: ' + (p.required_future_valve || WRE_OPERATIONAL_SPINE_REQUIRED_VALVE) + ' [OBSERVED]',
+    '- required_human_gate: ' + (p.required_human_gate || '012_sovereign') + ' [OBSERVED]',
+    '- not_invoked_reason: ' + (p.not_invoked_reason || 'extension_dry_run_preview_only') + ' [OBSERVED]',
+    '- evidence_refs: ' + JSON.stringify(p.evidence_refs || ['unknown']) + ' [OBSERVED]'
+  ];
+  return lines.join('\n');
+}
+
 function buildCopyMarkdown(result, workerType, contextSummary, workTrail, holoScorecard, resolvedEffort, copyContext) {
   const packet = result && typeof result === 'object' ? result : {};
   const ctx = copyContext && typeof copyContext === 'object' ? copyContext : {};
@@ -1566,6 +1662,10 @@ function buildCopyMarkdown(result, workerType, contextSummary, workTrail, holoSc
   }
   if (ctx.substantive) {
     sections.push(buildGovernedHandoffSection(ctx.handoffRecommendation || packet.governed_handoff_recommendation));
+    const spinePreview = ctx.wreSpineDryRunPreview || packet.wre_operational_spine_dryrun_preview;
+    if (spinePreview) {
+      sections.push(buildWreOperationalSpineDryRunPreviewSection(spinePreview));
+    }
   }
   sections.push(buildContinuationTelemetrySection(ctx.continuationTelemetry || packet.continuation_telemetry));
   // Gate Copy MD continuation inclusion on the toggle (continuationEnabled), not merely on summary existence.
@@ -2616,6 +2716,12 @@ function wireFusionWebview(context, webview, worker, state) {
       workFocusDigest: promptConstruction.work_focus_digest && promptConstruction.work_focus_digest.hash,
       wspPromptDigest: promptConstruction.wsp_prompt_digest && promptConstruction.wsp_prompt_digest.hash
     });
+    const wreSpineDryRunPreview = substantiveTask && result.reason !== 'redaction_blocked'
+      ? buildWreOperationalSpineDryRunPreview(workFocus, classification, handoffRecommendation, {
+        promptConstruction: promptConstruction,
+        contextMode: contextMode
+      })
+      : null;
     result.review_packet = attachOrchestratorMetadata(
       result.review_packet || {},
       classification,
@@ -2630,6 +2736,10 @@ function wireFusionWebview(context, webview, worker, state) {
       unicodeMeta
     );
     result.governed_handoff_recommendation = handoffRecommendation;
+    if (wreSpineDryRunPreview) {
+      result.wre_operational_spine_dryrun_preview = wreSpineDryRunPreview;
+      result.review_packet.wre_operational_spine_dryrun_preview = wreSpineDryRunPreview;
+    }
     if (result.reason === 'redaction_blocked') {
       result.redaction_gate_report = buildRedactionGateReport(result, promptConstruction, contextMode);
       result.review_packet.redaction_gate_report = result.redaction_gate_report;
@@ -2681,6 +2791,7 @@ function wireFusionWebview(context, webview, worker, state) {
       contextMode: contextMode,
       substantive: substantiveTask,
       handoffRecommendation: handoffRecommendation,
+      wreSpineDryRunPreview: wreSpineDryRunPreview,
       continuationEnabled: continuationEnabled,
       continuationTelemetry: continuationTelemetry,
       // Only pass the summary for Copy MD inclusion when appended this run (fail-closed).
@@ -4569,6 +4680,8 @@ module.exports = {
   buildRedactionGateReportSection,
   buildGovernedHandoffRecommendation,
   buildGovernedHandoffSection,
+  buildWreOperationalSpineDryRunPreview,
+  buildWreOperationalSpineDryRunPreviewSection,
   compositePayloadDigest,
   extractHoloIndexScorecard,
   formatHoloIndexScorecardLines,
