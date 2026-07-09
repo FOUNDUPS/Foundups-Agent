@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.45', 'package version must be 0.3.45');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.45'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.46', 'package version must be 0.3.46');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.46'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
 includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.45', 'README version mismatch');
+includes(readme, 'Version: 0.3.46', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -702,6 +702,8 @@ includes(extensionJs, 'function buildRunTraceSection', 'buildRunTraceSection mis
 includes(extensionJs, 'function buildWorkTrailSection', 'buildWorkTrailSection missing');
 includes(extensionJs, 'function buildRedactionGateReport', 'buildRedactionGateReport missing');
 includes(extensionJs, 'function buildGovernedHandoffRecommendation', 'buildGovernedHandoffRecommendation missing');
+includes(extensionJs, 'function buildWreOperationalSpineDryRunPreview', 'WRE spine dry-run preview builder missing');
+includes(extensionJs, 'function buildWreOperationalSpineDryRunPreviewSection', 'WRE spine dry-run preview section builder missing');
 includes(extensionJs, 'function detectMojibake', 'detectMojibake missing');
 includes(extensionJs, 'copy_markdown', 'copy_markdown payload missing');
 
@@ -730,6 +732,64 @@ assert.strictEqual(blockedHandoffRec.target, 'WRE', 'target may remain inferred 
 assert.strictEqual(blockedHandoffRec.reason, 'blocked_context_needs_local_0102_review', 'blocked-local handoff must include conservative reason');
 assert.strictEqual(blockedHandoffRec.wsp15_priority, 'P1', 'blocked-local handoff must default to P1');
 assert.strictEqual(blockedHandoffRec.suggested_slice_name, 'none', 'blocked-local handoff must not invent slice name');
+
+// REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1:
+// extension emits a typed dry-run preview only; it does NOT call the WRE spine or create a worktree.
+const spinePreview = orchestrator.buildWreOperationalSpineDryRunPreview(
+  'continue the WRE worker slice; OPENROUTER_API_KEY visible to bridge: yes; dry-run only',
+  { tier: 'ULTRA' },
+  handoffRec,
+  {
+    promptConstruction: { work_focus_digest: { hash: 'abc123' }, wsp_prompt_digest: { hash: 'def456' } },
+    contextMode: 'wsp_holo_git_skillz'
+  }
+);
+assert.strictEqual(spinePreview.slice_name, 'REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1', 'WRE preview slice name');
+assert.strictEqual(spinePreview.target, 'reddog_wre_operational_spine', 'WRE preview target');
+assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run only');
+assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
+assert.strictEqual(spinePreview.raw_work_focus_stored, false, 'WRE preview must not store raw work focus');
+assert.strictEqual(spinePreview.python_invocation_performed, false, 'WRE preview must not invoke Python');
+assert.strictEqual(spinePreview.wre_spine_invoked, false, 'WRE preview must not invoke the spine');
+assert.strictEqual(spinePreview.worktree_create_performed, false, 'WRE preview must not create a worktree');
+assert.strictEqual(spinePreview.task_execution_performed, false, 'WRE preview must not execute tasks');
+assert.strictEqual(spinePreview.openclaw_enqueue_performed, false, 'WRE preview must not enqueue OpenClaw');
+assert.strictEqual(spinePreview.hermes_dispatch_performed, false, 'WRE preview must not dispatch Hermes');
+assert.strictEqual(spinePreview.required_future_valve, 'VALVE_OPEN_WORKTREE_CREATE', 'WRE preview requires future valve');
+assert.strictEqual(spinePreview.required_human_gate, '012_sovereign', 'WRE preview keeps 012 gate');
+assert(/^sha256:[a-f0-9]{64}$/.test(spinePreview.command_digest), 'WRE preview command_digest must be full SHA256');
+assert(!spinePreview.command_redacted_summary.includes('OPENROUTER_API_KEY'), 'WRE preview summary must sanitize secret-adjacent env name');
+includes(spinePreview.command_redacted_summary, 'key_env_present: true', 'WRE preview summary should carry safe key-presence fact');
+const spinePreviewSection = orchestrator.buildWreOperationalSpineDryRunPreviewSection(spinePreview);
+includes(spinePreviewSection, '## WRE Operational Spine Dry-Run Preview', 'WRE preview section header');
+includes(spinePreviewSection, 'python_invocation_performed: false [OBSERVED]', 'WRE preview section must show no Python invocation');
+includes(spinePreviewSection, 'worktree_create_performed: false [OBSERVED]', 'WRE preview section must show no worktree creation');
+includes(spinePreviewSection, 'required_future_valve: VALVE_OPEN_WORKTREE_CREATE [OBSERVED]', 'WRE preview section must show valve');
+assert(!/execFileSync\([^;]*reddog_wre_operational_spine\.py/s.test(extensionJs), 'extension must not execFileSync the WRE operational spine in dry-run wire slice');
+includes(extensionJs, "result.reason !== 'redaction_blocked'", 'blocked-local packets must not receive WRE dry-run preview');
+
+const wrePreviewCopy = orchestrator.buildCopyMarkdown(
+  {
+    ok: true,
+    content: '## Decision\nProceed with preview only.',
+    review_packet: { task_classification: { tier: 'ULTRA' }, output_validation: { validated: true } },
+    wre_operational_spine_dryrun_preview: spinePreview
+  },
+  'reddog_architect',
+  'Repo context attached',
+  [],
+  null,
+  'ultra',
+  {
+    substantive: true,
+    handoffRecommendation: handoffRec,
+    wreSpineDryRunPreview: spinePreview
+  }
+);
+includes(wrePreviewCopy, '## Governed Handoff Recommendation', 'WRE preview Copy MD keeps governed handoff section');
+includes(wrePreviewCopy, '## WRE Operational Spine Dry-Run Preview', 'WRE preview Copy MD must include preview section');
+includes(wrePreviewCopy, 'raw_work_focus_stored: false [OBSERVED]', 'WRE preview Copy MD must state raw focus is not stored');
+assert(!wrePreviewCopy.includes('OPENROUTER_API_KEY'), 'WRE preview Copy MD must not leak env key name');
 
 const dedupeTrail = orchestrator.createWorkTrail();
 dedupeTrail.push('redaction_gate_blocked', 'Redaction gate blocked before network.');
@@ -1568,7 +1628,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.45'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.46'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -1582,7 +1642,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.45'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.46'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -1594,7 +1654,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.45'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.46'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');

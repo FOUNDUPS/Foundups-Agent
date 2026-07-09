@@ -2,6 +2,23 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-09 - REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1 (extension dry-run preview, 0.3.46)
+
+- Added `buildWreOperationalSpineDryRunPreview()` and `buildWreOperationalSpineDryRunPreviewSection()`.
+  Substantive non-blocked RedDog packets now emit `review_packet.wre_operational_spine_dryrun_preview`
+  and a Copy MD `## WRE Operational Spine Dry-Run Preview` section after the governed handoff section.
+- Boundary: preview metadata only. The extension does NOT call
+  `modules/communication/moltbot_bridge/src/reddog_wre_operational_spine.py`, does NOT create a worktree,
+  does NOT execute tasks, does NOT edit files, does NOT create PRs, does NOT enqueue OpenClaw, does NOT
+  dispatch Hermes, and does NOT push or merge. Blocked-local packets skip the preview.
+- Safety: raw work focus is not stored in the preview; it records a full SHA256 `command_digest`, bounded
+  sanitized `command_redacted_summary`, digest evidence refs, `required_future_valve: VALVE_OPEN_WORKTREE_CREATE`,
+  and `required_human_gate: 012_sovereign`.
+- Version 0.3.45 -> 0.3.46 (package.json + EXTENSION_VERSION + README + contract-test version assertions)
+  so this dry-run preview build is distinguishable from the prior prose-tokenization 0.3.45 build.
+- Next gate: `REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_EXPLICIT_VALVE_INVOKE_PHASE1` only after explicit
+  `012_sovereign` + `VALVE_OPEN_WORKTREE_CREATE` and leak/non-mutation tests.
+
 ## 2026-07-07 - REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (P0 hotfix, 0.3.44 -> 0.3.45)
 
 - Problem (OBSERVED, real 0.3.44 run on a free-form prose prompt): a `Read first:` prompt naming three

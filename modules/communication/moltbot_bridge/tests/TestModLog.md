@@ -1,3 +1,16 @@
+## 2026-07-08: REDDOG_WRE_OPERATIONAL_SPINE_WORKTREE_CREATE_PHASE1
+
+**File**: `test_reddog_wre_operational_spine.py` (NEW - 6 tests)
+**Slice**: `REDDOG_WRE_OPERATIONAL_SPINE_WORKTREE_CREATE_PHASE1` | **Predecessors**: #896 invocation, #898 executor plan, #903 valve, worktree-create slice
+
+Operational spine composer: governed work order -> invocation dry-run -> executor plan -> execution
+valve -> isolated worktree create. Tests prove acceptance with `VALVE_OPEN_WORKTREE_CREATE`,
+default-closed valve rejection before runner, write-sensitive index-gap rejection at invocation,
+lock-collision rejection at plan, digest stability, no sovereign-token egress, and no subprocess/live
+dispatch imports in the composer.
+
+**Run**: `pytest modules/communication/moltbot_bridge/tests/test_reddog_wre_operational_spine.py -q`
+
 ## 2026-06-28: REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_DRYRUN_PHASE1
 
 **File**: `test_reddog_wre_executor_dryrun.py` (NEW — 8 tests)

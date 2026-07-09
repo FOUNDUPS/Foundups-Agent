@@ -1,5 +1,22 @@
 # Foundups®Agent TestModLog
 
+## 2026-07-09 - REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1 (WRE-DRY-001..WRE-DRY-010)
+
+| ID | Asserts |
+| --- | --- |
+| WRE-DRY-001 | `buildWreOperationalSpineDryRunPreview` / section builder exported and reachable |
+| WRE-DRY-002 | Preview emits `REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1` and target `reddog_wre_operational_spine` |
+| WRE-DRY-003 | Preview records `dry_run_only=true`, no Python invocation, no spine invocation, no worktree create, no task execution |
+| WRE-DRY-004 | Preview records no OpenClaw enqueue, no Hermes dispatch, no PR, no merge |
+| WRE-DRY-005 | Preview uses full SHA256 `command_digest` and does not store raw work focus |
+| WRE-DRY-006 | Secret-adjacent env-name text is sanitized in `command_redacted_summary` and Copy MD |
+| WRE-DRY-007 | Copy MD includes `## WRE Operational Spine Dry-Run Preview` after governed handoff |
+| WRE-DRY-008 | Source has no `execFileSync(...reddog_wre_operational_spine.py...)` call in this slice |
+| WRE-DRY-009 | Blocked-local packets skip WRE preview wiring |
+| WRE-DRY-010 | Future live use is gated by `VALVE_OPEN_WORKTREE_CREATE` and `012_sovereign` |
+
+**Run:** `node extensions/foundups_advisory_workers/tests/verify_extension_contract.js`
+
 ## 2026-07-07 - REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (WFTD-015..WFTD-020, v0.3.45)
 
 | ID | Asserts |
@@ -13,7 +30,7 @@
 
 **Run:** `node extensions/foundups_advisory_workers/tests/verify_extension_contract.js`
 
-## 2026-07-07 - REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1 (WFTD-001..WFTD-013)
+## 2026-07-07 - REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1 (WFTD-001..WFTD-014)
 
 | ID | Asserts |
 | --- | --- |

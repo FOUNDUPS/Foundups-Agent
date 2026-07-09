@@ -18,6 +18,7 @@ Current implementation:
 - REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1 (docs): fixed 15-prompt pack, rubric, runbook, artifact template for 012 replacement scoreboard.
 - REDDOG_WORK_FOCUS_TARGET_DERIVATION_PHASE1 (v0.3.44): repo paths named with read-intent in free-form prose / WSP_99 M2M / "Read first" sections (not only under the exact `Required direct-read targets:` header) are promoted to required direct-read targets so the governed fetch fires even on HoloIndex semantic miss; command/validation fences and scope-out sections excluded.
 - REDDOG_WORK_FOCUS_READ_CAPTURE_PROSE_TOKENIZATION_PHASE1 (v0.3.45): flowing-prose `Read first:` lines are tokenized with the bounded path-token regex (not the comma-splitter), so a path followed by prose and an embedded-slash English fragment (`breadcrumb/handoff`) no longer corrupt derived targets; tiered strictness (flowing prose requires a file extension, explicit/M2M/bullet tiers keep slash-OR-extension); slash-only prose fragments reported in `work_focus_targets_dropped_low_confidence` and never flip `target_recall_ok`; `}` added to trailing-punctuation trim.
+- REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1 (v0.3.46): Copy MD/review packet emits typed WRE operational spine dry-run preview; no Python spine invocation, worktree create, task execution, OpenClaw enqueue, Hermes dispatch, PR, push, merge, or repo mutation.
 
 ## Architecture Direction
 
@@ -96,16 +97,18 @@ P0 NEXT (execution track)
 P1
 16. REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_WORKTREE_CREATE_PHASE1
     - first real isolated worktree; valve OPEN only
-17. REDDOG_SANITIZED_TARGET_CONTEXT_PROVENANCE_PHASE1
-18. REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1
-19. HOLOINDEX_REDDOG_GOVERNED_WORK_ORDER_INDEX_GAP_PHASE1
-20. HOLOINDEX_REDDOG_WRE_EXECUTOR_CONTRACT_INDEX_GAP_PHASE1
-21. HOLOINDEX_REDDOG_WRE_EXECUTOR_DRYRUN_INDEX_GAP_PHASE1
-22. HOLOINDEX_REDDOG_OPENCLAW_ADAPTER_CONTRACT_INDEX_GAP_PHASE1
+17. REDDOG_WRE_OPERATIONAL_SPINE_WORKTREE_CREATE_PHASE1
+    - compose invocation dry-run -> executor plan -> valve -> worktree create; no task execution
+18. REDDOG_SANITIZED_TARGET_CONTEXT_PROVENANCE_PHASE1
+19. REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1
+20. HOLOINDEX_REDDOG_GOVERNED_WORK_ORDER_INDEX_GAP_PHASE1
+21. HOLOINDEX_REDDOG_WRE_EXECUTOR_CONTRACT_INDEX_GAP_PHASE1
+22. HOLOINDEX_REDDOG_WRE_EXECUTOR_DRYRUN_INDEX_GAP_PHASE1
+23. HOLOINDEX_REDDOG_OPENCLAW_ADAPTER_CONTRACT_INDEX_GAP_PHASE1
 
 P2/P3
-23. REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
-24. REDDOG_AUTONOMOUS_MERGE_POLICY_PHASE1 (blocked)
+24. REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
+25. REDDOG_AUTONOMOUS_MERGE_POLICY_PHASE1 (blocked)
 ```
 
 **Rationale:** Sanitized provenance and telemetry are real polish issues, but the strategic blocker is that RedDog still cannot safely become a worker. The work-order contract is the missing bridge between “advisory RedDog” and “RedDog can direct WRE to do meaningful code work.”
@@ -457,7 +460,21 @@ Add slice spec section before WSP_15 table or after - actually add to ROADMAP wi
 
 ### REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_WORKTREE_CREATE_PHASE1
 
-- **Status:** **BLOCKED** -- until adapter dry-run lands; worktree requires `VALVE_OPEN_WORKTREE_CREATE`.
+- **Status:** **IMPLEMENTED (worktree-create only)** -- `create_reddog_wre_worktree()` consumes an accepted executor dry-run plan plus `VALVE_OPEN_WORKTREE_CREATE`, creates the isolated worktree through an injected runner, and stops before edits/tests/PR/merge.
+- **Module:** `modules/communication/moltbot_bridge/src/reddog_wre_worktree_create.py`
+- **Runner:** `modules/communication/moltbot_bridge/src/reddog_wre_worktree_runner.py`
+
+### REDDOG_WRE_OPERATIONAL_SPINE_WORKTREE_CREATE_PHASE1
+
+- **Status:** **IMPLEMENTED (worktree-create spine only)** -- `run_reddog_wre_worktree_create_spine()` composes #896 invocation dry-run, #898 executor plan, #903 execution valve, and `create_reddog_wre_worktree()` into one callable API.
+- **Module:** `modules/communication/moltbot_bridge/src/reddog_wre_operational_spine.py`
+- **Boundary:** no task execution, file edits, tests, PR, OpenClaw enqueue, Hermes dispatch, push, or merge. VS Code extension live invocation is a future gated slice.
+
+### REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1
+
+- **Status:** **IMPLEMENTED (extension dry-run preview only, v0.3.46)** -- `buildWreOperationalSpineDryRunPreview()` emits a typed candidate envelope into Copy MD and `review_packet.wre_operational_spine_dryrun_preview`.
+- **Boundary:** no `cp.execFileSync` call to `reddog_wre_operational_spine.py`, no worktree create, no task execution, no file edit, no PR, no OpenClaw enqueue, no Hermes dispatch, no push, no merge. Blocked-local packets skip the preview.
+- **Next gate:** `REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_EXPLICIT_VALVE_INVOKE_PHASE1` -- only after `012_sovereign` + `VALVE_OPEN_WORKTREE_CREATE` are explicit and tests prove no raw work focus/API key leakage.
 
 ### REDDOG_REVIEW_CONSENSUS_RECEIPTS_PHASE1
 
