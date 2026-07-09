@@ -433,6 +433,122 @@ def test_real_runner_create_draft_pr_only(monkeypatch: pytest.MonkeyPatch) -> No
     assert not any(hasattr(runner, m) for m in ("mark_ready", "ready", "merge", "merge_pr"))
 
 
+def test_real_runner_mutating_git_uses_worktree_cwd(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import modules.foundups.agent.src.worktree_pr_runner as wr
+
+    repo = tmp_path / "repo"
+    worktree = tmp_path / "worker-wt"
+    repo.mkdir()
+    worktree.mkdir()
+    captured: list = []
+
+    class _Proc:
+        returncode = 0
+        stdout = ""
+        stderr = ""
+
+    def _run(argv, **kw):
+        captured.append((argv, kw))
+        return _Proc()
+
+    monkeypatch.setattr(wr.subprocess, "run", _run)
+    runner = wr.RealWorktreeRunner(repo_root=repo)
+
+    result = runner.commit_all(
+        worktree_path=worktree,
+        add_paths=["modules/foundups/paccess_001"],
+        message="test",
+    )
+
+    assert result["ok"] is True
+    assert len(captured) == 2
+    assert captured[0][0] == ["git", "add", "--", "modules/foundups/paccess_001"]
+    assert captured[1][0] == ["git", "commit", "-m", "test"]
+    assert Path(captured[0][1]["cwd"]).resolve() == worktree.resolve()
+    assert Path(captured[1][1]["cwd"]).resolve() == worktree.resolve()
+
+
+def test_real_runner_refuses_shared_repo_cwd_before_subprocess(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import modules.foundups.agent.src.worktree_pr_runner as wr
+
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    captured: list = []
+
+    def _run(argv, **kw):
+        captured.append((argv, kw))
+        raise AssertionError("subprocess must not run when worktree path is repo root")
+
+    monkeypatch.setattr(wr.subprocess, "run", _run)
+    runner = wr.RealWorktreeRunner(repo_root=repo)
+
+    result = runner.commit_all(
+        worktree_path=repo,
+        add_paths=["modules/foundups/paccess_001"],
+        message="test",
+    )
+
+    assert result["ok"] is False
+    assert "FAIL_WORKTREE_INSIDE_REPO_ROOT" in result["stderr"]
+    assert captured == []
+
+
+def test_real_runner_refuses_in_repo_worktree_create_before_subprocess(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import modules.foundups.agent.src.worktree_pr_runner as wr
+
+    repo = tmp_path / "repo"
+    nested = repo / ".reddog" / "worktrees" / "wo" / "nonce"
+    repo.mkdir()
+    captured: list = []
+
+    def _run(argv, **kw):
+        captured.append((argv, kw))
+        raise AssertionError("subprocess must not create an in-repo worktree")
+
+    monkeypatch.setattr(wr.subprocess, "run", _run)
+    runner = wr.RealWorktreeRunner(repo_root=repo)
+
+    result = runner.create_worktree(
+        worktree_path=nested,
+        branch_name="feat/demo",
+        base_branch="main",
+    )
+
+    assert result["ok"] is False
+    assert "FAIL_WORKTREE_INSIDE_REPO_ROOT" in result["stderr"]
+    assert captured == []
+
+
+def test_real_runner_refuses_nested_main_worktree_before_push(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import modules.foundups.agent.src.worktree_pr_runner as wr
+
+    repo = tmp_path / "repo"
+    nested = repo / ".reddog" / "worktrees" / "wo" / "nonce"
+    nested.mkdir(parents=True)
+    captured: list = []
+
+    def _run(argv, **kw):
+        captured.append((argv, kw))
+        raise AssertionError("subprocess must not run for nested main worktree")
+
+    monkeypatch.setattr(wr.subprocess, "run", _run)
+    runner = wr.RealWorktreeRunner(repo_root=repo)
+
+    result = runner.push_branch(worktree_path=nested, branch_name="feat/demo")
+
+    assert result["ok"] is False
+    assert "FAIL_WORKTREE_INSIDE_REPO_ROOT" in result["stderr"]
+    assert captured == []
+
+
 # schema-compat: the real preauth packet exposes every field the live writer reads
 def test_real_preauth_packet_is_field_compatible(tmp_path: Path) -> None:
     from modules.foundups.agent.src.live_writer_preauth_packet import (

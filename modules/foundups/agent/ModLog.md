@@ -1,5 +1,19 @@
 # Agent Module ModLog
 
+## 2026-07-09 - WRE worktree cwd hazard guard integration
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 34, 50, 97
+**Slice**: WRE_WORKTREE_CWD_HAZARD_GUARD_PHASE1
+
+### Changed
+
+- Updated `src/worktree_pr_runner.py`: before `git add`, `git commit`, `git push`, or worktree cleanup, `RealWorktreeRunner` now calls the shared WRE cwd guard and refuses to run subprocess if the supplied worktree path resolves to the shared repo root or a nested path inside it. Mutating git commands now execute with the process cwd set to the isolated worktree rather than the main checkout.
+- Extended `tests/test_foundup_scaffold_writer_live.py`: verifies valid mutating git calls run from the worktree cwd, and shared-root / nested-main paths are rejected before subprocess is invoked.
+
+### Boundary
+
+No new live writer authority, no merge authority, no PR-ready path, and no task execution. This slice only hardens the approved runner against lane-cwd contamination.
+
 ## 2026-07-04 - FIRST live scaffold writer: isolated worktree + draft PR only (FOUNDUP_SCAFFOLD_WRITER_LIVE_PHASE1)
 
 **Author**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)

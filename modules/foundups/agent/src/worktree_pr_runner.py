@@ -26,6 +26,10 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, Protocol, runtime_checkable
 
+from modules.communication.moltbot_bridge.src.reddog_wre_cwd_guard import (
+    validate_wre_worker_operation_cwd,
+)
+
 
 @runtime_checkable
 class WorktreeRunner(Protocol):
@@ -50,6 +54,21 @@ class RealWorktreeRunner:
         self.repo_root = Path(repo_root)
         self.timeout_s = timeout_s
 
+    def _guard_worktree_cwd(self, worktree_path: Path) -> Dict[str, Any] | None:
+        guard = validate_wre_worker_operation_cwd(
+            repo_root=self.repo_root,
+            worktree_path=worktree_path,
+            operation_cwd=worktree_path,
+        )
+        if guard.ok:
+            return None
+        return {
+            "ok": False,
+            "returncode": -1,
+            "stdout": "",
+            "stderr": f"{guard.code}: {guard.reason}",
+        }
+
     def _run(self, argv, cwd=None) -> Dict[str, Any]:
         proc = subprocess.run(  # noqa: S603 -- argv list, no shell, approved helper
             argv, cwd=str(cwd or self.repo_root),
@@ -67,23 +86,34 @@ class RealWorktreeRunner:
         # would be resolved against this runner's cwd (repo_root), risking an in-repo worktree.
         if not Path(worktree_path).is_absolute():
             return {"ok": False, "returncode": -1, "stdout": "", "stderr": "worktree_path must be absolute"}
+        guard = self._guard_worktree_cwd(Path(worktree_path))
+        if guard is not None:
+            return guard
         return self._run(
             ["git", "worktree", "add", "-b", branch_name, str(worktree_path), base_branch],
         )
 
     def commit_all(self, *, worktree_path: Path, add_paths, message: str) -> Dict[str, Any]:
+        guard = self._guard_worktree_cwd(Path(worktree_path))
+        if guard is not None:
+            return guard
         # Stage ONLY the explicit module path(s) -- never `git add -A` -- so nothing
         # outside the scaffolded module can be committed even if the worktree is dirty.
         add = self._run(
-            ["git", "-C", str(worktree_path), "add", "--"] + [str(p) for p in add_paths],
+            ["git", "add", "--"] + [str(p) for p in add_paths],
+            cwd=worktree_path,
         )
         if not add["ok"]:
             return add
-        return self._run(["git", "-C", str(worktree_path), "commit", "-m", message])
+        return self._run(["git", "commit", "-m", message], cwd=worktree_path)
 
     def push_branch(self, *, worktree_path: Path, branch_name: str) -> Dict[str, Any]:
+        guard = self._guard_worktree_cwd(Path(worktree_path))
+        if guard is not None:
+            return guard
         return self._run(
-            ["git", "-C", str(worktree_path), "push", "-u", "origin", branch_name],
+            ["git", "push", "-u", "origin", branch_name],
+            cwd=worktree_path,
         )
 
     def create_draft_pr(self, *, branch_name: str, base_branch: str, title: str, body: str) -> str:
@@ -98,4 +128,7 @@ class RealWorktreeRunner:
         return res["stdout"]
 
     def cleanup_worktree(self, *, worktree_path: Path) -> Dict[str, Any]:
+        guard = self._guard_worktree_cwd(Path(worktree_path))
+        if guard is not None:
+            return guard
         return self._run(["git", "worktree", "remove", str(worktree_path), "--force"])

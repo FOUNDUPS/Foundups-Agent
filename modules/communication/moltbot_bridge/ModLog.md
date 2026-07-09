@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-09: WRE_WORKTREE_CWD_HAZARD_GUARD_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 34, 50, 97
+
+- Added `src/reddog_wre_cwd_guard.py`: reusable WRE guard for mutating worker commands after worktree creation. It fail-closes unless the operation cwd resolves inside the isolated worktree and outside the shared repo checkout; rejects relative paths, device/extended-length prefixes, nested-main worktrees, filesystem roots, and cwd drift back into the main worktree.
+- Added `tests/test_reddog_wre_cwd_guard.py`: isolated accept/reject coverage for safe worktree cwd, shared repo cwd, worktree-inside-main, cwd-outside-worktree, and relative path failures.
+- Purpose: prevent the repeated worker-lane cwd hazard where git staging/branch operations can accidentally target the shared main worktree instead of the isolated worker checkout.
+- HoloIndex read-only probe: `WRE worktree cwd hazard guard` and `worktree current directory guard git add shared main` did not surface this new guard or runner integration in top results. Recorded as `HOLOINDEX_WRE_WORKTREE_CWD_GUARD_DISCOVERABILITY_PHASE1`; no runtime re-index performed.
+
 ## 2026-07-08: REDDOG_WRE_OPERATIONAL_SPINE_WORKTREE_CREATE_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 22, 34, 50, 97
