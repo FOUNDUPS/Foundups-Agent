@@ -52,7 +52,7 @@ const GOLDEN_FOUNDUP_PROMPT = [
 ].join('\n');
 
 // REDDOG_AUDIT_CONTEXT_BRIDGE_WIRE_PHASE1: golden 7-file FoundUp creation audit prompt
-// (file paths only — no symbol targets that direct-read-by-path cannot fetch).
+// (file paths only -- no symbol targets that direct-read-by-path cannot fetch).
 const GOLDEN_7FILE_TARGETS = [
   'WSP_framework/src/WSP_109_FoundUp_Onboarding_Intake_Protocol.md',
   'WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md',
@@ -197,15 +197,15 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.46', 'package version must be 0.3.46');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.46'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.47', 'package version must be 0.3.47');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.47'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
-assert.strictEqual(pkg.displayName, 'Foundups®Agent', 'display name must be Foundups®Agent');
-includes(JSON.stringify(pkg), 'Foundups®Agent: Open', 'command title must use Foundups®Agent');
-includes(extensionJs, "title: 'Foundups®Agent'", 'webview title must use Foundups®Agent');
-includes(readme, 'Foundups®Agent is the product surface', 'README product identity statement missing');
+assert.strictEqual(pkg.displayName, 'Foundups\u00aeAgent', 'display name must be Foundups\u00aeAgent');
+includes(JSON.stringify(pkg), 'Foundups\u00aeAgent: Open', 'command title must use Foundups\u00aeAgent');
+includes(extensionJs, "title: 'Foundups\\u00aeAgent'", 'webview title must use Foundups\u00aeAgent');
+includes(readme, 'Foundups\u00aeAgent is the product surface', 'README product identity statement missing');
 includes(iface, 'Fusion is one internal reasoning mode, not the product identity', 'INTERFACE mode identity statement missing');
-includes(roadmap, 'Foundups®Agent is the product surface', 'ROADMAP product identity statement missing');
+includes(roadmap, 'Foundups\u00aeAgent is the product surface', 'ROADMAP product identity statement missing');
 includes(extensionJs, 'id="reddogWorkingTrail"', 'working trail DOM missing');
 includes(extensionJs, 'data-reddog-pixel', 'trail pixel attribute missing');
 includes(extensionJs, "command: 'progress'", 'progress command shape missing');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.46', 'README version mismatch');
+includes(readme, 'Version: 0.3.47', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -332,7 +332,7 @@ includes(executorContractDoc, 'WREExecutorResult', 'executor contract output sch
 includes(executorContractDoc, 'Execution valve', 'executor contract execution valve missing');
 includes(executorContractDoc, 'no autonomous merge', 'executor contract merge guard missing');
 includes(executorContractDoc, 'WSP_97 truth table', 'executor contract WSP_97 table missing');
-includes(executorContractDoc, 'WSP_15 — Next implementation slices', 'executor contract WSP_15 slices missing');
+includes(executorContractDoc, 'WSP_15 \u2014 Next implementation slices', 'executor contract WSP_15 slices missing');
 includes(iface, 'REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1.md', 'INTERFACE executor contract pointer missing');
 includes(roadmap, 'docs/audits/architecture/REDDOG_WRE_ISOLATED_WORKTREE_EXECUTOR_CONTRACT_PHASE1.md', 'executor contract path missing from roadmap');
 const executorDryrunPy = fs.readFileSync(path.join(root, 'modules', 'communication', 'moltbot_bridge', 'src', 'reddog_wre_executor_dryrun.py'), 'utf8');
@@ -1621,14 +1621,14 @@ const sanitized = orchestrator.sanitizeCopyMdText('OPENROUTER_API_KEY visible to
 includes(sanitized, 'key_env_present: true', 'trail sanitizer must normalize secret-adjacent env phrase');
 
 // ADDENDUM E - 0102 test-first content inclusion (no OpenRouter)
-// Fixtures: tests/fixtures.js — reuse EXT_ACC_001_PROMPT; do not duplicate.
+// Fixtures: tests/fixtures.js -- reuse EXT_ACC_001_PROMPT; do not duplicate.
 const extAcc001Prompt = fixtures.EXT_ACC_001_PROMPT;
 
 const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.46'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.47'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -1642,7 +1642,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.46'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.47'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -1654,7 +1654,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.46'", 'bounded context must include extension.js source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.47'", 'bounded context must include extension.js source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -2008,6 +2008,49 @@ if (rgProtect && rgProtect.ok) {
   console.log('  repair-evidence guard bridge unavailable (python) -- source wiring + presence checks still enforced');
 }
 
+// REDDOG_JUDGMENT_GENERATION_WIRING_PHASE1: generation must request canonical Determine
+// answers, then run the deterministic verifier bridge against already-fetched direct-read hits.
+includes(extensionJs, 'Determine answer contract: the 012 work focus contains a Determine numbered list', 'judgment wiring must inject Determine answer generation instructions');
+includes(extensionJs, 'function runJudgmentVerifier', 'judgment verifier bridge wrapper missing');
+includes(extensionJs, 'reddog_judgment_verifier_once.py', 'judgment verifier bridge script missing from extension source');
+includes(extensionJs, 'judgment_verifier_started', 'judgment verifier work trail event missing');
+includes(extensionJs, 'judgment_verification', 'judgment verifier telemetry missing');
+includes(extensionJs, 'buildJudgmentVerificationSection', 'Copy MD judgment verification section missing');
+includes(extensionJs, 'formatJudgmentVerificationLines', 'Run Trace judgment verifier fields missing');
+assert(fs.existsSync(path.join(root, 'scripts', 'reddog_judgment_verifier_once.py')), 'judgment verifier bridge script must exist');
+
+const jvPrompt = 'Audit.\n\nDetermine:\n1. Does build_foundup dispatch exist?\n';
+const jvOutput = '## Determine Answers\n\n```json\n' + JSON.stringify([
+  {
+    index: 1,
+    question_text: 'Does build_foundup dispatch exist?',
+    answer: 'yes',
+    wsp97_label: 'OBSERVED',
+    evidence_refs: ['modules/foundups/agent/src/hermes_foundup_job_executor.py:2']
+  }
+], null, 2) + '\n```\n';
+const jvResult = orchestrator.runJudgmentVerifier(null, jvPrompt, jvOutput, {
+  direct_read_fallback_used: true,
+  direct_read_paths: ['modules/foundups/agent/src/hermes_foundup_job_executor.py']
+}, [
+  {
+    location: 'modules/foundups/agent/src/hermes_foundup_job_executor.py',
+    content: ['class Builder:', '    def build_foundup(self):', '        return True', ''].join('\n')
+  }
+]);
+if (jvResult && jvResult.ok) {
+  assert.strictEqual(jvResult.applied, true, 'judgment verifier must apply to Determine prompts');
+  assert.strictEqual(jvResult.verified, true, 'judgment verifier must verify supported file:line evidence');
+  assert.strictEqual(jvResult.verified_count, 1, 'judgment verifier verified_count must be 1');
+  assert(jvResult.index_gap_event && jvResult.index_gap_event.event === 'INDEX_GAP', 'judgment verifier must emit advisory INDEX_GAP event when direct-read masks stale index');
+  const jvMissing = orchestrator.runJudgmentVerifier(null, jvPrompt, '## Decision\nMissing answer block.\n', {}, []);
+  assert(jvMissing.ok === true && jvMissing.verified === false && jvMissing.reason === 'missing_determine_answers_block',
+    'judgment verifier must fail closed when a Determine prompt lacks the canonical answer block');
+  console.log('  judgment verifier bridge end-to-end: OK');
+} else {
+  console.log('  judgment verifier bridge unavailable (python) -- source wiring + telemetry checks still enforced');
+}
+
 // REDDOG_SYMBOL_AWARE_EXCERPT_DEPTH_PHASE1: a required direct-read target may be `path#symbol`.
 // The extension forwards the FULL token to --bundle-must-include (so the Python bundle layer returns
 // a bounded line window around the symbol's definition) but matches recall/resolve by the BARE path.
@@ -2246,4 +2289,4 @@ assert(wftdDir.derivation_sources.includes('m2m_read'), 'WFTD-020: directory pat
 // Prove the asymmetry in one place: the same slash-only shape is DROPPED in flowing prose but ACCEPTED in M2M.
 assert(wftdDropped.some((t) => !/\.[a-z0-9]{1,6}$/.test(t)), 'WFTD-020: a slash-only prose fragment was dropped (prose stricter)');
 
-console.log('Foundups®Agent extension contract checks passed.');
+console.log('Foundups\u00aeAgent extension contract checks passed.');

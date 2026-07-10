@@ -1,6 +1,6 @@
 # Foundups®Agent
 
-Version: 0.3.46
+Version: 0.3.47
 
 This local Cursor/VS Code extension opens one RedDog Architect advisory worker as an editor webview tab, similar in ergonomics to `Claude Code: Open` but without repo, shell, browser, merge, CABR, or payout authority.
 
@@ -84,11 +84,11 @@ Canonical architecture contract (docs only, v0.3.27):
 
 - `docs/audits/architecture/REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md`
 - Schema draft: `RedDogGovernedWorkOrder` (see audit doc)
-- F0 autonomous merge: **SPECIFIED_NOT_IMPLEMENTED** — not planned until prior gates land
+- F0 autonomous merge: **SPECIFIED_NOT_IMPLEMENTED** -- not planned until prior gates land
 
 Future RedDog runtime must run **WSP Applicability Preflight** before emitting any work order (identify WSPs + Skillz from HoloIndex; block if recall is weak).
 
-## WRE Operational Spine Dry-Run Preview (v0.3.46)
+## WRE Operational Spine Dry-Run Preview (v0.3.47)
 
 Substantive non-blocked RedDog packets now include a typed `## WRE Operational Spine Dry-Run Preview` section in Copy MD and `review_packet.wre_operational_spine_dryrun_preview`. This is a bridge contract only: it names the future `reddog_wre_operational_spine` target, stores SHA256 digests plus a redacted work-focus summary, and records that no Python spine invocation, worktree create, task execution, OpenClaw enqueue, Hermes dispatch, PR creation, or merge occurred.
 
@@ -125,7 +125,7 @@ The webview follows the VS Code terminal/chat shape:
 
 For WSP/security/runtime/architecture work, RedDog auto-routes to `foundups_fusion` because it preserves a review packet with principal, critic, and synthesis excerpts. Regular smoke/simple prompts auto-route to a single GLM principal call. OpenRouter Fusion alias remains implemented in the bridge for explicit future use, but is not a 012-facing default control because individual critic traces are not exposed by the API response.
 
-Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed fixes, Uncertainties, Architect Trace (structured evidence/alternatives/critic rationale 窶・never raw hidden chain-of-thought), WSP_97 Truth Labels, WSP_15 Priority, Verification gaps, Next safest step. Fusion runs also expose Lead/Critic/Synthesis panel structure from the bridge. If sections are missing, the extension runs one repair pass through the same redaction-gated bridge before showing the final answer.
+Substantive RedDog answers must include: Decision, Findings, Evidence, Proposed fixes, Uncertainties, Architect Trace (structured evidence/alternatives/critic rationale -- never raw hidden chain-of-thought), WSP_97 Truth Labels, WSP_15 Priority, Verification gaps, Next safest step. Fusion runs also expose Lead/Critic/Synthesis panel structure from the bridge. If sections are missing, the extension runs one repair pass through the same redaction-gated bridge before showing the final answer.
 
 Output is prefixed with a visible **RedDog Routing** block (tier, effort, mode, mode-selection reasoning, principal, panel, context, advisory boundary).
 
