@@ -2,6 +2,14 @@
 
 # ModLog - Foundups®Agent Extension
 
+## 2026-07-11 - REDDOG_JUDGMENT_GENERATION_WIRING_PHASE1 (Determine verifier wiring, 0.3.47)
+
+- Wire the landed Determine contract plus adversarial verifier panel into the live RedDog extension path.
+- `constructWspTaskPrompt()` now instructs RedDog to emit the canonical `## Determine Answers` fenced JSON block when the 012 work focus contains a Determine numbered list.
+- Add `runJudgmentVerifier()` -> `scripts/reddog_judgment_verifier_once.py`, which verifies final Determine answers against already-fetched governed direct-read hits and the HoloIndex scorecard.
+- Boundary: local/advisory only. No HoloIndex re-index, WRE enqueue, shell, repo mutation, OpenClaw/Hermes dispatch, or network call is performed by the verifier bridge.
+- Copy MD / Run Trace now surface `judgment_verifier_*` telemetry plus an advisory INDEX_GAP event when direct-read evidence masks stale semantic retrieval.
+- Version 0.3.46 -> 0.3.47 (package.json + EXTENSION_VERSION + README + contract-test assertions).
 ## 2026-07-09 - REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_DRYRUN_WIRE_PHASE1 (extension dry-run preview, 0.3.46)
 
 - Added `buildWreOperationalSpineDryRunPreview()` and `buildWreOperationalSpineDryRunPreviewSection()`.

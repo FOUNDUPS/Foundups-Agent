@@ -1,8 +1,8 @@
 {
     "name":  "foundups-fusion-worker",
-    "displayName":  "Foundups®Agent",
+    "displayName":  "Foundups\u00aeAgent",
     "description":  "Open a WSP_00/WSP_97 RedDog Architect advisory worker in a Cursor editor webview tab.",
-    "version":  "0.3.46",
+    "version":  "0.3.47",
     "publisher":  "foundups",
     "icon":  "icon.png",
     "engines":  {
@@ -19,7 +19,7 @@
                         "commands":  [
                                          {
                                              "command":  "foundupsFusion.open",
-                                             "title":  "Foundups®Agent: Open",
+                                             "title":  "Foundups\u00aeAgent: Open",
                                              "category":  "FoundUps"
                                          }
                                      ],
@@ -43,7 +43,7 @@
                                                                ]
                                   },
                         "configuration":  {
-                                              "title":  "Foundups®Agent",
+                                              "title":  "Foundups\u00aeAgent",
                                               "properties":  {
                                                                  "foundupsFusion.pythonPath":  {
                                                                                                    "type":  "string",

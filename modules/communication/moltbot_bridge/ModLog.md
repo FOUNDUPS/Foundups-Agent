@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-11: REDDOG_JUDGMENT_GENERATION_WIRING_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `scripts/reddog_judgment_verifier_once.py`: stdin/stdout JSON bridge that reuses `reddog_adversarial_verifier_panel.verify_answer_set()` and reads evidence only from already-fetched direct-read hit bodies supplied by the extension.
+- Wired extension v0.3.47 to request canonical `## Determine Answers` fenced JSON when a prompt contains a Determine list, then run the deterministic verifier after repair and expose `judgment_verifier_*` Run Trace / Copy MD telemetry.
+- Boundary: local deterministic verifier only; no HoloIndex re-index, WRE enqueue, shell, repo mutation, OpenClaw/Hermes dispatch, or network call. INDEX_GAP is emitted as advisory metadata only.
+- HoloIndex read-only probes for judgment wiring did not surface the new runtime bridge or verifier wiring in top results. Recorded as `HOLOINDEX_REDDOG_JUDGMENT_GENERATION_WIRING_INDEX_GAP_PHASE1`; no runtime re-index performed.
+
 ## 2026-07-09: WRE_WORKTREE_CWD_HAZARD_GUARD_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 34, 50, 97

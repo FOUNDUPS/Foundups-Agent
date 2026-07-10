@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.46';
+const EXTENSION_VERSION = '0.3.47';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -230,6 +230,27 @@ function formatOutputValidationStatus(validationState) {
   return 'unknown';
 }
 
+function formatJudgmentVerificationLines(validationState) {
+  const vs = validationState && typeof validationState === 'object' ? validationState : {};
+  const jv = vs.judgment_verification && typeof vs.judgment_verification === 'object'
+    ? vs.judgment_verification
+    : null;
+  if (!jv) {
+    return [];
+  }
+  return [
+    '- judgment_verifier_applied: ' + (jv.applied === true ? 'true' : 'false'),
+    '- judgment_verifier_verified: ' + (jv.verified === true ? 'true' : 'false'),
+    '- judgment_verified_count: ' + (jv.verified_count !== undefined ? jv.verified_count : 'unknown'),
+    '- judgment_refuted_count: ' + (jv.refuted_count !== undefined ? jv.refuted_count : 'unknown'),
+    '- judgment_needs_verification_count: ' + (jv.needs_verification_count !== undefined ? jv.needs_verification_count : 'unknown'),
+    '- judgment_support_note_count: ' + (jv.support_note_count !== undefined ? jv.support_note_count : 'unknown'),
+    '- judgment_answer_block_found: ' + (jv.answer_block_found === true ? 'true' : 'false'),
+    '- judgment_index_gap_event: ' + (jv.index_gap_event ? 'present' : 'none'),
+    '- judgment_verifier_reason: ' + (jv.reason || 'none')
+  ];
+}
+
 function buildValidationFailedSection(validationState) {
   const vs = validationState && typeof validationState === 'object' ? validationState : {};
   const missing = vs.missing_sections_after_repair || vs.missing_sections || [];
@@ -239,6 +260,55 @@ function buildValidationFailedSection(validationState) {
     '- repair_failure_reason: ' + (vs.repair_failure_reason || vs.reason || 'schema_incomplete'),
     '- note: Output is advisory and incomplete.'
   ];
+  return lines.join('\n');
+}
+
+function buildJudgmentVerificationSection(validationState) {
+  const vs = validationState && typeof validationState === 'object' ? validationState : {};
+  const jv = vs.judgment_verification && typeof vs.judgment_verification === 'object'
+    ? vs.judgment_verification
+    : null;
+  if (!jv) {
+    return '';
+  }
+  const lines = [
+    '## Judgment Verification',
+    '- applied: ' + (jv.applied === true ? 'true' : 'false'),
+    '- verified: ' + (jv.verified === true ? 'true' : 'false'),
+    '- verified_count: ' + (jv.verified_count !== undefined ? jv.verified_count : 'unknown'),
+    '- refuted_count: ' + (jv.refuted_count !== undefined ? jv.refuted_count : 'unknown'),
+    '- needs_verification_count: ' + (jv.needs_verification_count !== undefined ? jv.needs_verification_count : 'unknown'),
+    '- support_note_count: ' + (jv.support_note_count !== undefined ? jv.support_note_count : 'unknown'),
+    '- answer_block_found: ' + (jv.answer_block_found === true ? 'true' : 'false'),
+    '- reason: ' + (jv.reason || 'none'),
+    '- boundary: deterministic local verifier only; no HoloIndex re-index, WRE enqueue, shell, or repo mutation'
+  ];
+  if (jv.index_gap_event) {
+    lines.push('- index_gap_event: present');
+    if (Array.isArray(jv.index_gap_event.stale_targets)) {
+      lines.push('- index_gap_stale_targets: ' + (jv.index_gap_event.stale_targets.length ? jv.index_gap_event.stale_targets.join(', ') : '(none)'));
+    }
+    lines.push('- index_gap_recommendation: ' + (jv.index_gap_event.recommendation || 'governed WRE/CI maintenance action'));
+  } else {
+    lines.push('- index_gap_event: none');
+  }
+  if (Array.isArray(jv.claims) && jv.claims.length) {
+    for (const claim of jv.claims.slice(0, 12)) {
+      if (!claim || typeof claim !== 'object') {
+        continue;
+      }
+      const refs = Array.isArray(claim.checked_refs) && claim.checked_refs.length
+        ? claim.checked_refs.join(', ')
+        : '(none)';
+      const refutes = Array.isArray(claim.refutations) && claim.refutations.length
+        ? claim.refutations.join(', ')
+        : '(none)';
+      const notes = Array.isArray(claim.notes) && claim.notes.length
+        ? ' notes=' + claim.notes.join(', ')
+        : '';
+      lines.push('- claim #' + (claim.index !== undefined ? claim.index : '?') + ': ' + (claim.verdict || 'unknown') + '; refs=' + refs + '; refutations=' + refutes + notes);
+    }
+  }
   return lines.join('\n');
 }
 
@@ -568,7 +638,7 @@ const WORK_FOCUS_READ_HEADER_PATTERNS = [
 const WORK_FOCUS_SCOPE_OUT_PATTERNS = [
   /out\s+of\s+scope/i,
   /scope[\s:_-]+out/i,
-  /scope\s*[-—]\s*out/i,
+  /scope\s*[-\u2014]\s*out/i,
   /do\s+not\s+touch/i,
   /do\s+not\s+read/i,
   /don'?t\s+read/i,
@@ -1383,6 +1453,7 @@ function buildRunTraceSection(result, workerType, contextSummary, holoScorecard,
   }
   lines.push.apply(lines, formatContinuationTelemetryLines(rp.continuation_telemetry || (result && result.continuation_telemetry)));
   lines.push('- output_validation: ' + formatOutputValidationStatus(rp.output_validation));
+  lines.push.apply(lines, formatJudgmentVerificationLines(rp.output_validation));
   if (rp.output_validation && rp.output_validation.repair_attempted) {
     lines.push('- repair_context_mode: ' + (rp.output_validation.repair_context_mode || 'unknown'));
     lines.push('- repair_mode: ' + (rp.output_validation.repair_mode || 'unknown'));
@@ -1656,6 +1727,10 @@ function buildCopyMarkdown(result, workerType, contextSummary, workTrail, holoSc
     sections.push(buildRedactionGateReportSection(report));
   }
   const validation = packet.review_packet && packet.review_packet.output_validation;
+  const judgmentSection = buildJudgmentVerificationSection(validation);
+  if (judgmentSection) {
+    sections.push(judgmentSection);
+  }
   if (validation && (validation.output_validation_failed || (validation.repair_attempted && !validation.validated))) {
     sections.push(buildValidationFailedSection(validation));
     sections.push(VALIDATION_FAILED_FOOTER);
@@ -1698,7 +1773,7 @@ function appendValidationFailureContent(content, validationState) {
     + VALIDATION_FAILED_FOOTER;
 }
 const DEFAULT_FUSION_WORKER = {
-  title: 'Foundups®Agent',
+  title: 'Foundups\u00aeAgent',
   lead: 'z-ai/glm-5.2',
   panel: ['deepseek/deepseek-v4-pro', 'moonshotai/kimi-k2.7-code']
 };
@@ -1942,6 +2017,12 @@ function constructWspTaskPrompt(workFocus, classification, contextQuality, worke
   ];
   if (contextQuality) {
     lines.push('', 'Retrieval quality note: ' + String(contextQuality).slice(0, 500));
+  }
+  if (/^\s*determine\s*:/im.test(focus)) {
+    lines.push(
+      '',
+      'Determine answer contract: the 012 work focus contains a Determine numbered list. Include a section exactly named `## Determine Answers` with a fenced `json` array. Each object must have `index`, `question_text`, `answer`, `wsp97_label`, and `evidence_refs`. Use one object per Determine item, in order. Evidence-bearing answers require repo `path:line` refs. If evidence is absent, use answer `needs_verification`, label `NEEDS_VERIFICATION`, and an empty `evidence_refs` list.'
+    );
   }
   lines.push('', 'Produce required RedDog architect output sections per contract.');
   return lines.join('\n');
@@ -2199,7 +2280,7 @@ function buildRepairPrompt(originalPrompt, badOutput, missingSections) {
     'Label new claims with WSP_97 truth labels where applicable.',
     'Missing sections: ' + (sections.length ? sections.join(', ') : '(none listed)'),
     '',
-    'Required output format — include EVERY missing section using exactly these markdown headers (one section each):',
+    'Required output format -- include EVERY missing section using exactly these markdown headers (one section each):',
     requiredHeaders || '(none listed)',
     'Do not omit any listed section. Each section must contain at least one substantive line.',
     '',
@@ -2312,6 +2393,40 @@ function runRepairGuard(context, action, prompt, primary, repaired) {
     return JSON.parse(lines[lines.length - 1]);
   } catch (e) {
     return { ok: false, reason: 'guard_bridge_error' };
+  }
+}
+
+// REDDOG_JUDGMENT_GENERATION_WIRING_PHASE1: synchronously invoke the deterministic
+// adversarial verifier bridge (scripts/reddog_judgment_verifier_once.py). The bridge
+// reuses the Determine contract + verifier panel and reads evidence ONLY from already
+// fetched direct-read hits supplied here. It never reindexes, enqueues, executes, or reads
+// the filesystem.
+function runJudgmentVerifier(context, prompt, output, scorecard, directReadHits) {
+  try {
+    const root = workspaceRoot();
+    const config = vscode.workspace.getConfiguration('foundupsFusion');
+    const configuredPython = config.get('pythonPath') || 'python';
+    const interpreter = resolvePythonInterpreter(root, configuredPython);
+    const script = path.join(root, 'scripts', 'reddog_judgment_verifier_once.py');
+    const payload = {
+      prompt: String(prompt || ''),
+      output: String(output || ''),
+      scorecard: scorecard && typeof scorecard === 'object' ? scorecard : {},
+      direct_read_hits: Array.isArray(directReadHits) ? directReadHits : []
+    };
+    const stdout = cp.execFileSync(interpreter.path, ['-B', script], {
+      input: JSON.stringify(payload),
+      cwd: root,
+      env: buildBridgePythonEnv(process.env),
+      encoding: 'utf8',
+      timeout: 15000,
+      maxBuffer: 8 * 1024 * 1024,
+      windowsHide: true
+    });
+    const lines = String(stdout || '').trim().split('\n');
+    return JSON.parse(lines[lines.length - 1]);
+  } catch (e) {
+    return { ok: false, reason: 'judgment_verifier_bridge_error' };
   }
 }
 
@@ -2467,6 +2582,7 @@ function wireFusionWebview(context, webview, worker, state) {
     }
 
     const workFocus = message.text;
+    const promptHasDetermineList = /^\s*determine\s*:/im.test(workFocus);
     const selectedContextMode = cleanContextMode(message.contextMode);
     const workerType = cleanWorkerType(message.workerType);
     const selectedEffort = cleanEffort(message.effort);
@@ -2599,7 +2715,8 @@ function wireFusionWebview(context, webview, worker, state) {
       }
     }
     absorbUnicodeMeta(result);
-    if (result.ok && isSubstantiveRedDogWorker(workerType)) {
+    const substantiveTask = isSubstantiveRedDogWorker(workerType);
+    if (result.ok && substantiveTask) {
       workTrail.push('validator_started');
       const validation = validateRedDogOutput(result.content || '', { substantiveArchitect: true, mode: mode });
       validationState = {
@@ -2709,7 +2826,86 @@ function wireFusionWebview(context, webview, worker, state) {
     } else {
       workTrail.push('failed', result.reason || 'unknown');
     }
-    const substantiveTask = isSubstantiveRedDogWorker(workerType);
+    if (result.ok && substantiveTask) {
+      workTrail.push('judgment_verifier_started');
+      const judgment = runJudgmentVerifier(
+        context,
+        wspTaskPrompt,
+        result.content || '',
+        holoScorecard,
+        Array.isArray(contextPacket.direct_read_hits) ? contextPacket.direct_read_hits : []
+      );
+      if (judgment && judgment.ok) {
+        const judgmentState = {
+          applied: judgment.applied === true,
+          verified: judgment.verified === true,
+          verified_count: judgment.verified_count,
+          refuted_count: judgment.refuted_count,
+          needs_verification_count: judgment.needs_verification_count,
+          support_note_count: judgment.support_note_count,
+          answer_block_found: judgment.answer_block_found === true,
+          reason: judgment.reason || null,
+          claims: Array.isArray(judgment.claims) ? judgment.claims : [],
+          index_gap_event: judgment.index_gap_event || null
+        };
+        validationState.judgment_verification = judgmentState;
+        if (judgment.applied === true) {
+          workTrail.push(
+            judgment.verified === true ? 'judgment_verifier_passed' : 'judgment_verifier_failed',
+            'refuted_count=' + (judgment.refuted_count !== undefined ? judgment.refuted_count : 'unknown')
+          );
+        } else {
+          workTrail.push('judgment_verifier_skipped', 'no_well_formed_determine_list');
+        }
+        if (judgment.applied === true && judgment.verified !== true) {
+          const alreadyFailed = validationState.output_validation_failed === true;
+          validationState.validated = false;
+          validationState.output_validation_failed = true;
+          validationState.repair_ok = false;
+          validationState.repair_failure_reason = judgment.reason || 'judgment_verifier_refuted_evidence';
+          validationState.missing_sections_after_repair = validationState.missing_sections_after_repair || validationState.missing_sections || [];
+          if (!alreadyFailed) {
+            result.content = appendValidationFailureContent(result.content, validationState);
+          }
+        }
+      } else if (promptHasDetermineList) {
+        const alreadyFailed = validationState.output_validation_failed === true;
+        validationState.judgment_verification = {
+          applied: true,
+          verified: false,
+          verified_count: 0,
+          refuted_count: 'unknown',
+          needs_verification_count: 'unknown',
+          support_note_count: 'unknown',
+          answer_block_found: false,
+          reason: judgment && judgment.reason ? judgment.reason : 'judgment_verifier_unavailable',
+          claims: [],
+          index_gap_event: null
+        };
+        validationState.validated = false;
+        validationState.output_validation_failed = true;
+        validationState.repair_ok = false;
+        validationState.repair_failure_reason = 'judgment_verifier_unavailable';
+        if (!alreadyFailed) {
+          result.content = appendValidationFailureContent(result.content, validationState);
+        }
+        workTrail.push('judgment_verifier_failed', 'bridge_unavailable');
+      } else {
+        validationState.judgment_verification = {
+          applied: false,
+          verified: true,
+          verified_count: 0,
+          refuted_count: 0,
+          needs_verification_count: 0,
+          support_note_count: 0,
+          answer_block_found: false,
+          reason: 'no_determine_list',
+          claims: [],
+          index_gap_event: null
+        };
+        workTrail.push('judgment_verifier_skipped', 'no_determine_list');
+      }
+    }
     const handoffRecommendation = buildGovernedHandoffRecommendation(workFocus, classification, workerType, contextMode, {
       substantive: substantiveTask,
       redactionBlockedOnly: result.reason === 'redaction_blocked',
@@ -3298,7 +3494,7 @@ function buildBoundedRepoContext(mode, taskText) {
   let audit_context = false;
   if (mode === 'none') {
     const text = sections.join('\n');
-    return { text, summary: 'Repo context: WSP operating contract only.', quality, holoindex_meta, holoindex_scorecard, audit_context };
+    return { text, summary: 'Repo context: WSP operating contract only.', quality, holoindex_meta, holoindex_scorecard, audit_context, direct_read_hits: [] };
   }
   // REDDOG_REQUIRED_TARGET_CONTEXT_PACKING_PHASE1: the head sections (WSP contract +
   // BOUNDED_REPO_CONTEXT preamble) always lead. Lower-priority sections (HoloIndex raw
@@ -3447,7 +3643,18 @@ function buildBoundedRepoContext(mode, taskText) {
     holoindex_meta.required_targets_authoritative_paths = authoritativePacked;
     holoindex_scorecard = extractHoloIndexScorecard(mode, holoindex_meta);
   }
-  return { text, summary: 'Repo context attached: ' + mode + ' (' + text.length + ' chars). ' + quality, quality, holoindex_meta, holoindex_scorecard, audit_context, required_targets_authoritative_paths: authoritativePacked };
+  return {
+    text,
+    summary: 'Repo context attached: ' + mode + ' (' + text.length + ' chars). ' + quality,
+    quality,
+    holoindex_meta,
+    holoindex_scorecard,
+    audit_context,
+    required_targets_authoritative_paths: authoritativePacked,
+    direct_read_hits: directReadSection && Array.isArray(directReadSection.hits)
+      ? directReadSection.hits.slice()
+      : []
+  };
 }
 
 function activeEditorContext(root) {
@@ -4294,8 +4501,8 @@ function renderHtml(worker, surface, logoUri) {
       <div class="brand"><img src="${escapedLogoUri}" alt="RedDawg"><h1>${escapedTitle}</h1></div>
       <div class="meta">Build: ${EXTENSION_VERSION}<br>Surface: ${escapedSurface}<br>Principal: ${escapedLead}<br>Panel: ${escapedPanel}<br>Advisory only. Redaction-gated. No repo, shell, or merge authority.</div>
     </header>
-    <main id="log" aria-label="Foundups®Agent output scrollback">
-      <div class="entry status"><span class="label">status</span>Foundups®Agent extension ${EXTENSION_VERSION} loaded.</div>
+    <main id="log" aria-label="Foundups\u00aeAgent output scrollback">
+      <div class="entry status"><span class="label">status</span>Foundups\u00aeAgent extension ${EXTENSION_VERSION} loaded.</div>
       <div class="entry status"><span class="label">status</span>OPENROUTER_API_KEY must be set in the environment used to launch Cursor. Do not paste secrets.</div>
     </main>
     <form id="form">
@@ -4625,6 +4832,7 @@ module.exports = {
   mergeRepairedOutput,
   hasDetermineAnswersBlock,
   runRepairGuard,
+  runJudgmentVerifier,
   extractMarkdownSection,
   buildSectionHeaderPattern,
   normalizeRepairBridgeStageToWorkTrail,
@@ -4670,6 +4878,8 @@ module.exports = {
   enrichRedactionBlockResult,
   detectMojibake,
   buildRunTraceSection,
+  formatJudgmentVerificationLines,
+  buildJudgmentVerificationSection,
   buildWorkTrailSection,
   buildCopyMarkdown,
   appendValidationFailureContent,
