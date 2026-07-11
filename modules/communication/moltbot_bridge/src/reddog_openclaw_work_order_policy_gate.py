@@ -50,6 +50,9 @@ from modules.communication.moltbot_bridge.src.reddog_governed_work_order_dryrun 
 from modules.platform_integration.github_integration.src.reddog_github_permission_probe import (
     permission_to_capabilities,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
+    verify_delegated_work_authority,
+)
 
 POLICY_ACCEPT = "POLICY_ACCEPT"
 POLICY_REJECT = "POLICY_REJECT"
@@ -57,6 +60,10 @@ POLICY_ACCEPT_WITH_RETRIEVAL_GAP = "POLICY_ACCEPT_WITH_RETRIEVAL_GAP"
 
 TRUTH_OBSERVED = "OBSERVED"
 TRUTH_NEEDS_VERIFICATION = "NEEDS_VERIFICATION"
+
+SIGNATURE_GATE_NOT_REQUIRED = "SIGNATURE_GATE_NOT_REQUIRED"
+SIGNATURE_GATE_ACCEPTED = "SIGNATURE_GATE_ACCEPTED"
+SIGNATURE_GATE_REJECTED = "SIGNATURE_GATE_REJECTED"
 
 DEFAULT_PERMISSION_TTL_SECONDS = 300
 TRUSTED_PERMISSION_SOURCES = frozenset({"gh_cli", "github_api", "mock"})
@@ -78,6 +85,8 @@ class PolicyGateReceipt:
     expires_at: Optional[str]
     next_required_check_at: Optional[str]
     receipt_digest: str
+    signature_gate_status: str = SIGNATURE_GATE_NOT_REQUIRED
+    signature_gate_digest: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -197,6 +206,86 @@ def _evaluate_holoindex_policy(work_order: RedDogGovernedWorkOrder) -> List[str]
     return reasons
 
 
+def _signature_result_to_dict(signature_verification_result: Any) -> Optional[Dict[str, Any]]:
+    if signature_verification_result is None:
+        return None
+    if hasattr(signature_verification_result, "to_dict"):
+        candidate = signature_verification_result.to_dict()
+    elif isinstance(signature_verification_result, Mapping):
+        candidate = dict(signature_verification_result)
+    else:
+        return None
+    return candidate if isinstance(candidate, dict) else None
+
+
+def _evaluate_signature_gate(
+    work_order: RedDogGovernedWorkOrder,
+    *,
+    require_signed_authority: bool,
+    signature_verification_result: Any,
+) -> tuple[str, str, List[str]]:
+    """Fail-closed bridge from E1 verifier output into the policy gate.
+
+    This function does NOT verify signatures itself; it consumes the E1 verifier result
+    and makes signed authority a policy-gate precondition when requested. The verifier
+    remains the only module that knows signature semantics.
+    """
+    result = _signature_result_to_dict(signature_verification_result)
+    if result is None:
+        if require_signed_authority:
+            return SIGNATURE_GATE_REJECTED, "", ["signed_work_authority_required"]
+        return SIGNATURE_GATE_NOT_REQUIRED, "", []
+
+    digest = _canonical_digest(
+        {
+            "accepted": result.get("accepted") is True,
+            "reason_codes": list(result.get("reason_codes") or []),
+            "work_order_id": result.get("work_order_id"),
+        }
+    )
+    reasons: List[str] = []
+    if result.get("accepted") is not True:
+        reasons.append("signed_work_authority_not_accepted")
+        for code in result.get("reason_codes") or []:
+            reasons.append(f"signed_work_authority_reject:{code}")
+    if result.get("work_order_id") != work_order.work_order_id:
+        reasons.append("signed_work_authority_work_order_mismatch")
+
+    if reasons:
+        return SIGNATURE_GATE_REJECTED, digest, reasons
+    return SIGNATURE_GATE_ACCEPTED, digest, []
+
+
+def _signed_authority_binding_reasons(
+    work_order: RedDogGovernedWorkOrder,
+    work_authority: Mapping[str, Any],
+) -> List[str]:
+    """Verify the signed authority covers the exact work-order request."""
+    reasons: List[str] = []
+    checks = (
+        ("work_order_id", work_authority.get("work_order_id"), work_order.work_order_id),
+        ("repo_full_name", work_authority.get("repo_full_name"), work_order.repo_full_name),
+        ("requested_operation", work_authority.get("requested_operation"), work_order.requested_operation),
+        (
+            "permission_snapshot_digest",
+            work_authority.get("permission_snapshot_digest"),
+            work_order.repo_permission_snapshot.digest,
+        ),
+    )
+    for name, signed_value, order_value in checks:
+        if str(signed_value) != str(order_value):
+            reasons.append(f"REJECT_SIGNED_AUTHORITY_BINDING_MISMATCH:{name}")
+    signed_allowed = sorted(map(str, work_authority.get("allowed_paths") or []))
+    order_allowed = sorted(map(str, work_order.allowed_paths))
+    if signed_allowed != order_allowed:
+        reasons.append("REJECT_SIGNED_AUTHORITY_BINDING_MISMATCH:allowed_paths")
+    signed_denied = sorted(map(str, work_authority.get("denied_paths") or []))
+    order_denied = sorted(map(str, work_order.denied_paths))
+    if signed_denied != order_denied:
+        reasons.append("REJECT_SIGNED_AUTHORITY_BINDING_MISMATCH:denied_paths")
+    return reasons
+
+
 def _permission_supports_operation(permission_level: str, operation: str) -> bool:
     op_norm = _normalize_operation(operation)
     can_read, can_write, _ = permission_to_capabilities(permission_level)
@@ -214,6 +303,8 @@ def evaluate_work_order_policy_gate(
     seen_nonces: Optional[MutableSet[str]] = None,
     permission_ttl_seconds: int = DEFAULT_PERMISSION_TTL_SECONDS,
     permission_expires_at: Optional[str] = None,
+    require_signed_authority: bool = False,
+    signature_verification_result: Any = None,
 ) -> PolicyGateReceipt:
     """Evaluate OpenClaw policy gate for a governed work order. No execution performed."""
     if isinstance(order, Mapping):
@@ -233,6 +324,15 @@ def evaluate_work_order_policy_gate(
     gates_checked.append("holoindex_evidence_policy")
     holo_reasons = _evaluate_holoindex_policy(work_order)
     rejection_reasons.extend(holo_reasons)
+
+    signature_status, signature_digest, signature_reasons = _evaluate_signature_gate(
+        work_order,
+        require_signed_authority=require_signed_authority,
+        signature_verification_result=signature_verification_result,
+    )
+    if require_signed_authority or signature_verification_result is not None:
+        gates_checked.append("signed_work_order_authority")
+    rejection_reasons.extend(signature_reasons)
 
     snap = work_order.repo_permission_snapshot
     truth = permission_truth_label(snap.permission_level, snap.source)
@@ -316,10 +416,69 @@ def evaluate_work_order_policy_gate(
         "checked_at": _iso8601(checked),
         "expires_at": work_order.expiry,
         "next_required_check_at": next_required_check_at,
+        "signature_gate_status": signature_status,
+        "signature_gate_digest": signature_digest,
     }
     receipt_digest = _canonical_digest(receipt_core)
 
     return PolicyGateReceipt(
         receipt_digest=receipt_digest,
         **receipt_core,
+    )
+
+
+def evaluate_signed_work_order_policy_gate(
+    order: Union[RedDogGovernedWorkOrder, Mapping[str, Any]],
+    *,
+    identity: Mapping[str, Any],
+    work_authority: Mapping[str, Any],
+    signature_verifier: Any,
+    principal_key_resolver: Any,
+    nonce_store: Any,
+    snapshot_resolver: Any,
+    revocation_oracle: Any,
+    required_valve_state: str,
+    now: Optional[datetime] = None,
+    seen_nonces: Optional[MutableSet[str]] = None,
+    permission_ttl_seconds: int = DEFAULT_PERMISSION_TTL_SECONDS,
+    permission_expires_at: Optional[str] = None,
+    forbidden_operations: Optional[List[str]] = None,
+    revoked_key_epochs: Optional[List[str]] = None,
+    leeway_s: int = 60,
+) -> PolicyGateReceipt:
+    """Canonical signed-authority entrypoint: verify E1 payload, then policy-gate.
+
+    This avoids a live caller treating a self-asserted `accepted: true` structure as
+    authority. Verification remains no-execution and fail-closed.
+    """
+    checked = _utc_now(now)
+    work_order_obj = _work_order_from_mapping(order) if isinstance(order, Mapping) else order
+    verification = verify_delegated_work_authority(
+        work_authority=work_authority,
+        identity=identity,
+        signature_verifier=signature_verifier,
+        principal_key_resolver=principal_key_resolver,
+        nonce_store=nonce_store,
+        snapshot_resolver=snapshot_resolver,
+        revocation_oracle=revocation_oracle,
+        now=int(checked.timestamp()),
+        required_valve_state=required_valve_state,
+        forbidden_operations=tuple(forbidden_operations or ()),
+        revoked_key_epochs=tuple(revoked_key_epochs or ()),
+        leeway_s=leeway_s,
+    )
+    verification_payload = verification.to_dict()
+    if verification_payload.get("accepted") is True:
+        binding_reasons = _signed_authority_binding_reasons(work_order_obj, work_authority)
+        if binding_reasons:
+            verification_payload["accepted"] = False
+            verification_payload["reason_codes"] = list(verification_payload.get("reason_codes") or []) + binding_reasons
+    return evaluate_work_order_policy_gate(
+        work_order_obj,
+        now=checked,
+        seen_nonces=seen_nonces,
+        permission_ttl_seconds=permission_ttl_seconds,
+        permission_expires_at=permission_expires_at,
+        require_signed_authority=True,
+        signature_verification_result=verification_payload,
     )

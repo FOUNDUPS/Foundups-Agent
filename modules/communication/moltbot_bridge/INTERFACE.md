@@ -789,7 +789,8 @@ Higher-priority work (restarts, autonomous tasks, self-audit events) blocks skil
 
 ```python
 from modules.communication.moltbot_bridge.src.reddog_openclaw_work_order_policy_gate import (
-    evaluate_work_order_policy_gate,  # (order, *, now, seen_nonces, permission_ttl_seconds, permission_expires_at) -> PolicyGateReceipt
+    evaluate_work_order_policy_gate,  # (order, *, now, seen_nonces, permission_ttl_seconds, permission_expires_at, require_signed_authority, signature_verification_result) -> PolicyGateReceipt
+    evaluate_signed_work_order_policy_gate,  # verifies E1 identity/work-authority, then policy-gates
     PolicyGateReceipt,
     POLICY_ACCEPT,
     POLICY_REJECT,
@@ -802,6 +803,17 @@ Composes `#890` `validate_work_order_dryrun()` and embedded `repo_permission_sna
 (uses `#892` `permission_to_capabilities` only — does not call `probe_repo_permission` or `gh`).
 Returns Hermes-shaped receipt with `no_execution_performed: true`. Spec:
 `docs/audits/architecture/REDDOG_GOVERNED_REPO_WORK_ORDER_CONTRACT_PHASE1.md`.
+
+`REDDOG_WORK_ORDER_SIGNATURE_GATE_INTEGRATION_PHASE1`: callers that approach worktree
+authority set `require_signed_authority=True` and provide the E1 verifier result as
+`signature_verification_result`. The gate fails closed on missing, rejected, malformed,
+or work-order-mismatched verifier output. Receipts include `signature_gate_status` and
+`signature_gate_digest`.
+
+Future live callers should prefer `evaluate_signed_work_order_policy_gate(...)`: it invokes
+the E1 verifier first, then binds the signed authority to the actual work-order fields
+(`work_order_id`, repo, operation, permission snapshot digest, allowed paths, denied paths)
+before emitting the policy receipt.
 
 ### RedDog Work-Order Receipt (Hermes-compatible audit trail, no execution)
 
@@ -873,7 +885,7 @@ OpenClaw dispatch, or task command execution.
 
 ```python
 from modules.communication.moltbot_bridge.src.reddog_wre_operational_spine import (
-    run_reddog_wre_worktree_create_spine,  # (work_order, *, valve_environment, runner, repo_root, now, locks) -> RedDogWREOperationalSpineResult
+    run_reddog_wre_worktree_create_spine,  # (work_order, *, valve_environment, signature_verification_result, runner, repo_root, now, locks) -> RedDogWREOperationalSpineResult
     RedDogWREOperationalSpineResult,
     WORKTREE_SPINE_ACCEPT,
     WORKTREE_SPINE_REJECT,
@@ -882,6 +894,6 @@ from modules.communication.moltbot_bridge.src.reddog_wre_operational_spine impor
 
 Composes the governed RedDog path into one callable API:
 runtime invocation dry-run, executor plan dry-run, execution valve, then isolated
-worktree create. Requires `VALVE_OPEN_WORKTREE_CREATE` for acceptance. The result
-keeps WSP 97 truth fields explicit: no task execution, no file edits, no PR, no
-OpenClaw enqueue, no Hermes dispatch, no push, and no merge.
+worktree create. Requires accepted signed work authority and `VALVE_OPEN_WORKTREE_CREATE`
+for acceptance. The result keeps WSP 97 truth fields explicit: no task execution,
+no file edits, no PR, no OpenClaw enqueue, no Hermes dispatch, no push, and no merge.

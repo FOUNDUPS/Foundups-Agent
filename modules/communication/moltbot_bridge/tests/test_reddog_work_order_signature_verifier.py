@@ -16,6 +16,7 @@ from __future__ import annotations
 import ast
 import hashlib
 import hmac
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -29,6 +30,12 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     ReasonCode,
     canonical_signing_input,
     verify_delegated_work_authority,
+)
+from modules.communication.moltbot_bridge.src.reddog_openclaw_work_order_policy_gate import (
+    POLICY_ACCEPT,
+    POLICY_REJECT,
+    SIGNATURE_GATE_ACCEPTED,
+    evaluate_signed_work_order_policy_gate,
 )
 
 _VALVE = "VALVE_OPEN_WORKTREE_CREATE"
@@ -137,6 +144,63 @@ def _resign_wa(crypto, identity, workauth):
 
 def _run(identity, workauth, ctx):
     return verify_delegated_work_authority(work_authority=workauth, identity=identity, **ctx)
+
+
+def _policy_order_from_workauth(workauth, now: int = 1000, **overrides):
+    captured = datetime.fromtimestamp(now - 60, timezone.utc).replace(microsecond=0).isoformat()
+    expiry = datetime.fromtimestamp(now + 3600, timezone.utc).replace(microsecond=0).isoformat()
+    payload = {
+        "work_order_id": workauth["work_order_id"],
+        "created_at": captured,
+        "red_dog_instance_id": "reddog-test",
+        "authenticated_principal": workauth["principal_id"],
+        "principal_provider": "github",
+        "repo_full_name": workauth["repo_full_name"],
+        "repo_permission_snapshot": {
+            "permission_level": "write",
+            "captured_at": captured,
+            "source": "mock",
+            "digest": workauth["permission_snapshot_digest"],
+        },
+        "requested_operation": workauth["requested_operation"],
+        "authority_tier": "source",
+        "allowed_paths": list(workauth["allowed_paths"]),
+        "denied_paths": list(workauth["denied_paths"]),
+        "branch_name": "feat/signed-policy-test",
+        "base_ref": "main",
+        "task_summary": "Signed policy gate integration test.",
+        "wsp_applicability": ["WSP_50", "WSP_97"],
+        "holoindex_evidence_refs": ["docs/contracts/REDDOG_PRINCIPAL_IDENTITY_AND_DELEGATION_CONTRACT_PHASE1.md"],
+        "skillz_candidates": [],
+        "required_tests": ["modules/communication/moltbot_bridge/tests/test_reddog_work_order_signature_verifier.py"],
+        "required_policy_gates": ["openclaw_policy_gate", "signed_work_order_authority"],
+        "required_reviewers": [],
+        "sentinel_checks": [],
+        "rollback_plan": "No execution performed.",
+        "expiry": expiry,
+        "nonce": "policy-" + workauth["nonce"],
+        "evidence_digest": "sha256:" + ("b" * 64),
+        "advisory_only_source_packet": {
+            "work_focus_digest": "sha256:" + ("c" * 64),
+            "wsp_prompt_digest": "sha256:" + ("d" * 64),
+            "copy_md_run_trace_digest": "sha256:" + ("e" * 64),
+        },
+        "holoindex_evidence": {
+            "holoindex_query": "RedDog signed work order",
+            "holoindex_status": "bundle_json_ok",
+            "code_hits": ["modules/communication/moltbot_bridge/src/reddog_work_order_signature_verifier.py"],
+            "wsp_hits": ["WSP_framework/src/WSP_97_WSP_97_Truth_Boundary_Protocol.md"],
+            "skillz_hits": [],
+            "direct_read_fallback_used": False,
+            "index_gap_detected": False,
+            "applicable_wsps": ["WSP_97"],
+            "evidence_refs": ["docs/contracts/REDDOG_PRINCIPAL_IDENTITY_AND_DELEGATION_CONTRACT_PHASE1.md"],
+            "retrieval_quality": "HIGH",
+            "skillz_gap_detected": False,
+        },
+    }
+    payload.update(overrides)
+    return payload
 
 
 # 1 -------------------------------------------------------------------------- #
@@ -491,3 +555,59 @@ def test_non_serializable_payload_fails_closed() -> None:
     r = _run(identity, workauth, ctx)
     assert r.accepted is False  # rejected, never raised
     assert r.reason_codes  # a static code was recorded
+
+
+def test_signed_policy_gate_invokes_verifier_and_accepts_exact_binding() -> None:
+    _, identity, workauth, ctx = _build()
+    order = _policy_order_from_workauth(workauth, now=ctx["now"])
+
+    receipt = evaluate_signed_work_order_policy_gate(
+        order,
+        identity=identity,
+        work_authority=workauth,
+        signature_verifier=ctx["signature_verifier"],
+        principal_key_resolver=ctx["principal_key_resolver"],
+        nonce_store=ctx["nonce_store"],
+        snapshot_resolver=ctx["snapshot_resolver"],
+        revocation_oracle=ctx["revocation_oracle"],
+        required_valve_state=_VALVE,
+        now=datetime.fromtimestamp(ctx["now"], timezone.utc),
+        seen_nonces=set(),
+        forbidden_operations=["rm_rf"],
+    )
+
+    assert receipt.decision == POLICY_ACCEPT
+    assert receipt.signature_gate_status == SIGNATURE_GATE_ACCEPTED
+    assert receipt.signature_gate_digest
+    assert "signed_work_order_authority" in receipt.gates_checked
+
+
+def test_signed_policy_gate_rejects_valid_signature_for_different_path_scope() -> None:
+    _, identity, workauth, ctx = _build()
+    order = _policy_order_from_workauth(
+        workauth,
+        now=ctx["now"],
+        allowed_paths=["modules/foundups/other_002/**"],
+    )
+
+    receipt = evaluate_signed_work_order_policy_gate(
+        order,
+        identity=identity,
+        work_authority=workauth,
+        signature_verifier=ctx["signature_verifier"],
+        principal_key_resolver=ctx["principal_key_resolver"],
+        nonce_store=ctx["nonce_store"],
+        snapshot_resolver=ctx["snapshot_resolver"],
+        revocation_oracle=ctx["revocation_oracle"],
+        required_valve_state=_VALVE,
+        now=datetime.fromtimestamp(ctx["now"], timezone.utc),
+        seen_nonces=set(),
+        forbidden_operations=["rm_rf"],
+    )
+
+    assert receipt.decision == POLICY_REJECT
+    assert "signed_work_authority_not_accepted" in receipt.rejection_reasons
+    assert (
+        "signed_work_authority_reject:REJECT_SIGNED_AUTHORITY_BINDING_MISMATCH:allowed_paths"
+        in receipt.rejection_reasons
+    )
