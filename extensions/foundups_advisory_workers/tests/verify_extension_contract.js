@@ -372,6 +372,15 @@ includes(adapterDryrunPy, 'plan_reddog_openclaw_adapter_dryrun', 'adapter dryrun
 includes(adapterDryrunPy, 'no_enqueue_performed', 'adapter dryrun no_enqueue_performed missing');
 includes(iface, 'reddog_openclaw_adapter_dryrun.py', 'INTERFACE adapter dryrun pointer missing');
 includes(roadmap, 'REDDOG_OPENCLAW_FOUNDUPJOB_ADAPTER_DRYRUN_PHASE1', 'adapter dryrun slice missing');
+const liveEnqueueContractDocPath = path.join(root, 'docs', 'audits', 'architecture', 'REDDOG_OPENCLAW_LIVE_ENQUEUE_CONTRACT_PHASE1.md');
+const liveEnqueueContractDoc = fs.readFileSync(liveEnqueueContractDocPath, 'utf8');
+includes(liveEnqueueContractDoc, 'RedDogOpenClawLiveEnqueueContractReceipt', 'live enqueue contract receipt missing');
+includes(liveEnqueueContractDoc, 'VALVE_OPEN_LIVE_ENQUEUE', 'live enqueue contract valve state missing');
+includes(liveEnqueueContractDoc, 'no_enqueue_performed', 'live enqueue contract no_enqueue missing');
+includes(liveEnqueueContractDoc, 'AssignmentDispatcher', 'live enqueue contract AssignmentDispatcher ruling missing');
+includes(liveEnqueueContractDoc, 'SPECIFIED_NOT_IMPLEMENTED', 'live enqueue contract implementation status missing');
+includes(iface, 'REDDOG_OPENCLAW_LIVE_ENQUEUE_CONTRACT_PHASE1.md', 'INTERFACE live enqueue contract pointer missing');
+includes(roadmap, 'REDDOG_OPENCLAW_LIVE_ENQUEUE_CONTRACT_PHASE1', 'live enqueue contract slice missing');
 includes(roadmap, 'External RedDog Lane Queue (post-#888)', 'post-#888 external lane queue missing');
 includes(roadmap, 'REDDOG_GOVERNED_REPO_WORK_ORDER_DRYRUN_PHASE1', 'governed work order dryrun slice missing');
 includes(roadmap, 'REDDOG_RUN_TRACE_TELEMETRY_CORRECTION_PHASE1', 'run trace telemetry correction slice missing');
