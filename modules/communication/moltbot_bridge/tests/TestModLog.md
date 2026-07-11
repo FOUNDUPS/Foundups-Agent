@@ -1,3 +1,14 @@
+## 2026-07-11: REDDOG_SIGNED_RECEIPT_CHAIN_PHASE1
+
+**File**: `test_reddog_signed_receipt_chain.py` (NEW - 15 tests)
+**Slice**: `REDDOG_SIGNED_RECEIPT_CHAIN_PHASE1` | **Predecessors**: #928 identity contract, #931 E0, #932 E1
+
+Signed receipt chain verification: empty issuance-time chain accepted as no-reward-yet,
+non-empty chains require injected signature verification, work-order/RedDog/reward-account
+binding, correct hash-link order, freshness, ASCII payloads, and no signing/execution imports.
+
+**Run**: `pytest modules/communication/moltbot_bridge/tests/test_reddog_signed_receipt_chain.py -q`
+
 ## 2026-07-11: REDDOG_WORK_ORDER_SIGNATURE_GATE_INTEGRATION_PHASE1
 
 **Files**: `test_reddog_openclaw_work_order_policy_gate.py`, `test_reddog_wre_operational_spine.py` (UPDATED)

@@ -815,6 +815,27 @@ the E1 verifier first, then binds the signed authority to the actual work-order 
 (`work_order_id`, repo, operation, permission snapshot digest, allowed paths, denied paths)
 before emitting the policy receipt.
 
+### RedDog Signed Receipt Chain (verification only)
+
+```python
+from modules.communication.moltbot_bridge.src.reddog_signed_receipt_chain import (
+    verify_signed_receipt_chain,       # verifies ordered externally signed receipts
+    build_receipt_payload_for_signing, # unsigned canonical payload for external signer
+    receipt_payload_hash,              # sha256 over reddog-receipt.v1 canonical input
+    SignedReceipt,
+    SignedReceiptChainVerificationResult,
+    SIGNED_RECEIPT_CHAIN_ACCEPT,
+    SIGNED_RECEIPT_CHAIN_REJECT,
+)
+```
+
+`REDDOG_SIGNED_RECEIPT_CHAIN_PHASE1` verifies `reddog-receipt.v1` records against an
+injected public-key verifier, then checks work-order identity, RedDog identity, optional
+reward-account binding, issued-at freshness, ASCII-only payloads, and `prev_receipt_hash`
+links. Empty chains are valid only as issuance-time "no reward yet"; unsigned receipts are
+rejected and cannot be reward-bearing. This module does not sign, generate keys, settle
+rewards, execute commands, enqueue OpenClaw/Hermes/WRE work, or mutate the repo.
+
 ### RedDog Work-Order Receipt (Hermes-compatible audit trail, no execution)
 
 ```python
