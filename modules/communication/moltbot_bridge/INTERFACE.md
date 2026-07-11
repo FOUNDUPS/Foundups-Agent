@@ -836,6 +836,25 @@ links. Empty chains are valid only as issuance-time "no reward yet"; unsigned re
 rejected and cannot be reward-bearing. This module does not sign, generate keys, settle
 rewards, execute commands, enqueue OpenClaw/Hermes/WRE work, or mutate the repo.
 
+### RedDog OpenClaw Live Enqueue (valve-gated queue-write seam)
+
+```python
+from modules.communication.moltbot_bridge.src.reddog_openclaw_live_enqueue import (
+    perform_reddog_openclaw_live_enqueue,  # adapter + policy + receipt-chain + valve + writer -> result
+    RedDogOpenClawLiveEnqueueResult,
+    RedDogOpenClawLiveEnqueueReceipt,
+    LIVE_ENQUEUE_ACCEPT,
+    LIVE_ENQUEUE_REJECT,
+)
+```
+
+`REDDOG_OPENCLAW_LIVE_ENQUEUE_IMPLEMENTATION_PHASE1` is the first live OpenClaw
+queue-write seam, but only through an injected writer and only when `VALVE_OPEN_LIVE_ENQUEUE`
+is present. It requires accepted #904 adapter dry-run output, #950 signed work authority,
+#951 signed receipt-chain verification, and a live enqueue writer. It does not import
+AgentDB/OpenClaw queue modules directly, execute Hermes/WRE work, create worktrees, edit files,
+create PRs, push, merge, or settle rewards.
+
 ### RedDog Work-Order Receipt (Hermes-compatible audit trail, no execution)
 
 ```python

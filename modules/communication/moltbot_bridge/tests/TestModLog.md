@@ -1,3 +1,15 @@
+## 2026-07-11: REDDOG_OPENCLAW_LIVE_ENQUEUE_IMPLEMENTATION_PHASE1
+
+**File**: `test_reddog_openclaw_live_enqueue.py` (NEW - 12 tests), `test_reddog_wre_execution_valve.py` (UPDATED)
+**Slice**: `REDDOG_OPENCLAW_LIVE_ENQUEUE_IMPLEMENTATION_PHASE1` | **Predecessors**: #904 adapter dry-run, #905 contract, #950 signature gate, #951 signed receipt chain
+
+Live enqueue seam: accepts only with `VALVE_OPEN_LIVE_ENQUEUE`, accepted signed work authority,
+accepted signed receipt-chain verification, accepted adapter dry-run output, and an injected
+writer. Tests prove dry-run/worktree/closed valves reject before writer call, replay protection,
+writer rejection, autonomous_task and foundup_job routing, and no direct execution/queue imports.
+
+**Run**: `pytest modules/communication/moltbot_bridge/tests/test_reddog_openclaw_live_enqueue.py modules/communication/moltbot_bridge/tests/test_reddog_wre_execution_valve.py -q`
+
 ## 2026-07-11: REDDOG_SIGNED_RECEIPT_CHAIN_PHASE1
 
 **File**: `test_reddog_signed_receipt_chain.py` (NEW - 15 tests)
