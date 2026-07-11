@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-11: REDDOG_SIGNED_RECEIPT_CHAIN_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_signed_receipt_chain.py`: verification-only SignedReceipt chain helper for the ratified principal identity/delegation contract. It verifies externally signed `reddog-receipt.v1` records, checks hash links, reward-account binding, receipt freshness, work-order identity, and RedDog identity.
+- Empty receipt chains can be accepted as issuance-time "no reward yet"; non-empty chains require every receipt to carry a valid injected signature and a correct `prev_receipt_hash` link. Unsigned receipts are rejected and therefore cannot become reward-bearing chain entries.
+- Boundary: no signing, no key generation, no private key handling, no reward settlement, no command execution, no repo mutation, no OpenClaw/Hermes/WRE wiring, and no chain/wallet integration. Production verification defaults fail-closed unless a verifier backend is injected.
+- HoloIndex read-only probes for this slice did not surface the new module in top results. Recorded as `HOLOINDEX_REDDOG_SIGNED_RECEIPT_CHAIN_INDEX_GAP_PHASE1`; no runtime re-index performed.
+
 ## 2026-07-11: REDDOG_WORK_ORDER_SIGNATURE_GATE_INTEGRATION_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
