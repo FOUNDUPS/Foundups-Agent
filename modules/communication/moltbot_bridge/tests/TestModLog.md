@@ -1,3 +1,16 @@
+## 2026-07-11: REDDOG_WORK_ORDER_SIGNATURE_GATE_INTEGRATION_PHASE1
+
+**Files**: `test_reddog_openclaw_work_order_policy_gate.py`, `test_reddog_wre_operational_spine.py` (UPDATED)
+**Slice**: `REDDOG_WORK_ORDER_SIGNATURE_GATE_INTEGRATION_PHASE1` | **Predecessors**: #931 E0, #932 E1, #947 WRE operational spine
+
+Signed-authority gate integration: policy gate rejects missing/rejected/mismatched verifier results
+when signed authority is required; explicit rejected signature results cannot be ignored; worktree-create
+operational spine requires accepted signed authority by default before runner/worktree creation.
+Canonical helper coverage proves E1 verification is invoked and rejects a valid signature whose signed
+path scope does not match the actual work order.
+
+**Run**: `pytest modules/communication/moltbot_bridge/tests/test_reddog_openclaw_work_order_policy_gate.py modules/communication/moltbot_bridge/tests/test_reddog_wre_operational_spine.py modules/communication/moltbot_bridge/tests/test_reddog_work_order_signature_verifier.py -q`
+
 ## 2026-07-08: REDDOG_WRE_OPERATIONAL_SPINE_WORKTREE_CREATE_PHASE1
 
 **File**: `test_reddog_wre_operational_spine.py` (NEW - 6 tests)

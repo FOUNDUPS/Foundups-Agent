@@ -97,6 +97,8 @@ def invoke_reddog_work_order_dryrun(
     receipt_store: Optional[RedDogWorkOrderReceiptStore] = None,
     permission_ttl_seconds: int = 300,
     permission_expires_at: Optional[str] = None,
+    require_signed_authority: bool = False,
+    signature_verification_result: Optional[Any] = None,
 ) -> WorkOrderDryRunInvocationResult:
     """Run governed work-order dry-run invocation: policy gate + receipt, no execution."""
     order = _merge_permission_snapshot(work_order, permission_snapshot)
@@ -108,6 +110,8 @@ def invoke_reddog_work_order_dryrun(
         seen_nonces=seen_nonces,
         permission_ttl_seconds=permission_ttl_seconds,
         permission_expires_at=permission_expires_at,
+        require_signed_authority=require_signed_authority,
+        signature_verification_result=signature_verification_result,
     )
 
     emission = emit_work_order_receipt(policy_receipt, store=receipt_store, now=checked)

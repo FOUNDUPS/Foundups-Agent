@@ -4,8 +4,9 @@ Slice: REDDOG_WRE_OPERATIONAL_SPINE_WORKTREE_CREATE_PHASE1
 
 This module composes the landed RedDog governance spine into one callable path:
 work-order invocation dry-run -> executor plan dry-run -> execution valve ->
-isolated worktree create. It stops before task execution, file edits, tests, PR,
-push, merge, OpenClaw enqueue, or Hermes dispatch.
+isolated worktree create. It requires accepted signed work authority by default,
+then stops before task execution, file edits, tests, PR, push, merge, OpenClaw
+enqueue, or Hermes dispatch.
 """
 
 from __future__ import annotations
@@ -203,6 +204,8 @@ def run_reddog_wre_worktree_create_spine(
     seen_nonces: Optional[MutableSet[str]] = None,
     receipt_store: Optional[RedDogWorkOrderReceiptStore] = None,
     valve_environment: Optional[ExecutionValveEnvironment | Mapping[str, Any]] = None,
+    signature_verification_result: Optional[Mapping[str, Any]] = None,
+    require_signed_authority: bool = True,
     runner: Optional[Any] = None,
     repo_root: Optional[Path] = None,
     now: Optional[datetime] = None,
@@ -224,6 +227,8 @@ def run_reddog_wre_worktree_create_spine(
         receipt_store=receipt_store,
         permission_ttl_seconds=permission_ttl_seconds,
         permission_expires_at=permission_expires_at,
+        require_signed_authority=require_signed_authority,
+        signature_verification_result=signature_verification_result,
     )
     invocation_dict = invocation.to_dict()
     policy_receipt = _minimal_policy_gate_receipt(invocation)

@@ -1,5 +1,16 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-11: REDDOG_WORK_ORDER_SIGNATURE_GATE_INTEGRATION_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Integrated the E1 `reddog_work_order_signature_verifier` result into the OpenClaw policy gate as an explicit `signed_work_order_authority` gate. The policy gate can now fail closed when signed authority is required but missing, rejected, malformed, or bound to a different `work_order_id`.
+- Added `evaluate_signed_work_order_policy_gate(...)`, the canonical no-execution helper that invokes E1 verification first and then binds the signed authority to the actual work-order fields: work_order_id, repo, operation, permission snapshot digest, allowed paths, and denied paths.
+- Added `signature_gate_status` and `signature_gate_digest` to `PolicyGateReceipt` so downstream receipts can prove whether signed work authority was accepted, rejected, or not required for advisory-only paths.
+- Threaded signed-authority requirements through `invoke_reddog_work_order_dryrun()` and made `run_reddog_wre_worktree_create_spine()` require accepted signed authority by default before it can reach worktree-create.
+- Boundary: no signing, no key generation, no private key handling, no shell, no OpenClaw enqueue, no Hermes dispatch, no PR/merge, and no new live execution. This slice consumes verifier output only.
+- HoloIndex read-only probes for `RedDog work order signature gate integration`, `evaluate_signed_work_order_policy_gate signed authority`, and `signed_work_order_authority policy gate` did not surface the new integration in top results. Recorded as `HOLOINDEX_REDDOG_WORK_ORDER_SIGNATURE_GATE_INTEGRATION_INDEX_GAP_PHASE1`; no runtime re-index performed.
+
 ## 2026-07-11: REDDOG_JUDGMENT_GENERATION_WIRING_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97

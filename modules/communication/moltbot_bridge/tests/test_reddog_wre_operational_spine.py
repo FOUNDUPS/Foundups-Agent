@@ -101,6 +101,14 @@ def _base_order(now: datetime, **overrides):
     return payload
 
 
+def _accepted_signature(order):
+    return {
+        "accepted": True,
+        "reason_codes": [],
+        "work_order_id": order["work_order_id"],
+    }
+
+
 class TestOperationalSpineAccept:
     def test_accept_runs_full_spine_to_worktree_create_only(self, tmp_path: Path):
         fixed = datetime(2026, 7, 8, 12, 0, 0, tzinfo=timezone.utc)
@@ -117,6 +125,7 @@ class TestOperationalSpineAccept:
                 valve_worktree_create_enabled=True,
                 sovereign_worktree_token=_TOKEN,
             ),
+            signature_verification_result=_accepted_signature(order),
             runner=runner,
             repo_root=repo_root,
             now=fixed,
@@ -151,6 +160,7 @@ class TestOperationalSpineAccept:
                 valve_worktree_create_enabled=True,
                 sovereign_worktree_token=_TOKEN,
             ),
+            signature_verification_result=_accepted_signature(order),
             runner=FakeRunner(),
             repo_root=repo_root,
             now=fixed,
@@ -163,6 +173,7 @@ class TestOperationalSpineAccept:
                 valve_worktree_create_enabled=True,
                 sovereign_worktree_token=_TOKEN,
             ),
+            signature_verification_result=_accepted_signature(order),
             runner=FakeRunner(),
             repo_root=repo_root,
             now=fixed,
@@ -184,6 +195,7 @@ class TestOperationalSpineReject:
         result = run_reddog_wre_worktree_create_spine(
             order,
             seen_nonces=set(),
+            signature_verification_result=_accepted_signature(order),
             runner=runner,
             repo_root=repo_root,
             now=fixed,
@@ -224,6 +236,7 @@ class TestOperationalSpineReject:
                 valve_worktree_create_enabled=True,
                 sovereign_worktree_token=_TOKEN,
             ),
+            signature_verification_result=_accepted_signature(order),
             runner=runner,
             repo_root=repo_root,
             now=fixed,
@@ -249,6 +262,7 @@ class TestOperationalSpineReject:
                 valve_worktree_create_enabled=True,
                 sovereign_worktree_token=_TOKEN,
             ),
+            signature_verification_result=_accepted_signature(order),
             runner=runner,
             repo_root=repo_root,
             now=fixed,
@@ -259,6 +273,31 @@ class TestOperationalSpineReject:
         assert "executor_plan_not_accepted" in result.rejection_reasons
         assert "lock_collision" in result.rejection_reasons
         assert result.valve_decision == {}
+        assert runner.calls == []
+
+    def test_missing_signed_authority_rejects_before_runner(self, tmp_path: Path):
+        fixed = datetime(2026, 7, 8, 12, 25, 0, tzinfo=timezone.utc)
+        repo_root = tmp_path / "repo"
+        repo_root.mkdir()
+        order = _base_order(fixed)
+        runner = FakeRunner()
+
+        result = run_reddog_wre_worktree_create_spine(
+            order,
+            seen_nonces=set(),
+            valve_environment=ExecutionValveEnvironment(
+                valve_worktree_create_enabled=True,
+                sovereign_worktree_token=_TOKEN,
+            ),
+            runner=runner,
+            repo_root=repo_root,
+            now=fixed,
+        )
+
+        assert result.decision == WORKTREE_SPINE_REJECT
+        assert "invocation_not_accepted" in result.rejection_reasons
+        assert "signed_work_authority_required" in result.rejection_reasons
+        assert result.executor_plan_result == {}
         assert runner.calls == []
 
 

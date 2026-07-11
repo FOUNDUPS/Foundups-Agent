@@ -11,6 +11,8 @@ from modules.communication.moltbot_bridge.src.reddog_openclaw_work_order_policy_
     POLICY_ACCEPT,
     POLICY_ACCEPT_WITH_RETRIEVAL_GAP,
     POLICY_REJECT,
+    SIGNATURE_GATE_ACCEPTED,
+    SIGNATURE_GATE_REJECTED,
     TRUTH_NEEDS_VERIFICATION,
     TRUTH_OBSERVED,
     evaluate_work_order_policy_gate,
@@ -254,6 +256,70 @@ class TestHoloIndexPolicy:
         assert "weak_wsp_recall_missing_direct_read_ref" in receipt.rejection_reasons
 
 
+class TestSignedAuthorityGate:
+    def test_signed_authority_required_rejects_when_missing(self):
+        receipt = evaluate_work_order_policy_gate(
+            _base_order(),
+            seen_nonces=set(),
+            require_signed_authority=True,
+        )
+
+        assert receipt.decision == POLICY_REJECT
+        assert receipt.signature_gate_status == SIGNATURE_GATE_REJECTED
+        assert "signed_work_authority_required" in receipt.rejection_reasons
+        assert "signed_work_order_authority" in receipt.gates_checked
+
+    def test_signed_authority_accepts_when_verifier_result_accepts(self):
+        order = _base_order()
+        receipt = evaluate_work_order_policy_gate(
+            order,
+            seen_nonces=set(),
+            require_signed_authority=True,
+            signature_verification_result={
+                "accepted": True,
+                "reason_codes": [],
+                "work_order_id": order["work_order_id"],
+            },
+        )
+
+        assert receipt.decision == POLICY_ACCEPT
+        assert receipt.signature_gate_status == SIGNATURE_GATE_ACCEPTED
+        assert receipt.signature_gate_digest
+
+    def test_rejected_signature_result_cannot_be_ignored(self):
+        order = _base_order()
+        receipt = evaluate_work_order_policy_gate(
+            order,
+            seen_nonces=set(),
+            require_signed_authority=False,
+            signature_verification_result={
+                "accepted": False,
+                "reason_codes": ["REJECT_WORKAUTH_SIGNATURE_INVALID"],
+                "work_order_id": order["work_order_id"],
+            },
+        )
+
+        assert receipt.decision == POLICY_REJECT
+        assert receipt.signature_gate_status == SIGNATURE_GATE_REJECTED
+        assert "signed_work_authority_not_accepted" in receipt.rejection_reasons
+        assert "signed_work_authority_reject:REJECT_WORKAUTH_SIGNATURE_INVALID" in receipt.rejection_reasons
+
+    def test_signed_authority_work_order_mismatch_rejects(self):
+        receipt = evaluate_work_order_policy_gate(
+            _base_order(),
+            seen_nonces=set(),
+            require_signed_authority=True,
+            signature_verification_result={
+                "accepted": True,
+                "reason_codes": [],
+                "work_order_id": "wo-other",
+            },
+        )
+
+        assert receipt.decision == POLICY_REJECT
+        assert "signed_work_authority_work_order_mismatch" in receipt.rejection_reasons
+
+
 class TestReceiptCompatibility:
     def test_receipt_digest_stable_for_same_input(self):
         fixed = datetime(2026, 6, 28, 14, 0, 0, tzinfo=timezone.utc)
@@ -305,6 +371,8 @@ class TestReceiptCompatibility:
             "expires_at",
             "next_required_check_at",
             "receipt_digest",
+            "signature_gate_status",
+            "signature_gate_digest",
         ):
             assert key in data
 
