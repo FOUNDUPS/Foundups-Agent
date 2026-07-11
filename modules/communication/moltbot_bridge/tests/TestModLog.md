@@ -1,3 +1,14 @@
+## 2026-07-11: REDDOG_OPENCLAW_LIVE_ENQUEUE_WRITER_ADAPTER_PHASE1
+
+**File**: `test_reddog_openclaw_live_enqueue_writer.py` (NEW - 6 tests)
+**Slice**: `REDDOG_OPENCLAW_LIVE_ENQUEUE_WRITER_ADAPTER_PHASE1` | **Predecessors**: #952 live enqueue seam
+
+Concrete writer adapter: foundup_job appends one typed FoundUpJob to OpenClaw queue without
+execution; autonomous_task calls injected AgentDB factory; #952 seam + concrete writer integration
+appends a queue item; missing ids reject before mutation; AST guard blocks shell/Hermes/WRE execution imports.
+
+**Run**: `pytest modules/communication/moltbot_bridge/tests/test_reddog_openclaw_live_enqueue_writer.py -q`
+
 ## 2026-07-11: REDDOG_OPENCLAW_LIVE_ENQUEUE_IMPLEMENTATION_PHASE1
 
 **File**: `test_reddog_openclaw_live_enqueue.py` (NEW - 12 tests), `test_reddog_wre_execution_valve.py` (UPDATED)

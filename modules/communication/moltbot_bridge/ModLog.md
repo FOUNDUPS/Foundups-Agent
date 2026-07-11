@@ -1,5 +1,13 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-11: REDDOG_OPENCLAW_LIVE_ENQUEUE_WRITER_ADAPTER_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_openclaw_live_enqueue_writer.py`: concrete writer for the #952 live enqueue seam. `foundup_job` appends a typed `FoundUpJob` to OpenClaw's in-memory queue; `autonomous_task` calls `AgentDB.create_autonomous_task()` through a lazy/injectable DB factory.
+- Boundary: queue/task creation only. No queue drain, no Hermes/WRE execution, no worktree creation, no file edits, no PR/push/merge, and no reward settlement.
+- HoloIndex read-only probes for `RedDog OpenClaw live enqueue writer adapter` and `OpenClawLiveEnqueueWriter AgentDB FoundUpJob` did not surface the new module in top results. Recorded as `HOLOINDEX_REDDOG_OPENCLAW_LIVE_ENQUEUE_WRITER_ADAPTER_INDEX_GAP_PHASE1`; no runtime re-index performed.
+
 ## 2026-07-11: REDDOG_OPENCLAW_LIVE_ENQUEUE_IMPLEMENTATION_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97

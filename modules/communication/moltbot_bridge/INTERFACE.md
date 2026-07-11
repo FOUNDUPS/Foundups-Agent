@@ -855,6 +855,17 @@ is present. It requires accepted #904 adapter dry-run output, #950 signed work a
 AgentDB/OpenClaw queue modules directly, execute Hermes/WRE work, create worktrees, edit files,
 create PRs, push, merge, or settle rewards.
 
+```python
+from modules.communication.moltbot_bridge.src.reddog_openclaw_live_enqueue_writer import (
+    OpenClawLiveEnqueueWriter,  # concrete writer adapter: FoundUpJob queue or AgentDB task only
+)
+```
+
+`REDDOG_OPENCLAW_LIVE_ENQUEUE_WRITER_ADAPTER_PHASE1` supplies the concrete writer for the
+injected seam. `foundup_job` appends a typed `FoundUpJob` to OpenClaw's queue; `autonomous_task`
+calls `AgentDB.create_autonomous_task()`. It does not drain the queue, execute tasks, dispatch
+Hermes/WRE, create worktrees, edit files, create PRs, push, merge, or settle rewards.
+
 ### RedDog Work-Order Receipt (Hermes-compatible audit trail, no execution)
 
 ```python
