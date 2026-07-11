@@ -20,6 +20,7 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
     INTAKE_FOUNDUP_JOB,
     VALVE_CLOSED,
     VALVE_OPEN_DRYRUN_ONLY,
+    VALVE_OPEN_LIVE_ENQUEUE,
     VALVE_OPEN_WORKTREE_CREATE,
     ExecutionValveEnvironment,
     ExecutionValveRequest,
@@ -180,6 +181,25 @@ class TestValveOpenPaths:
         decision = evaluate_reddog_execution_valve(req, env)
         assert decision.valve_state == VALVE_CLOSED
         assert "worktree_valve_missing_sovereign_token" in decision.rejection_reasons
+
+    def test_live_enqueue_requires_live_enqueue_token(self):
+        order, policy, receipt, invocation, executor = _full_spine_bundle()
+        req = _request_from_spine(order, policy, receipt, invocation, executor)
+        env = ExecutionValveEnvironment(valve_live_enqueue_enabled=True)
+        decision = evaluate_reddog_execution_valve(req, env)
+        assert decision.valve_state == VALVE_CLOSED
+        assert "live_enqueue_valve_missing_sovereign_token" in decision.rejection_reasons
+
+    def test_live_enqueue_with_token_opens_live_enqueue_state(self):
+        order, policy, receipt, invocation, executor = _full_spine_bundle()
+        req = _request_from_spine(order, policy, receipt, invocation, executor)
+        env = ExecutionValveEnvironment(
+            valve_live_enqueue_enabled=True,
+            sovereign_live_enqueue_token="012-sovereign-live-enqueue-token",
+        )
+        decision = evaluate_reddog_execution_valve(req, env)
+        assert decision.valve_state == VALVE_OPEN_LIVE_ENQUEUE
+        assert decision.rejection_reasons == []
 
     def test_worktree_create_with_token_opens(self):
         order, policy, receipt, invocation, executor = _full_spine_bundle()

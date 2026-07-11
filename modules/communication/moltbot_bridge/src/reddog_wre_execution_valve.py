@@ -48,6 +48,7 @@ from modules.communication.moltbot_bridge.src.reddog_wre_executor_dryrun import 
 
 VALVE_CLOSED = "VALVE_CLOSED"
 VALVE_OPEN_DRYRUN_ONLY = "VALVE_OPEN_DRYRUN_ONLY"
+VALVE_OPEN_LIVE_ENQUEUE = "VALVE_OPEN_LIVE_ENQUEUE"
 VALVE_OPEN_WORKTREE_CREATE = "VALVE_OPEN_WORKTREE_CREATE"
 
 INTAKE_FOUNDUP_JOB = "foundup_job"
@@ -79,7 +80,9 @@ class ExecutionValveRequest:
 @dataclass
 class ExecutionValveEnvironment:
     valve_dryrun_enabled: bool = False
+    valve_live_enqueue_enabled: bool = False
     valve_worktree_create_enabled: bool = False
+    sovereign_live_enqueue_token: Optional[str] = None
     sovereign_worktree_token: Optional[str] = None
     permission_ttl_seconds: int = DEFAULT_PERMISSION_TTL_SECONDS
     permission_expires_at: Optional[str] = None
@@ -304,12 +307,18 @@ def _resolve_valve_state(
     if reasons:
         return VALVE_CLOSED
     dryrun = bool(environment.get("valve_dryrun_enabled"))
+    live_enqueue = bool(environment.get("valve_live_enqueue_enabled"))
     worktree = bool(environment.get("valve_worktree_create_enabled"))
+    live_token = str(environment.get("sovereign_live_enqueue_token") or "").strip()
     token = str(environment.get("sovereign_worktree_token") or "").strip()
 
     if worktree:
         if token:
             return VALVE_OPEN_WORKTREE_CREATE
+        return VALVE_CLOSED
+    if live_enqueue:
+        if live_token:
+            return VALVE_OPEN_LIVE_ENQUEUE
         return VALVE_CLOSED
     if dryrun:
         return VALVE_OPEN_DRYRUN_ONLY
@@ -347,6 +356,10 @@ def evaluate_reddog_execution_valve(
             env.get("sovereign_worktree_token") or ""
         ).strip():
             rejection_reasons.append("worktree_valve_missing_sovereign_token")
+        elif env.get("valve_live_enqueue_enabled") and not str(
+            env.get("sovereign_live_enqueue_token") or ""
+        ).strip():
+            rejection_reasons.append("live_enqueue_valve_missing_sovereign_token")
         else:
             rejection_reasons.append("explicit_valve_flag_missing")
 
@@ -385,6 +398,7 @@ __all__ = [
     "INTAKE_FOUNDUP_JOB",
     "VALVE_CLOSED",
     "VALVE_OPEN_DRYRUN_ONLY",
+    "VALVE_OPEN_LIVE_ENQUEUE",
     "VALVE_OPEN_WORKTREE_CREATE",
     "evaluate_reddog_execution_valve",
 ]

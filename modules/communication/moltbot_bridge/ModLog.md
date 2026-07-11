@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-11: REDDOG_OPENCLAW_LIVE_ENQUEUE_IMPLEMENTATION_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
+
+- Added `src/reddog_openclaw_live_enqueue.py`: valve-gated live enqueue seam that validates #904 adapter dry-run output, #950 signed work authority, #951 signed receipt-chain verification, and `VALVE_OPEN_LIVE_ENQUEUE` before calling an injected writer.
+- Extended `reddog_wre_execution_valve.py` with `VALVE_OPEN_LIVE_ENQUEUE`, `valve_live_enqueue_enabled`, and `sovereign_live_enqueue_token`; dry-run and worktree-create valves do not authorize live enqueue.
+- Boundary: no direct AgentDB/OpenClaw imports, no Hermes/WRE execution, no worktree creation, no file edits, no PR/push/merge, and no reward settlement. Queue writes occur only through the injected writer after all gates pass.
+- HoloIndex read-only probes for `RedDog OpenClaw live enqueue implementation`, `VALVE_OPEN_LIVE_ENQUEUE`, and `perform_reddog_openclaw_live_enqueue` did not surface the new module in top results. Recorded as `HOLOINDEX_REDDOG_OPENCLAW_LIVE_ENQUEUE_IMPLEMENTATION_INDEX_GAP_PHASE1`; no runtime re-index performed.
+
 ## 2026-07-11: REDDOG_OPENCLAW_LIVE_ENQUEUE_CONTRACT_PHASE1 (refreshed)
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 97
