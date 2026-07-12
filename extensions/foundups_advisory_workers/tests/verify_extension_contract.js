@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.58', 'package version must be 0.3.58');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.58'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.59', 'package version must be 0.3.59');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.59'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups\u00aeAgent', 'display name must be Foundups\u00aeAgent');
 includes(JSON.stringify(pkg), 'Foundups\u00aeAgent: Open', 'command title must use Foundups\u00aeAgent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.58', 'README version mismatch');
+includes(readme, 'Version: 0.3.59', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -818,7 +818,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.58', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.59', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -2156,7 +2156,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.58'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.59'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -2170,7 +2170,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.58'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.59'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -2182,7 +2182,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.58'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.59'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
@@ -2816,6 +2816,34 @@ assert(wftdDir.targets.includes('holo_index/adaptive_learning'), 'WFTD-020: M2M 
 assert(wftdDir.derivation_sources.includes('m2m_read'), 'WFTD-020: directory path derived via m2m_read tier');
 // Prove the asymmetry in one place: the same slash-only shape is DROPPED in flowing prose but ACCEPTED in M2M.
 assert(wftdDropped.some((t) => !/\.[a-z0-9]{1,6}$/.test(t)), 'WFTD-020: a slash-only prose fragment was dropped (prose stricter)');
+
+// REDDOG_DETERMINE_BLOCK_TARGET_DERIVATION_GUARD_PHASE1 (WFTD-021): Determine numbered
+// questions are answer obligations, not repo-file target intent. The 0.3.58 host run blocked
+// because question prose (`Whether stale ledger/runtime...`) was promoted into repo_file_targets.
+includes(extensionJs, 'Determine questions are output obligations, not repository read intent',
+  'WFTD-021: Determine target-derivation guard comment missing');
+const wftdDetermineGuard = orchestrator.collectRequiredTargets(fixtures.WORK_FOCUS_DETERMINE_FALSE_POSITIVE_PROMPT);
+assert.deepStrictEqual([...wftdDetermineGuard.targets].sort(), [...fixtures.WORK_FOCUS_ORCH_PATHS].sort(),
+  'WFTD-021: Determine prompt must require exactly the three real repo files');
+assert(!wftdDetermineGuard.targets.some((t) => /ledger\/runtime|whether stale/i.test(t)),
+  'WFTD-021: Determine question prose must not become required targets');
+assert.deepStrictEqual(wftdDetermineGuard.derivation_sources, ['read_first'],
+  'WFTD-021: Determine question block must not add markdown_bullet/inline_path provenance');
+const wftdDetermineHits = { task_retrieval: { code_hits: fixtures.WORK_FOCUS_ORCH_PATHS.map((p) => ({ location: p, need: 'direct-read target' })) } };
+const wftdDetermineRecall = orchestrator.evaluateTargetRecall(fixtures.WORK_FOCUS_DETERMINE_FALSE_POSITIVE_PROMPT, wftdDetermineHits);
+assert.strictEqual(wftdDetermineRecall.required_targets_total, 3, 'WFTD-021: required_targets_total must stay 3');
+assert.strictEqual(wftdDetermineRecall.required_targets_recalled, 3, 'WFTD-021: required_targets_recalled must be 3');
+assert.strictEqual(wftdDetermineRecall.target_recall_ok, true, 'WFTD-021: target_recall_ok must pass');
+assert.strictEqual(wftdDetermineRecall.index_gap_detected, false, 'WFTD-021: no index gap after all three repo files are recalled');
+const wftdDetermineTyped = orchestrator.extractTypedTargets(fixtures.WORK_FOCUS_DETERMINE_FALSE_POSITIVE_PROMPT);
+assert.deepStrictEqual([...wftdDetermineTyped.repo_file_targets].sort(), [...fixtures.WORK_FOCUS_ORCH_PATHS].sort(),
+  'WFTD-021: typed repo_file_targets must exclude Determine prose');
+const wftdDeterminePreflight = orchestrator.buildTypedGroundingPreflight(
+  fixtures.WORK_FOCUS_DETERMINE_FALSE_POSITIVE_PROMPT,
+  'wsp_holo',
+  { holoindex_scorecard: wftdDetermineRecall }
+);
+assert.strictEqual(wftdDeterminePreflight.passed, true, 'WFTD-021: typed grounding preflight must pass after Determine prose is excluded');
 
 // REDDOG_TYPED_TARGET_EXTRACTION_PHASE1 (TTX-001..005): split preprocessing into typed channels
 // before grounding. Only repo_file_targets may feed governed direct-read.
