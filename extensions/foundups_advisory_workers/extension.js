@@ -4,7 +4,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 
-const EXTENSION_VERSION = '0.3.61';
+const EXTENSION_VERSION = '0.3.62';
 const UNICODE_SURROGATE_PLACEHOLDER = '[MALFORMED_SURROGATE]';
 const TARGET_READ_BLOCKED_SEGMENTS = ['.git', 'node_modules', '__pycache__', '.venv'];
 const TARGET_READ_BLOCKED_BASENAMES = ['.env'];
@@ -255,6 +255,9 @@ function buildRuntimeConsumptionGate(result, validationState, mode, substantiveT
 
   if (rp.local_fast_path === 'simple_identity') {
     reasons.push('local_identity_fast_path_not_actionable');
+  }
+  if (rp.local_fast_path === 'run_trace_assessment') {
+    reasons.push('local_run_trace_assessment_not_actionable');
   }
   if (substantiveTask !== true) {
     reasons.push('non_substantive_worker');
@@ -3182,6 +3185,15 @@ const SIMPLE_IDENTITY_PATTERNS = [
   /^(?:what\s+is\s+your\s+role|what\s+role\s+are\s+you|who\s+am\s+i\s+talking\s+to)$/,
   /^(?:what\s+version\s+are\s+you|what\s+build\s+are\s+you|version|build)$/
 ];
+const RUN_TRACE_ASSESSMENT_FAST_PATH_SLICE = 'REDDOG_RUN_TRACE_LOCAL_ASSESSMENT_PHASE1';
+const RUN_TRACE_ASSESSMENT_PATTERNS = [
+  /\b(?:assess|evaluate|review|diagnose|score|rate)\b[\s\S]{0,160}\brun trace\b/i,
+  /\brun trace\b[\s\S]{0,160}\b(?:assess|evaluate|review|diagnose|score|rate|why|blocked|slow|failed)\b/i,
+  /\bwhy\b[\s\S]{0,120}\b(?:blocked|slow|failed|took forever)\b/i
+];
+const RUN_TRACE_ACTION_BLOCKING_PATTERNS = [
+  /\b(?:implement|fix|patch|author|provide|create|draft|enhance|write|merge|land|dispatch|assign|spawn|execute|start)\b/i
+];
 
 function normalizeSimpleIdentityQuestion(text) {
   return String(text || '')
@@ -3201,6 +3213,150 @@ function isSimpleIdentityQuestion(text) {
   }
   const normalized = normalizeSimpleIdentityQuestion(raw);
   return SIMPLE_IDENTITY_PATTERNS.some((pattern) => pattern.test(normalized));
+}
+
+function extractRunTraceField(text, fieldName) {
+  const escaped = String(fieldName || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp('^\\s*-\\s*' + escaped + '\\s*:\\s*(.*)$', 'im');
+  const match = pattern.exec(String(text || ''));
+  return match ? match[1].trim() : '';
+}
+
+function isRunTraceAssessmentRequest(text) {
+  const raw = String(text || '');
+  if (!/##\s*Run Trace\b/i.test(raw) || !/\bextension_version\s*:/i.test(raw)) {
+    return false;
+  }
+  if (RUN_TRACE_ACTION_BLOCKING_PATTERNS.some((pattern) => pattern.test(raw.slice(0, 1200)))) {
+    return false;
+  }
+  return RUN_TRACE_ASSESSMENT_PATTERNS.some((pattern) => pattern.test(raw.slice(0, 2000)))
+    || /\bredaction gate status\s*:\s*BLOCKED_LOCALLY/i.test(raw);
+}
+
+function parseRunTraceAssessment(text) {
+  const src = String(text || '');
+  const get = (field) => extractRunTraceField(src, field);
+  const extensionVersion = get('extension_version') || 'unknown';
+  const mode = get('mode') || 'unknown';
+  const contextMode = get('context mode') || 'unknown';
+  const tier = get('WSP_15 tier') || 'unknown';
+  const redactionGateStatus = get('redaction gate status') || 'unknown';
+  const madeNetworkCall = get('made_network_call') || 'unknown';
+  const directReadFallbackUsed = get('direct_read_fallback_used') || 'unknown';
+  const directReadFetchAttempted = get('direct_read_fetch_attempted') || 'unknown';
+  const targetRecallOk = get('target_recall_ok') || 'unknown';
+  const requiredTargetsTotal = get('required_targets_total') || 'unknown';
+  const requiredTargetsRecalled = get('required_targets_recalled') || 'unknown';
+  const workFocusTargetsDerived = get('work_focus_targets_derived') || 'unknown';
+  const outputValidation = get('output_validation') || 'unknown';
+  const runtimeGateReasons = get('runtime_consumption_gate_rejection_reasons') || 'unknown';
+  const staleIdentityBuild = /^0\.3\.(?:[0-9]|[1-5][0-9]|60)$/.test(extensionVersion);
+  const blockedLocally = /BLOCKED_LOCALLY/i.test(redactionGateStatus) || /redaction_blocked/i.test(runtimeGateReasons);
+  const highFusion = /foundups_fusion/i.test(mode) && /HIGH|ULTRA/i.test(tier);
+  return {
+    extension_version: extensionVersion,
+    mode,
+    context_mode: contextMode,
+    tier,
+    redaction_gate_status: redactionGateStatus,
+    made_network_call: madeNetworkCall,
+    direct_read_fallback_used: directReadFallbackUsed,
+    direct_read_fetch_attempted: directReadFetchAttempted,
+    target_recall_ok: targetRecallOk,
+    required_targets_total: requiredTargetsTotal,
+    required_targets_recalled: requiredTargetsRecalled,
+    work_focus_targets_derived: workFocusTargetsDerived,
+    output_validation: outputValidation,
+    runtime_consumption_gate_rejection_reasons: runtimeGateReasons,
+    stale_identity_build: staleIdentityBuild,
+    blocked_locally: blockedLocally,
+    high_fusion_route: highFusion
+  };
+}
+
+function buildRunTraceAssessmentFastPathResult(workFocus) {
+  const a = parseRunTraceAssessment(workFocus);
+  const verdict = a.blocked_locally ? 'BLOCKED_LOCALLY before model output' : 'TRACE_PARSED';
+  const staleLine = a.stale_identity_build
+    ? '- OBSERVED: The trace is from extension `' + a.extension_version + '`, before the 0.3.61 simple-identity fast path.'
+    : '- OBSERVED: The trace extension version is `' + a.extension_version + '`.';
+  const content = [
+    '## Decision',
+    verdict + '. The pasted Run Trace was assessed locally; no model call is needed to explain it.',
+    '',
+    '## Findings',
+    staleLine,
+    '- OBSERVED: mode=`' + a.mode + '`, tier=`' + a.tier + '`, context=`' + a.context_mode + '`.',
+    '- OBSERVED: redaction gate status=`' + a.redaction_gate_status + '`, made_network_call=`' + a.made_network_call + '`.',
+    '- OBSERVED: required_targets_total=`' + a.required_targets_total + '`, required_targets_recalled=`' + a.required_targets_recalled + '`, direct_read_fetch_attempted=`' + a.direct_read_fetch_attempted + '`.',
+    a.high_fusion_route
+      ? '- INFERRED: The prompt routed through HIGH-tier Fusion, which is expensive and unnecessary for a local trace explanation.'
+      : '- INFERRED: The trace did not show a HIGH-tier Fusion route.',
+    a.blocked_locally
+      ? '- OBSERVED: No 0102 model output exists because the local redaction gate stopped the request before OpenRouter.'
+      : '- OBSERVED: The trace does not show a local redaction block.',
+    '',
+    '## Evidence',
+    '| Field | WSP_97 | Value |',
+    '|---|---|---|',
+    '| extension_version | OBSERVED | ' + a.extension_version + ' |',
+    '| mode | OBSERVED | ' + a.mode + ' |',
+    '| context mode | OBSERVED | ' + a.context_mode + ' |',
+    '| redaction gate status | OBSERVED | ' + a.redaction_gate_status + ' |',
+    '| made_network_call | OBSERVED | ' + a.made_network_call + ' |',
+    '| output_validation | OBSERVED | ' + a.output_validation + ' |',
+    '| runtime gate reasons | OBSERVED | ' + a.runtime_consumption_gate_rejection_reasons + ' |',
+    '',
+    '## Proposed fixes',
+    '- Use installed build 0.3.61+ for simple identity questions so `are you RedDog?` takes the local identity fast path.',
+    '- Use this local Run Trace assessment path for pasted Run Trace diagnostics instead of sending raw trace text through Fusion.',
+    '- For substantive code/audit work, keep the governed retrieval/Fusion path.',
+    '',
+    '## Uncertainties',
+    '- The local assessor explains telemetry fields only. It does not infer source-code facts that are absent from the trace.',
+    '',
+    '## WSP_97 Truth Labels',
+    '- OBSERVED: telemetry fields parsed from the pasted Run Trace.',
+    '- INFERRED: routing cost/root-cause statements derived from those fields.',
+    '- SPECIFIED_NOT_IMPLEMENTED: no repo, shell, merge, enqueue, or worktree authority is granted by this local assessor.',
+    '',
+    '## WSP_15 Priority',
+    'P2: diagnostics fast path. It prevents repeat local blocks on pasted traces and keeps action planning disabled.',
+    '',
+    '## Next safest step',
+    'Reload Cursor after installing the latest VSIX, then retest with the original question or paste a trace for local assessment.',
+    '',
+    '## Architect Trace',
+    '- slice_name: ' + RUN_TRACE_ASSESSMENT_FAST_PATH_SLICE,
+    '- local_fast_path: run_trace_assessment',
+    '- work_focus_digest: ' + redactedDigest(workFocus, 80).hash,
+    '',
+    '## Verification gaps',
+    '- None for the telemetry assessment.',
+    '- Any code-level fix beyond the parsed trace requires the normal governed audit path.'
+  ].join('\n');
+  return {
+    ok: true,
+    content,
+    mode: 'local_run_trace_assessment',
+    lead_model: 'local',
+    history: [],
+    made_network_call: false,
+    retry_count: 0,
+    local_run_trace_assessment: true,
+    no_execution_performed: true,
+    no_enqueue_performed: true,
+    review_packet: {
+      made_network_call: false,
+      retry_count: 0,
+      local_fast_path: 'run_trace_assessment',
+      local_fast_path_slice: RUN_TRACE_ASSESSMENT_FAST_PATH_SLICE,
+      parsed_run_trace_assessment: a,
+      no_execution_performed: true,
+      no_enqueue_performed: true
+    }
+  };
 }
 
 function buildSimpleIdentityFastPathResult(workFocus, workerType, worker) {
@@ -3284,6 +3440,10 @@ function classifyTaskForRedDog(prompt, contextMode, workerType) {
     tier = 'REGULAR';
     reasons.push('simple_identity_fast_path');
     localFastPath = 'simple_identity';
+  } else if (isRunTraceAssessmentRequest(text)) {
+    tier = 'REGULAR';
+    reasons.push('run_trace_assessment_fast_path');
+    localFastPath = 'run_trace_assessment';
   } else if (ULTRA_TASK_PATTERNS.some((pattern) => pattern.test(haystack))) {
     tier = 'ULTRA';
     reasons.push('ultra_keyword_match');
@@ -3365,7 +3525,7 @@ function resolveAutoContextMode(classification, selectedContextMode) {
   if (mode !== 'auto') {
     return mode;
   }
-  if (classification && classification.localFastPath === 'simple_identity') {
+  if (classification && (classification.localFastPath === 'simple_identity' || classification.localFastPath === 'run_trace_assessment')) {
     return 'none';
   }
   const tier = classification && classification.tier ? classification.tier : 'HIGH';
@@ -3383,7 +3543,7 @@ function resolveAutoEffort(classification, selectedEffort) {
   if (effort !== 'auto') {
     return effort;
   }
-  if (classification && classification.localFastPath === 'simple_identity') {
+  if (classification && (classification.localFastPath === 'simple_identity' || classification.localFastPath === 'run_trace_assessment')) {
     return 'regular';
   }
   const tier = classification && classification.tier ? classification.tier : 'HIGH';
@@ -3401,6 +3561,9 @@ function resolveModelMode(classification, selectedMode, workerType) {
   const worker = cleanWorkerType(workerType);
   if (classification && classification.localFastPath === 'simple_identity') {
     return 'local_identity_fast_path';
+  }
+  if (classification && classification.localFastPath === 'run_trace_assessment') {
+    return 'local_run_trace_assessment';
   }
   if (mode === 'auto') {
     return classification && classification.tier === 'REGULAR' ? 'openrouter_single' : 'foundups_fusion';
@@ -3453,6 +3616,9 @@ function modeSelectionReasoning(classification, resolvedEffort, resolvedMode, re
   const tier = classification && classification.tier ? classification.tier : 'HIGH';
   if (resolvedMode === 'local_identity_fast_path') {
     return 'Local RedDog identity fast path: short identity/status question; skips HoloIndex, OpenRouter, Fusion, repair, and downstream action planning; context=' + resolvedContextMode + '.';
+  }
+  if (resolvedMode === 'local_run_trace_assessment') {
+    return 'Local RedDog Run Trace assessment fast path: pasted Run Trace diagnostics; skips HoloIndex, OpenRouter, Fusion, repair, and downstream action planning; context=' + resolvedContextMode + '.';
   }
   if (resolvedMode === 'openrouter_single') {
     if (tier === 'REGULAR') {
@@ -4085,6 +4251,8 @@ function wireFusionWebview(context, webview, worker, state) {
     const continuationEnabled = message.useLastPacket === true;
     const classification = classifyTaskForRedDog(workFocus, selectedContextMode, workerType);
     const localIdentityFastPath = classification.localFastPath === 'simple_identity';
+    const localRunTraceAssessment = classification.localFastPath === 'run_trace_assessment';
+    const localFastPath = localIdentityFastPath || localRunTraceAssessment;
     const effort = resolveAutoEffort(classification, selectedEffort);
     const mode = resolveModelMode(classification, selectedMode, workerType);
     const contextMode = resolveAutoContextMode(classification, selectedContextMode);
@@ -4126,6 +4294,8 @@ function wireFusionWebview(context, webview, worker, state) {
     postStatusAndProgress(webview, null, 'Orchestrator: effort=' + effort + ' mode=' + mode + ' tier=' + classification.tier + ' context=' + contextMode + ' principal=' + worker.lead + ' panel=' + worker.panel.join(' + ') + ' (' + classification.reasons.join(', ') + ')');
     if (localIdentityFastPath) {
       postStatusAndProgress(webview, null, 'Simple RedDog identity question answered locally. No HoloIndex, OpenRouter, Fusion, repair, or downstream action planning.');
+    } else if (localRunTraceAssessment) {
+      postStatusAndProgress(webview, null, 'Run Trace diagnostics answered locally. No HoloIndex, OpenRouter, Fusion, repair, or downstream action planning.');
     } else {
       postStatusAndProgress(webview, null, 'Bridge started. Redaction gate runs before any OpenRouter API call.');
     }
@@ -4203,6 +4373,9 @@ function wireFusionWebview(context, webview, worker, state) {
     if (localIdentityFastPath) {
       workTrail.push('local_fast_path', 'simple_identity');
       result = buildSimpleIdentityFastPathResult(workFocus, workerType, worker);
+    } else if (localRunTraceAssessment) {
+      workTrail.push('local_fast_path', 'run_trace_assessment');
+      result = buildRunTraceAssessmentFastPathResult(workFocus);
     } else if (!groundingPreflight.passed) {
       workTrail.push('failed', 'grounding_preflight_blocked');
       postStatusAndProgress(webview, null, 'Grounding preflight blocked Fusion: ' + groundingPreflight.rejection_reasons.join(', '));
@@ -4235,7 +4408,7 @@ function wireFusionWebview(context, webview, worker, state) {
       }
     }
     absorbUnicodeMeta(result);
-    const substantiveTask = isSubstantiveRedDogWorker(workerType) && !localIdentityFastPath;
+    const substantiveTask = isSubstantiveRedDogWorker(workerType) && !localFastPath;
     if (result.ok && substantiveTask) {
       workTrail.push('validator_started');
       const outputValidationOptions = {
@@ -4344,7 +4517,7 @@ function wireFusionWebview(context, webview, worker, state) {
         }
       }
     } else if (result.ok) {
-      validationState = { validated: false, skipped: true, reason: localIdentityFastPath ? 'local_identity_fast_path' : 'non_substantive_worker' };
+      validationState = { validated: false, skipped: true, reason: localIdentityFastPath ? 'local_identity_fast_path' : (localRunTraceAssessment ? 'local_run_trace_assessment' : 'non_substantive_worker') };
     } else if (result.reason === 'redaction_blocked') {
       validationState = { validated: false, skipped: true, reason: 'redaction_blocked' };
       workTrail.push('redaction_gate_blocked');
@@ -6412,6 +6585,9 @@ module.exports = {
   constructWspTaskPrompt,
   isSimpleIdentityQuestion,
   buildSimpleIdentityFastPathResult,
+  isRunTraceAssessmentRequest,
+  parseRunTraceAssessment,
+  buildRunTraceAssessmentFastPathResult,
   appendContinuationSummaryToWspPrompt,
   buildSanitizedContinuationSummary,
   buildContinuationSummaryCopySection,
