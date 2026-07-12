@@ -197,8 +197,8 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.3.57', 'package version must be 0.3.57');
-includes(extensionJs, "const EXTENSION_VERSION = '0.3.57'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.3.58', 'package version must be 0.3.58');
+includes(extensionJs, "const EXTENSION_VERSION = '0.3.58'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'foundups-fusion-worker', 'package id must remain stable in branding slice');
 assert.strictEqual(pkg.displayName, 'Foundups\u00aeAgent', 'display name must be Foundups\u00aeAgent');
 includes(JSON.stringify(pkg), 'Foundups\u00aeAgent: Open', 'command title must use Foundups\u00aeAgent');
@@ -215,7 +215,7 @@ includes(extensionJs, 'REDDOG_STAGE_ACTIONS', 'structured stage map missing');
 includes(extensionJs, 'REDDOG_PROGRESS_ACTIONS', 'progress regex fallback missing');
 includes(extensionJs, 'function matchReddogProgress', 'matchReddogProgress missing');
 includes(extensionJs, 'function formatElapsed', 'formatElapsed missing');
-includes(readme, 'Version: 0.3.57', 'README version mismatch');
+includes(readme, 'Version: 0.3.58', 'README version mismatch');
 includes(extensionJs, 'function buildBridgePythonEnv', 'bridge Python UTF-8 env helper missing');
 includes(extensionJs, 'PYTHONIOENCODING', 'bridge must set PYTHONIOENCODING=utf-8');
 includes(extensionJs, 'PYTHONUTF8', 'bridge must set PYTHONUTF8=1');
@@ -569,6 +569,49 @@ includes(repairTraceFailed, 'missing_sections_after_repair: Evidence, Next safes
 includes(repairTraceFailed, '- extension_version: ' + pkg.version, 'RTBV-001: Run Trace must emit extension_version = package version (the real build)');
 includes(extensionJs, "'- extension_version: ' + EXTENSION_VERSION", 'RTBV-001: Run Trace line must read the EXTENSION_VERSION constant, not prompt/packet/model text');
 
+// REDDOG_EXTENSION_OPERATOR_LOOP_RUNTIME_CONSUMPTION_PHASE1:
+// Runtime action planning may consume only validated, grounded, quorum-passed recommendations.
+const runtimeGatePass = orchestrator.buildRuntimeConsumptionGate(
+  { ok: true, reason: 'ok', review_packet: { fusion_panel_quorum: { passed: true } } },
+  { validated: true, judgment_verification: { applied: true, verified: true } },
+  'foundups_fusion',
+  true
+);
+assert.strictEqual(runtimeGatePass.passed, true, 'runtime gate should pass only after validation, judgment, and quorum pass');
+const runtimeGateNoQuorum = orchestrator.buildRuntimeConsumptionGate(
+  { ok: true, reason: 'ok', review_packet: {} },
+  { validated: true },
+  'foundups_fusion',
+  true
+);
+assert.strictEqual(runtimeGateNoQuorum.passed, false, 'runtime gate must block missing Fusion quorum');
+assert(runtimeGateNoQuorum.rejection_reasons.includes('fusion_panel_quorum_not_passed'), 'runtime gate must cite missing Fusion quorum');
+const runtimeGateValidationFail = orchestrator.buildRuntimeConsumptionGate(
+  { ok: true, reason: 'ok', review_packet: { fusion_panel_quorum: { passed: true } } },
+  { validated: false, output_validation_failed: true },
+  'foundups_fusion',
+  true
+);
+assert.strictEqual(runtimeGateValidationFail.passed, false, 'runtime gate must block failed output validation');
+assert(runtimeGateValidationFail.rejection_reasons.includes('output_validation_not_passed'), 'runtime gate must cite output validation failure');
+const runtimeGateTrace = orchestrator.buildRunTraceSection(
+  {
+    ok: true,
+    mode: 'foundups_fusion',
+    review_packet: {
+      task_classification: { tier: 'HIGH' },
+      output_validation: { validated: true },
+      runtime_consumption_gate: runtimeGateNoQuorum
+    }
+  },
+  'reddog_architect',
+  '',
+  {},
+  'high'
+);
+includes(runtimeGateTrace, 'runtime_consumption_gate_passed: false', 'Run Trace must expose runtime gate failure');
+includes(runtimeGateTrace, 'runtime_consumption_gate_rejection_reasons: fusion_panel_quorum_not_passed', 'Run Trace must expose runtime gate reasons');
+
 const handoffContext = orchestrator.skillzWardrobeRolodexContext(root, 'process all youtube comments with existing skillz', 12000);
 includes(handoffContext, 'Skillz/Wardrobe/Rolodex discovery', 'handoff context header missing');
 assert(/youtube|comments|skillz/i.test(handoffContext), 'handoff context must surface relevant YouTube/comment/Skillz paths');
@@ -775,7 +818,7 @@ assert.strictEqual(spinePreview.dry_run_only, true, 'WRE preview must be dry-run
 assert.strictEqual(spinePreview.candidate_work_order_emitted, true, 'WRE preview emits typed candidate shape');
 assert(spinePreview.governed_work_order_candidate, 'WRE preview must include governed work-order candidate');
 assert(/^rdog-wo-[a-f0-9]{16}$/.test(spinePreview.governed_work_order_candidate.work_order_id), 'candidate work_order_id shape');
-assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.57', 'candidate must bind extension version');
+assert.strictEqual(spinePreview.governed_work_order_candidate.red_dog_instance_id, 'foundups-agent-0.3.58', 'candidate must bind extension version');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.source, 'extension_runtime_candidate', 'candidate must not forge permission source');
 assert.strictEqual(spinePreview.governed_work_order_candidate.repo_permission_snapshot.permission_level, 'needs_verification', 'candidate must fail closed on permission');
 assert.deepStrictEqual(spinePreview.governed_work_order_candidate.allowed_paths, [
@@ -2113,7 +2156,7 @@ const recallTargets = orchestrator.inferRecallTargetPaths(extAcc001Prompt);
 assert(recallTargets.includes(fixtures.EXT_ACC_001_TARGET_PATH), 'EXT-ACC-001 prompt must map to extension.js');
 
 const extensionSnippet = orchestrator.readBoundedTargetSnippet(root, fixtures.EXT_ACC_001_TARGET_PATH, 24000);
-includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.57'", 'target snippet must include extension.js source');
+includes(extensionSnippet.content, "const EXTENSION_VERSION = '0.3.58'", 'target snippet must include extension.js source');
 assert(extensionSnippet.chars > 0, 'target snippet chars must be nonzero');
 assert.strictEqual(extensionSnippet.omitted_reason, 'none', 'extension.js snippet must not be omitted');
 
@@ -2127,7 +2170,7 @@ assert.strictEqual(safeResolve.ok, true, 'extension.js must resolve inside works
 const targetSection = orchestrator.buildTargetRecallContentSection(root, extAcc001Prompt, 24000);
 includes(targetSection.text, '### Target recall content', 'target recall section header missing');
 includes(targetSection.text, fixtures.EXT_ACC_001_TARGET_PATH, 'target recall must cite extension.js path');
-includes(targetSection.text, "const EXTENSION_VERSION = '0.3.57'", 'target recall must include source snippet');
+includes(targetSection.text, "const EXTENSION_VERSION = '0.3.58'", 'target recall must include source snippet');
 assert.strictEqual(targetSection.meta.target_content_included, true, 'target_content_included must be true when snippets present');
 assert(targetSection.meta.target_content_chars > 0, 'target_content_chars must be > 0');
 
@@ -2139,7 +2182,7 @@ assert.strictEqual(wsp97Excerpt.meta.wsp97_excerpt_included, true, 'wsp97_excerp
 const boundedContext = orchestrator.buildBoundedRepoContext('wsp_holo_skillz', extAcc001Prompt);
 includes(boundedContext.text, '### Target recall content', 'bounded context must include target recall section');
 includes(boundedContext.text, fixtures.EXT_ACC_001_TARGET_PATH, 'bounded context must include extension.js path');
-includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.57'", 'bounded context must include source snippet');
+includes(boundedContext.text, "const EXTENSION_VERSION = '0.3.58'", 'bounded context must include source snippet');
 includes(boundedContext.text, '### WSP protocol excerpt (bounded)', 'WSP_97 task must include protocol excerpt');
 includes(boundedContext.text, 'WSP 97: System Execution Prompting Protocol', 'bounded context must include WSP_97 excerpt body');
 assert.strictEqual(boundedContext.holoindex_scorecard.target_content_included, true, 'scorecard target_content_included must be true');
