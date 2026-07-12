@@ -1,5 +1,15 @@
 # HoloIndex Package ModLog
 
+## [2026-07-12] HOLOINDEX_FRESHNESS_RECEIPT_PHASE1
+
+**Agent**: 0102 (Codex) | Commander: 012 | Gate: implementation slice
+**WSP**: 00, 15, 22, 50, 97 | **Base**: `dde962bb5`
+
+- ADD `holo_index/freshness_receipt.py`: durable `holoindex_freshness_receipt.json` schema with per-collection counts/status/source/repo SHA, path-to-collection freshness mapping, JSON roundtrip, and fail-closed `evaluate_freshness_for_paths`.
+- UPDATE `_cli_main.py`: existing `_write_index_state(source)` now also writes the freshness receipt beside `index_state.json` after manual index or explicitly allowed auto-refresh. Query/search paths remain read-only and no runtime re-index is introduced.
+- TEST `tests/test_holoindex_freshness_receipt.py`: all expected collections, roundtrip, changed-path routing, missing/stale/empty receipt failures, and CLI writer contract anchors.
+- HoloIndex read-only probe for `HOLOINDEX_FRESHNESS_RECEIPT_PHASE1 index_state freshness receipt collection SHA changed paths` did not surface the new receipt module before re-index. Recorded as `HOLOINDEX_FRESHNESS_RECEIPT_INDEX_GAP_PHASE1`; no runtime re-index performed.
+
 ## [2026-07-06] HOLOINDEX_FRESHNESS_AND_SCALING_GOVERNANCE_PHASE1 (decision-only audit)
 
 **Agent**: 0102 (RedDog Architect) | Commander: 012 | Gate: VERIFIED_READY draft PR (do NOT self-merge)
