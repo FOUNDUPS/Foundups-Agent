@@ -1,5 +1,13 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-13: REDDOG_WORKER_CLAIM_GATE_DRYRUN_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 60, 70, 97
+
+- Added `src/reddog_worker_claim_gate_dryrun.py`: dry-run claim gate that consumes `LaneReconciliationReport` and emits a claim-ready receipt only when the lane state is fresh, non-contradictory, and the selected slice is open.
+- Added `tests/test_reddog_worker_claim_gate_dryrun.py`: fresh acceptance, stale-source rejection, explicit stale override, conflict rejection, closed/unknown/open requested-slice behavior, no-open-work, digest, serialization, and AST no-mutation/no-execution coverage.
+- Boundary: no worker assignment, no worker spawn, no ledger mutation, no AgentDB write, no HoloIndex re-index, no shell/subprocess/git/GitHub call, no extension runtime wiring, and no execution. This slice emits a dry-run claim receipt only.
+
 ## 2026-07-13: REDDOG_LANE_STATE_RECONCILER_DRYRUN_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 60, 70, 97
