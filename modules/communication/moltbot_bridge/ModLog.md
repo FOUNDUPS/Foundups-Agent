@@ -1,5 +1,14 @@
 # ModLog - moltbot_bridge
 
+## 2026-07-12: REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_EXPLICIT_VALVE_INVOKE_PHASE1
+
+**Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 46, 50, 85, 97
+
+- Added `src/reddog_extension_wre_operational_spine_invoke.py`: an extension-facing explicit invoke guard for the RedDog WRE operational spine.
+- Requires an explicit invoke flag plus a sovereign worktree wardrobe-selection receipt before delegating to the already-gated WRE worktree-create spine.
+- Preserves extension-runtime separation: no `extension.js` wiring, no OpenClaw enqueue, no Hermes dispatch, no task execution, no PR, push, merge, or reward settlement in this slice.
+- HoloIndex read-only probe for `REDDOG_EXTENSION_TO_WRE_OPERATIONAL_SPINE_EXPLICIT_VALVE_INVOKE_PHASE1 explicit invoke operational spine selection receipt` surfaced the WRE valve/worktree docs and Skillz surfaces. No runtime re-index performed.
+
 ## 2026-07-12: REDDOG_WRE_WORKTREE_CREATE_CWD_GUARD_ALIGNMENT_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 50, 53, 85, 97
